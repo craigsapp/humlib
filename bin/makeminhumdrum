@@ -1,0 +1,186 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Mon Aug 10 00:06:00 PDT 2015
+# Last Modified: Mon Aug 10 00:06:00 PDT 2015
+# Filename:      /bin/makeminhumdrum
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Merge all library files into minhumdrum.h and minhumdrum.cpp.
+#
+
+use strict;
+
+my $srcdir = "src";
+my $incdir = "include";
+
+createIncludeFile($incdir, "minhumdrum.h");
+createSourceFile($srcdir, "minhumdrum.cpp");
+
+exit(0);
+
+
+
+##############################
+##
+## createIncludeFile --
+##
+
+sub createIncludeFile {
+	my ($basedir, $target) = @_;
+	open (IFILE, ">$basedir/$target") or die;
+
+
+	my $contents = "";
+	my @files = getFiles($basedir);
+	foreach my $file (@files) {
+		$contents .= getMergeContents("$basedir/$file");
+	}
+
+	my $date = `date`;
+	chomp $date;
+
+   print IFILE <<"EOT";
+//
+// Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
+// Creation Date: Sat Aug  8 12:24:49 PDT 2015
+// Last Modified: $date
+// Filename:      /include/minhumdrum.h
+// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
+// Syntax:        C++11
+// vim:           ts=3
+//
+// Description:   Include file for minHumdrum library.
+//
+
+#ifndef _MINHUMDRUM_H
+#define _MINHUMDRUM_H
+
+#include <math.h>
+
+#include <string>
+#include <vector>
+#include <iostream>
+
+class Convert;
+class HumNum;
+class HumAddress;
+class HumdrumToken;
+class HumdrumLine;
+class HumdrumFile;
+
+using std::string;
+using std::vector;
+using std::istream;
+using std::ostream;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::to_string;
+
+EOT
+
+	print IFILE <<"EOT";
+$contents
+
+#endif /* _MINHUMDRUM_H */
+
+EOT
+
+	close IFILE;
+}
+
+
+
+##############################
+##
+## createSourceFile --
+##
+
+sub createSourceFile {
+	my ($basedir, $target) = @_;
+	open (SFILE, ">$basedir/$target") or die;
+
+	my $date = `date`;
+	chomp $date;
+
+   print SFILE <<"EOT";
+//
+// Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
+// Creation Date: Sat Aug  8 12:24:49 PDT 2015
+// Last Modified: $date
+// Filename:      /include/minhumdrum.cpp
+// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
+// Syntax:        C++11
+// vim:           ts=3
+//
+// Description:   Source file for minHumdrum library.
+//
+
+#include "minhumdrum.h"
+
+EOT
+
+	my @files = getFiles($basedir);
+	foreach my $file (@files) {
+		print SFILE getMergeContents("$basedir/$file");
+	}
+
+	close SFILE;
+}
+
+
+
+##############################
+##
+## getMergeContents -- return the contents of a file between lines containing
+## "START_MERGE" and "END_MERGE".
+##
+
+sub getMergeContents {
+	my ($file) = @_;
+	open (MFILE, "$file") || die "Cannot read $file\n";
+	my @contents = <MFILE>;
+	close MFILE;
+	my $output = "";
+	my $active = 0;
+	foreach my $line (@contents) {
+		if ($active == 0) {
+			if ($line =~ /START_MERGE/) {
+				$active = 1;
+				next;
+			}
+		}
+		if ($active && ($line =~ /END_MERGE/)) {
+			$active = 0;
+			next;
+		}
+		next if $active == 0;
+		$output .= $line;
+	}
+	return $output;
+}
+
+
+
+##############################
+##
+## getFiles -- Get a list of a files in a directory.
+## 
+
+sub getFiles {
+	my ($dir) = @_;
+	opendir(DIR, $dir) or die;
+	my @output;
+	while (my $file = readdir(DIR)) {
+		next if $file =~ /^\./;
+		next if -d "$dir/$file";
+		next if !-r "$dir/$file";
+		$output[@output] = $file;
+	}
+	return sort @output;
+}
+
+
+
