@@ -611,26 +611,179 @@ bool HumdrumFile::analyzeRhythm(void) {
 		return false;
 	}
 	vector<HumNum> durstate;
+	vector<HumNum> newdurstate;
 	vector<HumNum> curdur;
+	HumNum linedur;
+	HumNum cumulativedur = 0;
 	HumNum dur;
 
 	int i, j;
 	for (i=0; i<size(); i++) {
 		if (lines[i]->isExclusiveInterpretation()) {
-			durstate.resize(0);
-			for (j=0; j<lines[i]->getTokenCount(); j++) {
-				dur = lines[i]->token(j).getDuration();
-				durstate.push_back(dur);
+			// If an exclusive interpretation line, initialize the durstate.
+			if (!getTokenDurations(curdur, i)) { return false; }
+			durstate = curdur;
+			linedur = getMinDur(curdur, durstate);
+			lines[i]->setDuration(linedur);
+			if (!decrementDurStates(durstate, linedur, i)) { return false; }
+			continue;
+		} else if (!lines[i]->isManipulator()) {
+			if (lines[i].isData()) {
+				if (!getTokenDurations(curdur, i)) { return false; }
+				if (curdur.size() != durstate.size()) {
+					cerr << "Error on line " << (line+1) 
+					     << ": spine problem" << endl;
+					cerr << "Line: " << *lines[line] << endl;
+					return false;
+				}
+				linedur = getMinDur(curdur, durstate);
+				lines[i]->setDuration(linedur);
+				if (!decrementDurStates(durstate, linedur, i)) { return false; }
+				continue;
+			} else {
+				// Not a rhythmic line, so preserve durstate and set the
+				// duration of the line to zero.
+				lines[i]->setDuration(0);
+				continue;
 			}
-cout << "DURS:\t";
-for (int m=0; m<durstate.size(); m++) {
-cout << durstate[m] << "\t";
-}
-cout << endl;
+		} else {
+			// Deal with spine manipulators.  The dur state of a spine must
+			// be zero when the manipulator is *^, *v, or *-. Exclusive
+			// interpretations initialze a new duration state.
+			newdurstate.resize(0);
+			for (j=0; j<lines[i]->getTokenCount(); j++) {
+				if (lines[i]->token(j).isSplitInterpretation()) {
+					if (durstate[j].isNonZero()) {
+						cerr << "Error on line " << (line+1)
+						     << ": notes must end before splitting spine." << endl;
+						return false;
+					}
+					newdurstate.push_back(durstate[j]);
+					newdurstate.push_back(durstate[j]);
+				} else if (lines[i]->token(j).isMergeInterpretation()) {
+					int mergecount = lines[i]->token(j).getNextToken()
+							.getPreviousTokenCount();
+					if (mergecount <= 1) {
+						cerr << "Error on line " << (line+1)
+						     << ": merger is incomplete" << endl;
+						cerr << "Line: " << lines[line] << endl;
+						return false;
+					}
+					// check that all merger spine running durations
+					// are zero; otherwise, there is a rhythmic error in the score.
+ggg
+					
+				} else if (lines[i]->token(j).isTerminatorInterpretation()) {
+				} else if (lines[i]->token(j).isExclusiveInterpretation()) {
+				} else {
+					// The manipulator should have a one-to-one mapping with
+					// the next token in the spine.
+					newdurstate.push_back(durstate[j]);
+				}
+			}
 		}
 	}
-
    return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getTokenDurations --
+//
+
+bool HumdrumFile::getTokenDurations(vector<HumNum>& durs, int line) {
+	durs.resize(0);
+	for (i=0; i<lines[i]->getTokenCount(); i++) {
+		dur = lines[i]->token(i).getDuration();
+		durstate.push_back(dur);
+	}
+	if (!cleanDurs(durstate, i)) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::decrementDurStates -- Subtract the line duration from
+//   the current line of running durations.  If any duration is less
+//   than zero, then a rhythm error exists in the data.
+//
+
+bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
+		int line) {
+	if (linedur.isZero()) {
+		return true;
+	}
+	for (int i=0; i<(int)durs.size(); i++) {
+		durs[i] -= linedur;
+		if (durs[i].isNegative()) {
+			cerr << "Error: rhythmic error on line " << (line+1)
+			     << " field index " << i << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getMinDur -- Return the smallest duration on the 
+//   line.  If all durations are zero, then return zero; otherwise,
+//   return the smallest positive duration.
+//
+
+HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
+	HumNum mindur = 0;
+	for (int i=0; i<(int)durs.size(); i++) {
+		if (durs[i].isPositive()) {
+			if (mindur.isZero()) {
+				mindur = durs[i];
+			} else if (mindur > durs[i]) {
+				mindur = durs[i];
+			}
+		}
+		if (durstate[i].isPositive()) {
+			if (mindur.isZero()) {
+				mindur = durs[i];
+			} else if (mindur > durs[i]) {
+				mindur = durs[i];
+			}
+		}
+	}
+	return mindur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::cleanDurs -- Check if there are grace note and regular
+//    notes on a line (not allowed), and convert negative durations
+//    to zero (negative durations indicate undefined durations).
+//
+
+bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
+	bool zero 		= false;
+	bool positive = false;
+	for (int i=0; i<(int)durs.size(); i++) {
+		if      (durs[i].isPositive()) { positive = true; }
+		else if (durs[i].isZero())     { zero     = true; }
+		else                           { durs[i]  = 0; }
+	}
+	if (zero && positive) {
+		cerr << "Error on line " << (line+1) << " grace note and "
+		     << " regular note cannot occur on same line." << endl;
+		cerr << "Line: " << *lines[line] << endl;
+		return false;
+	}
+	return true;
 }
 
 

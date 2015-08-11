@@ -54,6 +54,10 @@ class HumdrumToken : public string {
 		int      getSubtokenCount  (const string& separator = " ") const;
       string   getSubtoken       (int index, const string& separator) const;
 
+		// next/previous token functions:
+		int      getNextTokenCount     (void);
+		int      getPreviousTokenCount (void);
+
 	protected:
 		void     setLineAddress    (int aLineIndex, int aFieldIndex);
 		void     setLineIndex      (int lineindex);

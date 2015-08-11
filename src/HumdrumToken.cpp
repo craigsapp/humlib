@@ -499,6 +499,35 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 	previousToken.nextTokens.push_back(this);
 }
 
+
+//////////////////////////////
+//
+// HumdrumToken::getNextTokenCount -- Return the number of tokens in the
+//   spine/subspine which follow this token.  Typically this will be 1,
+//   but will be zero for a terminator interpretation (*-), and will be 
+//   2 for a split interpretation (*^).
+//
+
+int HumdrumToken::getNextTokenCount(void) {
+	return nextTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousTokenCount -- Return the number of tokens
+//   in the spine/subspine which precede this token.  Typically this will 
+//   be 1, but will be zero for an exclusive interpretation (starting with 
+//   "**"), and will be greater than one for a token which follows a 
+//   spine merger (using *v interpretations).
+//
+
+int HumdrumToken::getPreviousTokenCount(void) {
+	return previousTokens.size();
+}
+
+
 // END_MERGE
 
 

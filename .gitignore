@@ -1,3 +1,4 @@
 obj
 lib
 err
+bin/test*

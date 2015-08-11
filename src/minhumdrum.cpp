@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 19:14:04 PDT 2015
+// Last Modified: Mon Aug 10 23:44:33 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -1573,6 +1573,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 	vector<HumNum> curdur;
 	HumNum dur;
 
+	bool status;
 	int i, j;
 	for (i=0; i<size(); i++) {
 		if (lines[i]->isExclusiveInterpretation()) {
@@ -1580,6 +1581,10 @@ bool HumdrumFile::analyzeRhythm(void) {
 			for (j=0; j<lines[i]->getTokenCount(); j++) {
 				dur = lines[i]->token(j).getDuration();
 				durstate.push_back(dur);
+			}
+			status = cleanDurs(durstate, i, *this);
+			if (!status) {
+				return false;
 			}
 cout << "DURS:\t";
 for (int m=0; m<durstate.size(); m++) {
@@ -1590,6 +1595,33 @@ cout << endl;
 	}
 
    return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::cleanDurs -- Check if there are grace note and regular
+//    notes on a line (not allowed), and convert negative durations
+//    to zero (negative durations indicate undefined durations).
+//
+
+bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line, 
+		HumdrumFile& infile) {
+	bool zero 		= false;
+	bool positive = false;
+	for (int i=0; i<(int)durs.size(); i++) {
+		if      (durs[i].isPositive()) { positive = true; }
+		else if (durs[i].isZero())     { zero     = true; }
+		else                           { durs[i]  = 0; }
+	}
+	if (zero && positive) {
+		cerr << "Error on line " << (line+1) << " grace note and "
+		     << " regular note cannot occur on same line." << endl;
+		cerr << "Line: " << infile[line] << endl;
+		return false;
+	}
+	return true;
 }
 
 

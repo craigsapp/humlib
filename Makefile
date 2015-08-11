@@ -38,8 +38,8 @@ SRCDIR_MIN    = src
 INCDIR        = include
 INCDIR_MIN    = include
 LIBDIR        = lib
-LIBFILE       = humdrum.a
-LIBFILE_MIN   = minhumdrum.a
+LIBFILE       = libhumdrum.a
+LIBFILE_MIN   = libminhumdrum.a
 AR            = ar
 RANLIB        = ranlib
 

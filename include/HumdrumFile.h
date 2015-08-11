@@ -52,14 +52,18 @@ class HumdrumFile {
 		bool         analyzeTokenDurations  (void);
 		bool         analyzeTracks          (void);
 		bool         analyzeLines           (void);
-		int          adjustSpines           (HumdrumLine& line, 
-		                                     vector<string>& datatype, 
-		                                     vector<string>& sinfo, 
+		int          adjustSpines           (HumdrumLine& line,
+		                                     vector<string>& datatype,
+		                                     vector<string>& sinfo,
 		                                     int trackcount);
 		string       getMergedSpineInfo     (vector<string>& info, int starti,
 		                                     int extra);
-		bool         stitchLinesTogether    (HumdrumLine& previous, 
+		bool         stitchLinesTogether    (HumdrumLine& previous,
 		                                     HumdrumLine& next);
+		HumNum       getMinDur              (vector<HumNum>& durs,
+		                                     vector<HumNum>& durstate);
+      bool         getTokenDurations      (vector<HumNum>& durs, int line);
+		bool         cleanDurs              (vector<HumNum>& durs, int line);
 
 	private:
 		vector<HumdrumLine*> lines;

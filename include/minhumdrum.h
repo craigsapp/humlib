@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 19:14:04 PDT 2015
+// Last Modified: Mon Aug 10 23:44:33 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -187,14 +187,16 @@ class HumdrumFile {
 		bool         analyzeTokenDurations  (void);
 		bool         analyzeTracks          (void);
 		bool         analyzeLines           (void);
-		int          adjustSpines           (HumdrumLine& line, 
-		                                     vector<string>& datatype, 
-		                                     vector<string>& sinfo, 
+		int          adjustSpines           (HumdrumLine& line,
+		                                     vector<string>& datatype,
+		                                     vector<string>& sinfo,
 		                                     int trackcount);
 		string       getMergedSpineInfo     (vector<string>& info, int starti,
 		                                     int extra);
-		bool         stitchLinesTogether    (HumdrumLine& previous, 
+		bool         stitchLinesTogether    (HumdrumLine& previous,
 		                                     HumdrumLine& next);
+		bool         cleanDurs              (vector<HumNum>& durs, int line,
+		                                     HumdrumFile& infile);
 
 	private:
 		vector<HumdrumLine*> lines;
