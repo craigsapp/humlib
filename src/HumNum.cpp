@@ -631,7 +631,7 @@ ostream& HumNum::printList(ostream& out) const {
 // operator<< --
 //
 
-ostream& operator<<(ostream& out, HumNum number) {
+ostream& operator<<(ostream& out, const HumNum& number) {
 	number.printFraction(out);
 	return out;
 }

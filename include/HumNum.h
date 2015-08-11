@@ -84,7 +84,7 @@ class HumNum {
 		int bot;
 };
 
-ostream& operator<<(ostream& out, HumNum number);
+ostream& operator<<(ostream& out, const HumNum& number);
 
 // END_MERGE
 

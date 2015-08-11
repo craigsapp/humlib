@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 01:47:07 PDT 2015
+// Last Modified: Mon Aug 10 19:14:04 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -18,6 +18,20 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
+using std::string;
+using std::vector;
+using std::istream;
+using std::ifstream;
+using std::ostream;
+using std::cout;
+using std::cin;
+using std::cerr;
+using std::endl;
+using std::to_string;
+using std::stringstream;
 
 class Convert;
 class HumNum;
@@ -25,15 +39,6 @@ class HumAddress;
 class HumdrumToken;
 class HumdrumLine;
 class HumdrumFile;
-
-using std::string;
-using std::vector;
-using std::istream;
-using std::ostream;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::to_string;
 
 
 class Convert {
@@ -43,38 +48,6 @@ class Convert {
 };
 
 
-
-///////////////////////////////////////////////////////////////////////////
-// Templates -- Templates for use with minHumdrum.
-///////////////////////////////////////////////////////////////////////////
-
-
-
-// Print contents of vectors as a tab-separated list:
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << v[i];
-		if (i < v.size() - 1) {		
-			out << '\t';
-		}
-	}
-	return out;
-}
-
-
-
-// Print contents of pointer vectors as a tab-separated list:
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A*>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << *v[i];
-		if (i < v.size() - 1) {		
-			out << '\t';
-		}
-	}
-	return out;
-}
 
 
 class HumAddress {
@@ -182,7 +155,7 @@ class HumNum {
 		int bot;
 };
 
-ostream& operator<<(ostream& out, HumNum number);
+ostream& operator<<(ostream& out, const HumNum& number);
 
 
 class HumdrumFile {
@@ -191,12 +164,17 @@ class HumdrumFile {
 		            ~HumdrumFile            ();
 
 		bool         read                   (istream& infile);
+		bool         read                   (const char*   contents);
+		bool         read                   (const string& contents);
+		bool         readString             (const char*   contents);
+		bool         readString             (const string& contents);
 		void         createTokensFromLines  (void);
 		void         createLinesFromTokens  (void);
 		HumdrumLine& operator[]             (int index);
 		void         append                 (const char* line);
 		void         append                 (const string& line);
-		int          size                   (void);
+		int          size                   (void) const;
+		int          getMaxTrack            (void) const;
 		ostream&     printSpineInfo         (ostream& out = cout);
 		ostream&     printDataTypeInfo      (ostream& out = cout);
 		ostream&     printTrackInfo         (ostream& out = cout);
@@ -220,7 +198,11 @@ class HumdrumFile {
 
 	private:
 		vector<HumdrumLine*> lines;
+		int          maxtrack;              // the number of tracks (primary spines) in the data.
 };
+
+ostream& operator<<(ostream& out, HumdrumFile& infile);
+
 
 
 class HumdrumLine : public string {
@@ -234,6 +216,7 @@ class HumdrumLine : public string {
 		bool     isCommentLocal  (void) const;
 		bool     isCommentGlobal (void) const;
 		bool     isExclusive     (void) const;
+		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator    (void) const;
 		bool     isInterp        (void) const;
 		bool     isInterpretation(void) const { return isInterp(); }

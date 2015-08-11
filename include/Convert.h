@@ -30,38 +30,6 @@ class Convert {
 
 
 
-///////////////////////////////////////////////////////////////////////////
-// Templates -- Templates for use with minHumdrum.
-///////////////////////////////////////////////////////////////////////////
-
-
-
-// Print contents of vectors as a tab-separated list:
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << v[i];
-		if (i < v.size() - 1) {		
-			out << '\t';
-		}
-	}
-	return out;
-}
-
-
-
-// Print contents of pointer vectors as a tab-separated list:
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A*>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << *v[i];
-		if (i < v.size() - 1) {		
-			out << '\t';
-		}
-	}
-	return out;
-}
-
 // END_MERGE
 
 #endif /* _CONVERT */

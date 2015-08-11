@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 01:47:07 PDT 2015
+// Last Modified: Mon Aug 10 19:14:04 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -719,7 +719,7 @@ ostream& HumNum::printList(ostream& out) const {
 // operator<< --
 //
 
-ostream& operator<<(ostream& out, HumNum number) {
+ostream& operator<<(ostream& out, const HumNum& number) {
 	number.printFraction(out);
 	return out;
 }
@@ -977,6 +977,7 @@ void HumAddress::setSubtrack(int aSubtrack) {
 }
 
 
+
 //////////////////////////////
 //
 // HumdrumFile::HumdrumFile --
@@ -1036,6 +1037,48 @@ bool HumdrumFile::read(istream& infile) {
 }
 
 
+bool HumdrumFile::read(const char* filename) {
+	ifstream infile;
+	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
+		return read(cin);
+	} else {
+		infile.open(filename);
+		if (!infile.is_open()) {
+			return false;
+		}
+	}
+	int status = read(infile);
+	infile.close();
+	return status;
+}
+
+
+bool HumdrumFile::read(const string& filename) {
+	return read(filename.c_str());
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::ReadString -- Read contents from a string rather than 
+//    an istream or filename.
+//
+
+bool HumdrumFile::readString(const string& contents) { 
+	stringstream infile;
+	infile << contents;
+	return read(infile);
+}
+
+
+bool HumdrumFile::readString(const char* contents) { 
+	stringstream infile;
+	infile << contents;
+	return read(infile);
+}
+
+
 
 //////////////////////////////
 //
@@ -1091,8 +1134,19 @@ void HumdrumFile::append(const string& line) {
 // HumdrumFile::size -- Return the number of lines.
 //
 
-int HumdrumFile::size(void) {
+int HumdrumFile::size(void) const {
 	return lines.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getMaxTrack -- returns the number of primary spines in the data.
+//
+
+int HumdrumFile::getMaxTrack(void) const {
+	return maxtrack;
 }
 
 
@@ -1251,7 +1305,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		} else if (previous.token(i).isMergeInterpretation()) {
 			// connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
-			while ((i<previous.getTokenCount()) && 
+			while ((i<previous.getTokenCount()) &&
 					previous.token(i++).isMergeInterpretation()) {
 				previous.token(i).makeForwardLink(next.token(ii));
 			}
@@ -1311,7 +1365,6 @@ bool HumdrumFile::analyzeSpines(void) {
 	vector<string> sinfo;
 	vector<vector<HumdrumToken*> > lastspine;
 
-	int maxtrack = 0;
 	bool init = false;
 	int i, j;
 	for (i=0; i<size(); i++) {
@@ -1516,14 +1569,24 @@ bool HumdrumFile::analyzeRhythm(void) {
 	if (!analyzeTokenDurations()) {
 		return false;
 	}
-	vector<HumNum> rolling;
+	vector<HumNum> durstate;
+	vector<HumNum> curdur;
+	HumNum dur;
 
-	int i;
+	int i, j;
 	for (i=0; i<size(); i++) {
-		if (!lines[i]->isData()) {
-			continue;
+		if (lines[i]->isExclusiveInterpretation()) {
+			durstate.resize(0);
+			for (j=0; j<lines[i]->getTokenCount(); j++) {
+				dur = lines[i]->token(j).getDuration();
+				durstate.push_back(dur);
+			}
+cout << "DURS:\t";
+for (int m=0; m<durstate.size(); m++) {
+cout << durstate[m] << "\t";
+}
+cout << endl;
 		}
-		// ggg
 	}
 
    return true;

@@ -17,12 +17,10 @@
 ENV =
 
 ifeq ($(shell uname),Darwin)
-   OSTYPE = OSXPC
-   ENV = MACOSX_DEPLOYMENT_TARGET=10.6
+   ENV = MACOSX_DEPLOYMENT_TARGET=10.9
    # use the following to compile for 32-bit architecture on 64-bit comps:
    #ARCH = -m32 -arch i386
 else
-   OSTYPE = LINUX
    # use the following to compile for 32-bit architecture on 64-bit comps:
    # (you will need 32-bit libraries in order to do this)
    # ARCH = -m32
@@ -42,7 +40,6 @@ INCDIR_MIN    = include
 LIBDIR        = lib
 LIBFILE       = humdrum.a
 LIBFILE_MIN   = minhumdrum.a
-COMPILER      = LANG=C $(ENV) g++ $(ARCH)
 AR            = ar
 RANLIB        = ranlib
 
@@ -56,7 +53,7 @@ PREFLAGS += -std=c++11
 POSTFLAGS =
 # POSTFLAGS += -static
 
-COMPILER      = g++
+COMPILER      = LANG=C $(ENV) g++ $(ARCH)
 # Or use clang++ v3.3:
 #COMPILER      = clang++
 #PREFLAGS     += -stdlib=libc++
@@ -125,15 +122,19 @@ makedirs:
 	@-mkdir -p $(OBJDIR)
 	@-mkdir -p $(LIBDIR)
 
+%:
+	@echo compiling example $@
+	$(MAKE) -f Makefile.examples $@
+
 
 ###########################################################################
 #                                                                         #
 # defining an explicit rule for object file dependencies                  #
 #                                                                         #
 
-%.o : %.cpp
+%.o : %.cpp min
 	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
+	$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
 
 #                                                                         #
 ###########################################################################

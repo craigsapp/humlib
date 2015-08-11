@@ -29,12 +29,17 @@ class HumdrumFile {
 		            ~HumdrumFile            ();
 
 		bool         read                   (istream& infile);
+		bool         read                   (const char*   contents);
+		bool         read                   (const string& contents);
+		bool         readString             (const char*   contents);
+		bool         readString             (const string& contents);
 		void         createTokensFromLines  (void);
 		void         createLinesFromTokens  (void);
 		HumdrumLine& operator[]             (int index);
 		void         append                 (const char* line);
 		void         append                 (const string& line);
-		int          size                   (void);
+		int          size                   (void) const;
+		int          getMaxTrack            (void) const;
 		ostream&     printSpineInfo         (ostream& out = cout);
 		ostream&     printDataTypeInfo      (ostream& out = cout);
 		ostream&     printTrackInfo         (ostream& out = cout);
@@ -58,7 +63,11 @@ class HumdrumFile {
 
 	private:
 		vector<HumdrumLine*> lines;
+		int          maxtrack;              // the number of tracks (primary spines) in the data.
 };
+
+ostream& operator<<(ostream& out, HumdrumFile& infile);
+
 
 // END_MERGE
 

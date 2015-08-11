@@ -33,6 +33,7 @@ class HumdrumLine : public string {
 		bool     isCommentLocal  (void) const;
 		bool     isCommentGlobal (void) const;
 		bool     isExclusive     (void) const;
+		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator    (void) const;
 		bool     isInterp        (void) const;
 		bool     isInterpretation(void) const { return isInterp(); }
