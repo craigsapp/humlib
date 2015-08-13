@@ -242,15 +242,68 @@ void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
 
 
 
-
 //////////////////////////////
 //
-// HumdrumToken::setPreviousToken --
+// HumdrumToken::setNextToken --
 //
 
 void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 	nextTokens.resize(1);
 	nextTokens[0] = aToken;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextToken --
+//    default value: index = 0
+//
+
+HumdrumToken* HumdrumToken::getNextToken(int index) const {
+	if ((index >= 0) && (index < (int)nextTokens.size())) {
+		return nextTokens[index];
+	} else {
+		return NULL;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextTokens --
+//
+
+vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
+	return nextTokens;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousTokens --
+//
+
+vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
+	return previousTokens;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousToken --
+//    default value: index = 0
+//
+
+HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
+	if ((index >= 0) && (index < (int)previousTokens.size())) {
+		return previousTokens[index];
+	} else {
+		return NULL;
+	}
 }
 
 
@@ -319,6 +372,24 @@ bool HumdrumToken::isManipulator(void) const {
 
 HumNum HumdrumToken::getDuration(void) const {
 	return duration;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRhythm --
+//
+
+bool HumdrumToken::hasRhythm(void) const {
+	string type = getDataType();
+	if (type == "**kern") {
+		return true;
+	}
+	if (type == "**recip") {
+		return true;
+	}
+	return false;
 }
 
 
@@ -508,7 +579,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //   2 for a split interpretation (*^).
 //
 
-int HumdrumToken::getNextTokenCount(void) {
+int HumdrumToken::getNextTokenCount(void) const {
 	return nextTokens.size();
 }
 
@@ -523,7 +594,7 @@ int HumdrumToken::getNextTokenCount(void) {
 //   spine merger (using *v interpretations).
 //
 
-int HumdrumToken::getPreviousTokenCount(void) {
+int HumdrumToken::getPreviousTokenCount(void) const {
 	return previousTokens.size();
 }
 

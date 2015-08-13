@@ -14,6 +14,7 @@
 #define _HUMNUM_H
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 // START_MERGE
@@ -29,6 +30,7 @@ class HumNum {
 		bool     isNegative     (void) const;
 		bool     isPositive     (void) const;
 		bool     isZero         (void) const;
+		bool     isNonZero      (void) const;
 		bool     isNonNegative  (void) const;
 		bool     isNonPositive  (void) const;
 		bool     isInfinite     (void) const;
@@ -43,6 +45,16 @@ class HumNum {
 		void     setValue       (int numerator, int denominator);
 		HumNum   getAbs         (void) const;
 		HumNum&  makeAbs        (void);
+		HumNum&  operator=      (const HumNum& value);
+		HumNum&  operator=      (int value);
+		HumNum&  operator+=     (const HumNum& value);
+		HumNum&  operator+=     (int value);
+		HumNum&  operator-=     (const HumNum& value);
+		HumNum&  operator-=     (int value);
+		HumNum&  operator*=     (const HumNum& value);
+		HumNum&  operator*=     (int value);
+		HumNum&  operator/=     (const HumNum& value);
+		HumNum&  operator/=     (int value);
 		HumNum   operator-      (void);
 		HumNum   operator+      (const HumNum& value);
 		HumNum   operator+      (int value);
@@ -52,8 +64,6 @@ class HumNum {
 		HumNum   operator*      (int value);
 		HumNum   operator/      (const HumNum& value);
 		HumNum   operator/      (int value);
-		HumNum&  operator=      (const HumNum& value);
-		HumNum&  operator=      (int value);
 		bool     operator==     (const HumNum& value) const;
 		bool     operator==     (double value) const;
 		bool     operator==     (int value) const;
@@ -85,6 +95,9 @@ class HumNum {
 };
 
 ostream& operator<<(ostream& out, const HumNum& number);
+
+template <typename A>
+ostream& operator<<(ostream& out, const vector<A>& v);
 
 // END_MERGE
 

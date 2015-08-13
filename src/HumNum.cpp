@@ -86,6 +86,17 @@ bool HumNum::isZero(void) const {
 
 //////////////////////////////
 //
+// HumNum::isNonZero -- Returns true if value is zero.
+//
+
+bool HumNum::isNonZero(void) const {
+	return isFinite() && (top != 0);
+}
+
+
+
+//////////////////////////////
+//
 // HumNum::isNonNegative -- Returns true if value is non-negative.
 //
 
@@ -326,7 +337,7 @@ bool HumNum::isInteger(void) const {
 HumNum HumNum::operator+(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*b2	+ a2 * b1;
 	int bo = b1*b2;
@@ -336,7 +347,7 @@ HumNum HumNum::operator+(const HumNum& value) {
 
 
 HumNum HumNum::operator+(int value) {
-	HumNum output(value * bot, bot);
+	HumNum output(value * bot + top, bot);
 	return output;
 }
 
@@ -350,9 +361,9 @@ HumNum HumNum::operator+(int value) {
 HumNum HumNum::operator-(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
-	int ao = a1*b2	- a2 * b1;
+	int ao = a1*b2	- a2*b1;
 	int bo = b1*b2;
 	HumNum output(ao, bo);
 	return output;
@@ -386,7 +397,7 @@ HumNum HumNum::operator-(void) {
 HumNum HumNum::operator*(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*a2;
 	int bo = b1*b2;
@@ -410,7 +421,7 @@ HumNum HumNum::operator*(int value) {
 HumNum HumNum::operator/(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*b2;
 	int bo = b1*a2;
@@ -447,9 +458,80 @@ HumNum& HumNum::operator=(const HumNum& value) {
 	return *this;
 }
 
-
 HumNum& HumNum::operator=(int  value) {
 	setValue(value);
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator+= --
+//
+
+HumNum& HumNum::operator+=(const HumNum& value) {
+	*this = *this + value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator+=(int value) {
+	*this = *this + value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator-= --
+//
+
+HumNum& HumNum::operator-=(const HumNum& value) {
+	*this = *this - value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator-=(int value) {
+	*this = *this - value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator*= --
+//
+
+HumNum& HumNum::operator*=(const HumNum& value) {
+	*this = *this * value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator*=(int value) {
+	*this = *this * value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator/= --
+//
+
+HumNum& HumNum::operator/=(const HumNum& value) {
+	*this = *this / value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator/=(int value) {
+	*this = *this / value;
 	return *this;
 }
 
@@ -633,6 +715,22 @@ ostream& HumNum::printList(ostream& out) const {
 
 ostream& operator<<(ostream& out, const HumNum& number) {
 	number.printFraction(out);
+	return out;
+}
+
+/////////////////////////////
+//
+// template for printing arrays of items (not pointers to items).
+//
+
+template <typename A>
+ostream& operator<<(ostream& out, const vector<A>& v) {
+	for (unsigned int i=0; i<v.size(); i++) {
+		out << v[i];
+		if (i < v.size() - 1) {		
+			out << '\t';
+		}
+	}
 	return out;
 }
 

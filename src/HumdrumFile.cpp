@@ -65,15 +65,10 @@ bool HumdrumFile::read(istream& infile) {
 		lines.push_back(s);
 	}
 	createTokensFromLines();
-	if (!analyzeLines()) {
-		return false;
-	}
-	if (!analyzeSpines()) {
-		return false;
-	}
-	if (!analyzeTracks()) {
-		return false;
-	}
+	if (!analyzeLines())  { return false; }
+	if (!analyzeSpines()) { return false; }
+	if (!analyzeLinks())  { return false; }
+	if (!analyzeTracks()) { return false; }
 	return analyzeRhythm();
 }
 
@@ -347,8 +342,9 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 			// connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
 			while ((i<previous.getTokenCount()) &&
-					previous.token(i++).isMergeInterpretation()) {
+					previous.token(i).isMergeInterpretation()) {
 				previous.token(i).makeForwardLink(next.token(ii));
+				i++;
 			}
 			i--;
 			ii++;
@@ -381,13 +377,14 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		}
 	}
 
-	if ((i != previous.getTokenCount()+1) ||
-			(ii != next.getTokenCount()+1)) {
+	if ((i != previous.getTokenCount()) || (ii != next.getTokenCount())) {
 		cerr << "Error: cannot stitch lines together due to alignment problem\n";
 		cerr << "Line " << previous.getLineNumber() << ": "
 		     << previous << endl;
 		cerr << "Line " << next.getLineNumber() << ": "
 		     << next << endl;
+		cerr << "I = " <<i<< " token count " << previous.getTokenCount() << endl;
+		cerr << "II = " <<ii<< " token count " << next.getTokenCount() << endl;
 	}
 
 	return true;
@@ -614,37 +611,46 @@ bool HumdrumFile::analyzeRhythm(void) {
 	vector<HumNum> newdurstate;
 	vector<HumNum> curdur;
 	HumNum linedur;
-	HumNum cumulativedur = 0;
 	HumNum dur;
+	HumNum zero(0);
 
-	int i, j;
+	int i, j, k;
 	for (i=0; i<size(); i++) {
 		if (lines[i]->isExclusiveInterpretation()) {
 			// If an exclusive interpretation line, initialize the durstate.
 			if (!getTokenDurations(curdur, i)) { return false; }
 			durstate = curdur;
-			linedur = getMinDur(curdur, durstate);
+			linedur = 0;
 			lines[i]->setDuration(linedur);
-			if (!decrementDurStates(durstate, linedur, i)) { return false; }
 			continue;
 		} else if (!lines[i]->isManipulator()) {
-			if (lines[i].isData()) {
+			if (lines[i]->isData()) {
 				if (!getTokenDurations(curdur, i)) { return false; }
 				if (curdur.size() != durstate.size()) {
-					cerr << "Error on line " << (line+1) 
+					cerr << "Error on line " << (i+1) 
 					     << ": spine problem" << endl;
-					cerr << "Line: " << *lines[line] << endl;
+					cerr << "Line: " << *lines[i] << endl;
 					return false;
 				}
 				linedur = getMinDur(curdur, durstate);
+				for (j=0; j<curdur.size(); j++) {
+					if (curdur[j].isPositive()) {
+						if (durstate[j].isPositive()) {
+							cerr << "Error on line " << (i+1) 
+					     		<< ": previous rhythm too long in field " << j << endl;
+							cerr << "Line: " << *lines[i] << endl;
+							return false;
+						} else {
+							durstate[j] = curdur[j];
+						}
+					}
+				}
 				lines[i]->setDuration(linedur);
 				if (!decrementDurStates(durstate, linedur, i)) { return false; }
-				continue;
 			} else {
 				// Not a rhythmic line, so preserve durstate and set the
 				// duration of the line to zero.
 				lines[i]->setDuration(0);
-				continue;
 			}
 		} else {
 			// Deal with spine manipulators.  The dur state of a spine must
@@ -654,7 +660,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 			for (j=0; j<lines[i]->getTokenCount(); j++) {
 				if (lines[i]->token(j).isSplitInterpretation()) {
 					if (durstate[j].isNonZero()) {
-						cerr << "Error on line " << (line+1)
+						cerr << "Error on line " << (i+1)
 						     << ": notes must end before splitting spine." << endl;
 						return false;
 					}
@@ -662,28 +668,99 @@ bool HumdrumFile::analyzeRhythm(void) {
 					newdurstate.push_back(durstate[j]);
 				} else if (lines[i]->token(j).isMergeInterpretation()) {
 					int mergecount = lines[i]->token(j).getNextToken()
-							.getPreviousTokenCount();
+							->getPreviousTokenCount();
 					if (mergecount <= 1) {
-						cerr << "Error on line " << (line+1)
+						cerr << "Error on line " << (i+1)
 						     << ": merger is incomplete" << endl;
-						cerr << "Line: " << lines[line] << endl;
+						cerr << "Line: " << lines[i] << endl;
 						return false;
 					}
 					// check that all merger spine running durations
 					// are zero; otherwise, there is a rhythmic error in the score.
-ggg
-					
-				} else if (lines[i]->token(j).isTerminatorInterpretation()) {
+					for (k=0; k<mergecount; k++) {
+						if (durstate[j+k].isNonZero()) {
+							cerr << "Error on line " << (i+1)
+							     << ": merger is incomplete" << endl;
+							cerr << "Line: " << lines[i] << endl;
+							return false;
+						}
+					}
+					newdurstate.push_back(durstate[j]);
+					j += mergecount - 1;
+				} else if (lines[i]->token(j).isExchangeInterpretation()) {
+					// switch order of duration states.
+					newdurstate.push_back(durstate[j+1]);
+					newdurstate.push_back(durstate[j]);
+					j++;
+				} else if (lines[i]->token(j).isAddInterpretation()) {
+					// initialize a new durstate;
+					newdurstate.push_back(durstate[j]);
+					newdurstate.push_back(zero);
+				} else if (lines[i]->token(j).isTerminateInterpretation()) {
+					// the durstate should be removed for the current spine.
 				} else if (lines[i]->token(j).isExclusiveInterpretation()) {
+					// The add interpretation should have added this interpetation,
+					// and it should alread by in durstate
+					newdurstate.push_back(durstate[j]);
 				} else {
 					// The manipulator should have a one-to-one mapping with
 					// the next token in the spine.
 					newdurstate.push_back(durstate[j]);
 				}
 			}
+			// Store the new durstate:
+			durstate = newdurstate;
 		}
 	}
+
+   // Fill in the cumulative duration data:
+	HumNum dursum = 0;
+	for (i=0; i<lines.size(); i++) {
+		lines[i]->setDurationFromStart(dursum);
+		dursum += lines[i]->getDuration();
+	}
+
+	// Fill in the metrical information
+	if (!analyzeMeter()) {
+		return false;
+	}
+
    return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::analyzeMeter -- Store the times from the last barline
+//     to the current line, as well as the time to the next barline.
+//     the sum of these two will be the duration of the barline, except
+//     for barlines, where the getDurationToBarline() will store the 
+//     duration of the measure staring at that barline.  To get the
+//     beat, you will have to figure out the current time signature.
+//
+
+bool HumdrumFile::analyzeMeter(void) {
+	int i;
+	HumNum sum = 0;
+	for (i=0; i<size(); i++) {
+		lines[i]->setDurationFromBarline(sum);
+		sum += lines[i]->getDuration();
+		if (lines[i]->isBarline()) {
+			sum = 0;
+		}
+	}
+
+	sum = 0;
+	for (i=size()-1; i>=0; i--) {
+		sum += lines[i]->getDuration();
+		lines[i]->setDurationToBarline(sum);
+		if (lines[i]->isBarline()) {
+			sum = 0;
+		}
+	}
+
+	return true;
 }
 
 
@@ -695,11 +772,11 @@ ggg
 
 bool HumdrumFile::getTokenDurations(vector<HumNum>& durs, int line) {
 	durs.resize(0);
-	for (i=0; i<lines[i]->getTokenCount(); i++) {
-		dur = lines[i]->token(i).getDuration();
-		durstate.push_back(dur);
+	for (int i=0; i<lines[line]->getTokenCount(); i++) {
+		HumNum dur = lines[line]->token(i).getDuration();
+		durs.push_back(dur);
 	}
-	if (!cleanDurs(durstate, i)) {
+	if (!cleanDurs(durs, line)) {
 		return false;
 	}
 	return true;
@@ -720,10 +797,14 @@ bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
 		return true;
 	}
 	for (int i=0; i<(int)durs.size(); i++) {
+		if (!lines[line]->token(i).hasRhythm()) {
+			continue;
+		}
 		durs[i] -= linedur;
 		if (durs[i].isNegative()) {
 			cerr << "Error: rhythmic error on line " << (line+1)
 			     << " field index " << i << endl;
+			cerr << "Duration state is: " << durs[i] << endl;
 			return false;
 		}
 	}
@@ -750,10 +831,10 @@ HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
 			}
 		}
 		if (durstate[i].isPositive()) {
-			if (mindur.isZero()) {
-				mindur = durs[i];
-			} else if (mindur > durs[i]) {
-				mindur = durs[i];
+			if (durstate[i].isZero()) {
+				mindur = durstate[i];
+			} else if (mindur > durstate[i]) {
+				mindur = durstate[i];
 			}
 		}
 	}

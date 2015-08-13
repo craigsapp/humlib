@@ -178,13 +178,21 @@ sub getFiles {
 	my ($dir) = @_;
 	opendir(DIR, $dir) or die;
 	my @output;
+	my @output2;
 	while (my $file = readdir(DIR)) {
 		next if $file =~ /^\./;
 		next if -d "$dir/$file";
 		next if !-r "$dir/$file";
-		$output[@output] = $file;
+		if ($file =~ /Convert/) {
+			# classes which have a dependeny on other classes:
+			$output2[@output2] = $file;
+		} else {
+			$output[@output] = $file;
+		}
 	}
-	return sort @output;
+	@output = sort @output;
+	push(@output, @output2);
+	return @output;
 }
 
 

@@ -48,6 +48,7 @@ class HumdrumFile {
 	protected:
 		bool         analyzeSpines          (void);
 		bool         analyzeRhythm          (void);
+		bool         analyzeMeter           (void);
 		bool         analyzeLinks           (void);
 		bool         analyzeTokenDurations  (void);
 		bool         analyzeTracks          (void);
@@ -64,6 +65,8 @@ class HumdrumFile {
 		                                     vector<HumNum>& durstate);
       bool         getTokenDurations      (vector<HumNum>& durs, int line);
 		bool         cleanDurs              (vector<HumNum>& durs, int line);
+		bool         decrementDurStates     (vector<HumNum>& durs, HumNum linedur,
+		                                     int line);
 
 	private:
 		vector<HumdrumLine*> lines;

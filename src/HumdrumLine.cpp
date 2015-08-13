@@ -12,6 +12,7 @@
 //
 
 #include "HumdrumLine.h"
+#include "Convert.h"
 
 // START_MERGE
 
@@ -133,10 +134,10 @@ bool HumdrumLine::isInterp(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isMeasure -- Returns true if starts with '=' character.
+// HumdrumLine::isBarline -- Returns true if starts with '=' character.
 //
 
-bool HumdrumLine::isMeasure(void) const {
+bool HumdrumLine::isBarline(void) const {
 	return equalChar(0, '=');
 }
 
@@ -148,7 +149,7 @@ bool HumdrumLine::isMeasure(void) const {
 //
 
 bool HumdrumLine::isData(void) const {
-	if (isComment() || isInterp() || isMeasure() || isEmpty()) {
+	if (isComment() || isInterp() || isBarline() || isEmpty()) {
 		return false;
 	} else {
 		return true;
@@ -186,6 +187,119 @@ int HumdrumLine::getLineIndex(void) const {
 
 int HumdrumLine::getLineNumber(void) const {
 	return lineindex + 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getLineNumber --
+//
+
+HumNum HumdrumLine::getDuration(void) const { 
+	return duration;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationFromStart --
+//
+
+void HumdrumLine::setDurationFromStart(HumNum dur) {
+	 durationFromStart = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromStart --
+//
+
+HumNum HumdrumLine::getDurationFromStart(void) const {
+	return durationFromStart;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromBarline --
+//
+
+HumNum HumdrumLine::getDurationFromBarline(void) const { 
+	return durationFromBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationFromBarline -- Time from the previous
+//    barline to the current line.
+//
+
+void HumdrumLine::setDurationFromBarline(HumNum dur) { 
+	durationFromBarline = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationToBarline -- Time from the starting of the
+//     current note to the next barline.
+//
+
+HumNum HumdrumLine::getDurationToBarline(void) const { 
+	return durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getBeat -- return the beat number for the data on the
+//     current line given the input **recip representation for the duration
+//     of a beat.
+//  Default value: beatrecip = "4".
+//
+
+HumNum HumdrumLine::getBeat(string beatrecip) const {
+	HumNum beatdur = Convert::recipToDuration(beatrecip);
+	if (beatdur.isZero()) {
+		return beatdur;
+	}
+	HumNum beat = (getDurationFromBarline() / beatdur) + 1;
+	return beat;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationToBarline --
+//
+
+void HumdrumLine::setDurationToBarline(HumNum dur) { 
+	durationToBarline = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getLineNumber --
+//
+
+void HumdrumLine::setDuration(HumNum aDur) { 
+	if (aDur.isNonNegative()) {
+		duration = aDur;
+	} else {
+		duration = 0;
+	}
 }
 
 

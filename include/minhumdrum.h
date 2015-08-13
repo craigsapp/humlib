@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 23:44:33 PDT 2015
+// Last Modified: Wed Aug 12 17:44:39 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -39,15 +39,6 @@ class HumAddress;
 class HumdrumToken;
 class HumdrumLine;
 class HumdrumFile;
-
-
-class Convert {
-	public:
-		static HumNum    recipToDuration   (const string& recip, 
-		                                    string separator = " ");
-};
-
-
 
 
 class HumAddress {
@@ -100,6 +91,7 @@ class HumNum {
 		bool     isNegative     (void) const;
 		bool     isPositive     (void) const;
 		bool     isZero         (void) const;
+		bool     isNonZero      (void) const;
 		bool     isNonNegative  (void) const;
 		bool     isNonPositive  (void) const;
 		bool     isInfinite     (void) const;
@@ -114,6 +106,16 @@ class HumNum {
 		void     setValue       (int numerator, int denominator);
 		HumNum   getAbs         (void) const;
 		HumNum&  makeAbs        (void);
+		HumNum&  operator=      (const HumNum& value);
+		HumNum&  operator=      (int value);
+		HumNum&  operator+=     (const HumNum& value);
+		HumNum&  operator+=     (int value);
+		HumNum&  operator-=     (const HumNum& value);
+		HumNum&  operator-=     (int value);
+		HumNum&  operator*=     (const HumNum& value);
+		HumNum&  operator*=     (int value);
+		HumNum&  operator/=     (const HumNum& value);
+		HumNum&  operator/=     (int value);
 		HumNum   operator-      (void);
 		HumNum   operator+      (const HumNum& value);
 		HumNum   operator+      (int value);
@@ -123,8 +125,6 @@ class HumNum {
 		HumNum   operator*      (int value);
 		HumNum   operator/      (const HumNum& value);
 		HumNum   operator/      (int value);
-		HumNum&  operator=      (const HumNum& value);
-		HumNum&  operator=      (int value);
 		bool     operator==     (const HumNum& value) const;
 		bool     operator==     (double value) const;
 		bool     operator==     (int value) const;
@@ -157,6 +157,9 @@ class HumNum {
 
 ostream& operator<<(ostream& out, const HumNum& number);
 
+template <typename A>
+ostream& operator<<(ostream& out, const vector<A>& v);
+
 
 class HumdrumFile {
 	public:
@@ -183,6 +186,7 @@ class HumdrumFile {
 	protected:
 		bool         analyzeSpines          (void);
 		bool         analyzeRhythm          (void);
+		bool         analyzeMeter           (void);
 		bool         analyzeLinks           (void);
 		bool         analyzeTokenDurations  (void);
 		bool         analyzeTracks          (void);
@@ -195,8 +199,12 @@ class HumdrumFile {
 		                                     int extra);
 		bool         stitchLinesTogether    (HumdrumLine& previous,
 		                                     HumdrumLine& next);
-		bool         cleanDurs              (vector<HumNum>& durs, int line,
-		                                     HumdrumFile& infile);
+		HumNum       getMinDur              (vector<HumNum>& durs,
+		                                     vector<HumNum>& durstate);
+      bool         getTokenDurations      (vector<HumNum>& durs, int line);
+		bool         cleanDurs              (vector<HumNum>& durs, int line);
+		bool         decrementDurStates     (vector<HumNum>& durs, HumNum linedur,
+		                                     int line);
 
 	private:
 		vector<HumdrumLine*> lines;
@@ -209,51 +217,103 @@ ostream& operator<<(ostream& out, HumdrumFile& infile);
 
 class HumdrumLine : public string {
 	public:
-		         HumdrumLine     (void);
-		         HumdrumLine     (const string& aString);
-		         HumdrumLine     (const char* aString);
-		        ~HumdrumLine     ();
+		         HumdrumLine          (void);
+		         HumdrumLine          (const string& aString);
+		         HumdrumLine          (const char* aString);
+		        ~HumdrumLine          ();
 
-		bool     isComment       (void) const;
-		bool     isCommentLocal  (void) const;
-		bool     isCommentGlobal (void) const;
-		bool     isExclusive     (void) const;
+		bool     isComment              (void) const;
+		bool     isCommentLocal         (void) const;
+		bool     isCommentGlobal        (void) const;
+		bool     isExclusive            (void) const;
 		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
-		bool     isTerminator    (void) const;
-		bool     isInterp        (void) const;
-		bool     isInterpretation(void) const { return isInterp(); }
-		bool     isMeasure       (void) const;
-		bool     isData          (void) const;
-		bool     isEmpty         (void) const;
-		bool     hasSpines       (void) const;
-		bool     isManipulator   (void) const;
-		void     getTokens       (vector<HumdrumToken*>& list);
-		int      getTokenCount   (void) const;
-      HumdrumToken& token      (int index);
-      string   getTokenString  (int index) const;
-		bool     equalChar       (int index, char ch) const;
-		char     getChar         (int index) const;
-		ostream& printSpineInfo  (ostream& out = cout);
-		ostream& printDataType   (ostream& out = cout);
-		ostream& printTrackInfo  (ostream& out = cout);
-		ostream& printDataTypeInfo(ostream& out = cout);
-		ostream& printDurationInfo(ostream& out = cout);
-		int      createTokensFromLine (void);
-		void     createLineFromTokens (void);
-		int      getLineIndex    (void) const;
-		int      getLineNumber   (void) const;
+		bool     isTerminator           (void) const;
+		bool     isInterp               (void) const;
+		bool     isInterpretation       (void) const { return isInterp(); }
+		bool     isBarline              (void) const;
+		bool     isData                 (void) const;
+		bool     isEmpty                (void) const;
+		bool     isManipulator          (void) const;
+		bool     hasSpines              (void) const;
+      HumdrumToken& token             (int index);
+		void     getTokens              (vector<HumdrumToken*>& list);
+		int      getTokenCount          (void) const;
+      string   getTokenString         (int index) const;
+		bool     equalChar              (int index, char ch) const;
+		char     getChar                (int index) const;
+		ostream& printSpineInfo         (ostream& out = cout);
+		ostream& printDataType          (ostream& out = cout);
+		ostream& printTrackInfo         (ostream& out = cout);
+		ostream& printDataTypeInfo      (ostream& out = cout);
+		ostream& printDurationInfo      (ostream& out = cout);
+		int      createTokensFromLine   (void);
+		void     createLineFromTokens   (void);
+		int      getLineIndex           (void) const;
+		int      getLineNumber          (void) const;
+		HumNum   getDuration            (void) const;
+		HumNum   getDurationFromStart   (void) const;
+		HumNum   getDurationFromBarline (void) const;
+		HumNum   getDurationToBarline   (void) const;
+		HumNum   getBeat                (string beatrecip = "4") const;
 
 	protected:
-		bool     analyzeTracks   (void);
-		bool     analyzeTokenDurations (void);
-		void     setLineIndex    (int index);
-		void     clear           (void);
+		bool     analyzeTracks          (void);
+		bool     analyzeTokenDurations  (void);
+		void     setLineIndex           (int index);
+		void     clear                  (void);
+		void     setDuration            (HumNum aDur);
+		void     setDurationFromStart   (HumNum dur);
+		void     setDurationFromBarline (HumNum dur);
+		void     setDurationToBarline   (HumNum dur);
 
 	private:
-		int                  lineindex;
+
+		//
+		// State variables managed by the HumdrumLine class:
+		//
+
+		// lineindex: Used to store the index number of the HumdrumLine in
+		// the owning HumdrumFile object.
+		// This variable is filled by HumdrumFile::analyzeLines().
+		int lineindex;
+
+		// tokens: Used to store the individual tab-separated token fields
+		// on a line.  These are prepared automatically after reading in
+		// a full line of text (which is accessed throught the string parent
+		// class).  If the full line is changed, the tokens are not updated
+		// automatically -- use createTokensFromLine().  Likewise the full
+		// text line is not updated if any tokens are changed -- use
+		// createLineFromTokens() in that case.  The second case is more
+		// useful: you can read in a HumdrumFile, tweak the tokens, then
+		// reconstruct the full line and print out again.
+		// This variable is filled by HumdrumFile::read().
 		vector<HumdrumToken*> tokens;
-		HumNum               duration;
-		HumNum               absolute;
+
+		// duration: This is the "duration" of a line.  The duration is
+		// equal to the minimum time unit of all durational tokens on the
+		// line.  This also includes null tokens when the duration of a
+		// previous note in a previous spine is ending on the line, so it is
+		// not just the minimum duration on the line.
+		// This variable is filled by HumdrumFile::analyzeRhythm().
+		HumNum duration;
+
+		// durationFromStart: This is the cumulative duration of all lines
+		// prior to this one in the owning HumdrumFile object.  For example,
+		// the first notes in a score start at time 0, If the duration of the
+		// first data line is 1 quarter note, then the durationFromStart for
+		// the second line will be 1 quarter note.
+		// This variable is filled by HumdrumFile::analyzeRhythm().
+		HumNum durationFromStart;
+
+		// durationFromBarline: This is the cumulative duration from the
+		// last barline to the current data line.  
+		// This variable is filled by HumdrumFile::analyzeMeter().
+		HumNum durationFromBarline;
+
+		// durationToBarline: This is the duration from the start of the
+		// current line to the next barline in the owning HumdrumFile object.
+		// This variable is filled by HumdrumFile::analyzeMeter().
+		HumNum durationToBarline;
 
 	friend class HumdrumFile;
 };
@@ -280,6 +340,7 @@ class HumdrumToken : public string {
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
 		HumNum   getDuration       (void) const;
+		bool     hasRhythm         (void) const;
 		bool     equalChar         (int index, char ch) const;
 
 		int      getLineIndex      (void) const;
@@ -292,6 +353,14 @@ class HumdrumToken : public string {
 		string   getTrackString    (void) const;
 		int      getSubtokenCount  (const string& separator = " ") const;
       string   getSubtoken       (int index, const string& separator) const;
+
+		// next/previous token functions:
+		int           getNextTokenCount         (void) const;
+		int           getPreviousTokenCount     (void) const;
+		HumdrumToken* getNextToken              (int index = 0) const;
+		HumdrumToken* getPreviousToken          (int index = 0) const;
+		vector<HumdrumToken*> getNextTokens     (void) const;
+		vector<HumdrumToken*> getPreviousTokens (void) const;
 
 	protected:
 		void     setLineAddress    (int aLineIndex, int aFieldIndex);
@@ -319,6 +388,15 @@ class HumdrumToken : public string {
 	friend class HumdrumLine;
 	friend class HumdrumFile;
 };
+
+
+class Convert {
+	public:
+		static HumNum    recipToDuration  (const string& recip, HumNum scale = 4,
+		                                    string separator = " ");
+};
+
+
 
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 10 23:44:33 PDT 2015
+// Last Modified: Wed Aug 12 17:44:39 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -11,95 +11,6 @@
 //
 
 #include "minhumdrum.h"
-
-
-//////////////////////////////
-//
-// Convert::recipToDuration --
-//     default value: separator = " ";
-//
-
-HumNum Convert::recipToDuration(const string& recip, string separator) {
-	size_t loc;
-	loc = recip.find(separator);
-	string subtok;
-	if (loc != string::npos) {
-		subtok = recip.substr(0, loc);
-	} else {
-		subtok = recip;
-	}
-
-   loc = recip.find('q');
-	if (loc != string::npos) {
-		// grace note, ignore printed rhythm
-		HumNum zero(0);
-		return zero;
-	}
-
-	int dotcount = 0;
-	int i;
-	int numi = -1;
-	for (i=0; i<subtok.size(); i++) {
-		if (subtok[i] == '.') {
-			dotcount++;
-		}
-		if ((numi < 0) && isdigit(subtok[i])) {
-			numi = i;
-		}
-	}
-	loc = subtok.find("%");
-	int numerator = 1;
-	int denominator = 1;
-	HumNum output;
-	if (loc != string::npos) {
-		// reciporical rhythm
-		numerator = 1;
-		denominator = subtok[numi++] - '0';
-		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
-			int xi = loc + 1;
-			numerator = subtok[xi++] - '0';
-			while ((xi < subtok.size()) && isdigit(subtok[xi])) {
-				numerator = numerator * 10 + (subtok[xi++] - '0');
-			}
-		}
-		output.setValue(numerator, denominator);
-	} else if (numi < 0) {
-		// no rhythm found
-		HumNum zero(0);
-		return zero;
-	} else if (subtok[numi] == '0') {
-		// 0-symbol
-		int zerocount = 1;
-		for (i=numi+1; i<subtok.size(); i++) {
-			if (subtok[i] == '0') {
-				zerocount++;
-			} else {
-				break;
-			}
-			numerator = 4 * (int)pow(2, zerocount);
-			output.setValue(numerator, 1);
-		}
-   } else {
-		// plain rhythm
-		denominator = subtok[numi++] - '0';
-		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		output.setValue(1, denominator);
-	}
-
-	if (dotcount <= 0) {
-		return output;
-	}
-
-	int bot = (int)pow(2.0, dotcount);
-	int top = (int)pow(2.0, dotcount + 1) - 1;
-	HumNum factor(top, bot);
-	return output * factor;
-}
 
 
 //////////////////////////////
@@ -168,6 +79,17 @@ bool HumNum::isPositive(void) const {
 
 bool HumNum::isZero(void) const {
 	return isFinite() && (top == 0);
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::isNonZero -- Returns true if value is zero.
+//
+
+bool HumNum::isNonZero(void) const {
+	return isFinite() && (top != 0);
 }
 
 
@@ -414,7 +336,7 @@ bool HumNum::isInteger(void) const {
 HumNum HumNum::operator+(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*b2	+ a2 * b1;
 	int bo = b1*b2;
@@ -424,7 +346,7 @@ HumNum HumNum::operator+(const HumNum& value) {
 
 
 HumNum HumNum::operator+(int value) {
-	HumNum output(value * bot, bot);
+	HumNum output(value * bot + top, bot);
 	return output;
 }
 
@@ -438,9 +360,9 @@ HumNum HumNum::operator+(int value) {
 HumNum HumNum::operator-(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
-	int ao = a1*b2	- a2 * b1;
+	int ao = a1*b2	- a2*b1;
 	int bo = b1*b2;
 	HumNum output(ao, bo);
 	return output;
@@ -474,7 +396,7 @@ HumNum HumNum::operator-(void) {
 HumNum HumNum::operator*(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*a2;
 	int bo = b1*b2;
@@ -498,7 +420,7 @@ HumNum HumNum::operator*(int value) {
 HumNum HumNum::operator/(const HumNum& value) {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
-	int a2  = value.getDenominator();
+	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
 	int ao = a1*b2;
 	int bo = b1*a2;
@@ -535,9 +457,80 @@ HumNum& HumNum::operator=(const HumNum& value) {
 	return *this;
 }
 
-
 HumNum& HumNum::operator=(int  value) {
 	setValue(value);
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator+= --
+//
+
+HumNum& HumNum::operator+=(const HumNum& value) {
+	*this = *this + value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator+=(int value) {
+	*this = *this + value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator-= --
+//
+
+HumNum& HumNum::operator-=(const HumNum& value) {
+	*this = *this - value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator-=(int value) {
+	*this = *this - value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator*= --
+//
+
+HumNum& HumNum::operator*=(const HumNum& value) {
+	*this = *this * value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator*=(int value) {
+	*this = *this * value;
+	return *this;
+}
+
+
+
+//////////////////////////////
+//
+// HumNum::operator/= --
+//
+
+HumNum& HumNum::operator/=(const HumNum& value) {
+	*this = *this / value;
+	return *this;
+}
+
+
+HumNum& HumNum::operator/=(int value) {
+	*this = *this / value;
 	return *this;
 }
 
@@ -721,6 +714,22 @@ ostream& HumNum::printList(ostream& out) const {
 
 ostream& operator<<(ostream& out, const HumNum& number) {
 	number.printFraction(out);
+	return out;
+}
+
+/////////////////////////////
+//
+// template for printing arrays of items (not pointers to items).
+//
+
+template <typename A>
+ostream& operator<<(ostream& out, const vector<A>& v) {
+	for (unsigned int i=0; i<v.size(); i++) {
+		out << v[i];
+		if (i < v.size() - 1) {		
+			out << '\t';
+		}
+	}
 	return out;
 }
 
@@ -1024,15 +1033,10 @@ bool HumdrumFile::read(istream& infile) {
 		lines.push_back(s);
 	}
 	createTokensFromLines();
-	if (!analyzeLines()) {
-		return false;
-	}
-	if (!analyzeSpines()) {
-		return false;
-	}
-	if (!analyzeTracks()) {
-		return false;
-	}
+	if (!analyzeLines())  { return false; }
+	if (!analyzeSpines()) { return false; }
+	if (!analyzeLinks())  { return false; }
+	if (!analyzeTracks()) { return false; }
 	return analyzeRhythm();
 }
 
@@ -1306,8 +1310,9 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 			// connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
 			while ((i<previous.getTokenCount()) &&
-					previous.token(i++).isMergeInterpretation()) {
+					previous.token(i).isMergeInterpretation()) {
 				previous.token(i).makeForwardLink(next.token(ii));
+				i++;
 			}
 			i--;
 			ii++;
@@ -1340,13 +1345,14 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		}
 	}
 
-	if ((i != previous.getTokenCount()+1) ||
-			(ii != next.getTokenCount()+1)) {
+	if ((i != previous.getTokenCount()) || (ii != next.getTokenCount())) {
 		cerr << "Error: cannot stitch lines together due to alignment problem\n";
 		cerr << "Line " << previous.getLineNumber() << ": "
 		     << previous << endl;
 		cerr << "Line " << next.getLineNumber() << ": "
 		     << next << endl;
+		cerr << "I = " <<i<< " token count " << previous.getTokenCount() << endl;
+		cerr << "II = " <<ii<< " token count " << next.getTokenCount() << endl;
 	}
 
 	return true;
@@ -1570,31 +1576,237 @@ bool HumdrumFile::analyzeRhythm(void) {
 		return false;
 	}
 	vector<HumNum> durstate;
+	vector<HumNum> newdurstate;
 	vector<HumNum> curdur;
+	HumNum linedur;
 	HumNum dur;
+	HumNum zero(0);
 
-	bool status;
-	int i, j;
+	int i, j, k;
 	for (i=0; i<size(); i++) {
 		if (lines[i]->isExclusiveInterpretation()) {
-			durstate.resize(0);
+			// If an exclusive interpretation line, initialize the durstate.
+			if (!getTokenDurations(curdur, i)) { return false; }
+			durstate = curdur;
+			linedur = 0;
+			lines[i]->setDuration(linedur);
+			continue;
+		} else if (!lines[i]->isManipulator()) {
+			if (lines[i]->isData()) {
+				if (!getTokenDurations(curdur, i)) { return false; }
+				if (curdur.size() != durstate.size()) {
+					cerr << "Error on line " << (i+1) 
+					     << ": spine problem" << endl;
+					cerr << "Line: " << *lines[i] << endl;
+					return false;
+				}
+				linedur = getMinDur(curdur, durstate);
+				for (j=0; j<curdur.size(); j++) {
+					if (curdur[j].isPositive()) {
+						if (durstate[j].isPositive()) {
+							cerr << "Error on line " << (i+1) 
+					     		<< ": previous rhythm too long in field " << j << endl;
+							cerr << "Line: " << *lines[i] << endl;
+							return false;
+						} else {
+							durstate[j] = curdur[j];
+						}
+					}
+				}
+				lines[i]->setDuration(linedur);
+				if (!decrementDurStates(durstate, linedur, i)) { return false; }
+			} else {
+				// Not a rhythmic line, so preserve durstate and set the
+				// duration of the line to zero.
+				lines[i]->setDuration(0);
+			}
+		} else {
+			// Deal with spine manipulators.  The dur state of a spine must
+			// be zero when the manipulator is *^, *v, or *-. Exclusive
+			// interpretations initialze a new duration state.
+			newdurstate.resize(0);
 			for (j=0; j<lines[i]->getTokenCount(); j++) {
-				dur = lines[i]->token(j).getDuration();
-				durstate.push_back(dur);
+				if (lines[i]->token(j).isSplitInterpretation()) {
+					if (durstate[j].isNonZero()) {
+						cerr << "Error on line " << (i+1)
+						     << ": notes must end before splitting spine." << endl;
+						return false;
+					}
+					newdurstate.push_back(durstate[j]);
+					newdurstate.push_back(durstate[j]);
+				} else if (lines[i]->token(j).isMergeInterpretation()) {
+					int mergecount = lines[i]->token(j).getNextToken()
+							->getPreviousTokenCount();
+					if (mergecount <= 1) {
+						cerr << "Error on line " << (i+1)
+						     << ": merger is incomplete" << endl;
+						cerr << "Line: " << lines[i] << endl;
+						return false;
+					}
+					// check that all merger spine running durations
+					// are zero; otherwise, there is a rhythmic error in the score.
+					for (k=0; k<mergecount; k++) {
+						if (durstate[j+k].isNonZero()) {
+							cerr << "Error on line " << (i+1)
+							     << ": merger is incomplete" << endl;
+							cerr << "Line: " << lines[i] << endl;
+							return false;
+						}
+					}
+					newdurstate.push_back(durstate[j]);
+					j += mergecount - 1;
+				} else if (lines[i]->token(j).isExchangeInterpretation()) {
+					// switch order of duration states.
+					newdurstate.push_back(durstate[j+1]);
+					newdurstate.push_back(durstate[j]);
+					j++;
+				} else if (lines[i]->token(j).isAddInterpretation()) {
+					// initialize a new durstate;
+					newdurstate.push_back(durstate[j]);
+					newdurstate.push_back(zero);
+				} else if (lines[i]->token(j).isTerminateInterpretation()) {
+					// the durstate should be removed for the current spine.
+				} else if (lines[i]->token(j).isExclusiveInterpretation()) {
+					// The add interpretation should have added this interpetation,
+					// and it should alread by in durstate
+					newdurstate.push_back(durstate[j]);
+				} else {
+					// The manipulator should have a one-to-one mapping with
+					// the next token in the spine.
+					newdurstate.push_back(durstate[j]);
+				}
 			}
-			status = cleanDurs(durstate, i, *this);
-			if (!status) {
-				return false;
-			}
-cout << "DURS:\t";
-for (int m=0; m<durstate.size(); m++) {
-cout << durstate[m] << "\t";
-}
-cout << endl;
+			// Store the new durstate:
+			durstate = newdurstate;
 		}
 	}
 
+   // Fill in the cumulative duration data:
+	HumNum dursum = 0;
+	for (i=0; i<lines.size(); i++) {
+		lines[i]->setDurationFromStart(dursum);
+		dursum += lines[i]->getDuration();
+	}
+
+	// Fill in the metrical information
+	if (!analyzeMeter()) {
+		return false;
+	}
+
    return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::analyzeMeter -- Store the times from the last barline
+//     to the current line, as well as the time to the next barline.
+//     the sum of these two will be the duration of the barline, except
+//     for barlines, where the getDurationToBarline() will store the 
+//     duration of the measure staring at that barline.  To get the
+//     beat, you will have to figure out the current time signature.
+//
+
+bool HumdrumFile::analyzeMeter(void) {
+	int i;
+	HumNum sum = 0;
+	for (i=0; i<size(); i++) {
+		lines[i]->setDurationFromBarline(sum);
+		sum += lines[i]->getDuration();
+		if (lines[i]->isBarline()) {
+			sum = 0;
+		}
+	}
+
+	sum = 0;
+	for (i=size()-1; i>=0; i--) {
+		sum += lines[i]->getDuration();
+		lines[i]->setDurationToBarline(sum);
+		if (lines[i]->isBarline()) {
+			sum = 0;
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getTokenDurations --
+//
+
+bool HumdrumFile::getTokenDurations(vector<HumNum>& durs, int line) {
+	durs.resize(0);
+	for (int i=0; i<lines[line]->getTokenCount(); i++) {
+		HumNum dur = lines[line]->token(i).getDuration();
+		durs.push_back(dur);
+	}
+	if (!cleanDurs(durs, line)) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::decrementDurStates -- Subtract the line duration from
+//   the current line of running durations.  If any duration is less
+//   than zero, then a rhythm error exists in the data.
+//
+
+bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
+		int line) {
+	if (linedur.isZero()) {
+		return true;
+	}
+	for (int i=0; i<(int)durs.size(); i++) {
+		if (!lines[line]->token(i).hasRhythm()) {
+			continue;
+		}
+		durs[i] -= linedur;
+		if (durs[i].isNegative()) {
+			cerr << "Error: rhythmic error on line " << (line+1)
+			     << " field index " << i << endl;
+			cerr << "Duration state is: " << durs[i] << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getMinDur -- Return the smallest duration on the 
+//   line.  If all durations are zero, then return zero; otherwise,
+//   return the smallest positive duration.
+//
+
+HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
+	HumNum mindur = 0;
+	for (int i=0; i<(int)durs.size(); i++) {
+		if (durs[i].isPositive()) {
+			if (mindur.isZero()) {
+				mindur = durs[i];
+			} else if (mindur > durs[i]) {
+				mindur = durs[i];
+			}
+		}
+		if (durstate[i].isPositive()) {
+			if (durstate[i].isZero()) {
+				mindur = durstate[i];
+			} else if (mindur > durstate[i]) {
+				mindur = durstate[i];
+			}
+		}
+	}
+	return mindur;
 }
 
 
@@ -1606,8 +1818,7 @@ cout << endl;
 //    to zero (negative durations indicate undefined durations).
 //
 
-bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line, 
-		HumdrumFile& infile) {
+bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
 	bool zero 		= false;
 	bool positive = false;
 	for (int i=0; i<(int)durs.size(); i++) {
@@ -1618,7 +1829,7 @@ bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line,
 	if (zero && positive) {
 		cerr << "Error on line " << (line+1) << " grace note and "
 		     << " regular note cannot occur on same line." << endl;
-		cerr << "Line: " << infile[line] << endl;
+		cerr << "Line: " << *lines[line] << endl;
 		return false;
 	}
 	return true;
@@ -1757,10 +1968,10 @@ bool HumdrumLine::isInterp(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isMeasure -- Returns true if starts with '=' character.
+// HumdrumLine::isBarline -- Returns true if starts with '=' character.
 //
 
-bool HumdrumLine::isMeasure(void) const {
+bool HumdrumLine::isBarline(void) const {
 	return equalChar(0, '=');
 }
 
@@ -1772,7 +1983,7 @@ bool HumdrumLine::isMeasure(void) const {
 //
 
 bool HumdrumLine::isData(void) const {
-	if (isComment() || isInterp() || isMeasure() || isEmpty()) {
+	if (isComment() || isInterp() || isBarline() || isEmpty()) {
 		return false;
 	} else {
 		return true;
@@ -1810,6 +2021,119 @@ int HumdrumLine::getLineIndex(void) const {
 
 int HumdrumLine::getLineNumber(void) const {
 	return lineindex + 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getLineNumber --
+//
+
+HumNum HumdrumLine::getDuration(void) const { 
+	return duration;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationFromStart --
+//
+
+void HumdrumLine::setDurationFromStart(HumNum dur) {
+	 durationFromStart = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromStart --
+//
+
+HumNum HumdrumLine::getDurationFromStart(void) const {
+	return durationFromStart;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromBarline --
+//
+
+HumNum HumdrumLine::getDurationFromBarline(void) const { 
+	return durationFromBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationFromBarline -- Time from the previous
+//    barline to the current line.
+//
+
+void HumdrumLine::setDurationFromBarline(HumNum dur) { 
+	durationFromBarline = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationToBarline -- Time from the starting of the
+//     current note to the next barline.
+//
+
+HumNum HumdrumLine::getDurationToBarline(void) const { 
+	return durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getBeat -- return the beat number for the data on the
+//     current line given the input **recip representation for the duration
+//     of a beat.
+//  Default value: beatrecip = "4".
+//
+
+HumNum HumdrumLine::getBeat(string beatrecip) const {
+	HumNum beatdur = Convert::recipToDuration(beatrecip);
+	if (beatdur.isZero()) {
+		return beatdur;
+	}
+	HumNum beat = (getDurationFromBarline() / beatdur) + 1;
+	return beat;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setDurationToBarline --
+//
+
+void HumdrumLine::setDurationToBarline(HumNum dur) { 
+	durationToBarline = dur;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getLineNumber --
+//
+
+void HumdrumLine::setDuration(HumNum aDur) { 
+	if (aDur.isNonNegative()) {
+		duration = aDur;
+	} else {
+		duration = 0;
+	}
 }
 
 
@@ -2410,15 +2734,68 @@ void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
 
 
 
-
 //////////////////////////////
 //
-// HumdrumToken::setPreviousToken --
+// HumdrumToken::setNextToken --
 //
 
 void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 	nextTokens.resize(1);
 	nextTokens[0] = aToken;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextToken --
+//    default value: index = 0
+//
+
+HumdrumToken* HumdrumToken::getNextToken(int index) const {
+	if ((index >= 0) && (index < (int)nextTokens.size())) {
+		return nextTokens[index];
+	} else {
+		return NULL;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextTokens --
+//
+
+vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
+	return nextTokens;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousTokens --
+//
+
+vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
+	return previousTokens;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousToken --
+//    default value: index = 0
+//
+
+HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
+	if ((index >= 0) && (index < (int)previousTokens.size())) {
+		return previousTokens[index];
+	} else {
+		return NULL;
+	}
 }
 
 
@@ -2487,6 +2864,24 @@ bool HumdrumToken::isManipulator(void) const {
 
 HumNum HumdrumToken::getDuration(void) const {
 	return duration;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRhythm --
+//
+
+bool HumdrumToken::hasRhythm(void) const {
+	string type = getDataType();
+	if (type == "**kern") {
+		return true;
+	}
+	if (type == "**recip") {
+		return true;
+	}
+	return false;
 }
 
 
@@ -2665,5 +3060,125 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 	previousTokens.push_back(&previousToken);
 	previousToken.nextTokens.push_back(this);
+}
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextTokenCount -- Return the number of tokens in the
+//   spine/subspine which follow this token.  Typically this will be 1,
+//   but will be zero for a terminator interpretation (*-), and will be 
+//   2 for a split interpretation (*^).
+//
+
+int HumdrumToken::getNextTokenCount(void) const {
+	return nextTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousTokenCount -- Return the number of tokens
+//   in the spine/subspine which precede this token.  Typically this will 
+//   be 1, but will be zero for an exclusive interpretation (starting with 
+//   "**"), and will be greater than one for a token which follows a 
+//   spine merger (using *v interpretations).
+//
+
+int HumdrumToken::getPreviousTokenCount(void) const {
+	return previousTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// Convert::recipToDuration --
+//     default value: scale = 4 (duration in terms of quarter notes)
+//     default value: separator = " "
+//
+
+HumNum Convert::recipToDuration(const string& recip, HumNum scale, 
+		string separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
+	}
+
+   loc = recip.find('q');
+	if (loc != string::npos) {
+		// grace note, ignore printed rhythm
+		HumNum zero(0);
+		return zero;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciporical rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi < subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+			numerator = 4 * (int)pow(2, zerocount);
+			output.setValue(numerator, 1);
+		}
+   } else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
 }
 

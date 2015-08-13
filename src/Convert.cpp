@@ -19,10 +19,12 @@
 //////////////////////////////
 //
 // Convert::recipToDuration --
-//     default value: separator = " ";
+//     default value: scale = 4 (duration in terms of quarter notes)
+//     default value: separator = " "
 //
 
-HumNum Convert::recipToDuration(const string& recip, string separator) {
+HumNum Convert::recipToDuration(const string& recip, HumNum scale, 
+		string separator) {
 	size_t loc;
 	loc = recip.find(separator);
 	string subtok;
@@ -95,13 +97,13 @@ HumNum Convert::recipToDuration(const string& recip, string separator) {
 	}
 
 	if (dotcount <= 0) {
-		return output;
+		return output * scale;
 	}
 
 	int bot = (int)pow(2.0, dotcount);
 	int top = (int)pow(2.0, dotcount + 1) - 1;
 	HumNum factor(top, bot);
-	return output * factor;
+	return output * factor * scale;
 }
 
 // END_MERGE

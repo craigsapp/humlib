@@ -32,6 +32,7 @@ endif
 # Beginning of user-modifiable configuration variables                    #
 #                                                                         #
 
+BINDIR        = bin
 OBJDIR        = obj
 SRCDIR        = src
 SRCDIR_MIN    = src
@@ -116,6 +117,7 @@ clean:
 
 superclean: clean
 	-rm -rf $(LIBDIR)
+	-rm -f  $(BINDIR)/test*
 
 
 makedirs:

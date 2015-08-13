@@ -41,6 +41,7 @@ class HumdrumToken : public string {
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
 		HumNum   getDuration       (void) const;
+		bool     hasRhythm         (void) const;
 		bool     equalChar         (int index, char ch) const;
 
 		int      getLineIndex      (void) const;
@@ -55,8 +56,12 @@ class HumdrumToken : public string {
       string   getSubtoken       (int index, const string& separator) const;
 
 		// next/previous token functions:
-		int      getNextTokenCount     (void);
-		int      getPreviousTokenCount (void);
+		int           getNextTokenCount         (void) const;
+		int           getPreviousTokenCount     (void) const;
+		HumdrumToken* getNextToken              (int index = 0) const;
+		HumdrumToken* getPreviousToken          (int index = 0) const;
+		vector<HumdrumToken*> getNextTokens     (void) const;
+		vector<HumdrumToken*> getPreviousTokens (void) const;
 
 	protected:
 		void     setLineAddress    (int aLineIndex, int aFieldIndex);
