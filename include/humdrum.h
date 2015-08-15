@@ -13,13 +13,15 @@
 #ifndef _HUMDRUM_H
 #define _HUMDRUM_H
 
-// include class definitions:
+// include class definitions used in the minHumdrum library:
 #include "Convert.h"
 #include "HumNum.h"
 #include "HumAddress.h"
 #include "HumdrumToken.h"
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
+
+
 
 #endif /* _HUMDRUM_H */
 

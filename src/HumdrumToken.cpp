@@ -10,7 +10,9 @@
 // Description:   Used to work with tokens on a Humdrum line.
 //
 
+#include "HumAddress.h"
 #include "HumdrumToken.h"
+#include "HumdrumLine.h"
 #include "Convert.h"
 
 // START_MERGE
@@ -37,15 +39,15 @@
 //
 
 HumdrumToken::HumdrumToken(void) : string() {
-	// do nothing
+	rhycheck = 0;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
-	// do nothing
+	rhycheck = 0;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
-	// do nothing
+	rhycheck = 0;
 }
 
 
@@ -85,21 +87,10 @@ HumdrumToken::~HumdrumToken() {
 
 //////////////////////////////
 //
-// HumdrumToken::setDataType -- Set the exclusive interpretation type.
-//
-
-void HumdrumToken::setDataType(const string& datatype) {
-	address.setDataType(datatype);
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumToken::getDataType -- Get the exclusive interpretation type.
 //
 
-string HumdrumToken::getDataType(void) const {
+const string& HumdrumToken::getDataType(void) const {
 	return address.getDataType();
 }
 
@@ -132,7 +123,7 @@ string HumdrumToken::getSpineInfo(void) const {
 // HumdrumToken::getLineIndex --
 //
 
-int HumdrumToken::getLineIndex(void) const { 
+int HumdrumToken::getLineIndex(void) const {
 	return address.getLineIndex();
 }
 
@@ -145,29 +136,6 @@ int HumdrumToken::getLineIndex(void) const {
 
 int HumdrumToken::getLineNumber(void) const {
 	return address.getLineNumber();
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumToken::setLineAddress --
-//
-
-void HumdrumToken::setLineAddress(int aLineIndex, int aFieldIndex) {
-	setLineIndex(aLineIndex);
-	setFieldIndex(aFieldIndex);
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumToken::setLineIndex --
-//
-
-void HumdrumToken::setLineIndex(int index) {
-	address.setLineIndex(index);
 }
 
 
@@ -332,8 +300,16 @@ bool HumdrumToken::analyzeDuration(void) {
 		return true;
 	}
 	string dtype = getDataType();
-	if ((dtype == "**kern") || (dtype == "**recip")) {
-		duration = Convert::recipToDuration((string)(*this));
+	if (hasRhythm()) {
+		if (isData()) {
+			if (!isNull()) {
+				duration = Convert::recipToDuration((string)(*this));
+			} else {
+				duration.setValue(-1);
+			}
+		} else {
+			duration.setValue(-1);
+		}
 	} else {
 		duration.setValue(-1);
 	}
@@ -378,7 +354,20 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::hasRhythm --
+// HumdrumToken::getDurationFromStart --
+//
+
+HumNum HumdrumToken::getDurationFromStart(void) const {
+	return getLine()->getDurationFromStart();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRhythm -- Returns true if the exclusive interpretation
+//    contains rhythmic data which will be used for analyzing the
+//    duration of a HumdrumFile, for example.
 //
 
 bool HumdrumToken::hasRhythm(void) const {
@@ -390,6 +379,43 @@ bool HumdrumToken::hasRhythm(void) const {
 		return true;
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isBarlines --
+//
+
+bool HumdrumToken::isBarline(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '=') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isData -- Returns true if not an interpretation, barline
+//      or local comment;
+//
+
+bool HumdrumToken::isData(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	int firstchar = (*this)[0];
+	if ((firstchar == '*') || (firstchar == '!') || (firstchar == '=')) {
+		return false;
+	}
+	return true;
 }
 
 
@@ -410,7 +436,7 @@ bool HumdrumToken::isExclusive(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isSplitInterpretation --
-// 
+//
 
 bool HumdrumToken::isSplitInterpretation(void) const {
 	return ((string)(*this)) == SPLIT_TOKEN;
@@ -421,9 +447,9 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isMergeInterpretation --
-// 
+//
 
-bool HumdrumToken::isMergeInterpretation(void) const { 
+bool HumdrumToken::isMergeInterpretation(void) const {
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 
@@ -432,9 +458,9 @@ bool HumdrumToken::isMergeInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isExchangeInterpretation --
-// 
+//
 
-bool HumdrumToken::isExchangeInterpretation(void) const { 
+bool HumdrumToken::isExchangeInterpretation(void) const {
 	return ((string)(*this)) == EXCHANGE_TOKEN;
 }
 
@@ -443,9 +469,9 @@ bool HumdrumToken::isExchangeInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isTerminateInterpretation --
-// 
+//
 
-bool HumdrumToken::isTerminateInterpretation(void) const { 
+bool HumdrumToken::isTerminateInterpretation(void) const {
 	return ((string)(*this)) == TERMINATE_TOKEN;
 }
 
@@ -454,9 +480,9 @@ bool HumdrumToken::isTerminateInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isAddInterpretation --
-// 
+//
 
-bool HumdrumToken::isAddInterpretation(void) const { 
+bool HumdrumToken::isAddInterpretation(void) const {
 	return ((string)(*this)) == ADD_TOKEN;
 }
 
@@ -571,11 +597,56 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumToken::setOwner --
+//
+
+void HumdrumToken::setOwner(HumdrumLine* aLine) {
+	address.setOwner(aLine);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getOwner --
+//
+
+HumdrumLine* HumdrumToken::getOwner(void) const {
+	return address.getOwner();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getState --
+//
+
+int HumdrumToken::getState(void) const {
+	return rhycheck;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getState --
+//
+
+void HumdrumToken::incrementState(void) {
+	rhycheck++;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumToken::getNextTokenCount -- Return the number of tokens in the
 //   spine/subspine which follow this token.  Typically this will be 1,
-//   but will be zero for a terminator interpretation (*-), and will be 
+//   but will be zero for a terminator interpretation (*-), and will be
 //   2 for a split interpretation (*^).
 //
 
@@ -588,9 +659,9 @@ int HumdrumToken::getNextTokenCount(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getPreviousTokenCount -- Return the number of tokens
-//   in the spine/subspine which precede this token.  Typically this will 
-//   be 1, but will be zero for an exclusive interpretation (starting with 
-//   "**"), and will be greater than one for a token which follows a 
+//   in the spine/subspine which precede this token.  Typically this will
+//   be 1, but will be zero for an exclusive interpretation (starting with
+//   "**"), and will be greater than one for a token which follows a
 //   spine merger (using *v interpretations).
 //
 

@@ -11,6 +11,7 @@
 //
 
 #include "HumAddress.h"
+#include "HumdrumLine.h"
 
 // START_MERGE
 
@@ -22,8 +23,8 @@
 HumAddress::HumAddress(void) {
 	track      = -1;
 	subtrack   = -1;
-	lineindex  = -1;
 	fieldindex = -1;
+	owner      = NULL;
 }
 
 
@@ -36,19 +37,23 @@ HumAddress::HumAddress(void) {
 HumAddress::~HumAddress() {
 	track      = -1;
 	subtrack   = -1;
-	lineindex  = -1;
 	fieldindex = -1;
+	owner      = NULL;
 }
 
 
 
 //////////////////////////////
 //
-// HumAddress::getLineIndex --
+// HumAddress::getLineIndex -- Returns -1 if not owned by a HumdrumLine.
 //
 
 int  HumAddress::getLineIndex(void) const {
-	return lineindex;
+	if (owner == NULL) {
+		return -1;
+	} else {
+		return owner->getLineIndex();
+	}
 }
 
 
@@ -59,7 +64,7 @@ int  HumAddress::getLineIndex(void) const {
 //
 
 int  HumAddress::getLineNumber(void) const {
-	return lineindex + 1;
+	return getLineIndex() + 1;
 }
 
 
@@ -80,8 +85,13 @@ int  HumAddress::getFieldIndex(void) const {
 // HumAddress::getDataType --
 //
 
-string HumAddress::getDataType(void) const {
-	return exinterp;
+const HumdrumToken& HumAddress::getDataType(void) const {
+	static HumdrumToken null("");
+	if (owner == NULL) {
+		return null;
+	}
+	HumdrumToken* tok = owner->getSpineStart(getTrack());
+	return *tok;
 }
 
 
@@ -91,7 +101,7 @@ string HumAddress::getDataType(void) const {
 // HumAddress::getSpineInfo --
 //
 
-string HumAddress::getSpineInfo(void) const {
+const string& HumAddress::getSpineInfo(void) const {
 	return spining;
 }
 
@@ -139,23 +149,35 @@ string HumAddress::getTrackString(void) const {
 
 //////////////////////////////
 //
-// HumAddress::setLineAddress --
+// HumAddress::setOwner --
 //
 
-void HumAddress::setLineAddress(int aLineIndex, int aFieldIndex) {
-	setLineIndex(aLineIndex);
-	setFieldIndex(aFieldIndex);
+void HumAddress::setOwner(HumdrumLine* aLine) {
+	owner = aLine;
 }
 
 
 
 //////////////////////////////
 //
-// HumAddress::setLineIndex --
+// HumAddress::getLine -- return the HumdrumLine which owns the token
+//    associated with this address.
 //
 
-void HumAddress::setLineIndex(int index) {
-	lineindex = index;
+HumdrumLine* HumAddress::getLine(void) const {
+	return owner;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the specified
+//    token.
+//
+
+bool HumAddress::hasOwner(void) const {
+	return owner == NULL ? 0 : 1;
 }
 
 
@@ -166,11 +188,11 @@ void HumAddress::setLineIndex(int index) {
 //
 
 void HumAddress::setFieldIndex(int index) {
-	lineindex = index;
+	fieldindex = index;
 }
 
 
-
+/*
 //////////////////////////////
 //
 // HumAddress::setDataType --
@@ -214,6 +236,7 @@ void HumAddress::setDataType(const string& datatype) {
 	}
 }
 
+*/
 
 
 //////////////////////////////

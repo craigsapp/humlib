@@ -23,7 +23,7 @@
 //     default value: separator = " "
 //
 
-HumNum Convert::recipToDuration(const string& recip, HumNum scale, 
+HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		string separator) {
 	size_t loc;
 	loc = recip.find(separator);
@@ -84,9 +84,9 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 			} else {
 				break;
 			}
-			numerator = 4 * (int)pow(2, zerocount);
-			output.setValue(numerator, 1);
 		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
    } else {
 		// plain rhythm
 		denominator = subtok[numi++] - '0';

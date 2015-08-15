@@ -1,0 +1,21 @@
+!! each line in this file represents a quarter note.  The duration of 
+!! null lines are inferred from the druation of the non-null tokens.
+**kern	**kern
+1c	2c
+.	.
+.	1d
+.	.
+1d	.
+.	.
+.	0e
+.	.
+1e	.
+.	.
+.	.
+.	.
+1f	.
+.	.
+.	2f
+.	.
+*-	*-
+!! Ending comments

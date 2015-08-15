@@ -12,6 +12,7 @@
 //
 
 #include "HumdrumLine.h"
+#include "HumdrumFile.h"
 #include "Convert.h"
 
 // START_MERGE
@@ -21,11 +22,23 @@
 // HumdrumLine::HumdrumLine --
 //
 
-HumdrumLine::HumdrumLine(void) : string() { }
+HumdrumLine::HumdrumLine(void) : string() {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
-HumdrumLine::HumdrumLine(const string& aString) : string(aString) { }
+HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
-HumdrumLine::HumdrumLine(const char* aString) : string(aString) { }
+HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
 
 
@@ -160,6 +173,51 @@ bool HumdrumLine::isData(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isAllNull -- Returns true if all tokens on the line
+//		are null ("." if a data line, "*" if an interpretation line, "!"
+//		if a local comment line).
+//
+
+bool HumdrumLine::isAllNull(void) const {
+	if (!hasSpines()) {
+		return false;
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isAllRhythmicNull -- Returns true if all rhythmic
+//    data-type tokens on the line are null ("." if a data line, 
+//    "*" if an interpretation line, "!" if a local comment line).
+//
+
+bool HumdrumLine::isAllRhythmicNull(void) const {
+	if (!hasSpines()) {
+		return false;
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).hasRhythm()) {
+			continue;
+		}
+		if (!token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::setLineIndex --
 //
 
@@ -196,7 +254,7 @@ int HumdrumLine::getLineNumber(void) const {
 // HumdrumLine::getLineNumber --
 //
 
-HumNum HumdrumLine::getDuration(void) const { 
+HumNum HumdrumLine::getDuration(void) const {
 	return duration;
 }
 
@@ -229,8 +287,23 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 // HumdrumLine::getDurationFromBarline --
 //
 
-HumNum HumdrumLine::getDurationFromBarline(void) const { 
+HumNum HumdrumLine::getDurationFromBarline(void) const {
 	return durationFromBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getSpineStart --
+//
+
+HumdrumToken* HumdrumLine::getSpineStart(int track) const {
+	if (owner == NULL) {
+		return NULL;
+	} else {
+		return owner->getSpineStart(track);
+	}
 }
 
 
@@ -241,7 +314,7 @@ HumNum HumdrumLine::getDurationFromBarline(void) const {
 //    barline to the current line.
 //
 
-void HumdrumLine::setDurationFromBarline(HumNum dur) { 
+void HumdrumLine::setDurationFromBarline(HumNum dur) {
 	durationFromBarline = dur;
 }
 
@@ -253,7 +326,7 @@ void HumdrumLine::setDurationFromBarline(HumNum dur) {
 //     current note to the next barline.
 //
 
-HumNum HumdrumLine::getDurationToBarline(void) const { 
+HumNum HumdrumLine::getDurationToBarline(void) const {
 	return durationToBarline;
 }
 
@@ -283,7 +356,7 @@ HumNum HumdrumLine::getBeat(string beatrecip) const {
 // HumdrumLine::setDurationToBarline --
 //
 
-void HumdrumLine::setDurationToBarline(HumNum dur) { 
+void HumdrumLine::setDurationToBarline(HumNum dur) {
 	durationToBarline = dur;
 }
 
@@ -294,7 +367,7 @@ void HumdrumLine::setDurationToBarline(HumNum dur) {
 // HumdrumLine::getLineNumber --
 //
 
-void HumdrumLine::setDuration(HumNum aDur) { 
+void HumdrumLine::setDuration(HumNum aDur) {
 	if (aDur.isNonNegative()) {
 		duration = aDur;
 	} else {
@@ -366,7 +439,7 @@ int HumdrumLine::getTokenCount(void) const {
 // HumdrumLine::token --
 //
 
-HumdrumToken& HumdrumLine::token(int index) {
+HumdrumToken& HumdrumLine::token(int index) const {
 	return *tokens[index];
 }
 
@@ -390,12 +463,14 @@ string HumdrumLine::getTokenString(int index) const {
 int HumdrumLine::createTokensFromLine(void) {
 	tokens.resize(0);
 	HumdrumToken* token = new HumdrumToken();
+	token->setOwner(this);
 	char ch;
 	for (int i=0; i<size(); i++) {
 		ch = getChar(i);
 		if (ch == '\t') {
 			tokens.push_back(token);
 			token = new HumdrumToken();
+			token->setOwner(this);
 		} else {
 			*token += ch;
 		}
@@ -426,7 +501,7 @@ void HumdrumLine::createLineFromTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokens -- Returns an array of tokens pointers for a 
+// HumdrumLine::getTokens -- Returns an array of tokens pointers for a
 //   Humdrum line.  This function should not be called on global comments,
 //   reference records (which are a sub-cateogry of global comments).  This
 //   is because a line's type may contain tabs which are not representing
@@ -658,6 +733,18 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 		}
 	}
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setOwner -- store a pointer to the HumdrumFile which
+//    manages this object.
+//
+
+void HumdrumLine::setOwner(HumdrumFile* hfile) {
+	owner = hfile;
 }
 
 

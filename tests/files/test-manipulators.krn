@@ -1,0 +1,54 @@
+!! 
+!! This file can be used to test spine manipulator processing.
+!! The 6 spine manipulators:
+!!   *^  == split a spine into two subspines
+!!   *v  == merge subspines into a spine.  subspines may original
+!!          from different tracks, although this should generally be avoided.
+!!          The data-type for such a spine will be the data-type of the
+!!          first (left-most) field being merged.
+!!  *x   == switch the order of two fields on a line.  If a spine contains
+!!          an *x, then the next field must also have a *x.
+!!  *-   == terminate a spine.
+!!  **   == initiate a spine (with the data type appended, such as **kern).
+!!  *+   == add a new spine after the data has started.  Similar to *^,
+!!          but the right-most field on the next line is a new spine/track.
+!! 
+**kern	**text
+*clefG2	*
+*M4/4	*
+=1-	=1-
+4e	hel-
+!! create a new spine:
+*	*+
+*	*	**kern
+4d	-lo	2f
+2c	.	.
+.	.	4g
+=2	=2	=2
+!! split a spine
+*^	*	*
+!! exchange the order of two spines:
+*	*	*x	*x
+!! split a subspine:
+*^	*	*	*
+8f	8d	2b	2.a	world!
+!! merge two subspines:
+*v	*v	*	*	*
+2g	.	.	.
+.	8bq	.	.
+.	2cc	.	.
+4f	.	.	.
+!! create a new spine on the left side and terminate a spine:
+*+	*	*	*-
+*	**data	*	*
+*x	*x	*	*
+X	.	.	4g
+Z	.	.	.
+.	16cq	.	.
+.	16dq	.	.
+Y	8e	.	.
+!! terminate a spine early on the left side:
+*-	*	*	*
+*v	*v	*
+==	==
+*-	*-

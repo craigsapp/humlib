@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  9 21:03:12 PDT 2015
+// Last Modified: Fri Aug 14 22:45:49 PDT 2015
 // Filename:      HumdrumFile.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h
 // Syntax:        C++11
@@ -25,52 +25,97 @@ using namespace std;
 
 class HumdrumFile {
 	public:
-		             HumdrumFile            (void);
-		            ~HumdrumFile            ();
+		              HumdrumFile                  (void);
+		             ~HumdrumFile                  ();
 
-		bool         read                   (istream& infile);
-		bool         read                   (const char*   contents);
-		bool         read                   (const string& contents);
-		bool         readString             (const char*   contents);
-		bool         readString             (const string& contents);
-		void         createTokensFromLines  (void);
-		void         createLinesFromTokens  (void);
-		HumdrumLine& operator[]             (int index);
-		void         append                 (const char* line);
-		void         append                 (const string& line);
-		int          size                   (void) const;
-		int          getMaxTrack            (void) const;
-		ostream&     printSpineInfo         (ostream& out = cout);
-		ostream&     printDataTypeInfo      (ostream& out = cout);
-		ostream&     printTrackInfo         (ostream& out = cout);
-		ostream&     printDurationInfo      (ostream& out = cout);
+		bool          read                         (istream& infile);
+		bool          read                         (const char*   contents);
+		bool          read                         (const string& contents);
+		bool          readString                   (const char*   contents);
+		bool          readString                   (const string& contents);
+		bool          readNoRhythm                 (istream& infile);
+		bool          readNoRhythm                 (const char*   contents);
+		bool          readNoRhythm                 (const string& contents);
+		bool          readStringNoRhythm           (const char*   contents);
+		bool          readStringNoRhythm           (const string& contents);
+		HumdrumLine&  operator[]                   (int index);
+		void          append                       (const char* line);
+		void          append                       (const string& line);
+		int           getLineCount                 (void) const;
+		int           getMaxTrack                  (void) const;
+		ostream&      printSpineInfo               (ostream& out = cout);
+		ostream&      printDataTypeInfo            (ostream& out = cout);
+		ostream&      printTrackInfo               (ostream& out = cout);
+		ostream&      printDurationInfo            (ostream& out = cout);
+		HumdrumToken* getSpineStart                (int track) const;
+		void          createLinesFromTokens        (void);
+		HumNum        getScoreDuration             (void) const;
 
 	protected:
-		bool         analyzeSpines          (void);
-		bool         analyzeRhythm          (void);
-		bool         analyzeMeter           (void);
-		bool         analyzeLinks           (void);
-		bool         analyzeTokenDurations  (void);
-		bool         analyzeTracks          (void);
-		bool         analyzeLines           (void);
-		int          adjustSpines           (HumdrumLine& line,
-		                                     vector<string>& datatype,
-		                                     vector<string>& sinfo,
-		                                     int trackcount);
-		string       getMergedSpineInfo     (vector<string>& info, int starti,
-		                                     int extra);
-		bool         stitchLinesTogether    (HumdrumLine& previous,
-		                                     HumdrumLine& next);
-		HumNum       getMinDur              (vector<HumNum>& durs,
-		                                     vector<HumNum>& durstate);
-      bool         getTokenDurations      (vector<HumNum>& durs, int line);
-		bool         cleanDurs              (vector<HumNum>& durs, int line);
-		bool         decrementDurStates     (vector<HumNum>& durs, HumNum linedur,
-		                                     int line);
+		bool          analyzeTokens                (void);
+		bool          analyzeSpines                (void);
+		bool          analyzeRhythm                (void);
+		bool          analyzeMeter                 (void);
+		bool          analyzeLinks                 (void);
+		bool          analyzeTokenDurations        (void);
+		bool          analyzeTracks                (void);
+		bool          analyzeLines                 (void);
+		bool          adjustSpines                 (HumdrumLine& line,
+		                                            vector<string>& datatype,
+		                                            vector<string>& sinfo);
+		string        getMergedSpineInfo           (vector<string>& info,
+		                                            int starti, int extra);
+		bool          stitchLinesTogether          (HumdrumLine& previous,
+		                                            HumdrumLine& next);
+		HumNum        getMinDur                    (vector<HumNum>& durs,
+		                                            vector<HumNum>& durstate);
+		bool          getTokenDurations            (vector<HumNum>& durs,
+		                                            int line);
+		bool          cleanDurs                    (vector<HumNum>& durs,
+		                                            int line);
+		bool          decrementDurStates           (vector<HumNum>& durs,
+		                                            HumNum linedur, int line);
+		bool          assignDurationsToTrack       (HumdrumToken* starttoken,
+		                                            HumNum startdur);
+		void          addToTrackStarts             (HumdrumToken* token);
+		bool          prepareDurations             (HumdrumToken* token,
+		                                            int state,
+		                                            HumNum startdur);
+		bool          setLineDurationFromStart     (HumdrumToken* token,
+		                                            HumNum dursum);
+		bool          analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool          analyzeNullLineRhythms       (void);
+		void          fillInNegativeStartTimes     (void);
+		void          assignLineDurations          (void);
 
 	private:
+
+		// lines: an array representing lines from the input file.
 		vector<HumdrumLine*> lines;
-		int          maxtrack;              // the number of tracks (primary spines) in the data.
+
+		// trackstarts: list of addresses of the exclusive interpreations
+		// in the file.  The first element in the list is reserved, so the
+		// number of tracks (primary spines) is equal to one less than the
+		// size of this list.
+		vector<HumdrumToken*> trackstarts;
+
+		// trackends: list of the addresses of the spine terminators in the file.
+		// It is possible that spines can split and their subspines do not merge
+		// before termination; therefore, the ends are stored in a 2d array.
+		// The first dimension is the track number, and the second dimension
+		// is the list of terminators.
+		vector<vector<HumdrumToken*> > trackends;
+
+// ggg still to process:
+
+		// barlines: list of barlines in the data.  If the first measures is
+		// a pickup measure, then the first entry will not point to the first
+		// starting exclusive interpretation line rather than to a barline.
+		vector<HumdrumLine*> barlines;
+
+		// measures: list of measures in the data (which may contain a
+		// "non-controlling" barline;
+		vector<HumdrumLine*> measures;
 };
 
 ostream& operator<<(ostream& out, HumdrumFile& infile);

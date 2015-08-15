@@ -587,7 +587,7 @@ bool HumNum::operator<=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator> -- Test greater-than equality
+// HumNum::operator> -- Test greater-than equality.
 //
 
 bool HumNum::operator>(const HumNum& value) const {
@@ -654,6 +654,31 @@ bool HumNum::operator==(int value) const {
 bool HumNum::operator==(double value) const {
 	return getFloat() == value;
 }
+
+
+
+//////////////////////////////
+//
+// HumNum::operator!= -- Test equality.
+//
+
+bool HumNum::operator!=(const HumNum& value) const {
+	if (this == &value) {
+		return false;
+	}
+	return getFloat() != value.getFloat();
+}
+
+
+bool HumNum::operator!=(int value) const {
+	return getFloat() != value;
+}
+
+
+bool HumNum::operator!=(double value) const {
+	return getFloat() != value;
+}
+
 
 
 //////////////////////////////
@@ -727,7 +752,7 @@ template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v) {
 	for (unsigned int i=0; i<v.size(); i++) {
 		out << v[i];
-		if (i < v.size() - 1) {		
+		if (i < v.size() - 1) {
 			out << '\t';
 		}
 	}

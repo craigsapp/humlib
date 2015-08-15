@@ -17,40 +17,75 @@
 
 using namespace std;
 
+class HumdrumLine;
+class HumdrumToken;
+
 // START_MERGE
 
 class HumAddress {
 	public:
-		         HumAddress        (void);
-		        ~HumAddress        ();
+		              HumAddress        (void);
+		             ~HumAddress        ();
 
-		int      getLineIndex      (void) const;
-		int      getLineNumber     (void) const;
-		int      getFieldIndex     (void) const;
-		string   getDataType       (void) const;
-		string   getSpineInfo      (void) const;
-		int      getTrack          (void) const;
-		int      getSubtrack       (void) const;
-		string   getTrackString    (void) const;
+		int           getLineIndex      (void) const;
+		int           getLineNumber     (void) const;
+		int           getFieldIndex     (void) const;
+		const HumdrumToken& getDataType (void) const;
+		const string& getSpineInfo      (void) const;
+		int           getTrack          (void) const;
+		int           getSubtrack       (void) const;
+		string        getTrackString    (void) const;
+		HumdrumLine*  getLine           (void) const;
+		HumdrumLine*  getOwner          (void) const { return getLine(); }
+		bool          hasOwner          (void) const;
 
 	protected:
-		void     setLineAddress    (int aLineIndex, int aFieldIndex);
-		void     setLineIndex      (int lineindex);
-		void     setFieldIndex     (int fieldlindex);
-		void     setDataType       (const string& datatype);
-		void     setSpineInfo      (const string& spineinfo);
-		void     setTrack          (int aTrack, int aSubtrack);
-		void     setTrack          (int aTrack);
-		void     setSubtrack       (int aSubtrack);
+		void          setOwner          (HumdrumLine* aLine);
+		void          setFieldIndex     (int fieldlindex);
+		void          setSpineInfo      (const string& spineinfo);
+		void          setTrack          (int aTrack, int aSubtrack);
+		void          setTrack          (int aTrack);
+		void          setSubtrack       (int aSubtrack);
 
 	private:
-		int     lineindex;        // Humdrum data line index of token
-		int     fieldindex;       // field index of token on line
-		string  exinterp;         // data type of token
-		string  spining;          // spine manipulation history of token
-		int     track;            // track # (starting at 1 for first spine);
-		int     subtrack;         // subtrack # (starting at 1 for first track, or
-                                // zero if there are no subtracks.
+
+		// fieldindex: This is the index of the token in the HumdrumLine
+		// which owns this token.
+		int fieldindex;       // field index of token on line
+
+		// spining: This is the spine position of the token. A simple spine
+		// position is an integer, starting with "1" for the first spine
+		// of the file (left-most spine).  When the spine splits, "(#)a"
+		// is wrapped around the left-subspine's spine info, and "(#)b"
+		// around the right-subspine's info. Merged spines will add a space
+		// between the two or more merged spines information, such as
+		// "(#)a (#)b" for two sub-spines merged into a single spine again.
+		// But in this case there is a spine info simplification which will
+		// convert "(#)a (#)b" into "#" where # is the original spine number.
+		// Other more complicated mergers may be simplified in the future.
+		string spining;
+
+		// track: This is the track number of the spine.  It is the first
+		// number found in the spineinfo string.
+		int track;
+
+		// subtrack: This is the subtrack number for the spine.  When a spine
+		// is not split, it will be 0, if the spine has been split with *^,
+		// then the left-subspine will be in subtrack 1 and the right-spine
+		// will be subtrack 2.  If subspines are exchanged with *x, then their
+		// subtrack assignments will also change.
+		int subtrack;
+
+		// owner: This is the line which manages the given token.
+		HumdrumLine* owner;
+
+// ggg still to process:
+
+		// nullresolve: If the token is a null data token, then this variable
+		// contains a pointer to the data token which continues the null.
+		// If a null token comes before the first non-null token in the data spine,
+		// this this value will be NULL.
+		HumdrumToken* nullresolve;
 
 	friend class HumdrumToken;
 	friend class HumdrumLine;

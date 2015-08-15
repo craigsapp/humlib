@@ -24,8 +24,8 @@ using namespace std;
 
 class Convert {
 	public:
-		static HumNum    recipToDuration  (const string& recip, HumNum scale = 4,
-		                                    string separator = " ");
+		static HumNum  recipToDuration  (const string& recip, HumNum scale = 4,
+		                                 string separator = " ");
 };
 
 

@@ -1,0 +1,26 @@
+!! each line in this file represents a quarter note.  The duration of 
+!! null lines are inferred from the druation of the non-null tokens.
+**recip
+4
+2
+1
+0
+00
+000
+0000
+00000
+000000
+0000000
+00000000
+=
+4
+8
+16
+32
+64
+128
+256
+512
+1024
+2048
+*-

@@ -14,6 +14,7 @@ use strict;
 
 my $srcdir = "src";
 my $incdir = "include";
+my $license = getLicense("LICENSE.txt");
 
 createIncludeFile($incdir, "minhumdrum.h");
 createSourceFile($srcdir, "minhumdrum.cpp");
@@ -53,6 +54,9 @@ sub createIncludeFile {
 //
 // Description:   Include file for minHumdrum library.
 //
+/*
+$license
+*/
 
 #ifndef _MINHUMDRUM_H
 #define _MINHUMDRUM_H
@@ -122,6 +126,9 @@ sub createSourceFile {
 //
 // Description:   Source file for minHumdrum library.
 //
+/*
+$license
+*/
 
 #include "minhumdrum.h"
 
@@ -193,6 +200,21 @@ sub getFiles {
 	@output = sort @output;
 	push(@output, @output2);
 	return @output;
+}
+
+
+
+##############################
+##
+## getLicense -- 
+## 
+
+sub getLicense {
+	my ($file) = @_;
+	open (FILE, $file) or die "Cannot open $file\n";
+	my @contents = <FILE>;
+	close FILE;
+	return join("", @contents);
 }
 
 

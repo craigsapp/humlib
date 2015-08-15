@@ -1,0 +1,18 @@
+!! This example has a "floating spine" which does not have a known rhythmic
+!! position in the score at the start of the spine.  A parser should
+!! be able to infer the starting duration from a later position in the spine
+!! based on duration information of non-floating spines.
+**kern
+4c
+4d
+*^
+2e	4c
+	2e
+*	*+
+*	*	**kern
+.	.	16cc
+2f	.	4dd
+.	4b	4ff
+*v	*v	*
+4g	4ee
+*-	*-

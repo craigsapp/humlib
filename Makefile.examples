@@ -1,9 +1,9 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Mon Aug 10 16:06:48 PDT 2015
-## Last Modified: Mon Aug 10 16:09:11 PDT 2015
+## Last Modified: Fri Aug 14 14:53:33 PDT 2015
 ## Syntax:        GNU Makefile
-## Filename:      /Makefile
+## Filename:      /Makefile.examples
 ## vim:           ts=3
 ##
 ## Description: Makefile to compile programs using the  minHumdrum library.
@@ -43,22 +43,18 @@ endif
 # Beginning of user-modifiable configuration variables                    #
 #                                                                         #
 
-SRCDIR    = examples
 INCDIR    = include
-OBJDIR    = obj
 LIBDIR    = lib
-LIBFILE   = minhumdrum
+#LIBFILE   = minhumdrum
+LIBFILE   = humdrum
 TARGDIR   = bin
 
-
-DEFINES   = $(addprefix -D,$(OSTYPE))
-DEFINES  += $(addprefix -D,$(OSSUBTYPE))
-
-PREFLAGS  = -Wall -I$(INCDIR) $(DEFINES)
+PREFLAGS  = -Wall -I$(INCDIR)
 PREFLAGS += -O3
+PREFLAGS += -g
 
 # using C++ 2011 standard:
-PREFLAGS += -std=c++11
+#PREFLAGS += -std=c++11
 
 # Add -static flag to compile without dynamics libraries for better portability:
 #PREFLAGS += -static
@@ -76,22 +72,12 @@ COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 #                                                                         #
 ###########################################################################
 
-#                                                                         #
-# End of user-modifiable variables.                                       #
-#                                                                         #
-###########################################################################
-
-
 # setting up the directory paths to search for dependency files
-vpath %.h   $(INCDIR):$(SRCDIR)
-vpath %.cpp $(SRCDIR):$(INCDIR)
-vpath %.o   $(OBJDIR)
-
-# generating a list of the object files
-OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
+vpath %.h   $(INCDIR)
+vpath %.cpp $(wildcard tests/test-*)
 
 # targets which don't actually refer to files
-.PHONY: 
+.PHONY:
 
 
 ###########################################################################

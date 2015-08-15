@@ -48,7 +48,7 @@ PREFLAGS  = -c -g -Wall $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
 PREFLAGS += -O3
 
 # using C++ 2011 standard:
-PREFLAGS += -std=c++11
+#PREFLAGS += -std=c++11
 
 # Add -static flag to compile without dynamics libraries for better portability:
 POSTFLAGS =

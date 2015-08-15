@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 12 17:44:39 PDT 2015
+// Last Modified: Sat Aug 15 01:55:50 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -9,8 +9,307 @@
 //
 // Description:   Source file for minHumdrum library.
 //
+/*
+Copyright (c) 2015 Craig Stuart Sapp
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer. 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   and the following disclaimer in the documentation and/or other materials 
+   provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
 
 #include "minhumdrum.h"
+
+
+//////////////////////////////
+//
+// HumAddress::HumAddress --
+//
+
+HumAddress::HumAddress(void) {
+	track      = -1;
+	subtrack   = -1;
+	fieldindex = -1;
+	owner      = NULL;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::~HumAddress --
+//
+
+HumAddress::~HumAddress() {
+	track      = -1;
+	subtrack   = -1;
+	fieldindex = -1;
+	owner      = NULL;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getLineIndex -- Returns -1 if not owned by a HumdrumLine.
+//
+
+int  HumAddress::getLineIndex(void) const {
+	if (owner == NULL) {
+		return -1;
+	} else {
+		return owner->getLineIndex();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getLineNumber --
+//
+
+int  HumAddress::getLineNumber(void) const {
+	return getLineIndex() + 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getFieldIndex --
+//
+
+int  HumAddress::getFieldIndex(void) const {
+	return fieldindex;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getDataType --
+//
+
+const HumdrumToken& HumAddress::getDataType(void) const {
+	static HumdrumToken null("");
+	if (owner == NULL) {
+		return null;
+	}
+	HumdrumToken* tok = owner->getSpineStart(getTrack());
+	return *tok;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getSpineInfo --
+//
+
+const string& HumAddress::getSpineInfo(void) const {
+	return spining;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getTrack --
+//
+
+int HumAddress::getTrack(void) const {
+	return track;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getSubTrack --
+//
+
+int HumAddress::getSubtrack(void) const {
+	return subtrack;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getTrackString --
+//
+
+string HumAddress::getTrackString(void) const {
+	string output;
+	int thetrack    = getTrack();
+	int thesubtrack = getSubtrack();
+	output += to_string(thetrack);
+	if (thesubtrack > 0) {
+		output += '.' + to_string(thesubtrack);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::setOwner --
+//
+
+void HumAddress::setOwner(HumdrumLine* aLine) {
+	owner = aLine;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getLine -- return the HumdrumLine which owns the token
+//    associated with this address.
+//
+
+HumdrumLine* HumAddress::getLine(void) const {
+	return owner;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the specified
+//    token.
+//
+
+bool HumAddress::hasOwner(void) const {
+	return owner == NULL ? 0 : 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::setFieldIndex --
+//
+
+void HumAddress::setFieldIndex(int index) {
+	fieldindex = index;
+}
+
+
+/*
+//////////////////////////////
+//
+// HumAddress::setDataType --
+//
+
+void HumAddress::setDataType(const string& datatype) {
+	switch (datatype.size()) {
+		case 0:
+			cerr << "Error: cannot have an empty data type." << endl;
+			exit(1);
+		case 1:
+			if (datatype[0] == '*') {
+				cerr << "Error: incorrect data type: " << datatype << endl;
+				exit(1);
+			} else {
+				exinterp = "**" + datatype;
+				return;
+			}
+		case 2:
+			if ((datatype[0] == '*') && (datatype[1] == '*')) {
+				cerr << "Error: incorrect data type: " << datatype << endl;
+				exit(1);
+			} else if (datatype[1] == '*') {
+				exinterp = "**" + datatype;
+				return;
+			} else {
+				exinterp = '*' + datatype;
+				return;
+			}
+		default:
+			if (datatype[0] != '*') {
+				exinterp = "**" + datatype;
+				return;
+			} else if (datatype[1] == '*') {
+				exinterp = datatype;
+				return;
+			} else {
+				exinterp = '*' + datatype;
+				return;
+			}
+	}
+}
+
+*/
+
+
+//////////////////////////////
+//
+// HumAddress::setSpineInfo --
+//
+
+void HumAddress::setSpineInfo(const string& spineinfo) {
+	spining = spineinfo;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::setTrack --
+//
+
+void HumAddress::setTrack(int aTrack, int aSubtrack) {
+	setTrack(aTrack);
+	setSubtrack(aTrack);
+}
+
+
+void HumAddress::setTrack(int aTrack) {
+	if (aTrack < 0) {
+		aTrack = 0;
+	}
+	if (aTrack > 1000) {
+		aTrack = 1000;
+	}
+	track = aTrack;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::setSubtrack --
+//
+
+void HumAddress::setSubtrack(int aSubtrack) {
+	if (aSubtrack < 0) {
+		aSubtrack = 0;
+	}
+	if (aSubtrack > 1000) {
+		aSubtrack = 1000;
+	}
+	subtrack = aSubtrack;
+}
 
 
 //////////////////////////////
@@ -586,7 +885,7 @@ bool HumNum::operator<=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator> -- Test greater-than equality
+// HumNum::operator> -- Test greater-than equality.
 //
 
 bool HumNum::operator>(const HumNum& value) const {
@@ -653,6 +952,31 @@ bool HumNum::operator==(int value) const {
 bool HumNum::operator==(double value) const {
 	return getFloat() == value;
 }
+
+
+
+//////////////////////////////
+//
+// HumNum::operator!= -- Test equality.
+//
+
+bool HumNum::operator!=(const HumNum& value) const {
+	if (this == &value) {
+		return false;
+	}
+	return getFloat() != value.getFloat();
+}
+
+
+bool HumNum::operator!=(int value) const {
+	return getFloat() != value;
+}
+
+
+bool HumNum::operator!=(double value) const {
+	return getFloat() != value;
+}
+
 
 
 //////////////////////////////
@@ -726,263 +1050,11 @@ template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v) {
 	for (unsigned int i=0; i<v.size(); i++) {
 		out << v[i];
-		if (i < v.size() - 1) {		
+		if (i < v.size() - 1) {
 			out << '\t';
 		}
 	}
 	return out;
-}
-
-
-//////////////////////////////
-//
-// HumAddress::HumAddress --
-//
-
-HumAddress::HumAddress(void) {
-	track      = -1;
-	subtrack   = -1;
-	lineindex  = -1;
-	fieldindex = -1;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::~HumAddress --
-//
-
-HumAddress::~HumAddress() {
-	track      = -1;
-	subtrack   = -1;
-	lineindex  = -1;
-	fieldindex = -1;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getLineIndex --
-//
-
-int  HumAddress::getLineIndex(void) const {
-	return lineindex;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getLineNumber --
-//
-
-int  HumAddress::getLineNumber(void) const {
-	return lineindex + 1;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getFieldIndex --
-//
-
-int  HumAddress::getFieldIndex(void) const {
-	return fieldindex;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getDataType --
-//
-
-string HumAddress::getDataType(void) const {
-	return exinterp;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getSpineInfo --
-//
-
-string HumAddress::getSpineInfo(void) const {
-	return spining;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getTrack --
-//
-
-int HumAddress::getTrack(void) const {
-	return track;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getSubTrack --
-//
-
-int HumAddress::getSubtrack(void) const {
-	return subtrack;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::getTrackString --
-//
-
-string HumAddress::getTrackString(void) const {
-	string output;
-	int thetrack    = getTrack();
-	int thesubtrack = getSubtrack();
-	output += to_string(thetrack);
-	if (thesubtrack > 0) {
-		output += '.' + to_string(thesubtrack);
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setLineAddress --
-//
-
-void HumAddress::setLineAddress(int aLineIndex, int aFieldIndex) {
-	setLineIndex(aLineIndex);
-	setFieldIndex(aFieldIndex);
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setLineIndex --
-//
-
-void HumAddress::setLineIndex(int index) {
-	lineindex = index;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setFieldIndex --
-//
-
-void HumAddress::setFieldIndex(int index) {
-	lineindex = index;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setDataType --
-//
-
-void HumAddress::setDataType(const string& datatype) {
-	switch (datatype.size()) {
-		case 0:
-			cerr << "Error: cannot have an empty data type." << endl;
-			exit(1);
-		case 1:
-			if (datatype[0] == '*') {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else {
-				exinterp = "**" + datatype;
-				return;
-			}
-		case 2:
-			if ((datatype[0] == '*') && (datatype[1] == '*')) {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else if (datatype[1] == '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-		default:
-			if (datatype[0] != '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else if (datatype[1] == '*') {
-				exinterp = datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setSpineInfo --
-//
-
-void HumAddress::setSpineInfo(const string& spineinfo) {
-	spining = spineinfo;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setTrack --
-//
-
-void HumAddress::setTrack(int aTrack, int aSubtrack) {
-	setTrack(aTrack);
-	setSubtrack(aTrack);
-}
-
-
-void HumAddress::setTrack(int aTrack) {
-	if (aTrack < 0) {
-		aTrack = 0;
-	}
-	if (aTrack > 1000) {
-		aTrack = 1000;
-	}
-	track = aTrack;
-}
-
-
-
-//////////////////////////////
-//
-// HumAddress::setSubtrack --
-//
-
-void HumAddress::setSubtrack(int aSubtrack) {
-	if (aSubtrack < 0) {
-		aSubtrack = 0;
-	}
-	if (aSubtrack > 1000) {
-		aSubtrack = 1000;
-	}
-	subtrack = aSubtrack;
 }
 
 
@@ -992,7 +1064,9 @@ void HumAddress::setSubtrack(int aSubtrack) {
 // HumdrumFile::HumdrumFile --
 //
 
-HumdrumFile::HumdrumFile(void) { }
+HumdrumFile::HumdrumFile(void) {
+	addToTrackStarts(NULL);
+}
 
 
 
@@ -1007,13 +1081,17 @@ HumdrumFile::~HumdrumFile() { }
 
 //////////////////////////////
 //
-// HumdrumFile::operator[] --
+// HumdrumFile::operator[] -- Negative values will be in reference to the
+//    end of the list of lines.
 //
 
 HumdrumLine& HumdrumFile::operator[](int index) {
-	if ((index < 0) || (index >= (int)lines.size())) {
-		cerr << "Error: invalid index " << index << " in HumdrumFile" << endl;
-		exit(1);
+	if (index < 0) {
+		index = lines.size() - index;
+	}
+	if ((index < 0) || (index >= lines.size())) {
+		cerr << "Error: invalid index: " << index << endl;
+		index = lines.size()-1;
 	}
 	return *lines[index];
 }
@@ -1030,14 +1108,17 @@ bool HumdrumFile::read(istream& infile) {
 	HumdrumLine* s;
 	while (infile.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
+		s->setOwner(this);
 		lines.push_back(s);
 	}
-	createTokensFromLines();
-	if (!analyzeLines())  { return false; }
-	if (!analyzeSpines()) { return false; }
-	if (!analyzeLinks())  { return false; }
-	if (!analyzeTracks()) { return false; }
-	return analyzeRhythm();
+	if (!analyzeTokens()         ) { return false; }
+	if (!analyzeLines()          ) { return false; }
+	if (!analyzeSpines()         ) { return false; }
+	if (!analyzeLinks()          ) { return false; }
+	if (!analyzeTracks()         ) { return false; }
+	if (!analyzeTokenDurations() ) { return false; }
+	if (!analyzeRhythm()         ) { return false; }
+	return true;
 }
 
 
@@ -1065,18 +1146,63 @@ bool HumdrumFile::read(const string& filename) {
 
 //////////////////////////////
 //
-// HumdrumFile::ReadString -- Read contents from a string rather than 
+// HumdrumFile::readNoRhythm -- Load file contents from input stream without
+//    parsing the rhythmic information in the file.
+//
+
+bool HumdrumFile::readNoRhythm(const string& filename) {
+	return readNoRhythm(filename.c_str());
+}
+
+
+bool HumdrumFile::readNoRhythm(const char* filename) {
+	ifstream infile;
+	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
+		return readNoRhythm(cin);
+	} else {
+		infile.open(filename);
+		if (!infile.is_open()) {
+			return false;
+		}
+	}
+	int status = readNoRhythm(infile);
+	infile.close();
+	return status;
+}
+
+
+bool HumdrumFile::readNoRhythm(istream& infile) {
+	char buffer[123123] = {0};
+	HumdrumLine* s;
+	while (infile.getline(buffer, sizeof(buffer), '\n')) {
+		s = new HumdrumLine(buffer);
+		s->setOwner(this);
+		lines.push_back(s);
+	}
+	if (!analyzeTokens()         ) { return false; }
+	if (!analyzeLines()          ) { return false; }
+	if (!analyzeSpines()         ) { return false; }
+	if (!analyzeLinks()          ) { return false; }
+	if (!analyzeTracks()         ) { return false; }
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::ReadString -- Read contents from a string rather than
 //    an istream or filename.
 //
 
-bool HumdrumFile::readString(const string& contents) { 
+bool HumdrumFile::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
 }
 
 
-bool HumdrumFile::readString(const char* contents) { 
+bool HumdrumFile::readString(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
@@ -1086,17 +1212,39 @@ bool HumdrumFile::readString(const char* contents) {
 
 //////////////////////////////
 //
-// HumdrumFile::createTokensFromLines -- Generate token array from
+// HumdrumFile::ReadStringNoRhythm -- Read contents from a string rather than
+//    an istream or filename, but do not parse rhythm.
+//
+
+bool HumdrumFile::readStringNoRhythm(const string& contents) {
+	stringstream infile;
+	infile << contents;
+	return readNoRhythm(infile);
+}
+
+
+bool HumdrumFile::readStringNoRhythm(const char* contents) {
+	stringstream infile;
+	infile << contents;
+	return readNoRhythm(infile);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::analyzeTokens -- Generate token array from
 //    current state of lines.  If either state is changed, then the
 //    other state becomes invalid.  See createLinesFromTokens for
 //		regeneration of lines from tokens.
 //
 
-void HumdrumFile::createTokensFromLines(void) {
+bool HumdrumFile::analyzeTokens(void) {
 	int i;
 	for (i=0; i<lines.size(); i++) {
 		lines[i]->createTokensFromLine();
 	}
+	return true;
 }
 
 
@@ -1111,6 +1259,21 @@ void HumdrumFile::createLinesFromTokens(void) {
 	for (int i=0; i<lines.size(); i++) {
 		lines[i]->createLineFromTokens();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getScoreDuration -- Return the total duration of the score
+//		in quarter note units.
+//
+
+HumNum HumdrumFile::getScoreDuration(void) const {
+	if (lines.size() == 0) {
+		return 0;
+	}
+	return lines.back()->getDurationFromStart();
 }
 
 
@@ -1135,10 +1298,10 @@ void HumdrumFile::append(const string& line) {
 
 ////////////////////////////
 //
-// HumdrumFile::size -- Return the number of lines.
+// HumdrumFile::getLineCount -- Return the number of lines.
 //
 
-int HumdrumFile::size(void) const {
+int HumdrumFile::getLineCount(void) const {
 	return lines.size();
 }
 
@@ -1150,7 +1313,7 @@ int HumdrumFile::size(void) const {
 //
 
 int HumdrumFile::getMaxTrack(void) const {
-	return maxtrack;
+	return trackstarts.size() - 1;
 }
 
 
@@ -1161,7 +1324,7 @@ int HumdrumFile::getMaxTrack(void) const {
 //
 
 ostream& HumdrumFile::printSpineInfo(ostream& out) {
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printSpineInfo(out) << '\n';
 	}
 	return out;
@@ -1175,7 +1338,7 @@ ostream& HumdrumFile::printSpineInfo(ostream& out) {
 //
 
 ostream& HumdrumFile::printDataTypeInfo(ostream& out) {
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printDataTypeInfo(out) << '\n';
 	}
 	return out;
@@ -1189,7 +1352,7 @@ ostream& HumdrumFile::printDataTypeInfo(ostream& out) {
 //
 
 ostream& HumdrumFile::printTrackInfo(ostream& out) {
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printTrackInfo(out) << '\n';
 	}
 	return out;
@@ -1203,10 +1366,25 @@ ostream& HumdrumFile::printTrackInfo(ostream& out) {
 //
 
 ostream& HumdrumFile::printDurationInfo(ostream& out) {
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printDurationInfo(out) << '\n';
 	}
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::getSpineStart --
+//
+
+HumdrumToken* HumdrumFile::getSpineStart(int track) const {
+	if ((track > 0) && (track < trackstarts.size())) {
+		return trackstarts[track];
+	} else {
+		return NULL;
+	}
 }
 
 
@@ -1281,6 +1459,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		HumdrumLine& next) {
 	int i;
 
+
    // first handle simple cases where the spine assignments are one-to-one:
 	if (!previous.isInterpretation() && !next.isInterpretation()) {
 		if (previous.getTokenCount() != next.getTokenCount()) {
@@ -1297,7 +1476,6 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		}
 		return true;
 	}
-
 	int ii = 0;
 	for (i=0; i<previous.getTokenCount(); i++) {
 		if (!previous.token(i).isManipulator()) {
@@ -1323,6 +1501,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 				previous.token(i+1).makeForwardLink(next.token(ii++));
 				previous.token(i).makeForwardLink(next.token(ii++));
 			}
+			i++;
 		} else if (previous.token(i).isTerminateInterpretation()) {
 			// No link should be made.  There may be a problem if a
 			// new segment is given (this should be handled by a
@@ -1330,13 +1509,14 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		} else if (previous.token(i).isAddInterpretation()) {
 			// A new data stream is being added, the next linked token
 			// should be an exclusive interpretation.
-			if (!next.token(i).isExclusiveInterpretation()) {
+			if (!next.token(ii+1).isExclusiveInterpretation()) {
 				cerr << "Error: expecting exclusive interpretation on line "
-				     << next.getLineNumber() << " but got "
+				     << next.getLineNumber() << " at token " << i << " but got "
 				     << next.token(i) << endl;
 				return false;
 			}
 			previous.token(i).makeForwardLink(next.token(ii++));
+			ii++;
 		} else if (previous.token(i).isExclusiveInterpretation()) {
 			previous.token(i).makeForwardLink(next.token(ii++));
 		} else {
@@ -1370,12 +1550,14 @@ bool HumdrumFile::analyzeSpines(void) {
 	vector<string> datatype;
 	vector<string> sinfo;
 	vector<vector<HumdrumToken*> > lastspine;
+	trackstarts.resize(0);
+	addToTrackStarts(NULL);
 
 	bool init = false;
 	int i, j;
-	for (i=0; i<size(); i++) {
+	for (i=0; i<getLineCount(); i++) {
 		if (!lines[i]->hasSpines()) {
-			lines[i]->token(0).setLineAddress(i, 0);
+			lines[i]->token(0).setFieldIndex(0);
 			continue;
 		}
 		if ((init == false) && !lines[i]->isExclusive()) {
@@ -1392,13 +1574,12 @@ bool HumdrumFile::analyzeSpines(void) {
 			lastspine.resize(lines[i]->getTokenCount());
 			for (j=0; j<lines[i]->getTokenCount(); j++) {
 				datatype[j] = lines[i]->getTokenString(j);
-				sinfo[j]    = to_string(i+1);
-				lines[i]->token(j).setDataType(datatype[j]);
+				addToTrackStarts(&lines[i]->token(j));
+				sinfo[j]    = to_string(j+1);
 				lines[i]->token(j).setSpineInfo(sinfo[j]);
-				lines[i]->token(j).setLineAddress(i, j);
+				lines[i]->token(j).setFieldIndex(j);
 				lastspine[j].push_back(&(lines[i]->token(j)));
 			}
-			maxtrack = datatype.size();
 			continue;
 		}
 		if (datatype.size() != lines[i]->getTokenCount()) {
@@ -1408,18 +1589,33 @@ bool HumdrumFile::analyzeSpines(void) {
 			return false;
 		}
 		for (j=0; j<lines[i]->getTokenCount(); j++) {
-			lines[i]->token(j).setDataType(datatype[j]);
 			lines[i]->token(j).setSpineInfo(sinfo[j]);
-			lines[i]->token(j).setLineAddress(i, j);
+			lines[i]->token(j).setFieldIndex(j);
 		}
 		if (!lines[i]->isManipulator()) {
 			continue;
 		}
-		maxtrack = adjustSpines(*lines[i], datatype, sinfo, maxtrack);
+		if (!adjustSpines(*lines[i], datatype, sinfo)) { return false; }
 	}
    return true;
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumFile::addToTrackStarts --
+//
+
+void HumdrumFile::addToTrackStarts(HumdrumToken* token) {
+	if (token == NULL) {
+		trackstarts.push_back(NULL);
+	} else if ((trackstarts.size() > 1) && (trackstarts.back() == NULL)) {
+		trackstarts.back() = token;
+	} else {
+		trackstarts.push_back(token);
+	}
+}
 
 
 
@@ -1429,8 +1625,8 @@ bool HumdrumFile::analyzeSpines(void) {
 //   on manipulators.
 //
 
-int HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
-		vector<string>& sinfo, int trackcount) {
+bool HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
+		vector<string>& sinfo) {
 	vector<string> newtype;
 	vector<string> newinfo;
 	int mergecount = 0;
@@ -1466,7 +1662,8 @@ int HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newinfo.resize(newinfo.size() + 1);
 			newinfo.back() = sinfo[i];
 			newinfo.resize(newinfo.size() + 1);
-			newinfo.back() = to_string(++mergecount);
+			addToTrackStarts(NULL);
+			newinfo.back() = to_string(getMaxTrack());
 		} else if (line.token(i).isExchangeInterpretation()) {
 			if (i < line.getTokenCount() - 1) {
 				if (line.token(i).isExchangeInterpretation()) {
@@ -1480,12 +1677,15 @@ int HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 					newinfo.resize(newinfo.size() + 1);
 					newinfo.back() = sinfo[i];
 				} else {
-					cerr << "ERROR in *x calculation" << endl;
-					exit(1);
+					cerr << "ERROR1 in *x calculation" << endl;
+					return false;
 				}
+				i++;
 			} else {
-				cerr << "ERROR in *x calculation" << endl;
-				exit(1);
+				cerr << "ERROR2 in *x calculation" << endl;
+				cerr << "Index " << i << " larger than allowed: "
+				     << line.getTokenCount() - 1 << endl;
+				return false;
 			}
 		} else if (line.token(i).isTerminateInterpretation()) {
 			// do nothing: the spine is terminating;
@@ -1494,6 +1694,16 @@ int HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newtype.back() = line.getTokenString(i);
 			newinfo.resize(newinfo.size() + 1);
 			newinfo.back() = sinfo[i];
+			if (!((trackstarts.size() > 1) && (trackstarts.back() == NULL))) {
+				cerr << "Error: Exclusive interpretation with no preparation "
+				     << "on line " << line.getLineIndex()
+				     << " spine index " << i << endl;
+				cerr << "Line: " << line << endl;
+				return false;
+			}
+			if (trackstarts.back() == NULL) {
+				addToTrackStarts(&line.token(i));
+			}
 		} else {
 			// should only be null interpretation, but doesn't matter
 			newtype.resize(newtype.size() + 1);
@@ -1510,7 +1720,7 @@ int HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 		sinfo[i]    = newinfo[i];
 	}
 
-	return trackcount;
+	return true;
 }
 
 
@@ -1551,11 +1761,11 @@ string HumdrumFile::getMergedSpineInfo(vector<string>& info, int starti,
 //////////////////////////////
 //
 // HumdrumFile::analyzeTokenDurations -- Calculate the duration of
-//   all tokens in a file.
+//   all tokens in spines which posses duration in a file.
 //
 
 bool HumdrumFile::analyzeTokenDurations (void) {
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<getLineCount(); i++) {
 		if (!lines[i]->analyzeTokenDurations()) {
 			return false;
 		}
@@ -1572,128 +1782,332 @@ bool HumdrumFile::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFile::analyzeRhythm(void) {
-	if (!analyzeTokenDurations()) {
-		return false;
+	if (getMaxTrack() == 0) {
+		return true;
 	}
-	vector<HumNum> durstate;
-	vector<HumNum> newdurstate;
-	vector<HumNum> curdur;
-	HumNum linedur;
-	HumNum dur;
+	int startline = getSpineStart(1)->getLineIndex();
+	int testline;
 	HumNum zero(0);
 
-	int i, j, k;
-	for (i=0; i<size(); i++) {
-		if (lines[i]->isExclusiveInterpretation()) {
-			// If an exclusive interpretation line, initialize the durstate.
-			if (!getTokenDurations(curdur, i)) { return false; }
-			durstate = curdur;
-			linedur = 0;
-			lines[i]->setDuration(linedur);
+	int i;
+	for (int i=1; i<=getMaxTrack(); i++) {
+		if (!getSpineStart(i)->hasRhythm()) {
+			// Can't analyze rhythm of spines that do not have rhythm.
 			continue;
-		} else if (!lines[i]->isManipulator()) {
-			if (lines[i]->isData()) {
-				if (!getTokenDurations(curdur, i)) { return false; }
-				if (curdur.size() != durstate.size()) {
-					cerr << "Error on line " << (i+1) 
-					     << ": spine problem" << endl;
-					cerr << "Line: " << *lines[i] << endl;
-					return false;
-				}
-				linedur = getMinDur(curdur, durstate);
-				for (j=0; j<curdur.size(); j++) {
-					if (curdur[j].isPositive()) {
-						if (durstate[j].isPositive()) {
-							cerr << "Error on line " << (i+1) 
-					     		<< ": previous rhythm too long in field " << j << endl;
-							cerr << "Line: " << *lines[i] << endl;
-							return false;
-						} else {
-							durstate[j] = curdur[j];
-						}
-					}
-				}
-				lines[i]->setDuration(linedur);
-				if (!decrementDurStates(durstate, linedur, i)) { return false; }
-			} else {
-				// Not a rhythmic line, so preserve durstate and set the
-				// duration of the line to zero.
-				lines[i]->setDuration(0);
+		}
+		testline = getSpineStart(i)->getLineIndex();
+		if (testline == startline) {
+			if (!assignDurationsToTrack(getSpineStart(i), zero)) {
+				return false;
 			}
 		} else {
-			// Deal with spine manipulators.  The dur state of a spine must
-			// be zero when the manipulator is *^, *v, or *-. Exclusive
-			// interpretations initialze a new duration state.
-			newdurstate.resize(0);
-			for (j=0; j<lines[i]->getTokenCount(); j++) {
-				if (lines[i]->token(j).isSplitInterpretation()) {
-					if (durstate[j].isNonZero()) {
-						cerr << "Error on line " << (i+1)
-						     << ": notes must end before splitting spine." << endl;
-						return false;
-					}
-					newdurstate.push_back(durstate[j]);
-					newdurstate.push_back(durstate[j]);
-				} else if (lines[i]->token(j).isMergeInterpretation()) {
-					int mergecount = lines[i]->token(j).getNextToken()
-							->getPreviousTokenCount();
-					if (mergecount <= 1) {
-						cerr << "Error on line " << (i+1)
-						     << ": merger is incomplete" << endl;
-						cerr << "Line: " << lines[i] << endl;
-						return false;
-					}
-					// check that all merger spine running durations
-					// are zero; otherwise, there is a rhythmic error in the score.
-					for (k=0; k<mergecount; k++) {
-						if (durstate[j+k].isNonZero()) {
-							cerr << "Error on line " << (i+1)
-							     << ": merger is incomplete" << endl;
-							cerr << "Line: " << lines[i] << endl;
-							return false;
-						}
-					}
-					newdurstate.push_back(durstate[j]);
-					j += mergecount - 1;
-				} else if (lines[i]->token(j).isExchangeInterpretation()) {
-					// switch order of duration states.
-					newdurstate.push_back(durstate[j+1]);
-					newdurstate.push_back(durstate[j]);
-					j++;
-				} else if (lines[i]->token(j).isAddInterpretation()) {
-					// initialize a new durstate;
-					newdurstate.push_back(durstate[j]);
-					newdurstate.push_back(zero);
-				} else if (lines[i]->token(j).isTerminateInterpretation()) {
-					// the durstate should be removed for the current spine.
-				} else if (lines[i]->token(j).isExclusiveInterpretation()) {
-					// The add interpretation should have added this interpetation,
-					// and it should alread by in durstate
-					newdurstate.push_back(durstate[j]);
-				} else {
-					// The manipulator should have a one-to-one mapping with
-					// the next token in the spine.
-					newdurstate.push_back(durstate[j]);
-				}
-			}
-			// Store the new durstate:
-			durstate = newdurstate;
+			// Spine does not start at beginning of data, so
+			// the starting position of the spine has to be
+			// determined before continuing.  Search for a token
+			// which is on a line with assigned duration, then work
+			// outwards from that position.
+			continue;
 		}
 	}
 
-   // Fill in the cumulative duration data:
-	HumNum dursum = 0;
-	for (i=0; i<lines.size(); i++) {
-		lines[i]->setDurationFromStart(dursum);
-		dursum += lines[i]->getDuration();
+   // Go back and analyze spines which do not start at the beginning
+	// of the data stream.
+	for (i=1; i<=getMaxTrack(); i++) {
+		if (!getSpineStart(i)->hasRhythm()) {
+			// Can't analyze rhythm of spines that do not have rhythm.
+			continue;
+		}
+		testline = getSpineStart(i)->getLineIndex();
+		if (testline > startline) {
+			if (!analyzeRhythmOfFloatingSpine(getSpineStart(i))) { return false; }
+		}
 	}
 
-	// Fill in the metrical information
-	if (!analyzeMeter()) {
+   if (!analyzeNullLineRhythms()) { return false; }
+	fillInNegativeStartTimes();
+	assignLineDurations();
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::assignLineDurations --
+//
+
+void HumdrumFile::assignLineDurations(void) {
+	HumNum startdur;
+	HumNum enddur;
+	HumNum dur;
+	for (int i=0; i<lines.size()-1; i++) {
+		startdur = lines[i]->getDurationFromStart();
+		enddur = lines[i+1]->getDurationFromStart();
+		dur = enddur - startdur;
+		lines[i]->setDuration(dur);
+	}
+	if (lines.size() > 0) {
+		lines.back()->setDuration(0);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::fillInNegativeStartTimes --
+//
+
+void HumdrumFile::fillInNegativeStartTimes(void) {
+	int i;
+	HumNum lastdur = -1;
+	HumNum dur;
+	for (i=lines.size()-1; i>=0; i--) {
+		dur = lines[i]->getDurationFromStart();
+		if (dur.isNegative() && lastdur.isNonNegative()) {
+			lines[i]->setDurationFromStart(lastdur);
+		}
+		if (dur.isNonNegative()) {
+			lastdur = dur;
+			continue;
+		}
+	}
+
+	// fill in start times for ending comments
+	for (i=0; i<lines.size(); i++) {
+		dur = lines[i]->getDurationFromStart();
+		if (dur.isNonNegative()) {
+			lastdur = dur;
+		} else {
+			lines[i]->setDurationFromStart(lastdur);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::analyzeNullLineRhythms -- When a series of null-token data line
+//    occur between two data lines possessing a start duration, then split the
+//    duration between those two lines amongst the null-token lines.  For example
+//    if a data line starts at time 15, and there is one null-token line before
+//    another data line at time 16, then the null-token line will be assigned
+//    to the position 15.5 in the score.
+//
+
+bool HumdrumFile::analyzeNullLineRhythms(void) {
+	vector<HumdrumLine*> nulllines;
+	HumdrumLine* previous = NULL;
+	HumdrumLine* next = NULL;
+	HumNum dur;
+	HumNum startdur;
+	HumNum enddur;
+	int i, j;
+	for (i=0; i<(int)lines.size(); i++) {
+		if (!lines[i]->hasSpines()) {
+			continue;
+		}
+		if (lines[i]->isAllRhythmicNull()) {
+			if (lines[i]->isData()) {
+				nulllines.push_back(lines[i]);
+			}
+			continue;
+		}
+		dur = lines[i]->getDurationFromStart();
+		if (dur.isNegative()) {
+			if (lines[i]->isData()) {
+				cerr << "Error: found an unexpected negative duration on line " 
+			     	<< lines[i]->getDurationFromStart()<< endl;
+				cerr << "Line: " << *lines[i] << endl;
+				return false;
+			} else {
+				continue;
+			}
+		}
+		next = lines[i];
+		if (previous == NULL) {
+			previous = next;
+			nulllines.resize(0);
+			continue;
+		}
+		startdur = previous->getDurationFromStart();
+		enddur   = next ->getDurationFromStart();
+		HumNum gapdur = enddur - startdur;
+		HumNum nulldur = gapdur / (nulllines.size() + 1);
+		for (j=0; j<(int)nulllines.size(); j++) {
+			nulllines[j]->setDurationFromStart(startdur + (nulldur * (j+1)));
+		}
+		previous = next;
+		nulllines.resize(0);
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::analyzeRhythmOfFloatingSpine --  This analysis function is used
+//    to analyze the rhythm of spines which do not start at the beginning of
+//    the data.  The function searches for the first line which has an
+//    assigned durationFromStart value, and then uses that as the basis
+//		for assigning the initial durationFromStart position for the spine.
+//
+
+bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
+	HumNum dursum = 0;
+	HumNum founddur = 0;
+	HumdrumToken* token = spinestart;
+	int tcount = token->getNextTokenCount();
+
+	// Find a known durationFromStart for a line in the Humdrum file, then
+	// use that to calculate the starting duration of the floating spine.
+	if (token->getDurationFromStart().isNonNegative()) {
+		founddur = token->getLine()->getDurationFromStart();
+	} else {
+		tcount = token->getNextTokenCount();
+		while (tcount > 0) {
+			if (token->getDurationFromStart().isNonNegative()) {
+				founddur = token->getLine()->getDurationFromStart();
+				break;
+			}
+			if (token->getDuration().isPositive()) {
+				dursum += token->getDuration();
+			}
+			token = token->getNextToken(0);
+		}
+	}
+	
+	if (founddur.isZero()) {
+		cerr << "Error cannot link floating spine to score." << endl;
 		return false;
 	}
 
-   return true;
+	if (!assignDurationsToTrack(spinestart, founddur - dursum)) {
+		return false;
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::assignDurationsToTrack --
+//
+
+bool HumdrumFile::assignDurationsToTrack(HumdrumToken* starttoken,
+		HumNum startdur) {
+	if (!starttoken->hasRhythm()) {
+		return true;
+	}
+	int state = starttoken->getState();
+	if (!prepareDurations(starttoken, state, startdur)) { return false; }
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::prepareDurations --
+//
+
+bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
+		HumNum startdur) {
+	if (state != token->getState()) {
+		return true;
+	}
+
+	HumdrumToken* initial = token;
+	HumNum dursum = startdur;
+	token->incrementState();
+
+	if (!setLineDurationFromStart(token, dursum)) { return false; }
+	if (token->getDuration().isPositive()) {
+		dursum += token->getDuration();
+	}
+	int tcount = token->getNextTokenCount();
+
+	// Assign line durationFromStarts for primary track first.
+	while (tcount > 0) {
+		token = token->getNextToken(0);
+		if (state != token->getState()) {
+			return true;
+		}
+		token->incrementState();
+		if (!setLineDurationFromStart(token, dursum)) { return false; }
+		if (token->getDuration().isPositive()) {
+			dursum += token->getDuration();
+		}
+		tcount = token->getNextTokenCount();
+	}
+	if ((tcount == 0) && (token->isTerminateInterpretation())) {
+		if (!setLineDurationFromStart(token, dursum)) { return false; }
+	}
+
+   // Process secondary tracks next:
+	int newstate = state + 1;
+
+	token = initial;
+	dursum = startdur;
+	if (token->getDuration().isPositive()) {
+		dursum += token->getDuration();
+	}
+	tcount = token->getNextTokenCount();
+	while (tcount > 0) {
+		if (tcount > 1) {
+			for (int i=1; i<tcount; i++) {
+				if (!prepareDurations(token->getNextToken(i), state, dursum)) {
+					return false;
+				}
+			}
+		}
+		token = token->getNextToken(0);
+		if (newstate != token->getState()) {
+			return true;
+		}
+		if (token->getDuration().isPositive()) {
+			dursum += token->getDuration();
+		}
+		tcount = token->getNextTokenCount();
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::setLineDurationFromStart -- Set the duration of
+//      a line based on the analysis of tokens in the spine.
+//      If the duration
+//
+
+bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
+		HumNum dursum) {
+	if ((!token->isTerminateInterpretation()) && 
+			token->getDuration().isNegative()) {
+		// undefined rhythm, so don't assign line duration information:
+		return true;
+	}
+	HumdrumLine* line = token->getOwner();
+	if (line->getDurationFromStart().isNegative()) {
+		line->setDurationFromStart(dursum);
+	} else if (line->getDurationFromStart() != dursum) {
+		cerr << "Error: Inconsistent rhythm analysis occuring near line "
+		     << token->getLineNumber() << endl;
+		cerr << "Expected durationFromStart to be: " << dursum
+		     << " but found it to be " << line->getDurationFromStart() << endl;
+		cerr << "Line: " << *line << endl;
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -1703,7 +2117,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 // HumdrumFile::analyzeMeter -- Store the times from the last barline
 //     to the current line, as well as the time to the next barline.
 //     the sum of these two will be the duration of the barline, except
-//     for barlines, where the getDurationToBarline() will store the 
+//     for barlines, where the getDurationToBarline() will store the
 //     duration of the measure staring at that barline.  To get the
 //     beat, you will have to figure out the current time signature.
 //
@@ -1711,7 +2125,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 bool HumdrumFile::analyzeMeter(void) {
 	int i;
 	HumNum sum = 0;
-	for (i=0; i<size(); i++) {
+	for (i=0; i<getLineCount(); i++) {
 		lines[i]->setDurationFromBarline(sum);
 		sum += lines[i]->getDuration();
 		if (lines[i]->isBarline()) {
@@ -1720,7 +2134,7 @@ bool HumdrumFile::analyzeMeter(void) {
 	}
 
 	sum = 0;
-	for (i=size()-1; i>=0; i--) {
+	for (i=getLineCount()-1; i>=0; i--) {
 		sum += lines[i]->getDuration();
 		lines[i]->setDurationToBarline(sum);
 		if (lines[i]->isBarline()) {
@@ -1783,24 +2197,33 @@ bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
 
 //////////////////////////////
 //
-// HumdrumFile::getMinDur -- Return the smallest duration on the 
+// HumdrumFile::getMinDur -- Return the smallest duration on the
 //   line.  If all durations are zero, then return zero; otherwise,
 //   return the smallest positive duration.
 //
 
 HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
 	HumNum mindur = 0;
+	bool allzero = true;
+
 	for (int i=0; i<(int)durs.size(); i++) {
 		if (durs[i].isPositive()) {
+			allzero = false;
 			if (mindur.isZero()) {
 				mindur = durs[i];
 			} else if (mindur > durs[i]) {
 				mindur = durs[i];
 			}
 		}
-		if (durstate[i].isPositive()) {
+	}
+	if (allzero) {
+		return mindur;
+	}
+
+	for (int i=0; i<(int)durs.size(); i++) {
+		if (durstate[i].isPositive() && mindur.isZero()) {
 			if (durstate[i].isZero()) {
-				mindur = durstate[i];
+				// mindur = durstate[i];
 			} else if (mindur > durstate[i]) {
 				mindur = durstate[i];
 			}
@@ -1814,8 +2237,9 @@ HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
 //////////////////////////////
 //
 // HumdrumFile::cleanDurs -- Check if there are grace note and regular
-//    notes on a line (not allowed), and convert negative durations
-//    to zero (negative durations indicate undefined durations).
+//    notes on a line (not allowed).  Leaves negative durations which
+//    indicate undefined durations (needed for keeping track of null
+//    tokens in rhythmic spines.
 //
 
 bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
@@ -1824,7 +2248,6 @@ bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
 	for (int i=0; i<(int)durs.size(); i++) {
 		if      (durs[i].isPositive()) { positive = true; }
 		else if (durs[i].isZero())     { zero     = true; }
-		else                           { durs[i]  = 0; }
 	}
 	if (zero && positive) {
 		cerr << "Error on line " << (line+1) << " grace note and "
@@ -1843,7 +2266,7 @@ bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
 //
 
 ostream& operator<<(ostream& out, HumdrumFile& infile) {
-	for (int i=0; i<infile.size(); i++) {
+	for (int i=0; i<infile.getLineCount(); i++) {
 		out << infile[i] << '\n';
 	}
 	return out;
@@ -1855,11 +2278,23 @@ ostream& operator<<(ostream& out, HumdrumFile& infile) {
 // HumdrumLine::HumdrumLine --
 //
 
-HumdrumLine::HumdrumLine(void) : string() { }
+HumdrumLine::HumdrumLine(void) : string() {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
-HumdrumLine::HumdrumLine(const string& aString) : string(aString) { }
+HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
-HumdrumLine::HumdrumLine(const char* aString) : string(aString) { }
+HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+}
 
 
 
@@ -1994,6 +2429,51 @@ bool HumdrumLine::isData(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isAllNull -- Returns true if all tokens on the line
+//		are null ("." if a data line, "*" if an interpretation line, "!"
+//		if a local comment line).
+//
+
+bool HumdrumLine::isAllNull(void) const {
+	if (!hasSpines()) {
+		return false;
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isAllRhythmicNull -- Returns true if all rhythmic
+//    data-type tokens on the line are null ("." if a data line, 
+//    "*" if an interpretation line, "!" if a local comment line).
+//
+
+bool HumdrumLine::isAllRhythmicNull(void) const {
+	if (!hasSpines()) {
+		return false;
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).hasRhythm()) {
+			continue;
+		}
+		if (!token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::setLineIndex --
 //
 
@@ -2030,7 +2510,7 @@ int HumdrumLine::getLineNumber(void) const {
 // HumdrumLine::getLineNumber --
 //
 
-HumNum HumdrumLine::getDuration(void) const { 
+HumNum HumdrumLine::getDuration(void) const {
 	return duration;
 }
 
@@ -2063,8 +2543,23 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 // HumdrumLine::getDurationFromBarline --
 //
 
-HumNum HumdrumLine::getDurationFromBarline(void) const { 
+HumNum HumdrumLine::getDurationFromBarline(void) const {
 	return durationFromBarline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getSpineStart --
+//
+
+HumdrumToken* HumdrumLine::getSpineStart(int track) const {
+	if (owner == NULL) {
+		return NULL;
+	} else {
+		return owner->getSpineStart(track);
+	}
 }
 
 
@@ -2075,7 +2570,7 @@ HumNum HumdrumLine::getDurationFromBarline(void) const {
 //    barline to the current line.
 //
 
-void HumdrumLine::setDurationFromBarline(HumNum dur) { 
+void HumdrumLine::setDurationFromBarline(HumNum dur) {
 	durationFromBarline = dur;
 }
 
@@ -2087,7 +2582,7 @@ void HumdrumLine::setDurationFromBarline(HumNum dur) {
 //     current note to the next barline.
 //
 
-HumNum HumdrumLine::getDurationToBarline(void) const { 
+HumNum HumdrumLine::getDurationToBarline(void) const {
 	return durationToBarline;
 }
 
@@ -2117,7 +2612,7 @@ HumNum HumdrumLine::getBeat(string beatrecip) const {
 // HumdrumLine::setDurationToBarline --
 //
 
-void HumdrumLine::setDurationToBarline(HumNum dur) { 
+void HumdrumLine::setDurationToBarline(HumNum dur) {
 	durationToBarline = dur;
 }
 
@@ -2128,7 +2623,7 @@ void HumdrumLine::setDurationToBarline(HumNum dur) {
 // HumdrumLine::getLineNumber --
 //
 
-void HumdrumLine::setDuration(HumNum aDur) { 
+void HumdrumLine::setDuration(HumNum aDur) {
 	if (aDur.isNonNegative()) {
 		duration = aDur;
 	} else {
@@ -2200,7 +2695,7 @@ int HumdrumLine::getTokenCount(void) const {
 // HumdrumLine::token --
 //
 
-HumdrumToken& HumdrumLine::token(int index) {
+HumdrumToken& HumdrumLine::token(int index) const {
 	return *tokens[index];
 }
 
@@ -2224,12 +2719,14 @@ string HumdrumLine::getTokenString(int index) const {
 int HumdrumLine::createTokensFromLine(void) {
 	tokens.resize(0);
 	HumdrumToken* token = new HumdrumToken();
+	token->setOwner(this);
 	char ch;
 	for (int i=0; i<size(); i++) {
 		ch = getChar(i);
 		if (ch == '\t') {
 			tokens.push_back(token);
 			token = new HumdrumToken();
+			token->setOwner(this);
 		} else {
 			*token += ch;
 		}
@@ -2260,7 +2757,7 @@ void HumdrumLine::createLineFromTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokens -- Returns an array of tokens pointers for a 
+// HumdrumLine::getTokens -- Returns an array of tokens pointers for a
 //   Humdrum line.  This function should not be called on global comments,
 //   reference records (which are a sub-cateogry of global comments).  This
 //   is because a line's type may contain tabs which are not representing
@@ -2498,6 +2995,18 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
+// HumdrumLine::setOwner -- store a pointer to the HumdrumFile which
+//    manages this object.
+//
+
+void HumdrumLine::setOwner(HumdrumFile* hfile) {
+	owner = hfile;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine.
 //
 
@@ -2529,15 +3038,15 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 //
 
 HumdrumToken::HumdrumToken(void) : string() {
-	// do nothing
+	rhycheck = 0;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
-	// do nothing
+	rhycheck = 0;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
-	// do nothing
+	rhycheck = 0;
 }
 
 
@@ -2577,21 +3086,10 @@ HumdrumToken::~HumdrumToken() {
 
 //////////////////////////////
 //
-// HumdrumToken::setDataType -- Set the exclusive interpretation type.
-//
-
-void HumdrumToken::setDataType(const string& datatype) {
-	address.setDataType(datatype);
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumToken::getDataType -- Get the exclusive interpretation type.
 //
 
-string HumdrumToken::getDataType(void) const {
+const string& HumdrumToken::getDataType(void) const {
 	return address.getDataType();
 }
 
@@ -2624,7 +3122,7 @@ string HumdrumToken::getSpineInfo(void) const {
 // HumdrumToken::getLineIndex --
 //
 
-int HumdrumToken::getLineIndex(void) const { 
+int HumdrumToken::getLineIndex(void) const {
 	return address.getLineIndex();
 }
 
@@ -2637,29 +3135,6 @@ int HumdrumToken::getLineIndex(void) const {
 
 int HumdrumToken::getLineNumber(void) const {
 	return address.getLineNumber();
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumToken::setLineAddress --
-//
-
-void HumdrumToken::setLineAddress(int aLineIndex, int aFieldIndex) {
-	setLineIndex(aLineIndex);
-	setFieldIndex(aFieldIndex);
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumToken::setLineIndex --
-//
-
-void HumdrumToken::setLineIndex(int index) {
-	address.setLineIndex(index);
 }
 
 
@@ -2824,8 +3299,16 @@ bool HumdrumToken::analyzeDuration(void) {
 		return true;
 	}
 	string dtype = getDataType();
-	if ((dtype == "**kern") || (dtype == "**recip")) {
-		duration = Convert::recipToDuration((string)(*this));
+	if (hasRhythm()) {
+		if (isData()) {
+			if (!isNull()) {
+				duration = Convert::recipToDuration((string)(*this));
+			} else {
+				duration.setValue(-1);
+			}
+		} else {
+			duration.setValue(-1);
+		}
 	} else {
 		duration.setValue(-1);
 	}
@@ -2870,7 +3353,20 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::hasRhythm --
+// HumdrumToken::getDurationFromStart --
+//
+
+HumNum HumdrumToken::getDurationFromStart(void) const {
+	return getLine()->getDurationFromStart();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRhythm -- Returns true if the exclusive interpretation
+//    contains rhythmic data which will be used for analyzing the
+//    duration of a HumdrumFile, for example.
 //
 
 bool HumdrumToken::hasRhythm(void) const {
@@ -2882,6 +3378,43 @@ bool HumdrumToken::hasRhythm(void) const {
 		return true;
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isBarlines --
+//
+
+bool HumdrumToken::isBarline(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '=') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isData -- Returns true if not an interpretation, barline
+//      or local comment;
+//
+
+bool HumdrumToken::isData(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	int firstchar = (*this)[0];
+	if ((firstchar == '*') || (firstchar == '!') || (firstchar == '=')) {
+		return false;
+	}
+	return true;
 }
 
 
@@ -2902,7 +3435,7 @@ bool HumdrumToken::isExclusive(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isSplitInterpretation --
-// 
+//
 
 bool HumdrumToken::isSplitInterpretation(void) const {
 	return ((string)(*this)) == SPLIT_TOKEN;
@@ -2913,9 +3446,9 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isMergeInterpretation --
-// 
+//
 
-bool HumdrumToken::isMergeInterpretation(void) const { 
+bool HumdrumToken::isMergeInterpretation(void) const {
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 
@@ -2924,9 +3457,9 @@ bool HumdrumToken::isMergeInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isExchangeInterpretation --
-// 
+//
 
-bool HumdrumToken::isExchangeInterpretation(void) const { 
+bool HumdrumToken::isExchangeInterpretation(void) const {
 	return ((string)(*this)) == EXCHANGE_TOKEN;
 }
 
@@ -2935,9 +3468,9 @@ bool HumdrumToken::isExchangeInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isTerminateInterpretation --
-// 
+//
 
-bool HumdrumToken::isTerminateInterpretation(void) const { 
+bool HumdrumToken::isTerminateInterpretation(void) const {
 	return ((string)(*this)) == TERMINATE_TOKEN;
 }
 
@@ -2946,9 +3479,9 @@ bool HumdrumToken::isTerminateInterpretation(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isAddInterpretation --
-// 
+//
 
-bool HumdrumToken::isAddInterpretation(void) const { 
+bool HumdrumToken::isAddInterpretation(void) const {
 	return ((string)(*this)) == ADD_TOKEN;
 }
 
@@ -3063,11 +3596,56 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumToken::setOwner --
+//
+
+void HumdrumToken::setOwner(HumdrumLine* aLine) {
+	address.setOwner(aLine);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getOwner --
+//
+
+HumdrumLine* HumdrumToken::getOwner(void) const {
+	return address.getOwner();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getState --
+//
+
+int HumdrumToken::getState(void) const {
+	return rhycheck;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getState --
+//
+
+void HumdrumToken::incrementState(void) {
+	rhycheck++;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumToken::getNextTokenCount -- Return the number of tokens in the
 //   spine/subspine which follow this token.  Typically this will be 1,
-//   but will be zero for a terminator interpretation (*-), and will be 
+//   but will be zero for a terminator interpretation (*-), and will be
 //   2 for a split interpretation (*^).
 //
 
@@ -3080,9 +3658,9 @@ int HumdrumToken::getNextTokenCount(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getPreviousTokenCount -- Return the number of tokens
-//   in the spine/subspine which precede this token.  Typically this will 
-//   be 1, but will be zero for an exclusive interpretation (starting with 
-//   "**"), and will be greater than one for a token which follows a 
+//   in the spine/subspine which precede this token.  Typically this will
+//   be 1, but will be zero for an exclusive interpretation (starting with
+//   "**"), and will be greater than one for a token which follows a
 //   spine merger (using *v interpretations).
 //
 
@@ -3099,7 +3677,7 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 //     default value: separator = " "
 //
 
-HumNum Convert::recipToDuration(const string& recip, HumNum scale, 
+HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		string separator) {
 	size_t loc;
 	loc = recip.find(separator);
@@ -3160,9 +3738,9 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 			} else {
 				break;
 			}
-			numerator = 4 * (int)pow(2, zerocount);
-			output.setValue(numerator, 1);
 		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
    } else {
 		// plain rhythm
 		denominator = subtok[numi++] - '0';

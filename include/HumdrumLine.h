@@ -18,6 +18,8 @@
 
 #include "HumdrumToken.h"
 
+class HumdrumFile;
+
 using namespace std;
 
 // START_MERGE
@@ -39,13 +41,16 @@ class HumdrumLine : public string {
 		bool     isInterpretation       (void) const { return isInterp(); }
 		bool     isBarline              (void) const;
 		bool     isData                 (void) const;
+		bool     isAllNull              (void) const;
+		bool     isAllRhythmicNull      (void) const;
 		bool     isEmpty                (void) const;
 		bool     isManipulator          (void) const;
 		bool     hasSpines              (void) const;
-      HumdrumToken& token             (int index);
+		HumdrumToken& token             (int index) const;
 		void     getTokens              (vector<HumdrumToken*>& list);
 		int      getTokenCount          (void) const;
-      string   getTokenString         (int index) const;
+		int      getFieldCount          (void) const { return getTokenCount(); }
+		string   getTokenString         (int index) const;
 		bool     equalChar              (int index, char ch) const;
 		char     getChar                (int index) const;
 		ostream& printSpineInfo         (ostream& out = cout);
@@ -53,7 +58,6 @@ class HumdrumLine : public string {
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
-		int      createTokensFromLine   (void);
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
@@ -62,6 +66,7 @@ class HumdrumLine : public string {
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
 		HumNum   getBeat                (string beatrecip = "4") const;
+		HumdrumToken* getSpineStart     (int track) const;
 
 	protected:
 		bool     analyzeTracks          (void);
@@ -72,6 +77,8 @@ class HumdrumLine : public string {
 		void     setDurationFromStart   (HumNum dur);
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
+		void     setOwner               (HumdrumFile* hfile);
+		int      createTokensFromLine   (void);
 
 	private:
 
@@ -113,7 +120,7 @@ class HumdrumLine : public string {
 		HumNum durationFromStart;
 
 		// durationFromBarline: This is the cumulative duration from the
-		// last barline to the current data line.  
+		// last barline to the current data line.
 		// This variable is filled by HumdrumFile::analyzeMeter().
 		HumNum durationFromBarline;
 
@@ -121,6 +128,9 @@ class HumdrumLine : public string {
 		// current line to the next barline in the owning HumdrumFile object.
 		// This variable is filled by HumdrumFile::analyzeMeter().
 		HumNum durationToBarline;
+
+		// owner: This is the HumdrumFile which manages the given line.
+		HumdrumFile* owner;
 
 	friend class HumdrumFile;
 };
