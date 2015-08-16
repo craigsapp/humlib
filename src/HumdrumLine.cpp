@@ -284,7 +284,23 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getDurationFromBarline --
+// HumdrumLine::getDurationToEnd -- Return the duration from the start of the
+//    line to the end of the HumdrumFile which owns this HumdrumLine.
+//
+
+HumNum HumdrumLine::getDurationToEnd(void) const {
+	if (owner == NULL) {
+		return 0;
+	}
+	return owner->getScoreDuration() -  durationFromStart;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromBarline -- Return the duration from the start
+//    of the given line to the first barline occuring before the given line.
 //
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
@@ -295,14 +311,15 @@ HumNum HumdrumLine::getDurationFromBarline(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getSpineStart --
+// HumdrumLine::getTrackStart --  Return the starting exclusive interpretation
+//    for the given spine/track.
 //
 
-HumdrumToken* HumdrumLine::getSpineStart(int track) const {
+HumdrumToken* HumdrumLine::getTrackStart(int track) const {
 	if (owner == NULL) {
 		return NULL;
 	} else {
-		return owner->getSpineStart(track);
+		return owner->getTrackStart(track);
 	}
 }
 

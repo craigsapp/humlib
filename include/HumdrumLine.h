@@ -63,10 +63,11 @@ class HumdrumLine : public string {
 		int      getLineNumber          (void) const;
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
+		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HumdrumToken* getSpineStart     (int track) const;
+		HumdrumToken* getTrackStart     (int track) const;
 
 	protected:
 		bool     analyzeTracks          (void);

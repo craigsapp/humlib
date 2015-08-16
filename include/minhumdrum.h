@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 15 01:55:50 PDT 2015
+// Last Modified: Sat Aug 15 22:21:28 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -245,9 +245,19 @@ class HumdrumFile {
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
 		ostream&      printDurationInfo            (ostream& out = cout);
-		HumdrumToken* getSpineStart                (int track) const;
+		HumdrumToken* getTrackStart                (int track) const;
+		int           getTrackEndCount             (int track) const;
+		HumdrumToken* getTrackEnd                  (int track,
+		                                            int subtrack) const;
 		void          createLinesFromTokens        (void);
 		HumNum        getScoreDuration             (void) const;
+
+		// barline/measure functionality:
+		int           getBarlineCount              (void) const;
+		HumdrumLine*  getBarline                   (int index) const;
+		HumNum        getBarlineDuration           (int index) const;
+		HumNum        getBarlineDurationFromStart  (int index) const;
+		HumNum        getBarlineDurationToEnd      (int index) const;
 
 	protected:
 		bool          analyzeTokens                (void);
@@ -258,6 +268,7 @@ class HumdrumFile {
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeTracks                (void);
 		bool          analyzeLines                 (void);
+		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		bool          adjustSpines                 (HumdrumLine& line,
 		                                            vector<string>& datatype,
 		                                            vector<string>& sinfo);
@@ -281,10 +292,20 @@ class HumdrumFile {
 		                                            HumNum startdur);
 		bool          setLineDurationFromStart     (HumdrumToken* token,
 		                                            HumNum dursum);
-		bool          analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
-		bool          analyzeNullLineRhythms       (void);
-		void          fillInNegativeStartTimes     (void);
-		void          assignLineDurations          (void);
+		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool      analyzeNullLineRhythms       (void);
+		void      fillInNegativeStartTimes     (void);
+		void      assignLineDurations          (void);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken);
+		bool      analyzeNonNullDataTokens     (void);
+		void      addUniqueTokens              (vector<HumdrumToken*>& target,
+		                                        vector<HumdrumToken*>& source);
+		bool      processNonNullDataTokensForTrackForward(
+		                                        HumdrumToken* starttoken, 
+		                                        vector<HumdrumToken*> ptokens);
+		bool      processNonNullDataTokensForTrackBackward(
+		                                        HumdrumToken* starttoken, 
+		                                        vector<HumdrumToken*> ptokens);
 
 	private:
 
@@ -304,16 +325,12 @@ class HumdrumFile {
 		// is the list of terminators.
 		vector<vector<HumdrumToken*> > trackends;
 
-// ggg still to process:
-
 		// barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> barlines;
+		// Maybe also add "measures" which are complete metrical cycles.
 
-		// measures: list of measures in the data (which may contain a
-		// "non-controlling" barline;
-		vector<HumdrumLine*> measures;
 };
 
 ostream& operator<<(ostream& out, HumdrumFile& infile);
@@ -359,10 +376,11 @@ class HumdrumLine : public string {
 		int      getLineNumber          (void) const;
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
+		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HumdrumToken* getSpineStart     (int track) const;
+		HumdrumToken* getTrackStart     (int track) const;
 
 	protected:
 		bool     analyzeTracks          (void);
@@ -461,6 +479,15 @@ class HumdrumToken : public string {
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
 
+		int      getPreviousNonNullDataTokenCount(void);
+		int      getPreviousNNDTCount(void) { return getPreviousNonNullDataTokenCount(); }
+		HumdrumToken* getPreviousNonNullDataToken(int index);
+		HumdrumToken* getPreviousNNDT(int index) { return getPreviousNonNullDataToken(index); }
+		int      getNextNonNullDataTokenCount(void);
+		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
+		HumdrumToken* getNextNonNullDataToken(int index);
+		HumdrumToken* getNextNNDT(int index) { return getNextNonNullDataToken(index); }
+
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
@@ -524,6 +551,14 @@ class HumdrumToken : public string {
 		// line has *v merge tokens for the spine.  Exclusive interpretations
 		// have no tokens preceding them.
 		vector<HumdrumToken*> previousTokens; // link to last token(s) in spine
+
+		// nextNonNullTokens: This is a list of non-tokens in the spine 
+		// that follow this one.
+		vector<HumdrumToken*> nextNonNullTokens;
+
+		// previousNonNullTokens: This is a list of non-tokens in the spine 
+		// that preced this one.
+		vector<HumdrumToken*> previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;

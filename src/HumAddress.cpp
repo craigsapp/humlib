@@ -90,7 +90,7 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 	if (owner == NULL) {
 		return null;
 	}
-	HumdrumToken* tok = owner->getSpineStart(getTrack());
+	HumdrumToken* tok = owner->getTrackStart(getTrack());
 	return *tok;
 }
 

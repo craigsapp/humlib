@@ -76,6 +76,69 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getPreviousNullDataTokenCount --
+//
+
+int HumdrumToken::getPreviousNonNullDataTokenCount(void) { 
+	return previousNonNullTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousNullDataTokenCount --
+//
+
+
+HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) { 
+	if (index < 0) {
+		index += previousNonNullTokens.size();
+	}
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= previousNonNullTokens.size()) {
+		return NULL;
+	}
+	return previousNonNullTokens[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextNonNullDataTokenCount --
+//
+
+int HumdrumToken::getNextNonNullDataTokenCount(void) {
+	return nextNonNullTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getNextNonNullDataToken --
+//
+
+HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
+	if (index < 0) {
+		index += nextNonNullTokens.size();
+	}
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= nextNonNullTokens.size()) {
+		return NULL;
+	}
+	return nextNonNullTokens[index];
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::HumdrumToken --
 //
 

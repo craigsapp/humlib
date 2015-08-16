@@ -49,6 +49,15 @@ class HumdrumToken : public string {
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
 
+		int      getPreviousNonNullDataTokenCount(void);
+		int      getPreviousNNDTCount(void) { return getPreviousNonNullDataTokenCount(); }
+		HumdrumToken* getPreviousNonNullDataToken(int index);
+		HumdrumToken* getPreviousNNDT(int index) { return getPreviousNonNullDataToken(index); }
+		int      getNextNonNullDataTokenCount(void);
+		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
+		HumdrumToken* getNextNonNullDataToken(int index);
+		HumdrumToken* getNextNNDT(int index) { return getNextNonNullDataToken(index); }
+
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
@@ -112,6 +121,14 @@ class HumdrumToken : public string {
 		// line has *v merge tokens for the spine.  Exclusive interpretations
 		// have no tokens preceding them.
 		vector<HumdrumToken*> previousTokens; // link to last token(s) in spine
+
+		// nextNonNullTokens: This is a list of non-tokens in the spine 
+		// that follow this one.
+		vector<HumdrumToken*> nextNonNullTokens;
+
+		// previousNonNullTokens: This is a list of non-tokens in the spine 
+		// that preced this one.
+		vector<HumdrumToken*> previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;
