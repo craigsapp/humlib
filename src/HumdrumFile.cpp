@@ -16,6 +16,8 @@
 #include <sstream>
 #include <fstream>
 
+namespace minHumdrum {
+
 // START_MERGE
 
 
@@ -1562,6 +1564,8 @@ ostream& operator<<(ostream& out, HumdrumFile& infile) {
 }
 
 // END_MERGE
+
+} // end namespace std;
 
 
 

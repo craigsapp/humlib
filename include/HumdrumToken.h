@@ -18,8 +18,11 @@
 
 #include "HumNum.h"
 #include "HumAddress.h"
+#include "HumHash.h"
 
 using namespace std;
+
+namespace minHumdrum {
 
 // START_MERGE
 
@@ -133,6 +136,8 @@ class HumdrumToken : public string {
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;
 		
+		// parameters: Storage for non-data local parameters.
+		HumHash parameters;
 
 	friend class HumdrumLine;
 	friend class HumdrumFile;
@@ -141,6 +146,8 @@ class HumdrumToken : public string {
 
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _HUMDRUM_TOKEN_H */
 

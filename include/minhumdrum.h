@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 15 22:21:28 PDT 2015
+// Last Modified: Sun Aug 16 05:11:41 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 using std::string;
 using std::vector;
@@ -57,6 +58,10 @@ using std::cerr;
 using std::endl;
 using std::to_string;
 using std::stringstream;
+using std::map;
+using std::invalid_argument;
+
+namespace minHumdrum {
 
 class Convert;
 class HumNum;
@@ -137,12 +142,84 @@ class HumAddress {
 };
 
 
+class HumHash {
+	public:
+		               HumHash             (void);
+		              ~HumHash             ();
+
+		string         getParameter        (const string& key);
+		string         getParameter        (const string& ns2, const string& key);
+		string         getParameter        (const string& ns1, const string& ns2,
+		                                    const string& key);
+		int            getParameterInt     (const string& key);
+		int            getParameterInt     (const string& ns2, const string& key);
+		int            getParameterInt     (const string& ns1, const string& ns2,
+		                                    const string& key);
+		HumNum         getParameterFraction(const string& key);
+		HumNum         getParameterFraction(const string& ns2, const string& key);
+		HumNum         getParameterFraction(const string& ns1, const string& ns2,
+		                                    const string& key);
+		double         getParameterFloat   (const string& key);
+		double         getParameterFloat   (const string& ns2, const string& key);
+		double         getParameterFloat   (const string& ns1, const string& ns2,
+		                                    const string& key);
+		bool           getParameterBool    (const string& key);
+		bool           getParameterBool    (const string& ns2, const string& key);
+		bool           getParameterBool    (const string& ns1, const string& ns2,
+		                                    const string& key);
+		void           setParameter        (const string& key,
+		                                    const string& value);
+		void           setParameter        (const string& ns2,
+		                                    const string& key,
+		                                    const string& value);
+		void           setParameter        (const string& ns1,
+		                                    const string& ns2,
+		                                    const string& key,
+		                                    const string& value);
+/*
+		void           setParameter        (const string& key, int value);
+		void           setParameter        (const string& ns2, const string& key,
+		                                    int value);
+		void           setParameter        (const string& ns1, const string& ns2,
+		                                    const string& key, int value);
+		void           setParameter        (const string& key, float value);
+		void           setParameter        (const string& ns2, const string& key,
+		                                    float value);
+		void           setParameter        (const string& ns1, const string& ns2,
+		                                    const string& key, float value);
+		void           setParameter        (const string& key, bool value);
+		void           setParameter        (const string& ns2, const string& key,
+		                                    bool value);
+		void           setParameter        (const string& ns1, const string& ns2,
+		                                    const string& key, bool value);
+*/
+
+		bool           hasParameter        (const string& key);
+		bool           hasParameter        (const string& ns2, const string& key);
+		bool           hasParameter        (const string& ns1, const string& ns2,
+		                                    const string& key);
+		void           deleteParameter     (const string& key);
+		void           deleteParameter     (const string& ns2, const string& key);
+		void           deleteParameter     (const string& ns1, const string& ns2,
+		                                    const string& key);
+
+	protected:
+		void           initializeParameters(void);
+		vector<string> getKeyList          (const string& keys);
+
+	private:
+		map<string, map<string, map<string, string> > >* parameters;
+};
+
+
+
 class HumNum {
 	public:
 		         HumNum             (void);
 		         HumNum             (int value);
 		         HumNum             (int numerator, int denominator);
 		         HumNum             (const HumNum& rat);
+		         HumNum             (const string& ratstring);
 		        ~HumNum             ();
 
 		bool     isNegative         (void) const;
@@ -159,8 +236,9 @@ class HumNum {
 		int      getInteger         (double round = 0.0) const;
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
-		void     setValue           (int numerator);
-		void     setValue           (int numerator, int denominator);
+		HumNum   setValue           (int numerator);
+		HumNum   setValue           (int numerator, int denominator);
+		HumNum   setValue           (const string& ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
@@ -330,7 +408,6 @@ class HumdrumFile {
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
-
 };
 
 ostream& operator<<(ostream& out, HumdrumFile& infile);
@@ -445,6 +522,9 @@ class HumdrumLine : public string {
 
 		// owner: This is the HumdrumFile which manages the given line.
 		HumdrumFile* owner;
+
+		// parameters: Storage for non-data global token parameters on the line.
+		HumHash parameters;
 
 	friend class HumdrumFile;
 };
@@ -563,6 +643,8 @@ class HumdrumToken : public string {
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;
 		
+		// parameters: Storage for non-data local parameters.
+		HumHash parameters;
 
 	friend class HumdrumLine;
 	friend class HumdrumFile;
@@ -580,6 +662,7 @@ class Convert {
 
 
 
+} // end of namespace minHumdrum
 
 #endif /* _MINHUMDRUM_H */
 

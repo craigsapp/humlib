@@ -17,6 +17,8 @@
 
 using namespace std;
 
+namespace minHumdrum {
+
 class HumdrumLine;
 class HumdrumToken;
 
@@ -93,6 +95,8 @@ class HumAddress {
 };
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _HUMADDRESS */
 

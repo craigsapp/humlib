@@ -14,6 +14,8 @@
 
 #include "Convert.h"
 
+namespace minHumdrum {
+
 // START_MERGE
 
 //////////////////////////////
@@ -107,6 +109,8 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 }
 
 // END_MERGE
+
+} // end namespace std;
 
 
 

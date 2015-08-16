@@ -20,6 +20,8 @@
 
 using namespace std;
 
+namespace minHumdrum {
+
 // START_MERGE
 
 class Convert {
@@ -31,6 +33,8 @@ class Convert {
 
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _CONVERT */
 

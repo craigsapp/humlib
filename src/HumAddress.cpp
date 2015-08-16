@@ -13,6 +13,8 @@
 #include "HumAddress.h"
 #include "HumdrumLine.h"
 
+namespace minHumdrum {
+
 // START_MERGE
 
 //////////////////////////////
@@ -289,6 +291,8 @@ void HumAddress::setSubtrack(int aSubtrack) {
 }
 
 // END_MERGE
+
+} // end namespace std;
 
 
 

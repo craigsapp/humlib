@@ -15,7 +15,10 @@
 
 #include <iostream>
 #include <vector>
+
 using namespace std;
+
+namespace minHumdrum {
 
 // START_MERGE
 
@@ -25,6 +28,7 @@ class HumNum {
 		         HumNum             (int value);
 		         HumNum             (int numerator, int denominator);
 		         HumNum             (const HumNum& rat);
+		         HumNum             (const string& ratstring);
 		        ~HumNum             ();
 
 		bool     isNegative         (void) const;
@@ -41,8 +45,9 @@ class HumNum {
 		int      getInteger         (double round = 0.0) const;
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
-		void     setValue           (int numerator);
-		void     setValue           (int numerator, int denominator);
+		HumNum   setValue           (int numerator);
+		HumNum   setValue           (int numerator, int denominator);
+		HumNum   setValue           (const string& ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
@@ -103,6 +108,8 @@ template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v);
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _HUMNUM_H */
 

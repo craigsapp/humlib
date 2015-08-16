@@ -12,6 +12,8 @@
 
 #include "HumNum.h"
 
+namespace minHumdrum {
+
 // START_MERGE
 
 //////////////////////////////
@@ -31,6 +33,11 @@ HumNum::HumNum(int value){
 
 HumNum::HumNum(int numerator, int denominator){
 	setValue(numerator, denominator);
+}
+
+
+HumNum::HumNum(const string& ratstring) {
+	setValue(ratstring);
 }
 
 
@@ -177,16 +184,37 @@ int HumNum::getDenominator(void) const {
 // HumNum::setValue --
 //
 
-void HumNum::setValue(int numerator) {
+HumNum HumNum::setValue(int numerator) {
 	top = numerator;
 	bot = 1;
+	return *this;
 }
 
 
-void HumNum::setValue(int numerator, int denominator) {
+HumNum HumNum::setValue(int numerator, int denominator) {
 	top = numerator;
 	bot = denominator;
 	reduce();
+	return *this;
+}
+
+
+HumNum HumNum::setValue(const string& ratstring) {
+	int buffer[2];
+	buffer[0] = 1;
+	buffer[1] = 1;
+	int slash = 0;
+	for (int i=0; i<ratstring.size(); i++) {
+		if (ratstring[i] == '/') {
+			slash = 1;
+			continue;
+		}
+		if (!isdigit(ratstring[i])) {
+			break;
+		}
+		buffer[slash] = buffer[slash] * 10 + (ratstring[i] - '0');
+	}
+	return setValue(buffer[0], buffer[1]);
 }
 
 
@@ -760,6 +788,8 @@ ostream& operator<<(ostream& out, const vector<A>& v) {
 }
 
 // END_MERGE
+
+} // end namespace std;
 
 
 

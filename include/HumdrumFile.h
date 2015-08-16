@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace minHumdrum {
+
 // START_MERGE
 
 class HumdrumFile {
@@ -132,13 +134,14 @@ class HumdrumFile {
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
-
 };
 
 ostream& operator<<(ostream& out, HumdrumFile& infile);
 
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _HUMDRUMFILE_H */
 

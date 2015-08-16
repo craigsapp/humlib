@@ -17,10 +17,13 @@
 #include <iostream>
 
 #include "HumdrumToken.h"
-
-class HumdrumFile;
+#include "HumHash.h"
 
 using namespace std;
+
+namespace minHumdrum {
+
+class HumdrumFile;
 
 // START_MERGE
 
@@ -133,6 +136,9 @@ class HumdrumLine : public string {
 		// owner: This is the HumdrumFile which manages the given line.
 		HumdrumFile* owner;
 
+		// parameters: Storage for non-data global token parameters on the line.
+		HumHash parameters;
+
 	friend class HumdrumFile;
 };
 
@@ -140,6 +146,8 @@ ostream& operator<< (ostream& out, HumdrumLine& line);
 
 
 // END_MERGE
+
+} // end namespace std;
 
 #endif /* _HUMDRUMLINE */
 

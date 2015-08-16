@@ -15,6 +15,8 @@
 #include "HumdrumLine.h"
 #include "Convert.h"
 
+namespace minHumdrum {
+
 // START_MERGE
 
 // spine mainipulators:
@@ -734,6 +736,8 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 
 // END_MERGE
+
+} // end namespace std;
 
 
 
