@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 16 17:42:55 PDT 2015
+// Last Modified: Mon Aug 17 02:22:32 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -320,7 +320,7 @@ void HumAddress::setSubtrack(int aSubtrack) {
 // HumHash::HumHash --
 //
 
-HumHash::HumHash(void) { 
+HumHash::HumHash(void) {
 	parameters = NULL;
 }
 
@@ -331,7 +331,7 @@ HumHash::HumHash(void) {
 // HumHash::~HumHash --
 //
 
-HumHash::~HumHash() { 
+HumHash::~HumHash() {
 	if (parameters != NULL) {
 		delete parameters;
 		parameters = NULL;
@@ -345,7 +345,7 @@ HumHash::~HumHash() {
 // HumHash::getValue --
 //
 
-string HumHash::getValue(const string& key) {
+string HumHash::getValue(const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	} else {
@@ -361,7 +361,7 @@ string HumHash::getValue(const string& key) {
 }
 
 
-string HumHash::getValue(const string& ns2, const string& key) {
+string HumHash::getValue(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	} else {
@@ -370,8 +370,8 @@ string HumHash::getValue(const string& ns2, const string& key) {
 }
 
 
-string HumHash::getValue(const string& ns1, const string& ns2, 
-		const string& key) {
+string HumHash::getValue(const string& ns1, const string& ns2,
+		const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	}
@@ -399,7 +399,7 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 // HumHash::getValueInt --
 //
 
-int HumHash::getValueInt(const string& key) { 
+int HumHash::getValueInt(const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -414,7 +414,7 @@ int HumHash::getValueInt(const string& key) {
 }
 
 
-int HumHash::getValueInt(const string& ns2, const string& key) { 
+int HumHash::getValueInt(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -423,12 +423,12 @@ int HumHash::getValueInt(const string& ns2, const string& key) {
 
 
 int HumHash::getValueInt(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
 	string value = getValue(ns1, ns2, key);
- 	if (value.find("/") != string::npos) {
+	if (value.find("/") != string::npos) {
 		HumNum nvalue(value);
 		return  nvalue.getInteger();
 	} else {
@@ -449,7 +449,7 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 // HumHash::getValueFraction --
 //
 
-HumNum HumHash::getValueFraction(const string& key) { 
+HumNum HumHash::getValueFraction(const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -464,7 +464,7 @@ HumNum HumHash::getValueFraction(const string& key) {
 }
 
 
-HumNum HumHash::getValueFraction(const string& ns2, const string& key) { 
+HumNum HumHash::getValueFraction(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -473,7 +473,7 @@ HumNum HumHash::getValueFraction(const string& ns2, const string& key) {
 
 
 HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (!isDefined(ns1, ns2, key)) {
 		return 0;
 	}
@@ -489,7 +489,7 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 // HumHash::getValueFloat --
 //
 
-double HumHash::getValueFloat(const string& key) { 
+double HumHash::getValueFloat(const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
@@ -504,7 +504,7 @@ double HumHash::getValueFloat(const string& key) {
 }
 
 
-double HumHash::getValueFloat(const string& ns2, const string& key) { 
+double HumHash::getValueFloat(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
@@ -513,12 +513,12 @@ double HumHash::getValueFloat(const string& ns2, const string& key) {
 
 
 double HumHash::getValueFloat(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
 	string value = getValue(ns1, ns2, key);
- 	if (value.find("/") != string::npos) {
+	if (value.find("/") != string::npos) {
 		HumNum nvalue(value);
 		return nvalue.getFloat();
 	} else {
@@ -539,7 +539,7 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 // HumHash::getValueBool --
 //
 
-bool HumHash::getValueBool(const string& key) { 
+bool HumHash::getValueBool(const string& key) const {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
 		return getValueBool("", "", keys[2]);
@@ -551,13 +551,13 @@ bool HumHash::getValueBool(const string& key) {
 }
 
 
-bool HumHash::getValueBool(const string& ns2, const string& key) { 
+bool HumHash::getValueBool(const string& ns2, const string& key) const {
 	return getValueBool("", ns2, key);
 }
 
 
 bool HumHash::getValueBool(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -592,13 +592,13 @@ void HumHash::setValue(const string& key, const string& value) {
 }
 
 
-void HumHash::setValue(const string& ns2, const string& key, 
+void HumHash::setValue(const string& ns2, const string& key,
 		const string& value) {
 		setValue("", ns2, key, value);
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, const string& value) {
 	initializeParameters();
 	(*parameters)[ns1][ns2][key] = value;
@@ -623,7 +623,7 @@ void HumHash::setValue(const string& ns2, const string& key, int value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, int value) {
 	initializeParameters();
 	stringstream ss(value);
@@ -648,7 +648,7 @@ void HumHash::setValue(const string& ns2, const string& key, HumNum value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, HumNum value) {
 	initializeParameters();
 	stringstream ss;
@@ -675,7 +675,7 @@ void HumHash::setValue(const string& ns2, const string& key, double value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, double value) {
 	initializeParameters();
 	stringstream ss;
@@ -690,7 +690,7 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 // HumHash::getKeys --
 //
 
-vector<string> HumHash::getKeys(const string& ns1, const string& ns2) {
+vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 	vector<string> output;
 	if (parameters == NULL) {
 		return output;
@@ -705,11 +705,37 @@ vector<string> HumHash::getKeys(const string& ns1, const string& ns2) {
 
 //////////////////////////////
 //
+// HumHash::hasParameters -- Returns true if at least one parameter.
+//
+
+bool HumHash::hasParameters(void) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	if (parameters->size() == 0) {
+		return false;
+	}
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			if (it2.second.size() == 0) {
+				continue;
+			} else {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::isDefined -- Returns true if the given parameter exists in the
 //    map.
 //
 
-bool HumHash::isDefined(const string& key) {
+bool HumHash::isDefined(const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -724,7 +750,7 @@ bool HumHash::isDefined(const string& key) {
 }
 
 
-bool HumHash::isDefined(const string& ns2, const string& key) {
+bool HumHash::isDefined(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -733,7 +759,7 @@ bool HumHash::isDefined(const string& ns2, const string& key) {
 
 
 bool HumHash::isDefined(const string& ns1, const string& ns2,
-		const string& key) {
+		const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -747,7 +773,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 // HumHash::deleteValue --
 //
 
-void HumHash::deleteValue(const string& key) { 
+void HumHash::deleteValue(const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -762,7 +788,7 @@ void HumHash::deleteValue(const string& key) {
 }
 
 
-void HumHash::deleteValue(const string& ns2, const string& key) { 
+void HumHash::deleteValue(const string& ns2, const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -770,8 +796,8 @@ void HumHash::deleteValue(const string& ns2, const string& key) {
 }
 
 
-void HumHash::deleteValue(const string& ns1, const string& ns2, 
-		const string& key) { 
+void HumHash::deleteValue(const string& ns1, const string& ns2,
+		const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -813,7 +839,7 @@ void HumHash::initializeParameters(void) {
 // HumHash::getKeyList --
 //
 
-vector<string> HumHash::getKeyList(const string& keys) {
+vector<string> HumHash::getKeyList(const string& keys) const {
 	stringstream ss(keys);
 	string key;
 	vector<string> output;
@@ -825,6 +851,63 @@ vector<string> HumHash::getKeyList(const string& keys) {
 	}
 	return output;
 }
+
+
+
+//////////////////////////////
+//
+// HumHash::setPrefix: initial string to print when using
+//   operator<<.
+//
+
+void HumHash::setPrefix(const string& value) {
+	prefix = value;
+
+}
+
+
+
+//////////////////////////////
+//
+// operator<< --
+//
+
+ostream& operator<<(ostream& out, const HumHash& hash) {
+	if (hash.parameters == NULL) {
+		return out;
+	}
+	if (hash.parameters->size() == 0) {
+		return out;
+	}
+
+	string cleaned;
+
+	for (auto& it1 : *(hash.parameters)) {
+		if (it1.second.size() == 0) {
+			continue;
+		}
+		for (auto& it2 : it1.second) {
+			if (it2.second.size() == 0) {
+				continue;
+			}
+			out << hash.prefix;
+			out << it1.first << ":" << it2.first;
+			for (auto& it3 : it2.second) {
+				out << ":" << it3.first;
+				if (it3.second != "true") {
+					cleaned = it3.second;
+					Convert::replaceOccurrences(cleaned, ":", "&colon;");
+					out << "=" << cleaned;
+				}
+			}
+			out << endl;
+		}
+	}
+
+	return out;
+}
+
+
 
 
 
@@ -1654,13 +1737,16 @@ bool HumdrumFile::read(istream& infile) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return false; }
-	if (!analyzeLines()          ) { return false; }
-	if (!analyzeSpines()         ) { return false; }
-	if (!analyzeLinks()          ) { return false; }
-	if (!analyzeTracks()         ) { return false; }
-	if (!analyzeTokenDurations() ) { return false; }
-	if (!analyzeRhythm()         ) { return false; }
+	if (!analyzeTokens()           ) { return false; }
+	if (!analyzeLines()            ) { return false; }
+	if (!analyzeSpines()           ) { return false; }
+	if (!analyzeLinks()            ) { return false; }
+	if (!analyzeTracks()           ) { return false; }
+	if (!analyzeGlobalParameters() ) { return false; }
+	if (!analyzeLocalParameters()  ) { return false; }
+	if (!analyzeTokenDurations()   ) { return false; }
+	if (!analyzeRhythm()           ) { return false; }
+	if (!analyzeDurationsOfNonRhythmicSpines()) { return false; }
 	return true;
 }
 
@@ -1858,7 +1944,7 @@ int HumdrumFile::getBarlineCount(void) const {
 // HumdrumFile::getBarlineDuration --
 //
 
-HumNum HumdrumFile::getBarlineDuration(int index) const { 
+HumNum HumdrumFile::getBarlineDuration(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -1871,7 +1957,7 @@ HumNum HumdrumFile::getBarlineDuration(int index) const {
 	HumNum startdur = barlines[index]->getDurationFromStart();
 	HumNum enddur;
 	if (index + 1 < barlines.size() - 1) {
-		enddur = barlines[index+1]->getDurationFromStart();	
+		enddur = barlines[index+1]->getDurationFromStart();
 	} else {
 		enddur = getScoreDuration();
 	}
@@ -1886,7 +1972,7 @@ HumNum HumdrumFile::getBarlineDuration(int index) const {
 //    start of the Humdrum file and the barline.
 //
 
-HumNum HumdrumFile::getBarlineDurationFromStart(int index) const { 
+HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -1907,7 +1993,7 @@ HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
 //    barline and the end of the HumdrumFile.
 //
 
-HumNum HumdrumFile::getBarlineDurationToEnd(int index) const { 
+HumNum HumdrumFile::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -2101,26 +2187,6 @@ bool HumdrumFile::analyzeLines(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
-//    of non-null data token in non-rhythmic spines.
-//
-
-bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
-	for (int i=1; i<=getMaxTrack(); i++) {
-		if (getTrackStart(i)->hasRhythm()) {
-			continue;
-		}
-		if (!assignDurationsToNonRhythmicTrack(getTrackStart(i))) {
-			return false;
-		}
-	}
-	return true;
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumFile::analyzeTracks -- Analyze the track structure of the
 //     data.  Returns false if there was a parse error.
 //
@@ -2175,7 +2241,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 	int i;
 
 
-   // first handle simple cases where the spine assignments are one-to-one:
+	// first handle simple cases where the spine assignments are one-to-one:
 	if (!previous.isInterpretation() && !next.isInterpretation()) {
 		if (previous.getTokenCount() != next.getTokenCount()) {
 			cerr << "Error lines " << (previous.getLineNumber())
@@ -2313,7 +2379,7 @@ bool HumdrumFile::analyzeSpines(void) {
 		}
 		if (!adjustSpines(*lines[i], datatype, sinfo)) { return false; }
 	}
-   return true;
+	return true;
 }
 
 
@@ -2421,6 +2487,7 @@ bool HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				return false;
 			}
 			if (trackstarts.back() == NULL) {
+cout << "GOING TO ADD " << line.token(i) << endl;
 				addToTrackStarts(&line.token(i));
 			}
 		} else {
@@ -2529,7 +2596,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 		}
 	}
 
-   // Go back and analyze spines which do not start at the beginning
+	// Go back and analyze spines which do not start at the beginning
 	// of the data stream.
 	for (i=1; i<=getMaxTrack(); i++) {
 		if (!getTrackStart(i)->hasRhythm()) {
@@ -2542,13 +2609,90 @@ bool HumdrumFile::analyzeRhythm(void) {
 		}
 	}
 
-   if (!analyzeNullLineRhythms()) { return false; }
+	if (!analyzeNullLineRhythms()) { return false; }
 	fillInNegativeStartTimes();
 	assignLineDurations();
 	if (!analyzeMeter()) { return false; }
-   if (!analyzeNonNullDataTokens()) { return false; }
+	if (!analyzeNonNullDataTokens()) { return false; }
 
 	return true;
+}
+
+
+
+///////////////////////////////
+//
+// HumdrumFile::analyzeLocalParameters -- only allowing layout
+//    parameters at the moment.
+//
+
+bool HumdrumFile::analyzeLocalParameters(void) {
+	// analyze backward tokens:
+	for (int i=1; i<=getMaxTrack(); i++) {
+		for (int j=0; j<getTrackEndCount(i); j++) {
+			if (!processLocalParametersForTrack(getTrackEnd(i, j),
+					getTrackEnd(i, j))) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::processLocalParametersForTrack --
+//
+
+bool HumdrumFile::processLocalParametersForTrack(HumdrumToken* starttok,
+		HumdrumToken* current) {
+
+	HumdrumToken* token = starttok;
+	int tcount = token->getPreviousTokenCount();
+	while (tcount > 0) {
+		for (int i=1; i<tcount; i++) {
+			if (!processLocalParametersForTrack(
+					token->getPreviousToken(i), current)) {
+				return false;
+			}
+		}
+		if (!(token->isNull() && token->isManipulator())) {
+			if (token->isCommentLocal()) {
+				checkForLocalParameters(token, current);
+			} else {
+				current = token;
+			}
+		}
+
+		// Data tokens can only be followed by up to one previous token,
+		// so no need to check for more than one next token.
+		token = token->getPreviousToken(0);
+		tcount = token->getPreviousTokenCount();
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::checkForLocalParameters -- only allowing layout parameters
+//    currently.
+//
+
+void HumdrumFile::checkForLocalParameters(HumdrumToken *token,
+		HumdrumToken *current) {
+	if (token->size() < 1) {
+		return;
+	}
+	if (token->find("!LO:") != 0) {
+		return;
+	}
+	current->setParameters(token);
 }
 
 
@@ -2577,7 +2721,7 @@ bool HumdrumFile::analyzeNonNullDataTokens(void) {
 	// analyze backward tokens:
 	for (int i=1; i<=getMaxTrack(); i++) {
 		for (int j=0; j<getTrackEndCount(i); j++) {
-			if (!processNonNullDataTokensForTrackBackward(getTrackEnd(i, j), 
+			if (!processNonNullDataTokensForTrackBackward(getTrackEnd(i, j),
 					ptokens)) {
 				return false;
 			}
@@ -2590,11 +2734,70 @@ bool HumdrumFile::analyzeNonNullDataTokens(void) {
 
 //////////////////////////////
 //
+// HumdrumFile::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
+//    of non-null data token in non-rhythmic spines.
+//
+
+bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
+	// analyze tokens backwards:
+	for (int i=1; i<=getMaxTrack(); i++) {
+		for (int j=0; j<getTrackEndCount(i); j++) {
+			if (getTrackEnd(i, j)->hasRhythm()) {
+				continue;
+			}
+			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j), 
+					getTrackEnd(i, j))) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::assignDurationsToNonRhythmicTrack --
+//
+
+bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		HumdrumToken* current) {
+	HumdrumToken* token = endtoken;
+	int tcount = token->getPreviousTokenCount();
+	while (tcount > 0) {
+		for (int i=1; i<tcount; i++) {
+			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i), 
+					current)) {
+				return false;
+			}
+		}
+		if (token->isData()) {
+			if (!token->isNull()) {
+				token->setDuration(current->getDurationFromStart() - 
+						token->getDurationFromStart());
+				current = token;
+			}
+		}
+		// Data tokens can only be followed by up to one previous token,
+		// so no need to check for more than one next token.
+		token = token->getPreviousToken(0);
+		tcount = token->getPreviousTokenCount();
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdurmFile::processNonNullDataTokensForTrackBackward --
 //
 
 bool HumdrumFile::processNonNullDataTokensForTrackBackward(
 		HumdrumToken* endtoken, vector<HumdrumToken*> ptokens) {
+
 	HumdrumToken* token = endtoken;
 	int tcount = token->getPreviousTokenCount();
 	while (tcount > 0) {
@@ -2610,8 +2813,8 @@ bool HumdrumFile::processNonNullDataTokensForTrackBackward(
 				ptokens.resize(0);
 				ptokens.push_back(token);
 			}
-		}	
-		// Data tokens can only be followed by up to one previous token, 
+		}
+		// Data tokens can only be followed by up to one previous token,
 		// so no need to check for more than one next token.
 		token = token->getPreviousToken(0);
 		tcount = token->getPreviousTokenCount();
@@ -2645,8 +2848,8 @@ bool HumdrumFile::processNonNullDataTokensForTrackForward(
 				ptokens.resize(0);
 				ptokens.push_back(token);
 			}
-		}	
-		// Data tokens can only be followed by up to one next token, 
+		}
+		// Data tokens can only be followed by up to one next token,
 		// so no need to check for more than one next token.
 		token = token->getNextToken(0);
 		tcount = token->getNextTokenCount();
@@ -2662,10 +2865,10 @@ bool HumdrumFile::processNonNullDataTokensForTrackForward(
 // HumdrumFile::addUniqueTokens --
 //
 
-void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target, 
+void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target,
 		vector<HumdrumToken*>& source) {
-   int i, j;
-   bool found;
+	int i, j;
+	bool found;
 	for (i=0; i<source.size(); i++) {
 		found = false;
 		for (j=0; j<target.size(); j++) {
@@ -2767,7 +2970,7 @@ bool HumdrumFile::analyzeNullLineRhythms(void) {
 		dur = lines[i]->getDurationFromStart();
 		if (dur.isNegative()) {
 			if (lines[i]->isData()) {
-				cerr << "Error: found an unexpected negative duration on line " 
+				cerr << "Error: found an unexpected negative duration on line "
 			     	<< lines[i]->getDurationFromStart()<< endl;
 				cerr << "Line: " << *lines[i] << endl;
 				return false;
@@ -2828,7 +3031,7 @@ bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 			token = token->getNextToken(0);
 		}
 	}
-	
+
 	if (founddur.isZero()) {
 		cerr << "Error cannot link floating spine to score." << endl;
 		return false;
@@ -2838,18 +3041,6 @@ bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 		return false;
 	}
 
-	return true;
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumFile::assignDurationsToNonRhythmicTrack --
-//
-
-bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken) {
-	// ggg still to be implemented
 	return true;
 }
 
@@ -2911,7 +3102,7 @@ bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
 		if (!setLineDurationFromStart(token, dursum)) { return false; }
 	}
 
-   // Process secondary tracks next:
+	// Process secondary tracks next:
 	int newstate = state + 1;
 
 	token = initial;
@@ -2952,7 +3143,7 @@ bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
 
 bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
 		HumNum dursum) {
-	if ((!token->isTerminateInterpretation()) && 
+	if ((!token->isTerminateInterpretation()) &&
 			token->getDuration().isNegative()) {
 		// undefined rhythm, so don't assign line duration information:
 		return true;
@@ -2967,6 +3158,49 @@ bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
 		     << " but found it to be " << line->getDurationFromStart() << endl;
 		cerr << "Line: " << *line << endl;
 		return false;
+	}
+
+	return true;
+}
+
+
+
+///////////////////////////////
+//
+// HumdrumFile::analyzeGlobalParameters -- only allowing layout
+//    parameters at the moment.  Global parameters affect the next
+//    line which is either a barline, dataline or an interpretation
+//    other than a spine manipulator.  Null lines are also not
+//    considered.
+//
+
+bool HumdrumFile::analyzeGlobalParameters(void) {
+	HumdrumLine* spineline = NULL;
+	for (int i=lines.size()-1; i>=0; i--) {
+		if (lines[i]->hasSpines()) {
+			if (lines[i]->isAllNull())  {
+				continue;
+			}
+			if (lines[i]->isManipulator()) {
+				continue;
+			}
+			if (lines[i]->isCommentLocal()) {
+				continue;
+			}
+			// should be a non-null data, barlines, or interpretation
+			spineline = lines[i];
+			continue;
+		}
+		if (spineline == NULL) {
+			continue;
+		}
+		if (!lines[i]->isCommentGlobal()) {
+			continue;
+		}
+		if (lines[i]->find("!!LO:") != 0) {
+			continue;
+		}
+		spineline->setParameters(lines[i]);
 	}
 
 	return true;
@@ -3154,18 +3388,21 @@ HumdrumLine::HumdrumLine(void) : string() {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 
@@ -3323,7 +3560,7 @@ bool HumdrumLine::isAllNull(void) const {
 //////////////////////////////
 //
 // HumdrumLine::isAllRhythmicNull -- Returns true if all rhythmic
-//    data-type tokens on the line are null ("." if a data line, 
+//    data-type tokens on the line are null ("." if a data line,
 //    "*" if an interpretation line, "!" if a local comment line).
 //
 
@@ -3350,7 +3587,7 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 //
 
 void HumdrumLine::setLineIndex(int index) {
-   lineindex = index;
+	lineindex = index;
 }
 
 
@@ -3394,7 +3631,7 @@ HumNum HumdrumLine::getDuration(void) const {
 //
 
 void HumdrumLine::setDurationFromStart(HumNum dur) {
-	 durationFromStart = dur;
+	durationFromStart = dur;
 }
 
 
@@ -3896,7 +4133,50 @@ void HumdrumLine::setOwner(HumdrumFile* hfile) {
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumLine.
+// HumdrumLine::setParameters -- Takes a global comment with
+//     the structure:
+//        !!NS1:NS2:key1=value1:key2=value2:key3=value3
+//
+
+void HumdrumLine::setParameters(HumdrumLine* pLine) {
+	HumdrumLine& pl = *pLine;
+	if (pl.size() <= 2) {
+		return;
+	}
+	string pdata = pLine->substr(2, pl.size()-2);
+	setParameters(pdata);
+}
+
+
+void HumdrumLine::setParameters(const string& pdata) {
+	vector<string> pieces = Convert::splitString(pdata, ':');
+	if (pieces.size() < 3) {
+		return;
+	}
+	string ns1 = pieces[0];
+	string ns2 = pieces[1];
+	string key;
+	string value;
+	int loc;
+	for (int i=2; i<pieces.size(); i++) {
+		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
+		loc = pieces[i].find("=");
+		if (loc != string::npos) {
+			key   = pieces[i].substr(0, loc);
+			value = pieces[i].substr(loc+1, pieces[i].size());
+		} else {
+			key   = pieces[i];
+			value = "true";
+		}
+		setValue(ns1, ns2, key, value);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// operator<< -- Print a HumdrumLine. Needed to avoid interaction with HumHash.
 //
 
 ostream& operator<<(ostream& out, HumdrumLine& line) {
@@ -3928,14 +4208,17 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 
 HumdrumToken::HumdrumToken(void) : string() {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 
@@ -3967,7 +4250,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 // HumdrumToken::getPreviousNullDataTokenCount --
 //
 
-int HumdrumToken::getPreviousNonNullDataTokenCount(void) { 
+int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 	return previousNonNullTokens.size();
 }
 
@@ -3979,7 +4262,7 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 //
 
 
-HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) { 
+HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
 		index += previousNonNullTokens.size();
 	}
@@ -4305,6 +4588,17 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::setDuration --
+//
+
+void HumdrumToken::setDuration(const HumNum& dur) {
+	duration = dur;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDurationFromStart --
 //
 
@@ -4344,6 +4638,31 @@ bool HumdrumToken::isBarline(void) const {
 		return false;
 	}
 	if ((*this)[0] == '=') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isCommentLocal -- Presumed to be in a spine where
+//   only local comments are allowed.
+//
+
+bool HumdrumToken::isCommentLocal(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
+		if (size() > 1) {
+			if ((*this)[1] == '!') {
+				// global comment
+				return false;
+			}
+		}
 		return true;
 	} else {
 		return false;
@@ -4448,9 +4767,9 @@ bool HumdrumToken::isAddInterpretation(void) const {
 
 bool HumdrumToken::isNull(void) const {
 	const string& tok = (string)(*this);
-   if (tok == NULL_DATA)           { return true; }
-   if (tok == NULL_INTERPRETATION) { return true; }
-   if (tok == NULL_COMMENT_LOCAL)  { return true; }
+	if (tok == NULL_DATA)           { return true; }
+	if (tok == NULL_INTERPRETATION) { return true; }
+	if (tok == NULL_COMMENT_LOCAL)  { return true; }
 	return false;
 }
 
@@ -4517,10 +4836,53 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 		}
 		start += separator.size();
 	}
-   if (count == index) {
+	if (count == index) {
 		return string::substr(start, string::size()-start);
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setParameters -- Process a local comment with
+//     the structure:
+//        !NS1:NS2:key1=value1:key2=value2:key3=value3
+//
+
+void HumdrumToken::setParameters(HumdrumToken* ptok) {
+	HumdrumToken& pl = *ptok;
+	if (pl.size() <= 1) {
+		return;
+	}
+	string pdata = pl.substr(1, pl.size()-1);
+	setParameters(pdata);
+}
+
+
+void HumdrumToken::setParameters(const string& pdata) {
+	vector<string> pieces = Convert::splitString(pdata, ':');
+	if (pieces.size() < 3) {
+		return;
+	}
+	string ns1 = pieces[0];
+	string ns2 = pieces[1];
+	string key;
+	string value;
+	int loc;
+	for (int i=2; i<pieces.size(); i++) {
+		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
+		loc = pieces[i].find("=");
+		if (loc != string::npos) {
+			key   = pieces[i].substr(0, loc);
+			value = pieces[i].substr(loc+1, pieces[i].size());
+		} else {
+			key   = pieces[i];
+			value = "true";
+		}
+		setValue(ns1, ns2, key, value);
+	}
 }
 
 
@@ -4624,6 +4986,19 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 //////////////////////////////
 //
+// operator<< -- Needed to avoid interaction with HumHash.
+//
+
+ostream& operator<<(ostream& out, const HumdrumToken& token) {
+	out << (string)token;
+	return out;
+}
+
+
+
+
+//////////////////////////////
+//
 // Convert::recipToDuration --
 //     default value: scale = 4 (duration in terms of quarter notes)
 //     default value: separator = " "
@@ -4640,7 +5015,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		subtok = recip;
 	}
 
-   loc = recip.find('q');
+	loc = recip.find('q');
 	if (loc != string::npos) {
 		// grace note, ignore printed rhythm
 		HumNum zero(0);
@@ -4693,7 +5068,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		}
 		numerator = (int)pow(2, zerocount);
 		output.setValue(numerator, 1);
-   } else {
+	} else {
 		// plain rhythm
 		denominator = subtok[numi++] - '0';
 		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
@@ -4710,6 +5085,49 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	int top = (int)pow(2.0, dotcount + 1) - 1;
 	HumNum factor(top, bot);
 	return output * factor * scale;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += replace.size()) {
+		loc = source.find(search, loc);
+		if (loc == string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::splitString -- split a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
 }
 
 

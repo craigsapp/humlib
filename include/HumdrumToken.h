@@ -26,7 +26,7 @@ namespace minHumdrum {
 
 // START_MERGE
 
-class HumdrumToken : public string {
+class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
 		         HumdrumToken              (const char* token);
@@ -44,6 +44,7 @@ class HumdrumToken : public string {
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
 		bool     isBarline                 (void) const;
+		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
 		bool     hasRhythm                 (void) const;
 		HumNum   getDuration               (void) const;
@@ -53,13 +54,16 @@ class HumdrumToken : public string {
 		bool     equalChar                 (int index, char ch) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) { return getPreviousNonNullDataTokenCount(); }
+		int      getPreviousNNDTCount(void) {
+		               return getPreviousNonNullDataTokenCount(); }
 		HumdrumToken* getPreviousNonNullDataToken(int index);
-		HumdrumToken* getPreviousNNDT(int index) { return getPreviousNonNullDataToken(index); }
+		HumdrumToken* getPreviousNNDT(int index) {
+		               return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
 		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
 		HumdrumToken* getNextNonNullDataToken(int index);
-		HumdrumToken* getNextNNDT(int index) { return getNextNonNullDataToken(index); }
+		HumdrumToken* getNextNNDT(int index) {
+		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
@@ -72,6 +76,8 @@ class HumdrumToken : public string {
 		int      getSubtokenCount          (const string& separator = " ") const;
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
+		void     setParameters             (HumdrumToken* ptok);
+		void     setParameters             (const string& pdata);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -95,6 +101,7 @@ class HumdrumToken : public string {
 		void     setOwner          (HumdrumLine* aLine);
 		int      getState          (void) const;
 		void     incrementState    (void);
+		void     setDuration       (const HumNum& dur);
 
 		bool     analyzeDuration   (void);
 
@@ -125,24 +132,23 @@ class HumdrumToken : public string {
 		// have no tokens preceding them.
 		vector<HumdrumToken*> previousTokens; // link to last token(s) in spine
 
-		// nextNonNullTokens: This is a list of non-tokens in the spine 
+		// nextNonNullTokens: This is a list of non-tokens in the spine
 		// that follow this one.
 		vector<HumdrumToken*> nextNonNullTokens;
 
-		// previousNonNullTokens: This is a list of non-tokens in the spine 
+		// previousNonNullTokens: This is a list of non-tokens in the spine
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;
-		
-		// parameters: Storage for non-data local parameters.
-		HumHash parameters;
 
 	friend class HumdrumLine;
 	friend class HumdrumFile;
 };
 
+
+ostream& operator<<(ostream& out, const HumdrumToken& token);
 
 
 // END_MERGE

@@ -1,0 +1,13 @@
+**kern
+*M4/4
+=1-
+!!LO:CL:x=3
+*clefG2
+4c
+4d
+!!LO:N:vis=1:t=this is a colon&colon;:i
+.
+4e
+!!LO:B:i
+==
+*-

@@ -73,13 +73,16 @@ bool HumdrumFile::read(istream& infile) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return false; }
-	if (!analyzeLines()          ) { return false; }
-	if (!analyzeSpines()         ) { return false; }
-	if (!analyzeLinks()          ) { return false; }
-	if (!analyzeTracks()         ) { return false; }
-	if (!analyzeTokenDurations() ) { return false; }
-	if (!analyzeRhythm()         ) { return false; }
+	if (!analyzeTokens()           ) { return false; }
+	if (!analyzeLines()            ) { return false; }
+	if (!analyzeSpines()           ) { return false; }
+	if (!analyzeLinks()            ) { return false; }
+	if (!analyzeTracks()           ) { return false; }
+	if (!analyzeGlobalParameters() ) { return false; }
+	if (!analyzeLocalParameters()  ) { return false; }
+	if (!analyzeTokenDurations()   ) { return false; }
+	if (!analyzeRhythm()           ) { return false; }
+	if (!analyzeDurationsOfNonRhythmicSpines()) { return false; }
 	return true;
 }
 
@@ -277,7 +280,7 @@ int HumdrumFile::getBarlineCount(void) const {
 // HumdrumFile::getBarlineDuration --
 //
 
-HumNum HumdrumFile::getBarlineDuration(int index) const { 
+HumNum HumdrumFile::getBarlineDuration(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -290,7 +293,7 @@ HumNum HumdrumFile::getBarlineDuration(int index) const {
 	HumNum startdur = barlines[index]->getDurationFromStart();
 	HumNum enddur;
 	if (index + 1 < barlines.size() - 1) {
-		enddur = barlines[index+1]->getDurationFromStart();	
+		enddur = barlines[index+1]->getDurationFromStart();
 	} else {
 		enddur = getScoreDuration();
 	}
@@ -305,7 +308,7 @@ HumNum HumdrumFile::getBarlineDuration(int index) const {
 //    start of the Humdrum file and the barline.
 //
 
-HumNum HumdrumFile::getBarlineDurationFromStart(int index) const { 
+HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -326,7 +329,7 @@ HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
 //    barline and the end of the HumdrumFile.
 //
 
-HumNum HumdrumFile::getBarlineDurationToEnd(int index) const { 
+HumNum HumdrumFile::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -520,26 +523,6 @@ bool HumdrumFile::analyzeLines(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
-//    of non-null data token in non-rhythmic spines.
-//
-
-bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
-	for (int i=1; i<=getMaxTrack(); i++) {
-		if (getTrackStart(i)->hasRhythm()) {
-			continue;
-		}
-		if (!assignDurationsToNonRhythmicTrack(getTrackStart(i))) {
-			return false;
-		}
-	}
-	return true;
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumFile::analyzeTracks -- Analyze the track structure of the
 //     data.  Returns false if there was a parse error.
 //
@@ -594,7 +577,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 	int i;
 
 
-   // first handle simple cases where the spine assignments are one-to-one:
+	// first handle simple cases where the spine assignments are one-to-one:
 	if (!previous.isInterpretation() && !next.isInterpretation()) {
 		if (previous.getTokenCount() != next.getTokenCount()) {
 			cerr << "Error lines " << (previous.getLineNumber())
@@ -732,7 +715,7 @@ bool HumdrumFile::analyzeSpines(void) {
 		}
 		if (!adjustSpines(*lines[i], datatype, sinfo)) { return false; }
 	}
-   return true;
+	return true;
 }
 
 
@@ -840,6 +823,7 @@ bool HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				return false;
 			}
 			if (trackstarts.back() == NULL) {
+cout << "GOING TO ADD " << line.token(i) << endl;
 				addToTrackStarts(&line.token(i));
 			}
 		} else {
@@ -948,7 +932,7 @@ bool HumdrumFile::analyzeRhythm(void) {
 		}
 	}
 
-   // Go back and analyze spines which do not start at the beginning
+	// Go back and analyze spines which do not start at the beginning
 	// of the data stream.
 	for (i=1; i<=getMaxTrack(); i++) {
 		if (!getTrackStart(i)->hasRhythm()) {
@@ -961,13 +945,90 @@ bool HumdrumFile::analyzeRhythm(void) {
 		}
 	}
 
-   if (!analyzeNullLineRhythms()) { return false; }
+	if (!analyzeNullLineRhythms()) { return false; }
 	fillInNegativeStartTimes();
 	assignLineDurations();
 	if (!analyzeMeter()) { return false; }
-   if (!analyzeNonNullDataTokens()) { return false; }
+	if (!analyzeNonNullDataTokens()) { return false; }
 
 	return true;
+}
+
+
+
+///////////////////////////////
+//
+// HumdrumFile::analyzeLocalParameters -- only allowing layout
+//    parameters at the moment.
+//
+
+bool HumdrumFile::analyzeLocalParameters(void) {
+	// analyze backward tokens:
+	for (int i=1; i<=getMaxTrack(); i++) {
+		for (int j=0; j<getTrackEndCount(i); j++) {
+			if (!processLocalParametersForTrack(getTrackEnd(i, j),
+					getTrackEnd(i, j))) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::processLocalParametersForTrack --
+//
+
+bool HumdrumFile::processLocalParametersForTrack(HumdrumToken* starttok,
+		HumdrumToken* current) {
+
+	HumdrumToken* token = starttok;
+	int tcount = token->getPreviousTokenCount();
+	while (tcount > 0) {
+		for (int i=1; i<tcount; i++) {
+			if (!processLocalParametersForTrack(
+					token->getPreviousToken(i), current)) {
+				return false;
+			}
+		}
+		if (!(token->isNull() && token->isManipulator())) {
+			if (token->isCommentLocal()) {
+				checkForLocalParameters(token, current);
+			} else {
+				current = token;
+			}
+		}
+
+		// Data tokens can only be followed by up to one previous token,
+		// so no need to check for more than one next token.
+		token = token->getPreviousToken(0);
+		tcount = token->getPreviousTokenCount();
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::checkForLocalParameters -- only allowing layout parameters
+//    currently.
+//
+
+void HumdrumFile::checkForLocalParameters(HumdrumToken *token,
+		HumdrumToken *current) {
+	if (token->size() < 1) {
+		return;
+	}
+	if (token->find("!LO:") != 0) {
+		return;
+	}
+	current->setParameters(token);
 }
 
 
@@ -996,7 +1057,7 @@ bool HumdrumFile::analyzeNonNullDataTokens(void) {
 	// analyze backward tokens:
 	for (int i=1; i<=getMaxTrack(); i++) {
 		for (int j=0; j<getTrackEndCount(i); j++) {
-			if (!processNonNullDataTokensForTrackBackward(getTrackEnd(i, j), 
+			if (!processNonNullDataTokensForTrackBackward(getTrackEnd(i, j),
 					ptokens)) {
 				return false;
 			}
@@ -1009,11 +1070,70 @@ bool HumdrumFile::analyzeNonNullDataTokens(void) {
 
 //////////////////////////////
 //
+// HumdrumFile::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
+//    of non-null data token in non-rhythmic spines.
+//
+
+bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
+	// analyze tokens backwards:
+	for (int i=1; i<=getMaxTrack(); i++) {
+		for (int j=0; j<getTrackEndCount(i); j++) {
+			if (getTrackEnd(i, j)->hasRhythm()) {
+				continue;
+			}
+			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j), 
+					getTrackEnd(i, j))) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::assignDurationsToNonRhythmicTrack --
+//
+
+bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		HumdrumToken* current) {
+	HumdrumToken* token = endtoken;
+	int tcount = token->getPreviousTokenCount();
+	while (tcount > 0) {
+		for (int i=1; i<tcount; i++) {
+			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i), 
+					current)) {
+				return false;
+			}
+		}
+		if (token->isData()) {
+			if (!token->isNull()) {
+				token->setDuration(current->getDurationFromStart() - 
+						token->getDurationFromStart());
+				current = token;
+			}
+		}
+		// Data tokens can only be followed by up to one previous token,
+		// so no need to check for more than one next token.
+		token = token->getPreviousToken(0);
+		tcount = token->getPreviousTokenCount();
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdurmFile::processNonNullDataTokensForTrackBackward --
 //
 
 bool HumdrumFile::processNonNullDataTokensForTrackBackward(
 		HumdrumToken* endtoken, vector<HumdrumToken*> ptokens) {
+
 	HumdrumToken* token = endtoken;
 	int tcount = token->getPreviousTokenCount();
 	while (tcount > 0) {
@@ -1029,8 +1149,8 @@ bool HumdrumFile::processNonNullDataTokensForTrackBackward(
 				ptokens.resize(0);
 				ptokens.push_back(token);
 			}
-		}	
-		// Data tokens can only be followed by up to one previous token, 
+		}
+		// Data tokens can only be followed by up to one previous token,
 		// so no need to check for more than one next token.
 		token = token->getPreviousToken(0);
 		tcount = token->getPreviousTokenCount();
@@ -1064,8 +1184,8 @@ bool HumdrumFile::processNonNullDataTokensForTrackForward(
 				ptokens.resize(0);
 				ptokens.push_back(token);
 			}
-		}	
-		// Data tokens can only be followed by up to one next token, 
+		}
+		// Data tokens can only be followed by up to one next token,
 		// so no need to check for more than one next token.
 		token = token->getNextToken(0);
 		tcount = token->getNextTokenCount();
@@ -1081,10 +1201,10 @@ bool HumdrumFile::processNonNullDataTokensForTrackForward(
 // HumdrumFile::addUniqueTokens --
 //
 
-void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target, 
+void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target,
 		vector<HumdrumToken*>& source) {
-   int i, j;
-   bool found;
+	int i, j;
+	bool found;
 	for (i=0; i<source.size(); i++) {
 		found = false;
 		for (j=0; j<target.size(); j++) {
@@ -1186,7 +1306,7 @@ bool HumdrumFile::analyzeNullLineRhythms(void) {
 		dur = lines[i]->getDurationFromStart();
 		if (dur.isNegative()) {
 			if (lines[i]->isData()) {
-				cerr << "Error: found an unexpected negative duration on line " 
+				cerr << "Error: found an unexpected negative duration on line "
 			     	<< lines[i]->getDurationFromStart()<< endl;
 				cerr << "Line: " << *lines[i] << endl;
 				return false;
@@ -1247,7 +1367,7 @@ bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 			token = token->getNextToken(0);
 		}
 	}
-	
+
 	if (founddur.isZero()) {
 		cerr << "Error cannot link floating spine to score." << endl;
 		return false;
@@ -1257,18 +1377,6 @@ bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 		return false;
 	}
 
-	return true;
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumFile::assignDurationsToNonRhythmicTrack --
-//
-
-bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken) {
-	// ggg still to be implemented
 	return true;
 }
 
@@ -1330,7 +1438,7 @@ bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
 		if (!setLineDurationFromStart(token, dursum)) { return false; }
 	}
 
-   // Process secondary tracks next:
+	// Process secondary tracks next:
 	int newstate = state + 1;
 
 	token = initial;
@@ -1371,7 +1479,7 @@ bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
 
 bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
 		HumNum dursum) {
-	if ((!token->isTerminateInterpretation()) && 
+	if ((!token->isTerminateInterpretation()) &&
 			token->getDuration().isNegative()) {
 		// undefined rhythm, so don't assign line duration information:
 		return true;
@@ -1386,6 +1494,49 @@ bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
 		     << " but found it to be " << line->getDurationFromStart() << endl;
 		cerr << "Line: " << *line << endl;
 		return false;
+	}
+
+	return true;
+}
+
+
+
+///////////////////////////////
+//
+// HumdrumFile::analyzeGlobalParameters -- only allowing layout
+//    parameters at the moment.  Global parameters affect the next
+//    line which is either a barline, dataline or an interpretation
+//    other than a spine manipulator.  Null lines are also not
+//    considered.
+//
+
+bool HumdrumFile::analyzeGlobalParameters(void) {
+	HumdrumLine* spineline = NULL;
+	for (int i=lines.size()-1; i>=0; i--) {
+		if (lines[i]->hasSpines()) {
+			if (lines[i]->isAllNull())  {
+				continue;
+			}
+			if (lines[i]->isManipulator()) {
+				continue;
+			}
+			if (lines[i]->isCommentLocal()) {
+				continue;
+			}
+			// should be a non-null data, barlines, or interpretation
+			spineline = lines[i];
+			continue;
+		}
+		if (spineline == NULL) {
+			continue;
+		}
+		if (!lines[i]->isCommentGlobal()) {
+			continue;
+		}
+		if (lines[i]->find("!!LO:") != 0) {
+			continue;
+		}
+		spineline->setParameters(lines[i]);
 	}
 
 	return true;

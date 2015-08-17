@@ -26,8 +26,14 @@ namespace minHumdrum {
 
 class Convert {
 	public:
+		// duration processing
 		static HumNum  recipToDuration  (const string& recip, HumNum scale = 4,
 		                                 string separator = " ");
+
+		// string processing:
+		static vector<string> splitString (const string& data, char separator);
+		static void replaceOccurrences(string& source, const string& search,
+		                                               const string& replace);
 };
 
 

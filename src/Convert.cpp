@@ -12,6 +12,8 @@
 
 #include <math.h>
 
+#include <sstream>
+
 #include "Convert.h"
 
 namespace minHumdrum {
@@ -36,7 +38,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		subtok = recip;
 	}
 
-   loc = recip.find('q');
+	loc = recip.find('q');
 	if (loc != string::npos) {
 		// grace note, ignore printed rhythm
 		HumNum zero(0);
@@ -89,7 +91,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		}
 		numerator = (int)pow(2, zerocount);
 		output.setValue(numerator, 1);
-   } else {
+	} else {
 		// plain rhythm
 		denominator = subtok[numi++] - '0';
 		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
@@ -106,6 +108,49 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	int top = (int)pow(2.0, dotcount + 1) - 1;
 	HumNum factor(top, bot);
 	return output * factor * scale;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += replace.size()) {
+		loc = source.find(search, loc);
+		if (loc == string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::splitString -- split a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
 }
 
 // END_MERGE

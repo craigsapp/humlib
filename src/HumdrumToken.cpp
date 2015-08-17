@@ -42,14 +42,17 @@ namespace minHumdrum {
 
 HumdrumToken::HumdrumToken(void) : string() {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	rhycheck = 0;
+	setPrefix("!");
 }
 
 
@@ -81,7 +84,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 // HumdrumToken::getPreviousNullDataTokenCount --
 //
 
-int HumdrumToken::getPreviousNonNullDataTokenCount(void) { 
+int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 	return previousNonNullTokens.size();
 }
 
@@ -93,7 +96,7 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 //
 
 
-HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) { 
+HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
 		index += previousNonNullTokens.size();
 	}
@@ -419,6 +422,17 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::setDuration --
+//
+
+void HumdrumToken::setDuration(const HumNum& dur) {
+	duration = dur;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDurationFromStart --
 //
 
@@ -458,6 +472,31 @@ bool HumdrumToken::isBarline(void) const {
 		return false;
 	}
 	if ((*this)[0] == '=') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isCommentLocal -- Presumed to be in a spine where
+//   only local comments are allowed.
+//
+
+bool HumdrumToken::isCommentLocal(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
+		if (size() > 1) {
+			if ((*this)[1] == '!') {
+				// global comment
+				return false;
+			}
+		}
 		return true;
 	} else {
 		return false;
@@ -562,9 +601,9 @@ bool HumdrumToken::isAddInterpretation(void) const {
 
 bool HumdrumToken::isNull(void) const {
 	const string& tok = (string)(*this);
-   if (tok == NULL_DATA)           { return true; }
-   if (tok == NULL_INTERPRETATION) { return true; }
-   if (tok == NULL_COMMENT_LOCAL)  { return true; }
+	if (tok == NULL_DATA)           { return true; }
+	if (tok == NULL_INTERPRETATION) { return true; }
+	if (tok == NULL_COMMENT_LOCAL)  { return true; }
 	return false;
 }
 
@@ -631,10 +670,53 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 		}
 		start += separator.size();
 	}
-   if (count == index) {
+	if (count == index) {
 		return string::substr(start, string::size()-start);
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setParameters -- Process a local comment with
+//     the structure:
+//        !NS1:NS2:key1=value1:key2=value2:key3=value3
+//
+
+void HumdrumToken::setParameters(HumdrumToken* ptok) {
+	HumdrumToken& pl = *ptok;
+	if (pl.size() <= 1) {
+		return;
+	}
+	string pdata = pl.substr(1, pl.size()-1);
+	setParameters(pdata);
+}
+
+
+void HumdrumToken::setParameters(const string& pdata) {
+	vector<string> pieces = Convert::splitString(pdata, ':');
+	if (pieces.size() < 3) {
+		return;
+	}
+	string ns1 = pieces[0];
+	string ns2 = pieces[1];
+	string key;
+	string value;
+	int loc;
+	for (int i=2; i<pieces.size(); i++) {
+		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
+		loc = pieces[i].find("=");
+		if (loc != string::npos) {
+			key   = pieces[i].substr(0, loc);
+			value = pieces[i].substr(loc+1, pieces[i].size());
+		} else {
+			key   = pieces[i];
+			value = "true";
+		}
+		setValue(ns1, ns2, key, value);
+	}
 }
 
 
@@ -733,6 +815,19 @@ int HumdrumToken::getNextTokenCount(void) const {
 int HumdrumToken::getPreviousTokenCount(void) const {
 	return previousTokens.size();
 }
+
+
+
+//////////////////////////////
+//
+// operator<< -- Needed to avoid interaction with HumHash.
+//
+
+ostream& operator<<(ostream& out, const HumdrumToken& token) {
+	out << (string)token;
+	return out;
+}
+
 
 
 // END_MERGE

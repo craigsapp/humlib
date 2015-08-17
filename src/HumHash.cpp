@@ -7,7 +7,7 @@
 // Syntax:        C++11
 // vim:           ts=3
 //
-// Description:   Key/value parameters systems for Humdrum tokens, lines, 
+// Description:   Key/value parameters systems for Humdrum tokens, lines,
 //                and files.
 //
 
@@ -16,6 +16,7 @@
 
 #include "HumHash.h"
 #include "HumNum.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -29,7 +30,7 @@ namespace minHumdrum {
 // HumHash::HumHash --
 //
 
-HumHash::HumHash(void) { 
+HumHash::HumHash(void) {
 	parameters = NULL;
 }
 
@@ -40,7 +41,7 @@ HumHash::HumHash(void) {
 // HumHash::~HumHash --
 //
 
-HumHash::~HumHash() { 
+HumHash::~HumHash() {
 	if (parameters != NULL) {
 		delete parameters;
 		parameters = NULL;
@@ -54,7 +55,7 @@ HumHash::~HumHash() {
 // HumHash::getValue --
 //
 
-string HumHash::getValue(const string& key) {
+string HumHash::getValue(const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	} else {
@@ -70,7 +71,7 @@ string HumHash::getValue(const string& key) {
 }
 
 
-string HumHash::getValue(const string& ns2, const string& key) {
+string HumHash::getValue(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	} else {
@@ -79,8 +80,8 @@ string HumHash::getValue(const string& ns2, const string& key) {
 }
 
 
-string HumHash::getValue(const string& ns1, const string& ns2, 
-		const string& key) {
+string HumHash::getValue(const string& ns1, const string& ns2,
+		const string& key) const {
 	if (parameters == NULL) {
 		return "";
 	}
@@ -108,7 +109,7 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 // HumHash::getValueInt --
 //
 
-int HumHash::getValueInt(const string& key) { 
+int HumHash::getValueInt(const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -123,7 +124,7 @@ int HumHash::getValueInt(const string& key) {
 }
 
 
-int HumHash::getValueInt(const string& ns2, const string& key) { 
+int HumHash::getValueInt(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -132,12 +133,12 @@ int HumHash::getValueInt(const string& ns2, const string& key) {
 
 
 int HumHash::getValueInt(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
 	string value = getValue(ns1, ns2, key);
- 	if (value.find("/") != string::npos) {
+	if (value.find("/") != string::npos) {
 		HumNum nvalue(value);
 		return  nvalue.getInteger();
 	} else {
@@ -158,7 +159,7 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 // HumHash::getValueFraction --
 //
 
-HumNum HumHash::getValueFraction(const string& key) { 
+HumNum HumHash::getValueFraction(const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -173,7 +174,7 @@ HumNum HumHash::getValueFraction(const string& key) {
 }
 
 
-HumNum HumHash::getValueFraction(const string& ns2, const string& key) { 
+HumNum HumHash::getValueFraction(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0;
 	}
@@ -182,7 +183,7 @@ HumNum HumHash::getValueFraction(const string& ns2, const string& key) {
 
 
 HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (!isDefined(ns1, ns2, key)) {
 		return 0;
 	}
@@ -198,7 +199,7 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 // HumHash::getValueFloat --
 //
 
-double HumHash::getValueFloat(const string& key) { 
+double HumHash::getValueFloat(const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
@@ -213,7 +214,7 @@ double HumHash::getValueFloat(const string& key) {
 }
 
 
-double HumHash::getValueFloat(const string& ns2, const string& key) { 
+double HumHash::getValueFloat(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
@@ -222,12 +223,12 @@ double HumHash::getValueFloat(const string& ns2, const string& key) {
 
 
 double HumHash::getValueFloat(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return 0.0;
 	}
 	string value = getValue(ns1, ns2, key);
- 	if (value.find("/") != string::npos) {
+	if (value.find("/") != string::npos) {
 		HumNum nvalue(value);
 		return nvalue.getFloat();
 	} else {
@@ -248,7 +249,7 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 // HumHash::getValueBool --
 //
 
-bool HumHash::getValueBool(const string& key) { 
+bool HumHash::getValueBool(const string& key) const {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
 		return getValueBool("", "", keys[2]);
@@ -260,13 +261,13 @@ bool HumHash::getValueBool(const string& key) {
 }
 
 
-bool HumHash::getValueBool(const string& ns2, const string& key) { 
+bool HumHash::getValueBool(const string& ns2, const string& key) const {
 	return getValueBool("", ns2, key);
 }
 
 
 bool HumHash::getValueBool(const string& ns1, const string& ns2,
-		const string& key) { 
+		const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -301,13 +302,13 @@ void HumHash::setValue(const string& key, const string& value) {
 }
 
 
-void HumHash::setValue(const string& ns2, const string& key, 
+void HumHash::setValue(const string& ns2, const string& key,
 		const string& value) {
 		setValue("", ns2, key, value);
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, const string& value) {
 	initializeParameters();
 	(*parameters)[ns1][ns2][key] = value;
@@ -332,7 +333,7 @@ void HumHash::setValue(const string& ns2, const string& key, int value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, int value) {
 	initializeParameters();
 	stringstream ss(value);
@@ -357,7 +358,7 @@ void HumHash::setValue(const string& ns2, const string& key, HumNum value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, HumNum value) {
 	initializeParameters();
 	stringstream ss;
@@ -384,7 +385,7 @@ void HumHash::setValue(const string& ns2, const string& key, double value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, double value) {
 	initializeParameters();
 	stringstream ss;
@@ -399,7 +400,7 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 // HumHash::getKeys --
 //
 
-vector<string> HumHash::getKeys(const string& ns1, const string& ns2) {
+vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 	vector<string> output;
 	if (parameters == NULL) {
 		return output;
@@ -414,11 +415,37 @@ vector<string> HumHash::getKeys(const string& ns1, const string& ns2) {
 
 //////////////////////////////
 //
+// HumHash::hasParameters -- Returns true if at least one parameter.
+//
+
+bool HumHash::hasParameters(void) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	if (parameters->size() == 0) {
+		return false;
+	}
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			if (it2.second.size() == 0) {
+				continue;
+			} else {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::isDefined -- Returns true if the given parameter exists in the
 //    map.
 //
 
-bool HumHash::isDefined(const string& key) {
+bool HumHash::isDefined(const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -433,7 +460,7 @@ bool HumHash::isDefined(const string& key) {
 }
 
 
-bool HumHash::isDefined(const string& ns2, const string& key) {
+bool HumHash::isDefined(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -442,7 +469,7 @@ bool HumHash::isDefined(const string& ns2, const string& key) {
 
 
 bool HumHash::isDefined(const string& ns1, const string& ns2,
-		const string& key) {
+		const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -456,7 +483,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 // HumHash::deleteValue --
 //
 
-void HumHash::deleteValue(const string& key) { 
+void HumHash::deleteValue(const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -471,7 +498,7 @@ void HumHash::deleteValue(const string& key) {
 }
 
 
-void HumHash::deleteValue(const string& ns2, const string& key) { 
+void HumHash::deleteValue(const string& ns2, const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -479,8 +506,8 @@ void HumHash::deleteValue(const string& ns2, const string& key) {
 }
 
 
-void HumHash::deleteValue(const string& ns1, const string& ns2, 
-		const string& key) { 
+void HumHash::deleteValue(const string& ns1, const string& ns2,
+		const string& key) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -522,7 +549,7 @@ void HumHash::initializeParameters(void) {
 // HumHash::getKeyList --
 //
 
-vector<string> HumHash::getKeyList(const string& keys) {
+vector<string> HumHash::getKeyList(const string& keys) const {
 	stringstream ss(keys);
 	string key;
 	vector<string> output;
@@ -534,6 +561,63 @@ vector<string> HumHash::getKeyList(const string& keys) {
 	}
 	return output;
 }
+
+
+
+//////////////////////////////
+//
+// HumHash::setPrefix: initial string to print when using
+//   operator<<.
+//
+
+void HumHash::setPrefix(const string& value) {
+	prefix = value;
+
+}
+
+
+
+//////////////////////////////
+//
+// operator<< --
+//
+
+ostream& operator<<(ostream& out, const HumHash& hash) {
+	if (hash.parameters == NULL) {
+		return out;
+	}
+	if (hash.parameters->size() == 0) {
+		return out;
+	}
+
+	string cleaned;
+
+	for (auto& it1 : *(hash.parameters)) {
+		if (it1.second.size() == 0) {
+			continue;
+		}
+		for (auto& it2 : it1.second) {
+			if (it2.second.size() == 0) {
+				continue;
+			}
+			out << hash.prefix;
+			out << it1.first << ":" << it2.first;
+			for (auto& it3 : it2.second) {
+				out << ":" << it3.first;
+				if (it3.second != "true") {
+					cleaned = it3.second;
+					Convert::replaceOccurrences(cleaned, ":", "&colon;");
+					out << "=" << cleaned;
+				}
+			}
+			out << endl;
+		}
+	}
+
+	return out;
+}
+
+
 
 
 // END_MERGE

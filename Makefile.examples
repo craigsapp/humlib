@@ -45,8 +45,8 @@ endif
 
 INCDIR    = include
 LIBDIR    = lib
-#LIBFILE   = minhumdrum
-LIBFILE   = humdrum
+LIBFILE   = minhumdrum
+#LIBFILE   = humdrum
 TARGDIR   = bin
 
 PREFLAGS  = -Wall -I$(INCDIR)

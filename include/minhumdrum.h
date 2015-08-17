@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 16 17:42:55 PDT 2015
+// Last Modified: Mon Aug 17 02:22:32 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -128,14 +128,6 @@ class HumAddress {
 		// owner: This is the line which manages the given token.
 		HumdrumLine* owner;
 
-// ggg still to process:
-
-		// nullresolve: If the token is a null data token, then this variable
-		// contains a pointer to the data token which continues the null.
-		// If a null token comes before the first non-null token in the data spine,
-		// this this value will be NULL.
-		HumdrumToken* nullresolve;
-
 	friend class HumdrumToken;
 	friend class HumdrumLine;
 	friend class HumdrumFile;
@@ -151,26 +143,31 @@ class HumHash {
 		               HumHash             (void);
 		              ~HumHash             ();
 
-		string         getValue            (const string& key);
-		string         getValue            (const string& ns2, const string& key);
+		string         getValue            (const string& key) const;
+		string         getValue            (const string& ns2,
+		                                    const string& key) const;
 		string         getValue            (const string& ns1, const string& ns2,
-		                                    const string& key);
-		int            getValueInt         (const string& key);
-		int            getValueInt         (const string& ns2, const string& key);
+		                                    const string& key) const;
+		int            getValueInt         (const string& key) const;
+		int            getValueInt         (const string& ns2,
+		                                    const string& key) const;
 		int            getValueInt         (const string& ns1, const string& ns2,
-		                                    const string& key);
-		HumNum         getValueFraction    (const string& key);
-		HumNum         getValueFraction    (const string& ns2, const string& key);
+		                                    const string& key) const;
+		HumNum         getValueFraction    (const string& key) const;
+		HumNum         getValueFraction    (const string& ns2,
+		                                    const string& key) const;
 		HumNum         getValueFraction    (const string& ns1, const string& ns2,
-		                                    const string& key);
-		double         getValueFloat       (const string& key);
-		double         getValueFloat       (const string& ns2, const string& key);
+		                                    const string& key)const ;
+		double         getValueFloat       (const string& key)const ;
+		double         getValueFloat       (const string& ns2,
+		                                    const string& key) const;
 		double         getValueFloat       (const string& ns1, const string& ns2,
-		                                    const string& key);
-		bool           getValueBool        (const string& key);
-		bool           getValueBool        (const string& ns2, const string& key);
+		                                    const string& key) const;
+		bool           getValueBool        (const string& key) const;
+		bool           getValueBool        (const string& ns2,
+		                                    const string& key) const;
 		bool           getValueBool        (const string& ns1, const string& ns2,
-		                                    const string& key);
+		                                    const string& key) const;
 		void           setValue            (const string& key,
 		                                    const string& value);
 		void           setValue            (const string& ns2,
@@ -195,23 +192,31 @@ class HumHash {
 		                                    double value);
 		void           setValue            (const string& ns1, const string& ns2,
 		                                    const string& key, double value);
-		bool           isDefined           (const string& key);
-		bool           isDefined           (const string& ns2, const string& key);
+		bool           isDefined           (const string& key) const;
+		bool           isDefined           (const string& ns2,
+		                                    const string& key) const;
 		bool           isDefined           (const string& ns1, const string& ns2,
-		                                    const string& key);
+		                                    const string& key) const;
 		void           deleteValue         (const string& key);
 		void           deleteValue         (const string& ns2, const string& key);
 		void           deleteValue         (const string& ns1, const string& ns2,
 		                                    const string& key);
-		vector<string> getKeys             (const string& ns1, const string& ns2);
+		vector<string> getKeys             (const string& ns1,
+		                                    const string& ns2) const;
+		bool           hasParameters       (void) const;
+		void           setPrefix           (const string& value);
 
 	protected:
 		void           initializeParameters(void);
-		vector<string> getKeyList          (const string& keys);
+		vector<string> getKeyList          (const string& keys) const;
 
 	private:
 		MapNNKV* parameters;
+		string   prefix;
+
+	friend ostream& operator<<(ostream& out, const HumHash& hash);
 };
+
 
 
 
@@ -348,6 +353,8 @@ class HumdrumFile {
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeTracks                (void);
 		bool          analyzeLines                 (void);
+		bool          analyzeGlobalParameters      (void);
+		bool          analyzeLocalParameters       (void);
 		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		bool          adjustSpines                 (HumdrumLine& line,
 		                                            vector<string>& datatype,
@@ -381,11 +388,17 @@ class HumdrumFile {
 		void      addUniqueTokens              (vector<HumdrumToken*>& target,
 		                                        vector<HumdrumToken*>& source);
 		bool      processNonNullDataTokensForTrackForward(
-		                                        HumdrumToken* starttoken, 
+		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
 		bool      processNonNullDataTokensForTrackBackward(
-		                                        HumdrumToken* starttoken, 
+		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
+		bool      processLocalParametersForTrack(HumdrumToken* starttok,
+		                                         HumdrumToken* current);
+		void      checkForLocalParameters       (HumdrumToken *token,
+		                                         HumdrumToken *current);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                                  HumdrumToken* ptoken);
 
 	private:
 
@@ -416,7 +429,7 @@ ostream& operator<<(ostream& out, HumdrumFile& infile);
 
 
 
-class HumdrumLine : public string {
+class HumdrumLine : public string, public HumHash {
 	public:
 		         HumdrumLine          (void);
 		         HumdrumLine          (const string& aString);
@@ -472,6 +485,8 @@ class HumdrumLine : public string {
 		void     setDurationToBarline   (HumNum dur);
 		void     setOwner               (HumdrumFile* hfile);
 		int      createTokensFromLine   (void);
+		void     setParameters          (HumdrumLine* pLine);
+		void     setParameters          (const string& pdata);
 
 	private:
 
@@ -525,9 +540,6 @@ class HumdrumLine : public string {
 		// owner: This is the HumdrumFile which manages the given line.
 		HumdrumFile* owner;
 
-		// parameters: Storage for non-data global token parameters on the line.
-		HumHash parameters;
-
 	friend class HumdrumFile;
 };
 
@@ -535,7 +547,7 @@ ostream& operator<< (ostream& out, HumdrumLine& line);
 
 
 
-class HumdrumToken : public string {
+class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
 		         HumdrumToken              (const char* token);
@@ -553,6 +565,7 @@ class HumdrumToken : public string {
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
 		bool     isBarline                 (void) const;
+		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
 		bool     hasRhythm                 (void) const;
 		HumNum   getDuration               (void) const;
@@ -562,13 +575,16 @@ class HumdrumToken : public string {
 		bool     equalChar                 (int index, char ch) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) { return getPreviousNonNullDataTokenCount(); }
+		int      getPreviousNNDTCount(void) {
+		               return getPreviousNonNullDataTokenCount(); }
 		HumdrumToken* getPreviousNonNullDataToken(int index);
-		HumdrumToken* getPreviousNNDT(int index) { return getPreviousNonNullDataToken(index); }
+		HumdrumToken* getPreviousNNDT(int index) {
+		               return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
 		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
 		HumdrumToken* getNextNonNullDataToken(int index);
-		HumdrumToken* getNextNNDT(int index) { return getNextNonNullDataToken(index); }
+		HumdrumToken* getNextNNDT(int index) {
+		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
@@ -581,6 +597,8 @@ class HumdrumToken : public string {
 		int      getSubtokenCount          (const string& separator = " ") const;
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
+		void     setParameters             (HumdrumToken* ptok);
+		void     setParameters             (const string& pdata);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -604,6 +622,7 @@ class HumdrumToken : public string {
 		void     setOwner          (HumdrumLine* aLine);
 		int      getState          (void) const;
 		void     incrementState    (void);
+		void     setDuration       (const HumNum& dur);
 
 		bool     analyzeDuration   (void);
 
@@ -634,31 +653,36 @@ class HumdrumToken : public string {
 		// have no tokens preceding them.
 		vector<HumdrumToken*> previousTokens; // link to last token(s) in spine
 
-		// nextNonNullTokens: This is a list of non-tokens in the spine 
+		// nextNonNullTokens: This is a list of non-tokens in the spine
 		// that follow this one.
 		vector<HumdrumToken*> nextNonNullTokens;
 
-		// previousNonNullTokens: This is a list of non-tokens in the spine 
+		// previousNonNullTokens: This is a list of non-tokens in the spine
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
 		int rhycheck;
-		
-		// parameters: Storage for non-data local parameters.
-		HumHash parameters;
 
 	friend class HumdrumLine;
 	friend class HumdrumFile;
 };
 
 
+ostream& operator<<(ostream& out, const HumdrumToken& token);
+
 
 
 class Convert {
 	public:
+		// duration processing
 		static HumNum  recipToDuration  (const string& recip, HumNum scale = 4,
 		                                 string separator = " ");
+
+		// string processing:
+		static vector<string> splitString (const string& data, char separator);
+		static void replaceOccurrences(string& source, const string& search,
+		                                               const string& replace);
 };
 
 

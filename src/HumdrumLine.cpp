@@ -11,6 +11,8 @@
 //                of the line.
 //
 
+#include <sstream>
+
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "Convert.h"
@@ -28,18 +30,21 @@ HumdrumLine::HumdrumLine(void) : string() {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	owner = NULL;
 	duration = -1;
 	durationFromStart = -1;
+	setPrefix("!!");
 }
 
 
@@ -197,7 +202,7 @@ bool HumdrumLine::isAllNull(void) const {
 //////////////////////////////
 //
 // HumdrumLine::isAllRhythmicNull -- Returns true if all rhythmic
-//    data-type tokens on the line are null ("." if a data line, 
+//    data-type tokens on the line are null ("." if a data line,
 //    "*" if an interpretation line, "!" if a local comment line).
 //
 
@@ -224,7 +229,7 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 //
 
 void HumdrumLine::setLineIndex(int index) {
-   lineindex = index;
+	lineindex = index;
 }
 
 
@@ -268,7 +273,7 @@ HumNum HumdrumLine::getDuration(void) const {
 //
 
 void HumdrumLine::setDurationFromStart(HumNum dur) {
-	 durationFromStart = dur;
+	durationFromStart = dur;
 }
 
 
@@ -770,7 +775,50 @@ void HumdrumLine::setOwner(HumdrumFile* hfile) {
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumLine.
+// HumdrumLine::setParameters -- Takes a global comment with
+//     the structure:
+//        !!NS1:NS2:key1=value1:key2=value2:key3=value3
+//
+
+void HumdrumLine::setParameters(HumdrumLine* pLine) {
+	HumdrumLine& pl = *pLine;
+	if (pl.size() <= 2) {
+		return;
+	}
+	string pdata = pLine->substr(2, pl.size()-2);
+	setParameters(pdata);
+}
+
+
+void HumdrumLine::setParameters(const string& pdata) {
+	vector<string> pieces = Convert::splitString(pdata, ':');
+	if (pieces.size() < 3) {
+		return;
+	}
+	string ns1 = pieces[0];
+	string ns2 = pieces[1];
+	string key;
+	string value;
+	int loc;
+	for (int i=2; i<pieces.size(); i++) {
+		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
+		loc = pieces[i].find("=");
+		if (loc != string::npos) {
+			key   = pieces[i].substr(0, loc);
+			value = pieces[i].substr(loc+1, pieces[i].size());
+		} else {
+			key   = pieces[i];
+			value = "true";
+		}
+		setValue(ns1, ns2, key, value);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// operator<< -- Print a HumdrumLine. Needed to avoid interaction with HumHash.
 //
 
 ostream& operator<<(ostream& out, HumdrumLine& line) {

@@ -27,7 +27,7 @@ class HumdrumFile;
 
 // START_MERGE
 
-class HumdrumLine : public string {
+class HumdrumLine : public string, public HumHash {
 	public:
 		         HumdrumLine          (void);
 		         HumdrumLine          (const string& aString);
@@ -83,6 +83,8 @@ class HumdrumLine : public string {
 		void     setDurationToBarline   (HumNum dur);
 		void     setOwner               (HumdrumFile* hfile);
 		int      createTokensFromLine   (void);
+		void     setParameters          (HumdrumLine* pLine);
+		void     setParameters          (const string& pdata);
 
 	private:
 
@@ -135,9 +137,6 @@ class HumdrumLine : public string {
 
 		// owner: This is the HumdrumFile which manages the given line.
 		HumdrumFile* owner;
-
-		// parameters: Storage for non-data global token parameters on the line.
-		HumHash parameters;
 
 	friend class HumdrumFile;
 };

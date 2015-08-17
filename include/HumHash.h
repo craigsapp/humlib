@@ -35,26 +35,31 @@ class HumHash {
 		               HumHash             (void);
 		              ~HumHash             ();
 
-		string         getValue            (const string& key);
-		string         getValue            (const string& ns2, const string& key);
+		string         getValue            (const string& key) const;
+		string         getValue            (const string& ns2,
+		                                    const string& key) const;
 		string         getValue            (const string& ns1, const string& ns2,
-		                                    const string& key);
-		int            getValueInt         (const string& key);
-		int            getValueInt         (const string& ns2, const string& key);
+		                                    const string& key) const;
+		int            getValueInt         (const string& key) const;
+		int            getValueInt         (const string& ns2,
+		                                    const string& key) const;
 		int            getValueInt         (const string& ns1, const string& ns2,
-		                                    const string& key);
-		HumNum         getValueFraction    (const string& key);
-		HumNum         getValueFraction    (const string& ns2, const string& key);
+		                                    const string& key) const;
+		HumNum         getValueFraction    (const string& key) const;
+		HumNum         getValueFraction    (const string& ns2,
+		                                    const string& key) const;
 		HumNum         getValueFraction    (const string& ns1, const string& ns2,
-		                                    const string& key);
-		double         getValueFloat       (const string& key);
-		double         getValueFloat       (const string& ns2, const string& key);
+		                                    const string& key)const ;
+		double         getValueFloat       (const string& key)const ;
+		double         getValueFloat       (const string& ns2,
+		                                    const string& key) const;
 		double         getValueFloat       (const string& ns1, const string& ns2,
-		                                    const string& key);
-		bool           getValueBool        (const string& key);
-		bool           getValueBool        (const string& ns2, const string& key);
+		                                    const string& key) const;
+		bool           getValueBool        (const string& key) const;
+		bool           getValueBool        (const string& ns2,
+		                                    const string& key) const;
 		bool           getValueBool        (const string& ns1, const string& ns2,
-		                                    const string& key);
+		                                    const string& key) const;
 		void           setValue            (const string& key,
 		                                    const string& value);
 		void           setValue            (const string& ns2,
@@ -79,23 +84,31 @@ class HumHash {
 		                                    double value);
 		void           setValue            (const string& ns1, const string& ns2,
 		                                    const string& key, double value);
-		bool           isDefined           (const string& key);
-		bool           isDefined           (const string& ns2, const string& key);
+		bool           isDefined           (const string& key) const;
+		bool           isDefined           (const string& ns2,
+		                                    const string& key) const;
 		bool           isDefined           (const string& ns1, const string& ns2,
-		                                    const string& key);
+		                                    const string& key) const;
 		void           deleteValue         (const string& key);
 		void           deleteValue         (const string& ns2, const string& key);
 		void           deleteValue         (const string& ns1, const string& ns2,
 		                                    const string& key);
-		vector<string> getKeys             (const string& ns1, const string& ns2);
+		vector<string> getKeys             (const string& ns1,
+		                                    const string& ns2) const;
+		bool           hasParameters       (void) const;
+		void           setPrefix           (const string& value);
 
 	protected:
 		void           initializeParameters(void);
-		vector<string> getKeyList          (const string& keys);
+		vector<string> getKeyList          (const string& keys) const;
 
 	private:
 		MapNNKV* parameters;
+		string   prefix;
+
+	friend ostream& operator<<(ostream& out, const HumHash& hash);
 };
+
 
 
 // END_MERGE

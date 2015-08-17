@@ -72,6 +72,8 @@ class HumdrumFile {
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeTracks                (void);
 		bool          analyzeLines                 (void);
+		bool          analyzeGlobalParameters      (void);
+		bool          analyzeLocalParameters       (void);
 		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		bool          adjustSpines                 (HumdrumLine& line,
 		                                            vector<string>& datatype,
@@ -105,11 +107,17 @@ class HumdrumFile {
 		void      addUniqueTokens              (vector<HumdrumToken*>& target,
 		                                        vector<HumdrumToken*>& source);
 		bool      processNonNullDataTokensForTrackForward(
-		                                        HumdrumToken* starttoken, 
+		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
 		bool      processNonNullDataTokensForTrackBackward(
-		                                        HumdrumToken* starttoken, 
+		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
+		bool      processLocalParametersForTrack(HumdrumToken* starttok,
+		                                         HumdrumToken* current);
+		void      checkForLocalParameters       (HumdrumToken *token,
+		                                         HumdrumToken *current);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                                  HumdrumToken* ptoken);
 
 	private:
 

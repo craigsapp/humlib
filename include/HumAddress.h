@@ -81,14 +81,6 @@ class HumAddress {
 		// owner: This is the line which manages the given token.
 		HumdrumLine* owner;
 
-// ggg still to process:
-
-		// nullresolve: If the token is a null data token, then this variable
-		// contains a pointer to the data token which continues the null.
-		// If a null token comes before the first non-null token in the data spine,
-		// this this value will be NULL.
-		HumdrumToken* nullresolve;
-
 	friend class HumdrumToken;
 	friend class HumdrumLine;
 	friend class HumdrumFile;
