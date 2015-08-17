@@ -2,15 +2,15 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
 // Last Modified: Mon Aug 17 02:39:32 PDT 2015
-// Filename:      HumdrumFile.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFile.cpp
+// Filename:      HumdrumFileContent.h
+// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFileContent.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
 // Description:   Used to add structural analysis to HumdrumFileBase class.
 //
 
-#include "HumdrumFile.h"
+#include "HumdrumFileContent.h"
 
 using namespace std;
 
@@ -20,10 +20,10 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFileContent::HumdrumFileContent --
 //
 
-HumdrumFile::HumdrumFile(void) {
+HumdrumFileContent::HumdrumFileContent(void) {
 	// do nothing
 }
 
@@ -31,10 +31,10 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFileContent::HumdrumFileContent --
 //
 
-HumdrumFile::~HumdrumFile() {
+HumdrumFileContent::~HumdrumFileContent() {
 	// do nothing
 }
 

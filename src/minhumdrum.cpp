@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 17 02:22:32 PDT 2015
+// Last Modified: Mon Aug 17 03:12:30 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -1684,13 +1684,36 @@ ostream& operator<<(ostream& out, const vector<A>& v) {
 }
 
 
-
 //////////////////////////////
 //
 // HumdrumFile::HumdrumFile --
 //
 
 HumdrumFile::HumdrumFile(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFile::HumdrumFile --
+//
+
+HumdrumFile::~HumdrumFile() {
+	// do nothing
+}
+
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::HumdrumFileBase --
+//
+
+HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
 }
 
@@ -1698,20 +1721,20 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::~HumdrumFile --
+// HumdrumFileBase::~HumdrumFileBase --
 //
 
-HumdrumFile::~HumdrumFile() { }
+HumdrumFileBase::~HumdrumFileBase() { }
 
 
 
 //////////////////////////////
 //
-// HumdrumFile::operator[] -- Negative values will be in reference to the
+// HumdrumFileBase::operator[] -- Negative values will be in reference to the
 //    end of the list of lines.
 //
 
-HumdrumLine& HumdrumFile::operator[](int index) {
+HumdrumLine& HumdrumFileBase::operator[](int index) {
 	if (index < 0) {
 		index = lines.size() - index;
 	}
@@ -1726,10 +1749,10 @@ HumdrumLine& HumdrumFile::operator[](int index) {
 
 //////////////////////////////
 //
-// HumdrumFile::read -- Load file contents from input stream.
+// HumdrumFileBase::read -- Load file contents from input stream.
 //
 
-bool HumdrumFile::read(istream& infile) {
+bool HumdrumFileBase::read(istream& infile) {
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (infile.getline(buffer, sizeof(buffer), '\n')) {
@@ -1751,7 +1774,7 @@ bool HumdrumFile::read(istream& infile) {
 }
 
 
-bool HumdrumFile::read(const char* filename) {
+bool HumdrumFileBase::read(const char* filename) {
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return read(cin);
@@ -1767,7 +1790,7 @@ bool HumdrumFile::read(const char* filename) {
 }
 
 
-bool HumdrumFile::read(const string& filename) {
+bool HumdrumFileBase::read(const string& filename) {
 	return read(filename.c_str());
 }
 
@@ -1775,16 +1798,16 @@ bool HumdrumFile::read(const string& filename) {
 
 //////////////////////////////
 //
-// HumdrumFile::readNoRhythm -- Load file contents from input stream without
+// HumdrumFileBase::readNoRhythm -- Load file contents from input stream without
 //    parsing the rhythmic information in the file.
 //
 
-bool HumdrumFile::readNoRhythm(const string& filename) {
+bool HumdrumFileBase::readNoRhythm(const string& filename) {
 	return readNoRhythm(filename.c_str());
 }
 
 
-bool HumdrumFile::readNoRhythm(const char* filename) {
+bool HumdrumFileBase::readNoRhythm(const char* filename) {
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return readNoRhythm(cin);
@@ -1800,7 +1823,7 @@ bool HumdrumFile::readNoRhythm(const char* filename) {
 }
 
 
-bool HumdrumFile::readNoRhythm(istream& infile) {
+bool HumdrumFileBase::readNoRhythm(istream& infile) {
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (infile.getline(buffer, sizeof(buffer), '\n')) {
@@ -1820,18 +1843,18 @@ bool HumdrumFile::readNoRhythm(istream& infile) {
 
 //////////////////////////////
 //
-// HumdrumFile::ReadString -- Read contents from a string rather than
+// HumdrumFileBase::ReadString -- Read contents from a string rather than
 //    an istream or filename.
 //
 
-bool HumdrumFile::readString(const string& contents) {
+bool HumdrumFileBase::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
 }
 
 
-bool HumdrumFile::readString(const char* contents) {
+bool HumdrumFileBase::readString(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
@@ -1841,18 +1864,18 @@ bool HumdrumFile::readString(const char* contents) {
 
 //////////////////////////////
 //
-// HumdrumFile::ReadStringNoRhythm -- Read contents from a string rather than
+// HumdrumFileBase::ReadStringNoRhythm -- Read contents from a string rather than
 //    an istream or filename, but do not parse rhythm.
 //
 
-bool HumdrumFile::readStringNoRhythm(const string& contents) {
+bool HumdrumFileBase::readStringNoRhythm(const string& contents) {
 	stringstream infile;
 	infile << contents;
 	return readNoRhythm(infile);
 }
 
 
-bool HumdrumFile::readStringNoRhythm(const char* contents) {
+bool HumdrumFileBase::readStringNoRhythm(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return readNoRhythm(infile);
@@ -1862,13 +1885,13 @@ bool HumdrumFile::readStringNoRhythm(const char* contents) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeTokens -- Generate token array from
+// HumdrumFileBase::analyzeTokens -- Generate token array from
 //    current state of lines.  If either state is changed, then the
 //    other state becomes invalid.  See createLinesFromTokens for
 //		regeneration of lines from tokens.
 //
 
-bool HumdrumFile::analyzeTokens(void) {
+bool HumdrumFileBase::analyzeTokens(void) {
 	int i;
 	for (i=0; i<lines.size(); i++) {
 		lines[i]->createTokensFromLine();
@@ -1880,11 +1903,11 @@ bool HumdrumFile::analyzeTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::createLinesFromTokens -- Generate Humdrum lines from
+// HumdrumFileBase::createLinesFromTokens -- Generate Humdrum lines from
 //   the list of tokens.
 //
 
-void HumdrumFile::createLinesFromTokens(void) {
+void HumdrumFileBase::createLinesFromTokens(void) {
 	for (int i=0; i<lines.size(); i++) {
 		lines[i]->createLineFromTokens();
 	}
@@ -1894,11 +1917,11 @@ void HumdrumFile::createLinesFromTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::getScoreDuration -- Return the total duration of the score
+// HumdrumFileBase::getScoreDuration -- Return the total duration of the score
 //		in quarter note units.
 //
 
-HumNum HumdrumFile::getScoreDuration(void) const {
+HumNum HumdrumFileBase::getScoreDuration(void) const {
 	if (lines.size() == 0) {
 		return 0;
 	}
@@ -1909,11 +1932,11 @@ HumNum HumdrumFile::getScoreDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumFile::getBarline -- Return the given barline.  Negative index
+// HumdrumFileBase::getBarline -- Return the given barline.  Negative index
 //   accesses from the end of the list.
 //
 
-HumdrumLine* HumdrumFile::getBarline(int index) const {
+HumdrumLine* HumdrumFileBase::getBarline(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -1930,10 +1953,10 @@ HumdrumLine* HumdrumFile::getBarline(int index) const {
 
 //////////////////////////////
 //
-// HumdrumFile::getBarlineCount --
+// HumdrumFileBase::getBarlineCount --
 //
 
-int HumdrumFile::getBarlineCount(void) const {
+int HumdrumFileBase::getBarlineCount(void) const {
 	return barlines.size();
 }
 
@@ -1941,10 +1964,10 @@ int HumdrumFile::getBarlineCount(void) const {
 
 ///////////////////////////////
 //
-// HumdrumFile::getBarlineDuration --
+// HumdrumFileBase::getBarlineDuration --
 //
 
-HumNum HumdrumFile::getBarlineDuration(int index) const {
+HumNum HumdrumFileBase::getBarlineDuration(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -1968,11 +1991,11 @@ HumNum HumdrumFile::getBarlineDuration(int index) const {
 
 ///////////////////////////////
 //
-// HumdrumFile::getBarlineDurationFromStart -- Return the duration between the
+// HumdrumFileBase::getBarlineDurationFromStart -- Return the duration between the
 //    start of the Humdrum file and the barline.
 //
 
-HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
+HumNum HumdrumFileBase::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -1989,11 +2012,11 @@ HumNum HumdrumFile::getBarlineDurationFromStart(int index) const {
 
 ///////////////////////////////
 //
-// HumdrumFile::getBarlineDurationToEnd -- Return the duration between the
-//    barline and the end of the HumdrumFile.
+// HumdrumFileBase::getBarlineDurationToEnd -- Return the duration between the
+//    barline and the end of the HumdrumFileBase.
 //
 
-HumNum HumdrumFile::getBarlineDurationToEnd(int index) const {
+HumNum HumdrumFileBase::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
 		index += barlines.size();
 	}
@@ -2010,16 +2033,16 @@ HumNum HumdrumFile::getBarlineDurationToEnd(int index) const {
 
 ////////////////////////////
 //
-// HumdrumFile::append -- Add a line to the file's contents.
+// HumdrumFileBase::append -- Add a line to the file's contents.
 //
 
-void HumdrumFile::append(const char* line) {
+void HumdrumFileBase::append(const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
 }
 
 
-void HumdrumFile::append(const string& line) {
+void HumdrumFileBase::append(const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
 }
@@ -2028,10 +2051,10 @@ void HumdrumFile::append(const string& line) {
 
 ////////////////////////////
 //
-// HumdrumFile::getLineCount -- Return the number of lines.
+// HumdrumFileBase::getLineCount -- Return the number of lines.
 //
 
-int HumdrumFile::getLineCount(void) const {
+int HumdrumFileBase::getLineCount(void) const {
 	return lines.size();
 }
 
@@ -2039,10 +2062,10 @@ int HumdrumFile::getLineCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumFile::getMaxTrack -- returns the number of primary spines in the data.
+// HumdrumFileBase::getMaxTrack -- returns the number of primary spines in the data.
 //
 
-int HumdrumFile::getMaxTrack(void) const {
+int HumdrumFileBase::getMaxTrack(void) const {
 	return trackstarts.size() - 1;
 }
 
@@ -2050,10 +2073,10 @@ int HumdrumFile::getMaxTrack(void) const {
 
 //////////////////////////////
 //
-// HumdrumFile::printSpineInfo --
+// HumdrumFileBase::printSpineInfo --
 //
 
-ostream& HumdrumFile::printSpineInfo(ostream& out) {
+ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printSpineInfo(out) << '\n';
 	}
@@ -2064,10 +2087,10 @@ ostream& HumdrumFile::printSpineInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFile::printDataTypeInfo --
+// HumdrumFileBase::printDataTypeInfo --
 //
 
-ostream& HumdrumFile::printDataTypeInfo(ostream& out) {
+ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printDataTypeInfo(out) << '\n';
 	}
@@ -2078,10 +2101,10 @@ ostream& HumdrumFile::printDataTypeInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFile::printTrackInfo --
+// HumdrumFileBase::printTrackInfo --
 //
 
-ostream& HumdrumFile::printTrackInfo(ostream& out) {
+ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printTrackInfo(out) << '\n';
 	}
@@ -2092,10 +2115,10 @@ ostream& HumdrumFile::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFile::printDurationInfo --
+// HumdrumFileBase::printDurationInfo --
 //
 
-ostream& HumdrumFile::printDurationInfo(ostream& out) {
+ostream& HumdrumFileBase::printDurationInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
 		lines[i]->printDurationInfo(out) << '\n';
 	}
@@ -2106,10 +2129,10 @@ ostream& HumdrumFile::printDurationInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFile::getTrackStart --
+// HumdrumFileBase::getTrackStart --
 //
 
-HumdrumToken* HumdrumFile::getTrackStart(int track) const {
+HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
 	if ((track > 0) && (track < trackstarts.size())) {
 		return trackstarts[track];
 	} else {
@@ -2121,11 +2144,11 @@ HumdrumToken* HumdrumFile::getTrackStart(int track) const {
 
 //////////////////////////////
 //
-// HumdrumFile::getTrackEndCount -- return the number of ending tokens
+// HumdrumFileBase::getTrackEndCount -- return the number of ending tokens
 //    for the given track
 //
 
-int HumdrumFile::getTrackEndCount(int track) const {
+int HumdrumFileBase::getTrackEndCount(int track) const {
 	if (track < 0) {
 		track += trackends.size();
 	}
@@ -2142,11 +2165,11 @@ int HumdrumFile::getTrackEndCount(int track) const {
 
 //////////////////////////////
 //
-// HumdrumFile::getTrackEnd -- return the number of ending tokens
+// HumdrumFileBase::getTrackEnd -- return the number of ending tokens
 //    for the given track
 //
 
-HumdrumToken* HumdrumFile::getTrackEnd(int track, int subtrack) const {
+HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 	if (track < 0) {
 		track += trackends.size();
 	}
@@ -2172,11 +2195,11 @@ HumdrumToken* HumdrumFile::getTrackEnd(int track, int subtrack) const {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeLines -- Mark the line's index number in the
-//    HumdrumFile.
+// HumdrumFileBase::analyzeLines -- Mark the line's index number in the
+//    HumdrumFileBase.
 //
 
-bool HumdrumFile::analyzeLines(void) {
+bool HumdrumFileBase::analyzeLines(void) {
 	for (int i=0; i<lines.size(); i++) {
 		lines[i]->setLineIndex(i);
 	}
@@ -2187,11 +2210,11 @@ bool HumdrumFile::analyzeLines(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeTracks -- Analyze the track structure of the
+// HumdrumFileBase::analyzeTracks -- Analyze the track structure of the
 //     data.  Returns false if there was a parse error.
 //
 
-bool HumdrumFile::analyzeTracks(void) {
+bool HumdrumFileBase::analyzeTracks(void) {
 	for (int i=0; i<lines.size(); i++) {
 		int status = lines[i]->analyzeTracks();
 		if (!status) {
@@ -2205,11 +2228,11 @@ bool HumdrumFile::analyzeTracks(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeLinks -- Generate forward and backwards spine links
+// HumdrumFileBase::analyzeLinks -- Generate forward and backwards spine links
 //    for each token.
 //
 
-bool HumdrumFile::analyzeLinks(void) {
+bool HumdrumFileBase::analyzeLinks(void) {
 	HumdrumLine* next     = NULL;
 	HumdrumLine* previous = NULL;
 
@@ -2232,11 +2255,11 @@ bool HumdrumFile::analyzeLinks(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::stitchLinesTogether -- Make forward/backward links for
+// HumdrumFileBase::stitchLinesTogether -- Make forward/backward links for
 //    tokens on each line.
 //
 
-bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
+bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 		HumdrumLine& next) {
 	int i;
 
@@ -2286,7 +2309,7 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 		} else if (previous.token(i).isTerminateInterpretation()) {
 			// No link should be made.  There may be a problem if a
 			// new segment is given (this should be handled by a
-			// HumdrumSet class, not HumdrumFile.
+			// HumdrumSet class, not HumdrumFileBase.
 		} else if (previous.token(i).isAddInterpretation()) {
 			// A new data stream is being added, the next linked token
 			// should be an exclusive interpretation.
@@ -2323,11 +2346,11 @@ bool HumdrumFile::stitchLinesTogether(HumdrumLine& previous,
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeSpines -- Analyze the spine structure of the
+// HumdrumFileBase::analyzeSpines -- Analyze the spine structure of the
 //     data.  Returns false if there was a parse error.
 //
 
-bool HumdrumFile::analyzeSpines(void) {
+bool HumdrumFileBase::analyzeSpines(void) {
 	vector<string> datatype;
 	vector<string> sinfo;
 	vector<vector<HumdrumToken*> > lastspine;
@@ -2386,10 +2409,10 @@ bool HumdrumFile::analyzeSpines(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::addToTrackStarts --
+// HumdrumFileBase::addToTrackStarts --
 //
 
-void HumdrumFile::addToTrackStarts(HumdrumToken* token) {
+void HumdrumFileBase::addToTrackStarts(HumdrumToken* token) {
 	if (token == NULL) {
 		trackstarts.push_back(NULL);
 		trackends.resize(trackends.size()+1);
@@ -2405,11 +2428,11 @@ void HumdrumFile::addToTrackStarts(HumdrumToken* token) {
 
 //////////////////////////////
 //
-// HumdrumFile::adjustSpines -- adjust datatype and spineinfo based
+// HumdrumFileBase::adjustSpines -- adjust datatype and spineinfo based
 //   on manipulators.
 //
 
-bool HumdrumFile::adjustSpines(HumdrumLine& line, vector<string>& datatype,
+bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 		vector<string>& sinfo) {
 	vector<string> newtype;
 	vector<string> newinfo;
@@ -2513,11 +2536,11 @@ cout << "GOING TO ADD " << line.token(i) << endl;
 
 //////////////////////////////
 //
-// HumdrumFile::getMergedSpineInfo -- Will only simplify a two-spine
+// HumdrumFileBase::getMergedSpineInfo -- Will only simplify a two-spine
 //   merge.  Should be expanded to larger spine mergers.
 //
 
-string HumdrumFile::getMergedSpineInfo(vector<string>& info, int starti,
+string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		int extra) {
 	string output;
 	int len1;
@@ -2546,11 +2569,11 @@ string HumdrumFile::getMergedSpineInfo(vector<string>& info, int starti,
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeTokenDurations -- Calculate the duration of
+// HumdrumFileBase::analyzeTokenDurations -- Calculate the duration of
 //   all tokens in spines which posses duration in a file.
 //
 
-bool HumdrumFile::analyzeTokenDurations (void) {
+bool HumdrumFileBase::analyzeTokenDurations (void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (!lines[i]->analyzeTokenDurations()) {
 			return false;
@@ -2563,11 +2586,11 @@ bool HumdrumFile::analyzeTokenDurations (void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeRhythm -- Analyze the rhythmic structure of the
+// HumdrumFileBase::analyzeRhythm -- Analyze the rhythmic structure of the
 //     data.  Returns false if there was a parse error.
 //
 
-bool HumdrumFile::analyzeRhythm(void) {
+bool HumdrumFileBase::analyzeRhythm(void) {
 	if (getMaxTrack() == 0) {
 		return true;
 	}
@@ -2622,11 +2645,11 @@ bool HumdrumFile::analyzeRhythm(void) {
 
 ///////////////////////////////
 //
-// HumdrumFile::analyzeLocalParameters -- only allowing layout
+// HumdrumFileBase::analyzeLocalParameters -- only allowing layout
 //    parameters at the moment.
 //
 
-bool HumdrumFile::analyzeLocalParameters(void) {
+bool HumdrumFileBase::analyzeLocalParameters(void) {
 	// analyze backward tokens:
 	for (int i=1; i<=getMaxTrack(); i++) {
 		for (int j=0; j<getTrackEndCount(i); j++) {
@@ -2644,10 +2667,10 @@ bool HumdrumFile::analyzeLocalParameters(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::processLocalParametersForTrack --
+// HumdrumFileBase::processLocalParametersForTrack --
 //
 
-bool HumdrumFile::processLocalParametersForTrack(HumdrumToken* starttok,
+bool HumdrumFileBase::processLocalParametersForTrack(HumdrumToken* starttok,
 		HumdrumToken* current) {
 
 	HumdrumToken* token = starttok;
@@ -2680,11 +2703,11 @@ bool HumdrumFile::processLocalParametersForTrack(HumdrumToken* starttok,
 
 //////////////////////////////
 //
-// HumdrumFile::checkForLocalParameters -- only allowing layout parameters
+// HumdrumFileBase::checkForLocalParameters -- only allowing layout parameters
 //    currently.
 //
 
-void HumdrumFile::checkForLocalParameters(HumdrumToken *token,
+void HumdrumFileBase::checkForLocalParameters(HumdrumToken *token,
 		HumdrumToken *current) {
 	if (token->size() < 1) {
 		return;
@@ -2699,7 +2722,7 @@ void HumdrumFile::checkForLocalParameters(HumdrumToken *token,
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeNonNullDataTokens -- For null data tokens, indicate the
+// HumdrumFileBase::analyzeNonNullDataTokens -- For null data tokens, indicate the
 //    previous non-null token which the null token refers to.  After a spine
 //    merger, there may be multiple previous tokens, so you would have to
 //    decide on the actual source token on based on subtrack or subspine
@@ -2707,7 +2730,7 @@ void HumdrumFile::checkForLocalParameters(HumdrumToken *token,
 //    non-null tokens, skipping over intervening null data tokens.
 //
 
-bool HumdrumFile::analyzeNonNullDataTokens(void) {
+bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 	vector<HumdrumToken*> ptokens;
 
 	// analyze forward tokens:
@@ -2734,11 +2757,11 @@ bool HumdrumFile::analyzeNonNullDataTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
+// HumdrumFileBase::analyzeDurationsOfNonRhythmicSpines -- Calculate the duration
 //    of non-null data token in non-rhythmic spines.
 //
 
-bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
+bool HumdrumFileBase::analyzeDurationsOfNonRhythmicSpines(void) {
 	// analyze tokens backwards:
 	for (int i=1; i<=getMaxTrack(); i++) {
 		for (int j=0; j<getTrackEndCount(i); j++) {
@@ -2758,10 +2781,10 @@ bool HumdrumFile::analyzeDurationsOfNonRhythmicSpines(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::assignDurationsToNonRhythmicTrack --
+// HumdrumFileBase::assignDurationsToNonRhythmicTrack --
 //
 
-bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+bool HumdrumFileBase::assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
 		HumdrumToken* current) {
 	HumdrumToken* token = endtoken;
 	int tcount = token->getPreviousTokenCount();
@@ -2795,7 +2818,7 @@ bool HumdrumFile::assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
 // HumdurmFile::processNonNullDataTokensForTrackBackward --
 //
 
-bool HumdrumFile::processNonNullDataTokensForTrackBackward(
+bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 		HumdrumToken* endtoken, vector<HumdrumToken*> ptokens) {
 
 	HumdrumToken* token = endtoken;
@@ -2830,7 +2853,7 @@ bool HumdrumFile::processNonNullDataTokensForTrackBackward(
 // HumdurmFile::processNonNullDataTokensForTrackForward --
 //
 
-bool HumdrumFile::processNonNullDataTokensForTrackForward(
+bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
 		HumdrumToken* starttoken, vector<HumdrumToken*> ptokens) {
 	HumdrumToken* token = starttoken;
 	int tcount = token->getNextTokenCount();
@@ -2862,10 +2885,10 @@ bool HumdrumFile::processNonNullDataTokensForTrackForward(
 
 //////////////////////////////
 //
-// HumdrumFile::addUniqueTokens --
+// HumdrumFileBase::addUniqueTokens --
 //
 
-void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target,
+void HumdrumFileBase::addUniqueTokens(vector<HumdrumToken*>& target,
 		vector<HumdrumToken*>& source) {
 	int i, j;
 	bool found;
@@ -2886,10 +2909,10 @@ void HumdrumFile::addUniqueTokens(vector<HumdrumToken*>& target,
 
 //////////////////////////////
 //
-// HumdrumFile::assignLineDurations --
+// HumdrumFileBase::assignLineDurations --
 //
 
-void HumdrumFile::assignLineDurations(void) {
+void HumdrumFileBase::assignLineDurations(void) {
 	HumNum startdur;
 	HumNum enddur;
 	HumNum dur;
@@ -2908,10 +2931,10 @@ void HumdrumFile::assignLineDurations(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::fillInNegativeStartTimes --
+// HumdrumFileBase::fillInNegativeStartTimes --
 //
 
-void HumdrumFile::fillInNegativeStartTimes(void) {
+void HumdrumFileBase::fillInNegativeStartTimes(void) {
 	int i;
 	HumNum lastdur = -1;
 	HumNum dur;
@@ -2941,7 +2964,7 @@ void HumdrumFile::fillInNegativeStartTimes(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeNullLineRhythms -- When a series of null-token data line
+// HumdrumFileBase::analyzeNullLineRhythms -- When a series of null-token data line
 //    occur between two data lines possessing a start duration, then split the
 //    duration between those two lines amongst the null-token lines.  For example
 //    if a data line starts at time 15, and there is one null-token line before
@@ -2949,7 +2972,7 @@ void HumdrumFile::fillInNegativeStartTimes(void) {
 //    to the position 15.5 in the score.
 //
 
-bool HumdrumFile::analyzeNullLineRhythms(void) {
+bool HumdrumFileBase::analyzeNullLineRhythms(void) {
 	vector<HumdrumLine*> nulllines;
 	HumdrumLine* previous = NULL;
 	HumdrumLine* next = NULL;
@@ -3001,14 +3024,14 @@ bool HumdrumFile::analyzeNullLineRhythms(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeRhythmOfFloatingSpine --  This analysis function is used
+// HumdrumFileBase::analyzeRhythmOfFloatingSpine --  This analysis function is used
 //    to analyze the rhythm of spines which do not start at the beginning of
 //    the data.  The function searches for the first line which has an
 //    assigned durationFromStart value, and then uses that as the basis
 //		for assigning the initial durationFromStart position for the spine.
 //
 
-bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
+bool HumdrumFileBase::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 	HumNum dursum = 0;
 	HumNum founddur = 0;
 	HumdrumToken* token = spinestart;
@@ -3048,10 +3071,10 @@ bool HumdrumFile::analyzeRhythmOfFloatingSpine(HumdrumToken* spinestart) {
 
 //////////////////////////////
 //
-// HumdrumFile::assignDurationsToTrack --
+// HumdrumFileBase::assignDurationsToTrack --
 //
 
-bool HumdrumFile::assignDurationsToTrack(HumdrumToken* starttoken,
+bool HumdrumFileBase::assignDurationsToTrack(HumdrumToken* starttoken,
 		HumNum startdur) {
 	if (!starttoken->hasRhythm()) {
 		return true;
@@ -3065,10 +3088,10 @@ bool HumdrumFile::assignDurationsToTrack(HumdrumToken* starttoken,
 
 //////////////////////////////
 //
-// HumdrumFile::prepareDurations --
+// HumdrumFileBase::prepareDurations --
 //
 
-bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
+bool HumdrumFileBase::prepareDurations(HumdrumToken* token, int state,
 		HumNum startdur) {
 	if (state != token->getState()) {
 		return true;
@@ -3136,12 +3159,12 @@ bool HumdrumFile::prepareDurations(HumdrumToken* token, int state,
 
 //////////////////////////////
 //
-// HumdrumFile::setLineDurationFromStart -- Set the duration of
+// HumdrumFileBase::setLineDurationFromStart -- Set the duration of
 //      a line based on the analysis of tokens in the spine.
 //      If the duration
 //
 
-bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
+bool HumdrumFileBase::setLineDurationFromStart(HumdrumToken* token,
 		HumNum dursum) {
 	if ((!token->isTerminateInterpretation()) &&
 			token->getDuration().isNegative()) {
@@ -3167,14 +3190,14 @@ bool HumdrumFile::setLineDurationFromStart(HumdrumToken* token,
 
 ///////////////////////////////
 //
-// HumdrumFile::analyzeGlobalParameters -- only allowing layout
+// HumdrumFileBase::analyzeGlobalParameters -- only allowing layout
 //    parameters at the moment.  Global parameters affect the next
 //    line which is either a barline, dataline or an interpretation
 //    other than a spine manipulator.  Null lines are also not
 //    considered.
 //
 
-bool HumdrumFile::analyzeGlobalParameters(void) {
+bool HumdrumFileBase::analyzeGlobalParameters(void) {
 	HumdrumLine* spineline = NULL;
 	for (int i=lines.size()-1; i>=0; i--) {
 		if (lines[i]->hasSpines()) {
@@ -3210,7 +3233,7 @@ bool HumdrumFile::analyzeGlobalParameters(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::analyzeMeter -- Store the times from the last barline
+// HumdrumFileBase::analyzeMeter -- Store the times from the last barline
 //     to the current line, as well as the time to the next barline.
 //     the sum of these two will be the duration of the barline, except
 //     for barlines, where the getDurationToBarline() will store the
@@ -3218,7 +3241,7 @@ bool HumdrumFile::analyzeGlobalParameters(void) {
 //     beat, you will have to figure out the current time signature.
 //
 
-bool HumdrumFile::analyzeMeter(void) {
+bool HumdrumFileBase::analyzeMeter(void) {
 
 	barlines.resize(0);
 
@@ -3255,10 +3278,10 @@ bool HumdrumFile::analyzeMeter(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::getTokenDurations --
+// HumdrumFileBase::getTokenDurations --
 //
 
-bool HumdrumFile::getTokenDurations(vector<HumNum>& durs, int line) {
+bool HumdrumFileBase::getTokenDurations(vector<HumNum>& durs, int line) {
 	durs.resize(0);
 	for (int i=0; i<lines[line]->getTokenCount(); i++) {
 		HumNum dur = lines[line]->token(i).getDuration();
@@ -3274,12 +3297,12 @@ bool HumdrumFile::getTokenDurations(vector<HumNum>& durs, int line) {
 
 //////////////////////////////
 //
-// HumdrumFile::decrementDurStates -- Subtract the line duration from
+// HumdrumFileBase::decrementDurStates -- Subtract the line duration from
 //   the current line of running durations.  If any duration is less
 //   than zero, then a rhythm error exists in the data.
 //
 
-bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
+bool HumdrumFileBase::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
 		int line) {
 	if (linedur.isZero()) {
 		return true;
@@ -3303,12 +3326,12 @@ bool HumdrumFile::decrementDurStates(vector<HumNum>& durs, HumNum linedur,
 
 //////////////////////////////
 //
-// HumdrumFile::getMinDur -- Return the smallest duration on the
+// HumdrumFileBase::getMinDur -- Return the smallest duration on the
 //   line.  If all durations are zero, then return zero; otherwise,
 //   return the smallest positive duration.
 //
 
-HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
+HumNum HumdrumFileBase::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
 	HumNum mindur = 0;
 	bool allzero = true;
 
@@ -3342,13 +3365,13 @@ HumNum HumdrumFile::getMinDur(vector<HumNum>& durs, vector<HumNum>& durstate) {
 
 //////////////////////////////
 //
-// HumdrumFile::cleanDurs -- Check if there are grace note and regular
+// HumdrumFileBase::cleanDurs -- Check if there are grace note and regular
 //    notes on a line (not allowed).  Leaves negative durations which
 //    indicate undefined durations (needed for keeping track of null
 //    tokens in rhythmic spines.
 //
 
-bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
+bool HumdrumFileBase::cleanDurs(vector<HumNum>& durs, int line) {
 	bool zero 		= false;
 	bool positive = false;
 	for (int i=0; i<(int)durs.size(); i++) {
@@ -3368,15 +3391,61 @@ bool HumdrumFile::cleanDurs(vector<HumNum>& durs, int line) {
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumFile.
+// operator<< -- Print a HumdrumFileBase.
 //
 
-ostream& operator<<(ostream& out, HumdrumFile& infile) {
+ostream& operator<<(ostream& out, HumdrumFileBase& infile) {
 	for (int i=0; i<infile.getLineCount(); i++) {
 		out << infile[i] << '\n';
 	}
 	return out;
 }
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::HumdrumFileContent --
+//
+
+HumdrumFileContent::HumdrumFileContent(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::HumdrumFileContent --
+//
+
+HumdrumFileContent::~HumdrumFileContent() {
+	// do nothing
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::HumdrumFileStructure --
+//
+
+HumdrumFileStructure::HumdrumFileStructure(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::HumdrumFileStructure --
+//
+
+HumdrumFileStructure::~HumdrumFileStructure() {
+	// do nothing
+}
+
+
 
 
 //////////////////////////////
@@ -4125,7 +4194,7 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 //    manages this object.
 //
 
-void HumdrumLine::setOwner(HumdrumFile* hfile) {
+void HumdrumLine::setOwner(HumdrumFileBase* hfile) {
 	owner = hfile;
 }
 

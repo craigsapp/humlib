@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 17 02:22:32 PDT 2015
+// Last Modified: Mon Aug 17 03:12:30 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -68,70 +68,10 @@ class HumNum;
 class HumAddress;
 class HumdrumToken;
 class HumdrumLine;
+class HumdrumFileBase;
+class HumdrumFileStructure;
+class HumdrumFileContent;
 class HumdrumFile;
-
-
-class HumAddress {
-	public:
-		              HumAddress        (void);
-		             ~HumAddress        ();
-
-		int           getLineIndex      (void) const;
-		int           getLineNumber     (void) const;
-		int           getFieldIndex     (void) const;
-		const HumdrumToken& getDataType (void) const;
-		const string& getSpineInfo      (void) const;
-		int           getTrack          (void) const;
-		int           getSubtrack       (void) const;
-		string        getTrackString    (void) const;
-		HumdrumLine*  getLine           (void) const;
-		HumdrumLine*  getOwner          (void) const { return getLine(); }
-		bool          hasOwner          (void) const;
-
-	protected:
-		void          setOwner          (HumdrumLine* aLine);
-		void          setFieldIndex     (int fieldlindex);
-		void          setSpineInfo      (const string& spineinfo);
-		void          setTrack          (int aTrack, int aSubtrack);
-		void          setTrack          (int aTrack);
-		void          setSubtrack       (int aSubtrack);
-
-	private:
-
-		// fieldindex: This is the index of the token in the HumdrumLine
-		// which owns this token.
-		int fieldindex;       // field index of token on line
-
-		// spining: This is the spine position of the token. A simple spine
-		// position is an integer, starting with "1" for the first spine
-		// of the file (left-most spine).  When the spine splits, "(#)a"
-		// is wrapped around the left-subspine's spine info, and "(#)b"
-		// around the right-subspine's info. Merged spines will add a space
-		// between the two or more merged spines information, such as
-		// "(#)a (#)b" for two sub-spines merged into a single spine again.
-		// But in this case there is a spine info simplification which will
-		// convert "(#)a (#)b" into "#" where # is the original spine number.
-		// Other more complicated mergers may be simplified in the future.
-		string spining;
-
-		// track: This is the track number of the spine.  It is the first
-		// number found in the spineinfo string.
-		int track;
-
-		// subtrack: This is the subtrack number for the spine.  When a spine
-		// is not split, it will be 0, if the spine has been split with *^,
-		// then the left-subspine will be in subtrack 1 and the right-spine
-		// will be subtrack 2.  If subspines are exchanged with *x, then their
-		// subtrack assignments will also change.
-		int subtrack;
-
-		// owner: This is the line which manages the given token.
-		HumdrumLine* owner;
-
-	friend class HumdrumToken;
-	friend class HumdrumLine;
-	friend class HumdrumFile;
-};
 
 
 typedef map<string, map<string, map<string, string> > > MapNNKV;
@@ -306,127 +246,67 @@ template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v);
 
 
-class HumdrumFile {
+class HumAddress {
 	public:
-		              HumdrumFile                  (void);
-		             ~HumdrumFile                  ();
+		              HumAddress        (void);
+		             ~HumAddress        ();
 
-		bool          read                         (istream& infile);
-		bool          read                         (const char*   contents);
-		bool          read                         (const string& contents);
-		bool          readString                   (const char*   contents);
-		bool          readString                   (const string& contents);
-		bool          readNoRhythm                 (istream& infile);
-		bool          readNoRhythm                 (const char*   contents);
-		bool          readNoRhythm                 (const string& contents);
-		bool          readStringNoRhythm           (const char*   contents);
-		bool          readStringNoRhythm           (const string& contents);
-		HumdrumLine&  operator[]                   (int index);
-		void          append                       (const char* line);
-		void          append                       (const string& line);
-		int           getLineCount                 (void) const;
-		int           getMaxTrack                  (void) const;
-		ostream&      printSpineInfo               (ostream& out = cout);
-		ostream&      printDataTypeInfo            (ostream& out = cout);
-		ostream&      printTrackInfo               (ostream& out = cout);
-		ostream&      printDurationInfo            (ostream& out = cout);
-		HumdrumToken* getTrackStart                (int track) const;
-		int           getTrackEndCount             (int track) const;
-		HumdrumToken* getTrackEnd                  (int track,
-		                                            int subtrack) const;
-		void          createLinesFromTokens        (void);
-		HumNum        getScoreDuration             (void) const;
-
-		// barline/measure functionality:
-		int           getBarlineCount              (void) const;
-		HumdrumLine*  getBarline                   (int index) const;
-		HumNum        getBarlineDuration           (int index) const;
-		HumNum        getBarlineDurationFromStart  (int index) const;
-		HumNum        getBarlineDurationToEnd      (int index) const;
+		int           getLineIndex      (void) const;
+		int           getLineNumber     (void) const;
+		int           getFieldIndex     (void) const;
+		const HumdrumToken& getDataType (void) const;
+		const string& getSpineInfo      (void) const;
+		int           getTrack          (void) const;
+		int           getSubtrack       (void) const;
+		string        getTrackString    (void) const;
+		HumdrumLine*  getLine           (void) const;
+		HumdrumLine*  getOwner          (void) const { return getLine(); }
+		bool          hasOwner          (void) const;
 
 	protected:
-		bool          analyzeTokens                (void);
-		bool          analyzeSpines                (void);
-		bool          analyzeRhythm                (void);
-		bool          analyzeMeter                 (void);
-		bool          analyzeLinks                 (void);
-		bool          analyzeTokenDurations        (void);
-		bool          analyzeTracks                (void);
-		bool          analyzeLines                 (void);
-		bool          analyzeGlobalParameters      (void);
-		bool          analyzeLocalParameters       (void);
-		bool          analyzeDurationsOfNonRhythmicSpines(void);
-		bool          adjustSpines                 (HumdrumLine& line,
-		                                            vector<string>& datatype,
-		                                            vector<string>& sinfo);
-		string        getMergedSpineInfo           (vector<string>& info,
-		                                            int starti, int extra);
-		bool          stitchLinesTogether          (HumdrumLine& previous,
-		                                            HumdrumLine& next);
-		HumNum        getMinDur                    (vector<HumNum>& durs,
-		                                            vector<HumNum>& durstate);
-		bool          getTokenDurations            (vector<HumNum>& durs,
-		                                            int line);
-		bool          cleanDurs                    (vector<HumNum>& durs,
-		                                            int line);
-		bool          decrementDurStates           (vector<HumNum>& durs,
-		                                            HumNum linedur, int line);
-		bool          assignDurationsToTrack       (HumdrumToken* starttoken,
-		                                            HumNum startdur);
-		void          addToTrackStarts             (HumdrumToken* token);
-		bool          prepareDurations             (HumdrumToken* token,
-		                                            int state,
-		                                            HumNum startdur);
-		bool          setLineDurationFromStart     (HumdrumToken* token,
-		                                            HumNum dursum);
-		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
-		bool      analyzeNullLineRhythms       (void);
-		void      fillInNegativeStartTimes     (void);
-		void      assignLineDurations          (void);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken);
-		bool      analyzeNonNullDataTokens     (void);
-		void      addUniqueTokens              (vector<HumdrumToken*>& target,
-		                                        vector<HumdrumToken*>& source);
-		bool      processNonNullDataTokensForTrackForward(
-		                                        HumdrumToken* starttoken,
-		                                        vector<HumdrumToken*> ptokens);
-		bool      processNonNullDataTokensForTrackBackward(
-		                                        HumdrumToken* starttoken,
-		                                        vector<HumdrumToken*> ptokens);
-		bool      processLocalParametersForTrack(HumdrumToken* starttok,
-		                                         HumdrumToken* current);
-		void      checkForLocalParameters       (HumdrumToken *token,
-		                                         HumdrumToken *current);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
-		                                                  HumdrumToken* ptoken);
+		void          setOwner          (HumdrumLine* aLine);
+		void          setFieldIndex     (int fieldlindex);
+		void          setSpineInfo      (const string& spineinfo);
+		void          setTrack          (int aTrack, int aSubtrack);
+		void          setTrack          (int aTrack);
+		void          setSubtrack       (int aSubtrack);
 
 	private:
 
-		// lines: an array representing lines from the input file.
-		vector<HumdrumLine*> lines;
+		// fieldindex: This is the index of the token in the HumdrumLine
+		// which owns this token.
+		int fieldindex;       // field index of token on line
 
-		// trackstarts: list of addresses of the exclusive interpreations
-		// in the file.  The first element in the list is reserved, so the
-		// number of tracks (primary spines) is equal to one less than the
-		// size of this list.
-		vector<HumdrumToken*> trackstarts;
+		// spining: This is the spine position of the token. A simple spine
+		// position is an integer, starting with "1" for the first spine
+		// of the file (left-most spine).  When the spine splits, "(#)a"
+		// is wrapped around the left-subspine's spine info, and "(#)b"
+		// around the right-subspine's info. Merged spines will add a space
+		// between the two or more merged spines information, such as
+		// "(#)a (#)b" for two sub-spines merged into a single spine again.
+		// But in this case there is a spine info simplification which will
+		// convert "(#)a (#)b" into "#" where # is the original spine number.
+		// Other more complicated mergers may be simplified in the future.
+		string spining;
 
-		// trackends: list of the addresses of the spine terminators in the file.
-		// It is possible that spines can split and their subspines do not merge
-		// before termination; therefore, the ends are stored in a 2d array.
-		// The first dimension is the track number, and the second dimension
-		// is the list of terminators.
-		vector<vector<HumdrumToken*> > trackends;
+		// track: This is the track number of the spine.  It is the first
+		// number found in the spineinfo string.
+		int track;
 
-		// barlines: list of barlines in the data.  If the first measures is
-		// a pickup measure, then the first entry will not point to the first
-		// starting exclusive interpretation line rather than to a barline.
-		vector<HumdrumLine*> barlines;
-		// Maybe also add "measures" which are complete metrical cycles.
+		// subtrack: This is the subtrack number for the spine.  When a spine
+		// is not split, it will be 0, if the spine has been split with *^,
+		// then the left-subspine will be in subtrack 1 and the right-spine
+		// will be subtrack 2.  If subspines are exchanged with *x, then their
+		// subtrack assignments will also change.
+		int subtrack;
+
+		// owner: This is the line which manages the given token.
+		HumdrumLine* owner;
+
+	friend class HumdrumToken;
+	friend class HumdrumLine;
+	friend class HumdrumFile;
 };
-
-ostream& operator<<(ostream& out, HumdrumFile& infile);
-
 
 
 class HumdrumLine : public string, public HumHash {
@@ -483,7 +363,7 @@ class HumdrumLine : public string, public HumHash {
 		void     setDurationFromStart   (HumNum dur);
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
-		void     setOwner               (HumdrumFile* hfile);
+		void     setOwner               (HumdrumFileBase* hfile);
 		int      createTokensFromLine   (void);
 		void     setParameters          (HumdrumLine* pLine);
 		void     setParameters          (const string& pdata);
@@ -496,7 +376,7 @@ class HumdrumLine : public string, public HumHash {
 
 		// lineindex: Used to store the index number of the HumdrumLine in
 		// the owning HumdrumFile object.
-		// This variable is filled by HumdrumFile::analyzeLines().
+		// This variable is filled by HumdrumFileStructure::analyzeLines().
 		int lineindex;
 
 		// tokens: Used to store the individual tab-separated token fields
@@ -516,7 +396,7 @@ class HumdrumLine : public string, public HumHash {
 		// line.  This also includes null tokens when the duration of a
 		// previous note in a previous spine is ending on the line, so it is
 		// not just the minimum duration on the line.
-		// This variable is filled by HumdrumFile::analyzeRhythm().
+		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
 		HumNum duration;
 
 		// durationFromStart: This is the cumulative duration of all lines
@@ -524,22 +404,25 @@ class HumdrumLine : public string, public HumHash {
 		// the first notes in a score start at time 0, If the duration of the
 		// first data line is 1 quarter note, then the durationFromStart for
 		// the second line will be 1 quarter note.
-		// This variable is filled by HumdrumFile::analyzeRhythm().
+		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
 		HumNum durationFromStart;
 
 		// durationFromBarline: This is the cumulative duration from the
 		// last barline to the current data line.
-		// This variable is filled by HumdrumFile::analyzeMeter().
+		// This variable is filled by HumdrumFileStructure::analyzeMeter().
 		HumNum durationFromBarline;
 
 		// durationToBarline: This is the duration from the start of the
 		// current line to the next barline in the owning HumdrumFile object.
-		// This variable is filled by HumdrumFile::analyzeMeter().
+		// This variable is filled by HumdrumFileStructure::analyzeMeter().
 		HumNum durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		HumdrumFile* owner;
+		HumdrumFileBase* owner;
 
+	friend class HumdrumFileBase;
+	friend class HumdrumFileStructure;
+	friend class HumdrumFileContent;
 	friend class HumdrumFile;
 };
 
@@ -661,15 +544,166 @@ class HumdrumToken : public string, public HumHash {
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
-		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
+		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm 
+		// recursively.
 		int rhycheck;
 
 	friend class HumdrumLine;
+	friend class HumdrumFileBase;
+	friend class HumdrumFileStructure;
+	friend class HumdrumFileContent;
 	friend class HumdrumFile;
 };
 
 
 ostream& operator<<(ostream& out, const HumdrumToken& token);
+
+
+
+class HumdrumFileBase {
+	public:
+		              HumdrumFileBase              (void);
+		             ~HumdrumFileBase              ();
+
+		bool          read                         (istream& infile);
+		bool          read                         (const char*   contents);
+		bool          read                         (const string& contents);
+		bool          readString                   (const char*   contents);
+		bool          readString                   (const string& contents);
+		bool          readNoRhythm                 (istream& infile);
+		bool          readNoRhythm                 (const char*   contents);
+		bool          readNoRhythm                 (const string& contents);
+		bool          readStringNoRhythm           (const char*   contents);
+		bool          readStringNoRhythm           (const string& contents);
+		HumdrumLine&  operator[]                   (int index);
+		void          append                       (const char* line);
+		void          append                       (const string& line);
+		int           getLineCount                 (void) const;
+		int           getMaxTrack                  (void) const;
+		ostream&      printSpineInfo               (ostream& out = cout);
+		ostream&      printDataTypeInfo            (ostream& out = cout);
+		ostream&      printTrackInfo               (ostream& out = cout);
+		ostream&      printDurationInfo            (ostream& out = cout);
+		HumdrumToken* getTrackStart                (int track) const;
+		int           getTrackEndCount             (int track) const;
+		HumdrumToken* getTrackEnd                  (int track,
+		                                            int subtrack) const;
+		void          createLinesFromTokens        (void);
+		HumNum        getScoreDuration             (void) const;
+
+		// barline/measure functionality:
+		int           getBarlineCount              (void) const;
+		HumdrumLine*  getBarline                   (int index) const;
+		HumNum        getBarlineDuration           (int index) const;
+		HumNum        getBarlineDurationFromStart  (int index) const;
+		HumNum        getBarlineDurationToEnd      (int index) const;
+
+	protected:
+		bool          analyzeTokens                (void);
+		bool          analyzeSpines                (void);
+		bool          analyzeRhythm                (void);
+		bool          analyzeMeter                 (void);
+		bool          analyzeLinks                 (void);
+		bool          analyzeTokenDurations        (void);
+		bool          analyzeTracks                (void);
+		bool          analyzeLines                 (void);
+		bool          analyzeGlobalParameters      (void);
+		bool          analyzeLocalParameters       (void);
+		bool          analyzeDurationsOfNonRhythmicSpines(void);
+		bool          adjustSpines                 (HumdrumLine& line,
+		                                            vector<string>& datatype,
+		                                            vector<string>& sinfo);
+		string        getMergedSpineInfo           (vector<string>& info,
+		                                            int starti, int extra);
+		bool          stitchLinesTogether          (HumdrumLine& previous,
+		                                            HumdrumLine& next);
+		HumNum        getMinDur                    (vector<HumNum>& durs,
+		                                            vector<HumNum>& durstate);
+		bool          getTokenDurations            (vector<HumNum>& durs,
+		                                            int line);
+		bool          cleanDurs                    (vector<HumNum>& durs,
+		                                            int line);
+		bool          decrementDurStates           (vector<HumNum>& durs,
+		                                            HumNum linedur, int line);
+		bool          assignDurationsToTrack       (HumdrumToken* starttoken,
+		                                            HumNum startdur);
+		void          addToTrackStarts             (HumdrumToken* token);
+		bool          prepareDurations             (HumdrumToken* token,
+		                                            int state,
+		                                            HumNum startdur);
+		bool          setLineDurationFromStart     (HumdrumToken* token,
+		                                            HumNum dursum);
+		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool      analyzeNullLineRhythms       (void);
+		void      fillInNegativeStartTimes     (void);
+		void      assignLineDurations          (void);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken);
+		bool      analyzeNonNullDataTokens     (void);
+		void      addUniqueTokens              (vector<HumdrumToken*>& target,
+		                                        vector<HumdrumToken*>& source);
+		bool      processNonNullDataTokensForTrackForward(
+		                                        HumdrumToken* starttoken,
+		                                        vector<HumdrumToken*> ptokens);
+		bool      processNonNullDataTokensForTrackBackward(
+		                                        HumdrumToken* starttoken,
+		                                        vector<HumdrumToken*> ptokens);
+		bool      processLocalParametersForTrack(HumdrumToken* starttok,
+		                                         HumdrumToken* current);
+		void      checkForLocalParameters       (HumdrumToken *token,
+		                                         HumdrumToken *current);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                                  HumdrumToken* ptoken);
+
+	protected:
+
+		// lines: an array representing lines from the input file.
+		vector<HumdrumLine*> lines;
+
+		// trackstarts: list of addresses of the exclusive interpreations
+		// in the file.  The first element in the list is reserved, so the
+		// number of tracks (primary spines) is equal to one less than the
+		// size of this list.
+		vector<HumdrumToken*> trackstarts;
+
+		// trackends: list of the addresses of the spine terminators in the file.
+		// It is possible that spines can split and their subspines do not merge
+		// before termination; therefore, the ends are stored in a 2d array.
+		// The first dimension is the track number, and the second dimension
+		// is the list of terminators.
+		vector<vector<HumdrumToken*> > trackends;
+
+		// barlines: list of barlines in the data.  If the first measures is
+		// a pickup measure, then the first entry will not point to the first
+		// starting exclusive interpretation line rather than to a barline.
+		vector<HumdrumLine*> barlines;
+		// Maybe also add "measures" which are complete metrical cycles.
+};
+
+ostream& operator<<(ostream& out, HumdrumFileBase& infile);
+
+
+
+class HumdrumFileStructure : public HumdrumFileBase {
+	public:
+		              HumdrumFileStructure         (void);
+		             ~HumdrumFileStructure         ();
+};
+
+
+
+class HumdrumFileContent : public HumdrumFileStructure {
+	public:
+		              HumdrumFileContent         (void);
+		             ~HumdrumFileContent         ();
+};
+
+
+
+class HumdrumFile : public HumdrumFileContent {
+	public:
+		              HumdrumFile         (void);
+		             ~HumdrumFile         ();
+};
 
 
 

@@ -23,7 +23,7 @@ using namespace std;
 
 namespace minHumdrum {
 
-class HumdrumFile;
+class HumdrumFileBase;
 
 // START_MERGE
 
@@ -81,7 +81,7 @@ class HumdrumLine : public string, public HumHash {
 		void     setDurationFromStart   (HumNum dur);
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
-		void     setOwner               (HumdrumFile* hfile);
+		void     setOwner               (HumdrumFileBase* hfile);
 		int      createTokensFromLine   (void);
 		void     setParameters          (HumdrumLine* pLine);
 		void     setParameters          (const string& pdata);
@@ -94,7 +94,7 @@ class HumdrumLine : public string, public HumHash {
 
 		// lineindex: Used to store the index number of the HumdrumLine in
 		// the owning HumdrumFile object.
-		// This variable is filled by HumdrumFile::analyzeLines().
+		// This variable is filled by HumdrumFileStructure::analyzeLines().
 		int lineindex;
 
 		// tokens: Used to store the individual tab-separated token fields
@@ -114,7 +114,7 @@ class HumdrumLine : public string, public HumHash {
 		// line.  This also includes null tokens when the duration of a
 		// previous note in a previous spine is ending on the line, so it is
 		// not just the minimum duration on the line.
-		// This variable is filled by HumdrumFile::analyzeRhythm().
+		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
 		HumNum duration;
 
 		// durationFromStart: This is the cumulative duration of all lines
@@ -122,22 +122,25 @@ class HumdrumLine : public string, public HumHash {
 		// the first notes in a score start at time 0, If the duration of the
 		// first data line is 1 quarter note, then the durationFromStart for
 		// the second line will be 1 quarter note.
-		// This variable is filled by HumdrumFile::analyzeRhythm().
+		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
 		HumNum durationFromStart;
 
 		// durationFromBarline: This is the cumulative duration from the
 		// last barline to the current data line.
-		// This variable is filled by HumdrumFile::analyzeMeter().
+		// This variable is filled by HumdrumFileStructure::analyzeMeter().
 		HumNum durationFromBarline;
 
 		// durationToBarline: This is the duration from the start of the
 		// current line to the next barline in the owning HumdrumFile object.
-		// This variable is filled by HumdrumFile::analyzeMeter().
+		// This variable is filled by HumdrumFileStructure::analyzeMeter().
 		HumNum durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		HumdrumFile* owner;
+		HumdrumFileBase* owner;
 
+	friend class HumdrumFileBase;
+	friend class HumdrumFileStructure;
+	friend class HumdrumFileContent;
 	friend class HumdrumFile;
 };
 

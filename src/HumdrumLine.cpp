@@ -767,7 +767,7 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 //    manages this object.
 //
 
-void HumdrumLine::setOwner(HumdrumFile* hfile) {
+void HumdrumLine::setOwner(HumdrumFileBase* hfile) {
 	owner = hfile;
 }
 

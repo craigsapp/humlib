@@ -140,10 +140,14 @@ class HumdrumToken : public string, public HumHash {
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
-		// rhycheck: Used to perfrom HumdrumFile::analyzeRhythm recursively.
+		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm 
+		// recursively.
 		int rhycheck;
 
 	friend class HumdrumLine;
+	friend class HumdrumFileBase;
+	friend class HumdrumFileStructure;
+	friend class HumdrumFileContent;
 	friend class HumdrumFile;
 };
 

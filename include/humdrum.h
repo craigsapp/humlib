@@ -20,6 +20,9 @@
 #include "HumdrumToken.h"
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
+#include "HumdrumFileContent.h"
+#include "HumdrumFileStructure.h"
+#include "HumdrumFileBase.h"
 
 
 

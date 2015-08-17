@@ -34,7 +34,21 @@ sub createIncludeFile {
 
 
 	my $contents = "";
-	my @files = getFiles($basedir);
+	# my @files = getFiles($basedir);
+	my @files = (
+		"HumHash.h",
+		"HumNum.h",
+		"HumAddress.h",
+		"HumdrumLine.h",
+		"HumdrumToken.h",
+		"HumdrumFileBase.h",
+		"HumdrumFileStructure.h",
+		"HumdrumFileContent.h",
+		"HumdrumFile.h",
+		"Convert.h"
+	);
+
+
 	foreach my $file (@files) {
 		$contents .= getMergeContents("$basedir/$file");
 	}
@@ -91,6 +105,9 @@ class HumNum;
 class HumAddress;
 class HumdrumToken;
 class HumdrumLine;
+class HumdrumFileBase;
+class HumdrumFileStructure;
+class HumdrumFileContent;
 class HumdrumFile;
 
 EOT
