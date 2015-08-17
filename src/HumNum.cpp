@@ -184,25 +184,23 @@ int HumNum::getDenominator(void) const {
 // HumNum::setValue --
 //
 
-HumNum HumNum::setValue(int numerator) {
+void HumNum::setValue(int numerator) {
 	top = numerator;
 	bot = 1;
-	return *this;
 }
 
 
-HumNum HumNum::setValue(int numerator, int denominator) {
+void HumNum::setValue(int numerator, int denominator) {
 	top = numerator;
 	bot = denominator;
 	reduce();
-	return *this;
 }
 
 
-HumNum HumNum::setValue(const string& ratstring) {
+void HumNum::setValue(const string& ratstring) {
 	int buffer[2];
-	buffer[0] = 1;
-	buffer[1] = 1;
+	buffer[0] = 0;
+	buffer[1] = 0;
 	int slash = 0;
 	for (int i=0; i<ratstring.size(); i++) {
 		if (ratstring[i] == '/') {
@@ -214,7 +212,10 @@ HumNum HumNum::setValue(const string& ratstring) {
 		}
 		buffer[slash] = buffer[slash] * 10 + (ratstring[i] - '0');
 	}
-	return setValue(buffer[0], buffer[1]);
+	if (buffer[1] == 0) {
+		buffer[1] = 1;
+	}
+	setValue(buffer[0], buffer[1]);
 }
 
 

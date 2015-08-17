@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 16 05:11:41 PDT 2015
+// Last Modified: Sun Aug 16 17:42:55 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -342,206 +342,226 @@ HumHash::~HumHash() {
 
 //////////////////////////////
 //
-// HumHash::getParameter --
+// HumHash::getValue --
 //
 
-string HumHash::getParameter(const string& key) {
+string HumHash::getValue(const string& key) {
 	if (parameters == NULL) {
 		return "";
 	} else {
 		vector<string> keys = getKeyList(key);
 		if (keys.size() == 1) {
-			return getParameter("", "", keys[0]);
+			return getValue("", "", keys[0]);
 		} else if (keys.size() == 2) {
-			return getParameter("", keys[0], keys[1]);
+			return getValue("", keys[0], keys[1]);
 		} else {
-			return getParameter(keys[0], keys[1], keys[2]);
+			return getValue(keys[0], keys[1], keys[2]);
 		}
 	}
 }
 
 
-string HumHash::getParameter(const string& ns2, const string& key) {
+string HumHash::getValue(const string& ns2, const string& key) {
 	if (parameters == NULL) {
 		return "";
 	} else {
-		return getParameter("", ns2, key);
+		return getValue("", ns2, key);
 	}
 }
 
 
-string HumHash::getParameter(const string& ns1, const string& ns2, 
+string HumHash::getValue(const string& ns1, const string& ns2, 
 		const string& key) {
 	if (parameters == NULL) {
 		return "";
-	} else {
-		return (*parameters)[ns1][ns2][key];
 	}
+
+	MapNNKV& p = *parameters;
+	auto it1 = p.find(ns1);
+	if (it1 == p.end()) {
+		return "";
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return "";
+	}
+	auto it3 = it2->second.find(key);
+	if (it3 == it2->second.end()) {
+		return "";
+	}
+	return it3->second;
 }
 
 
 
 //////////////////////////////
 //
-// HumHash::getParameterInt --
+// HumHash::getValueInt --
 //
 
-int HumHash::getParameterInt(const string& key) { 
+int HumHash::getValueInt(const string& key) { 
 	if (parameters == NULL) {
 		return 0;
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return getParameterInt("", "", keys[2]);
+		return getValueInt("", "", keys[2]);
 	} else if (keys.size() == 2) {
-		return getParameterInt(keys[0], keys[1]);
+		return getValueInt(keys[0], keys[1]);
 	} else {
-		return getParameterInt(keys[0], keys[1], keys[2]);
+		return getValueInt(keys[0], keys[1], keys[2]);
 	}
 }
 
 
-int HumHash::getParameterInt(const string& ns2, const string& key) { 
+int HumHash::getValueInt(const string& ns2, const string& key) { 
 	if (parameters == NULL) {
 		return 0;
 	}
-	return getParameterInt("", ns2, key);
+	return getValueInt("", ns2, key);
 }
 
 
-int HumHash::getParameterInt(const string& ns1, const string& ns2,
+int HumHash::getValueInt(const string& ns1, const string& ns2,
 		const string& key) { 
 	if (parameters == NULL) {
 		return 0;
 	}
-	int value;
-	try {
-		value = stoi((*parameters)[ns1][ns2][key]);
-	} catch (invalid_argument& e) {
-		value = 0;
+	string value = getValue(ns1, ns2, key);
+ 	if (value.find("/") != string::npos) {
+		HumNum nvalue(value);
+		return  nvalue.getInteger();
+	} else {
+		int intvalue;
+		try {
+			intvalue = stoi(value);
+		} catch (invalid_argument& e) {
+			intvalue = 0;
+		}
+		return intvalue;
 	}
-	return value;
 }
 
 
 
 //////////////////////////////
 //
-// HumHash::getParameterFraction --
+// HumHash::getValueFraction --
 //
 
-HumNum HumHash::getParameterFraction(const string& key) { 
+HumNum HumHash::getValueFraction(const string& key) { 
 	if (parameters == NULL) {
 		return 0;
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return getParameterInt("", "", keys[2]);
+		return getValueFraction("", "", keys[0]);
 	} else if (keys.size() == 2) {
-		return getParameterInt(keys[0], keys[1]);
+		return getValueFraction(keys[0], keys[1]);
 	} else {
-		return getParameterInt(keys[0], keys[1], keys[2]);
+		return getValueFraction(keys[0], keys[1], keys[2]);
 	}
 }
 
 
-HumNum HumHash::getParameterFraction(const string& ns2, const string& key) { 
+HumNum HumHash::getValueFraction(const string& ns2, const string& key) { 
 	if (parameters == NULL) {
 		return 0;
 	}
-	return getParameterFraction("", ns2, key);
+	return getValueFraction("", ns2, key);
 }
 
 
-HumNum HumHash::getParameterFraction(const string& ns1, const string& ns2,
+HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 		const string& key) { 
-	if (!hasParameter(ns1, ns2, key)) {
+	if (!isDefined(ns1, ns2, key)) {
 		return 0;
 	}
-	string p = (*parameters)[ns1][ns2][key];
-	if (p.size() == 0) {
-		return 0;
-	}
-	HumNum value(p);
-	return value;
+	string value = getValue(ns1, ns2, key);
+	HumNum fractionvalue(value);
+	return fractionvalue;
 }
 
 
 
 //////////////////////////////
 //
-// HumHash::getParameterFloat --
+// HumHash::getValueFloat --
 //
 
-double HumHash::getParameterFloat(const string& key) { 
+double HumHash::getValueFloat(const string& key) { 
 	if (parameters == NULL) {
 		return 0.0;
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return getParameterFloat("", "", keys[2]);
+		return getValueFloat("", "", keys[2]);
 	} else if (keys.size() == 2) {
-		return getParameterFloat(keys[0], keys[1]);
+		return getValueFloat(keys[0], keys[1]);
 	} else {
-		return getParameterFloat(keys[0], keys[1], keys[2]);
+		return getValueFloat(keys[0], keys[1], keys[2]);
 	}
 }
 
 
-double HumHash::getParameterFloat(const string& ns2, const string& key) { 
+double HumHash::getValueFloat(const string& ns2, const string& key) { 
 	if (parameters == NULL) {
 		return 0.0;
 	}
-	return getParameterInt("", ns2, key);
+	return getValueInt("", ns2, key);
 }
 
 
-double HumHash::getParameterFloat(const string& ns1, const string& ns2,
+double HumHash::getValueFloat(const string& ns1, const string& ns2,
 		const string& key) { 
 	if (parameters == NULL) {
 		return 0.0;
 	}
-	int value;
-	try {
-		value = stod((*parameters)[ns1][ns2][key]);
-	} catch (invalid_argument& e) {
-		value = 0.0;
+	string value = getValue(ns1, ns2, key);
+ 	if (value.find("/") != string::npos) {
+		HumNum nvalue(value);
+		return nvalue.getFloat();
+	} else {
+		double floatvalue;
+		try {
+			floatvalue = stod(value);
+		} catch (invalid_argument& e) {
+			floatvalue = 0;
+		}
+		return floatvalue;
 	}
-	return value;
 }
-
-
 
 
 
 //////////////////////////////
 //
-// HumHash::getParameterBool --
+// HumHash::getValueBool --
 //
 
-bool HumHash::getParameterBool(const string& key) { 
+bool HumHash::getValueBool(const string& key) { 
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return getParameterBool("", "", keys[2]);
+		return getValueBool("", "", keys[2]);
 	} else if (keys.size() == 2) {
-		return getParameterBool(keys[0], keys[1]);
+		return getValueBool(keys[0], keys[1]);
 	} else {
-		return getParameterBool(keys[0], keys[1], keys[2]);
+		return getValueBool(keys[0], keys[1], keys[2]);
 	}
 }
 
 
-bool HumHash::getParameterBool(const string& ns2, const string& key) { 
-	return getParameterBool("", ns2, key);
+bool HumHash::getValueBool(const string& ns2, const string& key) { 
+	return getValueBool("", ns2, key);
 }
 
 
-bool HumHash::getParameterBool(const string& ns1, const string& ns2,
+bool HumHash::getValueBool(const string& ns1, const string& ns2,
 		const string& key) { 
 	if (parameters == NULL) {
 		return false;
 	}
-	if (!hasParameter(ns1, ns2, key)) {
+	if (!isDefined(ns1, ns2, key)) {
 		return false;
 	}
 	if ((*parameters)[ns1][ns2][key] == "false") {
@@ -557,28 +577,28 @@ bool HumHash::getParameterBool(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::setParameter --
+// HumHash::setValue --
 //
 
-void HumHash::setParameter(const string& key, const string& value) {
+void HumHash::setValue(const string& key, const string& value) {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		setParameter("", "", keys[0], value);
+		setValue("", "", keys[0], value);
 	} else if (keys.size() == 2) {
-		setParameter("", keys[0], keys[1], value);
+		setValue("", keys[0], keys[1], value);
 	} else {
-		setParameter(keys[0], keys[1], keys[2], value);
+		setValue(keys[0], keys[1], keys[2], value);
 	}
 }
 
 
-void HumHash::setParameter(const string& ns2, const string& key, 
+void HumHash::setValue(const string& ns2, const string& key, 
 		const string& value) {
-		setParameter("", ns2, key, value);
+		setValue("", ns2, key, value);
 }
 
 
-void HumHash::setParameter(const string& ns1, const string& ns2, 
+void HumHash::setValue(const string& ns1, const string& ns2, 
 		const string& key, const string& value) {
 	initializeParameters();
 	(*parameters)[ns1][ns2][key] = value;
@@ -586,13 +606,110 @@ void HumHash::setParameter(const string& ns1, const string& ns2,
 
 
 
+void HumHash::setValue(const string& key, int value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, int value) {
+		setValue("", ns2, key, value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, 
+		const string& key, int value) {
+	initializeParameters();
+	stringstream ss(value);
+	(*parameters)[ns1][ns2][key] = ss.str();
+}
+
+
+void HumHash::setValue(const string& key, HumNum value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, HumNum value) {
+		setValue("", ns2, key, value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, 
+		const string& key, HumNum value) {
+	initializeParameters();
+	stringstream ss;
+	ss << value;
+	(*parameters)[ns1][ns2][key] = ss.str();
+}
+
+
+
+void HumHash::setValue(const string& key, double value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, double value) {
+		setValue("", ns2, key, value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, 
+		const string& key, double value) {
+	initializeParameters();
+	stringstream ss;
+	ss << value;
+	(*parameters)[ns1][ns2][key] = ss.str();
+}
+
+
+
 //////////////////////////////
 //
-// HumHash::hasParameter -- Returns true if the given parameter exists in the
+// HumHash::getKeys --
+//
+
+vector<string> HumHash::getKeys(const string& ns1, const string& ns2) {
+	vector<string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	for (auto& it : (*parameters)[ns1][ns2]) {
+		output.push_back(it.first);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumHash::isDefined -- Returns true if the given parameter exists in the
 //    map.
 //
 
-bool HumHash::hasParameter(const string& key) {
+bool HumHash::isDefined(const string& key) {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -607,7 +724,7 @@ bool HumHash::hasParameter(const string& key) {
 }
 
 
-bool HumHash::hasParameter(const string& ns2, const string& key) {
+bool HumHash::isDefined(const string& ns2, const string& key) {
 	if (parameters == NULL) {
 		return false;
 	}
@@ -615,7 +732,7 @@ bool HumHash::hasParameter(const string& ns2, const string& key) {
 }
 
 
-bool HumHash::hasParameter(const string& ns1, const string& ns2,
+bool HumHash::isDefined(const string& ns1, const string& ns2,
 		const string& key) {
 	if (parameters == NULL) {
 		return false;
@@ -627,38 +744,53 @@ bool HumHash::hasParameter(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::deleteParameter --
+// HumHash::deleteValue --
 //
 
-void HumHash::deleteParameter(const string& key) { 
+void HumHash::deleteValue(const string& key) { 
 	if (parameters == NULL) {
 		return;
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		deleteParameter("", "", keys[0]);
+		deleteValue("", "", keys[0]);
 	} else if (keys.size() == 2) {
-		deleteParameter("", keys[0], keys[1]);
+		deleteValue("", keys[0], keys[1]);
 	} else {
-		deleteParameter(keys[0], keys[1], keys[2]);
+		deleteValue(keys[0], keys[1], keys[2]);
 	}
 }
 
 
-void HumHash::deleteParameter(const string& ns2, const string& key) { 
+void HumHash::deleteValue(const string& ns2, const string& key) { 
 	if (parameters == NULL) {
 		return;
 	}
-	deleteParameter("", ns2, key);
+	deleteValue("", ns2, key);
 }
 
 
-void HumHash::deleteParameter(const string& ns1, const string& ns2, 
+void HumHash::deleteValue(const string& ns1, const string& ns2, 
 		const string& key) { 
 	if (parameters == NULL) {
 		return;
 	}
 	(*parameters)[ns1][ns2].erase(key);
+
+	MapNNKV& p = *parameters;
+	auto it1 = p.find(ns1);
+	if (it1 == p.end()) {
+		return;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return;
+	}
+	auto it3 = it2->second.find(key);
+	if (it3 == it2->second.end()) {
+		return;
+	}
+	it2->second.erase(key);
 }
 
 
@@ -670,7 +802,7 @@ void HumHash::deleteParameter(const string& ns1, const string& ns2,
 
 void HumHash::initializeParameters(void) {
 	if (parameters == NULL) {
-		parameters = new map<string, map<string, map<string, string> > >;
+		parameters = new MapNNKV;
 	}
 }
 
@@ -687,6 +819,9 @@ vector<string> HumHash::getKeyList(const string& keys) {
 	vector<string> output;
 	while (getline(ss, key, ':')) {
 		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(keys);
 	}
 	return output;
 }
@@ -861,25 +996,23 @@ int HumNum::getDenominator(void) const {
 // HumNum::setValue --
 //
 
-HumNum HumNum::setValue(int numerator) {
+void HumNum::setValue(int numerator) {
 	top = numerator;
 	bot = 1;
-	return *this;
 }
 
 
-HumNum HumNum::setValue(int numerator, int denominator) {
+void HumNum::setValue(int numerator, int denominator) {
 	top = numerator;
 	bot = denominator;
 	reduce();
-	return *this;
 }
 
 
-HumNum HumNum::setValue(const string& ratstring) {
+void HumNum::setValue(const string& ratstring) {
 	int buffer[2];
-	buffer[0] = 1;
-	buffer[1] = 1;
+	buffer[0] = 0;
+	buffer[1] = 0;
 	int slash = 0;
 	for (int i=0; i<ratstring.size(); i++) {
 		if (ratstring[i] == '/') {
@@ -891,7 +1024,10 @@ HumNum HumNum::setValue(const string& ratstring) {
 		}
 		buffer[slash] = buffer[slash] * 10 + (ratstring[i] - '0');
 	}
-	return setValue(buffer[0], buffer[1]);
+	if (buffer[1] == 0) {
+		buffer[1] = 1;
+	}
+	setValue(buffer[0], buffer[1]);
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 16 05:11:41 PDT 2015
+// Last Modified: Sun Aug 16 17:42:55 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -142,73 +142,75 @@ class HumAddress {
 };
 
 
+typedef map<string, map<string, map<string, string> > > MapNNKV;
+typedef map<string, map<string, string> > MapNKV;
+typedef map<string, string> MapKV;
+
 class HumHash {
 	public:
 		               HumHash             (void);
 		              ~HumHash             ();
 
-		string         getParameter        (const string& key);
-		string         getParameter        (const string& ns2, const string& key);
-		string         getParameter        (const string& ns1, const string& ns2,
+		string         getValue            (const string& key);
+		string         getValue            (const string& ns2, const string& key);
+		string         getValue            (const string& ns1, const string& ns2,
 		                                    const string& key);
-		int            getParameterInt     (const string& key);
-		int            getParameterInt     (const string& ns2, const string& key);
-		int            getParameterInt     (const string& ns1, const string& ns2,
+		int            getValueInt         (const string& key);
+		int            getValueInt         (const string& ns2, const string& key);
+		int            getValueInt         (const string& ns1, const string& ns2,
 		                                    const string& key);
-		HumNum         getParameterFraction(const string& key);
-		HumNum         getParameterFraction(const string& ns2, const string& key);
-		HumNum         getParameterFraction(const string& ns1, const string& ns2,
+		HumNum         getValueFraction    (const string& key);
+		HumNum         getValueFraction    (const string& ns2, const string& key);
+		HumNum         getValueFraction    (const string& ns1, const string& ns2,
 		                                    const string& key);
-		double         getParameterFloat   (const string& key);
-		double         getParameterFloat   (const string& ns2, const string& key);
-		double         getParameterFloat   (const string& ns1, const string& ns2,
+		double         getValueFloat       (const string& key);
+		double         getValueFloat       (const string& ns2, const string& key);
+		double         getValueFloat       (const string& ns1, const string& ns2,
 		                                    const string& key);
-		bool           getParameterBool    (const string& key);
-		bool           getParameterBool    (const string& ns2, const string& key);
-		bool           getParameterBool    (const string& ns1, const string& ns2,
+		bool           getValueBool        (const string& key);
+		bool           getValueBool        (const string& ns2, const string& key);
+		bool           getValueBool        (const string& ns1, const string& ns2,
 		                                    const string& key);
-		void           setParameter        (const string& key,
+		void           setValue            (const string& key,
 		                                    const string& value);
-		void           setParameter        (const string& ns2,
+		void           setValue            (const string& ns2,
 		                                    const string& key,
 		                                    const string& value);
-		void           setParameter        (const string& ns1,
+		void           setValue            (const string& ns1,
 		                                    const string& ns2,
 		                                    const string& key,
 		                                    const string& value);
-/*
-		void           setParameter        (const string& key, int value);
-		void           setParameter        (const string& ns2, const string& key,
+		void           setValue            (const string& key, int value);
+		void           setValue            (const string& ns2, const string& key,
 		                                    int value);
-		void           setParameter        (const string& ns1, const string& ns2,
+		void           setValue            (const string& ns1, const string& ns2,
 		                                    const string& key, int value);
-		void           setParameter        (const string& key, float value);
-		void           setParameter        (const string& ns2, const string& key,
-		                                    float value);
-		void           setParameter        (const string& ns1, const string& ns2,
-		                                    const string& key, float value);
-		void           setParameter        (const string& key, bool value);
-		void           setParameter        (const string& ns2, const string& key,
-		                                    bool value);
-		void           setParameter        (const string& ns1, const string& ns2,
-		                                    const string& key, bool value);
-*/
-
-		bool           hasParameter        (const string& key);
-		bool           hasParameter        (const string& ns2, const string& key);
-		bool           hasParameter        (const string& ns1, const string& ns2,
+		void           setValue            (const string& key, HumNum value);
+		void           setValue            (const string& ns2, const string& key,
+		                                    HumNum value);
+		void           setValue            (const string& ns1, const string& ns2,
+		                                    const string& key, HumNum value);
+		void           setValue            (const string& key, double value);
+		void           setValue            (const string& ns2, const string& key,
+		                                    double value);
+		void           setValue            (const string& ns1, const string& ns2,
+		                                    const string& key, double value);
+		bool           isDefined           (const string& key);
+		bool           isDefined           (const string& ns2, const string& key);
+		bool           isDefined           (const string& ns1, const string& ns2,
 		                                    const string& key);
-		void           deleteParameter     (const string& key);
-		void           deleteParameter     (const string& ns2, const string& key);
-		void           deleteParameter     (const string& ns1, const string& ns2,
+		void           deleteValue         (const string& key);
+		void           deleteValue         (const string& ns2, const string& key);
+		void           deleteValue         (const string& ns1, const string& ns2,
 		                                    const string& key);
+		vector<string> getKeys             (const string& ns1, const string& ns2);
 
 	protected:
 		void           initializeParameters(void);
 		vector<string> getKeyList          (const string& keys);
 
 	private:
-		map<string, map<string, map<string, string> > >* parameters;
+		MapNNKV* parameters;
 };
 
 
@@ -236,9 +238,9 @@ class HumNum {
 		int      getInteger         (double round = 0.0) const;
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
-		HumNum   setValue           (int numerator);
-		HumNum   setValue           (int numerator, int denominator);
-		HumNum   setValue           (const string& ratstring);
+		void     setValue           (int numerator);
+		void     setValue           (int numerator, int denominator);
+		void     setValue           (const string& ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);

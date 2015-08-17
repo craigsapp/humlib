@@ -45,9 +45,9 @@ class HumNum {
 		int      getInteger         (double round = 0.0) const;
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
-		HumNum   setValue           (int numerator);
-		HumNum   setValue           (int numerator, int denominator);
-		HumNum   setValue           (const string& ratstring);
+		void     setValue           (int numerator);
+		void     setValue           (int numerator, int denominator);
+		void     setValue           (const string& ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
