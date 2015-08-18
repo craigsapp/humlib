@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileStructure.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileStructure.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to further process HumdrumFileBase content, primarily
 //                rhythmic analyses, but also parses global and local

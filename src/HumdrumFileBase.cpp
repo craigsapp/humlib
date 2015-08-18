@@ -686,10 +686,10 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 
 //////////////////////////////
 //
-// HumdrumFileBase::analyzeNonNullDataTokens -- For null data tokens, indicate 
-//    the previous non-null token which the null token refers to.  After 
-//    a spine merger, there may be multiple previous tokens, so you would 
-//		have to decide on the actual source token on based on subtrack or 
+// HumdrumFileBase::analyzeNonNullDataTokens -- For null data tokens, indicate
+//    the previous non-null token which the null token refers to.  After
+//    a spine merger, there may be multiple previous tokens, so you would
+//		have to decide on the actual source token on based on subtrack or
 //    subspine information.  The function also gives links to the previous/next
 //    non-null tokens, skipping over intervening null data tokens.
 //

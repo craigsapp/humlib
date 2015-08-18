@@ -5,7 +5,7 @@
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumToken.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to work with tokens on a Humdrum line.
 //

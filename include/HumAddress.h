@@ -5,7 +5,7 @@
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to store the location of a token within a HumdrumFile.
 //
@@ -36,7 +36,7 @@ class HumAddress {
 		const string& getSpineInfo      (void) const;
 		int           getTrack          (void) const;
 		int           getSubtrack       (void) const;
-		string        getTrackString    (void) const;
+		string        getTrackString    (string separator = ".") const;
 		HumdrumLine*  getLine           (void) const;
 		HumdrumLine*  getOwner          (void) const { return getLine(); }
 		bool          hasOwner          (void) const;

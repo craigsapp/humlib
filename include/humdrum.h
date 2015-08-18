@@ -5,7 +5,7 @@
 // Filename:      humdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Include file for working with minHumdrum library.
 //

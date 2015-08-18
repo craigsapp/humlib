@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileStructure.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFileStructure.cpp
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to further process HumdrumFileBase content, primarily
 //                rhythmic analyses, but also parses global and local
@@ -465,7 +465,7 @@ bool HumdrumFileStructure::analyzeDurationsOfNonRhythmicSpines(void) {
 			if (getTrackEnd(i, j)->hasRhythm()) {
 				continue;
 			}
-			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j), 
+			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j),
 					getTrackEnd(i, j))) {
 				return false;
 			}
@@ -483,7 +483,7 @@ bool HumdrumFileStructure::analyzeDurationsOfNonRhythmicSpines(void) {
 //   return the smallest positive duration.
 //
 
-HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs, 
+HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 		vector<HumNum>& durstate) {
 	HumNum mindur = 0;
 	bool allzero = true;
@@ -713,9 +713,9 @@ bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
 //
 // HumdrumFileStructure::analyzeRhythmOfFloatingSpine --  This analysis
 //    function is used to analyze the rhythm of spines which do not start at
-//    the beginning of the data.  The function searches for the first line 
-//    which has an assigned durationFromStart value, and then uses that 
-//    as the basis for assigning the initial durationFromStart position 
+//    the beginning of the data.  The function searches for the first line
+//    which has an assigned durationFromStart value, and then uses that
+//    as the basis for assigning the initial durationFromStart position
 //    for the spine.
 //
 
@@ -760,7 +760,7 @@ bool HumdrumFileStructure::analyzeRhythmOfFloatingSpine(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::analyzeNullLineRhythms -- When a series of null-token 
+// HumdrumFileStructure::analyzeNullLineRhythms -- When a series of null-token
 //    data line occur between two data lines possessing a start duration,
 //    then split the duration between those two lines amongst the null-token
 //    lines.  For example if a data line starts at time 15, and there is one
@@ -884,14 +884,14 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 	int tcount = token->getPreviousTokenCount();
 	while (tcount > 0) {
 		for (int i=1; i<tcount; i++) {
-			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i), 
+			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i),
 					current)) {
 				return false;
 			}
 		}
 		if (token->isData()) {
 			if (!token->isNull()) {
-				token->setDuration(current->getDurationFromStart() - 
+				token->setDuration(current->getDurationFromStart() -
 						token->getDurationFromStart());
 				current = token;
 			}

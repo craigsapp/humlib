@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 17 20:39:22 PDT 2015
+// Last Modified: Tue Aug 18 02:32:51 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -17,9 +17,9 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
-   and the following disclaimer in the documentation and/or other materials 
+   and the following disclaimer in the documentation and/or other materials
    provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -141,9 +141,18 @@ class HumHash {
 		void           deleteValue         (const string& ns2, const string& key);
 		void           deleteValue         (const string& ns1, const string& ns2,
 		                                    const string& key);
+		vector<string> getKeys             (void) const;
+		vector<string> getKeys             (const string& ns) const;
 		vector<string> getKeys             (const string& ns1,
 		                                    const string& ns2) const;
 		bool           hasParameters       (void) const;
+		bool           hasParameters       (const string& ns) const;
+		bool           hasParameters       (const string& ns1,
+		                                    const string& ns2) const;
+		int            getParameterCount   (void) const;
+		int            getParameterCount   (const string& ns) const;
+		int            getParameterCount   (const string& ns1,
+		                                    const string& ns2) const;
 		void           setPrefix           (const string& value);
 
 	protected:
@@ -258,7 +267,7 @@ class HumAddress {
 		const string& getSpineInfo      (void) const;
 		int           getTrack          (void) const;
 		int           getSubtrack       (void) const;
-		string        getTrackString    (void) const;
+		string        getTrackString    (string separator = ".") const;
 		HumdrumLine*  getLine           (void) const;
 		HumdrumLine*  getOwner          (void) const { return getLine(); }
 		bool          hasOwner          (void) const;
@@ -544,7 +553,7 @@ class HumdrumToken : public string, public HumHash {
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
-		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm 
+		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm
 		// recursively.
 		int rhycheck;
 

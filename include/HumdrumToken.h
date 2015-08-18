@@ -5,7 +5,7 @@
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumToken.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to work with Humdrum fields.
 //
@@ -140,7 +140,7 @@ class HumdrumToken : public string, public HumHash {
 		// that preced this one.
 		vector<HumdrumToken*> previousNonNullTokens;
 
-		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm 
+		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm
 		// recursively.
 		int rhycheck;
 

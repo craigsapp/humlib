@@ -5,7 +5,7 @@
 // Filename:      HumdrumFile.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFile.cpp
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to add structural analysis to HumdrumFileBase class.
 //

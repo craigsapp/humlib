@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 17 20:39:22 PDT 2015
+// Last Modified: Tue Aug 18 02:32:51 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -17,9 +17,9 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
-   and the following disclaimer in the documentation and/or other materials 
+   and the following disclaimer in the documentation and/or other materials
    provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -42,7 +42,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumAddress::HumAddress --
+// HumAddress::HumAddress -- HumAddress constructor.
 //
 
 HumAddress::HumAddress(void) {
@@ -56,7 +56,7 @@ HumAddress::HumAddress(void) {
 
 //////////////////////////////
 //
-// HumAddress::~HumAddress --
+// HumAddress::~HumAddress -- HumAddress deconstructor.
 //
 
 HumAddress::~HumAddress() {
@@ -70,7 +70,10 @@ HumAddress::~HumAddress() {
 
 //////////////////////////////
 //
-// HumAddress::getLineIndex -- Returns -1 if not owned by a HumdrumLine.
+// HumAddress::getLineIndex -- Returns the line index in the owning HumdrumFile
+//    for the token associated with the address.  Returns -1 if not owned by a
+//    HumdrumLine (or line assignments have not been made for tokens in the
+//    file).
 //
 
 int  HumAddress::getLineIndex(void) const {
@@ -85,10 +88,10 @@ int  HumAddress::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getLineNumber --
+// HumAddress::getLineNumber --  Similar to getLineIndex() but adds one.
 //
 
-int  HumAddress::getLineNumber(void) const {
+int HumAddress::getLineNumber(void) const {
 	return getLineIndex() + 1;
 }
 
@@ -96,10 +99,11 @@ int  HumAddress::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getFieldIndex --
+// HumAddress::getFieldIndex -- Returns the field index on the line of the
+//     token associated with the address.
 //
 
-int  HumAddress::getFieldIndex(void) const {
+int HumAddress::getFieldIndex(void) const {
 	return fieldindex;
 }
 
@@ -107,7 +111,8 @@ int  HumAddress::getFieldIndex(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getDataType --
+// HumAddress::getDataType -- Return the exclusive interpretation string of the
+//    token associated with the address.
 //
 
 const HumdrumToken& HumAddress::getDataType(void) const {
@@ -123,7 +128,13 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSpineInfo --
+// HumAddress::getSpineInfo -- Return the spine information for the token
+//     associated with the address.  Examples: "1" the token is in the first
+//     (left-most) spine, and there are no active subspines for the spine.
+//     "(1)a"/"(1)b" are the spine descriptions of the two subspines after
+//     a split manipluator (*^).  "((1)a)b" is the second subsubspine of the
+//     first subspine for spine 1.
+//
 //
 
 const string& HumAddress::getSpineInfo(void) const {
@@ -134,7 +145,9 @@ const string& HumAddress::getSpineInfo(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getTrack --
+// HumAddress::getTrack -- The track number of the given spine.  This is the
+//   first number in the spine info string.  The track number is the same
+//   as a spine number.
 //
 
 int HumAddress::getTrack(void) const {
@@ -145,7 +158,16 @@ int HumAddress::getTrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSubTrack --
+// HumAddress::getSubTrack -- The subtrack number of the given spine.  This
+//   functions in a similar manner to layer numbers in MEI data.  The first
+//   subspine of a spine is always subtrack 1, regardless of whether or not
+//   an exchange manipulator (*x) was used to switch the left-to-right ordering
+//   of the spines in the file.  All subspines regardless of their splitting
+//   origin are given sequential subtrack numbers.  For example if the spine
+//   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
+//   subspine only is split--then the subspines are labeled as subtracks "1",
+//   "2", "3" respectively.  When a track has only one subspine (i.e., it has
+//   been split), the subtrack value will be "0".
 //
 
 int HumAddress::getSubtrack(void) const {
@@ -156,16 +178,20 @@ int HumAddress::getSubtrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getTrackString --
+// HumAddress::getTrackString --  Return the track and subtrack as a string.
+//      The returned string will have the track number if the subspine value
+//      is zero.  The optional separator parameter is used to separate the
+//      track number from the subtrack number.
+//        default value: separator = "."
 //
 
-string HumAddress::getTrackString(void) const {
+string HumAddress::getTrackString(string separator) const {
 	string output;
 	int thetrack    = getTrack();
 	int thesubtrack = getSubtrack();
 	output += to_string(thetrack);
 	if (thesubtrack > 0) {
-		output += '.' + to_string(thesubtrack);
+		output += separator + to_string(thesubtrack);
 	}
 	return output;
 }
@@ -174,7 +200,9 @@ string HumAddress::getTrackString(void) const {
 
 //////////////////////////////
 //
-// HumAddress::setOwner --
+// HumAddress::setOwner -- Stores a pointer to the HumrumLine on which
+//   the token associated with this address belongs.  When not owned by
+//   a HumdrumLine, the parameter's value should be NULL.
 //
 
 void HumAddress::setOwner(HumdrumLine* aLine) {
@@ -186,7 +214,8 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //////////////////////////////
 //
 // HumAddress::getLine -- return the HumdrumLine which owns the token
-//    associated with this address.
+//    associated with this address.  Returns NULL if it does not belong
+//    to a HumdrumLine object.
 //
 
 HumdrumLine* HumAddress::getLine(void) const {
@@ -197,8 +226,8 @@ HumdrumLine* HumAddress::getLine(void) const {
 
 //////////////////////////////
 //
-// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the specified
-//    token.
+// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the token
+//    associated with the address.
 //
 
 bool HumAddress::hasOwner(void) const {
@@ -209,7 +238,9 @@ bool HumAddress::hasOwner(void) const {
 
 //////////////////////////////
 //
-// HumAddress::setFieldIndex --
+// HumAddress::setFieldIndex -- Set the field index of associated token
+//   in the HumdrumLine owner.  If the token is now owned by a HumdrumLine,
+//   then the input parameter should be -1.
 //
 
 void HumAddress::setFieldIndex(int index) {
@@ -217,56 +248,14 @@ void HumAddress::setFieldIndex(int index) {
 }
 
 
-/*
-//////////////////////////////
-//
-// HumAddress::setDataType --
-//
-
-void HumAddress::setDataType(const string& datatype) {
-	switch (datatype.size()) {
-		case 0:
-			cerr << "Error: cannot have an empty data type." << endl;
-			exit(1);
-		case 1:
-			if (datatype[0] == '*') {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else {
-				exinterp = "**" + datatype;
-				return;
-			}
-		case 2:
-			if ((datatype[0] == '*') && (datatype[1] == '*')) {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else if (datatype[1] == '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-		default:
-			if (datatype[0] != '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else if (datatype[1] == '*') {
-				exinterp = datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-	}
-}
-
-*/
-
 
 //////////////////////////////
 //
-// HumAddress::setSpineInfo --
+// HumAddress::setSpineInfo -- Set the spine description of the associated
+//     token.  For example "2" for the second spine (from the left), or
+//     "((2)a)b" for a subspine created as the left subspine of the main
+//     spine and then as the right subspine of that subspine.  This function
+//     is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setSpineInfo(const string& spineinfo) {
@@ -277,7 +266,11 @@ void HumAddress::setSpineInfo(const string& spineinfo) {
 
 //////////////////////////////
 //
-// HumAddress::setTrack --
+// HumAddress::setTrack -- Set the track number of the associated token.
+//   This should always be the first number in the spine information string,
+//   or -1 if the spine info is empty.  Tracks are limited to an arbitrary
+//   count of 1000 (could be increased in the future if needed).  This function
+//   is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setTrack(int aTrack, int aSubtrack) {
@@ -288,7 +281,7 @@ void HumAddress::setTrack(int aTrack, int aSubtrack) {
 
 void HumAddress::setTrack(int aTrack) {
 	if (aTrack < 0) {
-		aTrack = 0;
+		aTrack = -1;
 	}
 	if (aTrack > 1000) {
 		aTrack = 1000;
@@ -300,12 +293,19 @@ void HumAddress::setTrack(int aTrack) {
 
 //////////////////////////////
 //
-// HumAddress::setSubtrack --
+// HumAddress::setSubtrack -- Set the subtrack of the spine.
+//   If the token is the only one active for a spine, the subtrack should
+//   be set to zero.  If there are more than one subtracks for the spine, this
+//   is the one-offset index of the spine (be careful if a subspine column
+//   is exchanged with another spine other than the one from which it was
+//   created.  In this case the subtrack number is not useful to calculate
+//   the field index of other subtracks for the given track.
+//   This function is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setSubtrack(int aSubtrack) {
 	if (aSubtrack < 0) {
-		aSubtrack = 0;
+		aSubtrack = -1;
 	}
 	if (aSubtrack > 1000) {
 		aSubtrack = 1000;
@@ -317,7 +317,8 @@ void HumAddress::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
-// HumHash::HumHash --
+// HumHash::HumHash -- HumHash contructor.  The data storage is empty
+//    until the first parameter in the Hash is set.
 //
 
 HumHash::HumHash(void) {
@@ -328,7 +329,8 @@ HumHash::HumHash(void) {
 
 //////////////////////////////
 //
-// HumHash::~HumHash --
+// HumHash::~HumHash -- The HumHash deconstructor, which removed any
+//    allocated storage before the object dies.
 //
 
 HumHash::~HumHash() {
@@ -342,7 +344,15 @@ HumHash::~HumHash() {
 
 //////////////////////////////
 //
-// HumHash::getValue --
+// HumHash::getValue -- Returns the value specified by the given key.
+//    If there is no colon in the key then return the value for the key
+//    in the default namespaces (NS1="" and NS2="").  If there is one colon,
+//    then the two pieces of the string as NS2 and the key, with NS1="".
+//    If there are two colons, then that specified the complete namespaces/key
+//    address of the value.  The namespaces and key can be specified as
+//    separate parameters in a similar manner to the single-string version.
+//    But in these cases colon concatenation of the namespaces and/or key
+//    are not allowed.
 //
 
 string HumHash::getValue(const string& key) const {
@@ -396,7 +406,13 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueInt --
+// HumHash::getValueInt -- Return the value as an integer.  The value must
+//   start with a number and have no text before it; otherwise the
+//   returned value will be "0".  The HumHash class is aware of fractional
+//   values, so the integer form of the fraction will be returned.  For
+//   example if the value is "12/7", then the return value will be "1"
+//   since the integer part of 12/7 is 1 with a remainder of 5/7ths
+//   which will be chopped off.
 //
 
 int HumHash::getValueInt(const string& key) const {
@@ -446,7 +462,10 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueFraction --
+// HumHash::getValueFraction -- Return the value as a HumNum fraction.
+//    If the string represents an integer, it will be preserved in the
+//    HumNum return value.  For floating-point values, the fractional
+//    part will be ignored.  For example "1.52" will be returned as "1".
 //
 
 HumNum HumHash::getValueFraction(const string& key) const {
@@ -486,7 +505,13 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueFloat --
+// HumHash::getValueFloat --  Return the floating-point interpretation
+//   of the value string.  If the string can represent a HumNum fraction,
+//   then convert the HumNum interpretation as a floating point number.
+//   For example "1.25" and "5/4" will both return 1.25.  The value
+//   cannot contain a slash unless it is part of the first fraction
+//   on in the value string (this may be changed when regular expressions
+//   are used to implement this fucntion).
 //
 
 double HumHash::getValueFloat(const string& key) const {
@@ -536,7 +561,13 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueBool --
+// HumHash::getValueBool -- Return true or false based on the
+//   value.  If the value is "0" or false, then the function
+//   will return false.  If the value is anything else, then
+//   true will be returned.  If the parameter is not defined
+//   in the HumHash, then false will also be defined.
+//   See also hasParameter() if you do not like this last
+//   behavior.
 //
 
 bool HumHash::getValueBool(const string& key) const {
@@ -577,7 +608,14 @@ bool HumHash::getValueBool(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::setValue --
+// HumHash::setValue -- Set the parameter to the given value,
+//     over-writing any previous value for the parameter.  The
+//     value is any arbitrary string, but preferrably does not
+//     include tabs or colons.  If a colon is needed, then specify
+//     as "&colon;" without the quotes.  Values such as integers
+//     fractions and floats can be specified, and these wil be converted
+//     internally into strings (use getValueInt() or getValueFloat()
+//     to recover the original type).
 //
 
 void HumHash::setValue(const string& key, const string& value) {
@@ -603,7 +641,6 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 	initializeParameters();
 	(*parameters)[ns1][ns2][key] = value;
 }
-
 
 
 void HumHash::setValue(const string& key, int value) {
@@ -657,7 +694,6 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 }
 
 
-
 void HumHash::setValue(const string& key, double value) {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
@@ -687,7 +723,13 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getKeys --
+// HumHash::getKeys -- Return a list of keys in a particular namespace
+//     combination.  With no parameters, a complete list of all
+//     namespaces/keys will be returned.  Giving one parameter will
+//     produce a list will give all NS2:key values in the NS1 namespace.
+//     If there is a colon in the single paramter verion of the function,
+//     then this will be interpreted as "NS1", "NS2" version of the paramters
+//     described above.
 //
 
 vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
@@ -702,11 +744,93 @@ vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 }
 
 
+vector<string> HumHash::getKeys(const string& ns) const {
+	vector<string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getKeys(ns1, ns2);
+	}
+
+	for (auto& it1 : (*parameters)[ns]) {
+		for (auto& it2 : it1.second) {
+			output.push_back(it1.first + ":" + it2.first);
+		}
+	}
+	return output;
+}
+
+
+vector<string> HumHash::getKeys(void) const {
+	vector<string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			for (auto it3 : it2.second) {
+				output.push_back(it1.first + ":" + it2.first + ":" + it3.first);
+			}
+		}
+	}
+	return output;
+}
+
+
 
 //////////////////////////////
 //
-// HumHash::hasParameters -- Returns true if at least one parameter.
+// HumHash::hasParameters -- Returns true if at least one parameter is defined
+//     in the HumHash object (when no arguments are given to the function).
+//     When two strings are given as arguments, the function checks to see if
+//     the given namespace pair has any keys.  If only one string argument,
+//     then check if the given NS1 has any parameters, unless there is a
+//     colon in the string which means to check NS1:NS2.
 //
+
+bool HumHash::hasParameters(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	if (parameters->size() == 0) {
+		return false;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return false;
+	}
+	auto it2 = (*parameters)[ns1].find(ns2);
+	if (it2 == (*parameters)[ns1].end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+bool HumHash::hasParameters(const string& ns) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return hasParameters(ns1, ns2);
+	}
+
+	auto it = parameters->find(ns);
+	if (it == parameters->end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 
 bool HumHash::hasParameters(void) const {
 	if (parameters == NULL) {
@@ -715,7 +839,7 @@ bool HumHash::hasParameters(void) const {
 	if (parameters->size() == 0) {
 		return false;
 	}
-	for (auto& it1 : (*parameters)) {
+	for (auto& it1 : *parameters) {
 		for (auto& it2 : it1.second) {
 			if (it2.second.size() == 0) {
 				continue;
@@ -731,8 +855,81 @@ bool HumHash::hasParameters(void) const {
 
 //////////////////////////////
 //
+// HumHash::getParameterCount -- Return a count of the parameters which are
+//     stored in the HumHash.  If no arguments, then count all value in
+//     all namespaces.  If two arguments, then return the count for a
+//     specific NS1:NS2 namespace.  If one argument, then return the
+//     parameters in NS1, but if there is a colon in the string,
+//     return the parameters in NS1:NS2.
+//
+//
+
+int HumHash::getParameterCount(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	if (parameters->size() == 0) {
+		return 0;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return 0;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return 0;
+	}
+	return it2->second.size();
+}
+
+
+int HumHash::getParameterCount(const string& ns) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getParameterCount(ns1, ns2);
+	}
+
+	auto it1 = parameters->find(ns);
+	if (it1 == parameters->end()) {
+		return false;
+	}
+	int sum = 0;
+	for (auto& it2 : it1->second) {
+		sum += it2.second.size();
+	}
+	return sum;
+}
+
+
+int HumHash::getParameterCount(void) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	if (parameters->size() == 0) {
+		return 0;
+	}
+	int sum = 0;
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			sum += it2.second.size();
+		}
+	}
+	return sum;
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::isDefined -- Returns true if the given parameter exists in the
-//    map.
+//    map.   Format of the input string:   NS1:NS2:key or "":NS2:key for the
+//    two argument version of the function.  OR "":"":key if no colons in
+//    single string argument version.
 //
 
 bool HumHash::isDefined(const string& key) const {
@@ -770,7 +967,9 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::deleteValue --
+// HumHash::deleteValue -- Delete the given paramter key from the HumHash
+//   object.  Three string version is N1,NS2,key; two string version is
+//   "",NS2,key; and one argument version is "","",key.
 //
 
 void HumHash::deleteValue(const string& key) {
@@ -823,7 +1022,8 @@ void HumHash::deleteValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::initializeParameters --
+// HumHash::initializeParameters -- Create the map structure if it does not
+//     already exist.
 //
 
 void HumHash::initializeParameters(void) {
@@ -836,7 +1036,8 @@ void HumHash::initializeParameters(void) {
 
 //////////////////////////////
 //
-// HumHash::getKeyList --
+// HumHash::getKeyList -- Return a list of colon separated values from
+//      the string.
 //
 
 vector<string> HumHash::getKeyList(const string& keys) const {
@@ -857,7 +1058,10 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 //////////////////////////////
 //
 // HumHash::setPrefix: initial string to print when using
-//   operator<<.
+//   operator<<.  This is used for including the "!" for lcoal
+//   comments or "!!" for global comments.   The prefix will
+//   remain the same until it is changed.  The default prefix
+//   of the object it the empty string.
 //
 
 void HumHash::setPrefix(const string& value) {
@@ -869,7 +1073,7 @@ void HumHash::setPrefix(const string& value) {
 
 //////////////////////////////
 //
-// operator<< --
+// operator<< -- Print a list of the parameters in a HumHash object.
 //
 
 ostream& operator<<(ostream& out, const HumHash& hash) {
@@ -906,7 +1110,6 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 
 	return out;
 }
-
 
 
 
@@ -2369,10 +2572,10 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 
 //////////////////////////////
 //
-// HumdrumFileBase::analyzeNonNullDataTokens -- For null data tokens, indicate 
-//    the previous non-null token which the null token refers to.  After 
-//    a spine merger, there may be multiple previous tokens, so you would 
-//		have to decide on the actual source token on based on subtrack or 
+// HumdrumFileBase::analyzeNonNullDataTokens -- For null data tokens, indicate
+//    the previous non-null token which the null token refers to.  After
+//    a spine merger, there may be multiple previous tokens, so you would
+//		have to decide on the actual source token on based on subtrack or
 //    subspine information.  The function also gives links to the previous/next
 //    non-null tokens, skipping over intervening null data tokens.
 //
@@ -2975,7 +3178,7 @@ bool HumdrumFileStructure::analyzeDurationsOfNonRhythmicSpines(void) {
 			if (getTrackEnd(i, j)->hasRhythm()) {
 				continue;
 			}
-			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j), 
+			if (!assignDurationsToNonRhythmicTrack(getTrackEnd(i, j),
 					getTrackEnd(i, j))) {
 				return false;
 			}
@@ -2993,7 +3196,7 @@ bool HumdrumFileStructure::analyzeDurationsOfNonRhythmicSpines(void) {
 //   return the smallest positive duration.
 //
 
-HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs, 
+HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 		vector<HumNum>& durstate) {
 	HumNum mindur = 0;
 	bool allzero = true;
@@ -3223,9 +3426,9 @@ bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
 //
 // HumdrumFileStructure::analyzeRhythmOfFloatingSpine --  This analysis
 //    function is used to analyze the rhythm of spines which do not start at
-//    the beginning of the data.  The function searches for the first line 
-//    which has an assigned durationFromStart value, and then uses that 
-//    as the basis for assigning the initial durationFromStart position 
+//    the beginning of the data.  The function searches for the first line
+//    which has an assigned durationFromStart value, and then uses that
+//    as the basis for assigning the initial durationFromStart position
 //    for the spine.
 //
 
@@ -3270,7 +3473,7 @@ bool HumdrumFileStructure::analyzeRhythmOfFloatingSpine(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::analyzeNullLineRhythms -- When a series of null-token 
+// HumdrumFileStructure::analyzeNullLineRhythms -- When a series of null-token
 //    data line occur between two data lines possessing a start duration,
 //    then split the duration between those two lines amongst the null-token
 //    lines.  For example if a data line starts at time 15, and there is one
@@ -3394,14 +3597,14 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 	int tcount = token->getPreviousTokenCount();
 	while (tcount > 0) {
 		for (int i=1; i<tcount; i++) {
-			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i), 
+			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i),
 					current)) {
 				return false;
 			}
 		}
 		if (token->isData()) {
 			if (!token->isNull()) {
-				token->setDuration(current->getDurationFromStart() - 
+				token->setDuration(current->getDurationFromStart() -
 						token->getDurationFromStart());
 				current = token;
 			}
@@ -5093,9 +5296,19 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 
 //////////////////////////////
 //
-// Convert::recipToDuration --
-//     default value: scale = 4 (duration in terms of quarter notes)
-//     default value: separator = " "
+// Convert::recipToDuration -- Convert **recip rhythmic values into
+//     rational number durations in terms of quarter ntoes.  For example "4"
+//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
+//     is a scaling factor which can change the rhytmic value's base duration.
+//     Giving a scale of 1 will return the duration in whole note units, so
+//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
+//     3/2 will give the duration in terms of dotted-quarter note units.
+//     The third parameter is the subtoken separate.  For example if the input
+//     string contains a space, anything after the first space will be ignored
+//     when extracting the string.  **kern data which also includes the pitch
+//     along with the rhtym can also be given and will be ignored.
+//        default value: scale = 4 (duration in terms of quarter notes)
+//        default value: separator = " " (subtoken separator)
 //
 
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
@@ -5186,7 +5399,8 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 //////////////////////////////
 //
 // Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
 //
 
 void Convert::replaceOccurrences(string& source, const string& search,

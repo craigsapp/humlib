@@ -5,7 +5,7 @@
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to store Humdrum text lines and analytic markup
 //                of the line.

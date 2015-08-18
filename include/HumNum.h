@@ -5,7 +5,7 @@
 // Filename:      HumNum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumNum.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Rational number class for durations.
 //

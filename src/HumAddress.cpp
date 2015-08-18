@@ -5,7 +5,7 @@
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumAddress.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Used to store the location of a token in a HumdrumFile.
 //
@@ -19,7 +19,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumAddress::HumAddress --
+// HumAddress::HumAddress -- HumAddress constructor.
 //
 
 HumAddress::HumAddress(void) {
@@ -33,7 +33,7 @@ HumAddress::HumAddress(void) {
 
 //////////////////////////////
 //
-// HumAddress::~HumAddress --
+// HumAddress::~HumAddress -- HumAddress deconstructor.
 //
 
 HumAddress::~HumAddress() {
@@ -47,7 +47,10 @@ HumAddress::~HumAddress() {
 
 //////////////////////////////
 //
-// HumAddress::getLineIndex -- Returns -1 if not owned by a HumdrumLine.
+// HumAddress::getLineIndex -- Returns the line index in the owning HumdrumFile
+//    for the token associated with the address.  Returns -1 if not owned by a
+//    HumdrumLine (or line assignments have not been made for tokens in the
+//    file).
 //
 
 int  HumAddress::getLineIndex(void) const {
@@ -62,10 +65,10 @@ int  HumAddress::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getLineNumber --
+// HumAddress::getLineNumber --  Similar to getLineIndex() but adds one.
 //
 
-int  HumAddress::getLineNumber(void) const {
+int HumAddress::getLineNumber(void) const {
 	return getLineIndex() + 1;
 }
 
@@ -73,10 +76,11 @@ int  HumAddress::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getFieldIndex --
+// HumAddress::getFieldIndex -- Returns the field index on the line of the
+//     token associated with the address.
 //
 
-int  HumAddress::getFieldIndex(void) const {
+int HumAddress::getFieldIndex(void) const {
 	return fieldindex;
 }
 
@@ -84,7 +88,8 @@ int  HumAddress::getFieldIndex(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getDataType --
+// HumAddress::getDataType -- Return the exclusive interpretation string of the
+//    token associated with the address.
 //
 
 const HumdrumToken& HumAddress::getDataType(void) const {
@@ -100,7 +105,13 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSpineInfo --
+// HumAddress::getSpineInfo -- Return the spine information for the token
+//     associated with the address.  Examples: "1" the token is in the first
+//     (left-most) spine, and there are no active subspines for the spine.
+//     "(1)a"/"(1)b" are the spine descriptions of the two subspines after
+//     a split manipluator (*^).  "((1)a)b" is the second subsubspine of the
+//     first subspine for spine 1.
+//
 //
 
 const string& HumAddress::getSpineInfo(void) const {
@@ -111,7 +122,9 @@ const string& HumAddress::getSpineInfo(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getTrack --
+// HumAddress::getTrack -- The track number of the given spine.  This is the
+//   first number in the spine info string.  The track number is the same
+//   as a spine number.
 //
 
 int HumAddress::getTrack(void) const {
@@ -122,7 +135,16 @@ int HumAddress::getTrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSubTrack --
+// HumAddress::getSubTrack -- The subtrack number of the given spine.  This
+//   functions in a similar manner to layer numbers in MEI data.  The first
+//   subspine of a spine is always subtrack 1, regardless of whether or not
+//   an exchange manipulator (*x) was used to switch the left-to-right ordering
+//   of the spines in the file.  All subspines regardless of their splitting
+//   origin are given sequential subtrack numbers.  For example if the spine
+//   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
+//   subspine only is split--then the subspines are labeled as subtracks "1",
+//   "2", "3" respectively.  When a track has only one subspine (i.e., it has
+//   been split), the subtrack value will be "0".
 //
 
 int HumAddress::getSubtrack(void) const {
@@ -133,16 +155,20 @@ int HumAddress::getSubtrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getTrackString --
+// HumAddress::getTrackString --  Return the track and subtrack as a string.
+//      The returned string will have the track number if the subspine value
+//      is zero.  The optional separator parameter is used to separate the
+//      track number from the subtrack number.
+//        default value: separator = "."
 //
 
-string HumAddress::getTrackString(void) const {
+string HumAddress::getTrackString(string separator) const {
 	string output;
 	int thetrack    = getTrack();
 	int thesubtrack = getSubtrack();
 	output += to_string(thetrack);
 	if (thesubtrack > 0) {
-		output += '.' + to_string(thesubtrack);
+		output += separator + to_string(thesubtrack);
 	}
 	return output;
 }
@@ -151,7 +177,9 @@ string HumAddress::getTrackString(void) const {
 
 //////////////////////////////
 //
-// HumAddress::setOwner --
+// HumAddress::setOwner -- Stores a pointer to the HumrumLine on which
+//   the token associated with this address belongs.  When not owned by
+//   a HumdrumLine, the parameter's value should be NULL.
 //
 
 void HumAddress::setOwner(HumdrumLine* aLine) {
@@ -163,7 +191,8 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //////////////////////////////
 //
 // HumAddress::getLine -- return the HumdrumLine which owns the token
-//    associated with this address.
+//    associated with this address.  Returns NULL if it does not belong
+//    to a HumdrumLine object.
 //
 
 HumdrumLine* HumAddress::getLine(void) const {
@@ -174,8 +203,8 @@ HumdrumLine* HumAddress::getLine(void) const {
 
 //////////////////////////////
 //
-// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the specified
-//    token.
+// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the token
+//    associated with the address.
 //
 
 bool HumAddress::hasOwner(void) const {
@@ -186,7 +215,9 @@ bool HumAddress::hasOwner(void) const {
 
 //////////////////////////////
 //
-// HumAddress::setFieldIndex --
+// HumAddress::setFieldIndex -- Set the field index of associated token
+//   in the HumdrumLine owner.  If the token is now owned by a HumdrumLine,
+//   then the input parameter should be -1.
 //
 
 void HumAddress::setFieldIndex(int index) {
@@ -194,56 +225,14 @@ void HumAddress::setFieldIndex(int index) {
 }
 
 
-/*
-//////////////////////////////
-//
-// HumAddress::setDataType --
-//
-
-void HumAddress::setDataType(const string& datatype) {
-	switch (datatype.size()) {
-		case 0:
-			cerr << "Error: cannot have an empty data type." << endl;
-			exit(1);
-		case 1:
-			if (datatype[0] == '*') {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else {
-				exinterp = "**" + datatype;
-				return;
-			}
-		case 2:
-			if ((datatype[0] == '*') && (datatype[1] == '*')) {
-				cerr << "Error: incorrect data type: " << datatype << endl;
-				exit(1);
-			} else if (datatype[1] == '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-		default:
-			if (datatype[0] != '*') {
-				exinterp = "**" + datatype;
-				return;
-			} else if (datatype[1] == '*') {
-				exinterp = datatype;
-				return;
-			} else {
-				exinterp = '*' + datatype;
-				return;
-			}
-	}
-}
-
-*/
-
 
 //////////////////////////////
 //
-// HumAddress::setSpineInfo --
+// HumAddress::setSpineInfo -- Set the spine description of the associated
+//     token.  For example "2" for the second spine (from the left), or
+//     "((2)a)b" for a subspine created as the left subspine of the main
+//     spine and then as the right subspine of that subspine.  This function
+//     is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setSpineInfo(const string& spineinfo) {
@@ -254,7 +243,11 @@ void HumAddress::setSpineInfo(const string& spineinfo) {
 
 //////////////////////////////
 //
-// HumAddress::setTrack --
+// HumAddress::setTrack -- Set the track number of the associated token.
+//   This should always be the first number in the spine information string,
+//   or -1 if the spine info is empty.  Tracks are limited to an arbitrary
+//   count of 1000 (could be increased in the future if needed).  This function
+//   is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setTrack(int aTrack, int aSubtrack) {
@@ -265,7 +258,7 @@ void HumAddress::setTrack(int aTrack, int aSubtrack) {
 
 void HumAddress::setTrack(int aTrack) {
 	if (aTrack < 0) {
-		aTrack = 0;
+		aTrack = -1;
 	}
 	if (aTrack > 1000) {
 		aTrack = 1000;
@@ -277,12 +270,19 @@ void HumAddress::setTrack(int aTrack) {
 
 //////////////////////////////
 //
-// HumAddress::setSubtrack --
+// HumAddress::setSubtrack -- Set the subtrack of the spine.
+//   If the token is the only one active for a spine, the subtrack should
+//   be set to zero.  If there are more than one subtracks for the spine, this
+//   is the one-offset index of the spine (be careful if a subspine column
+//   is exchanged with another spine other than the one from which it was
+//   created.  In this case the subtrack number is not useful to calculate
+//   the field index of other subtracks for the given track.
+//   This function is used by the HumdrumFileStructure class.
 //
 
 void HumAddress::setSubtrack(int aSubtrack) {
 	if (aSubtrack < 0) {
-		aSubtrack = 0;
+		aSubtrack = -1;
 	}
 	if (aSubtrack > 1000) {
 		aSubtrack = 1000;

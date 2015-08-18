@@ -5,7 +5,7 @@
 // Filename:      Convert.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Convert between various data representations.
 //

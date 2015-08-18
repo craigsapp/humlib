@@ -5,7 +5,7 @@
 // Filename:      Convert.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/Convert.h
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Convert between various data representations.
 //
@@ -22,9 +22,19 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// Convert::recipToDuration --
-//     default value: scale = 4 (duration in terms of quarter notes)
-//     default value: separator = " "
+// Convert::recipToDuration -- Convert **recip rhythmic values into
+//     rational number durations in terms of quarter ntoes.  For example "4"
+//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
+//     is a scaling factor which can change the rhytmic value's base duration.
+//     Giving a scale of 1 will return the duration in whole note units, so
+//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
+//     3/2 will give the duration in terms of dotted-quarter note units.
+//     The third parameter is the subtoken separate.  For example if the input
+//     string contains a space, anything after the first space will be ignored
+//     when extracting the string.  **kern data which also includes the pitch
+//     along with the rhtym can also be given and will be ignored.
+//        default value: scale = 4 (duration in terms of quarter notes)
+//        default value: separator = " " (subtoken separator)
 //
 
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
@@ -115,7 +125,8 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 //////////////////////////////
 //
 // Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
 //
 
 void Convert::replaceOccurrences(string& source, const string& search,

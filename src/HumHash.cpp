@@ -5,10 +5,98 @@
 // Filename:      HumHash.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumHash.cpp
 // Syntax:        C++11
-// vim:           ts=3
+// vim:           ts=3 noexpandtab
 //
 // Description:   Key/value parameters systems for Humdrum tokens, lines,
-//                and files.
+//                and files.  The HumHash class has a double namespace
+//                capability. Parameters are encoded in local or global
+//                comments.  Examples:
+//                    !LO:N:vis=4
+//                Namespace 1: LO (layout codes)
+//                Namespace 2: N  (Note layout codes)
+//                Key/Value  : vis=4, the "vis" key has the value "4"
+//                Local parameters apply to the next non-null token in the
+//                spine which follow them (data, measure and interpretation
+//                tokens, but not local comment tokens).  For example to apply
+//                the above example parameter to a token:
+//                   **kern
+//                   !LO:N:vis=1
+//                   1c
+//                   *-
+//                 In this case the duration of the note is a whole note, but
+//                 is should be displayed in graphical notation as a quarter
+//                 note. If there are null data or interpretation tokens
+//                 between the parameter and the note, the parameter is passed
+//                 on to the next non-null token, such as:
+//                   **kern         **kern
+//                   1e             2g
+//                   !LO:N:vis=1    !
+//							.              2a
+//                   *              *clefG2
+//                   1c             1g
+//                   *-             *-
+//                 In the above case the parameter is still applied to "1c".
+//                 Namespace(s)+Keys must be unique, since including two
+//                 parameters with the same namespace(s)/key will only
+//                 accept one setting.  Only the value of the first
+//                 duplicate parameter will be stored, and all duplicates
+//                 after the first occurrence will be ignored.  For example:
+//                   **kern
+//                   !LO:N:vis=2
+//                   !LO:N:vis=4
+//                   1c
+//                   *-
+//                  will have the value LO:N:vis set to "2" for the "1c" token.
+//                  Namespaces are optional and are indicated by an empty
+//                  string.  For example, a parameter not stored in any
+//                  namespace will have this form:
+//                     !::vis=4
+//                  To give only one namespace, the preferable form is:
+//                     !:N:vis=4
+//                  although this form can also be given:
+//                     !N::vis=4
+//                  where the second namespace is the empty string "".
+//
+//                  Multiple key values can be specified, each separated by
+//                  a colon:
+//                    !LO:N:vis=2:stem=5
+//                  this can be expanded into two local comments:
+//                    !LO:N:vis=2
+//                    !LO:N:stem=5
+//
+//                  The namespaces and keys may not contain tabs (obviously),
+//                  spaces or colons.  Preferrably they will only contain
+//                  letters, digits, and the underscore, but not start with
+//                  a digit (but the minHumdrum parser will not enforce
+//                  this preference).  Values may contain spaces (but not
+//                  tabs or colons.  If the value must include a colon it
+//                  should be given as "&colon;" (without the quotes).
+//
+//                 Global comments affect all tokens on the next non-null
+//                 line, and are similar to the above examples, but start
+//                 with two exclamation marks:
+//                   **kern         **kern
+//                   1e             2g
+//							.              2a
+//                   !!LO:N:vis=4
+//                   1c             1g
+//                   *-             *-
+//                 This will apply the parameter to both "1c" and "1g" on the
+//                 following line.  In the following case:
+//                   **kern         **kern
+//                   1e             2g
+//                   !!LO:N:vis=4
+//							.              2a
+//                   1c             1g
+//                   *-             *-
+//                  The parameter will apply to "1c", and "2a" rather than
+//                  "1g". (Currently the parameter will only be applied to
+//                  "2a", but this will be canged in the future).  Typically
+//                  global parameters are used to apply parameters to all
+//                  measures in all spines, or they may be used to display
+//                  a single text string above or below the system in the
+//                  full score (or part if it is extracted from the full
+//                  score).
 //
 
 #include <sstream>
@@ -27,7 +115,8 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumHash::HumHash --
+// HumHash::HumHash -- HumHash contructor.  The data storage is empty
+//    until the first parameter in the Hash is set.
 //
 
 HumHash::HumHash(void) {
@@ -38,7 +127,8 @@ HumHash::HumHash(void) {
 
 //////////////////////////////
 //
-// HumHash::~HumHash --
+// HumHash::~HumHash -- The HumHash deconstructor, which removed any
+//    allocated storage before the object dies.
 //
 
 HumHash::~HumHash() {
@@ -52,7 +142,15 @@ HumHash::~HumHash() {
 
 //////////////////////////////
 //
-// HumHash::getValue --
+// HumHash::getValue -- Returns the value specified by the given key.
+//    If there is no colon in the key then return the value for the key
+//    in the default namespaces (NS1="" and NS2="").  If there is one colon,
+//    then the two pieces of the string as NS2 and the key, with NS1="".
+//    If there are two colons, then that specified the complete namespaces/key
+//    address of the value.  The namespaces and key can be specified as
+//    separate parameters in a similar manner to the single-string version.
+//    But in these cases colon concatenation of the namespaces and/or key
+//    are not allowed.
 //
 
 string HumHash::getValue(const string& key) const {
@@ -106,7 +204,13 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueInt --
+// HumHash::getValueInt -- Return the value as an integer.  The value must
+//   start with a number and have no text before it; otherwise the
+//   returned value will be "0".  The HumHash class is aware of fractional
+//   values, so the integer form of the fraction will be returned.  For
+//   example if the value is "12/7", then the return value will be "1"
+//   since the integer part of 12/7 is 1 with a remainder of 5/7ths
+//   which will be chopped off.
 //
 
 int HumHash::getValueInt(const string& key) const {
@@ -156,7 +260,10 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueFraction --
+// HumHash::getValueFraction -- Return the value as a HumNum fraction.
+//    If the string represents an integer, it will be preserved in the
+//    HumNum return value.  For floating-point values, the fractional
+//    part will be ignored.  For example "1.52" will be returned as "1".
 //
 
 HumNum HumHash::getValueFraction(const string& key) const {
@@ -196,7 +303,13 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueFloat --
+// HumHash::getValueFloat --  Return the floating-point interpretation
+//   of the value string.  If the string can represent a HumNum fraction,
+//   then convert the HumNum interpretation as a floating point number.
+//   For example "1.25" and "5/4" will both return 1.25.  The value
+//   cannot contain a slash unless it is part of the first fraction
+//   on in the value string (this may be changed when regular expressions
+//   are used to implement this fucntion).
 //
 
 double HumHash::getValueFloat(const string& key) const {
@@ -246,7 +359,13 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getValueBool --
+// HumHash::getValueBool -- Return true or false based on the
+//   value.  If the value is "0" or false, then the function
+//   will return false.  If the value is anything else, then
+//   true will be returned.  If the parameter is not defined
+//   in the HumHash, then false will also be defined.
+//   See also hasParameter() if you do not like this last
+//   behavior.
 //
 
 bool HumHash::getValueBool(const string& key) const {
@@ -287,7 +406,14 @@ bool HumHash::getValueBool(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::setValue --
+// HumHash::setValue -- Set the parameter to the given value,
+//     over-writing any previous value for the parameter.  The
+//     value is any arbitrary string, but preferrably does not
+//     include tabs or colons.  If a colon is needed, then specify
+//     as "&colon;" without the quotes.  Values such as integers
+//     fractions and floats can be specified, and these wil be converted
+//     internally into strings (use getValueInt() or getValueFloat()
+//     to recover the original type).
 //
 
 void HumHash::setValue(const string& key, const string& value) {
@@ -313,7 +439,6 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 	initializeParameters();
 	(*parameters)[ns1][ns2][key] = value;
 }
-
 
 
 void HumHash::setValue(const string& key, int value) {
@@ -367,7 +492,6 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 }
 
 
-
 void HumHash::setValue(const string& key, double value) {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
@@ -397,7 +521,13 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::getKeys --
+// HumHash::getKeys -- Return a list of keys in a particular namespace
+//     combination.  With no parameters, a complete list of all
+//     namespaces/keys will be returned.  Giving one parameter will
+//     produce a list will give all NS2:key values in the NS1 namespace.
+//     If there is a colon in the single paramter verion of the function,
+//     then this will be interpreted as "NS1", "NS2" version of the paramters
+//     described above.
 //
 
 vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
@@ -412,11 +542,93 @@ vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 }
 
 
+vector<string> HumHash::getKeys(const string& ns) const {
+	vector<string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getKeys(ns1, ns2);
+	}
+
+	for (auto& it1 : (*parameters)[ns]) {
+		for (auto& it2 : it1.second) {
+			output.push_back(it1.first + ":" + it2.first);
+		}
+	}
+	return output;
+}
+
+
+vector<string> HumHash::getKeys(void) const {
+	vector<string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			for (auto it3 : it2.second) {
+				output.push_back(it1.first + ":" + it2.first + ":" + it3.first);
+			}
+		}
+	}
+	return output;
+}
+
+
 
 //////////////////////////////
 //
-// HumHash::hasParameters -- Returns true if at least one parameter.
+// HumHash::hasParameters -- Returns true if at least one parameter is defined
+//     in the HumHash object (when no arguments are given to the function).
+//     When two strings are given as arguments, the function checks to see if
+//     the given namespace pair has any keys.  If only one string argument,
+//     then check if the given NS1 has any parameters, unless there is a
+//     colon in the string which means to check NS1:NS2.
 //
+
+bool HumHash::hasParameters(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	if (parameters->size() == 0) {
+		return false;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return false;
+	}
+	auto it2 = (*parameters)[ns1].find(ns2);
+	if (it2 == (*parameters)[ns1].end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+bool HumHash::hasParameters(const string& ns) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return hasParameters(ns1, ns2);
+	}
+
+	auto it = parameters->find(ns);
+	if (it == parameters->end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 
 bool HumHash::hasParameters(void) const {
 	if (parameters == NULL) {
@@ -425,7 +637,7 @@ bool HumHash::hasParameters(void) const {
 	if (parameters->size() == 0) {
 		return false;
 	}
-	for (auto& it1 : (*parameters)) {
+	for (auto& it1 : *parameters) {
 		for (auto& it2 : it1.second) {
 			if (it2.second.size() == 0) {
 				continue;
@@ -441,8 +653,81 @@ bool HumHash::hasParameters(void) const {
 
 //////////////////////////////
 //
+// HumHash::getParameterCount -- Return a count of the parameters which are
+//     stored in the HumHash.  If no arguments, then count all value in
+//     all namespaces.  If two arguments, then return the count for a
+//     specific NS1:NS2 namespace.  If one argument, then return the
+//     parameters in NS1, but if there is a colon in the string,
+//     return the parameters in NS1:NS2.
+//
+//
+
+int HumHash::getParameterCount(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	if (parameters->size() == 0) {
+		return 0;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return 0;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return 0;
+	}
+	return it2->second.size();
+}
+
+
+int HumHash::getParameterCount(const string& ns) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	int loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getParameterCount(ns1, ns2);
+	}
+
+	auto it1 = parameters->find(ns);
+	if (it1 == parameters->end()) {
+		return false;
+	}
+	int sum = 0;
+	for (auto& it2 : it1->second) {
+		sum += it2.second.size();
+	}
+	return sum;
+}
+
+
+int HumHash::getParameterCount(void) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	if (parameters->size() == 0) {
+		return 0;
+	}
+	int sum = 0;
+	for (auto& it1 : (*parameters)) {
+		for (auto& it2 : it1.second) {
+			sum += it2.second.size();
+		}
+	}
+	return sum;
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::isDefined -- Returns true if the given parameter exists in the
-//    map.
+//    map.   Format of the input string:   NS1:NS2:key or "":NS2:key for the
+//    two argument version of the function.  OR "":"":key if no colons in
+//    single string argument version.
 //
 
 bool HumHash::isDefined(const string& key) const {
@@ -480,7 +765,9 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::deleteValue --
+// HumHash::deleteValue -- Delete the given paramter key from the HumHash
+//   object.  Three string version is N1,NS2,key; two string version is
+//   "",NS2,key; and one argument version is "","",key.
 //
 
 void HumHash::deleteValue(const string& key) {
@@ -533,7 +820,8 @@ void HumHash::deleteValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::initializeParameters --
+// HumHash::initializeParameters -- Create the map structure if it does not
+//     already exist.
 //
 
 void HumHash::initializeParameters(void) {
@@ -546,7 +834,8 @@ void HumHash::initializeParameters(void) {
 
 //////////////////////////////
 //
-// HumHash::getKeyList --
+// HumHash::getKeyList -- Return a list of colon separated values from
+//      the string.
 //
 
 vector<string> HumHash::getKeyList(const string& keys) const {
@@ -567,7 +856,10 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 //////////////////////////////
 //
 // HumHash::setPrefix: initial string to print when using
-//   operator<<.
+//   operator<<.  This is used for including the "!" for lcoal
+//   comments or "!!" for global comments.   The prefix will
+//   remain the same until it is changed.  The default prefix
+//   of the object it the empty string.
 //
 
 void HumHash::setPrefix(const string& value) {
@@ -579,7 +871,7 @@ void HumHash::setPrefix(const string& value) {
 
 //////////////////////////////
 //
-// operator<< --
+// operator<< -- Print a list of the parameters in a HumHash object.
 //
 
 ostream& operator<<(ostream& out, const HumHash& hash) {
@@ -616,7 +908,6 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 
 	return out;
 }
-
 
 
 
