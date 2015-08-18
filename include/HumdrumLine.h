@@ -23,7 +23,7 @@ using namespace std;
 
 namespace minHumdrum {
 
-class HumdrumFileBase;
+class HumdrumFile;
 
 // START_MERGE
 
@@ -81,7 +81,7 @@ class HumdrumLine : public string, public HumHash {
 		void     setDurationFromStart   (HumNum dur);
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
-		void     setOwner               (HumdrumFileBase* hfile);
+		void     setOwner               (void* hfile);
 		int      createTokensFromLine   (void);
 		void     setParameters          (HumdrumLine* pLine);
 		void     setParameters          (const string& pdata);
@@ -136,7 +136,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		HumdrumFileBase* owner;
+		void* owner;
 
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;

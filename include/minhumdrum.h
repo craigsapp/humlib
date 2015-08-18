@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 17 03:12:30 PDT 2015
+// Last Modified: Mon Aug 17 20:39:22 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -363,7 +363,7 @@ class HumdrumLine : public string, public HumHash {
 		void     setDurationFromStart   (HumNum dur);
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
-		void     setOwner               (HumdrumFileBase* hfile);
+		void     setOwner               (void* hfile);
 		int      createTokensFromLine   (void);
 		void     setParameters          (HumdrumLine* pLine);
 		void     setParameters          (const string& pdata);
@@ -418,7 +418,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		HumdrumFileBase* owner;
+		void* owner;
 
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;
@@ -566,15 +566,11 @@ class HumdrumFileBase {
 		             ~HumdrumFileBase              ();
 
 		bool          read                         (istream& infile);
-		bool          read                         (const char*   contents);
-		bool          read                         (const string& contents);
+		bool          read                         (const char*   filename);
+		bool          read                         (const string& filename);
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
-		bool          readNoRhythm                 (istream& infile);
-		bool          readNoRhythm                 (const char*   contents);
-		bool          readNoRhythm                 (const string& contents);
-		bool          readStringNoRhythm           (const char*   contents);
-		bool          readStringNoRhythm           (const string& contents);
+
 		HumdrumLine&  operator[]                   (int index);
 		void          append                       (const char* line);
 		void          append                       (const string& line);
@@ -583,33 +579,19 @@ class HumdrumFileBase {
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
-		ostream&      printDurationInfo            (ostream& out = cout);
+
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;
 		HumdrumToken* getTrackEnd                  (int track,
 		                                            int subtrack) const;
 		void          createLinesFromTokens        (void);
-		HumNum        getScoreDuration             (void) const;
-
-		// barline/measure functionality:
-		int           getBarlineCount              (void) const;
-		HumdrumLine*  getBarline                   (int index) const;
-		HumNum        getBarlineDuration           (int index) const;
-		HumNum        getBarlineDurationFromStart  (int index) const;
-		HumNum        getBarlineDurationToEnd      (int index) const;
 
 	protected:
 		bool          analyzeTokens                (void);
 		bool          analyzeSpines                (void);
-		bool          analyzeRhythm                (void);
-		bool          analyzeMeter                 (void);
 		bool          analyzeLinks                 (void);
-		bool          analyzeTokenDurations        (void);
 		bool          analyzeTracks                (void);
 		bool          analyzeLines                 (void);
-		bool          analyzeGlobalParameters      (void);
-		bool          analyzeLocalParameters       (void);
-		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		bool          adjustSpines                 (HumdrumLine& line,
 		                                            vector<string>& datatype,
 		                                            vector<string>& sinfo);
@@ -617,42 +599,16 @@ class HumdrumFileBase {
 		                                            int starti, int extra);
 		bool          stitchLinesTogether          (HumdrumLine& previous,
 		                                            HumdrumLine& next);
-		HumNum        getMinDur                    (vector<HumNum>& durs,
-		                                            vector<HumNum>& durstate);
-		bool          getTokenDurations            (vector<HumNum>& durs,
-		                                            int line);
-		bool          cleanDurs                    (vector<HumNum>& durs,
-		                                            int line);
-		bool          decrementDurStates           (vector<HumNum>& durs,
-		                                            HumNum linedur, int line);
-		bool          assignDurationsToTrack       (HumdrumToken* starttoken,
-		                                            HumNum startdur);
 		void          addToTrackStarts             (HumdrumToken* token);
-		bool          prepareDurations             (HumdrumToken* token,
-		                                            int state,
-		                                            HumNum startdur);
-		bool          setLineDurationFromStart     (HumdrumToken* token,
-		                                            HumNum dursum);
-		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
-		bool      analyzeNullLineRhythms       (void);
-		void      fillInNegativeStartTimes     (void);
-		void      assignLineDurations          (void);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* starttoken);
-		bool      analyzeNonNullDataTokens     (void);
-		void      addUniqueTokens              (vector<HumdrumToken*>& target,
-		                                        vector<HumdrumToken*>& source);
-		bool      processNonNullDataTokensForTrackForward(
+		bool          analyzeNonNullDataTokens     (void);
+		void          addUniqueTokens          (vector<HumdrumToken*>& target,
+		                                       vector<HumdrumToken*>& source);
+		bool          processNonNullDataTokensForTrackForward(
 		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
-		bool      processNonNullDataTokensForTrackBackward(
+		bool          processNonNullDataTokensForTrackBackward(
 		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
-		bool      processLocalParametersForTrack(HumdrumToken* starttok,
-		                                         HumdrumToken* current);
-		void      checkForLocalParameters       (HumdrumToken *token,
-		                                         HumdrumToken *current);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
-		                                                  HumdrumToken* ptoken);
 
 	protected:
 
@@ -687,6 +643,65 @@ class HumdrumFileStructure : public HumdrumFileBase {
 	public:
 		              HumdrumFileStructure         (void);
 		             ~HumdrumFileStructure         ();
+
+		bool          read                         (istream& infile);
+		bool          read                         (const char*   filename);
+		bool          read                         (const string& filename);
+		bool          readString                   (const char*   contents);
+		bool          readString                   (const string& contents);
+
+		bool          readNoRhythm                 (istream& infile);
+		bool          readNoRhythm                 (const char*   filename);
+		bool          readNoRhythm                 (const string& filename);
+		bool          readStringNoRhythm           (const char*   contents);
+		bool          readStringNoRhythm           (const string& contents);
+
+		// rhythmic analysis related functionality:
+		HumNum        getScoreDuration             (void) const;
+		ostream&      printDurationInfo            (ostream& out = cout);
+
+		// barline/measure functionality:
+		int           getBarlineCount              (void) const;
+		HumdrumLine*  getBarline                   (int index) const;
+		HumNum        getBarlineDuration           (int index) const;
+		HumNum        getBarlineDurationFromStart  (int index) const;
+		HumNum        getBarlineDurationToEnd      (int index) const;
+
+	protected:
+
+		bool          analyzeStructure             (void);
+		bool          analyzeRhythm                (void);
+		bool          analyzeMeter                 (void);
+		bool          analyzeTokenDurations        (void);
+		bool          analyzeGlobalParameters      (void);
+		bool          analyzeLocalParameters       (void);
+		bool          analyzeDurationsOfNonRhythmicSpines(void);
+		HumNum        getMinDur                    (vector<HumNum>& durs,
+		                                            vector<HumNum>& durstate);
+		bool          getTokenDurations            (vector<HumNum>& durs,
+		                                            int line);
+		bool          cleanDurs                    (vector<HumNum>& durs,
+		                                            int line);
+		bool          decrementDurStates           (vector<HumNum>& durs,
+		                                            HumNum linedur, int line);
+		bool          assignDurationsToTrack       (HumdrumToken* starttoken,
+		                                            HumNum startdur);
+		bool          prepareDurations             (HumdrumToken* token,
+		                                            int state,
+		                                            HumNum startdur);
+		bool          setLineDurationFromStart     (HumdrumToken* token,
+		                                            HumNum dursum);
+		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool      analyzeNullLineRhythms       (void);
+		void      fillInNegativeStartTimes     (void);
+		void      assignLineDurations          (void);
+		bool      processLocalParametersForTrack(HumdrumToken* starttok,
+		                                         HumdrumToken* current);
+		void      checkForLocalParameters       (HumdrumToken *token,
+		                                         HumdrumToken *current);
+		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                                  HumdrumToken* ptoken);
+
 };
 
 

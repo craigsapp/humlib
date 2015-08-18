@@ -299,7 +299,7 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 	if (owner == NULL) {
 		return 0;
 	}
-	return owner->getScoreDuration() -  durationFromStart;
+	return ((HumdrumFile*)owner)->getScoreDuration() -  durationFromStart;
 }
 
 
@@ -326,7 +326,7 @@ HumdrumToken* HumdrumLine::getTrackStart(int track) const {
 	if (owner == NULL) {
 		return NULL;
 	} else {
-		return owner->getTrackStart(track);
+		return ((HumdrumFile*)owner)->getTrackStart(track);
 	}
 }
 
@@ -767,7 +767,7 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 //    manages this object.
 //
 
-void HumdrumLine::setOwner(HumdrumFileBase* hfile) {
+void HumdrumLine::setOwner(void* hfile) {
 	owner = hfile;
 }
 
