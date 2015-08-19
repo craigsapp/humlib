@@ -105,6 +105,34 @@ class HumdrumFileBase {
 
 		// ticksperquarternote: this is the number of tick
 		int ticksperquarternote;
+
+	public:
+		// Dummy functions to allow the HumdrumFile class's inheritance
+		// to be shifted between HumdrumFileContent (the top-level default), 
+      // HumdrumFileStructure (mid-level interface), or HumdrumFileBase
+		// (low-level interface).
+
+		// 
+		// HumdrumFileStructure public functions:
+		//
+		bool readNoRhythm      (istream& infile) { return read(infile); };
+		bool readNoRhythm      (const char*   filename) {return read(filename);};
+		bool readNoRhythm      (const string& filename) {return read(filename);};
+		bool readStringNoRhythm(const char*   contents) {return read(contents);};
+		bool readStringNoRhythm(const string& contents) {return read(contents);};
+		HumNum       getScoreDuration           (void) const { return 0; };
+		ostream&     printDurationInfo          (ostream& out=cout) {return out;};
+		int          tpq                        (void) { return 0; }
+		int          getBarlineCount            (void) const { return 0; }
+		HumdrumLine* getBarline                 (int index) const { return NULL };
+		HumNum       getBarlineDuration         (int index) const { return 0; };
+		HumNum       getBarlineDurationFromStart(int index) const { return 0; };
+		HumNum       getBarlineDurationToEnd    (int index) const { return 0; };
+
+		// HumdrumFileContent public functions:
+
+
+	
 };
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile);

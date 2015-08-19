@@ -22,7 +22,11 @@ namespace minHumdrum {
 
 // START_MERGE
 
-class HumdrumFile : public HumdrumFileContent {
+#ifndef HUMDRUMFILE_PARENT
+	#define HUMDRUMFILE_PARENT HumdrumFileContent
+#endif
+
+class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile         (void);
 		             ~HumdrumFile         ();
