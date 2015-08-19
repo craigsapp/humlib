@@ -2,3 +2,6 @@ obj
 lib
 err
 bin/test*
+bin
+myprograms
+test.krn

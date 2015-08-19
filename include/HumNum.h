@@ -29,6 +29,7 @@ class HumNum {
 		         HumNum             (int numerator, int denominator);
 		         HumNum             (const HumNum& rat);
 		         HumNum             (const string& ratstring);
+		         HumNum             (const char* ratstring);
 		        ~HumNum             ();
 
 		bool     isNegative         (void) const;
@@ -48,6 +49,7 @@ class HumNum {
 		void     setValue           (int numerator);
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const string& ratstring);
+		void     setValue           (const char* ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);

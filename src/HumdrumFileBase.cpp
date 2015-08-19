@@ -32,6 +32,7 @@ namespace minHumdrum {
 
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
+	ticksperquarternote = -1;
 }
 
 

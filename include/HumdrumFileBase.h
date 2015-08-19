@@ -102,6 +102,9 @@ class HumdrumFileBase {
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
+
+		// ticksperquarternote: this is the number of tick
+		int ticksperquarternote;
 };
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile);

@@ -382,7 +382,7 @@ HumNum HumdrumLine::getDurationToBarline(void) const {
 //  Default value: beatdur   = 1.
 //
 
-HumNum HumdrumLine::getBeat(const HumNum& beatdur) const {
+HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 	if (beatdur.isZero()) {
 		return beatdur;
 	}

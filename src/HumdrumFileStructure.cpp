@@ -15,6 +15,7 @@
 //
 
 #include "HumdrumFileStructure.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -169,6 +170,57 @@ HumNum HumdrumFileStructure::getScoreDuration(void) const {
 		return 0;
 	}
 	return lines.back()->getDurationFromStart();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::tpq -- "Ticks per Quarter-note".  Returns the minimal
+//    number of integral time units that divide a quarter note into equal
+//    subdivisions.  This value is needed to convert Humdrum data into
+//    MIDI file data, MuseData, and MusicXML data.  Also useful for timebase
+//    type of operations on the data and describing the durations in terms
+//    of integers rather than with fractions.  This function will also 
+//    consider the implicit durations of non-rhythmic spine data.
+//
+
+int HumdrumFileStructure::tpq(void) {
+	if (ticksperquarternote > 0) {
+		return ticksperquarternote;
+	}
+	set<HumNum> durlist = getPositiveLineDurations();
+	vector<int> dems;
+	for (auto& it : durlist) {
+		if (it.getDenominator() > 1) {
+			dems.push_back(it.getDenominator());
+		}
+	}
+	int lcm = 1;
+	if (dems.size() > 0) {
+		lcm = Convert::getLcm(dems);
+	}
+	ticksperquarternote = lcm;
+	return ticksperquarternote;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getPositiveLineDurations -- Return a list of all
+//    unique token durations in the file.  This function could be expanded
+//    to limit the search to a range of lines or to a specific track.
+//
+
+set<HumNum> HumdrumFileStructure::getPositiveLineDurations(void) {
+	set<HumNum> output;
+	for (auto& line : lines) {
+		if (line->getDuration().isPositive()) {
+			output.insert(line->getDuration());
+		}
+	}
+	return output;
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 18 02:32:51 PDT 2015
+// Last Modified: Wed Aug 19 02:07:32 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -17,9 +17,9 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+   list of conditions and the following disclaimer. 
 2. Redistributions in binary form must reproduce the above copyright notice,
-   and the following disclaimer in the documentation and/or other materials
+   and the following disclaimer in the documentation and/or other materials 
    provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -130,9 +130,9 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 //
 // HumAddress::getSpineInfo -- Return the spine information for the token
 //     associated with the address.  Examples: "1" the token is in the first
-//     (left-most) spine, and there are no active subspines for the spine.
-//     "(1)a"/"(1)b" are the spine descriptions of the two subspines after
-//     a split manipulator (*^).  "((1)a)b" is the second subsubspine of the
+//     (left-most) spine, and there are no active sub-spines for the spine.
+//     "(1)a"/"(1)b" are the spine descriptions of the two sub-spines after
+//     a split manipulator (*^).  "((1)a)b" is the second sub-spines of the
 //     first sub-spine for spine 1.
 //
 //
@@ -162,10 +162,10 @@ int HumAddress::getTrack(void) const {
 //   functions in a similar manner to layer numbers in MEI data.  The first
 //   sub-spine of a spine is always subtrack 1, regardless of whether or not
 //   an exchange manipulator (*x) was used to switch the left-to-right ordering
-//   of the spines in the file.  All subspines regardless of their splitting
+//   of the spines in the file.  All sub-spines regardless of their splitting
 //   origin are given sequential subtrack numbers.  For example if the spine
 //   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
-//   sub-spine only is split--then the subspines are labeled as subtracks "1",
+//   sub-spine only is split--then the sub-spines are labeled as sub-tracks "1",
 //   "2", "3" respectively.  When a track has only one sub-spine (i.e., it has
 //   been split), the subtrack value will be "0".
 //
@@ -200,7 +200,7 @@ string HumAddress::getTrackString(string separator) const {
 
 //////////////////////////////
 //
-// HumAddress::setOwner -- Stores a pointer to the HumrumLine on which
+// HumAddress::setOwner -- Stores a pointer to the HumdrumLine on which
 //   the token associated with this address belongs.  When not owned by
 //   a HumdrumLine, the parameter's value should be NULL.
 //
@@ -295,11 +295,11 @@ void HumAddress::setTrack(int aTrack) {
 //
 // HumAddress::setSubtrack -- Set the subtrack of the spine.
 //   If the token is the only one active for a spine, the subtrack should
-//   be set to zero.  If there are more than one subtracks for the spine, this
+//   be set to zero.  If there are more than one sub-tracks for the spine, this
 //   is the one-offset index of the spine (be careful if a sub-spine column
 //   is exchanged with another spine other than the one from which it was
 //   created.  In this case the subtrack number is not useful to calculate
-//   the field index of other subtracks for the given track.
+//   the field index of other sub-tracks for the given track.
 //   This function is used by the HumdrumFileStructure class.
 //
 
@@ -1116,7 +1116,8 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 
 //////////////////////////////
 //
-// HumNum::HumNum --
+// HumNum::HumNum -- HumNum Constructor.  Set the default value
+//   of the number to zero, or the given number if specified.
 //
 
 HumNum::HumNum(void){
@@ -1139,6 +1140,11 @@ HumNum::HumNum(const string& ratstring) {
 }
 
 
+HumNum::HumNum(const char* ratstring) {
+	setValue(ratstring);
+}
+
+
 HumNum::HumNum(const HumNum& rat) {
 	*this = rat;
 }
@@ -1147,7 +1153,7 @@ HumNum::HumNum(const HumNum& rat) {
 
 //////////////////////////////
 //
-// HumNum::~HumNum --
+// HumNum::~HumNum -- HumNum deconstructor.
 //
 
 HumNum::~HumNum() {
@@ -1191,7 +1197,7 @@ bool HumNum::isZero(void) const {
 
 //////////////////////////////
 //
-// HumNum::isNonZero -- Returns true if value is zero.
+// HumNum::isNonZero -- Returns true if value is not zero.
 //
 
 bool HumNum::isNonZero(void) const {
@@ -1258,7 +1264,7 @@ int HumNum::getInteger(double round) const {
 
 //////////////////////////////
 //
-// HumNum::getNumerator --
+// HumNum::getNumerator -- Return the top integer in the fraction.
 //
 
 int HumNum::getNumerator(void) const {
@@ -1269,7 +1275,7 @@ int HumNum::getNumerator(void) const {
 
 //////////////////////////////
 //
-// HumNum::getDenominator --
+// HumNum::getDenominator -- Return the bottom integer in the fraction.
 //
 
 int HumNum::getDenominator(void) const {
@@ -1279,7 +1285,11 @@ int HumNum::getDenominator(void) const {
 
 //////////////////////////////
 //
-// HumNum::setValue --
+// HumNum::setValue -- Set the number to the given integer.
+//    For the two-parameter version, set the top and bottom
+//    values for the number, reducing if necessary.  For the
+//    string version, parse an integer or fraction from the 
+//    string and reduce if necessary.
 //
 
 void HumNum::setValue(int numerator) {
@@ -1317,6 +1327,12 @@ void HumNum::setValue(const string& ratstring) {
 }
 
 
+void HumNum::setValue(const char* ratstring) {
+	string realstring = ratstring;
+	setValue(realstring);
+}
+
+
 
 //////////////////////////////
 //
@@ -1349,7 +1365,9 @@ HumNum& HumNum::makeAbs(void) {
 
 //////////////////////////////
 //
-// HumNum::reduce -- simplify the fraction.
+// HumNum::reduce -- simplify the fraction.  For example, 4/24 will
+//    reduce to 1/6 since a factor of 4 is common to the numerator
+//    and denominator.
 //
 
 void HumNum::reduce(void) {
@@ -1425,7 +1443,8 @@ bool HumNum::isInfinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isNaN -- Returns true if the numerator and denominator are zero.
+// HumNum::isNaN -- Returns true if the numerator and denominator
+//     are both zero.
 //
 
 bool HumNum::isNaN(void) const {
@@ -1447,18 +1466,19 @@ bool HumNum::isFinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isInteger -- Return true if an integer.
+// HumNum::isInteger -- Return true if number is an integer.
 //
 
 bool HumNum::isInteger(void) const {
-	return bot == 1;
+	return isFinite() && (bot == 1);
 }
 
 
 
 //////////////////////////////
 //
-// HumNum::operator+ -- Addition operator.
+// HumNum::operator+ -- Addition operator to add HumNums
+//    together or with integers.
 //
 
 HumNum HumNum::operator+(const HumNum& value) {
@@ -1482,7 +1502,9 @@ HumNum HumNum::operator+(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator- -- Subtraction operator.
+// HumNum::operator- -- Subtraction operator to subtract
+//     HumNums from each other and to subtrack integers from
+//     HumNums.
 //
 
 HumNum HumNum::operator-(const HumNum& value) {
@@ -1506,7 +1528,8 @@ HumNum HumNum::operator-(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator- -- Unary negation operator
+// HumNum::operator- -- Unary negation operator to generate
+//   the negative version of a HumNum.
 //
 
 HumNum HumNum::operator-(void) {
@@ -1518,7 +1541,8 @@ HumNum HumNum::operator-(void) {
 
 //////////////////////////////
 //
-// HumNum::operator* -- Multiplication operator.
+// HumNum::operator* -- Multiplication operator to multiply
+//   two HumNums together or a HumNum and an integer.
 //
 
 HumNum HumNum::operator*(const HumNum& value) {
@@ -1542,7 +1566,8 @@ HumNum HumNum::operator*(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator/ -- Division operator.
+// HumNum::operator/ -- Division operator to divide two
+//     HumNums together or divide a HumNum by an integer.
 //
 
 HumNum HumNum::operator/(const HumNum& value) {
@@ -1574,7 +1599,8 @@ HumNum HumNum::operator/(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator= -- Assign from another value.
+// HumNum::operator= -- Assign the contents of a HumNum
+//    from another HumNum.
 //
 
 HumNum& HumNum::operator=(const HumNum& value) {
@@ -1594,7 +1620,7 @@ HumNum& HumNum::operator=(int  value) {
 
 //////////////////////////////
 //
-// HumNum::operator+= --
+// HumNum::operator+= -- Add a HumNum or integer to a HumNum.
 //
 
 HumNum& HumNum::operator+=(const HumNum& value) {
@@ -1612,7 +1638,8 @@ HumNum& HumNum::operator+=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator-= --
+// HumNum::operator-= -- Subtract a HumNum or an integer from
+//    a HumNum.
 //
 
 HumNum& HumNum::operator-=(const HumNum& value) {
@@ -1630,7 +1657,7 @@ HumNum& HumNum::operator-=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator*= --
+// HumNum::operator*= -- Multiply a HumNum by a HumNum or integer.
 //
 
 HumNum& HumNum::operator*=(const HumNum& value) {
@@ -1648,7 +1675,7 @@ HumNum& HumNum::operator*=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator/= --
+// HumNum::operator/= -- Divide a HumNum by a HumNum or integer.
 //
 
 HumNum& HumNum::operator/=(const HumNum& value) {
@@ -1666,7 +1693,8 @@ HumNum& HumNum::operator/=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator< -- Test less-than equality
+// HumNum::operator< -- Less-than equality for a HumNum and
+//   a HumNum, integer, or float.
 //
 
 bool HumNum::operator<(const HumNum& value) const {
@@ -1690,7 +1718,8 @@ bool HumNum::operator<(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator<= -- Return less-than-or-equal equality
+// HumNum::operator<= -- Less-than-or-equal equality for a 
+//     HumNum with a HumNum, integer or float.
 //
 
 bool HumNum::operator<=(const HumNum& value) const {
@@ -1714,7 +1743,8 @@ bool HumNum::operator<=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator> -- Test greater-than equality.
+// HumNum::operator> -- Greater-than equality for a HumNum
+//     compared to a HumNum, integer, or float.
 //
 
 bool HumNum::operator>(const HumNum& value) const {
@@ -1738,7 +1768,8 @@ bool HumNum::operator>(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator>= -- Test greater-than-or-equal equality
+// HumNum::operator>= -- Greater-than-or-equal equality
+//    comparison for a HumNum to another HumNum, integer, or float.
 //
 
 bool HumNum::operator>=(const HumNum& value) const {
@@ -1762,7 +1793,8 @@ bool HumNum::operator>=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator== -- Test equality.
+// HumNum::operator== -- Equality test for HumNums compared to
+//   another HumNum, integer or float.
 //
 
 bool HumNum::operator==(const HumNum& value) const {
@@ -1786,7 +1818,8 @@ bool HumNum::operator==(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator!= -- Test equality.
+// HumNum::operator!= -- Inequality test for HumNums compared
+//   to other HumNums, integers or floats.
 //
 
 bool HumNum::operator!=(const HumNum& value) const {
@@ -1810,8 +1843,10 @@ bool HumNum::operator!=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::printFraction -- Print as fraction, such as 3/2.
-//		default parameter: out = cout;
+// HumNum::printFraction -- Print HumNum as a fraction,
+//    such as 3/2.  If the HumNum is an integer, then do
+//    not print the denominator.
+//      default parameter: out = cout;
 //
 
 ostream& HumNum::printFraction(ostream& out) const {
@@ -1827,12 +1862,17 @@ ostream& HumNum::printFraction(ostream& out) const {
 
 //////////////////////////////
 //
-// HumNum::printMixedFration -- Print as an integer plus fractional part.
-//		default parameter: out = cout;
-//		default parameter: separator = "_"
+// HumNum::printMixedFration -- Print as an integer plus fractional 
+//     remainder.  If absolute value is less than one, will only
+//     print the fraction.  The second parameter is the output stream
+//     for printing, and the third parameter is a separation string
+//     between the integer and remainder fraction.
+//        default parameter: out = cout;
+//        default parameter: separator = "_"
 //
 
-ostream& HumNum::printMixedFraction(ostream& out, string separator) const {
+ostream& HumNum::printMixedFraction(ostream& out,
+		string separator) const {
 	if (this->isInteger()) {
 		out << getNumerator();
 	} else if (top > bot) {
@@ -1849,7 +1889,8 @@ ostream& HumNum::printMixedFraction(ostream& out, string separator) const {
 
 //////////////////////////////
 //
-// HumNum::printList -- Print as a list of two numbers.
+// HumNum::printList -- Print as a list of two numbers, such as
+//    "(1, 2)" for 1/2.
 //		default parameter: out = cout;
 //
 
@@ -1862,7 +1903,7 @@ ostream& HumNum::printList(ostream& out) const {
 
 //////////////////////////////
 //
-// operator<< --
+// operator<< -- Default printing behavior for HumNums.
 //
 
 ostream& operator<<(ostream& out, const HumNum& number) {
@@ -1870,26 +1911,11 @@ ostream& operator<<(ostream& out, const HumNum& number) {
 	return out;
 }
 
-/////////////////////////////
-//
-// template for printing arrays of items (not pointers to items).
-//
-
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << v[i];
-		if (i < v.size() - 1) {
-			out << '\t';
-		}
-	}
-	return out;
-}
 
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFile::HumdrumFile -- HumdrumFile constructor.
 //
 
 HumdrumFile::HumdrumFile(void) {
@@ -1900,7 +1926,7 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFile::HumdrumFile -- HumdrumFile deconstructor.
 //
 
 HumdrumFile::~HumdrumFile() {
@@ -1913,18 +1939,19 @@ HumdrumFile::~HumdrumFile() {
 
 //////////////////////////////
 //
-// HumdrumFileBase::HumdrumFileBase --
+// HumdrumFileBase::HumdrumFileBase -- HumdrumFileBase constructor.
 //
 
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
+	ticksperquarternote = -1;
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumFileBase::~HumdrumFileBase --
+// HumdrumFileBase::~HumdrumFileBase -- HumdrumFileBase deconstructor.
 //
 
 HumdrumFileBase::~HumdrumFileBase() { }
@@ -1933,8 +1960,8 @@ HumdrumFileBase::~HumdrumFileBase() { }
 
 //////////////////////////////
 //
-// HumdrumFileBase::operator[] -- Negative values will be in reference to the
-//    end of the list of lines.
+// HumdrumFileBase::operator[] -- Access a Humdrum file line by and index.
+//    Negative values reference the end of the list of lines.
 //
 
 HumdrumLine& HumdrumFileBase::operator[](int index) {
@@ -1952,8 +1979,7 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::read -- Load file contents from input stream without
-//    parsing the rhythmic information in the file.
+// HumdrumFileBase::read -- Load file contents from an input stream or file.
 //
 
 bool HumdrumFileBase::read(const string& filename) {
@@ -2019,9 +2045,9 @@ bool HumdrumFileBase::readString(const char* contents) {
 //////////////////////////////
 //
 // HumdrumFileBase::analyzeTokens -- Generate token array from
-//    current state of lines.  If either state is changed, then the
-//    other state becomes invalid.  See createLinesFromTokens for
-//		regeneration of lines from tokens.
+//    current contents of the lines.  If either tokens or the line 
+//    is changed, then the other state becomes invalid.  
+//    See createLinesFromTokens for regeneration of lines from tokens.
 //
 
 bool HumdrumFileBase::analyzeTokens(void) {
@@ -2036,8 +2062,8 @@ bool HumdrumFileBase::analyzeTokens(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::createLinesFromTokens -- Generate Humdrum lines from
-//   the list of tokens.
+// HumdrumFileBase::createLinesFromTokens -- Generate Humdrum lines strings
+//   from the stored list of tokens.
 //
 
 void HumdrumFileBase::createLinesFromTokens(void) {
@@ -2050,7 +2076,8 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::append -- Add a line to the file's contents.
+// HumdrumFileBase::append -- Add a line to the file's contents.  The file's
+//    spine and rhythmic structure should be recalculated after an append.
 //
 
 void HumdrumFileBase::append(const char* line) {
@@ -2068,7 +2095,7 @@ void HumdrumFileBase::append(const string& line) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::getLineCount -- Return the number of lines.
+// HumdrumFileBase::getLineCount -- Returns the number of lines.
 //
 
 int HumdrumFileBase::getLineCount(void) const {
@@ -2079,7 +2106,8 @@ int HumdrumFileBase::getLineCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getMaxTrack -- returns the number of primary spines in the data.
+// HumdrumFileBase::getMaxTrack -- Returns the number of primary 
+//     spines in the data.
 //
 
 int HumdrumFileBase::getMaxTrack(void) const {
@@ -2090,7 +2118,8 @@ int HumdrumFileBase::getMaxTrack(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::printSpineInfo --
+// HumdrumFileBase::printSpineInfo -- Print the spine information for all 
+//    lines/tokens in file (for debugging).
 //
 
 ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
@@ -2104,7 +2133,8 @@ ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::printDataTypeInfo --
+// HumdrumFileBase::printDataTypeInfo -- Print the data type for all 
+//     spines in the file (for debugging).
 //
 
 ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
@@ -2118,7 +2148,8 @@ ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::printTrackInfo --
+// HumdrumFileBase::printTrackInfo -- Print the track numbers for all
+//     tokens in the file (for debugging).
 //
 
 ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
@@ -2132,7 +2163,9 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getTrackStart --
+// HumdrumFileBase::getTrackStart -- Return the starting exclusive
+//     interpretation for the given track.  Returns NULL if the track
+//     number is out of range.
 //
 
 HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
@@ -2147,8 +2180,12 @@ HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getTrackEndCount -- return the number of ending tokens
-//    for the given track
+// HumdrumFileBase::getTrackEndCount -- Return the number of ending tokens
+//    for the given track.  Spines must start as a single exclusive 
+//    interpretation token.  However, since spines may split and merge,
+//    it is possible that there are more than one termination points for a
+//    track.  This function returns the number of terminations which are
+//    present in a file for any given spine/track.
 //
 
 int HumdrumFileBase::getTrackEndCount(int track) const {
@@ -2168,8 +2205,9 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getTrackEnd -- return the number of ending tokens
-//    for the given track
+// HumdrumFileBase::getTrackEnd -- Returns a pointer to the terminal manipulator
+//    token for the given track and subtrack.  Sub-tracks are indexed from 0 up 
+//    to but not including getTrackEndCount.
 //
 
 HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
@@ -2198,8 +2236,9 @@ HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::analyzeLines -- Mark the line's index number in the
-//    HumdrumFileBase.
+// HumdrumFileBase::analyzeLines -- Store a line's index number in the 
+//    HumdrumFile within the HumdrumLine object at that index.
+//    Returns false if there was an error.
 //
 
 bool HumdrumFileBase::analyzeLines(void) {
@@ -2265,7 +2304,6 @@ bool HumdrumFileBase::analyzeLinks(void) {
 bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 		HumdrumLine& next) {
 	int i;
-
 
 	// first handle simple cases where the spine assignments are one-to-one:
 	if (!previous.isInterpretation() && !next.isInterpretation()) {
@@ -2412,7 +2450,9 @@ bool HumdrumFileBase::analyzeSpines(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::addToTrackStarts --
+// HumdrumFileBase::addToTrackStarts -- A starting exclusive interpretation was
+//    found, so store in the list of track starts.  The first index position 
+//    in trackstarts is reserve for non-spine usage.
 //
 
 void HumdrumFileBase::addToTrackStarts(HumdrumToken* token) {
@@ -2431,8 +2471,8 @@ void HumdrumFileBase::addToTrackStarts(HumdrumToken* token) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::adjustSpines -- adjust datatype and spineinfo based
-//   on manipulators.
+// HumdrumFileBase::adjustSpines -- adjust datatype and spineinfo values based
+//   on manipulators found in the data.
 //
 
 bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
@@ -2513,7 +2553,6 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				return false;
 			}
 			if (trackstarts.back() == NULL) {
-cout << "GOING TO ADD " << line.token(i) << endl;
 				addToTrackStarts(&line.token(i));
 			}
 		} else {
@@ -2540,7 +2579,10 @@ cout << "GOING TO ADD " << line.token(i) << endl;
 //////////////////////////////
 //
 // HumdrumFileBase::getMergedSpineInfo -- Will only simplify a two-spine
-//   merge.  Should be expanded to larger spine mergers.
+//   merge.  Should be expanded to larger spine mergers in the future.
+//   In other words, it is best to currently merge spines in the order
+//   in which they were split, so that the original spine label can
+//   be produced.
 //
 
 string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
@@ -2576,7 +2618,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 //    the previous non-null token which the null token refers to.  After
 //    a spine merger, there may be multiple previous tokens, so you would
 //		have to decide on the actual source token on based on subtrack or
-//    subspine information.  The function also gives links to the previous/next
+//    sub-spine information.  The function also gives links to the previous/next
 //    non-null tokens, skipping over intervening null data tokens.
 //
 
@@ -2607,7 +2649,10 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 
 //////////////////////////////
 //
-// HumdurmFile::processNonNullDataTokensForTrackBackward --
+// HumdurmFile::processNonNullDataTokensForTrackBackward -- Helper function
+//    for analyzeNonNullDataTokens.  Given any token, this function tells
+//    you what is the next non-null data token(s) in the spine after the given
+//    token.
 //
 
 bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
@@ -2642,7 +2687,10 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 
 //////////////////////////////
 //
-// HumdurmFile::processNonNullDataTokensForTrackForward --
+// HumdurmFile::processNonNullDataTokensForTrackForward -- Helper function
+//    for analyzeNonNullDataTokens.  Given any token, this function tells
+//    you what is the previous non-null data token(s) in the spine after 
+//    the given token.
 //
 
 bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
@@ -2677,7 +2725,11 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
 
 //////////////////////////////
 //
-// HumdrumFileBase::addUniqueTokens --
+// HumdrumFileBase::addUniqueTokens -- Used for non-null token analysis.  The
+//    analysis is recursive like rhythmic analysis in the HumdrumFileStructure
+//    class, but this algorithm does not terminate secondary traversals when
+//    recursing.  Perhaps that should be fixed (utilizing the "rhycheck"
+//    variable in HumdrumTokens)
 //
 
 void HumdrumFileBase::addUniqueTokens(vector<HumdrumToken*>& target,
@@ -2701,7 +2753,10 @@ void HumdrumFileBase::addUniqueTokens(vector<HumdrumToken*>& target,
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumFileBase.
+// operator<< -- Default method of printing HumdrumFiles.  This printing method 
+//    assumes that the HumdrumLine string is correct.  If a token is changed 
+//    in the file, the HumdrumFileBase::createLinesFromTokens() before printing
+//    the contents of the line.
 //
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile) {
@@ -2737,7 +2792,8 @@ HumdrumFileContent::~HumdrumFileContent() {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure --
+// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure
+//     constructor.
 //
 
 HumdrumFileStructure::HumdrumFileStructure(void) {
@@ -2748,7 +2804,8 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure --
+// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure 
+//     deconstructor.
 //
 
 HumdrumFileStructure::~HumdrumFileStructure() {
@@ -2759,7 +2816,9 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::read --
+// HumdrumFileStructure::read --  Read the contents of a file from a file or
+//   istream.  The file's structure is analyzed, and then the rhythmic structure
+//   is calculated.
 //
 
 
@@ -2783,6 +2842,14 @@ bool HumdrumFileStructure::read(const string& filename) {
 	}
 	return analyzeStructure();
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readString -- Read the contents from a string.
+//    Similar to HumdrumFileStructure::read, but for string data.
+//
 
 bool HumdrumFileStructure::readString(const char* contents) {
 	if (!HumdrumFileBase::readString(contents)) {
@@ -2820,7 +2887,8 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readNoRhythm --
+// HumdrumFileStructure::readNoRhythm -- Similar to the read() functions, but
+//    does not parse rhythm (or parameters).
 //
 
 bool HumdrumFileStructure::readNoRhythm(istream& infile) {
@@ -2838,6 +2906,14 @@ bool HumdrumFileStructure::readNoRhythm(const string& filename) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringNoRhythm -- Read a string, but
+//   do not analyze the rhythm (or parameters) in the read data.
+//
+
+
 bool HumdrumFileStructure::readStringNoRhythm(const char*   contents) {
 	return HumdrumFileBase::readString(contents);
 }
@@ -2852,8 +2928,9 @@ bool HumdrumFileStructure::readStringNoRhythm(const string& contents) {
 //////////////////////////////
 //
 // HumdrumFileStructure::getScoreDuration -- Return the total duration
-//    of the score in quarter note units.
-//
+//    of the score in quarter note units.  Returns zero if no lines in the
+//    file, or -1 if there are lines, but no rhythmic analysis has been done.
+// 
 
 HumNum HumdrumFileStructure::getScoreDuration(void) const {
 	if (lines.size() == 0) {
@@ -2866,7 +2943,59 @@ HumNum HumdrumFileStructure::getScoreDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::printDurationInfo --
+// HumdrumFileStructure::tpq -- "Ticks per Quarter-note".  Returns the minimal
+//    number of integral time units that divide a quarter note into equal
+//    subdivisions.  This value is needed to convert Humdrum data into
+//    MIDI file data, MuseData, and MusicXML data.  Also useful for timebase
+//    type of operations on the data and describing the durations in terms
+//    of integers rather than with fractions.  This function will also 
+//    consider the implicit durations of non-rhythmic spine data.
+//
+
+int HumdrumFileStructure::tpq(void) {
+	if (ticksperquarternote > 0) {
+		return ticksperquarternote;
+	}
+	set<HumNum> durlist = getPositiveLineDurations();
+	vector<int> dems;
+	for (auto& it : durlist) {
+		if (it.getDenominator() > 1) {
+			dems.push_back(it.getDenominator());
+		}
+	}
+	int lcm = 1;
+	if (dems.size() > 0) {
+		lcm = Convert::getLcm(dems);
+	}
+	ticksperquarternote = lcm;
+	return ticksperquarternote;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getPositiveLineDurations -- Return a list of all
+//    unique token durations in the file.  This function could be expanded
+//    to limit the search to a range of lines or to a specific track.
+//
+
+set<HumNum> HumdrumFileStructure::getPositiveLineDurations(void) {
+	set<HumNum> output;
+	for (auto& line : lines) {
+		if (line->getDuration().isPositive()) {
+			output.insert(line->getDuration());
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::printDurationInfo -- Print the assigned duration
+//    of each line in a file.  Useful for debugging.
 //
 
 ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
@@ -2880,8 +3009,10 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getBarline -- Return the given barline.  Negative
-//   index accesses from the end of the list.
+// HumdrumFileStructure::getBarline -- Return the given barline from the file
+//   based on the index number.  Negative index accesses from the end of the
+//   list.  If the first barline is a pickup beat, then the returned 
+//   HumdrumLine* will not be an actual barline line.
 //
 
 HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
@@ -2901,7 +3032,10 @@ HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getBarlineCount --
+// HumdrumFileStructure::getBarlineCount -- Return the number of barlines in
+//   the file.  If there is a pickup beat, then the count includes an imaginary
+//   barline before the first pickup (and the start of the file will be returned
+//   for barline(0).
 //
 
 int HumdrumFileStructure::getBarlineCount(void) const {
@@ -2912,7 +3046,11 @@ int HumdrumFileStructure::getBarlineCount(void) const {
 
 ///////////////////////////////
 //
-// HumdrumFileStructure::getBarlineDuration --
+// HumdrumFileStructure::getBarlineDuration --  Return the duration from the
+//    current barline to the next barline in the data.  For the last barline,
+//    the duration will be calculated from the end of the data;  The final
+//    will have a duration of 0 if there are not notes after the barline
+//    in the data.
 //
 
 HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
@@ -2940,7 +3078,7 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 ///////////////////////////////
 //
 // HumdrumFileStructure::getBarlineDurationFromStart -- Return the duration
-//    between the start of the Humdrum file and the barline.
+//    between the start of the Humdrum file and the given barline.
 //
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
@@ -3231,7 +3369,8 @@ HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getTokenDurations --
+// HumdrumFileStructure::getTokenDurations -- Extract the duration of rhythmic
+//    tokens on the line.
 //
 
 bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
@@ -3305,7 +3444,13 @@ bool HumdrumFileStructure::decrementDurStates(vector<HumNum>& durs,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignDurationsToTrack --
+// HumdrumFileStructure::assignDurationsToTrack -- Assign duration from starts
+//    for each rhythmic spine in the file.  Analysis is done recursively, one
+//    sub-spine at a time.  Duplicate analyses are prevented by the state
+//    variable in the HumdrumToken (currently called rhycheck because it is only
+//    used in this function).  After the durationFromStarts have been assigned
+//    for the rhythmic analysis of non-data tokens and non-rhythmic spines is
+//    done elsewhere.
 //
 
 bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
@@ -3322,7 +3467,9 @@ bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::prepareDurations --
+// HumdrumFileStructure::prepareDurations -- Helper function for
+//     HumdrumFileStructure::assignDurationsToTrack() which does all of the
+//     work for assigning durationFromStart values.
 //
 
 bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
@@ -3395,7 +3542,6 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 //
 // HumdrumFileStructure::setLineDurationFromStart -- Set the duration of
 //      a line based on the analysis of tokens in the spine.
-//      If the duration
 //
 
 bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
@@ -3533,7 +3679,10 @@ bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::fillInNegativeStartTimes --
+// HumdrumFileStructure::fillInNegativeStartTimes -- Negative line durations
+//    after the initial rhythmAnalysis mean that the lines are not data line.
+//    Duplicate the duration of the next non-negative duration for all negative
+//    durations.
 //
 
 void HumdrumFileStructure::fillInNegativeStartTimes(void) {
@@ -3566,7 +3715,8 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignLineDurations --
+// HumdrumFileStructure::assignLineDurations --  Calculate the duration of lines
+//   based on the durationFromStart of the current line and the next line.
 //
 
 void HumdrumFileStructure::assignLineDurations(void) {
@@ -3588,7 +3738,11 @@ void HumdrumFileStructure::assignLineDurations(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignDurationsToNonRhythmicTrack --
+// HumdrumFileStructure::assignDurationsToNonRhythmicTrack --  After the basic
+//   rhythmAnalysis has been done, go back and assign durations to non-rhythmic
+//   spine tokens based on the lineFromStart values of the lines that they 
+//   occur on as well as the distance in the file to the next non-null token for
+//   that spine.
 //
 
 bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
@@ -3622,7 +3776,9 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::processLocalParametersForTrack --
+// HumdrumFileStructure::processLocalParametersForTrack --  Search for local 
+//   parameters in each spine and fill in the HumHash for the token to which the
+//   parameter is to be applied.
 //
 
 bool HumdrumFileStructure::processLocalParametersForTrack(
@@ -3658,8 +3814,9 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::checkForLocalParameters -- only allowing layout
-//    parameters currently.
+// HumdrumFileStructure::checkForLocalParameters -- Helper function for
+//     HumdrumFileStructure::processLocalParametersForTrack.  Only allowing
+//     layout parameters currently.
 //
 
 void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,
@@ -3678,7 +3835,7 @@ void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,
 
 //////////////////////////////
 //
-// HumdrumLine::HumdrumLine --
+// HumdrumLine::HumdrumLine -- HumdrumLine constructor.
 //
 
 HumdrumLine::HumdrumLine(void) : string() {
@@ -3706,11 +3863,11 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 
 //////////////////////////////
 //
-// HumdrumLine::HumdrumLine --
+// HumdrumLine::~HumdrumLine -- HumdrumLine deconstructor.
 //
 
 HumdrumLine::~HumdrumLine() {
-	// free stored HumdrumTokens
+	// free stored HumdrumTokens:
 	clear();
 }
 
@@ -3718,7 +3875,7 @@ HumdrumLine::~HumdrumLine() {
 
 //////////////////////////////
 //
-// HumdrumLine::clear -- remove stored tokens.
+// HumdrumLine::clear -- Remove stored tokens.
 //
 
 void HumdrumLine::clear(void) {
@@ -3772,6 +3929,7 @@ bool HumdrumLine::isCommentGlobal(void) const {
 }
 
 
+
 //////////////////////////////
 //
 // HumdrumLine::isExclusive -- Returns true if the first two characters
@@ -3788,6 +3946,8 @@ bool HumdrumLine::isExclusive(void) const {
 //
 // HumdrumLine::isTerminator -- Returns true if first two characters
 //    are "*-" and the next character is undefined or a tab character.
+//    Not a very sophisticated function and may need adjustment later.
+//    Better to search for a terminator in each token.
 //
 
 bool HumdrumLine::isTerminator(void) const {
@@ -3880,7 +4040,8 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setLineIndex --
+// HumdrumLine::setLineIndex -- Used by the HumdrumFileBase class to set the
+//   index number of the line in the data storage for the file.
 //
 
 void HumdrumLine::setLineIndex(int index) {
@@ -3891,7 +4052,8 @@ void HumdrumLine::setLineIndex(int index) {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineIndex --
+// HumdrumLine::getLineIndex -- Returns the index number of the line in the
+//    HumdrumFileBase storage for the lines.
 //
 
 int HumdrumLine::getLineIndex(void) const {
@@ -3902,7 +4064,7 @@ int HumdrumLine::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::getLineNumber -- Return the line index plus one.
 //
 
 int HumdrumLine::getLineNumber(void) const {
@@ -3913,7 +4075,10 @@ int HumdrumLine::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::getDuration -- Get the duration of the line.  The duration will
+//    be negative one if rhythmic analysis in HumdrumFileStructure has not been
+//    done on the owning HumdrumFile object.  Otherwise this is the duration of
+//    the current line in the file.
 //
 
 HumNum HumdrumLine::getDuration(void) const {
@@ -3924,7 +4089,9 @@ HumNum HumdrumLine::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationFromStart --
+// HumdrumLine::setDurationFromStart -- Set the duration from the start of the
+//    file to the start of the current line.  This is used in rhythmic
+//    analysis done in the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationFromStart(HumNum dur) {
@@ -3935,7 +4102,9 @@ void HumdrumLine::setDurationFromStart(HumNum dur) {
 
 //////////////////////////////
 //
-// HumdrumLine::getDurationFromStart --
+// HumdrumLine::getDurationFromStart -- Get the duration from the start of the
+//    file to the start of the current line.  This will be -1 if rhythmic
+//    analysis has not been done in the HumdrumFileStructure class.
 //
 
 HumNum HumdrumLine::getDurationFromStart(void) const {
@@ -3947,7 +4116,9 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 //////////////////////////////
 //
 // HumdrumLine::getDurationToEnd -- Return the duration from the start of the
-//    line to the end of the HumdrumFile which owns this HumdrumLine.
+//    line to the end of the HumdrumFile which owns this HumdrumLine.  The
+//    rhythm of the HumdrumFile must be analyze before using this function;
+//    otherwise a 0 will probably be returned.
 //
 
 HumNum HumdrumLine::getDurationToEnd(void) const {
@@ -3963,6 +4134,7 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 //
 // HumdrumLine::getDurationFromBarline -- Return the duration from the start
 //    of the given line to the first barline occurring before the given line.
+//    Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
 //
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
@@ -3990,7 +4162,8 @@ HumdrumToken* HumdrumLine::getTrackStart(int track) const {
 //////////////////////////////
 //
 // HumdrumLine::setDurationFromBarline -- Time from the previous
-//    barline to the current line.
+//    barline to the current line.  This function is used in analyzeMeter in
+//    the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationFromBarline(HumNum dur) {
@@ -4015,9 +4188,20 @@ HumNum HumdrumLine::getDurationToBarline(void) const {
 //
 // HumdrumLine::getBeat -- return the beat number for the data on the
 //     current line given the input **recip representation for the duration
-//     of a beat.
+//     of a beat.  The beat in a measure is offset from 1 (first beat is
+//     1 rather than 0).
 //  Default value: beatrecip = "4".
+//  Default value: beatdur   = 1.
 //
+
+HumNum HumdrumLine::getBeat(HumNum beatdur) const {
+	if (beatdur.isZero()) {
+		return beatdur;
+	}
+	HumNum beat = (getDurationFromBarline() / beatdur) + 1;
+	return beat;
+}
+
 
 HumNum HumdrumLine::getBeat(string beatrecip) const {
 	HumNum beatdur = Convert::recipToDuration(beatrecip);
@@ -4032,7 +4216,9 @@ HumNum HumdrumLine::getBeat(string beatrecip) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationToBarline --
+// HumdrumLine::setDurationToBarline -- Set the duration from the current
+//     line to the next barline in the score.  This function is used by
+//     analyzeMeter in the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationToBarline(HumNum dur) {
@@ -4043,7 +4229,8 @@ void HumdrumLine::setDurationToBarline(HumNum dur) {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::setDuration -- Set the duration of the line.  This is done
+//   in the rhythmic analysis for the HumdurmFileStructure class.
 //
 
 void HumdrumLine::setDuration(HumNum aDur) {
@@ -4058,7 +4245,9 @@ void HumdrumLine::setDuration(HumNum aDur) {
 
 //////////////////////////////
 //
-// HumdrumLine::hasSpines --
+// HumdrumLine::hasSpines -- Returns true if the line contains spines.  This
+//   means the the line is not empty or a global comment (which can include
+//   reference records.
 //
 
 bool HumdrumLine::hasSpines(void) const {
@@ -4073,7 +4262,10 @@ bool HumdrumLine::hasSpines(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isManipulator --
+// HumdrumLine::isManipulator -- Returns true if any tokens on the line are
+//   manipulator interpretations.  Only null interpretations are allowed on
+//   lines which contain manipulators, but the parser currently does not
+//   enforce this rule.
 //
 
 bool HumdrumLine::isManipulator(void) const {
@@ -4089,7 +4281,11 @@ bool HumdrumLine::isManipulator(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isEmpty -- Returns true if no characters on line.
+// HumdrumLine::isEmpty -- Returns true if no characters on line.  A blank line
+//   is technically disallowed in the classic Humdrum Toolkit programs, but it
+//   is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+//   no content (not even space characters) are allowed and treated as a
+//   special class of line.
 //
 
 bool HumdrumLine::isEmpty(void) const {
@@ -4104,7 +4300,8 @@ bool HumdrumLine::isEmpty(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenCount --
+// HumdrumLine::getTokenCount --  Return the number of tokens on the line.  This
+//     value is set by HumdrumFileBase in analyzeTokens.
 //
 
 int HumdrumLine::getTokenCount(void) const {
@@ -4115,7 +4312,11 @@ int HumdrumLine::getTokenCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::token --
+// HumdrumLine::token -- Return a reference to the given token on the line.
+//    An invalid token index would be bad to give to this function as it
+//    returns a reference rather than a pointer (which could be set to
+//    NULL if invalid).  Perhaps this function will eventually throw an
+//    error if the index is out of bounds.
 //
 
 HumdrumToken& HumdrumLine::token(int index) const {
@@ -4126,7 +4327,9 @@ HumdrumToken& HumdrumLine::token(int index) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenString --
+// HumdrumLine::getTokenString -- Return a copy of the string component of
+//     a token.  This code will return a segmentation fault if index is out of
+//     range...
 //
 
 string HumdrumLine::getTokenString(int index) const {
@@ -4136,7 +4339,8 @@ string HumdrumLine::getTokenString(int index) const {
 
 //////////////////////////////
 //
-// HumdrumLine::createTokensFromLine --
+// HumdrumLine::createTokensFromLine -- Chop up a HumdrumLine string into
+//     individual tokens.
 //
 
 int HumdrumLine::createTokensFromLine(void) {
@@ -4162,7 +4366,11 @@ int HumdrumLine::createTokensFromLine(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::createLineFromTokens --
+// HumdrumLine::createLineFromTokens --  Re-generate a HumdrumLine string from
+//    individual tokens on the line.  This function will be necessary to
+//    run before printing a HumdrumFile if you have changed any tokens on the
+//    line.  Otherwise, changes in the tokens will not be passed on to the
+///   printing of the line.
 //
 
 void HumdrumLine::createLineFromTokens(void) {
@@ -4291,7 +4499,10 @@ bool HumdrumLine::analyzeTokenDurations(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::analyzeTracks --
+// HumdrumLine::analyzeTracks -- Calculate the subtrack info for subspines.
+//   Subtracks index subspines strictly from left to right on the line.
+//   Subspines can be exchanged and be represented left to right out of
+//   original order.
 //
 
 bool HumdrumLine::analyzeTracks(void) {
@@ -4419,7 +4630,7 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 //////////////////////////////
 //
 // HumdrumLine::setOwner -- store a pointer to the HumdrumFile which
-//    manages this object.
+//    manages (owns) this object.
 //
 
 void HumdrumLine::setOwner(void* hfile) {
@@ -4433,6 +4644,7 @@ void HumdrumLine::setOwner(void* hfile) {
 // HumdrumLine::setParameters -- Takes a global comment with
 //     the structure:
 //        !!NS1:NS2:key1=value1:key2=value2:key3=value3
+//     and stores it in the HumHash parent class of the line.
 //
 
 void HumdrumLine::setParameters(HumdrumLine* pLine) {
@@ -4473,13 +4685,16 @@ void HumdrumLine::setParameters(const string& pdata) {
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumLine. Needed to avoid interaction with HumHash.
+// operator<< -- Print a HumdrumLine. Needed to avoid interaction with
+//     HumHash parent class.
 //
 
 ostream& operator<<(ostream& out, HumdrumLine& line) {
 	out << (string)line;
 	return out;
 }
+
+
 
 
 // spine mainipulators:
@@ -4500,7 +4715,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 
 //////////////////////////////
 //
-// HumdrumToken::HumdrumToken --
+// HumdrumToken::HumdrumToken -- Constructor for HumdrumToken.
 //
 
 HumdrumToken::HumdrumToken(void) : string() {
@@ -4518,6 +4733,15 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	setPrefix("!");
 }
 
+
+//////////////////////////////
+//
+// HumdrumToken::~HumdrumToken -- Deconstructor for HumdrumToken.
+//
+
+HumdrumToken::~HumdrumToken() {
+    // do nothing
+}
 
 
 //////////////////////////////
@@ -4544,7 +4768,10 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount --
+// HumdrumToken::getPreviousNullDataTokenCount -- Return the number of
+//   previous tokens in the spine which is not a null token.  For null
+//   tokens, this will be a count of the number of non-null tokens which
+//   the null represents.
 //
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
@@ -4555,9 +4782,11 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount --
+// HumdrumToken::getPreviousNullDataTokenCount -- Return the non-null
+//    data token which occurs before this token in the data in the same
+//    spine.  The default value is index 0, since mostly there will only
+//    be one previous token.
 //
-
 
 HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
@@ -4576,7 +4805,8 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataTokenCount --
+// HumdrumToken::getNextNonNullDataTokenCount -- Return the number of non-null
+//     data tokens which follow this token in the spine.
 //
 
 int HumdrumToken::getNextNonNullDataTokenCount(void) {
@@ -4587,7 +4817,10 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataToken --
+// HumdrumToken::getNextNonNullDataToken -- Return the given next non-null token
+//    following this one in the spine.  The default value for index is 0 since
+//    the next non-null data token count will typically be 1.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
@@ -4607,22 +4840,28 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::HumdrumToken --
+// HumdrumToken::getDataType -- Get the exclusive interpretation type for
+//     the token.
 //
 
-HumdrumToken::~HumdrumToken() {
-	// do nothing
+const string& HumdrumToken::getDataType(void) const {
+	return address.getDataType();
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumToken::getDataType -- Get the exclusive interpretation type.
+// HumdrumToken::isDataType -- Returns true if the data type of the token
+//   matches the test data type.
 //
 
-const string& HumdrumToken::getDataType(void) const {
-	return address.getDataType();
+bool HumdrumToken::isDataType(string dtype) const {
+	if (dtype.compare(0, 2, "**") == 0) {
+		return dtype == getDataType();
+	} else {
+		return getDataType().compare(2, string::npos, dtype) == 0;
+	}
 }
 
 
@@ -4640,7 +4879,8 @@ void HumdrumToken::setSpineInfo(const string& spineinfo) {
 
 //////////////////////////////
 //
-// HumdrumToken::getSpineInfo --
+// HumdrumToken::getSpineInfo -- Return the spine split/merge history
+//    for the token.
 //
 
 string HumdrumToken::getSpineInfo(void) const {
@@ -4651,7 +4891,8 @@ string HumdrumToken::getSpineInfo(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineIndex --
+// HumdrumToken::getLineIndex -- Return the line index of the owning
+//    HumdrumLine for this token.
 //
 
 int HumdrumToken::getLineIndex(void) const {
@@ -4662,7 +4903,7 @@ int HumdrumToken::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineNumber --
+// HumdrumToken::getLineNumber -- Return the line index plus 1.
 //
 
 int HumdrumToken::getLineNumber(void) const {
@@ -4673,7 +4914,8 @@ int HumdrumToken::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setFieldIndex --
+// HumdrumToken::setFieldIndex -- Set the field index of the token on the
+//   owning HumdrumLine object.
 //
 
 void HumdrumToken::setFieldIndex(int index) {
@@ -4684,7 +4926,7 @@ void HumdrumToken::setFieldIndex(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::setTrack -- Set the track (similar to a staff in MEI).
+// HumdrumToken::setTrack -- Set the track number (similar to a staff in MEI).
 //
 
 void HumdrumToken::setTrack(int aTrack) {
@@ -4695,8 +4937,8 @@ void HumdrumToken::setTrack(int aTrack) {
 
 //////////////////////////////
 //
-// HumdrumToken::setTrack -- Set the track and subtrack (similar to a
-//     staff and layer in MEI).
+// HumdrumToken::setTrack -- Set the track and subtrack (subtrack is similar
+//     to a staff and layer in MEI).
 //
 
 void HumdrumToken::setTrack(int aTrack, int aSubtrack) {
@@ -4755,8 +4997,10 @@ void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextToken --
-//    default value: index = 0
+// HumdrumToken::getNextToken -- Return the next token in the
+//    spine.  Since the next token count is usually one, the default
+//    index value is zero.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getNextToken(int index) const {
@@ -4771,7 +5015,8 @@ HumdrumToken* HumdrumToken::getNextToken(int index) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextTokens --
+// HumdrumToken::getNextTokens --  Return a list of the next
+//   tokens in the spine after this token.
 //
 
 vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
@@ -4782,7 +5027,8 @@ vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousTokens --
+// HumdrumToken::getPreviousTokens --  Return a list of the previous
+//    tokens in the spine before this token.
 //
 
 vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
@@ -4793,8 +5039,10 @@ vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousToken --
-//    default value: index = 0
+// HumdrumToken::getPreviousToken -- Return the previous token in the
+//    spine.  Since the previous token count is usually one, the default
+//    index value is zero.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
@@ -4810,7 +5058,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //////////////////////////////
 //
 // HumdrumToken::analyzeDuration -- Currently reads the duration of
-//   **kern and **recip data.  Add more data types here.
+//   **kern and **recip data.  Add more data types here such as **koto.
 //
 
 bool HumdrumToken::analyzeDuration(void) {
@@ -4874,7 +5122,10 @@ bool HumdrumToken::isManipulator(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDuration --
+// HumdrumToken::getDuration -- Return the duration of the token.  The token
+//    does not necessarily need to have any explicit duration, as the returned
+//    value will also include implicit duration calculated in analyzeRhythm
+//    in the HumdrumFileStructure class.
 //
 
 HumNum HumdrumToken::getDuration(void) const {
@@ -4885,7 +5136,8 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setDuration --
+// HumdrumToken::setDuration -- Set the duration of the token.  This is done in
+//    HumdrumFileStructure::analyzeTokenDurations().
 //
 
 void HumdrumToken::setDuration(const HumNum& dur) {
@@ -4896,7 +5148,11 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationFromStart --
+// HumdrumToken::getDurationFromStart -- Return the duration from the
+//   start of the owning HumdrumFile to the starting time of the
+//   owning HumdrumLine for the token.  The durationFromStart is
+//   in reference to the start of the token, not the end of the token,
+//   which may be on another HumdrumLine.
 //
 
 HumNum HumdrumToken::getDurationFromStart(void) const {
@@ -4927,7 +5183,8 @@ bool HumdrumToken::hasRhythm(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isBarlines --
+// HumdrumToken::isBarline -- Returns true if the first character is an
+//   equals sign.
 //
 
 bool HumdrumToken::isBarline(void) const {
@@ -4945,8 +5202,8 @@ bool HumdrumToken::isBarline(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isCommentLocal -- Presumed to be in a spine where
-//   only local comments are allowed.
+// HumdrumToken::isCommentLocal -- Returns true of the token start with "!",
+//   but not "!!" which is for global comments.
 //
 
 bool HumdrumToken::isCommentLocal(void) const {
@@ -4971,7 +5228,9 @@ bool HumdrumToken::isCommentLocal(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isData -- Returns true if not an interpretation, barline
-//      or local comment;
+//      or local comment.  This will not work on synthetic tokens generated
+//      from an empty line.  So this function should be called only on tokens
+//      in lines which pass the HumdrumLine::hasSpines() test.
 //
 
 bool HumdrumToken::isData(void) const {
@@ -5002,7 +5261,7 @@ bool HumdrumToken::isExclusive(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isSplitInterpretation --
+// HumdrumToken::isSplitInterpretation -- True if the token is "*^".
 //
 
 bool HumdrumToken::isSplitInterpretation(void) const {
@@ -5013,7 +5272,7 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isMergeInterpretation --
+// HumdrumToken::isMergeInterpretation -- True if the token is "*v".
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
@@ -5024,7 +5283,7 @@ bool HumdrumToken::isMergeInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isExchangeInterpretation --
+// HumdrumToken::isExchangeInterpretation -- True if the token is "*x".
 //
 
 bool HumdrumToken::isExchangeInterpretation(void) const {
@@ -5035,7 +5294,7 @@ bool HumdrumToken::isExchangeInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isTerminateInterpretation --
+// HumdrumToken::isTerminateInterpretation -- True if the token is "*-".
 //
 
 bool HumdrumToken::isTerminateInterpretation(void) const {
@@ -5046,7 +5305,7 @@ bool HumdrumToken::isTerminateInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isAddInterpretation --
+// HumdrumToken::isAddInterpretation -- True if the token is "*+".
 //
 
 bool HumdrumToken::isAddInterpretation(void) const {
@@ -5115,8 +5374,11 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 
 /////////////////////////////
 //
-// HumdrumToken::getSubtoken --
-//   default value: separator = " "
+// HumdrumToken::getSubtoken -- Extract the specified subtoken from the token.
+//    Tokens usually are separated by spaces in Humdrum files, but this will 
+//    depened on the data type (so therefore, the tokens are not presplit into
+//    sub-tokens when reading in the file).
+//        default value: separator = " "
 //
 
 string HumdrumToken::getSubtoken(int index, const string& separator) const {
@@ -5146,6 +5408,8 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 // HumdrumToken::setParameters -- Process a local comment with
 //     the structure:
 //        !NS1:NS2:key1=value1:key2=value2:key3=value3
+//     and store the parameter in the HumHash parent class component of the
+//     HumdrumToken object.
 //
 
 void HumdrumToken::setParameters(HumdrumToken* ptok) {
@@ -5186,7 +5450,8 @@ void HumdrumToken::setParameters(const string& pdata) {
 
 //////////////////////////////
 //
-// HumdrumToken::makeForwardLink --
+// HumdrumToken::makeForwardLink -- Line a following spine token to this one.
+//    Used by the HumdrumFileBase::analyzeLinks function.
 //
 
 void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
@@ -5198,7 +5463,8 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::makeBackwarddLink --
+// HumdrumToken::makeBackwarddLink -- Link a previous spine token to this one.
+//    Used by the HumdrumFileBase::analyzeLinks function.
 //
 
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
@@ -5210,7 +5476,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::setOwner --
+// HumdrumToken::setOwner -- Set the HumdrumLine owner of this token.
 //
 
 void HumdrumToken::setOwner(HumdrumLine* aLine) {
@@ -5221,7 +5487,8 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 
 //////////////////////////////
 //
-// HumdrumToken::getOwner --
+// HumdrumToken::getOwner -- Return a pointer to the HumdrumLine which owns this
+//    token.
 //
 
 HumdrumLine* HumdrumToken::getOwner(void) const {
@@ -5232,7 +5499,7 @@ HumdrumLine* HumdrumToken::getOwner(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getState --
+// HumdrumToken::getState --  Return the rhythm state variable.
 //
 
 int HumdrumToken::getState(void) const {
@@ -5243,7 +5510,9 @@ int HumdrumToken::getState(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getState --
+// HumdrumToken::incrementState -- update the rhythm analysis state variable.
+//    This will prevent redundant recursive analysis in analyzeRhythm of
+//    the HumdrumFileStructure class.
 //
 
 void HumdrumToken::incrementState(void) {
@@ -5255,7 +5524,7 @@ void HumdrumToken::incrementState(void) {
 //////////////////////////////
 //
 // HumdrumToken::getNextTokenCount -- Return the number of tokens in the
-//   spine/subspine which follow this token.  Typically this will be 1,
+//   spine/sub spine which follow this token.  Typically this will be 1,
 //   but will be zero for a terminator interpretation (*-), and will be
 //   2 for a split interpretation (*^).
 //
@@ -5269,7 +5538,7 @@ int HumdrumToken::getNextTokenCount(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getPreviousTokenCount -- Return the number of tokens
-//   in the spine/subspine which precede this token.  Typically this will
+//   in the spine/sub-spine which precede this token.  Typically this will
 //   be 1, but will be zero for an exclusive interpretation (starting with
 //   "**"), and will be greater than one for a token which follows a
 //   spine merger (using *v interpretations).
@@ -5283,7 +5552,7 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 //////////////////////////////
 //
-// operator<< -- Needed to avoid interaction with HumHash.
+// operator<< -- Needed to avoid interaction with the HumHash parent class.
 //
 
 ostream& operator<<(ostream& out, const HumdrumToken& token) {
@@ -5294,21 +5563,242 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 
 
 
+
+
+//////////////////////////////
+//
+// Convert::getLcm -- Return the Least Common Multiple of a list of numbers.
+//
+
+int Convert::getLcm(const vector<int>& numbers) {
+   if (numbers.size() == 0) {
+		return 1;
+	}
+	int output = numbers[0];
+	for (int i=1; i<numbers.size(); i++) {
+		output = (output * numbers[i]) / getGcd(output, numbers[i]);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getGcd -- Return the Greatest Common Divisor of two numbers.
+//
+
+int Convert::getGcd(int a, int b) {
+  if (b == 0) {
+      return a;
+   }
+   int c = a % b;
+   a = b;
+   int output = getGcd(a, c);
+   return output;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::kernToScientificPitch -- Convert a **kern pitch to
+//   ScientificPitch notation, which is the diatonic letter name,
+//   followed by a possible accidental, then an optional separator
+//   string, and finally the octave number.  A string representing a
+//   chord can be given to this function, and the output will return
+//   a list of the pitches in the chord, separated by a space.
+//		default values:
+//			flat      = "b"
+//			sharp     = "#"
+//			separator = ""
+//
+
+string Convert::kernToScientificPitch(const string& kerndata,
+		string flat, string sharp, string separator) {
+	vector<string> subtokens = Convert::splitString(kerndata);
+	string output;
+	char   diatonic;
+	int    accidental;
+	int    octave;
+
+	for (int i=0; i<subtokens.size(); i++) {
+		diatonic   = Convert::kernToDiatonicUC(subtokens[i]);
+		accidental = Convert::kernToAccidentalCount(subtokens[i]);
+		octave     = Convert::kernToOctaveNumber(subtokens[i]);
+		if ((i > 0) && (i < subtokens.size()-1)) {
+			output += " ";
+		}
+		output += diatonic;
+		for (int j=0; j<abs(accidental); j++) {
+			output += (accidental < 0 ? flat : sharp);
+		}
+		output += separator;
+		output += to_string(octave);
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToDiatonicPC -- Convert a kern token into a diatonic
+//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned 
+//    if the note is rest, and -2000 if there is no pitch information in the
+//    input string. Only the first subtoken in the string is considered.
+//
+
+int Convert::kernToDiatonicPC(const string& kerndata) {
+	for (int i=0; i<kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return -1000;
+		}
+		switch (kerndata[i]) {
+			case 'A': case 'a': return 5;
+			case 'B': case 'b': return 6;
+			case 'C': case 'c': return 0;
+			case 'D': case 'd': return 1;
+			case 'E': case 'e': return 2;
+			case 'F': case 'f': return 3;
+			case 'G': case 'g': return 4;
+		}
+	}
+	return -2000;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToDiatonicUC -- Convert a kern token into a diatonic
+//    note pitch-class.  "R" is returned if the note is rest, and 
+//    "X" is returned if there is no pitch name in the string.
+//    Only the first subtoken in the string is considered.
+//
+
+char Convert::kernToDiatonicUC(const string& kerndata) {
+	for (int i=0; i<kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return 'R';
+		}
+		if (('A' <= kerndata[i]) && (kerndata[i] <= 'G')) {
+			return kerndata[i];
+		}
+		if (('a' <= kerndata[i]) && (kerndata[i] <= 'g')) {
+			return toupper(kerndata[i]);
+		}
+	}
+	return 'X';
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToDiatonicLC -- Similar to kernToDiatonicUC, but
+//    the returned pitch name is lower case.
+//
+
+char Convert::kernToDiatonicLC(const string& kerndata) {
+	return tolower(Convert::kernToDiatonicUC(kerndata));
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToAccidentalCount -- Convert a kern token into a count
+//    of accidentals in the first subtoken.  Sharps are assigned to the
+//    value +1 and flats to -1.  So a double sharp is +2 and a double
+//    flat is -2.  Only the first subtoken in the string is considered.
+//    Cases such as "#-" should not exist, but in this case the return
+//    value will be 0.
+//
+
+int Convert::kernToAccidentalCount(const string& kerndata) {
+	int output = 0;
+	for (int i=0; i<kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == '-') {
+			output--;
+		}
+		if (kerndata[i] == '#') {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToOctaveNumber -- Convert a kern token into an octave number.
+//    Middle C is the start of the 4th octave. -1000 is returned if there
+//    is not pitch in the string.  Only the first subtoken in the string is
+//    considered.
+//
+
+int Convert::kernToOctaveNumber(const string& kerndata) {
+	int uc = 0;
+	int lc = 0;
+	if (kerndata == ".") {
+		return -1000;
+	}
+	for (int i=0; i<kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return -1000;
+		}
+		uc += ('A' <= kerndata[i]) && (kerndata[i] <= 'G') ? 1 : 0;
+		lc += ('a' <= kerndata[i]) && (kerndata[i] <= 'g') ? 1 : 0;
+	}
+	if ((uc > 0) && (lc > 0)) {
+		// invalid pitch description
+		return -1000;
+	}
+	if (uc > 0) {
+		return 4 - uc;
+	} else if (lc > 0) {
+		return 3 + lc;
+	} else {
+		return -1000;
+	}
+}
+
+
+
+
+
 //////////////////////////////
 //
 // Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter toes.  For example "4"
+//     rational number durations in terms of quarter notes.  For example "4"
 //     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
 //     is a scaling factor which can change the rhythmic value's base duration.
 //     Giving a scale of 1 will return the duration in whole note units, so
 //     "4" will return a value of 1/4 (one quarter of a whole note).  Using
 //     3/2 will give the duration in terms of dotted-quarter note units.
-//     The third parameter is the subtoken separate.  For example if the input
+//     The third parameter is the sub-token separate.  For example if the input
 //     string contains a space, anything after the first space will be ignored
 //     when extracting the string.  **kern data which also includes the pitch
 //     along with the rhythm can also be given and will be ignored.
 //        default value: scale = 4 (duration in terms of quarter notes)
-//        default value: separator = " " (subtoken separator)
+//        default value: separator = " " (sub-token separator)
 //
 
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
@@ -5396,6 +5886,8 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 
 
 
+
+
 //////////////////////////////
 //
 // Convert::replaceOccurrences -- Similar to s// regular expressions
@@ -5423,6 +5915,7 @@ void Convert::replaceOccurrences(string& source, const string& search,
 //   separated by the given character.  Empty strings will be generated
 //   if the separator occurs at the start/end of the input string, and
 //   if two or more separates are adjacent to each other.
+//		default value: separator = ' ';
 //
 
 vector<string> Convert::splitString(const string& data, char separator) {
@@ -5437,6 +5930,8 @@ vector<string> Convert::splitString(const string& data, char separator) {
 	}
 	return output;
 }
+
+
 
 
 } // end namespace minHumdrum

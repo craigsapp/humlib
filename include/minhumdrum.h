@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 18 02:32:51 PDT 2015
+// Last Modified: Wed Aug 19 02:07:32 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -17,9 +17,9 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+   list of conditions and the following disclaimer. 
 2. Redistributions in binary form must reproduce the above copyright notice,
-   and the following disclaimer in the documentation and/or other materials
+   and the following disclaimer in the documentation and/or other materials 
    provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <set>
 
 using std::string;
 using std::vector;
@@ -59,6 +60,7 @@ using std::endl;
 using std::to_string;
 using std::stringstream;
 using std::map;
+using std::set;
 using std::invalid_argument;
 
 namespace minHumdrum {
@@ -176,6 +178,7 @@ class HumNum {
 		         HumNum             (int numerator, int denominator);
 		         HumNum             (const HumNum& rat);
 		         HumNum             (const string& ratstring);
+		         HumNum             (const char* ratstring);
 		        ~HumNum             ();
 
 		bool     isNegative         (void) const;
@@ -195,6 +198,7 @@ class HumNum {
 		void     setValue           (int numerator);
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const string& ratstring);
+		void     setValue           (const char* ratstring);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
@@ -360,6 +364,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
+		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
 
@@ -469,19 +474,20 @@ class HumdrumToken : public string, public HumHash {
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount(void) {
 		               return getPreviousNonNullDataTokenCount(); }
-		HumdrumToken* getPreviousNonNullDataToken(int index);
+		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
 		HumdrumToken* getPreviousNNDT(int index) {
 		               return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
 		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HumdrumToken* getNextNonNullDataToken(int index);
-		HumdrumToken* getNextNNDT(int index) {
+		HumdrumToken* getNextNonNullDataToken(int index = 0);
+		HumdrumToken* getNextNNDT(int index = 0) {
 		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
 		const string& getDataType          (void) const;
+		bool     isDataType                (string dtype) const;
 		string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
@@ -581,8 +587,6 @@ class HumdrumFileBase {
 		bool          readString                   (const string& contents);
 
 		HumdrumLine&  operator[]                   (int index);
-		void          append                       (const char* line);
-		void          append                       (const string& line);
 		int           getLineCount                 (void) const;
 		int           getMaxTrack                  (void) const;
 		ostream&      printSpineInfo               (ostream& out = cout);
@@ -594,6 +598,8 @@ class HumdrumFileBase {
 		HumdrumToken* getTrackEnd                  (int track,
 		                                            int subtrack) const;
 		void          createLinesFromTokens        (void);
+		void          append                       (const char* line);
+		void          append                       (const string& line);
 
 	protected:
 		bool          analyzeTokens                (void);
@@ -642,6 +648,9 @@ class HumdrumFileBase {
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
+
+		// ticksperquarternote: this is the number of tick
+		int ticksperquarternote;
 };
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile);
@@ -668,6 +677,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
 		ostream&      printDurationInfo            (ostream& out = cout);
+		int           tpq                          (void);
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
@@ -700,16 +710,18 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumNum startdur);
 		bool          setLineDurationFromStart     (HumdrumToken* token,
 		                                            HumNum dursum);
-		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
-		bool      analyzeNullLineRhythms       (void);
-		void      fillInNegativeStartTimes     (void);
-		void      assignLineDurations          (void);
-		bool      processLocalParametersForTrack(HumdrumToken* starttok,
-		                                         HumdrumToken* current);
-		void      checkForLocalParameters       (HumdrumToken *token,
-		                                         HumdrumToken *current);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
-		                                                  HumdrumToken* ptoken);
+		bool          analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool          analyzeNullLineRhythms       (void);
+		void          fillInNegativeStartTimes     (void);
+		void          assignLineDurations          (void);
+      set<HumNum>   getNonZeroLineDurations      (void);
+      set<HumNum>   getPositiveLineDurations     (void);
+		bool          processLocalParametersForTrack (HumdrumToken* starttok,
+		                                            HumdrumToken* current);
+		void          checkForLocalParameters      (HumdrumToken *token,
+		                                            HumdrumToken *current);
+		bool          assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                            HumdrumToken* ptoken);
 
 };
 
@@ -733,14 +745,33 @@ class HumdrumFile : public HumdrumFileContent {
 
 class Convert {
 	public:
-		// duration processing
-		static HumNum  recipToDuration  (const string& recip, HumNum scale = 4,
-		                                 string separator = " ");
 
-		// string processing:
-		static vector<string> splitString (const string& data, char separator);
-		static void replaceOccurrences(string& source, const string& search,
-		                                               const string& replace);
+      // Rhythm processing, defined in Convert-rhythm.cpp
+		static HumNum  recipToDuration    (const string& recip, HumNum scale = 4,
+		                                   string separator = " ");
+
+      // Pitch processing, defined in Convert-pitch.cpp
+      static int     kernToOctaveNumber   (const string& kerndata);
+		static int     kernToAccidentalCount(const string& kerndata);
+		static int     kernToDiatonicPC     (const string& kerndata);
+		static char    kernToDiatonicUC     (const string& kerndata);
+		static char    kernToDiatonicLC     (const string& kerndata);
+		static string  kernToScientificPitch(const string& kerndata, 
+		                                     string flat = "b",
+		                                     string sharp = "#", 
+		                                     string separator = "");
+
+		// String processing, defined in Convert-string.cpp
+		static vector<string> splitString   (const string& data,
+		                                     char separator = ' ');
+		static void    replaceOccurrences   (string& source,
+		                                     const string& search,
+		                                     const string& replace);
+
+		// Mathematical processing, defined in Convert-math.cpp
+		static int     getLcm               (const vector<int>& numbers);
+      static int     getGcd               (int a, int b);
+
 };
 
 

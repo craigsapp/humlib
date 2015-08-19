@@ -74,7 +74,7 @@ vpath %.o   $(OBJDIR)
 OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: 
+.PHONY: examples
 
 
 ###########################################################################

@@ -174,6 +174,22 @@ const string& HumdrumToken::getDataType(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isDataType -- Returns true if the data type of the token
+//   matches the test data type.
+//
+
+bool HumdrumToken::isDataType(string dtype) const {
+	if (dtype.compare(0, 2, "**") == 0) {
+		return dtype == getDataType();
+	} else {
+		return getDataType().compare(2, string::npos, dtype) == 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSpineInfo -- Set the spine manipulation history string.
 //
 

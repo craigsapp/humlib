@@ -69,6 +69,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
 		const string& getDataType          (void) const;
+		bool     isDataType                (string dtype) const;
 		string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;

@@ -26,14 +26,33 @@ namespace minHumdrum {
 
 class Convert {
 	public:
-		// duration processing
-		static HumNum  recipToDuration  (const string& recip, HumNum scale = 4,
-		                                 string separator = " ");
 
-		// string processing:
-		static vector<string> splitString (const string& data, char separator);
-		static void replaceOccurrences(string& source, const string& search,
-		                                               const string& replace);
+      // Rhythm processing, defined in Convert-rhythm.cpp
+		static HumNum  recipToDuration    (const string& recip, HumNum scale = 4,
+		                                   string separator = " ");
+
+      // Pitch processing, defined in Convert-pitch.cpp
+      static int     kernToOctaveNumber   (const string& kerndata);
+		static int     kernToAccidentalCount(const string& kerndata);
+		static int     kernToDiatonicPC     (const string& kerndata);
+		static char    kernToDiatonicUC     (const string& kerndata);
+		static char    kernToDiatonicLC     (const string& kerndata);
+		static string  kernToScientificPitch(const string& kerndata, 
+		                                     string flat = "b",
+		                                     string sharp = "#", 
+		                                     string separator = "");
+
+		// String processing, defined in Convert-string.cpp
+		static vector<string> splitString   (const string& data,
+		                                     char separator = ' ');
+		static void    replaceOccurrences   (string& source,
+		                                     const string& search,
+		                                     const string& replace);
+
+		// Mathematical processing, defined in Convert-math.cpp
+		static int     getLcm               (const vector<int>& numbers);
+      static int     getGcd               (int a, int b);
+
 };
 
 

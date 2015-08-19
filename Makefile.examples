@@ -74,10 +74,10 @@ COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 
 # setting up the directory paths to search for dependency files
 vpath %.h   $(INCDIR)
-vpath %.cpp $(wildcard tests/test-*)
+vpath %.cpp $(wildcard tests/test-*) examples myprograms
 
 # targets which don't actually refer to files
-.PHONY:
+.PHONY: examples
 
 
 ###########################################################################

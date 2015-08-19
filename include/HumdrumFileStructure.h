@@ -17,6 +17,8 @@
 #ifndef _HUMDRUMFILESTRUCTURE_H
 #define _HUMDRUMFILESTRUCTURE_H
 
+#include <set>
+
 #include "HumdrumFileBase.h"
 
 using namespace std;
@@ -45,6 +47,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
 		ostream&      printDurationInfo            (ostream& out = cout);
+		int           tpq                          (void);
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
@@ -77,16 +80,18 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumNum startdur);
 		bool          setLineDurationFromStart     (HumdrumToken* token,
 		                                            HumNum dursum);
-		bool      analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
-		bool      analyzeNullLineRhythms       (void);
-		void      fillInNegativeStartTimes     (void);
-		void      assignLineDurations          (void);
-		bool      processLocalParametersForTrack(HumdrumToken* starttok,
-		                                         HumdrumToken* current);
-		void      checkForLocalParameters       (HumdrumToken *token,
-		                                         HumdrumToken *current);
-		bool      assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
-		                                                  HumdrumToken* ptoken);
+		bool          analyzeRhythmOfFloatingSpine (HumdrumToken* spinestart);
+		bool          analyzeNullLineRhythms       (void);
+		void          fillInNegativeStartTimes     (void);
+		void          assignLineDurations          (void);
+      set<HumNum>   getNonZeroLineDurations      (void);
+      set<HumNum>   getPositiveLineDurations     (void);
+		bool          processLocalParametersForTrack (HumdrumToken* starttok,
+		                                            HumdrumToken* current);
+		void          checkForLocalParameters      (HumdrumToken *token,
+		                                            HumdrumToken *current);
+		bool          assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
+		                                            HumdrumToken* ptoken);
 
 };
 

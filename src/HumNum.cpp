@@ -46,6 +46,11 @@ HumNum::HumNum(const string& ratstring) {
 }
 
 
+HumNum::HumNum(const char* ratstring) {
+	setValue(ratstring);
+}
+
+
 HumNum::HumNum(const HumNum& rat) {
 	*this = rat;
 }
@@ -225,6 +230,12 @@ void HumNum::setValue(const string& ratstring) {
 		buffer[1] = 1;
 	}
 	setValue(buffer[0], buffer[1]);
+}
+
+
+void HumNum::setValue(const char* ratstring) {
+	string realstring = ratstring;
+	setValue(realstring);
 }
 
 
