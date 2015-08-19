@@ -113,12 +113,14 @@ Notice that all minHumdrum code is placed into the minHumdrum namespace.
 
 Test data for use with the above program:
 
+![Example music](https://github.com/craigsapp/minHumdrum/blob/master/examples/hum2notelist.svg)
+
 <table style="border-collapse: separate; margin-left:auto; margin-right:auto">
 <tr><td style="border:0">
 Example input:<br>
 <pre style="tab-stop: 12; font-family: Courier; text-align:left">
 **kern  **kern
-*M4/4   *M4/4
+*M3/4   *M3/4
 8C      12d
 .       12e
 8B      .
