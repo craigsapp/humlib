@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 19 02:26:26 PDT 2015
+// Last Modified: Wed Aug 19 13:32:12 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -651,6 +651,34 @@ class HumdrumFileBase {
 
 		// ticksperquarternote: this is the number of tick
 		int ticksperquarternote;
+
+	public:
+		// Dummy functions to allow the HumdrumFile class's inheritance
+		// to be shifted between HumdrumFileContent (the top-level default), 
+      // HumdrumFileStructure (mid-level interface), or HumdrumFileBase
+		// (low-level interface).
+
+		// 
+		// HumdrumFileStructure public functions:
+		//
+		bool readNoRhythm      (istream& infile) { return read(infile); };
+		bool readNoRhythm      (const char*   filename) {return read(filename);};
+		bool readNoRhythm      (const string& filename) {return read(filename);};
+		bool readStringNoRhythm(const char*   contents) {return read(contents);};
+		bool readStringNoRhythm(const string& contents) {return read(contents);};
+		HumNum       getScoreDuration           (void) const { return 0; };
+		ostream&     printDurationInfo          (ostream& out=cout) {return out;};
+		int          tpq                        (void) { return 0; }
+		int          getBarlineCount            (void) const { return 0; }
+		HumdrumLine* getBarline                 (int index) const { return NULL;};
+		HumNum       getBarlineDuration         (int index) const { return 0; };
+		HumNum       getBarlineDurationFromStart(int index) const { return 0; };
+		HumNum       getBarlineDurationToEnd    (int index) const { return 0; };
+
+		// HumdrumFileContent public functions:
+
+
+	
 };
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile);
@@ -735,7 +763,11 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 
 
-class HumdrumFile : public HumdrumFileContent {
+#ifndef HUMDRUMFILE_PARENT
+	#define HUMDRUMFILE_PARENT HumdrumFileContent
+#endif
+
+class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile         (void);
 		             ~HumdrumFile         ();
