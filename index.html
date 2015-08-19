@@ -21,24 +21,16 @@
     <section class="main-content">
 
 <p>The minHumdrum library is a set of C++ classes for parsing 
-<a href="http://www.humdrum.org">Humdrum</a> file data.  The library is designed
+<a href="http://www.humdrum.org">Humdrum</a> data.  The library is designed
 to be portable, consisting of two files that can be copied into
 your project:</p>
 
 <ol>
 <li>An include file <a href="https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h">minhumdrum.h</a>
 </li>
-<li>and a source file <a href="https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.h">minhumdrum.cpp</a>
+<li>and a source file <a href="https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp">minhumdrum.cpp</a>
 </li>
 </ol>
-
-<p>The classes use some C++11-specific features, so you must add the
-<code>-stc=c++11</code> option when compiling with GNU g++ or clang++ compiler.
-Also include the <code>-stdlib=libc++</code> when compiling with clang.  See the
-<a href="https://github.com/craigsapp/minHumdrum/Makefile">Makefile</a> for compiling the library and 
-<a href="https://github.com/craigsapp/minHumdrum/Makefile.examples">Makefile.examples</a> for linking to create executables.</p>
-
-<p>More information and documentation for the library can be found at <a href="http://min.humdrum.org">http://min.humdrum.org</a>.</p>
 
 <h1>
 <a id="class-overview" class="anchor" href="#class-overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Class overview</h1>
@@ -62,8 +54,26 @@ Also include the <code>-stdlib=libc++</code> when compiling with clang.  See the
 <a href="https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h">Convert</a>: utility functions for converting data (particularly from token strings) into other formats.</li>
 </ul>
 
+
+<h1>
+<a id="downloading" class="anchor" href="#downloading" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloading</h1>
+
+<p>To download using git, type:</p>
+
+<div class="highlight highlight-bash"><pre>git clone https://github.com/craigsapp/minHumdrum</pre></div>
+
+<p>To update to the most recent version of minHumdrum, type in the minHumdrum directory:</p>
+
+<div class="highlight highlight-bash"><pre>git pull</pre></div>
+
 <h1>
 <a id="compiling" class="anchor" href="#compiling" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compiling</h1>
+
+<p>The classes use some C++11-specific features, so you must add the
+<code>-stc=c++11</code> option when compiling with GNU g++ or clang++ compiler.
+Also include the <code>-stdlib=libc++</code> when compiling with clang.  See the
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/Makefile">Makefile</a> for compiling the library and 
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/Makefile.examples">Makefile.examples</a> for linking to create executables.</p>
 
 <p>If you download the git repository or a zip/tarball of the repository, you can
 compile the library with the command</p>
@@ -89,8 +99,7 @@ link to other program code.</p>
 <span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
 <span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">minHumdrum</span><span class="pl-k">;</span>
 
-<span class="pl-k">void</span> <span class="pl-en">printNoteInformation</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, 
-      <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq);
+<span class="pl-k">void</span> <span class="pl-en">printNote</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq);
 
 <span class="pl-k">int</span> <span class="pl-en">main</span>(<span class="pl-k">int</span> argc, <span class="pl-k">char</span>** argv) {
    <span class="pl-k">if</span> (argc != <span class="pl-c1">2</span>) {
@@ -113,15 +122,14 @@ link to other program code.</p>
             <span class="pl-k">continue</span>;
          }
          <span class="pl-k">if</span> (infile[i].<span class="pl-c1">token</span>(j).<span class="pl-c1">isDataType</span>(<span class="pl-s"><span class="pl-pds">"</span>kern<span class="pl-pds">"</span></span>)) {
-            <span class="pl-c1">printNoteInformation</span>(infile, i, j, tpq);
+            <span class="pl-c1">printNote</span>(infile, i, j, tpq);
          }
       }
    }
    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
 }
 
-<span class="pl-k">void</span> <span class="pl-en">printNoteInformation</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, 
-      <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq) {
+<span class="pl-k">void</span> <span class="pl-en">printNoteInformation</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq) {
    <span class="pl-k">int</span> starttime, duration;
    HumNum value;
 
@@ -141,9 +149,10 @@ link to other program code.</p>
 
 <p>Test data for use with the above program:</p>
 
-<p><img src="https://cdn.rawgit.com/craigsapp/minHumdrum/master/examples/hum2notelist.svg" alt="Example music"></p>
+<center>
+<p><img src="images/hum2notelist.svg" alt="Example music"></p>
 
-<table>
+<table style="display:inline; width:500px;  background:red">
 <tr>
 <td>
 Example input:<br>
@@ -177,6 +186,7 @@ G3      12      6
 </td>
 </tr>
 </table>
+</center>
 
 <p></p>
 
@@ -186,16 +196,6 @@ go to the base directory of the minHumdrum code and type <code>make myprogram</c
 if the program is called <code>myprograms/myprogram.cpp</code>.  The compiled program
 will be created as <code>bin/myprogram</code>.</p>
 
-<h1>
-<a id="downloading" class="anchor" href="#downloading" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloading</h1>
-
-<p>To download using git, type:</p>
-
-<div class="highlight highlight-bash"><pre>git clone https://github.com/craigsapp/minHumdrum</pre></div>
-
-<p>To update to the most recent version of minHumdrum, type in the minHumdrum directory:</p>
-
-<div class="highlight highlight-bash"><pre>git pull</pre></div>
 
     <footer class="site-footer">
     </footer>
