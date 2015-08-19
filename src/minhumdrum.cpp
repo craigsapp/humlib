@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 19 02:07:32 PDT 2015
+// Last Modified: Wed Aug 19 02:26:26 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -3011,7 +3011,7 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 //
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
-//   list.  If the first barline is a pickup beat, then the returned 
+//   list.  If the first barline is a pickup measure, then the returned 
 //   HumdrumLine* will not be an actual barline line.
 //
 
