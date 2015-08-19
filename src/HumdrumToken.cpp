@@ -37,7 +37,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumdrumToken::HumdrumToken --
+// HumdrumToken::HumdrumToken -- Constructor for HumdrumToken.
 //
 
 HumdrumToken::HumdrumToken(void) : string() {
@@ -55,6 +55,15 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	setPrefix("!");
 }
 
+
+//////////////////////////////
+//
+// HumdrumToken::~HumdrumToken -- Deconstructor for HumdrumToken.
+//
+
+HumdrumToken::~HumdrumToken() {
+    // do nothing
+}
 
 
 //////////////////////////////
@@ -81,7 +90,10 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount --
+// HumdrumToken::getPreviousNullDataTokenCount -- Return the number of
+//   previous tokens in the spine which is not a null token.  For null
+//   tokens, this will be a count of the number of non-null tokens which
+//   the null represents.
 //
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
@@ -92,9 +104,11 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount --
+// HumdrumToken::getPreviousNullDataTokenCount -- Return the non-null
+//    data token which occurs before this token in the data in the same
+//    spine.  The default value is index 0, since mostly there will only
+//    be one previous token.
 //
-
 
 HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
@@ -113,7 +127,8 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataTokenCount --
+// HumdrumToken::getNextNonNullDataTokenCount -- Return the number of non-null
+//     data tokens which follow this token in the spine.
 //
 
 int HumdrumToken::getNextNonNullDataTokenCount(void) {
@@ -124,7 +139,10 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataToken --
+// HumdrumToken::getNextNonNullDataToken -- Return the given next non-null token
+//    following this one in the spine.  The default value for index is 0 since
+//    the next non-null data token count will typically be 1.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
@@ -144,18 +162,8 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::HumdrumToken --
-//
-
-HumdrumToken::~HumdrumToken() {
-	// do nothing
-}
-
-
-
-//////////////////////////////
-//
-// HumdrumToken::getDataType -- Get the exclusive interpretation type.
+// HumdrumToken::getDataType -- Get the exclusive interpretation type for
+//     the token.
 //
 
 const string& HumdrumToken::getDataType(void) const {
@@ -177,7 +185,8 @@ void HumdrumToken::setSpineInfo(const string& spineinfo) {
 
 //////////////////////////////
 //
-// HumdrumToken::getSpineInfo --
+// HumdrumToken::getSpineInfo -- Return the spine split/merge history
+//    for the token.
 //
 
 string HumdrumToken::getSpineInfo(void) const {
@@ -188,7 +197,8 @@ string HumdrumToken::getSpineInfo(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineIndex --
+// HumdrumToken::getLineIndex -- Return the line index of the owning
+//    HumdrumLine for this token.
 //
 
 int HumdrumToken::getLineIndex(void) const {
@@ -199,7 +209,7 @@ int HumdrumToken::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineNumber --
+// HumdrumToken::getLineNumber -- Return the line index plus 1.
 //
 
 int HumdrumToken::getLineNumber(void) const {
@@ -210,7 +220,8 @@ int HumdrumToken::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setFieldIndex --
+// HumdrumToken::setFieldIndex -- Set the field index of the token on the
+//   owning HumdrumLine object.
 //
 
 void HumdrumToken::setFieldIndex(int index) {
@@ -221,7 +232,7 @@ void HumdrumToken::setFieldIndex(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::setTrack -- Set the track (similar to a staff in MEI).
+// HumdrumToken::setTrack -- Set the track number (similar to a staff in MEI).
 //
 
 void HumdrumToken::setTrack(int aTrack) {
@@ -232,8 +243,8 @@ void HumdrumToken::setTrack(int aTrack) {
 
 //////////////////////////////
 //
-// HumdrumToken::setTrack -- Set the track and subtrack (similar to a
-//     staff and layer in MEI).
+// HumdrumToken::setTrack -- Set the track and subtrack (subtrack is similar
+//     to a staff and layer in MEI).
 //
 
 void HumdrumToken::setTrack(int aTrack, int aSubtrack) {
@@ -292,8 +303,10 @@ void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextToken --
-//    default value: index = 0
+// HumdrumToken::getNextToken -- Return the next token in the
+//    spine.  Since the next token count is usually one, the default
+//    index value is zero.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getNextToken(int index) const {
@@ -308,7 +321,8 @@ HumdrumToken* HumdrumToken::getNextToken(int index) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextTokens --
+// HumdrumToken::getNextTokens --  Return a list of the next
+//   tokens in the spine after this token.
 //
 
 vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
@@ -319,7 +333,8 @@ vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousTokens --
+// HumdrumToken::getPreviousTokens --  Return a list of the previous
+//    tokens in the spine before this token.
 //
 
 vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
@@ -330,8 +345,10 @@ vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousToken --
-//    default value: index = 0
+// HumdrumToken::getPreviousToken -- Return the previous token in the
+//    spine.  Since the previous token count is usually one, the default
+//    index value is zero.
+//       default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
@@ -347,7 +364,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //////////////////////////////
 //
 // HumdrumToken::analyzeDuration -- Currently reads the duration of
-//   **kern and **recip data.  Add more data types here.
+//   **kern and **recip data.  Add more data types here such as **koto.
 //
 
 bool HumdrumToken::analyzeDuration(void) {
@@ -411,7 +428,10 @@ bool HumdrumToken::isManipulator(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDuration --
+// HumdrumToken::getDuration -- Return the duration of the token.  The token
+//    does not necessarily need to have any explicit duration, as the returned
+//    value will also include implicit duration calculated in analyzeRhythm
+//    in the HumdrumFileStructure class.
 //
 
 HumNum HumdrumToken::getDuration(void) const {
@@ -422,7 +442,8 @@ HumNum HumdrumToken::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setDuration --
+// HumdrumToken::setDuration -- Set the duration of the token.  This is done in
+//    HumdrumFileStructure::analyzeTokenDurations().
 //
 
 void HumdrumToken::setDuration(const HumNum& dur) {
@@ -433,7 +454,11 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationFromStart --
+// HumdrumToken::getDurationFromStart -- Return the duration from the
+//   start of the owning HumdrumFile to the starting time of the
+//   owning HumdrumLine for the token.  The durationFromStart is
+//   in reference to the start of the token, not the end of the token,
+//   which may be on another HumdrumLine.
 //
 
 HumNum HumdrumToken::getDurationFromStart(void) const {
@@ -464,7 +489,8 @@ bool HumdrumToken::hasRhythm(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isBarlines --
+// HumdrumToken::isBarline -- Returns true if the first character is an
+//   equals sign.
 //
 
 bool HumdrumToken::isBarline(void) const {
@@ -482,8 +508,8 @@ bool HumdrumToken::isBarline(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isCommentLocal -- Presumed to be in a spine where
-//   only local comments are allowed.
+// HumdrumToken::isCommentLocal -- Returns true of the token start with "!",
+//   but not "!!" which is for global comments.
 //
 
 bool HumdrumToken::isCommentLocal(void) const {
@@ -508,7 +534,9 @@ bool HumdrumToken::isCommentLocal(void) const {
 //////////////////////////////
 //
 // HumdrumToken::isData -- Returns true if not an interpretation, barline
-//      or local comment;
+//      or local comment.  This will not work on synthetic tokens generated
+//      from an empty line.  So this function should be called only on tokens
+//      in lines which pass the HumdrumLine::hasSpines() test.
 //
 
 bool HumdrumToken::isData(void) const {
@@ -539,7 +567,7 @@ bool HumdrumToken::isExclusive(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isSplitInterpretation --
+// HumdrumToken::isSplitInterpretation -- True if the token is "*^".
 //
 
 bool HumdrumToken::isSplitInterpretation(void) const {
@@ -550,7 +578,7 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isMergeInterpretation --
+// HumdrumToken::isMergeInterpretation -- True if the token is "*v".
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
@@ -561,7 +589,7 @@ bool HumdrumToken::isMergeInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isExchangeInterpretation --
+// HumdrumToken::isExchangeInterpretation -- True if the token is "*x".
 //
 
 bool HumdrumToken::isExchangeInterpretation(void) const {
@@ -572,7 +600,7 @@ bool HumdrumToken::isExchangeInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isTerminateInterpretation --
+// HumdrumToken::isTerminateInterpretation -- True if the token is "*-".
 //
 
 bool HumdrumToken::isTerminateInterpretation(void) const {
@@ -583,7 +611,7 @@ bool HumdrumToken::isTerminateInterpretation(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isAddInterpretation --
+// HumdrumToken::isAddInterpretation -- True if the token is "*+".
 //
 
 bool HumdrumToken::isAddInterpretation(void) const {
@@ -652,8 +680,11 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 
 /////////////////////////////
 //
-// HumdrumToken::getSubtoken --
-//   default value: separator = " "
+// HumdrumToken::getSubtoken -- Extract the specified subtoken from the token.
+//    Tokens usually are separated by spaces in Humdrum files, but this will 
+//    depened on the data type (so therefore, the tokens are not presplit into
+//    sub-tokens when reading in the file).
+//        default value: separator = " "
 //
 
 string HumdrumToken::getSubtoken(int index, const string& separator) const {
@@ -683,6 +714,8 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 // HumdrumToken::setParameters -- Process a local comment with
 //     the structure:
 //        !NS1:NS2:key1=value1:key2=value2:key3=value3
+//     and store the parameter in the HumHash parent class component of the
+//     HumdrumToken object.
 //
 
 void HumdrumToken::setParameters(HumdrumToken* ptok) {
@@ -723,7 +756,8 @@ void HumdrumToken::setParameters(const string& pdata) {
 
 //////////////////////////////
 //
-// HumdrumToken::makeForwardLink --
+// HumdrumToken::makeForwardLink -- Line a following spine token to this one.
+//    Used by the HumdrumFileBase::analyzeLinks function.
 //
 
 void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
@@ -735,7 +769,8 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::makeBackwarddLink --
+// HumdrumToken::makeBackwarddLink -- Link a previous spine token to this one.
+//    Used by the HumdrumFileBase::analyzeLinks function.
 //
 
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
@@ -747,7 +782,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::setOwner --
+// HumdrumToken::setOwner -- Set the HumdrumLine owner of this token.
 //
 
 void HumdrumToken::setOwner(HumdrumLine* aLine) {
@@ -758,7 +793,8 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 
 //////////////////////////////
 //
-// HumdrumToken::getOwner --
+// HumdrumToken::getOwner -- Return a pointer to the HumdrumLine which owns this
+//    token.
 //
 
 HumdrumLine* HumdrumToken::getOwner(void) const {
@@ -769,7 +805,7 @@ HumdrumLine* HumdrumToken::getOwner(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getState --
+// HumdrumToken::getState --  Return the rhythm state variable.
 //
 
 int HumdrumToken::getState(void) const {
@@ -780,7 +816,9 @@ int HumdrumToken::getState(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getState --
+// HumdrumToken::incrementState -- update the rhythm analysis state variable.
+//    This will prevent redundant recursive analysis in analyzeRhythm of
+//    the HumdrumFileStructure class.
 //
 
 void HumdrumToken::incrementState(void) {
@@ -792,7 +830,7 @@ void HumdrumToken::incrementState(void) {
 //////////////////////////////
 //
 // HumdrumToken::getNextTokenCount -- Return the number of tokens in the
-//   spine/subspine which follow this token.  Typically this will be 1,
+//   spine/sub spine which follow this token.  Typically this will be 1,
 //   but will be zero for a terminator interpretation (*-), and will be
 //   2 for a split interpretation (*^).
 //
@@ -806,7 +844,7 @@ int HumdrumToken::getNextTokenCount(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getPreviousTokenCount -- Return the number of tokens
-//   in the spine/subspine which precede this token.  Typically this will
+//   in the spine/sub-spine which precede this token.  Typically this will
 //   be 1, but will be zero for an exclusive interpretation (starting with
 //   "**"), and will be greater than one for a token which follows a
 //   spine merger (using *v interpretations).
@@ -820,7 +858,7 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 //////////////////////////////
 //
-// operator<< -- Needed to avoid interaction with HumHash.
+// operator<< -- Needed to avoid interaction with the HumHash parent class.
 //
 
 ostream& operator<<(ostream& out, const HumdrumToken& token) {

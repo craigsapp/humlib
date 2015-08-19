@@ -7,7 +7,11 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Rational number class for durations.
+// Description:   Rational number class for duration processing in
+//                HumdrumFiles.  The HumNum class manages a fractional
+//                number formed from two ints.  The fractional
+//                number will be kept in reduced for, such as
+//                the number 3/6 which can be simplified to 1/2.
 //
 
 #include "HumNum.h"
@@ -18,7 +22,8 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumNum::HumNum --
+// HumNum::HumNum -- HumNum Constructor.  Set the default value
+//   of the number to zero, or the given number if specified.
 //
 
 HumNum::HumNum(void){
@@ -49,7 +54,7 @@ HumNum::HumNum(const HumNum& rat) {
 
 //////////////////////////////
 //
-// HumNum::~HumNum --
+// HumNum::~HumNum -- HumNum deconstructor.
 //
 
 HumNum::~HumNum() {
@@ -93,7 +98,7 @@ bool HumNum::isZero(void) const {
 
 //////////////////////////////
 //
-// HumNum::isNonZero -- Returns true if value is zero.
+// HumNum::isNonZero -- Returns true if value is not zero.
 //
 
 bool HumNum::isNonZero(void) const {
@@ -144,7 +149,7 @@ double HumNum::getFloat(void) const {
 //    Examples:
 //       8/5 | round=0.0 ==  1
 //      -8/5 | round=0.0 == -1
-//			8/5 | roudn=0.5 ==  1
+//			8/5 | round=0.5 ==  1
 //      -8/5 | round=0.5 == -1
 //
 
@@ -160,7 +165,7 @@ int HumNum::getInteger(double round) const {
 
 //////////////////////////////
 //
-// HumNum::getNumerator --
+// HumNum::getNumerator -- Return the top integer in the fraction.
 //
 
 int HumNum::getNumerator(void) const {
@@ -171,7 +176,7 @@ int HumNum::getNumerator(void) const {
 
 //////////////////////////////
 //
-// HumNum::getDenominator --
+// HumNum::getDenominator -- Return the bottom integer in the fraction.
 //
 
 int HumNum::getDenominator(void) const {
@@ -181,7 +186,11 @@ int HumNum::getDenominator(void) const {
 
 //////////////////////////////
 //
-// HumNum::setValue --
+// HumNum::setValue -- Set the number to the given integer.
+//    For the two-parameter version, set the top and bottom
+//    values for the number, reducing if necessary.  For the
+//    string version, parse an integer or fraction from the 
+//    string and reduce if necessary.
 //
 
 void HumNum::setValue(int numerator) {
@@ -251,7 +260,9 @@ HumNum& HumNum::makeAbs(void) {
 
 //////////////////////////////
 //
-// HumNum::reduce -- simplify the fraction.
+// HumNum::reduce -- simplify the fraction.  For example, 4/24 will
+//    reduce to 1/6 since a factor of 4 is common to the numerator
+//    and denominator.
 //
 
 void HumNum::reduce(void) {
@@ -327,7 +338,8 @@ bool HumNum::isInfinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isNaN -- Returns true if the numerator and denominator are zero.
+// HumNum::isNaN -- Returns true if the numerator and denominator
+//     are both zero.
 //
 
 bool HumNum::isNaN(void) const {
@@ -349,18 +361,19 @@ bool HumNum::isFinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isInteger -- Return true if an integer.
+// HumNum::isInteger -- Return true if number is an integer.
 //
 
 bool HumNum::isInteger(void) const {
-	return bot == 1;
+	return isFinite() && (bot == 1);
 }
 
 
 
 //////////////////////////////
 //
-// HumNum::operator+ -- Addition operator.
+// HumNum::operator+ -- Addition operator to add HumNums
+//    together or with integers.
 //
 
 HumNum HumNum::operator+(const HumNum& value) {
@@ -384,7 +397,9 @@ HumNum HumNum::operator+(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator- -- Subtraction operator.
+// HumNum::operator- -- Subtraction operator to subtract
+//     HumNums from each other and to subtrack integers from
+//     HumNums.
 //
 
 HumNum HumNum::operator-(const HumNum& value) {
@@ -408,7 +423,8 @@ HumNum HumNum::operator-(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator- -- Unary negation operator
+// HumNum::operator- -- Unary negation operator to generate
+//   the negative version of a HumNum.
 //
 
 HumNum HumNum::operator-(void) {
@@ -420,7 +436,8 @@ HumNum HumNum::operator-(void) {
 
 //////////////////////////////
 //
-// HumNum::operator* -- Multiplication operator.
+// HumNum::operator* -- Multiplication operator to multiply
+//   two HumNums together or a HumNum and an integer.
 //
 
 HumNum HumNum::operator*(const HumNum& value) {
@@ -444,7 +461,8 @@ HumNum HumNum::operator*(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator/ -- Division operator.
+// HumNum::operator/ -- Division operator to divide two
+//     HumNums together or divide a HumNum by an integer.
 //
 
 HumNum HumNum::operator/(const HumNum& value) {
@@ -476,7 +494,8 @@ HumNum HumNum::operator/(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator= -- Assign from another value.
+// HumNum::operator= -- Assign the contents of a HumNum
+//    from another HumNum.
 //
 
 HumNum& HumNum::operator=(const HumNum& value) {
@@ -496,7 +515,7 @@ HumNum& HumNum::operator=(int  value) {
 
 //////////////////////////////
 //
-// HumNum::operator+= --
+// HumNum::operator+= -- Add a HumNum or integer to a HumNum.
 //
 
 HumNum& HumNum::operator+=(const HumNum& value) {
@@ -514,7 +533,8 @@ HumNum& HumNum::operator+=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator-= --
+// HumNum::operator-= -- Subtract a HumNum or an integer from
+//    a HumNum.
 //
 
 HumNum& HumNum::operator-=(const HumNum& value) {
@@ -532,7 +552,7 @@ HumNum& HumNum::operator-=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator*= --
+// HumNum::operator*= -- Multiply a HumNum by a HumNum or integer.
 //
 
 HumNum& HumNum::operator*=(const HumNum& value) {
@@ -550,7 +570,7 @@ HumNum& HumNum::operator*=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator/= --
+// HumNum::operator/= -- Divide a HumNum by a HumNum or integer.
 //
 
 HumNum& HumNum::operator/=(const HumNum& value) {
@@ -568,7 +588,8 @@ HumNum& HumNum::operator/=(int value) {
 
 //////////////////////////////
 //
-// HumNum::operator< -- Test less-than equality
+// HumNum::operator< -- Less-than equality for a HumNum and
+//   a HumNum, integer, or float.
 //
 
 bool HumNum::operator<(const HumNum& value) const {
@@ -592,7 +613,8 @@ bool HumNum::operator<(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator<= -- Return less-than-or-equal equality
+// HumNum::operator<= -- Less-than-or-equal equality for a 
+//     HumNum with a HumNum, integer or float.
 //
 
 bool HumNum::operator<=(const HumNum& value) const {
@@ -616,7 +638,8 @@ bool HumNum::operator<=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator> -- Test greater-than equality.
+// HumNum::operator> -- Greater-than equality for a HumNum
+//     compared to a HumNum, integer, or float.
 //
 
 bool HumNum::operator>(const HumNum& value) const {
@@ -640,7 +663,8 @@ bool HumNum::operator>(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator>= -- Test greater-than-or-equal equality
+// HumNum::operator>= -- Greater-than-or-equal equality
+//    comparison for a HumNum to another HumNum, integer, or float.
 //
 
 bool HumNum::operator>=(const HumNum& value) const {
@@ -664,7 +688,8 @@ bool HumNum::operator>=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator== -- Test equality.
+// HumNum::operator== -- Equality test for HumNums compared to
+//   another HumNum, integer or float.
 //
 
 bool HumNum::operator==(const HumNum& value) const {
@@ -688,7 +713,8 @@ bool HumNum::operator==(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator!= -- Test equality.
+// HumNum::operator!= -- Inequality test for HumNums compared
+//   to other HumNums, integers or floats.
 //
 
 bool HumNum::operator!=(const HumNum& value) const {
@@ -712,8 +738,10 @@ bool HumNum::operator!=(double value) const {
 
 //////////////////////////////
 //
-// HumNum::printFraction -- Print as fraction, such as 3/2.
-//		default parameter: out = cout;
+// HumNum::printFraction -- Print HumNum as a fraction,
+//    such as 3/2.  If the HumNum is an integer, then do
+//    not print the denominator.
+//      default parameter: out = cout;
 //
 
 ostream& HumNum::printFraction(ostream& out) const {
@@ -729,12 +757,17 @@ ostream& HumNum::printFraction(ostream& out) const {
 
 //////////////////////////////
 //
-// HumNum::printMixedFration -- Print as an integer plus fractional part.
-//		default parameter: out = cout;
-//		default parameter: separator = "_"
+// HumNum::printMixedFration -- Print as an integer plus fractional 
+//     remainder.  If absolute value is less than one, will only
+//     print the fraction.  The second parameter is the output stream
+//     for printing, and the third parameter is a separation string
+//     between the integer and remainder fraction.
+//        default parameter: out = cout;
+//        default parameter: separator = "_"
 //
 
-ostream& HumNum::printMixedFraction(ostream& out, string separator) const {
+ostream& HumNum::printMixedFraction(ostream& out,
+		string separator) const {
 	if (this->isInteger()) {
 		out << getNumerator();
 	} else if (top > bot) {
@@ -751,7 +784,8 @@ ostream& HumNum::printMixedFraction(ostream& out, string separator) const {
 
 //////////////////////////////
 //
-// HumNum::printList -- Print as a list of two numbers.
+// HumNum::printList -- Print as a list of two numbers, such as
+//    "(1, 2)" for 1/2.
 //		default parameter: out = cout;
 //
 
@@ -764,7 +798,7 @@ ostream& HumNum::printList(ostream& out) const {
 
 //////////////////////////////
 //
-// operator<< --
+// operator<< -- Default printing behavior for HumNums.
 //
 
 ostream& operator<<(ostream& out, const HumNum& number) {
@@ -772,21 +806,6 @@ ostream& operator<<(ostream& out, const HumNum& number) {
 	return out;
 }
 
-/////////////////////////////
-//
-// template for printing arrays of items (not pointers to items).
-//
-
-template <typename A>
-ostream& operator<<(ostream& out, const vector<A>& v) {
-	for (unsigned int i=0; i<v.size(); i++) {
-		out << v[i];
-		if (i < v.size() - 1) {
-			out << '\t';
-		}
-	}
-	return out;
-}
 
 // END_MERGE
 

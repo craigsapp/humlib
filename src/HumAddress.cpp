@@ -107,10 +107,10 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 //
 // HumAddress::getSpineInfo -- Return the spine information for the token
 //     associated with the address.  Examples: "1" the token is in the first
-//     (left-most) spine, and there are no active subspines for the spine.
-//     "(1)a"/"(1)b" are the spine descriptions of the two subspines after
-//     a split manipluator (*^).  "((1)a)b" is the second subsubspine of the
-//     first subspine for spine 1.
+//     (left-most) spine, and there are no active sub-spines for the spine.
+//     "(1)a"/"(1)b" are the spine descriptions of the two sub-spines after
+//     a split manipulator (*^).  "((1)a)b" is the second sub-spines of the
+//     first sub-spine for spine 1.
 //
 //
 
@@ -137,13 +137,13 @@ int HumAddress::getTrack(void) const {
 //
 // HumAddress::getSubTrack -- The subtrack number of the given spine.  This
 //   functions in a similar manner to layer numbers in MEI data.  The first
-//   subspine of a spine is always subtrack 1, regardless of whether or not
+//   sub-spine of a spine is always subtrack 1, regardless of whether or not
 //   an exchange manipulator (*x) was used to switch the left-to-right ordering
-//   of the spines in the file.  All subspines regardless of their splitting
+//   of the spines in the file.  All sub-spines regardless of their splitting
 //   origin are given sequential subtrack numbers.  For example if the spine
 //   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
-//   subspine only is split--then the subspines are labeled as subtracks "1",
-//   "2", "3" respectively.  When a track has only one subspine (i.e., it has
+//   sub-spine only is split--then the sub-spines are labeled as sub-tracks "1",
+//   "2", "3" respectively.  When a track has only one sub-spine (i.e., it has
 //   been split), the subtrack value will be "0".
 //
 
@@ -156,7 +156,7 @@ int HumAddress::getSubtrack(void) const {
 //////////////////////////////
 //
 // HumAddress::getTrackString --  Return the track and subtrack as a string.
-//      The returned string will have the track number if the subspine value
+//      The returned string will have the track number if the sub-spine value
 //      is zero.  The optional separator parameter is used to separate the
 //      track number from the subtrack number.
 //        default value: separator = "."
@@ -177,7 +177,7 @@ string HumAddress::getTrackString(string separator) const {
 
 //////////////////////////////
 //
-// HumAddress::setOwner -- Stores a pointer to the HumrumLine on which
+// HumAddress::setOwner -- Stores a pointer to the HumdrumLine on which
 //   the token associated with this address belongs.  When not owned by
 //   a HumdrumLine, the parameter's value should be NULL.
 //
@@ -230,8 +230,8 @@ void HumAddress::setFieldIndex(int index) {
 //
 // HumAddress::setSpineInfo -- Set the spine description of the associated
 //     token.  For example "2" for the second spine (from the left), or
-//     "((2)a)b" for a subspine created as the left subspine of the main
-//     spine and then as the right subspine of that subspine.  This function
+//     "((2)a)b" for a sub-spine created as the left sub-spine of the main
+//     spine and then as the right sub-spine of that sub-spine.  This function
 //     is used by the HumdrumFileStructure class.
 //
 
@@ -272,11 +272,11 @@ void HumAddress::setTrack(int aTrack) {
 //
 // HumAddress::setSubtrack -- Set the subtrack of the spine.
 //   If the token is the only one active for a spine, the subtrack should
-//   be set to zero.  If there are more than one subtracks for the spine, this
-//   is the one-offset index of the spine (be careful if a subspine column
+//   be set to zero.  If there are more than one sub-tracks for the spine, this
+//   is the one-offset index of the spine (be careful if a sub-spine column
 //   is exchanged with another spine other than the one from which it was
 //   created.  In this case the subtrack number is not useful to calculate
-//   the field index of other subtracks for the given track.
+//   the field index of other sub-tracks for the given track.
 //   This function is used by the HumdrumFileStructure class.
 //
 

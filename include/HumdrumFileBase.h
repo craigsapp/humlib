@@ -41,8 +41,6 @@ class HumdrumFileBase {
 		bool          readString                   (const string& contents);
 
 		HumdrumLine&  operator[]                   (int index);
-		void          append                       (const char* line);
-		void          append                       (const string& line);
 		int           getLineCount                 (void) const;
 		int           getMaxTrack                  (void) const;
 		ostream&      printSpineInfo               (ostream& out = cout);
@@ -54,6 +52,8 @@ class HumdrumFileBase {
 		HumdrumToken* getTrackEnd                  (int track,
 		                                            int subtrack) const;
 		void          createLinesFromTokens        (void);
+		void          append                       (const char* line);
+		void          append                       (const string& line);
 
 	protected:
 		bool          analyzeTokens                (void);

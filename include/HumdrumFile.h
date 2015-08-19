@@ -7,7 +7,8 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Used to add structural analysis to HumdrumFileBase class.
+// Description:   Placeholder class to serve as interface to HumdrumFileBase, 
+//                HumdrumFileStructure and HumdrumFileContent.
 //
 
 #ifndef _HUMDRUMFILE_H

@@ -56,13 +56,13 @@ class HumdrumToken : public string, public HumHash {
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount(void) {
 		               return getPreviousNonNullDataTokenCount(); }
-		HumdrumToken* getPreviousNonNullDataToken(int index);
+		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
 		HumdrumToken* getPreviousNNDT(int index) {
 		               return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
 		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HumdrumToken* getNextNonNullDataToken(int index);
-		HumdrumToken* getNextNNDT(int index) {
+		HumdrumToken* getNextNonNullDataToken(int index = 0);
+		HumdrumToken* getNextNNDT(int index = 0) {
 		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;

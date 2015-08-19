@@ -132,8 +132,8 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 //     associated with the address.  Examples: "1" the token is in the first
 //     (left-most) spine, and there are no active subspines for the spine.
 //     "(1)a"/"(1)b" are the spine descriptions of the two subspines after
-//     a split manipluator (*^).  "((1)a)b" is the second subsubspine of the
-//     first subspine for spine 1.
+//     a split manipulator (*^).  "((1)a)b" is the second subsubspine of the
+//     first sub-spine for spine 1.
 //
 //
 
@@ -160,13 +160,13 @@ int HumAddress::getTrack(void) const {
 //
 // HumAddress::getSubTrack -- The subtrack number of the given spine.  This
 //   functions in a similar manner to layer numbers in MEI data.  The first
-//   subspine of a spine is always subtrack 1, regardless of whether or not
+//   sub-spine of a spine is always subtrack 1, regardless of whether or not
 //   an exchange manipulator (*x) was used to switch the left-to-right ordering
 //   of the spines in the file.  All subspines regardless of their splitting
 //   origin are given sequential subtrack numbers.  For example if the spine
 //   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
-//   subspine only is split--then the subspines are labeled as subtracks "1",
-//   "2", "3" respectively.  When a track has only one subspine (i.e., it has
+//   sub-spine only is split--then the subspines are labeled as subtracks "1",
+//   "2", "3" respectively.  When a track has only one sub-spine (i.e., it has
 //   been split), the subtrack value will be "0".
 //
 
@@ -179,7 +179,7 @@ int HumAddress::getSubtrack(void) const {
 //////////////////////////////
 //
 // HumAddress::getTrackString --  Return the track and subtrack as a string.
-//      The returned string will have the track number if the subspine value
+//      The returned string will have the track number if the sub-spine value
 //      is zero.  The optional separator parameter is used to separate the
 //      track number from the subtrack number.
 //        default value: separator = "."
@@ -253,8 +253,8 @@ void HumAddress::setFieldIndex(int index) {
 //
 // HumAddress::setSpineInfo -- Set the spine description of the associated
 //     token.  For example "2" for the second spine (from the left), or
-//     "((2)a)b" for a subspine created as the left subspine of the main
-//     spine and then as the right subspine of that subspine.  This function
+//     "((2)a)b" for a sub-spine created as the left sub-spine of the main
+//     spine and then as the right sub-spine of that sub-spine.  This function
 //     is used by the HumdrumFileStructure class.
 //
 
@@ -296,7 +296,7 @@ void HumAddress::setTrack(int aTrack) {
 // HumAddress::setSubtrack -- Set the subtrack of the spine.
 //   If the token is the only one active for a spine, the subtrack should
 //   be set to zero.  If there are more than one subtracks for the spine, this
-//   is the one-offset index of the spine (be careful if a subspine column
+//   is the one-offset index of the spine (be careful if a sub-spine column
 //   is exchanged with another spine other than the one from which it was
 //   created.  In this case the subtrack number is not useful to calculate
 //   the field index of other subtracks for the given track.
@@ -317,7 +317,7 @@ void HumAddress::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
-// HumHash::HumHash -- HumHash contructor.  The data storage is empty
+// HumHash::HumHash -- HumHash constructor.  The data storage is empty
 //    until the first parameter in the Hash is set.
 //
 
@@ -511,7 +511,7 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 //   For example "1.25" and "5/4" will both return 1.25.  The value
 //   cannot contain a slash unless it is part of the first fraction
 //   on in the value string (this may be changed when regular expressions
-//   are used to implement this fucntion).
+//   are used to implement this function).
 //
 
 double HumHash::getValueFloat(const string& key) const {
@@ -610,7 +610,7 @@ bool HumHash::getValueBool(const string& ns1, const string& ns2,
 //
 // HumHash::setValue -- Set the parameter to the given value,
 //     over-writing any previous value for the parameter.  The
-//     value is any arbitrary string, but preferrably does not
+//     value is any arbitrary string, but preferably does not
 //     include tabs or colons.  If a colon is needed, then specify
 //     as "&colon;" without the quotes.  Values such as integers
 //     fractions and floats can be specified, and these wil be converted
@@ -727,8 +727,8 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 //     combination.  With no parameters, a complete list of all
 //     namespaces/keys will be returned.  Giving one parameter will
 //     produce a list will give all NS2:key values in the NS1 namespace.
-//     If there is a colon in the single paramter verion of the function,
-//     then this will be interpreted as "NS1", "NS2" version of the paramters
+//     If there is a colon in the single parameter version of the function,
+//     then this will be interpreted as "NS1", "NS2" version of the parameters
 //     described above.
 //
 
@@ -967,7 +967,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::deleteValue -- Delete the given paramter key from the HumHash
+// HumHash::deleteValue -- Delete the given parameter key from the HumHash
 //   object.  Three string version is N1,NS2,key; two string version is
 //   "",NS2,key; and one argument version is "","",key.
 //
@@ -1058,7 +1058,7 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 //////////////////////////////
 //
 // HumHash::setPrefix: initial string to print when using
-//   operator<<.  This is used for including the "!" for lcoal
+//   operator<<.  This is used for including the "!" for local
 //   comments or "!!" for global comments.   The prefix will
 //   remain the same until it is changed.  The default prefix
 //   of the object it the empty string.
@@ -1242,7 +1242,7 @@ double HumNum::getFloat(void) const {
 //    Examples:
 //       8/5 | round=0.0 ==  1
 //      -8/5 | round=0.0 == -1
-//			8/5 | roudn=0.5 ==  1
+//			8/5 | round=0.5 ==  1
 //      -8/5 | round=0.5 == -1
 //
 
@@ -3409,7 +3409,7 @@ bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
 	if (line->getDurationFromStart().isNegative()) {
 		line->setDurationFromStart(dursum);
 	} else if (line->getDurationFromStart() != dursum) {
-		cerr << "Error: Inconsistent rhythm analysis occuring near line "
+		cerr << "Error: Inconsistent rhythm analysis occurring near line "
 		     << token->getLineNumber() << endl;
 		cerr << "Expected durationFromStart to be: " << dursum
 		     << " but found it to be " << line->getDurationFromStart() << endl;
@@ -3962,7 +3962,7 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 //////////////////////////////
 //
 // HumdrumLine::getDurationFromBarline -- Return the duration from the start
-//    of the given line to the first barline occuring before the given line.
+//    of the given line to the first barline occurring before the given line.
 //
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
@@ -5297,16 +5297,16 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 //////////////////////////////
 //
 // Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter ntoes.  For example "4"
+//     rational number durations in terms of quarter toes.  For example "4"
 //     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
-//     is a scaling factor which can change the rhytmic value's base duration.
+//     is a scaling factor which can change the rhythmic value's base duration.
 //     Giving a scale of 1 will return the duration in whole note units, so
 //     "4" will return a value of 1/4 (one quarter of a whole note).  Using
 //     3/2 will give the duration in terms of dotted-quarter note units.
 //     The third parameter is the subtoken separate.  For example if the input
 //     string contains a space, anything after the first space will be ignored
 //     when extracting the string.  **kern data which also includes the pitch
-//     along with the rhtym can also be given and will be ignored.
+//     along with the rhythm can also be given and will be ignored.
 //        default value: scale = 4 (duration in terms of quarter notes)
 //        default value: separator = " " (subtoken separator)
 //
@@ -5345,7 +5345,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	int denominator = 1;
 	HumNum output;
 	if (loc != string::npos) {
-		// reciporical rhythm
+		// reciprocal rhythm
 		numerator = 1;
 		denominator = subtok[numi++] - '0';
 		while ((numi < subtok.size()) && isdigit(subtok[numi])) {

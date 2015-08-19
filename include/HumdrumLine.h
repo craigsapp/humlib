@@ -69,7 +69,8 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
-		HumNum   getBeat                (string beatrecip = "4") const;
+		HumNum   getBeat                (const HumNum beatdur = "1");
+		HumNum   getBeat                (const string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
 
 	protected:

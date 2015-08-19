@@ -23,18 +23,18 @@ namespace minHumdrum {
 //////////////////////////////
 //
 // Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter ntoes.  For example "4"
+//     rational number durations in terms of quarter notes.  For example "4"
 //     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
-//     is a scaling factor which can change the rhytmic value's base duration.
+//     is a scaling factor which can change the rhythmic value's base duration.
 //     Giving a scale of 1 will return the duration in whole note units, so
 //     "4" will return a value of 1/4 (one quarter of a whole note).  Using
 //     3/2 will give the duration in terms of dotted-quarter note units.
-//     The third parameter is the subtoken separate.  For example if the input
+//     The third parameter is the sub-token separate.  For example if the input
 //     string contains a space, anything after the first space will be ignored
 //     when extracting the string.  **kern data which also includes the pitch
-//     along with the rhtym can also be given and will be ignored.
+//     along with the rhythm can also be given and will be ignored.
 //        default value: scale = 4 (duration in terms of quarter notes)
-//        default value: separator = " " (subtoken separator)
+//        default value: separator = " " (sub-token separator)
 //
 
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
@@ -71,7 +71,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	int denominator = 1;
 	HumNum output;
 	if (loc != string::npos) {
-		// reciporical rhythm
+		// reciprocal rhythm
 		numerator = 1;
 		denominator = subtok[numi++] - '0';
 		while ((numi < subtok.size()) && isdigit(subtok[numi])) {

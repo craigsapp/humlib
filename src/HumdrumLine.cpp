@@ -23,7 +23,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumdrumLine::HumdrumLine --
+// HumdrumLine::HumdrumLine -- HumdrumLine constructor.
 //
 
 HumdrumLine::HumdrumLine(void) : string() {
@@ -51,11 +51,11 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 
 //////////////////////////////
 //
-// HumdrumLine::HumdrumLine --
+// HumdrumLine::~HumdrumLine -- HumdrumLine deconstructor.
 //
 
 HumdrumLine::~HumdrumLine() {
-	// free stored HumdrumTokens
+	// free stored HumdrumTokens:
 	clear();
 }
 
@@ -63,7 +63,7 @@ HumdrumLine::~HumdrumLine() {
 
 //////////////////////////////
 //
-// HumdrumLine::clear -- remove stored tokens.
+// HumdrumLine::clear -- Remove stored tokens.
 //
 
 void HumdrumLine::clear(void) {
@@ -117,6 +117,7 @@ bool HumdrumLine::isCommentGlobal(void) const {
 }
 
 
+
 //////////////////////////////
 //
 // HumdrumLine::isExclusive -- Returns true if the first two characters
@@ -133,6 +134,8 @@ bool HumdrumLine::isExclusive(void) const {
 //
 // HumdrumLine::isTerminator -- Returns true if first two characters
 //    are "*-" and the next character is undefined or a tab character.
+//    Not a very sophisticated function and may need adjustment later.
+//    Better to search for a terminator in each token.
 //
 
 bool HumdrumLine::isTerminator(void) const {
@@ -225,7 +228,8 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setLineIndex --
+// HumdrumLine::setLineIndex -- Used by the HumdrumFileBase class to set the
+//   index number of the line in the data storage for the file.
 //
 
 void HumdrumLine::setLineIndex(int index) {
@@ -236,7 +240,8 @@ void HumdrumLine::setLineIndex(int index) {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineIndex --
+// HumdrumLine::getLineIndex -- Returns the index number of the line in the
+//    HumdrumFileBase storage for the lines.
 //
 
 int HumdrumLine::getLineIndex(void) const {
@@ -247,7 +252,7 @@ int HumdrumLine::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::getLineNumber -- Return the line index plus one.
 //
 
 int HumdrumLine::getLineNumber(void) const {
@@ -258,7 +263,10 @@ int HumdrumLine::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::getDuration -- Get the duration of the line.  The duration will
+//    be negative one if rhythmic analysis in HumdrumFileStructure has not been
+//    done on the owning HumdrumFile object.  Otherwise this is the duration of
+//    the current line in the file.
 //
 
 HumNum HumdrumLine::getDuration(void) const {
@@ -269,7 +277,9 @@ HumNum HumdrumLine::getDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationFromStart --
+// HumdrumLine::setDurationFromStart -- Set the duration from the start of the
+//    file to the start of the current line.  This is used in rhythmic
+//    analysis done in the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationFromStart(HumNum dur) {
@@ -280,7 +290,9 @@ void HumdrumLine::setDurationFromStart(HumNum dur) {
 
 //////////////////////////////
 //
-// HumdrumLine::getDurationFromStart --
+// HumdrumLine::getDurationFromStart -- Get the duration from the start of the
+//    file to the start of the current line.  This will be -1 if rhythmic
+//    analysis has not been done in the HumdrumFileStructure class.
 //
 
 HumNum HumdrumLine::getDurationFromStart(void) const {
@@ -292,7 +304,9 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 //////////////////////////////
 //
 // HumdrumLine::getDurationToEnd -- Return the duration from the start of the
-//    line to the end of the HumdrumFile which owns this HumdrumLine.
+//    line to the end of the HumdrumFile which owns this HumdrumLine.  The
+//    rhythm of the HumdrumFile must be analyze before using this function;
+//    otherwise a 0 will probably be returned.
 //
 
 HumNum HumdrumLine::getDurationToEnd(void) const {
@@ -307,7 +321,8 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 //////////////////////////////
 //
 // HumdrumLine::getDurationFromBarline -- Return the duration from the start
-//    of the given line to the first barline occuring before the given line.
+//    of the given line to the first barline occurring before the given line.
+//    Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
 //
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
@@ -335,7 +350,8 @@ HumdrumToken* HumdrumLine::getTrackStart(int track) const {
 //////////////////////////////
 //
 // HumdrumLine::setDurationFromBarline -- Time from the previous
-//    barline to the current line.
+//    barline to the current line.  This function is used in analyzeMeter in
+//    the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationFromBarline(HumNum dur) {
@@ -360,9 +376,20 @@ HumNum HumdrumLine::getDurationToBarline(void) const {
 //
 // HumdrumLine::getBeat -- return the beat number for the data on the
 //     current line given the input **recip representation for the duration
-//     of a beat.
+//     of a beat.  The beat in a measure is offset from 1 (first beat is
+//     1 rather than 0).
 //  Default value: beatrecip = "4".
+//  Default value: beatdur   = 1.
 //
+
+HumNum HumdrumLine::getBeat(const HumNum& beatdur) const {
+	if (beatdur.isZero()) {
+		return beatdur;
+	}
+	HumNum beat = (getDurationFromBarline() / beatdur) + 1;
+	return beat;
+}
+
 
 HumNum HumdrumLine::getBeat(string beatrecip) const {
 	HumNum beatdur = Convert::recipToDuration(beatrecip);
@@ -377,7 +404,9 @@ HumNum HumdrumLine::getBeat(string beatrecip) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationToBarline --
+// HumdrumLine::setDurationToBarline -- Set the duration from the current
+//     line to the next barline in the score.  This function is used by
+//     analyzeMeter in the HumdrumFileStructure class.
 //
 
 void HumdrumLine::setDurationToBarline(HumNum dur) {
@@ -388,7 +417,8 @@ void HumdrumLine::setDurationToBarline(HumNum dur) {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber --
+// HumdrumLine::setDuration -- Set the duration of the line.  This is done
+//   in the rhythmic analysis for the HumdurmFileStructure class.
 //
 
 void HumdrumLine::setDuration(HumNum aDur) {
@@ -403,7 +433,9 @@ void HumdrumLine::setDuration(HumNum aDur) {
 
 //////////////////////////////
 //
-// HumdrumLine::hasSpines --
+// HumdrumLine::hasSpines -- Returns true if the line contains spines.  This
+//   means the the line is not empty or a global comment (which can include
+//   reference records.
 //
 
 bool HumdrumLine::hasSpines(void) const {
@@ -418,7 +450,10 @@ bool HumdrumLine::hasSpines(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isManipulator --
+// HumdrumLine::isManipulator -- Returns true if any tokens on the line are
+//   manipulator interpretations.  Only null interpretations are allowed on
+//   lines which contain manipulators, but the parser currently does not
+//   enforce this rule.
 //
 
 bool HumdrumLine::isManipulator(void) const {
@@ -434,7 +469,11 @@ bool HumdrumLine::isManipulator(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isEmpty -- Returns true if no characters on line.
+// HumdrumLine::isEmpty -- Returns true if no characters on line.  A blank line
+//   is technically disallowed in the classic Humdrum Toolkit programs, but it
+//   is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+//   no content (not even space characters) are allowed and treated as a
+//   special class of line.
 //
 
 bool HumdrumLine::isEmpty(void) const {
@@ -449,7 +488,8 @@ bool HumdrumLine::isEmpty(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenCount --
+// HumdrumLine::getTokenCount --  Return the number of tokens on the line.  This
+//     value is set by HumdrumFileBase in analyzeTokens.
 //
 
 int HumdrumLine::getTokenCount(void) const {
@@ -460,7 +500,11 @@ int HumdrumLine::getTokenCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::token --
+// HumdrumLine::token -- Return a reference to the given token on the line.
+//    An invalid token index would be bad to give to this function as it
+//    returns a reference rather than a pointer (which could be set to
+//    NULL if invalid).  Perhaps this function will eventually throw an
+//    error if the index is out of bounds.
 //
 
 HumdrumToken& HumdrumLine::token(int index) const {
@@ -471,7 +515,9 @@ HumdrumToken& HumdrumLine::token(int index) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenString --
+// HumdrumLine::getTokenString -- Return a copy of the string component of
+//     a token.  This code will return a segmentation fault if index is out of
+//     range...
 //
 
 string HumdrumLine::getTokenString(int index) const {
@@ -481,7 +527,8 @@ string HumdrumLine::getTokenString(int index) const {
 
 //////////////////////////////
 //
-// HumdrumLine::createTokensFromLine --
+// HumdrumLine::createTokensFromLine -- Chop up a HumdrumLine string into
+//     individual tokens.
 //
 
 int HumdrumLine::createTokensFromLine(void) {
@@ -507,7 +554,11 @@ int HumdrumLine::createTokensFromLine(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::createLineFromTokens --
+// HumdrumLine::createLineFromTokens --  Re-generate a HumdrumLine string from
+//    individual tokens on the line.  This function will be necessary to
+//    run before printing a HumdrumFile if you have changed any tokens on the
+//    line.  Otherwise, changes in the tokens will not be passed on to the
+///   printing of the line.
 //
 
 void HumdrumLine::createLineFromTokens(void) {
@@ -636,7 +687,10 @@ bool HumdrumLine::analyzeTokenDurations(void) {
 
 //////////////////////////////
 //
-// HumdrumLine::analyzeTracks --
+// HumdrumLine::analyzeTracks -- Calculate the subtrack info for subspines.
+//   Subtracks index subspines strictly from left to right on the line.
+//   Subspines can be exchanged and be represented left to right out of
+//   original order.
 //
 
 bool HumdrumLine::analyzeTracks(void) {
@@ -764,7 +818,7 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 //////////////////////////////
 //
 // HumdrumLine::setOwner -- store a pointer to the HumdrumFile which
-//    manages this object.
+//    manages (owns) this object.
 //
 
 void HumdrumLine::setOwner(void* hfile) {
@@ -778,6 +832,7 @@ void HumdrumLine::setOwner(void* hfile) {
 // HumdrumLine::setParameters -- Takes a global comment with
 //     the structure:
 //        !!NS1:NS2:key1=value1:key2=value2:key3=value3
+//     and stores it in the HumHash parent class of the line.
 //
 
 void HumdrumLine::setParameters(HumdrumLine* pLine) {
@@ -818,13 +873,16 @@ void HumdrumLine::setParameters(const string& pdata) {
 
 //////////////////////////////
 //
-// operator<< -- Print a HumdrumLine. Needed to avoid interaction with HumHash.
+// operator<< -- Print a HumdrumLine. Needed to avoid interaction with
+//     HumHash parent class.
 //
 
 ostream& operator<<(ostream& out, HumdrumLine& line) {
 	out << (string)line;
 	return out;
 }
+
+
 
 // END_MERGE
 

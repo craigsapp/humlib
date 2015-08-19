@@ -24,7 +24,8 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure --
+// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure
+//     constructor.
 //
 
 HumdrumFileStructure::HumdrumFileStructure(void) {
@@ -35,7 +36,8 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure --
+// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure 
+//     deconstructor.
 //
 
 HumdrumFileStructure::~HumdrumFileStructure() {
@@ -46,7 +48,9 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::read --
+// HumdrumFileStructure::read --  Read the contents of a file from a file or
+//   istream.  The file's structure is analyzed, and then the rhythmic structure
+//   is calculated.
 //
 
 
@@ -70,6 +74,14 @@ bool HumdrumFileStructure::read(const string& filename) {
 	}
 	return analyzeStructure();
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readString -- Read the contents from a string.
+//    Similar to HumdrumFileStructure::read, but for string data.
+//
 
 bool HumdrumFileStructure::readString(const char* contents) {
 	if (!HumdrumFileBase::readString(contents)) {
@@ -107,7 +119,8 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readNoRhythm --
+// HumdrumFileStructure::readNoRhythm -- Similar to the read() functions, but
+//    does not parse rhythm (or parameters).
 //
 
 bool HumdrumFileStructure::readNoRhythm(istream& infile) {
@@ -125,6 +138,14 @@ bool HumdrumFileStructure::readNoRhythm(const string& filename) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringNoRhythm -- Read a string, but
+//   do not analyze the rhythm (or parameters) in the read data.
+//
+
+
 bool HumdrumFileStructure::readStringNoRhythm(const char*   contents) {
 	return HumdrumFileBase::readString(contents);
 }
@@ -139,8 +160,9 @@ bool HumdrumFileStructure::readStringNoRhythm(const string& contents) {
 //////////////////////////////
 //
 // HumdrumFileStructure::getScoreDuration -- Return the total duration
-//    of the score in quarter note units.
-//
+//    of the score in quarter note units.  Returns zero if no lines in the
+//    file, or -1 if there are lines, but no rhythmic analysis has been done.
+// 
 
 HumNum HumdrumFileStructure::getScoreDuration(void) const {
 	if (lines.size() == 0) {
@@ -153,7 +175,8 @@ HumNum HumdrumFileStructure::getScoreDuration(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::printDurationInfo --
+// HumdrumFileStructure::printDurationInfo -- Print the assigned duration
+//    of each line in a file.  Useful for debugging.
 //
 
 ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
@@ -167,8 +190,10 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getBarline -- Return the given barline.  Negative
-//   index accesses from the end of the list.
+// HumdrumFileStructure::getBarline -- Return the given barline from the file
+//   based on the index number.  Negative index accesses from the end of the
+//   list.  If the first barline is a pickup beat, then the returned 
+//   HumdrumLine* will not be an actual barline line.
 //
 
 HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
@@ -188,7 +213,10 @@ HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getBarlineCount --
+// HumdrumFileStructure::getBarlineCount -- Return the number of barlines in
+//   the file.  If there is a pickup beat, then the count includes an imaginary
+//   barline before the first pickup (and the start of the file will be returned
+//   for barline(0).
 //
 
 int HumdrumFileStructure::getBarlineCount(void) const {
@@ -199,7 +227,11 @@ int HumdrumFileStructure::getBarlineCount(void) const {
 
 ///////////////////////////////
 //
-// HumdrumFileStructure::getBarlineDuration --
+// HumdrumFileStructure::getBarlineDuration --  Return the duration from the
+//    current barline to the next barline in the data.  For the last barline,
+//    the duration will be calculated from the end of the data;  The final
+//    will have a duration of 0 if there are not notes after the barline
+//    in the data.
 //
 
 HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
@@ -227,7 +259,7 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 ///////////////////////////////
 //
 // HumdrumFileStructure::getBarlineDurationFromStart -- Return the duration
-//    between the start of the Humdrum file and the barline.
+//    between the start of the Humdrum file and the given barline.
 //
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
@@ -518,7 +550,8 @@ HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getTokenDurations --
+// HumdrumFileStructure::getTokenDurations -- Extract the duration of rhythmic
+//    tokens on the line.
 //
 
 bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
@@ -592,7 +625,13 @@ bool HumdrumFileStructure::decrementDurStates(vector<HumNum>& durs,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignDurationsToTrack --
+// HumdrumFileStructure::assignDurationsToTrack -- Assign duration from starts
+//    for each rhythmic spine in the file.  Analysis is done recursively, one
+//    sub-spine at a time.  Duplicate analyses are prevented by the state
+//    variable in the HumdrumToken (currently called rhycheck because it is only
+//    used in this function).  After the durationFromStarts have been assigned
+//    for the rhythmic analysis of non-data tokens and non-rhythmic spines is
+//    done elsewhere.
 //
 
 bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
@@ -609,7 +648,9 @@ bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
 
 //////////////////////////////
 //
-// HumdrumFileStructure::prepareDurations --
+// HumdrumFileStructure::prepareDurations -- Helper function for
+//     HumdrumFileStructure::assignDurationsToTrack() which does all of the
+//     work for assigning durationFromStart values.
 //
 
 bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
@@ -682,7 +723,6 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 //
 // HumdrumFileStructure::setLineDurationFromStart -- Set the duration of
 //      a line based on the analysis of tokens in the spine.
-//      If the duration
 //
 
 bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
@@ -696,7 +736,7 @@ bool HumdrumFileStructure::setLineDurationFromStart(HumdrumToken* token,
 	if (line->getDurationFromStart().isNegative()) {
 		line->setDurationFromStart(dursum);
 	} else if (line->getDurationFromStart() != dursum) {
-		cerr << "Error: Inconsistent rhythm analysis occuring near line "
+		cerr << "Error: Inconsistent rhythm analysis occurring near line "
 		     << token->getLineNumber() << endl;
 		cerr << "Expected durationFromStart to be: " << dursum
 		     << " but found it to be " << line->getDurationFromStart() << endl;
@@ -820,7 +860,10 @@ bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::fillInNegativeStartTimes --
+// HumdrumFileStructure::fillInNegativeStartTimes -- Negative line durations
+//    after the initial rhythmAnalysis mean that the lines are not data line.
+//    Duplicate the duration of the next non-negative duration for all negative
+//    durations.
 //
 
 void HumdrumFileStructure::fillInNegativeStartTimes(void) {
@@ -853,7 +896,8 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignLineDurations --
+// HumdrumFileStructure::assignLineDurations --  Calculate the duration of lines
+//   based on the durationFromStart of the current line and the next line.
 //
 
 void HumdrumFileStructure::assignLineDurations(void) {
@@ -875,7 +919,11 @@ void HumdrumFileStructure::assignLineDurations(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::assignDurationsToNonRhythmicTrack --
+// HumdrumFileStructure::assignDurationsToNonRhythmicTrack --  After the basic
+//   rhythmAnalysis has been done, go back and assign durations to non-rhythmic
+//   spine tokens based on the lineFromStart values of the lines that they 
+//   occur on as well as the distance in the file to the next non-null token for
+//   that spine.
 //
 
 bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
@@ -909,7 +957,9 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::processLocalParametersForTrack --
+// HumdrumFileStructure::processLocalParametersForTrack --  Search for local 
+//   parameters in each spine and fill in the HumHash for the token to which the
+//   parameter is to be applied.
 //
 
 bool HumdrumFileStructure::processLocalParametersForTrack(
@@ -945,8 +995,9 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::checkForLocalParameters -- only allowing layout
-//    parameters currently.
+// HumdrumFileStructure::checkForLocalParameters -- Helper function for
+//     HumdrumFileStructure::processLocalParametersForTrack.  Only allowing
+//     layout parameters currently.
 //
 
 void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,

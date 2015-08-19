@@ -65,7 +65,7 @@
 //                    !LO:N:stem=5
 //
 //                  The namespaces and keys may not contain tabs (obviously),
-//                  spaces or colons.  Preferrably they will only contain
+//                  spaces or colons.  Preferably they will only contain
 //                  letters, digits, and the underscore, but not start with
 //                  a digit (but the minHumdrum parser will not enforce
 //                  this preference).  Values may contain spaces (but not
@@ -91,7 +91,7 @@
 //                   *-             *-
 //                  The parameter will apply to "1c", and "2a" rather than
 //                  "1g". (Currently the parameter will only be applied to
-//                  "2a", but this will be canged in the future).  Typically
+//                  "2a", but this will be changed in the future).  Typically
 //                  global parameters are used to apply parameters to all
 //                  measures in all spines, or they may be used to display
 //                  a single text string above or below the system in the
@@ -115,7 +115,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumHash::HumHash -- HumHash contructor.  The data storage is empty
+// HumHash::HumHash -- HumHash constructor.  The data storage is empty
 //    until the first parameter in the Hash is set.
 //
 
@@ -309,7 +309,7 @@ HumNum HumHash::getValueFraction(const string& ns1, const string& ns2,
 //   For example "1.25" and "5/4" will both return 1.25.  The value
 //   cannot contain a slash unless it is part of the first fraction
 //   on in the value string (this may be changed when regular expressions
-//   are used to implement this fucntion).
+//   are used to implement this function).
 //
 
 double HumHash::getValueFloat(const string& key) const {
@@ -408,7 +408,7 @@ bool HumHash::getValueBool(const string& ns1, const string& ns2,
 //
 // HumHash::setValue -- Set the parameter to the given value,
 //     over-writing any previous value for the parameter.  The
-//     value is any arbitrary string, but preferrably does not
+//     value is any arbitrary string, but preferably does not
 //     include tabs or colons.  If a colon is needed, then specify
 //     as "&colon;" without the quotes.  Values such as integers
 //     fractions and floats can be specified, and these wil be converted
@@ -525,8 +525,8 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 //     combination.  With no parameters, a complete list of all
 //     namespaces/keys will be returned.  Giving one parameter will
 //     produce a list will give all NS2:key values in the NS1 namespace.
-//     If there is a colon in the single paramter verion of the function,
-//     then this will be interpreted as "NS1", "NS2" version of the paramters
+//     If there is a colon in the single parameter version of the function,
+//     then this will be interpreted as "NS1", "NS2" version of the parameters
 //     described above.
 //
 
@@ -765,7 +765,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::deleteValue -- Delete the given paramter key from the HumHash
+// HumHash::deleteValue -- Delete the given parameter key from the HumHash
 //   object.  Three string version is N1,NS2,key; two string version is
 //   "",NS2,key; and one argument version is "","",key.
 //
@@ -856,7 +856,7 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 //////////////////////////////
 //
 // HumHash::setPrefix: initial string to print when using
-//   operator<<.  This is used for including the "!" for lcoal
+//   operator<<.  This is used for including the "!" for local
 //   comments or "!!" for global comments.   The prefix will
 //   remain the same until it is changed.  The default prefix
 //   of the object it the empty string.

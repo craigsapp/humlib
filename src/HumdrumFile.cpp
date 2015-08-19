@@ -7,7 +7,8 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Used to add structural analysis to HumdrumFileBase class.
+// Description:   Place-holder class to serve as interface to HumdrumFileBase, 
+//                HumdrumFileStructure and HumdrumFileContent.
 //
 
 #include "HumdrumFile.h"
@@ -20,7 +21,7 @@ namespace minHumdrum {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFile::HumdrumFile -- HumdrumFile constructor.
 //
 
 HumdrumFile::HumdrumFile(void) {
@@ -31,7 +32,7 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile --
+// HumdrumFile::HumdrumFile -- HumdrumFile deconstructor.
 //
 
 HumdrumFile::~HumdrumFile() {

@@ -7,7 +7,7 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Used to add structural analysis to HumdrumFileBase class.
+// Description:   Used to add content analysis to HumdrumFileStructure class.
 //
 
 #include "HumdrumFileContent.h"
