@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Minhumdrum by craigsapp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Minhumdrum</h1>
+      <h2 class="project-tagline">Minimal generalized Humdrum data parsing library in C++</h2>
+      <a href="https://github.com/craigsapp/minHumdrum" class="btn">View on GitHub</a>
+      <a href="https://github.com/craigsapp/minHumdrum/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/craigsapp/minHumdrum/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="minhumdrum" class="anchor" href="#minhumdrum" aria-hidden="true"><span class="octicon octicon-link"></span></a>minHumdrum</h1>
+
+<p>The minHumdrum library is a set of C++ classes for parsing 
+<a href="http://www.humdrum.org">Humdrum</a> file data.  The library is designed
+to be portable, consisting of two files that can be copied into
+your project:</p>
+
+<ol>
+<li>An include file <a href="/include/minhumdrum.h">minhumdrum.h</a>
+</li>
+<li>and a source file <a href="/src/minhumdrum.h">minhumdrum.cpp</a>
+</li>
+</ol>
+
+<p>The classes use some C++11-specific features, so you must add the
+<code>-stc=c++11</code> option when compiling with GNU g++ or clang++ compiler.
+Also include the <code>-stdlib=libc++</code> when compiling with clang.  See the
+<a href="https://github.com/craigsapp/minHumdrum/Makefile">Makefile</a> for compiling the library and 
+<a href="https://github.com/craigsapp/minHumdrum/Makefile.examples">Makefile.examples</a> for linking to create executables.</p>
+
+<p>More information and documentation for the library can be found at <a href="http://min.humdrum.org">http://min.humdrum.org</a>.</p>
+
+<h1>
+<a id="class-overview" class="anchor" href="#class-overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Class overview</h1>
+
+<p>Here are the classes defined in the minHumdrum library:</p>
+
+<ul>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumToken.h">HumdrumToken</a>: manages tokens (data elements on a line) for HumdrumLine.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumLine.h">HumdrumLine</a>: manages the content of a line (data record) in a Humdrum file.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h">HumdrumFile</a>: primary interface for working with Humdrum file data.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileContent.h">HumdrumFileContent</a>: manages analysis of data content (particularly of **kern data) beyond basic rhythmic analysis done in HumdrumFileStructure.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileStructure.h">HumdrumFileStructure</a>: manages rhythmic analysis of the data and extra parameters for data tokens.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileBase.h">HumdrumFileBase</a>: manages data storage and reading/writing of Humdrum file data.</li>
+<li>
+<a href="https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h">Convert</a>: utility functions for converting data (particularly from token strings) into other formats.</li>
+</ul>
+
+<h1>
+<a id="compiling" class="anchor" href="#compiling" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compiling</h1>
+
+<p>If you download the git repository or a zip/tarball of the repository, you can
+compile the library with the command</p>
+
+<div class="highlight highlight-bash"><pre>make</pre></div>
+
+<p>This should create the file <code>lib/libminhumdrum.a</code>, which can be used to
+link to other program code.</p>
+
+<p>For testing purposes, another form of the library can be compiled from the individual source files for each class:</p>
+
+<div class="highlight highlight-bash"><pre>make lib</pre></div>
+
+<p>This will create the file <code>lib/libhumdrum.a</code>.</p>
+
+<h1>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h1>
+
+<p>Here is an example program that uses the minHumdrum library to convert a Humdrum file into a MIDI-like listing of notes in the Humdrum score:</p>
+
+<div class="highlight highlight-cpp"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>minhumdrum.h<span class="pl-pds">"</span></span>
+
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">minHumdrum</span><span class="pl-k">;</span>
+
+<span class="pl-k">void</span> <span class="pl-en">printNoteInformation</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, 
+      <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq);
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>(<span class="pl-k">int</span> argc, <span class="pl-k">char</span>** argv) {
+   <span class="pl-k">if</span> (argc != <span class="pl-c1">2</span>) {
+      <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+   }
+   HumdrumFile infile;
+   <span class="pl-k">if</span> (!infile.<span class="pl-c1">read</span>(argv[<span class="pl-c1">1</span>])) {
+      <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+   }
+   <span class="pl-k">int</span> tpq = infile.<span class="pl-c1">tpq</span>();
+   cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>TPQ: <span class="pl-pds">"</span></span> &lt;&lt; tpq &lt;&lt; endl;
+   cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>PITCH<span class="pl-cce">\t</span>START<span class="pl-cce">\t</span>DURATION<span class="pl-pds">"</span></span> &lt;&lt; endl;
+
+   <span class="pl-k">for</span> (<span class="pl-k">int</span> i=<span class="pl-c1">0</span>; i&lt;infile.<span class="pl-c1">getLineCount</span>(); i++) {
+      <span class="pl-k">if</span> (!infile[i].<span class="pl-c1">isData</span>()) {
+         <span class="pl-k">continue</span>;
+      }
+      <span class="pl-k">for</span> (<span class="pl-k">int</span> j=<span class="pl-c1">0</span>; j&lt;infile[i].<span class="pl-c1">getTokenCount</span>(); j++) {
+         <span class="pl-k">if</span> (infile[i].<span class="pl-c1">token</span>(j).<span class="pl-c1">isNull</span>()) {
+            <span class="pl-k">continue</span>;
+         }
+         <span class="pl-k">if</span> (infile[i].<span class="pl-c1">token</span>(j).<span class="pl-c1">isDataType</span>(<span class="pl-s"><span class="pl-pds">"</span>kern<span class="pl-pds">"</span></span>)) {
+            <span class="pl-c1">printNoteInformation</span>(infile, i, j, tpq);
+         }
+      }
+   }
+   <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}
+
+<span class="pl-k">void</span> <span class="pl-en">printNoteInformation</span>(HumdrumFile&amp; infile, <span class="pl-k">int</span> line, 
+      <span class="pl-k">int</span> field, <span class="pl-k">int</span> tpq) {
+   <span class="pl-k">int</span> starttime, duration;
+   HumNum value;
+
+   value = infile[line].<span class="pl-c1">getDurationFromStart</span>();
+   value *= tpq;
+   starttime = value.<span class="pl-c1">getNumerator</span>();
+
+   value = infile[line].<span class="pl-c1">token</span>(field).<span class="pl-c1">getDuration</span>();
+   value *= tpq;
+   duration = value.<span class="pl-c1">getNumerator</span>();
+
+   cout &lt;&lt; <span class="pl-c1">Convert::kernToScientificPitch</span>(infile[line].<span class="pl-c1">token</span>(field))
+        &lt;&lt; <span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span> &lt;&lt; starttime &lt;&lt; <span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span> &lt;&lt; duration &lt;&lt; endl;
+}</pre></div>
+
+<p>Notice that all minHumdrum code is placed into the minHumdrum namespace.</p>
+
+<p>Test data for use with the above program:</p>
+
+<p><img src="https://cdn.rawgit.com/craigsapp/minHumdrum/master/examples/hum2notelist.svg" alt="Example music"></p>
+
+<table>
+<tr>
+<td>
+Example input:<br>
+<pre>
+**kern  **kern
+*M3/4   *M3/4
+8C      12d
+.       12e
+8B      .
+.       12f
+4A      2g
+4G      .
+=       =
+*-      *-
+</pre>
+</td>
+<td>
+Example output:<br>
+<pre>
+TPQ: 6
+PITCH   START   DURATION
+C3      0       3
+D4      0       2
+E4      2       2
+B3      3       3
+F4      4       2
+A3      6       6
+G4      6       12
+G3      12      6
+</pre>
+</td>
+</tr>
+</table>
+
+<p></p>
+
+<p>If you are using the minHumdrum project directory, you can place
+programs into a subdirectory called <code>myprograms</code> and then to compile,
+go to the base directory of the minHumdrum code and type <code>make myprogram</code>
+if the program is called <code>myprograms/myprogram.cpp</code>.  The compiled program
+will be created as <code>bin/myprogram</code>.</p>
+
+<h1>
+<a id="downloading" class="anchor" href="#downloading" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloading</h1>
+
+<p>To download using git, type:</p>
+
+<div class="highlight highlight-bash"><pre>git clone https://github.com/craigsapp/minHumdrum</pre></div>
+
+<p>To update to the most recent version of minHumdrum, type in the minHumdrum directory:</p>
+
+<div class="highlight highlight-bash"><pre>git pull</pre></div>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/craigsapp/minHumdrum">Minhumdrum</a> is maintained by <a href="https://github.com/craigsapp">craigsapp</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-66501284-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
