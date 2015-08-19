@@ -38,7 +38,7 @@ compile the library with the command
 ```bash
 make
 ```
-This should create the file `lib/libminhumdrum.a` that can be used to
+This should create the file `lib/libminhumdrum.a`, which can be used to
 link to other program code.
 
 For testing purposes, another form of the library can be compiled from the individual source files for each class:
