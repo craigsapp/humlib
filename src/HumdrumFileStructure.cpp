@@ -244,7 +244,7 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 //
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
-//   list.  If the first barline is a pickup beat, then the returned 
+//   list.  If the first barline is a pickup measure, then the returned 
 //   HumdrumLine* will not be an actual barline line.
 //
 
