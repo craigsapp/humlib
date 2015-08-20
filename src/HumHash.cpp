@@ -855,7 +855,7 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 
 //////////////////////////////
 //
-// HumHash::setPrefix: initial string to print when using
+// HumHash::setPrefix -- initial string to print when using
 //   operator<<.  This is used for including the "!" for local
 //   comments or "!!" for global comments.   The prefix will
 //   remain the same until it is changed.  The default prefix

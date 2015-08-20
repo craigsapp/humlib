@@ -31,7 +31,7 @@ HumdrumFileContent::HumdrumFileContent(void) {
 
 //////////////////////////////
 //
-// HumdrumFileContent::HumdrumFileContent --
+// HumdrumFileContent::~HumdrumFileContent --
 //
 
 HumdrumFileContent::~HumdrumFileContent() {

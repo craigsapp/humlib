@@ -37,7 +37,7 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure 
+// HumdrumFileStructure::~HumdrumFileStructure -- HumdrumFileStructure 
 //     deconstructor.
 //
 

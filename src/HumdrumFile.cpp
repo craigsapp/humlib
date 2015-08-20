@@ -32,7 +32,7 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile -- HumdrumFile deconstructor.
+// HumdrumFile::~HumdrumFile -- HumdrumFile deconstructor.
 //
 
 HumdrumFile::~HumdrumFile() {

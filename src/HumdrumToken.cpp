@@ -90,7 +90,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount -- Return the number of
+// HumdrumToken::getPreviousNonNullDataTokenCount -- Return the number of
 //   previous tokens in the spine which is not a null token.  For null
 //   tokens, this will be a count of the number of non-null tokens which
 //   the null represents.
@@ -104,7 +104,7 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount -- Return the non-null
+// HumdrumToken::getPreviousNonNullDataToken -- Return the non-null
 //    data token which occurs before this token in the data in the same
 //    spine.  The default value is index 0, since mostly there will only
 //    be one previous token.
@@ -219,6 +219,17 @@ string HumdrumToken::getSpineInfo(void) const {
 
 int HumdrumToken::getLineIndex(void) const {
 	return address.getLineIndex();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getFieldIndex --
+//
+
+int HumdrumToken::getFieldIndex(void) const {
+	return address.getFieldIndex();
 }
 
 

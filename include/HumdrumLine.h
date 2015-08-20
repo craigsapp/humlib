@@ -57,7 +57,6 @@ class HumdrumLine : public string, public HumHash {
 		bool     equalChar              (int index, char ch) const;
 		char     getChar                (int index) const;
 		ostream& printSpineInfo         (ostream& out = cout);
-		ostream& printDataType          (ostream& out = cout);
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);

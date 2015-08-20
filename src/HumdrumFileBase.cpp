@@ -111,7 +111,7 @@ bool HumdrumFileBase::read(istream& infile) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::ReadString -- Read contents from a string rather than
+// HumdrumFileBase::readString -- Read contents from a string rather than
 //    an istream or filename.
 //
 

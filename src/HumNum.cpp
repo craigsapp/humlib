@@ -383,8 +383,8 @@ bool HumNum::isInteger(void) const {
 
 //////////////////////////////
 //
-// HumNum::operator+ -- Addition operator to add HumNums
-//    together or with integers.
+// HumNum::operator+ -- Addition operator which adds HumNum
+//    to another HumNum or with a integers.
 //
 
 HumNum HumNum::operator+(const HumNum& value) {
@@ -768,7 +768,7 @@ ostream& HumNum::printFraction(ostream& out) const {
 
 //////////////////////////////
 //
-// HumNum::printMixedFration -- Print as an integer plus fractional 
+// HumNum::printMixedFraction -- Print as an integer plus fractional 
 //     remainder.  If absolute value is less than one, will only
 //     print the fraction.  The second parameter is the output stream
 //     for printing, and the third parameter is a separation string

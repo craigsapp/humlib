@@ -135,7 +135,7 @@ int HumAddress::getTrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSubTrack -- The subtrack number of the given spine.  This
+// HumAddress::getSubtrack -- The subtrack number of the given spine.  This
 //   functions in a similar manner to layer numbers in MEI data.  The first
 //   sub-spine of a spine is always subtrack 1, regardless of whether or not
 //   an exchange manipulator (*x) was used to switch the left-to-right ordering

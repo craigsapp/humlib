@@ -107,10 +107,24 @@ bool HumdrumLine::isComment(void) const {
 	return equalChar(0, '!');
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumLine::isCommentLocal -- Returns true if a local comment.
+//
+
 bool HumdrumLine::isCommentLocal(void) const {
 	return equalChar(0, '!') && !equalChar(1, '!');
 
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isCommentGlobal -- Returns true if a local comment.
+//
 
 bool HumdrumLine::isCommentGlobal(void) const {
 	return equalChar(0, '!') && equalChar(1, '!');
