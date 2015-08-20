@@ -1,0 +1,54 @@
+# Jekyll Configuration Settings
+# http://jekyllrb.com/docs/configuration
+
+# Site settings ###########################################################
+title: minHumdrum
+email: craig@ccrma.stanford.edu
+description: "minHumdrum: Minimal generalized Humdrum data parsing library in C++"
+baseurl: ""
+url: "http://min.humdrum.org"
+github_username:  craigsapp/minHumdrum
+timezone: America/Los_Angeles
+exclude: [
+   old,
+   bin,
+   Makefile,
+   class/Makefile,
+   _include/Makefile
+]
+
+
+# Build settings ##########################################################
+markdown: redcarpet
+permalink: pretty
+
+
+
+
+###        ________________________________________________________________
+### Notes: ________________________________________________________________
+###        ________________________________________________________________
+
+# YAML front matter #######################################################
+# http://jekyllrb.com/docs/frontmatter
+# publish: false    == don't put file on compiled website
+# layout:  xxxx     == Use the page template found in _layout/xxxx.html
+# permalink: address  == Use this address for the page location (can't
+#                        have any other matching locations on site.
+# category:  
+# categories
+# tags:              == Similar to categories
+#
+# Custom variables:
+# title: A title
+# Then use in body with the string   {{ page.title }}
+
+
+# Liquid templating language ##############################################
+# http://docs.shopify.com/themes/liquid-documentation
+#
+# Liquid cheat sheet
+# http://cheat.markdunkley.com
+
+
+

@@ -1,0 +1,2 @@
+jekyll serve --watch --host 127.0.0.1 --port 4000 &> /dev/null &
+echo "Go to http://127.0.0.1:400/index.html"

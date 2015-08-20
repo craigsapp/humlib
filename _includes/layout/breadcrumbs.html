@@ -1,0 +1,14 @@
+
+{% if page.breadcrumbs %}
+<!-- breadcrumbs navigator: -->
+<span style="position: relative; left: 30px; bottom: 30px;">
+	{% for item in page.breadcrumbs %}
+		{% if forloop.index0 > 0 %}
+			<span class="bread-spacer">&raquo;</span>
+		{% endif %}
+		<a class="bread-link" style="letter-spacing: -0.5px;" 
+			href="{{ item[0] | prepend: site.baseurl }}">{{ item[1] }}</a>
+   {% endfor %}
+</span>
+{% endif %}
+

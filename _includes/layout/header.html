@@ -1,0 +1,25 @@
+
+<section style="height:100px; padding-left:15px;" class="page-header">
+	{% if page.url == "/" %}
+		<h1 class="project-name">minHumdrum</h1>
+      <h2 class="project-tagline">Minimal generalized Humdrum data parsing library in C++</h2>
+      <a href="https://github.com/craigsapp/minHumdrum" class="btn">View on GitHub</a>
+      <a href="https://github.com/craigsapp/minHumdrum/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/craigsapp/minHumdrum/tarball/master" class="btn">Download .tar.gz</a>
+	{% else %}
+		<table><tr><td>
+		<a href="/"><h1 class="project-name2">minHumdrum</h1></a>
+		</td><td>
+		<h2 class="project-tagline2" style="padding-top:0; margin-top:0px;">
+		{% if page.title %}
+			{{ page.title }}
+		{% else %}
+			{{ site.title }}
+		{% endif %}
+		</h2>
+		</td></tr></table>
+	{% endif %}
+</section>
+
+{% include layout/breadcrumbs.html %}
+
