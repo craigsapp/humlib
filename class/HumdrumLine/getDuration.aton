@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getDuration
+@ACCESS:	public
+@RETURN:	HumNum   
+@PARAMETERS:	void
+@FILE:		HumdrumLine.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

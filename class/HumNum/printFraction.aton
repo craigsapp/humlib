@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumNum
+@METHOD:	printFraction
+@ACCESS:	public
+@RETURN:	ostream& 
+@PARAMETERS:	ostream& = cout
+@FILE:		HumNum.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

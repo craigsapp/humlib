@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	equalChar
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	int index, char ch
+@FILE:		HumdrumLine.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileContent
+@METHOD:	HumdrumFileContent
+@ACCESS:	public
+@RETURN:	
+@PARAMETERS:	void
+@FILE:		HumdrumFileContent.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

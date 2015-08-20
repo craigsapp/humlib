@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	getLcm
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	const vector<int>& numbers
+@FILE:		Convert.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

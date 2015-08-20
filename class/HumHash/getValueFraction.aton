@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	getValueFraction
+@ACCESS:	public
+@RETURN:	HumNum         
+HumNum         
+HumNum         
+@PARAMETERS:	const string& key
+const string& ns2, const string& key
+const string& ns1, const string& ns2, const string& key
+@FILE:		HumHash.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

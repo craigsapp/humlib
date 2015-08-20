@@ -1,0 +1,26 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileStructure
+@METHOD:	readString
+@ACCESS:	public
+@RETURN:	bool          
+bool          
+@PARAMETERS:	const char* contents
+const string& contents
+@FILE:		HumdrumFileStructure.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

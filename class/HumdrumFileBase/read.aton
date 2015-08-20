@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	read
+@ACCESS:	public
+@RETURN:	bool          
+bool          
+bool          
+@PARAMETERS:	istream& infile
+const char* filename
+const string& filename
+@FILE:		HumdrumFileBase.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

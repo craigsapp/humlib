@@ -1,0 +1,24 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	kernToScientificPitch
+@ACCESS:	public
+@RETURN:	static string  
+@PARAMETERS:	const string& kerndata, string flat = "b", string sharp = "#", string separator = ""
+@FILE:		Convert.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

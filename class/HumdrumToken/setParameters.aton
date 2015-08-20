@@ -1,0 +1,26 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	setParameters
+@ACCESS:	public
+@RETURN:	void     
+void     
+@PARAMETERS:	HumdrumToken* ptok
+const string& pdata
+@FILE:		HumdrumToken.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

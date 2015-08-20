@@ -1,0 +1,46 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	setValue
+@ACCESS:	public
+@RETURN:	void           
+void           
+void           
+void           
+void           
+void           
+void           
+void           
+void           
+void           
+void           
+void           
+@PARAMETERS:	const string& key, const string& value
+const string& ns2, const string& key, const string& value
+const string& ns1, const string& ns2, const string& key, const string& value
+const string& key, int value
+const string& ns2, const string& key, int value
+const string& ns1, const string& ns2, const string& key, int value
+const string& key, HumNum value
+const string& ns2, const string& key, HumNum value
+const string& ns1, const string& ns2, const string& key, HumNum value
+const string& key, double value
+const string& ns2, const string& key, double value
+const string& ns1, const string& ns2, const string& key, double value
+@FILE:		HumHash.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

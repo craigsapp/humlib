@@ -1,0 +1,34 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumNum
+@METHOD:	HumNum
+@ACCESS:	public
+@RETURN:	
+
+
+
+
+
+@PARAMETERS:	void
+int value
+int numerator, int denominator
+const HumNum& rat
+const string& ratstring
+const char* ratstring
+@FILE:		HumNum.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

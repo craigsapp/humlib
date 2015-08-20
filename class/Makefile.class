@@ -9,11 +9,20 @@
 #                version of the scorelib source code on GitHub.
 #
 
-BINDIR = ../../bin
+BINDIR = ../bin
 
-all: lines
+CLASS = $(shell basename `pwd`);
+
+all:
+	@echo
+	@echo "make lines -- insert source code lines.";
+	@echo "make aton  -- create ATON files for public functions.";
+	@echo
 
 lines:
 	$(BINDIR)/insertCodeLines *.aton
 
+aton:
+	-rm *.aton
+	$(BINDIR)/code2aton $(CLASS)
 

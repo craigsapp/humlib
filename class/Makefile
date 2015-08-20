@@ -11,6 +11,8 @@
 
 all: lines
 
+SRC = Convert HumAddress HumHash HumNum HumdrumFile HumdrumFileBase HumdrumFileContent HumdrumFileStructure HumdrumLine HumdrumToken
+
 lines:
 	@for i in */Makefile;						\
 	do								\
@@ -24,3 +26,12 @@ makefiles:
 	do          \
 		(cd $$i && ln -s ../Makefile.class Makefile); \
 	done
+
+aton:
+	for i in $(SRC);	\
+	do			\
+		(cd $$i ^&& ../bin/code2aton $$i);	\
+	done
+
+
+

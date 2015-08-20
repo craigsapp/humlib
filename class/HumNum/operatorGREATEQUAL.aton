@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumNum
+@METHOD:	operator>=
+@ACCESS:	public
+@RETURN:	bool     
+bool     
+bool     
+@PARAMETERS:	const HumNum& value
+double value
+int value
+@FILE:		HumNum.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

@@ -1,0 +1,26 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getBeat
+@ACCESS:	public
+@RETURN:	HumNum   
+HumNum   
+@PARAMETERS:	HumNum beatdur = "1"
+string beatrecip = "4"
+@FILE:		HumdrumLine.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

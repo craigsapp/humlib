@@ -1,0 +1,26 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumNum
+@METHOD:	operator+=
+@ACCESS:	public
+@RETURN:	HumNum&  
+HumNum&  
+@PARAMETERS:	const HumNum& value
+int value
+@FILE:		HumNum.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

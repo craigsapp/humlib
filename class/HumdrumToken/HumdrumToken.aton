@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	HumdrumToken
+@ACCESS:	public
+@RETURN:	
+
+
+@PARAMETERS:	void
+const char* token
+const string& token
+@FILE:		HumdrumToken.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+

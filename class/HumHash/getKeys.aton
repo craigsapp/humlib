@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	getKeys
+@ACCESS:	public
+@RETURN:	vector<string> 
+vector<string> 
+vector<string> 
+@PARAMETERS:	void
+const string& ns
+const string& ns1, const string& ns2
+@FILE:		HumHash.cpp
+@LINES:		;
+@SEEALSO:
+@SHORTDESC:	
+@LONGDESC:	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+
+@@END:	FunctionDocumentation
+
