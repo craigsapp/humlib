@@ -80,8 +80,13 @@ Here is an example program that uses the minHumdrum library to convert a Humdrum
 using namespace std;
 using namespace minHumdrum;
 
-void printNoteInformation(HumdrumFile& infile, int line, 
-      int field, int tpq);
+void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
+   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
+   int duration  = infile.token(line, field).getDuration(tpq).getInteger();;
+   cout << Convert::kernToSciPitch(infile.token(line, field))
+        << '\t' << infile.token(line, field).getTrackString()
+        << '\t' << starttime << '\t' << duration << endl;
+}
 
 int main(int argc, char** argv) {
    if (argc != 2) {
@@ -100,25 +105,15 @@ int main(int argc, char** argv) {
          continue;
       }
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         if (infile[i].token(j).isNull()) {
+         if (infile.token(i, j).isNull()) {
             continue;
          }
-         if (infile[i].token(j).isDataType("kern")) {
+         if (infile.token(i, j).isDataType("kern")) {
             printNoteInformation(infile, i, j, tpq);
          }
       }
    }
    return 0;
-}
-
-void printNoteInformation(HumdrumFile& infile, int line, 
-      int field, int tpq) {
-   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
-   int duration  = infile[line].token(field).getDuration(tpq).getInteger();;
-   cout << Convert::kernToSciPitch(infile[line].token(field))
-        << '\t' << infile[line].token(field).getTrack()
-        << '\t' << starttime 
-        << '\t' << duration << endl;
 }
 ```
 
@@ -138,8 +133,10 @@ Example input:<br>
 .       12e
 8B      .
 .       12f
-4A      2g
-4G      .
+*       *^
+4A      2g      4d
+4G      .       4c
+*       *v      *v
 =       =
 *-      *-
 </pre>
@@ -147,15 +144,17 @@ Example input:<br>
 Example output:<br>
 <pre style="font-family: Courier; text-align:left">
 TPQ: 6
-PITCH   START   DURATION
-C3      0       3
-D4      0       2
-E4      2       2
-B3      3       3
-F4      4       2
-A3      6       6
-G4      6       12
-G3      12      6
+PITCH	TRACK	START	DURATION
+C3      1       0       3
+D4      2       0       2
+E4      2       2       2
+B3      1       3       3
+F4      2       4       2
+A3      1       6       6
+G4      2.1     6       12
+D4      2.2     6       6
+G3	1       12      6
+C4	2.2	12	6
 </pre>
 </td></tr></table>
 </center>

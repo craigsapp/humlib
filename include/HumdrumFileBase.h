@@ -53,6 +53,7 @@ class HumdrumFileBase {
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
+		HumdrumToken& token                        (int lineindex, int fieldindex);
 		int           getMaxTrack                  (void) const;
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);

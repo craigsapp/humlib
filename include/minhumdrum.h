@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 20 22:51:59 PDT 2015
+// Last Modified: Thu Aug 20 23:02:27 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -637,6 +637,7 @@ class HumdrumFileBase {
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
+		HumdrumToken& token                        (int lineindex, int fieldindex);
 		int           getMaxTrack                  (void) const;
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 20 22:51:59 PDT 2015
+// Last Modified: Thu Aug 20 23:02:27 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2130,6 +2130,20 @@ void HumdrumFileBase::append(const string& line) {
 
 int HumdrumFileBase::getLineCount(void) const {
 	return lines.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::token -- Return the token at the given line/field index.
+//
+
+HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
+	if (lineindex < 0) {
+		lineindex += getLineCount();
+	}
+	return lines[lineindex]->token(fieldindex);
 }
 
 

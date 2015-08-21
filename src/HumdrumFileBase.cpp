@@ -194,6 +194,20 @@ int HumdrumFileBase::getLineCount(void) const {
 
 //////////////////////////////
 //
+// HumdrumFileBase::token -- Return the token at the given line/field index.
+//
+
+HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
+	if (lineindex < 0) {
+		lineindex += getLineCount();
+	}
+	return lines[lineindex]->token(fieldindex);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getMaxTrack -- Returns the number of primary 
 //     spines in the data.
 //
