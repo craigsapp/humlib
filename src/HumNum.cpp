@@ -387,7 +387,7 @@ bool HumNum::isInteger(void) const {
 //    to another HumNum or with a integers.
 //
 
-HumNum HumNum::operator+(const HumNum& value) {
+HumNum HumNum::operator+(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -399,7 +399,7 @@ HumNum HumNum::operator+(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator+(int value) {
+HumNum HumNum::operator+(int value) const {
 	HumNum output(value * bot + top, bot);
 	return output;
 }
@@ -413,7 +413,7 @@ HumNum HumNum::operator+(int value) {
 //     HumNums.
 //
 
-HumNum HumNum::operator-(const HumNum& value) {
+HumNum HumNum::operator-(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -425,7 +425,7 @@ HumNum HumNum::operator-(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator-(int value) {
+HumNum HumNum::operator-(int value) const {
 	HumNum output(top - value * bot, bot);
 	return output;
 }
@@ -438,7 +438,7 @@ HumNum HumNum::operator-(int value) {
 //   the negative version of a HumNum.
 //
 
-HumNum HumNum::operator-(void) {
+HumNum HumNum::operator-(void) const {
 	HumNum output(-top, bot);
 	return output;
 }
@@ -451,7 +451,7 @@ HumNum HumNum::operator-(void) {
 //   two HumNums together or a HumNum and an integer.
 //
 
-HumNum HumNum::operator*(const HumNum& value) {
+HumNum HumNum::operator*(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -463,7 +463,7 @@ HumNum HumNum::operator*(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator*(int value) {
+HumNum HumNum::operator*(int value) const {
 	HumNum output(top * value, bot);
 	return output;
 }
@@ -476,7 +476,7 @@ HumNum HumNum::operator*(int value) {
 //     HumNums together or divide a HumNum by an integer.
 //
 
-HumNum HumNum::operator/(const HumNum& value) {
+HumNum HumNum::operator/(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -488,7 +488,7 @@ HumNum HumNum::operator/(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator/(int value) {
+HumNum HumNum::operator/(int value) const {
 	int a  = getNumerator();
 	int b  = getDenominator();
 	if (value < 0) {

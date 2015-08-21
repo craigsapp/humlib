@@ -36,6 +36,7 @@ class HumAddress {
 		const string& getSpineInfo      (void) const;
 		int           getTrack          (void) const;
 		int           getSubtrack       (void) const;
+		int           getSubtrackCount  (void) const;
 		string        getTrackString    (string separator = ".") const;
 		HumdrumLine*  getLine           (void) const;
 		HumdrumLine*  getOwner          (void) const { return getLine(); }
@@ -48,6 +49,7 @@ class HumAddress {
 		void          setTrack          (int aTrack, int aSubtrack);
 		void          setTrack          (int aTrack);
 		void          setSubtrack       (int aSubtrack);
+		void          setSubtrackCount  (int aSubtrack);
 
 	private:
 
@@ -77,6 +79,13 @@ class HumAddress {
 		// will be subtrack 2.  If subspines are exchanged with *x, then their
 		// subtrack assignments will also change.
 		int subtrack;
+
+		// subtrackcount: The number of currently active subtracks tokens
+		// on the owning HumdrumLine (in the same track).  The subtrack range
+		// is from 1 (if there is only a primary spine), to a larger number.
+		// if subtrackcount is 0, then the variable is not set, or there are
+      // no tokens in the track (such as for global comments).
+		int subtrackcount;
 
 		// owner: This is the line which manages the given token.
 		HumdrumLine* owner;

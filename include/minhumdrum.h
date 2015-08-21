@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 19 13:52:28 PDT 2015
+// Last Modified: Thu Aug 20 20:44:49 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -211,15 +211,15 @@ class HumNum {
 		HumNum&  operator*=         (int value);
 		HumNum&  operator/=         (const HumNum& value);
 		HumNum&  operator/=         (int value);
-		HumNum   operator-          (void);
-		HumNum   operator+          (const HumNum& value);
-		HumNum   operator+          (int value);
-		HumNum   operator-          (const HumNum& value);
-		HumNum   operator-          (int value);
-		HumNum   operator*          (const HumNum& value);
-		HumNum   operator*          (int value);
-		HumNum   operator/          (const HumNum& value);
-		HumNum   operator/          (int value);
+		HumNum   operator-          (void) const;
+		HumNum   operator+          (const HumNum& value) const;
+		HumNum   operator+          (int value) const;
+		HumNum   operator-          (const HumNum& value) const;
+		HumNum   operator-          (int value) const;
+		HumNum   operator*          (const HumNum& value) const;
+		HumNum   operator*          (int value) const;
+		HumNum   operator/          (const HumNum& value) const;
+		HumNum   operator/          (int value) const;
 		bool     operator==         (const HumNum& value) const;
 		bool     operator==         (double value) const;
 		bool     operator==         (int value) const;
@@ -253,6 +253,7 @@ class HumNum {
 		int bot;
 };
 
+
 ostream& operator<<(ostream& out, const HumNum& number);
 
 template <typename A>
@@ -271,6 +272,7 @@ class HumAddress {
 		const string& getSpineInfo      (void) const;
 		int           getTrack          (void) const;
 		int           getSubtrack       (void) const;
+		int           getSubtrackCount  (void) const;
 		string        getTrackString    (string separator = ".") const;
 		HumdrumLine*  getLine           (void) const;
 		HumdrumLine*  getOwner          (void) const { return getLine(); }
@@ -283,6 +285,7 @@ class HumAddress {
 		void          setTrack          (int aTrack, int aSubtrack);
 		void          setTrack          (int aTrack);
 		void          setSubtrack       (int aSubtrack);
+		void          setSubtrackCount  (int aSubtrack);
 
 	private:
 
@@ -312,6 +315,13 @@ class HumAddress {
 		// will be subtrack 2.  If subspines are exchanged with *x, then their
 		// subtrack assignments will also change.
 		int subtrack;
+
+		// subtrackcount: The number of currently active subtracks tokens
+		// on the owning HumdrumLine (in the same track).  The subtrack range
+		// is from 1 (if there is only a primary spine), to a larger number.
+		// if subtrackcount is 0, then the variable is not set, or there are
+      // no tokens in the track (such as for global comments).
+		int subtrackcount;
 
 		// owner: This is the line which manages the given token.
 		HumdrumLine* owner;
@@ -352,18 +362,25 @@ class HumdrumLine : public string, public HumHash {
 		bool     equalChar              (int index, char ch) const;
 		char     getChar                (int index) const;
 		ostream& printSpineInfo         (ostream& out = cout);
-		ostream& printDataType          (ostream& out = cout);
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
+
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
 		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
+
+		HumNum   getDuration            (HumNum scale) const;
+		HumNum   getDurationFromStart   (HumNum scale) const;
+		HumNum   getDurationToEnd       (HumNum scale) const;
+		HumNum   getDurationFromBarline (HumNum scale) const;
+		HumNum   getDurationToBarline   (HumNum scale) const;
+
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
@@ -453,35 +470,43 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isNull                    (void) const;
 		bool     isManipulator             (void) const;
-		bool     isExclusive               (void) const;
-		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
-		bool     isExInterp                (void) const { return isExclusive(); }
+
+		bool     isExclusiveInterpretation (void) const;
 		bool     isSplitInterpretation     (void) const;
 		bool     isMergeInterpretation     (void) const;
 		bool     isExchangeInterpretation  (void) const;
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
+
+		// alises for the above
+		bool     isExclusive     (void) const { 
+		                                   return isExclusiveInterpretation(); }
+		bool     isExInterp      (void) const {
+		                                   return isExclusiveInterpretation(); }
+		bool     isSplit         (void) const { return isSplitInterpretation(); }
+		bool     isMerge         (void) const { return isMergeInterpretation(); }
+		bool     isExchange      (void) const {
+		                                   return isExchangeInterpretation(); }
+		bool     isTerminate     (void) const {
+		                                   return isTerminateInterpretation(); }
+		bool     isTerminator    (void) const {
+		                                   return isTerminateInterpretation(); }
+		bool     isAdd           (void) const { return isSplitInterpretation(); }
+
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
 		bool     hasRhythm                 (void) const;
+
 		HumNum   getDuration               (void) const;
 		HumNum   getDurationFromStart      (void) const;
+
+		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getDurationFromStart      (HumNum scale) const;
+
 		HumdrumLine* getOwner              (void) const;
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
-
-		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) {
-		               return getPreviousNonNullDataTokenCount(); }
-		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
-		HumdrumToken* getPreviousNNDT(int index) {
-		               return getPreviousNonNullDataToken(index); }
-		int      getNextNonNullDataTokenCount(void);
-		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HumdrumToken* getNextNonNullDataToken(int index = 0);
-		HumdrumToken* getNextNNDT(int index = 0) {
-		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
@@ -506,6 +531,18 @@ class HumdrumToken : public string, public HumHash {
 		vector<HumdrumToken*> getNextTokens     (void) const;
 		vector<HumdrumToken*> getPreviousTokens (void) const;
 
+		int      getPreviousNonNullDataTokenCount(void);
+		int      getPreviousNNDTCount(void) {
+		               return getPreviousNonNullDataTokenCount(); }
+		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
+		HumdrumToken* getPreviousNNDT(int index) {
+		               return getPreviousNonNullDataToken(index); }
+		int      getNextNonNullDataTokenCount(void);
+		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
+		HumdrumToken* getNextNonNullDataToken(int index = 0);
+		HumdrumToken* getNextNNDT(int index = 0) {
+		               return getNextNonNullDataToken(index); }
+
 	protected:
 		void     setLineIndex      (int lineindex);
 		void     setFieldIndex     (int fieldlindex);
@@ -513,6 +550,7 @@ class HumdrumToken : public string, public HumHash {
 		void     setTrack          (int aTrack, int aSubtrack);
 		void     setTrack          (int aTrack);
 		void     setSubtrack       (int aSubtrack);
+		void     setSubtrackCount  (int count);
 		void     setPreviousToken  (HumdrumToken* aToken);
 		void     setNextToken      (HumdrumToken* aToken);
 		void     makeForwardLink   (HumdrumToken& nextToken);
@@ -575,6 +613,17 @@ ostream& operator<<(ostream& out, const HumdrumToken& token);
 
 
 
+// The following options are used for get[Primary]TrackTokens.
+// * OPT_NONULLS    => don't include  null tokens in extracted list
+// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
+//                        but still keep ** and *0).
+// * OPT_NOGLOBALS  => don't include global records (global comments, reference
+//                        records, and empty lines). In other words, only return
+//                        a list of tokens from lines which hasSpines() it true.
+#define OPT_NONULLS  0x01
+#define OPT_NOMANIP  0x02
+#define OPT_NOGLOBAL 0x04
+
 class HumdrumFileBase {
 	public:
 		              HumdrumFileBase              (void);
@@ -600,6 +649,12 @@ class HumdrumFileBase {
 		void          createLinesFromTokens        (void);
 		void          append                       (const char* line);
 		void          append                       (const string& line);
+
+		// spine analysis functionality
+		vector<vector<HumdrumToken*> > getTrackSeq       (int track, 
+		                                                  int options);
+		vector<HumdrumToken*>          getPrimaryTrackSeq(int track,
+		                                                  int options);
 
 	protected:
 		bool          analyzeTokens                (void);

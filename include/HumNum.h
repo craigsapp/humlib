@@ -62,15 +62,15 @@ class HumNum {
 		HumNum&  operator*=         (int value);
 		HumNum&  operator/=         (const HumNum& value);
 		HumNum&  operator/=         (int value);
-		HumNum   operator-          (void);
-		HumNum   operator+          (const HumNum& value);
-		HumNum   operator+          (int value);
-		HumNum   operator-          (const HumNum& value);
-		HumNum   operator-          (int value);
-		HumNum   operator*          (const HumNum& value);
-		HumNum   operator*          (int value);
-		HumNum   operator/          (const HumNum& value);
-		HumNum   operator/          (int value);
+		HumNum   operator-          (void) const;
+		HumNum   operator+          (const HumNum& value) const;
+		HumNum   operator+          (int value) const;
+		HumNum   operator-          (const HumNum& value) const;
+		HumNum   operator-          (int value) const;
+		HumNum   operator*          (const HumNum& value) const;
+		HumNum   operator*          (int value) const;
+		HumNum   operator/          (const HumNum& value) const;
+		HumNum   operator/          (int value) const;
 		bool     operator==         (const HumNum& value) const;
 		bool     operator==         (double value) const;
 		bool     operator==         (int value) const;
@@ -103,6 +103,7 @@ class HumNum {
 		int top;
 		int bot;
 };
+
 
 ostream& operator<<(ostream& out, const HumNum& number);
 

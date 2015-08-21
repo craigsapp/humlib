@@ -42,13 +42,8 @@ void printNoteInformation(HumdrumFile& infile, int line,
    int starttime, duration;
    HumNum value;
 
-   value = infile[line].getDurationFromStart();
-   value *= tpq;
-   starttime = value.getNumerator();
-
-   value = infile[line].token(field).getDuration();
-   value *= tpq;
-   duration = value.getNumerator();
+   starttime = infile[line].getDurationFromStart(tpq).getInteger();
+   duration  = infile[line].token(field).getDuration(tpq).getInteger();
 
    cout << Convert::kernToScientificPitch(infile[line].token(field))
         << '\t' << starttime << '\t' << duration << endl;

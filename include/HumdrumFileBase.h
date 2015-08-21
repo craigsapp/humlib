@@ -29,6 +29,17 @@ namespace minHumdrum {
 
 // START_MERGE
 
+// The following options are used for get[Primary]TrackTokens.
+// * OPT_NONULLS    => don't include  null tokens in extracted list
+// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
+//                        but still keep ** and *0).
+// * OPT_NOGLOBALS  => don't include global records (global comments, reference
+//                        records, and empty lines). In other words, only return
+//                        a list of tokens from lines which hasSpines() it true.
+#define OPT_NONULLS  0x01
+#define OPT_NOMANIP  0x02
+#define OPT_NOGLOBAL 0x04
+
 class HumdrumFileBase {
 	public:
 		              HumdrumFileBase              (void);
@@ -54,6 +65,12 @@ class HumdrumFileBase {
 		void          createLinesFromTokens        (void);
 		void          append                       (const char* line);
 		void          append                       (const string& line);
+
+		// spine analysis functionality
+		vector<vector<HumdrumToken*> > getTrackSeq       (int track, 
+		                                                  int options);
+		vector<HumdrumToken*>          getPrimaryTrackSeq(int track,
+		                                                  int options);
 
 	protected:
 		bool          analyzeTokens                (void);

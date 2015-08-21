@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 19 13:52:28 PDT 2015
+// Last Modified: Thu Aug 20 20:44:49 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -40,16 +40,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace minHumdrum {
 
 
+
 //////////////////////////////
 //
 // HumAddress::HumAddress -- HumAddress constructor.
 //
 
 HumAddress::HumAddress(void) {
-	track      = -1;
-	subtrack   = -1;
-	fieldindex = -1;
-	owner      = NULL;
+	track         = -1;
+	subtrack      = -1;
+	subtrackcount = 0;
+	fieldindex    = -1;
+	owner         = NULL;
 }
 
 
@@ -60,10 +62,11 @@ HumAddress::HumAddress(void) {
 //
 
 HumAddress::~HumAddress() {
-	track      = -1;
-	subtrack   = -1;
-	fieldindex = -1;
-	owner      = NULL;
+	track         = -1;
+	subtrack      = -1;
+	fieldindex    = -1;
+	subtrackcount = 0;
+	owner         = NULL;
 }
 
 
@@ -158,7 +161,7 @@ int HumAddress::getTrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSubTrack -- The subtrack number of the given spine.  This
+// HumAddress::getSubtrack -- The subtrack number of the given spine.  This
 //   functions in a similar manner to layer numbers in MEI data.  The first
 //   sub-spine of a spine is always subtrack 1, regardless of whether or not
 //   an exchange manipulator (*x) was used to switch the left-to-right ordering
@@ -172,6 +175,20 @@ int HumAddress::getTrack(void) const {
 
 int HumAddress::getSubtrack(void) const {
 	return subtrack;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getSubtrackCount -- The number of subtrack spines for a 
+//   given spine on the owning HumdurmLine.  Returns 0 if spine analysis
+//   has not been done, or if the line does not have spines (i.e., reference
+//   records, global comments and empty lines).
+//
+
+int HumAddress::getSubtrackCount(void) const {
+	return subtrackcount;
 }
 
 
@@ -312,6 +329,19 @@ void HumAddress::setSubtrack(int aSubtrack) {
 	}
 	subtrack = aSubtrack;
 }
+
+
+
+//////////////////////////////
+//
+// HumAddress::setSubtrackCount --
+//
+
+void HumAddress::setSubtrackCount(int count) {
+	subtrackcount = count;
+}
+
+
 
 
 
@@ -1057,7 +1087,7 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 
 //////////////////////////////
 //
-// HumHash::setPrefix: initial string to print when using
+// HumHash::setPrefix -- initial string to print when using
 //   operator<<.  This is used for including the "!" for local
 //   comments or "!!" for global comments.   The prefix will
 //   remain the same until it is changed.  The default prefix
@@ -1477,11 +1507,11 @@ bool HumNum::isInteger(void) const {
 
 //////////////////////////////
 //
-// HumNum::operator+ -- Addition operator to add HumNums
-//    together or with integers.
+// HumNum::operator+ -- Addition operator which adds HumNum
+//    to another HumNum or with a integers.
 //
 
-HumNum HumNum::operator+(const HumNum& value) {
+HumNum HumNum::operator+(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -1493,7 +1523,7 @@ HumNum HumNum::operator+(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator+(int value) {
+HumNum HumNum::operator+(int value) const {
 	HumNum output(value * bot + top, bot);
 	return output;
 }
@@ -1507,7 +1537,7 @@ HumNum HumNum::operator+(int value) {
 //     HumNums.
 //
 
-HumNum HumNum::operator-(const HumNum& value) {
+HumNum HumNum::operator-(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -1519,7 +1549,7 @@ HumNum HumNum::operator-(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator-(int value) {
+HumNum HumNum::operator-(int value) const {
 	HumNum output(top - value * bot, bot);
 	return output;
 }
@@ -1532,7 +1562,7 @@ HumNum HumNum::operator-(int value) {
 //   the negative version of a HumNum.
 //
 
-HumNum HumNum::operator-(void) {
+HumNum HumNum::operator-(void) const {
 	HumNum output(-top, bot);
 	return output;
 }
@@ -1545,7 +1575,7 @@ HumNum HumNum::operator-(void) {
 //   two HumNums together or a HumNum and an integer.
 //
 
-HumNum HumNum::operator*(const HumNum& value) {
+HumNum HumNum::operator*(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -1557,7 +1587,7 @@ HumNum HumNum::operator*(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator*(int value) {
+HumNum HumNum::operator*(int value) const {
 	HumNum output(top * value, bot);
 	return output;
 }
@@ -1570,7 +1600,7 @@ HumNum HumNum::operator*(int value) {
 //     HumNums together or divide a HumNum by an integer.
 //
 
-HumNum HumNum::operator/(const HumNum& value) {
+HumNum HumNum::operator/(const HumNum& value) const {
 	int a1  = getNumerator();
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
@@ -1582,7 +1612,7 @@ HumNum HumNum::operator/(const HumNum& value) {
 }
 
 
-HumNum HumNum::operator/(int value) {
+HumNum HumNum::operator/(int value) const {
 	int a  = getNumerator();
 	int b  = getDenominator();
 	if (value < 0) {
@@ -1862,7 +1892,7 @@ ostream& HumNum::printFraction(ostream& out) const {
 
 //////////////////////////////
 //
-// HumNum::printMixedFration -- Print as an integer plus fractional 
+// HumNum::printMixedFraction -- Print as an integer plus fractional 
 //     remainder.  If absolute value is less than one, will only
 //     print the fraction.  The second parameter is the output stream
 //     for printing, and the third parameter is a separation string
@@ -1926,7 +1956,7 @@ HumdrumFile::HumdrumFile(void) {
 
 //////////////////////////////
 //
-// HumdrumFile::HumdrumFile -- HumdrumFile deconstructor.
+// HumdrumFile::~HumdrumFile -- HumdrumFile deconstructor.
 //
 
 HumdrumFile::~HumdrumFile() {
@@ -2023,7 +2053,7 @@ bool HumdrumFileBase::read(istream& infile) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::ReadString -- Read contents from a string rather than
+// HumdrumFileBase::readString -- Read contents from a string rather than
 //    an istream or filename.
 //
 
@@ -2157,6 +2187,138 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 		lines[i]->printTrackInfo(out) << '\n';
 	}
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getPrimaryTrackSeq -- Return a list of the
+//     given primary spine tokens for a given track (indexed starting at
+//     one and going through getMaxTrack().
+//
+// The following options are used for the getPrimaryTrackTokens.
+// * OPT_NONULLS    => don't include  null tokens in extracted list
+// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
+//                        but still keep ** and *0).
+// * OPT_NOGLOBALS  => don't include global records (global comments, reference
+//                        records, and empty lines). In other words, only return
+//                        a list of tokens from lines which hasSpines() it true.
+//
+// #define OPT_NONULLS  0x01
+// #define OPT_NOMANIP  0x02
+// #define OPT_NOGLOBAL 0x04
+//
+
+vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
+		int options) {
+	int i;
+	int nullQ    = (options & OPT_NONULLS);
+	int manipQ   = (options & OPT_NOMANIP);
+	int globalQ  = (options & OPT_NOGLOBAL);
+	vector<HumdrumToken*> output;
+	output.reserve(getLineCount());
+
+	auto current = getTrackStart(track);
+	if (current == NULL) {
+		return output;
+	}
+	HumdrumFileBase& infile = *this;
+	int startindex = current->getLineIndex();
+	if (globalQ) {
+		for (i=0; i<startindex; i++) {
+			if (!infile[i].hasSpines()) {
+				output.push_back(&(infile[i].token(0)));
+			}
+		}
+	}
+
+	while (current != NULL) {
+		if ((!nullQ) && current->isNull()) {
+			// don't insert
+		} else if ((!manipQ) && current->isManipulator() &&
+				(!current->isTerminator()) && (!current->isExclusive())) {
+			// don't insert
+		} else {
+			if ((output.size() > 0) && globalQ) {
+				for (i=output.back()->getLineIndex();i<current->getLineIndex();i++){
+					if (!infile[i].hasSpines()) {
+						output.push_back(&infile[i].token(0));
+					}
+				}
+			}
+			output.push_back(current);
+		}
+		if (current->getNextTokenCount() > 0) {
+			current = current->getNextToken();
+		} else {
+			current = NULL;
+			break;
+		}
+		
+	}
+
+	int endindex = output.back()->getLineIndex();
+	if (globalQ) {
+		for (i=endindex; i<infile.getLineCount(); i++) {
+			if (infile[i].hasSpines()) {
+				continue;
+			}
+			output.push_back(&infile[i].token(0));
+		}
+	}
+	return output;
+}
+
+
+
+/////////////////////////////
+//
+// HumdrumFileBase::getTrackSeq -- Extract a sequence of tokens
+//    for the given spine.  All subspine tokens will be included.
+//    See getPrimaryTrackSeq() if you only want the first subspine for
+//    a track on all lines.
+//
+
+vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track, 
+		int options) {
+	int nullQ    = (options & OPT_NONULLS);
+	int manipQ   = (options & OPT_NOMANIP);
+	int globalQ  = (options & OPT_NOGLOBAL);
+
+	vector<vector<HumdrumToken*> > output;
+	output.reserve(getLineCount());
+
+	vector<HumdrumToken*> tempout;
+	auto& infile = *this;
+	int i, j;
+
+	for (i=0; i<infile.getLineCount(); i++) {
+		tempout.resize(0);
+		if (globalQ && (!infile[i].hasSpines())) {
+			output.push_back(tempout);
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (infile[i].token(j).getTrack() == track) {
+				if ((!nullQ) && infile[i].token(j).isNull()) {
+					continue;
+				}
+				if ((!nullQ) && infile[i].token(j).isNull()) {
+					continue;
+				} else if ((!manipQ) && infile[i].token(j).isManipulator() &&
+						(!infile[i].token(j).isTerminator()) && 
+						(!infile[i].token(j).isExclusive())) {
+					continue;
+				}
+				tempout.push_back(&infile[i].token(j));
+			}
+		}
+		if (tempout.size() > 0) {
+			output.push_back(tempout);
+		}
+	}
+	return output;
 }
 
 
@@ -2780,7 +2942,7 @@ HumdrumFileContent::HumdrumFileContent(void) {
 
 //////////////////////////////
 //
-// HumdrumFileContent::HumdrumFileContent --
+// HumdrumFileContent::~HumdrumFileContent --
 //
 
 HumdrumFileContent::~HumdrumFileContent() {
@@ -2804,7 +2966,7 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure 
+// HumdrumFileStructure::~HumdrumFileStructure -- HumdrumFileStructure 
 //     deconstructor.
 //
 
@@ -3919,10 +4081,24 @@ bool HumdrumLine::isComment(void) const {
 	return equalChar(0, '!');
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumLine::isCommentLocal -- Returns true if a local comment.
+//
+
 bool HumdrumLine::isCommentLocal(void) const {
 	return equalChar(0, '!') && !equalChar(1, '!');
 
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isCommentGlobal -- Returns true if a local comment.
+//
 
 bool HumdrumLine::isCommentGlobal(void) const {
 	return equalChar(0, '!') && equalChar(1, '!');
@@ -4086,6 +4262,11 @@ HumNum HumdrumLine::getDuration(void) const {
 }
 
 
+HumNum HumdrumLine::getDuration(HumNum scale) const {
+	return duration * scale;
+}
+
+
 
 //////////////////////////////
 //
@@ -4112,6 +4293,11 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 }
 
 
+HumNum HumdrumLine::getDurationFromStart(HumNum scale) const {
+	return durationFromStart * scale;
+}
+
+
 
 //////////////////////////////
 //
@@ -4129,6 +4315,15 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 }
 
 
+HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
+	if (owner == NULL) {
+		return 0;
+	}
+	return scale * (((HumdrumFile*)owner)->getScoreDuration() -  
+		durationFromStart);
+}
+
+
 
 //////////////////////////////
 //
@@ -4139,6 +4334,11 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
 	return durationFromBarline;
+}
+
+
+HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
+	return durationFromBarline * scale;
 }
 
 
@@ -4175,11 +4375,16 @@ void HumdrumLine::setDurationFromBarline(HumNum dur) {
 //////////////////////////////
 //
 // HumdrumLine::getDurationToBarline -- Time from the starting of the
-//     current note to the next barline.
+//   current note to the next barline.
 //
 
 HumNum HumdrumLine::getDurationToBarline(void) const {
 	return durationToBarline;
+}
+
+
+HumNum HumdrumLine::getDurationToBarline(HumNum scale) const {
+	return durationToBarline * scale;
 }
 
 
@@ -4551,12 +4756,14 @@ bool HumdrumLine::analyzeTracks(void) {
 		subtracks[tokens[i]->getTrack()]++;
 	}
 	for (i=0; i<tokens.size(); i++) {
-		subtrack = subtracks[tokens[i]->getTrack()];
+		track = tokens[i]->getTrack();
+		subtrack = subtracks[track];
 		if (subtrack > 1) {
 			tokens[i]->setSubtrack(++cursub[tokens[i]->getTrack()]);
 		} else {
 			tokens[i]->setSubtrack(0);
 		}
+		tokens[i]->setSubtrackCount(subtracks[track]);
 	}
 	return true;
 }
@@ -4768,7 +4975,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount -- Return the number of
+// HumdrumToken::getPreviousNonNullDataTokenCount -- Return the number of
 //   previous tokens in the spine which is not a null token.  For null
 //   tokens, this will be a count of the number of non-null tokens which
 //   the null represents.
@@ -4782,7 +4989,7 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNullDataTokenCount -- Return the non-null
+// HumdrumToken::getPreviousNonNullDataToken -- Return the non-null
 //    data token which occurs before this token in the data in the same
 //    spine.  The default value is index 0, since mostly there will only
 //    be one previous token.
@@ -4903,6 +5110,17 @@ int HumdrumToken::getLineIndex(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getFieldIndex --
+//
+
+int HumdrumToken::getFieldIndex(void) const {
+	return address.getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getLineNumber -- Return the line index plus 1.
 //
 
@@ -4967,6 +5185,19 @@ int HumdrumToken::getTrack(void) const {
 
 void HumdrumToken::setSubtrack(int aSubtrack) {
 	address.setSubtrack(aSubtrack);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setSubtrackCount -- Set the subtrack count in the 
+//    HumdrumLine for all tokens in the same track as the current
+//    token.
+//
+
+void HumdrumToken::setSubtrackCount(int count) {
+	address.setSubtrackCount(count);
 }
 
 
@@ -5133,6 +5364,10 @@ HumNum HumdrumToken::getDuration(void) const {
 }
 
 
+HumNum HumdrumToken::getDuration(HumNum scale) const {
+	return duration * scale;
+}
+
 
 //////////////////////////////
 //
@@ -5157,6 +5392,11 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 
 HumNum HumdrumToken::getDurationFromStart(void) const {
 	return getLine()->getDurationFromStart();
+}
+
+
+HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
+	return getLine()->getDurationFromStart() * scale;
 }
 
 
@@ -5248,11 +5488,11 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isExclusive -- Returns true if first two characters
-//     are "**".
+// HumdrumToken::isExclusiveInterpretation -- Returns true if first two
+//     characters are "**".
 //
 
-bool HumdrumToken::isExclusive(void) const {
+bool HumdrumToken::isExclusiveInterpretation(void) const {
 	const string& tok = (string)(*this);
 	return tok.substr(0, 2) == "**";
 }

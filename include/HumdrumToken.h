@@ -35,35 +35,43 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isNull                    (void) const;
 		bool     isManipulator             (void) const;
-		bool     isExclusive               (void) const;
-		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
-		bool     isExInterp                (void) const { return isExclusive(); }
+
+		bool     isExclusiveInterpretation (void) const;
 		bool     isSplitInterpretation     (void) const;
 		bool     isMergeInterpretation     (void) const;
 		bool     isExchangeInterpretation  (void) const;
 		bool     isTerminateInterpretation (void) const;
 		bool     isAddInterpretation       (void) const;
+
+		// alises for the above
+		bool     isExclusive     (void) const { 
+		                                   return isExclusiveInterpretation(); }
+		bool     isExInterp      (void) const {
+		                                   return isExclusiveInterpretation(); }
+		bool     isSplit         (void) const { return isSplitInterpretation(); }
+		bool     isMerge         (void) const { return isMergeInterpretation(); }
+		bool     isExchange      (void) const {
+		                                   return isExchangeInterpretation(); }
+		bool     isTerminate     (void) const {
+		                                   return isTerminateInterpretation(); }
+		bool     isTerminator    (void) const {
+		                                   return isTerminateInterpretation(); }
+		bool     isAdd           (void) const { return isSplitInterpretation(); }
+
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
 		bool     hasRhythm                 (void) const;
+
 		HumNum   getDuration               (void) const;
 		HumNum   getDurationFromStart      (void) const;
+
+		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getDurationFromStart      (HumNum scale) const;
+
 		HumdrumLine* getOwner              (void) const;
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
-
-		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) {
-		               return getPreviousNonNullDataTokenCount(); }
-		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
-		HumdrumToken* getPreviousNNDT(int index) {
-		               return getPreviousNonNullDataToken(index); }
-		int      getNextNonNullDataTokenCount(void);
-		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HumdrumToken* getNextNonNullDataToken(int index = 0);
-		HumdrumToken* getNextNNDT(int index = 0) {
-		               return getNextNonNullDataToken(index); }
 
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
@@ -88,6 +96,18 @@ class HumdrumToken : public string, public HumHash {
 		vector<HumdrumToken*> getNextTokens     (void) const;
 		vector<HumdrumToken*> getPreviousTokens (void) const;
 
+		int      getPreviousNonNullDataTokenCount(void);
+		int      getPreviousNNDTCount(void) {
+		               return getPreviousNonNullDataTokenCount(); }
+		HumdrumToken* getPreviousNonNullDataToken(int index = 0);
+		HumdrumToken* getPreviousNNDT(int index) {
+		               return getPreviousNonNullDataToken(index); }
+		int      getNextNonNullDataTokenCount(void);
+		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
+		HumdrumToken* getNextNonNullDataToken(int index = 0);
+		HumdrumToken* getNextNNDT(int index = 0) {
+		               return getNextNonNullDataToken(index); }
+
 	protected:
 		void     setLineIndex      (int lineindex);
 		void     setFieldIndex     (int fieldlindex);
@@ -95,6 +115,7 @@ class HumdrumToken : public string, public HumHash {
 		void     setTrack          (int aTrack, int aSubtrack);
 		void     setTrack          (int aTrack);
 		void     setSubtrack       (int aSubtrack);
+		void     setSubtrackCount  (int count);
 		void     setPreviousToken  (HumdrumToken* aToken);
 		void     setNextToken      (HumdrumToken* aToken);
 		void     makeForwardLink   (HumdrumToken& nextToken);

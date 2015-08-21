@@ -63,11 +63,19 @@ class HumdrumLine : public string, public HumHash {
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
+
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
 		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
+
+		HumNum   getDuration            (HumNum scale) const;
+		HumNum   getDurationFromStart   (HumNum scale) const;
+		HumNum   getDurationToEnd       (HumNum scale) const;
+		HumNum   getDurationFromBarline (HumNum scale) const;
+		HumNum   getDurationToBarline   (HumNum scale) const;
+
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;

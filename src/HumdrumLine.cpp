@@ -12,6 +12,7 @@
 //
 
 #include <sstream>
+#include <algorithm>
 
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
@@ -288,6 +289,11 @@ HumNum HumdrumLine::getDuration(void) const {
 }
 
 
+HumNum HumdrumLine::getDuration(HumNum scale) const {
+	return duration * scale;
+}
+
+
 
 //////////////////////////////
 //
@@ -314,6 +320,11 @@ HumNum HumdrumLine::getDurationFromStart(void) const {
 }
 
 
+HumNum HumdrumLine::getDurationFromStart(HumNum scale) const {
+	return durationFromStart * scale;
+}
+
+
 
 //////////////////////////////
 //
@@ -331,6 +342,15 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 }
 
 
+HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
+	if (owner == NULL) {
+		return 0;
+	}
+	return scale * (((HumdrumFile*)owner)->getScoreDuration() -  
+		durationFromStart);
+}
+
+
 
 //////////////////////////////
 //
@@ -341,6 +361,11 @@ HumNum HumdrumLine::getDurationToEnd(void) const {
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
 	return durationFromBarline;
+}
+
+
+HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
+	return durationFromBarline * scale;
 }
 
 
@@ -377,11 +402,16 @@ void HumdrumLine::setDurationFromBarline(HumNum dur) {
 //////////////////////////////
 //
 // HumdrumLine::getDurationToBarline -- Time from the starting of the
-//     current note to the next barline.
+//   current note to the next barline.
 //
 
 HumNum HumdrumLine::getDurationToBarline(void) const {
 	return durationToBarline;
+}
+
+
+HumNum HumdrumLine::getDurationToBarline(HumNum scale) const {
+	return durationToBarline * scale;
 }
 
 
@@ -753,12 +783,14 @@ bool HumdrumLine::analyzeTracks(void) {
 		subtracks[tokens[i]->getTrack()]++;
 	}
 	for (i=0; i<tokens.size(); i++) {
-		subtrack = subtracks[tokens[i]->getTrack()];
+		track = tokens[i]->getTrack();
+		subtrack = subtracks[track];
 		if (subtrack > 1) {
 			tokens[i]->setSubtrack(++cursub[tokens[i]->getTrack()]);
 		} else {
 			tokens[i]->setSubtrack(0);
 		}
+		tokens[i]->setSubtrackCount(subtracks[track]);
 	}
 	return true;
 }

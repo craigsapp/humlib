@@ -17,16 +17,18 @@ namespace minHumdrum {
 
 // START_MERGE
 
+
 //////////////////////////////
 //
 // HumAddress::HumAddress -- HumAddress constructor.
 //
 
 HumAddress::HumAddress(void) {
-	track      = -1;
-	subtrack   = -1;
-	fieldindex = -1;
-	owner      = NULL;
+	track         = -1;
+	subtrack      = -1;
+	subtrackcount = 0;
+	fieldindex    = -1;
+	owner         = NULL;
 }
 
 
@@ -37,10 +39,11 @@ HumAddress::HumAddress(void) {
 //
 
 HumAddress::~HumAddress() {
-	track      = -1;
-	subtrack   = -1;
-	fieldindex = -1;
-	owner      = NULL;
+	track         = -1;
+	subtrack      = -1;
+	fieldindex    = -1;
+	subtrackcount = 0;
+	owner         = NULL;
 }
 
 
@@ -149,6 +152,20 @@ int HumAddress::getTrack(void) const {
 
 int HumAddress::getSubtrack(void) const {
 	return subtrack;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getSubtrackCount -- The number of subtrack spines for a 
+//   given spine on the owning HumdurmLine.  Returns 0 if spine analysis
+//   has not been done, or if the line does not have spines (i.e., reference
+//   records, global comments and empty lines).
+//
+
+int HumAddress::getSubtrackCount(void) const {
+	return subtrackcount;
 }
 
 
@@ -289,6 +306,19 @@ void HumAddress::setSubtrack(int aSubtrack) {
 	}
 	subtrack = aSubtrack;
 }
+
+
+
+//////////////////////////////
+//
+// HumAddress::setSubtrackCount --
+//
+
+void HumAddress::setSubtrackCount(int count) {
+	subtrackcount = count;
+}
+
+
 
 // END_MERGE
 

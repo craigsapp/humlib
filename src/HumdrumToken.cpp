@@ -306,6 +306,19 @@ void HumdrumToken::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
+// HumdrumToken::setSubtrackCount -- Set the subtrack count in the 
+//    HumdrumLine for all tokens in the same track as the current
+//    token.
+//
+
+void HumdrumToken::setSubtrackCount(int count) {
+	address.setSubtrackCount(count);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setPreviousToken --
 //
 
@@ -466,6 +479,10 @@ HumNum HumdrumToken::getDuration(void) const {
 }
 
 
+HumNum HumdrumToken::getDuration(HumNum scale) const {
+	return duration * scale;
+}
+
 
 //////////////////////////////
 //
@@ -490,6 +507,11 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 
 HumNum HumdrumToken::getDurationFromStart(void) const {
 	return getLine()->getDurationFromStart();
+}
+
+
+HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
+	return getLine()->getDurationFromStart() * scale;
 }
 
 
@@ -581,11 +603,11 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isExclusive -- Returns true if first two characters
-//     are "**".
+// HumdrumToken::isExclusiveInterpretation -- Returns true if first two
+//     characters are "**".
 //
 
-bool HumdrumToken::isExclusive(void) const {
+bool HumdrumToken::isExclusiveInterpretation(void) const {
 	const string& tok = (string)(*this);
 	return tok.substr(0, 2) == "**";
 }
