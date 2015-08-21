@@ -203,7 +203,7 @@ Notice that all minHumdrum code is placed into the minHumdrum namespace.
 
 Test data for use with the above program:
 
-![Example music](https://cdn.rawgit.com/craigsapp/minHumdrum/master/examples/hum2notelist.svg)
+![Example music](https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/hum2notelist.svg)
 
 <table style="border-collapse: separate; margin-left:auto; margin-right:auto">
 <tr><td style="border:0">
