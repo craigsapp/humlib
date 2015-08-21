@@ -144,7 +144,7 @@ Example input:<br>
 Example output:<br>
 <pre style="font-family: Courier; text-align:left">
 TPQ: 6
-PITCH	TRACK	START	DURATION
+PITCH   TRACK   START   DURATION
 C3      1       0       3
 D4      2       0       2
 E4      2       2       2
@@ -153,8 +153,8 @@ F4      2       4       2
 A3      1       6       6
 G4      2.1     6       12
 D4      2.2     6       6
-G3	1       12      6
-C4	2.2	12	6
+G3      1       12      6
+C4      2.2     12      6
 </pre>
 </td></tr></table>
 </center>
