@@ -18,25 +18,6 @@ Also include the `-stdlib=libc++` when compiling with clang.  See the
 More information and documentation for the library can be found at http://min.humdrum.org.
 
 
-Class overview
-==============
-
-Here are the classes defined in the minHumdrum library:
-
-* [HumdrumFile](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h): primary interface for working with Humdrum file data. <img title="class-organization" align=right width="250" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/class-organization.svg">
-* [HumdrumFileContent](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileContent.h): manages analysis of data content (particularly of **kern data) beyond basic rhythmic analysis done in HumdrumFileStructure.
-* [HumdrumFileStructure](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileStructure.h): manages rhythmic analysis of the data and extra parameters for data tokens.
-* [HumdrumFileBase](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileBase.h): manages data storage and reading/writing of Humdrum file data.
-(particularly from token strings) into other formats.
-* [HumdrumLine](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumLine.h): manages the content of a line (data record) in a Humdrum file.
-* [HumdrumToken](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumToken.h): manages tokens (data elements on a line) for HumdrumLine.
-* [HumAddress](https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h): location information for a HumdrumToken on a HumdrumLine and in a HumdrumFile.
-* [HumNum](https://github.com/craigsapp/minHumdrum/blob/master/include/HumNum.h): rational number class for working with durations. 
-* [HumHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h): associative array for HumdrumLine and HumdrumToken parameters.
-* [HumMultiHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumMultiHash.h): associative array for HumdrumFile reference records and parameters.
-* [Convert](https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h): utility functions for converting data (primarily for processing HumdrumToken strings).
-
-
 Downloading
 ===========
 
@@ -68,8 +49,109 @@ make lib
 This will create the file `lib/libhumdrum.a`.
 
 
-Example
-========
+Class overview
+==============
+
+Here are the classes defined in the minHumdrum library:
+
+* [HumdrumFile](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h): primary interface for working with Humdrum file data. <img title="class-organization" align="right" width="250" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/class-organization.svg">
+* [HumdrumFileContent](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileContent.h): manages analysis of data content (particularly of **kern data) beyond basic rhythmic analysis done in HumdrumFileStructure.
+* [HumdrumFileStructure](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileStructure.h): manages rhythmic analysis of the data and extra parameters for data tokens.
+* [HumdrumFileBase](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileBase.h): manages data storage and reading/writing of Humdrum file data.
+(particularly from token strings) into other formats.
+* [HumdrumLine](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumLine.h): manages the content of a line (data record) in a Humdrum file.
+* [HumdrumToken](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumToken.h): manages tokens (data elements on a line) for HumdrumLine.
+* [HumAddress](https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h): location information for a HumdrumToken on a HumdrumLine and in a HumdrumFile.
+* [HumNum](https://github.com/craigsapp/minHumdrum/blob/master/include/HumNum.h): rational number class for working with durations. 
+* [HumHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h): associative array for HumdrumLine and HumdrumToken parameters.
+* [HumMultiHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumMultiHash.h): associative array for HumdrumFile reference records and parameters.
+* [Convert](https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h): utility functions for converting data (primarily for processing HumdrumToken strings).
+
+The following figure shows some sample Humdrum file for a musical score with overlays illustrating how the class structure of a HumdrumFile interacts with the data.  The blue area represents a HumdrumFile.  The file primarily consists of an array of HumdrumLines, indexed from 0.  The HumdrumLine in turn contains a list of HumdrumTokens, indexed by a field number on the line, which is also indexed from 0.
+
+<img title="class-organization" width="600" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/humdrum-file.svg">
+
+The bottom right portion of the above figure shows the organization of the file in terms of parts (or staves) in the data.  The parts are contained in "spines" which start with a data type, such as `**kern` and end with a data terminator, `*-` (star-dash, not star-underscore).  Humdrum spines can split into two subspines (and the subspines can split into sub-subspines) as shown in the second spine.  A spine is split using the `*^` spine manipulator and can be merged again with the merge manipulator `*v`.  A related concept to spines are "tracks".  Tracks are identical to spines if spines do not split; otherwise, subspines and subtracks are described slighly differently.  Subspines are described by strings which indicate the spine manipulator history of the spine.  For example when spine `2` splits into two subspines, the first subspine on the line is labeled `(2)a` and the second subspine is `(2)b`.  Likewise if the `(2)b` subspine splits again, the two sub-subspines would be labeled `((2)b)a` and `((2)b)b`.  Subtracks are enumerated in the order of their left-to-right occurence on the line regardless of subspine manipulations, so in this example subspine `(2)a` is called subtrack `2.1` and subspine `(2)b` is called subtrack `2.2`.  If the two subspines were to switch their order on the line with the exchange manipulator `*x`, then the subtrack assignments would reverse such that `(2)b` would be subtrack `2.1` and `(2)a` would be subtrack `2.2`.  Note that spine and track labels are indexed from 1 rather than 0.
+
+Code snippets
+==============
+
+Here are examples of how to access the data using the minHumdrum classes:
+
+
+1: Read a Humdrum file from a file, string or istream:
+```cpp
+HumdrumFile infile;
+infile.read(filename);
+infile.read(string);
+infile.read(char*);
+infile.read(std::cin);
+```
+
+2: Access the token in the second field of the fourth line (`12e`). This can be done in two ways: either address the HumdrumLine by the [] operator of HumdrumClass and then the data files with HumdrumLine::token, or access the HumdrumToken directly from the HumdrumFile::token function, giving the line and field index as arguments.
+```cpp
+infile[3].token(1);
+infile.token(3, 1);
+```
+
+3: HumdrumTokens inherit from std::string, so you can access the text of the token in several ways:
+```cpp
+(std::string)infile.token(3, 1);
+infile.token(3, 1).c_str();
+```
+
+4: To access the parsed duration of the token, use the HumdrumToken::getDuration function.  The return value of getDuration() is a "HumNum" which is a rational number, or fraction, consisting of an integer numerator and denominator.  The HumNum::getFloat() function will return the duration as a double:
+```cpp
+infile.token(3, 1).getDuration();              // 1/3 for "12e"
+infile.token(3, 1).getDuration().getFloat();   // 0.3333 for "12a"
+```
+5: HumdrumLines also posses duration:
+```cpp
+infile[i].getDuration();  // 1/6 (1/6th of a quarter note, due to the polyrhythm between the parts)
+```
+6: HumdrumFiles also posses duration:
+```cpp
+infile.getDuration();    // 3 (one measure of 3/4)
+```
+7: When converting Humdrum files into MIDI, MuseData, MusicXML or SKINI, the function HumdrumFile::tpq (ticks per quarter note) will return the minimum number of fractional time units necessary to describe all rhythms in the file as integer durations.
+```cpp
+infile.tpq();           // 6 = minimum time unit is a triplet sixteenth note
+```
+8: Durations can be expressed in ticks by giving the tpq value as an argument to the duration functions:
+```cpp
+int tpq = infile.tpq();                           // 6 ticks per quarter note
+infile.token(3, 1).getDuration(tpq).toInteger();  // 2 ticks for a triplet eighth note
+infile[i].getDuration(tpq).toInteger();           // 1 tick for a triplet sixteenth note
+infile.getDuration(tpq).toInteger();              // 18 ticks for three quarter notes
+```
+9: Get the total number of HumdrumLines in a HumdrumFile:
+```cpp
+infile.getLineCount();
+```
+10: Get the total number of tokens on a HumdrumLine:
+```cpp
+infile[3].getTokenCount();
+```
+11: Get the total number of spines/tracks in a HumdrumFile:
+```cpp
+infile.getMaxTrack();
+```
+12: Get the first token in the seocond spine/track (second `**kern` token on the first line):
+```cpp
+infile.getTrackStart(2);
+```
+Note that this will return a pointer rather than a reference to the token.
+13:  Ask the staring token how many tokens precede/follow it in the spine:
+```cpp
+HumdrumToken* tok = infile.getTrackStart(2);
+tok->getNextTokenCount();           // 1 token following in the spine
+tok->getPreviousTokenCount();       // 0 tokens preceding in the spine
+tok->getNextToken();                // returns pointer to `*M3/4`, using default value of 0 for argument.
+tok->getPreviousToken();            // returns NULL
+```
+
+Code example
+=============
 
 Here is an example program that uses the minHumdrum library to convert a Humdrum file into a MIDI-like listing of notes in the Humdrum score:
 
