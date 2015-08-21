@@ -1,6 +1,7 @@
 obj
 lib
 bin
+err
 _site
 myprograms
 test.krn
