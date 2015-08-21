@@ -21,19 +21,18 @@ Class overview
 ==============
 
 Here are the classes defined in the minHumdrum library:
-<img title="class-organization" align=right width="230" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/class-organization.svg">
 
-* [HumdrumFile](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h): primary interface for working with Humdrum file data.
+* [HumdrumFile](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFile.h): primary interface for working with Humdrum file data. <img title="class-organization" align=right width="250" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/class-organization.svg">
 * [HumdrumFileContent](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileContent.h): manages analysis of data content (particularly of **kern data) beyond basic rhythmic analysis done in HumdrumFileStructure.
 * [HumdrumFileStructure](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileStructure.h): manages rhythmic analysis of the data and extra parameters for data tokens.
 * [HumdrumFileBase](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumFileBase.h): manages data storage and reading/writing of Humdrum file data.
 (particularly from token strings) into other formats.
 * [HumdrumLine](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumLine.h): manages the content of a line (data record) in a Humdrum file.
 * [HumdrumToken](https://github.com/craigsapp/minHumdrum/blob/master/include/HumdrumToken.h): manages tokens (data elements on a line) for HumdrumLine.
-* [HumAddress](https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h): Location information for a HumdrumToken on a HumdrumLine and in a HumdrumFile.
-* [HumNum](https://github.com/craigsapp/minHumdrum/blob/master/include/HumNum.h): Rational number class for working with durations. 
-* [HumHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h): Associative array for HumdrumLine and HumdrumToken parameters.
-* [HumMultiHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumMultiHash.h): Associative array for HumdrumFile reference records and parameters.
+* [HumAddress](https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h): location information for a HumdrumToken on a HumdrumLine and in a HumdrumFile.
+* [HumNum](https://github.com/craigsapp/minHumdrum/blob/master/include/HumNum.h): rational number class for working with durations. 
+* [HumHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h): associative array for HumdrumLine and HumdrumToken parameters.
+* [HumMultiHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumMultiHash.h): associative array for HumdrumFile reference records and parameters.
 * [Convert](https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h): utility functions for converting data (primarily for processing HumdrumToken strings).
  
 Compiling
