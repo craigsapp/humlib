@@ -17,6 +17,7 @@ Also include the `-stdlib=libc++` when compiling with clang.  See the
 
 More information and documentation for the library can be found at http://min.humdrum.org.
 
+
 Class overview
 ==============
 
@@ -34,6 +35,20 @@ Here are the classes defined in the minHumdrum library:
 * [HumHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h): associative array for HumdrumLine and HumdrumToken parameters.
 * [HumMultiHash](https://github.com/craigsapp/minHumdrum/blob/master/include/HumMultiHash.h): associative array for HumdrumFile reference records and parameters.
 * [Convert](https://github.com/craigsapp/minHumdrum/blob/master/include/Convert.h): utility functions for converting data (primarily for processing HumdrumToken strings).
+
+
+Downloading
+===========
+
+To download using git, type:
+```bash
+git clone https://github.com/craigsapp/minHumdrum
+```
+To update to the most recent version of minHumdrum, type in the minHumdrum directory:
+```bash
+git pull
+```
+
  
 Compiling
 ==========
@@ -78,7 +93,7 @@ int main(int argc, char** argv) {
    }
    int tpq = infile.tpq();
    cout << "TPQ: " << tpq << endl;
-   cout << "PITCH\tSTART\tDURATION" << endl;
+   cout << "PITCH\tTRACK\tSTART\tDURATION" << endl;
 
    for (int i=0; i<infile.getLineCount(); i++) {
       if (!infile[i].isData()) {
@@ -98,19 +113,12 @@ int main(int argc, char** argv) {
 
 void printNoteInformation(HumdrumFile& infile, int line, 
       int field, int tpq) {
-   int starttime, duration;
-   HumNum value;
-
-   value = infile[line].getDurationFromStart();
-   value *= tpq;
-   starttime = value.getNumerator();
-
-   value = infile[line].token(field).getDuration();
-   value *= tpq;
-   duration = value.getNumerator();
-
-   cout << Convert::kernToScientificPitch(infile[line].token(field))
-        << '\t' << starttime << '\t' << duration << endl;
+   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
+   int duration  = infile[line].token(field).getDuration(tpq).getInteger();;
+   cout << Convert::kernToSciPitch(infile[line].token(field))
+        << '\t' << infile[line].token(field).getTrack()
+        << '\t' << starttime 
+        << '\t' << duration << endl;
 }
 ```
 
@@ -157,18 +165,3 @@ programs into a subdirectory called `myprograms` and then to compile,
 go to the base directory of the minHumdrum code and type `make myprogram`
 if the program is called `myprograms/myprogram.cpp`.  The compiled program
 will be created as `bin/myprogram`.
-
-Downloading
-===========
-
-To download using git, type:
-```bash
-git clone https://github.com/craigsapp/minHumdrum
-```
-To update to the most recent version of minHumdrum, type in the minHumdrum directory:
-```bash
-git pull
-```
-
-
-

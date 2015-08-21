@@ -41,6 +41,14 @@ class Convert {
 		                                     string flat = "b",
 		                                     string sharp = "#", 
 		                                     string separator = "");
+		static string  kernToSciPitch      (const string& kerndata, 
+		      string flat = "b", string sharp = "#", string separator = "") {
+			return kernToScientificPitch(kerndata, flat, sharp, separator);
+		}
+		static string  kernToSP            (const string& kerndata, 
+		      string flat = "b", string sharp = "#", string separator = "") {
+			return kernToScientificPitch(kerndata, flat, sharp, separator);
+		}
 
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,

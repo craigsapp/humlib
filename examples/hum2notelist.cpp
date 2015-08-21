@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
    }
    int tpq = infile.tpq();
    cout << "TPQ: " << tpq << endl;
-   cout << "PITCH\tSTART\tDURATION" << endl;
+   cout << "PITCH\tTRACK\tSTART\tDURATION" << endl;
 
    for (int i=0; i<infile.getLineCount(); i++) {
       if (!infile[i].isData()) {
@@ -39,14 +39,12 @@ int main(int argc, char** argv) {
 
 void printNoteInformation(HumdrumFile& infile, int line, 
       int field, int tpq) {
-   int starttime, duration;
-   HumNum value;
-
-   starttime = infile[line].getDurationFromStart(tpq).getInteger();
-   duration  = infile[line].token(field).getDuration(tpq).getInteger();
-
+   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
+   int duration  = infile[line].token(field).getDuration(tpq).getInteger();
    cout << Convert::kernToScientificPitch(infile[line].token(field))
-        << '\t' << starttime << '\t' << duration << endl;
+        << '\t' << infile[line].token(field).getTrackString() 
+        << '\t' << starttime 
+        << '\t' << duration << endl;
 }
 
 
@@ -69,15 +67,15 @@ void printNoteInformation(HumdrumFile& infile, int line,
 /* Example output:
 
 TPQ: 6
-PITCH	START	DURATION
-C3	0	3
-D4	0	2
-E4	2	2
-B3	3	3
-F4	4	2
-A3	6	6
-G4	6	12
-G3	12	6
+PITCH	TRACK	START	DURATION
+C3	1	0	3
+D4	2	0	2
+E4	2	2	2
+B3	1	3	3
+F4	2	4	2
+A3	1	6	6
+G4	2	6	12
+G3	1	12	6
 
 */
 
