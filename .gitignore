@@ -4,5 +4,6 @@ err
 bin/test*
 bin
 myprograms
+transfer
 test.krn
 _site

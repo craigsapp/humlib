@@ -74,7 +74,7 @@ vpath %.o   $(OBJDIR)
 OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: examples
+.PHONY: examples transfer myprograms src include t trans r
 
 
 ###########################################################################
@@ -123,6 +123,21 @@ superclean: clean
 makedirs:
 	@-mkdir -p $(OBJDIR)
 	@-mkdir -p $(LIBDIR)
+
+
+t:        transfer
+trans:    transfer
+transfer:
+	rm -rf transfer
+	mkdir -p transfer
+	cp src/[A-Z]*.cpp transfer
+	cp include/[A-Z]*.h transfer
+
+r:      return
+return:
+	-cp transfer/[A-Z]*.cpp src
+	-cp transfer/[A-Z]*.h include
+	rm -rf transfer
 
 %:
 	@echo compiling example $@
