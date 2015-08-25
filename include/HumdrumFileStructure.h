@@ -37,6 +37,9 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          read                         (const string& filename);
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
+		bool parse(istream& contents) { return read(contents); }
+		bool parse(const char* contents) { return readString(contents); }
+		bool parse(const string& contents) { return readString(contents); }
 
 		bool          readNoRhythm                 (istream& infile);
 		bool          readNoRhythm                 (const char*   filename);

@@ -50,6 +50,9 @@ class HumdrumFileBase {
 		bool          read                         (const string& filename);
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
+		bool parse(istream& contents) { return read(contents); }
+		bool parse(const char* contents) { return readString(contents); }
+		bool parse(const string& contents) { return readString(contents); }
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;

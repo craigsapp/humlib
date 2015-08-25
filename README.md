@@ -76,19 +76,25 @@ The bottom right portion of the above figure shows the organization of the file 
 Code snippets
 ==============
 
-Here are examples of how to access the data using the minHumdrum classes:
+Here are examples of how to access data in a Humdrum score using the 
+minHumdrum classes:
 
 
-1: Read a Humdrum file from a file, string or istream:
+1: Read Humdrum data from a file, string or istream:
 ```cpp
 HumdrumFile infile;
-infile.read(filename);
-infile.read(string);
-infile.read(char*);
+infile.read(char* filename);
+infile.read(string filename);
 infile.read(std::cin);
 ```
+To read content from a char* or string:
+```cpp
+infile.parse(stringstream content);
+infile.parse(char* content);
+infile.parse(string content);
+```
 
-2: Access the token in the second field of the fourth line (`12e`). This can be done in two ways: either address the HumdrumLine by the [] operator of HumdrumClass and then the data files with HumdrumLine::token, or access the HumdrumToken directly from the HumdrumFile::token function, giving the line and field index as arguments.
+2: Access the token in the second field of the fourth line (`12e` in the above example). This can be done in two ways: either address the HumdrumLine by the [] operator of HumdrumClass and then the data files with HumdrumLine::token, or access the HumdrumToken directly from the HumdrumFile::token function, giving the line and field index as arguments.
 ```cpp
 infile[3].token(1);
 infile.token(3, 1);
@@ -103,45 +109,51 @@ infile.token(3, 1).c_str();
 4: To access the parsed duration of the token, use the HumdrumToken::getDuration function.  The return value of getDuration() is a "HumNum" which is a rational number, or fraction, consisting of an integer numerator and denominator.  The HumNum::getFloat() function will return the duration as a double:
 ```cpp
 infile.token(3, 1).getDuration();              // 1/3 for "12e"
-infile.token(3, 1).getDuration().getFloat();   // 0.3333 for "12a"
+infile.token(3, 1).getDuration().getFloat();   // 0.3333 for "12e"
 ```
-5: HumdrumLines also posses duration:
+5: HumdrumLines also possess duration:
 ```cpp
 infile[i].getDuration();  // 1/6 (1/6th of a quarter note, due to the polyrhythm between the parts)
 ```
-6: HumdrumFiles also posses duration:
+6: HumdrumFiles also possess duration:
 ```cpp
 infile.getDuration();    // 3 (one measure of 3/4)
 ```
 7: When converting Humdrum files into MIDI, MuseData, MusicXML or SKINI, the function HumdrumFile::tpq (ticks per quarter note) will return the minimum number of fractional time units necessary to describe all rhythms in the file as integer durations.
 ```cpp
-infile.tpq();           // 6 = minimum time unit is a triplet sixteenth note
+infile.tpq();           // 6 = minimum time unit is a triplet sixteenth note for example
 ```
 8: Durations can be expressed in ticks by giving the tpq value as an argument to the duration functions:
 ```cpp
 int tpq = infile.tpq();                           // 6 ticks per quarter note
 infile.token(3, 1).getDuration(tpq).toInteger();  // 2 ticks for a triplet eighth note
-infile[i].getDuration(tpq).toInteger();           // 1 tick for a triplet sixteenth note
+infile[3].getDuration(tpq).toInteger();           // 1 tick for a triplet sixteenth note
 infile.getDuration(tpq).toInteger();              // 18 ticks for three quarter notes
 ```
 9: Get the total number of HumdrumLines in a HumdrumFile:
 ```cpp
 infile.getLineCount();
 ```
-10: Get the total number of tokens on a HumdrumLine:
+10: Get the total number of token fields on a HumdrumLine:
 ```cpp
 infile[3].getTokenCount();
+infile[3].getFieldCount();
 ```
-11: Get the total number of spines/tracks in a HumdrumFile:
+11: Get the track number for a token:
+```cpp
+infile[3].getTrack(1);   // 2nd track in file.
+```
+12: Get the total number of spines/tracks in a HumdrumFile:
 ```cpp
 infile.getMaxTrack();
 ```
-12: Get the first token in the seocond spine/track (second `**kern` token on the first line):
+13: Get the first token in the seocond spine/track (second `**kern` token on the first line):
 ```cpp
 infile.getTrackStart(2);
 ```
 Note that this will return a pointer rather than a reference to the token.
-13:  Ask the staring token how many tokens precede/follow it in the spine:
+
+14:  Ask the starting token how many tokens precede/follow it in the spine:
 ```cpp
 HumdrumToken* tok = infile.getTrackStart(2);
 tok->getNextTokenCount();           // 1 token following in the spine
