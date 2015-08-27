@@ -61,6 +61,8 @@ class HumdrumToken : public string, public HumHash {
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
+		bool     isNonNullData             (void) const;
+		bool     isNullData                (void) const;
 		bool     hasRhythm                 (void) const;
 
 		HumNum   getDuration               (void) const;

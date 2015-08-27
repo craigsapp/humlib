@@ -603,6 +603,30 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isNonNullData -- Return true if the token is a data token
+//    that is not a null token.
+//
+
+bool HumdrumToken::isNonNullData(void) const {
+	return isData() && !isNull();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNullData -- Return true if the token is a null 
+//     data token.
+//
+
+bool HumdrumToken::isNullData(void) const {
+	return isData() && isNull();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isExclusiveInterpretation -- Returns true if first two
 //     characters are "**".
 //
@@ -911,7 +935,7 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 //
 
 ostream& operator<<(ostream& out, const HumdrumToken& token) {
-	out << (string)token;
+	out << token.c_str();
 	return out;
 }
 

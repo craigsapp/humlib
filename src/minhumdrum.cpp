@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 20 23:02:27 PDT 2015
+// Last Modified: Wed Aug 26 23:40:48 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -5502,6 +5502,30 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isNonNullData -- Return true if the token is a data token
+//    that is not a null token.
+//
+
+bool HumdrumToken::isNonNullData(void) const {
+	return isData() && !isNull();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNullData -- Return true if the token is a null 
+//     data token.
+//
+
+bool HumdrumToken::isNullData(void) const {
+	return isData() && isNull();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isExclusiveInterpretation -- Returns true if first two
 //     characters are "**".
 //
@@ -5810,7 +5834,7 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 //
 
 ostream& operator<<(ostream& out, const HumdrumToken& token) {
-	out << (string)token;
+	out << token.c_str();
 	return out;
 }
 

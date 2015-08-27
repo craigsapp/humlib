@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 20 23:02:27 PDT 2015
+// Last Modified: Wed Aug 26 23:40:48 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -496,6 +496,8 @@ class HumdrumToken : public string, public HumHash {
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
 		bool     isData                    (void) const;
+		bool     isNonNullData             (void) const;
+		bool     isNullData                (void) const;
 		bool     hasRhythm                 (void) const;
 
 		HumNum   getDuration               (void) const;
@@ -634,11 +636,15 @@ class HumdrumFileBase {
 		bool          read                         (const string& filename);
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
+		bool parse(istream& contents) { return read(contents); }
+		bool parse(const char* contents) { return readString(contents); }
+		bool parse(const string& contents) { return readString(contents); }
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
 		HumdrumToken& token                        (int lineindex, int fieldindex);
 		int           getMaxTrack                  (void) const;
+		int           getMaxSpine   (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
@@ -751,6 +757,9 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          read                         (const string& filename);
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
+		bool parse(istream& contents) { return read(contents); }
+		bool parse(const char* contents) { return readString(contents); }
+		bool parse(const string& contents) { return readString(contents); }
 
 		bool          readNoRhythm                 (istream& infile);
 		bool          readNoRhythm                 (const char*   filename);
