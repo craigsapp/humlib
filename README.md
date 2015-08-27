@@ -7,13 +7,13 @@ to be portable, consisting of two files that can be copied into
 your project:
 
 1. An include file [minhumdrum.h](/include/minhumdrum.h)
-2. and a source file [minhumdrum.cpp](/src/minhumdrum.h)
+2. and a source file [minhumdrum.cpp](/src/minhumdrum.cpp)
 
 The classes use some C++11-specific features, so you must add the
 `-stc=c++11` option when compiling with GNU g++ or clang++ compiler.
 Also include the `-stdlib=libc++` when compiling with clang.  See the
-[Makefile](https://github.com/craigsapp/minHumdrum/Makefile) for compiling the library and 
-[Makefile.examples](https://github.com/craigsapp/minHumdrum/Makefile.examples) for linking to create executables.
+[Makefile](Makefile) for compiling the library and 
+[Makefile.examples](Makefile.examples) for linking to create executables.
 
 More information and documentation for the library can be found at http://min.humdrum.org.
 
