@@ -36,46 +36,48 @@ function addClassListContent(classname, listing) {
 
 <script>
 window.addEventListener('DOMContentLoaded', function(event) {
-   list = [   // START_DOCLIST(MidiFile)
-	'absoluteTime',
-	'addEvent',
-	'addMetaEvent',
-	'addTrack',
-	'allocateEvents',
-	'clear',
-	'deleteTrack',
-	'deltaTime',
-	'doTimeInSecondsAnalysis',
-	'extractVlvTime',
-	'getAbsoluteTickTime',
-	'getEvent',
-	'getEventCount',
-	'getFilename',
-	'getSplitTrack',
-	'getTicksPerQuarterNote',
-	'getTimeInSeconds',
-	'getTrackCount',
-	'hasJoinedTracks',
-	'hasSplitTracks',
-	'isAbsoluteTime',
-	'isDeltaTime',
-	'joinTracks',
-	'linkNotePairs',
-	'mergeTracks',
-	'operator[]',
-	'read',
-	'setFilename',
-	'setMillisecondTicks',
-	'setTicksPerQuarterNote',
-	'size',
-	'sortTrack',
-	'sortTracks',
-	'splitTracks',
-	'status',
-	'write',
-	'writeBinasc',
-	'writeHex'
-   ];   // END_DOCLIST(MidiFile)
+   list = [   // START_DOCLIST(HumdrumToken)
+	'HumdrumToken',
+	'~HumdrumToken',
+	'equalChar',
+	'getDataType',
+	'getDuration',
+	'getDurationFromStart',
+	'getFieldIndex',
+	'getLineIndex',
+	'getLineNumber',
+	'getNextNonNullDataToken',
+	'getNextNonNullDataTokenCount',
+	'getNextToken',
+	'getNextTokenCount',
+	'getNextTokens',
+	'getOwner',
+	'getPreviousNonNullDataToken',
+	'getPreviousNonNullDataTokenCount',
+	'getPreviousToken',
+	'getPreviousTokenCount',
+	'getPreviousTokens',
+	'getSpineInfo',
+	'getSubtoken',
+	'getSubtokenCount',
+	'getSubtrack',
+	'getTrack',
+	'getTrackString',
+	'hasRhythm',
+	'isAddInterpretation',
+	'isBarline',
+	'isCommentLocal',
+	'isData',
+	'isDataType',
+	'isExchangeInterpretation',
+	'isExclusive',
+	'isManipulator',
+	'isMergeInterpretation',
+	'isNull',
+	'isSplitInterpretation',
+	'isTerminateInterpretation',
+	'setParameters'
+   ];   // END_DOCLIST(HumdrumToken)
 
 
 
@@ -98,196 +100,65 @@ window.addEventListener('DOMContentLoaded', function(event) {
 
 
 
-   addClassListContent("MidiFile", list);
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumdrumToken", list);
 });
 </script>
 
-<h2> <a href="MidiFile">MidiFile</a>:: <span class="h2subtitle">Main interface for reading/writing Standard MIDI Files</span></h2>
-<ul id="MidiFile-list" class="function-listing"></ul>
+<h2> <a href="HumdrumToken">HumdrumToken</a>:: <span class="h2subtitle">
+Manages data tokens for a HumdrumLine.
+</span></h2>
+<ul id="HumdrumToken-list" class="function-listing"></ul>
 
 
 
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(MidiEventList)
-	'append',
-	'back',
-	'clear',
-	'clearLinks',
-	'getSize',
-	'linkNotePairs',
-	'operator[]',
-	'reserve',
-	'size'
-   ];   // END_DOCLIST(MidiEventList)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   addClassListContent("MidiEventList", list);
-});
-</script>
-
-<h2> <a href="MidiEventList">MidiEventList</a>:: <span class="h2subtitle">MidiFile track storage for MidiEvent lists</span></h2>
-<ul id="MidiEventList-list" class="function-listing"></ul>
-
-
-<script>
-window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(MidiEvent)
-	'getDurationInSeconds',
-	'getLinkedEvent',
-	'getTickDuration',
-	'isLinked',
-	'linkEvent',
-	'operator=',
-	'unlinkEvent'
-   ];   // END_DOCLIST(MidiEvent
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   addClassListContent("MidiEvent", list);
-});
-</script>
-
-
-<h2> <a href="MidiEvent">MidiEvent</a>:: (also inherits from <a href="MidiMessage">MidiMessage</a>) <span class="h2subtitle"> MidiMessage + timestamp</span> </h2>
-<ul id="MidiEvent-list" class="function-listing"></ul>
-
-<script>
-window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(MidiMessage)
-	'getChannelNibble',
-	'getCommandByte',
-	'getCommandNibble',
-	'getSize',
-	'getTempoBPM',
-	'getTempoMicro',
-	'getTempoSPT',
-	'getTempoSeconds',
-	'getTempoTPS',
-	'isAftertouch',
-	'isController',
-	'isMeta',
-	'isNoteOff',
-	'isNoteOn',
-	'isPitchbend',
-	'isPressure',
-	'isTempo',
-	'isTimbre',
-	'operator=',
-	'operator[]',
-	'setChannelNibble',
-	'setCommand',
-	'setCommandByte',
-	'setCommandNibble',
-	'setKeyNumber',
-	'setMetaTempo',
-	'setParameters',
-	'setSize',
-	'setSizeToCommand'
-   ];   // END_DOCLIST(MidiMessage)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   addClassListContent("MidiMessage", list);
-});
-</script>
-
-<h2> <a href="MidiMessage">MidiMessage</a>:: (also inherits from 
-<a href="http://www.cplusplus.com/reference/vector/vector">vector&lt;uchar&gt;</a>) </h2>
-
-<ul id="MidiMessage-list" class="function-listing"></ul>
-
-
-
-<script>
-window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(Options)
-	'appendOptions',
-	'argc',
-	'argv',
-	'define',
-	'getArg',
-	'getArgCount',
-	'getArgList',
-	'getBoolean',
+   list = [   // START_DOCLIST(HumdrumLine)
+	'HumdrumLine',
+	'~HumdrumLine',
+	'createLineFromTokens',
+	'equalChar',
+	'getBeat',
 	'getChar',
-	'getCommand',
-	'getCommandLine',
-	'getDouble',
-	'getFlag',
-	'getFloat',
-	'getInt',
-	'getRegIndex',
-	'getString',
-	'isDefined',
-	'optionsArg',
-	'printOptionBooleanState',
-	'printOptionList',
-	'printRegister',
-	'process',
-	'setFlag',
-	'setOptions',
-	'storeOption',
-	'xverify'
-   ];   // END_DOCLIST(Options)
+	'getDuration',
+	'getDurationFromBarline',
+	'getDurationFromStart',
+	'getDurationToBarline',
+	'getDurationToEnd',
+	'getLineIndex',
+	'getLineNumber',
+	'getTokenCount',
+	'getTokenString',
+	'getTokens',
+	'getTrackStart',
+	'hasSpines',
+	'isAllNull',
+	'isAllRhythmicNull',
+	'isBarline',
+	'isComment',
+	'isCommentGlobal',
+	'isCommentLocal',
+	'isData',
+	'isEmpty',
+	'isExclusive',
+	'isInterp',
+	'isManipulator',
+	'isTerminator',
+	'printDataTypeInfo',
+	'printDurationInfo',
+	'printSpineInfo',
+	'printTrackInfo',
+	'token'
+   ];   // END_DOCLIST(HumdrumLine)
 
 
 
@@ -310,31 +181,94 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-   addClassListContent("Options", list);
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumdrumLine", list);
 });
 </script>
 
-<h2> <a href="Options">Options</a>:: <span class="h2subtitle">Auxiliary class for command-line option parsing</span></h2>
-<ul id="Options-list" class="function-listing"> </ul>
+<h2> <a href="HumdrumLine">HumdrumLine</a>:: <span class="h2subtitle">
+Manages the content of a line for a HumdrumFile.
+</span></h2>
+<ul id="HumdrumLine-list" class="function-listing"></ul>
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumdrumFileBase)
+	'HumdrumFileBase',
+	'~HumdrumFileBase',
+	'append',
+	'createLinesFromTokens',
+	'getLineCount',
+	'getMaxTrack',
+	'getTrackEnd',
+	'getTrackEndCount',
+	'getTrackStart',
+	'operator[]',
+	'printDataTypeInfo',
+	'printSpineInfo',
+	'printTrackInfo',
+	'read',
+	'readString'
+   ];   // END_DOCLIST(HumdrumFileBase)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumdrumFileBase", list);
+});
+</script>
+
+
+<h2> <a href="HumdrumFileBase">HumdrumFileBase</a>:: (also inherits from <a href="HumdrumFileBase">HumdrumFileBase</a>) 
+<span class="h2subtitle"> 
+Low-level functionality for parsing and storing Humdrum data.
+</span> </h2>
+<ul id="HumdrumFileBase-list" class="function-listing"></ul>
 
 
 
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(Binasc)
-	'getBytes',
-	'getComments',
-	'getLineBytes',
-	'getLineLength',
-	'getMidi',
-	'readFromBinary',
-	'setBytes',
-	'setComments',
-	'setLineBytes',
-	'setLineLength',
-	'setMidi',
-	'writeToBinary'
-   ];   // END_DOCLIST(Binasc)
+   list = [   // START_DOCLIST(HumdrumFile)
+	'HumdrumFile',
+	'~HumdrumFile'
+   ];   // END_DOCLIST(HumdrumFile)
 
 
 
@@ -357,11 +291,280 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-   addClassListContent("Binasc", list);
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumdrumFile", list);
 });
 </script>
 
-<h2> <a href="Binasc">Binasc</a>:: <span class="h2subtitle">Helper class for ASCII MIDI file parsing</span></h2>
-<ul id="Binasc-list" class="function-listing"> </ul>
+<h2> <a href="HumdrumFile">HumdrumFile</a>:: <span class="h2subtitle">
+Main programmer-level interface to HumdrumFile data structure.
+</span></h2>
+<ul id="HumdrumFile-list" class="function-listing"> </ul>
+
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumNum)
+	'HumNum',
+	'~HumNum',
+	'getAbs',
+	'getDenominator',
+	'getFloat',
+	'getInteger',
+	'getNumerator',
+	'isFinite',
+	'isInfinite',
+	'isInteger',
+	'isNaN',
+	'isNegative',
+	'isNonNegative',
+	'isNonPositive',
+	'isNonZero',
+	'isPositive',
+	'isZero',
+	'makeAbs',
+	'operator!=',
+	'operator&ndash;',
+	'operator&ndash;=',
+	'operator=',
+	'operator==',
+	'operator>',
+	'operator>=',
+	'operator<',
+	'operator<=',
+	'operator+',
+	'operator+=',
+	'operator/',
+	'operator/=',
+	'operator*',
+	'operator*=',
+	'printFraction',
+	'printList',
+	'printMixedFraction',
+	'setValue'
+   ];   // END_DOCLIST(HumNum)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumNum", list);
+});
+</script>
+
+<h2> <a href="HumNum">HumNum</a>:: <span class="h2subtitle">
+Rational number class for processing durations as fractions.
+</span></h2>
+<ul id="HumNum-list" class="function-listing"> </ul>
+
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumAddress)
+	'HumAddress',
+	'~HumAddress',
+	'getDataType',
+	'getFieldIndex',
+	'getLine',
+	'getLineIndex',
+	'getLineNumber',
+	'getSpineInfo',
+	'getSubtrack',
+	'getTrack',
+	'getTrackString',
+	'hasOwner'
+   ];   // END_DOCLIST(HumAddress)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumAddress", list);
+});
+</script>
+
+<h2> <a href="HumAddress">HumAddress</a>:: <span class="h2subtitle">
+Location information for a HumdrumToken on a HumdrumLine in a HumdrumFile.
+</span></h2>
+<ul id="HumAddress-list" class="function-listing"> </ul>
+
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumHash)
+	'HumHash',
+	'~HumHash',
+	'deleteValue',
+	'getKeys',
+	'getParameterCount',
+	'getValue',
+	'getValueBool',
+	'getValueFloat',
+	'getValueFraction',
+	'getValueInt',
+	'hasParameters',
+	'isDefined',
+	'setPrefix',
+	'setValue'
+   ];   // END_DOCLIST(HumHash)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   addClassListContent("HumHash", list);
+});
+</script>
+
+<h2> <a href="HumHash">HumHash</a>:: <span class="h2subtitle">
+Token and line parameter system.
+</span></h2>
+<ul id="HumHash-list" class="function-listing"> </ul>
+
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(Convert)
+	'getGcd',
+	'getLcm',
+	'kernToAccidentalCount',
+	'kernToDiatonicLC',
+	'kernToDiatonicPC',
+	'kernToDiatonicUC',
+	'kernToOctaveNumber',
+	'kernToScientificPitch',
+	'recipToDuration',
+	'replaceOccurrences',
+	'splitString'
+   ];   // END_DOCLIST(Convert)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   addClassListContent("Convert", list);
+});
+</script>
+
+<h2> <a href="Convert">Convert</a>:: <span class="h2subtitle">
+Utility functions for converting data between various representations.
+</span></h2>
+<ul id="Convert-list" class="function-listing"> </ul>
 
 

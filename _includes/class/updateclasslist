@@ -51,9 +51,18 @@ sub printClassListContents {
       $item = $items[$i];
       $item =~ s/.*\///;
       $item =~ s/\.aton.*//;
-      $item =~ s/SQUAREBRACKETS/[]/;
-      $item =~ s/EQUALS/=/;
-      $item =~ s/EQUAL/=/;
+      $item =~ s/SQUAREBRACKETS/[]/g;
+      $item =~ s/BRACKET/[]/g;
+      $item =~ s/SLASH/\//g;
+      $item =~ s/LESS/</g;
+      $item =~ s/GREAT/>/g;
+      $item =~ s/BANG/!/g;
+      $item =~ s/PLUS/+/g;
+      $item =~ s/STAR/*/g;
+      $item =~ s/DASH/&ndash;/g;
+      $item =~ s/TILDE/~/g;
+      $item =~ s/EQUALS/=/g;
+      $item =~ s/EQUAL/=/g;
       print "\t'$item'";
       if ($i < $#items) {
          print ",\n";

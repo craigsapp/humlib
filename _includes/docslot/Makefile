@@ -13,8 +13,9 @@ all: fix
 fix:
 	./fixcontent [A-Z]*.html
 
-fixold: 
-	./processFiles [A-Z]*.html
+convert:
+	./fixcontent Convert.html
+
 
 
 

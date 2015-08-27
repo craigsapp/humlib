@@ -11,7 +11,7 @@ table.classlist td {
 table.classlist tr td:nth-child(1) {
    text-align: right;
    font-weight: 400;
-   width: 140px;
+   width: 190px;
 }
 
 table.classlist tr td:nth-child(1)::after {
@@ -29,40 +29,65 @@ table.classlist tr td:nth-child(2) {
 <table class="classlist" cellpadding="0" cellspacing="0">
 
 <tr valign=top>
-   <td> <a href="/class/MidiFile">MidiFile</a> </td> <td> 
-	Primary class, responsible for reading and writing MIDI files.
+   <td> <a href="/class/HumdrumToken">HumdrumToken</a> </td> <td> 
+	Manages data tokens for a HumdrumLine.
    </td>
 </tr>
 
 <tr valign=top>
-   <td> <a href="/class/MidiEventList">MidiEventList</a> </td> <td> 
-	Responsible for managing MidiEvent lists for tracks within the MidiFile class.
+   <td> <a href="/class/HumdrumLine">HumdrumLine</a> </td> <td> 
+	Manages the content of a line for a HumdrumFile.
    </td>
 </tr>
 
 <tr valign=top>
-   <td> <a href="/class/MidiEvent">MidiEvent</a> </td> <td> 
-	MidiMessage plus a timestamp and other bookkeeping 
-	variables.
+   <td> <a href="/class/HumdrumFile">HumdrumFile</a> </td> <td> 
+	Main programmer-level interface to HumdrumFile data structure.
    </td>
 </tr>
 
 <tr valign=top>
-   <td> <a href="/class/MidiMessage">MidiMessage</a> </td> <td> 
-	Raw MIDI protocol message.  Inherited by the MidiEvent class.
+   <td> <a href="/class/HumdrumFileContent">HumdrumFileContent</a> </td> <td> 
+	Handles high-level analysis of the data dependent on content.
    </td>
 </tr>
 
 <tr valign=top>
-   <td> <a href="/class/Binasc">Binasc</a> </td> <td> 
-	MidiFile Support class for reading/writing
-	ASCII byte codes representing MIDI files.
+   <td> <a href="/class/HumdrumFileStructure">HumdrumFileStructure</a> </td> <td> 
+	Handles higher-level analysis of the data structure, particular
+	durations.
    </td>
 </tr>
 
 <tr valign=top>
-   <td> <a href="/class/Options">Options</a> </td> <td> 
-	Independent helper class for processing command-line options.
+   <td> <a href="/class/HumdrumFileBase">HumdrumFileBase</a> </td> <td> 
+	Low-level functionality for parsing and storing Humdrum data.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/class/HumNum">HumNum</a> </td> <td> 
+	Rational number class for processing durations as fractions.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/class/HumAddress">HumAddress</a> </td> <td> 
+	Location information for a HumdrumToken on a HumdrumLine
+	in a HumdrumFile.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/class/HumHash">HumHash</a> </td> <td> 
+	Token and line parameter system.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/class/Convert">Convert</a> </td> <td> 
+	Utility functions for converting data between various
+	representations.
    </td>
 </tr>
 
