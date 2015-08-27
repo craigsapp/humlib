@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 26 23:40:48 PDT 2015
+// Last Modified: Thu Aug 27 01:23:08 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -365,6 +365,8 @@ class HumdrumLine : public string, public HumHash {
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
+		ostream& printCSV               (ostream& out = cout,
+		                                 const string& separator = ",");
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
@@ -524,6 +526,7 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata);
+		ostream& printCSV                  (ostream& out = cout);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -648,6 +651,8 @@ class HumdrumFileBase {
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
+		ostream&      printCSV      (ostream& out = cout, 
+		                             const string& separator = ",");
 
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;

@@ -822,6 +822,26 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumLine::printCSV -- print the line as a CSV
+//    (comma separate value) line.
+//       default value: out = std::cout;
+//       default value: separator = ","
+//
+
+ostream& HumdrumLine::printCSV(ostream& out, const string& separator) {
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i).printCSV(out);
+		if (i<getFieldCount()-1) {
+			out << separator;
+		}
+	}
+	out << endl;
+	return out;
+}
+
+
 
 //////////////////////////////
 //

@@ -931,6 +931,33 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::printCSV -- print token in CSV format.
+//      default value: out = std::cout
+//
+
+ostream& HumdrumToken::printCSV(ostream& out) {
+	string& value = *this;
+	int loc = this->find(",");
+	if (loc == string::npos) {
+		out << value;
+	} else {
+		out << '"';
+		for (int i=0; i<value.size(); i++) {
+		   if (value[i] == '"') {
+				out << '"' << '"';
+			} else {
+				out << value[i];
+			}
+		}
+		out << '"';
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Needed to avoid interaction with the HumHash parent class.
 //
 

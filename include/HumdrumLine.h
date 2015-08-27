@@ -60,6 +60,8 @@ class HumdrumLine : public string, public HumHash {
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
+		ostream& printCSV               (ostream& out = cout,
+		                                 const string& separator = ",");
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;

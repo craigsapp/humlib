@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 26 23:40:48 PDT 2015
+// Last Modified: Thu Aug 27 01:23:08 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2068,6 +2068,24 @@ bool HumdrumFileBase::readString(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printCSV -- print Humdrum file content in
+//     CSV format.
+//        default value: out = std::cout
+//        default value: separator = ","
+//
+
+ostream& HumdrumFileBase::printCSV(ostream& out, 
+		const string& separator) {
+	for (int i=0; i<getLineCount(); i++) {
+		((*this)[i]).printCSV(out, separator);
+	}
+	return out;
 }
 
 
@@ -4809,6 +4827,26 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumLine::printCSV -- print the line as a CSV
+//    (comma separate value) line.
+//       default value: out = std::cout;
+//       default value: separator = ","
+//
+
+ostream& HumdrumLine::printCSV(ostream& out, const string& separator) {
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i).printCSV(out);
+		if (i<getFieldCount()-1) {
+			out << separator;
+		}
+	}
+	out << endl;
+	return out;
+}
+
+
 
 //////////////////////////////
 //
@@ -5824,6 +5862,33 @@ int HumdrumToken::getNextTokenCount(void) const {
 
 int HumdrumToken::getPreviousTokenCount(void) const {
 	return previousTokens.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printCSV -- print token in CSV format.
+//      default value: out = std::cout
+//
+
+ostream& HumdrumToken::printCSV(ostream& out) {
+	string& value = *this;
+	int loc = this->find(",");
+	if (loc == string::npos) {
+		out << value;
+	} else {
+		out << '"';
+		for (int i=0; i<value.size(); i++) {
+		   if (value[i] == '"') {
+				out << '"' << '"';
+			} else {
+				out << value[i];
+			}
+		}
+		out << '"';
+	}
+	return out;
 }
 
 

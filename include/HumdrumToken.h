@@ -89,6 +89,7 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata);
+		ostream& printCSV                  (ostream& out = cout);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;

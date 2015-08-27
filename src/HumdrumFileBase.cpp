@@ -132,6 +132,24 @@ bool HumdrumFileBase::readString(const char* contents) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::printCSV -- print Humdrum file content in
+//     CSV format.
+//        default value: out = std::cout
+//        default value: separator = ","
+//
+
+ostream& HumdrumFileBase::printCSV(ostream& out, 
+		const string& separator) {
+	for (int i=0; i<getLineCount(); i++) {
+		((*this)[i]).printCSV(out, separator);
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::analyzeTokens -- Generate token array from
 //    current contents of the lines.  If either tokens or the line 
 //    is changed, then the other state becomes invalid.  
