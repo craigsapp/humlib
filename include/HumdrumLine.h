@@ -81,6 +81,10 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
+		void     setLineFromCSV         (const char* csv, 
+		                                 const string& separator = ",");
+		void     setLineFromCSV         (const string& csv,
+		                                 const string& separator = ",");
 
 	protected:
 		bool     analyzeTracks          (void);

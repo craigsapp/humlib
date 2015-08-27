@@ -55,8 +55,8 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 //
 
 
-bool HumdrumFileStructure::read(istream& infile) {
-	if (!readNoRhythm(infile)) {
+bool HumdrumFileStructure::read(istream& contents) {
+	if (!readNoRhythm(contents)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -80,6 +80,41 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 //////////////////////////////
 //
+// HumdrumFileStructure::readCSV --  Read the contents of a file from a file or
+//   istream in CSV format.  The file's structure is analyzed, and then the
+//   rhythmic structure is calculated.
+//       default value: separator = ","
+//
+
+
+bool HumdrumFileStructure::readCSV(istream& contents,
+		const string& separator) {
+	if (!readNoRhythmCSV(contents, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readCSV(const char* filename,
+		const string& separator) {
+	if (!readNoRhythmCSV(filename, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readCSV(const string& filename,
+		const string& separator) {
+	if (!readNoRhythmCSV(filename, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileStructure::readString -- Read the contents from a string.
 //    Similar to HumdrumFileStructure::read, but for string data.
 //
@@ -91,8 +126,35 @@ bool HumdrumFileStructure::readString(const char* contents) {
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readString(const string& contents) {
 	if (!HumdrumFileBase::readString(contents)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringCSV -- Read the contents from a string.
+//    Similar to HumdrumFileStructure::read, but for string data.
+//       default value: separator = ","
+//
+
+bool HumdrumFileStructure::readStringCSV(const char* contents,
+		const string& separator) {
+	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+bool HumdrumFileStructure::readStringCSV(const string& contents,
+		const string& separator) {
+	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -142,18 +204,65 @@ bool HumdrumFileStructure::readNoRhythm(const string& filename) {
 
 //////////////////////////////
 //
+// HumdrumFileStructure::readNoRhythmCSV -- Similar to the readCSV()
+//    functions, but does not parse rhythm (or parameters).
+//        default value: separator = ","
+//
+
+bool HumdrumFileStructure::readNoRhythmCSV(istream& infile,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(infile);
+}
+
+
+bool HumdrumFileStructure::readNoRhythmCSV(const char* filename,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(filename);
+}
+
+
+bool HumdrumFileStructure::readNoRhythmCSV(const string& filename,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(filename);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileStructure::readStringNoRhythm -- Read a string, but
 //   do not analyze the rhythm (or parameters) in the read data.
 //
 
 
-bool HumdrumFileStructure::readStringNoRhythm(const char*   contents) {
+bool HumdrumFileStructure::readStringNoRhythm(const char* contents) {
 	return HumdrumFileBase::readString(contents);
 }
 
 
 bool HumdrumFileStructure::readStringNoRhythm(const string& contents) {
 	return HumdrumFileBase::readString(contents);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringNoRhythmCSV -- Read a string, but
+//   do not analyze the rhythm (or parameters) in the read data.
+//       default value: separator = ","
+//
+
+
+bool HumdrumFileStructure::readStringNoRhythmCSV(const char* contents,
+		const string& separator) {
+	return HumdrumFileBase::readStringCSV(contents);
+}
+
+
+bool HumdrumFileStructure::readStringNoRhythmCSV(const string& contents,
+		const string& separator) {
+	return HumdrumFileBase::readStringCSV(contents);
 }
 
 

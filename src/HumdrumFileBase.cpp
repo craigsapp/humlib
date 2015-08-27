@@ -91,11 +91,57 @@ bool HumdrumFileBase::read(const char* filename) {
 }
 
 
-bool HumdrumFileBase::read(istream& infile) {
+bool HumdrumFileBase::read(istream& contents) {
 	char buffer[123123] = {0};
 	HumdrumLine* s;
-	while (infile.getline(buffer, sizeof(buffer), '\n')) {
+	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
+		s->setOwner(this);
+		lines.push_back(s);
+	}
+	if (!analyzeTokens()         ) { return false; }
+	if (!analyzeLines()          ) { return false; }
+	if (!analyzeSpines()         ) { return false; }
+	if (!analyzeLinks()          ) { return false; }
+	if (!analyzeTracks()         ) { return false; }
+	return true;
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::readCSV -- Read a Humdrum file in CSV format
+//    (rather than TSV format).
+//       default value: separator = ","
+//
+
+bool HumdrumFileBase::readCSV(const string& filename, const string& separator) {
+	return HumdrumFileBase::readCSV(filename.c_str());
+}
+
+
+bool HumdrumFileBase::readCSV(const char* filename, const string& separator) {
+	ifstream infile;
+	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
+		return HumdrumFileBase::readCSV(cin, separator);
+	} else {
+		infile.open(filename);
+		if (!infile.is_open()) {
+			return false;
+		}
+	}
+	int status = HumdrumFileBase::readCSV(infile, separator);
+	infile.close();
+	return status;
+}
+
+
+bool HumdrumFileBase::readCSV(istream& contents, const string& separator) {
+	char buffer[123123] = {0};
+	HumdrumLine* s;
+	while (contents.getline(buffer, sizeof(buffer), '\n')) {
+		s = new HumdrumLine;
+		s->setLineFromCSV(buffer);
 		s->setOwner(this);
 		lines.push_back(s);
 	}
@@ -126,6 +172,28 @@ bool HumdrumFileBase::readString(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::readStringCSV -- read Humdrum data in CSV format.
+//
+
+bool HumdrumFileBase::readStringCSV(const char* contents,
+		const string& separator) {
+	stringstream infile;
+	infile << contents;
+	return readCSV(infile, separator);
+}
+
+
+bool HumdrumFileBase::readStringCSV(const string& contents,
+		const string& separator) {
+	stringstream infile;
+	infile << contents;
+	return readCSV(infile, separator);
 }
 
 

@@ -64,6 +64,52 @@ HumdrumLine::~HumdrumLine() {
 
 //////////////////////////////
 //
+// HumdrumLine::setLineFromCSV -- Read a HumdrumLine from a CSV line.
+//   default value: separator = ","
+//
+
+void HumdrumLine::setLineFromCSV(const char* csv, const string& separator) {
+	string temp = csv;
+	setLineFromCSV(temp);
+}
+
+
+void HumdrumLine::setLineFromCSV(const string& csv, const string& separator) {
+	if (csv.size() < 1) {
+		return;
+	}
+	// construct tab-delimited string
+	string output;
+	bool inquote = false;
+	for (int i=0; i<csv.size(); i++) {
+		if ((csv[i] == '"') && !inquote) {
+			inquote = true;
+			continue;
+		}
+		if (inquote && (csv[i] == '"') && (i < csv.length()-1)) {
+			output += '"';
+			i++;
+			continue;
+		}
+		if (csv[i] == '"') {
+			inquote = false;
+			continue;
+		}
+		if ((!inquote) && (csv.substr(i, separator.size()) == separator)) {
+			output += '\t';
+			i += separator.size() - 1;
+			continue;
+		}
+		output += csv[i];
+	}
+	string& value = *this;
+	value = output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::clear -- Remove stored tokens.
 //
 

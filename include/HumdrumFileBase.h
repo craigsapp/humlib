@@ -45,14 +45,32 @@ class HumdrumFileBase {
 		              HumdrumFileBase              (void);
 		             ~HumdrumFileBase              ();
 
-		bool          read                         (istream& infile);
+		bool          read                         (istream& contents);
 		bool          read                         (const char*   filename);
 		bool          read                         (const string& filename);
+		bool          readCSV                      (istream& contents,
+		                                            const string& separator=",");
+		bool          readCSV                      (const char* contents,
+		                                            const string& separator=",");
+		bool          readCSV                      (const string& contents,
+		                                            const string& separator=",");
+
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
-		bool parse(istream& contents) { return read(contents); }
-		bool parse(const char* contents) { return readString(contents); }
-		bool parse(const string& contents) { return readString(contents); }
+		bool          readStringCSV                (const char*   contents,
+                                                  const string& separator=",");
+		bool          readStringCSV                (const string& contents,
+                                                  const string& separator=",");
+
+		bool parse(istream& contents)         { return read(contents); }
+		bool parse(const char* contents)      { return readString(contents); }
+		bool parse(const string& contents)    { return readString(contents); }
+		bool parseCSV(istream& contents, const string& separator = ",")
+		                                      { return readCSV(contents); }
+		bool parseCSV(const char* contents, const string& separator = ",")
+		                                      { return readStringCSV(contents); }
+		bool parseCSV(const string& contents, const string& separator = ",")
+		                                      { return readStringCSV(contents); }
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
@@ -62,7 +80,7 @@ class HumdrumFileBase {
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
-		ostream&      printCSV      (ostream& out = cout, 
+		ostream&      printCSV      (ostream& out = cout,
 		                             const string& separator = ",");
 
 		HumdrumToken* getTrackStart                (int track) const;
@@ -74,7 +92,7 @@ class HumdrumFileBase {
 		void          append                       (const string& line);
 
 		// spine analysis functionality
-		vector<vector<HumdrumToken*> > getTrackSeq       (int track, 
+		vector<vector<HumdrumToken*> > getTrackSeq       (int track,
 		                                                  int options);
 		vector<HumdrumToken*>          getPrimaryTrackSeq(int track,
 		                                                  int options);
@@ -132,11 +150,11 @@ class HumdrumFileBase {
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
-		// to be shifted between HumdrumFileContent (the top-level default), 
+		// to be shifted between HumdrumFileContent (the top-level default),
       // HumdrumFileStructure (mid-level interface), or HumdrumFileBase
 		// (low-level interface).
 
-		// 
+		//
 		// HumdrumFileStructure public functions:
 		//
 		bool readNoRhythm      (istream& infile) { return read(infile); };

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 27 01:23:08 PDT 2015
+// Last Modified: Thu Aug 27 03:47:10 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2033,11 +2033,57 @@ bool HumdrumFileBase::read(const char* filename) {
 }
 
 
-bool HumdrumFileBase::read(istream& infile) {
+bool HumdrumFileBase::read(istream& contents) {
 	char buffer[123123] = {0};
 	HumdrumLine* s;
-	while (infile.getline(buffer, sizeof(buffer), '\n')) {
+	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
+		s->setOwner(this);
+		lines.push_back(s);
+	}
+	if (!analyzeTokens()         ) { return false; }
+	if (!analyzeLines()          ) { return false; }
+	if (!analyzeSpines()         ) { return false; }
+	if (!analyzeLinks()          ) { return false; }
+	if (!analyzeTracks()         ) { return false; }
+	return true;
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::readCSV -- Read a Humdrum file in CSV format
+//    (rather than TSV format).
+//       default value: separator = ","
+//
+
+bool HumdrumFileBase::readCSV(const string& filename, const string& separator) {
+	return HumdrumFileBase::readCSV(filename.c_str());
+}
+
+
+bool HumdrumFileBase::readCSV(const char* filename, const string& separator) {
+	ifstream infile;
+	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
+		return HumdrumFileBase::readCSV(cin, separator);
+	} else {
+		infile.open(filename);
+		if (!infile.is_open()) {
+			return false;
+		}
+	}
+	int status = HumdrumFileBase::readCSV(infile, separator);
+	infile.close();
+	return status;
+}
+
+
+bool HumdrumFileBase::readCSV(istream& contents, const string& separator) {
+	char buffer[123123] = {0};
+	HumdrumLine* s;
+	while (contents.getline(buffer, sizeof(buffer), '\n')) {
+		s = new HumdrumLine;
+		s->setLineFromCSV(buffer);
 		s->setOwner(this);
 		lines.push_back(s);
 	}
@@ -2068,6 +2114,28 @@ bool HumdrumFileBase::readString(const char* contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::readStringCSV -- read Humdrum data in CSV format.
+//
+
+bool HumdrumFileBase::readStringCSV(const char* contents,
+		const string& separator) {
+	stringstream infile;
+	infile << contents;
+	return readCSV(infile, separator);
+}
+
+
+bool HumdrumFileBase::readStringCSV(const string& contents,
+		const string& separator) {
+	stringstream infile;
+	infile << contents;
+	return readCSV(infile, separator);
 }
 
 
@@ -3016,8 +3084,8 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 //
 
 
-bool HumdrumFileStructure::read(istream& infile) {
-	if (!readNoRhythm(infile)) {
+bool HumdrumFileStructure::read(istream& contents) {
+	if (!readNoRhythm(contents)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -3041,6 +3109,41 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 //////////////////////////////
 //
+// HumdrumFileStructure::readCSV --  Read the contents of a file from a file or
+//   istream in CSV format.  The file's structure is analyzed, and then the
+//   rhythmic structure is calculated.
+//       default value: separator = ","
+//
+
+
+bool HumdrumFileStructure::readCSV(istream& contents,
+		const string& separator) {
+	if (!readNoRhythmCSV(contents, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readCSV(const char* filename,
+		const string& separator) {
+	if (!readNoRhythmCSV(filename, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readCSV(const string& filename,
+		const string& separator) {
+	if (!readNoRhythmCSV(filename, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileStructure::readString -- Read the contents from a string.
 //    Similar to HumdrumFileStructure::read, but for string data.
 //
@@ -3052,8 +3155,35 @@ bool HumdrumFileStructure::readString(const char* contents) {
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readString(const string& contents) {
 	if (!HumdrumFileBase::readString(contents)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringCSV -- Read the contents from a string.
+//    Similar to HumdrumFileStructure::read, but for string data.
+//       default value: separator = ","
+//
+
+bool HumdrumFileStructure::readStringCSV(const char* contents,
+		const string& separator) {
+	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+
+bool HumdrumFileStructure::readStringCSV(const string& contents,
+		const string& separator) {
+	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -3103,18 +3233,65 @@ bool HumdrumFileStructure::readNoRhythm(const string& filename) {
 
 //////////////////////////////
 //
+// HumdrumFileStructure::readNoRhythmCSV -- Similar to the readCSV()
+//    functions, but does not parse rhythm (or parameters).
+//        default value: separator = ","
+//
+
+bool HumdrumFileStructure::readNoRhythmCSV(istream& infile,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(infile);
+}
+
+
+bool HumdrumFileStructure::readNoRhythmCSV(const char* filename,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(filename);
+}
+
+
+bool HumdrumFileStructure::readNoRhythmCSV(const string& filename,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(filename);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileStructure::readStringNoRhythm -- Read a string, but
 //   do not analyze the rhythm (or parameters) in the read data.
 //
 
 
-bool HumdrumFileStructure::readStringNoRhythm(const char*   contents) {
+bool HumdrumFileStructure::readStringNoRhythm(const char* contents) {
 	return HumdrumFileBase::readString(contents);
 }
 
 
 bool HumdrumFileStructure::readStringNoRhythm(const string& contents) {
 	return HumdrumFileBase::readString(contents);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringNoRhythmCSV -- Read a string, but
+//   do not analyze the rhythm (or parameters) in the read data.
+//       default value: separator = ","
+//
+
+
+bool HumdrumFileStructure::readStringNoRhythmCSV(const char* contents,
+		const string& separator) {
+	return HumdrumFileBase::readStringCSV(contents);
+}
+
+
+bool HumdrumFileStructure::readStringNoRhythmCSV(const string& contents,
+		const string& separator) {
+	return HumdrumFileBase::readStringCSV(contents);
 }
 
 
@@ -4063,6 +4240,52 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 HumdrumLine::~HumdrumLine() {
 	// free stored HumdrumTokens:
 	clear();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::setLineFromCSV -- Read a HumdrumLine from a CSV line.
+//   default value: separator = ","
+//
+
+void HumdrumLine::setLineFromCSV(const char* csv, const string& separator) {
+	string temp = csv;
+	setLineFromCSV(temp);
+}
+
+
+void HumdrumLine::setLineFromCSV(const string& csv, const string& separator) {
+	if (csv.size() < 1) {
+		return;
+	}
+	// construct tab-delimited string
+	string output;
+	bool inquote = false;
+	for (int i=0; i<csv.size(); i++) {
+		if ((csv[i] == '"') && !inquote) {
+			inquote = true;
+			continue;
+		}
+		if (inquote && (csv[i] == '"') && (i < csv.length()-1)) {
+			output += '"';
+			i++;
+			continue;
+		}
+		if (csv[i] == '"') {
+			inquote = false;
+			continue;
+		}
+		if ((!inquote) && (csv.substr(i, separator.size()) == separator)) {
+			output += '\t';
+			i += separator.size() - 1;
+			continue;
+		}
+		output += csv[i];
+	}
+	string& value = *this;
+	value = output;
 }
 
 

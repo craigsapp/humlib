@@ -399,5 +399,8 @@ CSV format.  The example file in CSV format:
 *-,*-
 ```
 
+CSV files can be read into a HumdrumFile object by appending "CSV" to the
+various read functions, such as readCSV() and parseCSV().
+
 
 
