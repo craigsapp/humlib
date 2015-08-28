@@ -6,10 +6,14 @@
 @RETURN:	HumdrumLine*  
 @PARAMETERS:	int index
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		250-271
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the given barline from the file based on the index number.
+@LONGDESC:	Return the given barline from the file
+	based on the index number.  Negative index accesses from the end of the
+	list.  If the first barline is a pickup measure, then the returned 
+	HumdrumLine* will not be an actual barline line.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,28 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::getBarline -- Return the given barline from the file
+//   based on the index number.  Negative index accesses from the end of the
+//   list.  If the first barline is a pickup measure, then the returned 
+//   HumdrumLine* will not be an actual barline line.
+//
+
+HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
+	if (index < 0) {
+		index += barlines.size();
+	}
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= barlines.size()) {
+		return NULL;
+	}
+	return barlines[index];
+}
+
+
 
 
 @@END:	FunctionDocumentation

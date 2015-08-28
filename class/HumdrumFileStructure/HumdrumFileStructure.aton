@@ -6,10 +6,12 @@
 @RETURN:	
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		25-35
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	HumdrumFileStructure constructor.
+@LONGDESC:	HumdrumFileStructure
+	constructor.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure
+//     constructor.
+//
+
+HumdrumFileStructure::HumdrumFileStructure(void) {
+	// do nothing
+}
+
+
 
 
 @@END:	FunctionDocumentation

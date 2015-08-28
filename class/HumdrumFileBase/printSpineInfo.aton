@@ -6,10 +6,12 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		220-233
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print the spine information for all lines/tokens in file (for debugging).
+@LONGDESC:	Print the spine information for all 
+	lines/tokens in file (for debugging).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::printSpineInfo -- Print the spine information for all 
+//    lines/tokens in file (for debugging).
+//
+
+ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printSpineInfo(out) << '\n';
+	}
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

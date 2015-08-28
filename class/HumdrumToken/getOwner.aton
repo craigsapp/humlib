@@ -6,10 +6,12 @@
 @RETURN:	HumdrumLine* 
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		842-852
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return a pointer to the HumdrumLine which owns this token.
+@LONGDESC:	Return a pointer to the HumdrumLine which owns this
+	token.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getOwner -- Return a pointer to the HumdrumLine which owns this
+//    token.
+//
+
+HumdrumLine* HumdrumToken::getOwner(void) const {
+	return address.getOwner();
+}
+
+
 
 
 @@END:	FunctionDocumentation

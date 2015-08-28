@@ -4,12 +4,18 @@
 @METHOD:	getDurationToEnd
 @ACCESS:	public
 @RETURN:	HumNum   
+HumNum   
 @PARAMETERS:	void
+HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		328-343
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the duration from the start of the line to the end of the HumdrumFile which owns this HumdrumLine.
+@LONGDESC:	Return the duration from the start of the
+	line to the end of the HumdrumFile which owns this HumdrumLine.  The
+	rhythm of the HumdrumFile must be analyze before using this function;
+	otherwise a 0 will probably be returned.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +24,22 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getDurationToEnd -- Return the duration from the start of the
+//    line to the end of the HumdrumFile which owns this HumdrumLine.  The
+//    rhythm of the HumdrumFile must be analyze before using this function;
+//    otherwise a 0 will probably be returned.
+//
+
+HumNum HumdrumLine::getDurationToEnd(void) const {
+	if (owner == NULL) {
+		return 0;
+	}
+	return ((HumdrumFile*)owner)->getScoreDuration() -  durationFromStart;
+}
+
+
 
 
 @@END:	FunctionDocumentation

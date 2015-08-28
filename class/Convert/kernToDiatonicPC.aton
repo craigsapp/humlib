@@ -5,11 +5,15 @@
 @ACCESS:	public
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
-@FILE:		Convert.cpp
-@LINES:		;
+@FILE:		Convert-pitch.cpp
+@LINES:		65-94
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Convert a kern token into a diatonic note pitch-class where 0="C", 1="D", ..., 6="B".
+@LONGDESC:	Convert a kern token into a diatonic
+	note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned 
+	if the note is rest, and -2000 if there is no pitch information in the
+	input string. Only the first subtoken in the string is considered.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,36 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::kernToDiatonicPC -- Convert a kern token into a diatonic
+//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned 
+//    if the note is rest, and -2000 if there is no pitch information in the
+//    input string. Only the first subtoken in the string is considered.
+//
+
+int Convert::kernToDiatonicPC(const string& kerndata) {
+	for (int i=0; i<kerndata.size(); i++) {
+		if (kerndata[i] == ' ') {
+			break;
+		}
+		if (kerndata[i] == 'r') {
+			return -1000;
+		}
+		switch (kerndata[i]) {
+			case 'A': case 'a': return 5;
+			case 'B': case 'b': return 6;
+			case 'C': case 'c': return 0;
+			case 'D': case 'd': return 1;
+			case 'E': case 'e': return 2;
+			case 'F': case 'f': return 3;
+			case 'G': case 'g': return 4;
+		}
+	}
+	return -2000;
+}
+
+
 
 
 @@END:	FunctionDocumentation

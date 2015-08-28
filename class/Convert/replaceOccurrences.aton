@@ -5,11 +5,14 @@
 @ACCESS:	public
 @RETURN:	static void    
 @PARAMETERS:	string& source, const string& search, const string& replace
-@FILE:		Convert.cpp
-@LINES:		;
+@FILE:		Convert-string.cpp
+@LINES:		21-40
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Similar to s// regular expressions operator.
+@LONGDESC:	Similar to s// regular expressions
+	operator.  This function replaces the search string in the source
+	string with the replace string.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,26 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += replace.size()) {
+		loc = source.find(search, loc);
+		if (loc == string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

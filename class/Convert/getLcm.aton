@@ -5,11 +5,12 @@
 @ACCESS:	public
 @RETURN:	static int     
 @PARAMETERS:	const vector<int>& numbers
-@FILE:		Convert.cpp
-@LINES:		;
+@FILE:		Convert-math.cpp
+@LINES:		20-36
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the Least Common Multiple of a list of numbers.
+@LONGDESC:	Return the Least Common Multiple of a list of numbers.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +19,23 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::getLcm -- Return the Least Common Multiple of a list of numbers.
+//
+
+int Convert::getLcm(const vector<int>& numbers) {
+   if (numbers.size() == 0) {
+		return 1;
+	}
+	int output = numbers[0];
+	for (int i=1; i<numbers.size(); i++) {
+		output = (output * numbers[i]) / getGcd(output, numbers[i]);
+	}
+	return output;
+}
+
+
 
 
 @@END:	FunctionDocumentation

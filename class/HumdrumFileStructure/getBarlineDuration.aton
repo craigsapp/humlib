@@ -6,10 +6,15 @@
 @RETURN:	HumNum        
 @PARAMETERS:	int index
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		287-316
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the duration from the current barline to the next barline in the data.
+@LONGDESC:	Return the duration from the
+	current barline to the next barline in the data.  For the last barline,
+	the duration will be calculated from the end of the data;  The final
+	will have a duration of 0 if there are not notes after the barline
+	in the data.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,36 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+///////////////////////////////
+//
+// HumdrumFileStructure::getBarlineDuration --  Return the duration from the
+//    current barline to the next barline in the data.  For the last barline,
+//    the duration will be calculated from the end of the data;  The final
+//    will have a duration of 0 if there are not notes after the barline
+//    in the data.
+//
+
+HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
+	if (index < 0) {
+		index += barlines.size();
+	}
+	if (index < 0) {
+		return 0;
+	}
+	if (index >= barlines.size()) {
+		return 0;
+	}
+	HumNum startdur = barlines[index]->getDurationFromStart();
+	HumNum enddur;
+	if (index + 1 < barlines.size() - 1) {
+		enddur = barlines[index+1]->getDurationFromStart();
+	} else {
+		enddur = getScoreDuration();
+	}
+	return enddur - startdur;
+}
+
+
 
 
 @@END:	FunctionDocumentation

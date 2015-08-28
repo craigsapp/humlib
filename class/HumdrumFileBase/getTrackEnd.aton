@@ -6,10 +6,13 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track, int subtrack
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		439-468
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns a pointer to the terminal manipulator token for the given track and subtrack.
+@LONGDESC:	Returns a pointer to the terminal manipulator
+	token for the given track and subtrack.  Sub-tracks are indexed from 0 up 
+	to but not including getTrackEndCount.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,36 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::getTrackEnd -- Returns a pointer to the terminal manipulator
+//    token for the given track and subtrack.  Sub-tracks are indexed from 0 up 
+//    to but not including getTrackEndCount.
+//
+
+HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
+	if (track < 0) {
+		track += trackends.size();
+	}
+	if (track < 0) {
+		return NULL;
+	}
+	if (track >= trackends.size()) {
+		return NULL;
+	}
+	if (subtrack < 0) {
+		subtrack += trackends[track].size();
+	}
+	if (subtrack < 0) {
+		return NULL;
+	}
+	if (subtrack >= trackends[track].size()) {
+		return NULL;
+	}
+	return trackends[track][subtrack];
+}
+
+
 
 
 @@END:	FunctionDocumentation

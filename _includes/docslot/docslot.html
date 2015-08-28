@@ -4,7 +4,7 @@
 // Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 // Creation Date: Wed Jan 28 01:45:01 PST 2015
 // Last Modified: Thu Feb 12 09:48:26 PST 2015 Added sessionStorage use.
-// Filename:      midifile/_includes/docslot/docslot.html
+// Filename:      minHumdrum/_includes/docslot/docslot.html
 // Syntax:        JavaScript 1.5 (EMCAScript 5)
 // vim:           ts=3 ft=javascript hlsearch
 //
@@ -239,7 +239,7 @@ pre.output-example {
 		<a name="{{METHOD}}"> </a>
 		<details ontoggle='showOrHideShortDescriptionReverse(this);'>
 			<summary>
-				{{#if longname}}<a href="/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}<span class="docslot-short-title">{{METHOD}}</span>
+				.{{#if longname}}<a href="/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}<span class="docslot-short-title">{{METHOD}}</span>
 			<span class='short-desc'> &mdash;
 			{{{SHORTDESC}}}
 			</span>
@@ -316,9 +316,10 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 	if (typeof method === 'undefined') { return '' }
 	if (typeof file   === 'undefined') { return '' }
 
-   var url = 'https://github.com/craigsapp/midifile/tree/master/src-library/'
+   var url = 'https://github.com/craigsapp/minHumdrum/tree/master/src/'
 	url += file;
    if (linerange) {
+      linerange =  linerange.replace(/-/g, '-L');
 		url += '#L' + linerange;
 	}
 	var output = '';
@@ -327,12 +328,12 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 		output += '<details class="srccode">\n';
 		output += '<summary>\n';
 		output += 'Source code for ' + method 
-		output += ' <a target="new" href="' + url;
-		output += '">on GitHub';
-   	output += '</a>\n';
+		output += ' (<a target="new" href="' + url;
+		output += '">on Github';
+   	output += '</a>)\n';
 		output += '</summary>\n';
 		if (!srccode.match(/^\s*$/)) {
-			output += '<pre style="background:#888888;">';
+			output += '<pre style="padding:0.8rem; overflow:auto; font-size:0.9rem; line-height:1.45; border-radius:0.3rem; background-color#f3f6fa; border: solid 1px #dce6f0 box-sizing: border-box;">';
 			output += srccode;
 			output += '</pre>';
 		}
@@ -381,7 +382,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 
    if (entry.PARAMETERS instanceof Array) {
 		for (var i=0; i<entry.PARAMETERS.length; i++) {
-   		output += '<span style="color:#000088; font-weight:500;">';
+   		output += '<span style="color:#159957; font-weight:500;">';
 			if (entry.RETURN instanceof Array) {
 				output += entry.RETURN[i];
 			} else {
@@ -399,7 +400,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 		}
 
 	} else {
-   	output += '<span style="color:#000088; font-weight:500;">';
+   	output += '<span style="color:#159957; font-weight:500;">';
 		if (entry.RETURN instanceof Array) {
 			output += entry.RETURN[0];
 		} else {
@@ -515,14 +516,14 @@ function showOrHideShortDescriptionReverse(target) {
 //
 
 function insertDocumentation(target, template) {
-	var fullname     = target.id;
-	var fullQ = 0;
+	var fullname = target.id;
+	var fullQ    = 0;
 	if (!fullname) {
       fullname = target.textContent.replace(/\s/g, '');
 	   fullQ = 1;	
       target.id = fullname;
 	}
-	var matches      = fullname.match(/(.*)::(.*)/);
+	var matches = fullname.match(/(.*)::(.*)/);
    if (!matches) {
       console.log("Error: not a class function:", fullname);
       returnl;
@@ -533,6 +534,7 @@ function insertDocumentation(target, template) {
    functionname = functionname.replace(/\[\]/, "SQUAREBRACKETS");
    
 	var local = sessionStorage[classname + '/' + functionname + '.aton'];
+console.log(functionname);
 	if (local && !local.match(/^\s*$/)) {
 		processAtonData(local, fullname, functionname, target, template, fullQ);
    } else {
@@ -578,6 +580,7 @@ function processAtonData(atondata, fullname, functionname, target, template,
       target.id = fullname;
    }
 	target.innerHTML = dochtml;
+
 	var matches = window.location.href.match(/#([^\/]+)$/);
 	if (matches && (matches[1] === functionname)) {
 		showSlotDocumentation(fullname);

@@ -12,19 +12,17 @@ group: [
 ]
 ---
 
+{% include docslot/docslot.html %}
+
+
 The Convert class manages data conversions for the minHumdrum library.
 
 &nbsp;
 
-Public functions
-----------------
+Convert Public functions
+------------------------
 
 {% include docslot/Convert.html %}
-
-&nbsp;
-
-Functions inherited from <span class="class-link">YYY</span>
----------------------------------------------------------------
 
 
 

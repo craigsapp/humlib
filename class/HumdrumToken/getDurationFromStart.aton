@@ -4,12 +4,19 @@
 @METHOD:	getDurationFromStart
 @ACCESS:	public
 @RETURN:	HumNum   
+HumNum   
 @PARAMETERS:	void
+HumNum scale
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		498-511
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the duration from the start of the owning HumdrumFile to the starting time of the owning HumdrumLine for the token.
+@LONGDESC:	Return the duration from the
+	start of the owning HumdrumFile to the starting time of the
+	owning HumdrumLine for the token.  The durationFromStart is
+	in reference to the start of the token, not the end of the token,
+	which may be on another HumdrumLine.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +25,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getDurationFromStart -- Return the duration from the
+//   start of the owning HumdrumFile to the starting time of the
+//   owning HumdrumLine for the token.  The durationFromStart is
+//   in reference to the start of the token, not the end of the token,
+//   which may be on another HumdrumLine.
+//
+
+HumNum HumdrumToken::getDurationFromStart(void) const {
+	return getLine()->getDurationFromStart();
+}
+
+
 
 
 @@END:	FunctionDocumentation

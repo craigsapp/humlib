@@ -6,10 +6,12 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		235-248
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print the assigned duration of each line in a file.
+@LONGDESC:	Print the assigned duration
+	of each line in a file.  Useful for debugging.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::printDurationInfo -- Print the assigned duration
+//    of each line in a file.  Useful for debugging.
+//
+
+ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printDurationInfo(out) << '\n';
+	}
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

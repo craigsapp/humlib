@@ -10,10 +10,16 @@ bool
 const string& ns
 const string& ns1, const string& ns2
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		582-611
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if at least one parameter is defined in the HumHash object (when no arguments are given to the function).
+@LONGDESC:	Returns true if at least one parameter is defined
+	in the HumHash object (when no arguments are given to the function).
+	When two strings are given as arguments, the function checks to see if
+	the given namespace pair has any keys.  If only one string argument,
+	then check if the given NS1 has any parameters, unless there is a
+	colon in the string which means to check NS1:NS2.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +28,36 @@ const string& ns1, const string& ns2
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::hasParameters -- Returns true if at least one parameter is defined
+//     in the HumHash object (when no arguments are given to the function).
+//     When two strings are given as arguments, the function checks to see if
+//     the given namespace pair has any keys.  If only one string argument,
+//     then check if the given NS1 has any parameters, unless there is a
+//     colon in the string which means to check NS1:NS2.
+//
+
+bool HumHash::hasParameters(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return false;
+	}
+	if (parameters->size() == 0) {
+		return false;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return false;
+	}
+	auto it2 = (*parameters)[ns1].find(ns2);
+	if (it2 == (*parameters)[ns1].end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

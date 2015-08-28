@@ -4,12 +4,17 @@
 @METHOD:	getDurationFromStart
 @ACCESS:	public
 @RETURN:	HumNum   
+HumNum   
 @PARAMETERS:	void
+HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		310-321
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Get the duration from the start of the file to the start of the current line.
+@LONGDESC:	Get the duration from the start of the
+	file to the start of the current line.  This will be -1 if rhythmic
+	analysis has not been done in the HumdrumFileStructure class.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,18 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getDurationFromStart -- Get the duration from the start of the
+//    file to the start of the current line.  This will be -1 if rhythmic
+//    analysis has not been done in the HumdrumFileStructure class.
+//
+
+HumNum HumdrumLine::getDurationFromStart(void) const {
+	return durationFromStart;
+}
+
+
 
 
 @@END:	FunctionDocumentation

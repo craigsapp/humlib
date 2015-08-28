@@ -6,10 +6,13 @@
 @RETURN:	HumdrumLine*  
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		207-218
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	return the HumdrumLine which owns the token associated with this address.
+@LONGDESC:	return the HumdrumLine which owns the token
+	associated with this address.  Returns NULL if it does not belong
+	to a HumdrumLine object.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,18 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::getLine -- return the HumdrumLine which owns the token
+//    associated with this address.  Returns NULL if it does not belong
+//    to a HumdrumLine object.
+//
+
+HumdrumLine* HumAddress::getLine(void) const {
+	return owner;
+}
+
+
 
 
 @@END:	FunctionDocumentation

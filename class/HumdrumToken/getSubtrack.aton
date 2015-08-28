@@ -6,10 +6,12 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		688-698
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Get the subtrack (similar to a layer in MEI).
+@LONGDESC:	Get the subtrack (similar to a layer
+	in MEI).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getSubtrack -- Get the subtrack (similar to a layer
+//    in MEI).
+//
+
+int HumdrumToken::getSubtrack(void) const {
+	return address.getSubtrack();
+}
+
+
 
 
 @@END:	FunctionDocumentation

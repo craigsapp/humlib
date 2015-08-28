@@ -4,12 +4,16 @@
 @METHOD:	getDurationToBarline
 @ACCESS:	public
 @RETURN:	HumNum   
+HumNum   
 @PARAMETERS:	void
+HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		401-411
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Time from the starting of the current note to the next barline.
+@LONGDESC:	Time from the starting of the
+	current note to the next barline.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getDurationToBarline -- Time from the starting of the
+//   current note to the next barline.
+//
+
+HumNum HumdrumLine::getDurationToBarline(void) const {
+	return durationToBarline;
+}
+
+
 
 
 @@END:	FunctionDocumentation

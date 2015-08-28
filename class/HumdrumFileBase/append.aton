@@ -6,12 +6,14 @@
 @RETURN:	void          
 void          
 @PARAMETERS:	const char* line
-const string& line
+eonst string& line
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		164-175
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Add a line to the file's contents.
+@LONGDESC:	Add a line to the file's contents.  The file's
+	spine and rhythmic structure should be recalculated after an append.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -20,6 +22,18 @@ const string& line
 @@END:	EXAMPLE
 
 @SRCCODE:
+////////////////////////////
+//
+// HumdrumFileBase::append -- Add a line to the file's contents.  The file's
+//    spine and rhythmic structure should be recalculated after an append.
+//
+
+void HumdrumFileBase::append(const char* line) {
+	HumdrumLine* s = new HumdrumLine(line);
+	lines.push_back(s);
+}
+
+
 
 
 @@END:	FunctionDocumentation

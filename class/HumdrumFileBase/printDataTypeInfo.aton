@@ -6,10 +6,12 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		235-248
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print the data type for all spines in the file (for debugging).
+@LONGDESC:	Print the data type for all 
+	spines in the file (for debugging).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::printDataTypeInfo -- Print the data type for all 
+//     spines in the file (for debugging).
+//
+
+ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printDataTypeInfo(out) << '\n';
+	}
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

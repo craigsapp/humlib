@@ -6,10 +6,15 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		686-709
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print the datatype of each token in the file.
+@LONGDESC:	Print the datatype of each token in
+	the file.  Useful for debugging.  The datatype prefix "**" is removed;
+	otherwise, it is given when you call HumdrumToken::getDataType().
+	
+	default value: out = cout
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,30 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::printDataTypeInfo -- Print the datatype of each token in
+//     the file.  Useful for debugging.  The datatype prefix "**" is removed;
+//     otherwise, it is given when you call HumdrumToken::getDataType().
+//
+//     default value: out = cout
+//
+
+ostream& HumdrumLine::printDataTypeInfo(ostream& out) {
+	if (isManipulator()) {
+		out << *this;
+	} else {
+		for (int i=0; i<tokens.size(); i++) {
+			out << tokens[i]->getDataType().substr(2, string::npos);
+			if (i < tokens.size() - 1) {
+				out << '\t';
+			}
+		}
+	}
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

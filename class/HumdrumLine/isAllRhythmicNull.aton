@@ -6,10 +6,13 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		219-241
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if all rhythmic data-type tokens on the line are null (".
+@LONGDESC:	Returns true if all rhythmic
+	data-type tokens on the line are null ("." if a data line,
+	"*" if an interpretation line, "!" if a local comment line).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,29 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::isAllRhythmicNull -- Returns true if all rhythmic
+//    data-type tokens on the line are null ("." if a data line,
+//    "*" if an interpretation line, "!" if a local comment line).
+//
+
+bool HumdrumLine::isAllRhythmicNull(void) const {
+	if (!hasSpines()) {
+		return false;
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).hasRhythm()) {
+			continue;
+		}
+		if (!token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
 
 
 @@END:	FunctionDocumentation

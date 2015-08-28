@@ -6,10 +6,14 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		878-890
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the number of tokens in the spine/sub spine which follow this token.
+@LONGDESC:	Return the number of tokens in the
+	spine/sub spine which follow this token.  Typically this will be 1,
+	but will be zero for a terminator interpretation (*-), and will be
+	2 for a split interpretation (*^).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,19 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getNextTokenCount -- Return the number of tokens in the
+//   spine/sub spine which follow this token.  Typically this will be 1,
+//   but will be zero for a terminator interpretation (*-), and will be
+//   2 for a split interpretation (*^).
+//
+
+int HumdrumToken::getNextTokenCount(void) const {
+	return nextTokens.size();
+}
+
+
 
 
 @@END:	FunctionDocumentation

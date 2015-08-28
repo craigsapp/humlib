@@ -5,11 +5,23 @@
 @ACCESS:	public
 @RETURN:	static string  
 @PARAMETERS:	const string& kerndata, string flat = "b", string sharp = "#", string separator = ""
-@FILE:		Convert.cpp
-@LINES:		;
+kerndata, flat, sharp, separator
+kerndata, flat, sharp, separator
+@FILE:		Convert-pitch.cpp
+@LINES:		23-63
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Convert a **kern pitch to ScientificPitch notation, which is the diatonic letter name, followed by a possible accidental, then an optional separator string, and finally the octave number.
+@LONGDESC:	Convert a **kern pitch to
+	ScientificPitch notation, which is the diatonic letter name,
+	followed by a possible accidental, then an optional separator
+	string, and finally the octave number.  A string representing a
+	chord can be given to this function, and the output will return
+	a list of the pitches in the chord, separated by a space.
+	default values:
+	flat      = "b"
+	sharp     = "#"
+	separator = ""
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +30,47 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::kernToScientificPitch -- Convert a **kern pitch to
+//   ScientificPitch notation, which is the diatonic letter name,
+//   followed by a possible accidental, then an optional separator
+//   string, and finally the octave number.  A string representing a
+//   chord can be given to this function, and the output will return
+//   a list of the pitches in the chord, separated by a space.
+//		default values:
+//			flat      = "b"
+//			sharp     = "#"
+//			separator = ""
+//
+
+string Convert::kernToScientificPitch(const string& kerndata,
+		string flat, string sharp, string separator) {
+	vector<string> subtokens = Convert::splitString(kerndata);
+	string output;
+	char   diatonic;
+	int    accidental;
+	int    octave;
+
+	for (int i=0; i<subtokens.size(); i++) {
+		diatonic   = Convert::kernToDiatonicUC(subtokens[i]);
+		accidental = Convert::kernToAccidentalCount(subtokens[i]);
+		octave     = Convert::kernToOctaveNumber(subtokens[i]);
+		if ((i > 0) && (i < subtokens.size()-1)) {
+			output += " ";
+		}
+		output += diatonic;
+		for (int j=0; j<abs(accidental); j++) {
+			output += (accidental < 0 ? flat : sharp);
+		}
+		output += separator;
+		output += to_string(octave);
+	}
+
+	return output;
+}
+
+
 
 
 @@END:	FunctionDocumentation

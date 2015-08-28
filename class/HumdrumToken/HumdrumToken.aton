@@ -10,10 +10,11 @@
 const char* token
 const string& token
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		37-47
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Constructor for HumdrumToken.
+@LONGDESC:	Constructor for HumdrumToken.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +23,17 @@ const string& token
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::HumdrumToken -- Constructor for HumdrumToken.
+//
+
+HumdrumToken::HumdrumToken(void) : string() {
+	rhycheck = 0;
+	setPrefix("!");
+}
+
+HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 
 
 @@END:	FunctionDocumentation

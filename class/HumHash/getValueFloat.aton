@@ -10,10 +10,17 @@ double
 const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		303-328
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the floating-point interpretation of the value string.
+@LONGDESC:	Return the floating-point interpretation
+	of the value string.  If the string can represent a HumNum fraction,
+	then convert the HumNum interpretation as a floating point number.
+	For example "1.25" and "5/4" will both return 1.25.  The value
+	cannot contain a slash unless it is part of the first fraction
+	on in the value string (this may be changed when regular expressions
+	are used to implement this function).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +29,32 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::getValueFloat --  Return the floating-point interpretation
+//   of the value string.  If the string can represent a HumNum fraction,
+//   then convert the HumNum interpretation as a floating point number.
+//   For example "1.25" and "5/4" will both return 1.25.  The value
+//   cannot contain a slash unless it is part of the first fraction
+//   on in the value string (this may be changed when regular expressions
+//   are used to implement this function).
+//
+
+double HumHash::getValueFloat(const string& key) const {
+	if (parameters == NULL) {
+		return 0.0;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		return getValueFloat("", "", keys[2]);
+	} else if (keys.size() == 2) {
+		return getValueFloat(keys[0], keys[1]);
+	} else {
+		return getValueFloat(keys[0], keys[1], keys[2]);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,12 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		79-89
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns the field index on the line of the token associated with the address.
+@LONGDESC:	Returns the field index on the line of the
+	token associated with the address.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::getFieldIndex -- Returns the field index on the line of the
+//     token associated with the address.
+//
+
+int HumAddress::getFieldIndex(void) const {
+	return fieldindex;
+}
+
+
 
 
 @@END:	FunctionDocumentation

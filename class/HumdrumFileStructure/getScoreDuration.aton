@@ -4,12 +4,17 @@
 @METHOD:	getScoreDuration
 @ACCESS:	public
 @RETURN:	HumNum        
+HumNum        
 @PARAMETERS:	void
+HumNum scale
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		160-174
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the total duration of the score in quarter note units.
+@LONGDESC:	Return the total duration
+	of the score in quarter note units.  Returns zero if no lines in the
+	file, or -1 if there are lines, but no rhythmic analysis has been done.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,21 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::getScoreDuration -- Return the total duration
+//    of the score in quarter note units.  Returns zero if no lines in the
+//    file, or -1 if there are lines, but no rhythmic analysis has been done.
+// 
+
+HumNum HumdrumFileStructure::getScoreDuration(void) const {
+	if (lines.size() == 0) {
+		return 0;
+	}
+	return lines.back()->getDurationFromStart();
+}
+
+
 
 
 @@END:	FunctionDocumentation

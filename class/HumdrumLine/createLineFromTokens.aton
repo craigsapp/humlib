@@ -6,10 +6,15 @@
 @RETURN:	void     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		598-618
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Re-generate a HumdrumLine string from individual tokens on the line.
+@LONGDESC:	Re-generate a HumdrumLine string from
+	individual tokens on the line.  This function will be necessary to
+	run before printing a HumdrumFile if you have changed any tokens on the
+	line.  Otherwise, changes in the tokens will not be passed on to the
+	/   printing of the line.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,27 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::createLineFromTokens --  Re-generate a HumdrumLine string from
+//    individual tokens on the line.  This function will be necessary to
+//    run before printing a HumdrumFile if you have changed any tokens on the
+//    line.  Otherwise, changes in the tokens will not be passed on to the
+///   printing of the line.
+//
+
+void HumdrumLine::createLineFromTokens(void) {
+	string& iline = *this;
+	iline.resize(0);
+	for (int i=0; i<tokens.size(); i++) {
+		iline += (string)(*tokens[i]);
+		if (i < tokens.size() - 1) {
+			iline += '\t';
+		}
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

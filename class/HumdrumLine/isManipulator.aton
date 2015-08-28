@@ -6,10 +6,14 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		494-511
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if any tokens on the line are manipulator interpretations.
+@LONGDESC:	Returns true if any tokens on the line are
+	manipulator interpretations.  Only null interpretations are allowed on
+	lines which contain manipulators, but the parser currently does not
+	enforce this rule.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,24 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::isManipulator -- Returns true if any tokens on the line are
+//   manipulator interpretations.  Only null interpretations are allowed on
+//   lines which contain manipulators, but the parser currently does not
+//   enforce this rule.
+//
+
+bool HumdrumLine::isManipulator(void) const {
+	for (int i=0; i<tokens.size(); i++) {
+		if (tokens[i]->isManipulator()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 
 @@END:	FunctionDocumentation

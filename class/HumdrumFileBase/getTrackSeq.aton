@@ -1,0 +1,78 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	getTrackSeq
+@ACCESS:	public
+@RETURN:	vector<vector<HumdrumToken*> > 
+@PARAMETERS:	int track, int options
+@FILE:		HumdrumFileBase.cpp
+@LINES:		346-395
+@SEEALSO:
+@SHORTDESC:	Extract a sequence of tokens for the given spine.
+@LONGDESC:	Extract a sequence of tokens
+	for the given spine.  All subspine tokens will be included.
+	See getPrimaryTrackSeq() if you only want the first subspine for
+	a track on all lines.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+/////////////////////////////
+//
+// HumdrumFileBase::getTrackSeq -- Extract a sequence of tokens
+//    for the given spine.  All subspine tokens will be included.
+//    See getPrimaryTrackSeq() if you only want the first subspine for
+//    a track on all lines.
+//
+
+vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track, 
+		int options) {
+	int nullQ    = (options & OPT_NONULLS);
+	int manipQ   = (options & OPT_NOMANIP);
+	int globalQ  = (options & OPT_NOGLOBAL);
+
+	vector<vector<HumdrumToken*> > output;
+	output.reserve(getLineCount());
+
+	vector<HumdrumToken*> tempout;
+	auto& infile = *this;
+	int i, j;
+
+	for (i=0; i<infile.getLineCount(); i++) {
+		tempout.resize(0);
+		if (globalQ && (!infile[i].hasSpines())) {
+			output.push_back(tempout);
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (infile[i].token(j).getTrack() == track) {
+				if ((!nullQ) && infile[i].token(j).isNull()) {
+					continue;
+				}
+				if ((!nullQ) && infile[i].token(j).isNull()) {
+					continue;
+				} else if ((!manipQ) && infile[i].token(j).isManipulator() &&
+						(!infile[i].token(j).isTerminator()) && 
+						(!infile[i].token(j).isExclusive())) {
+					continue;
+				}
+				tempout.push_back(&infile[i].token(j));
+			}
+		}
+		if (tempout.size() > 0) {
+			output.push_back(tempout);
+		}
+	}
+	return output;
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

@@ -6,10 +6,15 @@
 @RETURN:	HumdrumToken& 
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		544-557
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return a reference to the given token on the line.
+@LONGDESC:	Return a reference to the given token on the line.
+	An invalid token index would be bad to give to this function as it
+	returns a reference rather than a pointer (which could be set to
+	NULL if invalid).  Perhaps this function will eventually throw an
+	error if the index is out of bounds.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::token -- Return a reference to the given token on the line.
+//    An invalid token index would be bad to give to this function as it
+//    returns a reference rather than a pointer (which could be set to
+//    NULL if invalid).  Perhaps this function will eventually throw an
+//    error if the index is out of bounds.
+//
+
+HumdrumToken& HumdrumLine::token(int index) const {
+	return *tokens[index];
+}
+
+
 
 
 @@END:	FunctionDocumentation

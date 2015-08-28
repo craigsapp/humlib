@@ -10,10 +10,12 @@ bool
 const char* filename
 const string& filename
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		120-130
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Similar to the read() functions, but does not parse rhythm (or parameters).
+@LONGDESC:	Similar to the read() functions, but
+	does not parse rhythm (or parameters).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +24,17 @@ const string& filename
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::readNoRhythm -- Similar to the read() functions, but
+//    does not parse rhythm (or parameters).
+//
+
+bool HumdrumFileStructure::readNoRhythm(istream& infile) {
+	return HumdrumFileBase::read(infile);
+}
+
+
 
 
 @@END:	FunctionDocumentation

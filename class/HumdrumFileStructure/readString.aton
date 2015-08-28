@@ -8,10 +8,12 @@ bool
 @PARAMETERS:	const char* contents
 const string& contents
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		80-93
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Read the contents from a string.
+@LONGDESC:	Read the contents from a string.
+	Similar to HumdrumFileStructure::read, but for string data.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -20,6 +22,20 @@ const string& contents
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::readString -- Read the contents from a string.
+//    Similar to HumdrumFileStructure::read, but for string data.
+//
+
+bool HumdrumFileStructure::readString(const char* contents) {
+	if (!HumdrumFileBase::readString(contents)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readString(const string& contents) {
 
 
 @@END:	FunctionDocumentation

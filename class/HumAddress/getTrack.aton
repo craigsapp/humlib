@@ -6,10 +6,13 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		125-136
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	The track number of the given spine.
+@LONGDESC:	The track number of the given spine.  This is the
+	first number in the spine info string.  The track number is the same
+	as a spine number.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,18 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::getTrack -- The track number of the given spine.  This is the
+//   first number in the spine info string.  The track number is the same
+//   as a spine number.
+//
+
+int HumAddress::getTrack(void) const {
+	return track;
+}
+
+
 
 
 @@END:	FunctionDocumentation

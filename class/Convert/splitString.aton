@@ -5,11 +5,16 @@
 @ACCESS:	public
 @RETURN:	static vector<string> 
 @PARAMETERS:	const string& data, char separator = ' '
-@FILE:		Convert.cpp
-@LINES:		;
+@FILE:		Convert-string.cpp
+@LINES:		42-64
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	split a string into a list of strings separated by the given character.
+@LONGDESC:	split a string into a list of strings
+	separated by the given character.  Empty strings will be generated
+	if the separator occurs at the start/end of the input string, and
+	if two or more separates are adjacent to each other.
+	default value: separator = ' ';
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,29 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::splitString -- split a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+//		default value: separator = ' ';
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
+}
+
+
 
 
 @@END:	FunctionDocumentation

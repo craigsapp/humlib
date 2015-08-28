@@ -28,10 +28,18 @@ const string& key, double value
 const string& ns2, const string& key, double value
 const string& ns1, const string& ns2, const string& key, double value
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		406-429
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Set the parameter to the given value, over-writing any previous value for the parameter.
+@LONGDESC:	Set the parameter to the given value,
+	over-writing any previous value for the parameter.  The
+	value is any arbitrary string, but preferably does not
+	include tabs or colons.  If a colon is needed, then specify
+	as "&colon;" without the quotes.  Values such as integers
+	fractions and floats can be specified, and these wil be converted
+	internally into strings (use getValueInt() or getValueFloat()
+	to recover the original type).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -40,6 +48,30 @@ const string& ns1, const string& ns2, const string& key, double value
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::setValue -- Set the parameter to the given value,
+//     over-writing any previous value for the parameter.  The
+//     value is any arbitrary string, but preferably does not
+//     include tabs or colons.  If a colon is needed, then specify
+//     as "&colon;" without the quotes.  Values such as integers
+//     fractions and floats can be specified, and these wil be converted
+//     internally into strings (use getValueInt() or getValueFloat()
+//     to recover the original type).
+//
+
+void HumHash::setValue(const string& key, const string& value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

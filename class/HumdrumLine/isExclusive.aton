@@ -6,10 +6,12 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		135-145
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if the first two characters are "**".
+@LONGDESC:	Returns true if the first two characters
+	are "**".
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::isExclusive -- Returns true if the first two characters
+//     are "**".
+//
+
+bool HumdrumLine::isExclusive(void) const {
+	return equalChar(1, '*') && equalChar(0, '*');
+}
+
+
 
 
 @@END:	FunctionDocumentation

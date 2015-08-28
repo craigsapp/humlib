@@ -8,10 +8,12 @@ bool
 @PARAMETERS:	const char* contents
 const string& contents
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		142-153
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Read a string, but do not analyze the rhythm (or parameters) in the read data.
+@LONGDESC:	Read a string, but
+	do not analyze the rhythm (or parameters) in the read data.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -20,6 +22,18 @@ const string& contents
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::readStringNoRhythm -- Read a string, but
+//   do not analyze the rhythm (or parameters) in the read data.
+//
+
+
+bool HumdrumFileStructure::readStringNoRhythm(const char*   contents) {
+	return HumdrumFileBase::readString(contents);
+}
+
+
 
 
 @@END:	FunctionDocumentation

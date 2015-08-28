@@ -10,10 +10,12 @@ bool
 double value
 int value
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		674-687
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Greater-than-or-equal equality comparison for a HumNum to another HumNum, integer, or float.
+@LONGDESC:	Greater-than-or-equal equality
+	comparison for a HumNum to another HumNum, integer, or float.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +24,20 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::operator>= -- Greater-than-or-equal equality
+//    comparison for a HumNum to another HumNum, integer, or float.
+//
+
+bool HumNum::operator>=(const HumNum& value) const {
+	if (this == &value) {
+		return true;
+	}
+	return getFloat() >= value.getFloat();
+}
+
+
 
 
 @@END:	FunctionDocumentation

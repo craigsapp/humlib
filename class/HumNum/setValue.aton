@@ -12,10 +12,15 @@ int numerator, int denominator
 const string& ratstring
 const char* ratstring
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		191-205
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Set the number to the given integer.
+@LONGDESC:	Set the number to the given integer.
+	For the two-parameter version, set the top and bottom
+	values for the number, reducing if necessary.  For the
+	string version, parse an integer or fraction from the 
+	string and reduce if necessary.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -24,6 +29,21 @@ const char* ratstring
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::setValue -- Set the number to the given integer.
+//    For the two-parameter version, set the top and bottom
+//    values for the number, reducing if necessary.  For the
+//    string version, parse an integer or fraction from the 
+//    string and reduce if necessary.
+//
+
+void HumNum::setValue(int numerator) {
+	top = numerator;
+	bot = 1;
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,12 @@
 @RETURN:	double   
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		136-146
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the floating-point equivalent of the rational number.
+@LONGDESC:	Return the floating-point equivalent of the
+	rational number.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::getFloat -- Return the floating-point equivalent of the
+//     rational number.
+//
+
+double HumNum::getFloat(void) const {
+	return (double)top/(double)bot;
+}
+
+
 
 
 @@END:	FunctionDocumentation

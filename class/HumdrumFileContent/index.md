@@ -12,20 +12,32 @@ group: [
 ]
 ---
 
-The HumdrumFileContents class manages data conversions for the minHumdrum library.
-
 {% include docslot/docslot.html %}
+
+The HumdrumFileContents class manages data conversions for the minHumdrum library.
 
 &nbsp;
 
-Public functions
-----------------
+HumdrumFileContent Public functions
+-----------------------------------
 
 {% include docslot/HumdrumFileContent.html %}
 
 &nbsp;
 
-Functions inherited from <span class="class-link">MidiMessage</span>
+
+Functions inherited from <span class="class-link">HumdrumFileStructure</span>
 ---------------------------------------------------------------
+
+{% include docslot/HumdrumFileStructure.html %}
+
+&nbsp;
+
+Functions inherited from <span class="class-link">HumdrumFileBase</span>
+---------------------------------------------------------------
+
+{% include docslot/HumdrumFileBase.html %}
+
+
 
 

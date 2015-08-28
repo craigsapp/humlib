@@ -6,10 +6,14 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		50-66
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns the line index in the owning HumdrumFile for the token associated with the address.
+@LONGDESC:	Returns the line index in the owning HumdrumFile
+	for the token associated with the address.  Returns -1 if not owned by a
+	HumdrumLine (or line assignments have not been made for tokens in the
+	file).
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,23 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::getLineIndex -- Returns the line index in the owning HumdrumFile
+//    for the token associated with the address.  Returns -1 if not owned by a
+//    HumdrumLine (or line assignments have not been made for tokens in the
+//    file).
+//
+
+int  HumAddress::getLineIndex(void) const {
+	if (owner == NULL) {
+		return -1;
+	} else {
+		return owner->getLineIndex();
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

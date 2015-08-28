@@ -12,18 +12,14 @@ group: [
 ]
 ---
 
-The HumNum class manages data conversions for the minHumdrum library.
-
 {% include docslot/docslot.html %}
+
+The HumNum class manages data conversions for the minHumdrum library.
 
 &nbsp;
 
-Public functions
-----------------
+HumNum Public functions
+-----------------------
 
 {% include docslot/HumNum.html %}
 
-&nbsp;
-
-Functions inherited from <span class="class-link">MidiMessage</span>
----------------------------------------------------------------

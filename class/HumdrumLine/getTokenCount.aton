@@ -6,10 +6,12 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		532-542
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the number of tokens on the line.
+@LONGDESC:	Return the number of tokens on the line.  This
+	value is set by HumdrumFileBase in analyzeTokens.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getTokenCount --  Return the number of tokens on the line.  This
+//     value is set by HumdrumFileBase in analyzeTokens.
+//
+
+int HumdrumLine::getTokenCount(void) const {
+	return tokens.size();
+}
+
+
 
 
 @@END:	FunctionDocumentation

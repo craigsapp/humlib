@@ -6,10 +6,11 @@
 @RETURN:	
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		20-33
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	HumAddress constructor.
+@LONGDESC:	HumAddress constructor.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +19,20 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::HumAddress -- HumAddress constructor.
+//
+
+HumAddress::HumAddress(void) {
+	track         = -1;
+	subtrack      = -1;
+	subtrackcount = 0;
+	fieldindex    = -1;
+	owner         = NULL;
+}
+
+
 
 
 @@END:	FunctionDocumentation

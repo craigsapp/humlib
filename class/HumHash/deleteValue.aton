@@ -10,10 +10,13 @@ void
 const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		765-786
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Delete the given parameter key from the HumHash object.
+@LONGDESC:	Delete the given parameter key from the HumHash
+	object.  Three string version is N1,NS2,key; two string version is
+	"",NS2,key; and one argument version is "","",key.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +25,28 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::deleteValue -- Delete the given parameter key from the HumHash
+//   object.  Three string version is N1,NS2,key; two string version is
+//   "",NS2,key; and one argument version is "","",key.
+//
+
+void HumHash::deleteValue(const string& key) {
+	if (parameters == NULL) {
+		return;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		deleteValue("", "", keys[0]);
+	} else if (keys.size() == 2) {
+		deleteValue("", keys[0], keys[1]);
+	} else {
+		deleteValue(keys[0], keys[1], keys[2]);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

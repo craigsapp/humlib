@@ -10,10 +10,11 @@
 const string& aString
 const char* aString
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		24-36
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	HumdrumLine constructor.
+@LONGDESC:	HumdrumLine constructor.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +23,19 @@ const char* aString
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::HumdrumLine -- HumdrumLine constructor.
+//
+
+HumdrumLine::HumdrumLine(void) : string() {
+	owner = NULL;
+	duration = -1;
+	durationFromStart = -1;
+	setPrefix("!!");
+}
+
+HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 
 
 @@END:	FunctionDocumentation

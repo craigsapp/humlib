@@ -6,10 +6,12 @@
 @RETURN:	void          
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		150-162
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Generate Humdrum lines strings from the stored list of tokens.
+@LONGDESC:	Generate Humdrum lines strings
+	from the stored list of tokens.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,19 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::createLinesFromTokens -- Generate Humdrum lines strings
+//   from the stored list of tokens.
+//
+
+void HumdrumFileBase::createLinesFromTokens(void) {
+	for (int i=0; i<lines.size(); i++) {
+		lines[i]->createLineFromTokens();
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,16 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		799-823
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print the analyzed duration of each token in a file (for debugging).
+@LONGDESC:	Print the analyzed duration of each
+	token in a file (for debugging).  If a token has an undefined
+	duration, then its duration is -1.  If a token represents
+	a grace note, then its duration is 0 (regardless of whether it
+	includes a visual duration).
+	default value: out = cout
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +24,31 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::printDurationInfo -- Print the analyzed duration of each
+//     token in a file (for debugging).  If a token has an undefined
+//     duration, then its duration is -1.  If a token represents
+//     a grace note, then its duration is 0 (regardless of whether it
+//     includes a visual duration).
+//     default value: out = cout
+//
+
+ostream& HumdrumLine::printDurationInfo(ostream& out) {
+	if (isManipulator()) {
+		out << *this;
+	} else {
+		for (int i=0; i<tokens.size(); i++) {
+			tokens[i]->getDuration().printMixedFraction(out);
+			if (i < tokens.size() - 1) {
+				out << '\t';
+			}
+		}
+	}
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,12 @@
 @RETURN:	int      
 @PARAMETERS:	const string& separator = " "
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		711-727
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	// HumdrumToken::getSubtokenCount -- default value: separator = " " 
+@LONGDESC:	// HumdrumToken::getSubtokenCount --
+	default value: separator = " "
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,23 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+/////////////////////////////
+//
+// HumdrumToken::getSubtokenCount --
+//   default value: separator = " "
+//
+
+int HumdrumToken::getSubtokenCount(const string& separator) const {
+	int count = 0;
+	string::size_type start = 0;
+	while ((start = string::find(separator, start)) != string::npos) {
+		count++;
+		start += separator.size();
+	}
+	return count;
+}
+
+
 
 
 @@END:	FunctionDocumentation

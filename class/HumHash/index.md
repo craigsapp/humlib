@@ -12,20 +12,15 @@ group: [
 ]
 ---
 
-The HumHash class manages data conversions for the minHumdrum library.
-
 {% include docslot/docslot.html %}
 
+The HumHash class manages data conversions for the minHumdrum library.
+
+
 &nbsp;
 
-Public functions
-----------------
+HumHash Public functions
+------------------------
 
 {% include docslot/HumHash.html %}
-
-&nbsp;
-
-Functions inherited from <span class="class-link">MidiMessage</span>
----------------------------------------------------------------
-
 

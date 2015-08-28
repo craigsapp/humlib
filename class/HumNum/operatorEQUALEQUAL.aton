@@ -10,10 +10,12 @@ bool
 double value
 int value
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		699-712
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Equality test for HumNums compared to another HumNum, integer or float.
+@LONGDESC:	Equality test for HumNums compared to
+	another HumNum, integer or float.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +24,20 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::operator== -- Equality test for HumNums compared to
+//   another HumNum, integer or float.
+//
+
+bool HumNum::operator==(const HumNum& value) const {
+	if (this == &value) {
+		return true;
+	}
+	return getFloat() == value.getFloat();
+}
+
+
 
 
 @@END:	FunctionDocumentation

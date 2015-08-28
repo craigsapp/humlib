@@ -6,10 +6,15 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		513-530
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if no characters on line.
+@LONGDESC:	Returns true if no characters on line.  A blank line
+	is technically disallowed in the classic Humdrum Toolkit programs, but it
+	is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+	no content (not even space characters) are allowed and treated as a
+	special class of line.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +23,24 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::isEmpty -- Returns true if no characters on line.  A blank line
+//   is technically disallowed in the classic Humdrum Toolkit programs, but it
+//   is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+//   no content (not even space characters) are allowed and treated as a
+//   special class of line.
+//
+
+bool HumdrumLine::isEmpty(void) const {
+	if (size() == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

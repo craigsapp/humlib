@@ -6,10 +6,12 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		100-110
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if the first character in the string is '!'.
+@LONGDESC:	Returns true if the first character
+	in the string is '!'. Could be local, global, or a reference record.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::isComment -- Returns true if the first character
+//   in the string is '!'. Could be local, global, or a reference record.
+//
+
+bool HumdrumLine::isComment(void) const {
+	return equalChar(0, '!');
+}
+
+
 
 
 @@END:	FunctionDocumentation

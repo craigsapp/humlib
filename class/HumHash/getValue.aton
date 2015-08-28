@@ -10,10 +10,19 @@ string
 const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		142-170
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns the value specified by the given key.
+@LONGDESC:	Returns the value specified by the given key.
+	If there is no colon in the key then return the value for the key
+	in the default namespaces (NS1="" and NS2="").  If there is one colon,
+	then the two pieces of the string as NS2 and the key, with NS1="".
+	If there are two colons, then that specified the complete namespaces/key
+	address of the value.  The namespaces and key can be specified as
+	separate parameters in a similar manner to the single-string version.
+	But in these cases colon concatenation of the namespaces and/or key
+	are not allowed.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +31,35 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::getValue -- Returns the value specified by the given key.
+//    If there is no colon in the key then return the value for the key
+//    in the default namespaces (NS1="" and NS2="").  If there is one colon,
+//    then the two pieces of the string as NS2 and the key, with NS1="".
+//    If there are two colons, then that specified the complete namespaces/key
+//    address of the value.  The namespaces and key can be specified as
+//    separate parameters in a similar manner to the single-string version.
+//    But in these cases colon concatenation of the namespaces and/or key
+//    are not allowed.
+//
+
+string HumHash::getValue(const string& key) const {
+	if (parameters == NULL) {
+		return "";
+	} else {
+		vector<string> keys = getKeyList(key);
+		if (keys.size() == 1) {
+			return getValue("", "", keys[0]);
+		} else if (keys.size() == 2) {
+			return getValue("", keys[0], keys[1]);
+		} else {
+			return getValue(keys[0], keys[1], keys[2]);
+		}
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

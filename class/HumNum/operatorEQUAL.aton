@@ -8,10 +8,12 @@ HumNum&
 @PARAMETERS:	const HumNum& value
 int value
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		505-519
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Assign the contents of a HumNum from another HumNum.
+@LONGDESC:	Assign the contents of a HumNum
+	from another HumNum.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -20,6 +22,21 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::operator= -- Assign the contents of a HumNum
+//    from another HumNum.
+//
+
+HumNum& HumNum::operator=(const HumNum& value) {
+	if (this == &value) {
+		return *this;
+	}
+	setValue(value.top, value.bot);
+	return *this;
+}
+
+HumNum& HumNum::operator=(int  value) {
 
 
 @@END:	FunctionDocumentation

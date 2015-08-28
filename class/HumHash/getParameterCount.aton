@@ -10,10 +10,17 @@ int
 const string& ns
 const string& ns1, const string& ns2
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		653-682
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return a count of the parameters which are stored in the HumHash.
+@LONGDESC:	Return a count of the parameters which are
+	stored in the HumHash.  If no arguments, then count all value in
+	all namespaces.  If two arguments, then return the count for a
+	specific NS1:NS2 namespace.  If one argument, then return the
+	parameters in NS1, but if there is a colon in the string,
+	return the parameters in NS1:NS2.
+	
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +29,36 @@ const string& ns1, const string& ns2
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::getParameterCount -- Return a count of the parameters which are
+//     stored in the HumHash.  If no arguments, then count all value in
+//     all namespaces.  If two arguments, then return the count for a
+//     specific NS1:NS2 namespace.  If one argument, then return the
+//     parameters in NS1, but if there is a colon in the string,
+//     return the parameters in NS1:NS2.
+//
+//
+
+int HumHash::getParameterCount(const string& ns1, const string& ns2) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	if (parameters->size() == 0) {
+		return 0;
+	}
+	auto it1 = parameters->find(ns1);
+	if (it1 == parameters->end()) {
+		return 0;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return 0;
+	}
+	return it2->second.size();
+}
+
+
 
 
 @@END:	FunctionDocumentation

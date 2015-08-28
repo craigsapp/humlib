@@ -12,14 +12,14 @@ group: [
 ]
 ---
 
-The HumdrumLine class manages data conversions for the minHumdrum library.
-
 {% include docslot/docslot.html %}
+
+The HumdrumLine class manages data conversions for the minHumdrum library.
 
 &nbsp;
 
-Public functions
-----------------
+HumdrumLine Public functions
+----------------------------
 
 {% include docslot/HumdrumLine.html %}
 

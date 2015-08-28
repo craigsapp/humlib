@@ -6,10 +6,12 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		208-218
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns the number of primary spines in the data.
+@LONGDESC:	Returns the number of primary 
+	spines in the data.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::getMaxTrack -- Returns the number of primary 
+//     spines in the data.
+//
+
+int HumdrumFileBase::getMaxTrack(void) const {
+	return trackstarts.size() - 1;
+}
+
+
 
 
 @@END:	FunctionDocumentation

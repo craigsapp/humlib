@@ -6,10 +6,14 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		582-601
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if not an interpretation, barline or local comment.
+@LONGDESC:	Returns true if not an interpretation, barline
+	or local comment.  This will not work on synthetic tokens generated
+	from an empty line.  So this function should be called only on tokens
+	in lines which pass the HumdrumLine::hasSpines() test.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,26 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::isData -- Returns true if not an interpretation, barline
+//      or local comment.  This will not work on synthetic tokens generated
+//      from an empty line.  So this function should be called only on tokens
+//      in lines which pass the HumdrumLine::hasSpines() test.
+//
+
+bool HumdrumToken::isData(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	int firstchar = (*this)[0];
+	if ((firstchar == '*') || (firstchar == '!') || (firstchar == '=')) {
+		return false;
+	}
+	return true;
+}
+
+
 
 
 @@END:	FunctionDocumentation

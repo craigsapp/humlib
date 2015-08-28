@@ -6,10 +6,12 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		372-386
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the starting exclusive interpretation for the given spine/track.
+@LONGDESC:	Return the starting exclusive interpretation
+	for the given spine/track.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,21 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getTrackStart --  Return the starting exclusive interpretation
+//    for the given spine/track.
+//
+
+HumdrumToken* HumdrumLine::getTrackStart(int track) const {
+	if (owner == NULL) {
+		return NULL;
+	} else {
+		return ((HumdrumFile*)owner)->getTrackStart(track);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

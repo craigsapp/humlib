@@ -6,10 +6,12 @@
 @RETURN:	string   
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		201-211
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the spine split/merge history for the token.
+@LONGDESC:	Return the spine split/merge history
+	for the token.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getSpineInfo -- Return the spine split/merge history
+//    for the token.
+//
+
+string HumdrumToken::getSpineInfo(void) const {
+	return address.getSpineInfo();
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,13 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track
 @FILE:		HumdrumFileBase.cpp
-@LINES:		;
+@LINES:		397-412
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the starting exclusive interpretation for the given track.
+@LONGDESC:	Return the starting exclusive
+	interpretation for the given track.  Returns NULL if the track
+	number is out of range.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,22 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileBase::getTrackStart -- Return the starting exclusive
+//     interpretation for the given track.  Returns NULL if the track
+//     number is out of range.
+//
+
+HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
+	if ((track > 0) && (track < trackstarts.size())) {
+		return trackstarts[track];
+	} else {
+		return NULL;
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

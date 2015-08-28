@@ -10,10 +10,14 @@ HumNum
 const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
-@LINES:		;
+@LINES:		260-282
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the value as a HumNum fraction.
+@LONGDESC:	Return the value as a HumNum fraction.
+	If the string represents an integer, it will be preserved in the
+	HumNum return value.  For floating-point values, the fractional
+	part will be ignored.  For example "1.52" will be returned as "1".
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +26,29 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumHash::getValueFraction -- Return the value as a HumNum fraction.
+//    If the string represents an integer, it will be preserved in the
+//    HumNum return value.  For floating-point values, the fractional
+//    part will be ignored.  For example "1.52" will be returned as "1".
+//
+
+HumNum HumHash::getValueFraction(const string& key) const {
+	if (parameters == NULL) {
+		return 0;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		return getValueFraction("", "", keys[0]);
+	} else if (keys.size() == 2) {
+		return getValueFraction(keys[0], keys[1]);
+	} else {
+		return getValueFraction(keys[0], keys[1], keys[2]);
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

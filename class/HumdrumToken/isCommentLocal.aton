@@ -6,10 +6,12 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		557-580
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true of the token start with "!", but not "!!" which is for global comments.
+@LONGDESC:	Returns true of the token start with "!",
+	but not "!!" which is for global comments.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,30 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::isCommentLocal -- Returns true of the token start with "!",
+//   but not "!!" which is for global comments.
+//
+
+bool HumdrumToken::isCommentLocal(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
+		if (size() > 1) {
+			if ((*this)[1] == '!') {
+				// global comment
+				return false;
+			}
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 
 
 @@END:	FunctionDocumentation

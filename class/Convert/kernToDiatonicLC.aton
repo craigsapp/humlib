@@ -5,11 +5,13 @@
 @ACCESS:	public
 @RETURN:	static char    
 @PARAMETERS:	const string& kerndata
-@FILE:		Convert.cpp
-@LINES:		;
+@FILE:		Convert-pitch.cpp
+@LINES:		124-134
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Similar to kernToDiatonicUC, but the returned pitch name is lower case.
+@LONGDESC:	Similar to kernToDiatonicUC, but
+	the returned pitch name is lower case.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// Convert::kernToDiatonicLC -- Similar to kernToDiatonicUC, but
+//    the returned pitch name is lower case.
+//
+
+char Convert::kernToDiatonicLC(const string& kerndata) {
+	return tolower(Convert::kernToDiatonicUC(kerndata));
+}
+
+
 
 
 @@END:	FunctionDocumentation

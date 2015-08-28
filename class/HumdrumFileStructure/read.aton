@@ -10,10 +10,13 @@ bool
 const char* filename
 const string& filename
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		49-64
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Read the contents of a file from a file or istream.
+@LONGDESC:	Read the contents of a file from a file or
+	istream.  The file's structure is analyzed, and then the rhythmic structure
+	is calculated.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +25,22 @@ const string& filename
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::read --  Read the contents of a file from a file or
+//   istream.  The file's structure is analyzed, and then the rhythmic structure
+//   is calculated.
+//
+
+
+bool HumdrumFileStructure::read(istream& infile) {
+	if (!readNoRhythm(infile)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::read(const char* filename) {
 
 
 @@END:	FunctionDocumentation

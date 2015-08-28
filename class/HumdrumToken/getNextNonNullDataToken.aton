@@ -6,10 +6,14 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		139-160
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the given next non-null token following this one in the spine.
+@LONGDESC:	Return the given next non-null token
+	following this one in the spine.  The default value for index is 0 since
+	the next non-null data token count will typically be 1.
+	default value: index = 0
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +22,28 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getNextNonNullDataToken -- Return the given next non-null token
+//    following this one in the spine.  The default value for index is 0 since
+//    the next non-null data token count will typically be 1.
+//       default value: index = 0
+//
+
+HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
+	if (index < 0) {
+		index += nextNonNullTokens.size();
+	}
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= nextNonNullTokens.size()) {
+		return NULL;
+	}
+	return nextNonNullTokens[index];
+}
+
+
 
 
 @@END:	FunctionDocumentation

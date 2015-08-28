@@ -6,10 +6,12 @@
 @RETURN:	bool          
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		220-230
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Returns true if a HumdrumLine owns the token associated with the address.
+@LONGDESC:	Returns true if a HumdrumLine owns the token
+	associated with the address.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::hasOwner -- Returns true if a HumdrumLine owns the token
+//    associated with the address.
+//
+
+bool HumAddress::hasOwner(void) const {
+	return owner == NULL ? 0 : 1;
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -1,0 +1,399 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Wed Aug 19 17:43:03 PDT 2015
+# Last Modified: Wed Aug 19 17:43:03 PDT 2015
+# Filename:      /class/bin/source2aton
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Convert source files into ATON documentation files.
+#
+
+use strict;
+
+my $srcdir = "../../transfer";
+my $incdir = "../../transfer";
+
+die "Usage $0 classname" if @ARGV != 1;
+
+my $classname = $ARGV[0];
+
+my @functions;
+my %returnvalues;
+my %parameterlist;
+my %documentation;
+my %qualifiers;
+my %alias;
+
+my @srclist = getSourceFiles($srcdir, $classname);
+
+getClassInfo($classname, $srcdir, $incdir);
+
+foreach my $function (@functions) {
+	printAtonFile($function);
+}
+
+exit(0);
+
+
+
+##############################
+##
+## printAtonFile --
+##
+
+sub printAtonFile {
+	my ($function) = @_;
+	print "PROCESSING $function ...\n";
+	my $description;
+	my $code;
+	my @srcfiles = getSourceFiles($srcdir, $classname);
+	my $sourcefile = getSourceFile($function, @srcfiles);
+	my $ALIAS = "";
+	if ($alias{$function} !~ /^\s*$/) {
+		$ALIAS = "\@ALIAS:\t$alias{$function}\n";
+	}
+	next if $sourcefile =~ /\.h$/;
+	open (XFILE, "$srcdir/$sourcefile") or die "Cannot $srcdir/$sourcefile";
+	my @source = <XFILE>;
+	close XFILE;
+	my ($description, $shortdesc, $lines, $code) = 
+			getFunctionInfo($function, @source);
+	my $filename = $function;
+	$filename =~ s/=/EQUAL/g;
+	$filename =~ s/-/DASH/g;
+	$filename =~ s/\+/PLUS/g;
+	$filename =~ s/\!/BANG/g;
+	$filename =~ s/</LESS/g;
+	$filename =~ s/>/GREAT/g;
+	$filename =~ s/~/TILDE/g;
+	$filename =~ s/\[\]/BRACKET/g;
+	$filename =~ s/\//SLASH/g;
+	$filename =~ s/\*/STAR/g;
+	open (FILE, ">$filename.aton") or die "Cannot write $filename.aton\n";
+
+print FILE <<"EOT";
+\@\@BEGIN:	FunctionDocumentation
+\@INDEXED:	yes
+\@CLASSNAME:	$classname
+\@METHOD:	$function
+EOT
+
+	if ($ALIAS !~ /^\s*$/) {
+
+	}
+
+print FILE <<"EOT";
+\@ACCESS:	public
+\@RETURN:	$returnvalues{$function}
+\@PARAMETERS:	$parameterlist{$function}
+\@FILE:		$sourcefile
+\@LINES:		$lines
+\@SEEALSO:
+\@SHORTDESC:	$shortdesc
+\@LONGDESC:	$description
+
+\@\@BEGIN: EXAMPLE
+\@DESCRIPTION:
+\@CODE:
+\@OUTPUT:
+\@\@END:	EXAMPLE
+
+\@SRCCODE:
+$code
+
+\@\@END:	FunctionDocumentation
+
+EOT
+ 	close FILE;
+
+
+}
+
+
+
+##############################
+##
+## getClassInfo --
+##
+
+sub getClassInfo {
+	my ($classname, $srcdir, $incdir) = @_;
+
+	open (IFILE, "$srcdir/$classname.h") or
+			die "Cannot find $srcdir/$classname.h for reading.";
+	my @contents = <IFILE>;
+	close IFILE;
+
+
+	my $function;
+	my $returnval;
+	my $inpublic = 0;
+	my $inclass = 0;
+	my $increment = 0;
+	my $parameters;
+	my $qualifier;
+	my $newfunction;
+	my %fun;
+
+
+	my $line;
+	my $newline;
+	for (my $i=0; $i<@contents; $i++) {
+		$line = $contents[$i];
+		chomp $line;
+		$line =~ s/\/\/.*$//;
+		next if $line =~ /^\s*$/;
+		if ($line =~ /class $classname/) {
+			$inclass = 1;
+			next;
+		}
+		if ($line =~ /^};/) {
+			$inclass = 0;
+			next;
+		}
+		if ($line =~ /public:/) {
+			$inpublic = 1;
+			next;
+		}
+		if ($line =~ /private:/) {
+			$inpublic = 0;
+			next;
+		}
+		if ($line =~ /protected:/) {
+			$inpublic = 0;
+			next;
+		}
+		next if !$inclass;
+		next if !$inpublic;;
+
+		$increment = 0;
+		if ($line =~ s/\s*{.*};?\s*$//) {
+			$newfunction = $1;
+			$alias{$function} .= "\n$newfunction";
+			next;
+		} elsif ($line =~ /{/) {
+			$line .= " " . $contents[$i+1];
+			$line =~ s/\n/ /sg;
+			if ($line =~ s/\s*{.*};?\s*$//) {
+				$newfunction = $1;
+				$alias{$function} .= "\n$newfunction";
+				$i++;
+				next;
+			}
+		}
+
+		if ($line =~ s/([^\s]+)\s*\(/(/) {
+			$function = $1;
+		} else {
+			print "ERROR in function name in $line\n";
+			next;
+		}
+
+		if ($line =~ s/^\s*([a-zA-Z_]+[^(]*)\s*\(/(/) {
+			$returnval = $1;
+		} elsif ($function =~ /^\s*~?$classname/) {
+			# constructor or destructor
+			$returnval = "";
+		} else {
+			print "ERROR in return value in $line\n";
+			next;
+		}
+
+		if ($line !~ /\)/) {
+			while ($line !~ /\)/) {
+				$i++;
+				$newline = $contents[$i];
+				chomp $newline;
+				$line .= " $newline";
+			}
+		}
+		$line =~ s/\s+/ /g;
+
+		if ($line =~ s/^\s*\(([^)]*)//) {
+			$parameters = $1;
+		} else {
+			print "ERROR in parameter list in $line\n";
+			next;
+		}
+
+		$line =~ s/\s*;\s*$//;
+		if ($line =~ s/\)\s*([^\s]+)\s*$//) {
+			$qualifier = $1;
+		} else {
+			$qualifier = "";
+		}
+		$line =~ s/^\s*\)//;
+
+		if ($line !~ /^\s*$/) {
+			print "ERROR in parsing: $line\n";
+			next;
+		}
+
+		# print "FUNCTION: $function\n";
+		# print "\tRETURN: $returnval\n";
+		# print "\tPARAMS: $parameters\n";
+		# print "\tQUAL  : $qualifier\n";
+		# print "\n";
+
+		my $findex = "";
+		if ($fun{$function} !~ /^\s*$/) {
+			$findex = $fun{$function};
+		}
+		if ($findex !~ /^\s*$/) {
+			$returnvalues{$function}  .= "\n$returnval";
+			$qualifiers{$function}    .= "\n$qualifier";
+			$parameterlist{$function} .= "\n$parameters";
+		} else {
+			$functions[@functions]    = $function;
+			$fun{$function}           = $#functions;
+			$returnvalues{$function}  = $returnval;
+			$qualifiers{$function}    = $qualifier;
+			$parameterlist{$function} = $parameters;
+		}
+	}
+}
+
+
+
+
+##############################
+##
+## getSourceFiles --
+##
+
+sub getSourceFiles {
+	my ($srcdir, $classname) = @_;
+	my $xt = $classname;
+	$xt =~ s/\+/\\+/g;
+	$xt =~ s/\[\]/\\[\\]/g;
+	opendir (DIR, $srcdir) or die "Cannot read directory $srcdir\n";
+	my $file;
+	my @output;
+	while ($file = readdir(DIR)) {
+		next if $file =~ /^\./;
+		next if ($file !~ /\.cpp$/) && ($file !~ /\.h$/);
+		next if $file !~ /$xt/;
+		$output[@output] = $file;
+	}
+	closedir DIR;
+	return sort @output;
+}
+
+
+
+##############################
+##
+## getSourceFile -- Search through the file list until the function is found
+##      and return the contents of that file.
+##
+#		static string  kernToSciPitch      (const string& kerndata, 
+#		      string flat = "b", string sharp = "#", string separator = "") {
+#			return kernToScientificPitch(kerndata, flat, sharp, separator);
+#		}
+#
+
+sub getSourceFile {
+	my ($function, @srcfiles) = @_;
+	my @contents;
+
+	foreach my $file (@srcfiles) {
+		next if $file =~ /\.h$/;
+		open (SFILE, "$srcdir/$file") or die "Cannot read $srcdir/$file\n";
+		@contents = <SFILE>;
+		close FILE;
+		foreach my $line (@contents) {
+			my $xt = $function;
+			$xt =~ s/\+/\\+/g;
+			$xt =~ s/\*/\\*/g;
+			$xt =~ s/\[\]/\\[\\]/g;
+			if ($line =~ /^\/\/\s*$classname::$xt\s*--/) {
+				return $file;
+			}
+		}
+	}
+
+	# cannot find in .cpp files, check the .h file for an alias:
+	foreach my $file (@srcfiles) {
+		next if $file !~ /\.h$/;
+		open (SFILE, "$srcdir/$file") or die "Cannot read $srcdir/$file\n";
+		@contents = <SFILE>;
+		close FILE;
+		foreach my $line (@contents) {
+			my $xt = $function;
+			$xt =~ s/\+/\\+/g;
+			$xt =~ s/\*/\\*/g;
+			$xt =~ s/\[\]/\\[\\]/g;
+			if ($line =~ /\b$xt\b\s*\(/) {
+				return $file;
+			}
+		}
+	}
+
+	print "Cannot find $function in $classname files:\n";
+	print "Files:\t", join(" ", @srcfiles), "\n";
+	die;
+}
+
+
+
+##############################
+##
+## getFunctionInfo --
+##
+
+sub getFunctionInfo  {
+	my ($function, @source) = @_;
+	my $i;
+	my $line;
+	my $titleline = "";
+
+	for ($i=0; $i<@source; $i++) {
+		$line = $source[$i];
+		if ($line =~ /\b$classname::\Q$function\E\s*--/) {
+			$titleline = $i;
+			last;
+		}
+	}
+
+	return ("", "", "") if $titleline =~ /^\s*$/;
+	my $startline = $titleline;
+	while (($startline > 0) && ($source[$startline] !~ /^\s*$/)) {
+		$startline--;
+	}
+	$startline++;
+	my $endline = $startline;
+	while ($source[$endline] !~ /^}\s*$/) {
+		$endline++;
+	}
+	$endline++;
+	$endline++; # add blank space
+	my $lines = "$startline-$endline";
+   my $code = "";
+	for ($i=$startline; $i<=$endline; $i++) {
+		$code .= $source[$i];
+	}
+
+	$line = $source[$titleline];
+	chomp $line;
+	$line =~ s/.*\s+--\s+//;
+	my $description = $line;
+	for ($i=$titleline+1; $i<=$endline; $i++) {
+		$line = $source[$i];
+		chomp $line;
+		if ($line !~ s/^\/\/\s*//) {
+			last;
+		}
+		$description .= "\n\t$line";
+	}
+	my $shortdesc = $description;
+	$shortdesc =~ s/(?<!\.)\.(?!\.).*$/./s;
+	$shortdesc =~ s/\n/ /g;
+	$shortdesc =~ s/\s+/ /g;
+
+	return ($description, $shortdesc, $lines, $code);
+}
+
+
+

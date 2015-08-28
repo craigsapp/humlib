@@ -6,10 +6,17 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		445-466
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	returns true if token is one of: SPLIT_TOKEN = "*^" == spine splitter MERGE_TOKEN = "*v" == spine merger EXCHANGE_TOKEN = "*x" == spine exchanger ADD_TOKEN = "*+" == spine adder TERMINATE_TOKEN = "*-" == spine terminator **... == exclusive interpretation 
+@LONGDESC:	returns true if token is one of:
+	SPLIT_TOKEN     = "*^"  == spine splitter
+	MERGE_TOKEN     = "*v"  == spine merger
+	EXCHANGE_TOKEN  = "*x"  == spine exchanger
+	ADD_TOKEN       = "*+"  == spine adder
+	TERMINATE_TOKEN = "*-"  == spine terminator
+	**...  == exclusive interpretation
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +25,28 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+///////////////////////////////
+//
+// HumdrumToken::isManipulator -- returns true if token is one of:
+//    SPLIT_TOKEN     = "*^"  == spine splitter
+//    MERGE_TOKEN     = "*v"  == spine merger
+//    EXCHANGE_TOKEN  = "*x"  == spine exchanger
+//    ADD_TOKEN       = "*+"  == spine adder
+//    TERMINATE_TOKEN = "*-"  == spine terminator
+//    **...  == exclusive interpretation
+//
+
+bool HumdrumToken::isManipulator(void) const {
+	if (isSplitInterpretation())     { return true; }
+	if (isMergeInterpretation())     { return true; }
+	if (isExchangeInterpretation())  { return true; }
+	if (isAddInterpretation())       { return true; }
+	if (isTerminateInterpretation()) { return true; }
+	if (isExclusiveInterpretation()) { return true; }
+	return false;
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,11 @@
 @RETURN:	HumNum&  
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		257-269
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Make the rational number non-negative.
+@LONGDESC:	Make the rational number non-negative.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +19,19 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::makeAbs -- Make the rational number non-negative.
+//
+
+HumNum& HumNum::makeAbs(void) {
+	if (!isNonNegative()) {
+		top = -top;
+	}
+	return *this;
+}
+
+
 
 
 @@END:	FunctionDocumentation

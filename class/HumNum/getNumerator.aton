@@ -6,10 +6,11 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		170-179
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return the top integer in the fraction.
+@LONGDESC:	Return the top integer in the fraction.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +19,16 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::getNumerator -- Return the top integer in the fraction.
+//
+
+int HumNum::getNumerator(void) const {
+	return top;
+}
+
+
 
 
 @@END:	FunctionDocumentation

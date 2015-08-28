@@ -10,10 +10,12 @@ bool
 double value
 int value
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		624-637
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Less-than-or-equal equality for a HumNum with a HumNum, integer or float.
+@LONGDESC:	Less-than-or-equal equality for a 
+	HumNum with a HumNum, integer or float.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -22,6 +24,20 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::operator<= -- Less-than-or-equal equality for a 
+//     HumNum with a HumNum, integer or float.
+//
+
+bool HumNum::operator<=(const HumNum& value) const {
+	if (this == &value) {
+		return true;
+	}
+	return getFloat() <= value.getFloat();
+}
+
+
 
 
 @@END:	FunctionDocumentation

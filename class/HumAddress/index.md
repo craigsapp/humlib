@@ -12,20 +12,15 @@ group: [
 ]
 ---
 
-The HumAddress class manages data conversions for the minHumdrum library.
-
 {% include docslot/docslot.html %}
 
+The HumAddress class manages data conversions for the minHumdrum library.
+
+
 &nbsp;
 
-Public functions
-----------------
+HumAddress Public functions
+---------------------------
 
 {% include docslot/HumAddress.html %}
-
-&nbsp;
-
-Functions inherited from <span class="class-link">MidiMessage</span>
----------------------------------------------------------------
-
 

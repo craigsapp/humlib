@@ -6,10 +6,13 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out
 @FILE:		HumNum.cpp
-@LINES:		;
+@LINES:		795-807
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Print as a list of two numbers, such as "(1, 2)" for 1/2.
+@LONGDESC:	Print as a list of two numbers, such as
+	"(1, 2)" for 1/2.
+	default parameter: out = cout;
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +21,19 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumNum::printList -- Print as a list of two numbers, such as
+//    "(1, 2)" for 1/2.
+//		default parameter: out = cout;
+//
+
+ostream& HumNum::printList(ostream& out) const {
+	out << '(' << top << ", " << bot << ')';
+	return out;
+}
+
+
 
 
 @@END:	FunctionDocumentation

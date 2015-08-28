@@ -6,10 +6,17 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		;
+@LINES:		184-214
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	"Ticks per Quarter-note".
+@LONGDESC:	"Ticks per Quarter-note".  Returns the minimal
+	number of integral time units that divide a quarter note into equal
+	subdivisions.  This value is needed to convert Humdrum data into
+	MIDI file data, MuseData, and MusicXML data.  Also useful for timebase
+	type of operations on the data and describing the durations in terms
+	of integers rather than with fractions.  This function will also 
+	consider the implicit durations of non-rhythmic spine data.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +25,37 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::tpq -- "Ticks per Quarter-note".  Returns the minimal
+//    number of integral time units that divide a quarter note into equal
+//    subdivisions.  This value is needed to convert Humdrum data into
+//    MIDI file data, MuseData, and MusicXML data.  Also useful for timebase
+//    type of operations on the data and describing the durations in terms
+//    of integers rather than with fractions.  This function will also 
+//    consider the implicit durations of non-rhythmic spine data.
+//
+
+int HumdrumFileStructure::tpq(void) {
+	if (ticksperquarternote > 0) {
+		return ticksperquarternote;
+	}
+	set<HumNum> durlist = getPositiveLineDurations();
+	vector<int> dems;
+	for (auto& it : durlist) {
+		if (it.getDenominator() > 1) {
+			dems.push_back(it.getDenominator());
+		}
+	}
+	int lcm = 1;
+	if (dems.size() > 0) {
+		lcm = Convert::getLcm(dems);
+	}
+	ticksperquarternote = lcm;
+	return ticksperquarternote;
+}
+
+
 
 
 @@END:	FunctionDocumentation

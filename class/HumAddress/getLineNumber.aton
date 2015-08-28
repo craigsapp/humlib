@@ -6,10 +6,11 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
-@LINES:		;
+@LINES:		68-77
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Similar to getLineIndex() but adds one.
+@LONGDESC:	Similar to getLineIndex() but adds one.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +19,16 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumAddress::getLineNumber --  Similar to getLineIndex() but adds one.
+//
+
+int HumAddress::getLineNumber(void) const {
+	return getLineIndex() + 1;
+}
+
+
 
 
 @@END:	FunctionDocumentation

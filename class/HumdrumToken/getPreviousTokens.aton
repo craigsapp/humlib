@@ -6,10 +6,12 @@
 @RETURN:	vector<HumdrumToken*> 
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		;
+@LINES:		373-383
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return a list of the previous tokens in the spine before this token.
+@LONGDESC:	Return a list of the previous
+	tokens in the spine before this token.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,17 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::getPreviousTokens --  Return a list of the previous
+//    tokens in the spine before this token.
+//
+
+vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
+	return previousTokens;
+}
+
+
 
 
 @@END:	FunctionDocumentation

@@ -6,10 +6,12 @@
 @RETURN:	char     
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		;
+@LINES:		639-655
 @SEEALSO:
-@SHORTDESC:	
-@LONGDESC:	
+@SHORTDESC:	Return character at given index in string, or null if out of range.
+@LONGDESC:	Return character at given index in string, or
+	null if out of range.
+	
 
 @@BEGIN: EXAMPLE
 @DESCRIPTION:
@@ -18,6 +20,23 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::getChar -- Return character at given index in string, or
+//    null if out of range.
+//
+
+char HumdrumLine::getChar(int index) const {
+	if (index < 0) {
+		return '\0';
+	}
+	if (index >= size()) {
+		return '\0';
+	}
+	return (((string)(*this))[index]);
+}
+
+
 
 
 @@END:	FunctionDocumentation
