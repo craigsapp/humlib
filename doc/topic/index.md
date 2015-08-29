@@ -3,6 +3,10 @@ layout: default
 breadcrumbs: [
                 ['/', 'home'],
                 ['/doc', 'documentation'],
+                ['/doc/tutorial', 'tutorial'],
+                ['/doc/class',    'classes'],
+                ['/doc/example',  'examples'],
+                ['/doc/snippet',  'snippets'],
                 ['/doc/topic', 'topics']
         ]
 title: Topics
