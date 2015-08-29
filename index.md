@@ -47,7 +47,7 @@ Resources
 <li> <a href=/doc/class>Classes</a> </li>
 <li> <a href=/doc/snippet>Code snippets</a> </li>
 <li> <a href=/doc/example>Example programs</a> </li>
-<li> <a href=/doc/tutorial>Topics</a> </li>
+<li> <a href=/doc/topics>Topics</a> </li>
 <li> <a href=/doc/tutorial>Tutorial</a> </li>
 </ul>
 </td></tr></table>
