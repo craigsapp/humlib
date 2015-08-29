@@ -70,7 +70,7 @@ window.addEventListener('DOMContentLoaded', function(event) {
 	'isData',
 	'isDataType',
 	'isExchangeInterpretation',
-	'isExclusive',
+	'isExclusiveInterpretation',
 	'isManipulator',
 	'isMergeInterpretation',
 	'isNull',
@@ -83,36 +83,9 @@ window.addEventListener('DOMContentLoaded', function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumdrumToken", list);
 });
 </script>
-
 <h2> <a href="HumdrumToken">HumdrumToken</a>:: <span class="h2subtitle">
 Manages data tokens for a HumdrumLine.
 </span></h2>
@@ -164,103 +137,13 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumdrumLine", list);
 });
 </script>
-
 <h2> <a href="HumdrumLine">HumdrumLine</a>:: <span class="h2subtitle">
-Manages the content of a line for a HumdrumFile.
+Manages the content of a Humdrum file line.
 </span></h2>
 <ul id="HumdrumLine-list" class="function-listing"></ul>
-
-
-<script>
-window.addEventListener("DOMContentLoaded", function(event) {
-   list = [   // START_DOCLIST(HumdrumFileBase)
-	'HumdrumFileBase',
-	'~HumdrumFileBase',
-	'append',
-	'createLinesFromTokens',
-	'getLineCount',
-	'getMaxTrack',
-	'getTrackEnd',
-	'getTrackEndCount',
-	'getTrackStart',
-	'operator[]',
-	'printDataTypeInfo',
-	'printSpineInfo',
-	'printTrackInfo',
-	'read',
-	'readString'
-   ];   // END_DOCLIST(HumdrumFileBase)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   addClassListContent("HumdrumFileBase", list);
-});
-</script>
-
-
-<h2> <a href="HumdrumFileBase">HumdrumFileBase</a>:: (also inherits from <a href="HumdrumFileBase">HumdrumFileBase</a>) 
-<span class="h2subtitle"> 
-Low-level functionality for parsing and storing Humdrum data.
-</span> </h2>
-<ul id="HumdrumFileBase-list" class="function-listing"></ul>
-
 
 
 <script>
@@ -274,40 +157,101 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumdrumFile", list);
 });
 </script>
-
 <h2> <a href="HumdrumFile">HumdrumFile</a>:: <span class="h2subtitle">
-Main programmer-level interface to HumdrumFile data structure.
+Main interface for Humdrum file parsing classes.
 </span></h2>
 <ul id="HumdrumFile-list" class="function-listing"> </ul>
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumdrumFileContent)
+	'HumdrumFileContent',
+	'~HumdrumFileContent'
+   ];   // END_DOCLIST(HumdrumFileContent)
+
+
+
+
+
+   addClassListContent("HumdrumFileContent", list);
+});
+</script>
+<h2> <a href="HumdrumFileContent">HumdrumFileContent</a>:: <span class="h2subtitle">
+Intermediate class for HumdrumFile content analysis.
+</span></h2>
+<ul id="HumdrumFileContent-list" class="function-listing"> </ul>
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumdrumFileStructure)
+	'HumdrumFileStructure',
+	'~HumdrumFileStructure',
+	'getBarline',
+	'getBarlineCount',
+	'getBarlineDuration',
+	'getBarlineDurationFromStart',
+	'getBarlineDurationToEnd',
+	'getScoreDuration',
+	'printDurationInfo',
+	'read',
+	'readNoRhythm',
+	'readString',
+	'readStringNoRhythm',
+	'tpq'
+   ];   // END_DOCLIST(HumdrumFileStructure)
+
+
+
+
+
+   addClassListContent("HumdrumFileStructure", list);
+});
+</script>
+<h2> <a href="HumdrumFileStructure">HumdrumFileStructure</a>:: <span class="h2subtitle">
+Intermediate class for HumdrumFile structural analysis.
+</span></h2>
+<ul id="HumdrumFileStructure-list" class="function-listing"> </ul>
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function(event) {
+   list = [   // START_DOCLIST(HumdrumFileBase)
+	'HumdrumFileBase',
+	'~HumdrumFileBase',
+	'append',
+	'createLinesFromTokens',
+	'getLineCount',
+	'getMaxTrack',
+	'getPrimaryTrackSeq',
+	'getTrackEnd',
+	'getTrackEndCount',
+	'getTrackSeq',
+	'getTrackStart',
+	'operator[]',
+	'printDataTypeInfo',
+	'printSpineInfo',
+	'printTrackInfo',
+	'read',
+	'readString',
+	'token'
+   ];   // END_DOCLIST(HumdrumFileBase)
+
+
+
+
+
+   addClassListContent("HumdrumFileBase", list);
+});
+</script>
+<h2> <a href="HumdrumFileBase">HumdrumFileBase</a>:: <span class="h2subtitle"> 
+Low-level Humdrum file parsing class for read/write and spine analysis.
+</span> </h2>
+<ul id="HumdrumFileBase-list" class="function-listing"></ul>
+
+
 
 
 
@@ -357,41 +301,13 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumNum", list);
 });
 </script>
-
 <h2> <a href="HumNum">HumNum</a>:: <span class="h2subtitle">
 Rational number class for processing durations as fractions.
 </span></h2>
 <ul id="HumNum-list" class="function-listing"> </ul>
-
 
 
 <script>
@@ -406,6 +322,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getLineNumber',
 	'getSpineInfo',
 	'getSubtrack',
+	'getSubtrackCount',
 	'getTrack',
 	'getTrackString',
 	'hasOwner'
@@ -415,38 +332,11 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumAddress", list);
 });
 </script>
-
 <h2> <a href="HumAddress">HumAddress</a>:: <span class="h2subtitle">
-Location information for a HumdrumToken on a HumdrumLine in a HumdrumFile.
+Location information for HumdrumTokens.
 </span></h2>
 <ul id="HumAddress-list" class="function-listing"> </ul>
 
@@ -475,38 +365,11 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("HumHash", list);
 });
 </script>
-
 <h2> <a href="HumHash">HumHash</a>:: <span class="h2subtitle">
-Token and line parameter system.
+HumdrumToken and HumdrumLine parameter system.
 </span></h2>
 <ul id="HumHash-list" class="function-listing"> </ul>
 
@@ -532,38 +395,11 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    addClassListContent("Convert", list);
 });
 </script>
-
 <h2> <a href="Convert">Convert</a>:: <span class="h2subtitle">
-Utility functions for converting data between various representations.
+Utility function for converting data between various representations.
 </span></h2>
 <ul id="Convert-list" class="function-listing"> </ul>
 

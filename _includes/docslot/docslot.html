@@ -160,6 +160,11 @@ details[open].example-details {
 	content: "XXX";
 }
 
+.hanging-indent {
+  padding-left: 35px;
+  text-indent: -35px;
+}
+
 /* For displaying keyboard short-cut keys. */
 .keyboard-char {
 	background: #999999;
@@ -237,9 +242,10 @@ pre.output-example {
 <script id="docslot-main" type="text/x-handlebars-template">
 	{{#if LONGDESC}}
 		<a name="{{METHOD}}"> </a>
-		<details ontoggle='showOrHideShortDescriptionReverse(this);'>
+		<details class="hanging-indent" ontoggle='showOrHideShortDescriptionReverse(this);'>
 			<summary>
-				.{{#if longname}}<a href="/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}<span class="docslot-short-title">{{METHOD}}</span>
+				{{#notConstructor CLASSNAME METHOD}}.{{/notConstructor}}{{#if longname}}<a href="/doc/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}
+				<span class="docslot-short-title">{{METHOD}}</span>
 			<span class='short-desc'> &mdash;
 			{{{SHORTDESC}}}
 			</span>
@@ -310,6 +316,14 @@ pre.output-example {
 //
 // Handlebars helper functions
 //
+
+Handlebars.registerHelper('notConstructor', function (classname, method, options) {
+	if (classname === method) {
+		return options.inverse(this);
+	}
+	return options.fn(this);
+});
+
 
 Handlebars.registerHelper('codeLink', function (method, file, linerange, 
 		srccode) {
@@ -538,7 +552,7 @@ console.log(functionname);
 	if (local && !local.match(/^\s*$/)) {
 		processAtonData(local, fullname, functionname, target, template, fullQ);
    } else {
-		var file    = '/class/' + classname + '/' + functionname + '.aton';
+		var file    = '/doc/class/' + classname + '/' + functionname + '.aton';
 		var request = new XMLHttpRequest();
 		var matches2;
 		request.open('GET', file);

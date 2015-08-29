@@ -11,7 +11,7 @@
 
 use strict;
 
-my $classdir = "../../class";
+my $classdir = "../../doc/class";
 my @contents = <>;
 my $i;
 
@@ -28,6 +28,16 @@ for ($i=0; $i<@contents; $i++) {
          $line = $contents[++$i];
       }
       print "$line\n";
+   } elsif ($line =~ /<h2>.*href="([^"]+).*h2subtitle/) {
+      # <h2> <a href="HumdrumToken">HumdrumToken</a>:: <span class="h2subtitle">
+      # Manages data tokens for a HumdrumLine.
+      # </span></h2>
+      my $class = $1;
+      my $description = `cat ../../doc/class/$class/.description`;
+      chomp $description;
+      print "$line\n";
+      print "$description\n";
+      $i++;
    } else {
       print "$line\n";
    }
@@ -43,7 +53,7 @@ for ($i=0; $i<@contents; $i++) {
 
 sub printClassListContents {
    my ($classname) = @_;
-   my $list = `grep INDEXED.*yes ../../class/$classname/*.aton`;
+   my $list = `grep INDEXED.*yes ../../doc/class/$classname/*.aton`;
    my @items = split(/\n/, $list);
    my $i;
    my $item;

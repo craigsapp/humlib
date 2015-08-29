@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Fri Aug 28 16:23:48 PDT 2015
+# Last Modified: Fri Aug 28 16:23:51 PDT 2015
+# Filename:      /tmp/midifile/_includes/class/updateclasssummary
+# Syntax:        perl 5
+#
+# Description:
+#
+
+use strict;
+
+my $classdir = "../../doc/class";
+my @contents = <>;
+my $i;
+
+for ($i=0; $i<@contents; $i++) {
+   my $line = $contents[$i];
+   chomp $line;
+   if ($line =~ /<td>.*href="\/doc\/class\/([^"]+).*\/td>/) {
+      # <td> <a href="/doc/class/HumdrumFile">HumdrumFile</a> </td> <td> 
+      #    Main programmer-level interface to HumdrumFile data structure.
+      # </td>
+      my $class = $1;
+      my $description = `cat ../../doc/class/$class/.description`;
+      chomp $description;
+      print "$line\n";
+      print "$description\n";
+      $i++;
+   } else {
+      print "$line\n";
+   }
+}
+
+
+

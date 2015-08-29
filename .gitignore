@@ -1,8 +1,8 @@
 obj
 lib
-bin
 err
 _site
+bin/test-*
 myprograms
 transfer
 test.krn
