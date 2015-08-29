@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		513-530
+@LINES:		559-576
 @SEEALSO:
 @SHORTDESC:	Returns true if no characters on line.
 @LONGDESC:	Returns true if no characters on line.  A blank line

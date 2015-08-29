@@ -9,7 +9,7 @@
 #                class documentation.
 #
 
-all: lines
+all: aton
 
 SRC = Convert HumAddress HumHash HumNum HumdrumFile HumdrumFileBase HumdrumFileContent HumdrumFileStructure HumdrumLine HumdrumToken
 

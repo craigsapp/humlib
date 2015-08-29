@@ -6,7 +6,7 @@
 @RETURN:	string   
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		700-709
+@LINES:		724-733
 @SEEALSO:
 @SHORTDESC:	Get "track.
 @LONGDESC:	Get "track.subtrack" as a string.

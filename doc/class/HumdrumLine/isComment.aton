@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		100-110
+@LINES:		146-156
 @SEEALSO:
 @SHORTDESC:	Returns true if the first character in the string is '!'.
 @LONGDESC:	Returns true if the first character

@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track
 @FILE:		HumdrumLine.cpp
-@LINES:		372-386
+@LINES:		418-432
 @SEEALSO:
 @SHORTDESC:	Return the starting exclusive interpretation for the given spine/track.
 @LONGDESC:	Return the starting exclusive interpretation

@@ -1,0 +1,40 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	setLineFromCSV
+@ACCESS:	public
+@RETURN:	void     
+void     
+@PARAMETERS:	const char* csv, const string& separator = ","
+const string& csv, const string& separator = ","
+@FILE:		HumdrumLine.cpp
+@LINES:		64-75
+@SEEALSO:
+@SHORTDESC:	Read a HumdrumLine from a CSV line.
+@LONGDESC:	Read a HumdrumLine from a CSV line.
+	default value: separator = ","
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::setLineFromCSV -- Read a HumdrumLine from a CSV line.
+//   default value: separator = ","
+//
+
+void HumdrumLine::setLineFromCSV(const char* csv, const string& separator) {
+	string temp = csv;
+	setLineFromCSV(temp);
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

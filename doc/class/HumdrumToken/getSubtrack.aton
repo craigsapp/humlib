@@ -6,7 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		688-698
+@LINES:		712-722
 @SEEALSO:
 @SHORTDESC:	Get the subtrack (similar to a layer in MEI).
 @LONGDESC:	Get the subtrack (similar to a layer

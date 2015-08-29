@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken& 
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		544-557
+@LINES:		590-603
 @SEEALSO:
 @SHORTDESC:	Return a reference to the given token on the line.
 @LONGDESC:	Return a reference to the given token on the line.

@@ -6,7 +6,7 @@
 @RETURN:	string   
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		559-570
+@LINES:		605-616
 @SEEALSO:
 @SHORTDESC:	Return a copy of the string component of a token.
 @LONGDESC:	Return a copy of the string component of

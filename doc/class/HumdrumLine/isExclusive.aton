@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		135-145
+@LINES:		181-191
 @SEEALSO:
 @SHORTDESC:	Returns true if the first two characters are "**".
 @LONGDESC:	Returns true if the first two characters

@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		878-890
+@LINES:		902-914
 @SEEALSO:
 @SHORTDESC:	Return the number of tokens in the spine/sub spine which follow this token.
 @LONGDESC:	Return the number of tokens in the

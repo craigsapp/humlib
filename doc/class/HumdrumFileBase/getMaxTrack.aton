@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		208-218
+@LINES:		294-304
 @SEEALSO:
 @SHORTDESC:	Returns the number of primary spines in the data.
 @LONGDESC:	Returns the number of primary 

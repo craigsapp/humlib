@@ -8,7 +8,7 @@ bool
 @PARAMETERS:	const char* contents
 const string& contents
 @FILE:		HumdrumFileBase.cpp
-@LINES:		111-123
+@LINES:		157-169
 @SEEALSO:
 @SHORTDESC:	Read contents from a string rather than an istream or filename.
 @LONGDESC:	Read contents from a string rather than

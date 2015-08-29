@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		686-709
+@LINES:		732-755
 @SEEALSO:
 @SHORTDESC:	Print the datatype of each token in the file.
 @LONGDESC:	Print the datatype of each token in

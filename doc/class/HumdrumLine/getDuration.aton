@@ -8,7 +8,7 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		278-290
+@LINES:		324-336
 @SEEALSO:
 @SHORTDESC:	Get the duration of the line.
 @LONGDESC:	Get the duration of the line.  The duration will

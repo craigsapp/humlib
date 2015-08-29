@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		494-511
+@LINES:		540-557
 @SEEALSO:
 @SHORTDESC:	Returns true if any tokens on the line are manipulator interpretations.
 @LONGDESC:	Returns true if any tokens on the line are

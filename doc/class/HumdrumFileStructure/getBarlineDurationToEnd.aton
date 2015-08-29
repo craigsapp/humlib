@@ -6,7 +6,7 @@
 @RETURN:	HumNum        
 @PARAMETERS:	int index
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		339-358
+@LINES:		440-459
 @SEEALSO:
 @SHORTDESC:	Return the duration between barline and the end of the HumdrumFileStructure.
 @LONGDESC:	Return the duration

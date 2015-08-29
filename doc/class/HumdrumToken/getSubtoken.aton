@@ -6,7 +6,7 @@
 @RETURN:	string   
 @PARAMETERS:	int index, const string& separator
 @FILE:		HumdrumToken.cpp
-@LINES:		729-758
+@LINES:		753-782
 @SEEALSO:
 @SHORTDESC:	Extract the specified subtoken from the token.
 @LONGDESC:	Extract the specified subtoken from the token.

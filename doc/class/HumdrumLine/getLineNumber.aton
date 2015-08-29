@@ -6,7 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		267-276
+@LINES:		313-322
 @SEEALSO:
 @SHORTDESC:	Return the line index plus one.
 @LONGDESC:	Return the line index plus one.

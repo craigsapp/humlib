@@ -6,7 +6,7 @@
 @RETURN:	char     
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		639-655
+@LINES:		685-701
 @SEEALSO:
 @SHORTDESC:	Return character at given index in string, or null if out of range.
 @LONGDESC:	Return character at given index in string, or

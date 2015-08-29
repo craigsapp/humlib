@@ -1,0 +1,44 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileStructure
+@METHOD:	readNoRhythmCSV
+@ACCESS:	public
+@RETURN:	bool          
+bool          
+bool          
+@PARAMETERS:	istream& contents, const string& separator = ","
+const char* filename, const string& separator = ","
+const string& filename, const string& separator = ","
+@FILE:		HumdrumFileStructure.cpp
+@LINES:		204-216
+@SEEALSO:
+@SHORTDESC:	Similar to the readCSV() functions, but does not parse rhythm (or parameters).
+@LONGDESC:	Similar to the readCSV()
+	functions, but does not parse rhythm (or parameters).
+	default value: separator = ","
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::readNoRhythmCSV -- Similar to the readCSV()
+//    functions, but does not parse rhythm (or parameters).
+//        default value: separator = ","
+//
+
+bool HumdrumFileStructure::readNoRhythmCSV(istream& infile,
+		const string& seperator) {
+	return HumdrumFileBase::readCSV(infile);
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

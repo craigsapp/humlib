@@ -8,7 +8,7 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		354-365
+@LINES:		400-411
 @SEEALSO:
 @SHORTDESC:	Return the duration from the start of the given line to the first barline occurring before the given line.
 @LONGDESC:	Return the duration from the start

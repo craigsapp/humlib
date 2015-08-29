@@ -38,7 +38,6 @@ function addClassListContent(classname, listing) {
 window.addEventListener('DOMContentLoaded', function(event) {
    list = [   // START_DOCLIST(HumdrumToken)
 	'HumdrumToken',
-	'~HumdrumToken',
 	'equalChar',
 	'getDataType',
 	'getDuration',
@@ -73,11 +72,15 @@ window.addEventListener('DOMContentLoaded', function(event) {
 	'isExclusiveInterpretation',
 	'isManipulator',
 	'isMergeInterpretation',
+	'isNonNullData',
 	'isNull',
+	'isNullData',
 	'isSplitInterpretation',
 	'isTerminateInterpretation',
+	'printCSV',
 	'setParameters'
    ];   // END_DOCLIST(HumdrumToken)
+
 
 
 
@@ -97,7 +100,6 @@ Manages data tokens for a HumdrumLine.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumLine)
 	'HumdrumLine',
-	'~HumdrumLine',
 	'createLineFromTokens',
 	'equalChar',
 	'getBeat',
@@ -126,12 +128,15 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'isInterp',
 	'isManipulator',
 	'isTerminator',
+	'printCSV',
 	'printDataTypeInfo',
 	'printDurationInfo',
 	'printSpineInfo',
 	'printTrackInfo',
+	'setLineFromCSV',
 	'token'
    ];   // END_DOCLIST(HumdrumLine)
+
 
 
 
@@ -149,9 +154,9 @@ Manages the content of a Humdrum file line.
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFile)
-	'HumdrumFile',
-	'~HumdrumFile'
+	'HumdrumFile'
    ];   // END_DOCLIST(HumdrumFile)
+
 
 
 
@@ -168,9 +173,9 @@ Main interface for Humdrum file parsing classes.
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFileContent)
-	'HumdrumFileContent',
-	'~HumdrumFileContent'
+	'HumdrumFileContent'
    ];   // END_DOCLIST(HumdrumFileContent)
+
 
 
 
@@ -188,7 +193,6 @@ Intermediate class for HumdrumFile content analysis.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFileStructure)
 	'HumdrumFileStructure',
-	'~HumdrumFileStructure',
 	'getBarline',
 	'getBarlineCount',
 	'getBarlineDuration',
@@ -197,11 +201,16 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getScoreDuration',
 	'printDurationInfo',
 	'read',
+	'readCSV',
 	'readNoRhythm',
+	'readNoRhythmCSV',
 	'readString',
+	'readStringCSV',
 	'readStringNoRhythm',
+	'readStringNoRhythmCSV',
 	'tpq'
    ];   // END_DOCLIST(HumdrumFileStructure)
+
 
 
 
@@ -220,7 +229,6 @@ Intermediate class for HumdrumFile structural analysis.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFileBase)
 	'HumdrumFileBase',
-	'~HumdrumFileBase',
 	'append',
 	'createLinesFromTokens',
 	'getLineCount',
@@ -231,13 +239,17 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackSeq',
 	'getTrackStart',
 	'operator[]',
+	'printCSV',
 	'printDataTypeInfo',
 	'printSpineInfo',
 	'printTrackInfo',
 	'read',
+	'readCSV',
 	'readString',
+	'readStringCSV',
 	'token'
    ];   // END_DOCLIST(HumdrumFileBase)
+
 
 
 
@@ -259,7 +271,6 @@ Low-level Humdrum file parsing class for read/write and spine analysis.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumNum)
 	'HumNum',
-	'~HumNum',
 	'getAbs',
 	'getDenominator',
 	'getFloat',
@@ -301,6 +312,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
    addClassListContent("HumNum", list);
 });
 </script>
@@ -314,7 +326,6 @@ Rational number class for processing durations as fractions.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumAddress)
 	'HumAddress',
-	'~HumAddress',
 	'getDataType',
 	'getFieldIndex',
 	'getLine',
@@ -327,6 +338,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackString',
 	'hasOwner'
    ];   // END_DOCLIST(HumAddress)
+
 
 
 
@@ -346,7 +358,6 @@ Location information for HumdrumTokens.
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumHash)
 	'HumHash',
-	'~HumHash',
 	'deleteValue',
 	'getKeys',
 	'getParameterCount',
@@ -360,6 +371,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'setPrefix',
 	'setValue'
    ];   // END_DOCLIST(HumHash)
+
 
 
 
@@ -390,6 +402,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'replaceOccurrences',
 	'splitString'
    ];   // END_DOCLIST(Convert)
+
 
 
 

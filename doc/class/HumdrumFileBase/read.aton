@@ -6,7 +6,7 @@
 @RETURN:	bool          
 bool          
 bool          
-@PARAMETERS:	istream& infile
+@PARAMETERS:	istream& contents
 const char* filename
 const string& filename
 @FILE:		HumdrumFileBase.cpp

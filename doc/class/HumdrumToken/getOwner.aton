@@ -6,7 +6,7 @@
 @RETURN:	HumdrumLine* 
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		842-852
+@LINES:		866-876
 @SEEALSO:
 @SHORTDESC:	Return a pointer to the HumdrumLine which owns this token.
 @LONGDESC:	Return a pointer to the HumdrumLine which owns this

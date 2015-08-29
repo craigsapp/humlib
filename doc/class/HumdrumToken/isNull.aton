@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		671-686
+@LINES:		695-710
 @SEEALSO:
 @SHORTDESC:	Returns true if the token is a null token, either for data, comments, or interpretations.
 @LONGDESC:	Returns true if the token is a null token,

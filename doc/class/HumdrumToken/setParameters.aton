@@ -8,7 +8,7 @@ void
 @PARAMETERS:	HumdrumToken* ptok
 const string& pdata
 @FILE:		HumdrumToken.cpp
-@LINES:		760-778
+@LINES:		784-802
 @SEEALSO:
 @SHORTDESC:	Process a local comment with the structure: !NS1:NS2:key1=value1:key2=value2:key3=value3 and store the parameter in the HumHash parent class component of the HumdrumToken object.
 @LONGDESC:	Process a local comment with

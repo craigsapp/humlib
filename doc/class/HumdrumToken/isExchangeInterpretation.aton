@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		638-647
+@LINES:		662-671
 @SEEALSO:
 @SHORTDESC:	True if the token is "*x".
 @LONGDESC:	True if the token is "*x".

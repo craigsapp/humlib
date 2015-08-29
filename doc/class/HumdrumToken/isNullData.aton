@@ -1,0 +1,37 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	isNullData
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@FILE:		HumdrumToken.cpp
+@LINES:		615-625
+@SEEALSO:
+@SHORTDESC:	Return true if the token is a null data token.
+@LONGDESC:	Return true if the token is a null 
+	data token.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::isNullData -- Return true if the token is a null 
+//     data token.
+//
+
+bool HumdrumToken::isNullData(void) const {
+	return isData() && isNull();
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track
 @FILE:		HumdrumFileBase.cpp
-@LINES:		397-412
+@LINES:		483-498
 @SEEALSO:
 @SHORTDESC:	Return the starting exclusive interpretation for the given track.
 @LONGDESC:	Return the starting exclusive

@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		273-285
+@LINES:		374-386
 @SEEALSO:
 @SHORTDESC:	Return the number of barlines in the file.
 @LONGDESC:	Return the number of barlines in

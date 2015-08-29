@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		477-492
+@LINES:		523-538
 @SEEALSO:
 @SHORTDESC:	Returns true if the line contains spines.
 @LONGDESC:	Returns true if the line contains spines.  This

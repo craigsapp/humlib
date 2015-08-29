@@ -6,9 +6,9 @@
 @RETURN:	void          
 void          
 @PARAMETERS:	const char* line
-eonst string& line
+const string& line
 @FILE:		HumdrumFileBase.cpp
-@LINES:		164-175
+@LINES:		250-261
 @SEEALSO:
 @SHORTDESC:	Add a line to the file's contents.
 @LONGDESC:	Add a line to the file's contents.  The file's

@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		603-614
+@LINES:		627-638
 @SEEALSO:
 @SHORTDESC:	Returns true if first two characters are "**".
 @LONGDESC:	Returns true if first two

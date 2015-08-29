@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		183-196
+@LINES:		229-242
 @SEEALSO:
 @SHORTDESC:	Returns true if data (but not measure).
 @LONGDESC:	Returns true if data (but not measure).

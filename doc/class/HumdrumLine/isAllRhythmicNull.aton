@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		219-241
+@LINES:		265-287
 @SEEALSO:
 @SHORTDESC:	Returns true if all rhythmic data-type tokens on the line are null (".
 @LONGDESC:	Returns true if all rhythmic

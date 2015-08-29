@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		124-133
+@LINES:		170-179
 @SEEALSO:
 @SHORTDESC:	Returns true if a local comment.
 @LONGDESC:	Returns true if a local comment.

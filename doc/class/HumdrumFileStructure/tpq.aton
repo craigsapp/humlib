@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		184-214
+@LINES:		285-315
 @SEEALSO:
 @SHORTDESC:	"Ticks per Quarter-note".
 @LONGDESC:	"Ticks per Quarter-note".  Returns the minimal

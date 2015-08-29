@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		183-192
+@LINES:		269-278
 @SEEALSO:
 @SHORTDESC:	Returns the number of lines.
 @LONGDESC:	Returns the number of lines.

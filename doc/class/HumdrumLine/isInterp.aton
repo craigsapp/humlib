@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		161-170
+@LINES:		207-216
 @SEEALSO:
 @SHORTDESC:	Returns true if starts with '*' character.
 @LONGDESC:	Returns true if starts with '*' character.

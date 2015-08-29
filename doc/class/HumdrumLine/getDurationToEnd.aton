@@ -8,7 +8,7 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		328-343
+@LINES:		374-389
 @SEEALSO:
 @SHORTDESC:	Return the duration from the start of the line to the end of the HumdrumFile which owns this HumdrumLine.
 @LONGDESC:	Return the duration from the start of the

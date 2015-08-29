@@ -8,7 +8,7 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		401-411
+@LINES:		447-457
 @SEEALSO:
 @SHORTDESC:	Time from the starting of the current note to the next barline.
 @LONGDESC:	Time from the starting of the

@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		825-861
+@LINES:		891-927
 @SEEALSO:
 @SHORTDESC:	Print the analyzed track information.
 @LONGDESC:	Print the analyzed track information.

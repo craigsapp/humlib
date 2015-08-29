@@ -4,11 +4,9 @@
 @METHOD:	getScoreDuration
 @ACCESS:	public
 @RETURN:	HumNum        
-HumNum        
 @PARAMETERS:	void
-HumNum scale
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		160-174
+@LINES:		269-283
 @SEEALSO:
 @SHORTDESC:	Return the total duration of the score in quarter note units.
 @LONGDESC:	Return the total duration

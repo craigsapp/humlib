@@ -6,7 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	const string& separator = " "
 @FILE:		HumdrumToken.cpp
-@LINES:		711-727
+@LINES:		735-751
 @SEEALSO:
 @SHORTDESC:	// HumdrumToken::getSubtokenCount -- default value: separator = " " 
 @LONGDESC:	// HumdrumToken::getSubtokenCount --

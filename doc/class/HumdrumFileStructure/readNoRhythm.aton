@@ -6,11 +6,11 @@
 @RETURN:	bool          
 bool          
 bool          
-@PARAMETERS:	istream& infile
+@PARAMETERS:	istream& contents
 const char* filename
 const string& filename
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		120-130
+@LINES:		182-192
 @SEEALSO:
 @SHORTDESC:	Similar to the read() functions, but does not parse rhythm (or parameters).
 @LONGDESC:	Similar to the read() functions, but

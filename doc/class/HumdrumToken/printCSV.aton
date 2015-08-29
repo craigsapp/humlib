@@ -1,0 +1,52 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	printCSV
+@ACCESS:	public
+@RETURN:	ostream& 
+@PARAMETERS:	ostream& out = cout
+@FILE:		HumdrumToken.cpp
+@LINES:		931-956
+@SEEALSO:
+@SHORTDESC:	print token in CSV format.
+@LONGDESC:	print token in CSV format.
+	default value: out = std::cout
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumToken::printCSV -- print token in CSV format.
+//      default value: out = std::cout
+//
+
+ostream& HumdrumToken::printCSV(ostream& out) {
+	string& value = *this;
+	int loc = this->find(",");
+	if (loc == string::npos) {
+		out << value;
+	} else {
+		out << '"';
+		for (int i=0; i<value.size(); i++) {
+		   if (value[i] == '"') {
+				out << '"' << '"';
+			} else {
+				out << value[i];
+			}
+		}
+		out << '"';
+	}
+	return out;
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

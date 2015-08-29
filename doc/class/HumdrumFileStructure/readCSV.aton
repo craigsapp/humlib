@@ -1,0 +1,50 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileStructure
+@METHOD:	readCSV
+@ACCESS:	public
+@RETURN:	bool          
+bool          
+bool          
+@PARAMETERS:	istream& contents, const string& separator=","
+const char* filename, const string& separator=","
+const string& filename, const string& separator=","
+@FILE:		HumdrumFileStructure.cpp
+@LINES:		80-97
+@SEEALSO:
+@SHORTDESC:	Read the contents of a file from a file or istream in CSV format.
+@LONGDESC:	Read the contents of a file from a file or
+	istream in CSV format.  The file's structure is analyzed, and then the
+	rhythmic structure is calculated.
+	default value: separator = ","
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumFileStructure::readCSV --  Read the contents of a file from a file or
+//   istream in CSV format.  The file's structure is analyzed, and then the
+//   rhythmic structure is calculated.
+//       default value: separator = ","
+//
+
+
+bool HumdrumFileStructure::readCSV(istream& contents,
+		const string& separator) {
+	if (!readNoRhythmCSV(contents, separator)) {
+		return false;
+	}
+	return analyzeStructure();
+}
+
+bool HumdrumFileStructure::readCSV(const char* filename,
+
+
+@@END:	FunctionDocumentation
+

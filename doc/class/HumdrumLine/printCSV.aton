@@ -1,0 +1,48 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	printCSV
+@ACCESS:	public
+@RETURN:	ostream& 
+@PARAMETERS:	ostream& out = cout, const string& separator = ","
+@FILE:		HumdrumLine.cpp
+@LINES:		870-889
+@SEEALSO:
+@SHORTDESC:	print the line as a CSV (comma separate value) line.
+@LONGDESC:	print the line as a CSV
+	(comma separate value) line.
+	default value: out = std::cout;
+	default value: separator = ","
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+//////////////////////////////
+//
+// HumdrumLine::printCSV -- print the line as a CSV
+//    (comma separate value) line.
+//       default value: out = std::cout;
+//       default value: separator = ","
+//
+
+ostream& HumdrumLine::printCSV(ostream& out, const string& separator) {
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i).printCSV(out);
+		if (i<getFieldCount()-1) {
+			out << separator;
+		}
+	}
+	out << endl;
+	return out;
+}
+
+
+
+
+@@END:	FunctionDocumentation
+

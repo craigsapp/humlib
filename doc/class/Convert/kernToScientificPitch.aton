@@ -4,6 +4,8 @@
 @METHOD:	kernToScientificPitch
 @ACCESS:	public
 @RETURN:	static string  
+return 
+return 
 @PARAMETERS:	const string& kerndata, string flat = "b", string sharp = "#", string separator = ""
 kerndata, flat, sharp, separator
 kerndata, flat, sharp, separator

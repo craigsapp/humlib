@@ -7,11 +7,70 @@ breadcrumbs: [
 title: Documentation
 ---
 
-<ul>
-<li> <a href=/doc/class>Class documentation</a>
-<li> <a href=/doc/snippet>Code snippets</a>: short bits of code demonstrating how to
+<style>
+
+table.classlist, 
+table.classlist tr,
+table.classlist td {
+   padding: 0;
+   border: 0;
+}
+
+table.classlist tr td:nth-child(1) {
+   text-align: right;
+   font-weight: 400;
+   width: 190px;
+}
+
+table.classlist tr td:nth-child(1)::after {
+   content: ":";
+}
+
+table.classlist tr td:nth-child(2) {
+   text-align: left;
+   padding-left: 10px;
+}
+
+</style>
+
+<table style="width:auto;" class="classlist" cellpadding="0" cellspacing="0">
+
+<tr valign=top>
+   <td> <a href="/doc/class">Class documentation</a> </td> <td> 
+Documentation for each function of all classes in the minHumdrum library.
+   </td>
+</tr>
+
+
+<tr valign=top>
+   <td> <a href="/doc/snippet">Code snippets</a> </td> <td> 
+Short bits of code demonstrating how to
 access data in a HumdrumFile structure.
-<li> <a href=/doc/example>Example programs</a>: longer examples form as complete programs.
-<li> <a href=/doc/topic>Topics</a>: documentation of extensions to humdrum as well as general concepts related to Humdrum file processing.
-<li> <a href=/doc/tutorial>Tutorial</a>: Programming tutorials for using minhumdrum.
-</ul>
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/doc/example">Code examples</a> </td> <td> 
+Full program coding examples.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/doc/topic">Topics</a> </td> <td> 
+Documentation of extensions to Humdrum as well as general 
+concepts related to Humdrum file processing.
+   </td>
+</tr>
+
+<tr valign=top>
+   <td> <a href="/doc/tutorial">Tutorial</a> </td> <td> 
+Programming tutorials for using minhumdrum.
+   </td>
+</tr>
+
+</table>
+
+
+
+
+

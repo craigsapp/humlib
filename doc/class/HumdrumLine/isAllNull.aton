@@ -6,7 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		198-217
+@LINES:		244-263
 @SEEALSO:
 @SHORTDESC:	Returns true if all tokens on the line are null (".
 @LONGDESC:	Returns true if all tokens on the line

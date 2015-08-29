@@ -6,7 +6,7 @@
 @RETURN:	HumdrumLine*  
 @PARAMETERS:	int index
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		250-271
+@LINES:		351-372
 @SEEALSO:
 @SHORTDESC:	Return the given barline from the file based on the index number.
 @LONGDESC:	Return the given barline from the file

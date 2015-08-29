@@ -6,7 +6,7 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileBase.cpp
-@LINES:		220-233
+@LINES:		306-319
 @SEEALSO:
 @SHORTDESC:	Print the spine information for all lines/tokens in file (for debugging).
 @LONGDESC:	Print the spine information for all 

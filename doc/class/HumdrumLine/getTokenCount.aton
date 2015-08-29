@@ -6,7 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		532-542
+@LINES:		578-588
 @SEEALSO:
 @SHORTDESC:	Return the number of tokens on the line.
 @LONGDESC:	Return the number of tokens on the line.  This

@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	int track
 @FILE:		HumdrumFileBase.cpp
-@LINES:		414-437
+@LINES:		500-523
 @SEEALSO:
 @SHORTDESC:	Return the number of ending tokens for the given track.
 @LONGDESC:	Return the number of ending tokens

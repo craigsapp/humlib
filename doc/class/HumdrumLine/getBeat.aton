@@ -8,7 +8,7 @@ HumNum
 @PARAMETERS:	HumNum beatdur = "1"
 string beatrecip = "4"
 @FILE:		HumdrumLine.cpp
-@LINES:		418-436
+@LINES:		464-482
 @SEEALSO:
 @SHORTDESC:	return the beat number for the data on the current line given the input **recip representation for the duration of a beat.
 @LONGDESC:	return the beat number for the data on the

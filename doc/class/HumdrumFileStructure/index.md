@@ -3,7 +3,7 @@ layout: default
 breadcrumbs: [
 		['/','home'], 
 		['/doc','documentation'], 
-		['/class', 'classes']
+		['/doc/class', 'classes']
 	]
 title:  HumdrumFileStructure class
 grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']
