@@ -22,14 +22,14 @@ window.addEventListener("DOMContentLoaded", function(event) {
 //       <span class="class-link">MidiMessage</span>
 //    into a hyperlink in this form:
 //       <span class="class-link">
-//          <a href="/class/MidiMessage">MidiMessage</a>
+//          <a href="/doc/class/MidiMessage">MidiMessage</a>
 //       </span>
 //    If the class name does not match the text of the span element,
 //    then a cname attribute can list the class name:
 //       <span class="class-link" cname="MidiMessage">MidiMessages</span>
 //    will get converted into:
 //       <span class="class-link">
-//          <a href="/class/MidiMessage">MidiMessages</a>
+//          <a href="/doc/class/MidiMessage">MidiMessages</a>
 //       </span>
 //
 
@@ -49,7 +49,7 @@ function processClassLinks() {
 			// don't redo links if they were already done.
 			continue;
 		}
-		var text = '<a href="/class/' + clink + '">' + cname + '</a>';
+		var text = '<a href="/doc/class/' + clink + '">' + cname + '</a>';
 		spans[i].innerHTML = text;
 	}
 }
@@ -62,7 +62,7 @@ function processClassLinks() {
 //      <span class="function-link" cname="MidiFile">linkNotePairs</span>
 //   get converted into hyperlinks with this form:
 //      <span class="functionlink" cname="MidiFile">
-//         <a href="/class/MidiMessage/#linkNotePairs">linkNotePairs</a>
+//         <a href="/doc/class/MidiMessage/#linkNotePairs">linkNotePairs</a>
 //      </span>
 //
 //  Or to explicitly display the class scope:
@@ -70,7 +70,7 @@ function processClassLinks() {
 //  which converts to:
 //      <span class="function-link">
 //         MidiFile::
-//         <a href="/class/MidiFile/#linkNotePairs</a>
+//         <a href="/doc/class/MidiFile/#linkNotePairs</a>
 //      </span>
 //
 
@@ -92,10 +92,10 @@ function processFunctionLinks() {
 			}
 			text = libclass;
 			text += '::';
-			text += '<a href="/class/' + libclass
+			text += '<a href="/doc/class/' + libclass
 			text += '/#' + fname + '">' + fname + '</a>';
 		} else {
-			text = '<a href="/class/' + libclass + '/#' + fname + '">'
+			text = '<a href="/doc/class/' + libclass + '/#' + fname + '">'
 						+ fname + '</a>';
 		}
 		spans[i].innerHTML = text;
