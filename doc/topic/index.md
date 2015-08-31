@@ -21,6 +21,13 @@ CVS Import/Export
 {% include topics/cvs.html %}
 </details>
 
+<details class="topic-cvs">
+<summary>
+XML Export
+</summary>
+{% include topics/xml.html %}
+</details>
+
 <details class="topic-parameters">
 <summary>
 Parameters
