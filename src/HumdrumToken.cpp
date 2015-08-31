@@ -1009,10 +1009,10 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 		const string& indent) { 
 
 	out << Convert::repeatString(indent, level);
-	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
+	out << "<track>" << getTrack() << "</track>\n";
 
 	out << Convert::repeatString(indent, level);
-	out << "<track>" << getTrack() << "</track>\n";
+	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
 
 	if (getSubtrack() > 0) {
 		out << Convert::repeatString(indent, level);

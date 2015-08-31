@@ -16,6 +16,7 @@
 
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
+#include "HumNum.h"
 #include "Convert.h"
 
 namespace minHumdrum {
@@ -344,6 +345,31 @@ HumNum HumdrumLine::getDuration(void) const {
 
 HumNum HumdrumLine::getDuration(HumNum scale) const {
 	return duration * scale;
+}
+
+
+
+//////////////////////////////
+// 
+// HumdrumLine::getBarlineDuration -- Return the duration following a barline,
+//    or the duration of the previous barline in the data.
+//
+
+HumNum HumdrumLine::getBarlineDuration(void) const {
+	if (isBarline()) {
+		return getDurationToBarline();
+	} else {
+		return getDurationFromBarline() + getDurationToBarline();
+	}
+}
+
+
+HumNum HumdrumLine::getBarlineDuration(HumNum scale) const {
+	if (isBarline()) {
+		return getDurationToBarline(scale);
+	} else {
+		return getDurationFromBarline(scale) + getDurationToBarline(scale);
+	}
 }
 
 
@@ -898,15 +924,67 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 
 //////////////////////////////
 //
-// HumdrumLine::printXml --
+// HumdrumLine::printXml -- Print the HumdrumLine as a XML element.
 //
 
 ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<line>\n";
-	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printXml(out, level+1, indent);
+
+	if (hasSpines()) {
+		out << Convert::repeatString(indent, level) << "<frame>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameStart";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameDuration";
+		out << Convert::getHumNumAttributes(getDuration());
+		out << "/>\n";
+
+		if (isBarline()) {
+			// print the duration to the next barline or to the end of the score
+			// if there is no barline at the end of the score.
+			out << Convert::repeatString(indent, level);
+			out << "<barlineDuration";
+			out << Convert::getHumNumAttributes(getBarlineDuration());
+			out << "/>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
+
+		out << Convert::repeatString(indent, level) << "<tokens>\n";
+		level++;
+		for (int i=0; i<getFieldCount(); i++) {
+			token(i).printXml(out, level, indent);
+		}
+		level--;
+		out << Convert::repeatString(indent, level) << "</tokens>\n";
+		
+		level--;
+		out << Convert::repeatString(indent, level) << "</frame>\n";
+
+	} else if (isEmpty()) {
+		out << Convert::repeatString(indent, level) << "<blank/>\n";
+	} else {
+		// global comments, reference records, or blank lines print here.
+		out << Convert::repeatString(indent, level) << "<metaFrame>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level);
+		out << "<startTime";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
 	}
-	out << Convert::repeatString(indent, level) << "</line>\n";
+
 	return out;
 }
 

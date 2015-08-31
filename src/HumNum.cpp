@@ -136,7 +136,7 @@ bool HumNum::isNonPositive(void) const {
 
 //////////////////////////////
 //
-// HumNum::getFloat -- Return the floating-point equivalent of the
+// HumNum::getFloat -- Returns the floating-point equivalent of the
 //     rational number.
 //
 
@@ -148,7 +148,7 @@ double HumNum::getFloat(void) const {
 
 //////////////////////////////
 //
-// HumNum::getInteger -- Return the integral part of the fraction.
+// HumNum::getInteger -- Returns the integral part of the fraction.
 //    Default value: round = 0.0
 //    Optional parameter is a rounding factor.
 //    Examples:
@@ -170,7 +170,7 @@ int HumNum::getInteger(double round) const {
 
 //////////////////////////////
 //
-// HumNum::getNumerator -- Return the top integer in the fraction.
+// HumNum::getNumerator -- Returns the top integer in the fraction.
 //
 
 int HumNum::getNumerator(void) const {
@@ -181,12 +181,24 @@ int HumNum::getNumerator(void) const {
 
 //////////////////////////////
 //
-// HumNum::getDenominator -- Return the bottom integer in the fraction.
+// HumNum::getDenominator -- Returns the bottom integer in the fraction.
 //
 
 int HumNum::getDenominator(void) const {
 	return bot;
 }
+
+
+
+//////////////////////////////
+//
+// HumNum::getRemainder -- Returns the non-integer fractional part of the value.
+//
+
+HumNum HumNum::getRemainder(void) const {
+	return (*this) - toInteger();
+}
+
 
 
 //////////////////////////////
@@ -301,7 +313,7 @@ void HumNum::reduce(void) {
 
 //////////////////////////////
 //
-// HumNum::gcdIterative -- Return the greatest common divisor of two
+// HumNum::gcdIterative -- Returns the greatest common divisor of two
 //      numbers using an iterative algorithm.
 //
 
@@ -319,7 +331,7 @@ int HumNum::gcdIterative(int a, int b) {
 
 //////////////////////////////
 //
-// HumNum::gcdRecursive -- Return the greatest common divisor of two
+// HumNum::gcdRecursive -- Returns the greatest common divisor of two
 //      numbers using a recursive algorithm.
 //
 
@@ -372,7 +384,7 @@ bool HumNum::isFinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isInteger -- Return true if number is an integer.
+// HumNum::isInteger -- Returns true if number is an integer.
 //
 
 bool HumNum::isInteger(void) const {

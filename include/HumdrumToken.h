@@ -71,6 +71,8 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getDuration               (HumNum scale) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
 
+		HumNum   getBarlineDuration        (HumNum scale) const;
+
 		HumdrumLine* getOwner              (void) const;
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;

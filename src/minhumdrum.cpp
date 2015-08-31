@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 31 01:34:27 PDT 2015
+// Last Modified: Mon Aug 31 13:30:20 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -1260,7 +1260,7 @@ bool HumNum::isNonPositive(void) const {
 
 //////////////////////////////
 //
-// HumNum::getFloat -- Return the floating-point equivalent of the
+// HumNum::getFloat -- Returns the floating-point equivalent of the
 //     rational number.
 //
 
@@ -1272,7 +1272,7 @@ double HumNum::getFloat(void) const {
 
 //////////////////////////////
 //
-// HumNum::getInteger -- Return the integral part of the fraction.
+// HumNum::getInteger -- Returns the integral part of the fraction.
 //    Default value: round = 0.0
 //    Optional parameter is a rounding factor.
 //    Examples:
@@ -1294,7 +1294,7 @@ int HumNum::getInteger(double round) const {
 
 //////////////////////////////
 //
-// HumNum::getNumerator -- Return the top integer in the fraction.
+// HumNum::getNumerator -- Returns the top integer in the fraction.
 //
 
 int HumNum::getNumerator(void) const {
@@ -1305,12 +1305,24 @@ int HumNum::getNumerator(void) const {
 
 //////////////////////////////
 //
-// HumNum::getDenominator -- Return the bottom integer in the fraction.
+// HumNum::getDenominator -- Returns the bottom integer in the fraction.
 //
 
 int HumNum::getDenominator(void) const {
 	return bot;
 }
+
+
+
+//////////////////////////////
+//
+// HumNum::getRemainder -- Returns the non-integer fractional part of the value.
+//
+
+HumNum HumNum::getRemainder(void) const {
+	return (*this) - toInteger();
+}
+
 
 
 //////////////////////////////
@@ -1425,7 +1437,7 @@ void HumNum::reduce(void) {
 
 //////////////////////////////
 //
-// HumNum::gcdIterative -- Return the greatest common divisor of two
+// HumNum::gcdIterative -- Returns the greatest common divisor of two
 //      numbers using an iterative algorithm.
 //
 
@@ -1443,7 +1455,7 @@ int HumNum::gcdIterative(int a, int b) {
 
 //////////////////////////////
 //
-// HumNum::gcdRecursive -- Return the greatest common divisor of two
+// HumNum::gcdRecursive -- Returns the greatest common divisor of two
 //      numbers using a recursive algorithm.
 //
 
@@ -1496,7 +1508,7 @@ bool HumNum::isFinite(void) const {
 
 //////////////////////////////
 //
-// HumNum::isInteger -- Return true if number is an integer.
+// HumNum::isInteger -- Returns true if number is an integer.
 //
 
 bool HumNum::isInteger(void) const {
@@ -4549,6 +4561,31 @@ HumNum HumdrumLine::getDuration(HumNum scale) const {
 
 
 //////////////////////////////
+// 
+// HumdrumLine::getBarlineDuration -- Return the duration following a barline,
+//    or the duration of the previous barline in the data.
+//
+
+HumNum HumdrumLine::getBarlineDuration(void) const {
+	if (isBarline()) {
+		return getDurationToBarline();
+	} else {
+		return getDurationFromBarline() + getDurationToBarline();
+	}
+}
+
+
+HumNum HumdrumLine::getBarlineDuration(HumNum scale) const {
+	if (isBarline()) {
+		return getDurationToBarline(scale);
+	} else {
+		return getDurationFromBarline(scale) + getDurationToBarline(scale);
+	}
+}
+
+
+
+//////////////////////////////
 //
 // HumdrumLine::setDurationFromStart -- Sets the duration from the start of the
 //    file to the start of the current line.  This is used in rhythmic
@@ -5098,15 +5135,67 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 
 //////////////////////////////
 //
-// HumdrumLine::printXml --
+// HumdrumLine::printXml -- Print the HumdrumLine as a XML element.
 //
 
 ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<line>\n";
-	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printXml(out, level+1, indent);
+
+	if (hasSpines()) {
+		out << Convert::repeatString(indent, level) << "<frame>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameStart";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameDuration";
+		out << Convert::getHumNumAttributes(getDuration());
+		out << "/>\n";
+
+		if (isBarline()) {
+			// print the duration to the next barline or to the end of the score
+			// if there is no barline at the end of the score.
+			out << Convert::repeatString(indent, level);
+			out << "<barlineDuration";
+			out << Convert::getHumNumAttributes(getBarlineDuration());
+			out << "/>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
+
+		out << Convert::repeatString(indent, level) << "<tokens>\n";
+		level++;
+		for (int i=0; i<getFieldCount(); i++) {
+			token(i).printXml(out, level, indent);
+		}
+		level--;
+		out << Convert::repeatString(indent, level) << "</tokens>\n";
+		
+		level--;
+		out << Convert::repeatString(indent, level) << "</frame>\n";
+
+	} else if (isEmpty()) {
+		out << Convert::repeatString(indent, level) << "<blank/>\n";
+	} else {
+		// global comments, reference records, or blank lines print here.
+		out << Convert::repeatString(indent, level) << "<metaFrame>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level);
+		out << "<startTime";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
 	}
-	out << Convert::repeatString(indent, level) << "</line>\n";
+
 	return out;
 }
 
@@ -6210,10 +6299,10 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 		const string& indent) { 
 
 	out << Convert::repeatString(indent, level);
-	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
+	out << "<track>" << getTrack() << "</track>\n";
 
 	out << Convert::repeatString(indent, level);
-	out << "<track>" << getTrack() << "</track>\n";
+	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
 
 	if (getSubtrack() > 0) {
 		out << Convert::repeatString(indent, level);
@@ -6692,6 +6781,33 @@ string Convert::encodeXml(const string& input) {
 			case '\'': output += "&apos;";  break;
 			default:   output += input[i];
 		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
+//   number.  First @float which gives the floating-point representation.
+//   If the number has a fractional part, then also add @ratfrac with the
+//   fractional representation of the non-integer portion number.
+//
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
 	}
 	return output;
 }

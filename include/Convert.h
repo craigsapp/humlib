@@ -58,6 +58,7 @@ class Convert {
 		                                     const string& replace);
 		static string  repeatString         (const string& pattern, int count);
 		static string  encodeXml            (const string& input);
+		static string  getHumNumAttributes  (const HumNum& num);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

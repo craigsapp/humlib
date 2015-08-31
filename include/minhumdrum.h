@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 31 01:34:27 PDT 2015
+// Last Modified: Mon Aug 31 13:30:20 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -192,9 +192,12 @@ class HumNum {
 		bool     isNaN              (void) const;
 		bool     isInteger          (void) const;
 		double   getFloat           (void) const;
+		double   toFloat  (void) const { return getFloat(); }
 		int      getInteger         (double round = 0.0) const;
+		int      toInteger (double round = 0.0) const { return getInteger(round); }
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
+		HumNum   getRemainder       (void) const;
 		void     setValue           (int numerator);
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const string& ratstring);
@@ -378,12 +381,14 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getDurationToEnd       (void) const;
 		HumNum   getDurationFromBarline (void) const;
 		HumNum   getDurationToBarline   (void) const;
+		HumNum   getBarlineDuration     (void) const;
 
 		HumNum   getDuration            (HumNum scale) const;
 		HumNum   getDurationFromStart   (HumNum scale) const;
 		HumNum   getDurationToEnd       (HumNum scale) const;
 		HumNum   getDurationFromBarline (HumNum scale) const;
 		HumNum   getDurationToBarline   (HumNum scale) const;
+		HumNum   getBarlineDuration     (HumNum scale) const;
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
@@ -513,6 +518,8 @@ class HumdrumToken : public string, public HumHash {
 
 		HumNum   getDuration               (HumNum scale) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
+
+		HumNum   getBarlineDuration        (HumNum scale) const;
 
 		HumdrumLine* getOwner              (void) const;
 		HumdrumLine* getLine               (void) const { return getOwner(); }
@@ -943,6 +950,7 @@ class Convert {
 		                                     const string& replace);
 		static string  repeatString         (const string& pattern, int count);
 		static string  encodeXml            (const string& input);
+		static string  getHumNumAttributes  (const HumNum& num);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

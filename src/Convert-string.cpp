@@ -104,6 +104,33 @@ string Convert::encodeXml(const string& input) {
 
 
 
+//////////////////////////////
+//
+// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
+//   number.  First @float which gives the floating-point representation.
+//   If the number has a fractional part, then also add @ratfrac with the
+//   fractional representation of the non-integer portion number.
+//
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
+	}
+	return output;
+}
+
+
+
 // END_MERGE
 
 } // end namespace std;

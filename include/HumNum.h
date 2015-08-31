@@ -43,9 +43,12 @@ class HumNum {
 		bool     isNaN              (void) const;
 		bool     isInteger          (void) const;
 		double   getFloat           (void) const;
+		double   toFloat  (void) const { return getFloat(); }
 		int      getInteger         (double round = 0.0) const;
+		int      toInteger (double round = 0.0) const { return getInteger(round); }
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
+		HumNum   getRemainder       (void) const;
 		void     setValue           (int numerator);
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const string& ratstring);
