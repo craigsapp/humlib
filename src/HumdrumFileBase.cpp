@@ -16,6 +16,7 @@
 //
 
 #include "HumdrumFileBase.h"
+#include "Convert.h"
 
 #include <sstream>
 #include <fstream>
@@ -110,38 +111,38 @@ bool HumdrumFileBase::read(istream& contents) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::readCSV -- Read a Humdrum file in CSV format
+// HumdrumFileBase::readCsv -- Read a Humdrum file in CSV format
 //    (rather than TSV format).
-//       default value: separator = ","
+// default value: separator = ","
 //
 
-bool HumdrumFileBase::readCSV(const string& filename, const string& separator) {
-	return HumdrumFileBase::readCSV(filename.c_str());
+bool HumdrumFileBase::readCsv(const string& filename, const string& separator) {
+	return HumdrumFileBase::readCsv(filename.c_str());
 }
 
 
-bool HumdrumFileBase::readCSV(const char* filename, const string& separator) {
+bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
-		return HumdrumFileBase::readCSV(cin, separator);
+		return HumdrumFileBase::readCsv(cin, separator);
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
 			return false;
 		}
 	}
-	int status = HumdrumFileBase::readCSV(infile, separator);
+	int status = HumdrumFileBase::readCsv(infile, separator);
 	infile.close();
 	return status;
 }
 
 
-bool HumdrumFileBase::readCSV(istream& contents, const string& separator) {
+bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine;
-		s->setLineFromCSV(buffer);
+		s->setLineFromCsv(buffer);
 		s->setOwner(this);
 		lines.push_back(s);
 	}
@@ -178,39 +179,57 @@ bool HumdrumFileBase::readString(const char* contents) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::readStringCSV -- read Humdrum data in CSV format.
+// HumdrumFileBase::readStringCsv -- read Humdrum data in CSV format.
 //
 
-bool HumdrumFileBase::readStringCSV(const char* contents,
+bool HumdrumFileBase::readStringCsv(const char* contents,
 		const string& separator) {
 	stringstream infile;
 	infile << contents;
-	return readCSV(infile, separator);
+	return readCsv(infile, separator);
 }
 
 
-bool HumdrumFileBase::readStringCSV(const string& contents,
+bool HumdrumFileBase::readStringCsv(const string& contents,
 		const string& separator) {
 	stringstream infile;
 	infile << contents;
-	return readCSV(infile, separator);
+	return readCsv(infile, separator);
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumFileBase::printCSV -- print Humdrum file content in
+// HumdrumFileBase::printCsv -- print Humdrum file content in
 //     CSV format.
-//        default value: out = std::cout
-//        default value: separator = ","
+// default value: out = std::cout
+// default value: separator = ","
 //
 
-ostream& HumdrumFileBase::printCSV(ostream& out, 
+ostream& HumdrumFileBase::printCsv(ostream& out, 
 		const string& separator) {
 	for (int i=0; i<getLineCount(); i++) {
-		((*this)[i]).printCSV(out, separator);
+		((*this)[i]).printCsv(out, separator);
 	}
+	return out;
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printXml -- Print a HumdrumFile object in XML format.
+// default value: level = 0
+// default value: indent = tab character
+//
+
+ostream& HumdrumFileBase::printXml(ostream& out, int level, 
+		const string& indent) {
+	out << Convert::repeatString(indent, level) << "<humdrum>\n";
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printXml(out, level+1, indent);
+	}
+	out << Convert::repeatString(indent, level) << "</humdrum>\n";
 	return out;
 }
 

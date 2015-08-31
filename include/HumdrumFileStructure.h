@@ -48,31 +48,31 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          readStringNoRhythm           (const string& contents);
 
 		// CSV reading functions:
-		bool          readCSV                      (istream& contents,
+		bool          readCsv                      (istream& contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const char*   filename,
+		bool          readCsv                      (const char*   filename,
 		                                            const string& separator=",");
-		bool          readCSV                      (const string& filename,
+		bool          readCsv                      (const string& filename,
 		                                            const string& separator=",");
-		bool          readStringCSV                (const char*   contents,
+		bool          readStringCsv                (const char*   contents,
 		                                            const string& separator=",");
-		bool          readStringCSV                (const string& contents,
+		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
-		bool parseCSV(istream& contents, const string& separator = ",")
-		                                 { return readCSV(contents, separator); }
-		bool parseCSV(const char* contents, const string& separator = ",")
-		                                 { return readStringCSV(contents, separator); }
-		bool parseCSV(const string& contents, const string& separator = ",")
-		                                 { return readStringCSV(contents, separator); }
-		bool          readNoRhythmCSV              (istream& contents,
+		bool parseCsv(istream& contents, const string& separator = ",")
+		                                 { return readCsv(contents, separator); }
+		bool parseCsv(const char* contents, const string& separator = ",")
+		                                 { return readStringCsv(contents, separator); }
+		bool parseCsv(const string& contents, const string& separator = ",")
+		                                 { return readStringCsv(contents, separator); }
+		bool          readNoRhythmCsv              (istream& contents,
 		                                            const string& separator = ",");
-		bool          readNoRhythmCSV              (const char*   filename,
+		bool          readNoRhythmCsv              (const char*   filename,
 		                                            const string& separator = ",");
-		bool          readNoRhythmCSV              (const string& filename,
+		bool          readNoRhythmCsv              (const string& filename,
 		                                            const string& separator = ",");
-		bool          readStringNoRhythmCSV        (const char*   contents,
+		bool          readStringNoRhythmCsv        (const char*   contents,
 		                                            const string& separator = ",");
-		bool          readStringNoRhythmCSV        (const string& contents,
+		bool          readStringNoRhythmCsv        (const string& contents,
 		                                            const string& separator = ",");
 
 		// rhythmic analysis related functionality:

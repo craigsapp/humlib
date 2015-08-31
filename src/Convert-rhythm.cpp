@@ -32,8 +32,8 @@ namespace minHumdrum {
 //     string contains a space, anything after the first space will be ignored
 //     when extracting the string.  **kern data which also includes the pitch
 //     along with the rhythm can also be given and will be ignored.
-//        default value: scale = 4 (duration in terms of quarter notes)
-//        default value: separator = " " (sub-token separator)
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
 //
 
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,

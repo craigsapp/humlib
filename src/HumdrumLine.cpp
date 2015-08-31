@@ -64,17 +64,17 @@ HumdrumLine::~HumdrumLine() {
 
 //////////////////////////////
 //
-// HumdrumLine::setLineFromCSV -- Read a HumdrumLine from a CSV line.
-//   default value: separator = ","
+// HumdrumLine::setLineFromCsv -- Read a HumdrumLine from a CSV line.
+// default value: separator = ","
 //
 
-void HumdrumLine::setLineFromCSV(const char* csv, const string& separator) {
+void HumdrumLine::setLineFromCsv(const char* csv, const string& separator) {
 	string temp = csv;
-	setLineFromCSV(temp);
+	setLineFromCsv(temp);
 }
 
 
-void HumdrumLine::setLineFromCSV(const string& csv, const string& separator) {
+void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 	if (csv.size() < 1) {
 		return;
 	}
@@ -193,14 +193,21 @@ bool HumdrumLine::isExclusive(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isTerminator -- Returns true if first two characters
-//    are "*-" and the next character is undefined or a tab character.
-//    Not a very sophisticated function and may need adjustment later.
-//    Better to search for a terminator in each token.
+// HumdrumLine::isTerminator -- Returns true if all tokens on the line
+//    are terminators.
 //
 
 bool HumdrumLine::isTerminator(void) const {
-	return equalChar(1, '!') && equalChar(0, '*');
+	if (getTokenCount() == 0) {
+		// if tokens have not been parsed, check line text
+		return equalChar(1, '!') && equalChar(0, '*');
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).isTerminator()) {
+			return false;
+		}
+	}
+	return true;
 }
 
 
@@ -313,7 +320,7 @@ int HumdrumLine::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getLineNumber -- Return the line index plus one.
+// HumdrumLine::getLineNumber -- Returns the line index plus one.
 //
 
 int HumdrumLine::getLineNumber(void) const {
@@ -343,7 +350,7 @@ HumNum HumdrumLine::getDuration(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationFromStart -- Set the duration from the start of the
+// HumdrumLine::setDurationFromStart -- Sets the duration from the start of the
 //    file to the start of the current line.  This is used in rhythmic
 //    analysis done in the HumdrumFileStructure class.
 //
@@ -374,7 +381,7 @@ HumNum HumdrumLine::getDurationFromStart(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getDurationToEnd -- Return the duration from the start of the
+// HumdrumLine::getDurationToEnd -- Returns the duration from the start of the
 //    line to the end of the HumdrumFile which owns this HumdrumLine.  The
 //    rhythm of the HumdrumFile must be analyze before using this function;
 //    otherwise a 0 will probably be returned.
@@ -400,7 +407,7 @@ HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getDurationFromBarline -- Return the duration from the start
+// HumdrumLine::getDurationFromBarline -- Returns the duration from the start
 //    of the given line to the first barline occurring before the given line.
 //    Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
 //
@@ -418,7 +425,7 @@ HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTrackStart --  Return the starting exclusive interpretation
+// HumdrumLine::getTrackStart --  Returns the starting exclusive interpretation
 //    for the given spine/track.
 //
 
@@ -464,7 +471,7 @@ HumNum HumdrumLine::getDurationToBarline(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getBeat -- return the beat number for the data on the
+// HumdrumLine::getBeat -- Returns the beat number for the data on the
 //     current line given the input **recip representation for the duration
 //     of a beat.  The beat in a measure is offset from 1 (first beat is
 //     1 rather than 0).
@@ -494,7 +501,7 @@ HumNum HumdrumLine::getBeat(string beatrecip) const {
 
 //////////////////////////////
 //
-// HumdrumLine::setDurationToBarline -- Set the duration from the current
+// HumdrumLine::setDurationToBarline -- Sets the duration from the current
 //     line to the next barline in the score.  This function is used by
 //     analyzeMeter in the HumdrumFileStructure class.
 //
@@ -507,7 +514,7 @@ void HumdrumLine::setDurationToBarline(HumNum dur) {
 
 //////////////////////////////
 //
-// HumdrumLine::setDuration -- Set the duration of the line.  This is done
+// HumdrumLine::setDuration -- Sets the duration of the line.  This is done
 //   in the rhythmic analysis for the HumdurmFileStructure class.
 //
 
@@ -578,7 +585,7 @@ bool HumdrumLine::isEmpty(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenCount --  Return the number of tokens on the line.  This
+// HumdrumLine::getTokenCount --  Returns the number of tokens on the line.  This
 //     value is set by HumdrumFileBase in analyzeTokens.
 //
 
@@ -590,7 +597,7 @@ int HumdrumLine::getTokenCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::token -- Return a reference to the given token on the line.
+// HumdrumLine::token -- Returns a reference to the given token on the line.
 //    An invalid token index would be bad to give to this function as it
 //    returns a reference rather than a pointer (which could be set to
 //    NULL if invalid).  Perhaps this function will eventually throw an
@@ -605,7 +612,7 @@ HumdrumToken& HumdrumLine::token(int index) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenString -- Return a copy of the string component of
+// HumdrumLine::getTokenString -- Returns a copy of the string component of
 //     a token.  This code will return a segmentation fault if index is out of
 //     range...
 //
@@ -685,7 +692,7 @@ void HumdrumLine::getTokens(vector<HumdrumToken*>& list) {
 
 //////////////////////////////
 //
-// HumdrumLine::getChar -- Return character at given index in string, or
+// HumdrumLine::getChar -- Returns character at given index in string, or
 //    null if out of range.
 //
 
@@ -711,7 +718,7 @@ char HumdrumLine::getChar(int index) const {
 //    will be "((1)b)a" and "((1)b)b". If two different tracks merge, such
 //    as "1" and "(2)a", then the spine info will be "1 (2)a".
 //
-//    default value: out = cout
+// default value: out = cout
 //
 
 ostream& HumdrumLine::printSpineInfo(ostream& out) {
@@ -736,7 +743,7 @@ ostream& HumdrumLine::printSpineInfo(ostream& out) {
 //     the file.  Useful for debugging.  The datatype prefix "**" is removed;
 //     otherwise, it is given when you call HumdrumToken::getDataType().
 //
-//     default value: out = cout
+// default value: out = cout
 //
 
 ostream& HumdrumLine::printDataTypeInfo(ostream& out) {
@@ -850,7 +857,7 @@ bool HumdrumLine::analyzeTracks(void) {
 //     duration, then its duration is -1.  If a token represents
 //     a grace note, then its duration is 0 (regardless of whether it
 //     includes a visual duration).
-//     default value: out = cout
+// default value: out = cout
 //
 
 ostream& HumdrumLine::printDurationInfo(ostream& out) {
@@ -870,20 +877,36 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumLine::printCSV -- print the line as a CSV
+// HumdrumLine::printCsv -- print the line as a CSV
 //    (comma separate value) line.
-//       default value: out = std::cout;
-//       default value: separator = ","
+// default value: out = std::cout;
+// default value: separator = ","
 //
 
-ostream& HumdrumLine::printCSV(ostream& out, const string& separator) {
+ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printCSV(out);
+		token(i).printCsv(out);
 		if (i<getFieldCount()-1) {
 			out << separator;
 		}
 	}
 	out << endl;
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::printXml --
+//
+
+ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
+	out << Convert::repeatString(indent, level) << "<line>\n";
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i).printXml(out, level+1, indent);
+	}
+	out << Convert::repeatString(indent, level) << "</line>\n";
 	return out;
 }
 
@@ -908,7 +931,7 @@ ostream& HumdrumLine::printCSV(ostream& out, const string& separator) {
 //     interpretation on the next line is give the next higher track
 //     number.
 //
-//     default value: out = cout
+// default value: out = cout
 //
 
 ostream& HumdrumLine::printTrackInfo(ostream& out) {

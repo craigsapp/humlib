@@ -68,7 +68,7 @@ HumdrumToken::~HumdrumToken() {
 
 //////////////////////////////
 //
-// HumdrumToken::equalChar -- return true if the character at the given
+// HumdrumToken::equalChar -- Returns true if the character at the given
 //     index is the given char.
 //
 
@@ -90,10 +90,11 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNonNullDataTokenCount -- Return the number of
+// HumdrumToken::getPreviousNonNullDataTokenCount -- Returns the number of
 //   previous tokens in the spine which is not a null token.  For null
 //   tokens, this will be a count of the number of non-null tokens which
 //   the null represents.
+// @SEEALSO: getPreviousNonNullDataToken
 //
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
@@ -104,7 +105,7 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousNonNullDataToken -- Return the non-null
+// HumdrumToken::getPreviousNonNullDataToken -- Returns the non-null
 //    data token which occurs before this token in the data in the same
 //    spine.  The default value is index 0, since mostly there will only
 //    be one previous token.
@@ -127,7 +128,7 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataTokenCount -- Return the number of non-null
+// HumdrumToken::getNextNonNullDataTokenCount -- Returns the number of non-null
 //     data tokens which follow this token in the spine.
 //
 
@@ -139,10 +140,10 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextNonNullDataToken -- Return the given next non-null token
+// HumdrumToken::getNextNonNullDataToken -- Returns the given next non-null token
 //    following this one in the spine.  The default value for index is 0 since
 //    the next non-null data token count will typically be 1.
-//       default value: index = 0
+// default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
@@ -164,6 +165,7 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 //
 // HumdrumToken::getDataType -- Get the exclusive interpretation type for
 //     the token.
+// @SEEALSO: isDataType
 //
 
 const string& HumdrumToken::getDataType(void) const {
@@ -176,6 +178,7 @@ const string& HumdrumToken::getDataType(void) const {
 //
 // HumdrumToken::isDataType -- Returns true if the data type of the token
 //   matches the test data type.
+// @SEEALSO: getDataType
 //
 
 bool HumdrumToken::isDataType(string dtype) const {
@@ -190,7 +193,8 @@ bool HumdrumToken::isDataType(string dtype) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setSpineInfo -- Set the spine manipulation history string.
+// HumdrumToken::setSpineInfo -- Sets the spine manipulation history string.
+// @SEEALTO: getSpineInfo
 //
 
 void HumdrumToken::setSpineInfo(const string& spineinfo) {
@@ -201,8 +205,9 @@ void HumdrumToken::setSpineInfo(const string& spineinfo) {
 
 //////////////////////////////
 //
-// HumdrumToken::getSpineInfo -- Return the spine split/merge history
+// HumdrumToken::getSpineInfo -- Returns the spine split/merge history
 //    for the token.
+// @SEEALTO: setSpineInfo
 //
 
 string HumdrumToken::getSpineInfo(void) const {
@@ -213,8 +218,9 @@ string HumdrumToken::getSpineInfo(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineIndex -- Return the line index of the owning
+// HumdrumToken::getLineIndex -- Returns the line index of the owning
 //    HumdrumLine for this token.
+// @SEEALTO: getLineNumber
 //
 
 int HumdrumToken::getLineIndex(void) const {
@@ -225,7 +231,8 @@ int HumdrumToken::getLineIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getFieldIndex --
+// HumdrumToken::getFieldIndex -- Returns the index of the token the line.
+// @SEEALSO: getFieldIndex
 //
 
 int HumdrumToken::getFieldIndex(void) const {
@@ -236,7 +243,8 @@ int HumdrumToken::getFieldIndex(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getLineNumber -- Return the line index plus 1.
+// HumdrumToken::getLineNumber -- Returns the line index plus 1.
+// @SEEALTO: getLineIndex
 //
 
 int HumdrumToken::getLineNumber(void) const {
@@ -247,8 +255,9 @@ int HumdrumToken::getLineNumber(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setFieldIndex -- Set the field index of the token on the
+// HumdrumToken::setFieldIndex -- Sets the field index of the token on the
 //   owning HumdrumLine object.
+// @SEEALSO: getFieldIndex
 //
 
 void HumdrumToken::setFieldIndex(int index) {
@@ -259,20 +268,15 @@ void HumdrumToken::setFieldIndex(int index) {
 
 //////////////////////////////
 //
-// HumdrumToken::setTrack -- Set the track number (similar to a staff in MEI).
+// HumdrumToken::setTrack -- Sets the track number (similar to a staff in MEI).
+//     The two-parameter version will set the track and sub-track at the same
+//     time (subtrack is similar to a staff and layer in MEI).
 //
 
 void HumdrumToken::setTrack(int aTrack) {
 	address.setTrack(aTrack);
 }
 
-
-
-//////////////////////////////
-//
-// HumdrumToken::setTrack -- Set the track and subtrack (subtrack is similar
-//     to a staff and layer in MEI).
-//
 
 void HumdrumToken::setTrack(int aTrack, int aSubtrack) {
 	setTrack(aTrack);
@@ -294,7 +298,7 @@ int HumdrumToken::getTrack(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setSubtrack -- Set the subtrack (similar to a layer
+// HumdrumToken::setSubtrack -- Sets the subtrack (similar to a layer
 //    in MEI).
 //
 
@@ -306,7 +310,7 @@ void HumdrumToken::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
-// HumdrumToken::setSubtrackCount -- Set the subtrack count in the 
+// HumdrumToken::setSubtrackCount -- Sets the subtrack count in the 
 //    HumdrumLine for all tokens in the same track as the current
 //    token.
 //
@@ -343,10 +347,12 @@ void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextToken -- Return the next token in the
+// HumdrumToken::getNextToken -- Returns the next token in the
 //    spine.  Since the next token count is usually one, the default
-//    index value is zero.
-//       default value: index = 0
+//    index value is zero.  When there is no next token (when the current
+//    token is a spine terminaor), then NULL will be returned.
+// default value: index = 0
+// @SEEALSO: getNextTokens, getPreviousToken
 //
 
 HumdrumToken* HumdrumToken::getNextToken(int index) const {
@@ -361,8 +367,9 @@ HumdrumToken* HumdrumToken::getNextToken(int index) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextTokens --  Return a list of the next
+// HumdrumToken::getNextTokens -- Returns a list of the next
 //   tokens in the spine after this token.
+// @SEEALSO: getNextToken
 //
 
 vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
@@ -373,7 +380,7 @@ vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousTokens --  Return a list of the previous
+// HumdrumToken::getPreviousTokens -- Returns a list of the previous
 //    tokens in the spine before this token.
 //
 
@@ -385,10 +392,10 @@ vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousToken -- Return the previous token in the
+// HumdrumToken::getPreviousToken -- Returns the previous token in the
 //    spine.  Since the previous token count is usually one, the default
 //    index value is zero.
-//       default value: index = 0
+// default value: index = 0
 //
 
 HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
@@ -445,7 +452,7 @@ bool HumdrumToken::analyzeDuration(void) {
 
 ///////////////////////////////
 //
-// HumdrumToken::isManipulator -- returns true if token is one of:
+// HumdrumToken::isManipulator -- Returns true if token is one of:
 //    SPLIT_TOKEN     = "*^"  == spine splitter
 //    MERGE_TOKEN     = "*v"  == spine merger
 //    EXCHANGE_TOKEN  = "*x"  == spine exchanger
@@ -468,7 +475,7 @@ bool HumdrumToken::isManipulator(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDuration -- Return the duration of the token.  The token
+// HumdrumToken::getDuration -- Returns the duration of the token.  The token
 //    does not necessarily need to have any explicit duration, as the returned
 //    value will also include implicit duration calculated in analyzeRhythm
 //    in the HumdrumFileStructure class.
@@ -486,7 +493,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::setDuration -- Set the duration of the token.  This is done in
+// HumdrumToken::setDuration -- Sets the duration of the token.  This is done in
 //    HumdrumFileStructure::analyzeTokenDurations().
 //
 
@@ -498,7 +505,7 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationFromStart -- Return the duration from the
+// HumdrumToken::getDurationFromStart -- Returns the duration from the
 //   start of the owning HumdrumFile to the starting time of the
 //   owning HumdrumLine for the token.  The durationFromStart is
 //   in reference to the start of the token, not the end of the token,
@@ -603,7 +610,7 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isNonNullData -- Return true if the token is a data token
+// HumdrumToken::isNonNullData -- Returns true if the token is a data token
 //    that is not a null token.
 //
 
@@ -615,7 +622,7 @@ bool HumdrumToken::isNonNullData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isNullData -- Return true if the token is a null 
+// HumdrumToken::isNullData -- Returns true if the token is a null 
 //     data token.
 //
 
@@ -724,7 +731,13 @@ int HumdrumToken::getSubtrack(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getTrackString -- Get "track.subtrack" as a string.
+// HumdrumToken::getTrackString -- Gets "track.subtrack" as a string.  The
+//     track and subtrack are integers.  The getTrackString function will 
+//     return a string with the track and subtrack separated by an dot.  The
+//     Dot is not a decimal point, but if the subtrack count does not exceed
+//     9, then the returned string can be treated as a floating-point number
+//     where the subtrack is the fractional part.
+// @SEEALSO: getTrack, getSubtrack
 //
 
 string HumdrumToken::getTrackString(void) const {
@@ -735,8 +748,12 @@ string HumdrumToken::getTrackString(void) const {
 
 /////////////////////////////
 //
-// HumdrumToken::getSubtokenCount --
-//   default value: separator = " "
+// HumdrumToken::getSubtokenCount -- Return the number of sub-tokens in
+//     a token.  The input parameter is the sub-token separator.  If the
+//     separator comes at the start or end of the token, then there will
+//     be empty sub-token(s) included in the count.
+// default value: separator = " "
+// @SEEALSO: getSubtoken
 //
 
 int HumdrumToken::getSubtokenCount(const string& separator) const {
@@ -753,11 +770,12 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 
 /////////////////////////////
 //
-// HumdrumToken::getSubtoken -- Extract the specified subtoken from the token.
+// HumdrumToken::getSubtoken -- Extract the specified sub-token from the token.
 //    Tokens usually are separated by spaces in Humdrum files, but this will 
 //    depened on the data type (so therefore, the tokens are not presplit into
 //    sub-tokens when reading in the file).
-//        default value: separator = " "
+// default value: separator = " "
+// @SEEALSO: getSubtokenCount, getTrackString
 //
 
 string HumdrumToken::getSubtoken(int index, const string& separator) const {
@@ -855,7 +873,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 
 //////////////////////////////
 //
-// HumdrumToken::setOwner -- Set the HumdrumLine owner of this token.
+// HumdrumToken::setOwner -- Sets the HumdrumLine owner of this token.
 //
 
 void HumdrumToken::setOwner(HumdrumLine* aLine) {
@@ -866,7 +884,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 
 //////////////////////////////
 //
-// HumdrumToken::getOwner -- Return a pointer to the HumdrumLine which owns this
+// HumdrumToken::getOwner -- Returns a pointer to the HumdrumLine which owns this
 //    token.
 //
 
@@ -878,7 +896,7 @@ HumdrumLine* HumdrumToken::getOwner(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getState --  Return the rhythm state variable.
+// HumdrumToken::getState -- Returns the rhythm state variable.
 //
 
 int HumdrumToken::getState(void) const {
@@ -902,7 +920,7 @@ void HumdrumToken::incrementState(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::getNextTokenCount -- Return the number of tokens in the
+// HumdrumToken::getNextTokenCount -- Returns the number of tokens in the
 //   spine/sub spine which follow this token.  Typically this will be 1,
 //   but will be zero for a terminator interpretation (*-), and will be
 //   2 for a split interpretation (*^).
@@ -916,7 +934,7 @@ int HumdrumToken::getNextTokenCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getPreviousTokenCount -- Return the number of tokens
+// HumdrumToken::getPreviousTokenCount -- Returns the number of tokens
 //   in the spine/sub-spine which precede this token.  Typically this will
 //   be 1, but will be zero for an exclusive interpretation (starting with
 //   "**"), and will be greater than one for a token which follows a
@@ -931,11 +949,11 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::printCSV -- print token in CSV format.
-//      default value: out = std::cout
+// HumdrumToken::printCsv -- print token in CSV format.
+// default value: out = std::cout
 //
 
-ostream& HumdrumToken::printCSV(ostream& out) {
+ostream& HumdrumToken::printCsv(ostream& out) {
 	string& value = *this;
 	int loc = this->find(",");
 	if (loc == string::npos) {
@@ -951,6 +969,106 @@ ostream& HumdrumToken::printCSV(ostream& out) {
 		}
 		out << '"';
 	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printXml -- Print a HumdrumToken in XML format.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+//
+
+ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
+	out << Convert::repeatString(indent, level) << "<token text=\"";
+	out << Convert::encodeXml(((string)(*this)));
+	out << "\">\n";
+	printXmlBaseInfo(out, level+1, indent);
+	printXmlStructureInfo(out, level+1, indent);
+	printXmlContentInfo(out, level+1, indent);
+	printXmlParameterInfo(out, level+1, indent);
+	out << Convert::repeatString(indent, level) << "</token>\n";
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printXmlBaseInfo -- print data type and spine info.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+
+ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level, 
+		const string& indent) { 
+
+	out << Convert::repeatString(indent, level);
+	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
+
+	out << Convert::repeatString(indent, level);
+	out << "<track>" << getTrack() << "</track>\n";
+
+	if (getSubtrack() > 0) {
+		out << Convert::repeatString(indent, level);
+		out << "<subtrack>" << getSubtrack() << "</subtrack>\n";
+	}
+
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printXmlStructureInfo -- Prints structural information
+//    other than spine analysis.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+
+ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level, 
+		const string& indent) { 
+
+	out << Convert::repeatString(indent, level);
+	out << "<duration>" << getDuration() << "</duration>\n";
+
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printXmlContentInfo -- Print content analysis information.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+
+ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level, 
+		const string& indent) { 
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::printXmlParameterInfo -- Print contents of HumHash for token.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+
+ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level, 
+		const string& indent) { 
 	return out;
 }
 

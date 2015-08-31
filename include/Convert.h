@@ -56,6 +56,8 @@ class Convert {
 		static void    replaceOccurrences   (string& source,
 		                                     const string& search,
 		                                     const string& replace);
+		static string  repeatString         (const string& pattern, int count);
+		static string  encodeXml            (const string& input);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

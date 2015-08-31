@@ -42,11 +42,11 @@ void Convert::replaceOccurrences(string& source, const string& search,
 
 //////////////////////////////
 //
-// Convert::splitString -- split a string into a list of strings
+// Convert::splitString -- Splits a string into a list of strings
 //   separated by the given character.  Empty strings will be generated
 //   if the separator occurs at the start/end of the input string, and
 //   if two or more separates are adjacent to each other.
-//		default value: separator = ' ';
+// default value: separator = ' ';
 //
 
 vector<string> Convert::splitString(const string& data, char separator) {
@@ -58,6 +58,46 @@ vector<string> Convert::splitString(const string& data, char separator) {
 	}
 	if (output.size() == 0) {
 		output.push_back(data);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::repeatString -- Returns a string which repeats the given
+//   pattern by the given count.
+//
+
+string Convert::repeatString(const string& pattern, int count) {
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pattern;
+	}
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
+//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and 
+//    ' to &apos;.
+//
+
+string Convert::encodeXml(const string& input) {
+	string output;
+	output.reserve(input.size()*2);
+	for (int i=0; i<input.size(); i++) {
+		switch (input[i]) {
+			case '&':  output += "&amp;";   break;
+			case '<':  output += "&lt;";    break;
+			case '>':  output += "&gt;";    break;
+			case '"':  output += "&quot;";  break;
+			case '\'': output += "&apos;";  break;
+			default:   output += input[i];
+		}
 	}
 	return output;
 }

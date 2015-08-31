@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 27 03:47:10 PDT 2015
+// Last Modified: Mon Aug 31 01:34:27 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -365,8 +365,10 @@ class HumdrumLine : public string, public HumHash {
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
-		ostream& printCSV               (ostream& out = cout,
+		ostream& printCsv               (ostream& out = cout,
 		                                 const string& separator = ",");
+		ostream& printXml               (ostream& out = cout, int level = 0, 
+		                                 const string& indent = "\t");
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
@@ -386,9 +388,9 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
-		void     setLineFromCSV         (const char* csv, 
+		void     setLineFromCsv         (const char* csv, 
 		                                 const string& separator = ",");
-		void     setLineFromCSV         (const string& csv,
+		void     setLineFromCsv         (const string& csv,
 		                                 const string& separator = ",");
 
 	protected:
@@ -530,7 +532,9 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata);
-		ostream& printCSV                  (ostream& out = cout);
+		ostream& printCsv                  (ostream& out = cout);
+		ostream& printXml                  (ostream& out = cout, int level = 0, 
+		                                    const string& indent = "\t");
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -570,6 +574,14 @@ class HumdrumToken : public string, public HumHash {
 		void     setDuration       (const HumNum& dur);
 
 		bool     analyzeDuration   (void);
+		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlContentInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
 
 	private:
 
@@ -641,29 +653,29 @@ class HumdrumFileBase {
 		bool          read                         (istream& contents);
 		bool          read                         (const char*   filename);
 		bool          read                         (const string& filename);
-		bool          readCSV                      (istream& contents,
+		bool          readCsv                      (istream& contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const char* contents,
+		bool          readCsv                      (const char* contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const string& contents,
+		bool          readCsv                      (const string& contents,
 		                                            const string& separator=",");
 
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
-		bool          readStringCSV                (const char*   contents,
+		bool          readStringCsv                (const char*   contents,
                                                   const string& separator=",");
-		bool          readStringCSV                (const string& contents,
+		bool          readStringCsv                (const string& contents,
                                                   const string& separator=",");
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
 		bool parse(const string& contents)    { return readString(contents); }
-		bool parseCSV(istream& contents, const string& separator = ",")
-		                                      { return readCSV(contents); }
-		bool parseCSV(const char* contents, const string& separator = ",")
-		                                      { return readStringCSV(contents); }
-		bool parseCSV(const string& contents, const string& separator = ",")
-		                                      { return readStringCSV(contents); }
+		bool parseCsv(istream& contents, const string& separator = ",")
+		                                      { return readCsv(contents); }
+		bool parseCsv(const char* contents, const string& separator = ",")
+		                                      { return readStringCsv(contents); }
+		bool parseCsv(const string& contents, const string& separator = ",")
+		                                      { return readStringCsv(contents); }
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
@@ -673,8 +685,10 @@ class HumdrumFileBase {
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
-		ostream&      printCSV      (ostream& out = cout,
+		ostream&      printCsv      (ostream& out = cout,
 		                             const string& separator = ",");
+		ostream&      printXml      (ostream& out = cout, int level = 0,
+		                             const string& indent = "\t");
 
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;
@@ -795,31 +809,31 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          readStringNoRhythm           (const string& contents);
 
 		// CSV reading functions:
-		bool          readCSV                      (istream& contents,
+		bool          readCsv                      (istream& contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const char*   filename,
+		bool          readCsv                      (const char*   filename,
 		                                            const string& separator=",");
-		bool          readCSV                      (const string& filename,
+		bool          readCsv                      (const string& filename,
 		                                            const string& separator=",");
-		bool          readStringCSV                (const char*   contents,
+		bool          readStringCsv                (const char*   contents,
 		                                            const string& separator=",");
-		bool          readStringCSV                (const string& contents,
+		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
-		bool parseCSV(istream& contents, const string& separator = ",")
-		                                 { return readCSV(contents, separator); }
-		bool parseCSV(const char* contents, const string& separator = ",")
-		                                 { return readStringCSV(contents, separator); }
-		bool parseCSV(const string& contents, const string& separator = ",")
-		                                 { return readStringCSV(contents, separator); }
-		bool          readNoRhythmCSV              (istream& contents,
+		bool parseCsv(istream& contents, const string& separator = ",")
+		                                 { return readCsv(contents, separator); }
+		bool parseCsv(const char* contents, const string& separator = ",")
+		                                 { return readStringCsv(contents, separator); }
+		bool parseCsv(const string& contents, const string& separator = ",")
+		                                 { return readStringCsv(contents, separator); }
+		bool          readNoRhythmCsv              (istream& contents,
 		                                            const string& separator = ",");
-		bool          readNoRhythmCSV              (const char*   filename,
+		bool          readNoRhythmCsv              (const char*   filename,
 		                                            const string& separator = ",");
-		bool          readNoRhythmCSV              (const string& filename,
+		bool          readNoRhythmCsv              (const string& filename,
 		                                            const string& separator = ",");
-		bool          readStringNoRhythmCSV        (const char*   contents,
+		bool          readStringNoRhythmCsv        (const char*   contents,
 		                                            const string& separator = ",");
-		bool          readStringNoRhythmCSV        (const string& contents,
+		bool          readStringNoRhythmCsv        (const string& contents,
 		                                            const string& separator = ",");
 
 		// rhythmic analysis related functionality:
@@ -927,6 +941,8 @@ class Convert {
 		static void    replaceOccurrences   (string& source,
 		                                     const string& search,
 		                                     const string& replace);
+		static string  repeatString         (const string& pattern, int count);
+		static string  encodeXml            (const string& input);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

@@ -48,29 +48,29 @@ class HumdrumFileBase {
 		bool          read                         (istream& contents);
 		bool          read                         (const char*   filename);
 		bool          read                         (const string& filename);
-		bool          readCSV                      (istream& contents,
+		bool          readCsv                      (istream& contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const char* contents,
+		bool          readCsv                      (const char* contents,
 		                                            const string& separator=",");
-		bool          readCSV                      (const string& contents,
+		bool          readCsv                      (const string& contents,
 		                                            const string& separator=",");
 
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
-		bool          readStringCSV                (const char*   contents,
+		bool          readStringCsv                (const char*   contents,
                                                   const string& separator=",");
-		bool          readStringCSV                (const string& contents,
+		bool          readStringCsv                (const string& contents,
                                                   const string& separator=",");
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
 		bool parse(const string& contents)    { return readString(contents); }
-		bool parseCSV(istream& contents, const string& separator = ",")
-		                                      { return readCSV(contents); }
-		bool parseCSV(const char* contents, const string& separator = ",")
-		                                      { return readStringCSV(contents); }
-		bool parseCSV(const string& contents, const string& separator = ",")
-		                                      { return readStringCSV(contents); }
+		bool parseCsv(istream& contents, const string& separator = ",")
+		                                      { return readCsv(contents); }
+		bool parseCsv(const char* contents, const string& separator = ",")
+		                                      { return readStringCsv(contents); }
+		bool parseCsv(const string& contents, const string& separator = ",")
+		                                      { return readStringCsv(contents); }
 
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
@@ -80,8 +80,10 @@ class HumdrumFileBase {
 		ostream&      printSpineInfo               (ostream& out = cout);
 		ostream&      printDataTypeInfo            (ostream& out = cout);
 		ostream&      printTrackInfo               (ostream& out = cout);
-		ostream&      printCSV      (ostream& out = cout,
+		ostream&      printCsv      (ostream& out = cout,
 		                             const string& separator = ",");
+		ostream&      printXml      (ostream& out = cout, int level = 0,
+		                             const string& indent = "\t");
 
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;

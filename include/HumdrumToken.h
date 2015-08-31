@@ -89,7 +89,9 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata);
-		ostream& printCSV                  (ostream& out = cout);
+		ostream& printCsv                  (ostream& out = cout);
+		ostream& printXml                  (ostream& out = cout, int level = 0, 
+		                                    const string& indent = "\t");
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -129,6 +131,14 @@ class HumdrumToken : public string, public HumHash {
 		void     setDuration       (const HumNum& dur);
 
 		bool     analyzeDuration   (void);
+		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlContentInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
+		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0, 
+		                            const string& indent = "\t");
 
 	private:
 

@@ -1,4 +1,4 @@
-// Description: Print a Humdrum file in CSV format.
+// Description: Print a file in XML format
 
 #include "minhumdrum.h"
 
@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
    if (!infile.read(argv[1])) {
       return 1;
    }
-   infile.printCsv();
+   infile.printXml();
    return 0;
 }
 

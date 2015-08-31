@@ -80,32 +80,32 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readCSV --  Read the contents of a file from a file or
+// HumdrumFileStructure::readCsv --  Read the contents of a file from a file or
 //   istream in CSV format.  The file's structure is analyzed, and then the
 //   rhythmic structure is calculated.
-//       default value: separator = ","
+// default value: separator = ","
 //
 
 
-bool HumdrumFileStructure::readCSV(istream& contents,
+bool HumdrumFileStructure::readCsv(istream& contents,
 		const string& separator) {
-	if (!readNoRhythmCSV(contents, separator)) {
+	if (!readNoRhythmCsv(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
 }
 
-bool HumdrumFileStructure::readCSV(const char* filename,
+bool HumdrumFileStructure::readCsv(const char* filename,
 		const string& separator) {
-	if (!readNoRhythmCSV(filename, separator)) {
+	if (!readNoRhythmCsv(filename, separator)) {
 		return false;
 	}
 	return analyzeStructure();
 }
 
-bool HumdrumFileStructure::readCSV(const string& filename,
+bool HumdrumFileStructure::readCsv(const string& filename,
 		const string& separator) {
-	if (!readNoRhythmCSV(filename, separator)) {
+	if (!readNoRhythmCsv(filename, separator)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -138,23 +138,23 @@ bool HumdrumFileStructure::readString(const string& contents) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readStringCSV -- Read the contents from a string.
+// HumdrumFileStructure::readStringCsv -- Read the contents from a string.
 //    Similar to HumdrumFileStructure::read, but for string data.
-//       default value: separator = ","
+// default value: separator = ","
 //
 
-bool HumdrumFileStructure::readStringCSV(const char* contents,
+bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
-	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
+	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
 }
 
 
-bool HumdrumFileStructure::readStringCSV(const string& contents,
+bool HumdrumFileStructure::readStringCsv(const string& contents,
 		const string& separator) {
-	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
+	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
@@ -204,26 +204,26 @@ bool HumdrumFileStructure::readNoRhythm(const string& filename) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readNoRhythmCSV -- Similar to the readCSV()
+// HumdrumFileStructure::readNoRhythmCsv -- Similar to the readCsv()
 //    functions, but does not parse rhythm (or parameters).
-//        default value: separator = ","
+// default value: separator = ","
 //
 
-bool HumdrumFileStructure::readNoRhythmCSV(istream& infile,
+bool HumdrumFileStructure::readNoRhythmCsv(istream& infile,
 		const string& seperator) {
-	return HumdrumFileBase::readCSV(infile);
+	return HumdrumFileBase::readCsv(infile);
 }
 
 
-bool HumdrumFileStructure::readNoRhythmCSV(const char* filename,
+bool HumdrumFileStructure::readNoRhythmCsv(const char* filename,
 		const string& seperator) {
-	return HumdrumFileBase::readCSV(filename);
+	return HumdrumFileBase::readCsv(filename);
 }
 
 
-bool HumdrumFileStructure::readNoRhythmCSV(const string& filename,
+bool HumdrumFileStructure::readNoRhythmCsv(const string& filename,
 		const string& seperator) {
-	return HumdrumFileBase::readCSV(filename);
+	return HumdrumFileBase::readCsv(filename);
 }
 
 
@@ -248,21 +248,21 @@ bool HumdrumFileStructure::readStringNoRhythm(const string& contents) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::readStringNoRhythmCSV -- Read a string, but
+// HumdrumFileStructure::readStringNoRhythmCsv -- Read a string, but
 //   do not analyze the rhythm (or parameters) in the read data.
-//       default value: separator = ","
+// default value: separator = ","
 //
 
 
-bool HumdrumFileStructure::readStringNoRhythmCSV(const char* contents,
+bool HumdrumFileStructure::readStringNoRhythmCsv(const char* contents,
 		const string& separator) {
-	return HumdrumFileBase::readStringCSV(contents);
+	return HumdrumFileBase::readStringCsv(contents);
 }
 
 
-bool HumdrumFileStructure::readStringNoRhythmCSV(const string& contents,
+bool HumdrumFileStructure::readStringNoRhythmCsv(const string& contents,
 		const string& separator) {
-	return HumdrumFileBase::readStringCSV(contents);
+	return HumdrumFileBase::readStringCsv(contents);
 }
 
 

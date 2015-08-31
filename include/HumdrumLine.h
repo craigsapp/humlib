@@ -60,8 +60,10 @@ class HumdrumLine : public string, public HumHash {
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
 		ostream& printDurationInfo      (ostream& out = cout);
-		ostream& printCSV               (ostream& out = cout,
+		ostream& printCsv               (ostream& out = cout,
 		                                 const string& separator = ",");
+		ostream& printXml               (ostream& out = cout, int level = 0, 
+		                                 const string& indent = "\t");
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
@@ -81,9 +83,9 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
-		void     setLineFromCSV         (const char* csv, 
+		void     setLineFromCsv         (const char* csv, 
 		                                 const string& separator = ",");
-		void     setLineFromCSV         (const string& csv,
+		void     setLineFromCsv         (const string& csv,
 		                                 const string& separator = ",");
 
 	protected:

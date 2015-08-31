@@ -176,7 +176,7 @@ int HumAddress::getSubtrackCount(void) const {
 //      The returned string will have the track number if the sub-spine value
 //      is zero.  The optional separator parameter is used to separate the
 //      track number from the subtrack number.
-//        default value: separator = "."
+// default value: separator = "."
 //
 
 string HumAddress::getTrackString(string separator) const {
