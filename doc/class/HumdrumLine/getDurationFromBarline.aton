@@ -8,10 +8,9 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		400-411
-@SEEALSO:
-@SHORTDESC:	Return the duration from the start of the given line to the first barline occurring before the given line.
-@LONGDESC:	Return the duration from the start
+@LINES:		407-418
+@SHORTDESC:	Returns the duration from the start of the given line to the first barline occurring before the given line.
+@LONGDESC:	Returns the duration from the start
 	of the given line to the first barline occurring before the given line.
 	Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
 	
@@ -23,18 +22,10 @@ HumNum scale
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getDurationFromBarline -- Return the duration from the start
-//    of the given line to the first barline occurring before the given line.
-//    Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
-//
 
 HumNum HumdrumLine::getDurationFromBarline(void) const {
 	return durationFromBarline;
 }
-
-
 
 
 @@END:	FunctionDocumentation

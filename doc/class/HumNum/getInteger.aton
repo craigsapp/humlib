@@ -7,7 +7,6 @@
 @PARAMETERS:	double round = 0.0
 @FILE:		HumNum.cpp
 @LINES:		148-168
-@SEEALSO:
 @SHORTDESC:	Return the integral part of the fraction.
 @LONGDESC:	Return the integral part of the fraction.
 	Default value: round = 0.0
@@ -26,17 +25,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::getInteger -- Return the integral part of the fraction.
-//    Default value: round = 0.0
-//    Optional parameter is a rounding factor.
-//    Examples:
-//       8/5 | round=0.0 ==  1
-//      -8/5 | round=0.0 == -1
-//			8/5 | round=0.5 ==  1
-//      -8/5 | round=0.5 == -1
-//
 
 int HumNum::getInteger(double round) const {
 	if (top < 0) {
@@ -45,8 +33,6 @@ int HumNum::getInteger(double round) const {
 		return int(top/bot + round);
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		684-693
-@SEEALSO:
+@LINES:		691-700
 @SHORTDESC:	True if the token is "*+".
 @LONGDESC:	True if the token is "*+".
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isAddInterpretation -- True if the token is "*+".
-//
 
 bool HumdrumToken::isAddInterpretation(void) const {
 	return ((string)(*this)) == ADD_TOKEN;
 }
-
-
 
 
 @@END:	FunctionDocumentation

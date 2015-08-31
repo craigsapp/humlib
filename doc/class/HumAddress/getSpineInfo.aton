@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
 @LINES:		108-123
-@SEEALSO:
 @SHORTDESC:	Return the spine information for the token associated with the address.
 @LONGDESC:	Return the spine information for the token
 	associated with the address.  Examples: "1" the token is in the first
@@ -25,22 +24,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumAddress::getSpineInfo -- Return the spine information for the token
-//     associated with the address.  Examples: "1" the token is in the first
-//     (left-most) spine, and there are no active sub-spines for the spine.
-//     "(1)a"/"(1)b" are the spine descriptions of the two sub-spines after
-//     a split manipulator (*^).  "((1)a)b" is the second sub-spines of the
-//     first sub-spine for spine 1.
-//
-//
 
 const string& HumAddress::getSpineInfo(void) const {
 	return spining;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		181-190
-@SEEALSO:
 @SHORTDESC:	Return the bottom integer in the fraction.
 @LONGDESC:	Return the bottom integer in the fraction.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::getDenominator -- Return the bottom integer in the fraction.
-//
 
 int HumNum::getDenominator(void) const {
 	return bot;
 }
-
-
 
 
 @@END:	FunctionDocumentation

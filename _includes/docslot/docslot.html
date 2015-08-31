@@ -156,6 +156,10 @@ summary {
 	outline:none; /* prevent a box from showing around summary text */
 }
 
+pre {
+	text-indent: 0;
+}
+
 details[open].example-details {
 	content: "XXX";
 }
@@ -244,7 +248,7 @@ pre.output-example {
 		<a name="{{METHOD}}"> </a>
 		<details class="hanging-indent" ontoggle='showOrHideShortDescriptionReverse(this);'>
 			<summary>
-				{{#notConstructor CLASSNAME METHOD}}.{{/notConstructor}}{{#if longname}}<a href="/doc/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}
+				{{#noDot CLASSNAME METHOD}}.{{/noDot}}{{#if longname}}<a href="/doc/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}
 				<span class="docslot-short-title">{{METHOD}}</span>
 			<span class='short-desc'> &mdash;
 			{{{SHORTDESC}}}
@@ -255,6 +259,7 @@ pre.output-example {
 					{{{printDeclarations this}}}
 				{{/if}}
 				{{{LONGDESC}}}
+				{{{showSeealso SEEALSO CLASSNAME}}}
 				{{{showExamples EXAMPLE}}}
 				{{{codeLink METHOD FILE LINES SRCCODE}}}
 			</div>
@@ -317,8 +322,11 @@ pre.output-example {
 // Handlebars helper functions
 //
 
-Handlebars.registerHelper('notConstructor', function (classname, method, options) {
+Handlebars.registerHelper('noDot', function (classname, method, options) {
 	if (classname === method) {
+		return options.inverse(this);
+	}
+	if (method.match(/^operator/)) {
 		return options.inverse(this);
 	}
 	return options.fn(this);
@@ -338,8 +346,11 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 	}
 	var output = '';
 
+	srccode = srccode.replace(/&/, "&amp;", "g");
+	srccode = srccode.replace(/</, "&lt;", "g");
+	srccode = srccode.replace(/>/, "&gt;", "g");
    if (!file.match(/^\s*$/)) {
-		output += '<details class="srccode">\n';
+		output += '<details class="src-code">\n';
 		output += '<summary>\n';
 		output += 'Source code for ' + method 
 		output += ' (<a target="new" href="' + url;
@@ -347,7 +358,7 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
    	output += '</a>)\n';
 		output += '</summary>\n';
 		if (!srccode.match(/^\s*$/)) {
-			output += '<pre style="padding:0.8rem; overflow:auto; font-size:0.9rem; line-height:1.45; border-radius:0.3rem; background-color#f3f6fa; border: solid 1px #dce6f0 box-sizing: border-box;">';
+			output += '<pre style="padding:0.8rem; tab-size: 3; overflow:auto; font-size:0.9rem; line-height:1.45; border-radius:0.3rem; background-color#f3f6fa; border: solid 1px #dce6f0 box-sizing: border-box;">';
 			output += srccode;
 			output += '</pre>';
 		}
@@ -436,6 +447,46 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 
 
 
+//////////////////////////////
+//
+// showSeealso -- Print see also info.
+//
+
+Handlebars.registerHelper('showSeealso', function (seealso, classname) {
+	if (typeof seealso === 'undefined') {
+		return '';
+	}
+	if (seealso.match(/^\s*$/)) {
+		return '';
+	}
+
+	var list = seealso.split(/,\s*/);
+
+	var output = '';
+	output += '<div style="text-indent:-35px">';
+	output += '<b>See also</b>: ';
+	for (var i=0; i<list.length; i++) {
+		output += '<span style="cursor:pointer; color:#1e6bb8;" onclick=\'showSlotDocumentation("';
+		if (list[i].match(/::/)) {
+			output += list[i];
+			output += '");\'>';
+			output += list[i];
+			output += '()</span>';
+		} else {
+			output += classname + '::' + list[i];
+			output += '");\'>';
+			output += list[i];
+			output += '()</span>';
+		}
+		if (i < list.length - 1) {
+			output += ', ';
+		}
+	}
+	output += '</div>';
+	return output;
+});
+
+
 
 //////////////////////////////
 //
@@ -513,9 +564,11 @@ function showOrHideShortDescriptionReverse(target) {
 	if (typeof openstate === 'string') {
 		// hide the short-desc text with visibility:hidden
 		shortdesc.style.visibility = 'hidden';
+		shortdesc.style.display = 'none';
 	} else {
 		// show the short-desc text with visibility:visible
 		shortdesc.style.visibility = 'visible';
+		shortdesc.style.display = 'inline';
 	}
 }
 
@@ -544,11 +597,11 @@ function insertDocumentation(target, template) {
    }
 	var classname    = matches[1];
 	var functionname = matches[2];
+
    functionname = functionname.replace(/=/, "EQUALS");
    functionname = functionname.replace(/\[\]/, "SQUAREBRACKETS");
    
 	var local = sessionStorage[classname + '/' + functionname + '.aton'];
-console.log(functionname);
 	if (local && !local.match(/^\s*$/)) {
 		processAtonData(local, fullname, functionname, target, template, fullQ);
    } else {
@@ -772,6 +825,75 @@ function exclusiveSlotShow(id) {
 }
 
 
+//////////////////////////////
+//
+// closeAllFunctions --
+//
+
+function closeAllFunctions() {
+	var details = document.querySelectorAll("details.hanging-indent");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllFunctions --
+//
+
+function openAllFunctions() {
+	var details = document.querySelectorAll("details.hanging-indent");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
+
+
+
+//////////////////////////////
+//
+// closeAllSource --
+//
+
+function closeAllSource() {
+	var details = document.querySelectorAll("details.src-code");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllSource --
+//
+
+function openAllSource() {
+	var details = document.querySelectorAll("details.src-code");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
 
 </script>
 

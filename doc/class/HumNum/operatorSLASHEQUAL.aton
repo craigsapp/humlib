@@ -9,7 +9,6 @@ HumNum&
 int value
 @FILE:		HumNum.cpp
 @LINES:		581-591
-@SEEALSO:
 @SHORTDESC:	Divide a HumNum by a HumNum or integer.
 @LONGDESC:	Divide a HumNum by a HumNum or integer.
 	
@@ -21,17 +20,11 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator/= -- Divide a HumNum by a HumNum or integer.
-//
 
 HumNum& HumNum::operator/=(const HumNum& value) {
 	*this = *this / value;
 	return *this;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		703-730
-@SEEALSO:
+@LINES:		710-737
 @SHORTDESC:	Print the spine state information of each token in a file.
 @LONGDESC:	Print the spine state information of
 	each token in a file.  Useful for debugging.  The spine info
@@ -17,7 +16,6 @@
 	will be "((1)b)a" and "((1)b)b". If two different tracks merge, such
 	as "1" and "(2)a", then the spine info will be "1 (2)a".
 	
-	default value: out = cout
 	
 
 @@BEGIN: EXAMPLE
@@ -27,18 +25,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::printSpineInfo -- Print the spine state information of
-//    each token in a file.  Useful for debugging.  The spine info
-//    is the track number, such as "1".  When the track splits into
-//    subtracks, then there will be two subtracks: "(1)a" and "(1)b".
-//    If the second of those subtracks splits again, then its subtracks
-//    will be "((1)b)a" and "((1)b)b". If two different tracks merge, such
-//    as "1" and "(2)a", then the spine info will be "1 (2)a".
-//
-//    default value: out = cout
-//
 
 ostream& HumdrumLine::printSpineInfo(ostream& out) {
 	if (isManipulator()) {
@@ -53,8 +39,6 @@ ostream& HumdrumLine::printSpineInfo(ostream& out) {
 	}
 	return out;
 }
-
-
 
 
 @@END:	FunctionDocumentation

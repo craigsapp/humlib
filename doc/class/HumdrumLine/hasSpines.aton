@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		523-538
-@SEEALSO:
+@LINES:		530-545
 @SHORTDESC:	Returns true if the line contains spines.
 @LONGDESC:	Returns true if the line contains spines.  This
 	means the the line is not empty or a global comment (which can include
@@ -21,12 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::hasSpines -- Returns true if the line contains spines.  This
-//   means the the line is not empty or a global comment (which can include
-//   reference records.
-//
 
 bool HumdrumLine::hasSpines(void) const {
 	if (isEmpty() || isCommentGlobal()) {
@@ -35,8 +28,6 @@ bool HumdrumLine::hasSpines(void) const {
 		return true;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

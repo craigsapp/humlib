@@ -11,7 +11,6 @@ const char* filename
 const string& filename
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		49-64
-@SEEALSO:
 @SHORTDESC:	Read the contents of a file from a file or istream.
 @LONGDESC:	Read the contents of a file from a file or
 	istream.  The file's structure is analyzed, and then the rhythmic structure
@@ -25,13 +24,6 @@ const string& filename
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileStructure::read --  Read the contents of a file from a file or
-//   istream.  The file's structure is analyzed, and then the rhythmic structure
-//   is calculated.
-//
-
 
 bool HumdrumFileStructure::read(istream& contents) {
 	if (!readNoRhythm(contents)) {

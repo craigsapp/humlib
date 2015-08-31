@@ -11,7 +11,6 @@ const string& aString
 const char* aString
 @FILE:		HumdrumLine.cpp
 @LINES:		24-36
-@SEEALSO:
 @SHORTDESC:	HumdrumLine constructor.
 @LONGDESC:	HumdrumLine constructor.
 	
@@ -23,10 +22,6 @@ const char* aString
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::HumdrumLine -- HumdrumLine constructor.
-//
 
 HumdrumLine::HumdrumLine(void) : string() {
 	owner = NULL;

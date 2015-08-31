@@ -9,7 +9,6 @@ HumNum&
 int value
 @FILE:		HumNum.cpp
 @LINES:		505-519
-@SEEALSO:
 @SHORTDESC:	Assign the contents of a HumNum from another HumNum.
 @LONGDESC:	Assign the contents of a HumNum
 	from another HumNum.
@@ -22,11 +21,6 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator= -- Assign the contents of a HumNum
-//    from another HumNum.
-//
 
 HumNum& HumNum::operator=(const HumNum& value) {
 	if (this == &value) {

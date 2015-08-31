@@ -8,10 +8,9 @@ HumNum
 @PARAMETERS:	HumNum beatdur = "1"
 string beatrecip = "4"
 @FILE:		HumdrumLine.cpp
-@LINES:		464-482
-@SEEALSO:
-@SHORTDESC:	return the beat number for the data on the current line given the input **recip representation for the duration of a beat.
-@LONGDESC:	return the beat number for the data on the
+@LINES:		471-489
+@SHORTDESC:	Returns the beat number for the data on the current line given the input **recip representation for the duration of a beat.
+@LONGDESC:	Returns the beat number for the data on the
 	current line given the input **recip representation for the duration
 	of a beat.  The beat in a measure is offset from 1 (first beat is
 	1 rather than 0).
@@ -26,15 +25,6 @@ string beatrecip = "4"
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getBeat -- return the beat number for the data on the
-//     current line given the input **recip representation for the duration
-//     of a beat.  The beat in a measure is offset from 1 (first beat is
-//     1 rather than 0).
-//  Default value: beatrecip = "4".
-//  Default value: beatdur   = 1.
-//
 
 HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 	if (beatdur.isZero()) {
@@ -43,8 +33,6 @@ HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 	HumNum beat = (getDurationFromBarline() / beatdur) + 1;
 	return beat;
 }
-
-
 
 
 @@END:	FunctionDocumentation

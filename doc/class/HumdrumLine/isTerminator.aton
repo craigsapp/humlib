@@ -6,13 +6,10 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		193-205
-@SEEALSO:
-@SHORTDESC:	Returns true if first two characters are "*-" and the next character is undefined or a tab character.
-@LONGDESC:	Returns true if first two characters
-	are "*-" and the next character is undefined or a tab character.
-	Not a very sophisticated function and may need adjustment later.
-	Better to search for a terminator in each token.
+@LINES:		193-212
+@SHORTDESC:	Returns true if all tokens on the line are terminators.
+@LONGDESC:	Returns true if all tokens on the line
+	are terminators.
 	
 
 @@BEGIN: EXAMPLE
@@ -22,19 +19,19 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isTerminator -- Returns true if first two characters
-//    are "*-" and the next character is undefined or a tab character.
-//    Not a very sophisticated function and may need adjustment later.
-//    Better to search for a terminator in each token.
-//
 
 bool HumdrumLine::isTerminator(void) const {
-	return equalChar(1, '!') && equalChar(0, '*');
+	if (getTokenCount() == 0) {
+		// if tokens have not been parsed, check line text
+		return equalChar(1, '!') && equalChar(0, '*');
+	}
+	for (int i=0; i<getTokenCount(); i++) {
+		if (!token(i).isTerminator()) {
+			return false;
+		}
+	}
+	return true;
 }
-
-
 
 
 @@END:	FunctionDocumentation

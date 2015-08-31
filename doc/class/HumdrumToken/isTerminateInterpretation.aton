@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		673-682
-@SEEALSO:
+@LINES:		680-689
 @SHORTDESC:	True if the token is "*-".
 @LONGDESC:	True if the token is "*-".
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isTerminateInterpretation -- True if the token is "*-".
-//
 
 bool HumdrumToken::isTerminateInterpretation(void) const {
 	return ((string)(*this)) == TERMINATE_TOKEN;
 }
-
-
 
 
 @@END:	FunctionDocumentation

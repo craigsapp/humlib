@@ -8,8 +8,7 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumLine.cpp
-@LINES:		324-336
-@SEEALSO:
+@LINES:		331-343
 @SHORTDESC:	Get the duration of the line.
 @LONGDESC:	Get the duration of the line.  The duration will
 	be negative one if rhythmic analysis in HumdrumFileStructure has not been
@@ -24,19 +23,10 @@ HumNum scale
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getDuration -- Get the duration of the line.  The duration will
-//    be negative one if rhythmic analysis in HumdrumFileStructure has not been
-//    done on the owning HumdrumFile object.  Otherwise this is the duration of
-//    the current line in the file.
-//
 
 HumNum HumdrumLine::getDuration(void) const {
 	return duration;
 }
-
-
 
 
 @@END:	FunctionDocumentation

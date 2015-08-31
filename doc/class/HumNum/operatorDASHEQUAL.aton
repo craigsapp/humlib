@@ -9,7 +9,6 @@ HumNum&
 int value
 @FILE:		HumNum.cpp
 @LINES:		544-555
-@SEEALSO:
 @SHORTDESC:	Subtract a HumNum or an integer from a HumNum.
 @LONGDESC:	Subtract a HumNum or an integer from
 	a HumNum.
@@ -22,18 +21,11 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator-= -- Subtract a HumNum or an integer from
-//    a HumNum.
-//
 
 HumNum& HumNum::operator-=(const HumNum& value) {
 	*this = *this - value;
 	return *this;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		695-710
-@SEEALSO:
+@LINES:		702-717
 @SHORTDESC:	Returns true if the token is a null token, either for data, comments, or interpretations.
 @LONGDESC:	Returns true if the token is a null token,
 	either for data, comments, or interpretations.  Does not consider
@@ -21,12 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isNull -- Returns true if the token is a null token,
-//   either for data, comments, or interpretations.  Does not consider
-//   null global comments since they are not part of the spine structure.
-//
 
 bool HumdrumToken::isNull(void) const {
 	const string& tok = (string)(*this);
@@ -35,8 +28,6 @@ bool HumdrumToken::isNull(void) const {
 	if (tok == NULL_COMMENT_LOCAL)  { return true; }
 	return false;
 }
-
-
 
 
 @@END:	FunctionDocumentation

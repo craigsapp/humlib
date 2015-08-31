@@ -7,7 +7,6 @@
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
 @LINES:		96-122
-@SEEALSO:
 @SHORTDESC:	Convert a kern token into a diatonic note pitch-class.
 @LONGDESC:	Convert a kern token into a diatonic
 	note pitch-class.  "R" is returned if the note is rest, and 
@@ -22,13 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::kernToDiatonicUC -- Convert a kern token into a diatonic
-//    note pitch-class.  "R" is returned if the note is rest, and 
-//    "X" is returned if there is no pitch name in the string.
-//    Only the first subtoken in the string is considered.
-//
 
 char Convert::kernToDiatonicUC(const string& kerndata) {
 	for (int i=0; i<kerndata.size(); i++) {
@@ -47,8 +39,6 @@ char Convert::kernToDiatonicUC(const string& kerndata) {
 	}
 	return 'X';
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -11,7 +11,6 @@ const string& ns
 const string& ns1, const string& ns2
 @FILE:		HumHash.cpp
 @LINES:		521-543
-@SEEALSO:
 @SHORTDESC:	Return a list of keys in a particular namespace combination.
 @LONGDESC:	Return a list of keys in a particular namespace
 	combination.  With no parameters, a complete list of all
@@ -29,16 +28,6 @@ const string& ns1, const string& ns2
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::getKeys -- Return a list of keys in a particular namespace
-//     combination.  With no parameters, a complete list of all
-//     namespaces/keys will be returned.  Giving one parameter will
-//     produce a list will give all NS2:key values in the NS1 namespace.
-//     If there is a colon in the single parameter version of the function,
-//     then this will be interpreted as "NS1", "NS2" version of the parameters
-//     described above.
-//
 
 vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 	vector<string> output;
@@ -50,8 +39,6 @@ vector<string> HumHash::getKeys(const string& ns1, const string& ns2) const {
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

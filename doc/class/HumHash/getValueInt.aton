@@ -11,7 +11,6 @@ const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
 @LINES:		204-229
-@SEEALSO:
 @SHORTDESC:	Return the value as an integer.
 @LONGDESC:	Return the value as an integer.  The value must
 	start with a number and have no text before it; otherwise the
@@ -29,16 +28,6 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::getValueInt -- Return the value as an integer.  The value must
-//   start with a number and have no text before it; otherwise the
-//   returned value will be "0".  The HumHash class is aware of fractional
-//   values, so the integer form of the fraction will be returned.  For
-//   example if the value is "12/7", then the return value will be "1"
-//   since the integer part of 12/7 is 1 with a remainder of 5/7ths
-//   which will be chopped off.
-//
 
 int HumHash::getValueInt(const string& key) const {
 	if (parameters == NULL) {
@@ -53,8 +42,6 @@ int HumHash::getValueInt(const string& key) const {
 		return getValueInt(keys[0], keys[1], keys[2]);
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

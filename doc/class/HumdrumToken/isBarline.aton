@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		538-555
-@SEEALSO:
+@LINES:		545-562
 @SHORTDESC:	Returns true if the first character is an equals sign.
 @LONGDESC:	Returns true if the first character is an
 	equals sign.
@@ -20,11 +19,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isBarline -- Returns true if the first character is an
-//   equals sign.
-//
 
 bool HumdrumToken::isBarline(void) const {
 	if (size() == 0) {
@@ -36,8 +30,6 @@ bool HumdrumToken::isBarline(void) const {
 		return false;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -17,7 +17,6 @@ const string& ratstring
 const char* ratstring
 @FILE:		HumNum.cpp
 @LINES:		22-32
-@SEEALSO:
 @SHORTDESC:	HumNum Constructor.
 @LONGDESC:	HumNum Constructor.  Set the default value
 	of the number to zero, or the given number if specified.
@@ -30,17 +29,10 @@ const char* ratstring
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::HumNum -- HumNum Constructor.  Set the default value
-//   of the number to zero, or the given number if specified.
-//
 
 HumNum::HumNum(void){
 	setValue(0);
 }
-
-
 
 
 @@END:	FunctionDocumentation

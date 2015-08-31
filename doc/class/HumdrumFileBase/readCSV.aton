@@ -1,7 +1,7 @@
 @@BEGIN:	FunctionDocumentation
 @INDEXED:	yes
 @CLASSNAME:	HumdrumFileBase
-@METHOD:	readCSV
+@METHOD:	readCsv
 @ACCESS:	public
 @RETURN:	bool          
 bool          
@@ -10,12 +10,10 @@ bool
 const char* contents, const string& separator=","
 const string& contents, const string& separator=","
 @FILE:		HumdrumFileBase.cpp
-@LINES:		110-121
-@SEEALSO:
+@LINES:		111-122
 @SHORTDESC:	Read a Humdrum file in CSV format (rather than TSV format).
 @LONGDESC:	Read a Humdrum file in CSV format
 	(rather than TSV format).
-	default value: separator = ","
 	
 
 @@BEGIN: EXAMPLE
@@ -25,18 +23,10 @@ const string& contents, const string& separator=","
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::readCSV -- Read a Humdrum file in CSV format
-//    (rather than TSV format).
-//       default value: separator = ","
-//
 
-bool HumdrumFileBase::readCSV(const string& filename, const string& separator) {
-	return HumdrumFileBase::readCSV(filename.c_str());
+bool HumdrumFileBase::readCsv(const string& filename, const string& separator) {
+	return HumdrumFileBase::readCsv(filename.c_str());
 }
-
-
 
 
 @@END:	FunctionDocumentation

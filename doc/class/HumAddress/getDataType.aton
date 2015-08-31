@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
 @LINES:		91-106
-@SEEALSO:
 @SHORTDESC:	Return the exclusive interpretation string of the token associated with the address.
 @LONGDESC:	Return the exclusive interpretation string of the
 	token associated with the address.
@@ -20,11 +19,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumAddress::getDataType -- Return the exclusive interpretation string of the
-//    token associated with the address.
-//
 
 const HumdrumToken& HumAddress::getDataType(void) const {
 	static HumdrumToken null("");
@@ -34,8 +28,6 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 	HumdrumToken* tok = owner->getTrackStart(getTrack());
 	return *tok;
 }
-
-
 
 
 @@END:	FunctionDocumentation

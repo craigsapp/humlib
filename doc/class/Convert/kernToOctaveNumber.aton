@@ -7,7 +7,6 @@
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
 @LINES:		164-201
-@SEEALSO:
 @SHORTDESC:	Convert a kern token into an octave number.
 @LONGDESC:	Convert a kern token into an octave number.
 	Middle C is the start of the 4th octave. -1000 is returned if there
@@ -22,13 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::kernToOctaveNumber -- Convert a kern token into an octave number.
-//    Middle C is the start of the 4th octave. -1000 is returned if there
-//    is not pitch in the string.  Only the first subtoken in the string is
-//    considered.
-//
 
 int Convert::kernToOctaveNumber(const string& kerndata) {
 	int uc = 0;
@@ -58,8 +50,6 @@ int Convert::kernToOctaveNumber(const string& kerndata) {
 		return -1000;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -8,8 +8,7 @@ bool
 @PARAMETERS:	const char* contents
 const string& contents
 @FILE:		HumdrumFileBase.cpp
-@LINES:		157-169
-@SEEALSO:
+@LINES:		158-170
 @SHORTDESC:	Read contents from a string rather than an istream or filename.
 @LONGDESC:	Read contents from a string rather than
 	an istream or filename.
@@ -22,19 +21,12 @@ const string& contents
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::readString -- Read contents from a string rather than
-//    an istream or filename.
-//
 
 bool HumdrumFileBase::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
 	return read(infile);
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		640-649
-@SEEALSO:
+@LINES:		647-656
 @SHORTDESC:	True if the token is "*^".
 @LONGDESC:	True if the token is "*^".
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isSplitInterpretation -- True if the token is "*^".
-//
 
 bool HumdrumToken::isSplitInterpretation(void) const {
 	return ((string)(*this)) == SPLIT_TOKEN;
 }
-
-
 
 
 @@END:	FunctionDocumentation

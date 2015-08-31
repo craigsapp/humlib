@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		170-179
-@SEEALSO:
 @SHORTDESC:	Return the top integer in the fraction.
 @LONGDESC:	Return the top integer in the fraction.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::getNumerator -- Return the top integer in the fraction.
-//
 
 int HumNum::getNumerator(void) const {
 	return top;
 }
-
-
 
 
 @@END:	FunctionDocumentation

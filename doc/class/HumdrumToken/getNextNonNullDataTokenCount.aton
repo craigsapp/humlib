@@ -6,10 +6,9 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		127-137
-@SEEALSO:
-@SHORTDESC:	Return the number of non-null data tokens which follow this token in the spine.
-@LONGDESC:	Return the number of non-null
+@LINES:		128-138
+@SHORTDESC:	Returns the number of non-null data tokens which follow this token in the spine.
+@LONGDESC:	Returns the number of non-null
 	data tokens which follow this token in the spine.
 	
 
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getNextNonNullDataTokenCount -- Return the number of non-null
-//     data tokens which follow this token in the spine.
-//
 
 int HumdrumToken::getNextNonNullDataTokenCount(void) {
 	return nextNonNullTokens.size();
 }
-
-
 
 
 @@END:	FunctionDocumentation

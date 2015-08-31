@@ -7,7 +7,6 @@
 @PARAMETERS:	const string& value
 @FILE:		HumHash.cpp
 @LINES:		855-869
-@SEEALSO:
 @SHORTDESC:	initial string to print when using operator<<.
 @LONGDESC:	initial string to print when using
 	operator<<.  This is used for including the "!" for local
@@ -23,21 +22,11 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::setPrefix -- initial string to print when using
-//   operator<<.  This is used for including the "!" for local
-//   comments or "!!" for global comments.   The prefix will
-//   remain the same until it is changed.  The default prefix
-//   of the object it the empty string.
-//
 
 void HumHash::setPrefix(const string& value) {
 	prefix = value;
 
 }
-
-
 
 
 @@END:	FunctionDocumentation

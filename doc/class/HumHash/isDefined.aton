@@ -11,7 +11,6 @@ const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
 @LINES:		724-746
-@SEEALSO:
 @SHORTDESC:	Returns true if the given parameter exists in the map.
 @LONGDESC:	Returns true if the given parameter exists in the
 	map.   Format of the input string:   NS1:NS2:key or "":NS2:key for the
@@ -26,13 +25,6 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::isDefined -- Returns true if the given parameter exists in the
-//    map.   Format of the input string:   NS1:NS2:key or "":NS2:key for the
-//    two argument version of the function.  OR "":"":key if no colons in
-//    single string argument version.
-//
 
 bool HumHash::isDefined(const string& key) const {
 	if (parameters == NULL) {
@@ -47,8 +39,6 @@ bool HumHash::isDefined(const string& key) const {
 		return (*parameters)[keys[0]][keys[1]].count(keys[2]);
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

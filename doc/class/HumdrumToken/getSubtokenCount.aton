@@ -2,15 +2,17 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getSubtokenCount
+@SEEALSO:	getSubtoken
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	const string& separator = " "
 @FILE:		HumdrumToken.cpp
-@LINES:		735-751
-@SEEALSO:
-@SHORTDESC:	// HumdrumToken::getSubtokenCount -- default value: separator = " " 
-@LONGDESC:	// HumdrumToken::getSubtokenCount --
-	default value: separator = " "
+@LINES:		748-768
+@SHORTDESC:	Return the number of sub-tokens in a token.
+@LONGDESC:	Return the number of sub-tokens in
+	a token.  The input parameter is the sub-token separator.  If the
+	separator comes at the start or end of the token, then there will
+	be empty sub-token(s) included in the count.
 	
 
 @@BEGIN: EXAMPLE
@@ -20,11 +22,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-/////////////////////////////
-//
-// HumdrumToken::getSubtokenCount --
-//   default value: separator = " "
-//
 
 int HumdrumToken::getSubtokenCount(const string& separator) const {
 	int count = 0;
@@ -35,8 +32,6 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 	}
 	return count;
 }
-
-
 
 
 @@END:	FunctionDocumentation

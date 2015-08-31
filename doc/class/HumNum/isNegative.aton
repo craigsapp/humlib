@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		70-79
-@SEEALSO:
 @SHORTDESC:	Returns true if value is negative.
 @LONGDESC:	Returns true if value is negative.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isNegative -- Returns true if value is negative.
-//
 
 bool HumNum::isNegative(void) const {
 	return isFinite() && (top < 0);
 }
-
-
 
 
 @@END:	FunctionDocumentation

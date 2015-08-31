@@ -2,12 +2,12 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	isDataType
+@SEEALSO:	getDataType
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	string dtype
 @FILE:		HumdrumToken.cpp
-@LINES:		174-188
-@SEEALSO:
+@LINES:		176-191
 @SHORTDESC:	Returns true if the data type of the token matches the test data type.
 @LONGDESC:	Returns true if the data type of the token
 	matches the test data type.
@@ -20,11 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isDataType -- Returns true if the data type of the token
-//   matches the test data type.
-//
 
 bool HumdrumToken::isDataType(string dtype) const {
 	if (dtype.compare(0, 2, "**") == 0) {
@@ -33,8 +28,6 @@ bool HumdrumToken::isDataType(string dtype) const {
 		return getDataType().compare(2, string::npos, dtype) == 0;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

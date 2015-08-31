@@ -6,11 +6,11 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		213-223
-@SEEALSO:
-@SHORTDESC:	Return the line index of the owning HumdrumLine for this token.
-@LONGDESC:	Return the line index of the owning
+@LINES:		218-229
+@SHORTDESC:	Returns the line index of the owning HumdrumLine for this token.
+@LONGDESC:	Returns the line index of the owning
 	HumdrumLine for this token.
+	@SEEALTO: getLineNumber
 	
 
 @@BEGIN: EXAMPLE
@@ -20,17 +20,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getLineIndex -- Return the line index of the owning
-//    HumdrumLine for this token.
-//
 
 int HumdrumToken::getLineIndex(void) const {
 	return address.getLineIndex();
 }
-
-
 
 
 @@END:	FunctionDocumentation

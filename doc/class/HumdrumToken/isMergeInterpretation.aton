@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		651-660
-@SEEALSO:
+@LINES:		658-667
 @SHORTDESC:	True if the token is "*v".
 @LONGDESC:	True if the token is "*v".
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isMergeInterpretation -- True if the token is "*v".
-//
 
 bool HumdrumToken::isMergeInterpretation(void) const {
 	return ((string)(*this)) == MERGE_TOKEN;
 }
-
-
 
 
 @@END:	FunctionDocumentation

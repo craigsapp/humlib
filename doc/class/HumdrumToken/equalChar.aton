@@ -7,9 +7,8 @@
 @PARAMETERS:	int index, char ch
 @FILE:		HumdrumToken.cpp
 @LINES:		68-88
-@SEEALSO:
-@SHORTDESC:	return true if the character at the given index is the given char.
-@LONGDESC:	return true if the character at the given
+@SHORTDESC:	Returns true if the character at the given index is the given char.
+@LONGDESC:	Returns true if the character at the given
 	index is the given char.
 	
 
@@ -20,11 +19,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::equalChar -- return true if the character at the given
-//     index is the given char.
-//
 
 bool HumdrumToken::equalChar(int index, char ch) const {
 	if (size() <= index) {
@@ -39,8 +33,6 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 		return false;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -1,0 +1,77 @@
+<script>
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	checkAnchor();
+});
+
+
+//////////////////////////////
+//
+// checkAnchor --
+//
+
+function checkAnchor() {
+	var anchor = '';
+	var matches = document.location.href.match(/#(.*)/);
+	if (!matches) {
+		return;
+	}
+	anchor = matches[1];
+	console.log(anchor);
+	var details = document.querySelector('details.example-' + anchor);
+	if (!details) {
+		return;
+	}
+	details.open = 'open';
+	details.scrollIntoViewIfNeeded();
+}
+
+
+
+//////////////////////////////
+//
+// closeAllExamples --
+//
+
+function closeAllExamples() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllExamples --
+//
+
+function openAllExamples() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
+
+
+</script>
+
+
+
+<style>
+
+details summary {
+	color: #159987;
+}
+
+</style>
+

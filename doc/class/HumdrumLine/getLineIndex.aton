@@ -6,8 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		301-311
-@SEEALSO:
+@LINES:		308-318
 @SHORTDESC:	Returns the index number of the line in the HumdrumFileBase storage for the lines.
 @LONGDESC:	Returns the index number of the line in the
 	HumdrumFileBase storage for the lines.
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getLineIndex -- Returns the index number of the line in the
-//    HumdrumFileBase storage for the lines.
-//
 
 int HumdrumLine::getLineIndex(void) const {
 	return lineindex;
 }
-
-
 
 
 @@END:	FunctionDocumentation

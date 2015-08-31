@@ -2,17 +2,17 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getNextToken
+@SEEALSO:	getNextTokens, getPreviousToken
 @ACCESS:	public
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		343-359
-@SEEALSO:
-@SHORTDESC:	Return the next token in the spine.
-@LONGDESC:	Return the next token in the
+@LINES:		347-365
+@SHORTDESC:	Returns the next token in the spine.
+@LONGDESC:	Returns the next token in the
 	spine.  Since the next token count is usually one, the default
-	index value is zero.
-	default value: index = 0
+	index value is zero.  When there is no next token (when the current
+	token is a spine terminaor), then NULL will be returned.
 	
 
 @@BEGIN: EXAMPLE
@@ -22,13 +22,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getNextToken -- Return the next token in the
-//    spine.  Since the next token count is usually one, the default
-//    index value is zero.
-//       default value: index = 0
-//
 
 HumdrumToken* HumdrumToken::getNextToken(int index) const {
 	if ((index >= 0) && (index < (int)nextTokens.size())) {
@@ -37,8 +30,6 @@ HumdrumToken* HumdrumToken::getNextToken(int index) const {
 		return NULL;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

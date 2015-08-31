@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		361-370
-@SEEALSO:
 @SHORTDESC:	Returns true if the denominator is not zero.
 @LONGDESC:	Returns true if the denominator is not zero.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isFinite -- Returns true if the denominator is not zero.
-//
 
 bool HumNum::isFinite(void) const {
 	return bot != 0;
 }
-
-
 
 
 @@END:	FunctionDocumentation

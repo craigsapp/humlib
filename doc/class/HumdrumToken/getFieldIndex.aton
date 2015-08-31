@@ -2,14 +2,14 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getFieldIndex
+@SEEALSO:	getFieldIndex
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		225-234
-@SEEALSO:
-@SHORTDESC:	// HumdrumToken::getFieldIndex -- 
-@LONGDESC:	// HumdrumToken::getFieldIndex --
+@LINES:		231-241
+@SHORTDESC:	Returns the index of the token the line.
+@LONGDESC:	Returns the index of the token the line.
 	
 
 @@BEGIN: EXAMPLE
@@ -19,16 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getFieldIndex --
-//
 
 int HumdrumToken::getFieldIndex(void) const {
 	return address.getFieldIndex();
 }
-
-
 
 
 @@END:	FunctionDocumentation

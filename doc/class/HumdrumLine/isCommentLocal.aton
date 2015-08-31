@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
 @LINES:		158-168
-@SEEALSO:
 @SHORTDESC:	Returns true if a local comment.
 @LONGDESC:	Returns true if a local comment.
 	
@@ -19,17 +18,11 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isCommentLocal -- Returns true if a local comment.
-//
 
 bool HumdrumLine::isCommentLocal(void) const {
 	return equalChar(0, '!') && !equalChar(1, '!');
 
 }
-
-
 
 
 @@END:	FunctionDocumentation

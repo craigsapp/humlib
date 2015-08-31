@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		662-671
-@SEEALSO:
+@LINES:		669-678
 @SHORTDESC:	True if the token is "*x".
 @LONGDESC:	True if the token is "*x".
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isExchangeInterpretation -- True if the token is "*x".
-//
 
 bool HumdrumToken::isExchangeInterpretation(void) const {
 	return ((string)(*this)) == EXCHANGE_TOKEN;
 }
-
-
 
 
 @@END:	FunctionDocumentation

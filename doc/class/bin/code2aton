@@ -12,8 +12,8 @@
 
 use strict;
 
-my $srcdir = "../../../transfer";
-my $incdir = "../../../transfer";
+my $srcdir = "../../../common/minHumdrum/src";
+my $incdir = "../../../common/minHumdrum/include";
 
 die "Usage $0 classname" if @ARGV != 1;
 
@@ -59,7 +59,7 @@ sub printAtonFile {
 	open (XFILE, "$srcdir/$sourcefile") or die "Cannot $srcdir/$sourcefile";
 	my @source = <XFILE>;
 	close XFILE;
-	my ($description, $shortdesc, $lines, $code) = 
+	my ($description, $shortdesc, $lines, $code, $seealso) = 
 			getFunctionInfo($function, @source);
 	my $filename = $function;
 	$filename =~ s/=/EQUAL/g;
@@ -84,6 +84,9 @@ EOT
 	if ($ALIAS !~ /^\s*$/) {
 
 	}
+	if ($seealso !~ /^\s*$/) {
+		print FILE "\@SEEALSO:\t$seealso\n";
+	}
 
 print FILE <<"EOT";
 \@ACCESS:	public
@@ -91,7 +94,6 @@ print FILE <<"EOT";
 \@PARAMETERS:	$parameterlist{$function}
 \@FILE:		$sourcefile
 \@LINES:		$lines
-\@SEEALSO:
 \@SHORTDESC:	$shortdesc
 \@LONGDESC:	$description
 
@@ -122,8 +124,8 @@ EOT
 sub getClassInfo {
 	my ($classname, $srcdir, $incdir) = @_;
 
-	open (IFILE, "$srcdir/$classname.h") or
-			die "Cannot find $srcdir/$classname.h for reading.";
+	open (IFILE, "$incdir/$classname.h") or
+			die "Cannot find $incdir/$classname.h for reading.";
 	my @contents = <IFILE>;
 	close IFILE;
 
@@ -373,12 +375,17 @@ sub getFunctionInfo  {
 	my $lines = "$startline-$endline";
    my $code = "";
 	for ($i=$startline; $i<=$endline; $i++) {
+		next if $source[$i] =~ /^\/\/\s*default value:/;
+		next if $source[$i] =~ /\@SEEALSO:/;
 		$code .= $source[$i];
 	}
+
+	$code = cleanCode($code);
 
 	$line = $source[$titleline];
 	chomp $line;
 	$line =~ s/.*\s+--\s+//;
+	my $seealso = "";
 	my $description = $line;
 	for ($i=$titleline+1; $i<=$endline; $i++) {
 		$line = $source[$i];
@@ -386,14 +393,47 @@ sub getFunctionInfo  {
 		if ($line !~ s/^\/\/\s*//) {
 			last;
 		}
+		next if $line =~ /^\s*default\s+value:/;
+		if ($line =~ /\@SEEALSO:/) {
+			$seealso = $line;
+			next;
+		}
+		next if $line =~ /^\s*default\s+value:/;
+		
 		$description .= "\n\t$line";
 	}
 	my $shortdesc = $description;
 	$shortdesc =~ s/(?<!\.)\.(?!\.).*$/./s;
 	$shortdesc =~ s/\n/ /g;
 	$shortdesc =~ s/\s+/ /g;
+	
+	if ($seealso !~ /^\s*$/) {
+		$seealso =~ s/.*\@SEEALSO:\s*//;
+		$seealso =~ s/\s+$//;
+	}
 
-	return ($description, $shortdesc, $lines, $code);
+	return ($description, $shortdesc, $lines, $code, $seealso);
+}
+
+
+##############################
+##
+## cleanCode -- Remove header comments.
+##
+
+sub cleanCode {
+   my ($code) = @_;
+	my @contents = split(/\n/, $code);
+	my $output = "\n";
+	my $found = 0;
+	foreach my $line (@contents) {
+		if ((!$found) && (($line =~ /^\s*$/) || ($line =~ /^\/\//))) {
+			next;
+		}
+		$found = 1;
+		$output .= "$line\n";
+	}
+	return $output;
 }
 
 

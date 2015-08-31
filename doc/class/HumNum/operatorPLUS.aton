@@ -9,7 +9,6 @@ HumNum
 int value
 @FILE:		HumNum.cpp
 @LINES:		383-400
-@SEEALSO:
 @SHORTDESC:	Addition operator which adds HumNum to another HumNum or with a integers.
 @LONGDESC:	Addition operator which adds HumNum
 	to another HumNum or with a integers.
@@ -22,11 +21,6 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator+ -- Addition operator which adds HumNum
-//    to another HumNum or with a integers.
-//
 
 HumNum HumNum::operator+(const HumNum& value) const {
 	int a1  = getNumerator();
@@ -38,8 +32,6 @@ HumNum HumNum::operator+(const HumNum& value) const {
 	HumNum output(ao, bo);
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

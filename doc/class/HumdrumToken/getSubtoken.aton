@@ -2,18 +2,17 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getSubtoken
+@SEEALSO:	getSubtokenCount, getTrackString
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	int index, const string& separator
 @FILE:		HumdrumToken.cpp
-@LINES:		753-782
-@SEEALSO:
-@SHORTDESC:	Extract the specified subtoken from the token.
-@LONGDESC:	Extract the specified subtoken from the token.
+@LINES:		770-800
+@SHORTDESC:	Extract the specified sub-token from the token.
+@LONGDESC:	Extract the specified sub-token from the token.
 	Tokens usually are separated by spaces in Humdrum files, but this will 
 	depened on the data type (so therefore, the tokens are not presplit into
 	sub-tokens when reading in the file).
-	default value: separator = " "
 	
 
 @@BEGIN: EXAMPLE
@@ -23,14 +22,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-/////////////////////////////
-//
-// HumdrumToken::getSubtoken -- Extract the specified subtoken from the token.
-//    Tokens usually are separated by spaces in Humdrum files, but this will 
-//    depened on the data type (so therefore, the tokens are not presplit into
-//    sub-tokens when reading in the file).
-//        default value: separator = " "
-//
 
 string HumdrumToken::getSubtoken(int index, const string& separator) const {
 	if (index < 0) {
@@ -51,8 +42,6 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 	}
 	return "";
 }
-
-
 
 
 @@END:	FunctionDocumentation

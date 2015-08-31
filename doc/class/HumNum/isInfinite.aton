@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		338-347
-@SEEALSO:
 @SHORTDESC:	Returns true if the denominator is zero.
 @LONGDESC:	Returns true if the denominator is zero.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isInfinite -- Returns true if the denominator is zero.
-//
 
 bool HumNum::isInfinite(void) const {
 	return (bot == 0) && (top != 0);
 }
-
-
 
 
 @@END:	FunctionDocumentation

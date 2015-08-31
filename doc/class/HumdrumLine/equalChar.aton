@@ -7,7 +7,6 @@
 @PARAMETERS:	int index, char ch
 @FILE:		HumdrumLine.cpp
 @LINES:		124-144
-@SEEALSO:
 @SHORTDESC:	return true if the character at the given index is the given char.
 @LONGDESC:	return true if the character at the given
 	index is the given char.
@@ -20,11 +19,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::equalChar -- return true if the character at the given
-//     index is the given char.
-//
 
 bool HumdrumLine::equalChar(int index, char ch) const {
 	if (size() <= index) {
@@ -39,8 +33,6 @@ bool HumdrumLine::equalChar(int index, char ch) const {
 		return false;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

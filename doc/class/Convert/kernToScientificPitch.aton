@@ -11,7 +11,6 @@ kerndata, flat, sharp, separator
 kerndata, flat, sharp, separator
 @FILE:		Convert-pitch.cpp
 @LINES:		23-63
-@SEEALSO:
 @SHORTDESC:	Convert a **kern pitch to ScientificPitch notation, which is the diatonic letter name, followed by a possible accidental, then an optional separator string, and finally the octave number.
 @LONGDESC:	Convert a **kern pitch to
 	ScientificPitch notation, which is the diatonic letter name,
@@ -32,19 +31,6 @@ kerndata, flat, sharp, separator
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::kernToScientificPitch -- Convert a **kern pitch to
-//   ScientificPitch notation, which is the diatonic letter name,
-//   followed by a possible accidental, then an optional separator
-//   string, and finally the octave number.  A string representing a
-//   chord can be given to this function, and the output will return
-//   a list of the pitches in the chord, separated by a space.
-//		default values:
-//			flat      = "b"
-//			sharp     = "#"
-//			separator = ""
-//
 
 string Convert::kernToScientificPitch(const string& kerndata,
 		string flat, string sharp, string separator) {
@@ -71,8 +57,6 @@ string Convert::kernToScientificPitch(const string& kerndata,
 
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

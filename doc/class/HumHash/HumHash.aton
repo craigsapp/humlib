@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumHash.cpp
 @LINES:		115-125
-@SEEALSO:
 @SHORTDESC:	HumHash constructor.
 @LONGDESC:	HumHash constructor.  The data storage is empty
 	until the first parameter in the Hash is set.
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::HumHash -- HumHash constructor.  The data storage is empty
-//    until the first parameter in the Hash is set.
-//
 
 HumHash::HumHash(void) {
 	parameters = NULL;
 }
-
-
 
 
 @@END:	FunctionDocumentation

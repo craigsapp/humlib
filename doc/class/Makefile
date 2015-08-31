@@ -27,11 +27,14 @@ makefiles:
 		(cd $$i && ln -s ../Makefile.class Makefile); \
 	done
 
-aton:
+aton: pull
 	for i in $(SRC);	\
 	do			\
 		(cd $$i ^&& ../bin/code2aton $$i);	\
 	done
+
+pull:
+	(cd ../../common/minHumdrum && git pull)
 
 
 

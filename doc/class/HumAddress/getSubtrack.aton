@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
 @LINES:		138-156
-@SEEALSO:
 @SHORTDESC:	The subtrack number of the given spine.
 @LONGDESC:	The subtrack number of the given spine.  This
 	functions in a similar manner to layer numbers in MEI data.  The first
@@ -28,25 +27,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumAddress::getSubtrack -- The subtrack number of the given spine.  This
-//   functions in a similar manner to layer numbers in MEI data.  The first
-//   sub-spine of a spine is always subtrack 1, regardless of whether or not
-//   an exchange manipulator (*x) was used to switch the left-to-right ordering
-//   of the spines in the file.  All sub-spines regardless of their splitting
-//   origin are given sequential subtrack numbers.  For example if the spine
-//   info is "(1)a"/"((1)b)a"/"((1)b)b" -- the spine is split, then the second
-//   sub-spine only is split--then the sub-spines are labeled as sub-tracks "1",
-//   "2", "3" respectively.  When a track has only one sub-spine (i.e., it has
-//   been split), the subtrack value will be "0".
-//
 
 int HumAddress::getSubtrack(void) const {
 	return subtrack;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -11,7 +11,6 @@ const string& ns
 const string& ns1, const string& ns2
 @FILE:		HumHash.cpp
 @LINES:		582-611
-@SEEALSO:
 @SHORTDESC:	Returns true if at least one parameter is defined in the HumHash object (when no arguments are given to the function).
 @LONGDESC:	Returns true if at least one parameter is defined
 	in the HumHash object (when no arguments are given to the function).
@@ -28,15 +27,6 @@ const string& ns1, const string& ns2
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::hasParameters -- Returns true if at least one parameter is defined
-//     in the HumHash object (when no arguments are given to the function).
-//     When two strings are given as arguments, the function checks to see if
-//     the given namespace pair has any keys.  If only one string argument,
-//     then check if the given NS1 has any parameters, unless there is a
-//     colon in the string which means to check NS1:NS2.
-//
 
 bool HumHash::hasParameters(const string& ns1, const string& ns2) const {
 	if (parameters == NULL) {
@@ -56,8 +46,6 @@ bool HumHash::hasParameters(const string& ns1, const string& ns2) const {
 		return true;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

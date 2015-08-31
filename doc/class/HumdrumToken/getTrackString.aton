@@ -2,14 +2,19 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getTrackString
+@SEEALSO:	getTrack, getSubtrack
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		724-733
-@SEEALSO:
-@SHORTDESC:	Get "track.
-@LONGDESC:	Get "track.subtrack" as a string.
+@LINES:		731-746
+@SHORTDESC:	Gets "track.
+@LONGDESC:	Gets "track.subtrack" as a string.  The
+	track and subtrack are integers.  The getTrackString function will 
+	return a string with the track and subtrack separated by an dot.  The
+	Dot is not a decimal point, but if the subtrack count does not exceed
+	9, then the returned string can be treated as a floating-point number
+	where the subtrack is the fractional part.
 	
 
 @@BEGIN: EXAMPLE
@@ -19,16 +24,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getTrackString -- Get "track.subtrack" as a string.
-//
 
 string HumdrumToken::getTrackString(void) const {
 	return address.getTrackString();
 }
-
-
 
 
 @@END:	FunctionDocumentation

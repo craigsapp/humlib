@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		518-536
-@SEEALSO:
+@LINES:		525-543
 @SHORTDESC:	Returns true if the exclusive interpretation contains rhythmic data which will be used for analyzing the duration of a HumdrumFile, for example.
 @LONGDESC:	Returns true if the exclusive interpretation
 	contains rhythmic data which will be used for analyzing the
@@ -21,12 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::hasRhythm -- Returns true if the exclusive interpretation
-//    contains rhythmic data which will be used for analyzing the
-//    duration of a HumdrumFile, for example.
-//
 
 bool HumdrumToken::hasRhythm(void) const {
 	string type = getDataType();
@@ -38,8 +31,6 @@ bool HumdrumToken::hasRhythm(void) const {
 	}
 	return false;
 }
-
-
 
 
 @@END:	FunctionDocumentation

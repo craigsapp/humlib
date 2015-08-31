@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		244-263
-@SEEALSO:
+@LINES:		251-270
 @SHORTDESC:	Returns true if all tokens on the line are null (".
 @LONGDESC:	Returns true if all tokens on the line
 	are null ("." if a data line, "*" if an interpretation line, "!"
@@ -21,12 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isAllNull -- Returns true if all tokens on the line
-//		are null ("." if a data line, "*" if an interpretation line, "!"
-//		if a local comment line).
-//
 
 bool HumdrumLine::isAllNull(void) const {
 	if (!hasSpines()) {
@@ -39,8 +32,6 @@ bool HumdrumLine::isAllNull(void) const {
 	}
 	return true;
 }
-
-
 
 
 @@END:	FunctionDocumentation

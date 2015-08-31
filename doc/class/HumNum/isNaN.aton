@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		349-359
-@SEEALSO:
 @SHORTDESC:	Returns true if the numerator and denominator are both zero.
 @LONGDESC:	Returns true if the numerator and denominator
 	are both zero.
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isNaN -- Returns true if the numerator and denominator
-//     are both zero.
-//
 
 bool HumNum::isNaN(void) const {
 	return (bot == 0) && (top == 0);
 }
-
-
 
 
 @@END:	FunctionDocumentation

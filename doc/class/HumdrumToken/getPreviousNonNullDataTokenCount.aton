@@ -2,14 +2,14 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getPreviousNonNullDataTokenCount
+@SEEALSO:	getPreviousNonNullDataToken
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		90-102
-@SEEALSO:
-@SHORTDESC:	Return the number of previous tokens in the spine which is not a null token.
-@LONGDESC:	Return the number of
+@LINES:		90-103
+@SHORTDESC:	Returns the number of previous tokens in the spine which is not a null token.
+@LONGDESC:	Returns the number of
 	previous tokens in the spine which is not a null token.  For null
 	tokens, this will be a count of the number of non-null tokens which
 	the null represents.
@@ -22,19 +22,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getPreviousNonNullDataTokenCount -- Return the number of
-//   previous tokens in the spine which is not a null token.  For null
-//   tokens, this will be a count of the number of non-null tokens which
-//   the null represents.
-//
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 	return previousNonNullTokens.size();
 }
-
-
 
 
 @@END:	FunctionDocumentation

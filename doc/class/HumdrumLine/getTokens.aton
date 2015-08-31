@@ -6,8 +6,7 @@
 @RETURN:	void     
 @PARAMETERS:	vector<HumdrumToken*>& list
 @FILE:		HumdrumLine.cpp
-@LINES:		666-683
-@SEEALSO:
+@LINES:		673-690
 @SHORTDESC:	Returns an array of tokens pointers for a Humdrum line.
 @LONGDESC:	Returns an array of tokens pointers for a
 	Humdrum line.  This function should not be called on global comments,
@@ -24,15 +23,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getTokens -- Returns an array of tokens pointers for a
-//   Humdrum line.  This function should not be called on global comments,
-//   reference records (which are a sub-cateogry of global comments).  This
-//   is because a line's type may contain tabs which are not representing
-//   token separators.  Empty lines are ok to input: the output token
-//   list will contain one empty string.
-//
 
 void HumdrumLine::getTokens(vector<HumdrumToken*>& list) {
 	if (tokens.size() == 0) {
@@ -40,8 +30,6 @@ void HumdrumLine::getTokens(vector<HumdrumToken*>& list) {
 	}
 	list = tokens;
 }
-
-
 
 
 @@END:	FunctionDocumentation

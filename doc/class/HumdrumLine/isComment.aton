@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
 @LINES:		146-156
-@SEEALSO:
 @SHORTDESC:	Returns true if the first character in the string is '!'.
 @LONGDESC:	Returns true if the first character
 	in the string is '!'. Could be local, global, or a reference record.
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isComment -- Returns true if the first character
-//   in the string is '!'. Could be local, global, or a reference record.
-//
 
 bool HumdrumLine::isComment(void) const {
 	return equalChar(0, '!');
 }
-
-
 
 
 @@END:	FunctionDocumentation

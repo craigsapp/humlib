@@ -6,8 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		891-927
-@SEEALSO:
+@LINES:		914-950
 @SHORTDESC:	Print the analyzed track information.
 @LONGDESC:	Print the analyzed track information.
 	The first (left-most) spine in a Humdrum file is track 1, the
@@ -26,7 +25,6 @@
 	interpretation on the next line is give the next higher track
 	number.
 	
-	default value: out = cout
 	
 
 @@BEGIN: EXAMPLE
@@ -36,27 +34,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::printTrackInfo -- Print the analyzed track information.
-//     The first (left-most) spine in a Humdrum file is track 1, the
-//     next is track 2, etc.  The track value is shared by all subspines,
-//     so there may be duplicate track numbers on a line if the spine
-//     has split.  When the spine splits, a subtrack number is given
-//     after a "." character in the printed output from this function.
-//     Subtrack==0 means that there is only one subtrack.
-//     Examples:
-//         "1"  == Track 1, subtrack 1 (and there are no more subtracks)
-//	        "1.1" == Track 1, subtrack 1 (and there are more subtracks)
-//	        "1.2" == Track 1, subtrack 2 (and there may be more subtracks)
-//	        "1.10" == Track 1, subtrack 10 (and there may be subtracks)
-//     Each starting exclusive interpretation is assigned to a unique
-//     track number.  When a *+ manipulator is given, the new exclusive
-//     interpretation on the next line is give the next higher track
-//     number.
-//
-//     default value: out = cout
-//
 
 ostream& HumdrumLine::printTrackInfo(ostream& out) {
 	if (isManipulator()) {
@@ -71,8 +48,6 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 	}
 	return out;
 }
-
-
 
 
 @@END:	FunctionDocumentation

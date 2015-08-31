@@ -11,7 +11,6 @@ const string& ns2, const string& key
 const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
 @LINES:		359-381
-@SEEALSO:
 @SHORTDESC:	Return true or false based on the value.
 @LONGDESC:	Return true or false based on the
 	value.  If the value is "0" or false, then the function
@@ -29,16 +28,6 @@ const string& ns1, const string& ns2, const string& key
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumHash::getValueBool -- Return true or false based on the
-//   value.  If the value is "0" or false, then the function
-//   will return false.  If the value is anything else, then
-//   true will be returned.  If the parameter is not defined
-//   in the HumHash, then false will also be defined.
-//   See also hasParameter() if you do not like this last
-//   behavior.
-//
 
 bool HumHash::getValueBool(const string& key) const {
 	vector<string> keys = getKeyList(key);
@@ -50,8 +39,6 @@ bool HumHash::getValueBool(const string& key) const {
 		return getValueBool(keys[0], keys[1], keys[2]);
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

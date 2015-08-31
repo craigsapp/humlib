@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumdrumFile.cpp
 @LINES:		21-30
-@SEEALSO:
 @SHORTDESC:	HumdrumFile constructor.
 @LONGDESC:	HumdrumFile constructor.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFile::HumdrumFile -- HumdrumFile constructor.
-//
 
 HumdrumFile::HumdrumFile(void) {
 	// do nothing
 }
-
-
 
 
 @@END:	FunctionDocumentation

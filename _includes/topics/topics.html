@@ -1,0 +1,33 @@
+<script>
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	checkAnchor();
+});
+
+
+function checkAnchor() {
+	var anchor = '';
+	var matches = document.location.href.match(/#(.*)/);
+	if (!matches) {
+		return;
+	}
+	anchor = matches[1];
+	console.log(anchor);
+	var details = document.querySelector('details.topic-' + anchor);
+	if (!details) {
+		return;
+	}
+	details.open = 'open';
+	details.scrollIntoViewIfNeeded();
+}
+
+
+</script>
+
+<style>
+
+details summary {
+	color: #159987;
+}
+
+</style>

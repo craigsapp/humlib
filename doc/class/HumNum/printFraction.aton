@@ -7,7 +7,6 @@
 @PARAMETERS:	ostream& = cout
 @FILE:		HumNum.cpp
 @LINES:		749-766
-@SEEALSO:
 @SHORTDESC:	Print HumNum as a fraction, such as 3/2.
 @LONGDESC:	Print HumNum as a fraction,
 	such as 3/2.  If the HumNum is an integer, then do
@@ -22,13 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::printFraction -- Print HumNum as a fraction,
-//    such as 3/2.  If the HumNum is an integer, then do
-//    not print the denominator.
-//      default parameter: out = cout;
-//
 
 ostream& HumNum::printFraction(ostream& out) const {
 	if (this->isInteger()) {
@@ -38,8 +30,6 @@ ostream& HumNum::printFraction(ostream& out) const {
 	}
 	return out;
 }
-
-
 
 
 @@END:	FunctionDocumentation

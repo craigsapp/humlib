@@ -9,7 +9,6 @@ HumNum
 int value
 @FILE:		HumNum.cpp
 @LINES:		447-464
-@SEEALSO:
 @SHORTDESC:	Multiplication operator to multiply two HumNums together or a HumNum and an integer.
 @LONGDESC:	Multiplication operator to multiply
 	two HumNums together or a HumNum and an integer.
@@ -22,11 +21,6 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator* -- Multiplication operator to multiply
-//   two HumNums together or a HumNum and an integer.
-//
 
 HumNum HumNum::operator*(const HumNum& value) const {
 	int a1  = getNumerator();
@@ -38,8 +32,6 @@ HumNum HumNum::operator*(const HumNum& value) const {
 	HumNum output(ao, bo);
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		218-227
-@SEEALSO:
+@LINES:		225-234
 @SHORTDESC:	Returns true if starts with '=' character.
 @LONGDESC:	Returns true if starts with '=' character.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isBarline -- Returns true if starts with '=' character.
-//
 
 bool HumdrumLine::isBarline(void) const {
 	return equalChar(0, '=');
 }
-
-
 
 
 @@END:	FunctionDocumentation

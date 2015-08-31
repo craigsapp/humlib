@@ -7,7 +7,6 @@
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
 @LINES:		136-162
-@SEEALSO:
 @SHORTDESC:	Convert a kern token into a count of accidentals in the first subtoken.
 @LONGDESC:	Convert a kern token into a count
 	of accidentals in the first subtoken.  Sharps are assigned to the
@@ -24,15 +23,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::kernToAccidentalCount -- Convert a kern token into a count
-//    of accidentals in the first subtoken.  Sharps are assigned to the
-//    value +1 and flats to -1.  So a double sharp is +2 and a double
-//    flat is -2.  Only the first subtoken in the string is considered.
-//    Cases such as "#-" should not exist, but in this case the return
-//    value will be 0.
-//
 
 int Convert::kernToAccidentalCount(const string& kerndata) {
 	int output = 0;
@@ -49,8 +39,6 @@ int Convert::kernToAccidentalCount(const string& kerndata) {
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

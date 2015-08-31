@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		627-638
-@SEEALSO:
+@LINES:		634-645
 @SHORTDESC:	Returns true if first two characters are "**".
 @LONGDESC:	Returns true if first two
 	characters are "**".
@@ -20,18 +19,11 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isExclusiveInterpretation -- Returns true if first two
-//     characters are "**".
-//
 
 bool HumdrumToken::isExclusiveInterpretation(void) const {
 	const string& tok = (string)(*this);
 	return tok.substr(0, 2) == "**";
 }
-
-
 
 
 @@END:	FunctionDocumentation

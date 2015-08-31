@@ -1,0 +1,33 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	printXml
+@ACCESS:	public
+@RETURN:	ostream& 
+@PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
+@FILE:		HumdrumLine.cpp
+@LINES:		898-912
+@SHORTDESC:	// HumdrumLine::printXml -- 
+@LONGDESC:	// HumdrumLine::printXml --
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
+	out << Convert::repeatString(indent, level) << "<line>\n";
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i).printXml(out, level+1, indent);
+	}
+	out << Convert::repeatString(indent, level) << "</line>\n";
+	return out;
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -13,14 +13,11 @@ group: [
 ---
 
 {% include docslot/docslot.html %}
+{% include docslot/open-close.html %}
 
 The HumdrumToken class manages data conversions for the minHumdrum library.
-
-&nbsp;
-
-HumdrumToken Public functions
------------------------------
 
 {% include docslot/HumdrumToken.html %}
 
 &nbsp;
+

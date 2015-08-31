@@ -2,12 +2,12 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getDataType
+@SEEALSO:	isDataType
 @ACCESS:	public
 @RETURN:	const string& 
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		162-172
-@SEEALSO:
+@LINES:		163-174
 @SHORTDESC:	Get the exclusive interpretation type for the token.
 @LONGDESC:	Get the exclusive interpretation type for
 	the token.
@@ -20,17 +20,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getDataType -- Get the exclusive interpretation type for
-//     the token.
-//
 
 const string& HumdrumToken::getDataType(void) const {
 	return address.getDataType();
 }
-
-
 
 
 @@END:	FunctionDocumentation

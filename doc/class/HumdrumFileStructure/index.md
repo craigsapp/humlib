@@ -13,6 +13,7 @@ group: [
 ---
 
 {% include docslot/docslot.html %}
+{% include docslot/open-close.html %}
 
 The HumdrumFileStructure class manages data conversions for the minHumdrum library.
 

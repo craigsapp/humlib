@@ -6,8 +6,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		283-292
-@SEEALSO:
+@LINES:		287-296
 @SHORTDESC:	Get the track (similar to a staff in MEI).
 @LONGDESC:	Get the track (similar to a staff in MEI).
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getTrack -- Get the track (similar to a staff in MEI).
-//
 
 int HumdrumToken::getTrack(void) const {
 	return address.getTrack();
 }
-
-
 
 
 @@END:	FunctionDocumentation

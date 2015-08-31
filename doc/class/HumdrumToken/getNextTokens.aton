@@ -2,14 +2,14 @@
 @INDEXED:	yes
 @CLASSNAME:	HumdrumToken
 @METHOD:	getNextTokens
+@SEEALSO:	getNextToken
 @ACCESS:	public
 @RETURN:	vector<HumdrumToken*> 
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		361-371
-@SEEALSO:
-@SHORTDESC:	Return a list of the next tokens in the spine after this token.
-@LONGDESC:	Return a list of the next
+@LINES:		367-378
+@SHORTDESC:	Returns a list of the next tokens in the spine after this token.
+@LONGDESC:	Returns a list of the next
 	tokens in the spine after this token.
 	
 
@@ -20,17 +20,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getNextTokens --  Return a list of the next
-//   tokens in the spine after this token.
-//
 
 vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
 	return nextTokens;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -12,14 +12,26 @@ breadcrumbs: [
 title: Topics
 ---
 
+{% include topics/topics.html %}
 
-Parsing extensions
-==================
-
-<details open>
+<details class="topic-cvs">
 <summary>
 CVS Import/Export
 </summary>
 {% include topics/cvs.html %}
+</details>
+
+<details class="topic-parameters">
+<summary>
+Parameters
+</summary>
+{% include topics/parameters.html %}
+</details>
+
+<details class="topic-rhythms">
+<summary>
+Rational rhythms
+</summary>
+{% include topics/rhythms.html %}
 </details>
 

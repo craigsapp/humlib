@@ -1,0 +1,70 @@
+<script>
+// vim: ts=3
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	fillSummaries();
+});
+
+
+
+//////////////////////////////
+//
+// fillSummaries --
+//
+
+function fillSummaries() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var summary  = details[i].querySelector("summary");
+		var title    = details[i].querySelector(".snippet-title");
+		if (!(summary && title)) {
+			return;
+		}
+		summary.style.color = "#159957";
+		summary.innerHTML = title.innerHTML;
+		title.innerHTML = '';
+	}
+}
+
+
+
+//////////////////////////////
+//
+// closeAllSnippets --
+//
+
+function closeAllSnippets() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllSnippets --
+//
+
+function openAllSnippets() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
+
+
+
+</script>
+
+
+

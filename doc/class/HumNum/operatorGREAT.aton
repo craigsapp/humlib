@@ -11,7 +11,6 @@ double value
 int value
 @FILE:		HumNum.cpp
 @LINES:		649-662
-@SEEALSO:
 @SHORTDESC:	Greater-than equality for a HumNum compared to a HumNum, integer, or float.
 @LONGDESC:	Greater-than equality for a HumNum
 	compared to a HumNum, integer, or float.
@@ -24,11 +23,6 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator> -- Greater-than equality for a HumNum
-//     compared to a HumNum, integer, or float.
-//
 
 bool HumNum::operator>(const HumNum& value) const {
 	if (this == &value) {
@@ -36,8 +30,6 @@ bool HumNum::operator>(const HumNum& value) const {
 	}
 	return getFloat() > value.getFloat();
 }
-
-
 
 
 @@END:	FunctionDocumentation

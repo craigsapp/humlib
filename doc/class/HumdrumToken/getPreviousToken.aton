@@ -6,13 +6,11 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		385-401
-@SEEALSO:
-@SHORTDESC:	Return the previous token in the spine.
-@LONGDESC:	Return the previous token in the
+@LINES:		392-408
+@SHORTDESC:	Returns the previous token in the spine.
+@LONGDESC:	Returns the previous token in the
 	spine.  Since the previous token count is usually one, the default
 	index value is zero.
-	default value: index = 0
 	
 
 @@BEGIN: EXAMPLE
@@ -22,13 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getPreviousToken -- Return the previous token in the
-//    spine.  Since the previous token count is usually one, the default
-//    index value is zero.
-//       default value: index = 0
-//
 
 HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 	if ((index >= 0) && (index < (int)previousTokens.size())) {
@@ -37,8 +28,6 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 		return NULL;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

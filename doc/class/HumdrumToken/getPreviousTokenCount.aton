@@ -6,10 +6,9 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		916-929
-@SEEALSO:
-@SHORTDESC:	Return the number of tokens in the spine/sub-spine which precede this token.
-@LONGDESC:	Return the number of tokens
+@LINES:		934-947
+@SHORTDESC:	Returns the number of tokens in the spine/sub-spine which precede this token.
+@LONGDESC:	Returns the number of tokens
 	in the spine/sub-spine which precede this token.  Typically this will
 	be 1, but will be zero for an exclusive interpretation (starting with
 	"**"), and will be greater than one for a token which follows a
@@ -23,20 +22,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getPreviousTokenCount -- Return the number of tokens
-//   in the spine/sub-spine which precede this token.  Typically this will
-//   be 1, but will be zero for an exclusive interpretation (starting with
-//   "**"), and will be greater than one for a token which follows a
-//   spine merger (using *v interpretations).
-//
 
 int HumdrumToken::getPreviousTokenCount(void) const {
 	return previousTokens.size();
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -7,13 +7,11 @@
 @PARAMETERS:	string separator = "."
 @FILE:		HumAddress.cpp
 @LINES:		172-192
-@SEEALSO:
 @SHORTDESC:	Return the track and subtrack as a string.
 @LONGDESC:	Return the track and subtrack as a string.
 	The returned string will have the track number if the sub-spine value
 	is zero.  The optional separator parameter is used to separate the
 	track number from the subtrack number.
-	default value: separator = "."
 	
 
 @@BEGIN: EXAMPLE
@@ -23,14 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumAddress::getTrackString --  Return the track and subtrack as a string.
-//      The returned string will have the track number if the sub-spine value
-//      is zero.  The optional separator parameter is used to separate the
-//      track number from the subtrack number.
-//        default value: separator = "."
-//
 
 string HumAddress::getTrackString(string separator) const {
 	string output;
@@ -42,8 +32,6 @@ string HumAddress::getTrackString(string separator) const {
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

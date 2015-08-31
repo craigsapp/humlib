@@ -13,6 +13,7 @@ group: [
 ---
 
 {% include docslot/docslot.html %}
+{% include docslot/open-close.html %}
 
 The HumdrumLine class manages data conversions for the minHumdrum library.
 
@@ -22,10 +23,5 @@ HumdrumLine Public functions
 ----------------------------
 
 {% include docslot/HumdrumLine.html %}
-
-&nbsp;
-
-Functions inherited from <span class="class-link">MidiMessage</span>
----------------------------------------------------------------
 
 

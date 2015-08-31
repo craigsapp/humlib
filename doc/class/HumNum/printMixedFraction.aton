@@ -7,7 +7,6 @@
 @PARAMETERS:	ostream& out = cout, string separator = "_"
 @FILE:		HumNum.cpp
 @LINES:		768-793
-@SEEALSO:
 @SHORTDESC:	Print as an integer plus fractional remainder.
 @LONGDESC:	Print as an integer plus fractional 
 	remainder.  If absolute value is less than one, will only
@@ -25,16 +24,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::printMixedFraction -- Print as an integer plus fractional 
-//     remainder.  If absolute value is less than one, will only
-//     print the fraction.  The second parameter is the output stream
-//     for printing, and the third parameter is a separation string
-//     between the integer and remainder fraction.
-//        default parameter: out = cout;
-//        default parameter: separator = "_"
-//
 
 ostream& HumNum::printMixedFraction(ostream& out,
 		string separator) const {
@@ -49,8 +38,6 @@ ostream& HumNum::printMixedFraction(ostream& out,
 	}
 	return out;
 }
-
-
 
 
 @@END:	FunctionDocumentation

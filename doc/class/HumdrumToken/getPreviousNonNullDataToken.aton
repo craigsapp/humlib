@@ -6,10 +6,9 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		104-125
-@SEEALSO:
-@SHORTDESC:	Return the non-null data token which occurs before this token in the data in the same spine.
-@LONGDESC:	Return the non-null
+@LINES:		105-126
+@SHORTDESC:	Returns the non-null data token which occurs before this token in the data in the same spine.
+@LONGDESC:	Returns the non-null
 	data token which occurs before this token in the data in the same
 	spine.  The default value is index 0, since mostly there will only
 	be one previous token.
@@ -22,13 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getPreviousNonNullDataToken -- Return the non-null
-//    data token which occurs before this token in the data in the same
-//    spine.  The default value is index 0, since mostly there will only
-//    be one previous token.
-//
 
 HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
@@ -42,8 +34,6 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	}
 	return previousNonNullTokens[index];
 }
-
-
 
 
 @@END:	FunctionDocumentation

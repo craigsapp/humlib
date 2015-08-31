@@ -8,10 +8,9 @@ HumNum
 @PARAMETERS:	void
 HumNum scale
 @FILE:		HumdrumToken.cpp
-@LINES:		468-480
-@SEEALSO:
-@SHORTDESC:	Return the duration of the token.
-@LONGDESC:	Return the duration of the token.  The token
+@LINES:		475-487
+@SHORTDESC:	Returns the duration of the token.
+@LONGDESC:	Returns the duration of the token.  The token
 	does not necessarily need to have any explicit duration, as the returned
 	value will also include implicit duration calculated in analyzeRhythm
 	in the HumdrumFileStructure class.
@@ -24,19 +23,10 @@ HumNum scale
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::getDuration -- Return the duration of the token.  The token
-//    does not necessarily need to have any explicit duration, as the returned
-//    value will also include implicit duration calculated in analyzeRhythm
-//    in the HumdrumFileStructure class.
-//
 
 HumNum HumdrumToken::getDuration(void) const {
 	return duration;
 }
-
-
 
 
 @@END:	FunctionDocumentation

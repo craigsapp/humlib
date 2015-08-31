@@ -6,10 +6,9 @@
 @RETURN:	string   
 @PARAMETERS:	int index
 @FILE:		HumdrumLine.cpp
-@LINES:		605-616
-@SEEALSO:
-@SHORTDESC:	Return a copy of the string component of a token.
-@LONGDESC:	Return a copy of the string component of
+@LINES:		612-623
+@SHORTDESC:	Returns a copy of the string component of a token.
+@LONGDESC:	Returns a copy of the string component of
 	a token.  This code will return a segmentation fault if index is out of
 	range...
 	
@@ -21,18 +20,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::getTokenString -- Return a copy of the string component of
-//     a token.  This code will return a segmentation fault if index is out of
-//     range...
-//
 
 string HumdrumLine::getTokenString(int index) const {
 	return (string(*tokens[index]));
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -11,7 +11,6 @@ const HumNum& value
 int value
 @FILE:		HumNum.cpp
 @LINES:		408-426
-@SEEALSO:
 @SHORTDESC:	Subtraction operator to subtract HumNums from each other and to subtrack integers from HumNums.
 @LONGDESC:	Subtraction operator to subtract
 	HumNums from each other and to subtrack integers from
@@ -25,12 +24,6 @@ int value
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::operator- -- Subtraction operator to subtract
-//     HumNums from each other and to subtrack integers from
-//     HumNums.
-//
 
 HumNum HumNum::operator-(const HumNum& value) const {
 	int a1  = getNumerator();
@@ -42,8 +35,6 @@ HumNum HumNum::operator-(const HumNum& value) const {
 	HumNum output(ao, bo);
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

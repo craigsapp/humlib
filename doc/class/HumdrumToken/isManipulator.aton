@@ -6,10 +6,9 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		445-466
-@SEEALSO:
-@SHORTDESC:	returns true if token is one of: SPLIT_TOKEN = "*^" == spine splitter MERGE_TOKEN = "*v" == spine merger EXCHANGE_TOKEN = "*x" == spine exchanger ADD_TOKEN = "*+" == spine adder TERMINATE_TOKEN = "*-" == spine terminator **... == exclusive interpretation 
-@LONGDESC:	returns true if token is one of:
+@LINES:		452-473
+@SHORTDESC:	Returns true if token is one of: SPLIT_TOKEN = "*^" == spine splitter MERGE_TOKEN = "*v" == spine merger EXCHANGE_TOKEN = "*x" == spine exchanger ADD_TOKEN = "*+" == spine adder TERMINATE_TOKEN = "*-" == spine terminator **... == exclusive interpretation 
+@LONGDESC:	Returns true if token is one of:
 	SPLIT_TOKEN     = "*^"  == spine splitter
 	MERGE_TOKEN     = "*v"  == spine merger
 	EXCHANGE_TOKEN  = "*x"  == spine exchanger
@@ -25,16 +24,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-///////////////////////////////
-//
-// HumdrumToken::isManipulator -- returns true if token is one of:
-//    SPLIT_TOKEN     = "*^"  == spine splitter
-//    MERGE_TOKEN     = "*v"  == spine merger
-//    EXCHANGE_TOKEN  = "*x"  == spine exchanger
-//    ADD_TOKEN       = "*+"  == spine adder
-//    TERMINATE_TOKEN = "*-"  == spine terminator
-//    **...  == exclusive interpretation
-//
 
 bool HumdrumToken::isManipulator(void) const {
 	if (isSplitInterpretation())     { return true; }
@@ -45,8 +34,6 @@ bool HumdrumToken::isManipulator(void) const {
 	if (isExclusiveInterpretation()) { return true; }
 	return false;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		257-269
-@SEEALSO:
 @SHORTDESC:	Make the rational number non-negative.
 @LONGDESC:	Make the rational number non-negative.
 	
@@ -19,10 +18,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::makeAbs -- Make the rational number non-negative.
-//
 
 HumNum& HumNum::makeAbs(void) {
 	if (!isNonNegative()) {
@@ -30,8 +25,6 @@ HumNum& HumNum::makeAbs(void) {
 	}
 	return *this;
 }
-
-
 
 
 @@END:	FunctionDocumentation

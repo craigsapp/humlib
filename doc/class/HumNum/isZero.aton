@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		92-101
-@SEEALSO:
 @SHORTDESC:	Returns true if value is zero.
 @LONGDESC:	Returns true if value is zero.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isZero -- Returns true if value is zero.
-//
 
 bool HumNum::isZero(void) const {
 	return isFinite() && (top == 0);
 }
-
-
 
 
 @@END:	FunctionDocumentation

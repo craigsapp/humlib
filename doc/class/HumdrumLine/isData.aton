@@ -6,8 +6,7 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		229-242
-@SEEALSO:
+@LINES:		236-249
 @SHORTDESC:	Returns true if data (but not measure).
 @LONGDESC:	Returns true if data (but not measure).
 	
@@ -19,10 +18,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumLine::isData -- Returns true if data (but not measure).
-//
 
 bool HumdrumLine::isData(void) const {
 	if (isComment() || isInterp() || isBarline() || isEmpty()) {
@@ -31,8 +26,6 @@ bool HumdrumLine::isData(void) const {
 		return true;
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

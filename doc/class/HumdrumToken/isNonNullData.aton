@@ -6,10 +6,9 @@
 @RETURN:	bool     
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		603-613
-@SEEALSO:
-@SHORTDESC:	Return true if the token is a data token that is not a null token.
-@LONGDESC:	Return true if the token is a data token
+@LINES:		610-620
+@SHORTDESC:	Returns true if the token is a data token that is not a null token.
+@LONGDESC:	Returns true if the token is a data token
 	that is not a null token.
 	
 
@@ -20,17 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumToken::isNonNullData -- Return true if the token is a data token
-//    that is not a null token.
-//
 
 bool HumdrumToken::isNonNullData(void) const {
 	return isData() && !isNull();
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -6,8 +6,7 @@
 @RETURN:	
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		27-37
-@SEEALSO:
+@LINES:		28-38
 @SHORTDESC:	HumdrumFileBase constructor.
 @LONGDESC:	HumdrumFileBase constructor.
 	
@@ -19,17 +18,11 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::HumdrumFileBase -- HumdrumFileBase constructor.
-//
 
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
 @LINES:		372-381
-@SEEALSO:
 @SHORTDESC:	Return true if number is an integer.
 @LONGDESC:	Return true if number is an integer.
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumNum::isInteger -- Return true if number is an integer.
-//
 
 bool HumNum::isInteger(void) const {
 	return isFinite() && (bot == 1);
 }
-
-
 
 
 @@END:	FunctionDocumentation

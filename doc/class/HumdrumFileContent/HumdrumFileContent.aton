@@ -7,7 +7,6 @@
 @PARAMETERS:	void
 @FILE:		HumdrumFileContent.cpp
 @LINES:		20-29
-@SEEALSO:
 @SHORTDESC:	// HumdrumFileContent::HumdrumFileContent -- 
 @LONGDESC:	// HumdrumFileContent::HumdrumFileContent --
 	
@@ -19,16 +18,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileContent::HumdrumFileContent --
-//
 
 HumdrumFileContent::HumdrumFileContent(void) {
 	// do nothing
 }
-
-
 
 
 @@END:	FunctionDocumentation

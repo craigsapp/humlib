@@ -1,7 +1,7 @@
 @@BEGIN:	FunctionDocumentation
 @INDEXED:	yes
 @CLASSNAME:	HumdrumFileStructure
-@METHOD:	readStringCSV
+@METHOD:	readStringCsv
 @ACCESS:	public
 @RETURN:	bool          
 bool          
@@ -9,11 +9,9 @@ bool
 const string& contents, const string& separator=","
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		138-153
-@SEEALSO:
 @SHORTDESC:	Read the contents from a string.
 @LONGDESC:	Read the contents from a string.
 	Similar to HumdrumFileStructure::read, but for string data.
-	default value: separator = ","
 	
 
 @@BEGIN: EXAMPLE
@@ -23,22 +21,14 @@ const string& contents, const string& separator=","
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileStructure::readStringCSV -- Read the contents from a string.
-//    Similar to HumdrumFileStructure::read, but for string data.
-//       default value: separator = ","
-//
 
-bool HumdrumFileStructure::readStringCSV(const char* contents,
+bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
-	if (!HumdrumFileBase::readStringCSV(contents, separator)) {
+	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return false;
 	}
 	return analyzeStructure();
 }
-
-
 
 
 @@END:	FunctionDocumentation
