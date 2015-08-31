@@ -12,6 +12,9 @@ breadcrumbs: [
 title: Topics
 ---
 
+[<span style="cursor:pointer;" onclick="openAllTopics()">Open all</span>]
+[<span style="cursor:pointer;" onclick="closeAllTopics()">Close all</span>]
+
 {% include topics/topics.html %}
 
 <details class="topic-cvs">

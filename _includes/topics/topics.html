@@ -22,6 +22,42 @@ function checkAnchor() {
 }
 
 
+
+//////////////////////////////
+//
+// closeAllTopics --
+//
+
+function closeAllTopics() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllTopics --
+//
+
+function openAllTopics() {
+	var details = document.querySelectorAll("details");
+	for (var i=0; i<details.length; i++) {
+		var detail = details[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
+
+
 </script>
 
 <style>
