@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 31 13:30:20 PDT 2015
+// Last Modified: Tue Sep  1 03:10:32 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -1977,6 +1977,60 @@ HumdrumFile::~HumdrumFile() {
 
 
 
+//////////////////////////////
+//
+// HumdrumFile::printXml -- Print a HumdrumFile object in XML format.
+// default value: level = 0
+// default value: indent = tab character
+//
+
+ostream& HumdrumFile::printXml(ostream& out, int level, 
+		const string& indent) {
+	out << Convert::repeatString(indent, level) << "<sequence>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<sequenceInfo>\n";
+	level++;
+	
+	out << Convert::repeatString(indent, level) << "<frameCount>";
+	out << getLineCount() << "</frameCount>\n";
+	
+	out << Convert::repeatString(indent, level) << "<trackCount>";
+	out << getMaxTrack() << "</trackCount>\n";
+
+	out << Convert::repeatString(indent, level) << "<tpq>";
+	out << tpq() << "<tpq>\n";
+
+	// Starting at 0 by default (single segment only).  Eventually
+	// add parameter to set the starting time of the sequence, which
+	// would be the duration of all previous segments before this one.
+	out << Convert::repeatString(indent, level) << "<sequenceStart";
+	out << Convert::getHumNumAttributes(0);
+	out << "/>\n";
+
+	out << Convert::repeatString(indent, level) << "<sequenceDuration";
+	out << Convert::getHumNumAttributes(getScoreDuration());
+	out << "/>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
+
+
+	out << Convert::repeatString(indent, level) << "<frames>\n";
+	level++;
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printXml(out, level, indent);
+	}
+	level--;
+	out << Convert::repeatString(indent, level) << "</frames>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequence>\n";
+
+	return out;
+}
+
+
 
 
 //////////////////////////////
@@ -2165,24 +2219,6 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 	for (int i=0; i<getLineCount(); i++) {
 		((*this)[i]).printCsv(out, separator);
 	}
-	return out;
-}
-
-
-//////////////////////////////
-//
-// HumdrumFileBase::printXml -- Print a HumdrumFile object in XML format.
-// default value: level = 0
-// default value: indent = tab character
-//
-
-ostream& HumdrumFileBase::printXml(ostream& out, int level, 
-		const string& indent) {
-	out << Convert::repeatString(indent, level) << "<humdrum>\n";
-	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printXml(out, level+1, indent);
-	}
-	out << Convert::repeatString(indent, level) << "</humdrum>\n";
 	return out;
 }
 
@@ -3605,6 +3641,7 @@ bool HumdrumFileStructure::analyzeMeter(void) {
 		if (lines[i]->isData() && !foundbarline) {
 			// pickup measure, so set the first measure to the start of the file.
 			barlines.push_back(lines[0]);
+			foundbarline = 1;
 		}
 	}
 
@@ -4393,6 +4430,106 @@ bool HumdrumLine::isCommentGlobal(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isReference -- Returns true if a reference record.
+//
+
+bool HumdrumLine::isReference(void) const {
+
+	if (this->size() < 5) {
+		return false;
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return false;
+	}
+	if ((*this)[3] == '!') {
+		return false;
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return false;
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return false;
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return false;
+	}
+	return true;
+
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getReferenceKey -- Return reference key if a reference
+//     record.  Otherwise returns an empty string.
+//
+
+string HumdrumLine::getReferenceKey(void) const {
+	if (this->size() < 5) {
+		return "";
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return "";
+	}
+	if ((*this)[3] == '!') {
+		return "";
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return "";
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return "";
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return "";
+	}
+	return this->substr(3, colloc - 3);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getReferenceValue -- Return reference value if a reference
+//     record.  Otherwise returns an empty string.
+//
+
+string HumdrumLine::getReferenceValue(void) const {
+	if (this->size() < 5) {
+		return "";
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return "";
+	}
+	if ((*this)[3] == '!') {
+		return "";
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return "";
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return "";
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return "";
+	}
+	return Convert::trimWhiteSpace(this->substr(colloc+1));
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isExclusive -- Returns true if the first two characters
 //     are "**".
 //
@@ -5141,11 +5278,15 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 
 	if (hasSpines()) {
-		out << Convert::repeatString(indent, level) << "<frame>\n";
+		out << Convert::repeatString(indent, level) << "<frame";
+		out << " n=\"" << getLineIndex() << "\">\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
 		level++;
+
+		out << Convert::repeatString(indent, level) << "<fieldCount>";
+		out << getTokenCount() << "</fieldCount>\n";
 
 		out << Convert::repeatString(indent, level);
 		out << "<frameStart";
@@ -5156,6 +5297,18 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		out << "<frameDuration";
 		out << Convert::getHumNumAttributes(getDuration());
 		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isData()) {
+			out << "data";
+		} else if (isBarline()) {
+			out << "barline";
+		} else if (isInterpretation()) {
+			out << "interpretation";
+		} else if (isLocalComment()) {
+			out << "local-comment";
+		}
+		out << "</frameType>\n";
 
 		if (isBarline()) {
 			// print the duration to the next barline or to the end of the score
@@ -5169,28 +5322,56 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
-		out << Convert::repeatString(indent, level) << "<tokens>\n";
+		out << Convert::repeatString(indent, level) << "<fields>\n";
 		level++;
 		for (int i=0; i<getFieldCount(); i++) {
 			token(i).printXml(out, level, indent);
 		}
 		level--;
-		out << Convert::repeatString(indent, level) << "</tokens>\n";
+		out << Convert::repeatString(indent, level) << "</fields>\n";
 		
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
-	} else if (isEmpty()) {
-		out << Convert::repeatString(indent, level) << "<blank/>\n";
 	} else {
 		// global comments, reference records, or blank lines print here.
-		out << Convert::repeatString(indent, level) << "<metaFrame>\n";
+		out << Convert::repeatString(indent, level) << "<metaFrame";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " text=\"" << Convert::encodeXml(((string)(*this)));
+		out << "\"/>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
 		level++;
 
 		out << Convert::repeatString(indent, level);
 		out << "<startTime";
 		out << Convert::getHumNumAttributes(getDurationFromStart());
 		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isReference()) {
+			out << "reference";
+		} else if (isBlank()) {
+			out << "empty";
+		} else {
+			out << "global-comment";
+		}
+		out << "</frameType>\n";
+
+		if (isReference()) {
+			out << Convert::repeatString(indent, level);
+			out << "<referenceKey>" << Convert::encodeXml(getReferenceKey());
+			out << "</referenceKey>\n";
+
+			out << Convert::repeatString(indent, level);
+			out << "<referenceValue>" << Convert::encodeXml(getReferenceValue());
+			out << "</referenceValue>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+
 
 		level--;
 		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
@@ -5352,7 +5533,7 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 //
 
 HumdrumToken::~HumdrumToken() {
-    // do nothing
+	// do nothing
 }
 
 
@@ -5600,7 +5781,7 @@ void HumdrumToken::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
-// HumdrumToken::setSubtrackCount -- Sets the subtrack count in the 
+// HumdrumToken::setSubtrackCount -- Sets the subtrack count in the
 //    HumdrumLine for all tokens in the same track as the current
 //    token.
 //
@@ -5835,6 +6016,39 @@ bool HumdrumToken::hasRhythm(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
+//
+
+bool HumdrumToken::isRest(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernRest((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNote -- Returns true if the token is a (kern) note
+//     (possessing a pitch).
+//
+
+bool HumdrumToken::isNote(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernNote((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isBarline -- Returns true if the first character is an
 //   equals sign.
 //
@@ -5912,7 +6126,7 @@ bool HumdrumToken::isNonNullData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isNullData -- Returns true if the token is a null 
+// HumdrumToken::isNullData -- Returns true if the token is a null
 //     data token.
 //
 
@@ -6022,7 +6236,7 @@ int HumdrumToken::getSubtrack(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getTrackString -- Gets "track.subtrack" as a string.  The
-//     track and subtrack are integers.  The getTrackString function will 
+//     track and subtrack are integers.  The getTrackString function will
 //     return a string with the track and subtrack separated by an dot.  The
 //     Dot is not a decimal point, but if the subtrack count does not exceed
 //     9, then the returned string can be treated as a floating-point number
@@ -6061,7 +6275,7 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 /////////////////////////////
 //
 // HumdrumToken::getSubtoken -- Extract the specified sub-token from the token.
-//    Tokens usually are separated by spaces in Humdrum files, but this will 
+//    Tokens usually are separated by spaces in Humdrum files, but this will
 //    depened on the data type (so therefore, the tokens are not presplit into
 //    sub-tokens when reading in the file).
 // default value: separator = " "
@@ -6274,14 +6488,25 @@ ostream& HumdrumToken::printCsv(ostream& out) {
 //
 
 ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<token text=\"";
-	out << Convert::encodeXml(((string)(*this)));
-	out << "\">\n";
+	out << Convert::repeatString(indent, level);
+	out << "<field";
+	out << " n=\"" << getTokenIndex() << "\"";
+	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << ">\n";
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
+
+	if (isRest()) {
+		out << Convert::repeatString(indent, level+1) << "<rest/>\n";
+	} else if (isNote()) {
+		out << Convert::repeatString(indent, level+1) << "<pitch";
+		out << Convert::getKernPitchAttributes(((string)(*this)));
+		out << ">\n";
+	}
+
 	printXmlContentInfo(out, level+1, indent);
 	printXmlParameterInfo(out, level+1, indent);
-	out << Convert::repeatString(indent, level) << "</token>\n";
+	out << Convert::repeatString(indent, level) << "</field>\n";
 	return out;
 }
 
@@ -6295,8 +6520,8 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
+		const string& indent) {
 
 	out << Convert::repeatString(indent, level);
 	out << "<track>" << getTrack() << "</track>\n";
@@ -6323,11 +6548,13 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
+		const string& indent) {
 
-	out << Convert::repeatString(indent, level);
-	out << "<duration>" << getDuration() << "</duration>\n";
+	if (getDuration().isNonNegative()) {
+		out << Convert::repeatString(indent, level);
+		out << "<duration>" << getDuration() << "</duration>\n";
+	}
 
 	return out;
 }
@@ -6342,8 +6569,8 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
+		const string& indent) {
 	return out;
 }
 
@@ -6357,8 +6584,8 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
+		const string& indent) {
 	return out;
 }
 
@@ -6372,6 +6599,83 @@ ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 ostream& operator<<(ostream& out, const HumdrumToken& token) {
 	out << token.c_str();
 	return out;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::isKernRest -- Returns true if the input string represents
+//   a **kern rest.
+//
+
+bool Convert::isKernRest(const string& kerndata) {
+	if (kerndata.find("r") != string::npos) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isKernNote -- Returns true if the input string represents
+//   a **kern note (i.e., token with a pitch, not a null token or a rest).
+//
+
+bool Convert::isKernNote(const string& kerndata) {
+	char ch;
+	for (int i = 0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch >= 'a') && (ch <= 'g')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernPitchAttributes --
+//    pc         = pitch class
+//    numacc     = numeric accidental (-1=flat, 0=natural, 1=sharp)
+//    explicit   = force showing of accidental
+//    oct        = octave number (middle C = 4)
+//    base40     = base-40 enumeration of pitch (valid if abs(numacc) <= 2
+//    base12     = base-12 enumeration of pitch (MIDI note number)
+//    base7      = base-7  enumeration of pitch (diatonic)
+//
+
+string Convert::getKernPitchAttributes(const string& kerndata) {
+	string output = "";
+
+	output += " pc=\"";
+	output += kernToDiatonicUC(kerndata);
+	output += "\"";
+
+	output += " numacc=\"";
+	output += to_string(kernToAccidentalCount(kerndata));
+	output += "\"";
+
+	if (kerndata.find('n') != string::npos) {
+		output += " explicit =\"true\"";
+	}
+
+	output += " oct=\"";
+	output += to_string(kernToOctaveNumber(kerndata));
+	output += "\"";
+
+	// base-40 parameter goes here
+	// base-12 parameter goes here
+	// base-7  parameter goes here
+
+	return output;
 }
 
 
@@ -6810,6 +7114,23 @@ string Convert::getHumNumAttributes(const HumNum& num) {
 				+ "/" + to_string(rem.getDenominator()) + "\"";
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
+//     from the beginning and end of input string.
+//
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+   s.erase(std::find_if(s.rbegin(), s.rend(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
 }
 
 

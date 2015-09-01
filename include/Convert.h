@@ -50,6 +50,12 @@ class Convert {
 			return kernToScientificPitch(kerndata, flat, sharp, separator);
 		}
 
+		// data-type specific (other than pitch/rhythm), 
+		// defined in Convert-kern.cpp
+		static bool isKernRest              (const string& kerndata);
+		static bool isKernNote              (const string& kerndata);
+		static string  getKernPitchAttributes  (const string& kerndata);
+
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
 		                                     char separator = ' ');
@@ -59,6 +65,7 @@ class Convert {
 		static string  repeatString         (const string& pattern, int count);
 		static string  encodeXml            (const string& input);
 		static string  getHumNumAttributes  (const HumNum& num);
+		static string  trimWhiteSpace       (const string& input);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

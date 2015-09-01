@@ -546,6 +546,7 @@ bool HumdrumFileStructure::analyzeMeter(void) {
 		if (lines[i]->isData() && !foundbarline) {
 			// pickup measure, so set the first measure to the start of the file.
 			barlines.push_back(lines[0]);
+			foundbarline = 1;
 		}
 	}
 

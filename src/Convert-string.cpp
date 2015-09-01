@@ -131,6 +131,23 @@ string Convert::getHumNumAttributes(const HumNum& num) {
 
 
 
+//////////////////////////////
+//
+// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
+//     from the beginning and end of input string.
+//
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+   s.erase(std::find_if(s.rbegin(), s.rend(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+
+
 // END_MERGE
 
 } // end namespace std;

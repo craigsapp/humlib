@@ -82,8 +82,6 @@ class HumdrumFileBase {
 		ostream&      printTrackInfo               (ostream& out = cout);
 		ostream&      printCsv      (ostream& out = cout,
 		                             const string& separator = ",");
-		ostream&      printXml      (ostream& out = cout, int level = 0,
-		                             const string& indent = "\t");
 
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;

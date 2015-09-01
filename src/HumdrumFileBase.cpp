@@ -16,7 +16,6 @@
 //
 
 #include "HumdrumFileBase.h"
-#include "Convert.h"
 
 #include <sstream>
 #include <fstream>
@@ -212,24 +211,6 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 	for (int i=0; i<getLineCount(); i++) {
 		((*this)[i]).printCsv(out, separator);
 	}
-	return out;
-}
-
-
-//////////////////////////////
-//
-// HumdrumFileBase::printXml -- Print a HumdrumFile object in XML format.
-// default value: level = 0
-// default value: indent = tab character
-//
-
-ostream& HumdrumFileBase::printXml(ostream& out, int level, 
-		const string& indent) {
-	out << Convert::repeatString(indent, level) << "<humdrum>\n";
-	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printXml(out, level+1, indent);
-	}
-	out << Convert::repeatString(indent, level) << "</humdrum>\n";
 	return out;
 }
 

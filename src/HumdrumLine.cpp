@@ -182,6 +182,106 @@ bool HumdrumLine::isCommentGlobal(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isReference -- Returns true if a reference record.
+//
+
+bool HumdrumLine::isReference(void) const {
+
+	if (this->size() < 5) {
+		return false;
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return false;
+	}
+	if ((*this)[3] == '!') {
+		return false;
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return false;
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return false;
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return false;
+	}
+	return true;
+
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getReferenceKey -- Return reference key if a reference
+//     record.  Otherwise returns an empty string.
+//
+
+string HumdrumLine::getReferenceKey(void) const {
+	if (this->size() < 5) {
+		return "";
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return "";
+	}
+	if ((*this)[3] == '!') {
+		return "";
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return "";
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return "";
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return "";
+	}
+	return this->substr(3, colloc - 3);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getReferenceValue -- Return reference value if a reference
+//     record.  Otherwise returns an empty string.
+//
+
+string HumdrumLine::getReferenceValue(void) const {
+	if (this->size() < 5) {
+		return "";
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return "";
+	}
+	if ((*this)[3] == '!') {
+		return "";
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return "";
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return "";
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return "";
+	}
+	return Convert::trimWhiteSpace(this->substr(colloc+1));
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isExclusive -- Returns true if the first two characters
 //     are "**".
 //
@@ -930,11 +1030,15 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 
 	if (hasSpines()) {
-		out << Convert::repeatString(indent, level) << "<frame>\n";
+		out << Convert::repeatString(indent, level) << "<frame";
+		out << " n=\"" << getLineIndex() << "\">\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
 		level++;
+
+		out << Convert::repeatString(indent, level) << "<fieldCount>";
+		out << getTokenCount() << "</fieldCount>\n";
 
 		out << Convert::repeatString(indent, level);
 		out << "<frameStart";
@@ -945,6 +1049,18 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		out << "<frameDuration";
 		out << Convert::getHumNumAttributes(getDuration());
 		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isData()) {
+			out << "data";
+		} else if (isBarline()) {
+			out << "barline";
+		} else if (isInterpretation()) {
+			out << "interpretation";
+		} else if (isLocalComment()) {
+			out << "local-comment";
+		}
+		out << "</frameType>\n";
 
 		if (isBarline()) {
 			// print the duration to the next barline or to the end of the score
@@ -958,28 +1074,56 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
-		out << Convert::repeatString(indent, level) << "<tokens>\n";
+		out << Convert::repeatString(indent, level) << "<fields>\n";
 		level++;
 		for (int i=0; i<getFieldCount(); i++) {
 			token(i).printXml(out, level, indent);
 		}
 		level--;
-		out << Convert::repeatString(indent, level) << "</tokens>\n";
+		out << Convert::repeatString(indent, level) << "</fields>\n";
 		
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
-	} else if (isEmpty()) {
-		out << Convert::repeatString(indent, level) << "<blank/>\n";
 	} else {
 		// global comments, reference records, or blank lines print here.
-		out << Convert::repeatString(indent, level) << "<metaFrame>\n";
+		out << Convert::repeatString(indent, level) << "<metaFrame";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " text=\"" << Convert::encodeXml(((string)(*this)));
+		out << "\"/>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
 		level++;
 
 		out << Convert::repeatString(indent, level);
 		out << "<startTime";
 		out << Convert::getHumNumAttributes(getDurationFromStart());
 		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isReference()) {
+			out << "reference";
+		} else if (isBlank()) {
+			out << "empty";
+		} else {
+			out << "global-comment";
+		}
+		out << "</frameType>\n";
+
+		if (isReference()) {
+			out << Convert::repeatString(indent, level);
+			out << "<referenceKey>" << Convert::encodeXml(getReferenceKey());
+			out << "</referenceKey>\n";
+
+			out << Convert::repeatString(indent, level);
+			out << "<referenceValue>" << Convert::encodeXml(getReferenceValue());
+			out << "</referenceValue>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+
 
 		level--;
 		out << Convert::repeatString(indent, level) << "</metaFrame>\n";

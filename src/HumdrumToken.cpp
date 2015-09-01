@@ -62,7 +62,7 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 //
 
 HumdrumToken::~HumdrumToken() {
-    // do nothing
+	// do nothing
 }
 
 
@@ -310,7 +310,7 @@ void HumdrumToken::setSubtrack(int aSubtrack) {
 
 //////////////////////////////
 //
-// HumdrumToken::setSubtrackCount -- Sets the subtrack count in the 
+// HumdrumToken::setSubtrackCount -- Sets the subtrack count in the
 //    HumdrumLine for all tokens in the same track as the current
 //    token.
 //
@@ -545,6 +545,39 @@ bool HumdrumToken::hasRhythm(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
+//
+
+bool HumdrumToken::isRest(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernRest((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNote -- Returns true if the token is a (kern) note
+//     (possessing a pitch).
+//
+
+bool HumdrumToken::isNote(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernNote((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isBarline -- Returns true if the first character is an
 //   equals sign.
 //
@@ -622,7 +655,7 @@ bool HumdrumToken::isNonNullData(void) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isNullData -- Returns true if the token is a null 
+// HumdrumToken::isNullData -- Returns true if the token is a null
 //     data token.
 //
 
@@ -732,7 +765,7 @@ int HumdrumToken::getSubtrack(void) const {
 //////////////////////////////
 //
 // HumdrumToken::getTrackString -- Gets "track.subtrack" as a string.  The
-//     track and subtrack are integers.  The getTrackString function will 
+//     track and subtrack are integers.  The getTrackString function will
 //     return a string with the track and subtrack separated by an dot.  The
 //     Dot is not a decimal point, but if the subtrack count does not exceed
 //     9, then the returned string can be treated as a floating-point number
@@ -771,7 +804,7 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 /////////////////////////////
 //
 // HumdrumToken::getSubtoken -- Extract the specified sub-token from the token.
-//    Tokens usually are separated by spaces in Humdrum files, but this will 
+//    Tokens usually are separated by spaces in Humdrum files, but this will
 //    depened on the data type (so therefore, the tokens are not presplit into
 //    sub-tokens when reading in the file).
 // default value: separator = " "
@@ -984,14 +1017,25 @@ ostream& HumdrumToken::printCsv(ostream& out) {
 //
 
 ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<token text=\"";
-	out << Convert::encodeXml(((string)(*this)));
-	out << "\">\n";
+	out << Convert::repeatString(indent, level);
+	out << "<field";
+	out << " n=\"" << getTokenIndex() << "\"";
+	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << ">\n";
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
+
+	if (isRest()) {
+		out << Convert::repeatString(indent, level+1) << "<rest/>\n";
+	} else if (isNote()) {
+		out << Convert::repeatString(indent, level+1) << "<pitch";
+		out << Convert::getKernPitchAttributes(((string)(*this)));
+		out << ">\n";
+	}
+
 	printXmlContentInfo(out, level+1, indent);
 	printXmlParameterInfo(out, level+1, indent);
-	out << Convert::repeatString(indent, level) << "</token>\n";
+	out << Convert::repeatString(indent, level) << "</field>\n";
 	return out;
 }
 
@@ -1005,8 +1049,8 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
+		const string& indent) {
 
 	out << Convert::repeatString(indent, level);
 	out << "<track>" << getTrack() << "</track>\n";
@@ -1033,11 +1077,13 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
+		const string& indent) {
 
-	out << Convert::repeatString(indent, level);
-	out << "<duration>" << getDuration() << "</duration>\n";
+	if (getDuration().isNonNegative()) {
+		out << Convert::repeatString(indent, level);
+		out << "<duration>" << getDuration() << "</duration>\n";
+	}
 
 	return out;
 }
@@ -1052,8 +1098,8 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
+		const string& indent) {
 	return out;
 }
 
@@ -1067,8 +1113,8 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 // default value: indent = "\t"
 //
 
-ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level, 
-		const string& indent) { 
+ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
+		const string& indent) {
 	return out;
 }
 

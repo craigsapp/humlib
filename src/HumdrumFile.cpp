@@ -12,6 +12,7 @@
 //
 
 #include "HumdrumFile.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -39,6 +40,60 @@ HumdrumFile::~HumdrumFile() {
 	// do nothing
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumFile::printXml -- Print a HumdrumFile object in XML format.
+// default value: level = 0
+// default value: indent = tab character
+//
+
+ostream& HumdrumFile::printXml(ostream& out, int level, 
+		const string& indent) {
+	out << Convert::repeatString(indent, level) << "<sequence>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<sequenceInfo>\n";
+	level++;
+	
+	out << Convert::repeatString(indent, level) << "<frameCount>";
+	out << getLineCount() << "</frameCount>\n";
+	
+	out << Convert::repeatString(indent, level) << "<trackCount>";
+	out << getMaxTrack() << "</trackCount>\n";
+
+	out << Convert::repeatString(indent, level) << "<tpq>";
+	out << tpq() << "<tpq>\n";
+
+	// Starting at 0 by default (single segment only).  Eventually
+	// add parameter to set the starting time of the sequence, which
+	// would be the duration of all previous segments before this one.
+	out << Convert::repeatString(indent, level) << "<sequenceStart";
+	out << Convert::getHumNumAttributes(0);
+	out << "/>\n";
+
+	out << Convert::repeatString(indent, level) << "<sequenceDuration";
+	out << Convert::getHumNumAttributes(getScoreDuration());
+	out << "/>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
+
+
+	out << Convert::repeatString(indent, level) << "<frames>\n";
+	level++;
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printXml(out, level, indent);
+	}
+	level--;
+	out << Convert::repeatString(indent, level) << "</frames>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequence>\n";
+
+	return out;
+}
 
 
 // END_MERGE

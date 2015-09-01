@@ -30,6 +30,9 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile         (void);
 		             ~HumdrumFile         ();
+
+		ostream&      printXml            (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 };
 
 

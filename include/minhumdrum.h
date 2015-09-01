@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 31 13:30:20 PDT 2015
+// Last Modified: Tue Sep  1 03:10:32 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -344,7 +344,12 @@ class HumdrumLine : public string, public HumHash {
 
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
+		bool     isLocalComment (void) const { return isCommentLocal(); }
 		bool     isCommentGlobal        (void) const;
+		bool     isReference            (void) const;
+		string   getReferenceKey        (void) const;
+		string   getReferenceValue      (void) const;
+		bool     isGlobalComment (void) const { return isCommentGlobal(); }
 		bool     isExclusive            (void) const;
 		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator           (void) const;
@@ -355,6 +360,7 @@ class HumdrumLine : public string, public HumHash {
 		bool     isAllNull              (void) const;
 		bool     isAllRhythmicNull      (void) const;
 		bool     isEmpty                (void) const;
+		bool     isBlank                (void) const { return isEmpty(); }
 		bool     isManipulator          (void) const;
 		bool     hasSpines              (void) const;
 		HumdrumToken& token             (int index) const;
@@ -513,6 +519,10 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNullData                (void) const;
 		bool     hasRhythm                 (void) const;
 
+		// kern-specific functions:
+		bool     isRest                    (void) const;
+		bool     isNote                    (void) const;
+
 		HumNum   getDuration               (void) const;
 		HumNum   getDurationFromStart      (void) const;
 
@@ -528,6 +538,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
+		int      getTokenIndex (void) const { return getFieldIndex(); }
 		const string& getDataType          (void) const;
 		bool     isDataType                (string dtype) const;
 		string   getSpineInfo              (void) const;
@@ -694,8 +705,6 @@ class HumdrumFileBase {
 		ostream&      printTrackInfo               (ostream& out = cout);
 		ostream&      printCsv      (ostream& out = cout,
 		                             const string& separator = ",");
-		ostream&      printXml      (ostream& out = cout, int level = 0,
-		                             const string& indent = "\t");
 
 		HumdrumToken* getTrackStart                (int track) const;
 		int           getTrackEndCount             (int track) const;
@@ -912,6 +921,9 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile         (void);
 		             ~HumdrumFile         ();
+
+		ostream&      printXml            (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 };
 
 
@@ -942,6 +954,12 @@ class Convert {
 			return kernToScientificPitch(kerndata, flat, sharp, separator);
 		}
 
+		// data-type specific (other than pitch/rhythm), 
+		// defined in Convert-kern.cpp
+		static bool isKernRest              (const string& kerndata);
+		static bool isKernNote              (const string& kerndata);
+		static string  getKernPitchAttributes  (const string& kerndata);
+
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
 		                                     char separator = ' ');
@@ -951,6 +969,7 @@ class Convert {
 		static string  repeatString         (const string& pattern, int count);
 		static string  encodeXml            (const string& input);
 		static string  getHumNumAttributes  (const HumNum& num);
+		static string  trimWhiteSpace       (const string& input);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);

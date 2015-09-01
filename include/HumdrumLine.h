@@ -36,7 +36,12 @@ class HumdrumLine : public string, public HumHash {
 
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
+		bool     isLocalComment (void) const { return isCommentLocal(); }
 		bool     isCommentGlobal        (void) const;
+		bool     isReference            (void) const;
+		string   getReferenceKey        (void) const;
+		string   getReferenceValue      (void) const;
+		bool     isGlobalComment (void) const { return isCommentGlobal(); }
 		bool     isExclusive            (void) const;
 		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator           (void) const;
@@ -47,6 +52,7 @@ class HumdrumLine : public string, public HumHash {
 		bool     isAllNull              (void) const;
 		bool     isAllRhythmicNull      (void) const;
 		bool     isEmpty                (void) const;
+		bool     isBlank                (void) const { return isEmpty(); }
 		bool     isManipulator          (void) const;
 		bool     hasSpines              (void) const;
 		HumdrumToken& token             (int index) const;

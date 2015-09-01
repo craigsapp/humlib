@@ -65,6 +65,10 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNullData                (void) const;
 		bool     hasRhythm                 (void) const;
 
+		// kern-specific functions:
+		bool     isRest                    (void) const;
+		bool     isNote                    (void) const;
+
 		HumNum   getDuration               (void) const;
 		HumNum   getDurationFromStart      (void) const;
 
@@ -80,6 +84,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
+		int      getTokenIndex (void) const { return getFieldIndex(); }
 		const string& getDataType          (void) const;
 		bool     isDataType                (string dtype) const;
 		string   getSpineInfo              (void) const;
