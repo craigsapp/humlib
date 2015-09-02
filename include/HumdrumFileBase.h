@@ -72,6 +72,9 @@ class HumdrumFileBase {
 		bool parseCsv(const string& contents, const string& separator = ",")
 		                                      { return readStringCsv(contents); }
 
+		void          setXmlIdPrefix               (const string& value);
+		string        getXmlIdPrefix               (void);
+
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
 		HumdrumToken& token                        (int lineindex, int fieldindex);
@@ -147,6 +150,10 @@ class HumdrumFileBase {
 
 		// ticksperquarternote: this is the number of tick
 		int ticksperquarternote;
+
+		// idprefix: an XML id prefix used to avoid id collisions when including
+		// multiple HumdrumFile XML in a single group.
+		string idprefix;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

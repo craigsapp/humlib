@@ -1031,7 +1031,9 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 
 	if (hasSpines()) {
 		out << Convert::repeatString(indent, level) << "<frame";
-		out << " n=\"" << getLineIndex() << "\">\n";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << ">\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
@@ -1089,8 +1091,9 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		// global comments, reference records, or blank lines print here.
 		out << Convert::repeatString(indent, level) << "<metaFrame";
 		out << " n=\"" << getLineIndex() << "\"";
-		out << " text=\"" << Convert::encodeXml(((string)(*this)));
-		out << "\"/>\n";
+		out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << "/>\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
@@ -1130,6 +1133,39 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 	}
 
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getXmlId -- Return a unique ID for the current line.
+//
+
+string HumdrumLine::getXmlId(const string& prefix) const {
+	string output;
+	if (prefix.size() > 0) {
+		output = prefix;
+	} else {
+		output = getXmlIdPrefix();
+	}
+	output += "loc" + to_string(getLineIndex());
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getXmlIdPrefix -- Return the pre-set XML ID attribute
+//     prefix from the owning HumdrumFile object.
+//
+
+string HumdrumLine::getXmlIdPrefix(void) const {
+	if (owner == NULL) {
+		return "";
+	}
+	return ((HumdrumFileBase*)owner)->getXmlIdPrefix();
 }
 
 

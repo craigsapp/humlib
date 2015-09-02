@@ -99,6 +99,8 @@ class HumdrumToken : public string, public HumHash {
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0, 
 		                                    const string& indent = "\t");
+		string   getXmlId                  (const string& prefix = "") const;
+		string   getXmlIdPrefix            (void) const;
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;

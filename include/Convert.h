@@ -37,6 +37,14 @@ class Convert {
 		static int     kernToDiatonicPC     (const string& kerndata);
 		static char    kernToDiatonicUC     (const string& kerndata);
 		static char    kernToDiatonicLC     (const string& kerndata);
+      static int     kernToBase40PC       (const string& kerndata);
+      static int     kernToBase12PC       (const string& kerndata);
+      static int     kernToBase7PC        (const string& kerndata) {
+				                               return kernToDiatonicPC(kerndata); }
+      static int     kernToBase40         (const string& kerndata);
+      static int     kernToBase12         (const string& kerndata);
+      static int     kernToBase7          (const string& kerndata);
+		static int     kernToMidiNoteNumber (const string& kerndata);
 		static string  kernToScientificPitch(const string& kerndata, 
 		                                     string flat = "b",
 		                                     string sharp = "#", 

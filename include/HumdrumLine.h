@@ -70,6 +70,8 @@ class HumdrumLine : public string, public HumHash {
 		                                 const string& separator = ",");
 		ostream& printXml               (ostream& out = cout, int level = 0, 
 		                                 const string& indent = "\t");
+		string   getXmlId               (const string& prefix = "") const;
+		string   getXmlIdPrefix         (void) const;
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;

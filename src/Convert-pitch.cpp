@@ -201,6 +201,130 @@ int Convert::kernToOctaveNumber(const string& kerndata) {
 
 
 
+//////////////////////////////
+//
+// Convert::kernToBase40PC -- Convert **kern pitch to a base-40 pitch class.
+//    Will ignore subsequent pitches in a chord.
+//
+
+int Convert::kernToBase40PC(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid  = Convert::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  6; break;
+		case 2: output = 12; break;
+		case 3: output = 17; break;
+		case 4: output = 23; break;
+		case 5: output = 29; break;
+		case 6: output = 35; break;
+	}
+	output += accid;
+	return output + 2;     // +2 to make c-flat-flat bottom of octave.
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase40 -- Convert **kern pitch to a base-40 integer.
+//    Will ignore subsequent pitches in a chord.
+//
+
+int Convert::kernToBase40(const string& kerndata) {
+	int pc = Convert::kernToBase40PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave   = Convert::kernToOctaveNumber(kerndata);
+	return pc + 40 * octave;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase12PC -- Convert **kern pitch to a base-12 pitch-class.
+//   C=0, C#/D-flat=1, D=2, etc.
+//
+
+int Convert::kernToBase12PC(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid    = Convert::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  2; break;
+		case 2: output =  4; break;
+		case 3: output =  5; break;
+		case 4: output =  7; break;
+		case 5: output =  9; break;
+		case 6: output = 11; break;
+	}
+	output += accid;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase12 -- Convert **kern pitch to a base-12 integer.
+//     (middle C = 48).
+//
+
+int Convert::kernToBase12(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * octave;
+}
+
+
+
+///////////////////////////////
+//
+// Convert::kernToMidiNoteNumber -- Convert **kern to MIDI note number
+//    (middle C = 60).  Middle C is assigned to octave 5 rather than
+//    octave 4 for the kernToBase12() function.
+//
+
+int Convert::kernToMidiNoteNumber(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * (octave + 1);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase7 -- Convert **kern pitch to a base-7 integer.
+//    This is a diatonic pitch class with C=0, D=1, ..., B=6.
+//
+
+int Convert::kernToBase7(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return diatonic + 7 * octave;;
+}
+
+
 // END_MERGE
 
 } // end namespace std;

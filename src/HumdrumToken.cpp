@@ -1021,6 +1021,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	out << "<field";
 	out << " n=\"" << getTokenIndex() << "\"";
 	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
@@ -1030,7 +1031,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	} else if (isNote()) {
 		out << Convert::repeatString(indent, level+1) << "<pitch";
 		out << Convert::getKernPitchAttributes(((string)(*this)));
-		out << ">\n";
+		out << "/>\n";
 	}
 
 	printXmlContentInfo(out, level+1, indent);
@@ -1055,12 +1056,53 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 	out << Convert::repeatString(indent, level);
 	out << "<track>" << getTrack() << "</track>\n";
 
-	out << Convert::repeatString(indent, level);
-	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
-
 	if (getSubtrack() > 0) {
 		out << Convert::repeatString(indent, level);
 		out << "<subtrack>" << getSubtrack() << "</subtrack>\n";
+	}
+
+   // <dataType> redundant with 
+	// sequence/sequenceInfo/trackInfo/track@dataType
+	out << Convert::repeatString(indent, level);
+	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
+
+	out << Convert::repeatString(indent, level) << "<tokenType>";
+	if (isNull()) {
+		out << "null";
+	} else if (isManipulator()) {
+		out << "manipulator";
+	} else if (isCommentLocal()) {
+		out << "local-comment";
+	} else if (isBarline()) {
+		out << "barline";
+	} else if (isData()) {
+		out << "data";
+	} else {
+		out << "interpretation";
+	}
+	out << "</tokenType>\n";
+
+   // <tokenFunction>
+	if (isDataType("**kern")) {
+		if (isNote()) {
+			out << Convert::repeatString(indent, level) << "<tokenFunction>";
+			out << "note" << "</tokenFunction>\n";
+		} else if (isRest()) {
+			out << Convert::repeatString(indent, level) << "<tokenFunction>";
+			out << "note" << "</tokenFunction>\n";
+		}
+	}
+
+	if (isNull()) {
+		HumdrumToken* previous = getPreviousNonNullDataToken(0);
+		if (previous != NULL) {
+			out << Convert::repeatString(indent, level) << "<nullResolve";
+			out << " text=\"";
+			out << Convert::encodeXml(((string)(*previous))) << "\"";
+			out << " idref=\"";
+			out << previous->getXmlId();
+			out << "\"/>\n";
+		}
 	}
 
 	return out;
@@ -1082,7 +1124,8 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 
 	if (getDuration().isNonNegative()) {
 		out << Convert::repeatString(indent, level);
-		out << "<duration>" << getDuration() << "</duration>\n";
+		out << "<duration" << Convert::getHumNumAttributes(getDuration());
+		out << "/>\n";
 	}
 
 	return out;
@@ -1116,6 +1159,47 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getXmlId -- Return an XML id attribute based on the line 
+//     and field index for the location of the token in the HumdrumFile.
+//     An optional parameter for a prefix can be given.  If this parameter
+//     is an empty string, then the prefix set in the owning HumdrumFile
+//     will instead be used.  The prefix cannot start with a digit, and 
+//     should not include a space charcter.
+//
+
+string HumdrumToken::getXmlId(const string& prefix) const {
+	string output;
+	if (prefix.size() > 0) {
+		output = prefix;
+	} else {
+		output = getXmlIdPrefix();
+	}
+	output += "loc" + to_string(getLineIndex()) + "_";
+	output += to_string(getFieldIndex());
+	// subtoken IDS could be added here.
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getXmlIdPrefix -- Return the XML ID prefix from the HumdrumFile
+//   structure via the HumdrumLine on which the token resides.
+//
+
+string HumdrumToken::getXmlIdPrefix(void) const {
+	auto own = getOwner();
+	if (own == NULL) {
+		return "";
+	}
+	return own->getXmlIdPrefix();
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  1 03:10:32 PDT 2015
+// Last Modified: Wed Sep  2 01:08:50 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -1995,11 +1995,9 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::repeatString(indent, level) << "<frameCount>";
 	out << getLineCount() << "</frameCount>\n";
 	
-	out << Convert::repeatString(indent, level) << "<trackCount>";
-	out << getMaxTrack() << "</trackCount>\n";
 
 	out << Convert::repeatString(indent, level) << "<tpq>";
-	out << tpq() << "<tpq>\n";
+	out << tpq() << "</tpq>\n";
 
 	// Starting at 0 by default (single segment only).  Eventually
 	// add parameter to set the starting time of the sequence, which
@@ -2012,9 +2010,32 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::getHumNumAttributes(getScoreDuration());
 	out << "/>\n";
 
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<trackCount>";
+	out << getMaxTrack() << "</trackCount>\n";
+
+	for (int i=1; i<=getMaxTrack(); i++) {
+		out << Convert::repeatString(indent, level) << "<track";
+		out << " n=\"" << i << "\"";
+		HumdrumToken* trackstart = getTrackStart(i);
+		if (trackstart != NULL) {
+			out << " dataType=\"" <<  trackstart->getDataType().substr(2) << "\"";
+			out << " startId=\"" <<  trackstart->getXmlId() << "\"";
+		}
+		HumdrumToken* trackend = getTrackEnd(i, 0);
+		if (trackend != NULL) {
+			out << " endId =\"" <<  trackend->getXmlId() << "\"";
+		}
+		out << "/>\n";
+	}
+
+	level--;
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+
 	level--;
 	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
-
 
 	out << Convert::repeatString(indent, level) << "<frames>\n";
 	level++;
@@ -2051,6 +2072,30 @@ HumdrumFileBase::HumdrumFileBase(void) {
 //
 
 HumdrumFileBase::~HumdrumFileBase() { }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::setXmlIdPrefix -- Set the prefix for a HumdrumXML ID 
+//     atrribute.  The prefix should not start with a digit, nor have 
+//     spaces in it.
+//
+
+void HumdrumFileBase::setXmlIdPrefix(const string& value) {
+	idprefix = value;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getXmlIdPrefix -- Return the HumdrumXML ID attribute prefix.
+//
+
+string HumdrumFileBase::getXmlIdPrefix(void) {
+	return idprefix;
+}
 
 
 
@@ -5279,7 +5324,9 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 
 	if (hasSpines()) {
 		out << Convert::repeatString(indent, level) << "<frame";
-		out << " n=\"" << getLineIndex() << "\">\n";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << ">\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
@@ -5337,8 +5384,9 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		// global comments, reference records, or blank lines print here.
 		out << Convert::repeatString(indent, level) << "<metaFrame";
 		out << " n=\"" << getLineIndex() << "\"";
-		out << " text=\"" << Convert::encodeXml(((string)(*this)));
-		out << "\"/>\n";
+		out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << "/>\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
@@ -5378,6 +5426,39 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 	}
 
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getXmlId -- Return a unique ID for the current line.
+//
+
+string HumdrumLine::getXmlId(const string& prefix) const {
+	string output;
+	if (prefix.size() > 0) {
+		output = prefix;
+	} else {
+		output = getXmlIdPrefix();
+	}
+	output += "loc" + to_string(getLineIndex());
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::getXmlIdPrefix -- Return the pre-set XML ID attribute
+//     prefix from the owning HumdrumFile object.
+//
+
+string HumdrumLine::getXmlIdPrefix(void) const {
+	if (owner == NULL) {
+		return "";
+	}
+	return ((HumdrumFileBase*)owner)->getXmlIdPrefix();
 }
 
 
@@ -6492,6 +6573,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	out << "<field";
 	out << " n=\"" << getTokenIndex() << "\"";
 	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
@@ -6501,7 +6583,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	} else if (isNote()) {
 		out << Convert::repeatString(indent, level+1) << "<pitch";
 		out << Convert::getKernPitchAttributes(((string)(*this)));
-		out << ">\n";
+		out << "/>\n";
 	}
 
 	printXmlContentInfo(out, level+1, indent);
@@ -6526,12 +6608,53 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 	out << Convert::repeatString(indent, level);
 	out << "<track>" << getTrack() << "</track>\n";
 
-	out << Convert::repeatString(indent, level);
-	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
-
 	if (getSubtrack() > 0) {
 		out << Convert::repeatString(indent, level);
 		out << "<subtrack>" << getSubtrack() << "</subtrack>\n";
+	}
+
+   // <dataType> redundant with 
+	// sequence/sequenceInfo/trackInfo/track@dataType
+	out << Convert::repeatString(indent, level);
+	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
+
+	out << Convert::repeatString(indent, level) << "<tokenType>";
+	if (isNull()) {
+		out << "null";
+	} else if (isManipulator()) {
+		out << "manipulator";
+	} else if (isCommentLocal()) {
+		out << "local-comment";
+	} else if (isBarline()) {
+		out << "barline";
+	} else if (isData()) {
+		out << "data";
+	} else {
+		out << "interpretation";
+	}
+	out << "</tokenType>\n";
+
+   // <tokenFunction>
+	if (isDataType("**kern")) {
+		if (isNote()) {
+			out << Convert::repeatString(indent, level) << "<tokenFunction>";
+			out << "note" << "</tokenFunction>\n";
+		} else if (isRest()) {
+			out << Convert::repeatString(indent, level) << "<tokenFunction>";
+			out << "note" << "</tokenFunction>\n";
+		}
+	}
+
+	if (isNull()) {
+		HumdrumToken* previous = getPreviousNonNullDataToken(0);
+		if (previous != NULL) {
+			out << Convert::repeatString(indent, level) << "<nullResolve";
+			out << " text=\"";
+			out << Convert::encodeXml(((string)(*previous))) << "\"";
+			out << " idref=\"";
+			out << previous->getXmlId();
+			out << "\"/>\n";
+		}
 	}
 
 	return out;
@@ -6553,7 +6676,8 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 
 	if (getDuration().isNonNegative()) {
 		out << Convert::repeatString(indent, level);
-		out << "<duration>" << getDuration() << "</duration>\n";
+		out << "<duration" << Convert::getHumNumAttributes(getDuration());
+		out << "/>\n";
 	}
 
 	return out;
@@ -6587,6 +6711,47 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
 	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getXmlId -- Return an XML id attribute based on the line 
+//     and field index for the location of the token in the HumdrumFile.
+//     An optional parameter for a prefix can be given.  If this parameter
+//     is an empty string, then the prefix set in the owning HumdrumFile
+//     will instead be used.  The prefix cannot start with a digit, and 
+//     should not include a space charcter.
+//
+
+string HumdrumToken::getXmlId(const string& prefix) const {
+	string output;
+	if (prefix.size() > 0) {
+		output = prefix;
+	} else {
+		output = getXmlIdPrefix();
+	}
+	output += "loc" + to_string(getLineIndex()) + "_";
+	output += to_string(getFieldIndex());
+	// subtoken IDS could be added here.
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getXmlIdPrefix -- Return the XML ID prefix from the HumdrumFile
+//   structure via the HumdrumLine on which the token resides.
+//
+
+string HumdrumToken::getXmlIdPrefix(void) const {
+	auto own = getOwner();
+	if (own == NULL) {
+		return "";
+	}
+	return own->getXmlIdPrefix();
 }
 
 
@@ -6647,12 +6812,11 @@ bool Convert::isKernNote(const string& kerndata) {
 //    numacc     = numeric accidental (-1=flat, 0=natural, 1=sharp)
 //    explicit   = force showing of accidental
 //    oct        = octave number (middle C = 4)
-//    base40     = base-40 enumeration of pitch (valid if abs(numacc) <= 2
-//    base12     = base-12 enumeration of pitch (MIDI note number)
-//    base7      = base-7  enumeration of pitch (diatonic)
+//    base40     = base-40 enumeration of pitch (valid if abs(numacc) <= 2)
 //
 
 string Convert::getKernPitchAttributes(const string& kerndata) {
+	int accid = kernToAccidentalCount(kerndata);
 	string output = "";
 
 	output += " pc=\"";
@@ -6660,7 +6824,7 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 	output += "\"";
 
 	output += " numacc=\"";
-	output += to_string(kernToAccidentalCount(kerndata));
+	output += to_string(accid);
 	output += "\"";
 
 	if (kerndata.find('n') != string::npos) {
@@ -6671,9 +6835,11 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 	output += to_string(kernToOctaveNumber(kerndata));
 	output += "\"";
 
-	// base-40 parameter goes here
-	// base-12 parameter goes here
-	// base-7  parameter goes here
+	if (abs(accid) <= 2) {
+		output += " base40=\"";
+		output += to_string(kernToBase40(kerndata));
+		output += "\"";
+	}
 
 	return output;
 }
@@ -6898,6 +7064,130 @@ int Convert::kernToOctaveNumber(const string& kerndata) {
 	}
 }
 
+
+
+//////////////////////////////
+//
+// Convert::kernToBase40PC -- Convert **kern pitch to a base-40 pitch class.
+//    Will ignore subsequent pitches in a chord.
+//
+
+int Convert::kernToBase40PC(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid  = Convert::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  6; break;
+		case 2: output = 12; break;
+		case 3: output = 17; break;
+		case 4: output = 23; break;
+		case 5: output = 29; break;
+		case 6: output = 35; break;
+	}
+	output += accid;
+	return output + 2;     // +2 to make c-flat-flat bottom of octave.
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase40 -- Convert **kern pitch to a base-40 integer.
+//    Will ignore subsequent pitches in a chord.
+//
+
+int Convert::kernToBase40(const string& kerndata) {
+	int pc = Convert::kernToBase40PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave   = Convert::kernToOctaveNumber(kerndata);
+	return pc + 40 * octave;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase12PC -- Convert **kern pitch to a base-12 pitch-class.
+//   C=0, C#/D-flat=1, D=2, etc.
+//
+
+int Convert::kernToBase12PC(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid    = Convert::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  2; break;
+		case 2: output =  4; break;
+		case 3: output =  5; break;
+		case 4: output =  7; break;
+		case 5: output =  9; break;
+		case 6: output = 11; break;
+	}
+	output += accid;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase12 -- Convert **kern pitch to a base-12 integer.
+//     (middle C = 48).
+//
+
+int Convert::kernToBase12(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * octave;
+}
+
+
+
+///////////////////////////////
+//
+// Convert::kernToMidiNoteNumber -- Convert **kern to MIDI note number
+//    (middle C = 60).  Middle C is assigned to octave 5 rather than
+//    octave 4 for the kernToBase12() function.
+//
+
+int Convert::kernToMidiNoteNumber(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * (octave + 1);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::kernToBase7 -- Convert **kern pitch to a base-7 integer.
+//    This is a diatonic pitch class with C=0, D=1, ..., B=6.
+//
+
+int Convert::kernToBase7(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return diatonic + 7 * octave;;
+}
 
 
 

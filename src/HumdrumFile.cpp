@@ -60,11 +60,9 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::repeatString(indent, level) << "<frameCount>";
 	out << getLineCount() << "</frameCount>\n";
 	
-	out << Convert::repeatString(indent, level) << "<trackCount>";
-	out << getMaxTrack() << "</trackCount>\n";
 
 	out << Convert::repeatString(indent, level) << "<tpq>";
-	out << tpq() << "<tpq>\n";
+	out << tpq() << "</tpq>\n";
 
 	// Starting at 0 by default (single segment only).  Eventually
 	// add parameter to set the starting time of the sequence, which
@@ -77,9 +75,32 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::getHumNumAttributes(getScoreDuration());
 	out << "/>\n";
 
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<trackCount>";
+	out << getMaxTrack() << "</trackCount>\n";
+
+	for (int i=1; i<=getMaxTrack(); i++) {
+		out << Convert::repeatString(indent, level) << "<track";
+		out << " n=\"" << i << "\"";
+		HumdrumToken* trackstart = getTrackStart(i);
+		if (trackstart != NULL) {
+			out << " dataType=\"" <<  trackstart->getDataType().substr(2) << "\"";
+			out << " startId=\"" <<  trackstart->getXmlId() << "\"";
+		}
+		HumdrumToken* trackend = getTrackEnd(i, 0);
+		if (trackend != NULL) {
+			out << " endId =\"" <<  trackend->getXmlId() << "\"";
+		}
+		out << "/>\n";
+	}
+
+	level--;
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+
 	level--;
 	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
-
 
 	out << Convert::repeatString(indent, level) << "<frames>\n";
 	level++;

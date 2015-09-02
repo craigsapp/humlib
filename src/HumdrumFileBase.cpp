@@ -48,6 +48,30 @@ HumdrumFileBase::~HumdrumFileBase() { }
 
 //////////////////////////////
 //
+// HumdrumFileBase::setXmlIdPrefix -- Set the prefix for a HumdrumXML ID 
+//     atrribute.  The prefix should not start with a digit, nor have 
+//     spaces in it.
+//
+
+void HumdrumFileBase::setXmlIdPrefix(const string& value) {
+	idprefix = value;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getXmlIdPrefix -- Return the HumdrumXML ID attribute prefix.
+//
+
+string HumdrumFileBase::getXmlIdPrefix(void) {
+	return idprefix;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::operator[] -- Access a Humdrum file line by and index.
 //    Negative values reference the end of the list of lines.
 //

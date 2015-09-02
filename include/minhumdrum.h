@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  1 03:10:32 PDT 2015
+// Last Modified: Wed Sep  2 01:08:50 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -378,6 +378,8 @@ class HumdrumLine : public string, public HumHash {
 		                                 const string& separator = ",");
 		ostream& printXml               (ostream& out = cout, int level = 0, 
 		                                 const string& indent = "\t");
+		string   getXmlId               (const string& prefix = "") const;
+		string   getXmlIdPrefix         (void) const;
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
@@ -553,6 +555,8 @@ class HumdrumToken : public string, public HumHash {
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0, 
 		                                    const string& indent = "\t");
+		string   getXmlId                  (const string& prefix = "") const;
+		string   getXmlIdPrefix            (void) const;
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -695,6 +699,9 @@ class HumdrumFileBase {
 		bool parseCsv(const string& contents, const string& separator = ",")
 		                                      { return readStringCsv(contents); }
 
+		void          setXmlIdPrefix               (const string& value);
+		string        getXmlIdPrefix               (void);
+
 		HumdrumLine&  operator[]                   (int index);
 		int           getLineCount                 (void) const;
 		HumdrumToken& token                        (int lineindex, int fieldindex);
@@ -770,6 +777,10 @@ class HumdrumFileBase {
 
 		// ticksperquarternote: this is the number of tick
 		int ticksperquarternote;
+
+		// idprefix: an XML id prefix used to avoid id collisions when including
+		// multiple HumdrumFile XML in a single group.
+		string idprefix;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
@@ -941,6 +952,14 @@ class Convert {
 		static int     kernToDiatonicPC     (const string& kerndata);
 		static char    kernToDiatonicUC     (const string& kerndata);
 		static char    kernToDiatonicLC     (const string& kerndata);
+      static int     kernToBase40PC       (const string& kerndata);
+      static int     kernToBase12PC       (const string& kerndata);
+      static int     kernToBase7PC        (const string& kerndata) {
+				                               return kernToDiatonicPC(kerndata); }
+      static int     kernToBase40         (const string& kerndata);
+      static int     kernToBase12         (const string& kerndata);
+      static int     kernToBase7          (const string& kerndata);
+		static int     kernToMidiNoteNumber (const string& kerndata);
 		static string  kernToScientificPitch(const string& kerndata, 
 		                                     string flat = "b",
 		                                     string sharp = "#", 
