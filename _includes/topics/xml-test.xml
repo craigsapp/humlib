@@ -1,0 +1,454 @@
+<sequence>
+	<sequenceInfo>
+		<frameCount>16</frameCount>
+		<tpq>6</tpq>
+		<sequenceStart float="0"/>
+		<sequenceDuration float="4"/>
+		<trackInfo>
+			<trackCount>3</trackCount>
+			<track n="1" dataType="kern" startId="loc1_0"/>
+			<track n="2" dataType="kern" startId="loc1_1"/>
+			<track n="3" dataType="text" startId="loc1_2" endId ="loc15_0"/>
+		<trackInfo>
+	</sequenceInfo>
+	<frames>
+		<metaFrame n="0" text="!!!OTL: Test piece" xml:id="loc0"/>
+			<frameInfo>
+				<startTime float="0"/>
+				<frameType>reference</frameType>
+				<referenceKey>OTL</referenceKey>
+				<referenceValue>Test piece</referenceValue>
+			<frameInfo>
+		</metaFrame>
+		<frame n="1" xml:id="loc1">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0"/>
+				<frameDuration float="0"/>
+				<frameType>interpretation</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="**kern" xml:id="loc1_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<rest/>
+				</field>
+				<field n="1" text="**kern" xml:id="loc1_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<rest/>
+				</field>
+				<field n="2" text="**text" xml:id="loc1_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<metaFrame n="2" text="!! This is a &quot;global comment&quot;" xml:id="loc2"/>
+			<frameInfo>
+				<startTime float="0"/>
+				<frameType>global-comment</frameType>
+			<frameInfo>
+		</metaFrame>
+		<frame n="3" xml:id="loc3">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0"/>
+				<frameDuration float="0"/>
+				<frameType>interpretation</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="*M4/4" xml:id="loc3_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>interpretation</tokenType>
+				</field>
+				<field n="1" text="*M4/4" xml:id="loc3_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>interpretation</tokenType>
+				</field>
+				<field n="2" text="*" xml:id="loc3_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<frame n="4" xml:id="loc4">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0"/>
+				<frameDuration float="0"/>
+				<frameType>barline</frameType>
+				<barlineDuration float="4"/>
+			</frameInfo>
+			<fields>
+				<field n="0" text="=1-" xml:id="loc4_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+				<field n="1" text="=1-" xml:id="loc4_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+				<field n="2" text="=1-" xml:id="loc4_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<frame n="5" xml:id="loc5">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0"/>
+				<frameDuration float="0.333333" ratfrac="1/3"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="8C" xml:id="loc5_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="0.5" ratfrac="1/2"/>
+					<pitch pc="C" numacc="0" oct="3" base40="122"/>
+				</field>
+				<field n="1" text="12d" xml:id="loc5_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="0.333333" ratfrac="1/3"/>
+					<pitch pc="D" numacc="0" oct="4" base40="168"/>
+				</field>
+				<field n="2" text="This" xml:id="loc5_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>data</tokenType>
+					<duration float="1"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="6" xml:id="loc6">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0.333333" ratfrac="1/3"/>
+				<frameDuration float="0.166667" ratfrac="1/6"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="." xml:id="loc6_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="8C" idref="loc5_0"/>
+				</field>
+				<field n="1" text="12e" xml:id="loc6_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="0.333333" ratfrac="1/3"/>
+					<pitch pc="E" numacc="0" oct="4" base40="174"/>
+				</field>
+				<field n="2" text="." xml:id="loc6_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="This" idref="loc5_2"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="7" xml:id="loc7">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0.5" ratfrac="1/2"/>
+				<frameDuration float="0.166667" ratfrac="1/6"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="8B" xml:id="loc7_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="0.5" ratfrac="1/2"/>
+					<pitch pc="B" numacc="0" oct="3" base40="157"/>
+				</field>
+				<field n="1" text="." xml:id="loc7_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="12e" idref="loc6_1"/>
+				</field>
+				<field n="2" text="." xml:id="loc7_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="This" idref="loc5_2"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="8" xml:id="loc8">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="0.666667" ratfrac="2/3"/>
+				<frameDuration float="0.333333" ratfrac="1/3"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="." xml:id="loc8_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="8B" idref="loc7_0"/>
+				</field>
+				<field n="1" text="12f" xml:id="loc8_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="0.333333" ratfrac="1/3"/>
+					<pitch pc="F" numacc="0" oct="4" base40="179"/>
+				</field>
+				<field n="2" text="." xml:id="loc8_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="This" idref="loc5_2"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="9" xml:id="loc9">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="1"/>
+				<frameDuration float="0"/>
+				<frameType>interpretation</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="*" xml:id="loc9_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+				</field>
+				<field n="1" text="*^" xml:id="loc9_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+				<field n="2" text="*" xml:id="loc9_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<frame n="10" xml:id="loc10">
+			<frameInfo>
+				<fieldCount>4</fieldCount>
+				<frameStart float="1"/>
+				<frameDuration float="1"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="4A" xml:id="loc10_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="A" numacc="0" oct="3" base40="151"/>
+				</field>
+				<field n="1" text="2g" xml:id="loc10_1">
+					<track>2</track>
+					<subtrack>1</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="2"/>
+					<pitch pc="G" numacc="0" oct="4" base40="185"/>
+				</field>
+				<field n="2" text="4d" xml:id="loc10_2">
+					<track>2</track>
+					<subtrack>2</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="D" numacc="0" oct="4" base40="168"/>
+				</field>
+				<field n="3" text="is" xml:id="loc10_3">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>data</tokenType>
+					<duration float="1"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="11" xml:id="loc11">
+			<frameInfo>
+				<fieldCount>4</fieldCount>
+				<frameStart float="2"/>
+				<frameDuration float="1"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="4G" xml:id="loc11_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="G" numacc="0" oct="3" base40="145"/>
+				</field>
+				<field n="1" text="." xml:id="loc11_1">
+					<track>2</track>
+					<subtrack>1</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+					<nullResolve text="2g" idref="loc10_1"/>
+				</field>
+				<field n="2" text="4c" xml:id="loc11_2">
+					<track>2</track>
+					<subtrack>2</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="C" numacc="0" oct="4" base40="162"/>
+				</field>
+				<field n="3" text="some" xml:id="loc11_3">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>data</tokenType>
+					<duration float="1"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="12" xml:id="loc12">
+			<frameInfo>
+				<fieldCount>4</fieldCount>
+				<frameStart float="3"/>
+				<frameDuration float="0"/>
+				<frameType>interpretation</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="*" xml:id="loc12_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>null</tokenType>
+				</field>
+				<field n="1" text="*v" xml:id="loc12_1">
+					<track>2</track>
+					<subtrack>1</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+				<field n="2" text="*v" xml:id="loc12_2">
+					<track>2</track>
+					<subtrack>2</subtrack>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+				<field n="3" text="*" xml:id="loc12_3">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>null</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<frame n="13" xml:id="loc13">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="3"/>
+				<frameDuration float="1"/>
+				<frameType>data</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="4B" xml:id="loc13_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="B" numacc="0" oct="3" base40="157"/>
+				</field>
+				<field n="1" text="4b" xml:id="loc13_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>data</tokenType>
+					<tokenFunction>note</tokenFunction>
+					<duration float="1"/>
+					<pitch pc="B" numacc="0" oct="4" base40="197"/>
+				</field>
+				<field n="2" text="text" xml:id="loc13_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>data</tokenType>
+					<duration float="1"/>
+				</field>
+			</fields>
+		</frame>
+		<frame n="14" xml:id="loc14">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="4"/>
+				<frameDuration float="0"/>
+				<frameType>barline</frameType>
+				<barlineDuration float="0"/>
+			</frameInfo>
+			<fields>
+				<field n="0" text="=" xml:id="loc14_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+				<field n="1" text="=" xml:id="loc14_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+				<field n="2" text="=" xml:id="loc14_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>barline</tokenType>
+				</field>
+			</fields>
+		</frame>
+		<frame n="15" xml:id="loc15">
+			<frameInfo>
+				<fieldCount>3</fieldCount>
+				<frameStart float="4"/>
+				<frameDuration float="0"/>
+				<frameType>interpretation</frameType>
+			</frameInfo>
+			<fields>
+				<field n="0" text="*-" xml:id="loc15_0">
+					<track>1</track>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+				<field n="1" text="*-" xml:id="loc15_1">
+					<track>2</track>
+					<dataType>kern</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+				<field n="2" text="*-" xml:id="loc15_2">
+					<track>3</track>
+					<dataType>text</dataType>
+					<tokenType>manipulator</tokenType>
+				</field>
+			</fields>
+		</frame>
+	</frames>
+</sequence>

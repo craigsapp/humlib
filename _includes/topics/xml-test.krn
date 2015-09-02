@@ -1,0 +1,16 @@
+!!!OTL: Test piece
+**kern	**kern	**text
+!! This is a "global comment"
+*M4/4	*M4/4	*
+=1-	=1-	=1-
+8C	12d	This
+.	12e	.
+8B	.	.
+.	12f	.
+*	*^	*
+4A	2g	4d	is
+4G	.	4c	some
+*	*v	*v	*
+4B	4b	text
+=	=	=
+*-	*-	*-

@@ -1,1 +1,45 @@
 
+The minHumdrum library includes a prototype for a Humdrum XML
+representation; a sample conversion given below.  The XML data
+includes automatic analytical markup done internally within
+minHumdrum classes.
+
+HumdrumFile objects map to &lt;sequence&gt; elements.
+
+HumdrumLine objects map to &lt;frame&gt; elements if HumdrumLine::hasSpines()
+returns true; otherwise map to &lt;metaFrame&gt; elements if HumdrumLine
+is a reference record, global comment, or empty record.
+
+HumdrumToken objects map to &lt;field&gt; elements.
+
+Duration values are given as floating point numbers.  When there
+is a fractional part to a durational value, the fractional part is
+also expressed as a rational number with the @ratfrac attribute.
+For example if there is a durational attribute float="1.66667", then
+there will be an additional attribute ratfrac="2/3" which means that the
+fractional part of the duration can be precisely expressed as 2/3.
+
+```
+!!!OTL: Test piece
+**kern  **kern  **text
+!! This is a "global comment"
+*M4/4   *M4/4	*
+=1-     =1-     =1-
+8C      12d     This
+.       12e     .
+8B      .       .
+.       12f     .
+*       *^      *
+4A      2g      4d      is
+4G      .       4c      some
+*       *v      *v      *
+4B      4b      text
+=       =       =
+*-      *-      *-
+```
+
+
+```xml
+{% include topics/xml-test.xml %}
+```
+
