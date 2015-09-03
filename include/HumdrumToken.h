@@ -70,11 +70,12 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNote                    (void) const;
 
 		HumNum   getDuration               (void) const;
-		HumNum   getDurationFromStart      (void) const;
-
 		HumNum   getDuration               (HumNum scale) const;
+
+		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
 
+		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;
 
 		HumdrumLine* getOwner              (void) const;

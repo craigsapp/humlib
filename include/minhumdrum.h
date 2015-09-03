@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  2 01:08:50 PDT 2015
+// Last Modified: Wed Sep  2 18:32:09 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -526,11 +526,12 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNote                    (void) const;
 
 		HumNum   getDuration               (void) const;
-		HumNum   getDurationFromStart      (void) const;
-
 		HumNum   getDuration               (HumNum scale) const;
+
+		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
 
+		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;
 
 		HumdrumLine* getOwner              (void) const;
@@ -692,12 +693,12 @@ class HumdrumFileBase {
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
 		bool parse(const string& contents)    { return readString(contents); }
-		bool parseCsv(istream& contents, const string& separator = ",")
-		                                      { return readCsv(contents); }
-		bool parseCsv(const char* contents, const string& separator = ",")
-		                                      { return readStringCsv(contents); }
-		bool parseCsv(const string& contents, const string& separator = ",")
-		                                      { return readStringCsv(contents); }
+		bool parseCsv(istream& contents, const string& separator = ",") {
+		                                       return readCsv(contents); }
+		bool parseCsv(const char* contents, const string& separator = ",") {
+		                                       return readStringCsv(contents); }
+		bool parseCsv(const string& contents, const string& separator = ",") {
+		                                       return readStringCsv(contents); }
 
 		void          setXmlIdPrefix               (const string& value);
 		string        getXmlIdPrefix               (void);

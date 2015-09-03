@@ -525,6 +525,32 @@ HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getBarlineDuration -- Return the duration between
+//   the next and previous barline.  If the token is a barline token,
+//   then return the duration to the next barline.
+//
+
+HumNum HumdrumToken::getBarlineDuration(void) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getBarlineDuration();
+}
+
+
+HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getBarlineDuration(scale);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasRhythm -- Returns true if the exclusive interpretation
 //    contains rhythmic data which will be used for analyzing the
 //    duration of a HumdrumFile, for example.

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  2 01:08:50 PDT 2015
+// Last Modified: Wed Sep  2 18:32:09 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -6071,6 +6071,32 @@ HumNum HumdrumToken::getDurationFromStart(void) const {
 
 HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 	return getLine()->getDurationFromStart() * scale;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getBarlineDuration -- Return the duration between
+//   the next and previous barline.  If the token is a barline token,
+//   then return the duration to the next barline.
+//
+
+HumNum HumdrumToken::getBarlineDuration(void) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getBarlineDuration();
+}
+
+
+HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getBarlineDuration(scale);
 }
 
 

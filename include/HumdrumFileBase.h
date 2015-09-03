@@ -65,12 +65,12 @@ class HumdrumFileBase {
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
 		bool parse(const string& contents)    { return readString(contents); }
-		bool parseCsv(istream& contents, const string& separator = ",")
-		                                      { return readCsv(contents); }
-		bool parseCsv(const char* contents, const string& separator = ",")
-		                                      { return readStringCsv(contents); }
-		bool parseCsv(const string& contents, const string& separator = ",")
-		                                      { return readStringCsv(contents); }
+		bool parseCsv(istream& contents, const string& separator = ",") {
+		                                       return readCsv(contents); }
+		bool parseCsv(const char* contents, const string& separator = ",") {
+		                                       return readStringCsv(contents); }
+		bool parseCsv(const string& contents, const string& separator = ",") {
+		                                       return readStringCsv(contents); }
 
 		void          setXmlIdPrefix               (const string& value);
 		string        getXmlIdPrefix               (void);
