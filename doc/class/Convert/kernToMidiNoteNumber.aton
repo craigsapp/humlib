@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	kernToMidiNoteNumber
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-pitch.cpp
+@LINES:		293-309
+@SHORTDESC:	Convert **kern to MIDI note number (middle C = 60).
+@LONGDESC:	Convert **kern to MIDI note number
+	(middle C = 60).  Middle C is assigned to octave 5 rather than
+	octave 4 for the kernToBase12() function.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::kernToMidiNoteNumber(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * (octave + 1);
+}
+
+
+@@END:	FunctionDocumentation
+

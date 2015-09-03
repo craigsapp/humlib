@@ -1,0 +1,36 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getXmlId
+@ACCESS:	public
+@RETURN:	string   
+@PARAMETERS:	const string& prefix = ""
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		1139-1155
+@SHORTDESC:	Return a unique ID for the current line.
+@LONGDESC:	Return a unique ID for the current line.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string HumdrumLine::getXmlId(const string& prefix) const {
+	string output;
+	if (prefix.size() > 0) {
+		output = prefix;
+	} else {
+		output = getXmlIdPrefix();
+	}
+	output += "loc" + to_string(getLineIndex());
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+

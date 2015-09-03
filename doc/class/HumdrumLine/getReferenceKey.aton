@@ -1,0 +1,51 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getReferenceKey
+@ACCESS:	public
+@RETURN:	string   
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		216-247
+@SHORTDESC:	Return reference key if a reference record.
+@LONGDESC:	Return reference key if a reference
+	record.  Otherwise returns an empty string.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string HumdrumLine::getReferenceKey(void) const {
+	if (this->size() < 5) {
+		return "";
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return "";
+	}
+	if ((*this)[3] == '!') {
+		return "";
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return "";
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return "";
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return "";
+	}
+	return this->substr(3, colloc - 3);
+}
+
+
+@@END:	FunctionDocumentation
+

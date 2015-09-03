@@ -1,0 +1,52 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	isReference
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		182-214
+@SHORTDESC:	Returns true if a reference record.
+@LONGDESC:	Returns true if a reference record.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumLine::isReference(void) const {
+
+	if (this->size() < 5) {
+		return false;
+	}
+	if (this->substr(0, 3) != "!!!") {
+		return false;
+	}
+	if ((*this)[3] == '!') {
+		return false;
+	}
+	int spaceloc = this->find(" ");
+	int tabloc = this->find("\t");
+	int colloc = this->find(":");
+	if (colloc == string::npos) {
+		return false;
+	}
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+		return false;
+	}
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
+		return false;
+	}
+	return true;
+
+}
+
+
+@@END:	FunctionDocumentation
+

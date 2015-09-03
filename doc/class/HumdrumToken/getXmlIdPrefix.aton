@@ -1,0 +1,34 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getXmlIdPrefix
+@ACCESS:	public
+@RETURN:	string   
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		1216-1230
+@SHORTDESC:	Return the XML ID prefix from the HumdrumFile structure via the HumdrumLine on which the token resides.
+@LONGDESC:	Return the XML ID prefix from the HumdrumFile
+	structure via the HumdrumLine on which the token resides.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string HumdrumToken::getXmlIdPrefix(void) const {
+	auto own = getOwner();
+	if (own == NULL) {
+		return "";
+	}
+	return own->getXmlIdPrefix();
+}
+
+
+@@END:	FunctionDocumentation
+

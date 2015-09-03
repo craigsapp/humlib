@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	isNote
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		587-602
+@SHORTDESC:	Returns true if the token is a (kern) note (possessing a pitch).
+@LONGDESC:	Returns true if the token is a (kern) note
+	(possessing a pitch).
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumToken::isNote(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernNote((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+@@END:	FunctionDocumentation
+

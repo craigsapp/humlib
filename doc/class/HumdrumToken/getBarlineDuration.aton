@@ -1,0 +1,38 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getBarlineDuration
+@ACCESS:	public
+@RETURN:	HumNum   
+@RETURN:	HumNum   
+@PARAMETERS:	void
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		525-540
+@SHORTDESC:	Return the duration between the next and previous barline.
+@LONGDESC:	Return the duration between
+	the next and previous barline.  If the token is a barline token,
+	then return the duration to the next barline.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumNum HumdrumToken::getBarlineDuration(void) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getBarlineDuration();
+}
+
+
+@@END:	FunctionDocumentation
+

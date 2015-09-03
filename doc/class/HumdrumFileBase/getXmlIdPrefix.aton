@@ -1,0 +1,28 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	getXmlIdPrefix
+@ACCESS:	public
+@RETURN:	string        
+@PARAMETERS:	void
+@FILE:		HumdrumFileBase.cpp
+@LINES:		61-70
+@SHORTDESC:	Return the HumdrumXML ID attribute prefix.
+@LONGDESC:	Return the HumdrumXML ID attribute prefix.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string HumdrumFileBase::getXmlIdPrefix(void) {
+	return idprefix;
+}
+
+
+@@END:	FunctionDocumentation
+

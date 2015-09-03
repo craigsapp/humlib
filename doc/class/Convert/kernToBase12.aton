@@ -1,0 +1,34 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	kernToBase12
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-pitch.cpp
+@LINES:		276-291
+@SHORTDESC:	Convert **kern pitch to a base-12 integer.
+@LONGDESC:	Convert **kern pitch to a base-12 integer.
+	(middle C = 48).
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::kernToBase12(const string& kerndata) {
+	int pc = Convert::kernToBase12PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave = Convert::kernToOctaveNumber(kerndata);
+	return pc + 12 * octave;
+}
+
+
+@@END:	FunctionDocumentation
+

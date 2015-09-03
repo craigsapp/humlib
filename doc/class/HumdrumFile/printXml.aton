@@ -1,0 +1,91 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFile
+@METHOD:	printXml
+@ACCESS:	public
+@RETURN:	ostream&      
+@PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
+@FILE:		HumdrumFile.cpp
+@LINES:		44-118
+@SHORTDESC:	Print a HumdrumFile object in XML format.
+@LONGDESC:	Print a HumdrumFile object in XML format.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+ostream& HumdrumFile::printXml(ostream& out, int level, 
+		const string& indent) {
+	out << Convert::repeatString(indent, level) << "<sequence>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<sequenceInfo>\n";
+	level++;
+	
+	out << Convert::repeatString(indent, level) << "<frameCount>";
+	out << getLineCount() << "</frameCount>\n";
+	
+
+	out << Convert::repeatString(indent, level) << "<tpq>";
+	out << tpq() << "</tpq>\n";
+
+	// Starting at 0 by default (single segment only).  Eventually
+	// add parameter to set the starting time of the sequence, which
+	// would be the duration of all previous segments before this one.
+	out << Convert::repeatString(indent, level) << "<sequenceStart";
+	out << Convert::getHumNumAttributes(0);
+	out << "/>\n";
+
+	out << Convert::repeatString(indent, level) << "<sequenceDuration";
+	out << Convert::getHumNumAttributes(getScoreDuration());
+	out << "/>\n";
+
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+	level++;
+
+	out << Convert::repeatString(indent, level) << "<trackCount>";
+	out << getMaxTrack() << "</trackCount>\n";
+
+	for (int i=1; i<=getMaxTrack(); i++) {
+		out << Convert::repeatString(indent, level) << "<track";
+		out << " n=\"" << i << "\"";
+		HumdrumToken* trackstart = getTrackStart(i);
+		if (trackstart != NULL) {
+			out << " dataType=\"" <<  trackstart->getDataType().substr(2) << "\"";
+			out << " startId=\"" <<  trackstart->getXmlId() << "\"";
+		}
+		HumdrumToken* trackend = getTrackEnd(i, 0);
+		if (trackend != NULL) {
+			out << " endId =\"" <<  trackend->getXmlId() << "\"";
+		}
+		out << "/>\n";
+	}
+
+	level--;
+	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
+
+	out << Convert::repeatString(indent, level) << "<frames>\n";
+	level++;
+	for (int i=0; i<getLineCount(); i++) {
+		lines[i]->printXml(out, level, indent);
+	}
+	level--;
+	out << Convert::repeatString(indent, level) << "</frames>\n";
+
+	level--;
+	out << Convert::repeatString(indent, level) << "</sequence>\n";
+
+	return out;
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -1,0 +1,34 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	kernToBase40
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-pitch.cpp
+@LINES:		231-246
+@SHORTDESC:	Convert **kern pitch to a base-40 integer.
+@LONGDESC:	Convert **kern pitch to a base-40 integer.
+	Will ignore subsequent pitches in a chord.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::kernToBase40(const string& kerndata) {
+	int pc = Convert::kernToBase40PC(kerndata);
+	if (pc < 0) {
+		return pc;
+	}
+	int octave   = Convert::kernToOctaveNumber(kerndata);
+	return pc + 40 * octave;
+}
+
+
+@@END:	FunctionDocumentation
+

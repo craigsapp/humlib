@@ -1,0 +1,30 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	setXmlIdPrefix
+@ACCESS:	public
+@RETURN:	void          
+@PARAMETERS:	const string& value
+@FILE:		HumdrumFileBase.cpp
+@LINES:		48-59
+@SHORTDESC:	Set the prefix for a HumdrumXML ID atrribute.
+@LONGDESC:	Set the prefix for a HumdrumXML ID 
+	atrribute.  The prefix should not start with a digit, nor have 
+	spaces in it.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::setXmlIdPrefix(const string& value) {
+	idprefix = value;
+}
+
+
+@@END:	FunctionDocumentation
+

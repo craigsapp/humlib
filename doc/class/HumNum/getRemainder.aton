@@ -1,0 +1,29 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumNum
+@METHOD:	getRemainder
+@ACCESS:	public
+@RETURN:	HumNum   
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumNum.cpp
+@LINES:		192-201
+@SHORTDESC:	Returns the non-integer fractional part of the value.
+@LONGDESC:	Returns the non-integer fractional part of the value.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumNum HumNum::getRemainder(void) const {
+	return (*this) - toInteger();
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -1,0 +1,37 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getBarlineDuration
+@ACCESS:	public
+@RETURN:	HumNum   
+@RETURN:	HumNum   
+@PARAMETERS:	void
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		451-465
+@SHORTDESC:	Return the duration following a barline, or the duration of the previous barline in the data.
+@LONGDESC:	Return the duration following a barline,
+	or the duration of the previous barline in the data.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumNum HumdrumLine::getBarlineDuration(void) const {
+	if (isBarline()) {
+		return getDurationToBarline();
+	} else {
+		return getDurationFromBarline() + getDurationToBarline();
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

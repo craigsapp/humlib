@@ -1,0 +1,45 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	kernToBase12PC
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-pitch.cpp
+@LINES:		248-274
+@SHORTDESC:	Convert **kern pitch to a base-12 pitch-class.
+@LONGDESC:	Convert **kern pitch to a base-12 pitch-class.
+	C=0, C#/D-flat=1, D=2, etc.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::kernToBase12PC(const string& kerndata) {
+	int diatonic = Convert::kernToDiatonicPC(kerndata);
+	if (diatonic < 0) {
+		return diatonic;
+	}
+	int accid    = Convert::kernToAccidentalCount(kerndata);
+	int output = -1000;
+	switch (diatonic) {
+		case 0: output =  0; break;
+		case 1: output =  2; break;
+		case 2: output =  4; break;
+		case 3: output =  5; break;
+		case 4: output =  7; break;
+		case 5: output =  9; break;
+		case 6: output = 11; break;
+	}
+	output += accid;
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+

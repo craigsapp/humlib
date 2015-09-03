@@ -1,0 +1,33 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	getXmlIdPrefix
+@ACCESS:	public
+@RETURN:	string   
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		1157-1170
+@SHORTDESC:	Return the pre-set XML ID attribute prefix from the owning HumdrumFile object.
+@LONGDESC:	Return the pre-set XML ID attribute
+	prefix from the owning HumdrumFile object.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string HumdrumLine::getXmlIdPrefix(void) const {
+	if (owner == NULL) {
+		return "";
+	}
+	return ((HumdrumFileBase*)owner)->getXmlIdPrefix();
+}
+
+
+@@END:	FunctionDocumentation
+
