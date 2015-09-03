@@ -2,7 +2,7 @@
 
 
 
-classdoc:
-	(cd _includes/class; make)
+class:
+	(cd doc/class; make)
 
 

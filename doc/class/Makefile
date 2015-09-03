@@ -29,6 +29,7 @@ listing:
 		(cd $$DIRNAME; $(MAKE) listing);			\
 	done
 	(cd ../../_includes/docslot/; make)
+	(cd ../../_includes/class/; make)
 
 
 

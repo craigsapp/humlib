@@ -96,6 +96,12 @@ window.addEventListener('DOMContentLoaded', function(event) {
 
 
 
+
+
+
+
+
+
    addClassListContent("HumdrumToken", list);
 });
 </script>
@@ -141,6 +147,8 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'isEmpty',
 	'isExclusive',
 	'isInterp',
+	'isKernBoundaryEnd',
+	'isKernBoundaryStart',
 	'isManipulator',
 	'isReference',
 	'isTerminator',
@@ -153,6 +161,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'setLineFromCSV',
 	'token'
    ];   // END_DOCLIST(HumdrumLine)
+
+
+
+
+
+
 
 
 
@@ -188,6 +202,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
+
+
+
+
+
    addClassListContent("HumdrumFile", list);
 });
 </script>
@@ -201,6 +221,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFileContent)
 	'@INDEXED:	yes'
    ];   // END_DOCLIST(HumdrumFileContent)
+
+
+
+
+
+
 
 
 
@@ -250,6 +276,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
+
+
+
+
+
    addClassListContent("HumdrumFileStructure", list);
 });
 </script>
@@ -274,17 +306,23 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackStart',
 	'getXmlIdPrefix',
 	'operator[]',
-	'printCSV',
+	'printCsv',
 	'printDataTypeInfo',
 	'printSpineInfo',
 	'printTrackInfo',
 	'read',
-	'readCSV',
+	'readCsv',
 	'readString',
-	'readStringCSV',
+	'readStringCsv',
 	'setXmlIdPrefix',
 	'token'
    ];   // END_DOCLIST(HumdrumFileBase)
+
+
+
+
+
+
 
 
 
@@ -358,6 +396,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
+
+
+
+
+
    addClassListContent("HumNum", list);
 });
 </script>
@@ -383,6 +427,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackString',
 	'hasOwner'
    ];   // END_DOCLIST(HumAddress)
+
+
+
+
+
+
 
 
 
@@ -430,6 +480,12 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
+
+
+
+
+
    addClassListContent("HumHash", list);
 });
 </script>
@@ -443,8 +499,13 @@ HumdrumToken and HumdrumLine parameter system.
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(Convert)
+	'encodeXml',
 	'getGcd',
+	'getHumNumAttributes',
+	'getKernPitchAttributes',
 	'getLcm',
+	'isKernNote',
+	'isKernRest',
 	'kernToAccidentalCount',
 	'kernToBase12',
 	'kernToBase12PC',
@@ -457,10 +518,19 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'kernToMidiNoteNumber',
 	'kernToOctaveNumber',
 	'kernToScientificPitch',
+	'pitchToWbh',
 	'recipToDuration',
+	'repeatString',
 	'replaceOccurrences',
-	'splitString'
+	'splitString',
+	'trimWhiteSpace'
    ];   // END_DOCLIST(Convert)
+
+
+
+
+
+
 
 
 

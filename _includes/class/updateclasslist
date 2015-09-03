@@ -53,7 +53,7 @@ for ($i=0; $i<@contents; $i++) {
 
 sub printClassListContents {
    my ($classname) = @_;
-   my $list = `grep INDEXED.*yes ../../doc/class/$classname/*.aton`;
+   my $list = `grep INDEXED.*[Yy][Ee][Ss] ../../doc/class/$classname/*.aton`;
    my @items = split(/\n/, $list);
    my $i;
    my $item;
