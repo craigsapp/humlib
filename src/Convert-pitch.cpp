@@ -66,7 +66,7 @@ string Convert::kernToScientificPitch(const string& kerndata,
 //////////////////////////////
 //
 // Convert::kernToDiatonicPC -- Convert a kern token into a diatonic
-//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned 
+//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned
 //    if the note is rest, and -2000 if there is no pitch information in the
 //    input string. Only the first subtoken in the string is considered.
 //
@@ -97,7 +97,7 @@ int Convert::kernToDiatonicPC(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::kernToDiatonicUC -- Convert a kern token into a diatonic
-//    note pitch-class.  "R" is returned if the note is rest, and 
+//    note pitch-class.  "R" is returned if the note is rest, and
 //    "X" is returned if there is no pitch name in the string.
 //    Only the first subtoken in the string is considered.
 //
@@ -323,6 +323,43 @@ int Convert::kernToBase7(const string& kerndata) {
 	int octave = Convert::kernToOctaveNumber(kerndata);
 	return diatonic + 7 * octave;;
 }
+
+
+//////////////////////////////
+//
+// Convert::pitchToWbh -- Convert a given diatonic pitch class and
+//   accidental adjustment to an integer.  The diatonic pitch class
+//   is C=0, D=1, E=2, F=3, G=4, A=5, B=6. "acc" is the accidental
+//   count: -2=double flat, -1=double flat, 0 natural, +1=sharp, etc.
+//   "octave" is the octave number, with middle-C being the start of
+//   octave 4.  //   "maxacc" is the maximum accidental which defines
+//    the base:
+//    maxacc = 2 -> Base-40.
+//    maxacc = n -> Base (n*2+1)*7 + 5.
+//
+
+int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
+	if (dpc > 6) {
+		// allow for pitch-classes as ASCII characters:
+		dpc = std::tolower(dpc) - 'a' + 5;
+		dpc = dpc % 7;
+	}
+	int output = -1000;
+	switch (dpc) {
+		case 0: output = 0;
+		case 1: output =  2 * maxacc + 2;
+		case 2: output =  4 * maxacc + 4;
+		case 3: output =  6 * maxacc + 4;
+		case 4: output =  8 * maxacc + 6;
+		case 5: output = 10 * maxacc + 8;
+		case 6: output = 12 * maxacc + 8;
+	}
+	if (output < 0) {
+		return output;
+	}
+	return (output + acc) * octave + maxacc;
+}
+
 
 
 // END_MERGE

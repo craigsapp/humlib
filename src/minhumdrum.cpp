@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  2 18:32:09 PDT 2015
+// Last Modified: Thu Sep  3 01:05:56 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -4440,6 +4440,66 @@ bool HumdrumLine::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isKernBoundaryStart -- Return true if the 
+//    line does not have any null tokens in **kern data which
+//    refer to data tokens above the line.
+//
+
+bool HumdrumLine::isKernBoundaryStart(void) const {
+	if (!isData()) {
+		return false;
+	}
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		if (token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isKernBoundaryEnd -- Return true if the next
+//    data line contains no null tokens in the **kern spines.
+//    Assuming that a **kern spine split always starts with
+//    a non-null token.
+//
+
+bool HumdrumLine::isKernBoundaryEnd(void) const {
+	if (!isData()) {
+		return false;
+	}
+	HumdrumToken* ntok;
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		ntok = token(i).getNextToken();
+		if (ntok == NULL) {
+			continue;
+		}
+		while ((ntok != NULL) && !ntok->isData()) {
+			ntok = ntok->getNextToken();
+		}
+		if (ntok == NULL) {
+			continue;
+		}
+		if (ntok->isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isComment -- Returns true if the first character
 //   in the string is '!'. Could be local, global, or a reference record.
 //
@@ -5364,6 +5424,28 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 			out << "<barlineDuration";
 			out << Convert::getHumNumAttributes(getBarlineDuration());
 			out << "/>\n";
+		}
+
+		bool bstart = isKernBoundaryStart();
+ 		bool bend   = isKernBoundaryEnd();
+		if (bstart || bend) {
+			out << Convert::repeatString(indent, level);
+			cout << "<kernBoundary";
+			cout << " start=\"";
+			if (bstart) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << " end=\"";
+			if (bend) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << "/>\n";
 		}
 
 		level--;
@@ -6598,18 +6680,24 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	out << Convert::repeatString(indent, level);
 	out << "<field";
 	out << " n=\"" << getTokenIndex() << "\"";
+
+	out << " track=\"" << getTrack() << "\"";
+	if (getSubtrack() > 0) {
+		out << " subtrack=\"" << getSubtrack() << "\"";
+	}
 	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
+
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
 
-	if (isRest()) {
-		out << Convert::repeatString(indent, level+1) << "<rest/>\n";
-	} else if (isNote()) {
-		out << Convert::repeatString(indent, level+1) << "<pitch";
-		out << Convert::getKernPitchAttributes(((string)(*this)));
-		out << "/>\n";
+	if (isData()) {
+		if (isNote()) {
+			out << Convert::repeatString(indent, level+1) << "<pitch";
+			out << Convert::getKernPitchAttributes(((string)(*this)));
+			out << "/>\n";
+		}
 	}
 
 	printXmlContentInfo(out, level+1, indent);
@@ -6630,14 +6718,6 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 
 ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 		const string& indent) {
-
-	out << Convert::repeatString(indent, level);
-	out << "<track>" << getTrack() << "</track>\n";
-
-	if (getSubtrack() > 0) {
-		out << Convert::repeatString(indent, level);
-		out << "<subtrack>" << getSubtrack() << "</subtrack>\n";
-	}
 
    // <dataType> redundant with 
 	// sequence/sequenceInfo/trackInfo/track@dataType
@@ -6845,7 +6925,7 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 	int accid = kernToAccidentalCount(kerndata);
 	string output = "";
 
-	output += " pc=\"";
+	output += " dpc=\"";
 	output += kernToDiatonicUC(kerndata);
 	output += "\"";
 
@@ -6957,7 +7037,7 @@ string Convert::kernToScientificPitch(const string& kerndata,
 //////////////////////////////
 //
 // Convert::kernToDiatonicPC -- Convert a kern token into a diatonic
-//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned 
+//    note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned
 //    if the note is rest, and -2000 if there is no pitch information in the
 //    input string. Only the first subtoken in the string is considered.
 //
@@ -6988,7 +7068,7 @@ int Convert::kernToDiatonicPC(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::kernToDiatonicUC -- Convert a kern token into a diatonic
-//    note pitch-class.  "R" is returned if the note is rest, and 
+//    note pitch-class.  "R" is returned if the note is rest, and
 //    "X" is returned if there is no pitch name in the string.
 //    Only the first subtoken in the string is considered.
 //
@@ -7214,6 +7294,43 @@ int Convert::kernToBase7(const string& kerndata) {
 	int octave = Convert::kernToOctaveNumber(kerndata);
 	return diatonic + 7 * octave;;
 }
+
+
+//////////////////////////////
+//
+// Covnert::pitchToWbh -- Convert a given diatonic pitch class and
+//   accidental adjustment to an integer.  The diatonic pitch class
+//   is C=0, D=1, E=2, F=3, G=4, A=5, B=6. "acc" is the accidental
+//   count: -2=double flat, -1=double flat, 0 natural, +1=sharp, etc.
+//   "octave" is the octave number, with middle-C being the start of
+//   octave 4.  //   "maxacc" is the maximum accidental which defines
+//    the base:
+//    maxacc = 2 -> Base-40.
+//    maxacc = n -> Base (n*2+1)*7 + 5.
+//
+
+int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
+	if (dpc > 6) {
+		// allow for pitch-classes as ASCII characters:
+		dpc = std::tolower(dpc) - 'a' + 5;
+		dpc = dpc % 7;
+	}
+	int output = -1000;
+	switch (dpc) {
+		case 0: output = 0;
+		case 1: output =  2 * maxacc + 2;
+		case 2: output =  4 * maxacc + 4;
+		case 3: output =  6 * maxacc + 4;
+		case 4: output =  8 * maxacc + 6;
+		case 5: output = 10 * maxacc + 8;
+		case 6: output = 12 * maxacc + 8;
+	}
+	if (output < 0) {
+		return output;
+	}
+	return (output + acc) * octave + maxacc;
+}
+
 
 
 

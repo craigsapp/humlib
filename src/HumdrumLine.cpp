@@ -147,6 +147,66 @@ bool HumdrumLine::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isKernBoundaryStart -- Return true if the 
+//    line does not have any null tokens in **kern data which
+//    refer to data tokens above the line.
+//
+
+bool HumdrumLine::isKernBoundaryStart(void) const {
+	if (!isData()) {
+		return false;
+	}
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		if (token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isKernBoundaryEnd -- Return true if the next
+//    data line contains no null tokens in the **kern spines.
+//    Assuming that a **kern spine split always starts with
+//    a non-null token.
+//
+
+bool HumdrumLine::isKernBoundaryEnd(void) const {
+	if (!isData()) {
+		return false;
+	}
+	HumdrumToken* ntok;
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		ntok = token(i).getNextToken();
+		if (ntok == NULL) {
+			continue;
+		}
+		while ((ntok != NULL) && !ntok->isData()) {
+			ntok = ntok->getNextToken();
+		}
+		if (ntok == NULL) {
+			continue;
+		}
+		if (ntok->isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isComment -- Returns true if the first character
 //   in the string is '!'. Could be local, global, or a reference record.
 //
@@ -1071,6 +1131,28 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 			out << "<barlineDuration";
 			out << Convert::getHumNumAttributes(getBarlineDuration());
 			out << "/>\n";
+		}
+
+		bool bstart = isKernBoundaryStart();
+ 		bool bend   = isKernBoundaryEnd();
+		if (bstart || bend) {
+			out << Convert::repeatString(indent, level);
+			cout << "<kernBoundary";
+			cout << " start=\"";
+			if (bstart) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << " end=\"";
+			if (bend) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << "/>\n";
 		}
 
 		level--;

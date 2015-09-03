@@ -57,6 +57,8 @@ class Convert {
 		      string flat = "b", string sharp = "#", string separator = "") {
 			return kernToScientificPitch(kerndata, flat, sharp, separator);
 		}
+		static int     pitchToWbh         (int dpc, int acc, int octave,
+		                                   int maxacc);
 
 		// data-type specific (other than pitch/rhythm), 
 		// defined in Convert-kern.cpp

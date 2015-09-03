@@ -62,6 +62,8 @@ class HumdrumLine : public string, public HumHash {
 		string   getTokenString         (int index) const;
 		bool     equalChar              (int index, char ch) const;
 		char     getChar                (int index) const;
+		bool     isKernBoundaryStart    (void) const;
+		bool     isKernBoundaryEnd      (void) const;
 		ostream& printSpineInfo         (ostream& out = cout);
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);

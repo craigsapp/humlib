@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  2 18:32:09 PDT 2015
+// Last Modified: Thu Sep  3 01:05:56 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -370,6 +370,8 @@ class HumdrumLine : public string, public HumHash {
 		string   getTokenString         (int index) const;
 		bool     equalChar              (int index, char ch) const;
 		char     getChar                (int index) const;
+		bool     isKernBoundaryStart    (void) const;
+		bool     isKernBoundaryEnd      (void) const;
 		ostream& printSpineInfo         (ostream& out = cout);
 		ostream& printTrackInfo         (ostream& out = cout);
 		ostream& printDataTypeInfo      (ostream& out = cout);
@@ -973,6 +975,8 @@ class Convert {
 		      string flat = "b", string sharp = "#", string separator = "") {
 			return kernToScientificPitch(kerndata, flat, sharp, separator);
 		}
+		static int     pitchToWbh         (int dpc, int acc, int octave,
+		                                   int maxacc);
 
 		// data-type specific (other than pitch/rhythm), 
 		// defined in Convert-kern.cpp

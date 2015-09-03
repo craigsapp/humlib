@@ -68,7 +68,7 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 	int accid = kernToAccidentalCount(kerndata);
 	string output = "";
 
-	output += " pc=\"";
+	output += " dpc=\"";
 	output += kernToDiatonicUC(kerndata);
 	output += "\"";
 

@@ -1046,18 +1046,24 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	out << Convert::repeatString(indent, level);
 	out << "<field";
 	out << " n=\"" << getTokenIndex() << "\"";
+
+	out << " track=\"" << getTrack() << "\"";
+	if (getSubtrack() > 0) {
+		out << " subtrack=\"" << getSubtrack() << "\"";
+	}
 	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
+
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
 
-	if (isRest()) {
-		out << Convert::repeatString(indent, level+1) << "<rest/>\n";
-	} else if (isNote()) {
-		out << Convert::repeatString(indent, level+1) << "<pitch";
-		out << Convert::getKernPitchAttributes(((string)(*this)));
-		out << "/>\n";
+	if (isData()) {
+		if (isNote()) {
+			out << Convert::repeatString(indent, level+1) << "<pitch";
+			out << Convert::getKernPitchAttributes(((string)(*this)));
+			out << "/>\n";
+		}
 	}
 
 	printXmlContentInfo(out, level+1, indent);
@@ -1078,14 +1084,6 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 
 ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 		const string& indent) {
-
-	out << Convert::repeatString(indent, level);
-	out << "<track>" << getTrack() << "</track>\n";
-
-	if (getSubtrack() > 0) {
-		out << Convert::repeatString(indent, level);
-		out << "<subtrack>" << getSubtrack() << "</subtrack>\n";
-	}
 
    // <dataType> redundant with 
 	// sequence/sequenceInfo/trackInfo/track@dataType
