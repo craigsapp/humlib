@@ -6,7 +6,7 @@
 @RETURN:	HumNum&  
 @PARAMETERS:	void
 @FILE:		HumNum.cpp
-@LINES:		257-269
+@LINES:		269-281
 @SHORTDESC:	Make the rational number non-negative.
 @LONGDESC:	Make the rational number non-negative.
 	

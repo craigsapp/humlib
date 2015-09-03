@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		719-729
+@LINES:		778-788
 @SHORTDESC:	Get the subtrack (similar to a layer in MEI).
 @LONGDESC:	Get the subtrack (similar to a layer
 	in MEI).

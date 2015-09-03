@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		251-270
+@LINES:		352-371
 @SHORTDESC:	Returns true if all tokens on the line are null (".
 @LONGDESC:	Returns true if all tokens on the line
 	are null ("." if a data line, "*" if an interpretation line, "!"

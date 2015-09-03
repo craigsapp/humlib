@@ -4,11 +4,14 @@
 @METHOD:	getValue
 @ACCESS:	public
 @RETURN:	string         
-string         
-string         
+@RETURN:	string         
+@RETURN:	string         
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		142-170
 @SHORTDESC:	Returns the value specified by the given key.

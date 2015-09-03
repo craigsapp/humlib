@@ -4,9 +4,11 @@
 @METHOD:	getDurationFromStart
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-HumNum scale
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		505-518
 @SHORTDESC:	Returns the duration from the start of the owning HumdrumFile to the starting time of the owning HumdrumLine for the token.

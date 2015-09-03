@@ -4,9 +4,11 @@
 @METHOD:	getDuration
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-HumNum scale
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		475-487
 @SHORTDESC:	Returns the duration of the token.

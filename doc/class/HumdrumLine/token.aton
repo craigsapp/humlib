@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	HumdrumToken& 
 @PARAMETERS:	int index
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		597-610
+@LINES:		723-736
 @SHORTDESC:	Returns a reference to the given token on the line.
 @LONGDESC:	Returns a reference to the given token on the line.
 	An invalid token index would be bad to give to this function as it

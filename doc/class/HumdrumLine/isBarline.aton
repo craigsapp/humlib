@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		225-234
+@LINES:		326-335
 @SHORTDESC:	Returns true if starts with '=' character.
 @LONGDESC:	Returns true if starts with '=' character.
 	

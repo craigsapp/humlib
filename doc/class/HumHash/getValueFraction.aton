@@ -4,11 +4,14 @@
 @METHOD:	getValueFraction
 @ACCESS:	public
 @RETURN:	HumNum         
-HumNum         
-HumNum         
+@RETURN:	HumNum         
+@RETURN:	HumNum         
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		260-282
 @SHORTDESC:	Return the value as a HumNum fraction.

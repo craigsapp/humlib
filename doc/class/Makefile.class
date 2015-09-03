@@ -19,6 +19,9 @@ all:
 	@echo "make aton  -- create ATON files for public functions.";
 	@echo
 
+listing:
+	$(BINDIR)/makeFunctionList
+
 lines:
 	$(BINDIR)/insertCodeLines *.aton
 

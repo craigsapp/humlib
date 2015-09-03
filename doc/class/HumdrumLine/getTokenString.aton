@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	int index
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		612-623
+@LINES:		738-749
 @SHORTDESC:	Returns a copy of the string component of a token.
 @LONGDESC:	Returns a copy of the string component of
 	a token.  This code will return a segmentation fault if index is out of

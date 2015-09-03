@@ -6,11 +6,12 @@
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	int index, const string& separator
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		770-800
+@LINES:		829-859
 @SHORTDESC:	Extract the specified sub-token from the token.
 @LONGDESC:	Extract the specified sub-token from the token.
-	Tokens usually are separated by spaces in Humdrum files, but this will 
+	Tokens usually are separated by spaces in Humdrum files, but this will
 	depened on the data type (so therefore, the tokens are not presplit into
 	sub-tokens when reading in the file).
 	

@@ -4,11 +4,14 @@
 @METHOD:	getValueInt
 @ACCESS:	public
 @RETURN:	int            
-int            
-int            
+@RETURN:	int            
+@RETURN:	int            
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		204-229
 @SHORTDESC:	Return the value as an integer.

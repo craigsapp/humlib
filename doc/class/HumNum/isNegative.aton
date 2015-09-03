@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
 @LINES:		70-79
 @SHORTDESC:	Returns true if value is negative.

@@ -3,7 +3,6 @@
 @CLASSNAME:	HumdrumFileStructure
 @METHOD:	HumdrumFileStructure
 @ACCESS:	public
-@RETURN:	
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		25-35

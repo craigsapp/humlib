@@ -5,9 +5,9 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		269-278
-@SEEALSO:
+@LINES:		293-302
 @SHORTDESC:	Returns the number of lines.
 @LONGDESC:	Returns the number of lines.
 	
@@ -19,16 +19,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-////////////////////////////
-//
-// HumdrumFileBase::getLineCount -- Returns the number of lines.
-//
 
 int HumdrumFileBase::getLineCount(void) const {
 	return lines.size();
 }
-
-
 
 
 @@END:	FunctionDocumentation

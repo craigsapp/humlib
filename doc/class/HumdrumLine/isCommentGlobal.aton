@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		170-179
+@LINES:		171-180
 @SHORTDESC:	Returns true if a local comment.
 @LONGDESC:	Returns true if a local comment.
 	

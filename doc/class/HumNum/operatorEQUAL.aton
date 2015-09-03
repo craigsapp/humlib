@@ -4,11 +4,11 @@
 @METHOD:	operator=
 @ACCESS:	public
 @RETURN:	HumNum&  
-HumNum&  
+@RETURN:	HumNum&  
 @PARAMETERS:	const HumNum& value
-int value
+@PARAMETERS:	int value
 @FILE:		HumNum.cpp
-@LINES:		505-519
+@LINES:		517-531
 @SHORTDESC:	Assign the contents of a HumNum from another HumNum.
 @LONGDESC:	Assign the contents of a HumNum
 	from another HumNum.

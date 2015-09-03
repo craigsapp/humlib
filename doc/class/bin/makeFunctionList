@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+#
+# Programmer:    Craig Stuart Sapp <craig.stanford.edu>
+# Creation Date: Wed Sep  2 16:38:27 PDT 2015
+# Last Modified: Wed Sep  2 16:38:31 PDT 2015
+# Filename:      /class/bin/makeFunctionList
+# Syntax:        perl 5
+# vim:           ts=3
+#
+# Description:   Write a list of aton files to docslot.html
+#
+
+use strict;
+
+my $classname = `pwd`;
+chomp $classname;
+$classname =~ s/.*\///;
+
+my @atons = getAtonFiles();
+
+open (FILE, ">docslot.html") or die;
+foreach my $aton (@atons) {
+	print FILE "$classname::$aton\n";
+}
+close FILE;
+
+exit(0);
+
+
+
+##############################
+##
+## getAtonFiles --
+##
+
+sub getAtonFiles {
+ 	opendir(TDIR, ".") or die;
+	my @output;
+	while (my $file = readdir(TDIR)) {
+		next if $file !~ /\.aton$/;
+		$file =~ s/\.aton$//;
+		$output[@output] = $file;
+	}
+	return sort @output;
+}

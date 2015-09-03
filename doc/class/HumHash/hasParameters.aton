@@ -4,11 +4,14 @@
 @METHOD:	hasParameters
 @ACCESS:	public
 @RETURN:	bool           
-bool           
-bool           
+@RETURN:	bool           
+@RETURN:	bool           
 @PARAMETERS:	void
-const string& ns
-const string& ns1, const string& ns2
+@PARAMETERS:	const string& ns
+@PARAMETERS:	const string& ns1, const string& ns2
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		582-611
 @SHORTDESC:	Returns true if at least one parameter is defined in the HumHash object (when no arguments are given to the function).

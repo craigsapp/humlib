@@ -4,9 +4,9 @@
 @METHOD:	readStringNoRhythm
 @ACCESS:	public
 @RETURN:	bool          
-bool          
+@RETURN:	bool          
 @PARAMETERS:	const char* contents
-const string& contents
+@PARAMETERS:	const string& contents
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		230-241
 @SHORTDESC:	Read a string, but do not analyze the rhythm (or parameters) in the read data.

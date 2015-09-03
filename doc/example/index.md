@@ -3,7 +3,6 @@ layout: default
 breadcrumbs: [
                 ['/', 'home'],
                 ['/doc', 'documentation'],
-                ['/doc/tutorial', 'tutorial'],
                 ['/doc/class', 'classes'],
                 ['/doc/snippet', 'snippets'],
                 ['/doc/example', 'examples']
@@ -13,8 +12,8 @@ title: Coding examples
 
 {% include examples/examples.html %}
 
-[<span style="cursor:pointer;" onclick="openAllExamples()">Open all</span>]
-[<span style="cursor:pointer;" onclick="closeAllExamples()">Close all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllExamples()">Open all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllExamples()">Close all</span>]
 
 <details class="example-notelist">
 <summary>

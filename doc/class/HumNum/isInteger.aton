@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		372-381
-@SHORTDESC:	Return true if number is an integer.
-@LONGDESC:	Return true if number is an integer.
+@LINES:		384-393
+@SHORTDESC:	Returns true if number is an integer.
+@LONGDESC:	Returns true if number is an integer.
 	
 
 @@BEGIN: EXAMPLE

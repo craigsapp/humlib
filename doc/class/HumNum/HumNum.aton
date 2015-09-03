@@ -3,18 +3,12 @@
 @CLASSNAME:	HumNum
 @METHOD:	HumNum
 @ACCESS:	public
-@RETURN:	
-
-
-
-
-
 @PARAMETERS:	void
-int value
-int numerator, int denominator
-const HumNum& rat
-const string& ratstring
-const char* ratstring
+@PARAMETERS:	int value
+@PARAMETERS:	int numerator, int denominator
+@PARAMETERS:	const HumNum& rat
+@PARAMETERS:	const string& ratstring
+@PARAMETERS:	const char* ratstring
 @FILE:		HumNum.cpp
 @LINES:		22-32
 @SHORTDESC:	HumNum Constructor.

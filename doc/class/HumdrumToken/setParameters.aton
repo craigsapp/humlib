@@ -4,11 +4,11 @@
 @METHOD:	setParameters
 @ACCESS:	public
 @RETURN:	void     
-void     
+@RETURN:	void     
 @PARAMETERS:	HumdrumToken* ptok
-const string& pdata
+@PARAMETERS:	const string& pdata
 @FILE:		HumdrumToken.cpp
-@LINES:		802-820
+@LINES:		861-879
 @SHORTDESC:	Process a local comment with the structure: !NS1:NS2:key1=value1:key2=value2:key3=value3 and store the parameter in the HumHash parent class component of the HumdrumToken object.
 @LONGDESC:	Process a local comment with
 	the structure:

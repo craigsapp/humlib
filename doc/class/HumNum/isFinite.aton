@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		361-370
+@LINES:		373-382
 @SHORTDESC:	Returns true if the denominator is not zero.
 @LONGDESC:	Returns true if the denominator is not zero.
 	

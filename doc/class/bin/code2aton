@@ -88,10 +88,26 @@ EOT
 		print FILE "\@SEEALSO:\t$seealso\n";
 	}
 
-print FILE <<"EOT";
-\@ACCESS:	public
-\@RETURN:	$returnvalues{$function}
-\@PARAMETERS:	$parameterlist{$function}
+print FILE "\@ACCESS:	public\n";
+
+my @returns = split("\n", $returnvalues{$function});
+foreach my $return (@returns) {
+	print FILE "\@RETURN:	$return\n";
+}
+
+my @params = split("\n", $parameterlist{$function});
+
+foreach my $param (@params) {
+	print FILE "\@PARAMETERS:	$param\n";
+}
+
+my @quals = split("\n", $qualifiers{$function});
+
+foreach my $qual (@quals) {
+	print FILE "\@QUALIFIER:	$qual\n";
+}
+
+print FILE<<"EOT";
 \@FILE:		$sourcefile
 \@LINES:		$lines
 \@SHORTDESC:	$shortdesc

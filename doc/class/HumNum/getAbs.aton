@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	HumNum   
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		242-255
+@LINES:		254-267
 @SHORTDESC:	returns the absolute value of the rational number.
 @LONGDESC:	returns the absolute value of the rational number.
 	

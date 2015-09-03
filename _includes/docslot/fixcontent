@@ -13,7 +13,7 @@
 use strict;
 
 my @files = @ARGV;
-my $classdir    = "../../class";
+my $classdir    = "../../doc/class";
 
 foreach my $file (@files) {
    processFile($file);

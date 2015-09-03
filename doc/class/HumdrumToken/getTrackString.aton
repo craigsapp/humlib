@@ -6,11 +6,12 @@
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		731-746
+@LINES:		790-805
 @SHORTDESC:	Gets "track.
 @LONGDESC:	Gets "track.subtrack" as a string.  The
-	track and subtrack are integers.  The getTrackString function will 
+	track and subtrack are integers.  The getTrackString function will
 	return a string with the track and subtrack separated by an dot.  The
 	Dot is not a decimal point, but if the subtrack count does not exceed
 	9, then the returned string can be treated as a floating-point number

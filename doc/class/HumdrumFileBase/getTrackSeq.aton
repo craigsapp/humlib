@@ -6,8 +6,7 @@
 @RETURN:	vector<vector<HumdrumToken*> > 
 @PARAMETERS:	int track, int options
 @FILE:		HumdrumFileBase.cpp
-@LINES:		432-481
-@SEEALSO:
+@LINES:		456-505
 @SHORTDESC:	Extract a sequence of tokens for the given spine.
 @LONGDESC:	Extract a sequence of tokens
 	for the given spine.  All subspine tokens will be included.
@@ -22,13 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-/////////////////////////////
-//
-// HumdrumFileBase::getTrackSeq -- Extract a sequence of tokens
-//    for the given spine.  All subspine tokens will be included.
-//    See getPrimaryTrackSeq() if you only want the first subspine for
-//    a track on all lines.
-//
 
 vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track, 
 		int options) {
@@ -70,8 +62,6 @@ vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		622-632
+@LINES:		681-691
 @SHORTDESC:	Returns true if the token is a null data token.
-@LONGDESC:	Returns true if the token is a null 
+@LONGDESC:	Returns true if the token is a null
 	data token.
 	
 

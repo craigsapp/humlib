@@ -4,11 +4,13 @@
 @METHOD:	getDuration
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-HumNum scale
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		331-343
+@LINES:		432-444
 @SHORTDESC:	Get the duration of the line.
 @LONGDESC:	Get the duration of the line.  The duration will
 	be negative one if rhythmic analysis in HumdrumFileStructure has not been

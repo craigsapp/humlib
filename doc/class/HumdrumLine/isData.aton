@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		236-249
+@LINES:		337-350
 @SHORTDESC:	Returns true if data (but not measure).
 @LONGDESC:	Returns true if data (but not measure).
 	

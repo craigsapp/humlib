@@ -4,13 +4,13 @@
 @METHOD:	read
 @ACCESS:	public
 @RETURN:	bool          
-bool          
-bool          
+@RETURN:	bool          
+@RETURN:	bool          
 @PARAMETERS:	istream& contents
-const char* filename
-const string& filename
+@PARAMETERS:	const char* filename
+@PARAMETERS:	const string& filename
 @FILE:		HumdrumFileBase.cpp
-@LINES:		68-77
+@LINES:		91-100
 @SHORTDESC:	Load file contents from an input stream or file.
 @LONGDESC:	Load file contents from an input stream or file.
 	

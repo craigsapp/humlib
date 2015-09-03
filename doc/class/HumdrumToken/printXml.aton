@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumToken.cpp
-@LINES:		976-997
+@LINES:		1035-1068
 @SHORTDESC:	Print a HumdrumToken in XML format.
 @LONGDESC:	Print a HumdrumToken in XML format.
 	
@@ -21,14 +21,26 @@
 @SRCCODE:
 
 ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<token text=\"";
-	out << Convert::encodeXml(((string)(*this)));
-	out << "\">\n";
+	out << Convert::repeatString(indent, level);
+	out << "<field";
+	out << " n=\"" << getTokenIndex() << "\"";
+	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " xml:id=\"" << getXmlId() << "\"";
+	out << ">\n";
 	printXmlBaseInfo(out, level+1, indent);
 	printXmlStructureInfo(out, level+1, indent);
+
+	if (isRest()) {
+		out << Convert::repeatString(indent, level+1) << "<rest/>\n";
+	} else if (isNote()) {
+		out << Convert::repeatString(indent, level+1) << "<pitch";
+		out << Convert::getKernPitchAttributes(((string)(*this)));
+		out << "/>\n";
+	}
+
 	printXmlContentInfo(out, level+1, indent);
 	printXmlParameterInfo(out, level+1, indent);
-	out << Convert::repeatString(indent, level) << "</token>\n";
+	out << Convert::repeatString(indent, level) << "</field>\n";
 	return out;
 }
 

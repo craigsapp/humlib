@@ -4,11 +4,13 @@
 @METHOD:	getDurationToBarline
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-HumNum scale
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		454-464
+@LINES:		580-590
 @SHORTDESC:	Time from the starting of the current note to the next barline.
 @LONGDESC:	Time from the starting of the
 	current note to the next barline.

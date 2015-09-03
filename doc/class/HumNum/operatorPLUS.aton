@@ -4,11 +4,13 @@
 @METHOD:	operator+
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	const HumNum& value
-int value
+@PARAMETERS:	int value
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		383-400
+@LINES:		395-412
 @SHORTDESC:	Addition operator which adds HumNum to another HumNum or with a integers.
 @LONGDESC:	Addition operator which adds HumNum
 	to another HumNum or with a integers.

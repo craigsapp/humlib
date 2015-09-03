@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		680-689
+@LINES:		739-748
 @SHORTDESC:	True if the token is "*-".
 @LONGDESC:	True if the token is "*-".
 	

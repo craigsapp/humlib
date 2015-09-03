@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		158-170
 @SHORTDESC:	The number of subtrack spines for a given spine on the owning HumdurmLine.

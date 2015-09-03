@@ -6,7 +6,7 @@
 @RETURN:	void     
 @PARAMETERS:	vector<HumdrumToken*>& list
 @FILE:		HumdrumLine.cpp
-@LINES:		673-690
+@LINES:		799-816
 @SHORTDESC:	Returns an array of tokens pointers for a Humdrum line.
 @LONGDESC:	Returns an array of tokens pointers for a
 	Humdrum line.  This function should not be called on global comments,

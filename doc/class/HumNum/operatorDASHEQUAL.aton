@@ -4,11 +4,11 @@
 @METHOD:	operator-=
 @ACCESS:	public
 @RETURN:	HumNum&  
-HumNum&  
+@RETURN:	HumNum&  
 @PARAMETERS:	const HumNum& value
-int value
+@PARAMETERS:	int value
 @FILE:		HumNum.cpp
-@LINES:		544-555
+@LINES:		556-567
 @SHORTDESC:	Subtract a HumNum or an integer from a HumNum.
 @LONGDESC:	Subtract a HumNum or an integer from
 	a HumNum.

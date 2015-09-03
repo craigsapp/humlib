@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		308-318
+@LINES:		409-419
 @SHORTDESC:	Returns the index number of the line in the HumdrumFileBase storage for the lines.
 @LONGDESC:	Returns the index number of the line in the
 	HumdrumFileBase storage for the lines.

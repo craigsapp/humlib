@@ -4,11 +4,13 @@
 @METHOD:	getDurationToEnd
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-HumNum scale
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		381-396
+@LINES:		507-522
 @SHORTDESC:	Returns the duration from the start of the line to the end of the HumdrumFile which owns this HumdrumLine.
 @LONGDESC:	Returns the duration from the start of the
 	line to the end of the HumdrumFile which owns this HumdrumLine.  The

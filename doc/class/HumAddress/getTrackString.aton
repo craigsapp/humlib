@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	string        
 @PARAMETERS:	string separator = "."
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		172-192
 @SHORTDESC:	Return the track and subtrack as a string.

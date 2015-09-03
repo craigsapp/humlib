@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& = cout
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		749-766
+@LINES:		761-778
 @SHORTDESC:	Print HumNum as a fraction, such as 3/2.
 @LONGDESC:	Print HumNum as a fraction,
 	such as 3/2.  If the HumNum is an integer, then do

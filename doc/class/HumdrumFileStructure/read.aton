@@ -4,11 +4,11 @@
 @METHOD:	read
 @ACCESS:	public
 @RETURN:	bool          
-bool          
-bool          
+@RETURN:	bool          
+@RETURN:	bool          
 @PARAMETERS:	istream& contents
-const char* filename
-const string& filename
+@PARAMETERS:	const char* filename
+@PARAMETERS:	const string& filename
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		49-64
 @SHORTDESC:	Read the contents of a file from a file or istream.

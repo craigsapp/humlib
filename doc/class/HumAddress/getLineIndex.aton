@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		50-66
 @SHORTDESC:	Returns the line index in the owning HumdrumFile for the token associated with the address.

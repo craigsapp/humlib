@@ -164,9 +164,20 @@ details[open].example-details {
 	content: "XXX";
 }
 
+.function-name {
+	color: #159957;
+	font-weight: bold;
+}
+
+.variable-name {
+	color: #159957;
+	font-style: italic;
+	font-family: Palatino, Times-Roman, serif;
+}
+
 .hanging-indent {
-  padding-left: 35px;
-  text-indent: -35px;
+  padding-left: 23px;
+  text-indent: -23px;
 }
 
 /* For displaying keyboard short-cut keys. */
@@ -246,19 +257,25 @@ pre.output-example {
 <script id="docslot-main" type="text/x-handlebars-template">
 	{{#if LONGDESC}}
 		<a name="{{METHOD}}"> </a>
-		<details class="hanging-indent" ontoggle='showOrHideShortDescriptionReverse(this);'>
-			<summary>
-				{{#noDot CLASSNAME METHOD}}.{{/noDot}}{{#if longname}}<a href="/doc/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}
-				<span class="docslot-short-title">{{METHOD}}</span>
-			<span class='short-desc'> &mdash;
-			{{{SHORTDESC}}}
-			</span>
-			</summary>
-			<div style="margin-left:40px; margin-bottom:20px;">
+		<details class="top-level" ontoggle='showOrHideShortDescriptionReverse(this);'>
+			<summary class="hanging-indent">
+				<span class="open-state" style="display:none">
 				{{#if PARAMETERS }}
 					{{{printDeclarations this}}}
 				{{/if}}
+				</span>
+				<span class="closed-state">
+					{{#noDot CLASSNAME METHOD}}.{{/noDot}}{{#if longname}}<a href="/doc/class/{{CLASSNAME}}">{{CLASSNAME}}</a>::{{/if}}
+					<span class="docslot-short-title">{{METHOD}}</span>
+					<span class='short-desc'> &mdash;
+					{{{SHORTDESC}}}
+					</span>
+				</span>
+			</summary>
+			<div style="margin-left:40px; margin-bottom:20px;">
+				<span style="margin-left:0">
 				{{{LONGDESC}}}
+				</span>
 				{{{showSeealso SEEALSO CLASSNAME}}}
 				{{{showExamples EXAMPLE}}}
 				{{{codeLink METHOD FILE LINES SRCCODE}}}
@@ -346,9 +363,9 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 	}
 	var output = '';
 
-	srccode = srccode.replace(/&/, "&amp;", "g");
-	srccode = srccode.replace(/</, "&lt;", "g");
-	srccode = srccode.replace(/>/, "&gt;", "g");
+	srccode = srccode.replace(/&/g, "&amp;");
+	srccode = srccode.replace(/</g, "&lt;");
+	srccode = srccode.replace(/>/g, "&gt;");
    if (!file.match(/^\s*$/)) {
 		output += '<details class="src-code">\n';
 		output += '<summary>\n';
@@ -415,10 +432,10 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 			}
 			output += ' ';
 			output += '<span class="docslot-long-title">';
-   		output += entry.METHOD;
+   		output += '<span class="function-name">' + entry.METHOD + '</span>';
 			output += '</span>';
 			output += '(';
-			output += entry.PARAMETERS[i];
+			output += formatParameters(entry.PARAMETERS[i]);
 			output += ');';
    		output += '</span>';
    		output += '</br>';
@@ -433,17 +450,65 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 		}
 		output += ' ';
 		output += '<span class="docslot-long-title">';
-   	output += entry.METHOD;
+   	output += '<span class="function-name">' + entry.METHOD + '</span>';
 		output += '</span>';
 		output += '(';
-		output += entry.PARAMETERS;
-		output += ');';
+		output += formatParameters(entry.PARAMETERS[i]);
+		output += ')';
+		if (entry.QUALIFIER) {
+			output += ' '+ entry.QUALIFIER;
+		}
+		output += ';';
    	output += '</span>';
    	output += '</br>';
 	}
 
    return output;
 });
+
+
+//////////////////////////////
+//
+// formatParameters --
+//
+
+function formatParameters(pstring) {
+	if (!pstring) {
+		return "";
+	}
+
+	pstring = pstring.replace(/&/g, "&amp;");
+	pstring = pstring.replace(/</g, "&lt;");
+	pstring = pstring.replace(/>/g, "&gt;");
+
+	var plist = pstring.split(/, ?/);
+	var output = "";
+	var matches;
+	for (var i=0; i<plist.length; i++) {
+		if (matches = plist[i].match(/(.*)\s*(=.*)/)) {
+			var prestuff  = matches[1];
+			var poststuff = matches[1];
+		} else {
+			prestuff  = plist[i];
+			poststuff = "";
+		}
+		if (matches = prestuff.match(/(.*)\s+([^\s]+)$/)) {
+			prestuff = matches[1];
+			var middlestuff = matches[2];
+		} else {
+			middlestuff = "";
+		}
+		output += prestuff;
+		if (middlestuff.length > 0) {
+			output += ' <span class="variable-name">' + middlestuff + '</span>';
+		}
+		if (poststuff.length > 0) {
+			output += ' ' + poststuff;
+		}
+	}
+	return output;
+}
+
 
 
 
@@ -553,22 +618,24 @@ function showOrHideShortDescriptionReverse(target) {
 	}
 
 	// go to the first sub-element which has a class of "short-desc":
-	var shortdesc = target.querySelector('.short-desc');
-	if (!shortdesc) {
-		return;
-	}
-	if (shortdesc.nodeName !== 'SPAN') {
-		return;
-	}
+	var declarations = target.querySelector('.open-state');
+	var shortdesc = target.querySelector('.closed-state');
+
 	var openstate = target.getAttribute('open');
 	if (typeof openstate === 'string') {
 		// hide the short-desc text with visibility:hidden
 		shortdesc.style.visibility = 'hidden';
 		shortdesc.style.display = 'none';
+		// show declarations
+		declarations.style.visibility = 'visible';
+		declarations.style.display = 'inline';
 	} else {
 		// show the short-desc text with visibility:visible
 		shortdesc.style.visibility = 'visible';
 		shortdesc.style.display = 'inline';
+		// hide declarations:
+		declarations.style.visibility = 'hidden';
+		declarations.style.display = 'none';
 	}
 }
 
@@ -831,7 +898,7 @@ function exclusiveSlotShow(id) {
 //
 
 function closeAllFunctions() {
-	var details = document.querySelectorAll("details.hanging-indent");
+	var details = document.querySelectorAll("details.top-level");
 	for (var i=0; i<details.length; i++) {
 		var detail = details[i];
 		if (!detail) {
@@ -849,7 +916,7 @@ function closeAllFunctions() {
 //
 
 function openAllFunctions() {
-	var details = document.querySelectorAll("details.hanging-indent");
+	var details = document.querySelectorAll("details.top-level");
 	for (var i=0; i<details.length; i++) {
 		var detail = details[i];
 		if (!detail) {

@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	HumdrumLine* 
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		884-894
+@LINES:		943-953
 @SHORTDESC:	Returns a pointer to the HumdrumLine which owns this token.
 @LONGDESC:	Returns a pointer to the HumdrumLine which owns this
 	token.

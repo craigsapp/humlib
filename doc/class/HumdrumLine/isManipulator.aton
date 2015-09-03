@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		547-564
+@LINES:		673-690
 @SHORTDESC:	Returns true if any tokens on the line are manipulator interpretations.
 @LONGDESC:	Returns true if any tokens on the line are
 	manipulator interpretations.  Only null interpretations are allowed on

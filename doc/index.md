@@ -62,12 +62,6 @@ concepts related to Humdrum file processing.
    </td>
 </tr>
 
-<tr valign=top>
-   <td> <a href="/doc/tutorial">Tutorial</a> </td> <td> 
-Programming tutorials for using minhumdrum.
-   </td>
-</tr>
-
 </table>
 
 

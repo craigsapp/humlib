@@ -3,14 +3,11 @@
 @CLASSNAME:	HumdrumLine
 @METHOD:	HumdrumLine
 @ACCESS:	public
-@RETURN:	
-
-
 @PARAMETERS:	void
-const string& aString
-const char* aString
+@PARAMETERS:	const string& aString
+@PARAMETERS:	const char* aString
 @FILE:		HumdrumLine.cpp
-@LINES:		24-36
+@LINES:		25-37
 @SHORTDESC:	HumdrumLine constructor.
 @LONGDESC:	HumdrumLine constructor.
 	

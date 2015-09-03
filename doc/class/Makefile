@@ -9,7 +9,7 @@
 #                class documentation.
 #
 
-all: aton
+all: aton listing
 
 SRC = Convert HumAddress HumHash HumNum HumdrumFile HumdrumFileBase HumdrumFileContent HumdrumFileStructure HumdrumLine HumdrumToken
 
@@ -19,6 +19,17 @@ lines:
 		DIRNAME=`echo $$i | sed 's/.Makefile//'`;		\
 		(cd $$DIRNAME; $(MAKE) lines);				\
 	done
+
+
+listing:
+	@for i in [A-Z]*/Makefile;					\
+	do								\
+		echo Processing $$i;					\
+		DIRNAME=`echo $$i | sed 's/.Makefile//'`;		\
+		(cd $$DIRNAME; $(MAKE) listing);			\
+	done
+	(cd ../../_includes/docslot/; make)
+
 
 
 makefiles:

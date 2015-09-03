@@ -4,11 +4,14 @@
 @METHOD:	getParameterCount
 @ACCESS:	public
 @RETURN:	int            
-int            
-int            
+@RETURN:	int            
+@RETURN:	int            
 @PARAMETERS:	void
-const string& ns
-const string& ns1, const string& ns2
+@PARAMETERS:	const string& ns
+@PARAMETERS:	const string& ns1, const string& ns2
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		653-682
 @SHORTDESC:	Return a count of the parameters which are stored in the HumHash.

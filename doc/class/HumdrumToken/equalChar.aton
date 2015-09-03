@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	int index, char ch
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		68-88
 @SHORTDESC:	Returns true if the character at the given index is the given char.

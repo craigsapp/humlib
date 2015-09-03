@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	HumdrumLine*  
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		207-218
 @SHORTDESC:	return the HumdrumLine which owns the token associated with this address.

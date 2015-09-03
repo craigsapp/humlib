@@ -4,11 +4,13 @@
 @METHOD:	operator*
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	const HumNum& value
-int value
+@PARAMETERS:	int value
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		447-464
+@LINES:		459-476
 @SHORTDESC:	Multiplication operator to multiply two HumNums together or a HumNum and an integer.
 @LONGDESC:	Multiplication operator to multiply
 	two HumNums together or a HumNum and an integer.

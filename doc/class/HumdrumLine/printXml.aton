@@ -6,9 +6,9 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumLine.cpp
-@LINES:		898-912
-@SHORTDESC:	// HumdrumLine::printXml -- 
-@LONGDESC:	// HumdrumLine::printXml --
+@LINES:		1024-1137
+@SHORTDESC:	Print the HumdrumLine as a XML element.
+@LONGDESC:	Print the HumdrumLine as a XML element.
 	
 
 @@BEGIN: EXAMPLE
@@ -20,11 +20,110 @@
 @SRCCODE:
 
 ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
-	out << Convert::repeatString(indent, level) << "<line>\n";
-	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printXml(out, level+1, indent);
+
+	if (hasSpines()) {
+		out << Convert::repeatString(indent, level) << "<frame";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << ">\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<fieldCount>";
+		out << getTokenCount() << "</fieldCount>\n";
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameStart";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		out << Convert::repeatString(indent, level);
+		out << "<frameDuration";
+		out << Convert::getHumNumAttributes(getDuration());
+		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isData()) {
+			out << "data";
+		} else if (isBarline()) {
+			out << "barline";
+		} else if (isInterpretation()) {
+			out << "interpretation";
+		} else if (isLocalComment()) {
+			out << "local-comment";
+		}
+		out << "</frameType>\n";
+
+		if (isBarline()) {
+			// print the duration to the next barline or to the end of the score
+			// if there is no barline at the end of the score.
+			out << Convert::repeatString(indent, level);
+			out << "<barlineDuration";
+			out << Convert::getHumNumAttributes(getBarlineDuration());
+			out << "/>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
+
+		out << Convert::repeatString(indent, level) << "<fields>\n";
+		level++;
+		for (int i=0; i<getFieldCount(); i++) {
+			token(i).printXml(out, level, indent);
+		}
+		level--;
+		out << Convert::repeatString(indent, level) << "</fields>\n";
+		
+		level--;
+		out << Convert::repeatString(indent, level) << "</frame>\n";
+
+	} else {
+		// global comments, reference records, or blank lines print here.
+		out << Convert::repeatString(indent, level) << "<metaFrame";
+		out << " n=\"" << getLineIndex() << "\"";
+		out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+		out << " xml:id=\"" << getXmlId() << "\"";
+		out << "/>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		level++;
+
+		out << Convert::repeatString(indent, level);
+		out << "<startTime";
+		out << Convert::getHumNumAttributes(getDurationFromStart());
+		out << "/>\n";
+
+		out << Convert::repeatString(indent, level) << "<frameType>";
+		if (isReference()) {
+			out << "reference";
+		} else if (isBlank()) {
+			out << "empty";
+		} else {
+			out << "global-comment";
+		}
+		out << "</frameType>\n";
+
+		if (isReference()) {
+			out << Convert::repeatString(indent, level);
+			out << "<referenceKey>" << Convert::encodeXml(getReferenceKey());
+			out << "</referenceKey>\n";
+
+			out << Convert::repeatString(indent, level);
+			out << "<referenceValue>" << Convert::encodeXml(getReferenceValue());
+			out << "</referenceValue>\n";
+		}
+
+		level--;
+		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+
+
+		level--;
+		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
 	}
-	out << Convert::repeatString(indent, level) << "</line>\n";
+
 	return out;
 }
 

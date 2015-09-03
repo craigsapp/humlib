@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		146-156
+@LINES:		147-157
 @SHORTDESC:	Returns true if the first character in the string is '!'.
 @LONGDESC:	Returns true if the first character
 	in the string is '!'. Could be local, global, or a reference record.

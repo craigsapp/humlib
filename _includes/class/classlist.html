@@ -39,6 +39,7 @@ window.addEventListener('DOMContentLoaded', function(event) {
    list = [   // START_DOCLIST(HumdrumToken)
 	'HumdrumToken',
 	'equalChar',
+	'getBarlineDuration',
 	'getDataType',
 	'getDuration',
 	'getDurationFromStart',
@@ -62,6 +63,8 @@ window.addEventListener('DOMContentLoaded', function(event) {
 	'getSubtrack',
 	'getTrack',
 	'getTrackString',
+	'getXmlId',
+	'getXmlIdPrefix',
 	'hasRhythm',
 	'isAddInterpretation',
 	'isBarline',
@@ -73,13 +76,17 @@ window.addEventListener('DOMContentLoaded', function(event) {
 	'isManipulator',
 	'isMergeInterpretation',
 	'isNonNullData',
+	'isNote',
 	'isNull',
 	'isNullData',
+	'isRest',
 	'isSplitInterpretation',
 	'isTerminateInterpretation',
 	'printCSV',
+	'printXml',
 	'setParameters'
    ];   // END_DOCLIST(HumdrumToken)
+
 
 
 
@@ -102,6 +109,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'HumdrumLine',
 	'createLineFromTokens',
 	'equalChar',
+	'getBarlineDuration',
 	'getBeat',
 	'getChar',
 	'getDuration',
@@ -111,10 +119,14 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getDurationToEnd',
 	'getLineIndex',
 	'getLineNumber',
+	'getReferenceKey',
+	'getReferenceValue',
 	'getTokenCount',
 	'getTokenString',
 	'getTokens',
 	'getTrackStart',
+	'getXmlId',
+	'getXmlIdPrefix',
 	'hasSpines',
 	'isAllNull',
 	'isAllRhythmicNull',
@@ -127,15 +139,18 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'isExclusive',
 	'isInterp',
 	'isManipulator',
+	'isReference',
 	'isTerminator',
 	'printCSV',
 	'printDataTypeInfo',
 	'printDurationInfo',
 	'printSpineInfo',
 	'printTrackInfo',
+	'printXml',
 	'setLineFromCSV',
 	'token'
    ];   // END_DOCLIST(HumdrumLine)
+
 
 
 
@@ -154,8 +169,10 @@ Manages the content of a Humdrum file line.
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFile)
-	'HumdrumFile'
+	'HumdrumFile',
+	'printXml'
    ];   // END_DOCLIST(HumdrumFile)
+
 
 
 
@@ -173,8 +190,9 @@ Main interface for Humdrum file parsing classes.
 <script>
 window.addEventListener("DOMContentLoaded", function(event) {
    list = [   // START_DOCLIST(HumdrumFileContent)
-	'HumdrumFileContent'
+	'@INDEXED:	yes'
    ];   // END_DOCLIST(HumdrumFileContent)
+
 
 
 
@@ -216,6 +234,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
    addClassListContent("HumdrumFileStructure", list);
 });
 </script>
@@ -238,17 +257,20 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackEndCount',
 	'getTrackSeq',
 	'getTrackStart',
+	'getXmlIdPrefix',
 	'operator[]',
-	'printCSV',
+	'printCsv',
 	'printDataTypeInfo',
 	'printSpineInfo',
 	'printTrackInfo',
 	'read',
-	'readCSV',
+	'readCsv',
 	'readString',
-	'readStringCSV',
+	'readStringCsv',
+	'setXmlIdPrefix',
 	'token'
    ];   // END_DOCLIST(HumdrumFileBase)
+
 
 
 
@@ -276,6 +298,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getFloat',
 	'getInteger',
 	'getNumerator',
+	'getRemainder',
 	'isFinite',
 	'isInfinite',
 	'isInteger',
@@ -313,6 +336,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
    addClassListContent("HumNum", list);
 });
 </script>
@@ -338,6 +362,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getTrackString',
 	'hasOwner'
    ];   // END_DOCLIST(HumAddress)
+
 
 
 
@@ -377,6 +402,7 @@ window.addEventListener("DOMContentLoaded", function(event) {
 
 
 
+
    addClassListContent("HumHash", list);
 });
 </script>
@@ -393,15 +419,22 @@ window.addEventListener("DOMContentLoaded", function(event) {
 	'getGcd',
 	'getLcm',
 	'kernToAccidentalCount',
+	'kernToBase12',
+	'kernToBase12PC',
+	'kernToBase40',
+	'kernToBase40PC',
+	'kernToBase7',
 	'kernToDiatonicLC',
 	'kernToDiatonicPC',
 	'kernToDiatonicUC',
+	'kernToMidiNoteNumber',
 	'kernToOctaveNumber',
 	'kernToScientificPitch',
 	'recipToDuration',
 	'replaceOccurrences',
 	'splitString'
    ];   // END_DOCLIST(Convert)
+
 
 
 

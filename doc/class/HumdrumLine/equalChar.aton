@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	int index, char ch
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		124-144
+@LINES:		125-145
 @SHORTDESC:	return true if the character at the given index is the given char.
 @LONGDESC:	return true if the character at the given
 	index is the given char.

@@ -3,10 +3,9 @@
 @CLASSNAME:	HumdrumFileBase
 @METHOD:	HumdrumFileBase
 @ACCESS:	public
-@RETURN:	
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		28-38
+@LINES:		27-37
 @SHORTDESC:	HumdrumFileBase constructor.
 @LONGDESC:	HumdrumFileBase constructor.
 	

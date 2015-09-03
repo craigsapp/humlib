@@ -6,6 +6,7 @@
 @ACCESS:	public
 @RETURN:	vector<HumdrumToken*> 
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		367-378
 @SHORTDESC:	Returns a list of the next tokens in the spine after this token.

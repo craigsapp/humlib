@@ -4,11 +4,11 @@
 @METHOD:	deleteValue
 @ACCESS:	public
 @RETURN:	void           
-void           
-void           
+@RETURN:	void           
+@RETURN:	void           
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
 @LINES:		765-786
 @SHORTDESC:	Delete the given parameter key from the HumHash object.

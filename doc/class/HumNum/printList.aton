@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		795-807
+@LINES:		807-819
 @SHORTDESC:	Print as a list of two numbers, such as "(1, 2)" for 1/2.
 @LONGDESC:	Print as a list of two numbers, such as
 	"(1, 2)" for 1/2.

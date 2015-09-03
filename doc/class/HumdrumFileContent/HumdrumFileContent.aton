@@ -3,7 +3,6 @@
 @CLASSNAME:	HumdrumFileContent
 @METHOD:	HumdrumFileContent
 @ACCESS:	public
-@RETURN:	
 @PARAMETERS:	void
 @FILE:		HumdrumFileContent.cpp
 @LINES:		20-29

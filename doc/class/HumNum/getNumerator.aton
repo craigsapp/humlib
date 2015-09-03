@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
 @LINES:		170-179
-@SHORTDESC:	Return the top integer in the fraction.
-@LONGDESC:	Return the top integer in the fraction.
+@SHORTDESC:	Returns the top integer in the fraction.
+@LONGDESC:	Returns the top integer in the fraction.
 	
 
 @@BEGIN: EXAMPLE

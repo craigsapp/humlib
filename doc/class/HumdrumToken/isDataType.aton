@@ -6,6 +6,7 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	string dtype
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		176-191
 @SHORTDESC:	Returns true if the data type of the token matches the test data type.

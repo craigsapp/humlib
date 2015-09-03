@@ -4,11 +4,14 @@
 @METHOD:	isDefined
 @ACCESS:	public
 @RETURN:	bool           
-bool           
-bool           
+@RETURN:	bool           
+@RETURN:	bool           
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		724-746
 @SHORTDESC:	Returns true if the given parameter exists in the map.

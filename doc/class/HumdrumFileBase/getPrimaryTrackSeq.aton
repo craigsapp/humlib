@@ -6,8 +6,7 @@
 @RETURN:	vector<HumdrumToken*>          
 @PARAMETERS:	int track, int options
 @FILE:		HumdrumFileBase.cpp
-@LINES:		351-430
-@SEEALSO:
+@LINES:		375-454
 @SHORTDESC:	Return a list of the given primary spine tokens for a given track (indexed starting at one and going through getMaxTrack().
 @LONGDESC:	Return a list of the
 	given primary spine tokens for a given track (indexed starting at
@@ -33,24 +32,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::getPrimaryTrackSeq -- Return a list of the
-//     given primary spine tokens for a given track (indexed starting at
-//     one and going through getMaxTrack().
-//
-// The following options are used for the getPrimaryTrackTokens.
-// * OPT_NONULLS    => don't include  null tokens in extracted list
-// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
-//                        but still keep ** and *0).
-// * OPT_NOGLOBALS  => don't include global records (global comments, reference
-//                        records, and empty lines). In other words, only return
-//                        a list of tokens from lines which hasSpines() it true.
-//
-// #define OPT_NONULLS  0x01
-// #define OPT_NOMANIP  0x02
-// #define OPT_NOGLOBAL 0x04
-//
 
 vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
 		int options) {
@@ -111,8 +92,6 @@ vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

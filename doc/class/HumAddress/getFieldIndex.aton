@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		79-89
 @SHORTDESC:	Returns the field index on the line of the token associated with the address.

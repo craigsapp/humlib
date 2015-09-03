@@ -6,8 +6,7 @@
 @RETURN:	HumdrumToken& 
 @PARAMETERS:	int lineindex, int fieldindex
 @FILE:		HumdrumFileBase.cpp
-@LINES:		280-292
-@SEEALSO:
+@LINES:		304-316
 @SHORTDESC:	Return the token at the given line/field index.
 @LONGDESC:	Return the token at the given line/field index.
 	
@@ -19,10 +18,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::token -- Return the token at the given line/field index.
-//
 
 HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
 	if (lineindex < 0) {
@@ -30,8 +25,6 @@ HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
 	}
 	return lines[lineindex]->token(fieldindex);
 }
-
-
 
 
 @@END:	FunctionDocumentation

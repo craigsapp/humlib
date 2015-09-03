@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	double   
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
 @LINES:		136-146
-@SHORTDESC:	Return the floating-point equivalent of the rational number.
-@LONGDESC:	Return the floating-point equivalent of the
+@SHORTDESC:	Returns the floating-point equivalent of the rational number.
+@LONGDESC:	Returns the floating-point equivalent of the
 	rational number.
 	
 

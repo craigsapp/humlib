@@ -5,9 +5,9 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	int track
+@QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		500-523
-@SEEALSO:
+@LINES:		524-547
 @SHORTDESC:	Return the number of ending tokens for the given track.
 @LONGDESC:	Return the number of ending tokens
 	for the given track.  Spines must start as a single exclusive 
@@ -24,15 +24,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::getTrackEndCount -- Return the number of ending tokens
-//    for the given track.  Spines must start as a single exclusive 
-//    interpretation token.  However, since spines may split and merge,
-//    it is possible that there are more than one termination points for a
-//    track.  This function returns the number of terminations which are
-//    present in a file for any given spine/track.
-//
 
 int HumdrumFileBase::getTrackEndCount(int track) const {
 	if (track < 0) {
@@ -46,8 +37,6 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 	}
 	return trackends[track].size();
 }
-
-
 
 
 @@END:	FunctionDocumentation

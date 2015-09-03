@@ -6,6 +6,7 @@
 @ACCESS:	public
 @RETURN:	const string& 
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		163-174
 @SHORTDESC:	Get the exclusive interpretation type for the token.

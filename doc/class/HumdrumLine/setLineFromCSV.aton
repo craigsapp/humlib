@@ -4,11 +4,11 @@
 @METHOD:	setLineFromCsv
 @ACCESS:	public
 @RETURN:	void     
-void     
+@RETURN:	void     
 @PARAMETERS:	const char* csv, const string& separator = ","
-const string& csv, const string& separator = ","
+@PARAMETERS:	const string& csv, const string& separator = ","
 @FILE:		HumdrumLine.cpp
-@LINES:		64-75
+@LINES:		65-76
 @SHORTDESC:	Read a HumdrumLine from a CSV line.
 @LONGDESC:	Read a HumdrumLine from a CSV line.
 	

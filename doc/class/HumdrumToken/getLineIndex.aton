@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		218-229
 @SHORTDESC:	Returns the line index of the owning HumdrumLine for this token.

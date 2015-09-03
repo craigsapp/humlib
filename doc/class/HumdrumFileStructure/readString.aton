@@ -4,9 +4,9 @@
 @METHOD:	readString
 @ACCESS:	public
 @RETURN:	bool          
-bool          
+@RETURN:	bool          
 @PARAMETERS:	const char* contents
-const string& contents
+@PARAMETERS:	const string& contents
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		115-128
 @SHORTDESC:	Read the contents from a string.

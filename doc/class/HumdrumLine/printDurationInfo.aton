@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		852-876
+@LINES:		978-1002
 @SHORTDESC:	Print the analyzed duration of each token in a file (for debugging).
 @LONGDESC:	Print the analyzed duration of each
 	token in a file (for debugging).  If a token has an undefined

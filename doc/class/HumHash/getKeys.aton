@@ -4,11 +4,14 @@
 @METHOD:	getKeys
 @ACCESS:	public
 @RETURN:	vector<string> 
-vector<string> 
-vector<string> 
+@RETURN:	vector<string> 
+@RETURN:	vector<string> 
 @PARAMETERS:	void
-const string& ns
-const string& ns1, const string& ns2
+@PARAMETERS:	const string& ns
+@PARAMETERS:	const string& ns1, const string& ns2
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		521-543
 @SHORTDESC:	Return a list of keys in a particular namespace combination.

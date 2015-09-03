@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		564-587
+@LINES:		623-646
 @SHORTDESC:	Returns true of the token start with "!", but not "!!" which is for global comments.
 @LONGDESC:	Returns true of the token start with "!",
 	but not "!!" which is for global comments.

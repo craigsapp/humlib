@@ -3,12 +3,9 @@
 @CLASSNAME:	HumdrumToken
 @METHOD:	HumdrumToken
 @ACCESS:	public
-@RETURN:	
-
-
 @PARAMETERS:	void
-const char* token
-const string& token
+@PARAMETERS:	const char* token
+@PARAMETERS:	const string& token
 @FILE:		HumdrumToken.cpp
 @LINES:		37-47
 @SHORTDESC:	Constructor for HumdrumToken.

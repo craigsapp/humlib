@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		710-737
+@LINES:		836-863
 @SHORTDESC:	Print the spine state information of each token in a file.
 @LONGDESC:	Print the spine state information of
 	each token in a file.  Useful for debugging.  The spine info

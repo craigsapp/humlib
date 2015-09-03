@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	string   
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		205-216
 @SHORTDESC:	Returns the spine split/merge history for the token.

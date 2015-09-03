@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	const string& 
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		108-123
 @SHORTDESC:	Return the spine information for the token associated with the address.

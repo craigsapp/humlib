@@ -6,6 +6,7 @@
 @ACCESS:	public
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		347-365
 @SHORTDESC:	Returns the next token in the spine.

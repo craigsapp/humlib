@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		138-156
 @SHORTDESC:	The subtrack number of the given spine.

@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		181-191
+@LINES:		282-292
 @SHORTDESC:	Returns true if the first two characters are "**".
 @LONGDESC:	Returns true if the first two characters
 	are "**".

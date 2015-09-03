@@ -3,7 +3,6 @@
 @CLASSNAME:	HumHash
 @METHOD:	HumHash
 @ACCESS:	public
-@RETURN:	
 @PARAMETERS:	void
 @FILE:		HumHash.cpp
 @LINES:		115-125

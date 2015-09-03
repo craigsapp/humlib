@@ -1,18 +1,15 @@
 @@BEGIN:	FunctionDocumentation
 @INDEXED:	yes
 @CLASSNAME:	HumdrumFileBase
-@METHOD:	printCSV
+@METHOD:	printCsv
 @ACCESS:	public
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout, const string& separator = ","
 @FILE:		HumdrumFileBase.cpp
-@LINES:		200-216
-@SEEALSO:
+@LINES:		224-240
 @SHORTDESC:	print Humdrum file content in CSV format.
 @LONGDESC:	print Humdrum file content in
 	CSV format.
-	default value: out = std::cout
-	default value: separator = ","
 	
 
 @@BEGIN: EXAMPLE
@@ -22,23 +19,14 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::printCSV -- print Humdrum file content in
-//     CSV format.
-//        default value: out = std::cout
-//        default value: separator = ","
-//
 
-ostream& HumdrumFileBase::printCSV(ostream& out, 
+ostream& HumdrumFileBase::printCsv(ostream& out, 
 		const string& separator) {
 	for (int i=0; i<getLineCount(); i++) {
-		((*this)[i]).printCSV(out, separator);
+		((*this)[i]).printCsv(out, separator);
 	}
 	return out;
 }
-
-
 
 
 @@END:	FunctionDocumentation

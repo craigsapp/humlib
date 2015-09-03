@@ -4,13 +4,16 @@
 @METHOD:	operator-
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
-HumNum   
+@RETURN:	HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	void
-const HumNum& value
-int value
+@PARAMETERS:	const HumNum& value
+@PARAMETERS:	int value
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		408-426
+@LINES:		420-438
 @SHORTDESC:	Subtraction operator to subtract HumNums from each other and to subtrack integers from HumNums.
 @LONGDESC:	Subtraction operator to subtract
 	HumNums from each other and to subtrack integers from

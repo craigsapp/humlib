@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	double round = 0.0
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
 @LINES:		148-168
-@SHORTDESC:	Return the integral part of the fraction.
-@LONGDESC:	Return the integral part of the fraction.
+@SHORTDESC:	Returns the integral part of the fraction.
+@LONGDESC:	Returns the integral part of the fraction.
 	Default value: round = 0.0
 	Optional parameter is a rounding factor.
 	Examples:

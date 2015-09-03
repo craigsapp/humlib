@@ -4,11 +4,11 @@
 @METHOD:	operator/=
 @ACCESS:	public
 @RETURN:	HumNum&  
-HumNum&  
+@RETURN:	HumNum&  
 @PARAMETERS:	const HumNum& value
-int value
+@PARAMETERS:	int value
 @FILE:		HumNum.cpp
-@LINES:		581-591
+@LINES:		593-603
 @SHORTDESC:	Divide a HumNum by a HumNum or integer.
 @LONGDESC:	Divide a HumNum by a HumNum or integer.
 	

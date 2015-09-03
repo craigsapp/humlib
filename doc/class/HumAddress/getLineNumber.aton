@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		68-77
 @SHORTDESC:	Similar to getLineIndex() but adds one.

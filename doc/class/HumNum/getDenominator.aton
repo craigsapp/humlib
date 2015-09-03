@@ -5,10 +5,11 @@
 @ACCESS:	public
 @RETURN:	int      
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
 @LINES:		181-190
-@SHORTDESC:	Return the bottom integer in the fraction.
-@LONGDESC:	Return the bottom integer in the fraction.
+@SHORTDESC:	Returns the bottom integer in the fraction.
+@LONGDESC:	Returns the bottom integer in the fraction.
 	
 
 @@BEGIN: EXAMPLE

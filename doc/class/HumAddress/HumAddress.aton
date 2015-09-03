@@ -3,7 +3,6 @@
 @CLASSNAME:	HumAddress
 @METHOD:	HumAddress
 @ACCESS:	public
-@RETURN:	
 @PARAMETERS:	void
 @FILE:		HumAddress.cpp
 @LINES:		20-33

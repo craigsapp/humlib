@@ -6,8 +6,7 @@
 @RETURN:	HumdrumLine&  
 @PARAMETERS:	int index
 @FILE:		HumdrumFileBase.cpp
-@LINES:		48-65
-@SEEALSO:
+@LINES:		72-89
 @SHORTDESC:	Access a Humdrum file line by and index.
 @LONGDESC:	Access a Humdrum file line by and index.
 	Negative values reference the end of the list of lines.
@@ -20,11 +19,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileBase::operator[] -- Access a Humdrum file line by and index.
-//    Negative values reference the end of the list of lines.
-//
 
 HumdrumLine& HumdrumFileBase::operator[](int index) {
 	if (index < 0) {
@@ -36,8 +30,6 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 	}
 	return *lines[index];
 }
-
-
 
 
 @@END:	FunctionDocumentation

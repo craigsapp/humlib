@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int track
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		425-439
+@LINES:		551-565
 @SHORTDESC:	Returns the starting exclusive interpretation for the given spine/track.
 @LONGDESC:	Returns the starting exclusive interpretation
 	for the given spine/track.

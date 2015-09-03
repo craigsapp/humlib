@@ -4,11 +4,13 @@
 @METHOD:	getBeat
 @ACCESS:	public
 @RETURN:	HumNum   
-HumNum   
+@RETURN:	HumNum   
 @PARAMETERS:	HumNum beatdur = "1"
-string beatrecip = "4"
+@PARAMETERS:	string beatrecip = "4"
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		471-489
+@LINES:		597-615
 @SHORTDESC:	Returns the beat number for the data on the current line given the input **recip representation for the duration of a beat.
 @LONGDESC:	Returns the beat number for the data on the
 	current line given the input **recip representation for the duration

@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, string separator = "_"
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		768-793
+@LINES:		780-805
 @SHORTDESC:	Print as an integer plus fractional remainder.
 @LONGDESC:	Print as an integer plus fractional 
 	remainder.  If absolute value is less than one, will only

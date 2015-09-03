@@ -5,6 +5,7 @@
 @ACCESS:	public
 @RETURN:	const HumdrumToken& 
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumAddress.cpp
 @LINES:		91-106
 @SHORTDESC:	Return the exclusive interpretation string of the token associated with the address.

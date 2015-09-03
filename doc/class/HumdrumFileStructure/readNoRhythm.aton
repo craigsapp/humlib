@@ -4,11 +4,11 @@
 @METHOD:	readNoRhythm
 @ACCESS:	public
 @RETURN:	bool          
-bool          
-bool          
+@RETURN:	bool          
+@RETURN:	bool          
 @PARAMETERS:	istream& contents
-const char* filename
-const string& filename
+@PARAMETERS:	const char* filename
+@PARAMETERS:	const string& filename
 @FILE:		HumdrumFileStructure.cpp
 @LINES:		182-192
 @SHORTDESC:	Similar to the read() functions, but does not parse rhythm (or parameters).

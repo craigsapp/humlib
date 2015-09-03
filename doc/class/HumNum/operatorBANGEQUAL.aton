@@ -4,13 +4,16 @@
 @METHOD:	operator!=
 @ACCESS:	public
 @RETURN:	bool     
-bool     
-bool     
+@RETURN:	bool     
+@RETURN:	bool     
 @PARAMETERS:	const HumNum& value
-double value
-int value
+@PARAMETERS:	double value
+@PARAMETERS:	int value
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumNum.cpp
-@LINES:		724-737
+@LINES:		736-749
 @SHORTDESC:	Inequality test for HumNums compared to other HumNums, integers or floats.
 @LONGDESC:	Inequality test for HumNums compared
 	to other HumNums, integers or floats.

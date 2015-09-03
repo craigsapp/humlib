@@ -4,12 +4,11 @@
 @METHOD:	append
 @ACCESS:	public
 @RETURN:	void          
-void          
+@RETURN:	void          
 @PARAMETERS:	const char* line
-const string& line
+@PARAMETERS:	const string& line
 @FILE:		HumdrumFileBase.cpp
-@LINES:		250-261
-@SEEALSO:
+@LINES:		274-285
 @SHORTDESC:	Add a line to the file's contents.
 @LONGDESC:	Add a line to the file's contents.  The file's
 	spine and rhythmic structure should be recalculated after an append.
@@ -22,18 +21,11 @@ const string& line
 @@END:	EXAMPLE
 
 @SRCCODE:
-////////////////////////////
-//
-// HumdrumFileBase::append -- Add a line to the file's contents.  The file's
-//    spine and rhythmic structure should be recalculated after an append.
-//
 
 void HumdrumFileBase::append(const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
 }
-
-
 
 
 @@END:	FunctionDocumentation

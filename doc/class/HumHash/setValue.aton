@@ -4,29 +4,29 @@
 @METHOD:	setValue
 @ACCESS:	public
 @RETURN:	void           
-void           
-void           
-void           
-void           
-void           
-void           
-void           
-void           
-void           
-void           
-void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
 @PARAMETERS:	const string& key, const string& value
-const string& ns2, const string& key, const string& value
-const string& ns1, const string& ns2, const string& key, const string& value
-const string& key, int value
-const string& ns2, const string& key, int value
-const string& ns1, const string& ns2, const string& key, int value
-const string& key, HumNum value
-const string& ns2, const string& key, HumNum value
-const string& ns1, const string& ns2, const string& key, HumNum value
-const string& key, double value
-const string& ns2, const string& key, double value
-const string& ns1, const string& ns2, const string& key, double value
+@PARAMETERS:	const string& ns2, const string& key, const string& value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, const string& value
+@PARAMETERS:	const string& key, int value
+@PARAMETERS:	const string& ns2, const string& key, int value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, int value
+@PARAMETERS:	const string& key, HumNum value
+@PARAMETERS:	const string& ns2, const string& key, HumNum value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, HumNum value
+@PARAMETERS:	const string& key, double value
+@PARAMETERS:	const string& ns2, const string& key, double value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, double value
 @FILE:		HumHash.cpp
 @LINES:		406-429
 @SHORTDESC:	Set the parameter to the given value, over-writing any previous value for the parameter.

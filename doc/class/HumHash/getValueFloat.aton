@@ -4,11 +4,14 @@
 @METHOD:	getValueFloat
 @ACCESS:	public
 @RETURN:	double         
-double         
-double         
+@RETURN:	double         
+@RETURN:	double         
 @PARAMETERS:	const string& key
-const string& ns2, const string& key
-const string& ns1, const string& ns2, const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
 @FILE:		HumHash.cpp
 @LINES:		303-328
 @SHORTDESC:	Return the floating-point interpretation of the value string.

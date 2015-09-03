@@ -5,8 +5,9 @@
 @ACCESS:	public
 @RETURN:	bool     
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		525-543
+@LINES:		551-569
 @SHORTDESC:	Returns true if the exclusive interpretation contains rhythmic data which will be used for analyzing the duration of a HumdrumFile, for example.
 @LONGDESC:	Returns true if the exclusive interpretation
 	contains rhythmic data which will be used for analyzing the
