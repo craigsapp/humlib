@@ -7,7 +7,6 @@
 @PARAMETERS:	string& source, const string& search, const string& replace
 @FILE:		Convert-string.cpp
 @LINES:		21-40
-@SEEALSO:
 @SHORTDESC:	Similar to s// regular expressions operator.
 @LONGDESC:	Similar to s// regular expressions
 	operator.  This function replaces the search string in the source
@@ -21,12 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.  This function replaces the search string in the source
-//    string with the replace string.
-//
 
 void Convert::replaceOccurrences(string& source, const string& search,
 		const string& replace) {
@@ -39,8 +32,6 @@ void Convert::replaceOccurrences(string& source, const string& search,
 		source.insert(loc, replace);
 	}
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -1,0 +1,44 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	getHumNumAttributes
+@ACCESS:	public
+@RETURN:	static string  
+@PARAMETERS:	const HumNum& num
+@FILE:		Convert-string.cpp
+@LINES:		106-131
+@SHORTDESC:	Returns XML attributes for a HumNum number.
+@LONGDESC:	Returns XML attributes for a HumNum
+	number.  First @float which gives the floating-point representation.
+	If the number has a fractional part, then also add @ratfrac with the
+	fractional representation of the non-integer portion number.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
+	}
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+

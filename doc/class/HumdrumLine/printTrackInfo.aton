@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumLine.cpp
-@LINES:		1172-1208
+@LINES:		1254-1290
 @SHORTDESC:	Print the analyzed track information.
 @LONGDESC:	Print the analyzed track information.
 	The first (left-most) spine in a Humdrum file is track 1, the

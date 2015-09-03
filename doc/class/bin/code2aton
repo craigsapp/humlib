@@ -24,7 +24,7 @@ my %returnvalues;
 my %parameterlist;
 my %documentation;
 my %qualifiers;
-my %alias;
+my %aliases;
 
 my @srclist = getSourceFiles($srcdir, $classname);
 
@@ -52,8 +52,12 @@ sub printAtonFile {
 	my @srcfiles = getSourceFiles($srcdir, $classname);
 	my $sourcefile = getSourceFile($function, @srcfiles);
 	my $ALIAS = "";
-	if ($alias{$function} !~ /^\s*$/) {
-		$ALIAS = "\@ALIAS:\t$alias{$function}\n";
+	if ($aliases{$function} !~ /^\s*$/) {
+		my @alist = split(/\n/, $aliases{$function});
+		for (my $i=0; $i<@alist; $i++) {
+			next if $alist[$i] =~ /^\s*$/;
+			$ALIAS .= "\@ALIAS:\t\t$alist[$i]\n";
+		}
 	}
 	next if $sourcefile =~ /\.h$/;
 	open (XFILE, "$srcdir/$sourcefile") or die "Cannot $srcdir/$sourcefile";
@@ -82,7 +86,7 @@ print FILE <<"EOT";
 EOT
 
 	if ($ALIAS !~ /^\s*$/) {
-
+		print FILE "$ALIAS";
 	}
 	if ($seealso !~ /^\s*$/) {
 		print FILE "\@SEEALSO:\t$seealso\n";
@@ -190,14 +194,14 @@ sub getClassInfo {
 		$increment = 0;
 		if ($line =~ s/\s*{.*};?\s*$//) {
 			$newfunction = $1;
-			$alias{$function} .= "\n$newfunction";
+			$aliases{$function} .= "\n$newfunction";
 			next;
 		} elsif ($line =~ /{/) {
 			$line .= " " . $contents[$i+1];
 			$line =~ s/\n/ /sg;
 			if ($line =~ s/\s*{.*};?\s*$//) {
 				$newfunction = $1;
-				$alias{$function} .= "\n$newfunction";
+				$aliases{$function} .= "\n$newfunction";
 				$i++;
 				next;
 			}
@@ -227,6 +231,14 @@ sub getClassInfo {
 				chomp $newline;
 				$line .= " $newline";
 			}
+			if ($line !~ /;/) {
+				while ($line !~ /}/) {
+					$i++;
+					$newline = $contents[$i];
+					chomp $newline;
+					$line .= " $newline";
+				}
+			}
 		}
 		$line =~ s/\s+/ /g;
 
@@ -246,8 +258,17 @@ sub getClassInfo {
 		$line =~ s/^\s*\)//;
 
 		if ($line !~ /^\s*$/) {
-			print "ERROR in parsing: $line\n";
-			next;
+			if ($line =~ /}/) {
+				$line =~ /return\s+([a-z0-9_]+)/i;
+				my $alias = $1;
+				print "ALIAS $function -> $alias\n";
+				$aliases{$alias} .= "$function\n";
+				next;
+			} else {
+				print "ERROR in parsing: $line\n";
+				print "PARAMETER $parameters\n";
+				next;
+			}
 		}
 
 		# print "FUNCTION: $function\n";
@@ -344,7 +365,7 @@ sub getSourceFile {
 			$xt =~ s/\+/\\+/g;
 			$xt =~ s/\*/\\*/g;
 			$xt =~ s/\[\]/\\[\\]/g;
-			if ($line =~ /\b$xt\b\s*\(/) {
+			if ($line =~ /\b$xt\s*\(/) {
 				return $file;
 			}
 		}
@@ -352,6 +373,7 @@ sub getSourceFile {
 
 	print "Cannot find $function in $classname files:\n";
 	print "Files:\t", join(" ", @srcfiles), "\n";
+	print "ALIASES: $aliases{$function}\n";
 	die;
 }
 

@@ -9,7 +9,7 @@
 @LINES:		96-122
 @SHORTDESC:	Convert a kern token into a diatonic note pitch-class.
 @LONGDESC:	Convert a kern token into a diatonic
-	note pitch-class.  "R" is returned if the note is rest, and 
+	note pitch-class.  "R" is returned if the note is rest, and
 	"X" is returned if there is no pitch name in the string.
 	Only the first subtoken in the string is considered.
 	

@@ -1,0 +1,33 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	isKernRest
+@ACCESS:	public
+@RETURN:	static bool 
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-kern.cpp
+@LINES:		21-35
+@SHORTDESC:	Returns true if the input string represents a **kern rest.
+@LONGDESC:	Returns true if the input string represents
+	a **kern rest.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool Convert::isKernRest(const string& kerndata) {
+	if (kerndata.find("r") != string::npos) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

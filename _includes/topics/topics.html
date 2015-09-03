@@ -1,4 +1,17 @@
 <script>
+// vim: ts=3
+
+document.addEventListener("keydown", function(event) {
+	switch (event.keyCode) {
+		case 49:
+			var details = document.querySelector('details[class^="topic-"]');
+			if (details.open) {
+				closeAllTopics();
+			} else {
+				openAllTopics();
+			}
+	}
+});
 
 document.addEventListener("DOMContentLoaded", function(event) {
 	checkAnchor();

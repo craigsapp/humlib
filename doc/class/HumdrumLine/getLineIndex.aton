@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		409-419
+@LINES:		469-479
 @SHORTDESC:	Returns the index number of the line in the HumdrumFileBase storage for the lines.
 @LONGDESC:	Returns the index number of the line in the
 	HumdrumFileBase storage for the lines.

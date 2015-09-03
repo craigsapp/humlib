@@ -7,7 +7,7 @@
 @PARAMETERS:	int track
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		551-565
+@LINES:		611-625
 @SHORTDESC:	Returns the starting exclusive interpretation for the given spine/track.
 @LONGDESC:	Returns the starting exclusive interpretation
 	for the given spine/track.

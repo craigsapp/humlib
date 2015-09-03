@@ -7,7 +7,6 @@
 @PARAMETERS:	const vector<int>& numbers
 @FILE:		Convert-math.cpp
 @LINES:		20-36
-@SEEALSO:
 @SHORTDESC:	Return the Least Common Multiple of a list of numbers.
 @LONGDESC:	Return the Least Common Multiple of a list of numbers.
 	
@@ -19,10 +18,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::getLcm -- Return the Least Common Multiple of a list of numbers.
-//
 
 int Convert::getLcm(const vector<int>& numbers) {
    if (numbers.size() == 0) {
@@ -34,8 +29,6 @@ int Convert::getLcm(const vector<int>& numbers) {
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

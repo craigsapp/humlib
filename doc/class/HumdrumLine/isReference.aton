@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		182-214
+@LINES:		242-274
 @SHORTDESC:	Returns true if a reference record.
 @LONGDESC:	Returns true if a reference record.
 	

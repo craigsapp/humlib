@@ -5,6 +5,7 @@ breadcrumbs: [
                 ['/doc', 'documentation'],
                 ['/doc/snippet', 'snippets'],
                 ['/doc/example', 'examples'],
+                ['/doc/topic', 'topics'],
                 ['/doc/class', 'classes']
         ]
 title: Classes in the minHumdrum library

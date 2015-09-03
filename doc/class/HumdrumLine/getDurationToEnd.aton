@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		507-522
+@LINES:		567-582
 @SHORTDESC:	Returns the duration from the start of the line to the end of the HumdrumFile which owns this HumdrumLine.
 @LONGDESC:	Returns the duration from the start of the
 	line to the end of the HumdrumFile which owns this HumdrumLine.  The

@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumLine.cpp
-@LINES:		1024-1137
+@LINES:		1084-1219
 @SHORTDESC:	Print the HumdrumLine as a XML element.
 @LONGDESC:	Print the HumdrumLine as a XML element.
 	
@@ -63,6 +63,28 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 			out << "<barlineDuration";
 			out << Convert::getHumNumAttributes(getBarlineDuration());
 			out << "/>\n";
+		}
+
+		bool bstart = isKernBoundaryStart();
+ 		bool bend   = isKernBoundaryEnd();
+		if (bstart || bend) {
+			out << Convert::repeatString(indent, level);
+			cout << "<kernBoundary";
+			cout << " start=\"";
+			if (bstart) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << " end=\"";
+			if (bend) {
+				cout << "true";
+			} else {
+				cout << "false";
+			}
+			cout << "\"";
+			cout << "/>\n";
 		}
 
 		level--;

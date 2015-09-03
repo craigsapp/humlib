@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		692-709
+@LINES:		752-769
 @SHORTDESC:	Returns true if no characters on line.
 @LONGDESC:	Returns true if no characters on line.  A blank line
 	is technically disallowed in the classic Humdrum Toolkit programs, but it

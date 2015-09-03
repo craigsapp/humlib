@@ -7,13 +7,11 @@
 @PARAMETERS:	const string& data, char separator = ' '
 @FILE:		Convert-string.cpp
 @LINES:		42-64
-@SEEALSO:
-@SHORTDESC:	split a string into a list of strings separated by the given character.
-@LONGDESC:	split a string into a list of strings
+@SHORTDESC:	Splits a string into a list of strings separated by the given character.
+@LONGDESC:	Splits a string into a list of strings
 	separated by the given character.  Empty strings will be generated
 	if the separator occurs at the start/end of the input string, and
 	if two or more separates are adjacent to each other.
-	default value: separator = ' ';
 	
 
 @@BEGIN: EXAMPLE
@@ -23,14 +21,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::splitString -- split a string into a list of strings
-//   separated by the given character.  Empty strings will be generated
-//   if the separator occurs at the start/end of the input string, and
-//   if two or more separates are adjacent to each other.
-//		default value: separator = ' ';
-//
 
 vector<string> Convert::splitString(const string& data, char separator) {
 	stringstream ss(data);
@@ -44,8 +34,6 @@ vector<string> Convert::splitString(const string& data, char separator) {
 	}
 	return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

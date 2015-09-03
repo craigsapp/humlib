@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		432-444
+@LINES:		492-504
 @SHORTDESC:	Get the duration of the line.
 @LONGDESC:	Get the duration of the line.  The duration will
 	be negative one if rhythmic analysis in HumdrumFileStructure has not been

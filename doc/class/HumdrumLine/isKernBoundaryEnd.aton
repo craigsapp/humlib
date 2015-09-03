@@ -1,0 +1,54 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	isKernBoundaryEnd
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		171-205
+@SHORTDESC:	Return true if the next data line contains no null tokens in the **kern spines.
+@LONGDESC:	Return true if the next
+	data line contains no null tokens in the **kern spines.
+	Assuming that a **kern spine split always starts with
+	a non-null token.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumLine::isKernBoundaryEnd(void) const {
+	if (!isData()) {
+		return false;
+	}
+	HumdrumToken* ntok;
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		ntok = token(i).getNextToken();
+		if (ntok == NULL) {
+			continue;
+		}
+		while ((ntok != NULL) && !ntok->isData()) {
+			ntok = ntok->getNextToken();
+		}
+		if (ntok == NULL) {
+			continue;
+		}
+		if (ntok->isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+@@END:	FunctionDocumentation
+

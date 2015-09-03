@@ -1,0 +1,54 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	pitchToWbh
+@ACCESS:	public
+@RETURN:	static int     
+@PARAMETERS:	int dpc, int acc, int octave, int maxacc
+@FILE:		Convert-pitch.cpp
+@LINES:		327-362
+@SHORTDESC:	Convert a given diatonic pitch class and accidental adjustment to an integer.
+@LONGDESC:	Convert a given diatonic pitch class and
+	accidental adjustment to an integer.  The diatonic pitch class
+	is C=0, D=1, E=2, F=3, G=4, A=5, B=6. "acc" is the accidental
+	count: -2=double flat, -1=double flat, 0 natural, +1=sharp, etc.
+	"octave" is the octave number, with middle-C being the start of
+	octave 4.  //   "maxacc" is the maximum accidental which defines
+	the base:
+	maxacc = 2 -> Base-40.
+	maxacc = n -> Base (n*2+1)*7 + 5.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
+	if (dpc > 6) {
+		// allow for pitch-classes as ASCII characters:
+		dpc = std::tolower(dpc) - 'a' + 5;
+		dpc = dpc % 7;
+	}
+	int output = -1000;
+	switch (dpc) {
+		case 0: output = 0;
+		case 1: output =  2 * maxacc + 2;
+		case 2: output =  4 * maxacc + 4;
+		case 3: output =  6 * maxacc + 4;
+		case 4: output =  8 * maxacc + 6;
+		case 5: output = 10 * maxacc + 8;
+		case 6: output = 12 * maxacc + 8;
+	}
+	if (output < 0) {
+		return output;
+	}
+	return (output + acc) * octave + maxacc;
+}
+
+
+@@END:	FunctionDocumentation
+

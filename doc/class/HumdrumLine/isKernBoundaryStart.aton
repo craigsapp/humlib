@@ -1,0 +1,42 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	isKernBoundaryStart
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		147-169
+@SHORTDESC:	Return true if the line does not have any null tokens in **kern data which refer to data tokens above the line.
+@LONGDESC:	Return true if the 
+	line does not have any null tokens in **kern data which
+	refer to data tokens above the line.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumLine::isKernBoundaryStart(void) const {
+	if (!isData()) {
+		return false;
+	}
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i).isDataType("**kern")) {
+			continue;
+		}
+		if (token(i).isNull()) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+@@END:	FunctionDocumentation
+

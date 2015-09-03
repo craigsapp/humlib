@@ -69,7 +69,7 @@ sub printClassListContents {
       $item =~ s/BANG/!/g;
       $item =~ s/PLUS/+/g;
       $item =~ s/STAR/*/g;
-      $item =~ s/DASH/&ndash;/g;
+      $item =~ s/DASH/-/g;
       $item =~ s/TILDE/~/g;
       $item =~ s/EQUALS/=/g;
       $item =~ s/EQUAL/=/g;

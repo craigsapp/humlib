@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		451-465
+@LINES:		511-525
 @SHORTDESC:	Return the duration following a barline, or the duration of the previous barline in the data.
 @LONGDESC:	Return the duration following a barline,
 	or the duration of the previous barline in the data.

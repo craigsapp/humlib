@@ -7,7 +7,6 @@
 @PARAMETERS:	int a, int b
 @FILE:		Convert-math.cpp
 @LINES:		38-53
-@SEEALSO:
 @SHORTDESC:	Return the Greatest Common Divisor of two numbers.
 @LONGDESC:	Return the Greatest Common Divisor of two numbers.
 	
@@ -19,10 +18,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// Convert::getGcd -- Return the Greatest Common Divisor of two numbers.
-//
 
 int Convert::getGcd(int a, int b) {
   if (b == 0) {
@@ -33,8 +28,6 @@ int Convert::getGcd(int a, int b) {
    int output = getGcd(a, c);
    return output;
 }
-
-
 
 
 @@END:	FunctionDocumentation

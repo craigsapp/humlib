@@ -2,13 +2,11 @@
 @INDEXED:	yes
 @CLASSNAME:	Convert
 @METHOD:	kernToScientificPitch
+@ALIAS:		kernToSciPitch
+@ALIAS:		kernToSP
 @ACCESS:	public
 @RETURN:	static string  
-@RETURN:	return 
-@RETURN:	return 
 @PARAMETERS:	const string& kerndata, string flat = "b", string sharp = "#", string separator = ""
-@PARAMETERS:	kerndata, flat, sharp, separator
-@PARAMETERS:	kerndata, flat, sharp, separator
 @FILE:		Convert-pitch.cpp
 @LINES:		23-63
 @SHORTDESC:	Convert a **kern pitch to ScientificPitch notation, which is the diatonic letter name, followed by a possible accidental, then an optional separator string, and finally the octave number.

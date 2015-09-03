@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		147-157
+@LINES:		207-217
 @SHORTDESC:	Returns true if the first character in the string is '!'.
 @LONGDESC:	Returns true if the first character
 	in the string is '!'. Could be local, global, or a reference record.

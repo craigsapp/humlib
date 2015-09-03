@@ -1,0 +1,42 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	encodeXml
+@ACCESS:	public
+@RETURN:	static string  
+@PARAMETERS:	const string& input
+@FILE:		Convert-string.cpp
+@LINES:		81-104
+@SHORTDESC:	Encode a string for XML printing.
+@LONGDESC:	Encode a string for XML printing.  Ampersands
+	get converted to &amp;, < to &lt; > to &gt;, " to &quot; and 
+	' to &apos;.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string Convert::encodeXml(const string& input) {
+	string output;
+	output.reserve(input.size()*2);
+	for (int i=0; i<input.size(); i++) {
+		switch (input[i]) {
+			case '&':  output += "&amp;";   break;
+			case '<':  output += "&lt;";    break;
+			case '>':  output += "&gt;";    break;
+			case '"':  output += "&quot;";  break;
+			case '\'': output += "&apos;";  break;
+			default:   output += input[i];
+		}
+	}
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+

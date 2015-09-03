@@ -1,0 +1,34 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	trimWhiteSpace
+@ACCESS:	public
+@RETURN:	static string  
+@PARAMETERS:	const string& input
+@FILE:		Convert-string.cpp
+@LINES:		133-148
+@SHORTDESC:	remove spaces, tabs and/or newlines from the beginning and end of input string.
+@LONGDESC:	remove spaces, tabs and/or newlines
+	from the beginning and end of input string.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+   s.erase(std::find_if(s.rbegin(), s.rend(), 
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+
+@@END:	FunctionDocumentation
+

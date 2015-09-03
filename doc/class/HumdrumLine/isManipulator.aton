@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		673-690
+@LINES:		733-750
 @SHORTDESC:	Returns true if any tokens on the line are manipulator interpretations.
 @LONGDESC:	Returns true if any tokens on the line are
 	manipulator interpretations.  Only null interpretations are allowed on

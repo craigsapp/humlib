@@ -91,12 +91,13 @@ window.addEventListener("DOMContentLoaded", function () {
 //
 
 document.addEventListener('keydown', function(event) {
-	if (!event.ctrlKey) {
-		return event;
-	}
+	//if (!event.ctrlKey) {
+	//	return event;
+	//}
 	const EqualsKey = 187;
 	const MinusKey  = 189;
 	const EKey      =  69;
+	const OneKey    =  49;
 	switch (event.keyCode) {
 		case EqualsKey:
 			if (typeof openAllDocumentation !== 'undefined') {
@@ -109,6 +110,7 @@ document.addEventListener('keydown', function(event) {
 			}
 			break;
 		case EKey:
+		case OneKey:
 				toggleAllExamplesDisplay();
 			break;
 	}
@@ -276,6 +278,7 @@ pre.output-example {
 				<span style="margin-left:0">
 				{{{LONGDESC}}}
 				</span>
+				{{{aliases ALIAS}}}
 				{{{showSeealso SEEALSO CLASSNAME}}}
 				{{{showExamples EXAMPLE}}}
 				{{{codeLink METHOD FILE LINES SRCCODE}}}
@@ -385,6 +388,12 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 	return output;
 });
 
+
+
+//////////////////////////////
+//
+// displaySourceBox --
+//
 
 function displaySourceBox (method, file) {
 	var target = document.querySelector("div#" + method + '_sourcebox');
@@ -509,6 +518,43 @@ function formatParameters(pstring) {
 	return output;
 }
 
+
+
+//////////////////////////////
+//
+// aliases -- Print any aliases for the function.
+//
+
+Handlebars.registerHelper('aliases', function (alist) {
+	if (typeof alist === 'undefined') {
+		return '';
+	}
+	var list = [];
+	if (alist instanceof Array) {
+		list = alist;
+	} else {
+		if (alist.match(/^\s*$/)) {
+			return '';
+		}
+		list.push(alist);
+	}
+
+	var output = '';
+	output += '<div style="text-indent:-35px">';
+	output += '<b>Alias';
+	if (list.length > 1) {
+		output += 'es';
+	}
+ 	output += '</b>: ';
+	for (var i=0; i<list.length; i++) {
+   	output += '<span class="function-name">' + list[i] + '</span>';
+		if (i < list.length - 1) {
+			output += ', ';
+		}
+	}
+	output += '</div>';
+	return output;
+});
 
 
 

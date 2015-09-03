@@ -1,0 +1,33 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	repeatString
+@ACCESS:	public
+@RETURN:	static string  
+@PARAMETERS:	const string& pattern, int count
+@FILE:		Convert-string.cpp
+@LINES:		66-80
+@SHORTDESC:	Returns a string which repeats the given pattern by the given count.
+@LONGDESC:	Returns a string which repeats the given
+	pattern by the given count.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+string Convert::repeatString(const string& pattern, int count) {
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pattern;
+	}
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+
