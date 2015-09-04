@@ -96,7 +96,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
-		void     setParameters             (const string& pdata);
+		void     setParameters             (const string& pdata, HumdrumToken* ptok = NULL);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");

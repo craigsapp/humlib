@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  4 01:14:48 PDT 2015
+// Last Modified: Fri Sep  4 12:54:44 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -586,7 +586,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
-		void     setParameters             (const string& pdata);
+		void     setParameters             (const string& pdata, HumdrumToken* ptok = NULL);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
