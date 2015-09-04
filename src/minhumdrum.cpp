@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep  3 18:42:40 PDT 2015
+// Last Modified: Fri Sep  4 01:14:48 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -345,6 +345,22 @@ void HumAddress::setSubtrackCount(int count) {
 
 
 
+////////////////////////////////
+//
+// HumParameter::HumParameter -- HumParameter constructor.
+//
+
+HumParameter::HumParameter(void) {
+	origin = NULL;
+}
+
+
+HumParameter::HumParameter(const string& str) : string(str) {
+	origin = NULL;
+}
+
+
+
 //////////////////////////////
 //
 // HumHash::HumHash -- HumHash constructor.  The data storage is empty
@@ -415,7 +431,6 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 	if (parameters == NULL) {
 		return "";
 	}
-
 	MapNNKV& p = *parameters;
 	auto it1 = p.find(ns1);
 	if (it1 == p.end()) {
@@ -1097,6 +1112,188 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 void HumHash::setPrefix(const string& value) {
 	prefix = value;
 
+}
+
+
+
+//////////////////////////////
+//
+// HumHash::setOrigin -- Set the source token for the parameter.
+//
+
+void HumHash::setOrigin(const string& key, HumdrumToken* tok) {
+	if (parameters == NULL) {
+		return;
+	} else {
+		vector<string> keys = getKeyList(key);
+		if (keys.size() == 1) {
+			setOrigin("", "", keys[0], tok);
+		} else if (keys.size() == 2) {
+			setOrigin("", keys[0], keys[1], tok);
+		} else {
+			setOrigin(keys[0], keys[1], keys[2], tok);
+		}
+	}
+}
+
+
+void HumHash::setOrigin(const string& key, HumdrumToken& tok) {
+	setOrigin(key, &tok);
+}
+
+
+void HumHash::setOrigin(const string& ns2, const string& key,
+		HumdrumToken* tok) {
+	if (parameters == NULL) {
+		return;
+	} else {
+		setOrigin("", ns2, key, tok);
+	}
+}
+
+
+void HumHash::setOrigin(const string& ns2, const string& key,
+		HumdrumToken& tok) {
+	setOrigin(ns2, key, &tok);
+}
+
+
+void HumHash::setOrigin(const string& ns1, const string& ns2,
+		const string& key, HumdrumToken* tok) { 
+	if (parameters == NULL) {
+		return;
+	}
+	MapNNKV& p = *parameters;
+	auto it1 = p.find(ns1);
+	if (it1 == p.end()) {
+		return;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return;
+	}
+	auto it3 = it2->second.find(key);
+	if (it3 == it2->second.end()) {
+		return;
+	}
+	it3->second.origin = tok;
+}
+
+
+void HumHash::setOrigin(const string& ns1, const string& ns2, 
+		const string& key, HumdrumToken& tok) {
+	setOrigin(ns1, ns2, key, &tok);
+}
+
+
+
+//////////////////////////////
+//
+// HumHash::getOrigin -- Get the source token for the parameter.
+//    Returns NULL if there is no origin.
+//
+
+HumdrumToken* HumHash::getOrigin(const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	} else {
+		vector<string> keys = getKeyList(key);
+		if (keys.size() == 1) {
+			return getOrigin("", "", keys[0]);
+		} else if (keys.size() == 2) {
+			return getOrigin("", keys[0], keys[1]);
+		} else {
+			return getOrigin(keys[0], keys[1], keys[2]);
+		}
+	}
+}
+
+
+HumdrumToken* HumHash::getOrigin(const string& ns2, const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	} else {
+		return getOrigin("", ns2, key);
+	}
+}
+
+
+HumdrumToken* HumHash::getOrigin(const string& ns1, const string& ns2, 
+		const string& key) const { 
+	if (parameters == NULL) {
+		return NULL;
+	}
+	MapNNKV& p = *parameters;
+	auto it1 = p.find(ns1);
+	if (it1 == p.end()) {
+		return NULL;
+	}
+	auto it2 = it1->second.find(ns2);
+	if (it2 == it1->second.end()) {
+		return NULL;
+	}
+	auto it3 = it2->second.find(key);
+	if (it3 == it2->second.end()) {
+		return NULL;
+	}
+	return it3->second.origin;
+}
+
+
+
+//////////////////////////////
+//
+// HumHash::printXml --
+//
+
+ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
+	if (parameters == NULL) {
+		return out;
+	}
+	if (parameters->size() == 0) {
+		return out;
+	}
+	
+	stringstream str;
+	bool found = 0;
+
+	level++;
+	for (auto& it1 : *(parameters)) {
+		if (it1.second.size() == 0) {
+			continue;
+		}
+		if (!found) {
+			found = 1;
+		}
+		str << Convert::repeatString(indent, level++);
+		str << "<namespace n=\"1\" name=\"" << it1.first << "\">\n";
+		for (auto& it2 : it1.second) {
+			if (it2.second.size() == 0) {
+				continue;
+			}
+
+			str << Convert::repeatString(indent, level++);
+			str << "<namespace n=\"2\" name=\"" << it2.first << "\">\n";
+
+			for (auto& it3 : it2.second) {
+				str << Convert::repeatString(indent, level);
+				str << "<parameter key=\"" << it3.first << "\"";
+				str << " value=\"";
+				str << Convert::encodeXml(it3.second) << "\"";
+				str << " idref=\"\"";
+				str << "/>\n";
+			}
+			str << Convert::repeatString(indent, --level) << "</namespace>\n";
+		}
+		str << Convert::repeatString(indent, --level) << "</namespace>\n";
+	}
+	if (found) {
+		str << Convert::repeatString(indent, --level) << "</parameters>\n";
+		out << Convert::repeatString(indent, level) << "<parameters>\n";
+		out << str.str();
+	}
+
+	return out;
 }
 
 
@@ -6814,6 +7011,7 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 
 ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
+	((HumHash)(*this)).printXml(out, level, indent);
 	return out;
 }
 

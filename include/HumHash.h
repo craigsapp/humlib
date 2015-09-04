@@ -111,12 +111,20 @@ using namespace std;
 namespace minHumdrum {
 
 class HumNum;
+class HumdrumToken;
 
 // START_MERGE
 
-typedef map<string, map<string, map<string, string> > > MapNNKV;
-typedef map<string, map<string, string> > MapNKV;
-typedef map<string, string> MapKV;
+class HumParameter : public string {
+	public:
+		HumParameter(void);
+		HumParameter(const string& str);
+		HumdrumToken* origin;
+};
+
+typedef map<string, map<string, map<string, HumParameter> > > MapNNKV;
+typedef map<string, map<string, HumParameter> > MapNKV;
+typedef map<string, HumParameter> MapKV;
 
 class HumHash {
 	public:
@@ -194,6 +202,30 @@ class HumHash {
 		int            getParameterCount   (const string& ns1,
 		                                    const string& ns2) const;
 		void           setPrefix           (const string& value);
+		ostream&       printXml            (ostream& out = cout, int level = 0,
+		                                    const string& indent = "\t");
+
+		void           setOrigin           (const string& key,
+		                                    HumdrumToken* tok);
+		void           setOrigin           (const string& key,
+		                                    HumdrumToken& tok);
+		void           setOrigin           (const string& ns2, const string& key,
+		                                    HumdrumToken* tok);
+		void           setOrigin           (const string& ns2, const string& key,
+		                                    HumdrumToken& tok);
+		void           setOrigin           (const string& ns1, const string& ns2,
+		                                    const string& parameter,
+		                                    HumdrumToken* tok);
+		void           setOrigin           (const string& ns1, const string& ns2, 
+		                                    const string& parameter,
+		                                    HumdrumToken& tok);
+
+		HumdrumToken*  getOrigin           (const string& key) const;
+		HumdrumToken*  getOrigin           (const string& ns2, 
+		                                    const string& key) const;
+		HumdrumToken*  getOrigin           (const string& ns1,
+		                                    const string& ns2,
+		                                    const string& parameter) const;
 
 	protected:
 		void           initializeParameters(void);

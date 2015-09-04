@@ -1182,6 +1182,7 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 
 ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
+	((HumHash)(*this)).printXml(out, level, indent);
 	return out;
 }
 
