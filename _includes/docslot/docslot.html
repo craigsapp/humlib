@@ -436,7 +436,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
    		output += '<span style="color:#159957; font-weight:500;">';
 			if (entry.RETURN instanceof Array) {
 				output += entry.RETURN[i];
-			} else {
+			} else if (entry.RETURN && (entry.RETURN !== 'undefined')) {
 				output += entry.RETURN;
 			}
 			output += ' ';
@@ -454,7 +454,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
    	output += '<span style="color:#159957; font-weight:500;">';
 		if (entry.RETURN instanceof Array) {
 			output += entry.RETURN[0];
-		} else {
+		} else if (entry.RETURN && (entry.RETURN !== 'undefined')) {
 			output += entry.RETURN;
 		}
 		output += ' ';
@@ -462,7 +462,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
    	output += '<span class="function-name">' + entry.METHOD + '</span>';
 		output += '</span>';
 		output += '(';
-		output += formatParameters(entry.PARAMETERS[i]);
+		output += formatParameters(entry.PARAMETERS);
 		output += ')';
 		if (entry.QUALIFIER) {
 			output += ' '+ entry.QUALIFIER;
@@ -474,6 +474,7 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 
    return output;
 });
+
 
 
 //////////////////////////////
@@ -496,7 +497,7 @@ function formatParameters(pstring) {
 	for (var i=0; i<plist.length; i++) {
 		if (matches = plist[i].match(/(.*)\s*(=.*)/)) {
 			var prestuff  = matches[1];
-			var poststuff = matches[1];
+			var poststuff = matches[2];
 		} else {
 			prestuff  = plist[i];
 			poststuff = "";
@@ -512,7 +513,10 @@ function formatParameters(pstring) {
 			output += ' <span class="variable-name">' + middlestuff + '</span>';
 		}
 		if (poststuff.length > 0) {
-			output += ' ' + poststuff;
+			output += poststuff;
+		}
+		if (i < plist.length-1) {
+			output += ",&nbsp;&nbsp;";
 		}
 	}
 	return output;
