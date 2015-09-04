@@ -7,7 +7,7 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Placeholder class to serve as interface to HumdrumFileBase, 
+// Description:   Placeholder class to serve as interface to HumdrumFileBase,
 //                HumdrumFileStructure and HumdrumFileContent.
 //
 

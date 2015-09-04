@@ -84,7 +84,7 @@ class HumAddress {
 		// on the owning HumdrumLine (in the same track).  The subtrack range
 		// is from 1 (if there is only a primary spine), to a larger number.
 		// if subtrackcount is 0, then the variable is not set, or there are
-      // no tokens in the track (such as for global comments).
+		// no tokens in the track (such as for global comments).
 		int subtrackcount;
 
 		// owner: This is the line which manages the given token.

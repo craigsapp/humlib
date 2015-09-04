@@ -45,7 +45,8 @@ class HumNum {
 		double   getFloat           (void) const;
 		double   toFloat  (void) const { return getFloat(); }
 		int      getInteger         (double round = 0.0) const;
-		int      toInteger (double round = 0.0) const { return getInteger(round); }
+		int      toInteger (double round = 0.0) const { 
+		                                            return getInteger(round); }
 		int      getNumerator       (void) const;
 		int      getDenominator     (void) const;
 		HumNum   getRemainder       (void) const;

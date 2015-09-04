@@ -37,7 +37,7 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::~HumdrumFileStructure -- HumdrumFileStructure 
+// HumdrumFileStructure::~HumdrumFileStructure -- HumdrumFileStructure
 //     deconstructor.
 //
 
@@ -170,12 +170,12 @@ bool HumdrumFileStructure::readStringCsv(const string& contents,
 
 
 bool HumdrumFileStructure::analyzeStructure(void) {
-   if (!analyzeGlobalParameters() ) { return false; }
-   if (!analyzeLocalParameters()  ) { return false; }
-   if (!analyzeTokenDurations()   ) { return false; }
-   if (!analyzeRhythm()           ) { return false; }
-   if (!analyzeDurationsOfNonRhythmicSpines()) { return false; }
-   return true;
+	if (!analyzeGlobalParameters() ) { return false; }
+	if (!analyzeLocalParameters()  ) { return false; }
+	if (!analyzeTokenDurations()   ) { return false; }
+	if (!analyzeRhythm()           ) { return false; }
+	if (!analyzeDurationsOfNonRhythmicSpines()) { return false; }
+	return true;
 }
 
 
@@ -272,7 +272,7 @@ bool HumdrumFileStructure::readStringNoRhythmCsv(const string& contents,
 // HumdrumFileStructure::getScoreDuration -- Return the total duration
 //    of the score in quarter note units.  Returns zero if no lines in the
 //    file, or -1 if there are lines, but no rhythmic analysis has been done.
-// 
+//
 
 HumNum HumdrumFileStructure::getScoreDuration(void) const {
 	if (lines.size() == 0) {
@@ -290,7 +290,7 @@ HumNum HumdrumFileStructure::getScoreDuration(void) const {
 //    subdivisions.  This value is needed to convert Humdrum data into
 //    MIDI file data, MuseData, and MusicXML data.  Also useful for timebase
 //    type of operations on the data and describing the durations in terms
-//    of integers rather than with fractions.  This function will also 
+//    of integers rather than with fractions.  This function will also
 //    consider the implicit durations of non-rhythmic spine data.
 //
 
@@ -353,7 +353,7 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 //
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
-//   list.  If the first barline is a pickup measure, then the returned 
+//   list.  If the first barline is a pickup measure, then the returned
 //   HumdrumLine* will not be an actual barline line.
 //
 
@@ -739,7 +739,7 @@ bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
 //
 
 bool HumdrumFileStructure::cleanDurs(vector<HumNum>& durs, int line) {
-	bool zero 		= false;
+	bool zero     = false;
 	bool positive = false;
 	for (int i=0; i<(int)durs.size(); i++) {
 		if      (durs[i].isPositive()) { positive = true; }
@@ -992,7 +992,7 @@ bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
 		if (dur.isNegative()) {
 			if (lines[i]->isData()) {
 				cerr << "Error: found an unexpected negative duration on line "
-			     	<< lines[i]->getDurationFromStart()<< endl;
+			        << lines[i]->getDurationFromStart()<< endl;
 				cerr << "Line: " << *lines[i] << endl;
 				return false;
 			} else {
@@ -1083,7 +1083,7 @@ void HumdrumFileStructure::assignLineDurations(void) {
 //
 // HumdrumFileStructure::assignDurationsToNonRhythmicTrack --  After the basic
 //   rhythmAnalysis has been done, go back and assign durations to non-rhythmic
-//   spine tokens based on the lineFromStart values of the lines that they 
+//   spine tokens based on the lineFromStart values of the lines that they
 //   occur on as well as the distance in the file to the next non-null token for
 //   that spine.
 //
@@ -1119,7 +1119,7 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::processLocalParametersForTrack --  Search for local 
+// HumdrumFileStructure::processLocalParametersForTrack --  Search for local
 //   parameters in each spine and fill in the HumHash for the token to which the
 //   parameter is to be applied.
 //

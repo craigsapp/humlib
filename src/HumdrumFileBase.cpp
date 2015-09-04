@@ -48,8 +48,8 @@ HumdrumFileBase::~HumdrumFileBase() { }
 
 //////////////////////////////
 //
-// HumdrumFileBase::setXmlIdPrefix -- Set the prefix for a HumdrumXML ID 
-//     atrribute.  The prefix should not start with a digit, nor have 
+// HumdrumFileBase::setXmlIdPrefix -- Set the prefix for a HumdrumXML ID
+//     atrribute.  The prefix should not start with a digit, nor have
 //     spaces in it.
 //
 
@@ -230,7 +230,7 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 // default value: separator = ","
 //
 
-ostream& HumdrumFileBase::printCsv(ostream& out, 
+ostream& HumdrumFileBase::printCsv(ostream& out,
 		const string& separator) {
 	for (int i=0; i<getLineCount(); i++) {
 		((*this)[i]).printCsv(out, separator);
@@ -243,8 +243,8 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 //////////////////////////////
 //
 // HumdrumFileBase::analyzeTokens -- Generate token array from
-//    current contents of the lines.  If either tokens or the line 
-//    is changed, then the other state becomes invalid.  
+//    current contents of the lines.  If either tokens or the line
+//    is changed, then the other state becomes invalid.
 //    See createLinesFromTokens for regeneration of lines from tokens.
 //
 
@@ -318,7 +318,7 @@ HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getMaxTrack -- Returns the number of primary 
+// HumdrumFileBase::getMaxTrack -- Returns the number of primary
 //     spines in the data.
 //
 
@@ -330,7 +330,7 @@ int HumdrumFileBase::getMaxTrack(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::printSpineInfo -- Print the spine information for all 
+// HumdrumFileBase::printSpineInfo -- Print the spine information for all
 //    lines/tokens in file (for debugging).
 //
 
@@ -345,7 +345,7 @@ ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::printDataTypeInfo -- Print the data type for all 
+// HumdrumFileBase::printDataTypeInfo -- Print the data type for all
 //     spines in the file (for debugging).
 //
 
@@ -462,7 +462,7 @@ vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
 //    a track on all lines.
 //
 
-vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track, 
+vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 		int options) {
 	int nullQ    = (options & OPT_NONULLS);
 	int manipQ   = (options & OPT_NOMANIP);
@@ -489,7 +489,7 @@ vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 				if ((!nullQ) && infile[i].token(j).isNull()) {
 					continue;
 				} else if ((!manipQ) && infile[i].token(j).isManipulator() &&
-						(!infile[i].token(j).isTerminator()) && 
+						(!infile[i].token(j).isTerminator()) &&
 						(!infile[i].token(j).isExclusive())) {
 					continue;
 				}
@@ -525,7 +525,7 @@ HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
 //////////////////////////////
 //
 // HumdrumFileBase::getTrackEndCount -- Return the number of ending tokens
-//    for the given track.  Spines must start as a single exclusive 
+//    for the given track.  Spines must start as a single exclusive
 //    interpretation token.  However, since spines may split and merge,
 //    it is possible that there are more than one termination points for a
 //    track.  This function returns the number of terminations which are
@@ -550,7 +550,7 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 //////////////////////////////
 //
 // HumdrumFileBase::getTrackEnd -- Returns a pointer to the terminal manipulator
-//    token for the given track and subtrack.  Sub-tracks are indexed from 0 up 
+//    token for the given track and subtrack.  Sub-tracks are indexed from 0 up
 //    to but not including getTrackEndCount.
 //
 
@@ -580,7 +580,7 @@ HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::analyzeLines -- Store a line's index number in the 
+// HumdrumFileBase::analyzeLines -- Store a line's index number in the
 //    HumdrumFile within the HumdrumLine object at that index.
 //    Returns false if there was an error.
 //
@@ -795,7 +795,7 @@ bool HumdrumFileBase::analyzeSpines(void) {
 //////////////////////////////
 //
 // HumdrumFileBase::addToTrackStarts -- A starting exclusive interpretation was
-//    found, so store in the list of track starts.  The first index position 
+//    found, so store in the list of track starts.  The first index position
 //    in trackstarts is reserve for non-spine usage.
 //
 
@@ -1033,7 +1033,7 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 //
 // HumdurmFile::processNonNullDataTokensForTrackForward -- Helper function
 //    for analyzeNonNullDataTokens.  Given any token, this function tells
-//    you what is the previous non-null data token(s) in the spine after 
+//    you what is the previous non-null data token(s) in the spine after
 //    the given token.
 //
 
@@ -1097,8 +1097,8 @@ void HumdrumFileBase::addUniqueTokens(vector<HumdrumToken*>& target,
 
 //////////////////////////////
 //
-// operator<< -- Default method of printing HumdrumFiles.  This printing method 
-//    assumes that the HumdrumLine string is correct.  If a token is changed 
+// operator<< -- Default method of printing HumdrumFiles.  This printing method
+//    assumes that the HumdrumLine string is correct.  If a token is changed
 //    in the file, the HumdrumFileBase::createLinesFromTokens() before printing
 //    the contents of the line.
 //

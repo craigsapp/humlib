@@ -58,9 +58,9 @@ class HumdrumFileBase {
 		bool          readString                   (const char*   contents);
 		bool          readString                   (const string& contents);
 		bool          readStringCsv                (const char*   contents,
-                                                  const string& separator=",");
+		                                            const string& separator=",");
 		bool          readStringCsv                (const string& contents,
-                                                  const string& separator=",");
+		                                            const string& separator=",");
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
@@ -72,27 +72,27 @@ class HumdrumFileBase {
 		bool parseCsv(const string& contents, const string& separator = ",") {
 		                                       return readStringCsv(contents); }
 
-		void          setXmlIdPrefix               (const string& value);
-		string        getXmlIdPrefix               (void);
+		void          setXmlIdPrefix            (const string& value);
+		string        getXmlIdPrefix            (void);
 
-		HumdrumLine&  operator[]                   (int index);
-		int           getLineCount                 (void) const;
-		HumdrumToken& token                        (int lineindex, int fieldindex);
-		int           getMaxTrack                  (void) const;
+		HumdrumLine&  operator[]                (int index);
+		int           getLineCount              (void) const;
+		HumdrumToken& token                     (int lineindex, int fieldindex);
+		int           getMaxTrack               (void) const;
 		int           getMaxSpine   (void) const { return getMaxTrack(); }
-		ostream&      printSpineInfo               (ostream& out = cout);
-		ostream&      printDataTypeInfo            (ostream& out = cout);
-		ostream&      printTrackInfo               (ostream& out = cout);
+		ostream&      printSpineInfo            (ostream& out = cout);
+		ostream&      printDataTypeInfo         (ostream& out = cout);
+		ostream&      printTrackInfo            (ostream& out = cout);
 		ostream&      printCsv      (ostream& out = cout,
 		                             const string& separator = ",");
 
-		HumdrumToken* getTrackStart                (int track) const;
-		int           getTrackEndCount             (int track) const;
-		HumdrumToken* getTrackEnd                  (int track,
-		                                            int subtrack) const;
-		void          createLinesFromTokens        (void);
-		void          append                       (const char* line);
-		void          append                       (const string& line);
+		HumdrumToken* getTrackStart             (int track) const;
+		int           getTrackEndCount          (int track) const;
+		HumdrumToken* getTrackEnd               (int track,
+		                                         int subtrack) const;
+		void          createLinesFromTokens     (void);
+		void          append                    (const char* line);
+		void          append                    (const string& line);
 
 		// spine analysis functionality
 		vector<vector<HumdrumToken*> > getTrackSeq       (int track,
@@ -158,7 +158,7 @@ class HumdrumFileBase {
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
 		// to be shifted between HumdrumFileContent (the top-level default),
-      // HumdrumFileStructure (mid-level interface), or HumdrumFileBase
+		// HumdrumFileStructure (mid-level interface), or HumdrumFileBase
 		// (low-level interface).
 
 		//
@@ -180,8 +180,6 @@ class HumdrumFileBase {
 
 		// HumdrumFileContent public functions:
 
-
-	
 };
 
 ostream& operator<<(ostream& out, HumdrumFileBase& infile);

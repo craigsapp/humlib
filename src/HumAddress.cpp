@@ -158,7 +158,7 @@ int HumAddress::getSubtrack(void) const {
 
 //////////////////////////////
 //
-// HumAddress::getSubtrackCount -- The number of subtrack spines for a 
+// HumAddress::getSubtrackCount -- The number of subtrack spines for a
 //   given spine on the owning HumdurmLine.  Returns 0 if spine analysis
 //   has not been done, or if the line does not have spines (i.e., reference
 //   records, global comments and empty lines).

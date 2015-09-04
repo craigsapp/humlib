@@ -31,7 +31,7 @@
 //                   **kern         **kern
 //                   1e             2g
 //                   !LO:N:vis=1    !
-//							.              2a
+//                   .              2a
 //                   *              *clefG2
 //                   1c             1g
 //                   *-             *-
@@ -77,7 +77,7 @@
 //                 with two exclamation marks:
 //                   **kern         **kern
 //                   1e             2g
-//							.              2a
+//                   .              2a
 //                   !!LO:N:vis=4
 //                   1c             1g
 //                   *-             *-
@@ -86,7 +86,7 @@
 //                   **kern         **kern
 //                   1e             2g
 //                   !!LO:N:vis=4
-//							.              2a
+//                   .              2a
 //                   1c             1g
 //                   *-             *-
 //                  The parameter will apply to "1c", and "2a" rather than

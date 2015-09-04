@@ -7,7 +7,7 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Place-holder class to serve as interface to HumdrumFileBase, 
+// Description:   Place-holder class to serve as interface to HumdrumFileBase,
 //                HumdrumFileStructure and HumdrumFileContent.
 //
 
@@ -49,7 +49,7 @@ HumdrumFile::~HumdrumFile() {
 // default value: indent = tab character
 //
 
-ostream& HumdrumFile::printXml(ostream& out, int level, 
+ostream& HumdrumFile::printXml(ostream& out, int level,
 		const string& indent) {
 	out << Convert::repeatString(indent, level) << "<sequence>\n";
 	level++;

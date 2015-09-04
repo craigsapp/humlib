@@ -154,7 +154,7 @@ double HumNum::getFloat(void) const {
 //    Examples:
 //       8/5 | round=0.0 ==  1
 //      -8/5 | round=0.0 == -1
-//			8/5 | round=0.5 ==  1
+//       8/5 | round=0.5 ==  1
 //      -8/5 | round=0.5 == -1
 //
 
@@ -206,7 +206,7 @@ HumNum HumNum::getRemainder(void) const {
 // HumNum::setValue -- Set the number to the given integer.
 //    For the two-parameter version, set the top and bottom
 //    values for the number, reducing if necessary.  For the
-//    string version, parse an integer or fraction from the 
+//    string version, parse an integer or fraction from the
 //    string and reduce if necessary.
 //
 
@@ -404,7 +404,7 @@ HumNum HumNum::operator+(const HumNum& value) const {
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
-	int ao = a1*b2	+ a2 * b1;
+	int ao = a1*b2 + a2 * b1;
 	int bo = b1*b2;
 	HumNum output(ao, bo);
 	return output;
@@ -430,7 +430,7 @@ HumNum HumNum::operator-(const HumNum& value) const {
 	int b1  = getDenominator();
 	int a2  = value.getNumerator();
 	int b2  = value.getDenominator();
-	int ao = a1*b2	- a2*b1;
+	int ao = a1*b2 - a2*b1;
 	int bo = b1*b2;
 	HumNum output(ao, bo);
 	return output;
@@ -636,7 +636,7 @@ bool HumNum::operator<(double value) const {
 
 //////////////////////////////
 //
-// HumNum::operator<= -- Less-than-or-equal equality for a 
+// HumNum::operator<= -- Less-than-or-equal equality for a
 //     HumNum with a HumNum, integer or float.
 //
 
@@ -780,7 +780,7 @@ ostream& HumNum::printFraction(ostream& out) const {
 
 //////////////////////////////
 //
-// HumNum::printMixedFraction -- Print as an integer plus fractional 
+// HumNum::printMixedFraction -- Print as an integer plus fractional
 //     remainder.  If absolute value is less than one, will only
 //     print the fraction.  The second parameter is the output stream
 //     for printing, and the third parameter is a separation string
@@ -809,7 +809,7 @@ ostream& HumNum::printMixedFraction(ostream& out,
 //
 // HumNum::printList -- Print as a list of two numbers, such as
 //    "(1, 2)" for 1/2.
-//		default parameter: out = cout;
+// default value: out = cout;
 //
 
 ostream& HumNum::printList(ostream& out) const {

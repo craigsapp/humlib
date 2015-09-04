@@ -147,7 +147,7 @@ bool HumdrumLine::equalChar(int index, char ch) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isKernBoundaryStart -- Return true if the 
+// HumdrumLine::isKernBoundaryStart -- Return true if the
 //    line does not have any null tokens in **kern data which
 //    refer to data tokens above the line.
 //
@@ -224,7 +224,6 @@ bool HumdrumLine::isComment(void) const {
 
 bool HumdrumLine::isCommentLocal(void) const {
 	return equalChar(0, '!') && !equalChar(1, '!');
-
 }
 
 
@@ -269,7 +268,6 @@ bool HumdrumLine::isReference(void) const {
 		return false;
 	}
 	return true;
-
 }
 
 
@@ -413,8 +411,8 @@ bool HumdrumLine::isData(void) const {
 //////////////////////////////
 //
 // HumdrumLine::isAllNull -- Returns true if all tokens on the line
-//		are null ("." if a data line, "*" if an interpretation line, "!"
-//		if a local comment line).
+//    are null ("." if a data line, "*" if an interpretation line, "!"
+//    if a local comment line).
 //
 
 bool HumdrumLine::isAllNull(void) const {
@@ -510,7 +508,7 @@ HumNum HumdrumLine::getDuration(HumNum scale) const {
 
 
 //////////////////////////////
-// 
+//
 // HumdrumLine::getBarlineDuration -- Return the duration following a barline,
 //    or the duration of the previous barline in the data.
 //
@@ -585,7 +583,7 @@ HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
 	if (owner == NULL) {
 		return 0;
 	}
-	return scale * (((HumdrumFile*)owner)->getScoreDuration() -  
+	return scale * (((HumdrumFile*)owner)->getScoreDuration() -
 		durationFromStart);
 }
 
@@ -1134,7 +1132,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		}
 
 		bool bstart = isKernBoundaryStart();
- 		bool bend   = isKernBoundaryEnd();
+		bool bend   = isKernBoundaryEnd();
 		if (bstart || bend) {
 			out << Convert::repeatString(indent, level);
 			cout << "<kernBoundary";

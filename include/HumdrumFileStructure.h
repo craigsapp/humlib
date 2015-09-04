@@ -61,19 +61,19 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool parseCsv(istream& contents, const string& separator = ",")
 		                                 { return readCsv(contents, separator); }
 		bool parseCsv(const char* contents, const string& separator = ",")
-		                                 { return readStringCsv(contents, separator); }
+		                     { return readStringCsv(contents, separator); }
 		bool parseCsv(const string& contents, const string& separator = ",")
-		                                 { return readStringCsv(contents, separator); }
+		                     { return readStringCsv(contents, separator); }
 		bool          readNoRhythmCsv              (istream& contents,
-		                                            const string& separator = ",");
+		                     const string& separator = ",");
 		bool          readNoRhythmCsv              (const char*   filename,
-		                                            const string& separator = ",");
+		                     const string& separator = ",");
 		bool          readNoRhythmCsv              (const string& filename,
-		                                            const string& separator = ",");
+		                     const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const char*   contents,
-		                                            const string& separator = ",");
+		                     const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const string& contents,
-		                                            const string& separator = ",");
+		                     const string& separator = ",");
 
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
@@ -115,8 +115,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeNullLineRhythms       (void);
 		void          fillInNegativeStartTimes     (void);
 		void          assignLineDurations          (void);
-      set<HumNum>   getNonZeroLineDurations      (void);
-      set<HumNum>   getPositiveLineDurations     (void);
+		set<HumNum>   getNonZeroLineDurations      (void);
+		set<HumNum>   getPositiveLineDurations     (void);
 		bool          processLocalParametersForTrack (HumdrumToken* starttok,
 		                                            HumdrumToken* current);
 		void          checkForLocalParameters      (HumdrumToken *token,

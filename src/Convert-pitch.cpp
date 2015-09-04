@@ -29,10 +29,9 @@ namespace minHumdrum {
 //   string, and finally the octave number.  A string representing a
 //   chord can be given to this function, and the output will return
 //   a list of the pitches in the chord, separated by a space.
-//		default values:
-//			flat      = "b"
-//			sharp     = "#"
-//			separator = ""
+// default value: flat      = "b"
+// default value: sharp     = "#"
+// default value: separator = ""
 //
 
 string Convert::kernToScientificPitch(const string& kerndata,

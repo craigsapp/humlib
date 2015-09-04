@@ -82,7 +82,7 @@ string Convert::repeatString(const string& pattern, int count) {
 //////////////////////////////
 //
 // Convert::encodeXml -- Encode a string for XML printing.  Ampersands
-//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and 
+//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
 //    ' to &apos;.
 //
 
@@ -139,9 +139,9 @@ string Convert::getHumNumAttributes(const HumNum& num) {
 
 string Convert::trimWhiteSpace(const string& input) {
 	string s = input;
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), 
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
 			std::not1(std::ptr_fun<int, int>(std::isspace))));
-   s.erase(std::find_if(s.rbegin(), s.rend(), 
+	s.erase(std::find_if(s.rbegin(), s.rend(),
 			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 	return s;
 }

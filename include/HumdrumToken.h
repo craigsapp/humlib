@@ -44,7 +44,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isAddInterpretation       (void) const;
 
 		// alises for the above
-		bool     isExclusive     (void) const { 
+		bool     isExclusive     (void) const {
 		                                   return isExclusiveInterpretation(); }
 		bool     isExInterp      (void) const {
 		                                   return isExclusiveInterpretation(); }
@@ -98,7 +98,7 @@ class HumdrumToken : public string, public HumHash {
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata);
 		ostream& printCsv                  (ostream& out = cout);
-		ostream& printXml                  (ostream& out = cout, int level = 0, 
+		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
@@ -141,13 +141,13 @@ class HumdrumToken : public string, public HumHash {
 		void     setDuration       (const HumNum& dur);
 
 		bool     analyzeDuration   (void);
-		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0, 
+		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
-		ostream& printXmlContentInfo(ostream& out = cout, int level = 0, 
+		ostream& printXmlContentInfo(ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
-		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0, 
+		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
-		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0, 
+		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
 
 	private:

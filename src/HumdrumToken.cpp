@@ -943,8 +943,8 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 
 //////////////////////////////
 //
-// HumdrumToken::getOwner -- Returns a pointer to the HumdrumLine which owns this
-//    token.
+// HumdrumToken::getOwner -- Returns a pointer to the HumdrumLine that
+//    owns this token.
 //
 
 HumdrumLine* HumdrumToken::getOwner(void) const {
@@ -1085,7 +1085,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 		const string& indent) {
 
-   // <dataType> redundant with 
+	// <dataType> redundant with
 	// sequence/sequenceInfo/trackInfo/track@dataType
 	out << Convert::repeatString(indent, level);
 	out << "<dataType>" << getDataType().substr(2) << "</dataType>\n";
@@ -1106,7 +1106,7 @@ ostream& HumdrumToken::printXmlBaseInfo(ostream& out, int level,
 	}
 	out << "</tokenType>\n";
 
-   // <tokenFunction>
+	// <tokenFunction>
 	if (isDataType("**kern")) {
 		if (isNote()) {
 			out << Convert::repeatString(indent, level) << "<tokenFunction>";
@@ -1189,11 +1189,11 @@ ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 
 //////////////////////////////
 //
-// HumdrumToken::getXmlId -- Return an XML id attribute based on the line 
+// HumdrumToken::getXmlId -- Return an XML id attribute based on the line
 //     and field index for the location of the token in the HumdrumFile.
 //     An optional parameter for a prefix can be given.  If this parameter
 //     is an empty string, then the prefix set in the owning HumdrumFile
-//     will instead be used.  The prefix cannot start with a digit, and 
+//     will instead be used.  The prefix cannot start with a digit, and
 //     should not include a space charcter.
 //
 

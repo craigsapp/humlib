@@ -70,7 +70,7 @@ class HumdrumLine : public string, public HumHash {
 		ostream& printDurationInfo      (ostream& out = cout);
 		ostream& printCsv               (ostream& out = cout,
 		                                 const string& separator = ",");
-		ostream& printXml               (ostream& out = cout, int level = 0, 
+		ostream& printXml               (ostream& out = cout, int level = 0,
 		                                 const string& indent = "\t");
 		string   getXmlId               (const string& prefix = "") const;
 		string   getXmlIdPrefix         (void) const;
@@ -95,7 +95,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
 		HumdrumToken* getTrackStart     (int track) const;
-		void     setLineFromCsv         (const char* csv, 
+		void     setLineFromCsv         (const char* csv,
 		                                 const string& separator = ",");
 		void     setLineFromCsv         (const string& csv,
 		                                 const string& separator = ",");

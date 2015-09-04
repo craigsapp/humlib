@@ -24,7 +24,7 @@ namespace minHumdrum {
 //
 
 int Convert::getLcm(const vector<int>& numbers) {
-   if (numbers.size() == 0) {
+	if (numbers.size() == 0) {
 		return 1;
 	}
 	int output = numbers[0];
@@ -42,13 +42,13 @@ int Convert::getLcm(const vector<int>& numbers) {
 //
 
 int Convert::getGcd(int a, int b) {
-  if (b == 0) {
-      return a;
-   }
-   int c = a % b;
-   a = b;
-   int output = getGcd(a, c);
-   return output;
+	if (b == 0) {
+		return a;
+	}
+	int c = a % b;
+	a = b;
+	int output = getGcd(a, c);
+	return output;
 }
 
 
