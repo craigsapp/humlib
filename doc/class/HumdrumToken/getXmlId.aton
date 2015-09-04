@@ -7,13 +7,13 @@
 @PARAMETERS:	const string& prefix = ""
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		1189-1212
+@LINES:		1190-1213
 @SHORTDESC:	Return an XML id attribute based on the line and field index for the location of the token in the HumdrumFile.
-@LONGDESC:	Return an XML id attribute based on the line 
+@LONGDESC:	Return an XML id attribute based on the line
 	and field index for the location of the token in the HumdrumFile.
 	An optional parameter for a prefix can be given.  If this parameter
 	is an empty string, then the prefix set in the owning HumdrumFile
-	will instead be used.  The prefix cannot start with a digit, and 
+	will instead be used.  The prefix cannot start with a digit, and
 	should not include a space charcter.
 	
 

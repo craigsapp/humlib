@@ -8,9 +8,9 @@
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
 @LINES:		943-953
-@SHORTDESC:	Returns a pointer to the HumdrumLine which owns this token.
-@LONGDESC:	Returns a pointer to the HumdrumLine which owns this
-	token.
+@SHORTDESC:	Returns a pointer to the HumdrumLine that owns this token.
+@LONGDESC:	Returns a pointer to the HumdrumLine that
+	owns this token.
 	
 
 @@BEGIN: EXAMPLE

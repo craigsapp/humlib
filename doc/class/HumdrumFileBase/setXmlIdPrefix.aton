@@ -8,8 +8,8 @@
 @FILE:		HumdrumFileBase.cpp
 @LINES:		48-59
 @SHORTDESC:	Set the prefix for a HumdrumXML ID atrribute.
-@LONGDESC:	Set the prefix for a HumdrumXML ID 
-	atrribute.  The prefix should not start with a digit, nor have 
+@LONGDESC:	Set the prefix for a HumdrumXML ID
+	atrribute.  The prefix should not start with a digit, nor have
 	spaces in it.
 	
 

@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		412-431
+@LINES:		410-429
 @SHORTDESC:	Returns true if all tokens on the line are null (".
 @LONGDESC:	Returns true if all tokens on the line
 	are null ("." if a data line, "*" if an interpretation line, "!"

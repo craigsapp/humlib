@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		231-240
+@LINES:		230-239
 @SHORTDESC:	Returns true if a local comment.
 @LONGDESC:	Returns true if a local comment.
 	

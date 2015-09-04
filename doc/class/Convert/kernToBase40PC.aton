@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		203-229
+@LINES:		202-228
 @SHORTDESC:	Convert **kern pitch to a base-40 pitch class.
 @LONGDESC:	Convert **kern pitch to a base-40 pitch class.
 	Will ignore subsequent pitches in a chord.

@@ -9,7 +9,7 @@
 @FILE:		HumdrumLine.cpp
 @LINES:		147-169
 @SHORTDESC:	Return true if the line does not have any null tokens in **kern data which refer to data tokens above the line.
-@LONGDESC:	Return true if the 
+@LONGDESC:	Return true if the
 	line does not have any null tokens in **kern data which
 	refer to data tokens above the line.
 	

@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		311-326
+@LINES:		310-325
 @SHORTDESC:	Convert **kern pitch to a base-7 integer.
 @LONGDESC:	Convert **kern pitch to a base-7 integer.
 	This is a diatonic pitch class with C=0, D=1, ..., B=6.

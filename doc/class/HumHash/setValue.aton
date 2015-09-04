@@ -28,7 +28,7 @@
 @PARAMETERS:	const string& ns2, const string& key, double value
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key, double value
 @FILE:		HumHash.cpp
-@LINES:		406-429
+@LINES:		421-444
 @SHORTDESC:	Set the parameter to the given value, over-writing any previous value for the parameter.
 @LONGDESC:	Set the parameter to the given value,
 	over-writing any previous value for the parameter.  The

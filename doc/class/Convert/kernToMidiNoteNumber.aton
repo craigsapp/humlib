@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		293-309
+@LINES:		292-308
 @SHORTDESC:	Convert **kern to MIDI note number (middle C = 60).
 @LONGDESC:	Convert **kern to MIDI note number
 	(middle C = 60).  Middle C is assigned to octave 5 rather than

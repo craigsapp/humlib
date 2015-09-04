@@ -10,7 +10,7 @@
 @LINES:		524-547
 @SHORTDESC:	Return the number of ending tokens for the given track.
 @LONGDESC:	Return the number of ending tokens
-	for the given track.  Spines must start as a single exclusive 
+	for the given track.  Spines must start as a single exclusive
 	interpretation token.  However, since spines may split and merge,
 	it is possible that there are more than one termination points for a
 	track.  This function returns the number of terminations which are

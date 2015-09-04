@@ -17,7 +17,7 @@
 @LONGDESC:	Set the number to the given integer.
 	For the two-parameter version, set the top and bottom
 	values for the number, reducing if necessary.  For the
-	string version, parse an integer or fraction from the 
+	string version, parse an integer or fraction from the
 	string and reduce if necessary.
 	
 

@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		771-781
+@LINES:		769-779
 @SHORTDESC:	Returns the number of tokens on the line.
 @LONGDESC:	Returns the number of tokens on the line.  This
 	value is set by HumdrumFileBase in analyzeTokens.

@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		549-560
+@LINES:		547-558
 @SHORTDESC:	Get the duration from the start of the file to the start of the current line.
 @LONGDESC:	Get the duration from the start of the
 	file to the start of the current line.  This will be -1 if rhythmic

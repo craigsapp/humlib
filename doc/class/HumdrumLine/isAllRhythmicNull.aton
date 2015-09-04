@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		433-455
+@LINES:		431-453
 @SHORTDESC:	Returns true if all rhythmic data-type tokens on the line are null (".
 @LONGDESC:	Returns true if all rhythmic
 	data-type tokens on the line are null ("." if a data line,

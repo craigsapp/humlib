@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		136-162
+@LINES:		135-161
 @SHORTDESC:	Convert a kern token into a count of accidentals in the first subtoken.
 @LONGDESC:	Convert a kern token into a count
 	of accidentals in the first subtoken.  Sharps are assigned to the

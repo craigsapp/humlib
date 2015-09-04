@@ -15,7 +15,7 @@
 @FILE:		HumNum.cpp
 @LINES:		636-649
 @SHORTDESC:	Less-than-or-equal equality for a HumNum with a HumNum, integer or float.
-@LONGDESC:	Less-than-or-equal equality for a 
+@LONGDESC:	Less-than-or-equal equality for a
 	HumNum with a HumNum, integer or float.
 	
 

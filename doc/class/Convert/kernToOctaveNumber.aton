@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		164-201
+@LINES:		163-200
 @SHORTDESC:	Convert a kern token into an octave number.
 @LONGDESC:	Convert a kern token into an octave number.
 	Middle C is the start of the 4th octave. -1000 is returned if there

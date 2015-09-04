@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		640-650
+@LINES:		638-648
 @SHORTDESC:	Time from the starting of the current note to the next barline.
 @LONGDESC:	Time from the starting of the
 	current note to the next barline.

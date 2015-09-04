@@ -6,7 +6,7 @@
 @RETURN:	static char    
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		124-134
+@LINES:		123-133
 @SHORTDESC:	Similar to kernToDiatonicUC, but the returned pitch name is lower case.
 @LONGDESC:	Similar to kernToDiatonicUC, but
 	the returned pitch name is lower case.
