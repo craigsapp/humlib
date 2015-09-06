@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		65-94
+@LINES:		64-93
 @SHORTDESC:	Convert a kern token into a diatonic note pitch-class where 0="C", 1="D", ..., 6="B".
 @LONGDESC:	Convert a kern token into a diatonic
 	note pitch-class where 0="C", 1="D", ..., 6="B".  -1000 is returned

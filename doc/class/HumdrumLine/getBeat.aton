@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		657-675
+@LINES:		655-673
 @SHORTDESC:	Returns the beat number for the data on the current line given the input **recip representation for the duration of a beat.
 @LONGDESC:	Returns the beat number for the data on the
 	current line given the input **recip representation for the duration

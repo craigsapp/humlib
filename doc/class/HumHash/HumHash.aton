@@ -5,7 +5,7 @@
 @ACCESS:	public
 @PARAMETERS:	void
 @FILE:		HumHash.cpp
-@LINES:		115-125
+@LINES:		131-141
 @SHORTDESC:	HumHash constructor.
 @LONGDESC:	HumHash constructor.  The data storage is empty
 	until the first parameter in the Hash is set.

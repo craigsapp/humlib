@@ -8,7 +8,7 @@
 @FILE:		HumdrumFileBase.cpp
 @LINES:		330-343
 @SHORTDESC:	Print the spine information for all lines/tokens in file (for debugging).
-@LONGDESC:	Print the spine information for all 
+@LONGDESC:	Print the spine information for all
 	lines/tokens in file (for debugging).
 	
 

@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		724-746
+@LINES:		739-761
 @SHORTDESC:	Returns true if the given parameter exists in the map.
 @LONGDESC:	Returns true if the given parameter exists in the
 	map.   Format of the input string:   NS1:NS2:key or "":NS2:key for the

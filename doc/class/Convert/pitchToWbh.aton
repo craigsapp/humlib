@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	int dpc, int acc, int octave, int maxacc
 @FILE:		Convert-pitch.cpp
-@LINES:		327-362
+@LINES:		326-361
 @SHORTDESC:	Convert a given diatonic pitch class and accidental adjustment to an integer.
 @LONGDESC:	Convert a given diatonic pitch class and
 	accidental adjustment to an integer.  The diatonic pitch class

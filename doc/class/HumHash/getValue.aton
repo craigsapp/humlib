@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		142-170
+@LINES:		158-186
 @SHORTDESC:	Returns the value specified by the given key.
 @LONGDESC:	Returns the value specified by the given key.
 	If there is no colon in the key then return the value for the key

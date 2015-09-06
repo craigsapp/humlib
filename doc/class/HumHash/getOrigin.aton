@@ -1,0 +1,47 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	getOrigin
+@ACCESS:	public
+@RETURN:	HumdrumToken*  
+@RETURN:	HumdrumToken*  
+@RETURN:	HumdrumToken*  
+@PARAMETERS:	const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& parameter
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumHash.cpp
+@LINES:		957-978
+@SHORTDESC:	Get the source token for the parameter.
+@LONGDESC:	Get the source token for the parameter.
+	Returns NULL if there is no origin.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumdrumToken* HumHash::getOrigin(const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	} else {
+		vector<string> keys = getKeyList(key);
+		if (keys.size() == 1) {
+			return getOrigin("", "", keys[0]);
+		} else if (keys.size() == 2) {
+			return getOrigin("", keys[0], keys[1]);
+		} else {
+			return getOrigin(keys[0], keys[1], keys[2]);
+		}
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

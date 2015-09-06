@@ -8,7 +8,7 @@
 @RETURN:	static string  
 @PARAMETERS:	const string& kerndata, string flat = "b", string sharp = "#", string separator = ""
 @FILE:		Convert-pitch.cpp
-@LINES:		23-63
+@LINES:		23-62
 @SHORTDESC:	Convert a **kern pitch to ScientificPitch notation, which is the diatonic letter name, followed by a possible accidental, then an optional separator string, and finally the octave number.
 @LONGDESC:	Convert a **kern pitch to
 	ScientificPitch notation, which is the diatonic letter name,
@@ -16,10 +16,6 @@
 	string, and finally the octave number.  A string representing a
 	chord can be given to this function, and the output will return
 	a list of the pitches in the chord, separated by a space.
-	default values:
-	flat      = "b"
-	sharp     = "#"
-	separator = ""
 	
 
 @@BEGIN: EXAMPLE

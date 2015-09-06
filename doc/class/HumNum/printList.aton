@@ -11,7 +11,6 @@
 @SHORTDESC:	Print as a list of two numbers, such as "(1, 2)" for 1/2.
 @LONGDESC:	Print as a list of two numbers, such as
 	"(1, 2)" for 1/2.
-	default parameter: out = cout;
 	
 
 @@BEGIN: EXAMPLE

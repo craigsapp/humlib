@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		248-274
+@LINES:		247-273
 @SHORTDESC:	Convert **kern pitch to a base-12 pitch-class.
 @LONGDESC:	Convert **kern pitch to a base-12 pitch-class.
 	C=0, C#/D-flat=1, D=2, etc.

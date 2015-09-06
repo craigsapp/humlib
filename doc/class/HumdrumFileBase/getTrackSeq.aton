@@ -22,7 +22,7 @@
 
 @SRCCODE:
 
-vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track, 
+vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 		int options) {
 	int nullQ    = (options & OPT_NONULLS);
 	int manipQ   = (options & OPT_NOMANIP);
@@ -49,7 +49,7 @@ vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 				if ((!nullQ) && infile[i].token(j).isNull()) {
 					continue;
 				} else if ((!manipQ) && infile[i].token(j).isManipulator() &&
-						(!infile[i].token(j).isTerminator()) && 
+						(!infile[i].token(j).isTerminator()) &&
 						(!infile[i].token(j).isExclusive())) {
 					continue;
 				}

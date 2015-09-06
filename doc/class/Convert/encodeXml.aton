@@ -9,7 +9,7 @@
 @LINES:		81-104
 @SHORTDESC:	Encode a string for XML printing.
 @LONGDESC:	Encode a string for XML printing.  Ampersands
-	get converted to &amp;, < to &lt; > to &gt;, " to &quot; and 
+	get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
 	' to &apos;.
 	
 

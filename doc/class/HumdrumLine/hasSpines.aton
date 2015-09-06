@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		716-731
+@LINES:		714-729
 @SHORTDESC:	Returns true if the line contains spines.
 @LONGDESC:	Returns true if the line contains spines.  This
 	means the the line is not empty or a global comment (which can include

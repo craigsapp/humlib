@@ -8,7 +8,7 @@
 @FILE:		HumdrumFileBase.cpp
 @LINES:		345-358
 @SHORTDESC:	Print the data type for all spines in the file (for debugging).
-@LONGDESC:	Print the data type for all 
+@LONGDESC:	Print the data type for all
 	spines in the file (for debugging).
 	
 

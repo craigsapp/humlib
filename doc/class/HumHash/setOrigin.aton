@@ -1,0 +1,49 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	setOrigin
+@ACCESS:	public
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@PARAMETERS:	const string& key, HumdrumToken* tok
+@PARAMETERS:	const string& key, HumdrumToken& tok
+@PARAMETERS:	const string& ns2, const string& key, HumdrumToken* tok
+@PARAMETERS:	const string& ns2, const string& key, HumdrumToken& tok
+@PARAMETERS:	const string& ns1, const string& ns2, const string& parameter, HumdrumToken* tok
+@PARAMETERS:	const string& ns1, const string& ns2, const string& parameter, HumdrumToken& tok
+@FILE:		HumHash.cpp
+@LINES:		886-906
+@SHORTDESC:	Set the source token for the parameter.
+@LONGDESC:	Set the source token for the parameter.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumHash::setOrigin(const string& key, HumdrumToken* tok) {
+	if (parameters == NULL) {
+		return;
+	} else {
+		vector<string> keys = getKeyList(key);
+		if (keys.size() == 1) {
+			setOrigin("", "", keys[0], tok);
+		} else if (keys.size() == 2) {
+			setOrigin("", keys[0], keys[1], tok);
+		} else {
+			setOrigin(keys[0], keys[1], keys[2], tok);
+		}
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

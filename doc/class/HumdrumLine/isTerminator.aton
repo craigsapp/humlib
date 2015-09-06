@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		354-373
+@LINES:		352-371
 @SHORTDESC:	Returns true if all tokens on the line are terminators.
 @LONGDESC:	Returns true if all tokens on the line
 	are terminators.

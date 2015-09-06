@@ -20,7 +20,7 @@
 @SRCCODE:
 
 int Convert::getLcm(const vector<int>& numbers) {
-   if (numbers.size() == 0) {
+	if (numbers.size() == 0) {
 		return 1;
 	}
 	int output = numbers[0];

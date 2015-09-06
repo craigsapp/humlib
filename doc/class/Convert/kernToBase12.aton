@@ -6,7 +6,7 @@
 @RETURN:	static int     
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-pitch.cpp
-@LINES:		276-291
+@LINES:		275-290
 @SHORTDESC:	Convert **kern pitch to a base-12 integer.
 @LONGDESC:	Convert **kern pitch to a base-12 integer.
 	(middle C = 48).
