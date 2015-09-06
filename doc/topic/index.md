@@ -16,6 +16,7 @@ title: Topics
 
 {% include topics/topics.html %}
 
+<a name="cvs"> </a>
 <details class="topic-cvs">
 <summary>
 CVS Import/Export
@@ -23,13 +24,16 @@ CVS Import/Export
 {% include topics/cvs.html %}
 </details>
 
-<details class="topic-cvs">
+<a name="xml"> </a>
+<details class="topic-xml">
 <summary>
 XML Export
 </summary>
 {% include topics/xml.html %}
 </details>
 
+<a name="parameter"> </a>
+<a name="parameters"> </a>
 <details class="topic-parameters">
 <summary>
 Parameters
@@ -37,6 +41,8 @@ Parameters
 {% include topics/parameters.html %}
 </details>
 
+<a name="rhythm"> </a>
+<a name="rhythms"> </a>
 <details class="topic-rhythms">
 <summary>
 Rational rhythms
@@ -44,6 +50,8 @@ Rational rhythms
 {% include topics/rhythms.html %}
 </details>
 
+<a name="strand"> </a>
+<a name="strands"> </a>
 <details class="topic-parameters">
 <summary>
 Strands
