@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  4 01:14:48 PDT 2015
+// Last Modified: Sun Sep  6 01:52:03 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -5661,7 +5661,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		// global comments, reference records, or blank lines print here.
 		out << Convert::repeatString(indent, level) << "<metaFrame";
 		out << " n=\"" << getLineIndex() << "\"";
-		out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+		out << " token=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 		out << " xml:id=\"" << getXmlId() << "\"";
 		out << "/>\n";
 		level++;
@@ -6880,7 +6880,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	if (getSubtrack() > 0) {
 		out << " subtrack=\"" << getSubtrack() << "\"";
 	}
-	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " token=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
 

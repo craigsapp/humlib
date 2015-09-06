@@ -1051,7 +1051,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	if (getSubtrack() > 0) {
 		out << " subtrack=\"" << getSubtrack() << "\"";
 	}
-	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " token=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
 
