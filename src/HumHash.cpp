@@ -105,6 +105,7 @@
 #include "HumHash.h"
 #include "HumNum.h"
 #include "Convert.h"
+#include "HumdrumToken.h"
 
 using namespace std;
 
@@ -1011,7 +1012,8 @@ HumdrumToken* HumHash::getOrigin(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
-// HumHash::printXml --
+// HumHash::printXml -- Print object as a <parameters> element for
+//     in a HumdrumXML file.
 //
 
 ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
@@ -1025,6 +1027,7 @@ ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
 	stringstream str;
 	bool found = 0;
 
+	HumdrumToken* ref = NULL;
 	level++;
 	for (auto& it1 : *(parameters)) {
 		if (it1.second.size() == 0) {
@@ -1048,7 +1051,12 @@ ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
 				str << "<parameter key=\"" << it3.first << "\"";
 				str << " value=\"";
 				str << Convert::encodeXml(it3.second) << "\"";
-				str << " idref=\"\"";
+				str << " idref=\"";
+				ref = it3.second.origin;
+				if (ref != NULL) {
+					str << ref->getXmlId();
+				}
+				str << "\"";
 				str << "/>\n";
 			}
 			str << Convert::repeatString(indent, --level) << "</namespace>\n";

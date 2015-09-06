@@ -525,9 +525,13 @@ HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getBarlineDuration -- Return the duration between
+// HumdrumToken::getBarlineDuration -- Returns the duration between
 //   the next and previous barline.  If the token is a barline token,
-//   then return the duration to the next barline.
+//   then return the duration to the next barline.  The barline duration data 
+//   is filled in automatically when reading a file with the 
+//   HumdrumFileStructure::analyzeMeter() function.  The duration
+//   will always be non-positive if the file is read with HumdrumFileBase and 
+//   analyzeMeter() is not run to analyze the data.
 //
 
 HumNum HumdrumToken::getBarlineDuration(void) const {
@@ -807,7 +811,7 @@ string HumdrumToken::getTrackString(void) const {
 
 /////////////////////////////
 //
-// HumdrumToken::getSubtokenCount -- Return the number of sub-tokens in
+// HumdrumToken::getSubtokenCount -- Returns the number of sub-tokens in
 //     a token.  The input parameter is the sub-token separator.  If the
 //     separator comes at the start or end of the token, then there will
 //     be empty sub-token(s) included in the count.
@@ -866,6 +870,7 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 //        !NS1:NS2:key1=value1:key2=value2:key3=value3
 //     and store the parameter in the HumHash parent class component of the
 //     HumdrumToken object.
+// default value for 2-parameter version: ptok = NULL
 //
 
 void HumdrumToken::setParameters(HumdrumToken* ptok) {
@@ -874,11 +879,11 @@ void HumdrumToken::setParameters(HumdrumToken* ptok) {
 		return;
 	}
 	string pdata = pl.substr(1, pl.size()-1);
-	setParameters(pdata);
+	setParameters(pdata, ptok);
 }
 
 
-void HumdrumToken::setParameters(const string& pdata) {
+void HumdrumToken::setParameters(const string& pdata, HumdrumToken* ptok) {
 	vector<string> pieces = Convert::splitString(pdata, ':');
 	if (pieces.size() < 3) {
 		return;
@@ -899,6 +904,7 @@ void HumdrumToken::setParameters(const string& pdata) {
 			value = "true";
 		}
 		setValue(ns1, ns2, key, value);
+		setOrigin(ns1, ns2, key, ptok);
 	}
 }
 
@@ -1190,7 +1196,7 @@ ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 
 //////////////////////////////
 //
-// HumdrumToken::getXmlId -- Return an XML id attribute based on the line
+// HumdrumToken::getXmlId -- Returns an XML id attribute based on the line
 //     and field index for the location of the token in the HumdrumFile.
 //     An optional parameter for a prefix can be given.  If this parameter
 //     is an empty string, then the prefix set in the owning HumdrumFile
@@ -1215,7 +1221,7 @@ string HumdrumToken::getXmlId(const string& prefix) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getXmlIdPrefix -- Return the XML ID prefix from the HumdrumFile
+// HumdrumToken::getXmlIdPrefix -- Returns the XML ID prefix from the HumdrumFile
 //   structure via the HumdrumLine on which the token resides.
 //
 
