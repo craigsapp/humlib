@@ -44,3 +44,10 @@ Rational rhythms
 {% include topics/rhythms.html %}
 </details>
 
+<details class="topic-parameters">
+<summary>
+Strands
+</summary>
+{% include topics/strand.html %}
+</details>
+
