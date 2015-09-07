@@ -5,9 +5,10 @@ breadcrumbs: [
                 ['/doc',          'documentation'],
                 ['/doc/class',    'classes'],
                 ['/doc/example',  'examples'],
-                ['/doc/snippets',  'snippets']
+                ['/doc/topic',    'topics'],
+                ['/doc/snippets', 'snippets']
         ]
-title: Code snippetss
+title: Code snippets
 ---
 
 {% include snippets/snippets.html %}

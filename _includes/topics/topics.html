@@ -4,8 +4,8 @@
 document.addEventListener("keydown", function(event) {
 	switch (event.keyCode) {
 		case 49:
-			var details = document.querySelector('details[class^="topic-"]');
-			if (details.open) {
+			var topics = document.querySelector('details[class^="topic-"]');
+			if (topics.open) {
 				closeAllTopics();
 			} else {
 				openAllTopics();
@@ -26,12 +26,13 @@ function checkAnchor() {
 	}
 	anchor = matches[1];
 	console.log(anchor);
-	var details = document.querySelector('details.topic-' + anchor);
-	if (!details) {
+	var topics = document.querySelector('details.topic-' + anchor);
+console.log(topics);
+	if (!topics) {
 		return;
 	}
-	details.open = 'open';
-	details.scrollIntoViewIfNeeded();
+	topics.open = 'open';
+	topics.scrollIntoViewIfNeeded();
 }
 
 
@@ -42,9 +43,9 @@ function checkAnchor() {
 //
 
 function closeAllTopics() {
-	var details = document.querySelectorAll("details");
-	for (var i=0; i<details.length; i++) {
-		var detail = details[i];
+	var topics = document.querySelectorAll("details");
+	for (var i=0; i<topics.length; i++) {
+		var detail = topics[i];
 		if (!detail) {
 			continue;
 		}
@@ -60,9 +61,9 @@ function closeAllTopics() {
 //
 
 function openAllTopics() {
-	var details = document.querySelectorAll("details");
-	for (var i=0; i<details.length; i++) {
-		var detail = details[i];
+	var topics = document.querySelectorAll("details");
+	for (var i=0; i<topics.length; i++) {
+		var detail = topics[i];
 		if (!detail) {
 			continue;
 		}

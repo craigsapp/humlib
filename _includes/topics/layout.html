@@ -1,0 +1,117 @@
+
+<style>
+textarea {
+	font-family: Courier;
+	font-size:   1rem
+	background-color:  #dddddd;
+}
+</style>
+
+
+Layout parameters can be embedded in \*\*kern data that give
+graphical printing information which is not otherwise specified
+in the data.  Layout codes have the form:
+
+```
+![!]LO:category:key=value
+```
+
+Local comments, starting with a single `!` indicate a local layout
+parameter which alters the next non-null token in a spine.  Global  
+comments, starting with `!!`, indicate that the parameter effect
+all parts.
+
+<h2> Slur orientation </h2>
+
+Slurs can be forced above notes by placing the local layout code
+`!LO:S:a` before the token staring a slur (which is an open parenthesis
+in \*\*kern data).  Use `!LO:S:b` to force the slur below the group
+of notes.
+
+<center>
+<table>
+<tr><td>
+<textarea rows="12">
+**kern
+*clefG2
+*M4/4
+*k[]
+=1-
+(4c/
+4d/
+4e/
+4f/)
+=2
+!LO:S:a
+(4c/
+4d/
+4e/
+4f/)
+=3
+(4cc\
+4dd\
+4ee\
+4ff\)
+=4
+!LO:S:b
+(4cc\
+4dd\
+4ee\
+4ff\)
+\==
+*-
+</textarea>
+</td><td>
+<img src=/images/layout/slur.png>
+</td></tr></table>
+</center>
+
+
+<h2> Generic text directions </h2>
+
+Any arbitrary text can be placed in the music by using the `!LO:TX:` 
+namespace:
+
+<center>
+<table>
+<tr><td>
+<textarea cols="25" rows="35">
+\*\*kern	\*\*kern
+*clefG2	*clefG2
+*k[f#]	*k[f#]
+*M4/4	*M4/4
+=1-	=1-
+4c/	2aa\
+4d/	.
+4e/	2gg\
+4f/	.
+!LO:TX:i:rj:t=fine	!
+=2||	=2||
+!	!LO:TX:bi:z=5:t=ritardando
+4g/	2ee\
+4a/	.
+4b\	2dd\
+4cc\	.
+=3	=3
+4b\	2dd#\
+4a/	.
+!LO:TX:b:X=-15:Z=15:t=ad lib.	!
+!	!LO:TX:Z=15:cj:t=reflectively
+4g/	2ee\
+4f/	.
+=4	=4
+4e/	2ff\
+4d/	.
+2c/;	2gg\;
+!LO:TX:i:rj:X=20:t=D.C. al fine	!
+=:|!	=:|!
+*-	*-
+</textarea>
+</td><td>
+<img src=/images/layout/text.png>
+</td></tr></table>
+</center>
+
+
+
+
