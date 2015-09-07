@@ -626,8 +626,8 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 
 ///////////////////////////////
 //
-// HumdrumFileStructure::analyzeLocalParameters -- only allowing layout
-//    parameters at the moment.
+// HumdrumFileStructure::analyzeLocalParameters -- Parses any 
+//    local comments before a non-null token.
 //
 
 bool HumdrumFileStructure::analyzeLocalParameters(void) {
@@ -1167,9 +1167,30 @@ void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,
 	if (token->size() < 1) {
 		return;
 	}
-	if (token->find("!LO:") != 0) {
+	int loc1 = token->find(":");
+	if (loc1 == string::npos) {
 		return;
 	}
+	int loc2 = token->substr(loc1).find(":");
+	if (loc2 == string::npos) {
+		return;
+	}
+	loc2 += loc1 + 1;
+cout << "LOC 1 = " << loc1 << "\t" << "LOC 2 = " << loc2 << endl;
+	int sloc = token->find(" ");
+	if (sloc != string::npos) {
+		if ((sloc < loc1) || (sloc < loc2)) {
+			return;
+		}
+	}
+	sloc = token->find("\t");
+	if (sloc != string::npos) {
+		if ((sloc < loc1) || (sloc < loc2)) {
+			return;
+		}
+	}
+cout << "GOT HERE AAA" << endl;
+	// Looks like a parameter so parse the comment:
 	current->setParameters(token);
 }
 
