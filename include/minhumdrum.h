@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  8 01:03:32 PDT 2015
+// Last Modified: Tue Sep  8 01:16:55 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -834,10 +834,10 @@ class HumdrumFileBase {
 		string idprefix;
 
 		// strands1d: one-dimensional list of spine strands.
-		vector<TokenPair> spines1d;
+		vector<TokenPair> strand1d;
 
 		// strands2d: one-dimensional list of spine strands.
-		vector<vector<TokenPair> > spines2d;
+		vector<vector<TokenPair> > strand2d;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
@@ -922,6 +922,17 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getScoreDuration             (void) const;
 		ostream&      printDurationInfo            (ostream& out = cout);
 		int           tpq                          (void);
+
+		// strand functionality:
+		HumdrumToken* getStrandStart(int index) const;
+		HumdrumToken* getStrandEnd(int index) const;
+		HumdrumToken* getStrandStart(int sindex, int index) const;
+		HumdrumToken* getStrandEnd(int sindex, int index) const;
+
+		HumdrumToken* getStrand(int index) const {
+			return getStrandStart(index); }
+		HumdrumToken* getStrand(int sindex, int index) const {
+			return getStrandStart(sindex, index); }
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;

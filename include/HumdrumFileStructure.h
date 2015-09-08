@@ -80,6 +80,17 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		ostream&      printDurationInfo            (ostream& out = cout);
 		int           tpq                          (void);
 
+		// strand functionality:
+		HumdrumToken* getStrandStart(int index) const;
+		HumdrumToken* getStrandEnd(int index) const;
+		HumdrumToken* getStrandStart(int sindex, int index) const;
+		HumdrumToken* getStrandEnd(int sindex, int index) const;
+
+		HumdrumToken* getStrand(int index) const {
+			return getStrandStart(index); }
+		HumdrumToken* getStrand(int sindex, int index) const {
+			return getStrandStart(sindex, index); }
+
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
 		HumdrumLine*  getBarline                   (int index) const;

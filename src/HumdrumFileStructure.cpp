@@ -1204,19 +1204,19 @@ cout << "GOT HERE AAA" << endl;
 
 bool HumdrumFileStructure::analyzeStrands(void) {
 	int spines = getSpineCount();
-	spines1d.resize(0);
-	spines2d.resize(0);
+	strand1d.resize(0);
+	strand2d.resize(0);
 	int i, j;
 	for (i=0; i<spines; i++) {
 		HumdrumToken* tok = getSpineStart(i);
-		spines2d.resize(spines2d.size()+1);
-		analyzeSpineStrands(spines2d.back(), tok);
+		strand2d.resize(strand2d.size()+1);
+		analyzeSpineStrands(strand2d.back(), tok);
 	}
    // The spine strands need to be sorted by line number.
 
-	for (i=0; i<spines2d.size(); i++) {
-		for (j=0; j<spines2d[i].size(); j++) {
-			spines1d.push_back(spines2d[i][j]);
+	for (i=0; i<strand2d.size(); i++) {
+		for (j=0; j<strand2d[i].size(); j++) {
+			strand1d.push_back(strand2d[i][j]);
 		}
 	}
 
@@ -1247,18 +1247,46 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 			ends[index].last = tok;
 			return;
 		}
-		if (tok->getNextTokenCount() == 1) {
-			tok = tok->getNextToken();
-		} else if (tok->getNextTokenCount() > 1) {
+		if (tok->getNextTokenCount() > 1) {
 			// should only be 2, but allow for generalizing in the future.
 			for (int j=1; j<tok->getNextTokenCount(); j++) {
 				analyzeSpineStrands(ends, tok->getNextToken(j));
 			}
 		}
+		tok = tok->getNextToken();
 	}
 
 	cerr << "Should not get here in analyzeSpineStrands()\n";
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getStrandStart -- Return the first token
+//    in the a strand.
+//
+
+HumdrumToken* HumdrumFileStructure::getStrandStart(int index) const {
+	return strand1d[index].first;
+}
+
+
+HumdrumToken* HumdrumFileStructure::getStrandEnd(int index) const {
+	return strand1d[index].last;
+}
+
+
+HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex, 
+		int index) const {
+	return strand2d[sindex][index].first;
+}
+
+
+HumdrumToken* HumdrumFileStructure::getStrandEnd(int sindex, int index) const {
+	return strand2d[sindex][index].last;
+}
+
 
 
 // END_MERGE

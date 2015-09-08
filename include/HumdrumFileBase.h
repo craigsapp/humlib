@@ -172,10 +172,10 @@ class HumdrumFileBase {
 		string idprefix;
 
 		// strands1d: one-dimensional list of spine strands.
-		vector<TokenPair> spines1d;
+		vector<TokenPair> strand1d;
 
 		// strands2d: one-dimensional list of spine strands.
-		vector<vector<TokenPair> > spines2d;
+		vector<vector<TokenPair> > strand2d;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
