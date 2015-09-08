@@ -6,7 +6,7 @@ The form of a parameter is:
 
 
 ```
-![!][ns1]:[ns2]:key1=value1[:key2=value[:key3=value3]
+![!][ns1]:[ns2]:key1=[value1][:key2=value[:key3=value3]
 ```
 
 The parameter system includes two optional namespace prefixes
@@ -147,6 +147,9 @@ infile.token(3, 0).getValue("ns1:ns2:Z");
 infile.token(3, 0).getValue("ns1", "ns2", Z");
 ```
 
+If a parameter key is not followed by a parameter, it's value is set to the
+string "true" which also returns a true when accessing the .getValueBool()
+function.
 
 
 

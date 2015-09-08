@@ -1,9 +1,14 @@
 
 <style>
 textarea {
-	font-family: Courier;
-	font-size:   1rem
-	background-color:  #dddddd;
+	font-family: Consolas, "Liberation Mono", Meno, Courier, monospace;
+	font-size:   1rem;
+	color: #567482;
+	background-color:  #f3f6fa;
+	border-radius: 4px;
+	border: solid 1px #dce6f0;
+	tab-size: 14;
+	white-space: pre;
 }
 </style>
 
@@ -69,14 +74,16 @@ of notes.
 
 <h2> Generic text directions </h2>
 
-Any arbitrary text can be placed in the music by using the `!LO:TX:` 
-namespace:
+Any arbitrary text can be placed in the music by using parameters
+in the `!LO:TX:` namespace:
 
-<center>
+<p>
 <table>
 <tr><td>
-<textarea cols="25" rows="35">
-\*\*kern	\*\*kern
+
+<!--
+
+**kern	**kern
 *clefG2	*clefG2
 *k[f#]	*k[f#]
 *M4/4	*M4/4
@@ -106,11 +113,101 @@ namespace:
 !LO:TX:i:rj:X=20:t=D.C. al fine	!
 =:|!	=:|!
 *-	*-
-</textarea>
+
+-->
+
+
+<style>
+div.humDiv table { 
+	border: 0; background-color: #f3f6fa; 
+	padding: 2px;
+	border-radius: 4px;
+	border: solid 1px #dce6f0;
+}
+div.humDiv table tr { border: 0}
+div.humDiv table td {
+	padding: 0;
+	font-family: Consolas, "Liberation Mono", Meno, Courier, monospace;
+	font-size:   0.8rem;
+	line-height: 1;
+	color: #567482;
+	background-color:  #f3f6fa;
+}
+</style>
+
+<style>
+.humTable      { padding:0; border-spacing:0; }
+.humSubtable   { padding:0; border-spacing:0; }
+.humLine:hover { background:#d0d0ff; }
+.humNull       { }
+.humKernToken  { }
+.humParameter  { font-weight: bold; color:#990000; }
+.humKernPitch  { }
+.humKernRhythm { }
+.humTrackpad   { padding-right:30px; }
+.humSubtrackpad{ padding-right:20px; }
+.humBar        { color:#555555; background-color:#eeeeee; }
+.humExinterp   { color:magenta; }
+.humManip      { color:#f62217; !important}
+.humInterp     { color:#9f000f; !important}
+.humRef        { color:#007700; }
+.humGcom       { color:#1100aa; }
+.humLcom       { color:#7d1b7e; }
+</style>
+
+<div class="humDiv">
+<table class="humTable">
+<tr valign="baseline" class="humLine humExinterp"><td class=" humTok  humSSkern humTr1 humTrackpad">**kern</td><td class=" humTok  humSSkern humTr2">**kern</td></tr>
+<tr valign="baseline" class="humLine humInterp"><td class=" humTok  humSSkern humTr1 humTrackpad">*clefG2</td><td class=" humTok  humSSkern humTr2">*clefG2</td></tr>
+<tr valign="baseline" class="humLine humInterp"><td class=" humTok  humSSkern humTr1 humTrackpad">*k[f#]</td><td class=" humTok  humSSkern humTr2">*k[f#]</td></tr>
+<tr valign="baseline" class="humLine humInterp"><td class=" humTok  humSSkern humTr1 humTrackpad">*M4/4</td><td class=" humTok  humSSkern humTr2">*M4/4</td></tr>
+<tr valign="baseline" class="humLine humBar"><td class=" humTok  humSSkern humTr1 humTrackpad">=1-</td><td class=" humTok  humSSkern humTr2">=1-</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4c/</td><td class=" humTok  humSSkern humTr2">2aa\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4d/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4e/</td><td class=" humTok  humSSkern humTr2">2gg\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4f/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humLcom"><td class=" humTok  humSSkern humTr1 humTrackpad"><span class="humParameter">!LO:TX:i:rj:t=fine</span></td><td class=" humTok  humSSkern humTr2">!</td></tr>
+<tr valign="baseline" class="humLine humBar"><td class=" humTok  humSSkern humTr1 humTrackpad">=2||</td><td class=" humTok  humSSkern humTr2">=2||</td></tr>
+<tr valign="baseline" class="humLine humLcom"><td class=" humTok  humSSkern humTr1 humTrackpad">!</td><td class=" humTok  humSSkern humTr2"><span class="humParameter">!LO:TX:bi:z=5:t=ritardando</span></td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4g/</td><td class=" humTok  humSSkern humTr2">2ee\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4a/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4b\</td><td class=" humTok  humSSkern humTr2">2dd\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4cc\</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humBar"><td class=" humTok  humSSkern humTr1 humTrackpad">=3</td><td class=" humTok  humSSkern humTr2">=3</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4b\</td><td class=" humTok  humSSkern humTr2">2dd#\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4a/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humLcom"><td class=" humTok  humSSkern humTr1 humTrackpad"><span class="humParameter">!LO:TX:b:X=-15:Z=15:t=ad&nbsp;lib.</span></td><td class=" humTok  humSSkern humTr2">!</td></tr>
+<tr valign="baseline" class="humLine humLcom"><td class=" humTok  humSSkern humTr1 humTrackpad">!</td><td class=" humTok  humSSkern humTr2"><span class="humParameter">!LO:TX:Z=15:cj:t=reflectively</span></td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4g/</td><td class=" humTok  humSSkern humTr2">2ee\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4f/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humBar"><td class=" humTok  humSSkern humTr1 humTrackpad">=4</td><td class=" humTok  humSSkern humTr2">=4</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4e/</td><td class=" humTok  humSSkern humTr2">2ff\</td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">4d/</td><td class=" humTok  humSSkern humTr2"><span class="humNull">.</span></td></tr>
+<tr valign="baseline" class="humLine humDat"><td class=" humTok  humSSkern humTr1 humTrackpad">2c/;</td><td class=" humTok  humSSkern humTr2">2gg\;</td></tr>
+<tr valign="baseline" class="humLine humLcom"><td class=" humTok  humSSkern humTr1 humTrackpad"><span class="humParameter">!LO:TX:i:rj:X=20:t=D.C.&nbsp;al&nbsp;fine</span></td><td class=" humTok  humSSkern humTr2">!</td></tr>
+<tr valign="baseline" class="humLine humBar"><td class=" humTok  humSSkern humTr1 humTrackpad">=:|!</td><td class=" humTok  humSSkern humTr2">=:|!</td></tr>
+<tr valign="baseline" class="humLine humManip"><td class=" humTok  humSSkern humTr1 humTrackpad">*-</td><td class=" humTok  humSSkern humTr2">*-</td></tr>
+</table>
+</div>
+
+
 </td><td>
 <img src=/images/layout/text.png>
+
+<h3 style="margin:0;">Text parameters:</h3>
+<ul>
+<li> t = text to display.
+<li> rj = right justify text (boolean).
+<li> cj = center justify text (boolean).
+<li> b = bold text.
+<li> X = horizontal offset of text.
+<li> Y = placement height below bottom line of staff.
+<li> Z = placement height above top line of staff.
+</ul>
+
+
 </td></tr></table>
-</center>
+</p>
 
 
 

@@ -21,7 +21,7 @@ exclude: [
 # Build settings ##########################################################
 markdown: redcarpet
 redcarpet:
-  extensions: ['fenced_code_blocks', 'smart']
+  extensions: ['fenced_code_blocks', 'filter_html', 'smart']
 permalink: pretty
 
 
