@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		597-626
+@LINES:		598-627
 @SHORTDESC:	Returns true if at least one parameter is defined in the HumHash object (when no arguments are given to the function).
 @LONGDESC:	Returns true if at least one parameter is defined
 	in the HumHash object (when no arguments are given to the function).

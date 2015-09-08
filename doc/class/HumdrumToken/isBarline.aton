@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		604-621
+@LINES:		608-625
 @SHORTDESC:	Returns true if the first character is an equals sign.
 @LONGDESC:	Returns true if the first character is an
 	equals sign.

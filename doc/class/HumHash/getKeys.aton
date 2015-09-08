@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		536-558
+@LINES:		537-559
 @SHORTDESC:	Return a list of keys in a particular namespace combination.
 @LONGDESC:	Return a list of keys in a particular namespace
 	combination.  With no parameters, a complete list of all

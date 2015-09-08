@@ -10,11 +10,15 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		525-540
-@SHORTDESC:	Return the duration between the next and previous barline.
-@LONGDESC:	Return the duration between
+@LINES:		525-544
+@SHORTDESC:	Returns the duration between the next and previous barline.
+@LONGDESC:	Returns the duration between
 	the next and previous barline.  If the token is a barline token,
-	then return the duration to the next barline.
+	then return the duration to the next barline.  The barline duration data 
+	is filled in automatically when reading a file with the 
+	HumdrumFileStructure::analyzeMeter() function.  The duration
+	will always be non-positive if the file is read with HumdrumFileBase and 
+	analyzeMeter() is not run to analyze the data.
 	
 
 @@BEGIN: EXAMPLE

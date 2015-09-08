@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		571-585
+@LINES:		575-589
 @SHORTDESC:	Returns true if the token is a (kern) rest.
 @LONGDESC:	Returns true if the token is a (kern) rest.
 	

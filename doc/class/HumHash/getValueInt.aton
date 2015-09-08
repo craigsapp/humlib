@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		219-244
+@LINES:		220-245
 @SHORTDESC:	Return the value as an integer.
 @LONGDESC:	Return the value as an integer.  The value must
 	start with a number and have no text before it; otherwise the

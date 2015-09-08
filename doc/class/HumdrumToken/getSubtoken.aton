@@ -8,7 +8,7 @@
 @PARAMETERS:	int index, const string& separator
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		829-859
+@LINES:		833-863
 @SHORTDESC:	Extract the specified sub-token from the token.
 @LONGDESC:	Extract the specified sub-token from the token.
 	Tokens usually are separated by spaces in Humdrum files, but this will

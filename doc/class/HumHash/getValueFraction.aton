@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		275-297
+@LINES:		276-298
 @SHORTDESC:	Return the value as a HumNum fraction.
 @LONGDESC:	Return the value as a HumNum fraction.
 	If the string represents an integer, it will be preserved in the

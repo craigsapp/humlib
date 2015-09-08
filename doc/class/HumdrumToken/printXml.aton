@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumToken.cpp
-@LINES:		1035-1074
+@LINES:		1041-1080
 @SHORTDESC:	Print a HumdrumToken in XML format.
 @LONGDESC:	Print a HumdrumToken in XML format.
 	
@@ -29,7 +29,7 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 	if (getSubtrack() > 0) {
 		out << " subtrack=\"" << getSubtrack() << "\"";
 	}
-	out << " text=\"" << Convert::encodeXml(((string)(*this))) << "\"";
+	out << " token=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 	out << " xml:id=\"" << getXmlId() << "\"";
 	out << ">\n";
 

@@ -10,7 +10,7 @@
 @PARAMETERS:	const char* filename
 @PARAMETERS:	const string& filename
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		182-192
+@LINES:		183-193
 @SHORTDESC:	Similar to the read() functions, but does not parse rhythm (or parameters).
 @LONGDESC:	Similar to the read() functions, but
 	does not parse rhythm (or parameters).

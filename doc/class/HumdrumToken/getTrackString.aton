@@ -8,7 +8,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		790-805
+@LINES:		794-809
 @SHORTDESC:	Gets "track.
 @LONGDESC:	Gets "track.subtrack" as a string.  The
 	track and subtrack are integers.  The getTrackString function will

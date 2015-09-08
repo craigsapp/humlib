@@ -10,7 +10,7 @@
 @PARAMETERS:	const string& ns2, const string& key
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key
 @FILE:		HumHash.cpp
-@LINES:		780-801
+@LINES:		781-802
 @SHORTDESC:	Delete the given parameter key from the HumHash object.
 @LONGDESC:	Delete the given parameter key from the HumHash
 	object.  Three string version is N1,NS2,key; two string version is

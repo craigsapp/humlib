@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		943-953
+@LINES:		949-959
 @SHORTDESC:	Returns a pointer to the HumdrumLine that owns this token.
 @LONGDESC:	Returns a pointer to the HumdrumLine that
 	owns this token.

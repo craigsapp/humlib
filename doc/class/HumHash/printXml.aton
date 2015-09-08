@@ -6,7 +6,7 @@
 @RETURN:	ostream&       
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumHash.cpp
-@LINES:		1011-1067
+@LINES:		1012-1074
 @SHORTDESC:	Print object as a <parameters> element for in a HumdrumXML file.
 @LONGDESC:	Print object as a <parameters> element for
 	in a HumdrumXML file.
@@ -31,6 +31,7 @@ ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
 	stringstream str;
 	bool found = 0;
 
+	HumdrumToken* ref = NULL;
 	level++;
 	for (auto& it1 : *(parameters)) {
 		if (it1.second.size() == 0) {
@@ -54,7 +55,12 @@ ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
 				str << "<parameter key=\"" << it3.first << "\"";
 				str << " value=\"";
 				str << Convert::encodeXml(it3.second) << "\"";
-				str << " idref=\"\"";
+				str << " idref=\"";
+				ref = it3.second.origin;
+				if (ref != NULL) {
+					str << ref->getXmlId();
+				}
+				str << "\"";
 				str << "/>\n";
 			}
 			str << Convert::repeatString(indent, --level) << "</namespace>\n";
