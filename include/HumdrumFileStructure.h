@@ -90,6 +90,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 	protected:
 
 		bool          analyzeStructure             (void);
+		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
 		bool          analyzeMeter                 (void);
 		bool          analyzeTokenDurations        (void);
@@ -123,6 +124,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumdrumToken *current);
 		bool          assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
 		                                            HumdrumToken* ptoken);
+		void          analyzeSpineStrands          (vector<TokenPair>& ends,
+		                                            HumdrumToken* starttok);
 
 };
 

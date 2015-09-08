@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep  6 16:35:53 PDT 2015
+// Last Modified: Tue Sep  8 01:03:32 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -3514,6 +3514,7 @@ bool HumdrumFileStructure::readStringCsv(const string& contents,
 
 
 bool HumdrumFileStructure::analyzeStructure(void) {
+	if (!analyzeStrands()          ) { return false; }
 	if (!analyzeGlobalParameters() ) { return false; }
 	if (!analyzeLocalParameters()  ) { return false; }
 	if (!analyzeTokenDurations()   ) { return false; }
@@ -4538,6 +4539,70 @@ cout << "GOT HERE AAA" << endl;
 	current->setParameters(token);
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeStrands -- Analyze spine strands.
+//
+
+bool HumdrumFileStructure::analyzeStrands(void) {
+	int spines = getSpineCount();
+	spines1d.resize(0);
+	spines2d.resize(0);
+	int i, j;
+	for (i=0; i<spines; i++) {
+		HumdrumToken* tok = getSpineStart(i);
+		spines2d.resize(spines2d.size()+1);
+		analyzeSpineStrands(spines2d.back(), tok);
+	}
+   // The spine strands need to be sorted by line number.
+
+	for (i=0; i<spines2d.size(); i++) {
+		for (j=0; j<spines2d[i].size(); j++) {
+			spines1d.push_back(spines2d[i][j]);
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeSpineStrands -- Fill in the list of
+//   strands in a single spine.
+//
+
+void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
+		HumdrumToken* starttok) {
+
+	ends.resize(ends.size()+1);
+	int index = ends.size()-1;
+	ends[index].first = starttok;
+	HumdrumToken* tok = starttok;
+	while (tok != NULL) {
+		if ((tok->getSubtrack() > 1) && (tok->isMerge())) {
+			ends[index].last = tok;
+			return;
+		}
+		if (tok->isTerminator()) {
+			ends[index].last = tok;
+			return;
+		}
+		if (tok->getNextTokenCount() == 1) {
+			tok = tok->getNextToken();
+		} else if (tok->getNextTokenCount() > 1) {
+			// should only be 2, but allow for generalizing in the future.
+			for (int j=1; j<tok->getNextTokenCount(); j++) {
+				analyzeSpineStrands(ends, tok->getNextToken(j));
+			}
+		}
+	}
+
+	cerr << "Should not get here in analyzeSpineStrands()\n";
+}
 
 
 

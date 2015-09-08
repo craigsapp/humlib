@@ -40,6 +40,20 @@ namespace minHumdrum {
 #define OPT_NOMANIP  0x02
 #define OPT_NOGLOBAL 0x04
 
+
+class TokenPair {
+	public:
+		TokenPair(void) { clear(); }
+		~TokenPair() { clear(); }
+		void clear(void) {
+			first = NULL;
+			last  = NULL;
+		}
+		HumdrumToken* first;
+		HumdrumToken* last;
+};
+
+
 class HumdrumFileBase {
 	public:
 		              HumdrumFileBase              (void);
@@ -79,7 +93,7 @@ class HumdrumFileBase {
 		int           getLineCount              (void) const;
 		HumdrumToken& token                     (int lineindex, int fieldindex);
 		int           getMaxTrack               (void) const;
-		int           getMaxSpine   (void) const { return getMaxTrack(); }
+		int           getSpineCount (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo            (ostream& out = cout);
 		ostream&      printDataTypeInfo         (ostream& out = cout);
 		ostream&      printTrackInfo            (ostream& out = cout);
@@ -87,6 +101,8 @@ class HumdrumFileBase {
 		                             const string& separator = ",");
 
 		HumdrumToken* getTrackStart             (int track) const;
+		HumdrumToken* getSpineStart (int spine) const { 
+		                    return getTrackStart(spine+1); }
 		int           getTrackEndCount          (int track) const;
 		HumdrumToken* getTrackEnd               (int track,
 		                                         int subtrack) const;
@@ -154,6 +170,12 @@ class HumdrumFileBase {
 		// idprefix: an XML id prefix used to avoid id collisions when including
 		// multiple HumdrumFile XML in a single group.
 		string idprefix;
+
+		// strands1d: one-dimensional list of spine strands.
+		vector<TokenPair> spines1d;
+
+		// strands2d: one-dimensional list of spine strands.
+		vector<vector<TokenPair> > spines2d;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

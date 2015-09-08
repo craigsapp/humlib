@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep  6 16:35:53 PDT 2015
+// Last Modified: Tue Sep  8 01:03:32 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -702,6 +702,20 @@ ostream& operator<<(ostream& out, const HumdrumToken& token);
 #define OPT_NOMANIP  0x02
 #define OPT_NOGLOBAL 0x04
 
+
+class TokenPair {
+	public:
+		TokenPair(void) { clear(); }
+		~TokenPair() { clear(); }
+		void clear(void) {
+			first = NULL;
+			last  = NULL;
+		}
+		HumdrumToken* first;
+		HumdrumToken* last;
+};
+
+
 class HumdrumFileBase {
 	public:
 		              HumdrumFileBase              (void);
@@ -741,7 +755,7 @@ class HumdrumFileBase {
 		int           getLineCount              (void) const;
 		HumdrumToken& token                     (int lineindex, int fieldindex);
 		int           getMaxTrack               (void) const;
-		int           getMaxSpine   (void) const { return getMaxTrack(); }
+		int           getSpineCount (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo            (ostream& out = cout);
 		ostream&      printDataTypeInfo         (ostream& out = cout);
 		ostream&      printTrackInfo            (ostream& out = cout);
@@ -749,6 +763,8 @@ class HumdrumFileBase {
 		                             const string& separator = ",");
 
 		HumdrumToken* getTrackStart             (int track) const;
+		HumdrumToken* getSpineStart (int spine) const { 
+		                    return getTrackStart(spine+1); }
 		int           getTrackEndCount          (int track) const;
 		HumdrumToken* getTrackEnd               (int track,
 		                                         int subtrack) const;
@@ -816,6 +832,12 @@ class HumdrumFileBase {
 		// idprefix: an XML id prefix used to avoid id collisions when including
 		// multiple HumdrumFile XML in a single group.
 		string idprefix;
+
+		// strands1d: one-dimensional list of spine strands.
+		vector<TokenPair> spines1d;
+
+		// strands2d: one-dimensional list of spine strands.
+		vector<vector<TokenPair> > spines2d;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
@@ -911,6 +933,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 	protected:
 
 		bool          analyzeStructure             (void);
+		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
 		bool          analyzeMeter                 (void);
 		bool          analyzeTokenDurations        (void);
@@ -944,6 +967,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumdrumToken *current);
 		bool          assignDurationsToNonRhythmicTrack(HumdrumToken* endtoken,
 		                                            HumdrumToken* ptoken);
+		void          analyzeSpineStrands          (vector<TokenPair>& ends,
+		                                            HumdrumToken* starttok);
 
 };
 
