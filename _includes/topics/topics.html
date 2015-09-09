@@ -1,9 +1,7 @@
-
-
 <script>
 // vim: ts=3
 
-document.addEventListener("keydown", function(event) {
+document.addEventListener('keydown', function(event) {
 	switch (event.keyCode) {
 		case 49:
 			var topics = document.querySelector('details[class^="topic-"]');
@@ -15,7 +13,7 @@ document.addEventListener("keydown", function(event) {
 	}
 });
 
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener('DOMContentLoaded', function(event) {
 	checkAnchor();
 });
 
@@ -44,7 +42,7 @@ function checkAnchor() {
 //
 
 function closeAllTopics() {
-	var topics = document.querySelectorAll("details");
+	var topics = document.querySelectorAll('details');
 	for (var i=0; i<topics.length; i++) {
 		var detail = topics[i];
 		if (!detail) {
@@ -62,7 +60,7 @@ function closeAllTopics() {
 //
 
 function openAllTopics() {
-	var topics = document.querySelectorAll("details");
+	var topics = document.querySelectorAll('details');
 	for (var i=0; i<topics.length; i++) {
 		var detail = topics[i];
 		if (!detail) {

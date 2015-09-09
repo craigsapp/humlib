@@ -12,8 +12,10 @@ title: Topics
 ---
 
 
+<p>
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllTopics()">Open all</span>]
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllTopics()">Close all</span>]
+</p>
 
 
 <details class="topic-cvs">
