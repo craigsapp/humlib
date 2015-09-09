@@ -27,6 +27,8 @@ CVS Import/Export
 {% include topics/cvs.html %}
 </details>
 
+<!--
+
 <details class="topic-xml">
 <summary>
 XML Export
@@ -62,3 +64,4 @@ Strands
 {% include topics/strand.html %}
 </details>
 
+-->
