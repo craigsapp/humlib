@@ -18,8 +18,6 @@ Open all
 Close all
 </span>]
 
-{% include topics/topics.html %}
-
 <details class="topic-cvs">
 <summary>
 CVS Import/Export
