@@ -1246,7 +1246,6 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 }
 
 
-
 // END_MERGE
 
 } // end namespace std;

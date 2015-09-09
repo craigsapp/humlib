@@ -1212,9 +1212,10 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 		strand2d.resize(strand2d.size()+1);
 		analyzeSpineStrands(strand2d.back(), tok);
 	}
-   // The spine strands need to be sorted by line number.
 
 	for (i=0; i<strand2d.size(); i++) {
+		std::sort(strand2d[i].begin(), strand2d[i].end(), 
+				sortTokenPairsByLineIndex);
 		for (j=0; j<strand2d[i].size(); j++) {
 			strand1d.push_back(strand2d[i][j]);
 		}

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  8 01:16:55 PDT 2015
+// Last Modified: Wed Sep  9 01:09:05 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -4556,9 +4556,10 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 		strand2d.resize(strand2d.size()+1);
 		analyzeSpineStrands(strand2d.back(), tok);
 	}
-   // The spine strands need to be sorted by line number.
 
 	for (i=0; i<strand2d.size(); i++) {
+		std::sort(strand2d[i].begin(), strand2d[i].end(), 
+				sortTokenPairsByLineIndex);
 		for (j=0; j<strand2d[i].size(); j++) {
 			strand1d.push_back(strand2d[i][j]);
 		}
@@ -7194,7 +7195,6 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 	out << token.c_str();
 	return out;
 }
-
 
 
 

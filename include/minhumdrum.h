@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  8 01:16:55 PDT 2015
+// Last Modified: Wed Sep  9 01:09:05 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -714,6 +714,19 @@ class TokenPair {
 		HumdrumToken* first;
 		HumdrumToken* last;
 };
+
+
+bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
+	if (a.first->getLineIndex() < b.first->getLineIndex()) {
+		return true;
+	}
+	if (a.first->getLineIndex() == b.first->getLineIndex()) {
+		if (a.first->getFieldIndex() < b.first->getFieldIndex()) {
+			return true;
+		}
+	}
+	return false;
+}
 
 
 class HumdrumFileBase {
