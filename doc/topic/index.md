@@ -11,6 +11,7 @@ breadcrumbs: [
 title: Topics
 ---
 
+{% include topics/topics.html %}
 
 <p>
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllTopics()">Open all</span>]
