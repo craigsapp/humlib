@@ -1,19 +1,17 @@
 @@BEGIN:	FunctionDocumentation
 @INDEXED:	yes
 @CLASSNAME:	HumdrumFileStructure
-@METHOD:	readStringNoRhythmCSV
+@METHOD:	readStringNoRhythmCsv
 @ACCESS:	public
 @RETURN:	bool          
-bool          
+@RETURN:	bool          
 @PARAMETERS:	const char* contents, const string& separator = ","
-const string& contents, const string& separator = ","
+@PARAMETERS:	const string& contents, const string& separator = ","
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		248-261
-@SEEALSO:
+@LINES:		249-262
 @SHORTDESC:	Read a string, but do not analyze the rhythm (or parameters) in the read data.
 @LONGDESC:	Read a string, but
 	do not analyze the rhythm (or parameters) in the read data.
-	default value: separator = ","
 	
 
 @@BEGIN: EXAMPLE
@@ -23,20 +21,11 @@ const string& contents, const string& separator = ","
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileStructure::readStringNoRhythmCSV -- Read a string, but
-//   do not analyze the rhythm (or parameters) in the read data.
-//       default value: separator = ","
-//
 
-
-bool HumdrumFileStructure::readStringNoRhythmCSV(const char* contents,
+bool HumdrumFileStructure::readStringNoRhythmCsv(const char* contents,
 		const string& separator) {
-	return HumdrumFileBase::readStringCSV(contents);
+	return HumdrumFileBase::readStringCsv(contents);
 }
-
-
 
 
 @@END:	FunctionDocumentation

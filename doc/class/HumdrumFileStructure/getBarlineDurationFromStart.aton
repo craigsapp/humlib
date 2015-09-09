@@ -5,9 +5,9 @@
 @ACCESS:	public
 @RETURN:	HumNum        
 @PARAMETERS:	int index
+@QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		419-438
-@SEEALSO:
+@LINES:		420-439
 @SHORTDESC:	Return the duration between the start of the Humdrum file and the given barline.
 @LONGDESC:	Return the duration
 	between the start of the Humdrum file and the given barline.
@@ -20,11 +20,6 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-///////////////////////////////
-//
-// HumdrumFileStructure::getBarlineDurationFromStart -- Return the duration
-//    between the start of the Humdrum file and the given barline.
-//
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
@@ -38,8 +33,6 @@ HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	}
 	return barlines[index]->getDurationFromStart();
 }
-
-
 
 
 @@END:	FunctionDocumentation

@@ -354,10 +354,11 @@ sub getSourceFile {
 		}
 	}
 
+	my @incfiles = ("$classname.h");
 	# cannot find in .cpp files, check the .h file for an alias:
-	foreach my $file (@srcfiles) {
+	foreach my $file (@incfiles) {
 		next if $file !~ /\.h$/;
-		open (SFILE, "$srcdir/$file") or die "Cannot read $srcdir/$file\n";
+		open (SFILE, "$incdir/$file") or die "Cannot read $incdir/$file\n";
 		@contents = <SFILE>;
 		close FILE;
 		foreach my $line (@contents) {

@@ -1,0 +1,33 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileStructure
+@METHOD:	getStrandStart
+@ACCESS:	public
+@RETURN:	HumdrumToken* 
+@RETURN:	HumdrumToken* 
+@PARAMETERS:	int index
+@PARAMETERS:	int sindex, int index
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumdrumFileStructure.cpp
+@LINES:		1264-1274
+@SHORTDESC:	Return the first token in the a strand.
+@LONGDESC:	Return the first token
+	in the a strand.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumdrumToken* HumdrumFileStructure::getStrandStart(int index) const {
+	return strand1d[index].first;
+}
+
+
+@@END:	FunctionDocumentation
+

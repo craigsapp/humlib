@@ -5,9 +5,9 @@
 @ACCESS:	public
 @RETURN:	int           
 @PARAMETERS:	void
+@QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		374-386
-@SEEALSO:
+@LINES:		375-387
 @SHORTDESC:	Return the number of barlines in the file.
 @LONGDESC:	Return the number of barlines in
 	the file.  If there is a pickup beat, then the count includes an imaginary
@@ -22,19 +22,10 @@
 @@END:	EXAMPLE
 
 @SRCCODE:
-//////////////////////////////
-//
-// HumdrumFileStructure::getBarlineCount -- Return the number of barlines in
-//   the file.  If there is a pickup beat, then the count includes an imaginary
-//   barline before the first pickup (and the start of the file will be returned
-//   for barline(0).
-//
 
 int HumdrumFileStructure::getBarlineCount(void) const {
 	return barlines.size();
 }
-
-
 
 
 @@END:	FunctionDocumentation
