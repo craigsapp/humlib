@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  9 01:09:05 PDT 2015
+// Last Modified: Fri Sep 11 01:30:16 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2168,6 +2168,17 @@ HumdrumFile::HumdrumFile(void) {
 	// do nothing
 }
 
+HumdrumFile::HumdrumFile(const string& filename) :
+		HUMDRUMFILE_PARENT() {
+	read(filename);
+}
+
+
+HumdrumFile::HumdrumFile(istream& contents) :
+		HUMDRUMFILE_PARENT() {
+	read(contents);
+}
+
 
 
 //////////////////////////////
@@ -2266,6 +2277,24 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
+	validParse = false;
+	quietParse = false;
+}
+
+HumdrumFileBase::HumdrumFileBase(const string& filename) {
+	addToTrackStarts(NULL);
+	ticksperquarternote = -1;
+	validParse = false;
+	quietParse = false;
+	read(filename);
+}
+
+HumdrumFileBase::HumdrumFileBase(istream& contents) {
+	addToTrackStarts(NULL);
+	ticksperquarternote = -1;
+	validParse = false;
+	quietParse = false;
+	read(contents);
 }
 
 
@@ -2344,6 +2373,7 @@ bool HumdrumFileBase::read(const char* filename) {
 	}
 	int status = HumdrumFileBase::read(infile);
 	infile.close();
+	validParse = status;
 	return status;
 }
 
@@ -2356,11 +2386,12 @@ bool HumdrumFileBase::read(istream& contents) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return false; }
-	if (!analyzeLines()          ) { return false; }
-	if (!analyzeSpines()         ) { return false; }
-	if (!analyzeLinks()          ) { return false; }
-	if (!analyzeTracks()         ) { return false; }
+	if (!analyzeTokens()         ) { validParse = false; return false; }
+	if (!analyzeLines()          ) { validParse = false; return false; }
+	if (!analyzeSpines()         ) { validParse = false; return false; }
+	if (!analyzeLinks()          ) { validParse = false; return false; }
+	if (!analyzeTracks()         ) { validParse = false; return false; }
+	validParse = true;
 	return true;
 }
 
@@ -2389,6 +2420,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 	}
 	int status = HumdrumFileBase::readCsv(infile, separator);
 	infile.close();
+	validParse = status;
 	return status;
 }
 
@@ -2402,11 +2434,12 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return false; }
-	if (!analyzeLines()          ) { return false; }
-	if (!analyzeSpines()         ) { return false; }
-	if (!analyzeLinks()          ) { return false; }
-	if (!analyzeTracks()         ) { return false; }
+	if (!analyzeTokens()         ) { validParse = false; return false; }
+	if (!analyzeLines()          ) { validParse = false; return false; }
+	if (!analyzeSpines()         ) { validParse = false; return false; }
+	if (!analyzeLinks()          ) { validParse = false; return false; }
+	if (!analyzeTracks()         ) { validParse = false; return false; }
+	validParse = true;
 	return true;
 }
 
@@ -2435,7 +2468,7 @@ bool HumdrumFileBase::readString(const char* contents) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::readStringCsv -- read Humdrum data in CSV format.
+// HumdrumFileBase::readStringCsv -- Reads Humdrum data in CSV format.
 //
 
 bool HumdrumFileBase::readStringCsv(const char* contents,
@@ -2451,6 +2484,42 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 	stringstream infile;
 	infile << contents;
 	return readCsv(infile, separator);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::isValid -- Returns true if last read was 
+//     successful.
+//
+
+bool HumdrumFileBase::isValid(void) const {
+   return validParse;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::setQuietParse -- Prevent error messages from
+//   being displayed when reading data.
+//
+
+void HumdrumFileBase::setQuietParse(void) {
+	quietParse = false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::setNoisyParse -- Display  error messages 
+//   on console when reading data.
+//
+
+void HumdrumFileBase::setNoisyParse(void) {
+	quietParse = true;
 }
 
 
@@ -3346,11 +3415,45 @@ ostream& operator<<(ostream& out, HumdrumFileBase& infile) {
 
 //////////////////////////////
 //
+// sortTokenParisByLineIndex -- Sort two tokens so that the one
+//    on the smaller line is first.  If both are on the same line then
+//    sort the left-most token first.
+//
+
+bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
+	if (a.first->getLineIndex() < b.first->getLineIndex()) {
+		return true;
+	}
+	if (a.first->getLineIndex() == b.first->getLineIndex()) {
+		if (a.first->getFieldIndex() < b.first->getFieldIndex()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+//////////////////////////////
+//
 // HumdrumFileContent::HumdrumFileContent --
 //
 
 HumdrumFileContent::HumdrumFileContent(void) {
 	// do nothing
+}
+
+
+HumdrumFileContent::HumdrumFileContent(const string& filename) :
+		HumdrumFileStructure() {
+	read(filename);
+}
+
+
+HumdrumFileContent::HumdrumFileContent(istream& contents) :
+		HumdrumFileStructure() {
+	read(contents);
 }
 
 
@@ -3377,6 +3480,16 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 	// do nothing
 }
 
+HumdrumFileStructure::HumdrumFileStructure(const string& filename) :
+		HumdrumFileBase() {
+	read(filename);
+}
+
+HumdrumFileStructure::HumdrumFileStructure(istream& contents) :
+		HumdrumFileBase() {
+	read(contents);
+}
+
 
 
 //////////////////////////////
@@ -3401,23 +3514,31 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 bool HumdrumFileStructure::read(istream& contents) {
 	if (!readNoRhythm(contents)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
+
 
 bool HumdrumFileStructure::read(const char* filename) {
 	if (!readNoRhythm(filename)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
+ 
 
 bool HumdrumFileStructure::read(const string& filename) {
 	if (!readNoRhythm(filename)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
 
 

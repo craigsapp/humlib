@@ -33,6 +33,16 @@ HumdrumFileStructure::HumdrumFileStructure(void) {
 	// do nothing
 }
 
+HumdrumFileStructure::HumdrumFileStructure(const string& filename) :
+		HumdrumFileBase() {
+	read(filename);
+}
+
+HumdrumFileStructure::HumdrumFileStructure(istream& contents) :
+		HumdrumFileBase() {
+	read(contents);
+}
+
 
 
 //////////////////////////////
@@ -57,23 +67,31 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 bool HumdrumFileStructure::read(istream& contents) {
 	if (!readNoRhythm(contents)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
+
 
 bool HumdrumFileStructure::read(const char* filename) {
 	if (!readNoRhythm(filename)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
+ 
 
 bool HumdrumFileStructure::read(const string& filename) {
 	if (!readNoRhythm(filename)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
 
 

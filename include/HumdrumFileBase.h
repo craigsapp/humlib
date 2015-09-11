@@ -53,23 +53,13 @@ class TokenPair {
 		HumdrumToken* last;
 };
 
-
-bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
-	if (a.first->getLineIndex() < b.first->getLineIndex()) {
-		return true;
-	}
-	if (a.first->getLineIndex() == b.first->getLineIndex()) {
-		if (a.first->getFieldIndex() < b.first->getFieldIndex()) {
-			return true;
-		}
-	}
-	return false;
-}
-
+bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 
 class HumdrumFileBase {
 	public:
 		              HumdrumFileBase              (void);
+                    HumdrumFileBase              (const string& contents);
+                    HumdrumFileBase              (istream& contents);
 		             ~HumdrumFileBase              ();
 
 		bool          read                         (istream& contents);
@@ -88,6 +78,9 @@ class HumdrumFileBase {
 		                                            const string& separator=",");
 		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
+		bool          isValid                      (void) const;
+		void          setQuietParse                (void);
+		void          setNoisyParse                (void);
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }
@@ -189,6 +182,13 @@ class HumdrumFileBase {
 
 		// strands2d: one-dimensional list of spine strands.
 		vector<vector<TokenPair> > strand2d;
+
+		// validParse: Set to true if a read is successful.
+		bool validParse;
+
+		// quietParse: Set to true if error messages should not be
+		// printed to the console when reading.
+		bool quietParse;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

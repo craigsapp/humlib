@@ -29,6 +29,17 @@ HumdrumFile::HumdrumFile(void) {
 	// do nothing
 }
 
+HumdrumFile::HumdrumFile(const string& filename) :
+		HUMDRUMFILE_PARENT() {
+	read(filename);
+}
+
+
+HumdrumFile::HumdrumFile(istream& contents) :
+		HUMDRUMFILE_PARENT() {
+	read(contents);
+}
+
 
 
 //////////////////////////////

@@ -29,6 +29,8 @@ namespace minHumdrum {
 class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile         (void);
+		              HumdrumFile         (const string& filename);
+		              HumdrumFile         (istream& filename);
 		             ~HumdrumFile         ();
 
 		ostream&      printXml            (ostream& out = cout, int level = 0,

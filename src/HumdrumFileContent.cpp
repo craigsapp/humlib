@@ -28,6 +28,18 @@ HumdrumFileContent::HumdrumFileContent(void) {
 }
 
 
+HumdrumFileContent::HumdrumFileContent(const string& filename) :
+		HumdrumFileStructure() {
+	read(filename);
+}
+
+
+HumdrumFileContent::HumdrumFileContent(istream& contents) :
+		HumdrumFileStructure() {
+	read(contents);
+}
+
+
 
 //////////////////////////////
 //

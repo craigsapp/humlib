@@ -30,6 +30,8 @@ namespace minHumdrum {
 class HumdrumFileStructure : public HumdrumFileBase {
 	public:
 		              HumdrumFileStructure         (void);
+		              HumdrumFileStructure         (const string& filename);
+		              HumdrumFileStructure         (istream& contents);
 		             ~HumdrumFileStructure         ();
 
 		// TSV reading functions:

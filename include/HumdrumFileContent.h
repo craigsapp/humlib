@@ -24,6 +24,8 @@ namespace minHumdrum {
 class HumdrumFileContent : public HumdrumFileStructure {
 	public:
 		              HumdrumFileContent         (void);
+		              HumdrumFileContent         (const string& filename);
+		              HumdrumFileContent         (istream& contents);
 		             ~HumdrumFileContent         ();
 };
 
