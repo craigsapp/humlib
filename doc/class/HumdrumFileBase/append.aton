@@ -8,7 +8,7 @@
 @PARAMETERS:	const char* line
 @PARAMETERS:	const string& line
 @FILE:		HumdrumFileBase.cpp
-@LINES:		332-343
+@LINES:		354-365
 @SHORTDESC:	Add a line to the file's contents.
 @LONGDESC:	Add a line to the file's contents.  The file's
 	spine and rhythmic structure should be recalculated after an append.

@@ -6,7 +6,7 @@
 @RETURN:	string        
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		79-88
+@LINES:		76-85
 @SHORTDESC:	Return the HumdrumXML ID attribute prefix.
 @LONGDESC:	Return the HumdrumXML ID attribute prefix.
 	

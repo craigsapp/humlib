@@ -6,7 +6,7 @@
 @RETURN:	void          
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		258-268
+@LINES:		280-290
 @SHORTDESC:	Prevent error messages from being displayed when reading data.
 @LONGDESC:	Prevent error messages from
 	being displayed when reading data.

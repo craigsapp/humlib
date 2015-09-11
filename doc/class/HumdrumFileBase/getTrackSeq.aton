@@ -6,7 +6,7 @@
 @RETURN:	vector<vector<HumdrumToken*> > 
 @PARAMETERS:	int track, int options
 @FILE:		HumdrumFileBase.cpp
-@LINES:		514-563
+@LINES:		536-585
 @SHORTDESC:	Extract a sequence of tokens for the given spine.
 @LONGDESC:	Extract a sequence of tokens
 	for the given spine.  All subspine tokens will be included.

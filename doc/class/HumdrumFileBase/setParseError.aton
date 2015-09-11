@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	setParseError
+@ACCESS:	public
+@RETURN:	bool          
+@RETURN:	bool          
+@PARAMETERS:	stringstream& err
+@PARAMETERS:	const string& err
+@FILE:		HumdrumFileBase.cpp
+@LINES:		106-120
+@SHORTDESC:	Set an error message from parsing input data.
+@LONGDESC:	Set an error message from parsing
+	input data.  The size of the message will keep track of whether
+	or not an error was generated.  If no error message is generated
+	when reading data, then the parsing of the data is assumed to be
+	good.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumFileBase::setParseError(const string& err) {
+	parseError = err;
+	return !parseError.size();
+}
+
+
+@@END:	FunctionDocumentation
+

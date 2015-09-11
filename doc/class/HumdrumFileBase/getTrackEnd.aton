@@ -7,7 +7,7 @@
 @PARAMETERS:	int track, int subtrack
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		607-636
+@LINES:		629-658
 @SHORTDESC:	Returns a pointer to the terminal manipulator token for the given track and subtrack.
 @LONGDESC:	Returns a pointer to the terminal manipulator
 	token for the given track and subtrack.  Sub-tracks are indexed from 0 up

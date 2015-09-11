@@ -7,7 +7,7 @@
 @PARAMETERS:	const string& contents
 @PARAMETERS:	istream& contents
 @FILE:		HumdrumFileBase.cpp
-@LINES:		27-39
+@LINES:		27-38
 @SHORTDESC:	HumdrumFileBase constructor.
 @LONGDESC:	HumdrumFileBase constructor.
 	
@@ -23,7 +23,6 @@
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
-	validParse = false;
 	quietParse = false;
 }
 

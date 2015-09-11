@@ -6,7 +6,7 @@
 @RETURN:	HumdrumLine&  
 @PARAMETERS:	int index
 @FILE:		HumdrumFileBase.cpp
-@LINES:		90-107
+@LINES:		87-104
 @SHORTDESC:	Access a Humdrum file line by and index.
 @LONGDESC:	Access a Humdrum file line by and index.
 	Negative values reference the end of the list of lines.
