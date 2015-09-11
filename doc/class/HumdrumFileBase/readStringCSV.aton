@@ -8,9 +8,9 @@
 @PARAMETERS:	const char* contents, const string& separator=","
 @PARAMETERS:	const string& contents, const string& separator=","
 @FILE:		HumdrumFileBase.cpp
-@LINES:		202-214
-@SHORTDESC:	read Humdrum data in CSV format.
-@LONGDESC:	read Humdrum data in CSV format.
+@LINES:		224-236
+@SHORTDESC:	Reads Humdrum data in CSV format.
+@LONGDESC:	Reads Humdrum data in CSV format.
 	
 
 @@BEGIN: EXAMPLE

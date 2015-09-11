@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		375-387
+@LINES:		393-405
 @SHORTDESC:	Return the number of barlines in the file.
 @LONGDESC:	Return the number of barlines in
 	the file.  If there is a pickup beat, then the count includes an imaginary

@@ -6,6 +6,7 @@ breadcrumbs: [
                 ['/doc/class',    'classes'],
                 ['/doc/example',  'examples'],
                 ['/doc/topic',    'topics'],
+                ['/doc/tutorial', 'tutorials'],
                 ['/doc/snippets', 'snippets']
         ]
 title: Code snippets

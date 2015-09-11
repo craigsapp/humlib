@@ -4,6 +4,8 @@
 @METHOD:	HumdrumFileContent
 @ACCESS:	public
 @PARAMETERS:	void
+@PARAMETERS:	const string& filename
+@PARAMETERS:	istream& contents
 @FILE:		HumdrumFileContent.cpp
 @LINES:		20-29
 @SHORTDESC:	// HumdrumFileContent::HumdrumFileContent -- 

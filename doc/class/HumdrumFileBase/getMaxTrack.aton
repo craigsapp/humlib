@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		318-328
+@LINES:		376-386
 @SHORTDESC:	Returns the number of primary spines in the data.
 @LONGDESC:	Returns the number of primary
 	spines in the data.

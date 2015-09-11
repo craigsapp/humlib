@@ -10,7 +10,7 @@
 @PARAMETERS:	const char* filename
 @PARAMETERS:	const string& filename
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		49-64
+@LINES:		59-76
 @SHORTDESC:	Read the contents of a file from a file or istream.
 @LONGDESC:	Read the contents of a file from a file or
 	istream.  The file's structure is analyzed, and then the rhythmic structure
@@ -27,12 +27,12 @@
 
 bool HumdrumFileStructure::read(istream& contents) {
 	if (!readNoRhythm(contents)) {
-		return false;
+		validParse = false;
+	} else {
+		validParse = analyzeStructure();
 	}
-	return analyzeStructure();
+	return validParse;
 }
-
-bool HumdrumFileStructure::read(const char* filename) {
 
 
 @@END:	FunctionDocumentation

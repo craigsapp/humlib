@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken& 
 @PARAMETERS:	int lineindex, int fieldindex
 @FILE:		HumdrumFileBase.cpp
-@LINES:		304-316
+@LINES:		362-374
 @SHORTDESC:	Return the token at the given line/field index.
 @LONGDESC:	Return the token at the given line/field index.
 	

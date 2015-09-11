@@ -10,7 +10,7 @@
 @PARAMETERS:	const char* filename
 @PARAMETERS:	const string& filename
 @FILE:		HumdrumFileBase.cpp
-@LINES:		91-100
+@LINES:		109-118
 @SHORTDESC:	Load file contents from an input stream or file.
 @LONGDESC:	Load file contents from an input stream or file.
 	

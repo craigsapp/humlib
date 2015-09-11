@@ -10,7 +10,7 @@
 @PARAMETERS:	const char* filename, const string& separator = ","
 @PARAMETERS:	const string& filename, const string& separator = ","
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		205-217
+@LINES:		223-235
 @SHORTDESC:	Similar to the readCsv() functions, but does not parse rhythm (or parameters).
 @LONGDESC:	Similar to the readCsv()
 	functions, but does not parse rhythm (or parameters).

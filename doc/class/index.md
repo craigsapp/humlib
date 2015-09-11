@@ -2,11 +2,12 @@
 layout: default
 breadcrumbs: [
                 ['/', 'home'],
-                ['/doc', 'documentation'],
-                ['/doc/snippet', 'snippets'],
-                ['/doc/example', 'examples'],
-                ['/doc/topic', 'topics'],
-                ['/doc/class', 'classes']
+                ['/doc',          'documentation'],
+                ['/doc/snippet',  'snippets'],
+                ['/doc/example',  'examples'],
+                ['/doc/topic',    'topics'],
+                ['/doc/tutorial', 'tutoials'],
+                ['/doc/class',    'classes']
         ]
 title: Classes in the minHumdrum library
 ---

@@ -6,7 +6,7 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout, const string& separator = ","
 @FILE:		HumdrumFileBase.cpp
-@LINES:		224-240
+@LINES:		282-298
 @SHORTDESC:	print Humdrum file content in CSV format.
 @LONGDESC:	print Humdrum file content in
 	CSV format.

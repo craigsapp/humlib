@@ -7,7 +7,7 @@
 @PARAMETERS:	int track
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		507-522
+@LINES:		565-580
 @SHORTDESC:	Return the starting exclusive interpretation for the given track.
 @LONGDESC:	Return the starting exclusive
 	interpretation for the given track.  Returns NULL if the track

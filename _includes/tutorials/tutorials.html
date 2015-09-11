@@ -1,0 +1,82 @@
+<script>
+// vim: ts=3
+
+document.addEventListener('keydown', function(event) {
+	switch (event.keyCode) {
+		case 49:
+			var tutorials = document.querySelector('details[class^="tutorial-"]');
+			if (tutorials.open) {
+				closeAllTutorials();
+			} else {
+				openAllTutorials();
+			}
+	}
+});
+
+document.addEventListener('DOMContentLoaded', function(event) {
+	checkAnchor();
+});
+
+
+function checkAnchor() {
+	var anchor = '';
+	var matches = document.location.href.match(/#(.*)/);
+	if (!matches) {
+		return;
+	}
+	anchor = matches[1];
+	console.log(anchor);
+	var tutorials = document.querySelector('details.tutorial-' + anchor);
+	if (!tutorials) {
+		return;
+	}
+	tutorials.open = 'open';
+	tutorials.scrollIntoViewIfNeeded();
+}
+
+
+
+//////////////////////////////
+//
+// closeAllTutorials --
+//
+
+function closeAllTutorials() {
+	var tutorials = document.querySelectorAll('details');
+	for (var i=0; i<tutorials.length; i++) {
+		var detail = tutorials[i];
+		if (!detail) {
+			continue;
+		}
+		detail.removeAttribute('open');
+	}
+}
+
+
+
+//////////////////////////////
+//
+// openAllTutorials --
+//
+
+function openAllTutorials() {
+	var tutorials = document.querySelectorAll('details');
+	for (var i=0; i<tutorials.length; i++) {
+		var detail = tutorials[i];
+		if (!detail) {
+			continue;
+		}
+		detail.open = 'open';
+	}
+}
+
+
+</script>
+
+<style>
+
+details summary {
+	color: #159987;
+}
+
+</style>

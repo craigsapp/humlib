@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		270-284
+@LINES:		288-302
 @SHORTDESC:	Return the total duration of the score in quarter note units.
 @LONGDESC:	Return the total duration
 	of the score in quarter note units.  Returns zero if no lines in the

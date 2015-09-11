@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		293-302
+@LINES:		351-360
 @SHORTDESC:	Returns the number of lines.
 @LONGDESC:	Returns the number of lines.
 	

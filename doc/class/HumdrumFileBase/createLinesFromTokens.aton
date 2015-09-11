@@ -6,7 +6,7 @@
 @RETURN:	void          
 @PARAMETERS:	void
 @FILE:		HumdrumFileBase.cpp
-@LINES:		260-272
+@LINES:		318-330
 @SHORTDESC:	Generate Humdrum lines strings from the stored list of tokens.
 @LONGDESC:	Generate Humdrum lines strings
 	from the stored list of tokens.

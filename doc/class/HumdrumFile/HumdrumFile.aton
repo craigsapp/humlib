@@ -4,6 +4,8 @@
 @METHOD:	HumdrumFile
 @ACCESS:	public
 @PARAMETERS:	void
+@PARAMETERS:	const string& filename
+@PARAMETERS:	istream& filename
 @FILE:		HumdrumFile.cpp
 @LINES:		22-31
 @SHORTDESC:	HumdrumFile constructor.
@@ -21,6 +23,8 @@
 HumdrumFile::HumdrumFile(void) {
 	// do nothing
 }
+
+HumdrumFile::HumdrumFile(const string& filename) :
 
 
 @@END:	FunctionDocumentation

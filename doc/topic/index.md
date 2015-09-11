@@ -6,6 +6,7 @@ breadcrumbs: [
                 ['/doc/class',    'classes'],
                 ['/doc/example',  'examples'],
                 ['/doc/snippet',  'snippets'],
+                ['/doc/tutorial', 'tutorials'],
                 ['/doc/topic',    'topics']
         ]
 title: Topics

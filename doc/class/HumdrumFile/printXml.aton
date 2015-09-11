@@ -6,7 +6,7 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumFile.cpp
-@LINES:		44-118
+@LINES:		55-129
 @SHORTDESC:	Print a HumdrumFile object in XML format.
 @LONGDESC:	Print a HumdrumFile object in XML format.
 	
