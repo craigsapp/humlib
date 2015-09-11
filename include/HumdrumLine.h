@@ -101,8 +101,8 @@ class HumdrumLine : public string, public HumHash {
 		                                 const string& separator = ",");
 
 	protected:
-		bool     analyzeTracks          (void);
-		bool     analyzeTokenDurations  (void);
+		bool     analyzeTracks          (string& err);
+		bool     analyzeTokenDurations  (string& err);
 		void     setLineIndex           (int index);
 		void     clear                  (void);
 		void     setDuration            (HumNum aDur);

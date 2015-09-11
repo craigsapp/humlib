@@ -33,14 +33,12 @@ namespace minHumdrum {
 HumdrumFileBase::HumdrumFileBase(void) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
-	validParse = false;
 	quietParse = false;
 }
 
 HumdrumFileBase::HumdrumFileBase(const string& filename) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
-	validParse = false;
 	quietParse = false;
 	read(filename);
 }
@@ -48,7 +46,6 @@ HumdrumFileBase::HumdrumFileBase(const string& filename) {
 HumdrumFileBase::HumdrumFileBase(istream& contents) {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
-	validParse = false;
 	quietParse = false;
 	read(contents);
 }
@@ -109,6 +106,34 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::setParseError -- Set an error message from parsing
+//     input data.  The size of the message will keep track of whether
+//     or not an error was generated.  If no error message is generated
+//     when reading data, then the parsing of the data is assumed to be
+//     good.
+//
+
+bool HumdrumFileBase::setParseError(const string& err) {
+	parseError = err;
+	return !parseError.size();
+}
+
+
+bool HumdrumFileBase::ssetParseError(stringstream& err) {
+	return setParseError(err.str());
+}
+
+
+bool HumdrumFileBase::setParseError(const string& format, ...) {
+	char buffer[1024] = {0};	
+	snprintf(buffer, 1024, format, ...);
+	return setParseError(buffer);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::read -- Load file contents from an input stream or file.
 //
 
@@ -124,13 +149,12 @@ bool HumdrumFileBase::read(const char* filename) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return false;
+			return setParseError("Cannot open file %s for reading.", filename);
 		}
 	}
-	int status = HumdrumFileBase::read(infile);
+	HumdrumFileBase::read(infile);
 	infile.close();
-	validParse = status;
-	return status;
+	return isValid();
 }
 
 
@@ -142,14 +166,14 @@ bool HumdrumFileBase::read(istream& contents) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { validParse = false; return false; }
-	if (!analyzeLines()          ) { validParse = false; return false; }
-	if (!analyzeSpines()         ) { validParse = false; return false; }
-	if (!analyzeLinks()          ) { validParse = false; return false; }
-	if (!analyzeTracks()         ) { validParse = false; return false; }
-	validParse = true;
-	return true;
+	if (!analyzeTokens()         ) { return isValid(); }
+	if (!analyzeLines()          ) { return isValid(); }
+	if (!analyzeSpines()         ) { return isValid(); }
+	if (!analyzeLinks()          ) { return isValid(); }
+	if (!analyzeTracks()         ) { return isValid(); }
+	return isValid();
 }
+
 
 
 //////////////////////////////
@@ -171,13 +195,12 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return false;
+			return setParseError("Cannot open file %s for reading.", filename);
 		}
 	}
-	int status = HumdrumFileBase::readCsv(infile, separator);
+	HumdrumFileBase::readCsv(infile, separator);
 	infile.close();
-	validParse = status;
-	return status;
+	return isValid();
 }
 
 
@@ -190,13 +213,12 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 		s->setOwner(this);
 		lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { validParse = false; return false; }
-	if (!analyzeLines()          ) { validParse = false; return false; }
-	if (!analyzeSpines()         ) { validParse = false; return false; }
-	if (!analyzeLinks()          ) { validParse = false; return false; }
-	if (!analyzeTracks()         ) { validParse = false; return false; }
-	validParse = true;
-	return true;
+	if (!analyzeTokens()         ) { return isValid(); }
+	if (!analyzeLines()          ) { return isValid(); }
+	if (!analyzeSpines()         ) { return isValid(); }
+	if (!analyzeLinks()          ) { return isValid(); }
+	if (!analyzeTracks()         ) { return isValid(); }
+	return isValid();
 }
 
 
@@ -251,7 +273,7 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 //
 
 bool HumdrumFileBase::isValid(void) const {
-   return validParse;
+   return !parseError.size();
 }
 
 
@@ -311,7 +333,7 @@ bool HumdrumFileBase::analyzeTokens(void) {
 	for (i=0; i<lines.size(); i++) {
 		lines[i]->createTokensFromLine();
 	}
-	return true;
+	return isValid();
 }
 
 
@@ -647,7 +669,7 @@ bool HumdrumFileBase::analyzeLines(void) {
 	for (int i=0; i<lines.size(); i++) {
 		lines[i]->setLineIndex(i);
 	}
-	return true;
+	return isValid();
 }
 
 
@@ -660,12 +682,12 @@ bool HumdrumFileBase::analyzeLines(void) {
 
 bool HumdrumFileBase::analyzeTracks(void) {
 	for (int i=0; i<lines.size(); i++) {
-		int status = lines[i]->analyzeTracks();
+		int status = lines[i]->analyzeTracks(parseError);
 		if (!status) {
 			return false;
 		}
 	}
-	return true;
+	return isValid();
 }
 
 
@@ -688,11 +710,11 @@ bool HumdrumFileBase::analyzeLinks(void) {
 		next = lines[i];
 		if (previous != NULL) {
 			if (!stitchLinesTogether(*previous, *next)) {
-				return false;
+				return isValid();
 			}
 		}
 	}
-	return true;
+	return isValid();;
 }
 
 
@@ -710,13 +732,14 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 	// first handle simple cases where the spine assignments are one-to-one:
 	if (!previous.isInterpretation() && !next.isInterpretation()) {
 		if (previous.getTokenCount() != next.getTokenCount()) {
-			cerr << "Error lines " << (previous.getLineNumber())
-			     << " and " << (next.getLineNumber()) << " not same length\n";
-			cerr << "Line " << (previous.getLineNumber()) << ": "
-			     << previous << endl;
-			cerr << "Line " << (next.getLineNumber()) << ": "
-			     << next << endl;
-			return false;
+			stringstream err;
+			err << "Error lines " << (previous.getLineNumber())
+			    << " and " << (next.getLineNumber()) << " not same length\n";
+			err << "Line " << (previous.getLineNumber()) << ": "
+			    << previous << endl;
+			err << "Line " << (next.getLineNumber()) << ": "
+			    << next;
+			return setParseError(err);
 		}
 		for (i=0; i<previous.getTokenCount(); i++) {
 			previous.token(i).makeForwardLink(next.token(i));
@@ -757,32 +780,34 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 			// A new data stream is being added, the next linked token
 			// should be an exclusive interpretation.
 			if (!next.token(ii+1).isExclusiveInterpretation()) {
-				cerr << "Error: expecting exclusive interpretation on line "
-				     << next.getLineNumber() << " at token " << i << " but got "
-				     << next.token(i) << endl;
-				return false;
+				stringstream err;
+				err << "Error: expecting exclusive interpretation on line "
+				    << next.getLineNumber() << " at token " << i << " but got "
+				    << next.token(i) << endl;
+				return setParseError(err);
 			}
 			previous.token(i).makeForwardLink(next.token(ii++));
 			ii++;
 		} else if (previous.token(i).isExclusiveInterpretation()) {
 			previous.token(i).makeForwardLink(next.token(ii++));
 		} else {
-			cerr << "Error: should not get here" << endl;
-			return false;
+			return setParseError("Error: should not get here");
 		}
 	}
 
 	if ((i != previous.getTokenCount()) || (ii != next.getTokenCount())) {
-		cerr << "Error: cannot stitch lines together due to alignment problem\n";
-		cerr << "Line " << previous.getLineNumber() << ": "
-		     << previous << endl;
-		cerr << "Line " << next.getLineNumber() << ": "
-		     << next << endl;
-		cerr << "I = " <<i<< " token count " << previous.getTokenCount() << endl;
-		cerr << "II = " <<ii<< " token count " << next.getTokenCount() << endl;
+		stringstream err;
+		err << "Error: cannot stitch lines together due to alignment problem\n";
+		err << "Line " << previous.getLineNumber() << ": "
+		    << previous << endl;
+		err << "Line " << next.getLineNumber() << ": "
+		    << next << endl;
+		err << "I = " <<i<< " token count " << previous.getTokenCount() << endl;
+		err << "II = " <<ii<< " token count " << next.getTokenCount() << endl;
+		return setParseError(err);
 	}
 
-	return true;
+	return isValid();
 }
 
 
@@ -809,10 +834,11 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			continue;
 		}
 		if ((init == false) && !lines[i]->isExclusive()) {
-			cerr << "Error on line: " << (i+1) << ':' << endl;
-			cerr << "   Data found before exclusive interpretation" << endl;
-			cerr << "   LINE: " << *lines[i] << endl;
-			return false;
+			stringstream err;
+			err << "Error on line: " << (i+1) << ':' << endl;
+			err << "   Data found before exclusive interpretation" << endl;
+			err << "   LINE: " << *lines[i];
+			return setParseError(err);
 		}
 		if ((init == false) && lines[i]->isExclusive()) {
 			// first line of data in file.
@@ -831,10 +857,11 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			continue;
 		}
 		if (datatype.size() != lines[i]->getTokenCount()) {
-			cerr << "Error on line " << (i+1) << ':' << endl;
-			cerr << "   Expected " << datatype.size() << " fields,"
+			stringstream err;
+			err << "Error on line " << (i+1) << ':' << endl;
+			err << "   Expected " << datatype.size() << " fields,"
 			     << " but found " << lines[i]->getTokenCount() << endl;
-			return false;
+			return setParseError(err);
 		}
 		for (j=0; j<lines[i]->getTokenCount(); j++) {
 			lines[i]->token(j).setSpineInfo(sinfo[j]);
@@ -843,9 +870,9 @@ bool HumdrumFileBase::analyzeSpines(void) {
 		if (!lines[i]->isManipulator()) {
 			continue;
 		}
-		if (!adjustSpines(*lines[i], datatype, sinfo)) { return false; }
+		if (!adjustSpines(*lines[i], datatype, sinfo)) { return isValid(); }
 	}
-	return true;
+	return isValid();
 }
 
 
@@ -929,15 +956,15 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 					newinfo.resize(newinfo.size() + 1);
 					newinfo.back() = sinfo[i];
 				} else {
-					cerr << "ERROR1 in *x calculation" << endl;
-					return false;
+					return setParseError("ERROR1 in *x calculation");
 				}
 				i++;
 			} else {
-				cerr << "ERROR2 in *x calculation" << endl;
-				cerr << "Index " << i << " larger than allowed: "
+				stringstream err;
+				err << "ERROR2 in *x calculation" << endl;
+				err << "Index " << i << " larger than allowed: "
 				     << line.getTokenCount() - 1 << endl;
-				return false;
+				return setParseError(err);
 			}
 		} else if (line.token(i).isTerminateInterpretation()) {
 			// store pointer to terminate token in trackends
@@ -948,11 +975,12 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newinfo.resize(newinfo.size() + 1);
 			newinfo.back() = sinfo[i];
 			if (!((trackstarts.size() > 1) && (trackstarts.back() == NULL))) {
-				cerr << "Error: Exclusive interpretation with no preparation "
+				stringstream err;
+				err << "Error: Exclusive interpretation with no preparation "
 				     << "on line " << line.getLineIndex()
 				     << " spine index " << i << endl;
-				cerr << "Line: " << line << endl;
-				return false;
+				err << "Line: " << line << endl;
+				return setParseError(err);
 			}
 			if (trackstarts.back() == NULL) {
 				addToTrackStarts(&line.token(i));

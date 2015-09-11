@@ -63,6 +63,8 @@ class HumdrumFileBase {
 		             ~HumdrumFileBase              ();
 
 		bool          read                         (istream& contents);
+		bool          setParseError                (stringstream& err);
+		bool          setParseError                (const string& err);
 		bool          read                         (const char*   filename);
 		bool          read                         (const string& filename);
 		bool          readCsv                      (istream& contents,
@@ -183,12 +185,12 @@ class HumdrumFileBase {
 		// strands2d: one-dimensional list of spine strands.
 		vector<vector<TokenPair> > strand2d;
 
-		// validParse: Set to true if a read is successful.
-		bool validParse;
-
 		// quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
 		bool quietParse;
+
+		// parseError: Set to true if a read is successful.
+		bool parseError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
