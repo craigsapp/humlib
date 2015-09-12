@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 11 01:30:16 PDT 2015
+// Last Modified: Sat Sep 12 00:04:41 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -441,8 +441,8 @@ class HumdrumLine : public string, public HumHash {
 		                                 const string& separator = ",");
 
 	protected:
-		bool     analyzeTracks          (void);
-		bool     analyzeTokenDurations  (void);
+		bool     analyzeTracks          (string& err);
+		bool     analyzeTokenDurations  (string& err);
 		void     setLineIndex           (int index);
 		void     clear                  (void);
 		void     setDuration            (HumNum aDur);
@@ -630,7 +630,7 @@ class HumdrumToken : public string, public HumHash {
 		void     incrementState    (void);
 		void     setDuration       (const HumNum& dur);
 
-		bool     analyzeDuration   (void);
+		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
 		ostream& printXmlContentInfo(ostream& out = cout, int level = 0,
@@ -807,6 +807,9 @@ class HumdrumFileBase {
 		bool          processNonNullDataTokensForTrackBackward(
 		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
+		bool          setParseError                (stringstream& err);
+		bool          setParseError                (const string& err);
+		bool          setParseError                (const char* format, ...);
 
 	protected:
 
@@ -845,12 +848,12 @@ class HumdrumFileBase {
 		// strands2d: one-dimensional list of spine strands.
 		vector<vector<TokenPair> > strand2d;
 
-		// validParse: Set to true if a read is successful.
-		bool validParse;
-
 		// quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
 		bool quietParse;
+
+		// parseError: Set to true if a read is successful.
+		string parseError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

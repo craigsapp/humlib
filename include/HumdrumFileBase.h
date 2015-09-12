@@ -63,8 +63,6 @@ class HumdrumFileBase {
 		             ~HumdrumFileBase              ();
 
 		bool          read                         (istream& contents);
-		bool          setParseError                (stringstream& err);
-		bool          setParseError                (const string& err);
 		bool          read                         (const char*   filename);
 		bool          read                         (const string& filename);
 		bool          readCsv                      (istream& contents,
@@ -147,6 +145,9 @@ class HumdrumFileBase {
 		bool          processNonNullDataTokensForTrackBackward(
 		                                        HumdrumToken* starttoken,
 		                                        vector<HumdrumToken*> ptokens);
+		bool          setParseError                (stringstream& err);
+		bool          setParseError                (const string& err);
+		bool          setParseError                (const char* format, ...);
 
 	protected:
 
@@ -190,7 +191,7 @@ class HumdrumFileBase {
 		bool quietParse;
 
 		// parseError: Set to true if a read is successful.
-		bool parseError;
+		string parseError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

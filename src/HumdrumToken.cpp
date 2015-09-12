@@ -414,7 +414,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //   **kern and **recip data.  Add more data types here such as **koto.
 //
 
-bool HumdrumToken::analyzeDuration(void) {
+bool HumdrumToken::analyzeDuration(string& err) {
 	if ((*this) == NULL_DATA) {
 		duration.setValue(-1);
 		return true;

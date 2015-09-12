@@ -140,7 +140,7 @@ class HumdrumToken : public string, public HumHash {
 		void     incrementState    (void);
 		void     setDuration       (const HumNum& dur);
 
-		bool     analyzeDuration   (void);
+		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
 		                            const string& indent = "\t");
 		ostream& printXmlContentInfo(ostream& out = cout, int level = 0,

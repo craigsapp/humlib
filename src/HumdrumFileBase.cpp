@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <fstream>
+#include "stdarg.h"
 
 namespace minHumdrum {
 
@@ -119,14 +120,17 @@ bool HumdrumFileBase::setParseError(const string& err) {
 }
 
 
-bool HumdrumFileBase::ssetParseError(stringstream& err) {
+bool HumdrumFileBase::setParseError(stringstream& err) {
 	return setParseError(err.str());
 }
 
 
-bool HumdrumFileBase::setParseError(const string& format, ...) {
+bool HumdrumFileBase::setParseError(const char* format, ...) {
 	char buffer[1024] = {0};	
-	snprintf(buffer, 1024, format, ...);
+	va_list ap;
+	va_start(ap, format);
+	snprintf(buffer, 1024, format, ap);
+	va_end(ap);
 	return setParseError(buffer);
 }
 

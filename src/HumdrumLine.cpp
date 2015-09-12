@@ -952,16 +952,16 @@ ostream& HumdrumLine::printDataTypeInfo(ostream& out) {
 //    all tokens on a line.
 //
 
-bool HumdrumLine::analyzeTokenDurations(void) {
+bool HumdrumLine::analyzeTokenDurations(string& err) {
 	if (!hasSpines()) {
-		return true;
+		return !err.size();
 	}
 	for (int i=0; i<tokens.size(); i++) {
-		if (!tokens[i]->analyzeDuration()) {
-			return false;
+		if (!tokens[i]->analyzeDuration(err)) {
+			return !err.size();
 		}
 	}
-	return true;
+	return !err.size();
 }
 
 
@@ -974,9 +974,9 @@ bool HumdrumLine::analyzeTokenDurations(void) {
 //   original order.
 //
 
-bool HumdrumLine::analyzeTracks(void) {
+bool HumdrumLine::analyzeTracks(string& err) {
 	if (!hasSpines()) {
-		return true;
+		return !err.size();
 	}
 
 	string info;
@@ -1029,7 +1029,7 @@ bool HumdrumLine::analyzeTracks(void) {
 		}
 		tokens[i]->setSubtrackCount(subtracks[track]);
 	}
-	return true;
+	return !err.size();
 }
 
 
