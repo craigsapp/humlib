@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 00:12:36 PDT 2015
+// Last Modified: Sat Sep 12 03:05:52 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -740,7 +740,8 @@ class HumdrumFileBase {
 		                                            const string& separator=",");
 		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
-		bool          isValid                      (void) const;
+		bool          isValid                      (void);
+		string        getParseError                (void) const;
 		bool          isQuiet                      (void) const;
 		void          setQuietParsing              (void);
 		void          setNoisyParsing              (void);
@@ -855,6 +856,9 @@ class HumdrumFileBase {
 
 		// parseError: Set to true if a read is successful.
 		string parseError;
+
+		// displayError: Used to print error message only once.
+		bool displayError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

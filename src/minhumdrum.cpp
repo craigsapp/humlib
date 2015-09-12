@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 00:12:36 PDT 2015
+// Last Modified: Sat Sep 12 03:05:52 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2364,7 +2364,8 @@ bool HumdrumFileBase::setParseError(const string& err) {
 
 
 bool HumdrumFileBase::setParseError(stringstream& err) {
-	return setParseError(err.str());
+	parseError = err.str();
+	return !parseError.size();
 }
 
 
@@ -2374,7 +2375,8 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 	va_start(ap, format);
 	snprintf(buffer, 1024, format, ap);
 	va_end(ap);
-	return setParseError(buffer);
+	parseError = buffer;
+	return !parseError.size();
 }
 
 
@@ -2385,11 +2387,13 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 //
 
 bool HumdrumFileBase::read(const string& filename) {
+	displayError = true;
 	return HumdrumFileBase::read(filename.c_str());
 }
 
 
 bool HumdrumFileBase::read(const char* filename) {
+	displayError = true;
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return HumdrumFileBase::read(cin);
@@ -2406,6 +2410,7 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
+	displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
@@ -2452,6 +2457,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 
 
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
+	displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
@@ -2515,13 +2521,25 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 
 //////////////////////////////
 //
+// HumdrumFileBase::getParseError -- Return parse fail reason.
+//
+
+string HumdrumFileBase::getParseError(void) const {
+	return parseError;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::isValid -- Returns true if last read was 
 //     successful.
 //
 
-bool HumdrumFileBase::isValid(void) const {
-	if (!isQuiet()) {
+bool HumdrumFileBase::isValid(void) {
+	if (displayError && !isQuiet()) {
 		cerr << parseError << endl;
+		displayError = false;
 	}
    return !parseError.size();
 }
@@ -2532,10 +2550,12 @@ bool HumdrumFileBase::isValid(void) const {
 //
 // HumdrumFileBase::setQuietParsing -- Prevent error messages from
 //   being displayed when reading data.
+// @SEEALSO: setNoisyParsing
+// @SEEALSO: isQuiet
 //
 
 void HumdrumFileBase::setQuietParsing(void) {
-	quietParse = false;
+	quietParse = true;
 }
 
 
@@ -2544,10 +2564,12 @@ void HumdrumFileBase::setQuietParsing(void) {
 //
 // HumdrumFileBase::setNoisyParsing -- Display error messages 
 //   on console when reading data.
+// @SEEALSO: setQuietParsing
+// @SEEALSO: isQuiet
 //
 
 void HumdrumFileBase::setNoisyParsing(void) {
-	quietParse = true;
+	quietParse = false;
 }
 
 
@@ -2555,7 +2577,11 @@ void HumdrumFileBase::setNoisyParsing(void) {
 //////////////////////////////
 //
 // HumdrmFileBase::isQuiet -- Returns true if parsing errors
-//    messages should be suppressed.
+//    messages should be suppressed. By default the parsing
+//    is "noisy" and the error messages will be printed to
+//    standard error.
+// @SEEALSO: setQuietParsing
+// @SEEALSO: setNoisyParsing
 //
 
 bool HumdrumFileBase::isQuiet(void) const{
@@ -3559,6 +3585,7 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 
 bool HumdrumFileStructure::read(istream& contents) {
+	displayError = false;
 	if (!readNoRhythm(contents)) {
 		return isValid();
 	} 
@@ -3567,6 +3594,7 @@ bool HumdrumFileStructure::read(istream& contents) {
 
 
 bool HumdrumFileStructure::read(const char* filename) {
+	displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -3575,6 +3603,7 @@ bool HumdrumFileStructure::read(const char* filename) {
  
 
 bool HumdrumFileStructure::read(const string& filename) {
+	displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -3594,22 +3623,27 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 bool HumdrumFileStructure::readCsv(istream& contents,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(contents, separator)) {
 		return isValid();
 	}
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readCsv(const char* filename,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readCsv(const string& filename,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
@@ -3625,6 +3659,7 @@ bool HumdrumFileStructure::readCsv(const string& filename,
 //
 
 bool HumdrumFileStructure::readString(const char* contents) {
+	displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -3633,6 +3668,7 @@ bool HumdrumFileStructure::readString(const char* contents) {
 
 
 bool HumdrumFileStructure::readString(const string& contents) {
+	displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -3650,6 +3686,7 @@ bool HumdrumFileStructure::readString(const string& contents) {
 
 bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
+	displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}
@@ -3659,6 +3696,7 @@ bool HumdrumFileStructure::readStringCsv(const char* contents,
 
 bool HumdrumFileStructure::readStringCsv(const string& contents,
 		const string& separator) {
+	displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}

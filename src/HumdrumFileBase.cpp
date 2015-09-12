@@ -121,7 +121,8 @@ bool HumdrumFileBase::setParseError(const string& err) {
 
 
 bool HumdrumFileBase::setParseError(stringstream& err) {
-	return setParseError(err.str());
+	parseError = err.str();
+	return !parseError.size();
 }
 
 
@@ -131,7 +132,8 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 	va_start(ap, format);
 	snprintf(buffer, 1024, format, ap);
 	va_end(ap);
-	return setParseError(buffer);
+	parseError = buffer;
+	return !parseError.size();
 }
 
 
@@ -142,11 +144,13 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 //
 
 bool HumdrumFileBase::read(const string& filename) {
+	displayError = true;
 	return HumdrumFileBase::read(filename.c_str());
 }
 
 
 bool HumdrumFileBase::read(const char* filename) {
+	displayError = true;
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return HumdrumFileBase::read(cin);
@@ -163,6 +167,7 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
+	displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
@@ -209,6 +214,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 
 
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
+	displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
@@ -272,13 +278,25 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 
 //////////////////////////////
 //
+// HumdrumFileBase::getParseError -- Return parse fail reason.
+//
+
+string HumdrumFileBase::getParseError(void) const {
+	return parseError;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::isValid -- Returns true if last read was 
 //     successful.
 //
 
-bool HumdrumFileBase::isValid(void) const {
-	if (!isQuiet()) {
+bool HumdrumFileBase::isValid(void) {
+	if (displayError && !isQuiet()) {
 		cerr << parseError << endl;
+		displayError = false;
 	}
    return !parseError.size();
 }
@@ -289,10 +307,12 @@ bool HumdrumFileBase::isValid(void) const {
 //
 // HumdrumFileBase::setQuietParsing -- Prevent error messages from
 //   being displayed when reading data.
+// @SEEALSO: setNoisyParsing
+// @SEEALSO: isQuiet
 //
 
 void HumdrumFileBase::setQuietParsing(void) {
-	quietParse = false;
+	quietParse = true;
 }
 
 
@@ -301,10 +321,12 @@ void HumdrumFileBase::setQuietParsing(void) {
 //
 // HumdrumFileBase::setNoisyParsing -- Display error messages 
 //   on console when reading data.
+// @SEEALSO: setQuietParsing
+// @SEEALSO: isQuiet
 //
 
 void HumdrumFileBase::setNoisyParsing(void) {
-	quietParse = true;
+	quietParse = false;
 }
 
 
@@ -312,7 +334,11 @@ void HumdrumFileBase::setNoisyParsing(void) {
 //////////////////////////////
 //
 // HumdrmFileBase::isQuiet -- Returns true if parsing errors
-//    messages should be suppressed.
+//    messages should be suppressed. By default the parsing
+//    is "noisy" and the error messages will be printed to
+//    standard error.
+// @SEEALSO: setQuietParsing
+// @SEEALSO: setNoisyParsing
 //
 
 bool HumdrumFileBase::isQuiet(void) const{

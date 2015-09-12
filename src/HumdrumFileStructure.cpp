@@ -68,6 +68,7 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 
 bool HumdrumFileStructure::read(istream& contents) {
+	displayError = false;
 	if (!readNoRhythm(contents)) {
 		return isValid();
 	} 
@@ -76,6 +77,7 @@ bool HumdrumFileStructure::read(istream& contents) {
 
 
 bool HumdrumFileStructure::read(const char* filename) {
+	displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -84,6 +86,7 @@ bool HumdrumFileStructure::read(const char* filename) {
  
 
 bool HumdrumFileStructure::read(const string& filename) {
+	displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -103,22 +106,27 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 bool HumdrumFileStructure::readCsv(istream& contents,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(contents, separator)) {
 		return isValid();
 	}
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readCsv(const char* filename,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
 	return analyzeStructure();
 }
 
+
 bool HumdrumFileStructure::readCsv(const string& filename,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
@@ -134,6 +142,7 @@ bool HumdrumFileStructure::readCsv(const string& filename,
 //
 
 bool HumdrumFileStructure::readString(const char* contents) {
+	displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -142,6 +151,7 @@ bool HumdrumFileStructure::readString(const char* contents) {
 
 
 bool HumdrumFileStructure::readString(const string& contents) {
+	displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -159,6 +169,7 @@ bool HumdrumFileStructure::readString(const string& contents) {
 
 bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
+	displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}
@@ -168,6 +179,7 @@ bool HumdrumFileStructure::readStringCsv(const char* contents,
 
 bool HumdrumFileStructure::readStringCsv(const string& contents,
 		const string& separator) {
+	displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}
