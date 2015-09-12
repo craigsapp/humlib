@@ -10,7 +10,7 @@
 @PARAMETERS:	const char* filename, const string& separator=","
 @PARAMETERS:	const string& filename, const string& separator=","
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		98-115
+@LINES:		97-115
 @SHORTDESC:	Read the contents of a file from a file or istream in CSV format.
 @LONGDESC:	Read the contents of a file from a file or
 	istream in CSV format.  The file's structure is analyzed, and then the
@@ -27,13 +27,12 @@
 
 bool HumdrumFileStructure::readCsv(istream& contents,
 		const string& separator) {
+	displayError = false;
 	if (!readNoRhythmCsv(contents, separator)) {
-		return false;
+		return isValid();
 	}
 	return analyzeStructure();
 }
-
-bool HumdrumFileStructure::readCsv(const char* filename,
 
 
 @@END:	FunctionDocumentation

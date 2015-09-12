@@ -1,0 +1,30 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	setQuietParsing
+@SEEALSO:	isQuiet
+@ACCESS:	public
+@RETURN:	void          
+@PARAMETERS:	void
+@FILE:		HumdrumFileBase.cpp
+@LINES:		305-317
+@SHORTDESC:	Prevent error messages from being displayed when reading data.
+@LONGDESC:	Prevent error messages from
+	being displayed when reading data.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::setQuietParsing(void) {
+	quietParse = true;
+}
+
+
+@@END:	FunctionDocumentation
+

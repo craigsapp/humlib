@@ -1,15 +1,15 @@
 @@BEGIN:	FunctionDocumentation
 @INDEXED:	yes
 @CLASSNAME:	HumdrumFileBase
-@METHOD:	getLineCount
+@METHOD:	getParseError
 @ACCESS:	public
-@RETURN:	int           
+@RETURN:	string        
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		418-427
-@SHORTDESC:	Returns the number of lines.
-@LONGDESC:	Returns the number of lines.
+@LINES:		278-287
+@SHORTDESC:	Return parse fail reason.
+@LONGDESC:	Return parse fail reason.
 	
 
 @@BEGIN: EXAMPLE
@@ -20,8 +20,8 @@
 
 @SRCCODE:
 
-int HumdrumFileBase::getLineCount(void) const {
-	return lines.size();
+string HumdrumFileBase::getParseError(void) const {
+	return parseError;
 }
 
 

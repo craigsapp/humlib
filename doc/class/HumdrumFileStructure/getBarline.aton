@@ -7,7 +7,7 @@
 @PARAMETERS:	int index
 @QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		370-391
+@LINES:		378-399
 @SHORTDESC:	Return the given barline from the file based on the index number.
 @LONGDESC:	Return the given barline from the file
 	based on the index number.  Negative index accesses from the end of the

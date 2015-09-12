@@ -6,7 +6,7 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileBase.cpp
-@LINES:		425-438
+@LINES:		470-483
 @SHORTDESC:	Print the data type for all spines in the file (for debugging).
 @LONGDESC:	Print the data type for all
 	spines in the file (for debugging).

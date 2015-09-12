@@ -6,7 +6,7 @@
 @RETURN:	int           
 @PARAMETERS:	void
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		304-334
+@LINES:		312-342
 @SHORTDESC:	"Ticks per Quarter-note".
 @LONGDESC:	"Ticks per Quarter-note".  Returns the minimal
 	number of integral time units that divide a quarter note into equal

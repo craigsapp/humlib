@@ -1,0 +1,30 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	setNoisyParsing
+@SEEALSO:	isQuiet
+@ACCESS:	public
+@RETURN:	void          
+@PARAMETERS:	void
+@FILE:		HumdrumFileBase.cpp
+@LINES:		319-331
+@SHORTDESC:	Display error messages on console when reading data.
+@LONGDESC:	Display error messages 
+	on console when reading data.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::setNoisyParsing(void) {
+	quietParse = false;
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -6,7 +6,7 @@
 @RETURN:	ostream&      
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		355-368
+@LINES:		363-376
 @SHORTDESC:	Print the assigned duration of each line in a file.
 @LONGDESC:	Print the assigned duration
 	of each line in a file.  Useful for debugging.

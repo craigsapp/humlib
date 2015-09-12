@@ -74,7 +74,7 @@ after reading data.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minhumdrum;
+using namespace minHumdrum;
 using namespace std;
 
 int main(void) {
@@ -89,7 +89,7 @@ int main(void) {
 }
 ```
 
-In addition to inializing the contents of a HumdrumFile through
+In addition to initializing the contents of a HumdrumFile through
 a constructor, data can be read after the object has been created.
 
 <table style="width:auto;">
@@ -151,17 +151,59 @@ int main(void) {
 ```
 
 
+<h2>Handling parsing errors</h2>
+
+By default reading incorrectly formatted data will cause an error 
+message to be sent to standard error.  To suppress these messages, the
+<span class="mhcf paren">HumdrumFileBase::setQuietParsing</span>
+can be called anytime before parsing the data.  This will prevent
+the error message from being sent to standard error.  The function
+<span class="mhcf paren">HumdrumFileBase::setNoisyParsing</span>
+will return the error reporting method back to the default behavior.
+
+
+After data has been read, the object can be checked for errors by
+calling the
+<span class="mhcf paren">HumdrumFileBase::isValid</span>.
+This function will return true if there was no parsing error
+generated while reading the data; otherwise, false will be returned.
+If data is read in quiet mode, the resulting parse
+error can be displayed by calling the
+<span class="mhcf paren">HumdrumFileBase::getParseError</span>
+function as illustrated in the following program:
+
+```cpp
+#include "minhumdrum.h"
+using namespace minHumdrum;
+using namespace std;
+
+int main(void) {
+    HumdrumFile infile;
+    infile.setQuietParsing();
+    infile.read("file.krn");
+    if (infile.isValid()) {
+        cout << infile;
+    } else {
+        cout << infile.getParseError() << endl;
+    }
+    return 0;
+}
+```
+
+
+
+
 <h2>Reading from a file without parsing rhythms</h2>
 
 The default reading methods parse the rhythmic structure of a score.
-If the Humdrum data does not contain rhtyhmic spines or contains
-known irregularties in the rhythmic syntax, 
+If the Humdrum data does not contain rhythmic spines or contains
+known irregularities in the rhythmic syntax, 
 use <span class="mhcf paren">HumdrumFileStructure::readNoRhythm</span> 
 instead.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minhumdrum;
+using namespace minHumdrum;
 using namespace std;
 
 int main(void) {
@@ -171,7 +213,6 @@ int main(void) {
 	return 0;
 }
 ```
-
 
 
 

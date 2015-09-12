@@ -7,7 +7,7 @@
 @PARAMETERS:	int index
 @QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		459-478
+@LINES:		467-486
 @SHORTDESC:	Return the duration between barline and the end of the HumdrumFileStructure.
 @LONGDESC:	Return the duration
 	between barline and the end of the HumdrumFileStructure.

@@ -8,7 +8,7 @@
 @PARAMETERS:	const char* contents, const string& separator=","
 @PARAMETERS:	const string& contents, const string& separator=","
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		156-171
+@LINES:		162-178
 @SHORTDESC:	Read the contents from a string.
 @LONGDESC:	Read the contents from a string.
 	Similar to HumdrumFileStructure::read, but for string data.
@@ -24,8 +24,9 @@
 
 bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
+	displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
-		return false;
+		return isValid();
 	}
 	return analyzeStructure();
 }

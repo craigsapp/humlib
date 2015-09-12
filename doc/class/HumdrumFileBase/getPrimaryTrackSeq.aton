@@ -6,7 +6,7 @@
 @RETURN:	vector<HumdrumToken*>          
 @PARAMETERS:	int track, int options
 @FILE:		HumdrumFileBase.cpp
-@LINES:		455-534
+@LINES:		500-579
 @SHORTDESC:	Return a list of the given primary spine tokens for a given track (indexed starting at one and going through getMaxTrack().
 @LONGDESC:	Return a list of the
 	given primary spine tokens for a given track (indexed starting at

@@ -6,7 +6,7 @@
 @RETURN:	void          
 @PARAMETERS:	const string& value
 @FILE:		HumdrumFileBase.cpp
-@LINES:		63-74
+@LINES:		64-75
 @SHORTDESC:	Set the prefix for a HumdrumXML ID atrribute.
 @LONGDESC:	Set the prefix for a HumdrumXML ID
 	atrribute.  The prefix should not start with a digit, nor have

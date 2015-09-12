@@ -7,7 +7,7 @@
 @PARAMETERS:	const string& contents
 @PARAMETERS:	istream& contents
 @FILE:		HumdrumFileBase.cpp
-@LINES:		27-38
+@LINES:		28-39
 @SHORTDESC:	HumdrumFileBase constructor.
 @LONGDESC:	HumdrumFileBase constructor.
 	

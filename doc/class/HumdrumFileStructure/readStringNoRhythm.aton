@@ -8,7 +8,7 @@
 @PARAMETERS:	const char* contents
 @PARAMETERS:	const string& contents
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		249-260
+@LINES:		257-268
 @SHORTDESC:	Read a string, but do not analyze the rhythm (or parameters) in the read data.
 @LONGDESC:	Read a string, but
 	do not analyze the rhythm (or parameters) in the read data.
