@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 00:04:41 PDT 2015
+// Last Modified: Sat Sep 12 00:12:36 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -741,8 +741,9 @@ class HumdrumFileBase {
 		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
 		bool          isValid                      (void) const;
-		void          setQuietParse                (void);
-		void          setNoisyParse                (void);
+		bool          isQuiet                      (void) const;
+		void          setQuietParsing              (void);
+		void          setNoisyParsing              (void);
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }

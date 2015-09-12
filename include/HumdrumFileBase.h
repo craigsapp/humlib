@@ -79,8 +79,9 @@ class HumdrumFileBase {
 		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
 		bool          isValid                      (void) const;
-		void          setQuietParse                (void);
-		void          setNoisyParse                (void);
+		bool          isQuiet                      (void) const;
+		void          setQuietParsing              (void);
+		void          setNoisyParsing              (void);
 
 		bool parse(istream& contents)         { return read(contents); }
 		bool parse(const char* contents)      { return readString(contents); }

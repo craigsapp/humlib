@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 00:04:41 PDT 2015
+// Last Modified: Sat Sep 12 00:12:36 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2520,6 +2520,9 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 //
 
 bool HumdrumFileBase::isValid(void) const {
+	if (!isQuiet()) {
+		cerr << parseError << endl;
+	}
    return !parseError.size();
 }
 
@@ -2527,11 +2530,11 @@ bool HumdrumFileBase::isValid(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::setQuietParse -- Prevent error messages from
+// HumdrumFileBase::setQuietParsing -- Prevent error messages from
 //   being displayed when reading data.
 //
 
-void HumdrumFileBase::setQuietParse(void) {
+void HumdrumFileBase::setQuietParsing(void) {
 	quietParse = false;
 }
 
@@ -2539,12 +2542,24 @@ void HumdrumFileBase::setQuietParse(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::setNoisyParse -- Display  error messages 
+// HumdrumFileBase::setNoisyParsing -- Display error messages 
 //   on console when reading data.
 //
 
-void HumdrumFileBase::setNoisyParse(void) {
+void HumdrumFileBase::setNoisyParsing(void) {
 	quietParse = true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrmFileBase::isQuiet -- Returns true if parsing errors
+//    messages should be suppressed.
+//
+
+bool HumdrumFileBase::isQuiet(void) const{
+	return quietParse;
 }
 
 
@@ -3030,7 +3045,7 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 				stringstream err;
 				err << "Error: expecting exclusive interpretation on line "
 				    << next.getLineNumber() << " at token " << i << " but got "
-				    << next.token(i) << endl;
+				    << next.token(i);
 				return setParseError(err);
 			}
 			previous.token(i).makeForwardLink(next.token(ii++));
@@ -3050,7 +3065,7 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 		err << "Line " << next.getLineNumber() << ": "
 		    << next << endl;
 		err << "I = " <<i<< " token count " << previous.getTokenCount() << endl;
-		err << "II = " <<ii<< " token count " << next.getTokenCount() << endl;
+		err << "II = " <<ii<< " token count " << next.getTokenCount();
 		return setParseError(err);
 	}
 
@@ -3107,7 +3122,7 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			stringstream err;
 			err << "Error on line " << (i+1) << ':' << endl;
 			err << "   Expected " << datatype.size() << " fields,"
-			     << " but found " << lines[i]->getTokenCount() << endl;
+			     << " but found " << lines[i]->getTokenCount();
 			return setParseError(err);
 		}
 		for (j=0; j<lines[i]->getTokenCount(); j++) {
@@ -3210,7 +3225,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				stringstream err;
 				err << "ERROR2 in *x calculation" << endl;
 				err << "Index " << i << " larger than allowed: "
-				     << line.getTokenCount() - 1 << endl;
+				     << line.getTokenCount() - 1;
 				return setParseError(err);
 			}
 		} else if (line.token(i).isTerminateInterpretation()) {
@@ -3226,7 +3241,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				err << "Error: Exclusive interpretation with no preparation "
 				     << "on line " << line.getLineIndex()
 				     << " spine index " << i << endl;
-				err << "Line: " << line << endl;
+				err << "Line: " << line;
 				return setParseError(err);
 			}
 			if (trackstarts.back() == NULL) {
