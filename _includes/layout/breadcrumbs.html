@@ -1,10 +1,9 @@
-
 {% if page.breadcrumbs %}
 <!-- breadcrumbs navigator: -->
 <span style="position: relative; left: 30px; bottom: 30px;">
 	{% for item in page.breadcrumbs %}
 		{% if forloop.index0 > 0 %}
-			<span class="bread-spacer">&raquo;</span>
+			<span class="bread-spacer">|</span>
 		{% endif %}
 		<a class="bread-link" style="letter-spacing: -0.5px;" 
 			href="{{ item[0] | prepend: site.baseurl }}">{{ item[1] }}</a>
@@ -12,3 +11,39 @@
 </span>
 {% endif %}
 
+<script>
+// vim: ts=3
+
+document.addEventListener('DOMContentLoaded', function(event) {
+	adjustBreadCrumbs();
+});
+
+
+
+//////////////////////////////
+//
+// adjustBreadCrumbs --
+//
+
+function adjustBreadCrumbs() {
+	var blist = document.querySelectorAll('.bread-link');
+	var matches = window.location.href.match(/([^\/]+)\/?$/);
+	if (!matches) {
+		return;
+	}
+	for (var i=0; i<blist.length; i++) {
+		if (!blist[i].innerHTML.match(matches[1])) {
+			continue;
+		}
+		var newtext = '<span';
+		newtext += ' style="color:#ffffff;';
+		newtext += ' opacity:0.7;';
+		newtext += '">';
+		newtext += blist[i].innerHTML;
+		newtext += '</span>';
+		blist[i].outerHTML = newtext;
+	}
+}
+
+
+</script>

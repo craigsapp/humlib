@@ -2,12 +2,12 @@
 layout: default
 breadcrumbs: [
                 ['/',             'home'],
-                ['/doc',          'documentation'],
                 ['/doc/class',    'classes'],
+                ['/doc/snippet',  'snippets'],
                 ['/doc/example',  'examples'],
                 ['/doc/topic',    'topics'],
                 ['/doc/tutorial', 'tutorials'],
-                ['/doc/snippets', 'snippets']
+                ['/doc/ref',      'reference']
         ]
 title: Code snippets
 ---
@@ -17,8 +17,22 @@ title: Code snippets
 Here are examples of how to access data in a Humdrum score using the
 minHumdrum classes:
 
-[<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllSnippets()">Close all</span>]
-[<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllSnippets()">Open all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllDetails()">Close all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllDetails()">Open all</span>]
+
+
+<style>
+
+body {
+	counter-reset: details
+}
+
+summary::before {
+	counter-increment: details;
+	content: counter(details) " ";
+}
+
+</style>
 
 <details open class="snippet-001">
 <summary></summary>

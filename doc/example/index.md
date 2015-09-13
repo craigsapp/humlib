@@ -2,12 +2,12 @@
 layout: default
 breadcrumbs: [
                 ['/',             'home'],
-                ['/doc',          'documentation'],
                 ['/doc/class',    'classes'],
+                ['/doc/snippet',  'snippets'],
+                ['/doc/example',  'examples'],
                 ['/doc/topic',    'topics'],
                 ['/doc/tutorial', 'tutorials'],
-                ['/doc/snippet',  'snippets'],
-                ['/doc/example',  'examples']
+                ['/doc/ref',      'reference']
         ]
 title: Coding examples
 ---

@@ -2,12 +2,12 @@
 layout: default
 breadcrumbs: [
                 ['/',             'home'],
-                ['/doc',          'documentation'],
                 ['/doc/class',    'classes'],
-                ['/doc/example',  'examples'],
                 ['/doc/snippet',  'snippets'],
+                ['/doc/example',  'examples'],
+                ['/doc/topic',    'topics'],
                 ['/doc/tutorial', 'tutorials'],
-                ['/doc/topic',    'topics']
+                ['/doc/ref',      'reference']
         ]
 title: Topics
 ---
@@ -15,8 +15,8 @@ title: Topics
 {% include topics/topics.html %}
 
 <p>
-[<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllTopics()">Open all</span>]
-[<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllTopics()">Close all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllDetails()">Open all</span>]
+[<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllDetails()">Close all</span>]
 </p>
 
 

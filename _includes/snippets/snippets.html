@@ -1,10 +1,16 @@
 <script>
-// vim: ts=3
-
-document.addEventListener("DOMContentLoaded", function(event) {
-	fillSummaries();
-});
-
+//
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Creation Date: Sun Sep 13 08:00:12 PDT 2015
+// Last Modified: Sun Sep 13 08:00:18 PDT 2015
+// Filename:      _includes/snippets/snippets.html
+// Syntax:        JavaScript 1.8.5/ECMAScript 5.1
+// vim:           ts=3 hlsearch
+//
+// Description:   Examine all links on a page, an if they start 
+//                with ^https?:// then make then open in a new 
+//                browser tab.
+//
 
 
 //////////////////////////////
@@ -12,11 +18,15 @@ document.addEventListener("DOMContentLoaded", function(event) {
 // fillSummaries --
 //
 
+document.addEventListener("DOMContentLoaded", function(event) {
+	fillSummaries();
+});
+
 function fillSummaries() {
 	var details = document.querySelectorAll("details");
 	for (var i=0; i<details.length; i++) {
 		var summary  = details[i].querySelector("summary");
-		var title    = details[i].querySelector(".snippet-title");
+		var title    = details[i].querySelector(".title-snippet");
 		if (!(summary && title)) {
 			return;
 		}
@@ -25,43 +35,6 @@ function fillSummaries() {
 		title.innerHTML = '';
 	}
 }
-
-
-
-//////////////////////////////
-//
-// closeAllSnippets --
-//
-
-function closeAllSnippets() {
-	var details = document.querySelectorAll("details");
-	for (var i=0; i<details.length; i++) {
-		var detail = details[i];
-		if (!detail) {
-			continue;
-		}
-		detail.removeAttribute('open');
-	}
-}
-
-
-
-//////////////////////////////
-//
-// openAllSnippets --
-//
-
-function openAllSnippets() {
-	var details = document.querySelectorAll("details");
-	for (var i=0; i<details.length; i++) {
-		var detail = details[i];
-		if (!detail) {
-			continue;
-		}
-		detail.open = 'open';
-	}
-}
-
 
 
 </script>

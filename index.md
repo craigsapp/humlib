@@ -3,9 +3,9 @@ layout: default
 title: minHumdrum
 ---
 
-The minHumdrum library consists of a set of C++ classes for parsing
-[Humdrum](http://www.humdrum.org) data files.  The library is designed
-to be portable with only two code files to copy into your project:
+The minHumdrum library is of a set of C++ classes for parsing
+[Humdrum](http://www.humdrum.org) data files.  It is easy to use
+by adding these two files to your project:
 
 1. An include file [minhumdrum.h](https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h)
 2. and a source file [minhumdrum.cpp](https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp)
@@ -17,40 +17,6 @@ Also include the `-stdlib=libc++` option when compiling with [clang](https://en.
 for compiling the library and
 [Makefile.examples](https://github.com/craigsapp/minHumdrum/blob/master/Makefile.examples)
 for compiling and linking executables.
-
-Resources
-=========
-
-<style>
-#resources {
-   -webkit-column-count:3;
-   -moz-column-count:3;
-   -ms-column-count:3;
-   -o-column-count:3;
-   column-count:3;
-   columns:3;
-   padding: 0;
-   margin: 0;
-}
-#resources > li {
-   list-style: disc outside none;
-   display: list-item;
-   margin-left: 4em;
-}
-</style>
-
-<center>
-<table style="display:block; padding:0; margin:0;">
-<tr><td>
-<ul id="resources">
-<li style="margin-top:0"> <a href=/doc>Documentation</a> </li>
-<li> <a href=/doc/class>Classes</a> </li>
-<li> <a href=/doc/snippet>Code snippets</a> </li>
-<li> <a href=/doc/example>Example programs</a> </li>
-<li> <a href=/doc/topic>Topics</a> </li>
-</ul>
-</td></tr></table>
-</center>
 
 
 Downloading
@@ -74,7 +40,7 @@ curl https://raw.githubusercontent.com/craigsapp/minHumdrum/master/src/minhumdru
 
 To compile minHumdrum as a stand-alone library, you can download a ZIP or
 tarball from the buttons at the top of this page, or you can use
-[git](https://en.wikipedia.org/wiki/Git_(software)) in the console to
+[git](https://en.wikipedia.org/wiki/Git_(software)) in the terminal to
 download and allow easy updating:
 
 ```console
@@ -117,7 +83,7 @@ This will create the file `lib/libhumdrum.a`.
 Example
 =============
 
-Here is a short example program that uses the minHumdrum library to convert
+Here is a short program that uses the minHumdrum library to convert
 a Humdrum file into a MIDI-like listing of notes.
 
 ```cpp
@@ -212,6 +178,29 @@ go to the base directory of the minHumdrum code and type `make myprogram`
 if the program is called `myprograms/myprogram.cpp`.  The compiled program
 will be created as `bin/myprogram`.
 
-See the [Coding-examples](/doc/example) documentation for more programming examples.
+For more information see:
+
+<ul>
+
+<li>
+	<a href="/doc/snippet">Snippets</a> for short code examples.
+</li>
+
+<li>
+	<a href="/doc/example">Examples</a> for 
+	more programming examples.
+</li>
+
+<li>
+	<a href="/doc/tutorial">Tutorials</a> for overview of how to use
+	the library code.
+</li>
+
+<li>
+	<a href="/doc/ref">Reference manual</a> with more details.
+</li>
+
+</ul>
+
 
 

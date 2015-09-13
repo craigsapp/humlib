@@ -35,48 +35,4 @@ function checkAnchor() {
 }
 
 
-
-//////////////////////////////
-//
-// closeAllTopics --
-//
-
-function closeAllTopics() {
-	var topics = document.querySelectorAll('details');
-	for (var i=0; i<topics.length; i++) {
-		var detail = topics[i];
-		if (!detail) {
-			continue;
-		}
-		detail.removeAttribute('open');
-	}
-}
-
-
-
-//////////////////////////////
-//
-// openAllTopics --
-//
-
-function openAllTopics() {
-	var topics = document.querySelectorAll('details');
-	for (var i=0; i<topics.length; i++) {
-		var detail = topics[i];
-		if (!detail) {
-			continue;
-		}
-		detail.open = 'open';
-	}
-}
-
-
 </script>
-
-<style>
-
-details summary {
-	color: #159987;
-}
-
-</style>

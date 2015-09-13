@@ -35,42 +35,6 @@ function checkAnchor() {
 }
 
 
-
-//////////////////////////////
-//
-// closeAllTutorials --
-//
-
-function closeAllTutorials() {
-	var tutorials = document.querySelectorAll('details');
-	for (var i=0; i<tutorials.length; i++) {
-		var detail = tutorials[i];
-		if (!detail) {
-			continue;
-		}
-		detail.removeAttribute('open');
-	}
-}
-
-
-
-//////////////////////////////
-//
-// openAllTutorials --
-//
-
-function openAllTutorials() {
-	var tutorials = document.querySelectorAll('details');
-	for (var i=0; i<tutorials.length; i++) {
-		var detail = tutorials[i];
-		if (!detail) {
-			continue;
-		}
-		detail.open = 'open';
-	}
-}
-
-
 </script>
 
 <style>

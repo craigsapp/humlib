@@ -1,0 +1,32 @@
+<script>
+// vim: ts=3
+
+document.addEventListener('keydown', function(event) {
+	switch (event.keyCode) {
+		case 49:
+			var refs = document.querySelector('details[class^="ref-"]');
+			if (refs.open) {
+				closeAllDetails();
+			} else {
+				openAllDetails();
+			}
+	}
+});
+
+document.addEventListener('DOMContentLoaded', function(event) {
+	checkDetailsState('refstate', 'ref');
+});
+
+
+
+
+</script>
+
+<style>
+
+details summary {
+	color: #159987;
+	/* color: #255799; */
+}
+
+</style>

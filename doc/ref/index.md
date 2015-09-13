@@ -9,11 +9,10 @@ breadcrumbs: [
                 ['/doc/tutorial', 'tutorials'],
                 ['/doc/ref',      'reference']
         ]
-title: Tutorials
+title: Reference
 ---
 
-
-{% include tutorials/tutorials.html %}
+{% include ref/ref.html %}
 
 <p>
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllDetails()">Open all</span>]
@@ -21,18 +20,10 @@ title: Tutorials
 </p>
 
 
-<details class="tutorial-start">
-<summary>
-Getting started
-</summary>
-{% include tutorials/start.md %}
-</details>
-
-<details class="tutorial-read">
+<details class="ref-read">
 <summary>
 Reading Humdrum data
 </summary>
-{% include tutorials/read.md %}
+{% include ref/read.md %}
 </details>
-
 
