@@ -8,11 +8,11 @@
 	<!-- meta http-equiv="X-UA-Compatible" content="IE=edge" -->
 	<link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-	<link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css" media="screen">
-	<link rel="stylesheet" type="text/css" href="/stylesheets/pygment_trac.css" media="screen">
-	<link rel="stylesheet" type="text/css" href="/stylesheets/print.css" media="print">
-	<script src="/javascripts/handlebars-v2.0.0.js"></script>
-	<script src="/javascripts/main.js"></script>
+	<link rel="stylesheet" type="text/css" href="/styles/stylesheet.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="/styles/pygment_trac.css" media="screen">
+	<link rel="stylesheet" type="text/css" href="/styles/print.css" media="print">
+	<script src="/scripts/handlebars-v2.0.0.js"></script>
+	<script src="/scripts/main.js"></script>
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
@@ -26,10 +26,10 @@
 	</title>
 
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="{{ "/stylesheets/main.css" | prepend: site.baseurl }}">
+	<link rel="stylesheet" href="{{ "/styles/main.css" | prepend: site.baseurl }}">
 
 	<!-- JavaScript -->
-	<script src="/javascripts/external-links.js"></script>
+	<script src="/scripts/external-links.js"></script>
 	{% if page.javascript %}
 		{% for file in page.javascript %}
 			{% include {{file}} %}

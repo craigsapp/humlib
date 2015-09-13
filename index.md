@@ -4,8 +4,8 @@ title: minHumdrum
 ---
 
 The minHumdrum library is of a set of C++ classes for parsing
-[Humdrum](http://www.humdrum.org) data files.  It is easy to use
-by adding these two files to your project:
+[Humdrum](http://www.humdrum.org) data files.  It is easy to incorporate
+into your project by adding these two files:
 
 1. An include file [minhumdrum.h](https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h)
 2. and a source file [minhumdrum.cpp](https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp)
@@ -23,8 +23,7 @@ Downloading
 ===========
 
 For minimal use of the library, you can download the composite header
-and source files.  In a terminal you can download with [wget](https://en.wikipedia.org/wiki/Wget)
-(most common method for linux):
+and source files.  In a terminal, download with [wget](https://en.wikipedia.org/wiki/Wget) (most common method for linux) by typing:
 
 ```console
 wget https://raw.githubusercontent.com/craigsapp/minHumdrum/master/include/minhumdrum.h
@@ -84,7 +83,7 @@ Example
 =============
 
 Here is a short program that uses the minHumdrum library to convert
-a Humdrum file into a MIDI-like listing of notes.
+a Humdrum file into a MIDI-like listing of notes:
 
 ```cpp
 #include "minhumdrum.h"
@@ -189,6 +188,11 @@ For more information see:
 <li>
 	<a href="/doc/example">Examples</a> for 
 	more programming examples.
+</li>
+
+<li>
+	<a href="/doc/topic">Topics</a> which discuss
+	various concepts related to Humdrum data.
 </li>
 
 <li>

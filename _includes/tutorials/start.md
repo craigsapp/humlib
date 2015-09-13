@@ -10,7 +10,7 @@ make myprog
 
 in the base directory to compile the program.  The executable,
 `myprog` will be created in the `bin` directory.  Note that you may
-need to compile the library first with the comamnd:
+need to compile the library first with the command:
 
 ```console
 make

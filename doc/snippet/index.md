@@ -34,74 +34,74 @@ summary::before {
 
 </style>
 
-<details open class="snippet-001">
+<details open class="snippet-read">
 <summary></summary>
-{% include snippets/001.md %}
+{% include snippets/read.md %}
 </details>
 
-<details open class="snippet-002">
+<details open class="snippet-token">
 <summary></summary>
-{% include snippets/002.md %}
+{% include snippets/token.md %}
 </details>
 
-<details open class="snippet-003">
+<details open class="snippet-tokstring">
 <summary></summary>
-{% include snippets/003.md %}
+{% include snippets/tokstring.md %}
 </details>
 
-<details open class="snippet-004">
+<details open class="snippet-tokdur">
 <summary></summary>
-{% include snippets/004.md %}
+{% include snippets/tokdur.md %}
 </details>
 
-<details open class="snippet-005">
+<details open class="snippet-linedur">
 <summary></summary>
-{% include snippets/005.md %}
+{% include snippets/linedur.md %}
 </details>
 
-<details open class="snippet-006">
+<details open class="snippet-filedur">
 <summary></summary>
-{% include snippets/006.md %}
+{% include snippets/filedur.md %}
 </details>
 
-<details open class="snippet-007">
+<details open class="snippet-tpq">
 <summary></summary>
-{% include snippets/007.md %}
+{% include snippets/tpq.md %}
 </details>
 
-<details open class="snippet-008">
+<details open class="snippet-tpqdur">
 <summary></summary>
-{% include snippets/008.md %}
+{% include snippets/tpqdur.md %}
 </details>
 
-<details open class="snippet-009">
+<details open class="snippet-linecount">
 <summary></summary>
-{% include snippets/009.md %}
+{% include snippets/linecount.md %}
 </details>
 
-<details open class="snippet-010">
+<details open class="snippet-fieldcount">
 <summary></summary>
-{% include snippets/010.md %}
+{% include snippets/fieldcount.md %}
 </details>
 
-<details open class="snippet-011">
+<details open class="snippet-track">
 <summary></summary>
-{% include snippets/011.md %}
+{% include snippets/track.md %}
 </details>
 
-<details open class="snippet-012">
+<details open class="snippet-subtrack">
 <summary></summary>
-{% include snippets/012.md %}
+{% include snippets/subtrack.md %}
 </details>
 
-<details open class="snippet-013">
+<details open class="snippet-spinestart">
 <summary></summary>
-{% include snippets/013.md %}
+{% include snippets/spinestart.md %}
 </details>
 
-<details open class="snippet-014">
+<details open class="snippet-nextcount">
 <summary></summary>
-{% include snippets/014.md %}
+{% include snippets/nextcount.md %}
 </details>
 
 

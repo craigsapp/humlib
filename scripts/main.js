@@ -1,4 +1,63 @@
-// vim: ts=3
+//
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Creation Date: Sun Sep 13 13:33:28 PDT 2015
+// Last Modified: Sun Sep 13 13:33:31 PDT 2015
+// Filename:      scripts/main.js
+// Syntax:        JavaScript 1.8.5/ECMAScript 5.1
+// vim:           ts=3 hlsearch
+//
+// Description:   Javascript common to all pages.
+//
+
+// event keyCodes.  See: http://www.javascripter.net/faq/keycodes.htm
+var TabKey       =   9;
+var BackspaceKey =   8;
+var ShiftKey     =  16;
+var CommaKey     = 188;
+var PeriodKey    = 190;
+var PeriodKeyNumberPad = 110; // Number Pad Minus Key;
+var AKey         =  65;
+var BKey         =  66;
+var CKey         =  67;
+var DKey         =  68;
+var EKey         =  69;
+var FKey         =  70;
+var GKey         =  71;
+var HKey         =  72;
+var IKey         =  73;
+var JKey         =  74;
+var KKey         =  75;
+var LKey         =  76;
+var MKey         =  77;
+var NKey         =  78;
+var OKey         =  79;
+var PKey         =  80;
+var QKey         =  81;
+var RKey         =  82;
+var SKey         =  83;
+var TKey         =  84;
+var UKey         =  85;
+var VKey         =  86;
+var WKey         =  87;
+var XKey         =  88;
+var PlusKey      = 187;
+var MinusKey     = 189;
+var MinusKey2    = 173;      // Firefox MinusKey
+var MinusKeyNumberPad = 109; // Number Pad Minus Key;
+var ZeroKey      =  48;
+var OneKey       =  49;
+var TwoKey       =  50;
+var ThreeKey     =  51;
+var FourKey      =  52;
+var FiveKey      =  53;
+var SixKey       =  54;
+var SevenKey     =  55;
+var EightKey     =  56;
+var NineKey      =  57;
+var QuestionKey  = 191;
+var EscKey       =  27;
+
+
 
 
 document.addEventListener('DOMContentLoaded', function(event) {
@@ -21,11 +80,6 @@ function insertLinks() {
 	var matches;
 	var output;
 	var i;
-	matches = window.location.hash.match(/^#(.*)/);
-	if (matches) {
-		sessionStorage.hash = matches[1];
-	}
-	removeHash();
 
 	var funcs = document.querySelectorAll('.mhcf');
 	for (i=0; i<funcs.length; i++) {
@@ -156,6 +210,61 @@ function openAllDetails() {
 		}
 		detail.open = 'open';
 	}
+}
+
+
+
+//////////////////////////////
+//
+// documentationKeyCommands -- keyboard commands for documentation pages.
+//
+
+function documentationKeyCommands(event, tag) {
+	switch (event.keyCode) {
+		case OneKey:
+			var list = document.querySelector('details[class^="' + tag + '-"]');
+			if (list.open) {
+				closeAllDetails();
+			} else {
+				openAllDetails();
+			}
+			break;
+
+		case PlusKey:
+			openAllDetails();
+			break;
+
+		case MinusKey:
+		case MinusKey2:
+		case MinusKeyNumberPad:
+			closeAllDetails();
+			break;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// checkAnchor -- If a specific details element is requested to be
+//    opened when the page is loaded, then open it and remove the anchor
+//    from the URL.
+//
+
+function checkAnchor(tag) {
+	var anchor = '';
+	matches = window.location.hash.match(/^#(.*)/);
+	if (matches) {
+		sessionStorage.hash = matches[1];
+		anchor = matches[1];
+	}
+	removeHash();
+	var list = document.querySelector('details.' + tag + '-' + anchor);
+	if (!list) {
+		return;
+	}
+	list.open = 'open';
+	list.scrollIntoViewIfNeeded();
 }
 
 

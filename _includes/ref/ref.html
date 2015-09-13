@@ -1,32 +1,23 @@
 <script>
+//
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Creation Date: Sun Sep 13 12:52:36 PDT 2015
+// Last Modified: Sun Sep 13 12:52:39 PDT 2015
+// Filename:      _includes/ref/ref.html
+// Syntax:        JavaScript 1.8.5/ECMAScript 5.1
+// vim:           ts=3 hlsearch
+//
+// Description:   Manage reference documentation page.
+//
 // vim: ts=3
 
 document.addEventListener('keydown', function(event) {
-	switch (event.keyCode) {
-		case 49:
-			var refs = document.querySelector('details[class^="ref-"]');
-			if (refs.open) {
-				closeAllDetails();
-			} else {
-				openAllDetails();
-			}
-	}
+	documentationKeyCommands(event, "ref");
 });
 
 document.addEventListener('DOMContentLoaded', function(event) {
 	checkDetailsState('refstate', 'ref');
 });
 
-
-
-
 </script>
 
-<style>
-
-details summary {
-	color: #159987;
-	/* color: #255799; */
-}
-
-</style>

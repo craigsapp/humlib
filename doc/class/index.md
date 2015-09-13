@@ -13,7 +13,9 @@ title: Class documentation
 ---
 
 
-<details open>
+{% include class/classes.html %}
+
+<details class="class-overview" open>
 <summary>
 Overview
 </summary>

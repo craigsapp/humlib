@@ -12,15 +12,25 @@
 //                browser tab.
 //
 
+document.addEventListener('keydown', function(event) {
+	documentationKeyCommands(event, "snippet");
+});
 
-//////////////////////////////
-//
-// fillSummaries --
-//
+document.addEventListener('DOMContentLoaded', function(event) {
+	checkAnchor("snippet");
+});
 
 document.addEventListener("DOMContentLoaded", function(event) {
 	fillSummaries();
 });
+
+
+
+//////////////////////////////
+//
+// fillSummaries -- Move the title of the snippet from inside of the 
+//      contents of the details element into the summary element.
+//
 
 function fillSummaries() {
 	var details = document.querySelectorAll("details");

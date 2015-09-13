@@ -1,38 +1,22 @@
 <script>
-// vim: ts=3
-
-document.addEventListener('keydown', function(event) {
-	switch (event.keyCode) {
-		case 49:
-			var topics = document.querySelector('details[class^="topic-"]');
-			if (topics.open) {
-				closeAllTopics();
-			} else {
-				openAllTopics();
-			}
-	}
-});
+//
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Creation Date: Sun Sep 13 12:46:07 PDT 2015
+// Last Modified: Sun Sep 13 12:46:11 PDT 2015
+// Filename:      _includes/topics/topics.html
+// Syntax:        JavaScript 1.8.5/ECMAScript 5.1
+// vim:           ts=3 hlsearch
+//
+// Description:   Manage topic documentation page.
+//
 
 document.addEventListener('DOMContentLoaded', function(event) {
-	checkAnchor();
+	checkAnchor("topic");
 });
 
-
-function checkAnchor() {
-	var anchor = '';
-	var matches = document.location.href.match(/#(.*)/);
-	if (!matches) {
-		return;
-	}
-	anchor = matches[1];
-	console.log(anchor);
-	var topics = document.querySelector('details.topic-' + anchor);
-	if (!topics) {
-		return;
-	}
-	topics.open = 'open';
-	topics.scrollIntoViewIfNeeded();
-}
+document.addEventListener('keydown', function(event) {
+	documentationKeyCommands(event, "topic");
+});
 
 
 </script>

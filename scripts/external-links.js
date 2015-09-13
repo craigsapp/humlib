@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jan 22 19:09:03 PST 2015
 // Last Modified: Sun Feb 22 17:33:25 PST 2015 Avoid null of a@name hyperlinks.
-// Filename:      midifile/javascripts/external-links.js
+// Filename:      javascripts/external-links.js
 // Syntax:        JavaScript 1.8.5/ECMAScript 5.1
 // vim:           ts=3 hlsearch
 //
@@ -14,6 +14,13 @@
 window.addEventListener('load', function () {
 	externalLinks('new');
 });
+
+
+
+//////////////////////////////
+//
+// externalLinks -- Force external links to open in a new tab.
+//
 
 function externalLinks(tabname) {
 	if (!tabname) {
@@ -29,3 +36,6 @@ function externalLinks(tabname) {
 		}
 	}
 }
+
+
+
