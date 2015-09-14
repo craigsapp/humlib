@@ -1,9 +1,13 @@
 ---
 layout: default
 breadcrumbs: [
-		['/','home'], 
-		['/doc','documentation'], 
-		['/doc/class', 'classes']
+                ['/',             'home'],
+                ['/doc/class',    'classes'],
+                ['/doc/snippet',  'snippets'],
+                ['/doc/example',  'examples'],
+                ['/doc/topic',    'topics'],
+                ['/doc/tutorial', 'tutorials'],
+                ['/doc/ref',      'reference']
 	]
 title:  HumdrumToken class
 grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']

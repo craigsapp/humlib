@@ -8,3 +8,7 @@ can be accessed in several ways:
 infile.token(3, 1).c_str();        // "12e"
 ```
 
+<span style="cursor:pointer; color:#1e6bb8" class="example1" title='/doc/snippet/example1.html'>example data</span>
+
+
+

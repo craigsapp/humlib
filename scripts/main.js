@@ -75,6 +75,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 // <span class="mhcf paren"><a href="/doc/class/HumdrumFile>HumdrumFile</a>
 //	::<a href="/doc/class/HumdrumFile#printCSV">printCSV</a></span> 
 //
+// Options: 
+//    noc = no class
+//    paren = put parenthese after function
+//    dot   = put dot before function
+//
 
 function insertLinks() {
 	var matches;

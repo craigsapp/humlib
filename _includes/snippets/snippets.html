@@ -1,3 +1,9 @@
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="/scripts/qtip/jquery.qtip.min.js"></script>
+<script src="/scripts/qtip/imagesloaded.pkg.min.js"></script>
+
 <script>
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
@@ -5,7 +11,7 @@
 // Last Modified: Sun Sep 13 08:00:18 PDT 2015
 // Filename:      _includes/snippets/snippets.html
 // Syntax:        JavaScript 1.8.5/ECMAScript 5.1
-// vim:           ts=3 hlsearch
+// vim:           ts=2 hlsearch
 //
 // Description:   Examine all links on a page, an if they start 
 //                with ^https?:// then make then open in a new 
@@ -47,7 +53,57 @@ function fillSummaries() {
 }
 
 
+//////////////////////////////
+//
+//
+// Create the tooltips only when document ready
+//
+
+
+$(document).ready(function() {
+	$('.example1').each(function() {
+			$(this).qtip({
+				content: {
+					text: function(event, api) {
+						$.ajax({
+							url: api.elements.target.attr('title')
+						})
+						.then(function(content) {
+								// Set the tooltip content upon successful retrieval
+								api.set('content.text', content);
+							}, function(xhr, status, error) {
+								// Upon failure... set the tooltip content to error
+								api.set('content.text', status + ': ' + error);
+							});
+
+							return 'Loading...'; // Set some initial text
+						}
+					},
+
+					style: { classes: 'qtip-dark' },
+
+					position: {
+						viewport: $(window),
+						at: 'bottom left',
+						my: 'top left'
+					},
+
+					style: 'qtip-wiki'
+			});
+		});
+});
+
+
+
 </script>
 
 
+
+<style>
+details summary {
+	color: #159987;
+	/* color: #255799; */
+	font-size: 120%;
+}
+</style>
 

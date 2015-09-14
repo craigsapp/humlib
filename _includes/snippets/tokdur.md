@@ -11,3 +11,7 @@ infile.token(3, 1).getDuration();              // 1/3    for "12e"
 infile.token(3, 1).getDuration().getFloat();   // 0.3333 for "12e"
 ```
 
+<span style="cursor:pointer; color:#1e6bb8" class="example1" title='/doc/snippet/example1.html'>example data</span>
+
+
+

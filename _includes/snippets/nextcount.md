@@ -11,6 +11,11 @@ tok->getNextToken();                // returns pointer to `*M3/4`, using default
 tok->getPreviousToken();            // returns NULL
 ```
 
+<span style="cursor:pointer; color:#1e6bb8" class="example1" title='/doc/snippet/example1.html'>example data</span>
+
 The HumdrumToken::getNextTokenCount() function will return 0 for
 the last token in a spine/track (which always must be the characters
 `*-` (start-minus) which is the data terminator token.
+
+
+

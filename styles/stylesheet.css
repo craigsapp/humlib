@@ -23,12 +23,6 @@ summary {
 	outline: none;
 }
 
-details summary {
-	color: #159987;
-	/* color: #255799; */
-	font-size: 120%;
-}
-
 .paren::after {
 	content: "()";
 }
@@ -353,8 +347,6 @@ table > tbody > tr > td {
 	color: white;
 	opacity: 0.4;
 }
-
-
 
 
 
