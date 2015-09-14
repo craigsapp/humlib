@@ -10,15 +10,15 @@ The minHumdrum library is of a set of C++ classes for parsing
 [Humdrum](http://www.humdrum.org) data files.  It is easy to incorporate
 into your project by adding these two files:
 
-1. An include file [minhumdrum.h](https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h)
-2. and a source file [minhumdrum.cpp](https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp)
+1. An include file [minhumdrum.h](https://github.com/humdrum-tools/minHumdrum/blob/master/include/minhumdrum.h)
+2. and a source file [minhumdrum.cpp](https://github.com/humdrum-tools/minHumdrum/blob/master/src/minhumdrum.cpp)
 
 The source code uses some C++11-specific features, so add the
 `-stc=c++11` option when compiling with GNU g++ or the clang++ compiler.
 Also include the `-stdlib=libc++` option when compiling with [clang](https://en.wikipedia.org/wiki/Clang).  See the
-[Makefile](https://github.com/craigsapp/minHumdrum/blob/master/Makefile)
+[Makefile](https://github.com/humdrum-tools/minHumdrum/blob/master/Makefile)
 for compiling the library and
-[Makefile.examples](https://github.com/craigsapp/minHumdrum/blob/master/Makefile.examples)
+[Makefile.examples](https://github.com/humdrum-tools/minHumdrum/blob/master/Makefile.examples)
 for compiling and linking executables.
 
 
@@ -29,15 +29,15 @@ For minimal use of the library, you can download the composite header
 and source files.  In a terminal, download with [wget](https://en.wikipedia.org/wiki/Wget) (most common method for linux) by typing:
 
 ```console
-wget https://raw.githubusercontent.com/craigsapp/minHumdrum/master/include/minhumdrum.h
-wget https://raw.githubusercontent.com/craigsapp/minHumdrum/master/src/minhumdrum.cpp
+wget https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/include/minhumdrum.h
+wget https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/src/minhumdrum.cpp
 ```
 
 Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X):
 
 ```console
-curl https://raw.githubusercontent.com/craigsapp/minHumdrum/master/include/minhumdrum.h -o minhumdrum.h
-curl https://raw.githubusercontent.com/craigsapp/minHumdrum/master/src/minhumdrum.cpp -o minhumdrum.cpp
+curl https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/include/minhumdrum.h -o minhumdrum.h
+curl https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/src/minhumdrum.cpp -o minhumdrum.cpp
 ```
 
 To compile minHumdrum as a stand-alone library, you can download a ZIP or
@@ -46,7 +46,7 @@ tarball from the buttons at the top of this page, or you can use
 download and allow easy updating:
 
 ```console
-git clone https://github.com/craigsapp/minHumdrum
+git clone https://github.com/humdrum-tools/minHumdrum
 ```
 
 To update to the most recent version of minHumdrum if git was used to
@@ -154,7 +154,7 @@ Example input:<br>
 </pre>
 </td>
 <td style="border:0">
-<img style="width:300px" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
+<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/minHumdrum/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
 </td>
 <td style="border:0">
 Example output:<br>
