@@ -23,10 +23,15 @@ namespace minHumdrum {
 
 class HumdrumFileContent : public HumdrumFileStructure {
 	public:
-		              HumdrumFileContent         (void);
-		              HumdrumFileContent         (const string& filename);
-		              HumdrumFileContent         (istream& contents);
-		             ~HumdrumFileContent         ();
+		       HumdrumFileContent         (void);
+		       HumdrumFileContent         (const string& filename);
+		       HumdrumFileContent         (istream& contents);
+		      ~HumdrumFileContent         ();
+
+		bool   analyzeKernSlurs           (void);
+
+	protected:
+		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
 };
 
 

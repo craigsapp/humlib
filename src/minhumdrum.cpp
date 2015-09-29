@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 03:05:52 PDT 2015
+// Last Modified: Mon Sep 28 17:29:53 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2743,6 +2743,52 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getSpineStartList -- Return a list of the exclustive 
+//     interpretations starting spines in the data.  The single parameter
+//     version of the fuction returns all starting exclusive interpretations.
+//     The two-parameter version will result all exclusive interpretations
+//     of a given datatype, and the three-parameter version where the third
+//     parameter is a vector of string, will selectively include all starting
+//     tokens which match one of the data types in the input list.
+//
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts) {
+	spinestarts.resize(trackstarts.size());
+	for (int i=0; i<trackstarts.size(); i++) {
+		spinestarts[i] = trackstarts[i];
+	}
+}
+
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+		const string& exinterp) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=0; i<trackstarts.size(); i++) {
+		if (exinterp == *trackstarts[i]) {
+			spinestarts.push_back(trackstarts[i]);
+		}
+	}
+}
+
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+		const vector<string>& exinterps) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=0; i<trackstarts.size(); i++) {
+		for (int j=0; j<exinterps.size(); j++) {
+			if (exinterps[j] == *trackstarts[i]) {
+				spinestarts.push_back(trackstarts[i]);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getPrimaryTrackSeq -- Return a list of the
 //     given primary spine tokens for a given track (indexed starting at
 //     one and going through getMaxTrack().
@@ -3537,6 +3583,34 @@ HumdrumFileContent::HumdrumFileContent(istream& contents) :
 
 HumdrumFileContent::~HumdrumFileContent() {
 	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+//    slurs to each other.
+//
+
+bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HumdrumToken*> kernspines;
+	getSpineStartList(kernspines, "**kern");
+	bool output = true;
+	for (int i=0; i<kernspines.size(); i++) {
+		output = output && analyzeKernSlurs(kernspines[i]);
+	}
+	return output;
+}
+
+
+bool HumdrumFileContent::analyzeKernSlurs(HumdrumToken* spinestart) {
+	vector<HumdrumToken*> sluropen;
+	vector<HumdrumToken*> slurclose;
+	vector<HumdrumToken*> current;
+	current.resize(1);
+
+	return true;
 }
 
 

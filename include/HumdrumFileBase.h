@@ -84,39 +84,54 @@ class HumdrumFileBase {
 		void          setQuietParsing              (void);
 		void          setNoisyParsing              (void);
 
-		bool parse(istream& contents)         { return read(contents); }
-		bool parse(const char* contents)      { return readString(contents); }
-		bool parse(const string& contents)    { return readString(contents); }
-		bool parseCsv(istream& contents, const string& separator = ",") {
-		                                       return readCsv(contents); }
-		bool parseCsv(const char* contents, const string& separator = ",") {
-		                                       return readStringCsv(contents); }
-		bool parseCsv(const string& contents, const string& separator = ",") {
-		                                       return readStringCsv(contents); }
+		bool    parse    (istream& contents)         { return read(contents); }
+		bool    parse    (const char* contents)   { return readString(contents); }
+		bool    parse    (const string& contents) { return readString(contents); }
+		bool    parseCsv (istream& contents, const string& separator = ",") {
+		                                     return readCsv(contents); }
+		bool    parseCsv (const char* contents, const string& separator = ",") {
+		                                     return readStringCsv(contents); }
+		bool    parseCsv (const string& contents, const string& separator = ",") {
+		                                     return readStringCsv(contents); }
 
-		void          setXmlIdPrefix            (const string& value);
-		string        getXmlIdPrefix            (void);
+		void          setXmlIdPrefix           (const string& value);
+		string        getXmlIdPrefix           (void);
 
-		HumdrumLine&  operator[]                (int index);
-		int           getLineCount              (void) const;
-		HumdrumToken& token                     (int lineindex, int fieldindex);
-		int           getMaxTrack               (void) const;
+		HumdrumLine&  operator[]               (int index);
+		int           getLineCount             (void) const;
+		HumdrumToken& token                    (int lineindex, int fieldindex);
+		int           getMaxTrack              (void) const;
 		int           getSpineCount (void) const { return getMaxTrack(); }
-		ostream&      printSpineInfo            (ostream& out = cout);
-		ostream&      printDataTypeInfo         (ostream& out = cout);
-		ostream&      printTrackInfo            (ostream& out = cout);
-		ostream&      printCsv      (ostream& out = cout,
-		                             const string& separator = ",");
+		ostream&      printSpineInfo           (ostream& out = cout);
+		ostream&      printDataTypeInfo        (ostream& out = cout);
+		ostream&      printTrackInfo           (ostream& out = cout);
+		ostream&      printCsv                 (ostream& out = cout,
+		                                        const string& separator = ",");
 
-		HumdrumToken* getTrackStart             (int track) const;
-		HumdrumToken* getSpineStart (int spine) const { 
-		                    return getTrackStart(spine+1); }
-		int           getTrackEndCount          (int track) const;
-		HumdrumToken* getTrackEnd               (int track,
-		                                         int subtrack) const;
-		void          createLinesFromTokens     (void);
-		void          append                    (const char* line);
-		void          append                    (const string& line);
+		HumdrumToken* getTrackStart            (int track) const;
+		HumdrumToken* getSpineStart            (int spine) const { 
+		                                         return getTrackStart(spine+1); }
+
+		void          getSpineStartList        (vector<HumdrumToken*>& spinelist);
+		void          getSpineStartList        (vector<HumdrumToken*>& spinelist,
+		                                        const string& exinterp);
+		void          getSpineStartList        (vector<HumdrumToken*>& spinelist,
+		                                        const vector<string>& exinterps);
+		void          getTrackStartList        (vector<HumdrumToken*>& spinelist) {
+								return getSpineStartList(spinelist); }
+		void          getTrackStartList        (vector<HumdrumToken*>& spinelist,
+		                                        const string& exinterp) {
+								return getSpineStartList(spinelist, exinterp); }
+		void          getTrackStartList        (vector<HumdrumToken*>& spinelist,
+		                                        const vector<string>& exinterps) {
+								return getSpineStartList(spinelist, exinterps); }
+
+		int           getTrackEndCount         (int track) const;
+		HumdrumToken* getTrackEnd              (int track,
+		                                        int subtrack) const;
+		void          createLinesFromTokens    (void);
+		void          append                   (const char* line);
+		void          append                   (const string& line);
 
 		// spine analysis functionality
 		vector<vector<HumdrumToken*> > getTrackSeq       (int track,

@@ -500,6 +500,52 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getSpineStartList -- Return a list of the exclustive 
+//     interpretations starting spines in the data.  The single parameter
+//     version of the fuction returns all starting exclusive interpretations.
+//     The two-parameter version will result all exclusive interpretations
+//     of a given datatype, and the three-parameter version where the third
+//     parameter is a vector of string, will selectively include all starting
+//     tokens which match one of the data types in the input list.
+//
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts) {
+	spinestarts.resize(trackstarts.size());
+	for (int i=0; i<trackstarts.size(); i++) {
+		spinestarts[i] = trackstarts[i];
+	}
+}
+
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+		const string& exinterp) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=0; i<trackstarts.size(); i++) {
+		if (exinterp == *trackstarts[i]) {
+			spinestarts.push_back(trackstarts[i]);
+		}
+	}
+}
+
+
+void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+		const vector<string>& exinterps) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=0; i<trackstarts.size(); i++) {
+		for (int j=0; j<exinterps.size(); j++) {
+			if (exinterps[j] == *trackstarts[i]) {
+				spinestarts.push_back(trackstarts[i]);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getPrimaryTrackSeq -- Return a list of the
 //     given primary spine tokens for a given track (indexed starting at
 //     one and going through getMaxTrack().

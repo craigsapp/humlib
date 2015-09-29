@@ -52,6 +52,34 @@ HumdrumFileContent::~HumdrumFileContent() {
 
 
 
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+//    slurs to each other.
+//
+
+bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HumdrumToken*> kernspines;
+	getSpineStartList(kernspines, "**kern");
+	bool output = true;
+	for (int i=0; i<kernspines.size(); i++) {
+		output = output && analyzeKernSlurs(kernspines[i]);
+	}
+	return output;
+}
+
+
+bool HumdrumFileContent::analyzeKernSlurs(HumdrumToken* spinestart) {
+	vector<HumdrumToken*> sluropen;
+	vector<HumdrumToken*> slurclose;
+	vector<HumdrumToken*> current;
+	current.resize(1);
+
+	return true;
+}
+
+
+
 // END_MERGE
 
 } // end namespace std;
