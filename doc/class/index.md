@@ -21,21 +21,21 @@ Overview
 </summary>
 
 The minHumdrum library consists of several classes that abstract
-various functionalities for the parser.  Briefly, the HumdrumToken
-class manages individual cells of data, with the HumdrumLine managing
-simultaneously occurring tokens, and the HumdrumFile manages the
-sequence of lines in a Humdrum score.  A HumdrumFile class is used to
-represent a single continuous movement in a musical score.  A class
-for managing multiple movements will be added to the code set in
-the future.  The figure on the right shows the relationship between
-the classes, and a short description of each class is given below:
+various functionalities for a Humdrum data parser.  Briefly, the
+HumdrumToken class manages individual cells of data, with the
+HumdrumLine class managing simultaneously occurring tokens, and the
+HumdrumFile class manages the sequence of lines in a single-movement
+Humdrum score.  A class for managing
+multiple movements will be added to the code set in the future.
+The figure on the right shows the relationship between the classes,
+and a short description of each class is given below:
 
-Here are the classes defined in the minHumdrum library:
+Here are the main classes defined in the minHumdrum library:
 
 <img width="35%" style="display:float; float:right;" src="/images/class-organization.svg">
 {% include class/classsummary.html %}
 
-The following figure shows some sample Humdrum file for a musical
+The following figure shows some sample Humdrum data content for a musical
 score with overlays illustrating how the class structure of a
 HumdrumFile interacts with the data.  The blue box represents a
 HumdrumFile.  The file primarily consists of an array of HumdrumLines,

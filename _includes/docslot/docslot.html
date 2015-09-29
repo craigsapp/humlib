@@ -435,9 +435,9 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 		for (var i=0; i<entry.PARAMETERS.length; i++) {
    		output += '<span style="color:#159957; font-weight:500;">';
 			if (entry.RETURN instanceof Array) {
-				output += entry.RETURN[i];
+				output += htmlEscape(entry.RETURN[i]);
 			} else if (entry.RETURN && (entry.RETURN !== 'undefined')) {
-				output += entry.RETURN;
+				output += htmlEscape(entry.RETURN);
 			}
 			output += ' ';
 			output += '<span class="docslot-long-title">';
@@ -453,9 +453,9 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 	} else {
    	output += '<span style="color:#159957; font-weight:500;">';
 		if (entry.RETURN instanceof Array) {
-			output += entry.RETURN[0];
+			output += htmlEscale(entry.RETURN[0]);
 		} else if (entry.RETURN && (entry.RETURN !== 'undefined')) {
-			output += entry.RETURN;
+			output += htmlEscape(entry.RETURN);
 		}
 		output += ' ';
 		output += '<span class="docslot-long-title">';
@@ -474,6 +474,22 @@ Handlebars.registerHelper('printDeclarations', function (entry) {
 
    return output;
 });
+
+
+
+//////////////////////////////
+//
+// htmlEscape -- 
+//
+
+function htmlEscape(input) {
+   return input
+	   .replace(/> >/g, ">>")
+		.replace(/&/g, "&amp;")
+	   .replace(/>/g, "&gt;")
+	   .replace(/</g, "&lt;")
+	   .replace(/"/g, "&quot;");
+}
 
 
 
