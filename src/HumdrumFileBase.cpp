@@ -519,9 +519,13 @@ void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts) {
 
 void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
 		const string& exinterp) {
+cout << "GOT HERE MMM" << endl;
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
 	for (int i=0; i<trackstarts.size(); i++) {
+cout << "EXINTERP: " << exinterp << endl;
+cout << "TRACKSTART VALUE" << (long long)trackstarts[i] << endl;
+cout << "TRACKSTART" << *trackstarts[i] << endl;
 		if (exinterp == *trackstarts[i]) {
 			spinestarts.push_back(trackstarts[i]);
 		}
@@ -633,13 +637,22 @@ vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
 //    a track on all lines.
 //
 
-vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
-		int options) {
+
+void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
+		HumdrumToken* starttoken, int options) {
+	int track = starttoken->getTrack();
+	getTrackSeq(sequence, track, options);
+}
+
+
+void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
+		int track, int options) {
 	int nullQ    = (options & OPT_NONULLS);
 	int manipQ   = (options & OPT_NOMANIP);
 	int globalQ  = (options & OPT_NOGLOBAL);
 
-	vector<vector<HumdrumToken*> > output;
+	vector<vector<HumdrumToken*> >& output = sequence;
+	output.resize(0);
 	output.reserve(getLineCount());
 
 	vector<HumdrumToken*> tempout;
@@ -671,7 +684,6 @@ vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 			output.push_back(tempout);
 		}
 	}
-	return output;
 }
 
 

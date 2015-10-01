@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 28 17:29:53 PDT 2015
+// Last Modified: Thu Oct  1 16:50:24 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2762,9 +2762,13 @@ void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts) {
 
 void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
 		const string& exinterp) {
+cout << "GOT HERE MMM" << endl;
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
 	for (int i=0; i<trackstarts.size(); i++) {
+cout << "EXINTERP: " << exinterp << endl;
+cout << "TRACKSTART VALUE" << (long long)trackstarts[i] << endl;
+cout << "TRACKSTART" << *trackstarts[i] << endl;
 		if (exinterp == *trackstarts[i]) {
 			spinestarts.push_back(trackstarts[i]);
 		}
@@ -2876,13 +2880,22 @@ vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
 //    a track on all lines.
 //
 
-vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
-		int options) {
+
+void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
+		HumdrumToken* starttoken, int options) {
+	int track = starttoken->getTrack();
+	getTrackSeq(sequence, track, options);
+}
+
+
+void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
+		int track, int options) {
 	int nullQ    = (options & OPT_NONULLS);
 	int manipQ   = (options & OPT_NOMANIP);
 	int globalQ  = (options & OPT_NOGLOBAL);
 
-	vector<vector<HumdrumToken*> > output;
+	vector<vector<HumdrumToken*> >& output = sequence;
+	output.resize(0);
 	output.reserve(getLineCount());
 
 	vector<HumdrumToken*> tempout;
@@ -2914,7 +2927,6 @@ vector<vector<HumdrumToken*> > HumdrumFileBase::getTrackSeq(int track,
 			output.push_back(tempout);
 		}
 	}
-	return output;
 }
 
 
@@ -3587,6 +3599,9 @@ HumdrumFileContent::~HumdrumFileContent() {
 
 
 
+
+
+
 //////////////////////////////
 //
 // HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
@@ -3595,9 +3610,12 @@ HumdrumFileContent::~HumdrumFileContent() {
 
 bool HumdrumFileContent::analyzeKernSlurs(void) {
 	vector<HumdrumToken*> kernspines;
+cout << "GOT HERE ZZZ" << endl;
 	getSpineStartList(kernspines, "**kern");
+cout << "GOT kern spines" << endl;
 	bool output = true;
 	for (int i=0; i<kernspines.size(); i++) {
+cout << "GOT HERE AAA" << i << endl;
 		output = output && analyzeKernSlurs(kernspines[i]);
 	}
 	return output;
@@ -3607,8 +3625,18 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 bool HumdrumFileContent::analyzeKernSlurs(HumdrumToken* spinestart) {
 	vector<HumdrumToken*> sluropen;
 	vector<HumdrumToken*> slurclose;
-	vector<HumdrumToken*> current;
-	current.resize(1);
+	
+	vector<vector<HumdrumToken*> > tracktokens;
+	this->getTrackSeq(tracktokens, spinestart, OPT_NONULLS | OPT_NOGLOBAL);
+	for (int i=0; i<tracktokens.size(); i++) {
+		for (int j=0; j<tracktokens[i].size(); j++) {
+			cout << tracktokens[i][j];
+			if (i < tracktokens[i].size() -1) {
+				cout << "\t";
+			}
+		}
+		cout << "\n";
+	}
 
 	return true;
 }

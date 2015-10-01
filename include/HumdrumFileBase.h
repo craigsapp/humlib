@@ -134,10 +134,12 @@ class HumdrumFileBase {
 		void          append                   (const string& line);
 
 		// spine analysis functionality
-		vector<vector<HumdrumToken*> > getTrackSeq       (int track,
-		                                                  int options);
-		vector<HumdrumToken*>          getPrimaryTrackSeq(int track,
-		                                                  int options);
+      void          getTrackSeq       (vector<vector<HumdrumToken*> >& sequence,
+		                                 HumdrumToken* starttoken, 
+		                                 int options);
+      void          getTrackSeq       (vector<vector<HumdrumToken*> >& sequence,
+		                                 int track, int options);
+		vector<HumdrumToken*>          getPrimaryTrackSeq(int track, int options);
 
 	protected:
 		bool          analyzeTokens                (void);
