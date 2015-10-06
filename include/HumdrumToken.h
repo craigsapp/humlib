@@ -26,6 +26,7 @@ namespace minHumdrum {
 
 // START_MERGE
 
+
 class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
@@ -60,6 +61,7 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isNonNullData             (void) const;
 		bool     isNullData                (void) const;
@@ -68,6 +70,10 @@ class HumdrumToken : public string, public HumHash {
 		// kern-specific functions:
 		bool     isRest                    (void) const;
 		bool     isNote                    (void) const;
+		bool     isSecondaryTiedNote       (void) const;
+
+		bool     hasSlurStart              (void) const;
+		bool     hasSlurEnd                (void) const;
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
@@ -96,7 +102,9 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
-		void     setParameters             (const string& pdata, HumdrumToken* ptok = NULL);
+		void     setParameters             (const string& pdata,
+		                                    HumdrumToken* ptok = NULL);
+		int      getStrandIndex            (void) const;
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
@@ -139,6 +147,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getState          (void) const;
 		void     incrementState    (void);
 		void     setDuration       (const HumNum& dur);
+		void     setStrandIndex    (int index);
 
 		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
@@ -189,6 +198,11 @@ class HumdrumToken : public string, public HumHash {
 		// recursively.
 		int rhycheck;
 
+		// strand: Used to keep track of contiguous voice connections between
+      // secondary spines/tracks.  This is the 1-D strand index number
+		// (not the 2-d one).
+		int strand;
+
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;
@@ -197,7 +211,10 @@ class HumdrumToken : public string, public HumHash {
 };
 
 
+typedef HumdrumToken* HTp;
+
 ostream& operator<<(ostream& out, const HumdrumToken& token);
+ostream& operator<<(ostream& out, HumdrumToken* token);
 
 
 // END_MERGE

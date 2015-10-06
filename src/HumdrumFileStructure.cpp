@@ -746,7 +746,7 @@ HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
 	durs.resize(0);
 	for (int i=0; i<lines[line]->getTokenCount(); i++) {
-		HumNum dur = lines[line]->token(i).getDuration();
+		HumNum dur = lines[line]->token(i)->getDuration();
 		durs.push_back(dur);
 	}
 	if (!cleanDurs(durs, line)) {
@@ -797,7 +797,7 @@ bool HumdrumFileStructure::decrementDurStates(vector<HumNum>& durs,
 		return isValid();
 	}
 	for (int i=0; i<(int)durs.size(); i++) {
-		if (!lines[line]->token(i).hasRhythm()) {
+		if (!lines[line]->token(i)->hasRhythm()) {
 			continue;
 		}
 		durs[i] -= linedur;
@@ -1250,7 +1250,29 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 		}
 	}
 
+	assignStrandsToTokens();
+	
 	return isValid();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::assignStrandsToTokens -- Store the 1D strand
+//    index number for each token in the file.  Global tokens will have
+//    strand index set to -1.
+//
+
+void HumdrumFileStructure::assignStrandsToTokens(void) {
+	HTp tok;
+	for (int i=0; i<strand1d.size(); i++) {
+		tok = strand1d[i].first;
+		while (tok != NULL) {
+			tok->setStrandIndex(i);
+			tok = tok->getNextToken();
+		}
+	}
 }
 
 

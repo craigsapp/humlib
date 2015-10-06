@@ -12,9 +12,7 @@ int main(int argc, char** argv) {
    if (!infile.read(argv[1])) {
       return 1;
    }
-cout << "GOT EHRE AAA" << endl;
    infile.analyzeKernSlurs();
-cout << "GOT EHRE BBB" << endl;
    return 0;
 }
 

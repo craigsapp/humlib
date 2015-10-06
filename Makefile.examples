@@ -108,7 +108,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo "Compiling $@..."
 	$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-		&& strip $@$(EXTEN)
+#		&& strip $@$(EXTEN)
 
 % : $(notdir %.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
@@ -116,7 +116,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo "Compiling $@..."
 	$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-		&& strip $(TARGDIR)/$@$(EXTEN)
+#		&& strip $(TARGDIR)/$@$(EXTEN)
 
 #                                                                         #
 #                                                                         #

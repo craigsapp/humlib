@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct  1 16:50:24 PDT 2015
+// Last Modified: Mon Oct  5 17:46:44 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -2532,12 +2532,12 @@ string HumdrumFileBase::getParseError(void) const {
 
 //////////////////////////////
 //
-// HumdrumFileBase::isValid -- Returns true if last read was 
+// HumdrumFileBase::isValid -- Returns true if last read was
 //     successful.
 //
 
 bool HumdrumFileBase::isValid(void) {
-	if (displayError && !isQuiet()) {
+	if (displayError && (parseError.size() > 0)&& !isQuiet()) {
 		cerr << parseError << endl;
 		displayError = false;
 	}
@@ -2562,7 +2562,7 @@ void HumdrumFileBase::setQuietParsing(void) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::setNoisyParsing -- Display error messages 
+// HumdrumFileBase::setNoisyParsing -- Display error messages
 //   on console when reading data.
 // @SEEALSO: setQuietParsing
 // @SEEALSO: isQuiet
@@ -2675,7 +2675,7 @@ int HumdrumFileBase::getLineCount(void) const {
 // HumdrumFileBase::token -- Return the token at the given line/field index.
 //
 
-HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
+HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 	if (lineindex < 0) {
 		lineindex += getLineCount();
 	}
@@ -2743,32 +2743,31 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::getSpineStartList -- Return a list of the exclustive 
+// HumdrumFileBase::getSpineStartList -- Return a list of the exclustive
 //     interpretations starting spines in the data.  The single parameter
 //     version of the fuction returns all starting exclusive interpretations.
 //     The two-parameter version will result all exclusive interpretations
 //     of a given datatype, and the three-parameter version where the third
 //     parameter is a vector of string, will selectively include all starting
-//     tokens which match one of the data types in the input list.
+//     tokens which match one of the data types in the input list.  The
+//     trackstarts class variable contains an empty slot at index 0;
+//     this is removed in the return vector.
 //
 
-void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts) {
-	spinestarts.resize(trackstarts.size());
-	for (int i=0; i<trackstarts.size(); i++) {
-		spinestarts[i] = trackstarts[i];
+void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=1; i<trackstarts.size(); i++) {
+		spinestarts.push_back(trackstarts[i]);
 	}
 }
 
 
-void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const string& exinterp) {
-cout << "GOT HERE MMM" << endl;
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=0; i<trackstarts.size(); i++) {
-cout << "EXINTERP: " << exinterp << endl;
-cout << "TRACKSTART VALUE" << (long long)trackstarts[i] << endl;
-cout << "TRACKSTART" << *trackstarts[i] << endl;
+	for (int i=1; i<trackstarts.size(); i++) {
 		if (exinterp == *trackstarts[i]) {
 			spinestarts.push_back(trackstarts[i]);
 		}
@@ -2776,11 +2775,11 @@ cout << "TRACKSTART" << *trackstarts[i] << endl;
 }
 
 
-void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts, 
+void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const vector<string>& exinterps) {
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=0; i<trackstarts.size(); i++) {
+	for (int i=1; i<trackstarts.size(); i++) {
 		for (int j=0; j<exinterps.size(); j++) {
 			if (exinterps[j] == *trackstarts[i]) {
 				spinestarts.push_back(trackstarts[i]);
@@ -2793,135 +2792,172 @@ void HumdrumFileBase::getSpineStartList(vector<HumdrumToken*>& spinestarts,
 
 //////////////////////////////
 //
-// HumdrumFileBase::getPrimaryTrackSeq -- Return a list of the
+// getPrimaryspineSequence -- Return a list of the HumdrumTokens in a spine,
+//    but not any secondary spine content if the spine splits.
+//
+
+
+void HumdrumFileBase::getPrimarySpineSequence(vector<HTp>& sequence, int spine,
+		int options) {
+	getPrimaryTrackSequence(sequence, spine+1, options);
+}
+
+
+
+//////////////////////////////
+//
+// getPrimaryspineSequence -- Return a list of the HumdrumTokens in a spine,
+//    but not any secondary spine content if the spine splits.
+//
+
+
+void HumdrumFileBase::getSpineSequence(vector<vector<HTp> >& sequence,
+		HTp starttoken, int options) {
+	getTrackSequence(sequence, starttoken, options);
+
+}
+
+
+void HumdrumFileBase::getSpineSequence(vector<vector<HTp> >& sequence, int spine,
+		int options) {
+	getTrackSequence(sequence, spine+1, options);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getPrimaryTrackSequence -- Return a list of the
 //     given primary spine tokens for a given track (indexed starting at
 //     one and going through getMaxTrack().
 //
-// The following options are used for the getPrimaryTrackTokens.
-// * OPT_NONULLS    => don't include  null tokens in extracted list
-// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
-//                        but still keep ** and *0).
-// * OPT_NOGLOBALS  => don't include global records (global comments, reference
-//                        records, and empty lines). In other words, only return
-//                        a list of tokens from lines which hasSpines() it true.
-//
-// #define OPT_NONULLS  0x01
-// #define OPT_NOMANIP  0x02
-// #define OPT_NOGLOBAL 0x04
-//
 
-vector<HumdrumToken*> HumdrumFileBase::getPrimaryTrackSeq(int track,
+void HumdrumFileBase::getPrimaryTrackSequence(vector<HTp>& sequence, int track,
 		int options) {
-	int i;
-	int nullQ    = (options & OPT_NONULLS);
-	int manipQ   = (options & OPT_NOMANIP);
-	int globalQ  = (options & OPT_NOGLOBAL);
-	vector<HumdrumToken*> output;
-	output.reserve(getLineCount());
-
-	auto current = getTrackStart(track);
-	if (current == NULL) {
-		return output;
+	vector<vector<HTp> > tempseq;
+	getTrackSequence(tempseq, track, options | OPT_PRIMARY);
+	sequence.resize(tempseq.size());
+	for (int i=0; i<tempseq.size(); i++) {
+		sequence[i] = tempseq[i][0];
 	}
-	HumdrumFileBase& infile = *this;
-	int startindex = current->getLineIndex();
-	if (globalQ) {
-		for (i=0; i<startindex; i++) {
-			if (!infile[i].hasSpines()) {
-				output.push_back(&(infile[i].token(0)));
-			}
-		}
-	}
-
-	while (current != NULL) {
-		if ((!nullQ) && current->isNull()) {
-			// don't insert
-		} else if ((!manipQ) && current->isManipulator() &&
-				(!current->isTerminator()) && (!current->isExclusive())) {
-			// don't insert
-		} else {
-			if ((output.size() > 0) && globalQ) {
-				for (i=output.back()->getLineIndex();i<current->getLineIndex();i++){
-					if (!infile[i].hasSpines()) {
-						output.push_back(&infile[i].token(0));
-					}
-				}
-			}
-			output.push_back(current);
-		}
-		if (current->getNextTokenCount() > 0) {
-			current = current->getNextToken();
-		} else {
-			current = NULL;
-			break;
-		}
-		
-	}
-
-	int endindex = output.back()->getLineIndex();
-	if (globalQ) {
-		for (i=endindex; i<infile.getLineCount(); i++) {
-			if (infile[i].hasSpines()) {
-				continue;
-			}
-			output.push_back(&infile[i].token(0));
-		}
-	}
-	return output;
 }
 
 
 
 /////////////////////////////
 //
-// HumdrumFileBase::getTrackSeq -- Extract a sequence of tokens
+// HumdrumFileBase::getTrackSequence -- Extract a sequence of tokens
 //    for the given spine.  All subspine tokens will be included.
-//    See getPrimaryTrackSeq() if you only want the first subspine for
+//    See getPrimaryTrackSequence() if you only want the first subspine for
 //    a track on all lines.
 //
+// The following options are used for the getPrimaryTrackTokens:
+// * OPT_PRIMARY    => only extract primary subspine/subtrack.
+// * OPT_NOEMPTY    => don't include null tokens in extracted list if all
+//                        extracted subspines contains null tokens.
+//                        Includes null interpretations and comments as well.
+// * OPT_NONULL     => don't include any null tokens in extracted list.
+// * OPT_NOINTERP   => don't include interprtation tokens.
+// * OPT_NOMANIP    => don't include spine manipulators (*^, *v, *x, *+,
+//                        but still keep ** and *0).
+// * OPT_NOCOMMENT  => don't include comment tokens.
+// * OPT_NOGLOBAL   => don't include global records (global comments, reference
+//                        records, and empty lines). In other words, only return
+//                        a list of tokens from lines which hasSpines() it true.
+// * OPT_NOREST     => don't include **kern rests.
+// * OPT_NOTIE      => don't include **kern secondary tied notes.
+// Compound options:
+// * OPT_DATA      (OPT_NOMANIP | OPT_NOCOMMENT | OPT_NOGLOBAL)
+//     Only data tokens (including barlines)
+// * OPT_ATTACKS   (OPT_DATA | OPT_NOREST | OPT_NOTIE | OPT_NONULL)
+//     Only note-attack tokens (when etracting **kern data)
+//
 
-
-void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
-		HumdrumToken* starttoken, int options) {
+void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
+		HTp starttoken, int options) {
 	int track = starttoken->getTrack();
-	getTrackSeq(sequence, track, options);
+	getTrackSequence(sequence, track, options);
 }
 
 
-void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
+void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 		int track, int options) {
-	int nullQ    = (options & OPT_NONULLS);
-	int manipQ   = (options & OPT_NOMANIP);
-	int globalQ  = (options & OPT_NOGLOBAL);
+	bool primaryQ   = options & OPT_PRIMARY;
+	bool nonullQ    = options & OPT_NONULL;
+	bool noemptyQ   = options & OPT_NOEMPTY;
+	bool nointerpQ  = options & OPT_NOINTERP;
+	bool nomanipQ   = options & OPT_NOMANIP;
+	bool nocommentQ = options & OPT_NOCOMMENT;
+	bool noglobalQ  = options & OPT_NOGLOBAL;
+	bool norestQ    = options & OPT_NOREST;
+	bool notieQ     = options & OPT_NOTIE;
 
-	vector<vector<HumdrumToken*> >& output = sequence;
-	output.resize(0);
+	vector<vector<HTp> >& output = sequence;
 	output.reserve(getLineCount());
+	output.resize(0);
 
-	vector<HumdrumToken*> tempout;
+	vector<HTp> tempout;
 	auto& infile = *this;
 	int i, j;
+	bool allNull;
+	HTp token;
+   bool foundTrack;
 
 	for (i=0; i<infile.getLineCount(); i++) {
 		tempout.resize(0);
-		if (globalQ && (!infile[i].hasSpines())) {
+		if (!noglobalQ && (infile[i].isGlobal())) {
+			tempout.push_back(infile[i].token(0));
 			output.push_back(tempout);
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
-			if (infile[i].token(j).getTrack() == track) {
-				if ((!nullQ) && infile[i].token(j).isNull()) {
+		if (noemptyQ) {
+			allNull = true;
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (infile[i].token(j)->getTrack() != track) {
 					continue;
 				}
-				if ((!nullQ) && infile[i].token(j).isNull()) {
-					continue;
-				} else if ((!manipQ) && infile[i].token(j).isManipulator() &&
-						(!infile[i].token(j).isTerminator()) &&
-						(!infile[i].token(j).isExclusive())) {
-					continue;
+				if (!infile[i].token(j)->isNull()) {
+					allNull = false;
+					break;
 				}
-				tempout.push_back(&infile[i].token(j));
 			}
+			if (allNull) {
+				continue;
+			}
+		}
+
+		foundTrack = false;
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			token = infile[i].token(j);
+			if (token->getTrack() != track) {
+				continue;
+			}
+			if (primaryQ && foundTrack) {
+				continue;
+			}
+			foundTrack = true;
+			if (nointerpQ && (infile[i].token(j)->isManipulator() ||
+					infile[i].token(j)->isTerminator() ||
+					infile[i].token(j)->isExclusive())) {
+				continue;
+			}
+			if (nomanipQ && infile[i].token(j)->isManipulator()) {
+				continue;
+			}
+			if (nonullQ && infile[i].token(j)->isNull()) {
+				continue;
+			}
+			if (nocommentQ && infile[i].token(j)->isComment()) {
+				continue;
+			}
+			if (norestQ && infile[i].token(j)->isRest()) {
+				continue;
+			}
+			if (notieQ && infile[i].token(j)->isSecondaryTiedNote()) {
+				continue;
+			}
+
+			tempout.push_back(infile[i].token(j));
 		}
 		if (tempout.size() > 0) {
 			output.push_back(tempout);
@@ -2938,7 +2974,7 @@ void HumdrumFileBase::getTrackSeq(vector<vector<HumdrumToken*> >& sequence,
 //     number is out of range.
 //
 
-HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
+HTp HumdrumFileBase::getTrackStart(int track) const {
 	if ((track > 0) && (track < trackstarts.size())) {
 		return trackstarts[track];
 	} else {
@@ -2980,7 +3016,7 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 //    to but not including getTrackEndCount.
 //
 
-HumdrumToken* HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
+HTp HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 	if (track < 0) {
 		track += trackends.size();
 	}
@@ -3088,54 +3124,54 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 			return setParseError(err);
 		}
 		for (i=0; i<previous.getTokenCount(); i++) {
-			previous.token(i).makeForwardLink(next.token(i));
+			previous.token(i)->makeForwardLink(*next.token(i));
 		}
 		return true;
 	}
 	int ii = 0;
 	for (i=0; i<previous.getTokenCount(); i++) {
-		if (!previous.token(i).isManipulator()) {
-			previous.token(i).makeForwardLink(next.token(ii++));
-		} else if (previous.token(i).isSplitInterpretation()) {
+		if (!previous.token(i)->isManipulator()) {
+			previous.token(i)->makeForwardLink(*next.token(ii++));
+		} else if (previous.token(i)->isSplitInterpretation()) {
 			// connect the previous token to the next two tokens.
-			previous.token(i).makeForwardLink(next.token(ii++));
-			previous.token(i).makeForwardLink(next.token(ii++));
-		} else if (previous.token(i).isMergeInterpretation()) {
+			previous.token(i)->makeForwardLink(*next.token(ii++));
+			previous.token(i)->makeForwardLink(*next.token(ii++));
+		} else if (previous.token(i)->isMergeInterpretation()) {
 			// connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
 			while ((i<previous.getTokenCount()) &&
-					previous.token(i).isMergeInterpretation()) {
-				previous.token(i).makeForwardLink(next.token(ii));
+					previous.token(i)->isMergeInterpretation()) {
+				previous.token(i)->makeForwardLink(*next.token(ii));
 				i++;
 			}
 			i--;
 			ii++;
-		} else if (previous.token(i).isExchangeInterpretation()) {
+		} else if (previous.token(i)->isExchangeInterpretation()) {
 			// swapping the order of two spines.
 			if ((i<previous.getTokenCount()) &&
-					previous.token(i+1).isExchangeInterpretation()) {
-				previous.token(i+1).makeForwardLink(next.token(ii++));
-				previous.token(i).makeForwardLink(next.token(ii++));
+					previous.token(i+1)->isExchangeInterpretation()) {
+				previous.token(i+1)->makeForwardLink(*next.token(ii++));
+				previous.token(i)->makeForwardLink(*next.token(ii++));
 			}
 			i++;
-		} else if (previous.token(i).isTerminateInterpretation()) {
+		} else if (previous.token(i)->isTerminateInterpretation()) {
 			// No link should be made.  There may be a problem if a
 			// new segment is given (this should be handled by a
 			// HumdrumSet class, not HumdrumFileBase.
-		} else if (previous.token(i).isAddInterpretation()) {
+		} else if (previous.token(i)->isAddInterpretation()) {
 			// A new data stream is being added, the next linked token
 			// should be an exclusive interpretation.
-			if (!next.token(ii+1).isExclusiveInterpretation()) {
+			if (!next.token(ii+1)->isExclusiveInterpretation()) {
 				stringstream err;
 				err << "Error: expecting exclusive interpretation on line "
 				    << next.getLineNumber() << " at token " << i << " but got "
 				    << next.token(i);
 				return setParseError(err);
 			}
-			previous.token(i).makeForwardLink(next.token(ii++));
+			previous.token(i)->makeForwardLink(*next.token(ii++));
 			ii++;
-		} else if (previous.token(i).isExclusiveInterpretation()) {
-			previous.token(i).makeForwardLink(next.token(ii++));
+		} else if (previous.token(i)->isExclusiveInterpretation()) {
+			previous.token(i)->makeForwardLink(*next.token(ii++));
 		} else {
 			return setParseError("Error: should not get here");
 		}
@@ -3167,7 +3203,7 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 bool HumdrumFileBase::analyzeSpines(void) {
 	vector<string> datatype;
 	vector<string> sinfo;
-	vector<vector<HumdrumToken*> > lastspine;
+	vector<vector<HTp> > lastspine;
 	trackstarts.resize(0);
 	trackends.resize(0);
 	addToTrackStarts(NULL);
@@ -3176,7 +3212,7 @@ bool HumdrumFileBase::analyzeSpines(void) {
 	int i, j;
 	for (i=0; i<getLineCount(); i++) {
 		if (!lines[i]->hasSpines()) {
-			lines[i]->token(0).setFieldIndex(0);
+			lines[i]->token(0)->setFieldIndex(0);
 			continue;
 		}
 		if ((init == false) && !lines[i]->isExclusive()) {
@@ -3194,11 +3230,11 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			lastspine.resize(lines[i]->getTokenCount());
 			for (j=0; j<lines[i]->getTokenCount(); j++) {
 				datatype[j] = lines[i]->getTokenString(j);
-				addToTrackStarts(&lines[i]->token(j));
+				addToTrackStarts(lines[i]->token(j));
 				sinfo[j]    = to_string(j+1);
-				lines[i]->token(j).setSpineInfo(sinfo[j]);
-				lines[i]->token(j).setFieldIndex(j);
-				lastspine[j].push_back(&(lines[i]->token(j)));
+				lines[i]->token(j)->setSpineInfo(sinfo[j]);
+				lines[i]->token(j)->setFieldIndex(j);
+				lastspine[j].push_back(lines[i]->token(j));
 			}
 			continue;
 		}
@@ -3210,8 +3246,8 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			return setParseError(err);
 		}
 		for (j=0; j<lines[i]->getTokenCount(); j++) {
-			lines[i]->token(j).setSpineInfo(sinfo[j]);
-			lines[i]->token(j).setFieldIndex(j);
+			lines[i]->token(j)->setSpineInfo(sinfo[j]);
+			lines[i]->token(j)->setFieldIndex(j);
 		}
 		if (!lines[i]->isManipulator()) {
 			continue;
@@ -3230,7 +3266,7 @@ bool HumdrumFileBase::analyzeSpines(void) {
 //    in trackstarts is reserve for non-spine usage.
 //
 
-void HumdrumFileBase::addToTrackStarts(HumdrumToken* token) {
+void HumdrumFileBase::addToTrackStarts(HTp token) {
 	if (token == NULL) {
 		trackstarts.push_back(NULL);
 		trackends.resize(trackends.size()+1);
@@ -3257,7 +3293,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 	int mergecount = 0;
 	int i, j;
 	for (i=0; i<line.getTokenCount(); i++) {
-		if (line.token(i).isSplitInterpretation()) {
+		if (line.token(i)->isSplitInterpretation()) {
 			newtype.resize(newtype.size() + 1);
 			newtype.back() = datatype[i];
 			newtype.resize(newtype.size() + 1);
@@ -3265,10 +3301,10 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newinfo.resize(newinfo.size() + 2);
 			newinfo[newinfo.size()-2] = '(' + sinfo[i] + ")a";
 			newinfo[newinfo.size()-1] = '(' + sinfo[i] + ")b";
-		} else if (line.token(i).isMergeInterpretation()) {
+		} else if (line.token(i)->isMergeInterpretation()) {
 			mergecount = 0;
 			for (j=i+1; j<line.getTokenCount(); j++) {
-				if (line.token(j).isMergeInterpretation()) {
+				if (line.token(j)->isMergeInterpretation()) {
 					mergecount++;
 				} else {
 					break;
@@ -3279,7 +3315,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newtype.resize(newtype.size() + 1);
 			newtype.back() = datatype[i];
 			i += mergecount;
-		} else if (line.token(i).isAddInterpretation()) {
+		} else if (line.token(i)->isAddInterpretation()) {
 			newtype.resize(newtype.size() + 1);
 			newtype.back() = datatype[i];
 			newtype.resize(newtype.size() + 1);
@@ -3289,9 +3325,9 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			newinfo.resize(newinfo.size() + 1);
 			addToTrackStarts(NULL);
 			newinfo.back() = to_string(getMaxTrack());
-		} else if (line.token(i).isExchangeInterpretation()) {
+		} else if (line.token(i)->isExchangeInterpretation()) {
 			if (i < line.getTokenCount() - 1) {
-				if (line.token(i).isExchangeInterpretation()) {
+				if (line.token(i)->isExchangeInterpretation()) {
 					// exchange spine information
 					newtype.resize(newtype.size() + 1);
 					newtype.back() = datatype[i+1];
@@ -3312,10 +3348,10 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				     << line.getTokenCount() - 1;
 				return setParseError(err);
 			}
-		} else if (line.token(i).isTerminateInterpretation()) {
+		} else if (line.token(i)->isTerminateInterpretation()) {
 			// store pointer to terminate token in trackends
-			trackends[trackstarts.size()-1].push_back(&(line.token(i)));
-		} else if (((string)line.token(i)).substr(0, 2) == "**") {
+			trackends[trackstarts.size()-1].push_back(line.token(i));
+		} else if (((string*)line.token(i))->substr(0, 2) == "**") {
 			newtype.resize(newtype.size() + 1);
 			newtype.back() = line.getTokenString(i);
 			newinfo.resize(newinfo.size() + 1);
@@ -3329,7 +3365,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				return setParseError(err);
 			}
 			if (trackstarts.back() == NULL) {
-				addToTrackStarts(&line.token(i));
+				addToTrackStarts(line.token(i));
 			}
 		} else {
 			// should only be null interpretation, but doesn't matter
@@ -3399,7 +3435,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 //
 
 bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
-	vector<HumdrumToken*> ptokens;
+	vector<HTp> ptokens;
 
 	// analyze forward tokens:
 	for (int i=1; i<=getMaxTrack(); i++) {
@@ -3432,9 +3468,9 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 //
 
 bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
-		HumdrumToken* endtoken, vector<HumdrumToken*> ptokens) {
+		HTp endtoken, vector<HTp> ptokens) {
 
-	HumdrumToken* token = endtoken;
+	HTp token = endtoken;
 	int tcount = token->getPreviousTokenCount();
 	while (tcount > 0) {
 		for (int i=1; i<tcount; i++) {
@@ -3470,8 +3506,8 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 //
 
 bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
-		HumdrumToken* starttoken, vector<HumdrumToken*> ptokens) {
-	HumdrumToken* token = starttoken;
+		HTp starttoken, vector<HTp> ptokens) {
+	HTp token = starttoken;
 	int tcount = token->getNextTokenCount();
 	while (tcount > 0) {
 		if (!token->isData()) {
@@ -3508,8 +3544,8 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
 //    variable in HumdrumTokens)
 //
 
-void HumdrumFileBase::addUniqueTokens(vector<HumdrumToken*>& target,
-		vector<HumdrumToken*>& source) {
+void HumdrumFileBase::addUniqueTokens(vector<HTp>& target,
+		vector<HTp>& source) {
 	int i, j;
 	bool found;
 	for (i=0; i<source.size(); i++) {
@@ -3609,33 +3645,42 @@ HumdrumFileContent::~HumdrumFileContent() {
 //
 
 bool HumdrumFileContent::analyzeKernSlurs(void) {
-	vector<HumdrumToken*> kernspines;
-cout << "GOT HERE ZZZ" << endl;
+	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
-cout << "GOT kern spines" << endl;
 	bool output = true;
 	for (int i=0; i<kernspines.size(); i++) {
-cout << "GOT HERE AAA" << i << endl;
 		output = output && analyzeKernSlurs(kernspines[i]);
 	}
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernSlurs(HumdrumToken* spinestart) {
-	vector<HumdrumToken*> sluropen;
-	vector<HumdrumToken*> slurclose;
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
+	vector<HTp> sluropen;
+	vector<HTp> slurclose;
 	
-	vector<vector<HumdrumToken*> > tracktokens;
-	this->getTrackSeq(tracktokens, spinestart, OPT_NONULLS | OPT_NOGLOBAL);
-	for (int i=0; i<tracktokens.size(); i++) {
+	vector<vector<HTp> > tracktokens;
+	this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
+
+	int i;
+	for (i=0; i<tracktokens.size(); i++) {
 		for (int j=0; j<tracktokens[i].size(); j++) {
-			cout << tracktokens[i][j];
-			if (i < tracktokens[i].size() -1) {
-				cout << "\t";
+			if (j < tracktokens[i].size() - 1) {
+				if (tracktokens[i][j]->hasSlurStart()) {
+					sluropen.push_back(tracktokens[i][j]);
+				}
+				if (tracktokens[i][j]->hasSlurEnd()) {
+					slurclose.push_back(tracktokens[i][j]);
+				}
 			}
 		}
-		cout << "\n";
+	}
+
+	for (i=0; i<sluropen.size(); i++) {
+		cout << "open\t" << sluropen[i] << "\t" << sluropen[i]->getStrandIndex() << endl;
+	}
+	for (i=0; i<slurclose.size(); i++) {
+		cout << "close\t" << slurclose[i] << "\t" << slurclose[i]->getStrandIndex() << endl;
 	}
 
 	return true;
@@ -4365,7 +4410,7 @@ HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
 	durs.resize(0);
 	for (int i=0; i<lines[line]->getTokenCount(); i++) {
-		HumNum dur = lines[line]->token(i).getDuration();
+		HumNum dur = lines[line]->token(i)->getDuration();
 		durs.push_back(dur);
 	}
 	if (!cleanDurs(durs, line)) {
@@ -4416,7 +4461,7 @@ bool HumdrumFileStructure::decrementDurStates(vector<HumNum>& durs,
 		return isValid();
 	}
 	for (int i=0; i<(int)durs.size(); i++) {
-		if (!lines[line]->token(i).hasRhythm()) {
+		if (!lines[line]->token(i)->hasRhythm()) {
 			continue;
 		}
 		durs[i] -= linedur;
@@ -4869,7 +4914,29 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 		}
 	}
 
+	assignStrandsToTokens();
+	
 	return isValid();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::assignStrandsToTokens -- Store the 1D strand
+//    index number for each token in the file.  Global tokens will have
+//    strand index set to -1.
+//
+
+void HumdrumFileStructure::assignStrandsToTokens(void) {
+	HTp tok;
+	for (int i=0; i<strand1d.size(); i++) {
+		tok = strand1d[i].first;
+		while (tok != NULL) {
+			tok->setStrandIndex(i);
+			tok = tok->getNextToken();
+		}
+	}
 }
 
 
@@ -5073,10 +5140,10 @@ bool HumdrumLine::isKernBoundaryStart(void) const {
 		return false;
 	}
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		if (token(i).isNull()) {
+		if (token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -5099,10 +5166,10 @@ bool HumdrumLine::isKernBoundaryEnd(void) const {
 	}
 	HumdrumToken* ntok;
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		ntok = token(i).getNextToken();
+		ntok = token(i)->getNextToken();
 		if (ntok == NULL) {
 			continue;
 		}
@@ -5278,7 +5345,7 @@ bool HumdrumLine::isTerminator(void) const {
 		return equalChar(1, '!') && equalChar(0, '*');
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).isTerminator()) {
+		if (!token(i)->isTerminator()) {
 			return false;
 		}
 	}
@@ -5336,7 +5403,7 @@ bool HumdrumLine::isAllNull(void) const {
 		return false;
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).isNull()) {
+		if (!token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -5357,10 +5424,10 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 		return false;
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).hasRhythm()) {
+		if (!token(i)->hasRhythm()) {
 			continue;
 		}
-		if (!token(i).isNull()) {
+		if (!token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -5647,6 +5714,18 @@ bool HumdrumLine::hasSpines(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isGlobal -- Returns true if the line is a global record: either
+//   and empty record, a global comment or a reference record.
+//
+
+bool HumdrumLine::isGlobal(void) const {
+	return !hasSpines();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isManipulator -- Returns true if any tokens on the line are
 //   manipulator interpretations.  Only null interpretations are allowed on
 //   lines which contain manipulators, but the parser currently does not
@@ -5685,8 +5764,8 @@ bool HumdrumLine::isEmpty(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenCount --  Returns the number of tokens on the line.  This
-//     value is set by HumdrumFileBase in analyzeTokens.
+// HumdrumLine::getTokenCount --  Returns the number of tokens on the line.
+//     This value is set by HumdrumFileBase in analyzeTokens.
 //
 
 int HumdrumLine::getTokenCount(void) const {
@@ -5704,8 +5783,8 @@ int HumdrumLine::getTokenCount(void) const {
 //    error if the index is out of bounds.
 //
 
-HumdrumToken& HumdrumLine::token(int index) const {
-	return *tokens[index];
+HTp HumdrumLine::token(int index) const {
+	return tokens[index];
 }
 
 
@@ -5985,7 +6064,7 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 
 ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printCsv(out);
+		token(i)->printCsv(out);
 		if (i<getFieldCount()-1) {
 			out << separator;
 		}
@@ -6075,7 +6154,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		out << Convert::repeatString(indent, level) << "<fields>\n";
 		level++;
 		for (int i=0; i<getFieldCount(); i++) {
-			token(i).printXml(out, level, indent);
+			token(i)->printXml(out, level, indent);
 		}
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";
@@ -6298,16 +6377,19 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 HumdrumToken::HumdrumToken(void) : string() {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 
@@ -6863,6 +6945,58 @@ bool HumdrumToken::isNote(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
+//     a '(' character.
+//
+
+bool HumdrumToken::hasSlurStart(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::hasKernSlurStart((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasSlurEnd -- Returns true if the **kern token has
+//     a ')' character.
+//
+
+bool HumdrumToken::hasSlurEnd(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::hasKernSlurEnd((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isSecondaryTiedNote -- Returns true if the token 
+//     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
+//
+
+bool HumdrumToken::isSecondaryTiedNote(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernSecondaryTiedNote((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isBarline -- Returns true if the first character is an
 //   equals sign.
 //
@@ -6897,6 +7031,24 @@ bool HumdrumToken::isCommentLocal(void) const {
 				return false;
 			}
 		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isComment -- Returns true of the token start with "!".
+//
+
+bool HumdrumToken::isComment(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
 		return true;
 	} else {
 		return false;
@@ -7227,6 +7379,33 @@ int HumdrumToken::getState(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getStrandIndex -- Returns the 1-D strand index
+//    that the token belongs to in the owning HumdrumFile.
+//    Returns -1 if there is no strand assignment.
+//
+
+int  HumdrumToken::getStrandIndex(void) const {
+	return strand;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setStrandIndex -- Sets the 1-D strand index
+//    that the token belongs to in the owning HumdrumFile.
+//    By default the strand index is set to -1 when a HumdrumToken
+//    is created.
+//
+
+void  HumdrumToken::setStrandIndex(int index) {
+	strand = index;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::incrementState -- update the rhythm analysis state variable.
 //    This will prevent redundant recursive analysis in analyzeRhythm of
 //    the HumdrumFileStructure class.
@@ -7501,6 +7680,12 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 }
 
 
+ostream& operator<<(ostream& out, HumdrumToken* token) {
+	out << token->c_str();
+	return out;
+}
+
+
 
 
 //////////////////////////////
@@ -7527,9 +7712,91 @@ bool Convert::isKernRest(const string& kerndata) {
 
 bool Convert::isKernNote(const string& kerndata) {
 	char ch;
-	for (int i = 0; i < kerndata.size(); i++) {
+	for (int i=0; i < kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch >= 'a') && (ch <= 'g')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isKernSecondaryTiedNote -- Returns true if the input string
+//   represents a **kern note (i.e., token with a pitch,
+//   not a null token or a rest) and has a '_' or ']' character.
+//
+
+bool Convert::isKernSecondaryTiedNote(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isKernNoteAttack -- Returns true if the input string
+//   represents a **kern note (not null or rest) and is not a 
+//   secondary tied note.
+//
+
+bool Convert::isKernNoteAttack(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernSlurStart -- Returns true if the input string
+//   has a '('.
+//
+
+bool Convert::hasKernSlurStart(const string& kerndata) {
+	for (int i=0; i < kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == '(') {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernSlurEnd -- Returns true if the input string
+//   has a '('.
+//
+
+bool Convert::hasKernSlurEnd(const string& kerndata) {
+	for (int i=0; i < kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == ')') {
 			return true;
 		}
 	}

@@ -55,8 +55,9 @@ class HumdrumLine : public string, public HumHash {
 		bool     isBlank                (void) const { return isEmpty(); }
 		bool     isManipulator          (void) const;
 		bool     hasSpines              (void) const;
-		HumdrumToken& token             (int index) const;
-		void     getTokens              (vector<HumdrumToken*>& list);
+		bool     isGlobal               (void) const;
+		HTp      token                  (int index) const;
+		void     getTokens              (vector<HTp>& list);
 		int      getTokenCount          (void) const;
 		int      getFieldCount          (void) const { return getTokenCount(); }
 		string   getTokenString         (int index) const;
@@ -94,7 +95,7 @@ class HumdrumLine : public string, public HumHash {
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HumdrumToken* getTrackStart     (int track) const;
+		HTp      getTrackStart     (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const string& separator = ",");
 		void     setLineFromCsv         (const string& csv,
@@ -135,7 +136,7 @@ class HumdrumLine : public string, public HumHash {
 		// useful: you can read in a HumdrumFile, tweak the tokens, then
 		// reconstruct the full line and print out again.
 		// This variable is filled by HumdrumFile::read().
-		vector<HumdrumToken*> tokens;
+		vector<HTp> tokens;
 
 		// duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the

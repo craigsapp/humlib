@@ -129,6 +129,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeNullLineRhythms       (void);
 		void          fillInNegativeStartTimes     (void);
 		void          assignLineDurations          (void);
+		void          assignStrandsToTokens        (void);
 		set<HumNum>   getNonZeroLineDurations      (void);
 		set<HumNum>   getPositiveLineDurations     (void);
 		bool          processLocalParametersForTrack (HumdrumToken* starttok,

@@ -43,9 +43,91 @@ bool Convert::isKernRest(const string& kerndata) {
 
 bool Convert::isKernNote(const string& kerndata) {
 	char ch;
-	for (int i = 0; i < kerndata.size(); i++) {
+	for (int i=0; i < kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch >= 'a') && (ch <= 'g')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isKernSecondaryTiedNote -- Returns true if the input string
+//   represents a **kern note (i.e., token with a pitch,
+//   not a null token or a rest) and has a '_' or ']' character.
+//
+
+bool Convert::isKernSecondaryTiedNote(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isKernNoteAttack -- Returns true if the input string
+//   represents a **kern note (not null or rest) and is not a 
+//   secondary tied note.
+//
+
+bool Convert::isKernNoteAttack(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernSlurStart -- Returns true if the input string
+//   has a '('.
+//
+
+bool Convert::hasKernSlurStart(const string& kerndata) {
+	for (int i=0; i < kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == '(') {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernSlurEnd -- Returns true if the input string
+//   has a '('.
+//
+
+bool Convert::hasKernSlurEnd(const string& kerndata) {
+	for (int i=0; i < kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == ')') {
 			return true;
 		}
 	}

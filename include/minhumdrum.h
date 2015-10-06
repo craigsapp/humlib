@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct  1 16:50:24 PDT 2015
+// Last Modified: Mon Oct  5 17:46:44 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -69,6 +69,7 @@ class Convert;
 class HumNum;
 class HumAddress;
 class HumdrumToken;
+typedef HumdrumToken* HTp;
 class HumdrumLine;
 class HumdrumFileBase;
 class HumdrumFileStructure;
@@ -395,8 +396,9 @@ class HumdrumLine : public string, public HumHash {
 		bool     isBlank                (void) const { return isEmpty(); }
 		bool     isManipulator          (void) const;
 		bool     hasSpines              (void) const;
-		HumdrumToken& token             (int index) const;
-		void     getTokens              (vector<HumdrumToken*>& list);
+		bool     isGlobal               (void) const;
+		HTp      token                  (int index) const;
+		void     getTokens              (vector<HTp>& list);
 		int      getTokenCount          (void) const;
 		int      getFieldCount          (void) const { return getTokenCount(); }
 		string   getTokenString         (int index) const;
@@ -434,7 +436,7 @@ class HumdrumLine : public string, public HumHash {
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HumdrumToken* getTrackStart     (int track) const;
+		HTp      getTrackStart     (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const string& separator = ",");
 		void     setLineFromCsv         (const string& csv,
@@ -475,7 +477,7 @@ class HumdrumLine : public string, public HumHash {
 		// useful: you can read in a HumdrumFile, tweak the tokens, then
 		// reconstruct the full line and print out again.
 		// This variable is filled by HumdrumFile::read().
-		vector<HumdrumToken*> tokens;
+		vector<HTp> tokens;
 
 		// duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the
@@ -516,6 +518,7 @@ ostream& operator<< (ostream& out, HumdrumLine& line);
 
 
 
+
 class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
@@ -550,6 +553,7 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isNonNullData             (void) const;
 		bool     isNullData                (void) const;
@@ -558,6 +562,10 @@ class HumdrumToken : public string, public HumHash {
 		// kern-specific functions:
 		bool     isRest                    (void) const;
 		bool     isNote                    (void) const;
+		bool     isSecondaryTiedNote       (void) const;
+
+		bool     hasSlurStart              (void) const;
+		bool     hasSlurEnd                (void) const;
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
@@ -586,7 +594,9 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator) const;
 		void     setParameters             (HumdrumToken* ptok);
-		void     setParameters             (const string& pdata, HumdrumToken* ptok = NULL);
+		void     setParameters             (const string& pdata,
+		                                    HumdrumToken* ptok = NULL);
+		int      getStrandIndex            (void) const;
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
@@ -629,6 +639,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getState          (void) const;
 		void     incrementState    (void);
 		void     setDuration       (const HumNum& dur);
+		void     setStrandIndex    (int index);
 
 		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
@@ -679,6 +690,11 @@ class HumdrumToken : public string, public HumHash {
 		// recursively.
 		int rhycheck;
 
+		// strand: Used to keep track of contiguous voice connections between
+      // secondary spines/tracks.  This is the 1-D strand index number
+		// (not the 2-d one).
+		int strand;
+
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;
@@ -687,20 +703,46 @@ class HumdrumToken : public string, public HumHash {
 };
 
 
+typedef HumdrumToken* HTp;
+
 ostream& operator<<(ostream& out, const HumdrumToken& token);
+ostream& operator<<(ostream& out, HumdrumToken* token);
 
 
 
-// The following options are used for get[Primary]TrackTokens.
-// * OPT_NONULLS    => don't include  null tokens in extracted list
-// * OPT_NOMANIP    => don't include  spine manipulators (*^, *v, *x, *+,
+// The following options are used for get[Primary]TrackTokens:
+// * OPT_PRIMARY    => only extract primary subspine/subtrack.
+// * OPT_NOEMPTY    => don't include null tokens in extracted list if all
+//                        extracted subspines contains null tokens.
+//                        Includes null interpretations and comments as well.
+// * OPT_NONULL     => don't include any null tokens in extracted list.
+// * OPT_NOINTERP   => don't include interprtation tokens.
+// * OPT_NOMANIP    => don't include spine manipulators (*^, *v, *x, *+,
 //                        but still keep ** and *0).
+// * OPT_NOCOMMENT  => don't include comment tokens.
 // * OPT_NOGLOBALS  => don't include global records (global comments, reference
 //                        records, and empty lines). In other words, only return
 //                        a list of tokens from lines which hasSpines() it true.
-#define OPT_NONULLS  0x01
-#define OPT_NOMANIP  0x02
-#define OPT_NOGLOBAL 0x04
+// * OPT_NOREST     => don't include **kern rests.
+// * OPT_NOTIE      => don't include **kern secondary tied notes.
+//
+// Compound options:
+// * OPT_DATA      (OPT_NOMANIP | OPT_NOCOMMENT | OPT_NOGLOBAL)
+//     Only data tokens (including barlines)
+// * OPT_ATTACKS   (OPT_DATA | OPT_NOREST | OPT_NOTIE | OPT_NONULL)
+//     Only note-attack tokens (when etracting **kern data)
+//
+#define OPT_PRIMARY   0x001
+#define OPT_NOEMPTY   0x002
+#define OPT_NONULL    0x004
+#define OPT_NOINTERP  0x008
+#define OPT_NOMANIP   0x010
+#define OPT_NOCOMMENT 0x020
+#define OPT_NOGLOBAL  0x040
+#define OPT_NOREST    0x080
+#define OPT_NOTIE     0x100
+#define OPT_DATA      (OPT_NOMANIP | OPT_NOCOMMENT | OPT_NOGLOBAL)
+#define OPT_ATTACKS   (OPT_DATA | OPT_NOREST | OPT_NOTIE | OPT_NONULL)
 
 
 class TokenPair {
@@ -711,11 +753,13 @@ class TokenPair {
 			first = NULL;
 			last  = NULL;
 		}
-		HumdrumToken* first;
-		HumdrumToken* last;
+		HTp first;
+		HTp last;
 };
 
+
 bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
+
 
 class HumdrumFileBase {
 	public:
@@ -761,7 +805,7 @@ class HumdrumFileBase {
 
 		HumdrumLine&  operator[]               (int index);
 		int           getLineCount             (void) const;
-		HumdrumToken& token                    (int lineindex, int fieldindex);
+		HTp           token                    (int lineindex, int fieldindex);
 		int           getMaxTrack              (void) const;
 		int           getSpineCount (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo           (ostream& out = cout);
@@ -770,38 +814,53 @@ class HumdrumFileBase {
 		ostream&      printCsv                 (ostream& out = cout,
 		                                        const string& separator = ",");
 
-		HumdrumToken* getTrackStart            (int track) const;
-		HumdrumToken* getSpineStart            (int spine) const { 
+		HTp           getTrackStart            (int track) const;
+		HTp           getSpineStart            (int spine) const { 
 		                                         return getTrackStart(spine+1); }
 
-		void          getSpineStartList        (vector<HumdrumToken*>& spinelist);
-		void          getSpineStartList        (vector<HumdrumToken*>& spinelist,
+		void          getSpineStartList        (vector<HTp>& spinelist);
+		void          getSpineStartList        (vector<HTp>& spinelist,
 		                                        const string& exinterp);
-		void          getSpineStartList        (vector<HumdrumToken*>& spinelist,
+		void          getSpineStartList        (vector<HTp>& spinelist,
 		                                        const vector<string>& exinterps);
-		void          getTrackStartList        (vector<HumdrumToken*>& spinelist) {
+		void          getTrackStartList        (vector<HTp>& spinelist) {
 								return getSpineStartList(spinelist); }
-		void          getTrackStartList        (vector<HumdrumToken*>& spinelist,
+		void          getTrackStartList        (vector<HTp>& spinelist,
 		                                        const string& exinterp) {
 								return getSpineStartList(spinelist, exinterp); }
-		void          getTrackStartList        (vector<HumdrumToken*>& spinelist,
+		void          getTrackStartList        (vector<HTp>& spinelist,
 		                                        const vector<string>& exinterps) {
 								return getSpineStartList(spinelist, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
-		HumdrumToken* getTrackEnd              (int track,
-		                                        int subtrack) const;
+		HTp           getTrackEnd              (int track, int subtrack) const;
 		void          createLinesFromTokens    (void);
 		void          append                   (const char* line);
 		void          append                   (const string& line);
 
-		// spine analysis functionality
-      void          getTrackSeq       (vector<vector<HumdrumToken*> >& sequence,
-		                                 HumdrumToken* starttoken, 
-		                                 int options);
-      void          getTrackSeq       (vector<vector<HumdrumToken*> >& sequence,
-		                                 int track, int options);
-		vector<HumdrumToken*>          getPrimaryTrackSeq(int track, int options);
+		// spine analysis functionality:
+
+      void   getTrackSequence  (vector<vector<HTp> >& sequence, HTp starttoken,
+		                            int options);
+      void   getTrackSequence  (vector<vector<HTp> >& sequence, int track,
+		                            int options);
+		void   getPrimaryTrackSequence(vector<HTp>& sequence, int track,
+		                            int options);
+
+      void   getSpineSequence  (vector<vector<HTp> >& sequence, HTp starttoken,
+		                            int options);
+      void   getSpineSequence  (vector<vector<HTp> >& sequence, int spine,
+		                            int options);
+		void   getPrimarySpineSequence(vector<HTp>& sequence, int spine,
+		                            int options);
+
+      void getTrackSeq(vector<vector<HTp> >& sequence, HTp starttoken,
+		        int options) { getTrackSequence(sequence, starttoken, options); }
+      void getTrackSeq(vector<vector<HTp> >& sequence, int track, int options) {
+		            getTrackSequence(sequence, track, options); }
+		void getPrimaryTrackSeq(vector<HTp>& sequence, int track, int options) {
+		            getPrimaryTrackSequence(sequence, track, options); }
+
 
 	protected:
 		bool          analyzeTokens                (void);
@@ -816,16 +875,16 @@ class HumdrumFileBase {
 		                                            int starti, int extra);
 		bool          stitchLinesTogether          (HumdrumLine& previous,
 		                                            HumdrumLine& next);
-		void          addToTrackStarts             (HumdrumToken* token);
+		void          addToTrackStarts             (HTp token);
 		bool          analyzeNonNullDataTokens     (void);
-		void          addUniqueTokens          (vector<HumdrumToken*>& target,
-		                                       vector<HumdrumToken*>& source);
+		void          addUniqueTokens          (vector<HTp>& target,
+		                                       vector<HTp>& source);
 		bool          processNonNullDataTokensForTrackForward(
-		                                        HumdrumToken* starttoken,
-		                                        vector<HumdrumToken*> ptokens);
+		                                        HTp starttoken,
+		                                        vector<HTp> ptokens);
 		bool          processNonNullDataTokensForTrackBackward(
-		                                        HumdrumToken* starttoken,
-		                                        vector<HumdrumToken*> ptokens);
+		                                        HTp starttoken,
+		                                        vector<HTp> ptokens);
 		bool          setParseError                (stringstream& err);
 		bool          setParseError                (const string& err);
 		bool          setParseError                (const char* format, ...);
@@ -839,14 +898,14 @@ class HumdrumFileBase {
 		// in the file.  The first element in the list is reserved, so the
 		// number of tracks (primary spines) is equal to one less than the
 		// size of this list.
-		vector<HumdrumToken*> trackstarts;
+		vector<HTp> trackstarts;
 
 		// trackends: list of the addresses of the spine terminators in the file.
 		// It is possible that spines can split and their subspines do not merge
 		// before termination; therefore, the ends are stored in a 2d array.
 		// The first dimension is the track number, and the second dimension
 		// is the list of terminators.
-		vector<vector<HumdrumToken*> > trackends;
+		vector<vector<HTp> > trackends;
 
 		// barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
@@ -1010,6 +1069,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeNullLineRhythms       (void);
 		void          fillInNegativeStartTimes     (void);
 		void          assignLineDurations          (void);
+		void          assignStrandsToTokens        (void);
 		set<HumNum>   getNonZeroLineDurations      (void);
 		set<HumNum>   getPositiveLineDurations     (void);
 		bool          processLocalParametersForTrack (HumdrumToken* starttok,
@@ -1097,6 +1157,11 @@ class Convert {
 		// defined in Convert-kern.cpp
 		static bool isKernRest              (const string& kerndata);
 		static bool isKernNote              (const string& kerndata);
+		static bool isKernNoteAttack        (const string& kerndata);
+		static bool hasKernSlurStart        (const string& kerndata);
+		static bool hasKernSlurEnd          (const string& kerndata);
+
+		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string  getKernPitchAttributes  (const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp

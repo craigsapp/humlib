@@ -27,33 +27,42 @@ namespace minHumdrum {
 //
 
 bool HumdrumFileContent::analyzeKernSlurs(void) {
-	vector<HumdrumToken*> kernspines;
-cout << "GOT HERE ZZZ" << endl;
+	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
-cout << "GOT kern spines" << endl;
 	bool output = true;
 	for (int i=0; i<kernspines.size(); i++) {
-cout << "GOT HERE AAA" << i << endl;
 		output = output && analyzeKernSlurs(kernspines[i]);
 	}
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernSlurs(HumdrumToken* spinestart) {
-	vector<HumdrumToken*> sluropen;
-	vector<HumdrumToken*> slurclose;
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
+	vector<HTp> sluropen;
+	vector<HTp> slurclose;
 	
-	vector<vector<HumdrumToken*> > tracktokens;
-	this->getTrackSeq(tracktokens, spinestart, OPT_NONULLS | OPT_NOGLOBAL);
-	for (int i=0; i<tracktokens.size(); i++) {
+	vector<vector<HTp> > tracktokens;
+	this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
+
+	int i;
+	for (i=0; i<tracktokens.size(); i++) {
 		for (int j=0; j<tracktokens[i].size(); j++) {
-			cout << tracktokens[i][j];
-			if (i < tracktokens[i].size() -1) {
-				cout << "\t";
+			if (j < tracktokens[i].size() - 1) {
+				if (tracktokens[i][j]->hasSlurStart()) {
+					sluropen.push_back(tracktokens[i][j]);
+				}
+				if (tracktokens[i][j]->hasSlurEnd()) {
+					slurclose.push_back(tracktokens[i][j]);
+				}
 			}
 		}
-		cout << "\n";
+	}
+
+	for (i=0; i<sluropen.size(); i++) {
+		cout << "open\t" << sluropen[i] << "\t" << sluropen[i]->getStrandIndex() << endl;
+	}
+	for (i=0; i<slurclose.size(); i++) {
+		cout << "close\t" << slurclose[i] << "\t" << slurclose[i]->getStrandIndex() << endl;
 	}
 
 	return true;

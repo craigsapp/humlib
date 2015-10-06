@@ -157,10 +157,10 @@ bool HumdrumLine::isKernBoundaryStart(void) const {
 		return false;
 	}
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		if (token(i).isNull()) {
+		if (token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -183,10 +183,10 @@ bool HumdrumLine::isKernBoundaryEnd(void) const {
 	}
 	HumdrumToken* ntok;
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		ntok = token(i).getNextToken();
+		ntok = token(i)->getNextToken();
 		if (ntok == NULL) {
 			continue;
 		}
@@ -362,7 +362,7 @@ bool HumdrumLine::isTerminator(void) const {
 		return equalChar(1, '!') && equalChar(0, '*');
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).isTerminator()) {
+		if (!token(i)->isTerminator()) {
 			return false;
 		}
 	}
@@ -420,7 +420,7 @@ bool HumdrumLine::isAllNull(void) const {
 		return false;
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).isNull()) {
+		if (!token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -441,10 +441,10 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 		return false;
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).hasRhythm()) {
+		if (!token(i)->hasRhythm()) {
 			continue;
 		}
-		if (!token(i).isNull()) {
+		if (!token(i)->isNull()) {
 			return false;
 		}
 	}
@@ -731,6 +731,18 @@ bool HumdrumLine::hasSpines(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isGlobal -- Returns true if the line is a global record: either
+//   and empty record, a global comment or a reference record.
+//
+
+bool HumdrumLine::isGlobal(void) const {
+	return !hasSpines();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isManipulator -- Returns true if any tokens on the line are
 //   manipulator interpretations.  Only null interpretations are allowed on
 //   lines which contain manipulators, but the parser currently does not
@@ -769,8 +781,8 @@ bool HumdrumLine::isEmpty(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getTokenCount --  Returns the number of tokens on the line.  This
-//     value is set by HumdrumFileBase in analyzeTokens.
+// HumdrumLine::getTokenCount --  Returns the number of tokens on the line.
+//     This value is set by HumdrumFileBase in analyzeTokens.
 //
 
 int HumdrumLine::getTokenCount(void) const {
@@ -788,8 +800,8 @@ int HumdrumLine::getTokenCount(void) const {
 //    error if the index is out of bounds.
 //
 
-HumdrumToken& HumdrumLine::token(int index) const {
-	return *tokens[index];
+HTp HumdrumLine::token(int index) const {
+	return tokens[index];
 }
 
 
@@ -1069,7 +1081,7 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 
 ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 	for (int i=0; i<getFieldCount(); i++) {
-		token(i).printCsv(out);
+		token(i)->printCsv(out);
 		if (i<getFieldCount()-1) {
 			out << separator;
 		}
@@ -1159,7 +1171,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		out << Convert::repeatString(indent, level) << "<fields>\n";
 		level++;
 		for (int i=0; i<getFieldCount(); i++) {
-			token(i).printXml(out, level, indent);
+			token(i)->printXml(out, level, indent);
 		}
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";

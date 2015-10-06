@@ -106,6 +106,7 @@ class Convert;
 class HumNum;
 class HumAddress;
 class HumdrumToken;
+typedef HumdrumToken* HTp;
 class HumdrumLine;
 class HumdrumFileBase;
 class HumdrumFileStructure;

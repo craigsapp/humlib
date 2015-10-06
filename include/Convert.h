@@ -64,6 +64,11 @@ class Convert {
 		// defined in Convert-kern.cpp
 		static bool isKernRest              (const string& kerndata);
 		static bool isKernNote              (const string& kerndata);
+		static bool isKernNoteAttack        (const string& kerndata);
+		static bool hasKernSlurStart        (const string& kerndata);
+		static bool hasKernSlurEnd          (const string& kerndata);
+
+		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string  getKernPitchAttributes  (const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp

@@ -43,16 +43,19 @@ namespace minHumdrum {
 HumdrumToken::HumdrumToken(void) : string() {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 
@@ -608,6 +611,58 @@ bool HumdrumToken::isNote(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
+//     a '(' character.
+//
+
+bool HumdrumToken::hasSlurStart(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::hasKernSlurStart((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasSlurEnd -- Returns true if the **kern token has
+//     a ')' character.
+//
+
+bool HumdrumToken::hasSlurEnd(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::hasKernSlurEnd((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isSecondaryTiedNote -- Returns true if the token 
+//     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
+//
+
+bool HumdrumToken::isSecondaryTiedNote(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::isKernSecondaryTiedNote((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isBarline -- Returns true if the first character is an
 //   equals sign.
 //
@@ -642,6 +697,24 @@ bool HumdrumToken::isCommentLocal(void) const {
 				return false;
 			}
 		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isComment -- Returns true of the token start with "!".
+//
+
+bool HumdrumToken::isComment(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
 		return true;
 	} else {
 		return false;
@@ -972,6 +1045,33 @@ int HumdrumToken::getState(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getStrandIndex -- Returns the 1-D strand index
+//    that the token belongs to in the owning HumdrumFile.
+//    Returns -1 if there is no strand assignment.
+//
+
+int  HumdrumToken::getStrandIndex(void) const {
+	return strand;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setStrandIndex -- Sets the 1-D strand index
+//    that the token belongs to in the owning HumdrumFile.
+//    By default the strand index is set to -1 when a HumdrumToken
+//    is created.
+//
+
+void  HumdrumToken::setStrandIndex(int index) {
+	strand = index;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::incrementState -- update the rhythm analysis state variable.
 //    This will prevent redundant recursive analysis in analyzeRhythm of
 //    the HumdrumFileStructure class.
@@ -1242,6 +1342,12 @@ string HumdrumToken::getXmlIdPrefix(void) const {
 
 ostream& operator<<(ostream& out, const HumdrumToken& token) {
 	out << token.c_str();
+	return out;
+}
+
+
+ostream& operator<<(ostream& out, HumdrumToken* token) {
+	out << token->c_str();
 	return out;
 }
 
