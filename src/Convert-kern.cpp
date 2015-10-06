@@ -138,6 +138,74 @@ bool Convert::hasKernSlurEnd(const string& kerndata) {
 
 //////////////////////////////
 //
+// Convert::getKernSlurStartElisionLevel -- Returns the number of
+//   '&' characters before the last '(' character in a kern token.
+//   Returns -1 if no '(' character in string.
+//
+
+int Convert::getKernSlurStartElisionLevel(const string& kerndata) { 
+	bool foundSlurStart = false;
+	int output = 0;
+	for (int i=kerndata.size()-1; i >=0; i--) {
+		char ch = kerndata[i];
+		if (ch == '(') {
+			foundSlurStart = true;
+			continue;
+		}
+		if (!foundSlurStart) {
+			continue;
+		}
+		if (ch == '&') {
+			output++;
+		} else {
+			return output;
+		}
+	}
+	if (foundSlurStart) {
+		return output;
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernSlurEndElisionLevel -- Returns the number of 
+//   '&' characters before the last ')' character in a kern token.
+//   Returns -1 if no ')' character in string.
+//
+
+int Convert::getKernSlurEndElisionLevel(const string& kerndata) { 
+	bool foundSlurEnd = false;
+	int output = 0;
+	for (int i=kerndata.size()-1; i >=0; i--) {
+		char ch = kerndata[i];
+		if (ch == ')') {
+			foundSlurEnd = true;
+			continue;
+		}
+		if (!foundSlurEnd) {
+			continue;
+		}
+		if (ch == '&') {
+			output++;
+		} else {
+			return output;
+		}
+	}
+	if (foundSlurEnd) {
+		return output;
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Convert::getKernPitchAttributes --
 //    pc         = pitch class
 //    numacc     = numeric accidental (-1=flat, 0=natural, 1=sharp)

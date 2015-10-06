@@ -112,6 +112,7 @@ namespace minHumdrum {
 
 class HumNum;
 class HumdrumToken;
+typedef HumdrumToken* HTp;
 
 // START_MERGE
 
@@ -136,6 +137,11 @@ class HumHash {
 		                                    const string& key) const;
 		string         getValue            (const string& ns1, const string& ns2,
 		                                    const string& key) const;
+		HTp            getValueHTp         (const string& key) const;
+		HTp            getValueHTp         (const string& ns2,
+		                                    const string& key) const;
+		HTp            getValueHTp         (const string& ns1, const string& ns2,
+		                                    const string& key) const;
 		int            getValueInt         (const string& key) const;
 		int            getValueInt         (const string& ns2,
 		                                    const string& key) const;
@@ -156,6 +162,7 @@ class HumHash {
 		                                    const string& key) const;
 		bool           getValueBool        (const string& ns1, const string& ns2,
 		                                    const string& key) const;
+
 		void           setValue            (const string& key,
 		                                    const string& value);
 		void           setValue            (const string& ns2,
@@ -165,11 +172,25 @@ class HumHash {
 		                                    const string& ns2,
 		                                    const string& key,
 		                                    const string& value);
+		void           setValue            (const string& key,
+		                                    const char* value);
+		void           setValue            (const string& ns2,
+		                                    const string& key,
+		                                    const char* value);
+		void           setValue            (const string& ns1,
+		                                    const string& ns2,
+		                                    const string& key,
+		                                    const char* value);
 		void           setValue            (const string& key, int value);
 		void           setValue            (const string& ns2, const string& key,
 		                                    int value);
 		void           setValue            (const string& ns1, const string& ns2,
 		                                    const string& key, int value);
+		void           setValue            (const string& key, HTp value);
+		void           setValue            (const string& ns2, const string& key,
+		                                    HTp value);
+		void           setValue            (const string& ns1, const string& ns2,
+		                                    const string& key, HTp value);
 		void           setValue            (const string& key, HumNum value);
 		void           setValue            (const string& ns2, const string& key,
 		                                    HumNum value);

@@ -166,6 +166,34 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 
 //////////////////////////////
 //
+// HumdrumToken::getSlurDuration -- If the note has a slur start, then
+//    returns the duration until the endpoint; otherwise, returns 0;
+//    Expand later to handle slur ends and elided slurs.  The function
+//    HumdrumFileContent::analyzeSlurs() should be called before accessing
+//    this function.  If the slur duruation was already calculated, return
+//    thave value; otherwise, calculate from the location of a matching
+//    slur end.
+//
+
+HumNum HumdrumToken::getSlurDuration(HumNum scale) {
+	if (!isDataType("**kern")) {
+		return 0;
+	}
+	if (isDefined("auto", "slurDuration")) {
+		return getValueFraction("auto", "slurDuration");
+	} else if (isDefined("auto", "slurEnd")) {
+		HTp slurend = getValueHTp("auto", "slurEnd");
+		return slurend->getDurationFromStart(scale) - 
+				getDurationFromStart(scale);
+	} else {
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDataType -- Get the exclusive interpretation type for
 //     the token.
 // @SEEALSO: isDataType
@@ -522,6 +550,26 @@ HumNum HumdrumToken::getDurationFromStart(void) const {
 
 HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 	return getLine()->getDurationFromStart() * scale;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationToEnd -- Returns the duration from the
+//   start of the current line to the start of the last line
+//   (the duration of the last line is always zero, so the duration
+//   to end is always the duration to the end of the last non-zero
+//   duration line.
+//
+
+HumNum HumdrumToken::getDurationToEnd(void) const {
+	return getLine()->getDurationToEnd();
+}
+
+
+HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
+	return getLine()->getDurationToEnd() * scale;
 }
 
 
@@ -1058,6 +1106,40 @@ int  HumdrumToken::getStrandIndex(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getSlurStartElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur start character '('.
+//   Returns -1 if there is no slur start character.
+//
+
+int HumdrumToken::getSlurStartElisionLevel(void) const { 
+	if (isDataType("**kern")) {
+		return Convert::getKernSlurStartElisionLevel((string)(*this));
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSlurEndElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur end character ')'.
+//   Returns -1 if there is no slur end character.
+//
+
+int HumdrumToken::getSlurEndElisionLevel(void) const { 
+	if (isDataType("**kern")) {
+		return Convert::getKernSlurEndElisionLevel((string)(*this));
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setStrandIndex -- Sets the 1-D strand index
 //    that the token belongs to in the owning HumdrumFile.
 //    By default the strand index is set to -1 when a HumdrumToken
@@ -1273,6 +1355,17 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 
 ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 		const string& indent) {
+	if (hasSlurStart()) {
+		out << Convert::repeatString(indent, level) << "<slur";
+		if (isDefined("auto", "hangingSlur")) {
+			out << " hanging=\"" << getValue("auto", "hangingSlur") << "\"";
+		}
+		out << ">" << endl; 
+		out << Convert::repeatString(indent, level+1);
+		out << "<duration" << Convert::getHumNumAttributes(getSlurDuration());
+		out << "/>\n";
+		out << Convert::repeatString(indent, level) << "</slur>" << endl; 
+	}
 	return out;
 }
 
@@ -1350,6 +1443,36 @@ ostream& operator<<(ostream& out, HumdrumToken* token) {
 	out << token->c_str();
 	return out;
 }
+
+
+
+//////////////////////////////
+//
+// printSequence --
+//    default value: out = cout;
+//
+
+ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out) {
+	for (int i=0; i<sequence.size(); i++) {
+		for (int j=0; j<sequence[i].size(); j++) {
+			out << sequence[i][j];
+			if (j < sequence[i].size() - 1) {
+				out << '\t';
+			}
+		}
+		out << endl;
+	}
+	return out;
+}
+
+
+ostream& printSequence(vector<HTp>& sequence, ostream& out) {
+	for (int i=0; i<sequence.size(); i++) {
+		out << sequence[i] << endl;
+	}
+	return out;
+}
+
 
 
 // END_MERGE

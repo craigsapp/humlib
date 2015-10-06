@@ -29,9 +29,11 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		      ~HumdrumFileContent         ();
 
 		bool   analyzeKernSlurs           (void);
+		bool   analyzeKernTies            (void);
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
+		bool   analyzeKernTies            (HumdrumToken* spinestart);
 };
 
 

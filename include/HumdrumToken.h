@@ -81,6 +81,9 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
 
+		HumNum   getDurationToEnd          (void) const;
+		HumNum   getDurationToEnd          (HumNum scale) const;
+
 		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;
 
@@ -105,6 +108,8 @@ class HumdrumToken : public string, public HumHash {
 		void     setParameters             (const string& pdata,
 		                                    HumdrumToken* ptok = NULL);
 		int      getStrandIndex            (void) const;
+		int      getSlurStartElisionLevel  (void) const;
+		int      getSlurEndElisionLevel    (void) const;
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
@@ -130,6 +135,9 @@ class HumdrumToken : public string, public HumHash {
 		HumdrumToken* getNextNonNullDataToken(int index = 0);
 		HumdrumToken* getNextNNDT(int index = 0) {
 		               return getNextNonNullDataToken(index); }
+
+		// slur-analysis based functions:
+		HumNum   getSlurDuration   (HumNum scale = 1);
 
 	protected:
 		void     setLineIndex      (int lineindex);
@@ -216,6 +224,8 @@ typedef HumdrumToken* HTp;
 ostream& operator<<(ostream& out, const HumdrumToken& token);
 ostream& operator<<(ostream& out, HumdrumToken* token);
 
+ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out=std::cout);
+ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
 
 // END_MERGE
 

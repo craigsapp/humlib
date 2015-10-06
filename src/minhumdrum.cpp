@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  5 17:46:44 PDT 2015
+// Last Modified: Mon Oct  5 23:28:01 PDT 2015
 // Filename:      /include/minhumdrum.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
 // Syntax:        C++11
@@ -451,6 +451,56 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
+// HumHash::getValueHTp -- Return an address of a HumdrumToken.
+//   Presumes 64-bit pointers (or at least not 128-bit pointers).
+//
+
+HTp HumHash::getValueHTp(const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		return getValueHTp("", "", keys[2]);
+	} else if (keys.size() == 2) {
+		return getValueHTp(keys[0], keys[1]);
+	} else {
+		return getValueHTp(keys[0], keys[1], keys[2]);
+	}
+}
+
+
+HTp HumHash::getValueHTp(const string& ns2, const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	return getValueHTp("", ns2, key);
+}
+
+
+HTp HumHash::getValueHTp(const string& ns1, const string& ns2,
+		const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	string value = getValue(ns1, ns2, key);
+	if (value.find("HT_") != 0) {
+		return NULL;
+	} else {
+		HTp pointer = NULL;
+		try {
+			pointer = (HTp)(stoll(value.substr(3)));
+		} catch (invalid_argument& e) {
+			pointer = NULL;
+		}
+		return pointer;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::getValueInt -- Return the value as an integer.  The value must
 //   start with a number and have no text before it; otherwise the
 //   returned value will be "0".  The HumHash class is aware of fractional
@@ -688,6 +738,23 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 }
 
 
+void HumHash::setValue(const string& key, const char* value) {
+	setValue(key, (string)value);
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, 
+		const char* value) {
+	setValue(ns2, key, (string)value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, const string& key,
+		const char* value) {
+	setValue(ns1, ns2, key, (string)value);
+}
+
+
 void HumHash::setValue(const string& key, int value) {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
@@ -709,6 +776,32 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, int value) {
 	initializeParameters();
 	stringstream ss(value);
+	(*parameters)[ns1][ns2][key] = ss.str();
+}
+
+
+void HumHash::setValue(const string& key, HTp value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, HTp value) {
+		setValue("", ns2, key, value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, 
+		const string& key, HTp value) { 
+	initializeParameters();
+	stringstream ss;
+	ss << "HT_" << ((long long)value);
 	(*parameters)[ns1][ns2][key] = ss.str();
 }
 
@@ -3601,6 +3694,114 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 
 
 
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+//    slurs to each other.
+//
+
+bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HTp> kernspines;
+	getSpineStartList(kernspines, "**kern");
+	bool output = true;
+	for (int i=0; i<kernspines.size(); i++) {
+		output = output && analyzeKernSlurs(kernspines[i]);
+	}
+	return output;
+}
+
+
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
+	vector<vector<HTp> > tracktokens;
+	this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
+	// printSequence(tracktokens);
+
+	vector<vector<HTp> > sluropens;
+	sluropens.resize(32);
+
+	int elisionlevel;
+	int i, j;
+	for (i=0; i<tracktokens.size(); i++) {
+		for (j=0; j<tracktokens[i].size(); j++) {
+			if (tracktokens[i][j]->hasSlurStart()) {
+				elisionlevel = tracktokens[i][j]->getSlurStartElisionLevel();
+				if (elisionlevel >= 0) {
+					sluropens[elisionlevel].push_back(tracktokens[i][j]);
+				}
+			}
+			if (tracktokens[i][j]->hasSlurEnd()) {
+				elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
+				if (elisionlevel >= 0) {
+					if (sluropens[elisionlevel].size() > 0) {
+						sluropens[elisionlevel].back()->setValue("auto",
+								"slurEnd", tracktokens[i][j]);
+						sluropens[elisionlevel].back()->setValue("auto",
+								"id", sluropens[elisionlevel].back());
+						tracktokens[i][j]->setValue("auto", "slurStart",
+								sluropens[elisionlevel].back());
+						tracktokens[i][j]->setValue("auto", "id",
+								tracktokens[i][j]);
+						sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
+							tracktokens[i][j]->getDurationFromStart() - 
+							sluropens[elisionlevel].back()->getDurationFromStart());
+						sluropens[elisionlevel].pop_back();
+					} else {
+						// no starting slur marker to match to this slur end.
+						tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
+						tracktokens[i][j]->setValue("auto", "slurDration", 
+							tracktokens[i][j]->getDurationToEnd());
+					}
+				}
+			}
+		}
+	}
+
+	// Mark un-closed slur starts:
+	for (i=0; i<sluropens.size(); i++) {
+		for (j=0; j<sluropens[i].size(); j++) {
+			sluropens[i][j]->setValue("", "auto", "hangingSlur", "true");
+			sluropens[i][j]->setValue("", "auto", "slurDuration", 
+				sluropens[i][j]->getDurationFromStart());
+		}
+	}
+
+	return true;
+}
+
+
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernTies -- Link start and ends of
+//    ties to each other.
+//
+
+bool HumdrumFileContent::analyzeKernTies(void) {
+	vector<HTp> kernspines;
+	getSpineStartList(kernspines, "**kern");
+	bool output = true;
+	for (int i=0; i<kernspines.size(); i++) {
+		output = output && analyzeKernTies(kernspines[i]);
+	}
+	return output;
+}
+
+
+bool HumdrumFileContent::analyzeKernTies(HTp spinestart) {
+	vector<vector<HTp> > tracktokens;
+	this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
+
+
+	return true;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumFileContent::HumdrumFileContent --
@@ -3631,59 +3832,6 @@ HumdrumFileContent::HumdrumFileContent(istream& contents) :
 
 HumdrumFileContent::~HumdrumFileContent() {
 	// do nothing
-}
-
-
-
-
-
-
-//////////////////////////////
-//
-// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
-//    slurs to each other.
-//
-
-bool HumdrumFileContent::analyzeKernSlurs(void) {
-	vector<HTp> kernspines;
-	getSpineStartList(kernspines, "**kern");
-	bool output = true;
-	for (int i=0; i<kernspines.size(); i++) {
-		output = output && analyzeKernSlurs(kernspines[i]);
-	}
-	return output;
-}
-
-
-bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
-	vector<HTp> sluropen;
-	vector<HTp> slurclose;
-	
-	vector<vector<HTp> > tracktokens;
-	this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
-
-	int i;
-	for (i=0; i<tracktokens.size(); i++) {
-		for (int j=0; j<tracktokens[i].size(); j++) {
-			if (j < tracktokens[i].size() - 1) {
-				if (tracktokens[i][j]->hasSlurStart()) {
-					sluropen.push_back(tracktokens[i][j]);
-				}
-				if (tracktokens[i][j]->hasSlurEnd()) {
-					slurclose.push_back(tracktokens[i][j]);
-				}
-			}
-		}
-	}
-
-	for (i=0; i<sluropen.size(); i++) {
-		cout << "open\t" << sluropen[i] << "\t" << sluropen[i]->getStrandIndex() << endl;
-	}
-	for (i=0; i<slurclose.size(); i++) {
-		cout << "close\t" << slurclose[i] << "\t" << slurclose[i]->getStrandIndex() << endl;
-	}
-
-	return true;
 }
 
 
@@ -6500,6 +6648,34 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 
 //////////////////////////////
 //
+// HumdrumToken::getSlurDuration -- If the note has a slur start, then
+//    returns the duration until the endpoint; otherwise, returns 0;
+//    Expand later to handle slur ends and elided slurs.  The function
+//    HumdrumFileContent::analyzeSlurs() should be called before accessing
+//    this function.  If the slur duruation was already calculated, return
+//    thave value; otherwise, calculate from the location of a matching
+//    slur end.
+//
+
+HumNum HumdrumToken::getSlurDuration(HumNum scale) {
+	if (!isDataType("**kern")) {
+		return 0;
+	}
+	if (isDefined("auto", "slurDuration")) {
+		return getValueFraction("auto", "slurDuration");
+	} else if (isDefined("auto", "slurEnd")) {
+		HTp slurend = getValueHTp("auto", "slurEnd");
+		return slurend->getDurationFromStart(scale) - 
+				getDurationFromStart(scale);
+	} else {
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDataType -- Get the exclusive interpretation type for
 //     the token.
 // @SEEALSO: isDataType
@@ -6856,6 +7032,26 @@ HumNum HumdrumToken::getDurationFromStart(void) const {
 
 HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 	return getLine()->getDurationFromStart() * scale;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationToEnd -- Returns the duration from the
+//   start of the current line to the start of the last line
+//   (the duration of the last line is always zero, so the duration
+//   to end is always the duration to the end of the last non-zero
+//   duration line.
+//
+
+HumNum HumdrumToken::getDurationToEnd(void) const {
+	return getLine()->getDurationToEnd();
+}
+
+
+HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
+	return getLine()->getDurationToEnd() * scale;
 }
 
 
@@ -7392,6 +7588,40 @@ int  HumdrumToken::getStrandIndex(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getSlurStartElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur start character '('.
+//   Returns -1 if there is no slur start character.
+//
+
+int HumdrumToken::getSlurStartElisionLevel(void) const { 
+	if (isDataType("**kern")) {
+		return Convert::getKernSlurStartElisionLevel((string)(*this));
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSlurEndElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur end character ')'.
+//   Returns -1 if there is no slur end character.
+//
+
+int HumdrumToken::getSlurEndElisionLevel(void) const { 
+	if (isDataType("**kern")) {
+		return Convert::getKernSlurEndElisionLevel((string)(*this));
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setStrandIndex -- Sets the 1-D strand index
 //    that the token belongs to in the owning HumdrumFile.
 //    By default the strand index is set to -1 when a HumdrumToken
@@ -7607,6 +7837,17 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 
 ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 		const string& indent) {
+	if (hasSlurStart()) {
+		out << Convert::repeatString(indent, level) << "<slur";
+		if (isDefined("auto", "hangingSlur")) {
+			out << " hanging=\"" << getValue("auto", "hangingSlur") << "\"";
+		}
+		out << ">" << endl; 
+		out << Convert::repeatString(indent, level+1);
+		out << "<duration" << Convert::getHumNumAttributes(getSlurDuration());
+		out << "/>\n";
+		out << Convert::repeatString(indent, level) << "</slur>" << endl; 
+	}
 	return out;
 }
 
@@ -7684,6 +7925,36 @@ ostream& operator<<(ostream& out, HumdrumToken* token) {
 	out << token->c_str();
 	return out;
 }
+
+
+
+//////////////////////////////
+//
+// printSequence --
+//    default value: out = cout;
+//
+
+ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out) {
+	for (int i=0; i<sequence.size(); i++) {
+		for (int j=0; j<sequence[i].size(); j++) {
+			out << sequence[i][j];
+			if (j < sequence[i].size() - 1) {
+				out << '\t';
+			}
+		}
+		out << endl;
+	}
+	return out;
+}
+
+
+ostream& printSequence(vector<HTp>& sequence, ostream& out) {
+	for (int i=0; i<sequence.size(); i++) {
+		out << sequence[i] << endl;
+	}
+	return out;
+}
+
 
 
 
@@ -7801,6 +8072,74 @@ bool Convert::hasKernSlurEnd(const string& kerndata) {
 		}
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernSlurStartElisionLevel -- Returns the number of
+//   '&' characters before the last '(' character in a kern token.
+//   Returns -1 if no '(' character in string.
+//
+
+int Convert::getKernSlurStartElisionLevel(const string& kerndata) { 
+	bool foundSlurStart = false;
+	int output = 0;
+	for (int i=kerndata.size()-1; i >=0; i--) {
+		char ch = kerndata[i];
+		if (ch == '(') {
+			foundSlurStart = true;
+			continue;
+		}
+		if (!foundSlurStart) {
+			continue;
+		}
+		if (ch == '&') {
+			output++;
+		} else {
+			return output;
+		}
+	}
+	if (foundSlurStart) {
+		return output;
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernSlurEndElisionLevel -- Returns the number of 
+//   '&' characters before the last ')' character in a kern token.
+//   Returns -1 if no ')' character in string.
+//
+
+int Convert::getKernSlurEndElisionLevel(const string& kerndata) { 
+	bool foundSlurEnd = false;
+	int output = 0;
+	for (int i=kerndata.size()-1; i >=0; i--) {
+		char ch = kerndata[i];
+		if (ch == ')') {
+			foundSlurEnd = true;
+			continue;
+		}
+		if (!foundSlurEnd) {
+			continue;
+		}
+		if (ch == '&') {
+			output++;
+		} else {
+			return output;
+		}
+	}
+	if (foundSlurEnd) {
+		return output;
+	} else {
+		return -1;
+	}
 }
 
 

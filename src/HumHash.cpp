@@ -220,6 +220,56 @@ string HumHash::getValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
+// HumHash::getValueHTp -- Return an address of a HumdrumToken.
+//   Presumes 64-bit pointers (or at least not 128-bit pointers).
+//
+
+HTp HumHash::getValueHTp(const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		return getValueHTp("", "", keys[2]);
+	} else if (keys.size() == 2) {
+		return getValueHTp(keys[0], keys[1]);
+	} else {
+		return getValueHTp(keys[0], keys[1], keys[2]);
+	}
+}
+
+
+HTp HumHash::getValueHTp(const string& ns2, const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	return getValueHTp("", ns2, key);
+}
+
+
+HTp HumHash::getValueHTp(const string& ns1, const string& ns2,
+		const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	string value = getValue(ns1, ns2, key);
+	if (value.find("HT_") != 0) {
+		return NULL;
+	} else {
+		HTp pointer = NULL;
+		try {
+			pointer = (HTp)(stoll(value.substr(3)));
+		} catch (invalid_argument& e) {
+			pointer = NULL;
+		}
+		return pointer;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::getValueInt -- Return the value as an integer.  The value must
 //   start with a number and have no text before it; otherwise the
 //   returned value will be "0".  The HumHash class is aware of fractional
@@ -457,6 +507,23 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 }
 
 
+void HumHash::setValue(const string& key, const char* value) {
+	setValue(key, (string)value);
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, 
+		const char* value) {
+	setValue(ns2, key, (string)value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, const string& key,
+		const char* value) {
+	setValue(ns1, ns2, key, (string)value);
+}
+
+
 void HumHash::setValue(const string& key, int value) {
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
@@ -478,6 +545,32 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, int value) {
 	initializeParameters();
 	stringstream ss(value);
+	(*parameters)[ns1][ns2][key] = ss.str();
+}
+
+
+void HumHash::setValue(const string& key, HTp value) {
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		setValue("", "", keys[0], value);
+	} else if (keys.size() == 2) {
+		setValue("", keys[0], keys[1], value);
+	} else {
+		setValue(keys[0], keys[1], keys[2], value);
+	}
+}
+
+
+void HumHash::setValue(const string& ns2, const string& key, HTp value) {
+		setValue("", ns2, key, value);
+}
+
+
+void HumHash::setValue(const string& ns1, const string& ns2, 
+		const string& key, HTp value) { 
+	initializeParameters();
+	stringstream ss;
+	ss << "HT_" << ((long long)value);
 	(*parameters)[ns1][ns2][key] = ss.str();
 }
 

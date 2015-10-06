@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  5 17:46:44 PDT 2015
+// Last Modified: Mon Oct  5 23:28:01 PDT 2015
 // Filename:      /include/minhumdrum.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
 // Syntax:        C++11
@@ -98,6 +98,11 @@ class HumHash {
 		                                    const string& key) const;
 		string         getValue            (const string& ns1, const string& ns2,
 		                                    const string& key) const;
+		HTp            getValueHTp         (const string& key) const;
+		HTp            getValueHTp         (const string& ns2,
+		                                    const string& key) const;
+		HTp            getValueHTp         (const string& ns1, const string& ns2,
+		                                    const string& key) const;
 		int            getValueInt         (const string& key) const;
 		int            getValueInt         (const string& ns2,
 		                                    const string& key) const;
@@ -118,6 +123,7 @@ class HumHash {
 		                                    const string& key) const;
 		bool           getValueBool        (const string& ns1, const string& ns2,
 		                                    const string& key) const;
+
 		void           setValue            (const string& key,
 		                                    const string& value);
 		void           setValue            (const string& ns2,
@@ -127,11 +133,25 @@ class HumHash {
 		                                    const string& ns2,
 		                                    const string& key,
 		                                    const string& value);
+		void           setValue            (const string& key,
+		                                    const char* value);
+		void           setValue            (const string& ns2,
+		                                    const string& key,
+		                                    const char* value);
+		void           setValue            (const string& ns1,
+		                                    const string& ns2,
+		                                    const string& key,
+		                                    const char* value);
 		void           setValue            (const string& key, int value);
 		void           setValue            (const string& ns2, const string& key,
 		                                    int value);
 		void           setValue            (const string& ns1, const string& ns2,
 		                                    const string& key, int value);
+		void           setValue            (const string& key, HTp value);
+		void           setValue            (const string& ns2, const string& key,
+		                                    HTp value);
+		void           setValue            (const string& ns1, const string& ns2,
+		                                    const string& key, HTp value);
 		void           setValue            (const string& key, HumNum value);
 		void           setValue            (const string& ns2, const string& key,
 		                                    HumNum value);
@@ -573,6 +593,9 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
 
+		HumNum   getDurationToEnd          (void) const;
+		HumNum   getDurationToEnd          (HumNum scale) const;
+
 		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;
 
@@ -597,6 +620,8 @@ class HumdrumToken : public string, public HumHash {
 		void     setParameters             (const string& pdata,
 		                                    HumdrumToken* ptok = NULL);
 		int      getStrandIndex            (void) const;
+		int      getSlurStartElisionLevel  (void) const;
+		int      getSlurEndElisionLevel    (void) const;
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
@@ -622,6 +647,9 @@ class HumdrumToken : public string, public HumHash {
 		HumdrumToken* getNextNonNullDataToken(int index = 0);
 		HumdrumToken* getNextNNDT(int index = 0) {
 		               return getNextNonNullDataToken(index); }
+
+		// slur-analysis based functions:
+		HumNum   getSlurDuration   (HumNum scale = 1);
 
 	protected:
 		void     setLineIndex      (int lineindex);
@@ -708,6 +736,8 @@ typedef HumdrumToken* HTp;
 ostream& operator<<(ostream& out, const HumdrumToken& token);
 ostream& operator<<(ostream& out, HumdrumToken* token);
 
+ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out=std::cout);
+ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
 
 
 // The following options are used for get[Primary]TrackTokens:
@@ -1093,9 +1123,11 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		      ~HumdrumFileContent         ();
 
 		bool   analyzeKernSlurs           (void);
+		bool   analyzeKernTies            (void);
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
+		bool   analyzeKernTies            (HumdrumToken* spinestart);
 };
 
 
@@ -1160,6 +1192,8 @@ class Convert {
 		static bool isKernNoteAttack        (const string& kerndata);
 		static bool hasKernSlurStart        (const string& kerndata);
 		static bool hasKernSlurEnd          (const string& kerndata);
+		static int  getKernSlurStartElisionLevel(const string& kerndata);
+		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string  getKernPitchAttributes  (const string& kerndata);

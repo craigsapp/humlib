@@ -67,6 +67,8 @@ class Convert {
 		static bool isKernNoteAttack        (const string& kerndata);
 		static bool hasKernSlurStart        (const string& kerndata);
 		static bool hasKernSlurEnd          (const string& kerndata);
+		static int  getKernSlurStartElisionLevel(const string& kerndata);
+		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string  getKernPitchAttributes  (const string& kerndata);
