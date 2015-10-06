@@ -8,7 +8,7 @@
 @PARAMETERS:	int index = 0
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		347-365
+@LINES:		378-396
 @SHORTDESC:	Returns the next token in the spine.
 @LONGDESC:	Returns the next token in the
 	spine.  Since the next token count is usually one, the default

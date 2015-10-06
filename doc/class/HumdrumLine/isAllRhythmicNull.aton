@@ -27,10 +27,10 @@ bool HumdrumLine::isAllRhythmicNull(void) const {
 		return false;
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).hasRhythm()) {
+		if (!token(i)->hasRhythm()) {
 			continue;
 		}
-		if (!token(i).isNull()) {
+		if (!token(i)->isNull()) {
 			return false;
 		}
 	}

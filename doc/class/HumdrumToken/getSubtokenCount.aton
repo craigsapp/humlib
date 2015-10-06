@@ -8,7 +8,7 @@
 @PARAMETERS:	const string& separator = " "
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		811-831
+@LINES:		932-952
 @SHORTDESC:	Returns the number of sub-tokens in a token.
 @LONGDESC:	Returns the number of sub-tokens in
 	a token.  The input parameter is the sub-token separator.  If the

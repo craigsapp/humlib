@@ -6,7 +6,7 @@
 @RETURN:	static string  
 @PARAMETERS:	const string& kerndata
 @FILE:		Convert-kern.cpp
-@LINES:		56-95
+@LINES:		206-245
 @SHORTDESC:	// Convert::getKernPitchAttributes -- pc = pitch class numacc = numeric accidental (-1=flat, 0=natural, 1=sharp) explicit = force showing of accidental oct = octave number (middle C = 4) base40 = base-40 enumeration of pitch (valid if abs(numacc) <= 2) 
 @LONGDESC:	// Convert::getKernPitchAttributes --
 	pc         = pitch class

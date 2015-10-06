@@ -7,7 +7,7 @@
 @RETURN:	int      
 @PARAMETERS:	void
 @FILE:		HumdrumToken.cpp
-@LINES:		90-103
+@LINES:		93-106
 @SHORTDESC:	Returns the number of previous tokens in the spine which is not a null token.
 @LONGDESC:	Returns the number of
 	previous tokens in the spine which is not a null token.  For null

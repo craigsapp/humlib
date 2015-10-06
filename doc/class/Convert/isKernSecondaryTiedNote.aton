@@ -1,0 +1,40 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	isKernSecondaryTiedNote
+@ACCESS:	public
+@RETURN:	static bool 
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-kern.cpp
+@LINES:		56-77
+@SHORTDESC:	Returns true if the input string represents a **kern note (i.
+@LONGDESC:	Returns true if the input string
+	represents a **kern note (i.e., token with a pitch,
+	not a null token or a rest) and has a '_' or ']' character.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool Convert::isKernSecondaryTiedNote(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+@@END:	FunctionDocumentation
+

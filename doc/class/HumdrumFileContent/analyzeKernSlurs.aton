@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileContent
+@METHOD:	analyzeKernSlurs
+@ACCESS:	public
+@RETURN:	bool   
+@PARAMETERS:	void
+@FILE:		HumdrumFileContent-slur.cpp
+@LINES:		22-38
+@SHORTDESC:	Link start and ends of slurs to each other.
+@LONGDESC:	Link start and ends of
+	slurs to each other.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HTp> kernspines;
+	getSpineStartList(kernspines, "**kern");
+	bool output = true;
+	for (int i=0; i<kernspines.size(); i++) {
+		output = output && analyzeKernSlurs(kernspines[i]);
+	}
+	return output;
+}
+
+
+@@END:	FunctionDocumentation
+

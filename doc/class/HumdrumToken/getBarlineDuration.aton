@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		525-544
+@LINES:		576-595
 @SHORTDESC:	Returns the duration between the next and previous barline.
 @LONGDESC:	Returns the duration between
 	the next and previous barline.  If the token is a barline token,

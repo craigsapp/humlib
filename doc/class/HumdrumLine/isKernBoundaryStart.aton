@@ -27,10 +27,10 @@ bool HumdrumLine::isKernBoundaryStart(void) const {
 		return false;
 	}
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		if (token(i).isNull()) {
+		if (token(i)->isNull()) {
 			return false;
 		}
 	}

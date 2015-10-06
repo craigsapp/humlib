@@ -22,7 +22,7 @@
 
 bool Convert::isKernNote(const string& kerndata) {
 	char ch;
-	for (int i = 0; i < kerndata.size(); i++) {
+	for (int i=0; i < kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch >= 'a') && (ch <= 'g')) {
 			return true;

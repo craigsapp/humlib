@@ -4,9 +4,9 @@
 @METHOD:	getTokens
 @ACCESS:	public
 @RETURN:	void     
-@PARAMETERS:	vector<HumdrumToken*>& list
+@PARAMETERS:	vector<HTp>& list
 @FILE:		HumdrumLine.cpp
-@LINES:		857-874
+@LINES:		869-886
 @SHORTDESC:	Returns an array of tokens pointers for a Humdrum line.
 @LONGDESC:	Returns an array of tokens pointers for a
 	Humdrum line.  This function should not be called on global comments,

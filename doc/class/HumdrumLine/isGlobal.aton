@@ -1,0 +1,30 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumLine
+@METHOD:	isGlobal
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumLine.cpp
+@LINES:		731-741
+@SHORTDESC:	Returns true if the line is a global record: either and empty record, a global comment or a reference record.
+@LONGDESC:	Returns true if the line is a global record: either
+	and empty record, a global comment or a reference record.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumLine::isGlobal(void) const {
+	return !hasSpines();
+}
+
+
+@@END:	FunctionDocumentation
+

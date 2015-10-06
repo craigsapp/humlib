@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	hasKernSlurEnd
+@ACCESS:	public
+@RETURN:	static bool 
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-kern.cpp
+@LINES:		120-136
+@SHORTDESC:	Returns true if the input string has a '('.
+@LONGDESC:	Returns true if the input string
+	has a '('.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool Convert::hasKernSlurEnd(const string& kerndata) {
+	for (int i=0; i < kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == ')') {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+@@END:	FunctionDocumentation
+

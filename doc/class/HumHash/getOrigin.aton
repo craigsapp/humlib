@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		958-979
+@LINES:		1051-1072
 @SHORTDESC:	Get the source token for the parameter.
 @LONGDESC:	Get the source token for the parameter.
 	Returns NULL if there is no origin.

@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumdrumToken.cpp
-@LINES:		1041-1080
+@LINES:		1223-1262
 @SHORTDESC:	Print a HumdrumToken in XML format.
 @LONGDESC:	Print a HumdrumToken in XML format.
 	

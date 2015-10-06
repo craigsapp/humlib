@@ -1,0 +1,36 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getDurationToEnd
+@ACCESS:	public
+@RETURN:	HumNum   
+@RETURN:	HumNum   
+@PARAMETERS:	void
+@PARAMETERS:	HumNum scale
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		556-569
+@SHORTDESC:	Returns the duration from the start of the current line to the start of the last line (the duration of the last line is always zero, so the duration to end is always the duration to the end of the last non-zero duration line.
+@LONGDESC:	Returns the duration from the
+	start of the current line to the start of the last line
+	(the duration of the last line is always zero, so the duration
+	to end is always the duration to the end of the last non-zero
+	duration line.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumNum HumdrumToken::getDurationToEnd(void) const {
+	return getLine()->getDurationToEnd();
+}
+
+
+@@END:	FunctionDocumentation
+

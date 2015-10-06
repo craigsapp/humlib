@@ -7,7 +7,7 @@
 @PARAMETERS:	int index, char ch
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		68-88
+@LINES:		71-91
 @SHORTDESC:	Returns true if the character at the given index is the given char.
 @LONGDESC:	Returns true if the character at the given
 	index is the given char.

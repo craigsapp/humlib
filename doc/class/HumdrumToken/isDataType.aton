@@ -8,7 +8,7 @@
 @PARAMETERS:	string dtype
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		176-191
+@LINES:		207-222
 @SHORTDESC:	Returns true if the data type of the token matches the test data type.
 @LONGDESC:	Returns true if the data type of the token
 	matches the test data type.

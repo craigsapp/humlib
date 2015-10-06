@@ -3,7 +3,7 @@
 @CLASSNAME:	HumdrumFileBase
 @METHOD:	token
 @ACCESS:	public
-@RETURN:	HumdrumToken& 
+@RETURN:	HTp           
 @PARAMETERS:	int lineindex, int fieldindex
 @FILE:		HumdrumFileBase.cpp
 @LINES:		429-441
@@ -19,7 +19,7 @@
 
 @SRCCODE:
 
-HumdrumToken& HumdrumFileBase::token(int lineindex, int fieldindex) {
+HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 	if (lineindex < 0) {
 		lineindex += getLineCount();
 	}

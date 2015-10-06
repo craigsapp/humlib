@@ -3,7 +3,7 @@
 @CLASSNAME:	HumdrumLine
 @METHOD:	getTrackStart
 @ACCESS:	public
-@RETURN:	HumdrumToken* 
+@RETURN:	HTp      
 @PARAMETERS:	int track
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp

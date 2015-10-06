@@ -6,7 +6,7 @@
 @RETURN:	void     
 @PARAMETERS:	void
 @FILE:		HumdrumLine.cpp
-@LINES:		835-855
+@LINES:		847-867
 @SHORTDESC:	Re-generate a HumdrumLine string from individual tokens on the line.
 @LONGDESC:	Re-generate a HumdrumLine string from
 	individual tokens on the line.  This function will be necessary to

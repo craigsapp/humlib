@@ -7,7 +7,7 @@
 @PARAMETERS:	int index
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		876-892
+@LINES:		888-904
 @SHORTDESC:	Returns character at given index in string, or null if out of range.
 @LONGDESC:	Returns character at given index in string, or
 	null if out of range.

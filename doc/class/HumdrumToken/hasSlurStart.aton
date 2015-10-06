@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	hasSlurStart
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		659-674
+@SHORTDESC:	Returns true if the **kern token has a '(' character.
+@LONGDESC:	Returns true if the **kern token has 
+	a '(' character.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumToken::hasSlurStart(void) const {
+	if (isDataType("**kern")) {
+		if (Convert::hasKernSlurStart((string)(*this))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+@@END:	FunctionDocumentation
+

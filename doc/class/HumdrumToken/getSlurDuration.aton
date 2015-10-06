@@ -1,0 +1,45 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getSlurDuration
+@ACCESS:	public
+@RETURN:	HumNum   
+@PARAMETERS:	HumNum scale = 1
+@FILE:		HumdrumToken.cpp
+@LINES:		166-192
+@SHORTDESC:	If the note has a slur start, then returns the duration until the endpoint; otherwise, returns 0; Expand later to handle slur ends and elided slurs.
+@LONGDESC:	If the note has a slur start, then
+	returns the duration until the endpoint; otherwise, returns 0;
+	Expand later to handle slur ends and elided slurs.  The function
+	HumdrumFileContent::analyzeSlurs() should be called before accessing
+	this function.  If the slur duruation was already calculated, return
+	thave value; otherwise, calculate from the location of a matching
+	slur end.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HumNum HumdrumToken::getSlurDuration(HumNum scale) {
+	if (!isDataType("**kern")) {
+		return 0;
+	}
+	if (isDefined("auto", "slurDuration")) {
+		return getValueFraction("auto", "slurDuration");
+	} else if (isDefined("auto", "slurEnd")) {
+		HTp slurend = getValueHTp("auto", "slurEnd");
+		return slurend->getDurationFromStart(scale) - 
+				getDurationFromStart(scale);
+	} else {
+		return 0;
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

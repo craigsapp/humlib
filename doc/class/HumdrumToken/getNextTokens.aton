@@ -8,7 +8,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		367-378
+@LINES:		398-409
 @SHORTDESC:	Returns a list of the next tokens in the spine after this token.
 @LONGDESC:	Returns a list of the next
 	tokens in the spine after this token.

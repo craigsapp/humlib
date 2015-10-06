@@ -3,11 +3,11 @@
 @CLASSNAME:	HumdrumFileBase
 @METHOD:	getTrackStart
 @ACCESS:	public
-@RETURN:	HumdrumToken* 
+@RETURN:	HTp           
 @PARAMETERS:	int track
 @QUALIFIER:	const
 @FILE:		HumdrumFileBase.cpp
-@LINES:		632-647
+@LINES:		726-741
 @SHORTDESC:	Return the starting exclusive interpretation for the given track.
 @LONGDESC:	Return the starting exclusive
 	interpretation for the given track.  Returns NULL if the track
@@ -22,7 +22,7 @@
 
 @SRCCODE:
 
-HumdrumToken* HumdrumFileBase::getTrackStart(int track) const {
+HTp HumdrumFileBase::getTrackStart(int track) const {
 	if ((track > 0) && (track < trackstarts.size())) {
 		return trackstarts[track];
 	} else {

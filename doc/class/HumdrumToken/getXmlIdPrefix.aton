@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		1221-1235
+@LINES:		1414-1428
 @SHORTDESC:	Returns the XML ID prefix from the HumdrumFile structure via the HumdrumLine on which the token resides.
 @LONGDESC:	Returns the XML ID prefix from the HumdrumFile
 	structure via the HumdrumLine on which the token resides.

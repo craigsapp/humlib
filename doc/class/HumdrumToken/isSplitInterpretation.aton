@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		710-719
+@LINES:		831-840
 @SHORTDESC:	True if the token is "*^".
 @LONGDESC:	True if the token is "*^".
 	

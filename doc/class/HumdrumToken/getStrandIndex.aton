@@ -1,0 +1,31 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getStrandIndex
+@ACCESS:	public
+@RETURN:	int      
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		1093-1104
+@SHORTDESC:	Returns the 1-D strand index that the token belongs to in the owning HumdrumFile.
+@LONGDESC:	Returns the 1-D strand index
+	that the token belongs to in the owning HumdrumFile.
+	Returns -1 if there is no strand assignment.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int  HumdrumToken::getStrandIndex(void) const {
+	return strand;
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumFileStructure.cpp
-@LINES:		1293-1303
+@LINES:		1315-1325
 @SHORTDESC:	Return the first token in the a strand.
 @LONGDESC:	Return the first token
 	in the a strand.

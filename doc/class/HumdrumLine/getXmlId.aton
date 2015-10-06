@@ -7,7 +7,7 @@
 @PARAMETERS:	const string& prefix = ""
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		1219-1235
+@LINES:		1231-1247
 @SHORTDESC:	Return a unique ID for the current line.
 @LONGDESC:	Return a unique ID for the current line.
 	

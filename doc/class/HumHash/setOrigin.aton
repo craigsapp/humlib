@@ -16,7 +16,7 @@
 @PARAMETERS:	const string& ns1, const string& ns2, const string& parameter, HumdrumToken* tok
 @PARAMETERS:	const string& ns1, const string& ns2, const string& parameter, HumdrumToken& tok
 @FILE:		HumHash.cpp
-@LINES:		887-907
+@LINES:		980-1000
 @SHORTDESC:	Set the source token for the parameter.
 @LONGDESC:	Set the source token for the parameter.
 	

@@ -1,0 +1,36 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	getPrimaryTrackSequence
+@ACCESS:	public
+@RETURN:	void   
+@PARAMETERS:	vector<HTp>& sequence, int track, int options
+@FILE:		HumdrumFileBase.cpp
+@LINES:		584-601
+@SHORTDESC:	Return a list of the given primary spine tokens for a given track (indexed starting at one and going through getMaxTrack().
+@LONGDESC:	Return a list of the
+	given primary spine tokens for a given track (indexed starting at
+	one and going through getMaxTrack().
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::getPrimaryTrackSequence(vector<HTp>& sequence, int track,
+		int options) {
+	vector<vector<HTp> > tempseq;
+	getTrackSequence(tempseq, track, options | OPT_PRIMARY);
+	sequence.resize(tempseq.size());
+	for (int i=0; i<tempseq.size(); i++) {
+		sequence[i] = tempseq[i][0];
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		697-708
+@LINES:		818-829
 @SHORTDESC:	Returns true if first two characters are "**".
 @LONGDESC:	Returns true if first two
 	characters are "**".

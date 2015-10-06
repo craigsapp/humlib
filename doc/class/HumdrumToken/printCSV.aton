@@ -6,7 +6,7 @@
 @RETURN:	ostream& 
 @PARAMETERS:	ostream& out = cout
 @FILE:		HumdrumToken.cpp
-@LINES:		1014-1039
+@LINES:		1196-1221
 @SHORTDESC:	print token in CSV format.
 @LONGDESC:	print token in CSV format.
 	

@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		669-698
+@LINES:		762-791
 @SHORTDESC:	Return a count of the parameters which are stored in the HumHash.
 @LONGDESC:	Return a count of the parameters which are
 	stored in the HumHash.  If no arguments, then count all value in

@@ -13,7 +13,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumHash.cpp
-@LINES:		375-397
+@LINES:		425-447
 @SHORTDESC:	Return true or false based on the value.
 @LONGDESC:	Return true or false based on the
 	value.  If the value is "0" or false, then the function

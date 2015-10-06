@@ -1,0 +1,56 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	getTrackSequence
+@ACCESS:	public
+@RETURN:	void   
+@RETURN:	void   
+@PARAMETERS:	vector<vector<HTp> >& sequence, HTp starttoken, int options
+@PARAMETERS:	vector<vector<HTp> >& sequence, int track, int options
+@FILE:		HumdrumFileBase.cpp
+@LINES:		603-638
+@SHORTDESC:	Extract a sequence of tokens for the given spine.
+@LONGDESC:	Extract a sequence of tokens
+	for the given spine.  All subspine tokens will be included.
+	See getPrimaryTrackSequence() if you only want the first subspine for
+	a track on all lines.
+	
+	The following options are used for the getPrimaryTrackTokens:
+	* OPT_PRIMARY    => only extract primary subspine/subtrack.
+	* OPT_NOEMPTY    => don't include null tokens in extracted list if all
+	extracted subspines contains null tokens.
+	Includes null interpretations and comments as well.
+	* OPT_NONULL     => don't include any null tokens in extracted list.
+	* OPT_NOINTERP   => don't include interprtation tokens.
+	* OPT_NOMANIP    => don't include spine manipulators (*^, *v, *x, *+,
+	but still keep ** and *0).
+	* OPT_NOCOMMENT  => don't include comment tokens.
+	* OPT_NOGLOBAL   => don't include global records (global comments, reference
+	records, and empty lines). In other words, only return
+	a list of tokens from lines which hasSpines() it true.
+	* OPT_NOREST     => don't include **kern rests.
+	* OPT_NOTIE      => don't include **kern secondary tied notes.
+	Compound options:
+	* OPT_DATA      (OPT_NOMANIP | OPT_NOCOMMENT | OPT_NOGLOBAL)
+	Only data tokens (including barlines)
+	* OPT_ATTACKS   (OPT_DATA | OPT_NOREST | OPT_NOTIE | OPT_NONULL)
+	Only note-attack tokens (when etracting **kern data)
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
+		HTp starttoken, int options) {
+	int track = starttoken->getTrack();
+	getTrackSequence(sequence, track, options);
+}
+
+
+@@END:	FunctionDocumentation
+

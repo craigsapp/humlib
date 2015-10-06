@@ -7,7 +7,7 @@
 @PARAMETERS:	const char* token
 @PARAMETERS:	const string& token
 @FILE:		HumdrumToken.cpp
-@LINES:		37-47
+@LINES:		37-48
 @SHORTDESC:	Constructor for HumdrumToken.
 @LONGDESC:	Constructor for HumdrumToken.
 	
@@ -23,6 +23,7 @@
 HumdrumToken::HumdrumToken(void) : string() {
 	rhycheck = 0;
 	setPrefix("!");
+	strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {

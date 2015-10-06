@@ -8,7 +8,7 @@
 @PARAMETERS:	HumdrumToken* ptok
 @PARAMETERS:	const string& pdata, HumdrumToken* ptok = NULL
 @FILE:		HumdrumToken.cpp
-@LINES:		865-884
+@LINES:		986-1005
 @SHORTDESC:	Process a local comment with the structure: !NS1:NS2:key1=value1:key2=value2:key3=value3 and store the parameter in the HumHash parent class component of the HumdrumToken object.
 @LONGDESC:	Process a local comment with
 	the structure:

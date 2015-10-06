@@ -10,7 +10,7 @@
 @QUALIFIER:	const
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		505-518
+@LINES:		536-549
 @SHORTDESC:	Returns the duration from the start of the owning HumdrumFile to the starting time of the owning HumdrumLine for the token.
 @LONGDESC:	Returns the duration from the
 	start of the owning HumdrumFile to the starting time of the

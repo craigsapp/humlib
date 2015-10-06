@@ -29,10 +29,10 @@ bool HumdrumLine::isKernBoundaryEnd(void) const {
 	}
 	HumdrumToken* ntok;
 	for (int i=0; i<getFieldCount(); i++) {
-		if (!token(i).isDataType("**kern")) {
+		if (!token(i)->isDataType("**kern")) {
 			continue;
 		}
-		ntok = token(i).getNextToken();
+		ntok = token(i)->getNextToken();
 		if (ntok == NULL) {
 			continue;
 		}

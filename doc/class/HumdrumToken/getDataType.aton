@@ -8,7 +8,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		163-174
+@LINES:		194-205
 @SHORTDESC:	Get the exclusive interpretation type for the token.
 @LONGDESC:	Get the exclusive interpretation type for
 	the token.

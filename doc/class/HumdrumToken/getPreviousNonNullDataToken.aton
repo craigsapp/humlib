@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		105-126
+@LINES:		108-129
 @SHORTDESC:	Returns the non-null data token which occurs before this token in the data in the same spine.
 @LONGDESC:	Returns the non-null
 	data token which occurs before this token in the data in the same

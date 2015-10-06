@@ -1,0 +1,40 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	isKernNoteAttack
+@ACCESS:	public
+@RETURN:	static bool 
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-kern.cpp
+@LINES:		79-100
+@SHORTDESC:	Returns true if the input string represents a **kern note (not null or rest) and is not a secondary tied note.
+@LONGDESC:	Returns true if the input string
+	represents a **kern note (not null or rest) and is not a 
+	secondary tied note.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool Convert::isKernNoteAttack(const string& kerndata) {
+	char ch;
+	if (!Convert::isKernNote(kerndata)) {
+		return false;
+	}
+	for (int i=0; i < kerndata.size(); i++) {
+		ch = std::tolower(kerndata[i]);
+		if ((ch == '_') || (ch == ']')) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+@@END:	FunctionDocumentation
+

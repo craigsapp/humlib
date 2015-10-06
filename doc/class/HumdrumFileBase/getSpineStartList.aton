@@ -1,0 +1,46 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumFileBase
+@METHOD:	getSpineStartList
+@ALIAS:		getTrackStartList
+@ALIAS:		getTrackStartList
+@ACCESS:	public
+@RETURN:	void          
+@RETURN:	void          
+@RETURN:	void          
+@PARAMETERS:	vector<HTp>& spinelist
+@PARAMETERS:	vector<HTp>& spinelist, const string& exinterp
+@PARAMETERS:	vector<HTp>& spinelist, const vector<string>& exinterps
+@FILE:		HumdrumFileBase.cpp
+@LINES:		500-521
+@SHORTDESC:	Return a list of the exclustive interpretations starting spines in the data.
+@LONGDESC:	Return a list of the exclustive
+	interpretations starting spines in the data.  The single parameter
+	version of the fuction returns all starting exclusive interpretations.
+	The two-parameter version will result all exclusive interpretations
+	of a given datatype, and the three-parameter version where the third
+	parameter is a vector of string, will selectively include all starting
+	tokens which match one of the data types in the input list.  The
+	trackstarts class variable contains an empty slot at index 0;
+	this is removed in the return vector.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts) {
+	spinestarts.reserve(trackstarts.size());
+	spinestarts.resize(0);
+	for (int i=1; i<trackstarts.size(); i++) {
+		spinestarts.push_back(trackstarts[i]);
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

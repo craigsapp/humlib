@@ -1,0 +1,46 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumHash
+@METHOD:	getValueHTp
+@ACCESS:	public
+@RETURN:	HTp            
+@RETURN:	HTp            
+@RETURN:	HTp            
+@PARAMETERS:	const string& key
+@PARAMETERS:	const string& ns2, const string& key
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key
+@QUALIFIER:	const
+@QUALIFIER:	const
+@QUALIFIER:	const
+@FILE:		HumHash.cpp
+@LINES:		220-240
+@SHORTDESC:	Return an address of a HumdrumToken.
+@LONGDESC:	Return an address of a HumdrumToken.
+	Presumes 64-bit pointers (or at least not 128-bit pointers).
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+HTp HumHash::getValueHTp(const string& key) const {
+	if (parameters == NULL) {
+		return NULL;
+	}
+	vector<string> keys = getKeyList(key);
+	if (keys.size() == 1) {
+		return getValueHTp("", "", keys[2]);
+	} else if (keys.size() == 2) {
+		return getValueHTp(keys[0], keys[1]);
+	} else {
+		return getValueHTp(keys[0], keys[1], keys[2]);
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

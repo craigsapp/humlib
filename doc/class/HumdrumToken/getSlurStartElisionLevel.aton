@@ -1,0 +1,35 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	getSlurStartElisionLevel
+@ACCESS:	public
+@RETURN:	int      
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		1106-1121
+@SHORTDESC:	Returns the count of elision marks ('&') preceding a slur start character '('.
+@LONGDESC:	Returns the count of
+	elision marks ('&') preceding a slur start character '('.
+	Returns -1 if there is no slur start character.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int HumdrumToken::getSlurStartElisionLevel(void) const { 
+	if (isDataType("**kern")) {
+		return Convert::getKernSlurStartElisionLevel((string)(*this));
+	} else {
+		return -1;
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

@@ -6,7 +6,7 @@
 @RETURN:	HumdrumToken* 
 @PARAMETERS:	int index = 0
 @FILE:		HumdrumToken.cpp
-@LINES:		140-161
+@LINES:		143-164
 @SHORTDESC:	Returns the given next non-null token following this one in the spine.
 @LONGDESC:	Returns the given next non-null token
 	following this one in the spine.  The default value for index is 0 since

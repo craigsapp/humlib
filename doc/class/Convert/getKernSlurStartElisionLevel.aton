@@ -1,0 +1,51 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	Convert
+@METHOD:	getKernSlurStartElisionLevel
+@ACCESS:	public
+@RETURN:	static int  
+@PARAMETERS:	const string& kerndata
+@FILE:		Convert-kern.cpp
+@LINES:		138-170
+@SHORTDESC:	Returns the number of '&' characters before the last '(' character in a kern token.
+@LONGDESC:	Returns the number of
+	'&' characters before the last '(' character in a kern token.
+	Returns -1 if no '(' character in string.
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+int Convert::getKernSlurStartElisionLevel(const string& kerndata) { 
+	bool foundSlurStart = false;
+	int output = 0;
+	for (int i=kerndata.size()-1; i >=0; i--) {
+		char ch = kerndata[i];
+		if (ch == '(') {
+			foundSlurStart = true;
+			continue;
+		}
+		if (!foundSlurStart) {
+			continue;
+		}
+		if (ch == '&') {
+			output++;
+		} else {
+			return output;
+		}
+	}
+	if (foundSlurStart) {
+		return output;
+	} else {
+		return -1;
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

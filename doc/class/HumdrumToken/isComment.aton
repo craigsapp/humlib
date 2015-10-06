@@ -1,0 +1,36 @@
+@@BEGIN:	FunctionDocumentation
+@INDEXED:	yes
+@CLASSNAME:	HumdrumToken
+@METHOD:	isComment
+@ACCESS:	public
+@RETURN:	bool     
+@PARAMETERS:	void
+@QUALIFIER:	const
+@FILE:		HumdrumToken.cpp
+@LINES:		755-771
+@SHORTDESC:	Returns true of the token start with "!".
+@LONGDESC:	Returns true of the token start with "!".
+	
+
+@@BEGIN: EXAMPLE
+@DESCRIPTION:
+@CODE:
+@OUTPUT:
+@@END:	EXAMPLE
+
+@SRCCODE:
+
+bool HumdrumToken::isComment(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+@@END:	FunctionDocumentation
+

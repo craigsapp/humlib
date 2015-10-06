@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		205-216
+@LINES:		236-247
 @SHORTDESC:	Returns the spine split/merge history for the token.
 @LONGDESC:	Returns the spine split/merge history
 	for the token.

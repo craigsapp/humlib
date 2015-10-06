@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		243-253
+@LINES:		274-284
 @SHORTDESC:	Returns the line index plus 1.
 @LONGDESC:	Returns the line index plus 1.
 	@SEEALTO: getLineIndex

@@ -7,7 +7,7 @@
 @PARAMETERS:	const string& prefix = ""
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		1196-1219
+@LINES:		1389-1412
 @SHORTDESC:	Returns an XML id attribute based on the line and field index for the location of the token in the HumdrumFile.
 @LONGDESC:	Returns an XML id attribute based on the line
 	and field index for the location of the token in the HumdrumFile.

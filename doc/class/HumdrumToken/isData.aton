@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		652-671
+@LINES:		773-792
 @SHORTDESC:	Returns true if not an interpretation, barline or local comment.
 @LONGDESC:	Returns true if not an interpretation, barline
 	or local comment.  This will not work on synthetic tokens generated

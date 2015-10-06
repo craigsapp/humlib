@@ -27,7 +27,7 @@ bool HumdrumLine::isTerminator(void) const {
 		return equalChar(1, '!') && equalChar(0, '*');
 	}
 	for (int i=0; i<getTokenCount(); i++) {
-		if (!token(i).isTerminator()) {
+		if (!token(i)->isTerminator()) {
 			return false;
 		}
 	}

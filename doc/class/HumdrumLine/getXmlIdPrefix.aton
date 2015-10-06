@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumLine.cpp
-@LINES:		1237-1250
+@LINES:		1249-1262
 @SHORTDESC:	Return the pre-set XML ID attribute prefix from the owning HumdrumFile object.
 @LONGDESC:	Return the pre-set XML ID attribute
 	prefix from the owning HumdrumFile object.

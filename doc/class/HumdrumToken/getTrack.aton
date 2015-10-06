@@ -7,7 +7,7 @@
 @PARAMETERS:	void
 @QUALIFIER:	const
 @FILE:		HumdrumToken.cpp
-@LINES:		287-296
+@LINES:		318-327
 @SHORTDESC:	Get the track (similar to a staff in MEI).
 @LONGDESC:	Get the track (similar to a staff in MEI).
 	

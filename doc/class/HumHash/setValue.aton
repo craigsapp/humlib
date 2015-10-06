@@ -15,12 +15,24 @@
 @RETURN:	void           
 @RETURN:	void           
 @RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
+@RETURN:	void           
 @PARAMETERS:	const string& key, const string& value
 @PARAMETERS:	const string& ns2, const string& key, const string& value
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key, const string& value
+@PARAMETERS:	const string& key, const char* value
+@PARAMETERS:	const string& ns2, const string& key, const char* value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, const char* value
 @PARAMETERS:	const string& key, int value
 @PARAMETERS:	const string& ns2, const string& key, int value
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key, int value
+@PARAMETERS:	const string& key, HTp value
+@PARAMETERS:	const string& ns2, const string& key, HTp value
+@PARAMETERS:	const string& ns1, const string& ns2, const string& key, HTp value
 @PARAMETERS:	const string& key, HumNum value
 @PARAMETERS:	const string& ns2, const string& key, HumNum value
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key, HumNum value
@@ -28,7 +40,7 @@
 @PARAMETERS:	const string& ns2, const string& key, double value
 @PARAMETERS:	const string& ns1, const string& ns2, const string& key, double value
 @FILE:		HumHash.cpp
-@LINES:		422-445
+@LINES:		472-495
 @SHORTDESC:	Set the parameter to the given value, over-writing any previous value for the parameter.
 @LONGDESC:	Set the parameter to the given value,
 	over-writing any previous value for the parameter.  The

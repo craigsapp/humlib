@@ -6,7 +6,7 @@
 @RETURN:	ostream&       
 @PARAMETERS:	ostream& out = cout, int level = 0, const string& indent = "\t"
 @FILE:		HumHash.cpp
-@LINES:		1012-1074
+@LINES:		1105-1167
 @SHORTDESC:	Print object as a <parameters> element for in a HumdrumXML file.
 @LONGDESC:	Print object as a <parameters> element for
 	in a HumdrumXML file.
