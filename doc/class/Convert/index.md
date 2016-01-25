@@ -10,9 +10,9 @@ breadcrumbs: [
                 ['/doc/ref',      'reference']
 	]
 title:  Convert class
-grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']
+grouptitle: ['https://github.com/craigsapp/humlib/blob/master/src', 'Source Code']
 group: [
-   ['https://github.com/craigsapp/minHumdrum/blob/master/src/Convert.cpp', 'Convert.cpp'],
+   ['https://github.com/craigsapp/humlib/blob/master/src/Convert.cpp', 'Convert.cpp'],
 ]
 ---
 
@@ -20,7 +20,7 @@ group: [
 {% include docslot/open-close.html %}
 
 
-The Convert class manages data conversions for the minHumdrum library.
+The Convert class manages data conversions for the humlib library.
 
 &nbsp;
 

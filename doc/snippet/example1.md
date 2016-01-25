@@ -24,7 +24,7 @@ Example input:<br>
 </td>
 
 <td style="border:0">
-<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/minHumdrum/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
+<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/humlib/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
 </td>
 
 </tr></table>

@@ -10,7 +10,7 @@ called "file.krn" and then prints the content (as a standard
 Humdrum file) to console out.
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 
 int main(void) {
 	humlib::HumdrumFile infile;
@@ -25,7 +25,7 @@ The humlib namespace can be omitted by adding `using namespace humlib;`
 at the top of the file:
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -42,7 +42,7 @@ input file streams or `stringstreams`.
 
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -57,7 +57,7 @@ int main(void) {
 Data can be read from an `ifstream` (or `stringstream`):
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -77,7 +77,7 @@ function (since a string is interpreted as a filename in the
 read function).
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -92,7 +92,7 @@ int main(void) {
 ```
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 

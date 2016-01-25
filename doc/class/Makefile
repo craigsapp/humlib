@@ -46,7 +46,7 @@ aton: pull
 	done
 
 pull:
-	(cd ../../common/minHumdrum && git pull)
+	(cd ../../common/humlib && git pull)
 
 
 

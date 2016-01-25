@@ -10,9 +10,9 @@ breadcrumbs: [
                 ['/doc/ref',      'reference']
 	]
 title:  HumdrumToken class
-grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']
+grouptitle: ['https://github.com/craigsapp/humlib/blob/master/src', 'Source Code']
 group: [
-   ['https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumToken.cpp', 'HumdrumToken.cpp'],
+   ['https://github.com/craigsapp/humlibblob/master/src/HumdrumToken.cpp', 'HumdrumToken.cpp'],
 ]
 ---
 

@@ -15,7 +15,7 @@ title: Code snippets
 {% include snippets/snippets.html %}
 
 Here are examples of how to access data in a Humdrum score using the
-minHumdrum classes:
+humlib classes:
 
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="closeAllDetails()">Close all</span>]
 [<span style="cursor:pointer; color:#1e6bb8;" onclick="openAllDetails()">Open all</span>]

@@ -1,7 +1,7 @@
 Below is an example program that uses the humlib library to convert a Humdrum file into a MIDI-like listing of notes in the Humdrum score:
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 
 using namespace std;
 using namespace humlib;

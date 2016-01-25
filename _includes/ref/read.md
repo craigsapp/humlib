@@ -19,7 +19,7 @@ opened file (or to read from a stringstream).
 Reading from filename:
 
 {% highlight cpp %}
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -35,7 +35,7 @@ int main(void) {
 Reading from istream:
 
 {% highlight cpp %}
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -57,7 +57,7 @@ shorthands:
 
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 
 int main(void) {
 	humlib::HumdrumFile infile("file.krn");
@@ -73,7 +73,7 @@ the Humdrum file contents, by calling the
 after reading data.
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -98,7 +98,7 @@ a constructor, data can be read after the object has been created.
 Reading from filename:
 
 {% highlight cpp %}
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -115,7 +115,7 @@ int main(void) {
 Reading from istream:
 
 {% highlight cpp %}
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -134,7 +134,7 @@ int main(void) {
 This allows the object to be filled multiple times.
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -173,7 +173,7 @@ error can be displayed by calling the
 function as illustrated in the following program:
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 
@@ -202,7 +202,7 @@ use <span class="mhcf paren">HumdrumFileStructure::readNoRhythm</span>
 instead.
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 using namespace humlib;
 using namespace std;
 

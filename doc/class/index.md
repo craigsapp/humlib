@@ -20,7 +20,7 @@ title: Class documentation
 Overview
 </summary>
 
-The minHumdrum library consists of several classes that abstract
+The humlib library consists of several classes that abstract
 various functionalities for a Humdrum data parser.  Briefly, the
 HumdrumToken class manages individual cells of data, with the
 HumdrumLine class managing simultaneously occurring tokens, and the
@@ -30,7 +30,7 @@ multiple movements will be added to the code set in the future.
 The figure on the right shows the relationship between the classes,
 and a short description of each class is given below:
 
-Here are the main classes defined in the minHumdrum library:
+Here are the main classes defined in the humlib library:
 
 <img width="35%" style="display:float; float:right;" src="/images/class-organization.svg">
 {% include class/classsummary.html %}
@@ -45,15 +45,15 @@ tab-separated strings in the text version of a standard Humdrum
 file), which is also indexed from 0.
 
 <center>
-<img title="class-organization" width="600" src="https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/humdrum-file.svg">
+<img title="class-organization" width="600" src="https://cdn.rawgit.com/craigsapp/humlib/gh-pages/images/humdrum-file.svg">
 </center>
 
 A Humdrum file has a two-dimensional organization.  The vertical
 dimension gives a time ordering of the data, while the horizontal
 dimension gives information about the musical parts.  A Humdrum
-"spine" roughly represents a musical "parts" and the minHumdrum
+"spine" roughly represents a musical "parts" and the humlib
 code provides functionality for iterating through parts between
-lines.  The minHumdrum code also has a system for iterating through
+lines.  The humlib code also has a system for iterating through
 the spines as "tracks" which are a simplified descriptions of the
 parts that is similar to standard MIDI file tracks or MEI layer
 elements.  The first spine (i.e., column or part) in the above

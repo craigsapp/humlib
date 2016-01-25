@@ -12,8 +12,8 @@
 
 use strict;
 
-my $srcdir = "../../../common/minHumdrum/src";
-my $incdir = "../../../common/minHumdrum/include";
+my $srcdir = "../../../common/humlib/src";
+my $incdir = "../../../common/humlib/include";
 
 die "Usage $0 classname" if @ARGV != 1;
 

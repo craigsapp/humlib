@@ -10,16 +10,16 @@ breadcrumbs: [
                 ['/doc/ref',      'reference']
 	]
 title:  HumdrumFile class
-grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']
+grouptitle: ['https://github.com/craigsapp/humlib/blob/master/src', 'Source Code']
 group: [
-   ['https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFile.cpp', 'HumdrumFile.cpp'],
+   ['https://github.com/craigsapp/humlib/blob/master/src/HumdrumFile.cpp', 'HumdrumFile.cpp'],
 ]
 ---
 
 {% include docslot/docslot.html %}
 {% include docslot/open-close.html %}
 
-The HumdrumFile class manages data conversions for the minHumdrum library.
+The HumdrumFile class manages data conversions for the humlib library.
 
 &nbsp;
 

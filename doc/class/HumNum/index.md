@@ -10,16 +10,16 @@ breadcrumbs: [
                 ['/doc/ref',      'reference']
 	]
 title:  HumNum class
-grouptitle: ['https://github.com/craigsapp/minHumdrum/blob/master/src', 'Source Code']
+grouptitle: ['https://github.com/craigsapp/humlib/blob/master/src', 'Source Code']
 group: [
-   ['https://github.com/craigsapp/minHumdrum/blob/master/src/HumNum.cpp', 'HumNum.cpp'],
+   ['https://github.com/craigsapp/humlib/blob/master/src/HumNum.cpp', 'HumNum.cpp'],
 ]
 ---
 
 {% include docslot/docslot.html %}
 {% include docslot/open-close.html %}
 
-The HumNum class manages data conversions for the minHumdrum library.
+The HumNum class manages data conversions for the humlib library.
 
 &nbsp;
 

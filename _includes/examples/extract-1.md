@@ -3,7 +3,7 @@ used to extract data for a specific part out of the full-score
 arrangement of the HumdrumFile data:
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 
 using namespace std;
 using namespace humlib;
