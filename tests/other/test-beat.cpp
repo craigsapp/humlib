@@ -1,7 +1,7 @@
 // Description: Print the duration from the start of the Humdrum file to the
 // start of the current line.
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
 int main(int argc, char** argv) {
    if (argc != 2) {

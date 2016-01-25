@@ -4,7 +4,7 @@
 #include "HumHash.h"
 #include "HumNum.h"
 
-using namespace minHumdrum;
+using namespace Humdrum;
 
 int main(int argc, char** argv) {
    HumHash myhash;

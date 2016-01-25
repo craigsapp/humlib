@@ -1,7 +1,7 @@
 // Extract a list of notes from a Humdrum score, giving their starting times
 // and durations as "ticks" (minimum rhythmic time unit of file).
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
 using namespace std;
 using namespace minHumdrum;

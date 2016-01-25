@@ -12,7 +12,7 @@
 
 #include "Convert.h"
 
-namespace humlib {
+namespace Humdrum {
 
 // START_MERGE
 
@@ -55,7 +55,7 @@ int Convert::getGcd(int a, int b) {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 
 

@@ -14,7 +14,7 @@
 
 #include "Convert.h"
 
-namespace humlib {
+namespace Humdrum {
 
 // START_MERGE
 
@@ -150,7 +150,7 @@ string Convert::trimWhiteSpace(const string& input) {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 
 

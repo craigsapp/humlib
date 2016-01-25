@@ -108,7 +108,7 @@
 
 using namespace std;
 
-namespace humlib {
+namespace Humdrum {
 
 class HumNum;
 class HumdrumToken;
@@ -263,7 +263,7 @@ class HumHash {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 #endif /* _HUMHASH_H */
 

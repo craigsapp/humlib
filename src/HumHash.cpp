@@ -109,7 +109,7 @@
 
 using namespace std;
 
-namespace humlib {
+namespace Humdrum {
 
 // START_MERGE
 
@@ -1211,7 +1211,7 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 
 

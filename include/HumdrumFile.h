@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace humlib {
+namespace Humdrum {
 
 // START_MERGE
 
@@ -40,7 +40,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 #endif /* _HUMDRUMFILE_H */
 

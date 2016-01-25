@@ -100,7 +100,7 @@ using std::map;
 using std::set;
 using std::invalid_argument;
 
-namespace humlib {
+namespace Humdrum {
 
 class Convert;
 class HumNum;
@@ -117,7 +117,7 @@ EOT
 
 	print IFILE <<"EOT";
 $contents
-} // end of namespace humlib
+} // end of namespace Humdrum
 
 #endif /* _MINHUMDRUM_H */
 
@@ -158,7 +158,7 @@ $license
 
 #include "humlib.h"
 
-namespace humlib {
+namespace Humdrum {
 
 EOT
 
@@ -167,7 +167,7 @@ EOT
 		print SFILE getMergeContents("$basedir/$file");
 	}
 
-print SFILE "\n} // end namespace humlib\n";
+print SFILE "\n} // end namespace Humdrum\n";
 
 	close SFILE;
 }

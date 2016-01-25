@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace humlib {
+namespace Humdrum {
 
 class HumdrumLine;
 class HumdrumToken;
@@ -97,7 +97,7 @@ class HumAddress {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 #endif /* _HUMADDRESS */
 

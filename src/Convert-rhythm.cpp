@@ -14,7 +14,7 @@
 
 #include "Convert.h"
 
-namespace humlib {
+namespace Humdrum {
 
 // START_MERGE
 
@@ -123,7 +123,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace Humdrum
 
 
 

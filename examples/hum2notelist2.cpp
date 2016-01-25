@@ -1,4 +1,4 @@
-#include "minhumdrum.h"
+#include "humlib.h"
 
 using namespace std;
 using namespace minHumdrum;

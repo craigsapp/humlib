@@ -1,8 +1,8 @@
 // Description: Print the inferred duration of non-rhythmic spine tokens.
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
-using namespace minHumdrum;
+using namespace Humdrum;
 
 int main(int argc, char** argv) {
    if (argc != 2) {

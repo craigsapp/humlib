@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jan 25 15:01:03 PST 2016
+// Last Modified: Mon Jan 25 15:29:53 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "humlib.h"
 
-namespace humlib {
+namespace Humdrum {
 
 
 
@@ -8801,4 +8801,4 @@ string Convert::trimWhiteSpace(const string& input) {
 
 
 
-} // end namespace humlib
+} // end namespace Humdrum
