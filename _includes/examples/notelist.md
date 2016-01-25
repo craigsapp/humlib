@@ -4,7 +4,7 @@ Below is an example program that uses the humlib library to convert a Humdrum fi
 #include "humlib.h"
 
 using namespace std;
-using namespace humlib;
+using namespace Humdrum;
 
 void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();

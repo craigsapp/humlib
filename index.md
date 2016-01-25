@@ -8,8 +8,8 @@ The humlib library is of a set of C++ classes for parsing
 [Humdrum](http://www.humdrum.org) data files.  It is easy to incorporate
 into your project by adding these two files:
 
-1. An include file [minhumdrum.h](https://github.com/humdrum-tools/humlib/blob/master/include/minhumdrum.h)
-2. and a source file [minhumdrum.cpp](https://github.com/humdrum-tools/humlib/blob/master/src/minhumdrum.cpp)
+1. An include file [humlib.h](https://github.com/humdrum-tools/humlib/blob/master/include/humlib.h)
+2. and a source file [humlib.cpp](https://github.com/humdrum-tools/humlib/blob/master/src/humlib.cpp)
 
 The source code uses some C++11-specific features, so add the
 `-stc=c++11` option when compiling with GNU g++ or the clang++ compiler.
@@ -27,15 +27,15 @@ For minimal use of the library, you can download the composite header
 and source files.  In a terminal, download with [wget](https://en.wikipedia.org/wiki/Wget) (most common method for linux) by typing:
 
 ```console
-wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/minhumdrum.h
-wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/minhumdrum.cpp
+wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/humlib.h
+wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/humlib.cpp
 ```
 
 Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X):
 
 ```console
-curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/minhumdrum.h -o minhumdrum.h
-curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/minhumdrum.cpp -o minhumdrum.cpp
+curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/humlib.h -o humlib.h
+curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/humlib.cpp -o humlib.cpp
 ```
 
 To compile humlib as a stand-alone library, you can download a ZIP or
@@ -65,7 +65,7 @@ compile the library with the command:
 make
 ```
 
-This should create the file `lib/libminhumdrum.a`, which can be
+This should create the file `lib/libhumlib.a`, which can be
 used to link to other program code. (But note that you can also
 simply copy the .h and .cpp files listed above into your own project
 files if you don't want to link against a separately compiled library
@@ -87,10 +87,10 @@ Here is a short program that uses the humlib library to convert
 a Humdrum file into a MIDI-like listing of notes:
 
 ```cpp
-#include "minhumdrum.h"
+#include "humlib.h"
 
 using namespace std;
-using namespace humlib;
+using namespace Humdrum;
 
 void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();

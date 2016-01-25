@@ -37,7 +37,7 @@ table.classlist tr td:nth-child(2) {
 
 <tr valign=top>
    <td> <a href="/doc/class">Class documentation</a> </td> <td> 
-Documentation for each function of all classes in the minHumdrum library.
+Documentation for each function of all classes in the humlib library.
    </td>
 </tr>
 

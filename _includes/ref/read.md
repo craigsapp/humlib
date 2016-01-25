@@ -20,7 +20,7 @@ Reading from filename:
 
 {% highlight cpp %}
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -36,7 +36,7 @@ Reading from istream:
 
 {% highlight cpp %}
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -74,7 +74,7 @@ after reading data.
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -99,7 +99,7 @@ Reading from filename:
 
 {% highlight cpp %}
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -116,7 +116,7 @@ Reading from istream:
 
 {% highlight cpp %}
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -135,7 +135,7 @@ This allows the object to be filled multiple times.
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -174,7 +174,7 @@ function as illustrated in the following program:
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -203,7 +203,7 @@ instead.
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {

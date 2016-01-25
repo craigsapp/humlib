@@ -21,12 +21,12 @@ int main(void) {
 ```
 
 
-The humlib namespace can be omitted by adding `using namespace humlib;`
+The Humdrum namespace prefix can be omitted by adding `using namespace Humdrum;`
 at the top of the file:
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -43,7 +43,7 @@ input file streams or `stringstreams`.
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -58,7 +58,7 @@ Data can be read from an `ifstream` (or `stringstream`):
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -78,7 +78,7 @@ read function).
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
@@ -93,7 +93,7 @@ int main(void) {
 
 ```cpp
 #include "humlib.h"
-using namespace humlib;
+using namespace Humdrum;
 using namespace std;
 
 int main(void) {
