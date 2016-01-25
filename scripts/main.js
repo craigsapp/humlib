@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 //////////////////////////////
 //
 // insertLinks -- Make links to class documentation, if the class::function
-//   name is in an element with the class "mhcf" (minHumdrum class function).
+//   name is in an element with the class "mhcf" (humlib class function).
 //
 // <span class="mhcf paren">HumdrumFile::printCSV</span> 
 // transforms into:
