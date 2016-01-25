@@ -4,7 +4,7 @@
 // Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 // Creation Date: Wed Jan 28 01:45:01 PST 2015
 // Last Modified: Thu Feb 12 09:48:26 PST 2015 Added sessionStorage use.
-// Filename:      minHumdrum/_includes/docslot/docslot.html
+// Filename:      humlib/_includes/docslot/docslot.html
 // Syntax:        JavaScript 1.5 (EMCAScript 5)
 // vim:           ts=3 ft=javascript hlsearch
 //
@@ -358,7 +358,7 @@ Handlebars.registerHelper('codeLink', function (method, file, linerange,
 	if (typeof method === 'undefined') { return '' }
 	if (typeof file   === 'undefined') { return '' }
 
-   var url = 'https://github.com/craigsapp/minHumdrum/tree/master/src/'
+   var url = 'https://github.com/craigsapp/humlib/tree/master/src/'
 	url += file;
    if (linerange) {
       linerange =  linerange.replace(/-/g, '-L');

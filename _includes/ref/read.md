@@ -20,7 +20,7 @@ Reading from filename:
 
 {% highlight cpp %}
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -36,7 +36,7 @@ Reading from istream:
 
 {% highlight cpp %}
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -51,7 +51,7 @@ int main(void) {
 </td></tr></table>
 
 The `using namespace` lines at the start of the file allow use of functions
-and classes in the minHumdrum library to be used without their full 
+and classes in the humlib library to be used without their full 
 namespace scope.  Here is what the code will look like without such
 shorthands:
 
@@ -60,7 +60,7 @@ shorthands:
 #include "minhumdrum.h"
 
 int main(void) {
-	minHumdrum::HumdrumFile infile("file.krn");
+	humlib::HumdrumFile infile("file.krn");
 	std::cout << infile;
 	return 0;
 }
@@ -74,7 +74,7 @@ after reading data.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -99,7 +99,7 @@ Reading from filename:
 
 {% highlight cpp %}
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -116,7 +116,7 @@ Reading from istream:
 
 {% highlight cpp %}
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -135,7 +135,7 @@ This allows the object to be filled multiple times.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -174,7 +174,7 @@ function as illustrated in the following program:
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -203,7 +203,7 @@ instead.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {

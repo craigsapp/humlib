@@ -2,12 +2,12 @@
 # http://jekyllrb.com/docs/configuration
 
 # Site settings ###########################################################
-title: minHumdrum
+title: humlib
 email: craig@ccrma.stanford.edu
-description: "minHumdrum: Minimal generalized Humdrum data parsing library in C++"
+description: "humlib: Humdrum data parsing library in C++"
 baseurl: ""
 url: "http://min.humdrum.org"
-github_username:  craigsapp/minHumdrum
+github_username:  craigsapp/humlib
 timezone: America/Los_Angeles
 exclude: [
    old,

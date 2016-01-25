@@ -13,7 +13,7 @@ Humdrum file) to console out.
 #include "minhumdrum.h"
 
 int main(void) {
-	minHumdrum::HumdrumFile infile;
+	humlib::HumdrumFile infile;
 	infile.read("file.krn");
 	std::cout << infile;
 	return 0;
@@ -21,12 +21,12 @@ int main(void) {
 ```
 
 
-The minHumdrum namespace can be omitted by adding `using namespace minHumdrum;`
+The humlib namespace can be omitted by adding `using namespace humlib;`
 at the top of the file:
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -43,7 +43,7 @@ input file streams or `stringstreams`.
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -58,7 +58,7 @@ Data can be read from an `ifstream` (or `stringstream`):
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -78,7 +78,7 @@ read function).
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {
@@ -93,7 +93,7 @@ int main(void) {
 
 ```cpp
 #include "minhumdrum.h"
-using namespace minHumdrum;
+using namespace humlib;
 using namespace std;
 
 int main(void) {

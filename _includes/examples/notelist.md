@@ -1,10 +1,10 @@
-Below is an example program that uses the minHumdrum library to convert a Humdrum file into a MIDI-like listing of notes in the Humdrum score:
+Below is an example program that uses the humlib library to convert a Humdrum file into a MIDI-like listing of notes in the Humdrum score:
 
 ```cpp
 #include "minhumdrum.h"
 
 using namespace std;
-using namespace minHumdrum;
+using namespace humlib;
 
 void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();
@@ -43,11 +43,11 @@ int main(int argc, char** argv) {
 }
 ```
 
-Notice that all minHumdrum code is placed into the minHumdrum namespace.
+Notice that all humlib code is placed into the humlib namespace.
 
 Test data for use with the above program:
 
-![Example music](https://cdn.rawgit.com/craigsapp/minHumdrum/gh-pages/images/hum2notelist.svg)
+![Example music](https://cdn.rawgit.com/craigsapp/humlib/gh-pages/images/hum2notelist.svg)
 
 <table style="border-collapse: separate; margin-left:auto; margin-right:auto">
 <tr><td style="border:0">
@@ -85,9 +85,9 @@ C4      2.2     12      6
 </td></tr></table>
 </center>
 
-If you are using the minHumdrum project directory, place
+If you are using the humlib project directory, place
 programs into a subdirectory called `myprograms` and then to compile,
-go to the base directory of the minHumdrum code and type `make myprogram`
+go to the base directory of the humlib code and type `make myprogram`
 if the program is called `myprograms/myprogram.cpp`.  The compiled program
 will be created as `bin/myprogram`.
 

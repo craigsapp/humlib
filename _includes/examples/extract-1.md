@@ -6,7 +6,7 @@ arrangement of the HumdrumFile data:
 #include "minhumdrum.h"
 
 using namespace std;
-using namespace minHumdrum;
+using namespace humlib;
 
 void printNoteInformation(HumdrumToken* tok, int tpq) {
    cout << *tok;
