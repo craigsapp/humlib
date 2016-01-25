@@ -3,7 +3,7 @@
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Sun Aug  9 21:59:46 PDT 2015
 // Filename:      Convert.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumLine.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumLine.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -19,7 +19,7 @@
 #include "HumNum.h"
 #include "Convert.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 
@@ -764,7 +764,7 @@ bool HumdrumLine::isManipulator(void) const {
 //
 // HumdrumLine::isEmpty -- Returns true if no characters on line.  A blank line
 //   is technically disallowed in the classic Humdrum Toolkit programs, but it
-//   is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+//   is usually tolerated.  In humlib (and HumdrumExtras) empty lines with
 //   no content (not even space characters) are allowed and treated as a
 //   special class of line.
 //

@@ -3,7 +3,7 @@
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Fri Aug 14 21:57:09 PDT 2015
 // Filename:      HumdrumFileBase.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFileBase.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileBase.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -21,7 +21,7 @@
 #include <fstream>
 #include "stdarg.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

@@ -3,7 +3,7 @@
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Sun Aug  9 21:03:12 PDT 2015
 // Filename:      HumdrumToken.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumToken.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumToken.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -15,7 +15,7 @@
 #include "HumdrumLine.h"
 #include "Convert.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

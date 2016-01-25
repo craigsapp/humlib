@@ -3,7 +3,7 @@
 // Creation Date: Sun Aug 16 01:35:04 PDT 2015
 // Last Modified: Sun Aug 16 12:58:17 PDT 2015
 // Filename:      HumHash.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumHash.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumHash.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -67,7 +67,7 @@
 //                  The namespaces and keys may not contain tabs (obviously),
 //                  spaces or colons.  Preferably they will only contain
 //                  letters, digits, and the underscore, but not start with
-//                  a digit (but the minHumdrum parser will not enforce
+//                  a digit (but the humlib parser will not enforce
 //                  this preference).  Values may contain spaces (but not
 //                  tabs or colons.  If the value must include a colon it
 //                  should be given as "&colon;" (without the quotes).
@@ -109,7 +109,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

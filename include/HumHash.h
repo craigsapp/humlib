@@ -3,7 +3,7 @@
 // Creation Date: Sun Aug 16 01:23:01 PDT 2015
 // Last Modified: Sun Aug 16 01:23:05 PDT 2015
 // Filename:      HumHash.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumHash.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/HumHash.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -67,7 +67,7 @@
 //                  The namespaces and keys may not contain tabs (obviously),
 //                  spaces or colons.  Preferrably they will only contain
 //                  letters, digits, and the underscore, but not start with
-//                  a digit (but the minHumdrum parser will not enforce
+//                  a digit (but the humlib parser will not enforce
 //                  this preference).  Values may contain spaces (but not
 //                  tabs or colons.  If the value must include a colon it
 //                  should be given as "&colon;" (without the quotes).
@@ -108,7 +108,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 class HumNum;
 class HumdrumToken;

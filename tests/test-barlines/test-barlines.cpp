@@ -1,8 +1,8 @@
 // Description: Print the duration of each line.
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
-using namespace minHumdrum;
+using namespace humlib;
 
 int main(int argc, char** argv) {
    if (argc != 2) {

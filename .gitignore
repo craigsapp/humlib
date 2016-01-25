@@ -5,6 +5,7 @@ bin/test*
 bin
 myprograms
 common
+transfer
 test.krn
 _site
 _includes

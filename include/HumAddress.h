@@ -3,7 +3,7 @@
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Sun Aug  9 21:19:53 PDT 2015
 // Filename:      HumAddress.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumAddress.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/HumAddress.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 class HumdrumLine;
 class HumdrumToken;

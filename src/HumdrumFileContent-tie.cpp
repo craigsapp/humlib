@@ -3,7 +3,7 @@
 // Creation Date: Mon Oct  5 23:16:26 PDT 2015
 // Last Modified: Mon Oct  5 23:16:29 PDT 2015
 // Filename:      HumdrumFileContent-tie.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFileContent-tie.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-tie.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

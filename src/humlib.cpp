@@ -1,13 +1,13 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  5 23:28:01 PDT 2015
-// Filename:      /include/minhumdrum.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
+// Last Modified: Mon Jan 25 15:01:03 PST 2016
+// Filename:      /include/humlib.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
-// Description:   Source file for minHumdrum library.
+// Description:   Source file for humlib library.
 //
 /*
 Copyright (c) 2015 Craig Stuart Sapp
@@ -35,9 +35,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 
 
@@ -5895,7 +5895,7 @@ bool HumdrumLine::isManipulator(void) const {
 //
 // HumdrumLine::isEmpty -- Returns true if no characters on line.  A blank line
 //   is technically disallowed in the classic Humdrum Toolkit programs, but it
-//   is usually tolerated.  In minHumdrum (and HumdrumExtras) empty lines with
+//   is usually tolerated.  In humlib (and HumdrumExtras) empty lines with
 //   no content (not even space characters) are allowed and treated as a
 //   special class of line.
 //
@@ -8801,4 +8801,4 @@ string Convert::trimWhiteSpace(const string& input) {
 
 
 
-} // end namespace minHumdrum
+} // end namespace humlib

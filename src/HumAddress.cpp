@@ -3,7 +3,7 @@
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Sun Aug  9 21:03:12 PDT 2015
 // Filename:      HumAddress.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumAddress.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumAddress.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -13,7 +13,7 @@
 #include "HumAddress.h"
 #include "HumdrumLine.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

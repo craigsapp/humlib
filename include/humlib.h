@@ -1,13 +1,13 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  5 23:28:01 PDT 2015
-// Filename:      /include/minhumdrum.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
+// Last Modified: Mon Jan 25 15:01:03 PST 2016
+// Filename:      /include/humlib.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
 // vim:           ts=3
 //
-// Description:   Include file for minHumdrum library.
+// Description:   Include file for humlib library.
 //
 /*
 Copyright (c) 2015 Craig Stuart Sapp
@@ -63,7 +63,7 @@ using std::map;
 using std::set;
 using std::invalid_argument;
 
-namespace minHumdrum {
+namespace humlib {
 
 class Convert;
 class HumNum;
@@ -1218,7 +1218,7 @@ class Convert {
 
 
 
-} // end of namespace minHumdrum
+} // end of namespace humlib
 
 #endif /* _MINHUMDRUM_H */
 

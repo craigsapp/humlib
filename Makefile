@@ -6,7 +6,7 @@
 ## Filename:      /Makefile
 ## vim:           ts=3
 ##
-## Description: Makefile to run tasks for minHumdrum library.
+## Description: Makefile to run tasks for humlib library.
 ##
 
 
@@ -40,7 +40,7 @@ INCDIR        = include
 INCDIR_MIN    = include
 LIBDIR        = lib
 LIBFILE       = libhumdrum.a
-LIBFILE_MIN   = libminhumdrum.a
+LIBFILE_MIN   = libhumlib.a
 AR            = ar
 RANLIB        = ranlib
 
@@ -86,10 +86,10 @@ all: minlibrary
 
 
 minlib: minlibrary
-minlibrary: makedirs min minhumdrum.o
-	@echo "Creating minhumdrum library file for OS X..."
+minlibrary: makedirs min humlib.o
+	@echo "Creating humlib library file for OS X..."
 	@-rm -f $(LIBDIR)/$(LIBFILE_MIN)
-	@$(AR) r $(LIBDIR)/$(LIBFILE_MIN) $(OBJDIR)/minhumdrum.o
+	@$(AR) r $(LIBDIR)/$(LIBFILE_MIN) $(OBJDIR)/humlib.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE_MIN)
 
 
@@ -105,7 +105,7 @@ both: library minlibrary
 
 
 min:
-	bin/makeminhumdrum
+	bin/makehumlib
 
 
 clean:

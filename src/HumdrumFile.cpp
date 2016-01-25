@@ -3,7 +3,7 @@
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
 // Last Modified: Mon Aug 17 02:39:32 PDT 2015
 // Filename:      HumdrumFile.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFile.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFile.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 

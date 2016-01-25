@@ -3,11 +3,11 @@
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Mon Aug 10 00:06:00 PDT 2015
 # Last Modified: Mon Aug 10 00:06:00 PDT 2015
-# Filename:      /bin/makeminhumdrum
+# Filename:      /bin/makehumlib
 # Syntax:        perl 5
 # vim:           ts=3
 #
-# Description:   Merge all library files into minhumdrum.h and minhumdrum.cpp.
+# Description:   Merge all library files into humlib.h and humlib.cpp.
 #
 
 use strict;
@@ -16,8 +16,8 @@ my $srcdir = "src";
 my $incdir = "include";
 my $license = getLicense("LICENSE.txt");
 
-createIncludeFile($incdir, "minhumdrum.h");
-createSourceFile($srcdir, "minhumdrum.cpp");
+createIncludeFile($incdir, "humlib.h");
+createSourceFile($srcdir, "humlib.cpp");
 
 exit(0);
 
@@ -61,12 +61,12 @@ sub createIncludeFile {
 // Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: $date
-// Filename:      /include/minhumdrum.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/minhumdrum.h
+// Filename:      /include/humlib.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
 // vim:           ts=3
 //
-// Description:   Include file for minHumdrum library.
+// Description:   Include file for humlib library.
 //
 /*
 $license
@@ -100,7 +100,7 @@ using std::map;
 using std::set;
 using std::invalid_argument;
 
-namespace minHumdrum {
+namespace humlib {
 
 class Convert;
 class HumNum;
@@ -117,7 +117,7 @@ EOT
 
 	print IFILE <<"EOT";
 $contents
-} // end of namespace minHumdrum
+} // end of namespace humlib
 
 #endif /* _MINHUMDRUM_H */
 
@@ -145,20 +145,20 @@ sub createSourceFile {
 // Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: $date
-// Filename:      /include/minhumdrum.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/minhumdrum.cpp
+// Filename:      /include/humlib.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
-// Description:   Source file for minHumdrum library.
+// Description:   Source file for humlib library.
 //
 /*
 $license
 */
 
-#include "minhumdrum.h"
+#include "humlib.h"
 
-namespace minHumdrum {
+namespace humlib {
 
 EOT
 
@@ -167,7 +167,7 @@ EOT
 		print SFILE getMergeContents("$basedir/$file");
 	}
 
-print SFILE "\n} // end namespace minHumdrum\n";
+print SFILE "\n} // end namespace humlib\n";
 
 	close SFILE;
 }

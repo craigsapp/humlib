@@ -3,7 +3,7 @@
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
 // Last Modified: Mon Oct  5 23:15:44 PDT 2015
 // Filename:      HumdrumFileContent-slur.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumdrumFileContent-slur.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-slur.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace minHumdrum {
+namespace humlib {
 
 // START_MERGE
 
