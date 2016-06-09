@@ -137,19 +137,20 @@ class HumdrumFileBase {
 		HTp           getSpineStart            (int spine) const { 
 		                                         return getTrackStart(spine+1); }
 
-		void          getSpineStartList        (vector<HTp>& spinelist);
-		void          getSpineStartList        (vector<HTp>& spinelist,
+		void          getSpineStartList        (vector<HTp>& spinestarts);
+		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
-		void          getSpineStartList        (vector<HTp>& spinelist,
+      void          getKernSpineStartList    (vector<HTp>& spinestarts);
+		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
-		void          getTrackStartList        (vector<HTp>& spinelist) {
-								return getSpineStartList(spinelist); }
-		void          getTrackStartList        (vector<HTp>& spinelist,
+		void          getTrackStartList        (vector<HTp>& spinestarts) {
+								return getSpineStartList(spinestarts); }
+		void          getTrackStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp) {
-								return getSpineStartList(spinelist, exinterp); }
-		void          getTrackStartList        (vector<HTp>& spinelist,
+								return getSpineStartList(spinestarts, exinterp); }
+		void          getTrackStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps) {
-								return getSpineStartList(spinelist, exinterps); }
+								return getSpineStartList(spinestarts, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
