@@ -141,6 +141,7 @@ class HumdrumFileBase {
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
       void          getKernSpineStartList    (vector<HTp>& spinestarts);
+      vector<HTp>   getKernSpineStartList    ();
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
 		void          getTrackStartList        (vector<HTp>& spinestarts) {

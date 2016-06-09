@@ -550,6 +550,12 @@ void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
    getSpineStartList(spinestarts, "**kern");
 }
 
+vector<HTp> HumdrumFileBase::getKernSpineStartList(void) {
+   vector<HTp> starts;
+   HumdrumFileBase::getKernSpineStartList(starts);
+   return starts;
+}
+
 
 
 //////////////////////////////
