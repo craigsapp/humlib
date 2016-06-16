@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 15 19:46:36 PDT 2016
+// Last Modified: Wed Jun 15 20:04:14 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -615,7 +615,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getTrackString            (void) const;
 		int      getSubtokenCount          (const string& separator = " ") const;
 		string   getSubtoken               (int index,
-		                                    const string& separator) const;
+		                                    const string& separator = " ") const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata,
 		                                    HumdrumToken* ptok = NULL);

@@ -103,7 +103,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getTrackString            (void) const;
 		int      getSubtokenCount          (const string& separator = " ") const;
 		string   getSubtoken               (int index,
-		                                    const string& separator) const;
+		                                    const string& separator = " ") const;
 		void     setParameters             (HumdrumToken* ptok);
 		void     setParameters             (const string& pdata,
 		                                    HumdrumToken* ptok = NULL);
