@@ -30,6 +30,9 @@ class Convert {
 		// Rhythm processing, defined in Convert-rhythm.cpp
 		static HumNum  recipToDuration    (const string& recip, HumNum scale = 4,
 		                                   string separator = " ");
+		static HumNum  recipToDurationNoDots(const string& recip,
+		                                   HumNum scale = 4,
+		                                   string separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static int     kernToOctaveNumber   (const string& kerndata);

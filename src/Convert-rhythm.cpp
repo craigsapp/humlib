@@ -120,6 +120,19 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 }
 
 
+//////////////////////////////
+//
+// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
+//   any augmentation dots.
+//
+
+HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
+		string separator) {
+	string temp = recip;
+	std::replace(temp.begin(), temp.end(), '.', 'Z');
+	return Convert::recipToDuration(temp, scale, separator);
+}
+
 
 // END_MERGE
 
