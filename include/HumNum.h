@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -116,7 +116,7 @@ ostream& operator<<(ostream& out, const vector<A>& v);
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMNUM_H */
 

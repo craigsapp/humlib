@@ -14,7 +14,7 @@
 
 #include "Convert.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -247,7 +247,7 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

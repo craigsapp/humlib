@@ -21,7 +21,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -1343,7 +1343,7 @@ HumdrumToken* HumdrumFileStructure::getStrandEnd(int sindex, int index) const {
 
 // END_MERGE
 
-} // end namespace std;
+} // end namespace hum
 
 
 

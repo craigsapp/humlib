@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 15 20:04:14 PDT 2016
+// Last Modified: Fri Jun 17 16:59:42 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1130,6 +1130,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
 		bool   analyzeKernTies            (HumdrumToken* spinestart);
+		bool   analyzeKernAccidentals     (void);
 };
 
 

@@ -16,7 +16,7 @@
 
 #include "Convert.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -363,7 +363,7 @@ int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

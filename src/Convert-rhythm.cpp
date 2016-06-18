@@ -14,7 +14,7 @@
 
 #include "Convert.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -136,7 +136,7 @@ HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

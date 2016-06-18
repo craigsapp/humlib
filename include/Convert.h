@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 

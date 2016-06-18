@@ -19,7 +19,7 @@
 #include "HumNum.h"
 #include "Convert.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -1371,7 +1371,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -130,7 +130,7 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

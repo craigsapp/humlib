@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -34,12 +34,13 @@ class HumdrumFileContent : public HumdrumFileStructure {
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
 		bool   analyzeKernTies            (HumdrumToken* spinestart);
+		bool   analyzeKernAccidentals     (void);
 };
 
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMDRUMFILECONTENT_H */
 

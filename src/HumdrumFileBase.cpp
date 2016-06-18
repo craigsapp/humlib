@@ -21,7 +21,7 @@
 #include <fstream>
 #include "stdarg.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -1370,4 +1370,7 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
+
+
+

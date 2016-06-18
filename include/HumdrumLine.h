@@ -21,7 +21,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 class HumdrumFile;
 
@@ -178,7 +178,7 @@ ostream& operator<< (ostream& out, HumdrumLine& line);
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMDRUMLINE */
 

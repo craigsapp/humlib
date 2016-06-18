@@ -16,7 +16,7 @@
 
 #include "HumNum.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -832,7 +832,7 @@ ostream& operator<<(ostream& out, const HumNum& number) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

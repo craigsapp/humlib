@@ -13,7 +13,7 @@
 #include "HumAddress.h"
 #include "HumdrumLine.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -322,7 +322,7 @@ void HumAddress::setSubtrackCount(int count) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

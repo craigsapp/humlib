@@ -22,7 +22,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -229,7 +229,7 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMDRUM_TOKEN_H */
 

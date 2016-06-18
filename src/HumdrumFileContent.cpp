@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -54,7 +54,7 @@ HumdrumFileContent::~HumdrumFileContent() {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

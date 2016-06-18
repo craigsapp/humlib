@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 15 20:04:14 PDT 2016
+// Last Modified: Fri Jun 17 16:59:42 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3702,6 +3702,20 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 	return false;
 }
 
+
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernAccidentals -- Identify accidentals that
+//    should be printed (only in **kern spines).
+//
+
+bool HumdrumFileContent::analyzeKernAccidentals(void) {
+	return true;
+}
 
 
 

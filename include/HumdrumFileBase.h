@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -289,7 +289,7 @@ ostream& operator<<(ostream& out, HumdrumFileBase& infile);
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMDRUMFILEBASE_H */
 

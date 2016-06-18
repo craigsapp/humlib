@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -98,7 +98,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

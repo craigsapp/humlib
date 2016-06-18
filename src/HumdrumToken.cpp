@@ -15,7 +15,7 @@
 #include "HumdrumLine.h"
 #include "Convert.h"
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -1477,7 +1477,7 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out) {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 
 

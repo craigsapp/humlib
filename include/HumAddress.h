@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 class HumdrumLine;
 class HumdrumToken;
@@ -97,7 +97,7 @@ class HumAddress {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMADDRESS */
 

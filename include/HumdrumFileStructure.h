@@ -23,7 +23,7 @@
 
 using namespace std;
 
-namespace Humdrum {
+namespace hum {
 
 // START_MERGE
 
@@ -146,7 +146,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _HUMDRUMFILESTRUCTURE_H */
 
