@@ -171,6 +171,8 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 				} else if ((accid == 0) && (subtok.find("n") != string::npos)) {
 					infile[i].token(j)->setValue("auto", to_string(k),
 							"cautionaryAccidental", "true");
+					infile[i].token(j)->setValue("auto", to_string(k),
+							"visualAccidental", "true");
 				} else if (subtok.find("XX") == string::npos) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
@@ -190,8 +192,8 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 						} else if (subtok[loc-1] == 'n') {
 							infile[i].token(j)->setValue("auto", to_string(k),
 									"cautionaryAccidental", "true");
-									infile[i].token(j)->setValue("auto", to_string(k),
-											"visualAccidental", "true");
+							infile[i].token(j)->setValue("auto", to_string(k),
+									"visualAccidental", "true");
 						}
 					}
 				}
