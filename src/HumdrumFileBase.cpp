@@ -31,20 +31,20 @@ namespace hum {
 // HumdrumFileBase::HumdrumFileBase -- HumdrumFileBase constructor.
 //
 
-HumdrumFileBase::HumdrumFileBase(void) {
+HumdrumFileBase::HumdrumFileBase(void) : HumHash() {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
 	quietParse = false;
 }
 
-HumdrumFileBase::HumdrumFileBase(const string& filename) {
+HumdrumFileBase::HumdrumFileBase(const string& filename) : HumHash() {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
 	quietParse = false;
 	read(filename);
 }
 
-HumdrumFileBase::HumdrumFileBase(istream& contents) {
+HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 	addToTrackStarts(NULL);
 	ticksperquarternote = -1;
 	quietParse = false;
@@ -58,7 +58,9 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) {
 // HumdrumFileBase::~HumdrumFileBase -- HumdrumFileBase deconstructor.
 //
 
-HumdrumFileBase::~HumdrumFileBase() { }
+HumdrumFileBase::~HumdrumFileBase() { 
+	// do nothing
+}
 
 
 
@@ -892,24 +894,44 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 			return setParseError(err);
 		}
 		for (i=0; i<previous.getTokenCount(); i++) {
-			previous.token(i)->makeForwardLink(*next.token(i));
+			if (next.token(i)) {
+				previous.token(i)->makeForwardLink(*next.token(i));
+			} else {
+				cerr << "Strange error 1" << endl;
+			}
 		}
 		return true;
 	}
 	int ii = 0;
 	for (i=0; i<previous.getTokenCount(); i++) {
 		if (!previous.token(i)->isManipulator()) {
-			previous.token(i)->makeForwardLink(*next.token(ii++));
+			if (next.token(ii) != NULL) {
+				previous.token(i)->makeForwardLink(*next.token(ii++));
+			} else {
+				cerr << "Strange error 2" << endl;
+			}
 		} else if (previous.token(i)->isSplitInterpretation()) {
 			// connect the previous token to the next two tokens.
-			previous.token(i)->makeForwardLink(*next.token(ii++));
-			previous.token(i)->makeForwardLink(*next.token(ii++));
+			if (next.token(ii) != NULL) {
+				previous.token(i)->makeForwardLink(*next.token(ii++));
+			} else {
+				cerr << "Strange error 3" << endl;
+			}
+			if (next.token(ii) != NULL) {
+				previous.token(i)->makeForwardLink(*next.token(ii++));
+			} else {
+				cerr << "Strange error 4" << endl;
+			}
 		} else if (previous.token(i)->isMergeInterpretation()) {
 			// connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
 			while ((i<previous.getTokenCount()) &&
 					previous.token(i)->isMergeInterpretation()) {
-				previous.token(i)->makeForwardLink(*next.token(ii));
+				if (next.token(ii) != NULL) {
+					previous.token(i)->makeForwardLink(*next.token(ii));
+				} else {
+					cerr << "Strange error 5" << endl;
+				}
 				i++;
 			}
 			i--;
@@ -918,8 +940,16 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 			// swapping the order of two spines.
 			if ((i<previous.getTokenCount()) &&
 					previous.token(i+1)->isExchangeInterpretation()) {
-				previous.token(i+1)->makeForwardLink(*next.token(ii++));
-				previous.token(i)->makeForwardLink(*next.token(ii++));
+				if (next.token(ii) != NULL) {
+					previous.token(i+1)->makeForwardLink(*next.token(ii++));
+				} else {
+					cerr << "Strange error 6" << endl;
+				}
+				if (next.token(ii) != NULL) {
+					previous.token(i)->makeForwardLink(*next.token(ii++));
+				} else {
+					cerr << "Strange error 7" << endl;
+				}
 			}
 			i++;
 		} else if (previous.token(i)->isTerminateInterpretation()) {
@@ -936,10 +966,22 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 				    << next.token(i);
 				return setParseError(err);
 			}
-			previous.token(i)->makeForwardLink(*next.token(ii++));
+			if (next.token(ii) != NULL) {
+				previous.token(i)->makeForwardLink(*next.token(ii++));
+			} else {
+				cerr << "Strange error 8" << endl;
+			}
 			ii++;
 		} else if (previous.token(i)->isExclusiveInterpretation()) {
-			previous.token(i)->makeForwardLink(*next.token(ii++));
+			if (next.token(ii) != NULL) {
+				if (previous.token(i) != NULL) {
+					previous.token(i)->makeForwardLink(*next.token(ii++));
+				} else {
+					cerr << "Strange error 10" << endl;
+				}
+			} else {
+				cerr << "Strange error 9" << endl;
+			}
 		} else {
 			return setParseError("Error: should not get here");
 		}

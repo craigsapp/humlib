@@ -78,6 +78,7 @@ class HumdrumLine : public string, public HumHash {
 		void     createLineFromTokens   (void);
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
+		HumdrumFile* getOwner           (void);
 
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;

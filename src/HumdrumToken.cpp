@@ -13,6 +13,7 @@
 #include "HumAddress.h"
 #include "HumdrumToken.h"
 #include "HumdrumLine.h"
+#include "HumdrumFile.h"
 #include "Convert.h"
 
 namespace hum {
@@ -209,7 +210,7 @@ const string& HumdrumToken::getDataType(void) const {
 //
 // HumdrumToken::isDataType -- Returns true if the data type of the token
 //   matches the test data type.
-// @SEEALSO: getDataType
+// @SEEALSO: getDataType getKern
 //
 
 bool HumdrumToken::isDataType(string dtype) const {
@@ -218,6 +219,19 @@ bool HumdrumToken::isDataType(string dtype) const {
 	} else {
 		return getDataType().compare(2, string::npos, dtype) == 0;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKern -- Returns true if the data type of the token
+//    is **kern.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isKern(void) const {
+	return isDataType("**kern");
 }
 
 
@@ -659,6 +673,33 @@ bool HumdrumToken::isNote(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isInvisible -- True if a barline and is invisible (contains
+//     a "-" styling), or a note/rest contains the string "yy" which is
+//     interpreted as meaning make it invisible.
+// 
+// 
+
+bool HumdrumToken::isInvisible(void) const {
+	if (!isDataType("**kern")) {
+			return false;
+	}
+	if (isBarline()) {
+		if (find("-") != string::npos) {
+			return true;
+		}
+	} else if (isData()) {
+		if (find("yy") != string::npos) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
 //     a '(' character.
 //
@@ -689,6 +730,65 @@ bool HumdrumToken::hasSlurEnd(void) const {
 	return false;
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasVisibleAccidental -- Returns true if the accidental
+//    of a **kern note is viewable if rendered to graphical notation.
+// 	return values:
+//      0  = false;
+//      1  = true;
+//      -1 = undefined;
+//
+
+int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
+	HumdrumLine* humrec = getOwner();
+	if (humrec == NULL) {
+		return -1;
+	}
+	HumdrumFile* humfile = humrec->getOwner();
+	if (humfile == NULL) {
+		return -1;
+	}
+	if (!humfile->getValueBool("auto", "accidentalAnalysis")) {
+		int status = humfile->analyzeKernAccidentals();
+		if (!status) {
+			return -1;
+		}
+	}
+	return getValueBool("auto", to_string(subtokenIndex), "visualAccidental");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasVisibleAccidental -- Returns true if the accidental
+//    of a **kern note is viewable if rendered to graphical notation.
+// 	return values:
+//      0  = false;
+//      1  = true;
+//      -1 = undefined;
+//
+
+int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
+	HumdrumLine* humrec = getOwner();
+	if (humrec == NULL) {
+		return -1;
+	}
+	HumdrumFile* humfile = humrec->getOwner();
+	if (humfile == NULL) {
+		return -1;
+	}
+	if (!humfile->getValueBool("auto", "accidentalAnalysis")) {
+		int status = humfile->analyzeKernAccidentals();
+		if (!status) {
+			return -1;
+		}
+	}
+	return getValueBool("auto", to_string(subtokenIndex), "cautionaryAccidental");
+}
 
 
 
@@ -947,7 +1047,7 @@ int HumdrumToken::getSubtokenCount(const string& separator) const {
 		count++;
 		start += separator.size();
 	}
-	return count;
+	return count+1;
 }
 
 
@@ -1381,7 +1481,7 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 
 ostream& HumdrumToken::printXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
-	((HumHash)(*this)).printXml(out, level, indent);
+	((HumHash*)this)->printXml(out, level, indent);
 	return out;
 }
 

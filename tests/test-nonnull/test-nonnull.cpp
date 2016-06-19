@@ -3,7 +3,7 @@
 
 #include "humlib.h"
 
-using namespace Humdrum;
+using namespace hum;
 
 int main(int argc, char** argv) {
    if (argc != 2) {

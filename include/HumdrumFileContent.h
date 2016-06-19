@@ -30,11 +30,15 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
+		bool   analyzeKernAccidentals     (void);
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
 		bool   analyzeKernTies            (HumdrumToken* spinestart);
-		bool   analyzeKernAccidentals     (void);
+		void   fillKeySignature           (vector<int>& states,
+		                                   const string& keysig);
+		void   resetDiatonicStatesWithKeySignature(vector<int>& states,
+				                             vector<int>& signature);
 };
 
 

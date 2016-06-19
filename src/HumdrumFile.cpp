@@ -110,6 +110,8 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	level--;
 	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
 
+	printXmlParameterInfo(out, level, "\t");
+
 	level--;
 	out << Convert::repeatString(indent, level) << "</sequenceInfo>\n";
 
@@ -128,9 +130,26 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFile::printXmlParameterInfo -- Print contents of HumHash for HumdrumFile.
+// default value: out = cout
+// default value: level = 0
+// default value: indent = "\t"
+//
+
+ostream& HumdrumFile::printXmlParameterInfo(ostream& out, int level,
+		const string& indent) {
+	((HumHash*)this)->printXml(out, level, indent);
+	return out;
+}
+
+
 // END_MERGE
 
 } // end namespace hum
+
 
 
 

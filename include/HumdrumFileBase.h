@@ -80,7 +80,7 @@ class TokenPair {
 bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 
 
-class HumdrumFileBase {
+class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase              (void);
                     HumdrumFileBase              (const string& contents);

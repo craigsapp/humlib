@@ -2,7 +2,7 @@
 
 #include "humlib.h"
 
-using namespace Humdrum;
+using namespace hum;
 
 int main(int argc, char** argv) {
    if (argc != 2) {
@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
    if (!infile.read(argv[1])) {
       return 1;
    }
+   infile.analyzeKernAccidentals();
    infile.printXml();
    return 0;
 }

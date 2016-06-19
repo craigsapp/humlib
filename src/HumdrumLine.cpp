@@ -1314,6 +1314,18 @@ void HumdrumLine::setOwner(void* hfile) {
 
 //////////////////////////////
 //
+// HumdrumLine::getOwner -- Return the HumdrumFile which manages
+//   (owns) this line.
+//
+
+HumdrumFile* HumdrumLine::getOwner(void) {
+	return (HumdrumFile*)owner;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::setParameters -- Takes a global comment with
 //     the structure:
 //        !!NS1:NS2:key1=value1:key2=value2:key3=value3

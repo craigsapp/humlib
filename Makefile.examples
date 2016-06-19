@@ -45,7 +45,7 @@ endif
 
 INCDIR    = include
 LIBDIR    = lib
-LIBFILE   = minhumdrum
+LIBFILE   = humlib
 #LIBFILE   = humdrum
 TARGDIR   = bin
 

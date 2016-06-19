@@ -71,9 +71,12 @@ class HumdrumToken : public string, public HumHash {
 		bool     isRest                    (void) const;
 		bool     isNote                    (void) const;
 		bool     isSecondaryTiedNote       (void) const;
+		bool     isInvisible               (void) const;
 
 		bool     hasSlurStart              (void) const;
 		bool     hasSlurEnd                (void) const;
+		int      hasVisibleAccidental      (int subtokenIndex) const;
+		int      hasCautionaryAccidental   (int subtokenIndex) const;
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
@@ -97,6 +100,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getTokenIndex (void) const { return getFieldIndex(); }
 		const string& getDataType          (void) const;
 		bool     isDataType                (string dtype) const;
+		bool     isKern                    (void) const;
 		string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;

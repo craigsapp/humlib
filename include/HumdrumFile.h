@@ -35,6 +35,8 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 		ostream&      printXml            (ostream& out = cout, int level = 0,
 		                                   const string& indent = "\t");
+		ostream&      printXmlParameterInfo(ostream& out, int level,
+		                                  const string& indent);
 };
 
 
