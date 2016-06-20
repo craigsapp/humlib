@@ -255,16 +255,16 @@ bool HumdrumLine::isReference(void) const {
 	if ((*this)[3] == '!') {
 		return false;
 	}
-	int spaceloc = this->find(" ");
-	int tabloc = this->find("\t");
-	int colloc = this->find(":");
-	if (colloc == string::npos) {
+	int spaceloc = (int)this->find(" ");
+	int tabloc = (int)this->find("\t");
+	int colloc = (int)this->find(":");
+	if (colloc == (int)string::npos) {
 		return false;
 	}
-	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+	if ((spaceloc != (int)string::npos) && (spaceloc < colloc)) {
 		return false;
 	}
-	if ((tabloc != string::npos) && (tabloc < colloc)) {
+	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
 		return false;
 	}
 	return true;
@@ -288,16 +288,16 @@ string HumdrumLine::getReferenceKey(void) const {
 	if ((*this)[3] == '!') {
 		return "";
 	}
-	int spaceloc = this->find(" ");
-	int tabloc = this->find("\t");
-	int colloc = this->find(":");
-	if (colloc == string::npos) {
+	int spaceloc = (int)this->find(" ");
+	int tabloc = (int)this->find("\t");
+	int colloc = (int)this->find(":");
+	if (colloc == (int)string::npos) {
 		return "";
 	}
-	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+	if ((spaceloc != (int)string::npos) && (spaceloc < colloc)) {
 		return "";
 	}
-	if ((tabloc != string::npos) && (tabloc < colloc)) {
+	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
 		return "";
 	}
 	return this->substr(3, colloc - 3);
@@ -321,16 +321,16 @@ string HumdrumLine::getReferenceValue(void) const {
 	if ((*this)[3] == '!') {
 		return "";
 	}
-	int spaceloc = this->find(" ");
-	int tabloc = this->find("\t");
-	int colloc = this->find(":");
-	if (colloc == string::npos) {
+	int spaceloc = (int)this->find(" ");
+	int tabloc = (int)this->find("\t");
+	int colloc = (int)this->find(":");
+	if (colloc == (int)string::npos) {
 		return "";
 	}
-	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
+	if ((spaceloc != (int)string::npos) && (spaceloc < colloc)) {
 		return "";
 	}
-	if ((tabloc != string::npos) && (tabloc < colloc)) {
+	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
 		return "";
 	}
 	return Convert::trimWhiteSpace(this->substr(colloc+1));
@@ -720,11 +720,7 @@ void HumdrumLine::setDuration(HumNum aDur) {
 //
 
 bool HumdrumLine::hasSpines(void) const {
-	if (isEmpty() || isCommentGlobal()) {
-		return false;
-	} else {
-		return true;
-	}
+	return (isEmpty() || isCommentGlobal()) ? false : true;
 }
 
 
@@ -770,11 +766,7 @@ bool HumdrumLine::isManipulator(void) const {
 //
 
 bool HumdrumLine::isEmpty(void) const {
-	if (size() == 0) {
-		return true;
-	} else {
-		return false;
-	}
+	return (size() == 0) ? true : false;
 }
 
 
@@ -786,7 +778,7 @@ bool HumdrumLine::isEmpty(void) const {
 //
 
 int HumdrumLine::getTokenCount(void) const {
-	return tokens.size();
+	return (int)tokens.size();
 }
 
 
@@ -840,7 +832,7 @@ int HumdrumLine::createTokensFromLine(void) {
 		}
 	}
 	tokens.push_back(token);
-	return tokens.size();
+	return (int)tokens.size();
 }
 
 
@@ -1354,8 +1346,8 @@ void HumdrumLine::setParameters(const string& pdata) {
 	int loc;
 	for (int i=2; i<pieces.size(); i++) {
 		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
-		loc = pieces[i].find("=");
-		if (loc != string::npos) {
+		loc = (int)pieces[i].find("=");
+		if (loc != (int)string::npos) {
 			key   = pieces[i].substr(0, loc);
 			value = pieces[i].substr(loc+1, pieces[i].size());
 		} else {

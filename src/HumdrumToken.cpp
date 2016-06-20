@@ -102,7 +102,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 //
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
-	return previousNonNullTokens.size();
+	return (int)previousNonNullTokens.size();
 }
 
 
@@ -117,12 +117,12 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
-		index += previousNonNullTokens.size();
+		index += (int)previousNonNullTokens.size();
 	}
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= previousNonNullTokens.size()) {
+	if (index >= (int)previousNonNullTokens.size()) {
 		return NULL;
 	}
 	return previousNonNullTokens[index];
@@ -137,7 +137,7 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 //
 
 int HumdrumToken::getNextNonNullDataTokenCount(void) {
-	return nextNonNullTokens.size();
+	return (int)nextNonNullTokens.size();
 }
 
 
@@ -1069,7 +1069,7 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 	int count = 0;
 	int start = 0;
 	int end   = 0;
-	while ((end = string::find(separator, start)) != string::npos) {
+	while ((end = (int)string::find(separator, start)) != (int)string::npos) {
 		count++;
 		if (count == index) {
 			return string::substr(start, end-start);
@@ -1116,8 +1116,8 @@ void HumdrumToken::setParameters(const string& pdata, HumdrumToken* ptok) {
 	int loc;
 	for (int i=2; i<pieces.size(); i++) {
 		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
-		loc = pieces[i].find("=");
-		if (loc != string::npos) {
+		loc = (int)pieces[i].find("=");
+		if (loc != (int)string::npos) {
 			key   = pieces[i].substr(0, loc);
 			value = pieces[i].substr(loc+1, pieces[i].size());
 		} else {
@@ -1274,7 +1274,7 @@ void HumdrumToken::incrementState(void) {
 //
 
 int HumdrumToken::getNextTokenCount(void) const {
-	return nextTokens.size();
+	return (int)nextTokens.size();
 }
 
 
@@ -1289,7 +1289,7 @@ int HumdrumToken::getNextTokenCount(void) const {
 //
 
 int HumdrumToken::getPreviousTokenCount(void) const {
-	return previousTokens.size();
+	return (int)previousTokens.size();
 }
 
 
@@ -1302,8 +1302,8 @@ int HumdrumToken::getPreviousTokenCount(void) const {
 
 ostream& HumdrumToken::printCsv(ostream& out) {
 	string& value = *this;
-	int loc = this->find(",");
-	if (loc == string::npos) {
+	int loc = (int)this->find(",");
+	if (loc == (int)string::npos) {
 		out << value;
 	} else {
 		out << '"';

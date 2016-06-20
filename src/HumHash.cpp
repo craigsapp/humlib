@@ -656,7 +656,7 @@ vector<string> HumHash::getKeys(const string& ns) const {
 	if (parameters == NULL) {
 		return output;
 	}
-	int loc = ns.find(":");
+	int loc = (int)ns.find(":");
 	if (loc != string::npos) {
 		string ns1 = ns.substr(0, loc);
 		string ns2 = ns.substr(loc+1);
@@ -723,7 +723,7 @@ bool HumHash::hasParameters(const string& ns) const {
 	if (parameters == NULL) {
 		return false;
 	}
-	int loc = ns.find(":");
+	int loc = (int)ns.find(":");
 	if (loc != string::npos) {
 		string ns1 = ns.substr(0, loc);
 		string ns2 = ns.substr(loc+1);
@@ -786,7 +786,7 @@ int HumHash::getParameterCount(const string& ns1, const string& ns2) const {
 	if (it2 == it1->second.end()) {
 		return 0;
 	}
-	return it2->second.size();
+	return (int)it2->second.size();
 }
 
 
@@ -794,7 +794,7 @@ int HumHash::getParameterCount(const string& ns) const {
 	if (parameters == NULL) {
 		return false;
 	}
-	int loc = ns.find(":");
+	int loc = (int)ns.find(":");
 	if (loc != string::npos) {
 		string ns1 = ns.substr(0, loc);
 		string ns2 = ns.substr(loc+1);

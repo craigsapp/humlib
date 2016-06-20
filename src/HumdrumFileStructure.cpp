@@ -408,7 +408,7 @@ HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 //
 
 int HumdrumFileStructure::getBarlineCount(void) const {
-	return barlines.size();
+	return (int)barlines.size();
 }
 
 
@@ -1040,7 +1040,7 @@ bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
 		startdur = previous->getDurationFromStart();
 		enddur   = next ->getDurationFromStart();
 		HumNum gapdur = enddur - startdur;
-		HumNum nulldur = gapdur / (nulllines.size() + 1);
+		HumNum nulldur = gapdur / ((int)nulllines.size() + 1);
 		for (j=0; j<(int)nulllines.size(); j++) {
 			nulllines[j]->setDurationFromStart(startdur + (nulldur * (j+1)));
 		}
@@ -1064,7 +1064,7 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 	int i;
 	HumNum lastdur = -1;
 	HumNum dur;
-	for (i=lines.size()-1; i>=0; i--) {
+	for (i=(int)lines.size()-1; i>=0; i--) {
 		dur = lines[i]->getDurationFromStart();
 		if (dur.isNegative() && lastdur.isNonNegative()) {
 			lines[i]->setDurationFromStart(lastdur);
@@ -1199,23 +1199,23 @@ void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,
 	if (token->size() < 1) {
 		return;
 	}
-	int loc1 = token->find(":");
-	if (loc1 == string::npos) {
+	int loc1 = (int)token->find(":");
+	if (loc1 == (int)string::npos) {
 		return;
 	}
-	int loc2 = token->substr(loc1).find(":");
-	if (loc2 == string::npos) {
+	int loc2 = (int)token->substr(loc1).find(":");
+	if (loc2 == (int)string::npos) {
 		return;
 	}
 	loc2 += loc1 + 1;
-	int sloc = token->find(" ");
-	if (sloc != string::npos) {
+	int sloc = (int)token->find(" ");
+	if (sloc != (int)string::npos) {
 		if ((sloc < loc1) || (sloc < loc2)) {
 			return;
 		}
 	}
-	sloc = token->find("\t");
-	if (sloc != string::npos) {
+	sloc = (int)token->find("\t");
+	if (sloc != (int)string::npos) {
 		if ((sloc < loc1) || (sloc < loc2)) {
 			return;
 		}
@@ -1287,7 +1287,7 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 		HumdrumToken* starttok) {
 
 	ends.resize(ends.size()+1);
-	int index = ends.size()-1;
+	int index = (int)ends.size()-1;
 	ends[index].first = starttok;
 	HumdrumToken* tok = starttok;
 	while (tok != NULL) {

@@ -96,11 +96,11 @@ string HumdrumFileBase::getXmlIdPrefix(void) {
 
 HumdrumLine& HumdrumFileBase::operator[](int index) {
 	if (index < 0) {
-		index = lines.size() - index;
+		index = (int)lines.size() - index;
 	}
 	if ((index < 0) || (index >= lines.size())) {
 		cerr << "Error: invalid index: " << index << endl;
-		index = lines.size()-1;
+		index = (int)lines.size()-1;
 	}
 	return *lines[index];
 }
@@ -424,7 +424,7 @@ void HumdrumFileBase::append(const string& line) {
 //
 
 int HumdrumFileBase::getLineCount(void) const {
-	return lines.size();
+	return (int)lines.size();
 }
 
 
@@ -450,7 +450,7 @@ HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 //
 
 int HumdrumFileBase::getMaxTrack(void) const {
-	return trackstarts.size() - 1;
+	return (int)trackstarts.size() - 1;
 }
 
 
@@ -766,15 +766,15 @@ HTp HumdrumFileBase::getTrackStart(int track) const {
 
 int HumdrumFileBase::getTrackEndCount(int track) const {
 	if (track < 0) {
-		track += trackends.size();
+		track += (int)trackends.size();
 	}
 	if (track < 0) {
 		return 0;
 	}
-	if (track >= trackends.size()) {
+	if (track >= (int)trackends.size()) {
 		return 0;
 	}
-	return trackends[track].size();
+	return (int)trackends[track].size();
 }
 
 
@@ -788,21 +788,21 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 
 HTp HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 	if (track < 0) {
-		track += trackends.size();
+		track += (int)trackends.size();
 	}
 	if (track < 0) {
 		return NULL;
 	}
-	if (track >= trackends.size()) {
+	if (track >= (int)trackends.size()) {
 		return NULL;
 	}
 	if (subtrack < 0) {
-		subtrack += trackends[track].size();
+		subtrack += (int)trackends[track].size();
 	}
 	if (subtrack < 0) {
 		return NULL;
 	}
-	if (subtrack >= trackends[track].size()) {
+	if (subtrack >= (int)trackends[track].size()) {
 		return NULL;
 	}
 	return trackends[track][subtrack];
@@ -1213,8 +1213,8 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 	int len1;
 	int len2;
 	if (extra == 1) {
-		len1 = info[starti].size();
-		len2 = info[starti+1].size();
+		len1 = (int)info[starti].size();
+		len2 = (int)info[starti+1].size();
 		if (len1 == len2) {
 			if (info[starti].substr(0, len1-1) ==
 					info[starti+1].substr(0,len2-1)) {

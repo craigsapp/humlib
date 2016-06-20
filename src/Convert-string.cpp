@@ -28,9 +28,9 @@ namespace hum {
 
 void Convert::replaceOccurrences(string& source, const string& search,
 		const string& replace) {
-	for (int loc=0; ; loc += replace.size()) {
-		loc = source.find(search, loc);
-		if (loc == string::npos) {
+	for (int loc=0; ; loc += (int)replace.size()) {
+		loc = (int)source.find(search, loc);
+		if (loc == (int)string::npos) {
 			break;
 		}
 		source.erase(loc, search.length());

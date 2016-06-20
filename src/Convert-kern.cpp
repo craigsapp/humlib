@@ -146,7 +146,7 @@ bool Convert::hasKernSlurEnd(const string& kerndata) {
 int Convert::getKernSlurStartElisionLevel(const string& kerndata) { 
 	bool foundSlurStart = false;
 	int output = 0;
-	for (int i=kerndata.size()-1; i >=0; i--) {
+	for (int i=(int)kerndata.size()-1; i >=0; i--) {
 		char ch = kerndata[i];
 		if (ch == '(') {
 			foundSlurStart = true;
@@ -180,7 +180,7 @@ int Convert::getKernSlurStartElisionLevel(const string& kerndata) {
 int Convert::getKernSlurEndElisionLevel(const string& kerndata) { 
 	bool foundSlurEnd = false;
 	int output = 0;
-	for (int i=kerndata.size()-1; i >=0; i--) {
+	for (int i=(int)kerndata.size()-1; i >=0; i--) {
 		char ch = kerndata[i];
 		if (ch == ')') {
 			foundSlurEnd = true;

@@ -77,7 +77,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 			denominator = denominator * 10 + (subtok[numi++] - '0');
 		}
 		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
-			int xi = loc + 1;
+			int xi = (int)loc + 1;
 			numerator = subtok[xi++] - '0';
 			while ((xi < subtok.size()) && isdigit(subtok[xi])) {
 				numerator = numerator * 10 + (subtok[xi++] - '0');

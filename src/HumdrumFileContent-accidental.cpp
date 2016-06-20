@@ -45,7 +45,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 		track = ktracks[i]->getTrack();
 		rtracks[track] = i;
 	}
-	int kcount = ktracks.size();
+	int kcount = (int)ktracks.size();
 
 	// keysigs == key signature spellings of diatonic pitch classes.  This array
 	// is duplicated into dstates after each barline.
@@ -177,7 +177,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
 					// display.
-					loc = subtok.find("X");
+					loc = (int)subtok.find("X");
 					if ((loc != string::npos) && (loc > 0)) {
 						if (subtok[loc-1] == '#') {
 							infile[i].token(j)->setValue("auto", to_string(k),
