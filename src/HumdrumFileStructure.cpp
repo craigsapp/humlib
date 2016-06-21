@@ -619,7 +619,7 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 	HumdrumLine* spineline = NULL;
-	for (int i=lines.size()-1; i>=0; i--) {
+	for (int i=(int)lines.size()-1; i>=0; i--) {
 		if (lines[i]->hasSpines()) {
 			if (lines[i]->isAllNull())  {
 				continue;

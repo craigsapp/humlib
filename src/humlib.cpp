@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 20 20:25:28 PDT 2016
+// Last Modified: Tue Jun 21 05:13:46 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4737,7 +4737,7 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 	HumdrumLine* spineline = NULL;
-	for (int i=lines.size()-1; i>=0; i--) {
+	for (int i=(int)lines.size()-1; i>=0; i--) {
 		if (lines[i]->hasSpines()) {
 			if (lines[i]->isAllNull())  {
 				continue;
