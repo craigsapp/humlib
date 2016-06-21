@@ -916,6 +916,20 @@ bool HumdrumToken::isNullData(void) const {
 
 
 
+/////////////////////////////
+//
+// HumdrumToken::isChord -- True if is a chord.  Presuming you know what
+//     data type you are accessing.
+//     Default value:
+//          separate = " "   (**kern note separator)
+//
+
+bool HumdrumToken::isChord(const string& separator) {
+	return (this->find(separator) != string::npos) ? true : false;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumToken::isExclusiveInterpretation -- Returns true if first two
