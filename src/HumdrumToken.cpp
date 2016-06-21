@@ -1080,20 +1080,27 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 	if (index < 0) {
 		return "";
 	}
+
+	string output;
+	const string& token = *this;
+	if (separator.size() == 0) {
+		output = token[index];
+		return output;
+	}
+
 	int count = 0;
-	int start = 0;
-	int end   = 0;
-	while ((end = (int)string::find(separator, start)) != (int)string::npos) {
-		count++;
-		if (count == index) {
-			return string::substr(start, end-start);
+	for (int i=0; i<(int)size(); i++) {
+		if (string::compare(i, separator.size(), separator) == 0) {
+			count++;
+			if (count > index) {
+				break;
+			}
+			i += (int)separator.size() - 1;
+		} else if (count == index) {
+			output += token[i];
 		}
-		start += separator.size();
 	}
-	if (count == index) {
-		return string::substr(start, string::size()-start);
-	}
-	return "";
+	return output;
 }
 
 
