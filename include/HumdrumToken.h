@@ -73,6 +73,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNote                    (void) const;
 		bool     isSecondaryTiedNote       (void) const;
 		bool     isInvisible               (void) const;
+		bool     isGrace                   (void) const;
 
 		bool     hasSlurStart              (void) const;
 		bool     hasSlurEnd                (void) const;

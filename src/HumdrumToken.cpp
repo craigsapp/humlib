@@ -700,6 +700,26 @@ bool HumdrumToken::isInvisible(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isGrace -- True if a **kern note has no duration.
+// 
+
+bool HumdrumToken::isGrace(void) const {
+	if (!isDataType("**kern")) {
+			return false;
+	}
+	if (!isData()) {
+		return false;
+	} else if (this->find("q") != string::npos) {
+		return true;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
 //     a '(' character.
 //
