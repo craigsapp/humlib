@@ -914,6 +914,24 @@ bool HumdrumToken::isData(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isInterpretation -- Returns true if an interpretation.
+//
+
+bool HumdrumToken::isInterpretation(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	int firstchar = (*this)[0];
+	if (firstchar == '*') {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isNonNullData -- Returns true if the token is a data token
 //    that is not a null token.
 //

@@ -63,6 +63,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isCommentLocal            (void) const;
 		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
+		bool     isInterpretation          (void) const;
 		bool     isNonNullData             (void) const;
 		bool     isNullData                (void) const;
 		bool     isChord                   (const string& separator = " ");
