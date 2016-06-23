@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 23 14:16:05 PDT 2016
+// Last Modified: Thu Jun 23 15:08:59 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1825,9 +1825,9 @@ bool HumNum::isPowerOfTwo(void) const {
 	}
 	int abstop = top > 0 ? top : -top;
    if (bot == 1) {
-		return (abstop & (abstop - 1));
+		return !(abstop & (abstop - 1));
 	} else if (abstop == 1) {
-		return (bot & (bot - 1));
+		return !(bot & (bot - 1));
 	}
 	return false;
 }
