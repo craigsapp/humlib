@@ -42,6 +42,7 @@ class HumNum {
 		bool     isFinite           (void) const;
 		bool     isNaN              (void) const;
 		bool     isInteger          (void) const;
+		bool     isPowerOfTwo       (void) const;
 		double   getFloat           (void) const;
 		double   toFloat  (void) const { return getFloat(); }
 		int      getInteger         (double round = 0.0) const;

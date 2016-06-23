@@ -395,6 +395,26 @@ bool HumNum::isInteger(void) const {
 
 //////////////////////////////
 //
+// HumNum::isPowerOfTwo -- Returns true if a power of two.
+//
+
+bool HumNum::isPowerOfTwo(void) const {
+	if (top == 0) {
+		return false;
+	}
+	int abstop = top > 0 ? top : -top;
+   if (bot == 1) {
+		return (abstop & (abstop - 1));
+	} else if (abstop == 1) {
+		return (bot & (bot - 1));
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumNum::operator+ -- Addition operator which adds HumNum
 //    to another HumNum or with a integers.
 //
