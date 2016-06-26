@@ -720,6 +720,26 @@ bool HumdrumToken::isGrace(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isClef -- True if a **kern clef.
+// 
+
+bool HumdrumToken::isClef(void) const {
+	if (!isDataType("**kern")) {
+			return false;
+	}
+	if (!isInterpretation()) {
+		return false;
+	} else if (this->compare(0, 5, "*clef") != string::npos) {
+		return true;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
 //     a '(' character.
 //
