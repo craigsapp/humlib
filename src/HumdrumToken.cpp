@@ -729,7 +729,7 @@ bool HumdrumToken::isClef(void) const {
 	}
 	if (!isInterpretation()) {
 		return false;
-	} else if (this->compare(0, 5, "*clef") != string::npos) {
+	} else if (this->compare(0, 5, "*clef") == 0) {
 		return true;
 	}
 
