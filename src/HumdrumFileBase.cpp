@@ -418,6 +418,27 @@ void HumdrumFileBase::append(const string& line) {
 
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::getReferenceRecords --
+//
+
+vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
+	vector<HumdrumLine*> hlps;
+	hlps.reserve(32);
+	HumdrumLine* hlp;
+	auto& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isReference()) {
+			hlp = &infile[i];
+			hlps.push_back(hlp);
+		}
+	}
+	return hlps;
+}
+
+
+
 ////////////////////////////
 //
 // HumdrumFileBase::getLineCount -- Returns the number of lines.
