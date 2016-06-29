@@ -1223,7 +1223,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 			if (primaryLanguage.size() > 0) {
 				out << " primary=\"" << Convert::encodeXml(primaryLanguage) << "\"";
 			}
-			out << ">" << Convert::encodeXml(getReferenceKey());
+			out << ">" << Convert::encodeXml(key);
 			out << "</referenceKey>\n";
 
 			out << Convert::repeatString(indent, level);
