@@ -1177,7 +1177,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		out << " n=\"" << getLineIndex() << "\"";
 		out << " token=\"" << Convert::encodeXml(((string)(*this))) << "\"";
 		out << " xml:id=\"" << getXmlId() << "\"";
-		out << "/>\n";
+		out << ">\n";
 		level++;
 
 		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
