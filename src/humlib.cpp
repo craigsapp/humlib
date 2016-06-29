@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 27 16:25:37 PDT 2016
+// Last Modified: Tue Jun 28 17:02:28 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6687,7 +6687,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		}
 
 		level--;
-		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
 
 		level--;

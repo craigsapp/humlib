@@ -1209,7 +1209,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		}
 
 		level--;
-		out << Convert::repeatString(indent, level) << "<frameInfo>\n";
+		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
 
 		level--;
