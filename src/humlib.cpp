@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 28 17:07:28 PDT 2016
+// Last Modified: Tue Jun 28 17:33:21 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6678,7 +6678,26 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 
 		if (isReference()) {
 			out << Convert::repeatString(indent, level);
-			out << "<referenceKey>" << Convert::encodeXml(getReferenceKey());
+			string key = getReferenceKey();
+			string language;
+			string primaryLanguage;
+			if (auto loc = key.find("@@") != string::npos) {
+				language = key.substr(loc+2);
+				key = key.substr(0, loc);
+				primaryLanguage = "true";
+			} else if (auto loc = key.find("@") != string::npos) {
+				language = key.substr(loc+1);
+				key = key.substr(0, loc);
+			}
+
+			out << "<referenceKey";
+			if (language.size() > 0) {
+				out << " language=\"" << Convert::encodeXml(language) << "\"";
+			}
+			if (language.size() > 0) {
+				out << " primary=\"" << Convert::encodeXml(language) << "\"";
+			}
+			out << ">" << Convert::encodeXml(getReferenceKey());
 			out << "</referenceKey>\n";
 
 			out << Convert::repeatString(indent, level);
