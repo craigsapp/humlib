@@ -1203,21 +1203,25 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 			string key = getReferenceKey();
 			string language;
 			string primaryLanguage;
-			if (auto loc = key.find("@@") != string::npos) {
+			auto loc = key.find("@@");
+			if (loc != string::npos) {
 				language = key.substr(loc+2);
 				key = key.substr(0, loc);
 				primaryLanguage = "true";
-			} else if (auto loc = key.find("@") != string::npos) {
-				language = key.substr(loc+1);
-				key = key.substr(0, loc);
+			} else {
+				loc = key.find("@");
+				if (loc != string::npos) {
+					language = key.substr(loc+1);
+					key = key.substr(0, loc);
+				}
 			}
 
 			out << "<referenceKey";
 			if (language.size() > 0) {
 				out << " language=\"" << Convert::encodeXml(language) << "\"";
 			}
-			if (language.size() > 0) {
-				out << " primary=\"" << Convert::encodeXml(language) << "\"";
+			if (primaryLanguage.size() > 0) {
+				out << " primary=\"" << Convert::encodeXml(primaryLanguage) << "\"";
 			}
 			out << ">" << Convert::encodeXml(getReferenceKey());
 			out << "</referenceKey>\n";
