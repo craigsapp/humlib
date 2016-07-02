@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
       return 1;
    }
    infile.analyzeKernAccidentals();
+   infile.analyzeKernSlurs();
    infile.printXml();
    return 0;
 }
