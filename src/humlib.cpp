@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  2 12:11:42 PDT 2016
+// Last Modified: Sat Jul  2 12:45:59 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7468,6 +7468,56 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
 		return 0;
 	}
 	return own->getBarlineDuration(scale);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationToBarline -- Get duration from start of token to 
+//      the start of the next barline. Units are quarter notes, unless scale
+//      is set to a value other than 1.
+//
+
+HumNum HumdrumToken::getDurationToBarline(void) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getDurationToBarline();
+}
+
+HumNum HumdrumToken::getDurationToBarline(HumNum scale) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getDurationToBarline(scale);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationFromBarline -- Get duration from start of token to 
+//      the previous barline. Units are quarter notes, unless scale
+//      is set to a value other than 1.
+//
+
+HumNum HumdrumToken::getDurationFromBarline(void) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getDurationFromBarline();
+}
+
+HumNum HumdrumToken::getDurationFromBarline(HumNum scale) const {
+	HumdrumLine* own = getOwner();
+	if (own == NULL) {
+		return 0;
+	}
+	return own->getDurationFromBarline(scale);
 }
 
 

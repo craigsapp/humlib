@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  2 12:11:42 PDT 2016
+// Last Modified: Sat Jul  2 12:45:59 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -604,6 +604,12 @@ class HumdrumToken : public string, public HumHash {
 
 		HumNum   getDurationToEnd          (void) const;
 		HumNum   getDurationToEnd          (HumNum scale) const;
+
+		HumNum   getDurationFromBarline    (void) const;
+		HumNum   getDurationFromBarline    (HumNum scale) const;
+
+		HumNum   getDurationToBarline      (void) const;
+		HumNum   getDurationToBarline      (HumNum scale) const;
 
 		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;

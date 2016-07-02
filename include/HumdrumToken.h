@@ -91,6 +91,12 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getDurationToEnd          (void) const;
 		HumNum   getDurationToEnd          (HumNum scale) const;
 
+		HumNum   getDurationFromBarline    (void) const;
+		HumNum   getDurationFromBarline    (HumNum scale) const;
+
+		HumNum   getDurationToBarline      (void) const;
+		HumNum   getDurationToBarline      (HumNum scale) const;
+
 		HumNum   getBarlineDuration        (void) const;
 		HumNum   getBarlineDuration        (HumNum scale) const;
 
