@@ -95,7 +95,6 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 }
 
 
-
 // END_MERGE
 
 } // end namespace hum

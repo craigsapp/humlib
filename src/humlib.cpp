@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  2 11:32:54 PDT 2016
+// Last Modified: Sat Jul  2 12:11:42 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4116,7 +4116,6 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 
 	return true;
 }
-
 
 
 
@@ -8507,6 +8506,33 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out) {
 	return out;
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSlurStartToken -- Return a pointer to the token
+//     which starts the given slur.  Returns NULL if no start.  Assumes that
+//     HumdrumFileContent::analyzeKernSlurs() has already been run.
+//				<parameter key="slurEnd" value="HT_140366146702320" idref=""/>
+//
+
+HTp HumdrumToken::getSlurStartToken(void) {
+	return getValueHTp("auto", "slurStart");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSlurEndToken -- Return a pointer to the token
+//     which ends the given slur.  Returns NULL if no end.  Assumes that
+//     HumdrumFileContent::analyzeKernSlurs() has already been run.
+//				<parameter key="slurStart" value="HT_140366146702320" idref=""/>
+//
+
+HTp HumdrumToken::getSlurEndToken(void) {
+	return getValueHTp("auto", "slurEnd");
+}
 
 
 

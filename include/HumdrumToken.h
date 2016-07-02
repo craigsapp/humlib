@@ -118,6 +118,8 @@ class HumdrumToken : public string, public HumHash {
 		int      getStrandIndex            (void) const;
 		int      getSlurStartElisionLevel  (void) const;
 		int      getSlurEndElisionLevel    (void) const;
+		HTp      getSlurStartToken         (void);
+		HTp      getSlurEndToken           (void);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
