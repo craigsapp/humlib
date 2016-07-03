@@ -544,7 +544,8 @@ void HumHash::setValue(const string& ns2, const string& key, int value) {
 void HumHash::setValue(const string& ns1, const string& ns2,
 		const string& key, int value) {
 	initializeParameters();
-	stringstream ss(value);
+	stringstream ss;
+	ss << value;
 	(*parameters)[ns1][ns2][key] = ss.str();
 }
 
