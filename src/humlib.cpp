@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  3 18:53:33 PDT 2016
+// Last Modified: Sun Jul  3 19:30:42 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4111,45 +4111,43 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 					sluropens[elisionlevel].push_back(tracktokens[i][j]);
 				}
 
-			}
+			} else {
 
-			if (tracktokens[i][j]->hasSlurStart()) {
-				elisionlevel = tracktokens[i][j]->getSlurStartElisionLevel();
-				if (elisionlevel >= 0) {
-					sluropens[elisionlevel].push_back(tracktokens[i][j]);
-				}
-			}
-
-			if (tracktokens[i][j]->hasSlurEnd()) {
-
-				elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
-				if (elisionlevel >= 0) {
-					if (sluropens[elisionlevel].size() > 0) {
-						sluropens[elisionlevel].back()->setValue("auto",
-								"slurEnd", tracktokens[i][j]);
-						sluropens[elisionlevel].back()->setValue("auto",
-								"id", sluropens[elisionlevel].back());
-						tracktokens[i][j]->setValue("auto", "slurStart",
-								sluropens[elisionlevel].back());
-						tracktokens[i][j]->setValue("auto", "id",
-								tracktokens[i][j]);
-						sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
-							tracktokens[i][j]->getDurationFromStart() - 
-							sluropens[elisionlevel].back()->getDurationFromStart());
-						sluropens[elisionlevel].pop_back();
-					} else {
-						// no starting slur marker to match to this slur end.
-						tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
-						tracktokens[i][j]->setValue("auto", "slurDration", 
-							tracktokens[i][j]->getDurationToEnd());
+				if (tracktokens[i][j]->hasSlurStart()) {
+					elisionlevel = tracktokens[i][j]->getSlurStartElisionLevel();
+					if (elisionlevel >= 0) {
+						sluropens[elisionlevel].push_back(tracktokens[i][j]);
 					}
+				}
 
+				if (tracktokens[i][j]->hasSlurEnd()) {
+	
+					elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
+					if (elisionlevel >= 0) {
+						if (sluropens[elisionlevel].size() > 0) {
+							sluropens[elisionlevel].back()->setValue("auto",
+									"slurEnd", tracktokens[i][j]);
+							sluropens[elisionlevel].back()->setValue("auto",
+									"id", sluropens[elisionlevel].back());
+							tracktokens[i][j]->setValue("auto", "slurStart",
+									sluropens[elisionlevel].back());
+							tracktokens[i][j]->setValue("auto", "id",
+									tracktokens[i][j]);
+							sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
+								tracktokens[i][j]->getDurationFromStart() - 
+								sluropens[elisionlevel].back()->getDurationFromStart());
+							sluropens[elisionlevel].pop_back();
+						} else {
+							// no starting slur marker to match to this slur end.
+							tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
+							tracktokens[i][j]->setValue("auto", "slurDration", 
+								tracktokens[i][j]->getDurationToEnd());
+						}
+					}
 				}
 			}
-
 		}
 	}
-
 	// Mark un-closed slur starts:
 	for (i=0; i<sluropens.size(); i++) {
 		for (j=0; j<sluropens[i].size(); j++) {
