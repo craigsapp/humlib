@@ -852,7 +852,6 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 		return isValid();
 	}
 
-	HumdrumToken* initial = token;
 	HumNum dursum = startdur;
 	token->incrementState();
 
@@ -862,11 +861,18 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 	}
 	int tcount = token->getNextTokenCount();
 
+	vector<HTp> reservoir;
+	vector<HumNum> startdurs;
+
 	// Assign line durationFromStarts for primary track first.
 	while (tcount > 0) {
+		for (int t=1; t<tcount; t++) {
+			reservoir.push_back(token->getNextToken(t));
+			startdurs.push_back(dursum);
+		}
 		token = token->getNextToken(0);
 		if (state != token->getState()) {
-			return isValid();
+			break;
 		}
 		token->incrementState();
 		if (!setLineDurationFromStart(token, dursum)) { return isValid(); }
@@ -881,30 +887,10 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 	}
 
 	// Process secondary tracks next:
-	int newstate = state + 1;
+	int newstate = state;
 
-	token = initial;
-	dursum = startdur;
-	if (token->getDuration().isPositive()) {
-		dursum += token->getDuration();
-	}
-	tcount = token->getNextTokenCount();
-	while (tcount > 0) {
-		if (tcount > 1) {
-			for (int i=1; i<tcount; i++) {
-				if (!prepareDurations(token->getNextToken(i), state, dursum)) {
-					return isValid();
-				}
-			}
-		}
-		token = token->getNextToken(0);
-		if (newstate != token->getState()) {
-			return isValid();
-		}
-		if (token->getDuration().isPositive()) {
-			dursum += token->getDuration();
-		}
-		tcount = token->getNextTokenCount();
+	for (int i=reservoir.size()-1; i>=0; i--) {
+		prepareDurations(reservoir[i], newstate, startdurs[i]);
 	}
 
 	return isValid();
@@ -1151,9 +1137,9 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 
 //////////////////////////////
 //
-// HumdrumFileStructure::processLocalParametersForTrack --  Search for local
-//   parameters in each spine and fill in the HumHash for the token to which the
-//   parameter is to be applied.
+// HumdrumFileStructure::processLocalParametersForTrack --  Search for
+//   local parameters backwards in each spine and fill in the HumHash 
+//   for the token to which the parameter is to be applied.
 //
 
 bool HumdrumFileStructure::processLocalParametersForTrack(
@@ -1161,6 +1147,7 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 
 	HumdrumToken* token = starttok;
 	int tcount = token->getPreviousTokenCount();
+
 	while (tcount > 0) {
 		for (int i=1; i<tcount; i++) {
 			if (!processLocalParametersForTrack(
@@ -1168,7 +1155,13 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 				return isValid();
 			}
 		}
-		if (!(token->isNull() && token->isManipulator())) {
+		HTp prevtoken = token->getPreviousToken();
+		if (prevtoken->isSplitInterpretation()) {
+			if (token != prevtoken->nextTokens[0]) {
+				// terminate if not most primary subspine
+				return true;
+			}
+		} else if (!(token->isNull() & token->isManipulator())) {
 			if (token->isCommentLocal()) {
 				checkForLocalParameters(token, current);
 			} else {
@@ -1176,8 +1169,7 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 			}
 		}
 
-		// Data tokens can only be followed by up to one previous token,
-		// so no need to check for more than one next token.
+		// Follow previous data token 0 since 1 and higher are handled above.
 		token = token->getPreviousToken(0);
 		tcount = token->getPreviousTokenCount();
 	}

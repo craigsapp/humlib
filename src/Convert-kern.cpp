@@ -80,7 +80,7 @@ bool Convert::isKernSecondaryTiedNote(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::isKernNoteAttack -- Returns true if the input string
-//   represents a **kern note (not null or rest) and is not a 
+//   represents a **kern note (not null or rest) and is not a
 //   secondary tied note.
 //
 
@@ -143,7 +143,7 @@ bool Convert::hasKernSlurEnd(const string& kerndata) {
 //   Returns -1 if no '(' character in string.
 //
 
-int Convert::getKernSlurStartElisionLevel(const string& kerndata) { 
+int Convert::getKernSlurStartElisionLevel(const string& kerndata) {
 	bool foundSlurStart = false;
 	int output = 0;
 	for (int i=(int)kerndata.size()-1; i >=0; i--) {
@@ -172,12 +172,12 @@ int Convert::getKernSlurStartElisionLevel(const string& kerndata) {
 
 //////////////////////////////
 //
-// Convert::getKernSlurEndElisionLevel -- Returns the number of 
+// Convert::getKernSlurEndElisionLevel -- Returns the number of
 //   '&' characters before the last ')' character in a kern token.
 //   Returns -1 if no ')' character in string.
 //
 
-int Convert::getKernSlurEndElisionLevel(const string& kerndata) { 
+int Convert::getKernSlurEndElisionLevel(const string& kerndata) {
 	bool foundSlurEnd = false;
 	int output = 0;
 	for (int i=(int)kerndata.size()-1; i >=0; i--) {

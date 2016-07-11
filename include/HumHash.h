@@ -237,12 +237,12 @@ class HumHash {
 		void           setOrigin           (const string& ns1, const string& ns2,
 		                                    const string& parameter,
 		                                    HumdrumToken* tok);
-		void           setOrigin           (const string& ns1, const string& ns2, 
+		void           setOrigin           (const string& ns1, const string& ns2,
 		                                    const string& parameter,
 		                                    HumdrumToken& tok);
 
 		HumdrumToken*  getOrigin           (const string& key) const;
-		HumdrumToken*  getOrigin           (const string& ns2, 
+		HumdrumToken*  getOrigin           (const string& ns2,
 		                                    const string& key) const;
 		HumdrumToken*  getOrigin           (const string& ns1,
 		                                    const string& ns2,

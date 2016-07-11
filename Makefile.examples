@@ -55,6 +55,7 @@ PREFLAGS += -g
 
 # using C++ 2011 standard:
 PREFLAGS += -std=c++11
+PREFLAGS += -pg
 
 # Add -static flag to compile without dynamics libraries for better portability:
 #PREFLAGS += -static

@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
          continue;
       }
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         cout << infile[i].token(j).getTrackString() << "\t";
+         cout << infile[i].token(j)->getTrackString() << "\t";
       }
       cout << "::\t" << infile[i] << endl;
    }

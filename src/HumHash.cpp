@@ -512,7 +512,7 @@ void HumHash::setValue(const string& key, const char* value) {
 }
 
 
-void HumHash::setValue(const string& ns2, const string& key, 
+void HumHash::setValue(const string& ns2, const string& key,
 		const char* value) {
 	setValue(ns2, key, (string)value);
 }
@@ -567,8 +567,8 @@ void HumHash::setValue(const string& ns2, const string& key, HTp value) {
 }
 
 
-void HumHash::setValue(const string& ns1, const string& ns2, 
-		const string& key, HTp value) { 
+void HumHash::setValue(const string& ns1, const string& ns2,
+		const string& key, HTp value) {
 	initializeParameters();
 	stringstream ss;
 	ss << "HT_" << ((long long)value);
@@ -1022,7 +1022,7 @@ void HumHash::setOrigin(const string& ns2, const string& key,
 
 
 void HumHash::setOrigin(const string& ns1, const string& ns2,
-		const string& key, HumdrumToken* tok) { 
+		const string& key, HumdrumToken* tok) {
 	if (parameters == NULL) {
 		return;
 	}
@@ -1043,7 +1043,7 @@ void HumHash::setOrigin(const string& ns1, const string& ns2,
 }
 
 
-void HumHash::setOrigin(const string& ns1, const string& ns2, 
+void HumHash::setOrigin(const string& ns1, const string& ns2,
 		const string& key, HumdrumToken& tok) {
 	setOrigin(ns1, ns2, key, &tok);
 }
@@ -1081,8 +1081,8 @@ HumdrumToken* HumHash::getOrigin(const string& ns2, const string& key) const {
 }
 
 
-HumdrumToken* HumHash::getOrigin(const string& ns1, const string& ns2, 
-		const string& key) const { 
+HumdrumToken* HumHash::getOrigin(const string& ns1, const string& ns2,
+		const string& key) const {
 	if (parameters == NULL) {
 		return NULL;
 	}

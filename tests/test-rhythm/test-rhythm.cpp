@@ -13,14 +13,10 @@ int main(int argc, char** argv) {
       return 1;
    }
    for (int i=0; i<infile.getLineCount(); i++) {
-      if (!infile[i].hasSpines()) {
-         cout << infile[i] << endl;
-         continue;
-      }
-      for (int j=0; j<infile[i].getTokenCount(); j++) {
-         cout << infile[i].token(j)->getSpineInfo() << "\t";
-      }
-      cout << "::\t" << infile[i] << endl;
+      cout << infile[i].getDuration() << "\t";
+      cout << infile[i].getDurationFromStart() << "\t";
+      cout << infile[i];
+      cout << endl;
    }
    return 0;
 }

@@ -58,7 +58,7 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 // HumdrumFileBase::~HumdrumFileBase -- HumdrumFileBase deconstructor.
 //
 
-HumdrumFileBase::~HumdrumFileBase() { 
+HumdrumFileBase::~HumdrumFileBase() {
 	// do nothing
 }
 
@@ -244,7 +244,8 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 bool HumdrumFileBase::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
-	return read(infile);
+	int status = read(infile);
+	return status;
 }
 
 
@@ -300,7 +301,7 @@ bool HumdrumFileBase::isValid(void) {
 		cerr << parseError << endl;
 		displayError = false;
 	}
-   return !parseError.size();
+   return parseError.empty();
 }
 
 
@@ -609,8 +610,8 @@ void HumdrumFileBase::getSpineSequence(vector<vector<HTp> >& sequence,
 }
 
 
-void HumdrumFileBase::getSpineSequence(vector<vector<HTp> >& sequence, int spine,
-		int options) {
+void HumdrumFileBase::getSpineSequence(vector<vector<HTp> >& sequence,
+		int spine, int options) {
 	getTrackSequence(sequence, spine+1, options);
 }
 
@@ -1276,6 +1277,8 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 		}
 	}
 
+	ptokens.resize(0);
+
 	// analyze backward tokens:
 	for (int i=1; i<=getMaxTrack(); i++) {
 		for (int j=0; j<getTrackEndCount(i); j++) {
@@ -1303,6 +1306,7 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 
 	HTp token = endtoken;
 	int tcount = token->getPreviousTokenCount();
+
 	while (tcount > 0) {
 		for (int i=1; i<tcount; i++) {
 			if (!processNonNullDataTokensForTrackBackward(
@@ -1310,15 +1314,22 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 				return false;
 			}
 		}
-		if (token->isData()) {
+		HTp prevtoken = token->getPreviousToken();
+		if (prevtoken->isSplitInterpretation()) {
+			addUniqueTokens(prevtoken->nextNonNullTokens, ptokens);
+			if (token != prevtoken->nextTokens[0]) {
+				// terminate if not most primary subspine
+				return true;
+			}
+		} else if (token->isData()) {
 			addUniqueTokens(token->nextNonNullTokens, ptokens);
 			if (!token->isNull()) {
 				ptokens.resize(0);
 				ptokens.push_back(token);
 			}
 		}
-		// Data tokens can only be followed by up to one previous token,
-		// so no need to check for more than one next token.
+
+		// Follow previous data token 0 since 1 and higher are handled above.
 		token = token->getPreviousToken(0);
 		tcount = token->getPreviousTokenCount();
 	}
@@ -1332,27 +1343,36 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 //
 // HumdurmFile::processNonNullDataTokensForTrackForward -- Helper function
 //    for analyzeNonNullDataTokens.  Given any token, this function tells
-//    you what is the previous non-null data token(s) in the spine after
+//    you what are the previous non-null data token(s) in the spine before
 //    the given token.
 //
 
-bool HumdrumFileBase::processNonNullDataTokensForTrackForward(
-		HTp starttoken, vector<HTp> ptokens) {
+bool HumdrumFileBase::processNonNullDataTokensForTrackForward(HTp starttoken,
+		vector<HTp> ptokens) {
+
 	HTp token = starttoken;
 	int tcount = token->getNextTokenCount();
 	while (tcount > 0) {
-		if (!token->isData()) {
+		if (token->isSplitInterpretation()) {
 			for (int i=1; i<tcount; i++) {
 				if (!processNonNullDataTokensForTrackForward(
 						token->getNextToken(i), ptokens)) {
 					return false;
 				}
 			}
+		} else if (token->isMergeInterpretation()) {
+			HTp nexttoken = token->getNextToken();
+			addUniqueTokens(nexttoken->previousNonNullTokens, ptokens);
+			if (token != nexttoken->previousTokens[0]) {
+				// terminate if not most primary subspine
+				return true;
+			}
 		} else {
 			addUniqueTokens(token->previousNonNullTokens, ptokens);
-			if (!token->isNull()) {
+			if (token->isData() && !token->isNull()) {
 				ptokens.resize(0);
 				ptokens.push_back(token);
+
 			}
 		}
 		// Data tokens can only be followed by up to one next token,

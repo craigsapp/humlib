@@ -134,7 +134,7 @@ class HumdrumFileBase : public HumHash {
 		                                        const string& separator = ",");
 
 		HTp           getTrackStart            (int track) const;
-		HTp           getSpineStart            (int spine) const { 
+		HTp           getSpineStart            (int spine) const {
 		                                         return getTrackStart(spine+1); }
 
 		void          getSpineStartList        (vector<HTp>& spinestarts);
