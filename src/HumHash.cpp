@@ -99,6 +99,7 @@
 //                  score).
 //
 
+#include <string>
 #include <sstream>
 #include <iostream>
 
@@ -314,7 +315,12 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 	} else {
 		int intvalue;
 		try {
-			intvalue = stoi(value);
+			// problem with emscripten with stoi:
+			// intvalue = stoi(value);
+			stringstream converter(value);
+			if (!(converter >> intvalue)) {
+				intvalue = 0;
+			}
 		} catch (invalid_argument& e) {
 			intvalue = 0;
 		}
