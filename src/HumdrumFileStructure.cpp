@@ -17,6 +17,7 @@
 #include "HumdrumFileStructure.h"
 #include "Convert.h"
 
+#include <algorithm>
 #include <sstream>
 
 using namespace std;
@@ -391,7 +392,7 @@ HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= barlines.size()) {
+	if (index >= (int)barlines.size()) {
 		return NULL;
 	}
 	return barlines[index];
@@ -429,12 +430,12 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= barlines.size()) {
+	if (index >= (int)barlines.size()) {
 		return 0;
 	}
 	HumNum startdur = barlines[index]->getDurationFromStart();
 	HumNum enddur;
-	if (index + 1 < barlines.size() - 1) {
+	if (index + 1 < (int)barlines.size() - 1) {
 		enddur = barlines[index+1]->getDurationFromStart();
 	} else {
 		enddur = getScoreDuration();
@@ -457,7 +458,7 @@ HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= barlines.size()) {
+	if (index >= (int)barlines.size()) {
 		return getScoreDuration();
 	}
 	return barlines[index]->getDurationFromStart();
@@ -478,7 +479,7 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= barlines.size()) {
+	if (index >= (int)barlines.size()) {
 		return getScoreDuration();
 	}
 	return barlines[index]->getDurationToEnd();
@@ -1062,7 +1063,7 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 	}
 
 	// fill in start times for ending comments
-	for (i=0; i<lines.size(); i++) {
+	for (i=0; i<(int)lines.size(); i++) {
 		dur = lines[i]->getDurationFromStart();
 		if (dur.isNonNegative()) {
 			lastdur = dur;
@@ -1084,7 +1085,7 @@ void HumdrumFileStructure::assignLineDurations(void) {
 	HumNum startdur;
 	HumNum enddur;
 	HumNum dur;
-	for (int i=0; i<lines.size()-1; i++) {
+	for (int i=0; i<(int)lines.size()-1; i++) {
 		startdur = lines[i]->getDurationFromStart();
 		enddur = lines[i+1]->getDurationFromStart();
 		dur = enddur - startdur;
@@ -1234,10 +1235,10 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 		analyzeSpineStrands(strand2d.back(), tok);
 	}
 
-	for (i=0; i<strand2d.size(); i++) {
+	for (i=0; i<(int)strand2d.size(); i++) {
 		std::sort(strand2d[i].begin(), strand2d[i].end(), 
 				sortTokenPairsByLineIndex);
-		for (j=0; j<strand2d[i].size(); j++) {
+		for (j=0; j<(int)strand2d[i].size(); j++) {
 			strand1d.push_back(strand2d[i][j]);
 		}
 	}
@@ -1258,7 +1259,7 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 
 void HumdrumFileStructure::assignStrandsToTokens(void) {
 	HTp tok;
-	for (int i=0; i<strand1d.size(); i++) {
+	for (int i=0; i<(int)strand1d.size(); i++) {
 		tok = strand1d[i].first;
 		while (tok != NULL) {
 			tok->setStrandIndex(i);

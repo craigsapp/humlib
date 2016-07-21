@@ -82,12 +82,12 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 	// construct tab-delimited string
 	string output;
 	bool inquote = false;
-	for (int i=0; i<csv.size(); i++) {
+	for (int i=0; i<(int)csv.size(); i++) {
 		if ((csv[i] == '"') && !inquote) {
 			inquote = true;
 			continue;
 		}
-		if (inquote && (csv[i] == '"') && (i < csv.length()-1)) {
+		if (inquote && (csv[i] == '"') && (i < (int)csv.length()-1)) {
 			output += '"';
 			i++;
 			continue;
@@ -115,7 +115,7 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 //
 
 void HumdrumLine::clear(void) {
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		delete tokens[i];
 		tokens[i] = NULL;
 	}
@@ -130,7 +130,7 @@ void HumdrumLine::clear(void) {
 //
 
 bool HumdrumLine::equalChar(int index, char ch) const {
-	if (size() <= index) {
+	if ((int)size() <= index) {
 		return false;
 	}
 	if (index < 0) {
@@ -746,7 +746,7 @@ bool HumdrumLine::isGlobal(void) const {
 //
 
 bool HumdrumLine::isManipulator(void) const {
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		if (tokens[i]->isManipulator()) {
 			return true;
 		}
@@ -821,7 +821,7 @@ int HumdrumLine::createTokensFromLine(void) {
 	HumdrumToken* token = new HumdrumToken();
 	token->setOwner(this);
 	char ch;
-	for (int i=0; i<size(); i++) {
+	for (int i=0; i<(int)size(); i++) {
 		ch = getChar(i);
 		if (ch == '\t') {
 			tokens.push_back(token);
@@ -849,9 +849,9 @@ int HumdrumLine::createTokensFromLine(void) {
 void HumdrumLine::createLineFromTokens(void) {
 	string& iline = *this;
 	iline.resize(0);
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		iline += (string)(*tokens[i]);
-		if (i < tokens.size() - 1) {
+		if (i < (int)tokens.size() - 1) {
 			iline += '\t';
 		}
 	}
@@ -888,7 +888,7 @@ char HumdrumLine::getChar(int index) const {
 	if (index < 0) {
 		return '\0';
 	}
-	if (index >= size()) {
+	if (index >= (int)size()) {
 		return '\0';
 	}
 	return (((string)(*this))[index]);
@@ -913,9 +913,9 @@ ostream& HumdrumLine::printSpineInfo(ostream& out) {
 	if (isManipulator()) {
 		out << *this;
 	} else {
-		for (int i=0; i<tokens.size(); i++) {
+		for (int i=0; i<(int)tokens.size(); i++) {
 			out << tokens[i]->getSpineInfo();
-			if (i < tokens.size() - 1) {
+			if (i < (int)tokens.size() - 1) {
 				out << '\t';
 			}
 		}
@@ -938,9 +938,9 @@ ostream& HumdrumLine::printDataTypeInfo(ostream& out) {
 	if (isManipulator()) {
 		out << *this;
 	} else {
-		for (int i=0; i<tokens.size(); i++) {
+		for (int i=0; i<(int)tokens.size(); i++) {
 			out << tokens[i]->getDataType().substr(2, string::npos);
-			if (i < tokens.size() - 1) {
+			if (i < (int)tokens.size() - 1) {
 				out << '\t';
 			}
 		}
@@ -960,7 +960,7 @@ bool HumdrumLine::analyzeTokenDurations(string& err) {
 	if (!hasSpines()) {
 		return !err.size();
 	}
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		if (!tokens[i]->analyzeDuration(err)) {
 			return !err.size();
 		}
@@ -988,15 +988,15 @@ bool HumdrumLine::analyzeTracks(string& err) {
 	int maxtrack = 0;
 	int i, j, k;
 
-	for (i=0; i<tokens.size(); i++) {
+	for (i=0; i<(int)tokens.size(); i++) {
 		info = tokens[i]->getSpineInfo();
 		track = 0;
-		for (j=0; j<info.size(); j++) {
+		for (j=0; j<(int)info.size(); j++) {
 			if (!isdigit(info[j])) {
 				continue;
 			}
 			track = info[j] - '0';
-			for (k=j+1; k<info.size(); k++) {
+			for (k=j+1; k<(int)info.size(); k++) {
 				if (isdigit(info[k])) {
 					track = track * 10 + (info[k] - '0');
 				} else {
@@ -1020,10 +1020,10 @@ bool HumdrumLine::analyzeTracks(string& err) {
 	fill(subtracks.begin(), subtracks.end(), 0);
 	fill(cursub.begin(), cursub.end(), 0);
 
-	for (i=0; i<tokens.size(); i++) {
+	for (i=0; i<(int)tokens.size(); i++) {
 		subtracks[tokens[i]->getTrack()]++;
 	}
-	for (i=0; i<tokens.size(); i++) {
+	for (i=0; i<(int)tokens.size(); i++) {
 		track = tokens[i]->getTrack();
 		subtrack = subtracks[track];
 		if (subtrack > 1) {
@@ -1052,9 +1052,9 @@ ostream& HumdrumLine::printDurationInfo(ostream& out) {
 	if (isManipulator()) {
 		out << *this;
 	} else {
-		for (int i=0; i<tokens.size(); i++) {
+		for (int i=0; i<(int)tokens.size(); i++) {
 			tokens[i]->getDuration().printMixedFraction(out);
-			if (i < tokens.size() - 1) {
+			if (i < (int)tokens.size() - 1) {
 				out << '\t';
 			}
 		}
@@ -1303,9 +1303,9 @@ ostream& HumdrumLine::printTrackInfo(ostream& out) {
 	if (isManipulator()) {
 		out << *this;
 	} else {
-		for (int i=0; i<tokens.size(); i++) {
+		for (int i=0; i<(int)tokens.size(); i++) {
 			out << tokens[i]->getTrackString();
-			if (i < tokens.size() - 1) {
+			if (i < (int)tokens.size() - 1) {
 				out << '\t';
 			}
 		}
@@ -1367,7 +1367,7 @@ void HumdrumLine::setParameters(const string& pdata) {
 	string key;
 	string value;
 	int loc;
-	for (int i=2; i<pieces.size(); i++) {
+	for (int i=2; i<(int)pieces.size(); i++) {
 		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
 		loc = (int)pieces[i].find("=");
 		if (loc != (int)string::npos) {

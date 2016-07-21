@@ -28,7 +28,7 @@ int Convert::getLcm(const vector<int>& numbers) {
 		return 1;
 	}
 	int output = numbers[0];
-	for (int i=1; i<numbers.size(); i++) {
+	for (int i=1; i<(int)numbers.size(); i++) {
 		output = (output * numbers[i]) / getGcd(output, numbers[i]);
 	}
 	return output;

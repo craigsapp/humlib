@@ -228,7 +228,7 @@ void HumNum::setValue(const string& ratstring) {
 	buffer[0] = 0;
 	buffer[1] = 0;
 	int slash = 0;
-	for (int i=0; i<ratstring.size(); i++) {
+	for (int i=0; i<(int)ratstring.size(); i++) {
 		if (ratstring[i] == '/') {
 			slash = 1;
 			continue;

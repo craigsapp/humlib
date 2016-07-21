@@ -41,7 +41,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 	// rtracks == Reverse mapping from track to ktrack index (part/staff index).
 	vector<HTp> ktracks = getKernSpineStartList();
 	vector<int> rtracks(getMaxTrack()+1, -1);
-	for (i=0; i<ktracks.size(); i++) {
+	for (i=0; i<(int)ktracks.size(); i++) {
 		track = ktracks[i]->getTrack();
 		rtracks[track] = i;
 	}
@@ -84,7 +84,6 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 	// rhythmstart == keep track of first beat in measure.
 	vector<int> firstinbar(kcount, 0);
 	
-	int loc;
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
@@ -224,7 +223,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
 					// display.
-					loc = (int)subtok.find("X");
+					auto loc = subtok.find("X");
 					if ((loc != string::npos) && (loc > 0)) {
 						if (subtok[loc-1] == '#') {
 							infile[i].token(j)->setValue("auto", to_string(k),

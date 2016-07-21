@@ -30,7 +30,7 @@ bool HumdrumFileContent::analyzeKernTies(void) {
 	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
-	for (int i=0; i<kernspines.size(); i++) {
+	for (int i=0; i<(int)kernspines.size(); i++) {
 		output = output && analyzeKernTies(kernspines[i]);
 	}
 	return output;

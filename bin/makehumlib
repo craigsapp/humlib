@@ -76,6 +76,8 @@ $license
 #define _MINHUMDRUM_H
 
 #include <math.h>
+#include <string.h>
+#include <stdarg.h>
 
 #include <string>
 #include <vector>
@@ -84,6 +86,7 @@ $license
 #include <sstream>
 #include <map>
 #include <set>
+#include <algorithm>
 
 using std::string;
 using std::vector;

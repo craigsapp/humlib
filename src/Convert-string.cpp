@@ -11,6 +11,7 @@
 //
 
 #include <sstream>
+#include <algorithm>
 
 #include "Convert.h"
 
@@ -89,7 +90,7 @@ string Convert::repeatString(const string& pattern, int count) {
 string Convert::encodeXml(const string& input) {
 	string output;
 	output.reserve(input.size()*2);
-	for (int i=0; i<input.size(); i++) {
+	for (int i=0; i<(int)input.size(); i++) {
 		switch (input[i]) {
 			case '&':  output += "&amp;";   break;
 			case '<':  output += "&lt;";    break;

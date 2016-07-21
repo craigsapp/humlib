@@ -42,11 +42,11 @@ string Convert::kernToScientificPitch(const string& kerndata,
 	int    accidental;
 	int    octave;
 
-	for (int i=0; i<subtokens.size(); i++) {
+	for (int i=0; i<(int)subtokens.size(); i++) {
 		diatonic   = Convert::kernToDiatonicUC(subtokens[i]);
 		accidental = Convert::kernToAccidentalCount(subtokens[i]);
 		octave     = Convert::kernToOctaveNumber(subtokens[i]);
-		if ((i > 0) && (i < subtokens.size()-1)) {
+		if ((i > 0) && (i < (int)subtokens.size()-1)) {
 			output += " ";
 		}
 		output += diatonic;
@@ -71,7 +71,7 @@ string Convert::kernToScientificPitch(const string& kerndata,
 //
 
 int Convert::kernToDiatonicPC(const string& kerndata) {
-	for (int i=0; i<kerndata.size(); i++) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		if (kerndata[i] == ' ') {
 			break;
 		}
@@ -102,7 +102,7 @@ int Convert::kernToDiatonicPC(const string& kerndata) {
 //
 
 char Convert::kernToDiatonicUC(const string& kerndata) {
-	for (int i=0; i<kerndata.size(); i++) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		if (kerndata[i] == ' ') {
 			break;
 		}
@@ -145,7 +145,7 @@ char Convert::kernToDiatonicLC(const string& kerndata) {
 
 int Convert::kernToAccidentalCount(const string& kerndata) {
 	int output = 0;
-	for (int i=0; i<kerndata.size(); i++) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		if (kerndata[i] == ' ') {
 			break;
 		}
@@ -175,7 +175,7 @@ int Convert::kernToOctaveNumber(const string& kerndata) {
 	if (kerndata == ".") {
 		return -1000;
 	}
-	for (int i=0; i<kerndata.size(); i++) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		if (kerndata[i] == ' ') {
 			break;
 		}

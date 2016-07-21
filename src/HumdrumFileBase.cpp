@@ -19,7 +19,8 @@
 
 #include <sstream>
 #include <fstream>
-#include "stdarg.h"
+#include <stdarg.h>
+#include <string.h>
 
 namespace hum {
 
@@ -98,7 +99,7 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 	if (index < 0) {
 		index = (int)lines.size() - index;
 	}
-	if ((index < 0) || (index >= lines.size())) {
+	if ((index < 0) || (index >= (int)lines.size())) {
 		cerr << "Error: invalid index: " << index << endl;
 		index = (int)lines.size()-1;
 	}
@@ -378,7 +379,7 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 
 bool HumdrumFileBase::analyzeTokens(void) {
 	int i;
-	for (i=0; i<lines.size(); i++) {
+	for (i=0; i<(int)lines.size(); i++) {
 		lines[i]->createTokensFromLine();
 	}
 	return isValid();
@@ -393,7 +394,7 @@ bool HumdrumFileBase::analyzeTokens(void) {
 //
 
 void HumdrumFileBase::createLinesFromTokens(void) {
-	for (int i=0; i<lines.size(); i++) {
+	for (int i=0; i<(int)lines.size(); i++) {
 		lines[i]->createLineFromTokens();
 	}
 }
@@ -538,7 +539,7 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts) {
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<trackstarts.size(); i++) {
+	for (int i=1; i<(int)trackstarts.size(); i++) {
 		spinestarts.push_back(trackstarts[i]);
 	}
 }
@@ -548,7 +549,7 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const string& exinterp) {
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<trackstarts.size(); i++) {
+	for (int i=1; i<(int)trackstarts.size(); i++) {
 		if (exinterp == *trackstarts[i]) {
 			spinestarts.push_back(trackstarts[i]);
 		}
@@ -560,8 +561,8 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const vector<string>& exinterps) {
 	spinestarts.reserve(trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<trackstarts.size(); i++) {
-		for (int j=0; j<exinterps.size(); j++) {
+	for (int i=1; i<(int)trackstarts.size(); i++) {
+		for (int j=0; j<(int)exinterps.size(); j++) {
 			if (exinterps[j] == *trackstarts[i]) {
 				spinestarts.push_back(trackstarts[i]);
 			}
@@ -629,7 +630,7 @@ void HumdrumFileBase::getPrimaryTrackSequence(vector<HTp>& sequence, int track,
 	vector<vector<HTp> > tempseq;
 	getTrackSequence(tempseq, track, options | OPT_PRIMARY);
 	sequence.resize(tempseq.size());
-	for (int i=0; i<tempseq.size(); i++) {
+	for (int i=0; i<(int)tempseq.size(); i++) {
 		sequence[i] = tempseq[i][0];
 	}
 }
@@ -767,7 +768,7 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 //
 
 HTp HumdrumFileBase::getTrackStart(int track) const {
-	if ((track > 0) && (track < trackstarts.size())) {
+	if ((track > 0) && (track < (int)trackstarts.size())) {
 		return trackstarts[track];
 	} else {
 		return NULL;
@@ -840,7 +841,7 @@ HTp HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 //
 
 bool HumdrumFileBase::analyzeLines(void) {
-	for (int i=0; i<lines.size(); i++) {
+	for (int i=0; i<(int)lines.size(); i++) {
 		lines[i]->setLineIndex(i);
 	}
 	return isValid();
@@ -855,7 +856,7 @@ bool HumdrumFileBase::analyzeLines(void) {
 //
 
 bool HumdrumFileBase::analyzeTracks(void) {
-	for (int i=0; i<lines.size(); i++) {
+	for (int i=0; i<(int)lines.size(); i++) {
 		int status = lines[i]->analyzeTracks(parseError);
 		if (!status) {
 			return false;
@@ -876,7 +877,7 @@ bool HumdrumFileBase::analyzeLinks(void) {
 	HumdrumLine* next     = NULL;
 	HumdrumLine* previous = NULL;
 
-	for (int i=0; i<lines.size(); i++) {
+	for (int i=0; i<(int)lines.size(); i++) {
 		if (!lines[i]->hasSpines()) {
 			continue;
 		}
@@ -1070,7 +1071,7 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			}
 			continue;
 		}
-		if (datatype.size() != lines[i]->getTokenCount()) {
+		if ((int)datatype.size() != lines[i]->getTokenCount()) {
 			stringstream err;
 			err << "Error on line " << (i+1) << ':' << endl;
 			err << "   Expected " << datatype.size() << " fields,"
@@ -1210,7 +1211,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 
 	datatype.resize(newtype.size());
 	sinfo.resize(newinfo.size());
-	for (i=0; i<newtype.size(); i++) {
+	for (i=0; i<(int)newtype.size(); i++) {
 		datatype[i] = newtype[i];
 		sinfo[i]    = newinfo[i];
 	}
@@ -1399,9 +1400,9 @@ void HumdrumFileBase::addUniqueTokens(vector<HTp>& target,
 		vector<HTp>& source) {
 	int i, j;
 	bool found;
-	for (i=0; i<source.size(); i++) {
+	for (i=0; i<(int)source.size(); i++) {
 		found = false;
-		for (j=0; j<target.size(); j++) {
+		for (j=0; j<(int)target.size(); j++) {
 			if (source[i] == target[i]) {
 				found = true;
 			}

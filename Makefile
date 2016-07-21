@@ -87,7 +87,7 @@ all: minlibrary
 
 minlib: minlibrary
 minlibrary: makedirs min humlib.o
-	@echo "Creating humlib library file for OS X..."
+	@echo "Creating humlib library ..."
 	@-rm -f $(LIBDIR)/$(LIBFILE_MIN)
 	@$(AR) r $(LIBDIR)/$(LIBFILE_MIN) $(OBJDIR)/humlib.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE_MIN)
@@ -95,7 +95,7 @@ minlibrary: makedirs min humlib.o
 
 lib: library
 library: makedirs $(OBJS)
-	@echo "Creating humdrum library file for OS X..."
+	@echo "Creating humdrum library file..."
 	@-rm -f $(LIBDIR)/$(LIBFILE)
 	@$(AR) r $(LIBDIR)/$(LIBFILE) $(OBJDIR)/*.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE)
@@ -136,7 +136,7 @@ makedirs:
 
 %.o : %.cpp min
 	@echo [CC] $@
-	$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
+	@$(COMPILER) $(PREFLAGS) -o $(OBJDIR)/$(notdir $@) $(POSTFLAGS) $<
 
 #                                                                         #
 ###########################################################################

@@ -30,7 +30,7 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
-	for (int i=0; i<kernspines.size(); i++) {
+	for (int i=0; i<(int)kernspines.size(); i++) {
 		output = output && analyzeKernSlurs(kernspines[i]);
 	}
 	return output;
@@ -47,8 +47,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 
 	int elisionlevel;
 	int i, j;
-	for (i=0; i<tracktokens.size(); i++) {
-		for (j=0; j<tracktokens[i].size(); j++) {
+	for (i=0; i<(int)tracktokens.size(); i++) {
+		for (j=0; j<(int)tracktokens[i].size(); j++) {
 			if (tracktokens[i][j]->hasSlurStart() &&
 					tracktokens[i][j]->hasSlurEnd()) {
 
@@ -125,8 +125,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 		}
 	}
 	// Mark un-closed slur starts:
-	for (i=0; i<sluropens.size(); i++) {
-		for (j=0; j<sluropens[i].size(); j++) {
+	for (i=0; i<(int)sluropens.size(); i++) {
+		for (j=0; j<(int)sluropens[i].size(); j++) {
 			sluropens[i][j]->setValue("", "auto", "hangingSlur", "true");
 			sluropens[i][j]->setValue("", "auto", "slurDuration", 
 				sluropens[i][j]->getDurationFromStart());

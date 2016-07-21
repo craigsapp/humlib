@@ -13,6 +13,7 @@
 #include <math.h>
 
 #include "Convert.h"
+#include <algorithm>
 
 namespace hum {
 
@@ -57,7 +58,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	int dotcount = 0;
 	int i;
 	int numi = -1;
-	for (i=0; i<subtok.size(); i++) {
+	for (i=0; i<(int)subtok.size(); i++) {
 		if (subtok[i] == '.') {
 			dotcount++;
 		}
@@ -73,13 +74,13 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		// reciprocal rhythm
 		numerator = 1;
 		denominator = subtok[numi++] - '0';
-		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
 			denominator = denominator * 10 + (subtok[numi++] - '0');
 		}
 		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
 			int xi = (int)loc + 1;
 			numerator = subtok[xi++] - '0';
-			while ((xi < subtok.size()) && isdigit(subtok[xi])) {
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
 				numerator = numerator * 10 + (subtok[xi++] - '0');
 			}
 		}
@@ -91,7 +92,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	} else if (subtok[numi] == '0') {
 		// 0-symbol
 		int zerocount = 1;
-		for (i=numi+1; i<subtok.size(); i++) {
+		for (i=numi+1; i<(int)subtok.size(); i++) {
 			if (subtok[i] == '0') {
 				zerocount++;
 			} else {
@@ -103,7 +104,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 	} else {
 		// plain rhythm
 		denominator = subtok[numi++] - '0';
-		while ((numi < subtok.size()) && isdigit(subtok[numi])) {
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
 			denominator = denominator * 10 + (subtok[numi++] - '0');
 		}
 		output.setValue(1, denominator);

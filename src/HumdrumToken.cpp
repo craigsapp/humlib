@@ -77,7 +77,7 @@ HumdrumToken::~HumdrumToken() {
 //
 
 bool HumdrumToken::equalChar(int index, char ch) const {
-	if (size() <= index) {
+	if ((int)size() <= index) {
 		return false;
 	}
 	if (index < 0) {
@@ -157,7 +157,7 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= nextNonNullTokens.size()) {
+	if (index >= (int)nextNonNullTokens.size()) {
 		return NULL;
 	}
 	return nextNonNullTokens[index];
@@ -1243,7 +1243,7 @@ void HumdrumToken::setParameters(const string& pdata, HumdrumToken* ptok) {
 	string key;
 	string value;
 	int loc;
-	for (int i=2; i<pieces.size(); i++) {
+	for (int i=2; i<(int)pieces.size(); i++) {
 		Convert::replaceOccurrences(pieces[i], "&colon;", ":");
 		loc = (int)pieces[i].find("=");
 		if (loc != (int)string::npos) {
@@ -1436,7 +1436,7 @@ ostream& HumdrumToken::printCsv(ostream& out) {
 		out << value;
 	} else {
 		out << '"';
-		for (int i=0; i<value.size(); i++) {
+		for (int i=0; i<(int)value.size(); i++) {
 		   if (value[i] == '"') {
 				out << '"' << '"';
 			} else {
@@ -1682,10 +1682,10 @@ ostream& operator<<(ostream& out, HumdrumToken* token) {
 //
 
 ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out) {
-	for (int i=0; i<sequence.size(); i++) {
-		for (int j=0; j<sequence[i].size(); j++) {
+	for (int i=0; i<(int)sequence.size(); i++) {
+		for (int j=0; j<(int)sequence[i].size(); j++) {
 			out << sequence[i][j];
-			if (j < sequence[i].size() - 1) {
+			if (j < (int)sequence[i].size() - 1) {
 				out << '\t';
 			}
 		}
@@ -1696,7 +1696,7 @@ ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out) {
 
 
 ostream& printSequence(vector<HTp>& sequence, ostream& out) {
-	for (int i=0; i<sequence.size(); i++) {
+	for (int i=0; i<(int)sequence.size(); i++) {
 		out << sequence[i] << endl;
 	}
 	return out;

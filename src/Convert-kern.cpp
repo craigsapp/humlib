@@ -43,7 +43,7 @@ bool Convert::isKernRest(const string& kerndata) {
 
 bool Convert::isKernNote(const string& kerndata) {
 	char ch;
-	for (int i=0; i < kerndata.size(); i++) {
+	for (int i=0; i < (int)kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch >= 'a') && (ch <= 'g')) {
 			return true;
@@ -66,7 +66,7 @@ bool Convert::isKernSecondaryTiedNote(const string& kerndata) {
 	if (!Convert::isKernNote(kerndata)) {
 		return false;
 	}
-	for (int i=0; i < kerndata.size(); i++) {
+	for (int i=0; i < (int)kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch == '_') || (ch == ']')) {
 			return true;
@@ -89,7 +89,7 @@ bool Convert::isKernNoteAttack(const string& kerndata) {
 	if (!Convert::isKernNote(kerndata)) {
 		return false;
 	}
-	for (int i=0; i < kerndata.size(); i++) {
+	for (int i=0; i < (int)kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
 		if ((ch == '_') || (ch == ']')) {
 			return false;
@@ -107,7 +107,7 @@ bool Convert::isKernNoteAttack(const string& kerndata) {
 //
 
 bool Convert::hasKernSlurStart(const string& kerndata) {
-	for (int i=0; i < kerndata.size(); i++) {
+	for (int i=0; i < (int)kerndata.size(); i++) {
 		char ch = kerndata[i];
 		if (ch == '(') {
 			return true;
@@ -125,7 +125,7 @@ bool Convert::hasKernSlurStart(const string& kerndata) {
 //
 
 bool Convert::hasKernSlurEnd(const string& kerndata) {
-	for (int i=0; i < kerndata.size(); i++) {
+	for (int i=0; i < (int)kerndata.size(); i++) {
 		char ch = kerndata[i];
 		if (ch == ')') {
 			return true;
