@@ -821,17 +821,26 @@ int HumdrumLine::createTokensFromLine(void) {
 	HumdrumToken* token = new HumdrumToken();
 	token->setOwner(this);
 	char ch;
-	for (int i=0; i<(int)size(); i++) {
-		ch = getChar(i);
-		if (ch == '\t') {
-			tokens.push_back(token);
-			token = new HumdrumToken();
-			token->setOwner(this);
-		} else {
-			*token += ch;
+
+	if (this->size() == 0) {
+		tokens.push_back(token);
+	} else if (this->compare(0, 2, "!!") == 0) {
+		*token = *this;
+		tokens.push_back(token);
+	} else {
+		for (int i=0; i<(int)size(); i++) {
+			ch = getChar(i);
+			if (ch == '\t') {
+				tokens.push_back(token);
+				token = new HumdrumToken();
+				token->setOwner(this);
+			} else {
+				*token += ch;
+			}
 		}
+		tokens.push_back(token);
 	}
-	tokens.push_back(token);
+
 	return (int)tokens.size();
 }
 

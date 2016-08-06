@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug  6 15:44:39 CEST 2016
+// Last Modified: Sat Aug  6 19:00:41 CEST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6405,17 +6405,26 @@ int HumdrumLine::createTokensFromLine(void) {
 	HumdrumToken* token = new HumdrumToken();
 	token->setOwner(this);
 	char ch;
-	for (int i=0; i<(int)size(); i++) {
-		ch = getChar(i);
-		if (ch == '\t') {
-			tokens.push_back(token);
-			token = new HumdrumToken();
-			token->setOwner(this);
-		} else {
-			*token += ch;
+
+	if (this->size() == 0) {
+		tokens.push_back(token);
+	} else if (this->compare(0, 2, "!!") == 0) {
+		*token = *this;
+		tokens.push_back(token);
+	} else {
+		for (int i=0; i<(int)size(); i++) {
+			ch = getChar(i);
+			if (ch == '\t') {
+				tokens.push_back(token);
+				token = new HumdrumToken();
+				token->setOwner(this);
+			} else {
+				*token += ch;
+			}
 		}
+		tokens.push_back(token);
 	}
-	tokens.push_back(token);
+
 	return (int)tokens.size();
 }
 
