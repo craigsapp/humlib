@@ -1024,6 +1024,23 @@ bool HumdrumToken::isNullData(void) const {
 
 
 
+//////////////////////////////
+//
+// HumdrumToken::isLabel -- Returns true if a thru label (such as *>A).
+//
+
+bool HumdrumToken::isLabel(void) const {
+	if (string::compare(0, 2, "*>") != 0) {
+		return false;
+	}
+	if (string::find("[") != string::npos) {
+		return false;
+	}
+	return true;
+}
+
+
+
 /////////////////////////////
 //
 // HumdrumToken::isChord -- True if is a chord.  Presuming you know what

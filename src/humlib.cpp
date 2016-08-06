@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug  6 13:10:54 CEST 2016
+// Last Modified: Sat Aug  6 15:44:39 CEST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7981,6 +7981,23 @@ bool HumdrumToken::isNonNullData(void) const {
 
 bool HumdrumToken::isNullData(void) const {
 	return isData() && isNull();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isLabel -- Returns true if a thru label (such as *>A).
+//
+
+bool HumdrumToken::isLabel(void) const {
+	if (string::compare(0, 2, "*>") != 0) {
+		return false;
+	}
+	if (string::find("[") != string::npos) {
+		return false;
+	}
+	return true;
 }
 
 

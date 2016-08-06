@@ -67,6 +67,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isNonNullData             (void) const;
 		bool     isNullData                (void) const;
 		bool     isChord                   (const string& separator = " ");
+		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
 
 		// kern-specific functions:
