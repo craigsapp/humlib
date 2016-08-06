@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Mon Aug 10 00:06:00 PDT 2015
-# Last Modified: Mon Aug 10 00:06:00 PDT 2015
+# Last Modified: Sat Aug  6 11:26:12 CEST 2016
 # Filename:      /bin/makehumlib
 # Syntax:        perl 5
 # vim:           ts=3
@@ -52,6 +52,9 @@ sub createIncludeFile {
 	foreach my $file (@files) {
 		$contents .= getMergeContents("$basedir/$file");
 	}
+
+	my $options = getMergeContents("$basedir/Options.h");
+	$contents .= $options;
 
 	my $date = `date`;
 	chomp $date;

@@ -97,7 +97,7 @@ class Convert {
 
 // END_MERGE
 
-} // end namespace Humdrum
+} // end namespace hum
 
 #endif /* _CONVERT */
 

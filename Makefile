@@ -1,14 +1,20 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Sun Aug  9 22:20:14 PDT 2015
-## Last Modified: Sun Aug  9 22:20:16 PDT 2015
+## Last Modified: Sat Aug  6 13:03:46 CEST 2016
 ## Syntax:        GNU Makefile
-## Filename:      /Makefile
+## Filename:      humlib/Makefile
 ## vim:           ts=3
 ##
 ## Description: Makefile to run tasks for humlib library.
 ##
-
+## To compile the humlib library with the Options class, run:
+##     make CFLAGS=-D_INCLUDE_HUMLIB_OPTIONS_
+## Otherwise to compile:
+##     make
+## To create the minimal file version:
+##     make min
+##
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
 # "10.9" in Apple OS X to compile for OS X 10.9 and later (for example,
@@ -44,7 +50,7 @@ LIBFILE_MIN   = libhumlib.a
 AR            = ar
 RANLIB        = ranlib
 
-PREFLAGS  = -c -g -Wall $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
+PREFLAGS  = -c -g -Wall $(CFLAGS) $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
 PREFLAGS += -O3
 
 # using C++ 2011 standard:
