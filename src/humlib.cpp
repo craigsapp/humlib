@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  7 20:45:49 CEST 2016
+// Last Modified: Sun Aug  7 21:18:54 CEST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7790,6 +7790,88 @@ bool HumdrumToken::isClef(void) const {
 	}
 
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKeySignature -- True if a **kern key signature.
+//
+
+bool HumdrumToken::isKeySignature(void) const { 
+	if (this->compare(0, 3, "*k[") != 0) {
+		return false;
+	}
+	if (this->back() != ']') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKeyDesignation -- True if a **kern key designation.
+//
+
+bool HumdrumToken::isKeyDesignation(void) const {
+	if (this->size() < 3) {
+		return false;
+	}
+	if (this->find(":") == string::npos) {
+		return false;
+	}
+	char diatonic = (*this)[2];
+	
+	if ((diatonic >= 'A') && (diatonic <= 'G')) {
+		return true;
+	}
+	if ((diatonic >= 'a') && (diatonic <= 'g')) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isTimeSignature -- True if a **kern time signature.
+//
+
+bool HumdrumToken::isTimeSignature(void) const {
+	if (this->size() < 5) {
+		return false;
+	}
+	if (this->compare(0, 2, "*M") != 0) {
+		return false;
+	}
+	if (!isdigit((*this)[3])) {
+		return false;
+	}
+	if (this->find("/") == string::npos) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
+//
+
+bool HumdrumToken::isMensurationSymbol(void) const { 
+	if (this->compare(0, 5, "*met(") != 0) {
+		return false;
+	}
+	if ((*this)[this->size()-1] != ')') {
+		return false;
+	}
+	return true;
 }
 
 

@@ -826,6 +826,88 @@ bool HumdrumToken::isClef(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isKeySignature -- True if a **kern key signature.
+//
+
+bool HumdrumToken::isKeySignature(void) const { 
+	if (this->compare(0, 3, "*k[") != 0) {
+		return false;
+	}
+	if (this->back() != ']') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKeyDesignation -- True if a **kern key designation.
+//
+
+bool HumdrumToken::isKeyDesignation(void) const {
+	if (this->size() < 3) {
+		return false;
+	}
+	if (this->find(":") == string::npos) {
+		return false;
+	}
+	char diatonic = (*this)[2];
+	
+	if ((diatonic >= 'A') && (diatonic <= 'G')) {
+		return true;
+	}
+	if ((diatonic >= 'a') && (diatonic <= 'g')) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isTimeSignature -- True if a **kern time signature.
+//
+
+bool HumdrumToken::isTimeSignature(void) const {
+	if (this->size() < 5) {
+		return false;
+	}
+	if (this->compare(0, 2, "*M") != 0) {
+		return false;
+	}
+	if (!isdigit((*this)[3])) {
+		return false;
+	}
+	if (this->find("/") == string::npos) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
+//
+
+bool HumdrumToken::isMensurationSymbol(void) const { 
+	if (this->compare(0, 5, "*met(") != 0) {
+		return false;
+	}
+	if ((*this)[this->size()-1] != ')') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
 //     a '(' character.
 //

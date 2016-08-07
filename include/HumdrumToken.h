@@ -77,6 +77,10 @@ class HumdrumToken : public string, public HumHash {
 		bool     isInvisible               (void) const;
 		bool     isGrace                   (void) const;
 		bool     isClef                    (void) const;
+		bool     isKeySignature            (void) const;
+		bool     isKeyDesignation          (void) const;
+		bool     isTimeSignature           (void) const;
+		bool     isMensurationSymbol       (void) const;
 
 		bool     hasSlurStart              (void) const;
 		bool     hasSlurEnd                (void) const;
