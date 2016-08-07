@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug  6 19:00:41 CEST 2016
+// Last Modified: Sun Aug  7 20:45:49 CEST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7252,6 +7252,42 @@ int HumdrumToken::getLineIndex(void) const {
 
 int HumdrumToken::getFieldIndex(void) const {
 	return address.getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getFieldNumber -- Returns the index of the token the line.
+// @SEEALSO: getFieldNumber
+//
+
+int HumdrumToken::getFieldNumber(void) const {
+	return address.getFieldIndex() + 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getTokenIndex -- Returns the index of the token the line.
+// @SEEALSO: getTokenIndex
+//
+
+int HumdrumToken::getTokenIndex(void) const {
+	return address.getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getTokenNumber -- Returns the index of the token the line.
+// @SEEALSO: getFieldNumber
+//
+
+int HumdrumToken::getTokenNumber(void) const {
+	return address.getFieldIndex() + 1;
 }
 
 

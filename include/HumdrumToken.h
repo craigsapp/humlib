@@ -108,7 +108,9 @@ class HumdrumToken : public string, public HumHash {
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
-		int      getTokenIndex (void) const { return getFieldIndex(); }
+		int      getFieldNumber            (void) const;
+		int      getTokenIndex             (void) const;
+		int      getTokenNumber            (void) const;
 		const string& getDataType          (void) const;
 		bool     isDataType                (string dtype) const;
 		bool     isKern                    (void) const;

@@ -288,6 +288,42 @@ int HumdrumToken::getFieldIndex(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getFieldNumber -- Returns the index of the token the line.
+// @SEEALSO: getFieldNumber
+//
+
+int HumdrumToken::getFieldNumber(void) const {
+	return address.getFieldIndex() + 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getTokenIndex -- Returns the index of the token the line.
+// @SEEALSO: getTokenIndex
+//
+
+int HumdrumToken::getTokenIndex(void) const {
+	return address.getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getTokenNumber -- Returns the index of the token the line.
+// @SEEALSO: getFieldNumber
+//
+
+int HumdrumToken::getTokenNumber(void) const {
+	return address.getFieldIndex() + 1;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getLineNumber -- Returns the line index plus 1.
 // @SEEALTO: getLineIndex
 //
