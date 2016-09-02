@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  2 11:04:59 CEST 2016
+// Last Modified: Fri Sep  2 13:07:18 CEST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1770,6 +1770,7 @@ void HumInstrument::initialize(void) {
    afi("tambn",	GM_TINKLE_BELL,	"tambourine");
    afi("tambu",	GM_MELODIC_DRUM,	"tambura");
    afi("tanbr",	GM_MELODIC_DRUM,	"tanbur");
+   afi("tenor",	GM_CHOIR_AAHS,	"tenor");
    afi("timpa",	GM_MELODIC_DRUM,	"timpani");
    afi("tiorb",	GM_ACOUSTIC_GUITAR_NYLON,	"theorbo");
    afi("tom",		GM_TAIKO_DRUM,	"tom-tom drum");
@@ -1848,7 +1849,7 @@ int HumInstrument::data_compare_by_humdrum_name(const void* a,
       const void* b) {
    _HumInstrument& valuea = *((_HumInstrument*)a);
    _HumInstrument& valueb = *((_HumInstrument*)b);
-   return valuea.humdrum == valueb.humdrum;
+   return strcmp(valuea.humdrum.c_str(), valueb.humdrum.c_str());
 }
 
 
