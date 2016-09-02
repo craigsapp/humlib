@@ -39,6 +39,7 @@ sub createIncludeFile {
 		"HumHash.h",
 		"HumNum.h",
 		"HumAddress.h",
+		"HumInstrument.h",
 		"HumdrumLine.h",
 		"HumdrumToken.h",
 		"HumdrumFileBase.h",

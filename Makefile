@@ -22,7 +22,11 @@
 # version of the operating system).
 ENV =
 
-ifeq ($(shell uname),Darwin)
+OS := $(shell uname -s)
+
+ifeq ($(OS),Darwin)
+	OS = OSX
+	# Minimum OS X Version for C++11 is OS X 10.9:
    ENV = MACOSX_DEPLOYMENT_TARGET=10.9
    # use the following to compile for 32-bit architecture on 64-bit comps:
    #ARCH = -m32 -arch i386
@@ -47,6 +51,15 @@ INCDIR_MIN    = include
 LIBDIR        = lib
 LIBFILE       = libhumdrum.a
 LIBFILE_MIN   = libhumlib.a
+
+DLIBFILE      = libhumdrum.a
+DLIBFILE_MIN  = libhumlib.a
+ifeq ($(OS),OSX)
+   DLIBFILE_MIN  = humlib.dylib
+else
+   DLIBFILE_MIN  = humlib.so
+endif
+
 AR            = ar
 RANLIB        = ranlib
 
@@ -80,15 +93,21 @@ vpath %.o   $(OBJDIR)
 OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: examples myprograms src include t trans r
+.PHONY: examples myprograms src include dynamic
 
 
 ###########################################################################
-#                                                                         #
-# Hardware Configurations:                                                #
-#                                                                         #
 
-all: minlibrary
+
+all: minlibrary dynamic
+
+
+dynamic: min
+ifeq ($(OS),OSX)
+	g++ -dynamiclib -o $(LIBDIR)/$(DLIBFILE_MIN) $(OBJDIR)/humlib.o
+else
+	g++ -shared -fPIC -o $(LIBDIR)/$(DLIBFILE_MIN) $(OBJDIR)/humlib.o
+endif
 
 
 minlib: minlibrary
