@@ -88,7 +88,7 @@ class HumdrumFileBase : public HumHash {
 		             ~HumdrumFileBase              ();
 
 		bool          read                         (istream& contents);
-		bool          read                         (const char*   filename);
+		bool          read                         (const char* filename);
 		bool          read                         (const string& filename);
 		bool          readCsv                      (istream& contents,
 		                                            const string& separator=",");
@@ -97,9 +97,9 @@ class HumdrumFileBase : public HumHash {
 		bool          readCsv                      (const string& contents,
 		                                            const string& separator=",");
 
-		bool          readString                   (const char*   contents);
+		bool          readString                   (const char* contents);
 		bool          readString                   (const string& contents);
-		bool          readStringCsv                (const char*   contents,
+		bool          readStringCsv                (const char* contents,
 		                                            const string& separator=",");
 		bool          readStringCsv                (const string& contents,
 		                                            const string& separator=",");
@@ -109,7 +109,7 @@ class HumdrumFileBase : public HumHash {
 		void          setQuietParsing              (void);
 		void          setNoisyParsing              (void);
 
-		bool    parse    (istream& contents)         { return read(contents); }
+		bool    parse    (istream& contents)      { return read(contents); }
 		bool    parse    (const char* contents)   { return readString(contents); }
 		bool    parse    (const string& contents) { return readString(contents); }
 		bool    parseCsv (istream& contents, const string& separator = ",") {
