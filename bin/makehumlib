@@ -91,6 +91,9 @@ $license
 #include <map>
 #include <set>
 #include <algorithm>
+#include <cctype>
+#include <functional>
+#include <locale>
 
 using std::string;
 using std::vector;

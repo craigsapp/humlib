@@ -223,6 +223,7 @@ class HumHash {
 		int            getParameterCount   (const string& ns1,
 		                                    const string& ns2) const;
 		void           setPrefix           (const string& value);
+		string         getPrefix           (void) const;
 		ostream&       printXml            (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
 

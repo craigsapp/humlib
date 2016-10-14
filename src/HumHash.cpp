@@ -980,7 +980,17 @@ vector<string> HumHash::getKeyList(const string& keys) const {
 
 void HumHash::setPrefix(const string& value) {
 	prefix = value;
+}
 
+
+
+//////////////////////////////
+//
+// HumHash::getPrefix -- get the prefix.
+//
+
+string HumHash::getPrefix(void) const {
+	return prefix;
 }
 
 

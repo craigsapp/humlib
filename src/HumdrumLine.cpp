@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  9 21:59:46 PDT 2015
+// Last Modified: Fri Oct 14 11:41:22 PDT 2016 Added insertion functionality
 // Filename:      Convert.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumLine.h
 // Syntax:        C++11
@@ -201,7 +201,7 @@ bool HumdrumLine::isKernBoundaryEnd(void) const {
 	if (!isData()) {
 		return false;
 	}
-	HumdrumToken* ntok;
+	HTp ntok;
 	for (int i=0; i<getFieldCount(); i++) {
 		if (!token(i)->isDataType("**kern")) {
 			continue;
@@ -633,7 +633,7 @@ HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
 //    for the given spine/track.
 //
 
-HumdrumToken* HumdrumLine::getTrackStart(int track) const {
+HTp HumdrumLine::getTrackStart(int track) const {
 	if (owner == NULL) {
 		return NULL;
 	} else {
@@ -838,14 +838,14 @@ string HumdrumLine::getTokenString(int index) const {
 
 int HumdrumLine::createTokensFromLine(void) {
 	tokens.resize(0);
-	HumdrumToken* token = new HumdrumToken();
+	HTp token = new HumdrumToken();
 	token->setOwner(this);
 	char ch;
 
 	if (this->size() == 0) {
 		tokens.push_back(token);
 	} else if (this->compare(0, 2, "!!") == 0) {
-		*token = *this;
+		*token = (string)(*this);
 		tokens.push_back(token);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
@@ -898,7 +898,7 @@ void HumdrumLine::createLineFromTokens(void) {
 //   list will contain one empty string.
 //
 
-void HumdrumLine::getTokens(vector<HumdrumToken*>& list) {
+void HumdrumLine::getTokens(vector<HTp>& list) {
 	if (tokens.size() == 0) {
 		createTokensFromLine();
 	}
@@ -1414,6 +1414,37 @@ void HumdrumLine::setParameters(const string& pdata) {
 
 //////////////////////////////
 //
+// HumdrumLine::appendToken -- add a token at the end of the current
+//      list of tokens in the line.
+//
+
+void HumdrumLine::appendToken(HTp token) { 
+	// deletion will be handled by class.
+	tokens.push_back(token);
+}
+
+
+void HumdrumLine::appendToken(const HumdrumToken& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.push_back(newtok);
+}
+
+
+void HumdrumLine::appendToken(const string& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.push_back(newtok);
+}
+
+
+void HumdrumLine::appendToken(const char* token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.push_back(newtok);
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -1422,6 +1453,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	out << (string)line;
 	return out;
 }
+
 
 
 
