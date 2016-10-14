@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 14 12:15:11 PDT 2016
+// Last Modified: Fri Oct 14 12:43:18 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3225,6 +3225,20 @@ void HumdrumFileBase::append(const char* line) {
 void HumdrumFileBase::append(const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
+}
+
+
+
+////////////////////////////
+//
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  
+//    The file's spine and rhythmic structure should be recalculated 
+//    after an append.  "appendLine" is used as the name in order to
+//    avoid confusion with the string inheritance of HumdrumLine.
+//
+
+void HumdrumFileBase::appendLine(HumdrumLine* line) {
+	lines.push_back(line);
 }
 
 

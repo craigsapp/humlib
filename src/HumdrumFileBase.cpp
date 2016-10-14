@@ -420,6 +420,20 @@ void HumdrumFileBase::append(const string& line) {
 
 
 
+////////////////////////////
+//
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  
+//    The file's spine and rhythmic structure should be recalculated 
+//    after an append.  "appendLine" is used as the name in order to
+//    avoid confusion with the string inheritance of HumdrumLine.
+//
+
+void HumdrumFileBase::appendLine(HumdrumLine* line) {
+	lines.push_back(line);
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumFileBase::getReferenceRecords --

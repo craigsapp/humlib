@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 14 12:15:11 PDT 2016
+// Last Modified: Fri Oct 14 12:43:18 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1188,6 +1188,7 @@ class HumdrumFileBase : public HumHash {
 		void          createLinesFromTokens    (void);
 		void          append                   (const char* line);
 		void          append                   (const string& line);
+		void          appendLine               (HumdrumLine* line);
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:
