@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 14 12:43:18 PDT 2016
+// Last Modified: Fri Oct 14 14:39:35 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -753,6 +753,11 @@ class HumdrumLine : public string, public HumHash {
 		void     appendToken            (const string& token);
 		void     appendToken            (const char* token);
 
+		void     insertToken            (int index, HTp token);
+		void     insertToken            (int index, const HumdrumToken& token);
+		void     insertToken            (int index, const string& token);
+		void     insertToken            (int index, const char* token);
+
 	protected:
 		bool     analyzeTracks          (string& err);
 		bool     analyzeTokenDurations  (string& err);
@@ -1186,9 +1191,15 @@ class HumdrumFileBase : public HumHash {
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
 		void          createLinesFromTokens    (void);
-		void          append                   (const char* line);
-		void          append                   (const string& line);
+
+		void          appendLine               (const char* line);
+		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
+
+		void          insertLine               (int index, const char* line);
+		void          insertLine               (int index, const string& line);
+		void          insertLine               (int index, HumdrumLine* line);
+
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:

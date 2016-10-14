@@ -156,9 +156,15 @@ class HumdrumFileBase : public HumHash {
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
 		void          createLinesFromTokens    (void);
-		void          append                   (const char* line);
-		void          append                   (const string& line);
+
+		void          appendLine               (const char* line);
+		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
+
+		void          insertLine               (int index, const char* line);
+		void          insertLine               (int index, const string& line);
+		void          insertLine               (int index, HumdrumLine* line);
+
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:

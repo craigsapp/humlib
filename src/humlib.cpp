@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 14 12:43:18 PDT 2016
+// Last Modified: Fri Oct 14 14:39:35 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3212,33 +3212,51 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::append -- Add a line to the file's contents.  The file's
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
-void HumdrumFileBase::append(const char* line) {
+void HumdrumFileBase::appendLine(const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
 }
 
 
-void HumdrumFileBase::append(const string& line) {
+void HumdrumFileBase::appendLine(const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
+}
+
+
+void HumdrumFileBase::appendLine(HumdrumLine* line) {
+	// deletion will be handled by class.
+	lines.push_back(line);
 }
 
 
 
 ////////////////////////////
 //
-// HumdrumFileBase::appendLine -- Add a line to the file's contents.  
-//    The file's spine and rhythmic structure should be recalculated 
-//    after an append.  "appendLine" is used as the name in order to
-//    avoid confusion with the string inheritance of HumdrumLine.
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
+//    spine and rhythmic structure should be recalculated after an append.
 //
 
-void HumdrumFileBase::appendLine(HumdrumLine* line) {
-	lines.push_back(line);
+
+void HumdrumFileBase::insertLine(int index, const char* line) { 
+	HumdrumLine* s = new HumdrumLine(line);
+	lines.insert(lines.begin() + index, s);
+}
+
+
+void HumdrumFileBase::insertLine(int index, const string& line) { 
+	HumdrumLine* s = new HumdrumLine(line);
+	lines.insert(lines.begin() + index, s);
+}
+
+
+void HumdrumFileBase::insertLine(int index, HumdrumLine* line) { 
+	// deletion will be handled by class.
+	lines.insert(lines.begin() + index, line);
 }
 
 
@@ -7467,6 +7485,37 @@ void HumdrumLine::appendToken(const string& token) {
 void HumdrumLine::appendToken(const char* token) { 
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::insertToken -- add a token at the end of the current
+//      list of tokens in the line.
+//
+
+void HumdrumLine::insertToken(int index, HTp token) { 
+	// deletion will be handled by class.
+	tokens.insert(tokens.begin() + index, token);
+}
+
+
+void HumdrumLine::insertToken(int index, const HumdrumToken& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
+}
+
+
+void HumdrumLine::insertToken(int index, const string& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
+}
+
+
+void HumdrumLine::insertToken(int index, const char* token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
 }
 
 

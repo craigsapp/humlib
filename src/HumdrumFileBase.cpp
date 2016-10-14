@@ -403,33 +403,51 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::append -- Add a line to the file's contents.  The file's
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
-void HumdrumFileBase::append(const char* line) {
+void HumdrumFileBase::appendLine(const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
 }
 
 
-void HumdrumFileBase::append(const string& line) {
+void HumdrumFileBase::appendLine(const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	lines.push_back(s);
+}
+
+
+void HumdrumFileBase::appendLine(HumdrumLine* line) {
+	// deletion will be handled by class.
+	lines.push_back(line);
 }
 
 
 
 ////////////////////////////
 //
-// HumdrumFileBase::appendLine -- Add a line to the file's contents.  
-//    The file's spine and rhythmic structure should be recalculated 
-//    after an append.  "appendLine" is used as the name in order to
-//    avoid confusion with the string inheritance of HumdrumLine.
+// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
+//    spine and rhythmic structure should be recalculated after an append.
 //
 
-void HumdrumFileBase::appendLine(HumdrumLine* line) {
-	lines.push_back(line);
+
+void HumdrumFileBase::insertLine(int index, const char* line) { 
+	HumdrumLine* s = new HumdrumLine(line);
+	lines.insert(lines.begin() + index, s);
+}
+
+
+void HumdrumFileBase::insertLine(int index, const string& line) { 
+	HumdrumLine* s = new HumdrumLine(line);
+	lines.insert(lines.begin() + index, s);
+}
+
+
+void HumdrumFileBase::insertLine(int index, HumdrumLine* line) { 
+	// deletion will be handled by class.
+	lines.insert(lines.begin() + index, line);
 }
 
 

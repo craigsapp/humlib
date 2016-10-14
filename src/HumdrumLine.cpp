@@ -1445,6 +1445,37 @@ void HumdrumLine::appendToken(const char* token) {
 
 //////////////////////////////
 //
+// HumdrumLine::insertToken -- add a token at the end of the current
+//      list of tokens in the line.
+//
+
+void HumdrumLine::insertToken(int index, HTp token) { 
+	// deletion will be handled by class.
+	tokens.insert(tokens.begin() + index, token);
+}
+
+
+void HumdrumLine::insertToken(int index, const HumdrumToken& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
+}
+
+
+void HumdrumLine::insertToken(int index, const string& token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
+}
+
+
+void HumdrumLine::insertToken(int index, const char* token) { 
+	HTp newtok = new HumdrumToken(token);
+	tokens.insert(tokens.begin() + index, newtok);
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
