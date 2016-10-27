@@ -61,6 +61,9 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 
 HumdrumFileBase::~HumdrumFileBase() {
 	// do nothing
+	for (int i=0; i<(int)lines.size(); i++) {
+		delete lines.at(i);
+	}
 }
 
 

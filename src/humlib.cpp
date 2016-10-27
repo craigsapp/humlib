@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 27 12:12:46 PDT 2016
+// Last Modified: Thu Oct 27 12:35:34 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2873,6 +2873,9 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 
 HumdrumFileBase::~HumdrumFileBase() {
 	// do nothing
+	for (int i=0; i<(int)lines.size(); i++) {
+		delete lines.at(i);
+	}
 }
 
 

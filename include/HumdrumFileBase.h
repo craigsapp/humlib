@@ -221,6 +221,7 @@ class HumdrumFileBase : public HumHash {
 	protected:
 
 		// lines: an array representing lines from the input file.
+		// The contents of lines must be deallocated when deconstructing object.
 		vector<HumdrumLine*> lines;
 
 		// trackstarts: list of addresses of the exclusive interpreations
