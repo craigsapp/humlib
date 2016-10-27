@@ -35,6 +35,7 @@ HumdrumLine::HumdrumLine(void) : string() {
 	setPrefix("!!");
 }
 
+
 HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	owner = NULL;
 	if ((this->size() > 0) && (this->back() == 0x0d)) {
@@ -44,6 +45,7 @@ HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	durationFromStart = -1;
 	setPrefix("!!");
 }
+
 
 HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	owner = NULL;
@@ -64,7 +66,12 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 
 HumdrumLine::~HumdrumLine() {
 	// free stored HumdrumTokens:
-	clear();
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (tokens[i] != NULL) {
+			delete tokens[i];
+			tokens[i] = NULL;
+		}
+	}
 }
 
 
@@ -136,8 +143,10 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 
 void HumdrumLine::clear(void) {
 	for (int i=0; i<(int)tokens.size(); i++) {
-		delete tokens[i];
-		tokens[i] = NULL;
+		if (tokens[i] != NULL) {
+			delete tokens[i];
+			tokens[i] = NULL;
+		}
 	}
 }
 

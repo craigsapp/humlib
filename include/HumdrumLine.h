@@ -148,7 +148,9 @@ class HumdrumLine : public string, public HumHash {
 		// useful: you can read in a HumdrumFile, tweak the tokens, then
 		// reconstruct the full line and print out again.
 		// This variable is filled by HumdrumFile::read().
-		vector<HTp> tokens;
+		// The contents of this vector should be deleted when deconstructing
+		// a HumdrumLine object.
+		vector<HumdrumToken*> tokens;
 
 		// duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the

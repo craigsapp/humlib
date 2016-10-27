@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 27 12:35:34 PDT 2016
+// Last Modified: Thu Oct 27 13:03:37 PDT 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2874,7 +2874,10 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 HumdrumFileBase::~HumdrumFileBase() {
 	// do nothing
 	for (int i=0; i<(int)lines.size(); i++) {
-		delete lines.at(i);
+		if (lines[i] != NULL) {
+			delete lines[i];
+			lines[i] = NULL;
+		}
 	}
 }
 
@@ -6087,6 +6090,7 @@ HumdrumLine::HumdrumLine(void) : string() {
 	setPrefix("!!");
 }
 
+
 HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	owner = NULL;
 	if ((this->size() > 0) && (this->back() == 0x0d)) {
@@ -6096,6 +6100,7 @@ HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	durationFromStart = -1;
 	setPrefix("!!");
 }
+
 
 HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	owner = NULL;
@@ -6116,7 +6121,12 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 
 HumdrumLine::~HumdrumLine() {
 	// free stored HumdrumTokens:
-	clear();
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (tokens[i] != NULL) {
+			delete tokens[i];
+			tokens[i] = NULL;
+		}
+	}
 }
 
 
@@ -6188,8 +6198,10 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 
 void HumdrumLine::clear(void) {
 	for (int i=0; i<(int)tokens.size(); i++) {
-		delete tokens[i];
-		tokens[i] = NULL;
+		if (tokens[i] != NULL) {
+			delete tokens[i];
+			tokens[i] = NULL;
+		}
 	}
 }
 
