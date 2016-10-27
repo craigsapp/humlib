@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  7 23:43:43 CEST 2016
+// Last Modified: Wed Oct 26 18:01:23 PDT 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1535,8 +1535,6 @@ class Convert {
 
 
 
-#ifdef _USE_HUMLIB_OPTIONS_
-
 class Option_register {
    public:
                    Option_register    (void);
@@ -1660,9 +1658,6 @@ class Options {
 #define OPTION_INT_TYPE       'i'
 #define OPTION_STRING_TYPE    's'
 #define OPTION_UNKNOWN_TYPE   'x'
-
-
-#endif /* _USE_HUMLIB_OPTIONS_ */
 
 
 } // end of namespace hum

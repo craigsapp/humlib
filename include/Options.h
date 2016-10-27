@@ -24,8 +24,6 @@ namespace hum {
 
 // START_MERGE
 
-#ifdef _USE_HUMLIB_OPTIONS_
-
 class Option_register {
    public:
                    Option_register    (void);
@@ -149,9 +147,6 @@ class Options {
 #define OPTION_INT_TYPE       'i'
 #define OPTION_STRING_TYPE    's'
 #define OPTION_UNKNOWN_TYPE   'x'
-
-
-#endif /* _USE_HUMLIB_OPTIONS_ */
 
 // END_MERGE
 

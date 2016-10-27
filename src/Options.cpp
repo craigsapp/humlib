@@ -11,9 +11,7 @@
 //
 
 
-#ifdef _USE_HUMLIB_OPTIONS_
-   #include "Options.h"
-#endif
+#include "Options.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +25,6 @@ namespace hum {
 
 // START_MERGE
 
-#ifdef _USE_HUMLIB_OPTIONS_
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -1240,8 +1237,6 @@ ostream& Options::printRegister(ostream& out) {
    }
    return out;
 }
-
-#endif /* _USE_HUMLIB_OPTIONS_ */
 
 // END_MERGE
 
