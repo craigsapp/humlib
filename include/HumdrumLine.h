@@ -102,6 +102,17 @@ class HumdrumLine : public string, public HumHash {
 		void     setLineFromCsv         (const string& csv,
 		                                 const string& separator = ",");
 
+		// low-level editing functions (need to re-analyze structure after using)
+		void     appendToken            (HTp token);
+		void     appendToken            (const HumdrumToken& token);
+		void     appendToken            (const string& token);
+		void     appendToken            (const char* token);
+
+		void     insertToken            (int index, HTp token);
+		void     insertToken            (int index, const HumdrumToken& token);
+		void     insertToken            (int index, const string& token);
+		void     insertToken            (int index, const char* token);
+
 	protected:
 		bool     analyzeTracks          (string& err);
 		bool     analyzeTokenDurations  (string& err);

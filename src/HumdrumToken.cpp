@@ -59,6 +59,13 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	strand = -1;
 }
 
+HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
+		string((string)aToken) {
+	rhycheck = 0;
+	setPrefix("!");
+	strand = -1;
+}
+
 
 //////////////////////////////
 //
@@ -1863,6 +1870,42 @@ HTp HumdrumToken::getSlurStartToken(void) {
 
 HTp HumdrumToken::getSlurEndToken(void) {
 	return getValueHTp("auto", "slurEnd");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::operator= -- Copy operator.
+//
+
+HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
+	if (this == &aToken) {
+		return *this;
+	}
+	(string)(*this) = (string)aToken;
+	rhycheck = aToken.rhycheck;
+	setPrefix(aToken.getPrefix());
+	strand = aToken.strand;
+	return *this;
+}
+
+
+HumdrumToken& HumdrumToken::operator=(const string& aToken) { 
+	(string)(*this) = aToken;
+	rhycheck = 0;
+	setPrefix("!");
+	strand = -1;
+	return *this;
+}
+
+
+HumdrumToken& HumdrumToken::operator=(const char* aToken) { 
+	(string)(*this) = aToken;
+	rhycheck = 0;
+	setPrefix("!");
+	strand = -1;
+	return *this;
 }
 
 

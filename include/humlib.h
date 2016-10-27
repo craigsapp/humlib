@@ -50,6 +50,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 #include <algorithm>
+#include <cctype>
+#include <functional>
+#include <locale>
 
 using std::string;
 using std::vector;
@@ -187,6 +190,7 @@ class HumHash {
 		int            getParameterCount   (const string& ns1,
 		                                    const string& ns2) const;
 		void           setPrefix           (const string& value);
+		string         getPrefix           (void) const;
 		ostream&       printXml            (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
 
@@ -743,6 +747,17 @@ class HumdrumLine : public string, public HumHash {
 		void     setLineFromCsv         (const string& csv,
 		                                 const string& separator = ",");
 
+		// low-level editing functions (need to re-analyze structure after using)
+		void     appendToken            (HTp token);
+		void     appendToken            (const HumdrumToken& token);
+		void     appendToken            (const string& token);
+		void     appendToken            (const char* token);
+
+		void     insertToken            (int index, HTp token);
+		void     insertToken            (int index, const HumdrumToken& token);
+		void     insertToken            (int index, const string& token);
+		void     insertToken            (int index, const char* token);
+
 	protected:
 		bool     analyzeTracks          (string& err);
 		bool     analyzeTokenDurations  (string& err);
@@ -823,6 +838,7 @@ ostream& operator<< (ostream& out, HumdrumLine& line);
 class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
+		         HumdrumToken              (const HumdrumToken& token);
 		         HumdrumToken              (const char* token);
 		         HumdrumToken              (const string& token);
 		        ~HumdrumToken              ();
@@ -931,6 +947,10 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
+
+		HumdrumToken& operator=            (HumdrumToken& aToken);
+		HumdrumToken& operator=            (const string& aToken);
+		HumdrumToken& operator=            (const char* aToken);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
@@ -1171,8 +1191,15 @@ class HumdrumFileBase : public HumHash {
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
 		void          createLinesFromTokens    (void);
-		void          append                   (const char* line);
-		void          append                   (const string& line);
+
+		void          appendLine               (const char* line);
+		void          appendLine               (const string& line);
+		void          appendLine               (HumdrumLine* line);
+
+		void          insertLine               (int index, const char* line);
+		void          insertLine               (int index, const string& line);
+		void          insertLine               (int index, HumdrumLine* line);
+
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:

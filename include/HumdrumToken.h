@@ -30,6 +30,7 @@ namespace hum {
 class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
+		         HumdrumToken              (const HumdrumToken& token);
 		         HumdrumToken              (const char* token);
 		         HumdrumToken              (const string& token);
 		        ~HumdrumToken              ();
@@ -138,6 +139,10 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
+
+		HumdrumToken& operator=            (HumdrumToken& aToken);
+		HumdrumToken& operator=            (const string& aToken);
+		HumdrumToken& operator=            (const char* aToken);
 
 		// next/previous token functions:
 		int           getNextTokenCount         (void) const;
