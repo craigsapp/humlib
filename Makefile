@@ -99,7 +99,7 @@ OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 ###########################################################################
 
 
-all: minlibrary dynamic
+all: minlibrary
 
 
 dynamic: min
