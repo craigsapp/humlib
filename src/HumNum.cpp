@@ -27,12 +27,14 @@ namespace hum {
 //
 
 HumNum::HumNum(void){
-	setValue(0);
+	top = 0;
+	bot = 1;
 }
 
 
 HumNum::HumNum(int value){
-	setValue(value);
+	top = value;
+	bot = 1;
 }
 
 
@@ -52,7 +54,8 @@ HumNum::HumNum(const char* ratstring) {
 
 
 HumNum::HumNum(const HumNum& rat) {
-	*this = rat;
+	top = rat.top;
+	bot = rat.bot;
 }
 
 

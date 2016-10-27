@@ -496,7 +496,7 @@ int Options::getArgumentCount(void) {
 
 vector<string>& Options::getArgList(vector<string>& output) {
    output.resize(argument.size());
-   for (int i=0; i<argument.size(); i++) {
+   for (int i=0; i<(int)argument.size(); i++) {
       output[i] = *argument[i];
    }
    return output;
