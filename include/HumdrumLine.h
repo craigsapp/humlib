@@ -113,15 +113,16 @@ class HumdrumLine : public string, public HumHash {
 		void     insertToken            (int index, const string& token);
 		void     insertToken            (int index, const char* token);
 
+		void     setDuration            (HumNum aDur);
+		void     setDurationFromStart   (HumNum dur);
+		void     setDurationFromBarline (HumNum dur);
+		void     setDurationToBarline   (HumNum dur);
+
 	protected:
 		bool     analyzeTracks          (string& err);
 		bool     analyzeTokenDurations  (string& err);
 		void     setLineIndex           (int index);
 		void     clear                  (void);
-		void     setDuration            (HumNum aDur);
-		void     setDurationFromStart   (HumNum dur);
-		void     setDurationFromBarline (HumNum dur);
-		void     setDurationToBarline   (HumNum dur);
 		void     setOwner               (void* hfile);
 		int      createTokensFromLine   (void);
 		void     setParameters          (HumdrumLine* pLine);

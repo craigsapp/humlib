@@ -201,9 +201,62 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 	if (!analyzeGlobalParameters() ) { return isValid(); }
 	if (!analyzeLocalParameters()  ) { return isValid(); }
 	if (!analyzeTokenDurations()   ) { return isValid(); }
-	if (!analyzeRhythm()           ) { return isValid(); }
-	if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
+	HTp firstspine = getSpineStart(0);
+	if (firstspine && firstspine->isDataType("**recip")) {
+		assignRhythmFromRecip(firstspine);
+	} else {
+		if (!analyzeRhythm()           ) { return isValid(); }
+		if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
+	}
 	return isValid();
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::assignRhythmFromRecip --
+//
+
+bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
+	HTp current = spinestart;
+	
+	HumNum duration;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			// This should not occur in a well-formed **recip spine, but
+			// treat as a zero duration.
+			continue;
+		}
+		
+		if (strchr(current->c_str(), 'q') != NULL) {
+			duration = 0;
+		} else {
+			duration = Convert::recipToDuration((string)*current);
+		}
+		current->getLine()->setDuration(duration);
+		current = current->getNextToken();
+	}
+
+	// now go back and set the absolute position from the start of
+	// the file.
+	HumNum sum = 0;
+	HumdrumFileStructure& hfile = *this;
+	for (int i=0; i<getLineCount(); i++) {
+		hfile[i].setDurationFromStart(sum);
+		if (hfile[i].getDuration() < 0) {
+			hfile[i].setDuration(0);
+		}
+		sum += hfile[i].getDuration();
+	}
+
+	// Analyze durations to/from barlines:
+	if (!analyzeMeter()) { return false; }
+	if (!analyzeNonNullDataTokens()) { return false; }
+	return true;
 }
 
 

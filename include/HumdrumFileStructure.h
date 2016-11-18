@@ -105,6 +105,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeStructure             (void);
 		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
+		bool          assignRhythmFromRecip        (HTp spinestart);
 		bool          analyzeMeter                 (void);
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeGlobalParameters      (void);

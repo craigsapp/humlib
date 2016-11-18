@@ -1,7 +1,7 @@
 #include "humlib.h"
 
 using namespace std;
-using namespace minHumdrum;
+using namespace hum;
 
 void printNoteInformation(HumdrumToken* tok, int tpq) {
    cout << *tok;

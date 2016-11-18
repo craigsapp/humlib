@@ -523,7 +523,11 @@ bool HumdrumToken::analyzeDuration(string& err) {
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
-				duration = Convert::recipToDuration((string)(*this));
+				if (strchr(this->c_str(), 'q') != NULL) {
+					duration = 0;
+				} else {
+					duration = Convert::recipToDuration((string)(*this));
+				}
 			} else {
 				duration.setValue(-1);
 			}

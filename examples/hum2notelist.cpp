@@ -4,7 +4,7 @@
 #include "humlib.h"
 
 using namespace std;
-using namespace minHumdrum;
+using namespace hum;
 
 void printNoteInformation(HumdrumFile& infile, int line, 
       int field, int tpq);
@@ -26,10 +26,10 @@ int main(int argc, char** argv) {
          continue;
       }
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         if (infile.token(i, j).isNull()) {
+         if (infile.token(i, j)->isNull()) {
             continue;
          }
-         if (infile.token(i, j).isDataType("kern")) {
+         if (infile.token(i, j)->isDataType("kern")) {
             printNoteInformation(infile, i, j, tpq);
          }
       }
@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
 void printNoteInformation(HumdrumFile& infile, int line, 
       int field, int tpq) {
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();
-   int duration  = infile.token(line, field).getDuration(tpq).getInteger();
-   cout << Convert::kernToScientificPitch(infile.token(line, field))
-        << '\t' << infile.token(line, field).getTrackString() 
+   int duration  = infile.token(line, field)->getDuration(tpq).getInteger();
+   cout << Convert::kernToScientificPitch(*infile.token(line, field))
+        << '\t' << infile.token(line, field)->getTrackString() 
         << '\t' << starttime 
         << '\t' << duration << endl;
 }
