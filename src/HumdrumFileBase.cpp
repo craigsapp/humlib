@@ -460,6 +460,17 @@ void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::back --
+//
+
+HumdrumLine* HumdrumFileBase::back(void) {
+	return lines.back();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getReferenceRecords --
 //
 

@@ -160,10 +160,16 @@ class HumdrumFileBase : public HumHash {
 		void          appendLine               (const char* line);
 		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
+      void          push_back(const char* line)   { appendLine(line); }
+      void          push_back(const string& line) { appendLine(line); }
+      void          push_back(HumdrumLine* line)  { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
 		void          insertLine               (int index, HumdrumLine* line);
+
+		HumdrumLine*  back                     (void);
+
 
 		vector<HumdrumLine*> getReferenceRecords(void);
 
