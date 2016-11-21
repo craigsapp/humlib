@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
    int wbh = 0;    // integer encoded pitch
    bool tochromatic;
 
-   if (argc < 2) {
+   if (argc < 3) {
       // too few parameters
       return 1;
    } else if (argc < 4) {
