@@ -380,16 +380,16 @@ int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 
 void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 		int wbh) {
-	int cwidth = maxacc * 1 + 1;
+	int cwidth = maxacc * 2 + 1;
 	int base = 7 * cwidth + 5;
-	octave = wbh % base;
-	int pc = wbh - base * octave;
+	octave = wbh / base;
+	int pc = wbh % base;
 
 	// test for C diatonic pitch:
 	int pctest = cwidth;
 	if (pc < pctest) {
 		dpc = 0;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -397,7 +397,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += 1 + cwidth;
 	if (pc < pctest) {
 		dpc = 1;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -405,7 +405,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += 1 + cwidth;
 	if (pc < pctest) {
 		dpc = 2;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -413,7 +413,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += cwidth;
 	if (pc < pctest) {
 		dpc = 3;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -421,7 +421,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += 1 + cwidth;
 	if (pc < pctest) {
 		dpc = 4;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -429,7 +429,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += 1 + cwidth;
 	if (pc < pctest) {
 		dpc = 5;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 
@@ -437,7 +437,7 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	pctest += 1 + cwidth;
 	if (pc < pctest) {
 		dpc = 6;
-		acc = pc - pctest + maxacc;
+		acc = pc - pctest + maxacc + 1;
 		return;
 	}
 

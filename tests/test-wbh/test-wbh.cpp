@@ -37,7 +37,17 @@ int main(int argc, char** argv) {
       cout << "acc = " << acc << endl;
       cout << "oct = " << oct << endl;
       cout << "wbh = " << wbh << endl;
-      cout << "name = " << 'A' + dpc;
+      cout << "name = ";
+      switch (dpc) {
+         case 0:  cout << "C"; break;
+         case 1:  cout << "D"; break;
+         case 2:  cout << "E"; break;
+         case 3:  cout << "F"; break;
+         case 4:  cout << "G"; break;
+         case 5:  cout << "A"; break;
+         case 6:  cout << "B"; break;
+         default: cout << "X";
+      }
       if (acc > 0) {
          for (int i=0; i<acc; i++) {
             cout << "#";
