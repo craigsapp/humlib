@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov 21 14:27:39 PST 2016
+// Last Modified: Mon Nov 21 15:16:42 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1512,6 +1512,9 @@ class Convert {
 		                                   string separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
+		static string  base40ToKern         (int b40);
+   	static int     base40ToAccidental   (int b40);
+   	static int     base40ToDiatonic     (int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
 		static int     kernToAccidentalCount(const string& kerndata);
 		static int     kernToDiatonicPC     (const string& kerndata);

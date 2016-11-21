@@ -35,6 +35,9 @@ class Convert {
 		                                   string separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
+		static string  base40ToKern         (int b40);
+   	static int     base40ToAccidental   (int b40);
+   	static int     base40ToDiatonic     (int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
 		static int     kernToAccidentalCount(const string& kerndata);
 		static int     kernToDiatonicPC     (const string& kerndata);

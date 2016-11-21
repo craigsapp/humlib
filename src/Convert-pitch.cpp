@@ -290,6 +290,163 @@ int Convert::kernToBase12(const string& kerndata) {
 
 
 
+//////////////////////////////
+//
+// Convert::base40ToKern -- Convert Base-40 integer pitches into
+//   **kern pitch representation.
+//
+
+string Convert::base40ToKern(int b40) {
+   int octave     = b40 / 40;
+   int accidental = Convert::base40ToAccidental(b40);
+   int diatonic   = Convert::base40ToDiatonic(b40) % 7;
+   char base = 'a';
+   switch (diatonic) {
+      case 0: base = 'c'; break;
+      case 1: base = 'd'; break;
+      case 2: base = 'e'; break;
+      case 3: base = 'f'; break;
+      case 4: base = 'g'; break;
+      case 5: base = 'a'; break;
+      case 6: base = 'b'; break;
+   }
+   if (octave < 4) {
+      base = std::toupper(base);
+   }
+   int repeat = 0;
+   if (octave > 4) {
+      repeat = octave - 4;
+   } else if (octave < 3) {
+      repeat = 3 - octave;
+   }
+   if (repeat > 12) {
+      cerr << "Error: unreasonable octave value: " << octave << endl;
+      exit(1);
+   }
+	string output;
+	output += base;
+   for (int i=0; i<repeat; i++) {
+		output += base;
+   }
+   if (accidental == 0) {
+      return output;
+   }
+   if (accidental > 0) {
+		for (int i=0; i<accidental; i++) {
+			output += '#';
+		}
+   } else if (accidental < 0) {
+		for (int i=0; i<-accidental; i++) {
+			output += '-';
+		}
+   }
+
+   return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToDiatonic -- find the diatonic pitch of the
+//   given base-40 pitch.  Output pitch classes: 0=C, 1=D, 2=E,
+//   3=F, 4=G, 5=A, 6=B.  To this the diatonic octave is added.
+//   To get only the diatonic pitch class, mod by 7: (% 7).
+//   Base-40 pitches are not allowed, and the algorithm will have
+//   to be adjusted to allow them.  Currently any negative base-40
+//   value is presumed to be a rest and not processed.
+//
+
+int Convert::base40ToDiatonic(int b40) {
+   int chroma = b40 % 40;
+   int octaveoffset = (b40 / 40) * 7;
+   if (b40 < 0) { 
+      return -1;   // rest;
+   }
+   switch (chroma) {
+		case 0: case 1: case 2: case 3: case 4:      // C-- to C##
+			return 0 + octaveoffset;
+		case 6: case 7: case 8: case 9: case 10:     // D-- to D##
+			return 1 + octaveoffset;
+		case 12: case 13: case 14: case 15: case 16: // E-- to E##
+			return 2 + octaveoffset;
+		case 17: case 18: case 19: case 20: case 21: // F-- to F##
+			return 3 + octaveoffset;
+		case 23: case 24: case 25: case 26: case 27: // G-- to G##
+			return 4 + octaveoffset;
+		case 29: case 30: case 31: case 32: case 33: // A-- to A##
+			return 5 + octaveoffset;
+		case 35: case 36: case 37: case 38: case 39: // B-- to B##
+			return 6 + octaveoffset;
+   }
+
+	// found an empty slot, so return rest:
+   return -1;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToAccidental -- +1 = 1 sharp, +2 = double sharp, 0 = natural
+//	-1 = 1 flat, -2 = double flat
+//
+
+int Convert::base40ToAccidental(int b40) {
+   if (b40 < 0) {
+		// not considering low pitches.  If so then the mod operator
+		// below whould need fixing.
+      return 0;
+   }
+
+   switch (b40 % 40) {
+      case 0:	return -2;      // C-double-flat
+      case 1:	return -1;      // C-flat
+      case 2:	return  0;      // C
+      case 3:	return  1;      // C-sharp
+      case 4:	return  2;      // C-double-sharp
+      case 5:	return 1000;
+      case 6:	return -2;
+      case 7:	return -1;
+      case 8:	return  0;      // D
+      case 9:	return  1;
+      case 10:	return  2;
+      case 11:	return 1000;
+      case 12:	return -2;
+      case 13:	return -1;
+      case 14:	return  0;      // E
+      case 15:	return  1;
+      case 16:	return  2;
+      case 17:	return -2;
+      case 18:	return -1;
+      case 19:	return  0;      // F
+      case 20:	return  1;
+      case 21:	return  2;
+      case 22:	return 1000;
+      case 23:	return -2;
+      case 24:	return -1;
+      case 25:	return  0;      // G
+      case 26:	return  1;
+      case 27:	return  2;
+      case 28:	return 1000;
+      case 29:	return -2;
+      case 30:	return -1;
+      case 31:	return  0;      // A
+      case 32:	return  1;
+      case 33:	return  2;
+      case 34:	return 1000;
+      case 35:	return -2;
+      case 36:	return -1;
+      case 37:	return  0;      // B
+      case 38:	return  1;
+      case 39:	return  2;
+   }
+
+   return 0;
+}
+
+
+
 ///////////////////////////////
 //
 // Convert::kernToMidiNoteNumber -- Convert **kern to MIDI note number
