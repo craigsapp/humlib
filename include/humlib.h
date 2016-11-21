@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Nov 20 12:55:14 PST 2016
+// Last Modified: Mon Nov 21 13:35:24 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1539,6 +1539,8 @@ class Convert {
 		}
 		static int     pitchToWbh         (int dpc, int acc, int octave,
 		                                   int maxacc);
+		static void    wbhToPitch         (int& dpc, int& acc, int& octave,
+		                                   int maxacc, int wbh);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp

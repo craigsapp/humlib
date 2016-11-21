@@ -62,6 +62,8 @@ class Convert {
 		}
 		static int     pitchToWbh         (int dpc, int acc, int octave,
 		                                   int maxacc);
+		static void    wbhToPitch         (int& dpc, int& acc, int& octave,
+		                                   int maxacc, int wbh);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp

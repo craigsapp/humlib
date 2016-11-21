@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Nov 20 12:55:14 PST 2016
+// Last Modified: Mon Nov 21 13:35:24 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11295,10 +11295,11 @@ int Convert::kernToBase7(const string& kerndata) {
 }
 
 
+
 //////////////////////////////
 //
 // Convert::pitchToWbh -- Convert a given diatonic pitch class and
-//   accidental adjustment to an integer.  The diatonic pitch class
+//   accidental adjustment into an integer.  The diatonic pitch class
 //   is C=0, D=1, E=2, F=3, G=4, A=5, B=6. "acc" is the accidental
 //   count: -2=double flat, -1=double flat, 0 natural, +1=sharp, etc.
 //   "octave" is the octave number, with middle-C being the start of
@@ -11310,24 +11311,110 @@ int Convert::kernToBase7(const string& kerndata) {
 
 int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 	if (dpc > 6) {
-		// allow for pitch-classes as ASCII characters:
+		// allow for pitch-classes expressed as ASCII characters:
 		dpc = std::tolower(dpc) - 'a' + 5;
 		dpc = dpc % 7;
 	}
 	int output = -1000;
 	switch (dpc) {
-		case 0: output = 0;
-		case 1: output =  2 * maxacc + 2;
-		case 2: output =  4 * maxacc + 4;
-		case 3: output =  6 * maxacc + 4;
-		case 4: output =  8 * maxacc + 6;
-		case 5: output = 10 * maxacc + 8;
-		case 6: output = 12 * maxacc + 8;
+		case 0: output = maxacc;            break;
+		case 1: output =  3  * maxacc + 2;  break;
+		case 2: output =  5  * maxacc + 4;  break;
+		case 3: output =  7  * maxacc + 5;  break;
+		case 4: output =  9  * maxacc + 7;  break;
+		case 5: output =  11 * maxacc + 9;  break;
+		case 6: output =  13 * maxacc + 11; break;
 	}
 	if (output < 0) {
 		return output;
 	}
-	return (output + acc) * octave + maxacc;
+	return (output + acc) + (7 * (maxacc * 2 + 1) + 5) * octave;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::wbhToPitch -- Convert an integer-based pitch into
+//    a diatonic pitch class, accidental alteration and octave number
+//   The output diatonic pitch classes are 0=C, 1=D, 2=E, 3=F, 4=G, 5=A, 6=B.
+//   "acc" is the accidental count: -2=double flat, -1=double flat, 
+//   0 natural, +1=sharp, etc.
+//   "octave" is the octave number, with middle-C being the start of
+//   octave 4.  
+//   "maxacc" is the maximum accidental which defines
+//    the base:
+//    maxacc = 2 -> Base-40.
+//    maxacc = n -> Base (n*2+1)*7 + 5.
+//    This valus must match the the analogous value used in PitchToWbh().
+//
+
+void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
+		int wbh) {
+	int cwidth = maxacc * 1 + 1;
+	int base = 7 * cwidth + 5;
+	octave = wbh % base;
+	int pc = wbh - base * octave;
+
+	// test for C diatonic pitch:
+	int pctest = cwidth;
+	if (pc < pctest) {
+		dpc = 0;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for D diatonic pitch
+	pctest += 1 + cwidth;
+	if (pc < pctest) {
+		dpc = 1;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for E diatonic pitch
+	pctest += 1 + cwidth;
+	if (pc < pctest) {
+		dpc = 2;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for F diatonic pitch
+	pctest += cwidth;
+	if (pc < pctest) {
+		dpc = 3;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for G diatonic pitch
+	pctest += 1 + cwidth;
+	if (pc < pctest) {
+		dpc = 4;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for A diatonic pitch
+	pctest += 1 + cwidth;
+	if (pc < pctest) {
+		dpc = 5;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// test for B diatonic pitch
+	pctest += 1 + cwidth;
+	if (pc < pctest) {
+		dpc = 6;
+		acc = pc - pctest + maxacc;
+		return;
+	}
+
+	// if acc in any of the above tests is +3/-3, then there was an
+	// accidental overflow (overflow of the accidental).
+
 }
 
 
