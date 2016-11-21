@@ -1,4 +1,4 @@
-// Description: Print a Humdrum file in CSV format.
+// Description: Test conversions from chromatic pitch to integer pitch.
 
 #include "humlib.h"
 
