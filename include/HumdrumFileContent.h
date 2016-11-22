@@ -7,13 +7,16 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Used to add content analysis to HumdrumFileStructure class.
+// Description:   Used to add content analysis to HumdrumFileStructure class,
+//                and do other higher-level processing of Humdrum data.
 //
 
 #ifndef _HUMDRUMFILECONTENT_H
 #define _HUMDRUMFILECONTENT_H
 
 #include "HumdrumFileStructure.h"
+
+#include <vector>
 
 using namespace std;
 
@@ -31,6 +34,16 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
+
+		template <class DATATYPE>
+		bool   prependDataSpine           (vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data");
+
+		template <class DATATYPE>
+		bool   appendDataSpine            (vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data");
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov 21 15:16:42 PST 2016
+// Last Modified: Tue Nov 22 14:45:19 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1161,6 +1161,7 @@ class HumdrumFileBase : public HumHash {
 		string        getXmlIdPrefix           (void);
 
 		HumdrumLine&  operator[]               (int index);
+		HumdrumLine*  getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
 		int           getMaxTrack              (void) const;
@@ -1470,6 +1471,16 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
+
+		template <class DATATYPE>
+		bool   prependDataSpine           (vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data");
+
+		template <class DATATYPE>
+		bool   appendDataSpine            (vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data");
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);

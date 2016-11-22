@@ -377,6 +377,24 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 
 //////////////////////////////
 //
+// HumdrumFileBase::getLine -- Return a pointer to the line at a
+//     given index in the data storage.
+//
+
+HumdrumLine* HumdrumFileBase::getLine(int index) {
+	if (index < 0) {
+		return NULL;
+	} else if (index >= (int)lines.size()) {
+		return NULL;
+	} else {
+		return lines[index];
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::analyzeTokens -- Generate token array from
 //    current contents of the lines.  If either tokens or the line
 //    is changed, then the other state becomes invalid.

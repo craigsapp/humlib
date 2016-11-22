@@ -123,6 +123,7 @@ class HumdrumFileBase : public HumHash {
 		string        getXmlIdPrefix           (void);
 
 		HumdrumLine&  operator[]               (int index);
+		HumdrumLine*  getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
 		int           getMaxTrack              (void) const;
