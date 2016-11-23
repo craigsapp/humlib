@@ -15,6 +15,7 @@
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "Convert.h"
+#include "string.h"
 
 namespace hum {
 
