@@ -3,8 +3,6 @@
 
 #include "humlib.h"
 
-#define REST -1000
-
 using namespace std;
 using namespace hum;
 
