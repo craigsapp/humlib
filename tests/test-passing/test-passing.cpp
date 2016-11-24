@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
       infile.read(cin);
    }
 
-   // get a list if the **kern spines in the file
+   // get a list of the **kern spines in the file
    vector<HTp> kernspines = infile.getKernSpineStartList();
    int spine = opts.getInteger("kern-spine") - 1;
    if (spine < 0 || spine > (int)kernspines.size()) {

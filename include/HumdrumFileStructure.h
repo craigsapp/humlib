@@ -87,6 +87,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumdrumToken* getStrandEnd(int index) const;
 		HumdrumToken* getStrandStart(int sindex, int index) const;
 		HumdrumToken* getStrandEnd(int sindex, int index) const;
+		void resolveNullTokens(void);
 
 		HumdrumToken* getStrand(int index) const {
 			return getStrandStart(index); }

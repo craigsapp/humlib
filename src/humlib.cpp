@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 23 20:22:41 PST 2016
+// Last Modified: Thu Nov 24 12:31:08 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2809,7 +2809,7 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::repeatString(indent, level) << "<frames>\n";
 	level++;
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printXml(out, level, indent);
+		m_lines[i]->printXml(out, level, indent);
 	}
 	level--;
 	out << Convert::repeatString(indent, level) << "</frames>\n";
@@ -2846,21 +2846,21 @@ ostream& HumdrumFile::printXmlParameterInfo(ostream& out, int level,
 
 HumdrumFileBase::HumdrumFileBase(void) : HumHash() {
 	addToTrackStarts(NULL);
-	ticksperquarternote = -1;
-	quietParse = false;
+	m_ticksperquarternote = -1;
+	m_quietParse = false;
 }
 
 HumdrumFileBase::HumdrumFileBase(const string& filename) : HumHash() {
 	addToTrackStarts(NULL);
-	ticksperquarternote = -1;
-	quietParse = false;
+	m_ticksperquarternote = -1;
+	m_quietParse = false;
 	read(filename);
 }
 
 HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 	addToTrackStarts(NULL);
-	ticksperquarternote = -1;
-	quietParse = false;
+	m_ticksperquarternote = -1;
+	m_quietParse = false;
 	read(contents);
 }
 
@@ -2873,10 +2873,10 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 
 HumdrumFileBase::~HumdrumFileBase() {
 	// do nothing
-	for (int i=0; i<(int)lines.size(); i++) {
-		if (lines[i] != NULL) {
-			delete lines[i];
-			lines[i] = NULL;
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		if (m_lines[i] != NULL) {
+			delete m_lines[i];
+			m_lines[i] = NULL;
 		}
 	}
 }
@@ -2891,7 +2891,7 @@ HumdrumFileBase::~HumdrumFileBase() {
 //
 
 void HumdrumFileBase::setXmlIdPrefix(const string& value) {
-	idprefix = value;
+	m_idprefix = value;
 }
 
 
@@ -2902,7 +2902,7 @@ void HumdrumFileBase::setXmlIdPrefix(const string& value) {
 //
 
 string HumdrumFileBase::getXmlIdPrefix(void) {
-	return idprefix;
+	return m_idprefix;
 }
 
 
@@ -2915,13 +2915,13 @@ string HumdrumFileBase::getXmlIdPrefix(void) {
 
 HumdrumLine& HumdrumFileBase::operator[](int index) {
 	if (index < 0) {
-		index = (int)lines.size() - index;
+		index = (int)m_lines.size() - index;
 	}
-	if ((index < 0) || (index >= (int)lines.size())) {
+	if ((index < 0) || (index >= (int)m_lines.size())) {
 		cerr << "Error: invalid index: " << index << endl;
-		index = (int)lines.size()-1;
+		index = (int)m_lines.size()-1;
 	}
-	return *lines[index];
+	return *m_lines[index];
 }
 
 
@@ -2936,14 +2936,14 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 //
 
 bool HumdrumFileBase::setParseError(const string& err) {
-	parseError = err;
-	return !parseError.size();
+	m_parseError = err;
+	return !m_parseError.size();
 }
 
 
 bool HumdrumFileBase::setParseError(stringstream& err) {
-	parseError = err.str();
-	return !parseError.size();
+	m_parseError = err.str();
+	return !m_parseError.size();
 }
 
 
@@ -2953,8 +2953,8 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 	va_start(ap, format);
 	snprintf(buffer, 1024, format, ap);
 	va_end(ap);
-	parseError = buffer;
-	return !parseError.size();
+	m_parseError = buffer;
+	return !m_parseError.size();
 }
 
 
@@ -2965,13 +2965,13 @@ bool HumdrumFileBase::setParseError(const char* format, ...) {
 //
 
 bool HumdrumFileBase::read(const string& filename) {
-	displayError = true;
+	m_displayError = true;
 	return HumdrumFileBase::read(filename.c_str());
 }
 
 
 bool HumdrumFileBase::read(const char* filename) {
-	displayError = true;
+	m_displayError = true;
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return HumdrumFileBase::read(cin);
@@ -2988,13 +2988,13 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
-	displayError = true;
+	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
 		s->setOwner(this);
-		lines.push_back(s);
+		m_lines.push_back(s);
 	}
 	if (!analyzeTokens()         ) { return isValid(); }
 	if (!analyzeLines()          ) { return isValid(); }
@@ -3035,14 +3035,14 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 
 
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
-	displayError = true;
+	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine;
 		s->setLineFromCsv(buffer);
 		s->setOwner(this);
-		lines.push_back(s);
+		m_lines.push_back(s);
 	}
 	if (!analyzeTokens()         ) { return isValid(); }
 	if (!analyzeLines()          ) { return isValid(); }
@@ -3104,7 +3104,7 @@ bool HumdrumFileBase::readStringCsv(const string& contents,
 //
 
 string HumdrumFileBase::getParseError(void) const {
-	return parseError;
+	return m_parseError;
 }
 
 
@@ -3116,11 +3116,11 @@ string HumdrumFileBase::getParseError(void) const {
 //
 
 bool HumdrumFileBase::isValid(void) {
-	if (displayError && (parseError.size() > 0)&& !isQuiet()) {
-		cerr << parseError << endl;
-		displayError = false;
+	if (m_displayError && (m_parseError.size() > 0)&& !isQuiet()) {
+		cerr << m_parseError << endl;
+		m_displayError = false;
 	}
-   return parseError.empty();
+   return m_parseError.empty();
 }
 
 
@@ -3134,7 +3134,7 @@ bool HumdrumFileBase::isValid(void) {
 //
 
 void HumdrumFileBase::setQuietParsing(void) {
-	quietParse = true;
+	m_quietParse = true;
 }
 
 
@@ -3148,7 +3148,7 @@ void HumdrumFileBase::setQuietParsing(void) {
 //
 
 void HumdrumFileBase::setNoisyParsing(void) {
-	quietParse = false;
+	m_quietParse = false;
 }
 
 
@@ -3164,7 +3164,7 @@ void HumdrumFileBase::setNoisyParsing(void) {
 //
 
 bool HumdrumFileBase::isQuiet(void) const{
-	return quietParse;
+	return m_quietParse;
 }
 
 
@@ -3196,10 +3196,10 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 HumdrumLine* HumdrumFileBase::getLine(int index) {
 	if (index < 0) {
 		return NULL;
-	} else if (index >= (int)lines.size()) {
+	} else if (index >= (int)m_lines.size()) {
 		return NULL;
 	} else {
-		return lines[index];
+		return m_lines[index];
 	}
 }
 
@@ -3215,8 +3215,8 @@ HumdrumLine* HumdrumFileBase::getLine(int index) {
 
 bool HumdrumFileBase::analyzeTokens(void) {
 	int i;
-	for (i=0; i<(int)lines.size(); i++) {
-		lines[i]->createTokensFromLine();
+	for (i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i]->createTokensFromLine();
 	}
 	return isValid();
 }
@@ -3230,8 +3230,8 @@ bool HumdrumFileBase::analyzeTokens(void) {
 //
 
 void HumdrumFileBase::createLinesFromTokens(void) {
-	for (int i=0; i<(int)lines.size(); i++) {
-		lines[i]->createLineFromTokens();
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i]->createLineFromTokens();
 	}
 }
 
@@ -3245,19 +3245,19 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 
 void HumdrumFileBase::appendLine(const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
-	lines.push_back(s);
+	m_lines.push_back(s);
 }
 
 
 void HumdrumFileBase::appendLine(const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
-	lines.push_back(s);
+	m_lines.push_back(s);
 }
 
 
 void HumdrumFileBase::appendLine(HumdrumLine* line) {
 	// deletion will be handled by class.
-	lines.push_back(line);
+	m_lines.push_back(line);
 }
 
 
@@ -3271,19 +3271,19 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 
 void HumdrumFileBase::insertLine(int index, const char* line) { 
 	HumdrumLine* s = new HumdrumLine(line);
-	lines.insert(lines.begin() + index, s);
+	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
 void HumdrumFileBase::insertLine(int index, const string& line) { 
 	HumdrumLine* s = new HumdrumLine(line);
-	lines.insert(lines.begin() + index, s);
+	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
 void HumdrumFileBase::insertLine(int index, HumdrumLine* line) { 
 	// deletion will be handled by class.
-	lines.insert(lines.begin() + index, line);
+	m_lines.insert(m_lines.begin() + index, line);
 }
 
 
@@ -3294,7 +3294,7 @@ void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
 //
 
 HumdrumLine* HumdrumFileBase::back(void) {
-	return lines.back();
+	return m_lines.back();
 }
 
 
@@ -3326,7 +3326,7 @@ vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
 //
 
 int HumdrumFileBase::getLineCount(void) const {
-	return (int)lines.size();
+	return (int)m_lines.size();
 }
 
 
@@ -3340,7 +3340,7 @@ HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 	if (lineindex < 0) {
 		lineindex += getLineCount();
 	}
-	return lines[lineindex]->token(fieldindex);
+	return m_lines[lineindex]->token(fieldindex);
 }
 
 
@@ -3352,7 +3352,7 @@ HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 //
 
 int HumdrumFileBase::getMaxTrack(void) const {
-	return (int)trackstarts.size() - 1;
+	return (int)m_trackstarts.size() - 1;
 }
 
 
@@ -3365,7 +3365,7 @@ int HumdrumFileBase::getMaxTrack(void) const {
 
 ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printSpineInfo(out) << '\n';
+		m_lines[i]->printSpineInfo(out) << '\n';
 	}
 	return out;
 }
@@ -3380,7 +3380,7 @@ ostream& HumdrumFileBase::printSpineInfo(ostream& out) {
 
 ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printDataTypeInfo(out) << '\n';
+		m_lines[i]->printDataTypeInfo(out) << '\n';
 	}
 	return out;
 }
@@ -3395,7 +3395,7 @@ ostream& HumdrumFileBase::printDataTypeInfo(ostream& out) {
 
 ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printTrackInfo(out) << '\n';
+		m_lines[i]->printTrackInfo(out) << '\n';
 	}
 	return out;
 }
@@ -3416,21 +3416,21 @@ ostream& HumdrumFileBase::printTrackInfo(ostream& out) {
 //
 
 void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts) {
-	spinestarts.reserve(trackstarts.size());
+	spinestarts.reserve(m_trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<(int)trackstarts.size(); i++) {
-		spinestarts.push_back(trackstarts[i]);
+	for (int i=1; i<(int)m_trackstarts.size(); i++) {
+		spinestarts.push_back(m_trackstarts[i]);
 	}
 }
 
 
 void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const string& exinterp) {
-	spinestarts.reserve(trackstarts.size());
+	spinestarts.reserve(m_trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<(int)trackstarts.size(); i++) {
-		if (exinterp == *trackstarts[i]) {
-			spinestarts.push_back(trackstarts[i]);
+	for (int i=1; i<(int)m_trackstarts.size(); i++) {
+		if (exinterp == *m_trackstarts[i]) {
+			spinestarts.push_back(m_trackstarts[i]);
 		}
 	}
 }
@@ -3438,12 +3438,12 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 
 void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const vector<string>& exinterps) {
-	spinestarts.reserve(trackstarts.size());
+	spinestarts.reserve(m_trackstarts.size());
 	spinestarts.resize(0);
-	for (int i=1; i<(int)trackstarts.size(); i++) {
+	for (int i=1; i<(int)m_trackstarts.size(); i++) {
 		for (int j=0; j<(int)exinterps.size(); j++) {
-			if (exinterps[j] == *trackstarts[i]) {
-				spinestarts.push_back(trackstarts[i]);
+			if (exinterps[j] == *m_trackstarts[i]) {
+				spinestarts.push_back(m_trackstarts[i]);
 			}
 		}
 	}
@@ -3647,8 +3647,8 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 //
 
 HTp HumdrumFileBase::getTrackStart(int track) const {
-	if ((track > 0) && (track < (int)trackstarts.size())) {
-		return trackstarts[track];
+	if ((track > 0) && (track < (int)m_trackstarts.size())) {
+		return m_trackstarts[track];
 	} else {
 		return NULL;
 	}
@@ -3668,15 +3668,15 @@ HTp HumdrumFileBase::getTrackStart(int track) const {
 
 int HumdrumFileBase::getTrackEndCount(int track) const {
 	if (track < 0) {
-		track += (int)trackends.size();
+		track += (int)m_trackends.size();
 	}
 	if (track < 0) {
 		return 0;
 	}
-	if (track >= (int)trackends.size()) {
+	if (track >= (int)m_trackends.size()) {
 		return 0;
 	}
-	return (int)trackends[track].size();
+	return (int)m_trackends[track].size();
 }
 
 
@@ -3690,24 +3690,24 @@ int HumdrumFileBase::getTrackEndCount(int track) const {
 
 HTp HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 	if (track < 0) {
-		track += (int)trackends.size();
+		track += (int)m_trackends.size();
 	}
 	if (track < 0) {
 		return NULL;
 	}
-	if (track >= (int)trackends.size()) {
+	if (track >= (int)m_trackends.size()) {
 		return NULL;
 	}
 	if (subtrack < 0) {
-		subtrack += (int)trackends[track].size();
+		subtrack += (int)m_trackends[track].size();
 	}
 	if (subtrack < 0) {
 		return NULL;
 	}
-	if (subtrack >= (int)trackends[track].size()) {
+	if (subtrack >= (int)m_trackends[track].size()) {
 		return NULL;
 	}
-	return trackends[track][subtrack];
+	return m_trackends[track][subtrack];
 }
 
 
@@ -3720,8 +3720,8 @@ HTp HumdrumFileBase::getTrackEnd(int track, int subtrack) const {
 //
 
 bool HumdrumFileBase::analyzeLines(void) {
-	for (int i=0; i<(int)lines.size(); i++) {
-		lines[i]->setLineIndex(i);
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
 	}
 	return isValid();
 }
@@ -3735,8 +3735,8 @@ bool HumdrumFileBase::analyzeLines(void) {
 //
 
 bool HumdrumFileBase::analyzeTracks(void) {
-	for (int i=0; i<(int)lines.size(); i++) {
-		int status = lines[i]->analyzeTracks(parseError);
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		int status = m_lines[i]->analyzeTracks(m_parseError);
 		if (!status) {
 			return false;
 		}
@@ -3756,12 +3756,12 @@ bool HumdrumFileBase::analyzeLinks(void) {
 	HumdrumLine* next     = NULL;
 	HumdrumLine* previous = NULL;
 
-	for (int i=0; i<(int)lines.size(); i++) {
-		if (!lines[i]->hasSpines()) {
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		if (!m_lines[i]->hasSpines()) {
 			continue;
 		}
 		previous = next;
-		next = lines[i];
+		next = m_lines[i];
 		if (previous != NULL) {
 			if (!stitchLinesTogether(*previous, *next)) {
 				return isValid();
@@ -3916,55 +3916,55 @@ bool HumdrumFileBase::analyzeSpines(void) {
 	vector<string> datatype;
 	vector<string> sinfo;
 	vector<vector<HTp> > lastspine;
-	trackstarts.resize(0);
-	trackends.resize(0);
+	m_trackstarts.resize(0);
+	m_trackends.resize(0);
 	addToTrackStarts(NULL);
 
 	bool init = false;
 	int i, j;
 	for (i=0; i<getLineCount(); i++) {
-		if (!lines[i]->hasSpines()) {
-			lines[i]->token(0)->setFieldIndex(0);
+		if (!m_lines[i]->hasSpines()) {
+			m_lines[i]->token(0)->setFieldIndex(0);
 			continue;
 		}
-		if ((init == false) && !lines[i]->isExclusive()) {
+		if ((init == false) && !m_lines[i]->isExclusive()) {
 			stringstream err;
 			err << "Error on line: " << (i+1) << ':' << endl;
 			err << "   Data found before exclusive interpretation" << endl;
-			err << "   LINE: " << *lines[i];
+			err << "   LINE: " << *m_lines[i];
 			return setParseError(err);
 		}
-		if ((init == false) && lines[i]->isExclusive()) {
+		if ((init == false) && m_lines[i]->isExclusive()) {
 			// first line of data in file.
 			init = true;
-			datatype.resize(lines[i]->getTokenCount());
-			sinfo.resize(lines[i]->getTokenCount());
-			lastspine.resize(lines[i]->getTokenCount());
-			for (j=0; j<lines[i]->getTokenCount(); j++) {
-				datatype[j] = lines[i]->getTokenString(j);
-				addToTrackStarts(lines[i]->token(j));
+			datatype.resize(m_lines[i]->getTokenCount());
+			sinfo.resize(m_lines[i]->getTokenCount());
+			lastspine.resize(m_lines[i]->getTokenCount());
+			for (j=0; j<m_lines[i]->getTokenCount(); j++) {
+				datatype[j] = m_lines[i]->getTokenString(j);
+				addToTrackStarts(m_lines[i]->token(j));
 				sinfo[j]    = to_string(j+1);
-				lines[i]->token(j)->setSpineInfo(sinfo[j]);
-				lines[i]->token(j)->setFieldIndex(j);
-				lastspine[j].push_back(lines[i]->token(j));
+				m_lines[i]->token(j)->setSpineInfo(sinfo[j]);
+				m_lines[i]->token(j)->setFieldIndex(j);
+				lastspine[j].push_back(m_lines[i]->token(j));
 			}
 			continue;
 		}
-		if ((int)datatype.size() != lines[i]->getTokenCount()) {
+		if ((int)datatype.size() != m_lines[i]->getTokenCount()) {
 			stringstream err;
 			err << "Error on line " << (i+1) << ':' << endl;
 			err << "   Expected " << datatype.size() << " fields,"
-			     << " but found " << lines[i]->getTokenCount();
+			     << " but found " << m_lines[i]->getTokenCount();
 			return setParseError(err);
 		}
-		for (j=0; j<lines[i]->getTokenCount(); j++) {
-			lines[i]->token(j)->setSpineInfo(sinfo[j]);
-			lines[i]->token(j)->setFieldIndex(j);
+		for (j=0; j<m_lines[i]->getTokenCount(); j++) {
+			m_lines[i]->token(j)->setSpineInfo(sinfo[j]);
+			m_lines[i]->token(j)->setFieldIndex(j);
 		}
-		if (!lines[i]->isManipulator()) {
+		if (!m_lines[i]->isManipulator()) {
 			continue;
 		}
-		if (!adjustSpines(*lines[i], datatype, sinfo)) { return isValid(); }
+		if (!adjustSpines(*m_lines[i], datatype, sinfo)) { return isValid(); }
 	}
 	return isValid();
 }
@@ -3980,13 +3980,13 @@ bool HumdrumFileBase::analyzeSpines(void) {
 
 void HumdrumFileBase::addToTrackStarts(HTp token) {
 	if (token == NULL) {
-		trackstarts.push_back(NULL);
-		trackends.resize(trackends.size()+1);
-	} else if ((trackstarts.size() > 1) && (trackstarts.back() == NULL)) {
-		trackstarts.back() = token;
+		m_trackstarts.push_back(NULL);
+		m_trackends.resize(m_trackends.size()+1);
+	} else if ((m_trackstarts.size() > 1) && (m_trackstarts.back() == NULL)) {
+		m_trackstarts.back() = token;
 	} else {
-		trackstarts.push_back(token);
-		trackends.resize(trackends.size()+1);
+		m_trackstarts.push_back(token);
+		m_trackends.resize(m_trackends.size()+1);
 	}
 }
 
@@ -4062,13 +4062,13 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 			}
 		} else if (line.token(i)->isTerminateInterpretation()) {
 			// store pointer to terminate token in trackends
-			trackends[trackstarts.size()-1].push_back(line.token(i));
+			m_trackends[m_trackstarts.size()-1].push_back(line.token(i));
 		} else if (((string*)line.token(i))->substr(0, 2) == "**") {
 			newtype.resize(newtype.size() + 1);
 			newtype.back() = line.getTokenString(i);
 			newinfo.resize(newinfo.size() + 1);
 			newinfo.back() = sinfo[i];
-			if (!((trackstarts.size() > 1) && (trackstarts.back() == NULL))) {
+			if (!((m_trackstarts.size() > 1) && (m_trackstarts.back() == NULL))) {
 				stringstream err;
 				err << "Error: Exclusive interpretation with no preparation "
 				     << "on line " << line.getLineIndex()
@@ -4076,7 +4076,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 				err << "Line: " << line;
 				return setParseError(err);
 			}
-			if (trackstarts.back() == NULL) {
+			if (m_trackstarts.back() == NULL) {
 				addToTrackStarts(line.token(i));
 			}
 		} else {
@@ -4902,7 +4902,7 @@ HumdrumFileStructure::~HumdrumFileStructure() {
 
 
 bool HumdrumFileStructure::read(istream& contents) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythm(contents)) {
 		return isValid();
 	} 
@@ -4911,7 +4911,7 @@ bool HumdrumFileStructure::read(istream& contents) {
 
 
 bool HumdrumFileStructure::read(const char* filename) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -4920,7 +4920,7 @@ bool HumdrumFileStructure::read(const char* filename) {
  
 
 bool HumdrumFileStructure::read(const string& filename) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythm(filename)) {
 		return isValid();
 	}
@@ -4940,7 +4940,7 @@ bool HumdrumFileStructure::read(const string& filename) {
 
 bool HumdrumFileStructure::readCsv(istream& contents,
 		const string& separator) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythmCsv(contents, separator)) {
 		return isValid();
 	}
@@ -4950,7 +4950,7 @@ bool HumdrumFileStructure::readCsv(istream& contents,
 
 bool HumdrumFileStructure::readCsv(const char* filename,
 		const string& separator) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
@@ -4960,7 +4960,7 @@ bool HumdrumFileStructure::readCsv(const char* filename,
 
 bool HumdrumFileStructure::readCsv(const string& filename,
 		const string& separator) {
-	displayError = false;
+	m_displayError = false;
 	if (!readNoRhythmCsv(filename, separator)) {
 		return isValid();
 	}
@@ -4976,7 +4976,7 @@ bool HumdrumFileStructure::readCsv(const string& filename,
 //
 
 bool HumdrumFileStructure::readString(const char* contents) {
-	displayError = false;
+	m_displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -4985,7 +4985,7 @@ bool HumdrumFileStructure::readString(const char* contents) {
 
 
 bool HumdrumFileStructure::readString(const string& contents) {
-	displayError = false;
+	m_displayError = false;
 	if (!HumdrumFileBase::readString(contents)) {
 		return isValid();
 	}
@@ -5003,7 +5003,7 @@ bool HumdrumFileStructure::readString(const string& contents) {
 
 bool HumdrumFileStructure::readStringCsv(const char* contents,
 		const string& separator) {
-	displayError = false;
+	m_displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}
@@ -5013,7 +5013,7 @@ bool HumdrumFileStructure::readStringCsv(const char* contents,
 
 bool HumdrumFileStructure::readStringCsv(const string& contents,
 		const string& separator) {
-	displayError = false;
+	m_displayError = false;
 	if (!HumdrumFileBase::readStringCsv(contents, separator)) {
 		return isValid();
 	}
@@ -5189,10 +5189,10 @@ bool HumdrumFileStructure::readStringNoRhythmCsv(const string& contents,
 //
 
 HumNum HumdrumFileStructure::getScoreDuration(void) const {
-	if (lines.size() == 0) {
+	if (m_lines.size() == 0) {
 		return 0;
 	}
-	return lines.back()->getDurationFromStart();
+	return m_lines.back()->getDurationFromStart();
 }
 
 
@@ -5209,8 +5209,8 @@ HumNum HumdrumFileStructure::getScoreDuration(void) const {
 //
 
 int HumdrumFileStructure::tpq(void) {
-	if (ticksperquarternote > 0) {
-		return ticksperquarternote;
+	if (m_ticksperquarternote > 0) {
+		return m_ticksperquarternote;
 	}
 	set<HumNum> durlist = getPositiveLineDurations();
 	vector<int> dems;
@@ -5223,8 +5223,8 @@ int HumdrumFileStructure::tpq(void) {
 	if (dems.size() > 0) {
 		lcm = Convert::getLcm(dems);
 	}
-	ticksperquarternote = lcm;
-	return ticksperquarternote;
+	m_ticksperquarternote = lcm;
+	return m_ticksperquarternote;
 }
 
 
@@ -5238,7 +5238,7 @@ int HumdrumFileStructure::tpq(void) {
 
 set<HumNum> HumdrumFileStructure::getPositiveLineDurations(void) {
 	set<HumNum> output;
-	for (auto& line : lines) {
+	for (auto& line : m_lines) {
 		if (line->getDuration().isPositive()) {
 			output.insert(line->getDuration());
 		}
@@ -5256,7 +5256,7 @@ set<HumNum> HumdrumFileStructure::getPositiveLineDurations(void) {
 
 ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printDurationInfo(out) << '\n';
+		m_lines[i]->printDurationInfo(out) << '\n';
 	}
 	return out;
 }
@@ -5273,15 +5273,15 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 
 HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
-		index += barlines.size();
+		index += m_barlines.size();
 	}
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= (int)barlines.size()) {
+	if (index >= (int)m_barlines.size()) {
 		return NULL;
 	}
-	return barlines[index];
+	return m_barlines[index];
 }
 
 
@@ -5295,7 +5295,7 @@ HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 //
 
 int HumdrumFileStructure::getBarlineCount(void) const {
-	return (int)barlines.size();
+	return (int)m_barlines.size();
 }
 
 
@@ -5311,18 +5311,18 @@ int HumdrumFileStructure::getBarlineCount(void) const {
 
 HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 	if (index < 0) {
-		index += barlines.size();
+		index += m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= (int)barlines.size()) {
+	if (index >= (int)m_barlines.size()) {
 		return 0;
 	}
-	HumNum startdur = barlines[index]->getDurationFromStart();
+	HumNum startdur = m_barlines[index]->getDurationFromStart();
 	HumNum enddur;
-	if (index + 1 < (int)barlines.size() - 1) {
-		enddur = barlines[index+1]->getDurationFromStart();
+	if (index + 1 < (int)m_barlines.size() - 1) {
+		enddur = m_barlines[index+1]->getDurationFromStart();
 	} else {
 		enddur = getScoreDuration();
 	}
@@ -5339,15 +5339,15 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
-		index += barlines.size();
+		index += m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= (int)barlines.size()) {
+	if (index >= (int)m_barlines.size()) {
 		return getScoreDuration();
 	}
-	return barlines[index]->getDurationFromStart();
+	return m_barlines[index]->getDurationFromStart();
 }
 
 
@@ -5360,15 +5360,15 @@ HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
-		index += barlines.size();
+		index += m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
 	}
-	if (index >= (int)barlines.size()) {
+	if (index >= (int)m_barlines.size()) {
 		return getScoreDuration();
 	}
-	return barlines[index]->getDurationToEnd();
+	return m_barlines[index]->getDurationToEnd();
 }
 
 
@@ -5444,31 +5444,31 @@ bool HumdrumFileStructure::analyzeRhythm(void) {
 
 bool HumdrumFileStructure::analyzeMeter(void) {
 
-	barlines.resize(0);
+	m_barlines.resize(0);
 
 	int i;
 	HumNum sum = 0;
 	bool foundbarline = false;
 	for (i=0; i<getLineCount(); i++) {
-		lines[i]->setDurationFromBarline(sum);
-		sum += lines[i]->getDuration();
-		if (lines[i]->isBarline()) {
+		m_lines[i]->setDurationFromBarline(sum);
+		sum += m_lines[i]->getDuration();
+		if (m_lines[i]->isBarline()) {
 			foundbarline = true;
-			barlines.push_back(lines[i]);
+			m_barlines.push_back(m_lines[i]);
 			sum = 0;
 		}
-		if (lines[i]->isData() && !foundbarline) {
+		if (m_lines[i]->isData() && !foundbarline) {
 			// pickup measure, so set the first measure to the start of the file.
-			barlines.push_back(lines[0]);
+			m_barlines.push_back(m_lines[0]);
 			foundbarline = 1;
 		}
 	}
 
 	sum = 0;
 	for (i=getLineCount()-1; i>=0; i--) {
-		sum += lines[i]->getDuration();
-		lines[i]->setDurationToBarline(sum);
-		if (lines[i]->isBarline()) {
+		sum += m_lines[i]->getDuration();
+		m_lines[i]->setDurationToBarline(sum);
+		if (m_lines[i]->isBarline()) {
 			sum = 0;
 		}
 	}
@@ -5486,7 +5486,7 @@ bool HumdrumFileStructure::analyzeMeter(void) {
 
 bool HumdrumFileStructure::analyzeTokenDurations (void) {
 	for (int i=0; i<getLineCount(); i++) {
-		if (!lines[i]->analyzeTokenDurations(parseError)) {
+		if (!m_lines[i]->analyzeTokenDurations(m_parseError)) {
 			return isValid();
 		}
 	}
@@ -5506,31 +5506,31 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 	HumdrumLine* spineline = NULL;
-	for (int i=(int)lines.size()-1; i>=0; i--) {
-		if (lines[i]->hasSpines()) {
-			if (lines[i]->isAllNull())  {
+	for (int i=(int)m_lines.size()-1; i>=0; i--) {
+		if (m_lines[i]->hasSpines()) {
+			if (m_lines[i]->isAllNull())  {
 				continue;
 			}
-			if (lines[i]->isManipulator()) {
+			if (m_lines[i]->isManipulator()) {
 				continue;
 			}
-			if (lines[i]->isCommentLocal()) {
+			if (m_lines[i]->isCommentLocal()) {
 				continue;
 			}
 			// should be a non-null data, barlines, or interpretation
-			spineline = lines[i];
+			spineline = m_lines[i];
 			continue;
 		}
 		if (spineline == NULL) {
 			continue;
 		}
-		if (!lines[i]->isCommentGlobal()) {
+		if (!m_lines[i]->isCommentGlobal()) {
 			continue;
 		}
-		if (lines[i]->find("!!LO:") != 0) {
+		if (m_lines[i]->find("!!LO:") != 0) {
 			continue;
 		}
-		spineline->setParameters(lines[i]);
+		spineline->setParameters(m_lines[i]);
 	}
 
 	return isValid();
@@ -5632,8 +5632,8 @@ HumNum HumdrumFileStructure::getMinDur(vector<HumNum>& durs,
 
 bool HumdrumFileStructure::getTokenDurations(vector<HumNum>& durs, int line) {
 	durs.resize(0);
-	for (int i=0; i<lines[line]->getTokenCount(); i++) {
-		HumNum dur = lines[line]->token(i)->getDuration();
+	for (int i=0; i<m_lines[line]->getTokenCount(); i++) {
+		HumNum dur = m_lines[line]->token(i)->getDuration();
 		durs.push_back(dur);
 	}
 	if (!cleanDurs(durs, line)) {
@@ -5663,7 +5663,7 @@ bool HumdrumFileStructure::cleanDurs(vector<HumNum>& durs, int line) {
 		stringstream err;
 		err << "Error on line " << (line+1) << " grace note and "
 		    << " regular note cannot occur on same line." << endl;
-		err << "Line: " << *lines[line] << endl;
+		err << "Line: " << *m_lines[line] << endl;
 		return setParseError(err);
 	}
 	return isValid();
@@ -5684,7 +5684,7 @@ bool HumdrumFileStructure::decrementDurStates(vector<HumNum>& durs,
 		return isValid();
 	}
 	for (int i=0; i<(int)durs.size(); i++) {
-		if (!lines[line]->token(i)->hasRhythm()) {
+		if (!m_lines[line]->token(i)->hasRhythm()) {
 			continue;
 		}
 		durs[i] -= linedur;
@@ -5882,29 +5882,29 @@ bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
 	HumNum startdur;
 	HumNum enddur;
 	int i, j;
-	for (i=0; i<(int)lines.size(); i++) {
-		if (!lines[i]->hasSpines()) {
+	for (i=0; i<(int)m_lines.size(); i++) {
+		if (!m_lines[i]->hasSpines()) {
 			continue;
 		}
-		if (lines[i]->isAllRhythmicNull()) {
-			if (lines[i]->isData()) {
-				nulllines.push_back(lines[i]);
+		if (m_lines[i]->isAllRhythmicNull()) {
+			if (m_lines[i]->isData()) {
+				nulllines.push_back(m_lines[i]);
 			}
 			continue;
 		}
-		dur = lines[i]->getDurationFromStart();
+		dur = m_lines[i]->getDurationFromStart();
 		if (dur.isNegative()) {
-			if (lines[i]->isData()) {
+			if (m_lines[i]->isData()) {
 				stringstream err;
 				err << "Error: found an unexpected negative duration on line "
-			       << lines[i]->getDurationFromStart()<< endl;
-				err << "Line: " << *lines[i] << endl;
+			       << m_lines[i]->getDurationFromStart()<< endl;
+				err << "Line: " << *m_lines[i] << endl;
 				return setParseError(err);
 			} else {
 				continue;
 			}
 		}
-		next = lines[i];
+		next = m_lines[i];
 		if (previous == NULL) {
 			previous = next;
 			nulllines.resize(0);
@@ -5937,10 +5937,10 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 	int i;
 	HumNum lastdur = -1;
 	HumNum dur;
-	for (i=(int)lines.size()-1; i>=0; i--) {
-		dur = lines[i]->getDurationFromStart();
+	for (i=(int)m_lines.size()-1; i>=0; i--) {
+		dur = m_lines[i]->getDurationFromStart();
 		if (dur.isNegative() && lastdur.isNonNegative()) {
-			lines[i]->setDurationFromStart(lastdur);
+			m_lines[i]->setDurationFromStart(lastdur);
 		}
 		if (dur.isNonNegative()) {
 			lastdur = dur;
@@ -5949,12 +5949,12 @@ void HumdrumFileStructure::fillInNegativeStartTimes(void) {
 	}
 
 	// fill in start times for ending comments
-	for (i=0; i<(int)lines.size(); i++) {
-		dur = lines[i]->getDurationFromStart();
+	for (i=0; i<(int)m_lines.size(); i++) {
+		dur = m_lines[i]->getDurationFromStart();
 		if (dur.isNonNegative()) {
 			lastdur = dur;
 		} else {
-			lines[i]->setDurationFromStart(lastdur);
+			m_lines[i]->setDurationFromStart(lastdur);
 		}
 	}
 }
@@ -5971,14 +5971,14 @@ void HumdrumFileStructure::assignLineDurations(void) {
 	HumNum startdur;
 	HumNum enddur;
 	HumNum dur;
-	for (int i=0; i<(int)lines.size()-1; i++) {
-		startdur = lines[i]->getDurationFromStart();
-		enddur = lines[i+1]->getDurationFromStart();
+	for (int i=0; i<(int)m_lines.size()-1; i++) {
+		startdur = m_lines[i]->getDurationFromStart();
+		enddur = m_lines[i+1]->getDurationFromStart();
 		dur = enddur - startdur;
-		lines[i]->setDuration(dur);
+		m_lines[i]->setDuration(dur);
 	}
-	if (lines.size() > 0) {
-		lines.back()->setDuration(0);
+	if (m_lines.size() > 0) {
+		m_lines.back()->setDuration(0);
 	}
 }
 
@@ -6112,26 +6112,63 @@ void HumdrumFileStructure::checkForLocalParameters(HumdrumToken *token,
 
 bool HumdrumFileStructure::analyzeStrands(void) {
 	int spines = getSpineCount();
-	strand1d.resize(0);
-	strand2d.resize(0);
+	m_strand1d.resize(0);
+	m_strand2d.resize(0);
 	int i, j;
 	for (i=0; i<spines; i++) {
 		HumdrumToken* tok = getSpineStart(i);
-		strand2d.resize(strand2d.size()+1);
-		analyzeSpineStrands(strand2d.back(), tok);
+		m_strand2d.resize(m_strand2d.size()+1);
+		analyzeSpineStrands(m_strand2d.back(), tok);
 	}
 
-	for (i=0; i<(int)strand2d.size(); i++) {
-		std::sort(strand2d[i].begin(), strand2d[i].end(), 
+	for (i=0; i<(int)m_strand2d.size(); i++) {
+		std::sort(m_strand2d[i].begin(), m_strand2d[i].end(), 
 				sortTokenPairsByLineIndex);
-		for (j=0; j<(int)strand2d[i].size(); j++) {
-			strand1d.push_back(strand2d[i][j]);
+		for (j=0; j<(int)m_strand2d[i].size(); j++) {
+			m_strand1d.push_back(m_strand2d[i][j]);
 		}
 	}
 
 	assignStrandsToTokens();
+
+	resolveNullTokens();
 	
 	return isValid();
+}
+
+
+
+///////////////////////////////
+//
+// HumdrumFileStructure::resolveNullTokens --
+//
+
+void HumdrumFileStructure::resolveNullTokens(void) {
+	HTp token;
+	HTp data = NULL;
+	HTp strandend;
+	for (int s=0; s<(int)m_strand1d.size(); s++) {
+		token = getStrandStart(s);
+		strandend = getStrandEnd(s);
+		while (token != strandend) {
+			if (!token->isData()) {
+				token = token->getNextToken();
+				continue;
+			}
+			if (data == NULL) {
+				data = token;
+				token->setNullResolution(data);
+				token = token->getNextToken();
+				continue;
+			}
+			if (token->isNull()) {
+				token->setNullResolution(data);
+			} else {
+				data = token;
+			}
+			token = token->getNextToken();
+		}
+	}
 }
 
 
@@ -6145,8 +6182,8 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 
 void HumdrumFileStructure::assignStrandsToTokens(void) {
 	HTp tok;
-	for (int i=0; i<(int)strand1d.size(); i++) {
-		tok = strand1d[i].first;
+	for (int i=0; i<(int)m_strand1d.size(); i++) {
+		tok = m_strand1d[i].first;
 		while (tok != NULL) {
 			tok->setStrandIndex(i);
 			tok = tok->getNextToken();
@@ -6199,23 +6236,23 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 //
 
 HumdrumToken* HumdrumFileStructure::getStrandStart(int index) const {
-	return strand1d[index].first;
+	return m_strand1d[index].first;
 }
 
 
 HumdrumToken* HumdrumFileStructure::getStrandEnd(int index) const {
-	return strand1d[index].last;
+	return m_strand1d[index].last;
 }
 
 
 HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex, 
 		int index) const {
-	return strand2d[sindex][index].first;
+	return m_strand2d[sindex][index].first;
 }
 
 
 HumdrumToken* HumdrumFileStructure::getStrandEnd(int sindex, int index) const {
-	return strand2d[sindex][index].last;
+	return m_strand2d[sindex][index].last;
 }
 
 
@@ -7725,18 +7762,21 @@ HumdrumToken::HumdrumToken(void) : string() {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
@@ -7744,6 +7784,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& aToken) :
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 
@@ -8440,9 +8481,11 @@ bool HumdrumToken::hasRhythm(void) const {
 // HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
 //
 
-bool HumdrumToken::isRest(void) const {
+bool HumdrumToken::isRest(void) {
 	if (isDataType("**kern")) {
-		if (Convert::isKernRest((string)(*this))) {
+		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
+			return true;
+		} else if (Convert::isKernRest((string)(*this))) {
 			return true;
 		}
 	}
@@ -8457,7 +8500,7 @@ bool HumdrumToken::isRest(void) const {
 //     (possessing a pitch).
 //
 
-bool HumdrumToken::isNote(void) const {
+bool HumdrumToken::isNote(void) {
 	if (isDataType("**kern")) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
@@ -8470,13 +8513,49 @@ bool HumdrumToken::isNote(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isSustainedNote -- Returns true if the token represents
+//     a sounding note, but not the attack portion.  Should only be
+//     applied to **kern data.
+//
+
+bool HumdrumToken::isSustainedNote(void) {
+	HTp token = this;
+	if (isNull()) {
+		token = resolveNull();
+	}
+	return token->isSecondaryTiedNote();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNoteAttack -- Returns true if the token represents
+//     the attack of a note.  Should only be applied to **kern data.
+//
+
+bool HumdrumToken::isNoteAttack(void) {
+	HTp token = this;
+	if (isNull()) {
+		token = resolveNull();
+	}
+	if (token->isRest()) {
+		return false;
+	}
+	return !token->isSecondaryTiedNote();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isInvisible -- True if a barline and is invisible (contains
 //     a "-" styling), or a note/rest contains the string "yy" which is
 //     interpreted as meaning make it invisible.
 // 
 // 
 
-bool HumdrumToken::isInvisible(void) const {
+bool HumdrumToken::isInvisible(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -8500,7 +8579,7 @@ bool HumdrumToken::isInvisible(void) const {
 // HumdrumToken::isGrace -- True if a **kern note has no duration.
 // 
 
-bool HumdrumToken::isGrace(void) const {
+bool HumdrumToken::isGrace(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -8520,7 +8599,7 @@ bool HumdrumToken::isGrace(void) const {
 // HumdrumToken::isClef -- True if a **kern clef.
 // 
 
-bool HumdrumToken::isClef(void) const {
+bool HumdrumToken::isClef(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -8540,7 +8619,7 @@ bool HumdrumToken::isClef(void) const {
 // HumdrumToken::isKeySignature -- True if a **kern key signature.
 //
 
-bool HumdrumToken::isKeySignature(void) const { 
+bool HumdrumToken::isKeySignature(void) { 
 	if (this->compare(0, 3, "*k[") != 0) {
 		return false;
 	}
@@ -8557,7 +8636,7 @@ bool HumdrumToken::isKeySignature(void) const {
 // HumdrumToken::isKeyDesignation -- True if a **kern key designation.
 //
 
-bool HumdrumToken::isKeyDesignation(void) const {
+bool HumdrumToken::isKeyDesignation(void) {
 	if (this->size() < 3) {
 		return false;
 	}
@@ -8582,7 +8661,7 @@ bool HumdrumToken::isKeyDesignation(void) const {
 // HumdrumToken::isTimeSignature -- True if a **kern time signature.
 //
 
-bool HumdrumToken::isTimeSignature(void) const {
+bool HumdrumToken::isTimeSignature(void) {
 	if (this->size() < 5) {
 		return false;
 	}
@@ -8605,7 +8684,7 @@ bool HumdrumToken::isTimeSignature(void) const {
 // HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
 //
 
-bool HumdrumToken::isMensurationSymbol(void) const { 
+bool HumdrumToken::isMensurationSymbol(void) { 
 	if (this->compare(0, 5, "*met(") != 0) {
 		return false;
 	}
@@ -8623,7 +8702,7 @@ bool HumdrumToken::isMensurationSymbol(void) const {
 //     a '(' character.
 //
 
-bool HumdrumToken::hasSlurStart(void) const {
+bool HumdrumToken::hasSlurStart(void) {
 	if (isDataType("**kern")) {
 		if (Convert::hasKernSlurStart((string)(*this))) {
 			return true;
@@ -8640,7 +8719,7 @@ bool HumdrumToken::hasSlurStart(void) const {
 //     a ')' character.
 //
 
-bool HumdrumToken::hasSlurEnd(void) const {
+bool HumdrumToken::hasSlurEnd(void) {
 	if (isDataType("**kern")) {
 		if (Convert::hasKernSlurEnd((string)(*this))) {
 			return true;
@@ -8717,7 +8796,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 //     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
 //
 
-bool HumdrumToken::isSecondaryTiedNote(void) const {
+bool HumdrumToken::isSecondaryTiedNote(void) {
 	if (isDataType("**kern")) {
 		if (Convert::isKernSecondaryTiedNote((string)(*this))) {
 			return true;
@@ -9584,6 +9663,32 @@ HTp HumdrumToken::getSlurEndToken(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::resolveNull --
+//
+
+HTp HumdrumToken::resolveNull(void) {
+	if (m_nullresolve == NULL) {
+		return this;
+	} else {
+		return m_nullresolve;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setNullResolution --
+//
+
+void HumdrumToken::setNullResolution(HTp resolution) {
+	m_nullresolve = resolution;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::operator= -- Copy operator.
 //
 
@@ -9595,6 +9700,7 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
 	m_rhycheck = aToken.m_rhycheck;
 	setPrefix(aToken.getPrefix());
 	m_strand = aToken.m_strand;
+	m_nullresolve = aToken.m_nullresolve;
 	return *this;
 }
 
@@ -9604,6 +9710,7 @@ HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 	return *this;
 }
 
@@ -9613,6 +9720,7 @@ HumdrumToken& HumdrumToken::operator=(const char* aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 	return *this;
 }
 

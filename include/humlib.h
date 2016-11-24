@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 23 20:22:41 PST 2016
+// Last Modified: Thu Nov 24 12:31:08 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -326,30 +326,30 @@ ostream& operator<<(ostream& out, const vector<A>& v);
 
 class HumAddress {
 	public:
-		              HumAddress        (void);
-		             ~HumAddress        ();
+		                    HumAddress        (void);
+		                   ~HumAddress        ();
 
-		int           getLineIndex      (void) const;
-		int           getLineNumber     (void) const;
-		int           getFieldIndex     (void) const;
+		int                 getLineIndex      (void) const;
+		int                 getLineNumber     (void) const;
+		int                 getFieldIndex     (void) const;
 		const HumdrumToken& getDataType (void) const;
-		const string& getSpineInfo      (void) const;
-		int           getTrack          (void) const;
-		int           getSubtrack       (void) const;
-		int           getSubtrackCount  (void) const;
-		string        getTrackString    (string separator = ".") const;
-		HumdrumLine*  getLine           (void) const;
-		HumdrumLine*  getOwner          (void) const { return getLine(); }
-		bool          hasOwner          (void) const;
+		const string&       getSpineInfo      (void) const;
+		int                 getTrack          (void) const;
+		int                 getSubtrack       (void) const;
+		int                 getSubtrackCount  (void) const;
+		string              getTrackString    (string separator = ".") const;
+		HumdrumLine*        getLine           (void) const;
+		HumdrumLine*        getOwner          (void) const { return getLine(); }
+		bool                hasOwner          (void) const;
 
 	protected:
-		void          setOwner          (HumdrumLine* aLine);
-		void          setFieldIndex     (int fieldlindex);
-		void          setSpineInfo      (const string& spineinfo);
-		void          setTrack          (int aTrack, int aSubtrack);
-		void          setTrack          (int aTrack);
-		void          setSubtrack       (int aSubtrack);
-		void          setSubtrackCount  (int aSubtrack);
+		void                setOwner          (HumdrumLine* aLine);
+		void                setFieldIndex     (int fieldlindex);
+		void                setSpineInfo      (const string& spineinfo);
+		void                setTrack          (int aTrack, int aSubtrack);
+		void                setTrack          (int aTrack);
+		void                setSubtrack       (int aSubtrack);
+		void                setSubtrackCount  (int aSubtrack);
 
 	private:
 
@@ -886,19 +886,21 @@ class HumdrumToken : public string, public HumHash {
 		bool     hasRhythm                 (void) const;
 
 		// kern-specific functions:
-		bool     isRest                    (void) const;
-		bool     isNote                    (void) const;
-		bool     isSecondaryTiedNote       (void) const;
-		bool     isInvisible               (void) const;
-		bool     isGrace                   (void) const;
-		bool     isClef                    (void) const;
-		bool     isKeySignature            (void) const;
-		bool     isKeyDesignation          (void) const;
-		bool     isTimeSignature           (void) const;
-		bool     isMensurationSymbol       (void) const;
+		bool     isRest                    (void);
+		bool     isNote                    (void);
+		bool     isSecondaryTiedNote       (void);
+		bool     isSustainedNote           (void);
+		bool     isNoteAttack              (void);
+		bool     isInvisible               (void);
+		bool     isGrace                   (void);
+		bool     isClef                    (void);
+		bool     isKeySignature            (void);
+		bool     isKeyDesignation          (void);
+		bool     isTimeSignature           (void);
+		bool     isMensurationSymbol       (void);
 
-		bool     hasSlurStart              (void) const;
-		bool     hasSlurEnd                (void) const;
+		bool     hasSlurStart              (void);
+		bool     hasSlurEnd                (void);
 		int      hasVisibleAccidental      (int subtokenIndex) const;
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 
@@ -924,6 +926,8 @@ class HumdrumToken : public string, public HumHash {
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
 
+		HTp      resolveNull               (void);
+		void     setNullResolution         (HTp resolution);
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
@@ -941,8 +945,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator = " ") const;
 		void     setParameters             (HTp ptok);
-		void     setParameters             (const string& pdata,
-		                                    HTp ptok = NULL);
+		void     setParameters             (const string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
 		int      getSlurStartElisionLevel  (void) const;
 		int      getSlurEndElisionLevel    (void) const;
@@ -963,8 +966,8 @@ class HumdrumToken : public string, public HumHash {
 		int           getPreviousTokenCount     (void) const;
 		HTp           getNextToken              (int index = 0) const;
 		HTp           getPreviousToken          (int index = 0) const;
-		vector<HTp>   getNextTokens     (void) const;
-		vector<HTp>   getPreviousTokens (void) const;
+		vector<HTp>   getNextTokens             (void) const;
+		vector<HTp>   getPreviousTokens         (void) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount(void) {
@@ -1053,6 +1056,11 @@ class HumdrumToken : public string, public HumHash {
       // secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
 		int m_strand;
+
+		// m_nullresolve: used to point to the token that a null token
+		// refers to
+		HTp m_nullresolve;
+
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
@@ -1269,49 +1277,49 @@ class HumdrumFileBase : public HumHash {
 
 		// lines: an array representing lines from the input file.
 		// The contents of lines must be deallocated when deconstructing object.
-		vector<HumdrumLine*> lines;
+		vector<HumdrumLine*> m_lines;
 
 		// trackstarts: list of addresses of the exclusive interpreations
 		// in the file.  The first element in the list is reserved, so the
 		// number of tracks (primary spines) is equal to one less than the
 		// size of this list.
-		vector<HTp> trackstarts;
+		vector<HTp> m_trackstarts;
 
 		// trackends: list of the addresses of the spine terminators in the file.
 		// It is possible that spines can split and their subspines do not merge
 		// before termination; therefore, the ends are stored in a 2d array.
 		// The first dimension is the track number, and the second dimension
 		// is the list of terminators.
-		vector<vector<HTp> > trackends;
+		vector<vector<HTp> > m_trackends;
 
 		// barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
-		vector<HumdrumLine*> barlines;
+		vector<HumdrumLine*> m_barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
 
 		// ticksperquarternote: this is the number of tick
-		int ticksperquarternote;
+		int m_ticksperquarternote;
 
 		// idprefix: an XML id prefix used to avoid id collisions when including
 		// multiple HumdrumFile XML in a single group.
-		string idprefix;
+		string m_idprefix;
 
 		// strands1d: one-dimensional list of spine strands.
-		vector<TokenPair> strand1d;
+		vector<TokenPair> m_strand1d;
 
-		// strands2d: one-dimensional list of spine strands.
-		vector<vector<TokenPair> > strand2d;
+		// strands2d: two-dimensional list of spine strands.
+		vector<vector<TokenPair> > m_strand2d;
 
 		// quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
-		bool quietParse;
+		bool m_quietParse;
 
 		// parseError: Set to true if a read is successful.
-		string parseError;
+		string m_parseError;
 
 		// displayError: Used to print error message only once.
-		bool displayError;
+		bool m_displayError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
@@ -1404,6 +1412,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumdrumToken* getStrandEnd(int index) const;
 		HumdrumToken* getStrandStart(int sindex, int index) const;
 		HumdrumToken* getStrandEnd(int sindex, int index) const;
+		void resolveNullTokens(void);
 
 		HumdrumToken* getStrand(int index) const {
 			return getStrandStart(index); }

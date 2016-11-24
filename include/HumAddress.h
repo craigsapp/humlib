@@ -26,30 +26,30 @@ class HumdrumToken;
 
 class HumAddress {
 	public:
-		              HumAddress        (void);
-		             ~HumAddress        ();
+		                    HumAddress        (void);
+		                   ~HumAddress        ();
 
-		int           getLineIndex      (void) const;
-		int           getLineNumber     (void) const;
-		int           getFieldIndex     (void) const;
+		int                 getLineIndex      (void) const;
+		int                 getLineNumber     (void) const;
+		int                 getFieldIndex     (void) const;
 		const HumdrumToken& getDataType (void) const;
-		const string& getSpineInfo      (void) const;
-		int           getTrack          (void) const;
-		int           getSubtrack       (void) const;
-		int           getSubtrackCount  (void) const;
-		string        getTrackString    (string separator = ".") const;
-		HumdrumLine*  getLine           (void) const;
-		HumdrumLine*  getOwner          (void) const { return getLine(); }
-		bool          hasOwner          (void) const;
+		const string&       getSpineInfo      (void) const;
+		int                 getTrack          (void) const;
+		int                 getSubtrack       (void) const;
+		int                 getSubtrackCount  (void) const;
+		string              getTrackString    (string separator = ".") const;
+		HumdrumLine*        getLine           (void) const;
+		HumdrumLine*        getOwner          (void) const { return getLine(); }
+		bool                hasOwner          (void) const;
 
 	protected:
-		void          setOwner          (HumdrumLine* aLine);
-		void          setFieldIndex     (int fieldlindex);
-		void          setSpineInfo      (const string& spineinfo);
-		void          setTrack          (int aTrack, int aSubtrack);
-		void          setTrack          (int aTrack);
-		void          setSubtrack       (int aSubtrack);
-		void          setSubtrackCount  (int aSubtrack);
+		void                setOwner          (HumdrumLine* aLine);
+		void                setFieldIndex     (int fieldlindex);
+		void                setSpineInfo      (const string& spineinfo);
+		void                setTrack          (int aTrack, int aSubtrack);
+		void                setTrack          (int aTrack);
+		void                setSubtrack       (int aSubtrack);
+		void                setSubtrackCount  (int aSubtrack);
 
 	private:
 

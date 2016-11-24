@@ -9,8 +9,9 @@ using namespace std;
 using namespace hum;
 
 enum OutputStyle {
+   None,
    Raw,
-   Note,
+   Kern,
    Diatonic,
    Midi,
    Base40
@@ -23,6 +24,14 @@ string  getKernPitch     (HTp token);
 int     getDiatonicPitch (HTp token);
 int     getMidiPitch     (HTp token);
 int     getBase40Pitch   (HTp token);
+void    fillDiatonicGrid (vector<vector<int> >& diatonic,
+                          vector<vector<HTp> >& grid);
+void    doAnalysis       (vector<vector<string> >& results,
+                          vector<vector<HTp> >& grid);
+void    doAnalysis       (vector<string>& results, vector<int>& data,
+                          vector<HTp>& grid);
+int     getPreviousAttack(vector<int>& data, int index);
+int     getNextAttack    (vector<int>& data, int index);
 
 int main(int argc, char** argv) {
 
@@ -32,9 +41,11 @@ int main(int argc, char** argv) {
    opts.define("d|diatonic=b",   "print diatonic grid");
    opts.define("m|midi-pitch=b", "print midie-pitch grid");
    opts.define("b|base-40=b",    "print base-40 grid");
+   opts.define("k|kern=b",       "print kern pitch grid");
+   opts.define("a|analysis=b",   "do melodic analysis");
    opts.process(argc, argv);
 
-   OutputStyle style = Note;
+   OutputStyle style = None;
    if (opts.getBoolean("raw")) {
       style = Raw;
    } else if (opts.getBoolean("diatonic")) {
@@ -43,6 +54,10 @@ int main(int argc, char** argv) {
       style = Midi;
    } else if (opts.getBoolean("base-40")) {
       style = Base40;
+   } else if (opts.getBoolean("kern")) {
+      style = Kern;
+   } else {
+      style = None;
    }
 
    // read an inputfile from the first filename argument, or standard input
@@ -57,9 +72,130 @@ int main(int argc, char** argv) {
    vector<vector<HTp> > grid;
    extractNoteGrid(grid, infile);
 
-   printGrid(grid, style);
+   vector<vector<string> > results;
+   if (style != None) {
+      printGrid(grid, style);
+   } else {
+
+      results.resize(grid.size());
+      for (int i=0; i<(int)grid.size(); i++) {
+         results[i].resize(infile.getLineCount());
+      }
+
+      doAnalysis(results, grid);
+      for (int i=0; i<(int)results.size(); i++) {
+         infile.appendDataSpine(results[i]);
+      }
+      cout << infile;
+   }
 
    return 0;
+}
+
+
+
+//////////////////////////////
+//
+// doAnalysis -- do a basic melodic analysis of all parts.
+//
+
+void doAnalysis(vector<vector<string> >& results, vector<vector<HTp> >& grid) {
+   vector<vector<int> > diatonic;
+   fillDiatonicGrid(diatonic, grid);
+   for (int i=0; i<(int)diatonic.size(); i++) {
+      doAnalysis(results[i], diatonic[i], grid[i]);
+   }
+}
+
+
+
+//////////////////////////////
+//
+// doAnalysis -- since voice analysis.
+//
+
+void doAnalysis(vector<string>& results, vector<int>& data,
+      vector<HTp>& vgrid) {
+   int previous, next, current;
+   int interval1, interval2;
+   for (int i=1; i<(int)data.size() - 1; i++) {
+      current = data[i];
+      if (current <= 0) {
+         continue;
+      }
+      previous = getPreviousAttack(data, i);
+      if (previous <= 0) {
+         continue;
+      }
+      next = getNextAttack(data, i);
+      if (next <= 0) {
+         continue;
+      }
+      interval1 = current - previous;
+      interval2 = next - current;
+      int lineindex = vgrid[i]->getLineIndex();
+      if ((interval1 == 1) && (interval2 == 1)) {
+         results[lineindex] = "pu";
+      } else if ((interval1 == -1) && (interval2 == -1)) {
+         results[lineindex] = "pd";
+      } else if ((interval1 == 1) && (interval2 == -1)) {
+         results[lineindex] = "nu";
+      } else if ((interval1 == -1) && (interval2 == 1)) {
+         results[lineindex] = "nd";
+      }
+   }
+}
+
+
+
+///////////////////////////////
+//
+// getPreviousAttack --
+//
+
+int getPreviousAttack(vector<int>& data, int index) {
+   for (int i = index-1; i>=0; i--) {
+      if (data[i] >= 0) {
+         return data[i];
+      }
+   }
+   return 0;
+}
+
+
+
+///////////////////////////////
+//
+// getNextAttack --
+//
+
+int getNextAttack(vector<int>& data, int index) {
+   for (int i = index+1; i<(int)data.size(); i++) {
+      if (data[i] >= 0) {
+         return data[i];
+      }
+   }
+   return 0;
+}
+
+
+
+//////////////////////////////
+//
+// fillDiatonicGrid --
+//
+
+void fillDiatonicGrid(vector<vector<int> >& diatonic,
+      vector<vector<HTp> >& grid) {
+   diatonic.resize(grid.size());
+   for (int i=0; i<(int)diatonic.size(); i++) {
+      diatonic[i].resize(grid[i].size(), 0);
+   }
+   for (int i=0; i<(int)diatonic.size(); i++) {
+      for (int j=0; j<(int)diatonic[i].size(); j++) {
+         diatonic[i][j] = getDiatonicPitch(grid[i][j]);
+      }
+   }
 }
 
 
@@ -76,11 +212,14 @@ void printToken(HTp token, OutputStyle style) {
    }
 
    switch (style) {
+      case None:
+         break;
+
       case Raw:
          cout << token;
          break;
 
-      case Note:
+      case Kern:
          cout << getKernPitch(token);
          break;
          

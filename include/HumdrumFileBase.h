@@ -229,49 +229,49 @@ class HumdrumFileBase : public HumHash {
 
 		// lines: an array representing lines from the input file.
 		// The contents of lines must be deallocated when deconstructing object.
-		vector<HumdrumLine*> lines;
+		vector<HumdrumLine*> m_lines;
 
 		// trackstarts: list of addresses of the exclusive interpreations
 		// in the file.  The first element in the list is reserved, so the
 		// number of tracks (primary spines) is equal to one less than the
 		// size of this list.
-		vector<HTp> trackstarts;
+		vector<HTp> m_trackstarts;
 
 		// trackends: list of the addresses of the spine terminators in the file.
 		// It is possible that spines can split and their subspines do not merge
 		// before termination; therefore, the ends are stored in a 2d array.
 		// The first dimension is the track number, and the second dimension
 		// is the list of terminators.
-		vector<vector<HTp> > trackends;
+		vector<vector<HTp> > m_trackends;
 
 		// barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
-		vector<HumdrumLine*> barlines;
+		vector<HumdrumLine*> m_barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
 
 		// ticksperquarternote: this is the number of tick
-		int ticksperquarternote;
+		int m_ticksperquarternote;
 
 		// idprefix: an XML id prefix used to avoid id collisions when including
 		// multiple HumdrumFile XML in a single group.
-		string idprefix;
+		string m_idprefix;
 
 		// strands1d: one-dimensional list of spine strands.
-		vector<TokenPair> strand1d;
+		vector<TokenPair> m_strand1d;
 
-		// strands2d: one-dimensional list of spine strands.
-		vector<vector<TokenPair> > strand2d;
+		// strands2d: two-dimensional list of spine strands.
+		vector<vector<TokenPair> > m_strand2d;
 
 		// quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
-		bool quietParse;
+		bool m_quietParse;
 
 		// parseError: Set to true if a read is successful.
-		string parseError;
+		string m_parseError;
 
 		// displayError: Used to print error message only once.
-		bool displayError;
+		bool m_displayError;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

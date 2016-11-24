@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  9 21:03:12 PDT 2015
+// Last Modified: Thu Nov 24 08:31:41 PST 2016 Added null token resolving
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumToken.h
 // Syntax:        C++11
@@ -74,19 +74,21 @@ class HumdrumToken : public string, public HumHash {
 		bool     hasRhythm                 (void) const;
 
 		// kern-specific functions:
-		bool     isRest                    (void) const;
-		bool     isNote                    (void) const;
-		bool     isSecondaryTiedNote       (void) const;
-		bool     isInvisible               (void) const;
-		bool     isGrace                   (void) const;
-		bool     isClef                    (void) const;
-		bool     isKeySignature            (void) const;
-		bool     isKeyDesignation          (void) const;
-		bool     isTimeSignature           (void) const;
-		bool     isMensurationSymbol       (void) const;
+		bool     isRest                    (void);
+		bool     isNote                    (void);
+		bool     isSecondaryTiedNote       (void);
+		bool     isSustainedNote           (void);
+		bool     isNoteAttack              (void);
+		bool     isInvisible               (void);
+		bool     isGrace                   (void);
+		bool     isClef                    (void);
+		bool     isKeySignature            (void);
+		bool     isKeyDesignation          (void);
+		bool     isTimeSignature           (void);
+		bool     isMensurationSymbol       (void);
 
-		bool     hasSlurStart              (void) const;
-		bool     hasSlurEnd                (void) const;
+		bool     hasSlurStart              (void);
+		bool     hasSlurEnd                (void);
 		int      hasVisibleAccidental      (int subtokenIndex) const;
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 
@@ -112,6 +114,8 @@ class HumdrumToken : public string, public HumHash {
 		HumdrumLine* getLine               (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
 
+		HTp      resolveNull               (void);
+		void     setNullResolution         (HTp resolution);
 		int      getLineIndex              (void) const;
 		int      getLineNumber             (void) const;
 		int      getFieldIndex             (void) const;
@@ -129,8 +133,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getSubtoken               (int index,
 		                                    const string& separator = " ") const;
 		void     setParameters             (HTp ptok);
-		void     setParameters             (const string& pdata,
-		                                    HTp ptok = NULL);
+		void     setParameters             (const string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
 		int      getSlurStartElisionLevel  (void) const;
 		int      getSlurEndElisionLevel    (void) const;
@@ -151,8 +154,8 @@ class HumdrumToken : public string, public HumHash {
 		int           getPreviousTokenCount     (void) const;
 		HTp           getNextToken              (int index = 0) const;
 		HTp           getPreviousToken          (int index = 0) const;
-		vector<HTp>   getNextTokens     (void) const;
-		vector<HTp>   getPreviousTokens (void) const;
+		vector<HTp>   getNextTokens             (void) const;
+		vector<HTp>   getPreviousTokens         (void) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount(void) {
@@ -241,6 +244,11 @@ class HumdrumToken : public string, public HumHash {
       // secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
 		int m_strand;
+
+		// m_nullresolve: used to point to the token that a null token
+		// refers to
+		HTp m_nullresolve;
+
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;

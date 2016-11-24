@@ -118,7 +118,7 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	out << Convert::repeatString(indent, level) << "<frames>\n";
 	level++;
 	for (int i=0; i<getLineCount(); i++) {
-		lines[i]->printXml(out, level, indent);
+		m_lines[i]->printXml(out, level, indent);
 	}
 	level--;
 	out << Convert::repeatString(indent, level) << "</frames>\n";

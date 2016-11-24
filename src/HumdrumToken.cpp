@@ -46,18 +46,21 @@ HumdrumToken::HumdrumToken(void) : string() {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
@@ -65,6 +68,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& aToken) :
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 }
 
 
@@ -761,9 +765,11 @@ bool HumdrumToken::hasRhythm(void) const {
 // HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
 //
 
-bool HumdrumToken::isRest(void) const {
+bool HumdrumToken::isRest(void) {
 	if (isDataType("**kern")) {
-		if (Convert::isKernRest((string)(*this))) {
+		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
+			return true;
+		} else if (Convert::isKernRest((string)(*this))) {
 			return true;
 		}
 	}
@@ -778,7 +784,7 @@ bool HumdrumToken::isRest(void) const {
 //     (possessing a pitch).
 //
 
-bool HumdrumToken::isNote(void) const {
+bool HumdrumToken::isNote(void) {
 	if (isDataType("**kern")) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
@@ -791,13 +797,49 @@ bool HumdrumToken::isNote(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isSustainedNote -- Returns true if the token represents
+//     a sounding note, but not the attack portion.  Should only be
+//     applied to **kern data.
+//
+
+bool HumdrumToken::isSustainedNote(void) {
+	HTp token = this;
+	if (isNull()) {
+		token = resolveNull();
+	}
+	return token->isSecondaryTiedNote();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isNoteAttack -- Returns true if the token represents
+//     the attack of a note.  Should only be applied to **kern data.
+//
+
+bool HumdrumToken::isNoteAttack(void) {
+	HTp token = this;
+	if (isNull()) {
+		token = resolveNull();
+	}
+	if (token->isRest()) {
+		return false;
+	}
+	return !token->isSecondaryTiedNote();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isInvisible -- True if a barline and is invisible (contains
 //     a "-" styling), or a note/rest contains the string "yy" which is
 //     interpreted as meaning make it invisible.
 // 
 // 
 
-bool HumdrumToken::isInvisible(void) const {
+bool HumdrumToken::isInvisible(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -821,7 +863,7 @@ bool HumdrumToken::isInvisible(void) const {
 // HumdrumToken::isGrace -- True if a **kern note has no duration.
 // 
 
-bool HumdrumToken::isGrace(void) const {
+bool HumdrumToken::isGrace(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -841,7 +883,7 @@ bool HumdrumToken::isGrace(void) const {
 // HumdrumToken::isClef -- True if a **kern clef.
 // 
 
-bool HumdrumToken::isClef(void) const {
+bool HumdrumToken::isClef(void) {
 	if (!isDataType("**kern")) {
 			return false;
 	}
@@ -861,7 +903,7 @@ bool HumdrumToken::isClef(void) const {
 // HumdrumToken::isKeySignature -- True if a **kern key signature.
 //
 
-bool HumdrumToken::isKeySignature(void) const { 
+bool HumdrumToken::isKeySignature(void) { 
 	if (this->compare(0, 3, "*k[") != 0) {
 		return false;
 	}
@@ -878,7 +920,7 @@ bool HumdrumToken::isKeySignature(void) const {
 // HumdrumToken::isKeyDesignation -- True if a **kern key designation.
 //
 
-bool HumdrumToken::isKeyDesignation(void) const {
+bool HumdrumToken::isKeyDesignation(void) {
 	if (this->size() < 3) {
 		return false;
 	}
@@ -903,7 +945,7 @@ bool HumdrumToken::isKeyDesignation(void) const {
 // HumdrumToken::isTimeSignature -- True if a **kern time signature.
 //
 
-bool HumdrumToken::isTimeSignature(void) const {
+bool HumdrumToken::isTimeSignature(void) {
 	if (this->size() < 5) {
 		return false;
 	}
@@ -926,7 +968,7 @@ bool HumdrumToken::isTimeSignature(void) const {
 // HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
 //
 
-bool HumdrumToken::isMensurationSymbol(void) const { 
+bool HumdrumToken::isMensurationSymbol(void) { 
 	if (this->compare(0, 5, "*met(") != 0) {
 		return false;
 	}
@@ -944,7 +986,7 @@ bool HumdrumToken::isMensurationSymbol(void) const {
 //     a '(' character.
 //
 
-bool HumdrumToken::hasSlurStart(void) const {
+bool HumdrumToken::hasSlurStart(void) {
 	if (isDataType("**kern")) {
 		if (Convert::hasKernSlurStart((string)(*this))) {
 			return true;
@@ -961,7 +1003,7 @@ bool HumdrumToken::hasSlurStart(void) const {
 //     a ')' character.
 //
 
-bool HumdrumToken::hasSlurEnd(void) const {
+bool HumdrumToken::hasSlurEnd(void) {
 	if (isDataType("**kern")) {
 		if (Convert::hasKernSlurEnd((string)(*this))) {
 			return true;
@@ -1038,7 +1080,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 //     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
 //
 
-bool HumdrumToken::isSecondaryTiedNote(void) const {
+bool HumdrumToken::isSecondaryTiedNote(void) {
 	if (isDataType("**kern")) {
 		if (Convert::isKernSecondaryTiedNote((string)(*this))) {
 			return true;
@@ -1905,6 +1947,32 @@ HTp HumdrumToken::getSlurEndToken(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::resolveNull --
+//
+
+HTp HumdrumToken::resolveNull(void) {
+	if (m_nullresolve == NULL) {
+		return this;
+	} else {
+		return m_nullresolve;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setNullResolution --
+//
+
+void HumdrumToken::setNullResolution(HTp resolution) {
+	m_nullresolve = resolution;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::operator= -- Copy operator.
 //
 
@@ -1916,6 +1984,7 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
 	m_rhycheck = aToken.m_rhycheck;
 	setPrefix(aToken.getPrefix());
 	m_strand = aToken.m_strand;
+	m_nullresolve = aToken.m_nullresolve;
 	return *this;
 }
 
@@ -1925,6 +1994,7 @@ HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 	return *this;
 }
 
@@ -1934,6 +2004,7 @@ HumdrumToken& HumdrumToken::operator=(const char* aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
+	m_nullresolve = NULL;
 	return *this;
 }
 
