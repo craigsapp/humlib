@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 22 23:46:35 PST 2016
+// Last Modified: Wed Nov 23 20:22:41 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -834,6 +834,7 @@ class HumdrumLine : public string, public HumHash {
 };
 
 ostream& operator<< (ostream& out, HumdrumLine& line);
+ostream& operator<< (ostream& out, HumdrumLine* line);
 
 
 
@@ -981,22 +982,23 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getSlurDuration   (HumNum scale = 1);
 
 	protected:
-		void     setLineIndex      (int lineindex);
-		void     setFieldIndex     (int fieldlindex);
-		void     setSpineInfo      (const string& spineinfo);
-		void     setTrack          (int aTrack, int aSubtrack);
-		void     setTrack          (int aTrack);
-		void     setSubtrack       (int aSubtrack);
-		void     setSubtrackCount  (int count);
-		void     setPreviousToken  (HTp aToken);
-		void     setNextToken      (HTp aToken);
-		void     makeForwardLink   (HumdrumToken& nextToken);
-		void     makeBackwardLink  (HumdrumToken& previousToken);
-		void     setOwner          (HumdrumLine* aLine);
-		int      getState          (void) const;
-		void     incrementState    (void);
-		void     setDuration       (const HumNum& dur);
-		void     setStrandIndex    (int index);
+		void     setLineIndex       (int lineindex);
+		void     setFieldIndex      (int fieldlindex);
+		void     setSpineInfo       (const string& spineinfo);
+		void     setTrack           (int aTrack, int aSubtrack);
+		void     setTrack           (int aTrack);
+		void     setSubtrack        (int aSubtrack);
+		void     setSubtrackCount   (int count);
+		void     setPreviousToken   (HTp aToken);
+		void     setNextToken       (HTp aToken);
+		void     addNextNonNullToken(HTp token);
+		void     makeForwardLink    (HumdrumToken& nextToken);
+		void     makeBackwardLink   (HumdrumToken& previousToken);
+		void     setOwner           (HumdrumLine* aLine);
+		int      getState           (void) const;
+		void     incrementState     (void);
+		void     setDuration        (const HumNum& dur);
+		void     setStrandIndex     (int index);
 
 		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
@@ -1012,45 +1014,45 @@ class HumdrumToken : public string, public HumHash {
 
 		// address: The address contains information about the location of
 		// the token on a HumdrumLine and in a HumdrumFile.
-		HumAddress address;
+		HumAddress m_address;
 
 		// duration: The duration of the token.  Non-rhythmic data types
 		// will have a negative duration (which should be interpreted
 		// as a zero duration--See HumdrumToken::hasRhythm()).
 		// Grace note will have a zero duration, even if they have a duration
 		// list in the token for a graphical display duration.
-		HumNum duration;
+		HumNum m_duration;
 
 		// nextTokens: This is a list of all previous tokens in the spine which
 		// immediately precede this token. Typically there will be one
 		// following token, but there can be two tokens if the current
 		// token is *^, and there will be zero following tokens after a
 		// spine terminating token (*-).
-		vector<HTp> nextTokens;     // link to next token(s) in spine
+		vector<HTp> m_nextTokens;     // link to next token(s) in spine
 
 		// previousTokens: Simiar to nextTokens, but for the immediately
 		// follow token(s) in the data.  Typically there will be one
 		// preceding token, but there can be multiple tokens when the previous
 		// line has *v merge tokens for the spine.  Exclusive interpretations
 		// have no tokens preceding them.
-		vector<HTp> previousTokens; // link to last token(s) in spine
+		vector<HTp> m_previousTokens; // link to last token(s) in spine
 
 		// nextNonNullTokens: This is a list of non-tokens in the spine
 		// that follow this one.
-		vector<HTp> nextNonNullTokens;
+		vector<HTp> m_nextNonNullTokens;
 
 		// previousNonNullTokens: This is a list of non-tokens in the spine
 		// that preced this one.
-		vector<HTp> previousNonNullTokens;
+		vector<HTp> m_previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm
 		// recursively.
-		int rhycheck;
+		int m_rhycheck;
 
 		// strand: Used to keep track of contiguous voice connections between
       // secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
-		int strand;
+		int m_strand;
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
@@ -1492,6 +1494,151 @@ class HumdrumFileContent : public HumdrumFileStructure {
 };
 
 
+//
+// Templates:
+//
+
+//////////////////////////////
+//
+// HumdrumFileContent::prependDataSpine -- prepend a data spine
+//     to the file.  Returns true if successful; false otherwise.
+//
+//     data == numeric or string data to print
+//     null == if the data is converted to a string is equal to this
+//             string then set the data spine content to a null token, ".".
+//             default is ".".
+//     exinterp == the exterp string to use.  Default is "**data".
+//
+
+template <class DATATYPE>
+bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
+		const string& null, const string& exinterp) {
+
+	if ((int)data.size() != getLineCount()) {
+		return false;
+	}
+
+	string ex;
+	if (exinterp.find("**") == 0) {
+		ex = exinterp;
+	} else if (exinterp.find("*") == 0) {
+		ex = "*" + exinterp;
+	} else {
+		ex = "**" + exinterp;
+	}
+	if (ex.size() <= 2) {
+		ex += "data";
+	}
+
+	stringstream ss;
+	HumdrumFileContent& infile = *this;
+	HumdrumLine* line;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		line = infile.getLine(i);
+		if (!line->hasSpines()) {
+			continue;
+		}
+		if (line->isExclusive()) {
+			line->insertToken(0, ex);
+		} else if (line->isTerminator()) {
+			line->insertToken(0, "*-");
+		} else if (line->isInterpretation()) {
+			line->insertToken(0, "*");
+		} else if (line->isLocalComment()) {
+			line->insertToken(0, "!");
+		} else if (line->isBarline()) {
+			line->insertToken(0, (string)*infile.token(i, 0));
+		} else if (line->isData()) {
+			ss.str(string());
+			ss << data[i];
+			if (ss.str() == null) {
+				line->insertToken(0, ".");
+			} else if (ss.str() == "") {
+				line->insertToken(0, ".");
+			} else {
+				line->insertToken(0, ss.str());
+			}
+		} else{
+			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+		}
+		// re-calculate line text
+		line->createLineFromTokens();
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::appendDataSpine -- prepend a data spine
+//     to the file.  Returns true if successful; false otherwise.
+//
+//     data == numeric or string data to print
+//     null == if the data is converted to a string is equal to this
+//             string then set the data spine content to a null token, ".".
+//             default is ".".
+//     exinterp == the exterp string to use.  Default is "**data".
+//
+
+template <class DATATYPE>
+bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
+		const string& null, const string& exinterp) {
+
+	if ((int)data.size() != getLineCount()) {
+		return false;
+	}
+
+	string ex;
+	if (exinterp.find("**") == 0) {
+		ex = exinterp;
+	} else if (exinterp.find("*") == 0) {
+		ex = "*" + exinterp;
+	} else {
+		ex = "**" + exinterp;
+	}
+	if (ex.size() <= 2) {
+		ex += "data";
+	}
+
+	stringstream ss;
+	HumdrumFileContent& infile = *this;
+	HumdrumLine* line;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		line = infile.getLine(i);
+		if (!line->hasSpines()) {
+			continue;
+		}
+		if (line->isExclusive()) {
+			line->appendToken(ex);
+		} else if (line->isTerminator()) {
+			line->appendToken("*-");
+		} else if (line->isInterpretation()) {
+			line->appendToken("*");
+		} else if (line->isLocalComment()) {
+			line->appendToken("!");
+		} else if (line->isBarline()) {
+			line->appendToken((string)*infile.token(i, 0));
+		} else if (line->isData()) {
+			ss.str(string());
+			ss << data[i];
+			if (ss.str() == null) {
+				line->appendToken(".");
+			} else if (ss.str() == "") {
+				line->appendToken(".");
+			} else {
+				line->appendToken(ss.str());
+			}
+		} else{
+			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+		}
+		// re-calculate line text
+		line->createLineFromTokens();
+	}
+	return true;
+}
+
+
 
 #ifndef HUMDRUMFILE_PARENT
 	#define HUMDRUMFILE_PARENT HumdrumFileContent
@@ -1527,18 +1674,42 @@ class Convert {
    	static int     base40ToAccidental   (int b40);
    	static int     base40ToDiatonic     (int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
+		static int     kernToOctaveNumber   (HTp token) 
+				{ return kernToOctaveNumber((string)*token); }
 		static int     kernToAccidentalCount(const string& kerndata);
+		static int     kernToAccidentalCount(HTp token) 
+				{ return kernToAccidentalCount((string)*token); }
 		static int     kernToDiatonicPC     (const string& kerndata);
+		static int     kernToDiatonicPC     (HTp token) 
+				{ return kernToDiatonicPC     ((string)*token); }
 		static char    kernToDiatonicUC     (const string& kerndata);
+		static int     kernToDiatonicUC     (HTp token) 
+				{ return kernToDiatonicUC     ((string)*token); }
 		static char    kernToDiatonicLC     (const string& kerndata);
+		static int     kernToDiatonicLC     (HTp token) 
+				{ return kernToDiatonicLC     ((string)*token); }
 		static int     kernToBase40PC       (const string& kerndata);
+		static int     kernToBase40PC       (HTp token) 
+				{ return kernToBase40PC       ((string)*token); }
 		static int     kernToBase12PC       (const string& kerndata);
+		static int     kernToBase12PC       (HTp token) 
+				{ return kernToBase12PC       ((string)*token); }
 		static int     kernToBase7PC        (const string& kerndata) {
 		                                     return kernToDiatonicPC(kerndata); }
+		static int     kernToBase7PC        (HTp token) 
+				{ return kernToBase7PC        ((string)*token); }
 		static int     kernToBase40         (const string& kerndata);
+		static int     kernToBase40         (HTp token) 
+				{ return kernToBase40         ((string)*token); }
 		static int     kernToBase12         (const string& kerndata);
+		static int     kernToBase12         (HTp token) 
+				{ return kernToBase12         ((string)*token); }
 		static int     kernToBase7          (const string& kerndata);
+		static int     kernToBase7         (HTp token) 
+				{ return kernToBase7         ((string)*token); }
 		static int     kernToMidiNoteNumber (const string& kerndata);
+		static int     kernToMidiNoteNumber(HTp token) 
+				{ return kernToMidiNoteNumber((string)*token); }
 		static string  kernToScientificPitch(const string& kerndata,
 		                                     string flat = "b",
 		                                     string sharp = "#",

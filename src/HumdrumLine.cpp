@@ -1494,6 +1494,10 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	return out;
 }
 
+ostream& operator<< (ostream& out, HumdrumLine* line) {
+	out << (string)(*line);
+	return out;
+}
 
 
 

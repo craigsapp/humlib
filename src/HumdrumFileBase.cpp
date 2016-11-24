@@ -1356,6 +1356,39 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 			}
 		}
 	}
+
+	// Eventually set the foward and backward non-null data token for
+	// tokens in spines for all types of line types  For now specify
+	// the next non-null data token for the exclusive interpretation token. 
+	// Also this implementation does not consider that the first
+	// non-null data tokens may be from nultiple split tokens (fix later).
+	vector<HTp> starts;
+	vector<HTp> nexts;
+	getSpineStartList(starts);
+	nexts.resize(starts.size(), NULL);
+	for (int i=0; i<(int)starts.size(); i++) {
+		if (starts[i] == NULL) {
+			continue;
+		}
+		HTp token = starts[i];
+		token = token->getNextToken();
+		while (token) {
+			if (token->isData()) {
+				if (!token->isNull()) {
+					nexts[i] = token;
+					break;
+				}
+			}
+			token = token->getNextToken();
+		}
+   }
+	for (int i=0; i<(int)nexts.size(); i++) {
+		if (nexts[i] == NULL) {
+			continue;
+		}
+		starts[i]->addNextNonNullToken(nexts[i]);
+	}
+
 	return true;
 }
 
@@ -1384,13 +1417,13 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackBackward(
 		}
 		HTp prevtoken = token->getPreviousToken();
 		if (prevtoken->isSplitInterpretation()) {
-			addUniqueTokens(prevtoken->nextNonNullTokens, ptokens);
-			if (token != prevtoken->nextTokens[0]) {
+			addUniqueTokens(prevtoken->m_nextNonNullTokens, ptokens);
+			if (token != prevtoken->m_nextTokens[0]) {
 				// terminate if not most primary subspine
 				return true;
 			}
 		} else if (token->isData()) {
-			addUniqueTokens(token->nextNonNullTokens, ptokens);
+			addUniqueTokens(token->m_nextNonNullTokens, ptokens);
 			if (!token->isNull()) {
 				ptokens.resize(0);
 				ptokens.push_back(token);
@@ -1430,13 +1463,13 @@ bool HumdrumFileBase::processNonNullDataTokensForTrackForward(HTp starttoken,
 			}
 		} else if (token->isMergeInterpretation()) {
 			HTp nexttoken = token->getNextToken();
-			addUniqueTokens(nexttoken->previousNonNullTokens, ptokens);
-			if (token != nexttoken->previousTokens[0]) {
+			addUniqueTokens(nexttoken->m_previousNonNullTokens, ptokens);
+			if (token != nexttoken->m_previousTokens[0]) {
 				// terminate if not most primary subspine
 				return true;
 			}
 		} else {
-			addUniqueTokens(token->previousNonNullTokens, ptokens);
+			addUniqueTokens(token->m_previousNonNullTokens, ptokens);
 			if (token->isData() && !token->isNull()) {
 				ptokens.resize(0);
 				ptokens.push_back(token);

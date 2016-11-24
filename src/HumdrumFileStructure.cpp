@@ -1212,7 +1212,7 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 		}
 		HTp prevtoken = token->getPreviousToken();
 		if (prevtoken->isSplitInterpretation()) {
-			if (token != prevtoken->nextTokens[0]) {
+			if (token != prevtoken->m_nextTokens[0]) {
 				// terminate if not most primary subspine
 				return true;
 			}

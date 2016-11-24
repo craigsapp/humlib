@@ -189,6 +189,7 @@ class HumdrumLine : public string, public HumHash {
 };
 
 ostream& operator<< (ostream& out, HumdrumLine& line);
+ostream& operator<< (ostream& out, HumdrumLine* line);
 
 
 // END_MERGE

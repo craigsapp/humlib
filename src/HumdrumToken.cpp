@@ -43,28 +43,28 @@ namespace hum {
 //
 
 HumdrumToken::HumdrumToken(void) : string() {
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 }
 
 HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
 		string((string)aToken) {
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 }
 
 
@@ -110,7 +110,7 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 //
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
-	return (int)previousNonNullTokens.size();
+	return (int)m_previousNonNullTokens.size();
 }
 
 
@@ -125,15 +125,15 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 
 HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 	if (index < 0) {
-		index += (int)previousNonNullTokens.size();
+		index += (int)m_previousNonNullTokens.size();
 	}
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= (int)previousNonNullTokens.size()) {
+	if (index >= (int)m_previousNonNullTokens.size()) {
 		return NULL;
 	}
-	return previousNonNullTokens[index];
+	return m_previousNonNullTokens[index];
 }
 
 
@@ -145,7 +145,7 @@ HumdrumToken* HumdrumToken::getPreviousNonNullDataToken(int index) {
 //
 
 int HumdrumToken::getNextNonNullDataTokenCount(void) {
-	return (int)nextNonNullTokens.size();
+	return (int)m_nextNonNullTokens.size();
 }
 
 
@@ -160,15 +160,15 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 	if (index < 0) {
-		index += nextNonNullTokens.size();
+		index += m_nextNonNullTokens.size();
 	}
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= (int)nextNonNullTokens.size()) {
+	if (index >= (int)m_nextNonNullTokens.size()) {
 		return NULL;
 	}
-	return nextNonNullTokens[index];
+	return m_nextNonNullTokens[index];
 }
 
 
@@ -209,7 +209,7 @@ HumNum HumdrumToken::getSlurDuration(HumNum scale) {
 //
 
 const string& HumdrumToken::getDataType(void) const {
-	return address.getDataType();
+	return m_address.getDataType();
 }
 
 
@@ -251,7 +251,7 @@ bool HumdrumToken::isKern(void) const {
 //
 
 void HumdrumToken::setSpineInfo(const string& spineinfo) {
-	address.setSpineInfo(spineinfo);
+	m_address.setSpineInfo(spineinfo);
 }
 
 
@@ -264,7 +264,7 @@ void HumdrumToken::setSpineInfo(const string& spineinfo) {
 //
 
 string HumdrumToken::getSpineInfo(void) const {
-	return address.getSpineInfo();
+	return m_address.getSpineInfo();
 }
 
 
@@ -277,7 +277,7 @@ string HumdrumToken::getSpineInfo(void) const {
 //
 
 int HumdrumToken::getLineIndex(void) const {
-	return address.getLineIndex();
+	return m_address.getLineIndex();
 }
 
 
@@ -289,7 +289,7 @@ int HumdrumToken::getLineIndex(void) const {
 //
 
 int HumdrumToken::getFieldIndex(void) const {
-	return address.getFieldIndex();
+	return m_address.getFieldIndex();
 }
 
 
@@ -301,7 +301,7 @@ int HumdrumToken::getFieldIndex(void) const {
 //
 
 int HumdrumToken::getFieldNumber(void) const {
-	return address.getFieldIndex() + 1;
+	return m_address.getFieldIndex() + 1;
 }
 
 
@@ -313,7 +313,7 @@ int HumdrumToken::getFieldNumber(void) const {
 //
 
 int HumdrumToken::getTokenIndex(void) const {
-	return address.getFieldIndex();
+	return m_address.getFieldIndex();
 }
 
 
@@ -325,7 +325,7 @@ int HumdrumToken::getTokenIndex(void) const {
 //
 
 int HumdrumToken::getTokenNumber(void) const {
-	return address.getFieldIndex() + 1;
+	return m_address.getFieldIndex() + 1;
 }
 
 
@@ -337,7 +337,7 @@ int HumdrumToken::getTokenNumber(void) const {
 //
 
 int HumdrumToken::getLineNumber(void) const {
-	return address.getLineNumber();
+	return m_address.getLineNumber();
 }
 
 
@@ -350,7 +350,7 @@ int HumdrumToken::getLineNumber(void) const {
 //
 
 void HumdrumToken::setFieldIndex(int index) {
-	address.setFieldIndex(index);
+	m_address.setFieldIndex(index);
 }
 
 
@@ -363,7 +363,7 @@ void HumdrumToken::setFieldIndex(int index) {
 //
 
 void HumdrumToken::setTrack(int aTrack) {
-	address.setTrack(aTrack);
+	m_address.setTrack(aTrack);
 }
 
 
@@ -380,7 +380,7 @@ void HumdrumToken::setTrack(int aTrack, int aSubtrack) {
 //
 
 int HumdrumToken::getTrack(void) const {
-	return address.getTrack();
+	return m_address.getTrack();
 }
 
 
@@ -392,7 +392,7 @@ int HumdrumToken::getTrack(void) const {
 //
 
 void HumdrumToken::setSubtrack(int aSubtrack) {
-	address.setSubtrack(aSubtrack);
+	m_address.setSubtrack(aSubtrack);
 }
 
 
@@ -405,7 +405,7 @@ void HumdrumToken::setSubtrack(int aSubtrack) {
 //
 
 void HumdrumToken::setSubtrackCount(int count) {
-	address.setSubtrackCount(count);
+	m_address.setSubtrackCount(count);
 }
 
 
@@ -416,8 +416,8 @@ void HumdrumToken::setSubtrackCount(int count) {
 //
 
 void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
-	previousTokens.resize(1);
-	previousTokens[0] = aToken;
+	m_previousTokens.resize(1);
+	m_previousTokens[0] = aToken;
 }
 
 
@@ -428,8 +428,28 @@ void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
 //
 
 void HumdrumToken::setNextToken(HumdrumToken* aToken) {
-	nextTokens.resize(1);
-	nextTokens[0] = aToken;
+	m_nextTokens.resize(1);
+	m_nextTokens[0] = aToken;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::addNextNonNullToken --
+//
+
+void HumdrumToken::addNextNonNullToken(HTp token) {
+	if (token == NULL) {
+		return;
+	}
+	for (int i=0; i<(int)m_nextNonNullTokens.size(); i++) {
+		if (token == m_nextNonNullTokens[i]) {
+			return;
+		}
+	}
+	m_nextNonNullTokens.push_back(token);
+	// maybe should sort by track/subspine order...
 }
 
 
@@ -444,9 +464,9 @@ void HumdrumToken::setNextToken(HumdrumToken* aToken) {
 // @SEEALSO: getNextTokens, getPreviousToken
 //
 
-HumdrumToken* HumdrumToken::getNextToken(int index) const {
-	if ((index >= 0) && (index < (int)nextTokens.size())) {
-		return nextTokens[index];
+HTp HumdrumToken::getNextToken(int index) const {
+	if ((index >= 0) && (index < (int)m_nextTokens.size())) {
+		return m_nextTokens[index];
 	} else {
 		return NULL;
 	}
@@ -462,7 +482,7 @@ HumdrumToken* HumdrumToken::getNextToken(int index) const {
 //
 
 vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
-	return nextTokens;
+	return m_nextTokens;
 }
 
 
@@ -474,7 +494,7 @@ vector<HumdrumToken*> HumdrumToken::getNextTokens(void) const {
 //
 
 vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
-	return previousTokens;
+	return m_previousTokens;
 }
 
 
@@ -488,8 +508,8 @@ vector<HumdrumToken*> HumdrumToken::getPreviousTokens(void) const {
 //
 
 HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
-	if ((index >= 0) && (index < (int)previousTokens.size())) {
-		return previousTokens[index];
+	if ((index >= 0) && (index < (int)m_previousTokens.size())) {
+		return m_previousTokens[index];
 	} else {
 		return NULL;
 	}
@@ -505,19 +525,19 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 
 bool HumdrumToken::analyzeDuration(string& err) {
 	if ((*this) == NULL_DATA) {
-		duration.setValue(-1);
+		m_duration.setValue(-1);
 		return true;
 	}
 	if (equalChar(0 ,'!')) {
-		duration.setValue(-1);
+		m_duration.setValue(-1);
 		return true;
 	}
 	if (equalChar(0 ,'*')) {
-		duration.setValue(-1);
+		m_duration.setValue(-1);
 		return true;
 	}
 	if (equalChar(0 ,'=')) {
-		duration.setValue(-1);
+		m_duration.setValue(-1);
 		return true;
 	}
 	string dtype = getDataType();
@@ -525,18 +545,18 @@ bool HumdrumToken::analyzeDuration(string& err) {
 		if (isData()) {
 			if (!isNull()) {
 				if (strchr(this->c_str(), 'q') != NULL) {
-					duration = 0;
+					m_duration = 0;
 				} else {
-					duration = Convert::recipToDuration((string)(*this));
+					m_duration = Convert::recipToDuration((string)(*this));
 				}
 			} else {
-				duration.setValue(-1);
+				m_duration.setValue(-1);
 			}
 		} else {
-			duration.setValue(-1);
+			m_duration.setValue(-1);
 		}
 	} else {
-		duration.setValue(-1);
+		m_duration.setValue(-1);
 	}
 	return true;
 }
@@ -575,12 +595,12 @@ bool HumdrumToken::isManipulator(void) const {
 //
 
 HumNum HumdrumToken::getDuration(void) const {
-	return duration;
+	return m_duration;
 }
 
 
 HumNum HumdrumToken::getDuration(HumNum scale) const {
-	return duration * scale;
+	return m_duration * scale;
 }
 
 
@@ -591,7 +611,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 //
 
 void HumdrumToken::setDuration(const HumNum& dur) {
-	duration = dur;
+	m_duration = dur;
 }
 
 
@@ -1277,7 +1297,7 @@ bool HumdrumToken::isNull(void) const {
 //
 
 int HumdrumToken::getSubtrack(void) const {
-	return address.getSubtrack();
+	return m_address.getSubtrack();
 }
 
 
@@ -1294,7 +1314,7 @@ int HumdrumToken::getSubtrack(void) const {
 //
 
 string HumdrumToken::getTrackString(void) const {
-	return address.getTrackString();
+	return m_address.getTrackString();
 }
 
 
@@ -1414,8 +1434,8 @@ void HumdrumToken::setParameters(const string& pdata, HumdrumToken* ptok) {
 //
 
 void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
-	nextTokens.push_back(&nextToken);
-	nextToken.previousTokens.push_back(this);
+	m_nextTokens.push_back(&nextToken);
+	nextToken.m_previousTokens.push_back(this);
 }
 
 
@@ -1427,8 +1447,8 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 //
 
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
-	previousTokens.push_back(&previousToken);
-	previousToken.nextTokens.push_back(this);
+	m_previousTokens.push_back(&previousToken);
+	previousToken.m_nextTokens.push_back(this);
 }
 
 
@@ -1439,7 +1459,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //
 
 void HumdrumToken::setOwner(HumdrumLine* aLine) {
-	address.setOwner(aLine);
+	m_address.setOwner(aLine);
 }
 
 
@@ -1451,7 +1471,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 //
 
 HumdrumLine* HumdrumToken::getOwner(void) const {
-	return address.getOwner();
+	return m_address.getOwner();
 }
 
 
@@ -1462,7 +1482,7 @@ HumdrumLine* HumdrumToken::getOwner(void) const {
 //
 
 int HumdrumToken::getState(void) const {
-	return rhycheck;
+	return m_rhycheck;
 }
 
 
@@ -1475,7 +1495,7 @@ int HumdrumToken::getState(void) const {
 //
 
 int  HumdrumToken::getStrandIndex(void) const {
-	return strand;
+	return m_strand;
 }
 
 
@@ -1523,7 +1543,7 @@ int HumdrumToken::getSlurEndElisionLevel(void) const {
 //
 
 void  HumdrumToken::setStrandIndex(int index) {
-	strand = index;
+	m_strand = index;
 }
 
 
@@ -1536,7 +1556,7 @@ void  HumdrumToken::setStrandIndex(int index) {
 //
 
 void HumdrumToken::incrementState(void) {
-	rhycheck++;
+	m_rhycheck++;
 }
 
 
@@ -1550,7 +1570,7 @@ void HumdrumToken::incrementState(void) {
 //
 
 int HumdrumToken::getNextTokenCount(void) const {
-	return (int)nextTokens.size();
+	return (int)m_nextTokens.size();
 }
 
 
@@ -1565,7 +1585,7 @@ int HumdrumToken::getNextTokenCount(void) const {
 //
 
 int HumdrumToken::getPreviousTokenCount(void) const {
-	return (int)previousTokens.size();
+	return (int)m_previousTokens.size();
 }
 
 
@@ -1816,7 +1836,11 @@ ostream& operator<<(ostream& out, const HumdrumToken& token) {
 
 
 ostream& operator<<(ostream& out, HumdrumToken* token) {
-	out << token->c_str();
+	if (token) {
+		out << token->c_str();
+	} else {
+		out << "{NULL}";
+	}
 	return out;
 }
 
@@ -1889,27 +1913,27 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
 		return *this;
 	}
 	(string)(*this) = (string)aToken;
-	rhycheck = aToken.rhycheck;
+	m_rhycheck = aToken.m_rhycheck;
 	setPrefix(aToken.getPrefix());
-	strand = aToken.strand;
+	m_strand = aToken.m_strand;
 	return *this;
 }
 
 
 HumdrumToken& HumdrumToken::operator=(const string& aToken) { 
 	(string)(*this) = aToken;
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 	return *this;
 }
 
 
 HumdrumToken& HumdrumToken::operator=(const char* aToken) { 
 	(string)(*this) = aToken;
-	rhycheck = 0;
+	m_rhycheck = 0;
 	setPrefix("!");
-	strand = -1;
+	m_strand = -1;
 	return *this;
 }
 

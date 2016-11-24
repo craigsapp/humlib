@@ -5,6 +5,12 @@
 using namespace hum;
 
 int main(int argc, char** argv) {
+   Options opts;
+   opts.define("a=s:sdf", "this is a test");
+   opts.process(argc, argv);
+   opts.clear();
+
+
    int dpc = 0;    // diatonic pitch class 0=C, 1=D, ..., 6=B
    int acc = 0;    // accidental alteration -2=double flat, 0=natural, 1=sharp
    int oct = 0;    // 4 = middle-C octave

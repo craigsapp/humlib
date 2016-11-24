@@ -170,22 +170,23 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getSlurDuration   (HumNum scale = 1);
 
 	protected:
-		void     setLineIndex      (int lineindex);
-		void     setFieldIndex     (int fieldlindex);
-		void     setSpineInfo      (const string& spineinfo);
-		void     setTrack          (int aTrack, int aSubtrack);
-		void     setTrack          (int aTrack);
-		void     setSubtrack       (int aSubtrack);
-		void     setSubtrackCount  (int count);
-		void     setPreviousToken  (HTp aToken);
-		void     setNextToken      (HTp aToken);
-		void     makeForwardLink   (HumdrumToken& nextToken);
-		void     makeBackwardLink  (HumdrumToken& previousToken);
-		void     setOwner          (HumdrumLine* aLine);
-		int      getState          (void) const;
-		void     incrementState    (void);
-		void     setDuration       (const HumNum& dur);
-		void     setStrandIndex    (int index);
+		void     setLineIndex       (int lineindex);
+		void     setFieldIndex      (int fieldlindex);
+		void     setSpineInfo       (const string& spineinfo);
+		void     setTrack           (int aTrack, int aSubtrack);
+		void     setTrack           (int aTrack);
+		void     setSubtrack        (int aSubtrack);
+		void     setSubtrackCount   (int count);
+		void     setPreviousToken   (HTp aToken);
+		void     setNextToken       (HTp aToken);
+		void     addNextNonNullToken(HTp token);
+		void     makeForwardLink    (HumdrumToken& nextToken);
+		void     makeBackwardLink   (HumdrumToken& previousToken);
+		void     setOwner           (HumdrumLine* aLine);
+		int      getState           (void) const;
+		void     incrementState     (void);
+		void     setDuration        (const HumNum& dur);
+		void     setStrandIndex     (int index);
 
 		bool     analyzeDuration   (string& err);
 		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
@@ -201,45 +202,45 @@ class HumdrumToken : public string, public HumHash {
 
 		// address: The address contains information about the location of
 		// the token on a HumdrumLine and in a HumdrumFile.
-		HumAddress address;
+		HumAddress m_address;
 
 		// duration: The duration of the token.  Non-rhythmic data types
 		// will have a negative duration (which should be interpreted
 		// as a zero duration--See HumdrumToken::hasRhythm()).
 		// Grace note will have a zero duration, even if they have a duration
 		// list in the token for a graphical display duration.
-		HumNum duration;
+		HumNum m_duration;
 
 		// nextTokens: This is a list of all previous tokens in the spine which
 		// immediately precede this token. Typically there will be one
 		// following token, but there can be two tokens if the current
 		// token is *^, and there will be zero following tokens after a
 		// spine terminating token (*-).
-		vector<HTp> nextTokens;     // link to next token(s) in spine
+		vector<HTp> m_nextTokens;     // link to next token(s) in spine
 
 		// previousTokens: Simiar to nextTokens, but for the immediately
 		// follow token(s) in the data.  Typically there will be one
 		// preceding token, but there can be multiple tokens when the previous
 		// line has *v merge tokens for the spine.  Exclusive interpretations
 		// have no tokens preceding them.
-		vector<HTp> previousTokens; // link to last token(s) in spine
+		vector<HTp> m_previousTokens; // link to last token(s) in spine
 
 		// nextNonNullTokens: This is a list of non-tokens in the spine
 		// that follow this one.
-		vector<HTp> nextNonNullTokens;
+		vector<HTp> m_nextNonNullTokens;
 
 		// previousNonNullTokens: This is a list of non-tokens in the spine
 		// that preced this one.
-		vector<HTp> previousNonNullTokens;
+		vector<HTp> m_previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm
 		// recursively.
-		int rhycheck;
+		int m_rhycheck;
 
 		// strand: Used to keep track of contiguous voice connections between
       // secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
-		int strand;
+		int m_strand;
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
