@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 24 12:31:08 PST 2016
+// Last Modified: Fri Nov 25 08:32:41 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1595,6 +1595,8 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 		const string& null, const string& exinterp) {
 
 	if ((int)data.size() != getLineCount()) {
+		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
+		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT " << getLineCount() << endl;
 		return false;
 	}
 

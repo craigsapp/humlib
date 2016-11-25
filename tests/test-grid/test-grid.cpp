@@ -6,6 +6,8 @@
 using namespace std;
 using namespace hum;
 
+int debug = 1;
+
 enum OutputStyle {
    None,
    Raw,
@@ -14,6 +16,7 @@ enum OutputStyle {
    Midi,
    Base40
 };
+
 
 // function declarations:
 void    extractNoteGrid  (vector<vector<HTp> >& grid, HumdrumFile& infile);
@@ -30,6 +33,12 @@ void    doAnalysis       (vector<string>& results, vector<int>& data,
                           vector<HTp>& grid);
 int     getPreviousAttack(vector<int>& data, int index);
 int     getNextAttack    (vector<int>& data, int index);
+
+void    doAnalysisB      (vector<string>& results, vector<int>& data,
+                          vector<HTp>& grid);
+int     getAttack        (int n, vector<int>& data, int index,
+                          vector<int> attacks);
+
 
 int main(int argc, char** argv) {
 
@@ -101,7 +110,7 @@ void doAnalysis(vector<vector<string> >& results, vector<vector<HTp> >& grid) {
    vector<vector<int> > diatonic;
    fillDiatonicGrid(diatonic, grid);
    for (int i=0; i<(int)diatonic.size(); i++) {
-      doAnalysis(results[i], diatonic[i], grid[i]);
+      doAnalysisB(results[i], diatonic[i], grid[i]);
    }
 }
 
@@ -145,6 +154,143 @@ void doAnalysis(vector<string>& results, vector<int>& data,
 }
 
 
+// 
+// doAnalysisB() improves extraction speed of previous/next note attacks.
+//
+
+void doAnalysisB(vector<string>& results, vector<int>& data,
+      vector<HTp>& vgrid) {
+   int previous, next, current;
+   int interval1, interval2;
+
+   // prepare lookup tables for next/previous note attack (or rest).
+   vector<int> lastattack(data.size(), -1);
+   vector<int> nextattack(data.size(), -1);
+   for (int i=0; i<(int)data.size(); i++) {
+      if (data[i] >= 0) {
+         lastattack[i] = i;
+         nextattack[i] = i;
+      }
+   }
+
+   int value = -1;
+   int temp = -1;
+   for (int i=(int)nextattack.size() - 1; i>= 0; i--) {
+      if (nextattack[i] >= 0) {
+         temp = nextattack[i];
+         nextattack[i] = value;
+         value = temp;
+      } else {
+         nextattack[i] = value;
+      }
+   }
+
+   value = -1;
+   temp = -1;
+   for (int i=0; i<(int)nextattack.size(); i++) {
+      if (lastattack[i] >= 0) {
+         temp = lastattack[i];
+         lastattack[i] = value;
+         value = temp;
+      } else {
+         lastattack[i] = value;
+      }
+   }
+
+   if (debug) {
+      cout << "==============================" << endl;
+      cout << "i\tnote\tnext\tprev\n";
+      for (int i=0; i<(int)data.size(); i++) {
+            cout << i << "\t" 
+                 << data[i] << "\t" 
+                 << nextattack[i] << "\t" 
+                 << lastattack[i] << endl;
+      }
+      cout << endl;
+   }
+
+
+   for (int i=1; i<(int)data.size() - 1; i++) {
+      current = data[i];
+      if (current <= 0) {
+         continue;
+      }
+      previous = getAttack(1, data, i, lastattack);
+      if (previous <= 0) {
+         continue;
+      }
+      next = getAttack(1, data, i, nextattack);
+      if (next <= 0) {
+         continue;
+      }
+      interval1 = current - previous;
+      interval2 = next - current;
+      int lineindex = vgrid[i]->getLineIndex();
+      if ((interval1 == 1) && (interval2 == 1)) {
+         results[lineindex] = "pu";
+      } else if ((interval1 == -1) && (interval2 == -1)) {
+         results[lineindex] = "pd";
+      } else if ((interval1 == 1) && (interval2 == -1)) {
+         results[lineindex] = "nu";
+      } else if ((interval1 == -1) && (interval2 == 1)) {
+         results[lineindex] = "nd";
+      }
+   }
+}
+
+
+
+//////////////////////////////
+//
+// getAttack --
+//
+
+int getAttack(int n, vector<int>& data, int index, vector<int> attacks) {
+   int ordinal = 0;
+   index = attacks[index];
+   while ((index >= 0) && (ordinal < n)) {
+      if (index < 0) {
+      	 return 0;
+      }
+      ordinal++;
+      if (ordinal == n) {
+         return data[index];
+      }
+      index = attacks[index];
+   }
+   return 0;
+}
+
+
+
+//////////////////////////////
+//
+// getAttacks --
+//
+
+vector<int> getAttack(int n, vector<int>& data, int index,
+      vector<int> attacks) {
+   vector<int> output(n, 0);
+   int ordinal = 0;
+   index = attacks[index];
+   while ((index >= 0) && (ordinal < n)) {
+      if (index < 0) {
+      	 return 0;
+      }
+      ordinal++;
+      if (ordinal <= n) {
+         output[ordinal-1] = data[index];
+      }
+      if (ordinal == n) {
+         break;
+      }
+      index = attacks[index];
+   }
+   return output;
+}
+
+
+
 
 ///////////////////////////////
 //
@@ -159,6 +305,7 @@ int getPreviousAttack(vector<int>& data, int index) {
    }
    return 0;
 }
+
 
 
 

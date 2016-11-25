@@ -148,6 +148,8 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 		const string& null, const string& exinterp) {
 
 	if ((int)data.size() != getLineCount()) {
+		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
+		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT " << getLineCount() << endl;
 		return false;
 	}
 
