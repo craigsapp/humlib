@@ -268,7 +268,7 @@ int getAttack(int n, vector<int>& data, int index, vector<int> attacks) {
 // getAttacks --
 //
 
-vector<int> getAttack(int n, vector<int>& data, int index,
+vector<int> getAttacks(int n, vector<int>& data, int index,
       vector<int> attacks) {
    vector<int> output(n, 0);
    int ordinal = 0;
