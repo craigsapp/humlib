@@ -275,7 +275,7 @@ vector<int> getAttacks(int n, vector<int>& data, int index,
    index = attacks[index];
    while ((index >= 0) && (ordinal < n)) {
       if (index < 0) {
-      	 return 0;
+      	 break;
       }
       ordinal++;
       if (ordinal <= n) {
