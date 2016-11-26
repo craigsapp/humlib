@@ -39,12 +39,28 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		template <class DATATYPE>
 		bool   prependDataSpine           (vector<DATATYPE> data,
 		                                   const string& null = ".",
-		                                   const string& exinterp = "**data");
+		                                   const string& exinterp = "**data",
+		                                   bool recalcLine = true);
 
 		template <class DATATYPE>
 		bool   appendDataSpine            (vector<DATATYPE> data,
 		                                   const string& null = ".",
-		                                   const string& exinterp = "**data");
+		                                   const string& exinterp = "**data",
+		                                   bool recalcLine = true);
+
+		template <class DATATYPE>
+		bool   insertDataSpineBefore      (int nexttrack,
+		                                   vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data",
+		                                   bool recalcLine = true);
+
+		template <class DATATYPE>
+		bool   insertDataSpineAfter       (int prevtrack,
+		                                   vector<DATATYPE> data,
+		                                   const string& null = ".",
+		                                   const string& exinterp = "**data",
+		                                   bool recalcLine = true);
 
 	protected:
 		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
@@ -60,6 +76,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 // Templates:
 //
 
+
 //////////////////////////////
 //
 // HumdrumFileContent::prependDataSpine -- prepend a data spine
@@ -70,11 +87,13 @@ class HumdrumFileContent : public HumdrumFileStructure {
 //             string then set the data spine content to a null token, ".".
 //             default is ".".
 //     exinterp == the exterp string to use.  Default is "**data".
+//     recalcLine == boolean for whether or not to recalculate line string.
+//                   Default is true;
 //
 
 template <class DATATYPE>
 bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
-		const string& null, const string& exinterp) {
+		const string& null, const string& exinterp, bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
 		return false;
@@ -123,8 +142,9 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 		} else{
 			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
 		}
-		// re-calculate line text
-		line->createLineFromTokens();
+		if (recalcLine) {
+			line->createLineFromTokens();
+		}
 	}
 	return true;
 }
@@ -141,15 +161,18 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 //             string then set the data spine content to a null token, ".".
 //             default is ".".
 //     exinterp == the exterp string to use.  Default is "**data".
+//     recalcLine == boolean for whether or not to recalculate line string.
+//                   Default is true;
 //
 
 template <class DATATYPE>
 bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
-		const string& null, const string& exinterp) {
+		const string& null, const string& exinterp, bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
 		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
-		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT " << getLineCount() << endl;
+		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		cerr  << getLineCount() << endl;
 		return false;
 	}
 
@@ -196,8 +219,200 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 		} else{
 			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
 		}
-		// re-calculate line text
-		line->createLineFromTokens();
+		if (recalcLine) {
+			line->createLineFromTokens();
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::insertDataSpineBefore -- prepend a data spine
+//     to the file before the given spine.  Returns true if successful; 
+//     false otherwise.
+//
+//     nexttrack == track number to insert before.
+//     data == numeric or string data to print
+//     null == if the data is converted to a string is equal to this
+//             string then set the data spine content to a null token, ".".
+//             default is ".".
+//     exinterp == the exterp string to use.  Default is "**data".
+//     recalcLine == boolean for whether or not to recalculate line string.
+//                   Default is true;
+//
+
+template <class DATATYPE>
+bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
+		vector<DATATYPE> data, const string& null, const string& exinterp,
+		bool recalcLine) {
+
+	if ((int)data.size() != getLineCount()) {
+		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
+		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		cerr  << getLineCount() << endl;
+		return false;
+	}
+
+	string ex;
+	if (exinterp.find("**") == 0) {
+		ex = exinterp;
+	} else if (exinterp.find("*") == 0) {
+		ex = "*" + exinterp;
+	} else {
+		ex = "**" + exinterp;
+	}
+	if (ex.size() <= 2) {
+		ex += "data";
+	}
+
+	stringstream ss;
+	HumdrumFileContent& infile = *this;
+	HumdrumLine* line;
+	int insertionField = -1;
+	int track;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		line = infile.getLine(i);
+		if (!line->hasSpines()) {
+			continue;
+		}
+		insertionField = -1;
+		for (int j=0; j<line->getFieldCount(); j++) {
+			track = line->token(j)->getTrack();
+         if (track != nexttrack) {
+				continue;
+			}
+			insertionField = j;
+			break;
+		}
+		if (insertionField < 0) {
+			return false;
+		}
+
+		if (line->isExclusive()) {
+			line->insertToken(insertionField, ex);
+		} else if (line->isTerminator()) {
+			line->insertToken(insertionField, "*-");
+		} else if (line->isInterpretation()) {
+			line->insertToken(insertionField, "*");
+		} else if (line->isLocalComment()) {
+			line->insertToken(insertionField, "!");
+		} else if (line->isBarline()) {
+			line->insertToken(insertionField, (string)*infile.token(i, 0));
+		} else if (line->isData()) {
+			ss.str(string());
+			ss << data[i];
+			if (ss.str() == null) {
+				line->insertToken(insertionField, ".");
+			} else if (ss.str() == "") {
+				line->insertToken(insertionField, ".");
+			} else {
+				line->insertToken(insertionField, ss.str());
+			}
+		} else{
+			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+		}
+		if (recalcLine) {
+			line->createLineFromTokens();
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::insertDataSpineAfter -- appen a data spine
+//     to the file after the given spine.  Returns true if successful; 
+//     false otherwise.
+//
+//     prevtrack == track number to insert after.
+//     data == numeric or string data to print
+//     null == if the data is converted to a string is equal to this
+//             string then set the data spine content to a null token, ".".
+//             default is ".".
+//     exinterp == the exterp string to use.  Default is "**data".
+//     recalcLine == boolean for whether or not to recalculate line string.
+//                   Default is true;
+//
+
+template <class DATATYPE>
+bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
+		vector<DATATYPE> data, const string& null, const string& exinterp,
+		bool recalcLine) {
+
+	if ((int)data.size() != getLineCount()) {
+		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
+		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		cerr  << getLineCount() << endl;
+		return false;
+	}
+
+	string ex;
+	if (exinterp.find("**") == 0) {
+		ex = exinterp;
+	} else if (exinterp.find("*") == 0) {
+		ex = "*" + exinterp;
+	} else {
+		ex = "**" + exinterp;
+	}
+	if (ex.size() <= 2) {
+		ex += "data";
+	}
+
+	stringstream ss;
+	HumdrumFileContent& infile = *this;
+	HumdrumLine* line;
+	int insertionField = -1;
+	int track;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		line = infile.getLine(i);
+		if (!line->hasSpines()) {
+			continue;
+		}
+		insertionField = -1;
+		for (int j = line->getFieldCount() - 1; j >= 0; j--) {
+			track = line->token(j)->getTrack();
+         if (track != prevtrack) {
+				continue;
+			}
+			insertionField = j;
+			break;
+		}
+		insertionField++;
+		if (insertionField < 0) {
+			return false;
+		}
+
+		if (line->isExclusive()) {
+			line->insertToken(insertionField, ex);
+		} else if (line->isTerminator()) {
+			line->insertToken(insertionField, "*-");
+		} else if (line->isInterpretation()) {
+			line->insertToken(insertionField, "*");
+		} else if (line->isLocalComment()) {
+			line->insertToken(insertionField, "!");
+		} else if (line->isBarline()) {
+			line->insertToken(insertionField, (string)*infile.token(i, 0));
+		} else if (line->isData()) {
+			ss.str(string());
+			ss << data[i];
+			if (ss.str() == null) {
+				line->insertToken(insertionField, ".");
+			} else if (ss.str() == "") {
+				line->insertToken(insertionField, ".");
+			} else {
+				line->insertToken(insertionField, ss.str());
+			}
+		} else{
+			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+		}
+		if (recalcLine) {
+			line->createLineFromTokens();
+		}
 	}
 	return true;
 }

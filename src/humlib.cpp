@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 25 08:32:41 PST 2016
+// Last Modified: Sat Nov 26 00:31:25 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4765,34 +4765,6 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	return true;
 }
 
-
-
-
-// Templates which are defined in HumdrumFileContent.h:
-
-//////////////////////////////
-//
-// HumdrumFileContent::prependDataSpine -- prepend a data spine
-//     to the file.  Returns true if successful; false otherwise.
-//
-//     data == numeric or string data to print
-//     null == if the data is converted to a string is equal to this
-//             string then set the data spine content to a null token, ".".
-//             default is ".".
-//     exinterp == the exterp string to use.  Default is "**data".
-//
-
-//////////////////////////////
-//
-// HumdrumFileContent::appendDataSpine -- prepend a data spine
-//     to the file.  Returns true if successful; false otherwise.
-//
-//     data == numeric or string data to print
-//     null == if the data is converted to a string is equal to this
-//             string then set the data spine content to a null token, ".".
-//             default is ".".
-//     exinterp == the exterp string to use.  Default is "**data".
-//
 
 
 
@@ -11568,6 +11540,30 @@ int Convert::base40ToDiatonic(int b40) {
 
 	// found an empty slot, so return rest:
    return -1;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToMidiNoteNumber --
+//
+
+int Convert::base40ToMidiNoteNumber(int b40) {
+	// +1 since middle-C octave is 5 in MIDI:
+   int octave     = b40 / 40 + 1;
+   int accidental = Convert::base40ToAccidental(b40);
+   int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
+	switch (diatonicpc) {
+		case 0: return octave * 12 +  0 + accidental;
+		case 1: return octave * 12 +  2 + accidental;
+		case 2: return octave * 12 +  4 + accidental;
+		case 3: return octave * 12 +  5 + accidental;
+		case 4: return octave * 12 +  7 + accidental;
+		case 5: return octave * 12 +  9 + accidental;
+		case 6: return octave * 12 + 11 + accidental;
+		default: return -1000; // can't deal with negative pitches
+	}
 }
 
 

@@ -388,6 +388,30 @@ int Convert::base40ToDiatonic(int b40) {
 
 //////////////////////////////
 //
+// Convert::base40ToMidiNoteNumber --
+//
+
+int Convert::base40ToMidiNoteNumber(int b40) {
+	// +1 since middle-C octave is 5 in MIDI:
+   int octave     = b40 / 40 + 1;
+   int accidental = Convert::base40ToAccidental(b40);
+   int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
+	switch (diatonicpc) {
+		case 0: return octave * 12 +  0 + accidental;
+		case 1: return octave * 12 +  2 + accidental;
+		case 2: return octave * 12 +  4 + accidental;
+		case 3: return octave * 12 +  5 + accidental;
+		case 4: return octave * 12 +  7 + accidental;
+		case 5: return octave * 12 +  9 + accidental;
+		case 6: return octave * 12 + 11 + accidental;
+		default: return -1000; // can't deal with negative pitches
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Convert::base40ToAccidental -- +1 = 1 sharp, +2 = double sharp, 0 = natural
 //	-1 = 1 flat, -2 = double flat
 //

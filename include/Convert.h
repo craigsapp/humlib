@@ -39,6 +39,7 @@ class Convert {
 		static string  base40ToKern         (int b40);
    	static int     base40ToAccidental   (int b40);
    	static int     base40ToDiatonic     (int b40);
+		static int     base40ToMidiNoteNumber(int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
 		static int     kernToOctaveNumber   (HTp token) 
 				{ return kernToOctaveNumber((string)*token); }

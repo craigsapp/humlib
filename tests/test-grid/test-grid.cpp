@@ -110,7 +110,7 @@ void doAnalysis(vector<vector<string> >& results, vector<vector<HTp> >& grid) {
    vector<vector<int> > diatonic;
    fillDiatonicGrid(diatonic, grid);
    for (int i=0; i<(int)diatonic.size(); i++) {
-      doAnalysisB(results[i], diatonic[i], grid[i]);
+      doAnalysis(results[i], diatonic[i], grid[i]);
    }
 }
 
