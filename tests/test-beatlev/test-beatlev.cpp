@@ -1,5 +1,4 @@
 // Description: Example of extracting beat levels
-// a score for dissonance analysis.
 // vim: ts=3
 // Todo: meters such as 2+3/4
 //       tuplets (may be hard)
