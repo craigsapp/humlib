@@ -13,7 +13,11 @@
 
 #include "NoteGrid.h"
 
+using namespace std;
+
+
 namespace hum {
+
 
 //////////////////////////////
 //
@@ -45,7 +49,7 @@ NoteGrid::~NoteGrid() {
 void NoteGrid::clear(void) {
 	m_kernspines.clear();
 
-	vector<vector<GridCell* > >& grid = m_grid;
+	vector<vector<NoteCell* > >& grid = m_grid;
 	for (int i=0; i<(int)grid.size(); i++) {
 		for (int j=0; j<(int)grid[i].size(); j++) {
 			if (grid[i][j]) {
@@ -107,7 +111,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 		return false;
 	}
 
-	vector<vector<GridCell* > >& grid = m_grid;
+	vector<vector<NoteCell* > >& grid = m_grid;
 	grid.resize(kernspines.size());
 	for (int i=0; i<(int)grid.size(); i++) {
 		grid[i].reserve(infile.getLineCount());
@@ -139,16 +143,13 @@ bool NoteGrid::load(HumdrumFile& infile) {
 				attack++;
 			}
 		}
-		if (attack == 0) {
-			continue;
-		}
 		if (current.size() != kernspines.size()) {
 			cerr << "Error: Unequal vector sizes " << current.size()
 			     << " compared to " << kernspines.size() << endl;
 			return false;
 		}
 		for (int j=0; j<(int)current.size(); j++) {
-			GridCell* cell = new GridCell(this, current[j]);
+			NoteCell* cell = new NoteCell(this, current[j]);
 			cell->setVoiceIndex(j);
 			cell->setSliceIndex((int)grid[j].size());
 			grid[j].push_back(cell);
@@ -167,7 +168,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 // NoteGrid::cell -- Return the given cell in the grid.
 //
 
-GridCell* NoteGrid::cell(int voiceindex, int sliceindex) {
+NoteCell* NoteGrid::cell(int voiceindex, int sliceindex) {
 	return m_grid.at(voiceindex).at(sliceindex);
 }
 
@@ -182,7 +183,7 @@ GridCell* NoteGrid::cell(int voiceindex, int sliceindex) {
 void NoteGrid::printDiatonicGrid(ostream& output) {
 	for (int j=0; j<getSliceCount(); j++) {
 		for (int i=0; i<(int)getVoiceCount(); i++) {
-			output << cell(i, j)->getDiatonicPitch();
+			output << cell(i, j)->getSgnDiatonicPitch();
 			if (i < getVoiceCount() - 1) {
 				output << "\t";
 			}
@@ -201,7 +202,7 @@ void NoteGrid::printDiatonicGrid(ostream& output) {
 void NoteGrid::printMidiGrid(ostream& output) {
 	for (int j=0; j<getSliceCount(); j++) {
 		for (int i=0; i<(int)getVoiceCount(); i++) {
-			output << cell(i, j)->getMidiPitch();
+			output << cell(i, j)->getSgnMidiPitch();
 			if (i < getVoiceCount() - 1) {
 				output << "\t";
 			}
@@ -220,7 +221,7 @@ void NoteGrid::printMidiGrid(ostream& output) {
 void NoteGrid::printBase40Grid(ostream& output) {
 	for (int j=0; j<getSliceCount(); j++) {
 		for (int i=0; i<(int)getVoiceCount(); i++) {
-			output << cell(i, j)->getBase40Pitch();
+			output << cell(i, j)->getSgnBase40Pitch();
 			if (i < getVoiceCount() - 1) {
 				output << "\t";
 			}
@@ -258,7 +259,7 @@ void NoteGrid::printRawGrid(ostream& output) {
 void NoteGrid::printKernGrid(ostream& output) {
 	for (int j=0; j<getSliceCount(); j++) {
 		for (int i=0; i<(int)getVoiceCount(); i++) {
-			output << cell(i, j)->getKernPitch();
+			output << cell(i, j)->getSgnKernPitch();
 			if (i < getVoiceCount() - 1) {
 				output << "\t";
 			}
@@ -290,7 +291,7 @@ void NoteGrid::buildAttackIndexes(void) {
 //
 
 void NoteGrid::buildAttackIndex(int vindex) {
-	vector<GridCell*>& part = m_grid[vindex];
+	vector<NoteCell*>& part = m_grid[vindex];
 
 	// Set the slice index for the attack of the current note.  This
 	// will be the same as the current slice if the NoteCell is an attack.
@@ -303,30 +304,31 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			part[0]->setCurrAttackIndex(0);
 			continue;
 		}
-		if (part[i]->getBase40Pitch() > 0) {
-			part[i]->setCurrAttackIndex(i);
-		} else if (part[i]->getBase40Pitch() < 0) {
-			// This is a sustain, so get the attack index of the
-			// note from the previous slice index.
-			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
-		} else {
+		if (part[i]->isRest()) {
 			// This is a rest, so check for a rest sustain or start
 			// of a rest sequence.
-			if (part[i-1]->getBase40Pitch() == 0) {
+			if (part[i-1]->isRest()) {
 				// rest "sustain"
 				part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			} else {
 				// rest "attack";
-				part[i]->getCurrAttackIndex();
+				part[i]->setCurrAttackIndex(i);
 			}
+		} else if (part[i]->isAttack()) {
+			part[i]->setCurrAttackIndex(i);
+		} else {
+			// This is a sustain, so get the attack index of the
+			// note from the previous slice index.
+			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 		}
 	}
 
+   // start with note attacks marked in the previous and next note slots:
 	for (int i=0; i<(int)part.size(); i++) {
-		if (part[i]->getBase40Pitch() > 0) {
+		if (part[i]->isAttack()) {
 			part[i]->setNextAttackIndex(i);
 			part[i]->setPrevAttackIndex(i);
-		} else if (part[i]->getBase40Pitch() == 0) {
+		} else if (part[i]->isRest()) {
 			if (part[i]->getCurrAttackIndex() == i) {
 				part[i]->setNextAttackIndex(i);
 				part[i]->setPrevAttackIndex(i);
@@ -334,10 +336,11 @@ void NoteGrid::buildAttackIndex(int vindex) {
 		}
 	}
 
+	// Go back and adjust the next note attack index:
 	int value = -1;
 	int temp  = -1;
 	for (int i=(int)part.size()-1; i>=0; i--) {
-		if (part[i]->getNextAttackIndex() >= 0) {
+		if (!part[i]->isSustained()) {
 			temp = part[i]->getNextAttackIndex();
 			part[i]->setNextAttackIndex(value);
 			value = temp;
@@ -346,15 +349,18 @@ void NoteGrid::buildAttackIndex(int vindex) {
 		}
 	}
 
+	// Go back and adjust the previous note attack index:
 	value = -1;
 	temp  = -1;
 	for (int i=0; i<(int)part.size(); i++) {
-		if (part[i]->getPrevAttackIndex() >= 0) {
+		if (!part[i]->isSustained()) {
 			temp = part[i]->getPrevAttackIndex();
 			part[i]->setPrevAttackIndex(value);
 			value = temp;
 		} else {
-			part[i]->setPrevAttackIndex(value);
+			if (i != 0) {
+				part[i]->setPrevAttackIndex(part[i-1]->getPrevAttackIndex());
+			}
 		}
 	}
 
@@ -364,48 +370,96 @@ void NoteGrid::buildAttackIndex(int vindex) {
 
 //////////////////////////////
 //
-// NoteGrid::getDiatonicPitch -- Return the diatonic pitch number for
+// NoteGrid::getAbsDiatonicPitch -- Return the diatonic pitch number for
 //     the given cell.
 //
 
-int NoteGrid::getDiatonicPitch(int vindex, int sindex) {
-	return m_grid.at(vindex).at(sindex)->getDiatonicPitch();
+double NoteGrid::getAbsDiatonicPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getAbsDiatonicPitch();
 }
 
 
 
 //////////////////////////////
 //
-// NoteGrid::getMidiPitch -- Return the MIDI pitch number for
+// NoteGrid::getSgnDiatonicPitch -- Return the diatonic pitch number for
 //     the given cell.
 //
 
-int NoteGrid::getMidiPitch(int vindex, int sindex) {
-	return m_grid.at(vindex).at(sindex)->getMidiPitch();
+double NoteGrid::getSgnDiatonicPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getSgnDiatonicPitch();
 }
 
 
 
 //////////////////////////////
 //
-// NoteGrid::getDiatonicPitch -- Return the base-40 pitch number for
+// NoteGrid::getAbsMidiPitch -- Return the MIDI pitch number for
 //     the given cell.
 //
 
-int NoteGrid::getBase40Pitch(int vindex, int sindex) {
-	return m_grid.at(vindex).at(sindex)->getBase40Pitch();
+double NoteGrid::getAbsMidiPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getAbsMidiPitch();
 }
 
 
 
 //////////////////////////////
 //
-// NoteGrid::getKernPitch -- Return the **kern pitch name for
+// NoteGrid::getSgnMidiPitch -- Return the MIDI pitch number for
+//     the given cell.
+//
+
+double NoteGrid::getSgnMidiPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getSgnMidiPitch();
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getAbsBase40Pitch -- Return the base-40 pitch number for
+//     the given cell.
+//
+
+double NoteGrid::getAbsBase40Pitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getAbsBase40Pitch();
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getSgnBase40Pitch -- Return the base-40 pitch number for
+//     the given cell.
+//
+
+double NoteGrid::getSgnBase40Pitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getSgnBase40Pitch();
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getAbsKernPitch -- Return the **kern pitch name for
 //     the given cell.  Sustained notes are enclosed in parentheses.
 //
 
-string NoteGrid::getKernPitch(int vindex, int sindex) {
-	return m_grid.at(vindex).at(sindex)->getKernPitch();
+string NoteGrid::getAbsKernPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getAbsKernPitch();
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getSgnKernPitch -- Return the **kern pitch name for
+//     the given cell.  Sustained notes are enclosed in parentheses.
+//
+
+string NoteGrid::getSgnKernPitch(int vindex, int sindex) {
+	return m_grid.at(vindex).at(sindex)->getSgnKernPitch();
 }
 
 
@@ -431,12 +485,12 @@ HTp NoteGrid::getToken(int vindex, int sindex) {
 //
 
 int NoteGrid::getPrevAttackDiatonic(int vindex, int sindex) {
-	GridCell*& cell = m_grid.at(vindex).at(sindex);
+	NoteCell*& cell = m_grid.at(vindex).at(sindex);
 	int index = cell->getPrevAttackIndex();
 	if (index < 0) {
 		return 0;
 	} else {
-		return this->cell(vindex, index)->getDiatonicPitch();
+		return this->cell(vindex, index)->getAbsDiatonicPitch();
 	}
 }
 
@@ -451,12 +505,12 @@ int NoteGrid::getPrevAttackDiatonic(int vindex, int sindex) {
 //
 
 int NoteGrid::getNextAttackDiatonic(int vindex, int sindex) {
-	GridCell*& cell = m_grid.at(vindex).at(sindex);
+	NoteCell*& cell = m_grid.at(vindex).at(sindex);
 	int index = cell->getNextAttackIndex();
 	if (index < 0) {
 		return 0;
 	} else {
-		return this->cell(vindex, index)->getDiatonicPitch();
+		return this->cell(vindex, index)->getAbsDiatonicPitch();
 	}
 }
 
@@ -479,27 +533,65 @@ int NoteGrid::getLineIndex(int sindex) {
 
 //////////////////////////////
 //
-// NoteGrid::printCellInfo -- for debugging.
+// NoteGrid::getNoteAndRestAttacks -- Return the note attacks,
+//    and the first rest slice ("rest attack") for a particular voice.
 //
 
-void NoteGrid::printCellInfo(ostream& out) {
+void NoteGrid::getNoteAndRestAttacks(vector<NoteCell*>& attacks,
+		int vindex) {
+	attacks.resize(0);
+	int max = getSliceCount();
+	if (max == 0) {
+		return;
+	}
+	attacks.reserve(max);
+	NoteCell* note = cell(vindex, 0);
+	attacks.push_back(note);
+	while (attacks.back()->getNextAttackIndex() > 0) {
+		note = cell(vindex, attacks.back()->getNextAttackIndex());
+		if (note == attacks.back()) {
+			cerr << "Strange duplicate: ";
+			note->printNoteInfo(cerr);
+			break;
+		}
+		attacks.push_back(note);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::printGridInfo -- for debugging.
+//
+
+void NoteGrid::printGridInfo(ostream& out) {
 	for (int i=0; i<getVoiceCount(); i++) {
-		printCellInfo(out, i);
+		printVoiceInfo(out, i);
 		out << endl;
 	}
 
 }
 
 
-void NoteGrid::printCellInfo(ostream& out, int vindex) {
+
+//////////////////////////////
+//
+// NoteGrid::printVoiceInfo -- for debugging.
+//
+
+void NoteGrid::printVoiceInfo(ostream& out, int vindex) {
 	out << "============================================================";
 	out << endl;
 	out << "i\tnote\tprevi\tcurri\tnexti\tb7\tmidi\tb40\n";
 	for (int i=0; i<getSliceCount(); i++) {
-		out << cell(vindex, i);
+		this->cell(vindex, i)->printNoteInfo(out);
 	}
 }
 
 
+
 } // end namespace hum
+
+
 

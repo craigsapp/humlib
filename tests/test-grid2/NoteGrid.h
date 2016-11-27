@@ -15,7 +15,7 @@
 #define _NOTEGRID_H
 
 #include "humlib.h"
-#include "GridCell.h"
+#include "NoteCell.h"
 
 using namespace std;
 
@@ -32,7 +32,7 @@ class NoteGrid {
 		void       clear              (void);
 
 		bool       load               (HumdrumFile& infile);
-		GridCell*  cell               (int voiceindex, int sliceindex);
+		NoteCell*  cell               (int voiceindex, int sliceindex);
 		int        getVoiceCount      (void);
 		int        getSliceCount      (void);
 		int        getLineIndex       (int sindex);
@@ -43,30 +43,45 @@ class NoteGrid {
 		void       printRawGrid       (ostream& out);
 		void       printKernGrid      (ostream& out);
 
-		int        getDiatonicPitch   (int vindex, int sindex);
-		int        getMidiPitch       (int vindex, int sindex);
-		int        getBase40Pitch     (int vindex, int sindex);
-		string     getKernPitch       (int vindex, int sindex);
+		double     getSgnDiatonicPitch   (int vindex, int sindex);
+		double     getSgnMidiPitch       (int vindex, int sindex);
+		double     getSgnBase40Pitch     (int vindex, int sindex);
+		string     getSgnKernPitch       (int vindex, int sindex);
+
+		double     getAbsDiatonicPitch   (int vindex, int sindex);
+		double     getAbsMidiPitch       (int vindex, int sindex);
+		double     getAbsBase40Pitch     (int vindex, int sindex);
+		string     getAbsKernPitch       (int vindex, int sindex);
+
+		bool       isRest                (int vindex, int sindex);
+		bool       isSustained           (int vindex, int sindex);
+		bool       isAttack              (int vindex, int sindex);
+
 		HTp        getToken           (int vindex, int sindex);
 
 		int        getPrevAttackDiatonic(int vindex, int sindex);
 		int        getNextAttackDiatonic(int vindex, int sindex);
 
-		void       printCellInfo(ostream& out);
-		void       printCellInfo(ostream& out, int vindex);
+		void       printGridInfo(ostream& out);
+		void       printVoiceInfo(ostream& out, int vindex);
+
+		void      getNoteAndRestAttacks(vector<NoteCell*>& attacks, int vindex);
 
 	protected:
 		void       buildAttackIndexes (void);
 		void       buildAttackIndex   (int vindex);
 
 	private:
-		vector<vector<GridCell*> > m_grid;
+		vector<vector<NoteCell*> > m_grid;
 		vector<HTp>                m_kernspines;
 
 };
 
 
+
 } // end namespace hum
+
+
 
 #endif /* _NOTEGRID_H */
 

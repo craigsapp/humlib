@@ -4,20 +4,26 @@
 // vim: ts=3
 
 #include "humlib.h"
-#include "GridCell.h"
+#include "NoteCell.h"
 #include "NoteGrid.h"
 
-// remove the following lines when GridCell and NoteGrid are in humlib library.
-#include "GridCell.cpp"
+// remove the following lines when NoteCell and NoteGrid are in humlib library.
+#include "NoteCell.cpp"
 #include "NoteGrid.cpp"
 
 using namespace std;
 using namespace hum;
 
 // function declarations:
-void    doAnalysis  (vector<vector<string> >& results, NoteGrid& grid);
-void    doAnalysis  (vector<string>& results, NoteGrid& grid, int vindex);
+void    doAnalysis  (vector<vector<string> >& results, NoteGrid& grid,
+                     bool debug);
+void    doAnalysisA (vector<string>& results, NoteGrid& grid, int vindex,
+                     bool debug);
+void    doAnalysisB (vector<string>& results, NoteGrid& grid, int vindex,
+                     bool debug);
 
+
+char Algorithm = 'A';
 
 int main(int argc, char** argv) {
 
@@ -29,7 +35,11 @@ int main(int argc, char** argv) {
 	opts.define("b|base-40=b",    "print base-40 grid");
 	opts.define("k|kern=b",       "print kern pitch grid");
 	opts.define("debug=b",        "print grid cell information");
+	opts.define("B=b",  		      "use second algorithm");
 	opts.process(argc, argv);
+	if (opts.getBoolean("B")) {
+		Algorithm = 'B';
+	}
 
 	// read an inputfile from the first filename argument, or standard input
 	HumdrumFile infile;
@@ -42,8 +52,8 @@ int main(int argc, char** argv) {
 	NoteGrid grid(infile);
 
 	if (opts.getBoolean("debug")) {
-		grid.printCellInfo(cout);
-		return 0;
+		grid.printGridInfo(cerr);
+		// return 0;
 	} else if (opts.getBoolean("raw")) {
 		grid.printRawGrid(cout);
 		return 0;
@@ -67,7 +77,7 @@ int main(int argc, char** argv) {
 	for (int i=0; i<(int)results.size(); i++) {
 		results[i].resize(infile.getLineCount());
 	}
-	doAnalysis(results, grid);
+	doAnalysis(results, grid, opts.getBoolean("debug"));
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 	infile.appendDataSpine(results.back());
@@ -87,9 +97,13 @@ int main(int argc, char** argv) {
 // doAnalysis -- do a basic melodic analysis of all parts.
 //
 
-void doAnalysis(vector<vector<string> >& results, NoteGrid& grid) {
+void doAnalysis(vector<vector<string> >& results, NoteGrid& grid, bool debug) {
 	for (int i=0; i<grid.getVoiceCount(); i++) {
-		doAnalysis(results[i], grid, i);
+		if (Algorithm == 'A') {
+			doAnalysisA(results[i], grid, i, debug);
+		} else {
+			doAnalysisB(results[i], grid, i, debug);
+		}
 	}
 }
 
@@ -97,29 +111,31 @@ void doAnalysis(vector<vector<string> >& results, NoteGrid& grid) {
 
 //////////////////////////////
 //
-// doAnalysis -- do analysis for a single voice.
+// doAnalysisA -- do analysis for a single voice by subtracting
+//     NoteCells to calculate the interval.
 //
 
-void doAnalysis(vector<string>& results, NoteGrid& grid, int vindex) {
-	int previous, next, current;
-	int interval1, interval2;
+void doAnalysisA(vector<string>& results, NoteGrid& grid, int vindex,
+		bool debug) {
+	vector<NoteCell*> attacks;
+	grid.getNoteAndRestAttacks(attacks, vindex);
 
-	for (int i=1; i<(int)grid.getSliceCount() - 1; i++) {
-		current = grid.getDiatonicPitch(vindex, i);
-		if (current <= 0) {
-			continue;
+	if (debug) {
+		cerr << "=======================================================";
+		cerr << endl;
+		cerr << "Note attacks for voice number "
+		     << grid.getVoiceCount()-vindex << ":" << endl;
+		for (int i=0; i<attacks.size(); i++) {
+			attacks[i]->printNoteInfo(cerr);
 		}
-		previous = grid.getPrevAttackDiatonic(vindex, i);
-		if (previous <= 0) {
-			continue;
-		}
-		next = grid.getNextAttackDiatonic(vindex, i);
-		if (next <= 0) {
-			continue;
-		}
-		interval1 = current - previous;
-		interval2 = next - current;
-		int lineindex = grid.getLineIndex(i);
+	}
+
+	double interval1, interval2;
+	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		interval1 = *attacks[i] - *attacks[i-1];
+		interval2 = *attacks[i+1] - *attacks[i];
+		int lineindex = attacks[i]->getLineIndex();
+
 		if ((interval1 == 1) && (interval2 == 1)) {
 			results[lineindex] = "pu";
 		} else if ((interval1 == -1) && (interval2 == -1)) {
@@ -129,8 +145,55 @@ void doAnalysis(vector<string>& results, NoteGrid& grid, int vindex) {
 		} else if ((interval1 == -1) && (interval2 == 1)) {
 			results[lineindex] = "nd";
 		}
+		
 	}
 }
+
+
+
+//////////////////////////////
+//
+// doAnalysisB -- do analysis for a single voice by asking the
+//     Note for the interval values instead of calculating them
+//     directly.
+//
+
+void doAnalysisB(vector<string>& results, NoteGrid& grid, int vindex,
+		bool debug) {
+	vector<NoteCell*> attacks;
+	grid.getNoteAndRestAttacks(attacks, vindex);
+
+	if (debug) {
+		cerr << "=======================================================";
+		cerr << endl;
+		cerr << "Note attacks for voice number "
+		     << grid.getVoiceCount()-vindex << ":" << endl;
+		for (int i=0; i<attacks.size(); i++) {
+			attacks[i]->printNoteInfo(cerr);
+		}
+	}
+
+	int interval1, interval2;
+	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		interval1 = attacks[i]->getDiatonicIntervalFromPreviousAttack();
+		interval2 = attacks[i]->getDiatonicIntervalToNextAttack();
+
+		int lineindex = attacks[i]->getLineIndex();
+
+		if ((interval1 == 1) && (interval2 == 1)) {
+			results[lineindex] = "pu";
+		} else if ((interval1 == -1) && (interval2 == -1)) {
+			results[lineindex] = "pd";
+		} else if ((interval1 == 1) && (interval2 == -1)) {
+			results[lineindex] = "nu";
+		} else if ((interval1 == -1) && (interval2 == 1)) {
+			results[lineindex] = "nd";
+		}
+		
+	}
+}
+
+
 
 
 /*
