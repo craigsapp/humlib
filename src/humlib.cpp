@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Nov 26 23:25:28 PST 2016
+// Last Modified: Sun Nov 27 11:33:00 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3181,6 +3181,39 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 		const string& separator) {
 	for (int i=0; i<getLineCount(); i++) {
 		((*this)[i]).printCsv(out, separator);
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printFieldNumber --
+//
+
+ostream& HumdrumFileBase::printFieldNumber(int fieldnum, ostream& out) {
+	return printFieldIndex(fieldnum - 1, out);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printFieldIndex --
+//
+
+ostream& HumdrumFileBase::printFieldIndex(int fieldind, ostream& out) {
+	if (fieldind < 0) {
+		return out;
+	}
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			out << infile[i] << endl;
+			continue;
+		}
+		cout << infile.token(i,fieldind) << endl;
 	}
 	return out;
 }

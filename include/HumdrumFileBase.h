@@ -133,6 +133,8 @@ class HumdrumFileBase : public HumHash {
 		ostream&      printTrackInfo           (ostream& out = cout);
 		ostream&      printCsv                 (ostream& out = cout,
 		                                        const string& separator = ",");
+		ostream&      printFieldNumber         (int fieldnum, ostream& out);
+		ostream&      printFieldIndex          (int fieldind, ostream& out);
 
 		HTp           getTrackStart            (int track) const;
 		HTp           getSpineStart            (int spine) const {

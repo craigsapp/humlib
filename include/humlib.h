@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Nov 26 23:25:28 PST 2016
+// Last Modified: Sun Nov 27 11:33:00 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1181,6 +1181,8 @@ class HumdrumFileBase : public HumHash {
 		ostream&      printTrackInfo           (ostream& out = cout);
 		ostream&      printCsv                 (ostream& out = cout,
 		                                        const string& separator = ",");
+		ostream&      printFieldNumber         (int fieldnum, ostream& out);
+		ostream&      printFieldIndex          (int fieldind, ostream& out);
 
 		HTp           getTrackStart            (int track) const;
 		HTp           getSpineStart            (int spine) const {

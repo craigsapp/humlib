@@ -377,6 +377,39 @@ ostream& HumdrumFileBase::printCsv(ostream& out,
 
 //////////////////////////////
 //
+// HumdrumFileBase::printFieldNumber --
+//
+
+ostream& HumdrumFileBase::printFieldNumber(int fieldnum, ostream& out) {
+	return printFieldIndex(fieldnum - 1, out);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printFieldIndex --
+//
+
+ostream& HumdrumFileBase::printFieldIndex(int fieldind, ostream& out) {
+	if (fieldind < 0) {
+		return out;
+	}
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			out << infile[i] << endl;
+			continue;
+		}
+		cout << infile.token(i,fieldind) << endl;
+	}
+	return out;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getLine -- Return a pointer to the line at a
 //     given index in the data storage.
 //
