@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Nov 27 11:33:00 PST 2016
+// Last Modified: Sun Nov 27 22:37:17 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -738,6 +738,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getDurationFromBarline (HumNum scale) const;
 		HumNum   getDurationToBarline   (HumNum scale) const;
 		HumNum   getBarlineDuration     (HumNum scale) const;
+		int      getKernNoteAttacks     (void);
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
@@ -1175,6 +1176,7 @@ class HumdrumFileBase : public HumHash {
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
 		int           getMaxTrack              (void) const;
+		int           getTrackCount (void) const { return getMaxTrack(); }
 		int           getSpineCount (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo           (ostream& out = cout);
 		ostream&      printDataTypeInfo        (ostream& out = cout);
@@ -1983,6 +1985,9 @@ class Convert {
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
 		static int     getGcd               (int a, int b);
+		static void    primeFactors         (vector<int>& output, int n);
+		static double  nearIntQuantize   (double value, double delta = 0.00001);
+		static double  significantDigits    (double value, int digits);
 
 };
 

@@ -93,6 +93,7 @@ class HumdrumLine : public string, public HumHash {
 		HumNum   getDurationFromBarline (HumNum scale) const;
 		HumNum   getDurationToBarline   (HumNum scale) const;
 		HumNum   getBarlineDuration     (HumNum scale) const;
+		int      getKernNoteAttacks     (void);
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;

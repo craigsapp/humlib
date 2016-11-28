@@ -121,6 +121,9 @@ class Convert {
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
 		static int     getGcd               (int a, int b);
+		static void    primeFactors         (vector<int>& output, int n);
+		static double  nearIntQuantize   (double value, double delta = 0.00001);
+		static double  significantDigits    (double value, int digits);
 
 };
 

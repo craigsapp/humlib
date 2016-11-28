@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Nov 27 11:33:00 PST 2016
+// Last Modified: Sun Nov 27 22:37:18 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7694,6 +7694,27 @@ void HumdrumLine::appendToken(const char* token) {
 
 //////////////////////////////
 //
+// HumdrumLine::getKernNoteAttacks -- Return the number of kern notes
+//    that attack on a line.
+//
+
+int HumdrumLine::getKernNoteAttacks(void) {
+	int output = 0;
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i)->isKern()) {
+			continue;
+		}
+		if (token(i)->isNoteAttack()) {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::insertToken -- add a token at the end of the current
 //      list of tokens in the line.
 //
@@ -11206,6 +11227,57 @@ int Convert::getGcd(int a, int b) {
 	a = b;
 	int output = getGcd(a, c);
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::primeFactors -- Return a list of prime factors of a number.
+//
+
+void Convert::primeFactors(vector<int>& output, int n) {
+   output.clear();
+   while (n%2 == 0) {
+      output.push_back(2);
+      n = n >> 1;
+   }
+   for (int i=3; i <= sqrt(n); i += 2) {
+      while (n%i == 0) {
+         output.push_back(i);
+         n = n/i;
+      }
+   }
+   if (n > 2) {
+      output.push_back(n);
+   }
+}
+
+
+
+//////////////////////////////
+//
+// Convert::nearIntQuantize -- avoid small deviations from integer values.
+//    devault value: delta = 0.00001
+//
+
+double Convert::nearIntQuantize(double value, double delta) {
+	if ((value + delta) - int(value+delta)  < delta*2) {
+		value = (int)(value+delta);
+	}
+	return value;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::significantDigits --
+//
+
+double Convert::significantDigits(double value, int digits) {
+	double scale = pow(10, digits);
+	return (int(value * scale + 0.5))/scale;
 }
 
 

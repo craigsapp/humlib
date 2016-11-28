@@ -1454,6 +1454,27 @@ void HumdrumLine::appendToken(const char* token) {
 
 //////////////////////////////
 //
+// HumdrumLine::getKernNoteAttacks -- Return the number of kern notes
+//    that attack on a line.
+//
+
+int HumdrumLine::getKernNoteAttacks(void) {
+	int output = 0;
+	for (int i=0; i<getFieldCount(); i++) {
+		if (!token(i)->isKern()) {
+			continue;
+		}
+		if (token(i)->isNoteAttack()) {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::insertToken -- add a token at the end of the current
 //      list of tokens in the line.
 //

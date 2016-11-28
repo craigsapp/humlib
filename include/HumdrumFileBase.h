@@ -127,6 +127,7 @@ class HumdrumFileBase : public HumHash {
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
 		int           getMaxTrack              (void) const;
+		int           getTrackCount (void) const { return getMaxTrack(); }
 		int           getSpineCount (void) const { return getMaxTrack(); }
 		ostream&      printSpineInfo           (ostream& out = cout);
 		ostream&      printDataTypeInfo        (ostream& out = cout);
