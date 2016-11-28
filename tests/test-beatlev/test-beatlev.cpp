@@ -1,10 +1,9 @@
 // Description: Example of extracting beat levels
-// a score for dissonance analysis.
 // vim: ts=3
 // Todo: meters such as 2+3/4
 //       tuplets (may be hard)
 //       pickups (particularly if they do not start on a beat
-//       secondary partial measures
+//       secondary partial measures (if they divide a beat)
 
 #include "humlib.h"
 #include <cmath>
