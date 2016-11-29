@@ -25,6 +25,7 @@ namespace hum {
 //
 
 NoteGrid::NoteGrid(HumdrumFile& infile) {
+	m_infile = NULL;
 	load(infile);
 }
 
@@ -47,6 +48,7 @@ NoteGrid::~NoteGrid() {
 //
 
 void NoteGrid::clear(void) {
+	m_infile = NULL;
 	m_kernspines.clear();
 
 	vector<vector<NoteCell* > >& grid = m_grid;
@@ -102,6 +104,8 @@ int NoteGrid::getSliceCount(void) {
 bool NoteGrid::load(HumdrumFile& infile) {
 	// remove any previous contents:
 	clear();
+
+	m_infile = &infile;
 
 	m_kernspines = infile.getKernSpineStartList();
 	vector<HTp>& kernspines = m_kernspines;
@@ -556,6 +560,30 @@ void NoteGrid::getNoteAndRestAttacks(vector<NoteCell*>& attacks,
 		}
 		attacks.push_back(note);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getMetricLevel --
+//
+
+double NoteGrid::getMetricLevel(int sindex) {
+	if (!m_infile) {
+		return NAN;
+	}
+	if ((getSliceCount() == 0) || (getVoiceCount() == 0)) {
+		return NAN;
+	}
+	if (m_metriclevels.empty()) {
+		int track = 0;
+		if ((getVoiceCount() > 0) && (getSliceCount() > 0)) {
+			track = cell(0, 0)->getToken()->getTrack();
+		}
+		m_infile->getMetricLevels(m_metriclevels, track, NAN);
+	}
+	return m_metriclevels[sindex];
 }
 
 

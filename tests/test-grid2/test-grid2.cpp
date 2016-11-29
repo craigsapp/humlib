@@ -24,6 +24,7 @@ void    doAnalysisB (vector<string>& results, NoteGrid& grid, int vindex,
 
 
 char Algorithm = 'A';
+bool levelsQ = false;
 
 int main(int argc, char** argv) {
 
@@ -33,6 +34,7 @@ int main(int argc, char** argv) {
 	opts.define("d|diatonic=b",   "print diatonic grid");
 	opts.define("m|midi-pitch=b", "print midie-pitch grid");
 	opts.define("b|base-40=b",    "print base-40 grid");
+	opts.define("l|metric-levels=b", "use metric levels in analysis");
 	opts.define("k|kern=b",       "print kern pitch grid");
 	opts.define("debug=b",        "print grid cell information");
 	opts.define("B=b",  		      "use second algorithm");
@@ -40,6 +42,7 @@ int main(int argc, char** argv) {
 	if (opts.getBoolean("B")) {
 		Algorithm = 'B';
 	}
+	levelsQ = opts.getBoolean("metric-levels");
 
 	// read an inputfile from the first filename argument, or standard input
 	HumdrumFile infile;
@@ -132,6 +135,16 @@ void doAnalysisA(vector<string>& results, NoteGrid& grid, int vindex,
 
 	double interval1, interval2;
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		if (levelsQ) {
+			double lev1 = attacks[i-1]->getMetricLevel();
+			double lev2 = attacks[i]->getMetricLevel();
+			// double lev3 = attacks[i+1]->getMetricLevel();
+			if (lev2 < lev1) {
+				// if the starting note is at a higher metric position
+				// than the second note, then don't mark.
+				continue;
+			}
+		}
 		interval1 = *attacks[i] - *attacks[i-1];
 		interval2 = *attacks[i+1] - *attacks[i];
 		int lineindex = attacks[i]->getLineIndex();

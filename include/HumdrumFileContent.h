@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -35,6 +36,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
+
+		// in HumdrumFileContent-metlev
+		void  getMetricLevels             (vector<double>& output, int track = 0,
+		                                   double undefined = NAN);
 
 		template <class DATATYPE>
 		bool   prependDataSpine           (vector<DATATYPE> data,

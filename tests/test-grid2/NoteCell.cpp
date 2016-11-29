@@ -246,8 +246,21 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 
 
 
-} // end namespace hum
+//////////////////////////////
+//
+// NoteCell::getMetricLevel --
+//
 
+double NoteCell::getMetricLevel(void) {
+	if (!m_owner) {
+		return NAN;
+	}
+	return m_owner->getMetricLevel(getLineIndex());
+}
+
+
+
+} // end namespace hum
 
 
 

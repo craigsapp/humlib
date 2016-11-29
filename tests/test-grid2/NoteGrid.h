@@ -65,7 +65,8 @@ class NoteGrid {
 		void       printGridInfo(ostream& out);
 		void       printVoiceInfo(ostream& out, int vindex);
 
-		void      getNoteAndRestAttacks(vector<NoteCell*>& attacks, int vindex);
+		void       getNoteAndRestAttacks(vector<NoteCell*>& attacks, int vindex);
+		double     getMetricLevel       (int sindex);
 
 	protected:
 		void       buildAttackIndexes (void);
@@ -74,7 +75,8 @@ class NoteGrid {
 	private:
 		vector<vector<NoteCell*> > m_grid;
 		vector<HTp>                m_kernspines;
-
+		vector<double>             m_metriclevels;
+		HumdrumFile*               m_infile;
 };
 
 

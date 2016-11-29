@@ -52,6 +52,7 @@ class NoteCell {
 		ostream& printNoteInfo    (ostream& out);
 		double getDiatonicIntervalToNextAttack(void);
 		double getDiatonicIntervalFromPreviousAttack(void);
+		double getMetricLevel     (void);
 
 	protected:
 		void clear                  (void);

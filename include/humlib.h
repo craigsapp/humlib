@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Nov 27 22:37:17 PST 2016
+// Last Modified: Mon Nov 28 22:23:35 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1486,6 +1486,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
+
+		// in HumdrumFileContent-metlev
+		void  getMetricLevels             (vector<double>& output, int track = 0,
+		                                   double undefined = NAN);
 
 		template <class DATATYPE>
 		bool   prependDataSpine           (vector<DATATYPE> data,
