@@ -48,6 +48,7 @@ LIBDIR    = lib
 LIBFILE   = humlib
 #LIBFILE   = humdrum
 TARGDIR   = bin
+TOOLDIR   = tools
 
 PREFLAGS  = -Wall -I$(INCDIR)
 PREFLAGS += -O3
@@ -75,6 +76,11 @@ COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 # setting up the directory paths to search for dependency files
 vpath %.h   $(INCDIR)
 vpath %.cpp $(wildcard tests/test-*) examples myprograms
+vpath %.cpp $(wildcard $(TOOLDIR)) examples myprograms
+
+# generating a list of the programs to compile with "make all"
+PROGS1=$(notdir $(patsubst %.cpp,%,$(wildcard $(TOOLDIR)/*.cpp)))
+PROGS=$(PROGS1)
 
 # targets which don't actually refer to files
 .PHONY: examples
@@ -86,7 +92,7 @@ vpath %.cpp $(wildcard tests/test-*) examples myprograms
 
 examples: all
 all: bin $(addprefix $(TARGDIR)/,$(PROGS))
-	@echo Finished compiling all programs.
+	@echo Finished compiling all programs: $(PROGS).
 
 info:
 	@echo "Programs to compile: $(PROGS)" | fmt
@@ -109,7 +115,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo "Compiling $@..."
 	$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-#		&& strip $@$(EXTEN)
+		&& strip $@$(EXTEN)
 
 % : $(notdir %.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
@@ -117,7 +123,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo "Compiling $@..."
 	$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-#		&& strip $(TARGDIR)/$@$(EXTEN)
+		&& strip $(TARGDIR)/$@$(EXTEN)
 
 #                                                                         #
 #                                                                         #

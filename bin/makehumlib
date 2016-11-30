@@ -49,13 +49,22 @@ sub createIncludeFile {
 		"Convert.h"
 	);
 
-
 	foreach my $file (@files) {
 		$contents .= getMergeContents("$basedir/$file");
 	}
 
 	my $options = getMergeContents("$basedir/Options.h");
 	$contents .= $options;
+
+	# HumTool depends on Options class:
+	$contents .= getMergeContents("$basedir/HumTool.h");
+
+	my @tools = glob "$basedir/tool-*.h";
+
+	foreach my $tool (@tools) {
+		$tool =~ s/^include\///;
+		$contents .= getMergeContents("$basedir/$tool");
+	}
 
 	my $date = `date`;
 	chomp $date;

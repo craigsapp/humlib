@@ -45,6 +45,7 @@ endif
 BINDIR        = bin
 OBJDIR        = obj
 SRCDIR        = src
+TOOLDIR       = tools
 SRCDIR_MIN    = src
 INCDIR        = include
 INCDIR_MIN    = include
@@ -86,14 +87,15 @@ COMPILER      = LANG=C $(ENV) g++ $(ARCH)
 
 # setting up the directory paths to search for dependency files
 vpath %.h   $(INCDIR):$(SRCDIR)
-vpath %.cpp $(SRCDIR):$(INCDIR)
+vpath %.cpp $(SRCDIR):$(INCDIR):%(TOOLDIR)
 vpath %.o   $(OBJDIR)
 
 # generating a list of the object files
-OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
+OBJS  = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
+OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/tool-*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: examples myprograms src include dynamic
+.PHONY: examples myprograms src include dynamic tools
 
 
 ###########################################################################
@@ -101,6 +103,12 @@ OBJS = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 all: minlibrary
 
+tool: tools
+tools:
+	$(MAKE) -f Makefile.programs
+
+%:
+	$(MAKE) -f Makefile.programs $@
 
 dynamic: min
 ifeq ($(OS),OSX)
@@ -151,7 +159,7 @@ makedirs:
 
 %:
 	@echo compiling example $@
-	$(MAKE) -f Makefile.examples $@
+	$(MAKE) -f Makefile.programs $@
 
 
 ###########################################################################

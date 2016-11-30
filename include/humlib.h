@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov 28 22:23:35 PST 2016
+// Last Modified: Tue Nov 29 22:02:04 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2121,6 +2121,39 @@ class Options {
 #define OPTION_INT_TYPE       'i'
 #define OPTION_STRING_TYPE    's'
 #define OPTION_UNKNOWN_TYPE   'x'
+
+
+class HumTool : public Options {
+	public:
+		       HumTool        (void);
+		      ~HumTool        ();
+
+		bool   hasError       (void);
+		string getError       (void);
+
+	protected:
+		stringstream m_error;
+
+};
+
+
+class Tool_metlev : public HumTool {
+	public:
+		      Tool_metlev        (void);
+		     ~Tool_metlev        ();
+
+		bool  run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  fillVoiceResults   (vector<vector<double> >& results, 
+		                          HumdrumFile& infile,
+		                          vector<double>& beatlev);
+
+	private:
+		vector<HTp> m_kernspines;
+
+
+};
 
 
 } // end of namespace hum
