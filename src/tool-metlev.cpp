@@ -14,11 +14,8 @@
 //       secondary partial measures (if they divide a beat)
 //
 
-#include "humlib.h"
-
-#ifdef NO_TOOLS
-	#include "tool-metlev.h"
-#endif
+#include "tool-metlev.h"
+#include "Convert.h"
 
 #include <algorithm>
 #include <cmath>
@@ -29,9 +26,10 @@ namespace hum {
 
 // START_MERGE
 
+
 /////////////////////////////////
 //
-// Tool_metlev::Tool_metlev --
+// Tool_gridtest::Tool_metlev -- Set the recognized options for the tool.
 //
 
 Tool_metlev::Tool_metlev(void) {
@@ -42,17 +40,6 @@ Tool_metlev::Tool_metlev(void) {
 	define("G|no-grace-notes=b",  "do not mark grace note lines");
 	define("k|kern-spine=i:1",    "analyze only given kern spine");
 	define("K|all-spines=b",      "analyze each kern spine separately");
-}
-
-
-
-/////////////////////////////////
-//
-// Tool_metlev::Tool_metlev --
-//
-
-Tool_metlev::~Tool_metlev(void) {
-	// do nothing
 }
 
 

@@ -13,7 +13,7 @@
 #ifndef _HUMTOOL_H
 #define _HUMTOOL_H
 
-#include "humlib.h"
+#include "Options.h"
 #include <sstream>
 
 namespace hum {

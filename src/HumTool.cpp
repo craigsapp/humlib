@@ -10,7 +10,7 @@
 // Description:   Common interface for Humdrum tools.
 //
 
-#include "humlib.h"
+#include "HumTool.h"
 
 namespace hum {
 

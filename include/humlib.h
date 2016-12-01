@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 29 22:02:04 PST 2016
+// Last Modified: Wed Nov 30 16:16:54 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1893,6 +1893,138 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 
 
+#define REST NAN
+
+class NoteGrid;
+
+
+class NoteCell {
+	public:
+		       NoteCell           (NoteGrid* owner, HTp token);
+		      ~NoteCell           (void) { clear();                    }
+
+		double getSgnDiatonicPitch(void) { return m_b7;                }
+		double getSgnMidiPitch    (void) { return m_b12;               }
+		double getSgnBase40Pitch  (void) { return m_b40;               }
+		double getSgnAccidental   (void) { return m_accidental;        }
+
+		double getAbsDiatonicPitch(void) { return fabs(m_b7);          }
+		double getAbsMidiPitch    (void) { return fabs(m_b12);         }
+		double getAbsBase40Pitch  (void) { return fabs(m_b40);         }
+		double getAbsAccidental   (void) { return fabs(m_accidental);  }
+
+		HTp    getToken           (void) { return m_token;             }
+		int    getNextAttackIndex (void) { return m_nextAttackIndex;   }
+		int    getPrevAttackIndex (void) { return m_prevAttackIndex;   }
+		int    getCurrAttackIndex (void) { return m_currAttackIndex;   }
+		int    getSliceIndex      (void) { return m_timeslice;         }
+
+		bool   isAttack           (void) { return m_b40>0? true:false; }
+		bool   isRest             (void) { return isnan(m_b40);        }
+		bool   isSustained        (void);
+
+		string getAbsKernPitch    (void);
+		string getSgnKernPitch    (void);
+
+		double operator-          (NoteCell& B);
+		double operator-          (int B);
+
+		int    getLineIndex       (void);
+		ostream& printNoteInfo    (ostream& out);
+		double getDiatonicIntervalToNextAttack(void);
+		double getDiatonicIntervalFromPreviousAttack(void);
+		double getMetricLevel     (void);
+
+	protected:
+		void clear                  (void);
+		void calculateNumericPitches(void);
+		void setVoiceIndex          (int index) { m_voice = index;           }
+		void setSliceIndex          (int index) { m_timeslice = index;       }
+		void setNextAttackIndex     (int index) { m_nextAttackIndex = index; }
+		void setPrevAttackIndex     (int index) { m_prevAttackIndex = index; }
+		void setCurrAttackIndex     (int index) { m_currAttackIndex = index; }
+
+	private:
+		NoteGrid* m_owner; // the NoteGrid to which this cell belongs.
+		HTp m_token;       // pointer to the note in the origina Humdrum file.
+		int m_voice;       // index of the voice in the score the note belongs
+		                   // 0=bottom voice (HumdrumFile ordering of parts)
+		                   // column in NoteGrid.
+		int m_timeslice;   // index for the row in NoteGrid.
+
+		double m_b7;         // diatonic note number; NaN=rest; negative=sustain.
+		double m_b12;        // MIDI note number; NaN=rest; negative=sustain.
+		double m_b40;        // base-40 note number; NaN=rest; negative=sustain.
+		double m_accidental; // chromatic alteration of a diatonic pitch. 
+		                     // NaN=no accidental.
+		int m_nextAttackIndex; // index to next note attack (or rest),
+		                       // -1 for undefined (interpred as rest).
+		int m_prevAttackIndex; // index to previous note attack.
+		int m_currAttackIndex; // index to current note attack (useful for
+		                       // finding the start of a sustained note.
+
+	friend NoteGrid;
+};
+
+
+class NoteGrid {
+	public:
+		           NoteGrid           (void) { }
+		           NoteGrid           (HumdrumFile& infile);
+		          ~NoteGrid           ();
+
+		void       clear              (void);
+
+		bool       load               (HumdrumFile& infile);
+		NoteCell*  cell               (int voiceindex, int sliceindex);
+		int        getVoiceCount      (void);
+		int        getSliceCount      (void);
+		int        getLineIndex       (int sindex);
+
+		void       printDiatonicGrid(ostream& out);
+		void       printMidiGrid      (ostream& out);
+		void       printBase40Grid    (ostream& out);
+		void       printRawGrid       (ostream& out);
+		void       printKernGrid      (ostream& out);
+
+		double     getSgnDiatonicPitch   (int vindex, int sindex);
+		double     getSgnMidiPitch       (int vindex, int sindex);
+		double     getSgnBase40Pitch     (int vindex, int sindex);
+		string     getSgnKernPitch       (int vindex, int sindex);
+
+		double     getAbsDiatonicPitch   (int vindex, int sindex);
+		double     getAbsMidiPitch       (int vindex, int sindex);
+		double     getAbsBase40Pitch     (int vindex, int sindex);
+		string     getAbsKernPitch       (int vindex, int sindex);
+
+		bool       isRest                (int vindex, int sindex);
+		bool       isSustained           (int vindex, int sindex);
+		bool       isAttack              (int vindex, int sindex);
+
+		HTp        getToken           (int vindex, int sindex);
+
+		int        getPrevAttackDiatonic(int vindex, int sindex);
+		int        getNextAttackDiatonic(int vindex, int sindex);
+
+		void       printGridInfo(ostream& out);
+		void       printVoiceInfo(ostream& out, int vindex);
+
+		void       getNoteAndRestAttacks(vector<NoteCell*>& attacks, int vindex);
+		double     getMetricLevel       (int sindex);
+
+	protected:
+		void       buildAttackIndexes (void);
+		void       buildAttackIndex   (int vindex);
+
+	private:
+		vector<vector<NoteCell*> > m_grid;
+		vector<HTp>                m_kernspines;
+		vector<double>             m_metriclevels;
+		HumdrumFile*               m_infile;
+};
+
+
+
 class Convert {
 	public:
 
@@ -2140,7 +2272,7 @@ class HumTool : public Options {
 class Tool_metlev : public HumTool {
 	public:
 		      Tool_metlev        (void);
-		     ~Tool_metlev        ();
+		     ~Tool_metlev        () {};
 
 		bool  run                (HumdrumFile& infile, ostream& out);
 
@@ -2151,7 +2283,6 @@ class Tool_metlev : public HumTool {
 
 	private:
 		vector<HTp> m_kernspines;
-
 
 };
 

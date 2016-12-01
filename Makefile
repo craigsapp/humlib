@@ -87,7 +87,7 @@ COMPILER      = LANG=C $(ENV) g++ $(ARCH)
 
 # setting up the directory paths to search for dependency files
 vpath %.h   $(INCDIR):$(SRCDIR)
-vpath %.cpp $(SRCDIR):$(INCDIR):%(TOOLDIR)
+vpath %.cpp $(SRCDIR):$(INCDIR)
 vpath %.o   $(OBJDIR)
 
 # generating a list of the object files
@@ -106,9 +106,6 @@ all: minlibrary
 tool: tools
 tools:
 	$(MAKE) -f Makefile.programs
-
-%:
-	$(MAKE) -f Makefile.programs $@
 
 dynamic: min
 ifeq ($(OS),OSX)
@@ -158,9 +155,7 @@ makedirs:
 	@-mkdir -p $(LIBDIR)
 
 %:
-	@echo compiling example $@
-	$(MAKE) -f Makefile.programs $@
-
+	@if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi
 
 ###########################################################################
 #                                                                         #

@@ -113,16 +113,16 @@ $(TARGDIR)/% : $(notdir %.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
-	@echo "Compiling $@..."
-	$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
+	@echo [CC] $@
+	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
 		&& strip $@$(EXTEN)
 
 % : $(notdir %.cpp)
 ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
-	@echo "Compiling $@..."
-	$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
+	@echo [CC] $@
+	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
 		&& strip $(TARGDIR)/$@$(EXTEN)
 
 #                                                                         #
