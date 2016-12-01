@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 30 16:16:54 PST 2016
+// Last Modified: Wed Nov 30 16:37:08 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1920,7 +1920,7 @@ class NoteCell {
 		int    getSliceIndex      (void) { return m_timeslice;         }
 
 		bool   isAttack           (void) { return m_b40>0? true:false; }
-		bool   isRest             (void) { return isnan(m_b40);        }
+		bool   isRest             (void) { return std::isnan(m_b40);   }
 		bool   isSustained        (void);
 
 		string getAbsKernPitch    (void);

@@ -126,7 +126,7 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 		cerr << endl;
 		cerr << "Note attacks for voice number "
 		     << grid.getVoiceCount()-vindex << ":" << endl;
-		for (int i=0; i<attacks.size(); i++) {
+		for (int i=0; i<(int)attacks.size(); i++) {
 			attacks[i]->printNoteInfo(cerr);
 		}
 	}
@@ -181,7 +181,7 @@ void Tool_testgrid::doAnalysisB(vector<string>& results, NoteGrid& grid,
 		cerr << endl;
 		cerr << "Note attacks for voice number "
 		     << grid.getVoiceCount()-vindex << ":" << endl;
-		for (int i=0; i<attacks.size(); i++) {
+		for (int i=0; i<(int)attacks.size(); i++) {
 			attacks[i]->printNoteInfo(cerr);
 		}
 	}

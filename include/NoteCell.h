@@ -41,7 +41,7 @@ class NoteCell {
 		int    getSliceIndex      (void) { return m_timeslice;         }
 
 		bool   isAttack           (void) { return m_b40>0? true:false; }
-		bool   isRest             (void) { return isnan(m_b40);        }
+		bool   isRest             (void) { return std::isnan(m_b40);   }
 		bool   isSustained        (void);
 
 		string getAbsKernPitch    (void);

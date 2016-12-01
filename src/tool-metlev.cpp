@@ -95,7 +95,7 @@ bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 	// print the analysis results:
 	if (getBoolean("kern-spine")) {
 		int kspine = getInteger("kern-spine") - 1;
-		if ((kspine >= 0) && (kspine < m_kernspines.size())) {
+		if ((kspine >= 0) && (kspine < (int)m_kernspines.size())) {
 			vector<vector<double> > results;
 			fillVoiceResults(results, infile, beatlev);
 			if (kspine == (int)m_kernspines.size() - 1) {
