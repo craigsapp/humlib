@@ -25,6 +25,7 @@ class Tool_metlev : public HumTool {
 		      Tool_metlev        (void);
 		     ~Tool_metlev        () {};
 
+		bool  run                (const string& indata, ostream& out);
 		bool  run                (HumdrumFile& infile, ostream& out);
 
 	protected:

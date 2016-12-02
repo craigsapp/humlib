@@ -7,13 +7,13 @@
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   
+// Description:
 //   Extracts metric level of rhythmic values in Humdrum files.
 //   Beat levels are log2 based, with 0 being the beat.  In 4/4 (and other
 //   simple meters), the beat level is the quarter note.  The 8th-note level
 //   is 1, the 16th-note level is 2, the 32nd-note level is 3, and so on.
 //   Compound meters such as 6/8, use log3 for the first level, and then
-//   log2 for smallert rhythmic value levels.  Metric positions above the 
+//   log2 for smallert rhythmic value levels.  Metric positions above the
 //   beat level have yet to be implemented.
 //
 
@@ -31,16 +31,16 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileContent -- HumdrumFileStructure
-//     constructor.  Each line in the output vector matches to the
-//     line of the metric analysis data.  undefined is the value to
-//     represent undefined analysis data (for non-data spines).
+// HumdrumFileStructure::getMetricLevels -- Each line in the output
+//     vector matches to the line of the metric analysis data.
+//     undefined is the value to represent undefined analysis data
+//     (for non-data spines).
 //
 //     default value: track = 0: 0 means use the time signature
 //         of the first **kern spines in the file; otherwise, use the
 //         time signatures found in the given track (indexed from 1
 //         for the first spine on a line).
-//     default value: undefined = NAN
+//     default value: undefined = NAN: The value to use for un-analyzed lines.
 //
 
 void HumdrumFileContent::getMetricLevels(vector<double>& output,
@@ -94,7 +94,7 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 		}
 
 		measurepos = infile[i].getDurationFromBarline();
-		// Might want to handle cases where the time signature changes in 
+		// Might want to handle cases where the time signature changes in
 		// the middle or a measure...
 		measurepos /= beatdur;
 		int denominator = measurepos.getDenominator();

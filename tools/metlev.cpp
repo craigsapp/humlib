@@ -11,30 +11,8 @@
 //                Extracts metric levels from a Humdrum file.
 //
 
+
 #include "humlib.h"
 
-using namespace std;
-using namespace hum;
-
-int main(int argc, char** argv) {
-	Tool_metlev interface;
-	interface.process(argc, argv);
-
-	// read an inputfile from the first filename argument, or standard input
-	HumdrumFile infile;
-	if (interface.getArgCount() > 0) {
-		infile.read(interface.getArgument(1));
-	} else {
-		infile.read(cin);
-	}
-
-	int status = interface.run(infile, cout);
-	if (interface.hasError()) {
-		cerr << interface.getError();
-	}
-
-	return !status;
-}
-
-
+BASIC_INTERFACE(Tool_metlev)
 

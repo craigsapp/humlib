@@ -608,6 +608,57 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumToken::getDots -- Count the number of '.' characters in token string.
+//
+
+int HumdrumToken::getDots(void) const {
+	int count = 0;
+	for (int i=0; i<this->size()-1; i++) {
+		if (this->at(i) == '.') {
+			count++;
+		}
+	}
+	return count;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationNoDots -- Return the duration of the
+//   note excluding any dots.
+//
+
+HumNum HumdrumToken::getDurationNoDots(void) const {
+
+	int dots = getDots();
+	if (dots == 0) {
+		return getDuration();
+	}
+	int bot = (int)pow(2.0, dots + 1) - 1;
+	int top = (int)pow(2.0, dots);
+	HumNum factor(top, bot);
+	return getDuration() * factor;
+
+}
+
+
+HumNum HumdrumToken::getDurationNoDots(HumNum scale) const {
+	int dots = getDots();
+	if (dots == 0) {
+		return getDuration(scale);
+	}
+	int top = (int)pow(2.0, dots + 1) - 1;
+	int bot = (int)pow(2.0, dots);
+	HumNum factor(top, bot);
+	return getDuration(scale) * factor;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumToken::setDuration -- Sets the duration of the token.  This is done in
@@ -754,6 +805,26 @@ bool HumdrumToken::hasRhythm(void) const {
 	}
 	if (type == "**recip") {
 		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasBeam -- True if **kern has L, J, K, or k.
+//
+
+bool HumdrumToken::hasBeam(void) const {
+	for (int i=0; i<this->size(); i++) {
+		switch (this->at(i)) {
+			case 'L':
+			case 'J':
+			case 'k':
+			case 'K':
+				return true;
+		}
 	}
 	return false;
 }

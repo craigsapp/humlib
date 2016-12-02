@@ -249,6 +249,17 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 
 //////////////////////////////
 //
+// NoteCell::isRest --
+//
+
+bool NoteCell::isRest(void) {
+	return isnan(m_b40);
+}
+
+
+
+//////////////////////////////
+//
 // NoteCell::getMetricLevel --
 //
 

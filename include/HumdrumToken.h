@@ -72,6 +72,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isChord                   (const string& separator = " ");
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
+		bool     hasBeam                   (void) const;
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -94,6 +95,9 @@ class HumdrumToken : public string, public HumHash {
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getDurationNoDots         (void) const;
+		HumNum   getDurationNoDots         (HumNum scale) const;
+		int      getDots                   (void) const;
 
 		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
@@ -248,7 +252,6 @@ class HumdrumToken : public string, public HumHash {
 		// m_nullresolve: used to point to the token that a null token
 		// refers to
 		HTp m_nullresolve;
-
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;

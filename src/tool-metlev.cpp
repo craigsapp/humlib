@@ -44,10 +44,15 @@ Tool_metlev::Tool_metlev(void) {
 
 
 
-/////////////////////////////////
+///////////////////////////////
 //
 // Tool_metlev::run --
-//
+
+bool Tool_metlev::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	return run(infile, out);
+}
+
 
 bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 

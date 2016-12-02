@@ -1396,6 +1396,27 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileStructure::getStrandCount --
+//
+
+int HumdrumFileStructure::getStrandCount(void) const {
+	return (int)m_strand1d.size();
+}
+
+
+int HumdrumFileStructure::getStrandCount(int spineindex) const {
+	if (spineindex < 0) {
+		return 0;
+	}
+	if (spineindex >= m_strand2d.size()) {
+		return 0;
+	}
+	return (int)m_strand2d[spineindex].size();
+}
+
+
 
 //////////////////////////////
 //

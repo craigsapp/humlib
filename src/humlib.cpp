@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 30 16:37:08 PST 2016
+// Last Modified: Fri Dec  2 03:26:40 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4728,16 +4728,16 @@ void HumdrumFileContent::resetDiatonicStatesWithKeySignature(vector<int>&
 
 //////////////////////////////
 //
-// HumdrumFileStructure::HumdrumFileContent -- HumdrumFileStructure
-//     constructor.  Each line in the output vector matches to the
-//     line of the metric analysis data.  undefined is the value to
-//     represent undefined analysis data (for non-data spines).
+// HumdrumFileStructure::getMetricLevels -- Each line in the output
+//     vector matches to the line of the metric analysis data.
+//     undefined is the value to represent undefined analysis data
+//     (for non-data spines).
 //
 //     default value: track = 0: 0 means use the time signature
 //         of the first **kern spines in the file; otherwise, use the
 //         time signatures found in the given track (indexed from 1
 //         for the first spine on a line).
-//     default value: undefined = NAN
+//     default value: undefined = NAN: The value to use for un-analyzed lines.
 //
 
 void HumdrumFileContent::getMetricLevels(vector<double>& output,
@@ -4791,7 +4791,7 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 		}
 
 		measurepos = infile[i].getDurationFromBarline();
-		// Might want to handle cases where the time signature changes in 
+		// Might want to handle cases where the time signature changes in
 		// the middle or a measure...
 		measurepos /= beatdur;
 		int denominator = measurepos.getDenominator();
@@ -4962,6 +4962,98 @@ bool HumdrumFileContent::analyzeKernTies(HTp spinestart) {
 
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getTimeSigs -- Return the prevailing time signature
+//     top and bottom for a particular spine for each line in the HumdrumFile.
+//     This version does not handle mulimeters such as 2+3/4 or 3/4+6/8.
+//     Only checks the primary strand of a spine/track for time signatures.
+//
+//     default value: track = 0: 0 means use the time signature
+//         of the first **kern spine in the file; otherwise, use the
+//         time signatures found in the given track (indexed from 1
+//         for the first spine on a line).  A value of <0, 0> is used for
+//         unassigned time signature lines.
+//
+
+void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
+		int track) {
+	HumdrumFileStructure& infile = *this;
+	int lineCount = infile.getLineCount();
+	output.resize(lineCount);
+	pair<int, HumNum> current(0, 0);
+	fill(output.begin(), output.end(), current);
+	if (track == 0) {
+		vector<HTp> kernspines = infile.getKernSpineStartList();
+		if (kernspines.size() > 0) {
+			track = kernspines[0]->getTrack();
+		}
+	}
+	if (track == 0) {
+		track = 1;
+	}
+
+	int top  = 0;   // top number of time signature (0 for no meter)
+	int bot  = 0;   // bottom number of time signature
+	int bot2 = 0;   // such as the 2 in 3%2.
+
+	int firstsig  = -1;
+	int firstdata = -1;
+
+	HTp token = getTrackStart(track);
+	while (token) {
+		if (!token->isInterpretation()) {
+			token = token->getNextToken();
+			continue;
+		}
+		// check for time signature:
+		if (sscanf(token->c_str(), "*M%d/%d%%%d", &top, &bot, &bot2) == 3) {
+			current.first = top;
+			current.second.setValue(bot, bot2);
+			if (firstsig < 0) {
+				firstsig = token->getLineIndex();
+			}
+			if (firstdata < 0) {
+				firstdata = token->getLineIndex();
+			}
+		} else if (sscanf(token->c_str(), "*M%d/%d", &top, &bot) == 2) {
+			current.first = top;
+			current.second = bot;
+			if (firstsig < 0) {
+				firstsig = token->getLineIndex();
+			}
+			if (firstdata < 0) {
+				firstdata = token->getLineIndex();
+			}
+		}
+		output[token->getLineIndex()] = current;
+		token = token->getNextToken();
+	}
+
+	// Back-fill the list if the first time signature occurs before
+	// the start of the data:
+	if ((firstsig >= 0) && (firstdata > firstsig)) {
+		current = output[firstsig];
+		for (int i=0; i<firstsig; i++) {
+			output[i] = current;
+		}
+	}
+
+	// In-fill the list:
+	int starti = firstsig;
+	if (starti < 0) {
+		starti = 0;
+	}
+	current = output[starti];
+	for (int i=starti+1; i<(int)output.size(); i++) {
+		if (output[i].first == 0) {
+			output[i] = current;
+		}
+	}
 }
 
 
@@ -6370,6 +6462,27 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileStructure::getStrandCount --
+//
+
+int HumdrumFileStructure::getStrandCount(void) const {
+	return (int)m_strand1d.size();
+}
+
+
+int HumdrumFileStructure::getStrandCount(int spineindex) const {
+	if (spineindex < 0) {
+		return 0;
+	}
+	if (spineindex >= m_strand2d.size()) {
+		return 0;
+	}
+	return (int)m_strand2d[spineindex].size();
+}
+
+
 
 //////////////////////////////
 //
@@ -7224,27 +7337,36 @@ string HumdrumLine::getTokenString(int index) const {
 
 int HumdrumLine::createTokensFromLine(void) {
 	tokens.resize(0);
-	HTp token = new HumdrumToken();
-	token->setOwner(this);
+	HTp token;
 	char ch;
+	string tstring;
 
 	if (this->size() == 0) {
+		token = new HumdrumToken();
+		token->setOwner(this);
 		tokens.push_back(token);
 	} else if (this->compare(0, 2, "!!") == 0) {
-		*token = (string)(*this);
+		token = new HumdrumToken(this->c_str());
+		token->setOwner(this);
 		tokens.push_back(token);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
 			ch = getChar(i);
 			if (ch == '\t') {
-				tokens.push_back(token);
-				token = new HumdrumToken();
+				token = new HumdrumToken(tstring);
 				token->setOwner(this);
+				tokens.push_back(token);
+				tstring.clear();
 			} else {
-				*token += ch;
+				tstring += ch;
 			}
 		}
+	}
+	if (tstring.size() > 0) {
+		token = new HumdrumToken(tstring);
+		token->setOwner(this);
 		tokens.push_back(token);
+		tstring.clear();
 	}
 
 	return (int)tokens.size();
@@ -7263,7 +7385,7 @@ int HumdrumLine::createTokensFromLine(void) {
 
 void HumdrumLine::createLineFromTokens(void) {
 	string& iline = *this;
-	iline.resize(0);
+	iline.clear();
 	for (int i=0; i<(int)tokens.size(); i++) {
 		iline += (string)(*tokens[i]);
 		if (i < (int)tokens.size() - 1) {
@@ -8487,6 +8609,57 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumToken::getDots -- Count the number of '.' characters in token string.
+//
+
+int HumdrumToken::getDots(void) const {
+	int count = 0;
+	for (int i=0; i<this->size()-1; i++) {
+		if (this->at(i) == '.') {
+			count++;
+		}
+	}
+	return count;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationNoDots -- Return the duration of the
+//   note excluding any dots.
+//
+
+HumNum HumdrumToken::getDurationNoDots(void) const {
+
+	int dots = getDots();
+	if (dots == 0) {
+		return getDuration();
+	}
+	int bot = (int)pow(2.0, dots + 1) - 1;
+	int top = (int)pow(2.0, dots);
+	HumNum factor(top, bot);
+	return getDuration() * factor;
+
+}
+
+
+HumNum HumdrumToken::getDurationNoDots(HumNum scale) const {
+	int dots = getDots();
+	if (dots == 0) {
+		return getDuration(scale);
+	}
+	int top = (int)pow(2.0, dots + 1) - 1;
+	int bot = (int)pow(2.0, dots);
+	HumNum factor(top, bot);
+	return getDuration(scale) * factor;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumToken::setDuration -- Sets the duration of the token.  This is done in
@@ -8633,6 +8806,26 @@ bool HumdrumToken::hasRhythm(void) const {
 	}
 	if (type == "**recip") {
 		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasBeam -- True if **kern has L, J, K, or k.
+//
+
+bool HumdrumToken::hasBeam(void) const {
+	for (int i=0; i<this->size(); i++) {
+		switch (this->at(i)) {
+			case 'L':
+			case 'J':
+			case 'k':
+			case 'K':
+				return true;
+		}
 	}
 	return false;
 }
@@ -10111,6 +10304,17 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 	}
 	return m_owner->cell(m_voice,nexti)->getAbsDiatonicPitch()
 			- getAbsDiatonicPitch();
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::isRest --
+//
+
+bool NoteCell::isRest(void) {
+	return isnan(m_b40);
 }
 
 
@@ -11960,10 +12164,15 @@ Tool_metlev::Tool_metlev(void) {
 
 
 
-/////////////////////////////////
+///////////////////////////////
 //
 // Tool_metlev::run --
-//
+
+bool Tool_metlev::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	return run(infile, out);
+}
+
 
 bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 
@@ -12109,254 +12318,6 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 		}
 	}
 }
-
-
-
-//////////////////////////////
-//
-// Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter notes.  For example "4"
-//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
-//     is a scaling factor which can change the rhythmic value's base duration.
-//     Giving a scale of 1 will return the duration in whole note units, so
-//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
-//     3/2 will give the duration in terms of dotted-quarter note units.
-//     The third parameter is the sub-token separate.  For example if the input
-//     string contains a space, anything after the first space will be ignored
-//     when extracting the string.  **kern data which also includes the pitch
-//     along with the rhythm can also be given and will be ignored.
-// default value: scale = 4 (duration in terms of quarter notes)
-// default value: separator = " " (sub-token separator)
-//
-
-HumNum Convert::recipToDuration(const string& recip, HumNum scale,
-		string separator) {
-	size_t loc;
-	loc = recip.find(separator);
-	string subtok;
-	if (loc != string::npos) {
-		subtok = recip.substr(0, loc);
-	} else {
-		subtok = recip;
-	}
-
-	loc = recip.find('q');
-	if (loc != string::npos) {
-		// grace note, ignore printed rhythm
-		HumNum zero(0);
-		return zero;
-	}
-
-	int dotcount = 0;
-	int i;
-	int numi = -1;
-	for (i=0; i<(int)subtok.size(); i++) {
-		if (subtok[i] == '.') {
-			dotcount++;
-		}
-		if ((numi < 0) && isdigit(subtok[i])) {
-			numi = i;
-		}
-	}
-	loc = subtok.find("%");
-	int numerator = 1;
-	int denominator = 1;
-	HumNum output;
-	if (loc != string::npos) {
-		// reciprocal rhythm
-		numerator = 1;
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
-			int xi = (int)loc + 1;
-			numerator = subtok[xi++] - '0';
-			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
-				numerator = numerator * 10 + (subtok[xi++] - '0');
-			}
-		}
-		output.setValue(numerator, denominator);
-	} else if (numi < 0) {
-		// no rhythm found
-		HumNum zero(0);
-		return zero;
-	} else if (subtok[numi] == '0') {
-		// 0-symbol
-		int zerocount = 1;
-		for (i=numi+1; i<(int)subtok.size(); i++) {
-			if (subtok[i] == '0') {
-				zerocount++;
-			} else {
-				break;
-			}
-		}
-		numerator = (int)pow(2, zerocount);
-		output.setValue(numerator, 1);
-	} else {
-		// plain rhythm
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		output.setValue(1, denominator);
-	}
-
-	if (dotcount <= 0) {
-		return output * scale;
-	}
-
-	int bot = (int)pow(2.0, dotcount);
-	int top = (int)pow(2.0, dotcount + 1) - 1;
-	HumNum factor(top, bot);
-	return output * factor * scale;
-}
-
-
-//////////////////////////////
-//
-// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
-//   any augmentation dots.
-//
-
-HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
-		string separator) {
-	string temp = recip;
-	std::replace(temp.begin(), temp.end(), '.', 'Z');
-	return Convert::recipToDuration(temp, scale, separator);
-}
-
-
-
-
-//////////////////////////////
-//
-// Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.  This function replaces the search string in the source
-//    string with the replace string.
-//
-
-void Convert::replaceOccurrences(string& source, const string& search,
-		const string& replace) {
-	for (int loc=0; ; loc += (int)replace.size()) {
-		loc = (int)source.find(search, loc);
-		if (loc == (int)string::npos) {
-			break;
-		}
-		source.erase(loc, search.length());
-		source.insert(loc, replace);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Convert::splitString -- Splits a string into a list of strings
-//   separated by the given character.  Empty strings will be generated
-//   if the separator occurs at the start/end of the input string, and
-//   if two or more separates are adjacent to each other.
-// default value: separator = ' ';
-//
-
-vector<string> Convert::splitString(const string& data, char separator) {
-	stringstream ss(data);
-	string key;
-	vector<string> output;
-	while (getline(ss, key, separator)) {
-		output.push_back(key);
-	}
-	if (output.size() == 0) {
-		output.push_back(data);
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::repeatString -- Returns a string which repeats the given
-//   pattern by the given count.
-//
-
-string Convert::repeatString(const string& pattern, int count) {
-	string output;
-	for (int i=0; i<count; i++) {
-		output += pattern;
-	}
-	return output;
-}
-
-
-//////////////////////////////
-//
-// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
-//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
-//    ' to &apos;.
-//
-
-string Convert::encodeXml(const string& input) {
-	string output;
-	output.reserve(input.size()*2);
-	for (int i=0; i<(int)input.size(); i++) {
-		switch (input[i]) {
-			case '&':  output += "&amp;";   break;
-			case '<':  output += "&lt;";    break;
-			case '>':  output += "&gt;";    break;
-			case '"':  output += "&quot;";  break;
-			case '\'': output += "&apos;";  break;
-			default:   output += input[i];
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
-//   number.  First @float which gives the floating-point representation.
-//   If the number has a fractional part, then also add @ratfrac with the
-//   fractional representation of the non-integer portion number.
-//
-
-string Convert::getHumNumAttributes(const HumNum& num) {
-	string output;
-	if (num.isInteger()) {
-		output += " float=\"" + to_string(num.getNumerator()) + "\"";
-	} else {
-		stringstream sstr;
-		sstr << num.toFloat();
-		output += " float=\"" + sstr.str() + "\"";
-	}
-	if (!num.isInteger()) {
-		HumNum rem = num.getRemainder();
-		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
-				+ "/" + to_string(rem.getDenominator()) + "\"";
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
-//     from the beginning and end of input string.
-//
-
-string Convert::trimWhiteSpace(const string& input) {
-	string s = input;
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
-	s.erase(std::find_if(s.rbegin(), s.rend(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
-}
-
-
 
 
 
@@ -13281,6 +13242,254 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	// if acc in any of the above tests is +3/-3, then there was an
 	// accidental overflow (overflow of the accidental).
 
+}
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::recipToDuration -- Convert **recip rhythmic values into
+//     rational number durations in terms of quarter notes.  For example "4"
+//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
+//     is a scaling factor which can change the rhythmic value's base duration.
+//     Giving a scale of 1 will return the duration in whole note units, so
+//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
+//     3/2 will give the duration in terms of dotted-quarter note units.
+//     The third parameter is the sub-token separate.  For example if the input
+//     string contains a space, anything after the first space will be ignored
+//     when extracting the string.  **kern data which also includes the pitch
+//     along with the rhythm can also be given and will be ignored.
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
+//
+
+HumNum Convert::recipToDuration(const string& recip, HumNum scale,
+		string separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
+	}
+
+	loc = recip.find('q');
+	if (loc != string::npos) {
+		// grace note, ignore printed rhythm
+		HumNum zero(0);
+		return zero;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<(int)subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciprocal rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = (int)loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<(int)subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
+	} else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
+}
+
+
+//////////////////////////////
+//
+// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
+//   any augmentation dots.
+//
+
+HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
+		string separator) {
+	string temp = recip;
+	std::replace(temp.begin(), temp.end(), '.', 'Z');
+	return Convert::recipToDuration(temp, scale, separator);
+}
+
+
+
+
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += (int)replace.size()) {
+		loc = (int)source.find(search, loc);
+		if (loc == (int)string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::splitString -- Splits a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+// default value: separator = ' ';
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::repeatString -- Returns a string which repeats the given
+//   pattern by the given count.
+//
+
+string Convert::repeatString(const string& pattern, int count) {
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pattern;
+	}
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
+//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
+//    ' to &apos;.
+//
+
+string Convert::encodeXml(const string& input) {
+	string output;
+	output.reserve(input.size()*2);
+	for (int i=0; i<(int)input.size(); i++) {
+		switch (input[i]) {
+			case '&':  output += "&amp;";   break;
+			case '<':  output += "&lt;";    break;
+			case '>':  output += "&gt;";    break;
+			case '"':  output += "&quot;";  break;
+			case '\'': output += "&apos;";  break;
+			default:   output += input[i];
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
+//   number.  First @float which gives the floating-point representation.
+//   If the number has a fractional part, then also add @ratfrac with the
+//   fractional representation of the non-integer portion number.
+//
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
+//     from the beginning and end of input string.
+//
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
 }
 
 

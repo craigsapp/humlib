@@ -183,17 +183,116 @@ makedirs:
 # done
 #
 
-Convert.o: Convert.cpp
+Convert-kern.o: Convert-kern.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h
 
-HumNum.o: HumNum.cpp
+Convert-math.o: Convert-math.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h
 
-HumdrumAddress.o: HumdrumAddress.cpp
+Convert-pitch.o: Convert-pitch.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h
 
-HumdrumFile.o: HumdrumFile.cpp
+Convert-rhythm.o: Convert-rhythm.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h
 
-HumdrumLine.o: HumdrumLine.cpp
+Convert-string.o: Convert-string.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h
 
-HumdrumToken.o: HumdrumToken.cpp
+HumAddress.o: HumAddress.cpp HumAddress.h \
+  HumdrumLine.h HumdrumToken.h HumNum.h \
+  HumHash.h
 
+HumHash.o: HumHash.cpp HumHash.h HumNum.h \
+  Convert.h HumdrumToken.h HumAddress.h
 
+HumInstrument.o: HumInstrument.cpp HumInstrument.h
+
+HumNum.o: HumNum.cpp HumNum.h
+
+HumTool.o: HumTool.cpp HumTool.h Options.h
+
+HumdrumFile.o: HumdrumFile.cpp HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  Convert.h
+
+HumdrumFileBase.o: HumdrumFileBase.cpp HumdrumFileBase.h \
+  HumdrumLine.h HumdrumToken.h HumNum.h \
+  HumAddress.h HumHash.h
+
+HumdrumFileContent-accidental.o: HumdrumFileContent-accidental.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  Convert.h
+
+HumdrumFileContent-metlev.o: HumdrumFileContent-metlev.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  Convert.h
+
+HumdrumFileContent-slur.o: HumdrumFileContent-slur.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h
+
+HumdrumFileContent-tie.o: HumdrumFileContent-tie.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h
+
+HumdrumFileContent-timesig.o: HumdrumFileContent-timesig.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  Convert.h
+
+HumdrumFileContent.o: HumdrumFileContent.cpp \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h
+
+HumdrumFileStructure.o: HumdrumFileStructure.cpp \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumdrumLine.h HumdrumToken.h HumNum.h \
+  HumAddress.h HumHash.h Convert.h
+
+HumdrumLine.o: HumdrumLine.cpp HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  Convert.h
+
+HumdrumToken.o: HumdrumToken.cpp HumAddress.h \
+  HumdrumToken.h HumNum.h HumHash.h \
+  HumdrumLine.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h Convert.h
+
+NoteCell.o: NoteCell.cpp NoteCell.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  NoteGrid.h Convert.h
+
+NoteGrid.o: NoteGrid.cpp NoteGrid.h NoteCell.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumdrumLine.h HumdrumToken.h HumNum.h \
+  HumAddress.h HumHash.h
+
+Options.o: Options.cpp Options.h
+
+humlib.o: humlib.cpp humlib.h
+
+tool-metlev.o: tool-metlev.cpp tool-metlev.h \
+  HumTool.h Options.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  Convert.h
 

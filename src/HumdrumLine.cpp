@@ -847,27 +847,36 @@ string HumdrumLine::getTokenString(int index) const {
 
 int HumdrumLine::createTokensFromLine(void) {
 	tokens.resize(0);
-	HTp token = new HumdrumToken();
-	token->setOwner(this);
+	HTp token;
 	char ch;
+	string tstring;
 
 	if (this->size() == 0) {
+		token = new HumdrumToken();
+		token->setOwner(this);
 		tokens.push_back(token);
 	} else if (this->compare(0, 2, "!!") == 0) {
-		*token = (string)(*this);
+		token = new HumdrumToken(this->c_str());
+		token->setOwner(this);
 		tokens.push_back(token);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
 			ch = getChar(i);
 			if (ch == '\t') {
-				tokens.push_back(token);
-				token = new HumdrumToken();
+				token = new HumdrumToken(tstring);
 				token->setOwner(this);
+				tokens.push_back(token);
+				tstring.clear();
 			} else {
-				*token += ch;
+				tstring += ch;
 			}
 		}
+	}
+	if (tstring.size() > 0) {
+		token = new HumdrumToken(tstring);
+		token->setOwner(this);
 		tokens.push_back(token);
+		tstring.clear();
 	}
 
 	return (int)tokens.size();
@@ -886,7 +895,7 @@ int HumdrumLine::createTokensFromLine(void) {
 
 void HumdrumLine::createLineFromTokens(void) {
 	string& iline = *this;
-	iline.resize(0);
+	iline.clear();
 	for (int i=0; i<(int)tokens.size(); i++) {
 		iline += (string)(*tokens[i]);
 		if (i < (int)tokens.size() - 1) {

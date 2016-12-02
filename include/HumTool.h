@@ -33,6 +33,41 @@ class HumTool : public Options {
 
 };
 
+
+///////////////////////////////////////////////////////////////////////////
+//
+// common command-line Interfaces
+//
+
+//
+// BASIC_INTERFACE -- .run(HumdrumFile& infile, ostream& out)
+//
+
+#define BASIC_INTERFACE(CLASS)                 \
+                                               \
+using namespace std;                           \
+using namespace hum;                           \
+                                               \
+int main(int argc, char** argv) {              \
+	CLASS interface;                            \
+	interface.process(argc, argv);              \
+                                               \
+	HumdrumFile infile;                         \
+	if (interface.getArgCount() > 0) {          \
+		infile.read(interface.getArgument(1));   \
+	} else {                                    \
+		infile.read(cin);                        \
+	}                                           \
+                                               \
+	int status = interface.run(infile, cout);   \
+	if (interface.hasError()) {                 \
+		cerr << interface.getError();            \
+	}                                           \
+                                               \
+	return !status;                             \
+}
+
+
 // END_MERGE
 
 } // end namespace hum

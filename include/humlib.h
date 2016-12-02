@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 30 16:37:08 PST 2016
+// Last Modified: Fri Dec  2 03:26:40 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cctype>
 #include <functional>
 #include <locale>
+#include <utility>
 
 using std::string;
 using std::vector;
@@ -67,6 +68,7 @@ using std::to_string;
 using std::stringstream;
 using std::map;
 using std::set;
+using std::pair;
 using std::invalid_argument;
 
 namespace hum {
@@ -885,6 +887,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isChord                   (const string& separator = " ");
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
+		bool     hasBeam                   (void) const;
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -907,6 +910,9 @@ class HumdrumToken : public string, public HumHash {
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getDurationNoDots         (void) const;
+		HumNum   getDurationNoDots         (HumNum scale) const;
+		int      getDots                   (void) const;
 
 		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
@@ -1061,7 +1067,6 @@ class HumdrumToken : public string, public HumHash {
 		// m_nullresolve: used to point to the token that a null token
 		// refers to
 		HTp m_nullresolve;
-
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
@@ -1416,6 +1421,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumdrumToken* getStrandEnd(int index) const;
 		HumdrumToken* getStrandStart(int sindex, int index) const;
 		HumdrumToken* getStrandEnd(int sindex, int index) const;
+		int           getStrandCount(void) const;
+		int           getStrandCount(int spineindex) const;
 		void resolveNullTokens(void);
 
 		HumdrumToken* getStrand(int index) const {
@@ -1487,9 +1494,12 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
 
-		// in HumdrumFileContent-metlev
+		// in HumdrumFileContent-metlev.cpp
 		void  getMetricLevels             (vector<double>& output, int track = 0,
 		                                   double undefined = NAN);
+		// in HumdrumFileContent-timesig.cpp
+		void  getTimeSigs                 (vector<pair<int, HumNum> >& output,
+		                                   int track = 0);
 
 		template <class DATATYPE>
 		bool   prependDataSpine           (vector<DATATYPE> data,
@@ -1920,7 +1930,7 @@ class NoteCell {
 		int    getSliceIndex      (void) { return m_timeslice;         }
 
 		bool   isAttack           (void) { return m_b40>0? true:false; }
-		bool   isRest             (void) { return std::isnan(m_b40);   }
+		bool   isRest             (void);
 		bool   isSustained        (void);
 
 		string getAbsKernPitch    (void);
@@ -2269,11 +2279,47 @@ class HumTool : public Options {
 };
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// common command-line Interfaces
+//
+
+//
+// BASIC_INTERFACE -- .run(HumdrumFile& infile, ostream& out)
+//
+
+#define BASIC_INTERFACE(CLASS)                 \
+                                               \
+using namespace std;                           \
+using namespace hum;                           \
+                                               \
+int main(int argc, char** argv) {              \
+	CLASS interface;                            \
+	interface.process(argc, argv);              \
+                                               \
+	HumdrumFile infile;                         \
+	if (interface.getArgCount() > 0) {          \
+		infile.read(interface.getArgument(1));   \
+	} else {                                    \
+		infile.read(cin);                        \
+	}                                           \
+                                               \
+	int status = interface.run(infile, cout);   \
+	if (interface.hasError()) {                 \
+		cerr << interface.getError();            \
+	}                                           \
+                                               \
+	return !status;                             \
+}
+
+
+
 class Tool_metlev : public HumTool {
 	public:
 		      Tool_metlev        (void);
 		     ~Tool_metlev        () {};
 
+		bool  run                (const string& indata, ostream& out);
 		bool  run                (HumdrumFile& infile, ostream& out);
 
 	protected:
