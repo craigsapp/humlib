@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec  2 03:26:40 PST 2016
+// Last Modified: Fri Dec  2 03:48:34 PST 2016
 // Filename:      /include/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2312,6 +2312,31 @@ int main(int argc, char** argv) {              \
 	return !status;                             \
 }
 
+
+
+class Tool_autobeam : public HumTool {
+	public:
+		         Tool_autobeam   (void);
+		        ~Tool_autobeam   () {};
+
+		bool     run             (const string& indata, ostream& out);
+		bool     run             (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     initialize      (HumdrumFile& infile);
+		void     processStrand   (HTp strandstart, HTp strandend);
+		void     processMeasure  (vector<HTp>& measure);
+		void     addBeam         (HTp startnote, HTp endnote);
+		void     addBeams        (HumdrumFile& infile);
+		void     removeBeams     (HumdrumFile& infile);
+
+	private:
+		vector<HTp> m_kernspines;
+		vector<vector<pair<int, HumNum> > > m_timesigs;
+		bool m_overwriteQ;
+		int  m_track;
+
+};
 
 
 class Tool_metlev : public HumTool {

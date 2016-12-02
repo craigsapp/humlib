@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov 30 01:02:57 PST 2016
+// Creation Date: Wed Nov 30 01:02:57 PST 2016
+// Last Modified: Fri Dec  2 03:45:34 PST 2016
 // Filename:      tool-autobeam.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-autobeam.cpp
 // Syntax:        C++11
