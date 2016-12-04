@@ -63,7 +63,7 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_nullresolve = NULL;
 }
 
-HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
+HumdrumToken::HumdrumToken(const HumdrumToken& aToken) :
 		string((string)aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
@@ -196,7 +196,7 @@ HumNum HumdrumToken::getSlurDuration(HumNum scale) {
 		return getValueFraction("auto", "slurDuration");
 	} else if (isDefined("auto", "slurEnd")) {
 		HTp slurend = getValueHTp("auto", "slurEnd");
-		return slurend->getDurationFromStart(scale) - 
+		return slurend->getDurationFromStart(scale) -
 				getDurationFromStart(scale);
 	} else {
 		return 0;
@@ -715,10 +715,10 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
 //
 // HumdrumToken::getBarlineDuration -- Returns the duration between
 //   the next and previous barline.  If the token is a barline token,
-//   then return the duration to the next barline.  The barline duration data 
-//   is filled in automatically when reading a file with the 
+//   then return the duration to the next barline.  The barline duration data
+//   is filled in automatically when reading a file with the
 //   HumdrumFileStructure::analyzeMeter() function.  The duration
-//   will always be non-positive if the file is read with HumdrumFileBase and 
+//   will always be non-positive if the file is read with HumdrumFileBase and
 //   analyzeMeter() is not run to analyze the data.
 //
 
@@ -743,7 +743,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationToBarline -- Get duration from start of token to 
+// HumdrumToken::getDurationToBarline -- Get duration from start of token to
 //      the start of the next barline. Units are quarter notes, unless scale
 //      is set to a value other than 1.
 //
@@ -768,7 +768,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationFromBarline -- Get duration from start of token to 
+// HumdrumToken::getDurationFromBarline -- Get duration from start of token to
 //      the previous barline. Units are quarter notes, unless scale
 //      is set to a value other than 1.
 //
@@ -907,8 +907,8 @@ bool HumdrumToken::isNoteAttack(void) {
 // HumdrumToken::isInvisible -- True if a barline and is invisible (contains
 //     a "-" styling), or a note/rest contains the string "yy" which is
 //     interpreted as meaning make it invisible.
-// 
-// 
+//
+//
 
 bool HumdrumToken::isInvisible(void) {
 	if (!isDataType("**kern")) {
@@ -932,7 +932,7 @@ bool HumdrumToken::isInvisible(void) {
 //////////////////////////////
 //
 // HumdrumToken::isGrace -- True if a **kern note has no duration.
-// 
+//
 
 bool HumdrumToken::isGrace(void) {
 	if (!isDataType("**kern")) {
@@ -952,7 +952,7 @@ bool HumdrumToken::isGrace(void) {
 //////////////////////////////
 //
 // HumdrumToken::isClef -- True if a **kern clef.
-// 
+//
 
 bool HumdrumToken::isClef(void) {
 	if (!isDataType("**kern")) {
@@ -974,7 +974,7 @@ bool HumdrumToken::isClef(void) {
 // HumdrumToken::isKeySignature -- True if a **kern key signature.
 //
 
-bool HumdrumToken::isKeySignature(void) { 
+bool HumdrumToken::isKeySignature(void) {
 	if (this->compare(0, 3, "*k[") != 0) {
 		return false;
 	}
@@ -999,7 +999,7 @@ bool HumdrumToken::isKeyDesignation(void) {
 		return false;
 	}
 	char diatonic = (*this)[2];
-	
+
 	if ((diatonic >= 'A') && (diatonic <= 'G')) {
 		return true;
 	}
@@ -1039,7 +1039,7 @@ bool HumdrumToken::isTimeSignature(void) {
 // HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
 //
 
-bool HumdrumToken::isMensurationSymbol(void) { 
+bool HumdrumToken::isMensurationSymbol(void) {
 	if (this->compare(0, 5, "*met(") != 0) {
 		return false;
 	}
@@ -1053,7 +1053,7 @@ bool HumdrumToken::isMensurationSymbol(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
+// HumdrumToken::hasSlurStart -- Returns true if the **kern token has
 //     a '(' character.
 //
 
@@ -1147,7 +1147,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isSecondaryTiedNote -- Returns true if the token 
+// HumdrumToken::isSecondaryTiedNote -- Returns true if the token
 //     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
 //
 
@@ -1620,7 +1620,7 @@ int  HumdrumToken::getStrandIndex(void) const {
 //   Returns -1 if there is no slur start character.
 //
 
-int HumdrumToken::getSlurStartElisionLevel(void) const { 
+int HumdrumToken::getSlurStartElisionLevel(void) const {
 	if (isDataType("**kern")) {
 		return Convert::getKernSlurStartElisionLevel((string)(*this));
 	} else {
@@ -1637,7 +1637,7 @@ int HumdrumToken::getSlurStartElisionLevel(void) const {
 //   Returns -1 if there is no slur end character.
 //
 
-int HumdrumToken::getSlurEndElisionLevel(void) const { 
+int HumdrumToken::getSlurEndElisionLevel(void) const {
 	if (isDataType("**kern")) {
 		return Convert::getKernSlurEndElisionLevel((string)(*this));
 	} else {
@@ -1869,11 +1869,11 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 		if (isDefined("auto", "hangingSlur")) {
 			out << " hanging=\"" << getValue("auto", "hangingSlur") << "\"";
 		}
-		out << ">" << endl; 
+		out << ">" << endl;
 		out << Convert::repeatString(indent, level+1);
 		out << "<duration" << Convert::getHumNumAttributes(getSlurDuration());
 		out << "/>\n";
-		out << Convert::repeatString(indent, level) << "</slur>" << endl; 
+		out << Convert::repeatString(indent, level) << "</slur>" << endl;
 	}
 	return out;
 }
@@ -2060,7 +2060,7 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
 }
 
 
-HumdrumToken& HumdrumToken::operator=(const string& aToken) { 
+HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 	(string)(*this) = aToken;
 	m_rhycheck = 0;
 	setPrefix("!");
@@ -2070,7 +2070,7 @@ HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 }
 
 
-HumdrumToken& HumdrumToken::operator=(const char* aToken) { 
+HumdrumToken& HumdrumToken::operator=(const char* aToken) {
 	(string)(*this) = aToken;
 	m_rhycheck = 0;
 	setPrefix("!");

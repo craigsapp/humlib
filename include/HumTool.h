@@ -39,39 +39,52 @@ class HumTool : public Options {
 // common command-line Interfaces
 //
 
+//////////////////////////////
 //
-// BASIC_INTERFACE -- .run(HumdrumFile& infile, ostream& out)
+// BASIC_INTERFACE -- Expects one Humdurm file, either from the
+//    first command-line argument (left over after options have been
+//    parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile, ostream& out)
+//
 //
 
 #define BASIC_INTERFACE(CLASS)                 \
-                                               \
 using namespace std;                           \
 using namespace hum;                           \
-                                               \
 int main(int argc, char** argv) {              \
 	CLASS interface;                            \
 	interface.process(argc, argv);              \
-                                               \
 	HumdrumFile infile;                         \
 	if (interface.getArgCount() > 0) {          \
 		infile.read(interface.getArgument(1));   \
 	} else {                                    \
 		infile.read(cin);                        \
 	}                                           \
-                                               \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
 		cerr << interface.getError();            \
 	}                                           \
-                                               \
 	return !status;                             \
 }
 
+
+
+//////////////////////////////
+//
+// STREAM_INTERFACE -- Expects one Humdurm file, either from the
+//    first command-line argument (left over after options have been
+//    parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile, ostream& out)
+//
+//
+
 #define STREAM_INTERFACE(CLASS)                                 \
-                                                                \
 using namespace std;                                            \
 using namespace hum;                                            \
-                                                                \
 int main(int argc, char** argv) {                               \
 	CLASS interface;                                             \
 	interface.process(argc, argv);                               \
@@ -84,7 +97,6 @@ int main(int argc, char** argv) {                               \
 			cerr << interface.getError();                          \
 		}                                                         \
 	}                                                            \
-                                                                \
 	return !status;                                              \
 }
 

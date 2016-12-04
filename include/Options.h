@@ -6,6 +6,7 @@
 // Filename:      Options.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/Options.h
 // Documentation: http://sig.sapp.org/doc/classes/Options
+// vim:           ts=3
 // Syntax:        C++11
 //
 // Description:   Interface to command-line options.
@@ -25,118 +26,116 @@ namespace hum {
 // START_MERGE
 
 class Option_register {
-   public:
-                   Option_register    (void);
-                   Option_register    (const string& aDefinition, char aType,
-                                       const string& aDefaultOption);
-                   Option_register    (const string& aDefinition, char aType,
-                                       const string& aDefaultOption,
-                                       const string& aModifiedOption);
-                  ~Option_register    ();
+	public:
+		             Option_register    (void);
+		             Option_register    (const string& aDefinition, char aType,
+		                                 const string& aDefaultOption);
+		             Option_register    (const string& aDefinition, char aType,
+		                                 const string& aDefaultOption,
+		                                 const string& aModifiedOption);
+		            ~Option_register    ();
 
-     void          clearModified      (void);
-     const string& getDefinition      (void);
-     const string& getDefault         (void);
-     const string& getOption          (void);
-     const string& getModified        (void);
-     const string& getDescription     (void);
-     int           isModified         (void);
-     char          getType            (void);
-     void          reset              (void);
-     void          setDefault         (const string& aString);
-     void          setDefinition      (const string& aString);
-     void          setDescription     (const string& aString);
-     void          setModified        (const string& aString);
-     void          setType            (char aType);
-     ostream&      print              (ostream& out);
+		void          clearModified      (void);
+		const string& getDefinition      (void);
+		const string& getDefault         (void);
+		const string& getOption          (void);
+		const string& getModified        (void);
+		const string& getDescription     (void);
+		int           isModified         (void);
+		char          getType            (void);
+		void          reset              (void);
+		void          setDefault         (const string& aString);
+		void          setDefinition      (const string& aString);
+		void          setDescription     (const string& aString);
+		void          setModified        (const string& aString);
+		void          setType            (char aType);
+		ostream&      print              (ostream& out);
 
-   protected:
-      string       definition;
-      string       description;
-      string       defaultOption;
-      string       modifiedOption;
-      int          modifiedQ;
-      char         type;
-
+	protected:
+		string       definition;
+		string       description;
+		string       defaultOption;
+		string       modifiedOption;
+		int          modifiedQ;
+		char         type;
 };
 
 
-
 class Options {
-   public:
-                      Options           (void);
-                      Options           (int argc, char** argv);
-                     ~Options           ();
+	public:
+		                Options           (void);
+		                Options           (int argc, char** argv);
+		               ~Options           ();
 
-      int             argc              (void) const;
-      const vector<string>& argv        (void) const;
-      int             define            (const string& aDefinition);
-      int             define            (const string& aDefinition, 
-                                         const string& description);
-      const string&   getArg            (int index);
-      const string&   getArgument       (int index);
-      int             getArgCount       (void);
-      int             getArgumentCount  (void);
-      vector<string>& getArgList        (vector<string>& output);
-      vector<string>& getArgumentList   (vector<string>& output);
-      int             getBoolean        (const string& optionName);
-      string          getCommand        (void);
-      const string&   getCommandLine    (void);
-      string          getDefinition     (const string& optionName);
-      double          getDouble         (const string& optionName);
-      char            getFlag           (void);
-      char            getChar           (const string& optionName);
-      float           getFloat          (const string& optionName);
-      int             getInt            (const string& optionName);
-      int             getInteger        (const string& optionName);
-      string          getString         (const string& optionName);
-      char            getType           (const string& optionName);
-      int             optionsArg        (void);
-      ostream&        print             (ostream& out); 
-      ostream&        printOptionList   (ostream& out);
-      ostream&        printOptionListBooleanState(ostream& out);
-      void            process           (int error_check = 1, int suppress = 0);
-      void            process           (int argc, char** argv,
-                                            int error_check = 1,
-                                            int suppress = 0);
-      void            reset             (void);
-      void            xverify           (int argc, char** argv, 
-                                            int error_check = 1,
-                                            int suppress = 0);
-      void            xverify           (int error_check = 1,
-                                            int suppress = 0);
-      void            setFlag           (char aFlag);
-      void            setModified       (const string& optionName, 
-                                         const string& optionValue);
-      void            setOptions        (int argc, char** argv);
-      void            appendOptions     (int argc, char** argv);
-      void            appendOptions     (const string& strang);
-      void            appendOptions     (const vector<string>& argv);
-      ostream&        printRegister     (ostream& out);
-      int             isDefined         (const string& name);
+		int             argc              (void) const;
+		const vector<string>& argv        (void) const;
+		int             define            (const string& aDefinition);
+		int             define            (const string& aDefinition,
+		                                   const string& description);
+		const string&   getArg            (int index);
+		const string&   getArgument       (int index);
+		int             getArgCount       (void);
+		int             getArgumentCount  (void);
+		vector<string>& getArgList        (vector<string>& output);
+		vector<string>& getArgumentList   (vector<string>& output);
+		int             getBoolean        (const string& optionName);
+		string          getCommand        (void);
+		const string&   getCommandLine    (void);
+		string          getDefinition     (const string& optionName);
+		double          getDouble         (const string& optionName);
+		char            getFlag           (void);
+		char            getChar           (const string& optionName);
+		float           getFloat          (const string& optionName);
+		int             getInt            (const string& optionName);
+		int             getInteger        (const string& optionName);
+		string          getString         (const string& optionName);
+		char            getType           (const string& optionName);
+		int             optionsArg        (void);
+		ostream&        print             (ostream& out);
+		ostream&        printOptionList   (ostream& out);
+		ostream&        printOptionListBooleanState(ostream& out);
+		void            process           (int error_check = 1, int suppress = 0);
+		void            process           (int argc, char** argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            reset             (void);
+		void            xverify           (int argc, char** argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            xverify           (int error_check = 1,
+		                                      int suppress = 0);
+		void            setFlag           (char aFlag);
+		void            setModified       (const string& optionName,
+		                                   const string& optionValue);
+		void            setOptions        (int argc, char** argv);
+		void            appendOptions     (int argc, char** argv);
+		void            appendOptions     (const string& strang);
+		void            appendOptions     (const vector<string>& argv);
+		ostream&        printRegister     (ostream& out);
+		int             isDefined         (const string& name);
 
-   protected:
-      int                      m_options_error_check;  // for verify command
-      int                      m_oargc;
-      vector<string>           m_oargv;
-      string                   m_commandString;
-      char                     m_optionFlag;
-      vector<string*>          m_argument;
+	protected:
+		int                      m_options_error_check;  // for verify command
+		int                      m_oargc;
+		vector<string>           m_oargv;
+		string                   m_commandString;
+		char                     m_optionFlag;
+		vector<string*>          m_argument;
 
-      vector<Option_register*> m_optionRegister;
-      map<string, int>         m_optionList;
+		vector<Option_register*> m_optionRegister;
+		map<string, int>         m_optionList;
 
-      int                      m_processedQ;
-      int                      m_suppressQ;       // prevent --options option
-      int                      m_optionsArgument; // indicates --options present
+		int                      m_processedQ;
+		int                      m_suppressQ;       // prevent --options option
+		int                      m_optionsArgument; // indicates --options present
 
-      vector<string>           m_extraArgv;
-      vector<string>           m_extraArgv_strings;
+		vector<string>           m_extraArgv;
+		vector<string>           m_extraArgv_strings;
 
-      int         getRegIndex             (const string& optionName);
-      int         optionQ                 (const string& aString, int& argp);
-      int         storeOption             (int gargp, int& position, 
-                                           int& running);
+		int         getRegIndex             (const string& optionName);
+		int         optionQ                 (const string& aString, int& argp);
+		int         storeOption             (int gargp, int& position,
+		                                     int& running);
 
 };
 

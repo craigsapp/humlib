@@ -406,7 +406,7 @@ bool HumNum::isPowerOfTwo(void) const {
 		return false;
 	}
 	int abstop = top > 0 ? top : -top;
-   if (bot == 1) {
+	if (bot == 1) {
 		return !(abstop & (abstop - 1));
 	} else if (abstop == 1) {
 		return !(bot & (bot - 1));

@@ -5,6 +5,7 @@
 // Last Modified: Fri Sep  2 10:16:09 CEST 2016 (added to humlib)
 // Filename:      HumInstrument.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumInstrument.h
+// vim:           ts=3
 // Syntax:        C++11
 //
 // Description:   Enumeration class for processing Humdrum instrument names.
@@ -24,41 +25,41 @@ namespace hum {
 // START_MERGE
 
 class _HumInstrument {
-   public:
-      _HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
-     ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
+	public:
+		_HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
+	  ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
 
-      string humdrum;
-      string name;
-      int   gm;
+		string humdrum;
+		string name;
+		int   gm;
 };
 
 class HumInstrument {
-   public:
-                      HumInstrument  (void);
-                      HumInstrument  (const string& Hname);
-                     ~HumInstrument  ();
+	public:
+		                HumInstrument  (void);
+		                HumInstrument  (const string& Hname);
+		               ~HumInstrument  ();
 
-      string          getName        (void);
-      string          getName        (const string& Hname);
-      string          getHumdrum     (void);
-      int             getGM          (void);
-      int             getGM          (const string& Hname);
-      void            setHumdrum     (const string& Hname);
-      int             setGM          (const string& Hname, int aValue);
+		string          getName        (void);
+		string          getName        (const string& Hname);
+		string          getHumdrum     (void);
+		int             getGM          (void);
+		int             getGM          (const string& Hname);
+		void            setHumdrum     (const string& Hname);
+		int             setGM          (const string& Hname, int aValue);
 
-   private:
-      int                                index;
-      static vector<_HumInstrument>      data;
-      static int                         classcount;
+	private:
+		int                                index;
+		static vector<_HumInstrument>      data;
+		static int                         classcount;
 
-   protected:
-      void   initialize   (void);
-      void   afi          (const char* humdrum_name, int midinum,
-                             const char* EN_name);
-      int    find         (const string& Hname);
-      void   sortData     (void);
-      static int data_compare_by_humdrum_name(const void* a, const void* b);
+	protected:
+		void   initialize   (void);
+		void   afi          (const char* humdrum_name, int midinum,
+		                    const char* EN_name);
+		int    find         (const string& Hname);
+		void   sortData     (void);
+		static int data_compare_by_humdrum_name(const void* a, const void* b);
 };
 
 
@@ -104,7 +105,7 @@ class HumInstrument {
 #define  GM_XYLOPHONE                     (13)
 #define  GM_TUBULAR_BELLS                 (14)
 #define  GM_DULCIMER                      (15)
-                                 
+
 #define  GM_ORGAN(X)                      (16+(X))
 #define  GM_DRAWBAR_ORGAN                 (16)
 #define  GM_PERCUSSIVE_ORGAN              (17)
@@ -124,7 +125,7 @@ class HumInstrument {
 #define  GM_OVERDRIVEN_GUITAR             (29)
 #define  GM_DISTORTION_GUITAR             (30)
 #define  GM_GUITAR_HARMONICS              (31)
-                       
+
 #define  GM_BASS(X)                       (32+(X))
 #define  GM_ACOUSTIC_BASS                 (32)
 #define  GM_ELECTRIC_BASS_FINGER          (33)
@@ -134,7 +135,7 @@ class HumInstrument {
 #define  GM_SLAP_BASS_2                   (37)
 #define  GM_SYNTH_BASS_1                  (38)
 #define  GM_SYNTH_BASS_2                  (39)
-                        
+
 #define  GM_STRINGS(X)                    (40+(X))
 #define  GM_VIOLIN                        (40)
 #define  GM_VIOLA                         (41)
@@ -144,7 +145,7 @@ class HumInstrument {
 #define  GM_PIZZACATO_STRINGS             (45)
 #define  GM_ORCHESTRAL_HARP               (46)
 #define  GM_TIMPANI                       (47)
-                         
+
 #define  GM_ENSEMBLE(X)                   (48+(X))
 #define  GM_STRING_ENSEMBLE_1             (48)
 #define  GM_STRING_ENSEMBLE_2             (49)
@@ -154,7 +155,7 @@ class HumInstrument {
 #define  GM_VOICE_OOHS                    (53)
 #define  GM_SYNTH_VOICE                   (54)
 #define  GM_ORCHESTRA_HIT                 (55)
-                          
+
 #define  GM_BRASS(X)                      (56+(X))
 #define  GM_TRUMPET                       (56)
 #define  GM_TROMBONE                      (57)
@@ -164,7 +165,7 @@ class HumInstrument {
 #define  GM_BRASS_SECTION                 (61)
 #define  GM_SYNTHBRASS_1                  (62)
 #define  GM_SYNTHBRASS_2                  (63)
-                           
+
 #define  GM_REED(X)                       (64+(X))
 #define  GM_SOPRANO_SAX                   (64)
 #define  GM_ALTO_SAX                      (65)
@@ -174,7 +175,7 @@ class HumInstrument {
 #define  GM_ENGLISH_HORN                  (69)
 #define  GM_BASSOON                       (70)
 #define  GM_CLARINET                      (71)
-                            
+
 #define  GM_PIPE(X)                       (72+(X))
 #define  GM_PICCOLO                       (72)
 #define  GM_FLUTE                         (73)
@@ -184,7 +185,7 @@ class HumInstrument {
 #define  GM_SHAKUHACHI                    (77)
 #define  GM_WHISTLE                       (78)
 #define  GM_OCARINA                       (79)
-                             
+
 #define  GM_LEAD(X)                       (80+(X))
 #define  GM_LEAD_SQUARE                   (80)
 #define  GM_LEAD_SAWTOOTH                 (81)
@@ -194,7 +195,7 @@ class HumInstrument {
 #define  GM_LEAD_VOICE                    (85)
 #define  GM_LEAD_FIFTHS                   (86)
 #define  GM_LEAD_BASS                     (87)
-                              
+
 #define  GM_PAD(X)                        (88+(X))
 #define  GM_PAD_NEW_AGE                   (88)
 #define  GM_PAD_WARM                      (89)
@@ -204,7 +205,7 @@ class HumInstrument {
 #define  GM_PAD_METALLIC                  (93)
 #define  GM_PAD_HALO                      (94)
 #define  GM_PAD_SWEEP                     (95)
-                               
+
 #define  GM_FX(X)                         (96+(X))
 #define  GM_FX_TRAIN                      (96)
 #define  GM_FX_SOUNDTRACK                 (97)
@@ -214,7 +215,7 @@ class HumInstrument {
 #define  GM_FX_GOBLINS                    (101)
 #define  GM_FX_ECHOES                     (102)
 #define  GM_FX_SCI_FI                     (103)
-                                
+
 #define  GM_ETHNIC(X)                     (104+(X))
 #define  GM_SITAR                         (104)
 #define  GM_BANJO                         (105)
@@ -224,7 +225,7 @@ class HumInstrument {
 #define  GM_BAGPIPE                       (109)
 #define  GM_FIDDLE                        (110)
 #define  GM_SHANAI                        (111)
-                                 
+
 #define  GM_PERCUSSION(X)                 (112+(X))
 #define  GM_TINKLE_BELL                   (112)
 #define  GM_AGOGO                         (113)
@@ -234,7 +235,7 @@ class HumInstrument {
 #define  GM_MELODIC_DRUM                  (117)
 #define  GM_SYNTH_DRUM                    (118)
 #define  GM_REVERSE_CYMBAL                (119)
-                                  
+
 #define  GM_SOUNDEFFECT(X)                (120+(X))
 #define  GM_GUITAR_FRET_NOISE             (120)
 #define  GM_BREATH_NOISE                  (121)

@@ -22,10 +22,10 @@ namespace hum {
 // START_MERGE
 
 class HumRegex {
-   public:
-                    HumRegex           (void);
+	public:
+		              HumRegex           (void);
 		              HumRegex           (const string& exp);
-                   ~HumRegex           ();
+		             ~HumRegex           ();
 
 		// searching
 		bool          search             (const string& input,
@@ -37,8 +37,8 @@ class HumRegex {
 		int           getMatchStartIndex (int index = 0);
 		int           getMatchEndIndex   (int index = 0);
 		int           getMatchLength     (int index = 0);
-   
-   protected:
+
+	protected:
 
 		// m_regex: store the regular expression to use as a default.
 		//
@@ -53,7 +53,7 @@ class HumRegex {
 		// .empty()     == check if match was successful.
 		// .size()      == number of matches.
 		// .length(i)   == return length of a submatch.
-      // .position(i) == return start index of submatch in search string.
+		// .position(i) == return start index of submatch in search string.
 		// .str(i)      == return string of submatch.
 		// operator[i]  == return submatch.
 		// .prefix

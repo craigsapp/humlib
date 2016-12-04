@@ -181,7 +181,7 @@ double NoteCell::operator-(int B) {
 //
 
 int NoteCell::getLineIndex(void) {
-   if (!m_token) {
+	if (!m_token) {
 		return -1;
 	}
 	return m_token->getLineIndex();
@@ -222,7 +222,7 @@ double NoteCell::getDiatonicIntervalFromPreviousAttack(void) {
 	if (!m_owner) {
 		return NAN;
 	}
-	return getAbsDiatonicPitch() 
+	return getAbsDiatonicPitch()
 			- m_owner->cell(m_voice,previ)->getAbsDiatonicPitch();
 }
 

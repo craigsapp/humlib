@@ -29,7 +29,7 @@ class Tool_metlev : public HumTool {
 		bool  run                (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  fillVoiceResults   (vector<vector<double> >& results, 
+		void  fillVoiceResults   (vector<vector<double> >& results,
 		                          HumdrumFile& infile,
 		                          vector<double>& beatlev);
 

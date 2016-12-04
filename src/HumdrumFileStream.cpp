@@ -190,7 +190,7 @@ restarting:
 
 	// (2) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
-	else if (((int)m_filelist.size() > 0) && 
+	else if (((int)m_filelist.size() > 0) &&
 			(m_curfile < (int)m_filelist.size()-1)) {
 		m_curfile++;
 		if (m_instream.is_open()) {
@@ -232,7 +232,6 @@ restarting:
 	if (m_newfilebuffer.size() > 0) {
 		// store the filename for the current HumdrumFile being read:
 		HumRegex hre;
-cerr << "GOT HERE AAA" << endl;
 		if (hre.search(m_newfilebuffer,
 				R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
 			if (hre.getMatchLength(1) > 0) {
@@ -299,7 +298,6 @@ cerr << "GOT HERE AAA" << endl;
 			string tempstring;
 			tempstring = templine;
 			HumRegex hre;
-cerr << "GOT HERE BBB" << endl;
 			if (hre.search(tempstring,
 					"^!!!!SEGMENT\\s*([+-]?\\d+)?\\s*:\\s*(.*)\\s*$")) {
 				if (hre.getMatchLength(1) > 0) {
@@ -350,7 +348,6 @@ cerr << "GOT HERE BBB" << endl;
 				// (i.e., it comes at the start of the file stream and
 				// is the name of the first HumdrumFile in the stream).
 				HumRegex hre;
-cerr << "GOT HERE CCC" << endl;
 				if (hre.search(m_newfilebuffer,
 						R"(^!!!!SEGMENT\s*([+-]?\d+)?\s:\s*(.*)\s*$)")) {
 					if (hre.getMatchLength(1) > 0) {
@@ -431,6 +428,9 @@ cerr << "GOT HERE CCC" << endl;
 	// of the data stream (maybe allow for postpending Universal comments
 	// in the future).
 	stringstream contents;
+	contents.str(""); // empty any contents in buffer
+	contents.clear(); // reset error flags in buffer
+
 	for (int i=0; i<(int)m_universals.size(); i++) {
 		contents << &(m_universals[i][1]) << "\n";
 	}

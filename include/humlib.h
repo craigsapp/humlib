@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 21:01:40 PST 2016
+// Last Modified: Sat Dec  3 22:40:09 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -340,10 +340,10 @@ ostream& operator<<(ostream& out, const vector<A>& v);
 
 
 class HumRegex {
-   public:
-                    HumRegex           (void);
+	public:
+		              HumRegex           (void);
 		              HumRegex           (const string& exp);
-                   ~HumRegex           ();
+		             ~HumRegex           ();
 
 		// searching
 		bool          search             (const string& input,
@@ -355,8 +355,8 @@ class HumRegex {
 		int           getMatchStartIndex (int index = 0);
 		int           getMatchEndIndex   (int index = 0);
 		int           getMatchLength     (int index = 0);
-   
-   protected:
+
+	protected:
 
 		// m_regex: store the regular expression to use as a default.
 		//
@@ -371,7 +371,7 @@ class HumRegex {
 		// .empty()     == check if match was successful.
 		// .size()      == number of matches.
 		// .length(i)   == return length of a submatch.
-      // .position(i) == return start index of submatch in search string.
+		// .position(i) == return start index of submatch in search string.
 		// .str(i)      == return string of submatch.
 		// operator[i]  == return submatch.
 		// .prefix
@@ -457,41 +457,41 @@ class HumAddress {
 
 
 class _HumInstrument {
-   public:
-      _HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
-     ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
+	public:
+		_HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
+	  ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
 
-      string humdrum;
-      string name;
-      int   gm;
+		string humdrum;
+		string name;
+		int   gm;
 };
 
 class HumInstrument {
-   public:
-                      HumInstrument  (void);
-                      HumInstrument  (const string& Hname);
-                     ~HumInstrument  ();
+	public:
+		                HumInstrument  (void);
+		                HumInstrument  (const string& Hname);
+		               ~HumInstrument  ();
 
-      string          getName        (void);
-      string          getName        (const string& Hname);
-      string          getHumdrum     (void);
-      int             getGM          (void);
-      int             getGM          (const string& Hname);
-      void            setHumdrum     (const string& Hname);
-      int             setGM          (const string& Hname, int aValue);
+		string          getName        (void);
+		string          getName        (const string& Hname);
+		string          getHumdrum     (void);
+		int             getGM          (void);
+		int             getGM          (const string& Hname);
+		void            setHumdrum     (const string& Hname);
+		int             setGM          (const string& Hname, int aValue);
 
-   private:
-      int                                index;
-      static vector<_HumInstrument>      data;
-      static int                         classcount;
+	private:
+		int                                index;
+		static vector<_HumInstrument>      data;
+		static int                         classcount;
 
-   protected:
-      void   initialize   (void);
-      void   afi          (const char* humdrum_name, int midinum,
-                             const char* EN_name);
-      int    find         (const string& Hname);
-      void   sortData     (void);
-      static int data_compare_by_humdrum_name(const void* a, const void* b);
+	protected:
+		void   initialize   (void);
+		void   afi          (const char* humdrum_name, int midinum,
+		                    const char* EN_name);
+		int    find         (const string& Hname);
+		void   sortData     (void);
+		static int data_compare_by_humdrum_name(const void* a, const void* b);
 };
 
 
@@ -537,7 +537,7 @@ class HumInstrument {
 #define  GM_XYLOPHONE                     (13)
 #define  GM_TUBULAR_BELLS                 (14)
 #define  GM_DULCIMER                      (15)
-                                 
+
 #define  GM_ORGAN(X)                      (16+(X))
 #define  GM_DRAWBAR_ORGAN                 (16)
 #define  GM_PERCUSSIVE_ORGAN              (17)
@@ -557,7 +557,7 @@ class HumInstrument {
 #define  GM_OVERDRIVEN_GUITAR             (29)
 #define  GM_DISTORTION_GUITAR             (30)
 #define  GM_GUITAR_HARMONICS              (31)
-                       
+
 #define  GM_BASS(X)                       (32+(X))
 #define  GM_ACOUSTIC_BASS                 (32)
 #define  GM_ELECTRIC_BASS_FINGER          (33)
@@ -567,7 +567,7 @@ class HumInstrument {
 #define  GM_SLAP_BASS_2                   (37)
 #define  GM_SYNTH_BASS_1                  (38)
 #define  GM_SYNTH_BASS_2                  (39)
-                        
+
 #define  GM_STRINGS(X)                    (40+(X))
 #define  GM_VIOLIN                        (40)
 #define  GM_VIOLA                         (41)
@@ -577,7 +577,7 @@ class HumInstrument {
 #define  GM_PIZZACATO_STRINGS             (45)
 #define  GM_ORCHESTRAL_HARP               (46)
 #define  GM_TIMPANI                       (47)
-                         
+
 #define  GM_ENSEMBLE(X)                   (48+(X))
 #define  GM_STRING_ENSEMBLE_1             (48)
 #define  GM_STRING_ENSEMBLE_2             (49)
@@ -587,7 +587,7 @@ class HumInstrument {
 #define  GM_VOICE_OOHS                    (53)
 #define  GM_SYNTH_VOICE                   (54)
 #define  GM_ORCHESTRA_HIT                 (55)
-                          
+
 #define  GM_BRASS(X)                      (56+(X))
 #define  GM_TRUMPET                       (56)
 #define  GM_TROMBONE                      (57)
@@ -597,7 +597,7 @@ class HumInstrument {
 #define  GM_BRASS_SECTION                 (61)
 #define  GM_SYNTHBRASS_1                  (62)
 #define  GM_SYNTHBRASS_2                  (63)
-                           
+
 #define  GM_REED(X)                       (64+(X))
 #define  GM_SOPRANO_SAX                   (64)
 #define  GM_ALTO_SAX                      (65)
@@ -607,7 +607,7 @@ class HumInstrument {
 #define  GM_ENGLISH_HORN                  (69)
 #define  GM_BASSOON                       (70)
 #define  GM_CLARINET                      (71)
-                            
+
 #define  GM_PIPE(X)                       (72+(X))
 #define  GM_PICCOLO                       (72)
 #define  GM_FLUTE                         (73)
@@ -617,7 +617,7 @@ class HumInstrument {
 #define  GM_SHAKUHACHI                    (77)
 #define  GM_WHISTLE                       (78)
 #define  GM_OCARINA                       (79)
-                             
+
 #define  GM_LEAD(X)                       (80+(X))
 #define  GM_LEAD_SQUARE                   (80)
 #define  GM_LEAD_SAWTOOTH                 (81)
@@ -627,7 +627,7 @@ class HumInstrument {
 #define  GM_LEAD_VOICE                    (85)
 #define  GM_LEAD_FIFTHS                   (86)
 #define  GM_LEAD_BASS                     (87)
-                              
+
 #define  GM_PAD(X)                        (88+(X))
 #define  GM_PAD_NEW_AGE                   (88)
 #define  GM_PAD_WARM                      (89)
@@ -637,7 +637,7 @@ class HumInstrument {
 #define  GM_PAD_METALLIC                  (93)
 #define  GM_PAD_HALO                      (94)
 #define  GM_PAD_SWEEP                     (95)
-                               
+
 #define  GM_FX(X)                         (96+(X))
 #define  GM_FX_TRAIN                      (96)
 #define  GM_FX_SOUNDTRACK                 (97)
@@ -647,7 +647,7 @@ class HumInstrument {
 #define  GM_FX_GOBLINS                    (101)
 #define  GM_FX_ECHOES                     (102)
 #define  GM_FX_SCI_FI                     (103)
-                                
+
 #define  GM_ETHNIC(X)                     (104+(X))
 #define  GM_SITAR                         (104)
 #define  GM_BANJO                         (105)
@@ -657,7 +657,7 @@ class HumInstrument {
 #define  GM_BAGPIPE                       (109)
 #define  GM_FIDDLE                        (110)
 #define  GM_SHANAI                        (111)
-                                 
+
 #define  GM_PERCUSSION(X)                 (112+(X))
 #define  GM_TINKLE_BELL                   (112)
 #define  GM_AGOGO                         (113)
@@ -667,7 +667,7 @@ class HumInstrument {
 #define  GM_MELODIC_DRUM                  (117)
 #define  GM_SYNTH_DRUM                    (118)
 #define  GM_REVERSE_CYMBAL                (119)
-                                  
+
 #define  GM_SOUNDEFFECT(X)                (120+(X))
 #define  GM_GUITAR_FRET_NOISE             (120)
 #define  GM_BREATH_NOISE                  (121)
@@ -1118,7 +1118,7 @@ class HumdrumToken : public string, public HumHash {
 		int m_rhycheck;
 
 		// strand: Used to keep track of contiguous voice connections between
-      // secondary spines/tracks.  This is the 1-D strand index number
+		// secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
 		int m_strand;
 
@@ -1195,8 +1195,8 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase          (void);
-                    HumdrumFileBase          (const string& contents);
-                    HumdrumFileBase          (istream& contents);
+		              HumdrumFileBase          (const string& contents);
+		              HumdrumFileBase          (istream& contents);
 		             ~HumdrumFileBase          ();
 
 		bool          read                     (istream& contents);
@@ -1243,10 +1243,10 @@ class HumdrumFileBase : public HumHash {
 		void          setFilename              (const string& filename);
 		string        getFilename              (void);
 
-      void          setSegmentLevel          (int level = 0);
-      int           getSegmentLevel          (void);
-      ostream&      printSegmentLabel        (ostream& out);
-      ostream&      printNonemptySegmentLabel(ostream& out);
+		void          setSegmentLevel          (int level = 0);
+		int           getSegmentLevel          (void);
+		ostream&      printSegmentLabel        (ostream& out);
+		ostream&      printNonemptySegmentLabel(ostream& out);
 
 		HumdrumLine&  operator[]               (int index);
 		HumdrumLine*  getLine                  (int index);
@@ -1270,8 +1270,8 @@ class HumdrumFileBase : public HumHash {
 		void          getSpineStartList        (vector<HTp>& spinestarts);
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
-      void          getKernSpineStartList    (vector<HTp>& spinestarts);
-      vector<HTp>   getKernSpineStartList    ();
+		void          getKernSpineStartList    (vector<HTp>& spinestarts);
+		vector<HTp>   getKernSpineStartList    ();
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
 		void          getTrackStartList        (vector<HTp>& spinestarts) {
@@ -1290,9 +1290,9 @@ class HumdrumFileBase : public HumHash {
 		void          appendLine               (const char* line);
 		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
-      void          push_back(const char* line)   { appendLine(line); }
-      void          push_back(const string& line) { appendLine(line); }
-      void          push_back(HumdrumLine* line)  { appendLine(line); }
+		void          push_back(const char* line)   { appendLine(line); }
+		void          push_back(const string& line) { appendLine(line); }
+		void          push_back(HumdrumLine* line)  { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
@@ -1304,24 +1304,24 @@ class HumdrumFileBase : public HumHash {
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:
-      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (vector<vector<HTp> >& sequence,
 		                                        int track, int options);
 		void          getPrimaryTrackSequence  (vector<HTp>& sequence,
 		                                        int track, int options);
 
-      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (vector<vector<HTp> >& sequence,
 		                                        int spine, int options);
 		void          getPrimarySpineSequence  (vector<HTp>& sequence,
 		                                        int spine, int options);
 
-      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options)
 		                      { getTrackSequence(sequence, starttoken, options); }
-      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        int track, int options)
 		                           { getTrackSequence(sequence, track, options); }
 		void          getPrimaryTrackSeq       (vector<HTp>& sequence,
@@ -1795,7 +1795,7 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 //////////////////////////////
 //
 // HumdrumFileContent::insertDataSpineBefore -- prepend a data spine
-//     to the file before the given spine.  Returns true if successful; 
+//     to the file before the given spine.  Returns true if successful;
 //     false otherwise.
 //
 //     nexttrack == track number to insert before.
@@ -1845,7 +1845,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 		insertionField = -1;
 		for (int j=0; j<line->getFieldCount(); j++) {
 			track = line->token(j)->getTrack();
-         if (track != nexttrack) {
+			if (track != nexttrack) {
 				continue;
 			}
 			insertionField = j;
@@ -1890,7 +1890,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 //////////////////////////////
 //
 // HumdrumFileContent::insertDataSpineAfter -- appen a data spine
-//     to the file after the given spine.  Returns true if successful; 
+//     to the file after the given spine.  Returns true if successful;
 //     false otherwise.
 //
 //     prevtrack == track number to insert after.
@@ -1940,7 +1940,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 		insertionField = -1;
 		for (int j = line->getFieldCount() - 1; j >= 0; j--) {
 			track = line->token(j)->getTrack();
-         if (track != prevtrack) {
+			if (track != prevtrack) {
 				continue;
 			}
 			insertionField = j;
@@ -2064,7 +2064,7 @@ class NoteCell {
 		double m_b7;         // diatonic note number; NaN=rest; negative=sustain.
 		double m_b12;        // MIDI note number; NaN=rest; negative=sustain.
 		double m_b40;        // base-40 note number; NaN=rest; negative=sustain.
-		double m_accidental; // chromatic alteration of a diatonic pitch. 
+		double m_accidental; // chromatic alteration of a diatonic pitch.
 		                     // NaN=no accidental.
 		int m_nextAttackIndex; // index to next note attack (or rest),
 		                       // -1 for undefined (interpred as rest).
@@ -2146,45 +2146,45 @@ class Convert {
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
-   	static int     base40ToAccidental   (int b40);
-   	static int     base40ToDiatonic     (int b40);
+		static int     base40ToAccidental   (int b40);
+		static int     base40ToDiatonic     (int b40);
 		static int     base40ToMidiNoteNumber(int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
-		static int     kernToOctaveNumber   (HTp token) 
+		static int     kernToOctaveNumber   (HTp token)
 				{ return kernToOctaveNumber((string)*token); }
 		static int     kernToAccidentalCount(const string& kerndata);
-		static int     kernToAccidentalCount(HTp token) 
+		static int     kernToAccidentalCount(HTp token)
 				{ return kernToAccidentalCount((string)*token); }
 		static int     kernToDiatonicPC     (const string& kerndata);
-		static int     kernToDiatonicPC     (HTp token) 
+		static int     kernToDiatonicPC     (HTp token)
 				{ return kernToDiatonicPC     ((string)*token); }
 		static char    kernToDiatonicUC     (const string& kerndata);
-		static int     kernToDiatonicUC     (HTp token) 
+		static int     kernToDiatonicUC     (HTp token)
 				{ return kernToDiatonicUC     ((string)*token); }
 		static char    kernToDiatonicLC     (const string& kerndata);
-		static int     kernToDiatonicLC     (HTp token) 
+		static int     kernToDiatonicLC     (HTp token)
 				{ return kernToDiatonicLC     ((string)*token); }
 		static int     kernToBase40PC       (const string& kerndata);
-		static int     kernToBase40PC       (HTp token) 
+		static int     kernToBase40PC       (HTp token)
 				{ return kernToBase40PC       ((string)*token); }
 		static int     kernToBase12PC       (const string& kerndata);
-		static int     kernToBase12PC       (HTp token) 
+		static int     kernToBase12PC       (HTp token)
 				{ return kernToBase12PC       ((string)*token); }
 		static int     kernToBase7PC        (const string& kerndata) {
 		                                     return kernToDiatonicPC(kerndata); }
-		static int     kernToBase7PC        (HTp token) 
+		static int     kernToBase7PC        (HTp token)
 				{ return kernToBase7PC        ((string)*token); }
 		static int     kernToBase40         (const string& kerndata);
-		static int     kernToBase40         (HTp token) 
+		static int     kernToBase40         (HTp token)
 				{ return kernToBase40         ((string)*token); }
 		static int     kernToBase12         (const string& kerndata);
-		static int     kernToBase12         (HTp token) 
+		static int     kernToBase12         (HTp token)
 				{ return kernToBase12         ((string)*token); }
 		static int     kernToBase7          (const string& kerndata);
-		static int     kernToBase7         (HTp token) 
+		static int     kernToBase7         (HTp token)
 				{ return kernToBase7         ((string)*token); }
 		static int     kernToMidiNoteNumber (const string& kerndata);
-		static int     kernToMidiNoteNumber(HTp token) 
+		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((string)*token); }
 		static string  kernToScientificPitch(const string& kerndata,
 		                                     string flat = "b",
@@ -2242,118 +2242,116 @@ class Convert {
 
 
 class Option_register {
-   public:
-                   Option_register    (void);
-                   Option_register    (const string& aDefinition, char aType,
-                                       const string& aDefaultOption);
-                   Option_register    (const string& aDefinition, char aType,
-                                       const string& aDefaultOption,
-                                       const string& aModifiedOption);
-                  ~Option_register    ();
+	public:
+		             Option_register    (void);
+		             Option_register    (const string& aDefinition, char aType,
+		                                 const string& aDefaultOption);
+		             Option_register    (const string& aDefinition, char aType,
+		                                 const string& aDefaultOption,
+		                                 const string& aModifiedOption);
+		            ~Option_register    ();
 
-     void          clearModified      (void);
-     const string& getDefinition      (void);
-     const string& getDefault         (void);
-     const string& getOption          (void);
-     const string& getModified        (void);
-     const string& getDescription     (void);
-     int           isModified         (void);
-     char          getType            (void);
-     void          reset              (void);
-     void          setDefault         (const string& aString);
-     void          setDefinition      (const string& aString);
-     void          setDescription     (const string& aString);
-     void          setModified        (const string& aString);
-     void          setType            (char aType);
-     ostream&      print              (ostream& out);
+		void          clearModified      (void);
+		const string& getDefinition      (void);
+		const string& getDefault         (void);
+		const string& getOption          (void);
+		const string& getModified        (void);
+		const string& getDescription     (void);
+		int           isModified         (void);
+		char          getType            (void);
+		void          reset              (void);
+		void          setDefault         (const string& aString);
+		void          setDefinition      (const string& aString);
+		void          setDescription     (const string& aString);
+		void          setModified        (const string& aString);
+		void          setType            (char aType);
+		ostream&      print              (ostream& out);
 
-   protected:
-      string       definition;
-      string       description;
-      string       defaultOption;
-      string       modifiedOption;
-      int          modifiedQ;
-      char         type;
-
+	protected:
+		string       definition;
+		string       description;
+		string       defaultOption;
+		string       modifiedOption;
+		int          modifiedQ;
+		char         type;
 };
 
 
-
 class Options {
-   public:
-                      Options           (void);
-                      Options           (int argc, char** argv);
-                     ~Options           ();
+	public:
+		                Options           (void);
+		                Options           (int argc, char** argv);
+		               ~Options           ();
 
-      int             argc              (void) const;
-      const vector<string>& argv        (void) const;
-      int             define            (const string& aDefinition);
-      int             define            (const string& aDefinition, 
-                                         const string& description);
-      const string&   getArg            (int index);
-      const string&   getArgument       (int index);
-      int             getArgCount       (void);
-      int             getArgumentCount  (void);
-      vector<string>& getArgList        (vector<string>& output);
-      vector<string>& getArgumentList   (vector<string>& output);
-      int             getBoolean        (const string& optionName);
-      string          getCommand        (void);
-      const string&   getCommandLine    (void);
-      string          getDefinition     (const string& optionName);
-      double          getDouble         (const string& optionName);
-      char            getFlag           (void);
-      char            getChar           (const string& optionName);
-      float           getFloat          (const string& optionName);
-      int             getInt            (const string& optionName);
-      int             getInteger        (const string& optionName);
-      string          getString         (const string& optionName);
-      char            getType           (const string& optionName);
-      int             optionsArg        (void);
-      ostream&        print             (ostream& out); 
-      ostream&        printOptionList   (ostream& out);
-      ostream&        printOptionListBooleanState(ostream& out);
-      void            process           (int error_check = 1, int suppress = 0);
-      void            process           (int argc, char** argv,
-                                            int error_check = 1,
-                                            int suppress = 0);
-      void            reset             (void);
-      void            xverify           (int argc, char** argv, 
-                                            int error_check = 1,
-                                            int suppress = 0);
-      void            xverify           (int error_check = 1,
-                                            int suppress = 0);
-      void            setFlag           (char aFlag);
-      void            setModified       (const string& optionName, 
-                                         const string& optionValue);
-      void            setOptions        (int argc, char** argv);
-      void            appendOptions     (int argc, char** argv);
-      void            appendOptions     (const string& strang);
-      void            appendOptions     (const vector<string>& argv);
-      ostream&        printRegister     (ostream& out);
-      int             isDefined         (const string& name);
+		int             argc              (void) const;
+		const vector<string>& argv        (void) const;
+		int             define            (const string& aDefinition);
+		int             define            (const string& aDefinition,
+		                                   const string& description);
+		const string&   getArg            (int index);
+		const string&   getArgument       (int index);
+		int             getArgCount       (void);
+		int             getArgumentCount  (void);
+		vector<string>& getArgList        (vector<string>& output);
+		vector<string>& getArgumentList   (vector<string>& output);
+		int             getBoolean        (const string& optionName);
+		string          getCommand        (void);
+		const string&   getCommandLine    (void);
+		string          getDefinition     (const string& optionName);
+		double          getDouble         (const string& optionName);
+		char            getFlag           (void);
+		char            getChar           (const string& optionName);
+		float           getFloat          (const string& optionName);
+		int             getInt            (const string& optionName);
+		int             getInteger        (const string& optionName);
+		string          getString         (const string& optionName);
+		char            getType           (const string& optionName);
+		int             optionsArg        (void);
+		ostream&        print             (ostream& out);
+		ostream&        printOptionList   (ostream& out);
+		ostream&        printOptionListBooleanState(ostream& out);
+		void            process           (int error_check = 1, int suppress = 0);
+		void            process           (int argc, char** argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            reset             (void);
+		void            xverify           (int argc, char** argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            xverify           (int error_check = 1,
+		                                      int suppress = 0);
+		void            setFlag           (char aFlag);
+		void            setModified       (const string& optionName,
+		                                   const string& optionValue);
+		void            setOptions        (int argc, char** argv);
+		void            appendOptions     (int argc, char** argv);
+		void            appendOptions     (const string& strang);
+		void            appendOptions     (const vector<string>& argv);
+		ostream&        printRegister     (ostream& out);
+		int             isDefined         (const string& name);
 
-   protected:
-      int                      m_options_error_check;  // for verify command
-      int                      m_oargc;
-      vector<string>           m_oargv;
-      string                   m_commandString;
-      char                     m_optionFlag;
-      vector<string*>          m_argument;
+	protected:
+		int                      m_options_error_check;  // for verify command
+		int                      m_oargc;
+		vector<string>           m_oargv;
+		string                   m_commandString;
+		char                     m_optionFlag;
+		vector<string*>          m_argument;
 
-      vector<Option_register*> m_optionRegister;
-      map<string, int>         m_optionList;
+		vector<Option_register*> m_optionRegister;
+		map<string, int>         m_optionList;
 
-      int                      m_processedQ;
-      int                      m_suppressQ;       // prevent --options option
-      int                      m_optionsArgument; // indicates --options present
+		int                      m_processedQ;
+		int                      m_suppressQ;       // prevent --options option
+		int                      m_optionsArgument; // indicates --options present
 
-      vector<string>           m_extraArgv;
-      vector<string>           m_extraArgv_strings;
+		vector<string>           m_extraArgv;
+		vector<string>           m_extraArgv_strings;
 
-      int         getRegIndex             (const string& optionName);
-      int         optionQ                 (const string& aString, int& argp);
-      int         storeOption             (int gargp, int& position, 
-                                           int& running);
+		int         getRegIndex             (const string& optionName);
+		int         optionQ                 (const string& aString, int& argp);
+		int         storeOption             (int gargp, int& position,
+		                                     int& running);
 
 };
 
@@ -2385,39 +2383,52 @@ class HumTool : public Options {
 // common command-line Interfaces
 //
 
+//////////////////////////////
 //
-// BASIC_INTERFACE -- .run(HumdrumFile& infile, ostream& out)
+// BASIC_INTERFACE -- Expects one Humdurm file, either from the
+//    first command-line argument (left over after options have been
+//    parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile, ostream& out)
+//
 //
 
 #define BASIC_INTERFACE(CLASS)                 \
-                                               \
 using namespace std;                           \
 using namespace hum;                           \
-                                               \
 int main(int argc, char** argv) {              \
 	CLASS interface;                            \
 	interface.process(argc, argv);              \
-                                               \
 	HumdrumFile infile;                         \
 	if (interface.getArgCount() > 0) {          \
 		infile.read(interface.getArgument(1));   \
 	} else {                                    \
 		infile.read(cin);                        \
 	}                                           \
-                                               \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
 		cerr << interface.getError();            \
 	}                                           \
-                                               \
 	return !status;                             \
 }
 
+
+
+//////////////////////////////
+//
+// STREAM_INTERFACE -- Expects one Humdurm file, either from the
+//    first command-line argument (left over after options have been
+//    parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile, ostream& out)
+//
+//
+
 #define STREAM_INTERFACE(CLASS)                                 \
-                                                                \
 using namespace std;                                            \
 using namespace hum;                                            \
-                                                                \
 int main(int argc, char** argv) {                               \
 	CLASS interface;                                             \
 	interface.process(argc, argv);                               \
@@ -2430,40 +2441,39 @@ int main(int argc, char** argv) {                               \
 			cerr << interface.getError();                          \
 		}                                                         \
 	}                                                            \
-                                                                \
 	return !status;                                              \
 }
 
 
 
 class HumdrumFileStream {
-   public:
-                      HumdrumFileStream  (void);
-                      HumdrumFileStream  (char** list);
-                      HumdrumFileStream  (const vector<string>& list);
-                      HumdrumFileStream  (Options& options);
+	public:
+		                HumdrumFileStream  (void);
+		                HumdrumFileStream  (char** list);
+		                HumdrumFileStream  (const vector<string>& list);
+		                HumdrumFileStream  (Options& options);
 
-      int             setFileList        (char** list);
-      int             setFileList        (const vector<string>& list);
+		int             setFileList        (char** list);
+		int             setFileList        (const vector<string>& list);
 
-      void            clear              (void);
-      int             eof                (void);
-   
-      int             getFile            (HumdrumFile& infile);
-      int             read               (HumdrumFile& infile);
+		void            clear              (void);
+		int             eof                (void);
 
-   protected:
-      ifstream        m_instream;       // used to read from list of files.
-      stringstream    m_urlbuffer;      // used to read data over internet.
-      string          m_newfilebuffer;  // used to keep track of !!!!segment: 
-                                        // records.
+		int             getFile            (HumdrumFile& infile);
+		int             read               (HumdrumFile& infile);
 
-      vector<string>  m_filelist;       // used when not using cin
-      int             m_curfile;        // index into filelist
+	protected:
+		ifstream        m_instream;       // used to read from list of files.
+		stringstream    m_urlbuffer;      // used to read data over internet.
+		string          m_newfilebuffer;  // used to keep track of !!!!segment:
+		                                  // records.
 
-      vector<string>  m_universals;     // storage for universal comments
+		vector<string>  m_filelist;       // used when not using cin
+		int             m_curfile;        // index into filelist
 
-      // Automatic URL downloading of data from internet in read():
+		vector<string>  m_universals;     // storage for universal comments
+
+		// Automatic URL downloading of data from internet in read():
 		void     fillUrlBuffer            (stringstream& uribuffer,
 		                                   const string& uriname);
 
@@ -2504,7 +2514,7 @@ class Tool_metlev : public HumTool {
 		bool  run                (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  fillVoiceResults   (vector<vector<double> >& results, 
+		void  fillVoiceResults   (vector<vector<double> >& results,
 		                          HumdrumFile& infile,
 		                          vector<double>& beatlev);
 

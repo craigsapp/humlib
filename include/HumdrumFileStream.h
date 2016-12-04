@@ -32,33 +32,33 @@ namespace hum {
 // START_MERGE
 
 class HumdrumFileStream {
-   public:
-                      HumdrumFileStream  (void);
-                      HumdrumFileStream  (char** list);
-                      HumdrumFileStream  (const vector<string>& list);
-                      HumdrumFileStream  (Options& options);
+	public:
+		                HumdrumFileStream  (void);
+		                HumdrumFileStream  (char** list);
+		                HumdrumFileStream  (const vector<string>& list);
+		                HumdrumFileStream  (Options& options);
 
-      int             setFileList        (char** list);
-      int             setFileList        (const vector<string>& list);
+		int             setFileList        (char** list);
+		int             setFileList        (const vector<string>& list);
 
-      void            clear              (void);
-      int             eof                (void);
-   
-      int             getFile            (HumdrumFile& infile);
-      int             read               (HumdrumFile& infile);
+		void            clear              (void);
+		int             eof                (void);
 
-   protected:
-      ifstream        m_instream;       // used to read from list of files.
-      stringstream    m_urlbuffer;      // used to read data over internet.
-      string          m_newfilebuffer;  // used to keep track of !!!!segment: 
-                                        // records.
+		int             getFile            (HumdrumFile& infile);
+		int             read               (HumdrumFile& infile);
 
-      vector<string>  m_filelist;       // used when not using cin
-      int             m_curfile;        // index into filelist
+	protected:
+		ifstream        m_instream;       // used to read from list of files.
+		stringstream    m_urlbuffer;      // used to read data over internet.
+		string          m_newfilebuffer;  // used to keep track of !!!!segment:
+		                                  // records.
 
-      vector<string>  m_universals;     // storage for universal comments
+		vector<string>  m_filelist;       // used when not using cin
+		int             m_curfile;        // index into filelist
 
-      // Automatic URL downloading of data from internet in read():
+		vector<string>  m_universals;     // storage for universal comments
+
+		// Automatic URL downloading of data from internet in read():
 		void     fillUrlBuffer            (stringstream& uribuffer,
 		                                   const string& uriname);
 

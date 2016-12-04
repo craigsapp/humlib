@@ -82,6 +82,7 @@ void HumdrumFileBase::clear(void) {
 			m_lines[i] = NULL;
 		}
 	}
+	m_lines.clear();
 
 	// clear state variables which are now invalid:
 	m_trackstarts.clear();
@@ -162,7 +163,7 @@ bool HumdrumFileBase::setParseError(stringstream& err) {
 
 
 bool HumdrumFileBase::setParseError(const char* format, ...) {
-	char buffer[1024] = {0};	
+	char buffer[1024] = {0};
 	va_list ap;
 	va_start(ap, format);
 	snprintf(buffer, 1024, format, ap);
@@ -189,22 +190,22 @@ bool HumdrumFileBase::read(const char* filename) {
 	m_displayError = true;
 
 #ifdef USING_URI
-   if (fname.find("://") != string::npos) {
+	if (fname.find("://") != string::npos) {
 		if (Convert::startsWith(fname, "http://")) {
-         readFromHttpUri(fname);
-         return isValid();
-      }
+			readFromHttpUri(fname);
+			return isValid();
+		}
 		if (Convert::startsWith(fname, "jrp://")) {
-         readFromJrpUri(fname);
-         return isValid();
-      }
+			readFromJrpUri(fname);
+			return isValid();
+		}
 		if (Convert::startsWith(fname, "h://") ||
-		    Convert::startsWith(fname, "hum://") ||
-		    Convert::startsWith(fname, "humdrum://")) {
-         readFromHumdrumUri(fname);
-         return isValid();
-      }
-   }
+			Convert::startsWith(fname, "hum://") ||
+			Convert::startsWith(fname, "humdrum://")) {
+			readFromHumdrumUri(fname);
+			return isValid();
+		}
+	}
 #endif
 
 	ifstream infile;
@@ -223,6 +224,7 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
+	clear();
 	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
@@ -231,11 +233,11 @@ bool HumdrumFileBase::read(istream& contents) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return isValid(); }
-	if (!analyzeLines()          ) { return isValid(); }
-	if (!analyzeSpines()         ) { return isValid(); }
-	if (!analyzeLinks()          ) { return isValid(); }
-	if (!analyzeTracks()         ) { return isValid(); }
+	if (!analyzeTokens()) { return isValid(); }
+	if (!analyzeLines() ) { return isValid(); }
+	if (!analyzeSpines()) { return isValid(); }
+	if (!analyzeLinks() ) { return isValid(); }
+	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
 }
 
@@ -279,11 +281,11 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return isValid(); }
-	if (!analyzeLines()          ) { return isValid(); }
-	if (!analyzeSpines()         ) { return isValid(); }
-	if (!analyzeLinks()          ) { return isValid(); }
-	if (!analyzeTracks()         ) { return isValid(); }
+	if (!analyzeTokens()) { return isValid(); }
+	if (!analyzeLines() ) { return isValid(); }
+	if (!analyzeSpines()) { return isValid(); }
+	if (!analyzeLinks() ) { return isValid(); }
+	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
 }
 
@@ -355,7 +357,7 @@ bool HumdrumFileBase::isValid(void) {
 		cerr << m_parseError << endl;
 		m_displayError = false;
 	}
-   return m_parseError.empty();
+	return m_parseError.empty();
 }
 
 
@@ -402,18 +404,18 @@ string HumdrumFileBase::getFilename(void) {
 //
 
 ostream& HumdrumFileBase::printSegmentLabel(ostream& out) {
-   out << "!!!!SEGMENT";
-   string filename = getFilename();
-   int segment = getSegmentLevel();
-   if (segment != 0) {
-      if (segment < 0) {
-         out << segment;
-      } else {
-         out << "+" << segment;
-      }
-   }
-   out << ": " << filename << endl;
-   return out;
+	out << "!!!!SEGMENT";
+	string filename = getFilename();
+	int segment = getSegmentLevel();
+	if (segment != 0) {
+		if (segment < 0) {
+			out << segment;
+		} else {
+			out << "+" << segment;
+		}
+	}
+	out << ": " << filename << endl;
+	return out;
 }
 
 
@@ -424,10 +426,10 @@ ostream& HumdrumFileBase::printSegmentLabel(ostream& out) {
 //
 
 ostream& HumdrumFileBase::printNonemptySegmentLabel(ostream& out) {
-   if (getFilename().size() > 0) {
-      printSegmentLabel(out);
-   } 
-   return out;
+	if (getFilename().size() > 0) {
+		printSegmentLabel(out);
+	}
+	return out;
 }
 
 
@@ -438,7 +440,7 @@ ostream& HumdrumFileBase::printNonemptySegmentLabel(ostream& out) {
 //
 
 int HumdrumFileBase::getSegmentLevel(void) {
-   return m_segmentlevel;
+	return m_segmentlevel;
 }
 
 
@@ -449,7 +451,7 @@ int HumdrumFileBase::getSegmentLevel(void) {
 //
 
 void HumdrumFileBase::setSegmentLevel(int level) {
-   m_segmentlevel = level;
+	m_segmentlevel = level;
 }
 
 //////////////////////////////
@@ -615,19 +617,19 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 //
 
 
-void HumdrumFileBase::insertLine(int index, const char* line) { 
+void HumdrumFileBase::insertLine(int index, const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
-void HumdrumFileBase::insertLine(int index, const string& line) { 
+void HumdrumFileBase::insertLine(int index, const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
-void HumdrumFileBase::insertLine(int index, HumdrumLine* line) { 
+void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
 	// deletion will be handled by class.
 	m_lines.insert(m_lines.begin() + index, line);
 }
@@ -797,13 +799,13 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 
 
 void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
-   getSpineStartList(spinestarts, "**kern");
+	getSpineStartList(spinestarts, "**kern");
 }
 
 vector<HTp> HumdrumFileBase::getKernSpineStartList(void) {
-   vector<HTp> starts;
-   HumdrumFileBase::getKernSpineStartList(starts);
-   return starts;
+	vector<HTp> starts;
+	HumdrumFileBase::getKernSpineStartList(starts);
+	return starts;
 }
 
 
@@ -919,7 +921,7 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 	int i, j;
 	bool allNull;
 	HTp token;
-   bool foundTrack;
+	bool foundTrack;
 
 	for (i=0; i<infile.getLineCount(); i++) {
 		tempout.resize(0);
@@ -1517,7 +1519,7 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 
 	// Eventually set the foward and backward non-null data token for
 	// tokens in spines for all types of line types  For now specify
-	// the next non-null data token for the exclusive interpretation token. 
+	// the next non-null data token for the exclusive interpretation token.
 	// Also this implementation does not consider that the first
 	// non-null data tokens may be from nultiple split tokens (fix later).
 	vector<HTp> starts;
@@ -1539,7 +1541,7 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 			}
 			token = token->getNextToken();
 		}
-   }
+	}
 	for (int i=0; i<(int)nexts.size(); i++) {
 		if (nexts[i] == NULL) {
 			continue;

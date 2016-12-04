@@ -245,7 +245,7 @@ class HumdrumToken : public string, public HumHash {
 		int m_rhycheck;
 
 		// strand: Used to keep track of contiguous voice connections between
-      // secondary spines/tracks.  This is the 1-D strand index number
+		// secondary spines/tracks.  This is the 1-D strand index number
 		// (not the 2-d one).
 		int m_strand;
 

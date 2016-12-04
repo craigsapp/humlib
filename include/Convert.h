@@ -37,45 +37,45 @@ class Convert {
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
-   	static int     base40ToAccidental   (int b40);
-   	static int     base40ToDiatonic     (int b40);
+		static int     base40ToAccidental   (int b40);
+		static int     base40ToDiatonic     (int b40);
 		static int     base40ToMidiNoteNumber(int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
-		static int     kernToOctaveNumber   (HTp token) 
+		static int     kernToOctaveNumber   (HTp token)
 				{ return kernToOctaveNumber((string)*token); }
 		static int     kernToAccidentalCount(const string& kerndata);
-		static int     kernToAccidentalCount(HTp token) 
+		static int     kernToAccidentalCount(HTp token)
 				{ return kernToAccidentalCount((string)*token); }
 		static int     kernToDiatonicPC     (const string& kerndata);
-		static int     kernToDiatonicPC     (HTp token) 
+		static int     kernToDiatonicPC     (HTp token)
 				{ return kernToDiatonicPC     ((string)*token); }
 		static char    kernToDiatonicUC     (const string& kerndata);
-		static int     kernToDiatonicUC     (HTp token) 
+		static int     kernToDiatonicUC     (HTp token)
 				{ return kernToDiatonicUC     ((string)*token); }
 		static char    kernToDiatonicLC     (const string& kerndata);
-		static int     kernToDiatonicLC     (HTp token) 
+		static int     kernToDiatonicLC     (HTp token)
 				{ return kernToDiatonicLC     ((string)*token); }
 		static int     kernToBase40PC       (const string& kerndata);
-		static int     kernToBase40PC       (HTp token) 
+		static int     kernToBase40PC       (HTp token)
 				{ return kernToBase40PC       ((string)*token); }
 		static int     kernToBase12PC       (const string& kerndata);
-		static int     kernToBase12PC       (HTp token) 
+		static int     kernToBase12PC       (HTp token)
 				{ return kernToBase12PC       ((string)*token); }
 		static int     kernToBase7PC        (const string& kerndata) {
 		                                     return kernToDiatonicPC(kerndata); }
-		static int     kernToBase7PC        (HTp token) 
+		static int     kernToBase7PC        (HTp token)
 				{ return kernToBase7PC        ((string)*token); }
 		static int     kernToBase40         (const string& kerndata);
-		static int     kernToBase40         (HTp token) 
+		static int     kernToBase40         (HTp token)
 				{ return kernToBase40         ((string)*token); }
 		static int     kernToBase12         (const string& kerndata);
-		static int     kernToBase12         (HTp token) 
+		static int     kernToBase12         (HTp token)
 				{ return kernToBase12         ((string)*token); }
 		static int     kernToBase7          (const string& kerndata);
-		static int     kernToBase7         (HTp token) 
+		static int     kernToBase7         (HTp token)
 				{ return kernToBase7         ((string)*token); }
 		static int     kernToMidiNoteNumber (const string& kerndata);
-		static int     kernToMidiNoteNumber(HTp token) 
+		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((string)*token); }
 		static string  kernToScientificPitch(const string& kerndata,
 		                                     string flat = "b",

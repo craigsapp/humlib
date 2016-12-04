@@ -327,7 +327,7 @@ void NoteGrid::buildAttackIndex(int vindex) {
 		}
 	}
 
-   // start with note attacks marked in the previous and next note slots:
+	// start with note attacks marked in the previous and next note slots:
 	for (int i=0; i<(int)part.size(); i++) {
 		if (part[i]->isAttack()) {
 			part[i]->setNextAttackIndex(i);

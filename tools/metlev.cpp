@@ -14,5 +14,5 @@
 
 #include "humlib.h"
 
-BASIC_INTERFACE(Tool_metlev)
+STREAM_INTERFACE(Tool_metlev)
 

@@ -60,11 +60,11 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 
 	int top = 1;                // top number of time signature (0 for no meter)
 	int bot = 4;                // bottom number of time signature
-   bool compoundQ = false;     // test for compound meters, such as 6/8
-   HumNum beatdur(1 * 4, bot); // duration of a beat in the measure
+	bool compoundQ = false;     // test for compound meters, such as 6/8
+	HumNum beatdur(1 * 4, bot); // duration of a beat in the measure
 	HumNum measurepos;          // quarter notes from the start of barline
-   HumNum combeatdur;          // for adjusting beat level in compound meters
-   HumNum commeasurepos;       // for adjusting beat level in compound meters
+	HumNum combeatdur;          // for adjusting beat level in compound meters
+	HumNum commeasurepos;       // for adjusting beat level in compound meters
 
 	for (int i=0; i<lineCount; i++) {
 		if (infile[i].isInterpretation()) {

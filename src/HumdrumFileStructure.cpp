@@ -73,7 +73,7 @@ bool HumdrumFileStructure::read(istream& contents) {
 	m_displayError = false;
 	if (!readNoRhythm(contents)) {
 		return isValid();
-	} 
+	}
 	return analyzeStructure();
 }
 
@@ -85,7 +85,7 @@ bool HumdrumFileStructure::read(const char* filename) {
 	}
 	return analyzeStructure();
 }
- 
+
 
 bool HumdrumFileStructure::read(const string& filename) {
 	m_displayError = false;
@@ -708,7 +708,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 
 ///////////////////////////////
 //
-// HumdrumFileStructure::analyzeLocalParameters -- Parses any 
+// HumdrumFileStructure::analyzeLocalParameters -- Parses any
 //    local comments before a non-null token.
 //
 
@@ -887,7 +887,7 @@ bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
 	}
 	int state = starttoken->getState();
 	if (!prepareDurations(starttoken, state, startdur)) {
-		return isValid(); 
+		return isValid();
 	}
 	return isValid();
 }
@@ -1193,7 +1193,7 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 //////////////////////////////
 //
 // HumdrumFileStructure::processLocalParametersForTrack --  Search for
-//   local parameters backwards in each spine and fill in the HumHash 
+//   local parameters backwards in each spine and fill in the HumHash
 //   for the token to which the parameter is to be applied.
 //
 
@@ -1290,7 +1290,7 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	}
 
 	for (i=0; i<(int)m_strand2d.size(); i++) {
-		std::sort(m_strand2d[i].begin(), m_strand2d[i].end(), 
+		std::sort(m_strand2d[i].begin(), m_strand2d[i].end(),
 				sortTokenPairsByLineIndex);
 		for (j=0; j<(int)m_strand2d[i].size(); j++) {
 			m_strand1d.push_back(m_strand2d[i][j]);
@@ -1434,7 +1434,7 @@ HumdrumToken* HumdrumFileStructure::getStrandEnd(int index) const {
 }
 
 
-HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex, 
+HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex,
 		int index) const {
 	return m_strand2d[sindex][index].first;
 }

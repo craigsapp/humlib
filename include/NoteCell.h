@@ -84,7 +84,7 @@ class NoteCell {
 		double m_b7;         // diatonic note number; NaN=rest; negative=sustain.
 		double m_b12;        // MIDI note number; NaN=rest; negative=sustain.
 		double m_b40;        // base-40 note number; NaN=rest; negative=sustain.
-		double m_accidental; // chromatic alteration of a diatonic pitch. 
+		double m_accidental; // chromatic alteration of a diatonic pitch.
 		                     // NaN=no accidental.
 		int m_nextAttackIndex; // index to next note attack (or rest),
 		                       // -1 for undefined (interpred as rest).

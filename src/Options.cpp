@@ -5,6 +5,7 @@
 // Filename:      Options.cpp
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/Options.h
 // Documentation: http://sig.sapp.org/doc/classes/Options
+// vim:           ts=3
 // Syntax:        C++11
 //
 // Description:   Interface to command-line options.
@@ -38,28 +39,28 @@ namespace hum {
 //
 
 Option_register::Option_register(void) {
-   type = 's';
-   modifiedQ = 0;
+	type = 's';
+	modifiedQ = 0;
 }
 
 
 Option_register::Option_register(const string& aDefinition, char aType,
-      const string& aDefaultOption) {
-   type = 's';
-   modifiedQ = 0;
-   setType(aType);
-   setDefinition(aDefinition);
-   setDefault(aDefaultOption);
+		const string& aDefaultOption) {
+	type = 's';
+	modifiedQ = 0;
+	setType(aType);
+	setDefinition(aDefinition);
+	setDefault(aDefaultOption);
 }
 
 Option_register::Option_register(const string& aDefinition, char aType,
-      const string& aDefaultOption, const string& aModifiedOption) {
-   type = 's';
-   modifiedQ = 0;
-   setType(aType);
-   setDefinition(aDefinition);
-   setDefault(aDefaultOption);
-   setModified(aModifiedOption);
+		const string& aDefaultOption, const string& aModifiedOption) {
+	type = 's';
+	modifiedQ = 0;
+	setType(aType);
+	setDefinition(aDefinition);
+	setDefault(aDefaultOption);
+	setModified(aModifiedOption);
 }
 
 
@@ -70,7 +71,7 @@ Option_register::Option_register(const string& aDefinition, char aType,
 //
 
 Option_register::~Option_register() {
-   // do nothing
+	// do nothing
 }
 
 
@@ -81,9 +82,9 @@ Option_register::~Option_register() {
 //
 
 void Option_register::clearModified(void) {
-   modifiedOption.clear();
-   modifiedQ = 0;
-}   
+	modifiedOption.clear();
+	modifiedQ = 0;
+}
 
 
 
@@ -94,19 +95,19 @@ void Option_register::clearModified(void) {
 //
 
 const string& Option_register::getDefinition(void) {
-   return definition;
+	return definition;
 }
 
 
 
 //////////////////////////////
 //
-// Option_register::getDescription -- Return the textual description 
+// Option_register::getDescription -- Return the textual description
 //      of the entry.
 //
 
 const string& Option_register::getDescription(void) {
-   return description;
+	return description;
 }
 
 
@@ -117,7 +118,7 @@ const string& Option_register::getDescription(void) {
 //
 
 const string& Option_register::getDefault(void) {
-   return defaultOption;
+	return defaultOption;
 }
 
 
@@ -128,7 +129,7 @@ const string& Option_register::getDefault(void) {
 //
 
 const string& Option_register::getModified(void) {
-   return modifiedOption;
+	return modifiedOption;
 }
 
 
@@ -140,7 +141,7 @@ const string& Option_register::getModified(void) {
 //
 
 int Option_register::isModified(void) {
-   return modifiedQ;
+	return modifiedQ;
 }
 
 
@@ -151,7 +152,7 @@ int Option_register::isModified(void) {
 //
 
 char Option_register::getType(void) {
-   return type;
+	return type;
 }
 
 
@@ -163,11 +164,11 @@ char Option_register::getType(void) {
 //
 
 const string& Option_register::getOption(void) {
-   if (isModified()) {
-      return getModified();
-   } else {
-      return getDefault();
-   }
+	if (isModified()) {
+		return getModified();
+	} else {
+		return getDefault();
+	}
 }
 
 
@@ -179,9 +180,9 @@ const string& Option_register::getOption(void) {
 //
 
 void Option_register::reset(void) {
-   definition.resize(0);
-   defaultOption.resize(0);
-   modifiedOption.resize(0);
+	definition.resize(0);
+	defaultOption.resize(0);
+	modifiedOption.resize(0);
 }
 
 
@@ -192,7 +193,7 @@ void Option_register::reset(void) {
 //
 
 void Option_register::setDefault(const string& aString) {
-   defaultOption = aString;
+	defaultOption = aString;
 }
 
 
@@ -203,7 +204,7 @@ void Option_register::setDefault(const string& aString) {
 //
 
 void Option_register::setDefinition(const string& aString) {
-   definition = aString;
+	definition = aString;
 }
 
 
@@ -214,7 +215,7 @@ void Option_register::setDefinition(const string& aString) {
 //
 
 void Option_register::setDescription(const string& aString) {
-   description = aString;
+	description = aString;
 }
 
 
@@ -225,8 +226,8 @@ void Option_register::setDescription(const string& aString) {
 //
 
 void Option_register::setModified(const string& aString) {
-   modifiedOption = aString;
-   modifiedQ = 1;
+	modifiedOption = aString;
+	modifiedQ = 1;
 }
 
 
@@ -237,7 +238,7 @@ void Option_register::setModified(const string& aString) {
 //
 
 void Option_register::setType(char aType) {
-   type = aType;
+	type = aType;
 }
 
 
@@ -249,13 +250,13 @@ void Option_register::setType(char aType) {
 //
 
 ostream& Option_register::print(ostream& out) {
-   out << "definition:\t"     << definition     << endl;
-   out << "description:\t"    << description    << endl;
-   out << "defaultOption:\t"  << defaultOption  << endl;
-   out << "modifiedOption:\t" << modifiedOption << endl;
-   out << "modifiedQ:\t\t"    << modifiedQ      << endl;
-   out << "type:\t\t"         << type           << endl;
-   return out;
+	out << "definition:\t"     << definition     << endl;
+	out << "description:\t"    << description    << endl;
+	out << "defaultOption:\t"  << defaultOption  << endl;
+	out << "modifiedOption:\t" << modifiedOption << endl;
+	out << "modifiedQ:\t\t"    << modifiedQ      << endl;
+	out << "type:\t\t"         << type           << endl;
+	return out;
 };
 
 
@@ -272,30 +273,30 @@ ostream& Option_register::print(ostream& out) {
 //
 
 Options::Options(void) {
-   m_oargc               = -1;
-   m_suppressQ           =  0;
-   m_processedQ          =  0;
-   m_optionsArgument     =  0;
-   m_options_error_check =  1;
-   m_optionFlag          = '-';
+	m_oargc               = -1;
+	m_suppressQ           =  0;
+	m_processedQ          =  0;
+	m_optionsArgument     =  0;
+	m_options_error_check =  1;
+	m_optionFlag          = '-';
 
-   m_extraArgv.reserve(100);
-   m_extraArgv_strings.reserve(100);
+	m_extraArgv.reserve(100);
+	m_extraArgv_strings.reserve(100);
 }
 
 
 Options::Options(int argc, char** argv) {
-   m_oargc               = -1;
-   m_suppressQ           =  0;
-   m_processedQ          =  0;
-   m_optionsArgument     =  0;
-   m_options_error_check =  1;
-   m_optionFlag          = '-';
+	m_oargc               = -1;
+	m_suppressQ           =  0;
+	m_processedQ          =  0;
+	m_optionsArgument     =  0;
+	m_options_error_check =  1;
+	m_optionFlag          = '-';
 
-   m_extraArgv.reserve(100);
-   m_extraArgv_strings.reserve(100);
+	m_extraArgv.reserve(100);
+	m_extraArgv_strings.reserve(100);
 
-   setOptions(argc, argv);
+	setOptions(argc, argv);
 }
 
 
@@ -306,7 +307,7 @@ Options::Options(int argc, char** argv) {
 //
 
 Options::~Options() {
-   reset();
+	reset();
 }
 
 
@@ -317,7 +318,7 @@ Options::~Options() {
 //
 
 int Options::argc(void) const {
-   return m_oargc;
+	return m_oargc;
 }
 
 
@@ -328,7 +329,7 @@ int Options::argc(void) const {
 //
 
 const vector<string>& Options::argv(void) const {
-   return m_oargv;
+	return m_oargv;
 }
 
 
@@ -346,89 +347,89 @@ const vector<string>& Options::argv(void) const {
 //
 
 int Options::define(const string& aDefinition) {
-   Option_register* definitionEntry = NULL;
+	Option_register* definitionEntry = NULL;
 
-   // Error if definition string doesn't contain an equals sign
-   auto location = aDefinition.find("=");
-   if (location == string::npos) {
-      cerr << "Error: no \"=\" in option definition: " << aDefinition << endl;
-      exit(1);
-   }
+	// Error if definition string doesn't contain an equals sign
+	auto location = aDefinition.find("=");
+	if (location == string::npos) {
+		cerr << "Error: no \"=\" in option definition: " << aDefinition << endl;
+		exit(1);
+	}
 
-   string aliases = aDefinition.substr(0, location);
-   string rest    = aDefinition.substr(location+1);
-   string otype   = rest;
-   string ovalue  = "";
+	string aliases = aDefinition.substr(0, location);
+	string rest    = aDefinition.substr(location+1);
+	string otype   = rest;
+	string ovalue  = "";
 
-   location = rest.find(":");
-   if (location != string::npos) {
-      otype  = rest.substr(0, location);
-      ovalue = rest.substr(location+1);
-   }
+	location = rest.find(":");
+	if (location != string::npos) {
+		otype  = rest.substr(0, location);
+		ovalue = rest.substr(location+1);
+	}
 
-   // Remove anyspaces in the option type field
-   otype.erase(remove_if(otype.begin(), otype.end(), ::isspace), otype.end());
-   
-   // Option types are only a single charater (b, i, d, c or s)
-   if (otype.size() != 1) {
-      cerr << "Error: option type is invalid: " << otype 
-           << " in option definition: " << aDefinition << endl;
-      exit(1);
-   }
+	// Remove anyspaces in the option type field
+	otype.erase(remove_if(otype.begin(), otype.end(), ::isspace), otype.end());
 
-   // Check to make sure that the type is known
-   if (otype[0] != OPTION_STRING_TYPE  &&
-       otype[0] != OPTION_INT_TYPE     &&
-       otype[0] != OPTION_FLOAT_TYPE   &&
-       otype[0] != OPTION_DOUBLE_TYPE  &&
-       otype[0] != OPTION_BOOLEAN_TYPE &&
-       otype[0] != OPTION_CHAR_TYPE ) {
-      cerr << "Error: unknown option type \'" << otype[0]
-           << "\' in defintion: " << aDefinition << endl;
-      exit(1);
-   }
+	// Option types are only a single charater (b, i, d, c or s)
+	if (otype.size() != 1) {
+		cerr << "Error: option type is invalid: " << otype
+			  << " in option definition: " << aDefinition << endl;
+		exit(1);
+	}
 
-   // Set up space for a option entry in the registry
-   definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
+	// Check to make sure that the type is known
+	if (otype[0] != OPTION_STRING_TYPE  &&
+		 otype[0] != OPTION_INT_TYPE     &&
+		 otype[0] != OPTION_FLOAT_TYPE   &&
+		 otype[0] != OPTION_DOUBLE_TYPE  &&
+		 otype[0] != OPTION_BOOLEAN_TYPE &&
+		 otype[0] != OPTION_CHAR_TYPE ) {
+		cerr << "Error: unknown option type \'" << otype[0]
+			  << "\' in defintion: " << aDefinition << endl;
+		exit(1);
+	}
 
-   auto definitionIndex = m_optionRegister.size();
+	// Set up space for a option entry in the registry
+	definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-   // Store option aliases
-   string optionName;
-   unsigned int i;
-   aliases += '|';
-   for (i=0; i<aliases.size(); i++) {
-      if (::isspace(aliases[i])) {
-         continue;
-      } else if (aliases[i] == '|') {
-         if (isDefined(optionName)) {
-            cerr << "Option \"" << optionName << "\" from definition:" << endl;
-            cerr << "\t" << aDefinition << endl;
-            cerr << "is already defined in: " << endl;
-            cerr << "\t" << getDefinition(optionName) << endl;
-            exit(1);
-         }
-         if (optionName.size() > 0) {
-            m_optionList[optionName] = definitionIndex;
-         }
-         optionName.clear();
-      } else {
-         optionName += aliases[i];
-      }
-   }
+	auto definitionIndex = m_optionRegister.size();
 
-   // Store definition in registry and return its indexed location.
-   // This location will be used to link option aliases to the main
-   // command name.
-   m_optionRegister.push_back(definitionEntry);
-   return definitionIndex;
+	// Store option aliases
+	string optionName;
+	unsigned int i;
+	aliases += '|';
+	for (i=0; i<aliases.size(); i++) {
+		if (::isspace(aliases[i])) {
+			continue;
+		} else if (aliases[i] == '|') {
+			if (isDefined(optionName)) {
+				cerr << "Option \"" << optionName << "\" from definition:" << endl;
+				cerr << "\t" << aDefinition << endl;
+				cerr << "is already defined in: " << endl;
+				cerr << "\t" << getDefinition(optionName) << endl;
+				exit(1);
+			}
+			if (optionName.size() > 0) {
+				m_optionList[optionName] = definitionIndex;
+			}
+			optionName.clear();
+		} else {
+			optionName += aliases[i];
+		}
+	}
+
+	// Store definition in registry and return its indexed location.
+	// This location will be used to link option aliases to the main
+	// command name.
+	m_optionRegister.push_back(definitionEntry);
+	return definitionIndex;
 }
 
 
 int Options::define(const string& aDefinition, const string& aDescription) {
-   int index = define(aDefinition);
-   m_optionRegister[index]->setDescription(aDescription);
-   return index;
+	int index = define(aDefinition);
+	m_optionRegister[index]->setDescription(aDescription);
+	return index;
 }
 
 
@@ -439,11 +440,11 @@ int Options::define(const string& aDefinition, const string& aDescription) {
 //
 
 int Options::isDefined(const string& name) {
-   if (m_optionList.find(name) == m_optionList.end()) {
-      return 0;
-   } else {
-      return 1;
-   }
+	if (m_optionList.find(name) == m_optionList.end()) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 
@@ -455,17 +456,17 @@ int Options::isDefined(const string& name) {
 //
 
 const string& Options::getArg(int index) {
-   if (index < 0 || index >= (int)m_argument.size()) {
-      cerr << "Error: argument " << index << " does not exist." << endl;
-      exit(1);
-   }
-   return *m_argument[index];
+	if (index < 0 || index >= (int)m_argument.size()) {
+		cerr << "Error: argument " << index << " does not exist." << endl;
+		exit(1);
+	}
+	return *m_argument[index];
 }
 
 // Alias:
 
 const string& Options::getArgument(int index) {
-   return getArg(index);
+	return getArg(index);
 }
 
 
@@ -477,13 +478,13 @@ const string& Options::getArgument(int index) {
 //
 
 int Options::getArgCount(void) {
-   return m_argument.size() - 1;
+	return m_argument.size() - 1;
 }
 
 // Alias:
 
 int Options::getArgumentCount(void) {
-   return getArgCount();
+	return getArgCount();
 }
 
 
@@ -496,17 +497,17 @@ int Options::getArgumentCount(void) {
 //
 
 vector<string>& Options::getArgList(vector<string>& output) {
-   output.clear();
-   for (int i=1; i<(int)m_argument.size(); i++) {
-      output.push_back(*m_argument[i]);
-   }
-   return output;
+	output.clear();
+	for (int i=1; i<(int)m_argument.size(); i++) {
+		output.push_back(*m_argument[i]);
+	}
+	return output;
 }
 
 // Alias:
 
-vector<string>& Options::getArgumentList(vector<string>& output) { 
-   return getArgList(output);
+vector<string>& Options::getArgumentList(vector<string>& output) {
+	return getArgList(output);
 }
 
 
@@ -518,11 +519,11 @@ vector<string>& Options::getArgumentList(vector<string>& output) {
 //
 
 int Options::getBoolean(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return 0;
-   }
-   return m_optionRegister[index]->isModified();
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return 0;
+	}
+	return m_optionRegister[index]->isModified();
 }
 
 
@@ -534,11 +535,11 @@ int Options::getBoolean(const string& optionName) {
 //
 
 string Options::getCommand(void) {
-   if (m_argument.size() == 0) {
-      return "";
-   } else {
-      return *m_argument[0];
-   }
+	if (m_argument.size() == 0) {
+		return "";
+	} else {
+		return *m_argument[0];
+	}
 }
 
 
@@ -550,38 +551,38 @@ string Options::getCommand(void) {
 //
 
 const string& Options::getCommandLine(void) {
-   if (m_commandString.size()) {
-      return m_commandString;
-   }
+	if (m_commandString.size()) {
+		return m_commandString;
+	}
 
-   m_commandString = m_oargv[0];
+	m_commandString = m_oargv[0];
 
-   int i;
-   for (i=1; i<m_oargc; i++) {
-      m_commandString += " ";
-      m_commandString += m_oargv[i];
-   }
+	int i;
+	for (i=1; i<m_oargc; i++) {
+		m_commandString += " ";
+		m_commandString += m_oargv[i];
+	}
 
-   return m_commandString;
+	return m_commandString;
 }
-   
+
 
 
 
 //////////////////////////////
 //
-// Options::getDefinition -- returns the definition for the specified 
-//      option name.  Returns empty string if there is no entry for 
+// Options::getDefinition -- returns the definition for the specified
+//      option name.  Returns empty string if there is no entry for
 //      the option name.  spaces count in the input option name.
 //
 
 string Options::getDefinition(const string& optionName) {
-   auto it = m_optionList.find(optionName);
-   if (it == m_optionList.end()) {
-      return "";
-   } else {
-      return m_optionRegister[it->second]->getDefinition();
-   }
+	auto it = m_optionList.find(optionName);
+	if (it == m_optionList.end()) {
+		return "";
+	} else {
+		return m_optionRegister[it->second]->getDefinition();
+	}
 }
 
 
@@ -594,7 +595,7 @@ string Options::getDefinition(const string& optionName) {
 //
 
 double Options::getDouble(const string& optionName) {
-   return strtod(getString(optionName).c_str(), (char**)NULL);
+	return strtod(getString(optionName).c_str(), (char**)NULL);
 }
 
 
@@ -606,7 +607,7 @@ double Options::getDouble(const string& optionName) {
 //
 
 char Options::getChar(const string& optionName) {
-   return getString(optionName).c_str()[0];
+	return getString(optionName).c_str()[0];
 }
 
 
@@ -618,7 +619,7 @@ char Options::getChar(const string& optionName) {
 //
 
 float Options::getFloat(const string& optionName) {
-   return (float)getDouble(optionName);
+	return (float)getDouble(optionName);
 }
 
 
@@ -626,16 +627,16 @@ float Options::getFloat(const string& optionName) {
 //////////////////////////////
 //
 // Options::getInt -- Return the integer argument.  Can handle
-//	hexadecimal, decimal, and octal written in standard 
+//	hexadecimal, decimal, and octal written in standard
 //	C syntax.
 //
 
 int Options::getInt(const string& optionName) {
-   return (int)strtol(getString(optionName).c_str(), (char**)NULL, 0);
+	return (int)strtol(getString(optionName).c_str(), (char**)NULL, 0);
 }
 
 int Options::getInteger(const string& optionName) {
-   return getInt(optionName);
+	return getInt(optionName);
 }
 
 
@@ -646,12 +647,12 @@ int Options::getInteger(const string& optionName) {
 //
 
 string Options::getString(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return "UNKNOWN OPTION";
-   } else {
-      return m_optionRegister[index]->getOption();
-   }
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return "UNKNOWN OPTION";
+	} else {
+		return m_optionRegister[index]->getOption();
+	}
 }
 
 
@@ -663,7 +664,7 @@ string Options::getString(const string& optionName) {
 //
 
 int Options::optionsArg(void) {
-   return m_optionsArgument;
+	return m_optionsArgument;
 }
 
 
@@ -674,11 +675,11 @@ int Options::optionsArg(void) {
 //
 
 ostream& Options::print(ostream& out) {
-   for (unsigned int i=0; i<m_optionRegister.size(); i++) {
-      out << m_optionRegister[i]->getDefinition() << "\t"
-           << m_optionRegister[i]->getDescription() << endl;
-   }
-   return out;
+	for (unsigned int i=0; i<m_optionRegister.size(); i++) {
+		out << m_optionRegister[i]->getDefinition() << "\t"
+			  << m_optionRegister[i]->getDescription() << endl;
+	}
+	return out;
 }
 
 
@@ -689,24 +690,24 @@ ostream& Options::print(ostream& out) {
 //
 
 void Options::reset(void) {
-   unsigned int i;
-   for (i=0; i<m_optionRegister.size(); i++) {
-      delete m_optionRegister[i];
-      m_optionRegister[i] = NULL;
-   }
-   m_optionRegister.clear();
+	unsigned int i;
+	for (i=0; i<m_optionRegister.size(); i++) {
+		delete m_optionRegister[i];
+		m_optionRegister[i] = NULL;
+	}
+	m_optionRegister.clear();
 
-   for (i=0; i<m_argument.size(); i++) {
-      delete m_argument[i];
-      m_argument[i] = NULL;
-   }
-   m_argument.resize(0);
-   m_commandString.clear();
-   m_extraArgv.clear();
-   m_extraArgv_strings.clear();
+	for (i=0; i<m_argument.size(); i++) {
+		delete m_argument[i];
+		m_argument[i] = NULL;
+	}
+	m_argument.resize(0);
+	m_commandString.clear();
+	m_extraArgv.clear();
+	m_extraArgv_strings.clear();
 
-   m_oargc = -1;
-   m_oargv.clear();
+	m_oargc = -1;
+	m_oargv.clear();
 }
 
 
@@ -717,37 +718,37 @@ void Options::reset(void) {
 //
 
 char Options::getFlag(void) {
-   return m_optionFlag;
+	return m_optionFlag;
 }
 
 
 
 //////////////////////////////
 //
-// Options::setFlag -- Set the character used to indicate an 
+// Options::setFlag -- Set the character used to indicate an
 //	option.  For unix this is usually '-', in MS-DOS,
 //	this is usually '/';  But the syntax of the Options
 //	class is for Unix-style options.
 //
 
 void Options::setFlag(char aFlag) {
-   m_optionFlag = aFlag;
+	m_optionFlag = aFlag;
 }
 
 
 
 //////////////////////////////
 //
-// Options::setModified -- 
+// Options::setModified --
 //
 
 void Options::setModified(const string& optionName, const string& aString) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return;
-   }
-   
-   m_optionRegister[getRegIndex(optionName)]->setModified(aString);
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return;
+	}
+
+	m_optionRegister[getRegIndex(optionName)]->setModified(aString);
 }
 
 
@@ -759,20 +760,20 @@ void Options::setModified(const string& optionName, const string& aString) {
 //
 
 void Options::setOptions(int argc, char** argv) {
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   m_extraArgv.resize(argc);
-   m_extraArgv_strings.resize(argc);
-   int oldsize = 0;
+	m_extraArgv.resize(argc);
+	m_extraArgv_strings.resize(argc);
+	int oldsize = 0;
 
-   int i;
-   for (i=0; i<argc; i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i] = m_extraArgv_strings[i];
-   }
+	int i;
+	for (i=0; i<argc; i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i] = m_extraArgv_strings[i];
+	}
 
-   m_oargc  = m_extraArgv.size();
-   m_oargv  = m_extraArgv;
+	m_oargc  = m_extraArgv.size();
+	m_oargv  = m_extraArgv;
 }
 
 
@@ -785,43 +786,43 @@ void Options::setOptions(int argc, char** argv) {
 
 void Options::appendOptions(int argc, char** argv) {
 
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   // data used to be stored directly here:
-   //gargc = argc;
-   //gargv = argv;
-   // but now gets interfaced to: m_extraArgv and m_extraArgv_strings:
+	// data used to be stored directly here:
+	//gargc = argc;
+	//gargv = argv;
+	// but now gets interfaced to: m_extraArgv and m_extraArgv_strings:
 
-   int oldsize = m_extraArgv.size();
-   m_extraArgv.resize(oldsize + argc);
-   m_extraArgv_strings.resize(oldsize + argc);
+	int oldsize = m_extraArgv.size();
+	m_extraArgv.resize(oldsize + argc);
+	m_extraArgv_strings.resize(oldsize + argc);
 
-   int i;
-   for (i=0; i<argc; i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
-   }
+	int i;
+	for (i=0; i<argc; i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
+	}
 
-   m_oargc = m_extraArgv.size();
-   m_oargv = m_extraArgv;
+	m_oargc = m_extraArgv.size();
+	m_oargv = m_extraArgv;
 }
 
 
 void Options::appendOptions(const vector<string>& argv) {
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   int oldsize = m_extraArgv.size();
-   m_extraArgv.resize(oldsize + argv.size());
-   m_extraArgv_strings.resize(oldsize + argv.size());
+	int oldsize = m_extraArgv.size();
+	m_extraArgv.resize(oldsize + argv.size());
+	m_extraArgv_strings.resize(oldsize + argv.size());
 
-   unsigned int i;
-   for (i=0; i<argv.size(); i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
-   }
+	unsigned int i;
+	for (i=0; i<argv.size(); i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
+	}
 
-   m_oargc = m_extraArgv.size();
-   m_oargv = m_extraArgv;
+	m_oargc = m_extraArgv.size();
+	m_oargv = m_extraArgv;
 }
 
 
@@ -839,87 +840,87 @@ void Options::appendOptions(const vector<string>& argv) {
 //
 
 void Options::appendOptions(const string& strang) {
-   int i;
-   int doublequote = 0;
-   int singlequote = 0;
+	int i;
+	int doublequote = 0;
+	int singlequote = 0;
 
-   vector<string> tokens;
-   vector<string> tempargv;
-   string tempvalue;
+	vector<string> tokens;
+	vector<string> tempargv;
+	string tempvalue;
 
-   tokens.reserve(100);
-   tempargv.reserve(100);
-   tempvalue.reserve(1000);
+	tokens.reserve(100);
+	tempargv.reserve(100);
+	tempvalue.reserve(1000);
 
-   char ch;
+	char ch;
 
-   int length = strang.size();
-   for (i=0; i<length; i++) {
+	int length = strang.size();
+	for (i=0; i<length; i++) {
 
-      if (!singlequote && (strang[i] == '"')) {
-         if ((i>0) && (strang[i-1] != '\\')) {
-            doublequote = !doublequote;
-            if (doublequote == 0) {
-               // finished a doublequoted section of data, so store
-               // even if it is the empty string
-               ch = '\0';
-               tempvalue += (ch);
-               tokens.push_back(tempvalue);
-               tempvalue.clear();
-               continue;
-            } else {
-               // don't store the leading ":
-               continue;
-            }
-         }
-      } else if (!doublequote && (strang[i] == '\'')) {
-         if ((i>0) && (strang[i-1] != '\\')) {
-            singlequote = !singlequote;
-            if (singlequote == 0) {
-               // finished a singlequote section of data, so store
-               // even if it is the empty string
-               ch = '\0';
-               tempvalue += ch;
-               tokens.push_back(tempvalue);
-               tempvalue.clear();
-               continue;
-            } else {
-               // don't store the leading ":
-               continue;
-            }
-         }
-      }
+		if (!singlequote && (strang[i] == '"')) {
+			if ((i>0) && (strang[i-1] != '\\')) {
+				doublequote = !doublequote;
+				if (doublequote == 0) {
+					// finished a doublequoted section of data, so store
+					// even if it is the empty string
+					ch = '\0';
+					tempvalue += (ch);
+					tokens.push_back(tempvalue);
+					tempvalue.clear();
+					continue;
+				} else {
+					// don't store the leading ":
+					continue;
+				}
+			}
+		} else if (!doublequote && (strang[i] == '\'')) {
+			if ((i>0) && (strang[i-1] != '\\')) {
+				singlequote = !singlequote;
+				if (singlequote == 0) {
+					// finished a singlequote section of data, so store
+					// even if it is the empty string
+					ch = '\0';
+					tempvalue += ch;
+					tokens.push_back(tempvalue);
+					tempvalue.clear();
+					continue;
+				} else {
+					// don't store the leading ":
+					continue;
+				}
+			}
+		}
 
 
-      if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
-         if (tempvalue.size() > 0) {
-            tempvalue += ch;
-            tokens.push_back(tempvalue);
-            tempvalue.clear();
-         }
-      } else {
-         ch = strang[i];
-         tempvalue += ch;
-      }
-   }
-   if (tempvalue.size() > 0) {
-      tokens.push_back(tempvalue);
-      tempvalue.clear();
-   }
+		if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
+			if (tempvalue.size() > 0) {
+				tempvalue += ch;
+				tokens.push_back(tempvalue);
+				tempvalue.clear();
+			}
+		} else {
+			ch = strang[i];
+			tempvalue += ch;
+		}
+	}
+	if (tempvalue.size() > 0) {
+		tokens.push_back(tempvalue);
+		tempvalue.clear();
+	}
 
-   // now that the input string has been chopped up into pieces,
-   // assemble the argv structure
+	// now that the input string has been chopped up into pieces,
+	// assemble the argv structure
 
-   tempargv.reserve(tokens.size());
-   for (i=0; i<(int)tempargv.size(); i++) {
-      tempargv[i] = tokens[i];
-   }
+	tempargv.reserve(tokens.size());
+	for (i=0; i<(int)tempargv.size(); i++) {
+		tempargv[i] = tokens[i];
+	}
 
-   // now store the argv and argc data in opts:
+	// now store the argv and argc data in opts:
 
-   // now store the parsed command-line simulated tokens
-   // for actual storage:
-   appendOptions(tempargv);
+	// now store the parsed command-line simulated tokens
+	// for actual storage:
+	appendOptions(tempargv);
 }
 
 
@@ -930,12 +931,12 @@ void Options::appendOptions(const string& strang) {
 //
 
 char Options::getType(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return -1;
-   } else {
-      return m_optionRegister[getRegIndex(optionName)]->getType();
-   }
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return -1;
+	} else {
+		return m_optionRegister[getRegIndex(optionName)]->getType();
+	}
 }
 
 
@@ -947,13 +948,13 @@ char Options::getType(const string& optionName) {
 //
 
 void Options::process(int argc, char** argv, int error_check, int suppress) {
-   setOptions(argc, argv);
-   xverify(error_check, suppress);
+	setOptions(argc, argv);
+	xverify(error_check, suppress);
 }
 
 
 void Options::process(int error_check, int suppress) {
-   xverify(error_check, suppress);
+	xverify(error_check, suppress);
 }
 
 
@@ -965,69 +966,69 @@ void Options::process(int error_check, int suppress) {
 //
 
 void Options::xverify(int error_check, int suppress) {
-   m_options_error_check = error_check;
-   int gargp = 1;
-   int optionend = 0;
+	m_options_error_check = error_check;
+	int gargp = 1;
+	int optionend = 0;
 
-   if (suppress) {
-      m_suppressQ = 1;
-   } else {
-      m_suppressQ = 0;
-   }
+	if (suppress) {
+		m_suppressQ = 1;
+	} else {
+		m_suppressQ = 0;
+	}
 
-   // if calling xverify again, must remove previous argument list.
-   int i;
-   if (m_argument.size() != 0) {
-      for (i=0; i<(int)m_argument.size(); i++) {
-         delete m_argument[i];
-      }
-      m_argument.resize(0);
-   }
+	// if calling xverify again, must remove previous argument list.
+	int i;
+	if (m_argument.size() != 0) {
+		for (i=0; i<(int)m_argument.size(); i++) {
+			delete m_argument[i];
+		}
+		m_argument.resize(0);
+	}
 
-   string* tempstr = new string(m_oargv[0]);
-   m_argument.push_back(tempstr);
+	string* tempstr = new string(m_oargv[0]);
+	m_argument.push_back(tempstr);
 
-   int oldgargp;
-   int position = 0;
-   int running = 0;
-   while (gargp < m_oargc && optionend == 0) {
-      if (optionQ(m_oargv[gargp], gargp)) {
-         oldgargp = gargp;
-         gargp = storeOption(gargp, position, running);
-         if (gargp != oldgargp) {
-            running = 0;
-            position = 0;
-         }
-      } else {
-         if (m_oargv[gargp].size() == 2 && m_oargv[gargp][0] == getFlag() &&
-            m_oargv[gargp][2] == getFlag() ) {
-               optionend = 1;
-            gargp++;
-            break;
-         } else {                          // this is an argument
-            tempstr = new string(m_oargv[gargp]);
-            m_argument.push_back(tempstr);
-            gargp++;
-         }
-      }
-   }
+	int oldgargp;
+	int position = 0;
+	int running = 0;
+	while (gargp < m_oargc && optionend == 0) {
+		if (optionQ(m_oargv[gargp], gargp)) {
+			oldgargp = gargp;
+			gargp = storeOption(gargp, position, running);
+			if (gargp != oldgargp) {
+				running = 0;
+				position = 0;
+			}
+		} else {
+			if (m_oargv[gargp].size() == 2 && m_oargv[gargp][0] == getFlag() &&
+				m_oargv[gargp][2] == getFlag() ) {
+					optionend = 1;
+				gargp++;
+				break;
+			} else {                          // this is an argument
+				tempstr = new string(m_oargv[gargp]);
+				m_argument.push_back(tempstr);
+				gargp++;
+			}
+		}
+	}
 
-   while (gargp < m_oargc) {
-      tempstr = new string(m_oargv[gargp]);
-      m_argument.push_back(tempstr);
-      gargp++;
-   }
+	while (gargp < m_oargc) {
+		tempstr = new string(m_oargv[gargp]);
+		m_argument.push_back(tempstr);
+		gargp++;
+	}
 
 }
 
 
 void Options::xverify(int argc, char** argv, int error_check, int suppress) {
-   setOptions(argc, argv);
-   xverify(error_check, suppress);
+	setOptions(argc, argv);
+	xverify(error_check, suppress);
 }
 
 
-   
+
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -1042,30 +1043,30 @@ void Options::xverify(int argc, char** argv, int error_check, int suppress) {
 //
 
 int Options::getRegIndex(const string& optionName) {
-   if (m_suppressQ && (optionName == "options")) {
-         return -1;
-   } 
+	if (m_suppressQ && (optionName == "options")) {
+			return -1;
+	}
 
-   if (optionName == "options") {
-      print(cout);
-      exit(0);
-   } 
+	if (optionName == "options") {
+		print(cout);
+		exit(0);
+	}
 
 
-   auto it = m_optionList.find(optionName);
-   if (it == m_optionList.end()) {
-      if (m_options_error_check) {
-         cerr << "Error: unknown option \"" << optionName << "\"." << endl;
-         print(cout);
-         exit(1);
-      } else {
-         return -1;
-      }
-   } else {
-      return it->second;
-   }
+	auto it = m_optionList.find(optionName);
+	if (it == m_optionList.end()) {
+		if (m_options_error_check) {
+			cerr << "Error: unknown option \"" << optionName << "\"." << endl;
+			print(cout);
+			exit(1);
+		} else {
+			return -1;
+		}
+	} else {
+		return it->second;
+	}
 }
-   
+
 
 
 //////////////////////////////
@@ -1076,30 +1077,30 @@ int Options::getRegIndex(const string& optionName) {
 //
 
 int Options::optionQ(const string& aString, int& argp) {
-   if (aString[0] == getFlag()) {
-      if (aString[1] == '\0') {
-         argp++; 
-         return 0;
-      } else if (aString[1] == getFlag()) {
-         if (aString[2] == '\0') {
-            argp++;
-            return 0;
-         } else {
-            return 1;
-         }
-      } else {
-         return 1;
-      }
-   } else {
-      return 0;
-   }
+	if (aString[0] == getFlag()) {
+		if (aString[1] == '\0') {
+			argp++;
+			return 0;
+		} else if (aString[1] == getFlag()) {
+			if (aString[2] == '\0') {
+				argp++;
+				return 0;
+			} else {
+				return 1;
+			}
+		} else {
+			return 1;
+		}
+	} else {
+		return 0;
+	}
 }
 
 
 
 //////////////////////////////
 //
-// Options::storeOption -- 
+// Options::storeOption --
 //
 
 #define OPTION_FORM_SHORT     0
@@ -1107,94 +1108,94 @@ int Options::optionQ(const string& aString, int& argp) {
 #define OPTION_FORM_CONTINUE  2
 
 int Options::storeOption(int gargp, int& position, int& running) {
-   int optionForm;
-   char tempname[1024];
-   char optionType = '\0';
+	int optionForm;
+	char tempname[1024];
+	char optionType = '\0';
 
-   if (running) {
-      optionForm = OPTION_FORM_CONTINUE;
-   } else if (m_oargv[gargp][1] == getFlag()) {
-      optionForm = OPTION_FORM_LONG;
-   } else {
-      optionForm = OPTION_FORM_SHORT;
-   }
+	if (running) {
+		optionForm = OPTION_FORM_CONTINUE;
+	} else if (m_oargv[gargp][1] == getFlag()) {
+		optionForm = OPTION_FORM_LONG;
+	} else {
+		optionForm = OPTION_FORM_SHORT;
+	}
 
-   switch (optionForm) {
-      case OPTION_FORM_CONTINUE:
-         position++;
-         tempname[0] = m_oargv[gargp][position];
-         tempname[1] = '\0';
-         optionType = getType(tempname);
-         if (optionType != OPTION_BOOLEAN_TYPE) {
-            running = 0;
-            position++;
-         }
-         break;
-      case OPTION_FORM_SHORT:   
-         position = 1;
-         tempname[0] = m_oargv[gargp][position];
-         tempname[1] = '\0';
-         optionType = getType(tempname);
-         if (optionType != OPTION_BOOLEAN_TYPE) {
-            position++;
-         }
-         break;
-      case OPTION_FORM_LONG:   
-         position = 2;
-         while (m_oargv[gargp][position] != '=' && 
-               m_oargv[gargp][position] != '\0') {
-            tempname[position-2] = m_oargv[gargp][position];
-            position++;    
-         }
-         tempname[position-2] = '\0';
-         optionType = getType(tempname);
-         if (optionType == -1) {         // suppressed --options option
-            m_optionsArgument = 1;
-            break;   
-         }
-         if (m_oargv[gargp][position] == '=') {
-            if (optionType == OPTION_BOOLEAN_TYPE) {
-               cerr << "Error: boolean variable cannot have any options: " 
-                    << tempname << endl;
-               exit(1);
-            }
-            position++;
-         }
-         break;
-   }
+	switch (optionForm) {
+		case OPTION_FORM_CONTINUE:
+			position++;
+			tempname[0] = m_oargv[gargp][position];
+			tempname[1] = '\0';
+			optionType = getType(tempname);
+			if (optionType != OPTION_BOOLEAN_TYPE) {
+				running = 0;
+				position++;
+			}
+			break;
+		case OPTION_FORM_SHORT:
+			position = 1;
+			tempname[0] = m_oargv[gargp][position];
+			tempname[1] = '\0';
+			optionType = getType(tempname);
+			if (optionType != OPTION_BOOLEAN_TYPE) {
+				position++;
+			}
+			break;
+		case OPTION_FORM_LONG:
+			position = 2;
+			while (m_oargv[gargp][position] != '=' &&
+					m_oargv[gargp][position] != '\0') {
+				tempname[position-2] = m_oargv[gargp][position];
+				position++;
+			}
+			tempname[position-2] = '\0';
+			optionType = getType(tempname);
+			if (optionType == -1) {         // suppressed --options option
+				m_optionsArgument = 1;
+				break;
+			}
+			if (m_oargv[gargp][position] == '=') {
+				if (optionType == OPTION_BOOLEAN_TYPE) {
+					cerr << "Error: boolean variable cannot have any options: "
+						  << tempname << endl;
+					exit(1);
+				}
+				position++;
+			}
+			break;
+	}
 
-   if (optionType == -1) {              // suppressed --options option
-      m_optionsArgument = 1;
-      gargp++;
-      position = 0;
-      return gargp;
-   }
+	if (optionType == -1) {              // suppressed --options option
+		m_optionsArgument = 1;
+		gargp++;
+		position = 0;
+		return gargp;
+	}
 
-   if (m_oargv[gargp][position] == '\0' && 
-         optionType != OPTION_BOOLEAN_TYPE) {
-      gargp++;
-      position = 0;
-   } 
+	if (m_oargv[gargp][position] == '\0' &&
+			optionType != OPTION_BOOLEAN_TYPE) {
+		gargp++;
+		position = 0;
+	}
 
-   if (optionForm != OPTION_FORM_LONG && optionType == OPTION_BOOLEAN_TYPE &&
-         m_oargv[gargp][position+1] != '\0') {
-      running = 1;
-   } else if (optionType == OPTION_BOOLEAN_TYPE &&
-         m_oargv[gargp][position+1] == '\0') {
-      running = 0;
-   }
+	if (optionForm != OPTION_FORM_LONG && optionType == OPTION_BOOLEAN_TYPE &&
+			m_oargv[gargp][position+1] != '\0') {
+		running = 1;
+	} else if (optionType == OPTION_BOOLEAN_TYPE &&
+			m_oargv[gargp][position+1] == '\0') {
+		running = 0;
+	}
 
-   if (gargp >= m_oargc) {
-      cerr << "Error: last option requires a parameter" << endl;
-      exit(1);
-   }
-   setModified(tempname, &m_oargv[gargp][position]);
+	if (gargp >= m_oargc) {
+		cerr << "Error: last option requires a parameter" << endl;
+		exit(1);
+	}
+	setModified(tempname, &m_oargv[gargp][position]);
 
-   if (!running) {
-      gargp++;
-   }
-   return gargp;
-} 
+	if (!running) {
+		gargp++;
+	}
+	return gargp;
+}
 
 
 
@@ -1204,10 +1205,10 @@ int Options::storeOption(int gargp, int& position, int& running) {
 //
 
 ostream& Options::printOptionList(ostream& out) {
-   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
-      out << it->first << "\t" << it->second << endl;
-   }
-   return out;
+	for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
+		out << it->first << "\t" << it->second << endl;
+	}
+	return out;
 }
 
 
@@ -1218,11 +1219,11 @@ ostream& Options::printOptionList(ostream& out) {
 //
 
 ostream& Options::printOptionListBooleanState(ostream& out) {
-   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
-      out << it->first << "\t" 
-          << m_optionRegister[it->second]->isModified() << endl;
-   }
-   return out;
+	for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
+		out << it->first << "\t"
+			 << m_optionRegister[it->second]->isModified() << endl;
+	}
+	return out;
 }
 
 
@@ -1233,10 +1234,10 @@ ostream& Options::printOptionListBooleanState(ostream& out) {
 //
 
 ostream& Options::printRegister(ostream& out) {
-   for (auto it = m_optionRegister.begin(); it != m_optionRegister.end(); it++) {
-      (*it)->print(out);
-   }
-   return out;
+	for (auto it = m_optionRegister.begin(); it != m_optionRegister.end(); it++) {
+		(*it)->print(out);
+	}
+	return out;
 }
 
 

@@ -30,14 +30,15 @@ namespace hum {
 //
 
 Tool_testgrid::Tool_testgrid(void) {
-	define("r|raw=b",           "print raw grid");
-	define("d|diatonic=b",      "print diatonic grid");
-	define("m|midi-pitch=b",    "print midie-pitch grid");
-	define("b|base-40=b",       "print base-40 grid");
-	define("l|metric-levels=b", "use metric levels in analysis");
-	define("k|kern=b",          "print kern pitch grid");
-	define("debug=b",           "print grid cell information");
-	define("B=b",  		       "use second algorithm");
+	define("r|raw=b",             "print raw grid");
+	define("d|diatonic=b",        "print diatonic grid");
+	define("m|midi-pitch=b",      "print midie-pitch grid");
+	define("b|base-40=b",         "print base-40 grid");
+	define("l|metric-levels=b",   "use metric levels in analysis");
+	define("k|kern=b",            "print kern pitch grid");
+	define("debug=b",             "print grid cell information");
+	define("e|exinterp=s:**data", "specify exinterp for **data spine");
+	define("B=b",  		         "use second algorithm");
 }
 
 
@@ -79,11 +80,12 @@ bool Tool_testgrid::run(HumdrumFile& infile, ostream& out) {
 	}
 	doAnalysis(results, grid, getBoolean("debug"));
 
+	string exinterp = getString("exinterp");
 	vector<HTp> kernspines = infile.getKernSpineStartList();
-	infile.appendDataSpine(results.back());
+	infile.appendDataSpine(results.back(), "", exinterp);
 	for (int i = (int)results.size()-1; i>0; i--) {
 		int track = kernspines[i]->getTrack();
-		infile.insertDataSpineBefore(track, results[i-1]);
+		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
 	}
 	out << infile;
 

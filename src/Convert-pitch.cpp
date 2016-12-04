@@ -297,51 +297,51 @@ int Convert::kernToBase12(const string& kerndata) {
 //
 
 string Convert::base40ToKern(int b40) {
-   int octave     = b40 / 40;
-   int accidental = Convert::base40ToAccidental(b40);
-   int diatonic   = Convert::base40ToDiatonic(b40) % 7;
-   char base = 'a';
-   switch (diatonic) {
-      case 0: base = 'c'; break;
-      case 1: base = 'd'; break;
-      case 2: base = 'e'; break;
-      case 3: base = 'f'; break;
-      case 4: base = 'g'; break;
-      case 5: base = 'a'; break;
-      case 6: base = 'b'; break;
-   }
-   if (octave < 4) {
-      base = std::toupper(base);
-   }
-   int repeat = 0;
-   if (octave > 4) {
-      repeat = octave - 4;
-   } else if (octave < 3) {
-      repeat = 3 - octave;
-   }
-   if (repeat > 12) {
-      cerr << "Error: unreasonable octave value: " << octave << endl;
-      exit(1);
-   }
+	int octave     = b40 / 40;
+	int accidental = Convert::base40ToAccidental(b40);
+	int diatonic   = Convert::base40ToDiatonic(b40) % 7;
+	char base = 'a';
+	switch (diatonic) {
+		case 0: base = 'c'; break;
+		case 1: base = 'd'; break;
+		case 2: base = 'e'; break;
+		case 3: base = 'f'; break;
+		case 4: base = 'g'; break;
+		case 5: base = 'a'; break;
+		case 6: base = 'b'; break;
+	}
+	if (octave < 4) {
+		base = std::toupper(base);
+	}
+	int repeat = 0;
+	if (octave > 4) {
+		repeat = octave - 4;
+	} else if (octave < 3) {
+		repeat = 3 - octave;
+	}
+	if (repeat > 12) {
+		cerr << "Error: unreasonable octave value: " << octave << endl;
+		exit(1);
+	}
 	string output;
 	output += base;
-   for (int i=0; i<repeat; i++) {
+	for (int i=0; i<repeat; i++) {
 		output += base;
-   }
-   if (accidental == 0) {
-      return output;
-   }
-   if (accidental > 0) {
+	}
+	if (accidental == 0) {
+		return output;
+	}
+	if (accidental > 0) {
 		for (int i=0; i<accidental; i++) {
 			output += '#';
 		}
-   } else if (accidental < 0) {
+	} else if (accidental < 0) {
 		for (int i=0; i<-accidental; i++) {
 			output += '-';
 		}
-   }
+	}
 
-   return output;
+	return output;
 }
 
 
@@ -358,12 +358,12 @@ string Convert::base40ToKern(int b40) {
 //
 
 int Convert::base40ToDiatonic(int b40) {
-   int chroma = b40 % 40;
-   int octaveoffset = (b40 / 40) * 7;
-   if (b40 < 0) { 
-      return -1;   // rest;
-   }
-   switch (chroma) {
+	int chroma = b40 % 40;
+	int octaveoffset = (b40 / 40) * 7;
+	if (b40 < 0) {
+		return -1;   // rest;
+	}
+	switch (chroma) {
 		case 0: case 1: case 2: case 3: case 4:      // C-- to C##
 			return 0 + octaveoffset;
 		case 6: case 7: case 8: case 9: case 10:     // D-- to D##
@@ -378,10 +378,10 @@ int Convert::base40ToDiatonic(int b40) {
 			return 5 + octaveoffset;
 		case 35: case 36: case 37: case 38: case 39: // B-- to B##
 			return 6 + octaveoffset;
-   }
+	}
 
 	// found an empty slot, so return rest:
-   return -1;
+	return -1;
 }
 
 
@@ -393,9 +393,9 @@ int Convert::base40ToDiatonic(int b40) {
 
 int Convert::base40ToMidiNoteNumber(int b40) {
 	// +1 since middle-C octave is 5 in MIDI:
-   int octave     = b40 / 40 + 1;
-   int accidental = Convert::base40ToAccidental(b40);
-   int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
+	int octave     = b40 / 40 + 1;
+	int accidental = Convert::base40ToAccidental(b40);
+	int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
 	switch (diatonicpc) {
 		case 0: return octave * 12 +  0 + accidental;
 		case 1: return octave * 12 +  2 + accidental;
@@ -417,56 +417,56 @@ int Convert::base40ToMidiNoteNumber(int b40) {
 //
 
 int Convert::base40ToAccidental(int b40) {
-   if (b40 < 0) {
+	if (b40 < 0) {
 		// not considering low pitches.  If so then the mod operator
 		// below whould need fixing.
-      return 0;
-   }
+		return 0;
+	}
 
-   switch (b40 % 40) {
-      case 0:	return -2;      // C-double-flat
-      case 1:	return -1;      // C-flat
-      case 2:	return  0;      // C
-      case 3:	return  1;      // C-sharp
-      case 4:	return  2;      // C-double-sharp
-      case 5:	return 1000;
-      case 6:	return -2;
-      case 7:	return -1;
-      case 8:	return  0;      // D
-      case 9:	return  1;
-      case 10:	return  2;
-      case 11:	return 1000;
-      case 12:	return -2;
-      case 13:	return -1;
-      case 14:	return  0;      // E
-      case 15:	return  1;
-      case 16:	return  2;
-      case 17:	return -2;
-      case 18:	return -1;
-      case 19:	return  0;      // F
-      case 20:	return  1;
-      case 21:	return  2;
-      case 22:	return 1000;
-      case 23:	return -2;
-      case 24:	return -1;
-      case 25:	return  0;      // G
-      case 26:	return  1;
-      case 27:	return  2;
-      case 28:	return 1000;
-      case 29:	return -2;
-      case 30:	return -1;
-      case 31:	return  0;      // A
-      case 32:	return  1;
-      case 33:	return  2;
-      case 34:	return 1000;
-      case 35:	return -2;
-      case 36:	return -1;
-      case 37:	return  0;      // B
-      case 38:	return  1;
-      case 39:	return  2;
-   }
+	switch (b40 % 40) {
+		case 0:	return -2;      // C-double-flat
+		case 1:	return -1;      // C-flat
+		case 2:	return  0;      // C
+		case 3:	return  1;      // C-sharp
+		case 4:	return  2;      // C-double-sharp
+		case 5:	return 1000;
+		case 6:	return -2;
+		case 7:	return -1;
+		case 8:	return  0;      // D
+		case 9:	return  1;
+		case 10:	return  2;
+		case 11:	return 1000;
+		case 12:	return -2;
+		case 13:	return -1;
+		case 14:	return  0;      // E
+		case 15:	return  1;
+		case 16:	return  2;
+		case 17:	return -2;
+		case 18:	return -1;
+		case 19:	return  0;      // F
+		case 20:	return  1;
+		case 21:	return  2;
+		case 22:	return 1000;
+		case 23:	return -2;
+		case 24:	return -1;
+		case 25:	return  0;      // G
+		case 26:	return  1;
+		case 27:	return  2;
+		case 28:	return 1000;
+		case 29:	return -2;
+		case 30:	return -1;
+		case 31:	return  0;      // A
+		case 32:	return  1;
+		case 33:	return  2;
+		case 34:	return 1000;
+		case 35:	return -2;
+		case 36:	return -1;
+		case 37:	return  0;      // B
+		case 38:	return  1;
+		case 39:	return  2;
+	}
 
-   return 0;
+	return 0;
 }
 
 
@@ -548,10 +548,10 @@ int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 // Convert::wbhToPitch -- Convert an integer-based pitch into
 //    a diatonic pitch class, accidental alteration and octave number
 //   The output diatonic pitch classes are 0=C, 1=D, 2=E, 3=F, 4=G, 5=A, 6=B.
-//   "acc" is the accidental count: -2=double flat, -1=double flat, 
+//   "acc" is the accidental count: -2=double flat, -1=double flat,
 //   0 natural, +1=sharp, etc.
 //   "octave" is the octave number, with middle-C being the start of
-//   octave 4.  
+//   octave 4.
 //   "maxacc" is the maximum accidental which defines
 //    the base:
 //    maxacc = 2 -> Base-40.

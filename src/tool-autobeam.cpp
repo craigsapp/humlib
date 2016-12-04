@@ -147,7 +147,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::initialize -- extract time signature lines for 
+// Tool_autobeam::initialize -- extract time signature lines for
 //    each **kern spine in file.
 //
 
@@ -226,7 +226,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
-		if ((current.first != timesig[line].first) || 
+		if ((current.first != timesig[line].first) ||
 		    (current.second != timesig[line].second)) {
 			current = timesig[line];
 			beatdur = 1;
@@ -236,7 +236,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 				// compound meter, so shift the beat to 3x the demoniator
 				beatdur *= 3;
 			} else if (current.first == 3 && (current.second > 4)) {
-				// time signatures such as 3/8 and 3/16 which should 
+				// time signatures such as 3/8 and 3/16 which should
 				// beam together at the measure level (3/4 not included).
 				beatdur *= 3;
 			}
@@ -245,8 +245,8 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 		notedurnodots.push_back(measure[i]->getDurationNoDots());
 		beatpos.push_back(measure[i]->getDurationFromBarline() / beatdur);
 	}
-	
-	// Now identify notes which should be beamed together 
+
+	// Now identify notes which should be beamed together
 	// (using lazy beaming for now).
 	HumNum eighthnote(1, 2);
 	int beat1;

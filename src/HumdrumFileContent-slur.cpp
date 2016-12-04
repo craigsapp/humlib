@@ -70,13 +70,13 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 						tracktokens[i][j]->setValue("auto", "id",
 								tracktokens[i][j]);
 						sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
-							tracktokens[i][j]->getDurationFromStart() - 
+							tracktokens[i][j]->getDurationFromStart() -
 							sluropens[elisionlevel].back()->getDurationFromStart());
 						sluropens[elisionlevel].pop_back();
 					} else {
 						// no starting slur marker to match to this slur end.
 						tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
-						tracktokens[i][j]->setValue("auto", "slurDration", 
+						tracktokens[i][j]->setValue("auto", "slurDration",
 							tracktokens[i][j]->getDurationToEnd());
 					}
 				}
@@ -97,7 +97,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 				}
 
 				if (tracktokens[i][j]->hasSlurEnd()) {
-	
+
 					elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
 					if (elisionlevel >= 0) {
 						if (sluropens[elisionlevel].size() > 0) {
@@ -110,13 +110,13 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 							tracktokens[i][j]->setValue("auto", "id",
 									tracktokens[i][j]);
 							sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
-								tracktokens[i][j]->getDurationFromStart() - 
+								tracktokens[i][j]->getDurationFromStart() -
 								sluropens[elisionlevel].back()->getDurationFromStart());
 							sluropens[elisionlevel].pop_back();
 						} else {
 							// no starting slur marker to match to this slur end.
 							tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
-							tracktokens[i][j]->setValue("auto", "slurDration", 
+							tracktokens[i][j]->setValue("auto", "slurDration",
 								tracktokens[i][j]->getDurationToEnd());
 						}
 					}
@@ -128,7 +128,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	for (i=0; i<(int)sluropens.size(); i++) {
 		for (j=0; j<(int)sluropens[i].size(); j++) {
 			sluropens[i][j]->setValue("", "auto", "hangingSlur", "true");
-			sluropens[i][j]->setValue("", "auto", "slurDuration", 
+			sluropens[i][j]->setValue("", "auto", "slurDuration",
 				sluropens[i][j]->getDurationFromStart());
 		}
 	}

@@ -57,12 +57,13 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 		string testfilename;
 		int repertoryQ = false;
 		auto slash = rest.rfind('/');
+		if (slash != string::npos) {
 			testlocation = rest.substr(0, slash);
 			testfilename = rest.substr(slash+1);
-			if (testfilename.find('.' != string::npos)) {
+			if (testfilename.find('.') == string::npos) {
 				repertoryQ = true;
 			}
-		if (slash != string::npos) {
+		} if (slash == string::npos) {
 			// no files in root directory, but no reperoties either
 			repertoryQ = true;
 		}
@@ -99,7 +100,7 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::readFromHumdrumUri -- Read a Humdrum file from an 
+// HumdrumFileBase::readFromHumdrumUri -- Read a Humdrum file from an
 //      humdrum:// web address
 //
 // Example:
@@ -139,7 +140,7 @@ void HumdrumFileBase::readFromJrpUri(const string& jrpaddress) {
 
 void HumdrumFileBase::readFromHttpUri(const string& webaddress) {
 	stringstream inputdata;
-   readStringFromHttpUri(inputdata, webaddress);
+	readStringFromHttpUri(inputdata, webaddress);
 	HumdrumFileBase::readString(inputdata.str());
 }
 

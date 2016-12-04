@@ -113,7 +113,7 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 			inquote = true;
 			continue;
 		}
-		if (inquote && (newcsv[i] == '"') && (newcsv[i+1] == '"') 
+		if (inquote && (newcsv[i] == '"') && (newcsv[i+1] == '"')
 				&& (i < (int)newcsv.length()-1)) {
 			output += '"';
 			i++;
@@ -1214,7 +1214,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		}
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";
-		
+
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
@@ -1436,25 +1436,25 @@ void HumdrumLine::setParameters(const string& pdata) {
 //      list of tokens in the line.
 //
 
-void HumdrumLine::appendToken(HTp token) { 
+void HumdrumLine::appendToken(HTp token) {
 	// deletion will be handled by class.
 	tokens.push_back(token);
 }
 
 
-void HumdrumLine::appendToken(const HumdrumToken& token) { 
+void HumdrumLine::appendToken(const HumdrumToken& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
 
 
-void HumdrumLine::appendToken(const string& token) { 
+void HumdrumLine::appendToken(const string& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
 
 
-void HumdrumLine::appendToken(const char* token) { 
+void HumdrumLine::appendToken(const char* token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
@@ -1488,25 +1488,25 @@ int HumdrumLine::getKernNoteAttacks(void) {
 //      list of tokens in the line.
 //
 
-void HumdrumLine::insertToken(int index, HTp token) { 
+void HumdrumLine::insertToken(int index, HTp token) {
 	// deletion will be handled by class.
 	tokens.insert(tokens.begin() + index, token);
 }
 
 
-void HumdrumLine::insertToken(int index, const HumdrumToken& token) { 
+void HumdrumLine::insertToken(int index, const HumdrumToken& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }
 
 
-void HumdrumLine::insertToken(int index, const string& token) { 
+void HumdrumLine::insertToken(int index, const string& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }
 
 
-void HumdrumLine::insertToken(int index, const char* token) { 
+void HumdrumLine::insertToken(int index, const char* token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }

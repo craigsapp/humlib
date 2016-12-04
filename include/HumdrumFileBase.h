@@ -34,7 +34,7 @@
 	#include <netdb.h>       /* gethostbyname   */
 	#include <unistd.h>      /* read, write     */
 	#include <string.h>      /* memcpy          */
-   #include <sstream>
+	#include <sstream>
 #endif
 
 #include "HumdrumLine.h"
@@ -99,8 +99,8 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase          (void);
-                    HumdrumFileBase          (const string& contents);
-                    HumdrumFileBase          (istream& contents);
+		              HumdrumFileBase          (const string& contents);
+		              HumdrumFileBase          (istream& contents);
 		             ~HumdrumFileBase          ();
 
 		bool          read                     (istream& contents);
@@ -147,10 +147,10 @@ class HumdrumFileBase : public HumHash {
 		void          setFilename              (const string& filename);
 		string        getFilename              (void);
 
-      void          setSegmentLevel          (int level = 0);
-      int           getSegmentLevel          (void);
-      ostream&      printSegmentLabel        (ostream& out);
-      ostream&      printNonemptySegmentLabel(ostream& out);
+		void          setSegmentLevel          (int level = 0);
+		int           getSegmentLevel          (void);
+		ostream&      printSegmentLabel        (ostream& out);
+		ostream&      printNonemptySegmentLabel(ostream& out);
 
 		HumdrumLine&  operator[]               (int index);
 		HumdrumLine*  getLine                  (int index);
@@ -174,8 +174,8 @@ class HumdrumFileBase : public HumHash {
 		void          getSpineStartList        (vector<HTp>& spinestarts);
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
-      void          getKernSpineStartList    (vector<HTp>& spinestarts);
-      vector<HTp>   getKernSpineStartList    ();
+		void          getKernSpineStartList    (vector<HTp>& spinestarts);
+		vector<HTp>   getKernSpineStartList    ();
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
 		void          getTrackStartList        (vector<HTp>& spinestarts) {
@@ -194,9 +194,9 @@ class HumdrumFileBase : public HumHash {
 		void          appendLine               (const char* line);
 		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
-      void          push_back(const char* line)   { appendLine(line); }
-      void          push_back(const string& line) { appendLine(line); }
-      void          push_back(HumdrumLine* line)  { appendLine(line); }
+		void          push_back(const char* line)   { appendLine(line); }
+		void          push_back(const string& line) { appendLine(line); }
+		void          push_back(HumdrumLine* line)  { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
@@ -208,24 +208,24 @@ class HumdrumFileBase : public HumHash {
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:
-      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (vector<vector<HTp> >& sequence,
 		                                        int track, int options);
 		void          getPrimaryTrackSequence  (vector<HTp>& sequence,
 		                                        int track, int options);
 
-      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (vector<vector<HTp> >& sequence,
 		                                        int spine, int options);
 		void          getPrimarySpineSequence  (vector<HTp>& sequence,
 		                                        int spine, int options);
 
-      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options)
 		                      { getTrackSequence(sequence, starttoken, options); }
-      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        int track, int options)
 		                           { getTrackSequence(sequence, track, options); }
 		void          getPrimaryTrackSeq       (vector<HTp>& sequence,

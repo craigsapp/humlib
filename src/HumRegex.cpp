@@ -27,13 +27,13 @@ using namespace std::regex_constants;
 //
 
 HumRegex::HumRegex(void) {
-  // do nothing
+	// do nothing
 }
 
 
 HumRegex::HumRegex(const string& exp) {
-  // initialize a regular expression for the object
-  m_regex = (exp);
+	// initialize a regular expression for the object
+	m_regex = (exp);
 }
 
 
@@ -44,7 +44,7 @@ HumRegex::HumRegex(const string& exp) {
 //
 
 HumRegex::~HumRegex() {
-  // do nothing
+	// do nothing
 }
 
 
@@ -57,7 +57,6 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
-cerr << "EXPRESSION " << exp << endl;
 	m_regex = exp;
 	return regex_search(input, m_matches, m_regex);
 
@@ -67,7 +66,7 @@ cerr << "EXPRESSION " << exp << endl;
 
 /////////////////////////////
 //
-// HumRegex::getMatchCount -- Return the number of submatches that a 
+// HumRegex::getMatchCount -- Return the number of submatches that a
 //   previous call to HumRegex::search generated.
 //
 
@@ -128,7 +127,7 @@ int HumRegex::getMatchStartIndex(int index) {
 //////////////////////////////
 //
 // HumRegex::getMatchEndIndex -- Get ending index of match in input
-//     search string.  The index is one larger than the index of the 
+//     search string.  The index is one larger than the index of the
 //     end of the matched position.
 //
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 21:01:40 PST 2016
+// Last Modified: Sat Dec  3 22:40:09 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1467,12 +1467,12 @@ int HumInstrument::classcount = 0;
 // HumInstrument::HumInstrument --
 //
 
-HumInstrument::HumInstrument(void) { 
-   if (classcount == 0) {
-      initialize();
-   }
-   classcount++;
-   index = -1;
+HumInstrument::HumInstrument(void) {
+	if (classcount == 0) {
+		initialize();
+	}
+	classcount++;
+	index = -1;
 }
 
 
@@ -1482,12 +1482,12 @@ HumInstrument::HumInstrument(void) {
 // HumInstrument::HumInstrument --
 //
 
-HumInstrument::HumInstrument(const string& Hname) { 
-   if (classcount == 0) {
-      initialize();
-   }
+HumInstrument::HumInstrument(const string& Hname) {
+	if (classcount == 0) {
+		initialize();
+	}
 
-   index = find(Hname);
+	index = find(Hname);
 }
 
 
@@ -1497,8 +1497,8 @@ HumInstrument::HumInstrument(const string& Hname) {
 // HumInstrument::~HumInstrument --
 //
 
-HumInstrument::~HumInstrument() { 
-   index = -1;
+HumInstrument::~HumInstrument() {
+	index = -1;
 }
 
 
@@ -1508,12 +1508,12 @@ HumInstrument::~HumInstrument() {
 // HumInstrument::getGM --
 //
 
-int HumInstrument::getGM(void) { 
-   if (index > 0) {
-      return data[index].gm;
-   } else {
-      return -1;
-   }
+int HumInstrument::getGM(void) {
+	if (index > 0) {
+		return data[index].gm;
+	} else {
+		return -1;
+	}
 }
 
 
@@ -1523,19 +1523,19 @@ int HumInstrument::getGM(void) {
 // HumInstrument::getGM --
 //
 
-int HumInstrument::getGM(const string& Hname) { 
-   int tindex;
-   if (Hname.compare(0, 2, "*I") == 0) {
-   	tindex = find(Hname.substr(2));
-   } else {
-   	tindex = find(Hname);
+int HumInstrument::getGM(const string& Hname) {
+	int tindex;
+	if (Hname.compare(0, 2, "*I") == 0) {
+		tindex = find(Hname.substr(2));
+	} else {
+		tindex = find(Hname);
 	}
 
-   if (tindex > 0) {
-      return data[tindex].gm;
-   } else {
-      return -1;
-   }
+	if (tindex > 0) {
+		return data[tindex].gm;
+	} else {
+		return -1;
+	}
 }
 
 
@@ -1545,12 +1545,12 @@ int HumInstrument::getGM(const string& Hname) {
 // HumInstrument::getName --
 //
 
-string HumInstrument::getName(void) { 
-   if (index > 0) {
-      return data[index].name;
-   } else {
-      return "";
-   }
+string HumInstrument::getName(void) {
+	if (index > 0) {
+		return data[index].name;
+	} else {
+		return "";
+	}
 }
 
 
@@ -1560,18 +1560,18 @@ string HumInstrument::getName(void) {
 // HumInstrument::getName --
 //
 
-string HumInstrument::getName(const string& Hname) { 
-   int tindex;
-   if (Hname.compare(0, 2, "*I") == 0) {
-   	tindex = find(Hname.substr(2));
-   } else{
-   	tindex = find(Hname);
+string HumInstrument::getName(const string& Hname) {
+	int tindex;
+	if (Hname.compare(0, 2, "*I") == 0) {
+		tindex = find(Hname.substr(2));
+	} else{
+		tindex = find(Hname);
 	}
-   if (tindex > 0) {
-      return data[tindex].name;
-   } else {
-      return "";
-   }
+	if (tindex > 0) {
+		return data[tindex].name;
+	} else {
+		return "";
+	}
 }
 
 
@@ -1581,12 +1581,12 @@ string HumInstrument::getName(const string& Hname) {
 // HumInstrument::getHumdrum --
 //
 
-string HumInstrument::getHumdrum(void) { 
-   if (index > 0) {
-      return data[index].humdrum;
-   } else {
-      return "";
-   }
+string HumInstrument::getHumdrum(void) {
+	if (index > 0) {
+		return data[index].humdrum;
+	} else {
+		return "";
+	}
 }
 
 
@@ -1597,17 +1597,17 @@ string HumInstrument::getHumdrum(void) {
 //
 
 int HumInstrument::setGM(const string& Hname, int aValue) {
-   if (aValue < 0 || aValue > 127) {
-      return 0;
-   }
-   int rindex = find(Hname);
-   if (rindex > 0) {
-      data[rindex].gm = aValue;
-   } else {
-      afi(Hname.c_str(), aValue, Hname.c_str());
-      sortData();
-   }
-   return rindex;
+	if (aValue < 0 || aValue > 127) {
+		return 0;
+	}
+	int rindex = find(Hname);
+	if (rindex > 0) {
+		data[rindex].gm = aValue;
+	} else {
+		afi(Hname.c_str(), aValue, Hname.c_str());
+		sortData();
+	}
+	return rindex;
 }
 
 
@@ -1617,11 +1617,11 @@ int HumInstrument::setGM(const string& Hname, int aValue) {
 // HumInstrument::setHumdrum --
 //
 
-void HumInstrument::setHumdrum(const string& Hname) { 
-   if (Hname.compare(0, 2, "*I") == 0) {
-   	index = find(Hname.substr(2));
-   } else {
-   	index = find(Hname);
+void HumInstrument::setHumdrum(const string& Hname) {
+	if (Hname.compare(0, 2, "*I") == 0) {
+		index = find(Hname.substr(2));
+	} else {
+		index = find(Hname);
 	}
 }
 
@@ -1638,170 +1638,170 @@ void HumInstrument::setHumdrum(const string& Hname) {
 // HumInstrument::initialize --
 //
 
-void HumInstrument::initialize(void) { 
-   data.reserve(500);
-   afi("accor",	GM_ACCORDION,	"accordion");
-   afi("alto",		GM_RECORDER,	"alto");
-   afi("archl",	GM_ACOUSTIC_GUITAR_NYLON,	"archlute");
-   afi("armon",	GM_HARMONICA,	"harmonica");
-   afi("arpa",		GM_ORCHESTRAL_HARP,	"harp");
-   afi("bagpI",	GM_BAGPIPE,	"bagpipe (Irish)");
-   afi("bagpS",	GM_BAGPIPE,	"bagpipe (Scottish)");
-   afi("banjo",	GM_BANJO,	"banjo");
-   afi("barit",	GM_CHOIR_AAHS,  	"baritone");
-   afi("baset",	GM_CLARINET,	"bassett horn");
-   afi("bass",		GM_CHOIR_AAHS,	"bass");
-   afi("bdrum",	GM_TAIKO_DRUM,	"bass drum (kit)");
-   afi("bguit",	GM_ELECTRIC_BASS_FINGER,	"electric bass guitar");
-   afi("biwa",		GM_FLUTE,	"biwa");
-   afi("bscan",	GM_CHOIR_AAHS,	"basso cantante");
-   afi("bspro",	GM_CHOIR_AAHS,	"basso profondo");
-   afi("calam",	GM_OBOE,	"chalumeau");
-   afi("calpe",	GM_LEAD_CALLIOPE,	"calliope");
-   afi("calto",	GM_CHOIR_AAHS,	"contralto");
-   afi("campn",	GM_TUBULAR_BELLS,	"bell");
-   afi("cangl",	GM_ENGLISH_HORN,	"english horn");
-   afi("caril",	GM_TUBULAR_BELLS,	"carillon");
-   afi("castr",	GM_CHOIR_AAHS,	"castrato");
-   afi("casts",	GM_WOODBLOCKS,	"castanets");
-   afi("cbass",	GM_CONTRABASS,	"contrabass");
-   afi("cello",	GM_CELLO,	"violoncello");
-   afi("cemba",	GM_HARPSICHORD,	"harpsichord");
-   afi("cetra",	GM_VIOLIN,	"cittern");
-   afi("chime",	GM_TUBULAR_BELLS,	"chimes");
-   afi("chlma",	GM_BASSOON,	"alto shawm");
-   afi("chlms",	GM_BASSOON,	"soprano shawm");
-   afi("chlmt",	GM_BASSOON,	"tenor shawm");
-   afi("clara",	GM_CLARINET,	"alto clarinet (in E-flat)");
-   afi("clarb",	GM_CLARINET,	"bass clarinet (in B-flat)");
-   afi("clarp",	GM_CLARINET,	"piccolo clarinet");
-   afi("clars",	GM_CLARINET,	"soprano clarinet");
-   afi("clavi",	GM_CLAVI,	"clavichord");
-   afi("clest",	GM_CELESTA,	"celesta");
-   afi("colsp",	GM_FLUTE,       	"coloratura soprano");
-   afi("cor",		GM_FRENCH_HORN,	"horn");
-   afi("cornm",	GM_BAGPIPE,	"French bagpipe");
-   afi("corno",	GM_TRUMPET,	"cornett");
-   afi("cornt",	GM_TRUMPET,	"cornet");
-   afi("crshc",	GM_REVERSE_CYMBAL,	"crash cymbal (kit)");
-   afi("ctenor",	GM_CHOIR_AAHS,	"counter-tenor");
-   afi("ctina",	GM_ACCORDION,	"concertina");
-   afi("drmsp",	GM_FLUTE,	"dramatic soprano");
-   afi("dulc",		GM_DULCIMER,	"dulcimer");
-   afi("eguit",	GM_ELECTRIC_GUITAR_CLEAN,	"electric guitar");
-   afi("fag_c",	GM_BASSOON,	"contrabassoon");
-   afi("fagot",	GM_BASSOON,	"bassoon");
-   afi("false",	GM_RECORDER,	"falsetto");
-   afi("feme",		GM_CHOIR_AAHS,	"female voice");
-   afi("fife",		GM_BLOWN_BOTTLE,	"fife");
-   afi("fingc",	GM_REVERSE_CYMBAL,	"finger cymbal");
-   afi("flt",		GM_FLUTE,	"flute");
-   afi("flt_a",	GM_FLUTE,	"alto flute");
-   afi("flt_b",	GM_FLUTE,	"bass flute");
-   afi("fltda",	GM_RECORDER,	"alto recorder");
-   afi("fltdb",	GM_RECORDER,	"bass recorder");
-   afi("fltdn",	GM_RECORDER,	"sopranino recorder");
-   afi("fltds",	GM_RECORDER,	"soprano recorder");
-   afi("fltdt",	GM_RECORDER,	"tenor recorder");
-   afi("flugh",	GM_FRENCH_HORN,	"flugelhorn");
-   afi("forte",	GM_HONKYTONK_PIANO,	"fortepiano");
-   afi("glock",	GM_GLOCKENSPIEL,	"glockenspiel");
-   afi("gong", 	GM_STEEL_DRUMS,	"gong");
-   afi("guitr",	GM_ACOUSTIC_GUITAR_NYLON,	"guitar");
-   afi("hammd",	GM_DRAWBAR_ORGAN,	"Hammond electronic organ");
-   afi("heltn",	GM_CHOIR_AAHS,	"Heldentenor");
-   afi("hichi",	GM_OBOE,	"hichiriki");
-   afi("hurdy",	GM_LEAD_CALLIOPE,	"hurdy-gurdy");
-   afi("kit",		GM_SYNTH_DRUM,	"drum kit");
-   afi("kokyu",	GM_FIDDLE,	"kokyu (Japanese spike fiddle)");
-   afi("komun",	GM_KOTO,	"komun'go (Korean long zither)");
-   afi("koto",		GM_KOTO,	"koto (Japanese long zither)");
-   afi("kruma",	GM_TRUMPET,	"alto crumhorn");
-   afi("krumb",	GM_TRUMPET,	"bass crumhorn");
-   afi("krums",	GM_TRUMPET,	"soprano crumhorn");
-   afi("krumt",	GM_TRUMPET,	"tenor crumhorn");
-   afi("liuto",	GM_ACOUSTIC_GUITAR_NYLON,	"lute");
-   afi("lyrsp",	GM_FLUTE,       	"lyric soprano");
-   afi("lyrtn",	GM_FRENCH_HORN,	"lyric tenor");
-   afi("male",		GM_CHOIR_AAHS,  	"male voice");
-   afi("mando",	GM_ACOUSTIC_GUITAR_NYLON,	"mandolin");
-   afi("marac",	GM_AGOGO,	"maracas");
-   afi("marim",	GM_MARIMBA,	"marimba");
-   afi("mezzo",	GM_CHOIR_AAHS,  	"mezzo soprano");
-   afi("nfant",	GM_CHOIR_AAHS,  	"child's voice");
-   afi("nokan",	GM_SHAKUHACHI,	"nokan (a Japanese flute)");
-   afi("oboeD",	GM_ENGLISH_HORN,	"oboe d'amore");
-   afi("oboe",		GM_OBOE,	"oboe");
-   afi("ocari",	GM_OCARINA,	"ocarina");
-   afi("organ",	GM_CHURCH_ORGAN,	"pipe organ");
-   afi("panpi",	GM_PAN_FLUTE,	"panpipe");
-   afi("piano",	GM_ACOUSTIC_GRAND_PIANO,	"pianoforte");
-   afi("piatt",	GM_REVERSE_CYMBAL,	"cymbals");
-   afi("picco",	GM_PICCOLO,	"piccolo");
-   afi("pipa",		GM_ACOUSTIC_GUITAR_NYLON,	"Chinese lute");
-   afi("porta",	GM_TANGO_ACCORDION,	"portative organ");
-   afi("psalt",	GM_CLAVI,	"psaltery (box zither)");
-   afi("qin",		GM_CLAVI,	"qin, ch'in (Chinese zither)");
-   afi("quitr",	GM_ACOUSTIC_GUITAR_NYLON,	"gittern");
-   afi("rackt",	GM_TRUMPET,	"racket");
-   afi("rebec",	GM_ACOUSTIC_GUITAR_NYLON,	"rebec");
-   afi("recit",	GM_CHOIR_AAHS,  	"recitativo");
-   afi("reedo",	GM_REED_ORGAN,	"reed organ");
-   afi("rhode",	GM_ELECTRIC_PIANO_1,	"Fender-Rhodes electric piano");
-   afi("ridec",	GM_REVERSE_CYMBAL,	"ride cymbal (kit)");
-   afi("sarod",	GM_SITAR,	"sarod");
-   afi("sarus",	GM_TUBA,	"sarrusophone");
-   afi("saxA",		GM_ALTO_SAX,	"E-flat alto saxophone");
-   afi("saxB",		GM_BARITONE_SAX,	"B-flat bass saxophone");
-   afi("saxC",		GM_BARITONE_SAX,	"E-flat contrabass saxophone");
-   afi("saxN",		GM_SOPRANO_SAX,	"E-flat sopranino saxophone");
-   afi("saxR",		GM_BARITONE_SAX,	"E-flat baritone saxophone");
-   afi("saxS",		GM_SOPRANO_SAX,	"B-flat soprano saxophone");
-   afi("saxT",		GM_TENOR_SAX,	"B-flat tenor saxophone");
-   afi("sdrum",	GM_SYNTH_DRUM,	"snare drum (kit)");
-   afi("shaku",	GM_SHAKUHACHI,	"shakuhachi");
-   afi("shami",	GM_SHAMISEN,	"shamisen (Japanese fretless lute)");
-   afi("sheng",	GM_SHANAI,	"mouth organ (Chinese)");
-   afi("sho",		GM_SHANAI,	"mouth organ (Japanese)");
-   afi("sitar",	GM_SITAR,	"sitar");
-   afi("soprn",	GM_CHOIR_AAHS,  	"soprano");
-   afi("spshc",	GM_REVERSE_CYMBAL,	"splash cymbal (kit)");
-   afi("steel",	GM_STEEL_DRUMS,	"steel-drum");
-   afi("sxhA",		GM_ALTO_SAX,	"E-flat alto saxhorn");
-   afi("sxhB",		GM_BARITONE_SAX,	"B-flat bass saxhorn");
-   afi("sxhC",		GM_BARITONE_SAX,	"E-flat contrabass saxhorn");
-   afi("sxhR",		GM_BARITONE_SAX,	"E-flat baritone saxhorn");
-   afi("sxhS",		GM_SOPRANO_SAX,	"B-flat soprano saxhorn");
-   afi("sxhT",		GM_TENOR_SAX,	"B-flat tenor saxhorn");
-   afi("synth",	GM_ELECTRIC_PIANO_2,	"keyboard synthesizer");
-   afi("tabla",	GM_MELODIC_DRUM,	"tabla");
-   afi("tambn",	GM_TINKLE_BELL,	"tambourine");
-   afi("tambu",	GM_MELODIC_DRUM,	"tambura");
-   afi("tanbr",	GM_MELODIC_DRUM,	"tanbur");
-   afi("tenor",	GM_CHOIR_AAHS,	"tenor");
-   afi("timpa",	GM_MELODIC_DRUM,	"timpani");
-   afi("tiorb",	GM_ACOUSTIC_GUITAR_NYLON,	"theorbo");
-   afi("tom",		GM_TAIKO_DRUM,	"tom-tom drum");
-   afi("trngl",	GM_TINKLE_BELL,	"triangle");
-   afi("tromb",	GM_TROMBONE,	"bass trombone");
-   afi("tromp",	GM_TRUMPET,	"trumpet");
-   afi("tromt",	GM_TROMBONE,	"tenor trombone");
-   afi("tuba",		GM_TUBA,	"tuba");
-   afi("ud",		GM_ACOUSTIC_GUITAR_NYLON,	"ud");
-   afi("ukule",	GM_ACOUSTIC_GUITAR_NYLON,	"ukulele");
-   afi("vibra",	GM_VIBRAPHONE,	"vibraphone");
-   afi("vina",		GM_SITAR,	"vina");
-   afi("viola",	GM_VIOLA,	"viola");
-   afi("violb",	GM_CONTRABASS,	"bass viola da gamba");
-   afi("viold",	GM_VIOLA,	"viola d'amore");
-   afi("violn",	GM_VIOLIN,	"violin");
-   afi("violp",	GM_VIOLIN,	"piccolo violin");
-   afi("viols",	GM_VIOLIN,	"treble viola da gamba");
-   afi("violt",	GM_CELLO,	"tenor viola da gamba");
-   afi("vox",		GM_CHOIR_AAHS,  	"generic voice");
-   afi("xylo",		GM_XYLOPHONE,	"xylophone");
-   afi("zithr",	GM_CLAVI,	"zither");
-   afi("zurna",	GM_ACOUSTIC_GUITAR_NYLON,	"zurna");
+void HumInstrument::initialize(void) {
+	data.reserve(500);
+	afi("accor",	GM_ACCORDION,	"accordion");
+	afi("alto",		GM_RECORDER,	"alto");
+	afi("archl",	GM_ACOUSTIC_GUITAR_NYLON,	"archlute");
+	afi("armon",	GM_HARMONICA,	"harmonica");
+	afi("arpa",		GM_ORCHESTRAL_HARP,	"harp");
+	afi("bagpI",	GM_BAGPIPE,	"bagpipe (Irish)");
+	afi("bagpS",	GM_BAGPIPE,	"bagpipe (Scottish)");
+	afi("banjo",	GM_BANJO,	"banjo");
+	afi("barit",	GM_CHOIR_AAHS,	"baritone");
+	afi("baset",	GM_CLARINET,	"bassett horn");
+	afi("bass",		GM_CHOIR_AAHS,	"bass");
+	afi("bdrum",	GM_TAIKO_DRUM,	"bass drum (kit)");
+	afi("bguit",	GM_ELECTRIC_BASS_FINGER,	"electric bass guitar");
+	afi("biwa",		GM_FLUTE,	"biwa");
+	afi("bscan",	GM_CHOIR_AAHS,	"basso cantante");
+	afi("bspro",	GM_CHOIR_AAHS,	"basso profondo");
+	afi("calam",	GM_OBOE,	"chalumeau");
+	afi("calpe",	GM_LEAD_CALLIOPE,	"calliope");
+	afi("calto",	GM_CHOIR_AAHS,	"contralto");
+	afi("campn",	GM_TUBULAR_BELLS,	"bell");
+	afi("cangl",	GM_ENGLISH_HORN,	"english horn");
+	afi("caril",	GM_TUBULAR_BELLS,	"carillon");
+	afi("castr",	GM_CHOIR_AAHS,	"castrato");
+	afi("casts",	GM_WOODBLOCKS,	"castanets");
+	afi("cbass",	GM_CONTRABASS,	"contrabass");
+	afi("cello",	GM_CELLO,	"violoncello");
+	afi("cemba",	GM_HARPSICHORD,	"harpsichord");
+	afi("cetra",	GM_VIOLIN,	"cittern");
+	afi("chime",	GM_TUBULAR_BELLS,	"chimes");
+	afi("chlma",	GM_BASSOON,	"alto shawm");
+	afi("chlms",	GM_BASSOON,	"soprano shawm");
+	afi("chlmt",	GM_BASSOON,	"tenor shawm");
+	afi("clara",	GM_CLARINET,	"alto clarinet (in E-flat)");
+	afi("clarb",	GM_CLARINET,	"bass clarinet (in B-flat)");
+	afi("clarp",	GM_CLARINET,	"piccolo clarinet");
+	afi("clars",	GM_CLARINET,	"soprano clarinet");
+	afi("clavi",	GM_CLAVI,	"clavichord");
+	afi("clest",	GM_CELESTA,	"celesta");
+	afi("colsp",	GM_FLUTE,	"coloratura soprano");
+	afi("cor",		GM_FRENCH_HORN,	"horn");
+	afi("cornm",	GM_BAGPIPE,	"French bagpipe");
+	afi("corno",	GM_TRUMPET,	"cornett");
+	afi("cornt",	GM_TRUMPET,	"cornet");
+	afi("crshc",	GM_REVERSE_CYMBAL,	"crash cymbal (kit)");
+	afi("ctenor",	GM_CHOIR_AAHS,	"counter-tenor");
+	afi("ctina",	GM_ACCORDION,	"concertina");
+	afi("drmsp",	GM_FLUTE,	"dramatic soprano");
+	afi("dulc",		GM_DULCIMER,	"dulcimer");
+	afi("eguit",	GM_ELECTRIC_GUITAR_CLEAN,	"electric guitar");
+	afi("fag_c",	GM_BASSOON,	"contrabassoon");
+	afi("fagot",	GM_BASSOON,	"bassoon");
+	afi("false",	GM_RECORDER,	"falsetto");
+	afi("feme",		GM_CHOIR_AAHS,	"female voice");
+	afi("fife",		GM_BLOWN_BOTTLE,	"fife");
+	afi("fingc",	GM_REVERSE_CYMBAL,	"finger cymbal");
+	afi("flt",		GM_FLUTE,	"flute");
+	afi("flt_a",	GM_FLUTE,	"alto flute");
+	afi("flt_b",	GM_FLUTE,	"bass flute");
+	afi("fltda",	GM_RECORDER,	"alto recorder");
+	afi("fltdb",	GM_RECORDER,	"bass recorder");
+	afi("fltdn",	GM_RECORDER,	"sopranino recorder");
+	afi("fltds",	GM_RECORDER,	"soprano recorder");
+	afi("fltdt",	GM_RECORDER,	"tenor recorder");
+	afi("flugh",	GM_FRENCH_HORN,	"flugelhorn");
+	afi("forte",	GM_HONKYTONK_PIANO,	"fortepiano");
+	afi("glock",	GM_GLOCKENSPIEL,	"glockenspiel");
+	afi("gong", 	GM_STEEL_DRUMS,	"gong");
+	afi("guitr",	GM_ACOUSTIC_GUITAR_NYLON,	"guitar");
+	afi("hammd",	GM_DRAWBAR_ORGAN,	"Hammond electronic organ");
+	afi("heltn",	GM_CHOIR_AAHS,	"Heldentenor");
+	afi("hichi",	GM_OBOE,	"hichiriki");
+	afi("hurdy",	GM_LEAD_CALLIOPE,	"hurdy-gurdy");
+	afi("kit",		GM_SYNTH_DRUM,	"drum kit");
+	afi("kokyu",	GM_FIDDLE,	"kokyu (Japanese spike fiddle)");
+	afi("komun",	GM_KOTO,	"komun'go (Korean long zither)");
+	afi("koto",		GM_KOTO,	"koto (Japanese long zither)");
+	afi("kruma",	GM_TRUMPET,	"alto crumhorn");
+	afi("krumb",	GM_TRUMPET,	"bass crumhorn");
+	afi("krums",	GM_TRUMPET,	"soprano crumhorn");
+	afi("krumt",	GM_TRUMPET,	"tenor crumhorn");
+	afi("liuto",	GM_ACOUSTIC_GUITAR_NYLON,	"lute");
+	afi("lyrsp",	GM_FLUTE,	"lyric soprano");
+	afi("lyrtn",	GM_FRENCH_HORN,	"lyric tenor");
+	afi("male",		GM_CHOIR_AAHS,  	"male voice");
+	afi("mando",	GM_ACOUSTIC_GUITAR_NYLON,	"mandolin");
+	afi("marac",	GM_AGOGO,	"maracas");
+	afi("marim",	GM_MARIMBA,	"marimba");
+	afi("mezzo",	GM_CHOIR_AAHS,  	"mezzo soprano");
+	afi("nfant",	GM_CHOIR_AAHS,  	"child's voice");
+	afi("nokan",	GM_SHAKUHACHI,	"nokan (a Japanese flute)");
+	afi("oboeD",	GM_ENGLISH_HORN,	"oboe d'amore");
+	afi("oboe",		GM_OBOE,	"oboe");
+	afi("ocari",	GM_OCARINA,	"ocarina");
+	afi("organ",	GM_CHURCH_ORGAN,	"pipe organ");
+	afi("panpi",	GM_PAN_FLUTE,	"panpipe");
+	afi("piano",	GM_ACOUSTIC_GRAND_PIANO,	"pianoforte");
+	afi("piatt",	GM_REVERSE_CYMBAL,	"cymbals");
+	afi("picco",	GM_PICCOLO,	"piccolo");
+	afi("pipa",		GM_ACOUSTIC_GUITAR_NYLON,	"Chinese lute");
+	afi("porta",	GM_TANGO_ACCORDION,	"portative organ");
+	afi("psalt",	GM_CLAVI,	"psaltery (box zither)");
+	afi("qin",		GM_CLAVI,	"qin, ch'in (Chinese zither)");
+	afi("quitr",	GM_ACOUSTIC_GUITAR_NYLON,	"gittern");
+	afi("rackt",	GM_TRUMPET,	"racket");
+	afi("rebec",	GM_ACOUSTIC_GUITAR_NYLON,	"rebec");
+	afi("recit",	GM_CHOIR_AAHS,  	"recitativo");
+	afi("reedo",	GM_REED_ORGAN,	"reed organ");
+	afi("rhode",	GM_ELECTRIC_PIANO_1,	"Fender-Rhodes electric piano");
+	afi("ridec",	GM_REVERSE_CYMBAL,	"ride cymbal (kit)");
+	afi("sarod",	GM_SITAR,	"sarod");
+	afi("sarus",	GM_TUBA,	"sarrusophone");
+	afi("saxA",		GM_ALTO_SAX,	"E-flat alto saxophone");
+	afi("saxB",		GM_BARITONE_SAX,	"B-flat bass saxophone");
+	afi("saxC",		GM_BARITONE_SAX,	"E-flat contrabass saxophone");
+	afi("saxN",		GM_SOPRANO_SAX,	"E-flat sopranino saxophone");
+	afi("saxR",		GM_BARITONE_SAX,	"E-flat baritone saxophone");
+	afi("saxS",		GM_SOPRANO_SAX,	"B-flat soprano saxophone");
+	afi("saxT",		GM_TENOR_SAX,	"B-flat tenor saxophone");
+	afi("sdrum",	GM_SYNTH_DRUM,	"snare drum (kit)");
+	afi("shaku",	GM_SHAKUHACHI,	"shakuhachi");
+	afi("shami",	GM_SHAMISEN,	"shamisen (Japanese fretless lute)");
+	afi("sheng",	GM_SHANAI,	"mouth organ (Chinese)");
+	afi("sho",		GM_SHANAI,	"mouth organ (Japanese)");
+	afi("sitar",	GM_SITAR,	"sitar");
+	afi("soprn",	GM_CHOIR_AAHS,  	"soprano");
+	afi("spshc",	GM_REVERSE_CYMBAL,	"splash cymbal (kit)");
+	afi("steel",	GM_STEEL_DRUMS,	"steel-drum");
+	afi("sxhA",		GM_ALTO_SAX,	"E-flat alto saxhorn");
+	afi("sxhB",		GM_BARITONE_SAX,	"B-flat bass saxhorn");
+	afi("sxhC",		GM_BARITONE_SAX,	"E-flat contrabass saxhorn");
+	afi("sxhR",		GM_BARITONE_SAX,	"E-flat baritone saxhorn");
+	afi("sxhS",		GM_SOPRANO_SAX,	"B-flat soprano saxhorn");
+	afi("sxhT",		GM_TENOR_SAX,	"B-flat tenor saxhorn");
+	afi("synth",	GM_ELECTRIC_PIANO_2,	"keyboard synthesizer");
+	afi("tabla",	GM_MELODIC_DRUM,	"tabla");
+	afi("tambn",	GM_TINKLE_BELL,	"tambourine");
+	afi("tambu",	GM_MELODIC_DRUM,	"tambura");
+	afi("tanbr",	GM_MELODIC_DRUM,	"tanbur");
+	afi("tenor",	GM_CHOIR_AAHS,	"tenor");
+	afi("timpa",	GM_MELODIC_DRUM,	"timpani");
+	afi("tiorb",	GM_ACOUSTIC_GUITAR_NYLON,	"theorbo");
+	afi("tom",		GM_TAIKO_DRUM,	"tom-tom drum");
+	afi("trngl",	GM_TINKLE_BELL,	"triangle");
+	afi("tromb",	GM_TROMBONE,	"bass trombone");
+	afi("tromp",	GM_TRUMPET,	"trumpet");
+	afi("tromt",	GM_TROMBONE,	"tenor trombone");
+	afi("tuba",		GM_TUBA,	"tuba");
+	afi("ud",		GM_ACOUSTIC_GUITAR_NYLON,	"ud");
+	afi("ukule",	GM_ACOUSTIC_GUITAR_NYLON,	"ukulele");
+	afi("vibra",	GM_VIBRAPHONE,	"vibraphone");
+	afi("vina",		GM_SITAR,	"vina");
+	afi("viola",	GM_VIOLA,	"viola");
+	afi("violb",	GM_CONTRABASS,	"bass viola da gamba");
+	afi("viold",	GM_VIOLA,	"viola d'amore");
+	afi("violn",	GM_VIOLIN,	"violin");
+	afi("violp",	GM_VIOLIN,	"piccolo violin");
+	afi("viols",	GM_VIOLIN,	"treble viola da gamba");
+	afi("violt",	GM_CELLO,	"tenor viola da gamba");
+	afi("vox",		GM_CHOIR_AAHS,  	"generic voice");
+	afi("xylo",		GM_XYLOPHONE,	"xylophone");
+	afi("zithr",	GM_CLAVI,	"zither");
+	afi("zurna",	GM_ACOUSTIC_GUITAR_NYLON,	"zurna");
 }
 
 
@@ -1812,13 +1812,13 @@ void HumInstrument::initialize(void) {
 //
 
 void HumInstrument::afi(const char* humdrum_name, int midinum,
-      const char* EN_name) {
-   _HumInstrument x;
-   x.name = EN_name;
-   x.humdrum = humdrum_name;
-   x.gm = midinum;
+		const char* EN_name) {
+	_HumInstrument x;
+	x.name = EN_name;
+	x.humdrum = humdrum_name;
+	x.gm = midinum;
 
-   data.push_back(x);
+	data.push_back(x);
 }
 
 
@@ -1828,23 +1828,23 @@ void HumInstrument::afi(const char* humdrum_name, int midinum,
 // HumInstrument::find --
 //
 
-int HumInstrument::find(const string& Hname) { 
-   void* searchResult;
-   _HumInstrument key;
-   key.humdrum = Hname;
-   key.name = "";
-   key.gm = 0;
+int HumInstrument::find(const string& Hname) {
+	void* searchResult;
+	_HumInstrument key;
+	key.humdrum = Hname;
+	key.name = "";
+	key.gm = 0;
 
-   searchResult = bsearch(&key, data.data(),
-         data.size(), sizeof(_HumInstrument),
-         &data_compare_by_humdrum_name);
+	searchResult = bsearch(&key, data.data(),
+			data.size(), sizeof(_HumInstrument),
+			&data_compare_by_humdrum_name);
 
-   if (searchResult == NULL) {
-      return -1;
-   } else {
-      return (((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
-         sizeof(_HumInstrument);
-   }
+	if (searchResult == NULL) {
+		return -1;
+	} else {
+		return (((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
+			sizeof(_HumInstrument);
+	}
 }
 
 
@@ -1854,10 +1854,10 @@ int HumInstrument::find(const string& Hname) {
 //
 
 int HumInstrument::data_compare_by_humdrum_name(const void* a,
-      const void* b) {
-   _HumInstrument& valuea = *((_HumInstrument*)a);
-   _HumInstrument& valueb = *((_HumInstrument*)b);
-   return strcmp(valuea.humdrum.c_str(), valueb.humdrum.c_str());
+		const void* b) {
+	_HumInstrument& valuea = *((_HumInstrument*)a);
+	_HumInstrument& valueb = *((_HumInstrument*)b);
+	return strcmp(valuea.humdrum.c_str(), valueb.humdrum.c_str());
 }
 
 
@@ -1868,8 +1868,8 @@ int HumInstrument::data_compare_by_humdrum_name(const void* a,
 //
 
 void HumInstrument::sortData(void) {
-   qsort(data.data(), data.size(), sizeof(_HumInstrument), 
-      &HumInstrument::data_compare_by_humdrum_name);
+	qsort(data.data(), data.size(), sizeof(_HumInstrument),
+		&HumInstrument::data_compare_by_humdrum_name);
 }
 
 
@@ -2260,7 +2260,7 @@ bool HumNum::isPowerOfTwo(void) const {
 		return false;
 	}
 	int abstop = top > 0 ? top : -top;
-   if (bot == 1) {
+	if (bot == 1) {
 		return !(abstop & (abstop - 1));
 	} else if (abstop == 1) {
 		return !(bot & (bot - 1));
@@ -2717,13 +2717,13 @@ using namespace std::regex_constants;
 //
 
 HumRegex::HumRegex(void) {
-  // do nothing
+	// do nothing
 }
 
 
 HumRegex::HumRegex(const string& exp) {
-  // initialize a regular expression for the object
-  m_regex = (exp);
+	// initialize a regular expression for the object
+	m_regex = (exp);
 }
 
 
@@ -2734,7 +2734,7 @@ HumRegex::HumRegex(const string& exp) {
 //
 
 HumRegex::~HumRegex() {
-  // do nothing
+	// do nothing
 }
 
 
@@ -2747,7 +2747,6 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
-cerr << "EXPRESSION " << exp << endl;
 	m_regex = exp;
 	return regex_search(input, m_matches, m_regex);
 
@@ -2757,7 +2756,7 @@ cerr << "EXPRESSION " << exp << endl;
 
 /////////////////////////////
 //
-// HumRegex::getMatchCount -- Return the number of submatches that a 
+// HumRegex::getMatchCount -- Return the number of submatches that a
 //   previous call to HumRegex::search generated.
 //
 
@@ -2818,7 +2817,7 @@ int HumRegex::getMatchStartIndex(int index) {
 //////////////////////////////
 //
 // HumRegex::getMatchEndIndex -- Get ending index of match in input
-//     search string.  The index is one larger than the index of the 
+//     search string.  The index is one larger than the index of the
 //     end of the matched position.
 //
 
@@ -3046,12 +3045,13 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 		string testfilename;
 		int repertoryQ = false;
 		auto slash = rest.rfind('/');
+		if (slash != string::npos) {
 			testlocation = rest.substr(0, slash);
 			testfilename = rest.substr(slash+1);
-			if (testfilename.find('.' != string::npos)) {
+			if (testfilename.find('.') == string::npos) {
 				repertoryQ = true;
 			}
-		if (slash != string::npos) {
+		} if (slash == string::npos) {
 			// no files in root directory, but no reperoties either
 			repertoryQ = true;
 		}
@@ -3088,7 +3088,7 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::readFromHumdrumUri -- Read a Humdrum file from an 
+// HumdrumFileBase::readFromHumdrumUri -- Read a Humdrum file from an
 //      humdrum:// web address
 //
 // Example:
@@ -3128,7 +3128,7 @@ void HumdrumFileBase::readFromJrpUri(const string& jrpaddress) {
 
 void HumdrumFileBase::readFromHttpUri(const string& webaddress) {
 	stringstream inputdata;
-   readStringFromHttpUri(inputdata, webaddress);
+	readStringFromHttpUri(inputdata, webaddress);
 	HumdrumFileBase::readString(inputdata.str());
 }
 
@@ -3504,6 +3504,7 @@ void HumdrumFileBase::clear(void) {
 			m_lines[i] = NULL;
 		}
 	}
+	m_lines.clear();
 
 	// clear state variables which are now invalid:
 	m_trackstarts.clear();
@@ -3584,7 +3585,7 @@ bool HumdrumFileBase::setParseError(stringstream& err) {
 
 
 bool HumdrumFileBase::setParseError(const char* format, ...) {
-	char buffer[1024] = {0};	
+	char buffer[1024] = {0};
 	va_list ap;
 	va_start(ap, format);
 	snprintf(buffer, 1024, format, ap);
@@ -3611,22 +3612,22 @@ bool HumdrumFileBase::read(const char* filename) {
 	m_displayError = true;
 
 #ifdef USING_URI
-   if (fname.find("://") != string::npos) {
+	if (fname.find("://") != string::npos) {
 		if (Convert::startsWith(fname, "http://")) {
-         readFromHttpUri(fname);
-         return isValid();
-      }
+			readFromHttpUri(fname);
+			return isValid();
+		}
 		if (Convert::startsWith(fname, "jrp://")) {
-         readFromJrpUri(fname);
-         return isValid();
-      }
+			readFromJrpUri(fname);
+			return isValid();
+		}
 		if (Convert::startsWith(fname, "h://") ||
-		    Convert::startsWith(fname, "hum://") ||
-		    Convert::startsWith(fname, "humdrum://")) {
-         readFromHumdrumUri(fname);
-         return isValid();
-      }
-   }
+			Convert::startsWith(fname, "hum://") ||
+			Convert::startsWith(fname, "humdrum://")) {
+			readFromHumdrumUri(fname);
+			return isValid();
+		}
+	}
 #endif
 
 	ifstream infile;
@@ -3645,6 +3646,7 @@ bool HumdrumFileBase::read(const char* filename) {
 
 
 bool HumdrumFileBase::read(istream& contents) {
+	clear();
 	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
@@ -3653,11 +3655,11 @@ bool HumdrumFileBase::read(istream& contents) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return isValid(); }
-	if (!analyzeLines()          ) { return isValid(); }
-	if (!analyzeSpines()         ) { return isValid(); }
-	if (!analyzeLinks()          ) { return isValid(); }
-	if (!analyzeTracks()         ) { return isValid(); }
+	if (!analyzeTokens()) { return isValid(); }
+	if (!analyzeLines() ) { return isValid(); }
+	if (!analyzeSpines()) { return isValid(); }
+	if (!analyzeLinks() ) { return isValid(); }
+	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
 }
 
@@ -3701,11 +3703,11 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
-	if (!analyzeTokens()         ) { return isValid(); }
-	if (!analyzeLines()          ) { return isValid(); }
-	if (!analyzeSpines()         ) { return isValid(); }
-	if (!analyzeLinks()          ) { return isValid(); }
-	if (!analyzeTracks()         ) { return isValid(); }
+	if (!analyzeTokens()) { return isValid(); }
+	if (!analyzeLines() ) { return isValid(); }
+	if (!analyzeSpines()) { return isValid(); }
+	if (!analyzeLinks() ) { return isValid(); }
+	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
 }
 
@@ -3777,7 +3779,7 @@ bool HumdrumFileBase::isValid(void) {
 		cerr << m_parseError << endl;
 		m_displayError = false;
 	}
-   return m_parseError.empty();
+	return m_parseError.empty();
 }
 
 
@@ -3824,18 +3826,18 @@ string HumdrumFileBase::getFilename(void) {
 //
 
 ostream& HumdrumFileBase::printSegmentLabel(ostream& out) {
-   out << "!!!!SEGMENT";
-   string filename = getFilename();
-   int segment = getSegmentLevel();
-   if (segment != 0) {
-      if (segment < 0) {
-         out << segment;
-      } else {
-         out << "+" << segment;
-      }
-   }
-   out << ": " << filename << endl;
-   return out;
+	out << "!!!!SEGMENT";
+	string filename = getFilename();
+	int segment = getSegmentLevel();
+	if (segment != 0) {
+		if (segment < 0) {
+			out << segment;
+		} else {
+			out << "+" << segment;
+		}
+	}
+	out << ": " << filename << endl;
+	return out;
 }
 
 
@@ -3846,10 +3848,10 @@ ostream& HumdrumFileBase::printSegmentLabel(ostream& out) {
 //
 
 ostream& HumdrumFileBase::printNonemptySegmentLabel(ostream& out) {
-   if (getFilename().size() > 0) {
-      printSegmentLabel(out);
-   } 
-   return out;
+	if (getFilename().size() > 0) {
+		printSegmentLabel(out);
+	}
+	return out;
 }
 
 
@@ -3860,7 +3862,7 @@ ostream& HumdrumFileBase::printNonemptySegmentLabel(ostream& out) {
 //
 
 int HumdrumFileBase::getSegmentLevel(void) {
-   return m_segmentlevel;
+	return m_segmentlevel;
 }
 
 
@@ -3871,7 +3873,7 @@ int HumdrumFileBase::getSegmentLevel(void) {
 //
 
 void HumdrumFileBase::setSegmentLevel(int level) {
-   m_segmentlevel = level;
+	m_segmentlevel = level;
 }
 
 //////////////////////////////
@@ -4037,19 +4039,19 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 //
 
 
-void HumdrumFileBase::insertLine(int index, const char* line) { 
+void HumdrumFileBase::insertLine(int index, const char* line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
-void HumdrumFileBase::insertLine(int index, const string& line) { 
+void HumdrumFileBase::insertLine(int index, const string& line) {
 	HumdrumLine* s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
 }
 
 
-void HumdrumFileBase::insertLine(int index, HumdrumLine* line) { 
+void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
 	// deletion will be handled by class.
 	m_lines.insert(m_lines.begin() + index, line);
 }
@@ -4219,13 +4221,13 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 
 
 void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
-   getSpineStartList(spinestarts, "**kern");
+	getSpineStartList(spinestarts, "**kern");
 }
 
 vector<HTp> HumdrumFileBase::getKernSpineStartList(void) {
-   vector<HTp> starts;
-   HumdrumFileBase::getKernSpineStartList(starts);
-   return starts;
+	vector<HTp> starts;
+	HumdrumFileBase::getKernSpineStartList(starts);
+	return starts;
 }
 
 
@@ -4341,7 +4343,7 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 	int i, j;
 	bool allNull;
 	HTp token;
-   bool foundTrack;
+	bool foundTrack;
 
 	for (i=0; i<infile.getLineCount(); i++) {
 		tempout.resize(0);
@@ -4939,7 +4941,7 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 
 	// Eventually set the foward and backward non-null data token for
 	// tokens in spines for all types of line types  For now specify
-	// the next non-null data token for the exclusive interpretation token. 
+	// the next non-null data token for the exclusive interpretation token.
 	// Also this implementation does not consider that the first
 	// non-null data tokens may be from nultiple split tokens (fix later).
 	vector<HTp> starts;
@@ -4961,7 +4963,7 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 			}
 			token = token->getNextToken();
 		}
-   }
+	}
 	for (int i=0; i<(int)nexts.size(); i++) {
 		if (nexts[i] == NULL) {
 			continue;
@@ -5444,11 +5446,11 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 
 	int top = 1;                // top number of time signature (0 for no meter)
 	int bot = 4;                // bottom number of time signature
-   bool compoundQ = false;     // test for compound meters, such as 6/8
-   HumNum beatdur(1 * 4, bot); // duration of a beat in the measure
+	bool compoundQ = false;     // test for compound meters, such as 6/8
+	HumNum beatdur(1 * 4, bot); // duration of a beat in the measure
 	HumNum measurepos;          // quarter notes from the start of barline
-   HumNum combeatdur;          // for adjusting beat level in compound meters
-   HumNum commeasurepos;       // for adjusting beat level in compound meters
+	HumNum combeatdur;          // for adjusting beat level in compound meters
+	HumNum commeasurepos;       // for adjusting beat level in compound meters
 
 	for (int i=0; i<lineCount; i++) {
 		if (infile[i].isInterpretation()) {
@@ -5555,13 +5557,13 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 						tracktokens[i][j]->setValue("auto", "id",
 								tracktokens[i][j]);
 						sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
-							tracktokens[i][j]->getDurationFromStart() - 
+							tracktokens[i][j]->getDurationFromStart() -
 							sluropens[elisionlevel].back()->getDurationFromStart());
 						sluropens[elisionlevel].pop_back();
 					} else {
 						// no starting slur marker to match to this slur end.
 						tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
-						tracktokens[i][j]->setValue("auto", "slurDration", 
+						tracktokens[i][j]->setValue("auto", "slurDration",
 							tracktokens[i][j]->getDurationToEnd());
 					}
 				}
@@ -5582,7 +5584,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 				}
 
 				if (tracktokens[i][j]->hasSlurEnd()) {
-	
+
 					elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
 					if (elisionlevel >= 0) {
 						if (sluropens[elisionlevel].size() > 0) {
@@ -5595,13 +5597,13 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 							tracktokens[i][j]->setValue("auto", "id",
 									tracktokens[i][j]);
 							sluropens[elisionlevel].back()->setValue("auto", "slurDuration",
-								tracktokens[i][j]->getDurationFromStart() - 
+								tracktokens[i][j]->getDurationFromStart() -
 								sluropens[elisionlevel].back()->getDurationFromStart());
 							sluropens[elisionlevel].pop_back();
 						} else {
 							// no starting slur marker to match to this slur end.
 							tracktokens[i][j]->setValue("auto", "hangingSlur", "true");
-							tracktokens[i][j]->setValue("auto", "slurDration", 
+							tracktokens[i][j]->setValue("auto", "slurDration",
 								tracktokens[i][j]->getDurationToEnd());
 						}
 					}
@@ -5613,7 +5615,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	for (i=0; i<(int)sluropens.size(); i++) {
 		for (j=0; j<(int)sluropens[i].size(); j++) {
 			sluropens[i][j]->setValue("", "auto", "hangingSlur", "true");
-			sluropens[i][j]->setValue("", "auto", "slurDuration", 
+			sluropens[i][j]->setValue("", "auto", "slurDuration",
 				sluropens[i][j]->getDurationFromStart());
 		}
 	}
@@ -5940,7 +5942,7 @@ restarting:
 
 	// (2) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
-	else if (((int)m_filelist.size() > 0) && 
+	else if (((int)m_filelist.size() > 0) &&
 			(m_curfile < (int)m_filelist.size()-1)) {
 		m_curfile++;
 		if (m_instream.is_open()) {
@@ -5982,7 +5984,6 @@ restarting:
 	if (m_newfilebuffer.size() > 0) {
 		// store the filename for the current HumdrumFile being read:
 		HumRegex hre;
-cerr << "GOT HERE AAA" << endl;
 		if (hre.search(m_newfilebuffer,
 				R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
 			if (hre.getMatchLength(1) > 0) {
@@ -6049,7 +6050,6 @@ cerr << "GOT HERE AAA" << endl;
 			string tempstring;
 			tempstring = templine;
 			HumRegex hre;
-cerr << "GOT HERE BBB" << endl;
 			if (hre.search(tempstring,
 					"^!!!!SEGMENT\\s*([+-]?\\d+)?\\s*:\\s*(.*)\\s*$")) {
 				if (hre.getMatchLength(1) > 0) {
@@ -6100,7 +6100,6 @@ cerr << "GOT HERE BBB" << endl;
 				// (i.e., it comes at the start of the file stream and
 				// is the name of the first HumdrumFile in the stream).
 				HumRegex hre;
-cerr << "GOT HERE CCC" << endl;
 				if (hre.search(m_newfilebuffer,
 						R"(^!!!!SEGMENT\s*([+-]?\d+)?\s:\s*(.*)\s*$)")) {
 					if (hre.getMatchLength(1) > 0) {
@@ -6181,6 +6180,9 @@ cerr << "GOT HERE CCC" << endl;
 	// of the data stream (maybe allow for postpending Universal comments
 	// in the future).
 	stringstream contents;
+	contents.str(""); // empty any contents in buffer
+	contents.clear(); // reset error flags in buffer
+
 	for (int i=0; i<(int)m_universals.size(); i++) {
 		contents << &(m_universals[i][1]) << "\n";
 	}
@@ -6254,7 +6256,7 @@ bool HumdrumFileStructure::read(istream& contents) {
 	m_displayError = false;
 	if (!readNoRhythm(contents)) {
 		return isValid();
-	} 
+	}
 	return analyzeStructure();
 }
 
@@ -6266,7 +6268,7 @@ bool HumdrumFileStructure::read(const char* filename) {
 	}
 	return analyzeStructure();
 }
- 
+
 
 bool HumdrumFileStructure::read(const string& filename) {
 	m_displayError = false;
@@ -6889,7 +6891,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 
 ///////////////////////////////
 //
-// HumdrumFileStructure::analyzeLocalParameters -- Parses any 
+// HumdrumFileStructure::analyzeLocalParameters -- Parses any
 //    local comments before a non-null token.
 //
 
@@ -7068,7 +7070,7 @@ bool HumdrumFileStructure::assignDurationsToTrack(HumdrumToken* starttoken,
 	}
 	int state = starttoken->getState();
 	if (!prepareDurations(starttoken, state, startdur)) {
-		return isValid(); 
+		return isValid();
 	}
 	return isValid();
 }
@@ -7374,7 +7376,7 @@ bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 //////////////////////////////
 //
 // HumdrumFileStructure::processLocalParametersForTrack --  Search for
-//   local parameters backwards in each spine and fill in the HumHash 
+//   local parameters backwards in each spine and fill in the HumHash
 //   for the token to which the parameter is to be applied.
 //
 
@@ -7471,7 +7473,7 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	}
 
 	for (i=0; i<(int)m_strand2d.size(); i++) {
-		std::sort(m_strand2d[i].begin(), m_strand2d[i].end(), 
+		std::sort(m_strand2d[i].begin(), m_strand2d[i].end(),
 				sortTokenPairsByLineIndex);
 		for (j=0; j<(int)m_strand2d[i].size(); j++) {
 			m_strand1d.push_back(m_strand2d[i][j]);
@@ -7615,7 +7617,7 @@ HumdrumToken* HumdrumFileStructure::getStrandEnd(int index) const {
 }
 
 
-HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex, 
+HumdrumToken* HumdrumFileStructure::getStrandStart(int sindex,
 		int index) const {
 	return m_strand2d[sindex][index].first;
 }
@@ -7717,7 +7719,7 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 			inquote = true;
 			continue;
 		}
-		if (inquote && (newcsv[i] == '"') && (newcsv[i+1] == '"') 
+		if (inquote && (newcsv[i] == '"') && (newcsv[i+1] == '"')
 				&& (i < (int)newcsv.length()-1)) {
 			output += '"';
 			i++;
@@ -8818,7 +8820,7 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		}
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";
-		
+
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
@@ -9040,25 +9042,25 @@ void HumdrumLine::setParameters(const string& pdata) {
 //      list of tokens in the line.
 //
 
-void HumdrumLine::appendToken(HTp token) { 
+void HumdrumLine::appendToken(HTp token) {
 	// deletion will be handled by class.
 	tokens.push_back(token);
 }
 
 
-void HumdrumLine::appendToken(const HumdrumToken& token) { 
+void HumdrumLine::appendToken(const HumdrumToken& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
 
 
-void HumdrumLine::appendToken(const string& token) { 
+void HumdrumLine::appendToken(const string& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
 
 
-void HumdrumLine::appendToken(const char* token) { 
+void HumdrumLine::appendToken(const char* token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.push_back(newtok);
 }
@@ -9092,25 +9094,25 @@ int HumdrumLine::getKernNoteAttacks(void) {
 //      list of tokens in the line.
 //
 
-void HumdrumLine::insertToken(int index, HTp token) { 
+void HumdrumLine::insertToken(int index, HTp token) {
 	// deletion will be handled by class.
 	tokens.insert(tokens.begin() + index, token);
 }
 
 
-void HumdrumLine::insertToken(int index, const HumdrumToken& token) { 
+void HumdrumLine::insertToken(int index, const HumdrumToken& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }
 
 
-void HumdrumLine::insertToken(int index, const string& token) { 
+void HumdrumLine::insertToken(int index, const string& token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }
 
 
-void HumdrumLine::insertToken(int index, const char* token) { 
+void HumdrumLine::insertToken(int index, const char* token) {
 	HTp newtok = new HumdrumToken(token);
 	tokens.insert(tokens.begin() + index, newtok);
 }
@@ -9177,7 +9179,7 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_nullresolve = NULL;
 }
 
-HumdrumToken::HumdrumToken(const HumdrumToken& aToken) : 
+HumdrumToken::HumdrumToken(const HumdrumToken& aToken) :
 		string((string)aToken) {
 	m_rhycheck = 0;
 	setPrefix("!");
@@ -9310,7 +9312,7 @@ HumNum HumdrumToken::getSlurDuration(HumNum scale) {
 		return getValueFraction("auto", "slurDuration");
 	} else if (isDefined("auto", "slurEnd")) {
 		HTp slurend = getValueHTp("auto", "slurEnd");
-		return slurend->getDurationFromStart(scale) - 
+		return slurend->getDurationFromStart(scale) -
 				getDurationFromStart(scale);
 	} else {
 		return 0;
@@ -9829,10 +9831,10 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
 //
 // HumdrumToken::getBarlineDuration -- Returns the duration between
 //   the next and previous barline.  If the token is a barline token,
-//   then return the duration to the next barline.  The barline duration data 
-//   is filled in automatically when reading a file with the 
+//   then return the duration to the next barline.  The barline duration data
+//   is filled in automatically when reading a file with the
 //   HumdrumFileStructure::analyzeMeter() function.  The duration
-//   will always be non-positive if the file is read with HumdrumFileBase and 
+//   will always be non-positive if the file is read with HumdrumFileBase and
 //   analyzeMeter() is not run to analyze the data.
 //
 
@@ -9857,7 +9859,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationToBarline -- Get duration from start of token to 
+// HumdrumToken::getDurationToBarline -- Get duration from start of token to
 //      the start of the next barline. Units are quarter notes, unless scale
 //      is set to a value other than 1.
 //
@@ -9882,7 +9884,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) const {
 
 //////////////////////////////
 //
-// HumdrumToken::getDurationFromBarline -- Get duration from start of token to 
+// HumdrumToken::getDurationFromBarline -- Get duration from start of token to
 //      the previous barline. Units are quarter notes, unless scale
 //      is set to a value other than 1.
 //
@@ -10021,8 +10023,8 @@ bool HumdrumToken::isNoteAttack(void) {
 // HumdrumToken::isInvisible -- True if a barline and is invisible (contains
 //     a "-" styling), or a note/rest contains the string "yy" which is
 //     interpreted as meaning make it invisible.
-// 
-// 
+//
+//
 
 bool HumdrumToken::isInvisible(void) {
 	if (!isDataType("**kern")) {
@@ -10046,7 +10048,7 @@ bool HumdrumToken::isInvisible(void) {
 //////////////////////////////
 //
 // HumdrumToken::isGrace -- True if a **kern note has no duration.
-// 
+//
 
 bool HumdrumToken::isGrace(void) {
 	if (!isDataType("**kern")) {
@@ -10066,7 +10068,7 @@ bool HumdrumToken::isGrace(void) {
 //////////////////////////////
 //
 // HumdrumToken::isClef -- True if a **kern clef.
-// 
+//
 
 bool HumdrumToken::isClef(void) {
 	if (!isDataType("**kern")) {
@@ -10088,7 +10090,7 @@ bool HumdrumToken::isClef(void) {
 // HumdrumToken::isKeySignature -- True if a **kern key signature.
 //
 
-bool HumdrumToken::isKeySignature(void) { 
+bool HumdrumToken::isKeySignature(void) {
 	if (this->compare(0, 3, "*k[") != 0) {
 		return false;
 	}
@@ -10113,7 +10115,7 @@ bool HumdrumToken::isKeyDesignation(void) {
 		return false;
 	}
 	char diatonic = (*this)[2];
-	
+
 	if ((diatonic >= 'A') && (diatonic <= 'G')) {
 		return true;
 	}
@@ -10153,7 +10155,7 @@ bool HumdrumToken::isTimeSignature(void) {
 // HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
 //
 
-bool HumdrumToken::isMensurationSymbol(void) { 
+bool HumdrumToken::isMensurationSymbol(void) {
 	if (this->compare(0, 5, "*met(") != 0) {
 		return false;
 	}
@@ -10167,7 +10169,7 @@ bool HumdrumToken::isMensurationSymbol(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::hasSlurStart -- Returns true if the **kern token has 
+// HumdrumToken::hasSlurStart -- Returns true if the **kern token has
 //     a '(' character.
 //
 
@@ -10261,7 +10263,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 
 //////////////////////////////
 //
-// HumdrumToken::isSecondaryTiedNote -- Returns true if the token 
+// HumdrumToken::isSecondaryTiedNote -- Returns true if the token
 //     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
 //
 
@@ -10734,7 +10736,7 @@ int  HumdrumToken::getStrandIndex(void) const {
 //   Returns -1 if there is no slur start character.
 //
 
-int HumdrumToken::getSlurStartElisionLevel(void) const { 
+int HumdrumToken::getSlurStartElisionLevel(void) const {
 	if (isDataType("**kern")) {
 		return Convert::getKernSlurStartElisionLevel((string)(*this));
 	} else {
@@ -10751,7 +10753,7 @@ int HumdrumToken::getSlurStartElisionLevel(void) const {
 //   Returns -1 if there is no slur end character.
 //
 
-int HumdrumToken::getSlurEndElisionLevel(void) const { 
+int HumdrumToken::getSlurEndElisionLevel(void) const {
 	if (isDataType("**kern")) {
 		return Convert::getKernSlurEndElisionLevel((string)(*this));
 	} else {
@@ -10983,11 +10985,11 @@ ostream& HumdrumToken::printXmlContentInfo(ostream& out, int level,
 		if (isDefined("auto", "hangingSlur")) {
 			out << " hanging=\"" << getValue("auto", "hangingSlur") << "\"";
 		}
-		out << ">" << endl; 
+		out << ">" << endl;
 		out << Convert::repeatString(indent, level+1);
 		out << "<duration" << Convert::getHumNumAttributes(getSlurDuration());
 		out << "/>\n";
-		out << Convert::repeatString(indent, level) << "</slur>" << endl; 
+		out << Convert::repeatString(indent, level) << "</slur>" << endl;
 	}
 	return out;
 }
@@ -11174,7 +11176,7 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
 }
 
 
-HumdrumToken& HumdrumToken::operator=(const string& aToken) { 
+HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 	(string)(*this) = aToken;
 	m_rhycheck = 0;
 	setPrefix("!");
@@ -11184,7 +11186,7 @@ HumdrumToken& HumdrumToken::operator=(const string& aToken) {
 }
 
 
-HumdrumToken& HumdrumToken::operator=(const char* aToken) { 
+HumdrumToken& HumdrumToken::operator=(const char* aToken) {
 	(string)(*this) = aToken;
 	m_rhycheck = 0;
 	setPrefix("!");
@@ -11355,7 +11357,7 @@ double NoteCell::operator-(int B) {
 //
 
 int NoteCell::getLineIndex(void) {
-   if (!m_token) {
+	if (!m_token) {
 		return -1;
 	}
 	return m_token->getLineIndex();
@@ -11396,7 +11398,7 @@ double NoteCell::getDiatonicIntervalFromPreviousAttack(void) {
 	if (!m_owner) {
 		return NAN;
 	}
-	return getAbsDiatonicPitch() 
+	return getAbsDiatonicPitch()
 			- m_owner->cell(m_voice,previ)->getAbsDiatonicPitch();
 }
 
@@ -11755,7 +11757,7 @@ void NoteGrid::buildAttackIndex(int vindex) {
 		}
 	}
 
-   // start with note attacks marked in the previous and next note slots:
+	// start with note attacks marked in the previous and next note slots:
 	for (int i=0; i<(int)part.size(); i++) {
 		if (part[i]->isAttack()) {
 			part[i]->setNextAttackIndex(i);
@@ -12060,28 +12062,28 @@ void NoteGrid::printVoiceInfo(ostream& out, int vindex) {
 //
 
 Option_register::Option_register(void) {
-   type = 's';
-   modifiedQ = 0;
+	type = 's';
+	modifiedQ = 0;
 }
 
 
 Option_register::Option_register(const string& aDefinition, char aType,
-      const string& aDefaultOption) {
-   type = 's';
-   modifiedQ = 0;
-   setType(aType);
-   setDefinition(aDefinition);
-   setDefault(aDefaultOption);
+		const string& aDefaultOption) {
+	type = 's';
+	modifiedQ = 0;
+	setType(aType);
+	setDefinition(aDefinition);
+	setDefault(aDefaultOption);
 }
 
 Option_register::Option_register(const string& aDefinition, char aType,
-      const string& aDefaultOption, const string& aModifiedOption) {
-   type = 's';
-   modifiedQ = 0;
-   setType(aType);
-   setDefinition(aDefinition);
-   setDefault(aDefaultOption);
-   setModified(aModifiedOption);
+		const string& aDefaultOption, const string& aModifiedOption) {
+	type = 's';
+	modifiedQ = 0;
+	setType(aType);
+	setDefinition(aDefinition);
+	setDefault(aDefaultOption);
+	setModified(aModifiedOption);
 }
 
 
@@ -12092,7 +12094,7 @@ Option_register::Option_register(const string& aDefinition, char aType,
 //
 
 Option_register::~Option_register() {
-   // do nothing
+	// do nothing
 }
 
 
@@ -12103,9 +12105,9 @@ Option_register::~Option_register() {
 //
 
 void Option_register::clearModified(void) {
-   modifiedOption.clear();
-   modifiedQ = 0;
-}   
+	modifiedOption.clear();
+	modifiedQ = 0;
+}
 
 
 
@@ -12116,19 +12118,19 @@ void Option_register::clearModified(void) {
 //
 
 const string& Option_register::getDefinition(void) {
-   return definition;
+	return definition;
 }
 
 
 
 //////////////////////////////
 //
-// Option_register::getDescription -- Return the textual description 
+// Option_register::getDescription -- Return the textual description
 //      of the entry.
 //
 
 const string& Option_register::getDescription(void) {
-   return description;
+	return description;
 }
 
 
@@ -12139,7 +12141,7 @@ const string& Option_register::getDescription(void) {
 //
 
 const string& Option_register::getDefault(void) {
-   return defaultOption;
+	return defaultOption;
 }
 
 
@@ -12150,7 +12152,7 @@ const string& Option_register::getDefault(void) {
 //
 
 const string& Option_register::getModified(void) {
-   return modifiedOption;
+	return modifiedOption;
 }
 
 
@@ -12162,7 +12164,7 @@ const string& Option_register::getModified(void) {
 //
 
 int Option_register::isModified(void) {
-   return modifiedQ;
+	return modifiedQ;
 }
 
 
@@ -12173,7 +12175,7 @@ int Option_register::isModified(void) {
 //
 
 char Option_register::getType(void) {
-   return type;
+	return type;
 }
 
 
@@ -12185,11 +12187,11 @@ char Option_register::getType(void) {
 //
 
 const string& Option_register::getOption(void) {
-   if (isModified()) {
-      return getModified();
-   } else {
-      return getDefault();
-   }
+	if (isModified()) {
+		return getModified();
+	} else {
+		return getDefault();
+	}
 }
 
 
@@ -12201,9 +12203,9 @@ const string& Option_register::getOption(void) {
 //
 
 void Option_register::reset(void) {
-   definition.resize(0);
-   defaultOption.resize(0);
-   modifiedOption.resize(0);
+	definition.resize(0);
+	defaultOption.resize(0);
+	modifiedOption.resize(0);
 }
 
 
@@ -12214,7 +12216,7 @@ void Option_register::reset(void) {
 //
 
 void Option_register::setDefault(const string& aString) {
-   defaultOption = aString;
+	defaultOption = aString;
 }
 
 
@@ -12225,7 +12227,7 @@ void Option_register::setDefault(const string& aString) {
 //
 
 void Option_register::setDefinition(const string& aString) {
-   definition = aString;
+	definition = aString;
 }
 
 
@@ -12236,7 +12238,7 @@ void Option_register::setDefinition(const string& aString) {
 //
 
 void Option_register::setDescription(const string& aString) {
-   description = aString;
+	description = aString;
 }
 
 
@@ -12247,8 +12249,8 @@ void Option_register::setDescription(const string& aString) {
 //
 
 void Option_register::setModified(const string& aString) {
-   modifiedOption = aString;
-   modifiedQ = 1;
+	modifiedOption = aString;
+	modifiedQ = 1;
 }
 
 
@@ -12259,7 +12261,7 @@ void Option_register::setModified(const string& aString) {
 //
 
 void Option_register::setType(char aType) {
-   type = aType;
+	type = aType;
 }
 
 
@@ -12271,13 +12273,13 @@ void Option_register::setType(char aType) {
 //
 
 ostream& Option_register::print(ostream& out) {
-   out << "definition:\t"     << definition     << endl;
-   out << "description:\t"    << description    << endl;
-   out << "defaultOption:\t"  << defaultOption  << endl;
-   out << "modifiedOption:\t" << modifiedOption << endl;
-   out << "modifiedQ:\t\t"    << modifiedQ      << endl;
-   out << "type:\t\t"         << type           << endl;
-   return out;
+	out << "definition:\t"     << definition     << endl;
+	out << "description:\t"    << description    << endl;
+	out << "defaultOption:\t"  << defaultOption  << endl;
+	out << "modifiedOption:\t" << modifiedOption << endl;
+	out << "modifiedQ:\t\t"    << modifiedQ      << endl;
+	out << "type:\t\t"         << type           << endl;
+	return out;
 };
 
 
@@ -12294,30 +12296,30 @@ ostream& Option_register::print(ostream& out) {
 //
 
 Options::Options(void) {
-   m_oargc               = -1;
-   m_suppressQ           =  0;
-   m_processedQ          =  0;
-   m_optionsArgument     =  0;
-   m_options_error_check =  1;
-   m_optionFlag          = '-';
+	m_oargc               = -1;
+	m_suppressQ           =  0;
+	m_processedQ          =  0;
+	m_optionsArgument     =  0;
+	m_options_error_check =  1;
+	m_optionFlag          = '-';
 
-   m_extraArgv.reserve(100);
-   m_extraArgv_strings.reserve(100);
+	m_extraArgv.reserve(100);
+	m_extraArgv_strings.reserve(100);
 }
 
 
 Options::Options(int argc, char** argv) {
-   m_oargc               = -1;
-   m_suppressQ           =  0;
-   m_processedQ          =  0;
-   m_optionsArgument     =  0;
-   m_options_error_check =  1;
-   m_optionFlag          = '-';
+	m_oargc               = -1;
+	m_suppressQ           =  0;
+	m_processedQ          =  0;
+	m_optionsArgument     =  0;
+	m_options_error_check =  1;
+	m_optionFlag          = '-';
 
-   m_extraArgv.reserve(100);
-   m_extraArgv_strings.reserve(100);
+	m_extraArgv.reserve(100);
+	m_extraArgv_strings.reserve(100);
 
-   setOptions(argc, argv);
+	setOptions(argc, argv);
 }
 
 
@@ -12328,7 +12330,7 @@ Options::Options(int argc, char** argv) {
 //
 
 Options::~Options() {
-   reset();
+	reset();
 }
 
 
@@ -12339,7 +12341,7 @@ Options::~Options() {
 //
 
 int Options::argc(void) const {
-   return m_oargc;
+	return m_oargc;
 }
 
 
@@ -12350,7 +12352,7 @@ int Options::argc(void) const {
 //
 
 const vector<string>& Options::argv(void) const {
-   return m_oargv;
+	return m_oargv;
 }
 
 
@@ -12368,89 +12370,89 @@ const vector<string>& Options::argv(void) const {
 //
 
 int Options::define(const string& aDefinition) {
-   Option_register* definitionEntry = NULL;
+	Option_register* definitionEntry = NULL;
 
-   // Error if definition string doesn't contain an equals sign
-   auto location = aDefinition.find("=");
-   if (location == string::npos) {
-      cerr << "Error: no \"=\" in option definition: " << aDefinition << endl;
-      exit(1);
-   }
+	// Error if definition string doesn't contain an equals sign
+	auto location = aDefinition.find("=");
+	if (location == string::npos) {
+		cerr << "Error: no \"=\" in option definition: " << aDefinition << endl;
+		exit(1);
+	}
 
-   string aliases = aDefinition.substr(0, location);
-   string rest    = aDefinition.substr(location+1);
-   string otype   = rest;
-   string ovalue  = "";
+	string aliases = aDefinition.substr(0, location);
+	string rest    = aDefinition.substr(location+1);
+	string otype   = rest;
+	string ovalue  = "";
 
-   location = rest.find(":");
-   if (location != string::npos) {
-      otype  = rest.substr(0, location);
-      ovalue = rest.substr(location+1);
-   }
+	location = rest.find(":");
+	if (location != string::npos) {
+		otype  = rest.substr(0, location);
+		ovalue = rest.substr(location+1);
+	}
 
-   // Remove anyspaces in the option type field
-   otype.erase(remove_if(otype.begin(), otype.end(), ::isspace), otype.end());
-   
-   // Option types are only a single charater (b, i, d, c or s)
-   if (otype.size() != 1) {
-      cerr << "Error: option type is invalid: " << otype 
-           << " in option definition: " << aDefinition << endl;
-      exit(1);
-   }
+	// Remove anyspaces in the option type field
+	otype.erase(remove_if(otype.begin(), otype.end(), ::isspace), otype.end());
 
-   // Check to make sure that the type is known
-   if (otype[0] != OPTION_STRING_TYPE  &&
-       otype[0] != OPTION_INT_TYPE     &&
-       otype[0] != OPTION_FLOAT_TYPE   &&
-       otype[0] != OPTION_DOUBLE_TYPE  &&
-       otype[0] != OPTION_BOOLEAN_TYPE &&
-       otype[0] != OPTION_CHAR_TYPE ) {
-      cerr << "Error: unknown option type \'" << otype[0]
-           << "\' in defintion: " << aDefinition << endl;
-      exit(1);
-   }
+	// Option types are only a single charater (b, i, d, c or s)
+	if (otype.size() != 1) {
+		cerr << "Error: option type is invalid: " << otype
+			  << " in option definition: " << aDefinition << endl;
+		exit(1);
+	}
 
-   // Set up space for a option entry in the registry
-   definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
+	// Check to make sure that the type is known
+	if (otype[0] != OPTION_STRING_TYPE  &&
+		 otype[0] != OPTION_INT_TYPE     &&
+		 otype[0] != OPTION_FLOAT_TYPE   &&
+		 otype[0] != OPTION_DOUBLE_TYPE  &&
+		 otype[0] != OPTION_BOOLEAN_TYPE &&
+		 otype[0] != OPTION_CHAR_TYPE ) {
+		cerr << "Error: unknown option type \'" << otype[0]
+			  << "\' in defintion: " << aDefinition << endl;
+		exit(1);
+	}
 
-   auto definitionIndex = m_optionRegister.size();
+	// Set up space for a option entry in the registry
+	definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-   // Store option aliases
-   string optionName;
-   unsigned int i;
-   aliases += '|';
-   for (i=0; i<aliases.size(); i++) {
-      if (::isspace(aliases[i])) {
-         continue;
-      } else if (aliases[i] == '|') {
-         if (isDefined(optionName)) {
-            cerr << "Option \"" << optionName << "\" from definition:" << endl;
-            cerr << "\t" << aDefinition << endl;
-            cerr << "is already defined in: " << endl;
-            cerr << "\t" << getDefinition(optionName) << endl;
-            exit(1);
-         }
-         if (optionName.size() > 0) {
-            m_optionList[optionName] = definitionIndex;
-         }
-         optionName.clear();
-      } else {
-         optionName += aliases[i];
-      }
-   }
+	auto definitionIndex = m_optionRegister.size();
 
-   // Store definition in registry and return its indexed location.
-   // This location will be used to link option aliases to the main
-   // command name.
-   m_optionRegister.push_back(definitionEntry);
-   return definitionIndex;
+	// Store option aliases
+	string optionName;
+	unsigned int i;
+	aliases += '|';
+	for (i=0; i<aliases.size(); i++) {
+		if (::isspace(aliases[i])) {
+			continue;
+		} else if (aliases[i] == '|') {
+			if (isDefined(optionName)) {
+				cerr << "Option \"" << optionName << "\" from definition:" << endl;
+				cerr << "\t" << aDefinition << endl;
+				cerr << "is already defined in: " << endl;
+				cerr << "\t" << getDefinition(optionName) << endl;
+				exit(1);
+			}
+			if (optionName.size() > 0) {
+				m_optionList[optionName] = definitionIndex;
+			}
+			optionName.clear();
+		} else {
+			optionName += aliases[i];
+		}
+	}
+
+	// Store definition in registry and return its indexed location.
+	// This location will be used to link option aliases to the main
+	// command name.
+	m_optionRegister.push_back(definitionEntry);
+	return definitionIndex;
 }
 
 
 int Options::define(const string& aDefinition, const string& aDescription) {
-   int index = define(aDefinition);
-   m_optionRegister[index]->setDescription(aDescription);
-   return index;
+	int index = define(aDefinition);
+	m_optionRegister[index]->setDescription(aDescription);
+	return index;
 }
 
 
@@ -12461,11 +12463,11 @@ int Options::define(const string& aDefinition, const string& aDescription) {
 //
 
 int Options::isDefined(const string& name) {
-   if (m_optionList.find(name) == m_optionList.end()) {
-      return 0;
-   } else {
-      return 1;
-   }
+	if (m_optionList.find(name) == m_optionList.end()) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 
@@ -12477,17 +12479,17 @@ int Options::isDefined(const string& name) {
 //
 
 const string& Options::getArg(int index) {
-   if (index < 0 || index >= (int)m_argument.size()) {
-      cerr << "Error: argument " << index << " does not exist." << endl;
-      exit(1);
-   }
-   return *m_argument[index];
+	if (index < 0 || index >= (int)m_argument.size()) {
+		cerr << "Error: argument " << index << " does not exist." << endl;
+		exit(1);
+	}
+	return *m_argument[index];
 }
 
 // Alias:
 
 const string& Options::getArgument(int index) {
-   return getArg(index);
+	return getArg(index);
 }
 
 
@@ -12499,13 +12501,13 @@ const string& Options::getArgument(int index) {
 //
 
 int Options::getArgCount(void) {
-   return m_argument.size() - 1;
+	return m_argument.size() - 1;
 }
 
 // Alias:
 
 int Options::getArgumentCount(void) {
-   return getArgCount();
+	return getArgCount();
 }
 
 
@@ -12518,17 +12520,17 @@ int Options::getArgumentCount(void) {
 //
 
 vector<string>& Options::getArgList(vector<string>& output) {
-   output.clear();
-   for (int i=1; i<(int)m_argument.size(); i++) {
-      output.push_back(*m_argument[i]);
-   }
-   return output;
+	output.clear();
+	for (int i=1; i<(int)m_argument.size(); i++) {
+		output.push_back(*m_argument[i]);
+	}
+	return output;
 }
 
 // Alias:
 
-vector<string>& Options::getArgumentList(vector<string>& output) { 
-   return getArgList(output);
+vector<string>& Options::getArgumentList(vector<string>& output) {
+	return getArgList(output);
 }
 
 
@@ -12540,11 +12542,11 @@ vector<string>& Options::getArgumentList(vector<string>& output) {
 //
 
 int Options::getBoolean(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return 0;
-   }
-   return m_optionRegister[index]->isModified();
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return 0;
+	}
+	return m_optionRegister[index]->isModified();
 }
 
 
@@ -12556,11 +12558,11 @@ int Options::getBoolean(const string& optionName) {
 //
 
 string Options::getCommand(void) {
-   if (m_argument.size() == 0) {
-      return "";
-   } else {
-      return *m_argument[0];
-   }
+	if (m_argument.size() == 0) {
+		return "";
+	} else {
+		return *m_argument[0];
+	}
 }
 
 
@@ -12572,38 +12574,38 @@ string Options::getCommand(void) {
 //
 
 const string& Options::getCommandLine(void) {
-   if (m_commandString.size()) {
-      return m_commandString;
-   }
+	if (m_commandString.size()) {
+		return m_commandString;
+	}
 
-   m_commandString = m_oargv[0];
+	m_commandString = m_oargv[0];
 
-   int i;
-   for (i=1; i<m_oargc; i++) {
-      m_commandString += " ";
-      m_commandString += m_oargv[i];
-   }
+	int i;
+	for (i=1; i<m_oargc; i++) {
+		m_commandString += " ";
+		m_commandString += m_oargv[i];
+	}
 
-   return m_commandString;
+	return m_commandString;
 }
-   
+
 
 
 
 //////////////////////////////
 //
-// Options::getDefinition -- returns the definition for the specified 
-//      option name.  Returns empty string if there is no entry for 
+// Options::getDefinition -- returns the definition for the specified
+//      option name.  Returns empty string if there is no entry for
 //      the option name.  spaces count in the input option name.
 //
 
 string Options::getDefinition(const string& optionName) {
-   auto it = m_optionList.find(optionName);
-   if (it == m_optionList.end()) {
-      return "";
-   } else {
-      return m_optionRegister[it->second]->getDefinition();
-   }
+	auto it = m_optionList.find(optionName);
+	if (it == m_optionList.end()) {
+		return "";
+	} else {
+		return m_optionRegister[it->second]->getDefinition();
+	}
 }
 
 
@@ -12616,7 +12618,7 @@ string Options::getDefinition(const string& optionName) {
 //
 
 double Options::getDouble(const string& optionName) {
-   return strtod(getString(optionName).c_str(), (char**)NULL);
+	return strtod(getString(optionName).c_str(), (char**)NULL);
 }
 
 
@@ -12628,7 +12630,7 @@ double Options::getDouble(const string& optionName) {
 //
 
 char Options::getChar(const string& optionName) {
-   return getString(optionName).c_str()[0];
+	return getString(optionName).c_str()[0];
 }
 
 
@@ -12640,7 +12642,7 @@ char Options::getChar(const string& optionName) {
 //
 
 float Options::getFloat(const string& optionName) {
-   return (float)getDouble(optionName);
+	return (float)getDouble(optionName);
 }
 
 
@@ -12648,16 +12650,16 @@ float Options::getFloat(const string& optionName) {
 //////////////////////////////
 //
 // Options::getInt -- Return the integer argument.  Can handle
-//	hexadecimal, decimal, and octal written in standard 
+//	hexadecimal, decimal, and octal written in standard
 //	C syntax.
 //
 
 int Options::getInt(const string& optionName) {
-   return (int)strtol(getString(optionName).c_str(), (char**)NULL, 0);
+	return (int)strtol(getString(optionName).c_str(), (char**)NULL, 0);
 }
 
 int Options::getInteger(const string& optionName) {
-   return getInt(optionName);
+	return getInt(optionName);
 }
 
 
@@ -12668,12 +12670,12 @@ int Options::getInteger(const string& optionName) {
 //
 
 string Options::getString(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return "UNKNOWN OPTION";
-   } else {
-      return m_optionRegister[index]->getOption();
-   }
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return "UNKNOWN OPTION";
+	} else {
+		return m_optionRegister[index]->getOption();
+	}
 }
 
 
@@ -12685,7 +12687,7 @@ string Options::getString(const string& optionName) {
 //
 
 int Options::optionsArg(void) {
-   return m_optionsArgument;
+	return m_optionsArgument;
 }
 
 
@@ -12696,11 +12698,11 @@ int Options::optionsArg(void) {
 //
 
 ostream& Options::print(ostream& out) {
-   for (unsigned int i=0; i<m_optionRegister.size(); i++) {
-      out << m_optionRegister[i]->getDefinition() << "\t"
-           << m_optionRegister[i]->getDescription() << endl;
-   }
-   return out;
+	for (unsigned int i=0; i<m_optionRegister.size(); i++) {
+		out << m_optionRegister[i]->getDefinition() << "\t"
+			  << m_optionRegister[i]->getDescription() << endl;
+	}
+	return out;
 }
 
 
@@ -12711,24 +12713,24 @@ ostream& Options::print(ostream& out) {
 //
 
 void Options::reset(void) {
-   unsigned int i;
-   for (i=0; i<m_optionRegister.size(); i++) {
-      delete m_optionRegister[i];
-      m_optionRegister[i] = NULL;
-   }
-   m_optionRegister.clear();
+	unsigned int i;
+	for (i=0; i<m_optionRegister.size(); i++) {
+		delete m_optionRegister[i];
+		m_optionRegister[i] = NULL;
+	}
+	m_optionRegister.clear();
 
-   for (i=0; i<m_argument.size(); i++) {
-      delete m_argument[i];
-      m_argument[i] = NULL;
-   }
-   m_argument.resize(0);
-   m_commandString.clear();
-   m_extraArgv.clear();
-   m_extraArgv_strings.clear();
+	for (i=0; i<m_argument.size(); i++) {
+		delete m_argument[i];
+		m_argument[i] = NULL;
+	}
+	m_argument.resize(0);
+	m_commandString.clear();
+	m_extraArgv.clear();
+	m_extraArgv_strings.clear();
 
-   m_oargc = -1;
-   m_oargv.clear();
+	m_oargc = -1;
+	m_oargv.clear();
 }
 
 
@@ -12739,37 +12741,37 @@ void Options::reset(void) {
 //
 
 char Options::getFlag(void) {
-   return m_optionFlag;
+	return m_optionFlag;
 }
 
 
 
 //////////////////////////////
 //
-// Options::setFlag -- Set the character used to indicate an 
+// Options::setFlag -- Set the character used to indicate an
 //	option.  For unix this is usually '-', in MS-DOS,
 //	this is usually '/';  But the syntax of the Options
 //	class is for Unix-style options.
 //
 
 void Options::setFlag(char aFlag) {
-   m_optionFlag = aFlag;
+	m_optionFlag = aFlag;
 }
 
 
 
 //////////////////////////////
 //
-// Options::setModified -- 
+// Options::setModified --
 //
 
 void Options::setModified(const string& optionName, const string& aString) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return;
-   }
-   
-   m_optionRegister[getRegIndex(optionName)]->setModified(aString);
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return;
+	}
+
+	m_optionRegister[getRegIndex(optionName)]->setModified(aString);
 }
 
 
@@ -12781,20 +12783,20 @@ void Options::setModified(const string& optionName, const string& aString) {
 //
 
 void Options::setOptions(int argc, char** argv) {
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   m_extraArgv.resize(argc);
-   m_extraArgv_strings.resize(argc);
-   int oldsize = 0;
+	m_extraArgv.resize(argc);
+	m_extraArgv_strings.resize(argc);
+	int oldsize = 0;
 
-   int i;
-   for (i=0; i<argc; i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i] = m_extraArgv_strings[i];
-   }
+	int i;
+	for (i=0; i<argc; i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i] = m_extraArgv_strings[i];
+	}
 
-   m_oargc  = m_extraArgv.size();
-   m_oargv  = m_extraArgv;
+	m_oargc  = m_extraArgv.size();
+	m_oargv  = m_extraArgv;
 }
 
 
@@ -12807,43 +12809,43 @@ void Options::setOptions(int argc, char** argv) {
 
 void Options::appendOptions(int argc, char** argv) {
 
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   // data used to be stored directly here:
-   //gargc = argc;
-   //gargv = argv;
-   // but now gets interfaced to: m_extraArgv and m_extraArgv_strings:
+	// data used to be stored directly here:
+	//gargc = argc;
+	//gargv = argv;
+	// but now gets interfaced to: m_extraArgv and m_extraArgv_strings:
 
-   int oldsize = m_extraArgv.size();
-   m_extraArgv.resize(oldsize + argc);
-   m_extraArgv_strings.resize(oldsize + argc);
+	int oldsize = m_extraArgv.size();
+	m_extraArgv.resize(oldsize + argc);
+	m_extraArgv_strings.resize(oldsize + argc);
 
-   int i;
-   for (i=0; i<argc; i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
-   }
+	int i;
+	for (i=0; i<argc; i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
+	}
 
-   m_oargc = m_extraArgv.size();
-   m_oargv = m_extraArgv;
+	m_oargc = m_extraArgv.size();
+	m_oargv = m_extraArgv;
 }
 
 
 void Options::appendOptions(const vector<string>& argv) {
-   m_processedQ = 0;
+	m_processedQ = 0;
 
-   int oldsize = m_extraArgv.size();
-   m_extraArgv.resize(oldsize + argv.size());
-   m_extraArgv_strings.resize(oldsize + argv.size());
+	int oldsize = m_extraArgv.size();
+	m_extraArgv.resize(oldsize + argv.size());
+	m_extraArgv_strings.resize(oldsize + argv.size());
 
-   unsigned int i;
-   for (i=0; i<argv.size(); i++) {
-      m_extraArgv_strings[i+oldsize] = argv[i];
-      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
-   }
+	unsigned int i;
+	for (i=0; i<argv.size(); i++) {
+		m_extraArgv_strings[i+oldsize] = argv[i];
+		m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
+	}
 
-   m_oargc = m_extraArgv.size();
-   m_oargv = m_extraArgv;
+	m_oargc = m_extraArgv.size();
+	m_oargv = m_extraArgv;
 }
 
 
@@ -12861,87 +12863,87 @@ void Options::appendOptions(const vector<string>& argv) {
 //
 
 void Options::appendOptions(const string& strang) {
-   int i;
-   int doublequote = 0;
-   int singlequote = 0;
+	int i;
+	int doublequote = 0;
+	int singlequote = 0;
 
-   vector<string> tokens;
-   vector<string> tempargv;
-   string tempvalue;
+	vector<string> tokens;
+	vector<string> tempargv;
+	string tempvalue;
 
-   tokens.reserve(100);
-   tempargv.reserve(100);
-   tempvalue.reserve(1000);
+	tokens.reserve(100);
+	tempargv.reserve(100);
+	tempvalue.reserve(1000);
 
-   char ch;
+	char ch;
 
-   int length = strang.size();
-   for (i=0; i<length; i++) {
+	int length = strang.size();
+	for (i=0; i<length; i++) {
 
-      if (!singlequote && (strang[i] == '"')) {
-         if ((i>0) && (strang[i-1] != '\\')) {
-            doublequote = !doublequote;
-            if (doublequote == 0) {
-               // finished a doublequoted section of data, so store
-               // even if it is the empty string
-               ch = '\0';
-               tempvalue += (ch);
-               tokens.push_back(tempvalue);
-               tempvalue.clear();
-               continue;
-            } else {
-               // don't store the leading ":
-               continue;
-            }
-         }
-      } else if (!doublequote && (strang[i] == '\'')) {
-         if ((i>0) && (strang[i-1] != '\\')) {
-            singlequote = !singlequote;
-            if (singlequote == 0) {
-               // finished a singlequote section of data, so store
-               // even if it is the empty string
-               ch = '\0';
-               tempvalue += ch;
-               tokens.push_back(tempvalue);
-               tempvalue.clear();
-               continue;
-            } else {
-               // don't store the leading ":
-               continue;
-            }
-         }
-      }
+		if (!singlequote && (strang[i] == '"')) {
+			if ((i>0) && (strang[i-1] != '\\')) {
+				doublequote = !doublequote;
+				if (doublequote == 0) {
+					// finished a doublequoted section of data, so store
+					// even if it is the empty string
+					ch = '\0';
+					tempvalue += (ch);
+					tokens.push_back(tempvalue);
+					tempvalue.clear();
+					continue;
+				} else {
+					// don't store the leading ":
+					continue;
+				}
+			}
+		} else if (!doublequote && (strang[i] == '\'')) {
+			if ((i>0) && (strang[i-1] != '\\')) {
+				singlequote = !singlequote;
+				if (singlequote == 0) {
+					// finished a singlequote section of data, so store
+					// even if it is the empty string
+					ch = '\0';
+					tempvalue += ch;
+					tokens.push_back(tempvalue);
+					tempvalue.clear();
+					continue;
+				} else {
+					// don't store the leading ":
+					continue;
+				}
+			}
+		}
 
 
-      if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
-         if (tempvalue.size() > 0) {
-            tempvalue += ch;
-            tokens.push_back(tempvalue);
-            tempvalue.clear();
-         }
-      } else {
-         ch = strang[i];
-         tempvalue += ch;
-      }
-   }
-   if (tempvalue.size() > 0) {
-      tokens.push_back(tempvalue);
-      tempvalue.clear();
-   }
+		if ((!doublequote && !singlequote) && std::isspace(strang[i])) {
+			if (tempvalue.size() > 0) {
+				tempvalue += ch;
+				tokens.push_back(tempvalue);
+				tempvalue.clear();
+			}
+		} else {
+			ch = strang[i];
+			tempvalue += ch;
+		}
+	}
+	if (tempvalue.size() > 0) {
+		tokens.push_back(tempvalue);
+		tempvalue.clear();
+	}
 
-   // now that the input string has been chopped up into pieces,
-   // assemble the argv structure
+	// now that the input string has been chopped up into pieces,
+	// assemble the argv structure
 
-   tempargv.reserve(tokens.size());
-   for (i=0; i<(int)tempargv.size(); i++) {
-      tempargv[i] = tokens[i];
-   }
+	tempargv.reserve(tokens.size());
+	for (i=0; i<(int)tempargv.size(); i++) {
+		tempargv[i] = tokens[i];
+	}
 
-   // now store the argv and argc data in opts:
+	// now store the argv and argc data in opts:
 
-   // now store the parsed command-line simulated tokens
-   // for actual storage:
-   appendOptions(tempargv);
+	// now store the parsed command-line simulated tokens
+	// for actual storage:
+	appendOptions(tempargv);
 }
 
 
@@ -12952,12 +12954,12 @@ void Options::appendOptions(const string& strang) {
 //
 
 char Options::getType(const string& optionName) {
-   int index = getRegIndex(optionName);
-   if (index < 0) {
-      return -1;
-   } else {
-      return m_optionRegister[getRegIndex(optionName)]->getType();
-   }
+	int index = getRegIndex(optionName);
+	if (index < 0) {
+		return -1;
+	} else {
+		return m_optionRegister[getRegIndex(optionName)]->getType();
+	}
 }
 
 
@@ -12969,13 +12971,13 @@ char Options::getType(const string& optionName) {
 //
 
 void Options::process(int argc, char** argv, int error_check, int suppress) {
-   setOptions(argc, argv);
-   xverify(error_check, suppress);
+	setOptions(argc, argv);
+	xverify(error_check, suppress);
 }
 
 
 void Options::process(int error_check, int suppress) {
-   xverify(error_check, suppress);
+	xverify(error_check, suppress);
 }
 
 
@@ -12987,69 +12989,69 @@ void Options::process(int error_check, int suppress) {
 //
 
 void Options::xverify(int error_check, int suppress) {
-   m_options_error_check = error_check;
-   int gargp = 1;
-   int optionend = 0;
+	m_options_error_check = error_check;
+	int gargp = 1;
+	int optionend = 0;
 
-   if (suppress) {
-      m_suppressQ = 1;
-   } else {
-      m_suppressQ = 0;
-   }
+	if (suppress) {
+		m_suppressQ = 1;
+	} else {
+		m_suppressQ = 0;
+	}
 
-   // if calling xverify again, must remove previous argument list.
-   int i;
-   if (m_argument.size() != 0) {
-      for (i=0; i<(int)m_argument.size(); i++) {
-         delete m_argument[i];
-      }
-      m_argument.resize(0);
-   }
+	// if calling xverify again, must remove previous argument list.
+	int i;
+	if (m_argument.size() != 0) {
+		for (i=0; i<(int)m_argument.size(); i++) {
+			delete m_argument[i];
+		}
+		m_argument.resize(0);
+	}
 
-   string* tempstr = new string(m_oargv[0]);
-   m_argument.push_back(tempstr);
+	string* tempstr = new string(m_oargv[0]);
+	m_argument.push_back(tempstr);
 
-   int oldgargp;
-   int position = 0;
-   int running = 0;
-   while (gargp < m_oargc && optionend == 0) {
-      if (optionQ(m_oargv[gargp], gargp)) {
-         oldgargp = gargp;
-         gargp = storeOption(gargp, position, running);
-         if (gargp != oldgargp) {
-            running = 0;
-            position = 0;
-         }
-      } else {
-         if (m_oargv[gargp].size() == 2 && m_oargv[gargp][0] == getFlag() &&
-            m_oargv[gargp][2] == getFlag() ) {
-               optionend = 1;
-            gargp++;
-            break;
-         } else {                          // this is an argument
-            tempstr = new string(m_oargv[gargp]);
-            m_argument.push_back(tempstr);
-            gargp++;
-         }
-      }
-   }
+	int oldgargp;
+	int position = 0;
+	int running = 0;
+	while (gargp < m_oargc && optionend == 0) {
+		if (optionQ(m_oargv[gargp], gargp)) {
+			oldgargp = gargp;
+			gargp = storeOption(gargp, position, running);
+			if (gargp != oldgargp) {
+				running = 0;
+				position = 0;
+			}
+		} else {
+			if (m_oargv[gargp].size() == 2 && m_oargv[gargp][0] == getFlag() &&
+				m_oargv[gargp][2] == getFlag() ) {
+					optionend = 1;
+				gargp++;
+				break;
+			} else {                          // this is an argument
+				tempstr = new string(m_oargv[gargp]);
+				m_argument.push_back(tempstr);
+				gargp++;
+			}
+		}
+	}
 
-   while (gargp < m_oargc) {
-      tempstr = new string(m_oargv[gargp]);
-      m_argument.push_back(tempstr);
-      gargp++;
-   }
+	while (gargp < m_oargc) {
+		tempstr = new string(m_oargv[gargp]);
+		m_argument.push_back(tempstr);
+		gargp++;
+	}
 
 }
 
 
 void Options::xverify(int argc, char** argv, int error_check, int suppress) {
-   setOptions(argc, argv);
-   xverify(error_check, suppress);
+	setOptions(argc, argv);
+	xverify(error_check, suppress);
 }
 
 
-   
+
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -13064,30 +13066,30 @@ void Options::xverify(int argc, char** argv, int error_check, int suppress) {
 //
 
 int Options::getRegIndex(const string& optionName) {
-   if (m_suppressQ && (optionName == "options")) {
-         return -1;
-   } 
+	if (m_suppressQ && (optionName == "options")) {
+			return -1;
+	}
 
-   if (optionName == "options") {
-      print(cout);
-      exit(0);
-   } 
+	if (optionName == "options") {
+		print(cout);
+		exit(0);
+	}
 
 
-   auto it = m_optionList.find(optionName);
-   if (it == m_optionList.end()) {
-      if (m_options_error_check) {
-         cerr << "Error: unknown option \"" << optionName << "\"." << endl;
-         print(cout);
-         exit(1);
-      } else {
-         return -1;
-      }
-   } else {
-      return it->second;
-   }
+	auto it = m_optionList.find(optionName);
+	if (it == m_optionList.end()) {
+		if (m_options_error_check) {
+			cerr << "Error: unknown option \"" << optionName << "\"." << endl;
+			print(cout);
+			exit(1);
+		} else {
+			return -1;
+		}
+	} else {
+		return it->second;
+	}
 }
-   
+
 
 
 //////////////////////////////
@@ -13098,30 +13100,30 @@ int Options::getRegIndex(const string& optionName) {
 //
 
 int Options::optionQ(const string& aString, int& argp) {
-   if (aString[0] == getFlag()) {
-      if (aString[1] == '\0') {
-         argp++; 
-         return 0;
-      } else if (aString[1] == getFlag()) {
-         if (aString[2] == '\0') {
-            argp++;
-            return 0;
-         } else {
-            return 1;
-         }
-      } else {
-         return 1;
-      }
-   } else {
-      return 0;
-   }
+	if (aString[0] == getFlag()) {
+		if (aString[1] == '\0') {
+			argp++;
+			return 0;
+		} else if (aString[1] == getFlag()) {
+			if (aString[2] == '\0') {
+				argp++;
+				return 0;
+			} else {
+				return 1;
+			}
+		} else {
+			return 1;
+		}
+	} else {
+		return 0;
+	}
 }
 
 
 
 //////////////////////////////
 //
-// Options::storeOption -- 
+// Options::storeOption --
 //
 
 #define OPTION_FORM_SHORT     0
@@ -13129,94 +13131,94 @@ int Options::optionQ(const string& aString, int& argp) {
 #define OPTION_FORM_CONTINUE  2
 
 int Options::storeOption(int gargp, int& position, int& running) {
-   int optionForm;
-   char tempname[1024];
-   char optionType = '\0';
+	int optionForm;
+	char tempname[1024];
+	char optionType = '\0';
 
-   if (running) {
-      optionForm = OPTION_FORM_CONTINUE;
-   } else if (m_oargv[gargp][1] == getFlag()) {
-      optionForm = OPTION_FORM_LONG;
-   } else {
-      optionForm = OPTION_FORM_SHORT;
-   }
+	if (running) {
+		optionForm = OPTION_FORM_CONTINUE;
+	} else if (m_oargv[gargp][1] == getFlag()) {
+		optionForm = OPTION_FORM_LONG;
+	} else {
+		optionForm = OPTION_FORM_SHORT;
+	}
 
-   switch (optionForm) {
-      case OPTION_FORM_CONTINUE:
-         position++;
-         tempname[0] = m_oargv[gargp][position];
-         tempname[1] = '\0';
-         optionType = getType(tempname);
-         if (optionType != OPTION_BOOLEAN_TYPE) {
-            running = 0;
-            position++;
-         }
-         break;
-      case OPTION_FORM_SHORT:   
-         position = 1;
-         tempname[0] = m_oargv[gargp][position];
-         tempname[1] = '\0';
-         optionType = getType(tempname);
-         if (optionType != OPTION_BOOLEAN_TYPE) {
-            position++;
-         }
-         break;
-      case OPTION_FORM_LONG:   
-         position = 2;
-         while (m_oargv[gargp][position] != '=' && 
-               m_oargv[gargp][position] != '\0') {
-            tempname[position-2] = m_oargv[gargp][position];
-            position++;    
-         }
-         tempname[position-2] = '\0';
-         optionType = getType(tempname);
-         if (optionType == -1) {         // suppressed --options option
-            m_optionsArgument = 1;
-            break;   
-         }
-         if (m_oargv[gargp][position] == '=') {
-            if (optionType == OPTION_BOOLEAN_TYPE) {
-               cerr << "Error: boolean variable cannot have any options: " 
-                    << tempname << endl;
-               exit(1);
-            }
-            position++;
-         }
-         break;
-   }
+	switch (optionForm) {
+		case OPTION_FORM_CONTINUE:
+			position++;
+			tempname[0] = m_oargv[gargp][position];
+			tempname[1] = '\0';
+			optionType = getType(tempname);
+			if (optionType != OPTION_BOOLEAN_TYPE) {
+				running = 0;
+				position++;
+			}
+			break;
+		case OPTION_FORM_SHORT:
+			position = 1;
+			tempname[0] = m_oargv[gargp][position];
+			tempname[1] = '\0';
+			optionType = getType(tempname);
+			if (optionType != OPTION_BOOLEAN_TYPE) {
+				position++;
+			}
+			break;
+		case OPTION_FORM_LONG:
+			position = 2;
+			while (m_oargv[gargp][position] != '=' &&
+					m_oargv[gargp][position] != '\0') {
+				tempname[position-2] = m_oargv[gargp][position];
+				position++;
+			}
+			tempname[position-2] = '\0';
+			optionType = getType(tempname);
+			if (optionType == -1) {         // suppressed --options option
+				m_optionsArgument = 1;
+				break;
+			}
+			if (m_oargv[gargp][position] == '=') {
+				if (optionType == OPTION_BOOLEAN_TYPE) {
+					cerr << "Error: boolean variable cannot have any options: "
+						  << tempname << endl;
+					exit(1);
+				}
+				position++;
+			}
+			break;
+	}
 
-   if (optionType == -1) {              // suppressed --options option
-      m_optionsArgument = 1;
-      gargp++;
-      position = 0;
-      return gargp;
-   }
+	if (optionType == -1) {              // suppressed --options option
+		m_optionsArgument = 1;
+		gargp++;
+		position = 0;
+		return gargp;
+	}
 
-   if (m_oargv[gargp][position] == '\0' && 
-         optionType != OPTION_BOOLEAN_TYPE) {
-      gargp++;
-      position = 0;
-   } 
+	if (m_oargv[gargp][position] == '\0' &&
+			optionType != OPTION_BOOLEAN_TYPE) {
+		gargp++;
+		position = 0;
+	}
 
-   if (optionForm != OPTION_FORM_LONG && optionType == OPTION_BOOLEAN_TYPE &&
-         m_oargv[gargp][position+1] != '\0') {
-      running = 1;
-   } else if (optionType == OPTION_BOOLEAN_TYPE &&
-         m_oargv[gargp][position+1] == '\0') {
-      running = 0;
-   }
+	if (optionForm != OPTION_FORM_LONG && optionType == OPTION_BOOLEAN_TYPE &&
+			m_oargv[gargp][position+1] != '\0') {
+		running = 1;
+	} else if (optionType == OPTION_BOOLEAN_TYPE &&
+			m_oargv[gargp][position+1] == '\0') {
+		running = 0;
+	}
 
-   if (gargp >= m_oargc) {
-      cerr << "Error: last option requires a parameter" << endl;
-      exit(1);
-   }
-   setModified(tempname, &m_oargv[gargp][position]);
+	if (gargp >= m_oargc) {
+		cerr << "Error: last option requires a parameter" << endl;
+		exit(1);
+	}
+	setModified(tempname, &m_oargv[gargp][position]);
 
-   if (!running) {
-      gargp++;
-   }
-   return gargp;
-} 
+	if (!running) {
+		gargp++;
+	}
+	return gargp;
+}
 
 
 
@@ -13226,10 +13228,10 @@ int Options::storeOption(int gargp, int& position, int& running) {
 //
 
 ostream& Options::printOptionList(ostream& out) {
-   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
-      out << it->first << "\t" << it->second << endl;
-   }
-   return out;
+	for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
+		out << it->first << "\t" << it->second << endl;
+	}
+	return out;
 }
 
 
@@ -13240,11 +13242,11 @@ ostream& Options::printOptionList(ostream& out) {
 //
 
 ostream& Options::printOptionListBooleanState(ostream& out) {
-   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
-      out << it->first << "\t" 
-          << m_optionRegister[it->second]->isModified() << endl;
-   }
-   return out;
+	for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
+		out << it->first << "\t"
+			 << m_optionRegister[it->second]->isModified() << endl;
+	}
+	return out;
 }
 
 
@@ -13255,10 +13257,10 @@ ostream& Options::printOptionListBooleanState(ostream& out) {
 //
 
 ostream& Options::printRegister(ostream& out) {
-   for (auto it = m_optionRegister.begin(); it != m_optionRegister.end(); it++) {
-      (*it)->print(out);
-   }
-   return out;
+	for (auto it = m_optionRegister.begin(); it != m_optionRegister.end(); it++) {
+		(*it)->print(out);
+	}
+	return out;
 }
 
 
@@ -13388,7 +13390,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::initialize -- extract time signature lines for 
+// Tool_autobeam::initialize -- extract time signature lines for
 //    each **kern spine in file.
 //
 
@@ -13467,7 +13469,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
-		if ((current.first != timesig[line].first) || 
+		if ((current.first != timesig[line].first) ||
 		    (current.second != timesig[line].second)) {
 			current = timesig[line];
 			beatdur = 1;
@@ -13477,7 +13479,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 				// compound meter, so shift the beat to 3x the demoniator
 				beatdur *= 3;
 			} else if (current.first == 3 && (current.second > 4)) {
-				// time signatures such as 3/8 and 3/16 which should 
+				// time signatures such as 3/8 and 3/16 which should
 				// beam together at the measure level (3/4 not included).
 				beatdur *= 3;
 			}
@@ -13486,8 +13488,8 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 		notedurnodots.push_back(measure[i]->getDurationNoDots());
 		beatpos.push_back(measure[i]->getDurationFromBarline() / beatdur);
 	}
-	
-	// Now identify notes which should be beamed together 
+
+	// Now identify notes which should be beamed together
 	// (using lazy beaming for now).
 	HumNum eighthnote(1, 2);
 	int beat1;
@@ -13740,264 +13742,6 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 			}
 		}
 	}
-}
-
-
-
-
-//////////////////////////////
-//
-// Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter notes.  For example "4"
-//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
-//     is a scaling factor which can change the rhythmic value's base duration.
-//     Giving a scale of 1 will return the duration in whole note units, so
-//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
-//     3/2 will give the duration in terms of dotted-quarter note units.
-//     The third parameter is the sub-token separate.  For example if the input
-//     string contains a space, anything after the first space will be ignored
-//     when extracting the string.  **kern data which also includes the pitch
-//     along with the rhythm can also be given and will be ignored.
-// default value: scale = 4 (duration in terms of quarter notes)
-// default value: separator = " " (sub-token separator)
-//
-
-HumNum Convert::recipToDuration(const string& recip, HumNum scale,
-		string separator) {
-	size_t loc;
-	loc = recip.find(separator);
-	string subtok;
-	if (loc != string::npos) {
-		subtok = recip.substr(0, loc);
-	} else {
-		subtok = recip;
-	}
-
-	loc = recip.find('q');
-	if (loc != string::npos) {
-		// grace note, ignore printed rhythm
-		HumNum zero(0);
-		return zero;
-	}
-
-	int dotcount = 0;
-	int i;
-	int numi = -1;
-	for (i=0; i<(int)subtok.size(); i++) {
-		if (subtok[i] == '.') {
-			dotcount++;
-		}
-		if ((numi < 0) && isdigit(subtok[i])) {
-			numi = i;
-		}
-	}
-	loc = subtok.find("%");
-	int numerator = 1;
-	int denominator = 1;
-	HumNum output;
-	if (loc != string::npos) {
-		// reciprocal rhythm
-		numerator = 1;
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
-			int xi = (int)loc + 1;
-			numerator = subtok[xi++] - '0';
-			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
-				numerator = numerator * 10 + (subtok[xi++] - '0');
-			}
-		}
-		output.setValue(numerator, denominator);
-	} else if (numi < 0) {
-		// no rhythm found
-		HumNum zero(0);
-		return zero;
-	} else if (subtok[numi] == '0') {
-		// 0-symbol
-		int zerocount = 1;
-		for (i=numi+1; i<(int)subtok.size(); i++) {
-			if (subtok[i] == '0') {
-				zerocount++;
-			} else {
-				break;
-			}
-		}
-		numerator = (int)pow(2, zerocount);
-		output.setValue(numerator, 1);
-	} else {
-		// plain rhythm
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		output.setValue(1, denominator);
-	}
-
-	if (dotcount <= 0) {
-		return output * scale;
-	}
-
-	int bot = (int)pow(2.0, dotcount);
-	int top = (int)pow(2.0, dotcount + 1) - 1;
-	HumNum factor(top, bot);
-	return output * factor * scale;
-}
-
-
-//////////////////////////////
-//
-// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
-//   any augmentation dots.
-//
-
-HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
-		string separator) {
-	string temp = recip;
-	std::replace(temp.begin(), temp.end(), '.', 'Z');
-	return Convert::recipToDuration(temp, scale, separator);
-}
-
-
-
-
-//////////////////////////////
-//
-// Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.  This function replaces the search string in the source
-//    string with the replace string.
-//
-
-void Convert::replaceOccurrences(string& source, const string& search,
-		const string& replace) {
-	for (int loc=0; ; loc += (int)replace.size()) {
-		loc = (int)source.find(search, loc);
-		if (loc == (int)string::npos) {
-			break;
-		}
-		source.erase(loc, search.length());
-		source.insert(loc, replace);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Convert::splitString -- Splits a string into a list of strings
-//   separated by the given character.  Empty strings will be generated
-//   if the separator occurs at the start/end of the input string, and
-//   if two or more separates are adjacent to each other.
-// default value: separator = ' ';
-//
-
-vector<string> Convert::splitString(const string& data, char separator) {
-	stringstream ss(data);
-	string key;
-	vector<string> output;
-	while (getline(ss, key, separator)) {
-		output.push_back(key);
-	}
-	if (output.size() == 0) {
-		output.push_back(data);
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::repeatString -- Returns a string which repeats the given
-//   pattern by the given count.
-//
-
-string Convert::repeatString(const string& pattern, int count) {
-	string output;
-	for (int i=0; i<count; i++) {
-		output += pattern;
-	}
-	return output;
-}
-
-
-//////////////////////////////
-//
-// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
-//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
-//    ' to &apos;.
-//
-
-string Convert::encodeXml(const string& input) {
-	string output;
-	output.reserve(input.size()*2);
-	for (int i=0; i<(int)input.size(); i++) {
-		switch (input[i]) {
-			case '&':  output += "&amp;";   break;
-			case '<':  output += "&lt;";    break;
-			case '>':  output += "&gt;";    break;
-			case '"':  output += "&quot;";  break;
-			case '\'': output += "&apos;";  break;
-			default:   output += input[i];
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
-//   number.  First @float which gives the floating-point representation.
-//   If the number has a fractional part, then also add @ratfrac with the
-//   fractional representation of the non-integer portion number.
-//
-
-string Convert::getHumNumAttributes(const HumNum& num) {
-	string output;
-	if (num.isInteger()) {
-		output += " float=\"" + to_string(num.getNumerator()) + "\"";
-	} else {
-		stringstream sstr;
-		sstr << num.toFloat();
-		output += " float=\"" + sstr.str() + "\"";
-	}
-	if (!num.isInteger()) {
-		HumNum rem = num.getRemainder();
-		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
-				+ "/" + to_string(rem.getDenominator()) + "\"";
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
-//     from the beginning and end of input string.
-//
-
-string Convert::trimWhiteSpace(const string& input) {
-	string s = input;
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
-	s.erase(std::find_if(s.rbegin(), s.rend(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::startsWith --
-//
-
-bool Convert::startsWith(const string& input, const string& searchstring) {
-	return input.compare(0, searchstring.size(), searchstring) == 0;
 }
 
 
@@ -14272,20 +14016,20 @@ int Convert::getGcd(int a, int b) {
 //
 
 void Convert::primeFactors(vector<int>& output, int n) {
-   output.clear();
-   while (n%2 == 0) {
-      output.push_back(2);
-      n = n >> 1;
-   }
-   for (int i=3; i <= sqrt(n); i += 2) {
-      while (n%i == 0) {
-         output.push_back(i);
-         n = n/i;
-      }
-   }
-   if (n > 2) {
-      output.push_back(n);
-   }
+	output.clear();
+	while (n%2 == 0) {
+		output.push_back(2);
+		n = n >> 1;
+	}
+	for (int i=3; i <= sqrt(n); i += 2) {
+		while (n%i == 0) {
+			output.push_back(i);
+			n = n/i;
+		}
+	}
+	if (n > 2) {
+		output.push_back(n);
+	}
 }
 
 
@@ -14594,51 +14338,51 @@ int Convert::kernToBase12(const string& kerndata) {
 //
 
 string Convert::base40ToKern(int b40) {
-   int octave     = b40 / 40;
-   int accidental = Convert::base40ToAccidental(b40);
-   int diatonic   = Convert::base40ToDiatonic(b40) % 7;
-   char base = 'a';
-   switch (diatonic) {
-      case 0: base = 'c'; break;
-      case 1: base = 'd'; break;
-      case 2: base = 'e'; break;
-      case 3: base = 'f'; break;
-      case 4: base = 'g'; break;
-      case 5: base = 'a'; break;
-      case 6: base = 'b'; break;
-   }
-   if (octave < 4) {
-      base = std::toupper(base);
-   }
-   int repeat = 0;
-   if (octave > 4) {
-      repeat = octave - 4;
-   } else if (octave < 3) {
-      repeat = 3 - octave;
-   }
-   if (repeat > 12) {
-      cerr << "Error: unreasonable octave value: " << octave << endl;
-      exit(1);
-   }
+	int octave     = b40 / 40;
+	int accidental = Convert::base40ToAccidental(b40);
+	int diatonic   = Convert::base40ToDiatonic(b40) % 7;
+	char base = 'a';
+	switch (diatonic) {
+		case 0: base = 'c'; break;
+		case 1: base = 'd'; break;
+		case 2: base = 'e'; break;
+		case 3: base = 'f'; break;
+		case 4: base = 'g'; break;
+		case 5: base = 'a'; break;
+		case 6: base = 'b'; break;
+	}
+	if (octave < 4) {
+		base = std::toupper(base);
+	}
+	int repeat = 0;
+	if (octave > 4) {
+		repeat = octave - 4;
+	} else if (octave < 3) {
+		repeat = 3 - octave;
+	}
+	if (repeat > 12) {
+		cerr << "Error: unreasonable octave value: " << octave << endl;
+		exit(1);
+	}
 	string output;
 	output += base;
-   for (int i=0; i<repeat; i++) {
+	for (int i=0; i<repeat; i++) {
 		output += base;
-   }
-   if (accidental == 0) {
-      return output;
-   }
-   if (accidental > 0) {
+	}
+	if (accidental == 0) {
+		return output;
+	}
+	if (accidental > 0) {
 		for (int i=0; i<accidental; i++) {
 			output += '#';
 		}
-   } else if (accidental < 0) {
+	} else if (accidental < 0) {
 		for (int i=0; i<-accidental; i++) {
 			output += '-';
 		}
-   }
+	}
 
-   return output;
+	return output;
 }
 
 
@@ -14655,12 +14399,12 @@ string Convert::base40ToKern(int b40) {
 //
 
 int Convert::base40ToDiatonic(int b40) {
-   int chroma = b40 % 40;
-   int octaveoffset = (b40 / 40) * 7;
-   if (b40 < 0) { 
-      return -1;   // rest;
-   }
-   switch (chroma) {
+	int chroma = b40 % 40;
+	int octaveoffset = (b40 / 40) * 7;
+	if (b40 < 0) {
+		return -1;   // rest;
+	}
+	switch (chroma) {
 		case 0: case 1: case 2: case 3: case 4:      // C-- to C##
 			return 0 + octaveoffset;
 		case 6: case 7: case 8: case 9: case 10:     // D-- to D##
@@ -14675,10 +14419,10 @@ int Convert::base40ToDiatonic(int b40) {
 			return 5 + octaveoffset;
 		case 35: case 36: case 37: case 38: case 39: // B-- to B##
 			return 6 + octaveoffset;
-   }
+	}
 
 	// found an empty slot, so return rest:
-   return -1;
+	return -1;
 }
 
 
@@ -14690,9 +14434,9 @@ int Convert::base40ToDiatonic(int b40) {
 
 int Convert::base40ToMidiNoteNumber(int b40) {
 	// +1 since middle-C octave is 5 in MIDI:
-   int octave     = b40 / 40 + 1;
-   int accidental = Convert::base40ToAccidental(b40);
-   int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
+	int octave     = b40 / 40 + 1;
+	int accidental = Convert::base40ToAccidental(b40);
+	int diatonicpc = Convert::base40ToDiatonic(b40) % 7;
 	switch (diatonicpc) {
 		case 0: return octave * 12 +  0 + accidental;
 		case 1: return octave * 12 +  2 + accidental;
@@ -14714,56 +14458,56 @@ int Convert::base40ToMidiNoteNumber(int b40) {
 //
 
 int Convert::base40ToAccidental(int b40) {
-   if (b40 < 0) {
+	if (b40 < 0) {
 		// not considering low pitches.  If so then the mod operator
 		// below whould need fixing.
-      return 0;
-   }
+		return 0;
+	}
 
-   switch (b40 % 40) {
-      case 0:	return -2;      // C-double-flat
-      case 1:	return -1;      // C-flat
-      case 2:	return  0;      // C
-      case 3:	return  1;      // C-sharp
-      case 4:	return  2;      // C-double-sharp
-      case 5:	return 1000;
-      case 6:	return -2;
-      case 7:	return -1;
-      case 8:	return  0;      // D
-      case 9:	return  1;
-      case 10:	return  2;
-      case 11:	return 1000;
-      case 12:	return -2;
-      case 13:	return -1;
-      case 14:	return  0;      // E
-      case 15:	return  1;
-      case 16:	return  2;
-      case 17:	return -2;
-      case 18:	return -1;
-      case 19:	return  0;      // F
-      case 20:	return  1;
-      case 21:	return  2;
-      case 22:	return 1000;
-      case 23:	return -2;
-      case 24:	return -1;
-      case 25:	return  0;      // G
-      case 26:	return  1;
-      case 27:	return  2;
-      case 28:	return 1000;
-      case 29:	return -2;
-      case 30:	return -1;
-      case 31:	return  0;      // A
-      case 32:	return  1;
-      case 33:	return  2;
-      case 34:	return 1000;
-      case 35:	return -2;
-      case 36:	return -1;
-      case 37:	return  0;      // B
-      case 38:	return  1;
-      case 39:	return  2;
-   }
+	switch (b40 % 40) {
+		case 0:	return -2;      // C-double-flat
+		case 1:	return -1;      // C-flat
+		case 2:	return  0;      // C
+		case 3:	return  1;      // C-sharp
+		case 4:	return  2;      // C-double-sharp
+		case 5:	return 1000;
+		case 6:	return -2;
+		case 7:	return -1;
+		case 8:	return  0;      // D
+		case 9:	return  1;
+		case 10:	return  2;
+		case 11:	return 1000;
+		case 12:	return -2;
+		case 13:	return -1;
+		case 14:	return  0;      // E
+		case 15:	return  1;
+		case 16:	return  2;
+		case 17:	return -2;
+		case 18:	return -1;
+		case 19:	return  0;      // F
+		case 20:	return  1;
+		case 21:	return  2;
+		case 22:	return 1000;
+		case 23:	return -2;
+		case 24:	return -1;
+		case 25:	return  0;      // G
+		case 26:	return  1;
+		case 27:	return  2;
+		case 28:	return 1000;
+		case 29:	return -2;
+		case 30:	return -1;
+		case 31:	return  0;      // A
+		case 32:	return  1;
+		case 33:	return  2;
+		case 34:	return 1000;
+		case 35:	return -2;
+		case 36:	return -1;
+		case 37:	return  0;      // B
+		case 38:	return  1;
+		case 39:	return  2;
+	}
 
-   return 0;
+	return 0;
 }
 
 
@@ -14845,10 +14589,10 @@ int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 // Convert::wbhToPitch -- Convert an integer-based pitch into
 //    a diatonic pitch class, accidental alteration and octave number
 //   The output diatonic pitch classes are 0=C, 1=D, 2=E, 3=F, 4=G, 5=A, 6=B.
-//   "acc" is the accidental count: -2=double flat, -1=double flat, 
+//   "acc" is the accidental count: -2=double flat, -1=double flat,
 //   0 natural, +1=sharp, etc.
 //   "octave" is the octave number, with middle-C being the start of
-//   octave 4.  
+//   octave 4.
 //   "maxacc" is the maximum accidental which defines
 //    the base:
 //    maxacc = 2 -> Base-40.
@@ -14922,6 +14666,264 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	// if acc in any of the above tests is +3/-3, then there was an
 	// accidental overflow (overflow of the accidental).
 
+}
+
+
+
+
+//////////////////////////////
+//
+// Convert::recipToDuration -- Convert **recip rhythmic values into
+//     rational number durations in terms of quarter notes.  For example "4"
+//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
+//     is a scaling factor which can change the rhythmic value's base duration.
+//     Giving a scale of 1 will return the duration in whole note units, so
+//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
+//     3/2 will give the duration in terms of dotted-quarter note units.
+//     The third parameter is the sub-token separate.  For example if the input
+//     string contains a space, anything after the first space will be ignored
+//     when extracting the string.  **kern data which also includes the pitch
+//     along with the rhythm can also be given and will be ignored.
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
+//
+
+HumNum Convert::recipToDuration(const string& recip, HumNum scale,
+		string separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
+	}
+
+	loc = recip.find('q');
+	if (loc != string::npos) {
+		// grace note, ignore printed rhythm
+		HumNum zero(0);
+		return zero;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<(int)subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciprocal rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = (int)loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<(int)subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
+	} else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
+}
+
+
+//////////////////////////////
+//
+// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
+//   any augmentation dots.
+//
+
+HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
+		string separator) {
+	string temp = recip;
+	std::replace(temp.begin(), temp.end(), '.', 'Z');
+	return Convert::recipToDuration(temp, scale, separator);
+}
+
+
+
+
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += (int)replace.size()) {
+		loc = (int)source.find(search, loc);
+		if (loc == (int)string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::splitString -- Splits a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+// default value: separator = ' ';
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::repeatString -- Returns a string which repeats the given
+//   pattern by the given count.
+//
+
+string Convert::repeatString(const string& pattern, int count) {
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pattern;
+	}
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
+//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
+//    ' to &apos;.
+//
+
+string Convert::encodeXml(const string& input) {
+	string output;
+	output.reserve(input.size()*2);
+	for (int i=0; i<(int)input.size(); i++) {
+		switch (input[i]) {
+			case '&':  output += "&amp;";   break;
+			case '<':  output += "&lt;";    break;
+			case '>':  output += "&gt;";    break;
+			case '"':  output += "&quot;";  break;
+			case '\'': output += "&apos;";  break;
+			default:   output += input[i];
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
+//   number.  First @float which gives the floating-point representation.
+//   If the number has a fractional part, then also add @ratfrac with the
+//   fractional representation of the non-integer portion number.
+//
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
+//     from the beginning and end of input string.
+//
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::startsWith --
+//
+
+bool Convert::startsWith(const string& input, const string& searchstring) {
+	return input.compare(0, searchstring.size(), searchstring) == 0;
 }
 
 

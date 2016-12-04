@@ -240,7 +240,7 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 //////////////////////////////
 //
 // HumdrumFileContent::insertDataSpineBefore -- prepend a data spine
-//     to the file before the given spine.  Returns true if successful; 
+//     to the file before the given spine.  Returns true if successful;
 //     false otherwise.
 //
 //     nexttrack == track number to insert before.
@@ -290,7 +290,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 		insertionField = -1;
 		for (int j=0; j<line->getFieldCount(); j++) {
 			track = line->token(j)->getTrack();
-         if (track != nexttrack) {
+			if (track != nexttrack) {
 				continue;
 			}
 			insertionField = j;
@@ -335,7 +335,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 //////////////////////////////
 //
 // HumdrumFileContent::insertDataSpineAfter -- appen a data spine
-//     to the file after the given spine.  Returns true if successful; 
+//     to the file after the given spine.  Returns true if successful;
 //     false otherwise.
 //
 //     prevtrack == track number to insert after.
@@ -385,7 +385,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 		insertionField = -1;
 		for (int j = line->getFieldCount() - 1; j >= 0; j--) {
 			track = line->token(j)->getTrack();
-         if (track != prevtrack) {
+			if (track != prevtrack) {
 				continue;
 			}
 			insertionField = j;
