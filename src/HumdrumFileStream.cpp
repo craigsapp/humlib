@@ -161,7 +161,7 @@ int HumdrumFileStream::eof(void) {
 
 int HumdrumFileStream::getFile(HumdrumFile& infile) {
 	infile.clear();
-	istream* newinput;
+	istream* newinput = NULL;
 
 restarting:
 
@@ -190,7 +190,8 @@ restarting:
 
 	// (2) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
-	else if (((int)m_filelist.size() > 0) && (m_curfile < (int)m_filelist.size()-1)) {
+	else if (((int)m_filelist.size() > 0) && 
+			(m_curfile < (int)m_filelist.size()-1)) {
 		m_curfile++;
 		if (m_instream.is_open()) {
 			m_instream.close();
@@ -200,7 +201,6 @@ restarting:
 			// data from the internet and start reading that instead
 			// of reading from a file on the hard disk.
 			fillUrlBuffer(m_urlbuffer, m_filelist[m_curfile].c_str());
-cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 			infile.setFilename(m_filelist[m_curfile].c_str());
 			goto restarting;
 		}
@@ -232,6 +232,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 	if (m_newfilebuffer.size() > 0) {
 		// store the filename for the current HumdrumFile being read:
 		HumRegex hre;
+cerr << "GOT HERE AAA" << endl;
 		if (hre.search(m_newfilebuffer,
 				R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
 			if (hre.getMatchLength(1) > 0) {
@@ -298,8 +299,9 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 			string tempstring;
 			tempstring = templine;
 			HumRegex hre;
+cerr << "GOT HERE BBB" << endl;
 			if (hre.search(tempstring,
-					R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
+					"^!!!!SEGMENT\\s*([+-]?\\d+)?\\s*:\\s*(.*)\\s*$")) {
 				if (hre.getMatchLength(1) > 0) {
 					infile.setSegmentLevel(atoi(hre.getMatch(1).c_str()));
 				} else {
@@ -348,6 +350,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 				// (i.e., it comes at the start of the file stream and
 				// is the name of the first HumdrumFile in the stream).
 				HumRegex hre;
+cerr << "GOT HERE CCC" << endl;
 				if (hre.search(m_newfilebuffer,
 						R"(^!!!!SEGMENT\s*([+-]?\d+)?\s:\s*(.*)\s*$)")) {
 					if (hre.getMatchLength(1) > 0) {
@@ -431,9 +434,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 	for (int i=0; i<(int)m_universals.size(); i++) {
 		contents << &(m_universals[i][1]) << "\n";
 	}
-	buffer << ends; // is this needed?
 	contents << buffer.str();
-cerr << "CONTENTS = " << buffer.str() << endl;
 	infile.read(contents);
 	return 1;
 }
@@ -452,8 +453,6 @@ void HumdrumFileStream::fillUrlBuffer(stringstream& uribuffer,
 		uribuffer.clear(); // reset error flags in buffer
 		string webaddress = HumdrumFileBase::getUriToUrlMapping(uriname);
 		HumdrumFileBase::readStringFromHttpUri(uribuffer, webaddress);
-cerr << "READ BUFFER FROM WEB ADDRESS: " << webaddress << endl;
-cerr << "URIBUFFER: " << uribuffer.str() << endl;
 	#endif
 }
 

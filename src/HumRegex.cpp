@@ -57,6 +57,7 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
+cerr << "EXPRESSION " << exp << endl;
 	m_regex = exp;
 	return regex_search(input, m_matches, m_regex);
 

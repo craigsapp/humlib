@@ -253,7 +253,8 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 //
 
 bool NoteCell::isRest(void) {
-	return isnan(m_b40);
+	// bug in GCC requires :: prefix to resolve two different isnan defs.
+	return ::isnan(m_b40);
 }
 
 

@@ -43,37 +43,40 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 
 	string tag  = uri.substr(0, css);
 	string rest = uri.substr(css+3);
+	if (rest.empty()) {
+		rest = "/";
+	}
 
+	// getting a repertory:
+	// http://kern.humdrum.org/data?l=osu/classical/bach/inventions
+	// getting a single file:
+	// http://kern.humdrum.org/data?s=http://kern.humdrum.org/data?s=osu/classical/bach/inventions&file=inven15.krn
+	// (Should allow repertory from &s...)
 	if ((tag == "humdrum") || (tag == "hum") || (tag == "h")) {
-		string location;
-		string filename;
+		string testlocation;
+		string testfilename;
+		int repertoryQ = false;
 		auto slash = rest.rfind('/');
-			location = rest.substr(0, slash);
-			filename = rest.substr(slash+1);
+			testlocation = rest.substr(0, slash);
+			testfilename = rest.substr(slash+1);
+			if (testfilename.find('.' != string::npos)) {
+				repertoryQ = true;
+			}
 		if (slash != string::npos) {
-		} else {
-			location = "/";
-			filename = rest;
+			// no files in root directory, but no reperoties either
+			repertoryQ = true;
 		}
 		string output = "http://";;
 		output += "kern.ccarh.org";
-		output += "/cgi-bin/ksdata";
-		if (filename.find('.' != string::npos)) {
-			output += "?file=";
-			output += filename;
-			output += "&l=";
-			if (location.size() > 0) {
-				output += location;
-			}
+		output += "/data?";
+		if (repertoryQ) {
+			output += "l=";
 		} else {
-			output += "?l=";
-			if (location.size() > 0) {
-				output += location;
-				output += "/";
-				output += filename;
-			}
+			output += "s=";
 		}
-		output += "&format=kern";
+		output += rest;
+		// probably not needed:
+		//output += "&format=kern";
 		return output;
 	}
 
@@ -229,6 +232,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 					sscanf(&buffer[i], "%d", &datalength);
 					if (datalength == 0) {
 						cerr << "Error: no data found for URI, probably invalid\n";
+						cerr << "URL:   " << webaddress << endl;
 						exit(1);
 					}
 					break;

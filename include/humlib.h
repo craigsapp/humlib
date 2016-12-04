@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 18:50:57 PST 2016
+// Last Modified: Sat Dec  3 21:01:40 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -38,40 +38,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _HUMLIB_H_INCLUDED
 #define _HUMLIB_H_INCLUDED
 
-#include <math.h>
-#include <string.h>
 #include <stdarg.h>
+#include <string.h>
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <map>
-#include <set>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <fstream>
 #include <functional>
+#include <iostream>
 #include <locale>
-#include <utility>
+#include <map>
 #include <regex>
+#include <set>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
-using std::string;
-using std::vector;
-using std::istream;
-using std::ifstream;
-using std::ostream;
-using std::cout;
-using std::cin;
 using std::cerr;
+using std::cin;
+using std::cout;
 using std::endl;
 using std::ends;
-using std::to_string;
-using std::stringstream;
-using std::map;
-using std::set;
-using std::pair;
+using std::ifstream;
 using std::invalid_argument;
+using std::istream;
+using std::map;
+using std::ostream;
+using std::pair;
+using std::set;
+using std::string;
+using std::stringstream;
+using std::to_string;
+using std::vector;
 
 #define USING_URI 1
 #ifdef USING_URI
@@ -2333,27 +2333,27 @@ class Options {
       int             isDefined         (const string& name);
 
    protected:
-      int                      options_error_check;  // for verify command
-      int                      oargc;
-      vector<string>           oargv;
-      string                   commandString;
-      char                     optionFlag;
-      vector<string*>          argument;
+      int                      m_options_error_check;  // for verify command
+      int                      m_oargc;
+      vector<string>           m_oargv;
+      string                   m_commandString;
+      char                     m_optionFlag;
+      vector<string*>          m_argument;
 
-      vector<Option_register*> optionRegister;
-      map<string, int>         optionList;
+      vector<Option_register*> m_optionRegister;
+      map<string, int>         m_optionList;
 
-      int                      processedQ;
-      int                      suppressQ;       // prevent the --options option
-      int                      optionsArgument; // indicates --options present
+      int                      m_processedQ;
+      int                      m_suppressQ;       // prevent --options option
+      int                      m_optionsArgument; // indicates --options present
 
-      vector<string>           extraArgv;
-      vector<string>           extraArgv_strings;
+      vector<string>           m_extraArgv;
+      vector<string>           m_extraArgv_strings;
 
       int         getRegIndex             (const string& optionName);
       int         optionQ                 (const string& aString, int& argp);
       int         storeOption             (int gargp, int& position, 
-                                             int& running);
+                                           int& running);
 
 };
 

@@ -16,9 +16,9 @@
 
 #include "HumdrumFileStructure.h"
 
+#include <cmath>
 #include <vector>
 #include <sstream>
-#include <cmath>
 #include <utility>
 
 using namespace std;

@@ -116,27 +116,27 @@ class Options {
       int             isDefined         (const string& name);
 
    protected:
-      int                      options_error_check;  // for verify command
-      int                      oargc;
-      vector<string>           oargv;
-      string                   commandString;
-      char                     optionFlag;
-      vector<string*>          argument;
+      int                      m_options_error_check;  // for verify command
+      int                      m_oargc;
+      vector<string>           m_oargv;
+      string                   m_commandString;
+      char                     m_optionFlag;
+      vector<string*>          m_argument;
 
-      vector<Option_register*> optionRegister;
-      map<string, int>         optionList;
+      vector<Option_register*> m_optionRegister;
+      map<string, int>         m_optionList;
 
-      int                      processedQ;
-      int                      suppressQ;       // prevent the --options option
-      int                      optionsArgument; // indicates --options present
+      int                      m_processedQ;
+      int                      m_suppressQ;       // prevent --options option
+      int                      m_optionsArgument; // indicates --options present
 
-      vector<string>           extraArgv;
-      vector<string>           extraArgv_strings;
+      vector<string>           m_extraArgv;
+      vector<string>           m_extraArgv_strings;
 
       int         getRegIndex             (const string& optionName);
       int         optionQ                 (const string& aString, int& argp);
       int         storeOption             (int gargp, int& position, 
-                                             int& running);
+                                           int& running);
 
 };
 

@@ -616,7 +616,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 int HumdrumToken::getDots(void) const {
 	int count = 0;
-	for (int i=0; i<this->size()-1; i++) {
+	for (int i=0; i<(int)this->size()-1; i++) {
 		if (this->at(i) == '.') {
 			count++;
 		}
@@ -817,7 +817,7 @@ bool HumdrumToken::hasRhythm(void) const {
 //
 
 bool HumdrumToken::hasBeam(void) const {
-	for (int i=0; i<this->size(); i++) {
+	for (int i=0; i<(int)this->size(); i++) {
 		switch (this->at(i)) {
 			case 'L':
 			case 'J':

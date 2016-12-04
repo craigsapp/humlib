@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 18:50:57 PST 2016
+// Last Modified: Sat Dec  3 21:01:40 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2747,6 +2747,7 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
+cerr << "EXPRESSION " << exp << endl;
 	m_regex = exp;
 	return regex_search(input, m_matches, m_regex);
 
@@ -3031,37 +3032,40 @@ string HumdrumFileBase::getUriToUrlMapping(const string& uri) {
 
 	string tag  = uri.substr(0, css);
 	string rest = uri.substr(css+3);
+	if (rest.empty()) {
+		rest = "/";
+	}
 
+	// getting a repertory:
+	// http://kern.humdrum.org/data?l=osu/classical/bach/inventions
+	// getting a single file:
+	// http://kern.humdrum.org/data?s=http://kern.humdrum.org/data?s=osu/classical/bach/inventions&file=inven15.krn
+	// (Should allow repertory from &s...)
 	if ((tag == "humdrum") || (tag == "hum") || (tag == "h")) {
-		string location;
-		string filename;
+		string testlocation;
+		string testfilename;
+		int repertoryQ = false;
 		auto slash = rest.rfind('/');
-			location = rest.substr(0, slash);
-			filename = rest.substr(slash+1);
+			testlocation = rest.substr(0, slash);
+			testfilename = rest.substr(slash+1);
+			if (testfilename.find('.' != string::npos)) {
+				repertoryQ = true;
+			}
 		if (slash != string::npos) {
-		} else {
-			location = "/";
-			filename = rest;
+			// no files in root directory, but no reperoties either
+			repertoryQ = true;
 		}
 		string output = "http://";;
 		output += "kern.ccarh.org";
-		output += "/cgi-bin/ksdata";
-		if (filename.find('.' != string::npos)) {
-			output += "?file=";
-			output += filename;
-			output += "&l=";
-			if (location.size() > 0) {
-				output += location;
-			}
+		output += "/data?";
+		if (repertoryQ) {
+			output += "l=";
 		} else {
-			output += "?l=";
-			if (location.size() > 0) {
-				output += location;
-				output += "/";
-				output += filename;
-			}
+			output += "s=";
 		}
-		output += "&format=kern";
+		output += rest;
+		// probably not needed:
+		//output += "&format=kern";
 		return output;
 	}
 
@@ -3217,6 +3221,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 					sscanf(&buffer[i], "%d", &datalength);
 					if (datalength == 0) {
 						cerr << "Error: no data found for URI, probably invalid\n";
+						cerr << "URL:   " << webaddress << endl;
 						exit(1);
 					}
 					break;
@@ -5906,7 +5911,7 @@ int HumdrumFileStream::eof(void) {
 
 int HumdrumFileStream::getFile(HumdrumFile& infile) {
 	infile.clear();
-	istream* newinput;
+	istream* newinput = NULL;
 
 restarting:
 
@@ -5935,7 +5940,8 @@ restarting:
 
 	// (2) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
-	else if (((int)m_filelist.size() > 0) && (m_curfile < (int)m_filelist.size()-1)) {
+	else if (((int)m_filelist.size() > 0) && 
+			(m_curfile < (int)m_filelist.size()-1)) {
 		m_curfile++;
 		if (m_instream.is_open()) {
 			m_instream.close();
@@ -5945,7 +5951,6 @@ restarting:
 			// data from the internet and start reading that instead
 			// of reading from a file on the hard disk.
 			fillUrlBuffer(m_urlbuffer, m_filelist[m_curfile].c_str());
-cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 			infile.setFilename(m_filelist[m_curfile].c_str());
 			goto restarting;
 		}
@@ -5977,6 +5982,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 	if (m_newfilebuffer.size() > 0) {
 		// store the filename for the current HumdrumFile being read:
 		HumRegex hre;
+cerr << "GOT HERE AAA" << endl;
 		if (hre.search(m_newfilebuffer,
 				R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
 			if (hre.getMatchLength(1) > 0) {
@@ -6043,8 +6049,9 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 			string tempstring;
 			tempstring = templine;
 			HumRegex hre;
+cerr << "GOT HERE BBB" << endl;
 			if (hre.search(tempstring,
-					R"(^!!!!SEGMENT\s*([+-]?\d+)?\s*:\s*(.*)\s*$)")) {
+					"^!!!!SEGMENT\\s*([+-]?\\d+)?\\s*:\\s*(.*)\\s*$")) {
 				if (hre.getMatchLength(1) > 0) {
 					infile.setSegmentLevel(atoi(hre.getMatch(1).c_str()));
 				} else {
@@ -6093,6 +6100,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 				// (i.e., it comes at the start of the file stream and
 				// is the name of the first HumdrumFile in the stream).
 				HumRegex hre;
+cerr << "GOT HERE CCC" << endl;
 				if (hre.search(m_newfilebuffer,
 						R"(^!!!!SEGMENT\s*([+-]?\d+)?\s:\s*(.*)\s*$)")) {
 					if (hre.getMatchLength(1) > 0) {
@@ -6176,9 +6184,7 @@ cerr << "URL BUFFER: " << m_urlbuffer.str() << endl;
 	for (int i=0; i<(int)m_universals.size(); i++) {
 		contents << &(m_universals[i][1]) << "\n";
 	}
-	buffer << ends; // is this needed?
 	contents << buffer.str();
-cerr << "CONTENTS = " << buffer.str() << endl;
 	infile.read(contents);
 	return 1;
 }
@@ -6197,8 +6203,6 @@ void HumdrumFileStream::fillUrlBuffer(stringstream& uribuffer,
 		uribuffer.clear(); // reset error flags in buffer
 		string webaddress = HumdrumFileBase::getUriToUrlMapping(uriname);
 		HumdrumFileBase::readStringFromHttpUri(uribuffer, webaddress);
-cerr << "READ BUFFER FROM WEB ADDRESS: " << webaddress << endl;
-cerr << "URIBUFFER: " << uribuffer.str() << endl;
 	#endif
 }
 
@@ -7587,7 +7591,7 @@ int HumdrumFileStructure::getStrandCount(int spineindex) const {
 	if (spineindex < 0) {
 		return 0;
 	}
-	if (spineindex >= m_strand2d.size()) {
+	if (spineindex >= (int)m_strand2d.size()) {
 		return 0;
 	}
 	return (int)m_strand2d[spineindex].size();
@@ -9726,7 +9730,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 int HumdrumToken::getDots(void) const {
 	int count = 0;
-	for (int i=0; i<this->size()-1; i++) {
+	for (int i=0; i<(int)this->size()-1; i++) {
 		if (this->at(i) == '.') {
 			count++;
 		}
@@ -9927,7 +9931,7 @@ bool HumdrumToken::hasRhythm(void) const {
 //
 
 bool HumdrumToken::hasBeam(void) const {
-	for (int i=0; i<this->size(); i++) {
+	for (int i=0; i<(int)this->size(); i++) {
 		switch (this->at(i)) {
 			case 'L':
 			case 'J':
@@ -11423,7 +11427,8 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 //
 
 bool NoteCell::isRest(void) {
-	return isnan(m_b40);
+	// bug in GCC requires :: prefix to resolve two different isnan defs.
+	return ::isnan(m_b40);
 }
 
 
@@ -12289,28 +12294,28 @@ ostream& Option_register::print(ostream& out) {
 //
 
 Options::Options(void) {
-   oargc               = -1;
-   suppressQ           =  0;
-   processedQ          =  0;
-   optionsArgument     =  0;
-   options_error_check =  1;
-   optionFlag          = '-';
+   m_oargc               = -1;
+   m_suppressQ           =  0;
+   m_processedQ          =  0;
+   m_optionsArgument     =  0;
+   m_options_error_check =  1;
+   m_optionFlag          = '-';
 
-   extraArgv.reserve(100);
-   extraArgv_strings.reserve(100);
+   m_extraArgv.reserve(100);
+   m_extraArgv_strings.reserve(100);
 }
 
 
 Options::Options(int argc, char** argv) {
-   oargc               = -1;
-   suppressQ           =  0;
-   processedQ          =  0;
-   optionsArgument     =  0;
-   options_error_check =  1;
-   optionFlag          = '-';
+   m_oargc               = -1;
+   m_suppressQ           =  0;
+   m_processedQ          =  0;
+   m_optionsArgument     =  0;
+   m_options_error_check =  1;
+   m_optionFlag          = '-';
 
-   extraArgv.reserve(100);
-   extraArgv_strings.reserve(100);
+   m_extraArgv.reserve(100);
+   m_extraArgv_strings.reserve(100);
 
    setOptions(argc, argv);
 }
@@ -12334,7 +12339,7 @@ Options::~Options() {
 //
 
 int Options::argc(void) const {
-   return oargc;
+   return m_oargc;
 }
 
 
@@ -12345,7 +12350,7 @@ int Options::argc(void) const {
 //
 
 const vector<string>& Options::argv(void) const {
-   return oargv;
+   return m_oargv;
 }
 
 
@@ -12408,7 +12413,7 @@ int Options::define(const string& aDefinition) {
    // Set up space for a option entry in the registry
    definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-   auto definitionIndex = optionRegister.size();
+   auto definitionIndex = m_optionRegister.size();
 
    // Store option aliases
    string optionName;
@@ -12426,7 +12431,7 @@ int Options::define(const string& aDefinition) {
             exit(1);
          }
          if (optionName.size() > 0) {
-            optionList[optionName] = definitionIndex;
+            m_optionList[optionName] = definitionIndex;
          }
          optionName.clear();
       } else {
@@ -12437,14 +12442,14 @@ int Options::define(const string& aDefinition) {
    // Store definition in registry and return its indexed location.
    // This location will be used to link option aliases to the main
    // command name.
-   optionRegister.push_back(definitionEntry);
+   m_optionRegister.push_back(definitionEntry);
    return definitionIndex;
 }
 
 
 int Options::define(const string& aDefinition, const string& aDescription) {
    int index = define(aDefinition);
-   optionRegister[index]->setDescription(aDescription);
+   m_optionRegister[index]->setDescription(aDescription);
    return index;
 }
 
@@ -12456,7 +12461,7 @@ int Options::define(const string& aDefinition, const string& aDescription) {
 //
 
 int Options::isDefined(const string& name) {
-   if (optionList.find(name) == optionList.end()) {
+   if (m_optionList.find(name) == m_optionList.end()) {
       return 0;
    } else {
       return 1;
@@ -12472,11 +12477,11 @@ int Options::isDefined(const string& name) {
 //
 
 const string& Options::getArg(int index) {
-   if (index < 0 || index >= (int)argument.size()) {
+   if (index < 0 || index >= (int)m_argument.size()) {
       cerr << "Error: argument " << index << " does not exist." << endl;
       exit(1);
    }
-   return *argument[index];
+   return *m_argument[index];
 }
 
 // Alias:
@@ -12494,7 +12499,7 @@ const string& Options::getArgument(int index) {
 //
 
 int Options::getArgCount(void) {
-   return argument.size() - 1;
+   return m_argument.size() - 1;
 }
 
 // Alias:
@@ -12508,13 +12513,14 @@ int Options::getArgumentCount(void) {
 //////////////////////////////
 //
 // Options::getArgList -- return a string vector of the arguments
-//     after the options have been parsed out of it.  
+//     after the options have been parsed out of it.  This list
+//     excludes the command name (uses Options::getCommand() for that).
 //
 
 vector<string>& Options::getArgList(vector<string>& output) {
-   output.resize(argument.size());
-   for (int i=0; i<(int)argument.size(); i++) {
-      output[i] = *argument[i];
+   output.clear();
+   for (int i=1; i<(int)m_argument.size(); i++) {
+      output.push_back(*m_argument[i]);
    }
    return output;
 }
@@ -12538,7 +12544,7 @@ int Options::getBoolean(const string& optionName) {
    if (index < 0) {
       return 0;
    }
-   return optionRegister[index]->isModified();
+   return m_optionRegister[index]->isModified();
 }
 
 
@@ -12550,10 +12556,10 @@ int Options::getBoolean(const string& optionName) {
 //
 
 string Options::getCommand(void) {
-   if (argument.size() == 0) {
+   if (m_argument.size() == 0) {
       return "";
    } else {
-      return *argument[0];
+      return *m_argument[0];
    }
 }
 
@@ -12566,19 +12572,19 @@ string Options::getCommand(void) {
 //
 
 const string& Options::getCommandLine(void) {
-   if (commandString.size()) {
-      return commandString;
+   if (m_commandString.size()) {
+      return m_commandString;
    }
 
-   commandString = oargv[0];
+   m_commandString = m_oargv[0];
 
    int i;
-   for (i=1; i<oargc; i++) {
-      commandString += " ";
-      commandString += oargv[i];
+   for (i=1; i<m_oargc; i++) {
+      m_commandString += " ";
+      m_commandString += m_oargv[i];
    }
 
-   return commandString;
+   return m_commandString;
 }
    
 
@@ -12592,11 +12598,11 @@ const string& Options::getCommandLine(void) {
 //
 
 string Options::getDefinition(const string& optionName) {
-   auto it = optionList.find(optionName);
-   if (it == optionList.end()) {
+   auto it = m_optionList.find(optionName);
+   if (it == m_optionList.end()) {
       return "";
    } else {
-      return optionRegister[it->second]->getDefinition();
+      return m_optionRegister[it->second]->getDefinition();
    }
 }
 
@@ -12666,7 +12672,7 @@ string Options::getString(const string& optionName) {
    if (index < 0) {
       return "UNKNOWN OPTION";
    } else {
-      return optionRegister[index]->getOption();
+      return m_optionRegister[index]->getOption();
    }
 }
 
@@ -12679,7 +12685,7 @@ string Options::getString(const string& optionName) {
 //
 
 int Options::optionsArg(void) {
-   return optionsArgument;
+   return m_optionsArgument;
 }
 
 
@@ -12690,9 +12696,9 @@ int Options::optionsArg(void) {
 //
 
 ostream& Options::print(ostream& out) {
-   for (unsigned int i=0; i<optionRegister.size(); i++) {
-      out << optionRegister[i]->getDefinition() << "\t"
-           << optionRegister[i]->getDescription() << endl;
+   for (unsigned int i=0; i<m_optionRegister.size(); i++) {
+      out << m_optionRegister[i]->getDefinition() << "\t"
+           << m_optionRegister[i]->getDescription() << endl;
    }
    return out;
 }
@@ -12706,23 +12712,23 @@ ostream& Options::print(ostream& out) {
 
 void Options::reset(void) {
    unsigned int i;
-   for (i=0; i<optionRegister.size(); i++) {
-      delete optionRegister[i];
-      optionRegister[i] = NULL;
+   for (i=0; i<m_optionRegister.size(); i++) {
+      delete m_optionRegister[i];
+      m_optionRegister[i] = NULL;
    }
-   optionRegister.clear();
+   m_optionRegister.clear();
 
-   for (i=0; i<argument.size(); i++) {
-      delete argument[i];
-      argument[i] = NULL;
+   for (i=0; i<m_argument.size(); i++) {
+      delete m_argument[i];
+      m_argument[i] = NULL;
    }
-   argument.resize(0);
-   commandString.clear();
-   extraArgv.clear();
-   extraArgv_strings.clear();
+   m_argument.resize(0);
+   m_commandString.clear();
+   m_extraArgv.clear();
+   m_extraArgv_strings.clear();
 
-   oargc = -1;
-   oargv.clear();
+   m_oargc = -1;
+   m_oargv.clear();
 }
 
 
@@ -12733,7 +12739,7 @@ void Options::reset(void) {
 //
 
 char Options::getFlag(void) {
-   return optionFlag;
+   return m_optionFlag;
 }
 
 
@@ -12747,7 +12753,7 @@ char Options::getFlag(void) {
 //
 
 void Options::setFlag(char aFlag) {
-   optionFlag = aFlag;
+   m_optionFlag = aFlag;
 }
 
 
@@ -12763,7 +12769,7 @@ void Options::setModified(const string& optionName, const string& aString) {
       return;
    }
    
-   optionRegister[getRegIndex(optionName)]->setModified(aString);
+   m_optionRegister[getRegIndex(optionName)]->setModified(aString);
 }
 
 
@@ -12775,20 +12781,20 @@ void Options::setModified(const string& optionName, const string& aString) {
 //
 
 void Options::setOptions(int argc, char** argv) {
-   processedQ = 0;
+   m_processedQ = 0;
 
-   extraArgv.resize(argc);
-   extraArgv_strings.resize(argc);
+   m_extraArgv.resize(argc);
+   m_extraArgv_strings.resize(argc);
    int oldsize = 0;
 
    int i;
    for (i=0; i<argc; i++) {
-      extraArgv_strings[i+oldsize] = argv[i];
-      extraArgv[i] = extraArgv_strings[i];
+      m_extraArgv_strings[i+oldsize] = argv[i];
+      m_extraArgv[i] = m_extraArgv_strings[i];
    }
 
-   oargc  = extraArgv.size();
-   oargv  = extraArgv;
+   m_oargc  = m_extraArgv.size();
+   m_oargv  = m_extraArgv;
 }
 
 
@@ -12801,43 +12807,43 @@ void Options::setOptions(int argc, char** argv) {
 
 void Options::appendOptions(int argc, char** argv) {
 
-   processedQ = 0;
+   m_processedQ = 0;
 
    // data used to be stored directly here:
    //gargc = argc;
    //gargv = argv;
-   // but now gets interfaced to: extraArgv and extraArgv_strings:
+   // but now gets interfaced to: m_extraArgv and m_extraArgv_strings:
 
-   int oldsize = extraArgv.size();
-   extraArgv.resize(oldsize + argc);
-   extraArgv_strings.resize(oldsize + argc);
+   int oldsize = m_extraArgv.size();
+   m_extraArgv.resize(oldsize + argc);
+   m_extraArgv_strings.resize(oldsize + argc);
 
    int i;
    for (i=0; i<argc; i++) {
-      extraArgv_strings[i+oldsize] = argv[i];
-      extraArgv[i+oldsize] = extraArgv_strings[i+oldsize];
+      m_extraArgv_strings[i+oldsize] = argv[i];
+      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
    }
 
-   oargc = extraArgv.size();
-   oargv = extraArgv;
+   m_oargc = m_extraArgv.size();
+   m_oargv = m_extraArgv;
 }
 
 
 void Options::appendOptions(const vector<string>& argv) {
-   processedQ = 0;
+   m_processedQ = 0;
 
-   int oldsize = extraArgv.size();
-   extraArgv.resize(oldsize + argv.size());
-   extraArgv_strings.resize(oldsize + argv.size());
+   int oldsize = m_extraArgv.size();
+   m_extraArgv.resize(oldsize + argv.size());
+   m_extraArgv_strings.resize(oldsize + argv.size());
 
    unsigned int i;
    for (i=0; i<argv.size(); i++) {
-      extraArgv_strings[i+oldsize] = argv[i];
-      extraArgv[i+oldsize] = extraArgv_strings[i+oldsize];
+      m_extraArgv_strings[i+oldsize] = argv[i];
+      m_extraArgv[i+oldsize] = m_extraArgv_strings[i+oldsize];
    }
 
-   oargc = extraArgv.size();
-   oargv = extraArgv;
+   m_oargc = m_extraArgv.size();
+   m_oargv = m_extraArgv;
 }
 
 
@@ -12950,7 +12956,7 @@ char Options::getType(const string& optionName) {
    if (index < 0) {
       return -1;
    } else {
-      return optionRegister[getRegIndex(optionName)]->getType();
+      return m_optionRegister[getRegIndex(optionName)]->getType();
    }
 }
 
@@ -12981,33 +12987,33 @@ void Options::process(int error_check, int suppress) {
 //
 
 void Options::xverify(int error_check, int suppress) {
-   options_error_check = error_check;
+   m_options_error_check = error_check;
    int gargp = 1;
    int optionend = 0;
 
    if (suppress) {
-      suppressQ = 1;
+      m_suppressQ = 1;
    } else {
-      suppressQ = 0;
+      m_suppressQ = 0;
    }
 
    // if calling xverify again, must remove previous argument list.
    int i;
-   if (argument.size() != 0) {
-      for (i=0; i<(int)argument.size(); i++) {
-         delete argument[i];
+   if (m_argument.size() != 0) {
+      for (i=0; i<(int)m_argument.size(); i++) {
+         delete m_argument[i];
       }
-      argument.resize(0);
+      m_argument.resize(0);
    }
 
-   string* tempstr = new string(oargv[0]);
-   argument.push_back(tempstr);
+   string* tempstr = new string(m_oargv[0]);
+   m_argument.push_back(tempstr);
 
    int oldgargp;
    int position = 0;
    int running = 0;
-   while (gargp < oargc && optionend == 0) {
-      if (optionQ(oargv[gargp], gargp)) {
+   while (gargp < m_oargc && optionend == 0) {
+      if (optionQ(m_oargv[gargp], gargp)) {
          oldgargp = gargp;
          gargp = storeOption(gargp, position, running);
          if (gargp != oldgargp) {
@@ -13015,22 +13021,22 @@ void Options::xverify(int error_check, int suppress) {
             position = 0;
          }
       } else {
-         if (oargv[gargp].size() == 2 && oargv[gargp][0] == getFlag() &&
-            oargv[gargp][2] == getFlag() ) {
+         if (m_oargv[gargp].size() == 2 && m_oargv[gargp][0] == getFlag() &&
+            m_oargv[gargp][2] == getFlag() ) {
                optionend = 1;
             gargp++;
             break;
          } else {                          // this is an argument
-            tempstr = new string(oargv[gargp]);
-            argument.push_back(tempstr);
+            tempstr = new string(m_oargv[gargp]);
+            m_argument.push_back(tempstr);
             gargp++;
          }
       }
    }
 
-   while (gargp < oargc) {
-      tempstr = new string(oargv[gargp]);
-      argument.push_back(tempstr);
+   while (gargp < m_oargc) {
+      tempstr = new string(m_oargv[gargp]);
+      m_argument.push_back(tempstr);
       gargp++;
    }
 
@@ -13058,7 +13064,7 @@ void Options::xverify(int argc, char** argv, int error_check, int suppress) {
 //
 
 int Options::getRegIndex(const string& optionName) {
-   if (suppressQ && (optionName == "options")) {
+   if (m_suppressQ && (optionName == "options")) {
          return -1;
    } 
 
@@ -13068,9 +13074,9 @@ int Options::getRegIndex(const string& optionName) {
    } 
 
 
-   auto it = optionList.find(optionName);
-   if (it == optionList.end()) {
-      if (options_error_check) {
+   auto it = m_optionList.find(optionName);
+   if (it == m_optionList.end()) {
+      if (m_options_error_check) {
          cerr << "Error: unknown option \"" << optionName << "\"." << endl;
          print(cout);
          exit(1);
@@ -13129,7 +13135,7 @@ int Options::storeOption(int gargp, int& position, int& running) {
 
    if (running) {
       optionForm = OPTION_FORM_CONTINUE;
-   } else if (oargv[gargp][1] == getFlag()) {
+   } else if (m_oargv[gargp][1] == getFlag()) {
       optionForm = OPTION_FORM_LONG;
    } else {
       optionForm = OPTION_FORM_SHORT;
@@ -13138,7 +13144,7 @@ int Options::storeOption(int gargp, int& position, int& running) {
    switch (optionForm) {
       case OPTION_FORM_CONTINUE:
          position++;
-         tempname[0] = oargv[gargp][position];
+         tempname[0] = m_oargv[gargp][position];
          tempname[1] = '\0';
          optionType = getType(tempname);
          if (optionType != OPTION_BOOLEAN_TYPE) {
@@ -13148,7 +13154,7 @@ int Options::storeOption(int gargp, int& position, int& running) {
          break;
       case OPTION_FORM_SHORT:   
          position = 1;
-         tempname[0] = oargv[gargp][position];
+         tempname[0] = m_oargv[gargp][position];
          tempname[1] = '\0';
          optionType = getType(tempname);
          if (optionType != OPTION_BOOLEAN_TYPE) {
@@ -13157,18 +13163,18 @@ int Options::storeOption(int gargp, int& position, int& running) {
          break;
       case OPTION_FORM_LONG:   
          position = 2;
-         while (oargv[gargp][position] != '=' && 
-               oargv[gargp][position] != '\0') {
-            tempname[position-2] = oargv[gargp][position];
+         while (m_oargv[gargp][position] != '=' && 
+               m_oargv[gargp][position] != '\0') {
+            tempname[position-2] = m_oargv[gargp][position];
             position++;    
          }
          tempname[position-2] = '\0';
          optionType = getType(tempname);
          if (optionType == -1) {         // suppressed --options option
-            optionsArgument = 1;
+            m_optionsArgument = 1;
             break;   
          }
-         if (oargv[gargp][position] == '=') {
+         if (m_oargv[gargp][position] == '=') {
             if (optionType == OPTION_BOOLEAN_TYPE) {
                cerr << "Error: boolean variable cannot have any options: " 
                     << tempname << endl;
@@ -13180,31 +13186,31 @@ int Options::storeOption(int gargp, int& position, int& running) {
    }
 
    if (optionType == -1) {              // suppressed --options option
-      optionsArgument = 1;
+      m_optionsArgument = 1;
       gargp++;
       position = 0;
       return gargp;
    }
 
-   if (oargv[gargp][position] == '\0' && 
+   if (m_oargv[gargp][position] == '\0' && 
          optionType != OPTION_BOOLEAN_TYPE) {
       gargp++;
       position = 0;
    } 
 
    if (optionForm != OPTION_FORM_LONG && optionType == OPTION_BOOLEAN_TYPE &&
-         oargv[gargp][position+1] != '\0') {
+         m_oargv[gargp][position+1] != '\0') {
       running = 1;
    } else if (optionType == OPTION_BOOLEAN_TYPE &&
-         oargv[gargp][position+1] == '\0') {
+         m_oargv[gargp][position+1] == '\0') {
       running = 0;
    }
 
-   if (gargp >= oargc) {
+   if (gargp >= m_oargc) {
       cerr << "Error: last option requires a parameter" << endl;
       exit(1);
    }
-   setModified(tempname, &oargv[gargp][position]);
+   setModified(tempname, &m_oargv[gargp][position]);
 
    if (!running) {
       gargp++;
@@ -13220,7 +13226,7 @@ int Options::storeOption(int gargp, int& position, int& running) {
 //
 
 ostream& Options::printOptionList(ostream& out) {
-   for (auto it = optionList.begin(); it != optionList.end(); it++) {
+   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
       out << it->first << "\t" << it->second << endl;
    }
    return out;
@@ -13234,9 +13240,9 @@ ostream& Options::printOptionList(ostream& out) {
 //
 
 ostream& Options::printOptionListBooleanState(ostream& out) {
-   for (auto it = optionList.begin(); it != optionList.end(); it++) {
+   for (auto it = m_optionList.begin(); it != m_optionList.end(); it++) {
       out << it->first << "\t" 
-          << optionRegister[it->second]->isModified() << endl;
+          << m_optionRegister[it->second]->isModified() << endl;
    }
    return out;
 }
@@ -13249,7 +13255,7 @@ ostream& Options::printOptionListBooleanState(ostream& out) {
 //
 
 ostream& Options::printRegister(ostream& out) {
-   for (auto it = optionRegister.begin(); it != optionRegister.end(); it++) {
+   for (auto it = m_optionRegister.begin(); it != m_optionRegister.end(); it++) {
       (*it)->print(out);
    }
    return out;
@@ -13734,6 +13740,264 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 			}
 		}
 	}
+}
+
+
+
+
+//////////////////////////////
+//
+// Convert::recipToDuration -- Convert **recip rhythmic values into
+//     rational number durations in terms of quarter notes.  For example "4"
+//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
+//     is a scaling factor which can change the rhythmic value's base duration.
+//     Giving a scale of 1 will return the duration in whole note units, so
+//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
+//     3/2 will give the duration in terms of dotted-quarter note units.
+//     The third parameter is the sub-token separate.  For example if the input
+//     string contains a space, anything after the first space will be ignored
+//     when extracting the string.  **kern data which also includes the pitch
+//     along with the rhythm can also be given and will be ignored.
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
+//
+
+HumNum Convert::recipToDuration(const string& recip, HumNum scale,
+		string separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
+	}
+
+	loc = recip.find('q');
+	if (loc != string::npos) {
+		// grace note, ignore printed rhythm
+		HumNum zero(0);
+		return zero;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<(int)subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciprocal rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = (int)loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<(int)subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
+	} else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
+}
+
+
+//////////////////////////////
+//
+// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
+//   any augmentation dots.
+//
+
+HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
+		string separator) {
+	string temp = recip;
+	std::replace(temp.begin(), temp.end(), '.', 'Z');
+	return Convert::recipToDuration(temp, scale, separator);
+}
+
+
+
+
+//////////////////////////////
+//
+// Convert::replaceOccurrences -- Similar to s// regular expressions
+//    operator.  This function replaces the search string in the source
+//    string with the replace string.
+//
+
+void Convert::replaceOccurrences(string& source, const string& search,
+		const string& replace) {
+	for (int loc=0; ; loc += (int)replace.size()) {
+		loc = (int)source.find(search, loc);
+		if (loc == (int)string::npos) {
+			break;
+		}
+		source.erase(loc, search.length());
+		source.insert(loc, replace);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::splitString -- Splits a string into a list of strings
+//   separated by the given character.  Empty strings will be generated
+//   if the separator occurs at the start/end of the input string, and
+//   if two or more separates are adjacent to each other.
+// default value: separator = ' ';
+//
+
+vector<string> Convert::splitString(const string& data, char separator) {
+	stringstream ss(data);
+	string key;
+	vector<string> output;
+	while (getline(ss, key, separator)) {
+		output.push_back(key);
+	}
+	if (output.size() == 0) {
+		output.push_back(data);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::repeatString -- Returns a string which repeats the given
+//   pattern by the given count.
+//
+
+string Convert::repeatString(const string& pattern, int count) {
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pattern;
+	}
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
+//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
+//    ' to &apos;.
+//
+
+string Convert::encodeXml(const string& input) {
+	string output;
+	output.reserve(input.size()*2);
+	for (int i=0; i<(int)input.size(); i++) {
+		switch (input[i]) {
+			case '&':  output += "&amp;";   break;
+			case '<':  output += "&lt;";    break;
+			case '>':  output += "&gt;";    break;
+			case '"':  output += "&quot;";  break;
+			case '\'': output += "&apos;";  break;
+			default:   output += input[i];
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
+//   number.  First @float which gives the floating-point representation.
+//   If the number has a fractional part, then also add @ratfrac with the
+//   fractional representation of the non-integer portion number.
+//
+
+string Convert::getHumNumAttributes(const HumNum& num) {
+	string output;
+	if (num.isInteger()) {
+		output += " float=\"" + to_string(num.getNumerator()) + "\"";
+	} else {
+		stringstream sstr;
+		sstr << num.toFloat();
+		output += " float=\"" + sstr.str() + "\"";
+	}
+	if (!num.isInteger()) {
+		HumNum rem = num.getRemainder();
+		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
+				+ "/" + to_string(rem.getDenominator()) + "\"";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
+//     from the beginning and end of input string.
+//
+
+string Convert::trimWhiteSpace(const string& input) {
+	string s = input;
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))));
+	s.erase(std::find_if(s.rbegin(), s.rend(),
+			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::startsWith --
+//
+
+bool Convert::startsWith(const string& input, const string& searchstring) {
+	return input.compare(0, searchstring.size(), searchstring) == 0;
 }
 
 
@@ -14658,264 +14922,6 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	// if acc in any of the above tests is +3/-3, then there was an
 	// accidental overflow (overflow of the accidental).
 
-}
-
-
-
-
-//////////////////////////////
-//
-// Convert::recipToDuration -- Convert **recip rhythmic values into
-//     rational number durations in terms of quarter notes.  For example "4"
-//     will be converted to 1, "4." to 3/2 (1+1/2).  The second parameter
-//     is a scaling factor which can change the rhythmic value's base duration.
-//     Giving a scale of 1 will return the duration in whole note units, so
-//     "4" will return a value of 1/4 (one quarter of a whole note).  Using
-//     3/2 will give the duration in terms of dotted-quarter note units.
-//     The third parameter is the sub-token separate.  For example if the input
-//     string contains a space, anything after the first space will be ignored
-//     when extracting the string.  **kern data which also includes the pitch
-//     along with the rhythm can also be given and will be ignored.
-// default value: scale = 4 (duration in terms of quarter notes)
-// default value: separator = " " (sub-token separator)
-//
-
-HumNum Convert::recipToDuration(const string& recip, HumNum scale,
-		string separator) {
-	size_t loc;
-	loc = recip.find(separator);
-	string subtok;
-	if (loc != string::npos) {
-		subtok = recip.substr(0, loc);
-	} else {
-		subtok = recip;
-	}
-
-	loc = recip.find('q');
-	if (loc != string::npos) {
-		// grace note, ignore printed rhythm
-		HumNum zero(0);
-		return zero;
-	}
-
-	int dotcount = 0;
-	int i;
-	int numi = -1;
-	for (i=0; i<(int)subtok.size(); i++) {
-		if (subtok[i] == '.') {
-			dotcount++;
-		}
-		if ((numi < 0) && isdigit(subtok[i])) {
-			numi = i;
-		}
-	}
-	loc = subtok.find("%");
-	int numerator = 1;
-	int denominator = 1;
-	HumNum output;
-	if (loc != string::npos) {
-		// reciprocal rhythm
-		numerator = 1;
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
-			int xi = (int)loc + 1;
-			numerator = subtok[xi++] - '0';
-			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
-				numerator = numerator * 10 + (subtok[xi++] - '0');
-			}
-		}
-		output.setValue(numerator, denominator);
-	} else if (numi < 0) {
-		// no rhythm found
-		HumNum zero(0);
-		return zero;
-	} else if (subtok[numi] == '0') {
-		// 0-symbol
-		int zerocount = 1;
-		for (i=numi+1; i<(int)subtok.size(); i++) {
-			if (subtok[i] == '0') {
-				zerocount++;
-			} else {
-				break;
-			}
-		}
-		numerator = (int)pow(2, zerocount);
-		output.setValue(numerator, 1);
-	} else {
-		// plain rhythm
-		denominator = subtok[numi++] - '0';
-		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
-			denominator = denominator * 10 + (subtok[numi++] - '0');
-		}
-		output.setValue(1, denominator);
-	}
-
-	if (dotcount <= 0) {
-		return output * scale;
-	}
-
-	int bot = (int)pow(2.0, dotcount);
-	int top = (int)pow(2.0, dotcount + 1) - 1;
-	HumNum factor(top, bot);
-	return output * factor * scale;
-}
-
-
-//////////////////////////////
-//
-// Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
-//   any augmentation dots.
-//
-
-HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
-		string separator) {
-	string temp = recip;
-	std::replace(temp.begin(), temp.end(), '.', 'Z');
-	return Convert::recipToDuration(temp, scale, separator);
-}
-
-
-
-
-//////////////////////////////
-//
-// Convert::replaceOccurrences -- Similar to s// regular expressions
-//    operator.  This function replaces the search string in the source
-//    string with the replace string.
-//
-
-void Convert::replaceOccurrences(string& source, const string& search,
-		const string& replace) {
-	for (int loc=0; ; loc += (int)replace.size()) {
-		loc = (int)source.find(search, loc);
-		if (loc == (int)string::npos) {
-			break;
-		}
-		source.erase(loc, search.length());
-		source.insert(loc, replace);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Convert::splitString -- Splits a string into a list of strings
-//   separated by the given character.  Empty strings will be generated
-//   if the separator occurs at the start/end of the input string, and
-//   if two or more separates are adjacent to each other.
-// default value: separator = ' ';
-//
-
-vector<string> Convert::splitString(const string& data, char separator) {
-	stringstream ss(data);
-	string key;
-	vector<string> output;
-	while (getline(ss, key, separator)) {
-		output.push_back(key);
-	}
-	if (output.size() == 0) {
-		output.push_back(data);
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::repeatString -- Returns a string which repeats the given
-//   pattern by the given count.
-//
-
-string Convert::repeatString(const string& pattern, int count) {
-	string output;
-	for (int i=0; i<count; i++) {
-		output += pattern;
-	}
-	return output;
-}
-
-
-//////////////////////////////
-//
-// Convert::encodeXml -- Encode a string for XML printing.  Ampersands
-//    get converted to &amp;, < to &lt; > to &gt;, " to &quot; and
-//    ' to &apos;.
-//
-
-string Convert::encodeXml(const string& input) {
-	string output;
-	output.reserve(input.size()*2);
-	for (int i=0; i<(int)input.size(); i++) {
-		switch (input[i]) {
-			case '&':  output += "&amp;";   break;
-			case '<':  output += "&lt;";    break;
-			case '>':  output += "&gt;";    break;
-			case '"':  output += "&quot;";  break;
-			case '\'': output += "&apos;";  break;
-			default:   output += input[i];
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::getHumNumAttributes -- Returns XML attributes for a HumNum
-//   number.  First @float which gives the floating-point representation.
-//   If the number has a fractional part, then also add @ratfrac with the
-//   fractional representation of the non-integer portion number.
-//
-
-string Convert::getHumNumAttributes(const HumNum& num) {
-	string output;
-	if (num.isInteger()) {
-		output += " float=\"" + to_string(num.getNumerator()) + "\"";
-	} else {
-		stringstream sstr;
-		sstr << num.toFloat();
-		output += " float=\"" + sstr.str() + "\"";
-	}
-	if (!num.isInteger()) {
-		HumNum rem = num.getRemainder();
-		output += " ratfrac=\"" + to_string(rem.getNumerator()) +
-				+ "/" + to_string(rem.getDenominator()) + "\"";
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::trimWhiteSpace -- remove spaces, tabs and/or newlines
-//     from the beginning and end of input string.
-//
-
-string Convert::trimWhiteSpace(const string& input) {
-	string s = input;
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
-	s.erase(std::find_if(s.rbegin(), s.rend(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-	return s;
-}
-
-
-
-//////////////////////////////
-//
-// Convert::startsWith --
-//
-
-bool Convert::startsWith(const string& input, const string& searchstring) {
-	return input.compare(0, searchstring.size(), searchstring) == 0;
 }
 
 
