@@ -10,8 +10,8 @@
 // Description:   Used to store the location of a token within a HumdrumFile.
 //
 
-#ifndef _HUMADDRESS_H
-#define _HUMADDRESS_H
+#ifndef _HUMADDRESS_H_INCLUDED
+#define _HUMADDRESS_H_INCLUDED
 
 #include <iostream>
 
@@ -99,7 +99,7 @@ class HumAddress {
 
 } // end namespace hum
 
-#endif /* _HUMADDRESS */
+#endif /* _HUMADDRESS_H_INCLUDED */
 
 
 

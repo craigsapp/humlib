@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
 // Last Modified: Mon Aug 17 02:39:32 PDT 2015
-// Filename:      HumdrumFile.h
+// Filename:      HumdrumFile.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFile.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
@@ -149,7 +149,6 @@ ostream& HumdrumFile::printXmlParameterInfo(ostream& out, int level,
 // END_MERGE
 
 } // end namespace hum
-
 
 
 

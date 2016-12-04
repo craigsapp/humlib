@@ -10,8 +10,8 @@
 // Description:   Include file for working with humlib library.
 //
 
-#ifndef _HUMDRUM_H
-#define _HUMDRUM_H
+#ifndef _HUMDRUM_H_INCLUDED
+#define _HUMDRUM_H_INCLUDED
 
 // include class definitions used in the humlib library:
 #include "Convert.h"
@@ -24,7 +24,7 @@
 #include "tool-metlev.h"
 
 
-#endif /* _HUMDRUM_H */
+#endif /* _HUMDRUM_H_INCLUDED */
 
 
 

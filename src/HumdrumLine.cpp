@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Fri Oct 14 11:41:22 PDT 2016 Added insertion functionality
-// Filename:      Convert.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumLine.h
+// Filename:      HumdrumLine.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumLine.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -1528,7 +1528,6 @@ ostream& operator<< (ostream& out, HumdrumLine* line) {
 	out << (string)(*line);
 	return out;
 }
-
 
 
 // END_MERGE

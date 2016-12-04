@@ -1,11 +1,19 @@
 //
-// class NoteCell -- keep track of variables related to a single note
-//    within a time slice (could be a note attack, note sustain, or rest.
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// Creation Date: Sat Aug  8 12:24:49 PDT 2015
+// Last Modified: Thu Nov 24 08:31:41 PST 2016 Added null token resolving
+// Filename:      HumdrumToken.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumToken.h
+// Syntax:        C++11
+// vim:           ts=3 noexpandtab
 //
-// vim: ts=3
+// Description:   Keep track of variables related to a single note
+//                within a time slice (could be a note attack, note
+//                sustain, or rest.
+//
 
-#ifndef _NOTECELL_H
-#define _NOTECELL_H
+#ifndef _NOTECELL_H_INCLUDED
+#define _NOTECELL_H_INCLUDED
 
 #include "HumdrumFile.h"
 #include <cmath>
@@ -91,6 +99,7 @@ class NoteCell {
 
 } // end namespace hum
 
-#endif /* _NOTECELL_H */
+#endif /* _NOTECELL_H_INCLUDED */
+
 
 

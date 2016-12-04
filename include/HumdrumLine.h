@@ -11,8 +11,8 @@
 //                of the line.
 //
 
-#ifndef _HUMDRUMLINE_H
-#define _HUMDRUMLINE_H
+#ifndef _HUMDRUMLINE_H_INCLUDED
+#define _HUMDRUMLINE_H_INCLUDED
 
 #include <iostream>
 
@@ -197,7 +197,7 @@ ostream& operator<< (ostream& out, HumdrumLine* line);
 
 } // end namespace hum
 
-#endif /* _HUMDRUMLINE */
+#endif /* _HUMDRUMLINE_H_INCLUDED */
 
 
 

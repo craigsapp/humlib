@@ -3,15 +3,15 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Nov 25 14:18:01 PST 2000
 // Last Modified: Fri Sep  2 10:16:09 CEST 2016 (added to humlib)
-// Filename:      ...sig/include/sigInfo/HumInstrument.h
+// Filename:      HumInstrument.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumInstrument.h
 // Syntax:        C++11
 //
 // Description:   Enumeration class for processing Humdrum instrument names.
 //
 
-#ifndef _HUMINSTRUMENT_H
-#define _HUMINSTRUMENT_H
+#ifndef _HUMINSTRUMENT_H_INCLUDED
+#define _HUMINSTRUMENT_H_INCLUDED
 
 #include <stdlib.h>
 #include <vector>
@@ -302,7 +302,7 @@ class HumInstrument {
 
 } // end namespace hum
 
-#endif /* _HUMINSTRUMENT_H */
+#endif /* _HUMINSTRUMENT_H_INCLUDED */
 
 
 

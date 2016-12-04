@@ -10,8 +10,8 @@
 // Description:   Rational number class for durations.
 //
 
-#ifndef _HUMNUM_H
-#define _HUMNUM_H
+#ifndef _HUMNUM_H_INCLUDED
+#define _HUMNUM_H_INCLUDED
 
 #include <iostream>
 #include <vector>
@@ -119,7 +119,7 @@ ostream& operator<<(ostream& out, const vector<A>& v);
 
 } // end namespace hum
 
-#endif /* _HUMNUM_H */
+#endif /* _HUMNUM_H_INCLUDED */
 
 
 

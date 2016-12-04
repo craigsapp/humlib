@@ -10,8 +10,8 @@
 // Description:   Used to work with Humdrum fields.
 //
 
-#ifndef _HUMDRUM_TOKEN_H
-#define _HUMDRUM_TOKEN_H
+#ifndef _HUMDRUM_TOKEN_H_INCLUDED
+#define _HUMDRUM_TOKEN_H_INCLUDED
 
 #include <iostream>
 #include <vector>
@@ -271,7 +271,7 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
 
 } // end namespace hum
 
-#endif /* _HUMDRUM_TOKEN_H */
+#endif /* _HUMDRUM_TOKEN_H_INCLUDED */
 
 
 

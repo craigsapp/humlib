@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
 // Last Modified: Fri Dec  2 03:45:34 PST 2016
-// Filename:      tool-autobeam.h
+// Filename:      tool-autobeam.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-autobeam.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
@@ -325,7 +325,6 @@ void Tool_autobeam::addBeam(HTp startnote, HTp endnote) {
 	startnote->push_back('L');
 	endnote->push_back('J');
 }
-
 
 
 // END_MERGE

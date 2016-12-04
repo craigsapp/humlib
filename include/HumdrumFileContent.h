@@ -11,8 +11,8 @@
 //                and do other higher-level processing of Humdrum data.
 //
 
-#ifndef _HUMDRUMFILECONTENT_H
-#define _HUMDRUMFILECONTENT_H
+#ifndef _HUMDRUMFILECONTENT_H_INCLUDED
+#define _HUMDRUMFILECONTENT_H_INCLUDED
 
 #include "HumdrumFileStructure.h"
 
@@ -431,7 +431,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 
 } // end namespace hum
 
-#endif /* _HUMDRUMFILECONTENT_H */
+#endif /* _HUMDRUMFILECONTENT_H_INCLUDED */
 
 
 

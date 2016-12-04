@@ -299,7 +299,6 @@ void HumdrumFileContent::resetDiatonicStatesWithKeySignature(vector<int>&
 }
 
 
-
 // END_MERGE
 
 } // end namespace hum

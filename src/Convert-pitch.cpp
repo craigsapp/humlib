@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Wed Aug 19 00:06:39 PDT 2015
-// Filename:      Convert-pitch.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-pitch.h
+// Filename:      Convert-pitch.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-pitch.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -626,7 +626,6 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 	// accidental overflow (overflow of the accidental).
 
 }
-
 
 
 // END_MERGE

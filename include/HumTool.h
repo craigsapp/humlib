@@ -10,8 +10,8 @@
 // Description:   Common interface for Humdrum tools.
 //
 
-#ifndef _HUMTOOL_H
-#define _HUMTOOL_H
+#ifndef _HUMTOOL_H_INCLUDED
+#define _HUMTOOL_H_INCLUDED
 
 #include "Options.h"
 #include <sstream>
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {              \
 
 } // end namespace hum
 
-#endif /* _HUMTOOL_H */
+#endif /* _HUMTOOL_H_INCLUDED */
 
 
 

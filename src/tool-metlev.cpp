@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Tue Nov 29 01:03:06 PST 2016
-// Filename:      tool-metlev.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-metlev.h
+// Filename:      tool-metlev.cpp
+// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-metlev.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -198,6 +198,7 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 		}
 	}
 }
+
 
 // END_MERGE
 

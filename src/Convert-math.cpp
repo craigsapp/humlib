@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Wed Aug 19 00:06:32 PDT 2015
-// Filename:      Convert-math.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-math.h
+// Filename:      Convert-math.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-math.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -102,7 +102,6 @@ double Convert::significantDigits(double value, int digits) {
 	double scale = pow(10, digits);
 	return (int(value * scale + 0.5))/scale;
 }
-
 
 
 // END_MERGE

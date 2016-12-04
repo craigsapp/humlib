@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 22:27:57 PST 2016
 // Last Modified: Wed Nov 30 22:28:03 PST 2016
-// Filename:      HumdrumFileContent-timesig.h
+// Filename:      HumdrumFileContent-timesig.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-timesig.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab

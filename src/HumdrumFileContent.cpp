@@ -51,7 +51,6 @@ HumdrumFileContent::~HumdrumFileContent() {
 }
 
 
-
 // END_MERGE
 
 } // end namespace hum

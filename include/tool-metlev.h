@@ -10,8 +10,8 @@
 // Description:   Interface for metlev tool.
 //
 
-#ifndef _TOOL_METLEV_H
-#define _TOOL_METLEV_H
+#ifndef _TOOL_METLEV_H_INCLUDED
+#define _TOOL_METLEV_H_INCLUDED
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -42,7 +42,7 @@ class Tool_metlev : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_METLEV_H */
+#endif /* _TOOL_METLEV_H_INCLUDED */
 
 
 

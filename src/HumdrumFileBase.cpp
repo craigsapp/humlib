@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Fri Aug 14 21:57:09 PDT 2015
-// Filename:      HumdrumFileBase.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileBase.h
+// Filename:      HumdrumFileBase.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileBase.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
@@ -16,6 +16,7 @@
 //
 
 #include "HumdrumFileBase.h"
+#include "Convert.h"
 
 #include <sstream>
 #include <fstream>
@@ -36,12 +37,14 @@ HumdrumFileBase::HumdrumFileBase(void) : HumHash() {
 	addToTrackStarts(NULL);
 	m_ticksperquarternote = -1;
 	m_quietParse = false;
+	m_segmentlevel = 0;
 }
 
 HumdrumFileBase::HumdrumFileBase(const string& filename) : HumHash() {
 	addToTrackStarts(NULL);
 	m_ticksperquarternote = -1;
 	m_quietParse = false;
+	m_segmentlevel = 0;
 	read(filename);
 }
 
@@ -49,6 +52,7 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 	addToTrackStarts(NULL);
 	m_ticksperquarternote = -1;
 	m_quietParse = false;
+	m_segmentlevel = 0;
 	read(contents);
 }
 
@@ -60,13 +64,35 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 //
 
 HumdrumFileBase::~HumdrumFileBase() {
-	// do nothing
+	clear();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::clear -- Reset the contents of a file to be empty.
+//
+
+void HumdrumFileBase::clear(void) {
+	// delete memory allocation:
 	for (int i=0; i<(int)m_lines.size(); i++) {
 		if (m_lines[i] != NULL) {
 			delete m_lines[i];
 			m_lines[i] = NULL;
 		}
 	}
+
+	// clear state variables which are now invalid:
+	m_trackstarts.clear();
+	m_trackends.clear();
+	m_barlines.clear();
+	m_ticksperquarternote = -1;
+	m_idprefix.clear();
+	m_strand1d.clear();
+	m_strand2d.clear();
+	m_filename.clear();
+	m_segmentlevel = 0;
 }
 
 
@@ -159,9 +185,30 @@ bool HumdrumFileBase::read(const string& filename) {
 
 
 bool HumdrumFileBase::read(const char* filename) {
+	string fname = filename;
 	m_displayError = true;
+
+#ifdef USING_URI
+   if (fname.find("://") != string::npos) {
+		if (Convert::startsWith(fname, "http://")) {
+         readFromHttpUri(fname);
+         return isValid();
+      }
+		if (Convert::startsWith(fname, "jrp://")) {
+         readFromJrpUri(fname);
+         return isValid();
+      }
+		if (Convert::startsWith(fname, "h://") ||
+		    Convert::startsWith(fname, "hum://") ||
+		    Convert::startsWith(fname, "humdrum://")) {
+         readFromHumdrumUri(fname);
+         return isValid();
+      }
+   }
+#endif
+
 	ifstream infile;
-	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
+	if (fname.empty() || (fname ==  "-")) {
 		return HumdrumFileBase::read(cin);
 	} else {
 		infile.open(filename);
@@ -326,6 +373,84 @@ void HumdrumFileBase::setQuietParsing(void) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileBase::setFilename --
+//
+
+void HumdrumFileBase::setFilename(const string& filename) {
+	m_filename = filename;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getFilename --
+//
+
+string HumdrumFileBase::getFilename(void) {
+	return m_filename;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printSegmentLabel --
+//
+
+ostream& HumdrumFileBase::printSegmentLabel(ostream& out) {
+   out << "!!!!SEGMENT";
+   string filename = getFilename();
+   int segment = getSegmentLevel();
+   if (segment != 0) {
+      if (segment < 0) {
+         out << segment;
+      } else {
+         out << "+" << segment;
+      }
+   }
+   out << ": " << filename << endl;
+   return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::printNonemptySegmentLabel --
+//
+
+ostream& HumdrumFileBase::printNonemptySegmentLabel(ostream& out) {
+   if (getFilename().size() > 0) {
+      printSegmentLabel(out);
+   } 
+   return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getSegmentLevel -- return the segment level
+//
+
+int HumdrumFileBase::getSegmentLevel(void) {
+   return m_segmentlevel;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::setSegmentLevel -- return the segment level
+//
+
+void HumdrumFileBase::setSegmentLevel(int level) {
+   m_segmentlevel = level;
+}
 
 //////////////////////////////
 //
@@ -1582,7 +1707,6 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 	}
 	return false;
 }
-
 
 
 // END_MERGE

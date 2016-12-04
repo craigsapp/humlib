@@ -10,8 +10,8 @@
 // Description:   Interface for autobeam tool.
 //
 
-#ifndef _TOOL_AUTOBEAM_H
-#define _TOOL_AUTOBEAM_H
+#ifndef _TOOL_AUTOBEAM_H_INCLUDED
+#define _TOOL_AUTOBEAM_H_INCLUDED
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -49,7 +49,7 @@ class Tool_autobeam : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_TESTGIRD_H */
+#endif /* _TOOL_TESTGIRD_H_INCLUDED */
 
 
 

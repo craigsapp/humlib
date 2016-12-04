@@ -14,8 +14,8 @@
 //                data content rather than general structural analysis.
 //
 
-#ifndef _HUMDRUMFILESTRUCTURE_H
-#define _HUMDRUMFILESTRUCTURE_H
+#ifndef _HUMDRUMFILESTRUCTURE_H_INCLUDED
+#define _HUMDRUMFILESTRUCTURE_H_INCLUDED
 
 #include <set>
 
@@ -152,7 +152,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 
 } // end namespace hum
 
-#endif /* _HUMDRUMFILESTRUCTURE_H */
+#endif /* _HUMDRUMFILESTRUCTURE_H_INCLUDED */
 
 
 

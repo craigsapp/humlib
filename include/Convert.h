@@ -10,8 +10,8 @@
 // Description:   Convert between various data representations.
 //
 
-#ifndef _CONVERT_H
-#define _CONVERT_H
+#ifndef _CONVERT_H_INCLUDED
+#define _CONVERT_H_INCLUDED
 
 #include <iostream>
 #include <vector>
@@ -117,6 +117,8 @@ class Convert {
 		static string  encodeXml            (const string& input);
 		static string  getHumNumAttributes  (const HumNum& num);
 		static string  trimWhiteSpace       (const string& input);
+		static bool    startsWith           (const string& input,
+		                                     const string& searchstring);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
@@ -133,7 +135,7 @@ class Convert {
 
 } // end namespace hum
 
-#endif /* _CONVERT */
+#endif /* _CONVERT_H_INCLUDED */
 
 
 

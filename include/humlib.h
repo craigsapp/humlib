@@ -1,8 +1,8 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec  2 03:48:34 PST 2016
-// Filename:      /include/humlib.h
+// Last Modified: Sat Dec  3 17:57:46 PST 2016
+// Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
 // vim:           ts=3
@@ -35,8 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef _MINHUMDRUM_H
-#define _MINHUMDRUM_H
+#ifndef _HUMLIB_H_INCLUDED
+#define _HUMLIB_H_INCLUDED
 
 #include <math.h>
 #include <string.h>
@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <functional>
 #include <locale>
 #include <utility>
+#include <regex>
 
 using std::string;
 using std::vector;
@@ -64,12 +65,24 @@ using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
+using std::ends;
 using std::to_string;
 using std::stringstream;
 using std::map;
 using std::set;
 using std::pair;
 using std::invalid_argument;
+
+#define USING_URI 1
+#ifdef USING_URI
+	#include <sys/types.h>   /* socket, connect */
+	#include <sys/socket.h>  /* socket, connect */
+	#include <netinet/in.h>  /* htons           */
+	#include <netdb.h>       /* gethostbyname   */
+	#include <unistd.h>      /* read, write     */
+	#include <string.h>      /* memcpy          */
+   #include <sstream>
+#endif
 
 namespace hum {
 
@@ -324,6 +337,51 @@ ostream& operator<<(ostream& out, const HumNum& number);
 
 template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v);
+
+
+class HumRegex {
+   public:
+                    HumRegex           (void);
+		              HumRegex           (const string& exp);
+                   ~HumRegex           ();
+
+		// searching
+		bool          search             (const string& input,
+		                                  const string& exp);
+		int           getMatchCount      (void);
+		string        getMatch           (int index);
+		string        getPrefix          (void);
+		string        getSuffix          (void);
+		int           getMatchStartIndex (int index = 0);
+		int           getMatchEndIndex   (int index = 0);
+		int           getMatchLength     (int index = 0);
+   
+   protected:
+
+		// m_regex: store the regular expression to use as a default.
+		//
+		// http://en.cppreference.com/w/cpp/regex/basic_regex
+		// .assign(string) == set the regular expression.
+		// operator=       == set the regular expression.
+		std::regex m_regex;
+
+		// m_matches: stores the matches from a search:
+		//
+		// http://en.cppreference.com/w/cpp/regex/match_results
+		// .empty()     == check if match was successful.
+		// .size()      == number of matches.
+		// .length(i)   == return length of a submatch.
+      // .position(i) == return start index of submatch in search string.
+		// .str(i)      == return string of submatch.
+		// operator[i]  == return submatch.
+		// .prefix
+		// .suffix
+		// .begin()     == start of submatch list.
+		// .end()       == end of submatch list.
+		std::smatch m_matches;
+
+};
+
 
 
 class HumAddress {
@@ -1136,45 +1194,59 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 
 class HumdrumFileBase : public HumHash {
 	public:
-		              HumdrumFileBase              (void);
-                    HumdrumFileBase              (const string& contents);
-                    HumdrumFileBase              (istream& contents);
-		             ~HumdrumFileBase              ();
+		              HumdrumFileBase          (void);
+                    HumdrumFileBase          (const string& contents);
+                    HumdrumFileBase          (istream& contents);
+		             ~HumdrumFileBase          ();
 
-		bool          read                         (istream& contents);
-		bool          read                         (const char* filename);
-		bool          read                         (const string& filename);
-		bool          readCsv                      (istream& contents,
-		                                            const string& separator=",");
-		bool          readCsv                      (const char* contents,
-		                                            const string& separator=",");
-		bool          readCsv                      (const string& contents,
-		                                            const string& separator=",");
+		bool          read                     (istream& contents);
+		bool          read                     (const char* filename);
+		bool          read                     (const string& filename);
+		bool          readCsv                  (istream& contents,
+		                                        const string& separator=",");
+		bool          readCsv                  (const char* contents,
+		                                        const string& separator=",");
+		bool          readCsv                  (const string& contents,
+		                                        const string& separator=",");
 
-		bool          readString                   (const char* contents);
-		bool          readString                   (const string& contents);
-		bool          readStringCsv                (const char* contents,
-		                                            const string& separator=",");
-		bool          readStringCsv                (const string& contents,
-		                                            const string& separator=",");
-		bool          isValid                      (void);
-		string        getParseError                (void) const;
-		bool          isQuiet                      (void) const;
-		void          setQuietParsing              (void);
-		void          setNoisyParsing              (void);
+		bool          readString               (const char* contents);
+		bool          readString               (const string& contents);
+		bool          readStringCsv            (const char* contents,
+		                                        const string& separator=",");
+		bool          readStringCsv            (const string& contents,
+		                                        const string& separator=",");
+		bool          isValid                  (void);
+		string        getParseError            (void) const;
+		bool          isQuiet                  (void) const;
+		void          setQuietParsing          (void);
+		void          setNoisyParsing          (void);
+		void          clear                    (void);
 
-		bool    parse    (istream& contents)      { return read(contents); }
-		bool    parse    (const char* contents)   { return readString(contents); }
-		bool    parse    (const string& contents) { return readString(contents); }
-		bool    parseCsv (istream& contents, const string& separator = ",") {
-		                                     return readCsv(contents); }
-		bool    parseCsv (const char* contents, const string& separator = ",") {
-		                                     return readStringCsv(contents); }
-		bool    parseCsv (const string& contents, const string& separator = ",") {
-		                                     return readStringCsv(contents); }
+		bool          parse                    (istream& contents)
+		                                    { return read(contents); }
+		bool          parse                    (const char* contents)
+		                                    { return readString(contents); }
+		bool          parse                    (const string& contents)
+		                                    { return readString(contents); }
+		bool          parseCsv                 (istream& contents,
+		                                        const string& separator = ",")
+		                                    { return readCsv(contents); }
+		bool          parseCsv                 (const char* contents,
+		                                        const string& separator = ",")
+		                                    { return readStringCsv(contents); }
+		bool          parseCsv                 (const string& contents,
+		                                        const string& separator = ",")
+		                                    { return readStringCsv(contents); }
 
 		void          setXmlIdPrefix           (const string& value);
 		string        getXmlIdPrefix           (void);
+		void          setFilename              (const string& filename);
+		string        getFilename              (void);
+
+      void          setSegmentLevel          (int level = 0);
+      int           getSegmentLevel          (void);
+      ostream&      printSegmentLabel        (ostream& out);
+      ostream&      printNonemptySegmentLabel(ostream& out);
 
 		HumdrumLine&  operator[]               (int index);
 		HumdrumLine*  getLine                  (int index);
@@ -1232,102 +1304,129 @@ class HumdrumFileBase : public HumHash {
 		vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:
+      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		                                        HTp starttoken, int options);
+      void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		                                        int track, int options);
+		void          getPrimaryTrackSequence  (vector<HTp>& sequence,
+		                                        int track, int options);
 
-      void   getTrackSequence  (vector<vector<HTp> >& sequence, HTp starttoken,
-		                            int options);
-      void   getTrackSequence  (vector<vector<HTp> >& sequence, int track,
-		                            int options);
-		void   getPrimaryTrackSequence(vector<HTp>& sequence, int track,
-		                            int options);
+      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		                                        HTp starttoken, int options);
+      void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		                                        int spine, int options);
+		void          getPrimarySpineSequence  (vector<HTp>& sequence,
+		                                        int spine, int options);
 
-      void   getSpineSequence  (vector<vector<HTp> >& sequence, HTp starttoken,
-		                            int options);
-      void   getSpineSequence  (vector<vector<HTp> >& sequence, int spine,
-		                            int options);
-		void   getPrimarySpineSequence(vector<HTp>& sequence, int spine,
-		                            int options);
+      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		                                        HTp starttoken, int options)
+		                      { getTrackSequence(sequence, starttoken, options); }
+      void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		                                        int track, int options)
+		                           { getTrackSequence(sequence, track, options); }
+		void          getPrimaryTrackSeq       (vector<HTp>& sequence,
+		                                        int track, int options)
+		                     {getPrimaryTrackSequence(sequence, track, options); }
 
-      void getTrackSeq(vector<vector<HTp> >& sequence, HTp starttoken,
-		        int options) { getTrackSequence(sequence, starttoken, options); }
-      void getTrackSeq(vector<vector<HTp> >& sequence, int track, int options) {
-		            getTrackSequence(sequence, track, options); }
-		void getPrimaryTrackSeq(vector<HTp>& sequence, int track, int options) {
-		            getPrimaryTrackSequence(sequence, track, options); }
-
-
-	protected:
-		bool          analyzeTokens                (void);
-		bool          analyzeSpines                (void);
-		bool          analyzeLinks                 (void);
-		bool          analyzeTracks                (void);
-		bool          analyzeLines                 (void);
-		bool          adjustSpines                 (HumdrumLine& line,
-		                                            vector<string>& datatype,
-		                                            vector<string>& sinfo);
-		string        getMergedSpineInfo           (vector<string>& info,
-		                                            int starti, int extra);
-		bool          stitchLinesTogether          (HumdrumLine& previous,
-		                                            HumdrumLine& next);
-		void          addToTrackStarts             (HTp token);
-		bool          analyzeNonNullDataTokens     (void);
-		void          addUniqueTokens          (vector<HTp>& target,
-		                                       vector<HTp>& source);
-		bool          processNonNullDataTokensForTrackForward(
-		                                        HTp starttoken,
-		                                        vector<HTp> ptokens);
-		bool          processNonNullDataTokensForTrackBackward(
-		                                        HTp starttoken,
-		                                        vector<HTp> ptokens);
-		bool          setParseError                (stringstream& err);
-		bool          setParseError                (const string& err);
-		bool          setParseError                (const char* format, ...);
+		// functions defined in HumdrumFileBase-net.cpp:
+		string        getUriToUrlMapping        (const string& uri);
+		void          readFromHumdrumUri        (const string& humaddress);
+		void          readFromJrpUri            (const string& jrpaddress);
+		void          readFromHttpUri           (const string& webaddress);
+		void          readStringFromHttpUri     (stringstream& inputdata,
+		                                         const string& webaddress);
 
 	protected:
+		int           getChunk                  (int socket_id,
+		                                         stringstream& inputdata,
+		                                         char* buffer, int bufsize);
+		int           getFixedDataSize          (int socket_id,
+		                                         int datalength,
+		                                         stringstream& inputdata,
+		                                         char* buffer, int bufsize);
+		void          prepare_address           (struct sockaddr_in *address,
+		                                         const string& hostname,
+		                                         unsigned short int port);
+		int           open_network_socket       (const string& hostname,
+		                                         unsigned short int port);
 
-		// lines: an array representing lines from the input file.
+	protected:
+		bool          analyzeTokens             (void);
+		bool          analyzeSpines             (void);
+		bool          analyzeLinks              (void);
+		bool          analyzeTracks             (void);
+		bool          analyzeLines              (void);
+		bool          adjustSpines              (HumdrumLine& line,
+		                                         vector<string>& datatype,
+		                                         vector<string>& sinfo);
+		string        getMergedSpineInfo        (vector<string>& info,
+		                                         int starti, int extra);
+		bool          stitchLinesTogether       (HumdrumLine& previous,
+		                                         HumdrumLine& next);
+		void          addToTrackStarts          (HTp token);
+		bool          analyzeNonNullDataTokens  (void);
+		void          addUniqueTokens           (vector<HTp>& target,
+		                                         vector<HTp>& source);
+		bool          processNonNullDataTokensForTrackForward(HTp starttoken,
+		                                         vector<HTp> ptokens);
+		bool          processNonNullDataTokensForTrackBackward(HTp starttoken,
+		                                         vector<HTp> ptokens);
+		bool          setParseError             (stringstream& err);
+		bool          setParseError             (const string& err);
+		bool          setParseError             (const char* format, ...);
+
+	protected:
+
+		// m_lines: an array representing lines from the input file.
 		// The contents of lines must be deallocated when deconstructing object.
 		vector<HumdrumLine*> m_lines;
 
-		// trackstarts: list of addresses of the exclusive interpreations
+		// m_filename: name of the file which was loaded.
+		string m_filename;
+
+		// m_segementlevel: segment level (e.g., work/movement)
+		int m_segmentlevel;
+
+		// m_trackstarts: list of addresses of the exclusive interpreations
 		// in the file.  The first element in the list is reserved, so the
 		// number of tracks (primary spines) is equal to one less than the
 		// size of this list.
 		vector<HTp> m_trackstarts;
 
-		// trackends: list of the addresses of the spine terminators in the file.
-		// It is possible that spines can split and their subspines do not merge
-		// before termination; therefore, the ends are stored in a 2d array.
-		// The first dimension is the track number, and the second dimension
-		// is the list of terminators.
+		// m_trackends: list of the addresses of the spine terminators in the
+		// file. It is possible that spines can split and their subspines do not
+		// merge before termination; therefore, the ends are stored in
+		// a 2d array. The first dimension is the track number, and the second
+		// dimension is the list of terminators.
 		vector<vector<HTp> > m_trackends;
 
-		// barlines: list of barlines in the data.  If the first measures is
+		// m_barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
 		vector<HumdrumLine*> m_barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
 
-		// ticksperquarternote: this is the number of tick
+		// m_ticksperquarternote: this is the number of tick
 		int m_ticksperquarternote;
 
-		// idprefix: an XML id prefix used to avoid id collisions when including
-		// multiple HumdrumFile XML in a single group.
+		// m_idprefix: an XML id prefix used to avoid id collisions when
+		// includeing multiple HumdrumFile XML in a single group.
 		string m_idprefix;
 
-		// strands1d: one-dimensional list of spine strands.
+		// m_strands1d: one-dimensional list of spine strands.
 		vector<TokenPair> m_strand1d;
 
-		// strands2d: two-dimensional list of spine strands.
+		// m_strands2d: two-dimensional list of spine strands.
 		vector<vector<TokenPair> > m_strand2d;
 
-		// quietParse: Set to true if error messages should not be
+		// m_quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
 		bool m_quietParse;
 
-		// parseError: Set to true if a read is successful.
+		// m_parseError: Set to true if a read is successful.
 		string m_parseError;
 
-		// displayError: Used to print error message only once.
+		// m_displayError: Used to print error message only once.
 		bool m_displayError;
 
 	public:
@@ -2127,6 +2226,8 @@ class Convert {
 		static string  encodeXml            (const string& input);
 		static string  getHumNumAttributes  (const HumNum& num);
 		static string  trimWhiteSpace       (const string& input);
+		static bool    startsWith           (const string& input,
+		                                     const string& searchstring);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
@@ -2314,6 +2415,40 @@ int main(int argc, char** argv) {              \
 
 
 
+class HumdrumFileStream {
+   public:
+                      HumdrumFileStream  (void);
+                      HumdrumFileStream  (char** list);
+                      HumdrumFileStream  (const vector<string>& list);
+                      HumdrumFileStream  (Options& options);
+
+      int             setFileList        (char** list);
+      int             setFileList        (const vector<string>& list);
+
+      void            clear              (void);
+      int             eof                (void);
+   
+      int             getFile            (HumdrumFile& infile);
+      int             read               (HumdrumFile& infile);
+
+   protected:
+      ifstream        instream;         // used to read from list of files.
+      stringstream    urlbuffer;        // used to read data over internet.
+      string          newfilebuffer;    // used to keep track of !!!!segment: 
+                                        // records.
+
+      vector<string>  filelist;         // used when not using cin
+      int             curfile;          // index into filelist
+
+      vector<string>  universals;       // storage for universal comments
+
+      // Automatic URL downloading of data from internet in read():
+		void     fillUrlBuffer            (stringstream& uribuffer,
+		                                   const string& uriname);
+
+};
+
+
 class Tool_autobeam : public HumTool {
 	public:
 		         Tool_autobeam   (void);
@@ -2360,5 +2495,7 @@ class Tool_metlev : public HumTool {
 
 } // end of namespace hum
 
-#endif /* _MINHUMDRUM_H */
+#endif /* _HUMLIB_H_INCLUDED */
+
+
 

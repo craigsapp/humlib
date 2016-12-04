@@ -99,8 +99,8 @@
 //                  score).
 //
 
-#ifndef _HUMHASH_H
-#define _HUMHASH_H
+#ifndef _HUMHASH_H_INCLUDED
+#define _HUMHASH_H_INCLUDED
 
 #include <string>
 #include <vector>
@@ -266,7 +266,7 @@ class HumHash {
 
 } // end namespace hum
 
-#endif /* _HUMHASH_H */
+#endif /* _HUMHASH_H_INCLUDED */
 
 
 

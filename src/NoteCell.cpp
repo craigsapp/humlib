@@ -270,8 +270,10 @@ double NoteCell::getMetricLevel(void) {
 	return m_owner->getMetricLevel(getLineIndex());
 }
 
+
 // END_MERGE
 
 } // end namespace hum
+
 
 

@@ -1225,7 +1225,6 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 }
 
 
-
 // END_MERGE
 
 } // end namespace hum

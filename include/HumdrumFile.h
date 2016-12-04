@@ -11,8 +11,8 @@
 //                HumdrumFileStructure and HumdrumFileContent.
 //
 
-#ifndef _HUMDRUMFILE_H
-#define _HUMDRUMFILE_H
+#ifndef _HUMDRUMFILE_H_INCLUDED
+#define _HUMDRUMFILE_H_INCLUDED
 
 #include "HumdrumFileContent.h"
 
@@ -44,7 +44,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 } // end namespace hum
 
-#endif /* _HUMDRUMFILE_H */
+#endif /* _HUMDRUMFILE_H_INCLUDED */
 
 
 

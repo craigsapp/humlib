@@ -1,5 +1,4 @@
 //
-//
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Nov 25 19:41:43 PST 2016
 // Last Modified: Fri Nov 25 19:41:49 PST 2016
@@ -11,8 +10,8 @@
 //                in the Humdrum file score.
 //
 
-#ifndef _NOTEGRID_H
-#define _NOTEGRID_H
+#ifndef _NOTEGRID_H_INCLUDED
+#define _NOTEGRID_H_INCLUDED
 
 #include "NoteCell.h"
 
@@ -83,7 +82,7 @@ class NoteGrid {
 
 } // end namespace hum
 
-#endif /* _NOTEGRID_H */
+#endif /* _NOTEGRID_H_INCLUDED */
 
 
 

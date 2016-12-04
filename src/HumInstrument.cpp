@@ -3,7 +3,6 @@
 // Creation Date: Sat Nov 25 14:18:01 PST 2000
 // Last Modified: Fri Sep  2 10:16:09 CEST 2016 (added to humlib)
 // Filename:      HumInstrument.cpp
-// Web Address:   http://sig.sapp.org/src/sigInfo/HumInstrument.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumInstrument.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
@@ -438,7 +437,6 @@ void HumInstrument::sortData(void) {
    qsort(data.data(), data.size(), sizeof(_HumInstrument), 
       &HumInstrument::data_compare_by_humdrum_name);
 }
-
 
 
 // END_MERGE
