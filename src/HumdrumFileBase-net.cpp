@@ -135,8 +135,9 @@ void HumdrumFileBase::readFromJrpUri(const string& jrpaddress) {
 //
 
 void HumdrumFileBase::readFromHttpUri(const string& webaddress) {
-	stringstream sstream;
-   readStringFromHttpUri(sstream, webaddress);
+	stringstream inputdata;
+   readStringFromHttpUri(inputdata, webaddress);
+	HumdrumFileBase::readString(inputdata.str());
 }
 
 
@@ -285,7 +286,6 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 	}
 
 	close(socket_id);
-	HumdrumFileBase::readString(inputdata.str());
 }
 
 

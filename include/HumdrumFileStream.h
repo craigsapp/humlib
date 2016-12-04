@@ -48,15 +48,15 @@ class HumdrumFileStream {
       int             read               (HumdrumFile& infile);
 
    protected:
-      ifstream        instream;         // used to read from list of files.
-      stringstream    urlbuffer;        // used to read data over internet.
-      string          newfilebuffer;    // used to keep track of !!!!segment: 
+      ifstream        m_instream;       // used to read from list of files.
+      stringstream    m_urlbuffer;      // used to read data over internet.
+      string          m_newfilebuffer;  // used to keep track of !!!!segment: 
                                         // records.
 
-      vector<string>  filelist;         // used when not using cin
-      int             curfile;          // index into filelist
+      vector<string>  m_filelist;       // used when not using cin
+      int             m_curfile;        // index into filelist
 
-      vector<string>  universals;       // storage for universal comments
+      vector<string>  m_universals;     // storage for universal comments
 
       // Automatic URL downloading of data from internet in read():
 		void     fillUrlBuffer            (stringstream& uribuffer,

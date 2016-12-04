@@ -233,25 +233,25 @@ class HumdrumFileBase : public HumHash {
 		                     {getPrimaryTrackSequence(sequence, track, options); }
 
 		// functions defined in HumdrumFileBase-net.cpp:
-		string        getUriToUrlMapping        (const string& uri);
+		static string getUriToUrlMapping        (const string& uri);
 		void          readFromHumdrumUri        (const string& humaddress);
 		void          readFromJrpUri            (const string& jrpaddress);
 		void          readFromHttpUri           (const string& webaddress);
-		void          readStringFromHttpUri     (stringstream& inputdata,
+		static void   readStringFromHttpUri     (stringstream& inputdata,
 		                                         const string& webaddress);
 
 	protected:
-		int           getChunk                  (int socket_id,
+		static int    getChunk                  (int socket_id,
 		                                         stringstream& inputdata,
 		                                         char* buffer, int bufsize);
-		int           getFixedDataSize          (int socket_id,
+		static int    getFixedDataSize          (int socket_id,
 		                                         int datalength,
 		                                         stringstream& inputdata,
 		                                         char* buffer, int bufsize);
-		void          prepare_address           (struct sockaddr_in *address,
+		static void   prepare_address           (struct sockaddr_in *address,
 		                                         const string& hostname,
 		                                         unsigned short int port);
-		int           open_network_socket       (const string& hostname,
+		static int    open_network_socket       (const string& hostname,
 		                                         unsigned short int port);
 
 	protected:

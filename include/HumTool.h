@@ -67,6 +67,27 @@ int main(int argc, char** argv) {              \
 	return !status;                             \
 }
 
+#define STREAM_INTERFACE(CLASS)                                 \
+                                                                \
+using namespace std;                                            \
+using namespace hum;                                            \
+                                                                \
+int main(int argc, char** argv) {                               \
+	CLASS interface;                                             \
+	interface.process(argc, argv);                               \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	HumdrumFile infile;                                          \
+	bool status = true;                                          \
+	while (streamer.read(infile)) {                              \
+		status &= interface.run(infile, cout);                    \
+		if (interface.hasError()) {                               \
+			cerr << interface.getError();                          \
+		}                                                         \
+	}                                                            \
+                                                                \
+	return !status;                                              \
+}
+
 
 // END_MERGE
 

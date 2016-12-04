@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 17:57:46 PST 2016
+// Last Modified: Sat Dec  3 18:50:57 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1329,25 +1329,25 @@ class HumdrumFileBase : public HumHash {
 		                     {getPrimaryTrackSequence(sequence, track, options); }
 
 		// functions defined in HumdrumFileBase-net.cpp:
-		string        getUriToUrlMapping        (const string& uri);
+		static string getUriToUrlMapping        (const string& uri);
 		void          readFromHumdrumUri        (const string& humaddress);
 		void          readFromJrpUri            (const string& jrpaddress);
 		void          readFromHttpUri           (const string& webaddress);
-		void          readStringFromHttpUri     (stringstream& inputdata,
+		static void   readStringFromHttpUri     (stringstream& inputdata,
 		                                         const string& webaddress);
 
 	protected:
-		int           getChunk                  (int socket_id,
+		static int    getChunk                  (int socket_id,
 		                                         stringstream& inputdata,
 		                                         char* buffer, int bufsize);
-		int           getFixedDataSize          (int socket_id,
+		static int    getFixedDataSize          (int socket_id,
 		                                         int datalength,
 		                                         stringstream& inputdata,
 		                                         char* buffer, int bufsize);
-		void          prepare_address           (struct sockaddr_in *address,
+		static void   prepare_address           (struct sockaddr_in *address,
 		                                         const string& hostname,
 		                                         unsigned short int port);
-		int           open_network_socket       (const string& hostname,
+		static int    open_network_socket       (const string& hostname,
 		                                         unsigned short int port);
 
 	protected:
@@ -2413,6 +2413,27 @@ int main(int argc, char** argv) {              \
 	return !status;                             \
 }
 
+#define STREAM_INTERFACE(CLASS)                                 \
+                                                                \
+using namespace std;                                            \
+using namespace hum;                                            \
+                                                                \
+int main(int argc, char** argv) {                               \
+	CLASS interface;                                             \
+	interface.process(argc, argv);                               \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	HumdrumFile infile;                                          \
+	bool status = true;                                          \
+	while (streamer.read(infile)) {                              \
+		status &= interface.run(infile, cout);                    \
+		if (interface.hasError()) {                               \
+			cerr << interface.getError();                          \
+		}                                                         \
+	}                                                            \
+                                                                \
+	return !status;                                              \
+}
+
 
 
 class HumdrumFileStream {
@@ -2432,15 +2453,15 @@ class HumdrumFileStream {
       int             read               (HumdrumFile& infile);
 
    protected:
-      ifstream        instream;         // used to read from list of files.
-      stringstream    urlbuffer;        // used to read data over internet.
-      string          newfilebuffer;    // used to keep track of !!!!segment: 
+      ifstream        m_instream;       // used to read from list of files.
+      stringstream    m_urlbuffer;      // used to read data over internet.
+      string          m_newfilebuffer;  // used to keep track of !!!!segment: 
                                         // records.
 
-      vector<string>  filelist;         // used when not using cin
-      int             curfile;          // index into filelist
+      vector<string>  m_filelist;       // used when not using cin
+      int             m_curfile;        // index into filelist
 
-      vector<string>  universals;       // storage for universal comments
+      vector<string>  m_universals;     // storage for universal comments
 
       // Automatic URL downloading of data from internet in read():
 		void     fillUrlBuffer            (stringstream& uribuffer,

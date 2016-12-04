@@ -13,7 +13,7 @@
 
 #include "humlib.h"
 
-BASIC_INTERFACE(Tool_autobeam)
+STREAM_INTERFACE(Tool_autobeam)
 
 
 
