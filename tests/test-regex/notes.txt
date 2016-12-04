@@ -1,0 +1,60 @@
+http://cpprocks.com/files/c++11-regex-cheatsheet.pdf
+http://www.cplusplus.com/reference/regex
+
+https://solarianprogrammer.com/2011/10/12/cpp-11-regex-tutorial
+https://solarianprogrammer.com/2011/10/20/cpp-11-regex-tutorial-part-2
+
+//////////////////////////////
+//
+// regex_match -- return true of expressions fully matches the 
+// input string (regex_search is for partial matches).
+
+bool regex_match(string input, string expression);
+
+bool regex_match(string input, string expression, flags);
+
+
+//////////////////////////////
+//
+// Regex flags
+//
+// Reference: 
+//    http://www.cplusplus.com/reference/regex/regex_constants
+//    http://www.cplusplus.com/reference/regex/ECMAScript
+//
+
+using namespace std::regex_constants;
+
+icase      == ignore case
+nosubs     == no submatches in results
+optimize   == matching efficiency preferred over construction efficiency
+collate    == locale stuff
+
+Choose a syntax:
+ECMAScript == use javascript syntax (default)
+basic      == basic POSIX
+extended   == extended POSIX
+awk        == awk POSIX
+grep       == grep POSIX
+egrep      == egrep POSIX
+
+//
+// match flags
+//
+
+http://en.cppreference.com/w/cpp/regex/match_flag_type
+
+
+
+//////////////////////////////
+//
+// regex_replace --
+//
+
+
+//////////////////////////////
+
+https://msdn.microsoft.com/en-us/magazine/dn519920.aspx
+
+
+
