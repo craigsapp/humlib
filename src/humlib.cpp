@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec  5 23:03:13 PST 2016
+// Last Modified: Tue Dec  6 08:01:26 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2896,7 +2896,8 @@ int HumRegex::getMatchLength(int index) {
 //
 
 void HumRegex::setIgnoreCase(void) {
-
+	m_flags = (std::regex_constants::match_flag_type)
+			(m_flags | std::regex_constants::icase);
 }
 
 
@@ -2907,8 +2908,10 @@ void HumRegex::setIgnoreCase(void) {
 //
 
 void HumRegex::setNoIgnoreCase(void) {
-
+	m_flags = (std::regex_constants::match_flag_type)
+			(m_flags & ~std::regex_constants::icase);
 }
+
 
 
 //////////////////////////////

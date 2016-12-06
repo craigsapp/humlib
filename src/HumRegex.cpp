@@ -11,6 +11,8 @@
 //
 // References:
 //     http://www-01.ibm.com/support/docview.wss?uid=swg27041858&aid=1
+//     https://msdn.microsoft.com/en-us/library/bb982382.aspx
+//     https://msdn.microsoft.com/en-us/library/bb982727.aspx
 //
 
 #include "HumRegex.h"
@@ -209,7 +211,8 @@ int HumRegex::getMatchLength(int index) {
 //
 
 void HumRegex::setIgnoreCase(void) {
-
+	m_flags = (std::regex_constants::match_flag_type)
+			(m_flags | std::regex_constants::icase);
 }
 
 
@@ -220,8 +223,10 @@ void HumRegex::setIgnoreCase(void) {
 //
 
 void HumRegex::setNoIgnoreCase(void) {
-
+	m_flags = (std::regex_constants::match_flag_type)
+			(m_flags & ~std::regex_constants::icase);
 }
+
 
 
 //////////////////////////////
