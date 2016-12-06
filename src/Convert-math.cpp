@@ -104,6 +104,21 @@ double Convert::significantDigits(double value, int digits) {
 }
 
 
+
+//////////////////////////////
+//
+// Convert::isNaN -- needed due to compiler differences.
+//
+
+bool Convert::isNaN(double value) {
+	union { uint64_t u; double f; } ieee754;
+	ieee754.f = value;
+	return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
+           ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

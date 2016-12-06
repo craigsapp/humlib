@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec  6 11:11:29 PST 2016
+// Last Modified: Tue Dec  6 11:27:32 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2344,6 +2344,7 @@ class Convert {
 		static double  nearIntQuantize      (double value,
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
+		static bool    isNaN                (double value);
 
 };
 

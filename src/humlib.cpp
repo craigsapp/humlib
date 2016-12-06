@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec  6 11:11:29 PST 2016
+// Last Modified: Tue Dec  6 11:27:32 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11686,8 +11686,8 @@ double NoteCell::getDiatonicIntervalToNextAttack(void) {
 //
 
 bool NoteCell::isRest(void) {
-	// bug in GCC requires :: prefix to resolve two different isnan defs.
-	return ::isnan(m_b40);
+	// bug in GCC requires :: prefix to resolve two different isnan() defs.
+	return Convert::isNaN(m_b40);
 }
 
 
@@ -15571,6 +15571,21 @@ double Convert::significantDigits(double value, int digits) {
 	double scale = pow(10, digits);
 	return (int(value * scale + 0.5))/scale;
 }
+
+
+
+//////////////////////////////
+//
+// Convert::isNaN -- needed due to compiler differences.
+//
+
+bool Convert::isNaN(double value) {
+	union { uint64_t u; double f; } ieee754;
+	ieee754.f = value;
+	return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
+           ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
+}
+
 
 
 

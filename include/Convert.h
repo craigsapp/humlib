@@ -135,6 +135,7 @@ class Convert {
 		static double  nearIntQuantize      (double value,
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
+		static bool    isNaN                (double value);
 
 };
 
