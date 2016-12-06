@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec  6 08:01:26 PST 2016
+// Last Modified: Tue Dec  6 11:11:29 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -374,13 +374,24 @@ class HumRegex {
 		bool        search             (const string& input, const string& exp);
 		bool        search             (const string& input, const string& exp,
 		                                const string& options);
+		bool        search             (const string& input, int startindex,
+		                                const string& exp);
+		bool        search             (const string& input, int startindex,
+		                                const string& exp,
+		                                const string& options);
 
 		bool        search             (string* input, const string& exp);
 		bool        search             (string* input, const string& exp,
 		                                const string& options);
+		bool        search             (string* input, int startindex,
+		                                const string& exp);
+		bool        search             (string* input, int startindex,
+		                                const string& exp,
+		                                const string& options);
 
 		int         getMatchCount      (void);
 		string      getMatch           (int index);
+		int         getMatchInt        (int index);
 		string      getPrefix          (void);
 		string      getSuffix          (void);
 		int         getMatchStartIndex (int index = 0);

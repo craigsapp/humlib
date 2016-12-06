@@ -66,8 +66,22 @@ bool HumRegex::search(const string& input, const string& exp) {
 }
 
 
+bool HumRegex::search(const string& input, int startindex,
+		const string& exp) {
+	m_regex = exp;
+	auto startit = input.begin() + startindex;
+	auto endit   = input.end();
+	return regex_search(startit, endit, m_matches, m_regex, m_flags);
+}
+
+
 bool HumRegex::search(string* input, const string& exp) {
 	return HumRegex::search(*input, exp);
+}
+
+
+bool HumRegex::search(string* input, int startindex, const string& exp) {
+	return HumRegex::search(*input, startindex, exp);
 }
 
 //
@@ -81,9 +95,25 @@ bool HumRegex::search(const string& input, const string& exp,
 }
 
 
+bool HumRegex::search(const string& input, int startindex, const string& exp,
+		const string& options) {
+	m_regex = exp;
+	auto startit = input.begin() + startindex;
+	auto endit   = input.end();
+	return regex_search(startit, endit, m_matches, m_regex,
+		getTemporaryFlags(options));
+}
+
+
 bool HumRegex::search(string* input, const string& exp,
 		const string& options) {
 	return HumRegex::search(*input, exp, options);
+}
+
+
+bool HumRegex::search(string* input, int startindex, const string& exp,
+		const string& options) {
+	return HumRegex::search(*input, startindex, exp, options);
 }
 
 
@@ -141,6 +171,18 @@ int HumRegex::getMatchCount(void) {
 string HumRegex::getMatch(int index) {
 	return m_matches.str(index);
 }
+
+
+
+//////////////////////////////
+//
+// HumRegex::getMatchInt -- Get the match interpreted as a integer.
+//
+
+int HumRegex::getMatchInt(int index) {
+	return stoi(m_matches.str(index));
+}
+
 
 
 //////////////////////////////
