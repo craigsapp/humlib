@@ -5,7 +5,7 @@
 // Filename:      HumdrumLine.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumLine.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines and analytic markup
 //                of the line.

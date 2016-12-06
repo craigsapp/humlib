@@ -5,7 +5,7 @@
 // Filename:      HumHash.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumHash.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Key/value parameters systems for Humdrum tokens, lines,
 //                and files.  The HumHash class has a double namespace

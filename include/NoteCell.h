@@ -5,7 +5,7 @@
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumToken.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Keep track of variables related to a single note
 //                within a time slice (could be a note attack, note
@@ -29,40 +29,40 @@ class NoteGrid;
 
 class NoteCell {
 	public:
-		       NoteCell           (NoteGrid* owner, HTp token);
-		      ~NoteCell           (void) { clear();                    }
+		       NoteCell             (NoteGrid* owner, HTp token);
+		      ~NoteCell             (void) { clear();                    }
 
-		double getSgnDiatonicPitch(void) { return m_b7;                }
-		double getSgnMidiPitch    (void) { return m_b12;               }
-		double getSgnBase40Pitch  (void) { return m_b40;               }
-		double getSgnAccidental   (void) { return m_accidental;        }
+		double getSgnDiatonicPitch  (void) { return m_b7;                }
+		double getSgnMidiPitch      (void) { return m_b12;               }
+		double getSgnBase40Pitch    (void) { return m_b40;               }
+		double getSgnAccidental     (void) { return m_accidental;        }
 
-		double getAbsDiatonicPitch(void) { return fabs(m_b7);          }
-		double getAbsMidiPitch    (void) { return fabs(m_b12);         }
-		double getAbsBase40Pitch  (void) { return fabs(m_b40);         }
-		double getAbsAccidental   (void) { return fabs(m_accidental);  }
+		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
+		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
+		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }
+		double getAbsAccidental     (void) { return fabs(m_accidental);  }
 
-		HTp    getToken           (void) { return m_token;             }
-		int    getNextAttackIndex (void) { return m_nextAttackIndex;   }
-		int    getPrevAttackIndex (void) { return m_prevAttackIndex;   }
-		int    getCurrAttackIndex (void) { return m_currAttackIndex;   }
-		int    getSliceIndex      (void) { return m_timeslice;         }
+		HTp    getToken             (void) { return m_token;             }
+		int    getNextAttackIndex   (void) { return m_nextAttackIndex;   }
+		int    getPrevAttackIndex   (void) { return m_prevAttackIndex;   }
+		int    getCurrAttackIndex   (void) { return m_currAttackIndex;   }
+		int    getSliceIndex        (void) { return m_timeslice;         }
 
-		bool   isAttack           (void) { return m_b40>0? true:false; }
-		bool   isRest             (void);
-		bool   isSustained        (void);
+		bool   isAttack             (void) { return m_b40>0? true:false; }
+		bool   isRest               (void);
+		bool   isSustained          (void);
 
-		string getAbsKernPitch    (void);
-		string getSgnKernPitch    (void);
+		string getAbsKernPitch      (void);
+		string getSgnKernPitch      (void);
 
-		double operator-          (NoteCell& B);
-		double operator-          (int B);
+		double operator-            (NoteCell& B);
+		double operator-            (int B);
 
-		int    getLineIndex       (void);
-		ostream& printNoteInfo    (ostream& out);
-		double getDiatonicIntervalToNextAttack(void);
+		int    getLineIndex         (void);
+		ostream& printNoteInfo      (ostream& out);
+		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
-		double getMetricLevel     (void);
+		double getMetricLevel       (void);
 
 	protected:
 		void clear                  (void);
@@ -94,6 +94,7 @@ class NoteCell {
 
 	friend NoteGrid;
 };
+
 
 // END_MERGE
 

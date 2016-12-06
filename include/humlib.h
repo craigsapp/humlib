@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec  3 22:40:09 PST 2016
+// Last Modified: Mon Dec  5 23:03:13 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -17,9 +17,9 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
-   and the following disclaimer in the documentation and/or other materials 
+   and the following disclaimer in the documentation and/or other materials
    provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -244,7 +244,6 @@ class HumHash {
 
 
 
-
 class HumNum {
 	public:
 		         HumNum             (void);
@@ -339,26 +338,67 @@ template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v);
 
 
+
 class HumRegex {
 	public:
-		              HumRegex           (void);
-		              HumRegex           (const string& exp);
-		             ~HumRegex           ();
+		            HumRegex           (void);
+		            HumRegex           (const string& exp);
+		           ~HumRegex           ();
+
+		// replacing
+
+		string&     replaceDestructive (string& input, const string& exp,
+		                                const string& replacement);
+		string&     replaceDestructive (string& input, const string& exp,
+		                                const string& replacement,
+		                                const string& options);
+		string      replaceCopy        (const string& input, const string& exp,
+		                                const string& replacement);
+		string      replaceCopy        (const string& input, const string& exp,
+		                                const string& replacement,
+		                                const string& options);
+
+		string&     replaceDestructive (string* input, const string& exp,
+		                                const string& replacement);
+		string&     replaceDestructive (string* input, const string& exp,
+		                                const string& replacement,
+		                                const string& options);
+		string      replaceCopy        (string* input, const string& exp,
+		                                const string& replacement);
+		string      replaceCopy        (string* input, const string& exp,
+		                                const string& replacement,
+		                                const string& options);
 
 		// searching
-		bool          search             (const string& input,
-		                                  const string& exp);
-		int           getMatchCount      (void);
-		string        getMatch           (int index);
-		string        getPrefix          (void);
-		string        getSuffix          (void);
-		int           getMatchStartIndex (int index = 0);
-		int           getMatchEndIndex   (int index = 0);
-		int           getMatchLength     (int index = 0);
+		// http://www.cplusplus.com/reference/regex/regex_search
+		bool        search             (const string& input, const string& exp);
+		bool        search             (const string& input, const string& exp,
+		                                const string& options);
+
+		bool        search             (string* input, const string& exp);
+		bool        search             (string* input, const string& exp,
+		                                const string& options);
+
+		int         getMatchCount      (void);
+		string      getMatch           (int index);
+		string      getPrefix          (void);
+		string      getSuffix          (void);
+		int         getMatchStartIndex (int index = 0);
+		int         getMatchEndIndex   (int index = 0);
+		int         getMatchLength     (int index = 0);
+
+		// setting option flags:
+		void        setIgnoreCase      (void);
+		void        setNoIgnoreCase    (void);
 
 	protected:
+		std::regex_constants::match_flag_type
+				getTemporaryFlags(const string& sflags);
 
-		// m_regex: store the regular expression to use as a default.
+
+	private:
+
+		// m_regex: stores the regular expression to use as a default.
 		//
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
 		// .assign(string) == set the regular expression.
@@ -380,6 +420,40 @@ class HumRegex {
 		// .end()       == end of submatch list.
 		std::smatch m_matches;
 
+		// m_flags: stores default settings for regex processing
+		// http://en.cppreference.com/w/cpp/regex/syntax_option_type
+		// http://en.cppreference.com/w/cpp/regex/basic_regex
+		//
+		// Options:
+		//    regex::icase      == Ignore case.
+		//    regex::nosubs     == Don't collect submatches.
+		//    regex::optimize   == Make matching faster, but
+		//                                   construction slower.
+		//    regex::collate    == locale character ranges.
+		//    regex::multiline  == C++17 only.
+		//
+		// only one of the following can be given.  EMCAScript will be
+		// used by default if non specified.
+		//    regex::EMCAScript == Use EMCAScript regex syntax.
+		//    regex::basic      == Use basic POSIX syntax.
+		//    regex::extended   == Use extended POSIX syntax.
+		//    regex::awk        == Use awk POSIX syntax.
+		//    regex::grep       == Use grep POSIX syntax.
+		//    regex::extended   == Use egrep POSIX syntax.
+		// or:
+		// http://www.cplusplus.com/reference/regex/regex_search/
+		//    match_default     == clear all options
+		//    match_not_bol     == not beginning of line
+		//    match_not_eol     == not end of line
+		//    match_not_bow     == not beginning of word for \b
+		//    match_not_eow     == not end of word for \b
+		//    match_any         == any match acceptable if more than 1 possible.
+		//    match_not_null    == empty sequence does note match
+		//    match_continuous  ==
+		//    match_prev_avail  ==
+		//    format_default    == same as match_default.
+		std::regex_constants::match_flag_type m_flags;
+
 };
 
 
@@ -392,7 +466,7 @@ class HumAddress {
 		int                 getLineIndex      (void) const;
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
-		const HumdrumToken& getDataType (void) const;
+		const HumdrumToken& getDataType       (void) const;
 		const string&       getSpineInfo      (void) const;
 		int                 getTrack          (void) const;
 		int                 getSubtrack       (void) const;
@@ -456,41 +530,43 @@ class HumAddress {
 };
 
 
+
 class _HumInstrument {
 	public:
-		_HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
-	  ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
+		_HumInstrument    (void) { humdrum = ""; name = ""; gm = 0; }
+	  ~_HumInstrument    ()     { humdrum = ""; name = ""; gm = 0; }
 
 		string humdrum;
 		string name;
-		int   gm;
+		int    gm;
 };
+
 
 class HumInstrument {
 	public:
-		                HumInstrument  (void);
-		                HumInstrument  (const string& Hname);
-		               ~HumInstrument  ();
+		           HumInstrument       (void);
+		           HumInstrument       (const string& Hname);
+		          ~HumInstrument       ();
 
-		string          getName        (void);
-		string          getName        (const string& Hname);
-		string          getHumdrum     (void);
-		int             getGM          (void);
-		int             getGM          (const string& Hname);
-		void            setHumdrum     (const string& Hname);
-		int             setGM          (const string& Hname, int aValue);
+		string     getName             (void);
+		string     getName             (const string& Hname);
+		string     getHumdrum          (void);
+		int        getGM               (void);
+		int        getGM               (const string& Hname);
+		void       setHumdrum          (const string& Hname);
+		int        setGM               (const string& Hname, int aValue);
 
 	private:
-		int                                index;
-		static vector<_HumInstrument>      data;
-		static int                         classcount;
+		int                            index;
+		static vector<_HumInstrument>  data;
+		static int                     classcount;
 
 	protected:
-		void   initialize   (void);
-		void   afi          (const char* humdrum_name, int midinum,
-		                    const char* EN_name);
-		int    find         (const string& Hname);
-		void   sortData     (void);
+		void       initialize          (void);
+		void       afi                 (const char* humdrum_name, int midinum,
+		                                const char* EN_name);
+		int        find                (const string& Hname);
+		void       sortData            (void);
 		static int data_compare_by_humdrum_name(const void* a, const void* b);
 };
 
@@ -734,19 +810,19 @@ class HumInstrument {
 
 class HumdrumLine : public string, public HumHash {
 	public:
-		         HumdrumLine          (void);
-		         HumdrumLine          (const string& aString);
-		         HumdrumLine          (const char* aString);
-		        ~HumdrumLine          ();
+		         HumdrumLine            (void);
+		         HumdrumLine            (const string& aString);
+		         HumdrumLine            (const char* aString);
+		        ~HumdrumLine            ();
 
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
-		bool     isLocalComment (void) const { return isCommentLocal(); }
+		bool     isLocalComment         (void) const { return isCommentLocal(); }
 		bool     isCommentGlobal        (void) const;
 		bool     isReference            (void) const;
 		string   getReferenceKey        (void) const;
 		string   getReferenceValue      (void) const;
-		bool     isGlobalComment (void) const { return isCommentGlobal(); }
+		bool     isGlobalComment         (void) const { return isCommentGlobal(); }
 		bool     isExclusive            (void) const;
 		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator           (void) const;
@@ -802,7 +878,7 @@ class HumdrumLine : public string, public HumHash {
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HTp      getTrackStart     (int track) const;
+		HTp      getTrackStart          (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const string& separator = ",");
 		void     setLineFromCsv         (const string& csv,
@@ -921,19 +997,22 @@ class HumdrumToken : public string, public HumHash {
 		bool     isAddInterpretation       (void) const;
 
 		// alises for the above
-		bool     isExclusive     (void) const {
-		                                   return isExclusiveInterpretation(); }
-		bool     isExInterp      (void) const {
-		                                   return isExclusiveInterpretation(); }
-		bool     isSplit         (void) const { return isSplitInterpretation(); }
-		bool     isMerge         (void) const { return isMergeInterpretation(); }
-		bool     isExchange      (void) const {
-		                                   return isExchangeInterpretation(); }
-		bool     isTerminate     (void) const {
-		                                   return isTerminateInterpretation(); }
-		bool     isTerminator    (void) const {
-		                                   return isTerminateInterpretation(); }
-		bool     isAdd           (void) const { return isSplitInterpretation(); }
+		bool     isExclusive               (void) const
+		                                  { return isExclusiveInterpretation(); }
+		bool     isExInterp                (void) const
+		                                  { return isExclusiveInterpretation(); }
+		bool     isSplit                   (void) const
+		                                      { return isSplitInterpretation(); }
+		bool     isMerge                   (void) const
+		                                      { return isMergeInterpretation(); }
+		bool     isExchange                (void) const
+		                                   { return isExchangeInterpretation(); }
+		bool     isTerminate               (void) const
+		                                  { return isTerminateInterpretation(); }
+		bool     isTerminator              (void) const
+		                                  { return isTerminateInterpretation(); }
+		bool     isAdd                     (void) const
+		                                      { return isSplitInterpretation(); }
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
@@ -1021,65 +1100,66 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
+		void     setText                   (const string& text);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);
 		HumdrumToken& operator=            (const char* aToken);
 
 		// next/previous token functions:
-		int           getNextTokenCount         (void) const;
-		int           getPreviousTokenCount     (void) const;
-		HTp           getNextToken              (int index = 0) const;
-		HTp           getPreviousToken          (int index = 0) const;
-		vector<HTp>   getNextTokens             (void) const;
-		vector<HTp>   getPreviousTokens         (void) const;
+		int         getNextTokenCount      (void) const;
+		int         getPreviousTokenCount  (void) const;
+		HTp         getNextToken           (int index = 0) const;
+		HTp         getPreviousToken       (int index = 0) const;
+		vector<HTp> getNextTokens          (void) const;
+		vector<HTp> getPreviousTokens      (void) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) {
-		               return getPreviousNonNullDataTokenCount(); }
+		int      getPreviousNNDTCount      (void)
+		                           { return getPreviousNonNullDataTokenCount(); }
 		HTp      getPreviousNonNullDataToken(int index = 0);
-		HTp      getPreviousNNDT(int index) {
-		               return getPreviousNonNullDataToken(index); }
+		HTp      getPreviousNNDT           (int index)
+		                           { return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
-		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HTp      getNextNonNullDataToken(int index = 0);
-		HTp      getNextNNDT(int index = 0) {
-		               return getNextNonNullDataToken(index); }
+		int      getNextNNDTCount          (void)
+		                               { return getNextNonNullDataTokenCount(); }
+		HTp      getNextNonNullDataToken   (int index = 0);
+		HTp      getNextNNDT               (int index = 0)
+		                               { return getNextNonNullDataToken(index); }
 
 		// slur-analysis based functions:
-		HumNum   getSlurDuration   (HumNum scale = 1);
+		HumNum   getSlurDuration           (HumNum scale = 1);
 
 	protected:
-		void     setLineIndex       (int lineindex);
-		void     setFieldIndex      (int fieldlindex);
-		void     setSpineInfo       (const string& spineinfo);
-		void     setTrack           (int aTrack, int aSubtrack);
-		void     setTrack           (int aTrack);
-		void     setSubtrack        (int aSubtrack);
-		void     setSubtrackCount   (int count);
-		void     setPreviousToken   (HTp aToken);
-		void     setNextToken       (HTp aToken);
-		void     addNextNonNullToken(HTp token);
-		void     makeForwardLink    (HumdrumToken& nextToken);
-		void     makeBackwardLink   (HumdrumToken& previousToken);
-		void     setOwner           (HumdrumLine* aLine);
-		int      getState           (void) const;
-		void     incrementState     (void);
-		void     setDuration        (const HumNum& dur);
-		void     setStrandIndex     (int index);
+		void     setLineIndex              (int lineindex);
+		void     setFieldIndex             (int fieldlindex);
+		void     setSpineInfo              (const string& spineinfo);
+		void     setTrack                  (int aTrack, int aSubtrack);
+		void     setTrack                  (int aTrack);
+		void     setSubtrack               (int aSubtrack);
+		void     setSubtrackCount          (int count);
+		void     setPreviousToken          (HTp aToken);
+		void     setNextToken              (HTp aToken);
+		void     addNextNonNullToken       (HTp token);
+		void     makeForwardLink           (HumdrumToken& nextToken);
+		void     makeBackwardLink          (HumdrumToken& previousToken);
+		void     setOwner                  (HumdrumLine* aLine);
+		int      getState                  (void) const;
+		void     incrementState            (void);
+		void     setDuration               (const HumNum& dur);
+		void     setStrandIndex            (int index);
 
-		bool     analyzeDuration   (string& err);
-		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlContentInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
+		bool     analyzeDuration          (string& err);
+		ostream& printXmlBaseInfo         (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlContentInfo      (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlStructureInfo    (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlParameterInfo    (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 
 	private:
-
 		// address: The address contains information about the location of
 		// the token on a HumdrumLine and in a HumdrumFile.
 		HumAddress m_address;
@@ -1139,6 +1219,7 @@ ostream& operator<<(ostream& out, HTp token);
 
 ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out=std::cout);
 ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
+
 
 
 // The following options are used for get[Primary]TrackTokens:
@@ -1252,9 +1333,14 @@ class HumdrumFileBase : public HumHash {
 		HumdrumLine*  getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
+		string        token                    (int lineindex, int fieldindex,
+		                                        int subtokenindex,
+		                                        const string& separator = " ");
 		int           getMaxTrack              (void) const;
-		int           getTrackCount (void) const { return getMaxTrack(); }
-		int           getSpineCount (void) const { return getMaxTrack(); }
+		int           getTrackCount            (void) const
+		                                                { return getMaxTrack(); }
+		int           getSpineCount            (void) const
+		                                                { return getMaxTrack(); }
 		ostream&      printSpineInfo           (ostream& out = cout);
 		ostream&      printDataTypeInfo        (ostream& out = cout);
 		ostream&      printTrackInfo           (ostream& out = cout);
@@ -1264,9 +1350,8 @@ class HumdrumFileBase : public HumHash {
 		ostream&      printFieldIndex          (int fieldind, ostream& out);
 
 		HTp           getTrackStart            (int track) const;
-		HTp           getSpineStart            (int spine) const {
-		                                         return getTrackStart(spine+1); }
-
+		HTp           getSpineStart            (int spine) const
+		                                       { return getTrackStart(spine+1); }
 		void          getSpineStartList        (vector<HTp>& spinestarts);
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
@@ -1274,14 +1359,14 @@ class HumdrumFileBase : public HumHash {
 		vector<HTp>   getKernSpineStartList    ();
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
-		void          getTrackStartList        (vector<HTp>& spinestarts) {
-								return getSpineStartList(spinestarts); }
+		void          getTrackStartList        (vector<HTp>& spinestarts)
+		                               { return getSpineStartList(spinestarts); }
 		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const string& exinterp) {
-								return getSpineStartList(spinestarts, exinterp); }
+		                                        const string& exinterp)
+		                     { return getSpineStartList(spinestarts, exinterp); }
 		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const vector<string>& exinterps) {
-								return getSpineStartList(spinestarts, exinterps); }
+		                                        const vector<string>& exinterps)
+		                    { return getSpineStartList(spinestarts, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
@@ -1290,9 +1375,12 @@ class HumdrumFileBase : public HumHash {
 		void          appendLine               (const char* line);
 		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
-		void          push_back(const char* line)   { appendLine(line); }
-		void          push_back(const string& line) { appendLine(line); }
-		void          push_back(HumdrumLine* line)  { appendLine(line); }
+		void          push_back                (const char* line)
+		                                                    { appendLine(line); }
+		void          push_back                (const string& line)
+		                                                    { appendLine(line); }
+		void          push_back                (HumdrumLine* line)
+		                                                    { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
@@ -1320,13 +1408,13 @@ class HumdrumFileBase : public HumHash {
 
 		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options)
-		                      { getTrackSequence(sequence, starttoken, options); }
+		                     { getTrackSequence(sequence, starttoken, options); }
 		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        int track, int options)
-		                           { getTrackSequence(sequence, track, options); }
+		                          { getTrackSequence(sequence, track, options); }
 		void          getPrimaryTrackSeq       (vector<HTp>& sequence,
 		                                        int track, int options)
-		                     {getPrimaryTrackSequence(sequence, track, options); }
+		                    {getPrimaryTrackSequence(sequence, track, options); }
 
 		// functions defined in HumdrumFileBase-net.cpp:
 		static string getUriToUrlMapping        (const string& uri);
@@ -1453,6 +1541,7 @@ class HumdrumFileBase : public HumHash {
 		HumNum       getBarlineDurationToEnd    (int index) const { return 0; };
 
 		// HumdrumFileContent public functions:
+		// to be added later
 
 };
 
@@ -1496,19 +1585,19 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool parseCsv(istream& contents, const string& separator = ",")
 		                                 { return readCsv(contents, separator); }
 		bool parseCsv(const char* contents, const string& separator = ",")
-		                     { return readStringCsv(contents, separator); }
+		                           { return readStringCsv(contents, separator); }
 		bool parseCsv(const string& contents, const string& separator = ",")
-		                     { return readStringCsv(contents, separator); }
+		                           { return readStringCsv(contents, separator); }
 		bool          readNoRhythmCsv              (istream& contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readNoRhythmCsv              (const char*   filename,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readNoRhythmCsv              (const string& filename,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const char*   contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const string& contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
@@ -1516,18 +1605,18 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 
 		// strand functionality:
-		HumdrumToken* getStrandStart(int index) const;
-		HumdrumToken* getStrandEnd(int index) const;
-		HumdrumToken* getStrandStart(int sindex, int index) const;
-		HumdrumToken* getStrandEnd(int sindex, int index) const;
-		int           getStrandCount(void) const;
-		int           getStrandCount(int spineindex) const;
-		void resolveNullTokens(void);
+		HumdrumToken* getStrandStart               (int index) const;
+		HumdrumToken* getStrandEnd                 (int index) const;
+		HumdrumToken* getStrandStart               (int sindex, int index) const;
+		HumdrumToken* getStrandEnd                 (int sindex, int index) const;
+		int           getStrandCount               (void) const;
+		int           getStrandCount               (int spineindex) const;
+		void          resolveNullTokens            (void);
 
-		HumdrumToken* getStrand(int index) const {
-			return getStrandStart(index); }
-		HumdrumToken* getStrand(int sindex, int index) const {
-			return getStrandStart(sindex, index); }
+		HumdrumToken* getStrand                    (int index) const
+		                                        { return getStrandStart(index); }
+		HumdrumToken* getStrand                    (int sindex, int index) const
+		                                { return getStrandStart(sindex, index); }
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
@@ -1577,7 +1666,6 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumdrumToken* ptoken);
 		void          analyzeSpineStrands          (vector<TokenPair>& ends,
 		                                            HumdrumToken* starttok);
-
 };
 
 
@@ -1989,15 +2077,15 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 
 class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
-		              HumdrumFile         (void);
-		              HumdrumFile         (const string& filename);
-		              HumdrumFile         (istream& filename);
-		             ~HumdrumFile         ();
+		              HumdrumFile          (void);
+		              HumdrumFile          (const string& filename);
+		              HumdrumFile          (istream& filename);
+		             ~HumdrumFile          ();
 
-		ostream&      printXml            (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
+		ostream&      printXml             (ostream& out = cout, int level = 0,
+		                                    const string& indent = "\t");
 		ostream&      printXmlParameterInfo(ostream& out, int level,
-		                                  const string& indent);
+		                                    const string& indent);
 };
 
 
@@ -2009,40 +2097,40 @@ class NoteGrid;
 
 class NoteCell {
 	public:
-		       NoteCell           (NoteGrid* owner, HTp token);
-		      ~NoteCell           (void) { clear();                    }
+		       NoteCell             (NoteGrid* owner, HTp token);
+		      ~NoteCell             (void) { clear();                    }
 
-		double getSgnDiatonicPitch(void) { return m_b7;                }
-		double getSgnMidiPitch    (void) { return m_b12;               }
-		double getSgnBase40Pitch  (void) { return m_b40;               }
-		double getSgnAccidental   (void) { return m_accidental;        }
+		double getSgnDiatonicPitch  (void) { return m_b7;                }
+		double getSgnMidiPitch      (void) { return m_b12;               }
+		double getSgnBase40Pitch    (void) { return m_b40;               }
+		double getSgnAccidental     (void) { return m_accidental;        }
 
-		double getAbsDiatonicPitch(void) { return fabs(m_b7);          }
-		double getAbsMidiPitch    (void) { return fabs(m_b12);         }
-		double getAbsBase40Pitch  (void) { return fabs(m_b40);         }
-		double getAbsAccidental   (void) { return fabs(m_accidental);  }
+		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
+		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
+		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }
+		double getAbsAccidental     (void) { return fabs(m_accidental);  }
 
-		HTp    getToken           (void) { return m_token;             }
-		int    getNextAttackIndex (void) { return m_nextAttackIndex;   }
-		int    getPrevAttackIndex (void) { return m_prevAttackIndex;   }
-		int    getCurrAttackIndex (void) { return m_currAttackIndex;   }
-		int    getSliceIndex      (void) { return m_timeslice;         }
+		HTp    getToken             (void) { return m_token;             }
+		int    getNextAttackIndex   (void) { return m_nextAttackIndex;   }
+		int    getPrevAttackIndex   (void) { return m_prevAttackIndex;   }
+		int    getCurrAttackIndex   (void) { return m_currAttackIndex;   }
+		int    getSliceIndex        (void) { return m_timeslice;         }
 
-		bool   isAttack           (void) { return m_b40>0? true:false; }
-		bool   isRest             (void);
-		bool   isSustained        (void);
+		bool   isAttack             (void) { return m_b40>0? true:false; }
+		bool   isRest               (void);
+		bool   isSustained          (void);
 
-		string getAbsKernPitch    (void);
-		string getSgnKernPitch    (void);
+		string getAbsKernPitch      (void);
+		string getSgnKernPitch      (void);
 
-		double operator-          (NoteCell& B);
-		double operator-          (int B);
+		double operator-            (NoteCell& B);
+		double operator-            (int B);
 
-		int    getLineIndex       (void);
-		ostream& printNoteInfo    (ostream& out);
-		double getDiatonicIntervalToNextAttack(void);
+		int    getLineIndex         (void);
+		ostream& printNoteInfo      (ostream& out);
+		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
-		double getMetricLevel     (void);
+		double getMetricLevel       (void);
 
 	protected:
 		void clear                  (void);
@@ -2076,25 +2164,26 @@ class NoteCell {
 };
 
 
+
 class NoteGrid {
 	public:
-		           NoteGrid           (void) { }
-		           NoteGrid           (HumdrumFile& infile);
-		          ~NoteGrid           ();
+		           NoteGrid              (void) { }
+		           NoteGrid              (HumdrumFile& infile);
+		          ~NoteGrid              ();
 
-		void       clear              (void);
+		void       clear                 (void);
 
-		bool       load               (HumdrumFile& infile);
-		NoteCell*  cell               (int voiceindex, int sliceindex);
-		int        getVoiceCount      (void);
-		int        getSliceCount      (void);
-		int        getLineIndex       (int sindex);
+		bool       load                  (HumdrumFile& infile);
+		NoteCell*  cell                  (int voiceindex, int sliceindex);
+		int        getVoiceCount         (void);
+		int        getSliceCount         (void);
+		int        getLineIndex          (int sindex);
 
-		void       printDiatonicGrid(ostream& out);
-		void       printMidiGrid      (ostream& out);
-		void       printBase40Grid    (ostream& out);
-		void       printRawGrid       (ostream& out);
-		void       printKernGrid      (ostream& out);
+		void       printDiatonicGrid     (ostream& out);
+		void       printMidiGrid         (ostream& out);
+		void       printBase40Grid       (ostream& out);
+		void       printRawGrid          (ostream& out);
+		void       printKernGrid         (ostream& out);
 
 		double     getSgnDiatonicPitch   (int vindex, int sindex);
 		double     getSgnMidiPitch       (int vindex, int sindex);
@@ -2110,20 +2199,20 @@ class NoteGrid {
 		bool       isSustained           (int vindex, int sindex);
 		bool       isAttack              (int vindex, int sindex);
 
-		HTp        getToken           (int vindex, int sindex);
+		HTp        getToken              (int vindex, int sindex);
 
-		int        getPrevAttackDiatonic(int vindex, int sindex);
-		int        getNextAttackDiatonic(int vindex, int sindex);
+		int        getPrevAttackDiatonic (int vindex, int sindex);
+		int        getNextAttackDiatonic (int vindex, int sindex);
 
-		void       printGridInfo(ostream& out);
-		void       printVoiceInfo(ostream& out, int vindex);
+		void       printGridInfo         (ostream& out);
+		void       printVoiceInfo        (ostream& out, int vindex);
 
-		void       getNoteAndRestAttacks(vector<NoteCell*>& attacks, int vindex);
-		double     getMetricLevel       (int sindex);
+		void       getNoteAndRestAttacks (vector<NoteCell*>& attacks, int vindex);
+		double     getMetricLevel        (int sindex);
 
 	protected:
-		void       buildAttackIndexes (void);
-		void       buildAttackIndex   (int vindex);
+		void       buildAttackIndexes    (void);
+		void       buildAttackIndex      (int vindex);
 
 	private:
 		vector<vector<NoteCell*> > m_grid;
@@ -2138,11 +2227,12 @@ class Convert {
 	public:
 
 		// Rhythm processing, defined in Convert-rhythm.cpp
-		static HumNum  recipToDuration    (const string& recip, HumNum scale = 4,
-		                                   string separator = " ");
+		static HumNum  recipToDuration      (const string& recip,
+		                                     HumNum scale = 4,
+		                                     string separator = " ");
 		static HumNum  recipToDurationNoDots(const string& recip,
-		                                   HumNum scale = 4,
-		                                   string separator = " ");
+		                                     HumNum scale = 4,
+		                                     string separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
@@ -2181,8 +2271,8 @@ class Convert {
 		static int     kernToBase12         (HTp token)
 				{ return kernToBase12         ((string)*token); }
 		static int     kernToBase7          (const string& kerndata);
-		static int     kernToBase7         (HTp token)
-				{ return kernToBase7         ((string)*token); }
+		static int     kernToBase7          (HTp token)
+				{ return kernToBase7          ((string)*token); }
 		static int     kernToMidiNoteNumber (const string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((string)*token); }
@@ -2190,18 +2280,21 @@ class Convert {
 		                                     string flat = "b",
 		                                     string sharp = "#",
 		                                     string separator = "");
-		static string  kernToSciPitch      (const string& kerndata,
-		      string flat = "b", string sharp = "#", string separator = "") {
-		          return kernToScientificPitch(kerndata, flat, sharp, separator);
-		}
-		static string  kernToSP            (const string& kerndata,
-		      string flat = "b", string sharp = "#", string separator = "") {
-		          return kernToScientificPitch(kerndata, flat, sharp, separator);
-		}
-		static int     pitchToWbh         (int dpc, int acc, int octave,
-		                                   int maxacc);
-		static void    wbhToPitch         (int& dpc, int& acc, int& octave,
-		                                   int maxacc, int wbh);
+		static string  kernToSciPitch       (const string& kerndata,
+		      										 string flat = "b",
+		                                     string sharp = "#",
+		                                     string separator = "")
+	       { return kernToScientificPitch(kerndata, flat, sharp, separator); }
+		static string  kernToSP             (const string& kerndata,
+		                                     string flat = "b",
+		                                     string sharp = "#",
+		                                     string separator = "")
+		      { return kernToScientificPitch(kerndata, flat, sharp, separator); }
+		static int     pitchToWbh           (int dpc, int acc, int octave,
+		                                     int maxacc);
+		static void    wbhToPitch           (int& dpc, int& acc, int& octave,
+		                                     int maxacc, int wbh);
+		static int     kernClefToBaseline   (const string& input);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -2214,7 +2307,7 @@ class Convert {
 		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
-		static string  getKernPitchAttributes  (const string& kerndata);
+		static string  getKernPitchAttributes (const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
@@ -2228,28 +2321,32 @@ class Convert {
 		static string  trimWhiteSpace       (const string& input);
 		static bool    startsWith           (const string& input,
 		                                     const string& searchstring);
+		static bool    contains(const string& input, const string& pattern);
+		static bool    contains(const string& input, char pattern);
+		static bool    contains(string* input, const string& pattern);
+		static bool    contains(string* input, char pattern);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
 		static int     getGcd               (int a, int b);
 		static void    primeFactors         (vector<int>& output, int n);
-		static double  nearIntQuantize   (double value, double delta = 0.00001);
+		static double  nearIntQuantize      (double value,
+		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 
 };
 
 
 
-
 class Option_register {
 	public:
-		             Option_register    (void);
-		             Option_register    (const string& aDefinition, char aType,
-		                                 const string& aDefaultOption);
-		             Option_register    (const string& aDefinition, char aType,
-		                                 const string& aDefaultOption,
-		                                 const string& aModifiedOption);
-		            ~Option_register    ();
+		             Option_register     (void);
+		             Option_register     (const string& aDefinition, char aType,
+		                                  const string& aDefaultOption);
+		             Option_register     (const string& aDefinition, char aType,
+		                                  const string& aDefaultOption,
+		                                  const string& aModifiedOption);
+		            ~Option_register     ();
 
 		void          clearModified      (void);
 		const string& getDefinition      (void);
@@ -2348,10 +2445,10 @@ class Options {
 		vector<string>           m_extraArgv;
 		vector<string>           m_extraArgv_strings;
 
-		int         getRegIndex             (const string& optionName);
-		int         optionQ                 (const string& aString, int& argp);
-		int         storeOption             (int gargp, int& position,
-		                                     int& running);
+		int         getRegIndex           (const string& optionName);
+		int         optionQ               (const string& aString, int& argp);
+		int         storeOption           (int gargp, int& position,
+		                                   int& running);
 
 };
 
@@ -2364,16 +2461,22 @@ class Options {
 #define OPTION_UNKNOWN_TYPE   'x'
 
 
+
 class HumTool : public Options {
 	public:
-		       HumTool        (void);
-		      ~HumTool        ();
+		         HumTool              (void);
+		        ~HumTool              ();
 
-		bool   hasError       (void);
-		string getError       (void);
+		bool     hasNonHumdrumOutput  (void);
+		string   getTextOutput        (void);
+		ostream& getTextOutput        (ostream& out);
+		bool     hasError             (void);
+		string   getError             (void);
+		ostream& getError             (ostream& out);
 
 	protected:
-		stringstream m_error;
+		stringstream m_text;   // output for non-humdrum output;
+	  	stringstream m_error;  // output for error text;
 
 };
 
@@ -2408,7 +2511,7 @@ int main(int argc, char** argv) {              \
 	}                                           \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
-		cerr << interface.getError();            \
+		interface.getError(cerr);                \
 	}                                           \
 	return !status;                             \
 }
@@ -2426,22 +2529,22 @@ int main(int argc, char** argv) {              \
 //
 //
 
-#define STREAM_INTERFACE(CLASS)                                 \
-using namespace std;                                            \
-using namespace hum;                                            \
-int main(int argc, char** argv) {                               \
-	CLASS interface;                                             \
-	interface.process(argc, argv);                               \
+#define STREAM_INTERFACE(CLASS)                                  \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	interface.process(argc, argv);                                \
 	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
-	HumdrumFile infile;                                          \
-	bool status = true;                                          \
-	while (streamer.read(infile)) {                              \
-		status &= interface.run(infile, cout);                    \
-		if (interface.hasError()) {                               \
-			cerr << interface.getError();                          \
-		}                                                         \
-	}                                                            \
-	return !status;                                              \
+	HumdrumFile infile;                                           \
+	bool status = true;                                           \
+	while (streamer.read(infile)) {                               \
+		status &= interface.run(infile, cout);                     \
+		if (interface.hasError()) {                                \
+			interface.getError(cerr);                               \
+		}                                                          \
+	}                                                             \
+	return !status;                                               \
 }
 
 
@@ -2480,11 +2583,13 @@ class HumdrumFileStream {
 };
 
 
+
 class Tool_autobeam : public HumTool {
 	public:
 		         Tool_autobeam   (void);
 		        ~Tool_autobeam   () {};
 
+		bool     run             (HumdrumFile& infile);
 		bool     run             (const string& indata, ostream& out);
 		bool     run             (HumdrumFile& infile, ostream& out);
 
@@ -2497,26 +2602,115 @@ class Tool_autobeam : public HumTool {
 		void     removeBeams     (HumdrumFile& infile);
 
 	private:
-		vector<HTp> m_kernspines;
 		vector<vector<pair<int, HumNum> > > m_timesigs;
-		bool m_overwriteQ;
-		int  m_track;
+		vector<HTp> m_kernspines;
+		bool        m_overwriteQ;
+		int         m_track;
+
+};
+
+
+
+class Coord {
+   public:
+           Coord(void) { clear(); }
+      void clear(void) { i = j = -1; }
+      int i;
+      int j;
+};
+
+
+class Tool_autostem : public HumTool {
+	public:
+		         Tool_autostem         (void);
+		        ~Tool_autostem         () {};
+
+		bool     run                   (HumdrumFile& infile);
+		bool     run                   (const string& indata, ostream& out);
+		bool     run                   (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     initialize            (HumdrumFile& infile);
+		void      example              (void);
+		void      usage                (void);
+		void      autostem             (HumdrumFile& infile);
+		void      getClefInfo          (vector<vector<int> >& baseline,
+		                                HumdrumFile& infile);
+		void      addStem              (string& input, const string& piece);
+		void      processKernTokenStemsSimpleModel(HumdrumFile& infile,
+		                                vector<vector<int> >& baseline,
+		                                int row, int col);
+		void      removeStems          (HumdrumFile& infile);
+		void      removeStem2          (HumdrumFile& infile, int row, int col);
+		int       getVoice             (HumdrumFile& infile, int row, int col);
+		void      getNotePositions     (vector<vector<vector<int> > >& notepos,
+		                                vector<vector<int> >& baseline,
+		                                HumdrumFile& infile);
+		void      printNotePositions   (HumdrumFile& infile,
+		                                vector<vector<vector<int> > >& notepos);
+		void      getVoiceInfo         (vector<vector<int> >& voice, HumdrumFile& infile);
+		void      printVoiceInfo       (HumdrumFile& infile, vector<vector<int> >& voice);
+		void      processKernTokenStems(HumdrumFile& infile,
+		                                vector<vector<int> >& baseline, int row, int col);
+		void      getMaxLayers         (vector<int>& maxlayer, vector<vector<int> >& voice,
+		                                HumdrumFile& infile);
+		void      assignStemDirections (vector<vector<int> >& stemdir,
+		                                vector<vector<int> > & voice,
+		                                vector<vector<vector<int> > >& notepos,
+		                                HumdrumFile& infile);
+		void      assignBasicStemDirections(vector<vector<int> >& stemdir,
+		                                vector<vector<int> >& voice,
+		                                vector<vector<vector<int> > >& notepos,
+		                                HumdrumFile& infile);
+		int       determineChordStem   (vector<vector<int> >& voice,
+		                                vector<vector<vector<int> > >& notepos,
+		                                HumdrumFile& infile, int row, int col);
+		void      insertStems          (HumdrumFile& infile,
+		                                vector<vector<int> >& stemdir);
+		void      setStemDirection     (HumdrumFile& infile, int row, int col,
+		                                int direction);
+		void      getBeamState         (vector<vector<string > >& beams,
+		                                HumdrumFile& infile);
+		void      countBeamStuff       (const string& token, int& start, int& stop,
+		                                int& flagr, int& flagl);
+		void      getBeamSegments      (vector<vector<Coord> >& beamednotes,
+		                                vector<vector<string > >& beamstates,
+		                                HumdrumFile& infile, vector<int> maxlayer);
+		int       getBeamDirection     (vector<Coord>& coords,
+		                                vector<vector<int> >& voice,
+		                                vector<vector<vector<int> > >& notepos);
+		void      setBeamDirection     (vector<vector<int> >& stemdir,
+		                                vector<Coord>& bnote, int direction);
+
+	private:
+		int    debugQ        = 0;       // used with --debug option
+		int    removeQ       = 0;       // used with -r option
+		int    noteposQ      = 0;       // used with -p option
+		int    voiceQ        = 0;       // used with --voice option
+		int    removeallQ    = 0;       // used with -R option
+		int    overwriteQ    = 0;       // used with -o option
+		int    overwriteallQ = 0;       // used with -O option
+		int    Middle        = 4;       // used with -u option
+		int    Borderline    = 0;       // really used with -u option
+		int    notlongQ      = 0;       // used with -L option
+		bool   m_quit        = false;
 
 };
 
 
 class Tool_metlev : public HumTool {
 	public:
-		      Tool_metlev        (void);
-		     ~Tool_metlev        () {};
+		      Tool_metlev      (void);
+		     ~Tool_metlev      () {};
 
-		bool  run                (const string& indata, ostream& out);
-		bool  run                (HumdrumFile& infile, ostream& out);
+		bool  run              (HumdrumFile& infile);
+		bool  run              (const string& indata, ostream& out);
+		bool  run              (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  fillVoiceResults   (vector<vector<double> >& results,
-		                          HumdrumFile& infile,
-		                          vector<double>& beatlev);
+		void  fillVoiceResults (vector<vector<double> >& results,
+		                        HumdrumFile& infile,
+		                        vector<double>& beatlev);
 
 	private:
 		vector<HTp> m_kernspines;
@@ -2524,7 +2718,9 @@ class Tool_metlev : public HumTool {
 };
 
 
+
 } // end of namespace hum
+
 
 #endif /* _HUMLIB_H_INCLUDED */
 

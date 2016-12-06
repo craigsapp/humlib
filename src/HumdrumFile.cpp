@@ -5,7 +5,7 @@
 // Filename:      HumdrumFile.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFile.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Place-holder class to serve as interface to HumdrumFileBase,
 //                HumdrumFileStructure and HumdrumFileContent.

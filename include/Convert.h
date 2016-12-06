@@ -5,7 +5,7 @@
 // Filename:      Convert.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/Convert.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Convert between various data representations.
 //
@@ -29,11 +29,12 @@ class Convert {
 	public:
 
 		// Rhythm processing, defined in Convert-rhythm.cpp
-		static HumNum  recipToDuration    (const string& recip, HumNum scale = 4,
-		                                   string separator = " ");
+		static HumNum  recipToDuration      (const string& recip,
+		                                     HumNum scale = 4,
+		                                     string separator = " ");
 		static HumNum  recipToDurationNoDots(const string& recip,
-		                                   HumNum scale = 4,
-		                                   string separator = " ");
+		                                     HumNum scale = 4,
+		                                     string separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
@@ -72,8 +73,8 @@ class Convert {
 		static int     kernToBase12         (HTp token)
 				{ return kernToBase12         ((string)*token); }
 		static int     kernToBase7          (const string& kerndata);
-		static int     kernToBase7         (HTp token)
-				{ return kernToBase7         ((string)*token); }
+		static int     kernToBase7          (HTp token)
+				{ return kernToBase7          ((string)*token); }
 		static int     kernToMidiNoteNumber (const string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((string)*token); }
@@ -81,18 +82,21 @@ class Convert {
 		                                     string flat = "b",
 		                                     string sharp = "#",
 		                                     string separator = "");
-		static string  kernToSciPitch      (const string& kerndata,
-		      string flat = "b", string sharp = "#", string separator = "") {
-		          return kernToScientificPitch(kerndata, flat, sharp, separator);
-		}
-		static string  kernToSP            (const string& kerndata,
-		      string flat = "b", string sharp = "#", string separator = "") {
-		          return kernToScientificPitch(kerndata, flat, sharp, separator);
-		}
-		static int     pitchToWbh         (int dpc, int acc, int octave,
-		                                   int maxacc);
-		static void    wbhToPitch         (int& dpc, int& acc, int& octave,
-		                                   int maxacc, int wbh);
+		static string  kernToSciPitch       (const string& kerndata,
+		      										 string flat = "b",
+		                                     string sharp = "#",
+		                                     string separator = "")
+	       { return kernToScientificPitch(kerndata, flat, sharp, separator); }
+		static string  kernToSP             (const string& kerndata,
+		                                     string flat = "b",
+		                                     string sharp = "#",
+		                                     string separator = "")
+		      { return kernToScientificPitch(kerndata, flat, sharp, separator); }
+		static int     pitchToWbh           (int dpc, int acc, int octave,
+		                                     int maxacc);
+		static void    wbhToPitch           (int& dpc, int& acc, int& octave,
+		                                     int maxacc, int wbh);
+		static int     kernClefToBaseline   (const string& input);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -105,7 +109,7 @@ class Convert {
 		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
-		static string  getKernPitchAttributes  (const string& kerndata);
+		static string  getKernPitchAttributes (const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
@@ -119,16 +123,20 @@ class Convert {
 		static string  trimWhiteSpace       (const string& input);
 		static bool    startsWith           (const string& input,
 		                                     const string& searchstring);
+		static bool    contains(const string& input, const string& pattern);
+		static bool    contains(const string& input, char pattern);
+		static bool    contains(string* input, const string& pattern);
+		static bool    contains(string* input, char pattern);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
 		static int     getGcd               (int a, int b);
 		static void    primeFactors         (vector<int>& output, int n);
-		static double  nearIntQuantize   (double value, double delta = 0.00001);
+		static double  nearIntQuantize      (double value,
+		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 
 };
-
 
 
 // END_MERGE

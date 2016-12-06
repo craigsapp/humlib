@@ -5,7 +5,7 @@
 // Filename:      HumHash.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumHash.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Key/value parameters systems for Humdrum tokens, lines,
 //                and files.  The HumHash class has a double namespace
@@ -259,7 +259,6 @@ class HumHash {
 
 	friend ostream& operator<<(ostream& out, const HumHash& hash);
 };
-
 
 
 // END_MERGE

@@ -5,7 +5,7 @@
 // Filename:      HumTool.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/HumTool.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Common interface for Humdrum tools.
 //
@@ -22,14 +22,19 @@ namespace hum {
 
 class HumTool : public Options {
 	public:
-		       HumTool        (void);
-		      ~HumTool        ();
+		         HumTool              (void);
+		        ~HumTool              ();
 
-		bool   hasError       (void);
-		string getError       (void);
+		bool     hasNonHumdrumOutput  (void);
+		string   getTextOutput        (void);
+		ostream& getTextOutput        (ostream& out);
+		bool     hasError             (void);
+		string   getError             (void);
+		ostream& getError             (ostream& out);
 
 	protected:
-		stringstream m_error;
+		stringstream m_text;   // output for non-humdrum output;
+	  	stringstream m_error;  // output for error text;
 
 };
 
@@ -64,7 +69,7 @@ int main(int argc, char** argv) {              \
 	}                                           \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
-		cerr << interface.getError();            \
+		interface.getError(cerr);                \
 	}                                           \
 	return !status;                             \
 }
@@ -82,22 +87,22 @@ int main(int argc, char** argv) {              \
 //
 //
 
-#define STREAM_INTERFACE(CLASS)                                 \
-using namespace std;                                            \
-using namespace hum;                                            \
-int main(int argc, char** argv) {                               \
-	CLASS interface;                                             \
-	interface.process(argc, argv);                               \
+#define STREAM_INTERFACE(CLASS)                                  \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	interface.process(argc, argv);                                \
 	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
-	HumdrumFile infile;                                          \
-	bool status = true;                                          \
-	while (streamer.read(infile)) {                              \
-		status &= interface.run(infile, cout);                    \
-		if (interface.hasError()) {                               \
-			cerr << interface.getError();                          \
-		}                                                         \
-	}                                                            \
-	return !status;                                              \
+	HumdrumFile infile;                                           \
+	bool status = true;                                           \
+	while (streamer.read(infile)) {                               \
+		status &= interface.run(infile, cout);                     \
+		if (interface.hasError()) {                                \
+			interface.getError(cerr);                               \
+		}                                                          \
+	}                                                             \
+	return !status;                                               \
 }
 
 

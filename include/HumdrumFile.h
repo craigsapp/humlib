@@ -5,7 +5,7 @@
 // Filename:      HumdrumFile.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFile.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Placeholder class to serve as interface to HumdrumFileBase,
 //                HumdrumFileStructure and HumdrumFileContent.
@@ -28,15 +28,15 @@ namespace hum {
 
 class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
-		              HumdrumFile         (void);
-		              HumdrumFile         (const string& filename);
-		              HumdrumFile         (istream& filename);
-		             ~HumdrumFile         ();
+		              HumdrumFile          (void);
+		              HumdrumFile          (const string& filename);
+		              HumdrumFile          (istream& filename);
+		             ~HumdrumFile          ();
 
-		ostream&      printXml            (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
+		ostream&      printXml             (ostream& out = cout, int level = 0,
+		                                    const string& indent = "\t");
 		ostream&      printXmlParameterInfo(ostream& out, int level,
-		                                  const string& indent);
+		                                    const string& indent);
 };
 
 

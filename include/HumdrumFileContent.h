@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileContent.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileContent.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to add content analysis to HumdrumFileStructure class,
 //                and do other higher-level processing of Humdrum data.

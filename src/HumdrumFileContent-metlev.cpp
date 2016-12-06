@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileContent-metlev.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-metlev.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:
 //   Extracts metric level of rhythmic values in Humdrum files.

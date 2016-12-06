@@ -5,7 +5,7 @@
 // Filename:      NoteCell.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/NoteCell.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Keep track of variables related to a single note
 //                within a time slice (could be a note attack, note

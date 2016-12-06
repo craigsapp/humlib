@@ -5,7 +5,7 @@
 // Filename:      HumdrumToken.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumToken.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to work with tokens on a Humdrum line.
 //
@@ -1536,6 +1536,17 @@ void HumdrumToken::setParameters(const string& pdata, HumdrumToken* ptok) {
 		setValue(ns1, ns2, key, value);
 		setOrigin(ns1, ns2, key, ptok);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setText --
+//
+
+void HumdrumToken::setText(const string& text) {
+	string::assign(text);
 }
 
 

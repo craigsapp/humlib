@@ -5,7 +5,7 @@
 // Filename:      tool-autobeam.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-autobeam.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for autobeam tool.
 //
@@ -26,6 +26,7 @@ class Tool_autobeam : public HumTool {
 		         Tool_autobeam   (void);
 		        ~Tool_autobeam   () {};
 
+		bool     run             (HumdrumFile& infile);
 		bool     run             (const string& indata, ostream& out);
 		bool     run             (HumdrumFile& infile, ostream& out);
 
@@ -38,10 +39,10 @@ class Tool_autobeam : public HumTool {
 		void     removeBeams     (HumdrumFile& infile);
 
 	private:
-		vector<HTp> m_kernspines;
 		vector<vector<pair<int, HumNum> > > m_timesigs;
-		bool m_overwriteQ;
-		int  m_track;
+		vector<HTp> m_kernspines;
+		bool        m_overwriteQ;
+		int         m_track;
 
 };
 
@@ -49,7 +50,7 @@ class Tool_autobeam : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_TESTGIRD_H_INCLUDED */
+#endif /* _TOOL_AUTOBEAM_H_INCLUDED */
 
 
 

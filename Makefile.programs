@@ -91,7 +91,7 @@ PROGS=$(PROGS1)
 #                                                                         #
 
 examples: all
-all: bin $(addprefix $(TARGDIR)/,$(PROGS))
+all: bin $(PROGS)
 	@echo Finished compiling all programs: $(PROGS).
 
 info:
@@ -109,21 +109,15 @@ endif
 # Defining explicit rules for program sourcefile dependencies:
 #
 
-$(TARGDIR)/% : $(notdir %.cpp)
-ifeq ($(wildcard $(TARGDIR)),)
-	@-mkdir -p $(TARGDIR)
-endif
-	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $@ $< $(POSTFLAGS) \
-		&& strip $@$(EXTEN)
-
-% : $(notdir %.cpp)
+.cpp:
 ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
 		&& strip $(TARGDIR)/$@$(EXTEN)
+
+
 
 #                                                                         #
 #                                                                         #

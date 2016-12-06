@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileBase.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileBase.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines from input stream
 //                for further parsing.  This class analyzes the basic
@@ -689,6 +689,17 @@ HTp HumdrumFileBase::token(int lineindex, int fieldindex) {
 		lineindex += getLineCount();
 	}
 	return m_lines[lineindex]->token(fieldindex);
+}
+
+
+//
+// Special case that returns a subtoken string:
+//   default value separator = " "
+//
+
+string HumdrumFileBase::token(int lineindex, int fieldindex,
+		int subtokenindex, const string& separator) {
+	return token(lineindex, fieldindex)->getSubtoken(subtokenindex, separator);
 }
 
 

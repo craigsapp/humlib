@@ -5,7 +5,7 @@
 // Filename:      tool-metlev.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-metlev.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Extract metric levels
 //
@@ -47,6 +47,7 @@ Tool_metlev::Tool_metlev(void) {
 ///////////////////////////////
 //
 // Tool_metlev::run --
+//
 
 bool Tool_metlev::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
@@ -55,7 +56,13 @@ bool Tool_metlev::run(const string& indata, ostream& out) {
 
 
 bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
+	int status = run(infile);
+	out << infile;
+	return status;
+}
 
+
+bool Tool_metlev::run(HumdrumFile& infile) {
 	int lineCount = infile.getLineCount();
 	if (lineCount == 0) {
 		m_error << "No input data";
@@ -97,7 +104,6 @@ bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 		}
 	}
 
-	// print the analysis results:
 	if (getBoolean("kern-spine")) {
 		int kspine = getInteger("kern-spine") - 1;
 		if ((kspine >= 0) && (kspine < (int)m_kernspines.size())) {
@@ -110,7 +116,8 @@ bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 				infile.insertDataSpineBefore(track, results[kspine],
 						"nan", "**blev");
 			}
-			out << infile;
+			infile.createLinesFromTokens();
+			return true;
 		}
 	} else if (getBoolean("all-spines")) {
 		vector<vector<double> > results;
@@ -120,16 +127,21 @@ bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 			int track = m_kernspines[i]->getTrack();
 			infile.insertDataSpineBefore(track, results[i-1], "nan", "**blev");
 		}
-		out << infile;
+		infile.createLinesFromTokens();
+		return true;
 	} else if (getBoolean("append")) {
 		infile.appendDataSpine(beatlev, "nan", "**blev");
-		out << infile;
+		infile.createLinesFromTokens();
+		return true;
 	} else if (getBoolean("prepend")) {
 		infile.prependDataSpine(beatlev, "nan", "**blev");
-		out << infile;
+		infile.createLinesFromTokens();
+		return true;
 	} else {
 		infile.prependDataSpine(beatlev, "nan", "**blev");
-		infile.printFieldIndex(0, out);
+		infile.printFieldIndex(0, m_text);
+		infile.clear();
+		infile.read(m_text.str());
 	}
 
 	return 0;

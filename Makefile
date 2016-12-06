@@ -64,10 +64,10 @@ endif
 AR            = ar
 RANLIB        = ranlib
 
-PREFLAGS  = -c -g -Wall $(CFLAGS) $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
-PREFLAGS += -O3
+PREFLAGS  = -c -g $(CFLAGS) $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
+PREFLAGS += -O3 -Wall
 
-# using C++ 2011 standard:
+# using C++ 2011 standard in Humlib:
 PREFLAGS += -std=c++11
 
 # Add -static flag to compile without dynamics libraries for better portability:

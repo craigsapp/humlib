@@ -5,14 +5,14 @@
 // Filename:      metlev.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/tools/metlev.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           ts=3 noexpandtab nowrap
 //
-// Description:   Command-line interface to metlev tool.
-//                Extracts metric levels from a Humdrum file.
+// Description:   Extract metric levels from Humdrum file(s).
 //
-
 
 #include "humlib.h"
 
 STREAM_INTERFACE(Tool_metlev)
+
+
 

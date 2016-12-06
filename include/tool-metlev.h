@@ -5,7 +5,7 @@
 // Filename:      tool-metlev.h
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-metlev.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for metlev tool.
 //
@@ -22,21 +22,23 @@ namespace hum {
 
 class Tool_metlev : public HumTool {
 	public:
-		      Tool_metlev        (void);
-		     ~Tool_metlev        () {};
+		      Tool_metlev      (void);
+		     ~Tool_metlev      () {};
 
-		bool  run                (const string& indata, ostream& out);
-		bool  run                (HumdrumFile& infile, ostream& out);
+		bool  run              (HumdrumFile& infile);
+		bool  run              (const string& indata, ostream& out);
+		bool  run              (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  fillVoiceResults   (vector<vector<double> >& results,
-		                          HumdrumFile& infile,
-		                          vector<double>& beatlev);
+		void  fillVoiceResults (vector<vector<double> >& results,
+		                        HumdrumFile& infile,
+		                        vector<double>& beatlev);
 
 	private:
 		vector<HTp> m_kernspines;
 
 };
+
 
 // END_MERGE
 

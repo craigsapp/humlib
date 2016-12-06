@@ -6,7 +6,7 @@
 // Filename:      Options.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/Options.h
 // Documentation: http://sig.sapp.org/doc/classes/Options
-// vim:           ts=3
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 // Syntax:        C++11
 //
 // Description:   Interface to command-line options.
@@ -27,13 +27,13 @@ namespace hum {
 
 class Option_register {
 	public:
-		             Option_register    (void);
-		             Option_register    (const string& aDefinition, char aType,
-		                                 const string& aDefaultOption);
-		             Option_register    (const string& aDefinition, char aType,
-		                                 const string& aDefaultOption,
-		                                 const string& aModifiedOption);
-		            ~Option_register    ();
+		             Option_register     (void);
+		             Option_register     (const string& aDefinition, char aType,
+		                                  const string& aDefaultOption);
+		             Option_register     (const string& aDefinition, char aType,
+		                                  const string& aDefaultOption,
+		                                  const string& aModifiedOption);
+		            ~Option_register     ();
 
 		void          clearModified      (void);
 		const string& getDefinition      (void);
@@ -132,10 +132,10 @@ class Options {
 		vector<string>           m_extraArgv;
 		vector<string>           m_extraArgv_strings;
 
-		int         getRegIndex             (const string& optionName);
-		int         optionQ                 (const string& aString, int& argp);
-		int         storeOption             (int gargp, int& position,
-		                                     int& running);
+		int         getRegIndex           (const string& optionName);
+		int         optionQ               (const string& aString, int& argp);
+		int         storeOption           (int gargp, int& position,
+		                                   int& running);
 
 };
 
@@ -146,6 +146,7 @@ class Options {
 #define OPTION_INT_TYPE       'i'
 #define OPTION_STRING_TYPE    's'
 #define OPTION_UNKNOWN_TYPE   'x'
+
 
 // END_MERGE
 

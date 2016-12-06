@@ -5,7 +5,7 @@
 // Filename:      Convert-pitch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-pitch.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Conversions related to pitch.
 //
@@ -624,7 +624,141 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 
 	// if acc in any of the above tests is +3/-3, then there was an
 	// accidental overflow (overflow of the accidental).
+}
 
+
+
+//////////////////////////////
+//
+// Convert::kernClefToBaseline -- returns the diatonic pitch
+//    of the bottom line on the staff.
+//
+
+int Convert::kernClefToBaseline(const string& input) {
+   string clefname;
+	if (input.compare(0, 5, "*clef") == 0) {
+		clefname = input.substr(5);
+	} else if (input.compare(0, 4, "clef") == 0) {
+      clefname = input.substr(4);
+   } else {
+      cerr << "Error in Convert::kernClefToBaseline: " << input << endl;
+      return -1000;
+   }
+
+   if (clefname == "G2") {                        // treble clef
+      return Convert::kernToBase7("e");
+   } else if (clefname == "F4") {                 // bass clef
+      return Convert::kernToBase7("GG");
+   } else if (clefname == "C3") {                 // alto clef
+      return Convert::kernToBase7("F");
+   } else if (clefname == "C4") {                 // tenor clef
+      return Convert::kernToBase7("D");
+   } else if (clefname == "Gv2") {                // vocal tenor clef
+      return Convert::kernToBase7("E");
+
+   // rest of C clef possibilities:
+   } else if (clefname == "C1") {                 // soprano clef
+      return Convert::kernToBase7("c");
+   } else if (clefname == "C2") {                 // mezzo-soprano clef
+      return Convert::kernToBase7("A");
+   } else if (clefname == "C5") {                 // baritone clef
+      return Convert::kernToBase7("BB");
+
+   // rest of G clef possibilities:
+   } else if (clefname == "G1") {                 // French-violin clef
+      return Convert::kernToBase7("g");
+   } else if (clefname == "G3") {
+      return Convert::kernToBase7("c");
+   } else if (clefname == "G4") {
+      return Convert::kernToBase7("A");
+   } else if (clefname == "G5") {
+      return Convert::kernToBase7("F");
+
+   // rest of F clef possibilities:
+   } else if (clefname == "F1") {
+      return Convert::kernToBase7("F");
+   } else if (clefname == "F2") {
+      return Convert::kernToBase7("D");
+   } else if (clefname == "F3") {
+      return Convert::kernToBase7("BB");
+   } else if (clefname == "F5") {
+      return Convert::kernToBase7("EE");
+
+   // rest of G clef down an octave possibilities:
+   } else if (clefname == "Gv1") {
+      return Convert::kernToBase7("G");
+   } else if (clefname == "Gv3") {
+      return Convert::kernToBase7("C");
+   } else if (clefname == "Gv4") {
+      return Convert::kernToBase7("AA");
+   } else if (clefname == "Gv5") {
+      return Convert::kernToBase7("FF");
+
+   // F clef down an octave possibilities:
+   } else if (clefname == "Fv1") {
+      return Convert::kernToBase7("FF");
+   } else if (clefname == "Fv2") {
+      return Convert::kernToBase7("DD");
+   } else if (clefname == "Fv3") {
+      return Convert::kernToBase7("BBB");
+   } else if (clefname == "Fv4") {
+      return Convert::kernToBase7("GGG");
+   } else if (clefname == "Fv5") {
+      return Convert::kernToBase7("EEE");
+
+   // C clef down an octave possibilities:
+   } else if (clefname == "Cv1") {
+      return Convert::kernToBase7("C");
+   } else if (clefname == "Cv2") {
+      return Convert::kernToBase7("AA");
+   } else if (clefname == "Cv3") {
+      return Convert::kernToBase7("FF");
+   } else if (clefname == "Cv4") {
+      return Convert::kernToBase7("DD");
+   } else if (clefname == "Cv5") {
+      return Convert::kernToBase7("BBB");
+
+   // G clef up an octave possibilities:
+   } else if (clefname == "G^1") {
+      return Convert::kernToBase7("gg");
+   } else if (clefname == "G^2") {
+      return Convert::kernToBase7("ee");
+   } else if (clefname == "G^3") {
+      return Convert::kernToBase7("cc");
+   } else if (clefname == "G^4") {
+      return Convert::kernToBase7("a");
+   } else if (clefname == "G^5") {
+      return Convert::kernToBase7("f");
+
+   // F clef up an octave possibilities:
+   } else if (clefname == "F^1") {
+      return Convert::kernToBase7("f");
+   } else if (clefname == "F^2") {
+      return Convert::kernToBase7("d");
+   } else if (clefname == "F^3") {
+      return Convert::kernToBase7("B");
+   } else if (clefname == "F^4") {
+      return Convert::kernToBase7("G");
+   } else if (clefname == "F^5") {
+      return Convert::kernToBase7("E");
+
+   // C clef up an octave possibilities:
+   } else if (clefname == "C^1") {
+      return Convert::kernToBase7("cc");
+   } else if (clefname == "C^2") {
+      return Convert::kernToBase7("a");
+   } else if (clefname == "C^3") {
+      return Convert::kernToBase7("f");
+   } else if (clefname == "C^4") {
+      return Convert::kernToBase7("d");
+   } else if (clefname == "C^5") {
+      return Convert::kernToBase7("B");
+
+   // there are also two octaves down (*clefGvv2) and two octaves up (*clefG^^2)
+   } else {
+      // but just use treble clef if don't know what the clef it by this point
+      return Convert::kernToBase7("e");
+   }
 }
 
 

@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileContent-tie.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-tie.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Links tie starting/continuing/ending points to each other.
 //

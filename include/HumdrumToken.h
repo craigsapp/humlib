@@ -5,13 +5,13 @@
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumToken.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to work with Humdrum fields.
 //
 
-#ifndef _HUMDRUM_TOKEN_H_INCLUDED
-#define _HUMDRUM_TOKEN_H_INCLUDED
+#ifndef _HUMDRUMTOKEN_H_INCLUDED
+#define _HUMDRUMTOKEN_H_INCLUDED
 
 #include <iostream>
 #include <vector>
@@ -48,19 +48,22 @@ class HumdrumToken : public string, public HumHash {
 		bool     isAddInterpretation       (void) const;
 
 		// alises for the above
-		bool     isExclusive     (void) const {
-		                                   return isExclusiveInterpretation(); }
-		bool     isExInterp      (void) const {
-		                                   return isExclusiveInterpretation(); }
-		bool     isSplit         (void) const { return isSplitInterpretation(); }
-		bool     isMerge         (void) const { return isMergeInterpretation(); }
-		bool     isExchange      (void) const {
-		                                   return isExchangeInterpretation(); }
-		bool     isTerminate     (void) const {
-		                                   return isTerminateInterpretation(); }
-		bool     isTerminator    (void) const {
-		                                   return isTerminateInterpretation(); }
-		bool     isAdd           (void) const { return isSplitInterpretation(); }
+		bool     isExclusive               (void) const
+		                                  { return isExclusiveInterpretation(); }
+		bool     isExInterp                (void) const
+		                                  { return isExclusiveInterpretation(); }
+		bool     isSplit                   (void) const
+		                                      { return isSplitInterpretation(); }
+		bool     isMerge                   (void) const
+		                                      { return isMergeInterpretation(); }
+		bool     isExchange                (void) const
+		                                   { return isExchangeInterpretation(); }
+		bool     isTerminate               (void) const
+		                                  { return isTerminateInterpretation(); }
+		bool     isTerminator              (void) const
+		                                  { return isTerminateInterpretation(); }
+		bool     isAdd                     (void) const
+		                                      { return isSplitInterpretation(); }
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
@@ -148,65 +151,66 @@ class HumdrumToken : public string, public HumHash {
 		                                    const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
+		void     setText                   (const string& text);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);
 		HumdrumToken& operator=            (const char* aToken);
 
 		// next/previous token functions:
-		int           getNextTokenCount         (void) const;
-		int           getPreviousTokenCount     (void) const;
-		HTp           getNextToken              (int index = 0) const;
-		HTp           getPreviousToken          (int index = 0) const;
-		vector<HTp>   getNextTokens             (void) const;
-		vector<HTp>   getPreviousTokens         (void) const;
+		int         getNextTokenCount      (void) const;
+		int         getPreviousTokenCount  (void) const;
+		HTp         getNextToken           (int index = 0) const;
+		HTp         getPreviousToken       (int index = 0) const;
+		vector<HTp> getNextTokens          (void) const;
+		vector<HTp> getPreviousTokens      (void) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
-		int      getPreviousNNDTCount(void) {
-		               return getPreviousNonNullDataTokenCount(); }
+		int      getPreviousNNDTCount      (void)
+		                           { return getPreviousNonNullDataTokenCount(); }
 		HTp      getPreviousNonNullDataToken(int index = 0);
-		HTp      getPreviousNNDT(int index) {
-		               return getPreviousNonNullDataToken(index); }
+		HTp      getPreviousNNDT           (int index)
+		                           { return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
-		int      getNextNNDTCount(void) { return getNextNonNullDataTokenCount(); }
-		HTp      getNextNonNullDataToken(int index = 0);
-		HTp      getNextNNDT(int index = 0) {
-		               return getNextNonNullDataToken(index); }
+		int      getNextNNDTCount          (void)
+		                               { return getNextNonNullDataTokenCount(); }
+		HTp      getNextNonNullDataToken   (int index = 0);
+		HTp      getNextNNDT               (int index = 0)
+		                               { return getNextNonNullDataToken(index); }
 
 		// slur-analysis based functions:
-		HumNum   getSlurDuration   (HumNum scale = 1);
+		HumNum   getSlurDuration           (HumNum scale = 1);
 
 	protected:
-		void     setLineIndex       (int lineindex);
-		void     setFieldIndex      (int fieldlindex);
-		void     setSpineInfo       (const string& spineinfo);
-		void     setTrack           (int aTrack, int aSubtrack);
-		void     setTrack           (int aTrack);
-		void     setSubtrack        (int aSubtrack);
-		void     setSubtrackCount   (int count);
-		void     setPreviousToken   (HTp aToken);
-		void     setNextToken       (HTp aToken);
-		void     addNextNonNullToken(HTp token);
-		void     makeForwardLink    (HumdrumToken& nextToken);
-		void     makeBackwardLink   (HumdrumToken& previousToken);
-		void     setOwner           (HumdrumLine* aLine);
-		int      getState           (void) const;
-		void     incrementState     (void);
-		void     setDuration        (const HumNum& dur);
-		void     setStrandIndex     (int index);
+		void     setLineIndex              (int lineindex);
+		void     setFieldIndex             (int fieldlindex);
+		void     setSpineInfo              (const string& spineinfo);
+		void     setTrack                  (int aTrack, int aSubtrack);
+		void     setTrack                  (int aTrack);
+		void     setSubtrack               (int aSubtrack);
+		void     setSubtrackCount          (int count);
+		void     setPreviousToken          (HTp aToken);
+		void     setNextToken              (HTp aToken);
+		void     addNextNonNullToken       (HTp token);
+		void     makeForwardLink           (HumdrumToken& nextToken);
+		void     makeBackwardLink          (HumdrumToken& previousToken);
+		void     setOwner                  (HumdrumLine* aLine);
+		int      getState                  (void) const;
+		void     incrementState            (void);
+		void     setDuration               (const HumNum& dur);
+		void     setStrandIndex            (int index);
 
-		bool     analyzeDuration   (string& err);
-		ostream& printXmlBaseInfo  (ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlContentInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlStructureInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
-		ostream& printXmlParameterInfo(ostream& out = cout, int level = 0,
-		                            const string& indent = "\t");
+		bool     analyzeDuration          (string& err);
+		ostream& printXmlBaseInfo         (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlContentInfo      (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlStructureInfo    (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
+		ostream& printXmlParameterInfo    (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 
 	private:
-
 		// address: The address contains information about the location of
 		// the token on a HumdrumLine and in a HumdrumFile.
 		HumAddress m_address;
@@ -267,11 +271,12 @@ ostream& operator<<(ostream& out, HTp token);
 ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out=std::cout);
 ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
 
+
 // END_MERGE
 
 } // end namespace hum
 
-#endif /* _HUMDRUM_TOKEN_H_INCLUDED */
+#endif /* _HUMDRUMTOKEN_H_INCLUDED */
 
 
 

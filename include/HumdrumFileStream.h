@@ -1,13 +1,12 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Dec 11 16:03:43 PST 2012
-// Last Modified: Tue Dec 11 16:03:46 PST 2012
 // Last Modified: Fri Mar 11 21:25:24 PST 2016 Changed to STL
 // Last Modified: Fri Dec  2 19:26:01 PST 2016 Ported to humlib
 // Filename:      HumdrumFileStream.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileStream.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Multi-movement manager for Humdrum files.  The class
 //                will accept files, standard input, URLs, URIs which
@@ -63,6 +62,7 @@ class HumdrumFileStream {
 		                                   const string& uriname);
 
 };
+
 
 // END_MERGE
 

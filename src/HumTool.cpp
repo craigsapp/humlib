@@ -5,7 +5,7 @@
 // Filename:      HumTool.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumTool.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Common interface for Humdrum tools.
 //
@@ -59,6 +59,46 @@ bool HumTool::hasError(void) {
 string HumTool::getError(void) {
 	return m_error.str();
 }
+
+//
+// ostream version:
+//
+
+ostream& HumTool::getError(ostream& out) {
+	out << m_text.str();
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// HumTool::hasNonHumdrumOutput --
+//
+
+bool HumTool::hasNonHumdrumOutput(void) {
+	return m_text.rdbuf()->in_avail();
+}
+
+
+//////////////////////////////
+//
+// HumTool::hasNonHumdrumOutput --
+//
+
+string HumTool::getTextOutput(void) {
+	return m_text.str();
+}
+
+//
+// ostream version:
+//
+
+ostream& HumTool::getTextOutput(ostream& out) {
+	out << m_text.str();
+	return out;
+}
+
 
 
 // END_MERGE

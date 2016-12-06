@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileStructure.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileStructure.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to further process HumdrumFileBase content, primarily
 //                rhythmic analyses, but also parses global and local
@@ -63,19 +63,19 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool parseCsv(istream& contents, const string& separator = ",")
 		                                 { return readCsv(contents, separator); }
 		bool parseCsv(const char* contents, const string& separator = ",")
-		                     { return readStringCsv(contents, separator); }
+		                           { return readStringCsv(contents, separator); }
 		bool parseCsv(const string& contents, const string& separator = ",")
-		                     { return readStringCsv(contents, separator); }
+		                           { return readStringCsv(contents, separator); }
 		bool          readNoRhythmCsv              (istream& contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readNoRhythmCsv              (const char*   filename,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readNoRhythmCsv              (const string& filename,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const char*   contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 		bool          readStringNoRhythmCsv        (const string& contents,
-		                     const string& separator = ",");
+		                                            const string& separator = ",");
 
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
@@ -83,18 +83,18 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 
 		// strand functionality:
-		HumdrumToken* getStrandStart(int index) const;
-		HumdrumToken* getStrandEnd(int index) const;
-		HumdrumToken* getStrandStart(int sindex, int index) const;
-		HumdrumToken* getStrandEnd(int sindex, int index) const;
-		int           getStrandCount(void) const;
-		int           getStrandCount(int spineindex) const;
-		void resolveNullTokens(void);
+		HumdrumToken* getStrandStart               (int index) const;
+		HumdrumToken* getStrandEnd                 (int index) const;
+		HumdrumToken* getStrandStart               (int sindex, int index) const;
+		HumdrumToken* getStrandEnd                 (int sindex, int index) const;
+		int           getStrandCount               (void) const;
+		int           getStrandCount               (int spineindex) const;
+		void          resolveNullTokens            (void);
 
-		HumdrumToken* getStrand(int index) const {
-			return getStrandStart(index); }
-		HumdrumToken* getStrand(int sindex, int index) const {
-			return getStrandStart(sindex, index); }
+		HumdrumToken* getStrand                    (int index) const
+		                                        { return getStrandStart(index); }
+		HumdrumToken* getStrand                    (int sindex, int index) const
+		                                { return getStrandStart(sindex, index); }
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
@@ -144,7 +144,6 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HumdrumToken* ptoken);
 		void          analyzeSpineStrands          (vector<TokenPair>& ends,
 		                                            HumdrumToken* starttok);
-
 };
 
 

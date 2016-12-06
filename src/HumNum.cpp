@@ -5,7 +5,7 @@
 // Filename:      HumNum.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumNum.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Rational number class for duration processing in
 //                HumdrumFiles.  The HumNum class manages a fractional

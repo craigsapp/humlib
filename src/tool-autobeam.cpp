@@ -5,7 +5,7 @@
 // Filename:      tool-autobeam.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-autobeam.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Example of extracting a 2D pitch grid from
 //                a score for dissonance analysis.
@@ -44,21 +44,38 @@ Tool_autobeam::Tool_autobeam(void) {
 
 bool Tool_autobeam::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
-	return run(infile, out);
+	bool status = run(infile);
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
+	return status;
 }
 
 
 bool Tool_autobeam::run(HumdrumFile& infile, ostream& out) {
+	int status = run(infile);
+	out << infile;
+	return status;
+}
+
+//
+// In-place processing of file:
+//
+
+bool Tool_autobeam::run(HumdrumFile& infile) {
 	initialize(infile);
 	if (getBoolean("remove")) {
 		removeBeams(infile);
 	} else {
 		addBeams(infile);
 	}
+	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
-	out << infile;
-	return 1;
+	return true;
 }
+
 
 
 //////////////////////////////

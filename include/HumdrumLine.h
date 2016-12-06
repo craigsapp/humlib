@@ -5,7 +5,7 @@
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumAddress.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines and analytic markup
 //                of the line.
@@ -29,19 +29,19 @@ class HumdrumFile;
 
 class HumdrumLine : public string, public HumHash {
 	public:
-		         HumdrumLine          (void);
-		         HumdrumLine          (const string& aString);
-		         HumdrumLine          (const char* aString);
-		        ~HumdrumLine          ();
+		         HumdrumLine            (void);
+		         HumdrumLine            (const string& aString);
+		         HumdrumLine            (const char* aString);
+		        ~HumdrumLine            ();
 
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
-		bool     isLocalComment (void) const { return isCommentLocal(); }
+		bool     isLocalComment         (void) const { return isCommentLocal(); }
 		bool     isCommentGlobal        (void) const;
 		bool     isReference            (void) const;
 		string   getReferenceKey        (void) const;
 		string   getReferenceValue      (void) const;
-		bool     isGlobalComment (void) const { return isCommentGlobal(); }
+		bool     isGlobalComment         (void) const { return isCommentGlobal(); }
 		bool     isExclusive            (void) const;
 		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
 		bool     isTerminator           (void) const;
@@ -97,7 +97,7 @@ class HumdrumLine : public string, public HumHash {
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
 		HumNum   getBeat                (string beatrecip = "4") const;
-		HTp      getTrackStart     (int track) const;
+		HTp      getTrackStart          (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const string& separator = ",");
 		void     setLineFromCsv         (const string& csv,

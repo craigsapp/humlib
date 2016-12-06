@@ -5,7 +5,7 @@
 // Filename:      Convert-string.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-string.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Conversions related to strings.
 //

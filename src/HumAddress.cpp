@@ -5,7 +5,7 @@
 // Filename:      HumAddress.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumAddress.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store the location of a token in a HumdrumFile.
 //
@@ -269,7 +269,7 @@ void HumAddress::setSpineInfo(const string& spineinfo) {
 
 void HumAddress::setTrack(int aTrack, int aSubtrack) {
 	setTrack(aTrack);
-	setSubtrack(aTrack);
+	setSubtrack(aSubtrack);
 }
 
 

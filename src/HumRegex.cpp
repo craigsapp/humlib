@@ -1,13 +1,16 @@
-//
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Dec  3 16:21:22 PST 2016
 // Last Modified: Sat Dec  3 16:21:25 PST 2016
 // Filename:      HumRegex.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumRegex.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
+// note:          Requires GCC v4.9 or higher
 //
 // Description:   Regular expression handling.
+//
+// References:
+//     http://www-01.ibm.com/support/docview.wss?uid=swg27041858&aid=1
 //
 
 #include "HumRegex.h"
@@ -18,8 +21,6 @@ namespace hum {
 
 // START_MERGE
 
-using namespace std::regex_constants;
-
 
 //////////////////////////////
 //
@@ -27,13 +28,14 @@ using namespace std::regex_constants;
 //
 
 HumRegex::HumRegex(void) {
-	// do nothing
+	m_flags = std::regex_constants::match_default
+				| std::regex_constants::format_first_only;
 }
 
 
 HumRegex::HumRegex(const string& exp) {
 	// initialize a regular expression for the object
-	m_regex = (exp);
+	m_regex = exp;
 }
 
 
@@ -58,8 +60,59 @@ HumRegex::~HumRegex() {
 
 bool HumRegex::search(const string& input, const string& exp) {
 	m_regex = exp;
-	return regex_search(input, m_matches, m_regex);
+	return regex_search(input, m_matches, m_regex, m_flags);
+}
 
+
+bool HumRegex::search(string* input, const string& exp) {
+	return HumRegex::search(*input, exp);
+}
+
+//
+// This version of HumRegex allows for setting the options temporarily.
+//
+
+bool HumRegex::search(const string& input, const string& exp,
+		const string& options) {
+	m_regex = exp;
+	return regex_search(input, m_matches, m_regex, getTemporaryFlags(options));
+}
+
+
+bool HumRegex::search(string* input, const string& exp,
+		const string& options) {
+	return HumRegex::search(*input, exp, options);
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getTemporaryFlags --
+//
+
+std::regex_constants::match_flag_type HumRegex::getTemporaryFlags(
+		const string& sflags) {
+	std::regex_constants::match_flag_type temp_flags;
+	for (auto it : sflags) {
+		switch (it) {
+			case 'i':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags | std::regex_constants::icase);
+				break;
+			case 'I':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags & ~std::regex_constants::icase);
+				break;
+			case 'g':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags & ~std::regex_constants::format_first_only);
+			case 'G':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags | std::regex_constants::format_first_only);
+		}
+	}
+	return temp_flags;
 }
 
 
@@ -145,6 +198,106 @@ int HumRegex::getMatchEndIndex(int index) {
 int HumRegex::getMatchLength(int index) {
 	return m_matches.length(index);
 }
+
+
+
+//////////////////////////////
+//
+// HumRegex::setIgnoreCase -- Turn on ignore case to be persistent until
+//     it is turned off with HumRegex::setNoIgnoreCase(), or if a function
+//     call sets it off temporarily.
+//
+
+void HumRegex::setIgnoreCase(void) {
+
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::setNoIgnoreCase -- Turn off persistent ignore case flag.
+//
+
+void HumRegex::setNoIgnoreCase(void) {
+
+}
+
+
+//////////////////////////////
+//
+// HumRegex::replaceDestructive -- Replace in input string.
+//
+
+string& HumRegex::replaceDestructive(string& input, const string& exp,
+		const string& replacement) {
+	m_regex = exp;
+	input = regex_replace(input, m_regex, replacement, m_flags);
+	return input;
+}
+
+
+string& HumRegex::replaceDestructive(string* input, const string& exp,
+		const string& replacement) {
+	return HumRegex::replaceDestructive(*input, exp, replacement);
+}
+
+//
+// This version allows for temporary match flag options.
+//
+
+string& HumRegex::replaceDestructive(string& input, const string& exp,
+		const string& replacement, const string& options) {
+	m_regex = exp;
+	input = regex_replace(input, m_regex, replacement,
+			getTemporaryFlags(options));
+	return input;
+}
+
+
+string& HumRegex::replaceDestructive (string* input, const string& exp,
+		const string& replacement, const string& options) {
+	return HumRegex::replaceDestructive(*input, exp, replacement, options);
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::replaceCopy --  Keep input string the same, return replacement
+//    string as output
+//
+
+string HumRegex::replaceCopy(const string& input, const string& exp,
+		const string& replacement) {
+	m_regex = exp;
+	return regex_replace(input, m_regex, replacement, m_flags);
+}
+
+
+string HumRegex::replaceCopy(string* input, const string& exp,
+		const string& replacement) {
+	return HumRegex::replaceCopy(*input, exp, replacement);
+}
+
+//
+// This version allows for temporary match flag options.
+//
+
+string HumRegex::replaceCopy(const string& input, const string& exp,
+		const string& replacement, const string& options) {
+	m_regex = exp;
+	return regex_replace(input, m_regex, replacement,
+			getTemporaryFlags(options));
+}
+
+
+string HumRegex::replaceCopy(string* input, const string& exp,
+		const string& replacement, const string& options) {
+	return HumRegex::replaceCopy(*input, exp, replacement, options);
+}
+
+
 
 
 // END_MERGE

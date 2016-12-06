@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileBase-net.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileBase-net.cpp
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Functionality related to downloading Humdrum data
 //                over the internet.

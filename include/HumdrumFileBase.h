@@ -5,7 +5,7 @@
 // Filename:      HumdrumFileBase.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileBase.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines from input stream
 //                for further parsing.  This class analyzes the basic
@@ -156,9 +156,14 @@ class HumdrumFileBase : public HumHash {
 		HumdrumLine*  getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
+		string        token                    (int lineindex, int fieldindex,
+		                                        int subtokenindex,
+		                                        const string& separator = " ");
 		int           getMaxTrack              (void) const;
-		int           getTrackCount (void) const { return getMaxTrack(); }
-		int           getSpineCount (void) const { return getMaxTrack(); }
+		int           getTrackCount            (void) const
+		                                                { return getMaxTrack(); }
+		int           getSpineCount            (void) const
+		                                                { return getMaxTrack(); }
 		ostream&      printSpineInfo           (ostream& out = cout);
 		ostream&      printDataTypeInfo        (ostream& out = cout);
 		ostream&      printTrackInfo           (ostream& out = cout);
@@ -168,9 +173,8 @@ class HumdrumFileBase : public HumHash {
 		ostream&      printFieldIndex          (int fieldind, ostream& out);
 
 		HTp           getTrackStart            (int track) const;
-		HTp           getSpineStart            (int spine) const {
-		                                         return getTrackStart(spine+1); }
-
+		HTp           getSpineStart            (int spine) const
+		                                       { return getTrackStart(spine+1); }
 		void          getSpineStartList        (vector<HTp>& spinestarts);
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const string& exinterp);
@@ -178,14 +182,14 @@ class HumdrumFileBase : public HumHash {
 		vector<HTp>   getKernSpineStartList    ();
 		void          getSpineStartList        (vector<HTp>& spinestarts,
 		                                        const vector<string>& exinterps);
-		void          getTrackStartList        (vector<HTp>& spinestarts) {
-								return getSpineStartList(spinestarts); }
+		void          getTrackStartList        (vector<HTp>& spinestarts)
+		                               { return getSpineStartList(spinestarts); }
 		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const string& exinterp) {
-								return getSpineStartList(spinestarts, exinterp); }
+		                                        const string& exinterp)
+		                     { return getSpineStartList(spinestarts, exinterp); }
 		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const vector<string>& exinterps) {
-								return getSpineStartList(spinestarts, exinterps); }
+		                                        const vector<string>& exinterps)
+		                    { return getSpineStartList(spinestarts, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
@@ -194,9 +198,12 @@ class HumdrumFileBase : public HumHash {
 		void          appendLine               (const char* line);
 		void          appendLine               (const string& line);
 		void          appendLine               (HumdrumLine* line);
-		void          push_back(const char* line)   { appendLine(line); }
-		void          push_back(const string& line) { appendLine(line); }
-		void          push_back(HumdrumLine* line)  { appendLine(line); }
+		void          push_back                (const char* line)
+		                                                    { appendLine(line); }
+		void          push_back                (const string& line)
+		                                                    { appendLine(line); }
+		void          push_back                (HumdrumLine* line)
+		                                                    { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
@@ -224,13 +231,13 @@ class HumdrumFileBase : public HumHash {
 
 		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        HTp starttoken, int options)
-		                      { getTrackSequence(sequence, starttoken, options); }
+		                     { getTrackSequence(sequence, starttoken, options); }
 		void          getTrackSeq              (vector<vector<HTp> >& sequence,
 		                                        int track, int options)
-		                           { getTrackSequence(sequence, track, options); }
+		                          { getTrackSequence(sequence, track, options); }
 		void          getPrimaryTrackSeq       (vector<HTp>& sequence,
 		                                        int track, int options)
-		                     {getPrimaryTrackSequence(sequence, track, options); }
+		                    {getPrimaryTrackSequence(sequence, track, options); }
 
 		// functions defined in HumdrumFileBase-net.cpp:
 		static string getUriToUrlMapping        (const string& uri);
@@ -357,6 +364,7 @@ class HumdrumFileBase : public HumHash {
 		HumNum       getBarlineDurationToEnd    (int index) const { return 0; };
 
 		// HumdrumFileContent public functions:
+		// to be added later
 
 };
 

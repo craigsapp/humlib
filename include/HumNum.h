@@ -5,7 +5,7 @@
 // Filename:      HumNum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumNum.h
 // Syntax:        C++11
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Rational number class for durations.
 //
@@ -114,6 +114,7 @@ ostream& operator<<(ostream& out, const HumNum& number);
 
 template <typename A>
 ostream& operator<<(ostream& out, const vector<A>& v);
+
 
 // END_MERGE
 

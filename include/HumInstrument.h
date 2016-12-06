@@ -5,7 +5,7 @@
 // Last Modified: Fri Sep  2 10:16:09 CEST 2016 (added to humlib)
 // Filename:      HumInstrument.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumInstrument.h
-// vim:           ts=3
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 // Syntax:        C++11
 //
 // Description:   Enumeration class for processing Humdrum instrument names.
@@ -26,39 +26,40 @@ namespace hum {
 
 class _HumInstrument {
 	public:
-		_HumInstrument(void) { humdrum = ""; name = ""; gm = 0; }
-	  ~_HumInstrument() { humdrum = ""; name = ""; gm = 0; }
+		_HumInstrument    (void) { humdrum = ""; name = ""; gm = 0; }
+	  ~_HumInstrument    ()     { humdrum = ""; name = ""; gm = 0; }
 
 		string humdrum;
 		string name;
-		int   gm;
+		int    gm;
 };
+
 
 class HumInstrument {
 	public:
-		                HumInstrument  (void);
-		                HumInstrument  (const string& Hname);
-		               ~HumInstrument  ();
+		           HumInstrument       (void);
+		           HumInstrument       (const string& Hname);
+		          ~HumInstrument       ();
 
-		string          getName        (void);
-		string          getName        (const string& Hname);
-		string          getHumdrum     (void);
-		int             getGM          (void);
-		int             getGM          (const string& Hname);
-		void            setHumdrum     (const string& Hname);
-		int             setGM          (const string& Hname, int aValue);
+		string     getName             (void);
+		string     getName             (const string& Hname);
+		string     getHumdrum          (void);
+		int        getGM               (void);
+		int        getGM               (const string& Hname);
+		void       setHumdrum          (const string& Hname);
+		int        setGM               (const string& Hname, int aValue);
 
 	private:
-		int                                index;
-		static vector<_HumInstrument>      data;
-		static int                         classcount;
+		int                            index;
+		static vector<_HumInstrument>  data;
+		static int                     classcount;
 
 	protected:
-		void   initialize   (void);
-		void   afi          (const char* humdrum_name, int midinum,
-		                    const char* EN_name);
-		int    find         (const string& Hname);
-		void   sortData     (void);
+		void       initialize          (void);
+		void       afi                 (const char* humdrum_name, int midinum,
+		                                const char* EN_name);
+		int        find                (const string& Hname);
+		void       sortData            (void);
 		static int data_compare_by_humdrum_name(const void* a, const void* b);
 };
 
