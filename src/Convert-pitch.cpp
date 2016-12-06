@@ -10,11 +10,9 @@
 // Description:   Conversions related to pitch.
 //
 
-#include <math.h>
-
-#include <vector>
-
 #include "Convert.h"
+#include <cmath>
+#include <vector>
 
 namespace hum {
 

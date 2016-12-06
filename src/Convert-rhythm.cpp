@@ -10,10 +10,9 @@
 // Description:   Conversions related to rhythm.
 //
 
-#include <math.h>
-
 #include "Convert.h"
 #include <algorithm>
+#include <cmath>
 
 namespace hum {
 
