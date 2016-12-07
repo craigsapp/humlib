@@ -47,6 +47,7 @@ class NoteCell {
 		int    getPrevAttackIndex   (void) { return m_prevAttackIndex;   }
 		int    getCurrAttackIndex   (void) { return m_currAttackIndex;   }
 		int    getSliceIndex        (void) { return m_timeslice;         }
+		int    getVoiceIndex        (void) { return m_voice;             }
 
 		bool   isAttack             (void) { return m_b40>0? true:false; }
 		bool   isRest               (void);
@@ -63,6 +64,8 @@ class NoteCell {
 		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
 		double getMetricLevel       (void);
+		HumNum getDurationFromStart (void);
+		HumNum getDuration          (void);
 
 	protected:
 		void clear                  (void);

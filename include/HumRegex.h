@@ -81,6 +81,11 @@ class HumRegex {
 		int         getMatchEndIndex   (int index = 0);
 		int         getMatchLength     (int index = 0);
 
+		// token lists:
+		bool        split              (vector<string>& entries,
+		                                const string& buffer,
+		                                const string& separator);
+
 		// setting option flags:
 		void        setIgnoreCase      (void);
 		void        setNoIgnoreCase    (void);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec  6 11:35:34 PST 2016
+// Last Modified: Wed Dec  7 09:00:36 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -397,6 +397,11 @@ class HumRegex {
 		int         getMatchStartIndex (int index = 0);
 		int         getMatchEndIndex   (int index = 0);
 		int         getMatchLength     (int index = 0);
+
+		// token lists:
+		bool        split              (vector<string>& entries,
+		                                const string& buffer,
+		                                const string& separator);
 
 		// setting option flags:
 		void        setIgnoreCase      (void);
@@ -2126,6 +2131,7 @@ class NoteCell {
 		int    getPrevAttackIndex   (void) { return m_prevAttackIndex;   }
 		int    getCurrAttackIndex   (void) { return m_currAttackIndex;   }
 		int    getSliceIndex        (void) { return m_timeslice;         }
+		int    getVoiceIndex        (void) { return m_voice;             }
 
 		bool   isAttack             (void) { return m_b40>0? true:false; }
 		bool   isRest               (void);
@@ -2142,6 +2148,8 @@ class NoteCell {
 		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
 		double getMetricLevel       (void);
+		HumNum getDurationFromStart (void);
+		HumNum getDuration          (void);
 
 	protected:
 		void clear                  (void);
@@ -2220,6 +2228,7 @@ class NoteGrid {
 
 		void       getNoteAndRestAttacks (vector<NoteCell*>& attacks, int vindex);
 		double     getMetricLevel        (int sindex);
+		HumNum     getNoteDuration       (int vindex, int sindex);
 
 	protected:
 		void       buildAttackIndexes    (void);
@@ -2240,10 +2249,16 @@ class Convert {
 		// Rhythm processing, defined in Convert-rhythm.cpp
 		static HumNum  recipToDuration      (const string& recip,
 		                                     HumNum scale = 4,
-		                                     string separator = " ");
+		                                     const string& separator = " ");
 		static HumNum  recipToDurationNoDots(const string& recip,
 		                                     HumNum scale = 4,
-		                                     string separator = " ");
+		                                     const string& separator = " ");
+		static HumNum  recipToDuration      (string* recip,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
+		static HumNum  recipToDurationNoDots(string* recip,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);

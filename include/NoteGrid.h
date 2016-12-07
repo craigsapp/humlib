@@ -65,6 +65,7 @@ class NoteGrid {
 
 		void       getNoteAndRestAttacks (vector<NoteCell*>& attacks, int vindex);
 		double     getMetricLevel        (int sindex);
+		HumNum     getNoteDuration       (int vindex, int sindex);
 
 	protected:
 		void       buildAttackIndexes    (void);

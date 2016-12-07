@@ -346,6 +346,33 @@ string HumRegex::replaceCopy(string* input, const string& exp,
 
 
 
+//////////////////////////////
+//
+// HumRegex::split --
+//
+
+bool HumRegex::split(vector<string>& entries, const string& buffer,
+		const string& separator) {
+	entries.clear();
+	string newsep = "(";
+	newsep += separator;
+	newsep += ")";
+	int status = search(buffer, newsep);
+	if (!status) {
+		return false;
+	}
+	int start = 0;
+	while (status) {
+		entries.push_back(getPrefix());
+		start += getMatchEndIndex(1);
+		status = search(buffer, start, newsep);
+	}
+	// add last token:
+	entries.push_back(getSuffix());
+	return true;
+}
+
+
 
 // END_MERGE
 

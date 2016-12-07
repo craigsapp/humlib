@@ -36,8 +36,14 @@ namespace hum {
 // default value: separator = " " (sub-token separator)
 //
 
+HumNum Convert::recipToDuration(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDuration(*recip, scale, separator);
+}
+
+
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
-		string separator) {
+		const string& separator) {
 	size_t loc;
 	loc = recip.find(separator);
 	string subtok;
@@ -120,14 +126,21 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 }
 
 
+
 //////////////////////////////
 //
 // Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
 //   any augmentation dots.
 //
 
+HumNum Convert::recipToDurationNoDots(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDurationNoDots(*recip, scale, separator);
+}
+
+
 HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
-		string separator) {
+		const string& separator) {
 	string temp = recip;
 	std::replace(temp.begin(), temp.end(), '.', 'Z');
 	return Convert::recipToDuration(temp, scale, separator);

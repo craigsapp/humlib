@@ -31,10 +31,16 @@ class Convert {
 		// Rhythm processing, defined in Convert-rhythm.cpp
 		static HumNum  recipToDuration      (const string& recip,
 		                                     HumNum scale = 4,
-		                                     string separator = " ");
+		                                     const string& separator = " ");
 		static HumNum  recipToDurationNoDots(const string& recip,
 		                                     HumNum scale = 4,
-		                                     string separator = " ");
+		                                     const string& separator = " ");
+		static HumNum  recipToDuration      (string* recip,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
+		static HumNum  recipToDurationNoDots(string* recip,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);

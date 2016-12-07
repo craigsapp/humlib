@@ -590,6 +590,30 @@ double NoteGrid::getMetricLevel(int sindex) {
 
 //////////////////////////////
 //
+// NoteGrid::getNoteDuration --
+//
+
+HumNum NoteGrid::getNoteDuration(int vindex, int sindex) {
+	NoteCell* curnote = cell(vindex, sindex);
+	int attacki = curnote->getCurrAttackIndex();
+	int nexti   = curnote->getNextAttackIndex();
+	HumNum starttime = 0;
+	if (attacki >= 0) {
+		starttime = cell(vindex, attacki)->getDurationFromStart();
+	}
+	HumNum endtime;
+	if (nexti >= 0) {
+		starttime = cell(vindex, nexti)->getDurationFromStart();
+	} else {
+		endtime = m_infile->getScoreDuration();
+	}
+	return endtime - starttime;
+}
+
+
+
+//////////////////////////////
+//
 // NoteGrid::printGridInfo -- for debugging.
 //
 

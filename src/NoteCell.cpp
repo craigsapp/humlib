@@ -272,6 +272,36 @@ double NoteCell::getMetricLevel(void) {
 }
 
 
+
+//////////////////////////////
+//
+// NoteCell::getDurationFromStart --
+//
+
+HumNum NoteCell::getDurationFromStart(void) {
+	if (m_token) {
+		return m_token->getDurationFromStart();
+	} else {
+		return -1;
+	}
+}
+
+
+//////////////////////////////
+//
+// NoteCell::getDuration -- Return the duration to the next note attack
+//     in the grid in the same voice.
+//
+
+HumNum NoteCell::getDuration(void) {
+	if (!m_owner) {
+		return Convert::recipToDuration(m_token);
+	}
+	return m_owner->getNoteDuration(getVoiceIndex(), getSliceIndex());
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

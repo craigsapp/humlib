@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec  6 11:35:34 PST 2016
+// Last Modified: Wed Dec  7 09:00:36 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3029,6 +3029,33 @@ string HumRegex::replaceCopy(string* input, const string& exp,
 	return HumRegex::replaceCopy(*input, exp, replacement, options);
 }
 
+
+
+//////////////////////////////
+//
+// HumRegex::split --
+//
+
+bool HumRegex::split(vector<string>& entries, const string& buffer,
+		const string& separator) {
+	entries.clear();
+	string newsep = "(";
+	newsep += separator;
+	newsep += ")";
+	int status = search(buffer, newsep);
+	if (!status) {
+		return false;
+	}
+	int start = 0;
+	while (status) {
+		entries.push_back(getPrefix());
+		start += getMatchEndIndex(1);
+		status = search(buffer, start, newsep);
+	}
+	// add last token:
+	entries.push_back(getSuffix());
+	return true;
+}
 
 
 
@@ -11708,6 +11735,36 @@ double NoteCell::getMetricLevel(void) {
 
 //////////////////////////////
 //
+// NoteCell::getDurationFromStart --
+//
+
+HumNum NoteCell::getDurationFromStart(void) {
+	if (m_token) {
+		return m_token->getDurationFromStart();
+	} else {
+		return -1;
+	}
+}
+
+
+//////////////////////////////
+//
+// NoteCell::getDuration -- Return the duration to the next note attack
+//     in the grid in the same voice.
+//
+
+HumNum NoteCell::getDuration(void) {
+	if (!m_owner) {
+		return Convert::recipToDuration(m_token);
+	}
+	return m_owner->getNoteDuration(getVoiceIndex(), getSliceIndex());
+}
+
+
+
+
+//////////////////////////////
+//
 // NoteGrid::NoteGrid -- Constructor.
 //
 
@@ -12271,6 +12328,30 @@ double NoteGrid::getMetricLevel(int sindex) {
 		m_infile->getMetricLevels(m_metriclevels, track, NAN);
 	}
 	return m_metriclevels[sindex];
+}
+
+
+
+//////////////////////////////
+//
+// NoteGrid::getNoteDuration --
+//
+
+HumNum NoteGrid::getNoteDuration(int vindex, int sindex) {
+	NoteCell* curnote = cell(vindex, sindex);
+	int attacki = curnote->getCurrAttackIndex();
+	int nexti   = curnote->getNextAttackIndex();
+	HumNum starttime = 0;
+	if (attacki >= 0) {
+		starttime = cell(vindex, attacki)->getDurationFromStart();
+	}
+	HumNum endtime;
+	if (nexti >= 0) {
+		starttime = cell(vindex, nexti)->getDurationFromStart();
+	} else {
+		endtime = m_infile->getScoreDuration();
+	}
+	return endtime - starttime;
 }
 
 
@@ -16350,8 +16431,14 @@ int Convert::kernClefToBaseline(const string& input) {
 // default value: separator = " " (sub-token separator)
 //
 
+HumNum Convert::recipToDuration(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDuration(*recip, scale, separator);
+}
+
+
 HumNum Convert::recipToDuration(const string& recip, HumNum scale,
-		string separator) {
+		const string& separator) {
 	size_t loc;
 	loc = recip.find(separator);
 	string subtok;
@@ -16434,14 +16521,21 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 }
 
 
+
 //////////////////////////////
 //
 // Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
 //   any augmentation dots.
 //
 
+HumNum Convert::recipToDurationNoDots(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDurationNoDots(*recip, scale, separator);
+}
+
+
 HumNum Convert::recipToDurationNoDots(const string& recip, HumNum scale,
-		string separator) {
+		const string& separator) {
 	string temp = recip;
 	std::replace(temp.begin(), temp.end(), '.', 'Z');
 	return Convert::recipToDuration(temp, scale, separator);
