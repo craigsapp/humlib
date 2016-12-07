@@ -155,6 +155,7 @@ makedirs:
 	@-mkdir -p $(LIBDIR)
 
 %:
+	echo "SHELL IS $(SHELL)"
 	@if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi
 
 ###########################################################################
