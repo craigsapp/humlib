@@ -80,7 +80,7 @@ vpath %.cpp $(wildcard $(TOOLDIR)) examples myprograms
 
 # generating a list of the programs to compile with "make all"
 PROGS1=$(notdir $(patsubst %.cpp,%,$(wildcard $(TOOLDIR)/*.cpp)))
-PROGS=$(PROGS1)
+PROGS=$(PROGS1) testgrid
 
 # targets which don't actually refer to files
 .PHONY: examples
