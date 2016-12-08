@@ -24,11 +24,21 @@ namespace hum {
 //
 
 HumAddress::HumAddress(void) {
-	track         = -1;
-	subtrack      = -1;
-	subtrackcount = 0;
-	fieldindex    = -1;
-	owner         = NULL;
+	m_track         = -1;
+	m_subtrack      = -1;
+	m_subtrackcount = 0;
+	m_fieldindex    = -1;
+	m_owner         = NULL;
+}
+
+
+HumAddress::HumAddress(HumAddress& address) {
+	m_fieldindex    = address.m_fieldindex;
+	m_track         = address.m_track;
+	m_subtrack      = address.m_subtrack;
+	m_subtrackcount = address.m_subtrackcount;
+	m_spining       = address.m_spining;
+	m_owner         = address.m_owner;
 }
 
 
@@ -39,13 +49,29 @@ HumAddress::HumAddress(void) {
 //
 
 HumAddress::~HumAddress() {
-	track         = -1;
-	subtrack      = -1;
-	fieldindex    = -1;
-	subtrackcount = 0;
-	owner         = NULL;
+	m_track         = -1;
+	m_subtrack      = -1;
+	m_fieldindex    = -1;
+	m_subtrackcount = 0;
+	m_owner         = NULL;
 }
 
+
+
+//////////////////////////////
+//
+// HumAddress::operator= -- Copy humdrum address to another object.
+//
+
+HumAddress& HumAddress::operator=(const HumAddress& address) {
+	m_fieldindex    = address.m_fieldindex;
+	m_track         = address.m_track;
+	m_subtrack      = address.m_subtrack;
+	m_subtrackcount = address.m_subtrackcount;
+	m_spining       = address.m_spining;
+	m_owner         = address.m_owner;
+	return *this;
+}
 
 
 //////////////////////////////
@@ -57,10 +83,10 @@ HumAddress::~HumAddress() {
 //
 
 int  HumAddress::getLineIndex(void) const {
-	if (owner == NULL) {
+	if (m_owner == NULL) {
 		return -1;
 	} else {
-		return owner->getLineIndex();
+		return m_owner->getLineIndex();
 	}
 }
 
@@ -84,7 +110,7 @@ int HumAddress::getLineNumber(void) const {
 //
 
 int HumAddress::getFieldIndex(void) const {
-	return fieldindex;
+	return m_fieldindex;
 }
 
 
@@ -97,10 +123,10 @@ int HumAddress::getFieldIndex(void) const {
 
 const HumdrumToken& HumAddress::getDataType(void) const {
 	static HumdrumToken null("");
-	if (owner == NULL) {
+	if (m_owner == NULL) {
 		return null;
 	}
-	HumdrumToken* tok = owner->getTrackStart(getTrack());
+	HumdrumToken* tok = m_owner->getTrackStart(getTrack());
 	return *tok;
 }
 
@@ -118,7 +144,7 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 //
 
 const string& HumAddress::getSpineInfo(void) const {
-	return spining;
+	return m_spining;
 }
 
 
@@ -131,7 +157,7 @@ const string& HumAddress::getSpineInfo(void) const {
 //
 
 int HumAddress::getTrack(void) const {
-	return track;
+	return m_track;
 }
 
 
@@ -151,7 +177,7 @@ int HumAddress::getTrack(void) const {
 //
 
 int HumAddress::getSubtrack(void) const {
-	return subtrack;
+	return m_subtrack;
 }
 
 
@@ -165,7 +191,7 @@ int HumAddress::getSubtrack(void) const {
 //
 
 int HumAddress::getSubtrackCount(void) const {
-	return subtrackcount;
+	return m_subtrackcount;
 }
 
 
@@ -200,7 +226,7 @@ string HumAddress::getTrackString(string separator) const {
 //
 
 void HumAddress::setOwner(HumdrumLine* aLine) {
-	owner = aLine;
+	m_owner = aLine;
 }
 
 
@@ -213,7 +239,7 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //
 
 HumdrumLine* HumAddress::getLine(void) const {
-	return owner;
+	return m_owner;
 }
 
 
@@ -225,7 +251,7 @@ HumdrumLine* HumAddress::getLine(void) const {
 //
 
 bool HumAddress::hasOwner(void) const {
-	return owner == NULL ? 0 : 1;
+	return m_owner == NULL ? 0 : 1;
 }
 
 
@@ -238,7 +264,7 @@ bool HumAddress::hasOwner(void) const {
 //
 
 void HumAddress::setFieldIndex(int index) {
-	fieldindex = index;
+	m_fieldindex = index;
 }
 
 
@@ -253,7 +279,7 @@ void HumAddress::setFieldIndex(int index) {
 //
 
 void HumAddress::setSpineInfo(const string& spineinfo) {
-	spining = spineinfo;
+	m_spining = spineinfo;
 }
 
 
@@ -280,7 +306,7 @@ void HumAddress::setTrack(int aTrack) {
 	if (aTrack > 1000) {
 		aTrack = 1000;
 	}
-	track = aTrack;
+	m_track = aTrack;
 }
 
 
@@ -304,7 +330,7 @@ void HumAddress::setSubtrack(int aSubtrack) {
 	if (aSubtrack > 1000) {
 		aSubtrack = 1000;
 	}
-	subtrack = aSubtrack;
+	m_subtrack = aSubtrack;
 }
 
 
@@ -315,7 +341,7 @@ void HumAddress::setSubtrack(int aSubtrack) {
 //
 
 void HumAddress::setSubtrackCount(int count) {
-	subtrackcount = count;
+	m_subtrackcount = count;
 }
 
 

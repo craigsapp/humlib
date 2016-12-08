@@ -99,10 +99,12 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase          (void);
+		              HumdrumFileBase          (HumdrumFileBase& infile);
 		              HumdrumFileBase          (const string& contents);
 		              HumdrumFileBase          (istream& contents);
 		             ~HumdrumFileBase          ();
 
+		HumdrumFileBase& operator=             (HumdrumFileBase& infile);
 		bool          read                     (istream& contents);
 		bool          read                     (const char* filename);
 		bool          read                     (const string& filename);
@@ -263,6 +265,7 @@ class HumdrumFileBase : public HumHash {
 
 	protected:
 		bool          analyzeTokens             (void);
+		bool          analyzeBaseFromLines      (void);
 		bool          analyzeSpines             (void);
 		bool          analyzeLinks              (void);
 		bool          analyzeTracks             (void);

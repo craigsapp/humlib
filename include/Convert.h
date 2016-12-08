@@ -41,6 +41,8 @@ class Convert {
 		static HumNum  recipToDurationNoDots(string* recip,
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
+		static string  durationToRecip      (HumNum duration, 
+		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);

@@ -103,9 +103,10 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getBarlineDurationFromStart  (int index) const;
 		HumNum        getBarlineDurationToEnd      (int index) const;
 
+		bool          analyzeStructure             (void);
+
 	protected:
 
-		bool          analyzeStructure             (void);
 		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);

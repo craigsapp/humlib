@@ -101,11 +101,7 @@ OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/tool-*.cpp)))
 ###########################################################################
 
 
-all: minlibrary
-
-tool: tools
-tools:
-	$(MAKE) -f Makefile.programs
+all: library tools
 
 dynamic: min
 ifeq ($(OS),OSX)
@@ -115,23 +111,23 @@ else
 endif
 
 
+library: minlibrary
 minlib: minlibrary
 minlibrary: makedirs min humlib.o
-	@echo "Creating humlib library ..."
 	@-rm -f $(LIBDIR)/$(LIBFILE_MIN)
 	@$(AR) r $(LIBDIR)/$(LIBFILE_MIN) $(OBJDIR)/humlib.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE_MIN)
 
 
-lib: library
-library: makedirs $(OBJS)
-	@echo "Creating humdrum library file..."
+lib: makedirs $(OBJS)
 	@-rm -f $(LIBDIR)/$(LIBFILE)
 	@$(AR) r $(LIBDIR)/$(LIBFILE) $(OBJDIR)/*.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE)
 
 
-both: library minlibrary
+tool: tools
+tools:
+	@$(MAKE) -f Makefile.programs
 
 
 min:
@@ -155,7 +151,6 @@ makedirs:
 	@-mkdir -p $(LIBDIR)
 
 %:
-	@echo "SHELL IS $(SHELL)"
 	@if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi
 
 ###########################################################################

@@ -27,8 +27,10 @@ class HumdrumToken;
 class HumAddress {
 	public:
 		                    HumAddress        (void);
+		                    HumAddress        (HumAddress& address);
 		                   ~HumAddress        ();
 
+		HumAddress&         operator=         (const HumAddress& address);
 		int                 getLineIndex      (void) const;
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
@@ -55,7 +57,7 @@ class HumAddress {
 
 		// fieldindex: This is the index of the token in the HumdrumLine
 		// which owns this token.
-		int fieldindex;       // field index of token on line
+		int m_fieldindex;
 
 		// spining: This is the spine position of the token. A simple spine
 		// position is an integer, starting with "1" for the first spine
@@ -67,28 +69,28 @@ class HumAddress {
 		// But in this case there is a spine info simplification which will
 		// convert "(#)a (#)b" into "#" where # is the original spine number.
 		// Other more complicated mergers may be simplified in the future.
-		string spining;
+		string m_spining;
 
 		// track: This is the track number of the spine.  It is the first
 		// number found in the spineinfo string.
-		int track;
+		int m_track;
 
 		// subtrack: This is the subtrack number for the spine.  When a spine
 		// is not split, it will be 0, if the spine has been split with *^,
 		// then the left-subspine will be in subtrack 1 and the right-spine
 		// will be subtrack 2.  If subspines are exchanged with *x, then their
 		// subtrack assignments will also change.
-		int subtrack;
+		int m_subtrack;
 
 		// subtrackcount: The number of currently active subtracks tokens
 		// on the owning HumdrumLine (in the same track).  The subtrack range
 		// is from 1 (if there is only a primary spine), to a larger number.
 		// if subtrackcount is 0, then the variable is not set, or there are
 		// no tokens in the track (such as for global comments).
-		int subtrackcount;
+		int m_subtrackcount;
 
 		// owner: This is the line which manages the given token.
-		HumdrumLine* owner;
+		HumdrumLine* m_owner;
 
 	friend class HumdrumToken;
 	friend class HumdrumLine;

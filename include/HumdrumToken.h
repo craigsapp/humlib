@@ -33,6 +33,11 @@ class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
 		         HumdrumToken              (const HumdrumToken& token);
+		         HumdrumToken              (HumdrumToken* token);
+		         HumdrumToken              (const HumdrumToken& token,
+		                                    HumdrumLine* owner);
+		         HumdrumToken              (HumdrumToken* token,
+		                                    HumdrumLine* owner);
 		         HumdrumToken              (const char* token);
 		         HumdrumToken              (const string& token);
 		        ~HumdrumToken              ();
@@ -152,6 +157,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
 		void     setText                   (const string& text);
+		string   getText                   (void) const;
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);

@@ -46,7 +46,7 @@ Tool_metlev::Tool_metlev(void) {
 
 ///////////////////////////////
 //
-// Tool_metlev::run --
+// Tool_metlev::run -- Primary interfaces to the tool.
 //
 
 bool Tool_metlev::run(const string& indata, ostream& out) {
@@ -141,7 +141,7 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 		infile.prependDataSpine(beatlev, "nan", "**blev");
 		infile.printFieldIndex(0, m_text);
 		infile.clear();
-		infile.read(m_text.str());
+		infile.readString(m_text.str());
 	}
 
 	return 0;

@@ -49,12 +49,14 @@ HumdrumToken::HumdrumToken(void) : string() {
 	m_nullresolve = NULL;
 }
 
+
 HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	m_rhycheck = 0;
 	setPrefix("!");
 	m_strand = -1;
 	m_nullresolve = NULL;
 }
+
 
 HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_rhycheck = 0;
@@ -63,13 +65,136 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	m_nullresolve = NULL;
 }
 
-HumdrumToken::HumdrumToken(const HumdrumToken& aToken) :
-		string((string)aToken) {
-	m_rhycheck = 0;
-	setPrefix("!");
-	m_strand = -1;
-	m_nullresolve = NULL;
+
+HumdrumToken::HumdrumToken(const HumdrumToken& token) :
+		string((string)token), HumHash((HumHash)token) {
+	m_address         = token.m_address;
+	m_address.m_owner = NULL;
+	m_duration        = token.m_duration;
+	m_nextTokens      = token.m_nextTokens;
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = token.m_rhycheck;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix(token.getPrefix());
 }
+
+
+HumdrumToken::HumdrumToken(HumdrumToken* token) :
+		string((string)(*token)), HumHash((HumHash)(*token)) {
+	m_address         = token->m_address;
+	m_address.m_owner = NULL;
+	m_duration        = token->m_duration;
+	m_nextTokens      = token->m_nextTokens;
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = token->m_rhycheck;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix(token->getPrefix());
+}
+
+
+
+HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
+		string((string)token), HumHash((HumHash)token) {
+	m_address         = token.m_address;
+	m_address.m_owner = owner;
+	m_duration        = token.m_duration;
+	m_nextTokens      = token.m_nextTokens;
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = token.m_rhycheck;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix(token.getPrefix());
+}
+
+
+HumdrumToken::HumdrumToken(HumdrumToken* token, HumdrumLine* owner) :
+		string((string)(*token)), HumHash((HumHash)(*token)) {
+	m_address         = token->m_address;
+	m_address.m_owner = owner;
+	m_duration        = token->m_duration;
+	m_nextTokens      = token->m_nextTokens;
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = token->m_rhycheck;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix(token->getPrefix());
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::operator= -- Copy operator.
+//
+
+HumdrumToken& HumdrumToken::operator=(HumdrumToken& token) {
+	if (this == &token) {
+		return *this;
+	}
+	(string)(*this)   = (string)token;
+	(HumHash)(*this)  = (HumHash)token;
+
+	m_address         = token.m_address;
+	m_address.m_owner = NULL;
+	m_duration        = token.m_duration;
+	m_nextTokens      = token.m_nextTokens;
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = token.m_rhycheck;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix(token.getPrefix());
+
+	return *this;
+}
+
+
+HumdrumToken& HumdrumToken::operator=(const string& token) {
+	(string)(*this) = token;
+
+	m_address.m_owner = NULL;
+	m_duration        = 0;
+	m_nextTokens.clear();
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = -1;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix("!");
+
+	return *this;
+}
+
+
+HumdrumToken& HumdrumToken::operator=(const char* token) {
+	(string)(*this) = token;
+
+	m_address.m_owner = NULL;
+	m_duration        = 0;
+	m_nextTokens.clear();
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+	m_rhycheck        = -1;
+	m_strand          = -1;
+	m_nullresolve     = NULL;
+	setPrefix("!");
+
+	return *this;
+}
+
 
 
 //////////////////////////////
@@ -419,9 +544,9 @@ void HumdrumToken::setSubtrackCount(int count) {
 // HumdrumToken::setPreviousToken --
 //
 
-void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
+void HumdrumToken::setPreviousToken(HumdrumToken* token) {
 	m_previousTokens.resize(1);
-	m_previousTokens[0] = aToken;
+	m_previousTokens[0] = token;
 }
 
 
@@ -431,9 +556,9 @@ void HumdrumToken::setPreviousToken(HumdrumToken* aToken) {
 // HumdrumToken::setNextToken --
 //
 
-void HumdrumToken::setNextToken(HumdrumToken* aToken) {
+void HumdrumToken::setNextToken(HumdrumToken* token) {
 	m_nextTokens.resize(1);
-	m_nextTokens[0] = aToken;
+	m_nextTokens[0] = token;
 }
 
 
@@ -1553,6 +1678,17 @@ void HumdrumToken::setText(const string& text) {
 
 //////////////////////////////
 //
+// HumdrumToken::getText --
+//
+
+string HumdrumToken::getText(void) const {
+	return string(*this);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::makeForwardLink -- Line a following spine token to this one.
 //    Used by the HumdrumFileBase::analyzeLinks function.
 //
@@ -2051,44 +2187,6 @@ void HumdrumToken::setNullResolution(HTp resolution) {
 	m_nullresolve = resolution;
 }
 
-
-
-//////////////////////////////
-//
-// HumdrumToken::operator= -- Copy operator.
-//
-
-HumdrumToken& HumdrumToken::operator=(HumdrumToken& aToken) {
-	if (this == &aToken) {
-		return *this;
-	}
-	(string)(*this) = (string)aToken;
-	m_rhycheck = aToken.m_rhycheck;
-	setPrefix(aToken.getPrefix());
-	m_strand = aToken.m_strand;
-	m_nullresolve = aToken.m_nullresolve;
-	return *this;
-}
-
-
-HumdrumToken& HumdrumToken::operator=(const string& aToken) {
-	(string)(*this) = aToken;
-	m_rhycheck = 0;
-	setPrefix("!");
-	m_strand = -1;
-	m_nullresolve = NULL;
-	return *this;
-}
-
-
-HumdrumToken& HumdrumToken::operator=(const char* aToken) {
-	(string)(*this) = aToken;
-	m_rhycheck = 0;
-	setPrefix("!");
-	m_strand = -1;
-	m_nullresolve = NULL;
-	return *this;
-}
 
 
 // END_MERGE

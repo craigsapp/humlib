@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Dec  7 09:00:36 PST 2016
+// Last Modified: Wed Dec  7 20:35:10 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -347,26 +347,28 @@ class HumRegex {
 
 		// replacing
 
-		string&     replaceDestructive (string& input, const string& exp,
-		                                const string& replacement);
-		string&     replaceDestructive (string& input, const string& exp,
-		                                const string& replacement,
+		string&     replaceDestructive (string& input, const string& replacement,
+		                                const string& exp);
+		string&     replaceDestructive (string& input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
-		string      replaceCopy        (const string& input, const string& exp,
-		                                const string& replacement);
-		string      replaceCopy        (const string& input, const string& exp,
+		string      replaceCopy        (const string& input,
 		                                const string& replacement,
+		                                const string& exp);
+		string      replaceCopy        (const string& input,
+		                                const string& replacement,
+		                                const string& exp,
 		                                const string& options);
 
-		string&     replaceDestructive (string* input, const string& exp,
-		                                const string& replacement);
-		string&     replaceDestructive (string* input, const string& exp,
-		                                const string& replacement,
+		string&     replaceDestructive (string* input, const string& replacement,
+		                                const string& exp);
+		string&     replaceDestructive (string* input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
-		string      replaceCopy        (string* input, const string& exp,
-		                                const string& replacement);
-		string      replaceCopy        (string* input, const string& exp,
-		                                const string& replacement,
+		string      replaceCopy        (string* input, const string& replacement,
+		                                const string& exp);
+		string      replaceCopy        (string* input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
 
 		// searching
@@ -477,8 +479,10 @@ class HumRegex {
 class HumAddress {
 	public:
 		                    HumAddress        (void);
+		                    HumAddress        (HumAddress& address);
 		                   ~HumAddress        ();
 
+		HumAddress&         operator=         (const HumAddress& address);
 		int                 getLineIndex      (void) const;
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
@@ -505,7 +509,7 @@ class HumAddress {
 
 		// fieldindex: This is the index of the token in the HumdrumLine
 		// which owns this token.
-		int fieldindex;       // field index of token on line
+		int m_fieldindex;
 
 		// spining: This is the spine position of the token. A simple spine
 		// position is an integer, starting with "1" for the first spine
@@ -517,28 +521,28 @@ class HumAddress {
 		// But in this case there is a spine info simplification which will
 		// convert "(#)a (#)b" into "#" where # is the original spine number.
 		// Other more complicated mergers may be simplified in the future.
-		string spining;
+		string m_spining;
 
 		// track: This is the track number of the spine.  It is the first
 		// number found in the spineinfo string.
-		int track;
+		int m_track;
 
 		// subtrack: This is the subtrack number for the spine.  When a spine
 		// is not split, it will be 0, if the spine has been split with *^,
 		// then the left-subspine will be in subtrack 1 and the right-spine
 		// will be subtrack 2.  If subspines are exchanged with *x, then their
 		// subtrack assignments will also change.
-		int subtrack;
+		int m_subtrack;
 
 		// subtrackcount: The number of currently active subtracks tokens
 		// on the owning HumdrumLine (in the same track).  The subtrack range
 		// is from 1 (if there is only a primary spine), to a larger number.
 		// if subtrackcount is 0, then the variable is not set, or there are
 		// no tokens in the track (such as for global comments).
-		int subtrackcount;
+		int m_subtrackcount;
 
 		// owner: This is the line which manages the given token.
-		HumdrumLine* owner;
+		HumdrumLine* m_owner;
 
 	friend class HumdrumToken;
 	friend class HumdrumLine;
@@ -829,8 +833,11 @@ class HumdrumLine : public string, public HumHash {
 		         HumdrumLine            (void);
 		         HumdrumLine            (const string& aString);
 		         HumdrumLine            (const char* aString);
+		         HumdrumLine            (HumdrumLine& line);
+		         HumdrumLine            (HumdrumLine& line, void* owner);
 		        ~HumdrumLine            ();
 
+		HumdrumLine& operator=          (HumdrumLine& line);
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
 		bool     isLocalComment         (void) const { return isCommentLocal(); }
@@ -876,6 +883,8 @@ class HumdrumLine : public string, public HumHash {
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
 		HumdrumFile* getOwner           (void);
+		void     setText                (const string& text);
+		string   getText                (void);
 
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
@@ -906,6 +915,11 @@ class HumdrumLine : public string, public HumHash {
 		void     appendToken            (const string& token);
 		void     appendToken            (const char* token);
 
+		void     appendToken            (int index, HTp token);
+		void     appendToken            (int index, const HumdrumToken& token);
+		void     appendToken            (int index, const string& token);
+		void     appendToken            (int index, const char* token);
+
 		void     insertToken            (int index, HTp token);
 		void     insertToken            (int index, const HumdrumToken& token);
 		void     insertToken            (int index, const string& token);
@@ -935,7 +949,7 @@ class HumdrumLine : public string, public HumHash {
 		// lineindex: Used to store the index number of the HumdrumLine in
 		// the owning HumdrumFile object.
 		// This variable is filled by HumdrumFileStructure::analyzeLines().
-		int lineindex;
+		int m_lineindex;
 
 		// tokens: Used to store the individual tab-separated token fields
 		// on a line.  These are prepared automatically after reading in
@@ -949,7 +963,7 @@ class HumdrumLine : public string, public HumHash {
 		// This variable is filled by HumdrumFile::read().
 		// The contents of this vector should be deleted when deconstructing
 		// a HumdrumLine object.
-		vector<HumdrumToken*> tokens;
+		vector<HumdrumToken*> m_tokens;
 
 		// duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the
@@ -957,7 +971,7 @@ class HumdrumLine : public string, public HumHash {
 		// previous note in a previous spine is ending on the line, so it is
 		// not just the minimum duration on the line.
 		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
-		HumNum duration;
+		HumNum m_duration;
 
 		// durationFromStart: This is the cumulative duration of all lines
 		// prior to this one in the owning HumdrumFile object.  For example,
@@ -965,20 +979,20 @@ class HumdrumLine : public string, public HumHash {
 		// first data line is 1 quarter note, then the durationFromStart for
 		// the second line will be 1 quarter note.
 		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
-		HumNum durationFromStart;
+		HumNum m_durationFromStart;
 
 		// durationFromBarline: This is the cumulative duration from the
 		// last barline to the current data line.
 		// This variable is filled by HumdrumFileStructure::analyzeMeter().
-		HumNum durationFromBarline;
+		HumNum m_durationFromBarline;
 
 		// durationToBarline: This is the duration from the start of the
 		// current line to the next barline in the owning HumdrumFile object.
 		// This variable is filled by HumdrumFileStructure::analyzeMeter().
-		HumNum durationToBarline;
+		HumNum m_durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		void* owner;
+		void* m_owner;
 
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;
@@ -998,6 +1012,11 @@ class HumdrumToken : public string, public HumHash {
 	public:
 		         HumdrumToken              (void);
 		         HumdrumToken              (const HumdrumToken& token);
+		         HumdrumToken              (HumdrumToken* token);
+		         HumdrumToken              (const HumdrumToken& token,
+		                                    HumdrumLine* owner);
+		         HumdrumToken              (HumdrumToken* token,
+		                                    HumdrumLine* owner);
 		         HumdrumToken              (const char* token);
 		         HumdrumToken              (const string& token);
 		        ~HumdrumToken              ();
@@ -1117,6 +1136,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
 		void     setText                   (const string& text);
+		string   getText                   (void) const;
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);
@@ -1292,10 +1312,12 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase          (void);
+		              HumdrumFileBase          (HumdrumFileBase& infile);
 		              HumdrumFileBase          (const string& contents);
 		              HumdrumFileBase          (istream& contents);
 		             ~HumdrumFileBase          ();
 
+		HumdrumFileBase& operator=             (HumdrumFileBase& infile);
 		bool          read                     (istream& contents);
 		bool          read                     (const char* filename);
 		bool          read                     (const string& filename);
@@ -1456,6 +1478,7 @@ class HumdrumFileBase : public HumHash {
 
 	protected:
 		bool          analyzeTokens             (void);
+		bool          analyzeBaseFromLines      (void);
 		bool          analyzeSpines             (void);
 		bool          analyzeLinks              (void);
 		bool          analyzeTracks             (void);
@@ -1641,9 +1664,10 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getBarlineDurationFromStart  (int index) const;
 		HumNum        getBarlineDurationToEnd      (int index) const;
 
+		bool          analyzeStructure             (void);
+
 	protected:
 
-		bool          analyzeStructure             (void);
 		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);
@@ -2259,6 +2283,8 @@ class Convert {
 		static HumNum  recipToDurationNoDots(string* recip,
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
+		static string  durationToRecip      (HumNum duration, 
+		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
@@ -2741,6 +2767,29 @@ class Tool_metlev : public HumTool {
 
 	private:
 		vector<HTp> m_kernspines;
+
+};
+
+
+
+class Tool_recip : public HumTool {
+	public:
+		      Tool_recip               (void);
+		     ~Tool_recip               () {};
+
+		bool  run                      (HumdrumFile& infile);
+		bool  run                      (const string& indata, ostream& out);
+		bool  run                      (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  initialize               (HumdrumFile& infile);
+		void  replaceKernWithRecip     (HumdrumFile& infile);
+		void  doCompositeAnalysis      (HumdrumFile& infile);
+		void  insertAnalysisSpines     (HumdrumFile& infile, HumdrumFile& cfile);
+
+	private:
+		vector<HTp> m_kernspines;
+		bool        m_graceQ = true;
 
 };
 

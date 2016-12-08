@@ -54,7 +54,7 @@ Tool_autostem::Tool_autostem(void) {
 
 /////////////////////////////////
 //
-// Tool_autostem::run -- Do the main work of the tool.
+// Tool_autostem::run -- Primary interfaces to the tool.
 //
 
 bool Tool_autostem::run(const string& indata, ostream& out) {
@@ -161,10 +161,10 @@ void Tool_autostem::removeStems(HumdrumFile& infile) {
 			HumRegex hre;
 			// string& buffer = static_cast<string&>(*infile.token(i, j));
 			if (removeallQ || overwriteallQ) {
-				hre.replaceDestructive(infile.token(i, j), "[\\\\/]x(?!x)", "", "g");
-				hre.replaceDestructive(infile.token(i, j), "[\\\\/](?!x)", "", "g");
+				hre.replaceDestructive(infile.token(i, j), "", "[\\\\/]x(?!x)", "g");
+				hre.replaceDestructive(infile.token(i, j), "", "[\\\\/](?!x)", "g");
 			} else {
-				hre.replaceDestructive(infile.token(i, j), "[\\\\/](?!x)", "", "g");
+				hre.replaceDestructive(infile.token(i, j), "", "[\\\\/](?!x)", "g");
 			}
 		}
 	}
@@ -951,8 +951,8 @@ int Tool_autostem::getVoice(HumdrumFile& infile, int row, int col) {
 
 void Tool_autostem::removeStem2(HumdrumFile& infile, int row, int col) {
 	HumRegex hre;
-	hre.replaceDestructive(infile.token(row, col), "[\\\\/]x(?!x)", "", "g");
-	hre.replaceDestructive(infile.token(row, col), "[\\\\/](?!x)", "", "g");
+	hre.replaceDestructive(infile.token(row, col), "", "[\\\\/]x(?!x)", "g");
+	hre.replaceDestructive(infile.token(row, col), "", "[\\\\/](?!x)", "g");
 }
 
 

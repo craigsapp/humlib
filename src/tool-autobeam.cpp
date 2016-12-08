@@ -39,7 +39,7 @@ Tool_autobeam::Tool_autobeam(void) {
 
 /////////////////////////////////
 //
-// Tool_autobeam::run -- Do the main work of the tool.
+// Tool_autobeam::run -- Primary interfaces to the tool.
 //
 
 bool Tool_autobeam::run(const string& indata, ostream& out) {

@@ -30,26 +30,28 @@ class HumRegex {
 
 		// replacing
 
-		string&     replaceDestructive (string& input, const string& exp,
-		                                const string& replacement);
-		string&     replaceDestructive (string& input, const string& exp,
-		                                const string& replacement,
+		string&     replaceDestructive (string& input, const string& replacement,
+		                                const string& exp);
+		string&     replaceDestructive (string& input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
-		string      replaceCopy        (const string& input, const string& exp,
-		                                const string& replacement);
-		string      replaceCopy        (const string& input, const string& exp,
+		string      replaceCopy        (const string& input,
 		                                const string& replacement,
+		                                const string& exp);
+		string      replaceCopy        (const string& input,
+		                                const string& replacement,
+		                                const string& exp,
 		                                const string& options);
 
-		string&     replaceDestructive (string* input, const string& exp,
-		                                const string& replacement);
-		string&     replaceDestructive (string* input, const string& exp,
-		                                const string& replacement,
+		string&     replaceDestructive (string* input, const string& replacement,
+		                                const string& exp);
+		string&     replaceDestructive (string* input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
-		string      replaceCopy        (string* input, const string& exp,
-		                                const string& replacement);
-		string      replaceCopy        (string* input, const string& exp,
-		                                const string& replacement,
+		string      replaceCopy        (string* input, const string& replacement,
+		                                const string& exp);
+		string      replaceCopy        (string* input, const string& replacement,
+		                                const string& exp,
 		                                const string& options);
 
 		// searching

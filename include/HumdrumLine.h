@@ -32,8 +32,11 @@ class HumdrumLine : public string, public HumHash {
 		         HumdrumLine            (void);
 		         HumdrumLine            (const string& aString);
 		         HumdrumLine            (const char* aString);
+		         HumdrumLine            (HumdrumLine& line);
+		         HumdrumLine            (HumdrumLine& line, void* owner);
 		        ~HumdrumLine            ();
 
+		HumdrumLine& operator=          (HumdrumLine& line);
 		bool     isComment              (void) const;
 		bool     isCommentLocal         (void) const;
 		bool     isLocalComment         (void) const { return isCommentLocal(); }
@@ -79,6 +82,8 @@ class HumdrumLine : public string, public HumHash {
 		int      getLineIndex           (void) const;
 		int      getLineNumber          (void) const;
 		HumdrumFile* getOwner           (void);
+		void     setText                (const string& text);
+		string   getText                (void);
 
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
@@ -109,6 +114,11 @@ class HumdrumLine : public string, public HumHash {
 		void     appendToken            (const string& token);
 		void     appendToken            (const char* token);
 
+		void     appendToken            (int index, HTp token);
+		void     appendToken            (int index, const HumdrumToken& token);
+		void     appendToken            (int index, const string& token);
+		void     appendToken            (int index, const char* token);
+
 		void     insertToken            (int index, HTp token);
 		void     insertToken            (int index, const HumdrumToken& token);
 		void     insertToken            (int index, const string& token);
@@ -138,7 +148,7 @@ class HumdrumLine : public string, public HumHash {
 		// lineindex: Used to store the index number of the HumdrumLine in
 		// the owning HumdrumFile object.
 		// This variable is filled by HumdrumFileStructure::analyzeLines().
-		int lineindex;
+		int m_lineindex;
 
 		// tokens: Used to store the individual tab-separated token fields
 		// on a line.  These are prepared automatically after reading in
@@ -152,7 +162,7 @@ class HumdrumLine : public string, public HumHash {
 		// This variable is filled by HumdrumFile::read().
 		// The contents of this vector should be deleted when deconstructing
 		// a HumdrumLine object.
-		vector<HumdrumToken*> tokens;
+		vector<HumdrumToken*> m_tokens;
 
 		// duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the
@@ -160,7 +170,7 @@ class HumdrumLine : public string, public HumHash {
 		// previous note in a previous spine is ending on the line, so it is
 		// not just the minimum duration on the line.
 		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
-		HumNum duration;
+		HumNum m_duration;
 
 		// durationFromStart: This is the cumulative duration of all lines
 		// prior to this one in the owning HumdrumFile object.  For example,
@@ -168,20 +178,20 @@ class HumdrumLine : public string, public HumHash {
 		// first data line is 1 quarter note, then the durationFromStart for
 		// the second line will be 1 quarter note.
 		// This variable is filled by HumdrumFileStructure::analyzeRhythm().
-		HumNum durationFromStart;
+		HumNum m_durationFromStart;
 
 		// durationFromBarline: This is the cumulative duration from the
 		// last barline to the current data line.
 		// This variable is filled by HumdrumFileStructure::analyzeMeter().
-		HumNum durationFromBarline;
+		HumNum m_durationFromBarline;
 
 		// durationToBarline: This is the duration from the start of the
 		// current line to the next barline in the owning HumdrumFile object.
 		// This variable is filled by HumdrumFileStructure::analyzeMeter().
-		HumNum durationToBarline;
+		HumNum m_durationToBarline;
 
 		// owner: This is the HumdrumFile which manages the given line.
-		void* owner;
+		void* m_owner;
 
 	friend class HumdrumFileBase;
 	friend class HumdrumFileStructure;

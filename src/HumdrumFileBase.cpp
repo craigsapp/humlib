@@ -57,6 +57,73 @@ HumdrumFileBase::HumdrumFileBase(istream& contents) : HumHash() {
 }
 
 
+//
+// HumdrumFileStructure::analyzeStructure() needs to be called after
+// using the following constructor:
+//
+
+HumdrumFileBase::HumdrumFileBase(HumdrumFileBase& infile) {
+
+	m_filename = infile.m_filename;
+	m_segmentlevel = infile.m_segmentlevel;
+	m_trackstarts.clear();
+	m_trackends.clear();
+	m_barlines.clear();
+	m_ticksperquarternote = infile.m_ticksperquarternote;
+	m_idprefix = infile.m_idprefix;
+	m_strand1d.clear();
+	m_strand2d.clear();
+	m_quietParse = infile.m_quietParse;
+	m_parseError = infile.m_parseError;
+	m_displayError = infile.m_displayError;
+
+	m_lines.resize(infile.m_lines.size());
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i] = new HumdrumLine(infile.m_lines[i]->getText());
+		m_lines[i]->setOwner(this);
+	}
+
+	analyzeBaseFromLines();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::operator = -- HumdrumFileStructure::analyzeStructure() 
+// needs to be called after copying from another HumdrumFile.
+//
+//
+
+HumdrumFileBase& HumdrumFileBase::operator=(HumdrumFileBase& infile) {
+	if (this == &infile) {
+		return *this;
+	}
+
+	m_filename = infile.m_filename;
+	m_segmentlevel = infile.m_segmentlevel;
+	m_trackstarts.clear();
+	m_trackends.clear();
+	m_barlines.clear();
+	m_ticksperquarternote = infile.m_ticksperquarternote;
+	m_idprefix = infile.m_idprefix;
+	m_strand1d.clear();
+	m_strand2d.clear();
+	m_quietParse = infile.m_quietParse;
+	m_parseError = infile.m_parseError;
+	m_displayError = infile.m_displayError;
+
+	m_lines.resize(infile.m_lines.size());
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i] = new HumdrumLine(infile.m_lines[i]->getText());
+		m_lines[i]->setOwner(this);
+	}
+
+	analyzeBaseFromLines();
+	return *this;
+}
+
+
 
 //////////////////////////////
 //
@@ -233,12 +300,15 @@ bool HumdrumFileBase::read(istream& contents) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
+	return analyzeBaseFromLines();
+/*
 	if (!analyzeTokens()) { return isValid(); }
 	if (!analyzeLines() ) { return isValid(); }
 	if (!analyzeSpines()) { return isValid(); }
 	if (!analyzeLinks() ) { return isValid(); }
 	if (!analyzeTracks()) { return isValid(); }
 	return isValid();
+*/
 }
 
 
@@ -281,6 +351,17 @@ bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 		s->setOwner(this);
 		m_lines.push_back(s);
 	}
+	return analyzeBaseFromLines();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::analyzeBaseFromLines --
+//
+
+bool HumdrumFileBase::analyzeBaseFromLines(void)  {
 	if (!analyzeTokens()) { return isValid(); }
 	if (!analyzeLines() ) { return isValid(); }
 	if (!analyzeSpines()) { return isValid(); }

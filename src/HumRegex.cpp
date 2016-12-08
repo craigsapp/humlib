@@ -276,25 +276,25 @@ void HumRegex::setNoIgnoreCase(void) {
 // HumRegex::replaceDestructive -- Replace in input string.
 //
 
-string& HumRegex::replaceDestructive(string& input, const string& exp,
-		const string& replacement) {
+string& HumRegex::replaceDestructive(string& input, const string& replacement,
+		const string& exp) {
 	m_regex = exp;
 	input = regex_replace(input, m_regex, replacement, m_flags);
 	return input;
 }
 
 
-string& HumRegex::replaceDestructive(string* input, const string& exp,
-		const string& replacement) {
-	return HumRegex::replaceDestructive(*input, exp, replacement);
+string& HumRegex::replaceDestructive(string* input, const string& replacement,
+		const string& exp) {
+	return HumRegex::replaceDestructive(*input, replacement, exp);
 }
 
 //
 // This version allows for temporary match flag options.
 //
 
-string& HumRegex::replaceDestructive(string& input, const string& exp,
-		const string& replacement, const string& options) {
+string& HumRegex::replaceDestructive(string& input, const string& replacement, 
+		const string& exp, const string& options) {
 	m_regex = exp;
 	input = regex_replace(input, m_regex, replacement,
 			getTemporaryFlags(options));
@@ -302,9 +302,9 @@ string& HumRegex::replaceDestructive(string& input, const string& exp,
 }
 
 
-string& HumRegex::replaceDestructive (string* input, const string& exp,
-		const string& replacement, const string& options) {
-	return HumRegex::replaceDestructive(*input, exp, replacement, options);
+string& HumRegex::replaceDestructive (string* input, const string& replacement, 
+		const string& exp, const string& options) {
+	return HumRegex::replaceDestructive(*input, replacement, exp, options);
 }
 
 
@@ -315,16 +315,16 @@ string& HumRegex::replaceDestructive (string* input, const string& exp,
 //    string as output
 //
 
-string HumRegex::replaceCopy(const string& input, const string& exp,
-		const string& replacement) {
+string HumRegex::replaceCopy(const string& input, const string& replacement,
+		const string& exp) {
 	m_regex = exp;
 	return regex_replace(input, m_regex, replacement, m_flags);
 }
 
 
-string HumRegex::replaceCopy(string* input, const string& exp,
-		const string& replacement) {
-	return HumRegex::replaceCopy(*input, exp, replacement);
+string HumRegex::replaceCopy(string* input, const string& replacement,
+		const string& exp) {
+	return HumRegex::replaceCopy(*input, replacement, exp);
 }
 
 //
@@ -341,7 +341,7 @@ string HumRegex::replaceCopy(const string& input, const string& exp,
 
 string HumRegex::replaceCopy(string* input, const string& exp,
 		const string& replacement, const string& options) {
-	return HumRegex::replaceCopy(*input, exp, replacement, options);
+	return HumRegex::replaceCopy(*input, replacement, exp, options);
 }
 
 
