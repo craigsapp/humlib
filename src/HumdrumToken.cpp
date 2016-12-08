@@ -958,6 +958,21 @@ bool HumdrumToken::hasBeam(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::equalTo --
+//
+
+bool HumdrumToken::equalTo(const string& pattern) {
+	if ((string)(*this) == pattern) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
 //
 

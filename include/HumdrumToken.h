@@ -81,6 +81,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
+		bool     equalTo                   (const string& pattern);
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -187,12 +188,13 @@ class HumdrumToken : public string, public HumHash {
 		// slur-analysis based functions:
 		HumNum   getSlurDuration           (HumNum scale = 1);
 
+		void     setTrack                  (int aTrack, int aSubtrack);
+		void     setTrack                  (int aTrack);
+
 	protected:
 		void     setLineIndex              (int lineindex);
 		void     setFieldIndex             (int fieldlindex);
 		void     setSpineInfo              (const string& spineinfo);
-		void     setTrack                  (int aTrack, int aSubtrack);
-		void     setTrack                  (int aTrack);
 		void     setSubtrack               (int aSubtrack);
 		void     setSubtrackCount          (int count);
 		void     setPreviousToken          (HTp aToken);

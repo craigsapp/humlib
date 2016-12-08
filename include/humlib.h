@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Dec  7 20:35:10 PST 2016
+// Last Modified: Thu Dec  8 14:59:42 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1060,6 +1060,7 @@ class HumdrumToken : public string, public HumHash {
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
+		bool     equalTo                   (const string& pattern);
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -1166,12 +1167,13 @@ class HumdrumToken : public string, public HumHash {
 		// slur-analysis based functions:
 		HumNum   getSlurDuration           (HumNum scale = 1);
 
+		void     setTrack                  (int aTrack, int aSubtrack);
+		void     setTrack                  (int aTrack);
+
 	protected:
 		void     setLineIndex              (int lineindex);
 		void     setFieldIndex             (int fieldlindex);
 		void     setSpineInfo              (const string& spineinfo);
-		void     setTrack                  (int aTrack, int aSubtrack);
-		void     setTrack                  (int aTrack);
 		void     setSubtrack               (int aSubtrack);
 		void     setSubtrackCount          (int count);
 		void     setPreviousToken          (HTp aToken);
@@ -1423,6 +1425,7 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
 		void          insertLine               (int index, HumdrumLine* line);
+//		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
 
@@ -1501,6 +1504,7 @@ class HumdrumFileBase : public HumHash {
 		bool          setParseError             (stringstream& err);
 		bool          setParseError             (const string& err);
 		bool          setParseError             (const char* format, ...);
+//		void          fixMerges                 (int linei);
 
 	protected:
 

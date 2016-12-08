@@ -1769,6 +1769,208 @@ void HumdrumFileBase::addUniqueTokens(vector<HTp>& target,
 
 //////////////////////////////
 //
+// HumdrumFileBase::adjustMergeSpineLines -- fix *v lines to that adjacent
+//     tracks do not merge at the same time.  In other words, split the line
+//     into two or more merge lines.
+//
+
+/* still to be implemented
+
+void HumdrumFileBase::adjustMergeSpineLines(void) {
+	HumdrumFileBase& infile = *this;
+	// going backwards to not have to deal with line number updates
+	// at the moment...
+	for (int i=infile.getLineCount()-1; i>= 0; i--) {
+		if (!infile[i].isManipulator()) {
+			continue;
+		}
+		bool hasbadmerge = false;
+		int track1;
+		int track2;
+		for (int j=1; j<infile[i].getFieldCount(); j++) {
+			if (!infile[i].token(j)->equalTo("*v")) {
+				continue;
+			}
+			if (!infile[i].token(j-1)->equalTo("*v")) {
+				continue;
+			}
+			track1 = infile.token(i, j-1)->getTrack();
+			track2 = infile.token(i, j)->getTrack();
+			if (track1 != track2) {
+				hasbadmerge = true;
+				break;
+			}
+		}
+		if (hasbadmerge) {
+			cerr << "!! BADMERGE on line " << i + 1 << endl;
+			fixMerges(i);
+		}
+	}
+}
+
+*/
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::fixMerges -- Split a line with merges into two
+//    lines.  The line is presumed to have a bad merge which
+//    means that two adjacent tracks have adjacent *v tokens.
+//    This algorithm will create a new lines where everything
+//    after the bad merge is placed on the newline.   Example:
+//
+// track:    1    2    2    3    3    4    5    5 
+//           *    *v   *v   *v   *v   *    *v   *v
+//
+// This is invalid because track 2 and track 3 have adjacent *v tokens.
+// This function will create a new line and move everything after 
+// the bad position to a new line:
+//
+// track:    1    2    2    3    3    4    5    5 
+//           *    *v   *v   *v   *v   *    *v   *v
+//           *    *    *v   *v   *    *    *
+// track:    1    2    3    3    4    5    5 
+//
+// This algorithm only fixes one bad boundary.  The calling function
+// will presumably fix any bad boundaries on the newly created line.
+//
+
+/* Still to be implemented...
+void HumdrumFileBase::fixMerges(int linei) {
+	HumdrumFileBase& infile = *this;
+
+	vector<vector<HTp> > linetoks;
+	HTp tok;
+
+	// linetoks: collect tokens on the current line by track groups.
+	int track1 = -1;
+	int track2 = -1;
+	for (int j=0; j<infile[linei].getFieldCount(); j++) {
+		tok = infile[linei].token(j);
+		track2 = tok->getTrack();
+		if (track2 != track1) {
+			linetoks.resize(linetoks.size()+1);
+			linetoks.back().push_back(tok);
+		}
+		track1 = track2;
+	}
+
+	// ptoks: collect the tokens on the previous line for stiching tokens
+	// together after adding new line.
+	vector<vector<HTp> > ptoks;
+	track1 = -1;
+	track2 = -1;
+	for (int j=0; j<infile[linei-1].getFieldCount(); j++) {
+		tok = infile[linei-1].token(j);
+		track2 = tok->getTrack();
+		if (track2 != track1) {
+			ptoks.resize(ptoks.size()+1);
+			ptoks.back().push_back(tok);
+		}
+		track1 = track2;
+	}
+
+	// ntoks: collect the tokens on the next line for stiching tokens
+	// together after adding new line.
+	vector<vector<HTp> > ntoks;
+	track1 = -1;
+	track2 = -1;
+	for (int j=0; j<infile[linei+1].getFieldCount(); j++) {
+		tok = infile[linei+1].token(j);
+		track2 = tok->getTrack();
+		if (track2 != track1) {
+			ntoks.resize(ntoks.size()+1);
+			ntoks.back().push_back(tok);
+		}
+		track1 = track2;
+	}
+
+	int maxt = infile.getMaxTrack();
+	vector<vector<HTp> > newtokbytrack(maxt+1);
+
+// track:    1    2    2    3    3    4    5    5 
+//           *    *v   *v   *v   *v   *    *v   *v
+//
+// o = new null tokens.
+//
+// original     *    *v   *v   o    o    o    o    o 
+// new          o    o         *v   *v   *    *v   *v
+// track:       1    2         3    3    4    5    5 
+
+	HumdrumLine* newline = new HumdrumLine;
+	newline->setOwner(this);
+	bool foundboundary = false;
+	HTp token;
+	int findex;
+	// int swaptrack = -1;
+	int difference = 0;  // decrease in token count on new line
+	for (int i=0; i<linetoks.size()-1; i++) {
+		if (foundboundary) {
+			// transfer the track tokens to the new line, and put
+			// new null tokens in their place on the old line.
+			for (int j=0; j<(int)linetoks[i].size(); j++) {
+				track1 = linetoks[i][j]->getTrack();
+				findex = linetoks[i][j]->getFieldIndex();
+            // move the token to the next line:
+				newline->m_tokens.push_back(linetoks[i][j]);
+				// put it in the list for later processing:
+				newtokbytrack[track1].push_back(linetoks[i][j]);
+				// replace the moved token with a null token:
+				token = new HumdrumToken("*");
+				infile[linei].m_tokens[findex] = token;
+				// probably need to update the HumAddress of both tokens.
+			}
+		} else if ((!foundboundary) && linetoks[i].back()->equalTo("*v") &&
+				linetoks[i+1][0]->equalTo("*v")) {
+			// This is the bad boundary.  Keep track fields in the
+			// original line, and create one new null token in
+			// the newline.
+// original     *    *v   *v   o    o    o    o    o 
+// new          o    o         *v   *v   *    *v   *v
+// track:       1    2         3    3    4    5    5 
+			difference = linetoks[i].size() - 1;
+
+			track1 = linetoks[i][0]->getTrack();
+			token = new HumdrumToken("*");
+			token->setTrack(track1);
+			token->setSubtrack(track1);
+			newline->m_tokens.push_back(token);
+			// put new token in list for later processing:
+			newtokbytrack[track1].push_back(token);
+			
+			foundboundary = true;
+		} else {
+			// add null tokens to the new line, and keep the
+			// tokens on the original line as they were
+			for (int j=0; j<(int)linetoks[i].size(); j++) {
+				track1 = linetoks[i][j]->getTrack();
+				token = new HumdrumToken("*");
+				token->setTrack(track1);
+				token->setSubtrack(track1);
+				newline->m_tokens.push_back(token);
+				// put new token in list for later processing:
+				newtokbytrack[track1].push_back(token);
+			}
+		}
+	}
+
+	// for now the links between the tokens on successive lines
+	// will not be updated.  For the most part it will not be
+	// important.  Probably more important is to update line numbers
+	// for HumdrumLines occurring on new lines.  Maybe need to set
+	// the line type for the new line.
+
+	// add the new line to the file:
+	m_lines.insert(m_lines.begin() + linei + 1, newline);
+
+}
+
+*/
+
+
+//////////////////////////////
+//
 // operator<< -- Default method of printing HumdrumFiles.  This printing method
 //    assumes that the HumdrumLine string is correct.  If a token is changed
 //    in the file, the HumdrumFileBase::createLinesFromTokens() before printing

@@ -210,6 +210,7 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const string& line);
 		void          insertLine               (int index, HumdrumLine* line);
+//		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
 
@@ -288,6 +289,7 @@ class HumdrumFileBase : public HumHash {
 		bool          setParseError             (stringstream& err);
 		bool          setParseError             (const string& err);
 		bool          setParseError             (const char* format, ...);
+//		void          fixMerges                 (int linei);
 
 	protected:
 

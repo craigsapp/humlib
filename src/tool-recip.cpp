@@ -85,6 +85,7 @@ bool Tool_recip::run(HumdrumFile& infile) {
 	replaceKernWithRecip(cfile);
 	cfile.createLinesFromTokens();
 	insertAnalysisSpines(infile, cfile);
+	// infile.adjustMergeSpineLines();
 	infile.createLinesFromTokens();
 	return true;
 }
@@ -98,22 +99,19 @@ bool Tool_recip::run(HumdrumFile& infile) {
 //
 
 void Tool_recip::insertAnalysisSpines(HumdrumFile& infile, HumdrumFile& cfile) {
-	int ktrack;
-	int track;
-	int insertj;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
 		}
 		for (int k=(int)m_kernspines.size()-1; k>=0; k--) {
-			ktrack = m_kernspines[k]->getTrack();
 			int fcount = infile[i].getFieldCount();
-			insertj = -1;
+			int ktrack = m_kernspines[k]->getTrack();
+			int insertj = -1;
 			for (int j=fcount-1; j>=0; j--) {
 				if (!infile.token(i, j)->isKern()) {
 					continue;
 				}
-				track = infile.token(i, j)->getTrack();
+				int track = infile.token(i, j)->getTrack();
 				if (track != ktrack) {
 					continue;
 				}
@@ -121,6 +119,7 @@ void Tool_recip::insertAnalysisSpines(HumdrumFile& infile, HumdrumFile& cfile) {
 					insertj = j;
 				}
 				infile[i].appendToken(insertj, cfile.token(i, j)->getText());
+				// infile.token(i, insertj+1)->setTrack(remapping[k]);
 			}
 		}
 	}
