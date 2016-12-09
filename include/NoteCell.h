@@ -22,7 +22,7 @@ namespace hum {
 
 // START_MERGE
 
-#define REST NAN
+#define GRIDREST NAN
 
 class NoteGrid;
 

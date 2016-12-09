@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec  8 14:59:42 PST 2016
+// Last Modified: Thu Dec  8 18:16:53 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2134,7 +2134,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 
 
-#define REST NAN
+#define GRIDREST NAN
 
 class NoteGrid;
 
