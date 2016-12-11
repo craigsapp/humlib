@@ -645,6 +645,43 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 }
 
 
+//////////////////////////////
+//
+// HumdrumToken::getNextFieldToken --
+//
+
+HTp HumdrumToken::getNextFieldToken(void) const {
+	HumdrumLine* line = getLine();
+	if (!line) {
+		return NULL;
+	}
+	int field = getFieldIndex();
+	if (field >= line->getFieldCount()  - 1) {
+		return NULL;
+	}
+	return line->token(field+1);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPreviousFieldToken --
+//
+
+HTp HumdrumToken::getPreviousFieldToken(void) const {
+	HumdrumLine* line = getLine();
+	if (!line) {
+		return NULL;
+	}
+	int field = getFieldIndex();
+	if (field < 1) {
+		return NULL;
+	}
+	return line->token(field-1);
+}
+
+
 
 //////////////////////////////
 //

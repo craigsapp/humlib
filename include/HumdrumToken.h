@@ -172,6 +172,10 @@ class HumdrumToken : public string, public HumHash {
 		vector<HTp> getNextTokens          (void) const;
 		vector<HTp> getPreviousTokens      (void) const;
 
+		// next/previous token on line:
+		HTp      getNextFieldToken           (void) const;
+		HTp      getPreviousFieldToken       (void) const;
+
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount      (void)
 		                           { return getPreviousNonNullDataTokenCount(); }
