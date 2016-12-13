@@ -633,129 +633,446 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 //
 
 int Convert::kernClefToBaseline(const string& input) {
-   string clefname;
+	string clefname;
 	if (input.compare(0, 5, "*clef") == 0) {
 		clefname = input.substr(5);
 	} else if (input.compare(0, 4, "clef") == 0) {
-      clefname = input.substr(4);
-   } else {
-      cerr << "Error in Convert::kernClefToBaseline: " << input << endl;
-      return -1000;
-   }
+		clefname = input.substr(4);
+	} else {
+		cerr << "Error in Convert::kernClefToBaseline: " << input << endl;
+		return -1000;
+	}
 
-   if (clefname == "G2") {                        // treble clef
-      return Convert::kernToBase7("e");
-   } else if (clefname == "F4") {                 // bass clef
-      return Convert::kernToBase7("GG");
-   } else if (clefname == "C3") {                 // alto clef
-      return Convert::kernToBase7("F");
-   } else if (clefname == "C4") {                 // tenor clef
-      return Convert::kernToBase7("D");
-   } else if (clefname == "Gv2") {                // vocal tenor clef
-      return Convert::kernToBase7("E");
+	if (clefname == "G2") {                        // treble clef
+		return Convert::kernToBase7("e");
+	} else if (clefname == "F4") {                 // bass clef
+		return Convert::kernToBase7("GG");
+	} else if (clefname == "C3") {                 // alto clef
+		return Convert::kernToBase7("F");
+	} else if (clefname == "C4") {                 // tenor clef
+		return Convert::kernToBase7("D");
+	} else if (clefname == "Gv2") {                // vocal tenor clef
+		return Convert::kernToBase7("E");
 
-   // rest of C clef possibilities:
-   } else if (clefname == "C1") {                 // soprano clef
-      return Convert::kernToBase7("c");
-   } else if (clefname == "C2") {                 // mezzo-soprano clef
-      return Convert::kernToBase7("A");
-   } else if (clefname == "C5") {                 // baritone clef
-      return Convert::kernToBase7("BB");
+	// rest of C clef possibilities:
+	} else if (clefname == "C1") {                 // soprano clef
+		return Convert::kernToBase7("c");
+	} else if (clefname == "C2") {                 // mezzo-soprano clef
+		return Convert::kernToBase7("A");
+	} else if (clefname == "C5") {                 // baritone clef
+		return Convert::kernToBase7("BB");
 
-   // rest of G clef possibilities:
-   } else if (clefname == "G1") {                 // French-violin clef
-      return Convert::kernToBase7("g");
-   } else if (clefname == "G3") {
-      return Convert::kernToBase7("c");
-   } else if (clefname == "G4") {
-      return Convert::kernToBase7("A");
-   } else if (clefname == "G5") {
-      return Convert::kernToBase7("F");
+	// rest of G clef possibilities:
+	} else if (clefname == "G1") {                 // French-violin clef
+		return Convert::kernToBase7("g");
+	} else if (clefname == "G3") {
+		return Convert::kernToBase7("c");
+	} else if (clefname == "G4") {
+		return Convert::kernToBase7("A");
+	} else if (clefname == "G5") {
+		return Convert::kernToBase7("F");
 
-   // rest of F clef possibilities:
-   } else if (clefname == "F1") {
-      return Convert::kernToBase7("F");
-   } else if (clefname == "F2") {
-      return Convert::kernToBase7("D");
-   } else if (clefname == "F3") {
-      return Convert::kernToBase7("BB");
-   } else if (clefname == "F5") {
-      return Convert::kernToBase7("EE");
+	// rest of F clef possibilities:
+	} else if (clefname == "F1") {
+		return Convert::kernToBase7("F");
+	} else if (clefname == "F2") {
+		return Convert::kernToBase7("D");
+	} else if (clefname == "F3") {
+		return Convert::kernToBase7("BB");
+	} else if (clefname == "F5") {
+		return Convert::kernToBase7("EE");
 
-   // rest of G clef down an octave possibilities:
-   } else if (clefname == "Gv1") {
-      return Convert::kernToBase7("G");
-   } else if (clefname == "Gv3") {
-      return Convert::kernToBase7("C");
-   } else if (clefname == "Gv4") {
-      return Convert::kernToBase7("AA");
-   } else if (clefname == "Gv5") {
-      return Convert::kernToBase7("FF");
+	// rest of G clef down an octave possibilities:
+	} else if (clefname == "Gv1") {
+		return Convert::kernToBase7("G");
+	} else if (clefname == "Gv3") {
+		return Convert::kernToBase7("C");
+	} else if (clefname == "Gv4") {
+		return Convert::kernToBase7("AA");
+	} else if (clefname == "Gv5") {
+		return Convert::kernToBase7("FF");
 
-   // F clef down an octave possibilities:
-   } else if (clefname == "Fv1") {
-      return Convert::kernToBase7("FF");
-   } else if (clefname == "Fv2") {
-      return Convert::kernToBase7("DD");
-   } else if (clefname == "Fv3") {
-      return Convert::kernToBase7("BBB");
-   } else if (clefname == "Fv4") {
-      return Convert::kernToBase7("GGG");
-   } else if (clefname == "Fv5") {
-      return Convert::kernToBase7("EEE");
+	// F clef down an octave possibilities:
+	} else if (clefname == "Fv1") {
+		return Convert::kernToBase7("FF");
+	} else if (clefname == "Fv2") {
+		return Convert::kernToBase7("DD");
+	} else if (clefname == "Fv3") {
+		return Convert::kernToBase7("BBB");
+	} else if (clefname == "Fv4") {
+		return Convert::kernToBase7("GGG");
+	} else if (clefname == "Fv5") {
+		return Convert::kernToBase7("EEE");
 
-   // C clef down an octave possibilities:
-   } else if (clefname == "Cv1") {
-      return Convert::kernToBase7("C");
-   } else if (clefname == "Cv2") {
-      return Convert::kernToBase7("AA");
-   } else if (clefname == "Cv3") {
-      return Convert::kernToBase7("FF");
-   } else if (clefname == "Cv4") {
-      return Convert::kernToBase7("DD");
-   } else if (clefname == "Cv5") {
-      return Convert::kernToBase7("BBB");
+	// C clef down an octave possibilities:
+	} else if (clefname == "Cv1") {
+		return Convert::kernToBase7("C");
+	} else if (clefname == "Cv2") {
+		return Convert::kernToBase7("AA");
+	} else if (clefname == "Cv3") {
+		return Convert::kernToBase7("FF");
+	} else if (clefname == "Cv4") {
+		return Convert::kernToBase7("DD");
+	} else if (clefname == "Cv5") {
+		return Convert::kernToBase7("BBB");
 
-   // G clef up an octave possibilities:
-   } else if (clefname == "G^1") {
-      return Convert::kernToBase7("gg");
-   } else if (clefname == "G^2") {
-      return Convert::kernToBase7("ee");
-   } else if (clefname == "G^3") {
-      return Convert::kernToBase7("cc");
-   } else if (clefname == "G^4") {
-      return Convert::kernToBase7("a");
-   } else if (clefname == "G^5") {
-      return Convert::kernToBase7("f");
+	// G clef up an octave possibilities:
+	} else if (clefname == "G^1") {
+		return Convert::kernToBase7("gg");
+	} else if (clefname == "G^2") {
+		return Convert::kernToBase7("ee");
+	} else if (clefname == "G^3") {
+		return Convert::kernToBase7("cc");
+	} else if (clefname == "G^4") {
+		return Convert::kernToBase7("a");
+	} else if (clefname == "G^5") {
+		return Convert::kernToBase7("f");
 
-   // F clef up an octave possibilities:
-   } else if (clefname == "F^1") {
-      return Convert::kernToBase7("f");
-   } else if (clefname == "F^2") {
-      return Convert::kernToBase7("d");
-   } else if (clefname == "F^3") {
-      return Convert::kernToBase7("B");
-   } else if (clefname == "F^4") {
-      return Convert::kernToBase7("G");
-   } else if (clefname == "F^5") {
-      return Convert::kernToBase7("E");
+	// F clef up an octave possibilities:
+	} else if (clefname == "F^1") {
+		return Convert::kernToBase7("f");
+	} else if (clefname == "F^2") {
+		return Convert::kernToBase7("d");
+	} else if (clefname == "F^3") {
+		return Convert::kernToBase7("B");
+	} else if (clefname == "F^4") {
+		return Convert::kernToBase7("G");
+	} else if (clefname == "F^5") {
+		return Convert::kernToBase7("E");
 
-   // C clef up an octave possibilities:
-   } else if (clefname == "C^1") {
-      return Convert::kernToBase7("cc");
-   } else if (clefname == "C^2") {
-      return Convert::kernToBase7("a");
-   } else if (clefname == "C^3") {
-      return Convert::kernToBase7("f");
-   } else if (clefname == "C^4") {
-      return Convert::kernToBase7("d");
-   } else if (clefname == "C^5") {
-      return Convert::kernToBase7("B");
+	// C clef up an octave possibilities:
+	} else if (clefname == "C^1") {
+		return Convert::kernToBase7("cc");
+	} else if (clefname == "C^2") {
+		return Convert::kernToBase7("a");
+	} else if (clefname == "C^3") {
+		return Convert::kernToBase7("f");
+	} else if (clefname == "C^4") {
+		return Convert::kernToBase7("d");
+	} else if (clefname == "C^5") {
+		return Convert::kernToBase7("B");
 
-   // there are also two octaves down (*clefGvv2) and two octaves up (*clefG^^2)
-   } else {
-      // but just use treble clef if don't know what the clef it by this point
-      return Convert::kernToBase7("e");
+	// there are also two octaves down (*clefGvv2) and two octaves up (*clefG^^2)
+	} else {
+		// but just use treble clef if don't know what the clef it by this point
+		return Convert::kernToBase7("e");
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToTrans -- convert a base-40 interval into
+//    a trans program's diatonic/chromatic alteration marker
+//
+
+string Convert::base40ToTrans(int base40) {
+	int sign = 1;
+	int chroma;
+	int octave;
+	if (base40 < 0) {
+		sign = -1;
+		chroma = -base40 % 40;
+		octave = -base40 / 40;
+	} else {
+		sign = +1;
+		chroma = base40 % 40;
+		octave = base40 / 40;
+	}
+
+	int cval = 0;
+	int dval = 0;
+
+	switch (chroma * sign) {
+		case   0: dval=0;  cval=0;   break; // C -> C
+		case   1: dval=0;  cval=1;   break; // C -> C#
+		case   2: dval=0;  cval=2;   break; // C -> C##
+		case   4: dval=1;  cval=0;   break; // C -> D--
+		case   5: dval=1;  cval=1;   break; // C -> D-
+		case   6: dval=1;  cval=2;   break; // C -> D
+		case   7: dval=1;  cval=3;   break; // C -> D#
+		case   8: dval=1;  cval=4;   break; // C -> D##
+		case  10: dval=2;  cval=2;   break; // C -> E--
+		case  11: dval=2;  cval=3;   break; // C -> E-
+		case  12: dval=2;  cval=4;   break; // C -> E
+		case  13: dval=2;  cval=5;   break; // C -> E#
+		case  14: dval=2;  cval=6;   break; // C -> E##
+		case  15: dval=3;  cval=3;   break; // C -> F--
+		case  16: dval=3;  cval=4;   break; // C -> F-
+		case  17: dval=3;  cval=5;   break; // C -> F
+		case  18: dval=3;  cval=6;   break; // C -> F#
+		case  19: dval=3;  cval=7;   break; // C -> F##
+		case  21: dval=4;  cval=5;   break; // C -> G--
+		case  22: dval=4;  cval=6;   break; // C -> G-
+		case  23: dval=4;  cval=7;   break; // C -> G
+		case  24: dval=4;  cval=8;   break; // C -> G#
+		case  25: dval=4;  cval=9;   break; // C -> G##
+		case  27: dval=5;  cval=7;   break; // C -> A--
+		case  28: dval=5;  cval=8;   break; // C -> A-
+		case  29: dval=5;  cval=9;   break; // C -> A
+		case  30: dval=5;  cval=10;  break; // C -> A#
+		case  31: dval=5;  cval=11;  break; // C -> A##
+		case  33: dval=6;  cval=9;   break; // C -> B--
+		case  34: dval=6;  cval=10;  break; // C -> B-
+		case  35: dval=6;  cval=11;  break; // C -> B
+		case  36: dval=6;  cval=12;  break; // C -> B#
+		case  37: dval=6;  cval=13;  break; // C -> B##
+		case  38: dval=7;  cval=10;  break; // C -> c--
+		case  39: dval=7;  cval=11;  break; // C -> c-
+		case  -1: dval=-0; cval=-1;  break; // c -> c-
+		case  -2: dval=-0; cval=-2;  break; // c -> c--
+		case  -3: dval=-1; cval=1;   break; // c -> B##
+		case  -4: dval=-1; cval=-0;  break; // c -> B#
+		case  -5: dval=-1; cval=-1;  break; // c -> B
+		case  -6: dval=-1; cval=-2;  break; // c -> B-
+		case  -7: dval=-1; cval=-3;  break; // c -> B--
+		case  -9: dval=-2; cval=-1;  break; // c -> A##
+		case -10: dval=-2; cval=-2;  break; // c -> A#
+		case -11: dval=-2; cval=-3;  break; // c -> A
+		case -12: dval=-2; cval=-4;  break; // c -> A-
+		case -13: dval=-2; cval=-5;  break; // c -> A-
+		case -15: dval=-3; cval=-3;  break; // c -> G##
+		case -16: dval=-3; cval=-4;  break; // c -> G#
+		case -17: dval=-3; cval=-5;  break; // c -> G
+		case -18: dval=-3; cval=-6;  break; // c -> G-
+		case -19: dval=-3; cval=-7;  break; // c -> G--
+		case -21: dval=-4; cval=-5;  break; // c -> F##
+		case -22: dval=-4; cval=-6;  break; // c -> F#
+		case -23: dval=-4; cval=-7;  break; // c -> F
+		case -24: dval=-4; cval=-8;  break; // c -> F-
+		case -25: dval=-4; cval=-9;  break; // c -> F--
+		case -26: dval=-5; cval=-6;  break; // c -> E##
+		case -27: dval=-5; cval=-7;  break; // c -> E#
+		case -28: dval=-5; cval=-8;  break; // c -> E
+		case -29: dval=-5; cval=-9;  break; // c -> E-
+		case -30: dval=-5; cval=-10; break; // c -> E--
+		case -32: dval=-6; cval=-8;  break; // c -> D##
+		case -33: dval=-6; cval=-9;  break; // c -> D#
+		case -34: dval=-6; cval=-10; break; // c -> D
+		case -35: dval=-6; cval=-11; break; // c -> D-
+		case -36: dval=-6; cval=-12; break; // c -> D--
+		case -38: dval=-7; cval=-10; break; // c -> C##
+		case -39: dval=-7; cval=-11; break; // c -> C#
+		default:
+			dval=0; cval=0;
+	}
+
+	if (octave > 0) {
+		dval = dval + sign * octave * 7;
+		cval = cval + sign * octave * 12;
+	}
+
+	string output = "d";
+	output += to_string(dval);
+	output += "c";
+	output += to_string(cval);
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::transToBase40 -- convert the Humdrum Toolkit program
+//     trans's binomial notation for intervals into base-40.
+//  The input can be in three formats:
+//     d1c2      == no prepended text on information
+//     *Trd1c2   == Transposition interpretation marker prefixed
+//     *ITrd1c2  == Instrumental transposition marker prefixed
+//
+
+int Convert::transToBase40(const string& input) {
+	int dval = 0;
+	int cval = 0;
+	if (sscanf(input.c_str(), "d%dc%d", &dval, &cval) != 2) {
+		if (sscanf(input.c_str(), "*Trd%dc%d", &dval, &cval) != 2) {
+			if (sscanf(input.c_str(), "*ITrd%dc%d", &dval, &cval) != 2) {
+			   // cerr << "Cannot find correct information" << endl;
+			   return 0;
+			}
+		}
+	}
+
+	int dsign = 1;
+	// int csign = 1;
+	if (dval < 0) {
+		dsign = -1;
+	}
+	// if (cval < 0) {
+	//    csign = -1;
+	// }
+
+	int doctave = dsign * dval / 7;
+	// int coctave = csign * cval / 12;
+
+	int base = 0;
+
+		  if ((dval==0)  && (cval==0))   { base =	 0; }
+	else if ((dval==0)  && (cval==1))   { base =	 1; }
+	else if ((dval==0)  && (cval==2))   { base =	 2; }
+	else if ((dval==1)  && (cval==0))   { base =	 4; }
+	else if ((dval==1)  && (cval==1))   { base =	 5; }
+	else if ((dval==1)  && (cval==2))   { base =	 6; }
+	else if ((dval==1)  && (cval==3))   { base =	 7; }
+	else if ((dval==1)  && (cval==4))   { base =	 8; }
+	else if ((dval==2)  && (cval==2))   { base =	 10; }
+	else if ((dval==2)  && (cval==3))   { base =	 11; }
+	else if ((dval==2)  && (cval==4))   { base =	 12; }
+	else if ((dval==2)  && (cval==5))   { base =	 13; }
+	else if ((dval==2)  && (cval==6))   { base =	 14; }
+	else if ((dval==3)  && (cval==3))   { base =	 15; }
+	else if ((dval==3)  && (cval==4))   { base =	 16; }
+	else if ((dval==3)  && (cval==5))   { base =	 17; }
+	else if ((dval==3)  && (cval==6))   { base =	 18; }
+	else if ((dval==3)  && (cval==7))   { base =	 19; }
+	else if ((dval==4)  && (cval==5))   { base =	 21; }
+	else if ((dval==4)  && (cval==6))   { base =	 22; }
+	else if ((dval==4)  && (cval==7))   { base =	 23; }
+	else if ((dval==4)  && (cval==8))   { base =	 24; }
+	else if ((dval==4)  && (cval==9))   { base =	 25; }
+	else if ((dval==5)  && (cval==7))   { base =	 27; }
+	else if ((dval==5)  && (cval==8))   { base =	 28; }
+	else if ((dval==5)  && (cval==9))   { base =	 29; }
+	else if ((dval==5)  && (cval==10))  { base =	 30; }
+	else if ((dval==5)  && (cval==11))  { base =	 31; }
+	else if ((dval==6)  && (cval==9))   { base =	 33; }
+	else if ((dval==6)  && (cval==10))  { base =	 34; }
+	else if ((dval==6)  && (cval==11))  { base =	 35; }
+	else if ((dval==6)  && (cval==12))  { base =	 36; }
+	else if ((dval==6)  && (cval==13))  { base =	 37; }
+	else if ((dval==7)  && (cval==10))  { base =	 38; }
+	else if ((dval==7)  && (cval==11))  { base =	 38; }
+	else if ((dval==-0) && (cval==-0))  { base =	 -0; }
+	else if ((dval==-0) && (cval==-1))  { base =	 -1; }
+	else if ((dval==-0) && (cval==-2))  { base =	 -2; }
+	else if ((dval==-1) && (cval==1))   { base =	 -3; }
+	else if ((dval==-1) && (cval==-0))  { base =	 -4; }
+	else if ((dval==-1) && (cval==-1))  { base =	 -5; }
+	else if ((dval==-1) && (cval==-2))  { base =	 -6; }
+	else if ((dval==-1) && (cval==-3))  { base =	 -7; }
+	else if ((dval==-2) && (cval==-1))  { base =	 -9; }
+	else if ((dval==-2) && (cval==-2))  { base =	-10; }
+	else if ((dval==-2) && (cval==-3))  { base =	-11; }
+	else if ((dval==-2) && (cval==-4))  { base =	-12; }
+	else if ((dval==-2) && (cval==-5))  { base =	-13; }
+	else if ((dval==-3) && (cval==-3))  { base =	-15; }
+	else if ((dval==-3) && (cval==-4))  { base =	-16; }
+	else if ((dval==-3) && (cval==-5))  { base =	-17; }
+	else if ((dval==-3) && (cval==-6))  { base =	-18; }
+	else if ((dval==-3) && (cval==-7))  { base =	-19; }
+	else if ((dval==-4) && (cval==-5))  { base =	-21; }
+	else if ((dval==-4) && (cval==-6))  { base =	-22; }
+	else if ((dval==-4) && (cval==-7))  { base =	-23; }
+	else if ((dval==-4) && (cval==-8))  { base =	-24; }
+	else if ((dval==-4) && (cval==-9))  { base =	-25; }
+	else if ((dval==-5) && (cval==-6))  { base =	-26; }
+	else if ((dval==-5) && (cval==-7))  { base =	-27; }
+	else if ((dval==-5) && (cval==-8))  { base =	-28; }
+	else if ((dval==-5) && (cval==-9))  { base =	-29; }
+	else if ((dval==-5) && (cval==-10)) { base =	-30; }
+	else if ((dval==-6) && (cval==-8))  { base =	-32; }
+	else if ((dval==-6) && (cval==-9))  { base =	-33; }
+	else if ((dval==-6) && (cval==-10)) { base =	-34; }
+	else if ((dval==-6) && (cval==-11)) { base =	-35; }
+	else if ((dval==-6) && (cval==-12)) { base =	-36; }
+	else if ((dval==-7) && (cval==-10)) { base =	-38; }
+	else if ((dval==-7) && (cval==-11)) { base =	-39; }
+	else { // some error occurred or accidentals out of range
+		// cerr << "Problem occured in transToBase40()" << endl;
+		base = 0;
+	}
+
+	base += 40 * doctave * dsign;
+
+	return base;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison), 
+//    Perfect Fifth => 1, Major second => 2 (two fifths up), etc.
+//
+
+int Convert::base40IntervalToLineOfFifths(int base40interval) {
+	base40interval += 4000;
+	base40interval = base40interval % 40;
+
+	switch (base40interval) {
+		case 0:    return   0;     // C
+		case 1:    return   7;     // C#
+		case 2:    return  14;     // C##
+		case 3:    return 100;     // X
+		case 4:    return -12;     // D--
+		case 5:    return  -5;     // D-
+		case 6:    return   2;     // D
+		case 7:    return   9;     // D#
+		case 8:    return  16;     // D##
+		case 9:    return 100;     // X
+		case 10:   return -10;     // E--
+		case 11:   return  -3;     // E-
+		case 12:   return   4;     // E
+		case 13:   return  11;     // E#
+		case 14:   return  18;     // E##
+		case 15:   return -15;     // F--
+		case 16:   return  -8;     // F-
+		case 17:   return  -1;     // F
+		case 18:   return   6;     // F#
+		case 19:   return  13;     // F##
+		case 20:   return 100;     // X
+		case 21:   return -13;     // G--
+		case 22:   return  -6;     // G-
+		case 23:   return   1;     // G
+		case 24:   return   8;     // G#
+		case 25:   return  15;     // G##
+		case 26:   return 100;     // X
+		case 27:   return -11;     // A--
+		case 28:   return  -4;     // A-
+		case 29:   return   3;     // A
+		case 30:   return  10;     // A#
+		case 31:   return  17;     // A##
+		case 32:   return 100;     // X
+		case 33:   return  -9;     // B--
+		case 34:   return  -2;     // B-
+		case 35:   return   5;     // B
+		case 36:   return  12;     // B#
+		case 37:   return  19;     // B##
+		case 38:   return -14;     // C--
+		case 39:   return  -7;     // C-
+		default:   return 100;     // X
+	}
+
+	return 100;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::keyNumberToKern -- reverse of kernKeyToNumber.
+//
+
+string Convert::keyNumberToKern(int number) {
+   switch (number) {
+      case -7: return "*k[b-e-a-d-g-c-f-]";
+      case -6: return "*k[b-e-a-d-g-c-]";
+      case -5: return "*k[b-e-a-d-g-]";
+      case -4: return "*k[b-e-a-d-]";
+      case -3: return "*k[b-e-a-]";
+      case -2: return "*k[b-e-]";
+      case -1: return "*k[b-]";
+      case  0: return "*k[]";
+      case +1: return "*k[f#]";
+      case +2: return "*k[f#c#]";
+      case +3: return "*k[f#c#g#]";
+      case +4: return "*k[f#c#g#d#]";
+      case +5: return "*k[f#c#g#d#a#]";
+      case +6: return "*k[f#c#g#d#a#e#]";
+      case +7: return "*k[f#c#g#d#a#e#b#]";
+      default: return "*k[]";
    }
 }
 

@@ -1,6 +1,6 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Dec  3 16:21:22 PST 2016
-// Last Modified: Sat Dec  3 16:21:25 PST 2016
+// Last Modified: Tue Dec 13 03:09:32 PST 2016
 // Filename:      HumRegex.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumRegex.cpp
 // Syntax:        C++11
@@ -13,6 +13,7 @@
 //     http://www-01.ibm.com/support/docview.wss?uid=swg27041858&aid=1
 //     https://msdn.microsoft.com/en-us/library/bb982382.aspx
 //     https://msdn.microsoft.com/en-us/library/bb982727.aspx
+//     /usr/local/Cellar/gcc49/4.9.3/include/c++/4.9.3/bits/regex_constants.h
 //
 
 #include "HumRegex.h"
@@ -30,14 +31,24 @@ namespace hum {
 //
 
 HumRegex::HumRegex(void) {
-	m_flags = std::regex_constants::match_default
-				| std::regex_constants::format_first_only;
+	// by default use ECMAScript regular expression syntax:
+	m_regexflags  = std::regex_constants::ECMAScript;
+
+	m_searchflags = std::regex_constants::format_first_only;
 }
 
 
-HumRegex::HumRegex(const string& exp) {
+HumRegex::HumRegex(const string& exp, const string& options) {
 	// initialize a regular expression for the object
-	m_regex = exp;
+	m_regexflags = (std::regex_constants::syntax_option_type)0;
+	m_regexflags = getTemporaryRegexFlags(options);
+	if (m_regexflags == 0) {
+		// explicitly set the default syntax
+		m_regexflags = std::regex_constants::ECMAScript;
+	}
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	m_searchflags = (std::regex_constants::match_flag_type)0;
+	m_searchflags = getTemporarySearchFlags(options);
 }
 
 
@@ -52,6 +63,80 @@ HumRegex::~HumRegex() {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// option setting
+//
+
+//////////////////////////////
+//
+// HumRegex::setIgnoreCase --
+//
+
+void HumRegex::setIgnoreCase(void) {
+	m_regexflags |= std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getIgnoreCase --
+//
+
+bool HumRegex::getIgnoreCase(void) {
+	return m_regexflags & std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::unsetIgnoreCase --
+//
+
+void HumRegex::unsetIgnoreCase(void) {
+	m_regexflags &= ~std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::setGlobal --
+//
+
+void HumRegex::setGlobal(void) {
+	m_searchflags &= ~std::regex_constants::format_first_only;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getGlobal --
+//
+
+bool HumRegex::getGlobal(void) {
+	return !(m_searchflags & std::regex_constants::format_first_only);
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::unsetGlobal --
+//
+
+void HumRegex::unsetGlobal(void) {
+	m_searchflags |= std::regex_constants::format_first_only;
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// Searching functions
+//
 
 //////////////////////////////
 //
@@ -61,17 +146,17 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
-	m_regex = exp;
-	return regex_search(input, m_matches, m_regex, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	return regex_search(input, m_matches, m_regex, m_searchflags);
 }
 
 
 bool HumRegex::search(const string& input, int startindex,
 		const string& exp) {
-	m_regex = exp;
+	m_regex = regex(exp, m_regexflags);
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex, m_flags);
+	return regex_search(startit, endit, m_matches, m_regex, m_searchflags);
 }
 
 
@@ -90,18 +175,17 @@ bool HumRegex::search(string* input, int startindex, const string& exp) {
 
 bool HumRegex::search(const string& input, const string& exp,
 		const string& options) {
-	m_regex = exp;
-	return regex_search(input, m_matches, m_regex, getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	return regex_search(input, m_matches, m_regex, getTemporarySearchFlags(options));
 }
 
 
 bool HumRegex::search(const string& input, int startindex, const string& exp,
 		const string& options) {
-	m_regex = exp;
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex,
-		getTemporaryFlags(options));
+	return regex_search(startit, endit, m_matches, m_regex, getTemporarySearchFlags(options));
 }
 
 
@@ -117,37 +201,10 @@ bool HumRegex::search(string* input, int startindex, const string& exp,
 }
 
 
-
-//////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 //
-// HumRegex::getTemporaryFlags --
+// match-related functions
 //
-
-std::regex_constants::match_flag_type HumRegex::getTemporaryFlags(
-		const string& sflags) {
-	std::regex_constants::match_flag_type temp_flags;
-	for (auto it : sflags) {
-		switch (it) {
-			case 'i':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags | std::regex_constants::icase);
-				break;
-			case 'I':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags & ~std::regex_constants::icase);
-				break;
-			case 'g':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags & ~std::regex_constants::format_first_only);
-			case 'G':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags | std::regex_constants::format_first_only);
-		}
-	}
-	return temp_flags;
-}
-
-
 
 /////////////////////////////
 //
@@ -244,32 +301,49 @@ int HumRegex::getMatchLength(int index) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// match functions (a "match" is a search that matches a regular 
+//    expression to the entire string").
+//
 
 //////////////////////////////
 //
-// HumRegex::setIgnoreCase -- Turn on ignore case to be persistent until
-//     it is turned off with HumRegex::setNoIgnoreCase(), or if a function
-//     call sets it off temporarily.
+// HumRegex::match --
 //
 
-void HumRegex::setIgnoreCase(void) {
-	m_flags = (std::regex_constants::match_flag_type)
-			(m_flags | std::regex_constants::icase);
+bool HumRegex::match(const string& input, const string& exp) {
+	m_regex = regex(exp, m_regexflags);
+	return regex_match(input, m_regex, m_searchflags);
+}
+
+
+bool HumRegex::match(const string& input, const string& exp,
+		const string& options) {
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	return regex_match(input, m_regex, getTemporarySearchFlags(options));
+}
+
+
+bool HumRegex::match(const string* input, const string& exp) {
+	return HumRegex::match(*input, exp);
+
+}
+
+
+bool HumRegex::match(const string* input, const string& exp,
+		const string& options) {
+	return HumRegex::match(*input, exp, options);
 }
 
 
 
-//////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 //
-// HumRegex::setNoIgnoreCase -- Turn off persistent ignore case flag.
+// search and replace functions.  Default behavior is to only match
+// the first match.  use the "g" option or .setGlobal() to do global
+// replacing.
 //
-
-void HumRegex::setNoIgnoreCase(void) {
-	m_flags = (std::regex_constants::match_flag_type)
-			(m_flags & ~std::regex_constants::icase);
-}
-
-
 
 //////////////////////////////
 //
@@ -278,8 +352,10 @@ void HumRegex::setNoIgnoreCase(void) {
 
 string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp) {
-	m_regex = exp;
-	input = regex_replace(input, m_regex, replacement, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	string output;
+	regex_replace(input, m_regex, replacement, m_searchflags);
+	input = output;
 	return input;
 }
 
@@ -293,16 +369,16 @@ string& HumRegex::replaceDestructive(string* input, const string& replacement,
 // This version allows for temporary match flag options.
 //
 
-string& HumRegex::replaceDestructive(string& input, const string& replacement, 
+string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp, const string& options) {
-	m_regex = exp;
-	input = regex_replace(input, m_regex, replacement,
-			getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	regex_replace(input, m_regex, replacement,
+			getTemporarySearchFlags(options));
 	return input;
 }
 
 
-string& HumRegex::replaceDestructive (string* input, const string& replacement, 
+string& HumRegex::replaceDestructive (string* input, const string& replacement,
 		const string& exp, const string& options) {
 	return HumRegex::replaceDestructive(*input, replacement, exp, options);
 }
@@ -317,8 +393,11 @@ string& HumRegex::replaceDestructive (string* input, const string& replacement,
 
 string HumRegex::replaceCopy(const string& input, const string& replacement,
 		const string& exp) {
-	m_regex = exp;
-	return regex_replace(input, m_regex, replacement, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	string output;
+	regex_replace(std::back_inserter(output), input.begin(), input.end(),
+			m_regex, replacement);
+	return output;
 }
 
 
@@ -333,9 +412,11 @@ string HumRegex::replaceCopy(string* input, const string& replacement,
 
 string HumRegex::replaceCopy(const string& input, const string& exp,
 		const string& replacement, const string& options) {
-	m_regex = exp;
-	return regex_replace(input, m_regex, replacement,
-			getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	string output;
+	regex_replace(std::back_inserter(output), input.begin(), input.end(),
+			m_regex, replacement, getTemporarySearchFlags(options));
+	return output;
 }
 
 
@@ -359,7 +440,12 @@ bool HumRegex::split(vector<string>& entries, const string& buffer,
 	newsep += ")";
 	int status = search(buffer, newsep);
 	if (!status) {
-		return false;
+		if (buffer.size() == 0) {
+			return false;
+		} else {
+			entries.push_back(buffer);
+			return true;
+		}
 	}
 	int start = 0;
 	while (status) {
@@ -368,11 +454,63 @@ bool HumRegex::split(vector<string>& entries, const string& buffer,
 		status = search(buffer, start, newsep);
 	}
 	// add last token:
-	entries.push_back(getSuffix());
+	entries.push_back(buffer.substr(start));
 	return true;
 }
 
 
+
+//////////////////////////////
+//
+// HumRegex::getTemporaryRegexFlags --
+//
+
+std::regex_constants::syntax_option_type HumRegex::getTemporaryRegexFlags(
+		const string& sflags) {
+	if (sflags.empty()) {
+		return m_regexflags;
+	}
+	std::regex_constants::syntax_option_type temp_flags = m_regexflags;
+	for (auto it : sflags) {
+		switch (it) {
+			case 'i':
+				temp_flags = (std::regex_constants::syntax_option_type)
+						(temp_flags | std::regex_constants::icase);
+				break;
+			case 'I':
+				temp_flags = (std::regex_constants::syntax_option_type)
+						(temp_flags & ~std::regex_constants::icase);
+				break;
+		}
+	}
+	return temp_flags;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getTemporarySearchFlags --
+//
+
+std::regex_constants::match_flag_type HumRegex::getTemporarySearchFlags(
+		const string& sflags) {
+	if (sflags.empty()) {
+		return m_searchflags;
+	}
+	std::regex_constants::match_flag_type temp_flags = m_searchflags;
+	for (auto it : sflags) {
+		switch (it) {
+			case 'g':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags & ~std::regex_constants::format_first_only);
+			case 'G':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags | std::regex_constants::format_first_only);
+		}
+	}
+	return temp_flags;
+}
 
 // END_MERGE
 

@@ -2005,6 +2005,19 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileBase::makeBooleanTrackList --
+//
+
+void HumdrumFileBase::makeBooleanTrackList(vector<bool>& spinelist,
+		const string& spinestring) {
+	Convert::makeBooleanTrackList(spinelist, spinestring, getMaxTrack());
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

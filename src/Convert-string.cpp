@@ -14,6 +14,7 @@
 #include <algorithm>
 
 #include "Convert.h"
+#include "HumRegex.h"
 
 namespace hum {
 
@@ -182,6 +183,107 @@ bool Convert::contains(string* input, char pattern) {
 }
 
 
+//////////////////////////////
+//
+// Convert::makeBooleanTrackList -- Given a string
+//   such as "1,2,3" and a max track of 5, then
+//   create a vector with contents:
+//      0:false, 1:true, 2:true, 3:true, 4:false, 5:false.
+//   The 0 track is not used, and the two tracks not specified
+//   in the string are set to false.  Special abbreviations:
+//     $ = maxtrack
+//     $1 = maxtrack - 1
+//     $2 = maxtrack - 2
+//     etc.
+//   Ranges can be given, such as 1-3 instead of 1,2,3
+//
+
+void Convert::makeBooleanTrackList(vector<bool>& spinelist,
+		 const string& spinestring, int maxtrack) {
+   spinelist.resize(maxtrack+1);
+
+	if (spinestring.size() == 0) {
+		fill(spinelist.begin()+1, spinelist.end(), true);
+		return;
+	}
+	fill(spinelist.begin(), spinelist.end(), false);
+
+   string buffer = spinestring;;
+	vector<string> entries;
+	string separator = "[^\\d\\$-]+";
+   HumRegex hre;
+
+	// create an initial list of values:
+	hre.split(entries, buffer, separator);
+
+	// Now process each token in the extracted list:
+	int val = -1;
+	int val2 = -1;
+	bool range = false;
+	string tbuff;
+	for (int i=0; i<(int)entries.size(); i++) {
+
+		if (hre.search(entries[i], "\\$(\\d*)")) {
+			if (hre.getMatch(1).size() == 0) {
+				tbuff = to_string(maxtrack);
+			} else {
+				val = hre.getMatchInt(1);
+				tbuff = to_string(maxtrack - val);
+			}
+			hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+		}
+
+		range = false;
+		if (entries[i].find('-') != string::npos) {
+			range = true;
+			// check for second $ abbreviation at end of range:
+			if (hre.search(entries[i], "\\$(\\d*)")) {
+				if (hre.getMatch(1).size() == 0) {
+					tbuff = to_string(maxtrack);
+				} else {
+					val = hre.getMatchInt(1);
+					tbuff = to_string(maxtrack - val);
+				}
+				hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+			}
+			if (entries[i].back() == '$') {
+				entries[i].pop_back();
+				entries[i] += to_string(maxtrack);
+			}
+			// extract second vlaue
+			if (hre.search(entries[i], "-(\\d+)")) {
+				val2 = hre.getMatchInt(1);
+			} else {
+				range = false;
+			}
+		}
+
+
+		// get first value:
+		if (hre.search(entries[i], "(\\d+)")) {
+			val = stoi(hre.getMatch(1));
+		}
+		if (range) {
+			int direction = 1;
+			if (val > val2) {
+				direction = -1;
+			}
+			for (int j=val; j != val2; j += direction) {
+				if ((j > 0) && (j < maxtrack + 1)) {
+					spinelist[j] = true;
+				}
+			}
+			if ((val2 > 0) && (val2 < maxtrack + 1)) {
+				spinelist[val2] = true;
+			}
+		} else {
+			// not a range
+			if ((val > 0) && (val < maxtrack+1)) {
+				spinelist[val] = true;
+			}
+		}
+	}
+}
 
 
 // END_MERGE

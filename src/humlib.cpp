@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 10 15:59:41 PST 2016
+// Last Modified: Tue Dec 13 12:25:24 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2741,14 +2741,24 @@ ostream& operator<<(ostream& out, const HumNum& number) {
 //
 
 HumRegex::HumRegex(void) {
-	m_flags = std::regex_constants::match_default
-				| std::regex_constants::format_first_only;
+	// by default use ECMAScript regular expression syntax:
+	m_regexflags  = std::regex_constants::ECMAScript;
+
+	m_searchflags = std::regex_constants::format_first_only;
 }
 
 
-HumRegex::HumRegex(const string& exp) {
+HumRegex::HumRegex(const string& exp, const string& options) {
 	// initialize a regular expression for the object
-	m_regex = exp;
+	m_regexflags = (std::regex_constants::syntax_option_type)0;
+	m_regexflags = getTemporaryRegexFlags(options);
+	if (m_regexflags == 0) {
+		// explicitly set the default syntax
+		m_regexflags = std::regex_constants::ECMAScript;
+	}
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	m_searchflags = (std::regex_constants::match_flag_type)0;
+	m_searchflags = getTemporarySearchFlags(options);
 }
 
 
@@ -2763,6 +2773,80 @@ HumRegex::~HumRegex() {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// option setting
+//
+
+//////////////////////////////
+//
+// HumRegex::setIgnoreCase --
+//
+
+void HumRegex::setIgnoreCase(void) {
+	m_regexflags |= std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getIgnoreCase --
+//
+
+bool HumRegex::getIgnoreCase(void) {
+	return m_regexflags & std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::unsetIgnoreCase --
+//
+
+void HumRegex::unsetIgnoreCase(void) {
+	m_regexflags &= ~std::regex_constants::icase;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::setGlobal --
+//
+
+void HumRegex::setGlobal(void) {
+	m_searchflags &= ~std::regex_constants::format_first_only;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getGlobal --
+//
+
+bool HumRegex::getGlobal(void) {
+	return !(m_searchflags & std::regex_constants::format_first_only);
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::unsetGlobal --
+//
+
+void HumRegex::unsetGlobal(void) {
+	m_searchflags |= std::regex_constants::format_first_only;
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// Searching functions
+//
 
 //////////////////////////////
 //
@@ -2772,17 +2856,17 @@ HumRegex::~HumRegex() {
 //
 
 bool HumRegex::search(const string& input, const string& exp) {
-	m_regex = exp;
-	return regex_search(input, m_matches, m_regex, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	return regex_search(input, m_matches, m_regex, m_searchflags);
 }
 
 
 bool HumRegex::search(const string& input, int startindex,
 		const string& exp) {
-	m_regex = exp;
+	m_regex = regex(exp, m_regexflags);
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex, m_flags);
+	return regex_search(startit, endit, m_matches, m_regex, m_searchflags);
 }
 
 
@@ -2801,18 +2885,17 @@ bool HumRegex::search(string* input, int startindex, const string& exp) {
 
 bool HumRegex::search(const string& input, const string& exp,
 		const string& options) {
-	m_regex = exp;
-	return regex_search(input, m_matches, m_regex, getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	return regex_search(input, m_matches, m_regex, getTemporarySearchFlags(options));
 }
 
 
 bool HumRegex::search(const string& input, int startindex, const string& exp,
 		const string& options) {
-	m_regex = exp;
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex,
-		getTemporaryFlags(options));
+	return regex_search(startit, endit, m_matches, m_regex, getTemporarySearchFlags(options));
 }
 
 
@@ -2828,37 +2911,10 @@ bool HumRegex::search(string* input, int startindex, const string& exp,
 }
 
 
-
-//////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 //
-// HumRegex::getTemporaryFlags --
+// match-related functions
 //
-
-std::regex_constants::match_flag_type HumRegex::getTemporaryFlags(
-		const string& sflags) {
-	std::regex_constants::match_flag_type temp_flags;
-	for (auto it : sflags) {
-		switch (it) {
-			case 'i':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags | std::regex_constants::icase);
-				break;
-			case 'I':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags & ~std::regex_constants::icase);
-				break;
-			case 'g':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags & ~std::regex_constants::format_first_only);
-			case 'G':
-				temp_flags = (std::regex_constants::match_flag_type)
-						(temp_flags | std::regex_constants::format_first_only);
-		}
-	}
-	return temp_flags;
-}
-
-
 
 /////////////////////////////
 //
@@ -2955,32 +3011,49 @@ int HumRegex::getMatchLength(int index) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+//
+// match functions (a "match" is a search that matches a regular 
+//    expression to the entire string").
+//
 
 //////////////////////////////
 //
-// HumRegex::setIgnoreCase -- Turn on ignore case to be persistent until
-//     it is turned off with HumRegex::setNoIgnoreCase(), or if a function
-//     call sets it off temporarily.
+// HumRegex::match --
 //
 
-void HumRegex::setIgnoreCase(void) {
-	m_flags = (std::regex_constants::match_flag_type)
-			(m_flags | std::regex_constants::icase);
+bool HumRegex::match(const string& input, const string& exp) {
+	m_regex = regex(exp, m_regexflags);
+	return regex_match(input, m_regex, m_searchflags);
+}
+
+
+bool HumRegex::match(const string& input, const string& exp,
+		const string& options) {
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	return regex_match(input, m_regex, getTemporarySearchFlags(options));
+}
+
+
+bool HumRegex::match(const string* input, const string& exp) {
+	return HumRegex::match(*input, exp);
+
+}
+
+
+bool HumRegex::match(const string* input, const string& exp,
+		const string& options) {
+	return HumRegex::match(*input, exp, options);
 }
 
 
 
-//////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 //
-// HumRegex::setNoIgnoreCase -- Turn off persistent ignore case flag.
+// search and replace functions.  Default behavior is to only match
+// the first match.  use the "g" option or .setGlobal() to do global
+// replacing.
 //
-
-void HumRegex::setNoIgnoreCase(void) {
-	m_flags = (std::regex_constants::match_flag_type)
-			(m_flags & ~std::regex_constants::icase);
-}
-
-
 
 //////////////////////////////
 //
@@ -2989,8 +3062,10 @@ void HumRegex::setNoIgnoreCase(void) {
 
 string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp) {
-	m_regex = exp;
-	input = regex_replace(input, m_regex, replacement, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	string output;
+	regex_replace(input, m_regex, replacement, m_searchflags);
+	input = output;
 	return input;
 }
 
@@ -3004,16 +3079,16 @@ string& HumRegex::replaceDestructive(string* input, const string& replacement,
 // This version allows for temporary match flag options.
 //
 
-string& HumRegex::replaceDestructive(string& input, const string& replacement, 
+string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp, const string& options) {
-	m_regex = exp;
-	input = regex_replace(input, m_regex, replacement,
-			getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	regex_replace(input, m_regex, replacement,
+			getTemporarySearchFlags(options));
 	return input;
 }
 
 
-string& HumRegex::replaceDestructive (string* input, const string& replacement, 
+string& HumRegex::replaceDestructive (string* input, const string& replacement,
 		const string& exp, const string& options) {
 	return HumRegex::replaceDestructive(*input, replacement, exp, options);
 }
@@ -3028,8 +3103,11 @@ string& HumRegex::replaceDestructive (string* input, const string& replacement,
 
 string HumRegex::replaceCopy(const string& input, const string& replacement,
 		const string& exp) {
-	m_regex = exp;
-	return regex_replace(input, m_regex, replacement, m_flags);
+	m_regex = regex(exp, m_regexflags);
+	string output;
+	regex_replace(std::back_inserter(output), input.begin(), input.end(),
+			m_regex, replacement);
+	return output;
 }
 
 
@@ -3044,9 +3122,11 @@ string HumRegex::replaceCopy(string* input, const string& replacement,
 
 string HumRegex::replaceCopy(const string& input, const string& exp,
 		const string& replacement, const string& options) {
-	m_regex = exp;
-	return regex_replace(input, m_regex, replacement,
-			getTemporaryFlags(options));
+	m_regex = regex(exp, getTemporaryRegexFlags(options));
+	string output;
+	regex_replace(std::back_inserter(output), input.begin(), input.end(),
+			m_regex, replacement, getTemporarySearchFlags(options));
+	return output;
 }
 
 
@@ -3070,7 +3150,12 @@ bool HumRegex::split(vector<string>& entries, const string& buffer,
 	newsep += ")";
 	int status = search(buffer, newsep);
 	if (!status) {
-		return false;
+		if (buffer.size() == 0) {
+			return false;
+		} else {
+			entries.push_back(buffer);
+			return true;
+		}
 	}
 	int start = 0;
 	while (status) {
@@ -3079,11 +3164,63 @@ bool HumRegex::split(vector<string>& entries, const string& buffer,
 		status = search(buffer, start, newsep);
 	}
 	// add last token:
-	entries.push_back(getSuffix());
+	entries.push_back(buffer.substr(start));
 	return true;
 }
 
 
+
+//////////////////////////////
+//
+// HumRegex::getTemporaryRegexFlags --
+//
+
+std::regex_constants::syntax_option_type HumRegex::getTemporaryRegexFlags(
+		const string& sflags) {
+	if (sflags.empty()) {
+		return m_regexflags;
+	}
+	std::regex_constants::syntax_option_type temp_flags = m_regexflags;
+	for (auto it : sflags) {
+		switch (it) {
+			case 'i':
+				temp_flags = (std::regex_constants::syntax_option_type)
+						(temp_flags | std::regex_constants::icase);
+				break;
+			case 'I':
+				temp_flags = (std::regex_constants::syntax_option_type)
+						(temp_flags & ~std::regex_constants::icase);
+				break;
+		}
+	}
+	return temp_flags;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::getTemporarySearchFlags --
+//
+
+std::regex_constants::match_flag_type HumRegex::getTemporarySearchFlags(
+		const string& sflags) {
+	if (sflags.empty()) {
+		return m_searchflags;
+	}
+	std::regex_constants::match_flag_type temp_flags = m_searchflags;
+	for (auto it : sflags) {
+		switch (it) {
+			case 'g':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags & ~std::regex_constants::format_first_only);
+			case 'G':
+				temp_flags = (std::regex_constants::match_flag_type)
+						(temp_flags | std::regex_constants::format_first_only);
+		}
+	}
+	return temp_flags;
+}
 
 
 
@@ -5713,6 +5850,19 @@ bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b) {
 	}
 	return false;
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::makeBooleanTrackList --
+//
+
+void HumdrumFileBase::makeBooleanTrackList(vector<bool>& spinelist,
+		const string& spinestring) {
+	Convert::makeBooleanTrackList(spinelist, spinestring, getMaxTrack());
+}
+
 
 
 
@@ -16100,6 +16250,1472 @@ void Tool_recip::initialize(HumdrumFile& infile) {
 
 
 
+#define STYLE_CONCERT 0
+#define STYLE_WRITTEN 1
+
+/////////////////////////////////
+//
+// Tool_transpose::Tool_transpose -- Set the recognized options for the tool.
+//
+
+Tool_transpose::Tool_transpose(void) {
+	define("b|base40=i:0",   "the base-40 transposition value");
+	define("d|diatonic=i:0", "the diatonic transposition value");
+	define("c|chromatic=i:0","the chromatic transposition value");
+	define("o|octave=i:0",    "the octave addition to tranpose value");
+	define("t|transpose=s",   "musical interval transposition value");
+	define("k|setkey=s",      "transpose to the given key");
+	define("auto=b",         "auto. trans. inst. parts to concert pitch");
+	define("debug=b",        "print debugging statements");
+	define("s|spines=s:", "transpose only specified spines");
+	define("q|quiet=b",      "suppress *Tr interpretations in output");
+	define("I|instrument=b", "insert instrument code (*ITr) as well");
+	define("C|concert=b",    "transpose written score to concert pitch");
+	define("W|written=b",    "trans. concert pitch score to written score");
+	define("rotation=b",     "display transposition in half-steps");
+
+	define("author=b",  "author of program");
+	define("version=b", "compilation info");
+	define("example=b", "example usages");
+	define("help=b",  "short description");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_transpose::run -- Do the main work of the tool.
+//
+
+bool Tool_transpose::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
+	int status = run(infile);
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+//
+// In-place processing of file:
+//
+
+bool Tool_transpose::run(HumdrumFile& infile) {
+	initialize(infile);
+
+	if (ssetkeyQ) {
+		transval = calculateTranspositionFromKey(ssetkey, infile);
+		transval = transval + octave * 40;
+		if (debugQ) {
+			m_text << "!!Key TRANSVAL = " << transval;
+		}
+	}
+
+	if (getBoolean("rotation")) {
+		// returns the base-12 pitch transposition for use in conjunction
+		// with the mkeyscape --rotate option
+		int value = 60 - Convert::base40ToMidiNoteNumber(162 - transval);
+		m_text << value << endl;
+		exit(0);
+	}
+
+	if (concertQ) {
+		convertScore(infile, STYLE_CONCERT);
+	} else if (writtenQ) {
+		convertScore(infile, STYLE_WRITTEN);
+	} else if (autoQ) {
+		doAutoTransposeAnalysis(infile);
+	} else {
+		vector<bool> spineprocess;
+		infile.makeBooleanTrackList(spineprocess, spinestring);
+		processFile(infile, spineprocess);
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::convertScore -- create a concert pitch score from
+//     a written pitch score.  The function will search for *Tr
+//     interpretations in spines, and convert them to *ITr interpretations
+//     as well as transposing notes, and transposing key signatures and
+//     key interpretations.  Or create a written score from a
+//     concert pitch score based on the style parameter.
+//
+
+void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
+	vector<int> tvals;  // transposition values for each spine
+	tvals.reserve(infile.getMaxTrack() + 1);
+
+	int ptrack;
+	int i, j;
+	for (i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+				// scan the line for transposition codes
+				// as well as key signatures and key markers
+				processInterpretationLine(infile, i, tvals, style);
+				break;
+
+		} else if (infile[i].isData()) {
+	    // transpose notes according to tvals data
+	    for (j=0; j<infile[i].getFieldCount(); j++) {
+				ptrack = infile.token(i, j)->getTrack();
+				if (tvals[ptrack] == 0) {
+					  m_text << infile.token(i, j);
+				} else {
+					  printTransposedToken(infile, i, j, tvals[ptrack]);
+				}
+				if (j < infile[i].getFieldCount() - 1) {
+					  m_text << "\t";
+				}
+			}
+			m_text << "\n";
+			break;
+
+		} else {
+			m_text << infile[i] << "\n";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::processInterpretationLine --  Used in converting between
+//   concert pitch and written pitch scores.
+//
+
+void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
+	  vector<int>& tvals, int style) {
+
+	HumRegex hre;
+
+	int j;
+	int ptrack;
+
+	if (hasTrMarkers(infile, line)) {
+		switch (style) {
+			case STYLE_CONCERT:
+				convertToConcertPitches(infile, line, tvals);
+				break;
+			case STYLE_WRITTEN:
+				convertToWrittenPitches(infile, line, tvals);
+				break;
+			default: m_text << infile[line];
+		}
+		m_text << "\n";
+		return;
+	}
+
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		ptrack = infile.token(line, j)->getTrack();
+
+		// check for *ITr or *Tr markers
+		// ignore *ITr markers when creating a Concert-pitch score
+		// ignore *Tr  markers when creating a Written-pitch score
+
+		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
+			// transpose *k[] markers if necessary
+			if (tvals[ptrack] != 0) {
+				printNewKeySignature(hre.getMatch(1), tvals[ptrack]);
+			} else {
+				m_text << infile.token(line, j);
+			}
+
+		} else if (isKeyMarker(*infile.token(line, j))) {
+			// transpose *C: markers and like if necessary
+			if (tvals[ptrack] != 0) {
+				printNewKeyInterpretation(infile[line], j, tvals[ptrack]);
+			} else {
+				m_text << infile.token(line, j);
+			}
+
+		} else {
+			// other interpretations just echoed to output:
+			m_text << infile.token(line, j);
+		}
+		if (j<infile[line].getFieldCount()-1) {
+			m_text << "\t";
+		}
+	}
+	m_text << "\n";
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::convertToWrittenPitches --
+//
+
+void Tool_transpose::convertToWrittenPitches(HumdrumFile& infile, int line,
+		vector<int>& tvals) {
+	HumRegex hre;
+	int j;
+	int base;
+	int ptrack;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (hre.search(infile.token(line, j),
+		"^\\*ITrd[+-]?\\d+c[+-]?\\d+$", "")) {
+			base = Convert::transToBase40(*infile.token(line, j));
+
+			string output = "*Tr";
+			output += Convert::base40ToTrans(base);
+			m_text << output;
+			ptrack = infile.token(line, j)->getTrack();
+			tvals[ptrack] = base;
+		} else {
+			m_text << infile.token(line, j);
+		}
+		if (j < infile[line].getFieldCount() - 1) {
+			m_text << "\t";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::convertToConcertPitches --
+//
+
+void Tool_transpose::convertToConcertPitches(HumdrumFile& infile, int line, vector<int>& tvals) {
+	HumRegex hre;
+	int j;
+	int base;
+	int ptrack;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (hre.search(infile.token(line, j),
+		"^\\*Trd[+-]?\\d+c[+-]?\\d+$", "")) {
+			base = Convert::transToBase40(*infile.token(line, j));
+			string output = "*ITr";
+			output += Convert::base40ToTrans(base);
+			m_text << output;
+			ptrack = infile.token(line, j)->getTrack();
+			tvals[ptrack] = -base;
+		} else {
+			m_text << infile.token(line, j);
+		}
+		if (j < infile[line].getFieldCount() - 1) {
+			m_text << "\t";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::hasTrMarkers -- returns true if there are any tokens
+//    which start with *ITr or *Tr and contains c and d
+//    with numbers after each of them.
+//
+
+int Tool_transpose::hasTrMarkers(HumdrumFile& infile, int line) {
+	HumRegex hre;
+	int j;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (hre.search(infile.token(line, j),
+				"^\\*I?Trd[+-]?\\d+c[+-]?\\d+$", "")) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::isKeyMarker -- returns true if the interpretation is
+//    a key description, such as *C: for C major, or *a:.
+//
+
+int Tool_transpose::isKeyMarker(const string& str) {
+	HumRegex hre;
+	return hre.search(str, "^\\*[a-g]?[\\#-]?:", "i");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printTransposedToken -- print a Humdrum token with the given
+//    base-40 transposition value applied.  Only **kern data is
+//    know now to transpose, other data types are currently not
+//    allowed to be transposed (but could be added here later).
+//
+
+void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col, int transval) {
+	if (!infile.token(row, col)->isKern()) {
+		// don't know how to transpose this type of data, so leave it as is
+		m_text << infile.token(row, col);
+		return;
+	}
+
+	printHumdrumKernToken(infile[row], col, transval);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::calculateTranspositionFromKey --
+//
+
+int Tool_transpose::calculateTranspositionFromKey(int targetkey, HumdrumFile& infile) {
+
+	int i, j;
+	HumRegex hre;
+	int base40 = 0;
+	int currentkey = 0;
+	int mode = 0;
+	int found = 0;
+
+	for (i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			// no initial key label was found, so don't transpose.
+			// in the future, maybe allow an automatic key analysis
+			// to be performed on the data if there is not explicit
+			// key designation.
+			return 0;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (!hre.search(infile.token(i, j), "^\\*([A-G][#-]?):", "i")) {
+				continue;
+			}
+
+			mode = 0;  // major key
+			if (std::islower(infile.token(i, j)->at(1))) {
+				mode = 1;  // minor key
+			}
+			base40 = Convert::kernToBase40(infile.token(i, j));
+			// base40 = base40 + transval;
+			base40 = base40 + 4000;
+			base40 = base40 % 40;
+			base40 = base40 + (3 + mode) * 40;
+			currentkey = base40;
+	 found = 1;
+
+			break;
+		}
+		if (found) {
+			break;
+		}
+	}
+
+	int trans = (targetkey%40 - currentkey%40);
+	// base40 = targetkey + (3 + mode) * 40;
+	if (trans > 40) {
+		trans -= 40;
+	}
+	if (trans > 20) {
+		trans = 40 - trans;
+		trans = -trans;
+	}
+	if (trans < -40) {
+		trans += 40;
+	}
+	if (trans < -20) {
+		trans = -40 - trans;
+		trans = -trans;
+	}
+
+	return trans;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printTransposeInformation -- collect and print *Tr interpretations
+//      at the start of the spine.  Looks for *Tr markers at the start
+//      of the file before any data.
+//
+
+void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
+		vector<bool>& spineprocess, int line, int transval) {
+	int j;
+	int ptrack;
+
+	vector<int> startvalues(infile.getMaxTrack()+1);
+	vector<int> finalvalues(infile.getMaxTrack()+1);
+
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		ptrack = infile.token(line, j)->getTrack();
+		startvalues[ptrack] = getTransposeInfo(infile, line, j);
+		// m_text << "Found transpose value " << startvalues[ptrack] << endl;
+	}
+
+	int entry = 0;
+	// check if any spine will be transposed after final processing
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		ptrack = infile.token(line, j)->getTrack();
+		if (spineprocess[ptrack]) {
+		finalvalues[ptrack] = transval;
+		if (!instrumentQ) {
+			finalvalues[ptrack] += startvalues[ptrack];
+		}
+		if (finalvalues[ptrack] != 0) {
+			entry = 1;
+		}
+	} else {
+			finalvalues[ptrack] = startvalues[ptrack];
+			if (finalvalues[ptrack] != 0) {
+				entry = 1;
+			}
+		}
+	}
+
+	if (!entry) {
+		return;
+	}
+
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		ptrack = infile.token(line, j)->getTrack();
+		if (finalvalues[ptrack] == 0) {
+			m_text << "*";
+		} else {
+			if (instrumentQ) {
+				m_text << "*ITr";
+				m_text << Convert::base40ToTrans(-finalvalues[ptrack]);
+			} else {
+				m_text << "*Tr";
+				m_text << Convert::base40ToTrans(finalvalues[ptrack]);
+			}
+		}
+		if (j < infile[line].getFieldCount()-1) {
+			m_text << "\t";
+		}
+
+	}
+	m_text << "\n";
+}
+
+
+
+//////////////////////////////
+//
+// getTransposeInfo -- returns the Transpose information found in
+//    the specified spine starting at the current line, and searching
+//    until data is found (or a *- record is found). Return value is a
+//    base-40 number.
+//
+
+int Tool_transpose::getTransposeInfo(HumdrumFile& infile, int row, int col) {
+	int i, j;
+	int track = infile.token(row, col)->getTrack();
+	int ptrack;
+
+	HumRegex hre;
+
+	int base;
+	int output = 0;
+
+	for (i=row; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			ptrack = infile.token(i, j)->getTrack();
+			if (ptrack != track) {
+				continue;
+			}
+			if (hre.search(infile.token(i, j),
+					"^\\*Trd[+-]?\\d+c[+-]?\\d+$", "")) {
+				base = Convert::transToBase40(*infile.token(i, j));
+				output += base;
+				// erase the *Tr value because it will be printed elsewhere
+				infile.token(i, j)->setText("*deletedTr");
+			}
+		}
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::checkForDeletedLine -- check to see if a "*deletedTr
+//
+
+int Tool_transpose::checkForDeletedLine(HumdrumFile& infile, int line) {
+	int j;
+	if (!infile[line].isInterpretation()) {
+		return 0;
+	}
+
+	int present = 0;
+	int composite = 0;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (infile.token(line, j)->find("deletedTr") != string::npos) {
+			present = 1;
+		} else if (infile.token(line, j)->isNull()) {
+			// do nothing: not composite
+		} else {
+			// not a *deletedTr token or a * token, so have to print line later
+			composite = 1;
+		}
+	}
+
+	if (present == 0) {
+		// no *deletedTr records found on the currnet line, so process normally
+		return 0;
+	}
+
+	if (composite == 0) {
+		// *deletedTr found, but no other important data found on line.
+		return 1;
+	}
+
+	// print non-deleted elements in line.
+	for (j=0; j<infile[line].getFieldCount(); j++) {;
+		if ((string)(*infile.token(line, j)) == "deletedTr") {
+			m_text << "*";
+		} else {
+			m_text << infile.token(line, j);
+		}
+		if (j < infile[line].getFieldCount() - 1) {
+			m_text << "\t";
+		}
+	}
+	m_text << "\n";
+
+	return 1;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::processFile --
+//
+
+void Tool_transpose::processFile(HumdrumFile& infile,
+		vector<bool>& spineprocess) {
+	int i;
+	int diatonic;
+	int j;
+	HumRegex hre;
+	int interpstart = 0;
+
+	for (i=0; i<infile.getLineCount(); i++) {
+		if (!quietQ && (interpstart == 1)) {
+			interpstart = 2;
+			printTransposeInformation(infile, spineprocess, i, transval);
+		}
+		if (checkForDeletedLine(infile, i)) {
+			continue;
+		}
+
+		if (infile[i].isData()) {
+			printHumdrumDataRecord(infile[i], spineprocess);
+			m_text << "\n";
+		} else if (infile[i].isInterpretation()) {
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (infile.token(i, j)->compare(0, 2, "**") == 0) {
+						interpstart = 1;
+				}
+
+				// check for key signature in a spine which is being
+				// transposed, and adjust it.
+				if (spineprocess[infile.token(i, j)->getTrack()] &&
+						hre.search(infile.token(i, j),
+							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
+						printNewKeySignature(hre.getMatch(1), transval);
+						if (j<infile[i].getFieldCount()-1) {
+						m_text << "\t";
+						}
+						continue;
+				}
+
+				// check for key tandem interpretation and tranpose
+				// if the spine data is being transposed.
+
+				if (hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
+					diatonic = tolower(hre.getMatch(1)[0]) - 'a';
+					if (diatonic >= 0 && diatonic <= 6) {
+					  	printNewKeyInterpretation(infile[i], j, transval);
+					  	if (j<infile[i].getFieldCount()-1) {
+							m_text << "\t";
+					  	}
+					  	continue;
+					}
+				}
+				m_text << infile.token(i, j);
+				if (j<infile[i].getFieldCount()-1) {
+					m_text << "\t";
+				}
+			}
+			m_text << "\n";
+
+		} else {
+			m_text << infile[i] << "\n";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printNewKeySignature --
+//
+
+void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
+	int counter = 0;
+	int len = (int)keysig.size();
+	for (int i=0; i<len; i++) {
+		switch(keysig[i]) {
+			case '-':   counter--; break;
+			case '#':   counter++; break;
+		}
+	}
+
+	int xxx = Convert::base40IntervalToLineOfFifths(trans);
+	int newkey = xxx + counter;
+	m_text << Convert::keyNumberToKern(newkey);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printNewKeyInterpretation --
+//
+
+void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
+		int index, int transval) {
+
+	int mode = 0;
+	if (std::islower(aRecord.token(index)->at(1))) {
+		mode = 1;
+	}
+	int base40 = Convert::kernToBase40(*aRecord.token(index));
+	currentkey = base40;
+	base40 = base40 + transval;
+	base40 = base40 + 4000;
+	base40 = base40 % 40;
+	base40 = base40 + (3 + mode) * 40;
+
+	m_text << "*" << Convert::base40ToKern(base40) << ":";
+
+	HumRegex hre;
+	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
+		m_text << hre.getMatch(1);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printHumdrumDataRecord --
+//
+
+void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
+		vector<bool>& spineprocess) {
+	int i;
+	for (i=0; i<record.getFieldCount(); i++) {
+		if (!spineprocess[record.token(i)->getTrack()]) {
+			// don't try to transpose spines which were not indicated.
+			m_text << record[i];
+			if (i<record.getFieldCount()-1) {
+				m_text << "\t";
+			}
+			continue;
+		}
+		if (!record.token(i)->isKern()) {
+			// don't try to transpose non-kern spines
+			m_text << record[i];
+			if (i<record.getFieldCount()-1) {
+				m_text << "\t";
+			}
+			continue;
+		}
+
+		printHumdrumKernToken(record, i, transval);
+		if (i<record.getFieldCount()-1) {
+			m_text << "\t";
+		}
+		continue;
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printHumdrumKernToken --
+//
+
+void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
+		int transval) {
+	if (record.token(index)->isNull()) {
+		// null record element (no pitch).
+		m_text << record.token(index);
+		return;
+	}
+
+	string buffer;
+	int tokencount = record.token(index)->getSubtokenCount();
+	for (int k=0; k<tokencount; k++) {
+		buffer = record.token(index)->getSubtoken(k);
+		printNewKernString(buffer, transval);
+		if (k<tokencount-1) {
+			m_text << " ";
+		}
+	}
+}
+
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printNewKernString --
+//
+
+void Tool_transpose::printNewKernString(const string& input, int transval) {
+	if (input.rfind('r') != string::npos) {
+		// don't transpose rests...
+		m_text << input;
+		return;
+	}
+	if (input == ".") {
+		// don't transpose null tokens...
+		m_text << input;
+		return;
+	}
+
+	int base40 = Convert::kernToBase40(input);
+	string newpitch = Convert::base40ToKern(base40 + transval);
+
+	// consider interaction of #X -X n interaction vs. nX.
+	HumRegex hre;
+	string output;
+	if (hre.search(input, "([A-Ga-g#n-]+)")) {
+		string oldpitch = hre.getMatch(1);
+		output = hre.replaceCopy(input, newpitch, oldpitch);
+	}
+	m_text << output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::getBase40ValueFromInterval -- note: only ninth interval range allowed
+//
+
+int Tool_transpose::getBase40ValueFromInterval(const string& string) {
+	int sign = 1;
+	if (string.find('-') != string::npos) {
+		sign = -1;
+	}
+
+	int length = (int)string.size();
+	char* buffer = new char[length+1];
+	strcpy(buffer, string.c_str());
+	int i;
+	for (i=0; i<length; i++) {
+		if (buffer[i] == 'p') { buffer[i] = 'P'; }
+		if (buffer[i] == 'a') { buffer[i] = 'A'; }
+		if (buffer[i] == 'D') { buffer[i] = 'd'; }
+	}
+
+	int output = 0;
+
+	if (strstr(buffer, "dd1") != NULL)      { output = -2; }
+	else if (strstr(buffer, "d1") != NULL)  { output = -1; }
+	else if (strstr(buffer, "P1") != NULL)  { output =  0; }
+	else if (strstr(buffer, "AA1") != NULL) { output =  2; }
+	else if (strstr(buffer, "A1") != NULL)  { output =  1; }
+
+	else if (strstr(buffer, "dd2") != NULL) { output =  3; }
+	else if (strstr(buffer, "d2") != NULL)  { output =  4; }
+	else if (strstr(buffer, "m2") != NULL)  { output =  5; }
+	else if (strstr(buffer, "M2") != NULL)  { output =  6; }
+	else if (strstr(buffer, "AA2") != NULL) { output =  8; }
+	else if (strstr(buffer, "A2") != NULL)  { output =  7; }
+
+	else if (strstr(buffer, "dd3") != NULL) { output =  9; }
+	else if (strstr(buffer, "d3") != NULL)  { output = 10; }
+	else if (strstr(buffer, "m3") != NULL)  { output = 11; }
+	else if (strstr(buffer, "M3") != NULL)  { output = 12; }
+	else if (strstr(buffer, "AA3") != NULL) { output = 14; }
+	else if (strstr(buffer, "A3") != NULL)  { output = 13; }
+
+	else if (strstr(buffer, "dd4") != NULL) { output = 15; }
+	else if (strstr(buffer, "d4") != NULL)  { output = 16; }
+	else if (strstr(buffer, "P4") != NULL)  { output = 17; }
+	else if (strstr(buffer, "AA4") != NULL) { output = 19; }
+	else if (strstr(buffer, "A4") != NULL)  { output = 18; }
+
+	else if (strstr(buffer, "dd5") != NULL) { output = 21; }
+	else if (strstr(buffer, "d5") != NULL)  { output = 22; }
+	else if (strstr(buffer, "P5") != NULL)  { output = 23; }
+	else if (strstr(buffer, "AA5") != NULL) { output = 25; }
+	else if (strstr(buffer, "A5") != NULL)  { output = 24; }
+
+	else if (strstr(buffer, "dd6") != NULL) { output = 26; }
+	else if (strstr(buffer, "d6") != NULL)  { output = 27; }
+	else if (strstr(buffer, "m6") != NULL)  { output = 28; }
+	else if (strstr(buffer, "M6") != NULL)  { output = 29; }
+	else if (strstr(buffer, "AA6") != NULL) { output = 31; }
+	else if (strstr(buffer, "A6") != NULL)  { output = 30; }
+
+	else if (strstr(buffer, "dd7") != NULL) { output = 32; }
+	else if (strstr(buffer, "d7") != NULL)  { output = 33; }
+	else if (strstr(buffer, "m7") != NULL)  { output = 34; }
+	else if (strstr(buffer, "M7") != NULL)  { output = 35; }
+	else if (strstr(buffer, "AA7") != NULL) { output = 37; }
+	else if (strstr(buffer, "A7") != NULL)  { output = 36; }
+
+	else if (strstr(buffer, "dd8") != NULL) { output = 38; }
+	else if (strstr(buffer, "d8") != NULL)  { output = 39; }
+	else if (strstr(buffer, "P8") != NULL)  { output = 40; }
+	else if (strstr(buffer, "AA8") != NULL) { output = 42; }
+	else if (strstr(buffer, "A8") != NULL)  { output = 41; }
+
+	else if (strstr(buffer, "dd9") != NULL) { output = 43; }
+	else if (strstr(buffer, "d9") != NULL)  { output = 44; }
+	else if (strstr(buffer, "m9") != NULL)  { output = 45; }
+	else if (strstr(buffer, "M9") != NULL)  { output = 46; }
+	else if (strstr(buffer, "AA9") != NULL) { output = 48; }
+	else if (strstr(buffer, "A9") != NULL)  { output = 47; }
+
+	return output * sign;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::example --
+//
+
+void Tool_transpose::example(void) {
+
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::usage --
+//
+
+void Tool_transpose::usage(const string& command) {
+
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// Automatic transposition functions
+//
+
+
+//////////////////////////////
+//
+// Tool_transpose::doAutoTransposeAnalysis --
+//
+
+void Tool_transpose::doAutoTransposeAnalysis(HumdrumFile& infile) {
+	vector<int> ktracks(infile.getMaxTrack()+1, 0);
+
+	vector<HTp> tracks;
+	infile.getTrackStartList(tracks);
+	int i;
+	for (i=0; i<(int)tracks.size(); i++) {
+		if (tracks[i]->isKern()) {
+			ktracks[i] = tracks[i]->getTrack();
+		} else {
+			ktracks[i] = 0;
+		}
+	}
+
+	int segments = int(infile.getScoreDuration().getFloat()+0.5);
+	if (segments < 1) {
+		segments = 1;
+	}
+
+	vector<vector<vector<double> > > trackhist;
+	trackhist.resize(ktracks.size());
+
+	for (i=1; i<(int)trackhist.size(); i++) {
+		if (ktracks[i]) {
+			storeHistogramForTrack(trackhist[i], infile, i, segments);
+		}
+	}
+
+	if (debugQ) {
+		m_text << "Segment pitch histograms: " << endl;
+		printHistograms(segments, ktracks, trackhist);
+	}
+
+	int level = 16;
+	int hop   = 8;
+	int count = segments / hop;
+
+	if (segments < count * level / (double)hop) {
+		level = level / 2;
+		hop   = hop / 2;
+	}
+	if (segments < count * level / (double)hop) {
+		count = count / 2;
+	}
+
+	if (segments < count * level / (double)hop) {
+		level = level / 2;
+		hop   = hop / 2;
+	}
+	if (segments < count * level / (double)hop) {
+		count = count / 2;
+	}
+
+	vector<vector<vector<double> > > analysis;
+
+	doAutoKeyAnalysis(analysis, level, hop, count, segments, ktracks, trackhist);
+
+	// print analyses raw results
+
+	m_text << "Raw key analysis by track:" << endl;
+	printRawTrackAnalysis(analysis, ktracks);
+
+	doTranspositionAnalysis(analysis);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::doTranspositionAnalysis --
+//
+
+void Tool_transpose::doTranspositionAnalysis(vector<vector<vector<double> > >& analysis) {
+	int i, j, k;
+	int value1;
+	int value2;
+	int value;
+
+	for (i=0; i<1; i++) {
+		for (j=2; j<3; j++) {
+			for (k=0; k<(int)analysis[i].size(); k++) {
+				if (analysis[i][k][24] >= 0 && analysis[j][k][24] >= 0) {
+	       value1 = (int)analysis[i][k][25];
+	       if (value1 >= 12) {
+						  value1 = value1 - 12;
+					}
+	       value2 = (int)analysis[j][k][25];
+	       if (value2 >= 12) {
+						  value2 = value2 - 12;
+					}
+	       value = value1 - value2;
+	       if (value < 0) {
+						  value = value + 12;
+					}
+					if (value > 6) {
+						  value = 12 - value;
+					}
+					m_text << value << endl;
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printRawTrackAnalysis --
+//
+
+void Tool_transpose::printRawTrackAnalysis(vector<vector<vector<double> > >& analysis,
+		vector<int>& ktracks) {
+
+	int i, j;
+	int value;
+	int value2;
+
+	for (i=0; i<(int)analysis[0].size(); i++) {
+		m_text << "Frame\t" << i << ":";
+		for (j=0; j<(int)analysis.size(); j++) {
+			m_text << "\t";
+	 value = (int)analysis[j][i][24];
+	 if (value >= 12) {
+				value = value - 12;
+			}
+	 value2 = (int)analysis[j][i][25];
+	 if (value2 >= 12) {
+				value2 = value2 - 12;
+			}
+			m_text << value;
+	 // if (value != value2) {
+	 //    m_text << "," << value2;
+			// }
+		}
+		m_text << "\n";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// doAutoKeyAnalysis --
+//
+
+void Tool_transpose::doAutoKeyAnalysis(vector<vector<vector<double> > >& analysis, int level,
+		int hop, int count, int segments, vector<int>& ktracks,
+		vector<vector<vector<double> > >& trackhist) {
+
+	vector<double> majorweights;
+	vector<double> minorweights;
+	fillWeightsWithKostkaPayne(majorweights, minorweights);
+
+	int size = 0;
+	int i;
+	for (i=1; i<(int)ktracks.size(); i++) {
+		if (ktracks[i]) {
+			size++;
+		}
+	}
+
+	analysis.resize(size);
+	for (i=0; i<(int)analysis.size(); i++) {
+		analysis[i].reserve(count);
+	}
+
+	int aindex = 0;
+	for (i=1; i<(int)ktracks.size(); i++) {
+		if (!ktracks[i]) {
+			continue;
+		}
+		doTrackKeyAnalysis(analysis[aindex++], level, hop, count,
+				trackhist[i], majorweights, minorweights);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::doTrackKeyAnalysis -- Do individual key analyses of sections of the
+//   given track.
+//
+
+void Tool_transpose::doTrackKeyAnalysis(vector<vector<double> >& analysis, int level, int hop,
+		int count, vector<vector<double> >& trackhist,
+		vector<double>& majorweights, vector<double>& minorweights) {
+
+	int i;
+	for (i=0; i<count; i++) {
+		if (i * hop + level > (int)trackhist.size()) {
+			break;
+		}
+		analysis.resize(i+1);
+		doSingleAnalysis(analysis[analysis.size()-1], i*hop+level, level,
+				trackhist, majorweights, minorweights);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::doSingleAnalysis --
+//
+
+void Tool_transpose::doSingleAnalysis(vector<double>& analysis, int startindex, int length,
+		vector<vector<double> >& trackhist, vector<double>& majorweights,
+		vector<double>& minorweights) {
+	vector<double> histsum(12, 0);
+
+	for (int i=0; (i<length) && (startindex+i+length<(int)trackhist.size()); i++) {
+		for (int k=0; k<12; k++) {
+			histsum[k] += trackhist[i+startindex][k];
+		}
+	}
+
+	identifyKey(analysis, histsum, majorweights, minorweights);
+}
+
+
+
+///////////////////////////////
+//
+// Tool_transpose::fillWeightsWithKostkaPayne --
+//
+
+void Tool_transpose::fillWeightsWithKostkaPayne(vector<double>& maj, vector<double>& min) {
+	maj.resize(12);
+	min.resize(12);
+
+	// found in David Temperley: Music and Probability 2006
+	maj[0]  = 0.748;	// C major weights
+	maj[1]  = 0.060;	// C#
+	maj[2]  = 0.488;	// D
+	maj[3]  = 0.082;	// D#
+	maj[4]  = 0.670;	// E
+	maj[5]  = 0.460;	// F
+	maj[6]  = 0.096;	// F#
+	maj[7]  = 0.715;	// G
+	maj[8]  = 0.104;	// G#
+	maj[9]  = 0.366;	// A
+	maj[10] = 0.057;	// A#
+	maj[11] = 0.400;	// B
+	min[0]  = 0.712;	// c minor weights
+	min[1]  = 0.084;	// c#
+	min[2]  = 0.474;	// d
+	min[3]  = 0.618;	// d#
+	min[4]  = 0.049;	// e
+	min[5]  = 0.460;	// f
+	min[6]  = 0.105;	// f#
+	min[7]  = 0.747;	// g
+	min[8]  = 0.404;	// g#
+	min[9]  = 0.067;	// a
+	min[10] = 0.133;	// a#
+	min[11] = 0.330;	// b
+}
+
+
+
+////////////////////////////////////////
+//
+// identifyKey -- correls contains the 12 major key correlation
+//      values, then the 12 minor key correlation values, then two
+//      more values: index=24 is the best key, and index=25 is the
+//      second best key.  If [24] or [25] is -1, then that means that
+//      all entries in the original histogram were zero (all rests).
+//
+
+void Tool_transpose::identifyKey(vector<double>& correls,
+		vector<double>& histogram, vector<double>& majorweights,
+		vector<double>& minorweights) {
+
+	correls.clear();
+	correls.reserve(26);
+
+	double testsum = 0.0;
+	for (int i=0; i<12; i++) {
+		testsum += histogram[i];
+	}
+	if (testsum == 0.0) {
+		correls.resize(26);
+		fill(correls.begin(), correls.end(), -1);
+		correls[24] = -1;
+		correls[25] = -1;
+		return;
+	}
+
+	vector<double> majorcorrels;
+	vector<double> minorcorrels;
+	for (int i=0; i<12; i++) {
+		majorcorrels[i] = Convert::pearsonCorrelation(majorweights, histogram);
+		minorcorrels[i] = Convert::pearsonCorrelation(minorweights, histogram);
+	}
+
+	// find max value
+	int besti;
+	int majorbesti = 0;
+	int minorbesti = 0;
+	for (int i=1; i<12; i++) {
+		if (majorcorrels[i] > majorcorrels[majorbesti]) {
+			majorbesti = i;
+		}
+		if (minorcorrels[i] > minorcorrels[minorbesti]) {
+			minorbesti = i;
+		}
+	}
+	besti = majorbesti;
+	if (majorcorrels[majorbesti] < minorcorrels[minorbesti]) {
+		besti = minorbesti + 12;
+	}
+
+	// find second best major key
+	int majorsecondbesti = 0;
+	if (majorbesti == 0) {
+		majorsecondbesti = 1;
+	}
+	for (int i=1; i<12; i++) {
+		if (i == majorbesti) {
+			continue;
+		}
+		if (majorcorrels[i] > majorcorrels[majorsecondbesti]) {
+			majorsecondbesti = i;
+		}
+	}
+
+	// find second best minor key
+	int minorsecondbesti = 0;
+	if (minorbesti == 0) {
+		minorsecondbesti = 1;
+	}
+	for (int i=1; i<12; i++) {
+		if (i == minorbesti) {
+			continue;
+		}
+		if (minorcorrels[i] > minorcorrels[minorsecondbesti]) {
+			minorsecondbesti = i;
+		}
+	}
+	
+	int secondbesti = majorsecondbesti;
+	if (majorcorrels[majorsecondbesti] < minorcorrels[minorsecondbesti]) {
+		secondbesti = minorsecondbesti;
+	}
+	secondbesti += 12;
+
+	correls = majorcorrels;
+	correls.insert(correls.end(), minorcorrels.begin(), minorcorrels.end());
+	correls.push_back(besti);
+	correls.push_back(secondbesti);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printHistograms --
+//
+
+void Tool_transpose::printHistograms(int segments, vector<int> ktracks,
+vector<vector<vector<double> > >& trackhist) {
+	int i, j, k;
+	int start;
+
+	for (i=0; i<segments; i++) {
+//m_text << "i=" << i << endl;
+		m_text << "segment " << i
+	   << " ==========================================\n";
+		for (j=0; j<12; j++) {
+			start = 0;
+//m_text << "j=" << i << endl;
+			for (k=1; k<(int)ktracks.size(); k++) {
+//m_text << "k=" << i << endl;
+				if (!ktracks[k]) {
+					continue;
+				}
+				if (!start) {
+					m_text << j;
+					start = 1;
+				}
+				m_text << "\t";
+	    m_text << trackhist[k][i][j];
+			}
+	 if (start) {
+				m_text << "\n";
+			}
+		}
+	}
+	m_text << "==========================================\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::storeHistogramForTrack --
+//
+
+double Tool_transpose::storeHistogramForTrack(vector<vector<double> >& histogram,
+		HumdrumFile& infile, int track, int segments) {
+
+	histogram.clear();
+	histogram.reserve(segments);
+
+	int i;
+	int j;
+	int k;
+
+	for (i=0; i<(int)histogram.size(); i++) {
+		histogram[i].resize(12);
+		fill(histogram[i].begin(), histogram[i].end(), 0);
+	}
+
+	double totalduration = infile.getScoreDuration().getFloat();
+
+	double duration;
+	string buffer;
+	int pitch;
+	double start;
+	int tokencount;
+	for (i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		start = infile[i].getDurationFromStart().getFloat();
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+	 if (infile.token(i, j)->getTrack() != track) {
+				continue;
+			}
+			if (!infile.token(i, j)->isKern()) {
+				continue;
+			}
+			if (!infile.token(i, j)->isNull()) {
+				continue;
+			}
+			tokencount = infile.token(i, j)->getSubtokenCount();
+			for (k=0; k<tokencount; k++) {
+				buffer = *infile.token(j, k);
+				if (buffer == ".") {
+					continue;  // ignore illegal inline null tokens
+				}
+				pitch = Convert::kernToMidiNoteNumber(buffer);
+				if (pitch < 0) {
+					continue;  // ignore rests or strange objects
+				}
+				pitch = pitch % 12;  // convert to chromatic pitch-class
+				duration = Convert::recipToDuration(buffer).getFloat();
+				if (duration <= 0.0) {
+					continue;   // ignore grace notes and strange objects
+				}
+				addToHistogramDouble(histogram, pitch,
+						  start, duration, totalduration, segments);
+			}
+		}
+	}
+
+	return totalduration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::addToHistogramDouble -- fill the pitch histogram in the right spots.
+//
+
+void Tool_transpose::addToHistogramDouble(vector<vector<double> >& histogram, int pc,
+		double start, double dur, double tdur, int segments) {
+
+	pc = (pc + 12) % 12;
+
+	double startseg = start / tdur * segments;
+	double startfrac = startseg - (int)startseg;
+
+	double segdur = dur / tdur * segments;
+
+	if (segdur <= 1.0 - startfrac) {
+		histogram[(int)startseg][pc] += segdur;
+		return;
+	} else if (1.0 - startfrac > 0.0) {
+		histogram[(int)startseg][pc] += (1.0 - startfrac);
+		segdur -= (1.0 - startfrac);
+	}
+
+	int i = (int)(startseg + 1);
+	while (segdur > 0.0 && i < (int)histogram.size()) {
+		if (segdur < 1.0) {
+			histogram[i][pc] += segdur;
+			segdur = 0.0;
+		} else {
+			histogram[i][pc] += 1.0;
+			segdur -= 1.0;
+		}
+		i++;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::initialize --
+//
+
+void Tool_transpose::initialize(HumdrumFile& infile) {
+
+	// handle basic options:
+	if (getBoolean("author")) {
+		m_text << "Written by Craig Stuart Sapp, "
+			  << "craig@ccrma.stanford.edu, 12 Apr 2004" << endl;
+		exit(0);
+	} else if (getBoolean("version")) {
+		m_text << getArg(0) << ", version: 10 Dec 2016" << endl;
+		m_text << "compiled: " << __DATE__ << endl;
+		exit(0);
+	} else if (getBoolean("help")) {
+		usage(getArg(0));
+		exit(0);
+	} else if (getBoolean("example")) {
+		example();
+		exit(0);
+	}
+
+	transval     = getInteger("base40");
+	ssetkeyQ     = getBoolean("setkey");
+	ssetkey      = Convert::kernToBase40(getString("setkey").data());
+	autoQ        = getBoolean("auto");
+	debugQ       = getBoolean("debug");
+	spineQ       = getBoolean("spines");
+	spinestring  = getString("spines");
+	octave       = getInteger("octave");
+	concertQ     = getBoolean("concert");
+	writtenQ     = getBoolean("written");
+	quietQ       = getBoolean("quiet");
+	instrumentQ  = getBoolean("instrument");
+
+	switch (getBoolean("diatonic") + getBoolean("chromatic")) {
+		case 1:
+			cerr << "Error: both -d and -c options must be specified" << endl;
+			exit(1);
+			break;
+		case 2:
+			{
+				char buffer[128] = {0};
+				sprintf(buffer, "d%dc%d", getInt("d"), getInt("c"));
+				transval = Convert::transToBase40(buffer);
+			}
+			break;
+	}
+
+	ssetkey = ssetkey % 40;
+
+	if (getBoolean("transpose")) {
+		transval = getBase40ValueFromInterval(getString("transpose").data());
+	}
+
+	transval += 40 * octave;
+}
+
+
+
+
 //////////////////////////////
 //
 // Convert::isKernRest -- Returns true if the input string represents
@@ -16424,6 +18040,46 @@ bool Convert::isNaN(double value) {
 	ieee754.f = value;
 	return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
            ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::pearsonCorrelation --
+//
+
+double Convert::pearsonCorrelation(vector<double> x, vector<double> y) {
+	double sumx  = 0.0;
+	double sumy  = 0.0;
+	double sumco = 0.0;
+	double meanx = x[0];
+	double meany = y[0];
+	double sweep;
+	double deltax;
+	double deltay;
+
+	int size = (int)x.size();
+	if ((int)y.size() < size) {
+		size = (int)y.size();
+	}
+
+	for (int i=2; i<=size; i++) {
+		sweep = (i-1.0) / i;
+		deltax = x[i-1] - meanx;
+		deltay = y[i-1] - meany;
+		sumx  += deltax * deltax * sweep;
+		sumy  += deltay * deltay * sweep;
+		sumco += deltax * deltay * sweep;
+		meanx += deltax / i;
+		meany += deltay / i;
+	}
+
+	double popsdx = sqrt(sumx / size);
+	double popsdy = sqrt(sumy / size);
+	double covxy  = sumco / size;
+
+	return covxy / (popsdx * popsdy);
 }
 
 
@@ -17044,129 +18700,446 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 //
 
 int Convert::kernClefToBaseline(const string& input) {
-   string clefname;
+	string clefname;
 	if (input.compare(0, 5, "*clef") == 0) {
 		clefname = input.substr(5);
 	} else if (input.compare(0, 4, "clef") == 0) {
-      clefname = input.substr(4);
-   } else {
-      cerr << "Error in Convert::kernClefToBaseline: " << input << endl;
-      return -1000;
-   }
+		clefname = input.substr(4);
+	} else {
+		cerr << "Error in Convert::kernClefToBaseline: " << input << endl;
+		return -1000;
+	}
 
-   if (clefname == "G2") {                        // treble clef
-      return Convert::kernToBase7("e");
-   } else if (clefname == "F4") {                 // bass clef
-      return Convert::kernToBase7("GG");
-   } else if (clefname == "C3") {                 // alto clef
-      return Convert::kernToBase7("F");
-   } else if (clefname == "C4") {                 // tenor clef
-      return Convert::kernToBase7("D");
-   } else if (clefname == "Gv2") {                // vocal tenor clef
-      return Convert::kernToBase7("E");
+	if (clefname == "G2") {                        // treble clef
+		return Convert::kernToBase7("e");
+	} else if (clefname == "F4") {                 // bass clef
+		return Convert::kernToBase7("GG");
+	} else if (clefname == "C3") {                 // alto clef
+		return Convert::kernToBase7("F");
+	} else if (clefname == "C4") {                 // tenor clef
+		return Convert::kernToBase7("D");
+	} else if (clefname == "Gv2") {                // vocal tenor clef
+		return Convert::kernToBase7("E");
 
-   // rest of C clef possibilities:
-   } else if (clefname == "C1") {                 // soprano clef
-      return Convert::kernToBase7("c");
-   } else if (clefname == "C2") {                 // mezzo-soprano clef
-      return Convert::kernToBase7("A");
-   } else if (clefname == "C5") {                 // baritone clef
-      return Convert::kernToBase7("BB");
+	// rest of C clef possibilities:
+	} else if (clefname == "C1") {                 // soprano clef
+		return Convert::kernToBase7("c");
+	} else if (clefname == "C2") {                 // mezzo-soprano clef
+		return Convert::kernToBase7("A");
+	} else if (clefname == "C5") {                 // baritone clef
+		return Convert::kernToBase7("BB");
 
-   // rest of G clef possibilities:
-   } else if (clefname == "G1") {                 // French-violin clef
-      return Convert::kernToBase7("g");
-   } else if (clefname == "G3") {
-      return Convert::kernToBase7("c");
-   } else if (clefname == "G4") {
-      return Convert::kernToBase7("A");
-   } else if (clefname == "G5") {
-      return Convert::kernToBase7("F");
+	// rest of G clef possibilities:
+	} else if (clefname == "G1") {                 // French-violin clef
+		return Convert::kernToBase7("g");
+	} else if (clefname == "G3") {
+		return Convert::kernToBase7("c");
+	} else if (clefname == "G4") {
+		return Convert::kernToBase7("A");
+	} else if (clefname == "G5") {
+		return Convert::kernToBase7("F");
 
-   // rest of F clef possibilities:
-   } else if (clefname == "F1") {
-      return Convert::kernToBase7("F");
-   } else if (clefname == "F2") {
-      return Convert::kernToBase7("D");
-   } else if (clefname == "F3") {
-      return Convert::kernToBase7("BB");
-   } else if (clefname == "F5") {
-      return Convert::kernToBase7("EE");
+	// rest of F clef possibilities:
+	} else if (clefname == "F1") {
+		return Convert::kernToBase7("F");
+	} else if (clefname == "F2") {
+		return Convert::kernToBase7("D");
+	} else if (clefname == "F3") {
+		return Convert::kernToBase7("BB");
+	} else if (clefname == "F5") {
+		return Convert::kernToBase7("EE");
 
-   // rest of G clef down an octave possibilities:
-   } else if (clefname == "Gv1") {
-      return Convert::kernToBase7("G");
-   } else if (clefname == "Gv3") {
-      return Convert::kernToBase7("C");
-   } else if (clefname == "Gv4") {
-      return Convert::kernToBase7("AA");
-   } else if (clefname == "Gv5") {
-      return Convert::kernToBase7("FF");
+	// rest of G clef down an octave possibilities:
+	} else if (clefname == "Gv1") {
+		return Convert::kernToBase7("G");
+	} else if (clefname == "Gv3") {
+		return Convert::kernToBase7("C");
+	} else if (clefname == "Gv4") {
+		return Convert::kernToBase7("AA");
+	} else if (clefname == "Gv5") {
+		return Convert::kernToBase7("FF");
 
-   // F clef down an octave possibilities:
-   } else if (clefname == "Fv1") {
-      return Convert::kernToBase7("FF");
-   } else if (clefname == "Fv2") {
-      return Convert::kernToBase7("DD");
-   } else if (clefname == "Fv3") {
-      return Convert::kernToBase7("BBB");
-   } else if (clefname == "Fv4") {
-      return Convert::kernToBase7("GGG");
-   } else if (clefname == "Fv5") {
-      return Convert::kernToBase7("EEE");
+	// F clef down an octave possibilities:
+	} else if (clefname == "Fv1") {
+		return Convert::kernToBase7("FF");
+	} else if (clefname == "Fv2") {
+		return Convert::kernToBase7("DD");
+	} else if (clefname == "Fv3") {
+		return Convert::kernToBase7("BBB");
+	} else if (clefname == "Fv4") {
+		return Convert::kernToBase7("GGG");
+	} else if (clefname == "Fv5") {
+		return Convert::kernToBase7("EEE");
 
-   // C clef down an octave possibilities:
-   } else if (clefname == "Cv1") {
-      return Convert::kernToBase7("C");
-   } else if (clefname == "Cv2") {
-      return Convert::kernToBase7("AA");
-   } else if (clefname == "Cv3") {
-      return Convert::kernToBase7("FF");
-   } else if (clefname == "Cv4") {
-      return Convert::kernToBase7("DD");
-   } else if (clefname == "Cv5") {
-      return Convert::kernToBase7("BBB");
+	// C clef down an octave possibilities:
+	} else if (clefname == "Cv1") {
+		return Convert::kernToBase7("C");
+	} else if (clefname == "Cv2") {
+		return Convert::kernToBase7("AA");
+	} else if (clefname == "Cv3") {
+		return Convert::kernToBase7("FF");
+	} else if (clefname == "Cv4") {
+		return Convert::kernToBase7("DD");
+	} else if (clefname == "Cv5") {
+		return Convert::kernToBase7("BBB");
 
-   // G clef up an octave possibilities:
-   } else if (clefname == "G^1") {
-      return Convert::kernToBase7("gg");
-   } else if (clefname == "G^2") {
-      return Convert::kernToBase7("ee");
-   } else if (clefname == "G^3") {
-      return Convert::kernToBase7("cc");
-   } else if (clefname == "G^4") {
-      return Convert::kernToBase7("a");
-   } else if (clefname == "G^5") {
-      return Convert::kernToBase7("f");
+	// G clef up an octave possibilities:
+	} else if (clefname == "G^1") {
+		return Convert::kernToBase7("gg");
+	} else if (clefname == "G^2") {
+		return Convert::kernToBase7("ee");
+	} else if (clefname == "G^3") {
+		return Convert::kernToBase7("cc");
+	} else if (clefname == "G^4") {
+		return Convert::kernToBase7("a");
+	} else if (clefname == "G^5") {
+		return Convert::kernToBase7("f");
 
-   // F clef up an octave possibilities:
-   } else if (clefname == "F^1") {
-      return Convert::kernToBase7("f");
-   } else if (clefname == "F^2") {
-      return Convert::kernToBase7("d");
-   } else if (clefname == "F^3") {
-      return Convert::kernToBase7("B");
-   } else if (clefname == "F^4") {
-      return Convert::kernToBase7("G");
-   } else if (clefname == "F^5") {
-      return Convert::kernToBase7("E");
+	// F clef up an octave possibilities:
+	} else if (clefname == "F^1") {
+		return Convert::kernToBase7("f");
+	} else if (clefname == "F^2") {
+		return Convert::kernToBase7("d");
+	} else if (clefname == "F^3") {
+		return Convert::kernToBase7("B");
+	} else if (clefname == "F^4") {
+		return Convert::kernToBase7("G");
+	} else if (clefname == "F^5") {
+		return Convert::kernToBase7("E");
 
-   // C clef up an octave possibilities:
-   } else if (clefname == "C^1") {
-      return Convert::kernToBase7("cc");
-   } else if (clefname == "C^2") {
-      return Convert::kernToBase7("a");
-   } else if (clefname == "C^3") {
-      return Convert::kernToBase7("f");
-   } else if (clefname == "C^4") {
-      return Convert::kernToBase7("d");
-   } else if (clefname == "C^5") {
-      return Convert::kernToBase7("B");
+	// C clef up an octave possibilities:
+	} else if (clefname == "C^1") {
+		return Convert::kernToBase7("cc");
+	} else if (clefname == "C^2") {
+		return Convert::kernToBase7("a");
+	} else if (clefname == "C^3") {
+		return Convert::kernToBase7("f");
+	} else if (clefname == "C^4") {
+		return Convert::kernToBase7("d");
+	} else if (clefname == "C^5") {
+		return Convert::kernToBase7("B");
 
-   // there are also two octaves down (*clefGvv2) and two octaves up (*clefG^^2)
-   } else {
-      // but just use treble clef if don't know what the clef it by this point
-      return Convert::kernToBase7("e");
+	// there are also two octaves down (*clefGvv2) and two octaves up (*clefG^^2)
+	} else {
+		// but just use treble clef if don't know what the clef it by this point
+		return Convert::kernToBase7("e");
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40ToTrans -- convert a base-40 interval into
+//    a trans program's diatonic/chromatic alteration marker
+//
+
+string Convert::base40ToTrans(int base40) {
+	int sign = 1;
+	int chroma;
+	int octave;
+	if (base40 < 0) {
+		sign = -1;
+		chroma = -base40 % 40;
+		octave = -base40 / 40;
+	} else {
+		sign = +1;
+		chroma = base40 % 40;
+		octave = base40 / 40;
+	}
+
+	int cval = 0;
+	int dval = 0;
+
+	switch (chroma * sign) {
+		case   0: dval=0;  cval=0;   break; // C -> C
+		case   1: dval=0;  cval=1;   break; // C -> C#
+		case   2: dval=0;  cval=2;   break; // C -> C##
+		case   4: dval=1;  cval=0;   break; // C -> D--
+		case   5: dval=1;  cval=1;   break; // C -> D-
+		case   6: dval=1;  cval=2;   break; // C -> D
+		case   7: dval=1;  cval=3;   break; // C -> D#
+		case   8: dval=1;  cval=4;   break; // C -> D##
+		case  10: dval=2;  cval=2;   break; // C -> E--
+		case  11: dval=2;  cval=3;   break; // C -> E-
+		case  12: dval=2;  cval=4;   break; // C -> E
+		case  13: dval=2;  cval=5;   break; // C -> E#
+		case  14: dval=2;  cval=6;   break; // C -> E##
+		case  15: dval=3;  cval=3;   break; // C -> F--
+		case  16: dval=3;  cval=4;   break; // C -> F-
+		case  17: dval=3;  cval=5;   break; // C -> F
+		case  18: dval=3;  cval=6;   break; // C -> F#
+		case  19: dval=3;  cval=7;   break; // C -> F##
+		case  21: dval=4;  cval=5;   break; // C -> G--
+		case  22: dval=4;  cval=6;   break; // C -> G-
+		case  23: dval=4;  cval=7;   break; // C -> G
+		case  24: dval=4;  cval=8;   break; // C -> G#
+		case  25: dval=4;  cval=9;   break; // C -> G##
+		case  27: dval=5;  cval=7;   break; // C -> A--
+		case  28: dval=5;  cval=8;   break; // C -> A-
+		case  29: dval=5;  cval=9;   break; // C -> A
+		case  30: dval=5;  cval=10;  break; // C -> A#
+		case  31: dval=5;  cval=11;  break; // C -> A##
+		case  33: dval=6;  cval=9;   break; // C -> B--
+		case  34: dval=6;  cval=10;  break; // C -> B-
+		case  35: dval=6;  cval=11;  break; // C -> B
+		case  36: dval=6;  cval=12;  break; // C -> B#
+		case  37: dval=6;  cval=13;  break; // C -> B##
+		case  38: dval=7;  cval=10;  break; // C -> c--
+		case  39: dval=7;  cval=11;  break; // C -> c-
+		case  -1: dval=-0; cval=-1;  break; // c -> c-
+		case  -2: dval=-0; cval=-2;  break; // c -> c--
+		case  -3: dval=-1; cval=1;   break; // c -> B##
+		case  -4: dval=-1; cval=-0;  break; // c -> B#
+		case  -5: dval=-1; cval=-1;  break; // c -> B
+		case  -6: dval=-1; cval=-2;  break; // c -> B-
+		case  -7: dval=-1; cval=-3;  break; // c -> B--
+		case  -9: dval=-2; cval=-1;  break; // c -> A##
+		case -10: dval=-2; cval=-2;  break; // c -> A#
+		case -11: dval=-2; cval=-3;  break; // c -> A
+		case -12: dval=-2; cval=-4;  break; // c -> A-
+		case -13: dval=-2; cval=-5;  break; // c -> A-
+		case -15: dval=-3; cval=-3;  break; // c -> G##
+		case -16: dval=-3; cval=-4;  break; // c -> G#
+		case -17: dval=-3; cval=-5;  break; // c -> G
+		case -18: dval=-3; cval=-6;  break; // c -> G-
+		case -19: dval=-3; cval=-7;  break; // c -> G--
+		case -21: dval=-4; cval=-5;  break; // c -> F##
+		case -22: dval=-4; cval=-6;  break; // c -> F#
+		case -23: dval=-4; cval=-7;  break; // c -> F
+		case -24: dval=-4; cval=-8;  break; // c -> F-
+		case -25: dval=-4; cval=-9;  break; // c -> F--
+		case -26: dval=-5; cval=-6;  break; // c -> E##
+		case -27: dval=-5; cval=-7;  break; // c -> E#
+		case -28: dval=-5; cval=-8;  break; // c -> E
+		case -29: dval=-5; cval=-9;  break; // c -> E-
+		case -30: dval=-5; cval=-10; break; // c -> E--
+		case -32: dval=-6; cval=-8;  break; // c -> D##
+		case -33: dval=-6; cval=-9;  break; // c -> D#
+		case -34: dval=-6; cval=-10; break; // c -> D
+		case -35: dval=-6; cval=-11; break; // c -> D-
+		case -36: dval=-6; cval=-12; break; // c -> D--
+		case -38: dval=-7; cval=-10; break; // c -> C##
+		case -39: dval=-7; cval=-11; break; // c -> C#
+		default:
+			dval=0; cval=0;
+	}
+
+	if (octave > 0) {
+		dval = dval + sign * octave * 7;
+		cval = cval + sign * octave * 12;
+	}
+
+	string output = "d";
+	output += to_string(dval);
+	output += "c";
+	output += to_string(cval);
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::transToBase40 -- convert the Humdrum Toolkit program
+//     trans's binomial notation for intervals into base-40.
+//  The input can be in three formats:
+//     d1c2      == no prepended text on information
+//     *Trd1c2   == Transposition interpretation marker prefixed
+//     *ITrd1c2  == Instrumental transposition marker prefixed
+//
+
+int Convert::transToBase40(const string& input) {
+	int dval = 0;
+	int cval = 0;
+	if (sscanf(input.c_str(), "d%dc%d", &dval, &cval) != 2) {
+		if (sscanf(input.c_str(), "*Trd%dc%d", &dval, &cval) != 2) {
+			if (sscanf(input.c_str(), "*ITrd%dc%d", &dval, &cval) != 2) {
+			   // cerr << "Cannot find correct information" << endl;
+			   return 0;
+			}
+		}
+	}
+
+	int dsign = 1;
+	// int csign = 1;
+	if (dval < 0) {
+		dsign = -1;
+	}
+	// if (cval < 0) {
+	//    csign = -1;
+	// }
+
+	int doctave = dsign * dval / 7;
+	// int coctave = csign * cval / 12;
+
+	int base = 0;
+
+		  if ((dval==0)  && (cval==0))   { base =	 0; }
+	else if ((dval==0)  && (cval==1))   { base =	 1; }
+	else if ((dval==0)  && (cval==2))   { base =	 2; }
+	else if ((dval==1)  && (cval==0))   { base =	 4; }
+	else if ((dval==1)  && (cval==1))   { base =	 5; }
+	else if ((dval==1)  && (cval==2))   { base =	 6; }
+	else if ((dval==1)  && (cval==3))   { base =	 7; }
+	else if ((dval==1)  && (cval==4))   { base =	 8; }
+	else if ((dval==2)  && (cval==2))   { base =	 10; }
+	else if ((dval==2)  && (cval==3))   { base =	 11; }
+	else if ((dval==2)  && (cval==4))   { base =	 12; }
+	else if ((dval==2)  && (cval==5))   { base =	 13; }
+	else if ((dval==2)  && (cval==6))   { base =	 14; }
+	else if ((dval==3)  && (cval==3))   { base =	 15; }
+	else if ((dval==3)  && (cval==4))   { base =	 16; }
+	else if ((dval==3)  && (cval==5))   { base =	 17; }
+	else if ((dval==3)  && (cval==6))   { base =	 18; }
+	else if ((dval==3)  && (cval==7))   { base =	 19; }
+	else if ((dval==4)  && (cval==5))   { base =	 21; }
+	else if ((dval==4)  && (cval==6))   { base =	 22; }
+	else if ((dval==4)  && (cval==7))   { base =	 23; }
+	else if ((dval==4)  && (cval==8))   { base =	 24; }
+	else if ((dval==4)  && (cval==9))   { base =	 25; }
+	else if ((dval==5)  && (cval==7))   { base =	 27; }
+	else if ((dval==5)  && (cval==8))   { base =	 28; }
+	else if ((dval==5)  && (cval==9))   { base =	 29; }
+	else if ((dval==5)  && (cval==10))  { base =	 30; }
+	else if ((dval==5)  && (cval==11))  { base =	 31; }
+	else if ((dval==6)  && (cval==9))   { base =	 33; }
+	else if ((dval==6)  && (cval==10))  { base =	 34; }
+	else if ((dval==6)  && (cval==11))  { base =	 35; }
+	else if ((dval==6)  && (cval==12))  { base =	 36; }
+	else if ((dval==6)  && (cval==13))  { base =	 37; }
+	else if ((dval==7)  && (cval==10))  { base =	 38; }
+	else if ((dval==7)  && (cval==11))  { base =	 38; }
+	else if ((dval==-0) && (cval==-0))  { base =	 -0; }
+	else if ((dval==-0) && (cval==-1))  { base =	 -1; }
+	else if ((dval==-0) && (cval==-2))  { base =	 -2; }
+	else if ((dval==-1) && (cval==1))   { base =	 -3; }
+	else if ((dval==-1) && (cval==-0))  { base =	 -4; }
+	else if ((dval==-1) && (cval==-1))  { base =	 -5; }
+	else if ((dval==-1) && (cval==-2))  { base =	 -6; }
+	else if ((dval==-1) && (cval==-3))  { base =	 -7; }
+	else if ((dval==-2) && (cval==-1))  { base =	 -9; }
+	else if ((dval==-2) && (cval==-2))  { base =	-10; }
+	else if ((dval==-2) && (cval==-3))  { base =	-11; }
+	else if ((dval==-2) && (cval==-4))  { base =	-12; }
+	else if ((dval==-2) && (cval==-5))  { base =	-13; }
+	else if ((dval==-3) && (cval==-3))  { base =	-15; }
+	else if ((dval==-3) && (cval==-4))  { base =	-16; }
+	else if ((dval==-3) && (cval==-5))  { base =	-17; }
+	else if ((dval==-3) && (cval==-6))  { base =	-18; }
+	else if ((dval==-3) && (cval==-7))  { base =	-19; }
+	else if ((dval==-4) && (cval==-5))  { base =	-21; }
+	else if ((dval==-4) && (cval==-6))  { base =	-22; }
+	else if ((dval==-4) && (cval==-7))  { base =	-23; }
+	else if ((dval==-4) && (cval==-8))  { base =	-24; }
+	else if ((dval==-4) && (cval==-9))  { base =	-25; }
+	else if ((dval==-5) && (cval==-6))  { base =	-26; }
+	else if ((dval==-5) && (cval==-7))  { base =	-27; }
+	else if ((dval==-5) && (cval==-8))  { base =	-28; }
+	else if ((dval==-5) && (cval==-9))  { base =	-29; }
+	else if ((dval==-5) && (cval==-10)) { base =	-30; }
+	else if ((dval==-6) && (cval==-8))  { base =	-32; }
+	else if ((dval==-6) && (cval==-9))  { base =	-33; }
+	else if ((dval==-6) && (cval==-10)) { base =	-34; }
+	else if ((dval==-6) && (cval==-11)) { base =	-35; }
+	else if ((dval==-6) && (cval==-12)) { base =	-36; }
+	else if ((dval==-7) && (cval==-10)) { base =	-38; }
+	else if ((dval==-7) && (cval==-11)) { base =	-39; }
+	else { // some error occurred or accidentals out of range
+		// cerr << "Problem occured in transToBase40()" << endl;
+		base = 0;
+	}
+
+	base += 40 * doctave * dsign;
+
+	return base;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison), 
+//    Perfect Fifth => 1, Major second => 2 (two fifths up), etc.
+//
+
+int Convert::base40IntervalToLineOfFifths(int base40interval) {
+	base40interval += 4000;
+	base40interval = base40interval % 40;
+
+	switch (base40interval) {
+		case 0:    return   0;     // C
+		case 1:    return   7;     // C#
+		case 2:    return  14;     // C##
+		case 3:    return 100;     // X
+		case 4:    return -12;     // D--
+		case 5:    return  -5;     // D-
+		case 6:    return   2;     // D
+		case 7:    return   9;     // D#
+		case 8:    return  16;     // D##
+		case 9:    return 100;     // X
+		case 10:   return -10;     // E--
+		case 11:   return  -3;     // E-
+		case 12:   return   4;     // E
+		case 13:   return  11;     // E#
+		case 14:   return  18;     // E##
+		case 15:   return -15;     // F--
+		case 16:   return  -8;     // F-
+		case 17:   return  -1;     // F
+		case 18:   return   6;     // F#
+		case 19:   return  13;     // F##
+		case 20:   return 100;     // X
+		case 21:   return -13;     // G--
+		case 22:   return  -6;     // G-
+		case 23:   return   1;     // G
+		case 24:   return   8;     // G#
+		case 25:   return  15;     // G##
+		case 26:   return 100;     // X
+		case 27:   return -11;     // A--
+		case 28:   return  -4;     // A-
+		case 29:   return   3;     // A
+		case 30:   return  10;     // A#
+		case 31:   return  17;     // A##
+		case 32:   return 100;     // X
+		case 33:   return  -9;     // B--
+		case 34:   return  -2;     // B-
+		case 35:   return   5;     // B
+		case 36:   return  12;     // B#
+		case 37:   return  19;     // B##
+		case 38:   return -14;     // C--
+		case 39:   return  -7;     // C-
+		default:   return 100;     // X
+	}
+
+	return 100;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::keyNumberToKern -- reverse of kernKeyToNumber.
+//
+
+string Convert::keyNumberToKern(int number) {
+   switch (number) {
+      case -7: return "*k[b-e-a-d-g-c-f-]";
+      case -6: return "*k[b-e-a-d-g-c-]";
+      case -5: return "*k[b-e-a-d-g-]";
+      case -4: return "*k[b-e-a-d-]";
+      case -3: return "*k[b-e-a-]";
+      case -2: return "*k[b-e-]";
+      case -1: return "*k[b-]";
+      case  0: return "*k[]";
+      case +1: return "*k[f#]";
+      case +2: return "*k[f#c#]";
+      case +3: return "*k[f#c#g#]";
+      case +4: return "*k[f#c#g#d#]";
+      case +5: return "*k[f#c#g#d#a#]";
+      case +6: return "*k[f#c#g#d#a#e#]";
+      case +7: return "*k[f#c#g#d#a#e#b#]";
+      default: return "*k[]";
    }
 }
 
@@ -17519,6 +19492,107 @@ bool Convert::contains(string* input, char pattern) {
 }
 
 
+//////////////////////////////
+//
+// Convert::makeBooleanTrackList -- Given a string
+//   such as "1,2,3" and a max track of 5, then
+//   create a vector with contents:
+//      0:false, 1:true, 2:true, 3:true, 4:false, 5:false.
+//   The 0 track is not used, and the two tracks not specified
+//   in the string are set to false.  Special abbreviations:
+//     $ = maxtrack
+//     $1 = maxtrack - 1
+//     $2 = maxtrack - 2
+//     etc.
+//   Ranges can be given, such as 1-3 instead of 1,2,3
+//
+
+void Convert::makeBooleanTrackList(vector<bool>& spinelist,
+		 const string& spinestring, int maxtrack) {
+   spinelist.resize(maxtrack+1);
+
+	if (spinestring.size() == 0) {
+		fill(spinelist.begin()+1, spinelist.end(), true);
+		return;
+	}
+	fill(spinelist.begin(), spinelist.end(), false);
+
+   string buffer = spinestring;;
+	vector<string> entries;
+	string separator = "[^\\d\\$-]+";
+   HumRegex hre;
+
+	// create an initial list of values:
+	hre.split(entries, buffer, separator);
+
+	// Now process each token in the extracted list:
+	int val = -1;
+	int val2 = -1;
+	bool range = false;
+	string tbuff;
+	for (int i=0; i<(int)entries.size(); i++) {
+
+		if (hre.search(entries[i], "\\$(\\d*)")) {
+			if (hre.getMatch(1).size() == 0) {
+				tbuff = to_string(maxtrack);
+			} else {
+				val = hre.getMatchInt(1);
+				tbuff = to_string(maxtrack - val);
+			}
+			hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+		}
+
+		range = false;
+		if (entries[i].find('-') != string::npos) {
+			range = true;
+			// check for second $ abbreviation at end of range:
+			if (hre.search(entries[i], "\\$(\\d*)")) {
+				if (hre.getMatch(1).size() == 0) {
+					tbuff = to_string(maxtrack);
+				} else {
+					val = hre.getMatchInt(1);
+					tbuff = to_string(maxtrack - val);
+				}
+				hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+			}
+			if (entries[i].back() == '$') {
+				entries[i].pop_back();
+				entries[i] += to_string(maxtrack);
+			}
+			// extract second vlaue
+			if (hre.search(entries[i], "-(\\d+)")) {
+				val2 = hre.getMatchInt(1);
+			} else {
+				range = false;
+			}
+		}
+
+
+		// get first value:
+		if (hre.search(entries[i], "(\\d+)")) {
+			val = stoi(hre.getMatch(1));
+		}
+		if (range) {
+			int direction = 1;
+			if (val > val2) {
+				direction = -1;
+			}
+			for (int j=val; j != val2; j += direction) {
+				if ((j > 0) && (j < maxtrack + 1)) {
+					spinelist[j] = true;
+				}
+			}
+			if ((val2 > 0) && (val2 < maxtrack + 1)) {
+				spinelist[val2] = true;
+			}
+		} else {
+			// not a range
+			if ((val > 0) && (val < maxtrack+1)) {
+				spinelist[val] = true;
+			}
+		}
+	}
+}
 
 
 

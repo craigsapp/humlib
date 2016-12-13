@@ -123,6 +123,7 @@ using std::istream;
 using std::map;
 using std::ostream;
 using std::pair;
+using std::regex;
 using std::set;
 using std::string;
 using std::stringstream;

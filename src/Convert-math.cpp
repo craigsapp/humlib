@@ -119,6 +119,46 @@ bool Convert::isNaN(double value) {
 
 
 
+//////////////////////////////
+//
+// Tool_transpose::pearsonCorrelation --
+//
+
+double Convert::pearsonCorrelation(vector<double> x, vector<double> y) {
+	double sumx  = 0.0;
+	double sumy  = 0.0;
+	double sumco = 0.0;
+	double meanx = x[0];
+	double meany = y[0];
+	double sweep;
+	double deltax;
+	double deltay;
+
+	int size = (int)x.size();
+	if ((int)y.size() < size) {
+		size = (int)y.size();
+	}
+
+	for (int i=2; i<=size; i++) {
+		sweep = (i-1.0) / i;
+		deltax = x[i-1] - meanx;
+		deltay = y[i-1] - meany;
+		sumx  += deltax * deltax * sweep;
+		sumy  += deltay * deltay * sweep;
+		sumco += deltax * deltay * sweep;
+		meanx += deltax / i;
+		meany += deltay / i;
+	}
+
+	double popsdx = sqrt(sumx / size);
+	double popsdy = sqrt(sumy / size);
+	double covxy  = sumco / size;
+
+	return covxy / (popsdx * popsdy);
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

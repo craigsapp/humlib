@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 10 15:59:41 PST 2016
+// Last Modified: Tue Dec 13 12:25:24 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -67,6 +67,7 @@ using std::istream;
 using std::map;
 using std::ostream;
 using std::pair;
+using std::regex;
 using std::set;
 using std::string;
 using std::stringstream;
@@ -342,11 +343,21 @@ ostream& operator<<(ostream& out, const vector<A>& v);
 class HumRegex {
 	public:
 		            HumRegex           (void);
-		            HumRegex           (const string& exp);
+		            HumRegex           (const string& exp,
+		                                const string& options = "");
 		           ~HumRegex           ();
 
+		// setting persistent options for regular expression contruction
+		void        setIgnoreCase      (void);
+		bool        getIgnoreCase      (void);
+		void        unsetIgnoreCase    (void);
+
+		// setting persistent search/match options
+		void        setGlobal          (void);
+		bool        getGlobal          (void);
+		void        unsetGlobal        (void);
+
 		// replacing
-
 		string&     replaceDestructive (string& input, const string& replacement,
 		                                const string& exp);
 		string&     replaceDestructive (string& input, const string& replacement,
@@ -370,6 +381,14 @@ class HumRegex {
 		string      replaceCopy        (string* input, const string& replacement,
 		                                const string& exp,
 		                                const string& options);
+		// matching (full-string match)
+		bool        match              (const string& input, const string& exp);
+		bool        match              (const string& input, const string& exp,
+		                                const string& options);
+		bool        match              (const string* input, const string& exp);
+		bool        match              (const string* input, const string& exp,
+		                                const string& options);
+
 
 		// searching
 		// http://www.cplusplus.com/reference/regex/regex_search
@@ -405,13 +424,11 @@ class HumRegex {
 		                                const string& buffer,
 		                                const string& separator);
 
-		// setting option flags:
-		void        setIgnoreCase      (void);
-		void        setNoIgnoreCase    (void);
-
 	protected:
+		std::regex_constants::syntax_option_type
+				getTemporaryRegexFlags(const string& sflags);
 		std::regex_constants::match_flag_type
-				getTemporaryFlags(const string& sflags);
+				getTemporarySearchFlags(const string& sflags);
 
 
 	private:
@@ -421,6 +438,7 @@ class HumRegex {
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
 		// .assign(string) == set the regular expression.
 		// operator=       == set the regular expression.
+		// .flags()        == return syntax_option_type used to construct.
 		std::regex m_regex;
 
 		// m_matches: stores the matches from a search:
@@ -438,39 +456,41 @@ class HumRegex {
 		// .end()       == end of submatch list.
 		std::smatch m_matches;
 
-		// m_flags: stores default settings for regex processing
+		// m_regexflags: store default settings for regex processing
 		// http://en.cppreference.com/w/cpp/regex/syntax_option_type
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
+		// /usr/local/Cellar/gcc49/4.9.3/include/c++/4.9.3/bits/regex_constants.h 
 		//
-		// Options:
-		//    regex::icase      == Ignore case.
-		//    regex::nosubs     == Don't collect submatches.
-		//    regex::optimize   == Make matching faster, but
-		//                                   construction slower.
-		//    regex::collate    == locale character ranges.
-		//    regex::multiline  == C++17 only.
+		// Options (in the namespace std::regex_constants):
+		//    icase      == Ignore case.
+		//    nosubs     == Don't collect submatches.
+		//    optimize   == Make matching faster, but construction slower.
+		//    collate    == locale character ranges.
+		//    multiline  == C++17 only.
 		//
-		// only one of the following can be given.  EMCAScript will be
-		// used by default if non specified.
-		//    regex::EMCAScript == Use EMCAScript regex syntax.
-		//    regex::basic      == Use basic POSIX syntax.
-		//    regex::extended   == Use extended POSIX syntax.
-		//    regex::awk        == Use awk POSIX syntax.
-		//    regex::grep       == Use grep POSIX syntax.
-		//    regex::extended   == Use egrep POSIX syntax.
-		// or:
-		// http://www.cplusplus.com/reference/regex/regex_search/
-		//    match_default     == clear all options
-		//    match_not_bol     == not beginning of line
-		//    match_not_eol     == not end of line
-		//    match_not_bow     == not beginning of word for \b
-		//    match_not_eow     == not end of word for \b
-		//    match_any         == any match acceptable if more than 1 possible.
-		//    match_not_null    == empty sequence does note match
+		// Only one of the following can be given.  EMCAScript will be
+		// used by default if none specified.
+		//    EMCAScript == Use EMCAScript regex syntax.
+		//    basic      == Use basic POSIX syntax.
+		//    extended   == Use extended POSIX syntax.
+		//    awk        == Use awk POSIX syntax.
+		//    grep       == Use grep POSIX syntax.
+		//    egrep      == Use egrep POSIX syntax.
+		std::regex_constants::syntax_option_type m_regexflags;
+
+		// m_flags: store default settings for regex processing
+		// http://www.cplusplus.com/reference/regex/regex_search
+		//    match_default     == clear all options.
+		//    match_not_bol     == not beginning of line.
+		//    match_not_eol     == not end of line.
+		//    match_not_bow     == not beginning of word for \b.
+		//    match_not_eow     == not end of word for \b.
+		//    match_any         == any match acceptable if more than 1 possible..
+		//    match_not_null    == empty sequence does note match.
 		//    match_continuous  ==
 		//    match_prev_avail  ==
 		//    format_default    == same as match_default.
-		std::regex_constants::match_flag_type m_flags;
+		std::regex_constants::match_flag_type m_searchflags;
 
 };
 
@@ -1392,6 +1412,8 @@ class HumdrumFileBase : public HumHash {
 		                                        const string& separator = ",");
 		ostream&      printFieldNumber         (int fieldnum, ostream& out);
 		ostream&      printFieldIndex          (int fieldind, ostream& out);
+		void          usage                    (const string& command);
+		void          example                  (void);
 
 		HTp           getTrackStart            (int track) const;
 		HTp           getSpineStart            (int spine) const
@@ -1432,6 +1454,8 @@ class HumdrumFileBase : public HumHash {
 //		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
+		void          makeBooleanTrackList     (vector<bool>& spinelist,
+		                                        const string& spinestring);
 
 
 		vector<HumdrumLine*> getReferenceRecords(void);
@@ -2355,6 +2379,10 @@ class Convert {
 		static void    wbhToPitch           (int& dpc, int& acc, int& octave,
 		                                     int maxacc, int wbh);
 		static int     kernClefToBaseline   (const string& input);
+		static string  base40ToTrans        (int base40);
+		static int     transToBase40        (const string& input);
+		static int     base40IntervalToLineOfFifths(int trans);
+		static string  keyNumberToKern      (int number);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -2367,7 +2395,7 @@ class Convert {
 		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
-		static string  getKernPitchAttributes (const string& kerndata);
+		static string getKernPitchAttributes(const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
@@ -2385,6 +2413,9 @@ class Convert {
 		static bool    contains(const string& input, char pattern);
 		static bool    contains(string* input, const string& pattern);
 		static bool    contains(string* input, char pattern);
+		static void    makeBooleanTrackList(vector<bool>& spinelist,
+		                                     const string& spinestring, 
+		                                     int maxtrack);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
@@ -2394,6 +2425,7 @@ class Convert {
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
+		static double  pearsonCorrelation   (vector<double> x, vector<double> y);
 
 };
 
@@ -2799,6 +2831,110 @@ class Tool_recip : public HumTool {
 		vector<HTp> m_kernspines;
 		bool        m_graceQ = true;
 
+};
+
+
+
+class Tool_transpose : public HumTool {
+	public:
+		         Tool_transpose  (void);
+		        ~Tool_transpose  () {};
+
+		bool     run             (HumdrumFile& infile);
+		bool     run             (const string& indata, ostream& out);
+		bool     run             (HumdrumFile& infile, ostream& out);
+
+	protected:
+
+		// auto transpose functions:
+		void     initialize             (HumdrumFile& infile);
+		void     convertScore           (HumdrumFile& infile, int style);
+		void     processFile            (HumdrumFile& infile,
+		                                 vector<bool>& spineprocess);
+		void     convertToConcertPitches(HumdrumFile& infile, int line,
+		                                 vector<int>& tvals);
+		void     convertToWrittenPitches(HumdrumFile& infile, int line,
+		                                 vector<int>& tvals);
+		void     printNewKeySignature   (const string& keysig, int trans);
+		void     processInterpretationLine(HumdrumFile& infile, int line,
+		                                 vector<int>& tvals, int style);
+		int      isKeyMarker            (const string& str);
+		void     printNewKeyInterpretation(HumdrumLine& aRecord,
+		                                 int index, int transval);
+		int      hasTrMarkers           (HumdrumFile& infile, int line);
+		void     printHumdrumKernToken  (HumdrumLine& record, int index,
+		                                 int transval);
+		int      checkForDeletedLine    (HumdrumFile& infile, int line);
+		int      getBase40ValueFromInterval(const string& string);
+		void     example                (void);
+		void     usage                  (const string& command);
+		void     printHumdrumDataRecord (HumdrumLine& record,
+		                                 vector<bool>& spineprocess);
+
+		double   pearsonCorrelation     (int size, double* x, double* y);
+		void     doAutoTransposeAnalysis(HumdrumFile& infile);
+		void     addToHistogramDouble   (vector<vector<double> >& histogram,
+		                                 int pc, double start, double dur,
+		                                 double tdur, int segments);
+		double   storeHistogramForTrack (vector<vector<double> >& histogram, 
+		                                 HumdrumFile& infile, int track,
+		                                 int segments);
+		void     printHistograms        (int segments, vector<int> ktracks, 
+		                                vector<vector<vector<double> > >&
+		                                 trackhist);
+		void     doAutoKeyAnalysis      (vector<vector<vector<double> > >&
+		                                 analysis, int level, int hop, int count,
+		                                 int segments, vector<int>& ktracks, 
+		                                 vector<vector<vector<double> > >&
+		                                 trackhist);
+		void     doTrackKeyAnalysis     (vector<vector<double> >& analysis,
+		                                 int level, int hop, int count, 
+		                                 vector<vector<double> >& trackhist,
+		                                 vector<double>& majorweights,
+		                                 vector<double>& minorweights);
+		void     identifyKeyDouble      (vector<double>& correls, 
+		                                 vector<double>& histogram, 
+		                                 vector<double>& majorweights, 
+		                                 vector<double>& minorweights);
+		void     fillWeightsWithKostkaPayne(vector<double>& maj,
+		                                 vector<double>& min);
+		void     printRawTrackAnalysis  (vector<vector<vector<double> > >&
+		                                 analysis, vector<int>& ktracks);
+		void     doSingleAnalysis       (vector<double>& analysis,
+		                                 int startindex, int length,
+		                                 vector<vector<double> >& trackhist, 
+		                                 vector<double>& majorweights, 
+		                                 vector<double>& minorweights);
+		void     identifyKey            (vector<double>& correls, 
+		                                 vector<double>& histogram,
+		                                 vector<double>& majorweights, 
+		                                 vector<double>& minorweights);
+		void     doTranspositionAnalysis(vector<vector<vector<double> > >&
+		                                 analysis);
+		int      calculateTranspositionFromKey(int targetkey,
+		                                 HumdrumFile& infile);
+		void     printTransposedToken   (HumdrumFile& infile, int row, int col,
+		                                 int transval);
+		void     printTransposeInformation(HumdrumFile& infile,
+		                                 vector<bool>& spineprocess,
+		                                 int line, int transval);
+		int      getTransposeInfo       (HumdrumFile& infile, int row, int col);
+		void     printNewKernString     (const string& string, int transval);
+
+	private:
+		int      transval     = 0;   // used with -b option
+		int      ssetkeyQ     = 0;   // used with -k option
+		int      ssetkey      = 0;   // used with -k option
+		int      currentkey   = 0;
+		int      autoQ        = 0;   // used with --auto option
+		int      debugQ       = 0;   // used with --debug option
+		int      spineQ       = 0;   // used with -s option
+		string   spinestring  = "";  // used with -s option
+		int      octave       = 0;   // used with -o option
+		int      concertQ     = 0;   // used with -C option
+		int      writtenQ     = 0;   // used with -W option
+		int      quietQ       = 0;   // used with -q option
+		int      instrumentQ  = 0;   // used with -I option
 };
 
 

@@ -25,11 +25,21 @@ namespace hum {
 class HumRegex {
 	public:
 		            HumRegex           (void);
-		            HumRegex           (const string& exp);
+		            HumRegex           (const string& exp,
+		                                const string& options = "");
 		           ~HumRegex           ();
 
+		// setting persistent options for regular expression contruction
+		void        setIgnoreCase      (void);
+		bool        getIgnoreCase      (void);
+		void        unsetIgnoreCase    (void);
+
+		// setting persistent search/match options
+		void        setGlobal          (void);
+		bool        getGlobal          (void);
+		void        unsetGlobal        (void);
+
 		// replacing
-
 		string&     replaceDestructive (string& input, const string& replacement,
 		                                const string& exp);
 		string&     replaceDestructive (string& input, const string& replacement,
@@ -53,6 +63,14 @@ class HumRegex {
 		string      replaceCopy        (string* input, const string& replacement,
 		                                const string& exp,
 		                                const string& options);
+		// matching (full-string match)
+		bool        match              (const string& input, const string& exp);
+		bool        match              (const string& input, const string& exp,
+		                                const string& options);
+		bool        match              (const string* input, const string& exp);
+		bool        match              (const string* input, const string& exp,
+		                                const string& options);
+
 
 		// searching
 		// http://www.cplusplus.com/reference/regex/regex_search
@@ -88,13 +106,11 @@ class HumRegex {
 		                                const string& buffer,
 		                                const string& separator);
 
-		// setting option flags:
-		void        setIgnoreCase      (void);
-		void        setNoIgnoreCase    (void);
-
 	protected:
+		std::regex_constants::syntax_option_type
+				getTemporaryRegexFlags(const string& sflags);
 		std::regex_constants::match_flag_type
-				getTemporaryFlags(const string& sflags);
+				getTemporarySearchFlags(const string& sflags);
 
 
 	private:
@@ -104,6 +120,7 @@ class HumRegex {
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
 		// .assign(string) == set the regular expression.
 		// operator=       == set the regular expression.
+		// .flags()        == return syntax_option_type used to construct.
 		std::regex m_regex;
 
 		// m_matches: stores the matches from a search:
@@ -121,39 +138,41 @@ class HumRegex {
 		// .end()       == end of submatch list.
 		std::smatch m_matches;
 
-		// m_flags: stores default settings for regex processing
+		// m_regexflags: store default settings for regex processing
 		// http://en.cppreference.com/w/cpp/regex/syntax_option_type
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
+		// /usr/local/Cellar/gcc49/4.9.3/include/c++/4.9.3/bits/regex_constants.h 
 		//
-		// Options:
-		//    regex::icase      == Ignore case.
-		//    regex::nosubs     == Don't collect submatches.
-		//    regex::optimize   == Make matching faster, but
-		//                                   construction slower.
-		//    regex::collate    == locale character ranges.
-		//    regex::multiline  == C++17 only.
+		// Options (in the namespace std::regex_constants):
+		//    icase      == Ignore case.
+		//    nosubs     == Don't collect submatches.
+		//    optimize   == Make matching faster, but construction slower.
+		//    collate    == locale character ranges.
+		//    multiline  == C++17 only.
 		//
-		// only one of the following can be given.  EMCAScript will be
-		// used by default if non specified.
-		//    regex::EMCAScript == Use EMCAScript regex syntax.
-		//    regex::basic      == Use basic POSIX syntax.
-		//    regex::extended   == Use extended POSIX syntax.
-		//    regex::awk        == Use awk POSIX syntax.
-		//    regex::grep       == Use grep POSIX syntax.
-		//    regex::extended   == Use egrep POSIX syntax.
-		// or:
-		// http://www.cplusplus.com/reference/regex/regex_search/
-		//    match_default     == clear all options
-		//    match_not_bol     == not beginning of line
-		//    match_not_eol     == not end of line
-		//    match_not_bow     == not beginning of word for \b
-		//    match_not_eow     == not end of word for \b
-		//    match_any         == any match acceptable if more than 1 possible.
-		//    match_not_null    == empty sequence does note match
+		// Only one of the following can be given.  EMCAScript will be
+		// used by default if none specified.
+		//    EMCAScript == Use EMCAScript regex syntax.
+		//    basic      == Use basic POSIX syntax.
+		//    extended   == Use extended POSIX syntax.
+		//    awk        == Use awk POSIX syntax.
+		//    grep       == Use grep POSIX syntax.
+		//    egrep      == Use egrep POSIX syntax.
+		std::regex_constants::syntax_option_type m_regexflags;
+
+		// m_flags: store default settings for regex processing
+		// http://www.cplusplus.com/reference/regex/regex_search
+		//    match_default     == clear all options.
+		//    match_not_bol     == not beginning of line.
+		//    match_not_eol     == not end of line.
+		//    match_not_bow     == not beginning of word for \b.
+		//    match_not_eow     == not end of word for \b.
+		//    match_any         == any match acceptable if more than 1 possible..
+		//    match_not_null    == empty sequence does note match.
 		//    match_continuous  ==
 		//    match_prev_avail  ==
 		//    format_default    == same as match_default.
-		std::regex_constants::match_flag_type m_flags;
+		std::regex_constants::match_flag_type m_searchflags;
 
 };
 

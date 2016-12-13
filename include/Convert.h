@@ -105,6 +105,10 @@ class Convert {
 		static void    wbhToPitch           (int& dpc, int& acc, int& octave,
 		                                     int maxacc, int wbh);
 		static int     kernClefToBaseline   (const string& input);
+		static string  base40ToTrans        (int base40);
+		static int     transToBase40        (const string& input);
+		static int     base40IntervalToLineOfFifths(int trans);
+		static string  keyNumberToKern      (int number);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -117,7 +121,7 @@ class Convert {
 		static int  getKernSlurEndElisionLevel  (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
-		static string  getKernPitchAttributes (const string& kerndata);
+		static string getKernPitchAttributes(const string& kerndata);
 
 		// String processing, defined in Convert-string.cpp
 		static vector<string> splitString   (const string& data,
@@ -135,6 +139,9 @@ class Convert {
 		static bool    contains(const string& input, char pattern);
 		static bool    contains(string* input, const string& pattern);
 		static bool    contains(string* input, char pattern);
+		static void    makeBooleanTrackList(vector<bool>& spinelist,
+		                                     const string& spinestring, 
+		                                     int maxtrack);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const vector<int>& numbers);
@@ -144,6 +151,7 @@ class Convert {
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
+		static double  pearsonCorrelation   (vector<double> x, vector<double> y);
 
 };
 

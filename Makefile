@@ -91,8 +91,9 @@ vpath %.cpp $(SRCDIR):$(INCDIR)
 vpath %.o   $(OBJDIR)
 
 # generating a list of the object files
-OBJS  = $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
+OBJS  =
 OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/tool-*.cpp)))
+OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
 .PHONY: examples myprograms src include dynamic tools

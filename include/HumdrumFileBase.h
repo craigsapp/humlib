@@ -173,6 +173,8 @@ class HumdrumFileBase : public HumHash {
 		                                        const string& separator = ",");
 		ostream&      printFieldNumber         (int fieldnum, ostream& out);
 		ostream&      printFieldIndex          (int fieldind, ostream& out);
+		void          usage                    (const string& command);
+		void          example                  (void);
 
 		HTp           getTrackStart            (int track) const;
 		HTp           getSpineStart            (int spine) const
@@ -213,6 +215,8 @@ class HumdrumFileBase : public HumHash {
 //		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
+		void          makeBooleanTrackList     (vector<bool>& spinelist,
+		                                        const string& spinestring);
 
 
 		vector<HumdrumLine*> getReferenceRecords(void);
