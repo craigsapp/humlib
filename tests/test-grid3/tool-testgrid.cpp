@@ -165,6 +165,10 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 			results[lineindex] = "eu";
 		} else if ((interval1 == -1) && (interval2 > 1) && (dur <= durp)) {
 			results[lineindex] = "ed";
+		} else if ((interval1 == -1) && (interval2 == 0) && (dur <= durp)) {
+			results[lineindex] = "ad";
+		} else if ((interval1 == 1) && (interval2 == 0) && (dur <= durp)) {
+			results[lineindex] = "au";
 		}
 		
 	}
