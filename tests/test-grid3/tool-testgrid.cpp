@@ -165,6 +165,10 @@ cout << endl;
 			results[lineindex] = "nu";
 		} else if ((interval1 == -1) && (interval2 == 1) && (dur <= durp)) {
 			results[lineindex] = "nd";
+		} else if ((interval1 == 1) && (interval2 < -1) && (dur <= durp)) {
+			results[lineindex] = "eu";
+		} else if ((interval1 == -1) && (interval2 > 1) && (dur <= durp)) {
+			results[lineindex] = "ed";
 		}
 		
 	}
