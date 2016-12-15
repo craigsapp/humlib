@@ -149,10 +149,6 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 		}
 		HumNum durp = attacks[i-1]->getDuration();
 		HumNum dur  = attacks[i]->getDuration();
-
-cout << "Attacks[" << i-1 << "]: " << attacks[i-1]->getToken() << "\tdurp=" << durp << endl;
-cout << "Attacks[" << i << "]: " << attacks[i]->getToken() << "\tdur=" << dur << endl;
-cout << endl;
 		interval1 = *attacks[i] - *attacks[i-1];
 		interval2 = *attacks[i+1] - *attacks[i];
 		int lineindex = attacks[i]->getLineIndex();
