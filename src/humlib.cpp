@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec 13 12:25:24 PST 2016
+// Last Modified: Thu Dec 15 12:56:59 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -13053,11 +13053,9 @@ HumNum NoteGrid::getNoteDuration(int vindex, int sindex) {
 	if (attacki >= 0) {
 		starttime = cell(vindex, attacki)->getDurationFromStart();
 	}
-	HumNum endtime;
+	HumNum endtime = m_infile->getScoreDuration();;
 	if (nexti >= 0) {
-		starttime = cell(vindex, nexti)->getDurationFromStart();
-	} else {
-		endtime = m_infile->getScoreDuration();
+		endtime = cell(vindex, nexti)->getDurationFromStart();
 	}
 	return endtime - starttime;
 }

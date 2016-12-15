@@ -147,17 +147,23 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 				continue;
 			}
 		}
+		HumNum durp = attacks[i-1]->getDuration();
+		HumNum dur  = attacks[i]->getDuration();
+
+cout << "Attacks[" << i-1 << "]: " << attacks[i-1]->getToken() << "\tdurp=" << durp << endl;
+cout << "Attacks[" << i << "]: " << attacks[i]->getToken() << "\tdur=" << dur << endl;
+cout << endl;
 		interval1 = *attacks[i] - *attacks[i-1];
 		interval2 = *attacks[i+1] - *attacks[i];
 		int lineindex = attacks[i]->getLineIndex();
 
-		if ((interval1 == 1) && (interval2 == 1)) {
+		if ((interval1 == 1) && (interval2 == 1) && (dur <= durp)) {
 			results[lineindex] = "pu";
-		} else if ((interval1 == -1) && (interval2 == -1)) {
+		} else if ((interval1 == -1) && (interval2 == -1) && (dur <= durp)) {
 			results[lineindex] = "pd";
-		} else if ((interval1 == 1) && (interval2 == -1)) {
+		} else if ((interval1 == 1) && (interval2 == -1) && (dur <= durp)) {
 			results[lineindex] = "nu";
-		} else if ((interval1 == -1) && (interval2 == 1)) {
+		} else if ((interval1 == -1) && (interval2 == 1) && (dur <= durp)) {
 			results[lineindex] = "nd";
 		}
 		
