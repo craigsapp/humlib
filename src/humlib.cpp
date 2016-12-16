@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 15 21:17:12 PST 2016
+// Last Modified: Thu Dec 15 23:18:56 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18238,6 +18238,12 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 	} else {
 		vector<bool> spineprocess;
 		infile.makeBooleanTrackList(spineprocess, spinestring);
+		// filter out non-kern spines so they are not analyzed.
+		for (int t=1; t<=infile.getMaxTrack(); t++) {
+			if (!infile.getTrackStart(t)->isKern()) {
+				spineprocess[t] = false;
+			}
+		}
 		processFile(infile, spineprocess);
 	}
 
@@ -18270,8 +18276,15 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 				break;
 
 		} else if (infile[i].isData()) {
-	    // transpose notes according to tvals data
-	    for (j=0; j<infile[i].getFieldCount(); j++) {
+			// transpose notes according to tvals data
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (!infile.token(i, j)->isKern()) {
+					m_text << infile.token(i, j);
+					if (j < infile[i].getFieldCount() - 1) {
+					 		m_text << "\t";
+					}
+					continue;
+				}
 				ptrack = infile.token(i, j)->getTrack();
 				if (tvals[ptrack] == 0) {
 					  m_text << infile.token(i, j);
@@ -18301,12 +18314,6 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 
 void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 	  vector<int>& tvals, int style) {
-
-	HumRegex hre;
-
-	int j;
-	int ptrack;
-
 	if (hasTrMarkers(infile, line)) {
 		switch (style) {
 			case STYLE_CONCERT:
@@ -18321,13 +18328,20 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 		return;
 	}
 
-	for (j=0; j<infile[line].getFieldCount(); j++) {
-		ptrack = infile.token(line, j)->getTrack();
+	for (int j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			m_text << infile.token(line, j);
+			if (j<infile[line].getFieldCount()-1) {
+				m_text << "\t";
+			}
+			continue;
+		}
+		int ptrack = infile.token(line, j)->getTrack();
 
 		// check for *ITr or *Tr markers
 		// ignore *ITr markers when creating a Concert-pitch score
 		// ignore *Tr  markers when creating a Written-pitch score
-
+		HumRegex hre;
 		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
 			// transpose *k[] markers if necessary
 			if (tvals[ptrack] != 0) {
@@ -18370,6 +18384,13 @@ void Tool_transpose::convertToWrittenPitches(HumdrumFile& infile, int line,
 	int base;
 	int ptrack;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			m_text << infile.token(line, j);
+			if (j < infile[line].getFieldCount() - 1) {
+				m_text << "\t";
+			}
+			continue;
+		}
 		if (hre.search(infile.token(line, j),
 		"^\\*ITrd[+-]?\\d+c[+-]?\\d+$", "")) {
 			base = Convert::transToBase40(*infile.token(line, j));
@@ -18401,8 +18422,15 @@ void Tool_transpose::convertToConcertPitches(HumdrumFile& infile, int line, vect
 	int base;
 	int ptrack;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			m_text << infile.token(line, j);
+			if (j < infile[line].getFieldCount() - 1) {
+				m_text << "\t";
+			}
+			continue;
+		}
 		if (hre.search(infile.token(line, j),
-		"^\\*Trd[+-]?\\d+c[+-]?\\d+$", "")) {
+				"^\\*Trd[+-]?\\d+c[+-]?\\d+$", "")) {
 			base = Convert::transToBase40(*infile.token(line, j));
 			string output = "*ITr";
 			output += Convert::base40ToTrans(base);
@@ -18431,6 +18459,9 @@ int Tool_transpose::hasTrMarkers(HumdrumFile& infile, int line) {
 	HumRegex hre;
 	int j;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			continue;
+		}
 		if (hre.search(infile.token(line, j),
 				"^\\*I?Trd[+-]?\\d+c[+-]?\\d+$", "")) {
 			return 1;
@@ -18464,7 +18495,7 @@ int Tool_transpose::isKeyMarker(const string& str) {
 //
 
 void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col, int transval) {
-	if (!infile.token(row, col)->isKern()) {
+	if (infile.token(row, col)->isKern()) {
 		// don't know how to transpose this type of data, so leave it as is
 		m_text << infile.token(row, col);
 		return;
@@ -18480,16 +18511,15 @@ void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col,
 // Tool_transpose::calculateTranspositionFromKey --
 //
 
-int Tool_transpose::calculateTranspositionFromKey(int targetkey, HumdrumFile& infile) {
-
-	int i, j;
+int Tool_transpose::calculateTranspositionFromKey(int targetkey, 
+		HumdrumFile& infile) {
 	HumRegex hre;
 	int base40 = 0;
 	int currentkey = 0;
 	int mode = 0;
 	int found = 0;
 
-	for (i=0; i<infile.getLineCount(); i++) {
+	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
 			// no initial key label was found, so don't transpose.
 			// in the future, maybe allow an automatic key analysis
@@ -18500,7 +18530,10 @@ int Tool_transpose::calculateTranspositionFromKey(int targetkey, HumdrumFile& in
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			if (!infile.token(i, j)->isKern()) {
+				continue;
+			}
 			if (!hre.search(infile.token(i, j), "^\\*([A-G][#-]?):", "i")) {
 				continue;
 			}
@@ -18515,8 +18548,7 @@ int Tool_transpose::calculateTranspositionFromKey(int targetkey, HumdrumFile& in
 			base40 = base40 % 40;
 			base40 = base40 + (3 + mode) * 40;
 			currentkey = base40;
-	 found = 1;
-
+	 		found = 1;
 			break;
 		}
 		if (found) {
@@ -18562,6 +18594,9 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 	vector<int> finalvalues(infile.getMaxTrack()+1);
 
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			continue;
+		}
 		ptrack = infile.token(line, j)->getTrack();
 		startvalues[ptrack] = getTransposeInfo(infile, line, j);
 		// m_text << "Found transpose value " << startvalues[ptrack] << endl;
@@ -18570,6 +18605,9 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 	int entry = 0;
 	// check if any spine will be transposed after final processing
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			continue;
+		}
 		ptrack = infile.token(line, j)->getTrack();
 		if (spineprocess[ptrack]) {
 		finalvalues[ptrack] = transval;
@@ -18592,6 +18630,13 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 	}
 
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			m_text << "*";
+			if (j < infile[line].getFieldCount()-1) {
+				m_text << "\t";
+			}
+			continue;
+		}
 		ptrack = infile.token(line, j)->getTrack();
 		if (finalvalues[ptrack] == 0) {
 			m_text << "*";
@@ -18623,23 +18668,23 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 //
 
 int Tool_transpose::getTransposeInfo(HumdrumFile& infile, int row, int col) {
-	int i, j;
 	int track = infile.token(row, col)->getTrack();
 	int ptrack;
-
 	HumRegex hre;
-
 	int base;
 	int output = 0;
 
-	for (i=row; i<infile.getLineCount(); i++) {
+	for (int i=row; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
 			break;
 		}
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			if (!infile.token(i, j)->isKern()) {
+				continue;
+			}
 			ptrack = infile.token(i, j)->getTrack();
 			if (ptrack != track) {
 				continue;
@@ -18673,6 +18718,9 @@ int Tool_transpose::checkForDeletedLine(HumdrumFile& infile, int line) {
 	int present = 0;
 	int composite = 0;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (!infile.token(line, j)->isKern()) {
+			continue;
+		}
 		if (infile.token(line, j)->find("deletedTr") != string::npos) {
 			present = 1;
 		} else if (infile.token(line, j)->isNull()) {
@@ -18738,6 +18786,13 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 			m_text << "\n";
 		} else if (infile[i].isInterpretation()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (!infile.token(i, j)->isKern()) {
+					m_text << infile.token(i, j);
+					if (j<infile[i].getFieldCount()-1) {
+						m_text << "\t";
+					}
+					continue;
+				}
 				if (infile.token(i, j)->compare(0, 2, "**") == 0) {
 						interpstart = 1;
 				}
@@ -18792,8 +18847,8 @@ void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
 	int len = (int)keysig.size();
 	for (int i=0; i<len; i++) {
 		switch(keysig[i]) {
-			case '-':   counter--; break;
-			case '#':   counter++; break;
+			case '-': counter--; break;
+			case '#': counter++; break;
 		}
 	}
 
@@ -18842,17 +18897,17 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 		vector<bool>& spineprocess) {
 	int i;
 	for (i=0; i<record.getFieldCount(); i++) {
-		if (!spineprocess[record.token(i)->getTrack()]) {
-			// don't try to transpose spines which were not indicated.
-			m_text << record[i];
+		if (!record.token(i)->isKern()) {
+			// don't try to transpose non-kern spines
+			m_text << record.token(i);
 			if (i<record.getFieldCount()-1) {
 				m_text << "\t";
 			}
 			continue;
 		}
-		if (!record.token(i)->isKern()) {
-			// don't try to transpose non-kern spines
-			m_text << record[i];
+		if (!spineprocess[record.token(i)->getTrack()]) {
+			// don't try to transpose spines which were not indicated.
+			m_text << record.token(i);
 			if (i<record.getFieldCount()-1) {
 				m_text << "\t";
 			}
@@ -18860,6 +18915,7 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 		}
 
 		printHumdrumKernToken(record, i, transval);
+
 		if (i<record.getFieldCount()-1) {
 			m_text << "\t";
 		}
@@ -18882,7 +18938,10 @@ void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
 		m_text << record.token(index);
 		return;
 	}
-
+	if (!record.token(index)->isKern()) {
+		m_text << record.token(index);
+		return;
+	}
 	string buffer;
 	int tokencount = record.token(index)->getSubtokenCount();
 	for (int k=0; k<tokencount; k++) {
@@ -19132,16 +19191,16 @@ void Tool_transpose::doTranspositionAnalysis(vector<vector<vector<double> > >& a
 		for (j=2; j<3; j++) {
 			for (k=0; k<(int)analysis[i].size(); k++) {
 				if (analysis[i][k][24] >= 0 && analysis[j][k][24] >= 0) {
-	       value1 = (int)analysis[i][k][25];
-	       if (value1 >= 12) {
+					value1 = (int)analysis[i][k][25];
+	 				if (value1 >= 12) {
 						  value1 = value1 - 12;
 					}
-	       value2 = (int)analysis[j][k][25];
-	       if (value2 >= 12) {
+					value2 = (int)analysis[j][k][25];
+	 				if (value2 >= 12) {
 						  value2 = value2 - 12;
 					}
-	       value = value1 - value2;
-	       if (value < 0) {
+					value = value1 - value2;
+					if (value < 0) {
 						  value = value + 12;
 					}
 					if (value > 6) {
@@ -19172,17 +19231,17 @@ void Tool_transpose::printRawTrackAnalysis(vector<vector<vector<double> > >& ana
 		m_text << "Frame\t" << i << ":";
 		for (j=0; j<(int)analysis.size(); j++) {
 			m_text << "\t";
-	 value = (int)analysis[j][i][24];
-	 if (value >= 12) {
+	 		value = (int)analysis[j][i][24];
+	 		if (value >= 12) {
 				value = value - 12;
 			}
-	 value2 = (int)analysis[j][i][25];
-	 if (value2 >= 12) {
+	 		value2 = (int)analysis[j][i][25];
+	 		if (value2 >= 12) {
 				value2 = value2 - 12;
 			}
 			m_text << value;
-	 // if (value != value2) {
-	 //    m_text << "," << value2;
+	 		// if (value != value2) {
+	 		//    m_text << "," << value2;
 			// }
 		}
 		m_text << "\n";
@@ -19418,7 +19477,7 @@ vector<vector<vector<double> > >& trackhist) {
 	for (i=0; i<segments; i++) {
 //m_text << "i=" << i << endl;
 		m_text << "segment " << i
-	   << " ==========================================\n";
+				<< " ==========================================\n";
 		for (j=0; j<12; j++) {
 			start = 0;
 //m_text << "j=" << i << endl;
@@ -19432,7 +19491,7 @@ vector<vector<vector<double> > >& trackhist) {
 					start = 1;
 				}
 				m_text << "\t";
-	    m_text << trackhist[k][i][j];
+				m_text << trackhist[k][i][j];
 			}
 	 if (start) {
 				m_text << "\n";
@@ -19477,7 +19536,10 @@ double Tool_transpose::storeHistogramForTrack(vector<vector<double> >& histogram
 		}
 		start = infile[i].getDurationFromStart().getFloat();
 		for (j=0; j<infile[i].getFieldCount(); j++) {
-	 if (infile.token(i, j)->getTrack() != track) {
+			if (!infile.token(i, j)->isKern()) {
+				continue;
+			}
+	 		if (infile.token(i, j)->getTrack() != track) {
 				continue;
 			}
 			if (!infile.token(i, j)->isKern()) {
