@@ -1445,6 +1445,25 @@ HumdrumToken* HumdrumFileStructure::getStrandEnd(int sindex, int index) const {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileStructure::hasFilters -- Returns true if has any
+//    reference records starting with "!!!filter:".
+//
+
+bool HumdrumFileStructure::hasFilters(void) {
+	HumdrumFileBase& infile = *this;
+	vector<HumdrumLine*> refs  = infile.getReferenceRecords();
+	for (int i=0; i<(int)refs.size(); i++) {
+		if (refs[i]->getReferenceKey() == "filter") {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 // END_MERGE
 
 } // end namespace hum

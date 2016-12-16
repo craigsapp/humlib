@@ -139,10 +139,10 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 		m_text << "!! Field Expansion List:";
 		for (int j=0; j<(int)field.size(); j++) {
 			m_text << " " << field[j];
-  			if (subfield[j]) {
+			if (subfield[j]) {
 				m_text << (char)subfield[j];
 			}
-  			if (model[j]) {
+			if (model[j]) {
 				m_text << (char)model[j];
 			}
 		}

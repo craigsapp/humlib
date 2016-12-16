@@ -33,6 +33,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		              HumdrumFileStructure         (const string& filename);
 		              HumdrumFileStructure         (istream& contents);
 		             ~HumdrumFileStructure         ();
+		bool          hasFilters                   (void);
 
 		// TSV reading functions:
 		bool          read                         (istream& contents);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 15 17:57:16 EST 2016
+// Last Modified: Thu Dec 15 21:17:12 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1626,6 +1626,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		              HumdrumFileStructure         (const string& filename);
 		              HumdrumFileStructure         (istream& contents);
 		             ~HumdrumFileStructure         ();
+		bool          hasFilters                   (void);
 
 		// TSV reading functions:
 		bool          read                         (istream& contents);

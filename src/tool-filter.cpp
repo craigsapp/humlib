@@ -12,17 +12,35 @@
 //
 
 #include "tool-filter.h"
-#include "HumRegex.h"
+
+// tools which filter can process:
 #include "tool-autobeam.h"
+#include "tool-autostem.h"
+#include "tool-extract.h"
+#include "tool-recip.h"
+#include "tool-metlev.h"
+#include "tool-transpose.h"
+#include "HumRegex.h"
 
 #include <algorithm>
 #include <cmath>
+
 
 using namespace std;
 
 namespace hum {
 
 // START_MERGE
+
+
+#define RUNTOOL(NAME, INFILE, COMMAND)             \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILE);                              \
+	if (tool->hasNonHumdrumOutput()) {              \
+		INFILE.readString(tool->getTextOutput());    \
+	}                                               \
+	delete tool;
 
 
 ////////////////////////////////
@@ -74,29 +92,17 @@ bool Tool_filter::run(HumdrumFile& infile) {
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
 		if (commands[i].first == "autobeam") {
-			Tool_autobeam *tool = new Tool_autobeam;
-			tool->process(commands[i].second);
-			tool->run(infile);
-			if (tool->hasNonHumdrumOutput()) {
-				infile.readString(tool->getTextOutput());
-			}
-			delete tool;
+			RUNTOOL(autobeam, infile, commands[i].second);
 		} else if (commands[i].first == "autostem") {
-			Tool_autostem *tool = new Tool_autostem;
-			tool->process(commands[i].second);
-			tool->run(infile);
-			if (tool->hasNonHumdrumOutput()) {
-				infile.readString(tool->getTextOutput());
-			}
-			delete tool;
+			RUNTOOL(autostem, infile, commands[i].second);
+		} else if (commands[i].first == "extract") {
+			RUNTOOL(extract, infile, commands[i].second);
+		} else if (commands[i].first == "metlev") {
+			RUNTOOL(metlev, infile, commands[i].second);
+		} else if (commands[i].first == "recip") {
+			RUNTOOL(recip, infile, commands[i].second);
 		} else if (commands[i].first == "transpose") {
-			Tool_transpose *tool = new Tool_transpose;
-			tool->process(commands[i].second);
-			tool->run(infile);
-			if (tool->hasNonHumdrumOutput()) {
-				infile.readString(tool->getTextOutput());
-			}
-			delete tool;
+			RUNTOOL(transpose, infile, commands[i].second);
 		}
 	}
 
