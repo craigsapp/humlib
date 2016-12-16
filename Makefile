@@ -152,7 +152,7 @@ makedirs:
 	@-mkdir -p $(LIBDIR)
 
 %:
-	@if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi
+	@echo 'if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi' | bash -s
 
 ###########################################################################
 #                                                                         #

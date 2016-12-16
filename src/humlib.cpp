@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 09:10:18 PST 2016
+// Last Modified: Fri Dec 16 11:50:32 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19608,7 +19608,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		}
 		string command = refs[i]->getReferenceValue();
 		hre.split(clist, command, "\\s*\\|\\s*");
-		for (int j=0; j<clist.size(); j++) {
+		for (int j=0; j<(int)clist.size(); j++) {
 			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
 				entry.first  = hre.getMatch(1);
 				entry.second = clist[j];

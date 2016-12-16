@@ -137,7 +137,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		}
 		string command = refs[i]->getReferenceValue();
 		hre.split(clist, command, "\\s*\\|\\s*");
-		for (int j=0; j<clist.size(); j++) {
+		for (int j=0; j<(int)clist.size(); j++) {
 			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
 				entry.first  = hre.getMatch(1);
 				entry.second = clist[j];
