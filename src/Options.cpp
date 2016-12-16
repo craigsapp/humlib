@@ -467,7 +467,7 @@ string Options::getArgument(int index) {
 //
 
 int Options::getArgCount(void) {
-	return m_arguments.size() - 1;
+	return m_arguments.size();
 }
 
 // Alias:
@@ -486,10 +486,7 @@ int Options::getArgumentCount(void) {
 //
 
 vector<string>& Options::getArgList(vector<string>& output) {
-	output.clear();
-	for (int i=1; i<(int)m_arguments.size(); i++) {
-		output.push_back(m_arguments[i]);
-	}
+	output = m_arguments;
 	return output;
 }
 
@@ -524,10 +521,10 @@ int Options::getBoolean(const string& optionName) {
 //
 
 string Options::getCommand(void) {
-	if (m_arguments.size() == 0) {
+	if (m_argv.empty()) {
 		return "";
 	} else {
-		return m_arguments[0];
+		return m_argv[0];
 	}
 }
 
@@ -940,9 +937,6 @@ void Options::xverify(int error_check, int suppress) {
 	if (m_arguments.size() != 0) {
 		m_arguments.clear();
 	}
-
-	// store the command in the first position of the parsed arguments.
-	m_arguments.push_back(m_argv[0]);
 
 	int position   = 0;
 	int running    = 0;

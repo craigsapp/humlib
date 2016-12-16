@@ -273,7 +273,7 @@ sub getFiles {
 	}
 	@output = sort @output;
 	push(@output, @output2);
-	return @output;
+	return sort  @output;
 }
 
 
