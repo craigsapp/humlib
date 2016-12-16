@@ -65,7 +65,7 @@ HumdrumLine::HumdrumLine(HumdrumLine& line) {
 	m_durationFromBarline = line.m_durationFromBarline;
 	m_durationToBarline   = line.m_durationToBarline;
 	m_tokens.resize(line.m_tokens.size());
-	for (int i=0; i<m_tokens.size(); i++) {
+	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
 	}
 	m_owner = NULL;
@@ -79,7 +79,7 @@ HumdrumLine::HumdrumLine(HumdrumLine& line, void* owner) {
 	m_durationFromBarline = line.m_durationFromBarline;
 	m_durationToBarline   = line.m_durationToBarline;
 	m_tokens.resize(line.m_tokens.size());
-	for (int i=0; i<m_tokens.size(); i++) {
+	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
 	}
 	m_owner = owner;
@@ -99,7 +99,7 @@ HumdrumLine& HumdrumLine::operator=(HumdrumLine& line) {
 	m_durationFromBarline = line.m_durationFromBarline;
 	m_durationToBarline   = line.m_durationToBarline;
 	m_tokens.resize(line.m_tokens.size());
-	for (int i=0; i<m_tokens.size(); i++) {
+	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
 	}
 	m_owner = NULL;
