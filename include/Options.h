@@ -27,37 +27,37 @@ namespace hum {
 
 class Option_register {
 	public:
-		             Option_register     (void);
-		             Option_register     (const string& aDefinition, char aType,
+		         Option_register     (void);
+		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption);
-		             Option_register     (const string& aDefinition, char aType,
+		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption,
 		                                  const string& aModifiedOption);
-		            ~Option_register     ();
+		        ~Option_register     ();
 
-		void          clearModified      (void);
-		const string& getDefinition      (void);
-		const string& getDefault         (void);
-		const string& getOption          (void);
-		const string& getModified        (void);
-		const string& getDescription     (void);
-		int           isModified         (void);
-		char          getType            (void);
-		void          reset              (void);
-		void          setDefault         (const string& aString);
-		void          setDefinition      (const string& aString);
-		void          setDescription     (const string& aString);
-		void          setModified        (const string& aString);
-		void          setType            (char aType);
-		ostream&      print              (ostream& out);
+		void     clearModified      (void);
+		string   getDefinition      (void);
+		string   getDefault         (void);
+		string   getOption          (void);
+		string   getModified        (void);
+		string   getDescription     (void);
+		int      isModified         (void);
+		char     getType            (void);
+		void     reset              (void);
+		void     setDefault         (const string& aString);
+		void     setDefinition      (const string& aString);
+		void     setDescription     (const string& aString);
+		void     setModified        (const string& aString);
+		void     setType            (char aType);
+		ostream& print              (ostream& out);
 
 	protected:
-		string       definition;
-		string       description;
-		string       defaultOption;
-		string       modifiedOption;
-		int          modifiedQ;
-		char         type;
+		string   m_definition;
+		string   m_description;
+		string   m_defaultOption;
+		string   m_modifiedOption;
+		int      m_modifiedQ;
+		char     m_type;
 };
 
 
@@ -72,15 +72,15 @@ class Options {
 		int             define            (const string& aDefinition);
 		int             define            (const string& aDefinition,
 		                                   const string& description);
-		const string&   getArg            (int index);
-		const string&   getArgument       (int index);
+		string          getArg            (int index);
+		string          getArgument       (int index);
 		int             getArgCount       (void);
 		int             getArgumentCount  (void);
 		vector<string>& getArgList        (vector<string>& output);
 		vector<string>& getArgumentList   (vector<string>& output);
 		int             getBoolean        (const string& optionName);
 		string          getCommand        (void);
-		const string&   getCommandLine    (void);
+		string          getCommandLine    (void);
 		string          getDefinition     (const string& optionName);
 		double          getDouble         (const string& optionName);
 		char            getFlag           (void);
@@ -98,6 +98,11 @@ class Options {
 		void            process           (int argc, char** argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
+		void            process           (vector<string>& argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            process           (string& argv, int error_check = 1,
+		                                      int suppress = 0);
 		void            reset             (void);
 		void            xverify           (int argc, char** argv,
 		                                      int error_check = 1,
@@ -108,35 +113,58 @@ class Options {
 		void            setModified       (const string& optionName,
 		                                   const string& optionValue);
 		void            setOptions        (int argc, char** argv);
+		void            setOptions        (vector<string>& argv);
+		void            setOptions        (string& args);
 		void            appendOptions     (int argc, char** argv);
-		void            appendOptions     (const string& strang);
-		void            appendOptions     (const vector<string>& argv);
+		void            appendOptions     (string& args);
+		void            appendOptions     (vector<string>& argv);
 		ostream&        printRegister     (ostream& out);
 		int             isDefined         (const string& name);
+		static vector<string>  tokenizeCommandLine(string& args);
 
 	protected:
-		int                      m_options_error_check;  // for verify command
-		int                      m_oargc;
-		vector<string>           m_oargv;
-		string                   m_commandString;
-		char                     m_optionFlag;
-		vector<string*>          m_argument;
+		// m_argv: the list of raw command line strings including
+		// a mix of options and non-option argument.
+		vector<string> m_argv;
 
+		// m_arguments: list of parsed command-line arguments which
+		// are not options, or the command (argv[0]);
+		vector<string> m_arguments;
+
+		// m_optionRegister: store for the states/values of each option.
 		vector<Option_register*> m_optionRegister;
-		map<string, int>         m_optionList;
 
-		int                      m_processedQ;
-		int                      m_suppressQ;       // prevent --options option
-		int                      m_optionsArgument; // indicates --options present
+		// m_optionFlag: the character which indicates an option.
+		// Generally a dash, but could be made a slash for Windows environments.
+		char m_optionFlag = '-';
 
-		vector<string>           m_extraArgv;
-		vector<string>           m_extraArgv_strings;
+		// m_optionList:
+		map<string, int> m_optionList;
 
-		int         getRegIndex           (const string& optionName);
-		int         optionQ               (const string& aString, int& argp);
-		int         storeOption           (int gargp, int& position,
-		                                   int& running);
+		//
+		// boolern options for object:
+		//
 
+		// m_options_error_check: for .verify() function.
+		bool m_options_error_checkQ = true;
+
+		// m_processedQ: true if process() was run.  This will parse
+		// the command-line arguments into a list of options, and also
+		// enable boolean versions of the options.
+		bool m_processedQ = false;
+
+		// m_suppressQ: true means to suppress automatic --options option
+		// listing.
+		bool m_suppressQ = false;
+
+		// m_optionsArgument: indicate that --options was used.
+		bool m_optionsArgQ = false;
+
+
+	private:
+		int     getRegIndex    (const string& optionName);
+		bool    isOption       (const string& aString, int& argp);
+		int     storeOption    (int gargp, int& position, int& running);
 };
 
 #define OPTION_BOOLEAN_TYPE   'b'

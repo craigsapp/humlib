@@ -56,7 +56,11 @@ bool Tool_autobeam::run(const string& indata, ostream& out) {
 
 bool Tool_autobeam::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	out << infile;
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
 	return status;
 }
 

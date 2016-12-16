@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 15 12:56:59 PST 2016
+// Last Modified: Thu Dec 15 20:14:02 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2433,37 +2433,37 @@ class Convert {
 
 class Option_register {
 	public:
-		             Option_register     (void);
-		             Option_register     (const string& aDefinition, char aType,
+		         Option_register     (void);
+		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption);
-		             Option_register     (const string& aDefinition, char aType,
+		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption,
 		                                  const string& aModifiedOption);
-		            ~Option_register     ();
+		        ~Option_register     ();
 
-		void          clearModified      (void);
-		const string& getDefinition      (void);
-		const string& getDefault         (void);
-		const string& getOption          (void);
-		const string& getModified        (void);
-		const string& getDescription     (void);
-		int           isModified         (void);
-		char          getType            (void);
-		void          reset              (void);
-		void          setDefault         (const string& aString);
-		void          setDefinition      (const string& aString);
-		void          setDescription     (const string& aString);
-		void          setModified        (const string& aString);
-		void          setType            (char aType);
-		ostream&      print              (ostream& out);
+		void     clearModified      (void);
+		string   getDefinition      (void);
+		string   getDefault         (void);
+		string   getOption          (void);
+		string   getModified        (void);
+		string   getDescription     (void);
+		int      isModified         (void);
+		char     getType            (void);
+		void     reset              (void);
+		void     setDefault         (const string& aString);
+		void     setDefinition      (const string& aString);
+		void     setDescription     (const string& aString);
+		void     setModified        (const string& aString);
+		void     setType            (char aType);
+		ostream& print              (ostream& out);
 
 	protected:
-		string       definition;
-		string       description;
-		string       defaultOption;
-		string       modifiedOption;
-		int          modifiedQ;
-		char         type;
+		string   m_definition;
+		string   m_description;
+		string   m_defaultOption;
+		string   m_modifiedOption;
+		int      m_modifiedQ;
+		char     m_type;
 };
 
 
@@ -2478,15 +2478,15 @@ class Options {
 		int             define            (const string& aDefinition);
 		int             define            (const string& aDefinition,
 		                                   const string& description);
-		const string&   getArg            (int index);
-		const string&   getArgument       (int index);
+		string          getArg            (int index);
+		string          getArgument       (int index);
 		int             getArgCount       (void);
 		int             getArgumentCount  (void);
 		vector<string>& getArgList        (vector<string>& output);
 		vector<string>& getArgumentList   (vector<string>& output);
 		int             getBoolean        (const string& optionName);
 		string          getCommand        (void);
-		const string&   getCommandLine    (void);
+		string          getCommandLine    (void);
 		string          getDefinition     (const string& optionName);
 		double          getDouble         (const string& optionName);
 		char            getFlag           (void);
@@ -2504,6 +2504,11 @@ class Options {
 		void            process           (int argc, char** argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
+		void            process           (vector<string>& argv,
+		                                      int error_check = 1,
+		                                      int suppress = 0);
+		void            process           (string& argv, int error_check = 1,
+		                                      int suppress = 0);
 		void            reset             (void);
 		void            xverify           (int argc, char** argv,
 		                                      int error_check = 1,
@@ -2514,35 +2519,58 @@ class Options {
 		void            setModified       (const string& optionName,
 		                                   const string& optionValue);
 		void            setOptions        (int argc, char** argv);
+		void            setOptions        (vector<string>& argv);
+		void            setOptions        (string& args);
 		void            appendOptions     (int argc, char** argv);
-		void            appendOptions     (const string& strang);
-		void            appendOptions     (const vector<string>& argv);
+		void            appendOptions     (string& args);
+		void            appendOptions     (vector<string>& argv);
 		ostream&        printRegister     (ostream& out);
 		int             isDefined         (const string& name);
+		static vector<string>  tokenizeCommandLine(string& args);
 
 	protected:
-		int                      m_options_error_check;  // for verify command
-		int                      m_oargc;
-		vector<string>           m_oargv;
-		string                   m_commandString;
-		char                     m_optionFlag;
-		vector<string*>          m_argument;
+		// m_argv: the list of raw command line strings including
+		// a mix of options and non-option argument.
+		vector<string> m_argv;
 
+		// m_arguments: list of parsed command-line arguments which
+		// are not options, or the command (argv[0]);
+		vector<string> m_arguments;
+
+		// m_optionRegister: store for the states/values of each option.
 		vector<Option_register*> m_optionRegister;
-		map<string, int>         m_optionList;
 
-		int                      m_processedQ;
-		int                      m_suppressQ;       // prevent --options option
-		int                      m_optionsArgument; // indicates --options present
+		// m_optionFlag: the character which indicates an option.
+		// Generally a dash, but could be made a slash for Windows environments.
+		char m_optionFlag = '-';
 
-		vector<string>           m_extraArgv;
-		vector<string>           m_extraArgv_strings;
+		// m_optionList:
+		map<string, int> m_optionList;
 
-		int         getRegIndex           (const string& optionName);
-		int         optionQ               (const string& aString, int& argp);
-		int         storeOption           (int gargp, int& position,
-		                                   int& running);
+		//
+		// boolern options for object:
+		//
 
+		// m_options_error_check: for .verify() function.
+		bool m_options_error_checkQ = true;
+
+		// m_processedQ: true if process() was run.  This will parse
+		// the command-line arguments into a list of options, and also
+		// enable boolean versions of the options.
+		bool m_processedQ = false;
+
+		// m_suppressQ: true means to suppress automatic --options option
+		// listing.
+		bool m_suppressQ = false;
+
+		// m_optionsArgument: indicate that --options was used.
+		bool m_optionsArgQ = false;
+
+
+	private:
+		int     getRegIndex    (const string& optionName);
+		bool    isOption       (const string& aString, int& argp);
+		int     storeOption    (int gargp, int& position, int& running);
 };
 
 #define OPTION_BOOLEAN_TYPE   'b'
@@ -2787,6 +2815,140 @@ class Tool_autostem : public HumTool {
 		int    Borderline    = 0;       // really used with -u option
 		int    notlongQ      = 0;       // used with -L option
 		bool   m_quit        = false;
+
+};
+
+
+class Tool_extract : public HumTool {
+	public:
+		         Tool_extract  (void);
+		        ~Tool_extract  () {};
+
+		bool     run                    (HumdrumFile& infile);
+		bool     run                    (const string& indata, ostream& out);
+		bool     run                    (HumdrumFile& infile, ostream& out);
+
+	protected:
+
+		// auto transpose functions:
+		void     initialize             (HumdrumFile& infile);
+
+		// function declarations
+		void    processFile             (HumdrumFile& infile);
+		void    excludeFields           (HumdrumFile& infile, vector<int>& field,
+		                                 vector<int>& subfield, vector<int>& model);
+		void    extractFields           (HumdrumFile& infile, vector<int>& field,
+		                                 vector<int>& subfield, vector<int>& model);
+		void    extractTrace            (HumdrumFile& infile, const string& tracefile);
+		void    getInterpretationFields (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, HumdrumFile& infile,
+		                                 string& interps, int state);
+		//void    extractInterpretations  (HumdrumFile& infile, string& interps);
+		void    example                 (void);
+		void    usage                   (const string& command);
+		void    fillFieldData           (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, string& fieldstring,
+		                                 HumdrumFile& infile);
+		void    processFieldEntry       (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, const string& astring,
+		                                 HumdrumFile& infile);
+		void    removeDollarsFromString (string& buffer, int maxtrack);
+		int     isInList                (int number, vector<int>& listofnum);
+		void    getTraceData            (vector<int>& startline,
+		                                 vector<vector<int> >& fields,
+		                                 const string& tracefile, HumdrumFile& infile);
+		void    printTraceLine          (HumdrumFile& infile, int line,
+		                                 vector<int>& field);
+		void    dealWithSpineManipulators(HumdrumFile& infile, int line,
+		                                 vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model);
+		void    storeToken              (vector<string>& storage,
+		                                 const string& string);
+		void    storeToken              (vector<string>& storage, int index,
+		                                 const string& string);
+		void    printMultiLines         (vector<int>& vsplit, vector<int>& vserial,
+		                                 vector<string>& tempout);
+		void    reverseSpines           (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, HumdrumFile& infile,
+		                                 const string& exinterp);
+		void    getSearchPat            (string& spat, int target,
+		                                 const string& modifier);
+		void    expandSpines            (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, HumdrumFile& infile,
+		                                 string& interp);
+		void    dealWithSecondarySubspine(vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, int targetindex,
+		                                 HumdrumFile& infile, int line, int spine,
+		                                 int submodel);
+		void    dealWithCospine         (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, int targetindex,
+		                                 HumdrumFile& infile, int line, int cospine,
+		                                 int comodel, int submodel,
+		                                 const string& cointerp);
+		void    printCotokenInfo        (int& start, HumdrumFile& infile, int line,
+		                                 int spine, vector<string>& cotokens,
+		                                 vector<int>& spineindex,
+		                                 vector<int>& subspineindex);
+		void    fillFieldDataByGrep     (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, const string& grepString,
+		                                 HumdrumFile& infile, int state);
+
+	private:
+
+		// global variables
+		int          excludeQ = 0;        // used with -x option
+		int          expandQ  = 0;        // used with -e option
+		string       expandInterp = "";   // used with -E option
+		int          interpQ  = 0;        // used with -i option
+		string       interps  = "";       // used with -i option
+		int          debugQ   = 0;        // used with --debug option
+		int          kernQ    = 0;        // used with -k option
+		int          fieldQ   = 0;        // used with -f or -p option
+		string       fieldstring = "";    // used with -f or -p option
+		vector<int>  field;               // used with -f or -p option
+		vector<int>  subfield;            // used with -f or -p option
+		vector<int>  model;               // used with -p, or -e options and similar
+		int          countQ   = 0;        // used with -C option
+		int          traceQ   = 0;        // used with -t option
+		string       tracefile = "";      // used with -t option
+		int          reverseQ = 0;        // used with -r option
+		string       reverseInterp = "**kern"; // used with -r and -R options.
+		// sub-spine "b" expansion model: how to generate data for a secondary
+		// spine if the primary spine is not divided.  Models are:
+		//    'd': duplicate primary spine (or "a" subspine) data (default)
+		//    'n': null = use a null token
+		//    'r': rest = use a rest instead of a primary spine note (in **kern)
+		//         data.  'n' will be used for non-kern spines when 'r' is used.
+		int          submodel = 'd';       // used with -m option
+		string editorialInterpretation = "yy";
+		string      cointerp = "**kern";   // used with -c option
+		int         comodel  = 0;          // used with -M option
+		string subtokenseparator = " "; // used with a future option
+		int         interpstate = 0;       // used -I or with -i
+		int         grepQ       = 0;       // used with -g option
+		string      grepString  = "";      // used with -g option
+
+};
+
+
+
+class Tool_filter : public HumTool {
+	public:
+		         Tool_filter   (void);
+		        ~Tool_filter   () {};
+
+		bool     run             (HumdrumFile& infile);
+		bool     run             (const string& indata, ostream& out);
+		bool     run             (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     getCommandList  (vector<pair<string, string> >& commands,
+		                          HumdrumFile& infile);
+		void     initialize      (HumdrumFile& infile);
+
+	private:
+		string   m_variant;        // used with -v option.
+		bool     m_debugQ = false; // used with --debug option
 
 };
 

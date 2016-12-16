@@ -59,13 +59,23 @@ Tool_autostem::Tool_autostem(void) {
 
 bool Tool_autostem::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
-	return run(infile, out);
+	int status = run(infile, out);
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
+	return status;
 }
 
 
 bool Tool_autostem::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	out << infile;
+	if (hasNonHumdrumOutput()) {
+		getTextOutput(out);
+	} else {
+		out << infile;
+	}
 	return status;
 }
 

@@ -17,6 +17,7 @@
 //
 
 #include "HumRegex.h"
+#include <iostream>
 
 using namespace std;
 
