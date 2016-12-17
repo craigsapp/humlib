@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 22:15:25 PST 2016
+// Last Modified: Fri Dec 16 23:59:38 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -13040,13 +13040,13 @@ bool HumdrumToken::isKeyDesignation(void) {
 //
 
 bool HumdrumToken::isTimeSignature(void) {
-	if (this->size() < 5) {
+	if (this->size() < 3) {
 		return false;
 	}
 	if (this->compare(0, 2, "*M") != 0) {
 		return false;
 	}
-	if (!isdigit((*this)[3])) {
+	if (!isdigit((*this)[2])) {
 		return false;
 	}
 	if (this->find("/") == string::npos) {

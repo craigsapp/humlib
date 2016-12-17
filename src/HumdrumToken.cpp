@@ -1194,13 +1194,13 @@ bool HumdrumToken::isKeyDesignation(void) {
 //
 
 bool HumdrumToken::isTimeSignature(void) {
-	if (this->size() < 5) {
+	if (this->size() < 3) {
 		return false;
 	}
 	if (this->compare(0, 2, "*M") != 0) {
 		return false;
 	}
-	if (!isdigit((*this)[3])) {
+	if (!isdigit((*this)[2])) {
 		return false;
 	}
 	if (this->find("/") == string::npos) {
