@@ -35,12 +35,12 @@ namespace hum {
 Tool_metlev::Tool_metlev(void) {
 	define("a|append=b",          "append data analysis to input file");
 	define("p|prepend=b",         "prepend data analysis to input file");
+	define("c|composite=b",       "generate composite rhythm");
 	define("i|integer=b",         "quantize metric levels to int values");
 	define("x|attacks-only=b",    "only mark lines with note attacks");
 	define("G|no-grace-notes=b",  "do not mark grace note lines");
 	define("k|kern-spine=i:1",    "analyze only given kern spine");
-	define("K|all-spines=b",      "analyze each kern spine separately");
-	define("e|exinterp=blev",     "exclusive interpretation type for output");
+	define("e|exinterp=s:blev",   "exclusive interpretation type for output");
 }
 
 
@@ -130,7 +130,20 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 			infile.createLinesFromTokens();
 			return true;
 		}
-	} else if (getBoolean("all-spines")) {
+	} else if (getBoolean("append")) {
+		infile.appendDataSpine(beatlev, "nan", exinterp);
+		infile.createLinesFromTokens();
+		return true;
+	} else if (getBoolean("prepend")) {
+		infile.prependDataSpine(beatlev, "nan", exinterp);
+		infile.createLinesFromTokens();
+		return true;
+	} else if (getBoolean("composite")) {
+		infile.prependDataSpine(beatlev, "nan", exinterp);
+		infile.printFieldIndex(0, m_text);
+		infile.clear();
+		infile.readString(m_text.str());
+	} else {
 		vector<vector<double> > results;
 		fillVoiceResults(results, infile, beatlev);
 		infile.appendDataSpine(results.back(), "nan", exinterp);
@@ -140,22 +153,9 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 		}
 		infile.createLinesFromTokens();
 		return true;
-	} else if (getBoolean("append")) {
-		infile.appendDataSpine(beatlev, "nan", exinterp);
-		infile.createLinesFromTokens();
-		return true;
-	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(beatlev, "nan", exinterp);
-		infile.createLinesFromTokens();
-		return true;
-	} else {
-		infile.prependDataSpine(beatlev, "nan", exinterp);
-		infile.printFieldIndex(0, m_text);
-		infile.clear();
-		infile.readString(m_text.str());
 	}
 
-	return 0;
+	return false;
 }
 
 

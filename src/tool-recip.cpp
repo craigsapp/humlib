@@ -40,6 +40,7 @@ Tool_recip::Tool_recip(void) {
 	define("G|ignore-grace-notes=b", "ignore grace notes");
 	define("k|kern-spine=i:1",       "analyze only given kern spine");
 	define("K|all-spines=b",         "analyze each kern spine separately");
+	define("e|exinterp=s:**recip",   "analyze each kern spine separately");
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 22:07:40 PST 2016
+// Last Modified: Fri Dec 16 22:15:25 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19643,12 +19643,12 @@ void Tool_filter::initialize(HumdrumFile& infile) {
 Tool_metlev::Tool_metlev(void) {
 	define("a|append=b",          "append data analysis to input file");
 	define("p|prepend=b",         "prepend data analysis to input file");
+	define("c|composite=b",       "generate composite rhythm");
 	define("i|integer=b",         "quantize metric levels to int values");
 	define("x|attacks-only=b",    "only mark lines with note attacks");
 	define("G|no-grace-notes=b",  "do not mark grace note lines");
 	define("k|kern-spine=i:1",    "analyze only given kern spine");
-	define("K|all-spines=b",      "analyze each kern spine separately");
-	define("e|exinterp=blev",     "exclusive interpretation type for output");
+	define("e|exinterp=s:blev",   "exclusive interpretation type for output");
 }
 
 
@@ -19738,7 +19738,20 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 			infile.createLinesFromTokens();
 			return true;
 		}
-	} else if (getBoolean("all-spines")) {
+	} else if (getBoolean("append")) {
+		infile.appendDataSpine(beatlev, "nan", exinterp);
+		infile.createLinesFromTokens();
+		return true;
+	} else if (getBoolean("prepend")) {
+		infile.prependDataSpine(beatlev, "nan", exinterp);
+		infile.createLinesFromTokens();
+		return true;
+	} else if (getBoolean("composite")) {
+		infile.prependDataSpine(beatlev, "nan", exinterp);
+		infile.printFieldIndex(0, m_text);
+		infile.clear();
+		infile.readString(m_text.str());
+	} else {
 		vector<vector<double> > results;
 		fillVoiceResults(results, infile, beatlev);
 		infile.appendDataSpine(results.back(), "nan", exinterp);
@@ -19748,22 +19761,9 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 		}
 		infile.createLinesFromTokens();
 		return true;
-	} else if (getBoolean("append")) {
-		infile.appendDataSpine(beatlev, "nan", exinterp);
-		infile.createLinesFromTokens();
-		return true;
-	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(beatlev, "nan", exinterp);
-		infile.createLinesFromTokens();
-		return true;
-	} else {
-		infile.prependDataSpine(beatlev, "nan", exinterp);
-		infile.printFieldIndex(0, m_text);
-		infile.clear();
-		infile.readString(m_text.str());
 	}
 
-	return 0;
+	return false;
 }
 
 
@@ -19847,6 +19847,7 @@ Tool_recip::Tool_recip(void) {
 	define("G|ignore-grace-notes=b", "ignore grace notes");
 	define("k|kern-spine=i:1",       "analyze only given kern spine");
 	define("K|all-spines=b",         "analyze each kern spine separately");
+	define("e|exinterp=s:**recip",   "analyze each kern spine separately");
 }
 
 
