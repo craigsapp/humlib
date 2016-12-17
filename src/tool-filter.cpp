@@ -18,6 +18,7 @@
 #include "tool-autostem.h"
 #include "tool-extract.h"
 #include "tool-recip.h"
+#include "tool-satb2gs.h"
 #include "tool-metlev.h"
 #include "tool-transpose.h"
 #include "HumRegex.h"
@@ -99,6 +100,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(extract, infile, commands[i].second);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second);
+		} else if (commands[i].first == "satb2gs") {
+			RUNTOOL(satb2gs, infile, commands[i].second);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second);
 		} else if (commands[i].first == "transpose") {

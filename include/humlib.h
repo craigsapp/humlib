@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 11:50:32 PST 2016
+// Last Modified: Fri Dec 16 18:08:57 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2994,6 +2994,34 @@ class Tool_recip : public HumTool {
 		vector<HTp> m_kernspines;
 		bool        m_graceQ = true;
 
+};
+
+
+
+class Tool_satb2gs : public HumTool {
+	public:
+		         Tool_satb2gs    (void);
+		        ~Tool_satb2gs    () {};
+
+		bool     run             (HumdrumFile& infile);
+		bool     run             (const string& indata, ostream& out);
+		bool     run             (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     initialize      (HumdrumFile& infile);
+		void     processFile     (HumdrumFile& infile);
+		void     example         (void);
+		void     usage           (const string& command);
+		void     convertData     (HumdrumFile& infile);
+		int      getSatbTracks   (vector<int>& tracks, HumdrumFile& infile);
+		void     printSpine      (HumdrumFile& infile, int row, int col, 
+		                          vector<int>& satbtracks);
+		void     printExInterp   (HumdrumFile& infile, int line, 
+		                          vector<int>& tracks);
+		void     printLastLine   (HumdrumFile& infile, int line, 
+		                          vector<int>& tracks);
+	private:
+		int    debugQ    = 0;             // used with --debug option
 };
 
 

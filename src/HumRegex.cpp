@@ -354,9 +354,7 @@ bool HumRegex::match(const string* input, const string& exp,
 string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp) {
 	m_regex = regex(exp, m_regexflags);
-	string output;
 	regex_replace(input, m_regex, replacement, m_searchflags);
-	input = output;
 	return input;
 }
 
