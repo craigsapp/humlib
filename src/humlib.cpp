@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 22:00:49 PST 2016
+// Last Modified: Fri Dec 16 22:07:40 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19958,13 +19958,13 @@ void Tool_recip::doCompositeAnalysis(HumdrumFile& infile) {
 	}
 
 	if (getBoolean("append")) {
-		infile.appendDataSpine(recips, "", "**recip");
+		infile.appendDataSpine(recips, "", m_exinterp);
 		return;
 	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(recips, "", "**recip");
+		infile.prependDataSpine(recips, "", m_exinterp);
 		return;
 	} else {
-		infile.prependDataSpine(recips, "", "**recip");
+		infile.prependDataSpine(recips, "", m_exinterp);
 		infile.printFieldIndex(0, m_text);
 		infile.clear();
 		infile.readString(m_text.str());
@@ -20012,7 +20012,7 @@ void Tool_recip::replaceKernWithRecip(HumdrumFile& infile) {
 	}
 
 	for (int i=0; i<(int)kspines.size(); i++) {
-		kspines[i]->setText("**recip");
+		kspines[i]->setText(m_exinterp);
 	}
 
 }
@@ -20028,6 +20028,16 @@ void Tool_recip::replaceKernWithRecip(HumdrumFile& infile) {
 void Tool_recip::initialize(HumdrumFile& infile) {
 	m_kernspines = infile.getKernSpineStartList();
 	m_graceQ = !getBoolean("ignore-grace-notes");
+
+	m_exinterp = getString("exinterp");
+	if (m_exinterp.empty()) {
+		m_exinterp = "**recip";
+	} else if (m_exinterp[0] != '*') {
+		m_exinterp.insert(0, "*");
+	}
+	if (m_exinterp[1] != '*') {
+		m_exinterp.insert(0, "*");
+	}
 }
 
 

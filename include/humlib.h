@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 22:00:49 PST 2016
+// Last Modified: Fri Dec 16 22:07:40 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2993,6 +2993,7 @@ class Tool_recip : public HumTool {
 	private:
 		vector<HTp> m_kernspines;
 		bool        m_graceQ = true;
+		string      m_exinterp = "**recip";
 
 };
 
