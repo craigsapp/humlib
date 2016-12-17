@@ -338,6 +338,8 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 	HumRegex hre;
 	string strang;
 	int count = 0;
+	bool foundnames = false;
+	bool foundabbreviations = false;
 	for (int j=0; j<infile[row].getFieldCount(); j++) {
 		track = infile.token(row, j)->getTrack();
 		if (track == target) {
@@ -346,9 +348,22 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 			}
 			strang = *infile.token(row,j);
 			hre.replaceDestructive(strang, "!*clef", "^\\*clef");
+			if ((!foundnames) && hre.search(strang, R"(^\*I")")) {
+				foundnames = true;
+				hre.replaceDestructive(strang, R"(!*I"Soprano")", R"(^\*I"Soprano)");
+				hre.replaceDestructive(strang, R"(!*I"Alto")"   , R"(^\*I"Alto)");
+				hre.replaceDestructive(strang, R"(!*I"Tenor")"  , R"(^\*I"Tenor)");
+				hre.replaceDestructive(strang, R"(!*I\"Bass")"  , R"(^\*I"Bass)");
+			}
+			if ((!foundabbreviations) && hre.search(strang, R"(^\*I')")) {
+				foundabbreviations = true;
+				hre.replaceDestructive(strang, R"(!*I'S")", R"(^\*I'S)");
+				hre.replaceDestructive(strang, R"(!*I'A")", R"(^\*I'A)");
+				hre.replaceDestructive(strang, R"(!*I'T")", R"(^\*I'T)");
+				hre.replaceDestructive(strang, R"(!*I'B")", R"(^\*I'B)");
+			}
 
 			if (infile[row].isData()) {
-
 				if ((cols[0] == col) && 
 							(infile.token(row, col)->find(';') != string::npos)) {
 					HumNum tenordur;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Dec 16 20:59:35 PST 2016
+// Last Modified: Fri Dec 16 22:00:49 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19648,6 +19648,7 @@ Tool_metlev::Tool_metlev(void) {
 	define("G|no-grace-notes=b",  "do not mark grace note lines");
 	define("k|kern-spine=i:1",    "analyze only given kern spine");
 	define("K|all-spines=b",      "analyze each kern spine separately");
+	define("e|exinterp=blev",     "exclusive interpretation type for output");
 }
 
 
@@ -19675,6 +19676,16 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 	if (lineCount == 0) {
 		m_error << "No input data";
 		return false;
+	}
+
+	string exinterp = getString("exinterp");
+	if (exinterp.empty()) {
+		exinterp = "**blev";
+	} else if (exinterp[0] != '*') {
+		exinterp.insert(0, "*");
+	}
+	if (exinterp[1] != '*') {
+		exinterp.insert(0, "*");
 	}
 
 	m_kernspines = infile.getKernSpineStartList();
@@ -19718,11 +19729,11 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 			vector<vector<double> > results;
 			fillVoiceResults(results, infile, beatlev);
 			if (kspine == (int)m_kernspines.size() - 1) {
-				infile.appendDataSpine(results.back(), "nan", "**blev");
+				infile.appendDataSpine(results.back(), "nan", exinterp);
 			} else {
 				int track = m_kernspines[kspine+1]->getTrack();
 				infile.insertDataSpineBefore(track, results[kspine],
-						"nan", "**blev");
+						"nan", exinterp);
 			}
 			infile.createLinesFromTokens();
 			return true;
@@ -19730,23 +19741,23 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 	} else if (getBoolean("all-spines")) {
 		vector<vector<double> > results;
 		fillVoiceResults(results, infile, beatlev);
-		infile.appendDataSpine(results.back(), "nan", "**blev");
+		infile.appendDataSpine(results.back(), "nan", exinterp);
 		for (int i = (int)results.size()-1; i>0; i--) {
 			int track = m_kernspines[i]->getTrack();
-			infile.insertDataSpineBefore(track, results[i-1], "nan", "**blev");
+			infile.insertDataSpineBefore(track, results[i-1], "nan", exinterp);
 		}
 		infile.createLinesFromTokens();
 		return true;
 	} else if (getBoolean("append")) {
-		infile.appendDataSpine(beatlev, "nan", "**blev");
+		infile.appendDataSpine(beatlev, "nan", exinterp);
 		infile.createLinesFromTokens();
 		return true;
 	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(beatlev, "nan", "**blev");
+		infile.prependDataSpine(beatlev, "nan", exinterp);
 		infile.createLinesFromTokens();
 		return true;
 	} else {
-		infile.prependDataSpine(beatlev, "nan", "**blev");
+		infile.prependDataSpine(beatlev, "nan", exinterp);
 		infile.printFieldIndex(0, m_text);
 		infile.clear();
 		infile.readString(m_text.str());
@@ -20336,6 +20347,8 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 	HumRegex hre;
 	string strang;
 	int count = 0;
+	bool foundnames = false;
+	bool foundabbreviations = false;
 	for (int j=0; j<infile[row].getFieldCount(); j++) {
 		track = infile.token(row, j)->getTrack();
 		if (track == target) {
@@ -20344,9 +20357,22 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 			}
 			strang = *infile.token(row,j);
 			hre.replaceDestructive(strang, "!*clef", "^\\*clef");
+			if ((!foundnames) && hre.search(strang, R"(^\*I")")) {
+				foundnames = true;
+				hre.replaceDestructive(strang, R"(!*I"Soprano")", R"(^\*I"Soprano)");
+				hre.replaceDestructive(strang, R"(!*I"Alto")"   , R"(^\*I"Alto)");
+				hre.replaceDestructive(strang, R"(!*I"Tenor")"  , R"(^\*I"Tenor)");
+				hre.replaceDestructive(strang, R"(!*I\"Bass")"  , R"(^\*I"Bass)");
+			}
+			if ((!foundabbreviations) && hre.search(strang, R"(^\*I')")) {
+				foundabbreviations = true;
+				hre.replaceDestructive(strang, R"(!*I'S")", R"(^\*I'S)");
+				hre.replaceDestructive(strang, R"(!*I'A")", R"(^\*I'A)");
+				hre.replaceDestructive(strang, R"(!*I'T")", R"(^\*I'T)");
+				hre.replaceDestructive(strang, R"(!*I'B")", R"(^\*I'B)");
+			}
 
 			if (infile[row].isData()) {
-
 				if ((cols[0] == col) && 
 							(infile.token(row, col)->find(';') != string::npos)) {
 					HumNum tenordur;

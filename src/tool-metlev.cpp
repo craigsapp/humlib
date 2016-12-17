@@ -40,6 +40,7 @@ Tool_metlev::Tool_metlev(void) {
 	define("G|no-grace-notes=b",  "do not mark grace note lines");
 	define("k|kern-spine=i:1",    "analyze only given kern spine");
 	define("K|all-spines=b",      "analyze each kern spine separately");
+	define("e|exinterp=blev",     "exclusive interpretation type for output");
 }
 
 
@@ -67,6 +68,16 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 	if (lineCount == 0) {
 		m_error << "No input data";
 		return false;
+	}
+
+	string exinterp = getString("exinterp");
+	if (exinterp.empty()) {
+		exinterp = "**blev";
+	} else if (exinterp[0] != '*') {
+		exinterp.insert(0, "*");
+	}
+	if (exinterp[1] != '*') {
+		exinterp.insert(0, "*");
 	}
 
 	m_kernspines = infile.getKernSpineStartList();
@@ -110,11 +121,11 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 			vector<vector<double> > results;
 			fillVoiceResults(results, infile, beatlev);
 			if (kspine == (int)m_kernspines.size() - 1) {
-				infile.appendDataSpine(results.back(), "nan", "**blev");
+				infile.appendDataSpine(results.back(), "nan", exinterp);
 			} else {
 				int track = m_kernspines[kspine+1]->getTrack();
 				infile.insertDataSpineBefore(track, results[kspine],
-						"nan", "**blev");
+						"nan", exinterp);
 			}
 			infile.createLinesFromTokens();
 			return true;
@@ -122,23 +133,23 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 	} else if (getBoolean("all-spines")) {
 		vector<vector<double> > results;
 		fillVoiceResults(results, infile, beatlev);
-		infile.appendDataSpine(results.back(), "nan", "**blev");
+		infile.appendDataSpine(results.back(), "nan", exinterp);
 		for (int i = (int)results.size()-1; i>0; i--) {
 			int track = m_kernspines[i]->getTrack();
-			infile.insertDataSpineBefore(track, results[i-1], "nan", "**blev");
+			infile.insertDataSpineBefore(track, results[i-1], "nan", exinterp);
 		}
 		infile.createLinesFromTokens();
 		return true;
 	} else if (getBoolean("append")) {
-		infile.appendDataSpine(beatlev, "nan", "**blev");
+		infile.appendDataSpine(beatlev, "nan", exinterp);
 		infile.createLinesFromTokens();
 		return true;
 	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(beatlev, "nan", "**blev");
+		infile.prependDataSpine(beatlev, "nan", exinterp);
 		infile.createLinesFromTokens();
 		return true;
 	} else {
-		infile.prependDataSpine(beatlev, "nan", "**blev");
+		infile.prependDataSpine(beatlev, "nan", exinterp);
 		infile.printFieldIndex(0, m_text);
 		infile.clear();
 		infile.readString(m_text.str());
