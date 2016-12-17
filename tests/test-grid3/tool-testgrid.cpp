@@ -1,6 +1,6 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Programmer:    Alex Morgan
+// Programmer:    Alexander Morgan
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Wed Nov 30 01:02:57 PST 2016
 // Filename:      tool-testgrid.h
@@ -135,24 +135,40 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 
 	bool levelsQ = getBoolean("metric-levels");
 
-	double interval1, interval2;
+	double interval1, interval2, interval3;
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
+		HumNum durp = attacks[i-1]->getDuration();
+		HumNum dur  = attacks[i]->getDuration();
+		HumNum durn = attacks[i+1]->getDuration();
+		HumNum duran = attacks[i+1]->getDuration();
+		interval1 = *attacks[i] - *attacks[i-1];
+		interval2 = *attacks[i+1] - *attacks[i];
+		interval3 = -1000;
+
+		int lineindex = attacks[i]->getLineIndex();
+
 		if (levelsQ) {
-			double lev1 = attacks[i-1]->getMetricLevel();
-			double lev2 = attacks[i]->getMetricLevel();
+			double lev1 = attacks[i]->getMetricLevel();
+			double lev2 = attacks[i+1]->getMetricLevel();
+			double lev3 = -1000;
+			if (i < (int)attacks.size() - 2) {
+				interval3 = *attacks[i+2] - *attacks[i+1];
+				HumNum duran = attacks[i+2]->getDuration();				
+				lev3 = attacks[i+2]->getMetricLevel();
+			}
+
 			// double lev3 = attacks[i+1]->getMetricLevel();
-			if (lev2 < lev1) {
+			if (lev1 < lev2) {
 				// if the starting note is at a higher metric position
-				// than the second note, then don't mark.
+				// than the second note, look for accented dissonances.
+
+				if ((interval1 == -1) && (interval2 == -1) && (interval3 == 1) && 
+					(lev1 == 1) && (lev2 == 2) && (lev3 == 0) && (durp == dur)) {
+					results[lineindex] = "ci";
+				}
 				continue;
 			}
 		}
-		HumNum durp = attacks[i-1]->getDuration();
-		HumNum dur  = attacks[i]->getDuration();
-		interval1 = *attacks[i] - *attacks[i-1];
-		interval2 = *attacks[i+1] - *attacks[i];
-		int lineindex = attacks[i]->getLineIndex();
-
 		if ((interval1 == 1) && (interval2 == 1) && (dur <= durp)) {
 			results[lineindex] = "pu";
 		} else if ((interval1 == -1) && (interval2 == -1) && (dur <= durp)) {
