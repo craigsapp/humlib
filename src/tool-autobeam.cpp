@@ -7,8 +7,7 @@
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Example of extracting a 2D pitch grid from
-//                a score for dissonance analysis.
+// Description:   Beam notes together by metric position.
 //
 
 #include "tool-autobeam.h"

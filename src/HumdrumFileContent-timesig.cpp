@@ -63,6 +63,13 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 
 	HTp token = getTrackStart(track);
 	while (token) {
+		if (token->isData()) {
+			if (firstdata < 0) {
+				firstdata = token->getLineIndex();
+			}
+			token = token->getNextToken();
+			continue;
+		}
 		if (!token->isInterpretation()) {
 			token = token->getNextToken();
 			continue;
@@ -74,17 +81,11 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 			if (firstsig < 0) {
 				firstsig = token->getLineIndex();
 			}
-			if (firstdata < 0) {
-				firstdata = token->getLineIndex();
-			}
 		} else if (sscanf(token->c_str(), "*M%d/%d", &top, &bot) == 2) {
 			current.first = top;
 			current.second = bot;
 			if (firstsig < 0) {
 				firstsig = token->getLineIndex();
-			}
-			if (firstdata < 0) {
-				firstdata = token->getLineIndex();
 			}
 		}
 		output[token->getLineIndex()] = current;
@@ -93,7 +94,7 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 
 	// Back-fill the list if the first time signature occurs before
 	// the start of the data:
-	if ((firstsig >= 0) && (firstdata > firstsig)) {
+	if ((firstsig > 0) && (firstdata >= firstsig)) {
 		current = output[firstsig];
 		for (int i=0; i<firstsig; i++) {
 			output[i] = current;
@@ -109,6 +110,8 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 	for (int i=starti+1; i<(int)output.size(); i++) {
 		if (output[i].first == 0) {
 			output[i] = current;
+		} else {
+			current = output[i];
 		}
 	}
 }
