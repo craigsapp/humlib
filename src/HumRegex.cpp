@@ -354,7 +354,7 @@ bool HumRegex::match(const string* input, const string& exp,
 string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp) {
 	m_regex = regex(exp, m_regexflags);
-	regex_replace(input, m_regex, replacement, m_searchflags);
+	input = regex_replace(input, m_regex, replacement, m_searchflags);
 	return input;
 }
 
@@ -371,8 +371,7 @@ string& HumRegex::replaceDestructive(string* input, const string& replacement,
 string& HumRegex::replaceDestructive(string& input, const string& replacement,
 		const string& exp, const string& options) {
 	m_regex = regex(exp, getTemporaryRegexFlags(options));
-	regex_replace(input, m_regex, replacement,
-			getTemporarySearchFlags(options));
+	input = regex_replace(input, m_regex, replacement, getTemporarySearchFlags(options));
 	return input;
 }
 
@@ -394,8 +393,8 @@ string HumRegex::replaceCopy(const string& input, const string& replacement,
 		const string& exp) {
 	m_regex = regex(exp, m_regexflags);
 	string output;
-	regex_replace(std::back_inserter(output), input.begin(), input.end(),
-			m_regex, replacement);
+	regex_replace(std::back_inserter(output), input.begin(),
+			input.end(), m_regex, replacement);
 	return output;
 }
 
@@ -413,8 +412,8 @@ string HumRegex::replaceCopy(const string& input, const string& exp,
 		const string& replacement, const string& options) {
 	m_regex = regex(exp, getTemporaryRegexFlags(options));
 	string output;
-	regex_replace(std::back_inserter(output), input.begin(), input.end(),
-			m_regex, replacement, getTemporarySearchFlags(options));
+	regex_replace(std::back_inserter(output), input.begin(),
+			input.end(), m_regex, replacement, getTemporarySearchFlags(options));
 	return output;
 }
 
@@ -503,9 +502,11 @@ std::regex_constants::match_flag_type HumRegex::getTemporarySearchFlags(
 			case 'g':
 				temp_flags = (std::regex_constants::match_flag_type)
 						(temp_flags & ~std::regex_constants::format_first_only);
+				break;
 			case 'G':
 				temp_flags = (std::regex_constants::match_flag_type)
 						(temp_flags | std::regex_constants::format_first_only);
+				break;
 		}
 	}
 	return temp_flags;

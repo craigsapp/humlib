@@ -357,6 +357,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 					bassdur  = Convert::recipToDuration(infile.token(row, cols[1])).getFloat();
 					if (tenordur == bassdur) {
 						hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata
+						// hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata
 					}
 				}
 

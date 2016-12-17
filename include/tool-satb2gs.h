@@ -10,8 +10,8 @@
 // Description:   Interface for satb2gs tool.
 //
 
-#ifndef _TOOL_AUTOBEAM_H_INCLUDED
-#define _TOOL_AUTOBEAM_H_INCLUDED
+#ifndef _TOOL_SATB2GS_H_INCLUDED
+#define _TOOL_SATB2GS_H_INCLUDED
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -53,7 +53,7 @@ class Tool_satb2gs : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_AUTOBEAM_H_INCLUDED */
+#endif /* _TOOL_SATB2GS_H_INCLUDED */
 
 
 
