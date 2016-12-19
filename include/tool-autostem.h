@@ -15,7 +15,6 @@
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
-#include "NoteGrid.h"
 
 namespace hum {
 
