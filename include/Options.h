@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -52,12 +53,12 @@ class Option_register {
 		ostream& print              (ostream& out);
 
 	protected:
-		string   m_definition;
-		string   m_description;
-		string   m_defaultOption;
-		string   m_modifiedOption;
-		int      m_modifiedQ;
-		char     m_type;
+		string       m_definition;
+		string       m_description;
+		string       m_defaultOption;
+		string       m_modifiedOption;
+		int          m_modifiedQ;
+		char         m_type;
 };
 
 
@@ -94,14 +95,14 @@ class Options {
 		ostream&        print             (ostream& out);
 		ostream&        printOptionList   (ostream& out);
 		ostream&        printOptionListBooleanState(ostream& out);
-		void            process           (int error_check = 1, int suppress = 0);
-		void            process           (int argc, char** argv,
+		bool            process           (int error_check = 1, int suppress = 0);
+		bool            process           (int argc, char** argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
-		void            process           (vector<string>& argv,
+		bool            process           (vector<string>& argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
-		void            process           (string& argv, int error_check = 1,
+		bool            process           (string& argv, int error_check = 1,
 		                                      int suppress = 0);
 		void            reset             (void);
 		void            xverify           (int argc, char** argv,
@@ -121,6 +122,9 @@ class Options {
 		ostream&        printRegister     (ostream& out);
 		int             isDefined         (const string& name);
 		static vector<string>  tokenizeCommandLine(string& args);
+		bool            hasParseError     (void);
+		string          getParseError     (void);
+		ostream&        getParseError     (ostream& out);
 
 	protected:
 		// m_argv: the list of raw command line strings including
@@ -160,6 +164,8 @@ class Options {
 		// m_optionsArgument: indicate that --options was used.
 		bool m_optionsArgQ = false;
 
+		// m_error: used to store errors in parsing command-line options.
+		stringstream m_error;
 
 	private:
 		int     getRegIndex    (const string& optionName);

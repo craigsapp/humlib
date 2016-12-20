@@ -34,11 +34,16 @@ namespace hum {
 // START_MERGE
 
 
-#define RUNTOOL(NAME, INFILE, COMMAND)             \
+#define RUNTOOL(NAME, INFILE, COMMAND, STATUS)     \
 	Tool_##NAME *tool = new Tool_##NAME;            \
 	tool->process(COMMAND);                         \
 	tool->run(INFILE);                              \
-	if (tool->hasNonHumdrumOutput()) {              \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasNonHumdrumOutput()) {       \
 		INFILE.readString(tool->getTextOutput());    \
 	}                                               \
 	delete tool;
@@ -89,30 +94,31 @@ bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
 bool Tool_filter::run(HumdrumFile& infile) {
 	initialize(infile);
 
+	bool status = true;
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
 		if (commands[i].first == "autobeam") {
-			RUNTOOL(autobeam, infile, commands[i].second);
+			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
-			RUNTOOL(autostem, infile, commands[i].second);
+			RUNTOOL(autostem, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
-			RUNTOOL(extract, infile, commands[i].second);
+			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
-			RUNTOOL(metlev, infile, commands[i].second);
+			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
-			RUNTOOL(satb2gs, infile, commands[i].second);
+			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
-			RUNTOOL(recip, infile, commands[i].second);
+			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
-			RUNTOOL(transpose, infile, commands[i].second);
+			RUNTOOL(transpose, infile, commands[i].second, status);
 		}
 	}
 
 	// Re-load the text for each line from their tokens in case any
 	// updates are needed from token changes.
 	infile.createLinesFromTokens();
-	return true;
+	return status;
 }
 
 

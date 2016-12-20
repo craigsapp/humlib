@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 17 01:06:37 PST 2016
+// Last Modified: Mon Dec 19 20:58:40 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5132,6 +5132,9 @@ HumTool::~HumTool() {
 //
 
 bool HumTool::hasError(void) {
+	if (hasParseError()) {
+		return true;
+	}
 	return m_error.rdbuf()->in_avail();
 }
 
@@ -5144,7 +5147,9 @@ bool HumTool::hasError(void) {
 //
 
 string HumTool::getError(void) {
-	return m_error.str();
+	string output = getParseError();
+	output += m_error.str();
+	return output;
 }
 
 //
@@ -5152,6 +5157,7 @@ string HumTool::getError(void) {
 //
 
 ostream& HumTool::getError(ostream& out) {
+	out << getParseError();
 	out << m_text.str();
 	return out;
 }
@@ -15304,8 +15310,8 @@ int Options::define(const string& aDefinition) {
 	// Error if definition string doesn't contain an equals sign
 	auto location = aDefinition.find("=");
 	if (location == string::npos) {
-		cerr << "Error: no \"=\" in option definition: " << aDefinition << endl;
-		exit(1);
+		m_error << "Error: no \"=\" in option definition: " << aDefinition << endl;
+		return -1;
 	}
 
 	string aliases = aDefinition.substr(0, location);
@@ -15324,9 +15330,9 @@ int Options::define(const string& aDefinition) {
 
 	// Option types are only a single charater (b, i, d, c or s)
 	if (otype.size() != 1) {
-		cerr << "Error: option type is invalid: " << otype
+		m_error << "Error: option type is invalid: " << otype
 			  << " in option definition: " << aDefinition << endl;
-		exit(1);
+		return -1;
 	}
 
 	// Check to make sure that the type is known
@@ -15336,9 +15342,9 @@ int Options::define(const string& aDefinition) {
 		 otype[0] != OPTION_DOUBLE_TYPE  &&
 		 otype[0] != OPTION_BOOLEAN_TYPE &&
 		 otype[0] != OPTION_CHAR_TYPE ) {
-		cerr << "Error: unknown option type \'" << otype[0]
+		m_error << "Error: unknown option type \'" << otype[0]
 			  << "\' in defintion: " << aDefinition << endl;
-		exit(1);
+		return -1;
 	}
 
 	// Set up space for a option entry in the registry
@@ -15355,11 +15361,11 @@ int Options::define(const string& aDefinition) {
 			continue;
 		} else if (aliases[i] == '|') {
 			if (isDefined(optionName)) {
-				cerr << "Option \"" << optionName << "\" from definition:" << endl;
-				cerr << "\t" << aDefinition << endl;
-				cerr << "is already defined in: " << endl;
-				cerr << "\t" << getDefinition(optionName) << endl;
-				exit(1);
+				m_error << "Option \"" << optionName << "\" from definition:" << endl;
+				m_error << "\t" << aDefinition << endl;
+				m_error << "is already defined in: " << endl;
+				m_error << "\t" << getDefinition(optionName) << endl;
+				return -1;
 			}
 			if (optionName.size() > 0) {
 				m_optionList[optionName] = definitionIndex;
@@ -15416,8 +15422,8 @@ string Options::getArg(int index) {
 		}
 	}
 	if (index < 1 || index > (int)m_arguments.size()) {
-		cerr << "Error: argument " << index << " does not exist." << endl;
-		exit(1);
+		m_error << "Error: argument " << index << " does not exist." << endl;
+		return "";
 	}
 	return m_arguments[index - 1];
 }
@@ -15862,26 +15868,30 @@ char Options::getType(const string& optionName) {
 //   	default values: error_check = 1, suppress = 0;
 //
 
-void Options::process(int argc, char** argv, int error_check, int suppress) {
+bool Options::process(int argc, char** argv, int error_check, int suppress) {
 	setOptions(argc, argv);
 	xverify(error_check, suppress);
+	return !hasParseError();
 }
 
 
-void Options::process(vector<string>& argv, int error_check, int suppress) {
+bool Options::process(vector<string>& argv, int error_check, int suppress) {
 	setOptions(argv);
 	xverify(error_check, suppress);
+	return !hasParseError();
 }
 
 
-void Options::process(string& argv, int error_check, int suppress) {
+bool Options::process(string& argv, int error_check, int suppress) {
 	setOptions(argv);
 	xverify(error_check, suppress);
+	return !hasParseError();
 }
 
 
-void Options::process(int error_check, int suppress) {
+bool Options::process(int error_check, int suppress) {
 	xverify(error_check, suppress);
+	return !hasParseError();
 }
 
 
@@ -15913,8 +15923,15 @@ void Options::xverify(int error_check, int suppress) {
 	bool optionend = false;
 	int i          = 1;
 	int oldi;
+	int terminate = 1000; // for malformed options (missing arguments)
+	int tcount = 0;
 
-	while (i < (int)m_argv.size() && !optionend) {
+	while ((i < (int)m_argv.size()) && !optionend) {
+		tcount++;
+		if (tcount > terminate) {
+			m_error << "Error: missing option argument" << endl;
+			break;
+		}
 		if (isOption(m_argv[i], i)) {
 			oldi = i;
 			i = storeOption(i, position, running);
@@ -15933,8 +15950,10 @@ void Options::xverify(int error_check, int suppress) {
 				i++;
 			}
 		}
+		if (hasParseError()) {
+			break;
+		}
 	}
-
 }
 
 
@@ -15960,15 +15979,15 @@ int Options::getRegIndex(const string& optionName) {
 
 	if (optionName == "options") {
 		print(cout);
-		exit(0);
+		return -1;
 	}
 
 	auto it = m_optionList.find(optionName);
 	if (it == m_optionList.end()) {
 		if (m_options_error_checkQ) {
-			cerr << "Error: unknown option \"" << optionName << "\"." << endl;
+			m_error << "Error: unknown option \"" << optionName << "\"." << endl;
 			print(cout);
-			exit(1);
+			return -1;
 		} else {
 			return -1;
 		}
@@ -16065,9 +16084,9 @@ int Options::storeOption(int index, int& position, int& running) {
 			}
 			if (m_argv[index][position] == '=') {
 				if (optionType == OPTION_BOOLEAN_TYPE) {
-					cerr << "Error: boolean variable cannot have any options: "
+					m_error << "Error: boolean variable cannot have any options: "
 						  << tempname << endl;
-					exit(1);
+					return -1;
 				}
 				position++;
 			}
@@ -16096,8 +16115,8 @@ int Options::storeOption(int index, int& position, int& running) {
 	}
 
 	if (index >= (int)m_argv.size()) {
-		cerr << "Error: last option requires a parameter" << endl;
-		exit(1);
+		m_error << "Error: last option requires a parameter" << endl;
+		return -1;
 	}
 	setModified(tempname, &m_argv[index][position]);
 
@@ -16148,6 +16167,35 @@ ostream& Options::printRegister(ostream& out) {
 		(*it)->print(out);
 	}
 	return out;
+}
+
+
+
+/////////////////////////////
+//
+// Options::hasParseError -- Returns true if there was an error parsing
+//     the arguments.
+//
+
+bool Options::hasParseError(void) {
+	return !m_error.str().empty();
+}
+
+
+
+//////////////////////////////
+//
+// Options::getParseError --
+//
+
+string Options::getParseError(void) {
+	return m_error.str();
+}
+
+
+ostream& Options::getParseError(ostream& out) {
+	out << m_error.str();
+	return m_error;
 }
 
 
@@ -19506,11 +19554,16 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 
 
 
-#define RUNTOOL(NAME, INFILE, COMMAND)             \
+#define RUNTOOL(NAME, INFILE, COMMAND, STATUS)     \
 	Tool_##NAME *tool = new Tool_##NAME;            \
 	tool->process(COMMAND);                         \
 	tool->run(INFILE);                              \
-	if (tool->hasNonHumdrumOutput()) {              \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasNonHumdrumOutput()) {       \
 		INFILE.readString(tool->getTextOutput());    \
 	}                                               \
 	delete tool;
@@ -19561,30 +19614,31 @@ bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
 bool Tool_filter::run(HumdrumFile& infile) {
 	initialize(infile);
 
+	bool status = true;
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
 		if (commands[i].first == "autobeam") {
-			RUNTOOL(autobeam, infile, commands[i].second);
+			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
-			RUNTOOL(autostem, infile, commands[i].second);
+			RUNTOOL(autostem, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
-			RUNTOOL(extract, infile, commands[i].second);
+			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
-			RUNTOOL(metlev, infile, commands[i].second);
+			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
-			RUNTOOL(satb2gs, infile, commands[i].second);
+			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
-			RUNTOOL(recip, infile, commands[i].second);
+			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
-			RUNTOOL(transpose, infile, commands[i].second);
+			RUNTOOL(transpose, infile, commands[i].second, status);
 		}
 	}
 
 	// Re-load the text for each line from their tokens in case any
 	// updates are needed from token changes.
 	infile.createLinesFromTokens();
-	return true;
+	return status;
 }
 
 

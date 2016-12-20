@@ -60,7 +60,10 @@ using namespace std;                           \
 using namespace hum;                           \
 int main(int argc, char** argv) {              \
 	CLASS interface;                            \
-	interface.process(argc, argv);              \
+	if (!interface.process(argc, argv)) {       \
+		interface.getError(cerr);                \
+		return -1;                               \
+	}                                           \
 	HumdrumFile infile;                         \
 	if (interface.getArgCount() > 0) {          \
 		infile.read(interface.getArgument(1));   \
@@ -70,6 +73,7 @@ int main(int argc, char** argv) {              \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
 		interface.getError(cerr);                \
+		return -1;                               \
 	}                                           \
 	return !status;                             \
 }
@@ -92,7 +96,10 @@ using namespace std;                                             \
 using namespace hum;                                             \
 int main(int argc, char** argv) {                                \
 	CLASS interface;                                              \
-	interface.process(argc, argv);                                \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
 	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
 	HumdrumFile infile;                                           \
 	bool status = true;                                           \
@@ -100,6 +107,7 @@ int main(int argc, char** argv) {                                \
 		status &= interface.run(infile, cout);                     \
 		if (interface.hasError()) {                                \
 			interface.getError(cerr);                               \
+         return -1;                                              \
 		}                                                          \
 	}                                                             \
 	return !status;                                               \

@@ -45,6 +45,9 @@ HumTool::~HumTool() {
 //
 
 bool HumTool::hasError(void) {
+	if (hasParseError()) {
+		return true;
+	}
 	return m_error.rdbuf()->in_avail();
 }
 
@@ -57,7 +60,9 @@ bool HumTool::hasError(void) {
 //
 
 string HumTool::getError(void) {
-	return m_error.str();
+	string output = getParseError();
+	output += m_error.str();
+	return output;
 }
 
 //
@@ -65,6 +70,7 @@ string HumTool::getError(void) {
 //
 
 ostream& HumTool::getError(ostream& out) {
+	out << getParseError();
 	out << m_text.str();
 	return out;
 }

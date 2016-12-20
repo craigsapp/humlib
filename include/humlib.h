@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 17 01:06:37 PST 2016
+// Last Modified: Mon Dec 19 20:58:40 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2459,12 +2459,12 @@ class Option_register {
 		ostream& print              (ostream& out);
 
 	protected:
-		string   m_definition;
-		string   m_description;
-		string   m_defaultOption;
-		string   m_modifiedOption;
-		int      m_modifiedQ;
-		char     m_type;
+		string       m_definition;
+		string       m_description;
+		string       m_defaultOption;
+		string       m_modifiedOption;
+		int          m_modifiedQ;
+		char         m_type;
 };
 
 
@@ -2501,14 +2501,14 @@ class Options {
 		ostream&        print             (ostream& out);
 		ostream&        printOptionList   (ostream& out);
 		ostream&        printOptionListBooleanState(ostream& out);
-		void            process           (int error_check = 1, int suppress = 0);
-		void            process           (int argc, char** argv,
+		bool            process           (int error_check = 1, int suppress = 0);
+		bool            process           (int argc, char** argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
-		void            process           (vector<string>& argv,
+		bool            process           (vector<string>& argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
-		void            process           (string& argv, int error_check = 1,
+		bool            process           (string& argv, int error_check = 1,
 		                                      int suppress = 0);
 		void            reset             (void);
 		void            xverify           (int argc, char** argv,
@@ -2528,6 +2528,9 @@ class Options {
 		ostream&        printRegister     (ostream& out);
 		int             isDefined         (const string& name);
 		static vector<string>  tokenizeCommandLine(string& args);
+		bool            hasParseError     (void);
+		string          getParseError     (void);
+		ostream&        getParseError     (ostream& out);
 
 	protected:
 		// m_argv: the list of raw command line strings including
@@ -2567,6 +2570,8 @@ class Options {
 		// m_optionsArgument: indicate that --options was used.
 		bool m_optionsArgQ = false;
 
+		// m_error: used to store errors in parsing command-line options.
+		stringstream m_error;
 
 	private:
 		int     getRegIndex    (const string& optionName);
@@ -2624,7 +2629,10 @@ using namespace std;                           \
 using namespace hum;                           \
 int main(int argc, char** argv) {              \
 	CLASS interface;                            \
-	interface.process(argc, argv);              \
+	if (!interface.process(argc, argv)) {       \
+		interface.getError(cerr);                \
+		return -1;                               \
+	}                                           \
 	HumdrumFile infile;                         \
 	if (interface.getArgCount() > 0) {          \
 		infile.read(interface.getArgument(1));   \
@@ -2634,6 +2642,7 @@ int main(int argc, char** argv) {              \
 	int status = interface.run(infile, cout);   \
 	if (interface.hasError()) {                 \
 		interface.getError(cerr);                \
+		return -1;                               \
 	}                                           \
 	return !status;                             \
 }
@@ -2656,7 +2665,10 @@ using namespace std;                                             \
 using namespace hum;                                             \
 int main(int argc, char** argv) {                                \
 	CLASS interface;                                              \
-	interface.process(argc, argv);                                \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
 	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
 	HumdrumFile infile;                                           \
 	bool status = true;                                           \
@@ -2664,6 +2676,7 @@ int main(int argc, char** argv) {                                \
 		status &= interface.run(infile, cout);                     \
 		if (interface.hasError()) {                                \
 			interface.getError(cerr);                               \
+         return -1;                                              \
 		}                                                          \
 	}                                                             \
 	return !status;                                               \
