@@ -1,6 +1,6 @@
 //
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Programmer:    Alexander Morgan
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Wed Nov 30 01:02:57 PST 2016
 // Filename:      tool-testgrid.h
@@ -32,13 +32,13 @@ namespace hum {
 Tool_testgrid::Tool_testgrid(void) {
 	define("r|raw=b",             "print raw grid");
 	define("d|diatonic=b",        "print diatonic grid");
-	define("m|midi-pitch=b",      "print midie-pitch grid");
+	define("D|no-dissonant=b",    "don't do dissonance anaysis");
+	define("m|midi-pitch=b",      "print midi-pitch grid");
 	define("b|base-40=b",         "print base-40 grid");
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
 	define("e|exinterp=s:**data", "specify exinterp for **data spine");
-	define("B=b",  		         "use second algorithm");
 }
 
 
@@ -102,11 +102,7 @@ bool Tool_testgrid::run(HumdrumFile& infile, ostream& out) {
 void Tool_testgrid::doAnalysis(vector<vector<string> >& results,
 		NoteGrid& grid, bool debug) {
 	for (int i=0; i<grid.getVoiceCount(); i++) {
-		if (getBoolean("B")) {
-			doAnalysisB(results[i], grid, i, debug);
-		} else {
-			doAnalysisA(results[i], grid, i, debug);
-		}
+		doAnalysisForVoice(results[i], grid, i, debug);
 	}
 }
 
@@ -114,11 +110,11 @@ void Tool_testgrid::doAnalysis(vector<vector<string> >& results,
 
 //////////////////////////////
 //
-// Tool_testgrid::doAnalysisA -- do analysis for a single voice by subtracting
-//     NoteCells to calculate the interval.
+// Tool_testgrid::doAnalysisForVoice -- do analysis for a single voice by
+//     subtracting NoteCells to calculate the diatonic intervals.
 //
 
-void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
+void Tool_testgrid::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 		int vindex, bool debug) {
 	vector<NoteCell*> attacks;
 	grid.getNoteAndRestAttacks(attacks, vindex);
@@ -132,122 +128,144 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 			attacks[i]->printNoteInfo(cerr);
 		}
 	}
+	bool nodissonanceQ = getBoolean("no-dissonant");
 
-	double interval1, interval2;
+	HumNum durp;     // duration of previous melodic note;
+	HumNum dur;      // duration of current note;
+	HumNum durn;     // duration of next melodic note;
+	HumNum durnn;    // duration of next next melodic note;
+	double intp;     // diatonic interval from previous melodic note
+	double intn;     // diatonic interval to next melodic note
+	double levp;     // metric level of the previous melodic note
+	double lev;      // metric level of the current note
+	double levn;     // metric level of the next melodic note
+	int lineindex;   // line in original Humdrum file content that contains note
+	int sliceindex;  // current timepoint in NoteGrid.
+	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
+	bool dissonant;  // true if  note is dissonant with other sounding notes.
+
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
-		HumNum durp = attacks[i-1]->getDuration();
-		HumNum dur  = attacks[i]->getDuration();
-		HumNum durn = attacks[i+1]->getDuration();
-		HumNum duran = attacks[i+1]->getDuration();
-		interval1 = *attacks[i] - *attacks[i-1];
-		interval2 = *attacks[i+1] - *attacks[i];
-		double levp = attacks[i-1]->getMetricLevel();
-		double lev = attacks[i]->getMetricLevel();
-		double levn = attacks[i+1]->getMetricLevel();
+		sliceindex = attacks[i]->getSliceIndex();
+		lineindex = attacks[i]->getLineIndex();
 
-		int lineindex = attacks[i]->getLineIndex();
+		// calculate harmonic intervals:
+		for (int j=0; j<(int)harmint.size(); j++) {
+			if (j == vindex) {
+				harmint[j] = 0;
+			}
+			if (j < vindex) {
+				harmint[j] = *grid.cell(vindex, sliceindex) -
+						*grid.cell(j, sliceindex);
+			} else {
+				harmint[j] = *grid.cell(j, sliceindex) -
+						*grid.cell(vindex, sliceindex);
+			}
+		}
+		// check if current note is dissonant to another sounding note:
+		dissonant = false;
+		for (int j=0; j<(int)harmint.size(); j++) {
+			if (j == vindex) {
+				// don't compare to self
+				continue;
+			}
+			if (harmint[j] == NAN) {
+				// rest, so ignore
+				continue;
+			}
+			int value = (int)harmint[j];
+			if (value > 7) {
+				value = value % 7; // remove octaves from interval
+			} else if (value < -7) {
+				value = -(-value % 7); // remove octaves from interval
+			}
+
+			if ((value == 1) || (value == -1)) {
+				// forms a second with another sounding note
+				dissonant = true;
+				results[lineindex] = "d2";
+				break;
+			} else if ((value == 6) || (value == -6)) {
+				// forms a seventh with another sounding note
+				dissonant = true;
+				results[lineindex] = "d7";
+				break;
+			}
+		}
+	
+		// Don't label current note if not dissonant with other sounding notes.
+		if (!dissonant) {
+			if (!nodissonanceQ) {
+				continue;
+			}
+		}
+
+		durp = attacks[i-1]->getDuration();
+		dur  = attacks[i]->getDuration();
+		durn = attacks[i+1]->getDuration();
+		intp = *attacks[i] - *attacks[i-1];
+		intn = *attacks[i+1] - *attacks[i];
+		levp = attacks[i-1]->getMetricLevel();
+		lev  = attacks[i]->getMetricLevel();
+		levn = attacks[i+1]->getMetricLevel();
 
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn)) { // weak dissonances
-			if (interval1 == -1) { // descending dissonances
-				if (interval2 == -1) {
+			if (intp == -1) { // descending dissonances
+				if (intn == -1) {
 					results[lineindex] = "pd"; // downward passing tone
-				} else if (interval2 == 1) {
+				} else if (intn == 1) {
 					results[lineindex] = "nd"; // lower neighbor
-				} else if (interval2 == 0) {
+				} else if (intn == 0) {
 					results[lineindex] = "ad"; // descending anticipation
-				} else if (interval2 > 1) {
+				} else if (intn > 1) {
 					results[lineindex] = "ed"; // lower échappée
-				} else if (interval2 == -2) {
+				} else if (intn == -2) {
 					results[lineindex] = "scd"; // short descending nota cambiata
-				} else if (interval2 < -2) {
+				} else if (intn < -2) {
 					results[lineindex] = "ipd"; // incomplete posterior lower neighbor
 				}
-			} else if (interval1 == 1) { // ascending dissonances
-				if (interval2 == 1) {
+			} else if (intp == 1) { // ascending dissonances
+				if (intn == 1) {
 					results[lineindex] = "pu"; // rising passing tone
-				} else if (interval2 == -1) {
+				} else if (intn == -1) {
 					results[lineindex] = "nu"; // upper neighbor
-				} else if (interval2 < -1) {
+				} else if (intn < -1) {
 					results[lineindex] = "eu"; // upper échappée
-				} else if (interval2 == 0) {
+				} else if (intn == 0) {
 					results[lineindex] = "au"; // rising anticipation
-				} else if (interval2 == 2) {
+				} else if (intn == 2) {
 					results[lineindex] = "scu"; // short ascending nota cambiata
-				} else if (interval2 > 2) {
+				} else if (intn > 2) {
 					results[lineindex] = "ipu"; // incomplete posterior upper neighbor
 				}
-			} else if ((interval1 < -2) && (interval2 == 1)) {
+			} else if ((intp < -2) && (intn == 1)) {
 				results[lineindex] = "iad"; // incomplete anterior lower neighbor
-			} else if ((interval1 > 2) && (interval2 == -1)) {
+			} else if ((intp > 2) && (intn == -1)) {
 				results[lineindex] = "iau"; // incomplete anterior upper neighbor
 			}
 		}
 		// TODO: add check to see if results already has a result.
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
 			double interval3 = *attacks[i+2] - *attacks[i+1];
-			HumNum duran = attacks[i+2]->getDuration();	// dur of note after next
-			double levan = attacks[i+2]->getMetricLevel(); // lev of note after next
+			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
+			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
-			if ((dur == durn) && (lev == 1) && (levn == 2) && (levan == 0) &&
-				(interval1 == -1) && (interval2 == -1) && (interval3 == 1)) {
+			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
+				(intp == -1) && (intn == -1) && (interval3 == 1)) {
 				results[lineindex] = "ci"; // chanson idiom
 			} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
-				(interval1 == -1) && (interval2 == -1)) {
+				(intp == -1) && (intn == -1)) {
 				results[lineindex] = "dq"; // dissonant third quarter
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
-				(interval1 == -1) && (interval2 == -2) && (interval3 == 1)) {
+				(intp == -1) && (intn == -2) && (interval3 == 1)) {
 				results[lineindex] = "lcd"; // long descending nota cambiata
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
-				(interval1 == 1) && (interval2 == 2) && (interval3 == -1)) {
+				(intp == 1) && (intn == 2) && (interval3 == -1)) {
 				results[lineindex] = "lcu"; // long ascending nota cambiata
 			}
 		}
 	}
 }
 
-
-
-//////////////////////////////
-//
-// Tool_testgrid::doAnalysisB -- do analysis for a single voice by asking the
-//     Note for the interval values instead of calculating them
-//     directly.
-//
-
-void Tool_testgrid::doAnalysisB(vector<string>& results, NoteGrid& grid,
-		int vindex, bool debug) {
-	vector<NoteCell*> attacks;
-	grid.getNoteAndRestAttacks(attacks, vindex);
-
-	if (debug) {
-		cerr << "=======================================================";
-		cerr << endl;
-		cerr << "Note attacks for voice number "
-		     << grid.getVoiceCount()-vindex << ":" << endl;
-		for (int i=0; i<(int)attacks.size(); i++) {
-			attacks[i]->printNoteInfo(cerr);
-		}
-	}
-
-	int interval1, interval2;
-	for (int i=1; i<(int)attacks.size() - 1; i++) {
-		interval1 = attacks[i]->getDiatonicIntervalFromPreviousAttack();
-		interval2 = attacks[i]->getDiatonicIntervalToNextAttack();
-
-		int lineindex = attacks[i]->getLineIndex();
-
-		if ((interval1 == 1) && (interval2 == 1)) {
-			results[lineindex] = "pu";
-		} else if ((interval1 == -1) && (interval2 == -1)) {
-			results[lineindex] = "pd";
-		} else if ((interval1 == 1) && (interval2 == -1)) {
-			results[lineindex] = "nu";
-		} else if ((interval1 == -1) && (interval2 == 1)) {
-			results[lineindex] = "nd";
-		}
-		
-	}
-}
 
 
 // END_MERGE

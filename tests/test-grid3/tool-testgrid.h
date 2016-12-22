@@ -23,18 +23,17 @@ namespace hum {
 
 class Tool_testgrid : public HumTool {
 	public:
-		         Tool_testgrid   (void);
-		        ~Tool_testgrid   () {};
+		         Tool_testgrid     (void);
+		        ~Tool_testgrid     () {};
 
-		bool     run             (HumdrumFile& infile, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    doAnalysis  (vector<vector<string> >& results, NoteGrid& grid,
-		                     bool debug);
-		void    doAnalysisA (vector<string>& results, NoteGrid& grid, int vindex,
-		                     bool debug);
-		void    doAnalysisB (vector<string>& results, NoteGrid& grid, int vindex,
-		                     bool debug);
+		void    doAnalysis         (vector<vector<string> >& results,
+		                            NoteGrid& grid,
+		                            bool debug);
+		void    doAnalysisForVoice (vector<string>& results, NoteGrid& grid,
+		                            int vindex, bool debug);
 
 	private:
 		vector<HTp> m_kernspines;
