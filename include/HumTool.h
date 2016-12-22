@@ -22,19 +22,41 @@ namespace hum {
 
 class HumTool : public Options {
 	public:
-		         HumTool              (void);
-		        ~HumTool              ();
+		         HumTool         (void);
+		        ~HumTool         ();
 
-		bool     hasNonHumdrumOutput  (void);
-		string   getTextOutput        (void);
-		ostream& getTextOutput        (ostream& out);
-		bool     hasError             (void);
-		string   getError             (void);
-		ostream& getError             (ostream& out);
+		void     clearOutput     (void);
+
+		bool     hasAnyText      (void);
+		string   getAllText      (void);
+		ostream& getAllText      (ostream& out);
+
+		bool     hasHumdrumText  (void);
+		string   getHumdrumText  (void);
+		ostream& getHumdrumText  (ostream& out);
+
+		bool     hasJsonText     (void);
+		string   getJsonText     (void);
+		ostream& getJsonText     (ostream& out);
+
+		bool     hasFreeText     (void);
+		string   getFreeText     (void);
+		ostream& getFreeText     (ostream& out);
+
+		bool     hasWarning      (void);
+		string   getWarning      (void);
+		ostream& getWarning      (ostream& out);
+
+		bool     hasError        (void);
+		string   getError        (void);
+		ostream& getError        (ostream& out);
 
 	protected:
-		stringstream m_text;   // output for non-humdrum output;
-	  	stringstream m_error;  // output for error text;
+		stringstream m_humdrum_text;  // output text in Humdrum syntax.
+		stringstream m_json_text;     // output text in JSON syntax.
+		stringstream m_free_text;     // output for plain text content.
+	  	stringstream m_warning_text;  // output for warning messages;
+	  	stringstream m_error_text;    // output for error messages;
 
 };
 
@@ -71,6 +93,10 @@ int main(int argc, char** argv) {              \
 		infile.read(cin);                        \
 	}                                           \
 	int status = interface.run(infile, cout);   \
+	if (interface.hasWarning()) {               \
+		interface.getWarning(cerr);              \
+		return 0;                                \
+	}                                           \
 	if (interface.hasError()) {                 \
 		interface.getError(cerr);                \
 		return -1;                               \
@@ -104,11 +130,21 @@ int main(int argc, char** argv) {                                \
 	HumdrumFile infile;                                           \
 	bool status = true;                                           \
 	while (streamer.read(infile)) {                               \
-		status &= interface.run(infile, cout);                     \
+		status &= interface.run(infile);                           \
+		if (interface.hasWarning()) {                              \
+			interface.getWarning(cerr);                             \
+		}                                                          \
+		if (interface.hasAnyText()) {                              \
+		   interface.getAllText(cout);                             \
+		}                                                          \
 		if (interface.hasError()) {                                \
 			interface.getError(cerr);                               \
          return -1;                                              \
 		}                                                          \
+		if (!interface.hasAnyText()) {                             \
+			cout << infile;                                         \
+		}                                                          \
+		interface.clearOutput();                                   \
 	}                                                             \
 	return !status;                                               \
 }

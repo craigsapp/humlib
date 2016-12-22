@@ -66,7 +66,7 @@ bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
 bool Tool_metlev::run(HumdrumFile& infile) {
 	int lineCount = infile.getLineCount();
 	if (lineCount == 0) {
-		m_error << "No input data";
+		m_error_text << "No input data";
 		return false;
 	}
 
@@ -87,7 +87,7 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 	if (m_kernspines.size() > 0) {
 		track = m_kernspines[0]->getTrack();
 	} else {
-		m_error << "No **kern spines in input file" << endl;
+		m_error_text << "No **kern spines in input file" << endl;
 		return false;
 	}
 	infile.getMetricLevels(beatlev, track, NAN);
@@ -140,9 +140,9 @@ bool Tool_metlev::run(HumdrumFile& infile) {
 		return true;
 	} else if (getBoolean("composite")) {
 		infile.prependDataSpine(beatlev, "nan", exinterp);
-		infile.printFieldIndex(0, m_text);
+		infile.printFieldIndex(0, m_humdrum_text);
 		infile.clear();
-		infile.readString(m_text.str());
+		infile.readString(m_humdrum_text.str());
 	} else {
 		vector<vector<double> > results;
 		fillVoiceResults(results, infile, beatlev);

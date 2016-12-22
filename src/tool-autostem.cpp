@@ -60,8 +60,8 @@ Tool_autostem::Tool_autostem(void) {
 bool Tool_autostem::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	int status = run(infile, out);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -71,8 +71,8 @@ bool Tool_autostem::run(const string& indata, ostream& out) {
 
 bool Tool_autostem::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -112,12 +112,12 @@ void Tool_autostem::initialize(HumdrumFile& infile) {
 	// handle basic options:
 
 	if (getBoolean("author")) {
-		m_text << "Written by Craig Stuart Sapp, "
+		m_free_text << "Written by Craig Stuart Sapp, "
 			  << "craig@ccrma.stanford.edu, December 2010" << endl;
 		m_quit = true;
 	} else if (getBoolean("version")) {
-		m_text << getCommand() << ", version: 26 December 2010" << endl;
-		m_text << "compiled: " << __DATE__ << endl;
+		m_free_text << getCommand() << ", version: 26 December 2010" << endl;
+		m_free_text << "compiled: " << __DATE__ << endl;
 		m_quit = true;
 	} else if (getBoolean("help")) {
 		usage();
@@ -321,11 +321,11 @@ void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 
 	if (debugQ) {
 		for (int i=0; i<(int)beamednotes.size(); i++) {
-			m_text << "!! ";
+			m_humdrum_text << "!! ";
 			for (int j=0; j<(int)beamednotes[i].size(); j++) {
-				m_text << infile[beamednotes[i][j].i][beamednotes[i][j].j] << "\t";
+				m_humdrum_text << infile[beamednotes[i][j].i][beamednotes[i][j].j] << "\t";
 			}
-			m_text << "\n";
+			m_humdrum_text << "\n";
 		}
 	}
 
@@ -1037,7 +1037,7 @@ void Tool_autostem::getClefInfo(vector<vector<int> >& baseline,
 //
 
 void Tool_autostem::example(void) {
-	m_text << getCommand() << " file.krn" << endl;
+	m_error_text << getCommand() << " file.krn" << endl;
 }
 
 
@@ -1048,7 +1048,7 @@ void Tool_autostem::example(void) {
 //
 
 void Tool_autostem::usage(void) {
-	m_text << "Usage: " << getCommand() << " [file(s)] " << endl;
+	m_error_text << "Usage: " << getCommand() << " [file(s)] " << endl;
 }
 
 

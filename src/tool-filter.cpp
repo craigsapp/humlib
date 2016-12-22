@@ -43,8 +43,8 @@ namespace hum {
 		tool->getError(cerr);                        \
 		delete tool;                                 \
 		break;                                       \
-	} else if (tool->hasNonHumdrumOutput()) {       \
-		INFILE.readString(tool->getTextOutput());    \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILE.readString(tool->getHumdrumText());   \
 	}                                               \
 	delete tool;
 
@@ -68,8 +68,8 @@ Tool_filter::Tool_filter(void) {
 bool Tool_filter::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -79,8 +79,8 @@ bool Tool_filter::run(const string& indata, ostream& out) {
 
 bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}

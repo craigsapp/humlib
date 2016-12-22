@@ -78,8 +78,8 @@ Tool_extract::Tool_extract(void) {
 bool Tool_extract::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -89,8 +89,8 @@ bool Tool_extract::run(const string& indata, ostream& out) {
 
 bool Tool_extract::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -118,7 +118,7 @@ bool Tool_extract::run(HumdrumFile& infile) {
 
 void Tool_extract::processFile(HumdrumFile& infile) {
 	if (countQ) {
-		m_text << infile.getMaxTrack() << endl;
+		m_free_text << infile.getMaxTrack() << endl;
 		return;
 	}
 	if (expandQ) {
@@ -136,21 +136,21 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 	}
 
 	if (debugQ && !traceQ) {
-		m_text << "!! Field Expansion List:";
+		m_free_text << "!! Field Expansion List:";
 		for (int j=0; j<(int)field.size(); j++) {
-			m_text << " " << field[j];
+			m_free_text << " " << field[j];
 			if (subfield[j]) {
-				m_text << (char)subfield[j];
+				m_free_text << (char)subfield[j];
 			}
 			if (model[j]) {
-				m_text << (char)model[j];
+				m_free_text << (char)model[j];
 			}
 		}
-		m_text << endl;
+		m_free_text << endl;
 	}
 
 	// preserve SEGMENT filename if present (now printed in main())
-	// infile.printNonemptySegmentLabel(m_text);
+	// infile.printNonemptySegmentLabel(m_humdrum_text);
 
 	// analyze the input file according to command-line options
 	if (fieldQ || grepQ) {
@@ -160,7 +160,7 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 	} else if (traceQ) {
 		extractTrace(infile, tracefile);
 	} else {
-		m_text << infile;
+		m_humdrum_text << infile;
 	}
 }
 
@@ -241,9 +241,9 @@ void Tool_extract::getInterpretationFields(vector<int>& field, vector<int>& subf
 	}
 
 	if (debugQ) {
-		m_text << "!! Interpretation strings to search for: " << endl;
+		m_humdrum_text << "!! Interpretation strings to search for: " << endl;
 		for (i=0; i<(int)sstrings.size(); i++) {
-			m_text << "!!\t" << sstrings[i] << endl;
+			m_humdrum_text << "!!\t" << sstrings[i] << endl;
 		}
 	}
 
@@ -363,17 +363,17 @@ void Tool_extract::expandSpines(vector<int>& field, vector<int>& subfield, vecto
 	}
 
 	if (debugQ) {
-		m_text << "!!expand: ";
+		m_humdrum_text << "!!expand: ";
 		for (i=0; i<(int)field.size(); i++) {
-			m_text << field[i];
+			m_humdrum_text << field[i];
 			if (subfield[i]) {
-				m_text << (char)subfield[i];
+				m_humdrum_text << (char)subfield[i];
 			}
 			if (i < (int)field.size()-1) {
-				m_text << ",";
+				m_humdrum_text << ",";
 			}
 		}
-		m_text << endl;
+		m_humdrum_text << endl;
 	}
 }
 
@@ -435,11 +435,11 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 	}
 
 	if (debugQ) {
-		m_text << "!!reverse: ";
+		m_humdrum_text << "!!reverse: ";
 		for (i=0; i<(int)field.size(); i++) {
-			m_text << field[i] << " ";
+			m_humdrum_text << field[i] << " ";
 		}
-		m_text << endl;
+		m_humdrum_text << endl;
 	}
 
 	subfield.resize(field.size());
@@ -703,7 +703,7 @@ void Tool_extract::excludeFields(HumdrumFile& infile, vector<int>& field,
 	int start = 0;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			m_text << infile[i] << '\n';
+			m_humdrum_text << infile[i] << '\n';
 			continue;
 		} else {
 			start = 0;
@@ -712,13 +712,13 @@ void Tool_extract::excludeFields(HumdrumFile& infile, vector<int>& field,
 					continue;
 				}
 				if (start != 0) {
-					m_text << '\t';
+					m_humdrum_text << '\t';
 				}
 				start = 1;
-				m_text << infile.token(i, j);
+				m_humdrum_text << infile.token(i, j);
 			}
 			if (start != 0) {
-				m_text << endl;
+				m_humdrum_text << endl;
 			}
 		}
 	}
@@ -743,7 +743,7 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			m_text << infile[i] << '\n';
+			m_humdrum_text << infile[i] << '\n';
 			continue;
 		}
 
@@ -769,20 +769,20 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 			}
 			if (target == 0) {
 				if (start != 0) {
-					 m_text << '\t';
+					 m_humdrum_text << '\t';
 				}
 				start = 1;
 				if (!infile[i].isManipulator()) {
 					if (infile[i].isLocalComment()) {
-						m_text << "!";
+						m_humdrum_text << "!";
 					} else if (infile[i].isBarline()) {
-						m_text << infile[i][0];
+						m_humdrum_text << infile[i][0];
 					} else if (infile[i].isData()) {
-				       m_text << ".";
+				       m_humdrum_text << ".";
 					    // interpretations handled in dealWithSpineManipulators()
 					    // [obviously not, so adding a blank one here
 					} else if (infile[i].isInterpretation()) {
-					    m_text << "*";
+					    m_humdrum_text << "*";
 					 }
 				}
 			} else {
@@ -796,24 +796,24 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 					    if (hre.search(infile.token(i,j)->getSpineInfo(), spat) ||
 					          !hre.search(infile.token(i, j)->getSpineInfo(), "\\(")) {
 					       if (start != 0) {
-					          m_text << '\t';
+					          m_humdrum_text << '\t';
 					       }
 					       start = 1;
-					       m_text << infile.token(i, j);
+					       m_humdrum_text << infile.token(i, j);
 					    }
 					    break;
 					 case 'b':
 					    getSearchPat(spat, target, "b");
 					    if (hre.search(infile.token(i, j)->getSpineInfo(), spat)) {
 					       if (start != 0) {
-					          m_text << '\t';
+					          m_humdrum_text << '\t';
 					       }
 					       start = 1;
-					       m_text << infile.token(i, j);
+					       m_humdrum_text << infile.token(i, j);
 					    } else if (!hre.search(infile.token(i, j)->getSpineInfo(),
 					          "\\(")) {
 					       if (start != 0) {
-					          m_text << '\t';
+					          m_humdrum_text << '\t';
 					       }
 					       start = 1;
 					       dealWithSecondarySubspine(field, subfield, model, t,
@@ -822,7 +822,7 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 					    break;
 					 case 'c':
 					    if (start != 0) {
-					       m_text << '\t';
+					       m_humdrum_text << '\t';
 					    }
 					    start = 1;
 					    dealWithCospine(field, subfield, model, t, infile, i, j,
@@ -830,16 +830,16 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 					    break;
 					 default:
 					    if (start != 0) {
-					       m_text << '\t';
+					       m_humdrum_text << '\t';
 					    }
 					    start = 1;
-					    m_text << infile.token(i, j);
+					    m_humdrum_text << infile.token(i, j);
 					 }
 				}
 			}
 		}
 		if (start != 0) {
-			m_text << endl;
+			m_humdrum_text << endl;
 		}
 	}
 }
@@ -863,17 +863,17 @@ void Tool_extract::dealWithCospine(vector<int>& field, vector<int>& subfield, ve
 	int index;
 
 	if (infile[line].isInterpretation()) {
-		m_text << infile.token(line, cospine);
+		m_humdrum_text << infile.token(line, cospine);
 		return;
 	}
 
 	if (infile[line].isBarline()) {
-		m_text << infile.token(line, cospine);
+		m_humdrum_text << infile.token(line, cospine);
 		return;
 	}
 
 	if (infile[line].isLocalComment()) {
-		m_text << infile.token(line, cospine);
+		m_humdrum_text << infile.token(line, cospine);
 		return;
 	}
 
@@ -915,17 +915,17 @@ void Tool_extract::dealWithCospine(vector<int>& field, vector<int>& subfield, ve
 	}
 
 	if (debugQ) {
-		m_text << "\n!!codata:\n";
+		m_humdrum_text << "\n!!codata:\n";
 		for (i=0; i<(int)cotokens.size(); i++) {
-			m_text << "!!\t" << i << "\t" << cotokens[i];
+			m_humdrum_text << "!!\t" << i << "\t" << cotokens[i];
 			if (i < (int)spineindex.size()) {
-				m_text << "\tspine=" << spineindex[i];
-				m_text << "\tsubspine=" << subspineindex[i];
+				m_humdrum_text << "\tspine=" << spineindex[i];
+				m_humdrum_text << "\tsubspine=" << subspineindex[i];
 			} else {
-				m_text << "\tspine=.";
-				m_text << "\tsubspine=.";
+				m_humdrum_text << "\tspine=.";
+				m_humdrum_text << "\tsubspine=.";
 			}
-			m_text << endl;
+			m_humdrum_text << endl;
 		}
 	}
 
@@ -981,12 +981,12 @@ void Tool_extract::printCotokenInfo(int& start, HumdrumFile& infile, int line, i
 			if (start == 0) {
 				start++;
 			} else {
-				m_text << subtokenseparator;
+				m_humdrum_text << subtokenseparator;
 			}
 			if (i<(int)cotokens.size()) {
-				m_text << cotokens[i];
+				m_humdrum_text << cotokens[i];
 			} else {
-				m_text << ".";
+				m_humdrum_text << ".";
 			}
 		found = 1;
 		}
@@ -995,9 +995,9 @@ void Tool_extract::printCotokenInfo(int& start, HumdrumFile& infile, int line, i
 		if (start == 0) {
 			start++;
 		} else {
-			m_text << subtokenseparator;
+			m_humdrum_text << subtokenseparator;
 		}
-		m_text << ".";
+		m_humdrum_text << ".";
 	}
 }
 
@@ -1020,32 +1020,32 @@ void Tool_extract::dealWithSecondarySubspine(vector<int>& field, vector<int>& su
 	string buffer;
 	if (infile[line].isLocalComment()) {
 		if ((submodel == 'n') || (submodel == 'r')) {
-			m_text << "!";
+			m_humdrum_text << "!";
 		} else {
-			m_text << infile.token(i, j);
+			m_humdrum_text << infile.token(i, j);
 		}
 	} else if (infile[line].isBarline()) {
-		m_text << infile.token(i, j);
+		m_humdrum_text << infile.token(i, j);
 	} else if (infile[line].isInterpretation()) {
 		if ((submodel == 'n') || (submodel == 'r')) {
-			m_text << "*";
+			m_humdrum_text << "*";
 		} else {
-			m_text << infile.token(i, j);
+			m_humdrum_text << infile.token(i, j);
 		}
 	} else if (infile[line].isData()) {
 		if (submodel == 'n') {
-			m_text << ".";
+			m_humdrum_text << ".";
 		} else if (submodel == 'r') {
 			if (*infile.token(i, j) == ".") {
-				m_text << ".";
+				m_humdrum_text << ".";
 			} else if (infile.token(i, j)->find('q') != string::npos) {
-				m_text << ".";
+				m_humdrum_text << ".";
 			} else if (infile.token(i, j)->find('Q') != string::npos) {
-				m_text << ".";
+				m_humdrum_text << ".";
 			} else {
 				buffer = *infile.token(i, j);
 				if (hre.search(buffer, "{")) {
-					m_text << "{";
+					m_humdrum_text << "{";
 				}
 				// remove secondary chord notes:
 				hre.replaceDestructive(buffer, "", " .*");
@@ -1063,10 +1063,10 @@ void Tool_extract::dealWithSecondarySubspine(vector<int>& field, vector<int>& su
 						 hre.replaceDestructive(buffer, editorialInterpretation, "(?<=r)");
 					}
 				}
-				m_text << buffer;
+				m_humdrum_text << buffer;
 			}
 		} else {
-			m_text << infile.token(i, j);
+			m_humdrum_text << infile.token(i, j);
 		}
 	} else {
 		cerr << "Should not get to this line of code" << endl;
@@ -1339,20 +1339,20 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 	}
 
 	if (debugQ && xdebug) {
-		m_text << "!! *x serials = ";
+		m_humdrum_text << "!! *x serials = ";
 		for (int ii=0; ii<(int)xserial.size(); ii++) {
-			m_text << xserial[ii] << " ";
+			m_humdrum_text << xserial[ii] << " ";
 		}
-		m_text << "\n";
+		m_humdrum_text << "\n";
 	}
 
 	if (debugQ && vdebug) {
-		m_text << "!!LINE: " << infile[line] << endl;
-		m_text << "!! *v serials = ";
+		m_humdrum_text << "!!LINE: " << infile[line] << endl;
+		m_humdrum_text << "!! *v serials = ";
 		for (int ii=0; ii<(int)vserial.size(); ii++) {
-			m_text << vserial[ii] << " ";
+			m_humdrum_text << vserial[ii] << " ";
 		}
-		m_text << "\n";
+		m_humdrum_text << "\n";
 	}
 
 	// check for proper *x syntax /////////////////////////////////
@@ -1421,11 +1421,11 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 	}
 
 	if (debugQ) {
-		m_text << "!!vsplit array: ";
+		m_humdrum_text << "!!vsplit array: ";
 		for (i=0; i<(int)vsplit.size(); i++) {
-			m_text << " " << vsplit[i];
+			m_humdrum_text << " " << vsplit[i];
 		}
-		m_text << endl;
+		m_humdrum_text << endl;
 	}
 
 	if (vsplit.size() > 0) {
@@ -1450,14 +1450,14 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 	for (i=0; i<(int)tempout.size(); i++) {
 		if (tempout[i] != "") {
 			if (start != 0) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
-			m_text << tempout[i];
+			m_humdrum_text << tempout[i];
 			start++;
 		}
 	}
 	if (start) {
-		m_text << '\n';
+		m_humdrum_text << '\n';
 	}
 }
 
@@ -1481,11 +1481,11 @@ void Tool_extract::printMultiLines(vector<int>& vsplit, vector<int>& vserial,
 	}
 
 	if (debugQ) {
-		m_text << "!!tempout: ";
+		m_humdrum_text << "!!tempout: ";
 		for (i=0; i<(int)tempout.size(); i++) {
-			m_text << tempout[i] << " ";
+			m_humdrum_text << tempout[i] << " ";
 		}
-		m_text << endl;
+		m_humdrum_text << endl;
 	}
 
 	if (splitpoint == -1) {
@@ -1497,9 +1497,9 @@ void Tool_extract::printMultiLines(vector<int>& vsplit, vector<int>& vserial,
 	for (i=0; i<splitpoint; i++) {
 		if (tempout[i] != "") {
 			if (start) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
-			m_text << tempout[i];
+			m_humdrum_text << tempout[i];
 			start = 1;
 			if (tempout[i] == "*v") {
 				if (printv) {
@@ -1517,14 +1517,14 @@ void Tool_extract::printMultiLines(vector<int>& vsplit, vector<int>& vserial,
 	for (i=splitpoint; i<(int)vsplit.size(); i++) {
 		if (tempout[i] != "") {
 			if (start) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
-			m_text << "*";
+			m_humdrum_text << "*";
 		}
 	}
 
 	if (start) {
-		m_text << "\n";
+		m_humdrum_text << "\n";
 	}
 
 	vsplit[splitpoint] = 0;
@@ -1637,11 +1637,11 @@ void Tool_extract::extractTrace(HumdrumFile& infile, const string& tracefile) {
 
 	if (debugQ) {
 		for (i=0; i<(int)startline.size(); i++) {
-			m_text << "!!TRACE " << startline[i]+1 << ":\t";
+			m_humdrum_text << "!!TRACE " << startline[i]+1 << ":\t";
 			for (j=0; j<(int)fields[i].size(); j++) {
-				m_text << fields[i][j] << " ";
+				m_humdrum_text << fields[i][j] << " ";
 			}
-			m_text << "\n";
+			m_humdrum_text << "\n";
 		}
 	}
 
@@ -1649,7 +1649,7 @@ void Tool_extract::extractTrace(HumdrumFile& infile, const string& tracefile) {
 	if (startline.size() == 0) {
 		for (i=0; i<infile.getLineCount(); i++) {
 			if (!infile[i].hasSpines()) {
-				m_text << infile[i] << '\n';
+				m_humdrum_text << infile[i] << '\n';
 			}
 		}
 		return;
@@ -1657,7 +1657,7 @@ void Tool_extract::extractTrace(HumdrumFile& infile, const string& tracefile) {
 
 	for (i=0; i<startline[0]; i++) {
 		if (!infile[i].hasSpines()) {
-			m_text << infile[i] << '\n';
+			m_humdrum_text << infile[i] << '\n';
 		}
 	}
 
@@ -1670,7 +1670,7 @@ void Tool_extract::extractTrace(HumdrumFile& infile, const string& tracefile) {
 		}
 		for (i=startline[j]; i<endline; i++) {
 			if (!infile[i].hasSpines()) {
-				m_text << infile[i] << '\n';
+				m_humdrum_text << infile[i] << '\n';
 			} else {
 				printTraceLine(infile, i, fields[j]);
 			}
@@ -1699,14 +1699,14 @@ void Tool_extract::printTraceLine(HumdrumFile& infile, int line, vector<int>& fi
 				continue;
 			}
 			if (start != 0) {
-				m_text << '\t';
+				m_humdrum_text << '\t';
 			}
 			start = 1;
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 		}
 	}
 	if (start != 0) {
-		m_text << endl;
+		m_humdrum_text << endl;
 	}
 }
 
@@ -1718,7 +1718,7 @@ void Tool_extract::printTraceLine(HumdrumFile& infile, int line, vector<int>& fi
 //
 
 void Tool_extract::example(void) {
-	m_text <<
+	m_free_text <<
 	"					                                                          \n"
 	<< endl;
 }
@@ -1731,7 +1731,7 @@ void Tool_extract::example(void) {
 //
 
 void Tool_extract::usage(const string& command) {
-	m_text <<
+	m_free_text <<
 	"					                                                          \n"
 	<< endl;
 }
@@ -1746,12 +1746,12 @@ void Tool_extract::usage(const string& command) {
 void Tool_extract::initialize(HumdrumFile& infile) {
 	// handle basic options:
 	if (getBoolean("author")) {
-		m_text << "Written by Craig Stuart Sapp, "
+		m_free_text << "Written by Craig Stuart Sapp, "
 			  << "craig@ccrma.stanford.edu, Feb 2008" << endl;
 		exit(0);
 	} else if (getBoolean("version")) {
-		m_text << getArg(0) << ", version: Feb 2008" << endl;
-		m_text << "compiled: " << __DATE__ << endl;
+		m_free_text << getArg(0) << ", version: Feb 2008" << endl;
+		m_free_text << "compiled: " << __DATE__ << endl;
 		exit(0);
 	} else if (getBoolean("help")) {
 		usage(getCommand().c_str());

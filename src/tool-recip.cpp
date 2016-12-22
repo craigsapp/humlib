@@ -68,7 +68,7 @@ bool Tool_recip::run(HumdrumFile& infile) {
 
 	int lineCount = infile.getLineCount();
 	if (lineCount == 0) {
-		m_error << "No input data";
+		m_error_text << "No input data";
 		return false;
 	}
 
@@ -159,9 +159,9 @@ void Tool_recip::doCompositeAnalysis(HumdrumFile& infile) {
 		return;
 	} else {
 		infile.prependDataSpine(recips, "", m_exinterp);
-		infile.printFieldIndex(0, m_text);
+		infile.printFieldIndex(0, m_humdrum_text);
 		infile.clear();
-		infile.readString(m_text.str());
+		infile.readString(m_humdrum_text.str());
 	}
 }
 

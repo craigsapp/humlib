@@ -48,8 +48,8 @@ Tool_satb2gs::Tool_satb2gs(void) {
 bool Tool_satb2gs::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -59,8 +59,8 @@ bool Tool_satb2gs::run(const string& indata, ostream& out) {
 
 bool Tool_satb2gs::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -89,12 +89,12 @@ bool Tool_satb2gs::run(HumdrumFile& infile) {
 void Tool_satb2gs::initialize(HumdrumFile& infile) {
    // handle basic options:
    if (getBoolean("author")) {
-      m_text << "Written by Craig Stuart Sapp, "
+      m_free_text << "Written by Craig Stuart Sapp, "
            << "craig@ccrma.stanford.edu, Feb 2011" << endl;
       exit(0);
    } else if (getBoolean("version")) {
-      m_text << getCommand() << ", version: 16 Dec 2016" << endl;
-      m_text << "compiled: " << __DATE__ << endl;
+      m_free_text << getCommand() << ", version: 16 Dec 2016" << endl;
+      m_free_text << "compiled: " << __DATE__ << endl;
       exit(0);
    } else if (getBoolean("help")) {
       usage(getCommand());
@@ -123,14 +123,14 @@ void Tool_satb2gs::processFile(HumdrumFile& infile) {
 	int exinterpline = getSatbTracks(satbtracks, infile);
 	int lastline = -1;
 	for (int i=0; i<exinterpline; i++) {
-		m_text << infile[i] << endl;
+		m_humdrum_text << infile[i] << endl;
 	}
 
 	printExInterp(infile, exinterpline, satbtracks);
 
 	for (int i=exinterpline+1; i<infile.getLineCount(); i++) {
 		if (infile[i].getFieldCount() == 1) {
-			m_text << infile[i] << endl;
+			m_humdrum_text << infile[i] << endl;
 			continue;
 		}
 		if (*infile.token(i, 0) == "*-") {
@@ -140,10 +140,10 @@ void Tool_satb2gs::processFile(HumdrumFile& infile) {
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			printSpine(infile, i, j, satbtracks);
 			if (j < infile[i].getFieldCount() - 1) {
-				m_text << '\t';
+				m_humdrum_text << '\t';
 			}
 		}
-		m_text << '\n';
+		m_humdrum_text << '\n';
 	}
 
 	if (lastline < 0) {
@@ -152,7 +152,7 @@ void Tool_satb2gs::processFile(HumdrumFile& infile) {
 	printLastLine(infile, lastline, satbtracks);
 
 	for (int i=lastline+1; i<infile.getLineCount(); i++) {
-		m_text << infile[i] << endl;
+		m_humdrum_text << infile[i] << endl;
 	}
 }
 
@@ -185,8 +185,8 @@ void Tool_satb2gs::printLastLine(HumdrumFile& infile, int line, vector<int>& tra
 	string strang = output.str();
 	HumRegex hre;
 	hre.replaceDestructive(strang, "", "\t+$");
-	m_text << strang;
-	m_text << endl;
+	m_humdrum_text << strang;
+	m_humdrum_text << endl;
 
 	stringstream output2;
 	for (int j=0; j<infile[line].getFieldCount() - 1; j++) {
@@ -207,16 +207,16 @@ void Tool_satb2gs::printLastLine(HumdrumFile& infile, int line, vector<int>& tra
 	output2 << ends;
 	strang = output2.str();
 	hre.replaceDestructive(strang, "", "\t+$");
-	m_text << strang;
-	m_text << endl;
+	m_humdrum_text << strang;
+	m_humdrum_text << endl;
 
 	for (int j=0; j<infile[line].getFieldCount()-2; j++) {
-		m_text << infile.token(line, j);
+		m_humdrum_text << infile.token(line, j);
 		if (j < infile[line].getFieldCount() - 3) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
-	m_text << "\n";
+	m_humdrum_text << "\n";
 
 }
 
@@ -244,8 +244,8 @@ void Tool_satb2gs::printExInterp(HumdrumFile& infile, int line,
 	string strang = output.str();
 	HumRegex hre;
 	hre.replaceDestructive(strang, "", "\t+$");
-	m_text << strang;
-	m_text << endl;
+	m_humdrum_text << strang;
+	m_humdrum_text << endl;
 
 	stringstream output2;
 	stringstream output3;
@@ -270,13 +270,13 @@ void Tool_satb2gs::printExInterp(HumdrumFile& infile, int line,
 
 	strang = output3.str();
 	hre.replaceDestructive(strang, "", "\t+$");
-	m_text << strang;
-	m_text << endl;
+	m_humdrum_text << strang;
+	m_humdrum_text << endl;
 
 	strang = output2.str();
 	hre.replaceDestructive(strang, "", "\t+$");
-	m_text << strang;
-	m_text << endl;
+	m_humdrum_text << strang;
+	m_humdrum_text << endl;
 
 }
 
@@ -304,7 +304,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 
 	if (target < 0) {
 		// does not need to be switched
-		m_text << infile.token(row, col);
+		m_humdrum_text << infile.token(row, col);
 		return;
 	}
 
@@ -344,7 +344,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 		track = infile.token(row, j)->getTrack();
 		if (track == target) {
 			if (count > 0) {
-				m_text << '\t';
+				m_humdrum_text << '\t';
 			}
 			strang = *infile.token(row,j);
 			hre.replaceDestructive(strang, "!*clef", "^\\*clef");
@@ -388,7 +388,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 
 			}
 
-			m_text << strang;
+			m_humdrum_text << strang;
 			count++;
 		}
 	}
@@ -425,7 +425,7 @@ int Tool_satb2gs::getSatbTracks(vector<int>& tracks, HumdrumFile& infile) {
 	}
 
 	if (tracks.size() != 4) {
-		cerr << "Error: there are " << tracks.size() << " **kern spines"
+		m_error_text << "Error: there are " << tracks.size() << " **kern spines"
 			  << " in input data (needs to be 4)" << endl;
 		exit(1);
 	}

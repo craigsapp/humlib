@@ -1,6 +1,6 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Programmer:    Alex Morgan
+// Programmer:    Alexander Morgan
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: Wed Nov 30 01:02:57 PST 2016
 // Filename:      tool-testgrid.h
@@ -133,44 +133,75 @@ void Tool_testgrid::doAnalysisA(vector<string>& results, NoteGrid& grid,
 		}
 	}
 
-	bool levelsQ = getBoolean("metric-levels");
-
 	double interval1, interval2;
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
-		if (levelsQ) {
-			double lev1 = attacks[i-1]->getMetricLevel();
-			double lev2 = attacks[i]->getMetricLevel();
-			// double lev3 = attacks[i+1]->getMetricLevel();
-			if (lev2 < lev1) {
-				// if the starting note is at a higher metric position
-				// than the second note, then don't mark.
-				continue;
-			}
-		}
 		HumNum durp = attacks[i-1]->getDuration();
 		HumNum dur  = attacks[i]->getDuration();
+		HumNum durn = attacks[i+1]->getDuration();
+		HumNum duran = attacks[i+1]->getDuration();
 		interval1 = *attacks[i] - *attacks[i-1];
 		interval2 = *attacks[i+1] - *attacks[i];
+		double levp = attacks[i-1]->getMetricLevel();
+		double lev = attacks[i]->getMetricLevel();
+		double levn = attacks[i+1]->getMetricLevel();
+
 		int lineindex = attacks[i]->getLineIndex();
 
-		if ((interval1 == 1) && (interval2 == 1) && (dur <= durp)) {
-			results[lineindex] = "pu";
-		} else if ((interval1 == -1) && (interval2 == -1) && (dur <= durp)) {
-			results[lineindex] = "pd";
-		} else if ((interval1 == 1) && (interval2 == -1) && (dur <= durp)) {
-			results[lineindex] = "nu";
-		} else if ((interval1 == -1) && (interval2 == 1) && (dur <= durp)) {
-			results[lineindex] = "nd";
-		} else if ((interval1 == 1) && (interval2 < -1) && (dur <= durp)) {
-			results[lineindex] = "eu";
-		} else if ((interval1 == -1) && (interval2 > 1) && (dur <= durp)) {
-			results[lineindex] = "ed";
-		} else if ((interval1 == -1) && (interval2 == 0) && (dur <= durp)) {
-			results[lineindex] = "ad";
-		} else if ((interval1 == 1) && (interval2 == 0) && (dur <= durp)) {
-			results[lineindex] = "au";
+		if ((dur <= durp) && (lev >= levp) && (lev >= levn)) { // weak dissonances
+			if (interval1 == -1) { // descending dissonances
+				if (interval2 == -1) {
+					results[lineindex] = "pd"; // downward passing tone
+				} else if (interval2 == 1) {
+					results[lineindex] = "nd"; // lower neighbor
+				} else if (interval2 == 0) {
+					results[lineindex] = "ad"; // descending anticipation
+				} else if (interval2 > 1) {
+					results[lineindex] = "ed"; // lower échappée
+				} else if (interval2 == -2) {
+					results[lineindex] = "scd"; // short descending nota cambiata
+				} else if (interval2 < -2) {
+					results[lineindex] = "ipd"; // incomplete posterior lower neighbor
+				}
+			} else if (interval1 == 1) { // ascending dissonances
+				if (interval2 == 1) {
+					results[lineindex] = "pu"; // rising passing tone
+				} else if (interval2 == -1) {
+					results[lineindex] = "nu"; // upper neighbor
+				} else if (interval2 < -1) {
+					results[lineindex] = "eu"; // upper échappée
+				} else if (interval2 == 0) {
+					results[lineindex] = "au"; // rising anticipation
+				} else if (interval2 == 2) {
+					results[lineindex] = "scu"; // short ascending nota cambiata
+				} else if (interval2 > 2) {
+					results[lineindex] = "ipu"; // incomplete posterior upper neighbor
+				}
+			} else if ((interval1 < -2) && (interval2 == 1)) {
+				results[lineindex] = "iad"; // incomplete anterior lower neighbor
+			} else if ((interval1 > 2) && (interval2 == -1)) {
+				results[lineindex] = "iau"; // incomplete anterior upper neighbor
+			}
 		}
-		
+		// TODO: add check to see if results already has a result.
+		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
+			double interval3 = *attacks[i+2] - *attacks[i+1];
+			HumNum duran = attacks[i+2]->getDuration();	// dur of note after next
+			double levan = attacks[i+2]->getMetricLevel(); // lev of note after next
+
+			if ((dur == durn) && (lev == 1) && (levn == 2) && (levan == 0) &&
+				(interval1 == -1) && (interval2 == -1) && (interval3 == 1)) {
+				results[lineindex] = "ci"; // chanson idiom
+			} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
+				(interval1 == -1) && (interval2 == -1)) {
+				results[lineindex] = "dq"; // dissonant third quarter
+			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
+				(interval1 == -1) && (interval2 == -2) && (interval3 == 1)) {
+				results[lineindex] = "lcd"; // long descending nota cambiata
+			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
+				(interval1 == 1) && (interval2 == 2) && (interval3 == -1)) {
+				results[lineindex] = "lcu"; // long ascending nota cambiata
+			}
+		}
 	}
 }
 

@@ -69,8 +69,8 @@ Tool_transpose::Tool_transpose(void) {
 bool Tool_transpose::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -80,8 +80,8 @@ bool Tool_transpose::run(const string& indata, ostream& out) {
 
 bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
-	if (hasNonHumdrumOutput()) {
-		getTextOutput(out);
+	if (hasAnyText()) {
+		getAllText(out);
 	} else {
 		out << infile;
 	}
@@ -99,7 +99,7 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 		transval = calculateTranspositionFromKey(ssetkey, infile);
 		transval = transval + octave * 40;
 		if (debugQ) {
-			m_text << "!!Key TRANSVAL = " << transval;
+			m_humdrum_text << "!!Key TRANSVAL = " << transval;
 		}
 	}
 
@@ -107,8 +107,8 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 		// returns the base-12 pitch transposition for use in conjunction
 		// with the mkeyscape --rotate option
 		int value = 60 - Convert::base40ToMidiNoteNumber(162 - transval);
-		m_text << value << endl;
-		exit(0);
+		m_free_text << value << endl;
+		return false;
 	}
 
 	if (concertQ) {
@@ -161,27 +161,27 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 			// transpose notes according to tvals data
 			for (j=0; j<infile[i].getFieldCount(); j++) {
 				if (!infile.token(i, j)->isKern()) {
-					m_text << infile.token(i, j);
+					m_humdrum_text << infile.token(i, j);
 					if (j < infile[i].getFieldCount() - 1) {
-					 		m_text << "\t";
+					 		m_humdrum_text << "\t";
 					}
 					continue;
 				}
 				ptrack = infile.token(i, j)->getTrack();
 				if (tvals[ptrack] == 0) {
-					  m_text << infile.token(i, j);
+					  m_humdrum_text << infile.token(i, j);
 				} else {
 					  printTransposedToken(infile, i, j, tvals[ptrack]);
 				}
 				if (j < infile[i].getFieldCount() - 1) {
-					  m_text << "\t";
+					  m_humdrum_text << "\t";
 				}
 			}
-			m_text << "\n";
+			m_humdrum_text << "\n";
 			break;
 
 		} else {
-			m_text << infile[i] << "\n";
+			m_humdrum_text << infile[i] << "\n";
 		}
 	}
 }
@@ -204,17 +204,17 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 			case STYLE_WRITTEN:
 				convertToWrittenPitches(infile, line, tvals);
 				break;
-			default: m_text << infile[line];
+			default: m_humdrum_text << infile[line];
 		}
-		m_text << "\n";
+		m_humdrum_text << "\n";
 		return;
 	}
 
 	for (int j=0; j<infile[line].getFieldCount(); j++) {
 		if (!infile.token(line, j)->isKern()) {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 			if (j<infile[line].getFieldCount()-1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
@@ -229,7 +229,7 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 			if (tvals[ptrack] != 0) {
 				printNewKeySignature(hre.getMatch(1), tvals[ptrack]);
 			} else {
-				m_text << infile.token(line, j);
+				m_humdrum_text << infile.token(line, j);
 			}
 
 		} else if (isKeyMarker(*infile.token(line, j))) {
@@ -237,18 +237,18 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 			if (tvals[ptrack] != 0) {
 				printNewKeyInterpretation(infile[line], j, tvals[ptrack]);
 			} else {
-				m_text << infile.token(line, j);
+				m_humdrum_text << infile.token(line, j);
 			}
 
 		} else {
 			// other interpretations just echoed to output:
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 		}
 		if (j<infile[line].getFieldCount()-1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
-	m_text << "\n";
+	m_humdrum_text << "\n";
 
 }
 
@@ -267,9 +267,9 @@ void Tool_transpose::convertToWrittenPitches(HumdrumFile& infile, int line,
 	int ptrack;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
 		if (!infile.token(line, j)->isKern()) {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 			if (j < infile[line].getFieldCount() - 1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
@@ -279,14 +279,14 @@ void Tool_transpose::convertToWrittenPitches(HumdrumFile& infile, int line,
 
 			string output = "*Tr";
 			output += Convert::base40ToTrans(base);
-			m_text << output;
+			m_humdrum_text << output;
 			ptrack = infile.token(line, j)->getTrack();
 			tvals[ptrack] = base;
 		} else {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 		}
 		if (j < infile[line].getFieldCount() - 1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
 }
@@ -305,9 +305,9 @@ void Tool_transpose::convertToConcertPitches(HumdrumFile& infile, int line, vect
 	int ptrack;
 	for (j=0; j<infile[line].getFieldCount(); j++) {
 		if (!infile.token(line, j)->isKern()) {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 			if (j < infile[line].getFieldCount() - 1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
@@ -316,14 +316,14 @@ void Tool_transpose::convertToConcertPitches(HumdrumFile& infile, int line, vect
 			base = Convert::transToBase40(*infile.token(line, j));
 			string output = "*ITr";
 			output += Convert::base40ToTrans(base);
-			m_text << output;
+			m_humdrum_text << output;
 			ptrack = infile.token(line, j)->getTrack();
 			tvals[ptrack] = -base;
 		} else {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 		}
 		if (j < infile[line].getFieldCount() - 1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
 }
@@ -379,7 +379,7 @@ int Tool_transpose::isKeyMarker(const string& str) {
 void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col, int transval) {
 	if (infile.token(row, col)->isKern()) {
 		// don't know how to transpose this type of data, so leave it as is
-		m_text << infile.token(row, col);
+		m_humdrum_text << infile.token(row, col);
 		return;
 	}
 
@@ -481,7 +481,7 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 		}
 		ptrack = infile.token(line, j)->getTrack();
 		startvalues[ptrack] = getTransposeInfo(infile, line, j);
-		// m_text << "Found transpose value " << startvalues[ptrack] << endl;
+		// m_humdrum_text << "Found transpose value " << startvalues[ptrack] << endl;
 	}
 
 	int entry = 0;
@@ -513,30 +513,30 @@ void Tool_transpose::printTransposeInformation(HumdrumFile& infile,
 
 	for (j=0; j<infile[line].getFieldCount(); j++) {
 		if (!infile.token(line, j)->isKern()) {
-			m_text << "*";
+			m_humdrum_text << "*";
 			if (j < infile[line].getFieldCount()-1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
 		ptrack = infile.token(line, j)->getTrack();
 		if (finalvalues[ptrack] == 0) {
-			m_text << "*";
+			m_humdrum_text << "*";
 		} else {
 			if (instrumentQ) {
-				m_text << "*ITr";
-				m_text << Convert::base40ToTrans(-finalvalues[ptrack]);
+				m_humdrum_text << "*ITr";
+				m_humdrum_text << Convert::base40ToTrans(-finalvalues[ptrack]);
 			} else {
-				m_text << "*Tr";
-				m_text << Convert::base40ToTrans(finalvalues[ptrack]);
+				m_humdrum_text << "*Tr";
+				m_humdrum_text << Convert::base40ToTrans(finalvalues[ptrack]);
 			}
 		}
 		if (j < infile[line].getFieldCount()-1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 
 	}
-	m_text << "\n";
+	m_humdrum_text << "\n";
 }
 
 
@@ -626,15 +626,15 @@ int Tool_transpose::checkForDeletedLine(HumdrumFile& infile, int line) {
 	// print non-deleted elements in line.
 	for (j=0; j<infile[line].getFieldCount(); j++) {;
 		if ((string)(*infile.token(line, j)) == "deletedTr") {
-			m_text << "*";
+			m_humdrum_text << "*";
 		} else {
-			m_text << infile.token(line, j);
+			m_humdrum_text << infile.token(line, j);
 		}
 		if (j < infile[line].getFieldCount() - 1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 	}
-	m_text << "\n";
+	m_humdrum_text << "\n";
 
 	return 1;
 }
@@ -665,13 +665,13 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 
 		if (infile[i].isData()) {
 			printHumdrumDataRecord(infile[i], spineprocess);
-			m_text << "\n";
+			m_humdrum_text << "\n";
 		} else if (infile[i].isInterpretation()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
 				if (!infile.token(i, j)->isKern()) {
-					m_text << infile.token(i, j);
+					m_humdrum_text << infile.token(i, j);
 					if (j<infile[i].getFieldCount()-1) {
-						m_text << "\t";
+						m_humdrum_text << "\t";
 					}
 					continue;
 				}
@@ -686,7 +686,7 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
 						printNewKeySignature(hre.getMatch(1), transval);
 						if (j<infile[i].getFieldCount()-1) {
-						m_text << "\t";
+						m_humdrum_text << "\t";
 						}
 						continue;
 				}
@@ -699,20 +699,20 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 					if (diatonic >= 0 && diatonic <= 6) {
 					  	printNewKeyInterpretation(infile[i], j, transval);
 					  	if (j<infile[i].getFieldCount()-1) {
-							m_text << "\t";
+							m_humdrum_text << "\t";
 					  	}
 					  	continue;
 					}
 				}
-				m_text << infile.token(i, j);
+				m_humdrum_text << infile.token(i, j);
 				if (j<infile[i].getFieldCount()-1) {
-					m_text << "\t";
+					m_humdrum_text << "\t";
 				}
 			}
-			m_text << "\n";
+			m_humdrum_text << "\n";
 
 		} else {
-			m_text << infile[i] << "\n";
+			m_humdrum_text << infile[i] << "\n";
 		}
 	}
 }
@@ -736,7 +736,7 @@ void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
 
 	int xxx = Convert::base40IntervalToLineOfFifths(trans);
 	int newkey = xxx + counter;
-	m_text << Convert::keyNumberToKern(newkey);
+	m_humdrum_text << Convert::keyNumberToKern(newkey);
 }
 
 
@@ -760,11 +760,11 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 	base40 = base40 % 40;
 	base40 = base40 + (3 + mode) * 40;
 
-	m_text << "*" << Convert::base40ToKern(base40) << ":";
+	m_humdrum_text << "*" << Convert::base40ToKern(base40) << ":";
 
 	HumRegex hre;
 	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
-		m_text << hre.getMatch(1);
+		m_humdrum_text << hre.getMatch(1);
 	}
 }
 
@@ -781,17 +781,17 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 	for (i=0; i<record.getFieldCount(); i++) {
 		if (!record.token(i)->isKern()) {
 			// don't try to transpose non-kern spines
-			m_text << record.token(i);
+			m_humdrum_text << record.token(i);
 			if (i<record.getFieldCount()-1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
 		if (!spineprocess[record.token(i)->getTrack()]) {
 			// don't try to transpose spines which were not indicated.
-			m_text << record.token(i);
+			m_humdrum_text << record.token(i);
 			if (i<record.getFieldCount()-1) {
-				m_text << "\t";
+				m_humdrum_text << "\t";
 			}
 			continue;
 		}
@@ -799,7 +799,7 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 		printHumdrumKernToken(record, i, transval);
 
 		if (i<record.getFieldCount()-1) {
-			m_text << "\t";
+			m_humdrum_text << "\t";
 		}
 		continue;
 	}
@@ -817,11 +817,11 @@ void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
 		int transval) {
 	if (record.token(index)->isNull()) {
 		// null record element (no pitch).
-		m_text << record.token(index);
+		m_humdrum_text << record.token(index);
 		return;
 	}
 	if (!record.token(index)->isKern()) {
-		m_text << record.token(index);
+		m_humdrum_text << record.token(index);
 		return;
 	}
 	string buffer;
@@ -830,7 +830,7 @@ void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
 		buffer = record.token(index)->getSubtoken(k);
 		printNewKernString(buffer, transval);
 		if (k<tokencount-1) {
-			m_text << " ";
+			m_humdrum_text << " ";
 		}
 	}
 }
@@ -846,12 +846,12 @@ void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
 void Tool_transpose::printNewKernString(const string& input, int transval) {
 	if (input.rfind('r') != string::npos) {
 		// don't transpose rests...
-		m_text << input;
+		m_humdrum_text << input;
 		return;
 	}
 	if (input == ".") {
 		// don't transpose null tokens...
-		m_text << input;
+		m_humdrum_text << input;
 		return;
 	}
 
@@ -865,7 +865,7 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 		string oldpitch = hre.getMatch(1);
 		output = hre.replaceCopy(input, newpitch, oldpitch);
 	}
-	m_text << output;
+	m_humdrum_text << output;
 }
 
 
@@ -1020,7 +1020,7 @@ void Tool_transpose::doAutoTransposeAnalysis(HumdrumFile& infile) {
 	}
 
 	if (debugQ) {
-		m_text << "Segment pitch histograms: " << endl;
+		m_free_text << "Segment pitch histograms: " << endl;
 		printHistograms(segments, ktracks, trackhist);
 	}
 
@@ -1050,7 +1050,7 @@ void Tool_transpose::doAutoTransposeAnalysis(HumdrumFile& infile) {
 
 	// print analyses raw results
 
-	m_text << "Raw key analysis by track:" << endl;
+	m_free_text << "Raw key analysis by track:" << endl;
 	printRawTrackAnalysis(analysis, ktracks);
 
 	doTranspositionAnalysis(analysis);
@@ -1088,7 +1088,7 @@ void Tool_transpose::doTranspositionAnalysis(vector<vector<vector<double> > >& a
 					if (value > 6) {
 						  value = 12 - value;
 					}
-					m_text << value << endl;
+					m_free_text << value << endl;
 				}
 			}
 		}
@@ -1110,9 +1110,9 @@ void Tool_transpose::printRawTrackAnalysis(vector<vector<vector<double> > >& ana
 	int value2;
 
 	for (i=0; i<(int)analysis[0].size(); i++) {
-		m_text << "Frame\t" << i << ":";
+		m_free_text << "Frame\t" << i << ":";
 		for (j=0; j<(int)analysis.size(); j++) {
-			m_text << "\t";
+			m_free_text << "\t";
 	 		value = (int)analysis[j][i][24];
 	 		if (value >= 12) {
 				value = value - 12;
@@ -1121,12 +1121,12 @@ void Tool_transpose::printRawTrackAnalysis(vector<vector<vector<double> > >& ana
 	 		if (value2 >= 12) {
 				value2 = value2 - 12;
 			}
-			m_text << value;
+			m_free_text << value;
 	 		// if (value != value2) {
-	 		//    m_text << "," << value2;
+	 		//    m_free_text << "," << value2;
 			// }
 		}
-		m_text << "\n";
+		m_free_text << "\n";
 	}
 }
 
@@ -1357,30 +1357,30 @@ vector<vector<vector<double> > >& trackhist) {
 	int start;
 
 	for (i=0; i<segments; i++) {
-//m_text << "i=" << i << endl;
-		m_text << "segment " << i
+//m_free_text << "i=" << i << endl;
+		m_free_text << "segment " << i
 				<< " ==========================================\n";
 		for (j=0; j<12; j++) {
 			start = 0;
-//m_text << "j=" << i << endl;
+//m_free_text << "j=" << i << endl;
 			for (k=1; k<(int)ktracks.size(); k++) {
-//m_text << "k=" << i << endl;
+//m_free_text << "k=" << i << endl;
 				if (!ktracks[k]) {
 					continue;
 				}
 				if (!start) {
-					m_text << j;
+					m_free_text << j;
 					start = 1;
 				}
-				m_text << "\t";
-				m_text << trackhist[k][i][j];
+				m_free_text << "\t";
+				m_free_text << trackhist[k][i][j];
 			}
 	 if (start) {
-				m_text << "\n";
+				m_free_text << "\n";
 			}
 		}
 	}
-	m_text << "==========================================\n";
+	m_free_text << "==========================================\n";
 }
 
 
@@ -1503,12 +1503,12 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 
 	// handle basic options:
 	if (getBoolean("author")) {
-		m_text << "Written by Craig Stuart Sapp, "
+		m_free_text << "Written by Craig Stuart Sapp, "
 			  << "craig@ccrma.stanford.edu, 12 Apr 2004" << endl;
 		exit(0);
 	} else if (getBoolean("version")) {
-		m_text << getArg(0) << ", version: 10 Dec 2016" << endl;
-		m_text << "compiled: " << __DATE__ << endl;
+		m_free_text << getArg(0) << ", version: 10 Dec 2016" << endl;
+		m_free_text << "compiled: " << __DATE__ << endl;
 		exit(0);
 	} else if (getBoolean("help")) {
 		usage(getArg(0));
