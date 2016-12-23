@@ -20,6 +20,7 @@
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
 #include "tool-metlev.h"
+#include "tool-myank.h"
 #include "tool-transpose.h"
 #include "HumRegex.h"
 
@@ -112,6 +113,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "myank") {
+			RUNTOOL(myank, infile, commands[i].second, status);
 		}
 	}
 
