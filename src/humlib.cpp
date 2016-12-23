@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 22 18:32:54 PST 2016
+// Last Modified: Thu Dec 22 19:07:54 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -15192,6 +15192,36 @@ Option_register::Option_register(const string& aDefinition, char aType,
 }
 
 
+Option_register::Option_register(Option_register& reg) {
+	m_definition = reg.m_definition;
+	m_description = reg.m_description;
+	m_defaultOption = reg.m_defaultOption;
+	m_modifiedOption = reg.m_modifiedOption;
+	m_modifiedQ = reg.m_modifiedQ;
+	m_type = reg.m_type;
+}
+
+
+
+//////////////////////////////
+//
+// Option_register::operator= --
+//
+
+Option_register& Option_register::operator=(Option_register& reg) {
+	if (this == &reg) {
+		return *this;
+	}
+	m_definition = reg.m_definition;
+	m_description = reg.m_description;
+	m_defaultOption = reg.m_defaultOption;
+	m_modifiedOption = reg.m_modifiedOption;
+	m_modifiedQ = reg.m_modifiedQ;
+	m_type = reg.m_type;
+	return *this;
+}
+
+
 
 //////////////////////////////
 //
@@ -15412,6 +15442,23 @@ Options::Options(int argc, char** argv) {
 }
 
 
+Options::Options(Options& options) {
+	m_argv = options.m_argv;
+	m_arguments = options.m_arguments;
+	m_optionFlag = options.m_optionFlag;
+	m_optionList = options.m_optionList;
+	m_options_error_checkQ = options.m_options_error_checkQ;
+	m_processedQ = options.m_processedQ;
+	m_suppressQ = options.m_suppressQ;
+	m_optionsArgQ = options.m_optionsArgQ;
+	for (int i=0; i<(int)options.m_optionRegister.size(); i++) {
+		Option_register* orr = new Option_register(*options.m_optionRegister[i]);
+		m_optionRegister.push_back(orr);
+	}
+
+}
+
+
 
 //////////////////////////////
 //
@@ -15420,6 +15467,41 @@ Options::Options(int argc, char** argv) {
 
 Options::~Options() {
 	reset();
+}
+
+
+
+//////////////////////////////
+//
+// Options::operator= --
+//
+
+Options& Options::operator=(Options& options) {
+	if (this == &options) {
+		return *this;
+	}
+	m_argv = options.m_argv;
+	m_arguments = options.m_arguments;
+	m_optionFlag = options.m_optionFlag;
+	m_optionList = options.m_optionList;
+	m_options_error_checkQ = options.m_options_error_checkQ;
+	m_processedQ = options.m_processedQ;
+	m_suppressQ = options.m_suppressQ;
+	m_optionsArgQ = options.m_optionsArgQ;
+
+	for (int i=0; i<(int)m_optionRegister.size(); i++) {
+		delete m_optionRegister[i];
+		m_optionRegister[i] = NULL;
+	}
+	m_optionRegister.clear();
+	
+	for (int i=0; i<(int)options.m_optionRegister.size(); i++) {
+		Option_register* orr = new Option_register(*options.m_optionRegister[i]);
+		m_optionRegister.push_back(orr);
+	}
+
+	m_error.str("");
+	return *this;
 }
 
 

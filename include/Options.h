@@ -34,8 +34,10 @@ class Option_register {
 		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption,
 		                                  const string& aModifiedOption);
+		         Option_register     (Option_register& reg);
 		        ~Option_register     ();
 
+		Option_register& operator=(Option_register& reg);
 		void     clearModified      (void);
 		string   getDefinition      (void);
 		string   getDefault         (void);
@@ -66,8 +68,10 @@ class Options {
 	public:
 		                Options           (void);
 		                Options           (int argc, char** argv);
+		                Options           (Options& options);
 		               ~Options           ();
 
+		Options&        operator=         (Options& options);
 		int             argc              (void) const;
 		const vector<string>& argv        (void) const;
 		int             define            (const string& aDefinition);
