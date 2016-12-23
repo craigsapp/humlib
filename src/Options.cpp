@@ -62,7 +62,7 @@ Option_register::Option_register(const string& aDefinition, char aType,
 }
 
 
-Option_register::Option_register(Option_register& reg) {
+Option_register::Option_register(const Option_register& reg) {
 	m_definition = reg.m_definition;
 	m_description = reg.m_description;
 	m_defaultOption = reg.m_defaultOption;
@@ -78,7 +78,7 @@ Option_register::Option_register(Option_register& reg) {
 // Option_register::operator= --
 //
 
-Option_register& Option_register::operator=(Option_register& reg) {
+Option_register& Option_register::operator=(const Option_register& reg) {
 	if (this == &reg) {
 		return *this;
 	}
@@ -312,7 +312,7 @@ Options::Options(int argc, char** argv) {
 }
 
 
-Options::Options(Options& options) {
+Options::Options(const Options& options) {
 	m_argv = options.m_argv;
 	m_arguments = options.m_arguments;
 	m_optionFlag = options.m_optionFlag;
@@ -346,7 +346,7 @@ Options::~Options() {
 // Options::operator= --
 //
 
-Options& Options::operator=(Options& options) {
+Options& Options::operator=(const Options& options) {
 	if (this == &options) {
 		return *this;
 	}

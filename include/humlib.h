@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 22 19:07:54 PST 2016
+// Last Modified: Thu Dec 22 19:25:55 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2440,10 +2440,10 @@ class Option_register {
 		         Option_register     (const string& aDefinition, char aType,
 		                                  const string& aDefaultOption,
 		                                  const string& aModifiedOption);
-		         Option_register     (Option_register& reg);
+		         Option_register     (const Option_register& reg);
 		        ~Option_register     ();
 
-		Option_register& operator=(Option_register& reg);
+		Option_register& operator=(const Option_register& reg);
 		void     clearModified      (void);
 		string   getDefinition      (void);
 		string   getDefault         (void);
@@ -2474,10 +2474,10 @@ class Options {
 	public:
 		                Options           (void);
 		                Options           (int argc, char** argv);
-		                Options           (Options& options);
+		                Options           (const Options& options);
 		               ~Options           ();
 
-		Options&        operator=         (Options& options);
+		Options&        operator=         (const Options& options);
 		int             argc              (void) const;
 		const vector<string>& argv        (void) const;
 		int             define            (const string& aDefinition);
