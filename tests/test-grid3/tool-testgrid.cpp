@@ -39,6 +39,7 @@ Tool_testgrid::Tool_testgrid(void) {
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
 	define("e|exinterp=s:**data", "specify exinterp for **data spine");
+	define("c|colorize=b",        "color dissonant notes");
 }
 
 
@@ -88,6 +89,9 @@ bool Tool_testgrid::run(HumdrumFile& infile, ostream& out) {
 		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
 	}
 	out << infile;
+	if (getBoolean("colorize")) {
+		out << "!!!RDF**kern: @ = dissonant marked note, color=\"#33bb00\"\n";
+	}
 
 	return 1;
 }
@@ -129,6 +133,7 @@ void Tool_testgrid::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 		}
 	}
 	bool nodissonanceQ = getBoolean("no-dissonant");
+	bool colorizeQ = getBoolean("colorize");
 
 	HumNum durp;     // duration of previous melodic note;
 	HumNum dur;      // duration of current note;
@@ -196,6 +201,16 @@ void Tool_testgrid::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 		if (!dissonant) {
 			if (!nodissonanceQ) {
 				continue;
+			}
+		}
+
+		if (colorizeQ) {
+			// mark note
+			char marker = '@';
+			string text = *attacks[i]->getToken();
+			if (text.find(marker) == string::npos) {
+				text += marker;
+				attacks[i]->getToken()->setText(text);
 			}
 		}
 
