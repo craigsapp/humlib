@@ -44,6 +44,7 @@ HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	m_duration = -1;
 	m_durationFromStart = -1;
 	setPrefix("!!");
+	createTokensFromLine();
 }
 
 
@@ -55,6 +56,7 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	m_duration = -1;
 	m_durationFromStart = -1;
 	setPrefix("!!");
+	createTokensFromLine();
 }
 
 

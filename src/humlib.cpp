@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 24 15:57:27 PST 2016
+// Last Modified: Sat Dec 24 17:17:32 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10444,6 +10444,7 @@ HumdrumLine::HumdrumLine(const string& aString) : string(aString) {
 	m_duration = -1;
 	m_durationFromStart = -1;
 	setPrefix("!!");
+	createTokensFromLine();
 }
 
 
@@ -10455,6 +10456,7 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 	m_duration = -1;
 	m_durationFromStart = -1;
 	setPrefix("!!");
+	createTokensFromLine();
 }
 
 
@@ -18091,6 +18093,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (getBoolean("colorize")) {
 		infile.appendLine("!!!RDF**kern: @ = dissonant marked note, color=\"#33bb00\"");
 	}
+	infile.createLinesFromTokens();
 
 	return true;
 }

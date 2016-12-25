@@ -113,6 +113,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (getBoolean("colorize")) {
 		infile.appendLine("!!!RDF**kern: @ = dissonant marked note, color=\"#33bb00\"");
 	}
+	infile.createLinesFromTokens();
 
 	return true;
 }
