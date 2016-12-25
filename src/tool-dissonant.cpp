@@ -94,6 +94,10 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		return 1;
 	}
 
+	diss2Q = false;
+	diss7Q = false;
+	diss4Q = false;
+
 	vector<vector<string> > results;
 
 	results.resize(grid.getVoiceCount());
@@ -111,7 +115,15 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	}
 
 	if (getBoolean("colorize")) {
-		infile.appendLine("!!!RDF**kern: @ = dissonant marked note, color=\"#33bb00\"");
+		if (diss2Q) {
+			infile.appendLine("!!!RDF**kern: @ = dissonant 2nd, marked note, color=\"#33bb00\"");
+		}
+		if (diss7Q) {
+			infile.appendLine("!!!RDF**kern: + = dissonant 7th, marked note, color=\"#0099ff\"");
+		}
+		if (diss4Q) {
+			infile.appendLine("!!!RDF**kern: N = dissonant 4th marked note, color=\"#bb3300\"");
+		}
 	}
 	infile.createLinesFromTokens();
 
@@ -170,13 +182,23 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 	int sliceindex;  // current timepoint in NoteGrid.
 	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
 	bool dissonant;  // true if  note is dissonant with other sounding notes.
-
+	char marking = '\0';
+	
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
+		marking = '\0';
 
 		// calculate harmonic intervals:
+		double lowestnote = 1000;
+		double tpitch;
 		for (int j=0; j<(int)harmint.size(); j++) {
+			tpitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			if (!Convert::isNaN(tpitch)) {
+				if (tpitch < lowestnote) {
+					lowestnote = tpitch;
+				}
+			}
 			if (j == vindex) {
 				harmint[j] = 0;
 			}
@@ -188,6 +210,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 						*grid.cell(vindex, sliceindex);
 			}
 		}
+
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
 		for (int j=0; j<(int)harmint.size(); j++) {
@@ -195,7 +218,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 				// don't compare to self
 				continue;
 			}
-			if (harmint[j] == NAN) {
+			if (Convert::isNaN(harmint[j])) {
 				// rest, so ignore
 				continue;
 			}
@@ -209,13 +232,26 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			if ((value == 1) || (value == -1)) {
 				// forms a second with another sounding note
 				dissonant = true;
+				diss2Q = true;
+				marking = '@';
 				results[lineindex] = "d2";
 				break;
 			} else if ((value == 6) || (value == -6)) {
 				// forms a seventh with another sounding note
 				dissonant = true;
+				diss7Q = true;
+				marking = '+';
 				results[lineindex] = "d7";
 				break;
+			}
+		}
+		double vpitch = grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
+		if (vpitch - lowestnote > 0) {
+			if (int(vpitch - lowestnote) % 7 == 3) {
+				diss4Q = true;
+				marking = 'N';
+				results[lineindex] = "d4";
+				dissonant = true;
 			}
 		}
 	
@@ -226,12 +262,11 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			}
 		}
 
-		if (colorizeQ) {
+		if (colorizeQ && marking) {
 			// mark note
-			char marker = '@';
 			string text = *attacks[i]->getToken();
-			if (text.find(marker) == string::npos) {
-				text += marker;
+			if (text.find(marking) == string::npos) {
+				text += marking;
 				attacks[i]->getToken()->setText(text);
 			}
 		}

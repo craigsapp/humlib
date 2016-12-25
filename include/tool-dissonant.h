@@ -38,7 +38,10 @@ class Tool_dissonant : public HumTool {
 		                            int vindex, bool debug);
 
 	private:
-		vector<HTp> m_kernspines;
+	 	vector<HTp> m_kernspines;
+		bool diss2Q = false;
+		bool diss7Q = false;
+		bool diss4Q = false;
 
 };
 
