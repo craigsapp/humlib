@@ -79,6 +79,7 @@ bool Tool_extract::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
+cerr << "GOT HERE BBB" << endl;
 		getAllText(out);
 	} else {
 		out << infile;
@@ -90,6 +91,7 @@ bool Tool_extract::run(const string& indata, ostream& out) {
 bool Tool_extract::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
 	if (hasAnyText()) {
+cerr << "GOT HERE AAA" << endl;
 		getAllText(out);
 	} else {
 		out << infile;
@@ -523,28 +525,28 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 		int lastone  = hre.getMatchInt(2);
 
 		if ((firstone < 1) && (firstone != 0)) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at start: " << firstone << endl;
-			cerr << "Minimum number allowed is " << 1 << endl;
-			exit(1);
+			m_error_text << "Minimum number allowed is " << 1 << endl;
+			return;
 		}
 		if ((lastone < 1) && (lastone != 0)) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at end: " << lastone << endl;
-			cerr << "Minimum number allowed is " << 1 << endl;
-			exit(1);
+			m_error_text << "Minimum number allowed is " << 1 << endl;
+			return;
 		}
 		if (firstone > maxtrack) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at start: " << firstone << endl;
-			cerr << "Maximum number allowed is " << maxtrack << endl;
-			exit(1);
+			m_error_text << "Maximum number allowed is " << maxtrack << endl;
+			return;
 		}
 		if (lastone > maxtrack) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at end: " << lastone << endl;
-			cerr << "Maximum number allowed is " << maxtrack << endl;
-			exit(1);
+			m_error_text << "Maximum number allowed is " << maxtrack << endl;
+			return;
 		}
 
 		if (firstone > lastone) {
@@ -584,16 +586,16 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 		}
 
 		if ((value < 1) && (value != 0)) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains too small a number at end: " << value << endl;
-			cerr << "Minimum number allowed is " << 1 << endl;
-			exit(1);
+			m_error_text << "Minimum number allowed is " << 1 << endl;
+			return;
 		}
 		if (value > maxtrack) {
-			cerr << "Error: range token: \"" << astring << "\""
+			m_error_text << "Error: range token: \"" << astring << "\""
 				  << " contains number too large at start: " << value << endl;
-			cerr << "Maximum number allowed is " << maxtrack << endl;
-			exit(1);
+			m_error_text << "Maximum number allowed is " << maxtrack << endl;
+			return;
 		}
 		field.push_back(value);
 		if (value == 0) {
@@ -1069,8 +1071,8 @@ void Tool_extract::dealWithSecondarySubspine(vector<int>& field, vector<int>& su
 			m_humdrum_text << infile.token(i, j);
 		}
 	} else {
-		cerr << "Should not get to this line of code" << endl;
-		exit(1);
+		m_error_text << "Should not get to this line of code" << endl;
+		return;
 	}
 }
 
@@ -1084,8 +1086,8 @@ void Tool_extract::dealWithSecondarySubspine(vector<int>& field, vector<int>& su
 
 void Tool_extract::getSearchPat(string& spat, int target, const string& modifier) {
 	if (modifier.size() > 20) {
-		cerr << "Error in GetSearchPat" << endl;
-		exit(1);
+		m_error_text << "Error in GetSearchPat" << endl;
+		return;
 	}
 	spat.reserve(16);
 	spat = "\\(";
@@ -1586,8 +1588,8 @@ void Tool_extract::getTraceData(vector<int>& startline, vector<vector<int> >& fi
 	ifstream input;
 	input.open(tracefile.c_str());
 	if (!input.is_open()) {
-		cerr << "Error: cannot open file for reading: " << tracefile << endl;
-		exit(1);
+		m_error_text << "Error: cannot open file for reading: " << tracefile << endl;
+		return;
 	}
 
 	string temps;
@@ -1748,17 +1750,17 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	if (getBoolean("author")) {
 		m_free_text << "Written by Craig Stuart Sapp, "
 			  << "craig@ccrma.stanford.edu, Feb 2008" << endl;
-		exit(0);
+		return;
 	} else if (getBoolean("version")) {
 		m_free_text << getArg(0) << ", version: Feb 2008" << endl;
 		m_free_text << "compiled: " << __DATE__ << endl;
-		exit(0);
+		return;
 	} else if (getBoolean("help")) {
 		usage(getCommand().c_str());
-		exit(0);
+		return;
 	} else if (getBoolean("example")) {
 		example();
-		exit(0);
+		return;
 	}
 
 	excludeQ    = getBoolean("x");
