@@ -12,6 +12,7 @@
 //
 
 #include "tool-dissonant.h"
+#include "Convert.h"
 
 #include <algorithm>
 #include <cmath>

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Dec 25 17:13:59 PST 2016
+// Last Modified: Sun Dec 25 18:00:09 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21632,7 +21632,7 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 			} else {
 				m_humdrum_text << '*';
 			}
-			if (i < splits.size()-1) {
+			if (i < (int)splits.size()-1) {
 				m_humdrum_text << '\t';
 			}
 		}
@@ -21693,7 +21693,7 @@ void Tool_myank::printJoinLine(vector<int>& splits, int index, int count) {
 		} else {
 			m_humdrum_text << "*";
 		}
-		if (i<splits.size()-1) {
+		if (i<(int)splits.size()-1) {
 			m_humdrum_text << "\t";
 		}
 	}
@@ -22330,7 +22330,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	}
 
 	// store state of global music values at end of music
-	if ((currmeasure >= 0) && (currmeasure < inmap.size()) 
+	if ((currmeasure >= 0) && (currmeasure < (int)inmap.size()) 
 			&& (inmap[currmeasure] >= 0)) {
 		measurein[inmap[currmeasure]].eclef    = currclef;
 		measurein[inmap[currmeasure]].ekeysig  = currkeysig;

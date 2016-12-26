@@ -1180,7 +1180,7 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 			} else {
 				m_humdrum_text << '*';
 			}
-			if (i < splits.size()-1) {
+			if (i < (int)splits.size()-1) {
 				m_humdrum_text << '\t';
 			}
 		}
@@ -1241,7 +1241,7 @@ void Tool_myank::printJoinLine(vector<int>& splits, int index, int count) {
 		} else {
 			m_humdrum_text << "*";
 		}
-		if (i<splits.size()-1) {
+		if (i<(int)splits.size()-1) {
 			m_humdrum_text << "\t";
 		}
 	}
@@ -1790,7 +1790,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 			lastmeasure = currmeasure;
 			currmeasure = hre.getMatchInt(1);
 
-			if (currmeasure < inmap.size()) {
+			if (currmeasure < (int)inmap.size()) {
 				// [20120818] Had to compensate for last measure being single
 				// and un-numbered.
 				if (inmap[currmeasure] < 0) {
@@ -1878,7 +1878,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	}
 
 	// store state of global music values at end of music
-	if ((currmeasure >= 0) && (currmeasure < inmap.size()) 
+	if ((currmeasure >= 0) && (currmeasure < (int)inmap.size()) 
 			&& (inmap[currmeasure] >= 0)) {
 		measurein[inmap[currmeasure]].eclef    = currclef;
 		measurein[inmap[currmeasure]].ekeysig  = currkeysig;
