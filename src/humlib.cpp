@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Dec 25 18:00:09 PST 2016
+// Last Modified: Sun Dec 25 21:38:19 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11321,6 +11321,12 @@ string HumdrumLine::getTokenString(int index) const {
 //
 
 int HumdrumLine::createTokensFromLine(void) {
+	// delete previous tokens (will need to re-analyze structure
+	// of file after this).
+	for (int i=0; i < (int)m_tokens.size(); i++) {
+		delete m_tokens[i];
+		m_tokens[i] = NULL;
+	}
 	m_tokens.resize(0);
 	HTp token;
 	char ch;
@@ -22242,7 +22248,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 			lastmeasure = currmeasure;
 			currmeasure = hre.getMatchInt(1);
 
-			if (currmeasure < inmap.size()) {
+			if (currmeasure < (int)inmap.size()) {
 				// [20120818] Had to compensate for last measure being single
 				// and un-numbered.
 				if (inmap[currmeasure] < 0) {
@@ -22469,11 +22475,11 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 		}
 		if (measurein[i+1].smet.size() == 0) {
 			measurein[i+1].smet.resize(tracks+1);
-			fill(measurein[i+1].smet.begin(), measurein[i].smet.end(), undefMyCoord);
+			fill(measurein[i+1].smet.begin(), measurein[i+1].smet.end(), undefMyCoord);
 		}
 		if (measurein[i+1].emet.size() == 0) {
 			measurein[i+1].emet.resize(tracks+1);
-			fill(measurein[i+1].emet.begin(), measurein[i].emet.end(), undefMyCoord);
+			fill(measurein[i+1].emet.begin(), measurein[i+1].emet.end(), undefMyCoord);
 		}
 		for (j=1; j<(int)measurein[i].smet.size(); j++) {
 			if (!measurein[i].emet[j].isValid()) {

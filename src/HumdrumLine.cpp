@@ -921,6 +921,12 @@ string HumdrumLine::getTokenString(int index) const {
 //
 
 int HumdrumLine::createTokensFromLine(void) {
+	// delete previous tokens (will need to re-analyze structure
+	// of file after this).
+	for (int i=0; i < (int)m_tokens.size(); i++) {
+		delete m_tokens[i];
+		m_tokens[i] = NULL;
+	}
 	m_tokens.resize(0);
 	HTp token;
 	char ch;

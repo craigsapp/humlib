@@ -2017,11 +2017,11 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 		}
 		if (measurein[i+1].smet.size() == 0) {
 			measurein[i+1].smet.resize(tracks+1);
-			fill(measurein[i+1].smet.begin(), measurein[i].smet.end(), undefMyCoord);
+			fill(measurein[i+1].smet.begin(), measurein[i+1].smet.end(), undefMyCoord);
 		}
 		if (measurein[i+1].emet.size() == 0) {
 			measurein[i+1].emet.resize(tracks+1);
-			fill(measurein[i+1].emet.begin(), measurein[i].emet.end(), undefMyCoord);
+			fill(measurein[i+1].emet.begin(), measurein[i+1].emet.end(), undefMyCoord);
 		}
 		for (j=1; j<(int)measurein[i].smet.size(); j++) {
 			if (!measurein[i].emet[j].isValid()) {
