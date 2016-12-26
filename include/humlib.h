@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 24 21:48:03 PST 2016
+// Last Modified: Sun Dec 25 16:12:28 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3013,17 +3013,18 @@ class Tool_extract : public HumTool {
 
 class Tool_filter : public HumTool {
 	public:
-		         Tool_filter   (void);
-		        ~Tool_filter   () {};
+		         Tool_filter        (void);
+		        ~Tool_filter        () {};
 
-		bool     run             (HumdrumFile& infile);
-		bool     run             (const string& indata, ostream& out);
-		bool     run             (HumdrumFile& infile, ostream& out);
+		bool     run                (HumdrumFile& infile);
+		bool     run                (const string& indata, ostream& out);
+		bool     run                (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     getCommandList  (vector<pair<string, string> >& commands,
-		                          HumdrumFile& infile);
-		void     initialize      (HumdrumFile& infile);
+		void     getCommandList     (vector<pair<string, string> >& commands,
+		                             HumdrumFile& infile);
+		void     initialize         (HumdrumFile& infile);
+		void     removeFilterLines  (HumdrumFile& infile);
 
 	private:
 		string   m_variant;        // used with -v option.

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Dec 24 21:48:03 PST 2016
+// Last Modified: Sun Dec 25 16:12:28 PST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -20198,10 +20198,34 @@ bool Tool_filter::run(HumdrumFile& infile) {
 		}
 	}
 
+	removeFilterLines(infile);
+
 	// Re-load the text for each line from their tokens in case any
 	// updates are needed from token changes.
 	infile.createLinesFromTokens();
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_filter::removeFilterLines --
+//
+
+void Tool_filter::removeFilterLines(HumdrumFile& infile) {
+	HumRegex hre;
+	string text;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		if (infile.token(i, 0)->compare(0, 10, "!!!filter:") == 0) { 
+			text = infile.token(i, 0)->getText();
+			hre.replaceDestructive(text, "!!!Xfilter:", "^!!!filter:");
+			infile.token(i, 0)->setText(text);
+		}
+	}
 }
 
 

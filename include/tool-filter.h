@@ -22,17 +22,18 @@ namespace hum {
 
 class Tool_filter : public HumTool {
 	public:
-		         Tool_filter   (void);
-		        ~Tool_filter   () {};
+		         Tool_filter        (void);
+		        ~Tool_filter        () {};
 
-		bool     run             (HumdrumFile& infile);
-		bool     run             (const string& indata, ostream& out);
-		bool     run             (HumdrumFile& infile, ostream& out);
+		bool     run                (HumdrumFile& infile);
+		bool     run                (const string& indata, ostream& out);
+		bool     run                (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     getCommandList  (vector<pair<string, string> >& commands,
-		                          HumdrumFile& infile);
-		void     initialize      (HumdrumFile& infile);
+		void     getCommandList     (vector<pair<string, string> >& commands,
+		                             HumdrumFile& infile);
+		void     initialize         (HumdrumFile& infile);
+		void     removeFilterLines  (HumdrumFile& infile);
 
 	private:
 		string   m_variant;        // used with -v option.
