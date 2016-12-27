@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Dec 25 21:38:19 PST 2016
+// Last Modified: Mon Dec 26 16:35:10 PST 2016
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2888,12 +2888,16 @@ class Tool_dissonant : public HumTool {
 		                            bool debug);
 		void    doAnalysisForVoice (vector<string>& results, NoteGrid& grid,
 		                            int vindex, bool debug);
+		void    printColorLegend   (HumdrumFile& infile);
 
 	private:
 	 	vector<HTp> m_kernspines;
 		bool diss2Q = false;
 		bool diss7Q = false;
 		bool diss4Q = false;
+		bool dissL0Q = false;
+		bool dissL1Q = false;
+		bool dissL2Q = false;
 
 };
 

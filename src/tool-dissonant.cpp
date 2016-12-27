@@ -39,7 +39,8 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
 	define("e|exinterp=s:**data", "specify exinterp for **data spine");
-	define("c|colorize=b",        "color dissonant notes");
+	define("c|colorize=b",        "color dissonant notes by beat level");
+	define("C|colorize2=b",       "color dissonant notes by dissonant interval");
 }
 
 
@@ -99,6 +100,10 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	diss7Q = false;
 	diss4Q = false;
 
+	dissL0Q = false;
+	dissL1Q = false;
+	dissL2Q = false;
+
 	vector<vector<string> > results;
 
 	results.resize(grid.getVoiceCount());
@@ -115,7 +120,31 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
 	}
 
+	printColorLegend(infile);
+	infile.createLinesFromTokens();
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::printColorLegend --
+//
+
+void Tool_dissonant::printColorLegend(HumdrumFile& infile) {
 	if (getBoolean("colorize")) {
+		if (dissL0Q) {
+			infile.appendLine("!!!RDF**kern: N = strong dissonant marked note, color=\"#bb3300\"");
+		}
+		if (dissL1Q) {
+			infile.appendLine("!!!RDF**kern: @ = weak 1 dissonant marked note, color=\"#33bb00\"");
+		}
+		if (dissL2Q) {
+			infile.appendLine("!!!RDF**kern: + = weak 2 dissonant marked note, color=\"#0099ff\"");
+		}
+	} else if (getBoolean("colorize2")) {
 		if (diss2Q) {
 			infile.appendLine("!!!RDF**kern: @ = dissonant 2nd, marked note, color=\"#33bb00\"");
 		}
@@ -126,9 +155,6 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			infile.appendLine("!!!RDF**kern: N = dissonant 4th marked note, color=\"#bb3300\"");
 		}
 	}
-	infile.createLinesFromTokens();
-
-	return true;
 }
 
 
@@ -169,6 +195,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 	}
 	bool nodissonanceQ = getBoolean("no-dissonant");
 	bool colorizeQ = getBoolean("colorize");
+	bool colorize2Q = getBoolean("colorize2");
 
 	HumNum durp;     // duration of previous melodic note;
 	HumNum dur;      // duration of current note;
@@ -263,14 +290,29 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			}
 		}
 
-		if (colorizeQ && marking) {
+		if (colorizeQ) {
+			int metriclevel = attacks[i]->getMetricLevel();
+			if (metriclevel <= 0) {
+				dissL0Q = true;
+				marking = 'N';
+			} else if (metriclevel < 2) {
+				dissL1Q = true;
+				marking = '@';
+			} else {
+				dissL2Q = true;
+				marking = '+';
+			}
+
+		}
+
+		if ((colorizeQ || colorize2Q) && marking) {
 			// mark note
 			string text = *attacks[i]->getToken();
 			if (text.find(marking) == string::npos) {
 				text += marking;
 				attacks[i]->getToken()->setText(text);
 			}
-		}
+		} 
 
 		durp = attacks[i-1]->getDuration();
 		dur  = attacks[i]->getDuration();
