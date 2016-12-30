@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec 26 16:35:10 PST 2016
+// Last Modified: Fri Dec 30 06:34:17 EST 2016
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18192,7 +18192,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 	double lev;      // metric level of the current note
 	double levn;     // metric level of the next melodic note
 	int lineindex;   // line in original Humdrum file content that contains note
+	int lineindexn;  // next line in original Humdrum file content that contains note
 	int sliceindex;  // current timepoint in NoteGrid.
+	int alineindexn; // next line in Humdrum file that contains note in accompaniment voice
 	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
 	bool dissonant;  // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
@@ -18299,6 +18301,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			}
 		} 
 
+		// variables for dissonant voice
 		durp = attacks[i-1]->getDuration();
 		dur  = attacks[i]->getDuration();
 		durn = attacks[i+1]->getDuration();
@@ -18307,6 +18310,10 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 		levp = attacks[i-1]->getMetricLevel();
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
+		lineindexn = attacks[i+1]->getLineIndex();
+
+		// variables for accompaniment voice
+		// int alineindexn = grid.cell(j, sliceindex);
 
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn)) { // weak dissonances
 			if (intp == -1) { // descending dissonances
@@ -18319,7 +18326,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 				} else if (intn > 1) {
 					results[lineindex] = "ed"; // lower échappée
 				} else if (intn == -2) {
-					results[lineindex] = "scd"; // short descending nota cambiata
+					results[lineindex] = "cd"; // descending nota cambiata
 				} else if (intn < -2) {
 					results[lineindex] = "ipd"; // incomplete posterior lower neighbor
 				}
@@ -18333,7 +18340,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 				} else if (intn == 0) {
 					results[lineindex] = "au"; // rising anticipation
 				} else if (intn == 2) {
-					results[lineindex] = "scu"; // short ascending nota cambiata
+					results[lineindex] = "cu"; // ascending nota cambiata
 				} else if (intn > 2) {
 					results[lineindex] = "ipu"; // incomplete posterior upper neighbor
 				}
@@ -18342,9 +18349,10 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			} else if ((intp > 2) && (intn == -1)) {
 				results[lineindex] = "iau"; // incomplete anterior upper neighbor
 			}
-		}
-		// TODO: add check to see if results already has a result.
-		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
+			(intp == -1) && (intn == -1)) {
+			results[lineindex] = "dq"; // dissonant third quarter
+		} else if (i < ((int)attacks.size() - 2)) { // expand the analysis window
 			double interval3 = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
@@ -18352,15 +18360,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
 				(intp == -1) && (intn == -1) && (interval3 == 1)) {
 				results[lineindex] = "ci"; // chanson idiom
-			} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
-				(intp == -1) && (intn == -1)) {
-				results[lineindex] = "dq"; // dissonant third quarter
-			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
-				(intp == -1) && (intn == -2) && (interval3 == 1)) {
-				results[lineindex] = "lcd"; // long descending nota cambiata
-			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
-				(intp == 1) && (intn == 2) && (interval3 == -1)) {
-				results[lineindex] = "lcu"; // long ascending nota cambiata
 			}
 		}
 	}
