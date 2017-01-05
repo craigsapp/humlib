@@ -148,7 +148,7 @@ void HumdrumFileBase::readFromHttpUri(const string& webaddress) {
 
 //////////////////////////////
 //
-// readFromHttpUri -- Read a Humdrum file from an http:// web address
+// readStringFromHttpUri -- Read a Humdrum file from an http:// web address
 //
 
 void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
@@ -190,7 +190,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 
 	#define URI_BUFFER_SIZE (10000)
 	char buffer[URI_BUFFER_SIZE];
-	int message_len;
+	unsigned int message_len;
 	stringstream header;
 	int foundcontent   = 0;
 	int newlinecounter = 0;
@@ -223,7 +223,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 
 	header << ends; // necessary?
 	while (header.getline(buffer, URI_BUFFER_SIZE)) {
-		int len = strlen(buffer);
+		int len = (int)strlen(buffer);
 		for (i=0; i<len; i++) {
 			buffer[i] = std::tolower(buffer[i]);
 		}
@@ -269,7 +269,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 			if (foundcontent) {
 				inputdata.write(buffer, message_len);
 			} else {
-				for (i=0; i<message_len; i++) {
+				for (i=0; i<(int)message_len; i++) {
 					if (foundcontent) {
 						inputdata << buffer[i];
 					} else {
@@ -325,7 +325,7 @@ void HumdrumFileBase::readStringFromHttpUri(stringstream& inputdata,
 int HumdrumFileBase::getChunk(int socket_id, stringstream& inputdata,
 		char* buffer, int bufsize) {
 	int chunksize = 0;
-	int message_len;
+	unsigned int message_len;
 	char digit[2] = {0};
 	int founddigit = 0;
 
@@ -333,7 +333,7 @@ int HumdrumFileBase::getChunk(int socket_id, stringstream& inputdata,
 	while ((message_len = ::read(socket_id, buffer, 1)) != 0) {
 		if (isxdigit(buffer[0])) {
 			digit[0] = buffer[0];
-			chunksize = (chunksize << 4) | strtol(digit, NULL, 16);
+			chunksize = (chunksize << 4) | (int)strtol(digit, NULL, 16);
 			founddigit = 1;
 		} else if (founddigit) {
 			break;
@@ -379,7 +379,7 @@ int HumdrumFileBase::getFixedDataSize(int socket_id, int datalength,
 		if (readcount + readsize > datalength) {
 			readsize = datalength - readcount;
 		}
-		message_len = ::read(socket_id, buffer, readsize);
+		message_len = (int)::read(socket_id, buffer, readsize);
 		if (message_len == 0) {
 			// shouldn't happen, but who knows...
 			break;

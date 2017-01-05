@@ -274,7 +274,7 @@ string HumRegex::getSuffix(void) {
 //
 
 int HumRegex::getMatchStartIndex(int index) {
-	return m_matches.position(index);
+	return (int)m_matches.position(index);
 }
 
 
@@ -298,7 +298,7 @@ int HumRegex::getMatchEndIndex(int index) {
 //
 
 int HumRegex::getMatchLength(int index) {
-	return m_matches.length(index);
+	return (int)m_matches.length(index);
 }
 
 

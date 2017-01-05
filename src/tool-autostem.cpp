@@ -1178,7 +1178,7 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				for (int ii=0; ii<flagl; ii++) {
 					gbinfo += "\\";
 				}
-				len = gbinfo.size();
+				len = (int)gbinfo.size();
 				if (len > 6) {
 					cerr << "Error too many grace note beams" << endl;
 					exit(1);
@@ -1229,7 +1229,7 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				for (int ii=0; ii<flagl; ii++) {
 					gbinfo += "\\";
 				}
-				len = gbinfo.size();
+				len = (int)gbinfo.size();
 				if (len > 6) {
 					cerr << "Error too many grace note beams" << endl;
 					exit(1);

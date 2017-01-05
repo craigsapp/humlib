@@ -456,13 +456,12 @@ int Options::define(const string& aDefinition) {
 	// Set up space for a option entry in the registry
 	definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-	auto definitionIndex = m_optionRegister.size();
+	int definitionIndex = m_optionRegister.size();
 
 	// Store option aliases
 	string optionName;
-	unsigned int i;
 	aliases += '|';
-	for (i=0; i<aliases.size(); i++) {
+	for (int i=0; i<(int)aliases.size(); i++) {
 		if (::isspace(aliases[i])) {
 			continue;
 		} else if (aliases[i] == '|') {
@@ -549,7 +548,7 @@ string Options::getArgument(int index) {
 //
 
 int Options::getArgCount(void) {
-	return m_arguments.size();
+	return (int)m_arguments.size();
 }
 
 // Alias:

@@ -207,9 +207,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 	double lev;      // metric level of the current note
 	double levn;     // metric level of the next melodic note
 	int lineindex;   // line in original Humdrum file content that contains note
-	int lineindexn;  // next line in original Humdrum file content that contains note
+	// int lineindexn;  // next line in original Humdrum file content that contains note
 	int sliceindex;  // current timepoint in NoteGrid.
-	int alineindexn; // next line in Humdrum file that contains note in accompaniment voice
+	// int alineindexn; // next line in Humdrum file that contains note in accompaniment voice
 	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
 	bool dissonant;  // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
@@ -325,7 +325,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<string>& results, NoteGrid& grid,
 		levp = attacks[i-1]->getMetricLevel();
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
-		lineindexn = attacks[i+1]->getLineIndex();
+		// lineindexn = attacks[i+1]->getLineIndex();
 
 		// variables for accompaniment voice
 		// int alineindexn = grid.cell(j, sliceindex);

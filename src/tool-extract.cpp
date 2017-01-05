@@ -407,7 +407,7 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 	field.resize(0);
 
 	int i, j;
-	int lasti = target.size();
+	int lasti = (int)target.size();
 	for (i=(int)target.size()-1; i>0; i--) {
 		if (target[i]) {
 			lasti = i;
@@ -504,7 +504,7 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 	vector<HTp> ktracks;
 	infile.getKernSpineStartList(ktracks);
 	if (kernQ) {
-		maxtrack = ktracks.size();
+		maxtrack = (int)ktracks.size();
 	}
 
 	int modletter;

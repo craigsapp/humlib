@@ -944,7 +944,7 @@ bool HumdrumFileStructure::prepareDurations(HumdrumToken* token, int state,
 	// Process secondary tracks next:
 	int newstate = state;
 
-	for (int i=reservoir.size()-1; i>=0; i--) {
+	for (int i=(int)reservoir.size()-1; i>=0; i--) {
 		prepareDurations(reservoir[i], newstate, startdurs[i]);
 	}
 
