@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan  5 04:39:32 PST 2017
+// Last Modified: Tue Jan 17 00:52:48 PST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1634,7 +1634,7 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 		return output;
 	}
 
-	// now decide if the rhythm can be represented simply with two dots.
+	// now decide if the rhythm can be represented simply with three dots.
 	HumNum test3dot = (duration * 8) / 15;
 	if (test3dot.getNumerator() == 1) {
 		// single dot works
@@ -4828,7 +4828,12 @@ string HumRegex::getMatch(int index) {
 //
 
 int HumRegex::getMatchInt(int index) {
-	return stoi(m_matches.str(index));
+	string value = m_matches.str(index);
+	if (value.size() > 0) {
+		return stoi(value);
+	} else {
+		return 0;
+	}
 }
 
 
@@ -8308,6 +8313,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	int i, j;
 	for (i=0; i<(int)tracktokens.size(); i++) {
 		for (j=0; j<(int)tracktokens[i].size(); j++) {
+cerr << "PROCESSING " << tracktokens[i][j] << endl;
 			if (tracktokens[i][j]->hasSlurStart() &&
 					tracktokens[i][j]->hasSlurEnd()) {
 
@@ -8349,6 +8355,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			} else {
 
 				if (tracktokens[i][j]->hasSlurStart()) {
+cerr << "\tHAS SLUR START" << endl;
 					elisionlevel = tracktokens[i][j]->getSlurStartElisionLevel();
 					if (elisionlevel >= 0) {
 						sluropens[elisionlevel].push_back(tracktokens[i][j]);
@@ -8356,9 +8363,12 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 				}
 
 				if (tracktokens[i][j]->hasSlurEnd()) {
+cerr << "\tHAS SLUR END" << endl;
 
 					elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
 					if (elisionlevel >= 0) {
+cerr << "ELISIONLEVEL " << elisionlevel << endl;
+cerr << "LINKING " << sluropens[elisionlevel].back() << " TO " << tracktokens[i][j] << endl;
 						if (sluropens[elisionlevel].size() > 0) {
 							sluropens[elisionlevel].back()->setValue("auto",
 									"slurEnd", tracktokens[i][j]);

@@ -49,6 +49,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	int i, j;
 	for (i=0; i<(int)tracktokens.size(); i++) {
 		for (j=0; j<(int)tracktokens[i].size(); j++) {
+cerr << "PROCESSING " << tracktokens[i][j] << endl;
 			if (tracktokens[i][j]->hasSlurStart() &&
 					tracktokens[i][j]->hasSlurEnd()) {
 
@@ -90,6 +91,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			} else {
 
 				if (tracktokens[i][j]->hasSlurStart()) {
+cerr << "\tHAS SLUR START" << endl;
 					elisionlevel = tracktokens[i][j]->getSlurStartElisionLevel();
 					if (elisionlevel >= 0) {
 						sluropens[elisionlevel].push_back(tracktokens[i][j]);
@@ -97,9 +99,12 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 				}
 
 				if (tracktokens[i][j]->hasSlurEnd()) {
+cerr << "\tHAS SLUR END" << endl;
 
 					elisionlevel = tracktokens[i][j]->getSlurEndElisionLevel();
 					if (elisionlevel >= 0) {
+cerr << "ELISIONLEVEL " << elisionlevel << endl;
+cerr << "LINKING " << sluropens[elisionlevel].back() << " TO " << tracktokens[i][j] << endl;
 						if (sluropens[elisionlevel].size() > 0) {
 							sluropens[elisionlevel].back()->setValue("auto",
 									"slurEnd", tracktokens[i][j]);

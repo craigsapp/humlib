@@ -238,7 +238,12 @@ string HumRegex::getMatch(int index) {
 //
 
 int HumRegex::getMatchInt(int index) {
-	return stoi(m_matches.str(index));
+	string value = m_matches.str(index);
+	if (value.size() > 0) {
+		return stoi(value);
+	} else {
+		return 0;
+	}
 }
 
 

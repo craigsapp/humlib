@@ -182,7 +182,7 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 		return output;
 	}
 
-	// now decide if the rhythm can be represented simply with two dots.
+	// now decide if the rhythm can be represented simply with three dots.
 	HumNum test3dot = (duration * 8) / 15;
 	if (test3dot.getNumerator() == 1) {
 		// single dot works
