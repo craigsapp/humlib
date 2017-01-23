@@ -79,7 +79,6 @@ bool Tool_extract::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
-cerr << "GOT HERE BBB" << endl;
 		getAllText(out);
 	} else {
 		out << infile;
@@ -91,7 +90,6 @@ cerr << "GOT HERE BBB" << endl;
 bool Tool_extract::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
 	if (hasAnyText()) {
-cerr << "GOT HERE AAA" << endl;
 		getAllText(out);
 	} else {
 		out << infile;
