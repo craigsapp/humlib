@@ -134,6 +134,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 
 							// search for an open slur in another track:
 							
+							bool found = false;
 							for (int itrack=0; itrack<(int)sluropens[elision].size(); itrack++) {
 								if (sluropens[elision][itrack].size() > 0) {
 
@@ -151,12 +152,15 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 										sluropens[elision][itrack].back()->getDurationFromStart());
 									sluropens[elision][itrack].pop_back();
 
+									found = true;
 									break;
 								}
 							}
-							tracktokens[row][track]->setValue("auto", "hangingSlur", "true");
-							tracktokens[row][track]->setValue("auto", "slurDration",
-								tracktokens[row][track]->getDurationToEnd());
+							if (!found) {
+								tracktokens[row][track]->setValue("auto", "hangingSlur", "true");
+								tracktokens[row][track]->setValue("auto", "slurDration",
+									tracktokens[row][track]->getDurationToEnd());
+							}
 						}
 					}
 					// if elision level is less than 0 something strange happened.
