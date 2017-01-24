@@ -138,6 +138,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 							for (int itrack=0; itrack<(int)sluropens[elision].size(); itrack++) {
 								if (sluropens[elision][itrack].size() > 0) {
 
+cerr << "LNKING " << tracktokens[row][track]  << " to " << sluropens[elision][itrack].back() << endl;
 									// link to this slur start in another layer instead
 									sluropens[elision][itrack].back()->setValue("auto",
 											"slurEnd", tracktokens[row][track]);
@@ -157,6 +158,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 								}
 							}
 							if (!found) {
+cerr << "HANGING SLUR" << endl;
 								tracktokens[row][track]->setValue("auto", "hangingSlur", "true");
 								tracktokens[row][track]->setValue("auto", "slurDration",
 									tracktokens[row][track]->getDurationToEnd());

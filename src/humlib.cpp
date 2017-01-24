@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jan 23 08:15:39 PST 2017
+// Last Modified: Mon Jan 23 17:46:30 PST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -8402,6 +8402,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 							for (int itrack=0; itrack<(int)sluropens[elision].size(); itrack++) {
 								if (sluropens[elision][itrack].size() > 0) {
 
+cerr << "LNKING " << tracktokens[row][track]  << " to " << sluropens[elision][itrack].back() << endl;
 									// link to this slur start in another layer instead
 									sluropens[elision][itrack].back()->setValue("auto",
 											"slurEnd", tracktokens[row][track]);
@@ -8421,6 +8422,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 								}
 							}
 							if (!found) {
+cerr << "HANGING SLUR" << endl;
 								tracktokens[row][track]->setValue("auto", "hangingSlur", "true");
 								tracktokens[row][track]->setValue("auto", "slurDration",
 									tracktokens[row][track]->getDurationToEnd());
