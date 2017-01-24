@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jan 23 18:51:52 PST 2017
+// Last Modified: Tue Jan 24 05:13:02 PST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1794,6 +1794,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   const string& keysig);
 		void   resetDiatonicStatesWithKeySignature(vector<int>& states,
 				                             vector<int>& signature);
+		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
 };
 
 

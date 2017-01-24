@@ -78,6 +78,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   const string& keysig);
 		void   resetDiatonicStatesWithKeySignature(vector<int>& states,
 				                             vector<int>& signature);
+		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
 };
 
 
