@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jan 24 05:13:02 PST 2017
+// Last Modified: Tue Jan 24 05:36:04 PST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -14263,8 +14263,12 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out) {
 //				<parameter key="slurEnd" value="HT_140366146702320" idref=""/>
 //
 
-HTp HumdrumToken::getSlurStartToken(void) {
-	return getValueHTp("auto", "slurStart");
+HTp HumdrumToken::getSlurStartToken(int number) {
+	string tag = "slurStart";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
 }
 
 
@@ -14277,8 +14281,12 @@ HTp HumdrumToken::getSlurStartToken(void) {
 //				<parameter key="slurStart" value="HT_140366146702320" idref=""/>
 //
 
-HTp HumdrumToken::getSlurEndToken(void) {
-	return getValueHTp("auto", "slurEnd");
+HTp HumdrumToken::getSlurEndToken(int number) {
+	string tag = "slurEnd";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
 }
 
 

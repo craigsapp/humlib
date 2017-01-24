@@ -2195,8 +2195,12 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out) {
 //				<parameter key="slurEnd" value="HT_140366146702320" idref=""/>
 //
 
-HTp HumdrumToken::getSlurStartToken(void) {
-	return getValueHTp("auto", "slurStart");
+HTp HumdrumToken::getSlurStartToken(int number) {
+	string tag = "slurStart";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
 }
 
 
@@ -2209,8 +2213,12 @@ HTp HumdrumToken::getSlurStartToken(void) {
 //				<parameter key="slurStart" value="HT_140366146702320" idref=""/>
 //
 
-HTp HumdrumToken::getSlurEndToken(void) {
-	return getValueHTp("auto", "slurEnd");
+HTp HumdrumToken::getSlurEndToken(int number) {
+	string tag = "slurEnd";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
 }
 
 
