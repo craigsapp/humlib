@@ -63,80 +63,52 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	for (int row=0; row<(int)tracktokens.size(); row++) {
 		for (int track=0; track<(int)tracktokens[row].size(); track++) {
 			token = tracktokens[row][track];
+			if (!token->isData()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
 			opencount = count(token->begin(), token->end(), '(');
 			closecount = count(token->begin(), token->end(), ')');
 
-			if (token->hasSlurStart() && token->hasSlurEnd()) {
-				// If note has slur start and stop on the same note,
-				// then this means to end the previous slur and start
-				// a new one.  This is a special case of an elided slur
-				// where the elision is not explicitly marked.
-				elision = token->getSlurEndElisionLevel();
-				if (elision >= 0) {
-					if (sluropens[elision][track].size() > 0) {
-						linkSlurEndpoints(sluropens[elision][track].back(), token);
-						// remove slur opening from buffer
-						sluropens[elision][track].pop_back();
-					} else {
-						// no starting slur marker to match to this slur end.
+			for (int i=0; i<closecount; i++) {
+				elision = token->getSlurEndElisionLevel(i);
+				if (elision < 0) {
+					continue;
+				}
+				if (sluropens[elision][track].size() > 0) {
+					linkSlurEndpoints(sluropens[elision][track].back(), token);
+					// remove slur opening from buffer
+					sluropens[elision][track].pop_back();
+				} else {
+					// No starting slur marker to match to this slur end in the
+					// given track.
+					// search for an open slur in another track:
+					bool found = false;
+					for (int itrack=0; itrack<(int)sluropens[elision].size(); itrack++) {
+						if (sluropens[elision][itrack].size() > 0) {
+							linkSlurEndpoints(sluropens[elision][itrack].back(), token);
+							// remove slur opening from buffer
+							sluropens[elision][itrack].pop_back();
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
 						token->setValue("auto", "hangingSlur", "true");
 						token->setValue("auto", "slurDration",
-								token->getDurationToEnd());
+							token->getDurationToEnd());
 					}
 				}
-				// slur starting code:
-				elision = token->getSlurStartElisionLevel();
-				if (elision >= 0) {
-					sluropens[elision][track].push_back(token);
+			}
+
+			for (int i=0; i<opencount; i++) {
+				elision = token->getSlurStartElisionLevel(i);
+				if (elision < 0) {
+					continue;
 				}
-
-			} else {
-				// not a single-note elided slur
-
-				if (token->hasSlurStart()) {
-					elision = token->getSlurStartElisionLevel();
-					if (elision >= 0) {
-						for (int i=0; i<opencount; i++) {
-							sluropens[elision][track].push_back(token);
-						}
-					}
-				}
-
-				for (int i=0; i<closecount; i++) {
-					if (!token->hasSlurEnd()) {
-						continue;
-					}
-					// elision = tracktokens[row][track]->getSlurEndElisionLevel();
-					elision = token->getSlurEndElisionLevel();
-					if (elision < 0) {
-						continue;
-					}
-					if (sluropens[elision][track].size() > 0) {
-						linkSlurEndpoints(sluropens[elision][track].back(), token);
-						// remove slur opening from buffer
-						sluropens[elision][track].pop_back();
-					} else {
-						// No starting slur marker to match to this slur end in the
-						// given track.
-						// search for an open slur in another track:
-						bool found = false;
-						for (int itrack=0; itrack<(int)sluropens[elision].size(); itrack++) {
-							if (sluropens[elision][itrack].size() > 0) {
-								linkSlurEndpoints(sluropens[elision][itrack].back(), token);
-								// remove slur opening from buffer
-								sluropens[elision][itrack].pop_back();
-								found = true;
-								break;
-							}
-						}
-						if (!found) {
-							token->setValue("auto", "hangingSlur", "true");
-							token->setValue("auto", "slurDration",
-								token->getDurationToEnd());
-						}
-					}
-				}
-
+				sluropens[elision][track].push_back(token);
 			}
 		}
 	}
@@ -166,13 +138,17 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 	string durtag = "slurDuration";
 	string endtag = "slurEnd";
-	if (slurstart->getValue("auto", "slurEnd") != "") {
-		endtag += "2";
-		durtag += "2";
+	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");
+	slurEndCount++;
+	if (slurEndCount > 1) {
+		endtag += to_string(slurEndCount);
+		durtag += to_string(slurEndCount);
 	}
 	string starttag = "slurStart";
-	if (slurend->getValue("auto", "slurStart") != "") {
-		starttag += "2";
+	int slurStartCount = slurend->getValueInt("auto", "slurStartCount");
+	slurStartCount++;
+	if (slurStartCount > 1) {
+		starttag += to_string(slurStartCount);
 	}
 
 	slurstart->setValue("auto", endtag, slurend);
@@ -182,6 +158,8 @@ void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 	HumNum duration = slurend->getDurationFromStart() 
 			- slurstart->getDurationFromStart();
 	slurstart->setValue("auto", durtag, duration);
+	slurstart->setValue("auto", "slurEndCount", to_string(slurEndCount));
+	slurend->setValue("auto", "slurStartCount", to_string(slurStartCount));
 }
 
 

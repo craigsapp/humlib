@@ -148,8 +148,8 @@ class HumdrumToken : public string, public HumHash {
 		void     setParameters             (HTp ptok);
 		void     setParameters             (const string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
-		int      getSlurStartElisionLevel  (void) const;
-		int      getSlurEndElisionLevel    (void) const;
+		int      getSlurStartElisionLevel  (int index = 0) const;
+		int      getSlurEndElisionLevel    (int index = 0) const;
 		HTp      getSlurStartToken         (int number = 0);
 		HTp      getSlurEndToken           (int number = 0);
 		ostream& printCsv                  (ostream& out = cout);

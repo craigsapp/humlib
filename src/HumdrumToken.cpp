@@ -1817,11 +1817,12 @@ int  HumdrumToken::getStrandIndex(void) const {
 // HumdrumToken::getSlurStartElisionLevel -- Returns the count of
 //   elision marks ('&') preceding a slur start character '('.
 //   Returns -1 if there is no slur start character.
+//   Default value: index = 0
 //
 
-int HumdrumToken::getSlurStartElisionLevel(void) const {
+int HumdrumToken::getSlurStartElisionLevel(int index) const {
 	if (isDataType("**kern")) {
-		return Convert::getKernSlurStartElisionLevel((string)(*this));
+		return Convert::getKernSlurStartElisionLevel((string)(*this), index);
 	} else {
 		return -1;
 	}
@@ -1834,11 +1835,12 @@ int HumdrumToken::getSlurStartElisionLevel(void) const {
 // HumdrumToken::getSlurEndElisionLevel -- Returns the count of
 //   elision marks ('&') preceding a slur end character ')'.
 //   Returns -1 if there is no slur end character.
+//   Default value: index = 0
 //
 
-int HumdrumToken::getSlurEndElisionLevel(void) const {
+int HumdrumToken::getSlurEndElisionLevel(int index) const {
 	if (isDataType("**kern")) {
-		return Convert::getKernSlurEndElisionLevel((string)(*this));
+		return Convert::getKernSlurEndElisionLevel((string)(*this), index);
 	} else {
 		return -1;
 	}

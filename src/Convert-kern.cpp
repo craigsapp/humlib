@@ -139,32 +139,37 @@ bool Convert::hasKernSlurEnd(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::getKernSlurStartElisionLevel -- Returns the number of
-//   '&' characters before the last '(' character in a kern token.
+//   '&' characters before the given '(' character in a kern token.
 //   Returns -1 if no '(' character in string.
 //
 
-int Convert::getKernSlurStartElisionLevel(const string& kerndata) {
+int Convert::getKernSlurStartElisionLevel(const string& kerndata, int index) {
 	bool foundSlurStart = false;
 	int output = 0;
-	for (int i=(int)kerndata.size()-1; i >=0; i--) {
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		char ch = kerndata[i];
 		if (ch == '(') {
+			count++;
+		}
+		if (count == target) {
 			foundSlurStart = true;
-			continue;
-		}
-		if (!foundSlurStart) {
-			continue;
-		}
-		if (ch == '&') {
-			output++;
-		} else {
-			return output;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
 		}
 	}
-	if (foundSlurStart) {
-		return output;
-	} else {
+	if (!foundSlurStart) {
 		return -1;
+	} else {
+		return output;
 	}
 }
 
@@ -177,28 +182,33 @@ int Convert::getKernSlurStartElisionLevel(const string& kerndata) {
 //   Returns -1 if no ')' character in string.
 //
 
-int Convert::getKernSlurEndElisionLevel(const string& kerndata) {
+int Convert::getKernSlurEndElisionLevel(const string& kerndata, int index) {
 	bool foundSlurEnd = false;
 	int output = 0;
-	for (int i=(int)kerndata.size()-1; i >=0; i--) {
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
 		char ch = kerndata[i];
 		if (ch == ')') {
+			count++;
+		}
+		if (count == target) {
 			foundSlurEnd = true;
-			continue;
-		}
-		if (!foundSlurEnd) {
-			continue;
-		}
-		if (ch == '&') {
-			output++;
-		} else {
-			return output;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
 		}
 	}
-	if (foundSlurEnd) {
-		return output;
-	} else {
+	if (!foundSlurEnd) {
 		return -1;
+	} else {
+		return output;
 	}
 }
 
