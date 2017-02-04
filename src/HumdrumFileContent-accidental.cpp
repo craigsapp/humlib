@@ -144,6 +144,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 			int rindex = rtracks[track];
 			for (k=0; k<subcount; k++) {
 				string subtok = infile[i].token(j)->getSubtoken(k);
+				int b40 = Convert::kernToBase40(subtok);
 				int diatonic = Convert::kernToBase7(subtok);
 				if (diatonic < 0) {
 					// Deal with extra-low notes later.
@@ -172,6 +173,27 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 						gdstates[rindex][diatonic] = -1000 + accid;
 					}
 					continue;
+				}
+
+				// check for accidentals on trills, mordents and turns.
+				if (subtok.find("t") != string::npos) {
+					// minor second trill
+					int trillnote     = b40 + 5;
+					int trilldiatonic = Convert::base40ToDiatonic(trillnote);
+					int trillaccid    = Convert::base40ToAccidental(trillnote);
+					if (dstates[rindex][trilldiatonic] != trillaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"trillAccidental", to_string(trillaccid));
+					}
+				} else if (subtok.find("T") != string::npos) {
+					// major second trill
+					int trillnote     = b40 + 6;
+					int trilldiatonic = Convert::base40ToDiatonic(trillnote);
+					int trillaccid    = Convert::base40ToAccidental(trillnote);
+					if (dstates[rindex][trilldiatonic] != trillaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"trillAccidental", to_string(trillaccid));
+					}
 				}
 
 				if (graceQ && (accid != gdstates[rindex][diatonic])) {
