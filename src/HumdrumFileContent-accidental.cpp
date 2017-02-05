@@ -194,6 +194,42 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 						infile[i].token(j)->setValue("auto", to_string(k),
 								"trillAccidental", to_string(trillaccid));
 					}
+				} else if (subtok.find("M") != string::npos) {
+					// major second upper mordent
+					int auxnote     = b40 + 6;
+					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
+					int auxaccid    = Convert::base40ToAccidental(auxnote);
+					if (dstates[rindex][auxdiatonic] != auxaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"mordentUpperAccidental", to_string(auxaccid));
+					}
+				} else if (subtok.find("m") != string::npos) {
+					// minor second upper mordent
+					int auxnote     = b40 + 5;
+					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
+					int auxaccid    = Convert::base40ToAccidental(auxnote);
+					if (dstates[rindex][auxdiatonic] != auxaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"mordentUpperAccidental", to_string(auxaccid));
+					}
+				} else if (subtok.find("W") != string::npos) {
+					// major second upper mordent
+					int auxnote     = b40 - 6;
+					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
+					int auxaccid    = Convert::base40ToAccidental(auxnote);
+					if (dstates[rindex][auxdiatonic] != auxaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"mordentLowerAccidental", to_string(auxaccid));
+					}
+				} else if (subtok.find("w") != string::npos) {
+					// minor second upper mordent
+					int auxnote     = b40 - 5;
+					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
+					int auxaccid    = Convert::base40ToAccidental(auxnote);
+					if (dstates[rindex][auxdiatonic] != auxaccid) {
+						infile[i].token(j)->setValue("auto", to_string(k),
+								"mordentLowerAccidental", to_string(auxaccid));
+					}
 				}
 
 				if (graceQ && (accid != gdstates[rindex][diatonic])) {
