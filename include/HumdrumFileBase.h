@@ -26,7 +26,6 @@
 // cannot access data from the internet due to the same-origin policy
 // in JavaScript unless it is from the computer serving the webpage
 // (except under certain circumstances).
-#define USING_URI 1
 #ifdef USING_URI
 	#include <sys/types.h>   /* socket, connect */
 	#include <sys/socket.h>  /* socket, connect */

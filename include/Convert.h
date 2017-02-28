@@ -109,6 +109,7 @@ class Convert {
 		static int     transToBase40        (const string& input);
 		static int     base40IntervalToLineOfFifths(int trans);
 		static string  keyNumberToKern      (int number);
+		static int     base7ToBase40        (int base7);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
