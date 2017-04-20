@@ -103,7 +103,7 @@ class Options {
 		bool            process           (int argc, char** argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
-		bool            process           (vector<string>& argv,
+		bool            process           (const vector<string>& argv,
 		                                      int error_check = 1,
 		                                      int suppress = 0);
 		bool            process           (string& argv, int error_check = 1,
@@ -118,7 +118,7 @@ class Options {
 		void            setModified       (const string& optionName,
 		                                   const string& optionValue);
 		void            setOptions        (int argc, char** argv);
-		void            setOptions        (vector<string>& argv);
+		void            setOptions        (const vector<string>& argv);
 		void            setOptions        (string& args);
 		void            appendOptions     (int argc, char** argv);
 		void            appendOptions     (string& args);
