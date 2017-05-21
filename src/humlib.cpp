@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun May 21 21:17:32 CEST 2017
+// Last Modified: Sun May 21 21:39:23 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16871,7 +16871,7 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::processStrand --
+// Tool_autobeam::processStrand -- Add beams to a single strand.
 //
 
 void Tool_autobeam::processStrand(HTp strandstart, HTp strandend) {
@@ -16902,7 +16902,8 @@ void Tool_autobeam::processStrand(HTp strandstart, HTp strandend) {
 
 //////////////////////////////
 //
-// Tool_autobeam::processMeasure --
+// Tool_autobeam::processMeasure -- Need to deal with rests starting or ending
+//    a beamed group.
 //
 
 void Tool_autobeam::processMeasure(vector<HTp>& measure) {

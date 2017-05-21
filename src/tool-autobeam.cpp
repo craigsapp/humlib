@@ -197,7 +197,7 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::processStrand --
+// Tool_autobeam::processStrand -- Add beams to a single strand.
 //
 
 void Tool_autobeam::processStrand(HTp strandstart, HTp strandend) {
@@ -228,7 +228,8 @@ void Tool_autobeam::processStrand(HTp strandstart, HTp strandend) {
 
 //////////////////////////////
 //
-// Tool_autobeam::processMeasure --
+// Tool_autobeam::processMeasure -- Need to deal with rests starting or ending
+//    a beamed group.
 //
 
 void Tool_autobeam::processMeasure(vector<HTp>& measure) {
