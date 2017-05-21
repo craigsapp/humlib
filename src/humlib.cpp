@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 20 09:35:35 PDT 2017
+// Last Modified: Sun May 21 21:17:32 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16832,6 +16832,10 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 			if (track != m_track) {
 				continue;
 			}
+		}
+		HTp starttok = infile.getStrandStart(i);
+		if (!starttok->isKern()) {
+			continue;
 		}
 		processStrand(infile.getStrandStart(i), infile.getStrandEnd(i));
 	}

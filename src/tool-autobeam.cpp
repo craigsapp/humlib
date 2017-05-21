@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Fri Dec  2 03:45:34 PST 2016
+// Last Modified: Sun May 21 21:11:12 CEST 2017 Ignore non-kern spines when adding beams
 // Filename:      tool-autobeam.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-autobeam.cpp
 // Syntax:        C++11
@@ -158,6 +158,10 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 			if (track != m_track) {
 				continue;
 			}
+		}
+		HTp starttok = infile.getStrandStart(i);
+		if (!starttok->isKern()) {
+			continue;
 		}
 		processStrand(infile.getStrandStart(i), infile.getStrandEnd(i));
 	}
