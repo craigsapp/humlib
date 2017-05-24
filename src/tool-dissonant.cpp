@@ -469,7 +469,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
 		} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
-			(intp == -1) && (intn == -1) // && (valid_acc_exit)
+			(intp == -1) && (intn == -1) && valid_acc_exit
 			) {
 			results[vindex][lineindex] = m_labels[THIRD_QUARTER]; // dissonant third quarter
 		}
