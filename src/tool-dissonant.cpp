@@ -237,6 +237,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	bool dissonant;  // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
 	int ovoiceindex = -1;
+	string unexp_label; // default dissonance label if none of the diss types apply
 	
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
@@ -273,6 +274,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
+
 		for (int j=0; j<(int)harmint.size(); j++) {
 			if (j == vindex) {
 				// don't compare to self
@@ -294,9 +296,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				dissonant = true;
 				diss2Q = true;
 				marking = '@';
-				if (results[vindex][lineindex] == "") {
-					results[vindex][lineindex] = m_labels[UNLABELED_Z2];
-				}
+				unexp_label = m_labels[UNLABELED_Z2];
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
@@ -305,9 +305,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				dissonant = true;
 				diss7Q = true;
 				marking = '+';
-				if (results[vindex][lineindex] == "") {
-					results[vindex][lineindex] = m_labels[UNLABELED_Z7];
-				}
+				unexp_label = m_labels[UNLABELED_Z7];
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
@@ -321,9 +319,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				marking = 'N';
 				ovoiceindex = vlowestnote;
 				oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
-				if (results[vindex][lineindex] == "") {
-					results[vindex][lineindex] = m_labels[UNLABELED_Z4];
-				}
+				unexp_label = m_labels[UNLABELED_Z4];
 				dissonant = true;
 			}
 		}
@@ -380,7 +376,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 
 		// Suspension test cases ////////////////////////////////////////////////
 
-		// valid_sus_acc: determines if the accompaniment voice conforms to the 
+		// valid_sus_acc: determines if the reference voice conforms to the 
 		// standards of the accompaniment voice for suspensions.
 
 		// Condition 1: The reference (accompaniment) voice moved to a different
@@ -408,6 +404,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			condition2 = false;
 		}
 
+		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
+		double opitchp = grid.cell(ovoiceindex, oattackindexp)->getAbsDiatonicPitch();
+
 		opitch = grid.cell(ovoiceindex, sliceindex)->getAbsDiatonicPitch();
 		int oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
 		int olineindexn = grid.cell(ovoiceindex, oattackindexn)->getLineIndex();
@@ -430,11 +429,12 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		bool valid_sus_acc = condition1 && condition2 && condition3a;
 		bool valid_ornam_sus_acc = condition1 && condition2 && condition3b;
 
+		double ointp = opitch - opitchp;
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
-		if ((dur <= durp) && (lev >= levp) && ((lev >= levn) || (dur == durn)) 
-			&& valid_acc_exit) { // weak dissonances
+		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
+			){ // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
@@ -502,6 +502,16 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				) {
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
+		}
+
+		// Decide which voice to give unexlained dissonance labels to if none of 
+		// the dissonant conditions above apply.
+		if ((results[vindex][lineindex] == "") && // ref. voice doesn't  have a diss label
+			((condition1 && condition2) || // ref. voice moved into diss obliquely
+			(((intp != 0) && (ointp != 0)) && // both voices moved to new pitches at start of diss
+			 (attackindexn <= oattackindexn))) // other voice doesn't leave diss. first
+			){
+			results[vindex][lineindex] = unexp_label;
 		}
 	}
 }
