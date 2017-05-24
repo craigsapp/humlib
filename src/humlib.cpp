@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 24 15:05:39 CEST 2017
+// Last Modified: Wed, May 24, 2017  3:14:12 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18739,7 +18739,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
-				(intp == -1) && (intn == -1) && (interval3 == 1) // && (valid_acc_exit)
+				(intp == -1) && (intn == -1) && (interval3 == 1) && valid_acc_exit
 				) {
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
