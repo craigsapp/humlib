@@ -378,7 +378,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		// different pitch class or a rest:
 		bool valid_acc_exit = oattackindexn < attackindexn ? false : true;
 
-
 		// Suspension test cases ////////////////////////////////////////////////
 
 		// valid_sus_acc: determines if the accompaniment voice conforms to the 
@@ -414,7 +413,10 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		int olineindexn = grid.cell(ovoiceindex, oattackindexn)->getLineIndex();
 		double opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
 		int oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
-		double opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
+		double opitchnn = NAN;
+		if (oattackindexnn >= 0) {
+			opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
+		}
 
 		// Condition 3: The other (dissonant) voice leaves its note before 
 		//    or at the same time as the accompaniment (reference) voice leaves 
@@ -431,6 +433,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
+cout << "\tGOT HERE HHH" << endl;
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
 			) { // weak dissonances
 			if (intp == -1) { // descending dissonances
@@ -501,6 +504,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
 		}
+cout << "\tGOT HERE III" << endl;
 	}
 }
 
