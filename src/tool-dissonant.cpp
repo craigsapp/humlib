@@ -498,7 +498,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
-				(intp == -1) && (intn == -1) && (interval3 == 1) // && (valid_acc_exit)
+				(intp == -1) && (intn == -1) && (interval3 == 1) && valid_acc_exit
 				) {
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
