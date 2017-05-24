@@ -433,7 +433,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
-cout << "\tGOT HERE HHH" << endl;
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
 			) { // weak dissonances
 			if (intp == -1) { // descending dissonances
@@ -504,7 +503,6 @@ cout << "\tGOT HERE HHH" << endl;
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
 		}
-cout << "\tGOT HERE III" << endl;
 	}
 }
 
