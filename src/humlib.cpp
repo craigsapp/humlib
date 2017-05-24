@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 24 10:44:31 CEST 2017
+// Last Modified: Wed May 24 11:23:07 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18480,7 +18480,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	int ovoiceindex;
 	
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
-cerr << "GOT HERE bbb " << i << endl;
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
 		lineindexn = attacks[i+1]->getLineIndex();
@@ -18649,28 +18648,22 @@ cerr << "GOT HERE bbb " << i << endl;
 		} else if (opitch != lopitch) {
 			condition2 = false;
 		}
-cout << "\tGOT HERE GGG" << endl;
 
 		opitch = grid.cell(ovoiceindex, sliceindex)->getAbsDiatonicPitch();
 		int oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
 		int olineindexn = grid.cell(ovoiceindex, oattackindexn)->getLineIndex();
 		double opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
 		int oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
-cout << "\tGOT HERE GGG5" << endl;
-cout << "\t\tOVOICEINDEX\t" << ovoiceindex << endl;
-cout << "\t\tOATTACIINDEXNN\t" << oattackindexnn << endl;
 		double opitchnn = NAN;
 		if (oattackindexnn >= 0) {
 			opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
 		}
-cout << "\tGOT HERE GGG5b" << endl;
 
 		// Condition 3: The other (dissonant) voice leaves its note before 
 		//    or at the same time as the accompaniment (reference) voice leaves 
 		//    its pitch class.  [The other (accompaniment) voice can leave its pitch
 		//    class for another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
-cout << "\tGOT HERE GGG6" << endl;
 
 		// deal with ornamented suspensions.
 		bool condition3b = oattackindexnn <= attackindexn ? true : false;
