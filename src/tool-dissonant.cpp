@@ -229,19 +229,19 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	double lev;      // metric level of the current note
 	double levn;     // metric level of the next melodic note
 	int lineindex;   // line in original Humdrum file content that contains note
-	int lineindexn;  // next line in original Humdrum file content that contains note
+	// int lineindexn;  // next line in original Humdrum file content that contains note
 	int attackindexn;// slice in NoteGrid content that contains next note attack
 	int sliceindex;  // current timepoint in NoteGrid.
-	int oattackindexn; // next note attack index of the other voice involved in the diss.
+	int oattackindexn = -1; // next note attack index of the other voice involved in the diss.
 	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
 	bool dissonant;  // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
-	int ovoiceindex;
+	int ovoiceindex = -1;
 	
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
-		lineindexn = attacks[i+1]->getLineIndex();
+		// lineindexn = attacks[i+1]->getLineIndex();
 		attackindexn = attacks[i]->getNextAttackIndex();
 
 		marking = '\0';
