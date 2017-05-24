@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, May 24, 2017  1:16:36 PM
+// Last Modified: Wed May 24 15:05:39 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18674,7 +18674,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
-cout << "\tGOT HERE HHH" << endl;
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
 			) { // weak dissonances
 			if (intp == -1) { // descending dissonances
@@ -18711,7 +18710,7 @@ cout << "\tGOT HERE HHH" << endl;
 				results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
 		} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
-			(intp == -1) && (intn == -1) // && (valid_acc_exit)
+			(intp == -1) && (intn == -1) && valid_acc_exit
 			) {
 			results[vindex][lineindex] = m_labels[THIRD_QUARTER]; // dissonant third quarter
 		}
@@ -18745,7 +18744,6 @@ cout << "\tGOT HERE HHH" << endl;
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
 			}
 		}
-cout << "\tGOT HERE III" << endl;
 	}
 }
 
