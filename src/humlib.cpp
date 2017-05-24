@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 24 15:05:39 CEST 2017
+// Last Modified: Wed May 24 18:08:19 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18272,6 +18272,7 @@ void Tool_autostem::countBeamStuff(const string& token, int& start, int& stop,
 
 Tool_dissonant::Tool_dissonant(void) {
 	define("r|raw=b",             "print raw grid");
+	define("p|percent=b",         "print counts as percentages");
 	define("d|diatonic=b",        "print diatonic grid");
 	define("D|no-dissonant=b",    "don't do dissonance anaysis");
 	define("m|midi-pitch=b",      "print midi-pitch grid");
@@ -18280,6 +18281,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
    define("u|undirected=b",      "use undirected dissonance labels");
+	define("count=b",             "count dissonances by category");
 	define("e|exinterp=s:**cdata","specify exinterp for **cdata spine");
 	define("c|colorize=b",        "color dissonant notes by beat level");
 	define("C|colorize2=b",       "color dissonant notes by dissonant interval");
@@ -18375,18 +18377,22 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	}
 	doAnalysis(results, grid, getBoolean("debug"));
 
-	string exinterp = getString("exinterp");
-	vector<HTp> kernspines = infile.getKernSpineStartList();
-	infile.appendDataSpine(results.back(), "", exinterp);
-	for (int i = (int)results.size()-1; i>0; i--) {
-		int track = kernspines[i]->getTrack();
-		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
+	if (getBoolean("count")) {
+		printCountAnalysis(results);
+		return false;
+	} else {
+		string exinterp = getString("exinterp");
+		vector<HTp> kernspines = infile.getKernSpineStartList();
+		infile.appendDataSpine(results.back(), "", exinterp);
+		for (int i = (int)results.size()-1; i>0; i--) {
+			int track = kernspines[i]->getTrack();
+			infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
+		}
+
+		printColorLegend(infile);
+		infile.createLinesFromTokens();
+		return true;
 	}
-
-	printColorLegend(infile);
-	infile.createLinesFromTokens();
-
-	return true;
 }
 
 
@@ -18745,6 +18751,97 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			}
 		}
 	}
+
+}
+
+
+///////////////////////////////
+//
+// printCountAnalysis --
+//
+
+void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
+
+	map<string, bool> reduced;
+	bool brief = getBoolean("u");
+	bool percentQ = getBoolean("percent");
+
+	vector<map<string, int> > analysis;
+	analysis.resize(data.size());
+	int i;
+	int j;
+	for (i=0; i<(int)data.size(); i++) {
+		for (j=0; j<(int)data[i].size(); j++) {
+			if (analysis[i].find(data[i][j]) != analysis[i].end()) {
+				analysis[i][data[i][j]]++;
+			} else {
+				analysis[i][data[i][j]] = 1;
+			}
+		}
+	}
+
+	m_humdrum_text << "**dis";
+	if (brief) {
+		m_humdrum_text << "u";
+	}
+	m_humdrum_text << "\t**sum";
+	for (j=0; j<(int)analysis.size(); j++) {
+		m_humdrum_text << "\t" << "**v" << j + 1;
+	}
+	m_humdrum_text << endl;
+
+	int sumsum = 0;
+	int sum;
+	int rj;
+	string item;
+	for (i=0; i<(int)LABELS_SIZE; i++) {
+
+		item = m_labels[i];
+
+		if (brief && (reduced.find(item) != reduced.end())) {
+			continue;
+		}
+		reduced[item] = 1;
+
+		sum = 0;
+		for (j=0; j<(int)analysis.size(); j++) {
+			if (analysis[j].find(item) != analysis[j].end()) {
+				sum += analysis[j][item];
+				sumsum += analysis[j][item];
+			}
+		}
+
+		if (sum == 0) {
+			continue;
+		}
+
+		m_humdrum_text << item;
+		m_humdrum_text << "\t" << sum;
+
+		for (int j=0; j<(int)analysis.size(); j++) {
+			m_humdrum_text << "\t";
+			rj = analysis.size() - j - 1;
+			if (analysis[j].find(item) != analysis[j].end()) {
+				if (percentQ) {
+					m_humdrum_text << int(analysis[j][item] * 1.0 / sum * 1000.0 + 0.5) / 10.0;
+				} else {
+					m_humdrum_text << analysis[j][item];
+				}
+			} else {
+				m_humdrum_text << 0;
+			}
+		}
+		m_humdrum_text << endl;
+	}
+
+	m_humdrum_text << "*-\t*-";
+	for (j=0; j<(int)analysis.size(); j++) {
+		m_humdrum_text << "\t" << "*-";
+	}
+	m_humdrum_text << endl;
+
+	m_humdrum_text << "!!total_dissonances:\t" << sumsum << endl;
+
 }
 
 
@@ -18781,10 +18878,6 @@ int Tool_dissonant::getNextPitchAttackIndex(NoteGrid& grid, int voicei, int slic
 
 void Tool_dissonant::fillLabels(void) {
 	m_labels.resize(LABELS_SIZE);
-	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
-	m_labels[UNLABELED_Z2      ] = "Z2"; // unknown dissonance, 2nd interval
-	m_labels[UNLABELED_Z7      ] = "Z7"; // unknown dissonance, 7th interval
-	m_labels[UNLABELED_Z4      ] = "Z4"; // unknown dissonance, 4th interval
 	m_labels[PASSING_UP        ] = "P"; // rising passing tone
 	m_labels[PASSING_DOWN      ] = "p"; // downward passing tone
 	m_labels[NEIGHBOR_UP       ] = "N"; // upper neighbor
@@ -18807,6 +18900,10 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[SUSPENSION_ORNAM  ] = "o"; // suspension ornament
 	m_labels[SUSPENSION_REP    ] = "r"; // suspension repeated note
 	m_labels[CHANSON_IDIOM     ] = "h"; // chanson idiom
+	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
+	m_labels[UNLABELED_Z2      ] = "Z2"; // unknown dissonance, 2nd interval
+	m_labels[UNLABELED_Z7      ] = "Z7"; // unknown dissonance, 7th interval
+	m_labels[UNLABELED_Z4      ] = "Z4"; // unknown dissonance, 4th interval
 }
 
 
@@ -18819,10 +18916,6 @@ void Tool_dissonant::fillLabels(void) {
 
 void Tool_dissonant::fillLabels2(void) {
 	m_labels.resize(LABELS_SIZE);
-	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
-	m_labels[UNLABELED_Z2      ] = "Z"; // unknown dissonance, 2nd interval
-	m_labels[UNLABELED_Z7      ] = "Z"; // unknown dissonance, 7th interval
-	m_labels[UNLABELED_Z4      ] = "Z"; // unknown dissonance, 4th interval
 	m_labels[PASSING_UP        ] = "P"; // rising passing tone
 	m_labels[PASSING_DOWN      ] = "P"; // downward passing tone
 	m_labels[NEIGHBOR_UP       ] = "N"; // upper neighbor
@@ -18845,6 +18938,10 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[SUSPENSION_ORNAM  ] = "O"; // suspension ornament
 	m_labels[SUSPENSION_REP    ] = "R"; // suspension repeated note
 	m_labels[CHANSON_IDIOM     ] = "H"; // chanson idiom
+	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
+	m_labels[UNLABELED_Z2      ] = "Z"; // unknown dissonance, 2nd interval
+	m_labels[UNLABELED_Z7      ] = "Z"; // unknown dissonance, 7th interval
+	m_labels[UNLABELED_Z4      ] = "Z"; // unknown dissonance, 4th interval
  }
 
 
