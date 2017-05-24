@@ -225,6 +225,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	HumNum durnn;    // duration of next next melodic note;
 	double intp;     // diatonic interval from previous melodic note
 	double intn;     // diatonic interval to next melodic note
+	double intnn;    // diatonic interval to next next melodic note
 	double levp;     // metric level of the previous melodic note
 	double lev;      // metric level of the current note
 	double levn;     // metric level of the next melodic note
@@ -493,14 +494,17 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		}
 
 		else if (i < ((int)attacks.size() - 2)) { // expand the analysis window
-			double interval3 = *attacks[i+2] - *attacks[i+1];
+			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
-				(intp == -1) && (intn == -1) && (interval3 == 1) && valid_acc_exit
+				(intp == -1) && (intn == -1) && (intnn == 1) && valid_acc_exit
 				) {
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
+			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
+				(intp == -1) && (intn == -2) && (intnn == 1)) {
+				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L]; // long-form descending cambiata
 			}
 		}
 
