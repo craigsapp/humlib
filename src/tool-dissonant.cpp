@@ -39,7 +39,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
-   define("u|undirected=b",      "use undirected dissonance labels");
+	define("u|undirected=b",      "use undirected dissonance labels");
 	define("count=b",             "count dissonances by category");
 	define("e|exinterp=s:**cdata","specify exinterp for **cdata spine");
 	define("c|colorize=b",        "color dissonant notes by beat level");
@@ -56,9 +56,9 @@ Tool_dissonant::Tool_dissonant(void) {
 bool Tool_dissonant::run(const string& indata, ostream& out) {
 
 	if (getBoolean("undirected")) {
-   	fillLabels2();
+		fillLabels2();
 	} else {
-   	fillLabels();
+		fillLabels();
 	}
 
 	HumdrumFile infile(indata);
@@ -75,9 +75,9 @@ bool Tool_dissonant::run(const string& indata, ostream& out) {
 bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
 
 	if (getBoolean("undirected")) {
-   	fillLabels2();
+		fillLabels2();
 	} else {
-   	fillLabels();
+		fillLabels();
 	}
 
 	int status = run(infile);
@@ -93,9 +93,9 @@ bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
 bool Tool_dissonant::run(HumdrumFile& infile) {
 
 	if (getBoolean("undirected")) {
-   	fillLabels2();
+		fillLabels2();
 	} else {
-   	fillLabels();
+		fillLabels();
 	}
 
 	NoteGrid grid(infile);
@@ -244,7 +244,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	char marking = '\0';
 	int ovoiceindex = -1;
 	string unexp_label; // default dissonance label if none of the diss types apply
-	
+
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
 		lineindex = attacks[i]->getLineIndex();
@@ -329,7 +329,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				dissonant = true;
 			}
 		}
-	
+
 		// Don't label current note if not dissonant with other sounding notes.
 		if (!dissonant) {
 			if (!nodissonanceQ) {
@@ -358,7 +358,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				text += marking;
 				attacks[i]->getToken()->setText(text);
 			}
-		} 
+		}
 
 		// variables for dissonant voice
 		durp = attacks[i-1]->getDuration();
@@ -372,17 +372,17 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 
 		// Non-suspension test cases ////////////////////////////////////////////
 
-		// valid_acc_exit determines if the other (accompaniment) voice conforms to the 
+		// valid_acc_exit determines if the other (accompaniment) voice conforms to the
 		// standards of all dissonant types except suspensions.
 
-		// The reference (dissonant) voice moves out of the dissonance to a different 
-		// pitch at the same time or before the other (accompaniment) voice moves to a 
+		// The reference (dissonant) voice moves out of the dissonance to a different
+		// pitch at the same time or before the other (accompaniment) voice moves to a
 		// different pitch class or a rest:
 		bool valid_acc_exit = oattackindexn < attackindexn ? false : true;
 
 		// Suspension test cases ////////////////////////////////////////////////
 
-		// valid_sus_acc: determines if the reference voice conforms to the 
+		// valid_sus_acc: determines if the reference voice conforms to the
 		// standards of the accompaniment voice for suspensions.
 
 		// Condition 1: The reference (accompaniment) voice moved to a different
@@ -411,20 +411,33 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		}
 
 		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
-		double opitchp = grid.cell(ovoiceindex, oattackindexp)->getAbsDiatonicPitch();
+		double opitchp = NAN;
+		if (oattackindexp >= 0) {
+			opitchp = grid.cell(ovoiceindex, oattackindexp)->getAbsDiatonicPitch();
+		}
 
 		opitch = grid.cell(ovoiceindex, sliceindex)->getAbsDiatonicPitch();
 		int oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
-		int olineindexn = grid.cell(ovoiceindex, oattackindexn)->getLineIndex();
-		double opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
-		int oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
+
+		int olineindexn = -1;
+		if (oattackindexn >= 0) {
+			olineindexn = grid.cell(ovoiceindex, oattackindexn)->getLineIndex();
+		}
+		double opitchn = NAN;
+		if (oattackindexn >= 0) {
+			opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
+		}
+		int oattackindexnn = -1;
+		if (oattackindexn >= 0) {
+			oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
+		}
 		double opitchnn = NAN;
 		if (oattackindexnn >= 0) {
 			opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
 		}
 
-		// Condition 3: The other (dissonant) voice leaves its note before 
-		//    or at the same time as the accompaniment (reference) voice leaves 
+		// Condition 3: The other (dissonant) voice leaves its note before
+		//    or at the same time as the accompaniment (reference) voice leaves
 		//    its pitch class.  [The other (accompaniment) voice can leave its pitch
 		//    class for another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
@@ -485,7 +498,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
 			results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
 		}
-		
+
 		else if (valid_sus_acc && ((ointn == 0) && (ointnn == -1))) {
 			results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
 			results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
@@ -510,7 +523,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			}
 		}
 
-		// Decide which voice to give unexlained dissonance labels to if none of 
+		// Decide which voice to give unexlained dissonance labels to if none of
 		// the dissonant conditions above apply.
 		if ((results[vindex][lineindex] == "") && // ref. voice doesn't  have a diss label
 			((condition1 && condition2) || // ref. voice moved into diss obliquely
@@ -622,17 +635,30 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 //
 
 int Tool_dissonant::getNextPitchAttackIndex(NoteGrid& grid, int voicei, int sliceindex) {
-	double pitch = grid.cell(voicei, sliceindex)->getAbsMidiPitch();
-	int endslice = grid.cell(voicei, sliceindex)->getNextAttackIndex();
-	double pitch2 = grid.cell(voicei, endslice)->getAbsMidiPitch();
+	double pitch = NAN;
+	int endslice = -1;
+	if (sliceindex >= 0) {
+		pitch = grid.cell(voicei, sliceindex)->getAbsMidiPitch();
+		endslice = grid.cell(voicei, sliceindex)->getNextAttackIndex();
+	}
+
+	double pitch2 = NAN;
+	if (endslice >= 0) {
+		pitch2 = grid.cell(voicei, endslice)->getAbsMidiPitch();
+	}
 
 	if (Convert::isNaN(pitch)) {
 		return endslice;
 	}
-	
+
 	while (pitch == pitch2) {
 		endslice = grid.cell(voicei, endslice)->getNextAttackIndex();
-		pitch2 = grid.cell(voicei, endslice)->getAbsMidiPitch();
+		pitch2 = NAN;
+		if (endslice >= 0) {
+			pitch2 = grid.cell(voicei, endslice)->getAbsMidiPitch();
+		} else {
+			break;
+		}
 	}
 
 	return endslice;
@@ -711,7 +737,7 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[UNLABELED_Z2      ] = "Z"; // unknown dissonance, 2nd interval
 	m_labels[UNLABELED_Z7      ] = "Z"; // unknown dissonance, 7th interval
 	m_labels[UNLABELED_Z4      ] = "Z"; // unknown dissonance, 4th interval
- }
+}
 
 
 
