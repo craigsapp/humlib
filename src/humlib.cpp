@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 26 10:17:34 CEST 2017
+// Last Modified: Fri May 26 11:13:59 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18621,6 +18621,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		// pitch at the same time or before the other (accompaniment) voice moves to a
 		// different pitch class or a rest:
 		bool valid_acc_exit = oattackindexn < attackindexn ? false : true;
+		if (oattackindexn < 0) {
+			valid_acc_exit = true;
+		}
 
 		// Suspension test cases ////////////////////////////////////////////////
 
@@ -18693,6 +18696,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		double ointp = opitch - opitchp;
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
+
+cerr << "==============" << endl;
+cerr << "DUR = " << dur <<  " durp = " << durp << endl;
+cerr << "LEV = " << lev <<  " levp = " << levp << " levn = " << levn << endl;
+cerr << "VALID ACC EXIT = " << valid_acc_exit << endl;
+cerr << "intp = " << intp << " intn = " << intn << endl;
+cerr << endl;
 
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
 			){ // weak dissonances
