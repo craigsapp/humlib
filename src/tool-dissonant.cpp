@@ -194,9 +194,17 @@ void Tool_dissonant::printColorLegend(HumdrumFile& infile) {
 
 void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 		NoteGrid& grid, bool debug) {
+	vector<vector<NoteCell*> > attacks;
+	attacks.resize(grid.getVoiceCount());
+
 	for (int i=0; i<grid.getVoiceCount(); i++) {
-		doAnalysisForVoice(results, grid, i, debug);
+		doAnalysisForVoice(results, grid, attacks[i], i, debug);
 	}
+
+	for (int i=0; i<grid.getVoiceCount(); i++) {
+		findFakeSuspensions(results, grid, attacks[i], i);
+	}
+
 }
 
 
@@ -208,8 +216,8 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 //
 
 void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGrid& grid,
-		int vindex, bool debug) {
-	vector<NoteCell*> attacks;
+		vector<NoteCell*>& attacks, int vindex, bool debug) {
+	// vector<NoteCell*> attacks;
 	grid.getNoteAndRestAttacks(attacks, vindex);
 
 	if (debug) {
@@ -546,6 +554,54 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 }
 
 
+
+//////////////////////////////
+//
+// Tool_dissonant::findFakeSuspensions --
+//
+
+void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, int vindex) {
+	double intp;     // diatonic interval from previous melodic note
+	int lineindexn;  // line index of the next note in the voice
+	bool sfound;     // boolean for if a suspension if found after a Z dissonance
+
+	for (int i=1; i<(int)attacks.size()-1; i++) {
+		int lineindex = attacks[i]->getLineIndex();
+		if (results[vindex][lineindex].find("Z") == string::npos) {
+			continue;
+		}
+		intp = *attacks[i] - *attacks[i-1];
+		if (fabs(intp) != 1.0) {
+			continue;
+		}
+		lineindexn = attacks[i+1]->getLineIndex();
+		sfound = false;
+		for (int j=lineindex + 1; j<=lineindexn; j++) {
+			if ((results[vindex][lineindex].compare(0, 1, "s") == 0) ||
+			    (results[vindex][lineindex].compare(0, 1, "S") == 0)) {
+				sfound = true;
+				break;
+			}
+		}
+		if (!sfound) {
+			continue;
+		}
+
+		// Also may need to check for the existance of another voice attacked before Z 
+		// and sustained through to the beginning of the resolution.
+
+
+		if (intp > 0) {
+			results[vindex][lineindex] = "F";
+		} else {
+			results[vindex][lineindex] = "f";
+		}
+	}
+}
+
+
+
 ///////////////////////////////
 //
 // printCountAnalysis --
@@ -680,32 +736,34 @@ int Tool_dissonant::getNextPitchAttackIndex(NoteGrid& grid, int voicei, int slic
 
 void Tool_dissonant::fillLabels(void) {
 	m_labels.resize(LABELS_SIZE);
-	m_labels[PASSING_UP        ] = "P"; // rising passing tone
-	m_labels[PASSING_DOWN      ] = "p"; // downward passing tone
-	m_labels[NEIGHBOR_UP       ] = "N"; // upper neighbor
-	m_labels[NEIGHBOR_DOWN     ] = "n"; // lower neighbor
-	m_labels[ECHAPPE_UP        ] = "E"; // upper échappée
-	m_labels[ECHAPPE_DOWN      ] = "e"; // lower échappée
-	m_labels[CAMBIATA_UP_S     ] = "C"; // ascending short nota cambiata
-	m_labels[CAMBIATA_DOWN_S   ] = "c"; // descending short nota cambiata
-	m_labels[CAMBIATA_UP_L     ] = "K"; // ascending long nota cambiata
-	m_labels[CAMBIATA_DOWN_L   ] = "k"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR  ] = "F"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR ] = "f"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR   ] = "B"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR  ] = "b"; // incomplete anterior lower neighbor
-	m_labels[ANT_UP            ] = "A"; // rising anticipation
-	m_labels[ANT_DOWN          ] = "a"; // descending anticipation
-	m_labels[THIRD_QUARTER     ] = "Q"; // dissonant third quarter
-	m_labels[SUSPENSION        ] = "s"; // suspension
-	m_labels[SUSPENSION_AGENT  ] = "G"; // suspension agent
-	m_labels[SUSPENSION_ORNAM  ] = "o"; // suspension ornament
-	m_labels[SUSPENSION_REP    ] = "r"; // suspension repeated note
-	m_labels[CHANSON_IDIOM     ] = "h"; // chanson idiom
-	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
-	m_labels[UNLABELED_Z2      ] = "Z2"; // unknown dissonance, 2nd interval
-	m_labels[UNLABELED_Z7      ] = "Z7"; // unknown dissonance, 7th interval
-	m_labels[UNLABELED_Z4      ] = "Z4"; // unknown dissonance, 4th interval
+	m_labels[PASSING_UP          ] = "P"; // rising passing tone
+	m_labels[PASSING_DOWN        ] = "p"; // downward passing tone
+	m_labels[NEIGHBOR_UP         ] = "N"; // upper neighbor
+	m_labels[NEIGHBOR_DOWN       ] = "n"; // lower neighbor
+	m_labels[ECHAPPE_UP          ] = "E"; // upper échappée
+	m_labels[ECHAPPE_DOWN        ] = "e"; // lower échappée
+	m_labels[CAMBIATA_UP_S       ] = "C"; // ascending short nota cambiata
+	m_labels[CAMBIATA_DOWN_S     ] = "c"; // descending short nota cambiata
+	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
+	m_labels[CAMBIATA_DOWN_L     ] = "k"; // descending long nota cambiata
+	m_labels[IPOSTHI_NEIGHBOR    ] = "F"; // incomplete posterior upper neighbor
+	m_labels[IPOSTLOW_NEIGHBOR   ] = "f"; // incomplete posterior lower neighbor
+	m_labels[IANTHI_NEIGHBOR     ] = "B"; // incomplete anterior upper neighbor
+	m_labels[IANTLOW_NEIGHBOR    ] = "b"; // incomplete anterior lower neighbor
+	m_labels[ANT_UP              ] = "A"; // rising anticipation
+	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
+	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
+	m_labels[SUSPENSION          ] = "s"; // suspension
+	m_labels[SUSPENSION_AGENT    ] = "G"; // suspension agent
+	m_labels[SUSPENSION_ORNAM    ] = "o"; // suspension ornament
+	m_labels[SUSPENSION_REP      ] = "r"; // suspension repeated note
+	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
+	m_labels[FAKE_SUSPENSION_DOWN] = "f"; // fake suspension approached by step down
+	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
+	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
+	m_labels[UNLABELED_Z2        ] = "Z2"; // unknown dissonance, 2nd interval
+	m_labels[UNLABELED_Z7        ] = "Z7"; // unknown dissonance, 7th interval
+	m_labels[UNLABELED_Z4        ] = "Z4"; // unknown dissonance, 4th interval
 }
 
 
@@ -718,32 +776,34 @@ void Tool_dissonant::fillLabels(void) {
 
 void Tool_dissonant::fillLabels2(void) {
 	m_labels.resize(LABELS_SIZE);
-	m_labels[PASSING_UP        ] = "P"; // rising passing tone
-	m_labels[PASSING_DOWN      ] = "P"; // downward passing tone
-	m_labels[NEIGHBOR_UP       ] = "N"; // upper neighbor
-	m_labels[NEIGHBOR_DOWN     ] = "N"; // lower neighbor
-	m_labels[ECHAPPE_UP        ] = "E"; // upper échappée
-	m_labels[ECHAPPE_DOWN      ] = "E"; // lower échappée
-	m_labels[CAMBIATA_UP_S     ] = "C"; // ascending short nota cambiata
-	m_labels[CAMBIATA_DOWN_S   ] = "C"; // descending short nota cambiata
-	m_labels[CAMBIATA_UP_L     ] = "K"; // ascending long nota cambiata
-	m_labels[CAMBIATA_DOWN_L   ] = "K"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR  ] = "F"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR ] = "F"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR   ] = "B"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR  ] = "B"; // incomplete anterior lower neighbor
-	m_labels[ANT_UP            ] = "A"; // rising anticipation
-	m_labels[ANT_DOWN          ] = "A"; // descending anticipation
-	m_labels[THIRD_QUARTER     ] = "Q"; // dissonant third quarter
-	m_labels[SUSPENSION        ] = "S"; // suspension
-	m_labels[SUSPENSION_AGENT  ] = "G"; // suspension agent
-	m_labels[SUSPENSION_ORNAM  ] = "O"; // suspension ornament
-	m_labels[SUSPENSION_REP    ] = "R"; // suspension repeated note
-	m_labels[CHANSON_IDIOM     ] = "H"; // chanson idiom
-	m_labels[UNKNOWN_DISSONANCE] = "Z"; // unknown dissonance
-	m_labels[UNLABELED_Z2      ] = "Z"; // unknown dissonance, 2nd interval
-	m_labels[UNLABELED_Z7      ] = "Z"; // unknown dissonance, 7th interval
-	m_labels[UNLABELED_Z4      ] = "Z"; // unknown dissonance, 4th interval
+	m_labels[PASSING_UP          ] = "P"; // rising passing tone
+	m_labels[PASSING_DOWN        ] = "P"; // downward passing tone
+	m_labels[NEIGHBOR_UP         ] = "N"; // upper neighbor
+	m_labels[NEIGHBOR_DOWN       ] = "N"; // lower neighbor
+	m_labels[ECHAPPE_UP          ] = "E"; // upper échappée
+	m_labels[ECHAPPE_DOWN        ] = "E"; // lower échappée
+	m_labels[CAMBIATA_UP_S       ] = "C"; // ascending short nota cambiata
+	m_labels[CAMBIATA_DOWN_S     ] = "C"; // descending short nota cambiata
+	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
+	m_labels[CAMBIATA_DOWN_L     ] = "K"; // descending long nota cambiata
+	m_labels[IPOSTHI_NEIGHBOR    ] = "F"; // incomplete posterior upper neighbor
+	m_labels[IPOSTLOW_NEIGHBOR   ] = "F"; // incomplete posterior lower neighbor
+	m_labels[IANTHI_NEIGHBOR     ] = "B"; // incomplete anterior upper neighbor
+	m_labels[IANTLOW_NEIGHBOR    ] = "B"; // incomplete anterior lower neighbor
+	m_labels[ANT_UP              ] = "A"; // rising anticipation
+	m_labels[ANT_DOWN            ] = "A"; // descending anticipation
+	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
+	m_labels[SUSPENSION          ] = "S"; // suspension
+	m_labels[SUSPENSION_AGENT    ] = "G"; // suspension agent
+	m_labels[SUSPENSION_ORNAM    ] = "O"; // suspension ornament
+	m_labels[SUSPENSION_REP      ] = "R"; // suspension repeated note
+	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
+	m_labels[FAKE_SUSPENSION_DOWN] = "F"; // fake suspension approached by step down
+	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom
+	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
+	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval
+	m_labels[UNLABELED_Z7        ] = "Z"; // unknown dissonance, 7th interval
+	m_labels[UNLABELED_Z4        ] = "Z"; // unknown dissonance, 4th interval
 }
 
 
