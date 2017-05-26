@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 26 11:13:59 CEST 2017
+// Last Modified: Fri May 26 11:24:32 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18469,10 +18469,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 	HumNum durp;     // duration of previous melodic note;
 	HumNum dur;      // duration of current note;
 	HumNum durn;     // duration of next melodic note;
-	HumNum durnn;    // duration of next next melodic note;
 	double intp;     // diatonic interval from previous melodic note
 	double intn;     // diatonic interval to next melodic note
-	double intnn;    // diatonic interval to next next melodic note
 	double levp;     // metric level of the previous melodic note
 	double lev;      // metric level of the current note
 	double levn;     // metric level of the next melodic note
@@ -18697,13 +18695,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
-cerr << "==============" << endl;
-cerr << "DUR = " << dur <<  " durp = " << durp << endl;
-cerr << "LEV = " << lev <<  " levp = " << levp << " levn = " << levn << endl;
-cerr << "VALID ACC EXIT = " << valid_acc_exit << endl;
-cerr << "intp = " << intp << " intn = " << intn << endl;
-cerr << endl;
-
 		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
 			){ // weak dissonances
 			if (intp == -1) { // descending dissonances
@@ -18764,6 +18755,7 @@ cerr << endl;
 		}
 
 		else if (i < ((int)attacks.size() - 2)) { // expand the analysis window
+
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
