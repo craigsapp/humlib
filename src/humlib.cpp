@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 25 19:12:01 CEST 2017
+// Last Modified: Fri May 26 10:17:34 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18822,7 +18822,6 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 
 	int sumsum = 0;
 	int sum;
-	int rj;
 	string item;
 	for (i=0; i<(int)LABELS_SIZE; i++) {
 
@@ -18850,7 +18849,6 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 
 		for (int j=0; j<(int)analysis.size(); j++) {
 			m_humdrum_text << "\t";
-			rj = analysis.size() - j - 1;
 			if (analysis[j].find(item) != analysis[j].end()) {
 				if (percentQ) {
 					m_humdrum_text << int(analysis[j][item] * 1.0 / sum * 1000.0 + 0.5) / 10.0;
