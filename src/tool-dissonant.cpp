@@ -511,6 +511,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 				(intp == -1) && (intn == -2) && (intnn == 1)) {
 				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L]; // long-form descending cambiata
+			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
+				(intp == 1) && (intn == 2) && (intnn == -1)) {
+				results[vindex][lineindex] = m_labels[CAMBIATA_UP_L]; // long-form ascending nota cambiata
 			}
 		}
 
