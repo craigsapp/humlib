@@ -578,8 +578,8 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
-			if ((results[vindex][lineindex].compare(0, 1, "s") == 0) ||
-			    (results[vindex][lineindex].compare(0, 1, "S") == 0)) {
+			if ((results[vindex][j].compare(0, 1, "s") == 0) ||
+			    (results[vindex][j].compare(0, 1, "S") == 0)) {
 				sfound = true;
 				break;
 			}

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri, May 26, 2017  6:10:36 PM
+// Last Modified: Fri May 26 18:28:32 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18819,8 +18819,8 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
-			if ((results[vindex][lineindex].compare(0, 1, "s") == 0) ||
-			    (results[vindex][lineindex].compare(0, 1, "S") == 0)) {
+			if ((results[vindex][j].compare(0, 1, "s") == 0) ||
+			    (results[vindex][j].compare(0, 1, "S") == 0)) {
 				sfound = true;
 				break;
 			}
