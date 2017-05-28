@@ -69,8 +69,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			if (token->isNull()) {
 				continue;
 			}
-			opencount = count(token->begin(), token->end(), '(');
-			closecount = count(token->begin(), token->end(), ')');
+			opencount = (int)count(token->begin(), token->end(), '(');
+			closecount = (int)count(token->begin(), token->end(), ')');
 
 			for (int i=0; i<closecount; i++) {
 				elision = token->getSlurEndElisionLevel(i);

@@ -408,7 +408,7 @@ int HumInstrument::find(const string& Hname) {
 	if (searchResult == NULL) {
 		return -1;
 	} else {
-		return (((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
+		return (int)(((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
 			sizeof(_HumInstrument);
 	}
 }

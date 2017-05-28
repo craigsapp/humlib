@@ -456,7 +456,7 @@ int Options::define(const string& aDefinition) {
 	// Set up space for a option entry in the registry
 	definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-	int definitionIndex = m_optionRegister.size();
+	int definitionIndex = (int)m_optionRegister.size();
 
 	// Store option aliases
 	string optionName;
