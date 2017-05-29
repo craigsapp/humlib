@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, May 29, 2017  4:59:09 PM
+// Last Modified: Mon May 29 17:08:43 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18814,7 +18814,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			if ((Convert::isNaN(intp) && (not Convert::isNaN(ointp)) &&
 				 (not Convert::isNaN(ointn))) ||
 				 // ref. voice is approached or left by leap but the other voice resolves by step
-				 (((abs(intp) > 1) || (abs(intn) > 1)) && (abs(ointn) == 1))) {
+				 (((abs((int)intp) > 1) || (abs((int)intn) > 1)) && (abs((int)ointn) == 1))) {
 				continue;
 			} else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
 				 (((condition1) && (ointp != 0)) && // both voices moved to new pitches at start of diss
