@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 26 18:28:32 CEST 2017
+// Last Modified: Mon May 29 12:58:11 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3785,7 +3785,7 @@ int HumInstrument::find(const string& Hname) {
 	if (searchResult == NULL) {
 		return -1;
 	} else {
-		return (((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
+		return (int)(((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
 			sizeof(_HumInstrument);
 	}
 }
@@ -8544,8 +8544,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			if (token->isNull()) {
 				continue;
 			}
-			opencount = count(token->begin(), token->end(), '(');
-			closecount = count(token->begin(), token->end(), ')');
+			opencount = (int)count(token->begin(), token->end(), '(');
+			closecount = (int)count(token->begin(), token->end(), ')');
 
 			for (int i=0; i<closecount; i++) {
 				elision = token->getSlurEndElisionLevel(i);
@@ -15846,7 +15846,7 @@ int Options::define(const string& aDefinition) {
 	// Set up space for a option entry in the registry
 	definitionEntry = new Option_register(aDefinition, otype[0], ovalue);
 
-	int definitionIndex = m_optionRegister.size();
+	int definitionIndex = (int)m_optionRegister.size();
 
 	// Store option aliases
 	string optionName;
@@ -18502,21 +18502,25 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		marking = '\0';
 
 		// calculate harmonic intervals:
-		double lowestnote = 1000;
+		int lowestnote = 1000;
 		double tpitch;
-		int vlowestnote = -1;
+		int lowestnotei = -1;
 		for (int j=0; j<(int)harmint.size(); j++) {
-
 			tpitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
-				if (tpitch < lowestnote) {
+				if (tpitch <= lowestnote) {
 					lowestnote = tpitch;
-					vlowestnote = j;
+					lowestnotei = j;
 				}
 			}
 			if (j == vindex) {
 				harmint[j] = 0;
 			}
+
+			harmint[j] = *grid.cell(j, sliceindex) -
+					*grid.cell(vindex, sliceindex);
+
+/*
 			if (j < vindex) {
 				harmint[j] = *grid.cell(vindex, sliceindex) -
 						*grid.cell(j, sliceindex);
@@ -18524,6 +18528,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				harmint[j] = *grid.cell(j, sliceindex) -
 						*grid.cell(vindex, sliceindex);
 			}
+*/
 		}
 
 		// check if current note is dissonant to another sounding note:
@@ -18544,6 +18549,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			} else if (value < -7) {
 				value = -(-value % 7); // remove octaves from interval
 			}
+			int vpitch = (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
+			int otherpitch = (int)grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 
 			if ((value == 1) || (value == -1)) {
 				// forms a second with another sounding note
@@ -18563,20 +18570,39 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
+			} else if (((value == 3) && ((vpitch % 7) == (lowestnote % 7))) ||
+			          ((value == -3) && ((otherpitch % 7) == (lowestnote % 7)))) {
+				// If the harmonic interval between two notes is a fourth and the reference note
+				// of the interval is the same pitch class as the lowest note (or is the lowest note);
+				// or if the interval is a fourth with the voices crossed and the other pitch is
+				// the same pitch class as the lowest note...
+				dissonant = true;
+				diss4Q = true;
+				marking = 'N';
+				// unexp_label = m_labels[UNLABELED_Z4];
+				unexp_label = m_labels[UNLABELED_Z4];
+				// ovoiceindex = lowestnotei;
+				ovoiceindex = j;
+				// oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
+				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 			}
 		}
 
+
+/*
 		double vpitch = grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
 		if (vpitch - lowestnote > 0) {
 			if (int(vpitch - lowestnote) % 7 == 3) {
 				diss4Q = true;
+				dissonant = true;
 				marking = 'N';
-				ovoiceindex = vlowestnote;
+				ovoiceindex = lowestnotei;
 				oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
 				unexp_label = m_labels[UNLABELED_Z4];
-				dissonant = true;
 			}
 		}
+*/
+
 
 		// Don't label current note if not dissonant with other sounding notes.
 		if (!dissonant) {
@@ -18762,7 +18788,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
 		}
 
-		else if (i < ((int)attacks.size() - 2)) { // expand the analysis window
+		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
@@ -18772,6 +18798,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 				(intp == -1) && (intn == -1) && (intnn == 1) && valid_acc_exit
 				) {
 				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
+
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 				(intp == -1) && (intn == -2) && (intnn == 1)) {
 				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L]; // long-form descending cambiata
