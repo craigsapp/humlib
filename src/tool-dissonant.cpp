@@ -567,16 +567,16 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			}
 		}
 
-		// Decide which voice to give unexlained dissonance labels to if none of
-		// the dissonant conditions above apply.
+		// Decide whether to give an unexplained dissonance label to the ref.
+		// voice if none of the dissonant conditions above apply.
 		if (results[vindex][lineindex] == "") { // ref. voice doesn't  have a diss label
 			if ((Convert::isNaN(intp) && (not Convert::isNaN(ointp)) &&
 				 (not Convert::isNaN(ointn))) ||
 				 // ref. voice is approached or left by leap but the other voice resolves by step
 				 (((abs(intp) > 1) || (abs(intn) > 1)) && (abs(ointn) == 1))) {
 				continue;
-			} else if ((condition1 && condition2) || // ref. voice moved into diss obliquely
-				 (((intp != 0) && (ointp != 0)) && // both voices moved to new pitches at start of diss
+			} else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
+				 (((condition1) && (ointp != 0)) && // both voices moved to new pitches at start of diss
 				 (attackindexn <= oattackindexn)) // and the other voice doesn't leave diss. first
 				){
 				results[vindex][lineindex] = unexp_label;
@@ -594,9 +594,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 
 void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
-	double intp;     // diatonic interval from previous melodic note
-	int lineindexn;  // line index of the next note in the voice
-	bool sfound;     // boolean for if a suspension if found after a Z dissonance
+	double intp;        // diatonic interval from previous melodic note
+	int lineindexn;     // line index of the next note in the voice
+	bool sfound;        // boolean for if a suspension if found after a Z dissonance
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		int lineindex = attacks[i]->getLineIndex();
@@ -604,9 +604,6 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 			continue;
 		}
 		intp = *attacks[i] - *attacks[i-1];
-		if (fabs(intp) != 1.0) {
-			continue;
-		}
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
@@ -619,15 +616,22 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		if (!sfound) {
 			continue;
 		}
-
 		// Also may need to check for the existance of another voice attacked before Z 
 		// and sustained through to the beginning of the resolution.
 
-
-		if (intp > 0) {
-			results[vindex][lineindex] = "F";
-		} else {
-			results[vindex][lineindex] = "f";
+		// Apply labels for normal fake suspensions.
+		if (intp == 1) {
+			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_UP];
+		} else if (intp == -1) {
+			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_DOWN];
+		} else if (i > 1) { // as long as i > 1 intpp will be in range.
+			// The next two fake suspension types are preceded by an anticipation.
+			double intpp = *attacks[i-1] - *attacks[i-2];
+			if ((intp == 0) && (intpp == 1)) {
+				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_UP];
+			} else if ((intp == 0) && (intpp == -1)) {
+				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_DOWN];
+			}
 		}
 	}
 }
