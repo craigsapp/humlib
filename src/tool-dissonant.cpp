@@ -263,13 +263,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		// calculate harmonic intervals:
 		int lowestnote = 1000;
 		double tpitch;
-		int lowestnotei = -1;
+		// int lowestnotei = -1;
 		for (int j=0; j<(int)harmint.size(); j++) {
 			tpitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
 				if (tpitch <= lowestnote) {
 					lowestnote = tpitch;
-					lowestnotei = j;
+					// lowestnotei = j;
 				}
 			}
 			if (j == vindex) {
@@ -569,15 +569,20 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 
 		// Decide which voice to give unexlained dissonance labels to if none of
 		// the dissonant conditions above apply.
-		if ((results[vindex][lineindex] == "") && // ref. voice doesn't  have a diss label
-			((condition1 && condition2) || // ref. voice moved into diss obliquely
-			(((intp != 0) && (ointp != 0)) && // both voices moved to new pitches at start of diss
-			 (attackindexn <= oattackindexn))) // other voice doesn't leave diss. first
-			){
-			results[vindex][lineindex] = unexp_label;
+		if (results[vindex][lineindex] == "") { // ref. voice doesn't  have a diss label
+			if ((Convert::isNaN(intp) && (not Convert::isNaN(ointp)) &&
+				 (not Convert::isNaN(ointn))) ||
+				 // ref. voice is approached or left by leap but the other voice resolves by step
+				 (((abs(intp) > 1) || (abs(intn) > 1)) && (abs(ointn) == 1))) {
+				continue;
+			} else if ((condition1 && condition2) || // ref. voice moved into diss obliquely
+				 (((intp != 0) && (ointp != 0)) && // both voices moved to new pitches at start of diss
+				 (attackindexn <= oattackindexn)) // and the other voice doesn't leave diss. first
+				){
+				results[vindex][lineindex] = unexp_label;
+			}
 		}
 	}
-
 }
 
 
@@ -773,10 +778,10 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "c"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "k"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR    ] = "F"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR   ] = "f"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR     ] = "B"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR    ] = "b"; // incomplete anterior lower neighbor
+	m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
+	m_labels[IPOSTLOW_NEIGHBOR   ] = "j"; // incomplete posterior lower neighbor
+	m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
+	m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
 	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
@@ -813,10 +818,10 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "C"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "K"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR    ] = "F"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR   ] = "F"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR     ] = "B"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR    ] = "B"; // incomplete anterior lower neighbor
+	m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
+	m_labels[IPOSTLOW_NEIGHBOR   ] = "J"; // incomplete posterior lower neighbor
+	m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
+	m_labels[IANTLOW_NEIGHBOR    ] = "I"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "A"; // descending anticipation
 	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
