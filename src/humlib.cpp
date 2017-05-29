@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, May 29, 2017  5:45:10 PM
+// Last Modified: Mon, May 29, 2017  6:10:01 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18719,11 +18719,11 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		//    class for another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
 
-		// deal with ornamented suspensions.
+		// For ornamented suspensions.
 		bool condition3b = oattackindexnn <= attackindexn ? true : false;
 
-		bool valid_sus_acc = condition1 && condition2 && condition3a;
-		bool valid_ornam_sus_acc = condition1 && condition2 && condition3b;
+		bool valid_sus_acc = condition2 && condition3a;
+		bool valid_ornam_sus_acc = condition2 && condition3b;
 
 		double ointp = opitch - opitchp;
 		double ointn = opitchn - opitch;

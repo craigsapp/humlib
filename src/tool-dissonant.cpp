@@ -478,11 +478,11 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 		//    class for another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
 
-		// deal with ornamented suspensions.
+		// For ornamented suspensions.
 		bool condition3b = oattackindexnn <= attackindexn ? true : false;
 
-		bool valid_sus_acc = condition1 && condition2 && condition3a;
-		bool valid_ornam_sus_acc = condition1 && condition2 && condition3b;
+		bool valid_sus_acc = condition2 && condition3a;
+		bool valid_ornam_sus_acc = condition2 && condition3b;
 
 		double ointp = opitch - opitchp;
 		double ointn = opitchn - opitch;
