@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, May 29, 2017  4:59:09 PM
+// Last Modified: Mon, May 29, 2017  5:45:10 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18776,7 +18776,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGr
 			results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
 		}
 
-		else if (valid_sus_acc && ((ointn == 0) && (ointnn == -1))) {
+		else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
 			results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
 			results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP]; // repeated-note of suspension
