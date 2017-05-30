@@ -40,10 +40,10 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("k|kern=b",            "print kern pitch grid");
 	define("debug=b",             "print grid cell information");
 	define("u|undirected=b",      "use undirected dissonance labels");
-	define("count=b",             "count dissonances by category");
+	define("c|count=b",           "count dissonances by category");
 	define("e|exinterp=s:**cdata","specify exinterp for **cdata spine");
-	define("c|colorize=b",        "color dissonant notes by beat level");
-	define("C|colorize2=b",       "color dissonant notes by dissonant interval");
+	define("color|colorize=b",    "color dissonant notes by beat level");
+	define("color2|colorize2=b",  "color dissonant notes by dissonant interval");
 }
 
 
@@ -797,9 +797,9 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[FAKE_SUSPENSION_DOWN] = "f"; // fake suspension approached by step down
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
 	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
-	m_labels[UNLABELED_Z2        ] = "Z2"; // unknown dissonance, 2nd interval
-	m_labels[UNLABELED_Z7        ] = "Z7"; // unknown dissonance, 7th interval
-	m_labels[UNLABELED_Z4        ] = "Z4"; // unknown dissonance, 4th interval
+	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval
+	m_labels[UNLABELED_Z7        ] = "Z"; // unknown dissonance, 7th interval
+	m_labels[UNLABELED_Z4        ] = "z"; // unknown dissonance, 4th interval
 }
 
 
