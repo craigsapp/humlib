@@ -3,7 +3,7 @@
 // Creation Date: Wed Dec  7 08:01:07 PST 2016
 // Last Modified: Wed Dec  7 12:40:28 PST 2016
 // Filename:      tool-recip.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-recip.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-recip.cpp
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

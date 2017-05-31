@@ -3,7 +3,7 @@
 // Creation Date: Wed Nov 30 20:36:38 PST 2016
 // Last Modified: Wed Nov 30 20:36:41 PST 2016
 // Filename:      tool-myank.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-myank.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-myank.h
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
@@ -105,8 +105,7 @@ class Tool_myank : public HumTool {
 		bool     run                   (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     initialize            (HumdrumFile& infile);
-		void      checkOptions         (Options& opts, int argc, char** argv);
+		void      initialize            (HumdrumFile& infile);
 		void      example              (void);
 		void      usage                (const string& command);
 		void      myank                (HumdrumFile& infile, 
@@ -152,7 +151,7 @@ class Tool_myank : public HumTool {
 
 	private:
 		int    debugQ      = 0;             // used with --debug option
-		int    inputlist   = 0;             // used with --inlist option
+		// int    inputlist   = 0;             // used with --inlist option
 		int    inlistQ     = 0;             // used with --inlist option
 		int    outlistQ    = 0;             // used with --outlist option
 		int    verboseQ    = 0;             // used with -v option

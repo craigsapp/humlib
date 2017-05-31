@@ -773,6 +773,59 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getTiedDuration -- Returns the duration of the token and any
+//    tied notes attached to it.  Does not work well which chords.
+//
+
+HumNum HumdrumToken::getTiedDuration(void) {
+	HumNum output = m_duration;
+	if ((*this).find("[") == string::npos) {
+		return output;
+	}
+	// start of a tied group so add the durations of the other notes.
+   int b40 = Convert::kernToBase40(*this);
+	HumdrumToken *note = this;
+	HumdrumToken *nnote = NULL;
+	int tcount;
+	while (note) {
+		tcount = note->getNextNonNullDataTokenCount();
+		if (tcount == 0) {
+			break;
+		}
+		if (!note->getNextNNDT()->isData()) {
+			note = note->getNextNNDT();
+			continue;
+		}
+		for (int i=0; i<getNextNonNullDataTokenCount(); i++) {
+			nnote = note->getNextNNDT();
+			if (!nnote->isData())  {
+				continue;
+			}
+			int pitch2 = Convert::kernToBase40(*nnote);
+			if (pitch2 != b40) {
+				continue;
+			}
+			if (nnote->find("_")  != string::npos) {
+				output += nnote->getDuration();
+			} else if (nnote->find("]") != string::npos) {
+				output += nnote->getDuration();
+				return output;
+			}
+		}
+		note = getNextNNDT();
+	}
+	return output;
+}
+
+
+HumNum HumdrumToken::getTiedDuration(HumNum scale) {
+	return getTiedDuration() * scale;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDots -- Count the number of '.' characters in token string.
 //
 

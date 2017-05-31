@@ -3,7 +3,7 @@
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
 // Last Modified: Sun May 21 21:11:12 CEST 2017 Ignore non-kern spines when adding beams
 // Filename:      tool-autobeam.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-autobeam.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-autobeam.cpp
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

@@ -49,6 +49,7 @@ class Convert {
 		static int     base40ToAccidental   (int b40);
 		static int     base40ToDiatonic     (int b40);
 		static int     base40ToMidiNoteNumber(int b40);
+		static string  base40ToIntervalAbbr (int b40);
 		static int     kernToOctaveNumber   (const string& kerndata);
 		static int     kernToOctaveNumber   (HTp token)
 				{ return kernToOctaveNumber((string)*token); }
@@ -110,6 +111,7 @@ class Convert {
 		static int     base40IntervalToLineOfFifths(int trans);
 		static string  keyNumberToKern      (int number);
 		static int     base7ToBase40        (int base7);
+		static int     base40IntervalToDiatonic(int base40interval);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp

@@ -8,7 +8,7 @@
 // Last Modifed:  Sun Dec 18 23:25:32 PST 2016 Ported to humlib
 // Filename:      ...sig/examples/all/myank.cpp 
 // Filename:      tool-myank.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-myank.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-myank.cpp
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

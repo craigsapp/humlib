@@ -11,7 +11,7 @@
 // Last Modified: Sat Mar 12 18:34:05 PST 2016 Add -k option
 // Last Modified: Tue Dec 13 18:50:58 PST 2016 Ported to humlib
 // Filename:      tool-extract.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-extract.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-extract.h
 // Syntax:        C++11;
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

@@ -3,7 +3,7 @@
 // Creation Date: Wed Nov 30 20:36:38 PST 2016
 // Last Modified: Wed Nov 30 20:36:41 PST 2016
 // Filename:      tool-autostem.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-autostem.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-autostem.h
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

@@ -63,6 +63,9 @@ class HumRegex {
 		string      replaceCopy        (string* input, const string& replacement,
 		                                const string& exp,
 		                                const string& options);
+		string&      tr                 (string& input, const string& from, 
+		                                const string& to);
+
 		// matching (full-string match)
 		bool        match              (const string& input, const string& exp);
 		bool        match              (const string& input, const string& exp,

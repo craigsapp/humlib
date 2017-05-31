@@ -3,7 +3,7 @@
 // Creation Date: Wed Dec 14 22:21:44 PST 2016
 // Last Modified: Wed Dec 14 22:21:47 PST 2016
 // Filename:      tool-filter.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-filter.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-filter.h
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

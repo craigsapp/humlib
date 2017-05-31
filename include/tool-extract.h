@@ -3,7 +3,7 @@
 // Creation Date: Mon Dec  5 23:09:00 PST 2016
 // Last Modified: Mon Dec  5 23:09:08 PST 2016
 // Filename:      tool-extract.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-extract.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-extract.h
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

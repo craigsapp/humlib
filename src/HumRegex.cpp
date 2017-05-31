@@ -432,6 +432,35 @@ string HumRegex::replaceCopy(string* input, const string& exp,
 
 //////////////////////////////
 //
+// HumRegex::tr --
+//
+
+string& HumRegex::tr(string& input, const string& from, const string& to) {
+	vector<char> trans;
+	trans.resize(256);
+	for (int i=0; i<(int)trans.size(); i++) {
+		trans[i] = (char)i;
+	}
+	int minmax = from.size();
+	if (to.size() < from.size()) {
+		minmax = to.size();
+	}
+	
+	for (int i=0; i<minmax; i++) {
+		trans[from[i]] = to[i];
+	}
+
+	for (int i=0; i<(int)input.size(); i++) {
+		input[i] = trans[input[i]];
+	}
+
+	return input;
+}
+
+
+
+//////////////////////////////
+//
 // HumRegex::split --
 //
 

@@ -104,6 +104,8 @@ class HumdrumToken : public string, public HumHash {
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getTiedDuration           (void);
+		HumNum   getTiedDuration           (HumNum scale);
 		HumNum   getDurationNoDots         (void) const;
 		HumNum   getDurationNoDots         (HumNum scale) const;
 		int      getDots                   (void) const;

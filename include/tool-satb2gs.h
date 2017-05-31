@@ -3,7 +3,7 @@
 // Creation Date: Sun Feb  6 14:33:36 PST 2011
 // Last Modified: Wed Nov 30 20:36:41 PST 2016
 // Filename:      tool-satb2gs.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-satb2gs.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-satb2gs.h
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

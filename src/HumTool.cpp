@@ -3,7 +3,7 @@
 // Creation Date: Mon Nov 28 08:55:15 PST 2016
 // Last Modified: Tue Dec 20 22:33:15 PST 2016
 // Filename:      HumTool.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/HumTool.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/HumTool.cpp
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

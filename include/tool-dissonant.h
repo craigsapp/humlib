@@ -3,7 +3,7 @@
 // Creation Date: Mon Nov 28 08:55:15 PST 2016
 // Last Modified: Mon Nov 28 08:55:38 PST 2016
 // Filename:      tool-dissonant.h
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/include/tool-dissonant.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-dissonant.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //

@@ -10,7 +10,7 @@
 // Last Modified: Thu Nov 19 19:28:26 PST 2009 Added -W and -C options
 // Last Modified: Mon Dec  5 23:28:50 PST 2016 Ported to humlib from humextras
 // Filename:      tool-transpose.cpp
-// URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-transpose.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-transpose.cpp
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //

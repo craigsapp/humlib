@@ -875,6 +875,153 @@ string Convert::base40ToTrans(int base40) {
 
 //////////////////////////////
 //
+// Convert::base40ToIntervalAbbr --
+//
+
+string Convert::base40ToIntervalAbbr(int base40interval) {
+	if (base40interval < -1000) {
+		return "r";
+	}
+
+	string output;
+	if (base40interval < 0) {
+		output = "-";
+		base40interval = -base40interval;
+	}
+
+	// Add chromatic prefix
+	switch (base40interval % 40) {
+		case  0: output += "p"   ; break;  // C
+		case  1: output += "a"   ; break;  // C#
+		case  2: output += "aa"  ; break;  // C##
+		case  3: output += "X"   ; break;  // X
+		case  4: output += "d"   ; break;  // D--
+		case  5: output += "m"   ; break;  // D-
+		case  6: output += "M"   ; break;  // D
+		case  7: output += "a"   ; break;  // D#
+		case  8: output += "aa"  ; break;  // D##
+		case  9: output += "X"   ; break;  // X
+		case 10: output += "d"   ; break;  // E--
+		case 11: output += "m"   ; break;  // E-
+		case 12: output += "M"   ; break;  // E
+		case 13: output += "a"   ; break;  // E#
+		case 14: output += "aa"  ; break;  // E##
+		case 15: output += "dd"  ; break;  // F--
+		case 16: output += "d"   ; break;  // F-
+		case 17: output += "p"   ; break;  // F
+		case 18: output += "a"   ; break;  // F#
+		case 19: output += "aa"  ; break;  // F##
+		case 20: output += "X"   ; break;  // X
+		case 21: output += "dd"  ; break;  // G--
+		case 22: output += "d"   ; break;  // G-
+		case 23: output += "p"   ; break;  // G
+		case 24: output += "a"   ; break;  // G#
+		case 25: output += "aa"  ; break;  // G##
+		case 26: output += "X"   ; break;  // X
+		case 27: output += "d"   ; break;  // A--
+		case 28: output += "m"   ; break;  // A-
+		case 29: output += "M"   ; break;  // A
+		case 30: output += "a"   ; break;  // A#
+		case 31: output += "aa"  ; break;  // A##
+		case 32: output += "X"   ; break;  // X
+		case 33: output += "d"   ; break;  // B--
+		case 34: output += "m"   ; break;  // B-
+		case 35: output += "M"   ; break;  // B
+		case 36: output += "a"   ; break;  // B#
+		case 37: output += "aa"  ; break;  // B##
+		case 38: output += "dd"  ; break;  // C--
+		case 39: output += "d"   ; break;  // C-
+	}
+
+	// Add base-7 number
+	char buffer2[32] = {0};
+	int diatonic = Convert::base40IntervalToDiatonic(base40interval)+1;
+	sprintf(buffer2, "%d", diatonic);
+	output += buffer2;
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::base40IntervalToDiatonic -- convert a base40 interval
+//    into a diatonic interval (excluding the chromatic alteration)
+//
+
+int Convert::base40IntervalToDiatonic(int base40interval) {
+   int sign = 1;
+   if (base40interval < 0) {
+      sign = -1;
+      base40interval = -base40interval;
+   }
+   int octave = base40interval / 40;
+   base40interval = base40interval % 40;
+
+   int diatonic = 0;
+   switch (base40interval) {
+      case  0: diatonic = 0; break;  // C
+      case  1: diatonic = 0; break;  // C#
+      case  2: diatonic = 0; break;  // C##
+
+      case  3: diatonic = 1000; break;  // blank
+
+      case  4: diatonic = 1; break;  // D--
+      case  5: diatonic = 1; break;  // D-
+      case  6: diatonic = 1; break;  // D
+      case  7: diatonic = 1; break;  // D#
+      case  8: diatonic = 1; break;  // D##
+
+      case  9: diatonic = 1000; break;  // blank
+
+      case 10: diatonic = 2; break;  // E--
+      case 11: diatonic = 2; break;  // E-
+      case 12: diatonic = 2; break;  // E
+      case 13: diatonic = 2; break;  // E#
+      case 14: diatonic = 2; break;  // E##
+
+      case 15: diatonic = 3; break;  // F--
+      case 16: diatonic = 3; break;  // F-
+      case 17: diatonic = 3; break;  // F
+      case 18: diatonic = 3; break;  // F#
+      case 19: diatonic = 3; break;  // F##
+
+      case 20: diatonic = 1000; break;  // blank
+
+      case 21: diatonic = 4; break;  // G--
+      case 22: diatonic = 4; break;  // G-
+      case 23: diatonic = 4; break;  // G
+      case 24: diatonic = 4; break;  // G#
+      case 25: diatonic = 4; break;  // G##
+
+      case 26: diatonic = 1000; break;  // blank
+
+      case 27: diatonic = 5; break;  // A--
+      case 28: diatonic = 5; break;  // A-
+      case 29: diatonic = 5; break;  // A
+      case 30: diatonic = 5; break;  // A#
+      case 31: diatonic = 5; break;  // A##
+
+      case 32: diatonic = 1000; break;  // blank
+
+      case 33: diatonic = 6; break;  // B--
+      case 34: diatonic = 6; break;  // B-
+      case 35: diatonic = 6; break;  // B
+      case 36: diatonic = 6; break;  // B#
+      case 37: diatonic = 6; break;  // B##
+
+      case 38: diatonic = 0; break;  // C--
+      case 39: diatonic = 0; break;  // C-
+   }
+
+   return sign * (diatonic + octave * 7);
+}
+
+
+
+//////////////////////////////
+//
 // Convert::transToBase40 -- convert the Humdrum Toolkit program
 //     trans's binomial notation for intervals into base-40.
 //  The input can be in three formats:
@@ -1056,24 +1203,24 @@ int Convert::base40IntervalToLineOfFifths(int base40interval) {
 //
 
 string Convert::keyNumberToKern(int number) {
-   switch (number) {
-      case -7: return "*k[b-e-a-d-g-c-f-]";
-      case -6: return "*k[b-e-a-d-g-c-]";
-      case -5: return "*k[b-e-a-d-g-]";
-      case -4: return "*k[b-e-a-d-]";
-      case -3: return "*k[b-e-a-]";
-      case -2: return "*k[b-e-]";
-      case -1: return "*k[b-]";
-      case  0: return "*k[]";
-      case +1: return "*k[f#]";
-      case +2: return "*k[f#c#]";
-      case +3: return "*k[f#c#g#]";
-      case +4: return "*k[f#c#g#d#]";
-      case +5: return "*k[f#c#g#d#a#]";
-      case +6: return "*k[f#c#g#d#a#e#]";
-      case +7: return "*k[f#c#g#d#a#e#b#]";
-      default: return "*k[]";
-   }
+	switch (number) {
+		case -7: return "*k[b-e-a-d-g-c-f-]";
+		case -6: return "*k[b-e-a-d-g-c-]";
+		case -5: return "*k[b-e-a-d-g-]";
+		case -4: return "*k[b-e-a-d-]";
+		case -3: return "*k[b-e-a-]";
+		case -2: return "*k[b-e-]";
+		case -1: return "*k[b-]";
+		case  0: return "*k[]";
+		case +1: return "*k[f#]";
+		case +2: return "*k[f#c#]";
+		case +3: return "*k[f#c#g#]";
+		case +4: return "*k[f#c#g#d#]";
+		case +5: return "*k[f#c#g#d#a#]";
+		case +6: return "*k[f#c#g#d#a#e#]";
+		case +7: return "*k[f#c#g#d#a#e#b#]";
+		default: return "*k[]";
+	}
 }
 
 
