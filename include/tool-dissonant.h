@@ -33,17 +33,32 @@ class Tool_dissonant : public HumTool {
 	protected:
 		void    doAnalysis         (vector<vector<string> >& results,
 		                            NoteGrid& grid,
+		                            vector<vector<NoteCell*> >& attacks,
 		                            bool debug);
-		void    doAnalysisForVoice (vector<vector<string> >& results, NoteGrid& grid,
-		                            vector<NoteCell*>& attacks, int vindex, bool debug);
-		void    findFakeSuspensions(vector<vector<string> >& results, NoteGrid& grid,
+		void    doAnalysisForVoice (vector<vector<string> >& results,
+		                            NoteGrid& grid,
+		                            vector<NoteCell*>& attacks,
+		                            int vindex, bool debug);
+		void    findFakeSuspensions(vector<vector<string> >& results, 
+		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
+		void    changePitch        (HTp note2, HTp note1);
 
 		void    printColorLegend   (HumdrumFile& infile);
-		int     getNextPitchAttackIndex(NoteGrid& grid, int voicei, int sliceindex);
+		int     getNextPitchAttackIndex(NoteGrid& grid, int voicei,
+		                            int sliceindex);
 		void    fillLabels         (void);
 		void    fillLabels2        (void);
 		void    printCountAnalysis (vector<vector<string> >& data);
+		void    suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
+		                            vector<vector<NoteCell* > >& attacks,
+		                            vector<vector<string> >& results);
+		void    suppressDissonancesInVoice(HumdrumFile& infile, 
+		                            NoteGrid& grid, int vindex,
+		                            vector<NoteCell*>& attacks,
+		                            vector<string>& results);
+		void    mergeWithPreviousNote(HumdrumFile& infile,
+		                            vector<NoteCell*>& attacks, int index);
 
 	private:
 	 	vector<HTp> m_kernspines;
@@ -53,6 +68,7 @@ class Tool_dissonant : public HumTool {
 		bool dissL0Q = false;
 		bool dissL1Q = false;
 		bool dissL2Q = false;
+		bool suppressQ = false;
 
 		vector<string> m_labels;
 

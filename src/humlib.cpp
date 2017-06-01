@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun  1 00:14:23 CEST 2017
+// Last Modified: Thu Jun  1 14:04:03 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21225,6 +21225,7 @@ void Tool_cint::usage(const string& command) {
 Tool_dissonant::Tool_dissonant(void) {
 	define("r|raw=b",             "print raw grid");
 	define("p|percent=b",         "print counts as percentages");
+	define("s|suppress=b",        "suppress dissonant notes");
 	define("d|diatonic=b",        "print diatonic grid");
 	define("D|no-dissonant=b",    "don't do dissonance anaysis");
 	define("m|midi-pitch=b",      "print midi-pitch grid");
@@ -21321,31 +21322,190 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	dissL1Q = false;
 	dissL2Q = false;
 
-	vector<vector<string> > results;
+	suppressQ = getBoolean("suppress");
 
+	vector<vector<string> > results;
+	vector<vector<string> > results2;
+	vector<vector<NoteCell*> > attacks;
+	vector<vector<NoteCell*> > attacks2;
+
+	attacks.resize(grid.getVoiceCount());
 	results.resize(grid.getVoiceCount());
 	for (int i=0; i<(int)results.size(); i++) {
 		results[i].resize(infile.getLineCount());
 	}
-	doAnalysis(results, grid, getBoolean("debug"));
+	doAnalysis(results, grid, attacks, getBoolean("debug"));
 
-	if (getBoolean("count")) {
-		printCountAnalysis(results);
-		return false;
-	} else {
-		string exinterp = getString("exinterp");
-		vector<HTp> kernspines = infile.getKernSpineStartList();
-		infile.appendDataSpine(results.back(), "", exinterp);
-		for (int i = (int)results.size()-1; i>0; i--) {
-			int track = kernspines[i]->getTrack();
-			infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
+	if (suppressQ) {
+		suppressDissonances(infile, grid, attacks, results);
+
+		NoteGrid grid2(infile);
+		results2.resize(grid2.getVoiceCount());
+		for (int i=0; i<(int)results2.size(); i++) {
+			results2[i].clear();
+			results2[i].resize(infile.getLineCount());
 		}
+		vector<vector<NoteCell*> > attacks2;
+		doAnalysis(results2, grid2, attacks2, getBoolean("debug"));
 
-		printColorLegend(infile);
-		infile.createLinesFromTokens();
-		return true;
+	}
+
+	if (suppressQ) {
+		if (getBoolean("count")) {
+			printCountAnalysis(results2);
+			return false;
+		} else {
+			string exinterp = getString("exinterp");
+			vector<HTp> kernspines = infile.getKernSpineStartList();
+			infile.appendDataSpine(results2.back(), "", exinterp);
+			for (int i = (int)results2.size()-1; i>0; i--) {
+				int track = kernspines[i]->getTrack();
+				infile.insertDataSpineBefore(track, results2[i-1], "", exinterp);
+			}
+			printColorLegend(infile);
+			infile.createLinesFromTokens();
+			return true;
+		}
+	} else {
+		if (getBoolean("count")) {
+			printCountAnalysis(results);
+			return false;
+		} else {
+			string exinterp = getString("exinterp");
+			vector<HTp> kernspines = infile.getKernSpineStartList();
+			infile.appendDataSpine(results.back(), "", exinterp);
+			for (int i = (int)results.size()-1; i>0; i--) {
+				int track = kernspines[i]->getTrack();
+				infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
+			}
+			printColorLegend(infile);
+			infile.createLinesFromTokens();
+			return true;
+		}
+	}
+
+}
+
+
+
+/////////////////////////////
+//
+// Tool_dissonant::suppressDissonances -- remove dissonances.
+//
+
+void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
+		vector<vector<NoteCell*> >& attacks, vector<vector<string> >& results) {
+
+	for (int i=0; i<(int)attacks.size(); i++) {
+		suppressDissonancesInVoice(infile, grid, i, attacks[i], results[i]);
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::suppressDissonancesInVoice --
+//
+
+void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile, 
+		NoteGrid& grid, int vindex, vector<NoteCell*>& attacks,
+		vector<string>& results) {
+
+	for (int i=0; i<(int)attacks.size(); i++) {
+		int lineindex = attacks[i]->getLineIndex();
+		if (results[lineindex] == "") {
+			continue;
+		} else if (results[lineindex] == ".") {
+			continue;
+		} else if (results[lineindex] == m_labels[PASSING_UP]) {
+			mergeWithPreviousNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[PASSING_DOWN]) {
+			mergeWithPreviousNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[NEIGHBOR_UP]) {
+			mergeWithPreviousNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[NEIGHBOR_DOWN]) {
+			mergeWithPreviousNote(infile, attacks, i);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::mergeWithPreviousNote --  will not
+//  handle chords correctly.
+//
+
+void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
+		vector<NoteCell*>& attacks, int index) {
+
+	if (index < 1) {
+		return;
+	}
+
+	HTp note1 = attacks[index-1]->getToken();
+	HTp note2 = attacks[index]->getToken();
+
+	int line1 = note1->getLineIndex();
+	int line2 = note2->getLineIndex();
+
+	bool barlineQ = false;
+	for (int i=line1+1; i<line2; i++) {
+		if (infile[i].isBarline()) {
+			barlineQ = true;
+			break;
+		}
+	}
+
+	HumNum dur1 = note1->getDuration();
+	HumNum dur2 = note2->getDuration();
+
+	HumNum sumdur = dur1 + dur2;
+
+	/*
+	cerr << "Notes" << note1;
+	cerr << "\tto\t" << note2;
+	cerr << "\tline\t" << note1->getLineIndex();
+	cerr << "\tnewdur=" << sumdur;
+	cerr << endl;
+	*/
+
+	bool tied1 = note1->find("[") != string::npos ? true : false;
+	bool tied2 = note2->find("[") != string::npos ? true : false;
+
+	if (tied1 || tied2) {
+		// don't deal with tied notes for now
+		return;
+	}
+
+
+	// for now, replace the pitch of the second note with
+	// that of the first note.  Later tied them together or
+	// merge into a single note depending on the notational
+	// context.
+
+	changePitch(note2, note1);
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::changePitch -- will not handle chords correctly.
+//
+
+void Tool_dissonant::changePitch(HTp note2, HTp note1) {
+	int b40 = Convert::kernToBase40(note1);
+	string pitch = Convert::base40ToKern(b40);
+	HumRegex hre;
+	string n2 = *note2;
+	hre.replaceDestructive(n2, pitch, "[A-Ga-gr#-]+");
+	note2->setText(n2);
+}
+
 
 
 
@@ -21386,11 +21546,11 @@ void Tool_dissonant::printColorLegend(HumdrumFile& infile) {
 //
 
 void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
-		NoteGrid& grid, bool debug) {
-	vector<vector<NoteCell*> > attacks;
+		NoteGrid& grid, vector<vector<NoteCell*> >& attacks, bool debug) {
 	attacks.resize(grid.getVoiceCount());
 
 	for (int i=0; i<grid.getVoiceCount(); i++) {
+		attacks[i].clear();
 		doAnalysisForVoice(results, grid, attacks[i], i, debug);
 	}
 
@@ -21408,9 +21568,9 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 //     subtracting NoteCells to calculate the diatonic intervals.
 //
 
-void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results, NoteGrid& grid,
-		vector<NoteCell*>& attacks, int vindex, bool debug) {
-	// vector<NoteCell*> attacks;
+void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
+		NoteGrid& grid, vector<NoteCell*>& attacks, int vindex, bool debug) {
+	attacks.clear();
 	grid.getNoteAndRestAttacks(attacks, vindex);
 
 	if (debug) {
