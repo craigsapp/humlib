@@ -202,6 +202,7 @@ class Tool_cint : public HumTool {
 		int       idQ          = 0;      // used with --id option
 		vector<string> Ids;              // used with --id option
 		char      NoteMarker   = '\0';   // used with -N option
+		string    SearchString;
 		string Spacer;
 
 };

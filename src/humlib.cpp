@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun  1 14:04:03 CEST 2017
+// Last Modified: Thu Jun  1 22:30:52 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18621,11 +18621,11 @@ bool Tool_cint::run(HumdrumFile& infile, ostream& out) {
 bool Tool_cint::run(HumdrumFile& infile) {
 	processFile(infile);
 
+
 	if (hasAnyText()) {
 		// getAllText(cout);
 	} else {
 		// Re-load the text for each line from their tokens.
-		infile.createLinesFromTokens();
 		cout << infile;
 	}
 
@@ -18763,7 +18763,7 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 				reverselookup, Chaincount, retrospective);
 	} else {
 		count = printCombinations(notes, infile, ktracks, reverselookup, 
-				Chaincount, retrospective, "");
+				Chaincount, retrospective, SearchString);
 	}
 
 
@@ -18772,6 +18772,7 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 		if (count > 0) {
 			addMarksToInputData(infile, notes, ktracks, reverselookup);
 		}
+		infile.createLinesFromTokens();
 		m_humdrum_text << infile;
 		m_humdrum_text << "!!!RDF**kern: @ = matched note, color=\"#ff0000\"\n";
 	} 
@@ -19376,6 +19377,9 @@ void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 //
 
 void Tool_cint::markNote(HumdrumFile& infile, int line, int col) {
+	// string text = *infile.token(line, col);
+	// text += "@";
+	// infile.token(line, col)->setText(text);
 	*infile.token(line, col) += "@";
 }
 
@@ -21183,7 +21187,7 @@ void Tool_cint::initialize(void) {
 	}
 
 	if (searchQ) {
-		// hre.initializeSearchAndStudy(opts.getString("search").c_str());
+		SearchString = getString("search");
 	}
 
 }
@@ -24063,6 +24067,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "cint") {
+			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {

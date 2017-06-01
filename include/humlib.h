@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun  1 14:04:03 CEST 2017
+// Last Modified: Thu Jun  1 22:30:52 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3058,6 +3058,7 @@ class Tool_cint : public HumTool {
 		int       idQ          = 0;      // used with --id option
 		vector<string> Ids;              // used with --id option
 		char      NoteMarker   = '\0';   // used with -N option
+		string    SearchString;
 		string Spacer;
 
 };
