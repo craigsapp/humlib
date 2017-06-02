@@ -598,7 +598,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		int lastonoteindex = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		double lopitch = NAN;
 		if (lastonoteindex >= 0) {
-			lopitch  = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
+			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
 		} else {
 			condition2 = false;
 		}
@@ -650,8 +650,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
 
-		if ((dur <= durp) && (lev >= levp) && (lev >= levn) && valid_acc_exit
-			){ // weak dissonances
+		if (((lev >= levn) || ((lev == 2) && (dur == .5) && condition2)) && 
+			(dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
