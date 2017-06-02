@@ -762,7 +762,8 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		int lineindex = attacks[i]->getLineIndex();
-		if (results[vindex][lineindex].find("Z") == string::npos) {
+		if ((results[vindex][lineindex].find("Z") == string::npos) &&
+			(results[vindex][lineindex].find("z") == string::npos)) {
 			continue;
 		}
 		intp = *attacks[i] - *attacks[i-1];
