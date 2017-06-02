@@ -490,12 +490,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
-			} else if (((value == 3) && ((vpitch % 7) == (lowestnote % 7))) ||
-			          ((value == -3) && ((otherpitch % 7) == (lowestnote % 7)))) {
-				// If the harmonic interval between two notes is a fourth and the reference note
-				// of the interval is the same pitch class as the lowest note (or is the lowest note);
-				// or if the interval is a fourth with the voices crossed and the other pitch is
-				// the same pitch class as the lowest note...
+			} else if (((value == 3) && not ((((vpitch-lowestnote) % 7) == 2) ||
+											 (((vpitch-lowestnote) % 7) == 4))) ||
+					   ((value == -3) && not ((((otherpitch-lowestnote) % 7) == 2) ||
+											 (((otherpitch-lowestnote) % 7) == 4)))) {
+				// If the harmonic interval between two notes is a fourth and 
+				// the lower pitch in the interval is not a a third or a fifth
+				// above the lowest note.
 				dissonant = true;
 				diss4Q = true;
 				marking = 'N';

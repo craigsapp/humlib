@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun  1 22:30:52 CEST 2017
+// Last Modified: Fri, Jun  2, 2017 11:39:59 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21686,12 +21686,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
-			} else if (((value == 3) && ((vpitch % 7) == (lowestnote % 7))) ||
-			          ((value == -3) && ((otherpitch % 7) == (lowestnote % 7)))) {
-				// If the harmonic interval between two notes is a fourth and the reference note
-				// of the interval is the same pitch class as the lowest note (or is the lowest note);
-				// or if the interval is a fourth with the voices crossed and the other pitch is
-				// the same pitch class as the lowest note...
+			} else if (((value == 3) && not ((((vpitch-lowestnote) % 7) == 2) ||
+											 (((vpitch-lowestnote) % 7) == 4))) ||
+					   ((value == -3) && not ((((otherpitch-lowestnote) % 7) == 2) ||
+											 (((otherpitch-lowestnote) % 7) == 4)))) {
+				// If the harmonic interval between two notes is a fourth and 
+				// the lower pitch in the interval is not a a third or a fifth
+				// above the lowest note.
 				dissonant = true;
 				diss4Q = true;
 				marking = 'N';
