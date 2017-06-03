@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri, Jun  2, 2017  8:12:43 PM
+// Last Modified: Sat, Jun  3, 2017 10:54:00 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22147,7 +22147,7 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
-	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
+	m_labels[THIRD_QUARTER       ] = "q"; // dissonant third quarter
 	m_labels[SUSPENSION          ] = "s"; // suspension
 	m_labels[SUSPENSION_AGENT    ] = "G"; // suspension agent
 	m_labels[SUSPENSION_ORNAM    ] = "o"; // suspension ornament
