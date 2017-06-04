@@ -302,6 +302,40 @@ HumNum NoteCell::getDuration(void) {
 
 
 
+//////////////////////////////
+//
+// NoteCell::setMeter --
+//
+
+void NoteCell::setMeter(int topval, HumNum botval) {
+	m_metertop = topval;
+	m_meterbot = botval;
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getMeterTop --
+//
+
+int NoteCell::getMeterTop(void) {
+	return m_metertop;
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getMeterBottom --
+//
+
+HumNum NoteCell::getMeterBottom(void) {
+	return m_meterbot;
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

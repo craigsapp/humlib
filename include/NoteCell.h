@@ -66,6 +66,9 @@ class NoteCell {
 		double getMetricLevel       (void);
 		HumNum getDurationFromStart (void);
 		HumNum getDuration          (void);
+		void   setMeter             (int topval, HumNum botval);
+		int    getMeterTop          (void);
+		HumNum getMeterBottom       (void);
 
 	protected:
 		void clear                  (void);
@@ -94,6 +97,8 @@ class NoteCell {
 		int m_prevAttackIndex; // index to previous note attack.
 		int m_currAttackIndex; // index to current note attack (useful for
 		                       // finding the start of a sustained note.
+		int m_metertop = 0;    // top number of prevailing meter signature
+		HumNum m_meterbot = 0; // bottom number of prevailing meter signature
 
 	friend NoteGrid;
 };

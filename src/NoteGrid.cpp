@@ -110,6 +110,9 @@ bool NoteGrid::load(HumdrumFile& infile) {
 	m_kernspines = infile.getKernSpineStartList();
 	vector<HTp>& kernspines = m_kernspines;
 
+	vector<int> metertops(infile.getMaxTrack() + 1, 0);
+	vector<HumNum> meterbots(infile.getMaxTrack() + 1, 0);
+
 	if (kernspines.size() == 0) {
 		cerr << "Warning: no **kern spines in file" << endl;
 		return false;
@@ -124,7 +127,27 @@ bool NoteGrid::load(HumdrumFile& infile) {
 	int attack = 0;
 	int track, lasttrack;
 	vector<HTp> current;
+	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				if (!infile[i].token(j)->isKern()) {
+					continue;
+				}
+				track = infile.token(i, j)->getTrack();
+				if (hre.search(*infile.token(i, j), "\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					metertops[track] = hre.getMatchInt(1);
+					meterbots[track] = hre.getMatchInt(2);
+					meterbots[track] /= hre.getMatchInt(3);
+				} else if (hre.search(*infile.token(i, j), "\\*M(\\d+)/(\\d+)")) {
+					metertops[track] = hre.getMatchInt(1);
+					meterbots[track] = hre.getMatchInt(2);
+				} else {
+					continue;
+				}
+
+			}
+		}
 		if (!infile[i].isData()) {
 			continue;
 		}
@@ -154,8 +177,10 @@ bool NoteGrid::load(HumdrumFile& infile) {
 		}
 		for (int j=0; j<(int)current.size(); j++) {
 			NoteCell* cell = new NoteCell(this, current[j]);
+			track = current[j]->getTrack();
 			cell->setVoiceIndex(j);
 			cell->setSliceIndex((int)grid[j].size());
+			cell->setMeter(metertops[track], meterbots[track]);
 			grid[j].push_back(cell);
 		}
 	}

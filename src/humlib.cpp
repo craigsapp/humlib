@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun  3 20:10:00 CEST 2017
+// Last Modified: Sun Jun  4 19:58:53 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -15047,6 +15047,40 @@ HumNum NoteCell::getDuration(void) {
 
 
 
+//////////////////////////////
+//
+// NoteCell::setMeter --
+//
+
+void NoteCell::setMeter(int topval, HumNum botval) {
+	m_metertop = topval;
+	m_meterbot = botval;
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getMeterTop --
+//
+
+int NoteCell::getMeterTop(void) {
+	return m_metertop;
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getMeterBottom --
+//
+
+HumNum NoteCell::getMeterBottom(void) {
+	return m_meterbot;
+}
+
+
+
 
 //////////////////////////////
 //
@@ -15139,6 +15173,9 @@ bool NoteGrid::load(HumdrumFile& infile) {
 	m_kernspines = infile.getKernSpineStartList();
 	vector<HTp>& kernspines = m_kernspines;
 
+	vector<int> metertops(infile.getMaxTrack() + 1, 0);
+	vector<HumNum> meterbots(infile.getMaxTrack() + 1, 0);
+
 	if (kernspines.size() == 0) {
 		cerr << "Warning: no **kern spines in file" << endl;
 		return false;
@@ -15153,7 +15190,27 @@ bool NoteGrid::load(HumdrumFile& infile) {
 	int attack = 0;
 	int track, lasttrack;
 	vector<HTp> current;
+	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				if (!infile[i].token(j)->isKern()) {
+					continue;
+				}
+				track = infile.token(i, j)->getTrack();
+				if (hre.search(*infile.token(i, j), "\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					metertops[track] = hre.getMatchInt(1);
+					meterbots[track] = hre.getMatchInt(2);
+					meterbots[track] /= hre.getMatchInt(3);
+				} else if (hre.search(*infile.token(i, j), "\\*M(\\d+)/(\\d+)")) {
+					metertops[track] = hre.getMatchInt(1);
+					meterbots[track] = hre.getMatchInt(2);
+				} else {
+					continue;
+				}
+
+			}
+		}
 		if (!infile[i].isData()) {
 			continue;
 		}
@@ -15183,8 +15240,10 @@ bool NoteGrid::load(HumdrumFile& infile) {
 		}
 		for (int j=0; j<(int)current.size(); j++) {
 			NoteCell* cell = new NoteCell(this, current[j]);
+			track = current[j]->getTrack();
 			cell->setVoiceIndex(j);
 			cell->setSliceIndex((int)grid[j].size());
+			cell->setMeter(metertops[track], meterbots[track]);
 			grid[j].push_back(cell);
 		}
 	}
@@ -21621,11 +21680,11 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	char marking = '\0';
 	int ovoiceindex = -1;
 	string unexp_label; // default dissonance label if none of the diss types apply
-	// int refMeterNum; // the numerator of the reference voice's notated time signature
-	// int refMeterDen; // the denominator of the reference voice's notated time signature
-	// int othMeterNum; // the numerator of the other voice's notated time signature
-	// int othMeterDen; // the denominator of the other voice's notated time signature
-	// bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
+	int refMeterNum; // the numerator of the reference voice's notated time signature
+	HumNum refMeterDen; // the denominator of the reference voice's notated time signature
+	int othMeterNum; // the numerator of the other voice's notated time signature
+	HumNum othMeterDen; // the denominator of the other voice's notated time signature
+	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
@@ -21779,16 +21838,24 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
 
+		int    getMeterTop          (void);
+		HumNum getMeterBottom       (void);
+
 		// Assign time signature ints here:
-		// refMeterNum = ?
-		// refMeterDen = ?
-		// othMeterNum = ?
-		// othMeterDen = ?
-		// if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
-		// 	((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
-		// 	((dur == 1.5*refMeterDen) || (dur == 2*refMeterDen))) { // the ref note lasts 1.5 or 2 times as long as the meter's denominator
-		// 	ternAgent = true;
-		// }
+		refMeterNum = attacks[i]->getMeterTop();
+		refMeterDen = attacks[i]->getMeterBottom();
+cerr << "METER : " << refMeterNum << "/" << refMeterDen << endl;
+		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
+		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
+cerr << "\tMETER2 : " << refMeterNum << "/" << refMeterDen << endl;
+		HumNum threehalves(3, 2);
+
+		ternAgent = false;
+		if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
+		 		((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
+		 		((dur == refMeterDen*threehalves) || (dur == refMeterDen*2))) { // the ref note lasts 3/2 or 2 times as long as the meter's denominator
+		 	ternAgent = true;
+		}
 
 		// Non-suspension test cases ////////////////////////////////////////////
 

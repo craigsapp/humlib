@@ -425,11 +425,11 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	char marking = '\0';
 	int ovoiceindex = -1;
 	string unexp_label; // default dissonance label if none of the diss types apply
-	// int refMeterNum; // the numerator of the reference voice's notated time signature
-	// int refMeterDen; // the denominator of the reference voice's notated time signature
-	// int othMeterNum; // the numerator of the other voice's notated time signature
-	// int othMeterDen; // the denominator of the other voice's notated time signature
-	// bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
+	int refMeterNum; // the numerator of the reference voice's notated time signature
+	HumNum refMeterDen; // the denominator of the reference voice's notated time signature
+	int othMeterNum; // the numerator of the other voice's notated time signature
+	HumNum othMeterDen; // the denominator of the other voice's notated time signature
+	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
 	for (int i=1; i<(int)attacks.size() - 1; i++) {
 		sliceindex = attacks[i]->getSliceIndex();
@@ -583,16 +583,22 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
 
+		int    getMeterTop          (void);
+		HumNum getMeterBottom       (void);
+
 		// Assign time signature ints here:
-		// refMeterNum = ?
-		// refMeterDen = ?
-		// othMeterNum = ?
-		// othMeterDen = ?
-		// if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
-		// 	((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
-		// 	((dur == 1.5*refMeterDen) || (dur == 2*refMeterDen))) { // the ref note lasts 1.5 or 2 times as long as the meter's denominator
-		// 	ternAgent = true;
-		// }
+		refMeterNum = attacks[i]->getMeterTop();
+		refMeterDen = attacks[i]->getMeterBottom();
+		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
+		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
+		HumNum threehalves(3, 2);
+
+		ternAgent = false;
+		if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
+		 		((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
+		 		((dur == refMeterDen*threehalves) || (dur == refMeterDen*2))) { // the ref note lasts 3/2 or 2 times as long as the meter's denominator
+		 	ternAgent = true;
+		}
 
 		// Non-suspension test cases ////////////////////////////////////////////
 

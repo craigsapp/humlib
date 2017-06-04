@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun  3 20:10:00 CEST 2017
+// Last Modified: Sun Jun  4 19:58:53 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2213,6 +2213,9 @@ class NoteCell {
 		double getMetricLevel       (void);
 		HumNum getDurationFromStart (void);
 		HumNum getDuration          (void);
+		void   setMeter             (int topval, HumNum botval);
+		int    getMeterTop          (void);
+		HumNum getMeterBottom       (void);
 
 	protected:
 		void clear                  (void);
@@ -2241,6 +2244,8 @@ class NoteCell {
 		int m_prevAttackIndex; // index to previous note attack.
 		int m_currAttackIndex; // index to current note attack (useful for
 		                       // finding the start of a sustained note.
+		int m_metertop = 0;    // top number of prevailing meter signature
+		HumNum m_meterbot = 0; // bottom number of prevailing meter signature
 
 	friend NoteGrid;
 };
