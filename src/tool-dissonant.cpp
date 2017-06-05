@@ -592,19 +592,21 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
 		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
 		HumNum threehalves(3, 2);
-		if (refMeterDen == 0) {
-			refMeterDen = 8;
-		} else if (refMeterDen == 1) {
-			refMeterDen = 4;
-		} else if (refMeterDen == 4) {
-			refMeterDen = 1;
+		HumNum sixteenthirds(16, 3);
+		if (othMeterDen == 0) {
+			othMeterDen = 8;
+		} else if (othMeterDen == 1) {
+			othMeterDen = 4;
+		} else if (othMeterDen == 4) {
+			othMeterDen = 1;
 		}
 
 		ternAgent = false;
-		if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
-		 		// ((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
-		 		((dur == refMeterDen*threehalves) || (dur == refMeterDen*2)) &&
-		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the ref note lasts 3/2 or 2 times as long as the meter's denominator
+		if ((othMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
+		 		((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
+		 		  ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
+		 		 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves))) && // special case for 3/3 time signature
+		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the other voice hasn't already been labeled as a binary suspension
 		 	ternAgent = true;
 		}
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, Jun  5, 2017 12:02:33 PM
+// Last Modified: Mon, Jun  5, 2017  2:10:52 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21847,19 +21847,21 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
 		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
 		HumNum threehalves(3, 2);
-		if (refMeterDen == 0) {
-			refMeterDen = 8;
-		} else if (refMeterDen == 1) {
-			refMeterDen = 4;
-		} else if (refMeterDen == 4) {
-			refMeterDen = 1;
+		HumNum sixteenthirds(16, 3);
+		if (othMeterDen == 0) {
+			othMeterDen = 8;
+		} else if (othMeterDen == 1) {
+			othMeterDen = 4;
+		} else if (othMeterDen == 4) {
+			othMeterDen = 1;
 		}
 
 		ternAgent = false;
-		if ((refMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
-		 		// ((refMeterNum == othMeterNum) && (refMeterDen == othMeterDen)) && // the ref and other voices have the same timesig
-		 		((dur == refMeterDen*threehalves) || (dur == refMeterDen*2)) &&
-		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the ref note lasts 3/2 or 2 times as long as the meter's denominator
+		if ((othMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
+		 		((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
+		 		  ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
+		 		 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves))) && // special case for 3/3 time signature
+		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the other voice hasn't already been labeled as a binary suspension
 		 	ternAgent = true;
 		}
 
@@ -21949,7 +21951,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double ointnn = opitchnn - opitchn;
 
 		if (((lev >= levn) || ((lev == 2) && (dur == .5) && condition2)) && 
-			(dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
+			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
