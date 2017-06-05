@@ -694,7 +694,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double ointnn = opitchnn - opitchn;
 
 		if (((lev >= levn) || ((lev == 2) && (dur == .5) && condition2)) && 
-			(dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
+			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
