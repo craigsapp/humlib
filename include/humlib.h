@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  4 19:58:53 CEST 2017
+// Last Modified: Mon, Jun  5, 2017 12:02:33 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3097,6 +3097,7 @@ class Tool_dissonant : public HumTool {
 		                            int sliceindex);
 		void    fillLabels         (void);
 		void    fillLabels2        (void);
+		void	collapseSus	       (void);
 		void    printCountAnalysis (vector<vector<string> >& data);
 		void    suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		                            vector<vector<NoteCell* > >& attacks,
@@ -3140,21 +3141,23 @@ class Tool_dissonant : public HumTool {
 
 		// unaccdented non-harmonic tones:
 		const int THIRD_QUARTER        = 16; // dissonant third quarter
-		const int SUSPENSION           = 17; // suspension
-		const int SUSPENSION_AGENT     = 18; // suspension agent
-		const int SUSPENSION_ORNAM     = 19; // suspension ornament
-		const int SUSPENSION_REP       = 20; // suspension repeated note
-		const int FAKE_SUSPENSION_UP   = 21; // fake suspension approached by step up
-		const int FAKE_SUSPENSION_DOWN = 22; // fake suspension approached by step down
-		const int CHANSON_IDIOM        = 23; // chanson idiom
+		const int SUS_BIN  	           = 17; // binary suspension
+		const int SUS_TERN  	       = 18; // ternary suspension
+		const int AGENT_BIN		       = 19; // binary agent
+		const int AGENT_TERN		   = 20; // ternary agent
+		const int SUSPENSION_ORNAM     = 21; // suspension ornament
+		const int SUSPENSION_REP       = 22; // suspension repeated note
+		const int FAKE_SUSPENSION_UP   = 23; // fake suspension approached by step up
+		const int FAKE_SUSPENSION_DOWN = 24; // fake suspension approached by step down
+		const int CHANSON_IDIOM        = 25; // chanson idiom
 
 		// unknown dissonances:
-		const int UNKNOWN_DISSONANCE   = 24; // unknown dissonance type
-		const int UNLABELED_Z2         = 25; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 26; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 27; // unknown dissonance type, 4th interval
+		const int UNKNOWN_DISSONANCE   = 26; // unknown dissonance type
+		const int UNLABELED_Z2         = 27; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 28; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 29; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 28; // one more than last index
+		const int LABELS_SIZE          = 30; // one more than last index
 };
 
 
