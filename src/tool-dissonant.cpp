@@ -520,7 +520,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				dissonant = true;
 				diss4Q = true;
 				marking = 'N';
-				// unexp_label = m_labels[UNLABELED_Z4];
 				unexp_label = m_labels[UNLABELED_Z4];
 				// ovoiceindex = lowestnotei;
 				ovoiceindex = j;
@@ -718,8 +717,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 					results[vindex][lineindex] = m_labels[ECHAPPE_DOWN]; // lower échappée
 				} else if (intn == -2) {
 					results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_S]; // descending short nota cambiata
-				} else if (intn < -2) {
-					results[vindex][lineindex] = m_labels[IPOSTLOW_NEIGHBOR]; // incomplete posterior lower neighbor
+				// } else if (intn < -2) {
+				// 	results[vindex][lineindex] = m_labels[IPOSTLOW_NEIGHBOR]; // incomplete posterior lower neighbor
 				}
 			} else if (intp == 1) { // ascending dissonances
 				if (intn == 1) {
@@ -732,18 +731,24 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 					results[vindex][lineindex] = m_labels[ANT_UP]; // rising anticipation
 				} else if (intn == 2) {
 					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S]; // ascending short nota cambiata
-				} else if (intn > 2) {
-					results[vindex][lineindex] = m_labels[IPOSTHI_NEIGHBOR]; // incomplete posterior upper neighbor
+				// } else if (intn > 2) {
+				// 	results[vindex][lineindex] = m_labels[IPOSTHI_NEIGHBOR]; // incomplete posterior upper neighbor
 				}
-			} else if ((intp < -2) && (intn == 1)) {
-				results[vindex][lineindex] = m_labels[IANTLOW_NEIGHBOR]; // incomplete anterior lower neighbor
-			} else if ((intp > 2) && (intn == -1)) {
-				results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
+			// } else if ((intp < -2) && (intn == 1)) {
+			// 	results[vindex][lineindex] = m_labels[IANTLOW_NEIGHBOR]; // incomplete anterior lower neighbor
+			// } else if ((intp > 2) && (intn == -1)) {
+			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) &&
-			(intp == -1) && (intn == -1) && valid_acc_exit
-			) {
-			results[vindex][lineindex] = m_labels[THIRD_QUARTER]; // dissonant third quarter
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit) {
+			if (intp == -1) {
+				if (intn == -1) {
+					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone
+				} else if (intn == 1) {
+					results[vindex][lineindex] = m_labels[THIRD_Q_LOWER_NEI]; // dissonant third quarter lower neighbor
+				}
+			else if ((intp == 1) && (intn == -1)) {
+				results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI]; // dissonant third quarter upper neighbor
+			}
 		}
 
 /////////////////////////////
@@ -1017,17 +1022,17 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "c"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "k"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR   ] = "j"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
+	// m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
+	// m_labels[IPOSTLOW_NEIGHBOR   ] = "j"; // incomplete posterior lower neighbor
+	// m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
+	// m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
-	m_labels[THIRD_QUARTER       ] = "q"; // dissonant third quarter
-	// m_labels[SUSPENSION          ] = "s"; // suspension
+	m_labels[THIRD_Q_PASS        ] = "q"; // dissonant third quarter descending passing tone
+	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
+	m_labels[THIRD_Q_LOWER_NEI   ] = "b"; // dissonant third quarter lower neighbor
 	m_labels[SUS_BIN			 ] = "s2"; // binary suspension
 	m_labels[SUS_TERN			 ] = "s3"; // ternary suspension
-	// m_labels[SUSPENSION_AGENT    ] = "G"; // suspension agent
 	m_labels[AGENT_BIN			 ] = "G2"; // binary agent
 	m_labels[AGENT_TERN			 ] = "G3"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "o"; // suspension ornament
@@ -1061,17 +1066,17 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "C"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "K"; // descending long nota cambiata
-	m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
-	m_labels[IPOSTLOW_NEIGHBOR   ] = "J"; // incomplete posterior lower neighbor
-	m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
-	m_labels[IANTLOW_NEIGHBOR    ] = "I"; // incomplete anterior lower neighbor
+	// m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
+	// m_labels[IPOSTLOW_NEIGHBOR   ] = "J"; // incomplete posterior lower neighbor
+	// m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
+	// m_labels[IANTLOW_NEIGHBOR    ] = "I"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "A"; // descending anticipation
-	m_labels[THIRD_QUARTER       ] = "Q"; // dissonant third quarter
-	// m_labels[SUSPENSION          ] = "S"; // suspension
+	m_labels[THIRD_Q_PASS        ] = "Q"; // dissonant third quarter
+	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
+	m_labels[THIRD_Q_LOWER_NEI   ] = "B"; // dissonant third quarter lower neighbor
 	m_labels[SUS_BIN			 ] = "S2"; // binary suspension
 	m_labels[SUS_TERN			 ] = "S3"; // ternary suspension
-	// m_labels[SUSPENSION_AGENT    ] = "G"; // suspension agent
 	m_labels[AGENT_BIN			 ] = "G2"; // binary agent
 	m_labels[AGENT_TERN			 ] = "G3"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "O"; // suspension ornament
