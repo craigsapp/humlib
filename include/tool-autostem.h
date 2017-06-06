@@ -111,7 +111,7 @@ class Tool_autostem : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_AUTOSTEMH_INCLUDED */
+#endif /* _TOOL_AUTOSTEM_H_INCLUDED */
 
 
 

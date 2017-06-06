@@ -43,6 +43,8 @@ class Convert {
 		                                     const string& separator = " ");
 		static string  durationToRecip      (HumNum duration, 
 		                                     HumNum scale = HumNum(1,4));
+		static string  durationFloatToRecip (double duration, 
+		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
