@@ -1,7 +1,11 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
+<<<<<<< HEAD
 // Last Modified: Tue, Jun  6, 2017  3:16:31 PM
+=======
+// Last Modified: Mon Jun  5 16:06:56 CEST 2017
+>>>>>>> 4193ea990000b1155a3265c6df1c647ba775f17a
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
