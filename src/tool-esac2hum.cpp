@@ -382,7 +382,6 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 void Tool_esac2hum::placeLyrics(vector<string>& song, vector<NoteData>& songdata) {
 	int start = -1;
 	int stop = -1;
-	int length;
 	getLineRange(song, "TXT", start, stop);
 	if (start < 0) {
 		// no TXT[] field, so don't do anything
@@ -399,7 +398,6 @@ void Tool_esac2hum::placeLyrics(vector<string>& song, vector<NoteData>& songdata
 		}
 		buffer = song[line+start].substr(4);
 		if (line == stop - start) {
-			length = (int)buffer.size();
 			auto loc = buffer.rfind(']');
 			if (loc != string::npos) {
 				buffer.resize(loc);
@@ -1203,7 +1201,7 @@ void Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata
 		#define STATE_BAR      4
 		#define STATE_SLEND    5
 
-		while (j < 200 && (j < song[i].size())) {
+		while (j < 200 && (j < (int)song[i].size())) {
 			// oldstate = state;
 			switch (song[i][j]) {
 				// Octave information:
