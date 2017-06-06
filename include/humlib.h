@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jun  6, 2017  7:32:15 PM
+// Last Modified: Tue, Jun  6, 2017  8:45:24 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2329,6 +2329,8 @@ class Convert {
 		                                     const string& separator = " ");
 		static string  durationToRecip      (HumNum duration, 
 		                                     HumNum scale = HumNum(1,4));
+		static string  durationFloatToRecip (double duration, 
+		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static string  base40ToKern         (int b40);
@@ -3160,6 +3162,99 @@ class Tool_dissonant : public HumTool {
 		const int UNLABELED_Z4         = 27; // unknown dissonance type, 4th interval
 
 		const int LABELS_SIZE          = 28; // one more than last index
+};
+
+
+
+#define ND_NOTE 0  /* notes or rests + text and phrase markings */
+#define ND_BAR  1  /* explicit barlines */
+
+
+class NoteData {
+	public:
+		NoteData(void) { clear(); }
+		void clear(void) { bar = pitch = phstart = phend = 0;
+							  phnum = -1;
+							  lyricerr = lyricnum = 0;
+							  tiestart = tiecont = tieend = 0;
+							  slstart = slend = 0;
+							  num = denom = barnum = 0;
+							  barinterp = 0; bardur = 0.0;
+							  duration = 0.0; text = ""; }
+		double duration;
+		int    bar;       int    num;
+		int    denom;     int    barnum;
+		double bardur;    int    barinterp;
+		int    pitch;     int    lyricerr;
+		int    phstart;   int    phend;    int phnum;
+		int    slstart;   int    slend;    int lyricnum;
+		int    tiestart;  int    tiecont;  int tieend;
+		string text;
+};
+
+		
+
+class Tool_esac2hum : public HumTool {
+	public:
+		         Tool_esac2hum         (void);
+		        ~Tool_esac2hum         () {};
+
+		bool    convertFile          (ostream& out, const string& filename);
+		bool    convert              (ostream& out, const string& input);
+		bool    convert              (ostream& out, istream& input);
+
+	protected:
+		void      initialize            (void);
+		void      checkOptions          (Options& opts, int argc, char** argv);
+		void      example               (void);
+		void      usage                 (const string& command);
+		void      convertEsacToHumdrum  (ostream& out, istream& input);
+		void      getSong               (vector<string>& song, istream& infile, 
+		                                int init);
+		void      convertSong           (vector<string>& song, ostream& out);
+		void      getKeyInfo            (vector<string>& song, string& key, 
+		                                 double& mindur, int& tonic, string& meter,
+		                                 ostream& out);
+		void      printNoteData         (NoteData& data, int textQ, ostream& out);
+		void      getNoteList           (vector<string>& song, 
+		                                 vector<NoteData>& songdata, double mindur,
+		                                 int tonic);
+		void      getMeterInfo          (string& meter, vector<int>& numerator, 
+		                                 vector<int>& denominator);
+		void      postProcessSongData   (vector<NoteData>& songdata,
+		                                 vector<int>& numerator,vector<int>& denominator);
+		void      printKeyInfo          (vector<NoteData>& songdata, int tonic, 
+		                                 int textQ, ostream& out);
+		int       getAccidentalMax      (int a, int b, int c);
+		void      printTitleInfo        (vector<string>& song, ostream& out);
+		void      getLineRange          (vector<string>& song, const string& field, 
+		                                 int& start, int& stop);
+		void      printChar             (unsigned char c, ostream& out);
+		void      printBibInfo          (vector<string>& song, ostream& out);
+		void      printString           (const string& string, ostream& out);
+		void      printSpecialChars     (ostream& out);
+		void      placeLyrics           (vector<string>& song,
+		                                 vector<NoteData>& songdata);
+		void      placeLyricPhrase      (vector<NoteData>& songdata, 
+		                                 vector<string>& lyrics, int line);
+		void      getLyrics             (vector<string>& lyrics, const string& buffer);
+		void      cleanupLyrics         (vector<string>& lyrics);
+		void      getFileContents       (vector<string>& array, const string& filename);
+		void      chopExtraInfo         (char* holdbuffer);
+		
+	private:
+		int            debugQ = 0;        // used with --debug option
+		int            verboseQ = 0;      // used with -v option
+		int            splitQ = 0;        // used with -s option
+		int            firstfilenum = 1;  // used with -f option
+		vector<string> header;            // used with -h option
+		vector<string> trailer;           // used with -t option
+		string         fileextension;     // used with -x option
+		string         namebase;          // used with -s option
+
+		vector<int>    chartable;  // used printChars() & printSpecialChars()
+		int inputline = 0;
+
 };
 
 
