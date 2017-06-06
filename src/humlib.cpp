@@ -21760,27 +21760,29 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	bool colorizeQ = getBoolean("colorize");
 	bool colorize2Q = getBoolean("colorize2");
 
-	HumNum durp;     // duration of previous melodic note;
-	HumNum dur;      // duration of current note;
-	HumNum durn;     // duration of next melodic note;
-	double intp;     // diatonic interval from previous melodic note
-	double intn;     // diatonic interval to next melodic note
-	double levp;     // metric level of the previous melodic note
-	double lev;      // metric level of the current note
-	double levn;     // metric level of the next melodic note
-	int lineindex;   // line in original Humdrum file content that contains note
-	// int lineindexn;  // next line in original Humdrum file content that contains note
-	int attackindexn;// slice in NoteGrid content that contains next note attack
-	int sliceindex;  // current timepoint in NoteGrid.
+	HumNum durp;       // duration of previous melodic note;
+	HumNum dur;        // duration of current note;
+	HumNum durn;       // duration of next melodic note;
+	HumNum susdur = -1; // duration of previous note in other voice;
+	HumNum odurn = -1; // duration of next note in other voice;
+	double intp;       // diatonic interval from previous melodic note
+	double intn;       // diatonic interval to next melodic note
+	double levp;       // metric level of the previous melodic note
+	double lev;        // metric level of the current note
+	double levn;       // metric level of the next melodic note
+	int lineindex;     // line in original Humdrum file content that contains note
+	// int lineindexn; // next line in original Humdrum file content that contains note
+	int attackindexn;  // slice in NoteGrid content that contains next note attack
+	int sliceindex;    // current timepoint in NoteGrid.
 	int oattackindexn = -1; // next note attack index of the other voice involved in the diss.
 	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
-	bool dissonant;  // true if  note is dissonant with other sounding notes.
+	bool dissonant;    // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
 	int ovoiceindex = -1;
 	string unexp_label; // default dissonance label if none of the diss types apply
-	int refMeterNum; // the numerator of the reference voice's notated time signature
+	int refMeterNum;    // the numerator of the reference voice's notated time signature
 	HumNum refMeterDen; // the denominator of the reference voice's notated time signature
-	int othMeterNum; // the numerator of the other voice's notated time signature
+	int othMeterNum;    // the numerator of the other voice's notated time signature
 	HumNum othMeterDen; // the denominator of the other voice's notated time signature
 	bool ternAgent = false;  // true if the ref voice would be a valid agent of a ternary susp. But if true, the diss is not necessarily a susp.
 
@@ -21936,33 +21938,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
 
-		int    getMeterTop          (void);
-		HumNum getMeterBottom       (void);
-
-		// Assign time signature ints here:
-		refMeterNum = attacks[i]->getMeterTop();
-		refMeterDen = attacks[i]->getMeterBottom();
-		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
-		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
-		HumNum threehalves(3, 2);
-		HumNum sixteenthirds(16, 3);
-		if (othMeterDen == 0) {
-			othMeterDen = 8;
-		} else if (othMeterDen == 1) {
-			othMeterDen = 4;
-		} else if (othMeterDen == 4) {
-			othMeterDen = 1;
-		}
-
-		ternAgent = false;
-		if ((othMeterNum % 3 == 0) && // the durational value of the meter's denominator groups in threes
-		 		((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
-		 		  ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
-		 		 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves))) && // special case for 3/3 time signature
-		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the other voice hasn't already been labeled as a binary suspension
-		 	ternAgent = true;
-		}
-
 		// Non-suspension test cases ////////////////////////////////////////////
 
 		// valid_acc_exit determines if the other (accompaniment) voice conforms to the
@@ -22007,6 +21982,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		}
 
 		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
+		int oattackindexc = grid.cell(ovoiceindex, sliceindex)->getCurrAttackIndex();
+		susdur = grid.cell(ovoiceindex, oattackindexc)->getDuration();
 		double opitchp = NAN;
 		if (oattackindexp >= 0) {
 			opitchp = grid.cell(ovoiceindex, oattackindexp)->getAbsDiatonicPitch();
@@ -22022,6 +21999,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double opitchn = NAN;
 		if (oattackindexn >= 0) {
 			opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
+			odurn = grid.cell(ovoiceindex, oattackindexn)->getDuration();
+
 		}
 		int oattackindexnn = -1;
 		if (oattackindexn >= 0) {
@@ -22047,6 +22026,37 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double ointp = opitch - opitchp;
 		double ointn = opitchn - opitch;
 		double ointnn = opitchnn - opitchn;
+
+		// To distinguish between binary and ternary suspensions and agents
+		int    getMeterTop          (void);
+		HumNum getMeterBottom       (void);
+
+		// Assign time signature ints here:
+		refMeterNum = attacks[i]->getMeterTop();
+		refMeterDen = attacks[i]->getMeterBottom();
+		othMeterNum = grid.cell(ovoiceindex, sliceindex)->getMeterTop();
+		othMeterDen = grid.cell(ovoiceindex, sliceindex)->getMeterBottom();
+		HumNum threehalves(3, 2);
+		HumNum sixteenthirds(16, 3);
+		if (othMeterDen == 0) {
+			othMeterDen = 8;
+		} else if (othMeterDen == 1) {
+			othMeterDen = 4;
+		} else if (othMeterDen == 4) {
+			othMeterDen = 1;
+		}
+
+		ternAgent = false;
+		if (((othMeterNum % 3 == 0) && (susdur >= othMeterDen)) && // the durational value of the meter's denominator groups in threes and the sus lasts at least as long as the denominator
+		 		((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
+		 		 ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
+		 		 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves)) || // special case for 3/3 time signature
+		 		 ((susdur == othMeterDen*threehalves) && (ointn == -1) && (odurn == 2) && (ointnn == 0)) || // change of agent suspension with ant of resolution
+		 		 ((dur == othMeterDen) && (susdur == othMeterDen*2))) && // unornamented change of agent suspension
+		 		(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the other voice hasn't already been labeled as a binary suspension
+		 	ternAgent = true;
+		}
+
 
 		if (((lev >= levn) || ((lev == 2) && (dur == .5) && condition2)) && 
 			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
@@ -22123,23 +22133,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
 		}
 /////////////////////////////
-
-		// else if (valid_sus_acc && (ointn == -1)) {
-		// 	results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
-		// 	results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
-		// }
-
-		// else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
-		// 	results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
-		// 	results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
-		// 	results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP]; // repeated-note of suspension
-		// }
-
-		// else if (valid_ornam_sus_acc && ((ointn == -2) && (ointnn == 1))) {
-		// 	results[vindex][lineindex] = m_labels[SUSPENSION_AGENT]; // the accompaniment voice of the suspension
-		// 	results[ovoiceindex][lineindex] = m_labels[SUSPENSION]; // suspension
-		// 	results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
-		// }
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
 
