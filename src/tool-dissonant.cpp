@@ -272,10 +272,10 @@ void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
 	int line1 = note1->getLineIndex();
 	int line2 = note2->getLineIndex();
 
-	bool barlineQ = false;
+	// bool barlineQ = false;
 	for (int i=line1+1; i<line2; i++) {
 		if (infile[i].isBarline()) {
-			barlineQ = true;
+			// barlineQ = true;
 			break;
 		}
 	}
