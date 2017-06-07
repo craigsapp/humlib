@@ -36,7 +36,6 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("s|suppress=b",        "suppress dissonant notes");
 	define("d|diatonic=b",        "print diatonic grid");
 	define("D|no-dissonant=b",    "don't do dissonance anaysis");
-	define("t|ternary=b",		  "distinguish between binary and ternary suspensions and agents");
 	define("m|midi-pitch=b",      "print midi-pitch grid");
 	define("b|base-40=b",         "print base-40 grid");
 	define("l|metric-levels=b",   "use metric levels in analysis");
@@ -63,10 +62,6 @@ bool Tool_dissonant::run(const string& indata, ostream& out) {
 	} else {
 		fillLabels();
 	}
-	
-	if (not getBoolean("ternary")) {
-		collapseSus();
-	}
 
 	HumdrumFile infile(indata);
 	bool status = run(infile);
@@ -87,10 +82,6 @@ bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
 		fillLabels();
 	}
 
-	if (not getBoolean("ternary")) {
-		collapseSus();
-	}
-
 	int status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -107,10 +98,6 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 		fillLabels2();
 	} else {
 		fillLabels();
-	}
-
-	if (not getBoolean("ternary")) {
-		collapseSus();
 	}
 
 	NoteGrid grid(infile);
@@ -1035,10 +1022,10 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[THIRD_Q_PASS        ] = "q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "b"; // dissonant third quarter lower neighbor
-	m_labels[SUS_BIN             ] = "s2"; // binary suspension
-	m_labels[SUS_TERN            ] = "s3"; // ternary suspension
-	m_labels[AGENT_BIN           ] = "G2"; // binary agent
-	m_labels[AGENT_TERN          ] = "G3"; // ternary agent
+	m_labels[SUS_BIN             ] = "s"; // binary suspension
+	m_labels[SUS_TERN            ] = "S"; // ternary suspension
+	m_labels[AGENT_BIN           ] = "g"; // binary agent
+	m_labels[AGENT_TERN          ] = "G"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "o"; // suspension ornament
 	m_labels[SUSPENSION_REP      ] = "r"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
@@ -1079,10 +1066,10 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[THIRD_Q_PASS        ] = "Q"; // dissonant third quarter
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "B"; // dissonant third quarter lower neighbor
-	m_labels[SUS_BIN             ] = "S2"; // binary suspension
-	m_labels[SUS_TERN            ] = "S3"; // ternary suspension
-	m_labels[AGENT_BIN           ] = "G2"; // binary agent
-	m_labels[AGENT_TERN          ] = "G3"; // ternary agent
+	m_labels[SUS_BIN             ] = "S"; // binary suspension
+	m_labels[SUS_TERN            ] = "S"; // ternary suspension
+	m_labels[AGENT_BIN           ] = "G"; // binary agent
+	m_labels[AGENT_TERN          ] = "G"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "O"; // suspension ornament
 	m_labels[SUSPENSION_REP      ] = "R"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
@@ -1094,12 +1081,6 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[UNLABELED_Z4        ] = "Z"; // unknown dissonance, 4th interval
 }
 
-void Tool_dissonant::collapseSus(void) { // call if you don't want to distinguish between binary/ternary suspensions and agents.
-	m_labels[SUS_BIN] = m_labels[SUS_BIN][0];
-	m_labels[SUS_TERN] = m_labels[SUS_TERN][0];
-	m_labels[AGENT_BIN] = m_labels[AGENT_BIN][0];
-	m_labels[AGENT_TERN] = m_labels[AGENT_TERN][0];
-}
 
 // END_MERGE
 

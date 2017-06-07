@@ -49,7 +49,6 @@ class Tool_dissonant : public HumTool {
 		                            int sliceindex);
 		void    fillLabels         (void);
 		void    fillLabels2        (void);
-		void	collapseSus	       (void);
 		void    printCountAnalysis (vector<vector<string> >& data);
 		void    suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		                            vector<vector<NoteCell* > >& attacks,
