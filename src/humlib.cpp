@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Jun  8, 2017  6:53:23 PM
+// Last Modified: Thu, Jun  8, 2017  7:32:59 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22080,7 +22080,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// } else if ((intp > 2) && (intn == -1)) {
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit) {
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
+				   valid_acc_exit) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone
@@ -22168,18 +22169,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom)))) { // ref voice enters diss by step and both voices leave by leap
 				results[vindex][lineindex] = unexp_label;
 			}
-
-			// if ((Convert::isNaN(intp) && (!Convert::isNaN(ointp)) &&
-			// 		(!Convert::isNaN(ointn))) ||
-			// 		// ref. voice is approached or left by leap but the other voice resolves by step
-			// 		 (((abs((int)intp) > 1) || (abs((int)intn) > 1)) && (abs((int)ointn) == 1))) {
-			// 	continue;
-			// } else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
-			// 		(((intp != 0) && (ointp != 0)) && (dur <= odur)) || // both voices moved to new pitches at start of diss and the other doesn't leave first
-			// 		()
-			// 	) {
-			// 	results[vindex][lineindex] = unexp_label;
-			// }
 		}
 	}
 }

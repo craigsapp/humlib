@@ -586,17 +586,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Suspension test cases ////////////////////////////////////////////////
 
-		// valid_sus_acc: determines if the reference voice conforms to the
-		// standards of the accompaniment voice for suspensions.
-
-		// Condition 1: The reference (accompaniment) voice moved to a different
-		//    pitch class at the onset of this dissonant interval) &&
-		bool condition1 = true;
-		if (intp == 0) {
-			// no repeated note attacks
-			condition1 = false;
-		}
-
 		// Condition 2: The other (dissonant) voice stayed in place or repeated the
 		//    same pitch at the onset of this dissonant interval.
 		bool condition2 = true;
@@ -654,6 +643,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// For ornamented suspensions.
 		bool condition3b = oattackindexnn <= attackindexn ? true : false;
 
+		// valid_sus_acc: determines if the reference voice conforms to the
+		// standards of the accompaniment voice for suspensions.
 		bool valid_sus_acc = condition2 && condition3a;
 		bool valid_ornam_sus_acc = condition2 && condition3b;
 
@@ -727,7 +718,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// } else if ((intp > 2) && (intn == -1)) {
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit) {
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
+				   valid_acc_exit) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone
@@ -815,18 +807,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom)))) { // ref voice enters diss by step and both voices leave by leap
 				results[vindex][lineindex] = unexp_label;
 			}
-
-			// if ((Convert::isNaN(intp) && (!Convert::isNaN(ointp)) &&
-			// 		(!Convert::isNaN(ointn))) ||
-			// 		// ref. voice is approached or left by leap but the other voice resolves by step
-			// 		 (((abs((int)intp) > 1) || (abs((int)intn) > 1)) && (abs((int)ointn) == 1))) {
-			// 	continue;
-			// } else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
-			// 		(((intp != 0) && (ointp != 0)) && (dur <= odur)) || // both voices moved to new pitches at start of diss and the other doesn't leave first
-			// 		()
-			// 	) {
-			// 	results[vindex][lineindex] = unexp_label;
-			// }
 		}
 	}
 }
