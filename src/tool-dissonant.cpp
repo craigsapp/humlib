@@ -729,7 +729,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			} else if ((intp == 1) && (intn == -1)) {
 				results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI]; // dissonant third quarter upper neighbor
 			}
+		} else if ((lev > levp) && (lev == levn) && condition2 && (intn == -1) &&
+				   (dur == (durn+durn)) && (dur == (durp+durp)) && ((dur+dur) == odur)) {
+			if (intp == 1) {
+				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_UP];
+			} else if (intp == -1) {
+				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_DOWN];
+			}
 		}
+
 
 		/////////////////////////////
 		////
@@ -796,18 +804,28 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		bool refLeaptFrom = fabs(intn) > 1 ? true : false;
 		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
 
-		if (results[vindex][lineindex] == "") { // ref. voice doesn't have a diss label
-			// The following are all cases where the ref voice gets an unexplained label
-			if ((olineindexc < lineindex) || // other voice does not attack at this point
+cerr << "*********************" << endl;
+cerr << "vpitch: " << (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch() << endl;
+cerr << "opitch: " << opitch << endl;
+cerr << "dur: " << dur << endl;
+cerr << "intp: " << intp << endl;
+cerr << "intn: " << intn << endl;
+cerr << "odurn: " << odurn << endl;
+cerr << "ointp: " << ointp << endl;
+cerr << "ointn: " << ointn << endl;
+cerr << "Current label: " << results[vindex][lineindex] << endl;
+		if ((results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
+			((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
 				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
 				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step and other voice leaves by leap
 				  (refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
 				  (!refLeaptTo && !refLeaptFrom && !othLeaptTo && !othLeaptFrom) || // both voices enter and leave by step
-				  (!refLeaptTo && refLeaptFrom && othLeaptFrom)))) { // ref voice enters diss by step and both voices leave by leap
-				results[vindex][lineindex] = unexp_label;
-			}
+				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step and both voices leave by leap
+			results[vindex][lineindex] = unexp_label;
 		}
+cerr << "New label: " << results[vindex][lineindex] << endl;
+
 	}
 }
 
@@ -822,12 +840,14 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		vector<NoteCell*>& attacks, int vindex) {
 	double intp;        // diatonic interval from previous melodic note
 	int lineindexn;     // line index of the next note in the voice
-	bool sfound;        // boolean for if a suspension if found after a Z dissonance
+	bool sfound;        // boolean for if a suspension is found after a Z dissonance
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		int lineindex = attacks[i]->getLineIndex();
 		if ((results[vindex][lineindex].find("Z") == string::npos) &&
-			(results[vindex][lineindex].find("z") == string::npos)) {
+			(results[vindex][lineindex].find("z") == string::npos) &&
+			(results[vindex][lineindex].find("M") == string::npos) &&
+			(results[vindex][lineindex].find("m") == string::npos)) {
 			continue;
 		}
 		intp = *attacks[i] - *attacks[i-1];
@@ -1026,6 +1046,8 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[SUSPENSION_REP      ] = "r"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
 	m_labels[FAKE_SUSPENSION_DOWN] = "f"; // fake suspension approached by step down
+	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
+	m_labels[SUS_NO_AGENT_DOWN   ] = "m"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
 	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
 	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval
@@ -1070,6 +1092,8 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[SUSPENSION_REP      ] = "R"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
 	m_labels[FAKE_SUSPENSION_DOWN] = "F"; // fake suspension approached by step down
+	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
+	m_labels[SUS_NO_AGENT_DOWN   ] = "M"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom
 	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
 	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval

@@ -102,15 +102,17 @@ class Tool_dissonant : public HumTool {
 		const int SUSPENSION_REP       = 20; // suspension repeated note
 		const int FAKE_SUSPENSION_UP   = 21; // fake suspension approached by step up
 		const int FAKE_SUSPENSION_DOWN = 22; // fake suspension approached by step down
-		const int CHANSON_IDIOM        = 23; // chanson idiom
+		const int SUS_NO_AGENT_UP      = 23; // suspension missing a normal agent approached by step up
+		const int SUS_NO_AGENT_DOWN    = 24; // suspension missing a normal agent approached by step down
+		const int CHANSON_IDIOM        = 25; // chanson idiom
 
 		// unknown dissonances:
-		const int UNKNOWN_DISSONANCE   = 24; // unknown dissonance type
-		const int UNLABELED_Z2         = 25; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 26; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 27; // unknown dissonance type, 4th interval
+		const int UNKNOWN_DISSONANCE   = 26; // unknown dissonance type
+		const int UNLABELED_Z2         = 27; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 28; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 29; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 28; // one more than last index
+		const int LABELS_SIZE          = 30; // one more than last index
 };
 
 // END_MERGE
