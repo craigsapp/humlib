@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Jun  8, 2017  7:32:59 PM
+// Last Modified: Thu, Jun  8, 2017  7:56:55 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21939,17 +21939,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Suspension test cases ////////////////////////////////////////////////
 
-		// valid_sus_acc: determines if the reference voice conforms to the
-		// standards of the accompaniment voice for suspensions.
-
-		// Condition 1: The reference (accompaniment) voice moved to a different
-		//    pitch class at the onset of this dissonant interval) &&
-		bool condition1 = true;
-		if (intp == 0) {
-			// no repeated note attacks
-			condition1 = false;
-		}
-
 		// Condition 2: The other (dissonant) voice stayed in place or repeated the
 		//    same pitch at the onset of this dissonant interval.
 		bool condition2 = true;
@@ -22007,6 +21996,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// For ornamented suspensions.
 		bool condition3b = oattackindexnn <= attackindexn ? true : false;
 
+		// valid_sus_acc: determines if the reference voice conforms to the
+		// standards of the accompaniment voice for suspensions.
 		bool valid_sus_acc = condition2 && condition3a;
 		bool valid_ornam_sus_acc = condition2 && condition3b;
 
@@ -22045,7 +22036,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		}
 
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5) && condition2)) && 
+		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && condition2 && 
 			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
