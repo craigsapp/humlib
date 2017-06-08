@@ -804,16 +804,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		bool refLeaptFrom = fabs(intn) > 1 ? true : false;
 		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
 
-cerr << "*********************" << endl;
-cerr << "vpitch: " << (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch() << endl;
-cerr << "opitch: " << opitch << endl;
-cerr << "dur: " << dur << endl;
-cerr << "intp: " << intp << endl;
-cerr << "intn: " << intn << endl;
-cerr << "odurn: " << odurn << endl;
-cerr << "ointp: " << ointp << endl;
-cerr << "ointn: " << ointn << endl;
-cerr << "Current label: " << results[vindex][lineindex] << endl;
 		if ((results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
 			((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
@@ -824,8 +814,6 @@ cerr << "Current label: " << results[vindex][lineindex] << endl;
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step and both voices leave by leap
 			results[vindex][lineindex] = unexp_label;
 		}
-cerr << "New label: " << results[vindex][lineindex] << endl;
-
 	}
 }
 
