@@ -397,7 +397,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	HumNum durp;       // duration of previous melodic note;
 	HumNum dur;        // duration of current note;
 	HumNum durn;       // duration of next melodic note;
-	HumNum susdur = -1; // duration of previous note in other voice;
+	HumNum odur = -1; // duration of current note in other voice which may have started earlier;
 	HumNum odurn = -1; // duration of next note in other voice;
 	double intp;       // diatonic interval from previous melodic note
 	double intn;       // diatonic interval to next melodic note
@@ -616,7 +616,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		int oattackindexc = grid.cell(ovoiceindex, sliceindex)->getCurrAttackIndex();
-		susdur = grid.cell(ovoiceindex, oattackindexc)->getDuration();
+		odur = grid.cell(ovoiceindex, oattackindexc)->getDuration();
+		int olineindexc = grid.cell(ovoiceindex, oattackindexc)->getLineIndex();
 		double opitchp = NAN;
 		if (oattackindexp >= 0) {
 			opitchp = grid.cell(ovoiceindex, oattackindexp)->getAbsDiatonicPitch();
@@ -646,8 +647,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Condition 3: The other (dissonant) voice leaves its note before
 		//    or at the same time as the accompaniment (reference) voice leaves
-		//    its pitch class.  [The other (accompaniment) voice can leave its pitch
-		//    class for another note or for a rest.]
+		//    its pitch class.  [The voices can leave their pitch classes for 
+		//    another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
 
 		// For ornamented suspensions.
@@ -680,12 +681,12 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		}
 
 		ternAgent = false;
-		if (((othMeterNum % 3 == 0) && (susdur >= othMeterDen)) && // the durational value of the meter's denominator groups in threes and the sus lasts at least as long as the denominator
+		if (((othMeterNum % 3 == 0) && (odur >= othMeterDen)) && // the durational value of the meter's denominator groups in threes and the sus lasts at least as long as the denominator
 				((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
 				 ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
 				 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves)) || // special case for 3/3 time signature
-				 ((susdur == othMeterDen*threehalves) && (ointn == -1) && (odurn == 2) && (ointnn == 0)) || // change of agent suspension with ant of resolution
-				 ((dur == othMeterDen) && (susdur == othMeterDen*2))) && // unornamented change of agent suspension
+				 ((odur == othMeterDen*threehalves) && (ointn == -1) && (odurn == 2) && (ointnn == 0)) || // change of agent suspension with ant of resolution
+				 ((dur == othMeterDen) && (odur == othMeterDen*2))) && // unornamented change of agent suspension
 				(results[ovoiceindex][lineindex] != m_labels[SUS_BIN])) { // the other voice hasn't already been labeled as a binary suspension
 			ternAgent = true;
 		}
@@ -798,20 +799,35 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Decide whether to give an unexplained dissonance label to the ref.
 		// voice if none of the dissonant conditions above apply.
-		if (results[vindex][lineindex] == "") { // ref. voice doesn't  have a diss label
-			if ((Convert::isNaN(intp) && (!Convert::isNaN(ointp)) &&
-					(!Convert::isNaN(ointn))) ||
-					// ref. voice is approached or left by leap but the other voice resolves by step
-					 (((abs((int)intp) > 1) || (abs((int)intn) > 1)) && (abs((int)ointn) == 1))) {
-				continue;
-			} else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
-					(((condition1) && (ointp != 0)) && // both voices moved to new pitches at start of diss
-					(attackindexn <= oattackindexn)) // and the other voice doesn't leave diss. first
-					) {
+		bool refLeaptTo = fabs(intp) > 1 ? true : false;
+		bool othLeaptTo = fabs(ointp) > 1 ? true : false;
+		bool refLeaptFrom = fabs(intn) > 1 ? true : false;
+		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
+
+		if (results[vindex][lineindex] == "") { // ref. voice doesn't have a diss label
+			// The following are all cases where the ref voice gets an unexplained label
+			if ((olineindexc < lineindex) || // other voice does not attack at this point
+				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
+				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
+				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step and other voice leaves by leap
+				  (refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
+				  (!refLeaptTo && !refLeaptFrom && !othLeaptTo && !othLeaptFrom) || // both voices enter and leave by step
+				  (!refLeaptTo && refLeaptFrom && othLeaptFrom)))) { // ref voice enters diss by step and both voices leave by leap
 				results[vindex][lineindex] = unexp_label;
 			}
-		}
 
+			// if ((Convert::isNaN(intp) && (!Convert::isNaN(ointp)) &&
+			// 		(!Convert::isNaN(ointn))) ||
+			// 		// ref. voice is approached or left by leap but the other voice resolves by step
+			// 		 (((abs((int)intp) > 1) || (abs((int)intn) > 1)) && (abs((int)ointn) == 1))) {
+			// 	continue;
+			// } else if (((not Convert::isNaN(intp)) && condition2) || // ref. voice repeated or moved into diss obliquely
+			// 		(((intp != 0) && (ointp != 0)) && (dur <= odur)) || // both voices moved to new pitches at start of diss and the other doesn't leave first
+			// 		()
+			// 	) {
+			// 	results[vindex][lineindex] = unexp_label;
+			// }
+		}
 	}
 }
 
