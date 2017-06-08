@@ -1,19 +1,19 @@
-minHumdrum
+humlib
 ==========
 
-The minHumdrum library consists of a set of C++ classes for parsing
+The humlib library consists of a set of C++ classes for parsing
 [Humdrum](http://www.humdrum.org) data files.  The library is designed
 to be portable with only two code files to copy into your project:
 
-1. An include file [minhumdrum.h](https://github.com/humdrum-tools/minHumdrum/blob/master/include/minhumdrum.h)
-2. and a source file [minhumdrum.cpp](https://github.com/humdrum-tools/minHumdrum/blob/master/src/minhumdrum.cpp)
+1. An include file [minhumdrum.h](https://github.com/humdrum-tools/humlib/blob/master/include/minhumdrum.h)
+2. and a source file [minhumdrum.cpp](https://github.com/humdrum-tools/humlib/blob/master/src/minhumdrum.cpp)
 
 The source code uses some C++11-specific features, so add the
 `-stc=c++11` option when compiling with GNU g++ or the clang++ compiler.
 Also include the `-stdlib=libc++` option when compiling with [clang](https://en.wikipedia.org/wiki/Clang).  See the
-[Makefile](https://github.com/humdrum-tools/minHumdrum/blob/master/Makefile)
+[Makefile](https://github.com/humdrum-tools/humlib/blob/master/Makefile)
 for compiling the library and
-[Makefile.examples](https://github.com/humdrum-tools/minHumdrum/blob/master/Makefile.examples)
+[Makefile.examples](https://github.com/humdrum-tools/humlib/blob/master/Makefile.examples)
 for compiling and linking executables.
 
 Resources
@@ -60,28 +60,28 @@ and source files.  In a terminal you can download with [wget](https://en.wikiped
 (most common method for linux):
 
 ```console
-wget https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/include/minhumdrum.h
-wget https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/src/minhumdrum.cpp
+wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/minhumdrum.h
+wget https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/minhumdrum.cpp
 ```
 
 Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X):
 
 ```console
-curl https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/include/minhumdrum.h -o minhumdrum.h
-curl https://raw.githubusercontent.com/humdrum-tools/minHumdrum/master/src/minhumdrum.cpp -o minhumdrum.cpp
+curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/include/minhumdrum.h -o minhumdrum.h
+curl https://raw.githubusercontent.com/humdrum-tools/humlib/master/src/minhumdrum.cpp -o minhumdrum.cpp
 ```
 
-To compile minHumdrum as a stand-alone library, you can download a ZIP or
+To compile humlib as a stand-alone library, you can download a ZIP or
 tarball from the buttons at the top of this page, or you can use
 [git](https://en.wikipedia.org/wiki/Git_(software)) in the console to
 download and allow easy updating:
 
 ```console
-git clone https://github.com/humdrum-tools/minHumdrum
+git clone https://github.com/humdrum-tools/humlib
 ```
 
-To update to the most recent version of minHumdrum if git was used to
-download the library, type anywhere in the minHumdrum directory structure:
+To update to the most recent version of humlib if git was used to
+download the library, type anywhere in the humlib directory structure:
 
 ```console
 git pull
@@ -116,14 +116,14 @@ This will create the file `lib/libhumdrum.a`.
 Example
 =============
 
-Here is a short example program that uses the minHumdrum library to convert
+Here is a short example program that uses the humlib library to convert
 a Humdrum file into a MIDI-like listing of notes.
 
 ```cpp
 #include "minhumdrum.h"
 
 using namespace std;
-using namespace minHumdrum;
+using namespace humlib;
 
 void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();
@@ -185,7 +185,7 @@ Example input:<br>
 </pre>
 </td>
 <td style="border:0">
-<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/minHumdrum/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
+<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/humlib/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
 </td>
 <td style="border:0">
 Example output:<br>
@@ -205,9 +205,9 @@ C4      2.2     12      6
 </pre>
 </td></tr></table>
 
-If you are using the minHumdrum project directory, place
+If you are using the humlib project directory, place
 your own programs into a subdirectory called `myprograms`, and then to compile,
-go to the base directory of the minHumdrum code and type `make myprogram`
+go to the base directory of the humlib code and type `make myprogram`
 if the program is called `myprograms/myprogram.cpp`.  The compiled program
 will be created as `bin/myprogram`.
 
