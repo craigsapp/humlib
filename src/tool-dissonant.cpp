@@ -461,6 +461,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
 
+		int value = 0;
 		for (int j=0; j<(int)harmint.size(); j++) {
 			if (j == vindex) {
 				// don't compare to self
@@ -470,7 +471,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				// rest, so ignore
 				continue;
 			}
-			int value = (int)harmint[j];
+			value = (int)harmint[j];
 			if (value > 7) {
 				value = value % 7; // remove octaves from interval
 			} else if (value < -7) {
@@ -497,10 +498,12 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				ovoiceindex = j;
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
-			} else if (((value == 3) && not ((((vpitch-lowestnote) % 7) == 2) ||
-											 (((vpitch-lowestnote) % 7) == 4))) ||
-					   ((value == -3) && not ((((otherpitch-lowestnote) % 7) == 2) ||
-											 (((otherpitch-lowestnote) % 7) == 4)))) {
+			} else if (
+					((value == 3) && not ((((vpitch-lowestnote) % 7) == 2) ||
+					                     (((vpitch-lowestnote) % 7) == 4))) ||
+					((value == -3) && not ((((otherpitch-lowestnote) % 7) == 2) ||
+					                      (((otherpitch-lowestnote) % 7) == 4)))
+					) {
 				// If the harmonic interval between two notes is a fourth and 
 				// the lower pitch in the interval is not a a third or a fifth
 				// above the lowest note.
@@ -512,6 +515,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				ovoiceindex = j;
 				// oattackindexn = grid.cell(ovoiceindex, sliceindex)->getNextAttackIndex();
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
+				break;
 			}
 		}
 
