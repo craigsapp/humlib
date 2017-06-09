@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri, Jun  9, 2017  3:12:05 PM
+// Last Modified: Fri, Jun  9, 2017  3:50:24 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22169,9 +22169,10 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
 				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
-				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step and other voice leaves by leap
+				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step or rep and other voice leaves by leap
 				  (refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
-				  (!refLeaptTo && !refLeaptFrom && !othLeaptTo && !othLeaptFrom) || // both voices enter and leave by step
+				  ((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
+				  ((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step and both voices leave by leap
 			results[vindex][lineindex] = unexp_label;
 		}
