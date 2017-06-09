@@ -91,28 +91,29 @@ class Tool_dissonant : public HumTool {
 		const int ANT_DOWN             = 11; // descending anticipation
 
 		// accented non-harmonic tones:
-		const int THIRD_Q_PASS         = 12; // dissonant third quarter
-		const int THIRD_Q_UPPER_NEI    = 13; // dissonant third quarter
-		const int THIRD_Q_LOWER_NEI    = 14; // dissonant third quarter
-		const int SUS_BIN  	           = 15; // binary suspension
-		const int SUS_TERN  	       = 16; // ternary suspension
-		const int AGENT_BIN		       = 17; // binary agent
-		const int AGENT_TERN		   = 18; // ternary agent
-		const int SUSPENSION_ORNAM     = 19; // suspension ornament
-		const int SUSPENSION_REP       = 20; // suspension repeated note
-		const int FAKE_SUSPENSION_UP   = 21; // fake suspension approached by step up
-		const int FAKE_SUSPENSION_DOWN = 22; // fake suspension approached by step down
-		const int SUS_NO_AGENT_UP      = 23; // suspension missing a normal agent approached by step up
-		const int SUS_NO_AGENT_DOWN    = 24; // suspension missing a normal agent approached by step down
-		const int CHANSON_IDIOM        = 25; // chanson idiom
+		const int THIRD_Q_PASS_UP      = 12; // dissonant third quarter
+		const int THIRD_Q_PASS_DOWN    = 13; // dissonant third quarter
+		const int THIRD_Q_UPPER_NEI    = 14; // dissonant third quarter
+		const int THIRD_Q_LOWER_NEI    = 15; // dissonant third quarter
+		const int SUS_BIN  	           = 16; // binary suspension
+		const int SUS_TERN  	       = 17; // ternary suspension
+		const int AGENT_BIN		       = 18; // binary agent
+		const int AGENT_TERN		   = 19; // ternary agent
+		const int SUSPENSION_ORNAM     = 20; // suspension ornament
+		const int SUSPENSION_REP       = 21; // suspension repeated note
+		const int FAKE_SUSPENSION_UP   = 22; // fake suspension approached by step up
+		const int FAKE_SUSPENSION_DOWN = 23; // fake suspension approached by step down
+		const int SUS_NO_AGENT_UP      = 24; // suspension missing a normal agent approached by step up
+		const int SUS_NO_AGENT_DOWN    = 25; // suspension missing a normal agent approached by step down
+		const int CHANSON_IDIOM        = 26; // chanson idiom
 
 		// unknown dissonances:
-		const int UNKNOWN_DISSONANCE   = 26; // unknown dissonance type
-		const int UNLABELED_Z2         = 27; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 28; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 29; // unknown dissonance type, 4th interval
+		const int UNKNOWN_DISSONANCE   = 27; // unknown dissonance type
+		const int UNLABELED_Z2         = 28; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 29; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 30; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 30; // one more than last index
+		const int LABELS_SIZE          = 31; // one more than last index
 };
 
 // END_MERGE

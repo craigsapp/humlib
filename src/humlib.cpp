@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri, Jun  9, 2017  2:56:58 PM
+// Last Modified: Fri, Jun  9, 2017  3:12:05 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22079,12 +22079,16 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				   valid_acc_exit && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) {
-					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone
+					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_DOWN]; // dissonant third quarter descending passing tone
 				} else if (intn == 1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_LOWER_NEI]; // dissonant third quarter lower neighbor
 				}
-			} else if ((intp == 1) && (intn == -1)) {
-				results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI]; // dissonant third quarter upper neighbor
+			} else if (intp == 1) {
+				if (intn == 1) {
+					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_UP]; // dissonant third quarter ascending passing tone
+				} else if (intn == -1) {
+					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI]; // dissonant third quarter upper neighbor
+				}
 			}
 		} else if ((lev > levp) && (lev == levn) && condition2 && (intn == -1) &&
 				   (dur == (durn+durn)) && (dur == (durp+durp)) && ((dur+dur) == odur)) {
@@ -22380,7 +22384,8 @@ void Tool_dissonant::fillLabels(void) {
 	// m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
-	m_labels[THIRD_Q_PASS        ] = "q"; // dissonant third quarter descending passing tone
+	m_labels[THIRD_Q_PASS_UP     ] = "Q"; // dissonant third quarter ascending passing tone
+	m_labels[THIRD_Q_PASS_DOWN   ] = "q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "b"; // dissonant third quarter lower neighbor
 	m_labels[SUS_BIN             ] = "s"; // binary suspension
@@ -22426,7 +22431,8 @@ void Tool_dissonant::fillLabels2(void) {
 	// m_labels[IANTLOW_NEIGHBOR    ] = "I"; // incomplete anterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "A"; // descending anticipation
-	m_labels[THIRD_Q_PASS        ] = "Q"; // dissonant third quarter
+	m_labels[THIRD_Q_PASS_UP     ] = "Q"; // dissonant third quarter ascending passing tone
+	m_labels[THIRD_Q_PASS_DOWN   ] = "Q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "B"; // dissonant third quarter lower neighbor
 	m_labels[SUS_BIN             ] = "S"; // binary suspension
