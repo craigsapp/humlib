@@ -719,7 +719,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
 		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
-				   valid_acc_exit) {
+				   valid_acc_exit && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone

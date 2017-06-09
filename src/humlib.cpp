@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Jun  8, 2017 10:59:56 PM
+// Last Modified: Fri, Jun  9, 2017  2:56:58 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22072,7 +22072,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
 		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
-				   valid_acc_exit) {
+				   valid_acc_exit && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS]; // dissonant third quarter descending passing tone
