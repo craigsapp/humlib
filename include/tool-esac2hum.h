@@ -64,7 +64,7 @@ class Tool_esac2hum : public HumTool {
 		void      example               (void);
 		void      usage                 (const string& command);
 		void      convertEsacToHumdrum  (ostream& out, istream& input);
-		void      getSong               (vector<string>& song, istream& infile, 
+		bool      getSong               (vector<string>& song, istream& infile, 
 		                                int init);
 		void      convertSong           (vector<string>& song, ostream& out);
 		bool      getKeyInfo            (vector<string>& song, string& key, 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 10 17:34:04 CEST 2017
+// Last Modified: Sat Jun 10 18:29:26 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22628,7 +22628,7 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 // Tool_esac2hum::getSong -- get a song from the ESac file
 //
 
-void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
+bool Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 	static char holdbuffer[10000] = {0};
 
 	song.resize(0);
@@ -22641,14 +22641,21 @@ void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 			if (verboseQ) {
 				cerr << "Contents: " << holdbuffer << endl;
 			}
+			if (strncmp(holdbuffer, "!!", 2) == 0) {
+				song.push_back(holdbuffer);
+			}
 		}
 		if (infile.eof()) {
-			return;
+			return false;
 		}
 	}
 
-	song.resize(1);
-	song[0] = holdbuffer;
+	if (!infile.eof()) {
+		song.push_back(holdbuffer);
+	} else {
+		return false;
+	}
+
 	infile.getline(holdbuffer, 256, '\n');
 	chopExtraInfo(holdbuffer);
 	inputline++;
@@ -22665,6 +22672,7 @@ void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 		}
 	}
 
+	return true;
 }
 
 
@@ -22737,9 +22745,8 @@ void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
 	}
 	int j = i;
 	for (j=i; j<(int)song.size(); j++) {
-		if (song[i].compare(0, 2, "!!") == 0) {
-			out << song[i] << "\n";
-			continue;
+		if (song[j].compare(0, 2, "!!") == 0) {
+			out << song[j] << "\n";
 		}
 	}
 }
@@ -24080,7 +24087,9 @@ void Tool_esac2hum::printBibInfo(vector<string>& song, ostream& out) {
 		}
 		if (song[i][0] != ' ') {
 			if (song[i].size() < 4 || song[i][3] != '[') {
-				out << "!! " << song[i] << "\n";
+				if (song[i].compare(0, 2, "!!") != 0) {
+					out << "!! " << song[i] << "\n";
+				}
 				continue;
 			}
 			strncpy(buffer, song[i].c_str(), 3);

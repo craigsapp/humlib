@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 10 17:34:04 CEST 2017
+// Last Modified: Sat Jun 10 18:29:26 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3211,7 +3211,7 @@ class Tool_esac2hum : public HumTool {
 		void      example               (void);
 		void      usage                 (const string& command);
 		void      convertEsacToHumdrum  (ostream& out, istream& input);
-		void      getSong               (vector<string>& song, istream& infile, 
+		bool      getSong               (vector<string>& song, istream& infile, 
 		                                int init);
 		void      convertSong           (vector<string>& song, ostream& out);
 		bool      getKeyInfo            (vector<string>& song, string& key, 
