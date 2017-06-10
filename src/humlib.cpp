@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 10 12:19:07 CEST 2017
+// Last Modified: Sat Jun 10 17:11:02 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22515,34 +22515,38 @@ bool Tool_esac2hum::convert(ostream& out, const string& input) {
 // Tool_esac2hum::initialize --
 //
 
-void Tool_esac2hum::initialize(void) {
+bool Tool_esac2hum::initialize(void) {
 	// handle basic options:
 	if (getBoolean("author")) {
-		cout << "Written by Craig Stuart Sapp, "
+		cerr << "Written by Craig Stuart Sapp, "
 			  << "craig@ccrma.stanford.edu, March 2002" << endl;
-		exit(0);
+		return false;
 	} else if (getBoolean("version")) {
-		cout << getCommand() << ", version: 6 June 2017" << endl;
-		cout << "compiled: " << __DATE__ << endl;
-		exit(0);
+		cerr << getCommand() << ", version: 6 June 2017" << endl;
+		cerr << "compiled: " << __DATE__ << endl;
+		return false;
 	} else if (getBoolean("help")) {
 		usage(getCommand());
-		exit(0);
+		return false;
 	} else if (getBoolean("example")) {
 		example();
-		exit(0);
+		return false;
 	}
 
 	debugQ   = getBoolean("debug");
 	verboseQ = getBoolean("verbose");
 
 	if (getBoolean("header")) {
-		getFileContents(header, getString("header"));
+		if (!getFileContents(header, getString("header"))) {
+			return false;
+		}
 	} else {
 		header.resize(0);
 	}
 	if (getBoolean("trailer")) {
-		getFileContents(trailer, getString("trailer"));
+		if (!getFileContents(trailer, getString("trailer"))) {
+			return false;
+		}
 	} else {
 		trailer.resize(0);
 	}
@@ -22553,6 +22557,7 @@ void Tool_esac2hum::initialize(void) {
 	namebase = getString("split");
 	fileextension = getString("extension");
 	firstfilenum = getInteger("first");
+	return true;
 }
 
 
@@ -22576,11 +22581,11 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 	// ofstream outfile;
 	while (!infile.eof()) {
 		if (debugQ) {
-			cout << "Getting a song..." << endl;
+			cerr << "Getting a song..." << endl;
 		}
 		getSong(song, infile, init);
 		if (debugQ) {
-			cout << "Got a song ..." << endl;
+			cerr << "Got a song ..." << endl;
 		}
 		init = 1;
 /*
@@ -22603,7 +22608,7 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 			outfile.open(outfilename);
 
 			if (!outfile.is_open()) {
-				cout << "Error: cannot write to file: " << outfilename << endl;
+				cerr << "Error: cannot write to file: " << outfilename << endl;
 			}
 			convertSong(song, outfile);
 			outfile.close();
@@ -22634,7 +22639,7 @@ void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 		while (!infile.eof() && strncmp(holdbuffer, "CUT[", 4) != 0) {
 			infile.getline(holdbuffer, 256, '\n');
 			if (verboseQ) {
-				cout << "Contents: " << holdbuffer << endl;
+				cerr << "Contents: " << holdbuffer << endl;
 			}
 		}
 		if (infile.eof()) {
@@ -22648,7 +22653,7 @@ void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 	chopExtraInfo(holdbuffer);
 	inputline++;
 	if (verboseQ) {
-		cout << "READ LINE: " << holdbuffer << endl;
+		cerr << "READ LINE: " << holdbuffer << endl;
 	}
 	while (!infile.eof() && strncmp(holdbuffer, "CUT[", 4) != 0) {
 		song.push_back(holdbuffer);
@@ -22656,7 +22661,7 @@ void Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 		chopExtraInfo(holdbuffer);
 		inputline++;
 		if (verboseQ) {
-			cout << "READ ANOTHER LINE: " << holdbuffer << endl;
+			cerr << "READ ANOTHER LINE: " << holdbuffer << endl;
 		}
 	}
 
@@ -22802,22 +22807,22 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 // Tool_esac2hum::placeLyrics -- extract lyrics (if any) and place on correct notes
 //
 
-void Tool_esac2hum::placeLyrics(vector<string>& song, vector<NoteData>& songdata) {
+bool Tool_esac2hum::placeLyrics(vector<string>& song, vector<NoteData>& songdata) {
 	int start = -1;
 	int stop = -1;
 	getLineRange(song, "TXT", start, stop);
 	if (start < 0) {
 		// no TXT[] field, so don't do anything
-		return;
+		return true;
 	}
 	int line = 0;
 	vector<string> lyrics;
 	string buffer;
 	for (line=0; line<=stop-start; line++) {
 		if (song[line+start].size() <= 4) {
-			cout << "Error: lyric line is too short!: "
+			cerr << "Error: lyric line is too short!: "
 				  << song[line+start] << endl;
-			exit(1);
+			return false;
 		}
 		buffer = song[line+start].substr(4);
 		if (line == stop - start) {
@@ -22833,6 +22838,8 @@ void Tool_esac2hum::placeLyrics(vector<string>& song, vector<NoteData>& songdata
 		cleanupLyrics(lyrics);
 		placeLyricPhrase(songdata, lyrics, line);
 	}
+
+	return true;
 }
 
 
@@ -22954,13 +22961,13 @@ void Tool_esac2hum::getLyrics(vector<string>& lyrics, const string& buffer) {
 // Tool_esac2hum::placeLyricPhrase -- match lyrics from a phrase to the songdata.
 //
 
-void Tool_esac2hum::placeLyricPhrase(vector<NoteData>& songdata, vector<string>& lyrics, int line) {
+bool Tool_esac2hum::placeLyricPhrase(vector<NoteData>& songdata, vector<string>& lyrics, int line) {
 	int i = 0;
 	int start = 0;
 	int found = 0;
 
 	if (lyrics.size() == 0) {
-		return;
+		return true;
 	}
 
 	// find the phrase to which the lyrics belongs
@@ -22973,9 +22980,9 @@ void Tool_esac2hum::placeLyricPhrase(vector<NoteData>& songdata, vector<string>&
 	start = i;
 
 	if (!found) {
-		cout << "Error: cannot find music for lyrics line " << line << endl;
-		cout << "Error near input data line: " << inputline << endl;
-		exit(1);
+		cerr << "Error: cannot find music for lyrics line " << line << endl;
+		cerr << "Error near input data line: " << inputline << endl;
+		return false;
 	}
 
 	for (i=0; i<(int)lyrics.size() && i+start < (int)songdata.size(); i++) {
@@ -22994,6 +23001,7 @@ void Tool_esac2hum::placeLyricPhrase(vector<NoteData>& songdata, vector<string>&
 		}
 	}
 
+	return true;
 }
 
 
@@ -23097,13 +23105,13 @@ void Tool_esac2hum::printSpecialChars(ostream& out) {
 // Tool_esac2hum::printTitleInfo -- print the first line of the CUT[] field.
 //
 
-void Tool_esac2hum::printTitleInfo(vector<string>& song, ostream& out) {
+bool Tool_esac2hum::printTitleInfo(vector<string>& song, ostream& out) {
 	int start = -1;
 	int stop = -1;
 	getLineRange(song, "CUT", start, stop);
 	if (start == -1) {
-		cout << "Error: cannot find CUT[] field in song: " << song[0] << endl;
-		exit(1);
+		cerr << "Error: cannot find CUT[] field in song: " << song[0] << endl;
+		return false;
 	}
 
 	string buffer;
@@ -23117,6 +23125,8 @@ void Tool_esac2hum::printTitleInfo(vector<string>& song, ostream& out) {
 		printChar(buffer[i], out);
 	}
 	out << "\n";
+
+	return true;
 }
 
 
@@ -23578,7 +23588,7 @@ void Tool_esac2hum::getLineRange(vector<string>& song, const string& field,
 //    the MEL field.
 //
 
-void Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata, double mindur,
+bool Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata, double mindur,
 		int tonic) {
 	songdata.resize(0);
 	NoteData tempnote;
@@ -23606,8 +23616,8 @@ void Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata
 
 	for (i=melstart; i<=melstop; i++) {
 		if (song[i].size() < 4) {
-			cout << "Error: invalid line in MEL[]: " << song[i] << endl;
-			exit(1);
+			cerr << "Error: invalid line in MEL[]: " << song[i] << endl;
+			return false;
 		}
 		j = 4;
 		phstart = 1;
@@ -23668,9 +23678,9 @@ void Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata
 //            case '>':                     break;   // unknown marker
 //            case '<':                     break;   //
 				case '^': tie = 1; state = STATE_NOTE; break;
-				default : cout << "Error: unknown character " << song[i][j]
+				default : cerr << "Error: unknown character " << song[i][j]
 							      << " on the line: " << song[i] << endl;
-							 exit(1);
+							 return false;
 			}
 			j++;
 			switch (song[i][j]) {
@@ -23734,13 +23744,14 @@ void Tool_esac2hum::getNoteList(vector<string>& song, vector<NoteData>& songdata
 				 octave = 0;
 				 accidental = 0;
 				 if (nextstate == -2) {
-					 return;
+					 return true;
 				 }
 			}
 		}
 		phnum++;
 	}
 
+	return true;
 }
 
 
@@ -23870,7 +23881,7 @@ void Tool_esac2hum::printNoteData(NoteData& data, int textQ, ostream& out) {
 // ggg fix this function
 //
 
-void Tool_esac2hum::getKeyInfo(vector<string>& song, string& key, double& mindur,
+bool Tool_esac2hum::getKeyInfo(vector<string>& song, string& key, double& mindur,
 		int& tonic, string& meter, ostream& out) {
 	int i;
 	for (i=0; i<(int)song.size(); i++) {
@@ -23918,22 +23929,24 @@ void Tool_esac2hum::getKeyInfo(vector<string>& song, string& key, double& mindur
 
 			tonic = Convert::kernToBase40(tonicstr);
 			if (tonic <= 0) {
-				cout << "Error: invalid tonic on line: " << song[i] << endl;
-				exit(1);
+				cerr << "Error: invalid tonic on line: " << song[i] << endl;
+				return false;
 			}
 			tonic = tonic % 40;
 			meter = song[i].substr(17);
 			if (meter.back() != ']') {
-				cout << "Error with meter on line: " << song[i] << endl;
-				exit(1);
+				cerr << "Error with meter on line: " << song[i] << endl;
+				cerr << "Meter area: " << meter << endl;
+				cerr << "Expected ] as last character but found " << meter.back() << endl;
+				return false;
 			} else {
 				meter.resize(meter.size() - 1);
 			}
-			return;
+			return true;
 		}
 	}
-	cout << "Error: did not find a KEY field" << endl;
-	exit(1);
+	cerr << "Error: did not find a KEY field" << endl;
+	return false;
 }
 
 
@@ -23943,14 +23956,14 @@ void Tool_esac2hum::getKeyInfo(vector<string>& song, string& key, double& mindur
 // Tool_esac2hum::getFileContents -- read a file into the array.
 //
 
-void Tool_esac2hum::getFileContents(vector<string>& array, const string& filename) {
+bool Tool_esac2hum::getFileContents(vector<string>& array, const string& filename) {
 	ifstream infile(filename.c_str());
 	array.reserve(100);
 	array.resize(0);
 
 	if (!infile.is_open()) {
-		cout << "Error: cannot open file: " << filename << endl;
-		exit(1);
+		cerr << "Error: cannot open file: " << filename << endl;
+		return false;
 	}
 
 	char holdbuffer[1024] = {0};
@@ -23962,6 +23975,7 @@ void Tool_esac2hum::getFileContents(vector<string>& array, const string& filenam
 	}
 
 	infile.close();
+	return true;
 }
 
 

@@ -59,7 +59,7 @@ class Tool_esac2hum : public HumTool {
 		bool    convert              (ostream& out, istream& input);
 
 	protected:
-		void      initialize            (void);
+		bool      initialize            (void);
 		void      checkOptions          (Options& opts, int argc, char** argv);
 		void      example               (void);
 		void      usage                 (const string& command);
@@ -67,11 +67,11 @@ class Tool_esac2hum : public HumTool {
 		void      getSong               (vector<string>& song, istream& infile, 
 		                                int init);
 		void      convertSong           (vector<string>& song, ostream& out);
-		void      getKeyInfo            (vector<string>& song, string& key, 
+		bool      getKeyInfo            (vector<string>& song, string& key, 
 		                                 double& mindur, int& tonic, string& meter,
 		                                 ostream& out);
 		void      printNoteData         (NoteData& data, int textQ, ostream& out);
-		void      getNoteList           (vector<string>& song, 
+		bool      getNoteList           (vector<string>& song, 
 		                                 vector<NoteData>& songdata, double mindur,
 		                                 int tonic);
 		void      getMeterInfo          (string& meter, vector<int>& numerator, 
@@ -81,20 +81,20 @@ class Tool_esac2hum : public HumTool {
 		void      printKeyInfo          (vector<NoteData>& songdata, int tonic, 
 		                                 int textQ, ostream& out);
 		int       getAccidentalMax      (int a, int b, int c);
-		void      printTitleInfo        (vector<string>& song, ostream& out);
+		bool      printTitleInfo        (vector<string>& song, ostream& out);
 		void      getLineRange          (vector<string>& song, const string& field, 
 		                                 int& start, int& stop);
 		void      printChar             (unsigned char c, ostream& out);
 		void      printBibInfo          (vector<string>& song, ostream& out);
 		void      printString           (const string& string, ostream& out);
 		void      printSpecialChars     (ostream& out);
-		void      placeLyrics           (vector<string>& song,
+		bool      placeLyrics           (vector<string>& song,
 		                                 vector<NoteData>& songdata);
-		void      placeLyricPhrase      (vector<NoteData>& songdata, 
+		bool      placeLyricPhrase      (vector<NoteData>& songdata, 
 		                                 vector<string>& lyrics, int line);
 		void      getLyrics             (vector<string>& lyrics, const string& buffer);
 		void      cleanupLyrics         (vector<string>& lyrics);
-		void      getFileContents       (vector<string>& array, const string& filename);
+		bool      getFileContents       (vector<string>& array, const string& filename);
 		void      chopExtraInfo         (char* holdbuffer);
 		
 	private:
