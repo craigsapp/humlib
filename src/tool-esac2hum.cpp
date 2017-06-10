@@ -12,7 +12,6 @@
 // Description:   Converts an EsAC file into Humdrum.
 //
 
-
 #include "tool-esac2hum.h"
 #include "Convert.h"
 
@@ -272,6 +271,59 @@ void Tool_esac2hum::chopExtraInfo(char* holdbuffer) {
 
 //////////////////////////////
 //
+// Tool_esac2hum::printHumdrumHeaderInfo --
+//
+
+void Tool_esac2hum::printHumdrumHeaderInfo(ostream& out, vector<string>& song) {
+	for (int i=0; i<(int)song.size(); i++) {
+		if (song[i].size() == 0) {
+			continue;
+		}
+		if (song[i].compare(0, 2, "!!") == 0) {
+			out << song[i] << "\n";
+			continue;
+		}
+		if ((song[i][0] == ' ') || (song[i][0] == '\t')) {
+			continue;
+		}
+		break;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_esac2hum::printHumdrumFooterInfo --
+//
+
+void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
+	int i = 0;
+	for (i=0; i<(int)song.size(); i++) {
+		if (song[i].size() == 0) {
+			continue;
+		}
+		if (song[i].compare(0, 2, "!!") == 0) {
+			continue;
+		}
+		if ((song[i][0] == ' ') || (song[i][0] == '\t')) {
+			continue;
+		}
+		break;
+	}
+	int j = i;
+	for (j=i; j<(int)song.size(); j++) {
+		if (song[i].compare(0, 2, "!!") == 0) {
+			out << song[i] << "\n";
+			continue;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_esac2hum::convertSong --
 //
 
@@ -283,6 +335,8 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 			out << song[i] << "\n";
 		}
 	}
+
+	printHumdrumHeaderInfo(out, song);
 
 	string key;
 	double mindur = 1.0;
@@ -304,7 +358,6 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 
 	printTitleInfo(song, out);
 	out << "!!!id: "    << key  << "\n";
-
 
 	// check for presence of lyrics
 	int textQ = 0;
@@ -372,9 +425,13 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 		out << trailer[i] << "\n";
 	}
 
+	printHumdrumFooterInfo(out, song);
+
+/*
 	if (!splitQ) {
 		out << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	}
+*/
 }
 
 

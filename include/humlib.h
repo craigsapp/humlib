@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 10 17:11:02 CEST 2017
+// Last Modified: Sat Jun 10 17:34:04 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3243,6 +3243,8 @@ class Tool_esac2hum : public HumTool {
 		void      cleanupLyrics         (vector<string>& lyrics);
 		bool      getFileContents       (vector<string>& array, const string& filename);
 		void      chopExtraInfo         (char* holdbuffer);
+		void      printHumdrumHeaderInfo(ostream& out, vector<string>& song);
+		void      printHumdrumFooterInfo(ostream& out, vector<string>& song);
 		
 	private:
 		int            debugQ = 0;        // used with --debug option
