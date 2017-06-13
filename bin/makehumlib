@@ -32,7 +32,6 @@ sub createIncludeFile {
 	my ($basedir, $target) = @_;
 	open (IFILE, ">$basedir/$target") or die;
 
-
 	my $contents = "";
 	# my @files = getFiles($basedir);
 	my @files = (
@@ -52,8 +51,37 @@ sub createIncludeFile {
 		"Convert.h"
 	);
 
-	foreach my $file (@files) {
-		$contents .= getMergeContents("$basedir/$file");
+	# musicxml2hum converter related files:
+	my @files2 = (
+		"GridMeasure.h",
+		"GridSlice.h",
+		"GridVoice.h",
+		"HumGrid.h",
+		"MxmlEvent.h",
+		"MxmlMeasure.h"
+	);
+
+	my $file;
+	foreach $file (@files) {
+		my $lines = getMergeContents("$basedir/$file");
+		if ($lines =~ /^\s*$/) {
+			print "$basedir/$file is not formatted correctly.\n";
+		}
+		$contents .= $lines;
+	}
+
+	$contents .= getMergeContents("$basedir/GridCommon.h");
+	$contents .= getMergeContents("$basedir/MxmlPart.h");
+	$contents .= getMergeContents("$basedir/GridSide.h");
+	$contents .= getMergeContents("$basedir/GridStaff.h");
+	$contents .= getMergeContents("$basedir/GridPart.h");
+
+	foreach $file (@files2) {
+		my $lines = getMergeContents("$basedir/$file");
+		if ($lines =~ /^\s*$/) {
+			print "$basedir/$file is not formatted correctly.\n";
+		}
+		$contents .= $lines;
 	}
 
 	my $options = getMergeContents("$basedir/Options.h");
@@ -103,6 +131,7 @@ $license
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <list>
 #include <locale>
 #include <map>
 #include <regex>
@@ -120,6 +149,8 @@ using std::ends;
 using std::ifstream;
 using std::invalid_argument;
 using std::istream;
+using std::istreambuf_iterator;
+using std::list;
 using std::map;
 using std::ostream;
 using std::pair;
@@ -140,6 +171,14 @@ using std::vector;
    #include <sstream>
 #endif
 
+#include "pugiconfig.hpp"
+#include "pugixml.hpp"
+
+using pugi::xml_node;
+using pugi::xml_attribute;
+using pugi::xml_document;
+using pugi::xpath_node;
+
 namespace hum {
 
 class Convert;
@@ -152,6 +191,7 @@ class HumdrumFileBase;
 class HumdrumFileStructure;
 class HumdrumFileContent;
 class HumdrumFile;
+class GridVoice;
 
 EOT
 
@@ -207,6 +247,11 @@ EOT
 
 	my @files = getFiles($basedir);
 	foreach my $file (@files) {
+		next if $file =~ /^humlib.cpp$/;
+		my $lines = getMergeContents("$basedir/$file");
+		if ($lines =~ /^\s*$/) {
+			print "$basedir/$file is not correctly formatted\n";
+		}
 		print SFILE getMergeContents("$basedir/$file");
 	}
 

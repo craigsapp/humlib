@@ -27,7 +27,7 @@ OS := $(shell uname -s)
 ifeq ($(OS),Darwin)
 	OS = OSX
 	# Minimum OS X Version for C++11 is OS X 10.9:
-   ENV = MACOSX_DEPLOYMENT_TARGET=10.9
+   # ENV = MACOSX_DEPLOYMENT_TARGET=10.9
    # use the following to compile for 32-bit architecture on 64-bit comps:
    #ARCH = -m32 -arch i386
 else
@@ -48,6 +48,7 @@ SRCDIR        = src
 TOOLDIR       = tools
 SRCDIR_MIN    = src
 INCDIR        = include
+INCDIR2       = external/pugixml/src 
 INCDIR_MIN    = include
 LIBDIR        = lib
 LIBFILE       = libhumdrum.a
@@ -64,7 +65,7 @@ endif
 AR            = ar
 RANLIB        = ranlib
 
-PREFLAGS  = -c -g $(CFLAGS) $(DEFINES) -I$(INCDIR) -I$(INCDIR_MIN)
+PREFLAGS  = -c -g $(CFLAGS) $(DEFINES) -I$(INCDIR) -I$(INCDIR2)
 PREFLAGS += -O3 -Wall
 
 # using C++ 2011 standard in Humlib:
@@ -96,13 +97,19 @@ OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/tool-*.cpp)))
 OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: examples myprograms src include dynamic tools
+.PHONY: examples myprograms src include dynamic tools external
 
 
 ###########################################################################
 
 
-all: library tools
+all: external library tools
+
+external:
+	echo "GOT HERE AAA"
+ifeq ($(wildcard libpugixml.a),)
+	(cd external && $(MAKE) pugixml)
+endif
 
 dynamic: min
 ifeq ($(OS),OSX)

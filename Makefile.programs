@@ -28,7 +28,7 @@
 ENV =
 
 ifeq ($(shell uname),Darwin)
-   ENV = MACOSX_DEPLOYMENT_TARGET=10.9
+   # ENV = MACOSX_DEPLOYMENT_TARGET=10.9
    # use the following to compile for 32-bit architecture on 64-bit comps:
    #ARCH = -m32 -arch i386
 else
@@ -44,15 +44,20 @@ endif
 #                                                                         #
 
 INCDIR    = include
+PUGIINCDIR = external/pugixml/src 
 LIBDIR    = lib
+LIBDIR2  += external/pugixml
 LIBFILE   = humlib
-#LIBFILE   = humdrum
+#LIBFILE  = humdrum
 TARGDIR   = bin
 TOOLDIR   = tools
+PUGIXML   = pugixml
 
-PREFLAGS  = -Wall -I$(INCDIR)
+PREFLAGS  = -Wall -I$(INCDIR) -I$(PUGIINCDIR)
 PREFLAGS += -O3
-PREFLAGS += -g
+
+# include debugging information:
+#PREFLAGS += -g
 
 # using C++ 2011 standard:
 PREFLAGS += -std=c++11
@@ -60,8 +65,7 @@ PREFLAGS += -std=c++11
 # Add -static flag to compile without dynamics libraries for better portability:
 #PREFLAGS += -static
 
-POSTFLAGS ?= -L$(LIBDIR) -l$(LIBFILE)
-
+POSTFLAGS = -L$(LIBDIR) -l$(LIBFILE) -L$(LIBDIR2) -l$(PUGIXML)
 
 COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 # Alternatly, use clang++ v3.3:

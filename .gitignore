@@ -1,4 +1,5 @@
 obj
+.temp/
 lib
 err
 bin/test*
@@ -10,3 +11,5 @@ test.krn
 _site
 _includes
 doc
+*.zip
+external/pugixml/

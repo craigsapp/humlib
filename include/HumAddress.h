@@ -19,10 +19,10 @@ using namespace std;
 
 namespace hum {
 
+// START_MERGE
+
 class HumdrumLine;
 class HumdrumToken;
-
-// START_MERGE
 
 class HumAddress {
 	public:

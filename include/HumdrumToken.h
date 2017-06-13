@@ -26,7 +26,6 @@ namespace hum {
 
 // START_MERGE
 
-
 typedef HumdrumToken* HTp;
 
 class HumdrumToken : public string, public HumHash {
