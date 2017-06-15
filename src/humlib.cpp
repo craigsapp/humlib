@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Jun 15, 2017  6:04:49 PM
+// Last Modified: Thu, Jun 15, 2017  6:25:39 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28266,16 +28266,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
-		} 
-		// else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
-		// 	if (ternAgent) {
-		// 		results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
-		// 		results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
-		// 	} else {
-		// 		results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
-		// 		results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
-		// 	} // NB: in this case the ornament is consonant against the agent so no ornament label.
-		// }
+		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
+			if (ternAgent) {
+				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
+				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
+			} else {
+				results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
+				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
+			} // NB: in this case the ornament is consonant against the agent so no ornament label.
+		}
 /////////////////////////////
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window

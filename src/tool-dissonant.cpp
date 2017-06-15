@@ -782,16 +782,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
-		} 
-		// else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
-		// 	if (ternAgent) {
-		// 		results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
-		// 		results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
-		// 	} else {
-		// 		results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
-		// 		results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
-		// 	} // NB: in this case the ornament is consonant against the agent so no ornament label.
-		// }
+		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
+			if (ternAgent) {
+				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
+				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
+			} else {
+				results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
+				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
+			} // NB: in this case the ornament is consonant against the agent so no ornament label.
+		}
 /////////////////////////////
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
