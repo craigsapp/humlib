@@ -400,6 +400,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	HumNum odur = -1; // duration of current note in other voice which may have started earlier;
 	HumNum odurn = -1; // duration of next note in other voice;
 	double intp;       // diatonic interval from previous melodic note
+	double intpp = -99;// diatonic interval to previous melodic note
 	double intn;       // diatonic interval to next melodic note
 	double levp;       // metric level of the previous melodic note
 	double lev;        // metric level of the current note
@@ -574,6 +575,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		levp = attacks[i-1]->getMetricLevel();
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
+		if (i >= 2) {
+			intpp = *attacks[i-1] - *attacks[i-2];
+		}
 
 		// Non-suspension test cases ////////////////////////////////////////////
 
@@ -737,15 +741,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI]; // dissonant third quarter upper neighbor
 				}
 			}
-		} else if ((lev > levp) && (lev == levn) && condition2 && (intn == -1) &&
-				   (dur == (durn+durn)) && (dur == (durp+durp)) && ((dur+dur) == odur)) {
-			if (intp == 1) {
+		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) && 
+				   (lev == levn) && condition2 && (intn == -1) && 
+				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
+			if ((intp == 1) || ((intp == 0) && (intpp == 1))) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_UP];
-			} else if (intp == -1) {
+			} else if ((intp == -1) || ((intp == 0) && (intpp == -1))) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_DOWN];
 			}
 		}
-
 
 		/////////////////////////////
 		////
@@ -760,9 +764,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
-		}
-
-		else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
+		} else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -771,9 +773,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP]; // repeated-note of suspension
-		}
-
-		else if (valid_ornam_sus_acc && ((ointn == -2) && (ointnn == 1))) {
+		} else if (valid_ornam_sus_acc && ((ointn == -2) && (ointnn == 1))) {
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -782,7 +782,16 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
-		}
+		} 
+		// else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
+		// 	if (ternAgent) {
+		// 		results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
+		// 		results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
+		// 	} else {
+		// 		results[vindex][lineindex] = m_labels[AGENT_BIN]; // binary agent
+		// 		results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
+		// 	} // NB: in this case the ornament is consonant against the agent so no ornament label.
+		// }
 /////////////////////////////
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
