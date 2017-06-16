@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Jun 15, 2017  6:25:39 PM
+// Last Modified: Fri, Jun 16, 2017  3:27:01 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27850,6 +27850,10 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 		findFakeSuspensions(results, grid, attacks[i], i);
 	}
 
+	for (int i=0; i<grid.getVoiceCount(); i++) {
+		categorizeUnknowns(results, grid, attacks[i], i);
+	}
+
 }
 
 
@@ -28115,7 +28119,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		if (oattackindexn >= 0) {
 			opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
 			odurn = grid.cell(ovoiceindex, oattackindexn)->getDuration();
-
 		}
 		int oattackindexnn = -1;
 		if (oattackindexn >= 0) {
@@ -28275,6 +28278,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			} // NB: in this case the ornament is consonant against the agent so no ornament label.
 		}
+
 /////////////////////////////
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
@@ -28372,6 +28376,82 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 	}
 }
 
+//////////////////////////////
+//
+// Tool_dissonant::categorizeUnknowns --
+//
+
+void Tool_dissonant::categorizeUnknowns(vector<vector<string> >& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, int vindex) {
+	HumNum dur;        // duration of current note;
+	HumNum odur;       // duration of current note in other voice which may have started earlier;
+	double intp;       // diatonic interval from previous melodic note
+	double intn;       // diatonic interval to next melodic note
+	double ointp;      // diatonic interval from previous melodic note in other voice
+	double ointn;      // diatonic interval to next melodic note in other voice
+	int lineindex;     // line in original Humdrum file content that contains note
+	int olineindex;   // line in original Humdrum file content that contains other voice note
+	int sliceindex;    // current timepoint in NoteGrid.
+	int oattackindexp; // line index of other voice's previous note
+	int oattackindexc; // line index of other voice's current note
+	int oattackindexn; // line index of other voice's next note
+	double opitchp;    // previous pitch in other voice
+	double opitch;     // current pitch in other voice
+	double opitchn;    // next pitch in other voice
+
+	for (int i=1; i<(int)attacks.size()-1; i++) {
+		lineindex = attacks[i]->getLineIndex();
+		if ((results[vindex][lineindex].find("Z") == string::npos) &&
+			(results[vindex][lineindex].find("z") == string::npos)) {
+			continue;
+		}
+		dur  = attacks[i]->getDuration();
+		intp = *attacks[i] - *attacks[i-1];
+		intn = *attacks[i+1] - *attacks[i];
+		sliceindex = attacks[i]->getSliceIndex();
+
+		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
+			if (vindex == j) { // only compare different voices
+				continue;
+			}
+			if ((results[j][lineindex] == m_labels[SUS_BIN]) ||
+				(results[j][lineindex] == m_labels[AGENT_BIN]) ||
+				(results[j][lineindex] == m_labels[SUS_TERN]) ||
+				(results[j][lineindex] == m_labels[AGENT_TERN]) ||
+				(results[j][lineindex] == m_labels[UNLABELED_Z7]) ||
+				(results[j][lineindex] == m_labels[UNLABELED_Z4]) ||
+				(results[j][lineindex] == "")) {
+				continue; // skip if other voice a suspension, an agent, unexplainable, or empty.
+			}
+			oattackindexc = grid.cell(j, sliceindex)->getCurrAttackIndex();
+			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
+			if (olineindex != lineindex) { // if olineindex == lineindex then oattackindexp is in range
+				continue; // skip if other voice doesn't attack at the same time
+			}
+			oattackindexp = grid.cell(j, sliceindex)->getPrevAttackIndex();
+			odur = grid.cell(j, oattackindexc)->getDuration();
+			if (dur != odur) { // if dur == odur then the oattackindexn will be in range
+				continue;
+			}
+			opitchp = grid.cell(j, oattackindexp)->getAbsDiatonicPitch();
+			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			oattackindexn = grid.cell(j, sliceindex)->getNextAttackIndex();
+			opitchn = grid.cell(j, oattackindexn)->getAbsDiatonicPitch();
+			ointp = opitch - opitchp;
+			ointn = opitchn - opitch;
+			if ((intp == ointp) && (intn == ointn)) { // this note moves in parallel with an identifiable dissonance
+				if (intp > 0) {
+					results[vindex][lineindex] = m_labels[PARALLEL_UP];
+				} else if (intp < 0) {
+					results[vindex][lineindex] = m_labels[PARALLEL_DOWN];					
+				}
+			}
+			// if (this note is only dissonant against other notes that are identifiable dissonances) {
+			// 	mark this note with a Y label;
+			// }
+		}
+	}
+}
 
 
 ///////////////////////////////
@@ -28539,6 +28619,10 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
 	m_labels[SUS_NO_AGENT_DOWN   ] = "m"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
+	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
+	m_labels[PARALLEL_DOWN       ] = "l"; // moves down in parallel with identifiable dissonance
+	m_labels[ONLY_WITH_VALID_UP  ] = "Y"; // only dissonant against identifiable dissonances, approached from below
+	m_labels[ONLY_WITH_VALID_DOWN] = "y"; // only dissonant against identifiable dissonances, approached from above
 	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
 	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval
 	m_labels[UNLABELED_Z7        ] = "Z"; // unknown dissonance, 7th interval
@@ -28586,6 +28670,10 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
 	m_labels[SUS_NO_AGENT_DOWN   ] = "M"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom
+	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
+	m_labels[PARALLEL_DOWN       ] = "L"; // moves down in parallel with identifiable dissonance
+	m_labels[ONLY_WITH_VALID_UP  ] = "Y"; // only dissonant against identifiable dissonances, approached from below
+	m_labels[ONLY_WITH_VALID_DOWN] = "Y"; // only dissonant against identifiable dissonances, approached from above
 	m_labels[UNKNOWN_DISSONANCE  ] = "Z"; // unknown dissonance
 	m_labels[UNLABELED_Z2        ] = "Z"; // unknown dissonance, 2nd interval
 	m_labels[UNLABELED_Z7        ] = "Z"; // unknown dissonance, 7th interval

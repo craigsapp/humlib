@@ -42,6 +42,9 @@ class Tool_dissonant : public HumTool {
 		void    findFakeSuspensions(vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
+		void    categorizeUnknowns (vector<vector<string> >& results, 
+		                            NoteGrid& grid,
+		                            vector<NoteCell*>& attacks, int vindex);
 		void    changePitch        (HTp note2, HTp note1);
 
 		void    printColorLegend   (HumdrumFile& infile);
@@ -108,12 +111,16 @@ class Tool_dissonant : public HumTool {
 		const int CHANSON_IDIOM        = 26; // chanson idiom
 
 		// unknown dissonances:
-		const int UNKNOWN_DISSONANCE   = 27; // unknown dissonance type
-		const int UNLABELED_Z2         = 28; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 29; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 30; // unknown dissonance type, 4th interval
+		const int PARALLEL_UP          = 27; // moves in parallel with known dissonant, approached from below
+		const int PARALLEL_DOWN        = 28; // moves in parallel with known dissonant, approached from above
+		const int ONLY_WITH_VALID_UP   = 29; // only dissonant with identifiable dissonances, approached from below
+		const int ONLY_WITH_VALID_DOWN = 30; // only dissonant with identifiable dissonances, approached from above
+		const int UNKNOWN_DISSONANCE   = 31; // unknown dissonance type
+		const int UNLABELED_Z2         = 32; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 33; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 34; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 31; // one more than last index
+		const int LABELS_SIZE          = 35; // one more than last index
 };
 
 // END_MERGE
