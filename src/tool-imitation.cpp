@@ -41,7 +41,7 @@ int Tool_imitation::Enumerator = 0;
 Tool_imitation::Tool_imitation(void) {
 	define("debug=b",             "print grid cell information");
 	define("e|exinterp=s:**vdata","specify exinterp for **vdata spine");
-	define("n|threshold=i:5",     "minimum number of notes to match");
+	define("n|threshold=i:7",     "minimum number of notes to match");
 	define("D|no-duration=b",     "do not consider duration when matching");
 	define("r|rest=b",            "require match trigger to follow a rest");
 	define("R|rest2=b",           "require match target to also follow a rest");
