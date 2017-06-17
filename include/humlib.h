@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 17 00:34:47 CEST 2017
+// Last Modified: Sat Jun 17 23:30:19 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4022,6 +4022,42 @@ class Tool_filter : public HumTool {
 		string   m_variant;        // used with -v option.
 		bool     m_debugQ = false; // used with --debug option
 
+};
+
+
+class Tool_immitation : public HumTool {
+	public:
+		         Tool_immitation    (void);
+		        ~Tool_immitation    () {};
+
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    doAnalysis         (vector<vector<string>>& results, NoteGrid& grid,
+		                            vector<vector<NoteCell*>>& attacks,
+		                            vector<vector<double>>& intervals,
+		                            HumdrumFile& infile, bool debug);
+		void    analyzeImmitation  (vector<vector<string>>& results,
+		                            vector<vector<NoteCell*>>& attacks,
+		                            vector<vector<double>>& intervals,
+		                            int v1, int v2);
+		void    getIntervals       (vector<double>& intervals,
+		                            vector<NoteCell*>& attacks);
+		int     compareSequences   (vector<NoteCell*>& attack1, vector<double>& seq1,
+		                            int i1, vector<NoteCell*>& attack2,
+		                            vector<double>& seq2, int i2);
+
+	private:
+	 	vector<HTp> m_kernspines;
+		int m_threshold;
+		bool m_duration;
+		bool m_rest;
+		bool m_rest2;
+		bool m_mark;
+		char m_marker = '@';
+		static int Enumerator;
 };
 
 
