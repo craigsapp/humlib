@@ -18,7 +18,7 @@
 #include "tool-autostem.h"
 #include "tool-cint.h"
 #include "tool-dissonant.h"
-#include "tool-immitation.h"
+#include "tool-imitation.h"
 #include "tool-extract.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
@@ -110,8 +110,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
-		} else if (commands[i].first == "immitation") {
-			RUNTOOL(immitation, infile, commands[i].second, status);
+		} else if (commands[i].first == "imitation") {
+			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 17 23:30:19 CEST 2017
+// Last Modified: Sat Jun 17 23:47:21 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4025,10 +4025,10 @@ class Tool_filter : public HumTool {
 };
 
 
-class Tool_immitation : public HumTool {
+class Tool_imitation : public HumTool {
 	public:
-		         Tool_immitation    (void);
-		        ~Tool_immitation    () {};
+		         Tool_imitation    (void);
+		        ~Tool_imitation    () {};
 
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);

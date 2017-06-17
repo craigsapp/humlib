@@ -2,12 +2,12 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Jun 17 20:18:23 CEST 2017
 // Last Modified: Sat Jun 17 22:40:59 CEST 2017
-// Filename:      tool-immitation.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-immitation.h
+// Filename:      tool-imitation.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-imitation.h
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Interface for immitation tool.
+// Description:   Interface for imitation tool.
 //
 
 #ifndef _TOOL_DISSONANT_H
@@ -21,10 +21,10 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_immitation : public HumTool {
+class Tool_imitation : public HumTool {
 	public:
-		         Tool_immitation    (void);
-		        ~Tool_immitation    () {};
+		         Tool_imitation    (void);
+		        ~Tool_imitation    () {};
 
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);

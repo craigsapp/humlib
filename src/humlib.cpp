@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 17 23:30:19 CEST 2017
+// Last Modified: Sat Jun 17 23:47:21 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32261,8 +32261,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
-		} else if (commands[i].first == "immitation") {
-			RUNTOOL(immitation, infile, commands[i].second, status);
+		} else if (commands[i].first == "imitation") {
+			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
@@ -32359,32 +32359,32 @@ void Tool_filter::initialize(HumdrumFile& infile) {
 
 
 
-int Tool_immitation::Enumerator = 0;
+int Tool_imitation::Enumerator = 0;
 
 
 /////////////////////////////////
 //
-// Tool_immitation::Tool_immitation -- Set the recognized options for the tool.
+// Tool_imitation::Tool_imitation -- Set the recognized options for the tool.
 //
 
-Tool_immitation::Tool_immitation(void) {
+Tool_imitation::Tool_imitation(void) {
 	define("debug=b",             "print grid cell information");
 	define("e|exinterp=s:**vdata","specify exinterp for **vdata spine");
 	define("n|threshold=i:5",     "minimum number of notes to match");
 	define("D|no-duration=b",     "do not consider duration when matching");
 	define("r|rest=b",            "require match trigger to follow a rest");
 	define("R|rest2=b",           "require match target to also follow a rest");
-	define("m|mark=b",            "mark matched sequences");
+	define("M|no-mark=b",         "do not mark matched sequences");
 }
 
 
 
 /////////////////////////////////
 //
-// Tool_immitation::run -- Do the main work of the tool.
+// Tool_imitation::run -- Do the main work of the tool.
 //
 
-bool Tool_immitation::run(const string& indata, ostream& out) {
+bool Tool_imitation::run(const string& indata, ostream& out) {
 
 	HumdrumFile infile(indata);
 	bool status = run(infile);
@@ -32397,7 +32397,7 @@ bool Tool_immitation::run(const string& indata, ostream& out) {
 }
 
 
-bool Tool_immitation::run(HumdrumFile& infile, ostream& out) {
+bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
 	int status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -32408,7 +32408,7 @@ bool Tool_immitation::run(HumdrumFile& infile, ostream& out) {
 }
 
 
-bool Tool_immitation::run(HumdrumFile& infile) {
+bool Tool_imitation::run(HumdrumFile& infile) {
 	NoteGrid grid(infile);
 
 	if (getBoolean("debug")) {
@@ -32422,7 +32422,7 @@ bool Tool_immitation::run(HumdrumFile& infile) {
 	}
 
 	m_duration = !getBoolean("no-duration");
-	m_mark     = getBoolean("mark");
+	m_mark     = !getBoolean("no-mark");
 	m_rest     = getBoolean("rest");
 	m_rest2    = getBoolean("rest2");
 
@@ -32453,10 +32453,10 @@ bool Tool_immitation::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_immitation::doAnalysis -- do a basic melodic analysis of all parts.
+// Tool_imitation::doAnalysis -- do a basic melodic analysis of all parts.
 //
 
-void Tool_immitation::doAnalysis(vector<vector<string> >& results,
+void Tool_imitation::doAnalysis(vector<vector<string> >& results,
 		NoteGrid& grid, vector<vector<NoteCell*> >& attacks,
 		vector<vector<double>>& intervals, HumdrumFile& infile,
 		bool debug) {
@@ -32489,10 +32489,10 @@ void Tool_immitation::doAnalysis(vector<vector<string> >& results,
 
 ///////////////////////////////
 //
-// Tool_immitation::getIntervals --
+// Tool_imitation::getIntervals --
 //
 
-void Tool_immitation::getIntervals(vector<double>& intervals,
+void Tool_imitation::getIntervals(vector<double>& intervals,
 		vector<NoteCell*>& attacks) {
 	for (int i=0; i<attacks.size() - 1; i++) {
 		intervals[i] = *attacks[i+1] - *attacks[i];
@@ -32504,10 +32504,10 @@ void Tool_immitation::getIntervals(vector<double>& intervals,
 
 //////////////////////////////
 //
-// Tool_immitation::analyzeImmitation -- do immitation analysis between two voices.
+// Tool_imitation::analyzeImmitation -- do imitation analysis between two voices.
 //
 
-void Tool_immitation::analyzeImmitation(vector<vector<string>>& results,
+void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
 		vector<vector<NoteCell*>>& attacks, vector<vector<double>>& intervals,
 		int v1, int v2) {
 
@@ -32610,10 +32610,10 @@ void Tool_immitation::analyzeImmitation(vector<vector<string>>& results,
 
 ///////////////////////////////
 //
-// Tool_immitation::compareSequences --
+// Tool_imitation::compareSequences --
 //
 
-int Tool_immitation::compareSequences(vector<NoteCell*>& attack1, vector<double>& seq1, int i1,
+int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>& seq1, int i1,
 		vector<NoteCell*>& attack2, vector<double>& seq2, int i2) {
 	int count = 0;
 	// sequences cannot start with rests
