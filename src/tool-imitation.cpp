@@ -10,11 +10,16 @@
 // Description:   Counterpoint imitation tool.
 //
 // Todo:          retrograde searches
+//                imitation at specific rhythmic scaling
 //                highlight tied notes in matches
+//                color immitations by interval
 //                terminate matches at rests
-//                create **vvdata
 //                match must come within a specified duration
 //                target must come before end of initiator match
+//                all inexact rhythm for last note in match
+//                allow inexact rhythm after x notes with exact rhythm
+//                count points of imitation that were found
+//                create an index of points of immitation
 
 #include "tool-imitation.h"
 #include "Convert.h"
@@ -40,7 +45,7 @@ int Tool_imitation::Enumerator = 0;
 
 Tool_imitation::Tool_imitation(void) {
 	define("debug=b",             "print grid cell information");
-	define("e|exinterp=s:**vdata","specify exinterp for **vdata spine");
+	define("e|exinterp=s:**vvdata","specify exinterp for **vvdata spine");
 	define("n|threshold=i:7",     "minimum number of notes to match");
 	define("D|no-duration=b",     "do not consider duration when matching");
 	define("r|rest=b",            "require match trigger to follow a rest");
