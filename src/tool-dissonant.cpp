@@ -609,11 +609,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		int lastonoteindex = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		double lopitch = NAN;
 		if (lastonoteindex >= 0) {
-			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
+			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getSgnMidiPitch();
 		} else {
 			condition2 = false;
 		}
 		if (opitch < 0) {
+			condition2 = true;
+		} else if ((opitch - lopitch) % 12 == 0) {
 			condition2 = true;
 		} else if (opitch != lopitch) {
 			condition2 = false;
