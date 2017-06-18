@@ -85,6 +85,8 @@ bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_imitation::run(HumdrumFile& infile) {
+	Enumerator = 0;
+
 	NoteGrid grid(infile);
 
 	if (getBoolean("debug")) {

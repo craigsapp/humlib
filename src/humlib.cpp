@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 18 09:56:50 CEST 2017
+// Last Modified: Sun Jun 18 23:26:57 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32409,6 +32409,8 @@ bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_imitation::run(HumdrumFile& infile) {
+	Enumerator = 0;
+
 	NoteGrid grid(infile);
 
 	if (getBoolean("debug")) {
