@@ -480,12 +480,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				// rest, so ignore
 				continue;
 			}
-			value = (int)harmint[j];
-			if (value > 7) {
-				value = value % 7; // remove octaves from interval
-			} else if (value < -7) {
-				value = -(-value % 7); // remove octaves from interval
-			}
+
+			value = (int)harmint[j] % 7; // remove octaves from interval
+
+			// value = (int)harmint[j];
+			// if (value > 7) {
+			// 	value = value % 7; // remove octaves from interval
+			// } else if (value < -7) {
+			// 	value = -(-value % 7); // remove octaves from interval
+			// }
 			int vpitch = (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
 			int otherpitch = (int)grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 
@@ -605,17 +608,21 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// Condition 2: The other (dissonant) voice stayed in place or repeated the
 		//    same pitch at the onset of this dissonant interval.
 		bool condition2 = true;
+		bool condition2b = false;
 		double opitch = grid.cell(ovoiceindex, sliceindex)->getSgnMidiPitch();
+		double opitchDia = grid.cell(ovoiceindex, sliceindex)->getAbsDiatonicPitch();
 		int lastonoteindex = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		double lopitch = NAN;
 		if (lastonoteindex >= 0) {
-			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getSgnMidiPitch();
+			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
+			double lopitchDia = grid.cell(ovoiceindex, lastonoteindex)->getAbsDiatonicPitch();
+			if (fabs(int(opitchDia - lopitchDia)) == 7) {
+				condition2b = true;
+			}
 		} else {
 			condition2 = false;
 		}
 		if (opitch < 0) {
-			condition2 = true;
-		} else if ((opitch - lopitch) % 12 == 0) {
 			condition2 = true;
 		} else if (opitch != lopitch) {
 			condition2 = false;
@@ -700,8 +707,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		}
 
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && condition2 && 
-			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
+		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) && 
+			(dur <= 2) && (dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
@@ -735,8 +742,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// } else if ((intp > 2) && (intn == -1)) {
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
-				   valid_acc_exit && (lev == 1)) {
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
+					 (condition2 || condition2b) && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_DOWN]; // dissonant third quarter descending passing tone

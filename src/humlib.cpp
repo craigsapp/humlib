@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun, Jun 18, 2017  6:11:16 PM
+// Last Modified: Mon, Jun 19, 2017  1:09:49 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27964,12 +27964,15 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				// rest, so ignore
 				continue;
 			}
-			value = (int)harmint[j];
-			if (value > 7) {
-				value = value % 7; // remove octaves from interval
-			} else if (value < -7) {
-				value = -(-value % 7); // remove octaves from interval
-			}
+
+			value = (int)harmint[j] % 7; // remove octaves from interval
+
+			// value = (int)harmint[j];
+			// if (value > 7) {
+			// 	value = value % 7; // remove octaves from interval
+			// } else if (value < -7) {
+			// 	value = -(-value % 7); // remove octaves from interval
+			// }
 			int vpitch = (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
 			int otherpitch = (int)grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 
@@ -28086,9 +28089,28 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Suspension test cases ////////////////////////////////////////////////
 
+		// Condition 2: The other (dissonant) voice stayed in place or repeated the
+		//    same pitch at the onset of this dissonant interval.
+		bool condition2 = true;
+		bool condition2b = false;
 		double opitch = grid.cell(ovoiceindex, sliceindex)->getSgnMidiPitch();
+		double opitchDia = grid.cell(ovoiceindex, sliceindex)->getAbsDiatonicPitch();
 		int lastonoteindex = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		double lopitch = NAN;
+		if (lastonoteindex >= 0) {
+			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
+			double lopitchDia = grid.cell(ovoiceindex, lastonoteindex)->getAbsDiatonicPitch();
+			if (fabs(int(opitchDia - lopitchDia)) == 7) {
+				condition2b = true;
+			}
+		} else {
+			condition2 = false;
+		}
+		if (opitch < 0) {
+			condition2 = true;
+		} else if (opitch != lopitch) {
+			condition2 = false;
+		}
 
 		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		int oattackindexc = grid.cell(ovoiceindex, sliceindex)->getCurrAttackIndex();
@@ -28111,7 +28133,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
 			odurn = grid.cell(ovoiceindex, oattackindexn)->getDuration();
 		}
-
 		int oattackindexnn = -1;
 		if (oattackindexn >= 0) {
 			oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
@@ -28119,26 +28140,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double opitchnn = NAN;
 		if (oattackindexnn >= 0) {
 			opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
-		}
-		double ointp = opitch - opitchp;
-		double ointn = opitchn - opitch;
-		double ointnn = opitchnn - opitchn;
-
-		// Condition 2: The other (dissonant) voice stayed in place or repeated the
-		//    same pitch at the onset of this dissonant interval.
-		bool condition2 = true;
-		if (lastonoteindex >= 0) {
-			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
-		} else {
-			condition2 = false;
-		}
-		if (opitch < 0) {
-			condition2 = true;
-		} else if (int(ointp) % 7 == 0) {
-			condition2 = true;
-		}
-		else if (opitch != lopitch) {
-			condition2 = false;
 		}
 
 		// Condition 3: The other (dissonant) voice leaves its note before
@@ -28154,6 +28155,10 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// standards of the accompaniment voice for suspensions.
 		bool valid_sus_acc = condition2 && condition3a;
 		bool valid_ornam_sus_acc = condition2 && condition3b;
+
+		double ointp = opitch - opitchp;
+		double ointn = opitchn - opitch;
+		double ointnn = opitchnn - opitchn;
 
 		// To distinguish between binary and ternary suspensions and agents
 		int    getMeterTop          (void);
@@ -28186,8 +28191,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		}
 
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && condition2 && 
-			(dur <= 2) && (dur <= durp) && (lev >= levp) && valid_acc_exit) { // weak dissonances
+		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) && 
+			(dur <= 2) && (dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
@@ -28221,8 +28226,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			// } else if ((intp > 2) && (intn == -1)) {
 			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
 			}
-		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && condition2 && 
-				   valid_acc_exit && (lev == 1)) {
+		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
+					 (condition2 || condition2b) && (lev == 1)) {
 			if (intp == -1) {
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[THIRD_Q_PASS_DOWN]; // dissonant third quarter descending passing tone
@@ -32434,6 +32439,304 @@ void Tool_filter::initialize(HumdrumFile& infile) {
 	m_debugQ = getBoolean("debug");
 }
 
+
+
+
+
+int Tool_imitation::Enumerator = 0;
+
+
+/////////////////////////////////
+//
+// Tool_imitation::Tool_imitation -- Set the recognized options for the tool.
+//
+
+Tool_imitation::Tool_imitation(void) {
+	define("debug=b",             "print grid cell information");
+	define("e|exinterp=s:**vvdata","specify exinterp for **vvdata spine");
+	define("n|threshold=i:7",     "minimum number of notes to match");
+	define("D|no-duration=b",     "do not consider duration when matching");
+	define("r|rest=b",            "require match trigger to follow a rest");
+	define("R|rest2=b",           "require match target to also follow a rest");
+	define("M|no-mark=b",         "do not mark matched sequences");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_imitation::run -- Do the main work of the tool.
+//
+
+bool Tool_imitation::run(const string& indata, ostream& out) {
+
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
+	int status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_imitation::run(HumdrumFile& infile) {
+	NoteGrid grid(infile);
+
+	if (getBoolean("debug")) {
+		grid.printGridInfo(cerr);
+		// return 1;
+	} 
+
+	m_threshold = getInteger("threshold") + 1;
+	if (m_threshold < 3) {
+		m_threshold = 3;
+	}
+
+	m_duration = !getBoolean("no-duration");
+	m_mark     = !getBoolean("no-mark");
+	m_rest     = getBoolean("rest");
+	m_rest2    = getBoolean("rest2");
+
+	vector<vector<string>>    results;
+	vector<vector<NoteCell*>> attacks;
+	vector<vector<double>>    intervals;
+
+	doAnalysis(results, grid, attacks, intervals, infile, getBoolean("debug"));
+
+	string exinterp = getString("exinterp");
+	vector<HTp> kernspines = infile.getKernSpineStartList();
+	infile.appendDataSpine(results.back(), "", exinterp);
+	for (int i = (int)results.size()-1; i>0; i--) {
+		int track = kernspines[i]->getTrack();
+		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
+	}
+	infile.createLinesFromTokens();
+	if (m_mark && Enumerator) {
+		string rdfline = "!!!RDF**kern: ";
+		rdfline += m_marker;
+		rdfline += " = marked note (color=\"chocolate\")";
+		infile.appendLine(rdfline);
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_imitation::doAnalysis -- do a basic melodic analysis of all parts.
+//
+
+void Tool_imitation::doAnalysis(vector<vector<string> >& results,
+		NoteGrid& grid, vector<vector<NoteCell*> >& attacks,
+		vector<vector<double>>& intervals, HumdrumFile& infile,
+		bool debug) {
+
+	results.resize(grid.getVoiceCount());
+	for (int i=0; i<(int)results.size(); i++) {
+		results[i].resize(infile.getLineCount());
+	}
+
+	attacks.resize(grid.getVoiceCount());
+	for (int i=0; i<(int)attacks.size(); i++) {
+		grid.getNoteAndRestAttacks(attacks[i], i);
+	}
+
+	intervals.resize(grid.getVoiceCount());
+	for (int i=0; i<(int)intervals.size(); i++) {
+		intervals[i].resize(attacks[i].size());
+		getIntervals(intervals[i], attacks[i]);
+	}
+
+
+	for (int i=0; i<(int)attacks.size(); i++) {
+		for (int j=i+1; j<(int)attacks.size(); j++) {
+			analyzeImmitation(results, attacks, intervals, i, j);
+		}
+	}
+}
+
+
+
+///////////////////////////////
+//
+// Tool_imitation::getIntervals --
+//
+
+void Tool_imitation::getIntervals(vector<double>& intervals,
+		vector<NoteCell*>& attacks) {
+	for (int i=0; i<attacks.size() - 1; i++) {
+		intervals[i] = *attacks[i+1] - *attacks[i];
+	}
+	intervals.back() = NAN;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_imitation::analyzeImmitation -- do imitation analysis between two voices.
+//
+
+void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
+		vector<vector<NoteCell*>>& attacks, vector<vector<double>>& intervals,
+		int v1, int v2) {
+
+	vector<NoteCell*>& v1a = attacks[v1];
+	vector<NoteCell*>& v2a = attacks[v2];
+	vector<double>& v1i = intervals[v1];
+	vector<double>& v2i = intervals[v2];
+
+	int min = m_threshold - 1;
+	int count;
+
+	vector<int> enum1(v1a.size(), 0);
+	vector<int> enum2(v1a.size(), 0);
+
+	for (int i=0; i<v1i.size() - 1; i++) {
+		for (int j=0; j<v2i.size() - 1; j++) {
+			if (m_rest || m_rest2) {
+				if ((i > 0) && (!Convert::isNaN(attacks[v1][i-1]->getSgnDiatonicPitch()))) {
+					// match initiator must be preceded by a rest (or start of music)
+					continue;
+				}
+			}
+			if (m_rest2) {
+				if ((j > 0) && (!Convert::isNaN(attacks[v2][j-1]->getSgnDiatonicPitch()))) {
+					// match target must be preceded by a rest (or start of music)
+					continue;
+				}
+			}
+			if ((enum1[i] != 0) && (enum1[i] == enum2[j])) {
+				// avoid re-matching an existing match as a submatch
+				continue;
+			}
+			count = compareSequences(v1a, v1i, i, v2a, v2i, j);
+			if (count >= min) {
+				Enumerator++;
+				for (int k=0; k<count; k++) {
+					enum1[i+k] = Enumerator;
+					enum2[j+k] = Enumerator;
+				}
+				// cout << "Match length count " << count << endl;
+				HTp token1 = attacks[v1][i]->getToken();
+				HTp token2 = attacks[v2][j]->getToken();
+				HumNum time1 = token1->getDurationFromStart();
+				HumNum time2 = token2->getDurationFromStart();
+				HumNum distance1 = time2 - time1;
+				HumNum distance2 = time1 - time2;
+
+				int interval = *attacks[v2][j] - *attacks[v1][i];
+				int line1 = attacks[v1][i]->getLineIndex();
+				int line2 = attacks[v2][j]->getLineIndex();
+				if (!results[v1][line1].empty()) {
+					results[v1][line1] += " ";
+				}
+				results[v1][line1] += "n";
+				results[v1][line1] += to_string(Enumerator);
+				results[v1][line1] += ":c";
+				results[v1][line1] += to_string(count);
+				results[v1][line1] += ":d";
+				results[v1][line1] += to_string(distance1.getNumerator());
+				if (distance1.getDenominator() != 1) {
+					results[v1][line1] += '/';
+					results[v1][line1] += to_string(distance1.getNumerator());
+				}
+				results[v1][line1] += ":i";
+				results[v1][line1] += to_string(interval + 1);
+
+				if (!results[v2][line2].empty()) {
+					results[v2][line2] += " ";
+				}
+				results[v2][line2] += "n";
+				results[v2][line2] += to_string(Enumerator);
+				results[v2][line2] += ":c";
+				results[v2][line2] += to_string(count);
+				results[v2][line2] += ":d";
+				results[v2][line2] += to_string(distance2.getNumerator());
+				if (distance2.getDenominator() != 1) {
+					results[v2][line2] += '/';
+					results[v2][line2] += to_string(distance2.getNumerator());
+				}
+				results[v2][line2] += ":i";
+				results[v2][line2] += to_string(interval + 1);
+
+				if (m_mark) {
+					for (int z=0; z<count; z++) {
+						token1 = attacks[v1][i+z]->getToken();
+						token2 = attacks[v2][j+z]->getToken();
+						token1->setText(*token1 + m_marker);
+						token2->setText(*token2 + m_marker);
+					}
+				}
+
+			}
+			// skip over match (need to do in i as well somehow)
+			j += count;
+		} // j loop
+	} // i loop
+}
+
+
+
+///////////////////////////////
+//
+// Tool_imitation::compareSequences --
+//
+
+int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>& seq1, int i1,
+		vector<NoteCell*>& attack2, vector<double>& seq2, int i2) {
+	int count = 0;
+	// sequences cannot start with rests
+	if (Convert::isNaN(seq1[i1]) || Convert::isNaN(seq2[i2])) {
+		return count;
+	}
+
+	HumNum dur1;
+	HumNum dur2;
+
+	while ((i1+count < (int)seq1.size()) && (i2+count < (int)seq2.size())) {
+
+		if (m_duration) {
+			dur1 = attack1[i1+count]->getDuration();
+			dur2 = attack2[i2+count]->getDuration();
+			if (dur1 != dur2) {
+				break;
+			}
+		}
+		
+		if (Convert::isNaN(seq1[i1+count])) {
+			if (Convert::isNaN(seq2[i2+count])) {
+				count++;
+				continue;
+			} else {
+				break;
+			}
+		} else if (Convert::isNaN(seq2[i2+count])) {
+			break;
+		} else if (seq1[i1+count] == seq2[i2+count]) {
+			count++;
+			continue;
+		} else {
+			break;
+		}
+	}
+
+	return count;
+}
 
 
 
