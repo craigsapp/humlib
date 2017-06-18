@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri, Jun 16, 2017  3:27:01 PM
+// Last Modified: Sun, Jun 18, 2017  6:11:16 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27851,7 +27851,11 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 	}
 
 	for (int i=0; i<grid.getVoiceCount(); i++) {
-		categorizeUnknowns(results, grid, attacks[i], i);
+		findLs(results, grid, attacks[i], i);
+	}
+	
+	for (int i=0; i<grid.getVoiceCount(); i++) {
+		findYs(results, grid, attacks[i], i);
 	}
 
 }
@@ -28082,22 +28086,9 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 
 		// Suspension test cases ////////////////////////////////////////////////
 
-		// Condition 2: The other (dissonant) voice stayed in place or repeated the
-		//    same pitch at the onset of this dissonant interval.
-		bool condition2 = true;
 		double opitch = grid.cell(ovoiceindex, sliceindex)->getSgnMidiPitch();
 		int lastonoteindex = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		double lopitch = NAN;
-		if (lastonoteindex >= 0) {
-			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
-		} else {
-			condition2 = false;
-		}
-		if (opitch < 0) {
-			condition2 = true;
-		} else if (opitch != lopitch) {
-			condition2 = false;
-		}
 
 		int oattackindexp = grid.cell(ovoiceindex, sliceindex)->getPrevAttackIndex();
 		int oattackindexc = grid.cell(ovoiceindex, sliceindex)->getCurrAttackIndex();
@@ -28120,6 +28111,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			opitchn = grid.cell(ovoiceindex, oattackindexn)->getAbsDiatonicPitch();
 			odurn = grid.cell(ovoiceindex, oattackindexn)->getDuration();
 		}
+
 		int oattackindexnn = -1;
 		if (oattackindexn >= 0) {
 			oattackindexnn = grid.cell(ovoiceindex, oattackindexn)->getNextAttackIndex();
@@ -28127,6 +28119,26 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		double opitchnn = NAN;
 		if (oattackindexnn >= 0) {
 			opitchnn = grid.cell(ovoiceindex, oattackindexnn)->getAbsDiatonicPitch();
+		}
+		double ointp = opitch - opitchp;
+		double ointn = opitchn - opitch;
+		double ointnn = opitchnn - opitchn;
+
+		// Condition 2: The other (dissonant) voice stayed in place or repeated the
+		//    same pitch at the onset of this dissonant interval.
+		bool condition2 = true;
+		if (lastonoteindex >= 0) {
+			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
+		} else {
+			condition2 = false;
+		}
+		if (opitch < 0) {
+			condition2 = true;
+		} else if (int(ointp) % 7 == 0) {
+			condition2 = true;
+		}
+		else if (opitch != lopitch) {
+			condition2 = false;
 		}
 
 		// Condition 3: The other (dissonant) voice leaves its note before
@@ -28142,10 +28154,6 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// standards of the accompaniment voice for suspensions.
 		bool valid_sus_acc = condition2 && condition3a;
 		bool valid_ornam_sus_acc = condition2 && condition3b;
-
-		double ointp = opitch - opitchp;
-		double ointn = opitchn - opitch;
-		double ointnn = opitchnn - opitchn;
 
 		// To distinguish between binary and ternary suspensions and agents
 		int    getMeterTop          (void);
@@ -28378,10 +28386,9 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 
 //////////////////////////////
 //
-// Tool_dissonant::categorizeUnknowns --
+// Tool_dissonant::findLs --
 //
-
-void Tool_dissonant::categorizeUnknowns(vector<vector<string> >& results, NoteGrid& grid,
+void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
 	HumNum dur;        // duration of current note;
 	HumNum odur;       // duration of current note in other voice which may have started earlier;
@@ -28414,14 +28421,12 @@ void Tool_dissonant::categorizeUnknowns(vector<vector<string> >& results, NoteGr
 			if (vindex == j) { // only compare different voices
 				continue;
 			}
-			if ((results[j][lineindex] == m_labels[SUS_BIN]) ||
-				(results[j][lineindex] == m_labels[AGENT_BIN]) ||
-				(results[j][lineindex] == m_labels[SUS_TERN]) ||
+			if ((results[j][lineindex] == m_labels[AGENT_BIN]) ||
 				(results[j][lineindex] == m_labels[AGENT_TERN]) ||
 				(results[j][lineindex] == m_labels[UNLABELED_Z7]) ||
 				(results[j][lineindex] == m_labels[UNLABELED_Z4]) ||
 				(results[j][lineindex] == "")) {
-				continue; // skip if other voice a suspension, an agent, unexplainable, or empty.
+				continue; // skip if other voice is an agent, unexplainable, or empty.
 			}
 			oattackindexc = grid.cell(j, sliceindex)->getCurrAttackIndex();
 			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
@@ -28442,17 +28447,93 @@ void Tool_dissonant::categorizeUnknowns(vector<vector<string> >& results, NoteGr
 			if ((intp == ointp) && (intn == ointn)) { // this note moves in parallel with an identifiable dissonance
 				if (intp > 0) {
 					results[vindex][lineindex] = m_labels[PARALLEL_UP];
+					break;
 				} else if (intp < 0) {
-					results[vindex][lineindex] = m_labels[PARALLEL_DOWN];					
+					results[vindex][lineindex] = m_labels[PARALLEL_DOWN];
+					break;			
 				}
 			}
-			// if (this note is only dissonant against other notes that are identifiable dissonances) {
-			// 	mark this note with a Y label;
-			// }
 		}
 	}
 }
 
+//////////////////////////////
+//
+// Tool_dissonant::findYs --
+//
+void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, int vindex) { 
+	double intp;       // diatonic interval from previous melodic note
+	int lineindex;     // line in original Humdrum file content that contains note
+	int olineindex;    // line in original Humdrum file content that contains other voice note
+	int sliceindex;    // current timepoint in NoteGrid
+	int oattackindexc; // line index of other voice current note
+	double pitch;      // current pitch in this voice
+	double opitch;     // current pitch in other voice
+	bool onlyWithValids; // note is only dissonant with identifiable dissonances
+
+	for (int i=1; i<(int)attacks.size()-1; i++) {
+		lineindex = attacks[i]->getLineIndex();
+		if ((results[vindex][lineindex].find("Z") == string::npos) &&
+			(results[vindex][lineindex].find("z") == string::npos)) {
+			continue;
+		}
+		intp = *attacks[i] - *attacks[i-1];
+		sliceindex = attacks[i]->getSliceIndex();
+
+		int lowestnote = 1000; // lowest sounding diatonic note in any voice at this sliceindex
+		double tpitch;
+		for (int v=0; v<(int)grid.getVoiceCount(); v++) {
+			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
+			if (!Convert::isNaN(tpitch)) {
+				if (tpitch <= lowestnote) {
+					lowestnote = tpitch;
+				}
+			}
+		}
+
+		onlyWithValids = true; 
+		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
+			if (vindex == j) { // only compare different voices
+				continue;
+			}
+			oattackindexc = grid.cell(j, sliceindex)->getCurrAttackIndex();
+			pitch = attacks[i]->getAbsDiatonicPitch();
+			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
+			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
+
+
+			if (((fabs(thisMod7) == 1) || (fabs(thisMod7) == 6)  ||
+				 ((thisInt > 0) && (thisMod7 == 3) && 
+				  not (((int(pitch-lowestnote) % 7) == 2) ||
+                 	   ((int(pitch-lowestnote) % 7) == 4))) ||
+				 ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 = -3.
+				  not (((int(opitch-lowestnote) % 7) == 2) ||
+                 	   ((int(opitch-lowestnote) % 7) == 4)))) &&
+				((results[j][olineindex] == m_labels[AGENT_BIN]) ||
+				 (results[j][olineindex] == m_labels[AGENT_TERN]) ||
+				 (results[j][olineindex] == m_labels[UNLABELED_Z7]) ||
+				 (results[j][olineindex] == m_labels[UNLABELED_Z4]) ||
+				 ((results[j][olineindex] == "") &&
+				  ((results[j][lineindex] != m_labels[SUS_BIN]) &&
+				   (results[j][lineindex] != m_labels[SUS_TERN]))))) {
+				
+				onlyWithValids = false;
+			}
+		}
+
+		if (onlyWithValids && ((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
+							   (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) {
+			if (intp > 0) {
+				results[vindex][lineindex] = m_labels[ONLY_WITH_VALID_UP];
+			} else if (intp <= 0) {
+				results[vindex][lineindex] = m_labels[ONLY_WITH_VALID_DOWN];
+			}
+		}
+	}
+}
 
 ///////////////////////////////
 //
