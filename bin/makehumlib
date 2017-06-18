@@ -65,7 +65,7 @@ sub createIncludeFile {
 	foreach $file (@files) {
 		my $lines = getMergeContents("$basedir/$file");
 		if ($lines =~ /^\s*$/) {
-			print "$basedir/$file is not formatted correctly.\n";
+			# print "$basedir/$file is not formatted correctly.\n";
 		}
 		$contents .= $lines;
 	}
@@ -250,7 +250,7 @@ EOT
 		next if $file =~ /^humlib.cpp$/;
 		my $lines = getMergeContents("$basedir/$file");
 		if ($lines =~ /^\s*$/) {
-			print "$basedir/$file is not correctly formatted\n";
+			# print "$basedir/$file is not correctly formatted\n";
 		}
 		print SFILE getMergeContents("$basedir/$file");
 	}

@@ -32347,6 +32347,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
+		} else if (commands[i].first == "imitation") {
+			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
@@ -32493,6 +32495,11 @@ bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_imitation::run(HumdrumFile& infile) {
+<<<<<<< HEAD
+=======
+	Enumerator = 0;
+
+>>>>>>> 87c153b8f57a169c79eb6f25177ef9d49ec9ec7e
 	NoteGrid grid(infile);
 
 	if (getBoolean("debug")) {

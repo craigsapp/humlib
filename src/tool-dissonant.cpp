@@ -481,14 +481,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				continue;
 			}
 
-			value = (int)harmint[j] % 7; // remove octaves from interval
+			value = (int)harmint[j] % 7; // remove octaves from interval, can return negative ints
 
-			// value = (int)harmint[j];
-			// if (value > 7) {
-			// 	value = value % 7; // remove octaves from interval
-			// } else if (value < -7) {
-			// 	value = -(-value % 7); // remove octaves from interval
-			// }
 			int vpitch = (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
 			int otherpitch = (int)grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 
