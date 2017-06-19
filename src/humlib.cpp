@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, Jun 19, 2017  1:09:49 AM
+// Last Modified: pon, 19 cze 2017, 11:05:55 DST
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27965,14 +27965,8 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				continue;
 			}
 
-			value = (int)harmint[j] % 7; // remove octaves from interval
+			value = (int)harmint[j] % 7; // remove octaves from interval, can return negative ints
 
-			// value = (int)harmint[j];
-			// if (value > 7) {
-			// 	value = value % 7; // remove octaves from interval
-			// } else if (value < -7) {
-			// 	value = -(-value % 7); // remove octaves from interval
-			// }
 			int vpitch = (int)grid.cell(vindex, sliceindex)->getAbsDiatonicPitch();
 			int otherpitch = (int)grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 
@@ -32495,11 +32489,8 @@ bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_imitation::run(HumdrumFile& infile) {
-<<<<<<< HEAD
-=======
 	Enumerator = 0;
 
->>>>>>> 87c153b8f57a169c79eb6f25177ef9d49ec9ec7e
 	NoteGrid grid(infile);
 
 	if (getBoolean("debug")) {
@@ -32585,7 +32576,7 @@ void Tool_imitation::doAnalysis(vector<vector<string> >& results,
 
 void Tool_imitation::getIntervals(vector<double>& intervals,
 		vector<NoteCell*>& attacks) {
-	for (int i=0; i<attacks.size() - 1; i++) {
+	for (int i=0; i<(int)attacks.size() - 1; i++) {
 		intervals[i] = *attacks[i+1] - *attacks[i];
 	}
 	intervals.back() = NAN;
@@ -32613,8 +32604,8 @@ void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
 	vector<int> enum1(v1a.size(), 0);
 	vector<int> enum2(v1a.size(), 0);
 
-	for (int i=0; i<v1i.size() - 1; i++) {
-		for (int j=0; j<v2i.size() - 1; j++) {
+	for (int i=0; i<(int)v1i.size() - 1; i++) {
+		for (int j=0; j<(int)v2i.size() - 1; j++) {
 			if (m_rest || m_rest2) {
 				if ((i > 0) && (!Convert::isNaN(attacks[v1][i-1]->getSgnDiatonicPitch()))) {
 					// match initiator must be preceded by a rest (or start of music)

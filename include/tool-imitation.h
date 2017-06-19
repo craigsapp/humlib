@@ -10,8 +10,8 @@
 // Description:   Interface for imitation tool.
 //
 
-#ifndef _TOOL_DISSONANT_H
-#define _TOOL_DISSONANT_H
+#ifndef _TOOL_IMITATION_H
+#define _TOOL_IMITATION_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -60,7 +60,7 @@ class Tool_imitation : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_DISSONANT_H */
+#endif /* _TOOL_IMITATION_H */
 
 
 

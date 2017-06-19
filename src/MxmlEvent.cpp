@@ -18,6 +18,7 @@
 #include "pugixml.hpp"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <sstream>
 #include <algorithm>
