@@ -1038,7 +1038,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 
-			if (((fabs(thisMod7) == 1) || (fabs(thisMod7) == 6)  ||
+			if (((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
 				 ((thisInt > 0) && (thisMod7 == 3) && 
 				  not (((int(pitch-lowestnote) % 7) == 2) ||
                  	   ((int(pitch-lowestnote) % 7) == 4))) ||

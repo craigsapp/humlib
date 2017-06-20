@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 20 12:13:27 CEST 2017
+// Last Modified: Tue Jun 20 12:22:20 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28100,7 +28100,7 @@ RECONSIDER:
 		if (lastonoteindex >= 0) {
 			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
 			double lopitchDia = grid.cell(ovoiceindex, lastonoteindex)->getAbsDiatonicPitch();
-			if (fabs(int(opitchDia - lopitchDia)) == 7) {
+			if (abs(int(opitchDia - lopitchDia)) == 7) {
 				condition2b = true;
 			}
 		} else {
@@ -28522,7 +28522,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 
-			if (((fabs(thisMod7) == 1) || (fabs(thisMod7) == 6)  ||
+			if (((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
 				 ((thisInt > 0) && (thisMod7 == 3) && 
 				  not (((int(pitch-lowestnote) % 7) == 2) ||
                  	   ((int(pitch-lowestnote) % 7) == 4))) ||
