@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 18 23:26:57 CEST 2017
+// Last Modified: Mon Jun 19 09:49:09 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27950,8 +27950,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
 
+		int nextj = 0;
+		int j = 0;
+
+RECONSIDER:
+
 		int value = 0;
-		for (int j=0; j<(int)harmint.size(); j++) {
+		for (j=nextj; j<(int)harmint.size(); j++) {
 			if (j == vindex) {
 				// don't compare to self
 				continue;
@@ -28007,6 +28012,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				break;
 			}
 		}
+		nextj = j+1;
 
 
 /*
@@ -28319,7 +28325,18 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step and both voices leave by leap
 			results[vindex][lineindex] = unexp_label;
 		}
+
+
+		// If the note was labeled as an unknown dissonance, then go back and check
+		// against another note with which it might have a known dissonant function.
+		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z4])) {
+			if (nextj < (int)harmint.size()) {
+				goto RECONSIDER;
+			}
+		}
 	}
+
 }
 
 
@@ -32500,6 +32517,14 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 		intervals[i] = *attacks[i+1] - *attacks[i];
 	}
 	intervals.back() = NAN;
+
+	if (getBoolean("debug")) {
+		cout << endl;
+		for (int i=0; i<intervals.size(); i++) {
+			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
+		}
+	}
+
 }
 
 
@@ -32615,8 +32640,9 @@ void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
 // Tool_imitation::compareSequences --
 //
 
-int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>& seq1, int i1,
-		vector<NoteCell*>& attack2, vector<double>& seq2, int i2) {
+int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
+		vector<double>& seq1, int i1, vector<NoteCell*>& attack2,
+		vector<double>& seq2, int i2) {
 	int count = 0;
 	// sequences cannot start with rests
 	if (Convert::isNaN(seq1[i1]) || Convert::isNaN(seq2[i2])) {
@@ -32627,11 +32653,21 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>&
 	HumNum dur2;
 
 	while ((i1+count < (int)seq1.size()) && (i2+count < (int)seq2.size())) {
+cerr << "I2=" << i2 << " pcount=" << i2 + count << " S1=" << seq1.size() << " S2=" << seq2.size() << endl;
 
 		if (m_duration) {
 			dur1 = attack1[i1+count]->getDuration();
 			dur2 = attack2[i2+count]->getDuration();
 			if (dur1 != dur2) {
+
+cerr << "DURNEQ COUNT " << count 
+     << " MATCH: " << attack1[i1+count]->getToken() 
+     << " (" << dur1 << ")\t"
+     << "\tindex2=" << i2+count
+     << "\tTO " << attack2[i2+count]->getToken() 
+     << " (" << dur2 << ")\t"
+     << endl;
+
 				break;
 			}
 		}
@@ -32639,16 +32675,57 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>&
 		if (Convert::isNaN(seq1[i1+count])) {
 			if (Convert::isNaN(seq2[i2+count])) {
 				count++;
+
+cerr << "DURNEQ COUNT " << count 
+     << " MATCH: " << attack1[i1+count]->getToken() 
+     << " (" << dur1 << ")\t"
+     << "\tindex2=" << i2+count
+     << "\tTO " << attack2[i2+count]->getToken() 
+     << " (" << dur2 << ")\t"
+     << endl;
+
 				continue;
 			} else {
+
+cerr << "RESTX COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 				break;
 			}
 		} else if (Convert::isNaN(seq2[i2+count])) {
+
+cerr << "RESTXX COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
+
+cerr << "COUNT " << count 
+     << "\t\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			count++;
 			continue;
 		} else {
+
+cerr << "NEQ COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			break;
 		}
 	}

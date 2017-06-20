@@ -11,7 +11,7 @@
 //                Humdrum files.
 //
 
-#include "tool-musicxml2hum.h"
+#include "humlib.h"
 
 #include <iostream>
 

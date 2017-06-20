@@ -466,8 +466,13 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 		// check if current note is dissonant to another sounding note:
 		dissonant = false;
 
+		int nextj = 0;
+		int j = 0;
+
+RECONSIDER:
+
 		int value = 0;
-		for (int j=0; j<(int)harmint.size(); j++) {
+		for (j=nextj; j<(int)harmint.size(); j++) {
 			if (j == vindex) {
 				// don't compare to self
 				continue;
@@ -523,6 +528,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				break;
 			}
 		}
+		nextj = j+1;
 
 
 /*
@@ -835,7 +841,19 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step and both voices leave by leap
 			results[vindex][lineindex] = unexp_label;
 		}
+
+
+		// If the note was labeled as an unknown dissonance, then go back and check
+		// against another note with which it might have a known dissonant function.
+		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z4])) {
+			if (nextj < (int)harmint.size()) {
+cerr << "RECONSIDERING " << attacks[i]->getToken() << endl;
+				goto RECONSIDER;
+			}
+		}
 	}
+
 }
 
 

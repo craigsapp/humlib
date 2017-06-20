@@ -12,14 +12,14 @@
 // Todo:          retrograde searches
 //                imitation at specific rhythmic scaling
 //                highlight tied notes in matches
-//                color immitations by interval
+//                color imitations by interval
 //                terminate matches at rests
 //                match must come within a specified duration
 //                target must come before end of initiator match
 //                all inexact rhythm for last note in match
 //                allow inexact rhythm after x notes with exact rhythm
 //                count points of imitation that were found
-//                create an index of points of immitation
+//                create an index of points of imitation
 
 #include "tool-imitation.h"
 #include "Convert.h"
@@ -176,6 +176,14 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 		intervals[i] = *attacks[i+1] - *attacks[i];
 	}
 	intervals.back() = NAN;
+
+	if (getBoolean("debug")) {
+		cout << endl;
+		for (int i=0; i<intervals.size(); i++) {
+			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
+		}
+	}
+
 }
 
 
@@ -291,8 +299,9 @@ void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
 // Tool_imitation::compareSequences --
 //
 
-int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>& seq1, int i1,
-		vector<NoteCell*>& attack2, vector<double>& seq2, int i2) {
+int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
+		vector<double>& seq1, int i1, vector<NoteCell*>& attack2,
+		vector<double>& seq2, int i2) {
 	int count = 0;
 	// sequences cannot start with rests
 	if (Convert::isNaN(seq1[i1]) || Convert::isNaN(seq2[i2])) {
@@ -303,11 +312,21 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>&
 	HumNum dur2;
 
 	while ((i1+count < (int)seq1.size()) && (i2+count < (int)seq2.size())) {
+cerr << "I2=" << i2 << " pcount=" << i2 + count << " S1=" << seq1.size() << " S2=" << seq2.size() << endl;
 
 		if (m_duration) {
 			dur1 = attack1[i1+count]->getDuration();
 			dur2 = attack2[i2+count]->getDuration();
 			if (dur1 != dur2) {
+
+cerr << "DURNEQ COUNT " << count 
+     << " MATCH: " << attack1[i1+count]->getToken() 
+     << " (" << dur1 << ")\t"
+     << "\tindex2=" << i2+count
+     << "\tTO " << attack2[i2+count]->getToken() 
+     << " (" << dur2 << ")\t"
+     << endl;
+
 				break;
 			}
 		}
@@ -315,16 +334,57 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1, vector<double>&
 		if (Convert::isNaN(seq1[i1+count])) {
 			if (Convert::isNaN(seq2[i2+count])) {
 				count++;
+
+cerr << "DURNEQ COUNT " << count 
+     << " MATCH: " << attack1[i1+count]->getToken() 
+     << " (" << dur1 << ")\t"
+     << "\tindex2=" << i2+count
+     << "\tTO " << attack2[i2+count]->getToken() 
+     << " (" << dur2 << ")\t"
+     << endl;
+
 				continue;
 			} else {
+
+cerr << "RESTX COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 				break;
 			}
 		} else if (Convert::isNaN(seq2[i2+count])) {
+
+cerr << "RESTXX COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
+
+cerr << "COUNT " << count 
+     << "\t\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			count++;
 			continue;
 		} else {
+
+cerr << "NEQ COUNT " << count 
+     << "\tMATCH: " << attack1[i1+count]->getToken() 
+     << " (" << seq1[i1+count] << ")\t"
+     << " TO " << attack2[i2+count]->getToken()
+     << " (" << seq2[i2+count] << ")\t"
+     << endl;
+
 			break;
 		}
 	}
