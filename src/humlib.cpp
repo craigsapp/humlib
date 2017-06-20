@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 19 09:49:09 CEST 2017
+// Last Modified: Tue Jun 20 12:13:27 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28339,6 +28339,7 @@ RECONSIDER:
 		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
 				(results[vindex][lineindex] == m_labels[UNLABELED_Z4])) {
 			if (nextj < (int)harmint.size()) {
+cerr << "RECONSIDERING " << attacks[i]->getToken() << endl;
 				goto RECONSIDER;
 			}
 		}

@@ -616,7 +616,7 @@ RECONSIDER:
 		if (lastonoteindex >= 0) {
 			lopitch = grid.cell(ovoiceindex, lastonoteindex)->getAbsMidiPitch();
 			double lopitchDia = grid.cell(ovoiceindex, lastonoteindex)->getAbsDiatonicPitch();
-			if (fabs(int(opitchDia - lopitchDia)) == 7) {
+			if (abs(int(opitchDia - lopitchDia)) == 7) {
 				condition2b = true;
 			}
 		} else {
