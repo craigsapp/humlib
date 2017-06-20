@@ -172,7 +172,7 @@ void Tool_imitation::doAnalysis(vector<vector<string> >& results,
 
 void Tool_imitation::getIntervals(vector<double>& intervals,
 		vector<NoteCell*>& attacks) {
-	for (int i=0; i<attacks.size() - 1; i++) {
+	for (int i=0; i<(int)attacks.size() - 1; i++) {
 		intervals[i] = *attacks[i+1] - *attacks[i];
 	}
 	intervals.back() = NAN;
@@ -208,8 +208,8 @@ void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
 	vector<int> enum1(v1a.size(), 0);
 	vector<int> enum2(v1a.size(), 0);
 
-	for (int i=0; i<v1i.size() - 1; i++) {
-		for (int j=0; j<v2i.size() - 1; j++) {
+	for (int i=0; i<(int)v1i.size() - 1; i++) {
+		for (int j=0; j<(int)v2i.size() - 1; j++) {
 			if (m_rest || m_rest2) {
 				if ((i > 0) && (!Convert::isNaN(attacks[v1][i-1]->getSgnDiatonicPitch()))) {
 					// match initiator must be preceded by a rest (or start of music)

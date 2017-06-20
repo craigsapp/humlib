@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 19 09:49:09 CEST 2017
+// Last Modified: pon, 19 cze 2017, 11:05:55 DST
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3713,7 +3713,10 @@ class Tool_dissonant : public HumTool {
 		void    findFakeSuspensions(vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    categorizeUnknowns (vector<vector<string> >& results, 
+		void    findLs			   (vector<vector<string> >& results, 
+		                            NoteGrid& grid,
+		                            vector<NoteCell*>& attacks, int vindex);
+		void    findYs			   (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
 		void    changePitch        (HTp note2, HTp note1);
