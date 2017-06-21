@@ -312,21 +312,11 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 	HumNum dur2;
 
 	while ((i1+count < (int)seq1.size()) && (i2+count < (int)seq2.size())) {
-cerr << "I2=" << i2 << " pcount=" << i2 + count << " S1=" << seq1.size() << " S2=" << seq2.size() << endl;
 
 		if (m_duration) {
 			dur1 = attack1[i1+count]->getDuration();
 			dur2 = attack2[i2+count]->getDuration();
 			if (dur1 != dur2) {
-
-cerr << "DURNEQ COUNT " << count 
-     << " MATCH: " << attack1[i1+count]->getToken() 
-     << " (" << dur1 << ")\t"
-     << "\tindex2=" << i2+count
-     << "\tTO " << attack2[i2+count]->getToken() 
-     << " (" << dur2 << ")\t"
-     << endl;
-
 				break;
 			}
 		}
@@ -334,62 +324,21 @@ cerr << "DURNEQ COUNT " << count
 		if (Convert::isNaN(seq1[i1+count])) {
 			if (Convert::isNaN(seq2[i2+count])) {
 				count++;
-
-cerr << "DURNEQ COUNT " << count 
-     << " MATCH: " << attack1[i1+count]->getToken() 
-     << " (" << dur1 << ")\t"
-     << "\tindex2=" << i2+count
-     << "\tTO " << attack2[i2+count]->getToken() 
-     << " (" << dur2 << ")\t"
-     << endl;
-
 				continue;
 			} else {
-
-cerr << "RESTX COUNT " << count 
-     << "\tMATCH: " << attack1[i1+count]->getToken() 
-     << " (" << seq1[i1+count] << ")\t"
-     << " TO " << attack2[i2+count]->getToken()
-     << " (" << seq2[i2+count] << ")\t"
-     << endl;
-
 				break;
 			}
 		} else if (Convert::isNaN(seq2[i2+count])) {
-
-cerr << "RESTXX COUNT " << count 
-     << "\tMATCH: " << attack1[i1+count]->getToken() 
-     << " (" << seq1[i1+count] << ")\t"
-     << " TO " << attack2[i2+count]->getToken()
-     << " (" << seq2[i2+count] << ")\t"
-     << endl;
-
 			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
-
-cerr << "COUNT " << count 
-     << "\t\tMATCH: " << attack1[i1+count]->getToken() 
-     << " (" << seq1[i1+count] << ")\t"
-     << " TO " << attack2[i2+count]->getToken()
-     << " (" << seq2[i2+count] << ")\t"
-     << endl;
-
 			count++;
 			continue;
 		} else {
-
-cerr << "NEQ COUNT " << count 
-     << "\tMATCH: " << attack1[i1+count]->getToken() 
-     << " (" << seq1[i1+count] << ")\t"
-     << " TO " << attack2[i2+count]->getToken()
-     << " (" << seq2[i2+count] << ")\t"
-     << endl;
-
 			break;
 		}
 	}
 
-	return count;
+	return count + 1;
 }
 
 
