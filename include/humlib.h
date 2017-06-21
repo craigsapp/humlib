@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Jun 21, 2017  5:16:33 PM
+// Last Modified: Wed, Jun 21, 2017  5:46:51 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4042,7 +4042,7 @@ class Tool_imitation : public HumTool {
 		                            vector<vector<NoteCell*>>& attacks,
 		                            vector<vector<double>>& intervals,
 		                            HumdrumFile& infile, bool debug);
-		void    analyzeImmitation  (vector<vector<string>>& results,
+		void    analyzeImitation  (vector<vector<string>>& results,
 		                            vector<vector<NoteCell*>>& attacks,
 		                            vector<vector<double>>& intervals,
 		                            int v1, int v2);
