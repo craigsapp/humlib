@@ -853,9 +853,9 @@ RECONSIDER:
 		// If the note was labeled as an unknown dissonance, then go back and check
 		// against another note with which it might have a known dissonant function.
 		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
-				(results[vindex][lineindex] == m_labels[UNLABELED_Z4])) {
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z7])) {
 			if (nextj < (int)harmint.size()) {
-cerr << "RECONSIDERING " << attacks[i]->getToken() << endl;
 				goto RECONSIDER;
 			}
 		}

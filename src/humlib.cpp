@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 20 12:22:20 CEST 2017
+// Last Modified: Wed Jun 21 14:48:04 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28337,9 +28337,9 @@ RECONSIDER:
 		// If the note was labeled as an unknown dissonance, then go back and check
 		// against another note with which it might have a known dissonant function.
 		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
-				(results[vindex][lineindex] == m_labels[UNLABELED_Z4])) {
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
+				(results[vindex][lineindex] == m_labels[UNLABELED_Z7])) {
 			if (nextj < (int)harmint.size()) {
-cerr << "RECONSIDERING " << attacks[i]->getToken() << endl;
 				goto RECONSIDER;
 			}
 		}
