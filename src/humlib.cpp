@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 21 14:48:04 CEST 2017
+// Last Modified: Wed, Jun 21, 2017  5:16:33 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27886,11 +27886,12 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	bool colorizeQ = getBoolean("colorize");
 	bool colorize2Q = getBoolean("colorize2");
 
-	HumNum durp;       // duration of previous melodic note;
-	HumNum dur;        // duration of current note;
-	HumNum durn;       // duration of next melodic note;
-	HumNum odur = -1; // duration of current note in other voice which may have started earlier;
-	HumNum odurn = -1; // duration of next note in other voice;
+	HumNum durpp = -1; // duration of previous previous note
+	HumNum durp;       // duration of previous melodic note
+	HumNum dur;        // duration of current note
+	HumNum durn;       // duration of next melodic note
+	HumNum odur = -1; // duration of current note in other voice which may have started earlier
+	HumNum odurn = -1; // duration of next note in other voice
 	double intp;       // diatonic interval from previous melodic note
 	double intpp = -99;// diatonic interval to previous melodic note
 	double intn;       // diatonic interval to next melodic note
@@ -27898,11 +27899,12 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 	double lev;        // metric level of the current note
 	double levn;       // metric level of the next melodic note
 	int lineindex;     // line in original Humdrum file content that contains note
+	int lineindexpp = -1;// line in original Humdrum file content that contains the previous previous note
 	// int lineindexn; // next line in original Humdrum file content that contains note
 	int attackindexn;  // slice in NoteGrid content that contains next note attack
 	int sliceindex;    // current timepoint in NoteGrid.
 	int oattackindexn = -1; // next note attack index of the other voice involved in the diss.
-	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals;
+	vector<double> harmint(grid.getVoiceCount());  // harmonic intervals
 	bool dissonant;    // true if  note is dissonant with other sounding notes.
 	char marking = '\0';
 	int ovoiceindex = -1;
@@ -28072,6 +28074,8 @@ RECONSIDER:
 		levn = attacks[i+1]->getMetricLevel();
 		if (i >= 2) {
 			intpp = *attacks[i-1] - *attacks[i-2];
+			durpp = attacks[i-2]->getDuration();
+			lineindexpp = attacks[i-2]->getLineIndex();
 		}
 
 		// Non-suspension test cases ////////////////////////////////////////////
@@ -28257,6 +28261,11 @@ RECONSIDER:
 		////
 
 		else if (valid_sus_acc && (ointn == -1)) {
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
+			}
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -28265,6 +28274,11 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 		} else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
+			}
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -28274,6 +28288,12 @@ RECONSIDER:
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP]; // repeated-note of suspension
 		} else if (valid_ornam_sus_acc && ((ointn == -2) && (ointnn == 1))) {
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN] ||
+				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4])))) {
+				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
+			}
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -28283,6 +28303,11 @@ RECONSIDER:
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
 		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
+			}
 			if (ternAgent) {
 				results[vindex][lineindex] = m_labels[AGENT_TERN]; // ternary agent
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN]; // ternary suspension
@@ -28300,12 +28325,7 @@ RECONSIDER:
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
 			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
-			if ((dur == durn) && (lev == 1) && (levn == 2) && (levnn == 0) &&
-					(intp == -1) && (intn == -1) && (intnn == 1) && valid_acc_exit
-					) {
-				results[vindex][lineindex] = m_labels[CHANSON_IDIOM]; // chanson idiom
-
-			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
+			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) {
 				results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_L]; // long-form descending cambiata
 			} else if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
