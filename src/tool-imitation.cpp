@@ -158,7 +158,7 @@ void Tool_imitation::doAnalysis(vector<vector<string> >& results,
 
 	for (int i=0; i<(int)attacks.size(); i++) {
 		for (int j=i+1; j<(int)attacks.size(); j++) {
-			analyzeImmitation(results, attacks, intervals, i, j);
+			analyzeImitation(results, attacks, intervals, i, j);
 		}
 	}
 }
@@ -190,10 +190,10 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 
 //////////////////////////////
 //
-// Tool_imitation::analyzeImmitation -- do imitation analysis between two voices.
+// Tool_imitation::analyzeImitation -- do imitation analysis between two voices.
 //
 
-void Tool_imitation::analyzeImmitation(vector<vector<string>>& results,
+void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 		vector<vector<NoteCell*>>& attacks, vector<vector<double>>& intervals,
 		int v1, int v2) {
 

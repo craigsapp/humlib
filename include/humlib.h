@@ -4042,7 +4042,7 @@ class Tool_imitation : public HumTool {
 		                            vector<vector<NoteCell*>>& attacks,
 		                            vector<vector<double>>& intervals,
 		                            HumdrumFile& infile, bool debug);
-		void    analyzeImmitation  (vector<vector<string>>& results,
+		void    analyzeImitation  (vector<vector<string>>& results,
 		                            vector<vector<NoteCell*>>& attacks,
 		                            vector<vector<double>>& intervals,
 		                            int v1, int v2);
