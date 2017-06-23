@@ -322,13 +322,11 @@ bool HumdrumFileBase::read(istream& contents) {
 //
 
 bool HumdrumFileBase::readCsv(const string& filename, const string& separator) {
-cerr << "READINGING CSV1" << endl;
 	return HumdrumFileBase::readCsv(filename.c_str());
 }
 
 
 bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
-cerr << "READINGING CSV2" << endl;
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return HumdrumFileBase::readCsv(cin, separator);
@@ -345,7 +343,6 @@ cerr << "READINGING CSV2" << endl;
 
 
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
-cerr << "READINGING CSV3" << endl;
 	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
@@ -405,7 +402,6 @@ bool HumdrumFileBase::readString(const char* contents) {
 
 bool HumdrumFileBase::readStringCsv(const char* contents,
 		const string& separator) {
-cerr << "READINGING CSV5" << endl;
 	stringstream infile;
 	infile << contents;
 	return readCsv(infile, separator);
@@ -414,7 +410,6 @@ cerr << "READINGING CSV5" << endl;
 
 bool HumdrumFileBase::readStringCsv(const string& contents,
 		const string& separator) {
-cerr << "READINGING CSV6" << endl;
 	stringstream infile;
 	infile << contents;
 	return readCsv(infile, separator);
