@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 23 08:50:45 CEST 2017
+// Last Modified: Fri Jun 23 19:07:46 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2809,6 +2809,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void cleanupManipulators            (void);
 		void cleanManipulator               (vector<GridSlice*>& newslices, 
 		                                     GridSlice* curr);
+		GridSlice* checkManipulatorExpand   (GridSlice* curr);
 		GridSlice* checkManipulatorContract (GridSlice* curr);
 		void transferMerges                 (GridStaff* oldstaff,
 		                                     GridStaff* oldlaststaff,

@@ -220,16 +220,29 @@ void HumGrid::cleanManipulator(vector<GridSlice*>& newslices, GridSlice* curr) {
 	GridSlice* output;
 
 	// deal with *^ manipulators:
-
-// ggg implement later:
-//	while (output = checkManipulatorExpand(curr)) {
-//		newslices.push_back(output);
-//	}
+	while ((output = checkManipulatorExpand(curr))) {
+		newslices.push_back(output);
+	}
 
 	// deal with *v manipulators:
 	while ((output = checkManipulatorContract(curr))) {
 		newslices.push_back(output);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::checkManipulatorExpand -- Check for cases where a spine expands
+//    into sub-spines.
+//
+
+GridSlice* HumGrid::checkManipulatorExpand(GridSlice* curr) {
+
+// ggg
+
+	return NULL;
 }
 
 
@@ -563,17 +576,19 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 			} else if (v1count < v2count) {
 				// need to grow
 				int grow = v2count - v1count;
+cerr << "GROW1 = " << grow << endl;
 				if (grow == 2 * v1count) {
+cerr << "\tGROWING1" << endl;
 					// all subspines split
 					for (z=0; z<v1count; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^X");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
 				} else if ((v1count > 0) && (grow > 2 * v1count)) {
 					// too large to split all at the same time, deal with later
 					for (z=0; z<v1count-1; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^Y");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
@@ -591,7 +606,7 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 						mslice->at(p)->at(s)->push_back(gv);
 					}
 					for (z=0; z<doubled; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^Z");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}

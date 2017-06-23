@@ -61,6 +61,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void cleanupManipulators            (void);
 		void cleanManipulator               (vector<GridSlice*>& newslices, 
 		                                     GridSlice* curr);
+		GridSlice* checkManipulatorExpand   (GridSlice* curr);
 		GridSlice* checkManipulatorContract (GridSlice* curr);
 		void transferMerges                 (GridStaff* oldstaff,
 		                                     GridStaff* oldlaststaff,

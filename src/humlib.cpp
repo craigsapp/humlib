@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 23 08:50:45 CEST 2017
+// Last Modified: Fri Jun 23 19:07:46 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4170,16 +4170,29 @@ void HumGrid::cleanManipulator(vector<GridSlice*>& newslices, GridSlice* curr) {
 	GridSlice* output;
 
 	// deal with *^ manipulators:
-
-// ggg implement later:
-//	while (output = checkManipulatorExpand(curr)) {
-//		newslices.push_back(output);
-//	}
+	while ((output = checkManipulatorExpand(curr))) {
+		newslices.push_back(output);
+	}
 
 	// deal with *v manipulators:
 	while ((output = checkManipulatorContract(curr))) {
 		newslices.push_back(output);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::checkManipulatorExpand -- Check for cases where a spine expands
+//    into sub-spines.
+//
+
+GridSlice* HumGrid::checkManipulatorExpand(GridSlice* curr) {
+
+// ggg
+
+	return NULL;
 }
 
 
@@ -4513,17 +4526,19 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 			} else if (v1count < v2count) {
 				// need to grow
 				int grow = v2count - v1count;
+cerr << "GROW1 = " << grow << endl;
 				if (grow == 2 * v1count) {
+cerr << "\tGROWING1" << endl;
 					// all subspines split
 					for (z=0; z<v1count; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^X");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
 				} else if ((v1count > 0) && (grow > 2 * v1count)) {
 					// too large to split all at the same time, deal with later
 					for (z=0; z<v1count-1; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^Y");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
@@ -4541,7 +4556,7 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 						mslice->at(p)->at(s)->push_back(gv);
 					}
 					for (z=0; z<doubled; z++) {
-						token = new HumdrumToken("*^");
+						token = new HumdrumToken("*^Z");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
@@ -9558,11 +9573,13 @@ bool HumdrumFileBase::read(istream& contents) {
 //
 
 bool HumdrumFileBase::readCsv(const string& filename, const string& separator) {
+cerr << "READINGING CSV1" << endl;
 	return HumdrumFileBase::readCsv(filename.c_str());
 }
 
 
 bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
+cerr << "READINGING CSV2" << endl;
 	ifstream infile;
 	if ((strlen(filename) == 0) || (strcmp(filename, "-") == 0)) {
 		return HumdrumFileBase::readCsv(cin, separator);
@@ -9579,6 +9596,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 
 
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
+cerr << "READINGING CSV3" << endl;
 	m_displayError = true;
 	char buffer[123123] = {0};
 	HumdrumLine* s;
@@ -9638,6 +9656,7 @@ bool HumdrumFileBase::readString(const char* contents) {
 
 bool HumdrumFileBase::readStringCsv(const char* contents,
 		const string& separator) {
+cerr << "READINGING CSV5" << endl;
 	stringstream infile;
 	infile << contents;
 	return readCsv(infile, separator);
@@ -9646,6 +9665,7 @@ bool HumdrumFileBase::readStringCsv(const char* contents,
 
 bool HumdrumFileBase::readStringCsv(const string& contents,
 		const string& separator) {
+cerr << "READINGING CSV6" << endl;
 	stringstream infile;
 	infile << contents;
 	return readCsv(infile, separator);
@@ -28323,7 +28343,7 @@ RECONSIDER:
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
-			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
+			// double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) {
