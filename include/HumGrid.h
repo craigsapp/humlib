@@ -79,6 +79,7 @@ class HumGrid : public vector<GridMeasure*> {
 		string  createBarToken              (int m, int barnum,
 		                                     GridMeasure* measure);
 		string getBarStyle                  (GridMeasure* measure);
+		void adjustExpansionsInStaff        (GridSlice* newmanip, GridSlice* curr, int p, int s);
 
 	private:
 		vector<GridSlice*>   m_allslices;
