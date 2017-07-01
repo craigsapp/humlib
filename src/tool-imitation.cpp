@@ -179,7 +179,7 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 
 	if (getBoolean("debug")) {
 		cout << endl;
-		for (int i=0; i<intervals.size(); i++) {
+		for (int i=0; i<(int)intervals.size(); i++) {
 			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
 		}
 	}
