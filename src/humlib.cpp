@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  2 21:07:10 CEST 2017
+// Last Modified: Sun Jul  2 22:00:50 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18685,6 +18685,12 @@ bool MxmlEvent::isGrace(void) {
 //         <slur type="start" orientation="under" number="1">
 //         <slur type="start" orientation="over" number="1">
 //
+//  And also:
+// 
+//  <note>
+//     <notations>
+//          <slur number="1" placement="above" type="start"/>
+//          <slur number="1" placement="below" type="start"/>
 //
 
 bool MxmlEvent::hasSlurStart(int& direction) {
@@ -18711,6 +18717,14 @@ bool MxmlEvent::hasSlurStart(int& direction) {
 						if (strcmp(orientation.value(), "over") == 0) {
 							direction = 1;
 						} else if (strcmp(orientation.value(), "under") == 0) {
+							direction = -1;
+						}
+					}
+					xml_attribute placement = grandchild.attribute("placement");
+					if (placement) {
+						if (strcmp(placement.value(), "above") == 0) {
+							direction = 1;
+						} else if (strcmp(placement.value(), "below") == 0) {
 							direction = -1;
 						}
 					}
