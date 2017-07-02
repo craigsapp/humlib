@@ -1306,7 +1306,30 @@ void HumGrid::addNullTokens(void) {
 	}
 
 	addNullTokensForGraceNotes();
+	adjustClefChanges();
 	addNullTokensForClefChanges();
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::adjustClefChanges -- If a clef change starts at the
+// beginning of a meausre, move it to before the measure.
+//
+
+void HumGrid::adjustClefChanges(void) {
+	vector<GridMeasure*>& measures = *this;
+	for (int i=1; i<(int)measures.size(); i++) {
+		auto it = measures[i]->begin();
+		if (!(*it)->isClefSlice()) {
+			continue;
+		}
+		// move clef to end of previous measure
+		GridSlice* tempslice = *it;
+		measures[i]->pop_front();
+		measures[i-1]->push_back(tempslice);
+	}
 }
 
 

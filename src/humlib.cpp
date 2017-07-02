@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  2 17:39:16 CEST 2017
+// Last Modified: Sun Jul  2 20:59:08 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5255,7 +5255,30 @@ void HumGrid::addNullTokens(void) {
 	}
 
 	addNullTokensForGraceNotes();
+	adjustClefChanges();
 	addNullTokensForClefChanges();
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::adjustClefChanges -- If a clef change starts at the
+// beginning of a meausre, move it to before the measure.
+//
+
+void HumGrid::adjustClefChanges(void) {
+	vector<GridMeasure*>& measures = *this;
+	for (int i=1; i<(int)measures.size(); i++) {
+		auto it = measures[i]->begin();
+		if (!(*it)->isClefSlice()) {
+			continue;
+		}
+		// move clef to end of previous measure
+		GridSlice* tempslice = *it;
+		measures[i]->pop_front();
+		measures[i-1]->push_back(tempslice);
+	}
 }
 
 
