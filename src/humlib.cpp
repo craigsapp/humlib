@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  1 15:18:59 CEST 2017
+// Last Modified: Sun Jul  2 17:09:29 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5020,7 +5020,117 @@ void HumGrid::addNullTokensForGraceNotes(void) {
 
 		FillInNullTokensForGraceNotes(m_allslices[i], lastnote, nextnote);
 	}
+}
 
+
+
+//////////////////////////////
+//
+// HumGrid::addNullTokensForClefChanges -- Avoid clef in multi-subspine
+//     regions from contracting to a single spine.
+//
+
+void HumGrid::addNullTokensForClefChanges(void) {
+	// add null tokens for key changes in other voices
+	GridSlice *lastnote = NULL;
+	GridSlice *nextnote = NULL;
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		if (!m_allslices[i]->isClefSlice()) {
+			continue;
+		}
+		// cerr << "PROCESSING " << m_allslices[i] << endl;
+		lastnote = NULL;
+		nextnote = NULL;
+
+		for (int j=i+1; j<(int)m_allslices.size(); j++) {
+			if (m_allslices[j]->isNoteSlice()) {
+				nextnote = m_allslices[j];
+				break;
+			}
+		}
+		if (nextnote == NULL) {
+			continue;
+		}
+
+		for (int j=i-1; j>=0; j--) {
+			if (m_allslices[j]->isNoteSlice()) {
+				lastnote = m_allslices[j];
+				break;
+			}
+		}
+		if (lastnote == NULL) {
+			continue;
+		}
+
+		FillInNullTokensForClefChanges(m_allslices[i], lastnote, nextnote);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::FillInNullTokensForClefChanges --
+//
+
+void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
+		GridSlice* lastnote, GridSlice* nextnote) {
+
+	if (clefslice == NULL) {
+		return;
+	}
+	if (lastnote == NULL) {
+		return;
+	}
+	if (nextnote == NULL) {
+		return;
+	}
+
+	// cerr << "CHECKING CLEF SLICE: " << endl;
+	// cerr << "\tclef\t" << clefslice << endl;
+	// cerr << "\tlast\t" << lastnote << endl;
+	// cerr << "\tnext\t" << nextnote << endl;
+
+	int partcount = (int)clefslice->size();
+	int staffcount;
+	int vgcount;
+	int v1count;
+	int v2count;
+
+	for (int p=0; p<partcount; p++) {
+		staffcount = (int)lastnote->at(p)->size();
+		for (int s=0; s<staffcount; s++) {
+			v1count = (int)lastnote->at(p)->at(s)->size();
+			v2count = (int)nextnote->at(p)->at(s)->size();
+			vgcount = (int)clefslice->at(p)->at(s)->size();
+			// if (vgcount < 1) {
+			// 	vgcount = 1;
+			// }
+			if (v1count < 1) {
+				v1count = 1;
+			}
+			if (v2count < 1) {
+				v2count = 1;
+			}
+			// cerr << "p=" << p << "\ts=" << s << "\tv1count = " << v1count;
+			// cerr << "\tv2count = " << v2count;
+			// cerr << "\tvgcount = " << vgcount << endl;
+			if (v1count != v2count) {
+				// Note slices are expanding or contracting so do
+				// not try to adjust clef slice between them.
+				continue;
+			}
+			if (vgcount == v1count) {
+				// Grace note slice does not need to be adjusted.
+			}
+			int diff = v1count - vgcount;
+			// fill in a null for each empty slot in voice
+			for (int i=0; i<diff; i++) {
+				GridVoice* gv = new GridVoice("*", 0);
+				clefslice->at(p)->at(s)->push_back(gv);
+			}
+		}
+	}
 }
 
 
@@ -5145,6 +5255,7 @@ void HumGrid::addNullTokens(void) {
 	}
 
 	addNullTokensForGraceNotes();
+	addNullTokensForClefChanges();
 }
 
 

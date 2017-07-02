@@ -50,6 +50,9 @@ class HumGrid : public vector<GridMeasure*> {
 		void addNullTokensForGraceNotes    (void);
 		void FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
+		void addNullTokensForClefChanges  (void);
+		void FillInNullTokensForClefChanges (GridSlice* clefslice,
+		                                    GridSlice* lastnote, GridSlice* nextnote);
 		bool buildSingleList               (void);
 		void extendDurationToken           (int slicei, int parti,
 		                                    int staffi, int voicei);
