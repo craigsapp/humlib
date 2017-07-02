@@ -155,7 +155,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		out << "!!!RDF**kern: > = slur above" << endl;
 	}
 	if (m_slurbelow) {
-		out << "!!!RDF**kern: > = slur below" << endl;
+		out << "!!!RDF**kern: < = slur below" << endl;
 	}
 
 	for (int i=0; i<(int)partdata.size(); i++) {
