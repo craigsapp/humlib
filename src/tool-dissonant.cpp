@@ -773,11 +773,11 @@ RECONSIDER:
 
 		/////////////////////////////
 		////
-		//// Code to apply binary or ternary suspension and agent labels
-		////
+		//// Code to apply binary or ternary suspension and agent labels and 
+		//// also suspension ornament and chanson idiom labels
 
 		else if (valid_sus_acc && (ointn == -1)) {
-			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
@@ -790,7 +790,7 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN]; // binary suspension
 			}
 		} else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
-			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
@@ -804,7 +804,7 @@ RECONSIDER:
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP]; // repeated-note of suspension
 		} else if (valid_ornam_sus_acc && ((ointn == -2) && (ointnn == 1))) {
-			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN] ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4])))) {
@@ -819,7 +819,7 @@ RECONSIDER:
 			}
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_ORNAM]; // suspension ornament
 		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
-			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp = 1) &&
+			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
