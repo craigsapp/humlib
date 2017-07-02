@@ -61,6 +61,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void cleanupManipulators            (void);
 		void cleanManipulator               (vector<GridSlice*>& newslices, 
 		                                     GridSlice* curr);
+		GridSlice* checkManipulatorExpand   (GridSlice* curr);
 		GridSlice* checkManipulatorContract (GridSlice* curr);
 		void transferMerges                 (GridStaff* oldstaff,
 		                                     GridStaff* oldlaststaff,
@@ -78,6 +79,7 @@ class HumGrid : public vector<GridMeasure*> {
 		string  createBarToken              (int m, int barnum,
 		                                     GridMeasure* measure);
 		string getBarStyle                  (GridMeasure* measure);
+		void adjustExpansionsInStaff        (GridSlice* newmanip, GridSlice* curr, int p, int s);
 
 	private:
 		vector<GridSlice*>   m_allslices;

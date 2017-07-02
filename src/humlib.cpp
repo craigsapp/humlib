@@ -2871,10 +2871,10 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 						line->appendToken(staff.at(v)->getToken());
 						staff.at(v)->forgetToken();
 					} else if (!staff.at(v)) {
-						token = new HumdrumToken(".z");
+						token = new HumdrumToken(".");
 						line->appendToken(token);
 					} else {
-						token = new HumdrumToken(".b");
+						token = new HumdrumToken(".");
 						line->appendToken(token);
 					}
 				}
@@ -4007,6 +4007,7 @@ HumGrid::~HumGrid(void) {
 }
 
 
+
 //////////////////////////////
 //
 // HumGrid::enableRecipSpine --
@@ -4015,6 +4016,7 @@ HumGrid::~HumGrid(void) {
 void HumGrid::enableRecipSpine(void) {
 	m_recip = true;
 }
+
 
 
 //////////////////////////////
@@ -4170,16 +4172,148 @@ void HumGrid::cleanManipulator(vector<GridSlice*>& newslices, GridSlice* curr) {
 	GridSlice* output;
 
 	// deal with *^ manipulators:
-
-// ggg implement later:
-//	while (output = checkManipulatorExpand(curr)) {
-//		newslices.push_back(output);
-//	}
+	while ((output = checkManipulatorExpand(curr))) {
+		newslices.push_back(output);
+	}
 
 	// deal with *v manipulators:
 	while ((output = checkManipulatorContract(curr))) {
 		newslices.push_back(output);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::checkManipulatorExpand -- Check for cases where a spine expands
+//    into sub-spines.
+//
+
+GridSlice* HumGrid::checkManipulatorExpand(GridSlice* curr) {
+	GridStaff* staff     = NULL;
+	GridPart*  part      = NULL;
+	GridVoice* voice     = NULL;
+	HTp        token     = NULL;
+	bool       neednew   = false;
+
+	int p, s, v;
+	int partcount = (int)curr->size();
+	int staffcount;
+
+	for (p=0; p<partcount; p++) {
+		part = curr->at(p);
+		staffcount = (int)part->size();
+		for (s=0; s<staffcount; s++) {
+			staff = part->at(s);
+			for (v=0; v<(int)staff->size(); v++) {
+				voice = staff->at(v);
+				token = voice->getToken();
+				if (token->compare(0, 2, "*^") == 0) {
+					if ((token->size() > 2) && isdigit((*token)[2])) {
+						neednew = true;
+						break;
+					}
+				}
+			}
+			if (neednew) {
+				break;
+			}
+		}
+		if (neednew) {
+			break;
+		}
+	}
+
+	if (neednew == false) {
+		return NULL;
+	}
+
+	// need to split *^#'s into separate *^
+
+	GridSlice* newmanip = new GridSlice(curr->getMeasure(), curr->getTimestamp(),
+	curr->getType(), curr);
+
+	for (p=0; p<partcount; p++) {
+		part = curr->at(p);
+		staffcount = (int)part->size();
+		for (s=0; s<staffcount; s++) {
+			staff = part->at(s);
+			adjustExpansionsInStaff(newmanip, curr, p, s);
+		}
+	}
+	return newmanip;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::adjustExpansionsInStaff -- duplicate null
+//   manipulators, and expand large-expansions, such as *^3 into
+//   *^ and *^ on the next line, or *^4 into *^ and *^3 on the
+//   next line.  The "newmanip" will be placed before curr, so
+//
+
+void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int p, int s) {
+	HTp token = NULL;
+	GridVoice* newvoice  = NULL;
+	GridVoice* curvoice  = NULL;
+	GridStaff* newstaff  = NULL;
+	GridStaff* curstaff  = NULL;
+
+	curstaff = curr->at(p)->at(s);
+	newstaff = newmanip->at(p)->at(s);
+
+	int originalsize = (int)curstaff->size();
+	int cv = 0;
+
+	for (int v=0; v<originalsize; v++) {
+		curvoice = curstaff->at(cv);
+		token = curvoice->getToken();
+
+		if (token->compare(0, 2, "*^") == 0) {
+			if ((token->size() > 2) && isdigit((*token)[2])) {
+				// transfer *^ to newmanip and replace with * and *^(n-1) in curr
+				// Convert *^3 to *^ and add ^* to next line, for example
+				// Convert *^4 to *^ and add ^*3 to next line, for example
+				int count = 0;
+				if (!sscanf(token->c_str(), "*^%d", &count)) {
+					cerr << "Error finding expansion number" << endl;
+				}
+				newstaff->push_back(curvoice);
+				curvoice->getToken()->setText("*^");
+				newvoice = new GridVoice("*", 0);
+				curstaff->at(cv) = newvoice;
+				if (count <= 3) {
+					newvoice = new GridVoice("*^", 0);
+				} else {
+					newvoice = new GridVoice("*^" + to_string(count-1), 0);
+				}
+				curstaff->insert(curstaff->begin()+cv+1, newvoice);
+				cv++;
+				continue;
+			} else {
+				// transfer *^ to newmanip and replace with two * in curr
+				newstaff->push_back(curvoice);
+				newvoice = new GridVoice("*", 0);
+				curstaff->at(cv) = newvoice;
+				newvoice = new GridVoice("*", 0);
+				curstaff->insert(curstaff->begin()+cv, newvoice);
+				cv++;
+				continue;
+			}
+		} else {
+			// insert * in newmanip
+			newvoice = new GridVoice("*", 0);
+			newstaff->push_back(newvoice);
+			cv++;
+			continue;
+		}
+
+	}
+
+// ggg
 }
 
 
@@ -4246,6 +4380,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	partcount = (int)curr->size();
 	int lastp = 0;
 	int lasts = 0;
+
 	for (p=0; p<partcount; p++) {
 		part  = curr->at(p);
 		staffcount = (int)part->size();
@@ -4513,7 +4648,8 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 			} else if (v1count < v2count) {
 				// need to grow
 				int grow = v2count - v1count;
-				if (grow == 2 * v1count) {
+				// if (grow == 2 * v1count) {
+				if (v2count == 2 * v1count) {
 					// all subspines split
 					for (z=0; z<v1count; z++) {
 						token = new HumdrumToken("*^");
@@ -4528,7 +4664,11 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 						mslice->at(p)->at(s)->push_back(gv);
 					}
 					int extra = v2count - (v1count - 1) * 2;
-					token = new HumdrumToken("*^" + to_string(extra));
+					if (extra > 2) {
+						token = new HumdrumToken("*^" + to_string(extra));
+					} else {
+						token = new HumdrumToken("*^");
+					}
 					gv = new GridVoice(token, 0);
 					mslice->at(p)->at(s)->push_back(gv);
 				} else {
@@ -4540,11 +4680,16 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
 					}
-					for (z=0; z<doubled; z++) {
-						token = new HumdrumToken("*^");
+					//for (z=0; z<doubled; z++) {
+						if (doubled > 1) {
+							token = new HumdrumToken("*^" + to_string(doubled+1));
+						} else {
+							token = new HumdrumToken("*^");
+						}
+						// token = new HumdrumToken("*^");
 						gv = new GridVoice(token, 0);
 						mslice->at(p)->at(s)->push_back(gv);
-					}
+					//}
 				}
 			} else if (v1count > v2count) {
 				// need to shrink
@@ -4961,7 +5106,7 @@ void HumGrid::addNullTokens(void) {
 	if (0) {
 		cerr << "SLICE TIMESTAMPS: " << endl;
 		for (int x=0; x<(int)m_allslices.size(); x++) {
-			cerr << "\tTIMESTAMP " << x << "= " 
+			cerr << "\tTIMESTAMP " << x << "= "
 			     << m_allslices[x]->getTimestamp()
 			     << "\tDUR=" << m_allslices[x]->getDuration()
 			     << "\t"
@@ -28337,7 +28482,7 @@ cerr << "durp: " << durp << endl;
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
-			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
+			// double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) {
@@ -32635,7 +32780,7 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 
 	if (getBoolean("debug")) {
 		cout << endl;
-		for (int i=0; i<intervals.size(); i++) {
+		for (int i=0; i<(int)intervals.size(); i++) {
 			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
 		}
 	}

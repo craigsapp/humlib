@@ -839,7 +839,7 @@ RECONSIDER:
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
 			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
-			double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
+			// double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
 					(intp == -1) && (intn == -2) && (intnn == 1)) {
