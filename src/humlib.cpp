@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  2 22:00:50 CEST 2017
+// Last Modified: Mon Jul  3 05:57:17 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19531,7 +19531,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 				hookbacks++;
 			}
 		} else if (nodeType(child, "stem")) {
-			if (m_stems || (m_voice > 2) || (getDuration() == 0)) {
+			if (m_stems || (m_voiceindex > 2) || (getDuration() == 0)) {
 				const char* stemdir = child.child_value();
 				if (strcmp(stemdir, "up") == 0) {
 					stem = 1;
