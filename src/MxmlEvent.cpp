@@ -1386,7 +1386,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 				hookbacks++;
 			}
 		} else if (nodeType(child, "stem")) {
-			if (m_stems || (m_voiceindex > 2) || (getDuration() == 0)) {
+			if (m_stems || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
 				const char* stemdir = child.child_value();
 				if (strcmp(stemdir, "up") == 0) {
 					stem = 1;
