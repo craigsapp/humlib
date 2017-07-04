@@ -50,6 +50,7 @@ Tool_imitation::Tool_imitation(void) {
 	define("D|no-duration=b",     "do not consider duration when matching");
 	define("r|rest=b",            "require match trigger to follow a rest");
 	define("R|rest2=b",           "require match target to also follow a rest");
+	define("i|intervals=s",       "require given interval sequence in imitation");
 	define("M|no-mark=b",         "do not mark matched sequences");
 }
 
@@ -103,6 +104,22 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 	m_mark     = !getBoolean("no-mark");
 	m_rest     = getBoolean("rest");
 	m_rest2    = getBoolean("rest2");
+	if (getBoolean("intervals")) {
+		vector<string> values;
+		HumRegex hre;
+		string intstring = getString("intervals");
+		hre.split(values, intstring.c_str(), "[^0-9+-]+");
+		m_intervals.resize(values.size());
+		for (int i=0; i<(int)values.size(); i++) {
+			m_intervals[i] = stoi(values[i]);
+			// subtract one since intervals in caluculations are zero-indexed:
+			if (m_intervals[i] > 0) {
+				m_intervals[i]--;
+			} else if (m_intervals[i] < 0) {
+				m_intervals[i]++;
+			}
+		}
+	}
 
 	vector<vector<string>>    results;
 	vector<vector<NoteCell*>> attacks;
@@ -180,7 +197,8 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 	if (getBoolean("debug")) {
 		cout << endl;
 		for (int i=0; i<(int)intervals.size(); i++) {
-			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
+			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " 
+			     << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
 		}
 	}
 
@@ -227,6 +245,9 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				continue;
 			}
 			count = compareSequences(v1a, v1i, i, v2a, v2i, j);
+			if ((count >= min) && (m_intervals.size() > 0)) {
+				count = checkForIntervalSequence(m_intervals, v1i, i, count);
+			}
 			if (count >= min) {
 				Enumerator++;
 				for (int k=0; k<count; k++) {
@@ -290,6 +311,33 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 			j += count;
 		} // j loop
 	} // i loop
+}
+
+
+
+//////////////////////////////
+//
+// checkForIntervalSequence --
+//
+
+int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
+		vector<double>& v1i, int starti, int count) {
+
+	int endi = starti + count - m_intervals.size();
+	for (int i=starti; i<endi; i++) {
+		for (int j=0; j<(int)m_intervals.size(); j++) {
+			if (m_intervals[j] != v1i[i+j]) {
+				break;
+			}
+			if (j == m_intervals.size() - 1) {
+				// successfully found the interval pattern in imitation
+				return count;
+			}
+		}
+	}
+
+	// pattern was not found so say that there was no match
+	return 0;
 }
 
 
