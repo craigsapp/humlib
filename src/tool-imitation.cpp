@@ -48,6 +48,7 @@ Tool_imitation::Tool_imitation(void) {
 	define("e|exinterp=s:**vvdata","specify exinterp for **vvdata spine");
 	define("n|threshold=i:7",     "minimum number of notes to match");
 	define("D|no-duration=b",     "do not consider duration when matching");
+	define("d|max-distance=d",    "maximum distance in quarter notes between imitations");
 	define("r|rest=b",            "require match trigger to follow a rest");
 	define("R|rest2=b",           "require match target to also follow a rest");
 	define("i|intervals=s",       "require given interval sequence in imitation");
@@ -100,6 +101,8 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 		m_threshold = 3;
 	}
 
+	m_maxdistanceQ = getBoolean("max-distance");
+	m_maxdistance = getDouble("max-distance");
 	m_duration = !getBoolean("no-duration");
 	m_mark     = !getBoolean("no-mark");
 	m_rest     = getBoolean("rest");
@@ -248,65 +251,74 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 			if ((count >= min) && (m_intervals.size() > 0)) {
 				count = checkForIntervalSequence(m_intervals, v1i, i, count);
 			}
-			if (count >= min) {
-				Enumerator++;
-				for (int k=0; k<count; k++) {
-					enum1[i+k] = Enumerator;
-					enum2[j+k] = Enumerator;
-				}
-				// cout << "Match length count " << count << endl;
-				HTp token1 = attacks[v1][i]->getToken();
-				HTp token2 = attacks[v2][j]->getToken();
-				HumNum time1 = token1->getDurationFromStart();
-				HumNum time2 = token2->getDurationFromStart();
-				HumNum distance1 = time2 - time1;
-				HumNum distance2 = time1 - time2;
-
-				int interval = *attacks[v2][j] - *attacks[v1][i];
-				int line1 = attacks[v1][i]->getLineIndex();
-				int line2 = attacks[v2][j]->getLineIndex();
-				if (!results[v1][line1].empty()) {
-					results[v1][line1] += " ";
-				}
-				results[v1][line1] += "n";
-				results[v1][line1] += to_string(Enumerator);
-				results[v1][line1] += ":c";
-				results[v1][line1] += to_string(count);
-				results[v1][line1] += ":d";
-				results[v1][line1] += to_string(distance1.getNumerator());
-				if (distance1.getDenominator() != 1) {
-					results[v1][line1] += '/';
-					results[v1][line1] += to_string(distance1.getNumerator());
-				}
-				results[v1][line1] += ":i";
-				results[v1][line1] += to_string(interval + 1);
-
-				if (!results[v2][line2].empty()) {
-					results[v2][line2] += " ";
-				}
-				results[v2][line2] += "n";
-				results[v2][line2] += to_string(Enumerator);
-				results[v2][line2] += ":c";
-				results[v2][line2] += to_string(count);
-				results[v2][line2] += ":d";
-				results[v2][line2] += to_string(distance2.getNumerator());
-				if (distance2.getDenominator() != 1) {
-					results[v2][line2] += '/';
-					results[v2][line2] += to_string(distance2.getNumerator());
-				}
-				results[v2][line2] += ":i";
-				results[v2][line2] += to_string(interval + 1);
-
-				if (m_mark) {
-					for (int z=0; z<count; z++) {
-						token1 = attacks[v1][i+z]->getToken();
-						token2 = attacks[v2][j+z]->getToken();
-						token1->setText(*token1 + m_marker);
-						token2->setText(*token2 + m_marker);
-					}
-				}
-
+			if (count < min) {
+				j += count;
+				continue;
 			}
+
+			// cout << "Match length count " << count << endl;
+			HTp token1 = attacks[v1][i]->getToken();
+			HTp token2 = attacks[v2][j]->getToken();
+			HumNum time1 = token1->getDurationFromStart();
+			HumNum time2 = token2->getDurationFromStart();
+			HumNum distance1 = time2 - time1;
+			HumNum distance2 = time1 - time2;
+
+			if (m_maxdistanceQ && (distance1.getAbs().getFloat() > m_maxdistance)) {
+				j += count;
+				continue;
+			}
+
+			Enumerator++;
+			for (int k=0; k<count; k++) {
+				enum1[i+k] = Enumerator;
+				enum2[j+k] = Enumerator;
+			}
+
+			int interval = *attacks[v2][j] - *attacks[v1][i];
+			int line1 = attacks[v1][i]->getLineIndex();
+			int line2 = attacks[v2][j]->getLineIndex();
+			if (!results[v1][line1].empty()) {
+				results[v1][line1] += " ";
+			}
+			results[v1][line1] += "n";
+			results[v1][line1] += to_string(Enumerator);
+			results[v1][line1] += ":c";
+			results[v1][line1] += to_string(count);
+			results[v1][line1] += ":d";
+			results[v1][line1] += to_string(distance1.getNumerator());
+			if (distance1.getDenominator() != 1) {
+				results[v1][line1] += '/';
+				results[v1][line1] += to_string(distance1.getNumerator());
+			}
+			results[v1][line1] += ":i";
+			results[v1][line1] += to_string(interval + 1);
+
+			if (!results[v2][line2].empty()) {
+				results[v2][line2] += " ";
+			}
+			results[v2][line2] += "n";
+			results[v2][line2] += to_string(Enumerator);
+			results[v2][line2] += ":c";
+			results[v2][line2] += to_string(count);
+			results[v2][line2] += ":d";
+			results[v2][line2] += to_string(distance2.getNumerator());
+			if (distance2.getDenominator() != 1) {
+				results[v2][line2] += '/';
+				results[v2][line2] += to_string(distance2.getNumerator());
+			}
+			results[v2][line2] += ":i";
+			results[v2][line2] += to_string(interval + 1);
+
+			if (m_mark) {
+				for (int z=0; z<count; z++) {
+					token1 = attacks[v1][i+z]->getToken();
+					token2 = attacks[v2][j+z]->getToken();
+					token1->setText(*token1 + m_marker);
+					token2->setText(*token2 + m_marker);
+				}
+			}
+
 			// skip over match (need to do in i as well somehow)
 			j += count;
 		} // j loop

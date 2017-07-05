@@ -54,6 +54,8 @@ class Tool_imitation : public HumTool {
 		bool m_duration;
 		bool m_rest;
 		bool m_rest2;
+		double m_maxdistance;
+		bool m_maxdistanceQ;
 		vector<int> m_intervals;
 		bool m_mark;
 		char m_marker = '@';

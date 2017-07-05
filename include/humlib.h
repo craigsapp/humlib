@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  4 23:00:57 CEST 2017
+// Last Modified: Thu Jul  6 01:25:29 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4068,6 +4068,8 @@ class Tool_imitation : public HumTool {
 		bool m_duration;
 		bool m_rest;
 		bool m_rest2;
+		double m_maxdistance;
+		bool m_maxdistanceQ;
 		vector<int> m_intervals;
 		bool m_mark;
 		char m_marker = '@';
