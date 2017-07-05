@@ -44,6 +44,9 @@ class Tool_imitation : public HumTool {
 		int     compareSequences   (vector<NoteCell*>& attack1, vector<double>& seq1,
 		                            int i1, vector<NoteCell*>& attack2,
 		                            vector<double>& seq2, int i2);
+		int     checkForIntervalSequence(vector<int>& m_intervals,
+		                            vector<double>& v1i, int starti, int count);
+
 
 	private:
 	 	vector<HTp> m_kernspines;
@@ -51,6 +54,7 @@ class Tool_imitation : public HumTool {
 		bool m_duration;
 		bool m_rest;
 		bool m_rest2;
+		vector<int> m_intervals;
 		bool m_mark;
 		char m_marker = '@';
 		static int Enumerator;
