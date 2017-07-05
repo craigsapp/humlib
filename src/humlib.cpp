@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat, Jul  1, 2017  5:04:17 PM
+// Last Modified: Sun, Jul  2, 2017 11:04:16 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28409,7 +28409,6 @@ RECONSIDER:
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
-				cerr << "Here 1." << endl;
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) {
@@ -28423,7 +28422,6 @@ RECONSIDER:
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
-				cerr << "Here 2." << endl;
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) {
@@ -28439,7 +28437,6 @@ RECONSIDER:
 				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN] ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4])))) {
-				cerr << "Here 3." << endl;
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) {
@@ -28454,7 +28451,6 @@ RECONSIDER:
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
 				((results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
 				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
-				cerr << "Here 4." << endl;
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) {
@@ -28466,16 +28462,6 @@ RECONSIDER:
 			} // NB: in this case the ornament is consonant against the agent so no ornament label.
 		}
 
-
-cerr << "*******************" << endl;
-cerr << "opitch: " << opitch << endl;
-cerr << "lowestnote: " << lowestnote << endl;
-cerr << "lineindex: " << lineindex << endl;
-cerr << "intpp: " << intpp << endl;
-cerr << "intp: " << intp << endl;
-cerr << "ointn: " << ointn << endl;
-cerr << "durpp: " << durpp << endl;
-cerr << "durp: " << durp << endl;
 /////////////////////////////
 
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
