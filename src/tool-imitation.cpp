@@ -394,6 +394,7 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 			count++;
 			continue;
 		} else {
+			return count;
 			break;
 		}
 	}
