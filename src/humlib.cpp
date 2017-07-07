@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  7 07:12:37 CEST 2017
+// Last Modified: Fri Jul  7 07:46:55 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32826,10 +32826,10 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 
 	NoteGrid grid(infile);
 
-	//if (getBoolean("debug")) {
+	if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
 		// return 1;
-	//} 
+	} 
 
 	m_threshold = getInteger("threshold") + 1;
 	if (m_threshold < 3) {
