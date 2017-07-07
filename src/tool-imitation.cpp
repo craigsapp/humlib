@@ -91,10 +91,10 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 
 	NoteGrid grid(infile);
 
-	if (getBoolean("debug")) {
+	//if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
 		// return 1;
-	} 
+	//} 
 
 	m_threshold = getInteger("threshold") + 1;
 	if (m_threshold < 3) {
