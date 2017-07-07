@@ -70,6 +70,8 @@ class NoteCell {
 		int    getMeterTop          (void);
 		HumNum getMeterBottom       (void);
 
+		vector<HTp> m_tiedtokens;	// list of tied notes/rests after note attack
+
 	protected:
 		void clear                  (void);
 		void calculateNumericPitches(void);

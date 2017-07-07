@@ -46,7 +46,7 @@ class Tool_imitation : public HumTool {
 		                            vector<double>& seq2, int i2);
 		int     checkForIntervalSequence(vector<int>& m_intervals,
 		                            vector<double>& v1i, int starti, int count);
-
+		void    markedTiedNotes    (vector<HTp>& tokens);
 
 	private:
 	 	vector<HTp> m_kernspines;

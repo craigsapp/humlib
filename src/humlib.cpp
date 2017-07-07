@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  7 11:35:14 CEST 2017
+// Last Modified: Fri Jul  7 12:49:15 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21913,6 +21913,7 @@ void NoteGrid::buildAttackIndex(int vindex) {
 	// to the slice of the attack correspinding to this NoteCell.
 	// For rests, the first rest in a continuous sequence of rests
 	// will be marked as the "attack" of the rest.
+	NoteCell* currentcell = NULL;
 	for (int i=0; i<(int)part.size(); i++) {
 		if (i == 0) {
 			part[0]->setCurrAttackIndex(0);
@@ -21923,6 +21924,9 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			// of a rest sequence.
 			if (part[i-1]->isRest()) {
 				// rest "sustain"
+				if (currentcell) {
+					currentcell->m_tiedtokens.push_back(part[i]->getToken());
+				}
 				part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			} else {
 				// rest "attack";
@@ -21934,6 +21938,9 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			// This is a sustain, so get the attack index of the
 			// note from the previous slice index.
 			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
+			if (currentcell) {
+				currentcell->m_tiedtokens.push_back(part[i]->getToken());
+			}
 		}
 	}
 
@@ -33051,6 +33058,12 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 					token2 = attacks[v2][j+z]->getToken();
 					token1->setText(*token1 + m_marker);
 					token2->setText(*token2 + m_marker);
+               if (attacks[v1][i+z]->isRest() && (z == count - 1) ) {
+						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
+					}
+               if (attacks[v2][j+z]->isRest() && (z == count - 1) ) {
+						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
+					}
 				}
 			}
 
@@ -33064,7 +33077,20 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 
 //////////////////////////////
 //
-// checkForIntervalSequence --
+// Tool_imitation::markedTiedNotes --
+//
+
+void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
+	for (int i=0; i<tokens.size(); i++) {
+			tokens[i]->setText(*tokens[i] + m_marker);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_imitation::checkForIntervalSequence --
 //
 
 int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
