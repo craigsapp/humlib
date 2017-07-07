@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  7 12:49:15 CEST 2017
+// Last Modified: Fri Jul  7 14:05:15 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21924,8 +21924,10 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			// of a rest sequence.
 			if (part[i-1]->isRest()) {
 				// rest "sustain"
-				if (currentcell) {
+				if (currentcell && !part[i]->getToken()->isNull()) {
 					currentcell->m_tiedtokens.push_back(part[i]->getToken());
+				} else {
+					currentcell = part[i];
 				}
 				part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			} else {
@@ -21934,12 +21936,15 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			}
 		} else if (part[i]->isAttack()) {
 			part[i]->setCurrAttackIndex(i);
+			currentcell = part[i];
 		} else {
 			// This is a sustain, so get the attack index of the
 			// note from the previous slice index.
 			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
-			if (currentcell) {
+			if (currentcell && !part[i]->getToken()->isNull()) {
 				currentcell->m_tiedtokens.push_back(part[i]->getToken());
+			} else {
+				currentcell = part[i];
 			}
 		}
 	}

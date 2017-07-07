@@ -340,8 +340,10 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			// of a rest sequence.
 			if (part[i-1]->isRest()) {
 				// rest "sustain"
-				if (currentcell) {
+				if (currentcell && !part[i]->getToken()->isNull()) {
 					currentcell->m_tiedtokens.push_back(part[i]->getToken());
+				} else {
+					currentcell = part[i];
 				}
 				part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			} else {
@@ -350,12 +352,15 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			}
 		} else if (part[i]->isAttack()) {
 			part[i]->setCurrAttackIndex(i);
+			currentcell = part[i];
 		} else {
 			// This is a sustain, so get the attack index of the
 			// note from the previous slice index.
 			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
-			if (currentcell) {
+			if (currentcell && !part[i]->getToken()->isNull()) {
 				currentcell->m_tiedtokens.push_back(part[i]->getToken());
+			} else {
+				currentcell = part[i];
 			}
 		}
 	}
