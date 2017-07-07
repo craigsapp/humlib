@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  7 14:05:15 CEST 2017
+// Last Modified: Fri Jul  7 14:41:08 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -33063,12 +33063,19 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 					token2 = attacks[v2][j+z]->getToken();
 					token1->setText(*token1 + m_marker);
 					token2->setText(*token2 + m_marker);
-               if (attacks[v1][i+z]->isRest() && (z == count - 1) ) {
+
+               if (attacks[v1][i+z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
+					} else if (!attacks[v1][i+z]->isRest()) {
 						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
 					}
-               if (attacks[v2][j+z]->isRest() && (z == count - 1) ) {
+
+               if (attacks[v2][j+z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
+					} else if (!attacks[v2][j+z]->isRest()) {
 						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
 					}
+
 				}
 			}
 

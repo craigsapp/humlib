@@ -316,12 +316,19 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 					token2 = attacks[v2][j+z]->getToken();
 					token1->setText(*token1 + m_marker);
 					token2->setText(*token2 + m_marker);
-               if (attacks[v1][i+z]->isRest() && (z == count - 1) ) {
+
+               if (attacks[v1][i+z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
+					} else if (!attacks[v1][i+z]->isRest()) {
 						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
 					}
-               if (attacks[v2][j+z]->isRest() && (z == count - 1) ) {
+
+               if (attacks[v2][j+z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
+					} else if (!attacks[v2][j+z]->isRest()) {
 						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
 					}
+
 				}
 			}
 
