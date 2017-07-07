@@ -248,6 +248,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				continue;
 			}
 			count = compareSequences(v1a, v1i, i, v2a, v2i, j);
+cerr << "count = " << count << " COMPARING " << v1a[i]->getToken() << " TO " << v2a[j]->getToken() << endl;
 			if ((count >= min) && (m_intervals.size() > 0)) {
 				count = checkForIntervalSequence(m_intervals, v1i, i, count);
 			}
