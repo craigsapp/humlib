@@ -116,7 +116,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 endif
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-		&& strip $(TARGDIR)/$@$(EXTEN)
+#		&& strip $(TARGDIR)/$@$(EXTEN)
 
 
 

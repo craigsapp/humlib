@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  7 14:41:08 CEST 2017
+// Last Modified: Sat Jul  8 08:07:59 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32974,7 +32974,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 	int count;
 
 	vector<int> enum1(v1a.size(), 0);
-	vector<int> enum2(v1a.size(), 0);
+	vector<int> enum2(v2a.size(), 0);
 
 	for (int i=0; i<(int)v1i.size() - 1; i++) {
 		for (int j=0; j<(int)v2i.size() - 1; j++) {
