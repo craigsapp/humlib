@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  8 08:07:59 CEST 2017
+// Last Modified: Sat Jul  8 18:23:03 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21926,8 +21926,6 @@ void NoteGrid::buildAttackIndex(int vindex) {
 				// rest "sustain"
 				if (currentcell && !part[i]->getToken()->isNull()) {
 					currentcell->m_tiedtokens.push_back(part[i]->getToken());
-				} else {
-					currentcell = part[i];
 				}
 				part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			} else {
@@ -21943,8 +21941,6 @@ void NoteGrid::buildAttackIndex(int vindex) {
 			part[i]->setCurrAttackIndex(part[i-1]->getCurrAttackIndex());
 			if (currentcell && !part[i]->getToken()->isNull()) {
 				currentcell->m_tiedtokens.push_back(part[i]->getToken());
-			} else {
-				currentcell = part[i];
 			}
 		}
 	}
@@ -33094,7 +33090,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 
 void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
 	for (int i=0; i<tokens.size(); i++) {
-			tokens[i]->setText(*tokens[i] + m_marker);
+		tokens[i]->setText(*tokens[i] + m_marker);
 	}
 }
 

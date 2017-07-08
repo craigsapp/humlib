@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Jun 17 15:24:23 CEST 2017
-// Last Modified: Sat Jun 17 22:41:25 CEST 2017
+// Last Modified: Sat Jul  8 17:17:21 CEST 2017
 // Filename:      tool-imitation.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-imitation.cpp
 // Syntax:        C++11
@@ -347,7 +347,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 
 void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
 	for (int i=0; i<tokens.size(); i++) {
-			tokens[i]->setText(*tokens[i] + m_marker);
+		tokens[i]->setText(*tokens[i] + m_marker);
 	}
 }
 
