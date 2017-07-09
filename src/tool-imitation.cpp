@@ -408,24 +408,34 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 		}
 		
 		if (Convert::isNaN(seq1[i1+count])) {
+			// the first voice's interval is to/from a rest
 			if (Convert::isNaN(seq2[i2+count])) {
+				// The seoncd voice's interval is also to/from a rest,
+				// so increment count and continue.
 				count++;
 				continue;
 			} else {
-				break;
+				// The second voice's interval is not to/from a rest,
+				// so return the current count.
+				return count;
 			}
 		} else if (Convert::isNaN(seq2[i2+count])) {
+			// The second voice's interval is to/from a rest
+			// but already know that the first one is not, so return
+			// current count;
+			return count;
 			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
+         // The two sequences match at this point, so continue.
 			count++;
 			continue;
 		} else {
+			// The sequences do not match so return the current count.
 			return count;
-			break;
 		}
 	}
 
-	return count + 1;
+	return count;
 }
 
 
