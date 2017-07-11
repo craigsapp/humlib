@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jul 11, 2017  5:58:22 PM
+// Last Modified: Tue, Jul 11, 2017  6:34:47 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28497,7 +28497,7 @@ RECONSIDER:
 
 
 		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) && 
-			(dur <= 2) && (dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
+			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone

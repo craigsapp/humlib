@@ -712,7 +712,7 @@ RECONSIDER:
 
 
 		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) && 
-			(dur <= 2) && (dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
+			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) {
 					results[vindex][lineindex] = m_labels[PASSING_DOWN]; // downward passing tone
