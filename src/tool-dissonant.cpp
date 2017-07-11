@@ -892,7 +892,7 @@ RECONSIDER:
 
 void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
-	double intp;        // diatonic interval from previous melodic note
+	double intp;        // abs value of diatonic interval from previous melodic note
 	int lineindexn;     // line index of the next note in the voice
 	bool sfound;        // boolean for if a suspension is found after a Z dissonance
 
@@ -904,7 +904,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 			(results[vindex][lineindex].find("m") == string::npos)) {
 			continue;
 		}
-		intp = *attacks[i] - *attacks[i-1];
+		intp = abs(*attacks[i] - *attacks[i-1]);
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
@@ -922,16 +922,14 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 
 		// Apply labels for normal fake suspensions.
 		if (intp == 1) {
-			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_UP];
-		} else if (intp == -1) {
-			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_DOWN];
+			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
+		} else if (intp > 1) {
+			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_LEAP];
 		} else if (i > 1) { // as long as i > 1 intpp will be in range.
 			// The next two fake suspension types are preceded by an anticipation.
-			double intpp = *attacks[i-1] - *attacks[i-2];
+			double intpp = abs(*attacks[i-1] - *attacks[i-2]);
 			if ((intp == 0) && (intpp == 1)) {
-				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_UP];
-			} else if ((intp == 0) && (intpp == -1)) {
-				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_DOWN];
+				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
 			}
 		}
 	}
@@ -1248,8 +1246,8 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[AGENT_TERN          ] = "G"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "o"; // suspension ornament
 	m_labels[SUSPENSION_REP      ] = "r"; // suspension repeated note
-	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
-	m_labels[FAKE_SUSPENSION_DOWN] = "f"; // fake suspension approached by step down
+	m_labels[FAKE_SUSPENSION_LEAP] = "F"; // fake suspension approached by leap
+	m_labels[FAKE_SUSPENSION_STEP] = "f"; // fake suspension approached by step or by anticipation
 	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
 	m_labels[SUS_NO_AGENT_DOWN   ] = "m"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
@@ -1299,8 +1297,8 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[AGENT_TERN          ] = "G"; // ternary agent
 	m_labels[SUSPENSION_ORNAM    ] = "O"; // suspension ornament
 	m_labels[SUSPENSION_REP      ] = "R"; // suspension repeated note
-	m_labels[FAKE_SUSPENSION_UP  ] = "F"; // fake suspension approached by step up
-	m_labels[FAKE_SUSPENSION_DOWN] = "F"; // fake suspension approached by step down
+	m_labels[FAKE_SUSPENSION_LEAP] = "F"; // fake suspension approached by leap
+	m_labels[FAKE_SUSPENSION_STEP] = "F"; // fake suspension approached by step or anticipation
 	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
 	m_labels[SUS_NO_AGENT_DOWN   ] = "M"; // suspension missing a normal agent approached by step down
 	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  9 11:46:06 CEST 2017
+// Last Modified: Tue, Jul 11, 2017  5:58:22 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3787,8 +3787,8 @@ class Tool_dissonant : public HumTool {
 		const int AGENT_TERN		   = 19; // ternary agent
 		const int SUSPENSION_ORNAM     = 20; // suspension ornament
 		const int SUSPENSION_REP       = 21; // suspension repeated note
-		const int FAKE_SUSPENSION_UP   = 22; // fake suspension approached by step up
-		const int FAKE_SUSPENSION_DOWN = 23; // fake suspension approached by step down
+		const int FAKE_SUSPENSION_LEAP = 22; // fake suspension approached by leap
+		const int FAKE_SUSPENSION_STEP = 23; // fake suspension approached by step or anticipation
 		const int SUS_NO_AGENT_UP      = 24; // suspension missing a normal agent approached by step up
 		const int SUS_NO_AGENT_DOWN    = 25; // suspension missing a normal agent approached by step down
 		const int CHANSON_IDIOM        = 26; // chanson idiom
