@@ -724,8 +724,8 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[ECHAPPE_DOWN]; // lower échappée
 				} else if (intn == -2) {
 					results[vindex][lineindex] = m_labels[CAMBIATA_DOWN_S]; // descending short nota cambiata
-				// } else if (intn < -2) {
-				// 	results[vindex][lineindex] = m_labels[IPOSTLOW_NEIGHBOR]; // incomplete posterior lower neighbor
+				} else if (intn < -2) {
+					results[vindex][lineindex] = m_labels[INC_POST_LO_NEI]; // incomplete posterior lower neighbor
 				}
 			} else if (intp == 1) { // ascending dissonances
 				if (intn == 1) {
@@ -738,13 +738,13 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[ANT_UP]; // rising anticipation
 				} else if (intn == 2) {
 					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S]; // ascending short nota cambiata
-				// } else if (intn > 2) {
-				// 	results[vindex][lineindex] = m_labels[IPOSTHI_NEIGHBOR]; // incomplete posterior upper neighbor
+				} else if (intn > 2) {
+					results[vindex][lineindex] = m_labels[INC_POST_UP_NEI]; // incomplete posterior upper neighbor
 				}
-			// } else if ((intp < -2) && (intn == 1)) {
-			// 	results[vindex][lineindex] = m_labels[IANTLOW_NEIGHBOR]; // incomplete anterior lower neighbor
-			// } else if ((intp > 2) && (intn == -1)) {
-			// 	results[vindex][lineindex] = m_labels[IANTHI_NEIGHBOR]; // incomplete anterior upper neighbor
+			} else if ((intp < -2) && (intn == 1)) {
+				results[vindex][lineindex] = m_labels[INC_ANT_LO_NEI]; // incomplete anterior lower neighbor
+			} else if ((intp > 2) && (intn == -1)) {
+				results[vindex][lineindex] = m_labels[INC_ANT_UP_NEI]; // incomplete anterior upper neighbor
 			}
 		} else if ((durp >= 2) && (dur == 1) && (lev < levn) && valid_acc_exit &&
 					 (condition2 || condition2b) && (lev == 1)) {
@@ -1230,10 +1230,10 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "c"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "k"; // descending long nota cambiata
-	// m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
-	// m_labels[IPOSTLOW_NEIGHBOR   ] = "j"; // incomplete posterior lower neighbor
-	// m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
-	// m_labels[IANTLOW_NEIGHBOR    ] = "i"; // incomplete anterior lower neighbor
+	m_labels[INC_ANT_UP_NEI      ] = "I"; // incomplete anterior upper neighbor
+	m_labels[INC_ANT_LO_NEI      ] = "i"; // incomplete anterior lower neighbor
+	m_labels[INC_POST_UP_NEI     ] = "J"; // incomplete posterior upper neighbor
+	m_labels[INC_POST_LO_NEI     ] = "j"; // incomplete posterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "a"; // descending anticipation
 	m_labels[THIRD_Q_PASS_UP     ] = "Q"; // dissonant third quarter ascending passing tone
@@ -1281,10 +1281,10 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[CAMBIATA_DOWN_S     ] = "C"; // descending short nota cambiata
 	m_labels[CAMBIATA_UP_L       ] = "K"; // ascending long nota cambiata
 	m_labels[CAMBIATA_DOWN_L     ] = "K"; // descending long nota cambiata
-	// m_labels[IPOSTHI_NEIGHBOR    ] = "J"; // incomplete posterior upper neighbor
-	// m_labels[IPOSTLOW_NEIGHBOR   ] = "J"; // incomplete posterior lower neighbor
-	// m_labels[IANTHI_NEIGHBOR     ] = "I"; // incomplete anterior upper neighbor
-	// m_labels[IANTLOW_NEIGHBOR    ] = "I"; // incomplete anterior lower neighbor
+	m_labels[INC_ANT_UP_NEI      ] = "I"; // incomplete anterior upper neighbor
+	m_labels[INC_ANT_LO_NEI      ] = "I"; // incomplete anterior lower neighbor
+	m_labels[INC_POST_UP_NEI     ] = "J"; // incomplete posterior upper neighbor
+	m_labels[INC_POST_LO_NEI     ] = "J"; // incomplete posterior lower neighbor
 	m_labels[ANT_UP              ] = "A"; // rising anticipation
 	m_labels[ANT_DOWN            ] = "A"; // descending anticipation
 	m_labels[THIRD_Q_PASS_UP     ] = "Q"; // dissonant third quarter ascending passing tone

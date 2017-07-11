@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jul 11, 2017  6:34:47 PM
+// Last Modified: Tue, Jul 11, 2017  9:06:51 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3769,41 +3769,41 @@ class Tool_dissonant : public HumTool {
 		const int CAMBIATA_DOWN_S      =  7; // descending short nota cambiata
 		const int CAMBIATA_UP_L        =  8; // ascending long nota cambiata
 		const int CAMBIATA_DOWN_L      =  9; // descending long nota cambiata
-		// const int IPOSTHI_NEIGHBOR     = 10; // incomplete posterior upper neighbor
-		// const int IPOSTLOW_NEIGHBOR    = 11; // incomplete posterior lower neighbor
-		// const int IANTHI_NEIGHBOR      = 12; // incomplete anterior upper neighbor
-		// const int IANTLOW_NEIGHBOR     = 13; // incomplete anterior lower neighbor
-		const int ANT_UP               = 10; // rising anticipation
-		const int ANT_DOWN             = 11; // descending anticipation
+		const int INC_ANT_UP_NEI       = 10; // incomplete anterior upper neighbor
+		const int INC_ANT_LO_NEI       = 11; // incomplete anterior lower neighbor
+		const int INC_POST_UP_NEI      = 12; // incomplete posterior upper neighbor
+		const int INC_POST_LO_NEI      = 13; // incomplete posterior lower neighbor
+		const int ANT_UP               = 14; // rising anticipation
+		const int ANT_DOWN             = 15; // descending anticipation
 
 		// accented non-harmonic tones:
-		const int THIRD_Q_PASS_UP      = 12; // dissonant third quarter
-		const int THIRD_Q_PASS_DOWN    = 13; // dissonant third quarter
-		const int THIRD_Q_UPPER_NEI    = 14; // dissonant third quarter
-		const int THIRD_Q_LOWER_NEI    = 15; // dissonant third quarter
-		const int SUS_BIN  	           = 16; // binary suspension
-		const int SUS_TERN  	       = 17; // ternary suspension
-		const int AGENT_BIN		       = 18; // binary agent
-		const int AGENT_TERN		   = 19; // ternary agent
-		const int SUSPENSION_ORNAM     = 20; // suspension ornament
-		const int SUSPENSION_REP       = 21; // suspension repeated note
-		const int FAKE_SUSPENSION_LEAP = 22; // fake suspension approached by leap
-		const int FAKE_SUSPENSION_STEP = 23; // fake suspension approached by step or anticipation
-		const int SUS_NO_AGENT_UP      = 24; // suspension missing a normal agent approached by step up
-		const int SUS_NO_AGENT_DOWN    = 25; // suspension missing a normal agent approached by step down
-		const int CHANSON_IDIOM        = 26; // chanson idiom
+		const int THIRD_Q_PASS_UP      = 16; // dissonant third quarter
+		const int THIRD_Q_PASS_DOWN    = 17; // dissonant third quarter
+		const int THIRD_Q_UPPER_NEI    = 18; // dissonant third quarter
+		const int THIRD_Q_LOWER_NEI    = 19; // dissonant third quarter
+		const int SUS_BIN  	           = 20; // binary suspension
+		const int SUS_TERN  	       = 21; // ternary suspension
+		const int AGENT_BIN		       = 22; // binary agent
+		const int AGENT_TERN		   = 23; // ternary agent
+		const int SUSPENSION_ORNAM     = 24; // suspension ornament
+		const int SUSPENSION_REP       = 25; // suspension repeated note
+		const int FAKE_SUSPENSION_LEAP = 26; // fake suspension approached by leap
+		const int FAKE_SUSPENSION_STEP = 27; // fake suspension approached by step or anticipation
+		const int SUS_NO_AGENT_UP      = 28; // suspension missing a normal agent approached by step up
+		const int SUS_NO_AGENT_DOWN    = 29; // suspension missing a normal agent approached by step down
+		const int CHANSON_IDIOM        = 30; // chanson idiom
 
 		// unknown dissonances:
-		const int PARALLEL_UP          = 27; // moves in parallel with known dissonant, approached from below
-		const int PARALLEL_DOWN        = 28; // moves in parallel with known dissonant, approached from above
-		const int ONLY_WITH_VALID_UP   = 29; // only dissonant with identifiable dissonances, approached from below
-		const int ONLY_WITH_VALID_DOWN = 30; // only dissonant with identifiable dissonances, approached from above
-		const int UNKNOWN_DISSONANCE   = 31; // unknown dissonance type
-		const int UNLABELED_Z2         = 32; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 33; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 34; // unknown dissonance type, 4th interval
+		const int PARALLEL_UP          = 31; // moves in parallel with known dissonant, approached from below
+		const int PARALLEL_DOWN        = 32; // moves in parallel with known dissonant, approached from above
+		const int ONLY_WITH_VALID_UP   = 33; // only dissonant with identifiable dissonances, approached from below
+		const int ONLY_WITH_VALID_DOWN = 34; // only dissonant with identifiable dissonances, approached from above
+		const int UNKNOWN_DISSONANCE   = 35; // unknown dissonance type
+		const int UNLABELED_Z2         = 36; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 37; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 38; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 35; // one more than last index
+		const int LABELS_SIZE          = 39; // one more than last index
 };
 
 
