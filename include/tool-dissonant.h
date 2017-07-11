@@ -109,8 +109,8 @@ class Tool_dissonant : public HumTool {
 		const int SUSPENSION_REP       = 25; // suspension repeated note
 		const int FAKE_SUSPENSION_LEAP = 26; // fake suspension approached by leap
 		const int FAKE_SUSPENSION_STEP = 27; // fake suspension approached by step or anticipation
-		const int SUS_NO_AGENT_UP      = 28; // suspension missing a normal agent approached by step up
-		const int SUS_NO_AGENT_DOWN    = 29; // suspension missing a normal agent approached by step down
+		const int SUS_NO_AGENT_LEAP    = 28; // suspension missing a normal agent approached by leap
+		const int SUS_NO_AGENT_STEP    = 29; // suspension missing a normal agent approached by step or anticipation
 		const int CHANSON_IDIOM        = 30; // chanson idiom
 
 		// unknown dissonances:

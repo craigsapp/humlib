@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jul 11, 2017  9:06:51 PM
+// Last Modified: Tue, Jul 11, 2017  9:35:54 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28549,10 +28549,10 @@ RECONSIDER:
 		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) && 
 				   (lev == levn) && condition2 && (intn == -1) && 
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
-			if ((intp == 1) || ((intp == 0) && (intpp == 1))) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_UP];
-			} else if ((intp == -1) || ((intp == 0) && (intpp == -1))) {
-				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_DOWN];
+			if (abs(intp) > 1) {
+				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
+			} else if ((abs(intp) == 1) || ((intp == 0) && (abs(intpp) == 1))) {
+				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_STEP];
 			}
 		}
 
@@ -29033,8 +29033,8 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[SUSPENSION_REP      ] = "r"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_LEAP] = "F"; // fake suspension approached by leap
 	m_labels[FAKE_SUSPENSION_STEP] = "f"; // fake suspension approached by step or by anticipation
-	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
-	m_labels[SUS_NO_AGENT_DOWN   ] = "m"; // suspension missing a normal agent approached by step down
+	m_labels[SUS_NO_AGENT_LEAP   ] = "M"; // suspension missing a normal agent approached by leap
+	m_labels[SUS_NO_AGENT_STEP   ] = "m"; // suspension missing a normal agent approached by step or by anticipation
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
 	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
 	m_labels[PARALLEL_DOWN       ] = "l"; // moves down in parallel with identifiable dissonance
@@ -29084,8 +29084,8 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[SUSPENSION_REP      ] = "R"; // suspension repeated note
 	m_labels[FAKE_SUSPENSION_LEAP] = "F"; // fake suspension approached by leap
 	m_labels[FAKE_SUSPENSION_STEP] = "F"; // fake suspension approached by step or anticipation
-	m_labels[SUS_NO_AGENT_UP     ] = "M"; // suspension missing a normal agent approached by step up
-	m_labels[SUS_NO_AGENT_DOWN   ] = "M"; // suspension missing a normal agent approached by step down
+	m_labels[SUS_NO_AGENT_LEAP   ] = "M"; // suspension missing a normal agent approached by leap
+	m_labels[SUS_NO_AGENT_STEP   ] = "M"; // suspension missing a normal agent approached by step or anticipation
 	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom
 	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
 	m_labels[PARALLEL_DOWN       ] = "L"; // moves down in parallel with identifiable dissonance
