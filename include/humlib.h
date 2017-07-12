@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jul 11, 2017  9:35:54 PM
+// Last Modified: Wed, Jul 12, 2017  2:02:56 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3722,6 +3722,9 @@ class Tool_dissonant : public HumTool {
 		void    findFakeSuspensions(vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
+		void    findAppoggiaturas  (vector<vector<string> >& results, 
+		                            NoteGrid& grid,
+		                            vector<NoteCell*>& attacks, int vindex);
 		void    findLs			   (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
@@ -3781,29 +3784,35 @@ class Tool_dissonant : public HumTool {
 		const int THIRD_Q_PASS_DOWN    = 17; // dissonant third quarter
 		const int THIRD_Q_UPPER_NEI    = 18; // dissonant third quarter
 		const int THIRD_Q_LOWER_NEI    = 19; // dissonant third quarter
-		const int SUS_BIN  	           = 20; // binary suspension
-		const int SUS_TERN  	       = 21; // ternary suspension
-		const int AGENT_BIN		       = 22; // binary agent
-		const int AGENT_TERN		   = 23; // ternary agent
-		const int SUSPENSION_ORNAM     = 24; // suspension ornament
-		const int SUSPENSION_REP       = 25; // suspension repeated note
-		const int FAKE_SUSPENSION_LEAP = 26; // fake suspension approached by leap
-		const int FAKE_SUSPENSION_STEP = 27; // fake suspension approached by step or anticipation
-		const int SUS_NO_AGENT_LEAP    = 28; // suspension missing a normal agent approached by leap
-		const int SUS_NO_AGENT_STEP    = 29; // suspension missing a normal agent approached by step or anticipation
-		const int CHANSON_IDIOM        = 30; // chanson idiom
+		const int ACC_PASSING_UP	   = 20; // appoggiatura
+		const int ACC_PASSING_DOWN	   = 21; // appoggiatura
+		const int ACC_UP_NEI		   = 22; // appoggiatura
+		const int ACC_LO_NEI		   = 23; // appoggiatura
+		const int APP_LEAP_UP		   = 24; // appoggiatura
+		const int APP_LEAP_DOWN		   = 25; // appoggiatura
+		const int SUS_BIN  	           = 26; // binary suspension
+		const int SUS_TERN  	       = 27; // ternary suspension
+		const int AGENT_BIN		       = 28; // binary agent
+		const int AGENT_TERN		   = 29; // ternary agent
+		const int SUSPENSION_ORNAM     = 30; // suspension ornament
+		const int SUSPENSION_REP       = 31; // suspension repeated note
+		const int FAKE_SUSPENSION_LEAP = 32; // fake suspension approached by leap
+		const int FAKE_SUSPENSION_STEP = 33; // fake suspension approached by step or anticipation
+		const int SUS_NO_AGENT_LEAP    = 34; // suspension missing a normal agent approached by leap
+		const int SUS_NO_AGENT_STEP    = 35; // suspension missing a normal agent approached by step or anticipation
+		const int CHANSON_IDIOM        = 36; // chanson idiom
 
 		// unknown dissonances:
-		const int PARALLEL_UP          = 31; // moves in parallel with known dissonant, approached from below
-		const int PARALLEL_DOWN        = 32; // moves in parallel with known dissonant, approached from above
-		const int ONLY_WITH_VALID_UP   = 33; // only dissonant with identifiable dissonances, approached from below
-		const int ONLY_WITH_VALID_DOWN = 34; // only dissonant with identifiable dissonances, approached from above
-		const int UNKNOWN_DISSONANCE   = 35; // unknown dissonance type
-		const int UNLABELED_Z2         = 36; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 37; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 38; // unknown dissonance type, 4th interval
+		const int PARALLEL_UP          = 37; // moves in parallel with known dissonant, approached from below
+		const int PARALLEL_DOWN        = 38; // moves in parallel with known dissonant, approached from above
+		const int ONLY_WITH_VALID_UP   = 39; // only dissonant with identifiable dissonances, approached from below
+		const int ONLY_WITH_VALID_DOWN = 40; // only dissonant with identifiable dissonances, approached from above
+		const int UNKNOWN_DISSONANCE   = 41; // unknown dissonance type
+		const int UNLABELED_Z2         = 42; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 43; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 44; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 39; // one more than last index
+		const int LABELS_SIZE          = 45; // one more than last index
 };
 
 
