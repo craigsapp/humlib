@@ -771,9 +771,9 @@ RECONSIDER:
 		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) && 
 				   (lev == levn) && condition2 && (intn == -1) && 
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
-			if (abs(intp) > 1) {
+			if (fabs(intp) > 1.0) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
-			} else if ((abs(intp) == 1) || ((intp == 0) && (abs(intpp) == 1))) {
+			} else if ((fabs(intp) == 1.0) || ((intp == 0) && (fabs(intpp) == 1.0))) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_STEP];
 			}
 		}
@@ -911,7 +911,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 			(results[vindex][lineindex].find("m") == string::npos)) {
 			continue;
 		}
-		intp = abs(*attacks[i] - *attacks[i-1]);
+		intp = fabs(*attacks[i] - *attacks[i-1]);
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
@@ -932,7 +932,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		} else if (intp > 1) {
 			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_LEAP];
 		} else if (i > 1) { // as long as i > 1 intpp will be in range.
-			double intpp = abs(*attacks[i-1] - *attacks[i-2]);
+			double intpp = fabs(*attacks[i-1] - *attacks[i-2]);
 			if (intp == 0) { // fake suspensions preceded by an anticipation.
 				if (intpp == 1) {
 					results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
