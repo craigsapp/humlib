@@ -369,11 +369,14 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 	for (int i=0; i<grid.getVoiceCount(); i++) {
 		findLs(results, grid, attacks[i], i);
 	}
-	
+
 	for (int i=0; i<grid.getVoiceCount(); i++) {
 		findYs(results, grid, attacks[i], i);
 	}
-
+	
+	for (int i=0; i<grid.getVoiceCount(); i++) {
+		findAppoggiaturas(results, grid, attacks[i], i);
+	}
 }
 
 
@@ -1010,6 +1013,130 @@ void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
 
 //////////////////////////////
 //
+// Tool_dissonant::findAppoggiaturas --
+//
+void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, int vindex) {
+	HumNum durpp;      // duration of previous previous note
+	HumNum durp;       // duration of previous note
+	HumNum dur;        // duration of current note
+	HumNum durn;	   // duration of next note
+	double intp;       // diatonic interval from previous melodic note
+	double intn;       // diatonic interval to next melodic note
+	double lev;        // metric level of the current note
+	double levn;       // metric level of the next melodic note
+	int lineindex;     // line in original Humdrum file content that contains note
+	int sliceindex;    // current timepoint in NoteGrid.
+	int attackindexn;  // line index of ref voice's next note
+	int oattackindexn; // line index of other voice's next note
+	double pitch;      // current pitch in ref voice
+	double opitch;     // current pitch in other voice
+	bool ant_down;	   // if the current ref voice pitch was preceded by a descending anticipation
+	bool ant_up;	   // if the current ref voice pitch was preceded by an ascending anticipation
+	bool ant_leap_dn;  // if the current ref voice pitch was preceded by an anticipation leapt down to
+	bool ant_leap_up;  // if the current ref voice pitch was preceded by an anticipation leapt up to
+
+	for (int i=1; i<(int)attacks.size()-1; i++) {
+		lineindex = attacks[i]->getLineIndex();
+		if ((results[vindex][lineindex].find("Z") == string::npos) &&
+			(results[vindex][lineindex].find("z") == string::npos)) {
+			continue;
+		}
+		durp = attacks[i-1]->getDuration();
+		dur  = attacks[i]->getDuration();
+		durn = attacks[i+1]->getDuration();
+		intp = *attacks[i] - *attacks[i-1];
+		intn = *attacks[i+1] - *attacks[i];
+		lev  = attacks[i]->getMetricLevel();
+		levn = attacks[i+1]->getMetricLevel();
+		sliceindex = attacks[i]->getSliceIndex();
+		
+		if (!((lev <= levn) && (dur <= durn))) {
+			continue; // go on when the voice with Z label doesn't fulfill its metric or durational requirements
+		}
+
+		// determine if current note was preceded by an anticipation (which may be a consonant anticipation)
+		ant_down    = false;
+		ant_up      = false;
+		ant_leap_dn = false;
+		ant_leap_up = false;
+		if (i > 1) {
+			durpp = attacks[i-2]->getDuration();
+			if ((intp == 0) && (durp <= dur) && (durp <= durpp)) {
+				if ((*attacks[i-1] - *attacks[i-2]) == -1) {
+					ant_down = true;
+				} else if ((*attacks[i-1] - *attacks[i-2]) == 1) {
+					ant_up = true;
+				} else if ((*attacks[i-1] - *attacks[i-2]) < -1) {
+					ant_leap_dn = true;
+				} else if ((*attacks[i-1] - *attacks[i-2]) > 1) {
+					ant_leap_up = true;
+				}
+			}
+		}
+
+		int lowestnote = 1000; // lowest sounding diatonic note in any voice at this sliceindex
+		double tpitch;
+		for (int v=0; v<(int)grid.getVoiceCount(); v++) {
+			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
+			if (!Convert::isNaN(tpitch)) {
+				if (tpitch <= lowestnote) {
+					lowestnote = tpitch;
+				}
+			}
+		}
+
+		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
+			if (vindex == j) { // only compare different voices
+				continue;
+			}
+			
+			attackindexn = attacks[i]->getNextAttackIndex();
+			oattackindexn = grid.cell(j, sliceindex)->getNextAttackIndex();
+			if (oattackindexn < attackindexn) {
+				continue; // skip this pair if other voice leaves diss first
+			}
+
+			pitch = attacks[i]->getAbsDiatonicPitch();
+			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
+
+			// see if the pair creates a dissonant interval
+			if (!((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
+				 ((thisInt > 0) && (thisMod7 == 3) && 
+				  not (((int(pitch-lowestnote) % 7) == 2) ||
+                 	   ((int(pitch-lowestnote) % 7) == 4))) ||
+				 ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 == -3.
+				  not (((int(opitch-lowestnote) % 7) == 2) ||
+                 	   ((int(opitch-lowestnote) % 7) == 4))))) {
+				continue;
+				
+			} else if ((intp == -1) || ant_down) {
+				if (intn == -1) {
+					results[vindex][lineindex] = m_labels[ACC_PASSING_DOWN]; // descending accented passing tone
+				} else if (intn == 1) {
+					results[vindex][lineindex] = m_labels[ACC_LO_NEI]; // accented lower neighbor
+				}
+			} else if ((intp == 1) || ant_up) {
+				if (intn == 1) {
+					results[vindex][lineindex] = m_labels[ACC_PASSING_UP]; // rising accented passing tone
+				} else if (intn == -1) {
+					results[vindex][lineindex] = m_labels[ACC_UP_NEI]; // accented upper neighbor
+				}
+			} else if (intn == -1) {
+				if ((intp > 1) || ant_leap_up) {
+					results[vindex][lineindex] = m_labels[APP_LEAP_UP]; // appoggiatura approached by leap up
+				} else if ((intp < -1) || ant_leap_dn) {
+					results[vindex][lineindex] = m_labels[APP_LEAP_DOWN]; // appoggiatura approached by leap down
+				}
+			}
+		}
+	}
+}
+
+//////////////////////////////
+//
 // Tool_dissonant::findYs --
 //
 void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
@@ -1240,6 +1367,12 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[THIRD_Q_PASS_DOWN   ] = "q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "b"; // dissonant third quarter lower neighbor
+	m_labels[ACC_PASSING_UP		 ] = "V"; // ascending accented passing tone
+	m_labels[ACC_PASSING_DOWN	 ] = "v"; // descending accented passing tone
+	m_labels[ACC_UP_NEI	 		 ] = "W"; // accented upper neighbor
+	m_labels[ACC_LO_NEI			 ] = "w"; // accented lower neighbor
+	m_labels[APP_LEAP_UP		 ] = "T"; // appoggiatura approached by leap up
+	m_labels[APP_LEAP_DOWN		 ] = "t"; // appoggiatura approached by leap down
 	m_labels[SUS_BIN             ] = "s"; // binary suspension
 	m_labels[SUS_TERN            ] = "S"; // ternary suspension
 	m_labels[AGENT_BIN           ] = "g"; // binary agent
@@ -1291,6 +1424,12 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[THIRD_Q_PASS_DOWN   ] = "Q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "B"; // dissonant third quarter lower neighbor
+	m_labels[ACC_PASSING_UP		 ] = "V"; // ascending accented passing tone
+	m_labels[ACC_PASSING_DOWN	 ] = "V"; // descending accented passing tone
+	m_labels[ACC_UP_NEI	 		 ] = "W"; // accented upper neighbor
+	m_labels[ACC_LO_NEI			 ] = "W"; // accented lower neighbor
+	m_labels[APP_LEAP_UP		 ] = "T"; // appoggiatura approached by leap up
+	m_labels[APP_LEAP_DOWN		 ] = "T"; // appoggiatura approached by leap down
 	m_labels[SUS_BIN             ] = "S"; // binary suspension
 	m_labels[SUS_TERN            ] = "S"; // ternary suspension
 	m_labels[AGENT_BIN           ] = "G"; // binary agent
