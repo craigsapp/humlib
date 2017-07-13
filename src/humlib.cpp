@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Jul 11, 2017  9:35:54 PM
+// Last Modified: Thu Jul 13 01:58:37 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10910,7 +10910,11 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			stringstream err;
 			err << "Error on line " << (i+1) << ':' << endl;
 			err << "   Expected " << datatype.size() << " fields,"
-			     << " but found " << m_lines[i]->getTokenCount();
+			    << "    but found " << m_lines[i]->getTokenCount();
+			err << "Line is: " << m_lines[i] << endl;
+			if (i > 0) {
+				cerr << "Previous line is: " << m_lines[i-1] << endl;
+			}
 			return setParseError(err);
 		}
 		for (j=0; j<m_lines[i]->getTokenCount(); j++) {
@@ -28549,9 +28553,9 @@ RECONSIDER:
 		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) && 
 				   (lev == levn) && condition2 && (intn == -1) && 
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
-			if (abs(intp) > 1) {
+			if (fabs(intp) > 1.0) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
-			} else if ((abs(intp) == 1) || ((intp == 0) && (abs(intpp) == 1))) {
+			} else if ((fabs(intp) == 1.0) || ((intp == 0) && (fabs(intpp) == 1.0))) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_STEP];
 			}
 		}
@@ -28689,7 +28693,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 			(results[vindex][lineindex].find("m") == string::npos)) {
 			continue;
 		}
-		intp = abs(*attacks[i] - *attacks[i-1]);
+		intp = fabs(*attacks[i] - *attacks[i-1]);
 		lineindexn = attacks[i+1]->getLineIndex();
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
@@ -28712,7 +28716,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_LEAP];
 		} else if (i > 1) { // as long as i > 1 intpp will be in range.
 			// The next two fake suspension types are preceded by an anticipation.
-			double intpp = abs(*attacks[i-1] - *attacks[i-2]);
+			double intpp = fabs(*attacks[i-1] - *attacks[i-2]);
 			if ((intp == 0) && (intpp == 1)) {
 				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
 			}

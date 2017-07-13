@@ -1395,7 +1395,11 @@ bool HumdrumFileBase::analyzeSpines(void) {
 			stringstream err;
 			err << "Error on line " << (i+1) << ':' << endl;
 			err << "   Expected " << datatype.size() << " fields,"
-			     << " but found " << m_lines[i]->getTokenCount();
+			    << "    but found " << m_lines[i]->getTokenCount();
+			err << "Line is: " << m_lines[i] << endl;
+			if (i > 0) {
+				cerr << "Previous line is: " << m_lines[i-1] << endl;
+			}
 			return setParseError(err);
 		}
 		for (j=0; j<m_lines[i]->getTokenCount(); j++) {
