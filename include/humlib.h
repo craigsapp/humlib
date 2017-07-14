@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jul 13 10:22:31 CEST 2017
+// Last Modified: Fri Jul 14 08:08:46 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4239,7 +4239,7 @@ class Tool_musicxml2hum : public HumTool {
 class MyCoord {
 	public:
 		     MyCoord   (void) { clear(); }
-		void clear   (void) { x = y = -1; }
+		void clear   (void) { x = -1; y = -1; }
 		bool isValid (void) { return ((x < 0) || (y < 0)) ? false : true; }
 		int  x;
 		int  y;
@@ -4358,7 +4358,7 @@ class Tool_myank : public HumTool {
 		                                HumdrumFile& infile);
 		void      getMetStates         (vector<vector<MyCoord> >& metstates, 
 		                                HumdrumFile& infile);
-		MyCoord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
+		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 		int       atEndOfFile          (HumdrumFile& infile, int line);
 		void      processFile          (HumdrumFile& infile);
 		int       getSectionCount      (HumdrumFile& infile);

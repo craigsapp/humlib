@@ -23,7 +23,7 @@ namespace hum {
 class MyCoord {
 	public:
 		     MyCoord   (void) { clear(); }
-		void clear   (void) { x = y = -1; }
+		void clear   (void) { x = -1; y = -1; }
 		bool isValid (void) { return ((x < 0) || (y < 0)) ? false : true; }
 		int  x;
 		int  y;
@@ -142,7 +142,7 @@ class Tool_myank : public HumTool {
 		                                HumdrumFile& infile);
 		void      getMetStates         (vector<vector<MyCoord> >& metstates, 
 		                                HumdrumFile& infile);
-		MyCoord     getLocalMetInfo      (HumdrumFile& infile, int row, int track);
+		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 		int       atEndOfFile          (HumdrumFile& infile, int line);
 		void      processFile          (HumdrumFile& infile);
 		int       getSectionCount      (HumdrumFile& infile);
