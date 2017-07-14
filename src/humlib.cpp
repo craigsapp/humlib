@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul 14 08:08:46 CEST 2017
+// Last Modified: Fri Jul 14 08:19:36 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28719,20 +28719,13 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		} else if (intp > 1) {
 			results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_LEAP];
 		} else if (i > 1) { // as long as i > 1 intpp will be in range.
-<<<<<<< HEAD
-			double intpp = abs(*attacks[i-1] - *attacks[i-2]);
+			double intpp = fabs(*attacks[i-1] - *attacks[i-2]);
 			if (intp == 0) { // fake suspensions preceded by an anticipation.
 				if (intpp == 1) {
 					results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
 				} else if (intpp > 1) {
 					results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_LEAP];
 				}
-=======
-			// The next two fake suspension types are preceded by an anticipation.
-			double intpp = fabs(*attacks[i-1] - *attacks[i-2]);
-			if ((intp == 0) && (intpp == 1)) {
-				results[vindex][lineindex] = m_labels[FAKE_SUSPENSION_STEP];
->>>>>>> c2b554be2004edf9a8b97fc41eb301808cb7d038
 			}
 		}
 	}
