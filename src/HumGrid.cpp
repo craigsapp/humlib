@@ -390,14 +390,16 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	int p, s;
 	int partcount = (int)curr->size();
 	int staffcount;
-	for (p=0; p<partcount; p++) {
+	bool init = false;
+	for (p=partcount-1; p>=0; p--) {
 		part  = curr->at(p);
 		staffcount = (int)part->size();
-		for (s=0; s<staffcount; s++) {
+		for (s=staffcount-1; s>=0; s--) {
 			staff = part->at(s);
-			voice = staff->front();
-			if ((p == 0) && (s == 0)) {
+			voice = staff->back();
+			if (!init) {
 				lastvoice = staff->back();
+				init = true;
 				continue;
 			}
 			if (lastvoice != NULL) {
@@ -432,12 +434,12 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	int lastp = 0;
 	int lasts = 0;
 
-	for (p=0; p<partcount; p++) {
+	for (p=partcount-1; p>=0; p--) {
 		part  = curr->at(p);
 		staffcount = (int)part->size();
-		for (s=0; s<staffcount; s++) {
+		for (s=staffcount-1; s>=0; s--) {
 			staff = part->at(s);
-			voice = staff->front();
+			voice = staff->back();
 			if (lastvoice != NULL) {
            	if ((*voice->getToken() == "*v") &&
 						(*lastvoice->getToken() == "*v")) {
