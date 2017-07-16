@@ -389,7 +389,6 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					if (!hiddenQ) {
 						infile[i].token(j)->setValue("auto", to_string(k),
 								"visualAccidental", "true");
-cerr << "GOT HERE AAA" << endl;
 						concurrentstate[diatonic] = accid;
 						if (dstates[rindex][diatonic] < -900) {
 							// this is an obligatory cautionary accidental
