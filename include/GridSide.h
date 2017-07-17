@@ -39,11 +39,14 @@ class GridSide {
 		void  setHarmony     (HTp token);
 		void  detachHarmony  (void);
 		HTp   getHarmony     (void);
+		void  setDynamic     (HTp token);
+		void  detachDynamics (void);
+		HTp   getDynamics    (void);
 
 	private:
 		vector<HumdrumToken*> m_verses;
-		vector<HumdrumToken*> m_dynamics;
-		HumdrumToken* m_harmony;
+		HumdrumToken* m_dynamics = NULL;
+		HumdrumToken* m_harmony = NULL;
 };
 
 

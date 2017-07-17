@@ -112,11 +112,12 @@ class MxmlEvent {
 		string             getElementName     (void);
 		void               addNotations       (stringstream& ss, 
 		                                       xml_node notations) const;
-		void               reportVerseCountToOwner (int count);
-		void               reportVerseCountToOwner (int staffnum, int count);
-		void               reportHarmonyCountToOwner (int count);
-		void               reportMeasureStyleToOwner (MeasureStyle style);
+		void               reportVerseCountToOwner         (int count);
+		void               reportVerseCountToOwner         (int staffnum, int count);
+		void               reportHarmonyCountToOwner       (int count);
+		void               reportMeasureStyleToOwner       (MeasureStyle style);
 		void               reportEditorialAccidentalToOwner(void);
+		void               reportDynamicToOwner            (void);
       void               makeDummyRest      (MxmlMeasure* owner, 
 		                                       HumNum startime,
 		                                       HumNum duration,
@@ -146,6 +147,7 @@ class MxmlEvent {
 		bool               m_stems;      // for preserving stems
 
 
+
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);
 		void   reportTimeSigDurToOwner   (HumNum duration);
@@ -155,6 +157,9 @@ class MxmlEvent {
 		static HumNum getEmbeddedDuration  (xml_node el = xml_node(NULL));
 		static HumNum getQuarterDurationFromType (const char* type);
 		static bool   nodeType             (xml_node node, const char* testname);
+
+		xml_node      m_dynamics;    // dynamics <direction> starting just before note
+		xml_node      m_text;        // text <direction> starting just before note
 
 	friend MxmlMeasure;
 	friend MxmlPart;

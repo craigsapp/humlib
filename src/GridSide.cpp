@@ -26,7 +26,7 @@ namespace hum {
 //
 
 GridSide::GridSide(void) {
-	m_harmony = NULL;
+	// do nothing
 }
 
 
@@ -46,13 +46,10 @@ GridSide::~GridSide(void) {
 	}
 	m_verses.resize(0);
 
-	for (int i=0; i<(int)m_dynamics.size(); i++) {
-		if (m_dynamics[i]) {
-			delete m_dynamics[i];
-			m_dynamics[i] = NULL;
-		}
+	if (m_dynamics) {
+		delete m_dynamics;
+		m_dynamics = NULL;
 	}
-	m_dynamics.resize(0);
 
 	if (m_harmony) {
 		delete m_harmony;
@@ -143,6 +140,21 @@ void GridSide::setHarmony(HTp token) {
 
 
 
+//////////////////////////////
+//
+// GridSide::setDynamic --
+//
+
+void GridSide::setDynamic(HTp token) {
+	if (m_dynamics) {
+		delete m_dynamics;
+		m_dynamics = NULL;
+	}
+	m_dynamics = token;
+}
+
+
+
 ///////////////////////////
 //
 // GridSide::detachHarmony --
@@ -154,6 +166,17 @@ void GridSide::detachHarmony(void) {
 
 
 
+///////////////////////////
+//
+// GridSide::detachDynamics --
+//
+
+void GridSide::detachDynamics(void) {
+	m_dynamics = NULL;
+}
+
+
+
 //////////////////////////////
 //
 // GridSide::getHarmony --
@@ -161,6 +184,17 @@ void GridSide::detachHarmony(void) {
 
 HTp GridSide::getHarmony(void) {
 	return m_harmony;
+}
+
+
+
+//////////////////////////////
+//
+// GridSide::getDynamics --
+//
+
+HTp GridSide::getDynamics(void) {
+	return m_dynamics;
 }
 
 

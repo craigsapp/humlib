@@ -64,13 +64,16 @@ class MxmlPart {
 		int           getVoiceIndex        (int voicenum);
 		int           getStaffIndex        (int voicenum);
 		bool          hasEditorialAccidental(void) const;
+		bool          hasDynamics          (void) const;
+
 
 	private:
 		void          receiveStaffNumberFromChild (int staffnum, int voicenum);
-		void          receiveVerseCount    (int count);
-		void          receiveVerseCount    (int staffnum, int count);
-		void          receiveHarmonyCount  (int count);
-		void          receiveEditorialAccidental(void);
+		void          receiveVerseCount           (int count);
+		void          receiveVerseCount           (int staffnum, int count);
+		void          receiveHarmonyCount         (int count);
+		void          receiveEditorialAccidental  (void);
+		void          receiveDynamic              (void);
 
 	protected:
 		vector<MxmlMeasure*> m_measures;
@@ -81,6 +84,7 @@ class MxmlPart {
 		int                  m_harmonyCount;
 		bool                 m_editorialAccidental;
 		bool                 m_stems = false;
+		bool                 m_has_dynamics = false;
 
 		// m_staffvoicehist: counts of staff and voice numbers.  
 		// staff=0 is used for items such as measures.

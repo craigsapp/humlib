@@ -395,6 +395,15 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		line.appendToken(newtoken);
 	}
 
+	HTp dynamics = sides.getDynamics();
+	if (dynamics) {
+		line.appendToken(dynamics);
+		sides.detachDynamics();
+	} else {
+		newtoken = new HumdrumToken(empty);
+		line.appendToken(newtoken);
+	}
+
 	for (int i=0; i<hcount; i++) {
 		HTp harmony = sides.getHarmony();
 		if (harmony) {

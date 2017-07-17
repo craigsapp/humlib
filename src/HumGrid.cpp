@@ -31,9 +31,11 @@ namespace hum {
 //
 
 HumGrid::HumGrid(void) {
-	// for now, limit to 100 parts:
+	// Limited to 100 parts:
 	m_verseCount.resize(100);
 	m_harmonyCount.resize(100);
+	m_dynamics.resize(100);
+	fill(m_dynamics.begin(), m_dynamics.end(), false);
 	fill(m_harmonyCount.begin(), m_harmonyCount.end(), 0);
 
 	// default options
@@ -100,6 +102,34 @@ int HumGrid::getVerseCount(int partindex, int staffindex) {
 	}
 	int value = m_verseCount.at(partindex).at(staffnumber);
 	return value;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::hasDynamics -- Return true if there are any dyanmics for the part.
+//
+
+bool HumGrid::hasDynamics(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_dynamics.size())) {
+		return false;
+	}
+	return m_dynamics[partindex];
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::setDynamicsPresent -- Indicate that part needs a **dynam spine.
+//
+
+void HumGrid::setDynamicsPresent(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_dynamics.size())) {
+		return;
+	}
+	m_dynamics[partindex] = true;
 }
 
 
@@ -1569,6 +1599,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 //
 
 void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
+
 	if (staff >= 0) {
 		int versecount = getVerseCount(part, staff); // verses related to staff
 		for (int i=0; i<versecount; i++) {
@@ -1577,12 +1608,18 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 		}
 	}
 
+	if ((staff < 0) && hasDynamics(part)) {
+		HTp token = new HumdrumToken("**dynam");
+		line->appendToken(token);
+	}
+
 	if (staff < 0) {
 		int harmonyCount = getHarmonyCount(part);
 		for (int i=0; i<harmonyCount; i++) {
 			HTp token = new HumdrumToken("**mxhm");
 			line->appendToken(token);
 		}
+
 	}
 }
 
@@ -1641,12 +1678,20 @@ void HumGrid::insertSidePartInfo(HumdrumLine* line, int part, int staff) {
 	string text;
 
 	if (staff < 0) {
+
+		if (hasDynamics(part)) {
+			text = "*part" + to_string(part+1);
+			token = new HumdrumToken(text);
+			line->appendToken(token);
+		}
+
 		int harmcount = getHarmonyCount(part);
 		for (int i=0; i<harmcount; i++) {
 			text = "*part" + to_string(part+1);
 			token = new HumdrumToken(text);
 			line->appendToken(token);
 		}
+
 	} else {
 		int versecount = getVerseCount(part, staff);
 		for (int i=0; i<versecount; i++) {
@@ -1722,11 +1767,18 @@ void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
 
 	// part-specific sides (no staff markers)
 	if (staffnum < 0) {
+
+		if (hasDynamics(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
 		int harmcount = getHarmonyCount(part);
 		for (int i=0; i<harmcount; i++) {
 			token = new HumdrumToken("*");
 			line->appendToken(token);
 		}
+
 		return;
 	}
 
@@ -1795,11 +1847,18 @@ void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
 	HTp token;
 
 	if (staff < 0) {
+
+		if (hasDynamics(part)) {
+			token = new HumdrumToken("*-");
+			line->appendToken(token);
+		}
+
 		int harmcount = getHarmonyCount(part);
 		for (int i=0; i<harmcount; i++) {
 			token = new HumdrumToken("*-");
 			line->appendToken(token);
 		}
+
 	} else {
 		int versecount = getVerseCount(part, staff);
 		for (int i=0; i<versecount; i++) {

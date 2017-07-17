@@ -138,7 +138,9 @@ class Tool_musicxml2hum : public HumTool {
 		bool isInvisible       (MxmlEvent* event);
 		int  addLyrics         (GridStaff* staff, MxmlEvent* event);
 		int  addHarmony        (GridPart* oart, MxmlEvent* event);
+		void addDynamic        (GridPart* part, MxmlEvent* event);
 		string getHarmonyString(xml_node hnode);
+		string getDynamicString(xml_node element);
 		string cleanSpaces     (const string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
 		void reindexVoices     (vector<MxmlPart>& partdata);
@@ -156,6 +158,9 @@ class Tool_musicxml2hum : public HumTool {
 		bool m_stemsQ = false;
 		int m_slurabove = 0;
 		int m_slurbelow = 0;
+
+		xml_node m_current_dynamic = xml_node(NULL);
+		xml_node m_current_text    = xml_node(NULL);
 
 };
 

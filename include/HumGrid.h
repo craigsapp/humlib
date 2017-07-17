@@ -29,14 +29,16 @@ class HumGrid : public vector<GridMeasure*> {
 	public:
 		HumGrid(void);
 		~HumGrid();
-		void enableRecipSpine (void);
-		bool transferTokens   (HumdrumFile& outfile);
-		int  getHarmonyCount  (int partindex);
-		int  getVerseCount    (int partindex, int staffindex);
-		void setVerseCount    (int partindex, int staffindex, int count);
-		void setHarmonyCount  (int partindex, int count);
-		void removeRedundantClefChanges(void);
-		bool hasPickup         (void);
+		void enableRecipSpine           (void);
+		bool transferTokens             (HumdrumFile& outfile);
+		int  getHarmonyCount            (int partindex);
+		int  getVerseCount              (int partindex, int staffindex);
+		bool hasDynamics                (int partindex);
+		void setDynamicsPresent         (int partindex);
+		void setVerseCount              (int partindex, int staffindex, int count);
+		void setHarmonyCount            (int partindex, int count);
+		void removeRedundantClefChanges (void);
+		bool hasPickup                  (void);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -91,6 +93,7 @@ class HumGrid : public vector<GridMeasure*> {
 		vector<vector<int> > m_verseCount;
 		vector<int>          m_harmonyCount;
 		bool                 m_pickup;
+		vector<bool>         m_dynamics;
 
 		// options:
 		bool m_recip;               // include **recip spine in output
