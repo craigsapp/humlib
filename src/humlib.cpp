@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 17 23:44:23 CEST 2017
+// Last Modified: Tue Jul 18 00:25:11 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27990,7 +27990,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
 	define("v|voice-number=b",    "print voice number of dissonance");
-	define("s|self-number=b",     "print self voice number of dissonance");
+	define("f|self-number=b",     "print self voice number of dissonance");
 	define("debug=b",             "print grid cell information");
 	define("u|undirected=b",      "use undirected dissonance labels");
 	define("c|count=b",           "count dissonances by category");

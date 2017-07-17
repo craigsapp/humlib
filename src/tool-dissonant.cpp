@@ -41,7 +41,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
 	define("v|voice-number=b",    "print voice number of dissonance");
-	define("s|self-number=b",     "print self voice number of dissonance");
+	define("f|self-number=b",     "print self voice number of dissonance");
 	define("debug=b",             "print grid cell information");
 	define("u|undirected=b",      "use undirected dissonance labels");
 	define("c|count=b",           "count dissonances by category");
