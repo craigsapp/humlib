@@ -78,6 +78,8 @@ class Tool_dissonant : public HumTool {
 		bool dissL1Q = false;
 		bool dissL2Q = false;
 		bool suppressQ = false;
+		bool m_voicenumQ = false;
+		bool m_selfnumQ = false;
 
 		vector<string> m_labels;
 

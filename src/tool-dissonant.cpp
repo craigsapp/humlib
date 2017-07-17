@@ -40,6 +40,8 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("b|base-40=b",         "print base-40 grid");
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
+	define("v|voice-number=b",    "print voice number of dissonance");
+	define("s|self-number=b",     "print self voice number of dissonance");
 	define("debug=b",             "print grid cell information");
 	define("u|undirected=b",      "use undirected dissonance labels");
 	define("c|count=b",           "count dissonances by category");
@@ -93,6 +95,13 @@ bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_dissonant::run(HumdrumFile& infile) {
+
+	if (getBoolean("voice-number")) {
+		m_voicenumQ = true;
+	}
+	if (getBoolean("self-number")) {
+		m_selfnumQ = true;
+	}
 
 	if (getBoolean("undirected")) {
 		fillLabels2();
