@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 18 00:25:11 CEST 2017
+// Last Modified: Tue Jul 18 01:21:13 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -29184,6 +29184,8 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 	}
 }
 
+
+
 ///////////////////////////////
 //
 // printCountAnalysis --
@@ -29209,7 +29211,7 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 		}
 	}
 
-	m_humdrum_text << "**dis";
+	m_humdrum_text << "**rdis";
 	if (brief) {
 		m_humdrum_text << "u";
 	}
@@ -29223,6 +29225,12 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 	int sum;
 	string item;
 	for (i=0; i<(int)LABELS_SIZE; i++) {
+		if (i == UNLABELED_Z2) {
+			continue;
+		}
+		if (i == UNLABELED_Z7) {
+			continue;
+		}
 
 		item = m_labels[i];
 
@@ -29235,7 +29243,10 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 		for (j=0; j<(int)analysis.size(); j++) {
 			if (analysis[j].find(item) != analysis[j].end()) {
 				sum += analysis[j][item];
-				sumsum += analysis[j][item];
+				// Don't include agents in dissonant note summation.
+				if ((item != m_labels[AGENT_TERN]) && (item != m_labels[AGENT_BIN])) {
+					sumsum += analysis[j][item];
+				}
 			}
 		}
 
@@ -29250,7 +29261,11 @@ void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
 			m_humdrum_text << "\t";
 			if (analysis[j].find(item) != analysis[j].end()) {
 				if (percentQ) {
-					m_humdrum_text << int(analysis[j][item] * 1.0 / sum * 1000.0 + 0.5) / 10.0;
+					if ((item == m_labels[AGENT_BIN]) || (item == m_labels[AGENT_TERN])) {
+						m_humdrum_text << ".";
+					} else {
+						m_humdrum_text << int(analysis[j][item] * 1.0 / sum * 1000.0 + 0.5) / 10.0;
+					}
 				} else {
 					m_humdrum_text << analysis[j][item];
 				}
@@ -29338,12 +29353,12 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[THIRD_Q_PASS_DOWN   ] = "q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "b"; // dissonant third quarter lower neighbor
-	m_labels[ACC_PASSING_UP		 ] = "V"; // ascending accented passing tone
-	m_labels[ACC_PASSING_DOWN	 ] = "v"; // descending accented passing tone
-	m_labels[ACC_UP_NEI	 		 ] = "W"; // accented upper neighbor
-	m_labels[ACC_LO_NEI			 ] = "w"; // accented lower neighbor
-	m_labels[APP_LEAP_UP		 ] = "T"; // appoggiatura approached by leap up
-	m_labels[APP_LEAP_DOWN		 ] = "t"; // appoggiatura approached by leap down
+	m_labels[ACC_PASSING_UP      ] = "V"; // ascending accented passing tone
+	m_labels[ACC_PASSING_DOWN    ] = "v"; // descending accented passing tone
+	m_labels[ACC_UP_NEI          ] = "W"; // accented upper neighbor
+	m_labels[ACC_LO_NEI          ] = "w"; // accented lower neighbor
+	m_labels[APP_LEAP_UP         ] = "T"; // appoggiatura approached by leap up
+	m_labels[APP_LEAP_DOWN       ] = "t"; // appoggiatura approached by leap down
 	m_labels[SUS_BIN             ] = "s"; // binary suspension
 	m_labels[SUS_TERN            ] = "S"; // ternary suspension
 	m_labels[AGENT_BIN           ] = "g"; // binary agent
@@ -29395,12 +29410,12 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[THIRD_Q_PASS_DOWN   ] = "Q"; // dissonant third quarter descending passing tone
 	m_labels[THIRD_Q_UPPER_NEI   ] = "B"; // dissonant third quarter upper neighbor
 	m_labels[THIRD_Q_LOWER_NEI   ] = "B"; // dissonant third quarter lower neighbor
-	m_labels[ACC_PASSING_UP		 ] = "V"; // ascending accented passing tone
-	m_labels[ACC_PASSING_DOWN	 ] = "V"; // descending accented passing tone
-	m_labels[ACC_UP_NEI	 		 ] = "W"; // accented upper neighbor
-	m_labels[ACC_LO_NEI			 ] = "W"; // accented lower neighbor
-	m_labels[APP_LEAP_UP		 ] = "T"; // appoggiatura approached by leap up
-	m_labels[APP_LEAP_DOWN		 ] = "T"; // appoggiatura approached by leap down
+	m_labels[ACC_PASSING_UP      ] = "V"; // ascending accented passing tone
+	m_labels[ACC_PASSING_DOWN    ] = "V"; // descending accented passing tone
+	m_labels[ACC_UP_NEI          ] = "W"; // accented upper neighbor
+	m_labels[ACC_LO_NEI          ] = "W"; // accented lower neighbor
+	m_labels[APP_LEAP_UP         ] = "T"; // appoggiatura approached by leap up
+	m_labels[APP_LEAP_DOWN       ] = "T"; // appoggiatura approached by leap down
 	m_labels[SUS_BIN             ] = "S"; // binary suspension
 	m_labels[SUS_TERN            ] = "S"; // ternary suspension
 	m_labels[AGENT_BIN           ] = "G"; // binary agent

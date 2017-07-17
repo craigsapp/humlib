@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 18 00:25:11 CEST 2017
+// Last Modified: Tue Jul 18 01:21:13 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3741,10 +3741,10 @@ class Tool_dissonant : public HumTool {
 		void    findAppoggiaturas  (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findLs			   (vector<vector<string> >& results, 
+		void    findLs             (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findYs			   (vector<vector<string> >& results, 
+		void    findYs             (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
 		void    changePitch        (HTp note2, HTp note1);
@@ -3784,8 +3784,8 @@ class Tool_dissonant : public HumTool {
 		const int PASSING_DOWN         =  1; // downward passing tone
 		const int NEIGHBOR_UP          =  2; // upper neighbor
 		const int NEIGHBOR_DOWN        =  3; // lower neighbor
-		const int ECHAPPEE_UP           =  4; // upper échappée
-		const int ECHAPPEE_DOWN         =  5; // lower échappée
+		const int ECHAPPEE_UP          =  4; // upper échappée
+		const int ECHAPPEE_DOWN        =  5; // lower échappée
 		const int CAMBIATA_UP_S        =  6; // ascending short nota cambiata
 		const int CAMBIATA_DOWN_S      =  7; // descending short nota cambiata
 		const int CAMBIATA_UP_L        =  8; // ascending long nota cambiata
@@ -3802,16 +3802,16 @@ class Tool_dissonant : public HumTool {
 		const int THIRD_Q_PASS_DOWN    = 17; // dissonant third quarter
 		const int THIRD_Q_UPPER_NEI    = 18; // dissonant third quarter
 		const int THIRD_Q_LOWER_NEI    = 19; // dissonant third quarter
-		const int ACC_PASSING_UP	   = 20; // appoggiatura
-		const int ACC_PASSING_DOWN	   = 21; // appoggiatura
-		const int ACC_UP_NEI		   = 22; // appoggiatura
-		const int ACC_LO_NEI		   = 23; // appoggiatura
-		const int APP_LEAP_UP		   = 24; // appoggiatura
-		const int APP_LEAP_DOWN		   = 25; // appoggiatura
-		const int SUS_BIN  	           = 26; // binary suspension
-		const int SUS_TERN  	       = 27; // ternary suspension
-		const int AGENT_BIN		       = 28; // binary agent
-		const int AGENT_TERN		   = 29; // ternary agent
+		const int ACC_PASSING_UP       = 20; // appoggiatura
+		const int ACC_PASSING_DOWN     = 21; // appoggiatura
+		const int ACC_UP_NEI           = 22; // appoggiatura
+		const int ACC_LO_NEI           = 23; // appoggiatura
+		const int APP_LEAP_UP          = 24; // appoggiatura
+		const int APP_LEAP_DOWN        = 25; // appoggiatura
+		const int SUS_BIN              = 26; // binary suspension
+		const int SUS_TERN             = 27; // ternary suspension
+		const int AGENT_BIN            = 28; // binary agent
+		const int AGENT_TERN           = 29; // ternary agent
 		const int SUSPENSION_ORNAM     = 30; // suspension ornament
 		const int SUSPENSION_REP       = 31; // suspension repeated note
 		const int FAKE_SUSPENSION_LEAP = 32; // fake suspension approached by leap
