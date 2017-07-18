@@ -132,13 +132,15 @@ class Tool_musicxml2hum : public HumTool {
 		xml_node convertMensurationToHumdrum(xml_node timesig,
 		                        HTp& token, int& staffindex);
 
-		void addEvent          (GridSlice& slice, MxmlEvent* event);
+		void addEvent          (GridSlice* slice, GridMeasure* outdata, MxmlEvent* event);
 		void fillEmpties       (GridPart* part, const char* string);
 		void addSecondaryChordNotes (ostream& output, MxmlEvent* head, const string& recip);
 		bool isInvisible       (MxmlEvent* event);
 		int  addLyrics         (GridStaff* staff, MxmlEvent* event);
 		int  addHarmony        (GridPart* oart, MxmlEvent* event);
 		void addDynamic        (GridPart* part, MxmlEvent* event);
+		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex, MxmlEvent* event);
+		void addText           (GridSlice* slice, GridMeasure* measure, int partindex, xml_node node);
 		string getHarmonyString(xml_node hnode);
 		string getDynamicString(xml_node element);
 		string cleanSpaces     (const string& input);
@@ -160,7 +162,7 @@ class Tool_musicxml2hum : public HumTool {
 		int m_slurbelow = 0;
 
 		xml_node m_current_dynamic = xml_node(NULL);
-		xml_node m_current_text    = xml_node(NULL);
+		vector<xml_node> m_current_text;
 
 };
 

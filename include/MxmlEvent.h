@@ -127,6 +127,10 @@ class MxmlEvent {
 		void               forceInvisible     (void);
 		bool               isInvisible        (void);
 		void               setBarlineStyle    (xml_node node);
+		void               setTexts           (vector<xml_node>& nodes);
+		vector<xml_node>&  getTexts           (void);
+		void               setDynamics        (xml_node node);
+		xml_node           getDynamics        (void);
 
 	protected:
 		HumNum             m_starttime;  // start time in quarter notes of event
@@ -146,7 +150,8 @@ class MxmlEvent {
 		bool               m_invisible;  // for forceInvisible();
 		bool               m_stems;      // for preserving stems
 
-
+		xml_node          m_dynamics;    // dynamics <direction> starting just before note
+		vector<xml_node>  m_text;        // text <direction> starting just before note
 
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);
@@ -158,8 +163,6 @@ class MxmlEvent {
 		static HumNum getQuarterDurationFromType (const char* type);
 		static bool   nodeType             (xml_node node, const char* testname);
 
-		xml_node      m_dynamics;    // dynamics <direction> starting just before note
-		xml_node      m_text;        // text <direction> starting just before note
 
 	friend MxmlMeasure;
 	friend MxmlPart;

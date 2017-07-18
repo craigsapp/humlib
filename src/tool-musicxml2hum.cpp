@@ -39,7 +39,6 @@ Tool_musicxml2hum::Tool_musicxml2hum(void) {
 
 	VoiceDebugQ = false;
 	DebugQ = false;
-
 }
 
 
@@ -140,8 +139,6 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		outdata.setHarmonyCount(p, harmonyCount);
 	}
 
-
-// ggg
 	// transfer dynamics boolean for part to HumGrid
 	for (int p=0; p<(int)partdata.size(); p++) {
 		bool dynstate = partdata[p].hasDynamics();
@@ -772,7 +769,7 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 	for (int i=0; i<(int)nowevents.size(); i++) {
 		vector<MxmlEvent*>& events = nowevents[i]->nonzerodur;
 		for (int j=0; j<(int)events.size(); j++) {
-			addEvent(*slice, events[j]);
+			addEvent(slice, outdata, events[j]);
 		}
 	}
 }
@@ -784,8 +781,7 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 // Tool_musicxml2hum::addEvent -- Add a note or rest.
 //
 
-void Tool_musicxml2hum::addEvent(GridSlice& slice,
-		MxmlEvent* event) {
+void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEvent* event) {
 
 	int partindex;  // which part the event occurs in
 	int staffindex; // which staff the event occurs in (need to fix)
@@ -850,7 +846,7 @@ void Tool_musicxml2hum::addEvent(GridSlice& slice,
 	if (event->isFloating()) {
 		ss << ".";
 		HTp token = new HumdrumToken(ss.str());
-		slice.at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
+		slice->at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
 			event->getDuration());
 	} else {
 		ss << prefix << recip << pitch << postfix;
@@ -863,11 +859,11 @@ void Tool_musicxml2hum::addEvent(GridSlice& slice,
 		if (event->isChord()) {
 			addSecondaryChordNotes(ss, event, recip);
 			token = new HumdrumToken(ss.str());
-			slice.at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
+			slice->at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
 				event->getDuration());
 		} else {
 			token = new HumdrumToken(ss.str());
-			slice.at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
+			slice->at(partindex)->at(staffindex)->setTokenLayer(voiceindex, token,
 				event->getDuration());
 		}
 	}
@@ -884,29 +880,114 @@ void Tool_musicxml2hum::addEvent(GridSlice& slice,
 		cerr << endl;
 	}
 
-	int vcount = addLyrics(slice.at(partindex)->at(staffindex), event);
+	int vcount = addLyrics(slice->at(partindex)->at(staffindex), event);
 
 	if (vcount > 0) {
 		event->reportVerseCountToOwner(staffindex, vcount);
 	}
 
-	int hcount = addHarmony(slice.at(partindex), event);
+	int hcount = addHarmony(slice->at(partindex), event);
 	if (hcount > 0) {
 		event->reportHarmonyCountToOwner(hcount);
 	}
 
-	if (m_current_text) {
-		event->m_text = m_current_text;
-		m_current_text = xml_node(NULL);
+	if (m_current_text.size() > 0) {
+		event->setTexts(m_current_text);
+		m_current_text.clear();
+		addTexts(slice, outdata, partindex, event);
 	}
 
 	if (m_current_dynamic) {
-		event->m_dynamics = m_current_dynamic;
+		event->setDynamics(m_current_dynamic);
 		m_current_dynamic = xml_node(NULL);
 		event->reportDynamicToOwner();
-		addDynamic(slice.at(partindex), event);
+		addDynamic(slice->at(partindex), event);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addTexts -- Add all text direction for a note.
+//
+
+void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int partindex, MxmlEvent* event) {
+	GridPart* part = slice->at(partindex);
+	vector<xml_node>& nodes = event->getTexts();
+	for (xml_node item : nodes) {
+		addText(slice, measure, partindex, item);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addText -- Add a text direction to the grid.
+//
+//      <direction placement="below">
+//        <direction-type>
+//          <words font-style="italic">Some Text</words>
+//        </direction-type>
+//      </direction>
+
+void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex, xml_node node) {
+	GridPart* part = slice->at(partindex);
+
+	string placementstring;
+	xml_attribute placement = node.attribute("placement");
+	if (placement) {
+		string value = placement.value();
+		if (value == "above") {
+			placementstring = ":a";
+		} else if (value == "below") {
+			placementstring = ":b";
+		}
 	}
 
+	xml_node child = node.first_child();
+	if (!child) {
+		return;
+	}
+	if (!nodeType(child, "direction-type")) {
+		return;
+	}
+
+
+	xml_node grandchild = child.first_child();
+	if (!grandchild) {
+		return;
+	}
+	if (!nodeType(grandchild, "words")) {
+		return;
+	}
+	string text = grandchild.child_value();
+	if (text == "") {
+		return;
+	}
+
+	string stylestring;
+	xml_attribute fontstyle = grandchild.attribute("font-style");
+	if (fontstyle) {
+		string value = fontstyle.value();
+		if (value == "italic") {
+			stylestring = ":i";
+		}
+		// add bold and bold-italic here
+	}
+
+	// maybe check for text only containing spaces and exclude here
+	string output = "!LO:TX";
+	output += placementstring;
+	output += stylestring;
+	output += ":t=";
+	output += text;
+
+	// The text direction needs to be added before the last line in the measure object.
+	// If there is already an empty layout slice before the current one (with no spine manipulators
+	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
+	measure->addLayoutParameter(slice, partindex, output);
 
 }
 
@@ -928,7 +1009,7 @@ void Tool_musicxml2hum::addEvent(GridSlice& slice,
 //
 
 void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
-	xml_node direction = event->m_dynamics;
+	xml_node direction = event->getDynamics();
 	if (!direction) {
 		return;
 	}
@@ -1403,7 +1484,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 				if (nodeType(child, "direction-type")) {
 					grandchild = child.first_child();
 					if (nodeType(grandchild, "words")) {
-						m_current_text = element;
+						m_current_text.push_back(element);
 					} else if (nodeType(grandchild, "dynamics")) {
 						m_current_dynamic = element;
 					}
@@ -1501,7 +1582,7 @@ void Tool_musicxml2hum::addGraceLines(GridMeasure* outdata,
 			for (int k=0; k<(int)notes[i][j].size(); k++) {
 				int startm = maxcount - (int)notes[i][j][k].size();
 				for (int m=0; m<(int)notes[i][j][k].size(); m++) {
-					addEvent(*slices.at(startm+m), notes[i][j][k][m]);
+					addEvent(slices.at(startm+m), outdata, notes[i][j][k][m]);
 				}
 			}
 		}
