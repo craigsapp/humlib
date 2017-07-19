@@ -76,7 +76,7 @@ class GridSlice : public vector<GridPart*> {
 		                           int maxhcount);
 		void transferSides        (HumdrumLine& line, GridPart& sides, 
 		                           const string& empty, int maxvcount,
-		                           int maxhcount);
+		                           int maxhcount, int maxdcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
