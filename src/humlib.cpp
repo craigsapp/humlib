@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 18 22:37:51 CEST 2017
+// Last Modified: Wed Jul 19 09:06:10 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2708,6 +2708,21 @@ HTp GridSide::getDynamics(void) {
 
 //////////////////////////////
 //
+// GridSide::getDynamicsCount --
+//
+
+int GridSide::getDynamicsCount(void) {
+	if (m_dynamics == NULL) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // GridSlice::GridSlice -- Constructor.  If partcount is positive, then
 //    allocate the desired number of parts (still have to allocate staves
 //    in part before using).
@@ -3055,6 +3070,26 @@ int GridSlice::getHarmonyCount(int partindex, int staffindex) {
 
 //////////////////////////////
 //
+// GridSlice::getDynamicsCount -- Return 0 if no dynamics, otherwise typically returns 1.
+//
+
+int GridSlice::getDynamicsCount(int partindex, int staffindex) {
+	HumGrid* grid = getOwner();
+	if (!grid) {
+		return 0;
+	}
+	if (staffindex >= 0) {
+		// ignoring staff-level harmony
+		return 0;
+	} else {
+		return grid->getDynamicsCount(partindex);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // GridSlice::transferSides --
 //
 
@@ -3065,6 +3100,8 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
+	int dcount = sides.getDynamicsCount();
+
 	HTp newtoken;
 
 	for (int i=0; i<vcount; i++) {
@@ -3083,13 +3120,15 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		line.appendToken(newtoken);
 	}
 
-	HTp dynamics = sides.getDynamics();
-	if (dynamics) {
-		line.appendToken(dynamics);
-		sides.detachDynamics();
-	} else {
-		newtoken = new HumdrumToken(empty);
-		line.appendToken(newtoken);
+	if (dcount > 0) {
+		HTp dynamics = sides.getDynamics();
+		if (dynamics) {
+			line.appendToken(dynamics);
+			sides.detachDynamics();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
 	}
 
 	for (int i=0; i<hcount; i++) {
@@ -4156,6 +4195,20 @@ int HumGrid::getHarmonyCount(int partindex) {
 		return 0;
 	}
 	return m_harmonyCount.at(partindex);
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::getDynamicsCount --
+//
+
+int HumGrid::getDynamicsCount(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_dynamics.size())) {
+		return 0;
+	}
+	return m_dynamics[partindex];
 }
 
 
@@ -21118,7 +21171,10 @@ int MxmlPart::getMeasureCount(void) const {
 //
 
 MxmlMeasure* MxmlPart::getMeasure(int index) const {
-	if ((index < 0) || (index >= (int)m_measures.size())) {
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= (int)m_measures.size()) {
 		return NULL;
 	}
 	return m_measures[index];
@@ -33554,7 +33610,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 //
 
 void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		tokens[i]->setText(*tokens[i] + m_marker);
 	}
 }
@@ -33575,7 +33631,7 @@ int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
 			if (m_intervals[j] != v1i[i+j]) {
 				break;
 			}
-			if (j == m_intervals.size() - 1) {
+			if (j == (int)m_intervals.size() - 1) {
 				// successfully found the interval pattern in imitation
 				return count;
 			}
@@ -33980,10 +34036,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	// add RDFs
 	if (m_slurabove) {
-		out << "!!!RDF**kern: > = slur above" << endl;
+		out << "!!!RDF**kern: > = above" << endl;
 	}
 	if (m_slurbelow) {
-		out << "!!!RDF**kern: < = slur below" << endl;
+		out << "!!!RDF**kern: < = below" << endl;
 	}
 
 	for (int i=0; i<(int)partdata.size(); i++) {
@@ -34734,7 +34790,6 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 //
 
 void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int partindex, MxmlEvent* event) {
-	GridPart* part = slice->at(partindex);
 	vector<xml_node>& nodes = event->getTexts();
 	for (xml_node item : nodes) {
 		addText(slice, measure, partindex, item);
@@ -34754,7 +34809,6 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //      </direction>
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex, xml_node node) {
-	GridPart* part = slice->at(partindex);
 
 	string placementstring;
 	xml_attribute placement = node.attribute("placement");

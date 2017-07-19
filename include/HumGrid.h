@@ -32,6 +32,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void enableRecipSpine           (void);
 		bool transferTokens             (HumdrumFile& outfile);
 		int  getHarmonyCount            (int partindex);
+		int  getDynamicsCount           (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
 		void setDynamicsPresent         (int partindex);

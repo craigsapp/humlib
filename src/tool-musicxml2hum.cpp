@@ -159,10 +159,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	// add RDFs
 	if (m_slurabove) {
-		out << "!!!RDF**kern: > = slur above" << endl;
+		out << "!!!RDF**kern: > = above" << endl;
 	}
 	if (m_slurbelow) {
-		out << "!!!RDF**kern: < = slur below" << endl;
+		out << "!!!RDF**kern: < = below" << endl;
 	}
 
 	for (int i=0; i<(int)partdata.size(); i++) {
@@ -913,7 +913,6 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 //
 
 void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int partindex, MxmlEvent* event) {
-	GridPart* part = slice->at(partindex);
 	vector<xml_node>& nodes = event->getTexts();
 	for (xml_node item : nodes) {
 		addText(slice, measure, partindex, item);
@@ -933,7 +932,6 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //      </direction>
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex, xml_node node) {
-	GridPart* part = slice->at(partindex);
 
 	string placementstring;
 	xml_attribute placement = node.attribute("placement");

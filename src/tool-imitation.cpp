@@ -346,7 +346,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 //
 
 void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
-	for (int i=0; i<tokens.size(); i++) {
+	for (int i=0; i<(int)tokens.size(); i++) {
 		tokens[i]->setText(*tokens[i] + m_marker);
 	}
 }
@@ -367,7 +367,7 @@ int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
 			if (m_intervals[j] != v1i[i+j]) {
 				break;
 			}
-			if (j == m_intervals.size() - 1) {
+			if (j == (int)m_intervals.size() - 1) {
 				// successfully found the interval pattern in imitation
 				return count;
 			}

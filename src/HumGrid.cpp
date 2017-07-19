@@ -88,6 +88,20 @@ int HumGrid::getHarmonyCount(int partindex) {
 
 //////////////////////////////
 //
+// HumGrid::getDynamicsCount --
+//
+
+int HumGrid::getDynamicsCount(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_dynamics.size())) {
+		return 0;
+	}
+	return m_dynamics[partindex];
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::getVerseCount --
 //
 

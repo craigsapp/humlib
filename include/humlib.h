@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 18 22:37:51 CEST 2017
+// Last Modified: Wed Jul 19 09:06:10 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2584,17 +2584,19 @@ class GridSide {
 		GridSide(void);
 		~GridSide();
 
-		int   getVerseCount  (void);
-		HTp   getVerse       (int index);
-		void  setVerse       (int index, HTp token);
+		int   getVerseCount     (void);
+		HTp   getVerse          (int index);
+		void  setVerse          (int index, HTp token);
 
-		int   getHarmonyCount(void);
-		void  setHarmony     (HTp token);
-		void  detachHarmony  (void);
-		HTp   getHarmony     (void);
-		void  setDynamic     (HTp token);
-		void  detachDynamics (void);
-		HTp   getDynamics    (void);
+		int   getHarmonyCount   (void);
+		void  setHarmony        (HTp token);
+		void  detachHarmony     (void);
+		HTp   getHarmony        (void);
+
+		int   getDynamicsCount  (void);
+		void  setDynamic        (HTp token);
+		void  detachDynamics    (void);
+		HTp   getDynamics       (void);
 
 	private:
 		vector<HumdrumToken*> m_verses;
@@ -2726,6 +2728,7 @@ class GridSlice : public vector<GridPart*> {
 		                           int maxhcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
+		int getDynamicsCount      (int partindex, int staffindex = -1);
 
 	protected:
 		HTp  createRecipTokenFromDuration  (HumNum duration);
@@ -2792,6 +2795,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void enableRecipSpine           (void);
 		bool transferTokens             (HumdrumFile& outfile);
 		int  getHarmonyCount            (int partindex);
+		int  getDynamicsCount           (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
 		void setDynamicsPresent         (int partindex);

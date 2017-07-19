@@ -79,6 +79,7 @@ class GridSlice : public vector<GridPart*> {
 		                           int maxhcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
+		int getDynamicsCount      (int partindex, int staffindex = -1);
 
 	protected:
 		HTp  createRecipTokenFromDuration  (HumNum duration);

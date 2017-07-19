@@ -198,6 +198,21 @@ HTp GridSide::getDynamics(void) {
 }
 
 
+
+//////////////////////////////
+//
+// GridSide::getDynamicsCount --
+//
+
+int GridSide::getDynamicsCount(void) {
+	if (m_dynamics == NULL) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
 // END_MERGE
 
 } // end namespace hum

@@ -31,17 +31,19 @@ class GridSide {
 		GridSide(void);
 		~GridSide();
 
-		int   getVerseCount  (void);
-		HTp   getVerse       (int index);
-		void  setVerse       (int index, HTp token);
+		int   getVerseCount     (void);
+		HTp   getVerse          (int index);
+		void  setVerse          (int index, HTp token);
 
-		int   getHarmonyCount(void);
-		void  setHarmony     (HTp token);
-		void  detachHarmony  (void);
-		HTp   getHarmony     (void);
-		void  setDynamic     (HTp token);
-		void  detachDynamics (void);
-		HTp   getDynamics    (void);
+		int   getHarmonyCount   (void);
+		void  setHarmony        (HTp token);
+		void  detachHarmony     (void);
+		HTp   getHarmony        (void);
+
+		int   getDynamicsCount  (void);
+		void  setDynamic        (HTp token);
+		void  detachDynamics    (void);
+		HTp   getDynamics       (void);
 
 	private:
 		vector<HumdrumToken*> m_verses;

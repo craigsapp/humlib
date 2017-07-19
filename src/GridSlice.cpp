@@ -369,6 +369,26 @@ int GridSlice::getHarmonyCount(int partindex, int staffindex) {
 
 //////////////////////////////
 //
+// GridSlice::getDynamicsCount -- Return 0 if no dynamics, otherwise typically returns 1.
+//
+
+int GridSlice::getDynamicsCount(int partindex, int staffindex) {
+	HumGrid* grid = getOwner();
+	if (!grid) {
+		return 0;
+	}
+	if (staffindex >= 0) {
+		// ignoring staff-level harmony
+		return 0;
+	} else {
+		return grid->getDynamicsCount(partindex);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // GridSlice::transferSides --
 //
 
@@ -379,6 +399,8 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
+	int dcount = sides.getDynamicsCount();
+
 	HTp newtoken;
 
 	for (int i=0; i<vcount; i++) {
@@ -397,13 +419,15 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		line.appendToken(newtoken);
 	}
 
-	HTp dynamics = sides.getDynamics();
-	if (dynamics) {
-		line.appendToken(dynamics);
-		sides.detachDynamics();
-	} else {
-		newtoken = new HumdrumToken(empty);
-		line.appendToken(newtoken);
+	if (dcount > 0) {
+		HTp dynamics = sides.getDynamics();
+		if (dynamics) {
+			line.appendToken(dynamics);
+			sides.detachDynamics();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
 	}
 
 	for (int i=0; i<hcount; i++) {
