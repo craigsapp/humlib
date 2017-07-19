@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Jul 19, 2017  1:03:29 PM
+// Last Modified: Wed Jul 19 15:27:30 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2763,13 +2763,8 @@ GridSlice::GridSlice(GridMeasure* measure, HumNum timestamp, SliceType type,
 		const GridSlice& slice) {
 	m_timestamp = timestamp;
 	m_type = type;
-	if (m_measure) {
-		m_owner = measure->getOwner();
-		m_measure = measure;
-	} else {
-		m_owner = NULL;
-		m_measure = NULL;
-	}
+	m_owner = measure->getOwner();
+	m_measure = measure;
 	int partcount = (int)slice.size();
 	int staffcount;
 	if (partcount > 0) {
@@ -2791,13 +2786,8 @@ GridSlice::GridSlice(GridMeasure* measure, HumNum timestamp, SliceType type,
 		GridSlice* slice) {
 	m_timestamp = timestamp;
 	m_type = type;
-	if (m_measure) {
-		m_owner = measure->getOwner();
-		m_measure = measure;
-	} else {
-		m_owner = NULL;
-		m_measure = NULL;
-	}
+	m_owner = measure->getOwner();
+	m_measure = measure;
 	int partcount = (int)slice->size();
 	int staffcount;
 	if (partcount > 0) {
@@ -2981,10 +2971,10 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 						line->appendToken(staff.at(v)->getToken());
 						staff.at(v)->forgetToken();
 					} else if (!staff.at(v)) {
-						token = new HumdrumToken(".");
+						token = new HumdrumToken(empty);
 						line->appendToken(token);
 					} else {
-						token = new HumdrumToken(".");
+						token = new HumdrumToken(empty);
 						line->appendToken(token);
 					}
 				}
@@ -2996,7 +2986,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		}
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
-		transferSides(*line, part, empty, maxvcount, maxhcount);
+		int maxdcount = getDynamicsCount(p);
+		transferSides(*line, part, empty, maxvcount, maxhcount, maxdcount);
 	}
 
 	outfile.appendLine(line);
@@ -3098,14 +3089,12 @@ int GridSlice::getDynamicsCount(int partindex, int staffindex) {
 // GridSlice::transferSides --
 //
 
-
 // this version is used to transfer Sides from the Part
 void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
-		const string& empty, int maxvcount, int maxhcount) {
+		const string& empty, int maxvcount, int maxhcount, int maxdcount) {
 
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
-	int dcount = sides.getDynamicsCount();
 
 	HTp newtoken;
 
@@ -3125,7 +3114,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		line.appendToken(newtoken);
 	}
 
-	if (dcount > 0) {
+	if (maxdcount > 0) {
 		HTp dynamics = sides.getDynamics();
 		if (dynamics) {
 			line.appendToken(dynamics);
@@ -29201,6 +29190,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			}
 			oattackindexc = grid.cell(j, sliceindex)->getCurrAttackIndex();
 			oattackindexn = grid.cell(j, sliceindex)->getNextAttackIndex();
+			attackindexn = attacks[i]->getNextAttackIndex();
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			olineindex = grid.cell(j, oattackindexc)->getLineIndex();

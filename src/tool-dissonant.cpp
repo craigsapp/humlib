@@ -1064,6 +1064,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			}
 			oattackindexc = grid.cell(j, sliceindex)->getCurrAttackIndex();
 			oattackindexn = grid.cell(j, sliceindex)->getNextAttackIndex();
+			attackindexn = attacks[i]->getNextAttackIndex();
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
@@ -1512,6 +1513,9 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[UNLABELED_Z7        ] = "Z"; // unknown dissonance, 7th interval
 	m_labels[UNLABELED_Z4        ] = "Z"; // unknown dissonance, 4th interval
 }
+
+
+// END_MERGE
 
 } // end namespace hum
 

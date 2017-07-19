@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Jul 19, 2017  1:03:29 PM
+// Last Modified: Wed Jul 19 15:27:30 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2725,7 +2725,7 @@ class GridSlice : public vector<GridPart*> {
 		                           int maxhcount);
 		void transferSides        (HumdrumLine& line, GridPart& sides, 
 		                           const string& empty, int maxvcount,
-		                           int maxhcount);
+		                           int maxhcount, int maxdcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
