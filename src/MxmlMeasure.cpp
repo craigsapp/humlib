@@ -353,6 +353,17 @@ void MxmlMeasure::reportHarmonyCountToOwner(int count) {
 
 //////////////////////////////
 //
+// MxmlMeasure::reportDynamicToOwner --
+//
+
+void MxmlMeasure::reportDynamicToOwner(void) {
+	m_owner->receiveDynamic();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlMeasure::reportEditorialAccidentalToOwner --
 //
 

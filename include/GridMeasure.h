@@ -61,6 +61,7 @@ class GridMeasure : public list<GridSlice*> {
 		                  { return m_style == MeasureStyle::RepeatForward; }
 		bool         isRepeatBoth(void) 
 		                  { return m_style == MeasureStyle::RepeatBoth; }
+		void         addLayoutParameter(GridSlice* slice, int partindex, const string& locomment);
 
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile);

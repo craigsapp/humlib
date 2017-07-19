@@ -50,13 +50,15 @@ class GridSlice : public vector<GridPart*> {
 		bool isTimeSigSlice(void)  { return m_type == SliceType::TimeSigs; }
 		bool isMeterSigSlice(void) { return m_type == SliceType::MeterSigs; }
 		bool isManipulatorSlice(void) { return m_type==SliceType::Manipulators; }
+		bool isLayoutSlice(void)   { return m_type ==  SliceType::Layouts; }
 		bool isInvalidSlice(void)  { return m_type == SliceType::Invalid; }
 		bool isInterpretationSlice(void);
 		bool isDataSlice(void);
 		SliceType getType(void)    { return m_type; }
 
-		void transferTokens    (HumdrumFile& outfile, bool recip);
-		void initializePartStaves (vector<MxmlPart>& partdata);
+		void transferTokens        (HumdrumFile& outfile, bool recip);
+		void initializePartStaves  (vector<MxmlPart>& partdata);
+		void initializeBySlice     (GridSlice* slice);
 
 		HumNum       getDuration        (void);
 		void         setDuration        (HumNum duration);
@@ -77,6 +79,7 @@ class GridSlice : public vector<GridPart*> {
 		                           int maxhcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
+		int getDynamicsCount      (int partindex, int staffindex = -1);
 
 	protected:
 		HTp  createRecipTokenFromDuration  (HumNum duration);

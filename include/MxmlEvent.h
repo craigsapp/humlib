@@ -112,11 +112,12 @@ class MxmlEvent {
 		string             getElementName     (void);
 		void               addNotations       (stringstream& ss, 
 		                                       xml_node notations) const;
-		void               reportVerseCountToOwner (int count);
-		void               reportVerseCountToOwner (int staffnum, int count);
-		void               reportHarmonyCountToOwner (int count);
-		void               reportMeasureStyleToOwner (MeasureStyle style);
+		void               reportVerseCountToOwner         (int count);
+		void               reportVerseCountToOwner         (int staffnum, int count);
+		void               reportHarmonyCountToOwner       (int count);
+		void               reportMeasureStyleToOwner       (MeasureStyle style);
 		void               reportEditorialAccidentalToOwner(void);
+		void               reportDynamicToOwner            (void);
       void               makeDummyRest      (MxmlMeasure* owner, 
 		                                       HumNum startime,
 		                                       HumNum duration,
@@ -126,6 +127,10 @@ class MxmlEvent {
 		void               forceInvisible     (void);
 		bool               isInvisible        (void);
 		void               setBarlineStyle    (xml_node node);
+		void               setTexts           (vector<xml_node>& nodes);
+		vector<xml_node>&  getTexts           (void);
+		void               setDynamics        (xml_node node);
+		xml_node           getDynamics        (void);
 
 	protected:
 		HumNum             m_starttime;  // start time in quarter notes of event
@@ -145,6 +150,8 @@ class MxmlEvent {
 		bool               m_invisible;  // for forceInvisible();
 		bool               m_stems;      // for preserving stems
 
+		xml_node          m_dynamics;    // dynamics <direction> starting just before note
+		vector<xml_node>  m_text;        // text <direction> starting just before note
 
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);
@@ -155,6 +162,7 @@ class MxmlEvent {
 		static HumNum getEmbeddedDuration  (xml_node el = xml_node(NULL));
 		static HumNum getQuarterDurationFromType (const char* type);
 		static bool   nodeType             (xml_node node, const char* testname);
+
 
 	friend MxmlMeasure;
 	friend MxmlPart;

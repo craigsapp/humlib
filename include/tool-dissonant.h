@@ -45,10 +45,10 @@ class Tool_dissonant : public HumTool {
 		void    findAppoggiaturas  (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findLs			   (vector<vector<string> >& results, 
+		void    findLs             (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findYs			   (vector<vector<string> >& results, 
+		void    findYs             (vector<vector<string> >& results, 
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
 		void    changePitch        (HTp note2, HTp note1);
@@ -78,6 +78,8 @@ class Tool_dissonant : public HumTool {
 		bool dissL1Q = false;
 		bool dissL2Q = false;
 		bool suppressQ = false;
+		bool m_voicenumQ = false;
+		bool m_selfnumQ = false;
 
 		vector<string> m_labels;
 
@@ -86,8 +88,8 @@ class Tool_dissonant : public HumTool {
 		const int PASSING_DOWN         =  1; // downward passing tone
 		const int NEIGHBOR_UP          =  2; // upper neighbor
 		const int NEIGHBOR_DOWN        =  3; // lower neighbor
-		const int ECHAPPEE_UP           =  4; // upper échappée
-		const int ECHAPPEE_DOWN         =  5; // lower échappée
+		const int ECHAPPEE_UP          =  4; // upper échappée
+		const int ECHAPPEE_DOWN        =  5; // lower échappée
 		const int CAMBIATA_UP_S        =  6; // ascending short nota cambiata
 		const int CAMBIATA_DOWN_S      =  7; // descending short nota cambiata
 		const int CAMBIATA_UP_L        =  8; // ascending long nota cambiata
@@ -137,8 +139,6 @@ class Tool_dissonant : public HumTool {
 
 		const int LABELS_SIZE          = 47; // one more than last index
 };
-
-// END_MERGE
 
 } // end namespace hum
 

@@ -100,15 +100,16 @@ class MxmlMeasure {
 		bool  isRepeatBoth(void)       { return m_style == MeasureStyle::RepeatBoth; }
 
 	private:
-		void  receiveStaffNumberFromChild (int staffnum, int voicenum);
-		void  receiveTimeSigDurFromChild  (HumNum duration);
-		void  receiveMeasureStyleFromChild(MeasureStyle style);
-		void  receiveEditorialAccidentalFromChild(void);
-   	void  reportStaffNumberToOwner    (int staffnum, int voicenum);
-		void  reportVerseCountToOwner     (int count);
-		void  reportVerseCountToOwner     (int staffindex, int count);
-		void  reportHarmonyCountToOwner   (int count);
-		void  reportEditorialAccidentalToOwner (void);
+		void  receiveStaffNumberFromChild         (int staffnum, int voicenum);
+		void  receiveTimeSigDurFromChild          (HumNum duration);
+		void  receiveMeasureStyleFromChild        (MeasureStyle style);
+		void  receiveEditorialAccidentalFromChild (void);
+   	void  reportStaffNumberToOwner            (int staffnum, int voicenum);
+		void  reportVerseCountToOwner             (int count);
+		void  reportVerseCountToOwner             (int staffindex, int count);
+		void  reportHarmonyCountToOwner           (int count);
+		void  reportEditorialAccidentalToOwner    (void);
+		void  reportDynamicToOwner                (void);
 
 	protected:
 		HumNum             m_starttime; // start time of measure in quarter notes
