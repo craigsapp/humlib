@@ -1510,6 +1510,9 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[UNLABELED_Z4        ] = "Z"; // unknown dissonance, 4th interval
 }
 
+
+// END_MERGE
+
 } // end namespace hum
 
 

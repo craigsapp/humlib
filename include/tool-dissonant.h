@@ -140,6 +140,8 @@ class Tool_dissonant : public HumTool {
 		const int LABELS_SIZE          = 47; // one more than last index
 };
 
+// END_MERGE
+
 } // end namespace hum
 
 #endif /* _TOOL_DISSONANT_H */
