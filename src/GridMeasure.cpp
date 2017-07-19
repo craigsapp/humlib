@@ -92,6 +92,11 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 		if (it->isDataSlice()) {
 			founddata = true;
 		}
+		if (it->isLayoutSlice()) {
+			// didn't actually find data, but barline should
+			// not cross this line.
+			founddata = true;
+		}
 		if (it->isManipulatorSlice()) {
 			// didn't acutally find data, but the barline should
 			// be placed before any manipulator (a spine split), since

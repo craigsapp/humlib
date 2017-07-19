@@ -966,13 +966,31 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 	}
 
 	string stylestring;
+	bool italic = false;
+	bool bold = false;
+
 	xml_attribute fontstyle = grandchild.attribute("font-style");
 	if (fontstyle) {
 		string value = fontstyle.value();
 		if (value == "italic") {
-			stylestring = ":i";
+			italic = true;
 		}
-		// add bold and bold-italic here
+	}
+
+	xml_attribute fontweight = grandchild.attribute("font-weight");
+	if (fontweight) {
+		string value = fontweight.value();
+		if (value == "bold") {
+			bold = true;
+		}
+	}
+	
+	if (italic && bold) {
+		stylestring = ":Bi";
+	} else if (italic) {
+		stylestring = ":i";
+	} else if (bold) {
+		stylestring = ":B";
 	}
 
 	// maybe check for text only containing spaces and exclude here
