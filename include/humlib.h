@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Jul 19, 2017  1:03:29 PM
+// Last Modified: Wed Jul 19 15:20:37 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3845,6 +3845,12 @@ class Tool_dissonant : public HumTool {
 
 		const int LABELS_SIZE          = 47; // one more than last index
 };
+
+} // end namespace hum
+
+#endif /* _TOOL_DISSONANT_H */
+
+
 
 
 
