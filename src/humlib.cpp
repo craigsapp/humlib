@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 19 22:20:39 CEST 2017
+// Last Modified: Thu Jul 20 10:49:42 CEST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -34056,6 +34056,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		bool dynstate = partdata[p].hasDynamics();
 		if (dynstate) {
 			outdata.setDynamicsPresent(p);
+			break;
 		}
 	}
 
@@ -34935,6 +34936,19 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 //      <sound dynamics="140.00"/>
 //      </direction>
 //
+// Hairpins:
+//      <direction placement="below">
+//        <direction-type>
+//          <wedge default-y="-75" number="2" spread="15" type="diminuendo"/>
+//        </direction-type>
+//      </direction>
+//
+//      <direction>
+//        <direction-type>
+//          <wedge spread="15" type="stop"/>
+//        </direction-type>
+//      </direction>
+//
 
 void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 	xml_node direction = event->getDynamics();
@@ -34952,16 +34966,74 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 	if (!grandchild) {
 		return;
 	}
-	if (!nodeType(grandchild, "dynamics")) {
+
+	if (!(nodeType(grandchild, "dynamics") || nodeType(grandchild, "wedge"))) {
 		return;
 	}
-	xml_node dynamic = grandchild.first_child();
-	if (!dynamic) {
-		return;
+
+	if (nodeType(grandchild, "dynamics")) {
+		xml_node dynamic = grandchild.first_child();
+		if (!dynamic) {
+			return;
+		}
+		string dstring = getDynamicString(dynamic);
+		HTp dtok = new HumdrumToken(dstring);
+		part->setDynamic(dtok);
+	} else if (nodeType(grandchild, "wedge")) {
+		xml_node hairpin = grandchild;
+		if (!hairpin) {
+			return;
+		}
+		string hstring = getHairpinString(hairpin);
+		HTp htok = new HumdrumToken(hstring);
+		part->setDynamic(htok);
 	}
-	string dstring = getDynamicString(dynamic);
-	HTp dtok = new HumdrumToken(dstring);
-	part->setDynamic(dtok);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getHairpinString --
+//
+// Hairpins:
+//      <direction placement="below">
+//        <direction-type>
+//          <wedge default-y="-75" number="2" spread="15" type="diminuendo"/>
+//        </direction-type>
+//      </direction>
+//
+//      <direction>
+//        <direction-type>
+//          <wedge spread="15" type="stop"/>
+//        </direction-type>
+//      </direction>
+//
+
+string Tool_musicxml2hum::getHairpinString(xml_node element) {
+	static char stopchar = '[';
+	if (nodeType(element, "wedge")) {
+		xml_attribute wtype = element.attribute("type");
+		if (!wtype) {
+			return "???";
+		}
+		string output;
+		string wstring = wtype.value();
+		if (wstring == "diminuendo") {
+			stopchar = ']';
+			output = '>';
+		} else if (wstring == "crescendo") {
+			stopchar = '[';
+			output = '<';
+		} else if (wstring == "stop") {
+			output = stopchar;
+		} else {
+			output = "???";
+		}
+		return output;
+	}
+
+	return "???";
 }
 
 
@@ -35414,6 +35486,8 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					if (nodeType(grandchild, "words")) {
 						m_current_text.push_back(element);
 					} else if (nodeType(grandchild, "dynamics")) {
+						m_current_dynamic = element;
+					} else if (nodeType(grandchild, "wedge")) {
 						m_current_dynamic = element;
 					}
 				}

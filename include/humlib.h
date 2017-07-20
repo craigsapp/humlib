@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 19 22:20:39 CEST 2017
+// Last Modified: Thu Jul 20 10:49:42 CEST 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4249,6 +4249,7 @@ class Tool_musicxml2hum : public HumTool {
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex, xml_node node);
 		string getHarmonyString(xml_node hnode);
 		string getDynamicString(xml_node element);
+		string getHairpinString(xml_node element);
 		string cleanSpaces     (const string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
 		void reindexVoices     (vector<MxmlPart>& partdata);
