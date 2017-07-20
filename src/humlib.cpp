@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 19 15:27:30 CEST 2017
+// Last Modified: Wed, Jul 19, 2017  3:51:29 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -29359,7 +29359,9 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 					results[vindex][lineindexp] = m_labels[DBL_NEIGHBOR_DOWN];
 					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_DOWN];									
 				} else if (((fabs(intp) > 1) || ant_leapt_to) && 
-						   ((lev <= levn) && (dur <= durn))) { // upper appoggiatura
+						   ((lev <= levn) && (dur <= durn)) &&
+						   ((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
+						    (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) { // upper appoggiatura
 					results[vindex][lineindex] = m_labels[APP_UPPER];
 				}
 			} else if (intn == 1) {
@@ -29371,7 +29373,9 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 					results[vindex][lineindexp] = m_labels[DBL_NEIGHBOR_UP];
 					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_UP];					
 				} else if (((fabs(intp) > 1) || ant_leapt_to) && 
-						   ((lev <= levn) && (dur <= durn))) { // lower appoggiatura
+						   ((lev <= levn) && (dur <= durn)) &&
+						   ((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
+						    (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) { // lower appoggiatura
 					results[vindex][lineindex] = m_labels[APP_LOWER];
 				}
 			}
