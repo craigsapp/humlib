@@ -995,6 +995,16 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			break;
 
 		case mevent_forward:
+			if (tempduration == 1) {
+				// handle errors in SharpEye:
+				long ticks = getQTicks();
+				if ((double)tempduration / (double)ticks < 0.0001) {
+					tempduration = 0;
+					m_eventtype = mevent_unknown;
+				}
+			} else if (tempduration < 4) {
+				cerr << "FORWARD WITH A SMALL VALUE " << tempduration << endl;
+			}
 			setDurationByTicks(tempduration);
 			break;
 

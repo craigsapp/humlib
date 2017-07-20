@@ -3459,17 +3459,22 @@ GridVoice* GridStaff::setTokenLayer(int layerindex, HTp token, HumNum duration) 
 void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 		HumNum nextdur) {
 
+	if (type == SliceType::Invalid) {
+		return;
+	}
+
 	string nulltoken;
 	if (type < SliceType::_Data) {
 		nulltoken = ".";
 	} else if (type < SliceType::_Measure) {
 		nulltoken = "=";
-	} else if (type < SliceType::_Manipulator) {
+	} else if (type < SliceType::_Interpretation) {
 		nulltoken = "*";
 	} else if (type < SliceType::_Spined) {
 		nulltoken = "!!";
 	} else {
-		cerr << "STRANGE ERROR" << endl;
+		cerr << "!!STRANGE ERROR: " << this << endl;
+		cerr << "!!SLICE TYPE: " << (int)type << endl;
 	}
 
 	if (layerindex < (int)this->size()) {
@@ -5554,7 +5559,6 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 				cerr << "Strange error2 in extendDurationToken()" << endl;
 				return;
 			}
-			gs->setNullTokenLayer(voicei, type, slicedur);
 			
 			if (m_allslices.at(s)->isDataSlice()) {
 				gs->setNullTokenLayer(voicei, type, slicedur);
@@ -5562,7 +5566,12 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-				gs->setNullTokenLayer(voicei, type, slicedur);
+				if (gs->at(voicei)->getToken()) {
+					// there is already a token here, so do not replace it.
+					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
+				} else {
+					gs->setNullTokenLayer(voicei, type, slicedur);
+				}
 			}
 			s++;
 			if (s == (int)m_allslices.size() - 1) {
@@ -19388,6 +19397,16 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			break;
 
 		case mevent_forward:
+			if (tempduration == 1) {
+				// handle errors in SharpEye:
+				long ticks = getQTicks();
+				if ((double)tempduration / (double)ticks < 0.0001) {
+					tempduration = 0;
+					m_eventtype = mevent_unknown;
+				}
+			} else if (tempduration < 4) {
+				cerr << "FORWARD WITH A SMALL VALUE " << tempduration << endl;
+			}
 			setDurationByTicks(tempduration);
 			break;
 
@@ -34041,6 +34060,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		bool dynstate = partdata[p].hasDynamics();
 		if (dynstate) {
 			outdata.setDynamicsPresent(p);
+			break;
 		}
 	}
 
@@ -34920,6 +34940,19 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 //      <sound dynamics="140.00"/>
 //      </direction>
 //
+// Hairpins:
+//      <direction placement="below">
+//        <direction-type>
+//          <wedge default-y="-75" number="2" spread="15" type="diminuendo"/>
+//        </direction-type>
+//      </direction>
+//
+//      <direction>
+//        <direction-type>
+//          <wedge spread="15" type="stop"/>
+//        </direction-type>
+//      </direction>
+//
 
 void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 	xml_node direction = event->getDynamics();
@@ -34937,16 +34970,74 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 	if (!grandchild) {
 		return;
 	}
-	if (!nodeType(grandchild, "dynamics")) {
+
+	if (!(nodeType(grandchild, "dynamics") || nodeType(grandchild, "wedge"))) {
 		return;
 	}
-	xml_node dynamic = grandchild.first_child();
-	if (!dynamic) {
-		return;
+
+	if (nodeType(grandchild, "dynamics")) {
+		xml_node dynamic = grandchild.first_child();
+		if (!dynamic) {
+			return;
+		}
+		string dstring = getDynamicString(dynamic);
+		HTp dtok = new HumdrumToken(dstring);
+		part->setDynamic(dtok);
+	} else if (nodeType(grandchild, "wedge")) {
+		xml_node hairpin = grandchild;
+		if (!hairpin) {
+			return;
+		}
+		string hstring = getHairpinString(hairpin);
+		HTp htok = new HumdrumToken(hstring);
+		part->setDynamic(htok);
 	}
-	string dstring = getDynamicString(dynamic);
-	HTp dtok = new HumdrumToken(dstring);
-	part->setDynamic(dtok);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getHairpinString --
+//
+// Hairpins:
+//      <direction placement="below">
+//        <direction-type>
+//          <wedge default-y="-75" number="2" spread="15" type="diminuendo"/>
+//        </direction-type>
+//      </direction>
+//
+//      <direction>
+//        <direction-type>
+//          <wedge spread="15" type="stop"/>
+//        </direction-type>
+//      </direction>
+//
+
+string Tool_musicxml2hum::getHairpinString(xml_node element) {
+	static char stopchar = '[';
+	if (nodeType(element, "wedge")) {
+		xml_attribute wtype = element.attribute("type");
+		if (!wtype) {
+			return "???";
+		}
+		string output;
+		string wstring = wtype.value();
+		if (wstring == "diminuendo") {
+			stopchar = ']';
+			output = '>';
+		} else if (wstring == "crescendo") {
+			stopchar = '[';
+			output = '<';
+		} else if (wstring == "stop") {
+			output = stopchar;
+		} else {
+			output = "???";
+		}
+		return output;
+	}
+
+	return "???";
 }
 
 
@@ -35399,6 +35490,8 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					if (nodeType(grandchild, "words")) {
 						m_current_text.push_back(element);
 					} else if (nodeType(grandchild, "dynamics")) {
+						m_current_dynamic = element;
+					} else if (nodeType(grandchild, "wedge")) {
 						m_current_dynamic = element;
 					}
 				}
