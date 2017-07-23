@@ -415,10 +415,6 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		if (dynamics) {
 			line.appendToken(dynamics);
 			sides.detachDynamics();
-
-			if (dynamics->getValue("LO", "DY", "a") == "true") {
-				GridMeasure* measure = getMeasure();
-			}
 		} else {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
