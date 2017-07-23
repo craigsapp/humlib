@@ -41,7 +41,7 @@ class GridSide {
 		HTp   getHarmony        (void);
 
 		int   getDynamicsCount  (void);
-		void  setDynamic        (HTp token);
+		void  setDynamics       (HTp token);
 		void  detachDynamics    (void);
 		HTp   getDynamics       (void);
 

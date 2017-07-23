@@ -279,6 +279,78 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 
 
 
+
+//////////////////////////////
+//
+// GridMeasure::addDynamicsLayoutParameters --
+//
+
+void GridMeasure::addDynamicsLayoutParameters(GridSlice* slice, int partindex,
+		const string& locomment) {
+	auto iter = this->rbegin();
+	if (iter == this->rend()) {
+		// something strange happened: expecting at least one item in measure.
+		return;
+	}
+	GridPart* part;
+
+	while ((iter != this->rend()) && (*iter != slice)) {
+		iter++;
+	}
+
+	if (*iter != slice) {
+		// cannot find owning line.
+		return;
+	}
+
+	auto previous = iter;
+	previous++;
+	while (previous != this->rend()) {
+		if ((*previous)->isLayoutSlice()) {
+			part = (*previous)->at(partindex);
+			if ((part->getDynamics() == NULL) || (*part->getDynamics() == "!")) {
+				HTp token = new HumdrumToken(locomment);
+				part->setDynamics(token);
+				return;
+			} else {
+				previous++;
+				continue;
+			}
+		} else {
+			break;
+		}
+	}
+
+	auto insertpoint = previous.base();
+	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::Layouts);	
+	newslice->initializeBySlice(*iter);
+	this->insert(insertpoint, newslice);
+
+	HTp newtoken = new HumdrumToken(locomment);
+	newslice->at(partindex)->setDynamics(newtoken);
+}
+
+
+
+//////////////////////////////
+//
+// operator<< --
+//
+
+ostream& operator<<(ostream& output, GridMeasure* measure) {
+	output << *measure;
+	return output;
+}
+
+ostream& operator<<(ostream& output, GridMeasure& measure) {
+	for (auto item : measure) {
+		output << item << endl;
+	}
+	return output;
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

@@ -164,7 +164,6 @@ void GridStaff::appendTokenLayer(int layerindex, HTp token, HumNum duration,
 
 int GridStaff::getMaxVerseCount(void) {
 	return 5;
-// ggg
 }
 
 

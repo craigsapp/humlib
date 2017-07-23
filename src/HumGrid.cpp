@@ -407,8 +407,6 @@ void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int 
 		}
 
 	}
-
-// ggg
 }
 
 
@@ -1469,7 +1467,6 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
-// ggg
 
 }
 

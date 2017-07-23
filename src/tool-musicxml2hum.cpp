@@ -900,9 +900,17 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 
 	if (m_current_dynamic) {
 		event->setDynamics(m_current_dynamic);
+		string dparam = getDynamicsParameters(m_current_dynamic);
 		m_current_dynamic = xml_node(NULL);
 		event->reportDynamicToOwner();
 		addDynamic(slice->at(partindex), event);
+		if (dparam != "") {
+			GridMeasure *gm = slice->getMeasure();
+			string fullparam = "!LO:DY" + dparam;
+			if (gm) {
+				gm->addDynamicsLayoutParameters(slice, partindex, fullparam);
+			}
+		}
 	}
 }
 
@@ -1043,6 +1051,14 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 	if (!direction) {
 		return;
 	}
+	xml_attribute placement = direction.attribute("placement");
+	bool above = false;
+	if (placement) {
+		string value = placement.value();
+		if (value == "above") {
+			above = true;
+		}
+	}
 	xml_node child = direction.first_child();
 	if (!child) {
 		return;
@@ -1066,7 +1082,7 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 		}
 		string dstring = getDynamicString(dynamic);
 		HTp dtok = new HumdrumToken(dstring);
-		part->setDynamic(dtok);
+		part->setDynamics(dtok);
 	} else if (nodeType(grandchild, "wedge")) {
 		xml_node hairpin = grandchild;
 		if (!hairpin) {
@@ -1074,8 +1090,60 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 		}
 		string hstring = getHairpinString(hairpin);
 		HTp htok = new HumdrumToken(hstring);
-		part->setDynamic(htok);
+		if ((hstring != "[") && (hstring != "]") && above) {
+			htok->setValue("LO", "DY", "a", "true");
+		}
+		part->setDynamics(htok);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getDynanmicsParameters --  Already presumed to be a dynamic.
+//
+
+string Tool_musicxml2hum::getDynamicsParameters(xml_node element) {
+	string output;
+	if (!nodeType(element, "direction")) {
+		return output;
+	}
+
+	xml_attribute placement = element.attribute("placement");
+	if (!placement) {
+		return output;
+	}
+	string value = placement.value();
+	if (value == "above") {
+		output = ":a";
+	}
+	xml_node child = element.first_child();
+	if (!child) {
+		return output;
+	}
+	if (!nodeType(child, "direction-type")) {
+		return output;
+	}
+	xml_node grandchild = child.first_child();
+	if (!grandchild) {
+		return output;
+	}
+	if (!nodeType(grandchild, "wedge")) {
+		return output;
+	}
+
+	xml_attribute wtype = grandchild.attribute("type");
+	if (!wtype) {
+		return output;
+	}
+	string value2 = wtype.value();
+	if (value2 == "stop") {
+		// don't apply parameters to ends of hairpins.
+		output = "";
+	}
+
+	return output;
 }
 
 

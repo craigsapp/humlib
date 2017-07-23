@@ -142,10 +142,10 @@ void GridSide::setHarmony(HTp token) {
 
 //////////////////////////////
 //
-// GridSide::setDynamic --
+// GridSide::setDynamics --
 //
 
-void GridSide::setDynamic(HTp token) {
+void GridSide::setDynamics(HTp token) {
 	if (m_dynamics) {
 		delete m_dynamics;
 		m_dynamics = NULL;

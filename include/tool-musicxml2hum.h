@@ -143,6 +143,7 @@ class Tool_musicxml2hum : public HumTool {
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex, xml_node node);
 		string getHarmonyString(xml_node hnode);
 		string getDynamicString(xml_node element);
+		string getDynamicsParameters(xml_node element);
 		string getHairpinString(xml_node element);
 		string cleanSpaces     (const string& input);
 		void checkForDummyRests(MxmlMeasure* measure);

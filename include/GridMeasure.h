@@ -62,6 +62,7 @@ class GridMeasure : public list<GridSlice*> {
 		bool         isRepeatBoth(void) 
 		                  { return m_style == MeasureStyle::RepeatBoth; }
 		void         addLayoutParameter(GridSlice* slice, int partindex, const string& locomment);
+		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const string& locomment);
 
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile);
@@ -73,6 +74,9 @@ class GridMeasure : public list<GridSlice*> {
 		HumNum       m_timesigdur;
 		MeasureStyle m_style;
 };
+
+ostream& operator<<(ostream& output, GridMeasure& measure);
+ostream& operator<<(ostream& output, GridMeasure* measure);
 
 // END_MERGE
 

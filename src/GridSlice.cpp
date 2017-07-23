@@ -281,7 +281,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
-		transferSides(*line, part, empty, maxvcount, maxhcount, maxdcount);
+
+		transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount);
 	}
 
 	outfile.appendLine(line);
@@ -385,7 +386,8 @@ int GridSlice::getDynamicsCount(int partindex, int staffindex) {
 
 // this version is used to transfer Sides from the Part
 void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
-		const string& empty, int maxvcount, int maxhcount, int maxdcount) {
+		int partindex, const string& empty, int maxvcount, int maxhcount,
+		int maxdcount) {
 
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
@@ -413,6 +415,10 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		if (dynamics) {
 			line.appendToken(dynamics);
 			sides.detachDynamics();
+
+			if (dynamics->getValue("LO", "DY", "a") == "true") {
+				GridMeasure* measure = getMeasure();
+			}
 		} else {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
