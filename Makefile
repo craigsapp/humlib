@@ -159,8 +159,10 @@ makedirs:
 	@-mkdir -p $(OBJDIR)
 	@-mkdir -p $(LIBDIR)
 
+
 %:
 	@echo 'if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi' | bash -s
+
 
 pugixml.o: pugixml.cpp
 	@echo [CC] $@

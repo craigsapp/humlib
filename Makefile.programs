@@ -99,6 +99,10 @@ all: bin $(PROGS)
 info:
 	@echo "Programs to compile: $(PROGS)" | fmt
 
+install:
+	@(cd bin && sudo cp $(PROGS) /usr/local/bin)
+	@echo "Copied tools to /usr/local/bin"
+
 bin:
 ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
