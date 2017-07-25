@@ -201,6 +201,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile) {
 		return false;
 	}
 	calculateGridDurations();
+
 	addNullTokens();
 	addMeasureLines();
 	buildSingleList();
@@ -1449,10 +1450,14 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			if (m_allslices.at(s)->isDataSlice()) {
 				gs->setNullTokenLayer(voicei, type, slicedur);
 				timeleft = timeleft - slicedur;
+			} else if (m_allslices.at(s)->isInvalidSlice()) {
+cerr << "THIS IS AN INVALID SLICE" << m_allslices.at(s) << endl;
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-				if (gs->at(voicei)->getToken()) {
+// ggg
+				
+				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
 				} else {

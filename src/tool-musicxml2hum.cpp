@@ -153,6 +153,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
 
+
 	for (int i=0; i<outfile.getLineCount(); i++) {
 		outfile[i].createLineFromTokens();
 	}

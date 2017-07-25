@@ -98,7 +98,7 @@ void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 	} else if (type < SliceType::_Interpretation) {
 		nulltoken = "*";
 	} else if (type < SliceType::_Spined) {
-		nulltoken = "!!";
+		nulltoken = "!";
 	} else {
 		cerr << "!!STRANGE ERROR: " << this << endl;
 		cerr << "!!SLICE TYPE: " << (int)type << endl;
