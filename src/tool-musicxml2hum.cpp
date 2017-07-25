@@ -1091,7 +1091,7 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 		string hstring = getHairpinString(hairpin);
 		HTp htok = new HumdrumToken(hstring);
 		if ((hstring != "[") && (hstring != "]") && above) {
-			htok->setValue("LO", "DY", "a", "true");
+			htok->setValue("LO", "HP", "a", "true");
 		}
 		part->setDynamics(htok);
 	}
