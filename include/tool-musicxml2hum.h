@@ -88,6 +88,9 @@ class Tool_musicxml2hum : public HumTool {
 		                              vector<MxmlPart>& partdata, HumNum nowtime);
 		void   addEventToList        (vector<vector<vector<vector<MxmlEvent*> > > >& list, 
 		                              MxmlEvent* event);
+		void   addHeaderRecords      (HumdrumFile& outfile, xml_document& doc);
+		void   addFooterRecords      (HumdrumFile& outfile, xml_document& doc);
+		string cleanSpaces           (string& input);
 
 		bool convert          (ostream& out);
 		bool convertPart      (ostream& out, const string& partname,
