@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 26 16:50:20 CEST 2017
+// Last Modified: Sun Aug  6 22:39:49 EDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2450,6 +2450,7 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 		} else {
 			break;
 		}
+		previous++;
 	}
 
 	auto insertpoint = previous.base();
@@ -34262,7 +34263,15 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 
 	// YEM: copyright
 	string copy = doc.select_single_node("/score-partwise/identification/rights").node().child_value();
-	if (copy != "") {
+	bool validcopy = true;
+	if (copy == "") {
+		validcopy = false;
+	}
+	if ((copy.find("opyright") != std::string::npos) && (copy.size() < 15)) {
+		validcopy = false;
+	}
+
+	if (validcopy) {
 		string yem_record = "!!!YEM:\t";
 		yem_record += copy;
 		outfile.appendLine(yem_record);

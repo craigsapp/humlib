@@ -267,6 +267,7 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 		} else {
 			break;
 		}
+		previous++;
 	}
 
 	auto insertpoint = previous.base();

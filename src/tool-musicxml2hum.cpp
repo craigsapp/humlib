@@ -272,7 +272,15 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 
 	// YEM: copyright
 	string copy = doc.select_single_node("/score-partwise/identification/rights").node().child_value();
-	if (copy != "") {
+	bool validcopy = true;
+	if (copy == "") {
+		validcopy = false;
+	}
+	if ((copy.find("opyright") != std::string::npos) && (copy.size() < 15)) {
+		validcopy = false;
+	}
+
+	if (validcopy) {
 		string yem_record = "!!!YEM:\t";
 		yem_record += copy;
 		outfile.appendLine(yem_record);
