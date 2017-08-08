@@ -715,6 +715,7 @@ RECONSIDER:
 		if (((othMeterNum % 3 == 0) && (odur >= othMeterDen)) && // the durational value of the meter's denominator groups in threes and the sus lasts at least as long as the denominator
 				((dur == othMeterDen*2) || // the ref note lasts 2 times as long as the meter's denominator
 				 ((dur == othMeterDen*threehalves) && ((intn == 0) || (intn == -1))) || // ref note lasts 1.5 times the meter's denominator and next note is a tenorizans ornament
+				 ((dur == othMeterDen*threehalves) && ((unexp_label == m_labels[UNLABELED_Z4]) || (intn == 3))) || // 4-3 susp where agent leaps to diatonic pitch class of resolution
 				 ((dur == sixteenthirds) && (refMeterNum == 3) && (refMeterDen == threehalves)) || // special case for 3/3 time signature
 				 ((odur == othMeterDen*threehalves) && (ointn == -1) && (odurn == 2) && (ointnn == 0)) || // change of agent suspension with ant of resolution
 				 ((dur == othMeterDen) && (odur == othMeterDen*2))) && // unornamented change of agent suspension
