@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug 11 07:27:40 EDT 2017
+// Last Modified: Fri Aug 11 18:55:45 EDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -33977,7 +33977,15 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				results[v1][line1] += to_string(distance1.getNumerator());
 			}
 			results[v1][line1] += ":i";
-			results[v1][line1] += to_string(interval + 1);
+			if (interval > 0) {
+				results[v1][line1] += to_string(interval + 1);
+			} else {
+				int newinterval = -(interval + 1);
+				if (newinterval == -1) {
+					newinterval = 1; // unison (no sign)
+				}
+				results[v1][line1] += to_string(newinterval);
+			}
 
 			if (!results[v2][line2].empty()) {
 				results[v2][line2] += " ";
@@ -33993,7 +34001,15 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				results[v2][line2] += to_string(distance2.getNumerator());
 			}
 			results[v2][line2] += ":i";
-			results[v2][line2] += to_string(interval + 1);
+			if (interval > 0) {
+				int newinterval = -(interval + 1);
+				if (newinterval == -1) {
+					newinterval = 1; // unison (no sign)
+				}
+				results[v2][line2] += to_string(newinterval);
+			} else {
+				results[v2][line2] += to_string(interval + 1);
+			}
 
 			if (m_mark) {
 				for (int z=0; z<count; z++) {
