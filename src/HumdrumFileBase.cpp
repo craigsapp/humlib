@@ -375,6 +375,22 @@ bool HumdrumFileBase::analyzeBaseFromLines(void)  {
 
 //////////////////////////////
 //
+// HumdrumFileBase::analyzeBaseFromTokens --
+//
+
+bool HumdrumFileBase::analyzeBaseFromTokens(void) {
+	// if (!analyzeTokens()) { return isValid(); } // this creates tokens from lines
+	if (!analyzeLines() ) { return isValid(); }
+	if (!analyzeSpines()) { return isValid(); }
+	if (!analyzeLinks() ) { return isValid(); }
+	if (!analyzeTracks()) { return isValid(); }
+	return isValid();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::readString -- Read contents from a string rather than
 //    an istream or filename.
 //
