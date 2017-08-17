@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Jun 17 15:24:23 CEST 2017
-// Last Modified: Sat Jul  8 17:17:21 CEST 2017
+// Last Modified: Fri Aug 11 18:25:50 EDT 2017
 // Filename:      tool-imitation.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-imitation.cpp
 // Syntax:        C++11
@@ -9,17 +9,17 @@
 //
 // Description:   Counterpoint imitation tool.
 //
-// Todo:          retrograde searches
-//                imitation at specific rhythmic scaling
+// Todo:          retrograde/inversion searches
+//                imitation at specific rhythmic scaling (double, half, etc)
+//                add inexact rhythm for first/last note in match
+//                allow inexact rhythm after x notes with exact rhythm
 //                highlight tied notes in matches
 //                color imitations by interval
 //                terminate matches at rests
-//                match must come within a specified duration
 //                target must come before end of initiator match
-//                all inexact rhythm for last note in match
-//                allow inexact rhythm after x notes with exact rhythm
 //                count points of imitation that were found
 //                create an index of points of imitation
+//
 
 #include "tool-imitation.h"
 #include "Convert.h"
@@ -292,7 +292,15 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				results[v1][line1] += to_string(distance1.getNumerator());
 			}
 			results[v1][line1] += ":i";
-			results[v1][line1] += to_string(interval + 1);
+			if (interval > 0) {
+				results[v1][line1] += to_string(interval + 1);
+			} else {
+				int newinterval = -(interval + 1);
+				if (newinterval == -1) {
+					newinterval = 1; // unison (no sign)
+				}
+				results[v1][line1] += to_string(newinterval);
+			}
 
 			if (!results[v2][line2].empty()) {
 				results[v2][line2] += " ";
@@ -308,7 +316,15 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				results[v2][line2] += to_string(distance2.getNumerator());
 			}
 			results[v2][line2] += ":i";
-			results[v2][line2] += to_string(interval + 1);
+			if (interval > 0) {
+				int newinterval = -(interval + 1);
+				if (newinterval == -1) {
+					newinterval = 1; // unison (no sign)
+				}
+				results[v2][line2] += to_string(newinterval);
+			} else {
+				results[v2][line2] += to_string(interval + 1);
+			}
 
 			if (m_mark) {
 				for (int z=0; z<count; z++) {

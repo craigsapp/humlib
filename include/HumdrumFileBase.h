@@ -217,6 +217,8 @@ class HumdrumFileBase : public HumHash {
 		HumdrumLine*  back                     (void);
 		void          makeBooleanTrackList     (vector<bool>& spinelist,
 		                                        const string& spinestring);
+		bool          analyzeBaseFromLines     (void);
+		bool          analyzeBaseFromTokens    (void);
 
 
 		vector<HumdrumLine*> getReferenceRecords(void);
@@ -270,7 +272,6 @@ class HumdrumFileBase : public HumHash {
 
 	protected:
 		bool          analyzeTokens             (void);
-		bool          analyzeBaseFromLines      (void);
 		bool          analyzeSpines             (void);
 		bool          analyzeLinks              (void);
 		bool          analyzeTracks             (void);

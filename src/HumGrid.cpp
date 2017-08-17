@@ -1892,6 +1892,175 @@ void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
 
 //////////////////////////////
 //
+// HumGrid::transferNonDataSlices --
+//
+
+void HumGrid::transferNonDataSlices(GridMeasure* output, GridMeasure* input) {
+	for (auto it = input->begin(); it != input->end(); it++) {
+		GridSlice* slice = *it;
+		if (slice->isDataSlice()) {
+			continue;
+		}
+		output->push_front(slice);
+		input->erase(it);
+		it--;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::removeSibeliusIncipit --
+//
+
+void HumGrid::removeSibeliusIncipit(void) {
+
+	if (this->size() == 0) {
+		return;
+	}
+	GridMeasure* measure = this->at(0);
+	bool invisible = measure->isInvisible();
+	if (!invisible) {
+		return;
+	}
+
+	this->erase(this->begin());
+	if (this->size() > 0) {
+		transferNonDataSlices(this->at(0), measure);
+	}
+	delete measure;
+	measure = NULL;
+
+	// remove vocal ranges, if present
+	if (this->size() == 0) {
+		return;
+	}
+
+	measure = this->at(0);
+	bool singlechord = measure->isSingleChordMeasure();
+	if (!singlechord) {
+		return;
+	}
+
+	this->erase(this->begin());
+	if (this->size() > 0) {
+		transferNonDataSlices(this->at(0), measure);
+	}
+	delete measure;
+	measure = NULL;
+
+	measure = this->at(0);
+	bool monophonic = measure->isMonophonicMeasure();
+	if (!monophonic) {
+		return;
+	}
+
+	string melody = extractMelody(measure);
+
+	this->erase(this->begin());
+	if (this->size() > 0) {
+		transferNonDataSlices(this->at(0), measure);
+	}
+	delete measure;
+	measure = NULL;
+
+	if (this->size() > 0) {
+		insertMelodyString(this->at(0), melody);
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::insertMelodyString -- Insert a global comment before first data line.
+//
+
+void HumGrid::insertMelodyString(GridMeasure* measure, const string& melody) {
+	for (auto it = measure->begin(); it != measure->end(); it++) {
+		GridSlice* slice = *it;
+		if (!slice->isDataSlice()) {
+			continue;
+		}
+
+		// insert a new GridSlice
+		// first need to implement global commands in GridSlice object...
+		break;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::extractMelody --
+//
+
+string HumGrid::extractMelody(GridMeasure* measure) {
+	string output = "!!";
+
+	int parti  = -1;
+	int staffi = -1;
+	int voicei = -1;
+
+	// First find the part which has the melody:
+	for (auto slice : *measure) {
+		if (!slice->isDataSlice()) {
+			continue;
+		}
+		for (int p=0; p<(int)slice->size(); p++) {
+			GridPart* part = slice->at(p);
+			for (int s=0; s<(int)part->size(); s++) {
+				GridStaff* staff = part->at(s);
+				for (int v=0; v<(int)staff->size(); v++) {
+					GridVoice* voice = staff->at(v);
+					HTp token = voice->getToken();
+					if (!token) {
+						continue;
+					}
+					if (token->find("yy") == string::npos) {
+						parti  = p;
+						staffi = s;
+						voicei = v;
+						goto loop_end;
+					}
+				}
+			}
+		}
+	}
+
+	loop_end:
+
+	if (parti < 0) {
+		return output;
+	}
+
+	// First find the part which has the melody:
+	for (auto slice : *measure) {
+		if (!slice->isDataSlice()) {
+			continue;
+		}
+		HTp token = slice->at(parti)->at(staffi)->at(voicei)->getToken();
+		if (!token) {
+			continue;
+		}
+		if (*token == ".") {
+			continue;
+		}
+		output += " ";
+		output += *token;
+	}
+
+	return output;
+}
+
+
+
+
+//////////////////////////////
+//
 // HumGrid::removeRedundantClefChanges -- Will also have to consider
 //		the meter signature.
 //

@@ -39,6 +39,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void setVerseCount              (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
+		void removeSibeliusIncipit      (void);
 		bool hasPickup                  (void);
 
 	protected:
@@ -88,6 +89,9 @@ class HumGrid : public vector<GridMeasure*> {
 		string getBarStyle                 (GridMeasure* measure);
 		void adjustExpansionsInStaff       (GridSlice* newmanip, GridSlice* curr,
 		                                    int p, int s);
+		void transferNonDataSlices         (GridMeasure* output, GridMeasure* input);
+		string extractMelody               (GridMeasure* measure);
+		void insertMelodyString            (GridMeasure* measure, const string& melody);
 
 	private:
 		vector<GridSlice*>   m_allslices;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 17 06:54:13 EDT 2017
+// Last Modified: Fri Aug 11 18:55:45 EDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1475,6 +1475,8 @@ class HumdrumFileBase : public HumHash {
 		HumdrumLine*  back                     (void);
 		void          makeBooleanTrackList     (vector<bool>& spinelist,
 		                                        const string& spinestring);
+		bool          analyzeBaseFromLines     (void);
+		bool          analyzeBaseFromTokens    (void);
 
 
 		vector<HumdrumLine*> getReferenceRecords(void);
@@ -1528,7 +1530,6 @@ class HumdrumFileBase : public HumHash {
 
 	protected:
 		bool          analyzeTokens             (void);
-		bool          analyzeBaseFromLines      (void);
 		bool          analyzeSpines             (void);
 		bool          analyzeLinks              (void);
 		bool          analyzeTracks             (void);
@@ -1717,10 +1718,10 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getBarlineDurationToEnd      (int index) const;
 
 		bool          analyzeStructure             (void);
+		bool          analyzeStrands               (void);
 
 	protected:
 
-		bool          analyzeStrands               (void);
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);
 		bool          analyzeMeter                 (void);
@@ -2680,6 +2681,10 @@ class GridMeasure : public list<GridSlice*> {
 		                  { return m_style == MeasureStyle::RepeatBoth; }
 		void         addLayoutParameter(GridSlice* slice, int partindex, const string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const string& locomment);
+		bool         isInvisible(void);
+		bool         isSingleChordMeasure(void);
+		bool         isMonophonicMeasure(void);
+	
 
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile);
@@ -2820,6 +2825,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void setVerseCount              (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
+		void removeSibeliusIncipit      (void);
 		bool hasPickup                  (void);
 
 	protected:
@@ -2869,6 +2875,9 @@ class HumGrid : public vector<GridMeasure*> {
 		string getBarStyle                 (GridMeasure* measure);
 		void adjustExpansionsInStaff       (GridSlice* newmanip, GridSlice* curr,
 		                                    int p, int s);
+		void transferNonDataSlices         (GridMeasure* output, GridMeasure* input);
+		string extractMelody               (GridMeasure* measure);
+		void insertMelodyString            (GridMeasure* measure, const string& melody);
 
 	private:
 		vector<GridSlice*>   m_allslices;
@@ -4499,6 +4508,23 @@ class Tool_recip : public HumTool {
 
 };
 
+
+
+class Tool_ruthfix : public HumTool {
+	public:
+		         Tool_ruthfix      (void);
+		        ~Tool_ruthfix      () {};
+
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    insertCrossBarTies (HumdrumFile& infile);
+		void    insertCrossBarTies (HumdrumFile& infile, int strand);
+		void    createTiedNote     (HTp left, HTp right);
+
+};
 
 
 class Tool_satb2gs : public HumTool {
