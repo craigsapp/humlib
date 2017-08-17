@@ -227,13 +227,20 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 		degrees = Convert::majorScaleBase40();
 	}
 
+	// Remove any **recip prefixed to token:
+	string newharm = harm;
+	HumRegex hre;
+	if (hre.search(harm, R"(^[{}\d%._\][]+(.*))")) {
+		newharm = hre.getMatch(1);
+	}
+
 	// Remove alternate chord labels:
 	string single;
-	auto loc = harm.find('[');
+	auto loc = newharm.find('[');
 	if (loc != string::npos) {
-		single = harm.substr(0, loc);
+		single = newharm.substr(0, loc);
 	} else {
-		single = harm;
+		single = newharm;
 	}
 
 	// Split off secondary dominant qualifications
@@ -303,7 +310,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 		}
 	}
 
-	int inversion = Convert::keyToInversion(harm);
+	int inversion = Convert::keyToInversion(single);
 	vector<int> output;
 
 	if (rootdeg < 0) {
@@ -368,8 +375,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 
 	// determine the seventh
 	if (chars['7']) {
-		HumRegex hre;
-		int7 = degrees.at((rootdeg + 6) % 7) - degrees.at(rootdeg) + secoffset;
+		int7 = root + degrees.at((rootdeg + 6) % 7);
 		if (int7 < 0) {
 			int7 += 40;
 		}
@@ -391,7 +397,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	// determine the 9th
 	if (chars['9']) {
 		HumRegex hre;
-		int9 = degrees.at((rootdeg + 1) % 7) - degrees.at(rootdeg) + secoffset;
+		int9 = root + degrees.at((rootdeg + 1) % 7);
 		if (int9 < 0) {
 			int9 += 40;
 		}
