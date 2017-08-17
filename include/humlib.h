@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  6 22:39:49 EDT 2017
+// Last Modified: Thu Aug 17 06:54:13 EDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2417,6 +2417,19 @@ class Convert {
 		static int     base7ToBase40        (int base7);
 		static int     base40IntervalToDiatonic(int base40interval);
 
+		// Harmony processing, defined in Convert-harmony.cpp
+		static vector<int> minorHScaleBase40(void);
+		static vector<int> majorScaleBase40 (void);
+		static int         keyToInversion   (const string& harm);
+		static int         keyToBase40      (const string& key);
+		static vector<int> harmToBase40     (HTp harm, const string& key) { 
+		                                        return harmToBase40(*harm, key); }
+		static vector<int> harmToBase40     (HTp harm, HTp key) { 
+		                                        return harmToBase40(*harm, *key); }
+		static vector<int> harmToBase40     (const string& harm, const string& key);
+		static vector<int> harmToBase40     (const string& harm, int keyroot, int keymode);
+		static int         makeRootInterval (const string& harm, int keyroot, int keymode);
+
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
 		static bool isKernRest              (const string& kerndata);
@@ -4080,6 +4093,29 @@ class Tool_filter : public HumTool {
 		bool     m_debugQ = false; // used with --debug option
 
 };
+
+
+class Tool_hproof : public HumTool {
+	public:
+		      Tool_hproof      (void);
+		     ~Tool_hproof      () {};
+
+		bool  run              (HumdrumFile& infile);
+		bool  run              (const string& indata, ostream& out);
+		bool  run              (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  markNonChordTones(HumdrumFile& infile);
+		void  processHarmSpine (HumdrumFile& infile, HTp hstart);
+		void  markNotesInRange (HumdrumFile& infile, HTp ctoken, HTp ntoken, const string& key);
+		void  markHarmonicTones(HTp tok, vector<int>& cts);
+		void  getNewKey        (HTp token, HTp ntoken, string& key);
+
+	private:
+		vector<HTp> m_kernspines;
+
+};
+
 
 
 class Tool_imitation : public HumTool {
