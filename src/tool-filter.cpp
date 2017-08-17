@@ -18,6 +18,7 @@
 #include "tool-autostem.h"
 #include "tool-cint.h"
 #include "tool-dissonant.h"
+#include "tool-hproof.h"
 #include "tool-imitation.h"
 #include "tool-extract.h"
 #include "tool-recip.h"
@@ -110,6 +111,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
+		} else if (commands[i].first == "hproof") {
+			RUNTOOL(hproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
