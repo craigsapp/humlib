@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 17 10:18:37 EDT 2017
+// Last Modified: Thu Aug 17 19:41:06 EDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2344,9 +2344,9 @@ class Convert {
 		static HumNum  recipToDurationNoDots(string* recip,
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
-		static string  durationToRecip      (HumNum duration, 
+		static string  durationToRecip      (HumNum duration,
 		                                     HumNum scale = HumNum(1,4));
-		static string  durationFloatToRecip (double duration, 
+		static string  durationFloatToRecip (double duration,
 		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
@@ -2423,13 +2423,15 @@ class Convert {
 		static vector<int> majorScaleBase40 (void);
 		static int         keyToInversion   (const string& harm);
 		static int         keyToBase40      (const string& key);
-		static vector<int> harmToBase40     (HTp harm, const string& key) { 
+		static vector<int> harmToBase40     (HTp harm, const string& key) {
 		                                        return harmToBase40(*harm, key); }
-		static vector<int> harmToBase40     (HTp harm, HTp key) { 
+		static vector<int> harmToBase40     (HTp harm, HTp key) {
 		                                        return harmToBase40(*harm, *key); }
 		static vector<int> harmToBase40     (const string& harm, const string& key);
 		static vector<int> harmToBase40     (const string& harm, int keyroot, int keymode);
-		static int         makeRootInterval (const string& harm, int keyroot, int keymode);
+		static void        makeAdjustedKeyRootAndMode(const string& secondary,
+		                                     int& keyroot, int& keymode);
+		static int         chromaticAlteration(const string& content);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -2461,7 +2463,7 @@ class Convert {
 		static bool    contains(string* input, const string& pattern);
 		static bool    contains(string* input, char pattern);
 		static void    makeBooleanTrackList(vector<bool>& spinelist,
-		                                     const string& spinestring, 
+		                                     const string& spinestring,
 		                                     int maxtrack);
 
 		// Mathematical processing, defined in Convert-math.cpp
@@ -2473,6 +2475,7 @@ class Convert {
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
 		static double  pearsonCorrelation   (vector<double> x, vector<double> y);
+		static int     romanNumeralToInteger(const string& roman);
 
 };
 

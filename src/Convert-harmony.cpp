@@ -106,92 +106,64 @@ int Convert::keyToInversion(const string& harm) {
 
 //////////////////////////////
 //
-// Convert::makeRootInterval --
+// Convert::chromaticAlteration -- Return the sum of "#" minus "-" in the string.
 //
 
-int Convert::makeRootInterval(const string& harm, int keyroot, int keymode) {
-	int output = 0;
-
-	string prefix;
-	string postfix;
-	auto loc = harm.find('/');
-	if (loc != string::npos) {
-		prefix = harm.substr(0, loc);
-		postfix = harm.substr(loc+1, string::npos);
-	} else {
-		prefix = harm;
+int Convert::chromaticAlteration(const string& content) {
+	int sum = 0;
+	for (char ch : content) {
+		switch (ch) {
+			case '#': sum++; break;
+			case '-': sum--; break;
+		}
 	}
+	return sum;
+}
 
-	int offset = 0;
-	if (!postfix.empty()) {
-		offset = makeRootInterval(postfix, keyroot, keymode);
-	} 
-	if (prefix.empty()) {
-		return offset;
-	}
 
-	if (keymode) {
-		// minor mode (harmonic minor)
-			  if (prefix.find("vii")   != string::npos) { output = 35; }
-		else if (prefix.find( "VII")  != string::npos) { output = 35; }
-		else if (prefix.find( "vi")   != string::npos) { output = 28; }
-		else if (prefix.find( "VI")   != string::npos) { output = 28; }
-		else if (prefix.find( "iv")   != string::npos) { output = 17; }
-		else if (prefix.find( "IV")   != string::npos) { output = 17; }
-		else if (prefix.find( "iii")  != string::npos) { output = 11; }
-		else if (prefix.find( "III")  != string::npos) { output = 11; }
-		else if (prefix.find( "ii")   != string::npos) { output =  6; }
-		else if (prefix.find( "II")   != string::npos) { output =  6; }
-		else if (prefix.find( "N")    != string::npos) { output =  5; }
-		else if (prefix.find( "v")    != string::npos) { output = 23; }
-		else if (prefix.find( "V")    != string::npos) { output = 23; }
-		else if (prefix.find( "i")    != string::npos) { output =  0; }
-		else if (prefix.find( "I")    != string::npos) { output =  0; }
-		else if (prefix.find( "Lt")   != string::npos) { output = 18; }
-		else if (prefix.find( "Gn")   != string::npos) { output = 18; }
-		else if (prefix.find( "Fr")   != string::npos) { output = 18; }
-		else { output = -1000; }
-	} else {
-		// major mode
-			  if (prefix.find("vii")  != string::npos) { output = 35; }
-		else if (prefix.find("VII")  != string::npos) { output = 35; }
-		else if (prefix.find("vi")   != string::npos) { output = 29; }
-		else if (prefix.find("VI")   != string::npos) { output = 29; }
-		else if (prefix.find("iv")   != string::npos) { output = 17; }
-		else if (prefix.find("IV")   != string::npos) { output = 17; }
-		else if (prefix.find("iii")  != string::npos) { output = 12; }
-		else if (prefix.find("III")  != string::npos) { output = 12; }
-		else if (prefix.find("ii")   != string::npos) { output =  6; }
-		else if (prefix.find("II")   != string::npos) { output =  6; }
-		else if (prefix.find("N")    != string::npos) { output =  5; }
-		else if (prefix.find("v")    != string::npos) { output = 23; }
-		else if (prefix.find("V")    != string::npos) { output = 23; }
-		else if (prefix.find("i")    != string::npos) { output =  0; }
-		else if (prefix.find("I")    != string::npos) { output =  0; }
-		else if (prefix.find("Lt")   != string::npos) { output = 18; }
-		else if (prefix.find("Gn")   != string::npos) { output = 18; }
-		else if (prefix.find("Fr")   != string::npos) { output = 18; }
-		else { output = -1000; }
-	}
 
-	int flatcount = 0;
-	int sharpcount = 0;
+//////////////////////////////
+//
+// Convert::makeAdjustedKeyRootAndMode --
+//
 
-	for (int i=0; i<(int)prefix.size(); i++) {
-		if (prefix[i] == '-') {
-			flatcount++;
-		} else if (prefix[i] == '#') {
-			sharpcount++;
+void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
+		int& keymode) {
+
+	vector<int> majorkey = Convert::majorScaleBase40();
+	vector<int> minorkey = Convert::minorHScaleBase40();
+
+	vector<string> roots;
+	HumRegex hre;
+	hre.split(roots, secondary, "/");
+	string piece;
+	int number;
+
+	for (int i=0; i<(int)roots.size(); i++) {
+		piece = roots[(int)roots.size() - i - 1];
+		number = Convert::romanNumeralToInteger(piece);
+		if (number == 0) {
+			continue;
+		} else if (number > 7) {
+			number = (number - 1) % 7;
+		} else {
+			number -= 1;
+		}
+		if (keyroot == 0) { // major key
+			keyroot += majorkey[number];
+		} else {
+			keyroot += minorkey[number];
+		}
+		int alteration = chromaticAlteration(piece);
+		keyroot += alteration;
+		if ((!piece.empty()) && isupper(piece[0])) {
+			keymode = 0; // major
+		} else {
+			keymode = 1; // minor
 		}
 	}
 
-	if (output < 0) {
-		return output;
-	} else {
-		output += sharpcount;
-		output -= flatcount;
-		return (output + offset) % 40;
-	}
+	keyroot = keyroot % 40;
 }
 
 
@@ -255,7 +227,11 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	}
 
 	// Calculate interval offset for secondary dominants:
-	int secoffset = makeRootInterval(secondary, keyroot, keymode);
+	int newkeyroot = keyroot;
+	int newkeymode = keymode;
+	if (!secondary.empty()) {
+		makeAdjustedKeyRootAndMode(secondary, newkeyroot, newkeymode);
+	}
 
 	int rootdeg = -1; // chord root scale degree in key
 	int degalt = 0;   // degree alteration
@@ -296,7 +272,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 					// augmented 6th chord on -VII
 					rootdeg = 5;
 					// fixed to -VI of major scale:
-					if (keymode == 0) { // major
+					if (newkeymode == 0) { // major
 						degalt += -1;
 					} else { // minor
 						// already at -VI in minor
@@ -317,7 +293,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 		return output;
 	}
 
-	int root = degrees.at(rootdeg) + keyroot + secoffset;
+	int root = degrees.at(rootdeg) + newkeyroot;
 	output.push_back(root);
 
 	int int3  = -1;
@@ -375,7 +351,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 
 	// determine the seventh
 	if (chars['7']) {
-		int7 = root + degrees.at((rootdeg + 6) % 7);
+		int7 = degrees.at((rootdeg + 6) % 7) - degrees.at(rootdeg);
 		if (int7 < 0) {
 			int7 += 40;
 		}
@@ -397,7 +373,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	// determine the 9th
 	if (chars['9']) {
 		HumRegex hre;
-		int9 = root + degrees.at((rootdeg + 1) % 7);
+		int9 = degrees.at((rootdeg + 1) % 7) - degrees.at(rootdeg);
 		if (int9 < 0) {
 			int9 += 40;
 		}
