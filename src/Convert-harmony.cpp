@@ -149,7 +149,7 @@ void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
 		} else {
 			number -= 1;
 		}
-		if (keyroot == 0) { // major key
+		if (keymode == 0) { // major key
 			keyroot += majorkey[number];
 		} else {
 			keyroot += minorkey[number];

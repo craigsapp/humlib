@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 17 19:41:06 EDT 2017
+// Last Modified: Thu Aug 17 22:09:57 EDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -150,7 +150,7 @@ int Convert::chromaticAlteration(const string& content) {
 // Convert::makeAdjustedKeyRootAndMode --
 //
 
-void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot, 
+void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
 		int& keymode) {
 
 	vector<int> majorkey = Convert::majorScaleBase40();
@@ -172,7 +172,7 @@ void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
 		} else {
 			number -= 1;
 		}
-		if (keyroot == 0) { // major key
+		if (keymode == 0) { // major key
 			keyroot += majorkey[number];
 		} else {
 			keyroot += minorkey[number];
@@ -185,7 +185,7 @@ void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
 			keymode = 1; // minor
 		}
 	}
-	
+
 	keyroot = keyroot % 40;
 }
 
@@ -396,7 +396,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	// determine the 9th
 	if (chars['9']) {
 		HumRegex hre;
-		int9 = root + degrees.at((rootdeg + 1) % 7);
+		int9 = degrees.at((rootdeg + 1) % 7) - degrees.at(rootdeg);
 		if (int9 < 0) {
 			int9 += 40;
 		}
