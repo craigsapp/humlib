@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Aug  8, 2017  5:08:16 PM
+// Last Modified: Wed, Aug  9, 2017  5:51:03 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28952,7 +28952,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[PASSING_DOWN];
 				} else if (intn == 1) { // lower neighbor
 					results[vindex][lineindex] = m_labels[NEIGHBOR_DOWN];
-				} else if (intn == 0) { // descending anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // descending anticipation
 					results[vindex][lineindex] = m_labels[ANT_DOWN];
 				} else if (intn > 1) { // lower échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_DOWN];
@@ -28966,7 +28966,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[NEIGHBOR_UP];
 				} else if (intn < -1) { // upper échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_UP];
-				} else if (intn == 0) { // rising anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // rising anticipation
 					results[vindex][lineindex] = m_labels[ANT_UP];
 				} else if (intn > 1) { // ascending short nota cambiata
 					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S];
@@ -29092,7 +29092,7 @@ RECONSIDER:
 				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
 				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step or rep and other voice leaves by leap
 				  (refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
-				  ((fabs(intp) == 1) && (intn == 0) && ((fabs(ointp)) > 0 || (fabs(ointn) >0))) || // ref voice enters by step, leaves by rep, other v repeats no more than once
+				  ((fabs(intp) == 1) && (intn == 0) && ((fabs(ointp)) > 0 || (fabs(ointn) > 0))) || // ref voice enters by step, leaves by rep, other v repeats no more than once
 				  ((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
 				  ((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
 				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step or rep and both voices leave by leap

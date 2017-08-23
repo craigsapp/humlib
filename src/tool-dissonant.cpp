@@ -731,7 +731,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[PASSING_DOWN];
 				} else if (intn == 1) { // lower neighbor
 					results[vindex][lineindex] = m_labels[NEIGHBOR_DOWN];
-				} else if (intn == 0) { // descending anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // descending anticipation
 					results[vindex][lineindex] = m_labels[ANT_DOWN];
 				} else if (intn > 1) { // lower échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_DOWN];
@@ -745,7 +745,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[NEIGHBOR_UP];
 				} else if (intn < -1) { // upper échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_UP];
-				} else if (intn == 0) { // rising anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // rising anticipation
 					results[vindex][lineindex] = m_labels[ANT_UP];
 				} else if (intn > 1) { // ascending short nota cambiata
 					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S];
