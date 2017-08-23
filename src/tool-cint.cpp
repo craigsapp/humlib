@@ -2433,7 +2433,8 @@ int Tool_cint::onlyRests(vector<NoteNode>& data) {
 
 //////////////////////////////
 //
-// Tool_cint::hasAttack -- returns true if all NoteNodes are for rests
+// Tool_cint::hasAttack -- returns true if at least one NoteNode has
+//   has an attack.
 //
 
 int Tool_cint::hasAttack(vector<NoteNode>& data) {
