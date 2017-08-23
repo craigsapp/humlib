@@ -11,6 +11,7 @@
 //
 
 #include "tool-musicxml2hum.h"
+#include "tool-ruthfix.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
 
@@ -86,8 +87,6 @@ bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 
 
 bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
-
-
 	initialize();
 
 	bool status = true; // for keeping track of problems in conversion process.
@@ -124,6 +123,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	status &= stitchParts(outdata, partids, partinfo, partcontent, partdata);
 
 	outdata.removeRedundantClefChanges();
+	outdata.removeSibeliusIncipit();
 
 	// tranfer verse counts from parts/staves to HumGrid:
 	// should also do part verse counts here (-1 staffindex).
@@ -155,9 +155,12 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	HumdrumFile outfile;
 
 	outdata.transferTokens(outfile);
+
 	addHeaderRecords(outfile, doc);
 	addFooterRecords(outfile, doc);
 
+	Tool_ruthfix ruthfix;
+	ruthfix.run(outfile);
 
 	for (int i=0; i<outfile.getLineCount(); i++) {
 		outfile[i].createLineFromTokens();
@@ -922,6 +925,16 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 
 	if (!event->isFloating()) {
 		recip     = event->getRecip();
+		// will need to fix for exotic tuplest such as 11%2 or 1%23
+		auto loc = recip.find("1%2");
+		if (loc != string::npos) {
+			recip.replace(loc, 3, "0");
+		}
+		// will need to fix for exotic tuplest such as 11%4 or 1%42
+		loc = recip.find("1%4");
+		if (loc != string::npos) {
+			recip.replace(loc, 3, "00");
+		}
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
