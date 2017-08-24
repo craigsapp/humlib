@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 17 22:09:57 EDT 2017
+// Last Modified: Thu Aug 24 11:40:49 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10034,12 +10034,14 @@ HumdrumFile::HumdrumFile(void) {
 
 HumdrumFile::HumdrumFile(const string& filename) :
 		HUMDRUMFILE_PARENT() {
+cerr << "GOT HERE EEE" << endl;
 	read(filename);
 }
 
 
 HumdrumFile::HumdrumFile(istream& contents) :
 		HUMDRUMFILE_PARENT() {
+cerr << "GOT HERE FFF" << endl;
 	read(contents);
 }
 
@@ -14563,32 +14565,35 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
-	HumdrumLine* spineline = NULL;
-	for (int i=(int)m_lines.size()-1; i>=0; i--) {
-		if (m_lines[i]->hasSpines()) {
-			if (m_lines[i]->isAllNull())  {
-				continue;
-			}
-			if (m_lines[i]->isManipulator()) {
-				continue;
-			}
-			if (m_lines[i]->isCommentLocal()) {
-				continue;
-			}
-			// should be a non-null data, barlines, or interpretation
-			spineline = m_lines[i];
+	vector<HumdrumLine*> globals;
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		if (m_lines[i]->isCommentGlobal() && (m_lines[i]->find("!!LO:") != string::npos)) {
+			globals.push_back(m_lines[i]);
 			continue;
 		}
-		if (spineline == NULL) {
+		if (!m_lines[i]->hasSpines()) {
 			continue;
 		}
-		if (!m_lines[i]->isCommentGlobal()) {
+		if (m_lines[i]->isAllNull())  {
 			continue;
 		}
-		if (m_lines[i]->find("!!LO:") != 0) {
+		if (m_lines[i]->isCommentLocal()) {
 			continue;
 		}
-		spineline->setParameters(m_lines[i]);
+		if (globals.empty()) {
+			continue;
+		}
+
+		// Filter manipulators or not?  At the moment allow
+		// global parameters to pass through manipulators.
+		// if (m_lines[i]->isManipulator()) {
+		// 	continue;
+		// }
+
+		for (int j=0; j<(int)globals.size(); j++) {
+			m_lines[i]->setParameters(globals[j]);
+		}
+		globals.clear();
 	}
 
 	return isValid();
@@ -16546,6 +16551,18 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 
 //////////////////////////////
 //
+// HumdrumLine::printXmlParameterInfo --
+//
+
+ostream& HumdrumLine::printXmlParameterInfo(ostream& out, int level,
+		const string& indent) {
+	((HumHash*)this)->printXml(out, level, indent);
+	return out;
+}
+
+
+//////////////////////////////
+//
 // HumdrumLine::printXml -- Print the HumdrumLine as a XML element.
 //
 
@@ -16628,6 +16645,8 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";
 
+		printXmlParameterInfo(out, level, indent);
+
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
@@ -16694,10 +16713,12 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
+		printXmlParameterInfo(out, level, indent);
 
 		level--;
 		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
 	}
+
 
 	return out;
 }

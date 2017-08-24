@@ -1214,6 +1214,18 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 
 //////////////////////////////
 //
+// HumdrumLine::printXmlParameterInfo --
+//
+
+ostream& HumdrumLine::printXmlParameterInfo(ostream& out, int level,
+		const string& indent) {
+	((HumHash*)this)->printXml(out, level, indent);
+	return out;
+}
+
+
+//////////////////////////////
+//
 // HumdrumLine::printXml -- Print the HumdrumLine as a XML element.
 //
 
@@ -1296,6 +1308,8 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</fields>\n";
 
+		printXmlParameterInfo(out, level, indent);
+
 		level--;
 		out << Convert::repeatString(indent, level) << "</frame>\n";
 
@@ -1362,10 +1376,12 @@ ostream& HumdrumLine::printXml(ostream& out, int level, const string& indent) {
 		level--;
 		out << Convert::repeatString(indent, level) << "</frameInfo>\n";
 
+		printXmlParameterInfo(out, level, indent);
 
 		level--;
 		out << Convert::repeatString(indent, level) << "</metaFrame>\n";
 	}
+
 
 	return out;
 }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 17 22:09:57 EDT 2017
+// Last Modified: Thu Aug 24 11:40:49 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -914,6 +914,8 @@ class HumdrumLine : public string, public HumHash {
 		                                 const string& separator = ",");
 		ostream& printXml               (ostream& out = cout, int level = 0,
 		                                 const string& indent = "\t");
+		ostream& printXmlParameterInfo  (ostream& out, int level,
+		                                 const string& indent);
 		string   getXmlId               (const string& prefix = "") const;
 		string   getXmlIdPrefix         (void) const;
 		void     createLineFromTokens   (void);

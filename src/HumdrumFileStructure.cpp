@@ -673,32 +673,35 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
-	HumdrumLine* spineline = NULL;
-	for (int i=(int)m_lines.size()-1; i>=0; i--) {
-		if (m_lines[i]->hasSpines()) {
-			if (m_lines[i]->isAllNull())  {
-				continue;
-			}
-			if (m_lines[i]->isManipulator()) {
-				continue;
-			}
-			if (m_lines[i]->isCommentLocal()) {
-				continue;
-			}
-			// should be a non-null data, barlines, or interpretation
-			spineline = m_lines[i];
+	vector<HumdrumLine*> globals;
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		if (m_lines[i]->isCommentGlobal() && (m_lines[i]->find("!!LO:") != string::npos)) {
+			globals.push_back(m_lines[i]);
 			continue;
 		}
-		if (spineline == NULL) {
+		if (!m_lines[i]->hasSpines()) {
 			continue;
 		}
-		if (!m_lines[i]->isCommentGlobal()) {
+		if (m_lines[i]->isAllNull())  {
 			continue;
 		}
-		if (m_lines[i]->find("!!LO:") != 0) {
+		if (m_lines[i]->isCommentLocal()) {
 			continue;
 		}
-		spineline->setParameters(m_lines[i]);
+		if (globals.empty()) {
+			continue;
+		}
+
+		// Filter manipulators or not?  At the moment allow
+		// global parameters to pass through manipulators.
+		// if (m_lines[i]->isManipulator()) {
+		// 	continue;
+		// }
+
+		for (int j=0; j<(int)globals.size(); j++) {
+			m_lines[i]->setParameters(globals[j]);
+		}
+		globals.clear();
 	}
 
 	return isValid();
