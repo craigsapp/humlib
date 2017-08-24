@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 24 11:40:49 PDT 2017
+// Last Modified: Thu Aug 24 11:44:31 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28722,7 +28722,8 @@ int Tool_cint::onlyRests(vector<NoteNode>& data) {
 
 //////////////////////////////
 //
-// Tool_cint::hasAttack -- returns true if all NoteNodes are for rests
+// Tool_cint::hasAttack -- returns true if at least one NoteNode has
+//   has an attack.
 //
 
 int Tool_cint::hasAttack(vector<NoteNode>& data) {
@@ -29720,7 +29721,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[PASSING_DOWN];
 				} else if (intn == 1) { // lower neighbor
 					results[vindex][lineindex] = m_labels[NEIGHBOR_DOWN];
-				} else if (intn == 0) { // descending anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // descending anticipation
 					results[vindex][lineindex] = m_labels[ANT_DOWN];
 				} else if (intn > 1) { // lower échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_DOWN];
@@ -29734,7 +29735,7 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[NEIGHBOR_UP];
 				} else if (intn < -1) { // upper échappée
 					results[vindex][lineindex] = m_labels[ECHAPPEE_UP];
-				} else if (intn == 0) { // rising anticipation
+				} else if ((intn == 0) && (dur <= 2)) { // rising anticipation
 					results[vindex][lineindex] = m_labels[ANT_UP];
 				} else if (intn > 1) { // ascending short nota cambiata
 					results[vindex][lineindex] = m_labels[CAMBIATA_UP_S];
