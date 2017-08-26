@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 26 13:57:07 PDT 2017
+// Last Modified: Sat Aug 26 14:34:00 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18903,6 +18903,29 @@ bool HumdrumToken::isBarline(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isCommentGlobal -- Returns true of the token starts with "!!".
+//    Currently confused with reference records.
+//
+
+bool HumdrumToken::isCommentGlobal(void) const {
+	if (size() == 0) {
+		return false;
+	}
+	if ((*this)[0] == '!') {
+		if (size() > 1) {
+			if ((*this)[1] == '!') {
+				// global comment
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isCommentLocal -- Returns true of the token start with "!",
 //   but not "!!" which is for global comments.
 //
@@ -19296,6 +19319,17 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 
 	m_linkedParameters.push_back(token);
 	return m_linkedParameters.size() - 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::linkedParameterIsGlobal --
+//
+
+bool HumdrumToken::linkedParameterIsGlobal(int index) {
+	return m_linkedParameters.at(index)->isCommentGlobal();
 }
 
 

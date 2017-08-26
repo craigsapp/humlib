@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 26 13:57:07 PDT 2017
+// Last Modified: Sat Aug 26 14:34:00 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1139,6 +1139,7 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isCommentGlobal           (void) const;
 		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isInterpretation          (void) const;
@@ -1222,6 +1223,7 @@ class HumdrumToken : public string, public HumHash {
 		HTp      getSlurStartToken         (int number = 0);
 		HTp      getSlurEndToken           (int number = 0);
 		void     storeLinkedParameters     (void);
+		bool     linkedParameterIsGlobal   (int index);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");

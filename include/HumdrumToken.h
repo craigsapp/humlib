@@ -75,6 +75,7 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isCommentGlobal           (void) const;
 		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isInterpretation          (void) const;
@@ -158,6 +159,7 @@ class HumdrumToken : public string, public HumHash {
 		HTp      getSlurStartToken         (int number = 0);
 		HTp      getSlurEndToken           (int number = 0);
 		void     storeLinkedParameters     (void);
+		bool     linkedParameterIsGlobal   (int index);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
