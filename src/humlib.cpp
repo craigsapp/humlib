@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 26 14:34:00 PDT 2017
+// Last Modified: Sat Aug 26 16:20:12 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4550,6 +4550,9 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 		return null;
 	}
 	HumdrumToken* tok = m_owner->getTrackStart(getTrack());
+	if (tok == NULL) {
+		return null;
+	}
 	return *tok;
 }
 
