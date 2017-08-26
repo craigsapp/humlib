@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 26 12:05:25 PDT 2017
+// Last Modified: Sat Aug 26 13:57:07 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -14986,7 +14986,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 		// 	continue;
 		// }
 
-		for (int j=0; j<(int)m_lines[i]->size(); j++) {
+		for (int j=0; j<(int)m_lines[i]->getFieldCount(); j++) {
 			for (int k=0; k<(int)globals.size(); k++) {
 				m_lines[i]->token(j)->addLinkedParameter(globals[k]->token(0));
 			}

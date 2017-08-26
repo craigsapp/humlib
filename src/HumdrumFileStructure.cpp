@@ -706,7 +706,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 		// 	continue;
 		// }
 
-		for (int j=0; j<(int)m_lines[i]->size(); j++) {
+		for (int j=0; j<(int)m_lines[i]->getFieldCount(); j++) {
 			for (int k=0; k<(int)globals.size(); k++) {
 				m_lines[i]->token(j)->addLinkedParameter(globals[k]->token(0));
 			}
