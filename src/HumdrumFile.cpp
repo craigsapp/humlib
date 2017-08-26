@@ -31,14 +31,12 @@ HumdrumFile::HumdrumFile(void) {
 
 HumdrumFile::HumdrumFile(const string& filename) :
 		HUMDRUMFILE_PARENT() {
-cerr << "GOT HERE EEE" << endl;
 	read(filename);
 }
 
 
 HumdrumFile::HumdrumFile(istream& contents) :
 		HUMDRUMFILE_PARENT() {
-cerr << "GOT HERE FFF" << endl;
 	read(contents);
 }
 
@@ -110,7 +108,7 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 	}
 
 	level--;
-	out << Convert::repeatString(indent, level) << "<trackInfo>\n";
+	out << Convert::repeatString(indent, level) << "</trackInfo>\n";
 
 	printXmlParameterInfo(out, level, "\t");
 
