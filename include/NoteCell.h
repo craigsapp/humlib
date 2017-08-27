@@ -37,6 +37,9 @@ class NoteCell {
 		double getSgnBase40Pitch    (void) { return m_b40;               }
 		double getSgnAccidental     (void) { return m_accidental;        }
 
+		double getSgnDiatonicPitchClass(void);
+		double getAbsDiatonicPitchClass(void);
+
 		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
 		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
 		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }

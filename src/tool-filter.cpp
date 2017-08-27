@@ -18,13 +18,14 @@
 #include "tool-autostem.h"
 #include "tool-cint.h"
 #include "tool-dissonant.h"
+#include "tool-extract.h"
 #include "tool-hproof.h"
 #include "tool-imitation.h"
-#include "tool-extract.h"
+#include "tool-metlev.h"
+#include "tool-msearch.h"
+#include "tool-myank.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
-#include "tool-metlev.h"
-#include "tool-myank.h"
 #include "tool-transpose.h"
 #include "HumRegex.h"
 
@@ -119,6 +120,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second, status);
+		} else if (commands[i].first == "msearch") {
+			RUNTOOL(msearch, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
