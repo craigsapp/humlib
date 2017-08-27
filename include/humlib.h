@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat, Aug 26, 2017 10:51:06 PM
+// Last Modified: Sun Aug 27 16:02:41 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2267,6 +2267,9 @@ class NoteCell {
 		double getSgnBase40Pitch    (void) { return m_b40;               }
 		double getSgnAccidental     (void) { return m_accidental;        }
 
+		double getSgnDiatonicPitchClass(void);
+		double getAbsDiatonicPitchClass(void);
+
 		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
 		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
 		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }
@@ -4264,6 +4267,29 @@ class Tool_metlev : public HumTool {
 
 };
 
+
+
+class Tool_msearch : public HumTool {
+	public:
+		         Tool_msearch      (void);
+		        ~Tool_msearch      () {};
+
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
+		                            vector<double>& query);
+		void    fillQueryDiatonicPC(vector<double>& query, const string& input);
+		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
+		                            vector<double>& dpcQuery,
+		                            vector<NoteCell*>& match);
+		void     markMatch         (HumdrumFile& infile, vector<NoteCell*>& match);
+
+	private:
+	 	vector<HTp> m_kernspines;
+};
 
 
 class Tool_musicxml2hum : public HumTool {

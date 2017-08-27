@@ -336,6 +336,38 @@ HumNum NoteCell::getMeterBottom(void) {
 
 
 
+//////////////////////////////
+//
+// NoteCell::getSgnDiatonicPitchClass --
+//
+
+double NoteCell::getSgnDiatonicPitchClass(void) {
+	if (m_b7 == GRIDREST) {
+		return GRIDREST;
+	} else if (m_b7 < 0) {
+		return -(double)(((int)-m_b7) % 7);
+	} else {
+		return (double)(((int)m_b7) % 7);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getAbsDiatonicPitchClass --
+//
+
+double NoteCell::getAbsDiatonicPitchClass(void) {
+	if (m_b7 == GRIDREST) {
+		return GRIDREST;
+	} else {
+		return (double)(((int)fabs(m_b7)) % 7);
+	}
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum
