@@ -226,6 +226,8 @@ class HumHash {
 		string         getPrefix           (void) const;
 		ostream&       printXml            (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
+		ostream&       printXmlAsGlobal    (ostream& out = cout, int level = 0,
+		                                    const string& indent = "\t");
 
 		void           setOrigin           (const string& key,
 		                                    HumdrumToken* tok);

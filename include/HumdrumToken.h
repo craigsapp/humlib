@@ -16,15 +16,19 @@
 #include <iostream>
 #include <vector>
 
+class HumParamSet;
+
 #include "HumNum.h"
 #include "HumAddress.h"
 #include "HumHash.h"
+#include "HumParamSet.h"
 
 using namespace std;
 
 namespace hum {
 
 // START_MERGE
+
 
 typedef HumdrumToken* HTp;
 
@@ -71,6 +75,7 @@ class HumdrumToken : public string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isCommentGlobal           (void) const;
 		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isInterpretation          (void) const;
@@ -153,13 +158,22 @@ class HumdrumToken : public string, public HumHash {
 		int      getSlurEndElisionLevel    (int index = 0) const;
 		HTp      getSlurStartToken         (int number = 0);
 		HTp      getSlurEndToken           (int number = 0);
+		void     storeLinkedParameters     (void);
+		bool     linkedParameterIsGlobal   (int index);
 		ostream& printCsv                  (ostream& out = cout);
 		ostream& printXml                  (ostream& out = cout, int level = 0,
 		                                    const string& indent = "\t");
+		ostream& printGlobalXmlParameterInfo(ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 		string   getXmlId                  (const string& prefix = "") const;
 		string   getXmlIdPrefix            (void) const;
 		void     setText                   (const string& text);
 		string   getText                   (void) const;
+		int      addLinkedParameter        (HTp token);
+		int      getLinkedParameterCount   (void);
+		HumParamSet* getLinkedParameter    (int index);
+		HumParamSet* getLinkedParameter    (void);
+		ostream& printXmlLinkedParameterInfo(ostream& out, int level, const string& indent);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);
@@ -222,6 +236,8 @@ class HumdrumToken : public string, public HumHash {
 		                                   const string& indent = "\t");
 		ostream& printXmlParameterInfo    (ostream& out = cout, int level = 0,
 		                                   const string& indent = "\t");
+		ostream&	printXmlLinkedParameters (ostream& out = cout, int level = 0,
+		                                   const string& indent = "\t");
 
 	private:
 		// address: The address contains information about the location of
@@ -267,8 +283,16 @@ class HumdrumToken : public string, public HumHash {
 		int m_strand;
 
 		// m_nullresolve: used to point to the token that a null token
-		// refers to
+		// refers to.
 		HTp m_nullresolve;
+
+		// m_linkedParameters: List of Humdrum tokens which are parameters
+		// (mostly only layout parameters at the moment).
+		vector<HTp> m_linkedParameters;
+
+		// m_linkedParameter: A single parameter encoded in the text of the
+		// token.
+		HumParamSet* m_linkedParameter = NULL;
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;
