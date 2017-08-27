@@ -40,6 +40,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("b|base-40=b",         "print base-40 grid");
 	define("l|metric-levels=b",   "use metric levels in analysis");
 	define("k|kern=b",            "print kern pitch grid");
+	define("V|voice-functions=b", "do cadential-voice-function analysis");
 	define("v|voice-number=b",    "print voice number of dissonance");
 	define("f|self-number=b",     "print self voice number of dissonance");
 	define("debug=b",             "print grid cell information");
@@ -140,9 +141,11 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	dissL2Q = false;
 
 	suppressQ = getBoolean("suppress");
+	voiceFuncsQ = getBoolean("voice-functions");
 
 	vector<vector<string> > results;
 	vector<vector<string> > results2;
+	vector<vector<string> > voiceFuncs;
 	vector<vector<NoteCell*> > attacks;
 	vector<vector<NoteCell*> > attacks2;
 
@@ -183,6 +186,30 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			infile.createLinesFromTokens();
 			return true;
 		}
+	} else if (voiceFuncsQ) { // run cadnetial-voice-function analysis if requested
+		// TODO: make sure this count stuff works with the -V setting too.
+		// if (getBoolean("count")) {
+		// 	printCountAnalysis(voiceFuncs);
+		// 	return false;
+		// }
+		voiceFuncs.resize(grid.getVoiceCount());
+		for (int i=0; i<(int)voiceFuncs.size(); i++) {
+			voiceFuncs[i].resize(infile.getLineCount());
+		}
+		for (int vindex=0; vindex<grid.getVoiceCount(); vindex++) {
+			findCadentialVoiceFunctions(results, grid, attacks[vindex], voiceFuncs, vindex);
+		}
+
+		string exinterp = getString("exinterp");
+		vector<HTp> kernspines = infile.getKernSpineStartList();
+		infile.appendDataSpine(voiceFuncs.back(), "", exinterp);
+		for (int i = (int)voiceFuncs.size()-1; i>0; i--) {
+			int track = kernspines[i]->getTrack();
+			infile.insertDataSpineBefore(track, voiceFuncs[i-1], "", exinterp);
+		}
+		printColorLegend(infile);
+		infile.createLinesFromTokens();
+		return true;
 	} else {
 		if (getBoolean("count")) {
 			printCountAnalysis(results);
@@ -200,7 +227,6 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			return true;
 		}
 	}
-
 }
 
 
@@ -1254,6 +1280,89 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 						    (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) { // lower appoggiatura
 					results[vindex][lineindex] = m_labels[APP_LOWER];
 				}
+			}
+		}
+	}
+}
+
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::findCadentialVoiceFunctions -- identify the cadential-voice 
+//		functions present in each voice. These are the single-line constituents
+//		of Renaissance cadences. Five basic types are identified: Cantizans,
+//		Altizans, Tenorizans, Leaping Contratenor, and Bassizans. Since the
+//		cadential-voice functions are identified contrapuntally, a Cantizans or
+//		Altizans must be found set against any of the other three types for 
+//		anything to be detected. 
+//
+void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, vector<vector<string> >& voiceFuncs, int vindex) {
+	HumNum dur;        // duration of current note
+	HumNum durn;	   // duration of next note
+	double intn;       // diatonic interval to next melodic note
+	double intnn;	   // diatonic interval from next melodic note to following note
+	double ointn;	   // diatonic interval to next melodic note in other voice
+	int lineindex;     // line in original Humdrum file content that contains note
+	// NB lineindex2 is not needed
+	int lineindex3;    // line in original Humdrum file content that contains note two events later
+	// int lineindex4;    // line in original Humdrum file content that contains note three events later
+	int sliceindex;    // current timepoint in NoteGrid.
+	int attInd2;  	   // line index of ref voice's next attack
+	int attInd3;       // line index of ref voice's attack two events later
+	int oattInd2;      // line index of other voice's next attack
+	double pitch;      // current pitch in ref voice
+	double opitch;     // current pitch in other voice
+	double opitchn;	   // pitch of next note in other voice
+
+	for (int i=1; i<(int)attacks.size()-2; i++) {
+		// lineindexp = attacks[i-1]->getLineIndex();
+		lineindex  = attacks[i]->getLineIndex();
+		lineindex3 = attacks[i+2]->getLineIndex();
+		// pass over if ref voice is not a patient
+		if ((results[vindex][lineindex].find("S") == string::npos) &&
+			(results[vindex][lineindex].find("s") == string::npos)) {
+			continue;
+		}
+		dur  = attacks[i]->getDuration();
+		durn = attacks[i+1]->getDuration();
+		intn = *attacks[i+1] - *attacks[i];
+		intnn = *attacks[i+2] - *attacks[i+1];
+		sliceindex = attacks[i]->getSliceIndex();
+
+		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
+			if (vindex == j) { // only compare different voices
+				continue;
+			}
+
+			// skip if other voice isn't an agent
+			if ((results[j][lineindex].find("G") == string::npos) &&
+				(results[j][lineindex].find("g") == string::npos) ) {
+				continue;
+			}
+
+			oattInd2 = -22;
+			pitch    = attacks[i]->getAbsDiatonicPitch();
+			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			attInd2  = attacks[i]->getNextAttackIndex();
+			attInd3  = attacks[i+1]->getNextAttackIndex();
+			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
+			if (oattInd2 > 0) {
+				opitchn = grid.cell(j, oattInd2)->getAbsDiatonicPitch();
+				ointn = opitchn - opitch;
+			}
+			// NB since the ref voice is the one with the suspension, if the 
+			// suspension is in the higher voice (the most common case) then the
+			// harmonic intervals will actually be negative
+			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
+
+			if ((thisMod7 == -6) && (intn == -2) && (intnn == 2) && 
+				(oattInd2 > 0) && (ointn == -2) && (attInd3 == oattInd2)) {
+				voiceFuncs[vindex][attInd3] = "C"; // cantizans
+				voiceFuncs[j][attInd3] = "T"; // tenorizans
 			}
 		}
 	}
