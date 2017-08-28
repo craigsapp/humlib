@@ -1307,19 +1307,25 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	// double int3;	   // diatonic interval from next melodic note to following note
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
-	int lineindex;     // line in original Humdrum file content that contains note
-	int lineindex2;
-	// int lineindex3;    // line in original Humdrum file content that contains note two events later
+	double oint4;	   // diatonic interval from third to fourth note in other voice
+	double oint5;	   // diatonic interval from third to fifth note in other voice
+	int lineindex;     // line in original Humdrum file that contains note
+	int lineindex2;	   // line in original Humdrum file that contains note one event later
+	int lineindex3;    // line in original Humdrum file that contains note two events later
 	// int lineindex4;    // line in original Humdrum file content that contains note three events later
 	int sliceindex;    // current timepoint in NoteGrid.
 	int attInd2;  	   // line index of ref voice's next attack
-	// int attInd3;       // line index of ref voice's attack two events later
+	int attInd3;       // line index of ref voice's attack two events later
 	int oattInd2;      // line index of other voice's next attack
 	int oattInd3;      // line index of other voice's third attack
+	int oattInd4;      // line index of other voice's fourth attack
+	int oattInd5;      // line index of other voice's fifth attack
 	double pitch;      // current pitch in ref voice
 	double opitch;     // current pitch in other voice
 	double opitch2;	   // pitch of next note in other voice
 	double opitch3;	   // pitch of third note in other voice
+	double opitch4;	   // pitch of fourth note in other voice
+	double opitch5;	   // pitch of fifth note in other voice
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
 		// lineindexp = attacks[i-1]->getLineIndex();
@@ -1337,7 +1343,6 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 		sliceindex = attacks[i]->getSliceIndex();
 
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
-			// cerr << "**************HERE 3" << endl;
 			if (vindex == j) { // only compare different voices
 				continue;
 			}
@@ -1350,24 +1355,31 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 
 			oattInd2 = -22;
 			oattInd3 = -22;
+			oattInd4 = -22;
 			oint2	 = -22;
 			oint3	 = -22;
+			oint4	 = -22;
+			oint5	 = -22;
 			pitch    = attacks[i]->getAbsDiatonicPitch();
 			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			lineindex2 = attacks[i+1]->getLineIndex();
 			attInd2  = attacks[i]->getNextAttackIndex();
 			// attInd3  = attacks[i+1]->getNextAttackIndex();
 			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
-			// cerr << "**************HERE 4" << endl;
 
 			if (oattInd2 > 0) {
 				opitch2 = grid.cell(j, oattInd2)->getAbsDiatonicPitch();
 				oint2 = opitch2 - opitch;
 				oattInd3 = grid.cell(j, oattInd2)->getNextAttackIndex();
-				if (oattInd3 > 0) {
-					opitch3 = grid.cell(j, oattInd3)->getAbsDiatonicPitch();
-					oint3 = opitch3 - opitch2;
-				}
+			} else { // all cadence types need at least 3 attacks in other voice
+				continue;
+			}
+			if (oattInd3 > 0) {
+				opitch3 = grid.cell(j, oattInd3)->getAbsDiatonicPitch();
+				oint3 = opitch3 - opitch2;
+				oattInd4 = grid.cell(j, oattInd3)->getNextAttackIndex();
+			} else { // all cadence types need at least 3 attacks in other voice
+				continue;
 			}
 			// NB since the ref voice is the one with the suspension, if the 
 			// suspension is in the higher voice (the most common case) then the
@@ -1375,27 +1387,111 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			int thisInt = opitch - pitch; // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
-cerr << "lineindex: " << lineindex << endl;
-cerr << "sliceindex: " << sliceindex << endl;
-cerr << "pitch: " << pitch << endl;
-cerr << "opitch: " << opitch << endl;
-cerr << "int2: " << int2 << endl;
-cerr << "oint2: " << oint2 << endl;
-cerr << "oint3: " << oint3 << endl;
-cerr << "attInd2: " << attInd2 << endl;
-cerr << "oattInd2: " << oattInd2 << endl;
-cerr << "oattInd3: " << oattInd3 << endl;
-cerr << "thisInt: " << thisInt << endl;
-cerr << "thisMod7: " << thisMod7 << endl;
+			// cerr << "lineindex: " << lineindex << endl;
+			// cerr << "sliceindex: " << sliceindex << endl;
+			// cerr << "pitch: " << pitch << endl;
+			// cerr << "opitch: " << opitch << endl;
+			// cerr << "int2: " << int2 << endl;
+			// cerr << "oint2: " << oint2 << endl;
+			// cerr << "oint3: " << oint3 << endl;
+			// cerr << "attInd2: " << attInd2 << endl;
+			// cerr << "oattInd2: " << oattInd2 << endl;
+			// cerr << "oattInd3: " << oattInd3 << endl;
+			// cerr << "thisInt: " << thisInt << endl;
+			// cerr << "thisMod7: " << thisMod7 << endl;
 
-			if ((thisMod7 == 6) && (int2 == -1) && (attInd2 == oattInd3) && 
-				(oint2 == -1) && (oint3 == 1)) {
+			// agent voice has 2 attacks, patient has 3 notes
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
+				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^7xs 1 6sx -2 8xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
-
-cerr << "This voice label: " << voiceFuncs[vindex][attInd2] << endl;
-cerr << "Other voice label: " << voiceFuncs[j][attInd2] << endl;
+			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
+				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -5 8xx$"
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd3) && 
+				(oint2 == -1) && (oint3 == 1)) { // "^11xs 1 10sx 8 4xx$"
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
+			} else if ((thisMod7 == 3) && (int2 == -1) && (attInd2 == oattInd3) &&
+				(oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -2 5xx$"
+				voiceFuncs[j][lineindex2] = "A"; // altizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 			}
+			
+			// agent voice has 3 attacks, patient has 3 notes. In this block the
+			// perfection is anticipated in the agent.
+			if ((i + 3) < int(attacks.size())) {
+				attInd3  = attacks[i+1]->getNextAttackIndex();
+				lineindex3 = attacks[i+2]->getLineIndex();
+				if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
+					(results[vindex][lineindex2] == m_labels[ANT_DOWN]) &&
+					(attInd3 == oattInd3) && (oint2 == -1) && (oint3 == 1)) {
+					voiceFuncs[j][lineindex3] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex3] = "T"; // tenorizans
+				} else if ((thisMod7 == 3) && (int2 == -1) && (attInd3 == oattInd3) &&
+					(results[vindex][lineindex2] == m_labels[ANT_DOWN]) &&
+					(oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -2 5xx$"
+					voiceFuncs[j][lineindex3] = "A"; // altizans
+					voiceFuncs[vindex][lineindex3] = "T"; // tenorizans
+				}
+			}
+			
+			// agent voice has 2 attacks, patient has 4 notes
+			if (oattInd4 > 0) {
+				opitch4 = grid.cell(j, oattInd4)->getAbsDiatonicPitch();
+				oint4 = opitch4 - opitch3;
+				oattInd5 = grid.cell(j, oattInd4)->getNextAttackIndex();
+			} else { // the following cadence types need 4 attacks in other voice
+				continue;
+			}
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
+				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) && 
+				(oint4 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
+				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) && 
+				(oint4 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd4) && 
+				(oint2 == -1) && (oint3 == -1) && (oint4 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
+			} else if ((thisMod7 == 3) && (int2 == -1) && (attInd2 == oattInd4) &&
+				(oint2 == -1) && (oint3 == -1) && (oint4 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "A"; // altizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			}
+			
+			// agent voice has 2 attacks, patient has 5 notes
+			if (oattInd5 > 0) {
+				opitch5 = grid.cell(j, oattInd5)->getAbsDiatonicPitch();
+				oint5 = opitch5 - opitch4;
+			} else { // the following cadence types need 5 attacks in other voice
+				continue;
+			}
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
+				(attInd2 == oattInd5) && (oint2 == -1) && (oint3 == 0) && 
+				(oint4 == -1) && (oint5 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
+				(attInd2 == oattInd5) && (oint2 == -1) && (oint3 == 0) && 
+				(oint4 == -1) && (oint5 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd5) && 
+				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
+			} else if ((thisMod7 == 3) && (int2 == -1) && (attInd2 == oattInd5) &&
+				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) { // under-third cadence
+				voiceFuncs[j][lineindex2] = "A"; // altizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			}
+
 		}
 	}
 }
