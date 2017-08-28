@@ -28,7 +28,7 @@ namespace hum {
 Tool_msearch::Tool_msearch(void) {
 	define("debug=b",       "diatonic search");
 	define("q|query=s:c d e f g",  "query string");
-	define("c|cross=b",     "search across voices");
+	define("x|cross=b",     "search across parts");
 }
 
 
@@ -64,8 +64,8 @@ bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
 bool Tool_msearch::run(HumdrumFile& infile) {
 	NoteGrid grid(infile);
 
-	vector<double> query;
-	fillQueryDiatonicPC(query, getString("query"));
+	vector<MSearchQueryToken> query;
+	fillQuery(query, getString("query"));
 
 	if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
@@ -87,7 +87,7 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 //
 
 void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
-		vector<double>& query) {
+		vector<MSearchQueryToken>& query) {
 
 	vector<vector<NoteCell*>> attacks;
 	attacks.resize(grid.getVoiceCount());
@@ -144,24 +144,38 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_msearch::checkForMatchDiatonicPC --
 //
 
 bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
-		vector<double>& dpcQuery, vector<NoteCell*>& match) {
+		vector<MSearchQueryToken>& dpcQuery, vector<NoteCell*>& match) {
 	match.clear();
 
 	int maxi = (int)notes.size() - index;
 	if ((int)dpcQuery.size() > maxi) {
 		return false;
 	}
+	int interval;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
-		if (notes[index + i]->getAbsDiatonicPitchClass() != dpcQuery[i]) {
+		if (notes[index + i]->getAbsDiatonicPitchClass() != dpcQuery[i].pc) {
 			match.clear();
 			return false;
 		} else {
+			if ((index + i>0) && dpcQuery[i].direction) {
+				interval = notes[index + i]->getAbsBase40Pitch() -
+						notes[index + i - 1]->getAbsBase40Pitch();
+				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
+					match.clear();
+					return false;
+				}
+				if ((dpcQuery[i].direction < 0) && (interval >= 0)) {
+					match.clear();
+					return false;
+				}
+			}
 			match.push_back(notes[index+i]);
 		}
 	}
@@ -180,21 +194,43 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 //////////////////////////////
 //
-// Tool_msearch::fillQueryDiatonicPC -- 
+// Tool_msearch::fillQuery -- 
 //
 
-void Tool_msearch::fillQueryDiatonicPC(vector<double>& query, const string& input) {
+void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query, const string& input) {
 	query.clear();
 	char ch;
-	int value;
+
+	MSearchQueryToken temp;
+
 	for (int i=0; i<(int)input.size(); i++) {
 		ch = tolower(input[i]);
-		if (ch >= 'a' && ch <= 'g') {
-			value = (ch - 'a' + 5) % 7;
-			query.push_back((double)value);
-		} else if (ch == 'r') {
-			query.push_back(GRIDREST);
+
+		if (ch == '^') {
+			temp.direction = 1;
+			continue;
 		}
+		if (ch == 'v') {
+			temp.direction = -1;
+			continue;
+		}
+
+		if ((ch >= 'a' && ch <= 'g')) {
+			temp.base = 7;
+			temp.pc = (ch - 'a' + 5) % 7;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == 'r') {
+			temp.base = 7;
+			temp.pc = GRIDREST;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		}
+
+		// deal with accidentals here
+		// deal with duration here
 	}
 }
 
