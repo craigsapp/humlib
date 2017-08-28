@@ -21,6 +21,41 @@ namespace hum {
 
 // START_MERGE
 
+class MSearchQueryToken {
+	public:
+		MSearchQueryToken(void) {
+			clear();
+		}
+		MSearchQueryToken(const MSearchQueryToken& token) {
+			pc        = token.pc;
+			base      = token.base;
+			direction = token.direction;
+			duration  = token.duration;
+		}
+		MSearchQueryToken& operator=(MSearchQueryToken& token) {
+			if (this == &token) {
+				return token;
+			}
+			pc        = token.pc;
+			base      = token.base;
+			direction = token.direction;
+			duration  = token.duration;
+			return *this;
+		}
+		void clear(void) {
+			pc        = NAN;
+			base      = 0;
+			direction = 0;
+			duration  = 0;
+		}
+
+		double pc;           // NAN = rest
+		int    base;
+		int    direction; 
+		HumNum duration;
+};
+
+
 class Tool_msearch : public HumTool {
 	public:
 		         Tool_msearch      (void);
@@ -32,10 +67,10 @@ class Tool_msearch : public HumTool {
 
 	protected:
 		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
-		                            vector<double>& query);
-		void    fillQueryDiatonicPC(vector<double>& query, const string& input);
+		                            vector<MSearchQueryToken>& query);
+		void    fillQuery          (vector<MSearchQueryToken>& query, const string& input);
 		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
-		                            vector<double>& dpcQuery,
+		                            vector<MSearchQueryToken>& dpcQuery,
 		                            vector<NoteCell*>& match);
 		void     markMatch         (HumdrumFile& infile, vector<NoteCell*>& match);
 
