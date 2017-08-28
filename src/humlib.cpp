@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun, Aug 27, 2017  7:01:51 PM
+// Last Modified: Mon, Aug 28, 2017 11:20:23 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31010,7 +31010,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
 	int lineindex;     // line in original Humdrum file content that contains note
-	// NB lineindex2 is not needed
+	int lineindex2;
 	// int lineindex3;    // line in original Humdrum file content that contains note two events later
 	// int lineindex4;    // line in original Humdrum file content that contains note three events later
 	int sliceindex;    // current timepoint in NoteGrid.
@@ -31032,17 +31032,10 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			(results[vindex][lineindex] != m_labels[AGENT_TERN])) {
 			continue;
 		}
-<<<<<<< HEAD
 		// dur  = attacks[i]->getDuration();
 		// durn = attacks[i+1]->getDuration();
 		int2 = *attacks[i+1] - *attacks[i];
 		// int3 = *attacks[i+2] - *attacks[i+1];
-=======
-		dur  = attacks[i]->getDuration();
-		durn = attacks[i+1]->getDuration();
-		intn = *attacks[i+1] - *attacks[i];
-		intnn = *attacks[i+2] - *attacks[i+1];
->>>>>>> 89e35b6b1f6dd5fd0c95f57fdb941d5a153a5047
 		sliceindex = attacks[i]->getSliceIndex();
 
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
@@ -31063,6 +31056,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			oint3	 = -22;
 			pitch    = attacks[i]->getAbsDiatonicPitch();
 			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			lineindex2 = attacks[i+1]->getLineIndex();
 			attInd2  = attacks[i]->getNextAttackIndex();
 			// attInd3  = attacks[i+1]->getNextAttackIndex();
 			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
@@ -31098,8 +31092,8 @@ cerr << "thisMod7: " << thisMod7 << endl;
 
 			if ((thisMod7 == 6) && (int2 == -1) && (attInd2 == oattInd3) && 
 				(oint2 == -1) && (oint3 == 1)) {
-				voiceFuncs[j][attInd2] = "C"; // cantizans
-				voiceFuncs[vindex][attInd2] = "T"; // tenorizans
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 
 cerr << "This voice label: " << voiceFuncs[vindex][attInd2] << endl;
 cerr << "Other voice label: " << voiceFuncs[j][attInd2] << endl;
@@ -35852,188 +35846,6 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 		}
 	}
 }
-
-
-
-
-/////////////////////////////////
-//
-// Tool_msearch::Tool_msearch -- Set the recognized options for the tool.
-//
-
-Tool_msearch::Tool_msearch(void) {
-	define("debug=b",       "diatonic search");
-	define("d|diatonic=s:c d e f g",  "diatonic search");
-	define("c|cross=b",     "search across voices");
-}
-
-
-
-/////////////////////////////////
-//
-// Tool_msearch::run -- Do the main work of the tool.
-//
-
-bool Tool_msearch::run(const string& indata, ostream& out) {
-	HumdrumFile infile(indata);
-	bool status = run(infile);
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile;
-	}
-	return status;
-}
-
-
-bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile;
-	}
-	return status;
-}
-
-
-bool Tool_msearch::run(HumdrumFile& infile) {
-	NoteGrid grid(infile);
-
-	vector<double> query;
-	fillQueryDiatonicPC(query, getString("diatonic"));
-
-	if (getBoolean("debug")) {
-		grid.printGridInfo(cerr);
-		// return 1;
-	}
-
-	doAnalysis(infile, grid, query);
-
-	return 1;
-}
-
-
-
-
-
-//////////////////////////////
-//
-// Tool_msearch::doAnalysis -- do a basic melodic analysis of all parts.
-//
-
-void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
-		vector<double>& query) {
-
-	vector<vector<NoteCell*>> attacks;
-	attacks.resize(grid.getVoiceCount());
-	for (int i=0; i<grid.getVoiceCount(); i++) {
-		grid.getNoteAndRestAttacks(attacks[i], i);
-	}
-
-	vector<NoteCell*>  match;
-	int mcount = 0;
-	for (int i=0; i<(int)attacks.size(); i++) {
-		for (int j=0; j<(int)attacks[i].size(); j++) {
-			checkForMatchDiatonicPC(attacks[i], j, query, match);
-			if (!match.empty()) {
-				mcount++;
-				markMatch(infile, match);
-				// cerr << "FOUND MATCH AT " << i << ", " << j << endl;
-				// markNotes(attacks[i], j, (int)query.size());
-			}
-		}
-	}
-	
-	if (mcount) {
-		infile.appendLine("!!!RDF**kern: @ = marked note");
-		infile.createLinesFromTokens();
-	}
-}
-
-
-//////////////////////////////
-//
-// Tool_msearch::markMatch -- assumes monophonic music.
-//
-
-void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
-	if (match.empty()) {
-		return;
-	}
-	HTp mstart = match[0]->getToken();
-	HTp mend = NULL;
-	if (match.back() != NULL) {
-		mend = match.back()->getToken();
-	}
-	HTp tok = mstart;
-	string text;
-	while (tok && (tok != mend)) {
-		if (!tok->isData()) {
-			return;
-		}
-		text = tok->getText();
-		text += '@';
-		tok->setText(text);
-		tok = tok->getNextNNDT();
-	}
-}
-
-
-//////////////////////////////
-//
-// Tool_msearch::checkForMatchDiatonicPC --
-//
-
-bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
-		vector<double>& dpcQuery, vector<NoteCell*>& match) {
-	match.clear();
-
-	int maxi = (int)notes.size() - index;
-	if ((int)dpcQuery.size() > maxi) {
-		return false;
-	}
-	for (int i=0; i<(int)dpcQuery.size(); i++) {
-		if (notes[index + i]->getAbsDiatonicPitchClass() != dpcQuery[i]) {
-			match.clear();
-			return false;
-		} else {
-			match.push_back(notes[index+i]);
-		}
-	}
-
-	// Add extra token for marking tied notes at end of match
-	if (index + (int)dpcQuery.size() < (int)notes.size()) {
-		match.push_back(notes[index + (int)dpcQuery.size()]);
-	} else {
-		match.push_back(NULL);
-	}
-
-	return true;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_msearch::fillQueryDiatonicPC -- 
-//
-
-void Tool_msearch::fillQueryDiatonicPC(vector<double>& query, const string& input) {
-	query.clear();
-	char ch;
-	int value;
-	for (int i=0; i<(int)input.size(); i++) {
-		ch = tolower(input[i]);
-		if (ch >= 'a' && ch <= 'g') {
-			value = (ch - 'a' + 5) % 7;
-			query.push_back((double)value);
-		} else if (ch == 'r') {
-			query.push_back(GRIDREST);
-		}
-	}
-}
-
 
 
 
