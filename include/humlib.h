@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon, Aug 28, 2017  5:59:40 PM
+// Last Modified: Mon Aug 28 15:15:57 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4269,8 +4269,6 @@ class Tool_metlev : public HumTool {
 
 
 
-<<<<<<< HEAD
-=======
 class MSearchQueryToken {
 	public:
 		MSearchQueryToken(void) {
@@ -4306,7 +4304,6 @@ class MSearchQueryToken {
 };
 
 
->>>>>>> f78abbd46720986269475e8227fbbbf4cadacfd3
 class Tool_msearch : public HumTool {
 	public:
 		         Tool_msearch      (void);
@@ -4318,17 +4315,10 @@ class Tool_msearch : public HumTool {
 
 	protected:
 		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
-<<<<<<< HEAD
-		                            vector<double>& query);
-		void    fillQueryDiatonicPC(vector<double>& query, const string& input);
-		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
-		                            vector<double>& dpcQuery,
-=======
 		                            vector<MSearchQueryToken>& query);
 		void    fillQuery          (vector<MSearchQueryToken>& query, const string& input);
 		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
 		                            vector<MSearchQueryToken>& dpcQuery,
->>>>>>> f78abbd46720986269475e8227fbbbf4cadacfd3
 		                            vector<NoteCell*>& match);
 		void     markMatch         (HumdrumFile& infile, vector<NoteCell*>& match);
 
