@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 27 18:57:25 PDT 2017
+// Last Modified: Mon, Aug 28, 2017 11:20:23 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31010,7 +31010,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
 	int lineindex;     // line in original Humdrum file content that contains note
-	// NB lineindex2 is not needed
+	int lineindex2;
 	// int lineindex3;    // line in original Humdrum file content that contains note two events later
 	// int lineindex4;    // line in original Humdrum file content that contains note three events later
 	int sliceindex;    // current timepoint in NoteGrid.
@@ -31056,6 +31056,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			oint3	 = -22;
 			pitch    = attacks[i]->getAbsDiatonicPitch();
 			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			lineindex2 = attacks[i+1]->getLineIndex();
 			attInd2  = attacks[i]->getNextAttackIndex();
 			// attInd3  = attacks[i+1]->getNextAttackIndex();
 			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
@@ -31091,8 +31092,8 @@ cerr << "thisMod7: " << thisMod7 << endl;
 
 			if ((thisMod7 == 6) && (int2 == -1) && (attInd2 == oattInd3) && 
 				(oint2 == -1) && (oint3 == 1)) {
-				voiceFuncs[j][attInd2] = "C"; // cantizans
-				voiceFuncs[vindex][attInd2] = "T"; // tenorizans
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 
 cerr << "This voice label: " << voiceFuncs[vindex][attInd2] << endl;
 cerr << "Other voice label: " << voiceFuncs[j][attInd2] << endl;
@@ -35848,6 +35849,8 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 
 
 
+<<<<<<< HEAD
+=======
 
 /////////////////////////////////
 //
@@ -36030,6 +36033,7 @@ void Tool_msearch::fillQueryDiatonicPC(vector<double>& query, const string& inpu
 
 
 
+>>>>>>> 3483b3f48b75601a7049114ad50ed99f8b123d83
 //////////////////////////////
 //
 // Tool_musicxml2hum::Tool_musicxml2hum --

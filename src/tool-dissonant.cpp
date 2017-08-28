@@ -1308,7 +1308,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
 	int lineindex;     // line in original Humdrum file content that contains note
-	// NB lineindex2 is not needed
+	int lineindex2;
 	// int lineindex3;    // line in original Humdrum file content that contains note two events later
 	// int lineindex4;    // line in original Humdrum file content that contains note three events later
 	int sliceindex;    // current timepoint in NoteGrid.
@@ -1354,6 +1354,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			oint3	 = -22;
 			pitch    = attacks[i]->getAbsDiatonicPitch();
 			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
+			lineindex2 = attacks[i+1]->getLineIndex();
 			attInd2  = attacks[i]->getNextAttackIndex();
 			// attInd3  = attacks[i+1]->getNextAttackIndex();
 			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
@@ -1389,8 +1390,8 @@ cerr << "thisMod7: " << thisMod7 << endl;
 
 			if ((thisMod7 == 6) && (int2 == -1) && (attInd2 == oattInd3) && 
 				(oint2 == -1) && (oint3 == 1)) {
-				voiceFuncs[j][attInd2] = "C"; // cantizans
-				voiceFuncs[vindex][attInd2] = "T"; // tenorizans
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 
 cerr << "This voice label: " << voiceFuncs[vindex][attInd2] << endl;
 cerr << "Other voice label: " << voiceFuncs[j][attInd2] << endl;
