@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun, Aug 27, 2017  7:01:51 PM
+// Last Modified: Sun Aug 27 18:57:25 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31032,17 +31032,10 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			(results[vindex][lineindex] != m_labels[AGENT_TERN])) {
 			continue;
 		}
-<<<<<<< HEAD
 		// dur  = attacks[i]->getDuration();
 		// durn = attacks[i+1]->getDuration();
 		int2 = *attacks[i+1] - *attacks[i];
 		// int3 = *attacks[i+2] - *attacks[i+1];
-=======
-		dur  = attacks[i]->getDuration();
-		durn = attacks[i+1]->getDuration();
-		intn = *attacks[i+1] - *attacks[i];
-		intnn = *attacks[i+2] - *attacks[i+1];
->>>>>>> 89e35b6b1f6dd5fd0c95f57fdb941d5a153a5047
 		sliceindex = attacks[i]->getSliceIndex();
 
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
@@ -35863,7 +35856,7 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 
 Tool_msearch::Tool_msearch(void) {
 	define("debug=b",       "diatonic search");
-	define("d|diatonic=s:c d e f g",  "diatonic search");
+	define("q|query=s:c d e f g",  "query string");
 	define("c|cross=b",     "search across voices");
 }
 
@@ -35901,7 +35894,7 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 	NoteGrid grid(infile);
 
 	vector<double> query;
-	fillQueryDiatonicPC(query, getString("diatonic"));
+	fillQueryDiatonicPC(query, getString("query"));
 
 	if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
