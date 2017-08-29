@@ -177,7 +177,7 @@ MxmlMeasure* MxmlPart::getMeasure(int index) const {
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= (int)m_measures.size()) {
+	if (index > (int)m_measures.size() - 1) {
 		return NULL;
 	}
 	return m_measures[index];

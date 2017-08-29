@@ -342,7 +342,7 @@ HumNum NoteCell::getMeterBottom(void) {
 //
 
 double NoteCell::getSgnDiatonicPitchClass(void) {
-	if (m_b7 == GRIDREST) {
+	if (Convert::isNaN(m_b7)) {
 		return GRIDREST;
 	} else if (m_b7 < 0) {
 		return -(double)(((int)-m_b7) % 7);
@@ -359,7 +359,7 @@ double NoteCell::getSgnDiatonicPitchClass(void) {
 //
 
 double NoteCell::getAbsDiatonicPitchClass(void) {
-	if (m_b7 == GRIDREST) {
+	if (Convert::isNaN(m_b7)) {
 		return GRIDREST;
 	} else {
 		return (double)(((int)fabs(m_b7)) % 7);

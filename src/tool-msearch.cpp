@@ -79,8 +79,6 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 
 
 
-
-
 //////////////////////////////
 //
 // Tool_msearch::doAnalysis -- do a basic melodic analysis of all parts.
@@ -160,10 +158,9 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	}
 	int interval;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
-		if (notes[index + i]->getAbsDiatonicPitchClass() != dpcQuery[i].pc) {
-			match.clear();
-			return false;
-		} else {
+		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
+				Convert::isNaN(dpcQuery[i].pc)) ||
+				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
 			if ((index + i>0) && dpcQuery[i].direction) {
 				interval = notes[index + i]->getAbsBase40Pitch() -
 						notes[index + i - 1]->getAbsBase40Pitch();
@@ -177,6 +174,10 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 				}
 			}
 			match.push_back(notes[index+i]);
+		} else {
+			// not a match
+			match.clear();
+			return false;
 		}
 	}
 
