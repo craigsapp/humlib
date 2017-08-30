@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Aug 30, 2017  2:52:20 AM
+// Last Modified: Wed, Aug 30, 2017  3:04:07 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -30610,9 +30610,12 @@ RECONSIDER:
 
 		// If the note was labeled as an unknown dissonance, then go back and check
 		// against another note with which it might have a known dissonant function.
+		// Also go back if this voice was identified as an agent, because it may be
+		// the agent of multiple patients.
 		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
 				(results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
-				(results[vindex][lineindex] == m_labels[UNLABELED_Z7])) {
+				(results[vindex][lineindex] == m_labels[AGENT_BIN]) ||
+				(results[vindex][lineindex] == m_labels[AGENT_TERN])) {
 			if (nextj < (int)harmint.size()) {
 				goto RECONSIDER;
 			}
