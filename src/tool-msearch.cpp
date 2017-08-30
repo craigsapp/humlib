@@ -12,6 +12,7 @@
 
 #include "tool-msearch.h"
 #include "HumRegex.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -157,7 +158,15 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		return false;
 	}
 	int interval;
+	bool rhymatch;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
+		rhymatch = true;
+		if ((!dpcQuery[i].rhythm.empty()) 
+				&& (notes[index+i]->getDuration() != dpcQuery[i].duration)) {
+			// duration needs to match query, but does not
+			rhymatch = false;
+		}
+		
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
@@ -173,7 +182,12 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 					return false;
 				}
 			}
-			match.push_back(notes[index+i]);
+			if (rhymatch) {
+				match.push_back(notes[index+i]);
+			} else {
+				match.clear();
+				return false;
+			}
 		} else {
 			// not a match
 			match.clear();
@@ -198,7 +212,8 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 // Tool_msearch::fillQuery -- 
 //
 
-void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query, const string& input) {
+void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
+		const string& input) {
 	query.clear();
 	char ch;
 
@@ -216,6 +231,14 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query, const string& inp
 			continue;
 		}
 
+		if (isdigit(ch)) {
+			temp.rhythm += ch;
+		}
+
+		if (ch == '.') {
+			temp.rhythm += ch;
+		}
+
 		if ((ch >= 'a' && ch <= 'g')) {
 			temp.base = 7;
 			temp.pc = (ch - 'a' + 5) % 7;
@@ -231,8 +254,18 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query, const string& inp
 		}
 
 		// deal with accidentals here
-		// deal with duration here
 	}
+
+
+	// Convert rhythms to durations
+	for (int i=0; i<(int)query.size(); i++) {
+		if (query[i].rhythm.empty()) {
+			continue;
+		}
+		query[i].duration = Convert::recipToDuration(query[i].rhythm);
+	}
+
+
 }
 
 
