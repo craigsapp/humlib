@@ -4279,6 +4279,7 @@ class MSearchQueryToken {
 			base      = token.base;
 			direction = token.direction;
 			duration  = token.duration;
+			rhythm    = token.rhythm;
 		}
 		MSearchQueryToken& operator=(MSearchQueryToken& token) {
 			if (this == &token) {
@@ -4288,19 +4289,22 @@ class MSearchQueryToken {
 			base      = token.base;
 			direction = token.direction;
 			duration  = token.duration;
+			rhythm    = token.rhythm;
 			return *this;
 		}
 		void clear(void) {
 			pc        = NAN;
 			base      = 0;
 			direction = 0;
-			duration  = 0;
+			duration  = -1;
+			rhythm    = "";
 		}
 
 		double pc;           // NAN = rest
 		int    base;
 		int    direction; 
 		HumNum duration;
+		string rhythm;
 };
 
 
@@ -4316,7 +4320,8 @@ class Tool_msearch : public HumTool {
 	protected:
 		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchQueryToken>& query);
-		void    fillQuery          (vector<MSearchQueryToken>& query, const string& input);
+		void    fillQuery          (vector<MSearchQueryToken>& query,
+		                            const string& input);
 		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
 		                            vector<MSearchQueryToken>& dpcQuery,
 		                            vector<NoteCell*>& match);
