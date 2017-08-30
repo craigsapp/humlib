@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Aug 30, 2017  3:04:07 AM
+// Last Modified: Wed, Aug 30, 2017  3:25:45 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31085,30 +31085,19 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // all cadence types need at least 3 attacks in other voice
 				continue;
 			}
-			// NB since the ref voice is the one with the suspension, if the 
-			// suspension is in the higher voice (the most common case) then the
-			// harmonic intervals will actually be negative
 			int thisInt = opitch - pitch; // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
-			// cerr << "lineindex: " << lineindex << endl;
-			// cerr << "sliceindex: " << sliceindex << endl;
-			// cerr << "pitch: " << pitch << endl;
-			// cerr << "opitch: " << opitch << endl;
-			// cerr << "int2: " << int2 << endl;
-			// cerr << "oint2: " << oint2 << endl;
-			// cerr << "oint3: " << oint3 << endl;
-			// cerr << "attInd2: " << attInd2 << endl;
-			// cerr << "oattInd2: " << oattInd2 << endl;
-			// cerr << "oattInd3: " << oattInd3 << endl;
-			// cerr << "thisInt: " << thisInt << endl;
-			// cerr << "thisMod7: " << thisMod7 << endl;
-
 			// agent voice has 2 attacks, patient has 3 notes
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
-				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^7xs 1 6sx -2 8xx$"
-				voiceFuncs[j][lineindex2] = "C"; // cantizans
-				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd3) && 
+				(oint2 == -1) && (oint3 == 1)) {
+				if (int2 == -1) { // "^7xs 1 6sx -2 8xx$"
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+				} else if (int2 == 1) { // "^7xs 1 6sx 2 6xx$"
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
+				}
 			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
 				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -5 8xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -31157,11 +31146,15 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // the following cadence types need 4 attacks in other voice
 				continue;
 			}
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
-				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) && 
-				(oint4 == 2)) { // under-third cadence
-				voiceFuncs[j][lineindex2] = "C"; // cantizans
-				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd4) && 
+				(oint2 == -1) && (oint3 == -1) && (oint4 == 2)) {
+				if (int2 == -1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+				} else if (int2 == 1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
+				}
 			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
 				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) && 
 				(oint4 == 2)) { // under-third cadence
@@ -31184,11 +31177,24 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // the following cadence types need 5 attacks in other voice
 				continue;
 			}
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
-				(attInd2 == oattInd5) && (oint2 == -1) && (oint3 == 0) && 
-				(oint4 == -1) && (oint5 == 2)) { // under-third cadence
-				voiceFuncs[j][lineindex2] = "C"; // cantizans
-				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) && 
+				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) {
+				if (int2 == -1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+				} else if (int2 == 1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
+				}
+			} else if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) && 
+				(oint2 == -1) && (oint3 == -1) && (oint4 == 1) && (oint5 == 1)) {
+				if (int2 == -1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
+				} else if (int2 == 1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
+				}
 			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
 				(attInd2 == oattInd5) && (oint2 == -1) && (oint3 == 0) && 
 				(oint4 == -1) && (oint5 == 2)) { // under-third cadence
