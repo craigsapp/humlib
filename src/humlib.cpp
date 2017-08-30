@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 29 00:27:40 PDT 2017
+// Last Modified: Wed, Aug 30, 2017  2:52:20 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31006,7 +31006,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	// HumNum dur;        // duration of current note
 	// HumNum durn;	   // duration of next note
 	double int2;       // diatonic interval to next melodic note
-	// double int3;	   // diatonic interval from next melodic note to following note
+	double int3;	   // diatonic interval from next melodic note to following note
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
 	double oint4;	   // diatonic interval from third to fourth note in other voice
@@ -31041,7 +31041,6 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 		// dur  = attacks[i]->getDuration();
 		// durn = attacks[i+1]->getDuration();
 		int2 = *attacks[i+1] - *attacks[i];
-		// int3 = *attacks[i+2] - *attacks[i+1];
 		sliceindex = attacks[i]->getSliceIndex();
 
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j is the voice index of the other voice
@@ -31111,6 +31110,10 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -5 8xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+			} else if ((thisMod7 == 3) && (int2 == 1) && (attInd2 == oattInd3) && 
+				(oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx 2 3xx$"
+				voiceFuncs[j][lineindex2] = "C"; // cantizans
+				voiceFuncs[vindex][lineindex2] = "b"; // evaded bassizans
 			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd3) && 
 				(oint2 == -1) && (oint3 == 1)) { // "^11xs 1 10sx 8 4xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -31121,9 +31124,9 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 			}
 			
-			// agent voice has 3 attacks, patient has 3 notes. In this block the
-			// perfection is anticipated in the agent.
+			// agent voice has 3 attacks, patient has 3 notes
 			if ((i + 3) < int(attacks.size())) {
+				int3 = *attacks[i+2] - *attacks[i+1];
 				attInd3  = attacks[i+1]->getNextAttackIndex();
 				lineindex3 = attacks[i+2]->getLineIndex();
 				if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
@@ -31136,6 +31139,10 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					(oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -2 5xx$"
 					voiceFuncs[j][lineindex3] = "A"; // altizans
 					voiceFuncs[vindex][lineindex3] = "T"; // tenorizans
+				} else if ((thisMod7 == 3) && (int2 == 2) && (int3 == -1) &&
+					(attInd3 == oattInd3) && (oint2 == -1) && (oint3 == 1)) {
+					voiceFuncs[j][lineindex3] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex3] = "b"; // evaded bassizans
 				}
 			}
 			
