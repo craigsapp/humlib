@@ -167,6 +167,27 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
+		if ((index + i > 0) && dpcQuery[i].base <= 0) {
+
+			// Search by gross contour
+			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else {
+				match.clear();
+				return false;
+			}
+		}
+
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
@@ -237,6 +258,29 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 
 		if (ch == '.') {
 			temp.rhythm += ch;
+		}
+
+		if (ch == '/') {
+			temp.direction = 1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '\\') {
+			temp.direction = -1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '=') {
+			temp.direction = 0;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
 		}
 
 		if ((ch >= 'a' && ch <= 'g')) {

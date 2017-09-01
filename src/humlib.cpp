@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 30 18:09:54 PDT 2017
+// Last Modified: Thu Aug 31 21:34:51 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36108,6 +36108,27 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
+		if ((index + i > 0) && dpcQuery[i].base <= 0) {
+
+			// Search by gross contour
+			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
+				notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else {
+				match.clear();
+				return false;
+			}
+		}
+
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
@@ -36178,6 +36199,29 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 
 		if (ch == '.') {
 			temp.rhythm += ch;
+		}
+
+		if (ch == '/') {
+			temp.direction = 1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '\\') {
+			temp.direction = -1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '=') {
+			temp.direction = 0;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
 		}
 
 		if ((ch >= 'a' && ch <= 'g')) {
