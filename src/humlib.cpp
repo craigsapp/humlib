@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 31 21:34:51 PDT 2017
+// Last Modified: Thu Aug 31 21:49:57 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36108,24 +36108,28 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
-		if ((index + i > 0) && dpcQuery[i].base <= 0) {
-
-			// Search by gross contour
-			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
-				notes[index + i - 1]->getAbsMidiPitch())) {
+		if (dpcQuery[i].base <= 0) {
+			if (i > 0) {
+				// Search by gross contour
+				if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else {
+					match.clear();
+					return false;
+				}
+			} else if (i == 0) {
 				match.push_back(notes[index+i]);
 				continue;
-			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
-				notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
-				continue;
-			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
-				notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
-				continue;
-			} else {
-				match.clear();
-				return false;
 			}
 		}
 

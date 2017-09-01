@@ -167,24 +167,28 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
-		if ((index + i > 0) && dpcQuery[i].base <= 0) {
-
-			// Search by gross contour
-			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
-				notes[index + i - 1]->getAbsMidiPitch())) {
+		if (dpcQuery[i].base <= 0) {
+			if (i > 0) {
+				// Search by gross contour
+				if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
+						notes[index + i - 1]->getAbsMidiPitch())) {
+					match.push_back(notes[index+i]);
+					continue;
+				} else {
+					match.clear();
+					return false;
+				}
+			} else if (i == 0) {
 				match.push_back(notes[index+i]);
 				continue;
-			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
-				notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
-				continue;
-			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
-				notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
-				continue;
-			} else {
-				match.clear();
-				return false;
 			}
 		}
 
