@@ -157,6 +157,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	if ((int)dpcQuery.size() > maxi) {
 		return false;
 	}
+	bool lastIsInterval = false;
 	int interval;
 	bool rhymatch;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
@@ -171,7 +172,9 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
+		// check for gross-contour queries:
 		if (dpcQuery[i].base <= 0) {
+			lastIsInterval = true;
 			// Search by gross contour
 			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
 					notes[index + i - 1]->getAbsMidiPitch())) {
@@ -191,6 +194,14 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			}
 		}
 
+		// Interface between interval moving to pitch:
+		if (lastIsInterval) {
+			i--;
+			match.pop_back();
+			lastIsInterval = false;
+		}
+
+		// Search by pitch/rest
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {

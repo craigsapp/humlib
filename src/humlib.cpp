@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug 31 23:58:46 PDT 2017
+// Last Modified: Sun Sep  3 00:07:26 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36098,6 +36098,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	if ((int)dpcQuery.size() > maxi) {
 		return false;
 	}
+	bool lastIsInterval = false;
 	int interval;
 	bool rhymatch;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
@@ -36112,7 +36113,9 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
+		// check for gross-contour queries:
 		if (dpcQuery[i].base <= 0) {
+			lastIsInterval = true;
 			// Search by gross contour
 			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
 					notes[index + i - 1]->getAbsMidiPitch())) {
@@ -36132,6 +36135,14 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			}
 		}
 
+		// Interface between interval moving to pitch:
+		if (lastIsInterval) {
+			i--;
+			match.pop_back();
+			lastIsInterval = false;
+		}
+
+		// Search by pitch/rest
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
