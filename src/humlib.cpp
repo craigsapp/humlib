@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed, Aug 30, 2017  3:25:45 AM
+// Last Modified: Sun, Sep  3, 2017 11:21:27 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -29889,11 +29889,10 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			return true;
 		}
 	} else if (voiceFuncsQ) { // run cadnetial-voice-function analysis if requested
-		// TODO: make sure this count stuff works with the -V setting too.
-		// if (getBoolean("count")) {
-		// 	printCountAnalysis(voiceFuncs);
-		// 	return false;
-		// }
+		if (getBoolean("count")) {
+			printCountAnalysis(voiceFuncs);
+			return false;
+		}
 		
 		voiceFuncs.resize(grid.getVoiceCount());
 		for (int i=0; i<(int)voiceFuncs.size(); i++) {
@@ -31006,10 +31005,9 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 //
 void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, vector<vector<string> >& voiceFuncs, int vindex) {
-	// HumNum dur;        // duration of current note
-	// HumNum durn;	   // duration of next note
 	double int2;       // diatonic interval to next melodic note
 	double int3;	   // diatonic interval from next melodic note to following note
+	double int4;	   // diatonic interval from note three to note four
 	double oint2;	   // diatonic interval to next melodic note in other voice
 	double oint3;	   // diatonic interval from next melodic note to following note
 	double oint4;	   // diatonic interval from third to fourth note in other voice
@@ -31017,10 +31015,11 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	int lineindex;     // line in original Humdrum file that contains note
 	int lineindex2;	   // line in original Humdrum file that contains note one event later
 	int lineindex3;    // line in original Humdrum file that contains note two events later
-	// int lineindex4;    // line in original Humdrum file content that contains note three events later
+	int lineindex4;    // line in original Humdrum file content that contains note three events later
 	int sliceindex;    // current timepoint in NoteGrid.
 	int attInd2;  	   // line index of ref voice's next attack
 	int attInd3;       // line index of ref voice's attack two events later
+	int attInd4;       // line index of ref voice's attack three events later
 	int oattInd2;      // line index of other voice's next attack
 	int oattInd3;      // line index of other voice's third attack
 	int oattInd4;      // line index of other voice's fourth attack
@@ -31033,16 +31032,12 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 	double opitch5;	   // pitch of fifth note in other voice
 
 	for (int i=1; i<(int)attacks.size()-1; i++) {
-		// lineindexp = attacks[i-1]->getLineIndex();
 		lineindex  = attacks[i]->getLineIndex();
-		// lineindex3 = attacks[i+2]->getLineIndex();
 		// pass over if ref voice is not an agent
 		if ((results[vindex][lineindex] != m_labels[AGENT_BIN]) &&
 			(results[vindex][lineindex] != m_labels[AGENT_TERN])) {
 			continue;
 		}
-		// dur  = attacks[i]->getDuration();
-		// durn = attacks[i+1]->getDuration();
 		int2 = *attacks[i+1] - *attacks[i];
 		sliceindex = attacks[i]->getSliceIndex();
 
@@ -31068,7 +31063,6 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			opitch   = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			lineindex2 = attacks[i+1]->getLineIndex();
 			attInd2  = attacks[i]->getNextAttackIndex();
-			// attInd3  = attacks[i+1]->getNextAttackIndex();
 			oattInd2 = grid.cell(j, sliceindex)->getNextAttackIndex();
 
 			if (oattInd2 > 0) {
@@ -31137,6 +31131,24 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[vindex][lineindex3] = "b"; // evaded bassizans
 				}
 			}
+
+			// agent voice has 4 attacks, patient has 3 notes
+			if ((i + 4) < int(attacks.size())) {
+				int4 = *attacks[i+3] - *attacks[i+2];
+				attInd4  = attacks[i+2]->getNextAttackIndex();
+				lineindex4 = attacks[i+3]->getLineIndex();
+				if ((int2 == -1) && (int3 == 1) && (int4 == 1) && 
+					(attInd4 == oattInd3) && (oint2 == -1) && (oint3 == 1) && 
+					(attInd2 > oattInd2)) {
+					if (thisMod7 == 3) { // ex. Obr1001a m. 85
+						voiceFuncs[j][lineindex4] = "C"; // cantizans
+						voiceFuncs[vindex][lineindex4] = "b"; // ornamented evaded bassizans
+					} else if ((thisMod7 == 6) || (thisMod7 == -1)) { // ex. Obr1001b m. 36
+						voiceFuncs[j][lineindex4] = "C"; // cantizans
+						voiceFuncs[vindex][lineindex4] = "t"; // ornamented evaded tenorizans
+					} 
+				}
+			}
 			
 			// agent voice has 2 attacks, patient has 4 notes
 			if (oattInd4 > 0) {
@@ -31195,21 +31207,27 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
 				}
-			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
-				(attInd2 == oattInd5) && (oint2 == -1) && (oint3 == 0) && 
-				(oint4 == -1) && (oint5 == 2)) { // under-third cadence
-				voiceFuncs[j][lineindex2] = "C"; // cantizans
-				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+			} else if ((thisMod7 == 3) && (attInd2 == oattInd5) && (oint2 == -1) && 
+				(((oint3 == 0) && (oint4 == -1) && (oint5 == 2)) || // under-third cadence
+				 ((oint3 == -1) && (oint4 == 1) && (oint5 == 1)))) { // anticipated resolution phase
+				if ((int2 == -4) || (int2 == 3)) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "B"; // bassizans
+				} else if (int2 == 1) {
+					voiceFuncs[j][lineindex2] = "C"; // cantizans
+					voiceFuncs[vindex][lineindex2] = "b"; // evaded bassizans
+				}
 			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd5) && 
 				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) { // under-third cadence
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
-			} else if ((thisMod7 == 3) && (int2 == -1) && (attInd2 == oattInd5) &&
-				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) { // under-third cadence
+			} else if ((thisMod7 == 3) && (int2 == -1) &&
+				(attInd2 == oattInd5) && (oint2 == -1) &&
+				(((oint3 == 0) && (oint4 == -1) && (oint5 == 2)) || // under-third cadence
+				 ((oint3 == -1) && (oint4 == 1) && (oint5 == 1)))) { // anticipated resolution phase
 				voiceFuncs[j][lineindex2] = "A"; // altizans
 				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 			}
-
 		}
 	}
 }
