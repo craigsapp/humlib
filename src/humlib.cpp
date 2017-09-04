@@ -36116,9 +36116,14 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	if ((int)dpcQuery.size() > maxi) {
 		return false;
 	}
+	bool lastIsInterval = false;
 	int interval;
 	bool rhymatch;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
+		if (dpcQuery[i].anything) {
+			match.push_back(notes[index+i]);
+			continue;
+		}
 		rhymatch = true;
 		if ((!dpcQuery[i].rhythm.empty()) 
 				&& (notes[index+i]->getDuration() != dpcQuery[i].duration)) {
@@ -36126,6 +36131,36 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			rhymatch = false;
 		}
 		
+		// check for gross-contour queries:
+		if (dpcQuery[i].base <= 0) {
+			lastIsInterval = true;
+			// Search by gross contour
+			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
+					notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
+					notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
+					notes[index + i - 1]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i]);
+				continue;
+			} else {
+				match.clear();
+				return false;
+			}
+		}
+
+		// Interface between interval moving to pitch:
+		if (lastIsInterval) {
+			i--;
+			match.pop_back();
+			lastIsInterval = false;
+		}
+
+		// Search by pitch/rest
 		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
@@ -36198,6 +36233,29 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 			temp.rhythm += ch;
 		}
 
+		if (ch == '/') {
+			temp.direction = 1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '\\') {
+			temp.direction = -1;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		} else if (ch == '=') {
+			temp.direction = 0;
+			temp.base = -1;
+			temp.pc = -1;
+			query.push_back(temp);
+			temp.clear();
+			continue;
+		}
+
 		if ((ch >= 'a' && ch <= 'g')) {
 			temp.base = 7;
 			temp.pc = (ch - 'a' + 5) % 7;
@@ -36224,9 +36282,13 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 		query[i].duration = Convert::recipToDuration(query[i].rhythm);
 	}
 
+	if ((!query.empty()) && (query[0].base <= 0)) {
+		temp.clear();
+		temp.anything = true;
+		query.insert(query.begin(), temp);
+	}
 
 }
-
 
 
 

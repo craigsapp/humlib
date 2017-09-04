@@ -4271,33 +4271,40 @@ class Tool_metlev : public HumTool {
 
 class MSearchQueryToken {
 	public:
+
 		MSearchQueryToken(void) {
 			clear();
 		}
+
 		MSearchQueryToken(const MSearchQueryToken& token) {
 			pc        = token.pc;
 			base      = token.base;
 			direction = token.direction;
 			duration  = token.duration;
 			rhythm    = token.rhythm;
+			anything  = token.anything;
 		}
-		MSearchQueryToken& operator=(MSearchQueryToken& token) {
+
+		MSearchQueryToken& operator=(const MSearchQueryToken& token) {
 			if (this == &token) {
-				return token;
+				return *this;
 			}
 			pc        = token.pc;
 			base      = token.base;
 			direction = token.direction;
 			duration  = token.duration;
 			rhythm    = token.rhythm;
+			anything  = token.anything;
 			return *this;
 		}
+
 		void clear(void) {
 			pc        = NAN;
 			base      = 0;
 			direction = 0;
 			duration  = -1;
 			rhythm    = "";
+			anything  = false;
 		}
 
 		double pc;           // NAN = rest
@@ -4305,6 +4312,7 @@ class MSearchQueryToken {
 		int    direction; 
 		HumNum duration;
 		string rhythm;
+		bool   anything;
 };
 
 
