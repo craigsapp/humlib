@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun, Sep  3, 2017 11:21:27 PM
+// Last Modified: Mon Sep  4 22:34:37 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -23519,6 +23519,38 @@ double NoteCell::getAbsDiatonicPitchClass(void) {
 
 
 
+//////////////////////////////
+//
+// NoteCell::getSgnBase40PitchClass --
+//
+
+double NoteCell::getSgnBase40PitchClass(void) {
+	if (Convert::isNaN(m_b40)) {
+		return GRIDREST;
+	} else if (m_b40 < 0) {
+		return -(double)(((int)-m_b40) % 40);
+	} else {
+		return (double)(((int)m_b40) % 40);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getAbsBase40PitchClass --
+//
+
+double NoteCell::getAbsBase40PitchClass(void) {
+	if (Convert::isNaN(m_b40)) {
+		return GRIDREST;
+	} else {
+		return (double)(((int)fabs(m_b40)) % 40);
+	}
+}
+
+
+
 
 //////////////////////////////
 //
@@ -36032,7 +36064,7 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 		// return 1;
 	}
 
-	doAnalysis(infile, grid, query);
+	doSearch(infile, grid, query);
 
 	return 1;
 }
@@ -36041,10 +36073,10 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_msearch::doAnalysis -- do a basic melodic analysis of all parts.
+// Tool_msearch::doSearch -- do a basic melodic analysis of all parts.
 //
 
-void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
+void Tool_msearch::doSearch(HumdrumFile& infile, NoteGrid& grid,
 		vector<MSearchQueryToken>& query) {
 
 	vector<vector<NoteCell*>> attacks;
@@ -36072,6 +36104,7 @@ void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
 		infile.createLinesFromTokens();
 	}
 }
+
 
 
 //////////////////////////////
@@ -36119,14 +36152,15 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	bool lastIsInterval = false;
 	int interval;
 	bool rhymatch;
+	int c = 0;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
 		if (dpcQuery[i].anything) {
-			match.push_back(notes[index+i]);
+			match.push_back(notes[index+i-c]);
 			continue;
 		}
 		rhymatch = true;
 		if ((!dpcQuery[i].rhythm.empty()) 
-				&& (notes[index+i]->getDuration() != dpcQuery[i].duration)) {
+				&& (notes[index+i-c]->getDuration() != dpcQuery[i].duration)) {
 			// duration needs to match query, but does not
 			rhymatch = false;
 		}
@@ -36135,17 +36169,17 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		if (dpcQuery[i].base <= 0) {
 			lastIsInterval = true;
 			// Search by gross contour
-			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			if ((dpcQuery[i].direction == 1) && (notes[index+i-c]->getAbsMidiPitch() >
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
-			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			} else if ((dpcQuery[i].direction == -1) && (notes[index+i-c]->getAbsMidiPitch() <
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
-			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			} else if ((dpcQuery[i].direction == 0) && (notes[index+i-c]->getAbsMidiPitch() ==
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
 			} else {
 				match.clear();
@@ -36155,18 +36189,45 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 		// Interface between interval moving to pitch:
 		if (lastIsInterval) {
-			i--;
+			c++;
 			match.pop_back();
 			lastIsInterval = false;
 		}
 
 		// Search by pitch/rest
-		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
+		if (dpcQuery[i].base == 40) {
+			if ((Convert::isNaN(notes[index+i-c]->getAbsBase40PitchClass()) &&
+					Convert::isNaN(dpcQuery[i].pc)) ||
+					(notes[index+i-c]->getAbsBase40PitchClass() == dpcQuery[i].pc)) {
+				if ((index+i-c>0) && dpcQuery[i].direction) {
+					interval = notes[index+i-c]->getAbsBase40Pitch() -
+							notes[index+i-1-c]->getAbsBase40Pitch();
+					if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
+						match.clear();
+						return false;
+					}
+					if ((dpcQuery[i].direction < 0) && (interval >= 0)) {
+						match.clear();
+						return false;
+					}
+				}
+				if (rhymatch) {
+					match.push_back(notes[index+i-c]);
+				} else {
+					match.clear();
+					return false;
+				}
+			} else {
+				// not a match
+				match.clear();
+				return false;
+			}
+		} else if ((Convert::isNaN(notes[index+i-c]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
-				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
-			if ((index + i>0) && dpcQuery[i].direction) {
-				interval = notes[index + i]->getAbsBase40Pitch() -
-						notes[index + i - 1]->getAbsBase40Pitch();
+				(notes[index+i-c]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
+			if ((index+i-c>0) && dpcQuery[i].direction) {
+				interval = notes[index+i-c]->getAbsBase40Pitch() -
+						notes[index+i-1-c]->getAbsBase40Pitch();
 				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 					match.clear();
 					return false;
@@ -36177,11 +36238,12 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 				}
 			}
 			if (rhymatch) {
-				match.push_back(notes[index+i]);
+				match.push_back(notes[index+i-c]);
 			} else {
 				match.clear();
 				return false;
 			}
+
 		} else {
 			// not a match
 			match.clear();
@@ -36191,7 +36253,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 	// Add extra token for marking tied notes at end of match
 	if (index + (int)dpcQuery.size() < (int)notes.size()) {
-		match.push_back(notes[index + (int)dpcQuery.size()]);
+		match.push_back(notes[index + (int)dpcQuery.size() - c]);
 	} else {
 		match.push_back(NULL);
 	}
@@ -36270,7 +36332,18 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 			continue;
 		}
 
-		// deal with accidentals here
+		// accidentals:
+		if ((!query.empty()) && (ch == 'n') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = Convert::base7ToBase40(query.back().pc + 70) % 40;
+		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
+		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) - 1) % 40;
+		}
+		// deal with double sharps and double flats here
 	}
 
 

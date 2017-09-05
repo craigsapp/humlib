@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun, Sep  3, 2017 11:21:27 PM
+// Last Modified: Mon Sep  4 22:34:37 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2270,6 +2270,9 @@ class NoteCell {
 		double getSgnDiatonicPitchClass(void);
 		double getAbsDiatonicPitchClass(void);
 
+		double getSgnBase40PitchClass(void);
+		double getAbsBase40PitchClass(void);
+
 		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
 		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
 		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }
@@ -4326,7 +4329,7 @@ class Tool_msearch : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
+		void    doSearch           (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchQueryToken>& query);
 		void    fillQuery          (vector<MSearchQueryToken>& query,
 		                            const string& input);
