@@ -78,7 +78,7 @@ class Tool_msearch : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
+		void    doSearch           (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchQueryToken>& query);
 		void    fillQuery          (vector<MSearchQueryToken>& query,
 		                            const string& input);
