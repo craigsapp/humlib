@@ -29,6 +29,7 @@ namespace hum {
 Tool_msearch::Tool_msearch(void) {
 	define("debug=b",       "diatonic search");
 	define("q|query=s:c d e f g",  "query string");
+	define("t|text=s:",  "lyrical text query string");
 	define("x|cross=b",     "search across parts");
 }
 
@@ -64,16 +65,24 @@ bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_msearch::run(HumdrumFile& infile) {
 	NoteGrid grid(infile);
-
-	vector<MSearchQueryToken> query;
-	fillQuery(query, getString("query"));
-
 	if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
 		// return 1;
 	}
 
-	doAnalysis(infile, grid, query);
+	if (getBoolean("text")) {
+		m_text = getString("text");
+	}
+
+	if (m_text.empty()) {
+		vector<MSearchQueryToken> query;
+		fillMusicQuery(query, getString("query"));
+		doMusicSearch(infile, grid, query);
+	} else {
+		vector<MSearchTextQuery> query;
+		fillTextQuery(query, getString("text"));
+		doTextSearch(infile, grid, query);
+	}
 
 	return 1;
 }
@@ -82,10 +91,107 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_msearch::doAnalysis -- do a basic melodic analysis of all parts.
+// Tool_msearch::fillWords --
 //
 
-void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
+void Tool_msearch::fillWords(HumdrumFile& infile, vector<TextInfo*>& words) {
+	vector<HTp> textspines;
+	infile.getSpineStartList(textspines, "**text");
+	for (int i=0; i<(int)textspines.size(); i++) {
+		fillWordsForTrack(words, textspines[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::fillWordsForTrack --
+//
+
+void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
+		HTp starttoken) {
+	HTp tok = starttoken->getNextNNDT();
+	while (tok != NULL) {
+		if (tok->empty()) {
+			tok = tok->getNextNNDT();
+			continue;
+		}
+		if (tok->at(0) == '-') {
+			// append a syllable to the end of previous word
+			if (!words.empty()) {
+				words.back()->fullword += tok->substr(1, string::npos);
+				if (words.back()->fullword.back() == '-') {
+					words.back()->fullword.pop_back();
+				}
+			}
+			tok = tok->getNextNNDT();
+			continue;
+		} else {
+			// start a new word
+			TextInfo* temp = new TextInfo();
+			temp->nexttoken = NULL;
+			if (!words.empty()) {
+				words.back()->nexttoken = tok;
+			}
+			temp->fullword = *tok;
+			if (!temp->fullword.empty()) {
+				if (temp->fullword.back() == '-') {
+					temp->fullword.pop_back();
+				}
+			}
+			temp->starttoken = tok;
+			words.push_back(temp);
+			tok = tok->getNextNNDT();
+			continue;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::doTextSearch -- do a basic text search of all parts.
+//
+
+void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
+		vector<MSearchTextQuery>& query) {
+
+	vector<TextInfo*> words;
+	words.reserve(10000);
+	fillWords(infile, words);
+	int tcount = 0;
+
+	HumRegex hre;
+	for (int i=0; i<(int)query.size(); i++) {
+		for (int j=0; j<(int)words.size(); j++) {
+			if (hre.search(words[j]->fullword, query[i].word, "i")) {
+				tcount++;
+				markTextMatch(infile, *words[j]);
+			}
+		}
+	}
+
+	if (tcount) {
+		infile.appendLine("!!!RDF**kern: @ = marked note");
+		infile.createLinesFromTokens();
+	}
+
+	for (int i=0; i<(int)words.size(); i++) {
+		delete words[i];
+		words[i] = NULL;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::doMusicSearch -- do a basic melodic search of all parts.
+//
+
+void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		vector<MSearchQueryToken>& query) {
 
 	vector<vector<NoteCell*>> attacks;
@@ -113,6 +219,7 @@ void Tool_msearch::doAnalysis(HumdrumFile& infile, NoteGrid& grid,
 		infile.createLinesFromTokens();
 	}
 }
+
 
 
 //////////////////////////////
@@ -146,6 +253,53 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 
 //////////////////////////////
 //
+// Tool_msearch::markTextMatch -- assumes monophonic music.
+//
+
+void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
+// ggg
+	HTp mstart = word.starttoken;
+	while (mstart && !mstart->isKern()) {
+		mstart = mstart->getPreviousFieldToken();
+	}
+	HTp mend = word.nexttoken;
+	while (mend && !mend->isKern()) {
+		mend = mend->getPreviousFieldToken();
+	}
+
+	if (mstart) {
+		if (!mstart->isData()) {
+			return;
+		} else if (mstart->isNull()) {
+			return;
+		}
+	}
+
+	if (mend) {
+		if (!mend->isData()) {
+			mend = NULL;
+		} else if (mend->isNull()) {
+			mend = NULL;
+		}
+	}
+
+	HTp tok = mstart;
+	string text;
+	while (tok && (tok != mend)) {
+		if (!tok->isData()) {
+			return;
+		}
+		text = tok->getText();
+		text += '@';
+		tok->setText(text);
+		tok = tok->getNextNNDT();
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_msearch::checkForMatchDiatonicPC --
 //
 
@@ -160,14 +314,15 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	bool lastIsInterval = false;
 	int interval;
 	bool rhymatch;
+	int c = 0;
 	for (int i=0; i<(int)dpcQuery.size(); i++) {
 		if (dpcQuery[i].anything) {
-			match.push_back(notes[index+i]);
+			match.push_back(notes[index+i-c]);
 			continue;
 		}
 		rhymatch = true;
 		if ((!dpcQuery[i].rhythm.empty()) 
-				&& (notes[index+i]->getDuration() != dpcQuery[i].duration)) {
+				&& (notes[index+i-c]->getDuration() != dpcQuery[i].duration)) {
 			// duration needs to match query, but does not
 			rhymatch = false;
 		}
@@ -176,17 +331,17 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		if (dpcQuery[i].base <= 0) {
 			lastIsInterval = true;
 			// Search by gross contour
-			if ((dpcQuery[i].direction == 1) && (notes[index + i]->getAbsMidiPitch() >
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			if ((dpcQuery[i].direction == 1) && (notes[index+i-c]->getAbsMidiPitch() >
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
-			} else if ((dpcQuery[i].direction == -1) && (notes[index + i]->getAbsMidiPitch() <
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			} else if ((dpcQuery[i].direction == -1) && (notes[index+i-c]->getAbsMidiPitch() <
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
-			} else if ((dpcQuery[i].direction == 0) && (notes[index + i]->getAbsMidiPitch() ==
-					notes[index + i - 1]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i]);
+			} else if ((dpcQuery[i].direction == 0) && (notes[index+i-c]->getAbsMidiPitch() ==
+					notes[index+i-1-c]->getAbsMidiPitch())) {
+				match.push_back(notes[index+i-c]);
 				continue;
 			} else {
 				match.clear();
@@ -196,18 +351,45 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 		// Interface between interval moving to pitch:
 		if (lastIsInterval) {
-			i--;
+			c++;
 			match.pop_back();
 			lastIsInterval = false;
 		}
 
 		// Search by pitch/rest
-		if ((Convert::isNaN(notes[index+i]->getAbsDiatonicPitchClass()) &&
+		if (dpcQuery[i].base == 40) {
+			if ((Convert::isNaN(notes[index+i-c]->getAbsBase40PitchClass()) &&
+					Convert::isNaN(dpcQuery[i].pc)) ||
+					(notes[index+i-c]->getAbsBase40PitchClass() == dpcQuery[i].pc)) {
+				if ((index+i-c>0) && dpcQuery[i].direction) {
+					interval = notes[index+i-c]->getAbsBase40Pitch() -
+							notes[index+i-1-c]->getAbsBase40Pitch();
+					if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
+						match.clear();
+						return false;
+					}
+					if ((dpcQuery[i].direction < 0) && (interval >= 0)) {
+						match.clear();
+						return false;
+					}
+				}
+				if (rhymatch) {
+					match.push_back(notes[index+i-c]);
+				} else {
+					match.clear();
+					return false;
+				}
+			} else {
+				// not a match
+				match.clear();
+				return false;
+			}
+		} else if ((Convert::isNaN(notes[index+i-c]->getAbsDiatonicPitchClass()) &&
 				Convert::isNaN(dpcQuery[i].pc)) ||
-				(notes[index + i]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
-			if ((index + i>0) && dpcQuery[i].direction) {
-				interval = notes[index + i]->getAbsBase40Pitch() -
-						notes[index + i - 1]->getAbsBase40Pitch();
+				(notes[index+i-c]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
+			if ((index+i-c>0) && dpcQuery[i].direction) {
+				interval = notes[index+i-c]->getAbsBase40Pitch() -
+						notes[index+i-1-c]->getAbsBase40Pitch();
 				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 					match.clear();
 					return false;
@@ -218,11 +400,12 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 				}
 			}
 			if (rhymatch) {
-				match.push_back(notes[index+i]);
+				match.push_back(notes[index+i-c]);
 			} else {
 				match.clear();
 				return false;
 			}
+
 		} else {
 			// not a match
 			match.clear();
@@ -232,7 +415,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 	// Add extra token for marking tied notes at end of match
 	if (index + (int)dpcQuery.size() < (int)notes.size()) {
-		match.push_back(notes[index + (int)dpcQuery.size()]);
+		match.push_back(notes[index + (int)dpcQuery.size() - c]);
 	} else {
 		match.push_back(NULL);
 	}
@@ -244,10 +427,40 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 //////////////////////////////
 //
-// Tool_msearch::fillQuery -- 
+// Tool_msearch::fillTextQuery -- 
 //
 
-void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
+void Tool_msearch::fillTextQuery(vector<MSearchTextQuery>& query,
+		const string& input) {
+	query.clear();
+	bool inquote = false;
+
+	query.resize(1);
+
+	for (int i=0; i<(int)input.size(); i++) {
+		if (input[i] == '"') {
+			inquote = !inquote;
+			query.resize(query.size() + 1);
+			continue;
+		}
+		if (isspace(input[i])) {
+			query.resize(query.size() + 1);
+		}
+		query.back().word.push_back(input[i]);
+		if (inquote) {
+			query.back().link = true;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::fillMusicQuery -- 
+//
+
+void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 		const string& input) {
 	query.clear();
 	char ch;
@@ -311,7 +524,18 @@ void Tool_msearch::fillQuery(vector<MSearchQueryToken>& query,
 			continue;
 		}
 
-		// deal with accidentals here
+		// accidentals:
+		if ((!query.empty()) && (ch == 'n') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = Convert::base7ToBase40(query.back().pc + 70) % 40;
+		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
+		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
+			query.back().base = 40;
+			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) - 1) % 40;
+		}
+		// deal with double sharps and double flats here
 	}
 
 

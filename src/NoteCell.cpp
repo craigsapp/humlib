@@ -368,6 +368,38 @@ double NoteCell::getAbsDiatonicPitchClass(void) {
 
 
 
+//////////////////////////////
+//
+// NoteCell::getSgnBase40PitchClass --
+//
+
+double NoteCell::getSgnBase40PitchClass(void) {
+	if (Convert::isNaN(m_b40)) {
+		return GRIDREST;
+	} else if (m_b40 < 0) {
+		return -(double)(((int)-m_b40) % 40);
+	} else {
+		return (double)(((int)m_b40) % 40);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// NoteCell::getAbsBase40PitchClass --
+//
+
+double NoteCell::getAbsBase40PitchClass(void) {
+	if (Convert::isNaN(m_b40)) {
+		return GRIDREST;
+	} else {
+		return (double)(((int)fabs(m_b40)) % 40);
+	}
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

@@ -2270,6 +2270,9 @@ class NoteCell {
 		double getSgnDiatonicPitchClass(void);
 		double getAbsDiatonicPitchClass(void);
 
+		double getSgnBase40PitchClass(void);
+		double getAbsBase40PitchClass(void);
+
 		double getAbsDiatonicPitch  (void) { return fabs(m_b7);          }
 		double getAbsMidiPitch      (void) { return fabs(m_b12);         }
 		double getAbsBase40Pitch    (void) { return fabs(m_b40);         }
@@ -4271,11 +4274,9 @@ class Tool_metlev : public HumTool {
 
 class MSearchQueryToken {
 	public:
-
 		MSearchQueryToken(void) {
 			clear();
 		}
-
 		MSearchQueryToken(const MSearchQueryToken& token) {
 			pc        = token.pc;
 			base      = token.base;
@@ -4284,7 +4285,6 @@ class MSearchQueryToken {
 			rhythm    = token.rhythm;
 			anything  = token.anything;
 		}
-
 		MSearchQueryToken& operator=(const MSearchQueryToken& token) {
 			if (this == &token) {
 				return *this;
@@ -4297,7 +4297,6 @@ class MSearchQueryToken {
 			anything  = token.anything;
 			return *this;
 		}
-
 		void clear(void) {
 			pc        = NAN;
 			base      = 0;
@@ -4306,13 +4305,69 @@ class MSearchQueryToken {
 			rhythm    = "";
 			anything  = false;
 		}
-
 		double pc;           // NAN = rest
 		int    base;
 		int    direction; 
 		HumNum duration;
 		string rhythm;
 		bool   anything;
+};
+
+
+
+class MSearchTextQuery {
+	public:
+		MSearchTextQuery(void) {
+			clear();
+		}
+		MSearchTextQuery(const MSearchTextQuery& token) {
+			word = token.word;
+			link = token.link;
+		}
+		MSearchTextQuery& operator=(const MSearchTextQuery& token) {
+			if (this == &token) {
+				return *this;
+			}
+			word = token.word;
+			link = token.link;
+			return *this;
+		}
+		void clear(void) {
+			word.clear();
+			link = false;
+		}
+		string word;
+		bool link = false;
+};
+
+
+class TextInfo {
+	public:
+		TextInfo(void) {
+			clear();
+		}
+		TextInfo(const TextInfo& info) {
+			fullword = info.fullword;
+			starttoken = info.starttoken;
+			nexttoken = info.nexttoken;
+		}
+		TextInfo& operator=(const TextInfo& info) {
+			if (this == &info) {
+				return *this;
+			}
+			fullword = info.fullword;
+			starttoken = info.starttoken;
+			nexttoken = info.nexttoken;
+			return *this;
+		}
+		void clear(void) {
+			fullword.clear();
+			starttoken = NULL;
+			nexttoken = NULL;
+		}
+		string fullword;
+		HTp starttoken;
+		HTp nexttoken;
 };
 
 
@@ -4326,17 +4381,28 @@ class Tool_msearch : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    doAnalysis         (HumdrumFile& infile, NoteGrid& grid,
+		void    doMusicSearch      (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchQueryToken>& query);
-		void    fillQuery          (vector<MSearchQueryToken>& query,
+		void    doTextSearch       (HumdrumFile& infile, NoteGrid& grid,
+		                            vector<MSearchTextQuery>& query);
+		void    fillMusicQuery     (vector<MSearchQueryToken>& query,
+		                            const string& input);
+		void    fillTextQuery      (vector<MSearchTextQuery>& query,
 		                            const string& input);
 		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
 		                            vector<MSearchQueryToken>& dpcQuery,
 		                            vector<NoteCell*>& match);
-		void     markMatch         (HumdrumFile& infile, vector<NoteCell*>& match);
+		void    markMatch          (HumdrumFile& infile,
+		                            vector<NoteCell*>& match);
+		void    markTextMatch      (HumdrumFile& infile, TextInfo& word);
+		void    fillWords          (HumdrumFile& infile,
+		                            vector<TextInfo*>& words);
+		void    fillWordsForTrack  (vector<TextInfo*>& words,
+		                            HTp starttoken);
 
 	private:
 	 	vector<HTp> m_kernspines;
+		string      m_text;
 };
 
 

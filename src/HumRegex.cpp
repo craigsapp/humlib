@@ -441,9 +441,9 @@ string& HumRegex::tr(string& input, const string& from, const string& to) {
 	for (int i=0; i<(int)trans.size(); i++) {
 		trans[i] = (char)i;
 	}
-	int minmax = from.size();
+	int minmax = (int)from.size();
 	if (to.size() < from.size()) {
-		minmax = to.size();
+		minmax = (int)to.size();
 	}
 	
 	for (int i=0; i<minmax; i++) {

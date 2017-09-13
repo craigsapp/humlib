@@ -259,7 +259,7 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 //
 
 void Tool_esac2hum::chopExtraInfo(char* holdbuffer) {
-	int length = strlen(holdbuffer);
+	int length = (int)strlen(holdbuffer);
 	int i;
 	int spacecount = 0;
 	for (i=length-2; i>=0; i--) {
@@ -497,7 +497,7 @@ void Tool_esac2hum::cleanupLyrics(vector<string>& lyrics) {
 	int i, j, m;
 	int lastsyl = 0;
 	for (i=0; i<(int)lyrics.size(); i++) {
-		length = lyrics[i].size();
+		length = (int)lyrics[i].size();
 		for (j=0; j<length; j++) {
 			if (lyrics[i][j] == '_') {
 				lyrics[i][j] = ' ';
@@ -524,7 +524,7 @@ void Tool_esac2hum::cleanupLyrics(vector<string>& lyrics) {
 					}
 				}
 				if (lastsyl >= 0) {
-					length2 = lyrics[lastsyl].size();
+					length2 = (int)lyrics[lastsyl].size();
 					if (lyrics[lastsyl][length2-1] == '-') {
 						for (j=0; j<=length; j++) {
 							lyrics[i][length - j + 1] = lyrics[i][length - j];
@@ -538,7 +538,7 @@ void Tool_esac2hum::cleanupLyrics(vector<string>& lyrics) {
 		// avoid *'s on the start of lyrics by placing a space before
 		// them if they exist.
 		if (lyrics[i][0] == '*') {
-			length = lyrics[i].size();
+			length = (int)lyrics[i].size();
 			for (j=0; j<=length; j++) {
 				lyrics[i][length - j + 1] = lyrics[i][length - j];
 			}
@@ -548,7 +548,7 @@ void Tool_esac2hum::cleanupLyrics(vector<string>& lyrics) {
 		// avoid !'s on the start of lyrics by placing a space before
 		// them if they exist.
 		if (lyrics[i][0] == '!') {
-			length = lyrics[i].size();
+			length = (int)lyrics[i].size();
 			for (j=0; j<=length; j++) {
 				lyrics[i][length - j + 1] = lyrics[i][length - j];
 			}
@@ -573,7 +573,7 @@ void Tool_esac2hum::getLyrics(vector<string>& lyrics, const string& buffer) {
 	int zero2 = 0;
 	zero2 = zero1 + zero2;
 
-	int length = buffer.size();
+	int length = (int)buffer.size();
 	int i;
 
 	i = 0;
@@ -607,7 +607,7 @@ bool Tool_esac2hum::placeLyricPhrase(vector<NoteData>& songdata, vector<string>&
 	int start = 0;
 	int found = 0;
 
-	if (lyrics.size() == 0) {
+	if (lyrics.empty()) {
 		return true;
 	}
 
@@ -758,7 +758,7 @@ bool Tool_esac2hum::printTitleInfo(vector<string>& song, ostream& out) {
 	string buffer;
 	buffer = song[start].substr(4);
 	if (buffer.back() == ']') {
-		buffer.resize(buffer.size() - 1);
+		buffer.resize((int)buffer.size() - 1);
 	}
 
 	out << "!!!OTL: ";
@@ -1581,7 +1581,7 @@ bool Tool_esac2hum::getKeyInfo(vector<string>& song, string& key, double& mindur
 				cerr << "Expected ] as last character but found " << meter.back() << endl;
 				return false;
 			} else {
-				meter.resize(meter.size() - 1);
+				meter.resize((int)meter.size() - 1);
 			}
 			return true;
 		}

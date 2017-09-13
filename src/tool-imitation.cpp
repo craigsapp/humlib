@@ -377,7 +377,7 @@ void Tool_imitation::markedTiedNotes(vector<HTp>& tokens) {
 int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
 		vector<double>& v1i, int starti, int count) {
 
-	int endi = starti + count - m_intervals.size();
+	int endi = starti + count - (int)m_intervals.size();
 	for (int i=starti; i<endi; i++) {
 		for (int j=0; j<(int)m_intervals.size(); j++) {
 			if (m_intervals[j] != v1i[i+j]) {
