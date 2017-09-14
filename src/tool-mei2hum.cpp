@@ -100,7 +100,7 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	if (m_recipQ) {
 		outdata.enableRecipSpine();
 	}
-	
+
 	HumNum systemstamp = 0;  // timestamp for music.
 	systemstamp = parseScore(outdata, score, systemstamp);
 
@@ -143,7 +143,6 @@ HumNum Tool_mei2hum::parseScore(HumGrid& outdata, xml_node score, HumNum startti
 	vector<xml_node> children;
 	getChildrenVector(children, score);
 
-
 	for (xml_node item : children) {
 		string nodename = item.name();
 		if (nodename == "scoreDef") {
@@ -175,11 +174,15 @@ void Tool_mei2hum::parseScoreDef(HumGrid& outdata, xml_node scoredef,
 		return;
 	}
 
-	m_scoredef.clear();
+	if (m_scoredef.global.timestamp == starttime) {
+		m_scoredef.clear();
+	}
 	m_scoredef.global.timestamp = starttime;
 
 	vector<xml_node> children;
 	getChildrenVector(children, scoredef);
+
+	fillWithStaffDefAttributes(m_scoredef.global, scoredef);
 
 	for (xml_node item : children) {
 		string nodename = item.name();
@@ -192,7 +195,7 @@ void Tool_mei2hum::parseScoreDef(HumGrid& outdata, xml_node scoredef,
 			cerr << " elements";
 		}
 	}
-	
+
 }
 
 
@@ -204,7 +207,6 @@ void Tool_mei2hum::parseScoreDef(HumGrid& outdata, xml_node scoredef,
 
 void Tool_mei2hum::processStaffGrp(HumGrid& outdata, xml_node staffgrp,
 		HumNum starttime) {
-	cerr << "\tProcessing staffgrp " << endl;
 
 	if (!staffgrp) {
 		return;
@@ -227,7 +229,7 @@ void Tool_mei2hum::processStaffGrp(HumGrid& outdata, xml_node staffgrp,
 			cerr << " elements";
 		}
 	}
-	
+
 }
 
 
@@ -239,7 +241,6 @@ void Tool_mei2hum::processStaffGrp(HumGrid& outdata, xml_node staffgrp,
 
 void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
 		HumNum starttime) {
-	cerr << "\t\tProcessing staffdef " << endl;
 
 	if (!staffdef) {
 		return;
@@ -248,13 +249,53 @@ void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
 		return;
 	}
 
+
+	string staffnum = staffdef.attribute("n").value();
+	if (staffnum.empty()) {
+		// no staffDef@n so cannot process.
+		return;
+	}
+
+	int num = stoi(staffnum);
+	if (num < 1) {
+		// to small
+		return;
+	}
+	if (num > 1000) {
+		// too large
+		return;
+	}
+
+	m_scoredef.minresize(num);
+
+	cerr << "STAFF " << num << endl;
+
+	m_scoredef.staves[num].clear();
+	m_scoredef.staves[num] = m_scoredef.global;
+
+	fillWithStaffDefAttributes(m_scoredef.staves[num], staffdef);
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::fillWithStaffDefAttributes --
+//
+
+void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffdef& staffinfo,
+		xml_node element) {
+
 	string clefshape;
 	string clefline;
 	string metercount;
 	string meterunit;
 	string staffnum;
+	string keysig;
+	string midibpm;
 
-	for (auto atti = staffdef.attributes_begin(); atti != staffdef.attributes_end();
+	for (auto atti = element.attributes_begin(); atti != element.attributes_end();
 				atti++) {
 		string attname = atti->name();
 		if (attname == "clef.shape") {
@@ -265,16 +306,56 @@ void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
 			metercount = atti->value();
 		} else if (attname == "meter.unit") {
 			meterunit = atti->value();
-		} else if (attname == "n") {
-			staffnum = atti->value();
+		} else if (attname == "key.sig") {
+			keysig = atti->value();
+		} else if (attname == "midi.bpm") {
+			midibpm = atti->value();
 		}
 	}
 
 	if ((!clefshape.empty()) && (!clefline.empty())) {
-		cerr << "CLEF IS *clef" << clefshape << clefline << endl;
+		staffinfo.clef = clefshape + clefline;
+		cerr << "\tCLEF IS *clef" << staffinfo.clef << endl;
 	}
 	if ((!metercount.empty()) && (!meterunit.empty())) {
-		cerr << "TIMESIG IS *M" << metercount << "/" << meterunit << endl;
+		staffinfo.timesig = "*M" + metercount + "/" + meterunit;
+		cerr << "\tTIMESIG IS " << staffinfo.timesig << endl;
+	}
+	if (!keysig.empty()) {
+		int count = stoi(keysig);
+		int accid = 0;
+		if (keysig.find("s") != string::npos) {
+			accid = +1;
+		} else if (keysig.find("f") != string::npos) {
+			accid = -1;
+		}
+
+		if (accid > 0) {
+			switch (count) {
+				case 1: staffinfo.keysig = "*k[f#]";             break;
+				case 2: staffinfo.keysig = "*k[f#c#]";           break;
+				case 3: staffinfo.keysig = "*k[f#c#g#]";         break;
+				case 4: staffinfo.keysig = "*k[f#c#g#d#]";       break;
+				case 5: staffinfo.keysig = "*k[f#c#g#d#a#]";     break;
+				case 6: staffinfo.keysig = "*k[f#c#g#d#a#e#]";   break;
+				case 7: staffinfo.keysig = "*k[f#c#g#d#a#e#b#]"; break;
+			}
+		} else if (accid < 0) {
+			switch (count) {
+				case 1: staffinfo.keysig = "*k[b-]";             break;
+				case 2: staffinfo.keysig = "*k[b-e-]";           break;
+				case 3: staffinfo.keysig = "*k[b-e-a-]";         break;
+				case 4: staffinfo.keysig = "*k[b-e-a-d-]";       break;
+				case 5: staffinfo.keysig = "*k[b-e-a-d-g-]";     break;
+				case 6: staffinfo.keysig = "*k[b-e-a-d-g-c-]";   break;
+				case 7: staffinfo.keysig = "*k[b-e-a-d-g-c-f-]"; break;
+			}
+		}
+		cerr << "\tKEYSIG IS " << staffinfo.keysig << endl;
+	}
+	if (!midibpm.empty()) {
+		staffinfo.midibpm = "*MM" + midibpm;
+		cerr << "\tTEMPO IS " << staffinfo.midibpm << endl;
 	}
 
 }
@@ -295,9 +376,101 @@ HumNum Tool_mei2hum::parseSection(HumGrid& outdata, xml_node section,
 		return starttime;
 	}
 
+	vector<xml_node> children;
+	getChildrenVector(children, section);
 	cerr << "PARSING SECTION " << endl;
 
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		cerr << "\tPARSING section/" << nodename << endl;
+		if (nodename == "section") {
+			starttime = parseSection(outdata, children[i], starttime);
+		} else if (nodename == "measure") {
+			starttime = parseMeasure(outdata, children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse element " << nodename << endl;
+		}
+	}
+
 	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseMeasure --
+//
+
+HumNum Tool_mei2hum::parseMeasure(HumGrid& outdata, xml_node measure, HumNum starttime) {
+	cerr << "\tparsing MEASURE" << endl;
+
+	vector<xml_node> children;
+	getChildrenVector(children, measure);
+cerr << "CHILDREN SIZE " << children.size() << endl;
+
+	vector<HumNum> durations(children.size(), 0);
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "staff") {
+			durations[i] = parseStaff(outdata, children[i], starttime);
+		} else {
+			cerr << "Do not know how to parse measure/" << nodename << endl;
+		}
+	}
+
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseStaff --
+//
+
+HumNum Tool_mei2hum::parseStaff(HumGrid& outdata, xml_node staff, HumNum starttime) {
+	cerr << "PARSING STAFF" << endl;
+
+	vector<xml_node> children;
+	getChildrenVector(children, staff);
+
+	vector<HumNum> durations(children.size(), 0);
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "layer") {
+			durations[i] = parseLayer(outdata, children[i], starttime);
+		} else {
+			cerr << "Do not know how to parse measure/staff/" << nodename << endl;
+		}
+	}
+
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseLayer --
+//
+
+HumNum Tool_mei2hum::parseLayer(HumGrid& outdata, xml_node layer, HumNum starttime) {
+	cerr << "PARSING LAYER" << endl;
+
+	vector<xml_node> children;
+	getChildrenVector(children, layer);
+
+	vector<HumNum> durations(children.size(), 0);
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		cerr << "processing measure/staff/layer/" << nodename << endl;
+	}
+
+	return 0;
 }
 
 
