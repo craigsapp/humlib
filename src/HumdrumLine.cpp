@@ -1539,7 +1539,7 @@ int HumdrumLine::addLinkedParameter(HTp token) {
 	}
 
 	m_linkedParameters.push_back(token);
-	return m_linkedParameters.size() - 1;
+	return (int)m_linkedParameters.size() - 1;
 }
 
 

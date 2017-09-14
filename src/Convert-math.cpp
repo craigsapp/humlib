@@ -168,7 +168,7 @@ int Convert::romanNumeralToInteger(const string& roman) {
 	int rdigit;
 	int sum = 0;
 	char previous='_';
-	for (int i=(roman.length()-1); i>=0; i--) {
+	for (int i=(int)roman.length()-1; i>=0; i--) {
 		switch (roman[i]) {
 			case 'I': case 'i': rdigit =    1; break;
 			case 'V': case 'v': rdigit =    5; break;
