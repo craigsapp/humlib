@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  5 16:30:05 PDT 2017
+// Last Modified: Wed Sep 13 18:39:20 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4249,6 +4249,67 @@ class Tool_imitation : public HumTool {
 		char m_marker = '@';
 		static int Enumerator;
 };
+
+
+class mei_staffdef {
+	public:
+		HumNum timestamp;
+		string clef;       // such as *clefG2
+		string timesig;    // such as *M4/4
+		string tempo;      // such as *MM120
+		void clear(void) {
+			clef.clear();
+			timesig.clear();
+		}
+};
+
+class mei_scoredef {
+	public:
+		mei_staffdef global;
+		vector<mei_staffdef> staves;
+		void clear(void) {
+			global.clear();
+			staves.clear(); // or clear the contents of each staff...
+		}
+};
+
+class Tool_mei2hum : public HumTool {
+	public:
+		        Tool_mei2hum    (void);
+		       ~Tool_mei2hum    () {}
+
+		bool    convertFile          (ostream& out, const char* filename);
+		bool    convert              (ostream& out, xml_document& infile);
+		bool    convert              (ostream& out, const char* input);
+		bool    convert              (ostream& out, istream& input);
+
+		void    setOptions           (int argc, char** argv);
+		void    setOptions           (const vector<string>& argvlist);
+		Options getOptionDefinitions (void);
+
+	protected:
+		void   initialize           (void);
+		HumNum parseScore           (HumGrid& outdata, xml_node score,
+		                             HumNum starttime);
+		void   getChildrenVector    (vector<xml_node>& children, xml_node parent);
+		void   parseScoreDef        (HumGrid& outdata, xml_node item,
+		                             HumNum starttime);
+		HumNum parseSection         (HumGrid& outdata, xml_node item,
+		                             HumNum starttime);
+		void   processStaffGrp      (HumGrid& outdata, xml_node item,
+		                             HumNum starttime);
+		void   processStaffDef      (HumGrid& outdata, xml_node item,
+		                             HumNum starttime);
+
+	private:
+		Options m_options;
+		bool    m_stemsQ = false;
+		bool    m_recipQ = false;
+
+		mei_scoredef m_scoredef;
+
+};
+
 
 
 class Tool_metlev : public HumTool {
