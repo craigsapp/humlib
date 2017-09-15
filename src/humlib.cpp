@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep 14 00:55:07 PDT 2017
+// Last Modified: Fri Sep 15 09:54:54 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -35820,7 +35820,6 @@ Tool_mei2hum::Tool_mei2hum(void) {
 
 	define("r|recip=b", "output **recip spine");
 	define("s|stems=b", "include stems in output");
-
 }
 
 
@@ -35874,9 +35873,13 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	auto score = doc.select_single_node("/mei/music/body/mdiv/score").node();
 
 	if (!score) {
-		cerr << "Cannot find score, so cannot convert MEI file to Humdrum" << endl;
+		cerr << "Cannot find score, so cannot convert ";
+		cerr << "MEI file to Humdrum" << endl;
 		return false;
 	}
+
+	m_staffcount = extractStaffCount(score);
+cerr << "STAFFCOUNT = " << m_staffcount << endl;
 
 	HumGrid outdata;
 	if (m_recipQ) {
@@ -35886,6 +35889,7 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	HumNum systemstamp = 0;  // timestamp for music.
 	systemstamp = parseScore(outdata, score, systemstamp);
 
+	cerr << "SCORE DURATION " << systemstamp << endl;
 
 	outdata.removeRedundantClefChanges();
 	outdata.removeSibeliusIncipit();
@@ -35907,6 +35911,28 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	return status;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::extractStaffCount -- Count the number of staves in the score.
+// 
+
+int Tool_mei2hum::extractStaffCount(xml_node element) {
+	auto measure = element.select_single_node("measure").node();
+	if (!measure) {
+		return 0;
+	}
+
+	int count = 0;
+	for (xml_node child : measure.children()) {
+		string nodename = child.name();
+		if (nodename == "staff") {
+			count++;
+		}
+	}
+	return count;
+}
 
 
 ///////////////////////////////////
@@ -36202,7 +36228,9 @@ cerr << "CHILDREN SIZE " << children.size() << endl;
 		}
 	}
 
-	return 0;
+	// Check that the duration of each layer is the same here.
+
+	return durations[0];
 }
 
 
@@ -36229,7 +36257,9 @@ HumNum Tool_mei2hum::parseStaff(HumGrid& outdata, xml_node staff, HumNum startti
 		}
 	}
 
-	return 0;
+	// Check that the duration of each layer is the same here.
+
+	return durations[0];
 }
 
 
@@ -36249,11 +36279,265 @@ HumNum Tool_mei2hum::parseLayer(HumGrid& outdata, xml_node layer, HumNum startti
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
-		cerr << "processing measure/staff/layer/" << nodename << endl;
+		if (nodename == "note") {
+			starttime = parseNote(outdata, children[i], starttime);
+		} else if (nodename == "chord") {
+			starttime = parseChord(outdata, children[i], starttime);
+		} else if (nodename == "rest") {
+			starttime = parseRest(outdata, children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse a " << nodename << " element in a layer" << endl;
+		}
 	}
 
-	return 0;
+	return starttime;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseNote --
+//
+
+HumNum Tool_mei2hum::parseNote(HumGrid& outdata, xml_node note, HumNum starttime) {
+	if (!note) {
+		return starttime;
+	}
+	if (strcmp(note.name(), "note") != 0) {
+		return starttime;
+	}
+
+	HumNum duration = getDuration(note);
+	string dots = note.attribute("dots").value();
+	int dotcount = 0;
+	if (dots != "") {
+		dotcount = stoi(dots);
+	}
+	string recip = getHumdrumRecip(duration, dotcount);
+	string humpitch = getHumdrumPitch(note);
+
+	string output = recip + humpitch;
+
+	cerr << "PARSING NOTE:\t" << output << endl;
+
+	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getHumdrumRecip --
+//
+
+string Tool_mei2hum::getHumdrumRecip(HumNum duration, int dotcount) {
+	string output;
+
+	if (dotcount > 0) {
+		// remove dots from duration
+		int top = (1 << (dotcount+1)) - 1;
+		int bot = 1 << dotcount;
+		HumNum dotfactor(bot, top);
+		duration *= dotfactor;
+	}
+
+	if (duration.getNumerator() == 1) {
+		output = to_string(duration.getDenominator());
+	} else if ((duration.getNumerator() == 2) && (duration.getDenominator() == 1)) {
+		// breve symbol:
+		output = "0";
+	} else if ((duration.getNumerator() == 4) && (duration.getDenominator() == 1)) {
+		// long symbol:
+		output = "00";
+	} else if ((duration.getNumerator() == 8) && (duration.getDenominator() == 1)) {
+		// maxima symbol:
+		output = "000";
+	} else {
+		output = to_string(duration.getDenominator());
+		output += "%";
+		output += to_string(duration.getNumerator());
+	}
+	
+	for (int i=0; i<dotcount; i++) {
+		output += '.';
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getHumdrumPitch --
+//
+
+string Tool_mei2hum::getHumdrumPitch(xml_node note) {
+	string pname = note.attribute("pname").value();
+	string accidvis = note.attribute("accid").value();
+	string accidges = note.attribute("accid.ges").value();
+
+	int octnum = 4;
+	string oct = note.attribute("oct").value();
+	if (oct == "") {
+		cerr << "Empty octave" << endl;
+	} else if (isdigit(oct[0])) {
+		octnum = stoi(oct);
+	} else {
+		cerr << "Unknown octave value: " << oct << endl;
+	}
+
+	if (pname == "") {
+		cerr << "Empty pname" << endl;
+		return "x";
+	}
+
+	string output;
+	if (octnum < 4) {
+		char val = toupper(pname[0]);
+		int count = 4 - octnum;
+		for (int i=0; i<count; i++) {
+			output += val;
+		}
+	} else {
+		char val = pname[0];
+		int count = octnum - 3;
+		for (int i=0; i<count; i++) {
+			output += val;
+		}
+	}
+
+	if (accidges != "") {
+		if (accidges == "n") {
+			// do nothing;
+		} else if (accidges == "f") {
+			output += "-";
+		} else if (accidges == "s") {
+			output += "#";
+		} else if (accidges == "ff") {
+			output += "--";
+		} else if (accidges == "ss") {
+			output += "##";
+		} else if (accidges == "x") {
+			output += "##";
+		}
+	} else if (accidvis != "") {
+		if (accidvis == "n") {
+			// do nothing;
+		} else if (accidvis == "f") {
+			output += "-";
+		} else if (accidvis == "s") {
+			output += "#";
+		} else if (accidvis == "ff") {
+			output += "--";
+		} else if (accidvis == "ss") {
+			output += "##";
+		} else if (accidvis == "x") {
+			output += "##";
+		}
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getDuration --
+//
+
+HumNum Tool_mei2hum::getDuration(xml_node element) {
+	string dur = element.attribute("dur").value();
+	if (dur == "") {
+		return 0;
+	}
+
+	HumNum output;
+	if (dur == "breve") {
+		output = 1;
+		output /= 2;
+	} else if (dur == "long") {
+		output = 1;
+		output /= 4;
+	} else if (dur == "maxima") {
+		output = 1;
+		output /= 8;
+	} else if (isdigit(dur[0])) {
+		output = 1;
+		output /= stoi(dur);
+	} else {
+		cerr << "Unknown " << element.name() << "@dur: " << dur << endl;
+		return 0;
+	}
+
+	int dotcount;
+	string dots = element.attribute("dots").value();
+	if (dots == "") {
+		dotcount = 0;
+	} else if (isdigit(dots[0])) {
+		dotcount = stoi(dots);
+	} else {
+		cerr << "Unknown " << element.name() << "@dotcount: " << dur << endl;
+		return 0;
+	}
+
+	if (dotcount > 0) {
+		int top = (1 << (dotcount+1)) - 1;
+		int bot = 1 << dotcount;
+		HumNum dotfactor(top, bot);
+		output *= dotfactor;
+	}
+
+	if (m_tupletfactor != 1) {
+		output *= m_tupletfactor;
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseChord --
+//
+
+HumNum Tool_mei2hum::parseChord(HumGrid& outdata, xml_node chord, HumNum starttime) {
+	if (!chord) {
+		return starttime;
+	}
+	if (strcmp(chord.name(), "chord") != 0) {
+		return starttime;
+	}
+
+	HumNum duration = getDuration(chord);
+	cerr << "PARSING CHORD" << endl;
+	return starttime + duration;
+}
+
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseRest --
+//
+
+HumNum Tool_mei2hum::parseRest(HumGrid& outdata, xml_node rest, HumNum starttime) {
+	if (!rest) {
+		return starttime;
+	}
+	if (strcmp(rest.name(), "rest") != 0) {
+		return starttime;
+	}
+
+	HumNum duration = getDuration(rest);
+	cerr << "PARSING REST" << endl;
+	return starttime + duration;
+}
+
 
 
 

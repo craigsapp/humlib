@@ -121,13 +121,22 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseMeasure         (HumGrid& outdata, xml_node measure, HumNum starttime);
 		HumNum parseStaff           (HumGrid& outdata, xml_node staff, HumNum starttime);
 		HumNum parseLayer           (HumGrid& outdata, xml_node layer, HumNum starttime);
+		int    extractStaffCount    (xml_node element);
+		HumNum parseRest            (HumGrid& outdata, xml_node chord, HumNum starttime);
+		HumNum parseChord           (HumGrid& outdata, xml_node chord, HumNum starttime);
+		HumNum parseNote            (HumGrid& outdata, xml_node note, HumNum starttime);
+		HumNum getDuration          (xml_node element);
+		string getHumdrumPitch      (xml_node note);
+		string getHumdrumRecip      (HumNum duration, int dotcount);
 
 	private:
 		Options m_options;
 		bool    m_stemsQ = false;
 		bool    m_recipQ = false;
 
-		mei_scoredef m_scoredef;
+		mei_scoredef m_scoredef;    // for keeping track of key/meter/clef etc.
+		int          m_staffcount;  // number of staves in score.
+		HumNum       m_tupletfactor = 1;
 
 };
 
