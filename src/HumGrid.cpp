@@ -63,6 +63,20 @@ HumGrid::~HumGrid(void) {
 
 //////////////////////////////
 //
+// HumGrid::addMeasureToBack -- Allocate a GridMeasure at the end of the
+//     measure list.
+// 
+
+GridMeasure* HumGrid::addMeasureToBack(void) {
+	GridMeasure* gm = new GridMeasure(this);
+	this->push_back(gm);
+	return this->back();
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::enableRecipSpine --
 //
 
@@ -961,6 +975,13 @@ void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
 	}
 
 	for (int m=0; m<(int)this->size(); m++) {
+		if ((m == 0) && (mdur[m] == 0)) {
+			barnums[m] = counter-1;
+			continue;
+		} else if (mdur[m] == 0) {
+			barnums[m] = -1;
+			continue;
+		}
 		if ((m < mcount-1) && (tsdur[m] == tsdur[m+1])) {
 			if (mdur[m] + mdur[m+1] == tsdur[m]) {
 				barnums[m] = -1;
@@ -1007,6 +1028,9 @@ void HumGrid::addLastMeasure(void) {
    // add the last measure, which will be only one voice
 	// for each part/staff.
 	GridSlice* model = this->back()->back();
+	if (model == NULL) {
+		return;
+	}
 
 	// probably not the correct timestamp, but probably not important
 	// to get correct:
@@ -1321,7 +1345,6 @@ void HumGrid::addNullTokens(void) {
 		}
 	}
 
-
 	for (i=0; i<(int)m_allslices.size(); i++) {
 		GridSlice& slice = *m_allslices.at(i);
 		if (!slice.isNoteSlice()) {
@@ -1360,13 +1383,22 @@ void HumGrid::addNullTokens(void) {
 //////////////////////////////
 //
 // HumGrid::adjustClefChanges -- If a clef change starts at the
-// beginning of a meausre, move it to before the measure.
+// beginning of a meausre, move it to before the measure (unless
+// the measure has zero duration).
 //
 
 void HumGrid::adjustClefChanges(void) {
 	vector<GridMeasure*>& measures = *this;
 	for (int i=1; i<(int)measures.size(); i++) {
 		auto it = measures[i]->begin();
+		if ((*it) == NULL) {
+			cerr << "Warning: GridSlice is null in GridMeasure " << i << endl;
+			continue;
+		}
+		if ((*it)->empty()) {
+			cerr << "Warning: GridSlice is empty in GridMeasure "  << i << endl;
+			continue;
+		}
 		if (!(*it)->isClefSlice()) {
 			continue;
 		}
@@ -1451,7 +1483,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 				gs->setNullTokenLayer(voicei, type, slicedur);
 				timeleft = timeleft - slicedur;
 			} else if (m_allslices.at(s)->isInvalidSlice()) {
-cerr << "THIS IS AN INVALID SLICE" << m_allslices.at(s) << endl;
+				cerr << "THIS IS AN INVALID SLICE" << m_allslices.at(s) << endl;
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).

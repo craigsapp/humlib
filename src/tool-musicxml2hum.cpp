@@ -664,8 +664,7 @@ void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		vector<MxmlPart>& partdata, vector<int> partstaves) {
 
-	GridMeasure* gm = new GridMeasure(&outdata);
-	outdata.push_back(gm);
+	GridMeasure* gm = outdata.addMeasureToBack();
 
 	MxmlMeasure* xmeasure;
 	vector<MxmlMeasure*> measuredata;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 16 16:08:05 PDT 2016
-// Last Modified: Sun Oct 16 16:08:08 PDT 2016
+// Last Modified: Mon Sep 18 15:46:44 PDT 2017
 // Filename:      GridMeasure.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridMeasure.h
 // Syntax:        C++11
@@ -36,6 +36,16 @@ class GridMeasure : public list<GridSlice*> {
 		GridMeasure(HumGrid* owner);
 		~GridMeasure();
 
+		GridSlice*   addTempoToken  (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addTimeSigToken(const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addKeySigToken (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addClefToken   (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addDataToken   (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
 		bool         transferTokens (HumdrumFile& outfile, bool recip,
 		                             bool addbar);
 		HumGrid*     getOwner       (void);
@@ -50,6 +60,7 @@ class GridMeasure : public list<GridSlice*> {
 		MeasureStyle getBarStyle    (void) { return getStyle(); }
 		void         setStyle       (MeasureStyle style) { m_style = style; }
 		void         setBarStyle    (MeasureStyle style) { setStyle(style); }
+		void         setFinalBarlineStyle(void) { setStyle(MeasureStyle::Final); }
 
 		bool         isDouble(void) 
 		                  {return m_style == MeasureStyle::Double;}
@@ -67,7 +78,6 @@ class GridMeasure : public list<GridSlice*> {
 		bool         isSingleChordMeasure(void);
 		bool         isMonophonicMeasure(void);
 	
-
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile);
 

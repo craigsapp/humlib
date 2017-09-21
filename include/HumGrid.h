@@ -41,6 +41,7 @@ class HumGrid : public vector<GridMeasure*> {
 		void removeRedundantClefChanges (void);
 		void removeSibeliusIncipit      (void);
 		bool hasPickup                  (void);
+		GridMeasure*  addMeasureToBack  (void);
 
 	protected:
 		void calculateGridDurations        (void);

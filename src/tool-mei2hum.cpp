@@ -1,13 +1,13 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 13 14:58:26 PDT 2017
-// Last Modified: Wed Sep 13 14:58:29 PDT 2017
+// Last Modified: Thu Sep 21 13:10:56 PDT 2017
 // Filename:      mei2hum.cpp
 // URL:           https://github.com/craigsapp/mei2hum/blob/master/src/mei2hum.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab
 //
-// Description:   Convert a MusicXML file into a Humdrum file.
+// Description:   Convert an MEI file into a Humdrum file.
 //
 
 #include "tool-mei2hum.h"
@@ -27,15 +27,33 @@ namespace hum {
 // START_MERGE
 
 
+#define QUARTER_CONVERT * 4
+#define ELEMENT_DEBUG_STATEMENT(X)
+// #define ELEMENT_DEBUG_STATEMENT(X)  cerr << #X << endl;
+
+
+#define NODE_VERIFY(ELEMENT, RETURNVALUE)        \
+	if (!ELEMENT) {                               \
+		return RETURNVALUE;                        \
+	}                                             \
+	if (strcmp(ELEMENT.name(), #ELEMENT) != 0) {  \
+		return RETURNVALUE;                        \
+	}                                             \
+	ELEMENT_DEBUG_STATEMENT(ELEMENT)
+
+#define MAKE_CHILD_LIST(VARNAME, ELEMENT)        \
+	vector<xml_node> VARNAME;                     \
+	getChildrenVector(VARNAME, ELEMENT);
+
+
+
 //////////////////////////////
 //
 // Tool_mei2hum::Tool_mei2hum --
 //
 
 Tool_mei2hum::Tool_mei2hum(void) {
-	// Options& options = m_options;
-	// options.define("k|kern=b","display corresponding **kern data");
-
+	define("app|app-label=s", "app label to follow");
 	define("r|recip=b", "output **recip spine");
 	define("s|stems=b", "include stems in output");
 }
@@ -44,7 +62,7 @@ Tool_mei2hum::Tool_mei2hum(void) {
 
 //////////////////////////////
 //
-// Tool_mei2hum::convert -- Convert a MusicXML file into
+// Tool_mei2hum::convert -- Convert an MEI file into
 //     Humdrum content.
 //
 
@@ -88,7 +106,9 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 
 	bool status = true; // for keeping track of problems in conversion process.
 
-	auto score = doc.select_single_node("/mei/music/body/mdiv/score").node();
+	buildIdLinkMap(doc);
+
+	auto score = doc.select_node("/mei/music/body/mdiv/score").node();
 
 	if (!score) {
 		cerr << "Cannot find score, so cannot convert ";
@@ -97,29 +117,26 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	m_staffcount = extractStaffCount(score);
-cerr << "STAFFCOUNT = " << m_staffcount << endl;
 
-	HumGrid outdata;
 	if (m_recipQ) {
-		outdata.enableRecipSpine();
+		m_outdata.enableRecipSpine();
 	}
 
 	HumNum systemstamp = 0;  // timestamp for music.
-	systemstamp = parseScore(outdata, score, systemstamp);
+	systemstamp = parseScore(score, systemstamp);
 
-	cerr << "SCORE DURATION " << systemstamp << endl;
-
-	outdata.removeRedundantClefChanges();
-	outdata.removeSibeliusIncipit();
+	m_outdata.removeRedundantClefChanges();
+	// m_outdata.removeSibeliusIncipit();
 
 	// set the duration of the last slice
 
 	HumdrumFile outfile;
 
-	outdata.transferTokens(outfile);
+	m_outdata.transferTokens(outfile);
 
-	// addHeaderRecords(outfile, doc);
-	// addFooterRecords(outfile, doc);
+	addHeaderRecords(outfile, doc);
+	addExtMetaRecords(outfile, doc);
+	addFooterRecords(outfile, doc);
 
 	for (int i=0; i<outfile.getLineCount(); i++) {
 		outfile[i].createLineFromTokens();
@@ -133,11 +150,107 @@ cerr << "STAFFCOUNT = " << m_staffcount << endl;
 
 //////////////////////////////
 //
+// Tool_mei2hum::addExtMetaRecords --
+//
+
+void Tool_mei2hum::addExtMetaRecords(HumdrumFile& outfile, xml_document& doc) {
+	pugi::xpath_node_set metaframes = doc.select_nodes("/mei/meiHead/extMeta/frames/metaFrame");
+	double starttime;
+	string starttimevalue;
+	string token;
+	xml_node node;
+	xml_node timenode;
+
+	// place header reference records, assumed to be time sorted
+	for (int i=(int)metaframes.size()-1; i>=0; i--) {
+		node = metaframes[i].node();
+		timenode = node.select_node("./frameInfo/startTime").node();
+		starttimevalue = timenode.attribute("float").value();
+		if (starttimevalue == "") {
+			starttime = 0.0;
+		} else {
+			starttime = stof(starttimevalue);
+		}
+		if (starttime > 0.0) {
+			continue;
+		}
+		token = node.attribute("token").value();
+		if (token == "") {
+			continue;
+		}
+		outfile.insertLine(0, token);
+		if (token.find("!!!RDF**kern: < = below") != string::npos) {
+			m_belowQ = false;
+		}
+		if (token.find("!!!RDF**kern: > = above") != string::npos) {
+			m_aboveQ = false;
+		}
+	}
+
+	// place footer reference records, assumed to be time sorted
+	for (int i=0; i<(int)metaframes.size(); i++) {
+		node = metaframes[i].node();
+		timenode = node.select_node("./frameInfo/startTime").node();
+		starttimevalue = timenode.attribute("float").value();
+		if (starttimevalue == "") {
+			starttime = 0.0;
+		} else {
+			starttime = stof(starttimevalue);
+		}
+		if (starttime == 0.0) {
+			continue;
+		}
+		token = node.attribute("token").value();
+		if (token == "") {
+			continue;
+		}
+		outfile.appendLine(token);
+		if (token.find("!!!RDF**kern: < = below") != string::npos) {
+			m_belowQ = false;
+		}
+		if (token.find("!!!RDF**kern: > = above") != string::npos) {
+			m_aboveQ = false;
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::addHeaderRecords --
+//
+
+void Tool_mei2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc) {
+	// do something here
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::addFooterRecords --
+//
+
+void Tool_mei2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc) {
+	if (m_aboveQ) {
+		outfile.appendLine("!!!RDF**kern: > = above");
+	}
+	if (m_belowQ) {
+		outfile.appendLine("!!!RDF**kern: < = below");
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_mei2hum::extractStaffCount -- Count the number of staves in the score.
-// 
+//
 
 int Tool_mei2hum::extractStaffCount(xml_node element) {
-	auto measure = element.select_single_node("measure").node();
+	auto measure = element.select_node("//measure").node();
 	if (!measure) {
 		return 0;
 	}
@@ -153,31 +266,24 @@ int Tool_mei2hum::extractStaffCount(xml_node element) {
 }
 
 
+
 ///////////////////////////////////
 //
 // Tool_mei2hum::parseScore -- Convert an MEI <score> element into Humdrum data.
 //
 
-HumNum Tool_mei2hum::parseScore(HumGrid& outdata, xml_node score, HumNum starttime) {
-	if (!score) {
-		return starttime;
-	}
-	if (strcmp(score.name(), "score") != 0) {
-		return starttime;
-	}
-
-	vector<xml_node> children;
-	getChildrenVector(children, score);
+HumNum Tool_mei2hum::parseScore(xml_node score, HumNum starttime) {
+	NODE_VERIFY(score, starttime)
+	MAKE_CHILD_LIST(children, score);
 
 	for (xml_node item : children) {
 		string nodename = item.name();
 		if (nodename == "scoreDef") {
-			parseScoreDef(outdata, item, starttime);
+			parseScoreDef(item, starttime);
 		} else if (nodename == "section") {
-			starttime = parseSection(outdata, item, starttime);
+			starttime = parseSection(item, starttime);
 		} else {
-			cerr << "Do not know how to process " << nodename << " elements";
-			cerr << endl;
+			cerr << "Don't know how to process score/" << nodename << endl;
 		}
 	}
 
@@ -191,34 +297,25 @@ HumNum Tool_mei2hum::parseScore(HumGrid& outdata, xml_node score, HumNum startti
 // Tool_mei2hum::parseScoreDef -- Process a <scoreDef> element in an MEI file.
 //
 
-void Tool_mei2hum::parseScoreDef(HumGrid& outdata, xml_node scoredef,
-		HumNum starttime) {
-	if (!scoredef) {
-		return;
-	}
-	if (strcmp(scoredef.name(), "scoreDef") != 0) {
-		return;
-	}
+void Tool_mei2hum::parseScoreDef(xml_node scoreDef, HumNum starttime) {
+	NODE_VERIFY(scoreDef, )
+	MAKE_CHILD_LIST(children, scoreDef);
 
-	if (m_scoredef.global.timestamp == starttime) {
-		m_scoredef.clear();
+	if (m_scoreDef.global.timestamp == starttime QUARTER_CONVERT) {
+		m_scoreDef.clear();
 	}
-	m_scoredef.global.timestamp = starttime;
+	m_scoreDef.global.timestamp = starttime QUARTER_CONVERT;
 
-	vector<xml_node> children;
-	getChildrenVector(children, scoredef);
-
-	fillWithStaffDefAttributes(m_scoredef.global, scoredef);
+	fillWithStaffDefAttributes(m_scoreDef.global, scoreDef);
 
 	for (xml_node item : children) {
 		string nodename = item.name();
 		if (nodename == "staffGrp") {
-		    processStaffGrp(outdata, item, starttime);
+		    processStaffGrp(item, starttime);
 		} else if (nodename == "staffDef") {
-		    processStaffDef(outdata, item, starttime);
+		    processStaffDef(item, starttime);
 		} else {
-			cerr << "Do not know how to process scoreDef/" << nodename;
-			cerr << " elements";
+			cerr << "Don't know how to process scoreDef/" << nodename << endl;
 		}
 	}
 
@@ -228,31 +325,21 @@ void Tool_mei2hum::parseScoreDef(HumGrid& outdata, xml_node scoredef,
 
 //////////////////////////////
 //
-// Tool_mei2hum::parseStaffGrp -- Process a <staffGrp> element in an MEI file.
+// Tool_mei2hum::processStaffGrp -- Process a <staffGrp> element in an MEI file.
 //
 
-void Tool_mei2hum::processStaffGrp(HumGrid& outdata, xml_node staffgrp,
-		HumNum starttime) {
-
-	if (!staffgrp) {
-		return;
-	}
-	if (strcmp(staffgrp.name(), "staffGrp") != 0) {
-		return;
-	}
-
-	vector<xml_node> children;
-	getChildrenVector(children, staffgrp);
+void Tool_mei2hum::processStaffGrp(xml_node staffGrp, HumNum starttime) {
+	NODE_VERIFY(staffGrp, )
+	MAKE_CHILD_LIST(children, staffGrp);
 
 	for (xml_node item : children) {
 		string nodename = item.name();
 		if (nodename == "staffGrp") {
-		    processStaffGrp(outdata, item, starttime);
+		    processStaffGrp(item, starttime);
 		} else if (nodename == "staffDef") {
-		    processStaffDef(outdata, item, starttime);
+		    processStaffDef(item, starttime);
 		} else {
-			cerr << "Do not know how to process scoreDef/" << nodename;
-			cerr << " elements";
+			cerr << "Don't know how to process staffGrp/" << nodename << endl;
 		}
 	}
 
@@ -262,21 +349,13 @@ void Tool_mei2hum::processStaffGrp(HumGrid& outdata, xml_node staffgrp,
 
 //////////////////////////////
 //
-// Tool_mei2hum::parseStaffDef -- Process a <staffDef> element in an MEI file.
+// Tool_mei2hum::processStaffDef -- Process a <staffDef> element in an MEI file.
 //
 
-void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
-		HumNum starttime) {
+void Tool_mei2hum::processStaffDef(xml_node staffDef, HumNum starttime) {
+	NODE_VERIFY(staffDef, )
 
-	if (!staffdef) {
-		return;
-	}
-	if (strcmp(staffdef.name(), "staffDef") != 0) {
-		return;
-	}
-
-
-	string staffnum = staffdef.attribute("n").value();
+	string staffnum = staffDef.attribute("n").value();
 	if (staffnum.empty()) {
 		// no staffDef@n so cannot process.
 		return;
@@ -292,14 +371,77 @@ void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
 		return;
 	}
 
-	m_scoredef.minresize(num);
+	m_scoreDef.minresize(num);
+	m_scoreDef.staves[num-1].clear();
+	m_scoreDef.staves[num-1] = m_scoreDef.global;
 
-	cerr << "STAFF " << num << endl;
+	fillWithStaffDefAttributes(m_scoreDef.staves[num-1], staffDef);
 
-	m_scoredef.staves[num].clear();
-	m_scoredef.staves[num] = m_scoredef.global;
+	// see leaky memory note below for why there are separate
+	// variables for clef, keysig, etc.
+	string clef = m_scoreDef.staves[num-1].clef;
+	string keysig = m_scoreDef.staves[num-1].keysig;
+	string timesig = m_scoreDef.staves[num-1].timesig;
+	string midibpm = m_scoreDef.staves[num-1].midibpm;
 
-	fillWithStaffDefAttributes(m_scoredef.staves[num], staffdef);
+
+	// Incorporate clef into HumGrid:
+	if (clef.empty()) {
+		clef = m_scoreDef.global.clef;
+	}
+	if (!clef.empty()) {
+		// Need to store in next measure (fix later).  If there are no measures then
+		// create one.
+		if (m_outdata.empty()) {
+			/* GridMeasure* gm = */ m_outdata.addMeasureToBack();
+		}
+		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
+		// leaky memory is likey to happen here.
+		m_outdata.back()->addClefToken(clef, starttime QUARTER_CONVERT, num-1,
+				0, 0, m_staffcount);
+	}
+
+	// Incorporate key signature into HumGrid:
+	if (keysig.empty()) {
+		keysig = m_scoreDef.global.keysig;
+	}
+	if (!keysig.empty()) {
+		// Need to store in next measure (fix later).  If there are no measures then
+		// create one.
+		if (m_outdata.empty()) {
+			/* GridMeasure* gm = */ m_outdata.addMeasureToBack();
+		}
+		m_outdata.back()->addKeySigToken(keysig, starttime QUARTER_CONVERT, num-1,
+				0, 0, m_staffcount);
+	}
+
+	// Incorporate time signature into HumGrid:
+	if (timesig.empty()) {
+		timesig = m_scoreDef.global.timesig;
+	}
+	if (!timesig.empty()) {
+		// Need to store in next measure (fix later).  If there are no measures then
+		// create one.
+		if (m_outdata.empty()) {
+			/* GridMeasure* gm = */ m_outdata.addMeasureToBack();
+		}
+		m_outdata.back()->addTimeSigToken(timesig, starttime QUARTER_CONVERT, num-1,
+				0, 0, m_staffcount);
+	}
+
+	// Incorporate tempo into HumGrid:
+	if (midibpm.empty()) {
+		midibpm = m_scoreDef.global.midibpm;
+	}
+	if (!midibpm.empty()) {
+		// Need to store in next measure (fix later).  If there are no measures then
+		// create one.
+		if (m_outdata.empty()) {
+			/* GridMeasure* gm = */ m_outdata.addMeasureToBack();
+		}
+		m_outdata.back()->addTempoToken(midibpm, starttime QUARTER_CONVERT, num-1,
+				0, 0, m_staffcount);
+	}
 
 }
 
@@ -310,8 +452,7 @@ void Tool_mei2hum::processStaffDef(HumGrid& outdata, xml_node staffdef,
 // Tool_mei2hum::fillWithStaffDefAttributes --
 //
 
-void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffdef& staffinfo,
-		xml_node element) {
+void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node element) {
 
 	string clefshape;
 	string clefline;
@@ -340,12 +481,10 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffdef& staffinfo,
 	}
 
 	if ((!clefshape.empty()) && (!clefline.empty())) {
-		staffinfo.clef = clefshape + clefline;
-		cerr << "\tCLEF IS *clef" << staffinfo.clef << endl;
+		staffinfo.clef = "*clef" + clefshape + clefline;
 	}
 	if ((!metercount.empty()) && (!meterunit.empty())) {
 		staffinfo.timesig = "*M" + metercount + "/" + meterunit;
-		cerr << "\tTIMESIG IS " << staffinfo.timesig << endl;
 	}
 	if (!keysig.empty()) {
 		int count = stoi(keysig);
@@ -377,11 +516,9 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffdef& staffinfo,
 				case 7: staffinfo.keysig = "*k[b-e-a-d-g-c-f-]"; break;
 			}
 		}
-		cerr << "\tKEYSIG IS " << staffinfo.keysig << endl;
 	}
 	if (!midibpm.empty()) {
 		staffinfo.midibpm = "*MM" + midibpm;
-		cerr << "\tTEMPO IS " << staffinfo.midibpm << endl;
 	}
 
 }
@@ -393,28 +530,20 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffdef& staffinfo,
 // Tool_mei2hum::parseSection -- Process a <section> element in an MEI file.
 //
 
-HumNum Tool_mei2hum::parseSection(HumGrid& outdata, xml_node section,
-		HumNum starttime) {
-	if (!section) {
-		return starttime;
-	}
-	if (strcmp(section.name(), "section") != 0) {
-		return starttime;
-	}
-
-	vector<xml_node> children;
-	getChildrenVector(children, section);
-	cerr << "PARSING SECTION " << endl;
+HumNum Tool_mei2hum::parseSection(xml_node section, HumNum starttime) {
+	NODE_VERIFY(section, starttime);
+	MAKE_CHILD_LIST(children, section);
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
-		cerr << "\tPARSING section/" << nodename << endl;
 		if (nodename == "section") {
-			starttime = parseSection(outdata, children[i], starttime);
+			starttime = parseSection(children[i], starttime);
 		} else if (nodename == "measure") {
-			starttime = parseMeasure(outdata, children[i], starttime);
+			starttime = parseMeasure(children[i], starttime);
+		} else if (nodename == "app") {
+			starttime = parseApp(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse element " << nodename << endl;
+			cerr << "Don't know how to parse section/" << nodename << endl;
 		}
 	}
 
@@ -425,28 +554,150 @@ HumNum Tool_mei2hum::parseSection(HumGrid& outdata, xml_node section,
 
 //////////////////////////////
 //
-// Tool_mei2hum::parseMeasure --
+// Tool_mei2hum::parseApp --
 //
 
-HumNum Tool_mei2hum::parseMeasure(HumGrid& outdata, xml_node measure, HumNum starttime) {
-	cerr << "\tparsing MEASURE" << endl;
+HumNum Tool_mei2hum::parseApp(xml_node app, HumNum starttime) {
+	NODE_VERIFY(app, starttime);
+	MAKE_CHILD_LIST(children, app);
 
-	vector<xml_node> children;
-	getChildrenVector(children, measure);
-cerr << "CHILDREN SIZE " << children.size() << endl;
+	if (children.empty()) {
+		return starttime;
+	}
+
+	xml_node target = children[0];
+	if (!m_appLabel.empty()) {
+		string testlabel;
+		for (int i=0; i<(int)children.size(); i++) {
+			testlabel = children[i].attribute("label").value();
+			if (testlabel == m_appLabel) {
+				target = children[i];
+				break;
+			}
+		}
+	}
+
+	// Only following the first element in app list for now.
+	string nodename = target.name();
+	if (nodename == "lem") {
+		starttime = parseLem(target, starttime);
+	} else if (nodename == "rdg") {
+		starttime = parseRdg(target, starttime);
+	} else {
+		cerr << "Don't know how to parse app/" << nodename << endl;
+	}
+
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseLem -- Process a <lem> element in an MEI file.
+//
+
+HumNum Tool_mei2hum::parseLem(xml_node lem, HumNum starttime) {
+	NODE_VERIFY(lem, starttime);
+	MAKE_CHILD_LIST(children, lem);
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "section") {
+			starttime = parseSection(children[i], starttime);
+		} else if (nodename == "measure") {
+			starttime = parseMeasure(children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse lem/" << nodename << endl;
+		}
+	}
+
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseRdg -- Process a <rdg> element in an MEI file.
+//
+
+HumNum Tool_mei2hum::parseRdg(xml_node rdg, HumNum starttime) {
+	NODE_VERIFY(rdg, starttime);
+	MAKE_CHILD_LIST(children, rdg);
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "section") {
+			starttime = parseSection(children[i], starttime);
+		} else if (nodename == "measure") {
+			starttime = parseMeasure(children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse rdg/" << nodename << endl;
+		}
+	}
+
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseMeasure -- Process an MEI measure element.
+//
+
+HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
+	NODE_VERIFY(measure, starttime);
+	MAKE_CHILD_LIST(children, measure);
+
+	GridMeasure* gm = m_outdata.addMeasureToBack();
+	gm->setTimestamp(starttime QUARTER_CONVERT);
 
 	vector<HumNum> durations(children.size(), 0);
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename == "staff") {
-			durations[i] = parseStaff(outdata, children[i], starttime);
+			durations[i] = parseStaff(children[i], starttime);
+		} else if (nodename == "fermata") {
+			// handled in process processNodeStartLinks()
+		} else if (nodename == "slur") {
+			// handled in process processNode(Start|Stop)Links()
+		} else if (nodename == "tie") {
+			// handled in process processNode(Start|Stop)Links()
 		} else {
 			cerr << "Do not know how to parse measure/" << nodename << endl;
 		}
 	}
 
+	if (durations.empty()) {
+		return starttime;
+	}
+
+	HumNum firstdur = durations[0];
+	int staffnumber = 0;
+	for (int i=1; i<durations.size(); i++) {
+		if (strcmp(children[i].name(), "staff") != 0) {
+			continue;
+		}
+		staffnumber++;
+		if (durations[i] != firstdur) {
+			cerr << "Error: staves do not have same duration in measure" << endl;
+			cerr << "First staff duration: " << firstdur << endl;
+			cerr << "Staff " << staffnumber << "'s duration:  " << durations[i] << endl;
+			break;
+		}
+	}
+
 	// Check that the duration of each layer is the same here.
+
+	gm->setTimestamp(starttime QUARTER_CONVERT);
+	gm->setDuration((firstdur - starttime) QUARTER_CONVERT);
+
+	if (strcmp(measure.attribute("right").value(), "end") == 0) {
+		gm->setFinalBarlineStyle();
+	}
 
 	return durations[0];
 }
@@ -455,27 +706,39 @@ cerr << "CHILDREN SIZE " << children.size() << endl;
 
 //////////////////////////////
 //
-// Tool_mei2hum::parseStaff --
+// Tool_mei2hum::parseStaff -- Process an MEI staff element.
 //
 
-HumNum Tool_mei2hum::parseStaff(HumGrid& outdata, xml_node staff, HumNum starttime) {
-	cerr << "PARSING STAFF" << endl;
+HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
+	NODE_VERIFY(staff, starttime);
+	MAKE_CHILD_LIST(children, staff);
 
-	vector<xml_node> children;
-	getChildrenVector(children, staff);
+	string n = staff.attribute("n").value();
+	int nnum = 0;
+	if (n == "") {
+		cerr << "Warning: no staff number on staff element" << endl;
+	} else {
+		nnum = stoi(n);
+	}
+	if (nnum < 1) {
+		cerr << "Error: invalid staff number: " << nnum << endl;
+	}
+	m_currentstaff = nnum;
 
 	vector<HumNum> durations(children.size(), 0);
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename == "layer") {
-			durations[i] = parseLayer(outdata, children[i], starttime);
+			durations[i] = parseLayer(children[i], starttime);
 		} else {
-			cerr << "Do not know how to parse measure/staff/" << nodename << endl;
+			cerr << "Don't know how to parse staff/" << nodename << endl;
 		}
 	}
 
-	// Check that the duration of each layer is the same here.
+	// Check that the duration of each staff is the same here.
+
+	m_currentstaff = 0;
 
 	return durations[0];
 }
@@ -487,24 +750,168 @@ HumNum Tool_mei2hum::parseStaff(HumGrid& outdata, xml_node staff, HumNum startti
 // Tool_mei2hum::parseLayer --
 //
 
-HumNum Tool_mei2hum::parseLayer(HumGrid& outdata, xml_node layer, HumNum starttime) {
-	cerr << "PARSING LAYER" << endl;
+HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime) {
+	NODE_VERIFY(layer, starttime)
+	MAKE_CHILD_LIST(children, layer);
 
-	vector<xml_node> children;
-	getChildrenVector(children, layer);
+	string n = layer.attribute("n").value();
+	int nnum = 0;
+	if (n == "") {
+		cerr << "Warning: no layer number on layer element" << endl;
+	} else {
+		nnum = stoi(n);
+	}
+	if (nnum < 1) {
+		cerr << "Error: invalid layer number: " << nnum << endl;
+	}
+	m_currentlayer = nnum;
 
 	vector<HumNum> durations(children.size(), 0);
+	string dummy;
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename == "note") {
-			starttime = parseNote(outdata, children[i], starttime);
+			starttime = parseNote(children[i], xml_node(NULL), dummy, starttime);
 		} else if (nodename == "chord") {
-			starttime = parseChord(outdata, children[i], starttime);
+			starttime = parseChord(children[i], starttime);
 		} else if (nodename == "rest") {
-			starttime = parseRest(outdata, children[i], starttime);
+			starttime = parseRest(children[i], starttime);
+		} else if (nodename == "beam") {
+			starttime = parseBeam(children[i], starttime);
+		} else if (nodename == "tuplet") {
+			starttime = parseTuplet(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse a " << nodename << " element in a layer" << endl;
+			cerr << "Don't know how to parse layer/" << nodename << endl;
+		}
+	}
+
+	m_currentlayer = 0;
+
+	return starttime;
+}
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseTuplet --
+//
+
+HumNum Tool_mei2hum::parseTuplet(xml_node tuplet, HumNum starttime) {
+	NODE_VERIFY(tuplet, starttime)
+	MAKE_CHILD_LIST(children, tuplet);
+
+	string num = tuplet.attribute("num").value();
+	string numbase = tuplet.attribute("numbase").value();
+
+	HumNum newfactor = 1;
+
+	if (numbase == "") {
+		cerr << "Warning: tuplet@numbase is empty" << endl;
+	} else {
+		newfactor = stoi(numbase);
+	}
+
+	if (num == "") {
+		cerr << "Warning: tuplet@num is empty" << endl;
+	} else {
+		newfactor /= stoi(num);
+	}
+
+	m_tupletfactor *= newfactor;
+
+	string stored_beamPostfix;
+	if (m_beamPostfix != "") {
+		stored_beamPostfix = m_beamPostfix;
+		m_beamPostfix.clear();
+	}
+
+	xml_node lastnoterestchord;
+	for (int i=(int)children.size() - 1; i>=0; i--) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			lastnoterestchord = children[i];
+			break;
+		} else if (nodename == "rest") {
+			lastnoterestchord = children[i];
+			break;
+		} else if (nodename == "chord") {
+			lastnoterestchord = children[i];
+			break;
+		}
+	}
+
+	string dummy;
+	for (int i=0; i<(int)children.size(); i++) {
+		if (children[i] == lastnoterestchord) {
+			m_beamPostfix = stored_beamPostfix;
+		}
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			starttime = parseNote(children[i], xml_node(NULL), dummy, starttime);
+		} else if (nodename == "rest") {
+			starttime = parseRest(children[i], starttime);
+		} else if (nodename == "chord") {
+			starttime = parseChord(children[i], starttime);
+		} else if (nodename == "beam") {
+			starttime = parseBeam(children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse tuplet/" << nodename << endl;
+		}
+	}
+
+	m_tupletfactor /= newfactor;
+
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseBeam --
+//
+
+HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
+	NODE_VERIFY(beam, starttime)
+	MAKE_CHILD_LIST(children, beam);
+
+	m_beamPrefix = "L";
+
+	xml_node lastnoterestchord;
+	for (int i=children.size()-1; i>=0; i--) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			lastnoterestchord = children[i];
+			break;
+		} else if (nodename == "rest") {
+			lastnoterestchord = children[i];
+			break;
+		} else if (nodename == "chord") {
+			lastnoterestchord = children[i];
+			break;
+		} else if (nodename == "tuplet") {
+			lastnoterestchord = children[i];
+			break;
+		}
+	}
+
+	string dummy;
+	for (int i=0; i<(int)children.size(); i++) {
+		if (children[i] == lastnoterestchord) {
+			m_beamPostfix = "J";
+		}
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			starttime = parseNote(children[i], xml_node(NULL), dummy, starttime);
+		} else if (nodename == "rest") {
+			starttime = parseRest(children[i], starttime);
+		} else if (nodename == "chord") {
+			starttime = parseChord(children[i], starttime);
+		} else if (nodename == "tuplet") {
+			starttime = parseTuplet(children[i], starttime);
+		} else {
+			cerr << "Don't know how to parse beam/" << nodename << endl;
 		}
 	}
 
@@ -518,28 +925,423 @@ HumNum Tool_mei2hum::parseLayer(HumGrid& outdata, xml_node layer, HumNum startti
 // Tool_mei2hum::parseNote --
 //
 
-HumNum Tool_mei2hum::parseNote(HumGrid& outdata, xml_node note, HumNum starttime) {
-	if (!note) {
-		return starttime;
-	}
-	if (strcmp(note.name(), "note") != 0) {
-		return starttime;
+HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, HumNum starttime) {
+	NODE_VERIFY(note, starttime)
+
+	HumNum duration;
+	int dotcount;
+
+	if (chord) {
+		duration = getDuration(chord);
+		dotcount = getDotCount(chord);
+		// maybe allow different durations on notes in a chord if the first one is the
+		// same as the duration of the chord.
+	} else {
+		duration = getDuration(note);
+		dotcount = getDotCount(note);
 	}
 
-	HumNum duration = getDuration(note);
-	string dots = note.attribute("dots").value();
+	string recip = getHumdrumRecip(duration, dotcount);
+	string humpitch = getHumdrumPitch(note);
+
+	string articulations = getNoteArticulations(note, chord);
+
+	string tok = recip + humpitch + articulations + m_beamPrefix + m_beamPostfix;
+	m_beamPrefix.clear();
+	m_beamPostfix.clear();
+
+	processLinkedNodes(tok, note);
+	processFermataAttribute(tok, note);
+
+	if (!chord) {
+		m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentstaff-1,
+			0, m_currentlayer-1, m_staffcount);
+	} else {
+		output += tok;
+	}
+
+	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseRest --
+//
+
+HumNum Tool_mei2hum::parseRest(xml_node rest, HumNum starttime) {
+	NODE_VERIFY(rest, starttime)
+
+	HumNum duration = getDuration(rest);
+	int dotcount = getDotCount(rest);
+	string recip = getHumdrumRecip(duration, dotcount);
+
+	string output = recip + "r" + m_beamPrefix + m_beamPostfix;
+	m_beamPrefix.clear();
+	m_beamPostfix.clear();
+
+	processLinkedNodes(output, rest);
+	processFermataAttribute(output, rest);
+
+	m_outdata.back()->addDataToken(output, starttime QUARTER_CONVERT, m_currentstaff-1,
+		0, m_currentlayer-1, m_staffcount);
+
+	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getNoteArticulations --
+//
+
+string Tool_mei2hum::getNoteArticulations(xml_node note, xml_node chord) {
+
+	string attribute_artic = note.attribute("artic").value();
+
+	vector<xml_node> element_artic;
+	for (pugi::xml_node artic : note.children("artic")) {
+		element_artic.push_back(artic);
+	}
+
+	string chord_attribute_artic;
+	vector<xml_node> chord_element_artic;
+
+	if (chord) {
+		chord_attribute_artic = chord.attribute("artic").value();
+	}
+	for (pugi::xml_node artic : chord.children("artic")) {
+		chord_element_artic.push_back(artic);
+	}
+
+	string output;
+
+	output += getHumdrumArticulation("\\bstacc\\b", "'", attribute_artic, element_artic,
+			chord_attribute_artic, chord_element_artic);
+	output += getHumdrumArticulation("\\bacc\\b", "^", attribute_artic, element_artic,
+			chord_attribute_artic, chord_element_artic);
+	output += getHumdrumArticulation("\\bmarc\\b", "^^", attribute_artic, element_artic,
+			chord_attribute_artic, chord_element_artic);
+	output += getHumdrumArticulation("\\bstacciss\\b", "`", attribute_artic, element_artic,
+			chord_attribute_artic, chord_element_artic);
+	output += getHumdrumArticulation("\\bten\\b", "~", attribute_artic, element_artic,
+			chord_attribute_artic, chord_element_artic);
+
+	return output;
+}
+
+
+
+///////////////////////////////
+//
+// Tool_mei2hum::getHumdrumArticulation --
+//
+
+string Tool_mei2hum::getHumdrumArticulation(const string& tag, const string& humdrum,
+		const string& attribute_artic, vector<xml_node>& element_artic,
+		const string& chord_attribute_artic, vector<xml_node>& chord_element_artic) {
+	HumRegex hre;
+	string output;
+
+	// First check artic attributes:
+	if (hre.search(attribute_artic, tag)) {
+		output = humdrum;
+		return output;
+	}
+
+	// If the note is attached to a chord, search the chord:
+	if (hre.search(chord_attribute_artic, tag)) {
+		output = humdrum;
+		return output;
+	}
+
+	// Now search for artic elements in the note:
+	for (int i=0; i<(int)element_artic.size(); i++) {
+		string nodename = element_artic[i].name();
+		if (nodename != "artic") {
+			continue;
+		}
+		string artic = element_artic[i].attribute("artic").value();
+		if (hre.search(artic, tag)) {
+			output = humdrum;
+			output += setPlacement(element_artic[i].attribute("place").value());
+			return output;
+		}
+	}
+
+	// And then in the chord:
+	for (int i=0; i<(int)chord_element_artic.size(); i++) {
+		string nodename = chord_element_artic[i].name();
+		if (nodename != "artic") {
+			continue;
+		}
+		string artic = chord_element_artic[i].attribute("artic").value();
+		if (hre.search(artic, tag)) {
+			output = humdrum;
+			output += setPlacement(chord_element_artic[i].attribute("place").value());
+			return output;
+		}
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::setPlacement --
+//
+
+string Tool_mei2hum::setPlacement(const string& placement) {
+	if (placement == "above") {
+		m_aboveQ = true;
+		return ">";
+	} else if (placement == "below") {
+		m_belowQ = true;
+		return "<";
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processFermataAttribute -- @fermata="(above|below)"
+//
+
+void Tool_mei2hum::processFermataAttribute(string& output, xml_node node) {
+	string fermata = node.attribute("fermata").value();
+	if (fermata.empty()) {
+		return;
+	}
+	if (fermata == "above") {
+		output += ';';
+	} else if (fermata == "below") {
+		output += ";<";
+		m_belowQ = true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processLinkedNodes --
+//
+
+void Tool_mei2hum::processLinkedNodes(string& output, xml_node node) {
+	string id = node.attribute("xml:id").value();
+	if (!id.empty()) {
+		auto found = m_startlinks.find(id);
+		if (found != m_startlinks.end()) {
+			processNodeStartLinks(output, node, (*found).second);
+		}
+		found = m_stoplinks.find(id);
+		if (found != m_stoplinks.end()) {
+			processNodeStopLinks(output, node, (*found).second);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getDotCount --
+//
+
+int Tool_mei2hum::getDotCount(xml_node node) {
+	string dots = node.attribute("dots").value();
 	int dotcount = 0;
 	if (dots != "") {
 		dotcount = stoi(dots);
 	}
-	string recip = getHumdrumRecip(duration, dotcount);
-	string humpitch = getHumdrumPitch(note);
+	return dotcount;
+}
 
-	string output = recip + humpitch;
 
-	cerr << "PARSING NOTE:\t" << output << endl;
 
-	return starttime + duration;
+//////////////////////////////
+//
+// Tool_mei2hum::processNodeStartLinks --
+//
+
+void Tool_mei2hum::processNodeStartLinks(string& output, xml_node node,
+		vector<xml_node>& nodelist) {
+	for (int i=0; i<(int)nodelist.size(); i++) {
+		string nodename = nodelist[i].name();
+		if (nodename == "fermata") {
+			parseFermata(output, node, nodelist[i]);
+		} else if (nodename == "slur") {
+			parseSlurStart(output, node, nodelist[i]);
+		} else if (nodename == "tie") {
+			parseTieStart(output, node, nodelist[i]);
+		} else {
+			cerr << "Don't know how to parse " << nodename
+			     << " element in processNodeStartLinks()" << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processNodeStopLinks --
+//
+
+void Tool_mei2hum::processNodeStopLinks(string& output, xml_node node,
+		vector<xml_node>& nodelist) {
+	for (int i=0; i<(int)nodelist.size(); i++) {
+		string nodename = nodelist[i].name();
+		if (nodename == "slur") {
+			parseSlurStop(output, node, nodelist[i]);
+		} else if (nodename == "tie") {
+			parseTieStop(output, node, nodelist[i]);
+		} else {
+			cerr << "Don't know how to parse " << nodename
+			     << " element in processNodeStopLinks()" << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseSlurStart --
+//
+
+void Tool_mei2hum::parseSlurStart(string& output, xml_node node, xml_node slur) {
+	NODE_VERIFY(slur, )
+	string nodename = node.name();
+	if (nodename == "note") {
+		output = "(" + setPlacement(slur.attribute("curvedir").value()) + output;
+	} else if (nodename == "chord") {
+		output = "(" + setPlacement(slur.attribute("curvedir").value()) + output;
+	} else {
+		cerr << "Don't know what to do with a slur start attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseSlurStop --
+//
+
+void Tool_mei2hum::parseSlurStop(string& output, xml_node node, xml_node slur) {
+	NODE_VERIFY(slur, )
+	string nodename = node.name();
+	if (nodename == "note") {
+		output += ")";
+	} else if (nodename == "chord") {
+		output += ")";
+	} else {
+		cerr << "Don't know what to do with a tie end attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseTieStart -- Need to deal with chords later.
+//
+
+void Tool_mei2hum::parseTieStart(string& output, xml_node node, xml_node tie) {
+	NODE_VERIFY(tie, )
+
+	string id = node.attribute("xml:id").value();
+	if (!id.empty()) {
+		auto found = m_stoplinks.find(id);
+		if (found != m_stoplinks.end()) {
+			for (auto item : (*found).second) {
+				if (strcmp(tie.attribute("startid").value(), item.attribute("endid").value()) == 0) {
+					// deal with tie middles in parseTieStop().
+					return;
+				}
+			}
+		}
+	}
+
+	string nodename = node.name();
+	if (nodename == "note") {
+		output = "[" + output;
+	} else {
+		cerr << "Don't know what to do with a tie start attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseTieStop -- Need to deal with chords later.
+//
+
+void Tool_mei2hum::parseTieStop(string& output, xml_node node, xml_node tie) {
+	NODE_VERIFY(tie, )
+
+	string id = node.attribute("xml:id").value();
+	if (!id.empty()) {
+		auto found = m_startlinks.find(id);
+		if (found != m_startlinks.end()) {
+			for (auto item : (*found).second) {
+				if (strcmp(tie.attribute("endid").value(), item.attribute("startid").value()) == 0) {
+					output += "_";
+					return;
+				}
+			}
+		}
+	}
+
+	string nodename = node.name();
+	if (nodename == "note") {
+		output += "]";
+	} else {
+		cerr << "Don't know what to do with a tie end attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseFermata -- deal with a fermata attached to something.
+///     output is a Humdrum token string (maybe have it as a HumdrumToken object).
+//
+
+void Tool_mei2hum::parseFermata(string& output, xml_node node, xml_node fermata) {
+	NODE_VERIFY(fermata, )
+
+	string nodename = node.name();
+	if (nodename == "note") {
+		output += ';';
+	} else if (nodename == "chord") {
+		output += ';';
+	} else if (nodename == "rest") {
+		output += ';';
+	} else {
+		cerr << "Don't know what to do with a fermata attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+
 }
 
 
@@ -576,7 +1378,7 @@ string Tool_mei2hum::getHumdrumRecip(HumNum duration, int dotcount) {
 		output += "%";
 		output += to_string(duration.getNumerator());
 	}
-	
+
 	for (int i=0; i<dotcount; i++) {
 		output += '.';
 	}
@@ -708,6 +1510,7 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 		output *= dotfactor;
 	}
 
+	// add a correction for the tuplet factor which is currently active.
 	if (m_tupletfactor != 1) {
 		output *= m_tupletfactor;
 	}
@@ -722,40 +1525,36 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 // Tool_mei2hum::parseChord --
 //
 
-HumNum Tool_mei2hum::parseChord(HumGrid& outdata, xml_node chord, HumNum starttime) {
-	if (!chord) {
-		return starttime;
+HumNum Tool_mei2hum::parseChord(xml_node chord, HumNum starttime) {
+	NODE_VERIFY(chord, starttime)
+	MAKE_CHILD_LIST(children, chord);
+
+	string tok;
+	int counter = 0;
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			counter++;
+			if (counter > 1) {
+				tok += " ";
+			}
+			parseNote(children[i], chord, tok, starttime);
+		} else if (nodename == "artic") {
+			// This is handled within parseNote();
+		} else {
+			cerr << "Don't know how to parse chord/" << nodename << endl;
+		}
 	}
-	if (strcmp(chord.name(), "chord") != 0) {
-		return starttime;
-	}
+
+	processLinkedNodes(tok, chord);
+	processFermataAttribute(tok, chord);
+
+	m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentstaff-1,
+		0, m_currentlayer-1, m_staffcount);
 
 	HumNum duration = getDuration(chord);
-	cerr << "PARSING CHORD" << endl;
 	return starttime + duration;
 }
-
-
-
-
-//////////////////////////////
-//
-// Tool_mei2hum::parseRest --
-//
-
-HumNum Tool_mei2hum::parseRest(HumGrid& outdata, xml_node rest, HumNum starttime) {
-	if (!rest) {
-		return starttime;
-	}
-	if (strcmp(rest.name(), "rest") != 0) {
-		return starttime;
-	}
-
-	HumNum duration = getDuration(rest);
-	cerr << "PARSING REST" << endl;
-	return starttime + duration;
-}
-
 
 
 
@@ -783,9 +1582,67 @@ void Tool_mei2hum::getChildrenVector(vector<xml_node>& children,
 //
 
 void Tool_mei2hum::initialize(void) {
-	m_recipQ = getBoolean("recip");
-	m_stemsQ = getBoolean("stems");
+	m_recipQ   = getBoolean("recip");
+	m_stemsQ   = getBoolean("stems");
+	m_appLabel = getString("app-label");
 }
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::buildIdLinkMap -- Build table of startid and endid links between elemements.
+//
+// Reference: https://pugixml.org/docs/samples/traverse_walker.cpp
+//
+
+void Tool_mei2hum::buildIdLinkMap(xml_document& doc) {
+	class linkmap_walker : public pugi::xml_tree_walker {
+		public:
+			virtual bool for_each(pugi::xml_node& node) {
+				xml_attribute startid = node.attribute("startid");
+				xml_attribute endid = node.attribute("endid");
+				if (startid) {
+
+					string value = startid.value();
+					if (!value.empty()) {
+						if (value[0] == '#') {
+							value = value.substr(1, string::npos);
+						}
+					}
+					if (!value.empty()) {
+						(*startlinks)[value].push_back(node);
+					}
+
+				}
+				if (endid) {
+
+					string value = endid.value();
+					if (!value.empty()) {
+						if (value[0] == '#') {
+							value = value.substr(1, string::npos);
+						}
+					}
+					if (!value.empty()) {
+						(*stoplinks)[value].push_back(node);
+					}
+
+				}
+				return true; // continue traversal
+			}
+
+			map<string, vector<xml_node>>* startlinks = NULL;
+			map<string, vector<xml_node>>* stoplinks = NULL;
+	};
+
+	m_startlinks.clear();
+	m_stoplinks.clear();
+	linkmap_walker walker;
+	walker.startlinks = &m_startlinks;
+	walker.stoplinks = &m_stoplinks;
+	doc.traverse(walker);
+}
+
 
 
 // END_MERGE
