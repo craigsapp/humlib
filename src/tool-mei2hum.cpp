@@ -879,7 +879,7 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 	m_beamPrefix = "L";
 
 	xml_node lastnoterestchord;
-	for (int i=children.size()-1; i>=0; i--) {
+	for (int i=(int)children.size()-1; i>=0; i--) {
 		string nodename = children[i].name();
 		if (nodename == "note") {
 			lastnoterestchord = children[i];
