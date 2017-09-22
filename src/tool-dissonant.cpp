@@ -550,9 +550,9 @@ RECONSIDER:
 				oattackindexn = getNextPitchAttackIndex(grid, ovoiceindex, sliceindex);
 				break;
 			} else if (
-					((value == 3) && not ((((vpitch-lowestnote) % 7) == 2) ||
+					((value == 3) && !((((vpitch-lowestnote) % 7) == 2) ||
 					                     (((vpitch-lowestnote) % 7) == 4))) ||
-					((value == -3) && not ((((otherpitch-lowestnote) % 7) == 2) ||
+					((value == -3) && !((((otherpitch-lowestnote) % 7) == 2) ||
 					                      (((otherpitch-lowestnote) % 7) == 4)))
 					) {
 				// If the harmonic interval between two notes is a fourth and 
@@ -1115,10 +1115,10 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 				onlyWithValids = false;
 			} else if (((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
 				       ((thisInt > 0) && (thisMod7 == 3) && 
-				        not (((int(pitch-lowestnote) % 7) == 2) ||
+				        !(((int(pitch-lowestnote) % 7) == 2) ||
                  	         ((int(pitch-lowestnote) % 7) == 4))) ||
 				       ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 = -3.
-				        not (((int(opitch-lowestnote) % 7) == 2) ||
+				        !(((int(opitch-lowestnote) % 7) == 2) ||
                  	         ((int(opitch-lowestnote) % 7) == 4)))) &&
 				      ((results[j][olineindex] == m_labels[AGENT_BIN]) ||
 				       (results[j][olineindex] == m_labels[AGENT_TERN]) ||
@@ -1234,10 +1234,10 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 			// see if the pair creates a dissonant interval
 			if (!((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
 				 ((thisInt > 0) && (thisMod7 == 3) && 
-				  not (((int(pitch-lowestnote) % 7) == 2) ||
+				  !(((int(pitch-lowestnote) % 7) == 2) ||
                  	   ((int(pitch-lowestnote) % 7) == 4))) ||
 				 ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 == -3.
-				  not (((int(opitch-lowestnote) % 7) == 2) ||
+				  !(((int(opitch-lowestnote) % 7) == 2) ||
                  	   ((int(opitch-lowestnote) % 7) == 4))))) {
 				continue;
 			} else if (((intp == -1) || ant_down) && ((lev <= levn) && (dur <= durn)) &&
