@@ -877,7 +877,7 @@ void HumGrid::addMeasureLines(void) {
 		// what to do when endslice is NULL?
 		endslice = measure->getLastSpinedSlice(); // this has to come before next line
 		measure->push_back(mslice); // this has to come after the previous line
-		partcount = firstspined->size();
+		partcount = (int)firstspined->size();
 		mslice->resize(partcount);
 
 		for (int p=0; p<partcount; p++) {

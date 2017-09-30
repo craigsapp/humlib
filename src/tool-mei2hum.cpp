@@ -861,7 +861,6 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 	}
 
 	vector<HumNum> durations;
-	int layerindex = 0;
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
