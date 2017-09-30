@@ -621,6 +621,10 @@ bool HumGrid::manipulatorCheck(void) {
 			continue;
 		}
 		for (auto it = this->at(m)->begin(); it != this->at(m)->end(); it++) {
+			if (!(*it)->hasSpines()) {
+				// Don't monitor manipulators on no-spined lines.
+				continue;
+			}
 			s1 = *it;
 			auto nextone = it;
 			nextone++;
@@ -673,12 +677,20 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 	if (ice2 == NULL) {
 		return NULL;
 	}
+	if (!ice1->hasSpines()) {
+		return NULL;
+	}
+	if (!ice2->hasSpines()) {
+		return NULL;
+	}
 	p1count = (int)ice1->size();
 	p2count = (int)ice2->size();
 	if (p1count != p2count) {
 		cerr << "Warning: Something weird happend here" << endl;
 		cerr << "p1count = " << p1count << endl;
 		cerr << "p2count = " << p2count << endl;
+		cerr << "ICE1: " << ice1 << endl;
+		cerr << "ICE2: " << ice2 << endl;
 		cerr << "The above two values should be the same." << endl;
 		return NULL;
 	}
@@ -746,7 +758,7 @@ GridSlice* HumGrid::manipulatorCheck(GridSlice* ice1, GridSlice* ice2) {
 			if ((v1count == 0) && (v2count == 1)) {
 				// grace note at the start of the measure in another voice
 				// no longer can get here due to v1count min being 1.
-				token = new HumdrumToken("*G");
+				token = new HumdrumToken("*");
 				gv = new GridVoice(token, 0);
 				mslice->at(p)->at(s)->push_back(gv);
 			} else if (v1count == v2count) {
@@ -852,20 +864,26 @@ void HumGrid::addMeasureLines(void) {
 			// next measure is empty for some reason so give up
 			continue;
 		}
-		timestamp = nextmeasure->front()->getTimestamp();
-		mslice = new GridSlice(measure, timestamp, SliceType::Measures);
+		GridSlice* firstspined = nextmeasure->getFirstSpinedSlice();
+		timestamp = firstspined->getTimestamp();
 		if (measure->size() == 0) {
 			continue;
 		}
-		endslice = measure->back();
-		measure->push_back(mslice);
-		partcount = (int)nextmeasure->front()->size();
+
+		if (measure->getDuration() == 0) {
+			continue;
+		}
+		mslice = new GridSlice(measure, timestamp, SliceType::Measures);
+		// what to do when endslice is NULL?
+		endslice = measure->getLastSpinedSlice(); // this has to come before next line
+		measure->push_back(mslice); // this has to come after the previous line
+		partcount = firstspined->size();
 		mslice->resize(partcount);
 
 		for (int p=0; p<partcount; p++) {
 			part = new GridPart();
 			mslice->at(p) = part;
-			staffcount = (int)nextmeasure->front()->at(p)->size();
+			staffcount = (int)firstspined->at(p)->size();
 			mslice->at(p)->resize(staffcount);
 			for (int s=0; s<(int)staffcount; s++) {
 				staff = new GridStaff;
@@ -874,7 +892,12 @@ void HumGrid::addMeasureLines(void) {
 				// insert the minimum number of barlines based on the
 				// voices in the current and next measure.
 				vcount = (int)endslice->at(p)->at(s)->size();
-				nextvcount = (int)nextmeasure->front()->at(p)->at(s)->size();
+				if (firstspined) {
+					nextvcount = (int)firstspined->at(p)->at(s)->size();
+				} else {
+					// perhaps an empty measure?  This will cause problems.
+					nextvcount = 0;
+				}
 				lcount = vcount;
 				if (lcount > nextvcount) {
 					lcount = nextvcount;
@@ -965,8 +988,15 @@ void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
 		}
 	}
 
+	int start = 0;
+	if (!mdur.empty()) {
+		if (mdur[0] == 0) {
+			start = 1;
+		}
+	}
+
 	int counter = 1;
-	if (mdur[0] == tsdur[0]) {
+	if (mdur[start] == tsdur[start]) {
 		m_pickup = false;
 		counter++;
 		// add the initial barline later when creating HumdrumFile.
@@ -974,8 +1004,8 @@ void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
 		m_pickup = true;
 	}
 
-	for (int m=0; m<(int)this->size(); m++) {
-		if ((m == 0) && (mdur[m] == 0)) {
+	for (int m=start; m<(int)this->size(); m++) {
+		if ((m == start) && (mdur[m] == 0)) {
 			barnums[m] = counter-1;
 			continue;
 		} else if (mdur[m] == 0) {
@@ -1146,12 +1176,56 @@ void HumGrid::addNullTokensForGraceNotes(void) {
 
 //////////////////////////////
 //
+// HumGrid::addNullTokensForLayoutComments -- Avoid layout in multi-subspine
+//     regions from contracting to a single spine.
+//
+
+void HumGrid::addNullTokensForLayoutComments(void) {
+	// add null tokens for key changes in other voices
+	GridSlice *lastnote = NULL;
+	GridSlice *nextnote = NULL;
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		if (!m_allslices[i]->isLocalLayoutSlice()) {
+			continue;
+		}
+		// cerr << "PROCESSING " << m_allslices[i] << endl;
+		lastnote = NULL;
+		nextnote = NULL;
+
+		for (int j=i+1; j<(int)m_allslices.size(); j++) {
+			if (m_allslices[j]->isNoteSlice()) {
+				nextnote = m_allslices[j];
+				break;
+			}
+		}
+		if (nextnote == NULL) {
+			continue;
+		}
+
+		for (int j=i-1; j>=0; j--) {
+			if (m_allslices[j]->isNoteSlice()) {
+				lastnote = m_allslices[j];
+				break;
+			}
+		}
+		if (lastnote == NULL) {
+			continue;
+		}
+
+		FillInNullTokensForLayoutComments(m_allslices[i], lastnote, nextnote);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::addNullTokensForClefChanges -- Avoid clef in multi-subspine
 //     regions from contracting to a single spine.
 //
 
 void HumGrid::addNullTokensForClefChanges(void) {
-	// add null tokens for key changes in other voices
+	// add null tokens for clef changes in other voices
 	GridSlice *lastnote = NULL;
 	GridSlice *nextnote = NULL;
 	for (int i=0; i<(int)m_allslices.size(); i++) {
@@ -1196,15 +1270,9 @@ void HumGrid::addNullTokensForClefChanges(void) {
 void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
 		GridSlice* lastnote, GridSlice* nextnote) {
 
-	if (clefslice == NULL) {
-		return;
-	}
-	if (lastnote == NULL) {
-		return;
-	}
-	if (nextnote == NULL) {
-		return;
-	}
+	if (clefslice == NULL) { return; }
+	if (lastnote == NULL)  { return; }
+	if (nextnote == NULL)  { return; }
 
 	// cerr << "CHECKING CLEF SLICE: " << endl;
 	// cerr << "\tclef\t" << clefslice << endl;
@@ -1248,6 +1316,67 @@ void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
 			for (int i=0; i<diff; i++) {
 				GridVoice* gv = new GridVoice("*", 0);
 				clefslice->at(p)->at(s)->push_back(gv);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::FillInNullTokensForLayoutComments --
+//
+
+void HumGrid::FillInNullTokensForLayoutComments(GridSlice* layoutslice,
+		GridSlice* lastnote, GridSlice* nextnote) {
+
+	if (layoutslice == NULL) { return; }
+	if (lastnote == NULL)    { return; }
+	if (nextnote == NULL)    { return; }
+
+	// cerr << "CHECKING CLEF SLICE: " << endl;
+	// cerr << "\tclef\t" << layoutslice << endl;
+	// cerr << "\tlast\t" << lastnote << endl;
+	// cerr << "\tnext\t" << nextnote << endl;
+
+	int partcount = (int)layoutslice->size();
+	int staffcount;
+	int vgcount;
+	int v1count;
+	int v2count;
+
+	for (int p=0; p<partcount; p++) {
+		staffcount = (int)lastnote->at(p)->size();
+		for (int s=0; s<staffcount; s++) {
+			v1count = (int)lastnote->at(p)->at(s)->size();
+			v2count = (int)nextnote->at(p)->at(s)->size();
+			vgcount = (int)layoutslice->at(p)->at(s)->size();
+			// if (vgcount < 1) {
+			// 	vgcount = 1;
+			// }
+			if (v1count < 1) {
+				v1count = 1;
+			}
+			if (v2count < 1) {
+				v2count = 1;
+			}
+			// cerr << "p=" << p << "\ts=" << s << "\tv1count = " << v1count;
+			// cerr << "\tv2count = " << v2count;
+			// cerr << "\tvgcount = " << vgcount << endl;
+			if (v1count != v2count) {
+				// Note slices are expanding or contracting so do
+				// not try to adjust clef slice between them.
+				continue;
+			}
+			if (vgcount == v1count) {
+				// Grace note slice does not need to be adjusted.
+			}
+			int diff = v1count - vgcount;
+			// fill in a null for each empty slot in voice
+			for (int i=0; i<diff; i++) {
+				GridVoice* gv = new GridVoice("!", 0);
+				layoutslice->at(p)->at(s)->push_back(gv);
 			}
 		}
 	}
@@ -1376,6 +1505,7 @@ void HumGrid::addNullTokens(void) {
 	addNullTokensForGraceNotes();
 	adjustClefChanges();
 	addNullTokensForClefChanges();
+	addNullTokensForLayoutComments();
 }
 
 
@@ -1423,6 +1553,11 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 		return;
 	}
 
+	if (!m_allslices.at(slicei)->hasSpines()) {
+		// no extensions needed in non-spined slices.
+		return;
+	}
+
 	GridVoice* gv = m_allslices.at(slicei)->at(parti)->at(staffi)->at(voicei);
  	HTp token = gv->getToken();
 	if (!token) {
@@ -1455,7 +1590,9 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	if (timeleft != 0) {
 		// fill in null tokens for the required duration.
 		if (timeleft < 0) {
-			cerr << "ERROR: Negative duration" << endl;
+			cerr << "ERROR: Negative duration: " << timeleft << endl;
+			cerr << "\ttokendur = " << tokendur << endl;
+			cerr << "\tslicedur = " << slicedur << endl;
 			return;
 		}
 
@@ -1464,9 +1601,21 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 		int s = slicei+1;
 
 		while ((s < (int)m_allslices.size()) && (timeleft > 0)) {
+			if (!m_allslices.at(s)->hasSpines()) {
+				s++;
+				continue;
+			}
 			currts = nextts;
-			if (s < (int)m_allslices.size() - 1) {
-				nextts = m_allslices.at(s+1)->getTimestamp();
+			int nexts = 1;
+			while (s < (int)m_allslices.size() - nexts) {
+				if (!m_allslices.at(s+nexts)->hasSpines()) {
+					nexts++;
+					continue;
+				}
+				break;
+			}
+			if (s < (int)m_allslices.size() - nexts) {
+				nextts = m_allslices.at(s+nexts)->getTimestamp();
 			} else {
 				nextts = currts + m_allslices.at(s)->getDuration();
 			}

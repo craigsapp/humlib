@@ -53,9 +53,13 @@ class HumGrid : public vector<GridMeasure*> {
 		void insertStaffIndications        (HumdrumFile& outfile);
 		void addNullTokens                 (void);
 		void addNullTokensForGraceNotes    (void);
+		void addNullTokensForClefChanges   (void);
+		void addNullTokensForLayoutComments(void);
+
 		void FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
-		void addNullTokensForClefChanges  (void);
+		void FillInNullTokensForLayoutComments(GridSlice* layoutslice, GridSlice* lastnote,
+		                                   GridSlice* nextnote);
 		void FillInNullTokensForClefChanges (GridSlice* clefslice,
 		                                    GridSlice* lastnote, GridSlice* nextnote);
 		void adjustClefChanges             (void);

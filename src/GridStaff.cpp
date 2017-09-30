@@ -89,6 +89,15 @@ void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 	if (type == SliceType::Invalid) {
 		return;
 	}
+	if (type == SliceType::GlobalLayouts) {
+		return;
+	}
+	if (type == SliceType::GlobalComments) {
+		return;
+	}
+	if (type == SliceType::ReferenceRecords) {
+		return;
+	}
 
 	string nulltoken;
 	if (type < SliceType::_Data) {
@@ -193,6 +202,7 @@ ostream& operator<<(ostream& output, GridStaff* staff) {
 			}
 		}
 	}
+	output << (GridSide*) staff;
 	return output;
 }
 

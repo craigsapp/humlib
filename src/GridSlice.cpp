@@ -311,10 +311,18 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				}
 
 			}
+
+			if (!this->hasSpines()) {
+				// Don't add sides to non-spined lines
+				continue;
+			}
+
 			int maxvcount = getVerseCount(p, s);
 			int maxhcount = getHarmonyCount(p, s);
 			transferSides(*line, staff, empty, maxvcount, maxhcount);
 		}
+
+		// Transfer the sides at the part level
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
@@ -487,7 +495,6 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	// (only to parts, so hcount should only be zero):
 	int hcount = sides.getHarmonyCount();
 	HTp newtoken;
-
 
 	for (int i=0; i<vcount; i++) {
 		HTp verse = sides.getVerse(i);
@@ -730,11 +737,28 @@ ostream& operator<<(ostream& output, GridSlice* slice) {
 						output << " \"" << *token << "\" ";
 					}
 				}
-
 			}
+			output << " sside:" << (GridSide*)staff;
 		}
+		output << " pside:" << (GridSide*)part;
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GridSlice::hasSpines -- true if not a global comment or similar.
+//
+
+bool GridSlice::hasSpines(void) {
+	SliceType type = getType();
+	if (type < SliceType::_Spined) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 

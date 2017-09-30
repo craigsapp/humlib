@@ -46,6 +46,9 @@ class GridMeasure : public list<GridSlice*> {
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addDataToken   (const string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addGlobalLayout(const string& tok, HumNum timestamp);
+		GridSlice*   addGlobalComment(const string& tok, HumNum timestamp);
+		GridSlice*   appendGlobalLayout(const string& tok, HumNum timestamp);
 		bool         transferTokens (HumdrumFile& outfile, bool recip,
 		                             bool addbar);
 		HumGrid*     getOwner       (void);
@@ -77,6 +80,8 @@ class GridMeasure : public list<GridSlice*> {
 		bool         isInvisible(void);
 		bool         isSingleChordMeasure(void);
 		bool         isMonophonicMeasure(void);
+		GridSlice*   getLastSpinedSlice(void);
+		GridSlice*   getFirstSpinedSlice(void);
 	
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile);

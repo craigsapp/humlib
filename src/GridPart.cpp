@@ -78,6 +78,7 @@ ostream& operator<<(ostream& output, GridPart* part) {
 			}
 		}
 	}
+	output << " ppp " << (GridSide*) part;
 	return output;
 }
 

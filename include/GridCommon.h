@@ -25,7 +25,7 @@ namespace hum {
 // 
 
 enum class SliceType {
-				Notes,
+				Notes = 1,
 			_Duration,
 				GraceNotes,
 		_Data,
@@ -45,8 +45,9 @@ enum class SliceType {
 			Layouts,
 			LocalComments,
 	_Spined,
-		GlobalComment,
-		ReferenceRecord,
+		GlobalComments,
+		GlobalLayouts,
+		ReferenceRecords,
 	_Other,
 		Invalid
 };

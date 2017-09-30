@@ -49,6 +49,21 @@ GridMeasure::~GridMeasure(void) {
 
 //////////////////////////////
 //
+// GridMeasure::appendGlobalLayout --
+//
+
+GridSlice* GridMeasure::appendGlobalLayout(const string& tok, HumNum timestamp) {
+	GridSlice* gs = new GridSlice(this, timestamp, SliceType::GlobalLayouts, 1);
+	gs->addToken(tok, 0, 0, 0);
+	gs->setDuration(0);
+	this->push_back(gs);
+	return gs;
+}
+
+
+
+//////////////////////////////
+//
 // GridMeasure::addDataToken -- Add a data token in the data slice at the given
 //    timestamp (or create a new data slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
@@ -69,10 +84,12 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 		auto iterator = this->begin();
 		while (iterator != this->end()) {
 			if (!(*iterator)->isDataSlice()) {
+				iterator++;
 				continue;
 			} else if ((*iterator)->getTimestamp() == timestamp) {
 				target = *iterator;
 				target->addToken(tok, part, staff, voice);
+				gs = target;
 				break;
 			} else if ((*iterator)->getTimestamp() > timestamp) {
 				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
@@ -310,6 +327,45 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::addGlobalComment -- Add a global comment at the given
+//    timestamp (before any data line at the same timestamp).
+//
+
+GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
+	GridSlice* gs = NULL;
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::Clefs, 1);
+		gs->addToken(tok, 0, 0, 0);
+		this->push_back(gs);
+	} else { 
+		// search for existing data line (or any other type)  with same timestamp 
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				// found the correct timestamp on a data slice, so add the global comment
+				// before the data slice.
+				gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
+				gs->addToken(tok, 0, 0, 0);
+				this->insert(iterator, gs);
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
+				gs->addToken(tok, 0, 0, 0);
+				this->insert(iterator, gs);
+				break;
+			}
+			iterator++;
+		}
+	}
+	return gs;
+}
+
+
+
+//////////////////////////////
+//
 // GridMeasure::transferTokens --
 //
 
@@ -366,8 +422,12 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 			founddata = true;
 		}
 		if (founddata && addbar && !addedbar) {
-			appendInitialBarline(outfile);
-			addedbar = true;
+			if (getDuration() == 0) {
+				// do nothing
+			} else {
+				appendInitialBarline(outfile);
+				addedbar = true;
+			}
 		}
 		it->transferTokens(outfile, recip);
 	}
@@ -709,6 +769,52 @@ bool GridMeasure::isInvisible(void) {
 	}
 	return true;
 
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::getFirstSpinedSlice --
+//
+
+GridSlice* GridMeasure::getFirstSpinedSlice(void) {
+	GridSlice* output = NULL;
+	for (auto tslice : *this) {
+		if (!tslice->hasSpines()) {
+			continue;
+		}
+		output = tslice;
+		break;
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::getLastSpinedSlice --
+//
+
+GridSlice* GridMeasure::getLastSpinedSlice(void) {
+	for (auto rit = this->rbegin(); rit != this->rend(); rit++) {
+		GridSlice* slice = *rit;
+		if (!slice) {
+			continue;
+		}
+		if (slice->isGlobalLayout()) {
+			continue;
+		}
+		if (slice->isGlobalComment()) {
+			continue;
+		}
+		if (slice->isReferenceRecord()) {
+			continue;
+		}
+		return slice;
+	}
+	return NULL;
 }
 
 

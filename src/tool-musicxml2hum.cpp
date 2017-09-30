@@ -1610,10 +1610,11 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 	if (!node) {
 		return 0;
 	}
+	HumRegex hre;
 	xml_node child = node.first_child();
 	xml_node grandchild;
 	// int max;
-	int number;
+	int number = 0;
 	vector<xml_node> verses;
 	string syllabic;
 	string text;
@@ -1622,7 +1623,17 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 			child = child.next_sibling();
 			continue;
 		}
-		number = atoi(child.attribute("number").value());
+		string value = child.attribute("number").value();
+		if (hre.search(value, R"(verse(\d+))")) {
+			// Fix for Sibelius which uses number="part8verse5" format.
+			number = stoi(hre.getMatch(1));
+		} else {
+			number = atoi(child.attribute("number").value());
+		}
+		if (number > 100) {
+			cerr << "Error: verse number is too large: number" << endl;
+			return 0;
+		}
 		if (number == (int)verses.size() + 1) {
 			verses.push_back(child);
 		} else if ((number > 0) && (number < (int)verses.size())) {

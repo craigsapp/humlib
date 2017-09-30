@@ -46,6 +46,10 @@ namespace hum {
 	getChildrenVector(VARNAME, ELEMENT);
 
 
+#define DKHTP "Don't know how to process "
+
+#define CURRLOC " in measure " << m_currentMeasure
+
 
 //////////////////////////////
 //
@@ -56,6 +60,20 @@ Tool_mei2hum::Tool_mei2hum(void) {
 	define("app|app-label=s", "app label to follow");
 	define("r|recip=b", "output **recip spine");
 	define("s|stems=b", "include stems in output");
+
+	m_maxverse.resize(m_maxstaff);
+	fill(m_maxverse.begin(), m_maxverse.end(), 0);
+
+	m_measureDuration.resize(m_maxstaff);
+	fill(m_measureDuration.begin(), m_measureDuration.end(), 0);
+
+	m_currentMeterUnit.resize(m_maxstaff);
+	fill(m_currentMeterUnit.begin(), m_currentMeterUnit.end(), 4);
+
+	m_hasDynamics.resize(m_maxstaff);
+	fill(m_hasDynamics.begin(), m_hasDynamics.end(), false);
+
+	
 }
 
 
@@ -132,6 +150,23 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 
 	HumdrumFile outfile;
 
+
+	// Report verse counts for each staff to HumGrid:
+	for (int i=0; i<m_maxverse.size(); i++) {
+		if (m_maxverse[i] == 0) {
+			continue;
+		}
+		m_outdata.setVerseCount(i, 0, m_maxverse[i]);
+	}
+
+	// Report dynamic presence for each staff to HumGrid:
+	for (int i=0; i<m_hasDynamics.size(); i++) {
+		if (m_hasDynamics[i] == false) {
+			continue;
+		}
+		m_outdata.setDynamicsPresent(i);
+	}
+
 	m_outdata.transferTokens(outfile);
 
 	addHeaderRecords(outfile, doc);
@@ -175,7 +210,7 @@ void Tool_mei2hum::addExtMetaRecords(HumdrumFile& outfile, xml_document& doc) {
 			continue;
 		}
 		token = node.attribute("token").value();
-		if (token == "") {
+		if (token.empty()) {
 			continue;
 		}
 		outfile.insertLine(0, token);
@@ -201,7 +236,7 @@ void Tool_mei2hum::addExtMetaRecords(HumdrumFile& outfile, xml_document& doc) {
 			continue;
 		}
 		token = node.attribute("token").value();
-		if (token == "") {
+		if (token.empty()) {
 			continue;
 		}
 		outfile.appendLine(token);
@@ -239,6 +274,9 @@ void Tool_mei2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc) {
 	}
 	if (m_belowQ) {
 		outfile.appendLine("!!!RDF**kern: < = below");
+	}
+	if (m_editorialAccidentalQ) {
+		outfile.appendLine("!!!RDF**kern: i = editorial accidental");
 	}
 }
 
@@ -283,7 +321,7 @@ HumNum Tool_mei2hum::parseScore(xml_node score, HumNum starttime) {
 		} else if (nodename == "section") {
 			starttime = parseSection(item, starttime);
 		} else {
-			cerr << "Don't know how to process score/" << nodename << endl;
+			cerr << DKHTP << score.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -315,7 +353,7 @@ void Tool_mei2hum::parseScoreDef(xml_node scoreDef, HumNum starttime) {
 		} else if (nodename == "staffDef") {
 		    processStaffDef(item, starttime);
 		} else {
-			cerr << "Don't know how to process scoreDef/" << nodename << endl;
+			cerr << DKHTP << scoreDef.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -339,7 +377,7 @@ void Tool_mei2hum::processStaffGrp(xml_node staffGrp, HumNum starttime) {
 		} else if (nodename == "staffDef") {
 		    processStaffDef(item, starttime);
 		} else {
-			cerr << "Don't know how to process staffGrp/" << nodename << endl;
+			cerr << DKHTP << staffGrp.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -456,11 +494,17 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 
 	string clefshape;
 	string clefline;
+	string clefdis;
+	string clefdisplace;
 	string metercount;
 	string meterunit;
 	string staffnum;
 	string keysig;
 	string midibpm;
+
+	string nodename = element.name();
+
+	int nnum = 0;  // For staffnumber of element is staffDef.
 
 	for (auto atti = element.attributes_begin(); atti != element.attributes_end();
 				atti++) {
@@ -469,6 +513,10 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 			clefshape = atti->value();
 		} else if (attname == "clef.line") {
 			clefline = atti->value();
+		} else if (attname == "clef.dis") {
+			clefdis = atti->value();
+		} else if (attname == "clef.displace") {
+			clefdisplace = atti->value();
 		} else if (attname == "meter.count") {
 			metercount = atti->value();
 		} else if (attname == "meter.unit") {
@@ -477,13 +525,33 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 			keysig = atti->value();
 		} else if (attname == "midi.bpm") {
 			midibpm = atti->value();
+		} else if (attname == "n") {
+			nnum = atoi(atti->value());
 		}
+	}
+	if (nnum < 1) {
+		nnum = 1;
 	}
 
 	if ((!clefshape.empty()) && (!clefline.empty())) {
-		staffinfo.clef = "*clef" + clefshape + clefline;
+		staffinfo.clef = makeHumdrumClef(clefshape, clefline, clefdis, clefdisplace);
 	}
 	if ((!metercount.empty()) && (!meterunit.empty())) {
+		HumNum meterduration = stoi(metercount) * 4 / stoi(meterunit);
+		if (nodename == "scoreDef") {
+			for (int i=0; i<m_measureDuration.size(); i++) {
+				m_measureDuration.at(i) = meterduration;
+				m_currentMeterUnit.at(i) = stoi(meterunit);
+			}
+		} else if (nodename == "staffDef") {
+			if (nnum > 0) {
+				m_measureDuration.at(nnum-1) = meterduration;
+				m_currentMeterUnit.at(nnum-1) = stoi(meterunit);
+			}
+		} else {
+			cerr << DKHTP << element.name() << "@meter.count/@meter.unit" << CURRLOC << endl;
+		}
+
 		staffinfo.timesig = "*M" + metercount + "/" + meterunit;
 	}
 	if (!keysig.empty()) {
@@ -542,12 +610,33 @@ HumNum Tool_mei2hum::parseSection(xml_node section, HumNum starttime) {
 			starttime = parseMeasure(children[i], starttime);
 		} else if (nodename == "app") {
 			starttime = parseApp(children[i], starttime);
+		} else if (nodename == "sb") {
+			parseSb(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse section/" << nodename << endl;
+			cerr << DKHTP << section.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
 	return starttime;
+}
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseSb -- System (line) break in the music.
+//
+
+void Tool_mei2hum::parseSb(xml_node sb, HumNum starttime) {
+	NODE_VERIFY(sb, );
+	MAKE_CHILD_LIST(children, sb);
+
+	// There should be no children of sb (at least any that are currently known)
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		cerr << DKHTP << sb.name() << "/" << nodename << CURRLOC << endl;
+	}
+
+	m_outdata.back()->appendGlobalLayout("!!LO:LB", starttime QUARTER_CONVERT);
 }
 
 
@@ -584,7 +673,7 @@ HumNum Tool_mei2hum::parseApp(xml_node app, HumNum starttime) {
 	} else if (nodename == "rdg") {
 		starttime = parseRdg(target, starttime);
 	} else {
-		cerr << "Don't know how to parse app/" << nodename << endl;
+		cerr << DKHTP << app.name() << "/" << nodename << CURRLOC << endl;
 	}
 
 	return starttime;
@@ -608,7 +697,7 @@ HumNum Tool_mei2hum::parseLem(xml_node lem, HumNum starttime) {
 		} else if (nodename == "measure") {
 			starttime = parseMeasure(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse lem/" << nodename << endl;
+			cerr << DKHTP << lem.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -633,7 +722,7 @@ HumNum Tool_mei2hum::parseRdg(xml_node rdg, HumNum starttime) {
 		} else if (nodename == "measure") {
 			starttime = parseMeasure(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse rdg/" << nodename << endl;
+			cerr << DKHTP << rdg.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -651,55 +740,97 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 	NODE_VERIFY(measure, starttime);
 	MAKE_CHILD_LIST(children, measure);
 
+	string n = measure.attribute("n").value();
+	int nnum = 0;
+	if (n.empty()) {
+		cerr << "Warning: no measure number on measure element" << endl;
+	} else {
+		nnum = stoi(n);
+	}
+	if (nnum < 0) {
+		cerr << "Error: invalid measure number: " << nnum << endl;
+	}
+	m_currentMeasure = nnum;
+
 	GridMeasure* gm = m_outdata.addMeasureToBack();
 	gm->setTimestamp(starttime QUARTER_CONVERT);
 
-	vector<HumNum> durations(children.size(), 0);
-
+	vector<HumNum> durations;
+	
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename == "staff") {
-			durations[i] = parseStaff(children[i], starttime);
+			durations.push_back(parseStaff(children[i], starttime) - starttime);
 		} else if (nodename == "fermata") {
 			// handled in process processNodeStartLinks()
 		} else if (nodename == "slur") {
 			// handled in process processNode(Start|Stop)Links()
 		} else if (nodename == "tie") {
 			// handled in process processNode(Start|Stop)Links()
+		} else if (nodename == "arpeg") {
+			// handled in process processNode(Start|Stop)Links()
+		} else if (nodename == "dynam") {
+			parseDynam(children[i], starttime);
+		} else if (nodename == "dir") {
+			parseDir(children[i], starttime);
 		} else {
-			cerr << "Do not know how to parse measure/" << nodename << endl;
-		}
-	}
-
-	if (durations.empty()) {
-		return starttime;
-	}
-
-	HumNum firstdur = durations[0];
-	int staffnumber = 0;
-	for (int i=1; i<durations.size(); i++) {
-		if (strcmp(children[i].name(), "staff") != 0) {
-			continue;
-		}
-		staffnumber++;
-		if (durations[i] != firstdur) {
-			cerr << "Error: staves do not have same duration in measure" << endl;
-			cerr << "First staff duration: " << firstdur << endl;
-			cerr << "Staff " << staffnumber << "'s duration:  " << durations[i] << endl;
-			break;
+			cerr << DKHTP << measure.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
 	// Check that the duration of each layer is the same here.
 
+	if (durations.empty()) {
+		return starttime;
+	}
+
+	bool allequal = true;
+	for (int i=1; i<durations.size(); i++) {
+		if (durations[i] != durations[0]) {
+			allequal = false;
+			break;
+		}
+	}
+
+	HumNum measuredur = durations[0];
+	HumNum targetDur = m_measureDuration.at(0);
+	if (!allequal) {
+		measuredur = targetDur;
+		for (int i=0; i<durations.size(); i++) {
+			if (durations[i] == targetDur) {
+				continue;
+			}
+			if (durations[i] < targetDur) {
+				std::ostringstream message;
+				message << "Error: measure " << m_currentMeasure;
+				message << " staff " << i+1 << " is underfilled: ";
+				message << (durations[i] QUARTER_CONVERT).getFloat();
+				message << " quarter notes instead of ";
+				message << (targetDur QUARTER_CONVERT).getFloat() << ".";
+				cerr << message.str() << endl;
+				m_outdata.back()->addGlobalComment("!!" + message.str(), starttime QUARTER_CONVERT);
+			} else if (durations[i] > targetDur) {
+				std::ostringstream message;
+				message << "Error: measure " << m_currentMeasure;
+				message << " staff " << i+1 << " is overfilled: ";
+				message << (durations[i] QUARTER_CONVERT).getFloat();
+				message << " quarter notes instead of ";
+				message << (targetDur QUARTER_CONVERT).getFloat() << ".";
+				cerr << message.str() << endl;
+				m_outdata.back()->addGlobalComment("!!" + message.str(), starttime QUARTER_CONVERT);
+			}
+		}
+	}
+
 	gm->setTimestamp(starttime QUARTER_CONVERT);
-	gm->setDuration((firstdur - starttime) QUARTER_CONVERT);
+	gm->setDuration(measuredur QUARTER_CONVERT);
+	gm->setTimeSigDur(m_measureDuration[0]);
 
 	if (strcmp(measure.attribute("right").value(), "end") == 0) {
 		gm->setFinalBarlineStyle();
 	}
 
-	return durations[0];
+	return starttime + measuredur;
 }
 
 
@@ -715,7 +846,7 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 
 	string n = staff.attribute("n").value();
 	int nnum = 0;
-	if (n == "") {
+	if (n.empty()) {
 		cerr << "Warning: no staff number on staff element" << endl;
 	} else {
 		nnum = stoi(n);
@@ -723,24 +854,76 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 	if (nnum < 1) {
 		cerr << "Error: invalid staff number: " << nnum << endl;
 	}
-	m_currentstaff = nnum;
+	m_currentStaff = nnum;
 
-	vector<HumNum> durations(children.size(), 0);
+	if (m_maxStaffInFile < m_currentStaff) {
+		m_maxStaffInFile = m_currentStaff;
+	}
+
+	vector<HumNum> durations;
+	int layerindex = 0;
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename == "layer") {
-			durations[i] = parseLayer(children[i], starttime);
+			durations.push_back(parseLayer(children[i], starttime) - starttime);
 		} else {
-			cerr << "Don't know how to parse staff/" << nodename << endl;
+			cerr << DKHTP << staff.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
-	// Check that the duration of each staff is the same here.
+	// Check that the duration of each layer is the same here.
 
-	m_currentstaff = 0;
+	if (durations.empty()) {
+		return starttime;
+	}
 
-	return durations[0];
+	bool allequal = true;
+	for (int i=1; i<durations.size(); i++) {
+		if (durations[i] != durations[0]) {
+			allequal = false;
+			break;
+		}
+	}
+
+	HumNum staffdur = durations[0];
+
+	HumNum targetDur = m_measureDuration.at(m_currentStaff-1) / 4;;
+	if (!allequal) {
+		staffdur = targetDur;
+		for (int i=0; i<durations.size(); i++) {
+			if (durations[i] QUARTER_CONVERT == targetDur) {
+				continue;
+			}
+			if (durations[i] < targetDur) {
+				std::ostringstream message;
+				message << "Error: measure " << m_currentMeasure;
+				message << " staff " << m_currentStaff;
+				message << " layer " << i+1;
+				message << " is underfilled: ";
+				message << (durations[i] QUARTER_CONVERT).getFloat();
+				message << " quarter notes instead of ";
+				message << (targetDur QUARTER_CONVERT).getFloat() << ".";
+				cerr << message.str() << endl;
+				m_outdata.back()->addGlobalComment("!!" + message.str(), starttime QUARTER_CONVERT);
+			} else if (durations[i] > targetDur) {
+				std::ostringstream message;
+				message << "Error: measure " << m_currentMeasure;
+				message << " staff " << m_currentStaff;
+				message << " layer " << i+1;
+				message << " is overfilled: ";
+				message << (durations[i] QUARTER_CONVERT).getFloat();
+				message << " quarter notes instead of ";
+				message << (targetDur QUARTER_CONVERT).getFloat() << ".";
+				cerr << message.str() << endl;
+				m_outdata.back()->addGlobalComment("!!" + message.str(), starttime QUARTER_CONVERT);
+			}
+		}
+	}
+
+	m_currentStaff = 0;
+
+	return starttime + staffdur;
 }
 
 
@@ -754,9 +937,10 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime) {
 	NODE_VERIFY(layer, starttime)
 	MAKE_CHILD_LIST(children, layer);
 
+
 	string n = layer.attribute("n").value();
 	int nnum = 0;
-	if (n == "") {
+	if (n.empty()) {
 		cerr << "Warning: no layer number on layer element" << endl;
 	} else {
 		nnum = stoi(n);
@@ -764,9 +948,9 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime) {
 	if (nnum < 1) {
 		cerr << "Error: invalid layer number: " << nnum << endl;
 	}
-	m_currentlayer = nnum;
+	m_currentLayer = nnum;
 
-	vector<HumNum> durations(children.size(), 0);
+	HumNum  starting = starttime;
 	string dummy;
 
 	for (int i=0; i<(int)children.size(); i++) {
@@ -777,18 +961,24 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime) {
 			starttime = parseChord(children[i], starttime);
 		} else if (nodename == "rest") {
 			starttime = parseRest(children[i], starttime);
+		} else if (nodename == "space") {
+			starttime = parseRest(children[i], starttime);
+		} else if (nodename == "mRest") {
+			starttime = parseMRest(children[i], starttime);
 		} else if (nodename == "beam") {
 			starttime = parseBeam(children[i], starttime);
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
+		} else if (nodename == "clef") {
+			parseClef(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse layer/" << nodename << endl;
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
-	m_currentlayer = 0;
-
+	m_currentLayer = 0;
 	return starttime;
+// ggg
 }
 
 
@@ -856,7 +1046,7 @@ HumNum Tool_mei2hum::parseTuplet(xml_node tuplet, HumNum starttime) {
 		} else if (nodename == "beam") {
 			starttime = parseBeam(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse tuplet/" << nodename << endl;
+			cerr << DKHTP << tuplet.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -911,7 +1101,7 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
 		} else {
-			cerr << "Don't know how to parse beam/" << nodename << endl;
+			cerr << DKHTP << beam.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
@@ -927,9 +1117,17 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 
 HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, HumNum starttime) {
 	NODE_VERIFY(note, starttime)
+	MAKE_CHILD_LIST(children, note);
 
 	HumNum duration;
 	int dotcount;
+
+	string grace = note.attribute("grace").value();
+	if (!grace.empty()) {
+		// grace note so currently ignore.
+		cerr << "Warning: currently ignoring grace notes." << endl;
+ 		return starttime;
+	}
 
 	if (chord) {
 		duration = getDuration(chord);
@@ -943,24 +1141,187 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 
 	string recip = getHumdrumRecip(duration, dotcount);
 	string humpitch = getHumdrumPitch(note);
+	string editorial = getEditorialAccidental(children);
+	string cautionary = getCautionaryAccidental(children);
+	if (!editorial.empty()) {
+		humpitch += editorial;
+	}
+	if (!cautionary.empty()) {
+		humpitch += cautionary;
+	}
 
 	string articulations = getNoteArticulations(note, chord);
 
-	string tok = recip + humpitch + articulations + m_beamPrefix + m_beamPostfix;
+	string stemdir = note.attribute("stem.dir").value();
+	if (stemdir == "up") {
+		stemdir = "/";
+	} else if (stemdir == "down") {
+		stemdir = "\\";
+	} else {
+		stemdir = "";
+	}
+
+	string tok = recip + humpitch + articulations + stemdir + m_beamPrefix + m_beamPostfix;
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 
 	processLinkedNodes(tok, note);
 	processFermataAttribute(tok, note);
 
+	GridSlice* dataslice = NULL;
+
 	if (!chord) {
-		m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentstaff-1,
-			0, m_currentlayer-1, m_staffcount);
+		dataslice = m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT,
+				m_currentStaff-1, 0, m_currentLayer-1, m_staffcount);
 	} else {
 		output += tok;
 	}
 
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if ((nodename == "verse") && (dataslice != NULL)) {
+			parseVerse(children[i], dataslice->at(m_currentStaff-1)->at(0));
+		} else if (nodename == "artic") {
+			// handled elsewhere: don't do anything
+		} else if (nodename == "accid") {
+			// handled elsewhere: don't do anything
+		} else {
+			cerr << DKHTP << note.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+
 	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getEditorialAccidental --
+//
+
+string Tool_mei2hum::getEditorialAccidental(vector<xml_node>& children) {
+	string output;
+	if (children.empty()) {
+		return output;
+	}
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename != "accid") {
+			continue;
+		}
+		string function = children[i].attribute("func").value();
+		if (function != "edit") {
+			continue;
+		}
+		string accid = children[i].attribute("accid").value();
+		if (accid.empty()) {
+			continue;
+		}
+		if (accid == "n") {
+			output = "ni";
+		} else if (accid == "s") {
+			output = "#i";
+		} else if (accid == "f") {
+			output = "-i";
+		} else if (accid == "ff") {
+			output = "--i";
+		} else if (accid == "ss") {
+			output = "##i";
+		} else if (accid == "x") {
+			output = "##i";
+		} else if (accid == "nf") {
+			output = "-i";
+		} else if (accid == "ns") {
+			output = "#i";
+		} else {
+			cerr << "Don't know how to interpret " << accid << " accidental" << endl;
+		}
+		m_editorialAccidentalQ = true;
+		break;
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getCautionaryAccidental --
+// Such as:
+//     <accid accid="n" func="caution" />
+//
+
+string Tool_mei2hum::getCautionaryAccidental(vector<xml_node>& children) {
+	string output;
+	if (children.empty()) {
+		return output;
+	}
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename != "accid") {
+			continue;
+		}
+		string function = children[i].attribute("func").value();
+		if (function != "caution") {
+			continue;
+		}
+		string accid = children[i].attribute("accid").value();
+		if (accid.empty()) {
+			continue;
+		}
+		if (accid == "n") {
+			output = "n";
+		} else if (accid == "s") {
+			output = "#X";
+		} else if (accid == "f") {
+			output = "-X";
+		} else if (accid == "ff") {
+			output = "--X";
+		} else if (accid == "ss") {
+			output = "##X";
+		} else if (accid == "x") {
+			output = "##X";
+		} else if (accid == "nf") {
+			output = "-X";
+		} else if (accid == "ns") {
+			output = "#X";
+		} else {
+			cerr << "Don't know how to interpret " << accid << " accidental" << endl;
+		}
+		break;
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseMRest -- Full-measure rest.
+//
+
+HumNum Tool_mei2hum::parseMRest(xml_node mrest, HumNum starttime) {
+	HumNum duration = m_measureDuration.at(m_currentStaff-1);
+	duration /= 4;
+	int dotcount = 0;
+	string recip = getHumdrumRecip(duration, dotcount);
+	string tok = recip + "r";
+	// Add fermata on whole-measure rest if needed.	
+
+	// Deal here with calculating number of dots needed for
+	// measure duration.
+
+	m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT,
+			m_currentStaff-1, 0, m_currentLayer-1, m_staffcount);
+
+	return starttime + duration; // convert to whole-note units
 }
 
 
@@ -971,21 +1332,36 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 //
 
 HumNum Tool_mei2hum::parseRest(xml_node rest, HumNum starttime) {
-	NODE_VERIFY(rest, starttime)
+	if (!rest) {
+		return starttime;
+	}
+	string nodename = rest.name();
+	if (!((nodename == "rest") || (nodename == "space"))) {
+		return starttime;
+	}
+	if (nodename == "rest") {
+		ELEMENT_DEBUG_STATEMENT(rest)
+	} else if (nodename == "space") {
+		ELEMENT_DEBUG_STATEMENT(space)
+	}
 
 	HumNum duration = getDuration(rest);
 	int dotcount = getDotCount(rest);
 	string recip = getHumdrumRecip(duration, dotcount);
+	string invisible;
+	if (nodename == "space") {
+		invisible = "yy";
+	}
 
-	string output = recip + "r" + m_beamPrefix + m_beamPostfix;
+	string output = recip + "r" + invisible + m_beamPrefix + m_beamPostfix;
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 
 	processLinkedNodes(output, rest);
 	processFermataAttribute(output, rest);
 
-	m_outdata.back()->addDataToken(output, starttime QUARTER_CONVERT, m_currentstaff-1,
-		0, m_currentlayer-1, m_staffcount);
+	m_outdata.back()->addDataToken(output, starttime QUARTER_CONVERT,
+			m_currentStaff-1, 0, m_currentLayer-1, m_staffcount);
 
 	return starttime + duration;
 }
@@ -1180,11 +1556,50 @@ void Tool_mei2hum::processNodeStartLinks(string& output, xml_node node,
 			parseSlurStart(output, node, nodelist[i]);
 		} else if (nodename == "tie") {
 			parseTieStart(output, node, nodelist[i]);
+		} else if (nodename == "arpeg") {
+			parseArpeg(output, node, nodelist[i]);
 		} else {
-			cerr << "Don't know how to parse " << nodename
+			cerr << DKHTP << nodename
 			     << " element in processNodeStartLinks()" << endl;
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseArpeg -- Only handles single chord arpeggiation for now
+//    (ignores @endid).
+//
+
+void Tool_mei2hum::parseArpeg(string& output, xml_node node, xml_node arpeg) {
+	NODE_VERIFY(arpeg, )
+
+	if (strcmp(arpeg.attribute("endid").value(), "") != 0) {
+		cerr << "Warning: multi-note arpeggios are not yet handled in the converter." << endl;
+	}
+
+	string nodename = node.name();
+	if (nodename == "note") {
+		output += ':';
+	} else if (nodename == "chord") {
+		string temp = output;
+		output.clear();
+		for (int i=0; i<(int)temp.size(); i++) {
+			if (temp[i] == ' ') {
+				output += ": ";
+			} else {
+				output += temp[i];
+			}
+		}
+		output += ':';
+	} else {
+		cerr << DKHTP << "an arpeggio attached to a "
+		     << nodename << " element" << endl;
+		return;
+	}
+
 }
 
 
@@ -1203,7 +1618,7 @@ void Tool_mei2hum::processNodeStopLinks(string& output, xml_node node,
 		} else if (nodename == "tie") {
 			parseTieStop(output, node, nodelist[i]);
 		} else {
-			cerr << "Don't know how to parse " << nodename
+			cerr << DKHTP << nodename
 			     << " element in processNodeStopLinks()" << endl;
 		}
 	}
@@ -1224,7 +1639,7 @@ void Tool_mei2hum::parseSlurStart(string& output, xml_node node, xml_node slur) 
 	} else if (nodename == "chord") {
 		output = "(" + setPlacement(slur.attribute("curvedir").value()) + output;
 	} else {
-		cerr << "Don't know what to do with a slur start attached to a "
+		cerr << DKHTP << "a slur start attached to a "
 		     << nodename << " element" << endl;
 		return;
 	}
@@ -1246,7 +1661,7 @@ void Tool_mei2hum::parseSlurStop(string& output, xml_node node, xml_node slur) {
 	} else if (nodename == "chord") {
 		output += ")";
 	} else {
-		cerr << "Don't know what to do with a tie end attached to a "
+		cerr << DKHTP << "a tie end attached to a "
 		     << nodename << " element" << endl;
 		return;
 	}
@@ -1279,7 +1694,7 @@ void Tool_mei2hum::parseTieStart(string& output, xml_node node, xml_node tie) {
 	if (nodename == "note") {
 		output = "[" + output;
 	} else {
-		cerr << "Don't know what to do with a tie start attached to a "
+		cerr << DKHTP << "a tie start attached to a "
 		     << nodename << " element" << endl;
 		return;
 	}
@@ -1312,7 +1727,7 @@ void Tool_mei2hum::parseTieStop(string& output, xml_node node, xml_node tie) {
 	if (nodename == "note") {
 		output += "]";
 	} else {
-		cerr << "Don't know what to do with a tie end attached to a "
+		cerr << DKHTP << "a tie end attached to a "
 		     << nodename << " element" << endl;
 		return;
 	}
@@ -1337,7 +1752,7 @@ void Tool_mei2hum::parseFermata(string& output, xml_node node, xml_node fermata)
 	} else if (nodename == "rest") {
 		output += ';';
 	} else {
-		cerr << "Don't know what to do with a fermata attached to a "
+		cerr << DKHTP << "a fermata attached to a "
 		     << nodename << " element" << endl;
 		return;
 	}
@@ -1492,6 +1907,10 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 		return 0;
 	}
 
+	if (output == 0) {
+		cerr << "Error: zero duration for note" << endl;
+	}
+
 	int dotcount;
 	string dots = element.attribute("dots").value();
 	if (dots == "") {
@@ -1522,6 +1941,164 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 
 //////////////////////////////
 //
+// Tool_mei2hum::parseVerse --
+//
+
+void Tool_mei2hum::parseVerse(xml_node verse, GridStaff* staff) {
+	NODE_VERIFY(verse, )
+	MAKE_CHILD_LIST(children, verse);
+
+	string n = verse.attribute("n").value();
+	int nnum = 1;
+	if (n.empty()) {
+		cerr << "Warning: no layer number on layer element" << endl;
+	} else {
+		nnum = stoi(n);
+	}
+	if (nnum < 1) {
+		cerr << "Warning: invalid layer number: " << nnum << endl;
+		cerr << "Setting it to 1." << endl;
+		nnum = 1;
+	}
+
+	string versetext;
+	int sylcount = 0;
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "syl") {
+			if (sylcount > 0) {
+				versetext += " ";
+			}
+			sylcount++;
+			versetext += parseSyl(children[i]);
+		} else {
+			cerr << DKHTP << verse.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+	if (versetext == "") {
+		// nothing to store
+		return;
+	}
+
+	staff->setVerse(nnum-1, versetext);
+	reportVerseNumber(nnum, m_currentStaff-1);
+
+	return;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::reportVerseNumber --
+//
+
+void Tool_mei2hum::reportVerseNumber(int pmax, int staffindex) {
+	if (staffindex < 0) {
+		return;
+	}
+	if (staffindex >= (int)m_maxverse.size()) {
+		return;
+	}
+	if (m_maxverse.at(staffindex) < pmax) {
+		m_maxverse[staffindex] = pmax;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseSyl --
+//
+
+string Tool_mei2hum::parseSyl(xml_node syl) {
+	NODE_VERIFY(syl, "")
+	MAKE_CHILD_LIST(children, syl);
+
+	string text = syl.child_value();
+	for (int i=0; i<(int)text.size(); i++) {
+		if (text[i] == '_') {
+			text[i] = ' ';
+		}
+	}
+
+	string wordpos = syl.attribute("wordpos").value();
+	if (wordpos == "i") {
+		text = text + "-";
+	} else if (wordpos == "m") {
+		text = "-" + text + "-";
+	} else if (wordpos == "t") {
+		text = "-" + text;
+	}
+
+	return text;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseClef --
+//
+//
+
+void Tool_mei2hum::parseClef(xml_node clef, HumNum starttime) {
+	NODE_VERIFY(clef, )
+
+	string shape = clef.attribute("shape").value();
+	string line = clef.attribute("line").value();
+	string clefdis = clef.attribute("clef.dis").value();
+	string clefdisplace = clef.attribute("clef.dis.place").value();
+
+	string tok = makeHumdrumClef(shape, line, clefdis, clefdisplace);
+
+	m_outdata.back()->addClefToken(tok, starttime QUARTER_CONVERT,
+			m_currentStaff-1, 0, 0, m_staffcount);
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::makeHumdrumClef --
+//
+// Example:
+//     <clef shape="G" line="2" clef.dis="8" clef.dis.place="below" />
+//
+
+string Tool_mei2hum::makeHumdrumClef(const string& shape,
+		const string& line, const string& clefdis, const string& clefdisplace) {
+	string output = "*clef" + shape;
+	if (!clefdis.empty()) {
+		int number = stoi(clefdis);
+		int count = 0;
+		if (number == 8) {
+			count = 1;
+		} else if (number == 15) {
+			count = 2;
+		}
+		if (clefdisplace != "above") {
+			count = -count;
+		}
+		switch (count) {
+			case 1: output += "^"; break;
+			case 2: output += "^^"; break;
+			case -1: output += "v"; break;
+			case -2: output += "vv"; break;
+		}
+	}
+	output += line;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_mei2hum::parseChord --
 //
 
@@ -1542,15 +2119,15 @@ HumNum Tool_mei2hum::parseChord(xml_node chord, HumNum starttime) {
 		} else if (nodename == "artic") {
 			// This is handled within parseNote();
 		} else {
-			cerr << "Don't know how to parse chord/" << nodename << endl;
+			cerr << DKHTP << chord.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
 	processLinkedNodes(tok, chord);
 	processFermataAttribute(tok, chord);
 
-	m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentstaff-1,
-		0, m_currentlayer-1, m_staffcount);
+	m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentStaff-1,
+		0, m_currentLayer-1, m_staffcount);
 
 	HumNum duration = getDuration(chord);
 	return starttime + duration;
@@ -1641,6 +2218,256 @@ void Tool_mei2hum::buildIdLinkMap(xml_document& doc) {
 	walker.startlinks = &m_startlinks;
 	walker.stoplinks = &m_stoplinks;
 	doc.traverse(walker);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseDir -- Meter cannot change in middle of measure.
+//     Need to implement @startid version.
+//
+// Example:
+//    <dir xml:id="dir-L408F3" place="below" staff="1" tstamp="2.0">con espressione</dir>
+//
+// or with normal font specified:
+//    <dir xml:id="dir-L7F1" staff="1" tstamp="2.000000">
+//       <rend xml:id="rend-0000001696821523" fontstyle="normal">test</rend>
+//    </dir>
+//
+// bold font:
+//   <dir xml:id="dir-L25F3" place="above" staff="1" tstamp="3.000000">
+//      <rend xml:id="rend-0000001714819172" fontstyle="normal" fontweight="bold">comment</rend>
+//   </dir>
+//
+
+void Tool_mei2hum::parseDir(xml_node dir, HumNum starttime) {
+	NODE_VERIFY(dir, )
+	MAKE_CHILD_LIST(children, dir);
+
+	string font = "i";  // italic by default in verovio
+
+	string placement = ""; // a = above, b = below
+
+	string place = dir.attribute("place").value();
+	if (place == "above") {
+		placement = "a:";
+	}
+	// Below is the default in Humdrum layout commands.
+
+	string text;
+
+	if (!children.empty()) { // also includes the above text node, but only looking at <rend>.
+		int count = 0;
+		for (int i=0; i<(int)children.size(); i++) {
+			string nodename = children[i].name();
+			if (nodename == "rend") {
+				if (count) {
+					text += " ";
+				}
+				count++;
+				text += children[i].child_value();
+				if (strcmp(children[i].attribute("fontstyle").value(), "normal") == 0) {
+					font = "";  // normal is default in Humdrum layout
+				}
+				if (strcmp(children[i].attribute("fontweight").value(), "bold") == 0) {
+					font += "B";  // normal is default in Humdrum layout
+				}
+			} else if (nodename == "") {
+				// text node
+				if (count) {
+					text += " ";
+				}
+				count++;
+				text += children[i].value();
+			} else {
+				cerr << DKHTP << dir.name() << "/" << nodename << CURRLOC << endl;
+			}
+		}
+	}
+
+	if (text.empty()) {
+		return;
+	}
+
+	string message = "!LO:TX:";
+	message += placement;
+	if (!font.empty()) {
+		message += font + ":";
+	}
+	message += "t=" + cleanDirText(text);
+
+	string ts = dir.attribute("tstamp").value();
+	if (ts.empty()) {
+		cerr << "Error: no timestamp on dir element and can't currently processes with @startid." << endl;
+		return;
+	}
+
+	int staffnum = dir.attribute("staff").as_int();
+	if (staffnum == 0) {
+		cerr << "Error: staff number required on dir element in measure " << m_currentMeasure  << endl;
+		return;
+	}
+	double meterunit = m_currentMeterUnit[staffnum - 1];
+
+	double tsd = (stof(ts)-1) * 4.0 / meterunit;
+	GridMeasure* gm = m_outdata.back();
+	double tsm = gm->getTimestamp().getFloat();
+	bool foundslice = false;
+	GridSlice* gs;
+	for (auto gsit = gm->begin(); gsit != gm->end(); gsit++) {
+		gs = *gsit;
+		if (!gs->isDataSlice()) {
+			continue;
+		}
+		double gsts = gs->getTimestamp().getFloat();
+		double difference = (gsts-tsm) - tsd;
+		if (!(fabs(difference) < 0.0001)) {
+			continue;
+		}
+		// GridVoice* voice = gs->at(staffnum-1)->at(0)->at(0);
+		// HTp token = voice->getToken();
+		// if (token != NULL) {
+		// 	token->setValue("LO", "TX", "t", text);	
+		// } else {
+		// 	cerr << "Strange null-token error while inserting dir element." << endl;
+		// }
+		foundslice = true;
+
+		// Found data line which should prefixed with a layout line
+		// should be done with HumHash post-processing, but do it manually for now.
+	
+		auto previousit = gsit;
+		previousit--;
+		if (previousit == gm->end()) {
+			previousit = gsit;
+		}
+		auto previous = *previousit;
+		if (previous->isLayoutSlice()) {
+			GridVoice* voice = previous->at(staffnum-1)->at(0)->at(0);
+			HTp tok = voice->getToken();
+			if ((tok == NULL) || tok->isNull()) {
+				tok->setText(message);
+				break;
+			}
+		}
+
+		// Insert a layout slice in front of current data slice.
+		GridSlice* ngs = new GridSlice(gm, gs->getTimestamp(), SliceType::Layouts, m_maxStaffInFile);
+		int parti = staffnum - 1;
+		int staffi = 0;
+		int voicei = 0;
+		ngs->addToken(message, parti, staffi, voicei);
+		gm->insert(gsit, ngs);
+
+// ggg
+
+		break;
+	}
+	if (!foundslice) {
+		cerr << "Warning: dir elements not occuring at note/rest times are not yet supported" << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::cleanDirText -- convert ":" to "&colon;".
+//     Remove tabs and newlines, and trim spaces.  Maybe allow
+//     newlines using "\n" and allow font changes in the future.
+//     Do accents later perhaps or monitor for UTF-8.
+//
+
+string Tool_mei2hum::cleanDirText(const string& input) {
+	string output;
+	output.reserve(input.size() + 8);
+	bool foundstart = false;
+	for (int i=0; i<(int)input.size(); i++) {
+		if ((!foundstart) && std::isspace(input[i])) {
+			continue;
+		}
+		foundstart = true;
+		if (input[i] == ':') {
+			output += "&colon;";
+		} else if (input[i] == '\t') {
+			output += ' ';
+		} else if (input[i] == '\n') {
+			output += ' ';
+		} else {
+			output += input[i];
+		}
+	}
+	while ((!output.empty()) && (output.back() == ' ')) {
+		output.pop_back();
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseDynam --
+//
+// Example:
+//     <dynam staff="1" tstamp="1.000000">p</dynam>
+//
+
+void Tool_mei2hum::parseDynam(xml_node dynam, HumNum starttime) {
+	NODE_VERIFY(dynam, )
+
+	string text = dynam.child_value();
+	// maybe check for valid text content here.
+	if (text.empty()) {
+		return;
+	}
+
+	string startid = dynam.attribute("startid").value();
+
+	int staffnum = dynam.attribute("staff").as_int();
+	if (staffnum == 0) {
+		cerr << "Error: staff number required on dynam element" << endl;
+		return;
+	}
+	double meterunit = m_currentMeterUnit[staffnum - 1];
+
+	if (!startid.empty()) {
+		// Dynamic is (or at least should) be attached directly
+		// do a note, so it is handled elsewhere.
+		cerr << "Warning DYNAMIC " << text << " is not yet processed." << endl;
+		return;
+	}
+
+	string ts = dynam.attribute("tstamp").value();
+	if (ts.empty()) {
+		cerr << "Error: no timestamp on dynam element" << endl;
+		return;
+	}
+	double tsd = (stof(ts)-1) * 4.0 / meterunit;
+	GridMeasure* gm = m_outdata.back();
+	double tsm = gm->getTimestamp().getFloat();
+	bool foundslice = false;
+	for (auto gs : *gm) {
+		if (!gs->isDataSlice()) {
+			continue;
+		}
+		double gsts = gs->getTimestamp().getFloat();
+		double difference = (gsts-tsm) - tsd;
+		if (!(fabs(difference) < 0.0001)) {
+			continue;
+		}
+		GridPart* part = gs->at(staffnum-1);
+		part->setDynamics(text);
+		m_outdata.setDynamicsPresent(staffnum-1);
+		foundslice = true;
+		break;
+	}
+	if (!foundslice) {
+		cerr << "Warning: dynamics not attched to system events are not yet supported" << endl;
+	}
+
 }
 
 
