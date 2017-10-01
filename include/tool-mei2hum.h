@@ -168,6 +168,8 @@ class Tool_mei2hum : public HumTool {
 		                              const string& clefdis,
 		                              const string& clefdisplace);
 		string cleanDirText          (const string& input);
+		string cleanReferenceRecordText(const string& input);
+		bool   beamIsValid           (vector<xml_node>& beamlist);
 
 	private:
 		Options        m_options;
