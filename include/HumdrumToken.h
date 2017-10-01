@@ -147,6 +147,7 @@ class HumdrumToken : public string, public HumHash {
 		string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
+		bool     noteInLowerSubtrack       (void);
 		string   getTrackString            (void) const;
 		int      getSubtokenCount          (const string& separator = " ") const;
 		string   getSubtoken               (int index,

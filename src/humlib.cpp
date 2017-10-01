@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 30 20:32:47 PDT 2017
+// Last Modified: Sat Sep 30 21:06:58 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19861,6 +19861,48 @@ bool HumdrumToken::isNull(void) const {
 
 int HumdrumToken::getSubtrack(void) const {
 	return m_address.getSubtrack();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::noteInLowerSubtrack -- Return true if the note
+//     is attacked or sustained with another note in a lower layer.
+//     This is for using in hum2mei conversion to avoid a bug in
+//     verovio related to lyrics in layers where the notes are a
+//     second apart.
+//
+
+bool HumdrumToken::noteInLowerSubtrack(void) {
+	int subtrack = this->getSubtrack();
+	if (subtrack <= 1) {
+		return false;
+	}
+	int field = this->getFieldIndex();
+	int track = this->getTrack();
+
+	HumdrumLine* owner = this->getOwner();
+	if (owner == NULL) {
+		return false;
+	}
+
+	for (int i=field-1; i>=0; i--) {
+		HTp xtoken = owner->token(i);
+		int xtrack = xtoken->getTrack();
+		if (xtrack != track) {
+			return false;
+		}
+		if (xtoken->isNull()) {
+			continue;
+		}
+		if (xtoken->find("r") != string::npos) {
+			continue;
+		}
+		return true;
+	}
+
+	return false;
 }
 
 
