@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 30 21:06:58 PDT 2017
+// Last Modified: Sun Oct  1 15:19:55 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4412,6 +4412,7 @@ class Tool_mei2hum : public HumTool {
 		void   addHeaderRecords      (HumdrumFile& outfile, xml_document& doc);
 		void   parseVerse            (xml_node verse, GridStaff* staff);
 		string parseSyl              (xml_node syl);
+		void   parseSylAttribute     (const string& attsyl, GridStaff* staff);
 		void   reportVerseNumber     (int pmax, int staffindex);
 		string getEditorialAccidental(vector<xml_node>& children);
 		string getCautionaryAccidental(vector<xml_node>& children);
@@ -4421,6 +4422,7 @@ class Tool_mei2hum : public HumTool {
 		                              const string& clefdisplace);
 		string cleanDirText          (const string& input);
 		string cleanReferenceRecordText(const string& input);
+		string cleanVerseText        (const string& input);
 		bool   beamIsValid           (vector<xml_node>& beamlist);
 
 	private:

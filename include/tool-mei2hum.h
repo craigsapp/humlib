@@ -160,6 +160,7 @@ class Tool_mei2hum : public HumTool {
 		void   addHeaderRecords      (HumdrumFile& outfile, xml_document& doc);
 		void   parseVerse            (xml_node verse, GridStaff* staff);
 		string parseSyl              (xml_node syl);
+		void   parseSylAttribute     (const string& attsyl, GridStaff* staff);
 		void   reportVerseNumber     (int pmax, int staffindex);
 		string getEditorialAccidental(vector<xml_node>& children);
 		string getCautionaryAccidental(vector<xml_node>& children);
@@ -169,6 +170,7 @@ class Tool_mei2hum : public HumTool {
 		                              const string& clefdisplace);
 		string cleanDirText          (const string& input);
 		string cleanReferenceRecordText(const string& input);
+		string cleanVerseText        (const string& input);
 		bool   beamIsValid           (vector<xml_node>& beamlist);
 
 	private:

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 30 21:06:58 PDT 2017
+// Last Modified: Sun Oct  1 15:19:55 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -37769,10 +37769,12 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 		output += tok;
 	}
 
+	bool hasverse = false;
 
 	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if ((nodename == "verse") && (dataslice != NULL)) {
+			hasverse = true;
 			parseVerse(children[i], dataslice->at(m_currentStaff-1)->at(0));
 		} else if (nodename == "artic") {
 			// handled elsewhere: don't do anything
@@ -37783,8 +37785,61 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 		}
 	}
 
+	if (!hasverse) {
+		string attsyl = note.attribute("syl").value();
+		if (!attsyl.empty()) {
+			parseSylAttribute(attsyl, dataslice->at(m_currentStaff-1)->at(0));
+		}
+	}
 
 	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseSylAttribute -- 
+//
+
+void Tool_mei2hum::parseSylAttribute(const string& attsyl, GridStaff* staff) {
+	vector<string> pieces(1);
+	int length = (int)attsyl.size();
+	if (length == 0) {
+		return;
+	}
+	if (length == 1) {
+		pieces[0] += attsyl;
+	} else {
+		for (int i=0; i<length-2; i++) {
+			if ((attsyl[i] == '/') && (attsyl[i+1] == '/')) {
+				pieces.emplace_back("");
+				i++;
+			} else {
+				pieces.back() += attsyl[i];
+			}
+		}
+		if ((attsyl[length-1] != '/') && (attsyl[length-2] != '/')) {
+			pieces.back() += attsyl[length-2];
+			pieces.back() += attsyl.back();
+		}
+	}
+
+	if ((pieces.size() == 1) && (pieces[0].empty())) {
+		return;
+	}
+
+	for (int i=0; i<(int)pieces.size(); i++) {
+		pieces[i] = cleanVerseText(pieces[i]);
+	}
+
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i].empty()) {
+			continue;
+		}
+		staff->setVerse(i, pieces[i]);
+		reportVerseNumber(i+1, m_currentStaff-1);
+	}
 }
 
 
@@ -38533,7 +38588,7 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 
 //////////////////////////////
 //
-// Tool_mei2hum::parseVerse --
+// Tool_mei2hum::parseVerse -- 
 //
 
 void Tool_mei2hum::parseVerse(xml_node verse, GridStaff* staff) {
@@ -38983,6 +39038,39 @@ string Tool_mei2hum::cleanDirText(const string& input) {
 		if (input[i] == ':') {
 			output += "&colon;";
 		} else if (input[i] == '\t') {
+			output += ' ';
+		} else if (input[i] == '\n') {
+			output += ' ';
+		} else {
+			output += input[i];
+		}
+	}
+	while ((!output.empty()) && (output.back() == ' ')) {
+		output.pop_back();
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::cleanVerseText -- 
+//     Remove tabs and newlines, and trim spaces. 
+//     Do accents later perhaps or monitor for UTF-8.
+//
+
+string Tool_mei2hum::cleanVerseText(const string& input) {
+	string output;
+	output.reserve(input.size() + 8);
+	bool foundstart = false;
+	for (int i=0; i<(int)input.size(); i++) {
+		if ((!foundstart) && std::isspace(input[i])) {
+			continue;
+		}
+		foundstart = true;
+		if (input[i] == '\t') {
 			output += ' ';
 		} else if (input[i] == '\n') {
 			output += ' ';
