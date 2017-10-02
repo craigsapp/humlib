@@ -761,7 +761,7 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 	string n = measure.attribute("n").value();
 	int nnum = 0;
 	if (n.empty()) {
-		cerr << "Warning: no measure number on measure element" << endl;
+		// cerr << "Warning: no measure number on measure element" << endl;
 	} else {
 		nnum = stoi(n);
 	}
@@ -2027,14 +2027,11 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 
 	HumNum output;
 	if (dur == "breve") {
-		output = 1;
-		output /= 2;
+		output = 2;
 	} else if (dur == "long") {
-		output = 1;
-		output /= 4;
+		output = 4;
 	} else if (dur == "maxima") {
-		output = 1;
-		output /= 8;
+		output = 8;
 	} else if (isdigit(dur[0])) {
 		output = 1;
 		output /= stoi(dur);
