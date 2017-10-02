@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Oct  1 15:19:55 PDT 2017
+// Last Modified: Sun Oct  1 23:40:55 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4450,6 +4450,8 @@ class Tool_mei2hum : public HumTool {
 		vector<HumNum> m_measureDuration;
 		vector<bool>   m_hasDynamics;
 		const int      m_maxstaff = 1000;
+
+		bool           m_fermata = false;     // set priority of note/fermata over note@fermata
 
 		map<string, vector<xml_node>> m_startlinks;
 		map<string, vector<xml_node>> m_stoplinks;

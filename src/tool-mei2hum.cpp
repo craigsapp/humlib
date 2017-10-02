@@ -1229,8 +1229,11 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 
+	m_fermata = false;
 	processLinkedNodes(tok, note);
-	processFermataAttribute(tok, note);
+	if (!m_fermata) {
+		processFermataAttribute(tok, note);
+	}
 
 	GridSlice* dataslice = NULL;
 
@@ -1431,6 +1434,19 @@ HumNum Tool_mei2hum::parseMRest(xml_node mrest, HumNum starttime) {
 	duration /= 4;
 	int dotcount = 0;
 	string recip = getHumdrumRecip(duration, dotcount);
+	if (recip.find('%') != string::npos) {
+		string recip2 = getHumdrumRecip(duration, 1);
+		if (recip2.find('%') == string::npos) {
+			recip = recip2;
+			dotcount = 1;
+		} else {
+			string recip3 = getHumdrumRecip(duration, 2);
+			if (recip2.find('%') == string::npos) {
+				recip = recip3;
+				dotcount = 2;
+			}
+		}
+	}
 	string tok = recip + "r";
 	// Add fermata on whole-measure rest if needed.	
 
@@ -1670,6 +1686,7 @@ void Tool_mei2hum::processNodeStartLinks(string& output, xml_node node,
 	for (int i=0; i<(int)nodelist.size(); i++) {
 		string nodename = nodelist[i].name();
 		if (nodename == "fermata") {
+			m_fermata = true; // used to disable note@fermata duplications
 			parseFermata(output, node, nodelist[i]);
 		} else if (nodename == "slur") {
 			parseSlurStart(output, node, nodelist[i]);
@@ -2242,8 +2259,11 @@ HumNum Tool_mei2hum::parseChord(xml_node chord, HumNum starttime) {
 		}
 	}
 
+	m_fermata = false;
 	processLinkedNodes(tok, chord);
-	processFermataAttribute(tok, chord);
+	if (!m_fermata) {
+		processFermataAttribute(tok, chord);
+	}
 
 	m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT, m_currentStaff-1,
 		0, m_currentLayer-1, m_staffcount);

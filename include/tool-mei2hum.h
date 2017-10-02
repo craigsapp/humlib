@@ -199,6 +199,8 @@ class Tool_mei2hum : public HumTool {
 		vector<bool>   m_hasDynamics;
 		const int      m_maxstaff = 1000;
 
+		bool           m_fermata = false;     // set priority of note/fermata over note@fermata
+
 		map<string, vector<xml_node>> m_startlinks;
 		map<string, vector<xml_node>> m_stoplinks;
 
