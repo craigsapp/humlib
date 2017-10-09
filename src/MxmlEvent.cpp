@@ -1277,12 +1277,17 @@ string MxmlEvent::getKernPitch(void) {
 					// doublesharpQ = true;
 					explicitQ = true;
 				}
-				xml_attribute paren = child.attribute("parentheses");
-				if (paren) {
-					if (strcmp(paren.value(), "yes") == 0) {
-						editorialQ = 1;
-						reportEditorialAccidentalToOwner();
-					}
+				string paren = child.attribute("parentheses").value();
+				if (paren == "yes") {
+					editorialQ = 1;
+					reportEditorialAccidentalToOwner();
+				}
+				// Sibelius method of adding parenthese to notes:
+    			//    <accidental cautionary="yes">natural</accidental>
+				string caution = child.attribute("cautionary").value();
+				if (caution == "yes") {
+					editorialQ = 1;
+					reportEditorialAccidentalToOwner();
 				}
 			}
 			child = child.next_sibling();
