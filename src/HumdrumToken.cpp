@@ -830,13 +830,18 @@ HumNum HumdrumToken::getTiedDuration(HumNum scale) {
 //////////////////////////////
 //
 // HumdrumToken::getDots -- Count the number of '.' characters in token string.
+//    Terminating the count at the first occurrence of the separator character,
+//    which is by default a space character.
 //
 
-int HumdrumToken::getDots(void) const {
+int HumdrumToken::getDots(char separator) const {
 	int count = 0;
 	for (int i=0; i<(int)this->size()-1; i++) {
 		if (this->at(i) == '.') {
 			count++;
+		}
+		if (this->at(i) == separator) {
+			break;
 		}
 	}
 	return count;
@@ -1957,6 +1962,42 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 	m_previousTokens.push_back(&previousToken);
 	previousToken.m_nextTokens.push_back(this);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getVisualDuration -- Returns LO:N:vis parameter if it is attached
+//    to a token directly or indirectly through a linked parameter.  Returns empty string
+//    if no explicit visual durtation (so the visual duration is same as the logical duration).
+//
+
+string HumdrumToken::getVisualDuration(void) {
+	string parameter = this->getValue("LO", "N", "vis");
+
+	if (!parameter.empty()) {
+		return parameter;
+	}
+
+	int lcount = this->getLinkedParameterCount();
+	HumParamSet* hps;
+	for (int i=0; i<lcount; i++) {
+		hps = this->getLinkedParameter(i);
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != "N") {
+			continue;
+		}
+		for (int j=0; j<hps->getCount(); j++) {
+			if (hps->getParameterName(j) == "vis") {
+				return hps->getParameterValue(j);
+			}
+		}
+	}
+
+	return "";
 }
 
 

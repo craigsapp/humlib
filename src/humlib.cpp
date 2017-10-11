@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  2 15:47:35 PDT 2017
+// Last Modified: Tue Oct 10 21:01:14 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2232,6 +2232,15 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 	if (duration.getNumerator() == 1) {
 		// simple rhythm (integer divisions of the whole note)
 		return to_string(duration.getDenominator());
+	}
+	if (duration.getDenominator() == 1) {
+		if (duration.getNumerator() == 2) {
+			return "0";
+		} else if (duration.getNumerator() == 4) {
+			return "00";
+		} else if (duration.getNumerator() == 8) {
+			return "000";
+		}
 	}
 	if (duration.getNumerator() == 0) {
 		// grace note
@@ -10115,7 +10124,7 @@ HumParamSet::~HumParamSet() {
 //
 
 const string& HumParamSet::getNamespace1(void) {
-	return ns1;
+	return m_ns1;
 }
 
 
@@ -10126,7 +10135,7 @@ const string& HumParamSet::getNamespace1(void) {
 //
 
 const string& HumParamSet::getNamespace2(void) {
-	return ns2;
+	return m_ns2;
 }
 
 
@@ -10137,7 +10146,7 @@ const string& HumParamSet::getNamespace2(void) {
 //
 
 string HumParamSet::getNamespace(void) {
-	return ns1 + ":" + ns2;
+	return m_ns1 + ":" + m_ns2;
 }
 
 
@@ -10148,7 +10157,7 @@ string HumParamSet::getNamespace(void) {
 //
 
 void HumParamSet::setNamespace1(const string& name) {
-	ns1 = name;
+	m_ns1 = name;
 }
 
 
@@ -10159,7 +10168,7 @@ void HumParamSet::setNamespace1(const string& name) {
 //
 
 void HumParamSet::setNamespace2(const string& name) {
-	ns2 = name;
+	m_ns2 = name;
 }
 
 
@@ -10172,11 +10181,11 @@ void HumParamSet::setNamespace2(const string& name) {
 void HumParamSet::setNamespace(const string& name) {
 	auto loc = name.find(':');
 	if (loc == string::npos) {
-		ns1 = "";
-		ns2 = name;
+		m_ns1 = "";
+		m_ns2 = name;
 	} else {
-		ns1 = name.substr(0, loc);
-		ns2 = name.substr(loc+1, string::npos);
+		m_ns1 = name.substr(0, loc);
+		m_ns2 = name.substr(loc+1, string::npos);
 	}
 }
 
@@ -10188,8 +10197,8 @@ void HumParamSet::setNamespace(const string& name) {
 //
 
 void HumParamSet::setNamespace(const string& name1, const string& name2) {
-	ns1 = name1;
-	ns2 = name2;
+	m_ns1 = name1;
+	m_ns2 = name2;
 }
 
 
@@ -10200,7 +10209,7 @@ void HumParamSet::setNamespace(const string& name1, const string& name2) {
 //
 
 int HumParamSet::getCount(void) {
-	return (int)parameters.size();
+	return (int)m_parameters.size();
 }
 
 
@@ -10211,7 +10220,7 @@ int HumParamSet::getCount(void) {
 //
 
 const string& HumParamSet::getParameterName(int index) {
-	return parameters.at(index).first;
+	return m_parameters.at(index).first;
 }
 
 
@@ -10222,7 +10231,7 @@ const string& HumParamSet::getParameterName(int index) {
 //
 
 const string& HumParamSet::getParameterValue(int index) {
-	return parameters.at(index).second;
+	return m_parameters.at(index).second;
 }
 
 
@@ -10233,8 +10242,8 @@ const string& HumParamSet::getParameterValue(int index) {
 //
 
 int HumParamSet::addParameter(const string& name, const string& value) {
-	parameters.push_back(make_pair(name, value));
-	return (int)parameters.size() - 1;
+	m_parameters.push_back(make_pair(name, value));
+	return (int)m_parameters.size() - 1;
 }
 
 
@@ -10245,15 +10254,15 @@ int HumParamSet::addParameter(const string& name, const string& value) {
 //
 
 int HumParamSet::setParameter(const string& name, const string& value) {
-	for (int i=0; i<(int)parameters.size(); i++) {
-		if (parameters[i].first == name) {
-			parameters[i].second = value;
+	for (int i=0; i<(int)m_parameters.size(); i++) {
+		if (m_parameters[i].first == name) {
+			m_parameters[i].second = value;
 			return i;
 		}
 	}
 	// Parameter does not exist so create at end of list.
-	parameters.push_back(make_pair(name, value));
-	return (int)parameters.size() - 1;
+	m_parameters.push_back(make_pair(name, value));
+	return (int)m_parameters.size() - 1;
 }
 
 
@@ -10264,9 +10273,9 @@ int HumParamSet::setParameter(const string& name, const string& value) {
 //
 
 void HumParamSet::clear(void) {
-	ns1.clear();
-	ns2.clear();
-	parameters.clear();
+	m_ns1.clear();
+	m_ns2.clear();
+	m_parameters.clear();
 }
 
 
@@ -10296,8 +10305,8 @@ void HumParamSet::readString(const string& text) {
 		return;
 	}
 
-	ns1 = pieces[0];
-	ns2 = pieces[1];
+	m_ns1 = pieces[0];
+	m_ns2 = pieces[1];
 
 	string key;
 	string value;
@@ -10347,6 +10356,30 @@ ostream& HumParamSet::printXml(ostream& out, int level,
 	out << Convert::repeatString(indent, --level) << "</namespace>\n";
 	out << Convert::repeatString(indent, --level) << "</namespace>\n";
 	out << Convert::repeatString(indent, --level) << "<linked-parameter-set>\n";
+	return out;
+}
+
+
+
+//////////////////////////////
+//
+// operator<< -- print HumParamSetData as a layout command
+//
+
+ostream& operator<<(ostream& out, HumParamSet* hps) {
+	out << *hps;
+	return out;
+}
+
+
+ostream& operator<<(ostream& out, HumParamSet& hps) {
+	out << hps.getNamespace();
+	int count = hps.getCount();
+	for (int i=0; i<count; i++) {
+		out << ":" << hps.getParameterName(i) << "=";
+		// should colon-escape the following line's output:
+		out << "=" << hps.getParameterValue(i);
+	}
 	return out;
 }
 
@@ -14581,6 +14614,88 @@ HumdrumFileContent::HumdrumFileContent(istream& contents) :
 HumdrumFileContent::~HumdrumFileContent() {
 	// do nothing
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeRScale --
+//
+
+bool HumdrumFileContent::analyzeRScale(void) {
+	int active = 0; // number of tracks currently having an active rscale parameter
+	HumdrumFileBase& infile = *this;
+	vector<HumNum> rscales(infile.getMaxTrack() + 1, 1);
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			int fieldcount = infile[i].getFieldCount();
+			for (int j=0; j<fieldcount; j++) {
+				HTp token = infile[i].token(j);
+				if (token->compare(0, 8, "*rscale:") != 0) {
+					continue;
+				}
+				if (!token->isKern()) {
+					continue;
+				}
+				int track = token->getTrack();
+				HumNum value = 1;
+				if (hre.search(*token, "\\*rscale:(\\d+)/(\\d+)")) {
+					int top = hre.getMatchInt(1);
+					int bot = hre.getMatchInt(2);
+					value.setValue(top, bot);
+				} else if (hre.search(*token, "\\*rscale:(\\d+)")) {
+					int top = hre.getMatchInt(1);
+					value.setValue(top, 1);
+				}
+				if (value == 1) {
+					if (rscales[track] != 1) {
+						rscales[track] = 1;
+						active--;
+					}
+				} else {
+					if (rscales[track] == 1) {
+						active++;
+					}
+					rscales[track] = value;
+				}
+			}
+			continue;
+		}
+		if (!active) {
+			continue;
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		int fieldcount = infile[i].getFieldCount();
+		for (int j=0; j<fieldcount; j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			if (rscales[track] == 1) {
+				continue;
+			}
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+
+			int dots = token->getDots();
+			HumNum dur = token->getDurationNoDots();
+			dur *= rscales[track];
+			string vis = Convert::durationToRecip(dur);
+			for (int k=0; k<dots; k++) {
+				vis += '.';
+			}
+			token->setValue("LO", "N", "vis", vis);
+		}
+	}
+
+	return true;
+}
+
 
 
 
@@ -19020,13 +19135,18 @@ HumNum HumdrumToken::getTiedDuration(HumNum scale) {
 //////////////////////////////
 //
 // HumdrumToken::getDots -- Count the number of '.' characters in token string.
+//    Terminating the count at the first occurrence of the separator character,
+//    which is by default a space character.
 //
 
-int HumdrumToken::getDots(void) const {
+int HumdrumToken::getDots(char separator) const {
 	int count = 0;
 	for (int i=0; i<(int)this->size()-1; i++) {
 		if (this->at(i) == '.') {
 			count++;
+		}
+		if (this->at(i) == separator) {
+			break;
 		}
 	}
 	return count;
@@ -20147,6 +20267,42 @@ void HumdrumToken::makeForwardLink(HumdrumToken& nextToken) {
 void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 	m_previousTokens.push_back(&previousToken);
 	previousToken.m_nextTokens.push_back(this);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getVisualDuration -- Returns LO:N:vis parameter if it is attached
+//    to a token directly or indirectly through a linked parameter.  Returns empty string
+//    if no explicit visual durtation (so the visual duration is same as the logical duration).
+//
+
+string HumdrumToken::getVisualDuration(void) {
+	string parameter = this->getValue("LO", "N", "vis");
+
+	if (!parameter.empty()) {
+		return parameter;
+	}
+
+	int lcount = this->getLinkedParameterCount();
+	HumParamSet* hps;
+	for (int i=0; i<lcount; i++) {
+		hps = this->getLinkedParameter(i);
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != "N") {
+			continue;
+		}
+		for (int j=0; j<hps->getCount(); j++) {
+			if (hps->getParameterName(j) == "vis") {
+				return hps->getParameterValue(j);
+			}
+		}
+	}
+
+	return "";
 }
 
 

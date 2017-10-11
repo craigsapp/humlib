@@ -143,11 +143,15 @@ class HumParamSet {
 		                                  const string& indent = "\t");
 
 	private:
-		string ns1;
-		string ns2;
-		vector<pair<string, string>> parameters;
+		string m_ns1;
+		string m_ns2;
+		vector<pair<string, string>> m_parameters;
 
 };
+
+
+ostream& operator<<(ostream& out, HumParamSet* hps);
+ostream& operator<<(ostream& out, HumParamSet& hps);
 
 
 // END_MERGE

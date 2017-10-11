@@ -159,6 +159,15 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 		// simple rhythm (integer divisions of the whole note)
 		return to_string(duration.getDenominator());
 	}
+	if (duration.getDenominator() == 1) {
+		if (duration.getNumerator() == 2) {
+			return "0";
+		} else if (duration.getNumerator() == 4) {
+			return "00";
+		} else if (duration.getNumerator() == 8) {
+			return "000";
+		}
+	}
 	if (duration.getNumerator() == 0) {
 		// grace note
 		return "q";

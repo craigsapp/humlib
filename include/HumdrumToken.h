@@ -112,7 +112,7 @@ class HumdrumToken : public string, public HumHash {
 		HumNum   getTiedDuration           (HumNum scale);
 		HumNum   getDurationNoDots         (void) const;
 		HumNum   getDurationNoDots         (HumNum scale) const;
-		int      getDots                   (void) const;
+		int      getDots                   (char separator = ' ') const;
 
 		HumNum   getDurationFromStart      (void) const;
 		HumNum   getDurationFromStart      (HumNum scale) const;
@@ -175,6 +175,9 @@ class HumdrumToken : public string, public HumHash {
 		HumParamSet* getLinkedParameter    (int index);
 		HumParamSet* getLinkedParameter    (void);
 		ostream& printXmlLinkedParameterInfo(ostream& out, int level, const string& indent);
+
+		// layout parameter accessors
+		string   getVisualDuration         (void);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const string& aToken);

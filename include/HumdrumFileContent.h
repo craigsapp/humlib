@@ -38,6 +38,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
 
+		bool   analyzeRScale              (void);
+
 		// in HumdrumFileContent-metlev.cpp
 		void  getMetricLevels             (vector<double>& output, int track = 0,
 		                                   double undefined = NAN);
