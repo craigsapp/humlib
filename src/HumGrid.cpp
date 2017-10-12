@@ -2108,7 +2108,9 @@ void HumGrid::removeSibeliusIncipit(void) {
 
 	this->erase(this->begin());
 	if (this->size() > 0) {
-		transferNonDataSlices(this->at(0), measure);
+		// [20171012] remove this for now since it is crashing
+		// emscripten version of code.
+		// transferNonDataSlices(this->at(0), measure);
 	}
 	delete measure;
 	measure = NULL;
