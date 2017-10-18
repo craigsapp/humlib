@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 12 01:50:53 PDT 2017
+// Last Modified: Tue Oct 17 22:50:41 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36820,8 +36820,10 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	auto score = doc.select_node("/mei/music/body/mdiv/score").node();
 
 	if (!score) {
-		cerr << "Cannot find score, so cannot convert ";
-		cerr << "MEI file to Humdrum" << endl;
+		cerr << "Cannot find score, so cannot convert MDI file to Humdrum";
+		cerr << endl;
+		cerr << "Perhaps there is a problem in the XML structure of the file.";
+		cerr << endl;
 		return false;
 	}
 
@@ -37061,11 +37063,38 @@ void Tool_mei2hum::parseScoreDef(xml_node scoreDef, HumNum starttime) {
 		    processStaffGrp(item, starttime);
 		} else if (nodename == "staffDef") {
 		    processStaffDef(item, starttime);
+		} else if (nodename == "pgHead") {
+		    processPgHead(item, starttime);
+		} else if (nodename == "pgFoot") {
+		    processPgFoot(item, starttime);
 		} else {
 			cerr << DKHTP << scoreDef.name() << "/" << nodename << CURRLOC << endl;
 		}
 	}
 
+}
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processPgFoot -- Dummy function since scoreDef/pgFoot is ignored.
+//
+
+void Tool_mei2hum::processPgFoot(xml_node pgFoot, HumNum starttime) {
+	NODE_VERIFY(pgFoot, )
+	return;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processPgHead -- Dummy function since scoreDef/pgHead is ignored.
+//
+
+void Tool_mei2hum::processPgHead(xml_node pgHead, HumNum starttime) {
+	NODE_VERIFY(pgHead, )
+	return;
 }
 
 
@@ -37478,6 +37507,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 			// handled in process processNode(Start|Stop)Links()
 		} else if (nodename == "arpeg") {
 			// handled in process processNode(Start|Stop)Links()
+		} else if (nodename == "tupletSpan") {
+			// handled in process processNode(Start|Stop)Links()
 		} else if (nodename == "dynam") {
 			parseDynam(children[i], starttime);
 		} else if (nodename == "dir") {
@@ -37692,7 +37723,6 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime) {
 
 	m_currentLayer = 0;
 	return starttime;
-// ggg
 }
 
 
@@ -37883,6 +37913,8 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output, Hu
 		cerr << "Warning: currently ignoring grace notes." << endl;
  		return starttime;
 	}
+
+	processPreliminaryLinkedNodes(note);
 
 	if (chord) {
 		duration = getDuration(chord);
@@ -38171,6 +38203,8 @@ HumNum Tool_mei2hum::parseRest(xml_node rest, HumNum starttime) {
 		ELEMENT_DEBUG_STATEMENT(space)
 	}
 
+	processPreliminaryLinkedNodes(rest);
+
 	HumNum duration = getDuration(rest);
 	int dotcount = getDotCount(rest);
 	string recip = getHumdrumRecip(duration, dotcount);
@@ -38332,6 +38366,24 @@ void Tool_mei2hum::processFermataAttribute(string& output, xml_node node) {
 
 //////////////////////////////
 //
+// Tool_mei2hum::processPreliminaryLinkedNodes -- Process tupletSpan
+//      before rhythm of linked notes are processed.
+//
+
+void Tool_mei2hum::processPreliminaryLinkedNodes(xml_node node) {
+	string id = node.attribute("xml:id").value();
+	if (!id.empty()) {
+		auto found = m_startlinks.find(id);
+		if (found != m_startlinks.end()) {
+			processNodeStartLinks2(node, (*found).second);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_mei2hum::processLinkedNodes --
 //
 
@@ -38385,11 +38437,123 @@ void Tool_mei2hum::processNodeStartLinks(string& output, xml_node node,
 			parseTieStart(output, node, nodelist[i]);
 		} else if (nodename == "arpeg") {
 			parseArpeg(output, node, nodelist[i]);
+		} else if (nodename == "tupletSpan") {
+			// handled in processNodeStartLinks2
 		} else {
 			cerr << DKHTP << nodename
 			     << " element in processNodeStartLinks()" << endl;
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processNodeStartLinks2 -- process tupletSpan before the 
+//     duration of the note/rest/chord is calculated.
+//
+
+void Tool_mei2hum::processNodeStartLinks2(xml_node node,
+		vector<xml_node>& nodelist) {
+	for (int i=0; i<(int)nodelist.size(); i++) {
+		string nodename = nodelist[i].name();
+		if (nodename == "tupletSpan") {
+			parseTupletSpanStart(node, nodelist[i]);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseTupletSpanStart -- 
+//     Such as:
+//          <tupletSpan staff="10" num="3" numbase="2" num.visible="true"
+//                num.place="below" num.format="count" startid="#4235235"
+//                endid="#532532"/>
+//
+
+void Tool_mei2hum::parseTupletSpanStart(xml_node node, 
+		xml_node tupletSpan) {
+	NODE_VERIFY(tupletSpan, )
+
+	if (strcmp(tupletSpan.attribute("endid").value(), "") == 0) {
+		cerr << "Warning: <tupletSpan> requires endid attribute (at least ";
+		cerr << "for this parser)" << endl;
+		return;
+	}
+
+	if (strcmp(tupletSpan.attribute("startid").value(), "") == 0) {
+		cerr << "Warning: <tupletSpan> requires startid attribute (at least ";
+		cerr << "for this parser)" << endl;
+		return;
+	}
+
+	string num = tupletSpan.attribute("num").value();
+	string numbase = tupletSpan.attribute("numbase").value();
+
+	HumNum newfactor = 1;
+
+	if (numbase == "") {
+		cerr << "Warning: tuplet@numbase is empty" << endl;
+	} else {
+		newfactor = stoi(numbase);
+	}
+
+	if (num == "") {
+		cerr << "Warning: tuplet@num is empty" << endl;
+	} else {
+		newfactor /= stoi(num);
+	}
+
+	m_tupletfactor *= newfactor;
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseTupletSpanStop -- 
+//     Such as:
+//          <tupletSpan staff="10" num="3" numbase="2" num.visible="true"
+//                num.place="below" num.format="count" startid="#4235235"
+//                endid="#532532"/>
+//
+
+void Tool_mei2hum::parseTupletSpanStop(string& output, xml_node node, 
+		xml_node tupletSpan) {
+	NODE_VERIFY(tupletSpan, )
+
+	if (strcmp(tupletSpan.attribute("endid").value(), "") == 0) {
+		return;
+	}
+	if (strcmp(tupletSpan.attribute("startid").value(), "") == 0) {
+		return;
+	}
+
+	string num = tupletSpan.attribute("num").value();
+	string numbase = tupletSpan.attribute("numbase").value();
+
+	HumNum newfactor = 1;
+
+	if (numbase == "") {
+		cerr << "Warning: tuplet@numbase is empty" << endl;
+	} else {
+		newfactor = stoi(numbase);
+	}
+
+	if (num == "") {
+		cerr << "Warning: tuplet@num is empty" << endl;
+	} else {
+		newfactor /= stoi(num);
+	}
+
+	// undo the tuplet factor:
+	m_tupletfactor /= newfactor;
+
 }
 
 
@@ -38444,6 +38608,8 @@ void Tool_mei2hum::processNodeStopLinks(string& output, xml_node node,
 			parseSlurStop(output, node, nodelist[i]);
 		} else if (nodename == "tie") {
 			parseTieStop(output, node, nodelist[i]);
+		} else if (nodename == "tupletSpan") {
+			parseTupletSpanStop(output, node, nodelist[i]);
 		} else {
 			cerr << DKHTP << nodename
 			     << " element in processNodeStopLinks()" << endl;
@@ -38930,6 +39096,8 @@ HumNum Tool_mei2hum::parseChord(xml_node chord, HumNum starttime) {
 	NODE_VERIFY(chord, starttime)
 	MAKE_CHILD_LIST(children, chord);
 
+	processPreliminaryLinkedNodes(chord);
+
 	string tok;
 	int counter = 0;
 	for (int i=0; i<(int)children.size(); i++) {
@@ -39173,7 +39341,12 @@ void Tool_mei2hum::parseDir(xml_node dir, HumNum starttime) {
 		if (previous->isLayoutSlice()) {
 			GridVoice* voice = previous->at(staffnum-1)->at(0)->at(0);
 			HTp tok = voice->getToken();
-			if ((tok == NULL) || tok->isNull()) {
+			if (tok == NULL) {
+				HTp newtok = new HumdrumToken(message);
+				voice->setToken(newtok);
+				tok = voice->getToken();
+				break;
+			} else if (tok->isNull()) {
 				tok->setText(message);
 				break;
 			}
@@ -39186,8 +39359,6 @@ void Tool_mei2hum::parseDir(xml_node dir, HumNum starttime) {
 		int voicei = 0;
 		ngs->addToken(message, parti, staffi, voicei);
 		gm->insert(gsit, ngs);
-
-// ggg
 
 		break;
 	}

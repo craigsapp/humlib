@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 12 01:50:53 PDT 2017
+// Last Modified: Tue Oct 17 22:50:41 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4371,6 +4371,8 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseScore           (xml_node score, HumNum starttime);
 		void   getChildrenVector    (vector<xml_node>& children, xml_node parent);
 		void   parseScoreDef        (xml_node scoreDef, HumNum starttime);
+		void   processPgHead        (xml_node pgHead, HumNum starttime);
+		void   processPgFoot        (xml_node pgFoot, HumNum starttime);
 		HumNum parseSection         (xml_node section, HumNum starttime);
 		HumNum parseApp             (xml_node app, HumNum starttime);
 		HumNum parseLem             (xml_node lem, HumNum starttime);
@@ -4399,12 +4401,16 @@ class Tool_mei2hum : public HumTool {
 		                             vector<xml_node>& nodelist);
 		void   processNodeStopLinks(string& output, xml_node node,
 		                             vector<xml_node>& nodelist);
+		void   processPreliminaryLinkedNodes(xml_node node);
+		void   processNodeStartLinks2(xml_node node, vector<xml_node>& nodelist);
 		void   parseFermata         (string& output, xml_node node, xml_node fermata);
 		void   parseSlurStart       (string& output, xml_node node, xml_node slur);
 		void   parseSlurStop        (string& output, xml_node node, xml_node slur);
 		void   parseTieStart        (string& output, xml_node node, xml_node tie);
 		void   parseTieStop         (string& output, xml_node node, xml_node tie);
 		void   parseArpeg           (string& output, xml_node node, xml_node arpeg);
+		void   parseTupletSpanStart (xml_node node, xml_node tupletSpan);
+		void   parseTupletSpanStop  (string& output, xml_node node, xml_node tupletSpan);
 		void   parseSb              (xml_node sb, HumNum starttime);
 		void   processLinkedNodes   (string& output, xml_node node);
 		int    getDotCount          (xml_node node);
