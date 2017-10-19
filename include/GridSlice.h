@@ -43,22 +43,30 @@ class GridSlice : public vector<GridPart*> {
 		          GridSlice* slice);
 		~GridSlice();
 
-		bool isNoteSlice(void)        { return m_type == SliceType::Notes;      }
-		bool isGraceSlice(void)       { return m_type == SliceType::GraceNotes; }
-		bool isMeasureSlice(void)     { return m_type == SliceType::Measures;   }
-		bool isClefSlice(void)        { return m_type == SliceType::Clefs;      }
-		bool isTimeSigSlice(void)     { return m_type == SliceType::TimeSigs;   }
-		bool isMeterSigSlice(void)    { return m_type == SliceType::MeterSigs;  }
-		bool isManipulatorSlice(void) { return m_type==SliceType::Manipulators; }
-		bool isLayoutSlice(void)      { return m_type ==  SliceType::Layouts;   }
-		bool isInvalidSlice(void)     { return m_type == SliceType::Invalid;    }
+		bool isNoteSlice(void)        { return m_type == SliceType::Notes;            }
+		bool isGraceSlice(void)       { return m_type == SliceType::GraceNotes;       }
+		bool isMeasureSlice(void)     { return m_type == SliceType::Measures;         }
+		bool isClefSlice(void)        { return m_type == SliceType::Clefs;            }
+		bool isKeySigSlice(void)      { return m_type == SliceType::KeySigs;          }
+		bool isTimeSigSlice(void)     { return m_type == SliceType::TimeSigs;         }
+		bool isTempoSlice(void)       { return m_type == SliceType::Tempos;           }
+		bool isMeterSigSlice(void)    { return m_type == SliceType::MeterSigs;        }
+		bool isManipulatorSlice(void) { return m_type==SliceType::Manipulators;       }
+		bool isLayoutSlice(void)      { return m_type ==  SliceType::Layouts;         }
+		bool isLocalLayoutSlice(void) { return m_type ==  SliceType::Layouts;         }
+		bool isInvalidSlice(void)     { return m_type == SliceType::Invalid;          }
+		bool isGlobalComment(void)    { return m_type == SliceType::GlobalComments;   }
+		bool isGlobalLayout(void)     { return m_type == SliceType::GlobalLayouts;    }
+		bool isReferenceRecord(void)  { return m_type == SliceType::ReferenceRecords; }
 		bool isInterpretationSlice(void);
 		bool isDataSlice(void);
+		bool hasSpines(void);
 		SliceType getType(void)    { return m_type; }
 
 		void transferTokens        (HumdrumFile& outfile, bool recip);
 		void initializePartStaves  (vector<MxmlPart>& partdata);
 		void initializeBySlice     (GridSlice* slice);
+		void initializeByStaffCount(int staffcount);
 
 		HumNum       getDuration        (void);
 		void         setDuration        (HumNum duration);
@@ -81,6 +89,7 @@ class GridSlice : public vector<GridPart*> {
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
+		void addToken             (const string& tok, int parti, int staffi, int voicei);
 
 	protected:
 		HTp  createRecipTokenFromDuration  (HumNum duration);

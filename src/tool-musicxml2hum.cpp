@@ -91,6 +91,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	bool status = true; // for keeping track of problems in conversion process.
 
+	setSoftwareInfo(doc);
 	vector<string> partids;            // list of part IDs
 	map<string, xml_node> partinfo;    // mapping if IDs to score-part elements
 	map<string, xml_node> partcontent; // mapping of IDs to part elements
@@ -189,6 +190,24 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 //////////////////////////////
 //
+// Tool_muisicxml2hum::setSoftwareInfo -- Store which software program generated the 
+//    MusicXML data to handle locale variants.  There can be more than one
+//    <software> entry, so desired information is not necessarily in the first one.
+//
+
+void Tool_musicxml2hum::setSoftwareInfo(xml_document& doc) {
+	string xpath = "/score-partwise/identification/encoding/software";
+	string software = doc.select_node(xpath.c_str()).node().child_value();
+	HumRegex hre;
+	if (hre.search(software, "sibelius", "i")) {
+		m_software = "sibelius";
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::cleanSpaces --
 //
 
@@ -214,11 +233,26 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	HumRegex hre;
 
 	// OTL: title //////////////////////////////////////////////////////////
-	xpath = "/score-partwise/movement-title";
-	string title = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
-	if (title != "") {
+
+	// Sibelius method
+	xpath = "/score-partwise/work/work-title";
+	string worktitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	bool worktitleQ = false;
+	if (worktitle != "") {
 		string otl_record = "!!!OTL:\t";
-		otl_record += title;
+		otl_record += worktitle;
+		outfile.insertLine(0, otl_record);
+		worktitleQ = true;
+	}
+
+	xpath = "/score-partwise/movement-title";
+	string mtitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	if (mtitle != "") {
+		string otl_record = "!!!OTL:\t";
+		if (worktitleQ) {
+			otl_record = "!!!OMV:\t";
+		}
+		otl_record += mtitle;
 		outfile.insertLine(0, otl_record);
 	}
 
@@ -285,7 +319,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 
 	if (validcopy) {
 		string yem_record = "!!!YEM:\t";
-		yem_record += copy;
+		yem_record += cleanSpaces(copy);
 		outfile.appendLine(yem_record);
 	}
 
@@ -664,8 +698,7 @@ void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		vector<MxmlPart>& partdata, vector<int> partstaves) {
 
-	GridMeasure* gm = new GridMeasure(&outdata);
-	outdata.push_back(gm);
+	GridMeasure* gm = outdata.addMeasureToBack();
 
 	MxmlMeasure* xmeasure;
 	vector<MxmlMeasure*> measuredata;
@@ -1611,10 +1644,11 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 	if (!node) {
 		return 0;
 	}
+	HumRegex hre;
 	xml_node child = node.first_child();
 	xml_node grandchild;
 	// int max;
-	int number;
+	int number = 0;
 	vector<xml_node> verses;
 	string syllabic;
 	string text;
@@ -1623,7 +1657,17 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 			child = child.next_sibling();
 			continue;
 		}
-		number = atoi(child.attribute("number").value());
+		string value = child.attribute("number").value();
+		if (hre.search(value, R"(verse(\d+))")) {
+			// Fix for Sibelius which uses number="part8verse5" format.
+			number = stoi(hre.getMatch(1));
+		} else {
+			number = atoi(child.attribute("number").value());
+		}
+		if (number > 100) {
+			cerr << "Error: verse number is too large: number" << endl;
+			return 0;
+		}
 		if (number == (int)verses.size() + 1) {
 			verses.push_back(child);
 		} else if ((number > 0) && (number < (int)verses.size())) {
@@ -1693,6 +1737,9 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 
 		if (finaltext.empty()) {
 			continue;
+		}
+		if (m_software == "sibelius") {
+			hre.replaceDestructive(finaltext, " ", "_", "g");
 		}
 
 		if (verses[i]) {

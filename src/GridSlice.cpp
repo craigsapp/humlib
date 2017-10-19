@@ -39,9 +39,14 @@ GridSlice::GridSlice(GridMeasure* measure, HumNum timestamp, SliceType type,
 		m_measure = measure;
 	}
 	if (partcount > 0) {
+		// create primary part/staff/voice structures
 		this->resize(partcount);
 		for (int p=0; p<partcount; p++) {
 			this->at(p) = new GridPart;
+			this->at(p)->resize(1);
+			this->at(p)->at(0) = new GridStaff;
+			this->at(p)->at(0)->resize(1);
+			this->at(p)->at(0)->at(0) = new GridVoice;
 		}
 	}
 }
@@ -112,6 +117,37 @@ GridSlice::~GridSlice(void) {
 			this->at(i) = NULL;
 		}
 	}
+}
+
+
+
+
+//////////////////////////////
+//
+// GridSlice::addToken -- Will not allocate part or staff array, but will 
+//     grow voice array if needed.
+//
+
+void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
+	if ((parti < 0) || (parti >= (int)this->size())) {
+		cerr << "Error: part index " << parti << " is out of range: size is ";
+		cerr << this->size() << endl;
+		return;
+	}
+	if ((staffi < 0) || (staffi >= (int)this->at(parti)->size())) {
+		cerr << "Error: staff index " << staffi << " is out of range: size is ";
+		cerr << this->at(parti)->size() << endl;
+		return;
+	}
+
+	if (voicei >= (int)this->at(parti)->at(staffi)->size()) {
+		int oldsize = (int)this->at(parti)->at(staffi)->size();
+		this->at(parti)->at(staffi)->resize(voicei+1);
+		for (int j=oldsize; j<=voicei; j++) {
+			this->at(parti)->at(staffi)->at(j) = new GridVoice;
+		}
+	}
+	this->at(parti)->at(staffi)->at(voicei)->setToken(tok);
 }
 
 
@@ -204,11 +240,13 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	GridVoice* voice;
 	string empty = ".";
 	if (isMeasureSlice()) {
-		if (this->at(0)->at(0)->size() > 0) {
-			voice = this->at(0)->at(0)->at(0);
-			empty = (string)*voice->getToken();
-		} else {
-			empty = "=";
+		if (this->size() > 0) {
+			if (this->at(0)->at(0)->size() > 0) {
+				voice = this->at(0)->at(0)->at(0);
+				empty = (string)*voice->getToken();
+			} else {
+				empty = "=";
+			}
 		}
 	} else if (isInterpretationSlice()) {
 		empty = "*";
@@ -249,7 +287,6 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	int v; // voice index
 
 	for (p=(int)size()-1; p>=0; p--) {
-
 		GridPart& part = *this->at(p);
 		for (s=(int)part.size()-1; s>=0; s--) {
 			GridStaff& staff = *part.at(s);
@@ -274,10 +311,18 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				}
 
 			}
+
+			if (!this->hasSpines()) {
+				// Don't add sides to non-spined lines
+				continue;
+			}
+
 			int maxvcount = getVerseCount(p, s);
 			int maxhcount = getHarmonyCount(p, s);
 			transferSides(*line, staff, empty, maxvcount, maxhcount);
 		}
+
+		// Transfer the sides at the part level
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
@@ -451,7 +496,6 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	int hcount = sides.getHarmonyCount();
 	HTp newtoken;
 
-
 	for (int i=0; i<vcount; i++) {
 		HTp verse = sides.getVerse(i);
 		if (verse) {
@@ -517,7 +561,36 @@ void GridSlice::initializePartStaves(vector<MxmlPart>& partdata) {
 			this->at(i)->at(j) = new GridStaff;
 		}
 	}
+}
 
+
+
+//////////////////////////////
+//
+// GridSlice::initializeByStaffCount -- Initialize with parts containing a single staff.
+//
+
+void GridSlice::initializeByStaffCount(int staffcount) {
+	if (this->size() > 0) {
+		// strange that this should happen, but presume the data
+		// needs to be deleted.
+		for (int i=0; i<(int)this->size(); i++) {
+			if (this->at(i)) {
+				delete this->at(i);
+				this->at(i) = NULL;
+			}
+		}
+	}
+	this->clear();
+	this->resize(staffcount);
+
+	for (int i=0; i<staffcount; i++) {
+		this->at(i) = new GridPart;
+		this->at(i)->resize(1);
+		this->at(i)->at(0) = new GridStaff;
+		this->at(i)->at(0)->resize(1);
+		this->at(i)->at(0)->at(0) = new GridVoice;
+	}
 }
 
 
@@ -664,11 +737,28 @@ ostream& operator<<(ostream& output, GridSlice* slice) {
 						output << " \"" << *token << "\" ";
 					}
 				}
-
 			}
+			output << " sside:" << (GridSide*)staff;
 		}
+		output << " pside:" << (GridSide*)part;
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// GridSlice::hasSpines -- true if not a global comment or similar.
+//
+
+bool GridSlice::hasSpines(void) {
+	SliceType type = getType();
+	if (type < SliceType::_Spined) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 

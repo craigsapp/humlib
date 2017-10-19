@@ -156,6 +156,7 @@ class Tool_musicxml2hum : public HumTool {
 		void checkForDummyRests(MxmlMeasure* measure);
 		void reindexVoices     (vector<MxmlPart>& partdata);
 		void reindexMeasure    (MxmlMeasure* measure);
+		void setSoftwareInfo   (xml_document& doc);
 
 	public:
 
@@ -170,6 +171,8 @@ class Tool_musicxml2hum : public HumTool {
 		int m_slurabove = 0;
 		int m_slurbelow = 0;
 		char m_hasEditorial = '\0';
+
+		string m_software;
 
 		xml_node m_current_dynamic = xml_node(NULL);
 		vector<xml_node> m_current_text;

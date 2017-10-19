@@ -34,6 +34,7 @@ class GridSide {
 		int   getVerseCount     (void);
 		HTp   getVerse          (int index);
 		void  setVerse          (int index, HTp token);
+		void  setVerse          (int index, const string& token);
 
 		int   getHarmonyCount   (void);
 		void  setHarmony        (HTp token);
@@ -42,6 +43,7 @@ class GridSide {
 
 		int   getDynamicsCount  (void);
 		void  setDynamics       (HTp token);
+		void  setDynamics       (const string& token);
 		void  detachDynamics    (void);
 		HTp   getDynamics       (void);
 
@@ -51,6 +53,7 @@ class GridSide {
 		HumdrumToken* m_harmony = NULL;
 };
 
+ostream& operator<<(ostream& output, GridSide* side);
 
 // END_MERGE
 

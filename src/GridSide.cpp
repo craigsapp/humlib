@@ -65,24 +65,39 @@ GridSide::~GridSide(void) {
 //
 
 void GridSide::setVerse(int index, HTp token) {
+	if (token == NULL) {
+		// null tokens are written in the transfer process when responsibility
+		// for deleting the pointer is given to another object (HumdrumFile class).
+	}
    if (index == (int)m_verses.size()) {
+		// Append to the end of the verse list.
 		m_verses.push_back(token);
-		return;
-	} else if (index < 0) {
-		return;
 	} else if (index < (int)m_verses.size()) {
+		// Insert in a slot which might already have a verse token
+		if ((token != NULL) && (m_verses.at(index) != NULL)) {
+			// don't delete a previous non-NULL token if a NULL
+			// token is being stored, as it is assumed that the
+			// token has been transferred to a HumdrumFile object.
+			delete m_verses[index];
+		}
 		m_verses[index] = token;
 	} else {
+		// Add more than one verse spot and insert verse:
 		int oldsize = (int)m_verses.size();
 		int newsize = index + 1;
 		m_verses.resize(newsize);
 		for (int i=oldsize; i<newsize; i++) {
-			m_verses[i] = NULL;
+			m_verses.at(i) = NULL;
 		}
-		m_verses[index] = token;
+		m_verses.at(index) = token;
 	}
 }
 
+
+void GridSide::setVerse(int index, const string& token) {
+	HTp newtoken = new HumdrumToken(token);
+	setVerse(index, newtoken);
+}
 
 
 //////////////////////////////
@@ -154,6 +169,12 @@ void GridSide::setDynamics(HTp token) {
 }
 
 
+void GridSide::setDynamics(const string& token) {
+	HTp newtoken = new HumdrumToken(token);
+	setDynamics(newtoken);
+}
+
+
 
 ///////////////////////////
 //
@@ -211,6 +232,40 @@ int GridSide::getDynamicsCount(void) {
 		return 1;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// operator<< --
+//
+
+ostream& operator<<(ostream& output, GridSide* side) {
+	output << " [";
+
+	if (side->getVerseCount() > 0) {
+		output << " verse:";
+	}
+	for (int i=0; i<(int)side->getVerseCount(); i++) {
+		output << side->getVerse(i);
+		if (i < (int)side->getVerseCount() - 1) {
+			output << "; ";
+		}
+		
+	}
+
+	if (side->getDynamicsCount() > 0) {
+		output << "dyn:" << side->getDynamics();
+	}
+
+	if (side->getHarmonyCount() > 0) {
+		output << "harm:" << side->getHarmony();
+	}
+
+	output << "] ";
+	return output;
+}
+
 
 
 // END_MERGE
