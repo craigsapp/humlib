@@ -748,6 +748,12 @@ RECONSIDER:
 			 ((dur == othMeterDen) && (odur == othMeterDen*2)) || // unornamented change of agent suspension
 			 ((dur == othMeterDen) && (odur == othMeterDen) && (durp == 2) &&
 			  (levp == 0) && (lev == 1) & (levn == 1))) ) { // perfection is on 4th minim of 6/2, see Jos2302 m. 34
+// TO DO: fix case from Ano2002 m. 29
+// Also fix Bus1001a m. 57 => conflicting agents
+// Bus1001b m. 135 susp. should be ternary
+// Bus2007 m. 43 should be binary and 47 shouldn't be a susp at all!
+// Com1002a m. 49 all should be ternary => conflicting agents
+// Sort out Bus3038 m. 16
 			ternAgent = true;
 		}
 
