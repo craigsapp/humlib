@@ -11,6 +11,8 @@
 //
 
 #include "HumdrumFileContent.h"
+#include "HumRegex.h"
+#include "Convert.h"
 
 using namespace std;
 

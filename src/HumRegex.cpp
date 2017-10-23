@@ -250,6 +250,22 @@ int HumRegex::getMatchInt(int index) {
 
 //////////////////////////////
 //
+// HumRegex::getMatchDouble -- Get the match interpreted as a double.
+//
+
+double HumRegex::getMatchDouble(int index) {
+	string value = m_matches.str(index);
+	if (value.size() > 0) {
+		return stod(value);
+	} else {
+		return 0.0;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumRegex::getPrefix -- Return the input string text which
 //    occurs before the match;
 //

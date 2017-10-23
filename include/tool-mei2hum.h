@@ -43,30 +43,47 @@ class mei_staffDef {
 		string timesig;    // such as *M4/4
 		string keysig;     // such as *k[f#]
 		string midibpm;    // such as *MM120
+		string transpose;  // such as *Trd-1c-2
+		int base40 = 0;    // used for transposing to C score
+		string label;      // such as *I"violin 1
+		string labelabbr;  // such as *I'v1
+
 		void clear(void) {
 			clef.clear();
 			timesig.clear();
 			keysig.clear();
 			midibpm.clear();
+			transpose.clear();
+			base40 = 0;
+			label.clear();
+			labelabbr.clear();
 		}
 		mei_staffDef& operator=(mei_staffDef& staffDef) {
 			if (this == &staffDef) {
 				return *this;
 			}
-			clef     = staffDef.clef;
-			timesig  = staffDef.timesig;
-			keysig   = staffDef.keysig;
-			midibpm  = staffDef.midibpm;
+			clef       = staffDef.clef;
+			timesig    = staffDef.timesig;
+			keysig     = staffDef.keysig;
+			midibpm    = staffDef.midibpm;
+			transpose  = staffDef.transpose;
+			base40     = staffDef.base40;
+			label      = staffDef.label;
+			labelabbr  = staffDef.labelabbr;
 			return *this;
 		}
 		mei_staffDef(void) {
 			// do nothing
 		}
 		mei_staffDef(const mei_staffDef& staffDef) {
-			clef     = staffDef.clef;
-			timesig  = staffDef.timesig;
-			keysig   = staffDef.keysig;
-			midibpm  = staffDef.midibpm;
+			clef       = staffDef.clef;
+			timesig    = staffDef.timesig;
+			keysig     = staffDef.keysig;
+			midibpm    = staffDef.midibpm;
+			transpose  = staffDef.transpose;
+			base40     = staffDef.base40;
+			label      = staffDef.label;
+			labelabbr  = staffDef.labelabbr;
 		}
 };
 
@@ -116,11 +133,12 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseApp             (xml_node app, HumNum starttime);
 		HumNum parseLem             (xml_node lem, HumNum starttime);
 		HumNum parseRdg             (xml_node rdg, HumNum starttime);
-		void   processStaffGrp      (xml_node staffGrp, HumNum starttime);
-		void   processStaffDef      (xml_node staffDef, HumNum starttime);
+		void   parseStaffGrp        (xml_node staffGrp, HumNum starttime);
+		void   parseStaffDef        (xml_node staffDef, HumNum starttime);
 		void   fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node element);
 		HumNum parseMeasure         (xml_node measure, HumNum starttime);
 		HumNum parseStaff           (xml_node staff, HumNum starttime);
+		void   parseReh             (xml_node reh, HumNum starttime);
 		HumNum parseLayer           (xml_node layer, HumNum starttime);
 		int    extractStaffCount    (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);
@@ -131,6 +149,7 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseTuplet          (xml_node note, HumNum starttime);
 		void   parseClef            (xml_node clef, HumNum starttime);
 		void   parseDynam           (xml_node dynam, HumNum starttime);
+		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
 		string getHumdrumPitch      (xml_node note);
@@ -151,6 +170,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTupletSpanStart (xml_node node, xml_node tupletSpan);
 		void   parseTupletSpanStop  (string& output, xml_node node, xml_node tupletSpan);
 		void   parseSb              (xml_node sb, HumNum starttime);
+		void   parsePb              (xml_node pb, HumNum starttime);
 		void   processLinkedNodes   (string& output, xml_node node);
 		int    getDotCount          (xml_node node);
 		void   processFermataAttribute(string& output, xml_node node);

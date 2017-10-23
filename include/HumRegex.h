@@ -98,6 +98,7 @@ class HumRegex {
 		int         getMatchCount      (void);
 		string      getMatch           (int index);
 		int         getMatchInt        (int index);
+		double      getMatchDouble     (int index);
 		string      getPrefix          (void);
 		string      getSuffix          (void);
 		int         getMatchStartIndex (int index = 0);

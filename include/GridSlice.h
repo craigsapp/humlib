@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 16 16:08:05 PDT 2016
-// Last Modified: Sun Oct 16 16:08:08 PDT 2016
+// Last Modified: Sat Oct 21 21:59:45 PDT 2017
 // Filename:      GridSlice.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridSlice.h
 // Syntax:        C++11
@@ -47,6 +47,9 @@ class GridSlice : public vector<GridPart*> {
 		bool isGraceSlice(void)       { return m_type == SliceType::GraceNotes;       }
 		bool isMeasureSlice(void)     { return m_type == SliceType::Measures;         }
 		bool isClefSlice(void)        { return m_type == SliceType::Clefs;            }
+		bool isLabelSlice(void)       { return m_type == SliceType::Labels;           }
+		bool isLabelAbbrSlice(void)   { return m_type == SliceType::LabelAbbrs;       }
+		bool isTransposeSlice(void)   { return m_type == SliceType::Transpositions;   }
 		bool isKeySigSlice(void)      { return m_type == SliceType::KeySigs;          }
 		bool isTimeSigSlice(void)     { return m_type == SliceType::TimeSigs;         }
 		bool isTempoSlice(void)       { return m_type == SliceType::Tempos;           }
