@@ -2953,7 +2953,7 @@ void Tool_mei2hum::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_mei2hum::buildIdLinkMap -- Build table of startid and endid links between elemements.
+// Tool_mei2hum::buildIdLinkMap -- Build table of startid and endid links between elements.
 //
 // Reference: https://pugixml.org/docs/samples/traverse_walker.cpp
 //
