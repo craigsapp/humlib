@@ -52,6 +52,9 @@ class GridMeasure : public list<GridSlice*> {
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addDataToken   (const string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addGraceToken  (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff,
+		                             int gracenumber);
 		GridSlice*   addGlobalLayout(const string& tok, HumNum timestamp);
 		GridSlice*   addGlobalComment(const string& tok, HumNum timestamp);
 		GridSlice*   appendGlobalLayout(const string& tok, HumNum timestamp);

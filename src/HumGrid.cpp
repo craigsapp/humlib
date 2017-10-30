@@ -1558,6 +1558,11 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 		return;
 	}
 
+	if (m_allslices.at(slicei)->isGraceSlice()) {
+		cerr << "THIS IS A GRACE SLICE SO DO NOT FILL" << endl;
+		return;
+	}
+
 	GridVoice* gv = m_allslices.at(slicei)->at(parti)->at(staffi)->at(voicei);
  	HTp token = gv->getToken();
 	if (!token) {
@@ -1627,8 +1632,10 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 				cerr << "Strange error2 in extendDurationToken()" << endl;
 				return;
 			}
-			
-			if (m_allslices.at(s)->isDataSlice()) {
+
+			if (m_allslices.at(s)->isGraceSlice()) {
+				m_allslices[s]->setDuration(0);
+			} else if (m_allslices.at(s)->isDataSlice()) {
 				gs->setNullTokenLayer(voicei, type, slicedur);
 				timeleft = timeleft - slicedur;
 			} else if (m_allslices.at(s)->isInvalidSlice()) {
