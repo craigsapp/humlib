@@ -363,12 +363,10 @@ void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
 		return;
 	}
 
-
 	// for now, replace the pitch of the second note with
 	// that of the first note.  Later tied them together or
 	// merge into a single note depending on the notational
 	// context.
-
 	changePitch(note2, note1);
 
 }
@@ -446,6 +444,22 @@ void Tool_dissonant::changePitch(HTp note2, HTp note1) {
 	note2->setText(n2);
 }
 
+
+
+//////////////////////////////
+//
+// Tool_dissonant::changeDuration -- will not handle chords correctly.
+//    Adds duration of note2 to note1 and replaces note2 with a
+//    placeholder "." token.
+//
+
+// void Tool_dissonant::changeDuration(HTp note1, HTp note2) {
+// 	HumNum dur1 = note1->getDuration();
+// 	HumNum dur2 = note2->getDuration();
+// 	HumNum sumdur = dur1 + dur2;
+// 	// note1.setDuration(sumdur); // The setDuration() function doesn't exist yet.
+// 	// note2->setText(".");
+// }
 
 
 
