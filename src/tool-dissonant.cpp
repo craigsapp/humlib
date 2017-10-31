@@ -239,6 +239,36 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		vector<vector<NoteCell*> >& attacks, vector<vector<string> >& results) {
 
+/*
+// Loop over the dissonance results one full row at a time. The point of doing it
+// one row at a time instead of one voice at a time is so that a weak dissonance in
+// any voice will cause other consonant notes to get reduced away if they begin
+// at that same moment in the piece and last no longer than the weak dissonance.
+for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
+	HumNum maxDur = 0  // duration of the longest weak dissonance starting at this row in any voice
+	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
+		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")) {
+			continue;
+		} else if ((results[voice][lineindex] == m_labels[PASSING_UP]) ||
+				   (results[voice][lineindex] == m_labels[PASSING_DOWN]) ||
+				   (results[voice][lineindex] == m_labels[NEIGHBOR_UP]) ||
+				   (results[voice][lineindex] == m_labels[NEIGHBOR_DOWN]) ) // ...etc. Include all weak dissonances here.
+			if (duration_of_this_weak_dissonance > maxDur) {
+				maxDur == duration_of_this_weak_dissonance;
+			}
+		}
+	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
+		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")
+			(results[voice][lineindex] == m_labels[SUS_BIN])
+			(results[voice][lineindex] == m_labels[SUS_TERN])
+			(results[voice][lineindex] == m_labels[AGENT_BIN])
+			(results[voice][lineindex] == m_labels[AGENT_TERN])) {
+			continue;
+		} else if ((thisVoice attacks a note in this lineindex) && (thisVoiceNoteDur <= maxDur) {
+			mergeWithPreviousNote(infile, attacks[voice], lineindex);
+		}
+*/
+
 	for (int i=0; i<(int)attacks.size(); i++) {
 		suppressDissonancesInVoice(infile, grid, i, attacks[i], results[i]);
 	}
