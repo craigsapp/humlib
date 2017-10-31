@@ -131,20 +131,21 @@ class Tool_dissonant : public HumTool {
 		const int SUS_NO_AGENT_LEAP    = 35; // suspension missing a normal agent approached by leap
 		const int SUS_NO_AGENT_STEP    = 36; // suspension missing a normal agent approached by step or anticipation
 		const int CHANSON_IDIOM        = 37; // chanson idiom
+		const int ORNAMENTAL_SUS	   = 38; // purely ornamental suspension
 
 		// unknown dissonances:
-		const int PARALLEL_UP          = 38; // moves in parallel with known dissonant, approached from below
-		const int PARALLEL_DOWN        = 39; // moves in parallel with known dissonant, approached from above
-		const int RES_PITCH			   = 40; // note of resolution of a suspension against suspension dissonance
+		const int PARALLEL_UP          = 39; // moves in parallel with known dissonant, approached from below
+		const int PARALLEL_DOWN        = 40; // moves in parallel with known dissonant, approached from above
+		const int RES_PITCH			   = 41; // note of resolution of a suspension against suspension dissonance
 
-		const int ONLY_WITH_VALID_UP   = 41; // only dissonant with identifiable dissonances, approached from below
-		const int ONLY_WITH_VALID_DOWN = 42; // only dissonant with identifiable dissonances, approached from above
-		const int UNKNOWN_DISSONANCE   = 43; // unknown dissonance type
-		const int UNLABELED_Z2         = 44; // unknown dissonance type, 2nd interval
-		const int UNLABELED_Z7         = 45; // unknown dissonance type, 7th interval
-		const int UNLABELED_Z4         = 46; // unknown dissonance type, 4th interval
+		const int ONLY_WITH_VALID_UP   = 42; // only dissonant with identifiable dissonances, approached from below
+		const int ONLY_WITH_VALID_DOWN = 43; // only dissonant with identifiable dissonances, approached from above
+		const int UNKNOWN_DISSONANCE   = 44; // unknown dissonance type
+		const int UNLABELED_Z2         = 45; // unknown dissonance type, 2nd interval
+		const int UNLABELED_Z7         = 46; // unknown dissonance type, 7th interval
+		const int UNLABELED_Z4         = 47; // unknown dissonance type, 4th interval
 
-		const int LABELS_SIZE          = 47; // one more than last index
+		const int LABELS_SIZE          = 48; // one more than last index
 };
 
 // END_MERGE

@@ -258,10 +258,10 @@ for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
 			}
 		}
 	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
-		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")
-			(results[voice][lineindex] == m_labels[SUS_BIN])
-			(results[voice][lineindex] == m_labels[SUS_TERN])
-			(results[voice][lineindex] == m_labels[AGENT_BIN])
+		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".") ||
+			(results[voice][lineindex] == m_labels[SUS_BIN]) ||
+			(results[voice][lineindex] == m_labels[SUS_TERN]) ||
+			(results[voice][lineindex] == m_labels[AGENT_BIN]) ||
 			(results[voice][lineindex] == m_labels[AGENT_TERN])) {
 			continue;
 		} else if ((thisVoice attacks a note in this lineindex) && (thisVoiceNoteDur <= maxDur) {
@@ -299,6 +299,16 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 			mergeWithPreviousNote(infile, attacks, i);
 		} else if (results[lineindex] == m_labels[NEIGHBOR_DOWN]) {
 			mergeWithPreviousNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[ACC_PASSING_UP]) {
+			mergeWithNextNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[ACC_PASSING_DOWN]) {
+			mergeWithNextNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[ACC_LO_NEI]) {
+			mergeWithNextNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[ACC_UP_NEI]) {
+			mergeWithNextNote(infile, attacks, i);
+		} else if (results[lineindex] == m_labels[CHANSON_IDIOM]) {
+			mergeWithNextNote(infile, attacks, i);
 		}
 	}
 }
@@ -924,6 +934,11 @@ RECONSIDER:
 			if (ternAgent) { // ternary agent and suspension
 				results[vindex][lineindex] = m_labels[AGENT_TERN];
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
+			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
+					   ((odurn == .5) || (odurn == 1)) &&
+					   (ointn == -1) && (ointnn == -1) ) { 
+				results[vindex][lineindex] = m_labels[AGENT_BIN];
+				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
 			} else { // binary agent and suspension
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[SUS_BIN];
@@ -1811,6 +1826,7 @@ void Tool_dissonant::fillLabels(void) {
 	m_labels[SUS_NO_AGENT_LEAP   ] = "M"; // suspension missing a normal agent approached by leap
 	m_labels[SUS_NO_AGENT_STEP   ] = "m"; // suspension missing a normal agent approached by step or by anticipation
 	m_labels[CHANSON_IDIOM       ] = "h"; // chanson idiom
+	m_labels[ORNAMENTAL_SUS		 ] = "o"; // purely ornamental suspension
 	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
 	m_labels[PARALLEL_DOWN       ] = "l"; // moves down in parallel with identifiable dissonance
 	m_labels[RES_PITCH			 ] = "x"; // note of resolution of a suspension against suspension dissonance
@@ -1870,6 +1886,7 @@ void Tool_dissonant::fillLabels2(void) {
 	m_labels[SUS_NO_AGENT_LEAP   ] = "M"; // suspension missing a normal agent approached by leap
 	m_labels[SUS_NO_AGENT_STEP   ] = "M"; // suspension missing a normal agent approached by step or anticipation
 	m_labels[CHANSON_IDIOM       ] = "H"; // chanson idiom
+	m_labels[ORNAMENTAL_SUS		 ] = "O"; // purely ornamental suspension
 	m_labels[PARALLEL_UP         ] = "L"; // moves up in parallel with identifiable dissonance
 	m_labels[PARALLEL_DOWN       ] = "L"; // moves down in parallel with identifiable dissonance
 	m_labels[RES_PITCH			 ] = "X"; // note of resolution of a suspension against suspension dissonance
