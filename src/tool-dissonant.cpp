@@ -287,27 +287,24 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 
 	for (int i=0; i<(int)attacks.size(); i++) {
 		int lineindex = attacks[i]->getLineIndex();
-		if (results[lineindex] == "") {
+		if ((results[lineindex] == "") || (results[lineindex] == ".") ) {
 			continue;
-		} else if (results[lineindex] == ".") {
-			continue;
-		} else if (results[lineindex] == m_labels[PASSING_UP]) {
+		} else if ((results[lineindex] == m_labels[PASSING_UP]) ||
+				   (results[lineindex] == m_labels[PASSING_DOWN]) ||
+				   (results[lineindex] == m_labels[NEIGHBOR_UP]) ||
+				   (results[lineindex] == m_labels[NEIGHBOR_DOWN]) ||
+				   (results[lineindex] == m_labels[ANT_UP]) ||
+				   (results[lineindex] == m_labels[ANT_DOWN]) ) {
 			mergeWithPreviousNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[PASSING_DOWN]) {
-			mergeWithPreviousNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[NEIGHBOR_UP]) {
-			mergeWithPreviousNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[NEIGHBOR_DOWN]) {
-			mergeWithPreviousNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[ACC_PASSING_UP]) {
-			mergeWithNextNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[ACC_PASSING_DOWN]) {
-			mergeWithNextNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[ACC_LO_NEI]) {
-			mergeWithNextNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[ACC_UP_NEI]) {
-			mergeWithNextNote(infile, attacks, i);
-		} else if (results[lineindex] == m_labels[CHANSON_IDIOM]) {
+		} else if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
+				   (results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
+				   (results[lineindex] == m_labels[THIRD_Q_LOWER_NEI]) ||
+				   (results[lineindex] == m_labels[THIRD_Q_UPPER_NEI]) ||
+				   (results[lineindex] == m_labels[ACC_PASSING_UP]) ||
+				   (results[lineindex] == m_labels[ACC_PASSING_DOWN]) ||
+				   (results[lineindex] == m_labels[ACC_LO_NEI]) ||
+				   (results[lineindex] == m_labels[ACC_UP_NEI]) ||
+				   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
 			mergeWithNextNote(infile, attacks, i);
 		}
 	}
