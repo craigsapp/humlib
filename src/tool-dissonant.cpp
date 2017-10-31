@@ -254,7 +254,7 @@ for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
 				   (results[voice][lineindex] == m_labels[NEIGHBOR_UP]) ||
 				   (results[voice][lineindex] == m_labels[NEIGHBOR_DOWN]) ) // ...etc. Include all weak dissonances here.
 			if (duration_of_this_weak_dissonance > maxDur) {
-				maxDur == duration_of_this_weak_dissonance;
+				maxDur = duration_of_this_weak_dissonance;
 			}
 		}
 	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
