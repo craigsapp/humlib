@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct 30 00:07:27 PDT 2017
+// Last Modified: Tue, Oct 31, 2017 10:21:06 AM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31191,6 +31191,36 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		vector<vector<NoteCell*> >& attacks, vector<vector<string> >& results) {
 
+/*
+// Loop over the dissonance results one full row at a time. The point of doing it
+// one row at a time instead of one voice at a time is so that a weak dissonance in
+// any voice will cause other consonant notes to get reduced away if they begin
+// at that same moment in the piece and last no longer than the weak dissonance.
+for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
+	HumNum maxDur = 0  // duration of the longest weak dissonance starting at this row in any voice
+	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
+		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")) {
+			continue;
+		} else if ((results[voice][lineindex] == m_labels[PASSING_UP]) ||
+				   (results[voice][lineindex] == m_labels[PASSING_DOWN]) ||
+				   (results[voice][lineindex] == m_labels[NEIGHBOR_UP]) ||
+				   (results[voice][lineindex] == m_labels[NEIGHBOR_DOWN]) ) // ...etc. Include all weak dissonances here.
+			if (duration_of_this_weak_dissonance > maxDur) {
+				maxDur = duration_of_this_weak_dissonance;
+			}
+		}
+	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
+		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")
+			(results[voice][lineindex] == m_labels[SUS_BIN])
+			(results[voice][lineindex] == m_labels[SUS_TERN])
+			(results[voice][lineindex] == m_labels[AGENT_BIN])
+			(results[voice][lineindex] == m_labels[AGENT_TERN])) {
+			continue;
+		} else if ((thisVoice attacks a note in this lineindex) && (thisVoiceNoteDur <= maxDur) {
+			mergeWithPreviousNote(infile, attacks[voice], lineindex);
+		}
+*/
+
 	for (int i=0; i<(int)attacks.size(); i++) {
 		suppressDissonancesInVoice(infile, grid, i, attacks[i], results[i]);
 	}
@@ -31282,6 +31312,63 @@ void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
 	// context.
 
 	changePitch(note2, note1);
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::mergeWithNextNote --  will not
+//  handle chords correctly. Use to reduce out
+//  accented dissonances.
+//
+
+void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile,
+		vector<NoteCell*>& attacks, int index) {
+
+	if ((index + 1) == attacks.size()) {
+		return;
+	}
+
+	HTp note1 = attacks[index]->getToken();
+	HTp note2 = attacks[index+1]->getToken();
+
+	// // this keeps the function from merging two notes across a barline. I
+	// don't think this is actually necessary.
+	// int line1 = note1->getLineIndex();
+	// int line2 = note2->getLineIndex();
+
+	// for (int i=line1+1; i<line2; i++) {
+	// 	if (infile[i].isBarline()) {
+	// 		break;
+	// 	}
+	// }
+
+	HumNum dur1 = note1->getDuration();
+	HumNum dur2 = note2->getDuration();
+
+	HumNum sumdur = dur1 + dur2;
+
+	// I'm not sure if this is necessary either.
+	// bool tied1 = note1->find("[") != string::npos ? true : false;
+	// bool tied2 = note2->find("[") != string::npos ? true : false;
+
+	// if (tied1 || tied2) {
+	// 	// don't deal with tied notes for now
+	// 	return;
+	// }
+
+
+	// Replace the pitch of the first note with
+	// that of the second note.  Later tie them together or
+	// merge into a single note depending on the notational
+	// context.
+
+	changePitch(note1, note2);
+
+	// Add a changeDuration() function and call it here.
+	// changeDuration(note1, sumdur);
 
 }
 
@@ -39964,7 +40051,7 @@ void Tool_mei2hum::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_mei2hum::buildIdLinkMap -- Build table of startid and endid links between elemements.
+// Tool_mei2hum::buildIdLinkMap -- Build table of startid and endid links between elements.
 //
 // Reference: https://pugixml.org/docs/samples/traverse_walker.cpp
 //

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct 30 00:07:27 PDT 2017
+// Last Modified: Tue, Oct 31, 2017 10:21:06 AM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3943,6 +3943,8 @@ class Tool_dissonant : public HumTool {
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);
 		void    mergeWithPreviousNote(HumdrumFile& infile,
+		                            vector<NoteCell*>& attacks, int index);
+		void    mergeWithNextNote	(HumdrumFile& infile,
 		                            vector<NoteCell*>& attacks, int index);
 
 	private:

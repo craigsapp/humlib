@@ -365,60 +365,60 @@ void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
 
 
 
-// //////////////////////////////
-// //
-// // Tool_dissonant::mergeWithNextNote --  will not
-// //  handle chords correctly. Eliminates accented
-// //  dissonances.
-// //
+//////////////////////////////
+//
+// Tool_dissonant::mergeWithNextNote --  will not
+//  handle chords correctly. Use to reduce out
+//  accented dissonances.
+//
 
-// void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile,
-// 		vector<NoteCell*>& attacks, int index) {
+void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile,
+		vector<NoteCell*>& attacks, int index) {
 
-// 	if ((index + 1) == attacks.size()) {
-// 		return;
-// 	}
+	if ((index + 1) == attacks.size()) {
+		return;
+	}
 
-// 	HTp note1 = attacks[index]->getToken();
-// 	HTp note2 = attacks[index+1]->getToken();
+	HTp note1 = attacks[index]->getToken();
+	HTp note2 = attacks[index+1]->getToken();
 
-// 	// // this keeps the function from merging two notes across a barline. I
-// 	// don't think this is actually necessary.
-// 	// int line1 = note1->getLineIndex();
-// 	// int line2 = note2->getLineIndex();
+	// // this keeps the function from merging two notes across a barline. I
+	// don't think this is actually necessary.
+	// int line1 = note1->getLineIndex();
+	// int line2 = note2->getLineIndex();
 
-// 	// for (int i=line1+1; i<line2; i++) {
-// 	// 	if (infile[i].isBarline()) {
-// 	// 		break;
-// 	// 	}
-// 	// }
+	// for (int i=line1+1; i<line2; i++) {
+	// 	if (infile[i].isBarline()) {
+	// 		break;
+	// 	}
+	// }
 
-// 	HumNum dur1 = note1->getDuration();
-// 	HumNum dur2 = note2->getDuration();
+	HumNum dur1 = note1->getDuration();
+	HumNum dur2 = note2->getDuration();
 
-// 	HumNum sumdur = dur1 + dur2;
+	HumNum sumdur = dur1 + dur2;
 
-// 	// I'm not sure if this is necessary either.
-// 	// bool tied1 = note1->find("[") != string::npos ? true : false;
-// 	// bool tied2 = note2->find("[") != string::npos ? true : false;
+	// I'm not sure if this is necessary either.
+	// bool tied1 = note1->find("[") != string::npos ? true : false;
+	// bool tied2 = note2->find("[") != string::npos ? true : false;
 
-// 	// if (tied1 || tied2) {
-// 	// 	// don't deal with tied notes for now
-// 	// 	return;
-// 	// }
+	// if (tied1 || tied2) {
+	// 	// don't deal with tied notes for now
+	// 	return;
+	// }
 
 
-// 	// Replace the pitch of the first note with
-// 	// that of the second note.  Later tie them together or
-// 	// merge into a single note depending on the notational
-// 	// context.
+	// Replace the pitch of the first note with
+	// that of the second note.  Later tie them together or
+	// merge into a single note depending on the notational
+	// context.
 
-// 	changePitch(note1, note2);
+	changePitch(note1, note2);
 
-// 	// Add a changeDuration() function and call it here.
-// 	// changeDuration(note1, sumdur);
+	// Add a changeDuration() function and call it here.
+	// changeDuration(note1, sumdur);
 
-// }
+}
 
 
 

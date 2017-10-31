@@ -72,6 +72,8 @@ class Tool_dissonant : public HumTool {
 		                            vector<string>& results);
 		void    mergeWithPreviousNote(HumdrumFile& infile,
 		                            vector<NoteCell*>& attacks, int index);
+		void    mergeWithNextNote	(HumdrumFile& infile,
+		                            vector<NoteCell*>& attacks, int index);
 
 	private:
 	 	vector<HTp> m_kernspines;
