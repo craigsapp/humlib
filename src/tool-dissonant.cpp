@@ -289,12 +289,24 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 		int lineindex = attacks[i]->getLineIndex();
 		if ((results[lineindex] == "") || (results[lineindex] == ".") ) {
 			continue;
-		} else if ((results[lineindex] == m_labels[PASSING_UP]) ||
-				   (results[lineindex] == m_labels[PASSING_DOWN]) ||
-				   (results[lineindex] == m_labels[NEIGHBOR_UP]) ||
+		} else if ((results[lineindex] == m_labels[PASSING_DOWN]) ||
+				   (results[lineindex] == m_labels[PASSING_UP]) ||
 				   (results[lineindex] == m_labels[NEIGHBOR_DOWN]) ||
+				   (results[lineindex] == m_labels[NEIGHBOR_UP]) ||
+				   (results[lineindex] == m_labels[CAMBIATA_DOWN_S]) ||
+				   (results[lineindex] == m_labels[CAMBIATA_UP_S]) ||
+				   (results[lineindex] == m_labels[CAMBIATA_DOWN_L]) ||
+				   (results[lineindex] == m_labels[CAMBIATA_UP_L]) ||
+				   (results[lineindex] == m_labels[ECHAPPEE_DOWN]) ||
+				   (results[lineindex] == m_labels[ECHAPPEE_UP]) ||
+				   (results[lineindex] == m_labels[ANT_DOWN]) ||
 				   (results[lineindex] == m_labels[ANT_UP]) ||
-				   (results[lineindex] == m_labels[ANT_DOWN]) ) {
+				   (results[lineindex] == m_labels[REV_ECHAPPEE_DOWN]) ||
+				   (results[lineindex] == m_labels[REV_ECHAPPEE_UP]) ||
+				   (results[lineindex] == m_labels[REV_CAMBIATA_DOWN]) ||
+				   (results[lineindex] == m_labels[REV_CAMBIATA_UP]) ||
+				   (results[lineindex] == m_labels[DBL_NEIGHBOR_DOWN]) ||
+				   (results[lineindex] == m_labels[DBL_NEIGHBOR_UP]) ) {
 			mergeWithPreviousNote(infile, attacks, i);
 		} else if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
 				   (results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
@@ -304,6 +316,9 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 				   (results[lineindex] == m_labels[ACC_PASSING_DOWN]) ||
 				   (results[lineindex] == m_labels[ACC_LO_NEI]) ||
 				   (results[lineindex] == m_labels[ACC_UP_NEI]) ||
+				   (results[lineindex] == m_labels[RES_PITCH]) ||
+				   (results[lineindex] == m_labels[APP_UPPER]) ||
+				   (results[lineindex] == m_labels[APP_LOWER]) ||
 				   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
 			mergeWithNextNote(infile, attacks, i);
 		}
