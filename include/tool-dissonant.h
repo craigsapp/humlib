@@ -74,6 +74,7 @@ class Tool_dissonant : public HumTool {
 		void    changeDurationOfNote(HTp note, HumNum dur);
 		void    changePitch        (HTp note2, HTp note1);
 		void    simplePreviousMerge(HTp pnote, HTp cnote);
+		void    simpleNextMerge	   (HTp cnote, HTp nnote);
 		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
 		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
 		void    mergeWithPreviousNote(HumdrumFile& infile, NoteCell* cell);

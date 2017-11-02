@@ -608,6 +608,47 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 
 //////////////////////////////
 //
+// Tool_dissonant::simpleNextMerge -- Merge two notes which are in the same measure
+//   and generate a printable duration when summed together.  Also deal with tied notes
+//   attached to the cnote.  Does not work with chords. Makes the pitch of the 
+//   next note start at the time point of the current note and last for the 
+//   comibined duration of the two original notes. The next note gets replaced
+//   with a placeholder token.
+//
+
+void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
+	bool ctie = cnote->find("]") != string::npos;
+	bool ntie = nnote->find("[") != string::npos;
+
+	if (ctie && ntie) {
+		// Current note is part of a tie group and ctie is part of a tie group
+		// so the merged tie will be parts of both previous and current groups.
+		auto loc = cnote->find("]");
+		if (loc != string::npos) {
+			string text = *cnote;
+			text.replace(loc, 1, "_");
+		}
+	} else if ((!ctie) && ntie) {
+		// Next note is tied to other notes, so the current note, which is an
+		// attack, should be converted to be the start of a tie group.
+		string text = "[" + *cnote;
+		cnote->setText(text);
+	}
+
+	HumNum cdur = cnote->getDuration();
+	HumNum ndur = nnote->getDuration();
+	HumNum dur = cdur + ndur;
+	changeDurationOfNote(cnote, dur);
+	changePitch(nnote, cnote)
+	nnote->setText(".");
+	return;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_dissonant::changePitchOfTieGroupFollowing -- 
 //
 
@@ -676,44 +717,48 @@ void Tool_dissonant::changeDurationOfNote(HTp note, HumNum dur) {
 //
 
 void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field) {
-	HTp token = infile.token(line, field);
-	if (!token) {
+	HTp cnote = infile.token(line, field);  // current note (attack)
+	if (!cnote) {
 		return;
 	}
-	if (token->isNull()) {
+	HTp nnote = cnote->getNextNNDT();   // next note
+	if (!nnote) {
 		return;
 	}
-	int b40 = Convert::kernToBase40(token);
-	if (b40 <= 0) {
+	if (nnote->isNull()) {
 		return;
 	}
-	if ((token->find("[") != string::npos) || (token->find("_") != string::npos)) {
-		token = token->getNextNNDT();
-		int b40b = Convert::kernToBase40(token);
-		while (token && (b40 == b40b) && (token->find("_") != string::npos)) {
-			token = token->getNextNNDT();
-			if (!token) {
-				break;
-			}
-			b40b = Convert::kernToBase40(token);
-		}
-		if (token && (token->find("]") == string::npos)) {
-			// no end of tie, so bakup
-			token = token->getPreviousNNDT();
-		}
-	}
-	token = token->getNextNNDT();
-	if (!token) {
-		return;
-	}
-	if (token->isNull()) {
+	if (nnote->isRest()) {
+		// next event is a rest, so don't merge.
 		return;
 	}
 
-	int lineindex = token->getLineIndex();
-	int fieldindex = token->getFieldIndex();
+	int cline = cnote->getLineIndex();   // current note's line
+	int nline = nnote->getLineIndex();   // next note's line
+	bool barline = false;
+	for (int i=cline; i<=nline; i++) {
+		if (infile[i].isBarline()) {
+			barline = true;
+			break;
+		}
+	}
 
-	mergeWithPreviousNote(infile, lineindex, fieldindex);
+	if (!barline) {
+		// cerr << "\tNOTES IN SAME MEASURE, MERGE IF REASONABLE RHYTHM" << endl;
+		HumNum cdur = cnote->getDuration();
+		HumNum pdur = nnote->getDuration();
+		HumNum dur = cdur + ndur;
+		string recip = Convert::durationToRecip(dur);
+		// cerr << "\tCOMBINED RHYTHM OF NOTES IS " << recip << endl;
+		if (recip.find("%") == string::npos) {
+			simpleNextMerge(cnote, nnote);   // TODO: Make a "simpleNextMerge(cnote, nnote)"
+			return;
+		}
+	}
+
+	// I'm not sure if a version of this function will be necessary for 
+	// next-note/strong-dissonance reduction.
+	// mergeWithNextNoteViaTies(pnote, cnote); 
 }
 
 
