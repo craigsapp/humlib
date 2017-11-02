@@ -55,7 +55,6 @@ class Tool_dissonant : public HumTool {
 									NoteGrid& grid,	vector<NoteCell*>& attacks,
 									vector<vector<string> >& voiceFuncs,
 									int vindex);
-		void    changePitch        (HTp note2, HTp note1);
 
 		void    printColorLegend   (HumdrumFile& infile);
 		int     getNextPitchAttackIndex(NoteGrid& grid, int voicei,
@@ -70,10 +69,13 @@ class Tool_dissonant : public HumTool {
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);
-		void    mergeWithPreviousNote(HumdrumFile& infile,
-		                            vector<NoteCell*>& attacks, int index);
-		void    mergeWithNextNote	(HumdrumFile& infile,
-		                            vector<NoteCell*>& attacks, int index);
+		void    mergeWithPreviousNote(HumdrumFile& infile, int line, int field);
+		void    mergeWithNextNote(HumdrumFile& infile, int line, int field);
+		void    changeDurationOfNote(HTp note, HumNum dur);
+		void    changePitch        (HTp note2, HTp note1);
+		void    simplePreviousMerge(HTp pnote, HTp cnote);
+		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
+		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
 
 	private:
 	 	vector<HTp> m_kernspines;

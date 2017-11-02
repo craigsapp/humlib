@@ -159,6 +159,11 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	if (suppressQ) {
 		suppressDissonances(infile, grid, attacks, results);
 
+		// should update low-level durations in suppressDissonances, but
+		// being lazy and re-analyze spines.  If there was any error in
+		// the durations, there will be no output from the program probably.
+		infile.analyzeStructure();
+
 		NoteGrid grid2(infile);
 		results2.resize(grid2.getVoiceCount());
 		for (int i=0; i<(int)results2.size(); i++) {
@@ -191,7 +196,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			printCountAnalysis(voiceFuncs);
 			return false;
 		}
-		
+
 		voiceFuncs.resize(grid.getVoiceCount());
 		for (int i=0; i<(int)voiceFuncs.size(); i++) {
 			voiceFuncs[i].resize(infile.getLineCount());
@@ -239,39 +244,103 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		vector<vector<NoteCell*> >& attacks, vector<vector<string> >& results) {
 
-/*
-// Loop over the dissonance results one full row at a time. The point of doing it
-// one row at a time instead of one voice at a time is so that a weak dissonance in
-// any voice will cause other consonant notes to get reduced away if they begin
-// at that same moment in the piece and last no longer than the weak dissonance.
-for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
-	HumNum maxDur = 0  // duration of the longest weak dissonance starting at this row in any voice
-	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
-		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".")) {
+	// Loop over the dissonance results one full row at a time. The point of doing it
+	// one row at a time instead of one voice at a time is so that a weak dissonance in
+	// any voice will cause other consonant notes to get reduced away if they begin
+	// at that same moment in the piece and last no longer than the weak dissonance.
+
+	vector<HTp> kernstarts;
+	infile.getKernSpineStartList(kernstarts);
+	vector<int> kernTrackToVoiceIndex(infile.getMaxTrack()+1, -1);
+	for (int i=0; i<(int)kernstarts.size(); i++) {
+		int track = kernstarts[i]->getTrack();
+		kernTrackToVoiceIndex[track] = i;
+	}
+
+	if (results.size() != kernstarts.size()) {
+		cerr << "Error: size of results does not match staves in score" << endl;
+		return;
+	}
+
+	HumNum maxWeakDur;  // Dur of longest weak dissonance starting at this row in any voice.
+	HTp maxToken = NULL; // Note which has the longest duration and is dissonant on line.
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			// skip non-note lines.
 			continue;
-		} else if ((results[voice][lineindex] == m_labels[PASSING_UP]) ||
-				   (results[voice][lineindex] == m_labels[PASSING_DOWN]) ||
-				   (results[voice][lineindex] == m_labels[NEIGHBOR_UP]) ||
-				   (results[voice][lineindex] == m_labels[NEIGHBOR_DOWN]) ) // ...etc. Include all weak dissonances here.
-			if (duration_of_this_weak_dissonance > maxDur) {
-				maxDur = duration_of_this_weak_dissonance;
+		}
+
+		// Loop over all the voices in this row to find the longest weak dissonance:
+		maxWeakDur = 0;
+		maxToken = NULL;
+		for (int j=0; j<(int)infile[i].getFieldCount(); j++) {
+			HTp token = infile[i].token(j);
+			if (!token->isKern()) {
+				continue;
+			}
+			int v = kernTrackToVoiceIndex.at(token->getTrack());
+			if (results[v][i].empty() || (results[v][i] == ".")) {
+				continue;
+			}
+			// cerr << "\tCHECKING DISSONANCE " << results[v][i] << " for note " << token << endl;
+			HumNum notedur = token->getTiedDuration();
+
+			if ((results[v][i] == m_labels[PASSING_UP] ) ||
+					(  results[v][i] == m_labels[PASSING_DOWN] ) ||
+					(  results[v][i] == m_labels[NEIGHBOR_UP]  ) ||
+					(  results[v][i] == m_labels[NEIGHBOR_DOWN])
+ 					// ...etc. Include all weak dissonances here.
+					) {
+				if (notedur > maxWeakDur) {
+					maxWeakDur = notedur;
+					maxToken = token;
+				}
 			}
 		}
-	for (int voice=0; voice<(int)results.size(); voice++) {} // loop over all the voices in this row to find the longest weak dissonance
-		if ((results[voice][lineindex] == "") || (results[voice][lineindex] == ".") ||
-			(results[voice][lineindex] == m_labels[SUS_BIN]) ||
-			(results[voice][lineindex] == m_labels[SUS_TERN]) ||
-			(results[voice][lineindex] == m_labels[AGENT_BIN]) ||
-			(results[voice][lineindex] == m_labels[AGENT_TERN])) {
+		if (maxToken == NULL) {
+			// No dissonant note of the required type on this line.
 			continue;
-		} else if ((thisVoice attacks a note in this lineindex) && (thisVoiceNoteDur <= maxDur) {
-			mergeWithPreviousNote(infile, attacks[voice], lineindex);
 		}
-*/
 
+		// cerr << "\tMAX DUR OF DISSONANT NOTE ON LINE: " << maxWeakDur << " FOR NOTE " << maxToken << endl;
+
+		for (int j=0; j<(int)infile[i].getFieldCount(); j++) {
+			HTp token = infile[i].token(j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			if (!token->isNoteAttack()) {
+				continue;
+			}
+			int v = kernTrackToVoiceIndex.at(token->getTrack());
+			if (results[v][i].empty() || (results[v][i] == ".")) {
+				continue;
+			}
+			HumNum notedur = token->getTiedDuration();
+			if ((results[v][i] == m_labels[SUS_BIN]) ||
+					(results[v][i] == m_labels[SUS_TERN]) ||
+					(results[v][i] == m_labels[AGENT_BIN]) ||
+					(results[v][i] == m_labels[AGENT_TERN])) {
+				continue;
+			} else if (notedur <= maxWeakDur) {
+				mergeWithPreviousNote(infile, i, j);
+			}
+		}
+	}
+
+/*
 	for (int i=0; i<(int)attacks.size(); i++) {
 		suppressDissonancesInVoice(infile, grid, i, attacks[i], results[i]);
 	}
+*/
+
 }
 
 
@@ -281,7 +350,7 @@ for (int lineindex=0; lineindex<(int)results[0].size(); lineindex++) {
 // Tool_dissonant::suppressDissonancesInVoice --
 //
 
-void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile, 
+void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 		NoteGrid& grid, int vindex, vector<NoteCell*>& attacks,
 		vector<string>& results) {
 
@@ -307,7 +376,7 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 				   (results[lineindex] == m_labels[REV_CAMBIATA_UP]) ||
 				   (results[lineindex] == m_labels[DBL_NEIGHBOR_DOWN]) ||
 				   (results[lineindex] == m_labels[DBL_NEIGHBOR_UP]) ) {
-			mergeWithPreviousNote(infile, attacks, i);
+			// mergeWithPreviousNote(infile, attacks, i);
 		} else if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
 				   (results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
 				   (results[lineindex] == m_labels[THIRD_Q_LOWER_NEI]) ||
@@ -320,7 +389,7 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 				   (results[lineindex] == m_labels[APP_UPPER]) ||
 				   (results[lineindex] == m_labels[APP_LOWER]) ||
 				   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
-			mergeWithNextNote(infile, attacks, i);
+			// mergeWithNextNote(infile, attacks, i);
 		}
 	}
 }
@@ -329,58 +398,233 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 
 //////////////////////////////
 //
-// Tool_dissonant::mergeWithPreviousNote --  will not
-//  handle chords correctly.
+// Tool_dissonant::mergeWithPreviousNote --  Will not handle chords correctly.  
+//     Input note is presumed to be a note attack.
 //
 
-void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
-		vector<NoteCell*>& attacks, int index) {
+void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile, int line, int field) {
+	HTp cnote = infile.token(line, field);  // current note (attack)
+	HTp pnote = cnote->getPreviousNNDT();   // previous note (not necessarily attack)
 
-	if (index < 1) {
+	if (pnote == NULL) {
+		// no previous note;
 		return;
 	}
 
-	HTp note1 = attacks[index-1]->getToken();
-	HTp note2 = attacks[index]->getToken();
+	if (pnote->isRest()) {
+		// previous note comes before a rest, so don't merge.
+		return;
+	}
 
-	int line1 = note1->getLineIndex();
-	int line2 = note2->getLineIndex();
+	// cerr << "GOING TO MERGE\t" << cnote << "\tWITH PREVIOUS NOTE" << endl;
+	// cerr << "\tPREVIOUS NOTE: " << pnote << endl;
 
-	// bool barlineQ = false;
-	for (int i=line1+1; i<line2; i++) {
+	int pline = pnote->getLineIndex();
+	int cline = cnote->getLineIndex();
+	bool barline = false;
+	for (int i=pline; i<=cline; i++) {
 		if (infile[i].isBarline()) {
-			// barlineQ = true;
+			barline = true;
 			break;
 		}
 	}
 
-	HumNum dur1 = note1->getDuration();
-	HumNum dur2 = note2->getDuration();
+	// bool ctie = pnote->find("[") != string::npos;
+	// bool ptie = pnote->find("]") != string::npos;
 
-	HumNum sumdur = dur1 + dur2;
+	if (!barline) {
+		// cerr << "\tNOTES IN SAME MEASURE, MERGE IF REASONABLE RHYTHM" << endl;
+		HumNum cdur = cnote->getDuration();
+		HumNum pdur = pnote->getDuration();
+		HumNum dur = cdur + pdur;
+		string recip = Convert::durationToRecip(dur);
+		// cerr << "\tCOMBINED RHYTHM OF NOTES IS " << recip << endl;
+		if (recip.find("%") == string::npos) {
+			simplePreviousMerge(pnote, cnote);
+			return;
+		}
+	}
 
-	/*
-	cerr << "Notes" << note1;
-	cerr << "\tto\t" << note2;
-	cerr << "\tline\t" << note1->getLineIndex();
-	cerr << "\tnewdur=" << sumdur;
-	cerr << endl;
-	*/
+	// cerr << "MERGING VIA TIES" << endl;
+	// if (barline) {
+	// 	cerr << "\tBARLINE BETWEEN NOTES, USE TIE METHOD" << endl;
+	// }
 
-	bool tied1 = note1->find("[") != string::npos ? true : false;
-	bool tied2 = note2->find("[") != string::npos ? true : false;
+	mergeWithPreviousNoteViaTies(pnote, cnote);
+}
 
-	if (tied1 || tied2) {
-		// don't deal with tied notes for now
+
+
+//////////////////////////////
+//
+// Tool_dissonant::mergeWithPreviousNoteViaTies --  Not for use with chords.
+//
+
+void Tool_dissonant::mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote) {
+	auto loc = pnote->find("]");
+	if (loc != string::npos) {
+		// change tie end to tie continue
+		string text = *pnote;
+		text.replace(loc, 1, "_");
+		pnote->setText(text);
+	} else {
+		// The previous note should be a note attack, so start a tie on it.
+		string text = "[" + *pnote;
+		pnote->setText(text);
+	}
+
+	loc = cnote->find("[");
+	if (loc != string::npos) {
+		// change tie start to tie continue and change all following
+		// pitches to that of the previous note.
+		string text = *cnote;
+		text.replace(loc, 1, "_");
+
+		string pitch = "";
+		HumRegex hre;
+		if (hre.search(*pnote, "([A-Ga-g]+[#-n]*[iXy]*)")) {
+			pitch = hre.getMatch(1);
+		} else {
+			cerr << "NO PITCH FOUND IN TARGET NOTE " << pnote << endl;
+			return;
+		}
+		changePitchOfTieGroupFollowing(cnote, pitch);
+	} else {
+		// add tie end to note and change to previous pitch
+		string text = *cnote + "]";
+		cnote->setText(text);
+		changePitch(pnote, cnote);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::simplePreviousMerge -- Merge two notes which are in the same measure
+//   and generate a printable duration when summed together.  Also deal with tied notes
+//   attached to the cnote.  Does not work with chords.
+//
+
+void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
+	bool ctie = pnote->find("[") != string::npos;
+	bool ptie = pnote->find("]") != string::npos;
+
+	if (ptie && ctie) {
+		// Previous note is part of a tie group and ctie is part of a tie group
+		// so the merged tie will be parts of both previous and current groups.
+		auto loc = pnote->find("]");
+		if (loc != string::npos) {
+			string text = *pnote;
+			text.replace(loc, 1, "_");
+		}
+	} else if ((!ptie) && ctie) {
+		// Current note is tied to other notes, so the previous note, which is an
+		// attack, should be converted to be the start of a tie group.
+		string text = "[" + *pnote;
+		pnote->setText(text);
+	} else if (ptie && (!ctie)) {
+		// Don't do anything: the merged note will still be the end of a tie group
+	} else if ((!ptie) && (!ctie)) {
+		// No need to deall with ties
+	}
+
+	HumNum cdur = cnote->getDuration();
+	HumNum pdur = pnote->getDuration();
+	HumNum dur = cdur + pdur;
+	changeDurationOfNote(pnote, dur);
+	
+
+	if (cnote->find("[") == string::npos) {
+		// current note is not the start of a tie group, so
+		// replace it with a null token and return.  Ideally
+		// the low-level duration of the token should also be
+		// set to zero.
+		cnote->setText(".");
 		return;
 	}
 
-	// for now, replace the pitch of the second note with
-	// that of the first note.  Later tied them together or
-	// merge into a single note depending on the notational
-	// context.
-	changePitch(note2, note1);
+	// The current note is part of a tie group, so change the pitch
+	// of each note in the tie group (after the current note) to the
+	// pitch of the previous note, then delete the current note and
+	// replace with a null token.
 
+	string pitch = "";
+	HumRegex hre;
+	if (hre.search(*pnote, "([A-Ga-g]+[#-n]*[iXy]*)")) {
+		pitch = hre.getMatch(1);
+	} else {
+		cerr << "NO PITCH FOUND IN TARGET NOTE " << pnote << endl;
+		return;
+	}
+
+	changePitchOfTieGroupFollowing(cnote, pitch);
+
+	// also should set the low-level duration of the token to 0.
+	cnote->setText(".");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::changePitchOfTieGroupFollowing -- 
+//
+
+void Tool_dissonant::changePitchOfTieGroupFollowing(HTp note, const string& pitch) {
+	int b40 = Convert::kernToBase40(note);
+	if (b40 <= 0) {
+		cerr << "SOME STRANGE ERROR:  NOTE HAS NO PITCH: " << note << endl;
+		return;
+	}
+	HumRegex hre;
+	HTp tok = note;
+	bool lastQ = false;
+	while (tok) {
+		if (lastQ) {
+			break;
+		}
+		int b40new = Convert::kernToBase40(tok);
+		if (b40 != b40new) {
+			// not the same pitch as the start of the note.
+			break;
+		}
+		string text = *tok;
+		hre.replaceDestructive(text, pitch, "[A-Ga-g]+[#-n]*[iXx]*");
+		tok->setText(text);
+		tok = tok->getNextNNDT();
+		if (!tok) {
+			break;
+		}
+		if (tok->find("]") != string::npos) {
+			lastQ = true;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::changeDurationOfNote -- Should also change low-level duration of note.
+//
+
+void Tool_dissonant::changeDurationOfNote(HTp note, HumNum dur) {
+	string recip = Convert::durationToRecip(dur);
+	HumRegex hre;
+	if (note->find("q") != string::npos) {
+		cerr << "STRANGE ERROR: note is a grace note" << endl;
+		return;
+	}
+	if (hre.search(*note, "^([^\\d.%]*)([\\d.%]+)(.*)")) {
+		string text = hre.getMatch(1);
+		text += recip;
+		text += hre.getMatch(3);
+		note->setText(text);
+	} else {
+		cerr << "STRANGE ERROR: no duration on note" << endl;
+		return;
+	}
 }
 
 
@@ -392,9 +636,14 @@ void Tool_dissonant::mergeWithPreviousNote(HumdrumFile& infile,
 //  accented dissonances.
 //
 
-void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile,
-		vector<NoteCell*>& attacks, int index) {
+void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field) {
 
+	HTp cnote = infile.token(line, field);
+
+cerr << "GOING TO MERGE " << cnote << " with next note" << endl;
+
+
+/*
 	if ((index + 1) == attacks.size()) {
 		return;
 	}
@@ -437,14 +686,15 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile,
 
 	// Add a changeDuration() function and call it here.
 	// changeDuration(note1, sumdur);
+*/
 
 }
-
 
 
 //////////////////////////////
 //
 // Tool_dissonant::changePitch -- will not handle chords correctly.
+//   First note is source for pitch and second is target for pitch.
 //
 
 void Tool_dissonant::changePitch(HTp note2, HTp note1) {
@@ -452,7 +702,7 @@ void Tool_dissonant::changePitch(HTp note2, HTp note1) {
 	string pitch = Convert::base40ToKern(b40);
 	HumRegex hre;
 	string n2 = *note2;
-	hre.replaceDestructive(n2, pitch, "[A-Ga-gr#-]+");
+	hre.replaceDestructive(n2, pitch, "[A-Ga-gr#-]+[ixX]*");
 	note2->setText(n2);
 }
 
@@ -531,7 +781,7 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 	for (int i=0; i<grid.getVoiceCount(); i++) {
 		findYs(results, grid, attacks[i], i);
 	}
-	
+
 	for (int i=0; i<grid.getVoiceCount(); i++) {
 		findAppoggiaturas(results, grid, attacks[i], i);
 	}
@@ -678,7 +928,7 @@ RECONSIDER:
 					((value == -3) && !((((otherpitch-lowestnote) % 7) == 2) ||
 					                      (((otherpitch-lowestnote) % 7) == 4)))
 					) {
-				// If the harmonic interval between two notes is a fourth and 
+				// If the harmonic interval between two notes is a fourth and
 				// the lower pitch in the interval is not a a third or a fifth
 				// above the lowest note.
 				dissonant = true;
@@ -825,7 +1075,7 @@ RECONSIDER:
 
 		// Condition 3: The other (dissonant) voice leaves its note before
 		//    or at the same time as the accompaniment (reference) voice leaves
-		//    its pitch class.  [The voices can leave their pitch classes for 
+		//    its pitch class.  [The voices can leave their pitch classes for
 		//    another note or for a rest.]
 		bool condition3a = oattackindexn <= attackindexn ? true : false;
 
@@ -880,7 +1130,7 @@ RECONSIDER:
 			ternAgent = true;
 		}
 
-		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) && 
+		if (((lev >= levn) || ((lev == 2) && (dur == .5))) && (lev >= levp) &&
 			(dur <= durp) && (condition2 || condition2b) && valid_acc_exit) { // weak dissonances
 			if (intp == -1) { // descending dissonances
 				if (intn == -1) { // downward passing tone
@@ -934,8 +1184,8 @@ RECONSIDER:
 					results[vindex][lineindex] = m_labels[THIRD_Q_UPPER_NEI];
 				}
 			}
-		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) && 
-				   (lev == levn) && condition2 && (intn == -1) && 
+		} else if (((lev > levp) || (durp+durp+durp+durp == dur)) &&
+				   (lev == levn) && condition2 && (intn == -1) &&
 				   (dur == (durn+durn)) && ((dur+dur) <= odur)) {
 			if (fabs(intp) > 1.0) {
 				results[vindex][lineindex] = m_labels[SUS_NO_AGENT_LEAP];
@@ -946,7 +1196,7 @@ RECONSIDER:
 
 		/////////////////////////////
 		////
-		//// Code to apply binary or ternary suspension and agent labels and 
+		//// Code to apply binary or ternary suspension and agent labels and
 		//// also suspension ornament and chanson idiom labels
 
 		else if (valid_sus_acc && ((ointn == -1) || ((ointn == -2) && (ointnn == 1)))) {
@@ -962,7 +1212,7 @@ RECONSIDER:
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
 					   ((odurn == .5) || (odurn == 1)) &&
-					   (ointn == -1) && (ointnn == -1) ) { 
+					   (ointn == -1) && (ointnn == -1) ) {
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
 			} else { // binary agent and suspension
@@ -1044,7 +1294,7 @@ RECONSIDER:
 		// against another note with which it might have a known dissonant function.
 		// Also go back if this voice was identified as an agent, because it may be
 		// the agent of multiple patients.
-		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) || 
+		if ((results[vindex][lineindex] == m_labels[UNLABELED_Z4]) ||
 				(results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
 				(results[vindex][lineindex] == m_labels[AGENT_BIN]) ||
 				(results[vindex][lineindex] == m_labels[AGENT_TERN])) {
@@ -1090,7 +1340,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		if (!sfound) {
 			continue;
 		}
-		// Also may need to check for the existance of another voice attacked before Z 
+		// Also may need to check for the existance of another voice attacked before Z
 		// and sustained through to the beginning of the resolution.
 
 		if (intp == 1) { // Apply labels for normal fake suspensions.
@@ -1176,7 +1426,7 @@ void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
 					break;
 				} else if (intp < 0) {
 					results[vindex][lineindex] = m_labels[PARALLEL_DOWN];
-					break;			
+					break;
 				}
 			}
 		}
@@ -1188,7 +1438,7 @@ void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
 // Tool_dissonant::findYs --
 //
 void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
-		vector<NoteCell*>& attacks, int vindex) { 
+		vector<NoteCell*>& attacks, int vindex) {
 	double intp;       // diatonic interval from previous melodic note
 	double intn;       // diatonic interval to next melodic note
 	int lineindex;     // line in original Humdrum file content that contains note
@@ -1223,7 +1473,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			}
 		}
 
-		onlyWithValids = true; 
+		onlyWithValids = true;
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) { // j = index of other voice
 			if ((vindex == j) || (onlyWithValids == false)) {
 				continue;
@@ -1248,7 +1498,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 				results[vindex][lineindex] = m_labels[RES_PITCH];
 				onlyWithValids = false;
 			} else if (((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
-				       ((thisInt > 0) && (thisMod7 == 3) && 
+				       ((thisInt > 0) && (thisMod7 == 3) &&
 				        !(((int(pitch-lowestnote) % 7) == 2) ||
                  	         ((int(pitch-lowestnote) % 7) == 4))) ||
 				       ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 = -3.
@@ -1318,7 +1568,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 		lev  = attacks[i]->getMetricLevel();
 		levn = attacks[i+1]->getMetricLevel();
 		sliceindex = attacks[i]->getSliceIndex();
-		
+
 		if (!((lev <= levn) && (dur <= durn))) {
 			continue; // go on when the voice with Z label doesn't fulfill its metric or durational requirements
 		}
@@ -1367,7 +1617,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 
 			// see if the pair creates a dissonant interval
 			if (!((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
-				 ((thisInt > 0) && (thisMod7 == 3) && 
+				 ((thisInt > 0) && (thisMod7 == 3) &&
 				  !(((int(pitch-lowestnote) % 7) == 2) ||
                  	   ((int(pitch-lowestnote) % 7) == 4))) ||
 				 ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 == -3.
@@ -1397,8 +1647,8 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 				      (results[vindex][lineindex] == m_labels[REV_ECHAPPEE_UP])) ||
 					 ((lev <= levn) && (dur <= durn)))) {
 					results[vindex][lineindexp] = m_labels[DBL_NEIGHBOR_DOWN];
-					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_DOWN];									
-				} else if (((fabs(intp) > 1) || ant_leapt_to) && 
+					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_DOWN];
+				} else if (((fabs(intp) > 1) || ant_leapt_to) &&
 						   ((lev <= levn) && (dur <= durn)) &&
 						   ((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
 						    (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) { // upper appoggiatura
@@ -1411,8 +1661,8 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 				      (results[vindex][lineindex] == m_labels[REV_ECHAPPEE_DOWN])) ||
 					 ((lev <= levn) && (dur <= durn)))) {
 					results[vindex][lineindexp] = m_labels[DBL_NEIGHBOR_UP];
-					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_UP];					
-				} else if (((fabs(intp) > 1) || ant_leapt_to) && 
+					results[vindex][lineindex]  = m_labels[DBL_NEIGHBOR_UP];
+				} else if (((fabs(intp) > 1) || ant_leapt_to) &&
 						   ((lev <= levn) && (dur <= durn)) &&
 						   ((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
 						    (results[vindex][lineindex] == m_labels[UNLABELED_Z4]))) { // lower appoggiatura
@@ -1428,13 +1678,13 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 
 //////////////////////////////
 //
-// Tool_dissonant::findCadentialVoiceFunctions -- identify the cadential-voice 
+// Tool_dissonant::findCadentialVoiceFunctions -- identify the cadential-voice
 //		functions present in each voice. These are the single-line constituents
 //		of Renaissance cadences. Five basic types are identified: Cantizans,
 //		Altizans, Tenorizans, Leaping Contratenor, and Bassizans. Since the
 //		cadential-voice functions are identified contrapuntally, a Cantizans or
-//		Altizans must be found set against any of the other three types for 
-//		anything to be detected. 
+//		Altizans must be found set against any of the other three types for
+//		anything to be detected.
 //
 void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, vector<vector<string> >& voiceFuncs, int vindex) {
@@ -1516,7 +1766,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 			// agent voice has 2 attacks, patient has 3 notes
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd3) && 
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd3) &&
 				(oint2 == -1) && (oint3 == 1)) {
 				if (int2 == -1) { // "^7xs 1 6sx -2 8xx$"
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -1525,15 +1775,15 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
 				}
-			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
+			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) &&
 				(attInd2 == oattInd3) && (oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx -5 8xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
-			} else if ((thisMod7 == 3) && (int2 == 1) && (attInd2 == oattInd3) && 
+			} else if ((thisMod7 == 3) && (int2 == 1) && (attInd2 == oattInd3) &&
 				(oint2 == -1) && (oint3 == 1)) { // "^4xs 1 3sx 2 3xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "b"; // evaded bassizans
-			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd3) && 
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd3) &&
 				(oint2 == -1) && (oint3 == 1)) { // "^11xs 1 10sx 8 4xx$"
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
@@ -1542,13 +1792,13 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 				voiceFuncs[j][lineindex2] = "A"; // altizans
 				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 			}
-			
+
 			// agent voice has 3 attacks, patient has 3 notes
 			if ((i + 3) < int(attacks.size())) {
 				int3 = *attacks[i+2] - *attacks[i+1];
 				attInd3  = attacks[i+1]->getNextAttackIndex();
 				lineindex3 = attacks[i+2]->getLineIndex();
-				if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) && 
+				if (((thisMod7 == 6) || (thisMod7 == -1)) && (int2 == -1) &&
 					(results[vindex][lineindex2] == m_labels[ANT_DOWN]) &&
 					(attInd3 == oattInd3) && (oint2 == -1) && (oint3 == 1)) {
 					voiceFuncs[j][lineindex3] = "C"; // cantizans
@@ -1570,8 +1820,8 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 				int4 = *attacks[i+3] - *attacks[i+2];
 				attInd4  = attacks[i+2]->getNextAttackIndex();
 				lineindex4 = attacks[i+3]->getLineIndex();
-				if ((int2 == -1) && (int3 == 1) && (int4 == 1) && 
-					(attInd4 == oattInd3) && (oint2 == -1) && (oint3 == 1) && 
+				if ((int2 == -1) && (int3 == 1) && (int4 == 1) &&
+					(attInd4 == oattInd3) && (oint2 == -1) && (oint3 == 1) &&
 					(attInd2 > oattInd2)) {
 					if (thisMod7 == 3) { // ex. Obr1001a m. 85
 						voiceFuncs[j][lineindex4] = "C"; // cantizans
@@ -1579,10 +1829,10 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					} else if ((thisMod7 == 6) || (thisMod7 == -1)) { // ex. Obr1001b m. 36
 						voiceFuncs[j][lineindex4] = "C"; // cantizans
 						voiceFuncs[vindex][lineindex4] = "t"; // ornamented evaded tenorizans
-					} 
+					}
 				}
 			}
-			
+
 			// agent voice has 2 attacks, patient has 4 notes
 			if (oattInd4 > 0) {
 				opitch4 = grid.cell(j, oattInd4)->getAbsDiatonicPitch();
@@ -1591,7 +1841,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // the following cadence types need 4 attacks in other voice
 				continue;
 			}
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd4) && 
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd4) &&
 				(oint2 == -1) && (oint3 == -1) && (oint4 == 2)) {
 				if (int2 == -1) {
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -1600,12 +1850,12 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
 				}
-			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) && 
-				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) && 
+			} else if ((thisMod7 == 3) && ((int2 == -4) || (int2 == 3)) &&
+				(attInd2 == oattInd4) && (oint2 == -1) && (oint3 == -1) &&
 				(oint4 == 2)) { // under-third cadence
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "B"; // bassizans
-			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd4) && 
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd4) &&
 				(oint2 == -1) && (oint3 == -1) && (oint4 == 2)) { // under-third cadence
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor
@@ -1614,7 +1864,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 				voiceFuncs[j][lineindex2] = "A"; // altizans
 				voiceFuncs[vindex][lineindex2] = "T"; // tenorizans
 			}
-			
+
 			// agent voice has 2 attacks, patient has 5 notes
 			if (oattInd5 > 0) {
 				opitch5 = grid.cell(j, oattInd5)->getAbsDiatonicPitch();
@@ -1622,7 +1872,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // the following cadence types need 5 attacks in other voice
 				continue;
 			}
-			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) && 
+			if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) &&
 				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) {
 				if (int2 == -1) {
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -1631,7 +1881,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
 				}
-			} else if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) && 
+			} else if (((thisMod7 == 6) || (thisMod7 == -1)) && (attInd2 == oattInd5) &&
 				(oint2 == -1) && (oint3 == -1) && (oint4 == 1) && (oint5 == 1)) {
 				if (int2 == -1) {
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
@@ -1640,7 +1890,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "t"; // evaded tenorizans
 				}
-			} else if ((thisMod7 == 3) && (attInd2 == oattInd5) && (oint2 == -1) && 
+			} else if ((thisMod7 == 3) && (attInd2 == oattInd5) && (oint2 == -1) &&
 				(((oint3 == 0) && (oint4 == -1) && (oint5 == 2)) || // under-third cadence
 				 ((oint3 == -1) && (oint4 == 1) && (oint5 == 1)))) { // anticipated resolution phase
 				if ((int2 == -4) || (int2 == 3)) {
@@ -1650,7 +1900,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 					voiceFuncs[j][lineindex2] = "C"; // cantizans
 					voiceFuncs[vindex][lineindex2] = "b"; // evaded bassizans
 				}
-			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd5) && 
+			} else if ((thisMod7 == 3) && (int2 == 7) && (attInd2 == oattInd5) &&
 				(oint2 == -1) && (oint3 == 0) && (oint4 == -1) && (oint5 == 2)) { // under-third cadence
 				voiceFuncs[j][lineindex2] = "C"; // cantizans
 				voiceFuncs[vindex][lineindex2] = "L"; // leaping contratenor

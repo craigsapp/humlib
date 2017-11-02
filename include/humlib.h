@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue, Oct 31, 2017 11:26:43 AM
+// Last Modified: Wed Nov  1 22:31:37 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1268,7 +1268,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getPreviousNNDTCount      (void)
 		                           { return getPreviousNonNullDataTokenCount(); }
 		HTp      getPreviousNonNullDataToken(int index = 0);
-		HTp      getPreviousNNDT           (int index)
+		HTp      getPreviousNNDT           (int index = 0)
 		                           { return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
 		int      getNextNNDTCount          (void)
@@ -3927,7 +3927,6 @@ class Tool_dissonant : public HumTool {
 									NoteGrid& grid,	vector<NoteCell*>& attacks,
 									vector<vector<string> >& voiceFuncs,
 									int vindex);
-		void    changePitch        (HTp note2, HTp note1);
 
 		void    printColorLegend   (HumdrumFile& infile);
 		int     getNextPitchAttackIndex(NoteGrid& grid, int voicei,
@@ -3942,10 +3941,13 @@ class Tool_dissonant : public HumTool {
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);
-		void    mergeWithPreviousNote(HumdrumFile& infile,
-		                            vector<NoteCell*>& attacks, int index);
-		void    mergeWithNextNote	(HumdrumFile& infile,
-		                            vector<NoteCell*>& attacks, int index);
+		void    mergeWithPreviousNote(HumdrumFile& infile, int line, int field);
+		void    mergeWithNextNote(HumdrumFile& infile, int line, int field);
+		void    changeDurationOfNote(HTp note, HumNum dur);
+		void    changePitch        (HTp note2, HTp note1);
+		void    simplePreviousMerge(HTp pnote, HTp cnote);
+		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
+		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
 
 	private:
 	 	vector<HTp> m_kernspines;
