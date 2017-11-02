@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Nov  1 22:31:37 PDT 2017
+// Last Modified: Thu Nov  2 00:24:04 PDT 2017
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2307,6 +2307,7 @@ class NoteCell {
 		double operator-            (int B);
 
 		int    getLineIndex         (void);
+		int    getFieldIndex        (void);
 		ostream& printNoteInfo      (ostream& out);
 		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
@@ -2367,6 +2368,7 @@ class NoteGrid {
 		int        getVoiceCount         (void);
 		int        getSliceCount         (void);
 		int        getLineIndex          (int sindex);
+		int        getFieldIndex         (int sindex);
 
 		void       printDiatonicGrid     (ostream& out);
 		void       printMidiGrid         (ostream& out);
@@ -3948,6 +3950,8 @@ class Tool_dissonant : public HumTool {
 		void    simplePreviousMerge(HTp pnote, HTp cnote);
 		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
 		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
+		void    mergeWithPreviousNote(HumdrumFile& infile, NoteCell* cell);
+		void    mergeWithNextNote(HumdrumFile& infile, NoteCell* cell);
 
 	private:
 	 	vector<HTp> m_kernspines;

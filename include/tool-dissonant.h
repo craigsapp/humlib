@@ -76,6 +76,8 @@ class Tool_dissonant : public HumTool {
 		void    simplePreviousMerge(HTp pnote, HTp cnote);
 		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
 		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
+		void    mergeWithPreviousNote(HumdrumFile& infile, NoteCell* cell);
+		void    mergeWithNextNote(HumdrumFile& infile, NoteCell* cell);
 
 	private:
 	 	vector<HTp> m_kernspines;

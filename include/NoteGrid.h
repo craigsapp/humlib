@@ -34,6 +34,7 @@ class NoteGrid {
 		int        getVoiceCount         (void);
 		int        getSliceCount         (void);
 		int        getLineIndex          (int sindex);
+		int        getFieldIndex         (int sindex);
 
 		void       printDiatonicGrid     (ostream& out);
 		void       printMidiGrid         (ostream& out);

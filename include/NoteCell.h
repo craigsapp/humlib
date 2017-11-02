@@ -66,6 +66,7 @@ class NoteCell {
 		double operator-            (int B);
 
 		int    getLineIndex         (void);
+		int    getFieldIndex        (void);
 		ostream& printNoteInfo      (ostream& out);
 		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);

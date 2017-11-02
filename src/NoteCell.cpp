@@ -191,6 +191,21 @@ int NoteCell::getLineIndex(void) {
 
 //////////////////////////////
 //
+// NoteCell::getFieldIndex -- Returns the field index of the note in
+//    the original file.
+//
+
+int NoteCell::getFieldIndex(void) {
+	if (!m_token) {
+		return -1;
+	}
+	return m_token->getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
 // NoteCell:printNoteInfo --
 //
 

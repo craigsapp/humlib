@@ -571,6 +571,21 @@ int NoteGrid::getLineIndex(int sindex) {
 
 //////////////////////////////
 //
+// NoteGrid::getFieldIndex -- return the field index in the original
+//    Humdrum data for the given slice index.
+//
+
+int NoteGrid::getFieldIndex(int sindex) {
+	if (m_grid.size() == 0) {
+		return -1;
+	}
+	return m_grid.at(0).at(sindex)->getToken()->getFieldIndex();
+}
+
+
+
+//////////////////////////////
+//
 // NoteGrid::getNoteAndRestAttacks -- Return the note attacks,
 //    and the first rest slice ("rest attack") for a particular voice.
 //
