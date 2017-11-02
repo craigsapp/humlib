@@ -680,6 +680,28 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 	if (!token) {
 		return;
 	}
+	if (token->isNull()) {
+		return;
+	}
+	int b40 = Convert::kernToBase40(token);
+	if (b40 <= 0) {
+		return;
+	}
+	if ((token->find("[") != string::npos) || (token->find("_") != string::npos)) {
+		token = token->getNextNNDT();
+		int b40b = Convert::kernToBase40(token);
+		while (token && (b40 == b40b) && (token->find("_") != string::npos)) {
+			token = token->getNextNNDT();
+			if (!token) {
+				break;
+			}
+			b40b = Convert::kernToBase40(token);
+		}
+		if (token && (token->find("]") == string::npos)) {
+			// no end of tie, so bakup
+			token = token->getPreviousNNDT();
+		}
+	}
 	token = token->getNextNNDT();
 	if (!token) {
 		return;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov  2 00:24:04 PDT 2017
+// Last Modified: Thu Nov  2 09:31:41 PDT 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31661,6 +31661,28 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 	HTp token = infile.token(line, field);
 	if (!token) {
 		return;
+	}
+	if (token->isNull()) {
+		return;
+	}
+	int b40 = Convert::kernToBase40(token);
+	if (b40 <= 0) {
+		return;
+	}
+	if ((token->find("[") != string::npos) || (token->find("_") != string::npos)) {
+		token = token->getNextNNDT();
+		int b40b = Convert::kernToBase40(token);
+		while (token && (b40 == b40b) && (token->find("_") != string::npos)) {
+			token = token->getNextNNDT();
+			if (!token) {
+				break;
+			}
+			b40b = Convert::kernToBase40(token);
+		}
+		if (token && (token->find("]") == string::npos)) {
+			// no end of tie, so bakup
+			token = token->getPreviousNNDT();
+		}
 	}
 	token = token->getNextNNDT();
 	if (!token) {
