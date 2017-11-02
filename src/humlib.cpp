@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Nov  2, 2017  2:20:56 PM
+// Last Modified: Thu, Nov  2, 2017  5:02:30 PM
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31268,12 +31268,24 @@ void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 			// cerr << "\tCHECKING DISSONANCE " << results[v][i] << " for note " << token << endl;
 			HumNum notedur = token->getTiedDuration();
 
-			if ((results[v][i] == m_labels[PASSING_UP] ) ||
-					(  results[v][i] == m_labels[PASSING_DOWN] ) ||
-					(  results[v][i] == m_labels[NEIGHBOR_UP]  ) ||
-					(  results[v][i] == m_labels[NEIGHBOR_DOWN])
-					// ...etc. Include all weak dissonances here.
-					) {
+			if ((results[v][i] == m_labels[PASSING_DOWN]) ||
+				(results[v][i] == m_labels[PASSING_UP]) ||
+			    (results[v][i] == m_labels[NEIGHBOR_DOWN]) ||
+			    (results[v][i] == m_labels[NEIGHBOR_UP]) ||
+			    (results[v][i] == m_labels[CAMBIATA_DOWN_S]) ||
+			    (results[v][i] == m_labels[CAMBIATA_UP_S]) ||
+			    (results[v][i] == m_labels[CAMBIATA_DOWN_L]) ||
+			    (results[v][i] == m_labels[CAMBIATA_UP_L]) ||
+			    (results[v][i] == m_labels[ECHAPPEE_DOWN]) ||
+			    (results[v][i] == m_labels[ECHAPPEE_UP]) ||
+			    (results[v][i] == m_labels[ANT_DOWN]) ||
+			    (results[v][i] == m_labels[ANT_UP]) ||
+			    (results[v][i] == m_labels[REV_ECHAPPEE_DOWN]) ||
+			    (results[v][i] == m_labels[REV_ECHAPPEE_UP]) ||
+			    (results[v][i] == m_labels[REV_CAMBIATA_DOWN]) ||
+			    (results[v][i] == m_labels[REV_CAMBIATA_UP]) ||
+			    (results[v][i] == m_labels[DBL_NEIGHBOR_DOWN]) ||
+			    (results[v][i] == m_labels[DBL_NEIGHBOR_UP]) ) {
 				if (notedur > maxWeakDur) {
 					maxWeakDur = notedur;
 					maxToken = token;
@@ -31351,28 +31363,7 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 			continue;
 		}
 
-		if ((results[lineindex] == m_labels[PASSING_DOWN]) ||
-				(results[lineindex] == m_labels[PASSING_UP]) ||
-			   (results[lineindex] == m_labels[NEIGHBOR_DOWN]) ||
-			   (results[lineindex] == m_labels[NEIGHBOR_UP]) ||
-			   (results[lineindex] == m_labels[CAMBIATA_DOWN_S]) ||
-			   (results[lineindex] == m_labels[CAMBIATA_UP_S]) ||
-			   (results[lineindex] == m_labels[CAMBIATA_DOWN_L]) ||
-			   (results[lineindex] == m_labels[CAMBIATA_UP_L]) ||
-			   (results[lineindex] == m_labels[ECHAPPEE_DOWN]) ||
-			   (results[lineindex] == m_labels[ECHAPPEE_UP]) ||
-			   (results[lineindex] == m_labels[ANT_DOWN]) ||
-			   (results[lineindex] == m_labels[ANT_UP]) ||
-			   (results[lineindex] == m_labels[REV_ECHAPPEE_DOWN]) ||
-			   (results[lineindex] == m_labels[REV_ECHAPPEE_UP]) ||
-			   (results[lineindex] == m_labels[REV_CAMBIATA_DOWN]) ||
-			   (results[lineindex] == m_labels[REV_CAMBIATA_UP]) ||
-			   (results[lineindex] == m_labels[DBL_NEIGHBOR_DOWN]) ||
-			   (results[lineindex] == m_labels[DBL_NEIGHBOR_UP]) ) {
-			// cerr << "MERGING " << infile.token(lineindex, fieldindex) << " with previous note" << endl;
-			// cerr << "\tDURATION OF NOTE " << infile.token(lineindex, fieldindex)->getDuration() << endl;
-			mergeWithPreviousNote(infile, lineindex, fieldindex);
-		} else if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
+		if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
 			   (results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
 			   (results[lineindex] == m_labels[THIRD_Q_LOWER_NEI]) ||
 			   (results[lineindex] == m_labels[THIRD_Q_UPPER_NEI]) ||
@@ -31383,6 +31374,8 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 			   (results[lineindex] == m_labels[RES_PITCH]) ||
 			   (results[lineindex] == m_labels[APP_UPPER]) ||
 			   (results[lineindex] == m_labels[APP_LOWER]) ||
+			   (results[lineindex] == m_labels[PARALLEL_DOWN]) ||
+			   (results[lineindex] == m_labels[PARALLEL_UP]) ||
 			   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
 			// cerr << "MERGING " << token << " with next note" << endl;
 			mergeWithNextNote(infile, lineindex, fieldindex);
