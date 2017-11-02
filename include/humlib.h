@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov  2 09:31:41 PDT 2017
+// Last Modified: Thu, Nov  2, 2017  2:20:56 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3948,6 +3948,7 @@ class Tool_dissonant : public HumTool {
 		void    changeDurationOfNote(HTp note, HumNum dur);
 		void    changePitch        (HTp note2, HTp note1);
 		void    simplePreviousMerge(HTp pnote, HTp cnote);
+		void    simpleNextMerge	   (HTp cnote, HTp nnote);
 		void    changePitchOfTieGroupFollowing(HTp note, const string& pitch);
 		void    mergeWithPreviousNoteViaTies(HTp pnote, HTp cnote);
 		void    mergeWithPreviousNote(HumdrumFile& infile, NoteCell* cell);

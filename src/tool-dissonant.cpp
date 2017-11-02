@@ -639,10 +639,9 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 	HumNum ndur = nnote->getDuration();
 	HumNum dur = cdur + ndur;
 	changeDurationOfNote(cnote, dur);
-	changePitch(nnote, cnote)
+	changePitch(cnote, nnote);
 	nnote->setText(".");
 	return;
-	}
 }
 
 
@@ -746,7 +745,7 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 	if (!barline) {
 		// cerr << "\tNOTES IN SAME MEASURE, MERGE IF REASONABLE RHYTHM" << endl;
 		HumNum cdur = cnote->getDuration();
-		HumNum pdur = nnote->getDuration();
+		HumNum ndur = nnote->getDuration();
 		HumNum dur = cdur + ndur;
 		string recip = Convert::durationToRecip(dur);
 		// cerr << "\tCOMBINED RHYTHM OF NOTES IS " << recip << endl;
