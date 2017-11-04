@@ -394,6 +394,7 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 			   (results[lineindex] == m_labels[APP_LOWER]) ||
 			   (results[lineindex] == m_labels[PARALLEL_DOWN]) ||
 			   (results[lineindex] == m_labels[PARALLEL_UP]) ||
+			   (results[lineindex] == m_labels[ORNAMENTAL_SUS]) ||
 			   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
 			// cerr << "MERGING " << token << " with next note" << endl;
 			mergeWithNextNote(infile, lineindex, fieldindex);
