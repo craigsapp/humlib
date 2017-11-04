@@ -350,6 +350,9 @@ void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 	for (int i=0; i<(int)attacks.size(); i++) {
 		suppressDissonancesInVoice(infile, grid, i, attacks[i], results[i]);
 	}
+	for (int i=0; i<(int)attacks.size(); i++) {
+		suppressSusOrnamentsInVoice(infile, grid, i, attacks[i], results[i]);
+	}
 
 }
 
@@ -382,22 +385,107 @@ void Tool_dissonant::suppressDissonancesInVoice(HumdrumFile& infile,
 		}
 
 		if ((results[lineindex] == m_labels[THIRD_Q_PASS_UP]) ||
-			   (results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
-			   (results[lineindex] == m_labels[THIRD_Q_LOWER_NEI]) ||
-			   (results[lineindex] == m_labels[THIRD_Q_UPPER_NEI]) ||
-			   (results[lineindex] == m_labels[ACC_PASSING_UP]) ||
-			   (results[lineindex] == m_labels[ACC_PASSING_DOWN]) ||
-			   (results[lineindex] == m_labels[ACC_LO_NEI]) ||
-			   (results[lineindex] == m_labels[ACC_UP_NEI]) ||
-			   (results[lineindex] == m_labels[RES_PITCH]) ||
-			   (results[lineindex] == m_labels[APP_UPPER]) ||
-			   (results[lineindex] == m_labels[APP_LOWER]) ||
-			   (results[lineindex] == m_labels[PARALLEL_DOWN]) ||
-			   (results[lineindex] == m_labels[PARALLEL_UP]) ||
-			   (results[lineindex] == m_labels[ORNAMENTAL_SUS]) ||
-			   (results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
+			(results[lineindex] == m_labels[THIRD_Q_PASS_DOWN]) ||
+			(results[lineindex] == m_labels[THIRD_Q_LOWER_NEI]) ||
+			(results[lineindex] == m_labels[THIRD_Q_UPPER_NEI]) ||
+			(results[lineindex] == m_labels[ACC_PASSING_UP]) ||
+			(results[lineindex] == m_labels[ACC_PASSING_DOWN]) ||
+			(results[lineindex] == m_labels[ACC_LO_NEI]) ||
+			(results[lineindex] == m_labels[ACC_UP_NEI]) ||
+			(results[lineindex] == m_labels[RES_PITCH]) ||
+			(results[lineindex] == m_labels[APP_UPPER]) ||
+			(results[lineindex] == m_labels[APP_LOWER]) ||
+			(results[lineindex] == m_labels[PARALLEL_DOWN]) ||
+			(results[lineindex] == m_labels[PARALLEL_UP]) ||
+			(results[lineindex] == m_labels[ORNAMENTAL_SUS]) ||
+			(results[lineindex] == m_labels[CHANSON_IDIOM]) ) {
 			// cerr << "MERGING " << token << " with next note" << endl;
 			mergeWithNextNote(infile, lineindex, fieldindex);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::suppressDissonancesInVoice --
+//
+
+void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
+		NoteGrid& grid, int vindex, vector<NoteCell*>& attacks,
+		vector<string>& results) {
+
+	for (int i=0; i<(int)attacks.size(); i++) {
+		int lineindex = attacks[i]->getLineIndex();
+		int fieldindex = attacks[i]->getFieldIndex();
+		if ((results[lineindex] == "") || (results[lineindex] == ".") ) {
+			continue;
+		}
+
+		HTp token = infile.token(lineindex, fieldindex);
+		if (token->isNull()) {
+			// The note was removed already in stage 1.
+			continue;
+		}
+		if (!token->isNoteAttack()) {
+			// The note was already merged with the previous note.
+			continue;
+		}
+
+		if (((results[lineindex] == m_labels[SUS_BIN]) ||
+			 (results[lineindex] == m_labels[SUS_TERN])) &&
+			(i < (attacks.size() - 3)) ) {
+			HumNum durn   = attacks[i+1]->getDuration();
+			HumNum durnn  = attacks[i+2]->getDuration();
+			HumNum durnnn  = attacks[i+3]->getDuration();
+			double intn   = *attacks[i+1] - *attacks[i];
+			double intnn  = *attacks[i+2] - *attacks[i+1];
+			double intnnn = *attacks[i+3] - *attacks[i+2];
+			double levn   = attacks[i+1]->getMetricLevel();
+			double levnn  = attacks[i+2]->getMetricLevel();
+			double levnnn = attacks[i+3]->getMetricLevel();
+			int lineindexn = attacks[i+1]->getLineIndex();
+			int lineindexnn = attacks[i+2]->getLineIndex();
+			int lineindexnnn = attacks[i+3]->getLineIndex();
+			HTp tokenn = infile.token(lineindexn, fieldindex);
+			HTp tokennn = infile.token(lineindexnn, fieldindex);
+			HTp tokennnn = infile.token(lineindexnnn, fieldindex);
+
+			if ((durn == durnn) && (durn < durnnn) && (levn > levnnn) && 
+				(intn == -1) && (intnn == -1) && (intnnn == 1) ) { // turn figure anticipation of resolution phase
+				if ((results[lineindexnn] == ".") && (!tokennn->isNull()) &&
+					(tokennn->isNoteAttack()) ) {
+					mergeWithPreviousNote(infile, lineindexnn, vindex);
+				}
+				if ((results[lineindexn] == ".") && (!tokenn->isNull()) &&
+					(tokenn->isNoteAttack()) ) {
+					mergeWithPreviousNote(infile, lineindexn, vindex);
+				}
+			} else if ((durn == durnn) && (durn == durnnn) && (levn > levnn) && 
+				(levnn < levnnn) && (intn == -1) && (intnn == 0) && 
+				(intnnn == -1) && (results[lineindexnnn] == ".") && 
+				(!tokennnn->isNull()) && (tokennnn->isNoteAttack()) ) { // Du Fay ornament
+				mergeWithPreviousNote(infile, lineindexnnn, vindex);
+			}
+		}
+		if (((results[lineindex] == m_labels[SUS_BIN]) ||
+			 (results[lineindex] == m_labels[SUS_TERN])) &&
+			(i < (attacks.size() - 2)) ) {
+			HumNum durn  = attacks[i+1]->getDuration();
+			HumNum durnn = attacks[i+2]->getDuration();
+			double intn  = *attacks[i+1] - *attacks[i];
+			double intnn = *attacks[i+2] - *attacks[i+1];
+			double levn  = attacks[i+1]->getMetricLevel();
+			double levnn = attacks[i+2]->getMetricLevel();
+			int lineindexn = attacks[i+1]->getLineIndex();
+			HTp tokenn = infile.token(lineindexn, fieldindex);
+
+			if ((durn <= durnn) && (levn >= levnn) && (intn == -1) && 
+				(intnn == 0) && (results[lineindexn] == ".") &&
+				(!tokenn->isNull()) && (tokenn->isNoteAttack()) ) { // anticipation of resolution phase
+				mergeWithPreviousNote(infile, lineindexn, vindex);	
+			}
 		}
 	}
 }

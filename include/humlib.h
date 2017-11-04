@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu, Nov  2, 2017  5:02:30 PM
+// Last Modified: Sat, Nov  4, 2017  4:07:26 PM
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3940,6 +3940,10 @@ class Tool_dissonant : public HumTool {
 		                            vector<vector<NoteCell* > >& attacks,
 		                            vector<vector<string> >& results);
 		void    suppressDissonancesInVoice(HumdrumFile& infile, 
+		                            NoteGrid& grid, int vindex,
+		                            vector<NoteCell*>& attacks,
+		                            vector<string>& results);
+		void    suppressSusOrnamentsInVoice(HumdrumFile& infile, 
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);

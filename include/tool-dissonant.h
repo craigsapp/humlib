@@ -69,6 +69,10 @@ class Tool_dissonant : public HumTool {
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);
+		void    suppressSusOrnamentsInVoice(HumdrumFile& infile, 
+		                            NoteGrid& grid, int vindex,
+		                            vector<NoteCell*>& attacks,
+		                            vector<string>& results);
 		void    mergeWithPreviousNote(HumdrumFile& infile, int line, int field);
 		void    mergeWithNextNote(HumdrumFile& infile, int line, int field);
 		void    changeDurationOfNote(HTp note, HumNum dur);
