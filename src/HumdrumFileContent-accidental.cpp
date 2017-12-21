@@ -409,7 +409,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 							"cautionaryAccidental", "true");
 					infile[i].token(j)->setValue("auto", to_string(k),
 							"visualAccidental", "true");
-				} else if (subtok.find("XX") == string::npos) {
+				} else if (subtok.find("X") == string::npos) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
 					// display.

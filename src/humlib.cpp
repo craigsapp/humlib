@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec 21 00:43:01 PST 2017
+// Last Modified: Thu Dec 21 01:47:53 PST 2017
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -14582,7 +14582,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 							"cautionaryAccidental", "true");
 					infile[i].token(j)->setValue("auto", to_string(k),
 							"visualAccidental", "true");
-				} else if (subtok.find("XX") == string::npos) {
+				} else if (subtok.find("X") == string::npos) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
 					// display.
