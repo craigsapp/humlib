@@ -183,7 +183,19 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 						dstates[rindex][diatonic] = -1000 + accid;
 						gdstates[rindex][diatonic] = -1000 + accid;
 					}
-					continue;
+					auto loc = subtok.find('X');
+					if (loc == string::npos) {
+						continue;
+					} else if (loc == 0) {
+						continue;
+					} else {
+						if (!((subtok[loc-1] == '#') || (subtok[loc-1] != '-') ||
+								(subtok[loc-1] == 'n'))) {
+							continue;
+						} else {
+							// an accident should be fored at end of tie
+						}
+					}
 				}
 
 				size_t loc;
@@ -409,7 +421,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 							"cautionaryAccidental", "true");
 					infile[i].token(j)->setValue("auto", to_string(k),
 							"visualAccidental", "true");
-				} else if (subtok.find("X") == string::npos) {
+				} else if (subtok.find("XX") == string::npos) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
 					// display.
