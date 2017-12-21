@@ -30,7 +30,7 @@ class HumGrid : public vector<GridMeasure*> {
 		HumGrid(void);
 		~HumGrid();
 		void enableRecipSpine           (void);
-		bool transferTokens             (HumdrumFile& outfile);
+		bool transferTokens             (HumdrumFile& outfile, int startbarnum = 0);
 		int  getHarmonyCount            (int partindex);
 		int  getDynamicsCount           (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
@@ -42,6 +42,9 @@ class HumGrid : public vector<GridMeasure*> {
 		void removeSibeliusIncipit      (void);
 		bool hasPickup                  (void);
 		GridMeasure*  addMeasureToBack  (void);
+		int  getPartCount               (void);
+		int  getStaffCount              (int partindex);
+		void deleteMeasure              (int index);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -97,6 +100,8 @@ class HumGrid : public vector<GridMeasure*> {
 		void transferNonDataSlices         (GridMeasure* output, GridMeasure* input);
 		string extractMelody               (GridMeasure* measure);
 		void insertMelodyString            (GridMeasure* measure, const string& melody);
+
+		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
 
 	private:
 		vector<GridSlice*>   m_allslices;

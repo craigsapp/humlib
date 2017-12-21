@@ -252,6 +252,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		empty = "*";
 	} else if (isLayoutSlice()) {
 		empty = "!";
+	} else if (!hasSpines()) {
+		empty = "???";
 	}
 
 	if (recip) {
@@ -274,11 +276,13 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		} else if (isGraceSlice()) {
 			token = new HumdrumToken("q");
 			empty = ".";
-		} else {
+		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
 			empty = "!z";
 		}
-		line->appendToken(token);
+		if (hasSpines()) {
+			line->appendToken(token);
+		}
 	}
 
 	// extract the Tokens from each part/staff
@@ -287,8 +291,14 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	int v; // voice index
 
 	for (p=(int)size()-1; p>=0; p--) {
+		if ((!hasSpines()) && (p != 0)) {
+			continue;
+		}
 		GridPart& part = *this->at(p);
 		for (s=(int)part.size()-1; s>=0; s--) {
+			if ((!hasSpines()) && (s != 0)) {
+				continue;
+			}
 			GridStaff& staff = *part.at(s);
 			if (staff.size() == 0) {
 				// fix this later.  For now if there are no notes
@@ -319,7 +329,9 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 
 			int maxvcount = getVerseCount(p, s);
 			int maxhcount = getHarmonyCount(p, s);
-			transferSides(*line, staff, empty, maxvcount, maxhcount);
+			if (hasSpines()) {
+				transferSides(*line, staff, empty, maxvcount, maxhcount);
+			}
 		}
 
 		// Transfer the sides at the part level
@@ -327,7 +339,9 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
 
-		transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount);
+		if (hasSpines()) {
+			transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount);
+		}
 	}
 
 	outfile.appendLine(line);

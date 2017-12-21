@@ -88,6 +88,49 @@ void HumGrid::enableRecipSpine(void) {
 
 //////////////////////////////
 //
+// HumGrid::getPartCount -- Return the number of parts in the Grid
+//   by looking at the number of parts in the first spined GridSlice.
+//
+
+int  HumGrid::getPartCount(void) {
+	if (!m_allslices.empty()) {
+		return (int)m_allslices[0]->size();
+	}
+
+	if (this->empty()) {
+		return 0;
+	}
+
+	if (this->at(0)->empty()) {
+		return 0;
+	}
+
+	return this->at(0)->back()->size();
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::getStaffCount --
+//
+
+int HumGrid::getStaffCount(int partindex) {
+	if (this->empty()) {
+		return 0;
+	}
+
+	if (this->at(0)->empty()) {
+		return 0;
+	}
+
+	return this->at(0)->back()->at(partindex)->size();
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::getHarmonyCount --
 //
 
@@ -207,9 +250,10 @@ void HumGrid::setVerseCount(int partindex, int staffindex, int count) {
 //////////////////////////////
 //
 // HumGrid::transferTokens --
+//   default value: startbarnum = 0.
 //
 
-bool HumGrid::transferTokens(HumdrumFile& outfile) {
+bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	bool status = buildSingleList();
 	if (!status) {
 		return false;
@@ -230,7 +274,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile) {
 	bool addstartbar = (!hasPickup()) && (!m_musicxmlbarlines);
 	for (int m=0; m<(int)this->size(); m++) {
 		if (addstartbar && m == 0) {
-			status &= at(m)->transferTokens(outfile, m_recip, addstartbar);
+			status &= at(m)->transferTokens(outfile, m_recip, addstartbar, startbarnum);
 		} else {
 			status &= at(m)->transferTokens(outfile, m_recip, false);
 		}
@@ -607,6 +651,44 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 
 //////////////////////////////
 //
+// HumGrid::getNextSpinedLine -- Find next spined GridSlice.
+//
+
+GridSlice* HumGrid::getNextSpinedLine(const GridMeasure::iterator& it, int measureindex) {
+	auto nextone = it;
+	nextone++;
+	while (nextone != this->at(measureindex)->end()) {
+		if ((*nextone)->hasSpines()) {
+			break;
+		}
+		nextone++;
+	}
+
+	if (nextone != this->at(measureindex)->end()) {
+		return *nextone;
+	}
+
+	measureindex++;
+	if (measureindex >= (int)this->size()) {
+		// end of data, so nothing to adjust with
+		// but this should never happen in general.
+		return NULL;
+	}
+	nextone = this->at(measureindex)->begin();
+	while (nextone != this->at(measureindex)->end()) {
+		if ((*nextone)->hasSpines()) {
+			return *nextone;
+		}
+		nextone++;
+	}
+
+	return NULL;
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::manipulatorCheck --
 //
 
@@ -626,18 +708,8 @@ bool HumGrid::manipulatorCheck(void) {
 				continue;
 			}
 			s1 = *it;
-			auto nextone = it;
-			nextone++;
-			if (nextone != this->at(m)->end()) {
-				s2 = *nextone;
-			} else if (m<(int)this->size()-1) {
-				s2 = this->at(m+1)->front();
-			} else {
-				continue;
-				// there is no next slice.  Presumably the terminal
-				// barlines have already been added, so this will not
-				// be a problem.
-			}
+			s2 = getNextSpinedLine(it, m);
+
 			manipulator = manipulatorCheck(s1, s2);
 			if (manipulator == NULL) {
 				continue;
@@ -1598,6 +1670,11 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			cerr << "ERROR: Negative duration: " << timeleft << endl;
 			cerr << "\ttokendur = " << tokendur << endl;
 			cerr << "\tslicedur = " << slicedur << endl;
+			cerr << "\ttoken    = " << token << endl;
+			cerr << "\tCURRENT SLICE = " << m_allslices.at(slicei) << endl;
+			cerr << "\tTIMESTAMP " << currts << endl;
+			cerr << "\tNEXT SLICE = " << m_allslices.at(slicei) << endl;
+			cerr << "\tNEXT TIMESTAMP " << nextts << endl;
 			return;
 		}
 
@@ -2333,6 +2410,20 @@ void HumGrid::removeRedundantClefChanges(void) {
 bool HumGrid::hasPickup(void) {
 	return m_pickup;
 }
+
+
+
+//////////////////////////////
+//
+// HumGrid::deleteMeasure --
+//
+
+void HumGrid::deleteMeasure(int index) {
+	delete this->at(index);
+	this->at(index) = NULL;
+	this->erase(this->begin() + index);
+}
+
 
 
 // END_MERGE

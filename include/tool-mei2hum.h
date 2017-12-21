@@ -156,7 +156,7 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseMeasure         (xml_node measure, HumNum starttime);
 		HumNum parseStaff           (xml_node staff, HumNum starttime);
 		void   parseReh             (xml_node reh, HumNum starttime);
-		HumNum parseLayer           (xml_node layer, HumNum starttime);
+		HumNum parseLayer           (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
 		int    extractStaffCount    (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);
 		HumNum parseMRest           (xml_node mrest, HumNum starttime);
@@ -184,6 +184,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTieStart        (string& output, xml_node node, xml_node tie);
 		void   parseTieStop         (string& output, xml_node node, xml_node tie);
 		void   parseArpeg           (string& output, xml_node node, xml_node arpeg);
+		void   parseTrill           (string& output, xml_node node, xml_node trill);
 		void   parseTupletSpanStart (xml_node node, xml_node tupletSpan);
 		void   parseTupletSpanStop  (string& output, xml_node node, xml_node tupletSpan);
 		void   parseSb              (xml_node sb, HumNum starttime);
@@ -212,6 +213,7 @@ class Tool_mei2hum : public HumTool {
 		                              const string& clefdis,
 		                              const string& clefdisplace);
 		string cleanDirText          (const string& input);
+		string cleanWhiteSpace       (const string& input);
 		string cleanReferenceRecordText(const string& input);
 		string cleanVerseText        (const string& input);
 		bool   beamIsValid           (vector<xml_node>& beamlist);
@@ -220,11 +222,15 @@ class Tool_mei2hum : public HumTool {
 		void   processHairpins       (void);
 		void   processHairpin        (hairpin_info& info);
 		void   processGraceNotes     (HumNum timestamp);
+		string prepareSystemDecoration(xml_node scoreDef);
+		void   getRecursiveSDString  (string& output, xml_node current);
+		void   parseBareSyl          (xml_node syl, GridStaff* staff);
 
 	private:
 		Options        m_options;
 		bool           m_stemsQ = false;
 		bool           m_recipQ = false;
+		bool           m_placeQ = false;
 
 		mei_scoreDef   m_scoreDef;    // for keeping track of key/meter/clef etc.
 		int            m_staffcount;  // number of staves in score.
@@ -241,6 +247,7 @@ class Tool_mei2hum : public HumTool {
 		bool           m_belowQ = false;
 		bool           m_editorialAccidentalQ = false;
 		string         m_appLabel;
+		string         m_systemDecoration;
 
 		vector<int>    m_maxverse;
 		vector<HumNum> m_measureDuration;

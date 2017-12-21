@@ -89,6 +89,8 @@ bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	initialize();
 
+// ggg
+
 	bool status = true; // for keeping track of problems in conversion process.
 
 	setSoftwareInfo(doc);
@@ -123,8 +125,19 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	}
 	status &= stitchParts(outdata, partids, partinfo, partcontent, partdata);
 
+	if (outdata.size() > 2) {
+		if (outdata.at(0)->getDuration() == 0) {
+			while (!outdata.at(0)->empty()) {
+				outdata.at(1)->push_front(outdata.at(0)->back());
+				outdata.at(0)->pop_back();
+			}
+			outdata.deleteMeasure(0);
+		}
+	}
+
 	outdata.removeRedundantClefChanges();
 	outdata.removeSibeliusIncipit();
+	m_systemDecoration = getSystemDecoration(doc, outdata, partids);
 
 	// tranfer verse counts from parts/staves to HumGrid:
 	// should also do part verse counts here (-1 staffindex).
@@ -231,6 +244,10 @@ string Tool_musicxml2hum::cleanSpaces(string& input) {
 void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc) {
 	string xpath;
 	HumRegex hre;
+
+	if (!m_systemDecoration.empty()) {
+		outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
+	}
 
 	// OTL: title //////////////////////////////////////////////////////////
 
@@ -510,6 +527,11 @@ bool Tool_musicxml2hum::fillPartData(MxmlPart& partdata,
 	if (m_stemsQ) {
 		partdata.enableStems();
 	}
+
+cerr << "GOT HERE XXX PREPARING ID " << id << endl;
+
+	partdata.parsePartInfo(partdeclaration);
+	
 	int count;
 	auto measures = partcontent.select_nodes("./measure");
 	for (int i=0; i<(int)measures.size(); i++) {
@@ -579,7 +601,75 @@ void Tool_musicxml2hum::printPartInfo(vector<string>& partids,
 
 //////////////////////////////
 //
-// stitchParts -- Merge individual parts into a single score sequence.
+// Tool_musicxml2hum::insertPartNames -- 
+//
+
+void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& partdata) {
+
+	bool hasname = false;
+	bool hasabbr = false;
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		string value;
+		value = partdata[i].getPartName();
+		if (!value.empty()) {
+			hasname = true;
+			break;
+		}
+	}
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		string value;
+		value = partdata[i].getPartAbbr();
+		if (!value.empty()) {
+			hasabbr = true;
+			break;
+		}
+	}
+
+	if (!(hasabbr || hasname)) {
+		return;
+	}
+
+	GridMeasure* gm;
+	if (outdata.empty()) {
+		gm = new GridMeasure(&outdata);
+		outdata.push_back(gm);
+	} else {
+		gm = outdata.back();
+	}
+
+	if (hasname) {
+		for (int i=0; i<(int)partdata.size(); i++) {
+			string partname = partdata[i].getPartName();
+			if (partname.empty()) {
+				continue;
+			}
+			string name = "*I\"" + partname;
+			gm->addLabelToken(name, 0, i, 0, 0, (int)partdata.size());
+		}
+	}
+
+	if (hasabbr) {
+		for (int i=0; i<(int)partdata.size(); i++) {
+			string partabbr = partdata[i].getPartAbbr();
+			if (partabbr.empty()) {
+				continue;
+			}
+			string abbr = "*I'" + partabbr;
+			gm->addLabelAbbrToken(abbr, 0, i, 0, 0, (int)partdata.size());
+		}
+	}
+// ggg
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::stitchParts -- Merge individual parts into a 
+//     single score sequence.
 //
 
 bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
@@ -605,6 +695,8 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 	for (i=0; i<(int)partstaves.size(); i++) {
 		partstaves[i] = partdata[i].getStaffCount();
 	}
+
+	insertPartNames(outdata, partdata);
 
 	bool status = true;
 	int m;
@@ -2647,11 +2739,14 @@ bool Tool_musicxml2hum::getPartContent(
 
 bool Tool_musicxml2hum::getPartInfo(map<string, xml_node>& partinfo,
 		vector<string>& partids, xml_document& doc) {
+cerr << "GOT HERE AAA" << endl;
 	auto scoreparts = doc.select_nodes("/score-partwise/part-list/score-part");
 	partids.reserve(scoreparts.size());
 	bool output = true;
+cerr << "PARTS SIZE " << scoreparts.size() << endl;
 	for (auto el : scoreparts) {
 		partids.emplace_back(getAttributeValue(el.node(), "id"));
+cerr << "\tPART ID = " << partids.back() << endl;
 		auto status = partinfo.insert(make_pair(partids.back(), el.node()));
 		if (status.second == false) {
 			cerr << "Error: ID " << partids.back()
@@ -2726,6 +2821,165 @@ void Tool_musicxml2hum::printAttributes(xml_node node) {
 		     << "\tname  = " << at.name()
 		     << "\tvalue = " << at.value()
 		     << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getSystemDecoration --
+//
+// Example:  [1,2]{(3,4)}
+//
+//  <part-list>
+//    <part-group type="start" number="1">
+//      <group-symbol>bracket</group-symbol>
+//    </part-group>
+//
+//    <score-part id="P1">
+//      <part-name>S A</part-name>
+//      <score-instrument id="P1-I1">
+//        <instrument-name>Soprano/Alto</instrument-name>
+//      </score-instrument>
+//      <midi-device id="P1-I1" port="1"></midi-device>
+//      <midi-instrument id="P1-I1">
+//        <midi-channel>1</midi-channel>
+//        <midi-program>53</midi-program>
+//        <volume>78.7402</volume>
+//        <pan>0</pan>
+//      </midi-instrument>
+//    </score-part>
+//
+//    <score-part id="P2">
+//      <part-name>T B</part-name>
+//      <score-instrument id="P2-I1">
+//        <instrument-name>Tenor/Bass</instrument-name>
+//      </score-instrument>
+//      <midi-device id="P2-I1" port="1"></midi-device>
+//      <midi-instrument id="P2-I1">
+//        <midi-channel>2</midi-channel>
+//        <midi-program>53</midi-program>
+//        <volume>78.7402</volume>
+//        <pan>0</pan>
+//      </midi-instrument>
+//    </score-part>
+// 
+//    <part-group type="stop" number="1"/>
+//
+//    <score-part id="P3">
+//      <part-name>Organ</part-name>
+//      <part-abbreviation>Org.</part-abbreviation>
+//      <score-instrument id="P3-I1">
+//        <instrument-name>Pipe Organ</instrument-name>
+//      </score-instrument>
+//      <midi-device id="P3-I1" port="1"></midi-device>
+//      <midi-instrument id="P3-I1">
+//        <midi-channel>3</midi-channel>
+//        <midi-program>76</midi-program>
+//        <volume>78.7402</volume>
+//        <pan>0</pan>
+//      </midi-instrument>
+//    </score-part>
+//
+//  </part-list>
+//
+
+string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid, 
+	vector<string>& partids) {
+
+	xml_node partlist = doc.select_node("/score-partwise/part-list").node();
+	if (!partlist) {
+		cerr << "Error: cannot find partlist\n";
+		return "";
+	}
+	vector<xml_node> children;
+	getChildrenVector(children, partlist);
+
+	vector<vector<int>> staffnumbers;
+	int pcount = grid.getPartCount();
+	staffnumbers.resize(pcount);
+
+	int scounter = 1;
+	for (int i=0; i<pcount; i++) {
+		int staffcount = grid.getStaffCount(i);
+		for (int j=0; j<staffcount; j++) {
+			staffnumbers[i].push_back(scounter++);
+		}
+	}
+
+	string output;
+
+	// part-group @type=start @number=1
+   //   <group-symbol>bracket</group-symbol>
+	// score-part
+	// score-part
+	// part-group @type=stop @number=1
+	// score-part
+	int pcounter = 0;
+	scounter = 1;
+	vector<string> typeendings(100);
+	for (int i=0; i<(int)children.size(); i++) {
+		string name = children[i].name();
+		if (name == "part-group") {
+			string grouptype = children[i].attribute("type").value();
+			string gsymbol = "";
+			int number = children[i].attribute("number").as_int();
+			if (grouptype == "start") {
+				string g = children[i].select_node("//group-symbol").node().child_value();
+				if (g == "bracket") {
+					output += "[(";
+					typeendings[number] = ")]";
+				} else if (g == "brace") {
+					output += "[(";
+					typeendings[number] = ")]";
+				} else {
+					cerr << "Unknown part grouping symbol: " << g << endl;
+				}
+			} else if (grouptype == "stop") {
+				output += typeendings[number];
+				typeendings[number].clear();
+			}
+		} else if (name == "score-part") {
+			pcounter++;
+			int staffcount = grid.getStaffCount(pcounter-1);
+			if (staffcount == 1) {
+				output += "s" + to_string(scounter++);
+			} else if (staffcount > 1) {
+				output += "{(";
+				for (int k=0; k<staffcount; k++) {
+					output += "s" + to_string(scounter++);
+				}
+				output += ")}";
+			}
+		}
+	}
+
+	string newoutput;
+	for (int i=0; i<output.size(); i++) {
+		if ((i>0) && (output[i] == 's') && isdigit(output[i-1])) {
+			newoutput += ',';
+		}
+		newoutput += output[i];
+	}
+
+	return newoutput;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getChildrenVector -- Return a list of all children elements
+//   of a given element.  Pugixml does not allow random access, but storing
+//   them in a vector allows that possibility.
+//
+
+void Tool_musicxml2hum::getChildrenVector(vector<xml_node>& children,
+		xml_node parent) {
+	children.clear();
+	for (xml_node child : parent.children()) {
+		children.push_back(child);
 	}
 }
 

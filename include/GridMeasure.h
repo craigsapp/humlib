@@ -59,7 +59,7 @@ class GridMeasure : public list<GridSlice*> {
 		GridSlice*   addGlobalComment(const string& tok, HumNum timestamp);
 		GridSlice*   appendGlobalLayout(const string& tok, HumNum timestamp);
 		bool         transferTokens (HumdrumFile& outfile, bool recip,
-		                             bool addbar);
+		                             bool addbar, int startbarnum = 0);
 		HumGrid*     getOwner       (void);
 		void         setOwner       (HumGrid* owner);
 		HumNum       getDuration    (void);
@@ -95,7 +95,7 @@ class GridMeasure : public list<GridSlice*> {
 		GridSlice*   getFirstSpinedSlice(void);
 	
 	protected:
-		void         appendInitialBarline(HumdrumFile& infile);
+		void         appendInitialBarline(HumdrumFile& infile, int startbarnum = 0);
 
 	private:
 		HumGrid*     m_owner;

@@ -1881,7 +1881,24 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 		}
 	}
 
-	m_linkedParameters.push_back(token);
+	if (m_linkedParameters.empty()) {
+		m_linkedParameters.push_back(token);
+	} else {
+		int lineindex = token->getLineIndex();
+		if (lineindex >= m_linkedParameters.back()->getLineIndex()) {
+			m_linkedParameters.push_back(token);
+		} else {
+			// Store sorted by line number
+			for (auto it = m_linkedParameters.begin(); it != m_linkedParameters.end(); it++) {
+				if (lineindex < (*it)->getLineIndex()) {
+					m_linkedParameters.insert(it, token);
+					break;
+				}
+			}
+		}
+		
+	}
+
 	return (int)m_linkedParameters.size() - 1;
 }
 

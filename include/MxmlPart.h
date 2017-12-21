@@ -65,6 +65,10 @@ class MxmlPart {
 		int           getStaffIndex        (int voicenum);
 		bool          hasEditorialAccidental(void) const;
 		bool          hasDynamics          (void) const;
+		void          parsePartInfo        (xml_node partdeclaration);
+		string        getPartName          (void) const;
+		string        getPartAbbr          (void) const;
+		string        cleanSpaces          (const string& input);
 
 
 	private:
@@ -85,6 +89,8 @@ class MxmlPart {
 		bool                 m_editorialAccidental;
 		bool                 m_stems = false;
 		bool                 m_has_dynamics = false;
+		string               m_partname;
+		string               m_partabbr;
 
 		// m_staffvoicehist: counts of staff and voice numbers.  
 		// staff=0 is used for items such as measures.

@@ -418,6 +418,7 @@ GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
 			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isLabelSlice()) {
 				target = *iterator;
 				target->addToken(tok, part, staff, voice);
+				gs = target;
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
@@ -635,7 +636,9 @@ GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
 		// search for existing data line (or any other type)  with same timestamp 
 		auto iterator = this->begin();
 		while (iterator != this->end()) {
-			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+			// does it need to be before data slice or any slice?
+			// if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+			if ((*iterator)->getTimestamp() == timestamp) {
 				// found the correct timestamp on a data slice, so add the global comment
 				// before the data slice.
 				gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
@@ -659,10 +662,11 @@ GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
 //////////////////////////////
 //
 // GridMeasure::transferTokens --
+//    default value: startbarnum = 0
 //
 
 bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
-		bool addbar) {
+		bool addbar, int startbarnum) {
 
 	// If the last data slice duration is zero, then calculate
 	// the true duration from the duration of the measure.
@@ -717,7 +721,11 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 			if (getDuration() == 0) {
 				// do nothing
 			} else {
-				appendInitialBarline(outfile);
+				if (startbarnum) {
+					appendInitialBarline(outfile, startbarnum);
+				} else {
+					appendInitialBarline(outfile);
+				}
 				addedbar = true;
 			}
 		}
@@ -734,16 +742,23 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 //    duplicated to all spines later.
 //
 
-void GridMeasure::appendInitialBarline(HumdrumFile& infile) {
+void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 	if (infile.getLineCount() == 0) {
 		// strange case which should never happen.
 		return;
 	}
 	int fieldcount = infile.back()->getFieldCount();
 	HumdrumLine* line = new HumdrumLine;
+	string tstring = "=";
+	if (startbarline) {
+		tstring += to_string(startbarline);
+	} else {
+		tstring += "1";
+	}
+	tstring += "-";
 	HTp token;
 	for (int i=0; i<fieldcount; i++) {
-		token = new HumdrumToken("=1-");
+		token = new HumdrumToken(tstring);
 		line->appendToken(token);
 	}
 	infile.push_back(line);

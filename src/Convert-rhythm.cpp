@@ -177,7 +177,8 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 	HumNum test1dot = (duration * 2) / 3;
 	if (test1dot.getNumerator() == 1) {
 		// single dot works
-		string output = to_string(test1dot.getDenominator() * 2);
+		// string output = to_string(test1dot.getDenominator() * 2);
+		string output = to_string(test1dot.getDenominator());
 		output += ".";
 		return output;
 	}
@@ -186,7 +187,7 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 	HumNum test2dot = (duration * 4) / 7;
 	if (test2dot.getNumerator() == 1) {
 		// double dot works
-		string output = to_string(test2dot.getDenominator() * 4);
+		string output = to_string(test2dot.getDenominator() * 2);
 		output += "..";
 		return output;
 	}
@@ -195,7 +196,7 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 	HumNum test3dot = (duration * 8) / 15;
 	if (test3dot.getNumerator() == 1) {
 		// single dot works
-		string output = to_string(test3dot.getDenominator() * 8);
+		string output = to_string(test3dot.getDenominator() * 4);
 		output += "...";
 		return output;
 	}

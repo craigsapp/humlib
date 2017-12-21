@@ -631,6 +631,95 @@ void MxmlPart::printStaffVoiceInfo(void) {
 }
 
 
+
+//////////////////////////
+//
+// MxmlPart::parsePartInfo -- find the part name and part abbreviation
+//    if there are any.
+//
+// Example:
+//     <score-part id="P1">
+//      <part-name>Alto</part-name>
+//      <part-name-display>
+//       <display-text>Alto</display-text>
+//      </part-name-display>
+//      <part-abbreviation> </part-abbreviation>
+//      <part-abbreviation-display>
+//       <display-text> </display-text>
+//      </part-abbreviation-display>
+//      <score-instrument id="P1-I1">
+//       <instrument-name> </instrument-name>
+//      </score-instrument>
+//     </score-part>
+//
+
+void MxmlPart::parsePartInfo(xml_node partinfo) {
+cerr << "PART INFO ID " << partinfo.attribute("id").value() << endl;
+	xml_node partnamenode = partinfo.select_node("./part-name").node();
+	if (partnamenode) {
+cerr << "PART NAME " << partnamenode.child_value() << endl;
+		m_partname = cleanSpaces(partnamenode.child_value());
+	}
+	xml_node abbrnode = partinfo.select_node("./part-abbreviation").node();
+	if (abbrnode) {
+		m_partabbr = cleanSpaces(abbrnode.child_value());
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::getPartName --
+//
+
+string MxmlPart::getPartName(void) const {
+	return m_partname;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::getPartAbbr --
+//
+
+string MxmlPart::getPartAbbr(void) const {
+	return m_partabbr;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::cleanSpaces -- remove leading/trailing spaces in string.
+//
+
+string MxmlPart::cleanSpaces(const string& input) {
+	string output;
+	int content = false;
+	for (int i=0; i<(int)input.size(); i++) {
+		if ((!content) && isspace(input[i]))  {
+			continue;
+		}
+		content = true;
+		if (isspace(input[i]) && isspace(input[i-1])) {
+			continue;
+		}
+		if (isspace(input[i])) {
+			output += ' ';
+		} else {
+			output += input[i];
+		}
+	}
+	if (isspace(output.back())) {
+		output.resize(output.size() - 1);
+	}
+
+	return output;
+}
+
+
 // END_MERGE
 
 } // end namespace hum
