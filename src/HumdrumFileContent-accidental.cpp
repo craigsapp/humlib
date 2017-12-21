@@ -189,11 +189,11 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					} else if (loc == 0) {
 						continue;
 					} else {
-						if (!((subtok[loc-1] == '#') || (subtok[loc-1] != '-') ||
+						if (!((subtok[loc-1] == '#') || (subtok[loc-1] == '-') ||
 								(subtok[loc-1] == 'n'))) {
 							continue;
 						} else {
-							// an accident should be fored at end of tie
+							// an accidental should be fored at end of tie
 						}
 					}
 				}
