@@ -654,10 +654,10 @@ void MxmlPart::printStaffVoiceInfo(void) {
 //
 
 void MxmlPart::parsePartInfo(xml_node partinfo) {
-cerr << "PART INFO ID " << partinfo.attribute("id").value() << endl;
+// ggg cerr << "PART INFO ID " << partinfo.attribute("id").value() << endl;
 	xml_node partnamenode = partinfo.select_node("./part-name").node();
 	if (partnamenode) {
-cerr << "PART NAME " << partnamenode.child_value() << endl;
+// ggg cerr << "PART NAME " << partnamenode.child_value() << endl;
 		m_partname = cleanSpaces(partnamenode.child_value());
 	}
 	xml_node abbrnode = partinfo.select_node("./part-abbreviation").node();

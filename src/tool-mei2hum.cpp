@@ -1469,15 +1469,17 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 		}
 	}
 
-if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
-cerr << "============= LAYER COUNT " << layerPresent.size() << endl;
-}
+// ggg
+// if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
+// cerr << "============= LAYER COUNT " << layerPresent.size() << endl;
+// }
 
 	bool complete = true;
 	for (int i=0; i<(int)layerPresent.size(); i++) {
-if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
-cerr << "============= LAYER " << i+1 << " : " << layerPresent[i] << endl;
-}
+// ggg
+// if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
+// cerr << "============= LAYER " << i+1 << " : " << layerPresent[i] << endl;
+// }
 		complete &= layerPresent[i];
 	}
 	if (!complete) {
@@ -1538,9 +1540,10 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime, vector<bool>& 
 	}
 	m_currentLayer = nnum;
 
-if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
-cerr << "CURRENT LAYER " << m_currentLayer << endl;
-}
+// ggg
+// if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
+// cerr << "CURRENT LAYER " << m_currentLayer << endl;
+// }
 
 	// grow Layer array if necessary:
 	if (layerPresent.size() < m_currentLayer) {
@@ -1550,9 +1553,10 @@ cerr << "CURRENT LAYER " << m_currentLayer << endl;
 			layerPresent.at(i) = false;
 		}
    }
-if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
-cerr << "LAYER CHECKER SIZE IS " << layerPresent.size() << endl;
-}
+// ggg
+// if ((m_currentMeasure == 12) && (m_currentStaff == 6)) {
+// cerr << "LAYER CHECKER SIZE IS " << layerPresent.size() << endl;
+// }
 
 
 	if (layerPresent.at(m_currentLayer - 1)) {
