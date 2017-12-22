@@ -246,7 +246,8 @@ int Convert::kernToBase40(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::kernToBase12PC -- Convert **kern pitch to a base-12 pitch-class.
-//   C=0, C#/D-flat=1, D=2, etc.
+//   C=0, C#/D-flat=1, D=2, etc.  Will return -1 instead of 11 for C-, and
+//   will return 12 instead of 0 for B#.
 //
 
 int Convert::kernToBase12PC(const string& kerndata) {
@@ -279,9 +280,6 @@ int Convert::kernToBase12PC(const string& kerndata) {
 
 int Convert::kernToBase12(const string& kerndata) {
 	int pc = Convert::kernToBase12PC(kerndata);
-	if (pc < 0) {
-		return pc;
-	}
 	int octave = Convert::kernToOctaveNumber(kerndata);
 	return pc + 12 * octave;
 }
@@ -478,9 +476,6 @@ int Convert::base40ToAccidental(int b40) {
 
 int Convert::kernToMidiNoteNumber(const string& kerndata) {
 	int pc = Convert::kernToBase12PC(kerndata);
-	if (pc < 0) {
-		return pc;
-	}
 	int octave = Convert::kernToOctaveNumber(kerndata);
 	return pc + 12 * (octave + 1);
 }
