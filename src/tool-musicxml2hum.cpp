@@ -2958,7 +2958,7 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 	}
 
 	string newoutput;
-	for (int i=0; i<output.size(); i++) {
+	for (int i=0; i<(int)output.size(); i++) {
 		if ((i>0) && (output[i] == 's') && isdigit(output[i-1])) {
 			newoutput += ',';
 		}

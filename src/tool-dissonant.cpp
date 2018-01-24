@@ -435,7 +435,7 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 
 		if (((results[lineindex] == m_labels[SUS_BIN]) ||
 			 (results[lineindex] == m_labels[SUS_TERN])) &&
-			(i < (attacks.size() - 3)) ) {
+			(i < ((int)attacks.size() - 3)) ) {
 			HumNum durn   = attacks[i+1]->getDuration();
 			HumNum durnn  = attacks[i+2]->getDuration();
 			HumNum durnnn  = attacks[i+3]->getDuration();
@@ -471,7 +471,7 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 		}
 		if (((results[lineindex] == m_labels[SUS_BIN]) ||
 			 (results[lineindex] == m_labels[SUS_TERN])) &&
-			(i < (attacks.size() - 2)) ) {
+			(i < ((int)attacks.size() - 2)) ) {
 			HumNum durn  = attacks[i+1]->getDuration();
 			HumNum durnn = attacks[i+2]->getDuration();
 			double intn  = *attacks[i+1] - *attacks[i];

@@ -154,7 +154,7 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	HumdrumFile outfile;
 
 	// Report verse counts for each staff to HumGrid:
-	for (int i=0; i<m_maxverse.size(); i++) {
+	for (int i=0; i<(int)m_maxverse.size(); i++) {
 		if (m_maxverse[i] == 0) {
 			continue;
 		}
@@ -162,7 +162,7 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	// Report dynamic presence for each staff to HumGrid:
-	for (int i=0; i<m_hasDynamics.size(); i++) {
+	for (int i=0; i<(int)m_hasDynamics.size(); i++) {
 		if (m_hasDynamics[i] == false) {
 			continue;
 		}
@@ -949,7 +949,7 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 	if ((!metercount.empty()) && (!meterunit.empty())) {
 		HumNum meterduration = stoi(metercount) * 4 / stoi(meterunit);
 		if (nodename == "scoreDef") {
-			for (int i=0; i<m_measureDuration.size(); i++) {
+			for (int i=0; i<(int)m_measureDuration.size(); i++) {
 				m_measureDuration.at(i) = meterduration;
 				m_currentMeterUnit.at(i) = stoi(meterunit);
 			}
@@ -1271,7 +1271,7 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 	}
 
 	bool allequal = true;
-	for (int i=1; i<durations.size(); i++) {
+	for (int i=1; i<(int)durations.size(); i++) {
 		if (durations[i] != durations[0]) {
 			allequal = false;
 			break;
@@ -1284,7 +1284,7 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 	bool overfilledQ = false;
 	if (!allequal) {
 		measuredur = targetDur;
-		for (int i=0; i<durations.size(); i++) {
+		for (int i=0; i<(int)durations.size(); i++) {
 			if (durations[i] > maxdur) {
 				maxdur = durations[i];
 			}
@@ -1330,7 +1330,7 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 	if (overfilledQ) {
 		// pad measures that are not under filled so that all 
 		// parts have the same maximum overfilling.
-		for (int i=0; i<durations.size(); i++) {
+		for (int i=0; i<(int)durations.size(); i++) {
 			if (durations[i] == maxdur) {
 				continue;
 			}
@@ -1494,7 +1494,7 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 	}
 
 	bool allequal = true;
-	for (int i=1; i<durations.size(); i++) {
+	for (int i=1; i<(int)durations.size(); i++) {
 		if (durations[i] != durations[0]) {
 			allequal = false;
 			break;
@@ -1546,7 +1546,7 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime, vector<bool>& 
 // }
 
 	// grow Layer array if necessary:
-	if (layerPresent.size() < m_currentLayer) {
+	if ((int)layerPresent.size() < m_currentLayer) {
 		int oldsize = (int)layerPresent.size();
 		layerPresent.resize(m_currentLayer);
 		for (int i=oldsize; i<m_currentLayer; i++) {
