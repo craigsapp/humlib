@@ -51,6 +51,7 @@ Tool_transpose::Tool_transpose(void) {
 	define("I|instrument=b", "insert instrument code (*ITr) as well");
 	define("C|concert=b",    "transpose written score to concert pitch");
 	define("W|written=b",    "trans. concert pitch score to written score");
+	define("n|negate=b",     "negate transposition indications");
 	define("rotation=b",     "display transposition in half-steps");
 
 	define("author=b",  "author of program");
@@ -145,8 +146,8 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 //
 
 void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
-	vector<int> tvals;  // transposition values for each spine
-	tvals.reserve(infile.getMaxTrack() + 1);
+	// transposition values for each spine
+	vector<int> tvals(infile.getMaxTrack()+1, 0);  
 
 	int ptrack;
 	int i, j;
@@ -155,8 +156,6 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 				// scan the line for transposition codes
 				// as well as key signatures and key markers
 				processInterpretationLine(infile, i, tvals, style);
-				break;
-
 		} else if (infile[i].isData()) {
 			// transpose notes according to tvals data
 			for (j=0; j<infile[i].getFieldCount(); j++) {
@@ -178,8 +177,6 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 				}
 			}
 			m_humdrum_text << "\n";
-			break;
-
 		} else {
 			m_humdrum_text << infile[i] << "\n";
 		}
@@ -377,13 +374,12 @@ int Tool_transpose::isKeyMarker(const string& str) {
 //
 
 void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col, int transval) {
-	if (infile.token(row, col)->isKern()) {
+	if (!infile.token(row, col)->isKern()) {
 		// don't know how to transpose this type of data, so leave it as is
 		m_humdrum_text << infile.token(row, col);
-		return;
+	} else {
+		printHumdrumKernToken(infile[row], col, transval);
 	}
-
-	printHumdrumKernToken(infile[row], col, transval);
 }
 
 
@@ -576,7 +572,8 @@ int Tool_transpose::getTransposeInfo(HumdrumFile& infile, int row, int col) {
 				base = Convert::transToBase40(*infile.token(i, j));
 				output += base;
 				// erase the *Tr value because it will be printed elsewhere
-				infile.token(i, j)->setText("*deletedTr");
+				infile.token(i, j)->setText("*XTr");
+				// ggg
 			}
 		}
 	}
