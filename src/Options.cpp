@@ -825,7 +825,7 @@ void Options::setOptions(const vector<string>& argv) {
 }
 
 
-void Options::setOptions(string& args) {
+void Options::setOptions(const string& args) {
 	m_processedQ = 0;
    m_argv = tokenizeCommandLine(args);
 }
@@ -880,7 +880,7 @@ void Options::appendOptions(string& args) {
 //    command-line strings.
 //
 
-vector<string> Options::tokenizeCommandLine(string& arguments) {
+vector<string> Options::tokenizeCommandLine(const string& arguments) {
 	char ch;
 	int doublequote = 0;
 	int singlequote = 0;
@@ -945,7 +945,6 @@ vector<string> Options::tokenizeCommandLine(string& arguments) {
 	}
 
 	return tokens;
-
 }
 
 
@@ -986,7 +985,7 @@ bool Options::process(const vector<string>& argv, int error_check, int suppress)
 }
 
 
-bool Options::process(string& argv, int error_check, int suppress) {
+bool Options::process(const string& argv, int error_check, int suppress) {
 	setOptions(argv);
 	xverify(error_check, suppress);
 	return !hasParseError();

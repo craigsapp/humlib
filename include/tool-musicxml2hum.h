@@ -121,6 +121,8 @@ class Tool_musicxml2hum : public HumTool {
 		void insertPartClefs   (xml_node clef, GridPart& part);
 		xml_node convertClefToHumdrum(xml_node clef, HTp& token, int& staffindex);
 
+		void addTranspositionLine(GridMeasure* outdata, vector<vector<xml_node> >& transpositions,
+		                       vector<MxmlPart>& partdata, HumNum nowtime);
 		void addKeySigLine    (GridMeasure* outdata, vector<vector<xml_node> >& keysigs,
 		                        vector<MxmlPart>& partdata, HumNum nowtime);
 		void insertPartKeySigs (xml_node keysig, GridPart& part);
@@ -160,6 +162,8 @@ class Tool_musicxml2hum : public HumTool {
 		void setSoftwareInfo   (xml_document& doc);
 		string getSystemDecoration(xml_document& doc, HumGrid& grid, vector<string>& partids);
 		void getChildrenVector (vector<xml_node>& children, xml_node parent);
+		void insertPartTranspositions(xml_node transposition, GridPart& part);
+		xml_node convertTranspositionToHumdrum(xml_node transpose, HTp& token, int& staffindex);
 
 	public:
 
@@ -180,6 +184,7 @@ class Tool_musicxml2hum : public HumTool {
 
 		xml_node m_current_dynamic = xml_node(NULL);
 		vector<xml_node> m_current_text;
+		bool m_hasTransposition = false;
 
 };
 
