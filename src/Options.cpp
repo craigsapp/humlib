@@ -287,8 +287,7 @@ ostream& Option_register::print(ostream& out) {
 	out << "modifiedQ:\t\t"    << m_modifiedQ      << endl;
 	out << "type:\t\t"         << m_type           << endl;
 	return out;
-};
-
+}
 
 
 

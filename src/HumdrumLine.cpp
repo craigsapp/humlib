@@ -60,7 +60,7 @@ HumdrumLine::HumdrumLine(const char* aString) : string(aString) {
 }
 
 
-HumdrumLine::HumdrumLine(HumdrumLine& line) {
+HumdrumLine::HumdrumLine(HumdrumLine& line)  : string((string)line) {
 	m_lineindex           = line.m_lineindex;
 	m_duration            = line.m_duration;
 	m_durationFromStart   = line.m_durationFromStart;
@@ -74,7 +74,7 @@ HumdrumLine::HumdrumLine(HumdrumLine& line) {
 }
 
 
-HumdrumLine::HumdrumLine(HumdrumLine& line, void* owner) {
+HumdrumLine::HumdrumLine(HumdrumLine& line, void* owner) : string((string)line) {
 	m_lineindex           = line.m_lineindex;
 	m_duration            = line.m_duration;
 	m_durationFromStart   = line.m_durationFromStart;
