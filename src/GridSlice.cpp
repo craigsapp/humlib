@@ -124,8 +124,8 @@ GridSlice::~GridSlice(void) {
 
 //////////////////////////////
 //
-// GridSlice::addToken -- Will not allocate part or staff array, but will 
-//     grow voice array if needed.
+// GridSlice::addToken -- Will not allocate part array, but will 
+//     grow staff or voice array if needed.
 //
 
 void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
@@ -134,10 +134,18 @@ void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
 		cerr << this->size() << endl;
 		return;
 	}
-	if ((staffi < 0) || (staffi >= (int)this->at(parti)->size())) {
+	if (staffi < 0) {
 		cerr << "Error: staff index " << staffi << " is out of range: size is ";
 		cerr << this->at(parti)->size() << endl;
 		return;
+	}
+
+	if (staffi >= (int)this->at(parti)->size()) {
+		int ssize = this->at(parti)->size();
+		for (int i=ssize; i<=staffi; i++) {
+			GridStaff* gs = new GridStaff;
+			this->at(parti)->push_back(gs);
+		}
 	}
 
 	if (voicei >= (int)this->at(parti)->at(staffi)->size()) {

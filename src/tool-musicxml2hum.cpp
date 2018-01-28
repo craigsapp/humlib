@@ -12,6 +12,8 @@
 
 #include "tool-musicxml2hum.h"
 #include "tool-ruthfix.h"
+#include "tool-transpose.h"
+#include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
 
@@ -258,7 +260,8 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	HumRegex hre;
 
 	if (!m_systemDecoration.empty()) {
-		outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
+		// outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
+		outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
 	}
 
 	// OTL: title //////////////////////////////////////////////////////////
@@ -652,8 +655,10 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 		gm = new GridMeasure(&outdata);
 		outdata.push_back(gm);
 	} else {
-		gm = outdata.back();
+		gm = outdata[0];
 	}
+
+	int maxstaff;
 
 	if (hasname) {
 		for (int i=0; i<(int)partdata.size(); i++) {
@@ -662,7 +667,8 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				continue;
 			}
 			string name = "*I\"" + partname;
-			gm->addLabelToken(name, 0, i, 0, 0, (int)partdata.size());
+			maxstaff = outdata.getStaffCount(i);
+			gm->addLabelToken(name, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
 		}
 	}
 
@@ -673,7 +679,8 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				continue;
 			}
 			string abbr = "*I'" + partabbr;
-			gm->addLabelAbbrToken(abbr, 0, i, 0, 0, (int)partdata.size());
+			maxstaff = outdata.getStaffCount(i);
+			gm->addLabelAbbrToken(abbr, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
 		}
 	}
 // ggg
@@ -712,8 +719,6 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 		partstaves[i] = partdata[i].getStaffCount();
 	}
 
-	insertPartNames(outdata, partdata);
-
 	bool status = true;
 	int m;
 	for (m=0; m<partdata[0].getMeasureCount(); m++) {
@@ -722,6 +727,8 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 		// insertSingleMeasure(outfile);
 		// measures.push_back(&outfile[outfile.getLineCount()-1]);
 	}
+
+	insertPartNames(outdata, partdata);
 
 	return status;
 }

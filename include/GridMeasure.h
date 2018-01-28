@@ -46,10 +46,12 @@ class GridMeasure : public list<GridSlice*> {
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addTransposeToken(const string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addLabelToken(const string& tok, HumNum timestamp,
-		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addLabelToken  (const string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxpart,
+		                             int maxstaff);
 		GridSlice*   addLabelAbbrToken(const string& tok, HumNum timestamp,
-		                             int part, int staff, int voice, int maxstaff);
+		                             int part, int staff, int voice, int maxpart,
+		                             int maxstaff);
 		GridSlice*   addDataToken   (const string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addGraceToken  (const string& tok, HumNum timestamp,

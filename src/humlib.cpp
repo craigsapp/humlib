@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 26 03:51:57 PST 2018
+// Last Modified: Sat Jan 27 23:28:39 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3029,48 +3029,20 @@ GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 //
 
 GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
-		int part, int staff, int voice, int maxstaff) {
+		int part, int staff, int voice, int maxpart, int maxstaff) {
+
 	GridSlice* gs = NULL;
 	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
-		gs = new GridSlice(this, timestamp, SliceType::Labels, maxstaff);
-		gs->addToken(tok, part, staff, voice);
+		gs = new GridSlice(this, timestamp, SliceType::Labels, maxpart);
+		gs->addToken(tok, part, maxstaff-1, voice);
 		this->push_back(gs);
 	} else { 
-		// search for existing line with same timestamp and the same slice type
-		GridSlice* target = NULL;
-		auto iterator = this->begin();
-		while (iterator != this->end()) {
-			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isLabelSlice()) {
-				target = *iterator;
-				target->addToken(tok, part, staff, voice);
-				gs = target;
-				break;
-			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
-				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
-				// track of the order in which the other non-data slices should be placed).
-				gs = new GridSlice(this, timestamp, SliceType::Labels, maxstaff);
-				gs->addToken(tok, part, staff, voice);
-				this->insert(iterator, gs);
-				break;
-			} else if ((*iterator)->getTimestamp() > timestamp) {
-				gs = new GridSlice(this, timestamp, SliceType::Labels, maxstaff);
-				gs->addToken(tok, part, staff, voice);
-				this->insert(iterator, gs);
-				break;
-			}
-			iterator++;
-		}
-
-		if (iterator == this->end()) {
-			// Couldn't find a place for the label line, so place at end of measure.
-			gs = new GridSlice(this, timestamp, SliceType::Labels, maxstaff);
-			gs->addToken(tok, part, staff, voice);
-			this->insert(iterator, gs);
-		}
-
+		// Couldn't find a place for the label line, so place at end of measure.
+		gs = new GridSlice(this, timestamp, SliceType::Labels, maxpart);
+		gs->addToken(tok, part, maxstaff-1, voice);
+		this->insert(this->begin(), gs);
 	}
 	return gs;
 }
@@ -3085,7 +3057,7 @@ GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
 //
 
 GridSlice* GridMeasure::addLabelAbbrToken(const string& tok, HumNum timestamp,
-		int part, int staff, int voice, int maxstaff) {
+		int part, int staff, int voice, int maxpart, int maxstaff) {
 	GridSlice* gs = NULL;
 	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
 		// add a new GridSlice to an empty list or at end of list if timestamp
@@ -4196,8 +4168,8 @@ GridSlice::~GridSlice(void) {
 
 //////////////////////////////
 //
-// GridSlice::addToken -- Will not allocate part or staff array, but will 
-//     grow voice array if needed.
+// GridSlice::addToken -- Will not allocate part array, but will 
+//     grow staff or voice array if needed.
 //
 
 void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
@@ -4206,10 +4178,18 @@ void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
 		cerr << this->size() << endl;
 		return;
 	}
-	if ((staffi < 0) || (staffi >= (int)this->at(parti)->size())) {
+	if (staffi < 0) {
 		cerr << "Error: staff index " << staffi << " is out of range: size is ";
 		cerr << this->at(parti)->size() << endl;
 		return;
+	}
+
+	if (staffi >= (int)this->at(parti)->size()) {
+		int ssize = this->at(parti)->size();
+		for (int i=ssize; i<=staffi; i++) {
+			GridStaff* gs = new GridStaff;
+			this->at(parti)->push_back(gs);
+		}
 	}
 
 	if (voicei >= (int)this->at(parti)->at(staffi)->size()) {
@@ -38583,7 +38563,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelToken(label, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount);
+				0, 0, m_staffcount, m_staffcount);
 	}
 
 	// Incorporate labelabbr into HumGrid:
@@ -38599,7 +38579,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelAbbrToken(labelabbr, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount);
+				0, 0, m_staffcount, m_staffcount);
 	}
 
 	// Incorporate clef into HumGrid:
@@ -42662,7 +42642,8 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	HumRegex hre;
 
 	if (!m_systemDecoration.empty()) {
-		outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
+		// outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
+		outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
 	}
 
 	// OTL: title //////////////////////////////////////////////////////////
@@ -43056,8 +43037,10 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 		gm = new GridMeasure(&outdata);
 		outdata.push_back(gm);
 	} else {
-		gm = outdata.back();
+		gm = outdata[0];
 	}
+
+	int maxstaff;
 
 	if (hasname) {
 		for (int i=0; i<(int)partdata.size(); i++) {
@@ -43066,7 +43049,8 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				continue;
 			}
 			string name = "*I\"" + partname;
-			gm->addLabelToken(name, 0, i, 0, 0, (int)partdata.size());
+			maxstaff = outdata.getStaffCount(i);
+			gm->addLabelToken(name, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
 		}
 	}
 
@@ -43077,7 +43061,8 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				continue;
 			}
 			string abbr = "*I'" + partabbr;
-			gm->addLabelAbbrToken(abbr, 0, i, 0, 0, (int)partdata.size());
+			maxstaff = outdata.getStaffCount(i);
+			gm->addLabelAbbrToken(abbr, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
 		}
 	}
 // ggg
@@ -43116,8 +43101,6 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 		partstaves[i] = partdata[i].getStaffCount();
 	}
 
-	insertPartNames(outdata, partdata);
-
 	bool status = true;
 	int m;
 	for (m=0; m<partdata[0].getMeasureCount(); m++) {
@@ -43126,6 +43109,8 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 		// insertSingleMeasure(outfile);
 		// measures.push_back(&outfile[outfile.getLineCount()-1]);
 	}
+
+	insertPartNames(outdata, partdata);
 
 	return status;
 }
