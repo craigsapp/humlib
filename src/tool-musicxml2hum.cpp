@@ -660,18 +660,6 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 
 	int maxstaff;
 
-	if (hasname) {
-		for (int i=0; i<(int)partdata.size(); i++) {
-			string partname = partdata[i].getPartName();
-			if (partname.empty()) {
-				continue;
-			}
-			string name = "*I\"" + partname;
-			maxstaff = outdata.getStaffCount(i);
-			gm->addLabelToken(name, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
-		}
-	}
-
 	if (hasabbr) {
 		for (int i=0; i<(int)partdata.size(); i++) {
 			string partabbr = partdata[i].getPartAbbr();
@@ -683,7 +671,18 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 			gm->addLabelAbbrToken(abbr, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
 		}
 	}
-// ggg
+
+	if (hasname) {
+		for (int i=0; i<(int)partdata.size(); i++) {
+			string partname = partdata[i].getPartName();
+			if (partname.empty()) {
+				continue;
+			}
+			string name = "*I\"" + partname;
+			maxstaff = outdata.getStaffCount(i);
+			gm->addLabelToken(name, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
+		}
+	}
 
 }
 
