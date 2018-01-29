@@ -27,10 +27,12 @@ namespace hum {
 //
 
 Tool_msearch::Tool_msearch(void) {
-	define("debug=b",       "diatonic search");
+	define("debug=b",    "diatonic search");
 	define("q|query=s:c d e f g",  "query string");
 	define("t|text=s:",  "lyrical text query string");
-	define("x|cross=b",     "search across parts");
+	define("x|cross=b",  "search across parts");
+	define("c|color=s",  "highlight color");
+	define("m|mark=s:@", "marking character");
 }
 
 
@@ -174,7 +176,14 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	}
 
 	if (tcount) {
-		infile.appendLine("!!!RDF**kern: @ = marked note");
+		string content = "!!!RDF**kern: ";
+		string marker = getString("mark");
+		content += marker[0];
+		content += " = marked note";
+		if (getBoolean("color")) {
+			content += ", color=\"" + getString("color") + "\"";
+		}
+		infile.appendLine(content);
 		infile.createLinesFromTokens();
 	}
 
@@ -215,7 +224,14 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 	}
 	
 	if (mcount) {
-		infile.appendLine("!!!RDF**kern: @ = marked note");
+		string content = "!!!RDF**kern: ";
+		string marker = getString("mark");
+		content += marker[0];
+		content += " = marked note";
+		if (getBoolean("color")) {
+			content += ", color=\"" + getString("color") + "\"";
+		}
+		infile.appendLine(content);
 		infile.createLinesFromTokens();
 	}
 }
