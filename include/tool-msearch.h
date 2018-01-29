@@ -130,6 +130,7 @@ class Tool_msearch : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
+		void    initialize         (void);
 		void    doMusicSearch      (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchQueryToken>& query);
 		void    doTextSearch       (HumdrumFile& infile, NoteGrid& grid,
@@ -152,6 +153,7 @@ class Tool_msearch : public HumTool {
 	private:
 	 	vector<HTp> m_kernspines;
 		string      m_text;
+		string      m_marker;
 };
 
 // END_MERGE
