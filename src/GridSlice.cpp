@@ -141,7 +141,7 @@ void GridSlice::addToken(const string& tok, int parti, int staffi, int voicei) {
 	}
 
 	if (staffi >= (int)this->at(parti)->size()) {
-		int ssize = this->at(parti)->size();
+		int ssize = (int)this->at(parti)->size();
 		for (int i=ssize; i<=staffi; i++) {
 			GridStaff* gs = new GridStaff;
 			this->at(parti)->push_back(gs);

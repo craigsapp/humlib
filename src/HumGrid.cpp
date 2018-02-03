@@ -105,7 +105,7 @@ int  HumGrid::getPartCount(void) {
 		return 0;
 	}
 
-	return this->at(0)->back()->size();
+	return (int)this->at(0)->back()->size();
 }
 
 
@@ -124,7 +124,7 @@ int HumGrid::getStaffCount(int partindex) {
 		return 0;
 	}
 
-	return this->at(0)->back()->at(partindex)->size();
+	return (int)this->at(0)->back()->at(partindex)->size();
 }
 
 

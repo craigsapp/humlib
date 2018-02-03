@@ -1402,7 +1402,7 @@ void Tool_mei2hum::parseHairpin(xml_node hairpin, HumNum starttime) {
 		m_hairpins.resize(m_hairpins.size() + 1);
 		m_hairpins.back().hairpin = hairpin;
 		m_hairpins.back().gm = *it;
-		m_hairpins.back().mindex = m_currentMeterUnit.size() - 1;
+		m_hairpins.back().mindex = ((int)m_currentMeterUnit.size()) - 1;
 	}
 }
 
@@ -1803,7 +1803,7 @@ bool Tool_mei2hum::beamIsValid(vector<xml_node>& beamlist) {
 //
 
 void Tool_mei2hum::processGraceNotes(HumNum timestamp) {
-	int size = m_gracenotes.size();
+	int size = (int)m_gracenotes.size();
 	int counter = 1;
 	string output;
 	for (int i=size-1; i>=0; i--) {

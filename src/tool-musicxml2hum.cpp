@@ -668,7 +668,7 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 			}
 			string abbr = "*I'" + partabbr;
 			maxstaff = outdata.getStaffCount(i);
-			gm->addLabelAbbrToken(abbr, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
+			gm->addLabelAbbrToken(abbr, 0, i, maxstaff-1, 0, (int)partdata.size(), maxstaff);
 		}
 	}
 
@@ -688,7 +688,7 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 			}
 			string name = "*I\"" + partname;
 			maxstaff = outdata.getStaffCount(i);
-			gm->addLabelToken(name, 0, i, maxstaff-1, 0, partdata.size(), maxstaff);
+			gm->addLabelToken(name, 0, i, maxstaff-1, 0, (int)partdata.size(), maxstaff);
 		}
 	}
 
