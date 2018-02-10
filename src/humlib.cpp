@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 10 12:29:40 PST 2018
+// Last Modified: Sat Feb 10 12:41:22 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -42766,6 +42766,9 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	Tool_ruthfix ruthfix;
 	ruthfix.run(outfile);
+
+	Tool_chord chord;
+	chord.run(outfile);
 
 	if (m_hasTransposition) {
 		Tool_transpose transpose;

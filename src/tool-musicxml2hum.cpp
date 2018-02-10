@@ -13,6 +13,7 @@
 #include "tool-musicxml2hum.h"
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
+#include "tool-chord.h"
 #include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
@@ -175,6 +176,9 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	Tool_ruthfix ruthfix;
 	ruthfix.run(outfile);
+
+	Tool_chord chord;
+	chord.run(outfile);
 
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
