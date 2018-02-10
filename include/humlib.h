@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Feb  2 21:58:15 PST 2018
+// Last Modified: Sat Feb 10 12:29:40 PST 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3722,6 +3722,26 @@ class Tool_autostem : public HumTool {
 		int    Borderline    = 0;       // really used with -u option
 		int    notlongQ      = 0;       // used with -L option
 		bool   m_quit        = false;
+
+};
+
+
+class Tool_chord : public HumTool {
+	public:
+		         Tool_chord      (void);
+		        ~Tool_chord      () {};
+
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     sortChordPitches  (HumdrumFile& infile, int direction);
+		void     sortNoteOrder     (HTp tok, int direction);
+		void     initialize        (void);
+
+	private:
+		int       m_direction = 1;
 
 };
 

@@ -16,6 +16,7 @@
 // tools which filter can process:
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
+#include "tool-chord.h"
 #include "tool-cint.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
@@ -108,6 +109,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "chord") {
+			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
 			RUNTOOL(cint, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
