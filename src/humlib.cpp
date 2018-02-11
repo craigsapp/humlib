@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Feb 11 08:04:43 PST 2018
+// Last Modified: Sun Feb 11 11:28:05 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28670,6 +28670,10 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	for (int i=0; i<(int)pitches.size(); i++) {
 		pitches[i].first = Convert::kernToBase40(notes[i]);
 		pitches[i].second = i;
+	}
+
+	if (ismin && (getBoolean("top-note") || getBoolean("bottom-note") || getBoolean("last-note"))) {
+		maximizeChordPitches(notes, pitches);
 	}
 
 	if (getBoolean("top-note")) {

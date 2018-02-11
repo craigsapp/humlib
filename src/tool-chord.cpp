@@ -181,6 +181,10 @@ void Tool_chord::processChord(HTp tok, int direction) {
 		pitches[i].second = i;
 	}
 
+	if (ismin && (getBoolean("top-note") || getBoolean("bottom-note") || getBoolean("last-note"))) {
+		maximizeChordPitches(notes, pitches);
+	}
+
 	if (getBoolean("top-note")) {
 		direction = -1;
 	}
