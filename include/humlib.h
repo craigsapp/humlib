@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 10 12:41:22 PST 2018
+// Last Modified: Sat Feb 10 20:02:49 PST 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3736,12 +3736,13 @@ class Tool_chord : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     sortChordPitches  (HumdrumFile& infile, int direction);
-		void     sortNoteOrder     (HTp tok, int direction);
+		void     processFile       (HumdrumFile& infile, int direction);
+		void     processChord      (HTp tok, int direction);
 		void     initialize        (void);
 
 	private:
-		int       m_direction = 1;
+		int       m_direction = 0;
+		int       m_spine     = -1;
 
 };
 

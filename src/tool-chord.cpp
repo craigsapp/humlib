@@ -32,6 +32,11 @@ Tool_chord::Tool_chord(void) {
 	// add options here
 	define("u|sort-upwards=b",    "sort notes by lowest first in chord");
 	define("d|sort-downwards=b",  "sort notes by highest first in chord");
+	define("t|top-note=b",        "extract top note of chords");
+	define("b|bottom-note=b",     "extract bottom note of chords");
+	define("f|first-note=b",      "extract first note of chords");
+	define("l|last-note=b",       "extract last note of chords");
+	define("s|spine=i:-1",        "spine to process (indexed from 1)");
 }
 
 
@@ -66,7 +71,7 @@ bool Tool_chord::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_chord::run(HumdrumFile& infile) {
 	initialize();
-	sortChordPitches(infile, m_direction);
+	processFile(infile, m_direction);
 	infile.createLinesFromTokens();
 	return true;
 }
@@ -83,22 +88,36 @@ void Tool_chord::initialize(void) {
 	if (getBoolean("sort-upwards")) {
 		m_direction = -1;
 	}
+	if (getBoolean("sort-downwards")) {
+		m_direction = +1;
+	}
+	m_spine = getInteger("spine");
 }
 
 
 
 //////////////////////////////
 //
-// Tool_chord::sortChordPitches --
+// Tool_chord::processFile --
 //     direction:  1 = highest first
 //     direction: -1 = lowest first
 //
 
-void Tool_chord::sortChordPitches(HumdrumFile& infile, int direction) {
+void Tool_chord::processFile(HumdrumFile& infile, int direction) {
+	if (!(getBoolean("top-note") || getBoolean("bottom-note") ||
+			getBoolean("sort-upwards") || getBoolean("sort-downwards") ||
+			getBoolean("first-note") || getBoolean("last-note"))) {
+		// nothing to do
+		return;
+	}
 
 	HumRegex hre;
 	for (int i=0; i<infile.getStrandCount(); i++) {
 		HTp stok = infile.getStrandStart(i);
+		int track = stok->getTrack();
+		if ((m_spine > 0) && (track != m_spine)) {	
+			continue;
+		}
 		if (!stok->isKern()) {
 			continue;
 		}
@@ -117,20 +136,20 @@ void Tool_chord::sortChordPitches(HumdrumFile& infile, int direction) {
 				tok = tok->getNextToken();
 				continue;
 			}
-			sortNoteOrder(tok, direction);
+			processChord(tok, direction);
 			tok = tok->getNextToken();
 		}
 	}
-
 }
+
 
 
 //////////////////////////////
 //
-// Tool_chord::sortNoteOrder --
+// Tool_chord::processChord --
 //
 
-void Tool_chord::sortNoteOrder(HTp tok, int direction) {
+void Tool_chord::processChord(HTp tok, int direction) {
 	vector<string> notes;
 	int count = (int)tok->getSubtokenCount();
 	for (int i=0; i<count; i++) {
@@ -147,12 +166,26 @@ void Tool_chord::sortNoteOrder(HTp tok, int direction) {
 		pitches[i].first = Convert::kernToBase40(notes[i]);
 		pitches[i].second = i;
 	}
+
+	if (getBoolean("top-note")) {
+		direction = -1;
+	}
+	if (getBoolean("bottom-note")) {
+		direction = -1;
+	}
+	if (getBoolean("first-note")) {
+		direction = 0;
+	}
+	if (getBoolean("last-note")) {
+		direction = 0;
+	}
+
 	if (direction > 0) {
 		sort(pitches.begin(), pitches.end(), 
 			[](const pair<int, int>& a, const pair<int, int>& b) -> bool {
 				return a.first > b.first;
 			});
-	} else {
+	} else if (direction < 0) {
 		sort(pitches.begin(), pitches.end(), 
 			[](const pair<int, int>& a, const pair<int, int>& b) -> bool {
 				return a.first < b.first;
@@ -166,7 +199,7 @@ void Tool_chord::sortNoteOrder(HTp tok, int direction) {
 			break;
 		}
 	}
-	if (same) {
+	if ((getBoolean("sort-upwards") || getBoolean("sort-downwards")) && same) {
 		return;
 	}
 
@@ -195,19 +228,29 @@ void Tool_chord::sortNoteOrder(HTp tok, int direction) {
 	}
 
 	string output = prefix;
-	for (int i=0; i<(int)pitches.size(); i++) {
-		output += notes[pitches[i].second];
-		if (beamindex == i) {
-			output += beam;
-		}
-		if (i < (int)pitches.size() - 1) {
-			output += " ";
+	if (getBoolean("top-note")) {
+		output += notes[pitches.back().second];
+	} else if (getBoolean("bottom-note")) {
+		output += notes[pitches[0].second];
+	} else if (getBoolean("first-note")) {
+		output += notes[pitches[0].second];
+	} else if (getBoolean("last-note")) {
+		output += notes[pitches.back().second];
+	} else {
+		for (int i=0; i<(int)pitches.size(); i++) {
+			output += notes[pitches[i].second];
+			if (beamindex == i) {
+				output += beam;
+			}
+			if (i < (int)pitches.size() - 1) {
+				output += " ";
+			}
 		}
 	}
+
 	output += suffix;
 	tok->setText(output);
 }
-
 
 
 // END_MERGE

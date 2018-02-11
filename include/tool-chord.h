@@ -31,12 +31,13 @@ class Tool_chord : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     sortChordPitches  (HumdrumFile& infile, int direction);
-		void     sortNoteOrder     (HTp tok, int direction);
+		void     processFile       (HumdrumFile& infile, int direction);
+		void     processChord      (HTp tok, int direction);
 		void     initialize        (void);
 
 	private:
-		int       m_direction = 1;
+		int       m_direction = 0;
+		int       m_spine     = -1;
 
 };
 
