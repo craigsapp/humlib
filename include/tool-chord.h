@@ -34,10 +34,13 @@ class Tool_chord : public HumTool {
 		void     processFile       (HumdrumFile& infile, int direction);
 		void     processChord      (HTp tok, int direction);
 		void     initialize        (void);
+		void     minimizeChordPitches(vector<string>& notes, vector<pair<int,int>>& pitches);
+		void     maximizeChordPitches(vector<string>& notes, vector<pair<int,int>>& pitches);
 
 	private:
 		int       m_direction = 0;
 		int       m_spine     = -1;
+		int       m_primary   = 0;
 
 };
 

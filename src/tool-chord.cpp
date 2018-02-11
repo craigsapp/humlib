@@ -35,8 +35,11 @@ Tool_chord::Tool_chord(void) {
 	define("t|top-note=b",        "extract top note of chords");
 	define("b|bottom-note=b",     "extract bottom note of chords");
 	define("f|first-note=b",      "extract first note of chords");
+	define("p|primary=b",         "place prefix/suffix/beams on first note in chord");
 	define("l|last-note=b",       "extract last note of chords");
 	define("s|spine=i:-1",        "spine to process (indexed from 1)");
+	define("m|minimize=b",        "minimize chords");
+	define("M|maximize=b",        "maximize chords");
 }
 
 
@@ -92,6 +95,10 @@ void Tool_chord::initialize(void) {
 		m_direction = +1;
 	}
 	m_spine = getInteger("spine");
+	m_primary = getBoolean("primary");
+	if (getBoolean("minimize")) {
+		m_primary = true;
+	}
 }
 
 
@@ -106,6 +113,7 @@ void Tool_chord::initialize(void) {
 void Tool_chord::processFile(HumdrumFile& infile, int direction) {
 	if (!(getBoolean("top-note") || getBoolean("bottom-note") ||
 			getBoolean("sort-upwards") || getBoolean("sort-downwards") ||
+			getBoolean("minimize") || getBoolean("maximize") ||
 			getBoolean("first-note") || getBoolean("last-note"))) {
 		// nothing to do
 		return;
@@ -214,6 +222,7 @@ void Tool_chord::processChord(HTp tok, int direction) {
 
 	string beam;
 	int beamindex = -1;
+
 	for (int i=0; i<(int)notes.size(); i++) {
 		if (hre.search(notes[i], "([LJkK]+[<>]?)")) {
 			beamindex = i;
@@ -221,10 +230,25 @@ void Tool_chord::processChord(HTp tok, int direction) {
 			hre.replaceDestructive(notes[i], "", "([LJkK]+[<>]?)");
 		}
 	}
+
+	if (getBoolean("maximize") && (beamindex >= 0)) {
+		beamindex = (int)notes.size() - 1;
+	}
 	
 	if (hre.search(notes.back(), "(&*\\)[<>]?)")) {
 		suffix += hre.getMatch(1);
 		hre.replaceDestructive(notes.back(), "", "(&*\\)[<>]?)");
+	} else if (getBoolean("maximize")) {
+		if (hre.search(notes[0], "(&*\\)[<>]?)")) {
+			suffix += hre.getMatch(1);
+			hre.replaceDestructive(notes[0], "", "(&*\\)[<>]?)");
+		}
+	}
+
+	if (getBoolean("minimize")) {
+		minimizeChordPitches(notes, pitches);
+	} else if (getBoolean("maximize")) {
+		maximizeChordPitches(notes, pitches);
 	}
 
 	string output = prefix;
@@ -243,7 +267,10 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	} else {
 		for (int i=0; i<(int)pitches.size(); i++) {
 			output += notes[pitches[i].second];
-			if (beamindex == i) {
+			if (m_primary && (i==0)) {
+				output += beam;
+				output += suffix;
+			} else if ((!m_primary) && (beamindex == i)) {
 				output += beam;
 			}
 			if (i < (int)pitches.size() - 1) {
@@ -252,9 +279,78 @@ void Tool_chord::processChord(HTp tok, int direction) {
 		}
 	}
 
-	output += suffix;
+	if (!m_primary) {
+		output += suffix;
+	}
 	tok->setText(output);
 }
+
+
+//////////////////////////////
+//
+// Tool_chord::minimizeChordPitches -- remove durations, articulations
+//   and stem directions for secondary notes in chord.
+//		pitches[x].first = base40 pitch.
+//		pitches[x].second = index for pitch in notes vector.
+//
+
+void Tool_chord::minimizeChordPitches(vector<string>& notes, 
+		vector<pair<int,int>>& pitches) {
+	if (notes.empty()) {
+		return;
+	}
+	HumRegex hre;
+	string firstdur;
+	string firstartic;
+	string firststem;
+	if (hre.search(notes[pitches[0].second], "([0-9%.]+)")) {
+		firstdur = hre.getMatch(1);
+	}
+	if (hre.search(notes[pitches[0].second], "([\\\\/])")) {
+		firststem = hre.getMatch(1);
+	}
+
+	for (int i=1; i<(int)pitches.size(); i++) {
+		hre.replaceDestructive(notes[pitches[i].second], "", firstdur);
+		hre.replaceDestructive(notes[pitches[i].second], "", firststem);
+
+		// articulations:
+		hre.replaceDestructive(notes[pitches[i].second], "", "'[<>]?");
+		hre.replaceDestructive(notes[pitches[i].second], "", "~[<>]?");
+		hre.replaceDestructive(notes[pitches[i].second], "", "\\^[<>]?");
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_chord::maximizeChordPitches -- add durations, articulations
+//   and stem directions to all secondary notes in chord.
+//
+
+void Tool_chord::maximizeChordPitches(vector<string>& notes, 
+		vector<pair<int,int>>& pitches) {
+	if (notes.empty()) {
+		return;
+	}
+	HumRegex hre;
+
+	string prefix;
+	string suffix;
+
+	if (hre.search(notes[0], "(.*?)(?=[A-Ga-g])")) {
+		prefix = hre.getMatch(1);
+	}
+	if (hre.search(notes[0], "([A-Ga-g]+[#n-]*[<>]?)(.*)")) {
+		suffix = hre.getMatch(2);
+	}
+
+	for (int i=1; i<(int)notes.size(); i++) {
+		notes[i] = prefix + notes[i] + suffix;
+	}
+}
+
 
 
 // END_MERGE
