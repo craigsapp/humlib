@@ -230,12 +230,16 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	string output = prefix;
 	if (getBoolean("top-note")) {
 		output += notes[pitches.back().second];
+		output += beam;
 	} else if (getBoolean("bottom-note")) {
 		output += notes[pitches[0].second];
+		output += beam;
 	} else if (getBoolean("first-note")) {
 		output += notes[pitches[0].second];
+		output += beam;
 	} else if (getBoolean("last-note")) {
 		output += notes[pitches.back().second];
+		output += beam;
 	} else {
 		for (int i=0; i<(int)pitches.size(); i++) {
 			output += notes[pitches[i].second];
