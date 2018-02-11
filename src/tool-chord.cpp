@@ -169,6 +169,12 @@ void Tool_chord::processChord(HTp tok, int direction) {
 		return;
 	}
 
+	bool ismin = false;
+	HumRegex hre;
+	if (!hre.search(notes[1], "[0-9]")) {
+		ismin = true;
+	}
+
 	vector<pair<int, int>> pitches(count);
 	for (int i=0; i<(int)pitches.size(); i++) {
 		pitches[i].first = Convert::kernToBase40(notes[i]);
@@ -214,7 +220,6 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	string prefix;
 	string suffix;
 
-	HumRegex hre;
 	if (hre.search(notes[0], "(&*\\([<>]?)")) {
 		prefix = hre.getMatch(1);
 		hre.replaceDestructive(notes[0], "", "(&*\\([<>]?)");
@@ -238,7 +243,7 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	if (hre.search(notes.back(), "(&*\\)[<>]?)")) {
 		suffix += hre.getMatch(1);
 		hre.replaceDestructive(notes.back(), "", "(&*\\)[<>]?)");
-	} else if (getBoolean("maximize")) {
+	} else if (ismin || getBoolean("maximize")) {
 		if (hre.search(notes[0], "(&*\\)[<>]?)")) {
 			suffix += hre.getMatch(1);
 			hre.replaceDestructive(notes[0], "", "(&*\\)[<>]?)");

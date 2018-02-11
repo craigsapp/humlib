@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Feb 11 01:45:33 PST 2018
+// Last Modified: Sun Feb 11 08:04:43 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28660,6 +28660,12 @@ void Tool_chord::processChord(HTp tok, int direction) {
 		return;
 	}
 
+	bool ismin = false;
+	HumRegex hre;
+	if (!hre.search(notes[1], "[0-9]")) {
+		ismin = true;
+	}
+
 	vector<pair<int, int>> pitches(count);
 	for (int i=0; i<(int)pitches.size(); i++) {
 		pitches[i].first = Convert::kernToBase40(notes[i]);
@@ -28705,7 +28711,6 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	string prefix;
 	string suffix;
 
-	HumRegex hre;
 	if (hre.search(notes[0], "(&*\\([<>]?)")) {
 		prefix = hre.getMatch(1);
 		hre.replaceDestructive(notes[0], "", "(&*\\([<>]?)");
@@ -28729,7 +28734,7 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	if (hre.search(notes.back(), "(&*\\)[<>]?)")) {
 		suffix += hre.getMatch(1);
 		hre.replaceDestructive(notes.back(), "", "(&*\\)[<>]?)");
-	} else if (getBoolean("maximize")) {
+	} else if (ismin || getBoolean("maximize")) {
 		if (hre.search(notes[0], "(&*\\)[<>]?)")) {
 			suffix += hre.getMatch(1);
 			hre.replaceDestructive(notes[0], "", "(&*\\)[<>]?)");
