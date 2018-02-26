@@ -115,6 +115,7 @@ class Tool_musicxml2hum : public HumTool {
 		void insertSingleMeasure(HumdrumFile& outfile);
 		void cleanupMeasures   (HumdrumFile& outfile,
 		                        vector<HumdrumLine*> measures);
+		void processPrintElement(GridMeasure* outdata, xml_node element, HumNum timestamp);
 
 		void addClefLine       (GridMeasure* outdata, vector<vector<xml_node> >& clefs,
 		                        vector<MxmlPart>& partdata, HumNum nowtime);
