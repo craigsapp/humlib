@@ -77,7 +77,7 @@ GridSlice* GridMeasure::addGraceToken(const string& tok, HumNum timestamp,
 	}
 
 	GridSlice* gs = NULL;
-	GridSlice* datatarget = NULL;
+	// GridSlice* datatarget = NULL;
 	auto iterator = this->begin();
 	if (this->empty()) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
@@ -128,7 +128,7 @@ GridSlice* GridMeasure::addGraceToken(const string& tok, HumNum timestamp,
 			if ((*iterator)->isDataSlice()) {
 				if ((*iterator)->getTimestamp() == timestamp) {
 					// found dataslice just before graceslice(s)
-					datatarget = *iterator;
+					// datatarget = *iterator;
 					break;
 				}
 			}

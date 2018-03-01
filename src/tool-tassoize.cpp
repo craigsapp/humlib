@@ -234,49 +234,63 @@ void Tool_tassoize::updateKeySignatures(HumdrumFile& infile, int lineindex) {
 				case 'a': case 'A':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][5] = +1;
+						break;
 						case '-': m_pstates[track][5] = -1;
+						break;
 					}
 					break;
 
 				case 'b': case 'B':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][6] = +1;
+						break;
 						case '-': m_pstates[track][6] = -1;
+						break;
 					}
 					break;
 
 				case 'c': case 'C':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][0] = +1;
+						break;
 						case '-': m_pstates[track][0] = -1;
+						break;
 					}
 					break;
 
 				case 'd': case 'D':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][1] = +1;
+						break;
 						case '-': m_pstates[track][1] = -1;
+						break;
 					}
 					break;
 
 				case 'e': case 'E':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][2] = +1;
+						break;
 						case '-': m_pstates[track][2] = -1;
+						break;
 					}
 					break;
 
 				case 'f': case 'F':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][3] = +1;
+						break;
 						case '-': m_pstates[track][3] = -1;
+						break;
 					}
 					break;
 
 				case 'g': case 'G':
 					switch (text[j+1]) {
 						case '#': m_pstates[track][4] = +1;
+						break;
 						case '-': m_pstates[track][4] = -1;
+						break;
 					}
 					break;
 			}

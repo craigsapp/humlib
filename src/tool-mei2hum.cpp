@@ -264,7 +264,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 	double threshold = 0.001;
 	auto it = gm->begin();
 	GridSlice *lastgs = NULL;
-	bool found = false;
+	// bool found = false;
 
 	while (it != gm->end()) {
 		if (!(*it)->isDataSlice()) {
@@ -275,11 +275,11 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
 		double diff = starttime - mtimestamp.getFloat();
 		if (diff < threshold) {
-			found = true;
+			// found = true;
 			lastgs = *it;
 			break;
 		} else if (diff < 0.0) {
-			found = true;
+			// found = true;
 			lastgs = *it;
 			break;
 		}
@@ -297,7 +297,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 	gm = *myit;
 	it = gm->begin();
 	lastgs = NULL;
-	found = false;
+	// found = false;
 	while (it != gm->end()) {
 		if (!(*it)->isDataSlice()) {
 			it++;
@@ -307,11 +307,11 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
 		double diff = endtime - mtimestamp.getFloat();
 		if (diff < threshold) {
-			found = true;
+			// found = true;
 			lastgs = *it;
 			break;
 		} else if (diff < 0.0) {
-			found = true;
+			// found = true;
 			lastgs = *it;
 			break;
 		}
@@ -889,8 +889,8 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 	string midibpm;
 	string label;
 	string labelabbr;
-	int transsemi;
-	int transdiat;
+	int transsemi = 0;
+	int transdiat = 0;
 
 	string nodename = element.name();
 
@@ -1493,10 +1493,10 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 		return starttime;
 	}
 
-	bool allequal = true;
+	// bool allequal = true;
 	for (int i=1; i<(int)durations.size(); i++) {
 		if (durations[i] != durations[0]) {
-			allequal = false;
+			// allequal = false;
 			break;
 		}
 	}
