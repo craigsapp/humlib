@@ -174,7 +174,13 @@ int MxmlPart::getMeasureCount(void) const {
 //
 
 MxmlMeasure* MxmlPart::getMeasure(int index) const {
-	return ((index >= 0) && (index < (int)m_measures.size())) ? m_measures[index] : NULL;
+	if (index < 0) {
+		return NULL;
+	}
+	if (index >= (int)m_measures.size()) {
+		return NULL;
+	}
+	return m_measures[index];
 }
 
 

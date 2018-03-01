@@ -1842,7 +1842,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, vector<vector<string> >& voiceFuncs, int vindex) {
 	double int2;      // diatonic interval to next melodic note
-	double int3;      // diatonic interval from next melodic note to following note
+	double int3 = -22; // diatonic interval from next melodic note to following note
 	double int4;      // diatonic interval from note three to note four
 	double oint2;     // diatonic interval to next melodic note in other voice
 	double oint3;     // diatonic interval from next melodic note to following note
