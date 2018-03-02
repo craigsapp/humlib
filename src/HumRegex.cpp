@@ -119,7 +119,8 @@ void HumRegex::setGlobal(void) {
 //
 
 bool HumRegex::getGlobal(void) {
-	return !(m_searchflags & std::regex_constants::format_first_only);
+	auto value = m_searchflags & std::regex_constants::format_first_only;
+	return value.none();
 }
 
 

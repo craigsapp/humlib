@@ -177,7 +177,8 @@ MxmlMeasure* MxmlPart::getMeasure(int index) const {
 	if (index < 0) {
 		return NULL;
 	}
-	if (index >= (int)m_measures.size()) {
+	int stupidwarningsuppression = (int)m_measures.size();
+	if ((index - stupidwarningsuppression) >= 0) {
 		return NULL;
 	}
 	return m_measures[index];
