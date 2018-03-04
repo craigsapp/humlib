@@ -120,7 +120,7 @@ void HumRegex::setGlobal(void) {
 
 bool HumRegex::getGlobal(void) {
 	auto value = m_searchflags & std::regex_constants::format_first_only;
-	return value.none();
+	return !value;
 }
 
 
