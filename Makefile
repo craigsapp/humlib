@@ -75,7 +75,11 @@ PREFLAGS += -std=c++11
 POSTFLAGS =
 # POSTFLAGS += -static
 
-COMPILER      = LANG=C $(ENV) g++ $(ARCH)
+ifeq ($(CXX),)
+   COMPILER      = LANG=C $(ENV) g++ $(ARCH)
+else 
+   COMPILER      = LANG=C $(ENV) $(CXX) $(ARCH)
+endif
 # Or use clang++ v3.3:
 #COMPILER      = clang++
 #PREFLAGS     += -stdlib=libc++
