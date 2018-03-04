@@ -2,7 +2,7 @@ branches:
   only:
   - master
 
-sudo: false
+sudo: required
 dist: trusty
 language: cpp
 
@@ -15,6 +15,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-5
             - g++-5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
@@ -29,4 +30,6 @@ before_install:
 before_script:
 
 script: 
+  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
   - make
