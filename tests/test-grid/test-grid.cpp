@@ -249,9 +249,6 @@ int getAttack(int n, vector<int>& data, int index, vector<int> attacks) {
    int ordinal = 0;
    index = attacks[index];
    while ((index >= 0) && (ordinal < n)) {
-      if (index < 0) {
-      	 return 0;
-      }
       ordinal++;
       if (ordinal == n) {
          return data[index];
