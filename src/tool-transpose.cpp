@@ -872,82 +872,79 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 // Tool_transpose::getBase40ValueFromInterval -- note: only ninth interval range allowed
 //
 
-int Tool_transpose::getBase40ValueFromInterval(const string& string) {
+int Tool_transpose::getBase40ValueFromInterval(const string& interval) {
 	int sign = 1;
-	if (string.find('-') != string::npos) {
+	if (interval.find('-') != string::npos) {
 		sign = -1;
 	}
 
-	int length = (int)string.size();
-	char* buffer = new char[length+1];
-	strcpy(buffer, string.c_str());
-	int i;
-	for (i=0; i<length; i++) {
-		if (buffer[i] == 'p') { buffer[i] = 'P'; }
-		if (buffer[i] == 'a') { buffer[i] = 'A'; }
-		if (buffer[i] == 'D') { buffer[i] = 'd'; }
+	string icopy = interval;
+	for (int i=0; i<(int)icopy.size(); i++) {
+		if (icopy[i] == 'p') { icopy[i] = 'P'; }
+		if (icopy[i] == 'a') { icopy[i] = 'A'; }
+		if (icopy[i] == 'D') { icopy[i] = 'd'; }
 	}
 
 	int output = 0;
 
-	if (strstr(buffer, "dd1") != NULL)      { output = -2; }
-	else if (strstr(buffer, "d1") != NULL)  { output = -1; }
-	else if (strstr(buffer, "P1") != NULL)  { output =  0; }
-	else if (strstr(buffer, "AA1") != NULL) { output =  2; }
-	else if (strstr(buffer, "A1") != NULL)  { output =  1; }
+	if (icopy.find("dd1") != string::npos)      { output = -2; }
+	else if (icopy.find("d1") != string::npos)  { output = -1; }
+	else if (icopy.find("P1") != string::npos)  { output =  0; }
+	else if (icopy.find("AA1") != string::npos) { output =  2; }
+	else if (icopy.find("A1") != string::npos)  { output =  1; }
 
-	else if (strstr(buffer, "dd2") != NULL) { output =  3; }
-	else if (strstr(buffer, "d2") != NULL)  { output =  4; }
-	else if (strstr(buffer, "m2") != NULL)  { output =  5; }
-	else if (strstr(buffer, "M2") != NULL)  { output =  6; }
-	else if (strstr(buffer, "AA2") != NULL) { output =  8; }
-	else if (strstr(buffer, "A2") != NULL)  { output =  7; }
+	else if (icopy.find("dd2") != string::npos) { output =  3; }
+	else if (icopy.find("d2") != string::npos)  { output =  4; }
+	else if (icopy.find("m2") != string::npos)  { output =  5; }
+	else if (icopy.find("M2") != string::npos)  { output =  6; }
+	else if (icopy.find("AA2") != string::npos) { output =  8; }
+	else if (icopy.find("A2") != string::npos)  { output =  7; }
 
-	else if (strstr(buffer, "dd3") != NULL) { output =  9; }
-	else if (strstr(buffer, "d3") != NULL)  { output = 10; }
-	else if (strstr(buffer, "m3") != NULL)  { output = 11; }
-	else if (strstr(buffer, "M3") != NULL)  { output = 12; }
-	else if (strstr(buffer, "AA3") != NULL) { output = 14; }
-	else if (strstr(buffer, "A3") != NULL)  { output = 13; }
+	else if (icopy.find("dd3") != string::npos) { output =  9; }
+	else if (icopy.find("d3") != string::npos)  { output = 10; }
+	else if (icopy.find("m3") != string::npos)  { output = 11; }
+	else if (icopy.find("M3") != string::npos)  { output = 12; }
+	else if (icopy.find("AA3") != string::npos) { output = 14; }
+	else if (icopy.find("A3") != string::npos)  { output = 13; }
 
-	else if (strstr(buffer, "dd4") != NULL) { output = 15; }
-	else if (strstr(buffer, "d4") != NULL)  { output = 16; }
-	else if (strstr(buffer, "P4") != NULL)  { output = 17; }
-	else if (strstr(buffer, "AA4") != NULL) { output = 19; }
-	else if (strstr(buffer, "A4") != NULL)  { output = 18; }
+	else if (icopy.find("dd4") != string::npos) { output = 15; }
+	else if (icopy.find("d4") != string::npos)  { output = 16; }
+	else if (icopy.find("P4") != string::npos)  { output = 17; }
+	else if (icopy.find("AA4") != string::npos) { output = 19; }
+	else if (icopy.find("A4") != string::npos)  { output = 18; }
 
-	else if (strstr(buffer, "dd5") != NULL) { output = 21; }
-	else if (strstr(buffer, "d5") != NULL)  { output = 22; }
-	else if (strstr(buffer, "P5") != NULL)  { output = 23; }
-	else if (strstr(buffer, "AA5") != NULL) { output = 25; }
-	else if (strstr(buffer, "A5") != NULL)  { output = 24; }
+	else if (icopy.find("dd5") != string::npos) { output = 21; }
+	else if (icopy.find("d5") != string::npos)  { output = 22; }
+	else if (icopy.find("P5") != string::npos)  { output = 23; }
+	else if (icopy.find("AA5") != string::npos) { output = 25; }
+	else if (icopy.find("A5") != string::npos)  { output = 24; }
 
-	else if (strstr(buffer, "dd6") != NULL) { output = 26; }
-	else if (strstr(buffer, "d6") != NULL)  { output = 27; }
-	else if (strstr(buffer, "m6") != NULL)  { output = 28; }
-	else if (strstr(buffer, "M6") != NULL)  { output = 29; }
-	else if (strstr(buffer, "AA6") != NULL) { output = 31; }
-	else if (strstr(buffer, "A6") != NULL)  { output = 30; }
+	else if (icopy.find("dd6") != string::npos) { output = 26; }
+	else if (icopy.find("d6") != string::npos)  { output = 27; }
+	else if (icopy.find("m6") != string::npos)  { output = 28; }
+	else if (icopy.find("M6") != string::npos)  { output = 29; }
+	else if (icopy.find("AA6") != string::npos) { output = 31; }
+	else if (icopy.find("A6") != string::npos)  { output = 30; }
 
-	else if (strstr(buffer, "dd7") != NULL) { output = 32; }
-	else if (strstr(buffer, "d7") != NULL)  { output = 33; }
-	else if (strstr(buffer, "m7") != NULL)  { output = 34; }
-	else if (strstr(buffer, "M7") != NULL)  { output = 35; }
-	else if (strstr(buffer, "AA7") != NULL) { output = 37; }
-	else if (strstr(buffer, "A7") != NULL)  { output = 36; }
+	else if (icopy.find("dd7") != string::npos) { output = 32; }
+	else if (icopy.find("d7") != string::npos)  { output = 33; }
+	else if (icopy.find("m7") != string::npos)  { output = 34; }
+	else if (icopy.find("M7") != string::npos)  { output = 35; }
+	else if (icopy.find("AA7") != string::npos) { output = 37; }
+	else if (icopy.find("A7") != string::npos)  { output = 36; }
 
-	else if (strstr(buffer, "dd8") != NULL) { output = 38; }
-	else if (strstr(buffer, "d8") != NULL)  { output = 39; }
-	else if (strstr(buffer, "P8") != NULL)  { output = 40; }
-	else if (strstr(buffer, "AA8") != NULL) { output = 42; }
-	else if (strstr(buffer, "A8") != NULL)  { output = 41; }
+	else if (icopy.find("dd8") != string::npos) { output = 38; }
+	else if (icopy.find("d8") != string::npos)  { output = 39; }
+	else if (icopy.find("P8") != string::npos)  { output = 40; }
+	else if (icopy.find("AA8") != string::npos) { output = 42; }
+	else if (icopy.find("A8") != string::npos)  { output = 41; }
 
-	else if (strstr(buffer, "dd9") != NULL) { output = 43; }
-	else if (strstr(buffer, "d9") != NULL)  { output = 44; }
-	else if (strstr(buffer, "m9") != NULL)  { output = 45; }
-	else if (strstr(buffer, "M9") != NULL)  { output = 46; }
-	else if (strstr(buffer, "AA9") != NULL) { output = 48; }
-	else if (strstr(buffer, "A9") != NULL)  { output = 47; }
+	else if (icopy.find("dd9") != string::npos) { output = 43; }
+	else if (icopy.find("d9") != string::npos)  { output = 44; }
+	else if (icopy.find("m9") != string::npos)  { output = 45; }
+	else if (icopy.find("M9") != string::npos)  { output = 46; }
+	else if (icopy.find("AA9") != string::npos) { output = 48; }
+	else if (icopy.find("A9") != string::npos)  { output = 47; }
 
 	return output * sign;
 }
