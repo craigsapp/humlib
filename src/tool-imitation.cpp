@@ -440,7 +440,6 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 			// but already know that the first one is not, so return
 			// current count;
 			return count;
-			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
          // The two sequences match at this point, so continue.
 			count++;
