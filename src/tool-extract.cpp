@@ -396,7 +396,7 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 	vector<HTp> trackstarts;
 	infile.getSpineStartList(trackstarts);
 
-	for (int t=1; t<=(int)trackstarts.size(); t++) {
+	for (int t=0; t<(int)trackstarts.size(); t++) {
 		if (trackstarts[t]->isDataType(exinterp)) {
 			target[t] = 1;
 		}
