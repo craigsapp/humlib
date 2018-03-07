@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar  6 05:34:36 PST 2018
+// Last Modified: Tue Mar  6 21:14:38 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -38356,7 +38356,6 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 			// but already know that the first one is not, so return
 			// current count;
 			return count;
-			break;
 		} else if (seq1[i1+count] == seq2[i2+count]) {
          // The two sequences match at this point, so continue.
 			count++;
@@ -42601,7 +42600,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	}
 
 	if (tcount) {
-		string content = "!!!RDF**kern: " + m_marker + " = marked note";
+		string content = "!!!RDF**kern: " + m_marker + " = marked text";
 		if (getBoolean("color")) {
 			content += ", color=\"" + getString("color") + "\"";
 		}

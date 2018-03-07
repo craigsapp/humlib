@@ -189,7 +189,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	}
 
 	if (tcount) {
-		string content = "!!!RDF**kern: " + m_marker + " = marked note";
+		string content = "!!!RDF**kern: " + m_marker + " = marked text";
 		if (getBoolean("color")) {
 			content += ", color=\"" + getString("color") + "\"";
 		}
