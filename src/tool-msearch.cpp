@@ -111,7 +111,10 @@ void Tool_msearch::initialize(void) {
 
 void Tool_msearch::fillWords(HumdrumFile& infile, vector<TextInfo*>& words) {
 	vector<HTp> textspines;
-	infile.getSpineStartList(textspines, "**text");
+	infile.getSpineStartList(textspines, "**silbe");
+	if (textspines.empty()) {
+		infile.getSpineStartList(textspines, "**text");
+	}
 	for (int i=0; i<(int)textspines.size(); i++) {
 		fillWordsForTrack(words, textspines[i]);
 	}
@@ -188,8 +191,30 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 		}
 	}
 
+	string textinterp = "**text";
+	vector<HTp> interps;
+	infile.getSpineStartList(interps);
+	int textcount = 0;
+	int silbecount = 0;
+	for (int i=0; i<(int)interps.size(); i++) {
+		if (interps[i]->getText() == "**text") {
+			textcount++;
+		}
+		if (interps[i]->getText() == "**silbe") {
+			silbecount++;
+		}
+	}
+	if (silbecount > 0) {
+		// giving priority to **silbe content
+		textinterp = "**silbe";
+	}
+
 	if (tcount) {
-		string content = "!!!RDF**kern: " + m_marker + " = marked text";
+		string content = "!!!RDF";
+		content += textinterp;
+		content += ": ";
+		content += m_marker;
+		content += " = marked text";
 		if (getBoolean("color")) {
 			content += ", color=\"" + getString("color") + "\"";
 		}
@@ -281,13 +306,14 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 // ggg
 	HTp mstart = word.starttoken;
-	while (mstart && !mstart->isKern()) {
-		mstart = mstart->getPreviousFieldToken();
-	}
-	HTp mend = word.nexttoken;
-	while (mend && !mend->isKern()) {
-		mend = mend->getPreviousFieldToken();
-	}
+	HTp mnext = word.nexttoken;
+	// while (mstart && !mstart->isKern()) {
+	// 	mstart = mstart->getPreviousFieldToken();
+	// }
+	// HTp mend = word.nexttoken;
+	// while (mend && !mend->isKern()) {
+	// 	mend = mend->getPreviousFieldToken();
+	// }
 
 	if (mstart) {
 		if (!mstart->isData()) {
@@ -297,21 +323,28 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 		}
 	}
 
-	if (mend) {
-		if (!mend->isData()) {
-			mend = NULL;
-		} else if (mend->isNull()) {
-			mend = NULL;
-		}
-	}
+	//if (mend) {
+	//	if (!mend->isData()) {
+	//		mend = NULL;
+	//	} else if (mend->isNull()) {
+	//		mend = NULL;
+	//	}
+	//}
 
 	HTp tok = mstart;
 	string text;
-	while (tok && (tok != mend)) {
+	while (tok && (tok != mnext)) {
 		if (!tok->isData()) {
 			return;
 		}
-		text = tok->getText() + m_marker;
+		text = tok->getText();
+		if ((!text.empty()) && (text.back() == '-')) {
+			text.pop_back();
+			text += m_marker;
+			text += '-';
+		} else {
+			text += m_marker;
+		}
 		tok->setText(text);
 		tok = tok->getNextNNDT();
 	}

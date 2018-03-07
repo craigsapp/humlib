@@ -12,6 +12,7 @@
 
 #include "tool-binroll.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 
 using namespace std;
