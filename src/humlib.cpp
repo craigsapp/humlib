@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar  6 22:09:39 PST 2018
+// Last Modified: Tue Mar  6 22:23:33 PST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -42605,12 +42605,12 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	string textinterp = "**text";
 	vector<HTp> interps;
 	infile.getSpineStartList(interps);
-	int textcount = 0;
+	//int textcount = 0;
 	int silbecount = 0;
 	for (int i=0; i<(int)interps.size(); i++) {
-		if (interps[i]->getText() == "**text") {
-			textcount++;
-		}
+		//if (interps[i]->getText() == "**text") {
+		//	textcount++;
+		//}
 		if (interps[i]->getText() == "**silbe") {
 			silbecount++;
 		}

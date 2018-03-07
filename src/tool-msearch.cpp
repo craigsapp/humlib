@@ -194,12 +194,12 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	string textinterp = "**text";
 	vector<HTp> interps;
 	infile.getSpineStartList(interps);
-	int textcount = 0;
+	//int textcount = 0;
 	int silbecount = 0;
 	for (int i=0; i<(int)interps.size(); i++) {
-		if (interps[i]->getText() == "**text") {
-			textcount++;
-		}
+		//if (interps[i]->getText() == "**text") {
+		//	textcount++;
+		//}
 		if (interps[i]->getText() == "**silbe") {
 			silbecount++;
 		}
