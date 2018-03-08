@@ -21,6 +21,7 @@
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-hproof.h"
+#include "tool-binroll.h"
 #include "tool-imitation.h"
 #include "tool-metlev.h"
 #include "tool-msearch.h"
@@ -131,6 +132,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "binroll") {
+			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "myank") {
 			RUNTOOL(myank, infile, commands[i].second, status);
 		}
