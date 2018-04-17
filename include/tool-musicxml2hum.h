@@ -119,8 +119,13 @@ class Tool_musicxml2hum : public HumTool {
 
 		void addClefLine       (GridMeasure* outdata, vector<vector<xml_node> >& clefs,
 		                        vector<MxmlPart>& partdata, HumNum nowtime);
+		void addOttavaLine     (GridMeasure* outdata, vector<vector<xml_node> >& ottavas,
+		                        vector<MxmlPart>& partdata, HumNum nowtime);
 		void insertPartClefs   (xml_node clef, GridPart& part);
+		void insertPartOttavas (xml_node ottava, GridPart& part, int partindex, int partstaffindex);
 		xml_node convertClefToHumdrum(xml_node clef, HTp& token, int& staffindex);
+		xml_node convertOttavaToHumdrum(xml_node ottava, HTp& token, int& staffindex,
+		                        int partindex, int partstaffindex);
 
 		void addTranspositionLine(GridMeasure* outdata, vector<vector<xml_node> >& transpositions,
 		                       vector<MxmlPart>& partdata, HumNum nowtime);
@@ -179,6 +184,7 @@ class Tool_musicxml2hum : public HumTool {
 		int m_slurabove = 0;
 		int m_slurbelow = 0;
 		char m_hasEditorial = '\0';
+		vector<vector<string>> m_last_ottava_direction;
 
 		string m_software;
 		string m_systemDecoration;
