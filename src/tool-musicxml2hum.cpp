@@ -2967,7 +2967,7 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 			ss += "ba";
 		} else if (otype == "stop") {
 			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
-				ss += "vb";
+				ss += "ba";
 			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
 				ss += "va";
 			}
@@ -2980,7 +2980,7 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 			ss += "ba";
 		} else if (otype == "stop") {
 			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
-				ss += "vb";
+				ss += "ba";
 			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
 				ss += "va";
 			}
