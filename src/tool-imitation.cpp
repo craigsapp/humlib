@@ -275,7 +275,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				enum2[j+k] = Enumerator;
 			}
 
-			int interval = *attacks[v2][j] - *attacks[v1][i];
+			int interval = int(*attacks[v2][j] - *attacks[v1][i]);
 			int line1 = attacks[v1][i]->getLineIndex();
 			int line2 = attacks[v2][j]->getLineIndex();
 			if (!results[v1][line1].empty()) {

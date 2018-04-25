@@ -295,7 +295,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 	}
 
 	myit += measure;
-	mindex += measure;
+	mindex += (int)measure;
 	gm = *myit;
 	it = gm->begin();
 	lastgs = NULL;

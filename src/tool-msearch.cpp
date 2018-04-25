@@ -416,8 +416,8 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 					Convert::isNaN(dpcQuery[i].pc)) ||
 					(notes[index+i-c]->getAbsBase40PitchClass() == dpcQuery[i].pc)) {
 				if ((index+i-c>0) && dpcQuery[i].direction) {
-					interval = notes[index+i-c]->getAbsBase40Pitch() -
-							notes[index+i-1-c]->getAbsBase40Pitch();
+					interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
+							notes[index+i-1-c]->getAbsBase40Pitch());
 					if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 						match.clear();
 						return false;
@@ -581,13 +581,13 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 		// accidentals:
 		if ((!query.empty()) && (ch == 'n') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = Convert::base7ToBase40(query.back().pc + 70) % 40;
+			query.back().pc = Convert::base7ToBase40((int)query.back().pc + 70) % 40;
 		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
 			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
 		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) - 1) % 40;
+			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) - 1) % 40;
 		}
 		// deal with double sharps and double flats here
 	}

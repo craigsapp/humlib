@@ -11,8 +11,8 @@
 //
 
 #include <sstream>
-#include <functional>
 #include <algorithm>
+#include <functional>
 
 #include "Convert.h"
 #include "HumRegex.h"

@@ -1637,7 +1637,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 			valid_acc_exit = oattackindexn < attackindexn ? false : true;
 			if (oattackindexn < 0) {

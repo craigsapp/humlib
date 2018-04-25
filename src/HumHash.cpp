@@ -261,6 +261,7 @@ HTp HumHash::getValueHTp(const string& ns1, const string& ns2,
 		try {
 			pointer = (HTp)(stoll(value.substr(3)));
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			pointer = NULL;
 		}
 		return pointer;
@@ -322,6 +323,7 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 				intvalue = 0;
 			}
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			intvalue = 0;
 		}
 		return intvalue;
@@ -421,6 +423,7 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 		try {
 			floatvalue = stod(value);
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			floatvalue = 0;
 		}
 		return floatvalue;

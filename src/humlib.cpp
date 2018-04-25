@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 08:19:17 PDT 2018
+// Last Modified: Wed Apr 25 09:17:12 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -8147,6 +8147,7 @@ HTp HumHash::getValueHTp(const string& ns1, const string& ns2,
 		try {
 			pointer = (HTp)(stoll(value.substr(3)));
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			pointer = NULL;
 		}
 		return pointer;
@@ -8208,6 +8209,7 @@ int HumHash::getValueInt(const string& ns1, const string& ns2,
 				intvalue = 0;
 			}
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			intvalue = 0;
 		}
 		return intvalue;
@@ -8307,6 +8309,7 @@ double HumHash::getValueFloat(const string& ns1, const string& ns2,
 		try {
 			floatvalue = stod(value);
 		} catch (invalid_argument& e) {
+         std::cerr << e.what() << std::endl;
 			floatvalue = 0;
 		}
 		return floatvalue;
@@ -33388,7 +33391,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			olineindex = grid.cell(j, oattackindexc)->getLineIndex();
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 			valid_acc_exit = oattackindexn < attackindexn ? false : true;
 			if (oattackindexn < 0) {
@@ -38194,7 +38197,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				enum2[j+k] = Enumerator;
 			}
 
-			int interval = *attacks[v2][j] - *attacks[v1][i];
+			int interval = int(*attacks[v2][j] - *attacks[v1][i]);
 			int line1 = attacks[v1][i]->getLineIndex();
 			int line2 = attacks[v2][j]->getLineIndex();
 			if (!results[v1][line1].empty()) {
@@ -38641,7 +38644,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 	}
 
 	myit += measure;
-	mindex += measure;
+	mindex += (int)measure;
 	gm = *myit;
 	it = gm->begin();
 	lastgs = NULL;
@@ -42831,8 +42834,8 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 					Convert::isNaN(dpcQuery[i].pc)) ||
 					(notes[index+i-c]->getAbsBase40PitchClass() == dpcQuery[i].pc)) {
 				if ((index+i-c>0) && dpcQuery[i].direction) {
-					interval = notes[index+i-c]->getAbsBase40Pitch() -
-							notes[index+i-1-c]->getAbsBase40Pitch();
+					interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
+							notes[index+i-1-c]->getAbsBase40Pitch());
 					if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 						match.clear();
 						return false;
@@ -42996,13 +42999,13 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 		// accidentals:
 		if ((!query.empty()) && (ch == 'n') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = Convert::base7ToBase40(query.back().pc + 70) % 40;
+			query.back().pc = Convert::base7ToBase40((int)query.back().pc + 70) % 40;
 		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
 			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
 		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) - 1) % 40;
+			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) - 1) % 40;
 		}
 		// deal with double sharps and double flats here
 	}
