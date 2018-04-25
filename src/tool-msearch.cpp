@@ -584,7 +584,7 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 			query.back().pc = Convert::base7ToBase40((int)query.back().pc + 70) % 40;
 		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
+			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) + 1) % 40;
 		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
 			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) - 1) % 40;

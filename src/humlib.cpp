@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 09:17:12 PDT 2018
+// Last Modified: Wed Apr 25 10:47:59 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1148,7 +1148,7 @@ string Convert::base40ToKern(int b40) {
 		case 6: base = 'b'; break;
 	}
 	if (octave < 4) {
-		base = std::toupper(base);
+		base = toupper(base);
 	}
 	int repeat = 0;
 	if (octave > 4) {
@@ -1356,7 +1356,7 @@ int Convert::kernToBase7(const string& kerndata) {
 int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 	if (dpc > 6) {
 		// allow for pitch-classes expressed as ASCII characters:
-		dpc = std::tolower(dpc) - 'a' + 5;
+		dpc = tolower(dpc) - 'a' + 5;
 		dpc = dpc % 7;
 	}
 	int output = -1000;
@@ -38643,7 +38643,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		m_outdata.setDynamicsPresent(staffnum-1);
 	}
 
-	myit += measure;
+	myit += (int)measure;
 	mindex += (int)measure;
 	gm = *myit;
 	it = gm->begin();
@@ -38655,7 +38655,8 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 			continue;
 		}
 		timestamp = (*it)->getTimestamp();
-		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
+		mtimestamp = (timestamp - measurestart) * 4;
+		mtimestamp /=  m_currentMeterUnit[mindex];
 		double diff = endtime - mtimestamp.getFloat();
 		if (diff < threshold) {
 			// found = true;
@@ -43002,7 +43003,7 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 			query.back().pc = Convert::base7ToBase40((int)query.back().pc + 70) % 40;
 		} else if ((!query.empty()) && (ch == '#') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
-			query.back().pc = (Convert::base7ToBase40(query.back().pc + 70) + 1) % 40;
+			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) + 1) % 40;
 		} else if ((!query.empty()) && (ch == '-') && (!Convert::isNaN(query.back().pc))) {
 			query.back().base = 40;
 			query.back().pc = (Convert::base7ToBase40((int)query.back().pc + 70) - 1) % 40;
@@ -50083,7 +50084,7 @@ int Tool_transpose::calculateTranspositionFromKey(int targetkey,
 			}
 
 			mode = 0;  // major key
-			if (std::islower(infile.token(i, j)->at(1))) {
+			if (islower(infile.token(i, j)->at(1))) {
 				mode = 1;  // minor key
 			}
 			base40 = Convert::kernToBase40(infile.token(i, j));
@@ -50413,7 +50414,7 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 		int index, int transval) {
 
 	int mode = 0;
-	if (std::islower(aRecord.token(index)->at(1))) {
+	if (islower(aRecord.token(index)->at(1))) {
 		mode = 1;
 	}
 	int base40 = Convert::kernToBase40(*aRecord.token(index));

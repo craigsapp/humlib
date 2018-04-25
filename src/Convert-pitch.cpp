@@ -13,6 +13,7 @@
 #include "Convert.h"
 #include <cmath>
 #include <vector>
+#include <ctype.h>
 
 namespace hum {
 
@@ -307,7 +308,7 @@ string Convert::base40ToKern(int b40) {
 		case 6: base = 'b'; break;
 	}
 	if (octave < 4) {
-		base = std::toupper(base);
+		base = toupper(base);
 	}
 	int repeat = 0;
 	if (octave > 4) {
@@ -515,7 +516,7 @@ int Convert::kernToBase7(const string& kerndata) {
 int Convert::pitchToWbh(int dpc, int acc, int octave, int maxacc) {
 	if (dpc > 6) {
 		// allow for pitch-classes expressed as ASCII characters:
-		dpc = std::tolower(dpc) - 'a' + 5;
+		dpc = tolower(dpc) - 'a' + 5;
 		dpc = dpc % 7;
 	}
 	int output = -1000;

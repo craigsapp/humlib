@@ -294,7 +294,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		m_outdata.setDynamicsPresent(staffnum-1);
 	}
 
-	myit += measure;
+	myit += (int)measure;
 	mindex += (int)measure;
 	gm = *myit;
 	it = gm->begin();
@@ -306,7 +306,8 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 			continue;
 		}
 		timestamp = (*it)->getTimestamp();
-		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
+		mtimestamp = (timestamp - measurestart) * 4;
+		mtimestamp /=  m_currentMeterUnit[mindex];
 		double diff = endtime - mtimestamp.getFloat();
 		if (diff < threshold) {
 			// found = true;

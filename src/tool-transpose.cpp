@@ -21,6 +21,7 @@
 #include "Convert.h"
 #include "HumRegex.h"
 #include <cstring>
+#include <ctype.h>
 
 using namespace std;
 
@@ -417,7 +418,7 @@ int Tool_transpose::calculateTranspositionFromKey(int targetkey,
 			}
 
 			mode = 0;  // major key
-			if (std::islower(infile.token(i, j)->at(1))) {
+			if (islower(infile.token(i, j)->at(1))) {
 				mode = 1;  // minor key
 			}
 			base40 = Convert::kernToBase40(infile.token(i, j));
@@ -747,7 +748,7 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 		int index, int transval) {
 
 	int mode = 0;
-	if (std::islower(aRecord.token(index)->at(1))) {
+	if (islower(aRecord.token(index)->at(1))) {
 		mode = 1;
 	}
 	int base40 = Convert::kernToBase40(*aRecord.token(index));
