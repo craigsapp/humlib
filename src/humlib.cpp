@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 11:34:37 PDT 2018
+// Last Modified: Wed Apr 25 11:50:24 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -8741,11 +8741,11 @@ bool HumHash::isDefined(const string& key) const {
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return (*parameters)[""][""].count(keys[0]);
+		return (*parameters)[""][""].count(keys[0]) ? true : false;
 	} else if (keys.size() == 2) {
-		return (*parameters)[""][keys[0]].count(keys[1]);
+		return (*parameters)[""][keys[0]].count(keys[1]) ? true : false;
 	} else {
-		return (*parameters)[keys[0]][keys[1]].count(keys[2]);
+		return (*parameters)[keys[0]][keys[1]].count(keys[2]) ? true : false;
 	}
 }
 
@@ -8754,7 +8754,7 @@ bool HumHash::isDefined(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
-	return (*parameters)[""][ns2].count(key);
+	return (*parameters)[""][ns2].count(key) ? true : false;
 }
 
 
@@ -8763,7 +8763,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 	if (parameters == NULL) {
 		return false;
 	}
-	return (*parameters)[ns1][ns2].count(key);
+	return (*parameters)[ns1][ns2].count(key) ? true : false;
 }
 
 
@@ -11390,7 +11390,7 @@ ostream& HumTool::getAllText(ostream& out) {
 //
 
 bool HumTool::hasHumdrumText(void) {
-	return m_humdrum_text.rdbuf()->in_avail();
+	return m_humdrum_text.rdbuf()->in_avail() ? true : false;
 }
 
 
@@ -12502,7 +12502,7 @@ bool HumdrumFileBase::analyzeBaseFromTokens(void) {
 bool HumdrumFileBase::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
-	int status = read(infile);
+	bool status = read(infile);
 	return status;
 }
 
@@ -13115,15 +13115,15 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 
 void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 		int track, int options) {
-	bool primaryQ   = options & OPT_PRIMARY;
-	bool nonullQ    = options & OPT_NONULL;
-	bool noemptyQ   = options & OPT_NOEMPTY;
-	bool nointerpQ  = options & OPT_NOINTERP;
-	bool nomanipQ   = options & OPT_NOMANIP;
-	bool nocommentQ = options & OPT_NOCOMMENT;
-	bool noglobalQ  = options & OPT_NOGLOBAL;
-	bool norestQ    = options & OPT_NOREST;
-	bool notieQ     = options & OPT_NOTIE;
+	bool primaryQ   = bool(options & OPT_PRIMARY);
+	bool nonullQ    = bool(options & OPT_NONULL);
+	bool noemptyQ   = bool(options & OPT_NOEMPTY);
+	bool nointerpQ  = bool(options & OPT_NOINTERP);
+	bool nomanipQ   = bool(options & OPT_NOMANIP);
+	bool nocommentQ = bool(options & OPT_NOCOMMENT);
+	bool noglobalQ  = bool(options & OPT_NOGLOBAL);
+	bool norestQ    = bool(options & OPT_NOREST);
+	bool notieQ     = bool(options & OPT_NOTIE);
 
 	vector<vector<HTp> >& output = sequence;
 	output.reserve(getLineCount());
@@ -24034,7 +24034,7 @@ bool MxmlPart::addMeasure(xml_node mel) {
 		m_measures.back()->setNextMeasure(meas);
 	}
 	m_measures.push_back(meas);
-	int status = meas->parseMeasure(mel);
+	bool status = meas->parseMeasure(mel);
 
 	return status;
 }
@@ -26988,7 +26988,7 @@ bool Tool_autobeam::run(const string& indata, ostream& out) {
 
 
 bool Tool_autobeam::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -28555,7 +28555,7 @@ bool Tool_binroll::run(const string& indata, ostream& out) {
 
 
 bool Tool_binroll::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -28774,7 +28774,7 @@ bool Tool_chord::run(const string& indata, ostream& out) {
 
 
 bool Tool_chord::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -31832,14 +31832,13 @@ bool Tool_dissonant::run(const string& indata, ostream& out) {
 
 
 bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
-
 	if (getBoolean("undirected")) {
 		fillLabels2();
 	} else {
 		fillLabels();
 	}
 
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -48992,7 +48991,7 @@ bool Tool_satb2gs::run(const string& indata, ostream& out) {
 
 
 bool Tool_satb2gs::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -49424,7 +49423,7 @@ bool Tool_tassoize::run(const string& indata, ostream& out) {
 
 
 bool Tool_tassoize::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -49749,7 +49748,7 @@ bool Tool_transpose::run(const string& indata, ostream& out) {
 
 
 bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {

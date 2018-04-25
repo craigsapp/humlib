@@ -81,7 +81,7 @@ bool Tool_transpose::run(const string& indata, ostream& out) {
 
 
 bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {

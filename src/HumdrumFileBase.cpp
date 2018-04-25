@@ -398,7 +398,7 @@ bool HumdrumFileBase::analyzeBaseFromTokens(void) {
 bool HumdrumFileBase::readString(const string& contents) {
 	stringstream infile;
 	infile << contents;
-	int status = read(infile);
+	bool status = read(infile);
 	return status;
 }
 
@@ -1011,15 +1011,15 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 
 void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 		int track, int options) {
-	bool primaryQ   = options & OPT_PRIMARY;
-	bool nonullQ    = options & OPT_NONULL;
-	bool noemptyQ   = options & OPT_NOEMPTY;
-	bool nointerpQ  = options & OPT_NOINTERP;
-	bool nomanipQ   = options & OPT_NOMANIP;
-	bool nocommentQ = options & OPT_NOCOMMENT;
-	bool noglobalQ  = options & OPT_NOGLOBAL;
-	bool norestQ    = options & OPT_NOREST;
-	bool notieQ     = options & OPT_NOTIE;
+	bool primaryQ   = bool(options & OPT_PRIMARY);
+	bool nonullQ    = bool(options & OPT_NONULL);
+	bool noemptyQ   = bool(options & OPT_NOEMPTY);
+	bool nointerpQ  = bool(options & OPT_NOINTERP);
+	bool nomanipQ   = bool(options & OPT_NOMANIP);
+	bool nocommentQ = bool(options & OPT_NOCOMMENT);
+	bool noglobalQ  = bool(options & OPT_NOGLOBAL);
+	bool norestQ    = bool(options & OPT_NOREST);
+	bool notieQ     = bool(options & OPT_NOTIE);
 
 	vector<vector<HTp> >& output = sequence;
 	output.reserve(getLineCount());

@@ -85,7 +85,7 @@ ostream& HumTool::getAllText(ostream& out) {
 //
 
 bool HumTool::hasHumdrumText(void) {
-	return m_humdrum_text.rdbuf()->in_avail();
+	return m_humdrum_text.rdbuf()->in_avail() ? true : false;
 }
 
 

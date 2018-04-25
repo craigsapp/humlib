@@ -78,14 +78,13 @@ bool Tool_dissonant::run(const string& indata, ostream& out) {
 
 
 bool Tool_dissonant::run(HumdrumFile& infile, ostream& out) {
-
 	if (getBoolean("undirected")) {
 		fillLabels2();
 	} else {
 		fillLabels();
 	}
 
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {

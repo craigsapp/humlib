@@ -59,7 +59,7 @@ class Option_register {
 		string       m_description;
 		string       m_defaultOption;
 		string       m_modifiedOption;
-		int          m_modifiedQ;
+		bool         m_modifiedQ;
 		char         m_type;
 };
 

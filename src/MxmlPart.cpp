@@ -150,7 +150,7 @@ bool MxmlPart::addMeasure(xml_node mel) {
 		m_measures.back()->setNextMeasure(meas);
 	}
 	m_measures.push_back(meas);
-	int status = meas->parseMeasure(mel);
+	bool status = meas->parseMeasure(mel);
 
 	return status;
 }

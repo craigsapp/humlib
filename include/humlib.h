@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 11:34:37 PDT 2018
+// Last Modified: Wed Apr 25 11:50:24 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3321,7 +3321,7 @@ class Option_register {
 		string       m_description;
 		string       m_defaultOption;
 		string       m_modifiedOption;
-		int          m_modifiedQ;
+		bool         m_modifiedQ;
 		char         m_type;
 };
 

@@ -855,11 +855,11 @@ bool HumHash::isDefined(const string& key) const {
 	}
 	vector<string> keys = getKeyList(key);
 	if (keys.size() == 1) {
-		return (*parameters)[""][""].count(keys[0]);
+		return (*parameters)[""][""].count(keys[0]) ? true : false;
 	} else if (keys.size() == 2) {
-		return (*parameters)[""][keys[0]].count(keys[1]);
+		return (*parameters)[""][keys[0]].count(keys[1]) ? true : false;
 	} else {
-		return (*parameters)[keys[0]][keys[1]].count(keys[2]);
+		return (*parameters)[keys[0]][keys[1]].count(keys[2]) ? true : false;
 	}
 }
 
@@ -868,7 +868,7 @@ bool HumHash::isDefined(const string& ns2, const string& key) const {
 	if (parameters == NULL) {
 		return false;
 	}
-	return (*parameters)[""][ns2].count(key);
+	return (*parameters)[""][ns2].count(key) ? true : false;
 }
 
 
@@ -877,7 +877,7 @@ bool HumHash::isDefined(const string& ns1, const string& ns2,
 	if (parameters == NULL) {
 		return false;
 	}
-	return (*parameters)[ns1][ns2].count(key);
+	return (*parameters)[ns1][ns2].count(key) ? true : false;
 }
 
 

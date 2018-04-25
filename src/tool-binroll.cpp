@@ -52,7 +52,7 @@ bool Tool_binroll::run(const string& indata, ostream& out) {
 
 
 bool Tool_binroll::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
