@@ -1915,7 +1915,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // all cadence types need at least 3 attacks in other voice
 				continue;
 			}
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 			// agent voice has 2 attacks, patient has 3 notes

@@ -143,9 +143,9 @@ string Convert::getHumNumAttributes(const HumNum& num) {
 string Convert::trimWhiteSpace(const string& input) {
 	string s = input;
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
+			std::not1(std::ptr_fun<int, int>(isspace))));
 	s.erase(std::find_if(s.rbegin(), s.rend(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+			std::not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
 	return s;
 }
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 10:47:59 PDT 2018
+// Last Modified: Wed Apr 25 11:01:35 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2501,9 +2501,9 @@ string Convert::getHumNumAttributes(const HumNum& num) {
 string Convert::trimWhiteSpace(const string& input) {
 	string s = input;
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
+			std::not1(std::ptr_fun<int, int>(isspace))));
 	s.erase(std::find_if(s.rbegin(), s.rend(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+			std::not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
 	return s;
 }
 
@@ -33669,7 +33669,7 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 			} else { // all cadence types need at least 3 attacks in other voice
 				continue;
 			}
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 			// agent voice has 2 attacks, patient has 3 notes
