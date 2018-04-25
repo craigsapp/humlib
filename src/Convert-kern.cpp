@@ -11,6 +11,7 @@
 //
 
 #include <sstream>
+#include <ctype.h>
 
 #include "Convert.h"
 

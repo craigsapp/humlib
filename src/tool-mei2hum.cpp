@@ -16,6 +16,7 @@
 #include "Convert.h"
 
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 
 #include <algorithm>
@@ -272,7 +273,8 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 			continue;
 		}
 		timestamp = (*it)->getTimestamp();
-		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
+		mtimestamp = (timestamp - measurestart) * 4;
+      mtimestamp /= m_currentMeterUnit[mindex];
 		double diff = starttime - mtimestamp.getFloat();
 		if (diff < threshold) {
 			// found = true;

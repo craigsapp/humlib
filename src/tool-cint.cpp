@@ -185,7 +185,8 @@ NoteNode::~NoteNode(void) {
 
 
 void NoteNode::clear(void) { 
-	mark = measure = beatsize = serial = b40 = 0; 
+	mark = measure = serial = b40 = 0; 
+	beatsize = 0.0;
 	notemarker = 0; 
 	line = spine = -1; 
 	protected_id = "";

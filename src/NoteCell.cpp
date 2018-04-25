@@ -81,13 +81,13 @@ void NoteCell::calculateNumericPitches(void) {
 
 	// convert to base-7 (diatonic pitch numbers)
 	if (m_b40 > 0) {
-		m_b7         = Convert::base40ToDiatonic(m_b40);
-		m_b12        = Convert::base40ToMidiNoteNumber(m_b40);
-		m_accidental = Convert::base40ToAccidental(m_b40);
+		m_b7         = Convert::base40ToDiatonic((int)m_b40);
+		m_b12        = Convert::base40ToMidiNoteNumber((int)m_b40);
+		m_accidental = Convert::base40ToAccidental((int)m_b40);
 	} else if (m_b40 < 0) {
-		m_b7         = -Convert::base40ToDiatonic(-m_b40);
-		m_b12        = -Convert::base40ToMidiNoteNumber(-m_b40);
-		m_accidental = -Convert::base40ToAccidental(-m_b40);
+		m_b7         = -Convert::base40ToDiatonic(-(int)m_b40);
+		m_b12        = -Convert::base40ToMidiNoteNumber(-(int)m_b40);
+		m_accidental = -Convert::base40ToAccidental(-(int)m_b40);
 	} else {
 		m_b7         = NAN;
 		m_b12        = NAN;

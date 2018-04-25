@@ -442,8 +442,8 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index+i-c]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
 			if ((index+i-c>0) && dpcQuery[i].direction) {
-				interval = notes[index+i-c]->getAbsBase40Pitch() -
-						notes[index+i-1-c]->getAbsBase40Pitch();
+				interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
+						notes[index+i-1-c]->getAbsBase40Pitch());
 				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 					match.clear();
 					return false;

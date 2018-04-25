@@ -1765,7 +1765,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 			// see if the pair creates a dissonant interval

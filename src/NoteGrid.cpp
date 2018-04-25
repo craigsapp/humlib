@@ -528,7 +528,7 @@ int NoteGrid::getPrevAttackDiatonic(int vindex, int sindex) {
 	if (index < 0) {
 		return 0;
 	} else {
-		return this->cell(vindex, index)->getAbsDiatonicPitch();
+		return (int)this->cell(vindex, index)->getAbsDiatonicPitch();
 	}
 }
 

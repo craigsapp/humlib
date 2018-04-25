@@ -11,6 +11,7 @@
 //
 
 #include <sstream>
+#include <functional>
 #include <algorithm>
 
 #include "Convert.h"

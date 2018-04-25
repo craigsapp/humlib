@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 07:21:58 PDT 2018
+// Last Modified: Wed Apr 25 08:06:48 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -24669,13 +24669,13 @@ void NoteCell::calculateNumericPitches(void) {
 
 	// convert to base-7 (diatonic pitch numbers)
 	if (m_b40 > 0) {
-		m_b7         = Convert::base40ToDiatonic(m_b40);
-		m_b12        = Convert::base40ToMidiNoteNumber(m_b40);
-		m_accidental = Convert::base40ToAccidental(m_b40);
+		m_b7         = Convert::base40ToDiatonic((int)m_b40);
+		m_b12        = Convert::base40ToMidiNoteNumber((int)m_b40);
+		m_accidental = Convert::base40ToAccidental((int)m_b40);
 	} else if (m_b40 < 0) {
-		m_b7         = -Convert::base40ToDiatonic(-m_b40);
-		m_b12        = -Convert::base40ToMidiNoteNumber(-m_b40);
-		m_accidental = -Convert::base40ToAccidental(-m_b40);
+		m_b7         = -Convert::base40ToDiatonic(-(int)m_b40);
+		m_b12        = -Convert::base40ToMidiNoteNumber(-(int)m_b40);
+		m_accidental = -Convert::base40ToAccidental(-(int)m_b40);
 	} else {
 		m_b7         = NAN;
 		m_b12        = NAN;
@@ -25512,7 +25512,7 @@ int NoteGrid::getPrevAttackDiatonic(int vindex, int sindex) {
 	if (index < 0) {
 		return 0;
 	} else {
-		return this->cell(vindex, index)->getAbsDiatonicPitch();
+		return (int)this->cell(vindex, index)->getAbsDiatonicPitch();
 	}
 }
 
@@ -29234,7 +29234,8 @@ NoteNode::~NoteNode(void) {
 
 
 void NoteNode::clear(void) { 
-	mark = measure = beatsize = serial = b40 = 0; 
+	mark = measure = serial = b40 = 0; 
+	beatsize = 0.0;
 	notemarker = 0; 
 	line = spine = -1; 
 	protected_id = "";
@@ -33515,7 +33516,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 
 			pitch = attacks[i]->getAbsDiatonicPitch();
 			opitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
-			int thisInt = opitch - pitch; // diatonic interval in this pair
+			int thisInt = int(opitch - pitch); // diatonic interval in this pair
 			int thisMod7 = thisInt % 7; // simplify octaves out of thisInt
 
 			// see if the pair creates a dissonant interval
@@ -38618,7 +38619,8 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 			continue;
 		}
 		timestamp = (*it)->getTimestamp();
-		mtimestamp = (timestamp - measurestart) * 4.0 / m_currentMeterUnit[mindex];
+		mtimestamp = (timestamp - measurestart) * 4;
+      mtimestamp /= m_currentMeterUnit[mindex];
 		double diff = starttime - mtimestamp.getFloat();
 		if (diff < threshold) {
 			// found = true;
@@ -42855,8 +42857,8 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 				Convert::isNaN(dpcQuery[i].pc)) ||
 				(notes[index+i-c]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
 			if ((index+i-c>0) && dpcQuery[i].direction) {
-				interval = notes[index+i-c]->getAbsBase40Pitch() -
-						notes[index+i-1-c]->getAbsBase40Pitch();
+				interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
+						notes[index+i-1-c]->getAbsBase40Pitch());
 				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
 					match.clear();
 					return false;
