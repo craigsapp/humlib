@@ -1011,7 +1011,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			tpitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
 				if (tpitch <= lowestnote) {
-					lowestnote = tpitch;
+					lowestnote = (int)tpitch;
 					// lowestnotei = j;
 				}
 			}
@@ -1121,7 +1121,7 @@ RECONSIDER:
 		}
 
 		if (colorizeQ) {
-			int metriclevel = attacks[i]->getMetricLevel();
+			double metriclevel = attacks[i]->getMetricLevel();
 			if (metriclevel <= 0) {
 				dissL0Q = true;
 				marking = 'N';
@@ -1621,7 +1621,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
 				if (tpitch <= lowestnote) {
-					lowestnote = tpitch;
+					lowestnote = (int)tpitch;
 				}
 			}
 		}
@@ -1748,7 +1748,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 		for (int v=0; v<(int)grid.getVoiceCount(); v++) {
 			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
 			if ((!Convert::isNaN(tpitch)) && (tpitch <= lowestnote)) {
-				lowestnote = tpitch;
+				lowestnote = (int)tpitch;
 			}
 		}
 

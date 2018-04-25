@@ -109,7 +109,7 @@ string NoteCell::getSgnKernPitch(void) {
 		return "r";
 	}
 	string pitch;
-	pitch = Convert::base40ToKern(getAbsBase40Pitch());
+	pitch = Convert::base40ToKern((int)getAbsBase40Pitch());
 	if (isSustained()) {
 		pitch.insert(0, "(");
 		pitch += ")";
@@ -128,7 +128,7 @@ string NoteCell::getAbsKernPitch(void) {
 	if (isRest()) {
 		return "r";
 	}
-	return Convert::base40ToKern(getAbsBase40Pitch());
+	return Convert::base40ToKern((int)getAbsBase40Pitch());
 }
 
 

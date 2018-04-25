@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <cctype>
 #include <algorithm>
 
 using namespace std;

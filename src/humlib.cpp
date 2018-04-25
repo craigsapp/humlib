@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 08:06:48 PDT 2018
+// Last Modified: Wed Apr 25 08:19:17 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -24697,7 +24697,7 @@ string NoteCell::getSgnKernPitch(void) {
 		return "r";
 	}
 	string pitch;
-	pitch = Convert::base40ToKern(getAbsBase40Pitch());
+	pitch = Convert::base40ToKern((int)getAbsBase40Pitch());
 	if (isSustained()) {
 		pitch.insert(0, "(");
 		pitch += ")";
@@ -24716,7 +24716,7 @@ string NoteCell::getAbsKernPitch(void) {
 	if (isRest()) {
 		return "r";
 	}
-	return Convert::base40ToKern(getAbsBase40Pitch());
+	return Convert::base40ToKern((int)getAbsBase40Pitch());
 }
 
 
@@ -25532,7 +25532,7 @@ int NoteGrid::getNextAttackDiatonic(int vindex, int sindex) {
 	if (index < 0) {
 		return 0;
 	} else {
-		return this->cell(vindex, index)->getAbsDiatonicPitch();
+		return (int)(this->cell(vindex, index)->getAbsDiatonicPitch());
 	}
 }
 
@@ -32762,7 +32762,7 @@ void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
 			tpitch = grid.cell(j, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
 				if (tpitch <= lowestnote) {
-					lowestnote = tpitch;
+					lowestnote = (int)tpitch;
 					// lowestnotei = j;
 				}
 			}
@@ -32872,7 +32872,7 @@ RECONSIDER:
 		}
 
 		if (colorizeQ) {
-			int metriclevel = attacks[i]->getMetricLevel();
+			double metriclevel = attacks[i]->getMetricLevel();
 			if (metriclevel <= 0) {
 				dissL0Q = true;
 				marking = 'N';
@@ -33372,7 +33372,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
 			if (!Convert::isNaN(tpitch)) {
 				if (tpitch <= lowestnote) {
-					lowestnote = tpitch;
+					lowestnote = (int)tpitch;
 				}
 			}
 		}
@@ -33499,7 +33499,7 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 		for (int v=0; v<(int)grid.getVoiceCount(); v++) {
 			tpitch = grid.cell(v, sliceindex)->getAbsDiatonicPitch();
 			if ((!Convert::isNaN(tpitch)) && (tpitch <= lowestnote)) {
-				lowestnote = tpitch;
+				lowestnote = (int)tpitch;
 			}
 		}
 
@@ -49296,8 +49296,8 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 							(infile.token(row, col)->find(';') != string::npos)) {
 					HumNum tenordur;
 					HumNum bassdur;
-					tenordur = Convert::recipToDuration(infile.token(row, cols[0])).getFloat();
-					bassdur  = Convert::recipToDuration(infile.token(row, cols[1])).getFloat();
+					tenordur = Convert::recipToDuration(infile.token(row, cols[0]));
+					bassdur  = Convert::recipToDuration(infile.token(row, cols[1]));
 					if (tenordur == bassdur) {
 						hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata
 						// hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata

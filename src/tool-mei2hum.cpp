@@ -16,10 +16,10 @@
 #include "Convert.h"
 
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 
 #include <algorithm>
+#include <cctype>
 
 using namespace std;
 using namespace pugi;

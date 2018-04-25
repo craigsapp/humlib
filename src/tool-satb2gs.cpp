@@ -368,8 +368,8 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 							(infile.token(row, col)->find(';') != string::npos)) {
 					HumNum tenordur;
 					HumNum bassdur;
-					tenordur = Convert::recipToDuration(infile.token(row, cols[0])).getFloat();
-					bassdur  = Convert::recipToDuration(infile.token(row, cols[1])).getFloat();
+					tenordur = Convert::recipToDuration(infile.token(row, cols[0]));
+					bassdur  = Convert::recipToDuration(infile.token(row, cols[1]));
 					if (tenordur == bassdur) {
 						hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata
 						// hre.replaceDestructive(strang, ";y", ";", "g"); // hide fermata
