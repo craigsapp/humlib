@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 11:01:35 PDT 2018
+// Last Modified: Wed Apr 25 11:13:49 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32999,8 +32999,8 @@ RECONSIDER:
 		double ointnn = opitchnn - opitchn;
 
 		// To distinguish between binary and ternary suspensions and agents
-		int    getMeterTop          (void);
-		HumNum getMeterBottom       (void);
+		// int    getMeterTop          (void);
+		// HumNum getMeterBottom       (void);
 
 		// Assign time signature ints here:
 		refMeterNum = attacks[i]->getMeterTop();
@@ -42014,8 +42014,7 @@ string Tool_mei2hum::cleanReferenceRecordText(const string& input) {
 //
 // &#xE1D5; == quarter note
 //
-
-#define SMUFL_QUARTER_NOTE "\ue1d5"
+// #define SMUFL_QUARTER_NOTE "\ue1d5"
 
 void Tool_mei2hum::parseTempo(xml_node tempo, HumNum starttime) {
 	NODE_VERIFY(tempo, )
@@ -42076,7 +42075,10 @@ void Tool_mei2hum::parseTempo(xml_node tempo, HumNum starttime) {
 
 		}
 		HumRegex hre;
-		if (hre.search(text, SMUFL_QUARTER_NOTE "\\s*=\\s*(\\d+\\.?\\d*)")) {
+		// #define SMUFL_QUARTER_NOTE "\ue1d5"
+		// if (hre.search(text, SMUFL_QUARTER_NOTE "\\s*=\\s*(\\d+\\.?\\d*)")) {
+		if (hre.search(text, "\\s*=\\s*(\\d+\\.?\\d*)")) {
+			// assuming quarter note for now.
 			value = hre.getMatchDouble(1);
 			found = true;
 		}

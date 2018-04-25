@@ -3665,8 +3665,7 @@ string Tool_mei2hum::cleanReferenceRecordText(const string& input) {
 //
 // &#xE1D5; == quarter note
 //
-
-#define SMUFL_QUARTER_NOTE "\ue1d5"
+// #define SMUFL_QUARTER_NOTE "\ue1d5"
 
 void Tool_mei2hum::parseTempo(xml_node tempo, HumNum starttime) {
 	NODE_VERIFY(tempo, )
@@ -3727,7 +3726,10 @@ void Tool_mei2hum::parseTempo(xml_node tempo, HumNum starttime) {
 
 		}
 		HumRegex hre;
-		if (hre.search(text, SMUFL_QUARTER_NOTE "\\s*=\\s*(\\d+\\.?\\d*)")) {
+		// #define SMUFL_QUARTER_NOTE "\ue1d5"
+		// if (hre.search(text, SMUFL_QUARTER_NOTE "\\s*=\\s*(\\d+\\.?\\d*)")) {
+		if (hre.search(text, "\\s*=\\s*(\\d+\\.?\\d*)")) {
+			// assuming quarter note for now.
 			value = hre.getMatchDouble(1);
 			found = true;
 		}

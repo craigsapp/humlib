@@ -1245,8 +1245,8 @@ RECONSIDER:
 		double ointnn = opitchnn - opitchn;
 
 		// To distinguish between binary and ternary suspensions and agents
-		int    getMeterTop          (void);
-		HumNum getMeterBottom       (void);
+		// int    getMeterTop          (void);
+		// HumNum getMeterBottom       (void);
 
 		// Assign time signature ints here:
 		refMeterNum = attacks[i]->getMeterTop();
