@@ -86,7 +86,7 @@ void HumRegex::setIgnoreCase(void) {
 //
 
 bool HumRegex::getIgnoreCase(void) {
-	return m_regexflags & std::regex_constants::icase;
+	return (m_regexflags & std::regex_constants::icase) ? true : false;
 }
 
 

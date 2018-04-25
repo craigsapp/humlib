@@ -1012,7 +1012,7 @@ void Options::xverify(int argc, char** argv, int error_check, int suppress) {
 
 
 void Options::xverify(int error_check, int suppress) {
-	m_options_error_checkQ = error_check;
+	m_options_error_checkQ = error_check ? true : false;
 	m_suppressQ = suppress ? true : false;
 
 

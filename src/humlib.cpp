@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 11:50:24 PDT 2018
+// Last Modified: Wed Apr 25 12:08:23 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10843,7 +10843,7 @@ void HumRegex::setIgnoreCase(void) {
 //
 
 bool HumRegex::getIgnoreCase(void) {
-	return m_regexflags & std::regex_constants::icase;
+	return (m_regexflags & std::regex_constants::icase) ? true : false;
 }
 
 
@@ -11422,7 +11422,7 @@ ostream& HumTool::getHumdrumText(ostream& out) {
 //
 
 bool HumTool::hasFreeText(void) {
-	return m_free_text.rdbuf()->in_avail();
+	return m_free_text.rdbuf()->in_avail() ? true : false;
 }
 
 
@@ -11486,7 +11486,7 @@ ostream& HumTool::getJsonText(ostream& out) {
 //
 
 bool HumTool::hasWarning(void) {
-	return m_warning_text.rdbuf()->in_avail();
+	return m_warning_text.rdbuf()->in_avail() ? true : false;
 }
 
 
@@ -13115,15 +13115,15 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 
 void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 		int track, int options) {
-	bool primaryQ   = bool(options & OPT_PRIMARY);
-	bool nonullQ    = bool(options & OPT_NONULL);
-	bool noemptyQ   = bool(options & OPT_NOEMPTY);
-	bool nointerpQ  = bool(options & OPT_NOINTERP);
-	bool nomanipQ   = bool(options & OPT_NOMANIP);
-	bool nocommentQ = bool(options & OPT_NOCOMMENT);
-	bool noglobalQ  = bool(options & OPT_NOGLOBAL);
-	bool norestQ    = bool(options & OPT_NOREST);
-	bool notieQ     = bool(options & OPT_NOTIE);
+	bool primaryQ   = (options & OPT_PRIMARY) ? true : false;
+	bool nonullQ    = (options & OPT_NONULL) ? true : false;
+	bool noemptyQ   = (options & OPT_NOEMPTY) ? true : false;
+	bool nointerpQ  = (options & OPT_NOINTERP) ? true : false;
+	bool nomanipQ   = (options & OPT_NOMANIP) ? true : false;
+	bool nocommentQ = (options & OPT_NOCOMMENT) ? true : false;
+	bool noglobalQ  = (options & OPT_NOGLOBAL) ? true : false;
+	bool norestQ    = (options & OPT_NOREST) ? true : false;
+	bool notieQ     = (options & OPT_NOTIE) ? true : false;
 
 	vector<vector<HTp> >& output = sequence;
 	output.reserve(getLineCount());
@@ -26664,7 +26664,7 @@ void Options::xverify(int argc, char** argv, int error_check, int suppress) {
 
 
 void Options::xverify(int error_check, int suppress) {
-	m_options_error_checkQ = error_check;
+	m_options_error_checkQ = error_check ? true : false;
 	m_suppressQ = suppress ? true : false;
 
 
@@ -29159,7 +29159,7 @@ bool Tool_cint::run(const string& indata, ostream& out) {
 
 
 bool Tool_cint::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 
 	if (hasAnyText()) {
 		getAllText(out);
@@ -35846,7 +35846,7 @@ bool Tool_extract::run(const string& indata, ostream& out) {
 
 
 bool Tool_extract::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -37997,7 +37997,7 @@ bool Tool_imitation::run(const string& indata, ostream& out) {
 
 
 bool Tool_imitation::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -42273,7 +42273,7 @@ bool Tool_metlev::run(const string& indata, ostream& out) {
 
 
 bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	out << infile;
 	return status;
 }
@@ -42475,7 +42475,7 @@ bool Tool_msearch::run(const string& indata, ostream& out) {
 
 
 bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -48651,7 +48651,7 @@ bool Tool_recip::run(const string& indata, ostream& out) {
 
 
 bool Tool_recip::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	out << infile;
 	return status;
 }
@@ -48861,7 +48861,7 @@ bool Tool_ruthfix::run(const string& indata, ostream& out) {
 
 
 bool Tool_ruthfix::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {

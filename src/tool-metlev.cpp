@@ -57,7 +57,7 @@ bool Tool_metlev::run(const string& indata, ostream& out) {
 
 
 bool Tool_metlev::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	out << infile;
 	return status;
 }

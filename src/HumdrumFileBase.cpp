@@ -1011,15 +1011,15 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 
 void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 		int track, int options) {
-	bool primaryQ   = bool(options & OPT_PRIMARY);
-	bool nonullQ    = bool(options & OPT_NONULL);
-	bool noemptyQ   = bool(options & OPT_NOEMPTY);
-	bool nointerpQ  = bool(options & OPT_NOINTERP);
-	bool nomanipQ   = bool(options & OPT_NOMANIP);
-	bool nocommentQ = bool(options & OPT_NOCOMMENT);
-	bool noglobalQ  = bool(options & OPT_NOGLOBAL);
-	bool norestQ    = bool(options & OPT_NOREST);
-	bool notieQ     = bool(options & OPT_NOTIE);
+	bool primaryQ   = (options & OPT_PRIMARY) ? true : false;
+	bool nonullQ    = (options & OPT_NONULL) ? true : false;
+	bool noemptyQ   = (options & OPT_NOEMPTY) ? true : false;
+	bool nointerpQ  = (options & OPT_NOINTERP) ? true : false;
+	bool nomanipQ   = (options & OPT_NOMANIP) ? true : false;
+	bool nocommentQ = (options & OPT_NOCOMMENT) ? true : false;
+	bool noglobalQ  = (options & OPT_NOGLOBAL) ? true : false;
+	bool norestQ    = (options & OPT_NOREST) ? true : false;
+	bool notieQ     = (options & OPT_NOTIE) ? true : false;
 
 	vector<vector<HTp> >& output = sequence;
 	output.reserve(getLineCount());

@@ -117,7 +117,7 @@ ostream& HumTool::getHumdrumText(ostream& out) {
 //
 
 bool HumTool::hasFreeText(void) {
-	return m_free_text.rdbuf()->in_avail();
+	return m_free_text.rdbuf()->in_avail() ? true : false;
 }
 
 
@@ -181,7 +181,7 @@ ostream& HumTool::getJsonText(ostream& out) {
 //
 
 bool HumTool::hasWarning(void) {
-	return m_warning_text.rdbuf()->in_avail();
+	return m_warning_text.rdbuf()->in_avail() ? true : false;
 }
 
 
