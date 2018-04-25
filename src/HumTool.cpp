@@ -149,7 +149,7 @@ ostream& HumTool::getFreeText(ostream& out) {
 //
 
 bool HumTool::hasJsonText(void) {
-	return m_json_text.rdbuf()->in_avail();
+	return m_json_text.rdbuf()->in_avail() ? true : false;
 }
 
 
@@ -217,7 +217,7 @@ bool HumTool::hasError(void) {
 	if (hasParseError()) {
 		return true;
 	}
-	return m_error_text.rdbuf()->in_avail();
+	return m_error_text.rdbuf()->in_avail() ? true : false;
 }
 
 

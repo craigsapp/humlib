@@ -59,7 +59,7 @@ Tool_autostem::Tool_autostem(void) {
 
 bool Tool_autostem::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
-	int status = run(infile, out);
+	bool status = run(infile, out);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -70,7 +70,7 @@ bool Tool_autostem::run(const string& indata, ostream& out) {
 
 
 bool Tool_autostem::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {

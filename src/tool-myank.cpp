@@ -72,7 +72,7 @@ bool Tool_myank::run(const string& indata, ostream& out) {
 
 
 bool Tool_myank::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
