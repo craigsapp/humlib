@@ -39,6 +39,7 @@ enum class SliceType {
 				Tempos,
 				Labels,
 				LabelAbbrs,
+				Ottavas,
 			_RegularInterpretation,
 				Exclusives,
 				Terminators,

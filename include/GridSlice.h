@@ -61,6 +61,7 @@ class GridSlice : public vector<GridPart*> {
 		bool isGlobalComment(void)    { return m_type == SliceType::GlobalComments;   }
 		bool isGlobalLayout(void)     { return m_type == SliceType::GlobalLayouts;    }
 		bool isReferenceRecord(void)  { return m_type == SliceType::ReferenceRecords; }
+		bool isOttavaRecord(void)     { return m_type == SliceType::Ottavas; }
 		bool isInterpretationSlice(void);
 		bool isDataSlice(void);
 		bool hasSpines(void);

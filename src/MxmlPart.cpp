@@ -457,7 +457,7 @@ void MxmlPart::trackStaffVoices(int staffnum, int voicenum) {
 
 //////////////////////////////
 //
-// MxmlPart::prepareVoiceIndex -- Takes the histogram of staff/voice
+// MxmlPart::prepareVoiceMapping -- Takes the histogram of staff/voice
 //    pairings and create a list of new voice indexes for each
 //    staff.  In Finale & Sibelius, four voices are hardwired to each
 //    staff: staff1 {1, 2, 3, 4}, staff2 {5, 6, 7, 8}.  But some
