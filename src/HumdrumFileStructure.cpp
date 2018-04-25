@@ -441,7 +441,7 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 
 HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return NULL;
@@ -479,7 +479,7 @@ int HumdrumFileStructure::getBarlineCount(void) const {
 
 HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
@@ -507,7 +507,7 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
@@ -528,7 +528,7 @@ HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;

@@ -176,7 +176,7 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 		}
 		if ((!inquote) && (newcsv.substr(i, separator.size()) == separator)) {
 			output += '\t';
-			i += separator.size() - 1;
+			i += (int)separator.size() - 1;
 			continue;
 		}
 		output += newcsv[i];

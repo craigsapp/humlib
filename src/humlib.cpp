@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 25 11:13:49 PDT 2018
+// Last Modified: Wed Apr 25 11:34:37 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -8703,7 +8703,7 @@ int HumHash::getParameterCount(const string& ns) const {
 	}
 	int sum = 0;
 	for (auto& it2 : it1->second) {
-		sum += it2.second.size();
+		sum += (int)it2.second.size();
 	}
 	return sum;
 }
@@ -8719,7 +8719,7 @@ int HumHash::getParameterCount(void) const {
 	int sum = 0;
 	for (auto& it1 : (*parameters)) {
 		for (auto& it2 : it1.second) {
-			sum += it2.second.size();
+			sum += (int)it2.second.size();
 		}
 	}
 	return sum;
@@ -15969,7 +15969,7 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 
 HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return NULL;
@@ -16007,7 +16007,7 @@ int HumdrumFileStructure::getBarlineCount(void) const {
 
 HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
@@ -16035,7 +16035,7 @@ HumNum HumdrumFileStructure::getBarlineDuration(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
@@ -16056,7 +16056,7 @@ HumNum HumdrumFileStructure::getBarlineDurationFromStart(int index) const {
 
 HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 	if (index < 0) {
-		index += m_barlines.size();
+		index += (int)m_barlines.size();
 	}
 	if (index < 0) {
 		return 0;
@@ -17194,7 +17194,7 @@ void HumdrumLine::setLineFromCsv(const string& csv, const string& separator) {
 		}
 		if ((!inquote) && (newcsv.substr(i, separator.size()) == separator)) {
 			output += '\t';
-			i += separator.size() - 1;
+			i += (int)separator.size() - 1;
 			continue;
 		}
 		output += newcsv[i];
@@ -19023,7 +19023,7 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 	if (index < 0) {
-		index += m_nextNonNullTokens.size();
+		index += (int)m_nextNonNullTokens.size();
 	}
 	if (index < 0) {
 		return NULL;
@@ -25820,7 +25820,7 @@ string Option_register::getModified(void) {
 //    set on the command-line.
 //
 
-int Option_register::isModified(void) {
+bool Option_register::isModified(void) {
 	return m_modifiedQ;
 }
 
@@ -26236,7 +26236,7 @@ vector<string>& Options::getArgumentList(vector<string>& output) {
 //	used on the command line.
 //
 
-int Options::getBoolean(const string& optionName) {
+bool Options::getBoolean(const string& optionName) {
 	int index = getRegIndex(optionName);
 	if (index < 0) {
 		return 0;
@@ -37792,7 +37792,7 @@ bool Tool_hproof::run(const string& indata, ostream& out) {
 
 
 bool Tool_hproof::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	out << infile;
 	return status;
 }
@@ -48046,7 +48046,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	value = hre.search(ostring, "^([^,]+,?)");
 	while (value != 0) {
 		start += value - 1;
-		start += hre.getMatch(1).size();
+		start += (int)hre.getMatch(1).size();
 		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
 			 measurein, inmap);
 		value = hre.search(ostring.c_str() + start, "^([^,]+,?)");

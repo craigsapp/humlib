@@ -1727,7 +1727,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	value = hre.search(ostring, "^([^,]+,?)");
 	while (value != 0) {
 		start += value - 1;
-		start += hre.getMatch(1).size();
+		start += (int)hre.getMatch(1).size();
 		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
 			 measurein, inmap);
 		value = hre.search(ostring.c_str() + start, "^([^,]+,?)");

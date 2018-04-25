@@ -44,7 +44,7 @@ class Option_register {
 		string   getOption          (void);
 		string   getModified        (void);
 		string   getDescription     (void);
-		int      isModified         (void);
+		bool     isModified         (void);
 		char     getType            (void);
 		void     reset              (void);
 		void     setDefault         (const string& aString);
@@ -83,7 +83,7 @@ class Options {
 		int             getArgumentCount  (void);
 		vector<string>& getArgList        (vector<string>& output);
 		vector<string>& getArgumentList   (vector<string>& output);
-		int             getBoolean        (const string& optionName);
+		bool            getBoolean        (const string& optionName);
 		string          getCommand        (void);
 		string          getCommandLine    (void);
 		string          getDefinition     (const string& optionName);

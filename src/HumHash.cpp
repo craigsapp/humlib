@@ -817,7 +817,7 @@ int HumHash::getParameterCount(const string& ns) const {
 	}
 	int sum = 0;
 	for (auto& it2 : it1->second) {
-		sum += it2.second.size();
+		sum += (int)it2.second.size();
 	}
 	return sum;
 }
@@ -833,7 +833,7 @@ int HumHash::getParameterCount(void) const {
 	int sum = 0;
 	for (auto& it1 : (*parameters)) {
 		for (auto& it2 : it1.second) {
-			sum += it2.second.size();
+			sum += (int)it2.second.size();
 		}
 	}
 	return sum;

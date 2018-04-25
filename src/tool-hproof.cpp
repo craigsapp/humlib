@@ -44,7 +44,7 @@ bool Tool_hproof::run(const string& indata, ostream& out) {
 
 
 bool Tool_hproof::run(HumdrumFile& infile, ostream& out) {
-	int status = run(infile);
+	bool status = run(infile);
 	out << infile;
 	return status;
 }

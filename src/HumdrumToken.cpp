@@ -292,7 +292,7 @@ int HumdrumToken::getNextNonNullDataTokenCount(void) {
 
 HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 	if (index < 0) {
-		index += m_nextNonNullTokens.size();
+		index += (int)m_nextNonNullTokens.size();
 	}
 	if (index < 0) {
 		return NULL;

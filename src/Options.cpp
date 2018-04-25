@@ -168,7 +168,7 @@ string Option_register::getModified(void) {
 //    set on the command-line.
 //
 
-int Option_register::isModified(void) {
+bool Option_register::isModified(void) {
 	return m_modifiedQ;
 }
 
@@ -584,7 +584,7 @@ vector<string>& Options::getArgumentList(vector<string>& output) {
 //	used on the command line.
 //
 
-int Options::getBoolean(const string& optionName) {
+bool Options::getBoolean(const string& optionName) {
 	int index = getRegIndex(optionName);
 	if (index < 0) {
 		return 0;
