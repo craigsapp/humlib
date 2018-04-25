@@ -102,7 +102,7 @@ set(SRCS
 	src/tool-satb2gs.cpp
 	src/tool-tassoize.cpp
 	src/tool-transpose.cpp
-	src/pugi.cpp
+	src/pugixml.cpp
 )
 
 set(HDRS
@@ -161,7 +161,7 @@ set(HDRS
 	include/tool-transpose.h
 )
 
-add_library(midifile STATIC ${SRCS} ${HDRS})
+add_library(humlib STATIC ${SRCS} ${HDRS})
 
 ##############################
 ##
@@ -170,5 +170,5 @@ add_library(midifile STATIC ${SRCS} ${HDRS})
 
 #add_executable(80off src-programs/80off.cpp)
 
-# target_link_libraries(80off midifile)
+# target_link_libraries(80off humlib)
 
