@@ -1,6 +1,9 @@
 humlib
 ==========
 
+[![Travis Build Status](https://travis-ci.org/craigsapp/humlib.svg?branch=master)](https://travis-ci.org/craigsapp/humlib) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/e08c7i6tl17j3ip2?svg=true)](https://ci.appveyor.com/project/craigsapp/humlib)
+
+
 The humlib library consists of a set of C++ classes for parsing
 [Humdrum](http://www.humdrum.org) data files.  The library is designed
 to be portable with only two code files to copy into your project:
