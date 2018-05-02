@@ -52,6 +52,7 @@ INCDIR_MIN    = include
 LIBDIR        = lib
 LIBFILE       = libhumdrum.a
 LIBFILE_MIN   = libhumlib.a
+DYLIBFILE     = libhumlib.dylib
 LIBFILE_PUGI  = libpugixml.a
 
 DLIBFILE      = libhumdrum.a
@@ -130,6 +131,7 @@ minlibrary: makedirs min humlib.o
 	@-rm -f $(LIBDIR)/$(LIBFILE_MIN)
 	@$(AR) r $(LIBDIR)/$(LIBFILE_MIN) $(OBJDIR)/humlib.o
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE_MIN)
+	@$(COMPILER) -dynamiclib -o $(LIBDIR)/$(DYLIBFILE) $(OBJDIR)/humlib.o $(OBJDIR)/pugixml.o
 
 
 lib: makedirs $(OBJS)
