@@ -1029,6 +1029,9 @@ bool HumdrumToken::hasRhythm(void) const {
 	if (type == "**recip") {
 		return true;
 	}
+	if (type == "**mens") {
+		return true;
+	}
 	return false;
 }
 

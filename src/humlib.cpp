@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  4 21:25:52 PDT 2018
+// Last Modified: Fri May  4 22:23:01 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -962,7 +962,7 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 	HumNum output(0);
    bool perfect = false;
    bool imperfect = true;
-	for (int i=0; i<mensdata.size(); i++) {
+	for (int i=0; i<(int)mensdata.size(); i++) {
 		if (mensdata[i] == 'p') {
 			perfect = true;
 			imperfect = false;
@@ -19914,6 +19914,9 @@ bool HumdrumToken::hasRhythm(void) const {
 		return true;
 	}
 	if (type == "**recip") {
+		return true;
+	}
+	if (type == "**mens") {
 		return true;
 	}
 	return false;
