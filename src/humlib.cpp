@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  4 22:23:01 PDT 2018
+// Last Modified: Fri May  4 23:06:16 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -995,6 +995,8 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 		output *= 3;
 		output /= 2;
 	}
+
+	output *= scale;
 
 	return output;
 }
@@ -16227,8 +16229,8 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::analyzeRhythm -- Analyze the rhythmic structure of the
-//     data.  Returns false if there was a parse error.
+// HumdrumFileStructure::analyzeRhythm -- Analyze the rhythmic structure
+//     of the data.  Returns false if there was a parse error.
 //
 
 bool HumdrumFileStructure::analyzeRhythm(void) {
@@ -16260,8 +16262,8 @@ bool HumdrumFileStructure::analyzeRhythm(void) {
 		}
 	}
 
-	// Go back and analyze spines which do not start at the beginning
-	// of the data stream.
+	// Go back and analyze spines that do not start at the
+	// beginning of the data stream.
 	for (i=1; i<=getMaxTrack(); i++) {
 		if (!getTrackStart(i)->hasRhythm()) {
 			// Can't analyze rhythm of spines that do not have rhythm.
@@ -19265,6 +19267,19 @@ bool HumdrumToken::isKern(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isMens -- Returns true if the data type of the token
+//    is **mens.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isMens(void) const {
+	return isDataType("**mens");
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSpineInfo -- Sets the spine manipulation history string.
 // @SEEALTO: getSpineInfo
 //
@@ -19600,10 +19615,14 @@ bool HumdrumToken::analyzeDuration(string& err) {
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
-				if (strchr(this->c_str(), 'q') != NULL) {
-					m_duration = 0;
-				} else {
-					m_duration = Convert::recipToDuration((string)(*this));
+				if (isKern()) {
+					if (strchr(this->c_str(), 'q') != NULL) {
+						m_duration = 0;
+					} else {
+						m_duration = Convert::recipToDuration((string)(*this));
+					}
+				} else if (isMens()) {
+					m_duration = Convert::mensToDuration((string)(*this));
 				}
 			} else {
 				m_duration.setValue(-1);
@@ -19611,6 +19630,7 @@ bool HumdrumToken::analyzeDuration(string& err) {
 		} else {
 			m_duration.setValue(-1);
 		}
+
 	} else {
 		m_duration.setValue(-1);
 	}

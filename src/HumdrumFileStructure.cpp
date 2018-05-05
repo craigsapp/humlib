@@ -543,8 +543,8 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::analyzeRhythm -- Analyze the rhythmic structure of the
-//     data.  Returns false if there was a parse error.
+// HumdrumFileStructure::analyzeRhythm -- Analyze the rhythmic structure
+//     of the data.  Returns false if there was a parse error.
 //
 
 bool HumdrumFileStructure::analyzeRhythm(void) {
@@ -576,8 +576,8 @@ bool HumdrumFileStructure::analyzeRhythm(void) {
 		}
 	}
 
-	// Go back and analyze spines which do not start at the beginning
-	// of the data stream.
+	// Go back and analyze spines that do not start at the
+	// beginning of the data stream.
 	for (i=1; i<=getMaxTrack(); i++) {
 		if (!getTrackStart(i)->hasRhythm()) {
 			// Can't analyze rhythm of spines that do not have rhythm.

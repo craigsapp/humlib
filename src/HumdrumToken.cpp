@@ -378,6 +378,19 @@ bool HumdrumToken::isKern(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isMens -- Returns true if the data type of the token
+//    is **mens.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isMens(void) const {
+	return isDataType("**mens");
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSpineInfo -- Sets the spine manipulation history string.
 // @SEEALTO: getSpineInfo
 //
@@ -713,10 +726,14 @@ bool HumdrumToken::analyzeDuration(string& err) {
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
-				if (strchr(this->c_str(), 'q') != NULL) {
-					m_duration = 0;
-				} else {
-					m_duration = Convert::recipToDuration((string)(*this));
+				if (isKern()) {
+					if (strchr(this->c_str(), 'q') != NULL) {
+						m_duration = 0;
+					} else {
+						m_duration = Convert::recipToDuration((string)(*this));
+					}
+				} else if (isMens()) {
+					m_duration = Convert::mensToDuration((string)(*this));
 				}
 			} else {
 				m_duration.setValue(-1);
@@ -724,6 +741,7 @@ bool HumdrumToken::analyzeDuration(string& err) {
 		} else {
 			m_duration.setValue(-1);
 		}
+
 	} else {
 		m_duration.setValue(-1);
 	}

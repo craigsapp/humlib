@@ -144,6 +144,7 @@ class HumdrumToken : public string, public HumHash {
 		const string& getDataType          (void) const;
 		bool     isDataType                (string dtype) const;
 		bool     isKern                    (void) const;
+		bool     isMens                    (void) const;
 		string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
