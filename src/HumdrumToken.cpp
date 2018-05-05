@@ -1096,10 +1096,16 @@ bool HumdrumToken::equalTo(const string& pattern) {
 //
 
 bool HumdrumToken::isRest(void) {
-	if (isDataType("**kern")) {
+	if (isKern()) {
 		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isKernRest((string)(*this))) {
+			return true;
+		}
+	} else if (isMens()) {
+		if (isNull() && Convert::isMensRest((string)(*resolveNull()))) {
+			return true;
+		} else if (Convert::isMensRest((string)(*this))) {
 			return true;
 		}
 	}
@@ -1115,8 +1121,12 @@ bool HumdrumToken::isRest(void) {
 //
 
 bool HumdrumToken::isNote(void) {
-	if (isDataType("**kern")) {
+	if (isKern()) {
 		if (Convert::isKernNote((string)(*this))) {
+			return true;
+		}
+	} else if (isMens()) {
+		if (Convert::isMensNote((string)(*this))) {
 			return true;
 		}
 	}

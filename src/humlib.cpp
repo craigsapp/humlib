@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  4 23:06:16 PDT 2018
+// Last Modified: Fri May  4 23:29:27 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -975,14 +975,14 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 		// units are in whole notes, but scaling will probably
 		// convert to quarter notes (default
 		switch (mensdata[i]) {
-			case 'X': output = 8; break;
-			case 'L': output = 4; break;
-			case 'S': output = 2; break;
-			case 's': output = 1; break;
-			case 'M': output.setValue(1, 2); break;
-			case 'm': output.setValue(1, 4); break;
-			case 'U': output.setValue(1, 8); break;
-			case 'u': output.setValue(1, 16); break;
+			case 'X': output = 8; break;              // octuple whole note
+			case 'L': output = 4; break;              // quadruple whole note
+			case 'S': output = 2; break;              // double whole note
+			case 's': output = 1; break;              // whole note
+			case 'M': output.setValue(1, 2);  break;  // half note
+			case 'm': output.setValue(1, 4);  break;  // quarter note
+			case 'U': output.setValue(1, 8);  break;  // eighth note
+			case 'u': output.setValue(1, 16); break;  // sixteenth note
 		}
 
 		if (mensdata.compare(i, separator.size(), separator) == 0) {
@@ -19985,10 +19985,16 @@ bool HumdrumToken::equalTo(const string& pattern) {
 //
 
 bool HumdrumToken::isRest(void) {
-	if (isDataType("**kern")) {
+	if (isKern()) {
 		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isKernRest((string)(*this))) {
+			return true;
+		}
+	} else if (isMens()) {
+		if (isNull() && Convert::isMensRest((string)(*resolveNull()))) {
+			return true;
+		} else if (Convert::isMensRest((string)(*this))) {
 			return true;
 		}
 	}
@@ -20004,8 +20010,12 @@ bool HumdrumToken::isRest(void) {
 //
 
 bool HumdrumToken::isNote(void) {
-	if (isDataType("**kern")) {
+	if (isKern()) {
 		if (Convert::isKernNote((string)(*this))) {
+			return true;
+		}
+	} else if (isMens()) {
+		if (Convert::isMensNote((string)(*this))) {
 			return true;
 		}
 	}
