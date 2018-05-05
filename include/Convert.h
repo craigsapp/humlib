@@ -115,6 +115,20 @@ class Convert {
 		static int     base7ToBase40        (int base7);
 		static int     base40IntervalToDiatonic(int base40interval);
 
+
+		// **mens, white mensual notation, defiend in Convert-mens.cpp
+		static bool    isMensRest           (const string& mensdata);
+		static bool    isMensNote           (const string& mensdata);
+		static bool    hasLigatureStart     (const string& mensdata);
+		static bool    hasLigatureEnd       (const string& mensdata);
+		static bool    getMensStemDirection (const string& mensdata);
+		static HumNum  mensToDuration       (const string& mensdata,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
+		static string  mensToRecip          (const string& mensdata,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
+
 		// Harmony processing, defined in Convert-harmony.cpp
 		static vector<int> minorHScaleBase40(void);
 		static vector<int> majorScaleBase40 (void);
