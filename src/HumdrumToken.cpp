@@ -1420,6 +1420,36 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 
 //////////////////////////////
 //
+// HumdrumToken::hasLigatureBegin --
+//
+
+bool HumdrumToken::hasLigatureBegin(void) {
+	if (isMens()) {
+		return Convert::hasLigatureBegin(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasLigatureBegin --
+//
+
+bool HumdrumToken::hasLigatureEnd(void) {
+	if (isMens()) {
+		return Convert::hasLigatureEnd(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isSecondaryTiedNote -- Returns true if the token
 //     is a (kern) note (possessing a pitch) and has '_' or ']' characters.
 //

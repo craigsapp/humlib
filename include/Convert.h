@@ -119,7 +119,7 @@ class Convert {
 		// **mens, white mensual notation, defiend in Convert-mens.cpp
 		static bool    isMensRest           (const string& mensdata);
 		static bool    isMensNote           (const string& mensdata);
-		static bool    hasLigatureStart     (const string& mensdata);
+		static bool    hasLigatureBegin     (const string& mensdata);
 		static bool    hasLigatureEnd       (const string& mensdata);
 		static bool    getMensStemDirection (const string& mensdata);
 		static HumNum  mensToDuration       (const string& mensdata,

@@ -105,6 +105,8 @@ class HumdrumToken : public string, public HumHash {
 		bool     hasSlurEnd                (void);
 		int      hasVisibleAccidental      (int subtokenIndex) const;
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
+		bool     hasLigatureBegin          (void);
+		bool     hasLigatureEnd            (void);
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
