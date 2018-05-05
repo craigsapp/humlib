@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  4 23:29:26 PDT 2018
+// Last Modified: Sat May  5 00:28:09 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2518,6 +2518,9 @@ class Convert {
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
 		static string  mensToRecip          (const string& mensdata,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
+		static HumNum  mensToDurationNoDots(const string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
 

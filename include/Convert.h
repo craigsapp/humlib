@@ -128,6 +128,9 @@ class Convert {
 		static string  mensToRecip          (const string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const string& separator = " ");
+		static HumNum  mensToDurationNoDots(const string& mensdata,
+		                                     HumNum scale = 4,
+		                                     const string& separator = " ");
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static vector<int> minorHScaleBase40(void);
