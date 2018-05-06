@@ -40,6 +40,7 @@ class Tool_kern2mens : public HumTool {
 		bool     m_numbersQ   = true;      // used with -N option
 		bool     m_measuresQ  = true;      // used with -M option
 		bool     m_invisibleQ = true;      // used with -I option
+		bool     m_doublebarQ = true;      // used with -D option
 		string   m_clef;                   // used with -c option
 
 };
