@@ -202,6 +202,7 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 	}
 	if ((index < 0) || (index >= (int)m_lines.size())) {
 		cerr << "Error: invalid index: " << index << endl;
+		cerr << "Max index is " << m_lines.size() - 1 << endl;
 		index = (int)m_lines.size()-1;
 	}
 	return *m_lines[index];
