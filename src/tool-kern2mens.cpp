@@ -76,6 +76,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isBarline()) {
+			printBarline(infile, i);
 			continue;
 		}
 		if (!infile[i].hasSpines()) {
@@ -140,6 +141,52 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 	return data;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::printBarline --
+//
+
+void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
+	int dataline = line+1;
+	while (dataline < infile.getLineCount()) {
+		if (infile[dataline].isData()) {
+			break;
+		}
+		dataline++;
+	}
+	if (!infile[dataline].isData()) {
+		return;
+	}
+	int attacks = true;
+	for (int j=0; j<infile[dataline].getFieldCount(); j++) {
+		HTp token = infile.token(dataline, j);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isSecondaryTiedNote()) {
+			attacks = false;
+			break;
+		}
+	}
+	if (!attacks) {
+		return;
+	}
+
+	for (int j=0; j<infile[line].getFieldCount(); j++) {
+		HTp token = infile.token(line, j);
+		if (token->find("-") != std::string::npos) {
+			m_humdrum_text << token;
+		} else {
+			m_humdrum_text << token << "-";
+		}
+		if (j < infile[line].getFieldCount() - 1) {
+			m_humdrum_text << "\t";
+		}
+	}
+	m_humdrum_text << "\n";
+}
 
 
 // END_MERGE

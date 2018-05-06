@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May  5 23:49:10 PDT 2018
+// Last Modified: Sun May  6 00:31:08 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4421,6 +4421,7 @@ class Tool_kern2mens : public HumTool {
 	protected:
 		void     convertToMens            (HumdrumFile& infile);
 		string   convertKernTokenToMens   (HTp token);
+		void     printBarline             (HumdrumFile& infile, int line);
 
 };
 

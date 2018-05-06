@@ -34,6 +34,7 @@ class Tool_kern2mens : public HumTool {
 	protected:
 		void     convertToMens            (HumdrumFile& infile);
 		string   convertKernTokenToMens   (HTp token);
+		void     printBarline             (HumdrumFile& infile, int line);
 
 };
 
