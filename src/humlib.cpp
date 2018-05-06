@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun May  6 10:03:37 PDT 2018
+// Last Modified: Sun May  6 14:44:59 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -12496,6 +12496,7 @@ HumdrumLine& HumdrumFileBase::operator[](int index) {
 	}
 	if ((index < 0) || (index >= (int)m_lines.size())) {
 		cerr << "Error: invalid index: " << index << endl;
+		cerr << "Max index is " << m_lines.size() - 1 << endl;
 		index = (int)m_lines.size()-1;
 	}
 	return *m_lines[index];
@@ -38642,6 +38643,7 @@ Tool_kern2mens::Tool_kern2mens(void) {
 	define("N|no-measure-numbers=b", "remove measure numbers");
 	define("M|no-measures=b",        "remove measures ");
 	define("I|not-invisible=b",       "keep measures visible");
+	define("c|clef=s",                "clef to use in mensural notation");
 }
 
 
@@ -38678,6 +38680,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_numbersQ   = !getBoolean("no-measure-numbers");
 	m_measuresQ  = !getBoolean("no-measures");
 	m_invisibleQ = !getBoolean("not-invisible");
+	m_clef       = getString("clef");
 	convertToMens(infile);
 	return true;
 }
@@ -38731,7 +38734,16 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 		return *token;
 	}
 	if (token->isExclusiveInterpretation()) {
-		return "**mens";;
+		return "**mens";
+	}
+	if (token->isInterpretation()) {
+		if (!m_clef.empty()) {
+			if (hre.search(token, "^\\*clef")) {
+				data = "*clef";
+				data += m_clef;
+				return data;
+			}
+		}
 	}
 	if (!token->isData()) {
 		return *token;
@@ -38779,6 +38791,9 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 			break;
 		}
 		dataline++;
+	}
+	if (dataline >= infile.getLineCount()) {
+		return;
 	}
 	if (!infile[dataline].isData()) {
 		return;

@@ -31,6 +31,7 @@ Tool_kern2mens::Tool_kern2mens(void) {
 	define("N|no-measure-numbers=b", "remove measure numbers");
 	define("M|no-measures=b",        "remove measures ");
 	define("I|not-invisible=b",       "keep measures visible");
+	define("c|clef=s",                "clef to use in mensural notation");
 }
 
 
@@ -67,6 +68,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_numbersQ   = !getBoolean("no-measure-numbers");
 	m_measuresQ  = !getBoolean("no-measures");
 	m_invisibleQ = !getBoolean("not-invisible");
+	m_clef       = getString("clef");
 	convertToMens(infile);
 	return true;
 }
@@ -120,7 +122,16 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 		return *token;
 	}
 	if (token->isExclusiveInterpretation()) {
-		return "**mens";;
+		return "**mens";
+	}
+	if (token->isInterpretation()) {
+		if (!m_clef.empty()) {
+			if (hre.search(token, "^\\*clef")) {
+				data = "*clef";
+				data += m_clef;
+				return data;
+			}
+		}
 	}
 	if (!token->isData()) {
 		return *token;
@@ -168,6 +179,9 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 			break;
 		}
 		dataline++;
+	}
+	if (dataline >= infile.getLineCount()) {
+		return;
 	}
 	if (!infile[dataline].isData()) {
 		return;
