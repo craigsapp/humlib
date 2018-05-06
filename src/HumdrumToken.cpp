@@ -800,13 +800,11 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
-	if ((*this).find("[") == string::npos) {
-		return output;
-	}
+
 	// start of a tied group so add the durations of the other notes.
    int b40 = Convert::kernToBase40(*this);
-	HumdrumToken *note = this;
-	HumdrumToken *nnote = NULL;
+	HTp note = this;
+	HTp nnote = NULL;
 	int tcount;
 	while (note) {
 		tcount = note->getNextNonNullDataTokenCount();
@@ -819,6 +817,10 @@ HumNum HumdrumToken::getTiedDuration(void) {
 		}
 		for (int i=0; i<getNextNonNullDataTokenCount(); i++) {
 			nnote = note->getNextNNDT();
+			if ((nnote->find("_") == std::string::npos) &&
+			   (nnote->find("]") == std::string::npos)) {
+				return output;
+			}
 			if (!nnote->isData())  {
 				continue;
 			}
@@ -826,9 +828,10 @@ HumNum HumdrumToken::getTiedDuration(void) {
 			if (pitch2 != b40) {
 				continue;
 			}
-			if (nnote->find("_")  != string::npos) {
+
+			if (nnote->find("_")  != std::string::npos) {
 				output += nnote->getDuration();
-			} else if (nnote->find("]") != string::npos) {
+			} else if (nnote->find("]") != std::string::npos) {
 				output += nnote->getDuration();
 				return output;
 			}

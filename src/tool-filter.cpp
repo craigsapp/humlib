@@ -16,19 +16,21 @@
 // tools which filter can process:
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
+#include "tool-binroll.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-hproof.h"
-#include "tool-binroll.h"
 #include "tool-imitation.h"
+#include "tool-kern2mens.h"
 #include "tool-metlev.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
 #include "tool-transpose.h"
+
 #include "HumRegex.h"
 
 #include <algorithm>
@@ -128,6 +130,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(msearch, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "kern2mens") {
+			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
