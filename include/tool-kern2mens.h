@@ -36,6 +36,11 @@ class Tool_kern2mens : public HumTool {
 		string   convertKernTokenToMens   (HTp token);
 		void     printBarline             (HumdrumFile& infile, int line);
 
+	private:
+		bool     m_numbersQ   = true;      // used with -N option
+		bool     m_measuresQ  = true;      // used with -M option
+		bool     m_invisibleQ = true;      // used with -I option
+
 };
 
 // END_MERGE

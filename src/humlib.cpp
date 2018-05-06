@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun May  6 00:31:08 PDT 2018
+// Last Modified: Sun May  6 10:03:37 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -38639,7 +38639,9 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 //
 
 Tool_kern2mens::Tool_kern2mens(void) {
-	// add options here
+	define("N|no-measure-numbers=b", "remove measure numbers");
+	define("M|no-measures=b",        "remove measures ");
+	define("I|not-invisible=b",       "keep measures visible");
 }
 
 
@@ -38673,6 +38675,9 @@ bool Tool_kern2mens::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_kern2mens::run(HumdrumFile& infile) {
+	m_numbersQ   = !getBoolean("no-measure-numbers");
+	m_measuresQ  = !getBoolean("no-measures");
+	m_invisibleQ = !getBoolean("not-invisible");
 	convertToMens(infile);
 	return true;
 }
@@ -38685,6 +38690,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 //
 
 void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
+	int maxtrack = infile.getMaxTrack();
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isBarline()) {
 			printBarline(infile, i);
@@ -38692,6 +38698,9 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 		}
 		if (!infile[i].hasSpines()) {
 			m_humdrum_text << infile[i] << "\n";
+			continue;
+		}
+		if ((maxtrack == 1) && infile[i].isAllNull()) {
 			continue;
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
@@ -38760,6 +38769,10 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 //
 
 void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
+	if (!m_measuresQ) {
+		return;
+	}
+	HumRegex hre;
 	int dataline = line+1;
 	while (dataline < infile.getLineCount()) {
 		if (infile[dataline].isData()) {
@@ -38786,11 +38799,18 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 	}
 
 	for (int j=0; j<infile[line].getFieldCount(); j++) {
-		HTp token = infile.token(line, j);
-		if (token->find("-") != std::string::npos) {
+		string token = *infile.token(line, j);
+		if (!m_numbersQ) {
+			hre.replaceDestructive(token, "", "\\d+");
+		}
+		if (token.find("-") != std::string::npos) {
 			m_humdrum_text << token;
 		} else {
-			m_humdrum_text << token << "-";
+			if (m_invisibleQ) {
+				m_humdrum_text << token << "-";
+			} else {
+				m_humdrum_text << token;
+			}
 		}
 		if (j < infile[line].getFieldCount() - 1) {
 			m_humdrum_text << "\t";
@@ -38798,6 +38818,7 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 	}
 	m_humdrum_text << "\n";
 }
+
 
 
 
