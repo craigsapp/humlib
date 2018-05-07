@@ -161,11 +161,17 @@ string Convert::durationToRecip(HumNum duration, HumNum scale) {
 	}
 	if (duration.getDenominator() == 1) {
 		if (duration.getNumerator() == 2) {
-			return "0";
+			return "0";  // breve
+		} else if (duration.getNumerator() == 3) {
+			return "0."; // dotted breve
 		} else if (duration.getNumerator() == 4) {
-			return "00";
+			return "00";  // long
+		} else if (duration.getNumerator() == 6) {
+			return "00."; // dotted long
 		} else if (duration.getNumerator() == 8) {
-			return "000";
+			return "000";  // maxima
+		} else if (duration.getNumerator() == 12) {
+			return "000."; // dotted maxima
 		}
 	}
 	if (duration.getNumerator() == 0) {
