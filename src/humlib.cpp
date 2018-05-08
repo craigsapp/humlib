@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  7 20:44:17 PDT 2018
+// Last Modified: Mon May  7 21:41:51 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -38761,7 +38761,7 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 	}
 	data = *token;
 	// remove uninteresting characters (beams, articulations, slurs, etc).
-	hre.replaceDestructive(data, "", "[^A-Gna-g#\\[\\]0-9%.-]", "g");
+	hre.replaceDestructive(data, "", "[^A-Gnra-g#\\[\\]0-9%.-]", "g");
 	// but keep editorial accidental (probably i)
 	HumNum dur;
 	if (token->find("[") != std::string::npos) {

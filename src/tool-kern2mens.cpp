@@ -143,7 +143,7 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 	}
 	data = *token;
 	// remove uninteresting characters (beams, articulations, slurs, etc).
-	hre.replaceDestructive(data, "", "[^A-Gna-g#\\[\\]0-9%.-]", "g");
+	hre.replaceDestructive(data, "", "[^A-Gnra-g#\\[\\]0-9%.-]", "g");
 	// but keep editorial accidental (probably i)
 	HumNum dur;
 	if (token->find("[") != std::string::npos) {
