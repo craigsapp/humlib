@@ -918,7 +918,7 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 		const vector<string>& exinterps) {
 	vector<string> newexinterps(exinterps.size());
-	for (int i=0; i<exinterps.size(); i++) {
+	for (int i=0; i<(int)exinterps.size(); i++) {
 		if (exinterps[i].compare(0, 2, "**") == 0) {
 			newexinterps[i] = exinterps[i];
 		} else {
