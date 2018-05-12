@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 11 21:12:55 PDT 2018
+// Last Modified: Fri May 11 21:23:19 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -43914,7 +43914,9 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 
 	if (!m_systemDecoration.empty()) {
 		// outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
-		outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
+		if (m_systemDecoration != "s1") {
+			outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
+		}
 	}
 
 	// OTL: title //////////////////////////////////////////////////////////

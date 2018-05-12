@@ -332,7 +332,9 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 
 	if (!m_systemDecoration.empty()) {
 		// outfile.insertLine(0, "!!!system-decoration: " + m_systemDecoration);
-		outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
+		if (m_systemDecoration != "s1") {
+			outfile.appendLine("!!!system-decoration: " + m_systemDecoration);
+		}
 	}
 
 	// OTL: title //////////////////////////////////////////////////////////
