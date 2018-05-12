@@ -170,6 +170,9 @@ class Tool_musicxml2hum : public HumTool {
 		void getChildrenVector (vector<xml_node>& children, xml_node parent);
 		void insertPartTranspositions(xml_node transposition, GridPart& part);
 		xml_node convertTranspositionToHumdrum(xml_node transpose, HTp& token, int& staffindex);
+		void prepareRdfs       (vector<MxmlPart>& partdata);
+		void printRdfs         (ostream& out);
+		void printResult       (ostream& out, HumdrumFile& outfile);
 
 	public:
 
@@ -179,12 +182,15 @@ class Tool_musicxml2hum : public HumTool {
 		Options m_options;
 		bool DebugQ;
 		bool VoiceDebugQ;
-		bool m_recipQ = false;
-		bool m_stemsQ = false;
-		int m_slurabove = 0;
-		int m_slurbelow = 0;
+		bool m_recipQ       = false;
+		bool m_stemsQ       = false;
+		int  m_slurabove    = 0;
+		int  m_slurbelow    = 0;
 		char m_hasEditorial = '\0';
 		vector<vector<string>> m_last_ottava_direction;
+
+		// RDF indications in **kern data:
+		string  m_caesura_rdf;
 
 		string m_software;
 		string m_systemDecoration;

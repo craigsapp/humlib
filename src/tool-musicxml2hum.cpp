@@ -192,14 +192,16 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		transpose.process(argv);
 		transpose.run(outfile);
 		if (transpose.hasHumdrumText()) {
-			transpose.getHumdrumText(out);
+			stringstream ss;
+			transpose.getHumdrumText(ss);
+			outfile.read(ss.str());
+			printResult(out, outfile);
 		}
-
 	} else {
 		for (int i=0; i<outfile.getLineCount(); i++) {
 			outfile[i].createLineFromTokens();
 		}
-		out << outfile;
+		printResult(out, outfile);
 	}
 
 	// add RDFs
@@ -217,7 +219,69 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
+	// put the above code in here some time:
+	prepareRdfs(partdata);
+	printRdfs(out);
+
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::printResult -- filter out
+//      some item if not necessary:
+//
+// MuseScore calls everything "Piano" by default, so suppress
+// this instrument name if there is only one **kern spine in
+// the file.
+//
+
+void Tool_musicxml2hum::printResult(ostream& out, HumdrumFile& outfile) {
+	vector<HTp> kernspines = outfile.getKernSpineStartList();
+	if (kernspines.size() > 1) {
+		out << outfile;
+	} else {
+		for (int i=0; i<outfile.getLineCount(); i++) {
+			bool isPianoLabel = false;
+			bool isPianoAbbr  = false;
+			bool isPartNum    = false;
+			bool isStaffNum   = false;
+			if (!outfile[i].isInterpretation()) {
+				out << outfile[i] << "\n";
+				continue;
+			}
+			for (int j=0; j<outfile[i].getFieldCount(); j++) {
+				if (*outfile.token(i, j) == "*I\"Piano") {
+					isPianoLabel = true;
+				} else if (*outfile.token(i, j) == "*I'Pno.") {
+					isPianoAbbr = true;
+				} else if (*outfile.token(i, j) == "*staff1") {
+					isStaffNum = true;
+				} else if (*outfile.token(i, j) == "*part1") {
+					isPartNum = true;
+				}
+			}
+			if (isPianoLabel || isPianoAbbr || isStaffNum || isPartNum) {
+				continue;
+			}
+			out << outfile[i] << "\n";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::printRdfs --
+//
+
+void Tool_musicxml2hum::printRdfs(ostream& out) {
+	if (!m_caesura_rdf.empty()) {
+		out << m_caesura_rdf << "\n";
+	}
 }
 
 
@@ -401,6 +465,27 @@ void Tool_musicxml2hum::reindexVoices(vector<MxmlPart>& partdata) {
 			reindexMeasure(measure);
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::prepareRdfs --
+//
+
+void Tool_musicxml2hum::prepareRdfs(vector<MxmlPart>& partdata) {
+	string caesura;
+	for (int i=0; i<(int)partdata.size(); i++) {
+		caesura = partdata[i].getCaesura();
+		if (!caesura.empty()) {
+		}
+	}
+
+	if (!caesura.empty()) {
+		m_caesura_rdf = "!!!RDF**kern: " + caesura + " = caesura";
+	}
+
 }
 
 

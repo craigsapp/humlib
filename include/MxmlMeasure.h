@@ -110,6 +110,7 @@ class MxmlMeasure {
 		void  reportHarmonyCountToOwner           (int count);
 		void  reportEditorialAccidentalToOwner    (void);
 		void  reportDynamicToOwner                (void);
+		void  reportCaesuraToOwner                (const string& letter);
 
 	protected:
 		HumNum             m_starttime; // start time of measure in quarter notes

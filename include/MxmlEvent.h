@@ -112,12 +112,13 @@ class MxmlEvent {
 		string             getElementName     (void);
 		void               addNotations       (stringstream& ss, 
 		                                       xml_node notations) const;
-		void               reportVerseCountToOwner         (int count);
-		void               reportVerseCountToOwner         (int staffnum, int count);
-		void               reportHarmonyCountToOwner       (int count);
-		void               reportMeasureStyleToOwner       (MeasureStyle style);
+		void               reportVerseCountToOwner    (int count);
+		void               reportVerseCountToOwner    (int staffnum, int count);
+		void               reportHarmonyCountToOwner  (int count);
+		void               reportMeasureStyleToOwner  (MeasureStyle style);
 		void               reportEditorialAccidentalToOwner(void);
-		void               reportDynamicToOwner            (void);
+		void               reportDynamicToOwner       (void);
+		void               reportCaesuraToOwner       (const string& letter = "Z") const;
       void               makeDummyRest      (MxmlMeasure* owner, 
 		                                       HumNum startime,
 		                                       HumNum duration,

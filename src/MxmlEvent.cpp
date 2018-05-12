@@ -235,6 +235,19 @@ void MxmlEvent::reportDynamicToOwner(void) {
 
 //////////////////////////////
 //
+// MxmlEvent::reportCaesuraToOwner -- inform the owner that there is a caesura
+//    that needs an RDF marker.
+// default value: letter = "Z"
+//
+
+void MxmlEvent::reportCaesuraToOwner(const string& letter) const {
+	m_owner->reportCaesuraToOwner(letter);
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::reportHarmonyCountToOwner --
 //
 
@@ -1501,6 +1514,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool upbow          = false;
 	bool downbow        = false;
 	bool harmonic       = false;
+	bool breath         = false;
+	bool caesura        = false;
 
 	while (child) {
 		if (strcmp(child.name(), "articulations") == 0) {
@@ -1516,6 +1531,10 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					accent = true;
 				} else if (strcmp(grandchild.name(), "tenuto") == 0) {
 					tenuto = true;
+				} else if (strcmp(grandchild.name(), "breath-mark") == 0) {
+					breath = true;
+				} else if (strcmp(grandchild.name(), "caesura") == 0) {
+					caesura = true;
 				} else if (strcmp(grandchild.name(), "strong-accent") == 0) {
 					strongaccent = true;
 				} else if (strcmp(grandchild.name(), "detached-legato") == 0) {
@@ -1575,6 +1594,11 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	if (downbow)      { ss << "u";  }
 	if (umordent)     { ss << "m";  }  // figure out whole-tone mordents later
 	if (lmordent)     { ss << "w";  }  // figure out whole-tone mordents later
+	if (breath)       { ss << ",";  }
+	if (caesura)      { 
+		ss << "Z";  
+		reportCaesuraToOwner();
+	}
 
 }
 

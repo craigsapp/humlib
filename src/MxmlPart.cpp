@@ -337,6 +337,18 @@ int MxmlPart::getVerseCount(int staffindex) const {
 
 //////////////////////////////
 //
+// MxmlPart::getCaesura -- Returns the RDF marker for a caesura in **kern
+//    data (or an empty string if there is no marker defined).
+//
+
+string MxmlPart::getCaesura(void) const {
+	return m_caesura;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlPart::receiveHarmonyCount --
 //
 
@@ -353,6 +365,17 @@ void MxmlPart::receiveHarmonyCount(int count) {
 
 void MxmlPart::receiveDynamic(void) {
 	m_has_dynamics = true;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::receiveCaesura --
+//
+
+void MxmlPart::receiveCaesura(const string& letter) {
+	m_caesura = letter;
 }
 
 

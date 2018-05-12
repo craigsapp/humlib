@@ -57,6 +57,7 @@ class MxmlPart {
 		int           getStaffCount        (void) const;
 		int           getVerseCount        (void) const;
 		int           getVerseCount        (int staffindex) const;
+		string        getCaesura           (void) const;
 		int           getHarmonyCount      (void) const;
 		void          trackStaffVoices     (int staffnum, int voicenum);
 		void          printStaffVoiceInfo  (void);
@@ -78,6 +79,7 @@ class MxmlPart {
 		void          receiveHarmonyCount         (int count);
 		void          receiveEditorialAccidental  (void);
 		void          receiveDynamic              (void);
+		void          receiveCaesura              (const string& letter);
 
 	protected:
 		vector<MxmlMeasure*> m_measures;
@@ -91,6 +93,7 @@ class MxmlPart {
 		bool                 m_has_dynamics = false;
 		string               m_partname;
 		string               m_partabbr;
+		string               m_caesura;
 
 		// m_staffvoicehist: counts of staff and voice numbers.  
 		// staff=0 is used for items such as measures.

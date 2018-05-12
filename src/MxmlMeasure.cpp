@@ -364,6 +364,17 @@ void MxmlMeasure::reportDynamicToOwner(void) {
 
 //////////////////////////////
 //
+// MxmlMeasure::reportCaesuraToOwner --
+//
+
+void MxmlMeasure::reportCaesuraToOwner(const string& letter) {
+	m_owner->receiveCaesura(letter);
+}
+
+
+
+//////////////////////////////
+//
 // MxmlMeasure::reportEditorialAccidentalToOwner --
 //
 
