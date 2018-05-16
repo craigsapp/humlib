@@ -130,9 +130,6 @@ double Convert::pearsonCorrelation(vector<double> x, vector<double> y) {
 	double sumco = 0.0;
 	double meanx = x[0];
 	double meany = y[0];
-	double sweep;
-	double deltax;
-	double deltay;
 
 	int size = (int)x.size();
 	if ((int)y.size() < size) {
@@ -140,9 +137,9 @@ double Convert::pearsonCorrelation(vector<double> x, vector<double> y) {
 	}
 
 	for (int i=2; i<=size; i++) {
-		sweep = (i-1.0) / i;
-		deltax = x[i-1] - meanx;
-		deltay = y[i-1] - meany;
+		double sweep = (i-1.0) / i;
+		double deltax = x[i-1] - meanx;
+		double deltay = y[i-1] - meany;
 		sumx  += deltax * deltax * sweep;
 		sumy  += deltay * deltay * sweep;
 		sumco += deltax * deltay * sweep;

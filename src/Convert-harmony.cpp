@@ -136,12 +136,10 @@ void Convert::makeAdjustedKeyRootAndMode(const string& secondary, int& keyroot,
 	vector<string> roots;
 	HumRegex hre;
 	hre.split(roots, secondary, "/");
-	string piece;
-	int number;
 
 	for (int i=0; i<(int)roots.size(); i++) {
-		piece = roots[(int)roots.size() - i - 1];
-		number = Convert::romanNumeralToInteger(piece);
+		string piece = roots[(int)roots.size() - i - 1];
+		int number = Convert::romanNumeralToInteger(piece);
 		if (number == 0) {
 			continue;
 		} else if (number > 7) {

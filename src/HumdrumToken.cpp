@@ -801,7 +801,6 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
-
 	// start of a tied group so add the durations of the other notes.
    int b40 = Convert::kernToBase40(this);
 	HTp note = this;
@@ -819,7 +818,7 @@ HumNum HumdrumToken::getTiedDuration(void) {
 			break;
 		}
 		// note is tied to previous one, so add its curation to output.
-		output += note->getDuration();
+		output += nnote->getDuration();
 		note = nnote;
 	}
 

@@ -156,9 +156,7 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 		output *= 3;
 		output /= 2;
 	}
-
 	output *= scale;
-
 	return output;
 }
 
