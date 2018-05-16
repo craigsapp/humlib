@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue May 15 19:36:23 PDT 2018
+// Last Modified: Tue May 15 19:44:35 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19783,7 +19783,6 @@ HumNum HumdrumToken::getTiedDuration(void) {
 
 	// start of a tied group so add the durations of the other notes.
    int b40 = Convert::kernToBase40(this);
-   int nb40;
 	HTp note = this;
 	HTp nnote = NULL;
 	while (note) {
@@ -19794,7 +19793,7 @@ HumNum HumdrumToken::getTiedDuration(void) {
 		if (!nnote->isSecondaryTiedNote()) {
 			break;
 		}
-		nb40 = Convert::kernToBase40(this);
+		int nb40 = Convert::kernToBase40(this);
 		if (nb40 != b40) {
 			break;
 		}

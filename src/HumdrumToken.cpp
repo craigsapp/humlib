@@ -804,7 +804,6 @@ HumNum HumdrumToken::getTiedDuration(void) {
 
 	// start of a tied group so add the durations of the other notes.
    int b40 = Convert::kernToBase40(this);
-   int nb40;
 	HTp note = this;
 	HTp nnote = NULL;
 	while (note) {
@@ -815,7 +814,7 @@ HumNum HumdrumToken::getTiedDuration(void) {
 		if (!nnote->isSecondaryTiedNote()) {
 			break;
 		}
-		nb40 = Convert::kernToBase40(this);
+		int nb40 = Convert::kernToBase40(this);
 		if (nb40 != b40) {
 			break;
 		}
