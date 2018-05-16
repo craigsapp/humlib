@@ -795,49 +795,35 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 //////////////////////////////
 //
 // HumdrumToken::getTiedDuration -- Returns the duration of the token and any
-//    tied notes attached to it.  Does not work well which chords.
+//    tied notes attached to it.  Does not work well which chords.  Does
+//    not work well with secondary spine splits.
 //
 
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
 
 	// start of a tied group so add the durations of the other notes.
-   int b40 = Convert::kernToBase40(*this);
+   int b40 = Convert::kernToBase40(this);
+   int nb40;
 	HTp note = this;
 	HTp nnote = NULL;
-	int tcount;
 	while (note) {
-		tcount = note->getNextNonNullDataTokenCount();
-		if (tcount == 0) {
+		nnote = note->getNextNNDT();
+		if (!nnote) {
 			break;
 		}
-		if (!note->getNextNNDT()->isData()) {
-			note = note->getNextNNDT();
-			continue;
+		if (!nnote->isSecondaryTiedNote()) {
+			break;
 		}
-		for (int i=0; i<getNextNonNullDataTokenCount(); i++) {
-			nnote = note->getNextNNDT();
-			if ((nnote->find("_") == std::string::npos) &&
-			   (nnote->find("]") == std::string::npos)) {
-				return output;
-			}
-			if (!nnote->isData())  {
-				continue;
-			}
-			int pitch2 = Convert::kernToBase40(*nnote);
-			if (pitch2 != b40) {
-				continue;
-			}
-
-			if (nnote->find("_")  != std::string::npos) {
-				output += nnote->getDuration();
-			} else if (nnote->find("]") != std::string::npos) {
-				output += nnote->getDuration();
-				return output;
-			}
+		nb40 = Convert::kernToBase40(this);
+		if (nb40 != b40) {
+			break;
 		}
-		note = getNextNNDT();
+		// note is tied to previous one, so add its curation to output.
+		output += note->getDuration();
+		note = nnote;
 	}
+
 	return output;
 }
 

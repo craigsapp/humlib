@@ -876,6 +876,23 @@ int HumdrumFileBase::getExinterpCount(const string& exinterp) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getSpineStopList -- Return a list of the ending
+//     points of spine strands.
+//
+
+void HumdrumFileBase::getSpineStopList(vector<HTp>& spinestops) {
+	spinestops.reserve(m_trackends.size());
+	spinestops.resize(0);
+	for (int i=0; i<(int)m_trackends.size(); i++) {
+		for (int j=0; j<(int)m_trackends[i].size(); j++) {
+			spinestops.push_back(m_trackends[i][j]);
+		}
+	}
+}
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getSpineStartList -- Return a list of the exclustive
 //     interpretations starting spines in the data.  The single parameter
 //     version of the fuction returns all starting exclusive interpretations.
@@ -1663,32 +1680,36 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 	// tokens in spines for all types of line types  For now specify
 	// the next non-null data token for the exclusive interpretation token.
 	// Also this implementation does not consider that the first
-	// non-null data tokens may be from nultiple split tokens (fix later).
-	vector<HTp> starts;
-	vector<HTp> nexts;
-	getSpineStartList(starts);
-	nexts.resize(starts.size(), NULL);
-	for (int i=0; i<(int)starts.size(); i++) {
-		if (starts[i] == NULL) {
+	// non-null data tokens may be from multiple split tokens (fix later).
+
+	// This algorithm is probably not right, but good enough for now.
+	// There may be missing portions of the file for the analysis,
+	// and/or the algorithm is probably retracking tokens in the case
+	// of spine splits.
+
+	vector<HTp> stops;
+	getSpineStopList(stops);
+	HTp nexts = NULL;
+
+	for (int i=0; i<(int)stops.size(); i++) {
+		if (stops[i] == NULL) {
 			continue;
 		}
-		HTp token = starts[i];
-		token = token->getNextToken();
+		HTp token = stops[i];
+		if (token->isData() && !token->isNull()) {
+			nexts = token;
+		}
+		token = token->getPreviousToken();
+
 		while (token) {
-			if (token->isData()) {
-				if (!token->isNull()) {
-					nexts[i] = token;
-					break;
-				}
+			if (nexts) {
+				token->addNextNonNullToken(nexts);
 			}
-			token = token->getNextToken();
+			if (token->isData() && !token->isNull()) {
+				nexts = token;
+			}
+			token = token->getPreviousToken();
 		}
-	}
-	for (int i=0; i<(int)nexts.size(); i++) {
-		if (nexts[i] == NULL) {
-			continue;
-		}
-		starts[i]->addNextNonNullToken(nexts[i]);
 	}
 
 	return true;

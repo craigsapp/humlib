@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 11 21:23:19 PDT 2018
+// Last Modified: Tue May 15 19:36:23 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -13176,6 +13176,23 @@ int HumdrumFileBase::getExinterpCount(const string& exinterp) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getSpineStopList -- Return a list of the ending
+//     points of spine strands.
+//
+
+void HumdrumFileBase::getSpineStopList(vector<HTp>& spinestops) {
+	spinestops.reserve(m_trackends.size());
+	spinestops.resize(0);
+	for (int i=0; i<(int)m_trackends.size(); i++) {
+		for (int j=0; j<(int)m_trackends[i].size(); j++) {
+			spinestops.push_back(m_trackends[i][j]);
+		}
+	}
+}
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getSpineStartList -- Return a list of the exclustive
 //     interpretations starting spines in the data.  The single parameter
 //     version of the fuction returns all starting exclusive interpretations.
@@ -13963,32 +13980,36 @@ bool HumdrumFileBase::analyzeNonNullDataTokens(void) {
 	// tokens in spines for all types of line types  For now specify
 	// the next non-null data token for the exclusive interpretation token.
 	// Also this implementation does not consider that the first
-	// non-null data tokens may be from nultiple split tokens (fix later).
-	vector<HTp> starts;
-	vector<HTp> nexts;
-	getSpineStartList(starts);
-	nexts.resize(starts.size(), NULL);
-	for (int i=0; i<(int)starts.size(); i++) {
-		if (starts[i] == NULL) {
+	// non-null data tokens may be from multiple split tokens (fix later).
+
+	// This algorithm is probably not right, but good enough for now.
+	// There may be missing portions of the file for the analysis,
+	// and/or the algorithm is probably retracking tokens in the case
+	// of spine splits.
+
+	vector<HTp> stops;
+	getSpineStopList(stops);
+	HTp nexts = NULL;
+
+	for (int i=0; i<(int)stops.size(); i++) {
+		if (stops[i] == NULL) {
 			continue;
 		}
-		HTp token = starts[i];
-		token = token->getNextToken();
+		HTp token = stops[i];
+		if (token->isData() && !token->isNull()) {
+			nexts = token;
+		}
+		token = token->getPreviousToken();
+
 		while (token) {
-			if (token->isData()) {
-				if (!token->isNull()) {
-					nexts[i] = token;
-					break;
-				}
+			if (nexts) {
+				token->addNextNonNullToken(nexts);
 			}
-			token = token->getNextToken();
+			if (token->isData() && !token->isNull()) {
+				nexts = token;
+			}
+			token = token->getPreviousToken();
 		}
-	}
-	for (int i=0; i<(int)nexts.size(); i++) {
-		if (nexts[i] == NULL) {
-			continue;
-		}
-		starts[i]->addNextNonNullToken(nexts[i]);
 	}
 
 	return true;
@@ -19753,49 +19774,35 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 //////////////////////////////
 //
 // HumdrumToken::getTiedDuration -- Returns the duration of the token and any
-//    tied notes attached to it.  Does not work well which chords.
+//    tied notes attached to it.  Does not work well which chords.  Does
+//    not work well with secondary spine splits.
 //
 
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
 
 	// start of a tied group so add the durations of the other notes.
-   int b40 = Convert::kernToBase40(*this);
+   int b40 = Convert::kernToBase40(this);
+   int nb40;
 	HTp note = this;
 	HTp nnote = NULL;
-	int tcount;
 	while (note) {
-		tcount = note->getNextNonNullDataTokenCount();
-		if (tcount == 0) {
+		nnote = note->getNextNNDT();
+		if (!nnote) {
 			break;
 		}
-		if (!note->getNextNNDT()->isData()) {
-			note = note->getNextNNDT();
-			continue;
+		if (!nnote->isSecondaryTiedNote()) {
+			break;
 		}
-		for (int i=0; i<getNextNonNullDataTokenCount(); i++) {
-			nnote = note->getNextNNDT();
-			if ((nnote->find("_") == std::string::npos) &&
-			   (nnote->find("]") == std::string::npos)) {
-				return output;
-			}
-			if (!nnote->isData())  {
-				continue;
-			}
-			int pitch2 = Convert::kernToBase40(*nnote);
-			if (pitch2 != b40) {
-				continue;
-			}
-
-			if (nnote->find("_")  != std::string::npos) {
-				output += nnote->getDuration();
-			} else if (nnote->find("]") != std::string::npos) {
-				output += nnote->getDuration();
-				return output;
-			}
+		nb40 = Convert::kernToBase40(this);
+		if (nb40 != b40) {
+			break;
 		}
-		note = getNextNNDT();
+		// note is tied to previous one, so add its curation to output.
+		output += note->getDuration();
+		note = nnote;
 	}
+
 	return output;
 }
 
