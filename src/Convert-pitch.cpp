@@ -37,14 +37,11 @@ string Convert::kernToScientificPitch(const string& kerndata,
 		string flat, string sharp, string separator) {
 	vector<string> subtokens = Convert::splitString(kerndata);
 	string output;
-	char   diatonic;
-	int    accidental;
-	int    octave;
 
 	for (int i=0; i<(int)subtokens.size(); i++) {
-		diatonic   = Convert::kernToDiatonicUC(subtokens[i]);
-		accidental = Convert::kernToAccidentalCount(subtokens[i]);
-		octave     = Convert::kernToOctaveNumber(subtokens[i]);
+		char diatonic   = Convert::kernToDiatonicUC(subtokens[i]);
+		int accidental = Convert::kernToAccidentalCount(subtokens[i]);
+		int octave     = Convert::kernToOctaveNumber(subtokens[i]);
 		if ((i > 0) && (i < (int)subtokens.size()-1)) {
 			output += " ";
 		}

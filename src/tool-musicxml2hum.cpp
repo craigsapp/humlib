@@ -1163,11 +1163,8 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 	string pitch;
 	string prefix;
 	string postfix;
-	bool grace = false;
 	bool invisible = false;
 	bool primarynote = true;
-	bool slurstart = false;
-	bool slurstop = false;
 	int slurdir = 0;
 
 	if (!event->isFloating()) {
@@ -1185,9 +1182,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
-		grace     = event->isGrace();
-		slurstart = event->hasSlurStart(slurdir);
-		slurstop  = event->hasSlurStop();
+		bool grace     = event->isGrace();
+		bool slurstart = event->hasSlurStart(slurdir);
+		bool slurstop  = event->hasSlurStop();
 
 		if (slurstart) {
 			prefix.insert(0, "(");

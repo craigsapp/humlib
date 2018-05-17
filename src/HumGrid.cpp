@@ -413,11 +413,8 @@ void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int 
 	HTp token = NULL;
 	GridVoice* newvoice  = NULL;
 	GridVoice* curvoice  = NULL;
-	GridStaff* newstaff  = NULL;
-	GridStaff* curstaff  = NULL;
-
-	curstaff = curr->at(p)->at(s);
-	newstaff = newmanip->at(p)->at(s);
+	GridStaff* newstaff  = newmanip->at(p)->at(s);
+	GridStaff* curstaff  = curr->at(p)->at(s);
 
 	int originalsize = (int)curstaff->size();
 	int cv = 0;
@@ -1352,17 +1349,13 @@ void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
 	// cerr << "\tnext\t" << nextnote << endl;
 
 	int partcount = (int)clefslice->size();
-	int staffcount;
-	int vgcount;
-	int v1count;
-	int v2count;
 
 	for (int p=0; p<partcount; p++) {
-		staffcount = (int)lastnote->at(p)->size();
+		int staffcount = (int)lastnote->at(p)->size();
 		for (int s=0; s<staffcount; s++) {
-			v1count = (int)lastnote->at(p)->at(s)->size();
-			v2count = (int)nextnote->at(p)->at(s)->size();
-			vgcount = (int)clefslice->at(p)->at(s)->size();
+			int v1count = (int)lastnote->at(p)->at(s)->size();
+			int v2count = (int)nextnote->at(p)->at(s)->size();
+			int vgcount = (int)clefslice->at(p)->at(s)->size();
 			// if (vgcount < 1) {
 			// 	vgcount = 1;
 			// }
@@ -2337,11 +2330,8 @@ void HumGrid::removeRedundantClefChanges(void) {
 	vector<vector<string> > curclef;
 
 	bool hasduplicate = false;
-	GridMeasure* measure;
-	GridVoice* voice;
-	HTp token;
 	for (int m=0; m<(int)this->size(); m++) {
-		measure = this->at(m);
+		GridMeasure* measure = this->at(m);
 		for (auto slice : *measure) {
 			if (!slice->isClefSlice()) {
 				continue;
@@ -2352,8 +2342,8 @@ void HumGrid::removeRedundantClefChanges(void) {
 					if (slice->at(p)->at(s)->size() < 1) {
 						continue;
 					}
-					voice = slice->at(p)->at(s)->at(0);
-					token = voice->getToken();
+					GridVoice* voice = slice->at(p)->at(s)->at(0);
+					HTp token = voice->getToken();
 					if (!token) {
 						continue;
 					}

@@ -177,6 +177,7 @@ class HumdrumFileBase : public HumHash {
 		void          example                  (void);
 
 		HTp           getTrackStart            (int track) const;
+		void          getSpineStopList         (vector<HTp>& spinestops);
 		HTp           getSpineStart            (int spine) const
 		                                       { return getTrackStart(spine+1); }
 		void          getSpineStartList        (vector<HTp>& spinestarts);
