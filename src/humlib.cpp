@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 11 21:23:19 PDT 2018
+// Last Modified: Wed May 16 22:35:04 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19311,7 +19311,7 @@ const string& HumdrumToken::getDataType(void) const {
 // @SEEALSO: getDataType getKern
 //
 
-bool HumdrumToken::isDataType(string dtype) const {
+bool HumdrumToken::isDataType(const string& dtype) const {
 	if (dtype.compare(0, 2, "**") == 0) {
 		return dtype == getDataType();
 	} else {
@@ -50459,8 +50459,10 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 		vector<bool> spineprocess;
 		infile.makeBooleanTrackList(spineprocess, spinestring);
 		// filter out non-kern spines so they are not analyzed.
+		// but now also allowing for *mxhm spines (musicxml harmony)
 		for (int t=1; t<=infile.getMaxTrack(); t++) {
-			if (!infile.getTrackStart(t)->isKern()) {
+			if (!(infile.getTrackStart(t)->isKern() ||
+					infile.getTrackStart(t)->isDataType("mxhm"))) {
 				spineprocess[t] = false;
 			}
 		}
@@ -51113,8 +51115,9 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 		vector<bool>& spineprocess) {
 	int i;
 	for (i=0; i<record.getFieldCount(); i++) {
-		if (!record.token(i)->isKern()) {
-			// don't try to transpose non-kern spines
+		if (!(record.token(i)->isKern() ||
+				record.token(i)->isDataType("mxhm"))) {
+			// don't try to transpose non-kern and non-mxhm spines
 			m_humdrum_text << record.token(i);
 			if (i<record.getFieldCount()-1) {
 				m_humdrum_text << "\t";
@@ -51130,7 +51133,13 @@ void Tool_transpose::printHumdrumDataRecord(HumdrumLine& record,
 			continue;
 		}
 
-		printHumdrumKernToken(record, i, transval);
+		if (record.token(i)->isKern()) {
+			printHumdrumKernToken(record, i, transval);
+		} else if (record.token(i)->isDataType("mxhm")) {
+			printHumdrumMxhmToken(record, i, transval);
+		} else {
+			m_humdrum_text << record.token(i);
+		}
 
 		if (i<record.getFieldCount()-1) {
 			m_humdrum_text << "\t";
@@ -51166,6 +51175,39 @@ void Tool_transpose::printHumdrumKernToken(HumdrumLine& record, int index,
 		if (k<tokencount-1) {
 			m_humdrum_text << " ";
 		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_transpose::printHumdrumMxhmToken --
+//
+
+void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
+		int transval) {
+	if (record.token(index)->isNull()) {
+		// null record element (nothing to do)
+		m_humdrum_text << record.token(index);
+		return;
+	}
+	if (!record.token(index)->isDataType("mxhm")) {
+		m_humdrum_text << record.token(index);
+		return;
+	}
+	HumRegex hre;
+	if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
+		string pitch = hre.getMatch(1);
+		int b40 = Convert::kernToBase40(pitch) + transval;
+		b40 = b40 % 40 + 120;
+		pitch = Convert::base40ToKern(b40);
+		string newtext = *record.token(index);
+		hre.replaceDestructive(newtext, pitch, "([A-Ga-g]+[n#-]{0,2})");
+		m_humdrum_text << newtext;
+	} else {
+		m_humdrum_text << record.token(index);
+		return;
 	}
 }
 
