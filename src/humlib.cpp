@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 16 22:44:10 PDT 2018
+// Last Modified: Wed May 16 23:22:23 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -50357,26 +50357,26 @@ void Tool_tassoize::clearStates(void) {
 //
 
 Tool_transpose::Tool_transpose(void) {
-	define("b|base40=i:0",   "the base-40 transposition value");
-	define("d|diatonic=i:0", "the diatonic transposition value");
-	define("c|chromatic=i:0","the chromatic transposition value");
+	define("b|base40=i:0",    "the base-40 transposition value");
+	define("d|diatonic=i:0",  "the diatonic transposition value");
+	define("c|chromatic=i:0", "the chromatic transposition value");
 	define("o|octave=i:0",    "the octave addition to tranpose value");
 	define("t|transpose=s",   "musical interval transposition value");
 	define("k|setkey=s",      "transpose to the given key");
-	define("auto=b",         "auto. trans. inst. parts to concert pitch");
-	define("debug=b",        "print debugging statements");
-	define("s|spines=s:", "transpose only specified spines");
-	define("q|quiet=b",      "suppress *Tr interpretations in output");
-	define("I|instrument=b", "insert instrument code (*ITr) as well");
-	define("C|concert=b",    "transpose written score to concert pitch");
-	define("W|written=b",    "trans. concert pitch score to written score");
-	define("n|negate=b",     "negate transposition indications");
-	define("rotation=b",     "display transposition in half-steps");
+	define("auto=b",          "auto. trans. inst. parts to concert pitch");
+	define("debug=b",         "print debugging statements");
+	define("s|spines=s:",     "transpose only specified spines");
+	define("q|quiet=b",       "suppress *Tr interpretations in output");
+	define("I|instrument=b",  "insert instrument code (*ITr) as well");
+	define("C|concert=b",     "transpose written score to concert pitch");
+	define("W|written=b",     "trans. concert pitch score to written score");
+	define("n|negate=b",      "negate transposition indications");
+	define("rotation=b",      "display transposition in half-steps");
 
-	define("author=b",  "author of program");
-	define("version=b", "compilation info");
-	define("example=b", "example usages");
-	define("help=b",  "short description");
+	define("author=b",   "author of program");
+	define("version=b",  "compilation info");
+	define("example=b",  "example usages");
+	define("help=b",     "short description");
 }
 
 
@@ -50509,11 +50509,13 @@ void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 //////////////////////////////
 //
 // Tool_transpose::processInterpretationLine --  Used in converting between
-//   concert pitch and written pitch scores.
+//   concert pitch and written pitch scores.  Has some duplicate code that
+//   is not used here.
 //
 
 void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 	  vector<int>& tvals, int style) {
+
 	if (hasTrMarkers(infile, line)) {
 		switch (style) {
 			case STYLE_CONCERT:
@@ -50529,13 +50531,6 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 	}
 
 	for (int j=0; j<infile[line].getFieldCount(); j++) {
-		if (!infile.token(line, j)->isKern()) {
-			m_humdrum_text << infile.token(line, j);
-			if (j<infile[line].getFieldCount()-1) {
-				m_humdrum_text << "\t";
-			}
-			continue;
-		}
 		int ptrack = infile.token(line, j)->getTrack();
 
 		// check for *ITr or *Tr markers
@@ -50549,15 +50544,16 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 			} else {
 				m_humdrum_text << infile.token(line, j);
 			}
-
 		} else if (isKeyMarker(*infile.token(line, j))) {
 			// transpose *C: markers and like if necessary
 			if (tvals[ptrack] != 0) {
 				printNewKeyInterpretation(infile[line], j, tvals[ptrack]);
+			} else if (transval != 0) {
+				// maybe not quite right for all possible cases
+				printNewKeyInterpretation(infile[line], j, transval);
 			} else {
 				m_humdrum_text << infile.token(line, j);
 			}
-
 		} else {
 			// other interpretations just echoed to output:
 			m_humdrum_text << infile.token(line, j);
@@ -50986,13 +50982,7 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 			m_humdrum_text << "\n";
 		} else if (infile[i].isInterpretation()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (!infile.token(i, j)->isKern()) {
-					m_humdrum_text << infile.token(i, j);
-					if (j<infile[i].getFieldCount()-1) {
-						m_humdrum_text << "\t";
-					}
-					continue;
-				}
+
 				if (infile.token(i, j)->compare(0, 2, "**") == 0) {
 						interpstart = 1;
 				}
