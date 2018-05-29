@@ -169,7 +169,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
-		string getHumdrumPitch      (xml_node note);
+		string getHumdrumPitch      (xml_node note, vector<xml_node>& children);
 		string getHumdrumRecip      (HumNum duration, int dotcount);
 		void   buildIdLinkMap       (xml_document& doc);
 		void   processNodeStartLinks(string& output, xml_node node,
@@ -225,6 +225,11 @@ class Tool_mei2hum : public HumTool {
 		string prepareSystemDecoration(xml_node scoreDef);
 		void   getRecursiveSDString  (string& output, xml_node current);
 		void   parseBareSyl          (xml_node syl, GridStaff* staff);
+		string getChildAccidGes      (vector<xml_node>& children);
+		string getChildAccidVis      (vector<xml_node>& children);
+
+		// static functions
+		static string accidToKern(const string& accid);
 
 	private:
 		Options        m_options;
