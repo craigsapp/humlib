@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May 28 17:53:35 PDT 2018
+// Last Modified: Mon May 28 21:58:21 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -41763,7 +41763,7 @@ string Tool_mei2hum::getHumdrumRecip(HumNum duration, int dotcount) {
 //
 
 string Tool_mei2hum::getChildAccidVis(vector<xml_node>& children) {
-	for (int i=0; i<children.size(); i++) {
+	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename != "accid") {
 			continue;
@@ -41792,7 +41792,7 @@ string Tool_mei2hum::getChildAccidVis(vector<xml_node>& children) {
 //
 
 string Tool_mei2hum::getChildAccidGes(vector<xml_node>& children) {
-	for (int i=0; i<children.size(); i++) {
+	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename != "accid") {
 			continue;

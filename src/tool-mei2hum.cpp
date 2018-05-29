@@ -2848,7 +2848,7 @@ string Tool_mei2hum::getHumdrumRecip(HumNum duration, int dotcount) {
 //
 
 string Tool_mei2hum::getChildAccidVis(vector<xml_node>& children) {
-	for (int i=0; i<children.size(); i++) {
+	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename != "accid") {
 			continue;
@@ -2877,7 +2877,7 @@ string Tool_mei2hum::getChildAccidVis(vector<xml_node>& children) {
 //
 
 string Tool_mei2hum::getChildAccidGes(vector<xml_node>& children) {
-	for (int i=0; i<children.size(); i++) {
+	for (int i=0; i<(int)children.size(); i++) {
 		string nodename = children[i].name();
 		if (nodename != "accid") {
 			continue;
