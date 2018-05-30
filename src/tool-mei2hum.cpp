@@ -561,15 +561,21 @@ string Tool_mei2hum::prepareSystemDecoration(xml_node scoreDef) {
 		getRecursiveSDString(output, children[i]);
 	}
 	string newoutput;
+	int counter = 0;
 	for (int i=0; i<(int)output.size(); i++) {
 		newoutput += output[i];
 		if (i < (int)output.size() - 1) {
 			if (std::isdigit(output[i]) && (output[i+1] == 's')) {
 				newoutput += ',';
+				counter++;
 			}
 		}
 	}
-	return newoutput;
+	if (counter <= 1) {
+		return "";
+	} else {
+		return newoutput;
+	}
 }
 
 
