@@ -2955,7 +2955,7 @@ string Tool_mei2hum::getHumdrumPitch(xml_node note, vector<xml_node>& children) 
 			output += "y";
 		}
 	} else if (accidvis != "") {
-		string acc = accidToKern(accidges);
+		string acc = accidToKern(accidvis);
 		output += acc;
 	} else if (accidvischild != "") {
 		string acc = accidToKern(accidvischild);
