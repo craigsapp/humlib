@@ -2945,6 +2945,8 @@ string Tool_mei2hum::getHumdrumPitch(xml_node note, vector<xml_node>& children) 
 		string acc = accidToKern(accidges);
 		if (acc != "n") {
 			output += acc;
+			// accidental is not visible
+			output += "y";
 		}
 	} else if (accidvis != "") {
 		string acc = accidToKern(accidges);
@@ -2954,7 +2956,11 @@ string Tool_mei2hum::getHumdrumPitch(xml_node note, vector<xml_node>& children) 
 		output += acc;
 	} else if (accidgeschild != "") {
 		string acc = accidToKern(accidgeschild);
-		output += acc;
+		if (acc != "n") {
+			output += acc;
+			// accidental is not visible
+			output += "y";
+		}
 	}
 
 	// Transpose to C score if part is transposing:
