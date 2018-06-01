@@ -353,7 +353,7 @@ const string& HumdrumToken::getDataType(void) const {
 // @SEEALSO: getDataType getKern
 //
 
-bool HumdrumToken::isDataType(string dtype) const {
+bool HumdrumToken::isDataType(const string& dtype) const {
 	if (dtype.compare(0, 2, "**") == 0) {
 		return dtype == getDataType();
 	} else {

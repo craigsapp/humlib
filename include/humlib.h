@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 31 18:29:40 PDT 2018
+// Last Modified: Thu May 31 18:34:17 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1214,7 +1214,7 @@ class HumdrumToken : public string, public HumHash {
 		int      getTokenIndex             (void) const;
 		int      getTokenNumber            (void) const;
 		const string& getDataType          (void) const;
-		bool     isDataType                (string dtype) const;
+		bool     isDataType                (const string& dtype) const;
 		bool     isKern                    (void) const;
 		bool     isMens                    (void) const;
 		string   getSpineInfo              (void) const;
@@ -4573,7 +4573,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
-		string getHumdrumPitch      (xml_node note);
+		string getHumdrumPitch      (xml_node note, vector<xml_node>& children);
 		string getHumdrumRecip      (HumNum duration, int dotcount);
 		void   buildIdLinkMap       (xml_document& doc);
 		void   processNodeStartLinks(string& output, xml_node node,
@@ -4629,6 +4629,11 @@ class Tool_mei2hum : public HumTool {
 		string prepareSystemDecoration(xml_node scoreDef);
 		void   getRecursiveSDString  (string& output, xml_node current);
 		void   parseBareSyl          (xml_node syl, GridStaff* staff);
+		string getChildAccidGes      (vector<xml_node>& children);
+		string getChildAccidVis      (vector<xml_node>& children);
+
+		// static functions
+		static string accidToKern(const string& accid);
 
 	private:
 		Options        m_options;
@@ -5287,6 +5292,8 @@ class Tool_transpose : public HumTool {
 		                                 int index, int transval);
 		int      hasTrMarkers           (HumdrumFile& infile, int line);
 		void     printHumdrumKernToken  (HumdrumLine& record, int index,
+		                                 int transval);
+		void     printHumdrumMxhmToken(HumdrumLine& record, int index,
 		                                 int transval);
 		int      checkForDeletedLine    (HumdrumFile& infile, int line);
 		int      getBase40ValueFromInterval(const string& string);

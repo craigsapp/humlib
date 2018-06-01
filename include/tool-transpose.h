@@ -49,6 +49,8 @@ class Tool_transpose : public HumTool {
 		int      hasTrMarkers           (HumdrumFile& infile, int line);
 		void     printHumdrumKernToken  (HumdrumLine& record, int index,
 		                                 int transval);
+		void     printHumdrumMxhmToken(HumdrumLine& record, int index,
+		                                 int transval);
 		int      checkForDeletedLine    (HumdrumFile& infile, int line);
 		int      getBase40ValueFromInterval(const string& string);
 		void     example                (void);
