@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue May 15 20:27:30 PDT 2018
+// Last Modified: Thu May 31 18:29:40 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5147,6 +5147,24 @@ class Tool_myank : public HumTool {
 		vector<vector<MyCoord> > metstates;
 
 };
+
+
+class Tool_phrase : public HumTool {
+	public:
+		      Tool_phrase      (void);
+		     ~Tool_phrase      () {};
+
+		bool  run              (HumdrumFile& infile);
+		bool  run              (const string& indata, ostream& out);
+		bool  run              (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  analyzeSpine     (vector<HTp>& starts, int index);
+
+	private:
+
+};
+
 
 
 class Tool_recip : public HumTool {
