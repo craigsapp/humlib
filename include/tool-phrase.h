@@ -16,6 +16,9 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <vector>
+#include <string>
+
 namespace hum {
 
 // START_MERGE
@@ -30,9 +33,17 @@ class Tool_phrase : public HumTool {
 		bool  run              (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  analyzeSpine     (vector<HTp>& starts, int index);
+		void  analyzeSpine     (int index);
+		void  initialize       (HumdrumFile& infile);
+		void  prepareAnalysis  (HumdrumFile& infile);
+		void  addAverageLines  (HumdrumFile& infile);
 
 	private:
+		vector<vector<string>> m_results;
+		vector<HTp>            m_starts;
+		HumdrumFile            m_infile;
+		vector<int>            m_pcount;
+		vector<HumNum>         m_psum;
 
 };
 

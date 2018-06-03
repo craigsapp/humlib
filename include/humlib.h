@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 31 18:34:17 PDT 2018
+// Last Modified: Sun Jun  3 12:56:09 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5164,9 +5164,17 @@ class Tool_phrase : public HumTool {
 		bool  run              (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  analyzeSpine     (vector<HTp>& starts, int index);
+		void  analyzeSpine     (int index);
+		void  initialize       (HumdrumFile& infile);
+		void  prepareAnalysis  (HumdrumFile& infile);
+		void  addAverageLines  (HumdrumFile& infile);
 
 	private:
+		vector<vector<string>> m_results;
+		vector<HTp>            m_starts;
+		HumdrumFile            m_infile;
+		vector<int>            m_pcount;
+		vector<HumNum>         m_psum;
 
 };
 
