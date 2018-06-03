@@ -27,6 +27,7 @@
 #include "tool-metlev.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
+#include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
 #include "tool-transpose.h"
@@ -128,6 +129,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "phrase") {
+			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {

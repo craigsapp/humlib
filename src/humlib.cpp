@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  3 12:56:09 PDT 2018
+// Last Modified: Sun Jun  3 13:13:46 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -38008,6 +38008,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "phrase") {
+			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
