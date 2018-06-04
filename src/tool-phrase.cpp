@@ -29,6 +29,8 @@ namespace hum {
 //
 
 Tool_phrase::Tool_phrase(void) {
+	define("A|no-average=b", "do not do average phrase-length analysis");
+	define("R|remove2=b", "remove phrase boundaries in data and do not do analysis");
 	define("m|mark=b", "mark phrase boundaries based on rests");
 	define("r|remove=b", "remove phrase boundaries in data");
 }
@@ -58,14 +60,19 @@ bool Tool_phrase::run(HumdrumFile& infile) {
 		if (m_removeQ) {
 			removePhraseMarks(m_starts[i]);
 		}
+		if (m_remove2Q) {
+			continue;
+		}
 		if (hasPhraseMarks(m_starts[i])) {
 			analyzeSpineByPhrase(i);
 		} else {
 			analyzeSpineByRests(i);
 		}
 	}
-	prepareAnalysis(infile);
-	cout << m_free_text.str();
+	if (!m_remove2Q) {
+		prepareAnalysis(infile);
+	}
+	infile.createLinesFromTokens();
 	return true;
 }
 
@@ -83,8 +90,9 @@ void Tool_phrase::prepareAnalysis(HumdrumFile& infile) {
 		int track = m_starts[i]->getTrack();
 		infile.insertDataSpineBefore(track, m_results[i-1], "", exinterp);
 	}
-	addAverageLines(infile);
-	infile.createLinesFromTokens();
+	if (m_averageQ) {
+		addAverageLines(infile);
+	}
 }
 
 
@@ -145,6 +153,8 @@ void Tool_phrase::initialize(HumdrumFile& infile) {
 	std::fill(m_psum.begin(), m_psum.end(), 0);
 	m_markQ = getBoolean("mark");
 	m_removeQ = getBoolean("remove");
+	m_averageQ = !getBoolean("no-average");
+	m_remove2Q = getBoolean("remove2");
 }
 
 
