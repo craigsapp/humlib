@@ -33,6 +33,7 @@ Tool_phrase::Tool_phrase(void) {
 	define("R|remove2=b", "remove phrase boundaries in data and do not do analysis");
 	define("m|mark=b", "mark phrase boundaries based on rests");
 	define("r|remove=b", "remove phrase boundaries in data");
+	define("c|color=s", "display color of analysis data");
 }
 
 
@@ -92,6 +93,32 @@ void Tool_phrase::prepareAnalysis(HumdrumFile& infile) {
 	}
 	if (m_averageQ) {
 		addAverageLines(infile);
+	}
+	if (!m_color.empty()) {
+		int insertline = -1;
+		for (int i=0; i<infile.getLineCount(); i++) {
+			if (infile[i].isData() || infile[i].isBarline()) {
+				insertline = i;
+				break;
+			}
+		}
+		if (insertline > 0) {
+			stringstream ss;
+			int fsize = infile[insertline].getFieldCount();
+			for (int j=0; j<fsize; j++) {
+				ss << "*";
+				HTp token = infile.token(insertline, j);
+				string dt = token->getDataType();
+				if (dt.empty() || (dt == "**cdata")) {
+					ss << "color:" << m_color;
+				}
+				if (j < fsize  - 1) {
+					ss << "\t";
+				}
+			}
+			string output = ss.str();
+			infile.insertLine(insertline, output);
+		}
 	}
 }
 
@@ -155,6 +182,9 @@ void Tool_phrase::initialize(HumdrumFile& infile) {
 	m_removeQ = getBoolean("remove");
 	m_averageQ = !getBoolean("no-average");
 	m_remove2Q = getBoolean("remove2");
+	if (getBoolean("color")) {
+		m_color = getString("color");
+	}
 }
 
 
@@ -226,7 +256,7 @@ void Tool_phrase::analyzeSpineByRests(int index) {
 		}
 		if (pstart && current->isNote() && (current->find(";") != std::string::npos)) {
 			// fermata at end of phrase.
-			dur = current->getDurationFromStart()
+			dur = current->getDurationFromStart() + current->getDuration()
 					- pstart->getDurationFromStart();
 			ss.str("");
 			ss.clear();
@@ -238,6 +268,7 @@ void Tool_phrase::analyzeSpineByRests(int index) {
 				current->setText(current->getText() + "}");
 			}
 			current = current->getNextToken();
+			pstart = NULL;
 			continue;
 		}
 		if (current->isNote() && pstart == NULL) {

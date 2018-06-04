@@ -48,9 +48,10 @@ class Tool_phrase : public HumTool {
 		vector<int>               m_pcount;
 		vector<HumNum>            m_psum;
 		bool                      m_markQ;
-      bool                      m_removeQ;
-      bool                      m_remove2Q;
-      bool                      m_averageQ;
+		bool                      m_removeQ;
+		bool                      m_remove2Q;
+		bool                      m_averageQ;
+		string                    m_color;
 
 };
 
