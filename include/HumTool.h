@@ -14,7 +14,9 @@
 #define _HUMTOOL_H_INCLUDED
 
 #include "Options.h"
+
 #include <sstream>
+#include <string>
 
 namespace hum {
 
@@ -22,41 +24,41 @@ namespace hum {
 
 class HumTool : public Options {
 	public:
-		         HumTool         (void);
-		        ~HumTool         ();
+		              HumTool         (void);
+		             ~HumTool         ();
 
-		void     clearOutput     (void);
+		void          clearOutput     (void);
 
-		bool     hasAnyText      (void);
-		string   getAllText      (void);
-		ostream& getAllText      (ostream& out);
+		bool          hasAnyText      (void);
+		std::string   getAllText      (void);
+		ostream&      getAllText      (ostream& out);
 
-		bool     hasHumdrumText  (void);
-		string   getHumdrumText  (void);
-		ostream& getHumdrumText  (ostream& out);
+		bool          hasHumdrumText  (void);
+		std::string   getHumdrumText  (void);
+		ostream&      getHumdrumText  (ostream& out);
 
-		bool     hasJsonText     (void);
-		string   getJsonText     (void);
-		ostream& getJsonText     (ostream& out);
+		bool          hasJsonText     (void);
+		std::string   getJsonText     (void);
+		ostream&      getJsonText     (ostream& out);
 
-		bool     hasFreeText     (void);
-		string   getFreeText     (void);
-		ostream& getFreeText     (ostream& out);
+		bool          hasFreeText     (void);
+		std::string   getFreeText     (void);
+		ostream&      getFreeText     (ostream& out);
 
-		bool     hasWarning      (void);
-		string   getWarning      (void);
-		ostream& getWarning      (ostream& out);
+		bool          hasWarning      (void);
+		std::string   getWarning      (void);
+		ostream&      getWarning      (ostream& out);
 
-		bool     hasError        (void);
-		string   getError        (void);
-		ostream& getError        (ostream& out);
+		bool          hasError        (void);
+		std::string   getError        (void);
+		ostream&      getError        (ostream& out);
 
 	protected:
-		stringstream m_humdrum_text;  // output text in Humdrum syntax.
-		stringstream m_json_text;     // output text in JSON syntax.
-		stringstream m_free_text;     // output for plain text content.
-	  	stringstream m_warning_text;  // output for warning messages;
-	  	stringstream m_error_text;    // output for error messages;
+		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
+		std::stringstream m_json_text;     // output text in JSON syntax.
+		std::stringstream m_free_text;     // output for plain text content.
+	  	std::stringstream m_warning_text;  // output for warning messages;
+	  	std::stringstream m_error_text;    // output for error messages;
 
 };
 

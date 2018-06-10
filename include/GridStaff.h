@@ -9,7 +9,7 @@
 //
 // Description:   HumGrid is an intermediate container for converting from
 //                MusicXML syntax into Humdrum syntax. GridStaff is used
-//                to store all voices/layers for particular staff in a 
+//                to store all voices/layers for particular staff in a
 //                particular MusicXML <part>.
 //
 //
@@ -21,6 +21,8 @@
 #include "GridSide.h"
 #include "GridVoice.h"
 
+#include <iostream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -29,18 +31,18 @@ namespace hum {
 
 // START_MERGE
 
-class GridStaff : public vector<GridVoice*>, public GridSide {
+class GridStaff : public std::vector<GridVoice*>, public GridSide {
 	public:
 		GridStaff(void);
 		~GridStaff();
 		GridVoice* setTokenLayer (int layerindex, HTp token, HumNum duration);
 		void setNullTokenLayer   (int layerindex, SliceType type, HumNum nextdur);
 		void appendTokenLayer    (int layerindex, HTp token, HumNum duration,
-		                          const string& spacer = " ");
+		                          const std::string& spacer = " ");
 		int getMaxVerseCount     (void);
 };
 
-ostream& operator<<(ostream& output, GridStaff* staff);
+std::ostream& operator<<(std::ostream& output, GridStaff* staff);
 
 
 // END_MERGE

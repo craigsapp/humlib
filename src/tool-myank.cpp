@@ -6,7 +6,7 @@
 // Last Modified: Mon Apr  1 00:28:01 PDT 2013 Enabled multiple segment input
 // Last Modified: Tue Feb 23 04:40:04 PST 2016 Added --section option
 // Last Modifed:  Sun Dec 18 23:25:32 PST 2016 Ported to humlib
-// Filename:      ...sig/examples/all/myank.cpp 
+// Filename:      ...sig/examples/all/myank.cpp
 // Filename:      tool-myank.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-myank.cpp
 // Syntax:        C++11
@@ -138,7 +138,7 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
 		if (info.stempo[i].isValid()) {
 			out << "   START TEMPO   = " << infile.token(info.stempo[i].x, info.stempo[i].y)     << endl;
 		}
-	
+
 		if (info.eclef[i].isValid()) {
 			out << "   END CLEF    = " << infile.token(info.eclef[i].x, info.eclef[i].y)       << endl;
 		}
@@ -236,7 +236,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	string measurestring = getString("measure");
 	if (markQ) {
 		stringstream mstring;
-		getMarkString(mstring, infile); 
+		getMarkString(mstring, infile);
 		measurestring = mstring.str();
 		if (debugQ) {
 			m_free_text << "MARK STRING: " << mstring.str() << endl;
@@ -249,9 +249,9 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	if (debugQ) {
 		m_free_text << "MARK MEASURES: " << measurestring << endl;
 	}
-	
+
 	// expand to multiple measures later.
-	expandMeasureOutList(MeasureOutList, MeasureInList, infile, 
+	expandMeasureOutList(MeasureOutList, MeasureInList, infile,
 			measurestring);
 
 	if (inlistQ) {
@@ -283,7 +283,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 // in the score, keeping track of meter without metric symbols.
 //
 
-void Tool_myank::getMetStates(vector<vector<MyCoord> >& metstates, 
+void Tool_myank::getMetStates(vector<vector<MyCoord> >& metstates,
 		HumdrumFile& infile) {
 	vector<MyCoord> current;
 	current.resize(infile.getMaxTrack()+1);
@@ -299,7 +299,7 @@ void Tool_myank::getMetStates(vector<vector<MyCoord> >& metstates,
 					current[track].x = i;
 					current[track].y = j;
 				} else if (hre.search(infile.token(i, j), R"(^\*M\d+\d+)")) {
-					current[track] = getLocalMetInfo(infile, i, track);   
+					current[track] = getLocalMetInfo(infile, i, track);
 				}
 			}
 		}
@@ -335,8 +335,8 @@ void Tool_myank::getMetStates(vector<vector<MyCoord> >& metstates,
 
 //////////////////////////////
 //
-// Tool_myank::getLocalMetInfo -- search in the non-data region indicated by the 
-// input row for a *met entry in the input track.  Return empty 
+// Tool_myank::getLocalMetInfo -- search in the non-data region indicated by the
+// input row for a *met entry in the input track.  Return empty
 // value if none found.
 //
 
@@ -359,8 +359,8 @@ MyCoord Tool_myank::getLocalMetInfo(HumdrumFile& infile, int row, int track) {
 	if (startline < 0) {
 		startline = 0;
 	}
-	i = row; 
-	while (i<infile.getLineCount()){ 
+	i = row;
+	while (i<infile.getLineCount()){
 		if (infile[i].isData()) {
 			stopline = i-1;
 			break;
@@ -412,11 +412,11 @@ void Tool_myank::getMarkString(ostream& out, HumdrumFile& infile)  {
 		if (!infile[i].isReference()) {
 			continue;
 		}
-		if (hre.search(infile.token(i, 0), 
+		if (hre.search(infile.token(i, 0),
 				R"(!!!RDF\*\*kern\s*:\s*([^=])\s*=\s*match)", "i")) {
 			target = hre.getMatch(1)[0];
 			mchar.push_back(target);
-		} else if (hre.search(infile.token(i, 0), 
+		} else if (hre.search(infile.token(i, 0),
 				R"(!!!RDF\*\*kern\s*:\s*([^=])\s*=\s*mark)", "i")) {
 			target = hre.getMatch(1)[0];
 			mchar.push_back(target);
@@ -517,7 +517,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				if ((datastart == 0) && outmeasures[h].num == 0) {
 					// not ideal setup...
 					datastart = 1;
-				} else{ 
+				} else{
 					adjustGlobalInterpretations(infile, i, outmeasures, h);
 					printed = 1;
 				}
@@ -611,7 +611,7 @@ void Tool_myank::adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 
 	// the following lines will not work when non-contiguous measures are
 	// elided.
-	//   if (!infile[ii].isInterpretation()) { 
+	//   if (!infile[ii].isInterpretation()) {
 	//      return;
 	//   }
 
@@ -1111,7 +1111,7 @@ void Tool_myank::printInvisibleMeasure(HumdrumFile& infile, int line) {
 			m_humdrum_text << "-";
 			m_humdrum_text << hre.getMatch(2);
 		} else {
-			m_humdrum_text << infile.token(line, j); 
+			m_humdrum_text << infile.token(line, j);
 		}
 		if (j < infile[line].getFieldCount()-1) {
 			m_humdrum_text << "\t";
@@ -1133,14 +1133,14 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 
 	if (debugQ) {
 		m_humdrum_text << "RECONCILING LINES " << index1+1 << " and " << index2+1 << endl;
-		m_humdrum_text << "FIELD COUNT OF " << index1+1 << " is " 
+		m_humdrum_text << "FIELD COUNT OF " << index1+1 << " is "
 			  << infile[index1].getFieldCount() << endl;
-		m_humdrum_text << "FIELD COUNT OF " << index2+1 << " is " 
+		m_humdrum_text << "FIELD COUNT OF " << index2+1 << " is "
 			  << infile[index2].getFieldCount() << endl;
 	}
 
 	// check to see if any changes need reconciling; otherwise, exit function
-	int i, j; 
+	int i, j;
 	if (infile[index1].getFieldCount() == infile[index2].getFieldCount()) {
 		int same = 1;
 		for (i=0; i<infile[index1].getFieldCount(); i++) {
@@ -1195,7 +1195,7 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 	//for (i=1; i<(int)splits.size(); i++) {
 	//   splits[i] += splits[i-1];
 	//}
-  
+
 	HumRegex hre1;
 	HumRegex hre2;
 	// handle joins one at a time, only look for binary joins at the moment.
@@ -1222,10 +1222,10 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 			printJoinLine(splits, i, 2);
 		}
 	}
-	
+
 	// handle *x switches, not perfect since ordering might need to be
 	// handled between manipulators...
-	
+
 }
 
 
@@ -1262,7 +1262,7 @@ void Tool_myank::printJoinLine(vector<int>& splits, int index, int count) {
 
 //////////////////////////////
 //
-// Tool_myank::reconcileStartingPosition -- merge spines from start of data and 
+// Tool_myank::reconcileStartingPosition -- merge spines from start of data and
 //    first measure in output.
 //
 
@@ -1276,7 +1276,7 @@ void Tool_myank::reconcileStartingPosition(HumdrumFile& infile, int index2) {
 	}
 }
 
-  
+
 
 //////////////////////////////
 //
@@ -1355,7 +1355,7 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 	int marker = -1;
 	int i;
 	for (i=infile.getLineCount()-1; i>=0; i--) {
-		if (infile[i].isInterpretation() && (ending <0) 
+		if (infile[i].isInterpretation() && (ending <0)
 				&& (*infile.token(i, 0) == "*-")) {
 			ending = i;
 		}
@@ -1372,7 +1372,7 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 	if (ending >= 0) {
 		reconcileSpineBoundary(infile, adjlin, ending);
 	}
-	
+
 	int startline  = ending;
 	if (marker >= 0) {
 		// capture any comment which occur after the last measure
@@ -1396,7 +1396,7 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 //
 // Tool_myank::getMeasureStartStop --  Get a list of the (numbered) measures in the
 //    input file, and store the start/stop lines for those measures.
-//    All data before the first numbered measure is in measure 0.  
+//    All data before the first numbered measure is in measure 0.
 //    although, if the first measure is not labeled, then ...
 //
 
@@ -1468,10 +1468,10 @@ void Tool_myank::getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFi
 
 	for (i=infile.getLineCount()-1; i>=0; i--) {
 		if ((lastdata < 0) && infile[i].isData()) {
-			lastdata = i; 
+			lastdata = i;
 		}
 		if ((lastmeasure < 0) && infile[i].isBarline()) {
-			lastmeasure = i; 
+			lastmeasure = i;
 		}
 		if ((lastmeasure >= 0) && (lastdata >= 0)) {
 			break;
@@ -1483,7 +1483,7 @@ void Tool_myank::getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFi
 		lastmeasure = -1;
 		lastdata    = -1;
 	}
- 
+
 	if ((barnum2 >= 0) && (lastend >= 0) && (dataend >= 0)) {
 		current.clear();
 		current.num = barnum2;
@@ -1559,7 +1559,7 @@ void Tool_myank::getSectionString(string& sstring, HumdrumFile& infile, int sec)
 			}
 			if (hre.search(infile.token(i, 0), "(\\d+)")) {
 				barnum = hre.getMatchInt(1);
-			} 
+			}
 		}
 	}
 	if (second < 0) {
@@ -1595,7 +1595,7 @@ int Tool_myank::atEndOfFile(HumdrumFile& infile, int line) {
 // Tool_myank::insertZerothMeasure --
 //
 
-void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist, 
+void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 		HumdrumFile& infile) {
 
 	HumRegex hre;
@@ -1647,8 +1647,8 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 //     to extract.
 //
 
-void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout, 
-		vector<MeasureInfo>& measurein, HumdrumFile& infile, 
+void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
+		vector<MeasureInfo>& measurein, HumdrumFile& infile,
 		const string& optionstring) {
 
 	HumRegex hre;
@@ -1741,7 +1741,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 // Tool_myank::fillGlobalDefaults -- keep track of the clef, key signature, key, etc.
 //
 
-void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& measurein, 
+void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& measurein,
 		vector<int>& inmap) {
 	int i, j;
 	HumRegex hre;
@@ -1847,7 +1847,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 						measurein[inmap[currmeasure]].stempo[track].x = -1;
 						measurein[inmap[currmeasure]].stempo[track].y = -1;
 					}
-				} 
+				}
 
 				if (infile.token(i, j)->compare(0, 5, "*clef") == 0) {
 					currclef[track].x = i;
@@ -1888,7 +1888,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	}
 
 	// store state of global music values at end of music
-	if ((currmeasure >= 0) && (currmeasure < (int)inmap.size()) 
+	if ((currmeasure >= 0) && (currmeasure < (int)inmap.size())
 			&& (inmap[currmeasure] >= 0)) {
 		measurein[inmap[currmeasure]].eclef    = currclef;
 		measurein[inmap[currmeasure]].ekeysig  = currkeysig;
@@ -2081,7 +2081,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 
 //////////////////////////////
 //
-// Tool_myank::processFieldEntry -- 
+// Tool_myank::processFieldEntry --
 //   3-6 expands to 3 4 5 6
 //   $   expands to maximum spine track
 //   $0  expands to maximum spine track
@@ -2115,13 +2115,13 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		if (lastone  < 0         ) { lastone  = 0         ; }
 
 		if ((firstone < 1) && (firstone != 0)) {
-			cerr << "Error: range token: \"" << str << "\"" 
+			cerr << "Error: range token: \"" << str << "\""
 				  << " contains too small a number at start: " << firstone << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
 		}
 		if ((lastone < 1) && (lastone != 0)) {
-			cerr << "Error: range token: \"" << str << "\"" 
+			cerr << "Error: range token: \"" << str << "\""
 				  << " contains too small a number at end: " << lastone << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
@@ -2130,7 +2130,7 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		if (firstone > lastone) {
 			for (int i=firstone; i>=lastone; i--) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) && 
+					if ((field.size() > 0) &&
 							(field.back().stop == inmeasures[inmap[i]].start)) {
 						field.back().stop = inmeasures[inmap[i]].stop;
 					} else {
@@ -2161,7 +2161,7 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		} else {
 			for (int i=firstone; i<=lastone; i++) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) && 
+					if ((field.size() > 0) &&
 							(field.back().stop == inmeasures[inmap[i]].start)) {
 						field.back().stop = inmeasures[inmap[i]].stop;
 					} else {
@@ -2195,13 +2195,13 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		// do something with letter later...
 
 		if ((value < 1) && (value != 0)) {
-			cerr << "Error: range token: \"" << str << "\"" 
+			cerr << "Error: range token: \"" << str << "\""
 				  << " contains too small a number at end: " << value << endl;
 			cerr << "Minimum number allowed is " << 1 << endl;
 			exit(1);
 		}
 		if (inmap[value] >= 0) {
-			if ((field.size() > 0) && 
+			if ((field.size() > 0) &&
 					(field.back().stop == inmeasures[inmap[value]].start)) {
 				field.back().stop = inmeasures[inmap[value]].stop;
 			} else {
@@ -2262,7 +2262,7 @@ void Tool_myank::removeDollarsFromString(string& buffer, int maxx) {
 		if (outval < 0) {
 			outval = 0;
 		}
-		
+
 		tbuf = to_string(outval);
 		obuf = "\\";
 		obuf += hre.getMatch(1);

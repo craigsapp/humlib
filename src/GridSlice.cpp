@@ -124,7 +124,7 @@ GridSlice::~GridSlice(void) {
 
 //////////////////////////////
 //
-// GridSlice::addToken -- Will not allocate part array, but will 
+// GridSlice::addToken -- Will not allocate part array, but will
 //     grow staff or voice array if needed.
 //
 

@@ -32,7 +32,7 @@ class MyCoord {
 class MeasureInfo {
 	public:
 		MeasureInfo(void) { clear(); }
-		void clear(void)  { num = seg = start = stop = -1; 
+		void clear(void)  { num = seg = start = stop = -1;
 			sclef.resize(0); skeysig.resize(0); skey.resize(0);
 			stimesig.resize(0); smet.resize(0); stempo.resize(0);
 			eclef.resize(0); ekeysig.resize(0); ekey.resize(0);
@@ -75,7 +75,7 @@ class MeasureInfo {
 		int stop;         // ending line of segment
 		int tracks;       // number of primary tracks in file.
 		HumdrumFile* file;
-	 
+
 		// musical settings at start of measure
 		vector<MyCoord> sclef;     // starting clef of segment
 		vector<MyCoord> skeysig;   // starting keysig of segment
@@ -108,18 +108,18 @@ class Tool_myank : public HumTool {
 		void      initialize            (HumdrumFile& infile);
 		void      example              (void);
 		void      usage                (const string& command);
-		void      myank                (HumdrumFile& infile, 
+		void      myank                (HumdrumFile& infile,
 		                                vector<MeasureInfo>& outmeasure);
 		void      removeDollarsFromString(string& buffer, int maxx);
-		void      processFieldEntry    (vector<MeasureInfo>& field, 
-		                                const string& str, 
-		                                HumdrumFile& infile, int maxmeasure, 
-		                                vector<MeasureInfo>& inmeasures, 
+		void      processFieldEntry    (vector<MeasureInfo>& field,
+		                                const string& str,
+		                                HumdrumFile& infile, int maxmeasure,
+		                                vector<MeasureInfo>& inmeasures,
 		                                vector<int>& inmap);
-		void      expandMeasureOutList (vector<MeasureInfo>& measureout, 
-		                                vector<MeasureInfo>& measurein, 
+		void      expandMeasureOutList (vector<MeasureInfo>& measureout,
+		                                vector<MeasureInfo>& measurein,
 		                                HumdrumFile& infile, const string& optionstring);
-		void      getMeasureStartStop  (vector<MeasureInfo>& measurelist, 
+		void      getMeasureStartStop  (vector<MeasureInfo>& measurelist,
 		                                HumdrumFile& infile);
 		void      printEnding          (HumdrumFile& infile, int lastline, int adjlin);
 		void      printStarting        (HumdrumFile& infile);
@@ -127,20 +127,20 @@ class Tool_myank : public HumTool {
 		void      reconcileStartingPosition(HumdrumFile& infile, int index2);
 		void      printJoinLine        (vector<int>& splits, int index, int count);
 		void      printInvisibleMeasure(HumdrumFile& infile, int line);
-		void      fillGlobalDefaults   (HumdrumFile& infile, 
-		                                vector<MeasureInfo>& measurein, 
+		void      fillGlobalDefaults   (HumdrumFile& infile,
+		                                vector<MeasureInfo>& measurein,
 		                                vector<int>& inmap);
 		void      adjustGlobalInterpretations(HumdrumFile& infile, int ii,
 		                                vector<MeasureInfo>& outmeasures,
 		                                int index);
 		void      adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
-		                                vector<MeasureInfo>& outmeasures, 
+		                                vector<MeasureInfo>& outmeasures,
 		                                int index);
 		void      getMarkString        (ostream& out, HumdrumFile& infile);
 		void      printDoubleBarline   (HumdrumFile& infile, int line);
-		void      insertZerothMeasure  (vector<MeasureInfo>& measurelist, 
+		void      insertZerothMeasure  (vector<MeasureInfo>& measurelist,
 		                                HumdrumFile& infile);
-		void      getMetStates         (vector<vector<MyCoord> >& metstates, 
+		void      getMetStates         (vector<vector<MyCoord> >& metstates,
 		                                HumdrumFile& infile);
 		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 		int       atEndOfFile          (HumdrumFile& infile, int line);

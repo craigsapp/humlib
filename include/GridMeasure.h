@@ -21,8 +21,7 @@
 #include "HumdrumFile.h"
 
 #include <list>
-
-using namespace std;
+#include <string>
 
 namespace hum {
 
@@ -31,35 +30,35 @@ namespace hum {
 class GridSlice;
 class HumGrid;
 
-class GridMeasure : public list<GridSlice*> {
+class GridMeasure : public std::list<GridSlice*> {
 	public:
 		GridMeasure(HumGrid* owner);
 		~GridMeasure();
 
-		GridSlice*   addTempoToken  (const string& tok, HumNum timestamp,
+		GridSlice*   addTempoToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addTimeSigToken(const string& tok, HumNum timestamp,
+		GridSlice*   addTimeSigToken(const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addKeySigToken (const string& tok, HumNum timestamp,
+		GridSlice*   addKeySigToken (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addClefToken   (const string& tok, HumNum timestamp,
+		GridSlice*   addClefToken   (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addTransposeToken(const string& tok, HumNum timestamp,
+		GridSlice*   addTransposeToken(const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addLabelToken  (const string& tok, HumNum timestamp,
+		GridSlice*   addLabelToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxpart,
 		                             int maxstaff);
-		GridSlice*   addLabelAbbrToken(const string& tok, HumNum timestamp,
+		GridSlice*   addLabelAbbrToken(const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxpart,
 		                             int maxstaff);
-		GridSlice*   addDataToken   (const string& tok, HumNum timestamp,
+		GridSlice*   addDataToken   (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
-		GridSlice*   addGraceToken  (const string& tok, HumNum timestamp,
+		GridSlice*   addGraceToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff,
 		                             int gracenumber);
-		GridSlice*   addGlobalLayout(const string& tok, HumNum timestamp);
-		GridSlice*   addGlobalComment(const string& tok, HumNum timestamp);
-		GridSlice*   appendGlobalLayout(const string& tok, HumNum timestamp);
+		GridSlice*   addGlobalLayout(const std::string& tok, HumNum timestamp);
+		GridSlice*   addGlobalComment(const std::string& tok, HumNum timestamp);
+		GridSlice*   appendGlobalLayout(const std::string& tok, HumNum timestamp);
 		bool         transferTokens (HumdrumFile& outfile, bool recip,
 		                             bool addbar, int startbarnum = 0);
 		HumGrid*     getOwner       (void);
@@ -78,24 +77,24 @@ class GridMeasure : public list<GridSlice*> {
 		void         setRepeatEndStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 		void         setRepeatBackwardStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 
-		bool         isDouble(void) 
+		bool         isDouble(void)
 		                  {return m_style == MeasureStyle::Double;}
-		bool         isFinal(void) 
+		bool         isFinal(void)
 		                  {return m_style == MeasureStyle::Final;}
-		bool         isRepeatBackward(void) 
+		bool         isRepeatBackward(void)
 		                  { return m_style == MeasureStyle::RepeatBackward; }
-		bool         isRepeatForward(void) 
+		bool         isRepeatForward(void)
 		                  { return m_style == MeasureStyle::RepeatForward; }
-		bool         isRepeatBoth(void) 
+		bool         isRepeatBoth(void)
 		                  { return m_style == MeasureStyle::RepeatBoth; }
-		void         addLayoutParameter(GridSlice* slice, int partindex, const string& locomment);
-		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const string& locomment);
+		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
+		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		bool         isInvisible(void);
 		bool         isSingleChordMeasure(void);
 		bool         isMonophonicMeasure(void);
 		GridSlice*   getLastSpinedSlice(void);
 		GridSlice*   getFirstSpinedSlice(void);
-	
+
 	protected:
 		void         appendInitialBarline(HumdrumFile& infile, int startbarnum = 0);
 
@@ -107,8 +106,8 @@ class GridMeasure : public list<GridSlice*> {
 		MeasureStyle m_style;
 };
 
-ostream& operator<<(ostream& output, GridMeasure& measure);
-ostream& operator<<(ostream& output, GridMeasure* measure);
+std::ostream& operator<<(std::ostream& output, GridMeasure& measure);
+std::ostream& operator<<(std::ostream& output, GridMeasure* measure);
 
 // END_MERGE
 

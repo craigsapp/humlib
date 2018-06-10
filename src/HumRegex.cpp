@@ -17,6 +17,7 @@
 //
 
 #include "HumRegex.h"
+
 #include <iostream>
 
 using namespace std;
@@ -326,7 +327,7 @@ int HumRegex::getMatchLength(int index) {
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// match functions (a "match" is a search that matches a regular 
+// match functions (a "match" is a search that matches a regular
 //    expression to the entire string").
 //
 
@@ -462,7 +463,7 @@ string& HumRegex::tr(string& input, const string& from, const string& to) {
 	if (to.size() < from.size()) {
 		minmax = (int)to.size();
 	}
-	
+
 	for (int i=0; i<minmax; i++) {
 		trans[from[i]] = to[i];
 	}

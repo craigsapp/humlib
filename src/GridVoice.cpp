@@ -15,7 +15,6 @@
 //
 //
 
-
 #include "GridVoice.h"
 
 using namespace std;

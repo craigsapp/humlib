@@ -21,10 +21,10 @@
 #include "HumdrumFile.h"
 #include "Options.h"
 
-#include <vector>
-#include <sstream>
 #include <fstream>
-#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -34,11 +34,11 @@ class HumdrumFileStream {
 	public:
 		                HumdrumFileStream  (void);
 		                HumdrumFileStream  (char** list);
-		                HumdrumFileStream  (const vector<string>& list);
+		                HumdrumFileStream  (const std::vector<std::string>& list);
 		                HumdrumFileStream  (Options& options);
 
 		int             setFileList        (char** list);
-		int             setFileList        (const vector<string>& list);
+		int             setFileList        (const std::vector<std::string>& list);
 
 		void            clear              (void);
 		int             eof                (void);
@@ -47,19 +47,19 @@ class HumdrumFileStream {
 		int             read               (HumdrumFile& infile);
 
 	protected:
-		ifstream        m_instream;       // used to read from list of files.
-		stringstream    m_urlbuffer;      // used to read data over internet.
-		string          m_newfilebuffer;  // used to keep track of !!!!segment:
-		                                  // records.
+		std::ifstream     m_instream;       // used to read from list of files.
+		std::stringstream m_urlbuffer;      // used to read data over internet.
+		std::string       m_newfilebuffer;  // used to keep track of !!!!segment:
+		                                    // records.
 
-		vector<string>  m_filelist;       // used when not using cin
-		int             m_curfile;        // index into filelist
+		std::vector<std::string>  m_filelist;       // used when not using cin
+		int                       m_curfile;        // index into filelist
 
-		vector<string>  m_universals;     // storage for universal comments
+		std::vector<std::string>  m_universals;     // storage for universal comments
 
 		// Automatic URL downloading of data from internet in read():
-		void     fillUrlBuffer            (stringstream& uribuffer,
-		                                   const string& uriname);
+		void     fillUrlBuffer            (std::stringstream& uribuffer,
+		                                   const std::string& uriname);
 
 };
 

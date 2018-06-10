@@ -8,7 +8,7 @@
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Set of parameters, specifically for Layout codes.
-//                The HumParamSet class has a double namespace capability. 
+//                The HumParamSet class has a double namespace capability.
 //                Parameters are encoded in local or global comments.
 //                Examples:
 //                    !LO:N:vis=4
@@ -102,6 +102,7 @@
 #ifndef _HUMPARAMSET_H_INCLUDED
 #define _HUMPARAMSET_H_INCLUDED
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -109,8 +110,6 @@ class HumdrumToken;
 typedef HumdrumToken* HTp;
 
 #include "HumdrumToken.h"
-
-using namespace std;
 
 namespace hum {
 
@@ -120,38 +119,38 @@ class HumParamSet {
 
 	public:
 		              HumParamSet        (void);
-		              HumParamSet        (const string& token);
+		              HumParamSet        (const std::string& token);
 		              HumParamSet        (HTp token);
 		             ~HumParamSet        ();
 
-		const string& getNamespace1      (void);
-		const string& getNamespace2      (void);
-		string        getNamespace       (void);
-		void          setNamespace1      (const string& name);
-		void          setNamespace2      (const string& name);
-		void          setNamespace       (const string& name);
-		void          setNamespace       (const string& name1, const string& name2);
+		const std::string& getNamespace1      (void);
+		const std::string& getNamespace2      (void);
+		std::string   getNamespace       (void);
+		void          setNamespace1      (const std::string& name);
+		void          setNamespace2      (const std::string& name);
+		void          setNamespace       (const std::string& name);
+		void          setNamespace       (const std::string& name1, const std::string& name2);
 
 		void          clear              (void);
 		int           getCount           (void);
-		const string& getParameterName   (int index);
-		const string& getParameterValue  (int index);
-		int           addParameter       (const string& name, const string& value);
-		int           setParameter       (const string& name, const string& value);
-		void          readString         (const string& text);
-		ostream&      printXml           (ostream& out = cout, int level = 0,
-		                                  const string& indent = "\t");
+		const std::string& getParameterName   (int index);
+		const std::string& getParameterValue  (int index);
+		int           addParameter       (const std::string& name, const std::string& value);
+		int           setParameter       (const std::string& name, const std::string& value);
+		void          readString         (const std::string& text);
+		std::ostream& printXml           (std::ostream& out = std::cout, int level = 0,
+		                                  const std::string& indent = "\t");
 
 	private:
-		string m_ns1;
-		string m_ns2;
-		vector<pair<string, string>> m_parameters;
+		std::string m_ns1;
+		std::string m_ns2;
+		std::vector<std::pair<std::string, std::string>> m_parameters;
 
 };
 
 
-ostream& operator<<(ostream& out, HumParamSet* hps);
-ostream& operator<<(ostream& out, HumParamSet& hps);
+std::ostream& operator<<(std::ostream& out, HumParamSet* hps);
+std::ostream& operator<<(std::ostream& out, HumParamSet& hps);
 
 
 // END_MERGE

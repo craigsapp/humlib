@@ -257,7 +257,7 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 			}
 		}
 	}
-	
+
 	if (mcount) {
 		string content = "!!!RDF**kern: " + m_marker + " = marked note";
 		if (getBoolean("color")) {
@@ -357,7 +357,7 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 // Tool_msearch::checkForMatchDiatonicPC --
 //
 
-bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
+bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		vector<MSearchQueryToken>& dpcQuery, vector<NoteCell*>& match) {
 	match.clear();
 
@@ -375,12 +375,12 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			continue;
 		}
 		rhymatch = true;
-		if ((!dpcQuery[i].rhythm.empty()) 
+		if ((!dpcQuery[i].rhythm.empty())
 				&& (notes[index+i-c]->getDuration() != dpcQuery[i].duration)) {
 			// duration needs to match query, but does not
 			rhymatch = false;
 		}
-		
+
 		// check for gross-contour queries:
 		if (dpcQuery[i].base <= 0) {
 			lastIsInterval = true;
@@ -481,7 +481,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 //////////////////////////////
 //
-// Tool_msearch::fillTextQuery -- 
+// Tool_msearch::fillTextQuery --
 //
 
 void Tool_msearch::fillTextQuery(vector<MSearchTextQuery>& query,
@@ -511,7 +511,7 @@ void Tool_msearch::fillTextQuery(vector<MSearchTextQuery>& query,
 
 //////////////////////////////
 //
-// Tool_msearch::fillMusicQuery -- 
+// Tool_msearch::fillMusicQuery --
 //
 
 void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,

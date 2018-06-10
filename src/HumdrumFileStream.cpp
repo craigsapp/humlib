@@ -17,11 +17,11 @@
 #include "HumdrumFileStream.h"
 #include "HumRegex.h"
 
-#include <vector>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <cstring>
+#include <vector>
 
 using namespace std;
 

@@ -99,14 +99,14 @@
 //                  score).
 //
 
-#include <string>
-#include <sstream>
-#include <iostream>
-
 #include "HumHash.h"
 #include "HumNum.h"
 #include "Convert.h"
 #include "HumdrumToken.h"
+
+#include <iostream>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -1137,7 +1137,7 @@ ostream& HumHash::printXml(ostream& out, int level, const string& indent) {
 	if (parameters->size() == 0) {
 		return out;
 	}
-	
+
 	stringstream str;
 	bool found = 0;
 
@@ -1203,7 +1203,7 @@ ostream& HumHash::printXmlAsGlobal(ostream& out, int level,
 	if (parameters->size() == 0) {
 		return out;
 	}
-	
+
 	stringstream str;
 	stringstream str2;
 	string it1str;

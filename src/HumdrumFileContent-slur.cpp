@@ -10,9 +10,9 @@
 // Description:   Links slur starting/ending points to each other.
 //
 
-#include <algorithm>
-
 #include "HumdrumFileContent.h"
+
+#include <algorithm>
 
 using namespace std;
 
@@ -155,7 +155,7 @@ void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 	slurstart->setValue("auto", "id", slurstart);
 	slurend->setValue("auto", starttag, slurstart);
 	slurend->setValue("auto", "id", slurend);
-	HumNum duration = slurend->getDurationFromStart() 
+	HumNum duration = slurend->getDurationFromStart()
 			- slurstart->getDurationFromStart();
 	slurstart->setValue("auto", durtag, duration);
 	slurstart->setValue("auto", "slurEndCount", to_string(slurEndCount));

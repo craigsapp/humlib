@@ -12,6 +12,8 @@
 
 #include "HumTool.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -124,7 +126,7 @@ bool HumTool::hasFreeText(void) {
 
 //////////////////////////////
 //
-// HumTool::getFreeText -- Return any free-form text output from the 
+// HumTool::getFreeText -- Return any free-form text output from the
 //     tool.
 //
 
@@ -156,7 +158,7 @@ bool HumTool::hasJsonText(void) {
 
 //////////////////////////////
 //
-// HumTool::getFreeText -- Return any JSON text output from the 
+// HumTool::getFreeText -- Return any JSON text output from the
 //     tool.
 //
 

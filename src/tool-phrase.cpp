@@ -12,6 +12,7 @@
 
 #include "tool-phrase.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 #include <algorithm>
 #include <cmath>
@@ -362,12 +363,12 @@ void Tool_phrase::removePhraseMarks(HTp start) {
 			string data = *current;
 			hre.replaceDestructive(data, "", "\\{", "g");
 			current->setText(data);
-		} 
+		}
 		if (current->find("}") != std::string::npos) {
 			string data = *current;
 			hre.replaceDestructive(data, "", "\\}", "g");
 			current->setText(data);
-		} 
+		}
 		current = current->getNextToken();
 	}
 }

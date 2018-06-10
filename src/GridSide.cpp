@@ -251,7 +251,7 @@ ostream& operator<<(ostream& output, GridSide* side) {
 		if (i < (int)side->getVerseCount() - 1) {
 			output << "; ";
 		}
-		
+
 	}
 
 	if (side->getDynamicsCount() > 0) {

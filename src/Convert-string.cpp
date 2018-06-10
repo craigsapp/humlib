@@ -10,12 +10,14 @@
 // Description:   Conversions related to strings.
 //
 
-#include <sstream>
-#include <algorithm>
-#include <functional>
-
 #include "Convert.h"
 #include "HumRegex.h"
+
+#include <algorithm>
+#include <sstream>
+#include <functional>
+
+using namespace std;
 
 namespace hum {
 

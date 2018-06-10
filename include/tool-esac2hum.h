@@ -47,7 +47,7 @@ class NoteData {
 		string text;
 };
 
-		
+
 
 class Tool_esac2hum : public HumTool {
 	public:
@@ -64,25 +64,25 @@ class Tool_esac2hum : public HumTool {
 		void      example               (void);
 		void      usage                 (const string& command);
 		void      convertEsacToHumdrum  (ostream& out, istream& input);
-		bool      getSong               (vector<string>& song, istream& infile, 
+		bool      getSong               (vector<string>& song, istream& infile,
 		                                int init);
 		void      convertSong           (vector<string>& song, ostream& out);
-		bool      getKeyInfo            (vector<string>& song, string& key, 
+		bool      getKeyInfo            (vector<string>& song, string& key,
 		                                 double& mindur, int& tonic, string& meter,
 		                                 ostream& out);
 		void      printNoteData         (NoteData& data, int textQ, ostream& out);
-		bool      getNoteList           (vector<string>& song, 
+		bool      getNoteList           (vector<string>& song,
 		                                 vector<NoteData>& songdata, double mindur,
 		                                 int tonic);
-		void      getMeterInfo          (string& meter, vector<int>& numerator, 
+		void      getMeterInfo          (string& meter, vector<int>& numerator,
 		                                 vector<int>& denominator);
 		void      postProcessSongData   (vector<NoteData>& songdata,
 		                                 vector<int>& numerator,vector<int>& denominator);
-		void      printKeyInfo          (vector<NoteData>& songdata, int tonic, 
+		void      printKeyInfo          (vector<NoteData>& songdata, int tonic,
 		                                 int textQ, ostream& out);
 		int       getAccidentalMax      (int a, int b, int c);
 		bool      printTitleInfo        (vector<string>& song, ostream& out);
-		void      getLineRange          (vector<string>& song, const string& field, 
+		void      getLineRange          (vector<string>& song, const string& field,
 		                                 int& start, int& stop);
 		void      printChar             (unsigned char c, ostream& out);
 		void      printBibInfo          (vector<string>& song, ostream& out);
@@ -90,7 +90,7 @@ class Tool_esac2hum : public HumTool {
 		void      printSpecialChars     (ostream& out);
 		bool      placeLyrics           (vector<string>& song,
 		                                 vector<NoteData>& songdata);
-		bool      placeLyricPhrase      (vector<NoteData>& songdata, 
+		bool      placeLyricPhrase      (vector<NoteData>& songdata,
 		                                 vector<string>& lyrics, int line);
 		void      getLyrics             (vector<string>& lyrics, const string& buffer);
 		void      cleanupLyrics         (vector<string>& lyrics);
@@ -98,7 +98,7 @@ class Tool_esac2hum : public HumTool {
 		void      chopExtraInfo         (char* holdbuffer);
 		void      printHumdrumHeaderInfo(ostream& out, vector<string>& song);
 		void      printHumdrumFooterInfo(ostream& out, vector<string>& song);
-		
+
 	private:
 		int            debugQ = 0;        // used with --debug option
 		int            verboseQ = 0;      // used with -v option

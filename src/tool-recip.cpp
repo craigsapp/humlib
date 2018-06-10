@@ -95,7 +95,7 @@ bool Tool_recip::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_recip::insertAnalysisSpines -- Could be more efficient than the 
+// Tool_recip::insertAnalysisSpines -- Could be more efficient than the
 //     k-index loop...
 //
 
@@ -141,7 +141,7 @@ void Tool_recip::doCompositeAnalysis(HumdrumFile& infile) {
 	for (int i=0; i<(int)composite.size(); i++) {
 		composite[i] = infile[i].getDuration();
 	}
-	
+
 	// convert durations to **recip strings
 	vector<string> recips(composite.size());
 	for (int i=0; i<(int)recips.size(); i++) {

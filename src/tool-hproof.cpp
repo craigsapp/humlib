@@ -81,7 +81,7 @@ void Tool_hproof::markNonChordTones(HumdrumFile& infile) {
 		cerr << "Warning: No **harm or **rhrm spines in data" << endl;
 		return;
 	}
-	
+
 	processHarmSpine(infile, hlist[0]);
 }
 

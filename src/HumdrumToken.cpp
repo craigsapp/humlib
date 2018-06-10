@@ -15,7 +15,10 @@
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "Convert.h"
+
 #include "string.h"
+
+using namespace std;
 
 namespace hum {
 
@@ -1944,7 +1947,7 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 				}
 			}
 		}
-		
+
 	}
 
 	return (int)m_linkedParameters.size() - 1;
@@ -2301,7 +2304,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 	if (m_linkedParameters.empty()) {
 		return out;
 	}
-	
+
 	out << Convert::repeatString(indent, level);
 	out << "<parameters-linked>\n";
 

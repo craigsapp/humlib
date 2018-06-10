@@ -288,7 +288,7 @@ void Tool_musicxml2hum::printRdfs(ostream& out) {
 
 //////////////////////////////
 //
-// Tool_muisicxml2hum::setSoftwareInfo -- Store which software program generated the 
+// Tool_muisicxml2hum::setSoftwareInfo -- Store which software program generated the
 //    MusicXML data to handle locale variants.  There can be more than one
 //    <software> entry, so desired information is not necessarily in the first one.
 //
@@ -712,7 +712,7 @@ void Tool_musicxml2hum::printPartInfo(vector<string>& partids,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::insertPartNames -- 
+// Tool_musicxml2hum::insertPartNames --
 //
 
 void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& partdata) {
@@ -790,7 +790,7 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::stitchParts -- Merge individual parts into a 
+// Tool_musicxml2hum::stitchParts -- Merge individual parts into a
 //     single score sequence.
 //
 
@@ -1315,7 +1315,7 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //        </direction-type>
 //      </direction>
 
-void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex, 
+void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
 		int staffindex, int voiceindex, xml_node node) {
 	string placementstring;
 	xml_attribute placement = node.attribute("placement");
@@ -1383,7 +1383,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 			bold = true;
 		}
 	}
-	
+
 	if (italic && bold) {
 		stylestring = ":Bi";
 	} else if (italic) {
@@ -1413,7 +1413,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 // setEditorialAccidental --
 //
 
-void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice, 
+void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		int partindex, int staffindex, int voiceindex) {
 
 	HTp tok = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
@@ -1503,7 +1503,7 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 //////////////////////////////
 //
 // Tool_musicxml2hum::addDynamic -- extract any dynamics for the event
-// 
+//
 // Such as:
 //    <direction placement="below">
 //      <direction-type>
@@ -2233,7 +2233,7 @@ void Tool_musicxml2hum::processPrintElement(GridMeasure* outdata, xml_node eleme
 // Tool_musicxml2hum::addEventToList --
 //
 
-void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> > > >& list, 
+void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> > > >& list,
 		MxmlEvent* event) {
 	int pindex = event->getPartIndex();
 	int staffindex = event->getStaffIndex();
@@ -2254,7 +2254,7 @@ void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> >
 
 ///////////////////////////////
 //
-// Tool_musicxml2hum::addGraceLines -- Add grace note lines.  The number of 
+// Tool_musicxml2hum::addGraceLines -- Add grace note lines.  The number of
 //     lines is equal to the maximum number of successive grace notes in
 //     any part.  Grace notes are filled in reverse sequence.
 //
@@ -2425,7 +2425,7 @@ void Tool_musicxml2hum::addKeySigLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::addTranspositionLine -- Transposition codes to 
+// Tool_musicxml2hum::addTranspositionLine -- Transposition codes to
 //   produce written parts.
 //
 
@@ -2478,7 +2478,7 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 // Tool_musicxml2hum::insertPartOttavas --
 //
 
-void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int partindex, 
+void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int partindex,
 		int partstaffindex) {
 	if (!ottava) {
 		// no ottava for some reason.
@@ -2611,7 +2611,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 	bool hasmensuration = false;
 	HTp token;
 	int staffnum = 0;
-	
+
 	while (timesig) {
 		hasmensuration |= checkForMensuration(timesig);
 		timesig = convertTimeSigToHumdrum(timesig, token, staffnum);
@@ -2637,7 +2637,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::insertPartMensurations -- 
+// Tool_musicxml2hum::insertPartMensurations --
 //
 
 void Tool_musicxml2hum::insertPartMensurations(xml_node timesig,
@@ -3043,7 +3043,7 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
 				ss += "ma";
 			}
-		} 
+		}
 	} else if (interval == 8) {
 		ss += "8";
 		if (otype == "down") {
@@ -3305,7 +3305,7 @@ void Tool_musicxml2hum::printAttributes(xml_node node) {
 //        <pan>0</pan>
 //      </midi-instrument>
 //    </score-part>
-// 
+//
 //    <part-group type="stop" number="1"/>
 //
 //    <score-part id="P3">
@@ -3326,7 +3326,7 @@ void Tool_musicxml2hum::printAttributes(xml_node node) {
 //  </part-list>
 //
 
-string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid, 
+string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 	vector<string>& partids) {
 
 	xml_node partlist = doc.select_node("/score-partwise/part-list").node();

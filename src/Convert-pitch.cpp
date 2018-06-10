@@ -15,6 +15,8 @@
 #include <vector>
 #include <ctype.h>
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -1133,7 +1135,7 @@ int Convert::transToBase40(const string& input) {
 
 //////////////////////////////
 //
-// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison), 
+// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison),
 //    Perfect Fifth => 1, Major second => 2 (two fifths up), etc.
 //
 

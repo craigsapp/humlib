@@ -11,13 +11,15 @@
 //                of the line.
 //
 
-#include <sstream>
-#include <algorithm>
-
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "HumNum.h"
 #include "Convert.h"
+
+#include <algorithm>
+#include <sstream>
+
+using namespace std;
 
 namespace hum {
 
@@ -1217,7 +1219,7 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 // HumdrumLine::printGlobalXmlParameterInfo --
 //
 
-ostream& HumdrumLine::printGlobalXmlParameterInfo(ostream& out, int level, 
+ostream& HumdrumLine::printGlobalXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
 	token(0)->printGlobalXmlParameterInfo(out, level, indent);
 	return out;
@@ -1684,7 +1686,7 @@ void HumdrumLine::insertToken(int index, const char* token) {
 // HumdrumLine::appendToken -- Add a token after the given token position.
 //
 
-void HumdrumLine::appendToken(int index, HTp token) { 
+void HumdrumLine::appendToken(int index, HTp token) {
 	HumdrumLine::insertToken(index+1, token);
 }
 

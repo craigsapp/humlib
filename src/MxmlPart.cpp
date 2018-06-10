@@ -302,7 +302,7 @@ bool MxmlPart::hasEditorialAccidental(void) const {
 //////////////////////////////
 //
 // MxmlPart::hasDynamics --
-// 
+//
 
 bool MxmlPart::hasDynamics(void) const {
 	return m_has_dynamics;
@@ -471,7 +471,7 @@ void MxmlPart::trackStaffVoices(int staffnum, int voicenum) {
 		int newsize = voicenum + 1;
 		sv[staffnum].resize(newsize);
 		for (int i=oldsize; i<newsize; i++) {
-			sv[staffnum][i] = 0;		
+			sv[staffnum][i] = 0;
 		}
 	}
 	sv[staffnum][voicenum]++;

@@ -16,7 +16,11 @@
 #define _NOTECELL_H_INCLUDED
 
 #include "HumdrumFile.h"
+
 #include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -59,15 +63,15 @@ class NoteCell {
 		bool   isRest               (void);
 		bool   isSustained          (void);
 
-		string getAbsKernPitch      (void);
-		string getSgnKernPitch      (void);
+		std::string getAbsKernPitch (void);
+		std::string getSgnKernPitch (void);
 
 		double operator-            (NoteCell& B);
 		double operator-            (int B);
 
 		int    getLineIndex         (void);
 		int    getFieldIndex        (void);
-		ostream& printNoteInfo      (ostream& out);
+		std::ostream& printNoteInfo (std::ostream& out);
 		double getDiatonicIntervalToNextAttack      (void);
 		double getDiatonicIntervalFromPreviousAttack(void);
 		double getMetricLevel       (void);
@@ -77,7 +81,7 @@ class NoteCell {
 		int    getMeterTop          (void);
 		HumNum getMeterBottom       (void);
 
-		vector<HTp> m_tiedtokens;	// list of tied notes/rests after note attack
+		std::vector<HTp> m_tiedtokens;  // list of tied notes/rests after note attack
 
 	protected:
 		void clear                  (void);

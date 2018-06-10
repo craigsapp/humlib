@@ -67,10 +67,10 @@ ostream& HumdrumFile::printXml(ostream& out, int level,
 
 	out << Convert::repeatString(indent, level) << "<sequenceInfo>\n";
 	level++;
-	
+
 	out << Convert::repeatString(indent, level) << "<frameCount>";
 	out << getLineCount() << "</frameCount>\n";
-	
+
 
 	out << Convert::repeatString(indent, level) << "<tpq>";
 	out << tpq() << "</tpq>\n";

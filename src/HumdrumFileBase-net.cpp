@@ -14,10 +14,13 @@
 #include "HumdrumFileBase.h"
 #include "Convert.h"
 
-#include <sstream>
-#include <fstream>
 #include <stdarg.h>
 #include <string.h>
+
+#include <fstream>
+#include <sstream>
+
+using namespace std;
 
 namespace hum {
 

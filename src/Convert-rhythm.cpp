@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <cmath>
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -269,7 +271,7 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
    // special case for 9/2 full-measure rest
    if (fabs(input - 18.0) < 0.0001) {
 		return "2%9";
-   } 
+   }
 
    // handle special rounding cases primarily for SCORE which
    // only stores 4 digits for a duration
@@ -277,10 +279,10 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
       // triplet 32nd note, which has a real duration of 0.0833333 etc.
 		return "48";
    }
-	    
+
    if (diff < 0.002) {
 		output += to_string((int)basic);
-   } else { 
+   } else {
       testinput = input / 3.0 * 2.0;
       basic = 4.0 / testinput;
       diff = basic - (int)basic;

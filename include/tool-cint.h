@@ -32,7 +32,7 @@ class NoteNode {
 		int line;        // line number in original score of note
 		int spine;       // spine number in original score of note
 		int measure;     // measure number of note
-		int serial;      // serial number 
+		int serial;      // serial number
 		int mark;        // for marking search matches
 		int notemarker;  // for pass-through of marks
 		double beatsize; // time signature bottom value which or
@@ -74,84 +74,84 @@ class Tool_cint : public HumTool {
 		void      usage                (const string& command);
 		int       processFile          (HumdrumFile& infile);
 		void      getKernTracks        (vector<int>& ktracks, HumdrumFile& infile);
-		int       validateInterval     (vector<vector<NoteNode> >& notes, 
+		int       validateInterval     (vector<vector<NoteNode> >& notes,
 		                                int i, int j, int k);
-		void      printIntervalInfo    (HumdrumFile& infile, int line, 
-		                                int spine, vector<vector<NoteNode> >& notes, 
-		                                int noteline, int noteindex, 
+		void      printIntervalInfo    (HumdrumFile& infile, int line,
+		                                int spine, vector<vector<NoteNode> >& notes,
+		                                int noteline, int noteindex,
 		                                vector<string >& abbr);
-		void      getAbbreviations     (vector<string >& abbreviations, 
+		void      getAbbreviations     (vector<string >& abbreviations,
 		                                vector<string >& names);
 		void      getAbbreviation      (string& abbr, string& name);
-		void      extractNoteArray     (vector<vector<NoteNode> >& notes, 
-		                                HumdrumFile& infile, vector<int>& ktracks, 
+		void      extractNoteArray     (vector<vector<NoteNode> >& notes,
+		                                HumdrumFile& infile, vector<int>& ktracks,
 		                                vector<int>& reverselookup);
 		int       onlyRests            (vector<NoteNode>& data);
 		int       hasAttack            (vector<NoteNode>& data);
 		int       allSustained         (vector<NoteNode>& data);
-		void      printPitchGrid       (vector<vector<NoteNode> >& notes, 
+		void      printPitchGrid       (vector<vector<NoteNode> >& notes,
 		                                HumdrumFile& infile);
-		void      getNames             (vector<string >& names, 
+		void      getNames             (vector<string >& names,
 		                                vector<int>& reverselookup, HumdrumFile& infile);
-		void      printLattice         (vector<vector<NoteNode> >& notes, 
-		                                HumdrumFile& infile, vector<int>& ktracks, 
+		void      printLattice         (vector<vector<NoteNode> >& notes,
+		                                HumdrumFile& infile, vector<int>& ktracks,
 		                                vector<int>& reverselookup, int n);
 		void      printSpacer          (ostream& out);
 		int       printInterval        (ostream& out, NoteNode& note1, NoteNode& note2,
 		                                int type, int octaveadjust = 0);
-		int       printLatticeItem     (vector<vector<NoteNode> >& notes, int n, 
+		int       printLatticeItem     (vector<vector<NoteNode> >& notes, int n,
 		                                int currentindex, int fileline);
-		int       printLatticeItemRows (vector<vector<NoteNode> >& notes, int n, 
+		int       printLatticeItemRows (vector<vector<NoteNode> >& notes, int n,
 		                                int currentindex, int fileline);
-		int       printLatticeModule   (ostream& out, vector<vector<NoteNode> >& notes, 
+		int       printLatticeModule   (ostream& out, vector<vector<NoteNode> >& notes,
 		                                int n, int startline, int part1, int part2);
-		void      printInterleaved     (HumdrumFile& infile, int line, 
-		                                vector<int>& ktracks, vector<int>& reverselookup, 
+		void      printInterleaved     (HumdrumFile& infile, int line,
+		                                vector<int>& ktracks, vector<int>& reverselookup,
 		                                const string& interstring);
-		void      printLatticeInterleaved(vector<vector<NoteNode> >& notes, 
-		                                HumdrumFile& infile, vector<int>& ktracks, 
+		void      printLatticeInterleaved(vector<vector<NoteNode> >& notes,
+		                                HumdrumFile& infile, vector<int>& ktracks,
 		                                vector<int>& reverselookup, int n);
-		int       printInterleavedLattice(HumdrumFile& infile, int line, 
+		int       printInterleavedLattice(HumdrumFile& infile, int line,
 		                                vector<int>& ktracks, vector<int>& reverselookup,
 		                                int n, int currentindex,
 		                                vector<vector<NoteNode> >& notes);
-		int       printCombinations    (vector<vector<NoteNode> >& notes, 
-		                                HumdrumFile& infile, vector<int>& ktracks, 
+		int       printCombinations    (vector<vector<NoteNode> >& notes,
+		                                HumdrumFile& infile, vector<int>& ktracks,
 		                                vector<int>& reverselookup, int n,
 		                                vector<vector<string> >& retrospective,
 		                                const string& searchstring);
-		void      printAsCombination   (HumdrumFile& infile, int line, 
+		void      printAsCombination   (HumdrumFile& infile, int line,
 		                                vector<int>& ktracks, vector<int>& reverselookup,
 		                                const string& interstring);
-		int       printModuleCombinations(HumdrumFile& infile, int line, 
+		int       printModuleCombinations(HumdrumFile& infile, int line,
 		                                vector<int>& ktracks, vector<int>& reverselookup,
-		                                int n, int currentindex, 
-		                                vector<vector<NoteNode> >& notes, 
-		                                int& matchcount, 
+		                                int n, int currentindex,
+		                                vector<vector<NoteNode> >& notes,
+		                                int& matchcount,
 		                                vector<vector<string> >& retrospective,
 		                                const string& searchstring);
-		int       printCombinationsSuspensions(vector<vector<NoteNode> >& notes, 
-		                                HumdrumFile& infile, vector<int>& ktracks, 
+		int       printCombinationsSuspensions(vector<vector<NoteNode> >& notes,
+		                                HumdrumFile& infile, vector<int>& ktracks,
 		                                vector<int>& reverselookup, int n,
 		                                vector<vector<string> >& retrospective);
-		int       printCombinationModule(ostream& out, const string& filename, 
-		                                vector<vector<NoteNode> >& notes, 
+		int       printCombinationModule(ostream& out, const string& filename,
+		                                vector<vector<NoteNode> >& notes,
 		                                int n, int startline, int part1, int part2,
 		                                vector<vector<string> >& retrospective,
 		                                char& notemarker, int markstate = 0);
 		int       printCombinationModulePrepare(ostream& out, const string& filename,
-		                                vector<vector<NoteNode> >& notes, int n, 
+		                                vector<vector<NoteNode> >& notes, int n,
 		                                int startline, int part1, int part2,
 		                                vector<vector<string> >& retrospective,
 		                                HumdrumFile& infile, const string& searchstring);
-		int       getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& notes, 
+		int       getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& notes,
 		                                int n, int startline, int part1, int part2);
-		void      addMarksToInputData  (HumdrumFile& infile, 
+		void      addMarksToInputData  (HumdrumFile& infile,
 		                                vector<vector<NoteNode> >& notes,
 		                                vector<int>& ktracks,
 		                                vector<int>& reverselookup);
 		void      markNote              (HumdrumFile& infile, int line, int col);
-		void      initializeRetrospective(vector<vector<string> >& retrospective, 
+		void      initializeRetrospective(vector<vector<string> >& retrospective,
 		                                HumdrumFile& infile, vector<int>& ktracks);
 		int       getTriangleIndex(int number, int num1, int num2);
 		void      adjustKTracks        (vector<int>& ktracks, const string& koption);

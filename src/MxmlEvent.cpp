@@ -557,7 +557,7 @@ bool MxmlEvent::isGrace(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStart -- 
+// MxmlEvent::hasSlurStart --
 //   direction: 0=unspecified, 1=positive curvature, -1=negative curvature.
 //
 //  <note>
@@ -566,7 +566,7 @@ bool MxmlEvent::isGrace(void) {
 //         <slur type="start" orientation="over" number="1">
 //
 //  And also:
-// 
+//
 //  <note>
 //     <notations>
 //          <slur number="1" placement="above" type="start"/>
@@ -1595,8 +1595,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	if (umordent)     { ss << "m";  }  // figure out whole-tone mordents later
 	if (lmordent)     { ss << "w";  }  // figure out whole-tone mordents later
 	if (breath)       { ss << ",";  }
-	if (caesura)      { 
-		ss << "Z";  
+	if (caesura)      {
+		ss << "Z";
 		reportCaesuraToOwner();
 	}
 

@@ -40,7 +40,7 @@ class MxmlPart {
 		             ~MxmlPart             ();
 		void          clear                (void);
 		void          enableStems          (void);
-		bool          readPart             (const string& id, xml_node partdef, 
+		bool          readPart             (const string& id, xml_node partdef,
 		                                    xml_node part);
 		bool          addMeasure           (xml_node mel);
 		bool          addMeasure           (xpath_node mel);
@@ -95,12 +95,12 @@ class MxmlPart {
 		string               m_partabbr;
 		string               m_caesura;
 
-		// m_staffvoicehist: counts of staff and voice numbers.  
+		// m_staffvoicehist: counts of staff and voice numbers.
 		// staff=0 is used for items such as measures.
 		// voice=0 is used for nonduration items such as harmony.
 		vector<vector<int> > m_staffvoicehist;
 	 	vector<pair<int, int> > m_voicemapping; // voicenum -> (staff, voiceindex)
-		
+
 	friend MxmlMeasure;
 	friend MxmlEvent;
 

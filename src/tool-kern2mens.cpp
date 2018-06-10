@@ -79,7 +79,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_kern2mens::convertToMens -- 
+// Tool_kern2mens::convertToMens --
 //
 
 void Tool_kern2mens::convertToMens(HumdrumFile& infile) {

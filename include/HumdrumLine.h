@@ -14,12 +14,12 @@
 #ifndef _HUMDRUMLINE_H_INCLUDED
 #define _HUMDRUMLINE_H_INCLUDED
 
-#include <iostream>
-
 #include "HumdrumToken.h"
 #include "HumHash.h"
 
-using namespace std;
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -27,67 +27,67 @@ class HumdrumFile;
 
 // START_MERGE
 
-class HumdrumLine : public string, public HumHash {
+class HumdrumLine : public std::string, public HumHash {
 	public:
-		         HumdrumLine            (void);
-		         HumdrumLine            (const string& aString);
-		         HumdrumLine            (const char* aString);
-		         HumdrumLine            (HumdrumLine& line);
-		         HumdrumLine            (HumdrumLine& line, void* owner);
-		        ~HumdrumLine            ();
+		            HumdrumLine            (void);
+		            HumdrumLine            (const std::string& aString);
+		            HumdrumLine            (const char* aString);
+		            HumdrumLine            (HumdrumLine& line);
+		            HumdrumLine            (HumdrumLine& line, void* owner);
+		           ~HumdrumLine            ();
 
-		HumdrumLine& operator=          (HumdrumLine& line);
-		bool     isComment              (void) const;
-		bool     isCommentLocal         (void) const;
-		bool     isLocalComment         (void) const { return isCommentLocal(); }
-		bool     isCommentGlobal        (void) const;
-		bool     isReference            (void) const;
-		string   getReferenceKey        (void) const;
-		string   getReferenceValue      (void) const;
-		bool     isGlobalComment         (void) const { return isCommentGlobal(); }
-		bool     isExclusive            (void) const;
-		bool     isExclusiveInterpretation (void) const { return isExclusive(); }
-		bool     isTerminator           (void) const;
-		bool     isInterp               (void) const;
-		bool     isInterpretation       (void) const { return isInterp(); }
-		bool     isBarline              (void) const;
-		bool     isData                 (void) const;
-		bool     isAllNull              (void) const;
-		bool     isAllRhythmicNull      (void) const;
-		bool     isEmpty                (void) const;
-		bool     isBlank                (void) const { return isEmpty(); }
-		bool     isManipulator          (void) const;
-		bool     hasSpines              (void) const;
-		bool     isGlobal               (void) const;
-		HTp      token                  (int index) const;
-		void     getTokens              (vector<HTp>& list);
-		int      getTokenCount          (void) const;
-		int      getFieldCount          (void) const { return getTokenCount(); }
-		string   getTokenString         (int index) const;
-		bool     equalChar              (int index, char ch) const;
-		char     getChar                (int index) const;
-		bool     isKernBoundaryStart    (void) const;
-		bool     isKernBoundaryEnd      (void) const;
-		ostream& printSpineInfo         (ostream& out = cout);
-		ostream& printTrackInfo         (ostream& out = cout);
-		ostream& printDataTypeInfo      (ostream& out = cout);
-		ostream& printDurationInfo      (ostream& out = cout);
-		ostream& printCsv               (ostream& out = cout,
-		                                 const string& separator = ",");
-		ostream& printXml               (ostream& out = cout, int level = 0,
-		                                 const string& indent = "\t");
-		ostream& printXmlParameterInfo  (ostream& out, int level,
-		                                 const string& indent);
-		ostream& printGlobalXmlParameterInfo(ostream& out, int level,
-		                                 const string& indent);
-		string   getXmlId               (const string& prefix = "") const;
-		string   getXmlIdPrefix         (void) const;
-		void     createLineFromTokens   (void);
-		int      getLineIndex           (void) const;
-		int      getLineNumber          (void) const;
-		HumdrumFile* getOwner           (void);
-		void     setText                (const string& text);
-		string   getText                (void);
+		HumdrumLine& operator=             (HumdrumLine& line);
+		bool        isComment              (void) const;
+		bool        isCommentLocal         (void) const;
+		bool        isLocalComment         (void) const { return isCommentLocal(); }
+		bool        isCommentGlobal        (void) const;
+		bool        isReference            (void) const;
+		std::string getReferenceKey        (void) const;
+		std::string getReferenceValue      (void) const;
+		bool        isGlobalComment         (void) const { return isCommentGlobal(); }
+		bool        isExclusive            (void) const;
+		bool        isExclusiveInterpretation (void) const { return isExclusive(); }
+		bool        isTerminator           (void) const;
+		bool        isInterp               (void) const;
+		bool        isInterpretation       (void) const { return isInterp(); }
+		bool        isBarline              (void) const;
+		bool        isData                 (void) const;
+		bool        isAllNull              (void) const;
+		bool        isAllRhythmicNull      (void) const;
+		bool        isEmpty                (void) const;
+		bool        isBlank                (void) const { return isEmpty(); }
+		bool        isManipulator          (void) const;
+		bool        hasSpines              (void) const;
+		bool        isGlobal               (void) const;
+		HTp         token                  (int index) const;
+		void        getTokens              (std::vector<HTp>& list);
+		int         getTokenCount          (void) const;
+		int         getFieldCount          (void) const { return getTokenCount(); }
+		std::string getTokenString         (int index) const;
+		bool        equalChar              (int index, char ch) const;
+		char        getChar                (int index) const;
+		bool        isKernBoundaryStart    (void) const;
+		bool        isKernBoundaryEnd      (void) const;
+		std::ostream& printSpineInfo       (std::ostream& out = std::cout);
+		std::ostream& printTrackInfo       (std::ostream& out = std::cout);
+		std::ostream& printDataTypeInfo    (std::ostream& out = std::cout);
+		std::ostream& printDurationInfo    (std::ostream& out = std::cout);
+		std::ostream& printCsv             (std::ostream& out = std::cout,
+		                                    const std::string& separator = ",");
+		std::ostream& printXml             (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printXmlParameterInfo(std::ostream& out, int level,
+		                                    const std::string& indent);
+		std::ostream& printGlobalXmlParameterInfo(std::ostream& out, int level,
+		                                    const std::string& indent);
+		std::string   getXmlId             (const std::string& prefix = "") const;
+		std::string   getXmlIdPrefix       (void) const;
+		void          createLineFromTokens (void);
+		int           getLineIndex         (void) const;
+		int           getLineNumber        (void) const;
+		HumdrumFile*  getOwner             (void);
+		void          setText              (const std::string& text);
+		std::string   getText              (void);
 
 		HumNum   getDuration            (void) const;
 		HumNum   getDurationFromStart   (void) const;
@@ -106,27 +106,27 @@ class HumdrumLine : public string, public HumHash {
 		int      addLinkedParameter     (HTp token);
 
 		HumNum   getBeat                (HumNum beatdur = "1") const;
-		HumNum   getBeat                (string beatrecip = "4") const;
+		HumNum   getBeat                (std::string beatrecip = "4") const;
 		HTp      getTrackStart          (int track) const;
 		void     setLineFromCsv         (const char* csv,
-		                                 const string& separator = ",");
-		void     setLineFromCsv         (const string& csv,
-		                                 const string& separator = ",");
+		                                 const std::string& separator = ",");
+		void     setLineFromCsv         (const std::string& csv,
+		                                 const std::string& separator = ",");
 
 		// low-level editing functions (need to re-analyze structure after using)
 		void     appendToken            (HTp token);
 		void     appendToken            (const HumdrumToken& token);
-		void     appendToken            (const string& token);
+		void     appendToken            (const std::string& token);
 		void     appendToken            (const char* token);
 
 		void     appendToken            (int index, HTp token);
 		void     appendToken            (int index, const HumdrumToken& token);
-		void     appendToken            (int index, const string& token);
+		void     appendToken            (int index, const std::string& token);
 		void     appendToken            (int index, const char* token);
 
 		void     insertToken            (int index, HTp token);
 		void     insertToken            (int index, const HumdrumToken& token);
-		void     insertToken            (int index, const string& token);
+		void     insertToken            (int index, const std::string& token);
 		void     insertToken            (int index, const char* token);
 
 		void     setDuration            (HumNum aDur);
@@ -135,19 +135,19 @@ class HumdrumLine : public string, public HumHash {
 		void     setDurationToBarline   (HumNum dur);
 
 	protected:
-		bool     analyzeTracks          (string& err);
-		bool     analyzeTokenDurations  (string& err);
+		bool     analyzeTracks          (std::string& err);
+		bool     analyzeTokenDurations  (std::string& err);
 		void     setLineIndex           (int index);
 		void     clear                  (void);
 		void     setOwner               (void* hfile);
 		int      createTokensFromLine   (void);
 		void     setLayoutParameters    (void);
-		void     setParameters          (const string& pdata);
+		void     setParameters          (const std::string& pdata);
 		void     storeGlobalLinkedParameters(void);
-		ostream&	printXmlGlobalLinkedParameterInfo(ostream& out = cout, int level = 0,
-		                                 const string& indent = "\t");
-		ostream& printXmlGlobalLinkedParameters(ostream& out = cout, int level = 0,
-		                                 const string& indent = "\t");
+		std::ostream&	printXmlGlobalLinkedParameterInfo(std::ostream& out = std::cout, int level = 0,
+		                                 const std::string& indent = "\t");
+		std::ostream& printXmlGlobalLinkedParameters(std::ostream& out = std::cout, int level = 0,
+		                                 const std::string& indent = "\t");
 
 	private:
 
@@ -172,7 +172,7 @@ class HumdrumLine : public string, public HumHash {
 		// This variable is filled by HumdrumFile::read().
 		// The contents of this vector should be deleted when deconstructing
 		// a HumdrumLine object.
-		vector<HumdrumToken*> m_tokens;
+		std::vector<HumdrumToken*> m_tokens;
 
 		// m_duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the
@@ -202,7 +202,7 @@ class HumdrumLine : public string, public HumHash {
 
 		// m_linkedParameters: List of Humdrum tokens which are parameters
 		// (mostly only layout parameters at the moment)
-		vector<HTp> m_linkedParameters;
+		std::vector<HTp> m_linkedParameters;
 
 		// owner: This is the HumdrumFile which manages the given line.
 		void* m_owner;
@@ -213,8 +213,8 @@ class HumdrumLine : public string, public HumHash {
 	friend class HumdrumFile;
 };
 
-ostream& operator<< (ostream& out, HumdrumLine& line);
-ostream& operator<< (ostream& out, HumdrumLine* line);
+std::ostream& operator<< (std::ostream& out, HumdrumLine& line);
+std::ostream& operator<< (std::ostream& out, HumdrumLine* line);
 
 
 // END_MERGE

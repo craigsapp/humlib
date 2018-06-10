@@ -14,6 +14,7 @@
 #define _HUMDRUMTOKEN_H_INCLUDED
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 class HumParamSet;
@@ -23,8 +24,6 @@ class HumParamSet;
 #include "HumHash.h"
 #include "HumParamSet.h"
 
-using namespace std;
-
 namespace hum {
 
 // START_MERGE
@@ -32,7 +31,7 @@ namespace hum {
 
 typedef HumdrumToken* HTp;
 
-class HumdrumToken : public string, public HumHash {
+class HumdrumToken : public std::string, public HumHash {
 	public:
 		         HumdrumToken              (void);
 		         HumdrumToken              (const HumdrumToken& token);
@@ -42,7 +41,7 @@ class HumdrumToken : public string, public HumHash {
 		         HumdrumToken              (HumdrumToken* token,
 		                                    HumdrumLine* owner);
 		         HumdrumToken              (const char* token);
-		         HumdrumToken              (const string& token);
+		         HumdrumToken              (const std::string& token);
 		        ~HumdrumToken              ();
 
 		bool     isNull                    (void) const;
@@ -81,11 +80,11 @@ class HumdrumToken : public string, public HumHash {
 		bool     isInterpretation          (void) const;
 		bool     isNonNullData             (void) const;
 		bool     isNullData                (void) const;
-		bool     isChord                   (const string& separator = " ");
+		bool     isChord                   (const std::string& separator = " ");
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
-		bool     equalTo                   (const string& pattern);
+		bool     equalTo                   (const std::string& pattern);
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -143,20 +142,20 @@ class HumdrumToken : public string, public HumHash {
 		int      getFieldNumber            (void) const;
 		int      getTokenIndex             (void) const;
 		int      getTokenNumber            (void) const;
-		const string& getDataType          (void) const;
-		bool     isDataType                (const string& dtype) const;
+		const std::string& getDataType          (void) const;
+		bool     isDataType                (const std::string& dtype) const;
 		bool     isKern                    (void) const;
 		bool     isMens                    (void) const;
-		string   getSpineInfo              (void) const;
+		std::string   getSpineInfo              (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
 		bool     noteInLowerSubtrack       (void);
-		string   getTrackString            (void) const;
-		int      getSubtokenCount          (const string& separator = " ") const;
-		string   getSubtoken               (int index,
-		                                    const string& separator = " ") const;
+		std::string   getTrackString            (void) const;
+		int      getSubtokenCount          (const std::string& separator = " ") const;
+		std::string   getSubtoken               (int index,
+		                                    const std::string& separator = " ") const;
 		void     setParameters             (HTp ptok);
-		void     setParameters             (const string& pdata, HTp ptok = NULL);
+		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
 		int      getSlurStartElisionLevel  (int index = 0) const;
 		int      getSlurEndElisionLevel    (int index = 0) const;
@@ -164,26 +163,26 @@ class HumdrumToken : public string, public HumHash {
 		HTp      getSlurEndToken           (int number = 0);
 		void     storeLinkedParameters     (void);
 		bool     linkedParameterIsGlobal   (int index);
-		ostream& printCsv                  (ostream& out = cout);
-		ostream& printXml                  (ostream& out = cout, int level = 0,
-		                                    const string& indent = "\t");
-		ostream& printGlobalXmlParameterInfo(ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
-		string   getXmlId                  (const string& prefix = "") const;
-		string   getXmlIdPrefix            (void) const;
-		void     setText                   (const string& text);
-		string   getText                   (void) const;
+		std::ostream& printCsv                  (std::ostream& out = std::cout);
+		std::ostream& printXml                  (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printGlobalXmlParameterInfo(std::ostream& out = std::cout, int level = 0,
+		                                   const std::string& indent = "\t");
+		std::string   getXmlId                  (const std::string& prefix = "") const;
+		std::string   getXmlIdPrefix            (void) const;
+		void     setText                   (const std::string& text);
+		std::string   getText                   (void) const;
 		int      addLinkedParameter        (HTp token);
 		int      getLinkedParameterCount   (void);
 		HumParamSet* getLinkedParameter    (int index);
 		HumParamSet* getLinkedParameter    (void);
-		ostream& printXmlLinkedParameterInfo(ostream& out, int level, const string& indent);
+		std::ostream& printXmlLinkedParameterInfo(std::ostream& out, int level, const std::string& indent);
 
 		// layout parameter accessors
-		string   getVisualDuration         (void);
+		std::string   getVisualDuration         (void);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
-		HumdrumToken& operator=            (const string& aToken);
+		HumdrumToken& operator=            (const std::string& aToken);
 		HumdrumToken& operator=            (const char* aToken);
 
 		// next/previous token functions:
@@ -191,8 +190,8 @@ class HumdrumToken : public string, public HumHash {
 		int         getPreviousTokenCount  (void) const;
 		HTp         getNextToken           (int index = 0) const;
 		HTp         getPreviousToken       (int index = 0) const;
-		vector<HTp> getNextTokens          (void) const;
-		vector<HTp> getPreviousTokens      (void) const;
+		std::vector<HTp> getNextTokens     (void) const;
+		std::vector<HTp> getPreviousTokens (void) const;
 
 		// next/previous token on line:
 		HTp      getNextFieldToken           (void) const;
@@ -220,7 +219,7 @@ class HumdrumToken : public string, public HumHash {
 	protected:
 		void     setLineIndex              (int lineindex);
 		void     setFieldIndex             (int fieldlindex);
-		void     setSpineInfo              (const string& spineinfo);
+		void     setSpineInfo              (const std::string& spineinfo);
 		void     setSubtrack               (int aSubtrack);
 		void     setSubtrackCount          (int count);
 		void     setPreviousToken          (HTp aToken);
@@ -234,17 +233,17 @@ class HumdrumToken : public string, public HumHash {
 		void     setDuration               (const HumNum& dur);
 		void     setStrandIndex            (int index);
 
-		bool     analyzeDuration          (string& err);
-		ostream& printXmlBaseInfo         (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
-		ostream& printXmlContentInfo      (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
-		ostream& printXmlStructureInfo    (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
-		ostream& printXmlParameterInfo    (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
-		ostream&	printXmlLinkedParameters (ostream& out = cout, int level = 0,
-		                                   const string& indent = "\t");
+		bool     analyzeDuration           (std::string& err);
+		std::ostream& printXmlBaseInfo     (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printXmlContentInfo  (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printXmlStructureInfo(std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printXmlParameterInfo(std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream&	printXmlLinkedParameters (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
 
 	private:
 		// address: The address contains information about the location of
@@ -263,22 +262,22 @@ class HumdrumToken : public string, public HumHash {
 		// following token, but there can be two tokens if the current
 		// token is *^, and there will be zero following tokens after a
 		// spine terminating token (*-).
-		vector<HTp> m_nextTokens;     // link to next token(s) in spine
+		std::vector<HTp> m_nextTokens;     // link to next token(s) in spine
 
 		// previousTokens: Simiar to nextTokens, but for the immediately
 		// follow token(s) in the data.  Typically there will be one
 		// preceding token, but there can be multiple tokens when the previous
 		// line has *v merge tokens for the spine.  Exclusive interpretations
 		// have no tokens preceding them.
-		vector<HTp> m_previousTokens; // link to last token(s) in spine
+		std::vector<HTp> m_previousTokens; // link to last token(s) in spine
 
 		// nextNonNullTokens: This is a list of non-tokens in the spine
 		// that follow this one.
-		vector<HTp> m_nextNonNullTokens;
+		std::vector<HTp> m_nextNonNullTokens;
 
 		// previousNonNullTokens: This is a list of non-tokens in the spine
 		// that preced this one.
-		vector<HTp> m_previousNonNullTokens;
+		std::vector<HTp> m_previousNonNullTokens;
 
 		// rhycheck: Used to perfrom HumdrumFileStructure::analyzeRhythm
 		// recursively.
@@ -295,7 +294,7 @@ class HumdrumToken : public string, public HumHash {
 
 		// m_linkedParameters: List of Humdrum tokens which are parameters
 		// (mostly only layout parameters at the moment).
-		vector<HTp> m_linkedParameters;
+		std::vector<HTp> m_linkedParameters;
 
 		// m_linkedParameter: A single parameter encoded in the text of the
 		// token.
@@ -309,11 +308,11 @@ class HumdrumToken : public string, public HumHash {
 };
 
 
-ostream& operator<<(ostream& out, const HumdrumToken& token);
-ostream& operator<<(ostream& out, HTp token);
+std::ostream& operator<<(std::ostream& out, const HumdrumToken& token);
+std::ostream& operator<<(std::ostream& out, HTp token);
 
-ostream& printSequence(vector<vector<HTp> >& sequence, ostream& out=std::cout);
-ostream& printSequence(vector<HTp>& sequence, ostream& out = std::cout);
+std::ostream& printSequence(std::vector<std::vector<HTp> >& sequence, std::ostream& out=std::cout);
+std::ostream& printSequence(std::vector<HTp>& sequence, std::ostream& out = std::cout);
 
 
 // END_MERGE

@@ -143,14 +143,14 @@ bool Tool_cint::run(HumdrumFile& infile) {
 //
 
 NoteNode::NoteNode(const NoteNode& anode) {
-	b40        = anode.b40; 
-	line       = anode.line; 
-	spine      = anode.spine; 
-	measure    = anode.measure; 
-	serial     = anode.serial; 
-	mark       = anode.mark; 
-	notemarker = anode.notemarker; 
-	beatsize   = anode.beatsize; 
+	b40        = anode.b40;
+	line       = anode.line;
+	spine      = anode.spine;
+	measure    = anode.measure;
+	serial     = anode.serial;
+	mark       = anode.mark;
+	notemarker = anode.notemarker;
+	beatsize   = anode.beatsize;
 	duration   = 0;
 	protected_id = anode.protected_id;
 }
@@ -160,14 +160,14 @@ NoteNode& NoteNode::operator=(NoteNode& anode) {
 	if (this == &anode) {
 		return *this;
 	}
-	b40        = anode.b40; 
-	line       = anode.line; 
-	spine      = anode.spine; 
-	measure    = anode.measure; 
-	serial     = anode.serial; 
-	mark       = anode.mark; 
-	notemarker = anode.notemarker; 
-	beatsize   = anode.beatsize; 
+	b40        = anode.b40;
+	line       = anode.line;
+	spine      = anode.spine;
+	measure    = anode.measure;
+	serial     = anode.serial;
+	mark       = anode.mark;
+	notemarker = anode.notemarker;
+	beatsize   = anode.beatsize;
 	duration   = anode.duration;
 	protected_id = anode.protected_id;
 	return *this;
@@ -184,11 +184,11 @@ NoteNode::~NoteNode(void) {
 }
 
 
-void NoteNode::clear(void) { 
-	mark = measure = serial = b40 = 0; 
+void NoteNode::clear(void) {
+	mark = measure = serial = b40 = 0;
 	beatsize = 0.0;
-	notemarker = 0; 
-	line = spine = -1; 
+	notemarker = 0;
+	line = spine = -1;
 	protected_id = "";
 }
 
@@ -253,7 +253,7 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 	extractNoteArray(notes, infile, ktracks, reverselookup);
 
 	if (pitchesQ) {
-		printPitchGrid(notes, infile); 
+		printPitchGrid(notes, infile);
 		exit(0);
 	}
 
@@ -261,13 +261,13 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 	if (latticeQ) {
 		printLattice(notes, infile, ktracks, reverselookup, Chaincount);
 	} else if (interleavedQ) {
-		printLatticeInterleaved(notes, infile, ktracks, reverselookup, 
+		printLatticeInterleaved(notes, infile, ktracks, reverselookup,
 			Chaincount);
 	} else if (suspensionsQ) {
-		count = printCombinationsSuspensions(notes, infile, ktracks, 
+		count = printCombinationsSuspensions(notes, infile, ktracks,
 				reverselookup, Chaincount, retrospective);
 	} else {
-		count = printCombinations(notes, infile, ktracks, reverselookup, 
+		count = printCombinations(notes, infile, ktracks, reverselookup,
 				Chaincount, retrospective, SearchString);
 	}
 
@@ -280,9 +280,9 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 		infile.createLinesFromTokens();
 		m_humdrum_text << infile;
 		m_humdrum_text << "!!!RDF**kern: @ = matched note, color=\"#ff0000\"\n";
-	} 
+	}
 
-	if (debugQ) { 
+	if (debugQ) {
 		int j;
 		for (i=0; i<(int)retrospective[0].size(); i++) {
 			for (j=0; j<(int)retrospective.size(); j++) {
@@ -314,7 +314,7 @@ void Tool_cint::adjustKTracks(vector<int>& ktracks, const string& koption) {
 	int number2 = 0;
 	HumRegex pre2;
 
-	if (pre2.search(pre.getMatch(1), "\\d+")) { 
+	if (pre2.search(pre.getMatch(1), "\\d+")) {
 		number1 = pre.getMatchInt(1);
 		if (pre.getMatch(1).find('$') != string::npos) {
 			number1 = (int)ktracks.size() - number1;
@@ -323,7 +323,7 @@ void Tool_cint::adjustKTracks(vector<int>& ktracks, const string& koption) {
 		number1 = (int)ktracks.size();
 	}
 
-	if (pre2.search(pre.getMatch(2), "\\d+")) { 
+	if (pre2.search(pre.getMatch(2), "\\d+")) {
 		number2 = pre.getMatchInt(2);
 		if (pre.getMatch(2).find('$') != string::npos) {
 			number2 = (int)ktracks.size() - number2;
@@ -350,7 +350,7 @@ void Tool_cint::adjustKTracks(vector<int>& ktracks, const string& koption) {
 // Tool_cint::initializeRetrospective --
 //
 
-void Tool_cint::initializeRetrospective(vector<vector<string> >& retrospective, 
+void Tool_cint::initializeRetrospective(vector<vector<string> >& retrospective,
 		HumdrumFile& infile, vector<int>& ktracks) {
 
 	int columns = (int)ktracks.size();
@@ -409,8 +409,8 @@ void Tool_cint::initializeRetrospective(vector<vector<string> >& retrospective,
 // have to do something with sbuffer
 //
 
-int  Tool_cint::printCombinationsSuspensions(vector<vector<NoteNode> >& notes, 
-		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup, 
+int  Tool_cint::printCombinationsSuspensions(vector<vector<NoteNode> >& notes,
+		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup,
 		int n, vector<vector<string> >& retrospective) {
 
 	string sbuffer;
@@ -465,7 +465,7 @@ int  Tool_cint::printCombinationsSuspensions(vector<vector<NoteNode> >& notes,
 	sbuffer = "";
 	// "8xs 1 7sx 1 7sx 1 6sx 1 6sx 1 5sx -1 8xx" archetype: Duf3015a m94 S&T
 	sbuffer += "^8xs 1 7sx 1 7sx 1 6sx 1 5sx -2 8xx$";
- 
+
 	countsum += printCombinations(notes, infile, ktracks, reverselookup, n,
 							retrospective, sbuffer);
 
@@ -485,15 +485,15 @@ int  Tool_cint::printCombinationsSuspensions(vector<vector<NoteNode> >& notes,
 // Tool_cint::printCombinations --
 //
 
-int  Tool_cint::printCombinations(vector<vector<NoteNode> >& notes, 
-		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup, 
+int  Tool_cint::printCombinations(vector<vector<NoteNode> >& notes,
+		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup,
 		int n, vector<vector<string> >& retrospective, const string& searchstring) {
 	int i;
 	int currentindex = 0;
 	int matchcount   = 0;
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			// print all lines here which do not contain spine 
+			// print all lines here which do not contain spine
 			// information.
 			if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
 				m_humdrum_text << infile[i] << "\n";
@@ -523,7 +523,7 @@ int  Tool_cint::printCombinations(vector<vector<NoteNode> >& notes,
 			printAsCombination(infile, i, ktracks, reverselookup, *infile.token(i, 0));
 		} else {
 			// print combination data
-			currentindex = printModuleCombinations(infile, i, ktracks, 
+			currentindex = printModuleCombinations(infile, i, ktracks,
 				reverselookup, n, currentindex, notes, matchcount, retrospective, searchstring);
 		}
 		if (!(raw2Q || rawQ || markQ || retroQ || countQ)) {
@@ -542,14 +542,14 @@ int  Tool_cint::printCombinations(vector<vector<NoteNode> >& notes,
 //
 
 int Tool_cint::printModuleCombinations(HumdrumFile& infile, int line, vector<int>& ktracks,
-		vector<int>& reverselookup, int n, int currentindex, 
-		vector<vector<NoteNode> >& notes, int& matchcount, 
+		vector<int>& reverselookup, int n, int currentindex,
+		vector<vector<NoteNode> >& notes, int& matchcount,
 		vector<vector<string> >& retrospective, const string& searchstring) {
 
 	int fileline = line;
 	string filename = infile.getFilename();
 
-	while ((currentindex < (int)notes[0].size()) 
+	while ((currentindex < (int)notes[0].size())
 			&& (fileline > notes[0][currentindex].line)) {
 		currentindex++;
 	}
@@ -622,7 +622,7 @@ int Tool_cint::printModuleCombinations(HumdrumFile& infile, int line, vector<int
 				int part1 = reverselookup[track];
 				int part2 = part1+1+jj;
 				// m_humdrum_text << part1 << "," << part2;
-				matchcount += printCombinationModulePrepare(m_humdrum_text, filename, 
+				matchcount += printCombinationModulePrepare(m_humdrum_text, filename,
 						notes, n, currentindex, part1, part2, retrospective, infile,
 						searchstring);
 			}
@@ -646,8 +646,8 @@ int Tool_cint::printModuleCombinations(HumdrumFile& infile, int line, vector<int
 //
 
 int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filename,
-		 vector<vector<NoteNode> >& notes, int n, int startline, int part1, 
-		 int part2, vector<vector<string> >& retrospective, 
+		 vector<vector<NoteNode> >& notes, int n, int startline, int part1,
+		 int part2, vector<vector<string> >& retrospective,
 		HumdrumFile& infile, const string& searchstring) {
 	int count = 0;
 	HumRegex hre;
@@ -655,9 +655,9 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 	int match;
 	char notemarker = '\0';
 // ggg
-	int status = printCombinationModule(tempstream, filename, notes, 
+	int status = printCombinationModule(tempstream, filename, notes,
 			n, startline, part1, part2, retrospective, notemarker);
-	if (status) { 
+	if (status) {
 		if (raw2Q || rawQ) {
 			tempstream << "\n";
 		}
@@ -672,15 +672,15 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 				count++;
 				if (locationQ) {
 					int line = notes[0][startline].line;
-					double loc = infile[line].getDurationFromStart().getFloat() / 
+					double loc = infile[line].getDurationFromStart().getFloat() /
 							infile[infile.getLineCount()-1].getDurationFromStart().getFloat();
 					loc = int(100.0 * loc + 0.5)/100.0;
-					m_humdrum_text << "!!LOCATION:" 
-							<< "\t"  << loc 
+					m_humdrum_text << "!!LOCATION:"
+							<< "\t"  << loc
 							<< "\tm" << getMeasure(infile, line)
 							<< "\tv" << ((int)notes.size() - part2)
 							<< ":v"  << ((int)notes.size() - part1)
-							<< "\t"  << infile.getFilename() 
+							<< "\t"  << infile.getFilename()
 							<< endl;
 				}
 				if (raw2Q || rawQ) {
@@ -688,10 +688,10 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 					// newline already added somewhere previously.
 					// m_humdrum_text << "\n";
 				} else {
-					// mark notes of the matched module(s) in the note array 
+					// mark notes of the matched module(s) in the note array
 					// for later marking in input score.
-					status = printCombinationModule(tempstream, filename, 
-						 notes, n, startline, part1, part2, retrospective, 
+					status = printCombinationModule(tempstream, filename,
+						 notes, n, startline, part1, part2, retrospective,
 						 notemarker, MARKNOTES);
 					if (status && (raw2Q || rawQ)) {
 						tempstream << "\n";
@@ -726,7 +726,7 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 int Tool_cint::getMeasure(HumdrumFile& infile, int line) {
 	int measure = 0;
 	HumRegex hre;
-	
+
 	for (int i=line; i>=0; i--) {
 		if (!infile[i].isBarline()) {
 			continue;
@@ -760,7 +760,7 @@ int Tool_cint::getTriangleIndex(int number, int num1, int num2) {
 //     to the search query.
 //
 
-void Tool_cint::addMarksToInputData(HumdrumFile& infile, 
+void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 		vector<vector<NoteNode> >& notes, vector<int>& ktracks,
 		vector<int>& reverselookup) {
 
@@ -771,24 +771,24 @@ void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 	int mark = 0;
 	int track = 0;
 	int markpitch = -1;
- 
+
 	for (i=0; i<(int)notes.size(); i++) {
 		mark = 0;
 		for (j=(int)notes[i].size()-1; j>=0; j--) {
 			if (mark && (-markpitch == notes[i][j].b40)) {
 				// In the sustain region between a note
-				// attack and the marked sustain. Mark the 
+				// attack and the marked sustain. Mark the
 				// sustained region as well (don't know
 				// if this behavior might change in the
 				// future.
-				notes[i][j].mark = mark; 
+				notes[i][j].mark = mark;
 				continue;
 			}
 			if (mark && (markpitch == notes[i][j].b40)) {
 				// At the start of a notes which was marked.
 				// Mark the attack since only note attacks
 				// will be marked in the score
-				notes[i][j].mark = mark; 
+				notes[i][j].mark = mark;
 				mark = 0;
 				continue;
 			}
@@ -804,7 +804,7 @@ void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 			} else {
 				mark = 0;
 			}
-			
+
 		}
 	}
 
@@ -844,7 +844,7 @@ void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 		if (!infile[i].isData()) {
 			continue;
 		}
-		while ((currentindex < (int)notes[0].size()) 
+		while ((currentindex < (int)notes[0].size())
 				&& (i > notes[0][currentindex].line)) {
 			currentindex++;
 		}
@@ -892,17 +892,17 @@ void Tool_cint::markNote(HumdrumFile& infile, int line, int col) {
 
 //////////////////////////////
 //
-// Tool_cint::getOctaveAdjustForCombinationModule -- Find the minim harmonic interval in 
-//      the module chain.  If it is greater than an octave, then move it down 
+// Tool_cint::getOctaveAdjustForCombinationModule -- Find the minim harmonic interval in
+//      the module chain.  If it is greater than an octave, then move it down
 //      below an octave.  If the minimum is an octave, then don't do anything.
 //      Not considering crossed voices.
 //
 
-int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& notes, int n, 
+int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& notes, int n,
 		int startline, int part1, int part2) {
 
 	// if the current two notes are both sustains, then skip
-	if ((notes[part1][startline].b40 <= 0) && 
+	if ((notes[part1][startline].b40 <= 0) &&
 		 (notes[part2][startline].b40 <= 0)) {
 		return 0;
 	}
@@ -929,8 +929,8 @@ int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& no
 			// skip notes if both are sustained
 			continue;
 		}
-  
-		if (attackQ && ((notes[part1][i].b40 <= 0) || 
+
+		if (attackQ && ((notes[part1][i].b40 <= 0) ||
 							 (notes[part2][i].b40 <= 0))) {
 			if (attackcount == 0) {
 				// not at the start of a pair of attacks.
@@ -950,7 +950,7 @@ int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& no
 		// if count matches n, then exit loop
 		if ((count == n) && !attackQ) {
 			break;
-		} 
+		}
 		count++;
 
 		if ((notes[part1][i].b40 > 0) && (notes[part2][i].b40 > 0)) {
@@ -1007,18 +1007,18 @@ int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& no
 
 //////////////////////////////
 //
-// Tool_cint::printCombinationModule -- Similar to printLatticeModule, but harmonic 
-//      intervals will not be triggered by a pair of sustained notes.  
-//      Print a counterpoint module or module chain given the start notes 
-//      and pair of parts to calculate the module (chains) from.  Will not 
-//      print anything if the chain length is longer than the note array.  
-//      The n parameter will be ignored if --attacks option is used 
+// Tool_cint::printCombinationModule -- Similar to printLatticeModule, but harmonic
+//      intervals will not be triggered by a pair of sustained notes.
+//      Print a counterpoint module or module chain given the start notes
+//      and pair of parts to calculate the module (chains) from.  Will not
+//      print anything if the chain length is longer than the note array.
+//      The n parameter will be ignored if --attacks option is used
 //      (--attacks will gnereate a variable length module chain).
 //
 
-int Tool_cint::printCombinationModule(ostream& out, const string& filename, 
-		vector<vector<NoteNode> >& notes, int n, int startline, int part1, 
-		int part2, vector<vector<string> >& retrospective, char& notemarker, 
+int Tool_cint::printCombinationModule(ostream& out, const string& filename,
+		vector<vector<NoteNode> >& notes, int n, int startline, int part1,
+		int part2, vector<vector<string> >& retrospective, char& notemarker,
 		int markstate) {
 
 	notemarker = '\0';
@@ -1039,7 +1039,7 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 
 	int octaveadjust = 0;   // used for -o option
 	if (octaveQ) {
-		octaveadjust = getOctaveAdjustForCombinationModule(notes, n, startline, 
+		octaveadjust = getOctaveAdjustForCombinationModule(notes, n, startline,
 				part1, part2);
 	}
 
@@ -1059,20 +1059,20 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 	}
 
 	// if the current two notes are both sustains, then skip
-	if ((notes[part1][startline].b40 <= 0) && 
+	if ((notes[part1][startline].b40 <= 0) &&
 		 (notes[part2][startline].b40 <= 0)) {
 		return 0;
 	}
 
-	if (raw2Q) { 
+	if (raw2Q) {
 		// print pitch of first bottom note
 		if (filenameQ) {
 			(*outp) << "file_" << filename;
 			(*outp) << " ";
 		}
-	  
+
 		(*outp) << "v_" << part1 << " v_" << part2 << " ";
-		
+
 		if (base12Q) {
 			(*outp) << "base12_";
 			(*outp) << Convert::base40ToMidiNoteNumber(abs(notes[part1][startline].b40));
@@ -1113,8 +1113,8 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 				return 0;
 			}
 		}
-  
-		if (attackQ && ((notes[part1][i].b40 <= 0) || 
+
+		if (attackQ && ((notes[part1][i].b40 <= 0) ||
 							 (notes[part2][i].b40 <= 0))) {
 			if (attackcount == 0) {
 				// not at the start of a pair of attacks.
@@ -1130,37 +1130,37 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 
 			if (nounisonsQ) {
 				// suppress modules which contain melodic perfect unisons:
-				if ((notes[part1][i].b40 != 0) && 
+				if ((notes[part1][i].b40 != 0) &&
 					(abs(notes[part1][i].b40) == abs(notes[part1][lastindex].b40))) {
 					return 0;
 				}
-				if ((notes[part2][i].b40 != 0) && 
+				if ((notes[part2][i].b40 != 0) &&
 					(abs(notes[part2][i].b40) == abs(notes[part2][lastindex].b40))) {
 					return 0;
 				}
 			}
 			// bottom melodic interval:
 			if (!toponlyQ) {
-				printInterval((*outp), notes[part1][lastindex], 
+				printInterval((*outp), notes[part1][lastindex],
 						notes[part1][i], INTERVAL_MELODIC);
 				if (mmarkerQ) {
 					(*outp) << "m";
 				}
 			}
-	 
+
 			// print top melodic interval here if requested
 			if (topQ || toponlyQ) {
 				if (!toponlyQ) {
 					printSpacer((*outp));
 				}
 				// top melodic interval:
-				printInterval((*outp), notes[part2][lastindex], 
+				printInterval((*outp), notes[part2][lastindex],
 						notes[part2][i], INTERVAL_MELODIC);
 				if (mmarkerQ) {
 					(*outp) << "m";
 				}
 			}
-		
+
 			if (mparenQ) {
 				(*outp) << "}";
 			}
@@ -1179,9 +1179,9 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 				notes[part2][i].mark = 1;
 			} else {
 				// oldcrossing = crossing;
-				//crossing = printInterval((*outp), notes[part1][i], 
+				//crossing = printInterval((*outp), notes[part1][i],
 				//      notes[part2][i], INTERVAL_HARMONIC, octaveadjust);
-				printInterval((*outp), notes[part1][i], 
+				printInterval((*outp), notes[part1][i],
 						notes[part2][i], INTERVAL_HARMONIC, octaveadjust);
 			}
 
@@ -1193,7 +1193,7 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 					(*outp) << "d" << notes[part1][i].duration;
 				}
 			}
-		
+
 			if (hmarkerQ) {
 				(*outp) << "h";
 			}
@@ -1208,7 +1208,7 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 				// insert both first two notes, even if sustain.
 				if (idstart != 0) { idstream << ':'; }
 				idstart++;
-				idstream << notes[part1][i].getId() << ':' 
+				idstream << notes[part1][i].getId() << ':'
 							<< notes[part2][i].getId();
 		//   } else {
 		//      // only insert IDs if an attack
@@ -1287,7 +1287,7 @@ int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 // Tool_cint::printAsCombination --
 //
 
-void Tool_cint::printAsCombination(HumdrumFile& infile, int line, vector<int>& ktracks, 
+void Tool_cint::printAsCombination(HumdrumFile& infile, int line, vector<int>& ktracks,
 	 vector<int>& reverselookup, const string& interstring) {
 
 	if (raw2Q || rawQ || markQ || retroQ || countQ) {
@@ -1347,14 +1347,14 @@ void Tool_cint::printAsCombination(HumdrumFile& infile, int line, vector<int>& k
 // Tool_cint::printLatticeInterleaved --
 //
 
-void Tool_cint::printLatticeInterleaved(vector<vector<NoteNode> >& notes, 
-		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup, 
+void Tool_cint::printLatticeInterleaved(vector<vector<NoteNode> >& notes,
+		HumdrumFile& infile, vector<int>& ktracks, vector<int>& reverselookup,
 		int n) {
 	int currentindex = 0;
 	int i;
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
-			// print all lines here which do not contain spine 
+			// print all lines here which do not contain spine
 			// information.
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << infile[i] << "\n";
@@ -1384,7 +1384,7 @@ void Tool_cint::printLatticeInterleaved(vector<vector<NoteNode> >& notes,
 			printInterleaved(infile, i, ktracks, reverselookup, *infile.token(i, 0));
 		} else {
 			// print interleaved data
-			currentindex = printInterleavedLattice(infile, i, ktracks, 
+			currentindex = printInterleavedLattice(infile, i, ktracks,
 				reverselookup, n, currentindex, notes);
 		}
 		if (!(rawQ || raw2Q)) {
@@ -1401,12 +1401,12 @@ void Tool_cint::printLatticeInterleaved(vector<vector<NoteNode> >& notes,
 //
 
 int Tool_cint::printInterleavedLattice(HumdrumFile& infile, int line, vector<int>& ktracks,
-		vector<int>& reverselookup, int n, int currentindex, 
+		vector<int>& reverselookup, int n, int currentindex,
 		vector<vector<NoteNode> >& notes) {
 
 	int fileline = line;
 
-	while ((currentindex < (int)notes[0].size()) 
+	while ((currentindex < (int)notes[0].size())
 			&& (fileline > notes[0][currentindex].line)) {
 		currentindex++;
 	}
@@ -1491,7 +1491,7 @@ int Tool_cint::printInterleavedLattice(HumdrumFile& infile, int line, vector<int
 // Tool_cint::printInterleaved --
 //
 
-void Tool_cint::printInterleaved(HumdrumFile& infile, int line, vector<int>& ktracks, 
+void Tool_cint::printInterleaved(HumdrumFile& infile, int line, vector<int>& ktracks,
 	 vector<int>& reverselookup, const string& interstring) {
 
 	vector<int> done(ktracks.size(), 0);
@@ -1548,7 +1548,7 @@ void Tool_cint::printInterleaved(HumdrumFile& infile, int line, vector<int>& ktr
 // Tool_cint::printLattice --
 //
 
-void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infile, 
+void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infile,
 		vector<int>& ktracks, vector<int>& reverselookup, int n) {
 
 	int i;
@@ -1608,7 +1608,7 @@ void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infi
 //      is longer than the note array.
 //
 
-int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes, int n, 
+int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes, int n,
 		int startline, int part1, int part2) {
 
 	if (n + startline >= (int)notes[0].size()) {
@@ -1625,7 +1625,7 @@ int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes
 		if (hparenQ) {
 			out << "[";
 		}
-		printInterval(out, notes[part1][startline+i], 
+		printInterval(out, notes[part1][startline+i],
 			notes[part2][startline+i], INTERVAL_HARMONIC);
 		if (hmarkerQ) {
 			out << "h";
@@ -1641,17 +1641,17 @@ int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes
 		}
 		// bottom melodic interval:
 		if (!toponlyQ) {
-			printInterval(out, notes[part1][startline+i], 
+			printInterval(out, notes[part1][startline+i],
 							  notes[part1][startline+i+1], INTERVAL_MELODIC);
 		}
- 
+
 		// print top melodic interval here if requested
 		if (topQ || toponlyQ) {
 			if (!toponlyQ) {
 				printSpacer(out);
 			}
 			// top melodic interval:
-			printInterval(out, notes[part2][startline+i], 
+			printInterval(out, notes[part2][startline+i],
 							  notes[part2][startline+i+1], INTERVAL_MELODIC);
 			if (mmarkerQ) {
 				out << "m";
@@ -1668,7 +1668,7 @@ int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes
 	if (hparenQ) {
 	  out << "[";
 	}
-	printInterval(out, notes[part1][startline+n], 
+	printInterval(out, notes[part1][startline+n],
 			notes[part2][startline+n], INTERVAL_HARMONIC);
 	if (hmarkerQ) {
 		out << "h";
@@ -1691,10 +1691,10 @@ int Tool_cint::printLatticeModule(ostream& out, vector<vector<NoteNode> >& notes
 // Tool_cint::printLatticeItemRows -- Row form of the lattice.
 //
 
-int Tool_cint::printLatticeItemRows(vector<vector<NoteNode> >& notes, int n, 
+int Tool_cint::printLatticeItemRows(vector<vector<NoteNode> >& notes, int n,
 		int currentindex, int fileline) {
 
-	while ((currentindex < (int)notes[0].size()) 
+	while ((currentindex < (int)notes[0].size())
 			&& (fileline > notes[0][currentindex].line)) {
 		currentindex++;
 	}
@@ -1752,9 +1752,9 @@ int Tool_cint::printLatticeItemRows(vector<vector<NoteNode> >& notes, int n,
 // Tool_cint::printLatticeItem --
 //
 
-int Tool_cint::printLatticeItem(vector<vector<NoteNode> >& notes, int n, int currentindex, 
+int Tool_cint::printLatticeItem(vector<vector<NoteNode> >& notes, int n, int currentindex,
 		int fileline) {
-	while ((currentindex < (int)notes[0].size()) 
+	while ((currentindex < (int)notes[0].size())
 			&& (fileline > notes[0][currentindex].line)) {
 		currentindex++;
 	}
@@ -1793,7 +1793,7 @@ int Tool_cint::printLatticeItem(vector<vector<NoteNode> >& notes, int n, int cur
 			m_humdrum_text << "[";
 		}
 		for (j=0; j<(int)notes.size()-1; j++) {
-			printInterval(m_humdrum_text, notes[j][currentindex+count], 
+			printInterval(m_humdrum_text, notes[j][currentindex+count],
 					notes[j+1][currentindex+count], INTERVAL_HARMONIC);
 			if (j < (int)notes.size()-2) {
 				printSpacer(m_humdrum_text);
@@ -1813,7 +1813,7 @@ int Tool_cint::printLatticeItem(vector<vector<NoteNode> >& notes, int n, int cur
 			melcount++;
 		}
 		for (j=0; j<melcount; j++) {
-			printInterval(m_humdrum_text, notes[j][currentindex+count], 
+			printInterval(m_humdrum_text, notes[j][currentindex+count],
 					notes[j][currentindex+count+1], INTERVAL_MELODIC);
 			if (j < melcount-1) {
 				printSpacer(m_humdrum_text);
@@ -1830,7 +1830,7 @@ int Tool_cint::printLatticeItem(vector<vector<NoteNode> >& notes, int n, int cur
 		m_humdrum_text << "[";
 	}
 	for (j=0; j<(int)notes.size()-1; j++) {
-		printInterval(m_humdrum_text, notes[j][currentindex+n], 
+		printInterval(m_humdrum_text, notes[j][currentindex+n],
 				notes[j+1][currentindex+n], INTERVAL_HARMONIC);
 		if (j < (int)notes.size()-2) {
 			printSpacer(m_humdrum_text);
@@ -1933,7 +1933,7 @@ int Tool_cint::printInterval(ostream& out, NoteNode& note1, NoteNode& note2,
 	} else {
 		int negative = 1;
 		if (interval < 0) {
-			negative = -1; 
+			negative = -1;
 			interval = -interval;
 		}
 		if (base7Q && !zeroQ) {
@@ -2007,7 +2007,7 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 		for (i=0; i<(int)notes[0].size(); i++) {
 			if (rhythmQ) {
 				line = notes[0][i].line;
-				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1; 
+				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
 				m_humdrum_text << infile[line].getDurationFromStart().getFloat() << "\t";
 				m_humdrum_text << notes[0][i].measure << "\t";
 				m_humdrum_text << beat << "\t";
@@ -2054,7 +2054,7 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 		for (i=0; i<(int)notes[0].size(); i++) {
 			if (rhythmQ) {
 				line = notes[0][i].line;
-				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1; 
+				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
 				m_humdrum_text << infile[line].getDurationFromStart().getFloat() << "\t";
 				m_humdrum_text << notes[0][i].measure << "\t";
 				m_humdrum_text << beat << "\t";
@@ -2112,7 +2112,7 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 		for (i=0; i<(int)notes[0].size(); i++) {
 			if (rhythmQ) {
 				line = notes[0][i].line;
-				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1; 
+				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
 				if (notes[j][i].notemarker) {
 					m_humdrum_text << (char)notes[j][i].notemarker;
 				}
@@ -2174,7 +2174,7 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 		for (i=0; i<(int)notes[0].size(); i++) {
 			if (rhythmQ) {
 				line = notes[0][i].line;
-				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1; 
+				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
 				if (notes[j][i].notemarker) {
 					m_humdrum_text << (char)notes[j][i].notemarker;
 				}
@@ -2191,16 +2191,16 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 				if (pitch == 0) {
 					m_humdrum_text << "r";
 				} else {
-					if ((pitch > 0) && (i<(int)notes[j].size()-1) && 
+					if ((pitch > 0) && (i<(int)notes[j].size()-1) &&
 						 (notes[j][i+1].b40 == -abspitch)) {
-						// start of a note which continues into next 
+						// start of a note which continues into next
 						// sonority.
 						m_humdrum_text << "[";
 					}
 					m_humdrum_text << Convert::base40ToKern(abspitch);
 					// print tie continue/termination as necessary.
 					if (pitch < 0) {
-						if ((i < (int)notes[j].size() - 1) && 
+						if ((i < (int)notes[j].size() - 1) &&
 							 (notes[j][i+1].b40 == notes[j][i].b40)) {
 						  // note sustains further
 						  m_humdrum_text << "_";
@@ -2262,7 +2262,7 @@ void Tool_cint::extractNoteArray(vector<vector<NoteNode> >& notes, HumdrumFile& 
 	int tempmeasurenum = 0;
 	double beatsize = 1.0;
 	int topnum, botnum;
-	
+
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (debugQ) {
 			m_humdrum_text << "PROCESSING LINE: " << i << "\t" << infile[i] << endl;
@@ -2314,7 +2314,7 @@ void Tool_cint::extractNoteArray(vector<vector<NoteNode> >& notes, HumdrumFile& 
 				}
 			}
 		}
-		 
+
 		if (!infile[i].isData()) {
 			continue;
 		}
@@ -2373,7 +2373,7 @@ void Tool_cint::extractNoteArray(vector<vector<NoteNode> >& notes, HumdrumFile& 
 			current[index].b40 *= sign;
 			if (sign > 0) {
 				current[index].serial = ++snum;
-				if (durationQ) { 
+				if (durationQ) {
 					current[index].duration = infile.token(ii, jj)->getTiedDuration();
 				}
 			}
@@ -2469,7 +2469,7 @@ int Tool_cint::allSustained(vector<NoteNode>& data) {
 	}
 	if (hasnote == 0) {
 		return 0;
-	} 
+	}
 	return 1;
 }
 
@@ -2480,11 +2480,11 @@ int Tool_cint::allSustained(vector<NoteNode>& data) {
 // Tool_cint::getAbbreviations --
 //
 
-void Tool_cint::getAbbreviations(vector<string>& abbreviations, 
+void Tool_cint::getAbbreviations(vector<string>& abbreviations,
 		vector<string>& names) {
 	abbreviations.resize(names.size());
 	for (int i=0; i<(int)names.size(); i++) {
-		getAbbreviation(abbreviations[i], names[i]);     
+		getAbbreviation(abbreviations[i], names[i]);
 	}
 }
 
@@ -2534,7 +2534,7 @@ void Tool_cint::getKernTracks(vector<int>& ktracks, HumdrumFile& infile) {
 // Tool_cint::getNames -- get the names of each column if they have one.
 //
 
-void Tool_cint::getNames(vector<string>& names, vector<int>& reverselookup, 
+void Tool_cint::getNames(vector<string>& names, vector<int>& reverselookup,
 		HumdrumFile& infile) {
 
 	names.resize((int)reverselookup.size()-1);
@@ -2544,7 +2544,7 @@ void Tool_cint::getNames(vector<string>& names, vector<int>& reverselookup,
 	int i;
 	int j;
 	int track;
- 
+
 	for (i=0; i<(int)names.size(); i++) {
 		value = (int)reverselookup.size() - i;
 		sprintf(buffer, "%d", value);
@@ -2606,7 +2606,7 @@ void Tool_cint::initialize(void) {
 		example();
 		exit(0);
 	}
-	
+
 	koptionQ = getBoolean("koption");
 
 	if (getBoolean("comma")) {
@@ -2677,12 +2677,12 @@ void Tool_cint::initialize(void) {
 	if (Chaincount < 0) {
 		Chaincount = 0;
 	}
-	
+
 	if (searchQ) {
 		// Automatically assume marking of --search is used
 		// (may change in the future).
 		markQ = 1;
-	} 
+	}
 	if (countQ) {
 		searchQ = 1;
 		markQ   = 0;

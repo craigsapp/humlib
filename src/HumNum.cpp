@@ -16,6 +16,8 @@
 
 #include "HumNum.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE

@@ -597,7 +597,7 @@ int MxmlMeasure::getStaffIndex(int voicenum) {
 //
 // MxmlMeasure::sortEvents -- Sorts events for the measure into
 //   time order.  They are split into zero-duration evnets and
-//   non-zero events.  mevent_floating type are placed into the 
+//   non-zero events.  mevent_floating type are placed into the
 //   non-zero events eventhough they have zero duration (this is
 //   for harmony not attached to a note attack, and will be
 //   eventually including basso continuo figuration having the
@@ -796,7 +796,7 @@ MeasureStyle MxmlMeasure::getStyle(void) {
 // MxmlMeasure::getBarStyle --
 //
 
-MeasureStyle MxmlMeasure::getBarStyle(void) { 
+MeasureStyle MxmlMeasure::getBarStyle(void) {
 	return getStyle();
 }
 
@@ -810,10 +810,10 @@ MeasureStyle MxmlMeasure::getBarStyle(void) {
 void MxmlMeasure::setStyle(MeasureStyle style) {
 	if (m_style == MeasureStyle::Plain) {
 		m_style = style;
-	} else if ((m_style == MeasureStyle::RepeatBackward) && 
+	} else if ((m_style == MeasureStyle::RepeatBackward) &&
 			(style == MeasureStyle::RepeatForward)) {
 		m_style = MeasureStyle::RepeatBoth;
-	} else if ((m_style == MeasureStyle::RepeatForward) && 
+	} else if ((m_style == MeasureStyle::RepeatForward) &&
 			(style == MeasureStyle::RepeatBackward)) {
 		m_style = MeasureStyle::RepeatBoth;
 	} else {
@@ -829,7 +829,7 @@ void MxmlMeasure::setStyle(MeasureStyle style) {
 // MxmlMeasure::setBarStyle --
 //
 
-void MxmlMeasure::setBarStyle(MeasureStyle style) { 
+void MxmlMeasure::setBarStyle(MeasureStyle style) {
 	m_style = style;
 }
 

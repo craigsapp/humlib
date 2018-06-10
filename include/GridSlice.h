@@ -21,10 +21,10 @@
 #include "GridPart.h"
 #include "GridMeasure.h"
 
-#include <vector>
+#include <iostream>
 #include <list>
-
-using namespace std;
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -33,7 +33,7 @@ namespace hum {
 class HumGrid;
 
 
-class GridSlice : public vector<GridPart*> {
+class GridSlice : public std::vector<GridPart*> {
 	public:
 		GridSlice(GridMeasure* measure, HumNum timestamp, SliceType type,
 		          int partcount = 0);
@@ -68,7 +68,7 @@ class GridSlice : public vector<GridPart*> {
 		SliceType getType(void)    { return m_type; }
 
 		void transferTokens        (HumdrumFile& outfile, bool recip);
-		void initializePartStaves  (vector<MxmlPart>& partdata);
+		void initializePartStaves  (std::vector<MxmlPart>& partdata);
 		void initializeBySlice     (GridSlice* slice);
 		void initializeByStaffCount(int staffcount);
 
@@ -83,17 +83,17 @@ class GridSlice : public vector<GridPart*> {
 		GridMeasure* getMeasure         (void);
 		void         invalidate         (void);
 
-		void transferSides        (HumdrumLine& line, GridStaff& sides, 
-		                           const string& empty, int maxvcount,
+		void transferSides        (HumdrumLine& line, GridStaff& sides,
+		                           const std::string& empty, int maxvcount,
 		                           int maxhcount);
-		void transferSides        (HumdrumLine& line, GridPart& sides, 
-		                           int partindex, const string& empty,
+		void transferSides        (HumdrumLine& line, GridPart& sides,
+		                           int partindex, const std::string& empty,
 		                           int maxvcount, int maxhcount,
 		                           int maxdcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
-		void addToken             (const string& tok, int parti, int staffi, int voicei);
+		void addToken             (const std::string& tok, int parti, int staffi, int voicei);
 
 	protected:
 		HTp  createRecipTokenFromDuration  (HumNum duration);
@@ -108,7 +108,7 @@ class GridSlice : public vector<GridPart*> {
 };
 
 
-ostream& operator<<(ostream& output, GridSlice* slice);
+std::ostream& operator<<(std::ostream& output, GridSlice* slice);
 
 
 // END_MERGE

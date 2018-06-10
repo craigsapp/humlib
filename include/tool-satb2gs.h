@@ -38,11 +38,11 @@ class Tool_satb2gs : public HumTool {
 		void     usage           (const string& command);
 		void     convertData     (HumdrumFile& infile);
 		int      getSatbTracks   (vector<int>& tracks, HumdrumFile& infile);
-		void     printSpine      (HumdrumFile& infile, int row, int col, 
+		void     printSpine      (HumdrumFile& infile, int row, int col,
 		                          vector<int>& satbtracks);
-		void     printExInterp   (HumdrumFile& infile, int line, 
+		void     printExInterp   (HumdrumFile& infile, int line,
 		                          vector<int>& tracks);
-		void     printLastLine   (HumdrumFile& infile, int line, 
+		void     printLastLine   (HumdrumFile& infile, int line,
 		                          vector<int>& tracks);
 	private:
 		int    debugQ    = 0;             // used with --debug option

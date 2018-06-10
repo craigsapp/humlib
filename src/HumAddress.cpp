@@ -13,6 +13,8 @@
 #include "HumAddress.h"
 #include "HumdrumLine.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE

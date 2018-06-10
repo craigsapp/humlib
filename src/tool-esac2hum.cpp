@@ -20,12 +20,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 using namespace std;
-
 
 namespace hum {
 

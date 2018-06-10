@@ -16,6 +16,7 @@
 #include "Convert.h"
 
 #include <string.h>
+
 #include <stdio.h>
 #include <iomanip>
 
@@ -65,7 +66,7 @@ HumGrid::~HumGrid(void) {
 //
 // HumGrid::addMeasureToBack -- Allocate a GridMeasure at the end of the
 //     measure list.
-// 
+//
 
 GridMeasure* HumGrid::addMeasureToBack(void) {
 	GridMeasure* gm = new GridMeasure(this);
@@ -1639,7 +1640,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 		// change this later to add a duration for the null token below.
 		return;
 	}
-	
+
 	HumNum tokendur = Convert::recipToDuration((string)*token);
 	HumNum currts   = m_allslices.at(slicei)->getTimestamp();
 	HumNum nextts   = m_allslices.at(slicei+1)->getTimestamp();
@@ -1714,7 +1715,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
 // ggg
-				
+
 				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
@@ -2385,7 +2386,7 @@ void HumGrid::removeRedundantClefChanges(void) {
 			if (allempty) {
 				slice->invalidate();
 			}
-			
+
 		}
 	}
 }

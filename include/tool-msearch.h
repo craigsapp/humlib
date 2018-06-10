@@ -56,7 +56,7 @@ class MSearchQueryToken {
 		}
 		double pc;           // NAN = rest
 		int    base;
-		int    direction; 
+		int    direction;
 		HumNum duration;
 		string rhythm;
 		bool   anything;
@@ -139,7 +139,7 @@ class Tool_msearch : public HumTool {
 		                            const string& input);
 		void    fillTextQuery      (vector<MSearchTextQuery>& query,
 		                            const string& input);
-		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
+		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		                            vector<MSearchQueryToken>& dpcQuery,
 		                            vector<NoteCell*>& match);
 		void    markMatch          (HumdrumFile& infile,

@@ -73,14 +73,14 @@ bool Tool_ruthfix::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_ruthfix::insertCrossBarTies -- 
+// Tool_ruthfix::insertCrossBarTies --
 //
 
 void Tool_ruthfix::insertCrossBarTies(HumdrumFile& infile) {
 	int scount = infile.getStrandCount();
 	if (scount == 0) {
 		// The input file was not read from a file but was created
-		// dynamically.  The easiest thing to do is to reload to get the 
+		// dynamically.  The easiest thing to do is to reload to get the
 		// spine/strand information.
 		stringstream ss;
 		infile.createLinesFromTokens();

@@ -39,16 +39,16 @@ class Tool_dissonant : public HumTool {
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks,
 		                            int vindex, bool debug);
-		void    findFakeSuspensions(vector<vector<string> >& results, 
+		void    findFakeSuspensions(vector<vector<string> >& results,
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findAppoggiaturas  (vector<vector<string> >& results, 
+		void    findAppoggiaturas  (vector<vector<string> >& results,
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findLs             (vector<vector<string> >& results, 
+		void    findLs             (vector<vector<string> >& results,
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
-		void    findYs             (vector<vector<string> >& results, 
+		void    findYs             (vector<vector<string> >& results,
 		                            NoteGrid& grid,
 		                            vector<NoteCell*>& attacks, int vindex);
 		void	findCadentialVoiceFunctions(vector<vector<string> >& results,
@@ -65,11 +65,11 @@ class Tool_dissonant : public HumTool {
 		void    suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 		                            vector<vector<NoteCell* > >& attacks,
 		                            vector<vector<string> >& results);
-		void    suppressDissonancesInVoice(HumdrumFile& infile, 
+		void    suppressDissonancesInVoice(HumdrumFile& infile,
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);
-		void    suppressSusOrnamentsInVoice(HumdrumFile& infile, 
+		void    suppressSusOrnamentsInVoice(HumdrumFile& infile,
 		                            NoteGrid& grid, int vindex,
 		                            vector<NoteCell*>& attacks,
 		                            vector<string>& results);

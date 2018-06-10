@@ -13,6 +13,8 @@
 #include "Convert.h"
 #include <cmath>
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE

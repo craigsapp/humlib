@@ -15,7 +15,6 @@
 #include "Convert.h"
 #include "HumRegex.h"
 
-
 using namespace std;
 
 namespace hum {
@@ -123,7 +122,7 @@ void Tool_chord::processFile(HumdrumFile& infile, int direction) {
 	for (int i=0; i<infile.getStrandCount(); i++) {
 		HTp stok = infile.getStrandStart(i);
 		int track = stok->getTrack();
-		if ((m_spine > 0) && (track != m_spine)) {	
+		if ((m_spine > 0) && (track != m_spine)) {
 			continue;
 		}
 		if (!stok->isKern()) {
@@ -199,12 +198,12 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	}
 
 	if (direction > 0) {
-		sort(pitches.begin(), pitches.end(), 
+		sort(pitches.begin(), pitches.end(),
 			[](const pair<int, int>& a, const pair<int, int>& b) -> bool {
 				return a.first > b.first;
 			});
 	} else if (direction < 0) {
-		sort(pitches.begin(), pitches.end(), 
+		sort(pitches.begin(), pitches.end(),
 			[](const pair<int, int>& a, const pair<int, int>& b) -> bool {
 				return a.first < b.first;
 			});
@@ -243,7 +242,7 @@ void Tool_chord::processChord(HTp tok, int direction) {
 	if (getBoolean("maximize") && (beamindex >= 0)) {
 		beamindex = (int)notes.size() - 1;
 	}
-	
+
 	if (hre.search(notes.back(), "(&*\\)[<>]?)")) {
 		suffix += hre.getMatch(1);
 		hre.replaceDestructive(notes.back(), "", "(&*\\)[<>]?)");
@@ -303,7 +302,7 @@ void Tool_chord::processChord(HTp tok, int direction) {
 //		pitches[x].second = index for pitch in notes vector.
 //
 
-void Tool_chord::minimizeChordPitches(vector<string>& notes, 
+void Tool_chord::minimizeChordPitches(vector<string>& notes,
 		vector<pair<int,int>>& pitches) {
 	if (notes.empty()) {
 		return;
@@ -338,7 +337,7 @@ void Tool_chord::minimizeChordPitches(vector<string>& notes,
 //   and stem directions to all secondary notes in chord.
 //
 
-void Tool_chord::maximizeChordPitches(vector<string>& notes, 
+void Tool_chord::maximizeChordPitches(vector<string>& notes,
 		vector<pair<int,int>>& pitches) {
 	if (notes.empty()) {
 		return;
