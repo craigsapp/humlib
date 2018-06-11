@@ -38,6 +38,7 @@
 	#include <sstream>
 #endif
 
+#include "HumSignifiers.h"
 #include "HumdrumLine.h"
 
 namespace hum {
@@ -351,6 +352,9 @@ class HumdrumFileBase : public HumHash {
 
 		// m_displayError: Used to print error message only once.
 		bool m_displayError;
+
+		// m_signifiers: Used to keep track of !!!RDF records.
+		HumSignifiers m_signifiers;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

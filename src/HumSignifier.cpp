@@ -87,10 +87,9 @@ bool HumSignifier::parseSignifier(const string& rdfline) {
 	m_definition = hre.getMatch(2);
 
 	// identify signifier category
-	if (m_exinterp == "kern") {
+	if (m_exinterp == "**kern") {
 		if (m_definition.find("link") != std::string::npos) {
 			m_sigtype = signifier_type::signifier_link;
-cerr << "FOUND LINK SIGNIFIER" << endl;
 		}
 	}
 

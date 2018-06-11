@@ -29,17 +29,28 @@ namespace hum {
 //
 
 bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HTp> slurstarts;
+	vector<HTp> slurends;
+
 	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
+	string linkSignifier = m_signifiers.getKernLinkSignifier();
 	for (int i=0; i<(int)kernspines.size(); i++) {
-		output = output && analyzeKernSlurs(kernspines[i]);
+		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, linkSignifier);
 	}
+	createLinkedSlurs(slurstarts, slurends);
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart, 
+		vector<HTp>& linkstarts, vector<HTp>& linkends, const string& linksig) {
+
+	// linked slurs handled separately, so generate an ignore sequence:
+	string ignorebegin = linksig + "(";
+	string ignoreend = linksig + ")";
+
 	// tracktokens == the 2-D data list for the track,
 	// arranged in layers with the second dimension.
 	vector<vector<HTp> > tracktokens;
@@ -49,7 +60,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	// sluropens == list of slur openings for each track and elision level
 	// first dimension: elision level
 	// second dimension: track number
-	vector<vector<vector<HTp> > > sluropens;
+	vector<vector<vector<HTp>>> sluropens;
 
 	sluropens.resize(4); // maximum of 4 elision levels
 	for (int i=0; i<(int)sluropens.size(); i++) {
@@ -73,6 +84,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			closecount = (int)count(token->begin(), token->end(), ')');
 
 			for (int i=0; i<closecount; i++) {
+				bool isLinked = isLinkedSlurEnd(token, i, ignoreend);
+				if (isLinked) {
+					linkends.push_back(token);
+					continue;
+				}
 				elision = token->getSlurEndElisionLevel(i);
 				if (elision < 0) {
 					continue;
@@ -104,6 +120,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			}
 
 			for (int i=0; i<opencount; i++) {
+				bool isLinked = isLinkedSlurBegin(token, i, ignorebegin);
+				if (isLinked) {
+					linkstarts.push_back(token);
+					continue;
+				}
 				elision = token->getSlurStartElisionLevel(i);
 				if (elision < 0) {
 					continue;
@@ -125,6 +146,89 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	}
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::createLinkedSlurs --  Currently assume that
+//    start and ends are matched.
+//
+
+void HumdrumFileContent::createLinkedSlurs(vector<HTp>& linkstarts, vector<HTp>& linkends) {
+	int max = (int)linkstarts.size();
+	if ((int)linkends.size() < max) {
+		max = (int)linkends.size();
+	}
+	if (max == 0) {
+		// nothing to do
+		return;
+	}
+
+	for (int i=0; i<max; i++) {
+		linkSlurEndpoints(linkstarts[i], linkends[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isLinkedSlurEnd --
+//
+
+bool HumdrumFileContent::isLinkedSlurEnd(HTp token, int index, const string& pattern) {
+	if (pattern.size() <= 1) {
+		return false;
+	}
+	int counter = -1;
+	for (int i=0; i<(int)token->size(); i++) {
+		if (token->at(i) == ')') {
+			counter++;
+		}
+		if (i == 0) {
+			continue;
+		}
+		if (counter != index) {
+			continue;
+		}
+		if (token->find(pattern, i - (int)pattern.size() + 1) != std::string::npos) {
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isLinkedSlurBegin --
+//
+
+bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& pattern) {
+	if (pattern.size() <= 1) {
+		return false;
+	}
+	int counter = -1;
+	for (int i=0; i<(int)token->size(); i++) {
+		if (token->at(i) == '(') {
+			counter++;
+		}
+		if (i == 0) {
+			continue;
+		}
+		if (counter != index) {
+			continue;
+		}
+		if (token->find(pattern, i - (int)pattern.size() + 1) != std::string::npos) {
+			return true;
+		}
+		return false;
+	}
+	return false;
 }
 
 

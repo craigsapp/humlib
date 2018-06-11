@@ -42,6 +42,7 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isLocalComment         (void) const { return isCommentLocal(); }
 		bool        isCommentGlobal        (void) const;
 		bool        isReference            (void) const;
+		bool        isSignifier            (void) const;
 		std::string getReferenceKey        (void) const;
 		std::string getReferenceValue      (void) const;
 		bool        isGlobalComment         (void) const { return isCommentGlobal(); }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 10 16:05:25 PDT 2018
+// Last Modified: Sun Jun 10 23:34:53 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11562,10 +11562,9 @@ bool HumSignifier::parseSignifier(const string& rdfline) {
 	m_definition = hre.getMatch(2);
 
 	// identify signifier category
-	if (m_exinterp == "kern") {
+	if (m_exinterp == "**kern") {
 		if (m_definition.find("link") != std::string::npos) {
 			m_sigtype = signifier_type::signifier_link;
-cerr << "FOUND LINK SIGNIFIER" << endl;
 		}
 	}
 
@@ -15220,17 +15219,28 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 //
 
 bool HumdrumFileContent::analyzeKernSlurs(void) {
+	vector<HTp> slurstarts;
+	vector<HTp> slurends;
+
 	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
+	string linkSignifier = m_signifiers.getKernLinkSignifier();
 	for (int i=0; i<(int)kernspines.size(); i++) {
-		output = output && analyzeKernSlurs(kernspines[i]);
+		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, linkSignifier);
 	}
+	createLinkedSlurs(slurstarts, slurends);
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart, 
+		vector<HTp>& linkstarts, vector<HTp>& linkends, const string& linksig) {
+
+	// linked slurs handled separately, so generate an ignore sequence:
+	string ignorebegin = linksig + "(";
+	string ignoreend = linksig + ")";
+
 	// tracktokens == the 2-D data list for the track,
 	// arranged in layers with the second dimension.
 	vector<vector<HTp> > tracktokens;
@@ -15240,7 +15250,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	// sluropens == list of slur openings for each track and elision level
 	// first dimension: elision level
 	// second dimension: track number
-	vector<vector<vector<HTp> > > sluropens;
+	vector<vector<vector<HTp>>> sluropens;
 
 	sluropens.resize(4); // maximum of 4 elision levels
 	for (int i=0; i<(int)sluropens.size(); i++) {
@@ -15264,6 +15274,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			closecount = (int)count(token->begin(), token->end(), ')');
 
 			for (int i=0; i<closecount; i++) {
+				bool isLinked = isLinkedSlurEnd(token, i, ignoreend);
+				if (isLinked) {
+					linkends.push_back(token);
+					continue;
+				}
 				elision = token->getSlurEndElisionLevel(i);
 				if (elision < 0) {
 					continue;
@@ -15295,6 +15310,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 			}
 
 			for (int i=0; i<opencount; i++) {
+				bool isLinked = isLinkedSlurBegin(token, i, ignorebegin);
+				if (isLinked) {
+					linkstarts.push_back(token);
+					continue;
+				}
 				elision = token->getSlurStartElisionLevel(i);
 				if (elision < 0) {
 					continue;
@@ -15316,6 +15336,89 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart) {
 	}
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::createLinkedSlurs --  Currently assume that
+//    start and ends are matched.
+//
+
+void HumdrumFileContent::createLinkedSlurs(vector<HTp>& linkstarts, vector<HTp>& linkends) {
+	int max = (int)linkstarts.size();
+	if ((int)linkends.size() < max) {
+		max = (int)linkends.size();
+	}
+	if (max == 0) {
+		// nothing to do
+		return;
+	}
+
+	for (int i=0; i<max; i++) {
+		linkSlurEndpoints(linkstarts[i], linkends[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isLinkedSlurEnd --
+//
+
+bool HumdrumFileContent::isLinkedSlurEnd(HTp token, int index, const string& pattern) {
+	if (pattern.size() <= 1) {
+		return false;
+	}
+	int counter = -1;
+	for (int i=0; i<(int)token->size(); i++) {
+		if (token->at(i) == ')') {
+			counter++;
+		}
+		if (i == 0) {
+			continue;
+		}
+		if (counter != index) {
+			continue;
+		}
+		if (token->find(pattern, i - (int)pattern.size() + 1) != std::string::npos) {
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::isLinkedSlurBegin --
+//
+
+bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& pattern) {
+	if (pattern.size() <= 1) {
+		return false;
+	}
+	int counter = -1;
+	for (int i=0; i<(int)token->size(); i++) {
+		if (token->at(i) == '(') {
+			counter++;
+		}
+		if (i == 0) {
+			continue;
+		}
+		if (counter != index) {
+			continue;
+		}
+		if (token->find(pattern, i - (int)pattern.size() + 1) != std::string::npos) {
+			return true;
+		}
+		return false;
+	}
+	return false;
 }
 
 
@@ -16025,6 +16128,7 @@ void HumdrumFileStream::fillUrlBuffer(stringstream& uribuffer,
 
 
 
+
 //////////////////////////////
 //
 // HumdrumFileStructure::HumdrumFileStructure -- HumdrumFileStructure
@@ -16207,6 +16311,7 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 		if (!analyzeRhythm()           ) { return isValid(); }
 		if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
 	}
+	analyzeSignifiers();
 	return isValid();
 }
 
@@ -17513,6 +17618,23 @@ bool HumdrumFileStructure::hasFilters(void) {
 
 //////////////////////////////
 //
+// HumdrumFileStructure::analyzeSignifiers --
+//
+
+void HumdrumFileStructure::analyzeSignifiers(void) {
+	HumdrumFileStructure& infile = *this;
+	for (int i=0; i<getLineCount(); i++) {
+		if (!infile[i].isSignifier()) {
+			continue;
+		}
+		m_signifiers.addSignifier(infile[i].getText());
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::HumdrumLine -- HumdrumLine constructor.
 //
 
@@ -17857,6 +17979,24 @@ bool HumdrumLine::isReference(void) const {
 		return false;
 	}
 	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
+		return false;
+	}
+	return true;
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isSignifier -- Returns true if a !!!RDF reference record.
+//
+
+bool HumdrumLine::isSignifier(void) const {
+	if (this->size() < 9) {
+		return false;
+	}
+	if (this->substr(0, 8) != "!!!RDF**") {
 		return false;
 	}
 	return true;

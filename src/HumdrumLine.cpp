@@ -378,6 +378,24 @@ bool HumdrumLine::isReference(void) const {
 
 
 
+
+//////////////////////////////
+//
+// HumdrumLine::isSignifier -- Returns true if a !!!RDF reference record.
+//
+
+bool HumdrumLine::isSignifier(void) const {
+	if (this->size() < 9) {
+		return false;
+	}
+	if (this->substr(0, 8) != "!!!RDF**") {
+		return false;
+	}
+	return true;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumLine::getReferenceKey -- Return reference key if a reference

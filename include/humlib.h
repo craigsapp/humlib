@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 10 16:05:25 PDT 2018
+// Last Modified: Sun Jun 10 23:34:53 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -970,6 +970,7 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isLocalComment         (void) const { return isCommentLocal(); }
 		bool        isCommentGlobal        (void) const;
 		bool        isReference            (void) const;
+		bool        isSignifier            (void) const;
 		std::string getReferenceKey        (void) const;
 		std::string getReferenceValue      (void) const;
 		bool        isGlobalComment         (void) const { return isCommentGlobal(); }
@@ -1742,6 +1743,9 @@ class HumdrumFileBase : public HumHash {
 		// m_displayError: Used to print error message only once.
 		bool m_displayError;
 
+		// m_signifiers: Used to keep track of !!!RDF records.
+		HumSignifiers m_signifiers;
+
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
 		// to be shifted between HumdrumFileContent (the top-level default),
@@ -1855,7 +1859,6 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeStrands               (void);
 
 	protected:
-
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);
 		bool          analyzeMeter                 (void);
@@ -1889,6 +1892,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          assignDurationsToNonRhythmicTrack(HTp endtoken, HTp ptoken);
 		void          analyzeSpineStrands          (std::vector<TokenPair>& ends,
 		                                            HTp starttok);
+		void          analyzeSignifiers            (void);
 };
 
 
@@ -1940,13 +1944,18 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   bool recalcLine = true);
 
 	protected:
-		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
-		bool   analyzeKernTies            (HumdrumToken* spinestart);
+		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
+		                                   std::vector<HTp>& slurends,
+		                                   const std::string& linksig = "");
+		bool   analyzeKernTies            (HTp spinestart);
 		void   fillKeySignature           (std::vector<int>& states,
 		                                   const std::string& keysig);
 		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
 				                             std::vector<int>& signature);
 		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
+		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
+		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
 };
 
 
@@ -4886,115 +4895,115 @@ class Tool_musicxml2hum : public HumTool {
 		       ~Tool_musicxml2hum    () {}
 
 		bool    convertFile          (ostream& out, const char* filename);
-		bool    convert              (ostream& out, xml_document& infile);
+		bool    convert              (ostream& out, pugi::xml_document& infile);
 		bool    convert              (ostream& out, const char* input);
 		bool    convert              (ostream& out, istream& input);
 
 		void    setOptions           (int argc, char** argv);
-		void    setOptions           (const vector<string>& argvlist);
+		void    setOptions           (const std::vector<std::string>& argvlist);
 		Options getOptionDefinitions (void);
 
 	protected:
 		void   initialize           (void);
-		string getChildElementText  (xml_node root, const char* xpath);
-		string getChildElementText  (xpath_node root, const char* xpath);
-		string getAttributeValue    (xml_node xnode, const string& target);
-		string getAttributeValue    (xpath_node xnode, const string& target);
-		void   printAttributes      (xml_node node);
-		bool   getPartInfo          (map<string, xml_node>& partinfo,
-		                             vector<string>& partids, xml_document& doc);
+		std::string getChildElementText  (pugi::xml_node root, const char* xpath);
+		std::string getChildElementText  (pugi::xpath_node root, const char* xpath);
+		std::string getAttributeValue    (pugi::xml_node xnode, const std::string& target);
+		std::string getAttributeValue    (xpath_node xnode, const std::string& target);
+		void   printAttributes      (pugi::xml_node node);
+		bool   getPartInfo          (map<std::string, pugi::xml_node>& partinfo,
+		                             std::vector<std::string>& partids, pugi::xml_document& doc);
 		bool   stitchParts          (HumGrid& outdata,
-		                             vector<string>& partids,
-		                             map<string, xml_node>& partinfo,
-		                             map<string, xml_node>& partcontent,
-		                             vector<MxmlPart>& partdata);
-		bool   getPartContent       (map<string, xml_node>& partcontent,
-		                             vector<string>& partids, xml_document& doc);
-		void   printPartInfo        (vector<string>& partids,
-		                             map<string, xml_node>& partinfo,
-		                             map<string, xml_node>& partcontent,
-		                             vector<MxmlPart>& partdata);
-		bool   fillPartData         (vector<MxmlPart>& partdata,
-		                             const vector<string>& partids,
-		                             map<string, xml_node>& partinfo,
-		                             map<string, xml_node>& partcontent);
-		bool   fillPartData         (MxmlPart& partdata, const string& id,
-		                             xml_node partdeclaration,
-		                             xml_node partcontent);
+		                             std::vector<std::string>& partids,
+		                             map<std::string, pugi::xml_node>& partinfo,
+		                             map<std::string, pugi::xml_node>& partcontent,
+		                             std::vector<MxmlPart>& partdata);
+		bool   getPartContent       (map<std::string, pugi::xml_node>& partcontent,
+		                             std::vector<std::string>& partids, pugi::xml_document& doc);
+		void   printPartInfo        (std::vector<std::string>& partids,
+		                             map<std::string, pugi::xml_node>& partinfo,
+		                             map<std::string, pugi::xml_node>& partcontent,
+		                             std::vector<MxmlPart>& partdata);
+		bool   fillPartData         (std::vector<MxmlPart>& partdata,
+		                             const std::vector<std::string>& partids,
+		                             map<std::string, pugi::xml_node>& partinfo,
+		                             map<std::string, pugi::xml_node>& partcontent);
+		bool   fillPartData         (MxmlPart& partdata, const std::string& id,
+		                             pugi::xml_node partdeclaration,
+		                             pugi::xml_node partcontent);
 		void   appendZeroEvents     (GridMeasure* outfile,
-		                             vector<SimultaneousEvents*>& nowevents,
+		                             std::vector<SimultaneousEvents*>& nowevents,
 		                             HumNum nowtime,
-		                             vector<MxmlPart>& partdata);
+		                             std::vector<MxmlPart>& partdata);
 		void   appendNonZeroEvents   (GridMeasure* outdata,
-		                              vector<SimultaneousEvents*>& nowevents,
+		                              std::vector<SimultaneousEvents*>& nowevents,
 		                              HumNum nowtime,
-		                              vector<MxmlPart>& partdata);
+		                              std::vector<MxmlPart>& partdata);
 		void   addGraceLines         (GridMeasure* outdata,
-		                              vector<vector<vector<vector<MxmlEvent*> > > >& notes,
-		                              vector<MxmlPart>& partdata, HumNum nowtime);
-		void   addEventToList        (vector<vector<vector<vector<MxmlEvent*> > > >& list,
+		                              std::vector<std::vector<std::vector<std::vector<MxmlEvent*> > > >& notes,
+		                              std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void   addEventToList        (std::vector<std::vector<std::vector<std::vector<MxmlEvent*> > > >& list,
 		                              MxmlEvent* event);
-		void   addHeaderRecords      (HumdrumFile& outfile, xml_document& doc);
-		void   addFooterRecords      (HumdrumFile& outfile, xml_document& doc);
-		string cleanSpaces           (string& input);
+		void   addHeaderRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
+		void   addFooterRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
+		std::string cleanSpaces           (std::string& input);
 		void setEditorialAccidental  (int accidental, GridSlice* slice,
 		                              int partindex, int staffindex, int voiceindex);
 
 		bool convert          (ostream& out);
-		bool convertPart      (ostream& out, const string& partname,
+		bool convertPart      (ostream& out, const std::string& partname,
 		                       int partindex);
 		bool insertMeasure    (HumGrid& outdata, int mnum,
-		                       vector<MxmlPart>& partdata,
-		                       vector<int> partstaves);
+		                       std::vector<MxmlPart>& partdata,
+		                       std::vector<int> partstaves);
 		bool convertNowEvents (GridMeasure* outdata,
-		                       vector<SimultaneousEvents*>& nowevents,
-		                       vector<int>& nowparts,
+		                       std::vector<SimultaneousEvents*>& nowevents,
+		                       std::vector<int>& nowparts,
 		                       HumNum nowtime,
-		                       vector<MxmlPart>& partdata,
-		                       vector<int>& partstaves);
+		                       std::vector<MxmlPart>& partdata,
+		                       std::vector<int>& partstaves);
 		void appendNullTokens (HumdrumLine* line, MxmlPart& part);
 		void appendEvent      (HumdrumLine* line, MxmlEvent* event);
 		void insertExclusiveInterpretationLine(HumdrumFile& outfile,
-		                       vector<MxmlPart>& partdata);
-		void insertAllToken   (HumdrumFile& outfile, vector<MxmlPart>& partdata,
-		                       const string& common);
+		                       std::vector<MxmlPart>& partdata);
+		void insertAllToken   (HumdrumFile& outfile, std::vector<MxmlPart>& partdata,
+		                       const std::string& common);
 		void insertSingleMeasure(HumdrumFile& outfile);
 		void cleanupMeasures   (HumdrumFile& outfile,
-		                        vector<HumdrumLine*> measures);
-		void processPrintElement(GridMeasure* outdata, xml_node element, HumNum timestamp);
+		                        std::vector<HumdrumLine*> measures);
+		void processPrintElement(GridMeasure* outdata, pugi::xml_node element, HumNum timestamp);
 
-		void addClefLine       (GridMeasure* outdata, vector<vector<xml_node> >& clefs,
-		                        vector<MxmlPart>& partdata, HumNum nowtime);
-		void addOttavaLine     (GridMeasure* outdata, vector<vector<xml_node> >& ottavas,
-		                        vector<MxmlPart>& partdata, HumNum nowtime);
-		void insertPartClefs   (xml_node clef, GridPart& part);
-		void insertPartOttavas (xml_node ottava, GridPart& part, int partindex, int partstaffindex);
-		xml_node convertClefToHumdrum(xml_node clef, HTp& token, int& staffindex);
-		xml_node convertOttavaToHumdrum(xml_node ottava, HTp& token, int& staffindex,
+		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& clefs,
+		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& ottavas,
+		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void insertPartClefs   (pugi::xml_node clef, GridPart& part);
+		void insertPartOttavas (pugi::xml_node ottava, GridPart& part, int partindex, int partstaffindex);
+		pugi::xml_node convertClefToHumdrum(pugi::xml_node clef, HTp& token, int& staffindex);
+		pugi::xml_node convertOttavaToHumdrum(pugi::xml_node ottava, HTp& token, int& staffindex,
 		                        int partindex, int partstaffindex);
 
-		void addTranspositionLine(GridMeasure* outdata, vector<vector<xml_node> >& transpositions,
-		                       vector<MxmlPart>& partdata, HumNum nowtime);
-		void addKeySigLine    (GridMeasure* outdata, vector<vector<xml_node> >& keysigs,
-		                        vector<MxmlPart>& partdata, HumNum nowtime);
-		void insertPartKeySigs (xml_node keysig, GridPart& part);
-		xml_node convertKeySigToHumdrum(xml_node keysig,
+		void addTranspositionLine(GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& transpositions,
+		                       std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void addKeySigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& keysigs,
+		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void insertPartKeySigs (pugi::xml_node keysig, GridPart& part);
+		pugi::xml_node convertKeySigToHumdrum(pugi::xml_node keysig,
 		                        HTp& token, int& staffindex);
 
-		void addTimeSigLine    (GridMeasure* outdata, vector<vector<xml_node> >& timesigs,
-		                        vector<MxmlPart>& partdata, HumNum nowtime);
-		bool insertPartTimeSigs (xml_node timesig, GridPart& part);
-		void insertPartMensurations(xml_node timesig, GridPart& part);
-		void insertPartNames    (HumGrid& outdata, vector<MxmlPart>& partdata);
-		bool checkForMensuration(xml_node timesig);
-		xml_node convertTimeSigToHumdrum(xml_node timesig,
+		void addTimeSigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& timesigs,
+		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		bool insertPartTimeSigs (pugi::xml_node timesig, GridPart& part);
+		void insertPartMensurations(pugi::xml_node timesig, GridPart& part);
+		void insertPartNames    (HumGrid& outdata, std::vector<MxmlPart>& partdata);
+		bool checkForMensuration(pugi::xml_node timesig);
+		pugi::xml_node convertTimeSigToHumdrum(pugi::xml_node timesig,
 		                        HTp& token, int& staffindex);
-		xml_node convertMensurationToHumdrum(xml_node timesig,
+		pugi::xml_node convertMensurationToHumdrum(pugi::xml_node timesig,
 		                        HTp& token, int& staffindex);
 
 		void addEvent          (GridSlice* slice, GridMeasure* outdata, MxmlEvent* event);
 		void fillEmpties       (GridPart* part, const char* string);
-		void addSecondaryChordNotes (ostream& output, MxmlEvent* head, const string& recip);
+		void addSecondaryChordNotes (ostream& output, MxmlEvent* head, const std::string& recip);
 		bool isInvisible       (MxmlEvent* event);
 		int  addLyrics         (GridStaff* staff, MxmlEvent* event);
 		int  addHarmony        (GridPart* oart, MxmlEvent* event);
@@ -5002,27 +5011,27 @@ class Tool_musicxml2hum : public HumTool {
 		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex,
-		                        int staffindex, int voiceindex, xml_node node);
-		string getHarmonyString(xml_node hnode);
-		string getDynamicString(xml_node element);
-		string getDynamicsParameters(xml_node element);
-		string getHairpinString(xml_node element);
-		string cleanSpaces     (const string& input);
+		                        int staffindex, int voiceindex, pugi::xml_node node);
+		std::string getHarmonyString(pugi::xml_node hnode);
+		std::string getDynamicString(pugi::xml_node element);
+		std::string getDynamicsParameters(pugi::xml_node element);
+		std::string getHairpinString(pugi::xml_node element);
+		std::string cleanSpaces     (const std::string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
-		void reindexVoices     (vector<MxmlPart>& partdata);
+		void reindexVoices     (std::vector<MxmlPart>& partdata);
 		void reindexMeasure    (MxmlMeasure* measure);
-		void setSoftwareInfo   (xml_document& doc);
-		string getSystemDecoration(xml_document& doc, HumGrid& grid, vector<string>& partids);
-		void getChildrenVector (vector<xml_node>& children, xml_node parent);
-		void insertPartTranspositions(xml_node transposition, GridPart& part);
-		xml_node convertTranspositionToHumdrum(xml_node transpose, HTp& token, int& staffindex);
-		void prepareRdfs       (vector<MxmlPart>& partdata);
+		void setSoftwareInfo   (pugi::xml_document& doc);
+		std::string getSystemDecoration(pugi::xml_document& doc, HumGrid& grid, std::vector<std::string>& partids);
+		void getChildrenVector (std::vector<pugi::xml_node>& children, pugi::xml_node parent);
+		void insertPartTranspositions(pugi::xml_node transposition, GridPart& part);
+		pugi::xml_node convertTranspositionToHumdrum(pugi::xml_node transpose, HTp& token, int& staffindex);
+		void prepareRdfs       (std::vector<MxmlPart>& partdata);
 		void printRdfs         (ostream& out);
 		void printResult       (ostream& out, HumdrumFile& outfile);
 
 	public:
 
-	static bool nodeType      (xml_node node, const char* testname);
+	static bool nodeType      (pugi::xml_node node, const char* testname);
 
 	private:
 		Options m_options;
@@ -5033,16 +5042,16 @@ class Tool_musicxml2hum : public HumTool {
 		int  m_slurabove    = 0;
 		int  m_slurbelow    = 0;
 		char m_hasEditorial = '\0';
-		vector<vector<string>> m_last_ottava_direction;
+		std::vector<std::vector<std::string>> m_last_ottava_direction;
 
 		// RDF indications in **kern data:
-		string  m_caesura_rdf;
+		std::string  m_caesura_rdf;
 
-		string m_software;
-		string m_systemDecoration;
+		std::string m_software;
+		std::string m_systemDecoration;
 
-		xml_node m_current_dynamic = xml_node(NULL);
-		vector<xml_node> m_current_text;
+		pugi::xml_node m_current_dynamic = pugi::xml_node(NULL);
+		std::vector<pugi::xml_node> m_current_text;
 		bool m_hasTransposition = false;
 
 };

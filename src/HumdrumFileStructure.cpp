@@ -210,6 +210,7 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 		if (!analyzeRhythm()           ) { return isValid(); }
 		if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
 	}
+	analyzeSignifiers();
 	return isValid();
 }
 
@@ -1510,6 +1511,23 @@ bool HumdrumFileStructure::hasFilters(void) {
 		}
 	}
 	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeSignifiers --
+//
+
+void HumdrumFileStructure::analyzeSignifiers(void) {
+	HumdrumFileStructure& infile = *this;
+	for (int i=0; i<getLineCount(); i++) {
+		if (!infile[i].isSignifier()) {
+			continue;
+		}
+		m_signifiers.addSignifier(infile[i].getText());
+	}
 }
 
 

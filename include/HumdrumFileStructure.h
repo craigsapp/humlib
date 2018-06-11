@@ -109,7 +109,6 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeStrands               (void);
 
 	protected:
-
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);
 		bool          analyzeMeter                 (void);
@@ -143,6 +142,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          assignDurationsToNonRhythmicTrack(HTp endtoken, HTp ptoken);
 		void          analyzeSpineStrands          (std::vector<TokenPair>& ends,
 		                                            HTp starttok);
+		void          analyzeSignifiers            (void);
 };
 
 

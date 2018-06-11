@@ -74,13 +74,18 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   bool recalcLine = true);
 
 	protected:
-		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
-		bool   analyzeKernTies            (HumdrumToken* spinestart);
+		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
+		                                   std::vector<HTp>& slurends,
+		                                   const std::string& linksig = "");
+		bool   analyzeKernTies            (HTp spinestart);
 		void   fillKeySignature           (std::vector<int>& states,
 		                                   const std::string& keysig);
 		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
 				                             std::vector<int>& signature);
 		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
+		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
+		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
 };
 
 
