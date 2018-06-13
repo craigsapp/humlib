@@ -40,6 +40,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 		bool   analyzeRScale              (void);
 
+		// in HumdrumFileContent-rest.cpp
+		void  analyzeRestPositions        (void);
+		void  analyzeRestPositions        (HTp kernstart);
+
 		// in HumdrumFileContent-metlev.cpp
 		void  getMetricLevels             (std::vector<double>& output, int track = 0,
 		                                   double undefined = NAN);
@@ -86,6 +90,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
 		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
 		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+		void    assignVerticalRestPosition(HTp first, HTp second, int baseline);
+		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
+		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
+		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
 };
 
 

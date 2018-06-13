@@ -142,17 +142,17 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getFieldNumber            (void) const;
 		int      getTokenIndex             (void) const;
 		int      getTokenNumber            (void) const;
-		const std::string& getDataType          (void) const;
+		const std::string& getDataType     (void) const;
 		bool     isDataType                (const std::string& dtype) const;
 		bool     isKern                    (void) const;
 		bool     isMens                    (void) const;
-		std::string   getSpineInfo              (void) const;
+		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
 		bool     noteInLowerSubtrack       (void);
-		std::string   getTrackString            (void) const;
+		std::string   getTrackString       (void) const;
 		int      getSubtokenCount          (const std::string& separator = " ") const;
-		std::string   getSubtoken               (int index,
+		std::string   getSubtoken          (int index,
 		                                    const std::string& separator = " ") const;
 		void     setParameters             (HTp ptok);
 		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
@@ -163,15 +163,15 @@ class HumdrumToken : public std::string, public HumHash {
 		HTp      getSlurEndToken           (int number = 0);
 		void     storeLinkedParameters     (void);
 		bool     linkedParameterIsGlobal   (int index);
-		std::ostream& printCsv                  (std::ostream& out = std::cout);
-		std::ostream& printXml                  (std::ostream& out = std::cout, int level = 0,
+		std::ostream& printCsv             (std::ostream& out = std::cout);
+		std::ostream& printXml             (std::ostream& out = std::cout, int level = 0,
 		                                    const std::string& indent = "\t");
 		std::ostream& printGlobalXmlParameterInfo(std::ostream& out = std::cout, int level = 0,
 		                                   const std::string& indent = "\t");
-		std::string   getXmlId                  (const std::string& prefix = "") const;
-		std::string   getXmlIdPrefix            (void) const;
+		std::string   getXmlId             (const std::string& prefix = "") const;
+		std::string   getXmlIdPrefix       (void) const;
 		void     setText                   (const std::string& text);
-		std::string   getText                   (void) const;
+		std::string   getText              (void) const;
 		int      addLinkedParameter        (HTp token);
 		int      getLinkedParameterCount   (void);
 		HumParamSet* getLinkedParameter    (int index);
@@ -179,7 +179,7 @@ class HumdrumToken : public std::string, public HumHash {
 		std::ostream& printXmlLinkedParameterInfo(std::ostream& out, int level, const std::string& indent);
 
 		// layout parameter accessors
-		std::string   getVisualDuration         (void);
+		std::string   getVisualDuration    (void);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const std::string& aToken);
@@ -194,8 +194,8 @@ class HumdrumToken : public std::string, public HumHash {
 		std::vector<HTp> getPreviousTokens (void) const;
 
 		// next/previous token on line:
-		HTp      getNextFieldToken           (void) const;
-		HTp      getPreviousFieldToken       (void) const;
+		HTp      getNextFieldToken         (void) const;
+		HTp      getPreviousFieldToken     (void) const;
 
 		int      getPreviousNonNullDataTokenCount(void);
 		int      getPreviousNNDTCount      (void)
@@ -204,7 +204,7 @@ class HumdrumToken : public std::string, public HumHash {
 		HTp      getPreviousNNDT           (int index = 0)
 		                           { return getPreviousNonNullDataToken(index); }
 		int      getNextNonNullDataTokenCount(void);
-		int      getNextNNDTCount          (void)
+		int      getNextNNDTCount           (void)
 		                               { return getNextNonNullDataTokenCount(); }
 		HTp      getNextNonNullDataToken   (int index = 0);
 		HTp      getNextNNDT               (int index = 0)

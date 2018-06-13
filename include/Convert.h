@@ -45,7 +45,7 @@ class Convert {
 		                                     HumNum scale = HumNum(1,4));
 
 		// Pitch processing, defined in Convert-pitch.cpp
-		static std::string  base40ToKern         (int b40);
+		static std::string  base40ToKern    (int b40);
 		static int     base40ToAccidental   (int b40);
 		static int     base40ToDiatonic     (int b40);
 		static int     base40ToMidiNoteNumber(int b40);
@@ -91,12 +91,12 @@ class Convert {
 		                                     std::string flat = "b",
 		                                     std::string sharp = "#",
 		                                     std::string separator = "");
-		static std::string  kernToSciPitch       (const std::string& kerndata,
+		static std::string  kernToSciPitch  (const std::string& kerndata,
 		      										 std::string flat = "b",
 		                                     std::string sharp = "#",
 		                                     std::string separator = "")
 	       { return kernToScientificPitch(kerndata, flat, sharp, separator); }
-		static std::string  kernToSP             (const std::string& kerndata,
+		static std::string  kernToSP        (const std::string& kerndata,
 		                                     std::string flat = "b",
 		                                     std::string sharp = "#",
 		                                     std::string separator = "")
@@ -106,10 +106,11 @@ class Convert {
 		static void    wbhToPitch           (int& dpc, int& acc, int& octave,
 		                                     int maxacc, int wbh);
 		static int     kernClefToBaseline   (const std::string& input);
-		static std::string  base40ToTrans        (int base40);
+		static int     kernClefToBaseline   (HTp input);
+		static std::string  base40ToTrans   (int base40);
 		static int     transToBase40        (const std::string& input);
 		static int     base40IntervalToLineOfFifths(int trans);
-		static std::string  keyNumberToKern      (int number);
+		static std::string  keyNumberToKern (int number);
 		static int     base7ToBase40        (int base7);
 		static int     base40IntervalToDiatonic(int base40interval);
 
