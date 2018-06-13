@@ -73,6 +73,7 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			// verovio will try to tweak it when there is
 			// more than one layer on the staff.
 			setRestOnCenterStaffLine(current, baseline);
+			setRestOnCenterStaffLine(second, baseline);
 		}
 		if (second->isNull()) {
 			current = current->getNextToken();

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 13 08:56:18 PDT 2018
+// Last Modified: Wed Jun 13 09:59:23 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -15269,6 +15269,7 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			// verovio will try to tweak it when there is
 			// more than one layer on the staff.
 			setRestOnCenterStaffLine(current, baseline);
+			setRestOnCenterStaffLine(second, baseline);
 		}
 		if (second->isNull()) {
 			current = current->getNextToken();
