@@ -133,6 +133,7 @@ class MxmlEvent {
 		std::vector<xml_node>&  getTexts           (void);
 		void               setDynamics        (xml_node node);
 		xml_node           getDynamics        (void);
+		std::string        getRestPitch       (void) const;
 
 	protected:
 		HumNum             m_starttime;  // start time in quarter notes of event

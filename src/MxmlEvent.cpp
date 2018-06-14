@@ -1327,6 +1327,7 @@ string MxmlEvent::getKernPitch(void) {
 	for (int i=0; i<count; i++) {
 		output += pc;
 	}
+
 	if (alter > 0) {  // sharps
 		for (int i=0; i<alter; i++) {
 			output += '#';
@@ -1702,6 +1703,65 @@ int MxmlEvent::getDotCount(void) const {
 	} else {
 		return -1;
 	}
+}
+
+
+
+//////////////////////////////
+//
+//  MxmlEvent::getRestPitch -- return the vertical position of a rest
+//     as a kern pitch.
+//   Example:
+//    <note>
+//       <rest>
+//          <display-step>G</display-step>
+//          <display-octave>4</display-octave>
+//       </rest>
+//       <duration>2</duration>
+//       <voice>1</voice>
+//       <type>quarter</type>
+//    </note>
+//
+
+string MxmlEvent::getRestPitch(void) const {
+	xpath_node rest = m_node.select_single_node("./rest");
+	if (rest.node().empty()) {
+		// not a rest, so no pitch information.
+		return "";
+	}
+	xpath_node step = rest.node().select_single_node("./display-step");
+	if (step.node().empty()) {
+		// no vertical positioning information
+	}
+	string steptext = step.node().child_value();
+	if (steptext.empty()) {
+		return "";
+	}
+	xpath_node octave = rest.node().select_single_node("./display-octave");
+	if (octave.node().empty()) {
+		// not enough vertical positioning information
+	}
+	string octavetext = octave.node().child_value();
+	if (octavetext.empty()) {
+		return "";
+	}
+
+	int octaveval = stoi(octavetext);
+	int count = 1;
+	char pc = steptext[0];
+	if (octaveval > 3) {
+		pc = tolower(pc);
+		count = octaveval - 3;
+	} else {
+		pc = toupper(pc);
+		count = 4 - octaveval;
+	}
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pc;
+	}
+
+	return output;
 }
 
 

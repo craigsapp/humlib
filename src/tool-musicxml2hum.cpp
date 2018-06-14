@@ -1186,6 +1186,11 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		bool slurstart = event->hasSlurStart(slurdir);
 		bool slurstop  = event->hasSlurStop();
 
+		if (pitch.find('r') != std::string::npos) {
+			string restpitch =  event->getRestPitch();
+			pitch += restpitch;
+		}
+
 		if (slurstart) {
 			prefix.insert(0, "(");
 			if (slurdir) {
