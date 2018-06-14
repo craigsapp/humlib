@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 13 09:59:23 PDT 2018
+// Last Modified: Wed Jun 13 22:18:02 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -15260,6 +15260,24 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			setRestOnCenterStaffLine(current, baseline);
 		}
 		HTp second = current->getNextFieldToken();
+		if (current->isRest()) {
+			if (processRestPitch(current, baseline)) {
+				if (second && second->isRest()) {
+					if (processRestPitch(second, baseline)) {
+						current = current->getNextToken();
+						continue;
+					}
+				}
+				current = current->getNextToken();
+				continue;
+			}
+			if (second && second->isRest()) {
+				if (processRestPitch(second, baseline)) {
+					current = current->getNextToken();
+					continue;
+				}
+			}
+		}
 		if (!second) {
 			current = current->getNextToken();
 			continue;
@@ -15297,6 +15315,62 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileContent::processRestPitch -- Read any pitch information attached to 
+//     a rest and convert to ploc/oloc values.
+//
+
+bool HumdrumFileContent::processRestPitch(HTp rest, int baseline) {
+	HumRegex hre;
+	if (!hre.search(rest, "([A-Ga-g]+)")) {
+		return false;
+	}
+	string pitch = hre.getMatch(1);
+	int b7 = Convert::kernToBase7(pitch);
+
+	int diff = (b7 - baseline) + 100;
+	if (diff % 2) {
+		// force to every other diatonic step (stafflines)
+		HumNum dur = rest->getDuration();
+		if (dur > 1) {
+			b7--;
+		} else {
+			b7++;
+		}
+	}
+
+	int pc = b7 % 7;
+	int oct = b7 / 7; 
+
+	string dname;
+	switch (pc) {
+		case 0: dname = "C"; break;
+		case 1: dname = "D"; break;
+		case 2: dname = "E"; break;
+		case 3: dname = "F"; break;
+		case 4: dname = "G"; break;
+		case 5: dname = "A"; break;
+		case 6: dname = "B"; break;
+	}
+
+	if (dname.empty()) {
+		return false;
+	}
+
+	string oloc = to_string(oct);
+
+	rest->setValue("auto", "ploc", dname);
+	rest->setValue("auto", "oloc", oloc);
+
+	return true;
+}
+
+
+
+
+
 //////////////////////////////
 //
 // HumdrumFileContent::setRestOnCenterStaffLine --
@@ -15306,7 +15380,7 @@ void HumdrumFileContent::setRestOnCenterStaffLine(HTp rest, int baseline) {
 	int rpos = 4;
 	int restdia = rpos + baseline;
 	int pc = restdia % 7;
-	int oct = restdia / 7;  // maybe off by one.
+	int oct = restdia / 7;
 
 	string dname;
 	switch (pc) {
@@ -15371,7 +15445,7 @@ void HumdrumFileContent::assignVerticalRestPosition(HTp first, HTp second, int b
 
 	int restdia = rpos + baseline;
 	int pc = restdia % 7;
-	int oct = restdia / 7;  // maybe off by one.
+	int oct = restdia / 7;
 
 	string dname;
 	switch (pc) {

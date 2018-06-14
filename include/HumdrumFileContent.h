@@ -94,6 +94,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
 		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
+		bool    processRestPitch          (HTp rest, int baseline);
 };
 
 
