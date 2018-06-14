@@ -1530,7 +1530,8 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime, vector<bool>& 
 	int nnum = 0;
 	xml_attribute nattr = layer.attribute("n");
 	if (!nattr) {
-		cerr << "Warning: no number on layer element, assigning it " << ++m_currentLayer << endl;
+		// No number on layer, assuming next available number should be used.
+		m_currentLayer++;
 		nnum = m_currentLayer;
 	} else {
 		nnum = nattr.as_int();

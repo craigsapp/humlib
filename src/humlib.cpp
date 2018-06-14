@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 13 23:57:50 PDT 2018
+// Last Modified: Thu Jun 14 13:53:49 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -41536,7 +41536,8 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime, vector<bool>& 
 	int nnum = 0;
 	xml_attribute nattr = layer.attribute("n");
 	if (!nattr) {
-		cerr << "Warning: no number on layer element, assigning it " << ++m_currentLayer << endl;
+		// No number on layer, assuming next available number should be used.
+		m_currentLayer++;
 		nnum = m_currentLayer;
 	} else {
 		nnum = nattr.as_int();
