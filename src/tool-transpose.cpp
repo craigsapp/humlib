@@ -10,6 +10,7 @@
 // Last Modified: Thu Nov 19 19:28:26 PST 2009 Added -W and -C options
 // Last Modified: Mon Dec  5 23:28:50 PST 2016 Ported to humlib from humextras
 // Last Modified: Wed May 16 22:47:11 PDT 2018 Added **mxhm transposition
+// Last Modified: Thu Jun 14 15:30:53 PDT 2018 Added rest position transposition
 // Filename:      tool-transpose.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-transpose.cpp
 // Syntax:        C++11; humlib
@@ -875,9 +876,19 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 //
 
 void Tool_transpose::printNewKernString(const string& input, int transval) {
+	HumRegex hre;
 	if (input.rfind('r') != string::npos) {
+		string output = input;
+		if (hre.search(input, "([A-Ga-g]+[#n-]*)")) {
+			// transpose pitch portion of rest (indicating vertical position)
+			string pitch = hre.getMatch(1);
+			int base40 = Convert::kernToBase40(pitch);
+			string newpitch = Convert::base40ToKern(base40 + transval);
+			hre.replaceDestructive(newpitch, "", "[-#n]+");
+			hre.replaceDestructive(output, newpitch, "([A-Ga-g]+[#n-]*)");
+		}
 		// don't transpose rests...
-		m_humdrum_text << input;
+		m_humdrum_text << output;
 		return;
 	}
 	if (input == ".") {
@@ -890,7 +901,6 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 	string newpitch = Convert::base40ToKern(base40 + transval);
 
 	// consider interaction of #X -X n interaction vs. nX.
-	HumRegex hre;
 	string output;
 	if (hre.search(input, "([A-Ga-g#n-]+)")) {
 		string oldpitch = hre.getMatch(1);
