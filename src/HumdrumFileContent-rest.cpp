@@ -63,7 +63,16 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			// more than one layer on the staff.
 			setRestOnCenterStaffLine(current, baseline);
 		}
+		int strack = -1;
 		HTp second = current->getNextFieldToken();
+		if (second) {
+			strack = second->getTrack();
+		}
+		if (track != strack) {
+			// only one layer in current spine.
+			current = current->getNextToken();
+			continue;
+		}
 		if (current->isRest()) {
 			if (processRestPitch(current, baseline)) {
 				if (second && second->isRest()) {
@@ -75,11 +84,11 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 				current = current->getNextToken();
 				continue;
 			}
-			if (second && second->isRest()) {
-				if (processRestPitch(second, baseline)) {
-					current = current->getNextToken();
-					continue;
-				}
+		}
+		if (second && second->isRest()) {
+			if (processRestPitch(second, baseline)) {
+				current = current->getNextToken();
+				continue;
 			}
 		}
 		if (!second) {
@@ -94,11 +103,6 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			setRestOnCenterStaffLine(second, baseline);
 		}
 		if (second->isNull()) {
-			current = current->getNextToken();
-			continue;
-		}
-		int strack = second->getTrack();
-		if (track != strack) {
 			current = current->getNextToken();
 			continue;
 		}
