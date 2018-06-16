@@ -44,6 +44,9 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void  analyzeRestPositions        (void);
 		void  analyzeRestPositions        (HTp kernstart);
 
+		// in HumdrumFileContent-stem.cpp
+		bool analyzeKernStems             (void);
+
 		// in HumdrumFileContent-metlev.cpp
 		void  getMetricLevels             (std::vector<double>& output, int track = 0,
 		                                   double undefined = NAN);
@@ -95,6 +98,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
 		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
 		bool    processRestPitch          (HTp rest, int baseline);
+		bool    analyzeKernStems          (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
+		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
 };
 
 

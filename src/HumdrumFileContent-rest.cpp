@@ -1,4 +1,3 @@
-//
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Jun 12 21:02:48 PDT 2018
 // Last Modified: Tue Jun 12 21:02:56 PDT 2018
@@ -11,7 +10,9 @@
 //
 
 #include "HumdrumFileContent.h"
+#include "HumRegex.h"
 #include "Convert.h"
+
 
 using namespace std;
 
@@ -53,16 +54,6 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			current = current->getNextToken();
 			continue;
 		}
-		if (current->isNull()) {
-			current = current->getNextToken();
-			continue;
-		}
-		if (current->isRest()) {
-			// assign a default position for the rest, since
-			// verovio will try to tweak it when there is
-			// more than one layer on the staff.
-			setRestOnCenterStaffLine(current, baseline);
-		}
 		int strack = -1;
 		HTp second = current->getNextFieldToken();
 		if (second) {
@@ -72,6 +63,25 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			// only one layer in current spine.
 			current = current->getNextToken();
 			continue;
+		}
+		if (current->isNull()) {
+			HTp resolve = current->resolveNull();
+			if (resolve && resolve->isRest()) {
+				if (second && second->isRest()) {
+					if (processRestPitch(second, baseline)) {
+						current = current->getNextToken();
+						continue;
+					}
+				}
+			}
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isRest()) {
+			// assign a default position for the rest, since
+			// verovio will try to tweak it when there is
+			// more than one layer on the staff.
+			setRestOnCenterStaffLine(current, baseline);
 		}
 		if (current->isRest()) {
 			if (processRestPitch(current, baseline)) {
