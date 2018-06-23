@@ -46,11 +46,13 @@ Tool_transpose::Tool_transpose(void) {
 	define("c|chromatic=i:0", "the chromatic transposition value");
 	define("o|octave=i:0",    "the octave addition to tranpose value");
 	define("t|transpose=s",   "musical interval transposition value");
-	define("k|setkey=s",      "transpose to the given key");
+	define("k|settonic=s",    "transpose to the given key/tonic (mode will not change)");
 	define("auto=b",          "auto. trans. inst. parts to concert pitch");
 	define("debug=b",         "print debugging statements");
 	define("s|spines=s:",     "transpose only specified spines");
-	define("q|quiet=b",       "suppress *Tr interpretations in output");
+	// quiet reversed with -T option (actively need to request transposition code now)
+	// define("q|quiet=b",       "suppress *Tr interpretations in output");
+	define("T|transcode=b",   "include transposition code to reverse transposition");
 	define("I|instrument=b",  "insert instrument code (*ITr) as well");
 	define("C|concert=b",     "transpose written score to concert pitch");
 	define("W|written=b",     "trans. concert pitch score to written score");
@@ -99,8 +101,8 @@ bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
 bool Tool_transpose::run(HumdrumFile& infile) {
 	initialize(infile);
 
-	if (ssetkeyQ) {
-		transval = calculateTranspositionFromKey(ssetkey, infile);
+	if (ssettonicQ) {
+		transval = calculateTranspositionFromKey(ssettonic, infile);
 		transval = transval + octave * 40;
 		if (debugQ) {
 			m_humdrum_text << "!!Key TRANSVAL = " << transval;
@@ -1556,18 +1558,18 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 		exit(0);
 	}
 
-	transval     = getInteger("base40");
-	ssetkeyQ     = getBoolean("setkey");
-	ssetkey      = Convert::kernToBase40(getString("setkey").data());
-	autoQ        = getBoolean("auto");
-	debugQ       = getBoolean("debug");
-	spineQ       = getBoolean("spines");
-	spinestring  = getString("spines");
-	octave       = getInteger("octave");
-	concertQ     = getBoolean("concert");
-	writtenQ     = getBoolean("written");
-	quietQ       = getBoolean("quiet");
-	instrumentQ  = getBoolean("instrument");
+	transval     =  getInteger("base40");
+	ssettonicQ   =  getBoolean("settonic");
+	ssettonic    =  Convert::kernToBase40(getString("settonic").data());
+	autoQ        =  getBoolean("auto");
+	debugQ       =  getBoolean("debug");
+	spineQ       =  getBoolean("spines");
+	spinestring  =  getString("spines");
+	octave       =  getInteger("octave");
+	concertQ     =  getBoolean("concert");
+	writtenQ     =  getBoolean("written");
+	quietQ       = !getBoolean("transcode");
+	instrumentQ  =  getBoolean("instrument");
 
 	switch (getBoolean("diatonic") + getBoolean("chromatic")) {
 		case 1:
@@ -1583,7 +1585,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 			break;
 	}
 
-	ssetkey = ssetkey % 40;
+	ssettonic = ssettonic % 40;
 
 	if (getBoolean("transpose")) {
 		transval = getBase40ValueFromInterval(getString("transpose").data());

@@ -110,8 +110,8 @@ class Tool_transpose : public HumTool {
 
 	private:
 		int      transval     = 0;   // used with -b option
-		int      ssetkeyQ     = 0;   // used with -k option
-		int      ssetkey      = 0;   // used with -k option
+		int      ssettonicQ   = 0;   // used with -k option
+		int      ssettonic    = 0;   // used with -k option
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option
