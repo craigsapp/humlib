@@ -609,7 +609,14 @@ GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
 			// if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 			if ((*iterator)->getTimestamp() == timestamp) {
 				// found the correct timestamp on a data slice, so add the global comment
-				// before the data slice.
+				// before the data slice.  But don't add if the previous
+				// grid slice is a global comment with the same text.
+				if ((iterator != this->end()) && (*iterator)->isGlobalComment()) {
+					if (tok == *(*iterator)->at(0)->at(0)->at(0)->getToken()) {
+						// do not insert duplicate global comment
+						break;
+					}
+				}
 				gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
 				gs->addToken(tok, 0, 0, 0);
 				this->insert(iterator, gs);
