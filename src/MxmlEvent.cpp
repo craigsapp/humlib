@@ -948,6 +948,13 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			tempvoice = atoi(el.child_value());
 		} else if (nodeType(el, "duration")) {
 			tempduration = atoi(el.child_value());
+			// Duration must be set to 0 for figured bass.  But maybe need
+			// duration to create line extensions.  Probably other elements
+			// which are not notes should also have their durations set
+			// to zero.
+			if (nodeType(m_node, "figured-bass")) {
+				tempduration = 0;
+			}
 		}
 	}
 
@@ -1039,11 +1046,11 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			}
 			break;
 
+		case mevent_figured_bass:
 		case mevent_harmony:
 		case mevent_barline:
 		case mevent_bookmark:
 		case mevent_direction:
-		case mevent_figured_bass:
 		case mevent_grouping:
 		case mevent_link:
 		case mevent_print:
