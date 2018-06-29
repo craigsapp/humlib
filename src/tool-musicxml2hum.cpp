@@ -1948,6 +1948,7 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 				} else {
 					finaltext += text;
 				}
+				syllabic.clear();
 			}
 		}
 
@@ -2010,6 +2011,13 @@ string Tool_musicxml2hum::cleanSpaces(const string& input) {
 		}
 		i--;
 	}
+	if ((output.size() == 3) && ((unsigned char)output[0] == 0xee) && 
+			((unsigned char)output[1] == 0x95) && ((unsigned char)output[2] == 0x91)) {
+		// MuseScore elision character:
+		// <text font-family="MScore Text"></text>
+		output = " ";
+	}
+
 	return output;
 }
 
