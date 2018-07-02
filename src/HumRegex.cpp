@@ -144,31 +144,46 @@ void HumRegex::unsetGlobal(void) {
 //////////////////////////////
 //
 // HumRegex::search -- Search for the regular expression in the
-//    input string.  Returns true if any matches were found.  Search
-//    results can be accessed with .getSubmatchCount() and .getSubmatch(index).
+//    input string.  Returns the character position + 1 of the first match if any found.
+//    Search results can be accessed with .getSubmatchCount() and .getSubmatch(index).
 //
 
-bool HumRegex::search(const string& input, const string& exp) {
+int HumRegex::search(const string& input, const string& exp) {
 	m_regex = regex(exp, m_regexflags);
-	return regex_search(input, m_matches, m_regex, m_searchflags);
+	bool result = regex_search(input, m_matches, m_regex, m_searchflags);
+	if (!result) {
+		return 0;
+	} else if (m_matches.size() < 1) {
+		return 0;
+	} else {
+		// return the char+1 position of the first match
+		return m_matches.position(0) + 1;
+	}
 }
 
 
-bool HumRegex::search(const string& input, int startindex,
+int HumRegex::search(const string& input, int startindex,
 		const string& exp) {
 	m_regex = regex(exp, m_regexflags);
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex, m_searchflags);
+	bool result = regex_search(startit, endit, m_matches, m_regex, m_searchflags);
+	if (!result) {
+		return 0;
+	} else if (m_matches.size() < 1) {
+		return 0;
+	} else {
+		return m_matches.position(0) + 1;
+	}
 }
 
 
-bool HumRegex::search(string* input, const string& exp) {
+int HumRegex::search(string* input, const string& exp) {
 	return HumRegex::search(*input, exp);
 }
 
 
-bool HumRegex::search(string* input, int startindex, const string& exp) {
+int HumRegex::search(string* input, int startindex, const string& exp) {
 	return HumRegex::search(*input, startindex, exp);
 }
 
@@ -176,29 +191,43 @@ bool HumRegex::search(string* input, int startindex, const string& exp) {
 // This version of HumRegex allows for setting the options temporarily.
 //
 
-bool HumRegex::search(const string& input, const string& exp,
+int HumRegex::search(const string& input, const string& exp,
 		const string& options) {
 	m_regex = regex(exp, getTemporaryRegexFlags(options));
-	return regex_search(input, m_matches, m_regex, getTemporarySearchFlags(options));
+	bool result = regex_search(input, m_matches, m_regex, getTemporarySearchFlags(options));
+	if (!result) {
+		return 0;
+	} else if (m_matches.size() < 1) {
+		return 0;
+	} else {
+		return m_matches.position(0) + 1;
+	}
 }
 
 
-bool HumRegex::search(const string& input, int startindex, const string& exp,
+int HumRegex::search(const string& input, int startindex, const string& exp,
 		const string& options) {
 	m_regex = regex(exp, getTemporaryRegexFlags(options));
 	auto startit = input.begin() + startindex;
 	auto endit   = input.end();
-	return regex_search(startit, endit, m_matches, m_regex, getTemporarySearchFlags(options));
+	bool result = regex_search(startit, endit, m_matches, m_regex, getTemporarySearchFlags(options));
+	if (!result) {
+		return 0;
+	} else if (m_matches.size() < 1) {
+		return 0;
+	} else {
+		return m_matches.position(0) + 1;
+	}
 }
 
 
-bool HumRegex::search(string* input, const string& exp,
+int HumRegex::search(string* input, const string& exp,
 		const string& options) {
 	return HumRegex::search(*input, exp, options);
 }
 
 
-bool HumRegex::search(string* input, int startindex, const string& exp,
+int HumRegex::search(string* input, int startindex, const string& exp,
 		const string& options) {
 	return HumRegex::search(*input, startindex, exp, options);
 }

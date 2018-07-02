@@ -1108,7 +1108,7 @@ void Tool_myank::printInvisibleMeasure(HumdrumFile& infile, int line) {
 		}
 		if (hre.search(infile.token(line, j), "(=\\d*)(.*)", "")) {
 			m_humdrum_text << hre.getMatch(1);
-			m_humdrum_text << "-";
+			// m_humdrum_text << "-";
 			m_humdrum_text << hre.getMatch(2);
 		} else {
 			m_humdrum_text << infile.token(line, j);
@@ -1655,8 +1655,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	// find the largest measure number in the score
 	int maxmeasure = -1;
 	int minmeasure = -1;
-	int i;
-	for (i=0; i<(int)measurein.size(); i++) {
+	for (int i=0; i<(int)measurein.size(); i++) {
 		if (maxmeasure < measurein[i].num) {
 			maxmeasure = measurein[i].num;
 		}
@@ -1680,8 +1679,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 		}
 		exit(0);
 	} else if (minQ) {
-		int ii;
-		for (ii=0; ii<infile.getLineCount(); ii++) {
+		for (int ii=0; ii<infile.getLineCount(); ii++) {
 			if (infile[ii].isBarline()) {
 				if (hre.search(infile.token(ii, 0), "=\\d", "")) {
 					break;
@@ -1706,7 +1704,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	// create reverse-lookup list
 	vector<int> inmap(maxmeasure+1);
 	fill(inmap.begin(), inmap.end(), -1);
-	for (i=0; i<(int)measurein.size(); i++) {
+	for (int i=0; i<(int)measurein.size(); i++) {
 		inmap[measurein[i].num] = i;
 	}
 
@@ -1730,7 +1728,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 		start += (int)hre.getMatch(1).size();
 		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
 			 measurein, inmap);
-		value = hre.search(ostring.c_str() + start, "^([^,]+,?)");
+		value = hre.search(ostring, start, "^([^,]+,?)");
 	}
 }
 
