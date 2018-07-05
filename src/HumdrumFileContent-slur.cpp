@@ -113,6 +113,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 					}
 					if (!found) {
 						token->setValue("auto", "hangingSlur", "true");
+						token->setValue("auto", "slurSide", "start");
 						token->setValue("auto", "slurDration",
 							token->getDurationToEnd());
 					}
@@ -139,6 +140,7 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 		for (int j=0; j<(int)sluropens[i].size(); j++) {
 			for (int k=0; k<(int)sluropens[i][j].size(); j++) {
 				sluropens[i][j][k]->setValue("", "auto", "hangingSlur", "true");
+				sluropens[i][j][k]->setValue("", "auto", "slurSide", "stop");
 				sluropens[i][j][k]->setValue("", "auto", "slurDuration",
 					sluropens[i][j][k]->getDurationFromStart());
 			}

@@ -30,6 +30,7 @@
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
+#include "tool-slur.h"
 #include "tool-transpose.h"
 
 #include "HumRegex.h"
@@ -137,6 +138,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
+		} else if (commands[i].first == "slur") {
+			RUNTOOL(slur, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {

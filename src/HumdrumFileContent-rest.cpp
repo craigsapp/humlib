@@ -60,6 +60,9 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			strack = second->getTrack();
 		}
 		if (track != strack) {
+         if (current->isRest()) {
+				processRestPitch(current, baseline);
+			}
 			// only one layer in current spine.
 			current = current->getNextToken();
 			continue;
