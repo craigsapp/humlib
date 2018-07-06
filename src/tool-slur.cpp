@@ -112,13 +112,13 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 					string data = *tok;
 					data += "i";
 					tok->setText(data);
-					//cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
+					// cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
 				} else if (side == "stop") {
 					closecount++;
 					string data = *tok;
 					data += "j";
 					tok->setText(data);
-					//cerr << "TOK " << tok << " has an unopened slur closing" << endl;
+					// cerr << "TOK " << tok << " has an unopened slur closing" << endl;
 				}
 			}
 			tok = tok->getNextToken();
@@ -134,7 +134,7 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	}
 
 	if (closecount) {
-		infile.appendLine("!!!RDF**kern: i = marked note, color=\"magenta\", text=\"unopened slur\"");
+		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"unopened slur\"");
 	}
 
 	infile.createLinesFromTokens();

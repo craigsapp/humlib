@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  6 01:02:37 CEST 2018
+// Last Modified: Fri Jul  6 03:19:12 CEST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16002,7 +16002,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 					}
 					if (!found) {
 						token->setValue("auto", "hangingSlur", "true");
-						token->setValue("auto", "slurSide", "start");
+						token->setValue("auto", "slurSide", "stop");
+						token->setValue("auto", "slurOpenIndex", to_string(i));
 						token->setValue("auto", "slurDration",
 							token->getDurationToEnd());
 					}
@@ -16027,11 +16028,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 	// Mark un-closed slur starts:
 	for (int i=0; i<(int)sluropens.size(); i++) {
 		for (int j=0; j<(int)sluropens[i].size(); j++) {
-			for (int k=0; k<(int)sluropens[i][j].size(); j++) {
+			for (int k=0; k<(int)sluropens[i][j].size(); k++) {
 				sluropens[i][j][k]->setValue("", "auto", "hangingSlur", "true");
-				sluropens[i][j][k]->setValue("", "auto", "slurSide", "stop");
+				sluropens[i][j][k]->setValue("", "auto", "slurSide", "start");
 				sluropens[i][j][k]->setValue("", "auto", "slurDuration",
-					sluropens[i][j][k]->getDurationFromStart());
+						sluropens[i][j][k]->getDurationFromStart());
 			}
 		}
 	}
@@ -51884,13 +51885,13 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 					string data = *tok;
 					data += "i";
 					tok->setText(data);
-					//cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
+					// cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
 				} else if (side == "stop") {
 					closecount++;
 					string data = *tok;
 					data += "j";
 					tok->setText(data);
-					//cerr << "TOK " << tok << " has an unopened slur closing" << endl;
+					// cerr << "TOK " << tok << " has an unopened slur closing" << endl;
 				}
 			}
 			tok = tok->getNextToken();
@@ -51906,7 +51907,7 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	}
 
 	if (closecount) {
-		infile.appendLine("!!!RDF**kern: i = marked note, color=\"magenta\", text=\"unopened slur\"");
+		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"unopened slur\"");
 	}
 
 	infile.createLinesFromTokens();

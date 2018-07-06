@@ -113,7 +113,8 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 					}
 					if (!found) {
 						token->setValue("auto", "hangingSlur", "true");
-						token->setValue("auto", "slurSide", "start");
+						token->setValue("auto", "slurSide", "stop");
+						token->setValue("auto", "slurOpenIndex", to_string(i));
 						token->setValue("auto", "slurDration",
 							token->getDurationToEnd());
 					}
@@ -138,11 +139,11 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 	// Mark un-closed slur starts:
 	for (int i=0; i<(int)sluropens.size(); i++) {
 		for (int j=0; j<(int)sluropens[i].size(); j++) {
-			for (int k=0; k<(int)sluropens[i][j].size(); j++) {
+			for (int k=0; k<(int)sluropens[i][j].size(); k++) {
 				sluropens[i][j][k]->setValue("", "auto", "hangingSlur", "true");
-				sluropens[i][j][k]->setValue("", "auto", "slurSide", "stop");
+				sluropens[i][j][k]->setValue("", "auto", "slurSide", "start");
 				sluropens[i][j][k]->setValue("", "auto", "slurDuration",
-					sluropens[i][j][k]->getDurationFromStart());
+						sluropens[i][j][k]->getDurationFromStart());
 			}
 		}
 	}
