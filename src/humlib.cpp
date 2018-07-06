@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  6 03:49:41 CEST 2018
+// Last Modified: Fri Jul  6 16:48:23 CEST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11809,9 +11809,9 @@ HumTool::~HumTool() {
 //
 
 bool HumTool::hasAnyText(void) {
-	return (m_humdrum_text.rdbuf()->in_avail()
-			|| m_free_text.rdbuf()->in_avail()
-			|| m_json_text.rdbuf()->in_avail());
+	return ((!m_humdrum_text.str().empty())
+			|| (!m_free_text.str().empty())
+			|| (!m_json_text.str().empty()));
 }
 
 
@@ -11848,7 +11848,7 @@ ostream& HumTool::getAllText(ostream& out) {
 //
 
 bool HumTool::hasHumdrumText(void) {
-	return m_humdrum_text.rdbuf()->in_avail() ? true : false;
+	return m_humdrum_text.str().empty() ? false : true;
 }
 
 
@@ -11880,7 +11880,7 @@ ostream& HumTool::getHumdrumText(ostream& out) {
 //
 
 bool HumTool::hasFreeText(void) {
-	return m_free_text.rdbuf()->in_avail() ? true : false;
+	return m_free_text.str().empty() ? false : true;
 }
 
 
@@ -11912,7 +11912,7 @@ ostream& HumTool::getFreeText(ostream& out) {
 //
 
 bool HumTool::hasJsonText(void) {
-	return m_json_text.rdbuf()->in_avail() ? true : false;
+	return m_json_text.str().empty() ? false : true;
 }
 
 
@@ -11944,7 +11944,7 @@ ostream& HumTool::getJsonText(ostream& out) {
 //
 
 bool HumTool::hasWarning(void) {
-	return m_warning_text.rdbuf()->in_avail() ? true : false;
+	return m_warning_text.str().empty() ? false : true;
 }
 
 
@@ -11980,7 +11980,7 @@ bool HumTool::hasError(void) {
 	if (hasParseError()) {
 		return true;
 	}
-	return m_error_text.rdbuf()->in_avail() ? true : false;
+	return m_error_text.str().empty() ? false : true;
 }
 
 
@@ -51801,6 +51801,9 @@ void Tool_satb2gs::usage(const string& command) {
 
 Tool_slur::Tool_slur(void) {
 	// add options here
+	define("l|list=b", "list locations of unclosed slur endings");
+	define("c|count=b", "cound unclosed slur endings");
+	define("f|filename=b", "print filename for list and count options");
 }
 
 
@@ -51861,6 +51864,9 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	infile.analyzeKernSlurs();
 	int opencount = 0;
 	int closecount = 0;
+	int listQ  = getBoolean("list");
+	int countQ = getBoolean("count");
+	int filenameQ  = getBoolean("filename");
 	for (int i=0; i<infile.getStrandCount(); i++) {
 		HTp stok = infile.getStrandStart(i);
 		if (!stok->isKern()) {
@@ -51882,20 +51888,45 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 				string side = tok->getValue("auto", "slurSide");
 				if (side == "start") {
 					opencount++;
-					string data = *tok;
-					data += "i";
-					tok->setText(data);
-					// cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
+					if (listQ) {
+						if (filenameQ) {
+							m_free_text << infile.getFilename() << ":\t";
+						}
+						m_free_text << "UNCLOSED SLUR\tline:" << tok->getLineIndex()+1 
+								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
+					} else if (!countQ) {
+						string data = *tok;
+						data += "i";
+						tok->setText(data);
+					}
 				} else if (side == "stop") {
 					closecount++;
-					string data = *tok;
-					data += "j";
-					tok->setText(data);
-					// cerr << "TOK " << tok << " has an unopened slur closing" << endl;
+					if (listQ) {
+						if (filenameQ) {
+							m_free_text << infile.getFilename() << ":\t";
+						}
+						m_free_text << "UNOPENED SLUR\tline:" << tok->getLineIndex()+1 
+								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
+					} else if (!countQ) {
+						string data = *tok;
+						data += "j";
+						tok->setText(data);
+					}
 				}
 			}
 			tok = tok->getNextToken();
 		}
+	}
+
+	if (countQ) {
+		if (filenameQ) {
+			m_free_text << infile.getFilename() << ":\t";
+		}
+		m_free_text << (opencount + closecount) << "\t(:" << opencount << "\t):" << closecount << endl;
+	}
+
+	if (countQ || listQ) {
+		return;
 	}
 
 	if (opencount + closecount == 0) {

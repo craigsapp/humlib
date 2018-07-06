@@ -28,6 +28,9 @@ namespace hum {
 
 Tool_slur::Tool_slur(void) {
 	// add options here
+	define("l|list=b", "list locations of unclosed slur endings");
+	define("c|count=b", "cound unclosed slur endings");
+	define("f|filename=b", "print filename for list and count options");
 }
 
 
@@ -88,6 +91,9 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	infile.analyzeKernSlurs();
 	int opencount = 0;
 	int closecount = 0;
+	int listQ  = getBoolean("list");
+	int countQ = getBoolean("count");
+	int filenameQ  = getBoolean("filename");
 	for (int i=0; i<infile.getStrandCount(); i++) {
 		HTp stok = infile.getStrandStart(i);
 		if (!stok->isKern()) {
@@ -109,20 +115,45 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 				string side = tok->getValue("auto", "slurSide");
 				if (side == "start") {
 					opencount++;
-					string data = *tok;
-					data += "i";
-					tok->setText(data);
-					// cerr << "TOK " << tok << " has an unclosed slur opening" << endl;
+					if (listQ) {
+						if (filenameQ) {
+							m_free_text << infile.getFilename() << ":\t";
+						}
+						m_free_text << "UNCLOSED SLUR\tline:" << tok->getLineIndex()+1 
+								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
+					} else if (!countQ) {
+						string data = *tok;
+						data += "i";
+						tok->setText(data);
+					}
 				} else if (side == "stop") {
 					closecount++;
-					string data = *tok;
-					data += "j";
-					tok->setText(data);
-					// cerr << "TOK " << tok << " has an unopened slur closing" << endl;
+					if (listQ) {
+						if (filenameQ) {
+							m_free_text << infile.getFilename() << ":\t";
+						}
+						m_free_text << "UNOPENED SLUR\tline:" << tok->getLineIndex()+1 
+								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
+					} else if (!countQ) {
+						string data = *tok;
+						data += "j";
+						tok->setText(data);
+					}
 				}
 			}
 			tok = tok->getNextToken();
 		}
+	}
+
+	if (countQ) {
+		if (filenameQ) {
+			m_free_text << infile.getFilename() << ":\t";
+		}
+		m_free_text << (opencount + closecount) << "\t(:" << opencount << "\t):" << closecount << endl;
+	}
+
+	if (countQ || listQ) {
+		return;
 	}
 
 	if (opencount + closecount == 0) {

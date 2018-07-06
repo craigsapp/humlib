@@ -48,9 +48,9 @@ HumTool::~HumTool() {
 //
 
 bool HumTool::hasAnyText(void) {
-	return (m_humdrum_text.rdbuf()->in_avail()
-			|| m_free_text.rdbuf()->in_avail()
-			|| m_json_text.rdbuf()->in_avail());
+	return ((!m_humdrum_text.str().empty())
+			|| (!m_free_text.str().empty())
+			|| (!m_json_text.str().empty()));
 }
 
 
@@ -87,7 +87,7 @@ ostream& HumTool::getAllText(ostream& out) {
 //
 
 bool HumTool::hasHumdrumText(void) {
-	return m_humdrum_text.rdbuf()->in_avail() ? true : false;
+	return m_humdrum_text.str().empty() ? false : true;
 }
 
 
@@ -119,7 +119,7 @@ ostream& HumTool::getHumdrumText(ostream& out) {
 //
 
 bool HumTool::hasFreeText(void) {
-	return m_free_text.rdbuf()->in_avail() ? true : false;
+	return m_free_text.str().empty() ? false : true;
 }
 
 
@@ -151,7 +151,7 @@ ostream& HumTool::getFreeText(ostream& out) {
 //
 
 bool HumTool::hasJsonText(void) {
-	return m_json_text.rdbuf()->in_avail() ? true : false;
+	return m_json_text.str().empty() ? false : true;
 }
 
 
@@ -183,7 +183,7 @@ ostream& HumTool::getJsonText(ostream& out) {
 //
 
 bool HumTool::hasWarning(void) {
-	return m_warning_text.rdbuf()->in_avail() ? true : false;
+	return m_warning_text.str().empty() ? false : true;
 }
 
 
@@ -219,7 +219,7 @@ bool HumTool::hasError(void) {
 	if (hasParseError()) {
 		return true;
 	}
-	return m_error_text.rdbuf()->in_avail() ? true : false;
+	return m_error_text.str().empty() ? false : true;
 }
 
 
