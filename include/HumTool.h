@@ -36,6 +36,7 @@ class HumTool : public Options {
 		bool          hasHumdrumText  (void);
 		std::string   getHumdrumText  (void);
 		ostream&      getHumdrumText  (ostream& out);
+		void          suppressHumdrumFileOutput(void);
 
 		bool          hasJsonText     (void);
 		std::string   getJsonText     (void);
@@ -59,6 +60,8 @@ class HumTool : public Options {
 		std::stringstream m_free_text;     // output for plain text content.
 	  	std::stringstream m_warning_text;  // output for warning messages;
 	  	std::stringstream m_error_text;    // output for error messages;
+
+		bool m_suppress = false;
 
 };
 

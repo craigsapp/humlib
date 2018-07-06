@@ -436,7 +436,11 @@ restarting:
 		contents << &(m_universals[i][1]) << "\n";
 	}
 	contents << buffer.str();
+	string filename = infile.getFilename();
 	infile.read(contents);
+	if (!filename.empty()) {
+		infile.setFilename(filename);
+	}
 	return 1;
 }
 
