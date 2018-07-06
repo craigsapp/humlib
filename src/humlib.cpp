@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  6 03:19:12 CEST 2018
+// Last Modified: Fri Jul  6 03:49:41 CEST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -51903,11 +51903,11 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	}
 
 	if (opencount) {
-		infile.appendLine("!!!RDF**kern: i = marked note, color=\"hotpink\", text=\"unclosed slur\"");
+		infile.appendLine("!!!RDF**kern: i = marked note, color=\"hotpink\", text=\"extra(\"");
 	}
 
 	if (closecount) {
-		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"unopened slur\"");
+		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"extra)\"");
 	}
 
 	infile.createLinesFromTokens();

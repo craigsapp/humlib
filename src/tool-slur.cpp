@@ -130,11 +130,11 @@ void Tool_slur::processFile(HumdrumFile& infile) {
 	}
 
 	if (opencount) {
-		infile.appendLine("!!!RDF**kern: i = marked note, color=\"hotpink\", text=\"unclosed slur\"");
+		infile.appendLine("!!!RDF**kern: i = marked note, color=\"hotpink\", text=\"extra(\"");
 	}
 
 	if (closecount) {
-		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"unopened slur\"");
+		infile.appendLine("!!!RDF**kern: j = marked note, color=\"magenta\", text=\"extra)\"");
 	}
 
 	infile.createLinesFromTokens();
