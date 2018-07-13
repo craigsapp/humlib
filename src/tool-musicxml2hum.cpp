@@ -1354,6 +1354,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		return;
 	}
 
+	/* Problem: these are also possibly for figured bass
 	if (text == "#") {
 		// interpret as an editorial sharp marker
 		setEditorialAccidental(+1, slice, partindex, staffindex, voiceindex);
@@ -1368,6 +1369,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		setEditorialAccidental(0, slice, partindex, staffindex, voiceindex);
 		return;
 	}
+	*/
 
 	string stylestring;
 	bool italic = false;

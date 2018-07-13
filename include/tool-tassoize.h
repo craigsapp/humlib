@@ -35,9 +35,17 @@ class Tool_tassoize : public HumTool {
 		void     updateKeySignatures(HumdrumFile& infile, int lineindex);
 		void     checkDataLine      (HumdrumFile& infile, int lineindex);
 		void     clearStates        (void);
+		void     addBibliographicRecords(HumdrumFile& infile);
+		void     deleteBreaks       (HumdrumFile& infile);
+		void     fixEditorialAccidentals(HumdrumFile& infile);
+		void     fixInstrumentAbbreviations(HumdrumFile& infile);
+		void     addTerminalLongs   (HumdrumFile& infile);
+		void     deleteDummyTranspositions(HumdrumFile& infile);
+		string   getDate            (void);
 
 	private:
 		vector<vector<int>> m_pstates;
+		vector<vector<int>> m_kstates;
 		vector<vector<bool>> m_estates;
 
 };

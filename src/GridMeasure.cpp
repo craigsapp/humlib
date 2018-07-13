@@ -731,7 +731,9 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 	} else {
 		tstring += "1";
 	}
-	tstring += "-";
+	// probably best not to start with an invisible barline since
+	// a plain barline would not be shown before the first measure anyway.
+	// tstring += "-";
 	HTp token;
 	for (int i=0; i<fieldcount; i++) {
 		token = new HumdrumToken(tstring);

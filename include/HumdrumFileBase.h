@@ -215,6 +215,8 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const std::string& line);
 		void          insertLine               (int index, HumdrumLine* line);
+
+		void          deleteLine               (int index);
 //		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
