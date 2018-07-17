@@ -30,6 +30,7 @@
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
+#include "tool-simat.h"
 #include "tool-slurcheck.h"
 #include "tool-transpose.h"
 
@@ -59,6 +60,26 @@ namespace hum {
 		INFILE.readString(tool->getHumdrumText());   \
 	}                                               \
 	delete tool;
+
+#define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILE1, INFILE2);                    \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILE1.readString(tool->getHumdrumText());  \
+	}                                               \
+	delete tool;
+
+
+////////////////////////////////
+//
+// Tool_filter::Tool_filter -- Set the recognized options for the tool.
+//
 
 
 ////////////////////////////////
@@ -134,6 +155,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "simat") {
+			RUNTOOL2(simat, infile, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {

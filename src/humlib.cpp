@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 17 14:40:16 CEST 2018
+// Last Modified: Tue Jul 17 16:09:38 CEST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -39270,6 +39270,26 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	}                                               \
 	delete tool;
 
+#define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILE1, INFILE2);                    \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILE1.readString(tool->getHumdrumText());  \
+	}                                               \
+	delete tool;
+
+
+////////////////////////////////
+//
+// Tool_filter::Tool_filter -- Set the recognized options for the tool.
+//
+
 
 ////////////////////////////////
 //
@@ -39344,6 +39364,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "simat") {
+			RUNTOOL2(simat, infile, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
