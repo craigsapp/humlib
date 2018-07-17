@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 17 10:21:41 CEST 2018
+// Last Modified: Tue Jul 17 14:40:16 CEST 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -52814,8 +52814,14 @@ Tool_simat::Tool_simat(void) {
 
 bool Tool_simat::run(const string& indata1, const string& indata2, ostream& out) {
 	HumdrumFile infile1(indata1);
-	HumdrumFile infile2(indata2);
-	bool status = run(infile1, infile2);
+	HumdrumFile infile2;
+	bool status;
+	if (indata2.empty()) {
+		infile2.read(indata2);
+		status = run(infile1, infile2);
+	} else {
+		status = run(infile1, infile1);
+	}
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -52827,7 +52833,12 @@ bool Tool_simat::run(const string& indata1, const string& indata2, ostream& out)
 
 
 bool Tool_simat::run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out) {
-	bool status = run(infile1, infile2);
+	bool status;
+	if (infile2.getLineCount() == 0) {
+		status = run(infile1, infile1);
+	} else {
+		status = run(infile1, infile2);
+	}
 	if (hasAnyText()) {
 		getAllText(out);
 	} else {
@@ -52842,7 +52853,11 @@ bool Tool_simat::run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out) {
 //
 
 bool Tool_simat::run(HumdrumFile& infile1, HumdrumFile& infile2) {
-	processFile(infile1, infile2);
+	if (infile2.getLineCount() == 0) {
+		processFile(infile1, infile1);
+	} else {
+		processFile(infile1, infile2);
+	}
 
 	return true;
 }
