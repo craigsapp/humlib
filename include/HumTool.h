@@ -155,6 +155,53 @@ int main(int argc, char** argv) {                                \
 }
 
 
+
+//////////////////////////////
+//
+// STREAM_INTERFACE2 -- Expects two Humdurm files, either from the
+//    first two command-line arguments (left over after options have
+//    been parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out)
+//
+//
+
+#define STREAM_INTERFACE2(CLASS)                                 \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	HumdrumFile infile1;                                          \
+	HumdrumFile infile2;                                          \
+	bool status = true;                                           \
+	streamer.read(infile1);                                       \
+	streamer.read(infile2);                                       \
+	status &= interface.run(infile1, infile2);                    \
+	if (interface.hasWarning()) {                                 \
+		interface.getWarning(cerr);                                \
+	}                                                             \
+	if (interface.hasAnyText()) {                                 \
+	   interface.getAllText(cout);                                \
+	}                                                             \
+	if (interface.hasError()) {                                   \
+		interface.getError(cerr);                                  \
+        return -1;                                               \
+	}                                                             \
+	if (!interface.hasAnyText()) {                                \
+		cout << infile1;                                           \
+		cout << infile2;                                           \
+	}                                                             \
+	interface.clearOutput();                                      \
+	return !status;                                               \
+}
+
+
 // END_MERGE
 
 } // end namespace hum

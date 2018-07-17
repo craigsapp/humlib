@@ -187,7 +187,7 @@ class Convert {
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
-		static double  pearsonCorrelation   (std::vector<double> x, std::vector<double> y);
+		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static int     romanNumeralToInteger(const std::string& roman);
 
 };

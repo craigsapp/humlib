@@ -12,7 +12,9 @@
 //
 
 #include "tool-tassoize.h"
+
 #include "Convert.h"
+#include "HumRegex.h"
 
 #include <algorithm>
 
