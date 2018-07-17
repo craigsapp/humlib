@@ -1058,17 +1058,16 @@ bool Tool_simat::run(HumdrumFile& infile1, HumdrumFile& infile2) {
 
 void Tool_simat::processFile(HumdrumFile& infile1, HumdrumFile& infile2) {
 	m_data1.parse(infile1);
-	cerr << endl;
 	m_data2.parse(infile2);
 	m_grid.analyze(m_data1, m_data2);
 	if (getBoolean("raw")) {
-		m_grid.printCorrelationGrid(std::cerr);
+		m_grid.printCorrelationGrid(m_free_text);
 		suppressHumdrumFileOutput();
 	} else if (getBoolean("diagonal")) {
-		m_grid.printCorrelationDiagonal(std::cerr);
+		m_grid.printCorrelationDiagonal(m_free_text);
 		suppressHumdrumFileOutput();
 	} else {
-		m_grid.printSvgGrid();
+		m_grid.printSvgGrid(m_free_text);
 		suppressHumdrumFileOutput();
 	}
 }
