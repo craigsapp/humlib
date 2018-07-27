@@ -85,6 +85,7 @@ class MxmlEvent {
 		bool               isLinked           (void) const;
 		bool               isRest             (void);
 		bool               isGrace            (void);
+		bool               hasGraceSlash      (void);
 		bool               isFloating         (void);
 		bool               hasSlurStart       (int& direction);
 		bool               hasSlurStop        (void);

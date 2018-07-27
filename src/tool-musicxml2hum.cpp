@@ -1219,6 +1219,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 			} else {
 				recip = "q";
 			}
+			if (!event->hasGraceSlash()) {
+				recip += "q";
+			}
 		}
 	}
 
