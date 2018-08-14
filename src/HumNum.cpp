@@ -256,6 +256,17 @@ void HumNum::setValue(const char* ratstring) {
 }
 
 
+//////////////////////////////
+//
+// HumNum::invert --
+//
+
+void HumNum::invert(void) {
+	int temp = top;
+	top = bot;
+	bot = temp;
+}
+
 
 //////////////////////////////
 //

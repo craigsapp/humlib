@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul 27 10:43:04 CEST 2018
+// Last Modified: Tue Aug 14 09:44:40 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -292,6 +292,7 @@ class HumNum {
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const std::string& ratstring);
 		void     setValue           (const char* ratstring);
+		void     invert             (void);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
@@ -5275,6 +5276,33 @@ class Tool_myank : public HumTool {
 		vector<MeasureInfo> MeasureOutList; // used with -m option
 		vector<MeasureInfo> MeasureInList;  // used with -m option
 		vector<vector<MyCoord> > metstates;
+
+};
+
+
+
+
+class Tool_periodicity : public HumTool {
+	public:
+		         Tool_periodicity   (void);
+		        ~Tool_periodicity   () {};
+
+		bool     run                (HumdrumFile& infile);
+		bool     run                (const string& indata, ostream& out);
+		bool     run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     initialize         (HumdrumFile& infile);
+		void     processFile        (HumdrumFile& infile);
+		void     fillAttackGrids    (HumdrumFile& infile, vector<vector<double>>& grids, HumNum minrhy);
+		void     printAttackGrid    (ostream& out, HumdrumFile& infile, vector<vector<double>>& grids, HumNum minrhy);
+		void     doAnalysis         (vector<vector<double>>& analysis, int level, vector<double>& grid);
+		void     doPeriodicityAnalysis(vector<vector<double>> & analysis, vector<double>& grid, HumNum minrhy);
+		void     printPeriodicityAnalysis(ostream& out, vector<vector<double>>& analysis);
+		void     printSvgAnalysis(ostream& out, vector<vector<double>>& analysis, HumNum minrhy);
+		void     getColorMapping(double input, double& hue, double& saturation, double& lightness);
+
+	private:
 
 };
 

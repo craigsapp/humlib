@@ -54,6 +54,7 @@ class HumNum {
 		void     setValue           (int numerator, int denominator);
 		void     setValue           (const std::string& ratstring);
 		void     setValue           (const char* ratstring);
+		void     invert             (void);
 		HumNum   getAbs             (void) const;
 		HumNum&  makeAbs            (void);
 		HumNum&  operator=          (const HumNum& value);
