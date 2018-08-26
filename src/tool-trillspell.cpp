@@ -208,7 +208,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
-						// Set to minor-second trill
+						// Set to minor-second upper mordent
 						hre.replaceDestructive(subtok, "m", "M", "g");
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
@@ -217,7 +217,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
-						// Set to major-second trill
+						// Set to major-second upper mordent
 						hre.replaceDestructive(subtok, "M", "m", "g");
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
@@ -225,8 +225,8 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					// major-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
-					if (interval == 6) {
-						// Set to minor-second trill
+					if (interval == 5) {
+						// Set to minor-second lower mordent
 						hre.replaceDestructive(subtok, "w", "W", "g");
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
@@ -235,7 +235,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
-						// Set to major-second trill
+						// Set to major-second lower mordent
 						hre.replaceDestructive(subtok, "W", "w", "g");
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
