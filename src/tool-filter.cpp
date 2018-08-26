@@ -32,6 +32,7 @@
 #include "tool-satb2gs.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
+#include "tool-trillspell.h"
 #include "tool-transpose.h"
 
 #include "HumRegex.h"
@@ -167,6 +168,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "trillspell") {
+			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "myank") {

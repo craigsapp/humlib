@@ -10,8 +10,8 @@
 // Description:   Interface for phrase tool.
 //
 
-#ifndef _TOOL_PRASE_H_INCLUDED
-#define _TOOL_PRASE_H_INCLUDED
+#ifndef _TOOL_PHRASE_H_INCLUDED
+#define _TOOL_PHRASE_H_INCLUDED
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -60,7 +60,7 @@ class Tool_phrase : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_PRASE_H_INCLUDED */
+#endif /* _TOOL_PHRASE_H_INCLUDED */
 
 
 

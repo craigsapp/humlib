@@ -15,6 +15,7 @@
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 #include "string.h"
 
@@ -1847,6 +1848,51 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 		}
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSubtokens -- Return the list of subtokens as an array
+//     of strings.
+//     default value: separator = " "
+//
+
+std::vector<std::string> HumdrumToken::getSubtokens (const std::string& separator) const {
+	std::vector<std::string> output;
+	const string& token = *this;
+	HumRegex hre;
+	hre.split(output, token, separator);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::replaceSubtoken --
+//     default value: separator = " "
+//
+
+void HumdrumToken::replaceSubtoken(int index, const std::string& newsubtok,
+		const std::string& separator) {
+	if (index < 0) {
+		return;
+	}
+	std::vector<std::string> subtokens = getSubtokens(separator);
+	if (index >= (int)subtokens.size()) {
+		return;
+	}
+	subtokens[index] = newsubtok;
+	string output;
+	for (int i=0; i<(int)subtokens.size(); i++) {
+		output += subtokens[i];
+		if (i < (int)subtokens.size() - 1) {
+			output += separator;
+		}
+	}
+	this->setText(output);
 }
 
 

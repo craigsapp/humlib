@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 14 09:44:40 PDT 2018
+// Last Modified: Sat Aug 25 23:00:19 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1274,6 +1274,9 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getSubtokenCount          (const std::string& separator = " ") const;
 		std::string   getSubtoken          (int index,
 		                                    const std::string& separator = " ") const;
+		std::vector<std::string> getSubtokens (const std::string& separator = " ") const;
+		void     replaceSubtoken           (int index, const std::string& newsubtok,
+		                                    const std::string& separator = " ");
 		void     setParameters             (HTp ptok);
 		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
@@ -5360,6 +5363,7 @@ class Tool_recip : public HumTool {
 		vector<HTp> m_kernspines;
 		bool        m_graceQ = true;
 		string      m_exinterp = "**recip";
+		string      m_kernpitch = "e";
 
 };
 
@@ -5695,6 +5699,29 @@ class Tool_transpose : public HumTool {
 		int      writtenQ     = 0;   // used with -W option
 		int      quietQ       = 0;   // used with -q option
 		int      instrumentQ  = 0;   // used with -I option
+};
+
+
+
+class Tool_trillspell : public HumTool {
+	public:
+		      Tool_trillspell     (void);
+		     ~Tool_trillspell     () {};
+
+		bool  run                 (HumdrumFile& infile);
+		bool  run                 (const string& indata, ostream& out);
+		bool  run                 (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  processFile         (HumdrumFile& infile);
+		bool  analyzeOrnamentAccidentals(HumdrumFile& infile);
+		void  resetDiatonicStatesWithKeySignature(vector<int>& states,
+		                                          vector<int>& signature);
+		void  fillKeySignature    (vector<int>& states, const string& keysig);
+		int   getBase40           (int diatonic, int accidental);
+
+	private:
+
 };
 
 

@@ -11,6 +11,7 @@
 //
 
 #include "tool-periodicity.h"
+#include "Convert.h"
 
 #include "pugixml.hpp"
 #include <math.h>

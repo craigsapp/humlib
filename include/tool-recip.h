@@ -39,6 +39,7 @@ class Tool_recip : public HumTool {
 		vector<HTp> m_kernspines;
 		bool        m_graceQ = true;
 		string      m_exinterp = "**recip";
+		string      m_kernpitch = "e";
 
 };
 

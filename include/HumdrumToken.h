@@ -154,6 +154,9 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getSubtokenCount          (const std::string& separator = " ") const;
 		std::string   getSubtoken          (int index,
 		                                    const std::string& separator = " ") const;
+		std::vector<std::string> getSubtokens (const std::string& separator = " ") const;
+		void     replaceSubtoken           (int index, const std::string& newsubtok,
+		                                    const std::string& separator = " ");
 		void     setParameters             (HTp ptok);
 		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
