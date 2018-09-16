@@ -81,6 +81,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    GridStaff* oldlaststaff,
 		                                    GridStaff* newstaff,
 		                                    GridStaff* newlaststaff);
+		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
 		void insertExInterpSides           (HumdrumLine* line, int part,
 		                                    int staff);
 		void insertSideTerminals           (HumdrumLine* line, int part,
