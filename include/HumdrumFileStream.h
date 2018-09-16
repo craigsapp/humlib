@@ -36,6 +36,7 @@ class HumdrumFileStream {
 		                HumdrumFileStream  (char** list);
 		                HumdrumFileStream  (const std::vector<std::string>& list);
 		                HumdrumFileStream  (Options& options);
+		                HumdrumFileStream  (const string& datastream);
 
 		int             setFileList        (char** list);
 		int             setFileList        (const std::vector<std::string>& list);
@@ -47,8 +48,9 @@ class HumdrumFileStream {
 		int             read               (HumdrumFile& infile);
 
 	protected:
-		std::ifstream     m_instream;       // used to read from list of files.
-		std::stringstream m_urlbuffer;      // used to read data over internet.
+		std::stringstream m_stringbuffer;   // used to read files from a string
+		std::ifstream     m_instream;       // used to read from list of files
+		std::stringstream m_urlbuffer;      // used to read data over internet
 		std::string       m_newfilebuffer;  // used to keep track of !!!!segment:
 		                                    // records.
 

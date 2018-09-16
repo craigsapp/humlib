@@ -56,6 +56,11 @@ HumdrumFileStream::HumdrumFileStream(Options& options) {
 	setFileList(list);
 }
 
+HumdrumFileStream::HumdrumFileStream(const string& datastring) {
+	m_curfile = -1;
+	m_stringbuffer << datastring;
+}
+
 
 
 //////////////////////////////
@@ -68,6 +73,7 @@ void HumdrumFileStream::clear(void) {
 	m_filelist.resize(0);
 	m_universals.resize(0);
 	m_newfilebuffer.resize(0);
+	m_stringbuffer.clear(0);
 }
 
 
@@ -174,22 +180,28 @@ restarting:
 	}
 
 	// Read HumdrumFile contents from:
-	// (1) Current ifstream if open
-	// (2) Next filename if ifstream is done
-	// (3) cin if no ifstream open and no filenames
+	// (1) Read from string buffer
+	// (2) Current ifstream if open
+	// (3) Next filename if ifstream is done
+	// (4) cin if no ifstream open and no filenames
 
-	// (1) Is an ifstream open?
-	if (m_instream.is_open() && !m_instream.eof()) {
+	// (1) Is there content in the string buffer?
+	if (!m_stringbuffer.str().empty()) {
+		newinput = &m_stringbuffer;
+	}
+
+	// (2) Is an ifstream open?
+	else if (m_instream.is_open() && !m_instream.eof()) {
 		newinput = &m_instream;
 	}
 
-	// (1b) Is the URL data buffer open?
+	// (2b) Is the URL data buffer open?
 	else if (m_urlbuffer.str() != "") {
 		m_urlbuffer.clear();
 		newinput = &m_urlbuffer;
 	}
 
-	// (2) If ifstream is closed but there is a file to be processed,
+	// (3) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
 	else if (((int)m_filelist.size() > 0) &&
 			(m_curfile < (int)m_filelist.size()-1)) {
