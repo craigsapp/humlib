@@ -43,6 +43,7 @@ class Tool_trillspell : public HumTool {
 		int   getBase40           (int diatonic, int accidental);
 
 	private:
+		bool m_xmark = false;
 
 };
 
