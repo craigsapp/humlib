@@ -32,7 +32,7 @@ namespace hum {
 //
 
 Tool_trillspell::Tool_trillspell(void) {
-	// define options here
+	define("x=b", "mark trills with x (interpretation)");
 }
 
 
@@ -68,6 +68,7 @@ bool Tool_trillspell::run(HumdrumFile& infile) {
 //
 
 void Tool_trillspell::processFile(HumdrumFile& infile) {
+	m_xmark = getBoolean("x");
 	analyzeOrnamentAccidentals(infile);
 }
 
@@ -187,56 +188,104 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 				// check for accidentals on trills, mordents and turns.
 				// N.B.: augmented-second intervals are not considered.
 
-				if (subtok.find("t") != string::npos) {
+				if ((subtok.find("t") != string::npos) && !hre.search(subtok, "[tT]x")) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "T", "t", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("T") != string::npos) {
+				} else if ((subtok.find("T") != string::npos) && !hre.search(subtok, "[tT]x")) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "t", "T", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("M") != string::npos) {
+				} else if ((subtok.find("M") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// major-second upper mordent
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "m", "M", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("m") != string::npos) {
+				} else if ((subtok.find("m") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// minor-second upper mordent
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "M", "m", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("W") != string::npos) {
+				} else if ((subtok.find("W") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// major-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "w", "W", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("w") != string::npos) {
+				} else if ((subtok.find("w") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// minor-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "W", "w", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
 				}
