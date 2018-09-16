@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 25 23:00:19 PDT 2018
+// Last Modified: Sun Sep 16 14:58:21 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3118,6 +3118,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    GridStaff* oldlaststaff,
 		                                    GridStaff* newstaff,
 		                                    GridStaff* newlaststaff);
+		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
 		void insertExInterpSides           (HumdrumLine* line, int part,
 		                                    int staff);
 		void insertSideTerminals           (HumdrumLine* line, int part,
@@ -3742,6 +3743,7 @@ class HumdrumFileStream {
 		                HumdrumFileStream  (char** list);
 		                HumdrumFileStream  (const std::vector<std::string>& list);
 		                HumdrumFileStream  (Options& options);
+		                HumdrumFileStream  (const string& datastream);
 
 		int             setFileList        (char** list);
 		int             setFileList        (const std::vector<std::string>& list);
@@ -3753,8 +3755,9 @@ class HumdrumFileStream {
 		int             read               (HumdrumFile& infile);
 
 	protected:
-		std::ifstream     m_instream;       // used to read from list of files.
-		std::stringstream m_urlbuffer;      // used to read data over internet.
+		std::stringstream m_stringbuffer;   // used to read files from a string
+		std::ifstream     m_instream;       // used to read from list of files
+		std::stringstream m_urlbuffer;      // used to read data over internet
 		std::string       m_newfilebuffer;  // used to keep track of !!!!segment:
 		                                    // records.
 
@@ -5721,6 +5724,7 @@ class Tool_trillspell : public HumTool {
 		int   getBase40           (int diatonic, int accidental);
 
 	private:
+		bool m_xmark = false;
 
 };
 

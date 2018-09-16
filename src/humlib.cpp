@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Aug 25 23:00:19 PDT 2018
+// Last Modified: Sun Sep 16 14:58:21 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4516,7 +4516,7 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				voice = this->at(0)->at(0)->at(0);
 				token = new HumdrumToken((string)*voice->getToken());
 			} else {
-				token = new HumdrumToken("=X");
+				token = new HumdrumToken("=");
 			}
 			empty = (string)*token;
 		} else if (isInterpretationSlice()) {
@@ -6067,9 +6067,8 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 //
 
 void HumGrid::cleanupManipulators(void) {
-	int m;
 	vector<GridSlice*> newslices;
-	for (m=0; m<(int)this->size(); m++) {
+	for (int m=0; m<(int)this->size(); m++) {
 		for (auto it = this->at(m)->begin(); it != this->at(m)->end(); it++) {
 			if ((*it)->getType() != SliceType::Manipulators) {
 				continue;
@@ -6267,6 +6266,9 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 		staffcount = (int)part->size();
 		for (s=staffcount-1; s>=0; s--) {
 			staff = part->at(s);
+			if (staff->empty()) {
+				continue;
+			}
 			voice = staff->back();
 			if (!init) {
 				lastvoice = staff->back();
@@ -6304,6 +6306,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	partcount = (int)curr->size();
 	int lastp = 0;
 	int lasts = 0;
+	int partsplit = -1;
 
 	for (p=partcount-1; p>=0; p--) {
 		part  = curr->at(p);
@@ -6317,23 +6320,49 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
                // splitting the slices at this staff boundary
 					newstaff     = newmanip->at(p)->at(s);
 					newlaststaff = newmanip->at(lastp)->at(lasts);
-
 					transferMerges(staff, laststaff, newstaff, newlaststaff);
 					foundnew = true;
+					partsplit = p;
 					break;
 				}
 			}
 			laststaff = staff;
-			lastvoice = staff->back();
+			lastvoice = laststaff->back();
 			lastp = p;
 			lasts = s;
 		}
+
 		if (foundnew) {
+			// transfer all of the subsequent manipulators forward
+			// after the staff/newstaff point in the slice
+			if (partsplit > 0) {
+				transferOtherParts(curr, newmanip, partsplit);
+			}
 			break;
 		}
 	}
-
 	return newmanip;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::transferOtherParts -- after a line split do to merges 
+//    occurring at the same time.
+//
+
+void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int maxpart) {
+	GridPart* temp;
+	int partcount = (int)oldline->size();
+	if (maxpart >= partcount) {
+		return;
+	}
+	for (int i=0; i<maxpart; i++) {
+		temp = oldline->at(i);
+		oldline->at(i) = newline->at(i);
+		newline->at(i) = temp;
+	}
 }
 
 
@@ -6348,6 +6377,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 // converts to:
 // new:            *v   *v        *    *
 // old:            *              *v   *v
+//
 //
 //
 
@@ -7486,8 +7516,6 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-// ggg
-
 				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
@@ -16615,6 +16643,11 @@ HumdrumFileStream::HumdrumFileStream(Options& options) {
 	setFileList(list);
 }
 
+HumdrumFileStream::HumdrumFileStream(const string& datastring) {
+	m_curfile = -1;
+	m_stringbuffer << datastring;
+}
+
 
 
 //////////////////////////////
@@ -16627,6 +16660,7 @@ void HumdrumFileStream::clear(void) {
 	m_filelist.resize(0);
 	m_universals.resize(0);
 	m_newfilebuffer.resize(0);
+	m_stringbuffer.clear(0);
 }
 
 
@@ -16733,22 +16767,28 @@ restarting:
 	}
 
 	// Read HumdrumFile contents from:
-	// (1) Current ifstream if open
-	// (2) Next filename if ifstream is done
-	// (3) cin if no ifstream open and no filenames
+	// (1) Read from string buffer
+	// (2) Current ifstream if open
+	// (3) Next filename if ifstream is done
+	// (4) cin if no ifstream open and no filenames
 
-	// (1) Is an ifstream open?
-	if (m_instream.is_open() && !m_instream.eof()) {
+	// (1) Is there content in the string buffer?
+	if (!m_stringbuffer.str().empty()) {
+		newinput = &m_stringbuffer;
+	}
+
+	// (2) Is an ifstream open?
+	else if (m_instream.is_open() && !m_instream.eof()) {
 		newinput = &m_instream;
 	}
 
-	// (1b) Is the URL data buffer open?
+	// (2b) Is the URL data buffer open?
 	else if (m_urlbuffer.str() != "") {
 		m_urlbuffer.clear();
 		newinput = &m_urlbuffer;
 	}
 
-	// (2) If ifstream is closed but there is a file to be processed,
+	// (3) If ifstream is closed but there is a file to be processed,
 	// load it into the ifstream and start processing it immediately.
 	else if (((int)m_filelist.size() > 0) &&
 			(m_curfile < (int)m_filelist.size()-1)) {
@@ -39462,6 +39502,10 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "slur") {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "tassoize") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "tasso") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
@@ -55994,7 +56038,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 //
 
 Tool_trillspell::Tool_trillspell(void) {
-	// define options here
+	define("x=b", "mark trills with x (interpretation)");
 }
 
 
@@ -56030,6 +56074,7 @@ bool Tool_trillspell::run(HumdrumFile& infile) {
 //
 
 void Tool_trillspell::processFile(HumdrumFile& infile) {
+	m_xmark = getBoolean("x");
 	analyzeOrnamentAccidentals(infile);
 }
 
@@ -56149,56 +56194,104 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 				// check for accidentals on trills, mordents and turns.
 				// N.B.: augmented-second intervals are not considered.
 
-				if (subtok.find("t") != string::npos) {
+				if ((subtok.find("t") != string::npos) && !hre.search(subtok, "[tT]x")) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "T", "t", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("T") != string::npos) {
+				} else if ((subtok.find("T") != string::npos) && !hre.search(subtok, "[tT]x")) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "t", "T", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("M") != string::npos) {
+				} else if ((subtok.find("M") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// major-second upper mordent
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "m", "M", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("m") != string::npos) {
+				} else if ((subtok.find("m") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// minor-second upper mordent
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "M", "m", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("W") != string::npos) {
+				} else if ((subtok.find("W") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// major-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
 						// Set to minor-second trill
 						hre.replaceDestructive(subtok, "w", "W", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
-				} else if (subtok.find("w") != string::npos) {
+				} else if ((subtok.find("w") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// minor-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
 						// Set to major-second trill
 						hre.replaceDestructive(subtok, "W", "w", "g");
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
+						infile[i].token(j)->replaceSubtoken(k, subtok);
+					} else {
+						if (m_xmark) {
+							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
+						}
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
 				}
