@@ -375,6 +375,17 @@ void MxmlMeasure::reportCaesuraToOwner(const string& letter) {
 
 //////////////////////////////
 //
+// MxmlMeasure::reportOrnamentToOwner --
+//
+
+void MxmlMeasure::reportOrnamentToOwner(void) {
+	m_owner->receiveOrnament();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlMeasure::reportEditorialAccidentalToOwner --
 //
 

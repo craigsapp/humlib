@@ -70,6 +70,7 @@ class MxmlPart {
 		string        getPartName          (void) const;
 		string        getPartAbbr          (void) const;
 		string        cleanSpaces          (const string& input);
+		bool          hasOrnaments         (void) const;
 
 
 	private:
@@ -80,6 +81,7 @@ class MxmlPart {
 		void          receiveEditorialAccidental  (void);
 		void          receiveDynamic              (void);
 		void          receiveCaesura              (const string& letter);
+		void          receiveOrnament             (void);
 
 	protected:
 		vector<MxmlMeasure*> m_measures;
@@ -94,6 +96,7 @@ class MxmlPart {
 		string               m_partname;
 		string               m_partabbr;
 		string               m_caesura;
+		bool                 m_hasOrnaments = false;
 
 		// m_staffvoicehist: counts of staff and voice numbers.
 		// staff=0 is used for items such as measures.

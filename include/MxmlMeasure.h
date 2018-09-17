@@ -104,6 +104,7 @@ class MxmlMeasure {
 		void  receiveTimeSigDurFromChild          (HumNum duration);
 		void  receiveMeasureStyleFromChild        (MeasureStyle style);
 		void  receiveEditorialAccidentalFromChild (void);
+		void  receiveOrnamentFromChild            (void);
    	void  reportStaffNumberToOwner            (int staffnum, int voicenum);
 		void  reportVerseCountToOwner             (int count);
 		void  reportVerseCountToOwner             (int staffindex, int count);
@@ -111,6 +112,7 @@ class MxmlMeasure {
 		void  reportEditorialAccidentalToOwner    (void);
 		void  reportDynamicToOwner                (void);
 		void  reportCaesuraToOwner                (const string& letter);
+		void  reportOrnamentToOwner               (void);
 
 	protected:
 		HumNum             m_starttime; // start time of measure in quarter notes

@@ -121,6 +121,7 @@ class MxmlEvent {
 		void               reportEditorialAccidentalToOwner(void);
 		void               reportDynamicToOwner       (void);
 		void               reportCaesuraToOwner       (const std::string& letter = "Z") const;
+		void               reportOrnamentToOwner      (void) const;
       void               makeDummyRest      (MxmlMeasure* owner,
 		                                       HumNum startime,
 		                                       HumNum duration,

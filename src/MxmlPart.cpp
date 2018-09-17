@@ -382,6 +382,28 @@ void MxmlPart::receiveCaesura(const string& letter) {
 
 //////////////////////////////
 //
+// MxmlPart::receiveOrnament --
+//
+
+void MxmlPart::receiveOrnament(void) {
+	m_hasOrnaments = true;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::hasOrnaments --
+//
+
+bool MxmlPart::hasOrnaments(void) const {
+	return m_hasOrnaments;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlPart::receiveEditorialAccidental --
 //
 

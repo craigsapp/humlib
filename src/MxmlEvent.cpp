@@ -248,6 +248,17 @@ void MxmlEvent::reportCaesuraToOwner(const string& letter) const {
 
 //////////////////////////////
 //
+// MxmlEvent::reportOrnamentToOwner --
+//
+
+void MxmlEvent::reportOrnamentToOwner(void) const {
+	m_owner->reportOrnamentToOwner();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::reportHarmonyCountToOwner --
 //
 
@@ -1628,12 +1639,24 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	if (accent)       { ss << "^";  }
 	if (strongaccent) { ss << "^^"; }  // might be something else
 	if (harmonic)     { ss << "o";  }
-	if (trill)        { ss << "t";  }  // figure out whole-tone trills later
+	if (trill) {
+		ss << "t";
+		// figure out whole-tone trills later via trillspell tool:
+		reportOrnamentToOwner();
+	}
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
-	if (umordent)     { ss << "m";  }  // figure out whole-tone mordents later
-	if (lmordent)     { ss << "w";  }  // figure out whole-tone mordents later
+	if (umordent) {
+		ss << "m";
+		// figure out whole-tone mordents later via trillspell tool:
+		reportOrnamentToOwner();
+	}
+	if (lmordent) {
+		ss << "w";
+		// figure out whole-tone mordents later
+		reportOrnamentToOwner();
+	}
 	if (breath)       { ss << ",";  }
 	if (caesura)      {
 		ss << "Z";

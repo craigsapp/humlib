@@ -14,6 +14,7 @@
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
 #include "tool-chord.h"
+#include "tool-tillspell.h"
 #include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
@@ -139,6 +140,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
+	for (int i=0; i<(int)partdata.size(); i++) {
+		m_hasOrnamentsQ |= partdata[i].hasOrnaments();
+	}
+
 	outdata.removeRedundantClefChanges();
 	outdata.removeSibeliusIncipit();
 	m_systemDecoration = getSystemDecoration(doc, outdata, partids);
@@ -182,6 +187,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	Tool_chord chord;
 	chord.run(outfile);
+
+	if (m_hasOrnamentsQ) {
+		Tool_trillspell trillspell;
+		trillspell.run(outfile);
+	}
 
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
@@ -448,6 +458,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 void Tool_musicxml2hum::initialize(void) {
 	m_recipQ = getBoolean("recip");
 	m_stemsQ = getBoolean("stems");
+	m_hasOrnamentsQ = false;
 }
 
 

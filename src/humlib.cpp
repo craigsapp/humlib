@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 16 21:28:37 PDT 2018
+// Last Modified: Sun Sep 16 23:21:56 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -23157,6 +23157,17 @@ void MxmlEvent::reportCaesuraToOwner(const string& letter) const {
 
 //////////////////////////////
 //
+// MxmlEvent::reportOrnamentToOwner --
+//
+
+void MxmlEvent::reportOrnamentToOwner(void) const {
+	m_owner->reportOrnamentToOwner();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::reportHarmonyCountToOwner --
 //
 
@@ -24537,12 +24548,24 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	if (accent)       { ss << "^";  }
 	if (strongaccent) { ss << "^^"; }  // might be something else
 	if (harmonic)     { ss << "o";  }
-	if (trill)        { ss << "t";  }  // figure out whole-tone trills later
+	if (trill) {
+		ss << "t";
+		// figure out whole-tone trills later via trillspell tool:
+		reportOrnamentToOwner();
+	}
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
-	if (umordent)     { ss << "m";  }  // figure out whole-tone mordents later
-	if (lmordent)     { ss << "w";  }  // figure out whole-tone mordents later
+	if (umordent) {
+		ss << "m";
+		// figure out whole-tone mordents later via trillspell tool:
+		reportOrnamentToOwner();
+	}
+	if (lmordent) {
+		ss << "w";
+		// figure out whole-tone mordents later
+		reportOrnamentToOwner();
+	}
 	if (breath)       { ss << ",";  }
 	if (caesura)      {
 		ss << "Z";
@@ -25224,6 +25247,17 @@ void MxmlMeasure::reportDynamicToOwner(void) {
 
 void MxmlMeasure::reportCaesuraToOwner(const string& letter) {
 	m_owner->receiveCaesura(letter);
+}
+
+
+
+//////////////////////////////
+//
+// MxmlMeasure::reportOrnamentToOwner --
+//
+
+void MxmlMeasure::reportOrnamentToOwner(void) {
+	m_owner->receiveOrnament();
 }
 
 
@@ -26032,6 +26066,28 @@ void MxmlPart::receiveDynamic(void) {
 
 void MxmlPart::receiveCaesura(const string& letter) {
 	m_caesura = letter;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::receiveOrnament --
+//
+
+void MxmlPart::receiveOrnament(void) {
+	m_hasOrnaments = true;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::hasOrnaments --
+//
+
+bool MxmlPart::hasOrnaments(void) const {
+	return m_hasOrnaments;
 }
 
 
@@ -45269,6 +45325,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
+	for (int i=0; i<(int)partdata.size(); i++) {
+		m_hasOrnamentsQ |= partdata[i].hasOrnaments();
+	}
+
 	outdata.removeRedundantClefChanges();
 	outdata.removeSibeliusIncipit();
 	m_systemDecoration = getSystemDecoration(doc, outdata, partids);
@@ -45312,6 +45372,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	Tool_chord chord;
 	chord.run(outfile);
+
+	if (m_hasOrnamentsQ) {
+		Tool_trillspell trillspell;
+		trillspell.run(outfile);
+	}
 
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
@@ -45578,6 +45643,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 void Tool_musicxml2hum::initialize(void) {
 	m_recipQ = getBoolean("recip");
 	m_stemsQ = getBoolean("stems");
+	m_hasOrnamentsQ = false;
 }
 
 

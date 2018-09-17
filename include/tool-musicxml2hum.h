@@ -186,6 +186,7 @@ class Tool_musicxml2hum : public HumTool {
 		int  m_slurabove    = 0;
 		int  m_slurbelow    = 0;
 		char m_hasEditorial = '\0';
+		bool m_hasOrnamentsQ = false;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 
 		// RDF indications in **kern data:
