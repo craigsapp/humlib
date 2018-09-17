@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 16 14:58:21 PDT 2018
+// Last Modified: Sun Sep 16 21:28:37 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7516,7 +7516,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
+				if ((voicei < (int)gs->size()) && (gs->at(voicei) != NULL)) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
 				} else {
@@ -7531,6 +7531,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
+
 
 }
 
@@ -56231,7 +56232,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
-						// Set to minor-second trill
+						// Set to minor-second upper mordent
 						hre.replaceDestructive(subtok, "m", "M", "g");
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
@@ -56248,7 +56249,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
-						// Set to major-second trill
+						// Set to major-second upper mordent
 						hre.replaceDestructive(subtok, "M", "m", "g");
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
@@ -56264,8 +56265,8 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					// major-second lower mordent
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
-					if (interval == 6) {
-						// Set to minor-second trill
+					if (interval == 5) {
+						// Set to minor-second lower mordent
 						hre.replaceDestructive(subtok, "w", "W", "g");
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
@@ -56282,7 +56283,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 					int nextdn = getBase40(diatonic - 1, dstates[rindex][diatonic-1]);
 					int interval = b40 - nextdn;
 					if (interval == 6) {
-						// Set to major-second trill
+						// Set to major-second lower mordent
 						hre.replaceDestructive(subtok, "W", "w", "g");
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
