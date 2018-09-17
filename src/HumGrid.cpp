@@ -1744,7 +1744,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
+				if ((voicei < (int)gs->size()) && (gs->at(voicei) != NULL)) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
 				} else {
@@ -1759,6 +1759,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
+
 
 }
 
