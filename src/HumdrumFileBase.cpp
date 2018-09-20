@@ -286,7 +286,7 @@ bool HumdrumFileBase::read(const char* filename) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return setParseError("Cannot open file %s for reading.", filename);
+			return setParseError("Cannot open file %s for reading. A", filename);
 		}
 	}
 	HumdrumFileBase::read(infile);
@@ -337,7 +337,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return setParseError("Cannot open file %s for reading.", filename);
+			return setParseError("Cannot open file %s for reading. B", filename);
 		}
 	}
 	HumdrumFileBase::readCsv(infile, separator);

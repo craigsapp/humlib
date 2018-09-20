@@ -80,6 +80,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   const std::string& exinterp = "**data",
 		                                   bool recalcLine = true);
 
+		// in HumdrumFileContent-ottava.cpp
+		void   analyzeOttavas             (void);
+
+
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
 		                                   std::vector<HTp>& slurends,
