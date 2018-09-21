@@ -176,7 +176,6 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	// set the duration of the last slice
 
 	HumdrumFile outfile;
-
 	outdata.transferTokens(outfile);
 
 	addHeaderRecords(outfile, doc);
@@ -652,7 +651,10 @@ bool Tool_musicxml2hum::fillPartData(MxmlPart& partdata,
 	}
 
 	partdata.parsePartInfo(partdeclaration);
-	m_last_ottava_direction.at(partdata.getPartIndex()).resize(partdata.getStaffCount());
+	// m_last_ottava_direction.at(partdata.getPartIndex()).resize(partdata.getStaffCount());
+	// staff count is incorrect at this point? Just assume 32 staves in the part, which should
+	// be 28-30 staffs too many.
+	m_last_ottava_direction.at(partdata.getPartIndex()).resize(32);
 
 	int count;
 	auto measures = partcontent.select_nodes("./measure");
@@ -2418,7 +2420,7 @@ void Tool_musicxml2hum::addOttavaLine(GridMeasure* outdata,
 	for (int i=0; i<(int)partdata.size(); i++) {
 		for (int j=0; j<(int)ottavas[i].size(); j++) {
 			if (ottavas[i][j]) {
-				insertPartOttavas(ottavas[i][j], *slice->at(i), i, j);
+				insertPartOttavas(ottavas[i][j], *slice->at(i), i, j, partdata[i].getStaffCount());
 			}
 		}
 	}
@@ -2508,7 +2510,7 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 //
 
 void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int partindex,
-		int partstaffindex) {
+		int partstaffindex, int staffcount) {
 	if (!ottava) {
 		// no ottava for some reason.
 		return;
@@ -2517,7 +2519,7 @@ void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int p
 	HTp token;
 	int staffnum = 0;
 	while (ottava) {
-		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex);
+		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex, staffcount);
 		part[staffnum]->setTokenLayer(0, token, 0);
 	}
 
@@ -3035,7 +3037,10 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 //
 
 xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
-		HTp& token, int& staffindex, int partindex, int partstaffindex) {
+		HTp& token, int& staffindex, int partindex, int partstaffindex, int staffcount) {
+
+	// partstaffindex is useless or incorrect? At least for grand staff parts.
+	// The staffindex calculated below is the one to used.
 
 	if (!ottava) {
 		// no clef for some reason.
@@ -3047,18 +3052,20 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 	if (sn) {
 		staffindex = atoi(sn.value()) - 1;
 	}
+	staffindex = staffcount - staffindex - 1;
 
 	int interval = 0;
 
 	interval = ottava.attribute("size").as_int();
 	string otype = ottava.attribute("type").as_string();
+	string lastotype = m_last_ottava_direction.at(partindex).at(staffindex);
 
 	string ss;
 	ss = "*";
 	if (otype == "stop") {
 		ss += "X";
 	} else {
-	   m_last_ottava_direction.at(partindex).at(partstaffindex) = otype;
+	   m_last_ottava_direction.at(partindex).at(staffindex) = otype;
    }
 	if (interval == 15) {
 		ss += "15";
@@ -3067,9 +3074,9 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "ma";
 			}
 		}
@@ -3080,9 +3087,9 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "va";
 			}
 		}
@@ -3093,9 +3100,9 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "va";
 			}
 		}

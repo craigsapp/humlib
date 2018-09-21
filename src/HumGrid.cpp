@@ -2446,6 +2446,20 @@ void HumGrid::deleteMeasure(int index) {
 
 
 
+//////////////////////////////
+//
+// operator<< -- Debugging printing of Humgrid Contents.
+//
+
+ostream& operator<<(ostream& out, HumGrid& grid) {
+	for (int i=0; i<(int)grid.size(); i++) {
+		out << "\nMEASURE " << i << " =========================" << endl;
+		out << grid[i];
+	}
+	return out;
+}
+
+
 // END_MERGE
 
 } // end namespace hum

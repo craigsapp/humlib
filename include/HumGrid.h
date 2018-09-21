@@ -115,6 +115,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 
 };
 
+ostream& operator<<(ostream& out, HumGrid& grid);
+
 
 // END_MERGE
 

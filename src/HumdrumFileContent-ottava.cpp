@@ -85,9 +85,8 @@ void HumdrumFileContent::analyzeOttavas(void) {
 					continue;
 				}
 				if (token->isRest()) {
-					// maybe not exclude rests?  This might be important when
-					// there are more than two voices/layers on a staff.
-					continue;
+					// do not exclude rests, since the vertical placement
+					// of the staff may need to be updated by the ottava mark.
 				}
 				token->setValue("auto", "ottava", to_string(octavestate[track]));
 			}
