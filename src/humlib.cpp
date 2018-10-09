@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 26 13:35:15 PDT 2018
+// Last Modified: Mon Oct  8 23:42:57 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18343,7 +18343,7 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 	HTp send = getStrandEnd(index);
 	HTp tok = send;
 	HTp dtok = NULL;
-	while (tok && (tok != sstart)) {
+	while (tok) {
 		if (tok->isData()) {
 			dtok = tok;
 		} else if (tok->isCommentLocal()) {
@@ -18353,6 +18353,9 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 					dtok->addLinkedParameter(tok);
 				}
 			}
+		}
+		if (tok == sstart) {
+			break;
 		}
 		tok = tok->getPreviousToken();
 	}

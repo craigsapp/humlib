@@ -1220,7 +1220,7 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 	HTp send = getStrandEnd(index);
 	HTp tok = send;
 	HTp dtok = NULL;
-	while (tok && (tok != sstart)) {
+	while (tok) {
 		if (tok->isData()) {
 			dtok = tok;
 		} else if (tok->isCommentLocal()) {
@@ -1230,6 +1230,9 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 					dtok->addLinkedParameter(tok);
 				}
 			}
+		}
+		if (tok == sstart) {
+			break;
 		}
 		tok = tok->getPreviousToken();
 	}
