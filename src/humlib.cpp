@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 21 12:49:20 PDT 2018
+// Last Modified: Wed Sep 26 13:35:15 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -51018,6 +51018,7 @@ void Tool_myank::usage(const string& ommand) {
 
 Tool_periodicity::Tool_periodicity(void) {
 	define("m|min=b", "minimum time unit (other than grace notes)");
+	define("n|max-rows=i:-1", "maxumum number of rows in svg analysis display");
 	define("t|track=i:0", "track to analyze");
 	define("attacks=b", "extract attack grid)");
 	define("raw=b", "show only raw period data");
@@ -51098,8 +51099,6 @@ void Tool_periodicity::processFile(HumdrumFile& infile) {
 	}
 
 	printSvgAnalysis(m_free_text, analysis, minrhy);
-
-// Tool_periodicity::printSvgGrid --
 }
 
 
@@ -51263,7 +51262,7 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 	svgnode.append_attribute("height") = "1000px";
 
 	auto style = svgnode.append_child("style");
-	style.text().set(".label { font: 14px sans-serif; alignment-baseline: middle; text-anchor: middle; }");
+	style.text().set(".label { font: 14px sans-serif; alignment-baseline: middle; text-anchor: left; }");
 
 	auto grid = svgnode.append_child("g");
 	grid.append_attribute("id") = "grid";
@@ -51287,10 +51286,17 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 	double imagewidth = 1000.0;
 	double imageheight = 1000.0;
 
-	double sdur = (double)analysis.back().size();
+	int maxrow = getInteger("max-rows");
+	if (maxrow <= 0) {
+		maxrow = analysis.back().size();
+	}
+
+
+	// double sdur = (double)analysis.back().size();
+	double sdur = (double)maxrow;
 
 	double maxscore = 0.0;
-	for (int i=0; i<(int)analysis.size(); i++) {
+	for (int i=0; i<maxrow; i++) {
 		for (int j=0; j<(int)analysis[i].size(); j++) {
 			if (maxscore < analysis[i][j]) {
 				maxscore = analysis[i][j];
@@ -51299,7 +51305,7 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 	}
 
 	double power = getDouble("power");
-	for (int i=0; i<(int)analysis.size(); i++) {
+	for (int i=0; i<maxrow; i++) {
 		for (int j=0; j<(int)analysis[i].size(); j++) {
 			width = 1 / sdur * imagewidth;
 			height = 1 / sdur * imageheight;
@@ -51333,9 +51339,8 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 		rval /= minrhy;
 		rval *= 4;
 	
-
 		std::string rhythm = Convert::durationToRecip(rval);
-cerr << "MINRHY " << minrhy << " analysize=" << analysis.size() << " i = " << i << " rval=> " << rval  << " rhythm => " << rhythm << endl;
+		rhythm += " (" + to_string(i+1) + ")";
 		label.text().set(rhythm.c_str());
 		x = (i+1+0.5)/sdur * imageheight;
 		y = (i+0.5)/sdur * imagewidth;
