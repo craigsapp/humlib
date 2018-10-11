@@ -14,7 +14,7 @@
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
 #include "tool-chord.h"
-#include "tool-tillspell.h"
+#include "tool-trillspell.h"
 #include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"

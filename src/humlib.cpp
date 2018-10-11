@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Oct  8 23:42:57 PDT 2018
+// Last Modified: Wed Oct 10 22:36:50 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -956,15 +956,15 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 		const string& separator) {
 	HumNum output(0);
    bool perfect = false;
-   bool imperfect = true;
+   // bool imperfect = true;
 	for (int i=0; i<(int)mensdata.size(); i++) {
 		if (mensdata[i] == 'p') {
 			perfect = true;
-			imperfect = false;
+			// imperfect = false;
 		}
 		if (mensdata[i] == 'i') {
 			perfect = false;
-			imperfect = true;
+			// imperfect = true;
 		}
 
 		// units are in whole notes, but scaling will probably
@@ -16748,7 +16748,8 @@ void HumdrumFileStream::clear(void) {
 	m_filelist.resize(0);
 	m_universals.resize(0);
 	m_newfilebuffer.resize(0);
-	m_stringbuffer.clear(0);
+	// m_stringbuffer.clear(0);
+	m_stringbuffer.str("");
 }
 
 

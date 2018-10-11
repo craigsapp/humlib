@@ -73,7 +73,8 @@ void HumdrumFileStream::clear(void) {
 	m_filelist.resize(0);
 	m_universals.resize(0);
 	m_newfilebuffer.resize(0);
-	m_stringbuffer.clear(0);
+	// m_stringbuffer.clear(0);
+	m_stringbuffer.str("");
 }
 
 
