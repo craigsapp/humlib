@@ -28,6 +28,46 @@ namespace hum {
 //    slurs to each other.
 //
 
+
+bool HumdrumFileContent::analyzeSlurs(void) {
+	bool output = true;
+	output &= analyzeKernSlurs();
+	output &= analyzeMensSlurs();
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeMensSlurs -- Link start and ends of
+//    slurs to each other.  They are the same as **kern, so borrowing
+//    analyzeKernSlurs to do the analysis.
+//
+
+bool HumdrumFileContent::analyzeMensSlurs(void) {
+	vector<HTp> slurstarts;
+	vector<HTp> slurends;
+
+	vector<HTp> mensspines;
+	getSpineStartList(mensspines, "**mens");
+	bool output = true;
+	string linkSignifier = m_signifiers.getKernLinkSignifier();
+	for (int i=0; i<(int)mensspines.size(); i++) {
+		output = output && analyzeKernSlurs(mensspines[i], slurstarts, slurends, linkSignifier);
+	}
+	createLinkedSlurs(slurstarts, slurends);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+//    slurs to each other.
+//
+
 bool HumdrumFileContent::analyzeKernSlurs(void) {
 	vector<HTp> slurstarts;
 	vector<HTp> slurends;

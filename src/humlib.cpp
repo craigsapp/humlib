@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 12 17:25:10 PDT 2018
+// Last Modified: Fri Oct 12 17:51:34 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16073,6 +16073,46 @@ int HumdrumFileContent::getRestPositionAboveNotes(HTp rest, vector<int>& vpos) {
 }
 
 
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+//    slurs to each other.
+//
+
+
+bool HumdrumFileContent::analyzeSlurs(void) {
+	bool output = true;
+	output &= analyzeKernSlurs();
+	output &= analyzeMensSlurs();
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeMensSlurs -- Link start and ends of
+//    slurs to each other.  They are the same as **kern, so borrowing
+//    analyzeKernSlurs to do the analysis.
+//
+
+bool HumdrumFileContent::analyzeMensSlurs(void) {
+	vector<HTp> slurstarts;
+	vector<HTp> slurends;
+
+	vector<HTp> mensspines;
+	getSpineStartList(mensspines, "**mens");
+	bool output = true;
+	string linkSignifier = m_signifiers.getKernLinkSignifier();
+	for (int i=0; i<(int)mensspines.size(); i++) {
+		output = output && analyzeKernSlurs(mensspines[i], slurstarts, slurends, linkSignifier);
+	}
+	createLinkedSlurs(slurstarts, slurends);
+	return output;
+}
 
 
 

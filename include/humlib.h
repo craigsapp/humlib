@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 12 17:25:10 PDT 2018
+// Last Modified: Fri Oct 12 17:51:34 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1910,6 +1910,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		       HumdrumFileContent         (std::istream& contents);
 		      ~HumdrumFileContent         ();
 
+		bool   analyzeSlurs               (void);
+		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);

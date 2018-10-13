@@ -34,6 +34,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		       HumdrumFileContent         (std::istream& contents);
 		      ~HumdrumFileContent         ();
 
+		bool   analyzeSlurs               (void);
+		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
