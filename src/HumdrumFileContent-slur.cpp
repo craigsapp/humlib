@@ -24,7 +24,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeKernSlurs -- Link start and ends of
+// HumdrumFileContent::analyzeSlurs -- Link start and ends of
 //    slurs to each other.
 //
 
