@@ -180,7 +180,7 @@ class HumdrumToken : public std::string, public HumHash {
 		HumParamSet* getLinkedParameter    (int index);
 		HumParamSet* getLinkedParameter    (void);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,
-		                                    int subtokenindex);
+		                                    int subtokenindex = -1);
 		std::ostream& printXmlLinkedParameterInfo(std::ostream& out, int level, const std::string& indent);
 
 		// layout parameter accessors
