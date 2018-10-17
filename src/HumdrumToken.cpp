@@ -2088,30 +2088,14 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //
 
 string HumdrumToken::getVisualDuration(int subtokenindex) {
-	string parameter = this->getValue("LO", "N", "vis");
 
+	// direct storage of the layout parameter is possible, but currently disabled:
+	string parameter = this->getValue("LO", "N", "vis");
 	if (!parameter.empty()) {
 		return parameter;
 	}
 
-	int lcount = this->getLinkedParameterCount();
-	HumParamSet* hps;
-	for (int i=0; i<lcount; i++) {
-		hps = this->getLinkedParameter(i);
-		if (hps->getNamespace1() != "LO") {
-			continue;
-		}
-		if (hps->getNamespace2() != "N") {
-			continue;
-		}
-		for (int j=0; j<hps->getCount(); j++) {
-			if (hps->getParameterName(j) == "vis") {
-				return hps->getParameterValue(j);
-			}
-		}
-	}
-
-	return "";
+	return this->getLayoutParameter("N", "vis", subtokenindex);
 }
 
 

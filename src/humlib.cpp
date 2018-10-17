@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 17 15:57:05 PDT 2018
+// Last Modified: Wed Oct 17 16:45:37 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22491,30 +22491,14 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //
 
 string HumdrumToken::getVisualDuration(int subtokenindex) {
-	string parameter = this->getValue("LO", "N", "vis");
 
+	// direct storage of the layout parameter is possible, but currently disabled:
+	string parameter = this->getValue("LO", "N", "vis");
 	if (!parameter.empty()) {
 		return parameter;
 	}
 
-	int lcount = this->getLinkedParameterCount();
-	HumParamSet* hps;
-	for (int i=0; i<lcount; i++) {
-		hps = this->getLinkedParameter(i);
-		if (hps->getNamespace1() != "LO") {
-			continue;
-		}
-		if (hps->getNamespace2() != "N") {
-			continue;
-		}
-		for (int j=0; j<hps->getCount(); j++) {
-			if (hps->getParameterName(j) == "vis") {
-				return hps->getParameterValue(j);
-			}
-		}
-	}
-
-	return "";
+	return this->getLayoutParameter("N", "vis", subtokenindex);
 }
 
 
