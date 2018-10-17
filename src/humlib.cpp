@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 17 12:07:05 PDT 2018
+// Last Modified: Wed Oct 17 15:57:05 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22574,7 +22574,7 @@ std::string HumdrumToken::getLayoutParameter(const std::string& category,
 	// currently @n requires a single value (should allow a range or multiple values later)
 	// also not checking validity of string first (needs to start with a digit);
 	int n = stoi(nparam);
-	if (n == subtokenindex - 1) {
+	if (n == subtokenindex + 1) {
 		return output;
 	} else {
 		return "";

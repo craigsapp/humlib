@@ -2171,7 +2171,7 @@ std::string HumdrumToken::getLayoutParameter(const std::string& category,
 	// currently @n requires a single value (should allow a range or multiple values later)
 	// also not checking validity of string first (needs to start with a digit);
 	int n = stoi(nparam);
-	if (n == subtokenindex - 1) {
+	if (n == subtokenindex + 1) {
 		return output;
 	} else {
 		return "";
