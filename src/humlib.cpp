@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct 12 19:17:49 PDT 2018
+// Last Modified: Wed Oct 17 12:01:47 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21209,7 +21209,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
 	// start of a tied group so add the durations of the other notes.
-   int b40 = Convert::kernToBase40(this);
+	int b40 = Convert::kernToBase40(this);
 	HTp note = this;
 	HTp nnote = NULL;
 	while (note) {
@@ -22490,7 +22490,7 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //    if no explicit visual durtation (so the visual duration is same as the logical duration).
 //
 
-string HumdrumToken::getVisualDuration(void) {
+string HumdrumToken::getVisualDuration(int subtokenindex) {
 	string parameter = this->getValue("LO", "N", "vis");
 
 	if (!parameter.empty()) {
@@ -22516,6 +22516,71 @@ string HumdrumToken::getVisualDuration(void) {
 
 	return "";
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getLayoutParameter -- Returns requested layout parameter if it is attached
+//    to a token directly or indirectly through a linked parameter.  Returns empty string
+//    if no explicit visual durtation (so the visual duration is same as the logical duration).
+//    If subtokenindex is less than -1 (the default value for the paramter), then ignore
+//    the @n parameter control for indexing the layout parameter to chord notes.  The
+//    subtokenindex (0 indexed) is converted to note number (1 indexed) for checking @n.
+//    @n is currently only allowed to be a single integer (eventually allow ranges and multiple values).
+//
+
+std::string HumdrumToken::getLayoutParameter(const std::string& category,
+		const std::string& keyname, int subtokenindex) {
+
+	// maybe also check for any local layout parameter 
+	// (which are currently not possible)
+	std::string output;
+		int lcount = this->getLinkedParameterCount();
+		if (lcount == 0) {
+		return output;
+	}
+
+	std::string nparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "n") {
+				nparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+	if (subtokenindex < 0) {
+		// do not filter by n parameter
+		return output;
+	} else if (nparam.empty()) {
+		// parameter is not qualified by a note number, so applies to whole token
+		return output;
+	}
+
+	// currently @n requires a single value (should allow a range or multiple values later)
+	// also not checking validity of string first (needs to start with a digit);
+	int n = stoi(nparam);
+	if (n == subtokenindex - 1) {
+		return output;
+	} else {
+		return "";
+	}
+}
+
 
 
 
