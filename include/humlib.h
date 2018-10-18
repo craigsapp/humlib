@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 17 17:12:34 PDT 2018
+// Last Modified: Wed Oct 17 17:33:10 PDT 2018
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1301,12 +1301,12 @@ class HumdrumToken : public std::string, public HumHash {
 		HumParamSet* getLinkedParameter    (void);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,
 		                                    int subtokenindex = -1);
-		std::string getLayoutParameterChord(const std::string& category,
-		                                    const std::string& keyname, int subtokenindex);
+		std::string getLayoutParameterChord(const std::string& category, const std::string& keyname);
 		std::ostream& printXmlLinkedParameterInfo(std::ostream& out, int level, const std::string& indent);
 
 		// layout parameter accessors
 		std::string   getVisualDuration    (int subtokenindex = -1);
+		std::string   getVisualDurationChord(void);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const std::string& aToken);

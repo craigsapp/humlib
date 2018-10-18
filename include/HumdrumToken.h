@@ -181,12 +181,12 @@ class HumdrumToken : public std::string, public HumHash {
 		HumParamSet* getLinkedParameter    (void);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,
 		                                    int subtokenindex = -1);
-		std::string getLayoutParameterChord(const std::string& category,
-		                                    const std::string& keyname, int subtokenindex);
+		std::string getLayoutParameterChord(const std::string& category, const std::string& keyname);
 		std::ostream& printXmlLinkedParameterInfo(std::ostream& out, int level, const std::string& indent);
 
 		// layout parameter accessors
 		std::string   getVisualDuration    (int subtokenindex = -1);
+		std::string   getVisualDurationChord(void);
 
 		HumdrumToken& operator=            (HumdrumToken& aToken);
 		HumdrumToken& operator=            (const std::string& aToken);

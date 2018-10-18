@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 17 17:12:34 PDT 2018
+// Last Modified: Wed Oct 17 17:33:10 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22500,6 +22500,16 @@ string HumdrumToken::getVisualDuration(int subtokenindex) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumToken::getVisualDurationChord -- only return the chord-level visual duration
+//    parameter (not if it is specific to certain note(s) in the chord.
+//
+
+string HumdrumToken::getVisualDurationChord(void) {
+	return this->getLayoutParameterChord("N", "vis");
+}
+
 
 //////////////////////////////
 //
@@ -22573,7 +22583,7 @@ std::string HumdrumToken::getLayoutParameter(const std::string& category,
 //    include all notes in the chord).
 
 std::string HumdrumToken::getLayoutParameterChord(const std::string& category,
-		const std::string& keyname, int subtokenindex) {
+		const std::string& keyname) {
 
 	// maybe also check for any local layout parameter 
 	// (which are currently not possible)
@@ -22605,14 +22615,13 @@ std::string HumdrumToken::getLayoutParameterChord(const std::string& category,
 			}
 		}
 	}
-	if (subtokenindex < 0) {
-		// do not filter by n parameter
-		return output;
-	} else if (!nparam.empty()) {
+
+	if (!nparam.empty()) {
 		// parameter is qualified by a note number, so does not apply to whole token
 		return "";
+	} else {
+		return output;
 	}
-	return output;
 }
 
 
