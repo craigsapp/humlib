@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 17 16:45:37 PDT 2018
+// Last Modified: Wed Oct 17 17:12:34 PDT 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22491,13 +22491,11 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //
 
 string HumdrumToken::getVisualDuration(int subtokenindex) {
-
 	// direct storage of the layout parameter is possible, but currently disabled:
-	string parameter = this->getValue("LO", "N", "vis");
-	if (!parameter.empty()) {
-		return parameter;
-	}
-
+	//string parameter = this->getValue("LO", "N", "vis");
+	//if (!parameter.empty()) {
+	//	return parameter;
+	//}
 	return this->getLayoutParameter("N", "vis", subtokenindex);
 }
 
@@ -22565,6 +22563,57 @@ std::string HumdrumToken::getLayoutParameter(const std::string& category,
 	}
 }
 
+
+
+//////////////////////////////
+//
+// HumdrumToken::getLayoutParameterChord -- Returns requested layout parameter if it is attached
+//    to a token directly or indirectly through a linked parameter.  The parameter must
+//    apply to the entire chord, so no @n qualification parameters can be given (even if they
+//    include all notes in the chord).
+
+std::string HumdrumToken::getLayoutParameterChord(const std::string& category,
+		const std::string& keyname, int subtokenindex) {
+
+	// maybe also check for any local layout parameter 
+	// (which are currently not possible)
+	std::string output;
+		int lcount = this->getLinkedParameterCount();
+		if (lcount == 0) {
+		return output;
+	}
+
+	std::string nparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "n") {
+				nparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+	if (subtokenindex < 0) {
+		// do not filter by n parameter
+		return output;
+	} else if (!nparam.empty()) {
+		// parameter is qualified by a note number, so does not apply to whole token
+		return "";
+	}
+	return output;
+}
 
 
 
