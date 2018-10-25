@@ -43,8 +43,9 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeRScale              (void);
 
 		// in HumdrumFileContent-rest.cpp
-		void  analyzeRestPositions        (void);
-		void  analyzeRestPositions        (HTp kernstart);
+		void  analyzeRestPositions                  (void);
+		void  assignImplicitVerticalRestPositions   (HTp kernstart);
+		void  checkForExplicitVerticalRestPositions (void);
 
 		// in HumdrumFileContent-stem.cpp
 		bool analyzeKernStems             (void);
@@ -103,7 +104,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
 		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
-		bool    processRestPitch          (HTp rest, int baseline);
+		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
 		bool    analyzeKernStems          (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
 		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
 };

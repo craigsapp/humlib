@@ -31,11 +31,64 @@ namespace hum {
 void HumdrumFileContent::analyzeRestPositions(void) {
 	vector<HTp> kernstarts = getKernSpineStartList();
 	for (int i=0; i<(int)kernstarts.size(); i++) {
-		analyzeRestPositions(kernstarts[i]);
+		assignImplicitVerticalRestPositions(kernstarts[i]);
+	}
+
+	checkForExplicitVerticalRestPositions();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::checkForExplicitVerticalRestPositions -- Starting at the
+//     current layer, check all rests in the same track for vertical positioning.
+//
+
+void HumdrumFileContent::checkForExplicitVerticalRestPositions(void) {
+	HumdrumFileContent& infile = *this;
+	vector<int> baselines(infile.getTrackCount() + 1, Convert::kernClefToBaseline("*clefG2"));
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp tok = infile.token(i, j);
+				if (!tok->isKern()) {
+					continue;
+				}
+				if (!tok->isClef()) {
+					continue;
+				}
+				int track = tok->getTrack();
+				baselines[track] = Convert::kernClefToBaseline(tok);
+			}
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp tok = infile.token(i, j);
+			if (!tok->isKern()) {
+				continue;
+			}
+			if (!tok->isRest()) {
+				continue;
+			}
+			int track = tok->getTrack();
+			checkRestForVerticalPositioning(tok, baselines[track]);
+		}
 	}
 }
 
-void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::assignImplicitVerticalRestPositions -- Starting at the
+//     current layer, check all rests in the same track for vertical positioning.
+//     Only checks the first and second layers in a track.
+//
+
+void HumdrumFileContent::assignImplicitVerticalRestPositions(HTp kernstart) {
 	if (!kernstart) {
 		return;
 	}
@@ -61,7 +114,7 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 		}
 		if (track != strack) {
          if (current->isRest()) {
-				processRestPitch(current, baseline);
+				checkRestForVerticalPositioning(current, baseline);
 			}
 			// only one layer in current spine.
 			current = current->getNextToken();
@@ -71,7 +124,7 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			HTp resolve = current->resolveNull();
 			if (resolve && resolve->isRest()) {
 				if (second && second->isRest()) {
-					if (processRestPitch(second, baseline)) {
+					if (checkRestForVerticalPositioning(second, baseline)) {
 						current = current->getNextToken();
 						continue;
 					}
@@ -87,9 +140,9 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			setRestOnCenterStaffLine(current, baseline);
 		}
 		if (current->isRest()) {
-			if (processRestPitch(current, baseline)) {
+			if (checkRestForVerticalPositioning(current, baseline)) {
 				if (second && second->isRest()) {
-					if (processRestPitch(second, baseline)) {
+					if (checkRestForVerticalPositioning(second, baseline)) {
 						current = current->getNextToken();
 						continue;
 					}
@@ -99,7 +152,7 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 			}
 		}
 		if (second && second->isRest()) {
-			if (processRestPitch(second, baseline)) {
+			if (checkRestForVerticalPositioning(second, baseline)) {
 				current = current->getNextToken();
 				continue;
 			}
@@ -139,11 +192,11 @@ void HumdrumFileContent::analyzeRestPositions(HTp kernstart) {
 
 //////////////////////////////
 //
-// HumdrumFileContent::processRestPitch -- Read any pitch information attached to
+// HumdrumFileContent::checkRestForVerticalPositioning -- Read any pitch information attached to
 //     a rest and convert to ploc/oloc values.
 //
 
-bool HumdrumFileContent::processRestPitch(HTp rest, int baseline) {
+bool HumdrumFileContent::checkRestForVerticalPositioning(HTp rest, int baseline) {
 	HumRegex hre;
 	if (!hre.search(rest, "([A-Ga-g]+)")) {
 		return false;
