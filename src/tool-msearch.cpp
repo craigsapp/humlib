@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Aug 27 06:15:38 PDT 2017
-// Last Modified: Sun Aug 27 06:15:42 PDT 2017
+// Last Modified: Mon Oct 29 10:38:26 EDT 2018
 // Filename:      tool-msearch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-msearch.cpp
 // Syntax:        C++11
@@ -283,6 +283,8 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	HTp mend = NULL;
 	if (match.back() != NULL) {
 		mend = match.back()->getToken();
+	} else {
+		cerr << "GOT TO THIS STRANGE PLACE start=" << mstart << endl;
 	}
 	HTp tok = mstart;
 	string text;
@@ -293,6 +295,10 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 		text = tok->getText() + m_marker;
 		tok->setText(text);
 		tok = tok->getNextNNDT();
+		if (tok && !tok->isKern()) {
+			cerr << "STRANGE LINKING WITH TETX SPINE IN getNextNNDT()" << endl;
+			break;
+		}
 	}
 }
 
