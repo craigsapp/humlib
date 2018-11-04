@@ -283,6 +283,7 @@ bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& p
 //
 
 void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
+cerr << "LINKING " << slurstart << " TO " << slurend << endl;
 	string durtag = "slurDuration";
 	string endtag = "slurEnd";
 	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");

@@ -1534,6 +1534,19 @@ void HumdrumFileStructure::analyzeSignifiers(void) {
 }
 
 
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getKernLinkSignifier -- used for linking two
+//     non-standard slur/tie ends together.
+//
+
+std::string HumdrumFileStructure::getKernLinkSignifier(void) {
+	return m_signifiers.getKernLinkSignifier();
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

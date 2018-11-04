@@ -108,6 +108,9 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeStructure             (void);
 		bool          analyzeStrands               (void);
 
+		// signifier access
+		std::string   getKernLinkSignifier         (void);
+
 	protected:
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);

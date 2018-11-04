@@ -296,7 +296,7 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 		tok->setText(text);
 		tok = tok->getNextNNDT();
 		if (tok && !tok->isKern()) {
-			cerr << "STRANGE LINKING WITH TETX SPINE IN getNextNNDT()" << endl;
+			cerr << "STRANGE LINKING WITH TEXT SPINE IN getNextNNDT()" << endl;
 			break;
 		}
 	}

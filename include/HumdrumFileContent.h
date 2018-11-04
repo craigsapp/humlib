@@ -91,12 +91,16 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
 		                                   std::vector<HTp>& slurends,
 		                                   const std::string& linksig = "");
-		bool   analyzeKernTies            (HTp spinestart);
+		bool   analyzeKernTies            (std::vector<std::pair<HTp, int>>& linkedtiestarts,
+		                                   std::vector<std::pair<HTp, int>>& linkedtieends,
+		                                   std::string& linkSignifier);
 		void   fillKeySignature           (std::vector<int>& states,
 		                                   const std::string& keysig);
 		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
 				                             std::vector<int>& signature);
 		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+		void    linkTieEndpoints          (HTp tiestart, int startindex,
+		                                   HTp tieend, int endindex);
 		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
 		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
 		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
@@ -107,6 +111,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
 		bool    analyzeKernStems          (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
 		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
+		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts, 
+		                                   std::vector<std::pair<HTp, int>>& ends);
 };
 
 
