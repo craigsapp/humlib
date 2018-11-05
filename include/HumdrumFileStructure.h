@@ -110,6 +110,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 
 		// signifier access
 		std::string   getKernLinkSignifier         (void);
+		std::string   getKernAboveSignifier        (void);
+		std::string   getKernBelowSignifier        (void);
 
 	protected:
 		bool          analyzeRhythm                (void);

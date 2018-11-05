@@ -22,7 +22,9 @@ namespace hum {
 
 enum signifier_type {
 	signifier_unknown,
-	signifier_link
+	signifier_link,
+	signifier_above,
+	signifier_below
 };
 
 class HumSignifier {
@@ -37,6 +39,8 @@ class HumSignifier {
 		std::string getDefinition    (void);
 		std::string getParameter     (const std::string& key);
 		bool        isKernLink       (void);
+		bool        isKernAbove      (void);
+		bool        isKernBelow      (void);
 
 	private:
 		std::string m_exinterp;

@@ -87,9 +87,14 @@ bool HumSignifier::parseSignifier(const string& rdfline) {
 	m_definition = hre.getMatch(2);
 
 	// identify signifier category
+
 	if (m_exinterp == "**kern") {
 		if (m_definition.find("link") != std::string::npos) {
 			m_sigtype = signifier_type::signifier_link;
+		} else if (m_definition.find("above") != std::string::npos) {
+			m_sigtype = signifier_type::signifier_above;
+		} else if (m_definition.find("below") != std::string::npos) {
+			m_sigtype = signifier_type::signifier_below;
 		}
 	}
 
@@ -145,6 +150,28 @@ std::string HumSignifier::getParameter(const std::string& key) {
 
 bool HumSignifier::isKernLink(void) {
 	return (m_sigtype == signifier_type::signifier_link);
+}
+
+
+
+//////////////////////////////
+//
+// HumSignifier::isKernAbove -- Is an above signifier.
+//
+
+bool HumSignifier::isKernAbove(void) {
+	return (m_sigtype == signifier_type::signifier_above);
+}
+
+
+
+//////////////////////////////
+//
+// HumSignifier::isKernBelow -- Is a below signifier.
+//
+
+bool HumSignifier::isKernBelow(void) {
+	return (m_sigtype == signifier_type::signifier_below);
 }
 
 

@@ -31,12 +31,19 @@ class HumSignifiers {
 		bool          addSignifier     (const std::string& rdfline);
 		bool          hasKernLinkSignifier (void);
 		std::string   getKernLinkSignifier (void);
+		bool          hasKernAboveSignifier (void);
+		std::string   getKernAboveSignifier (void);
+		bool          hasKernBelowSignifier (void);
+		std::string   getKernBelowSignifier (void);
 		int           getSignifierCount(void);
 		HumSignifier* getSignifier(int index);
 
 	private:
 		std::vector<HumSignifier*> m_signifiers;
 		int  m_kernLinkIndex = -1;
+		int  m_kernAboveIndex = -1;
+		int  m_kernBelowIndex = -1;
+
 };
 
 

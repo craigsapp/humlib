@@ -86,6 +86,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-ottava.cpp
 		void   analyzeOttavas             (void);
 
+		// in HumdrumFileContent-note.cpp
+		void   analyzeCrossStaffStemDirections (void);
+		void   analyzeCrossStaffStemDirections (HTp kernstart);
+
 
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
@@ -113,6 +117,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
 		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts, 
 		                                   std::vector<std::pair<HTp, int>>& ends);
+		void    checkCrossStaffStems      (HTp token, std::string& above, std::string& below);
+		void    checkDataForCrossStaffStems(HTp token, std::string& above, std::string& below);
+		void    prepareStaffAboveNoteStems (HTp token);
+		void    prepareStaffBelowNoteStems (HTp token);
 };
 
 
