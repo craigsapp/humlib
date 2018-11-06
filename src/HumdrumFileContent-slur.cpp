@@ -76,9 +76,11 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
 	string linkSignifier = m_signifiers.getKernLinkSignifier();
+// cerr << "LINK SIGNIFIER == " << linkSignifier << endl;
 	for (int i=0; i<(int)kernspines.size(); i++) {
 		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, linkSignifier);
 	}
+// cerr << "SLUR STARTS " << slurstarts.size() << " ENDS " << slurends.size() << endl;
 	createLinkedSlurs(slurstarts, slurends);
 	return output;
 }
@@ -283,7 +285,7 @@ bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& p
 //
 
 void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
-cerr << "LINKING " << slurstart << " TO " << slurend << endl;
+// cerr << "LINKING " << slurstart << " TO " << slurend << endl;
 	string durtag = "slurDuration";
 	string endtag = "slurEnd";
 	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");

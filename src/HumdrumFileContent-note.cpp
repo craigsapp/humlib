@@ -246,7 +246,7 @@ void HumdrumFileContent::prepareStaffAboveNoteStems(HTp token) {
 
 //////////////////////////////
 //
-// HumdrumFileContent::prepareStaffAboveNoteStems --
+// HumdrumFileContent::prepareStaffBelowNoteStems --
 //
 
 void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
@@ -281,7 +281,7 @@ void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
 	// Find the first subtrack of the identified spine
 	int targettrack = curr->getTrack();
 	while (curr) {
-		HTp ptok = curr->getPreviousToken();
+		HTp ptok = curr->getPreviousFieldToken();
 		if (!ptok) {
 			break;
 		}
