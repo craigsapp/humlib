@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  6 17:38:46 CET 2018
+// Last Modified: Tue Nov  6 18:04:57 CET 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16748,7 +16748,7 @@ bool HumdrumFileContent::isLinkedSlurEnd(HTp token, int index, const string& pat
 
 		int startindex = i - (int)pattern.size() + 1;
 		auto loc = token->find(pattern, startindex);
-		if ((loc != std::string::npos) && (loc == startindex)) {
+		if ((loc != std::string::npos) && ((int)loc == startindex)) {
 			return true;
 		}
 		return false;

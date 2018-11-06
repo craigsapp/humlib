@@ -241,7 +241,7 @@ bool HumdrumFileContent::isLinkedSlurEnd(HTp token, int index, const string& pat
 
 		int startindex = i - (int)pattern.size() + 1;
 		auto loc = token->find(pattern, startindex);
-		if ((loc != std::string::npos) && (loc == startindex)) {
+		if ((loc != std::string::npos) && ((int)loc == startindex)) {
 			return true;
 		}
 		return false;
