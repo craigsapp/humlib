@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov  6 14:23:40 CET 2018
+// Last Modified: Tue Nov  6 17:38:46 CET 2018
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16583,11 +16583,10 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
 	string linkSignifier = m_signifiers.getKernLinkSignifier();
-// cerr << "LINK SIGNIFIER == " << linkSignifier << endl;
 	for (int i=0; i<(int)kernspines.size(); i++) {
 		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, linkSignifier);
 	}
-// cerr << "SLUR STARTS " << slurstarts.size() << " ENDS " << slurends.size() << endl;
+
 	createLinkedSlurs(slurstarts, slurends);
 	return output;
 }
@@ -16740,12 +16739,16 @@ bool HumdrumFileContent::isLinkedSlurEnd(HTp token, int index, const string& pat
 			counter++;
 		}
 		if (i == 0) {
+			// Can't have linked slur at starting index in string.
 			continue;
 		}
 		if (counter != index) {
 			continue;
 		}
-		if (token->find(pattern, i - (int)pattern.size() + 1) != std::string::npos) {
+
+		int startindex = i - (int)pattern.size() + 1;
+		auto loc = token->find(pattern, startindex);
+		if ((loc != std::string::npos) && (loc == startindex)) {
 			return true;
 		}
 		return false;
@@ -16792,7 +16795,6 @@ bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& p
 //
 
 void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
-// cerr << "LINKING " << slurstart << " TO " << slurend << endl;
 	string durtag = "slurDuration";
 	string endtag = "slurEnd";
 	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");
