@@ -202,7 +202,7 @@ void HumdrumFileContent::prepareStaffAboveNoteStems(HTp token) {
 	HumNum endtime = token->getDurationFromStart() + token->getDuration();
 	HTp curr2 = curr;
 	while (curr2) {
-		if (curr2->getDurationFromStart() <= endtime) {
+		if (curr2->getDurationFromStart() >= endtime) {
 			// exceeded the duration of the cross-staff note, so stop looking
 			break;
 		}
@@ -297,7 +297,7 @@ void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
 	HumNum endtime = token->getDurationFromStart() + token->getDuration();
 	HTp curr2 = curr;
 	while (curr2) {
-		if (curr2->getDurationFromStart() <= endtime) {
+		if (curr2->getDurationFromStart() >= endtime) {
 			// exceeded the duration of the cross-staff note, so stop looking
 			break;
 		}
