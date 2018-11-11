@@ -179,6 +179,7 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getLinkedParameterCount   (void);
 		HumParamSet* getLinkedParameter    (int index);
 		HumParamSet* getLinkedParameter    (void);
+		std::string getSlurLayoutParameter (const std::string& keyname, int subtokenindex = -1);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,
 		                                    int subtokenindex = -1);
 		std::string getLayoutParameterChord(const std::string& category,
