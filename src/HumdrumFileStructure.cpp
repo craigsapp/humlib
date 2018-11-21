@@ -1223,6 +1223,12 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 	while (tok) {
 		if (tok->isData()) {
 			dtok = tok;
+		} else if (tok->isBarline()) {
+			// layout parameters allowed for barlines
+			dtok = tok;
+		} else if (tok->isInterpretation() && (*tok != "*")) {
+			// layout parameters allowed for non-null interpretations
+			dtok = tok;
 		} else if (tok->isCommentLocal()) {
 			if (tok->find("!LO:") == 0) {
 				tok->storeLinkedParameters();
