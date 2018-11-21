@@ -317,14 +317,20 @@ void Tool_musicxml2hum::setSoftwareInfo(xml_document& doc) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::cleanSpaces --
+// Tool_musicxml2hum::cleanSpaces -- Converts newlines and tabs to spaces, and removes
+//     trailing spaces from the string.  Does not remove leading spaces, but this could
+//     be added.  Another variation would be to use \n to encode newlines if they need
+//     to be preserved, but for now converting them to spaces.
 //
 
-string Tool_musicxml2hum::cleanSpaces(string& input) {
+string& Tool_musicxml2hum::cleanSpaces(string& input) {
 	for (int i=0; i<(int)input.size(); i++) {
 		if (std::isspace(input[i])) {
 			input[i] = ' ';
 		}
+	}
+	while ((!input.empty()) && std::isspace(input.back())) {
+		input.resize(input.size() - 1);
 	}
 	return input;
 }
@@ -1482,7 +1488,12 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
-	// maybe check for text only containing spaces and exclude here
+	text = cleanSpaces(text);
+	if (text.empty()) {
+		// no text to display after removing whitespace
+		return;
+	}
+
 	string output = "!LO:TX";
 	output += placementstring;
 	output += stylestring;

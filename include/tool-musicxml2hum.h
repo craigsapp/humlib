@@ -97,7 +97,7 @@ class Tool_musicxml2hum : public HumTool {
 		                              MxmlEvent* event);
 		void   addHeaderRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
 		void   addFooterRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
-		std::string cleanSpaces           (std::string& input);
+		std::string& cleanSpaces     (std::string& input);
 		void setEditorialAccidental  (int accidental, GridSlice* slice,
 		                              int partindex, int staffindex, int voiceindex);
 
