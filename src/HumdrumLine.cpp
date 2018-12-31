@@ -1463,7 +1463,7 @@ string HumdrumLine::getXmlId(const string& prefix) const {
 	} else {
 		output = getXmlIdPrefix();
 	}
-	output += "loc" + to_string(getLineIndex());
+	output += "L" + to_string(getLineIndex() + 1);
 	return output;
 }
 
