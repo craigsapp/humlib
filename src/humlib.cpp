@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jan  2 18:38:46 PST 2019
+// Last Modified: Wed Jan  2 19:37:53 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11258,7 +11258,13 @@ int HumRegex::getMatchCount(void) {
 //
 
 string HumRegex::getMatch(int index) {
-	return m_matches.str(index);
+	if (index < 0) {
+		return "";
+	} if (index >= (int)m_matches.size()) {
+		return "";
+	}
+	string output = m_matches.str(index);
+	return output;
 }
 
 
@@ -56464,7 +56470,6 @@ void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
 
 void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 		int index, int transval) {
-
 	int mode = 0;
 	if (islower(aRecord.token(index)->at(1))) {
 		mode = 1;
@@ -56480,7 +56485,8 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 
 	HumRegex hre;
 	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
-		m_humdrum_text << hre.getMatch(1);
+		string value = hre.getMatch(1);
+		m_humdrum_text << value;
 	}
 }
 

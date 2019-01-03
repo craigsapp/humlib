@@ -742,7 +742,6 @@ void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
 
 void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 		int index, int transval) {
-
 	int mode = 0;
 	if (islower(aRecord.token(index)->at(1))) {
 		mode = 1;
@@ -758,7 +757,8 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 
 	HumRegex hre;
 	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
-		m_humdrum_text << hre.getMatch(1);
+		string value = hre.getMatch(1);
+		m_humdrum_text << value;
 	}
 }
 

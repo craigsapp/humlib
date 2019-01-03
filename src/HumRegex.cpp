@@ -258,7 +258,13 @@ int HumRegex::getMatchCount(void) {
 //
 
 string HumRegex::getMatch(int index) {
-	return m_matches.str(index);
+	if (index < 0) {
+		return "";
+	} if (index >= (int)m_matches.size()) {
+		return "";
+	}
+	string output = m_matches.str(index);
+	return output;
 }
 
 
