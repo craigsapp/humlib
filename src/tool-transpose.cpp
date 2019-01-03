@@ -1560,7 +1560,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 
 	transval     =  getInteger("base40");
 	ssettonicQ   =  getBoolean("settonic");
-	ssettonic    =  Convert::kernToBase40(getString("settonic").data());
+	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
 	autoQ        =  getBoolean("auto");
 	debugQ       =  getBoolean("debug");
 	spineQ       =  getBoolean("spines");
@@ -1588,7 +1588,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	ssettonic = ssettonic % 40;
 
 	if (getBoolean("transpose")) {
-		transval = getBase40ValueFromInterval(getString("transpose").data());
+		transval = getBase40ValueFromInterval(getString("transpose").c_str());
 	}
 
 	transval += 40 * octave;

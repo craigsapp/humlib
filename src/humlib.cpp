@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec 31 13:18:53 EST 2018
+// Last Modified: Wed Jan  2 18:38:46 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -57282,7 +57282,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 
 	transval     =  getInteger("base40");
 	ssettonicQ   =  getBoolean("settonic");
-	ssettonic    =  Convert::kernToBase40(getString("settonic").data());
+	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
 	autoQ        =  getBoolean("auto");
 	debugQ       =  getBoolean("debug");
 	spineQ       =  getBoolean("spines");
@@ -57310,7 +57310,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	ssettonic = ssettonic % 40;
 
 	if (getBoolean("transpose")) {
-		transval = getBase40ValueFromInterval(getString("transpose").data());
+		transval = getBase40ValueFromInterval(getString("transpose").c_str());
 	}
 
 	transval += 40 * octave;
