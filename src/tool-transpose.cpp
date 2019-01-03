@@ -226,7 +226,8 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
 			// transpose *k[] markers if necessary
 			if (tvals[ptrack] != 0) {
-				printNewKeySignature(hre.getMatch(1), tvals[ptrack]);
+				string value = hre.getMatch(1);
+				printNewKeySignature(value, tvals[ptrack]);
 			} else {
 				m_humdrum_text << infile.token(line, j);
 			}
@@ -678,7 +679,8 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
 						hre.search(infile.token(i, j),
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
-						printNewKeySignature(hre.getMatch(1), transval);
+						string value = hre.getMatch(1);
+						printNewKeySignature(value, transval);
 						if (j<infile[i].getFieldCount()-1) {
 						m_humdrum_text << "\t";
 						}
@@ -756,7 +758,8 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 	m_humdrum_text << "*" << Convert::base40ToKern(base40) << ":";
 
 	HumRegex hre;
-	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
+	string tvalue = *aRecord.token(index);
+	if (hre.search(tvalue, ":(.+)$", "")) {
 		string value = hre.getMatch(1);
 		m_humdrum_text << value;
 	}
