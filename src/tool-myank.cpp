@@ -1581,11 +1581,11 @@ int Tool_myank::atEndOfFile(HumdrumFile& infile, int line) {
 	int i;
 	for (i=line+1; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
-			return 1;
+			return 0;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
 
