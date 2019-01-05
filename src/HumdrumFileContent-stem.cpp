@@ -88,7 +88,7 @@ bool HumdrumFileContent::analyzeKernStems(HTp stok, HTp etok, vector<vector<int>
 			continue;
 		}
 		if (dur > 4) {
-			// half-note or greater (no stem)
+			// greater than a half-note (no stem)
 			tok = tok->getNextToken();
 			continue;
 		}
@@ -153,6 +153,7 @@ void HumdrumFileContent::getBaselines(vector<vector<int>>& centerlines) {
 			}
 			int centerline = Convert::kernClefToBaseline(tok) + 4;
 			centerlines[track][tok->getLineIndex()] = centerline;
+			clefcenter = centerline;
 			tok = tok->getNextToken();
 		}
 	}
