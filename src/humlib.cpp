@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 11 03:09:09 EST 2019
+// Last Modified: Fri Jan 11 04:50:39 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56780,7 +56780,10 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 		return;
 	}
 	HumRegex hre;
-	if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
+	if (hre.search(record.token(index), "N\\.C\\.")) {
+		// no pitch information so just echo the text:
+		m_humdrum_text << record.token(index);
+	} else if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
 		string pitch = hre.getMatch(1);
 		int b40 = Convert::kernToBase40(pitch) + transval;
 		b40 = b40 % 40 + 120;

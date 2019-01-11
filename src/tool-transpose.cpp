@@ -858,7 +858,10 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 		return;
 	}
 	HumRegex hre;
-	if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
+	if (hre.search(record.token(index), "N\\.C\\.")) {
+		// no pitch information so just echo the text:
+		m_humdrum_text << record.token(index);
+	} else if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
 		string pitch = hre.getMatch(1);
 		int b40 = Convert::kernToBase40(pitch) + transval;
 		b40 = b40 % 40 + 120;
