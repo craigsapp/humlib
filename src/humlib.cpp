@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 11 02:50:21 EST 2019
+// Last Modified: Fri Jan 11 03:09:09 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -48617,12 +48617,12 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 		addTranspositionLine(outdata, transpositions, partdata, nowtime);
 	}
 
-	if (haskeydesignation) {
-		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
-	}
-
 	if (haskeysig) {
 		addKeySigLine(outdata, keysigs, partdata, nowtime);
+	}
+
+	if (haskeydesignation) {
+		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
 	}
 
 	if (hastimesig) {

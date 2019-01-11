@@ -2343,12 +2343,12 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 		addTranspositionLine(outdata, transpositions, partdata, nowtime);
 	}
 
-	if (haskeydesignation) {
-		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
-	}
-
 	if (haskeysig) {
 		addKeySigLine(outdata, keysigs, partdata, nowtime);
+	}
+
+	if (haskeydesignation) {
+		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
 	}
 
 	if (hastimesig) {
