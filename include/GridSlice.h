@@ -43,25 +43,26 @@ class GridSlice : public std::vector<GridPart*> {
 		          GridSlice* slice);
 		~GridSlice();
 
-		bool isNoteSlice(void)        { return m_type == SliceType::Notes;            }
-		bool isGraceSlice(void)       { return m_type == SliceType::GraceNotes;       }
-		bool isMeasureSlice(void)     { return m_type == SliceType::Measures;         }
-		bool isClefSlice(void)        { return m_type == SliceType::Clefs;            }
-		bool isLabelSlice(void)       { return m_type == SliceType::Labels;           }
-		bool isLabelAbbrSlice(void)   { return m_type == SliceType::LabelAbbrs;       }
-		bool isTransposeSlice(void)   { return m_type == SliceType::Transpositions;   }
-		bool isKeySigSlice(void)      { return m_type == SliceType::KeySigs;          }
-		bool isTimeSigSlice(void)     { return m_type == SliceType::TimeSigs;         }
-		bool isTempoSlice(void)       { return m_type == SliceType::Tempos;           }
-		bool isMeterSigSlice(void)    { return m_type == SliceType::MeterSigs;        }
-		bool isManipulatorSlice(void) { return m_type==SliceType::Manipulators;       }
-		bool isLayoutSlice(void)      { return m_type ==  SliceType::Layouts;         }
-		bool isLocalLayoutSlice(void) { return m_type ==  SliceType::Layouts;         }
-		bool isInvalidSlice(void)     { return m_type == SliceType::Invalid;          }
-		bool isGlobalComment(void)    { return m_type == SliceType::GlobalComments;   }
-		bool isGlobalLayout(void)     { return m_type == SliceType::GlobalLayouts;    }
-		bool isReferenceRecord(void)  { return m_type == SliceType::ReferenceRecords; }
-		bool isOttavaRecord(void)     { return m_type == SliceType::Ottavas; }
+		bool isNoteSlice(void)          { return m_type == SliceType::Notes;            }
+		bool isGraceSlice(void)         { return m_type == SliceType::GraceNotes;       }
+		bool isMeasureSlice(void)       { return m_type == SliceType::Measures;         }
+		bool isClefSlice(void)          { return m_type == SliceType::Clefs;            }
+		bool isLabelSlice(void)         { return m_type == SliceType::Labels;           }
+		bool isLabelAbbrSlice(void)     { return m_type == SliceType::LabelAbbrs;       }
+		bool isTransposeSlice(void)     { return m_type == SliceType::Transpositions;   }
+		bool isKeySigSlice(void)        { return m_type == SliceType::KeySigs;          }
+		bool isKeyDesignationSlice(void){ return m_type == SliceType::KeyDesignations;  }
+		bool isTimeSigSlice(void)       { return m_type == SliceType::TimeSigs;         }
+		bool isTempoSlice(void)         { return m_type == SliceType::Tempos;           }
+		bool isMeterSigSlice(void)      { return m_type == SliceType::MeterSigs;        }
+		bool isManipulatorSlice(void)   { return m_type==SliceType::Manipulators;       }
+		bool isLayoutSlice(void)        { return m_type ==  SliceType::Layouts;         }
+		bool isLocalLayoutSlice(void)   { return m_type ==  SliceType::Layouts;         }
+		bool isInvalidSlice(void)       { return m_type == SliceType::Invalid;          }
+		bool isGlobalComment(void)      { return m_type == SliceType::GlobalComments;   }
+		bool isGlobalLayout(void)       { return m_type == SliceType::GlobalLayouts;    }
+		bool isReferenceRecord(void)    { return m_type == SliceType::ReferenceRecords; }
+		bool isOttavaRecord(void)       { return m_type == SliceType::Ottavas;          }
 		bool isInterpretationSlice(void);
 		bool isDataSlice(void);
 		bool hasSpines(void);

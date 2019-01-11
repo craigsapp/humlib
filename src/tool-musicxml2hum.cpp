@@ -2242,11 +2242,12 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 		vector<SimultaneousEvents*>& nowevents, HumNum nowtime,
 		vector<MxmlPart>& partdata) {
 
-	bool hasclef          = false;
-	bool haskeysig        = false;
-	bool hastransposition = false;
-	bool hastimesig       = false;
-	bool hasottava        = false;
+	bool hasclef           = false;
+	bool haskeysig         = false;
+	bool haskeydesignation = false;
+	bool hastransposition  = false;
+	bool hastimesig        = false;
+	bool hasottava         = false;
 
 	vector<vector<xml_node>> clefs(partdata.size());
 	vector<vector<xml_node>> keysigs(partdata.size());
@@ -2279,6 +2280,11 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					if (nodeType(child, "key")) {
 						keysigs[pindex].push_back(child);
 						haskeysig = true;
+						string xpath = "mode";
+						string mode = child.select_node(xpath.c_str()).node().child_value();
+						if (mode != "") {
+							haskeydesignation = true;
+						}
 						foundnongrace = true;
 					}
 
@@ -2335,6 +2341,10 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 
 	if (hastransposition) {
 		addTranspositionLine(outdata, transpositions, partdata, nowtime);
+	}
+
+	if (haskeydesignation) {
+		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
 	}
 
 	if (haskeysig) {
@@ -2582,6 +2592,32 @@ void Tool_musicxml2hum::addKeySigLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::addKeyDesignationLine -- Only adding one key designation line
+//   for each part for now.
+//
+
+void Tool_musicxml2hum::addKeyDesignationLine(GridMeasure* outdata,
+		vector<vector<xml_node> >& keydesigs,
+		vector<MxmlPart>& partdata, HumNum nowtime) {
+
+	GridSlice* slice = new GridSlice(outdata, nowtime,
+		SliceType::KeyDesignations);
+	outdata->push_back(slice);
+	slice->initializePartStaves(partdata);
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		for (int j=0; j<(int)keydesigs[i].size(); j++) {
+			if (keydesigs[i][j]) {
+				insertPartKeyDesignations(keydesigs[i][j], *slice->at(i));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addTranspositionLine -- Transposition codes to
 //   produce written parts.
 //
@@ -2703,6 +2739,41 @@ void Tool_musicxml2hum::insertPartKeySigs(xml_node keysig, GridPart& part) {
 	int staffnum = 0;
 	while (keysig) {
 		keysig = convertKeySigToHumdrum(keysig, token, staffnum);
+		if (staffnum < 0) {
+			// key signature applies to all staves in part (most common case)
+			for (int s=0; s<(int)part.size(); s++) {
+				if (s==0) {
+					part[s]->setTokenLayer(0, token, 0);
+				} else {
+					HTp token2 = new HumdrumToken(*token);
+					part[s]->setTokenLayer(0, token2, 0);
+				}
+			}
+		} else {
+			part[staffnum]->setTokenLayer(0, token, 0);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertPartKeyDesignations --
+//
+
+void Tool_musicxml2hum::insertPartKeyDesignations(xml_node keydesig, GridPart& part) {
+	if (!keydesig) {
+		return;
+	}
+
+	HTp token;
+	int staffnum = 0;
+	while (keydesig) {
+		keydesig = convertKeySigToHumdrumKeyDesignation(keydesig, token, staffnum);
+		if (token == NULL) {
+			return;
+		}
 		if (staffnum < 0) {
 			// key signature applies to all staves in part (most common case)
 			for (int s=0; s<(int)part.size(); s++) {
@@ -2914,10 +2985,122 @@ xml_node Tool_musicxml2hum::convertTranspositionToHumdrum(xml_node transpose,
 
 //////////////////////////////
 //
+//	Tool_musicxml2hum::convertKeySigToHumdrumKeyDesignation --
+//
+//  <key>
+//     <fifths>4</fifths>
+// and sometimes:
+//     <mode>major</mode>
+// or
+//     <mode>minor</mode>
+//
+
+xml_node Tool_musicxml2hum::convertKeySigToHumdrumKeyDesignation(xml_node keysig,
+		HTp& token, int& staffindex) {
+
+	if (!keysig) {
+		return keysig;
+	}
+
+	staffindex = -1;
+	xml_attribute sn = keysig.attribute("number");
+	if (sn) {
+		staffindex = atoi(sn.value()) - 1;
+	}
+
+	int fifths = 0;
+	int mode = -1;
+
+	xml_node child = keysig.first_child();
+	while (child) {
+		if (nodeType(child, "fifths")) {
+			fifths = atoi(child.child_value());
+		}
+		if (nodeType(child, "mode")) {
+			string value = child.child_value();
+			if (value == "major") {
+				mode = 0;
+			} else if (value == "minor") {
+				mode = 1;
+			}
+			fifths = atoi(child.child_value());
+		}
+		child = child.next_sibling();
+	}
+
+	if (mode < 0) {
+		return xml_node(NULL);
+	}
+
+	stringstream ss;
+	ss << "*";
+
+	if (mode == 0) { // major:
+		switch (fifths) {
+			case +7: ss << "C#"; break;
+			case +6: ss << "F#"; break;
+			case +5: ss << "B"; break;
+			case +4: ss << "E"; break;
+			case +3: ss << "A"; break;
+			case +2: ss << "D"; break;
+			case +1: ss << "G"; break;
+			case  0: ss << "C"; break;
+			case -1: ss << "F"; break;
+			case -2: ss << "B-"; break;
+			case -3: ss << "E-"; break;
+			case -4: ss << "A-"; break;
+			case -5: ss << "D-"; break;
+			case -6: ss << "G-"; break;
+			case -7: ss << "C-"; break;
+			default: return xml_node(NULL);
+		}
+	} else if (mode == 1) { // minor:
+		switch (fifths) {
+			case +7: ss << "a#"; break;
+			case +6: ss << "d#"; break;
+			case +5: ss << "g#"; break;
+			case +4: ss << "c#"; break;
+			case +3: ss << "f#"; break;
+			case +2: ss << "b"; break;
+			case +1: ss << "e"; break;
+			case  0: ss << "a"; break;
+			case -1: ss << "d"; break;
+			case -2: ss << "g"; break;
+			case -3: ss << "c"; break;
+			case -4: ss << "f"; break;
+			case -5: ss << "b-"; break;
+			case -6: ss << "e-"; break;
+			case -7: ss << "a-"; break;
+			default: return xml_node(NULL);
+		}
+	}
+	ss << ":";
+
+	token = new HumdrumToken(ss.str());
+
+	keysig = keysig.next_sibling();
+	if (!keysig) {
+		return keysig;
+	}
+	if (nodeType(keysig, "key")) {
+		return keysig;
+	} else {
+		return xml_node(NULL);
+	}
+}
+
+
+
+//////////////////////////////
+//
 //	Tool_musicxml2hum::convertKeySigToHumdrum --
 //
 //  <key>
 //     <fifths>4</fifths>
+// and sometimes:
+//     <mode>major</mode>
+// or
+//     <mode>minor</mode>
 //
 
 xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
@@ -2934,10 +3117,20 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 	}
 
 	int fifths = 0;
+	int mode = -1;
 
 	xml_node child = keysig.first_child();
 	while (child) {
 		if (nodeType(child, "fifths")) {
+			fifths = atoi(child.child_value());
+		}
+		if (nodeType(child, "mode")) {
+			string value = child.child_value();
+			if (value == "major") {
+				mode = 0;
+			} else if (value == "minor") {
+				mode = 1;
+			}
 			fifths = atoi(child.child_value());
 		}
 		child = child.next_sibling();

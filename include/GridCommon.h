@@ -33,6 +33,7 @@ enum class SliceType {
 		_Measure,
 				Clefs,
 				Transpositions,
+				KeyDesignations,
 				KeySigs,
 				TimeSigs,
 				MeterSigs,
