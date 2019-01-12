@@ -359,7 +359,7 @@ ostream& HumParamSet::printXml(ostream& out, int level,
 	if (getCount() == 0) {
 		return out;
 	}
-	
+
 	out << Convert::repeatString(indent, level++) << "<linked-parameter-set>\n";
 	out << Convert::repeatString(indent, level++);
 	out << "<namespace n=\"1\" name=\"" << getNamespace1() << "\">\n";

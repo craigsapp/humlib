@@ -102,11 +102,10 @@
 #ifndef _HUMHASH_H_INCLUDED
 #define _HUMHASH_H_INCLUDED
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
-
-using namespace std;
 
 namespace hum {
 
@@ -116,150 +115,150 @@ typedef HumdrumToken* HTp;
 
 // START_MERGE
 
-class HumParameter : public string {
+class HumParameter : public std::string {
 	public:
 		HumParameter(void);
-		HumParameter(const string& str);
+		HumParameter(const std::string& str);
 		HumdrumToken* origin;
 };
 
-typedef map<string, map<string, map<string, HumParameter> > > MapNNKV;
-typedef map<string, map<string, HumParameter> > MapNKV;
-typedef map<string, HumParameter> MapKV;
+typedef std::map<std::string, std::map<std::string, std::map<std::string, HumParameter> > > MapNNKV;
+typedef std::map<std::string, std::map<std::string, HumParameter> > MapNKV;
+typedef std::map<std::string, HumParameter> MapKV;
 
 class HumHash {
 	public:
 		               HumHash             (void);
 		              ~HumHash             ();
 
-		string         getValue            (const string& key) const;
-		string         getValue            (const string& ns2,
-		                                    const string& key) const;
-		string         getValue            (const string& ns1, const string& ns2,
-		                                    const string& key) const;
-		HTp            getValueHTp         (const string& key) const;
-		HTp            getValueHTp         (const string& ns2,
-		                                    const string& key) const;
-		HTp            getValueHTp         (const string& ns1, const string& ns2,
-		                                    const string& key) const;
-		int            getValueInt         (const string& key) const;
-		int            getValueInt         (const string& ns2,
-		                                    const string& key) const;
-		int            getValueInt         (const string& ns1, const string& ns2,
-		                                    const string& key) const;
-		HumNum         getValueFraction    (const string& key) const;
-		HumNum         getValueFraction    (const string& ns2,
-		                                    const string& key) const;
-		HumNum         getValueFraction    (const string& ns1, const string& ns2,
-		                                    const string& key)const ;
-		double         getValueFloat       (const string& key)const ;
-		double         getValueFloat       (const string& ns2,
-		                                    const string& key) const;
-		double         getValueFloat       (const string& ns1, const string& ns2,
-		                                    const string& key) const;
-		bool           getValueBool        (const string& key) const;
-		bool           getValueBool        (const string& ns2,
-		                                    const string& key) const;
-		bool           getValueBool        (const string& ns1, const string& ns2,
-		                                    const string& key) const;
+		std::string    getValue            (const std::string& key) const;
+		std::string    getValue            (const std::string& ns2,
+		                                    const std::string& key) const;
+		std::string    getValue            (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
+		HTp            getValueHTp         (const std::string& key) const;
+		HTp            getValueHTp         (const std::string& ns2,
+		                                    const std::string& key) const;
+		HTp            getValueHTp         (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
+		int            getValueInt         (const std::string& key) const;
+		int            getValueInt         (const std::string& ns2,
+		                                    const std::string& key) const;
+		int            getValueInt         (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
+		HumNum         getValueFraction    (const std::string& key) const;
+		HumNum         getValueFraction    (const std::string& ns2,
+		                                    const std::string& key) const;
+		HumNum         getValueFraction    (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key)const ;
+		double         getValueFloat       (const std::string& key)const ;
+		double         getValueFloat       (const std::string& ns2,
+		                                    const std::string& key) const;
+		double         getValueFloat       (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
+		bool           getValueBool        (const std::string& key) const;
+		bool           getValueBool        (const std::string& ns2,
+		                                    const std::string& key) const;
+		bool           getValueBool        (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
 
-		void           setValue            (const string& key,
-		                                    const string& value);
-		void           setValue            (const string& ns2,
-		                                    const string& key,
-		                                    const string& value);
-		void           setValue            (const string& ns1,
-		                                    const string& ns2,
-		                                    const string& key,
-		                                    const string& value);
-		void           setValue            (const string& key,
+		void           setValue            (const std::string& key,
+		                                    const std::string& value);
+		void           setValue            (const std::string& ns2,
+		                                    const std::string& key,
+		                                    const std::string& value);
+		void           setValue            (const std::string& ns1,
+		                                    const std::string& ns2,
+		                                    const std::string& key,
+		                                    const std::string& value);
+		void           setValue            (const std::string& key,
 		                                    const char* value);
-		void           setValue            (const string& ns2,
-		                                    const string& key,
+		void           setValue            (const std::string& ns2,
+		                                    const std::string& key,
 		                                    const char* value);
-		void           setValue            (const string& ns1,
-		                                    const string& ns2,
-		                                    const string& key,
+		void           setValue            (const std::string& ns1,
+		                                    const std::string& ns2,
+		                                    const std::string& key,
 		                                    const char* value);
-		void           setValue            (const string& key, int value);
-		void           setValue            (const string& ns2, const string& key,
+		void           setValue            (const std::string& key, int value);
+		void           setValue            (const std::string& ns2, const std::string& key,
 		                                    int value);
-		void           setValue            (const string& ns1, const string& ns2,
-		                                    const string& key, int value);
-		void           setValue            (const string& key, HTp value);
-		void           setValue            (const string& ns2, const string& key,
+		void           setValue            (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key, int value);
+		void           setValue            (const std::string& key, HTp value);
+		void           setValue            (const std::string& ns2, const std::string& key,
 		                                    HTp value);
-		void           setValue            (const string& ns1, const string& ns2,
-		                                    const string& key, HTp value);
-		void           setValue            (const string& key, HumNum value);
-		void           setValue            (const string& ns2, const string& key,
+		void           setValue            (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key, HTp value);
+		void           setValue            (const std::string& key, HumNum value);
+		void           setValue            (const std::string& ns2, const std::string& key,
 		                                    HumNum value);
-		void           setValue            (const string& ns1, const string& ns2,
-		                                    const string& key, HumNum value);
-		void           setValue            (const string& key, double value);
-		void           setValue            (const string& ns2, const string& key,
+		void           setValue            (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key, HumNum value);
+		void           setValue            (const std::string& key, double value);
+		void           setValue            (const std::string& ns2, const std::string& key,
 		                                    double value);
-		void           setValue            (const string& ns1, const string& ns2,
-		                                    const string& key, double value);
-		bool           isDefined           (const string& key) const;
-		bool           isDefined           (const string& ns2,
-		                                    const string& key) const;
-		bool           isDefined           (const string& ns1, const string& ns2,
-		                                    const string& key) const;
-		void           deleteValue         (const string& key);
-		void           deleteValue         (const string& ns2, const string& key);
-		void           deleteValue         (const string& ns1, const string& ns2,
-		                                    const string& key);
-		vector<string> getKeys             (void) const;
-		vector<string> getKeys             (const string& ns) const;
-		vector<string> getKeys             (const string& ns1,
-		                                    const string& ns2) const;
+		void           setValue            (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key, double value);
+		bool           isDefined           (const std::string& key) const;
+		bool           isDefined           (const std::string& ns2,
+		                                    const std::string& key) const;
+		bool           isDefined           (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key) const;
+		void           deleteValue         (const std::string& key);
+		void           deleteValue         (const std::string& ns2, const std::string& key);
+		void           deleteValue         (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& key);
+		std::vector<std::string> getKeys             (void) const;
+		std::vector<std::string> getKeys             (const std::string& ns) const;
+		std::vector<std::string> getKeys             (const std::string& ns1,
+		                                    const std::string& ns2) const;
 		bool           hasParameters       (void) const;
-		bool           hasParameters       (const string& ns) const;
-		bool           hasParameters       (const string& ns1,
-		                                    const string& ns2) const;
+		bool           hasParameters       (const std::string& ns) const;
+		bool           hasParameters       (const std::string& ns1,
+		                                    const std::string& ns2) const;
 		int            getParameterCount   (void) const;
-		int            getParameterCount   (const string& ns) const;
-		int            getParameterCount   (const string& ns1,
-		                                    const string& ns2) const;
-		void           setPrefix           (const string& value);
-		string         getPrefix           (void) const;
-		ostream&       printXml            (ostream& out = cout, int level = 0,
-		                                    const string& indent = "\t");
-		ostream&       printXmlAsGlobal    (ostream& out = cout, int level = 0,
-		                                    const string& indent = "\t");
+		int            getParameterCount   (const std::string& ns) const;
+		int            getParameterCount   (const std::string& ns1,
+		                                    const std::string& ns2) const;
+		void           setPrefix           (const std::string& value);
+		std::string    getPrefix           (void) const;
+		std::ostream&       printXml            (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream&       printXmlAsGlobal    (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
 
-		void           setOrigin           (const string& key,
+		void           setOrigin           (const std::string& key,
 		                                    HumdrumToken* tok);
-		void           setOrigin           (const string& key,
+		void           setOrigin           (const std::string& key,
 		                                    HumdrumToken& tok);
-		void           setOrigin           (const string& ns2, const string& key,
+		void           setOrigin           (const std::string& ns2, const std::string& key,
 		                                    HumdrumToken* tok);
-		void           setOrigin           (const string& ns2, const string& key,
+		void           setOrigin           (const std::string& ns2, const std::string& key,
 		                                    HumdrumToken& tok);
-		void           setOrigin           (const string& ns1, const string& ns2,
-		                                    const string& parameter,
+		void           setOrigin           (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& parameter,
 		                                    HumdrumToken* tok);
-		void           setOrigin           (const string& ns1, const string& ns2,
-		                                    const string& parameter,
+		void           setOrigin           (const std::string& ns1, const std::string& ns2,
+		                                    const std::string& parameter,
 		                                    HumdrumToken& tok);
 
-		HumdrumToken*  getOrigin           (const string& key) const;
-		HumdrumToken*  getOrigin           (const string& ns2,
-		                                    const string& key) const;
-		HumdrumToken*  getOrigin           (const string& ns1,
-		                                    const string& ns2,
-		                                    const string& parameter) const;
+		HumdrumToken*  getOrigin           (const std::string& key) const;
+		HumdrumToken*  getOrigin           (const std::string& ns2,
+		                                    const std::string& key) const;
+		HumdrumToken*  getOrigin           (const std::string& ns1,
+		                                    const std::string& ns2,
+		                                    const std::string& parameter) const;
 
 	protected:
-		void           initializeParameters(void);
-		vector<string> getKeyList          (const string& keys) const;
+		void                     initializeParameters  (void);
+		std::vector<std::string> getKeyList            (const std::string& keys) const;
 
 	private:
-		MapNNKV* parameters;
-		string   prefix;
+		MapNNKV*    parameters;
+		std::string prefix;
 
-	friend ostream& operator<<(ostream& out, const HumHash& hash);
+	friend std::ostream& operator<<(std::ostream& out, const HumHash& hash);
 };
 
 

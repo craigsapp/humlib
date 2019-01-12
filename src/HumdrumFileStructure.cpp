@@ -17,9 +17,10 @@
 #include "HumdrumFileStructure.h"
 #include "Convert.h"
 
+#include <string.h>
+
 #include <algorithm>
 #include <sstream>
-#include <string.h>
 
 using namespace std;
 
@@ -209,6 +210,7 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 		if (!analyzeRhythm()           ) { return isValid(); }
 		if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
 	}
+	analyzeSignifiers();
 	return isValid();
 }
 
@@ -220,7 +222,7 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 
 bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
 	HTp current = spinestart;
-	
+
 	HumNum duration;
 	while (current) {
 		if (!current->isData()) {
@@ -232,7 +234,7 @@ bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
 			// treat as a zero duration.
 			continue;
 		}
-		
+
 		if (strchr(current->c_str(), 'q') != NULL) {
 			duration = 0;
 		} else {
@@ -1218,8 +1220,14 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 	HTp send = getStrandEnd(index);
 	HTp tok = send;
 	HTp dtok = NULL;
-	while (tok && (tok != sstart)) {
+	while (tok) {
 		if (tok->isData()) {
+			dtok = tok;
+		} else if (tok->isBarline()) {
+			// layout parameters allowed for barlines
+			dtok = tok;
+		} else if (tok->isInterpretation() && (*tok != "*")) {
+			// layout parameters allowed for non-null interpretations
 			dtok = tok;
 		} else if (tok->isCommentLocal()) {
 			if (tok->find("!LO:") == 0) {
@@ -1228,6 +1236,9 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 					dtok->addLinkedParameter(tok);
 				}
 			}
+		}
+		if (tok == sstart) {
+			break;
 		}
 		tok = tok->getPreviousToken();
 	}
@@ -1348,7 +1359,7 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	assignStrandsToTokens();
 
 	resolveNullTokens();
-	
+
 	return isValid();
 }
 
@@ -1510,6 +1521,62 @@ bool HumdrumFileStructure::hasFilters(void) {
 	}
 	return false;
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeSignifiers --
+//
+
+void HumdrumFileStructure::analyzeSignifiers(void) {
+	HumdrumFileStructure& infile = *this;
+	for (int i=0; i<getLineCount(); i++) {
+		if (!infile[i].isSignifier()) {
+			continue;
+		}
+		m_signifiers.addSignifier(infile[i].getText());
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getKernLinkSignifier -- used for linking two
+//     non-standard slur/tie ends together.
+//
+
+std::string HumdrumFileStructure::getKernLinkSignifier(void) {
+	return m_signifiers.getKernLinkSignifier();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getKernAboveSignifier -- used to place things
+//     "above" (note on staff above, slurs/ties with an "above" orientation,
+//     etc.
+//
+
+std::string HumdrumFileStructure::getKernAboveSignifier(void) {
+	return m_signifiers.getKernAboveSignifier();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::getKernBelowSignifier -- used to place things
+//     "below" (note on staff above, slurs/ties with an "below" orientation,
+//     etc.
+//
+
+std::string HumdrumFileStructure::getKernBelowSignifier(void) {
+	return m_signifiers.getKernBelowSignifier();
+}
+
 
 
 // END_MERGE

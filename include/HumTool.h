@@ -14,7 +14,9 @@
 #define _HUMTOOL_H_INCLUDED
 
 #include "Options.h"
+
 #include <sstream>
+#include <string>
 
 namespace hum {
 
@@ -22,41 +24,44 @@ namespace hum {
 
 class HumTool : public Options {
 	public:
-		         HumTool         (void);
-		        ~HumTool         ();
+		              HumTool         (void);
+		             ~HumTool         ();
 
-		void     clearOutput     (void);
+		void          clearOutput     (void);
 
-		bool     hasAnyText      (void);
-		string   getAllText      (void);
-		ostream& getAllText      (ostream& out);
+		bool          hasAnyText      (void);
+		std::string   getAllText      (void);
+		ostream&      getAllText      (ostream& out);
 
-		bool     hasHumdrumText  (void);
-		string   getHumdrumText  (void);
-		ostream& getHumdrumText  (ostream& out);
+		bool          hasHumdrumText  (void);
+		std::string   getHumdrumText  (void);
+		ostream&      getHumdrumText  (ostream& out);
+		void          suppressHumdrumFileOutput(void);
 
-		bool     hasJsonText     (void);
-		string   getJsonText     (void);
-		ostream& getJsonText     (ostream& out);
+		bool          hasJsonText     (void);
+		std::string   getJsonText     (void);
+		ostream&      getJsonText     (ostream& out);
 
-		bool     hasFreeText     (void);
-		string   getFreeText     (void);
-		ostream& getFreeText     (ostream& out);
+		bool          hasFreeText     (void);
+		std::string   getFreeText     (void);
+		ostream&      getFreeText     (ostream& out);
 
-		bool     hasWarning      (void);
-		string   getWarning      (void);
-		ostream& getWarning      (ostream& out);
+		bool          hasWarning      (void);
+		std::string   getWarning      (void);
+		ostream&      getWarning      (ostream& out);
 
-		bool     hasError        (void);
-		string   getError        (void);
-		ostream& getError        (ostream& out);
+		bool          hasError        (void);
+		std::string   getError        (void);
+		ostream&      getError        (ostream& out);
 
 	protected:
-		stringstream m_humdrum_text;  // output text in Humdrum syntax.
-		stringstream m_json_text;     // output text in JSON syntax.
-		stringstream m_free_text;     // output for plain text content.
-	  	stringstream m_warning_text;  // output for warning messages;
-	  	stringstream m_error_text;    // output for error messages;
+		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
+		std::stringstream m_json_text;     // output text in JSON syntax.
+		std::stringstream m_free_text;     // output for plain text content.
+	  	std::stringstream m_warning_text;  // output for warning messages;
+	  	std::stringstream m_error_text;    // output for error messages;
+
+		bool m_suppress = false;
 
 };
 
@@ -146,6 +151,53 @@ int main(int argc, char** argv) {                                \
 		}                                                          \
 		interface.clearOutput();                                   \
 	}                                                             \
+	return !status;                                               \
+}
+
+
+
+//////////////////////////////
+//
+// STREAM_INTERFACE2 -- Expects two Humdurm files, either from the
+//    first two command-line arguments (left over after options have
+//    been parsed out), or from standard input.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out)
+//
+//
+
+#define STREAM_INTERFACE2(CLASS)                                 \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	HumdrumFile infile1;                                          \
+	HumdrumFile infile2;                                          \
+	bool status = true;                                           \
+	streamer.read(infile1);                                       \
+	streamer.read(infile2);                                       \
+	status &= interface.run(infile1, infile2);                    \
+	if (interface.hasWarning()) {                                 \
+		interface.getWarning(cerr);                                \
+	}                                                             \
+	if (interface.hasAnyText()) {                                 \
+	   interface.getAllText(cout);                                \
+	}                                                             \
+	if (interface.hasError()) {                                   \
+		interface.getError(cerr);                                  \
+        return -1;                                               \
+	}                                                             \
+	if (!interface.hasAnyText()) {                                \
+		cout << infile1;                                           \
+		cout << infile2;                                           \
+	}                                                             \
+	interface.clearOutput();                                      \
 	return !status;                                               \
 }
 

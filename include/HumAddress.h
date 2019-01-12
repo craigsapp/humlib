@@ -13,9 +13,7 @@
 #ifndef _HUMADDRESS_H_INCLUDED
 #define _HUMADDRESS_H_INCLUDED
 
-#include <iostream>
-
-using namespace std;
+#include <string>
 
 namespace hum {
 
@@ -35,11 +33,11 @@ class HumAddress {
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
 		const HumdrumToken& getDataType       (void) const;
-		const string&       getSpineInfo      (void) const;
+		const std::string&  getSpineInfo      (void) const;
 		int                 getTrack          (void) const;
 		int                 getSubtrack       (void) const;
 		int                 getSubtrackCount  (void) const;
-		string              getTrackString    (string separator = ".") const;
+		std::string         getTrackString    (std::string separator = ".") const;
 		HumdrumLine*        getLine           (void) const;
 		HumdrumLine*        getOwner          (void) const { return getLine(); }
 		bool                hasOwner          (void) const;
@@ -47,7 +45,7 @@ class HumAddress {
 	protected:
 		void                setOwner          (HumdrumLine* aLine);
 		void                setFieldIndex     (int fieldlindex);
-		void                setSpineInfo      (const string& spineinfo);
+		void                setSpineInfo      (const std::string& spineinfo);
 		void                setTrack          (int aTrack, int aSubtrack);
 		void                setTrack          (int aTrack);
 		void                setSubtrack       (int aSubtrack);
@@ -69,7 +67,7 @@ class HumAddress {
 		// But in this case there is a spine info simplification which will
 		// convert "(#)a (#)b" into "#" where # is the original spine number.
 		// Other more complicated mergers may be simplified in the future.
-		string m_spining;
+		std::string m_spining;
 
 		// track: This is the track number of the spine.  It is the first
 		// number found in the spineinfo string.

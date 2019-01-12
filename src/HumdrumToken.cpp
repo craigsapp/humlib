@@ -15,7 +15,11 @@
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "Convert.h"
+#include "HumRegex.h"
+
 #include "string.h"
+
+using namespace std;
 
 namespace hum {
 
@@ -802,7 +806,7 @@ HumNum HumdrumToken::getDuration(HumNum scale) const {
 HumNum HumdrumToken::getTiedDuration(void) {
 	HumNum output = m_duration;
 	// start of a tied group so add the durations of the other notes.
-   int b40 = Convert::kernToBase40(this);
+	int b40 = Convert::kernToBase40(this);
 	HTp note = this;
 	HTp nnote = NULL;
 	while (note) {
@@ -1865,6 +1869,51 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getSubtokens -- Return the list of subtokens as an array
+//     of strings.
+//     default value: separator = " "
+//
+
+std::vector<std::string> HumdrumToken::getSubtokens (const std::string& separator) const {
+	std::vector<std::string> output;
+	const string& token = *this;
+	HumRegex hre;
+	hre.split(output, token, separator);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::replaceSubtoken --
+//     default value: separator = " "
+//
+
+void HumdrumToken::replaceSubtoken(int index, const std::string& newsubtok,
+		const std::string& separator) {
+	if (index < 0) {
+		return;
+	}
+	std::vector<std::string> subtokens = getSubtokens(separator);
+	if (index >= (int)subtokens.size()) {
+		return;
+	}
+	subtokens[index] = newsubtok;
+	string output;
+	for (int i=0; i<(int)subtokens.size(); i++) {
+		output += subtokens[i];
+		if (i < (int)subtokens.size() - 1) {
+			output += separator;
+		}
+	}
+	this->setText(output);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setParameters -- Process a local comment with
 //     the structure:
 //        !NS1:NS2:key1=value1:key2=value2:key3=value3
@@ -1959,7 +2008,7 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 				}
 			}
 		}
-		
+
 	}
 
 	return (int)m_linkedParameters.size() - 1;
@@ -2053,31 +2102,310 @@ void HumdrumToken::makeBackwardLink(HumdrumToken& previousToken) {
 //    if no explicit visual durtation (so the visual duration is same as the logical duration).
 //
 
-string HumdrumToken::getVisualDuration(void) {
-	string parameter = this->getValue("LO", "N", "vis");
+string HumdrumToken::getVisualDuration(int subtokenindex) {
+	// direct storage of the layout parameter is possible, but currently disabled:
+	//string parameter = this->getValue("LO", "N", "vis");
+	//if (!parameter.empty()) {
+	//	return parameter;
+	//}
+	return this->getLayoutParameter("N", "vis", subtokenindex);
+}
 
-	if (!parameter.empty()) {
-		return parameter;
+
+
+//////////////////////////////
+//
+// HumdrumToken::getVisualDurationChord -- only return the chord-level visual duration
+//    parameter (not if it is specific to certain note(s) in the chord).
+//
+
+string HumdrumToken::getVisualDurationChord(void) {
+	return this->getLayoutParameterChord("N", "vis");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getVisualDurationNote -- only return the note-level visual duration
+//    parameter (not if it is general to the entire chord.
+//
+
+string HumdrumToken::getVisualDurationNote(int subtokenindex) {
+	return this->getLayoutParameterNote("N", "vis", subtokenindex);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getLayoutParameter -- Returns requested layout parameter
+//     if it is attached to a token directly or indirectly through a linked
+//     parameter.  Returns empty string if no explicit visual durtation (so
+//     the visual duration is same as the logical duration).  If subtokenindex
+//     is less than -1 (the default value for the paramter), then ignore the
+//     @n parameter control for indexing the layout parameter to chord notes.
+//     The subtokenindex (0 indexed) is converted to note number (1 indexed)
+//     for checking @n.  @n is currently only allowed to be a single integer
+//     (eventually allow ranges and multiple values).
+//
+
+std::string HumdrumToken::getLayoutParameter(const std::string& category,
+		const std::string& keyname, int subtokenindex) {
+	std::string output;
+
+	// First check for any local layout parameter:
+	std::string testoutput = this->getValue("LO", category, keyname);
+	if (!testoutput.empty()) {
+		if (subtokenindex >= 0) {
+			int n = this->getValueInt("LO", category, "n");
+			if (n == subtokenindex + 1) {
+				return testoutput;
+			}
+		} else {
+			return testoutput;
+		}
 	}
 
 	int lcount = this->getLinkedParameterCount();
-	HumParamSet* hps;
-	for (int i=0; i<lcount; i++) {
-		hps = this->getLinkedParameter(i);
+	if (lcount == 0) {
+		return output;
+	}
+
+	std::string nparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
 		if (hps->getNamespace1() != "LO") {
 			continue;
 		}
-		if (hps->getNamespace2() != "N") {
+		if (hps->getNamespace2() != category) {
 			continue;
 		}
-		for (int j=0; j<hps->getCount(); j++) {
-			if (hps->getParameterName(j) == "vis") {
-				return hps->getParameterValue(j);
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "n") {
+				nparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+	if (subtokenindex < 0) {
+		// do not filter by n parameter
+		return output;
+	} else if (nparam.empty()) {
+		// parameter is not qualified by a note number, so applies to whole token
+		return output;
+	}
+
+	// currently @n requires a single value (should allow a range or multiple values later)
+	// also not checking validity of string first (needs to start with a digit);
+	int n = stoi(nparam);
+	if (n == subtokenindex + 1) {
+		return output;
+	} else {
+		return "";
+	}
+}
+
+
+std::string HumdrumToken::getSlurLayoutParameter(const std::string& keyname,
+		int subtokenindex) {
+	std::string category = "S";
+	std::string output;
+
+	// First check for any local layout parameter:
+	std::string testoutput = this->getValue("LO", category, keyname);
+	if (!testoutput.empty()) {
+		if (subtokenindex >= 0) {
+			int s = this->getValueInt("LO", category, "s");
+			if (s == subtokenindex + 1) {
+				return testoutput;
+			}
+		} else {
+			return testoutput;
+		}
+	}
+
+	int lcount = this->getLinkedParameterCount();
+	if (lcount == 0) {
+		return output;
+	}
+
+	std::string sparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "s") {
+				sparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+	if (subtokenindex < 0) {
+		// do not filter by s parameter
+		return output;
+	} else if (sparam.empty()) {
+		// parameter is not qualified by a note number, so applies to whole token
+		return output;
+	}
+
+	// currently @s requires a single value (should allow a range or multiple values later)
+	// also not checking validity of string first (needs to start with a digit);
+	int s = stoi(sparam);
+	if (s == subtokenindex + 1) {
+		return output;
+	} else {
+		return "";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getLayoutParameterChord -- Returns requested layout
+// parameter if it is attached to a token directly or indirectly through
+// a linked parameter.  The parameter must apply to the entire chord, so
+// no @n qualification parameters can be given (even if they include all
+// notes in the chord).
+
+std::string HumdrumToken::getLayoutParameterChord(const std::string& category,
+		const std::string& keyname) {
+
+	// First check for any local layout parameter:
+	std::string testoutput = this->getValue("LO", category, keyname);
+	if (!testoutput.empty()) {
+		std::string n = this->getValue("LO", category, "n");
+		if (n.empty()) {
+			return testoutput;
+		}
+	}
+
+	std::string output;
+	int lcount = this->getLinkedParameterCount();
+	if (lcount == 0) {
+		return output;
+	}
+
+	std::string nparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "n") {
+				nparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
 			}
 		}
 	}
 
-	return "";
+	if (!nparam.empty()) {
+		// parameter is qualified by a note number, so does not apply to whole token
+		return "";
+	} else {
+		return output;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getLayoutParameterNote -- Returns requested layout
+//     parameter if it is attached to a token directly or indirectly through a
+//     linked parameter.  The parameter must apply to a single note or specific
+//     note in a chord.
+
+
+std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
+		const std::string& keyname, int subtokenindex) {
+
+	// First check for any local layout parameter:
+	std::string testoutput = this->getValue("LO", category, keyname);
+	if (!testoutput.empty()) {
+		if (subtokenindex >= 0) {
+			int n = this->getValueInt("LO", category, "n");
+			if (n == subtokenindex + 1) {
+				return testoutput;
+			}
+		}
+	}
+
+	std::string output;
+	int lcount = this->getLinkedParameterCount();
+	if (lcount == 0) {
+		return output;
+	}
+
+	std::string nparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "n") {
+				nparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+
+	if (!nparam.empty()) {
+		// a number number is specified from the parameter(s)
+		int n = stoi(nparam);
+		if (n == subtokenindex + 1) {
+			return output;
+		} else {
+			// wrong note
+			return "";
+		}
+	}
+
+	if ((subtokenindex < 0) && isChord()) {
+		// in chord, and no specific note is selected by @n.
+		return "";
+	} else {
+		// single note, so return parameter:
+		return output;
+	}
 }
 
 
@@ -2138,7 +2466,7 @@ int  HumdrumToken::getStrandIndex(void) const {
 //
 
 int HumdrumToken::getSlurStartElisionLevel(int index) const {
-	if (isDataType("**kern")) {
+	if (isDataType("**kern") || isDataType("**mens")) {
 		return Convert::getKernSlurStartElisionLevel((string)(*this), index);
 	} else {
 		return -1;
@@ -2156,7 +2484,7 @@ int HumdrumToken::getSlurStartElisionLevel(int index) const {
 //
 
 int HumdrumToken::getSlurEndElisionLevel(int index) const {
-	if (isDataType("**kern")) {
+	if (isDataType("**kern") || isDataType("**mens")) {
 		return Convert::getKernSlurEndElisionLevel((string)(*this), index);
 	} else {
 		return -1;
@@ -2316,7 +2644,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 	if (m_linkedParameters.empty()) {
 		return out;
 	}
-	
+
 	out << Convert::repeatString(indent, level);
 	out << "<parameters-linked>\n";
 

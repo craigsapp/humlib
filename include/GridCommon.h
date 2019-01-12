@@ -17,12 +17,12 @@ namespace hum {
 
 // START_MERGE
 
-// SliceType is a list of various Humdrum line types.  Groupings are 
+// SliceType is a list of various Humdrum line types.  Groupings are
 // segmented by categories which are prefixed with an underscore.
-// For example Notes are in the _Duration group, since they have 
+// For example Notes are in the _Duration group, since they have
 // non-zero durations.  Notes and Gracenotes are in the _Data group.
 // The indentation shows the various types of groups.
-// 
+//
 
 enum class SliceType {
 				Notes = 1,
@@ -33,6 +33,7 @@ enum class SliceType {
 		_Measure,
 				Clefs,
 				Transpositions,
+				KeyDesignations,
 				KeySigs,
 				TimeSigs,
 				MeterSigs,

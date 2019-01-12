@@ -15,9 +15,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <algorithm>
 
 using namespace std;
 
@@ -363,7 +364,7 @@ Options& Options::operator=(const Options& options) {
 		m_optionRegister[i] = NULL;
 	}
 	m_optionRegister.clear();
-	
+
 	for (int i=0; i<(int)options.m_optionRegister.size(); i++) {
 		Option_register* orr = new Option_register(*options.m_optionRegister[i]);
 		m_optionRegister.push_back(orr);

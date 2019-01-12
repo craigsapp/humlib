@@ -15,6 +15,8 @@
 #include <vector>
 #include <ctype.h>
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -625,6 +627,11 @@ void Convert::wbhToPitch(int& dpc, int& acc, int& octave, int maxacc,
 //    of the bottom line on the staff.
 //
 
+int Convert::kernClefToBaseline(HTp input) {
+	return kernClefToBaseline((string)*input);
+}
+
+
 int Convert::kernClefToBaseline(const string& input) {
 	string clefname;
 	if (input.compare(0, 5, "*clef") == 0) {
@@ -1133,7 +1140,7 @@ int Convert::transToBase40(const string& input) {
 
 //////////////////////////////
 //
-// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison), 
+// Convert::base40IntervalToLineOfFifths -- 0 => 0 (unison),
 //    Perfect Fifth => 1, Major second => 2 (two fifths up), etc.
 //
 

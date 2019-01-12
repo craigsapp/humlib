@@ -10,6 +10,7 @@
 // Last Modified: Thu Nov 19 19:28:26 PST 2009 Added -W and -C options
 // Last Modified: Mon Dec  5 23:28:50 PST 2016 Ported to humlib from humextras
 // Last Modified: Wed May 16 22:47:11 PDT 2018 Added **mxhm transposition
+// Last Modified: Thu Jun 14 15:30:53 PDT 2018 Added rest position transposition
 // Filename:      tool-transpose.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-transpose.cpp
 // Syntax:        C++11; humlib
@@ -45,11 +46,13 @@ Tool_transpose::Tool_transpose(void) {
 	define("c|chromatic=i:0", "the chromatic transposition value");
 	define("o|octave=i:0",    "the octave addition to tranpose value");
 	define("t|transpose=s",   "musical interval transposition value");
-	define("k|setkey=s",      "transpose to the given key");
+	define("k|settonic=s",    "transpose to the given key/tonic (mode will not change)");
 	define("auto=b",          "auto. trans. inst. parts to concert pitch");
 	define("debug=b",         "print debugging statements");
 	define("s|spines=s:",     "transpose only specified spines");
-	define("q|quiet=b",       "suppress *Tr interpretations in output");
+	// quiet reversed with -T option (actively need to request transposition code now)
+	// define("q|quiet=b",       "suppress *Tr interpretations in output");
+	define("T|transcode=b",   "include transposition code to reverse transposition");
 	define("I|instrument=b",  "insert instrument code (*ITr) as well");
 	define("C|concert=b",     "transpose written score to concert pitch");
 	define("W|written=b",     "trans. concert pitch score to written score");
@@ -98,8 +101,8 @@ bool Tool_transpose::run(HumdrumFile& infile, ostream& out) {
 bool Tool_transpose::run(HumdrumFile& infile) {
 	initialize(infile);
 
-	if (ssetkeyQ) {
-		transval = calculateTranspositionFromKey(ssetkey, infile);
+	if (ssettonicQ) {
+		transval = calculateTranspositionFromKey(ssettonic, infile);
 		transval = transval + octave * 40;
 		if (debugQ) {
 			m_humdrum_text << "!!Key TRANSVAL = " << transval;
@@ -151,7 +154,7 @@ bool Tool_transpose::run(HumdrumFile& infile) {
 
 void Tool_transpose::convertScore(HumdrumFile& infile, int style) {
 	// transposition values for each spine
-	vector<int> tvals(infile.getMaxTrack()+1, 0);  
+	vector<int> tvals(infile.getMaxTrack()+1, 0);
 
 	int ptrack;
 	int i, j;
@@ -223,7 +226,8 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
 			// transpose *k[] markers if necessary
 			if (tvals[ptrack] != 0) {
-				printNewKeySignature(hre.getMatch(1), tvals[ptrack]);
+				string value = hre.getMatch(1);
+				printNewKeySignature(value, tvals[ptrack]);
 			} else {
 				m_humdrum_text << infile.token(line, j);
 			}
@@ -389,7 +393,7 @@ void Tool_transpose::printTransposedToken(HumdrumFile& infile, int row, int col,
 // Tool_transpose::calculateTranspositionFromKey --
 //
 
-int Tool_transpose::calculateTranspositionFromKey(int targetkey, 
+int Tool_transpose::calculateTranspositionFromKey(int targetkey,
 		HumdrumFile& infile) {
 	HumRegex hre;
 	int base40 = 0;
@@ -675,7 +679,8 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
 						hre.search(infile.token(i, j),
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
-						printNewKeySignature(hre.getMatch(1), transval);
+						string value = hre.getMatch(1);
+						printNewKeySignature(value, transval);
 						if (j<infile[i].getFieldCount()-1) {
 						m_humdrum_text << "\t";
 						}
@@ -739,7 +744,6 @@ void Tool_transpose::printNewKeySignature(const string& keysig, int trans) {
 
 void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 		int index, int transval) {
-
 	int mode = 0;
 	if (islower(aRecord.token(index)->at(1))) {
 		mode = 1;
@@ -754,8 +758,10 @@ void Tool_transpose::printNewKeyInterpretation(HumdrumLine& aRecord,
 	m_humdrum_text << "*" << Convert::base40ToKern(base40) << ":";
 
 	HumRegex hre;
-	if (hre.search((string)*aRecord.token(index), ":(.+)$", "")) {
-		m_humdrum_text << hre.getMatch(1);
+	string tvalue = *aRecord.token(index);
+	if (hre.search(tvalue, ":(.+)$", "")) {
+		string value = hre.getMatch(1);
+		m_humdrum_text << value;
 	}
 }
 
@@ -852,7 +858,10 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 		return;
 	}
 	HumRegex hre;
-	if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
+	if (hre.search(record.token(index), "N\\.C\\.")) {
+		// no pitch information so just echo the text:
+		m_humdrum_text << record.token(index);
+	} else if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
 		string pitch = hre.getMatch(1);
 		int b40 = Convert::kernToBase40(pitch) + transval;
 		b40 = b40 % 40 + 120;
@@ -875,9 +884,19 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 //
 
 void Tool_transpose::printNewKernString(const string& input, int transval) {
+	HumRegex hre;
 	if (input.rfind('r') != string::npos) {
+		string output = input;
+		if (hre.search(input, "([A-Ga-g]+[#n-]*)")) {
+			// transpose pitch portion of rest (indicating vertical position)
+			string pitch = hre.getMatch(1);
+			int base40 = Convert::kernToBase40(pitch);
+			string newpitch = Convert::base40ToKern(base40 + transval);
+			hre.replaceDestructive(newpitch, "", "[-#n]+");
+			hre.replaceDestructive(output, newpitch, "([A-Ga-g]+[#n-]*)");
+		}
 		// don't transpose rests...
-		m_humdrum_text << input;
+		m_humdrum_text << output;
 		return;
 	}
 	if (input == ".") {
@@ -890,7 +909,6 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 	string newpitch = Convert::base40ToKern(base40 + transval);
 
 	// consider interaction of #X -X n interaction vs. nX.
-	HumRegex hre;
 	string output;
 	if (hre.search(input, "([A-Ga-g#n-]+)")) {
 		string oldpitch = hre.getMatch(1);
@@ -1359,7 +1377,7 @@ void Tool_transpose::identifyKey(vector<double>& correls,
 			minorsecondbesti = i;
 		}
 	}
-	
+
 	int secondbesti = majorsecondbesti;
 	if (majorcorrels[majorsecondbesti] < minorcorrels[minorsecondbesti]) {
 		secondbesti = minorsecondbesti;
@@ -1546,18 +1564,18 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 		exit(0);
 	}
 
-	transval     = getInteger("base40");
-	ssetkeyQ     = getBoolean("setkey");
-	ssetkey      = Convert::kernToBase40(getString("setkey").data());
-	autoQ        = getBoolean("auto");
-	debugQ       = getBoolean("debug");
-	spineQ       = getBoolean("spines");
-	spinestring  = getString("spines");
-	octave       = getInteger("octave");
-	concertQ     = getBoolean("concert");
-	writtenQ     = getBoolean("written");
-	quietQ       = getBoolean("quiet");
-	instrumentQ  = getBoolean("instrument");
+	transval     =  getInteger("base40");
+	ssettonicQ   =  getBoolean("settonic");
+	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
+	autoQ        =  getBoolean("auto");
+	debugQ       =  getBoolean("debug");
+	spineQ       =  getBoolean("spines");
+	spinestring  =  getString("spines");
+	octave       =  getInteger("octave");
+	concertQ     =  getBoolean("concert");
+	writtenQ     =  getBoolean("written");
+	quietQ       = !getBoolean("transcode");
+	instrumentQ  =  getBoolean("instrument");
 
 	switch (getBoolean("diatonic") + getBoolean("chromatic")) {
 		case 1:
@@ -1573,10 +1591,10 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 			break;
 	}
 
-	ssetkey = ssetkey % 40;
+	ssettonic = ssettonic % 40;
 
 	if (getBoolean("transpose")) {
-		transval = getBase40ValueFromInterval(getString("transpose").data());
+		transval = getBase40ValueFromInterval(getString("transpose").c_str());
 	}
 
 	transval += 40 * octave;

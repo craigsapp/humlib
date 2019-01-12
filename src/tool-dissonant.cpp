@@ -451,7 +451,7 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 			HTp tokennn = infile.token(lineindexnn, fieldindex);
 			HTp tokennnn = infile.token(lineindexnnn, fieldindex);
 
-			if ((durn == durnn) && (durn < durnnn) && (levn > levnnn) && 
+			if ((durn == durnn) && (durn < durnnn) && (levn > levnnn) &&
 				(intn == -1) && (intnn == -1) && (intnnn == 1) ) { // turn figure anticipation of resolution phase
 				if ((results[lineindexnn] == ".") && (!tokennn->isNull()) &&
 					(tokennn->isNoteAttack()) ) {
@@ -461,9 +461,9 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 					(tokenn->isNoteAttack()) ) {
 					mergeWithPreviousNote(infile, lineindexn, vindex);
 				}
-			} else if ((durn == durnn) && (durn == durnnn) && (levn > levnn) && 
-				(levnn < levnnn) && (intn == -1) && (intnn == 0) && 
-				(intnnn == -1) && (results[lineindexnnn] == ".") && 
+			} else if ((durn == durnn) && (durn == durnnn) && (levn > levnn) &&
+				(levnn < levnnn) && (intn == -1) && (intnn == 0) &&
+				(intnnn == -1) && (results[lineindexnnn] == ".") &&
 				(!tokennnn->isNull()) && (tokennnn->isNoteAttack()) ) { // Du Fay ornament
 				mergeWithPreviousNote(infile, lineindexnnn, vindex);
 			}
@@ -480,10 +480,10 @@ void Tool_dissonant::suppressSusOrnamentsInVoice(HumdrumFile& infile,
 			int lineindexn = attacks[i+1]->getLineIndex();
 			HTp tokenn = infile.token(lineindexn, fieldindex);
 
-			if ((durn <= durnn) && (levn >= levnn) && (intn == -1) && 
+			if ((durn <= durnn) && (levn >= levnn) && (intn == -1) &&
 				(intnn == 0) && (results[lineindexn] == ".") &&
 				(!tokenn->isNull()) && (tokenn->isNoteAttack()) ) { // anticipation of resolution phase
-				mergeWithPreviousNote(infile, lineindexn, vindex);	
+				mergeWithPreviousNote(infile, lineindexn, vindex);
 			}
 		}
 	}
@@ -519,7 +519,7 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, NoteCell* cell) {
 
 //////////////////////////////
 //
-// Tool_dissonant::mergeWithPreviousNote --  Will not handle chords correctly.  
+// Tool_dissonant::mergeWithPreviousNote --  Will not handle chords correctly.
 //     Input note is presumed to be a note attack.
 //
 
@@ -654,7 +654,7 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 	HumNum pdur = pnote->getDuration();
 	HumNum dur = cdur + pdur;
 	changeDurationOfNote(pnote, dur);
-	
+
 
 	if (cnote->find("[") == string::npos) {
 		// current note is not the start of a tie group, so
@@ -691,8 +691,8 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 //
 // Tool_dissonant::simpleNextMerge -- Merge two notes which are in the same measure
 //   and generate a printable duration when summed together.  Also deal with tied notes
-//   attached to the cnote.  Does not work with chords. Makes the pitch of the 
-//   next note start at the time point of the current note and last for the 
+//   attached to the cnote.  Does not work with chords. Makes the pitch of the
+//   next note start at the time point of the current note and last for the
 //   comibined duration of the two original notes. The next note gets replaced
 //   with a placeholder token.
 //
@@ -729,7 +729,7 @@ void Tool_dissonant::simpleNextMerge(HTp cnote, HTp nnote) {
 
 //////////////////////////////
 //
-// Tool_dissonant::changePitchOfTieGroupFollowing -- 
+// Tool_dissonant::changePitchOfTieGroupFollowing --
 //
 
 void Tool_dissonant::changePitchOfTieGroupFollowing(HTp note, const string& pitch) {
@@ -792,7 +792,7 @@ void Tool_dissonant::changeDurationOfNote(HTp note, HumNum dur) {
 
 //////////////////////////////
 //
-// Tool_dissonant::mergeWithNextNote --  will not handle chords correctly. 
+// Tool_dissonant::mergeWithNextNote --  will not handle chords correctly.
 //     Used to reduce out accented dissonances.
 //
 
@@ -836,9 +836,9 @@ void Tool_dissonant::mergeWithNextNote(HumdrumFile& infile, int line, int field)
 		}
 	}
 
-	// I'm not sure if a version of this function will be necessary for 
+	// I'm not sure if a version of this function will be necessary for
 	// next-note/strong-dissonance reduction.
-	// mergeWithNextNoteViaTies(pnote, cnote); 
+	// mergeWithNextNoteViaTies(pnote, cnote);
 }
 
 

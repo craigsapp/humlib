@@ -38,6 +38,8 @@ sub createIncludeFile {
 		"HumHash.h",
 		"HumNum.h",
 		"HumRegex.h",
+		"HumSignifier.h",
+		"HumSignifiers.h",
 		"HumAddress.h",
 		"HumParamSet.h",
 		"HumInstrument.h",

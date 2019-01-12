@@ -124,7 +124,7 @@ GridSlice::~GridSlice(void) {
 
 //////////////////////////////
 //
-// GridSlice::addToken -- Will not allocate part array, but will 
+// GridSlice::addToken -- Will not allocate part array, but will
 //     grow staff or voice array if needed.
 //
 
@@ -275,7 +275,7 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				voice = this->at(0)->at(0)->at(0);
 				token = new HumdrumToken((string)*voice->getToken());
 			} else {
-				token = new HumdrumToken("=X");
+				token = new HumdrumToken("=");
 			}
 			empty = (string)*token;
 		} else if (isInterpretationSlice()) {

@@ -40,7 +40,9 @@ Tool_recip::Tool_recip(void) {
 	define("G|ignore-grace-notes=b", "ignore grace notes");
 	define("k|kern-spine=i:1",       "analyze only given kern spine");
 	define("K|all-spines=b",         "analyze each kern spine separately");
-	define("e|exinterp=s:**recip",   "analyze each kern spine separately");
+	define("e|exinterp=s:**recip",   "use the given exinterp for data output");
+	define("n|kern-pitch=s:e",       "note to add for '-e kern' option");
+	define("kern=b",                 "equivalent to '-e kern' option");
 }
 
 
@@ -95,7 +97,7 @@ bool Tool_recip::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_recip::insertAnalysisSpines -- Could be more efficient than the 
+// Tool_recip::insertAnalysisSpines -- Could be more efficient than the
 //     k-index loop...
 //
 
@@ -141,7 +143,13 @@ void Tool_recip::doCompositeAnalysis(HumdrumFile& infile) {
 	for (int i=0; i<(int)composite.size(); i++) {
 		composite[i] = infile[i].getDuration();
 	}
-	
+
+	int kernQ = false;
+	if (m_exinterp.find("kern") != std::string::npos) {
+		kernQ = true;
+// cerr << "KERN ON" << endl;
+	}
+
 	// convert durations to **recip strings
 	vector<string> recips(composite.size());
 	for (int i=0; i<(int)recips.size(); i++) {
@@ -149,6 +157,10 @@ void Tool_recip::doCompositeAnalysis(HumdrumFile& infile) {
 			continue;
 		}
 		recips[i] = Convert::durationToRecip(composite[i]);
+		if (kernQ) {
+			recips[i] += m_kernpitch;
+// cerr << "ADDING PITCH " << m_kernpitch << endl;
+		}
 	}
 
 	if (getBoolean("append")) {
@@ -232,6 +244,13 @@ void Tool_recip::initialize(HumdrumFile& infile) {
 	if (m_exinterp[1] != '*') {
 		m_exinterp.insert(0, "*");
 	}
+
+	m_kernpitch = getString("kern-pitch");
+
+	if (getBoolean("kern")) {
+		m_exinterp = "**kern";
+	}
+
 }
 
 

@@ -14,7 +14,6 @@
 #include "Convert.h"
 #include "HumRegex.h"
 
-
 using namespace std;
 
 namespace hum {

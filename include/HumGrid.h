@@ -19,13 +19,11 @@
 
 #include <vector>
 
-using namespace std;
-
 namespace hum {
 
 // START_MERGE
 
-class HumGrid : public vector<GridMeasure*> {
+class HumGrid : public std::vector<GridMeasure*> {
 	public:
 		HumGrid(void);
 		~HumGrid();
@@ -75,7 +73,7 @@ class HumGrid : public vector<GridMeasure*> {
 		bool manipulatorCheck              (void);
 		GridSlice* manipulatorCheck        (GridSlice* ice1, GridSlice* ice2);
 		void cleanupManipulators           (void);
-		void cleanManipulator              (vector<GridSlice*>& newslices,
+		void cleanManipulator              (std::vector<GridSlice*>& newslices,
 		                                    GridSlice* curr);
 		GridSlice* checkManipulatorExpand  (GridSlice* curr);
 		GridSlice* checkManipulatorContract(GridSlice* curr);
@@ -83,6 +81,7 @@ class HumGrid : public vector<GridMeasure*> {
 		                                    GridStaff* oldlaststaff,
 		                                    GridStaff* newstaff,
 		                                    GridStaff* newlaststaff);
+		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
 		void insertExInterpSides           (HumdrumLine* line, int part,
 		                                    int staff);
 		void insertSideTerminals           (HumdrumLine* line, int part,
@@ -91,7 +90,7 @@ class HumGrid : public vector<GridMeasure*> {
 		                                    int staff);
 		void insertSideStaffInfo           (HumdrumLine* line, int part,
 		                                    int staff, int staffnum);
-		void getMetricBarNumbers           (vector<int>& barnums);
+		void getMetricBarNumbers           (std::vector<int>& barnums);
 		string  createBarToken             (int m, int barnum,
 		                                    GridMeasure* measure);
 		string getBarStyle                 (GridMeasure* measure);
@@ -104,17 +103,19 @@ class HumGrid : public vector<GridMeasure*> {
 		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
 
 	private:
-		vector<GridSlice*>   m_allslices;
-		vector<vector<int> > m_verseCount;
-		vector<int>          m_harmonyCount;
-		bool                 m_pickup;
-		vector<bool>         m_dynamics;
+		std::vector<GridSlice*>       m_allslices;
+		std::vector<std::vector<int>> m_verseCount;
+		std::vector<int>              m_harmonyCount;
+		bool                          m_pickup;
+		std::vector<bool>             m_dynamics;
 
 		// options:
 		bool m_recip;               // include **recip spine in output
 		bool m_musicxmlbarlines;    // use measure numbers from <measure> element
 
 };
+
+ostream& operator<<(ostream& out, HumGrid& grid);
 
 
 // END_MERGE

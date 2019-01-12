@@ -102,6 +102,7 @@ set(SRCS
 	src/tool-satb2gs.cpp
 	src/tool-tassoize.cpp
 	src/tool-transpose.cpp
+	src/tool-trillspell.cpp
 	src/pugixml.cpp
 )
 
@@ -159,6 +160,7 @@ set(HDRS
 	include/tool-satb2gs.h
 	include/tool-tassoize.h
 	include/tool-transpose.h
+	include/tool-trillspell.h
 )
 
 add_library(humlib STATIC ${SRCS} ${HDRS})

@@ -16,6 +16,8 @@
 
 #include "HumNum.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -253,6 +255,17 @@ void HumNum::setValue(const char* ratstring) {
 	setValue(realstring);
 }
 
+
+//////////////////////////////
+//
+// HumNum::invert --
+//
+
+void HumNum::invert(void) {
+	int temp = top;
+	top = bot;
+	bot = temp;
+}
 
 
 //////////////////////////////

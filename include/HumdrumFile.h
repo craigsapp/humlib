@@ -16,7 +16,8 @@
 
 #include "HumdrumFileContent.h"
 
-using namespace std;
+#include <iostream>
+#include <string>
 
 namespace hum {
 
@@ -29,14 +30,14 @@ namespace hum {
 class HumdrumFile : public HUMDRUMFILE_PARENT {
 	public:
 		              HumdrumFile          (void);
-		              HumdrumFile          (const string& filename);
-		              HumdrumFile          (istream& filename);
+		              HumdrumFile          (const std::string& filename);
+		              HumdrumFile          (std::istream& filename);
 		             ~HumdrumFile          ();
 
-		ostream&      printXml             (ostream& out = cout, int level = 0,
-		                                    const string& indent = "\t");
-		ostream&      printXmlParameterInfo(ostream& out, int level,
-		                                    const string& indent);
+		std::ostream& printXml             (std::ostream& out = std::cout, int level = 0,
+		                                    const std::string& indent = "\t");
+		std::ostream& printXmlParameterInfo(std::ostream& out, int level,
+		                                    const std::string& indent);
 };
 
 

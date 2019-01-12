@@ -83,7 +83,7 @@ class MxmlMeasure {
 		void          setTimeSigDur      (HumNum duration);
 		HumNum        getTimeSigDur      (void);
 		void          addDummyRest       (void);
-		void          addDummyRest       (HumNum starttime, HumNum duration, 
+		void          addDummyRest       (HumNum starttime, HumNum duration,
 		                                  int staffindex, int voiceindex);
 		vector<MxmlEvent*>& getEventList (void);
 		void  sortEvents                 (void);
@@ -104,6 +104,7 @@ class MxmlMeasure {
 		void  receiveTimeSigDurFromChild          (HumNum duration);
 		void  receiveMeasureStyleFromChild        (MeasureStyle style);
 		void  receiveEditorialAccidentalFromChild (void);
+		void  receiveOrnamentFromChild            (void);
    	void  reportStaffNumberToOwner            (int staffnum, int voicenum);
 		void  reportVerseCountToOwner             (int count);
 		void  reportVerseCountToOwner             (int staffindex, int count);
@@ -111,11 +112,12 @@ class MxmlMeasure {
 		void  reportEditorialAccidentalToOwner    (void);
 		void  reportDynamicToOwner                (void);
 		void  reportCaesuraToOwner                (const string& letter);
+		void  reportOrnamentToOwner               (void);
 
 	protected:
 		HumNum             m_starttime; // start time of measure in quarter notes
 		HumNum             m_duration;  // duration of measure in quarter notes
-		HumNum             m_timesigdur; // duration of measure according to 
+		HumNum             m_timesigdur; // duration of measure according to
 													// prevailing time signature.
 		MxmlPart*          m_owner;     // part which contains measure
 		MxmlMeasure*       m_previous;  // previous measure in part or null

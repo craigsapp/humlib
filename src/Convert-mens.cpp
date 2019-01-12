@@ -16,6 +16,8 @@
 
 #include "Convert.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -122,15 +124,15 @@ HumNum Convert::mensToDuration(const string& mensdata, HumNum scale,
 		const string& separator) {
 	HumNum output(0);
    bool perfect = false;
-   bool imperfect = true;
+   // bool imperfect = true;
 	for (int i=0; i<(int)mensdata.size(); i++) {
 		if (mensdata[i] == 'p') {
 			perfect = true;
-			imperfect = false;
+			// imperfect = false;
 		}
 		if (mensdata[i] == 'i') {
 			perfect = false;
-			imperfect = true;
+			// imperfect = true;
 		}
 
 		// units are in whole notes, but scaling will probably

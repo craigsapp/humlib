@@ -94,7 +94,7 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 	if (getBoolean("debug")) {
 		grid.printGridInfo(cerr);
 		// return 1;
-	} 
+	}
 
 	m_threshold = getInteger("threshold") + 1;
 	if (m_threshold < 3) {
@@ -200,7 +200,7 @@ void Tool_imitation::getIntervals(vector<double>& intervals,
 	if (getBoolean("debug")) {
 		cout << endl;
 		for (int i=0; i<(int)intervals.size(); i++) {
-			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK " 
+			cout << "INTERVAL " << i << "\t=\t" << intervals[i] << "\tATK "
 			     << attacks[i]->getSgnDiatonicPitch() << "\t" << attacks[i]->getToken() << endl;
 		}
 	}
@@ -422,7 +422,7 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 				break;
 			}
 		}
-		
+
 		if (Convert::isNaN(seq1[i1+count])) {
 			// the first voice's interval is to/from a rest
 			if (Convert::isNaN(seq2[i2+count])) {

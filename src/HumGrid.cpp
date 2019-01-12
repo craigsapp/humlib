@@ -16,6 +16,7 @@
 #include "Convert.h"
 
 #include <string.h>
+
 #include <stdio.h>
 #include <iomanip>
 
@@ -65,7 +66,7 @@ HumGrid::~HumGrid(void) {
 //
 // HumGrid::addMeasureToBack -- Allocate a GridMeasure at the end of the
 //     measure list.
-// 
+//
 
 GridMeasure* HumGrid::addMeasureToBack(void) {
 	GridMeasure* gm = new GridMeasure(this);
@@ -294,9 +295,8 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 //
 
 void HumGrid::cleanupManipulators(void) {
-	int m;
 	vector<GridSlice*> newslices;
-	for (m=0; m<(int)this->size(); m++) {
+	for (int m=0; m<(int)this->size(); m++) {
 		for (auto it = this->at(m)->begin(); it != this->at(m)->end(); it++) {
 			if ((*it)->getType() != SliceType::Manipulators) {
 				continue;
@@ -494,6 +494,9 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 		staffcount = (int)part->size();
 		for (s=staffcount-1; s>=0; s--) {
 			staff = part->at(s);
+			if (staff->empty()) {
+				continue;
+			}
 			voice = staff->back();
 			if (!init) {
 				lastvoice = staff->back();
@@ -531,6 +534,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	partcount = (int)curr->size();
 	int lastp = 0;
 	int lasts = 0;
+	int partsplit = -1;
 
 	for (p=partcount-1; p>=0; p--) {
 		part  = curr->at(p);
@@ -544,23 +548,49 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
                // splitting the slices at this staff boundary
 					newstaff     = newmanip->at(p)->at(s);
 					newlaststaff = newmanip->at(lastp)->at(lasts);
-
 					transferMerges(staff, laststaff, newstaff, newlaststaff);
 					foundnew = true;
+					partsplit = p;
 					break;
 				}
 			}
 			laststaff = staff;
-			lastvoice = staff->back();
+			lastvoice = laststaff->back();
 			lastp = p;
 			lasts = s;
 		}
+
 		if (foundnew) {
+			// transfer all of the subsequent manipulators forward
+			// after the staff/newstaff point in the slice
+			if (partsplit > 0) {
+				transferOtherParts(curr, newmanip, partsplit);
+			}
 			break;
 		}
 	}
-
 	return newmanip;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::transferOtherParts -- after a line split do to merges 
+//    occurring at the same time.
+//
+
+void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int maxpart) {
+	GridPart* temp;
+	int partcount = (int)oldline->size();
+	if (maxpart >= partcount) {
+		return;
+	}
+	for (int i=0; i<maxpart; i++) {
+		temp = oldline->at(i);
+		oldline->at(i) = newline->at(i);
+		newline->at(i) = temp;
+	}
 }
 
 
@@ -575,6 +605,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 // converts to:
 // new:            *v   *v        *    *
 // old:            *              *v   *v
+//
 //
 //
 
@@ -1639,7 +1670,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 		// change this later to add a duration for the null token below.
 		return;
 	}
-	
+
 	HumNum tokendur = Convert::recipToDuration((string)*token);
 	HumNum currts   = m_allslices.at(slicei)->getTimestamp();
 	HumNum nextts   = m_allslices.at(slicei+1)->getTimestamp();
@@ -1713,9 +1744,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			} else {
 				// store a null token for the non-data slice, but probably skip
 				// if there is a token already there (such as a clef-change).
-// ggg
-				
-				if ((voicei < (int)gs->size()) && gs->at(voicei)->getToken()) {
+				if ((voicei < (int)gs->size()) && (gs->at(voicei) != NULL)) {
 					// there is already a token here, so do not replace it.
 					// cerr << "Not replacing token: "  << gs->at(voicei)->getToken() << endl;
 				} else {
@@ -1730,6 +1759,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
+
 
 }
 
@@ -2385,7 +2415,7 @@ void HumGrid::removeRedundantClefChanges(void) {
 			if (allempty) {
 				slice->invalidate();
 			}
-			
+
 		}
 	}
 }
@@ -2414,6 +2444,20 @@ void HumGrid::deleteMeasure(int index) {
 	this->erase(this->begin() + index);
 }
 
+
+
+//////////////////////////////
+//
+// operator<< -- Debugging printing of Humgrid Contents.
+//
+
+ostream& operator<<(ostream& out, HumGrid& grid) {
+	for (int i=0; i<(int)grid.size(); i++) {
+		out << "\nMEASURE " << i << " =========================" << endl;
+		out << grid[i];
+	}
+	return out;
+}
 
 
 // END_MERGE

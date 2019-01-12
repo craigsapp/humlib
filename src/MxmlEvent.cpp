@@ -248,6 +248,17 @@ void MxmlEvent::reportCaesuraToOwner(const string& letter) const {
 
 //////////////////////////////
 //
+// MxmlEvent::reportOrnamentToOwner --
+//
+
+void MxmlEvent::reportOrnamentToOwner(void) const {
+	m_owner->reportOrnamentToOwner();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::reportHarmonyCountToOwner --
 //
 
@@ -531,8 +542,7 @@ bool MxmlEvent::isChord(void) const {
 
 //////////////////////////////
 //
-// MxmlEvent::isGrace -- Returns true if the event is the primary note
-//    in a chord.
+// MxmlEvent::isGrace -- Returns true if the event is a grace note.
 //
 
 bool MxmlEvent::isGrace(void) {
@@ -557,7 +567,40 @@ bool MxmlEvent::isGrace(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStart -- 
+// MxmlEvent::hasGraceSlash -- Returns true if the note is a grace note
+//    with a slash.
+//
+
+bool MxmlEvent::hasGraceSlash(void) {
+	xml_node child = this->getNode();
+	if (!nodeType(child, "note")) {
+		return false;
+	}
+	child = child.first_child();
+	while (child) {
+		if (nodeType(child, "grace")) {
+			string slash = child.attribute("slash").value();
+			if (slash == "yes") {
+				return true;
+			} else {
+				return false;
+			}
+		} else if (nodeType(child, "pitch")) {
+			// grace element has to come before pitch
+			return false;
+		}
+		child = child.next_sibling();
+	}
+	return false;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::hasSlurStart --
 //   direction: 0=unspecified, 1=positive curvature, -1=negative curvature.
 //
 //  <note>
@@ -566,7 +609,7 @@ bool MxmlEvent::isGrace(void) {
 //         <slur type="start" orientation="over" number="1">
 //
 //  And also:
-// 
+//
 //  <note>
 //     <notations>
 //          <slur number="1" placement="above" type="start"/>
@@ -948,6 +991,13 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			tempvoice = atoi(el.child_value());
 		} else if (nodeType(el, "duration")) {
 			tempduration = atoi(el.child_value());
+			// Duration must be set to 0 for figured bass.  But maybe need
+			// duration to create line extensions.  Probably other elements
+			// which are not notes should also have their durations set
+			// to zero.
+			if (nodeType(m_node, "figured-bass")) {
+				tempduration = 0;
+			}
 		}
 	}
 
@@ -1039,11 +1089,11 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			}
 			break;
 
+		case mevent_figured_bass:
 		case mevent_harmony:
 		case mevent_barline:
 		case mevent_bookmark:
 		case mevent_direction:
-		case mevent_figured_bass:
 		case mevent_grouping:
 		case mevent_link:
 		case mevent_print:
@@ -1327,6 +1377,7 @@ string MxmlEvent::getKernPitch(void) {
 	for (int i=0; i<count; i++) {
 		output += pc;
 	}
+
 	if (alter > 0) {  // sharps
 		for (int i=0; i<alter; i++) {
 			output += '#';
@@ -1588,15 +1639,27 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	if (accent)       { ss << "^";  }
 	if (strongaccent) { ss << "^^"; }  // might be something else
 	if (harmonic)     { ss << "o";  }
-	if (trill)        { ss << "t";  }  // figure out whole-tone trills later
+	if (trill) {
+		ss << "t";
+		// figure out whole-tone trills later via trillspell tool:
+		reportOrnamentToOwner();
+	}
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
-	if (umordent)     { ss << "m";  }  // figure out whole-tone mordents later
-	if (lmordent)     { ss << "w";  }  // figure out whole-tone mordents later
+	if (umordent) {
+		ss << "m";
+		// figure out whole-tone mordents later via trillspell tool:
+		reportOrnamentToOwner();
+	}
+	if (lmordent) {
+		ss << "w";
+		// figure out whole-tone mordents later
+		reportOrnamentToOwner();
+	}
 	if (breath)       { ss << ",";  }
-	if (caesura)      { 
-		ss << "Z";  
+	if (caesura)      {
+		ss << "Z";
 		reportCaesuraToOwner();
 	}
 
@@ -1702,6 +1765,65 @@ int MxmlEvent::getDotCount(void) const {
 	} else {
 		return -1;
 	}
+}
+
+
+
+//////////////////////////////
+//
+//  MxmlEvent::getRestPitch -- return the vertical position of a rest
+//     as a kern pitch.
+//   Example:
+//    <note>
+//       <rest>
+//          <display-step>G</display-step>
+//          <display-octave>4</display-octave>
+//       </rest>
+//       <duration>2</duration>
+//       <voice>1</voice>
+//       <type>quarter</type>
+//    </note>
+//
+
+string MxmlEvent::getRestPitch(void) const {
+	xpath_node rest = m_node.select_single_node("./rest");
+	if (rest.node().empty()) {
+		// not a rest, so no pitch information.
+		return "";
+	}
+	xpath_node step = rest.node().select_single_node("./display-step");
+	if (step.node().empty()) {
+		// no vertical positioning information
+	}
+	string steptext = step.node().child_value();
+	if (steptext.empty()) {
+		return "";
+	}
+	xpath_node octave = rest.node().select_single_node("./display-octave");
+	if (octave.node().empty()) {
+		// not enough vertical positioning information
+	}
+	string octavetext = octave.node().child_value();
+	if (octavetext.empty()) {
+		return "";
+	}
+
+	int octaveval = stoi(octavetext);
+	int count = 1;
+	char pc = steptext[0];
+	if (octaveval > 3) {
+		pc = tolower(pc);
+		count = octaveval - 3;
+	} else {
+		pc = toupper(pc);
+		count = 4 - octaveval;
+	}
+	string output;
+	for (int i=0; i<count; i++) {
+		output += pc;
+	}
+
+	return output;
 }
 
 

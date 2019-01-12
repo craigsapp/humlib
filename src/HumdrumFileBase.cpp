@@ -19,10 +19,13 @@
 #include "Convert.h"
 #include "HumRegex.h"
 
-#include <sstream>
-#include <fstream>
 #include <stdarg.h>
 #include <string.h>
+
+#include <fstream>
+#include <sstream>
+
+using namespace std;
 
 namespace hum {
 
@@ -91,7 +94,7 @@ HumdrumFileBase::HumdrumFileBase(HumdrumFileBase& infile) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::operator = -- HumdrumFileStructure::analyzeStructure() 
+// HumdrumFileBase::operator = -- HumdrumFileStructure::analyzeStructure()
 // needs to be called after copying from another HumdrumFile.
 //
 //
@@ -283,7 +286,7 @@ bool HumdrumFileBase::read(const char* filename) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return setParseError("Cannot open file %s for reading.", filename);
+			return setParseError("Cannot open file %s for reading. A", filename);
 		}
 	}
 	HumdrumFileBase::read(infile);
@@ -334,7 +337,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return setParseError("Cannot open file %s for reading.", filename);
+			return setParseError("Cannot open file %s for reading. B", filename);
 		}
 	}
 	HumdrumFileBase::readCsv(infile, separator);
@@ -733,6 +736,28 @@ void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
 	m_lines.insert(m_lines.begin() + index, line);
 }
 
+
+//////////////////////////////
+//
+// HumdrumFileBase::deleteLine -- remove a line from the Humdrum file.
+//    Is best used for global comments and reference records for now.
+//    Other line types will cause parsing problems untill further
+//    generalized to stitch previous next lines together.
+//
+
+void HumdrumFileBase::deleteLine(int index) {
+	if (index >= (int)m_lines.size()) {
+		return;
+	}
+	if (index < 0) {
+		return;
+	}
+	delete m_lines[index];
+	for (int i=index+1; i<(int)m_lines.size(); i++) {
+		m_lines[i-1] = m_lines[i];
+	}
+	m_lines.resize(m_lines.size() - 1);
+}
 
 
 //////////////////////////////
@@ -1891,17 +1916,17 @@ void HumdrumFileBase::adjustMergeSpineLines(void) {
 //    This algorithm will create a new lines where everything
 //    after the bad merge is placed on the newline.   Example:
 //
-// track:    1    2    2    3    3    4    5    5 
+// track:    1    2    2    3    3    4    5    5
 //           *    *v   *v   *v   *v   *    *v   *v
 //
 // This is invalid because track 2 and track 3 have adjacent *v tokens.
-// This function will create a new line and move everything after 
+// This function will create a new line and move everything after
 // the bad position to a new line:
 //
-// track:    1    2    2    3    3    4    5    5 
+// track:    1    2    2    3    3    4    5    5
 //           *    *v   *v   *v   *v   *    *v   *v
 //           *    *    *v   *v   *    *    *
-// track:    1    2    3    3    4    5    5 
+// track:    1    2    3    3    4    5    5
 //
 // This algorithm only fixes one bad boundary.  The calling function
 // will presumably fix any bad boundaries on the newly created line.
@@ -1960,14 +1985,14 @@ void HumdrumFileBase::fixMerges(int linei) {
 	int maxt = infile.getMaxTrack();
 	vector<vector<HTp> > newtokbytrack(maxt+1);
 
-// track:    1    2    2    3    3    4    5    5 
+// track:    1    2    2    3    3    4    5    5
 //           *    *v   *v   *v   *v   *    *v   *v
 //
 // o = new null tokens.
 //
-// original     *    *v   *v   o    o    o    o    o 
+// original     *    *v   *v   o    o    o    o    o
 // new          o    o         *v   *v   *    *v   *v
-// track:       1    2         3    3    4    5    5 
+// track:       1    2         3    3    4    5    5
 
 	HumdrumLine* newline = new HumdrumLine;
 	newline->setOwner(this);
@@ -1997,9 +2022,9 @@ void HumdrumFileBase::fixMerges(int linei) {
 			// This is the bad boundary.  Keep track fields in the
 			// original line, and create one new null token in
 			// the newline.
-// original     *    *v   *v   o    o    o    o    o 
+// original     *    *v   *v   o    o    o    o    o
 // new          o    o         *v   *v   *    *v   *v
-// track:       1    2         3    3    4    5    5 
+// track:       1    2         3    3    4    5    5
 			difference = linetoks[i].size() - 1;
 
 			track1 = linetoks[i][0]->getTrack();
@@ -2009,7 +2034,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 			newline->m_tokens.push_back(token);
 			// put new token in list for later processing:
 			newtokbytrack[track1].push_back(token);
-			
+
 			foundboundary = true;
 		} else {
 			// add null tokens to the new line, and keep the

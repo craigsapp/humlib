@@ -20,22 +20,21 @@
 
 #include "GridStaff.h"
 
+#include <iostream>
 #include <vector>
-
-using namespace std;
 
 namespace hum {
 
 // START_MERGE
 
-class GridPart : public vector<GridStaff*>, public GridSide {
+class GridPart : public std::vector<GridStaff*>, public GridSide {
 	public:
 		GridPart(void);
 		~GridPart();
 };
 
-ostream& operator<<(ostream& output, GridPart* part);
-ostream& operator<<(ostream& output, GridPart& part);
+std::ostream& operator<<(std::ostream& output, GridPart* part);
+std::ostream& operator<<(std::ostream& output, GridPart& part);
 
 
 // END_MERGE

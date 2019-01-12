@@ -63,25 +63,25 @@ class Tool_transpose : public HumTool {
 		void     addToHistogramDouble   (vector<vector<double> >& histogram,
 		                                 int pc, double start, double dur,
 		                                 double tdur, int segments);
-		double   storeHistogramForTrack (vector<vector<double> >& histogram, 
+		double   storeHistogramForTrack (vector<vector<double> >& histogram,
 		                                 HumdrumFile& infile, int track,
 		                                 int segments);
-		void     printHistograms        (int segments, vector<int> ktracks, 
+		void     printHistograms        (int segments, vector<int> ktracks,
 		                                vector<vector<vector<double> > >&
 		                                 trackhist);
 		void     doAutoKeyAnalysis      (vector<vector<vector<double> > >&
 		                                 analysis, int level, int hop, int count,
-		                                 int segments, vector<int>& ktracks, 
+		                                 int segments, vector<int>& ktracks,
 		                                 vector<vector<vector<double> > >&
 		                                 trackhist);
 		void     doTrackKeyAnalysis     (vector<vector<double> >& analysis,
-		                                 int level, int hop, int count, 
+		                                 int level, int hop, int count,
 		                                 vector<vector<double> >& trackhist,
 		                                 vector<double>& majorweights,
 		                                 vector<double>& minorweights);
-		void     identifyKeyDouble      (vector<double>& correls, 
-		                                 vector<double>& histogram, 
-		                                 vector<double>& majorweights, 
+		void     identifyKeyDouble      (vector<double>& correls,
+		                                 vector<double>& histogram,
+		                                 vector<double>& majorweights,
 		                                 vector<double>& minorweights);
 		void     fillWeightsWithKostkaPayne(vector<double>& maj,
 		                                 vector<double>& min);
@@ -89,12 +89,12 @@ class Tool_transpose : public HumTool {
 		                                 analysis, vector<int>& ktracks);
 		void     doSingleAnalysis       (vector<double>& analysis,
 		                                 int startindex, int length,
-		                                 vector<vector<double> >& trackhist, 
-		                                 vector<double>& majorweights, 
+		                                 vector<vector<double> >& trackhist,
+		                                 vector<double>& majorweights,
 		                                 vector<double>& minorweights);
-		void     identifyKey            (vector<double>& correls, 
+		void     identifyKey            (vector<double>& correls,
 		                                 vector<double>& histogram,
-		                                 vector<double>& majorweights, 
+		                                 vector<double>& majorweights,
 		                                 vector<double>& minorweights);
 		void     doTranspositionAnalysis(vector<vector<vector<double> > >&
 		                                 analysis);
@@ -110,8 +110,8 @@ class Tool_transpose : public HumTool {
 
 	private:
 		int      transval     = 0;   // used with -b option
-		int      ssetkeyQ     = 0;   // used with -k option
-		int      ssetkey      = 0;   // used with -k option
+		int      ssettonicQ   = 0;   // used with -k option
+		int      ssettonic    = 0;   // used with -k option
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option

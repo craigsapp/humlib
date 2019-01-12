@@ -16,12 +16,12 @@
 
 #include "HumdrumFileStructure.h"
 
+#include <iostream>
 #include <cmath>
-#include <vector>
 #include <sstream>
+#include <string>
+#include <vector>
 #include <utility>
-
-using namespace std;
 
 namespace hum {
 
@@ -30,57 +30,97 @@ namespace hum {
 class HumdrumFileContent : public HumdrumFileStructure {
 	public:
 		       HumdrumFileContent         (void);
-		       HumdrumFileContent         (const string& filename);
-		       HumdrumFileContent         (istream& contents);
+		       HumdrumFileContent         (const std::string& filename);
+		       HumdrumFileContent         (std::istream& contents);
 		      ~HumdrumFileContent         ();
 
+		bool   analyzeSlurs               (void);
+		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
 
 		bool   analyzeRScale              (void);
 
+		// in HumdrumFileContent-rest.cpp
+		void  analyzeRestPositions                  (void);
+		void  assignImplicitVerticalRestPositions   (HTp kernstart);
+		void  checkForExplicitVerticalRestPositions (void);
+
+		// in HumdrumFileContent-stem.cpp
+		bool analyzeKernStems             (void);
+
 		// in HumdrumFileContent-metlev.cpp
-		void  getMetricLevels             (vector<double>& output, int track = 0,
+		void  getMetricLevels             (std::vector<double>& output, int track = 0,
 		                                   double undefined = NAN);
 		// in HumdrumFileContent-timesig.cpp
-		void  getTimeSigs                 (vector<pair<int, HumNum> >& output,
+		void  getTimeSigs                 (std::vector<std::pair<int, HumNum> >& output,
 		                                   int track = 0);
 
 		template <class DATATYPE>
-		bool   prependDataSpine           (vector<DATATYPE> data,
-		                                   const string& null = ".",
-		                                   const string& exinterp = "**data",
+		bool   prependDataSpine           (std::vector<DATATYPE> data,
+		                                   const std::string& null = ".",
+		                                   const std::string& exinterp = "**data",
 		                                   bool recalcLine = true);
 
 		template <class DATATYPE>
-		bool   appendDataSpine            (vector<DATATYPE> data,
-		                                   const string& null = ".",
-		                                   const string& exinterp = "**data",
+		bool   appendDataSpine            (std::vector<DATATYPE> data,
+		                                   const std::string& null = ".",
+		                                   const std::string& exinterp = "**data",
 		                                   bool recalcLine = true);
 
 		template <class DATATYPE>
 		bool   insertDataSpineBefore      (int nexttrack,
-		                                   vector<DATATYPE> data,
-		                                   const string& null = ".",
-		                                   const string& exinterp = "**data",
+		                                   std::vector<DATATYPE> data,
+		                                   const std::string& null = ".",
+		                                   const std::string& exinterp = "**data",
 		                                   bool recalcLine = true);
 
 		template <class DATATYPE>
 		bool   insertDataSpineAfter       (int prevtrack,
-		                                   vector<DATATYPE> data,
-		                                   const string& null = ".",
-		                                   const string& exinterp = "**data",
+		                                   std::vector<DATATYPE> data,
+		                                   const std::string& null = ".",
+		                                   const std::string& exinterp = "**data",
 		                                   bool recalcLine = true);
 
+		// in HumdrumFileContent-ottava.cpp
+		void   analyzeOttavas             (void);
+
+		// in HumdrumFileContent-note.cpp
+		void   analyzeCrossStaffStemDirections (void);
+		void   analyzeCrossStaffStemDirections (HTp kernstart);
+
+
 	protected:
-		bool   analyzeKernSlurs           (HumdrumToken* spinestart);
-		bool   analyzeKernTies            (HumdrumToken* spinestart);
-		void   fillKeySignature           (vector<int>& states,
-		                                   const string& keysig);
-		void   resetDiatonicStatesWithKeySignature(vector<int>& states,
-				                             vector<int>& signature);
+		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
+		                                   std::vector<HTp>& slurends,
+		                                   const std::string& linksig = "");
+		bool   analyzeKernTies            (std::vector<std::pair<HTp, int>>& linkedtiestarts,
+		                                   std::vector<std::pair<HTp, int>>& linkedtieends,
+		                                   std::string& linkSignifier);
+		void   fillKeySignature           (std::vector<int>& states,
+		                                   const std::string& keysig);
+		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
+				                             std::vector<int>& signature);
 		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+		void    linkTieEndpoints          (HTp tiestart, int startindex,
+		                                   HTp tieend, int endindex);
+		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
+		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
+		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+		void    assignVerticalRestPosition(HTp first, HTp second, int baseline);
+		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
+		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
+		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
+		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
+		bool    analyzeKernStems          (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
+		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
+		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts, 
+		                                   std::vector<std::pair<HTp, int>>& ends);
+		void    checkCrossStaffStems      (HTp token, std::string& above, std::string& below);
+		void    checkDataForCrossStaffStems(HTp token, std::string& above, std::string& below);
+		void    prepareStaffAboveNoteStems (HTp token);
+		void    prepareStaffBelowNoteStems (HTp token);
 };
 
 
@@ -104,14 +144,14 @@ class HumdrumFileContent : public HumdrumFileStructure {
 //
 
 template <class DATATYPE>
-bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
-		const string& null, const string& exinterp, bool recalcLine) {
+bool HumdrumFileContent::prependDataSpine(std::vector<DATATYPE> data,
+		const std::string& null, const std::string& exinterp, bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
 		return false;
 	}
 
-	string ex;
+	std::string ex;
 	if (exinterp.find("**") == 0) {
 		ex = exinterp;
 	} else if (exinterp.find("*") == 0) {
@@ -123,7 +163,7 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 		ex += "data";
 	}
 
-	stringstream ss;
+	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
 	HumdrumLine* line;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -140,9 +180,9 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 		} else if (line->isLocalComment()) {
 			line->insertToken(0, "!");
 		} else if (line->isBarline()) {
-			line->insertToken(0, (string)*infile.token(i, 0));
+			line->insertToken(0, (std::string)*infile.token(i, 0));
 		} else if (line->isData()) {
-			ss.str(string());
+			ss.str(std::string());
 			ss << data[i];
 			if (ss.str() == null) {
 				line->insertToken(0, ".");
@@ -152,7 +192,7 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 				line->insertToken(0, ss.str());
 			}
 		} else{
-			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+			std::cerr << "!!strange error for line " << i+1 << ":\t" << line << std::endl;
 		}
 		if (recalcLine) {
 			line->createLineFromTokens();
@@ -178,17 +218,17 @@ bool HumdrumFileContent::prependDataSpine(vector<DATATYPE> data,
 //
 
 template <class DATATYPE>
-bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
-		const string& null, const string& exinterp, bool recalcLine) {
+bool HumdrumFileContent::appendDataSpine(std::vector<DATATYPE> data,
+		const std::string& null, const std::string& exinterp, bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
-		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
-		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
-		cerr  << getLineCount() << endl;
+		std::cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << std::endl;
+		std::cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		std::cerr  << getLineCount() << std::endl;
 		return false;
 	}
 
-	string ex;
+	std::string ex;
 	if (exinterp.find("**") == 0) {
 		ex = exinterp;
 	} else if (exinterp.find("*") == 0) {
@@ -200,7 +240,7 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 		ex += "data";
 	}
 
-	stringstream ss;
+	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
 	HumdrumLine* line;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -217,9 +257,9 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 		} else if (line->isLocalComment()) {
 			line->appendToken("!");
 		} else if (line->isBarline()) {
-			line->appendToken((string)*infile.token(i, 0));
+			line->appendToken((std::string)*infile.token(i, 0));
 		} else if (line->isData()) {
-			ss.str(string());
+			ss.str(std::string());
 			ss << data[i];
 			if (ss.str() == null) {
 				line->appendToken(".");
@@ -229,7 +269,7 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 				line->appendToken(ss.str());
 			}
 		} else{
-			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+			std::cerr << "!!strange error for line " << i+1 << ":\t" << line << std::endl;
 		}
 		if (recalcLine) {
 			line->createLineFromTokens();
@@ -258,17 +298,17 @@ bool HumdrumFileContent::appendDataSpine(vector<DATATYPE> data,
 
 template <class DATATYPE>
 bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
-		vector<DATATYPE> data, const string& null, const string& exinterp,
+		std::vector<DATATYPE> data, const std::string& null, const std::string& exinterp,
 		bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
-		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
-		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
-		cerr  << getLineCount() << endl;
+		std::cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << std::endl;
+		std::cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		std::cerr  << getLineCount() << std::endl;
 		return false;
 	}
 
-	string ex;
+	std::string ex;
 	if (exinterp.find("**") == 0) {
 		ex = exinterp;
 	} else if (exinterp.find("*") == 0) {
@@ -280,7 +320,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 		ex += "data";
 	}
 
-	stringstream ss;
+	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
 	HumdrumLine* line;
 	int insertionField = -1;
@@ -312,9 +352,9 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 		} else if (line->isLocalComment()) {
 			line->insertToken(insertionField, "!");
 		} else if (line->isBarline()) {
-			line->insertToken(insertionField, (string)*infile.token(i, 0));
+			line->insertToken(insertionField, (std::string)*infile.token(i, 0));
 		} else if (line->isData()) {
-			ss.str(string());
+			ss.str(std::string());
 			ss << data[i];
 			if (ss.str() == null) {
 				line->insertToken(insertionField, ".");
@@ -324,7 +364,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 				line->insertToken(insertionField, ss.str());
 			}
 		} else{
-			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+			std::cerr << "!!strange error for line " << i+1 << ":\t" << line << std::endl;
 		}
 		if (recalcLine) {
 			line->createLineFromTokens();
@@ -353,17 +393,17 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 
 template <class DATATYPE>
 bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
-		vector<DATATYPE> data, const string& null, const string& exinterp,
+		std::vector<DATATYPE> data, const std::string& null, const std::string& exinterp,
 		bool recalcLine) {
 
 	if ((int)data.size() != getLineCount()) {
-		cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << endl;
-		cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
-		cerr  << getLineCount() << endl;
+		std::cerr << "DATA SIZE DOES NOT MATCH GETLINECOUNT " << std::endl;
+		std::cerr << "DATA SIZE " << data.size() << "\tLINECOUNT ";
+		std::cerr  << getLineCount() << std::endl;
 		return false;
 	}
 
-	string ex;
+	std::string ex;
 	if (exinterp.find("**") == 0) {
 		ex = exinterp;
 	} else if (exinterp.find("*") == 0) {
@@ -375,7 +415,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 		ex += "data";
 	}
 
-	stringstream ss;
+	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
 	HumdrumLine* line;
 	int insertionField = -1;
@@ -408,9 +448,9 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 		} else if (line->isLocalComment()) {
 			line->insertToken(insertionField, "!");
 		} else if (line->isBarline()) {
-			line->insertToken(insertionField, (string)*infile.token(i, 0));
+			line->insertToken(insertionField, (std::string)*infile.token(i, 0));
 		} else if (line->isData()) {
-			ss.str(string());
+			ss.str(std::string());
 			ss << data[i];
 			if (ss.str() == null) {
 				line->insertToken(insertionField, ".");
@@ -420,7 +460,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 				line->insertToken(insertionField, ss.str());
 			}
 		} else{
-			cerr << "!!strange error for line " << i+1 << ":\t" << line << endl;
+			std::cerr << "!!strange error for line " << i+1 << ":\t" << line << std::endl;
 		}
 		if (recalcLine) {
 			line->createLineFromTokens();

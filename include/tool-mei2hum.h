@@ -208,7 +208,7 @@ class Tool_mei2hum : public HumTool {
 		void   reportVerseNumber     (int pmax, int staffindex);
 		string getEditorialAccidental(vector<xml_node>& children);
 		string getCautionaryAccidental(vector<xml_node>& children);
-		string makeHumdrumClef       (const string& shape, 
+		string makeHumdrumClef       (const string& shape,
 		                              const string& line,
 		                              const string& clefdis,
 		                              const string& clefdisplace);

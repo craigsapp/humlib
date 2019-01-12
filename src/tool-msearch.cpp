@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Aug 27 06:15:38 PDT 2017
-// Last Modified: Sun Aug 27 06:15:42 PDT 2017
+// Last Modified: Mon Oct 29 10:38:26 EDT 2018
 // Filename:      tool-msearch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-msearch.cpp
 // Syntax:        C++11
@@ -257,7 +257,7 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 			}
 		}
 	}
-	
+
 	if (mcount) {
 		string content = "!!!RDF**kern: " + m_marker + " = marked note";
 		if (getBoolean("color")) {
@@ -283,6 +283,8 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	HTp mend = NULL;
 	if (match.back() != NULL) {
 		mend = match.back()->getToken();
+	} else {
+		cerr << "GOT TO THIS STRANGE PLACE start=" << mstart << endl;
 	}
 	HTp tok = mstart;
 	string text;
@@ -293,6 +295,10 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 		text = tok->getText() + m_marker;
 		tok->setText(text);
 		tok = tok->getNextNNDT();
+		if (tok && !tok->isKern()) {
+			cerr << "STRANGE LINKING WITH TEXT SPINE IN getNextNNDT()" << endl;
+			break;
+		}
 	}
 }
 
@@ -357,7 +363,7 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 // Tool_msearch::checkForMatchDiatonicPC --
 //
 
-bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index, 
+bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		vector<MSearchQueryToken>& dpcQuery, vector<NoteCell*>& match) {
 	match.clear();
 
@@ -375,12 +381,12 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			continue;
 		}
 		rhymatch = true;
-		if ((!dpcQuery[i].rhythm.empty()) 
+		if ((!dpcQuery[i].rhythm.empty())
 				&& (notes[index+i-c]->getDuration() != dpcQuery[i].duration)) {
 			// duration needs to match query, but does not
 			rhymatch = false;
 		}
-		
+
 		// check for gross-contour queries:
 		if (dpcQuery[i].base <= 0) {
 			lastIsInterval = true;
@@ -481,7 +487,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 //////////////////////////////
 //
-// Tool_msearch::fillTextQuery -- 
+// Tool_msearch::fillTextQuery --
 //
 
 void Tool_msearch::fillTextQuery(vector<MSearchTextQuery>& query,
@@ -511,7 +517,7 @@ void Tool_msearch::fillTextQuery(vector<MSearchTextQuery>& query,
 
 //////////////////////////////
 //
-// Tool_msearch::fillMusicQuery -- 
+// Tool_msearch::fillMusicQuery --
 //
 
 void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,

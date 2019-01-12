@@ -11,13 +11,15 @@
 //                of the line.
 //
 
-#include <sstream>
-#include <algorithm>
-
 #include "HumdrumLine.h"
 #include "HumdrumFile.h"
 #include "HumNum.h"
 #include "Convert.h"
+
+#include <algorithm>
+#include <sstream>
+
+using namespace std;
 
 namespace hum {
 
@@ -369,6 +371,24 @@ bool HumdrumLine::isReference(void) const {
 		return false;
 	}
 	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
+		return false;
+	}
+	return true;
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isSignifier -- Returns true if a !!!RDF reference record.
+//
+
+bool HumdrumLine::isSignifier(void) const {
+	if (this->size() < 9) {
+		return false;
+	}
+	if (this->substr(0, 8) != "!!!RDF**") {
 		return false;
 	}
 	return true;
@@ -1217,7 +1237,7 @@ ostream& HumdrumLine::printCsv(ostream& out, const string& separator) {
 // HumdrumLine::printGlobalXmlParameterInfo --
 //
 
-ostream& HumdrumLine::printGlobalXmlParameterInfo(ostream& out, int level, 
+ostream& HumdrumLine::printGlobalXmlParameterInfo(ostream& out, int level,
 		const string& indent) {
 	token(0)->printGlobalXmlParameterInfo(out, level, indent);
 	return out;
@@ -1443,7 +1463,7 @@ string HumdrumLine::getXmlId(const string& prefix) const {
 	} else {
 		output = getXmlIdPrefix();
 	}
-	output += "loc" + to_string(getLineIndex());
+	output += "L" + to_string(getLineIndex() + 1);
 	return output;
 }
 
@@ -1684,7 +1704,7 @@ void HumdrumLine::insertToken(int index, const char* token) {
 // HumdrumLine::appendToken -- Add a token after the given token position.
 //
 
-void HumdrumLine::appendToken(int index, HTp token) { 
+void HumdrumLine::appendToken(int index, HTp token) {
 	HumdrumLine::insertToken(index+1, token);
 }
 

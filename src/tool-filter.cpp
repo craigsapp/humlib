@@ -27,8 +27,13 @@
 #include "tool-metlev.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
+#include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-satb2gs.h"
+#include "tool-simat.h"
+#include "tool-slurcheck.h"
+#include "tool-tassoize.h"
+#include "tool-trillspell.h"
 #include "tool-transpose.h"
 
 #include "HumRegex.h"
@@ -57,6 +62,26 @@ namespace hum {
 		INFILE.readString(tool->getHumdrumText());   \
 	}                                               \
 	delete tool;
+
+#define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILE1, INFILE2);                    \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILE1.readString(tool->getHumdrumText());  \
+	}                                               \
+	delete tool;
+
+
+////////////////////////////////
+//
+// Tool_filter::Tool_filter -- Set the recognized options for the tool.
+//
 
 
 ////////////////////////////////
@@ -128,14 +153,28 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "phrase") {
+			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "simat") {
+			RUNTOOL2(simat, infile, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
+		} else if (commands[i].first == "slurcheck") {
+			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "slur") {
+			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "tassoize") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "tasso") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "trillspell") {
+			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "myank") {
@@ -165,7 +204,7 @@ void Tool_filter::removeFilterLines(HumdrumFile& infile) {
 		if (!infile[i].isReference()) {
 			continue;
 		}
-		if (infile.token(i, 0)->compare(0, 10, "!!!filter:") == 0) { 
+		if (infile.token(i, 0)->compare(0, 10, "!!!filter:") == 0) {
 			text = infile.token(i, 0)->getText();
 			hre.replaceDestructive(text, "!!!Xfilter:", "^!!!filter:");
 			infile.token(i, 0)->setText(text);

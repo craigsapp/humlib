@@ -7,7 +7,7 @@
 // Syntax:        C++11
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Converts Soprano/Alto/Tenor/Bass staves into 
+// Description:   Converts Soprano/Alto/Tenor/Bass staves into
 //                Grand-staff style.
 //
 
@@ -112,7 +112,7 @@ void Tool_satb2gs::initialize(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_satb2gs::processFile -- data is assumed to be in the order from
-// bass, tenor, alto, soprano, with non-**kern data found 
+// bass, tenor, alto, soprano, with non-**kern data found
 // in any order.  Only the first four **kern spines in the file
 // will be considered.
 //
@@ -364,7 +364,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 			}
 
 			if (infile[row].isData()) {
-				if ((cols[0] == col) && 
+				if ((cols[0] == col) &&
 							(infile.token(row, col)->find(';') != string::npos)) {
 					HumNum tenordur;
 					HumNum bassdur;
@@ -398,7 +398,7 @@ void Tool_satb2gs::printSpine(HumdrumFile& infile, int row, int col,
 
 ///////////////////////////////
 //
-// Tool_satb2gs::getSatbTracks -- return the primary track numbers of 
+// Tool_satb2gs::getSatbTracks -- return the primary track numbers of
 //     the satb spines.
 //
 

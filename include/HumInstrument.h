@@ -18,8 +18,6 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 namespace hum {
 
 // START_MERGE
@@ -29,36 +27,36 @@ class _HumInstrument {
 		_HumInstrument    (void) { humdrum = ""; name = ""; gm = 0; }
 	  ~_HumInstrument    ()     { humdrum = ""; name = ""; gm = 0; }
 
-		string humdrum;
-		string name;
-		int    gm;
+		std::string humdrum;
+		std::string name;
+		int         gm;
 };
 
 
 class HumInstrument {
 	public:
-		           HumInstrument       (void);
-		           HumInstrument       (const string& Hname);
-		          ~HumInstrument       ();
+		            HumInstrument       (void);
+		            HumInstrument       (const std::string& Hname);
+		           ~HumInstrument       ();
 
-		string     getName             (void);
-		string     getName             (const string& Hname);
-		string     getHumdrum          (void);
-		int        getGM               (void);
-		int        getGM               (const string& Hname);
-		void       setHumdrum          (const string& Hname);
-		int        setGM               (const string& Hname, int aValue);
+		std::string getName             (void);
+		std::string getName             (const std::string& Hname);
+		std::string getHumdrum          (void);
+		int         getGM               (void);
+		int         getGM               (const std::string& Hname);
+		void        setHumdrum          (const std::string& Hname);
+		int         setGM               (const std::string& Hname, int aValue);
 
 	private:
 		int                            index;
-		static vector<_HumInstrument>  data;
+		static std::vector<_HumInstrument>  data;
 		static int                     classcount;
 
 	protected:
 		void       initialize          (void);
 		void       afi                 (const char* humdrum_name, int midinum,
 		                                const char* EN_name);
-		int        find                (const string& Hname);
+		int        find                (const std::string& Hname);
 		void       sortData            (void);
 		static int data_compare_by_humdrum_name(const void* a, const void* b);
 };

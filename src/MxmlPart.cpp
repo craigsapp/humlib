@@ -302,7 +302,7 @@ bool MxmlPart::hasEditorialAccidental(void) const {
 //////////////////////////////
 //
 // MxmlPart::hasDynamics --
-// 
+//
 
 bool MxmlPart::hasDynamics(void) const {
 	return m_has_dynamics;
@@ -376,6 +376,28 @@ void MxmlPart::receiveDynamic(void) {
 
 void MxmlPart::receiveCaesura(const string& letter) {
 	m_caesura = letter;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::receiveOrnament --
+//
+
+void MxmlPart::receiveOrnament(void) {
+	m_hasOrnaments = true;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::hasOrnaments --
+//
+
+bool MxmlPart::hasOrnaments(void) const {
+	return m_hasOrnaments;
 }
 
 
@@ -471,7 +493,7 @@ void MxmlPart::trackStaffVoices(int staffnum, int voicenum) {
 		int newsize = voicenum + 1;
 		sv[staffnum].resize(newsize);
 		for (int i=oldsize; i<newsize; i++) {
-			sv[staffnum][i] = 0;		
+			sv[staffnum][i] = 0;
 		}
 	}
 	sv[staffnum][voicenum]++;

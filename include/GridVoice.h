@@ -20,7 +20,8 @@
 
 #include "HumdrumToken.h"
 
-using namespace std;
+#include <iostream>
+#include <string>
 
 class GridSlice;
 
@@ -33,14 +34,14 @@ class GridVoice {
 		GridVoice(void);
 		GridVoice(HTp token, HumNum duration);
 		GridVoice(const char* token, HumNum duration);
-		GridVoice(const string& token, HumNum duration);
+		GridVoice(const std::string& token, HumNum duration);
 		~GridVoice();
 
 		bool   isTransfered       (void);
 
 		HTp    getToken           (void) const;
 		void   setToken           (HTp token);
-		void   setToken           (const string& token);
+		void   setToken           (const std::string& token);
 		void   setToken           (const char* token);
 		bool   isNull             (void) const;
 
@@ -64,8 +65,8 @@ class GridVoice {
 	friend class GridSlice;
 };
 
-ostream& operator<<(ostream& output, GridVoice* voice);
-ostream& operator<<(ostream& output, GridVoice& voice);
+std::ostream& operator<<(std::ostream& output, GridVoice* voice);
+std::ostream& operator<<(std::ostream& output, GridVoice& voice);
 
 
 // END_MERGE

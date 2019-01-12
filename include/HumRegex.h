@@ -15,8 +15,8 @@
 #define _HUMREGEX_H_INCLUDED
 
 #include <regex>
-
-using namespace std;
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -25,8 +25,8 @@ namespace hum {
 class HumRegex {
 	public:
 		            HumRegex           (void);
-		            HumRegex           (const string& exp,
-		                                const string& options = "");
+		            HumRegex           (const std::string& exp,
+		                                const std::string& options = "");
 		           ~HumRegex           ();
 
 		// setting persistent options for regular expression contruction
@@ -40,81 +40,81 @@ class HumRegex {
 		void        unsetGlobal        (void);
 
 		// replacing
-		string&     replaceDestructive (string& input, const string& replacement,
-		                                const string& exp);
-		string&     replaceDestructive (string& input, const string& replacement,
-		                                const string& exp,
-		                                const string& options);
-		string      replaceCopy        (const string& input,
-		                                const string& replacement,
-		                                const string& exp);
-		string      replaceCopy        (const string& input,
-		                                const string& replacement,
-		                                const string& exp,
-		                                const string& options);
+		std::string&     replaceDestructive (std::string& input, const std::string& replacement,
+		                                const std::string& exp);
+		std::string&     replaceDestructive (std::string& input, const std::string& replacement,
+		                                const std::string& exp,
+		                                const std::string& options);
+		std::string      replaceCopy        (const std::string& input,
+		                                const std::string& replacement,
+		                                const std::string& exp);
+		std::string      replaceCopy        (const std::string& input,
+		                                const std::string& replacement,
+		                                const std::string& exp,
+		                                const std::string& options);
 
-		string&     replaceDestructive (string* input, const string& replacement,
-		                                const string& exp);
-		string&     replaceDestructive (string* input, const string& replacement,
-		                                const string& exp,
-		                                const string& options);
-		string      replaceCopy        (string* input, const string& replacement,
-		                                const string& exp);
-		string      replaceCopy        (string* input, const string& replacement,
-		                                const string& exp,
-		                                const string& options);
-		string&      tr                 (string& input, const string& from, 
-		                                const string& to);
+		std::string&     replaceDestructive (std::string* input, const std::string& replacement,
+		                                const std::string& exp);
+		std::string&     replaceDestructive (std::string* input, const std::string& replacement,
+		                                const std::string& exp,
+		                                const std::string& options);
+		std::string      replaceCopy        (std::string* input, const std::string& replacement,
+		                                const std::string& exp);
+		std::string      replaceCopy        (std::string* input, const std::string& replacement,
+		                                const std::string& exp,
+		                                const std::string& options);
+		std::string&      tr                 (std::string& input, const std::string& from,
+		                                const std::string& to);
 
 		// matching (full-string match)
-		bool        match              (const string& input, const string& exp);
-		bool        match              (const string& input, const string& exp,
-		                                const string& options);
-		bool        match              (const string* input, const string& exp);
-		bool        match              (const string* input, const string& exp,
-		                                const string& options);
+		bool        match              (const std::string& input, const std::string& exp);
+		bool        match              (const std::string& input, const std::string& exp,
+		                                const std::string& options);
+		bool        match              (const std::string* input, const std::string& exp);
+		bool        match              (const std::string* input, const std::string& exp,
+		                                const std::string& options);
 
 
 		// searching
 		// http://www.cplusplus.com/reference/regex/regex_search
-		bool        search             (const string& input, const string& exp);
-		bool        search             (const string& input, const string& exp,
-		                                const string& options);
-		bool        search             (const string& input, int startindex,
-		                                const string& exp);
-		bool        search             (const string& input, int startindex,
-		                                const string& exp,
-		                                const string& options);
+		int         search             (const std::string& input, const std::string& exp);
+		int         search             (const std::string& input, const std::string& exp,
+		                                const std::string& options);
+		int         search             (const std::string& input, int startindex,
+		                                const std::string& exp);
+		int         search             (const std::string& input, int startindex,
+		                                const std::string& exp,
+		                                const std::string& options);
 
-		bool        search             (string* input, const string& exp);
-		bool        search             (string* input, const string& exp,
-		                                const string& options);
-		bool        search             (string* input, int startindex,
-		                                const string& exp);
-		bool        search             (string* input, int startindex,
-		                                const string& exp,
-		                                const string& options);
+		int         search             (std::string* input, const std::string& exp);
+		int         search             (std::string* input, const std::string& exp,
+		                                const std::string& options);
+		int         search             (std::string* input, int startindex,
+		                                const std::string& exp);
+		int         search             (std::string* input, int startindex,
+		                                const std::string& exp,
+		                                const std::string& options);
 
 		int         getMatchCount      (void);
-		string      getMatch           (int index);
+		std::string getMatch           (int index);
 		int         getMatchInt        (int index);
 		double      getMatchDouble     (int index);
-		string      getPrefix          (void);
-		string      getSuffix          (void);
+		std::string getPrefix          (void);
+		std::string getSuffix          (void);
 		int         getMatchStartIndex (int index = 0);
 		int         getMatchEndIndex   (int index = 0);
 		int         getMatchLength     (int index = 0);
 
 		// token lists:
-		bool        split              (vector<string>& entries,
-		                                const string& buffer,
-		                                const string& separator);
+		bool        split              (std::vector<std::string>& entries,
+		                                const std::string& buffer,
+		                                const std::string& separator);
 
 	protected:
 		std::regex_constants::syntax_option_type
-				getTemporaryRegexFlags(const string& sflags);
+				getTemporaryRegexFlags(const std::string& sflags);
 		std::regex_constants::match_flag_type
-				getTemporarySearchFlags(const string& sflags);
+				getTemporarySearchFlags(const std::string& sflags);
 
 
 	private:
@@ -145,7 +145,7 @@ class HumRegex {
 		// m_regexflags: store default settings for regex processing
 		// http://en.cppreference.com/w/cpp/regex/syntax_option_type
 		// http://en.cppreference.com/w/cpp/regex/basic_regex
-		// /usr/local/Cellar/gcc49/4.9.3/include/c++/4.9.3/bits/regex_constants.h 
+		// /usr/local/Cellar/gcc49/4.9.3/include/c++/4.9.3/bits/regex_constants.h
 		//
 		// Options (in the namespace std::regex_constants):
 		//    icase      == Ignore case.

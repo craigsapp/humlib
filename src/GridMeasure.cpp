@@ -85,7 +85,7 @@ GridSlice* GridMeasure::addGraceToken(const string& tok, HumNum timestamp,
 		gs = new GridSlice(this, timestamp, SliceType::GraceNotes, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else if (timestamp > this->back()->getTimestamp()) { 
+	} else if (timestamp > this->back()->getTimestamp()) {
 
 		// Grace note needs to be added at the end of a measure:
 		auto it2 = this->end();
@@ -115,7 +115,7 @@ GridSlice* GridMeasure::addGraceToken(const string& tok, HumNum timestamp,
 		}
 		return NULL;
 
-	} else { 
+	} else {
 		// search for existing line with same timestamp on a data slice:
 
 		while (iterator != this->end()) {
@@ -183,13 +183,13 @@ GridSlice* GridMeasure::addGraceToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -230,7 +230,7 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addTempoToken -- Add a tempo token in the data slice at 
+// GridMeasure::addTempoToken -- Add a tempo token in the data slice at
 //    the given timestamp (or create a new tempo slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
 //
@@ -238,13 +238,13 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addTempoToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Tempos, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -285,7 +285,7 @@ GridSlice* GridMeasure::addTempoToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addTimeSigToken -- Add a time signature token in the data slice at 
+// GridMeasure::addTimeSigToken -- Add a time signature token in the data slice at
 //    the given timestamp (or create a new timesig slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
 //
@@ -293,13 +293,13 @@ GridSlice* GridMeasure::addTempoToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::TimeSigs, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -340,7 +340,7 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addKeySigToken -- Add a key signature  token in a key sig slice at 
+// GridMeasure::addKeySigToken -- Add a key signature  token in a key sig slice at
 //    the given timestamp (or create a new keysig slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
 //
@@ -348,13 +348,13 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::KeySigs, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -396,7 +396,7 @@ GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addLabelToken -- Add an instrument label token in a label slice at 
+// GridMeasure::addLabelToken -- Add an instrument label token in a label slice at
 //    the given timestamp (or create a new label slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
 //
@@ -404,13 +404,13 @@ GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxpart, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Labels, maxpart);
 		gs->addToken(tok, part, maxstaff-1, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -436,7 +436,7 @@ GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addLabelAbbrToken -- Add an instrument label token in a label slice at 
+// GridMeasure::addLabelAbbrToken -- Add an instrument label token in a label slice at
 //    the given timestamp (or create a new label slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
 //
@@ -444,13 +444,13 @@ GridSlice* GridMeasure::addLabelToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addLabelAbbrToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxpart, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::LabelAbbrs, maxpart);
 		gs->addToken(tok, part, maxstaff-1, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -476,7 +476,7 @@ GridSlice* GridMeasure::addLabelAbbrToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
-// GridMeasure::addTransposeToken -- Add a transposition token in the data slice at 
+// GridMeasure::addTransposeToken -- Add a transposition token in the data slice at
 //    the given timestamp (or create a new transposition slice at that timestamp), placing
 //    the token at the specified part, staff, and voice index.
 //
@@ -487,13 +487,13 @@ GridSlice* GridMeasure::addLabelAbbrToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addTransposeToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Transpositions, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -542,13 +542,13 @@ GridSlice* GridMeasure::addTransposeToken(const string& tok, HumNum timestamp,
 GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 		int part, int staff, int voice, int maxstaff) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Clefs, maxstaff);
 		gs->addToken(tok, part, staff, voice);
 		this->push_back(gs);
-	} else { 
+	} else {
 		// search for existing line with same timestamp and the same slice type
 		GridSlice* target = NULL;
 		auto iterator = this->begin();
@@ -595,21 +595,28 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 
 GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
 	GridSlice* gs = NULL;
-	if (this->empty() || (this->back()->getTimestamp() < timestamp)) { 
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
 		gs->addToken(tok, 0, 0, 0);
 		this->push_back(gs);
-	} else { 
-		// search for existing data line (or any other type)  with same timestamp 
+	} else {
+		// search for existing data line (or any other type)  with same timestamp
 		auto iterator = this->begin();
 		while (iterator != this->end()) {
 			// does it need to be before data slice or any slice?
 			// if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 			if ((*iterator)->getTimestamp() == timestamp) {
 				// found the correct timestamp on a data slice, so add the global comment
-				// before the data slice.
+				// before the data slice.  But don't add if the previous
+				// grid slice is a global comment with the same text.
+				if ((iterator != this->end()) && (*iterator)->isGlobalComment()) {
+					if (tok == *(*iterator)->at(0)->at(0)->at(0)->getToken()) {
+						// do not insert duplicate global comment
+						break;
+					}
+				}
 				gs = new GridSlice(this, timestamp, SliceType::GlobalComments, 1);
 				gs->addToken(tok, 0, 0, 0);
 				this->insert(iterator, gs);
@@ -652,7 +659,7 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 		} else {
 			slice = NULL;
 		}
-		if ((slice != NULL) && slice->isDataSlice() 
+		if ((slice != NULL) && slice->isDataSlice()
 				&& (slice->getDuration() == 0)) {
 			HumNum mts  = getTimestamp();
 			HumNum mdur = getDuration();
@@ -667,7 +674,7 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 
 	for (auto it : *this) {
 		if (it->isInvalidSlice()) {
-			// ignore slices to be removed from output (used for 
+			// ignore slices to be removed from output (used for
 			// removing redundant clef slices).
 			continue;
 		}
@@ -724,7 +731,9 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 	} else {
 		tstring += "1";
 	}
-	tstring += "-";
+	// probably best not to start with an invisible barline since
+	// a plain barline would not be shown before the first measure anyway.
+	// tstring += "-";
 	HTp token;
 	for (int i=0; i<fieldcount; i++) {
 		token = new HumdrumToken(tstring);
@@ -837,7 +846,7 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 	GridPart* part;
 	GridStaff* staff;
 	GridVoice* voice;
-	
+
 	auto previous = iter;
 	previous++;
 	while (previous != this->rend()) {
@@ -868,7 +877,7 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 	}
 
 	auto insertpoint = previous.base();
-	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::Layouts);	
+	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::Layouts);
 	newslice->initializeBySlice(*iter);
 	this->insert(insertpoint, newslice);
 	HTp newtoken = new HumdrumToken(locomment);
@@ -920,7 +929,7 @@ void GridMeasure::addDynamicsLayoutParameters(GridSlice* slice, int partindex,
 	}
 
 	auto insertpoint = previous.base();
-	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::Layouts);	
+	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::Layouts);
 	newslice->initializeBySlice(*iter);
 	this->insert(insertpoint, newslice);
 
@@ -932,7 +941,7 @@ void GridMeasure::addDynamicsLayoutParameters(GridSlice* slice, int partindex,
 
 //////////////////////////////
 //
-// GridMeasure::isMonophonicMeasure --  One part starts with note/rest, the others 
+// GridMeasure::isMonophonicMeasure --  One part starts with note/rest, the others
 //     with invisible rest.
 //
 

@@ -19,6 +19,8 @@
 #define _HUMDRUMFILEBASE_H_INCLUDED
 
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
 
 // USING_URI is defined if you want to be able to download Humdrum data
@@ -36,9 +38,8 @@
 	#include <sstream>
 #endif
 
+#include "HumSignifiers.h"
 #include "HumdrumLine.h"
-
-using namespace std;
 
 namespace hum {
 
@@ -99,102 +100,102 @@ class HumdrumFileBase : public HumHash {
 	public:
 		              HumdrumFileBase          (void);
 		              HumdrumFileBase          (HumdrumFileBase& infile);
-		              HumdrumFileBase          (const string& contents);
-		              HumdrumFileBase          (istream& contents);
+		              HumdrumFileBase          (const std::string& contents);
+		              HumdrumFileBase          (std::istream& contents);
 		             ~HumdrumFileBase          ();
 
 		HumdrumFileBase& operator=             (HumdrumFileBase& infile);
-		bool          read                     (istream& contents);
+		bool          read                     (std::istream& contents);
 		bool          read                     (const char* filename);
-		bool          read                     (const string& filename);
-		bool          readCsv                  (istream& contents,
-		                                        const string& separator=",");
+		bool          read                     (const std::string& filename);
+		bool          readCsv                  (std::istream& contents,
+		                                        const std::string& separator=",");
 		bool          readCsv                  (const char* contents,
-		                                        const string& separator=",");
-		bool          readCsv                  (const string& contents,
-		                                        const string& separator=",");
+		                                        const std::string& separator=",");
+		bool          readCsv                  (const std::string& contents,
+		                                        const std::string& separator=",");
 
 		bool          readString               (const char* contents);
-		bool          readString               (const string& contents);
+		bool          readString               (const std::string& contents);
 		bool          readStringCsv            (const char* contents,
-		                                        const string& separator=",");
-		bool          readStringCsv            (const string& contents,
-		                                        const string& separator=",");
+		                                        const std::string& separator=",");
+		bool          readStringCsv            (const std::string& contents,
+		                                        const std::string& separator=",");
 		bool          isValid                  (void);
-		string        getParseError            (void) const;
+		std::string   getParseError            (void) const;
 		bool          isQuiet                  (void) const;
 		void          setQuietParsing          (void);
 		void          setNoisyParsing          (void);
 		void          clear                    (void);
 
-		bool          parse                    (istream& contents)
+		bool          parse                    (std::istream& contents)
 		                                    { return read(contents); }
 		bool          parse                    (const char* contents)
 		                                    { return readString(contents); }
-		bool          parse                    (const string& contents)
+		bool          parse                    (const std::string& contents)
 		                                    { return readString(contents); }
-		bool          parseCsv                 (istream& contents,
-		                                        const string& separator = ",")
+		bool          parseCsv                 (std::istream& contents,
+		                                        const std::string& separator = ",")
 		                                    { return readCsv(contents); }
 		bool          parseCsv                 (const char* contents,
-		                                        const string& separator = ",")
+		                                        const std::string& separator = ",")
 		                                    { return readStringCsv(contents); }
-		bool          parseCsv                 (const string& contents,
-		                                        const string& separator = ",")
+		bool          parseCsv                 (const std::string& contents,
+		                                        const std::string& separator = ",")
 		                                    { return readStringCsv(contents); }
 
-		void          setXmlIdPrefix           (const string& value);
-		string        getXmlIdPrefix           (void);
-		void          setFilename              (const string& filename);
-		string        getFilename              (void);
+		void          setXmlIdPrefix           (const std::string& value);
+		std::string   getXmlIdPrefix           (void);
+		void          setFilename              (const std::string& filename);
+		std::string   getFilename              (void);
 
 		void          setSegmentLevel          (int level = 0);
 		int           getSegmentLevel          (void);
-		ostream&      printSegmentLabel        (ostream& out);
-		ostream&      printNonemptySegmentLabel(ostream& out);
+		std::ostream& printSegmentLabel        (std::ostream& out);
+		std::ostream& printNonemptySegmentLabel(std::ostream& out);
 
 		HumdrumLine&  operator[]               (int index);
 		HumdrumLine*  getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
-		string        token                    (int lineindex, int fieldindex,
+		std::string   token                    (int lineindex, int fieldindex,
 		                                        int subtokenindex,
-		                                        const string& separator = " ");
+		                                        const std::string& separator = " ");
 		int           getMaxTrack              (void) const;
 		int           getTrackCount            (void) const
 		                                                { return getMaxTrack(); }
 		int           getSpineCount            (void) const
 		                                                { return getMaxTrack(); }
 		int           getMeasureNumber         (int line);
-		ostream&      printSpineInfo           (ostream& out = cout);
-		ostream&      printDataTypeInfo        (ostream& out = cout);
-		ostream&      printTrackInfo           (ostream& out = cout);
-		ostream&      printCsv                 (ostream& out = cout,
-		                                        const string& separator = ",");
-		ostream&      printFieldNumber         (int fieldnum, ostream& out);
-		ostream&      printFieldIndex          (int fieldind, ostream& out);
-		void          usage                    (const string& command);
+		std::ostream& printSpineInfo           (std::ostream& out = std::cout);
+		std::ostream& printDataTypeInfo        (std::ostream& out = std::cout);
+		std::ostream& printTrackInfo           (std::ostream& out = std::cout);
+		std::ostream& printCsv                 (std::ostream& out = std::cout,
+		                                        const std::string& separator = ",");
+		std::ostream& printFieldNumber         (int fieldnum, std::ostream& out);
+		std::ostream& printFieldIndex          (int fieldind, std::ostream& out);
+		void          usage                    (const std::string& command);
 		void          example                  (void);
 
 		HTp           getTrackStart            (int track) const;
-		void          getSpineStopList         (vector<HTp>& spinestops);
+		void          getSpineStopList         (std::vector<HTp>& spinestops);
 		HTp           getSpineStart            (int spine) const
 		                                       { return getTrackStart(spine+1); }
-		void          getSpineStartList        (vector<HTp>& spinestarts);
-		void          getSpineStartList        (vector<HTp>& spinestarts,
-		                                        const string& exinterp);
-		void          getKernSpineStartList    (vector<HTp>& spinestarts);
-		vector<HTp>   getKernSpineStartList    ();
-		int           getExinterpCount         (const string& exinterp);
-		void          getSpineStartList        (vector<HTp>& spinestarts,
-		                                        const vector<string>& exinterps);
-		void          getTrackStartList        (vector<HTp>& spinestarts)
+		void          getSpineStartList        (std::vector<HTp>& spinestarts);
+		void          getSpineStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::string& exinterp);
+		void          getKernSpineStartList    (std::vector<HTp>& spinestarts);
+		std::vector<HTp> getKernSpineStartList (void);
+		int           getExinterpCount         (const std::string& exinterp);
+		void          getSpineStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::vector<std::string>& exinterps);
+		void          getTrackStartList        (std::vector<HTp>& spinestarts)
 		                               { return getSpineStartList(spinestarts); }
-		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const string& exinterp)
+		void          getTrackStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::string& exinterp)
 		                     { return getSpineStartList(spinestarts, exinterp); }
-		void          getTrackStartList        (vector<HTp>& spinestarts,
-		                                        const vector<string>& exinterps)
+		void          getTrackStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::vector<std::string>& exinterps)
 		                    { return getSpineStartList(spinestarts, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
@@ -202,74 +203,76 @@ class HumdrumFileBase : public HumHash {
 		void          createLinesFromTokens    (void);
 
 		void          appendLine               (const char* line);
-		void          appendLine               (const string& line);
+		void          appendLine               (const std::string& line);
 		void          appendLine               (HumdrumLine* line);
 		void          push_back                (const char* line)
 		                                                    { appendLine(line); }
-		void          push_back                (const string& line)
+		void          push_back                (const std::string& line)
 		                                                    { appendLine(line); }
 		void          push_back                (HumdrumLine* line)
 		                                                    { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
-		void          insertLine               (int index, const string& line);
+		void          insertLine               (int index, const std::string& line);
 		void          insertLine               (int index, HumdrumLine* line);
+
+		void          deleteLine               (int index);
 //		void          adjustMergeSpineLines    (void);
 
 		HumdrumLine*  back                     (void);
-		void          makeBooleanTrackList     (vector<bool>& spinelist,
-		                                        const string& spinestring);
+		void          makeBooleanTrackList     (std::vector<bool>& spinelist,
+		                                        const std::string& spinestring);
 		bool          analyzeBaseFromLines     (void);
 		bool          analyzeBaseFromTokens    (void);
 
 
-		vector<HumdrumLine*> getReferenceRecords(void);
+		std::vector<HumdrumLine*> getReferenceRecords(void);
 
 		// spine analysis functionality:
-		void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (std::vector<std::vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-		void          getTrackSequence         (vector<vector<HTp> >& sequence,
+		void          getTrackSequence         (std::vector<std::vector<HTp> >& sequence,
 		                                        int track, int options);
-		void          getPrimaryTrackSequence  (vector<HTp>& sequence,
+		void          getPrimaryTrackSequence  (std::vector<HTp>& sequence,
 		                                        int track, int options);
 
-		void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (std::vector<std::vector<HTp> >& sequence,
 		                                        HTp starttoken, int options);
-		void          getSpineSequence         (vector<vector<HTp> >& sequence,
+		void          getSpineSequence         (std::vector<std::vector<HTp> >& sequence,
 		                                        int spine, int options);
-		void          getPrimarySpineSequence  (vector<HTp>& sequence,
+		void          getPrimarySpineSequence  (std::vector<HTp>& sequence,
 		                                        int spine, int options);
 
-		void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (std::vector<std::vector<HTp> >& sequence,
 		                                        HTp starttoken, int options)
 		                     { getTrackSequence(sequence, starttoken, options); }
-		void          getTrackSeq              (vector<vector<HTp> >& sequence,
+		void          getTrackSeq              (std::vector<std::vector<HTp> >& sequence,
 		                                        int track, int options)
 		                          { getTrackSequence(sequence, track, options); }
-		void          getPrimaryTrackSeq       (vector<HTp>& sequence,
+		void          getPrimaryTrackSeq       (std::vector<HTp>& sequence,
 		                                        int track, int options)
 		                    {getPrimaryTrackSequence(sequence, track, options); }
 
 		// functions defined in HumdrumFileBase-net.cpp:
-		static string getUriToUrlMapping        (const string& uri);
-		void          readFromHumdrumUri        (const string& humaddress);
-		void          readFromJrpUri            (const string& jrpaddress);
-		void          readFromHttpUri           (const string& webaddress);
-		static void   readStringFromHttpUri     (stringstream& inputdata,
-		                                         const string& webaddress);
+		static std::string getUriToUrlMapping        (const std::string& uri);
+		void          readFromHumdrumUri        (const std::string& humaddress);
+		void          readFromJrpUri            (const std::string& jrpaddress);
+		void          readFromHttpUri           (const std::string& webaddress);
+		static void   readStringFromHttpUri     (std::stringstream& inputdata,
+		                                         const std::string& webaddress);
 
 	protected:
 		static int    getChunk                  (int socket_id,
-		                                         stringstream& inputdata,
+		                                         std::stringstream& inputdata,
 		                                         char* buffer, int bufsize);
 		static int    getFixedDataSize          (int socket_id,
 		                                         int datalength,
-		                                         stringstream& inputdata,
+		                                         std::stringstream& inputdata,
 		                                         char* buffer, int bufsize);
 		static void   prepare_address           (struct sockaddr_in *address,
-		                                         const string& hostname,
+		                                         const std::string& hostname,
 		                                         unsigned short int port);
-		static int    open_network_socket       (const string& hostname,
+		static int    open_network_socket       (const std::string& hostname,
 		                                         unsigned short int port);
 
 	protected:
@@ -279,22 +282,22 @@ class HumdrumFileBase : public HumHash {
 		bool          analyzeTracks             (void);
 		bool          analyzeLines              (void);
 		bool          adjustSpines              (HumdrumLine& line,
-		                                         vector<string>& datatype,
-		                                         vector<string>& sinfo);
-		string        getMergedSpineInfo        (vector<string>& info,
+		                                         std::vector<std::string>& datatype,
+		                                         std::vector<std::string>& sinfo);
+		std::string   getMergedSpineInfo        (std::vector<std::string>& info,
 		                                         int starti, int extra);
 		bool          stitchLinesTogether       (HumdrumLine& previous,
 		                                         HumdrumLine& next);
 		void          addToTrackStarts          (HTp token);
 		bool          analyzeNonNullDataTokens  (void);
-		void          addUniqueTokens           (vector<HTp>& target,
-		                                         vector<HTp>& source);
+		void          addUniqueTokens           (std::vector<HTp>& target,
+		                                         std::vector<HTp>& source);
 		bool          processNonNullDataTokensForTrackForward(HTp starttoken,
-		                                         vector<HTp> ptokens);
+		                                         std::vector<HTp> ptokens);
 		bool          processNonNullDataTokensForTrackBackward(HTp starttoken,
-		                                         vector<HTp> ptokens);
-		bool          setParseError             (stringstream& err);
-		bool          setParseError             (const string& err);
+		                                         std::vector<HTp> ptokens);
+		bool          setParseError             (std::stringstream& err);
+		bool          setParseError             (const std::string& err);
 		bool          setParseError             (const char* format, ...);
 //		void          fixMerges                 (int linei);
 
@@ -302,10 +305,10 @@ class HumdrumFileBase : public HumHash {
 
 		// m_lines: an array representing lines from the input file.
 		// The contents of lines must be deallocated when deconstructing object.
-		vector<HumdrumLine*> m_lines;
+		std::vector<HumdrumLine*> m_lines;
 
 		// m_filename: name of the file which was loaded.
-		string m_filename;
+		std::string m_filename;
 
 		// m_segementlevel: segment level (e.g., work/movement)
 		int m_segmentlevel;
@@ -314,19 +317,19 @@ class HumdrumFileBase : public HumHash {
 		// in the file.  The first element in the list is reserved, so the
 		// number of tracks (primary spines) is equal to one less than the
 		// size of this list.
-		vector<HTp> m_trackstarts;
+		std::vector<HTp> m_trackstarts;
 
 		// m_trackends: list of the addresses of the spine terminators in the
 		// file. It is possible that spines can split and their subspines do not
 		// merge before termination; therefore, the ends are stored in
 		// a 2d array. The first dimension is the track number, and the second
 		// dimension is the list of terminators.
-		vector<vector<HTp> > m_trackends;
+		std::vector<std::vector<HTp> > m_trackends;
 
 		// m_barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
-		vector<HumdrumLine*> m_barlines;
+		std::vector<HumdrumLine*> m_barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
 
 		// m_ticksperquarternote: this is the number of tick
@@ -334,23 +337,26 @@ class HumdrumFileBase : public HumHash {
 
 		// m_idprefix: an XML id prefix used to avoid id collisions when
 		// includeing multiple HumdrumFile XML in a single group.
-		string m_idprefix;
+		std::string m_idprefix;
 
 		// m_strands1d: one-dimensional list of spine strands.
-		vector<TokenPair> m_strand1d;
+		std::vector<TokenPair> m_strand1d;
 
 		// m_strands2d: two-dimensional list of spine strands.
-		vector<vector<TokenPair> > m_strand2d;
+		std::vector<std::vector<TokenPair> > m_strand2d;
 
 		// m_quietParse: Set to true if error messages should not be
 		// printed to the console when reading.
 		bool m_quietParse;
 
 		// m_parseError: Set to true if a read is successful.
-		string m_parseError;
+		std::string m_parseError;
 
 		// m_displayError: Used to print error message only once.
 		bool m_displayError;
+
+		// m_signifiers: Used to keep track of !!!RDF records.
+		HumSignifiers m_signifiers;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
@@ -361,13 +367,13 @@ class HumdrumFileBase : public HumHash {
 		//
 		// HumdrumFileStructure public functions:
 		//
-		bool readNoRhythm      (istream& infile) { return read(infile); };
+		bool readNoRhythm      (std::istream& infile) { return read(infile); };
 		bool readNoRhythm      (const char*   filename) {return read(filename);};
-		bool readNoRhythm      (const string& filename) {return read(filename);};
+		bool readNoRhythm      (const std::string& filename) {return read(filename);};
 		bool readStringNoRhythm(const char*   contents) {return read(contents);};
-		bool readStringNoRhythm(const string& contents) {return read(contents);};
+		bool readStringNoRhythm(const std::string& contents) {return read(contents);};
 		HumNum       getScoreDuration           (void) const { return 0; };
-		ostream&     printDurationInfo          (ostream& out=cout) {return out;};
+		std::ostream&     printDurationInfo          (std::ostream& out=std::cout) {return out;};
 		int          tpq                        (void) { return 0; }
 		int          getBarlineCount            (void) const { return 0; }
 		HumdrumLine* getBarline                 (int index) const { return NULL;};
@@ -380,7 +386,7 @@ class HumdrumFileBase : public HumHash {
 
 };
 
-ostream& operator<<(ostream& out, HumdrumFileBase& infile);
+std::ostream& operator<<(std::ostream& out, HumdrumFileBase& infile);
 
 
 // END_MERGE

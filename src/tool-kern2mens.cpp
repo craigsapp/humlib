@@ -79,7 +79,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_kern2mens::convertToMens -- 
+// Tool_kern2mens::convertToMens --
 //
 
 void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
@@ -142,8 +142,9 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 		return ".";
 	}
 	data = *token;
-	// remove uninteresting characters (beams, articulations, slurs, etc).
-	hre.replaceDestructive(data, "", "[^A-Gnra-g#\\[\\]0-9%.-]", "g");
+	// remove uninteresting characters (beams, articulations, etc).
+	// keeping pitches, accidentals, rests, slurs, durations, ties
+	hre.replaceDestructive(data, "", "[^A-Gnra-g#\\(\\)\\[\\]0-9%.-]", "g");
 	// but keep editorial accidental (probably i)
 	HumNum dur;
 	if (token->find("[") != std::string::npos) {

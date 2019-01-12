@@ -15,6 +15,8 @@
 
 #include "Convert.h"
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE

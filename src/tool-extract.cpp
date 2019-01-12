@@ -1051,7 +1051,7 @@ void Tool_extract::dealWithSecondarySubspine(vector<int>& field, vector<int>& su
 				// remove secondary chord notes:
 				hre.replaceDestructive(buffer, "", " .*");
 				// remove unnecessary characters (such as stem direction):
-				hre.replaceDestructive(buffer, "", 
+				hre.replaceDestructive(buffer, "",
 						"[^}pPqQA-Ga-g0-9.;%#nr-]", "g");
 				// change pitch to rest:
 				hre.replaceDestructive(buffer, "[A-Ga-g#n-]+", "r");

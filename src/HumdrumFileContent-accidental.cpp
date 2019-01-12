@@ -85,7 +85,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 
 	int lasttrack = -1;
 	vector<int> concurrentstate(70, 0);
-	
+
 	for (i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
@@ -395,7 +395,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					// displayed for clarification.
 					dstates[rindex][diatonic] = -1000 + accid;
 
-				} else if (!graceQ && ((concurrentstate[diatonic] && (concurrentstate[diatonic] == accid)) 
+				} else if (!graceQ && ((concurrentstate[diatonic] && (concurrentstate[diatonic] == accid))
 						|| (accid != dstates[rindex][diatonic]))) {
 					// accidental is different from the previous state so should be
 					// printed, but only print if not supposed to be hidden.

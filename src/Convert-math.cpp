@@ -13,6 +13,8 @@
 #include "Convert.h"
 #include <cmath>
 
+using namespace std;
+
 namespace hum {
 
 // START_MERGE
@@ -124,7 +126,7 @@ bool Convert::isNaN(double value) {
 // Tool_transpose::pearsonCorrelation --
 //
 
-double Convert::pearsonCorrelation(vector<double> x, vector<double> y) {
+double Convert::pearsonCorrelation(const vector<double>& x, const vector<double>& y) {
 	double sumx  = 0.0;
 	double sumy  = 0.0;
 	double sumco = 0.0;

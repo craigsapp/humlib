@@ -23,9 +23,10 @@
 #include "pugixml.hpp"
 
 #include <sstream>
+#include <string>
+#include <vector>
 
 using namespace pugi;
-using namespace std;
 
 namespace hum {
 
@@ -84,11 +85,12 @@ class MxmlEvent {
 		bool               isLinked           (void) const;
 		bool               isRest             (void);
 		bool               isGrace            (void);
+		bool               hasGraceSlash      (void);
 		bool               isFloating         (void);
 		bool               hasSlurStart       (int& direction);
 		bool               hasSlurStop        (void);
 		void               setLinked          (void);
-		vector<MxmlEvent*> getLinkedNotes     (void);
+		std::vector<MxmlEvent*> getLinkedNotes     (void);
 		void               attachToLastEvent  (void);
 		bool               isChord            (void) const;
 		void               printEvent         (void);
@@ -102,15 +104,15 @@ class MxmlEvent {
 		measure_event_type getType            (void) const;
 		int                getPartNumber      (void) const;
 		int                getPartIndex       (void) const;
-		string             getRecip           (void) const;
-		string             getKernPitch       (void);
-		string             getPrefixNoteInfo  (void) const;
-		string             getPostfixNoteInfo (bool primarynote) const;
+		std::string        getRecip           (void) const;
+		std::string        getKernPitch       (void);
+		std::string        getPrefixNoteInfo  (void) const;
+		std::string        getPostfixNoteInfo (bool primarynote) const;
 		xml_node           getNode            (void);
 		xml_node           getHNode           (void);
 		HumNum             getTimeSigDur      (void);
-		string             getElementName     (void);
-		void               addNotations       (stringstream& ss, 
+		std::string        getElementName     (void);
+		void               addNotations       (std::stringstream& ss,
 		                                       xml_node notations) const;
 		void               reportVerseCountToOwner    (int count);
 		void               reportVerseCountToOwner    (int staffnum, int count);
@@ -118,8 +120,9 @@ class MxmlEvent {
 		void               reportMeasureStyleToOwner  (MeasureStyle style);
 		void               reportEditorialAccidentalToOwner(void);
 		void               reportDynamicToOwner       (void);
-		void               reportCaesuraToOwner       (const string& letter = "Z") const;
-      void               makeDummyRest      (MxmlMeasure* owner, 
+		void               reportCaesuraToOwner       (const std::string& letter = "Z") const;
+		void               reportOrnamentToOwner      (void) const;
+      void               makeDummyRest      (MxmlMeasure* owner,
 		                                       HumNum startime,
 		                                       HumNum duration,
 		                                       int staffindex = 0,
@@ -128,10 +131,11 @@ class MxmlEvent {
 		void               forceInvisible     (void);
 		bool               isInvisible        (void);
 		void               setBarlineStyle    (xml_node node);
-		void               setTexts           (vector<xml_node>& nodes);
-		vector<xml_node>&  getTexts           (void);
+		void               setTexts           (std::vector<xml_node>& nodes);
+		std::vector<xml_node>&  getTexts           (void);
 		void               setDynamics        (xml_node node);
 		xml_node           getDynamics        (void);
+		std::string        getRestPitch       (void) const;
 
 	protected:
 		HumNum             m_starttime;  // start time in quarter notes of event
@@ -139,7 +143,7 @@ class MxmlEvent {
 		measure_event_type m_eventtype;  // enumeration type of event
 		xml_node           m_node;       // pointer to event in XML structure
 		MxmlMeasure*       m_owner;      // measure that contains this event
-		vector<MxmlEvent*> m_links;      // list of secondary chord notes
+		std::vector<MxmlEvent*> m_links;      // list of secondary chord notes
 		bool               m_linked;     // true if a secondary chord note
 		int                m_sequence;   // ordering of event in XML file
 		static int         m_counter;    // counter for sequence variable
@@ -152,7 +156,7 @@ class MxmlEvent {
 		bool               m_stems;      // for preserving stems
 
 		xml_node          m_dynamics;    // dynamics <direction> starting just before note
-		vector<xml_node>  m_text;        // text <direction> starting just before note
+		std::vector<xml_node>  m_text;        // text <direction> starting just before note
 
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);

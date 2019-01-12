@@ -14,6 +14,7 @@
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
 #include "tool-chord.h"
+#include "tool-trillspell.h"
 #include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
@@ -124,9 +125,6 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	reindexVoices(partdata);
 
 	HumGrid outdata;
-	if (m_recipQ) {
-		outdata.enableRecipSpine();
-	}
 	status &= stitchParts(outdata, partids, partinfo, partcontent, partdata);
 
 	if (outdata.size() > 2) {
@@ -137,6 +135,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 			}
 			outdata.deleteMeasure(0);
 		}
+	}
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		m_hasOrnamentsQ |= partdata[i].hasOrnaments();
 	}
 
 	outdata.removeRedundantClefChanges();
@@ -168,10 +170,14 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
+
+	if (m_recipQ || m_forceRecipQ) {
+		outdata.enableRecipSpine();
+	}
+
 	// set the duration of the last slice
 
 	HumdrumFile outfile;
-
 	outdata.transferTokens(outfile);
 
 	addHeaderRecords(outfile, doc);
@@ -182,6 +188,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	Tool_chord chord;
 	chord.run(outfile);
+
+	if (m_hasOrnamentsQ) {
+		Tool_trillspell trillspell;
+		trillspell.run(outfile);
+	}
 
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
@@ -288,7 +299,7 @@ void Tool_musicxml2hum::printRdfs(ostream& out) {
 
 //////////////////////////////
 //
-// Tool_muisicxml2hum::setSoftwareInfo -- Store which software program generated the 
+// Tool_muisicxml2hum::setSoftwareInfo -- Store which software program generated the
 //    MusicXML data to handle locale variants.  There can be more than one
 //    <software> entry, so desired information is not necessarily in the first one.
 //
@@ -306,14 +317,20 @@ void Tool_musicxml2hum::setSoftwareInfo(xml_document& doc) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::cleanSpaces --
+// Tool_musicxml2hum::cleanSpaces -- Converts newlines and tabs to spaces, and removes
+//     trailing spaces from the string.  Does not remove leading spaces, but this could
+//     be added.  Another variation would be to use \n to encode newlines if they need
+//     to be preserved, but for now converting them to spaces.
 //
 
-string Tool_musicxml2hum::cleanSpaces(string& input) {
+string& Tool_musicxml2hum::cleanSpaces(string& input) {
 	for (int i=0; i<(int)input.size(); i++) {
 		if (std::isspace(input[i])) {
 			input[i] = ' ';
 		}
+	}
+	while ((!input.empty()) && std::isspace(input.back())) {
+		input.resize(input.size() - 1);
 	}
 	return input;
 }
@@ -448,6 +465,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 void Tool_musicxml2hum::initialize(void) {
 	m_recipQ = getBoolean("recip");
 	m_stemsQ = getBoolean("stems");
+	m_hasOrnamentsQ = false;
 }
 
 
@@ -641,7 +659,10 @@ bool Tool_musicxml2hum::fillPartData(MxmlPart& partdata,
 	}
 
 	partdata.parsePartInfo(partdeclaration);
-	m_last_ottava_direction.at(partdata.getPartIndex()).resize(partdata.getStaffCount());
+	// m_last_ottava_direction.at(partdata.getPartIndex()).resize(partdata.getStaffCount());
+	// staff count is incorrect at this point? Just assume 32 staves in the part, which should
+	// be 28-30 staffs too many.
+	m_last_ottava_direction.at(partdata.getPartIndex()).resize(32);
 
 	int count;
 	auto measures = partcontent.select_nodes("./measure");
@@ -712,7 +733,7 @@ void Tool_musicxml2hum::printPartInfo(vector<string>& partids,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::insertPartNames -- 
+// Tool_musicxml2hum::insertPartNames --
 //
 
 void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& partdata) {
@@ -790,7 +811,7 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::stitchParts -- Merge individual parts into a 
+// Tool_musicxml2hum::stitchParts -- Merge individual parts into a
 //     single score sequence.
 //
 
@@ -1007,7 +1028,71 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 				nowevents, nowparts, processtime, partdata, partstaves);
 	}
 
+	if (offsetHarmony.size() > 0) {
+		insertOffsetHarmonyIntoMeasure(outdata.back());
+	}
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertOffsetHarmonyIntoMeasure --
+//
+
+void Tool_musicxml2hum::insertOffsetHarmonyIntoMeasure(GridMeasure* gm) {
+	if (offsetHarmony.empty()) {
+		return;
+	}
+	// the offsetHarmony list should probably be time sorted first, and then
+	// iterate through the slices once.  But there should not be many offset
+	bool beginQ = true;
+	for (auto it = gm->begin(); it != gm->end(); ++it) {
+		GridSlice* gs = *it;
+		if (!gs->isNoteSlice()) {
+			// Only attached harmony to data lines.
+			continue;
+		}
+		HumNum timestamp = gs->getTimestamp();
+		for (int i=0; i<(int)offsetHarmony.size(); i++) {
+			if (offsetHarmony[i].token == NULL) {
+				continue;
+ 			}
+			if (offsetHarmony[i].timestamp == timestamp) {
+				// this is the slice to insert the harmony
+				gs->at(offsetHarmony[i].partindex)->setHarmony(offsetHarmony[i].token);
+				offsetHarmony[i].token = NULL;
+			} else if (offsetHarmony[i].timestamp < timestamp) {
+				if (beginQ) {
+					cerr << "Error: Cannot insert harmony " << offsetHarmony[i].token
+					     << " at timestamp " << offsetHarmony[i].timestamp
+					     << " since first timestamp in measure is " << timestamp << endl;
+				} else {
+					m_forceRecipQ = true;
+					// go back to previous note line and insert new slice to stor
+					// the harmony token
+					auto tempit = it;
+					tempit--;
+					while (tempit != gm->end()) {
+						if ((*tempit)->getTimestamp() == (*it)->getTimestamp()) {
+							tempit--;
+							continue;
+						}
+						int partcount = (int)(*tempit)->size();
+						tempit++;
+						GridSlice* newgs = new GridSlice(gm, offsetHarmony[i].timestamp,
+								SliceType::Notes, partcount);
+						newgs->at(offsetHarmony[i].partindex)->setHarmony(offsetHarmony[i].token);
+						gm->insert(tempit, newgs);
+						offsetHarmony[i].token = NULL;
+						break;
+					}
+				}
+			}
+		}
+		beginQ = false;
+	}
 }
 
 
@@ -1137,7 +1222,7 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 	for (int i=0; i<(int)nowevents.size(); i++) {
 		vector<MxmlEvent*>& events = nowevents[i]->nonzerodur;
 		for (int j=0; j<(int)events.size(); j++) {
-			addEvent(slice, outdata, events[j]);
+			addEvent(slice, outdata, events[j], nowtime);
 		}
 	}
 }
@@ -1149,7 +1234,8 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 // Tool_musicxml2hum::addEvent -- Add a note or rest.
 //
 
-void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEvent* event) {
+void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEvent* event,
+		HumNum nowtime) {
 
 	int partindex;  // which part the event occurs in
 	int staffindex; // which staff the event occurs in (need to fix)
@@ -1186,6 +1272,11 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		bool slurstart = event->hasSlurStart(slurdir);
 		bool slurstop  = event->hasSlurStop();
 
+		if (pitch.find('r') != std::string::npos) {
+			string restpitch =  event->getRestPitch();
+			pitch += restpitch;
+		}
+
 		if (slurstart) {
 			prefix.insert(0, "(");
 			if (slurdir) {
@@ -1213,6 +1304,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 				recip = to_string(dur.getDenominator()) + "q";
 			} else {
 				recip = "q";
+			}
+			if (!event->hasGraceSlash()) {
+				recip += "q";
 			}
 		}
 	}
@@ -1261,7 +1355,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		event->reportVerseCountToOwner(staffindex, vcount);
 	}
 
-	int hcount = addHarmony(slice->at(partindex), event);
+	int hcount = addHarmony(slice->at(partindex), event, nowtime, partindex);
 	if (hcount > 0) {
 		event->reportHarmonyCountToOwner(hcount);
 	}
@@ -1315,7 +1409,7 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //        </direction-type>
 //      </direction>
 
-void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex, 
+void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
 		int staffindex, int voiceindex, xml_node node) {
 	string placementstring;
 	xml_attribute placement = node.attribute("placement");
@@ -1349,6 +1443,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		return;
 	}
 
+	/* Problem: these are also possibly for figured bass
 	if (text == "#") {
 		// interpret as an editorial sharp marker
 		setEditorialAccidental(+1, slice, partindex, staffindex, voiceindex);
@@ -1363,6 +1458,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		setEditorialAccidental(0, slice, partindex, staffindex, voiceindex);
 		return;
 	}
+	*/
 
 	string stylestring;
 	bool italic = false;
@@ -1383,7 +1479,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 			bold = true;
 		}
 	}
-	
+
 	if (italic && bold) {
 		stylestring = ":Bi";
 	} else if (italic) {
@@ -1392,7 +1488,12 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
-	// maybe check for text only containing spaces and exclude here
+	text = cleanSpaces(text);
+	if (text.empty()) {
+		// no text to display after removing whitespace
+		return;
+	}
+
 	string output = "!LO:TX";
 	output += placementstring;
 	output += stylestring;
@@ -1413,7 +1514,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 // setEditorialAccidental --
 //
 
-void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice, 
+void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 		int partindex, int staffindex, int voiceindex) {
 
 	HTp tok = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
@@ -1503,7 +1604,7 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 //////////////////////////////
 //
 // Tool_musicxml2hum::addDynamic -- extract any dynamics for the event
-// 
+//
 // Such as:
 //    <direction placement="below">
 //      <direction-type>
@@ -1733,7 +1834,8 @@ string Tool_musicxml2hum::getDynamicString(xml_node element) {
 // Tool_musicxml2hum::addHarmony --
 //
 
-int Tool_musicxml2hum::addHarmony(GridPart* part, MxmlEvent* event) {
+int Tool_musicxml2hum::addHarmony(GridPart* part, MxmlEvent* event, HumNum nowtime,
+		int partindex) {
 	xml_node hnode = event->getHNode();
 	if (!hnode) {
 		return 0;
@@ -1741,10 +1843,56 @@ int Tool_musicxml2hum::addHarmony(GridPart* part, MxmlEvent* event) {
 
 	// fill in X with the harmony values from the <harmony> node
 	string hstring = getHarmonyString(hnode);
+	int offset = getHarmonyOffset(hnode);
 	HTp htok = new HumdrumToken(hstring);
-	part->setHarmony(htok);
+	if (offset == 0) {
+		part->setHarmony(htok);
+	} else {
+		MusicXmlHarmonyInfo hinfo;
+		hinfo.timestamp = offset;
+		hinfo.timestamp /= event->getQTicks();
+		hinfo.timestamp += nowtime;
+		hinfo.partindex = partindex;
+		hinfo.token = htok;
+		offsetHarmony.push_back(hinfo);
+	}
 
 	return 1;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getHarmonyOffset --
+//   <harmony default-y="40">
+//       <root>
+//           <root-step>C</root-step>
+//       </root>
+//       <kind>major-ninth</kind>
+//       <bass>
+//           <bass-step>E</bass-step>
+//       </bass>
+//       <offset>-8</offset>
+//   </harmony>
+//
+
+int Tool_musicxml2hum::getHarmonyOffset(xml_node hnode) {
+	if (!hnode) {
+		return 0;
+	}
+	xml_node child = hnode.first_child();
+	if (!child) {
+		return 0;
+	}
+	while (child) {
+		if (nodeType(child, "offset")) {
+			return atoi(child.child_value());
+		}
+		child = child.next_sibling();
+	}
+
+	return 0;
 }
 
 
@@ -1760,6 +1908,7 @@ int Tool_musicxml2hum::addHarmony(GridPart* part, MxmlEvent* event) {
 //       <bass>
 //           <bass-step>E</bass-step>
 //       </bass>
+//       <offset>-8</offset>
 //   </harmony>
 //
 
@@ -1943,6 +2092,7 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 				} else {
 					finaltext += text;
 				}
+				syllabic.clear();
 			}
 		}
 
@@ -2005,6 +2155,13 @@ string Tool_musicxml2hum::cleanSpaces(const string& input) {
 		}
 		i--;
 	}
+	if ((output.size() == 3) && ((unsigned char)output[0] == 0xee) &&
+			((unsigned char)output[1] == 0x95) && ((unsigned char)output[2] == 0x91)) {
+		// MuseScore elision character:
+		// <text font-family="MScore Text"></text>
+		output = " ";
+	}
+
 	return output;
 }
 
@@ -2085,11 +2242,12 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 		vector<SimultaneousEvents*>& nowevents, HumNum nowtime,
 		vector<MxmlPart>& partdata) {
 
-	bool hasclef          = false;
-	bool haskeysig        = false;
-	bool hastransposition = false;
-	bool hastimesig       = false;
-	bool hasottava        = false;
+	bool hasclef           = false;
+	bool haskeysig         = false;
+	bool haskeydesignation = false;
+	bool hastransposition  = false;
+	bool hastimesig        = false;
+	bool hasottava         = false;
 
 	vector<vector<xml_node>> clefs(partdata.size());
 	vector<vector<xml_node>> keysigs(partdata.size());
@@ -2122,6 +2280,11 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					if (nodeType(child, "key")) {
 						keysigs[pindex].push_back(child);
 						haskeysig = true;
+						string xpath = "mode";
+						string mode = child.select_node(xpath.c_str()).node().child_value();
+						if (mode != "") {
+							haskeydesignation = true;
+						}
 						foundnongrace = true;
 					}
 
@@ -2184,6 +2347,10 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 		addKeySigLine(outdata, keysigs, partdata, nowtime);
 	}
 
+	if (haskeydesignation) {
+		addKeyDesignationLine(outdata, keysigs, partdata, nowtime);
+	}
+
 	if (hastimesig) {
 		addTimeSigLine(outdata, timesigs, partdata, nowtime);
 	}
@@ -2233,7 +2400,7 @@ void Tool_musicxml2hum::processPrintElement(GridMeasure* outdata, xml_node eleme
 // Tool_musicxml2hum::addEventToList --
 //
 
-void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> > > >& list, 
+void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> > > >& list,
 		MxmlEvent* event) {
 	int pindex = event->getPartIndex();
 	int staffindex = event->getStaffIndex();
@@ -2254,7 +2421,7 @@ void Tool_musicxml2hum::addEventToList(vector<vector<vector<vector<MxmlEvent*> >
 
 ///////////////////////////////
 //
-// Tool_musicxml2hum::addGraceLines -- Add grace note lines.  The number of 
+// Tool_musicxml2hum::addGraceLines -- Add grace note lines.  The number of
 //     lines is equal to the maximum number of successive grace notes in
 //     any part.  Grace notes are filled in reverse sequence.
 //
@@ -2291,7 +2458,7 @@ void Tool_musicxml2hum::addGraceLines(GridMeasure* outdata,
 			for (int k=0; k<(int)notes[i][j].size(); k++) {
 				int startm = maxcount - (int)notes[i][j][k].size();
 				for (int m=0; m<(int)notes[i][j][k].size(); m++) {
-					addEvent(slices.at(startm+m), outdata, notes[i][j][k][m]);
+					addEvent(slices.at(startm+m), outdata, notes[i][j][k][m], nowtime);
 				}
 			}
 		}
@@ -2389,7 +2556,7 @@ void Tool_musicxml2hum::addOttavaLine(GridMeasure* outdata,
 	for (int i=0; i<(int)partdata.size(); i++) {
 		for (int j=0; j<(int)ottavas[i].size(); j++) {
 			if (ottavas[i][j]) {
-				insertPartOttavas(ottavas[i][j], *slice->at(i), i, j);
+				insertPartOttavas(ottavas[i][j], *slice->at(i), i, j, partdata[i].getStaffCount());
 			}
 		}
 	}
@@ -2425,7 +2592,33 @@ void Tool_musicxml2hum::addKeySigLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::addTranspositionLine -- Transposition codes to 
+// Tool_musicxml2hum::addKeyDesignationLine -- Only adding one key designation line
+//   for each part for now.
+//
+
+void Tool_musicxml2hum::addKeyDesignationLine(GridMeasure* outdata,
+		vector<vector<xml_node> >& keydesigs,
+		vector<MxmlPart>& partdata, HumNum nowtime) {
+
+	GridSlice* slice = new GridSlice(outdata, nowtime,
+		SliceType::KeyDesignations);
+	outdata->push_back(slice);
+	slice->initializePartStaves(partdata);
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		for (int j=0; j<(int)keydesigs[i].size(); j++) {
+			if (keydesigs[i][j]) {
+				insertPartKeyDesignations(keydesigs[i][j], *slice->at(i));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addTranspositionLine -- Transposition codes to
 //   produce written parts.
 //
 
@@ -2478,8 +2671,8 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 // Tool_musicxml2hum::insertPartOttavas --
 //
 
-void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int partindex, 
-		int partstaffindex) {
+void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int partindex,
+		int partstaffindex, int staffcount) {
 	if (!ottava) {
 		// no ottava for some reason.
 		return;
@@ -2488,7 +2681,7 @@ void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int p
 	HTp token;
 	int staffnum = 0;
 	while (ottava) {
-		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex);
+		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex, staffcount);
 		part[staffnum]->setTokenLayer(0, token, 0);
 	}
 
@@ -2566,6 +2759,41 @@ void Tool_musicxml2hum::insertPartKeySigs(xml_node keysig, GridPart& part) {
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::insertPartKeyDesignations --
+//
+
+void Tool_musicxml2hum::insertPartKeyDesignations(xml_node keydesig, GridPart& part) {
+	if (!keydesig) {
+		return;
+	}
+
+	HTp token;
+	int staffnum = 0;
+	while (keydesig) {
+		keydesig = convertKeySigToHumdrumKeyDesignation(keydesig, token, staffnum);
+		if (token == NULL) {
+			return;
+		}
+		if (staffnum < 0) {
+			// key signature applies to all staves in part (most common case)
+			for (int s=0; s<(int)part.size(); s++) {
+				if (s==0) {
+					part[s]->setTokenLayer(0, token, 0);
+				} else {
+					HTp token2 = new HumdrumToken(*token);
+					part[s]->setTokenLayer(0, token2, 0);
+				}
+			}
+		} else {
+			part[staffnum]->setTokenLayer(0, token, 0);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::insertPartTranspositions --
 //
 
@@ -2611,7 +2839,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 	bool hasmensuration = false;
 	HTp token;
 	int staffnum = 0;
-	
+
 	while (timesig) {
 		hasmensuration |= checkForMensuration(timesig);
 		timesig = convertTimeSigToHumdrum(timesig, token, staffnum);
@@ -2637,7 +2865,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::insertPartMensurations -- 
+// Tool_musicxml2hum::insertPartMensurations --
 //
 
 void Tool_musicxml2hum::insertPartMensurations(xml_node timesig,
@@ -2757,10 +2985,122 @@ xml_node Tool_musicxml2hum::convertTranspositionToHumdrum(xml_node transpose,
 
 //////////////////////////////
 //
+//	Tool_musicxml2hum::convertKeySigToHumdrumKeyDesignation --
+//
+//  <key>
+//     <fifths>4</fifths>
+// and sometimes:
+//     <mode>major</mode>
+// or
+//     <mode>minor</mode>
+//
+
+xml_node Tool_musicxml2hum::convertKeySigToHumdrumKeyDesignation(xml_node keysig,
+		HTp& token, int& staffindex) {
+
+	if (!keysig) {
+		return keysig;
+	}
+
+	staffindex = -1;
+	xml_attribute sn = keysig.attribute("number");
+	if (sn) {
+		staffindex = atoi(sn.value()) - 1;
+	}
+
+	int fifths = 0;
+	int mode = -1;
+
+	xml_node child = keysig.first_child();
+	while (child) {
+		if (nodeType(child, "fifths")) {
+			fifths = atoi(child.child_value());
+		}
+		if (nodeType(child, "mode")) {
+			string value = child.child_value();
+			if (value == "major") {
+				mode = 0;
+			} else if (value == "minor") {
+				mode = 1;
+			}
+			fifths = atoi(child.child_value());
+		}
+		child = child.next_sibling();
+	}
+
+	if (mode < 0) {
+		return xml_node(NULL);
+	}
+
+	stringstream ss;
+	ss << "*";
+
+	if (mode == 0) { // major:
+		switch (fifths) {
+			case +7: ss << "C#"; break;
+			case +6: ss << "F#"; break;
+			case +5: ss << "B"; break;
+			case +4: ss << "E"; break;
+			case +3: ss << "A"; break;
+			case +2: ss << "D"; break;
+			case +1: ss << "G"; break;
+			case  0: ss << "C"; break;
+			case -1: ss << "F"; break;
+			case -2: ss << "B-"; break;
+			case -3: ss << "E-"; break;
+			case -4: ss << "A-"; break;
+			case -5: ss << "D-"; break;
+			case -6: ss << "G-"; break;
+			case -7: ss << "C-"; break;
+			default: return xml_node(NULL);
+		}
+	} else if (mode == 1) { // minor:
+		switch (fifths) {
+			case +7: ss << "a#"; break;
+			case +6: ss << "d#"; break;
+			case +5: ss << "g#"; break;
+			case +4: ss << "c#"; break;
+			case +3: ss << "f#"; break;
+			case +2: ss << "b"; break;
+			case +1: ss << "e"; break;
+			case  0: ss << "a"; break;
+			case -1: ss << "d"; break;
+			case -2: ss << "g"; break;
+			case -3: ss << "c"; break;
+			case -4: ss << "f"; break;
+			case -5: ss << "b-"; break;
+			case -6: ss << "e-"; break;
+			case -7: ss << "a-"; break;
+			default: return xml_node(NULL);
+		}
+	}
+	ss << ":";
+
+	token = new HumdrumToken(ss.str());
+
+	keysig = keysig.next_sibling();
+	if (!keysig) {
+		return keysig;
+	}
+	if (nodeType(keysig, "key")) {
+		return keysig;
+	} else {
+		return xml_node(NULL);
+	}
+}
+
+
+
+//////////////////////////////
+//
 //	Tool_musicxml2hum::convertKeySigToHumdrum --
 //
 //  <key>
 //     <fifths>4</fifths>
+// and sometimes:
+//     <mode>major</mode>
+// or
+//     <mode>minor</mode>
 //
 
 xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
@@ -2777,10 +3117,20 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 	}
 
 	int fifths = 0;
+	int mode = -1;
 
 	xml_node child = keysig.first_child();
 	while (child) {
 		if (nodeType(child, "fifths")) {
+			fifths = atoi(child.child_value());
+		}
+		if (nodeType(child, "mode")) {
+			string value = child.child_value();
+			if (value == "major") {
+				mode = 0;
+			} else if (value == "minor") {
+				mode = 1;
+			}
 			fifths = atoi(child.child_value());
 		}
 		child = child.next_sibling();
@@ -3006,7 +3356,10 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 //
 
 xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
-		HTp& token, int& staffindex, int partindex, int partstaffindex) {
+		HTp& token, int& staffindex, int partindex, int partstaffindex, int staffcount) {
+
+	// partstaffindex is useless or incorrect? At least for grand staff parts.
+	// The staffindex calculated below is the one to used.
 
 	if (!ottava) {
 		// no clef for some reason.
@@ -3018,18 +3371,20 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 	if (sn) {
 		staffindex = atoi(sn.value()) - 1;
 	}
+	staffindex = staffcount - staffindex - 1;
 
 	int interval = 0;
 
 	interval = ottava.attribute("size").as_int();
 	string otype = ottava.attribute("type").as_string();
+	string lastotype = m_last_ottava_direction.at(partindex).at(staffindex);
 
 	string ss;
 	ss = "*";
 	if (otype == "stop") {
 		ss += "X";
 	} else {
-	   m_last_ottava_direction.at(partindex).at(partstaffindex) = otype;
+	   m_last_ottava_direction.at(partindex).at(staffindex) = otype;
    }
 	if (interval == 15) {
 		ss += "15";
@@ -3038,12 +3393,12 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "ma";
 			}
-		} 
+		}
 	} else if (interval == 8) {
 		ss += "8";
 		if (otype == "down") {
@@ -3051,9 +3406,9 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "va";
 			}
 		}
@@ -3064,9 +3419,9 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		} else if (otype == "up") {
 			ss += "ba";
 		} else if (otype == "stop") {
-			if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "up") {
+			if (m_last_ottava_direction.at(partindex).at(staffindex) == "up") {
 				ss += "ba";
-			} else if (m_last_ottava_direction.at(partindex).at(partstaffindex) == "down") {
+			} else if (m_last_ottava_direction.at(partindex).at(staffindex) == "down") {
 				ss += "va";
 			}
 		}
@@ -3305,7 +3660,7 @@ void Tool_musicxml2hum::printAttributes(xml_node node) {
 //        <pan>0</pan>
 //      </midi-instrument>
 //    </score-part>
-// 
+//
 //    <part-group type="stop" number="1"/>
 //
 //    <score-part id="P3">
@@ -3326,7 +3681,7 @@ void Tool_musicxml2hum::printAttributes(xml_node node) {
 //  </part-list>
 //
 
-string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid, 
+string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 	vector<string>& partids) {
 
 	xml_node partlist = doc.select_node("/score-partwise/part-list").node();
