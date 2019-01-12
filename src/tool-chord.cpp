@@ -317,6 +317,7 @@ void Tool_chord::minimizeChordPitches(vector<string>& notes,
 	}
 	if (hre.search(notes[pitches[0].second], "([\\\\/])")) {
 		firststem = hre.getMatch(1);
+		hre.replaceDestructive(firststem, "\\\\", "\\", "g");
 	}
 
 	for (int i=1; i<(int)pitches.size(); i++) {

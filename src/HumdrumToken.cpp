@@ -1422,6 +1422,21 @@ bool HumdrumToken::hasLigatureBegin(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::hasStemDirection --
+//
+
+char HumdrumToken::hasStemDirection(void) {
+	if (isKern()) {
+		return Convert::hasKernStemDirection(*this);
+	} else {
+		// don't know what a stem in this datatype is
+		return '\0';
+	}
+}
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasLigatureBegin --
 //
 

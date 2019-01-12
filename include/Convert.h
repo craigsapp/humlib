@@ -156,6 +156,7 @@ class Convert {
 		static bool hasKernSlurEnd          (const string& kerndata);
 		static int  getKernSlurStartElisionLevel(const string& kerndata, int index);
 		static int  getKernSlurEndElisionLevel  (const string& kerndata, int index);
+		static char hasKernStemDirection    (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string getKernPitchAttributes(const string& kerndata);

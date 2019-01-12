@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 31 18:34:17 PDT 2018
+// Last Modified: Fri Jan 11 18:44:20 PST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1177,6 +1177,7 @@ class HumdrumToken : public string, public HumHash {
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 		bool     hasLigatureBegin          (void);
 		bool     hasLigatureEnd            (void);
+		char     hasStemDirection          (void);
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;
@@ -2552,6 +2553,7 @@ class Convert {
 		static bool hasKernSlurEnd          (const string& kerndata);
 		static int  getKernSlurStartElisionLevel(const string& kerndata, int index);
 		static int  getKernSlurEndElisionLevel  (const string& kerndata, int index);
+		static char hasKernStemDirection    (const string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const string& kerndata);
 		static string getKernPitchAttributes(const string& kerndata);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 31 18:34:17 PDT 2018
+// Last Modified: Fri Jan 11 18:44:20 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -675,6 +675,26 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 	}
 
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernStemDirection -- Returns true if a stem direction in data; otherwise,
+//    return false.  If true, then '/' means stem up, and '\\' means stem down.
+//
+
+char Convert::hasKernStemDirection(const string& kerndata) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata[i] == '/') {
+			return '/';
+		}
+		if (kerndata[i] == '\\') {
+			return '\\';
+		}
+	}
+	return '\0';
 }
 
 
@@ -20381,6 +20401,21 @@ bool HumdrumToken::hasLigatureBegin(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::hasStemDirection --
+//
+
+char HumdrumToken::hasStemDirection(void) {
+	if (isKern()) {
+		return Convert::hasKernStemDirection(*this);
+	} else {
+		// don't know what a stem in this datatype is
+		return '\0';
+	}
+}
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasLigatureBegin --
 //
 
@@ -29363,6 +29398,7 @@ void Tool_chord::minimizeChordPitches(vector<string>& notes,
 	}
 	if (hre.search(notes[pitches[0].second], "([\\\\/])")) {
 		firststem = hre.getMatch(1);
+		hre.replaceDestructive(firststem, "\\\\", "\\", "g");
 	}
 
 	for (int i=1; i<(int)pitches.size(); i++) {

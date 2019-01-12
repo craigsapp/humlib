@@ -255,9 +255,28 @@ string Convert::getKernPitchAttributes(const string& kerndata) {
 }
 
 
+
+//////////////////////////////
+//
+// Convert::hasKernStemDirection -- Returns true if a stem direction in data; otherwise,
+//    return false.  If true, then '/' means stem up, and '\\' means stem down.
+//
+
+char Convert::hasKernStemDirection(const string& kerndata) {
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata[i] == '/') {
+			return '/';
+		}
+		if (kerndata[i] == '\\') {
+			return '\\';
+		}
+	}
+	return '\0';
+}
+
+
 // END_MERGE
 
 } // end namespace hum
-
 
 
