@@ -131,8 +131,8 @@ class MxmlEvent {
 		void               forceInvisible     (void);
 		bool               isInvisible        (void);
 		void               setBarlineStyle    (xml_node node);
-		void               setTexts           (std::vector<xml_node>& nodes);
-		std::vector<xml_node>&  getTexts           (void);
+		void               setTexts           (std::vector<std::pair<int, xml_node>>& nodes);
+		std::vector<std::pair<int, xml_node>>&  getTexts           (void);
 		void               setDynamics        (xml_node node);
 		xml_node           getDynamics        (void);
 		std::string        getRestPitch       (void) const;
@@ -143,7 +143,7 @@ class MxmlEvent {
 		measure_event_type m_eventtype;  // enumeration type of event
 		xml_node           m_node;       // pointer to event in XML structure
 		MxmlMeasure*       m_owner;      // measure that contains this event
-		std::vector<MxmlEvent*> m_links;      // list of secondary chord notes
+		std::vector<MxmlEvent*> m_links; // list of secondary chord notes
 		bool               m_linked;     // true if a secondary chord note
 		int                m_sequence;   // ordering of event in XML file
 		static int         m_counter;    // counter for sequence variable
@@ -156,7 +156,7 @@ class MxmlEvent {
 		bool               m_stems;      // for preserving stems
 
 		xml_node          m_dynamics;    // dynamics <direction> starting just before note
-		std::vector<xml_node>  m_text;        // text <direction> starting just before note
+		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note
 
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);

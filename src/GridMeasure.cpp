@@ -853,6 +853,10 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 		if ((*previous)->isLayoutSlice()) {
 			part = (*previous)->at(partindex);
 			staff = part->at(0);
+			if (staff->size() == 0) {
+				GridVoice* v = new GridVoice;
+				staff->push_back(v);
+			}
 			voice = staff->at(0);
 			if (voice) {
 				if (voice->getToken() == NULL) {
@@ -881,6 +885,10 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const stri
 	newslice->initializeBySlice(*iter);
 	this->insert(insertpoint, newslice);
 	HTp newtoken = new HumdrumToken(locomment);
+	if (newslice->at(partindex)->at(0)->size() == 0) {
+		GridVoice* v = new GridVoice;
+		newslice->at(partindex)->at(0)->push_back(v);
+	}
 	newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
 }
 

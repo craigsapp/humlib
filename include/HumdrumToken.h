@@ -106,6 +106,7 @@ class HumdrumToken : public std::string, public HumHash {
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 		bool     hasLigatureBegin          (void);
 		bool     hasLigatureEnd            (void);
+		char     hasStemDirection          (void);
 
 		HumNum   getDuration               (void) const;
 		HumNum   getDuration               (HumNum scale) const;

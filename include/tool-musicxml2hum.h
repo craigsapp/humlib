@@ -212,7 +212,8 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		pugi::xml_node m_current_dynamic = pugi::xml_node(NULL);
-		std::vector<pugi::xml_node> m_current_text;
+		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
+
 		bool m_hasTransposition = false;
 
 		// m_forceRecipQ is used to force the display of the **recip spint

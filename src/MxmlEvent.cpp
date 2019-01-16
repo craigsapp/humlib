@@ -1954,7 +1954,7 @@ bool MxmlEvent::nodeType(xml_node node, const char* testname) {
 // MxmlEvent::setTexts --
 //
 
-void MxmlEvent::setTexts(vector<xml_node>& nodes) {
+void MxmlEvent::setTexts(vector<pair<int, xml_node>>& nodes) {
 	m_text = nodes;
 }
 
@@ -1965,7 +1965,7 @@ void MxmlEvent::setTexts(vector<xml_node>& nodes) {
 // MxmlEvent::getTexts --
 //
 
-vector<xml_node>&  MxmlEvent::getTexts(void) {
+vector<pair<int, xml_node>>&  MxmlEvent::getTexts(void) {
 	return m_text;
 }
 
