@@ -590,6 +590,15 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 		temp = oldline->at(i);
 		oldline->at(i) = newline->at(i);
 		newline->at(i) = temp;
+		// duplicate the voice counts on the old line (needed if there are more
+		// than one voices in a staff when splitting a line due to *v merging.
+		for (int j=0; j<(int)oldline->at(i)->size(); j++) {
+			int voices = (int)newline->at(i)->at(j)->size();
+			oldline->at(i)->at(j)->resize(voices);
+			for (int k=0; k<voices; k++) {
+				oldline->at(i)->at(j)->at(k) = new GridVoice("*", 0);
+			}
+		}
 	}
 }
 
@@ -670,7 +679,6 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 		if (oldlaststaff->at(t) == NULL) {
 			int newsize = (int)oldlaststaff->size() - 1;
 			oldlaststaff->resize(newsize);
-		} else {
 		}
 	}
 }

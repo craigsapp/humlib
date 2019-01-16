@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 11 04:50:39 EST 2019
+// Last Modified: Wed Jan 16 01:47:04 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4568,7 +4568,6 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 						line->appendToken(token);
 					}
 				}
-
 			}
 
 			if (!this->hasSpines()) {
@@ -6362,6 +6361,15 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 		temp = oldline->at(i);
 		oldline->at(i) = newline->at(i);
 		newline->at(i) = temp;
+		// duplicate the voice counts on the old line (needed if there are more
+		// than one voices in a staff when splitting a line due to *v merging.
+		for (int j=0; j<(int)oldline->at(i)->size(); j++) {
+			int voices = (int)newline->at(i)->at(j)->size();
+			oldline->at(i)->at(j)->resize(voices);
+			for (int k=0; k<voices; k++) {
+				oldline->at(i)->at(j)->at(k) = new GridVoice("*", 0);
+			}
+		}
 	}
 }
 
@@ -6442,7 +6450,6 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 		if (oldlaststaff->at(t) == NULL) {
 			int newsize = (int)oldlaststaff->size() - 1;
 			oldlaststaff->resize(newsize);
-		} else {
 		}
 	}
 }

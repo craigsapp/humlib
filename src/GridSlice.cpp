@@ -327,7 +327,6 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 						line->appendToken(token);
 					}
 				}
-
 			}
 
 			if (!this->hasSpines()) {
