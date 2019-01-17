@@ -160,6 +160,27 @@ double Convert::pearsonCorrelation(const vector<double>& x, const vector<double>
 
 //////////////////////////////
 //
+// Tool_transpose::standardDeviation --
+//
+
+double Convert::standardDeviation(const vector<double>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / x.size();
+	return sqrt(variance);
+}
+
+
+
+//////////////////////////////
+//
 // Convert::romanNumeralToInteger -- Convert a roman numeral into an integer.
 //
 

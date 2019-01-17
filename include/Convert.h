@@ -148,14 +148,14 @@ class Convert {
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
-		static bool isKernRest              (const string& kerndata);
-		static bool isKernNote              (const string& kerndata);
-		static bool isKernNoteAttack        (const string& kerndata);
-		static bool hasKernSlurStart        (const string& kerndata);
-		static bool hasKernSlurEnd          (const string& kerndata);
-		static int  getKernSlurStartElisionLevel(const string& kerndata, int index);
-		static int  getKernSlurEndElisionLevel  (const string& kerndata, int index);
-		static char hasKernStemDirection    (const string& kerndata);
+		static bool isKernRest              (const std::string& kerndata);
+		static bool isKernNote              (const std::string& kerndata);
+		static bool isKernNoteAttack        (const std::string& kerndata);
+		static bool hasKernSlurStart        (const std::string& kerndata);
+		static bool hasKernSlurEnd          (const std::string& kerndata);
+		static int  getKernSlurStartElisionLevel(const std::string& kerndata, int index);
+		static int  getKernSlurEndElisionLevel  (const std::string& kerndata, int index);
+		static char hasKernStemDirection    (const std::string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const std::string& kerndata);
 		static std::string getKernPitchAttributes(const std::string& kerndata);
@@ -189,6 +189,7 @@ class Convert {
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
+		static double  standardDeviation    (const std::vector<double>& x);
 		static int     romanNumeralToInteger(const std::string& roman);
 
 };

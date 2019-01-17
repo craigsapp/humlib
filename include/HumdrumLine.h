@@ -27,6 +27,8 @@ class HumdrumFile;
 
 // START_MERGE
 
+typedef HumdrumLine* HLp;
+
 class HumdrumLine : public std::string, public HumHash {
 	public:
 		            HumdrumLine            (void);
