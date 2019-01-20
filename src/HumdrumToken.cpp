@@ -1426,6 +1426,36 @@ bool HumdrumToken::hasLigatureBegin(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::hasRectaLigatureBegin --
+//
+
+bool HumdrumToken::hasRectaLigatureBegin(void) {
+	if (isMens()) {
+		return Convert::hasRectaLigatureBegin(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasObliquaLigatureBegin --
+//
+
+bool HumdrumToken::hasObliquaLigatureBegin(void) {
+	if (isMens()) {
+		return Convert::hasObliquaLigatureBegin(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasStemDirection --
 //
 
@@ -1441,12 +1471,42 @@ char HumdrumToken::hasStemDirection(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::hasLigatureBegin --
+// HumdrumToken::hasLigatureEnd --
 //
 
 bool HumdrumToken::hasLigatureEnd(void) {
 	if (isMens()) {
 		return Convert::hasLigatureEnd(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRectaLigatureEnd --
+//
+
+bool HumdrumToken::hasRectaLigatureEnd(void) {
+	if (isMens()) {
+		return Convert::hasRectaLigatureEnd(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasObliquaLigatureEnd --
+//
+
+bool HumdrumToken::hasObliquaLigatureEnd(void) {
+	if (isMens()) {
+		return Convert::hasObliquaLigatureEnd(*this);
 	} else {
 		return false;
 	}

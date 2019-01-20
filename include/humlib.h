@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 20 12:37:01 EST 2019
+// Last Modified: Sun Jan 20 13:32:59 EST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1238,7 +1238,11 @@ class HumdrumToken : public std::string, public HumHash {
 		int      hasVisibleAccidental      (int subtokenIndex) const;
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 		bool     hasLigatureBegin          (void);
+		bool     hasRectaLigatureBegin     (void);
+		bool     hasObliquaLigatureBegin   (void);
 		bool     hasLigatureEnd            (void);
+		bool     hasRectaLigatureEnd       (void);
+		bool     hasObliquaLigatureEnd     (void);
 		char     hasStemDirection          (void);
 
 		HumNum   getDuration               (void) const;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 20 12:37:01 EST 2019
+// Last Modified: Sun Jan 20 13:32:59 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22647,6 +22647,36 @@ bool HumdrumToken::hasLigatureBegin(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::hasRectaLigatureBegin --
+//
+
+bool HumdrumToken::hasRectaLigatureBegin(void) {
+	if (isMens()) {
+		return Convert::hasRectaLigatureBegin(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasObliquaLigatureBegin --
+//
+
+bool HumdrumToken::hasObliquaLigatureBegin(void) {
+	if (isMens()) {
+		return Convert::hasObliquaLigatureBegin(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasStemDirection --
 //
 
@@ -22662,12 +22692,42 @@ char HumdrumToken::hasStemDirection(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::hasLigatureBegin --
+// HumdrumToken::hasLigatureEnd --
 //
 
 bool HumdrumToken::hasLigatureEnd(void) {
 	if (isMens()) {
 		return Convert::hasLigatureEnd(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasRectaLigatureEnd --
+//
+
+bool HumdrumToken::hasRectaLigatureEnd(void) {
+	if (isMens()) {
+		return Convert::hasRectaLigatureEnd(*this);
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasObliquaLigatureEnd --
+//
+
+bool HumdrumToken::hasObliquaLigatureEnd(void) {
+	if (isMens()) {
+		return Convert::hasObliquaLigatureEnd(*this);
 	} else {
 		return false;
 	}

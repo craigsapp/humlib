@@ -105,7 +105,11 @@ class HumdrumToken : public std::string, public HumHash {
 		int      hasVisibleAccidental      (int subtokenIndex) const;
 		int      hasCautionaryAccidental   (int subtokenIndex) const;
 		bool     hasLigatureBegin          (void);
+		bool     hasRectaLigatureBegin     (void);
+		bool     hasObliquaLigatureBegin   (void);
 		bool     hasLigatureEnd            (void);
+		bool     hasRectaLigatureEnd       (void);
+		bool     hasObliquaLigatureEnd     (void);
 		char     hasStemDirection          (void);
 
 		HumNum   getDuration               (void) const;
