@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 17 15:51:50 EST 2019
+// Last Modified: Sun Jan 20 01:35:27 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22391,7 +22391,7 @@ bool HumdrumToken::isGrace(void) {
 //
 
 bool HumdrumToken::isClef(void) {
-	if (!isDataType("**kern")) {
+	if (!(isDataType("**kern") || isDataType("**mens"))) {
 			return false;
 	}
 	if (!isInterpretation()) {

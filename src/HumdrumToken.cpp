@@ -1215,7 +1215,7 @@ bool HumdrumToken::isGrace(void) {
 //
 
 bool HumdrumToken::isClef(void) {
-	if (!isDataType("**kern")) {
+	if (!(isDataType("**kern") || isDataType("**mens"))) {
 			return false;
 	}
 	if (!isInterpretation()) {
