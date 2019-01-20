@@ -119,7 +119,11 @@ class Convert {
 		static bool    isMensRest           (const std::string& mensdata);
 		static bool    isMensNote           (const std::string& mensdata);
 		static bool    hasLigatureBegin     (const std::string& mensdata);
+		static bool    hasRectaLigatureBegin(const std::string& mensdata);
+		static bool    hasObliquaLigatureBegin(const std::string& mensdata);
 		static bool    hasLigatureEnd       (const std::string& mensdata);
+		static bool    hasRectaLigatureEnd  (const std::string& mensdata);
+		static bool    hasObliquaLigatureEnd(const std::string& mensdata);
 		static bool    getMensStemDirection (const std::string& mensdata);
 		static HumNum  mensToDuration       (const std::string& mensdata,
 		                                     HumNum scale = 4,

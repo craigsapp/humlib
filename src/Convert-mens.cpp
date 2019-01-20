@@ -57,10 +57,32 @@ bool Convert::isMensNote(const string& mensdata) {
 //////////////////////////////
 //
 // Convert::hasLigatureBegin -- Returns true if the input string
-//   has a '<' character.
+//   has a '<' or '[' character.
 //
 
 bool Convert::hasLigatureBegin(const string& mensdata) {
+	return hasRectaLigatureBegin(mensdata) || hasObliquaLigatureBegin(mensdata);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasRectaLigatureBegin --
+//
+
+bool Convert::hasRectaLigatureBegin(const string& mensdata) {
+	return mensdata.find('[') != std::string::npos;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasObliquaLigatureBegin --
+//
+
+bool Convert::hasObliquaLigatureBegin(const string& mensdata) {
 	return mensdata.find('<') != std::string::npos;
 }
 
@@ -68,11 +90,34 @@ bool Convert::hasLigatureBegin(const string& mensdata) {
 
 //////////////////////////////
 //
-// Convert::hasLigatureEnd -- Returns true if the input string
-//   has a '>'.
+// Convert::hasLigatureEnd --
 //
 
 bool Convert::hasLigatureEnd(const string& mensdata) {
+	return hasRectaLigatureEnd(mensdata) || hasObliquaLigatureEnd(mensdata);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasRectaLigatureEnd -- Returns true if the input string
+//   has a ']'.
+//
+
+bool Convert::hasRectaLigatureEnd(const string& mensdata) {
+	return mensdata.find(']') != std::string::npos;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasObliquaLigatureEnd -- Returns true if the input string
+//   has a '>'.
+//
+
+bool Convert::hasObliquaLigatureEnd(const string& mensdata) {
 	return mensdata.find('>') != std::string::npos;
 }
 

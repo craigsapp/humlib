@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 20 01:35:27 EST 2019
+// Last Modified: Sun Jan 20 12:37:01 EST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2642,7 +2642,11 @@ class Convert {
 		static bool    isMensRest           (const std::string& mensdata);
 		static bool    isMensNote           (const std::string& mensdata);
 		static bool    hasLigatureBegin     (const std::string& mensdata);
+		static bool    hasRectaLigatureBegin(const std::string& mensdata);
+		static bool    hasObliquaLigatureBegin(const std::string& mensdata);
 		static bool    hasLigatureEnd       (const std::string& mensdata);
+		static bool    hasRectaLigatureEnd  (const std::string& mensdata);
+		static bool    hasObliquaLigatureEnd(const std::string& mensdata);
 		static bool    getMensStemDirection (const std::string& mensdata);
 		static HumNum  mensToDuration       (const std::string& mensdata,
 		                                     HumNum scale = 4,
@@ -4565,6 +4569,21 @@ class Tool_hproof : public HumTool {
 
 };
 
+
+
+class Tool_humsort : public HumTool {
+	public:
+		         Tool_humsort      (void);
+		        ~Tool_humsort      () {};
+
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+
+};
 
 
 class Tool_imitation : public HumTool {
