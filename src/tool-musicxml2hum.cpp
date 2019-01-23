@@ -1070,8 +1070,8 @@ void Tool_musicxml2hum::insertOffsetHarmonyIntoMeasure(GridMeasure* gm) {
 					     << " since first timestamp in measure is " << timestamp << endl;
 				} else {
 					m_forceRecipQ = true;
-					// go back to previous note line and insert new slice to stor
-					// the harmony token
+					// go back to previous note line and insert
+					// new slice to store the harmony token
 					auto tempit = it;
 					tempit--;
 					while (tempit != gm->end()) {
@@ -1093,6 +1093,21 @@ void Tool_musicxml2hum::insertOffsetHarmonyIntoMeasure(GridMeasure* gm) {
 		}
 		beginQ = false;
 	}
+	// If there are still valid harmonies in the input list, apppend
+	// them to the end of the measure.
+	for (int i=0; i<(int)offsetHarmony.size(); i++) {
+		if (offsetHarmony[i].token == NULL) {
+			continue;
+ 		}
+		m_forceRecipQ = true;
+		int partcount = (int)gm->back()->size();
+		GridSlice* newgs = new GridSlice(gm, offsetHarmony[i].timestamp,
+				SliceType::Notes, partcount);
+		newgs->at(offsetHarmony[i].partindex)->setHarmony(offsetHarmony[i].token);
+		gm->insert(gm->end(), newgs);
+		offsetHarmony[i].token = NULL;
+	}
+	offsetHarmony.clear();
 }
 
 
