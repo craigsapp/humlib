@@ -126,8 +126,8 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 				char chb = b->at(0);
 				if ((isdigit(cha) || cha == '-' || cha == '+' || cha == '.') &&
 				    (isdigit(chb) || chb == '-' || chb == '+' || chb == '.')) {
-					int A = stoi(*a);
-					int B = stoi(*b);
+					int A = stod(*a);
+					int B = stod(*b);
 					if (A < B) {
 						return -1;
 					} else {
@@ -147,7 +147,6 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 					std::transform(B.begin(), B.end(), B.begin(), ::tolower);
 					return A < B; 
 			});
-// ggg
 		} else {
 			std::sort(data.begin(), data.end(),
 				[](HTp a, HTp b) { return *a < *b; });

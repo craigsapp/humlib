@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jan 23 12:27:35 EST 2019
+// Last Modified: Thu Jan 24 00:05:56 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -41248,8 +41248,8 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 				char chb = b->at(0);
 				if ((isdigit(cha) || cha == '-' || cha == '+' || cha == '.') &&
 				    (isdigit(chb) || chb == '-' || chb == '+' || chb == '.')) {
-					int A = stoi(*a);
-					int B = stoi(*b);
+					int A = stod(*a);
+					int B = stod(*b);
 					if (A < B) {
 						return -1;
 					} else {
@@ -41269,7 +41269,6 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 					std::transform(B.begin(), B.end(), B.begin(), ::tolower);
 					return A < B; 
 			});
-// ggg
 		} else {
 			std::sort(data.begin(), data.end(),
 				[](HTp a, HTp b) { return *a < *b; });
