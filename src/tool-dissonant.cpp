@@ -31,24 +31,24 @@ namespace hum {
 //
 
 Tool_dissonant::Tool_dissonant(void) {
-	define("r|raw=b",             "print raw grid");
-	define("p|percent=b",         "print counts as percentages");
-	define("s|suppress=b",        "suppress dissonant notes");
-	define("d|diatonic=b",        "print diatonic grid");
-	define("D|no-dissonant=b",    "don't do dissonance anaysis");
-	define("m|midi-pitch=b",      "print midi-pitch grid");
-	define("b|base-40=b",         "print base-40 grid");
-	define("l|metric-levels=b",   "use metric levels in analysis");
-	define("k|kern=b",            "print kern pitch grid");
-	define("V|voice-functions=b", "do cadential-voice-function analysis");
-	define("v|voice-number=b",    "print voice number of dissonance");
-	define("f|self-number=b",     "print self voice number of dissonance");
-	define("debug=b",             "print grid cell information");
-	define("u|undirected=b",      "use undirected dissonance labels");
-	define("c|count=b",           "count dissonances by category");
-	define("e|exinterp=s:**cdata","specify exinterp for **cdata spine");
-	define("color|colorize=b",    "color dissonant notes by beat level");
-	define("color2|colorize2=b",  "color dissonant notes by dissonant interval");
+	define("r|raw=b",                 "print raw grid");
+	define("p|percent=b",             "print counts as percentages");
+	define("s|suppress=b",            "suppress dissonant notes");
+	define("d|diatonic=b",            "print diatonic grid");
+	define("D|no-dissonant=b",        "don't do dissonance anaysis");
+	define("m|midi-pitch=b",          "print midi-pitch grid");
+	define("b|base-40=b",             "print base-40 grid");
+	define("l|metric-levels=b",       "use metric levels in analysis");
+	define("k|kern=b",                "print kern pitch grid");
+	define("V|voice-functions=b",     "do cadential-voice-function analysis");
+	define("v|voice-number=b",        "print voice number of dissonance");
+	define("f|self-number=b",         "print self voice number of dissonance");
+	define("debug=b",                 "print grid cell information");
+	define("u|undirected=b",          "use undirected dissonance labels");
+	define("c|count=b",               "count dissonances by category");
+	define("i|x|e|exinterp=s:**cdata","specify exinterp for **cdata spine");
+	define("color|colorize|color-by-rhythm=b", "color dissonant notes by beat level");
+	define("color2|colorize2|color-by-interval=b", "color dissonant notes by dissonant interval");
 }
 
 
@@ -187,6 +187,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 				infile.insertDataSpineBefore(track, results2[i-1], "", exinterp);
 			}
 			printColorLegend(infile);
+			adjustColorization(infile);
 			infile.createLinesFromTokens();
 			return true;
 		}
@@ -212,6 +213,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			infile.insertDataSpineBefore(track, voiceFuncs[i-1], "", exinterp);
 		}
 		printColorLegend(infile);
+		adjustColorization(infile);
 		infile.createLinesFromTokens();
 		return true;
 	} else {
@@ -227,10 +229,128 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 				infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
 			}
 			printColorLegend(infile);
+			adjustColorization(infile);
 			infile.createLinesFromTokens();
 			return true;
 		}
 	}
+}
+
+
+
+/////////////////////////////
+//
+// Tool_dissonant::adjustColorization -- The dissonance analysis will color the
+//      dissonances before they are labeled.  This function will adjust the colorization
+//      related to suspensions: (1) The G/g labels for the suspension agent will be
+//      uncolored.  These are treated as consonant notes against which the sustain
+//      note causes the dissonance.  and (2) Sustain note attacks are colored in
+//      retrospect (unless the sustain occurs on a tied portion of the note).
+//
+
+void Tool_dissonant::adjustColorization(HumdrumFile& infile) {
+	// New spines were added so need to re-analyze spine structure:
+	infile.analyzeBaseFromLines();
+
+	bool colorizeQ = getBoolean("colorize");
+	bool colorize2Q = getBoolean("colorize2");
+	if (!(colorizeQ || colorize2Q)) {
+		// nothing to do
+		return;
+	}
+
+	// see Tool_dissonant::printColorLegend() for the labels that are used for coloring
+	// (if they are changed, then they will have to be changed here since they are
+	// currently hard-coded to specific strings.
+	string clev0 = "N";  // strong dissonance (at semi-breve level)
+	string clev1 = "@";  // weaker dissonance (at minim level)
+	string clev2 = "+";  // weakest dissonance (at semi-minim level or lower)
+
+	string c2lev0 = "@";  // dissonance caused by a 2nd harmonic interval
+	string c2lev1 = "+";  // dissonance caused by a 7th harmonic interval
+	string c2lev2 = "N";  // dissonance caused by a perfect 4th harmonic interval with the bass.
+
+	vector<string> markers;
+	if (colorizeQ) {
+		markers.push_back(clev0);
+		markers.push_back(clev1);
+		markers.push_back(clev2);
+	} else {
+		markers.push_back(c2lev0);
+		markers.push_back(c2lev1);
+		markers.push_back(c2lev2);
+	}
+
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts, getString("exinterp"));
+	for (int i=0; i<(int)sstarts.size(); i++) {
+		adjustColorForVoice(sstarts[i], markers);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::adjustColorForVoice --
+//
+
+void Tool_dissonant::adjustColorForVoice(HTp spinestart, vector<string>& labels) {
+	HTp current = spinestart;
+	current = current->getNextToken();
+	HumRegex hre;
+	string query;
+	query += "[";
+	for (int i=0; i<(int)labels.size(); i++) {
+		query += labels[i];
+	}
+	query += "]";
+
+	string binaryAgent  = m_labels[AGENT_BIN];
+	string ternaryAgent = m_labels[AGENT_TERN];
+
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (hre.search(current, binaryAgent)) {
+			removeAgentColor(current, binaryAgent, query);
+		} else if (hre.search(current, ternaryAgent)) {
+			removeAgentColor(current, ternaryAgent, query);
+		}
+
+
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::removeAgentColor --
+//
+
+void Tool_dissonant::removeAgentColor(HTp disslabel, const string& marker, const string& query) {
+	HTp kern = disslabel->getPreviousFieldToken();
+	while (kern) {
+		if (kern->isKern()) {
+			break;
+		}
+	}
+	if (!kern) {
+		// something went wrong: no kern data associated with label.
+		return;
+	}
+	string value = *kern;
+	HumRegex hre;
+	hre.replaceDestructive(value, "", query);
+	kern->setText(value);
 }
 
 
@@ -286,23 +406,23 @@ void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
 			HumNum notedur = token->getTiedDuration();
 
 			if ((results[v][i] == m_labels[PASSING_DOWN]) ||
-				(results[v][i] == m_labels[PASSING_UP]) ||
-			    (results[v][i] == m_labels[NEIGHBOR_DOWN]) ||
-			    (results[v][i] == m_labels[NEIGHBOR_UP]) ||
-			    (results[v][i] == m_labels[CAMBIATA_DOWN_S]) ||
-			    (results[v][i] == m_labels[CAMBIATA_UP_S]) ||
-			    (results[v][i] == m_labels[CAMBIATA_DOWN_L]) ||
-			    (results[v][i] == m_labels[CAMBIATA_UP_L]) ||
-			    (results[v][i] == m_labels[ECHAPPEE_DOWN]) ||
-			    (results[v][i] == m_labels[ECHAPPEE_UP]) ||
-			    (results[v][i] == m_labels[ANT_DOWN]) ||
-			    (results[v][i] == m_labels[ANT_UP]) ||
-			    (results[v][i] == m_labels[REV_ECHAPPEE_DOWN]) ||
-			    (results[v][i] == m_labels[REV_ECHAPPEE_UP]) ||
-			    (results[v][i] == m_labels[REV_CAMBIATA_DOWN]) ||
-			    (results[v][i] == m_labels[REV_CAMBIATA_UP]) ||
-			    (results[v][i] == m_labels[DBL_NEIGHBOR_DOWN]) ||
-			    (results[v][i] == m_labels[DBL_NEIGHBOR_UP]) ) {
+					(results[v][i] == m_labels[PASSING_UP]) ||
+					(results[v][i] == m_labels[NEIGHBOR_DOWN]) ||
+					(results[v][i] == m_labels[NEIGHBOR_UP]) ||
+					(results[v][i] == m_labels[CAMBIATA_DOWN_S]) ||
+					(results[v][i] == m_labels[CAMBIATA_UP_S]) ||
+					(results[v][i] == m_labels[CAMBIATA_DOWN_L]) ||
+					(results[v][i] == m_labels[CAMBIATA_UP_L]) ||
+					(results[v][i] == m_labels[ECHAPPEE_DOWN]) ||
+					(results[v][i] == m_labels[ECHAPPEE_UP]) ||
+					(results[v][i] == m_labels[ANT_DOWN]) ||
+					(results[v][i] == m_labels[ANT_UP]) ||
+					(results[v][i] == m_labels[REV_ECHAPPEE_DOWN]) ||
+					(results[v][i] == m_labels[REV_ECHAPPEE_UP]) ||
+					(results[v][i] == m_labels[REV_CAMBIATA_DOWN]) ||
+					(results[v][i] == m_labels[REV_CAMBIATA_UP]) ||
+					(results[v][i] == m_labels[DBL_NEIGHBOR_DOWN]) ||
+					(results[v][i] == m_labels[DBL_NEIGHBOR_UP]) ) {
 				if (notedur > maxWeakDur) {
 					maxWeakDur = notedur;
 					maxToken = token;
@@ -654,7 +774,6 @@ void Tool_dissonant::simplePreviousMerge(HTp pnote, HTp cnote) {
 	HumNum pdur = pnote->getDuration();
 	HumNum dur = cdur + pdur;
 	changeDurationOfNote(pnote, dur);
-
 
 	if (cnote->find("[") == string::npos) {
 		// current note is not the start of a tie group, so
@@ -1353,18 +1472,18 @@ RECONSIDER:
 
 		else if (valid_sus_acc && ((ointn == -1) || ((ointn == -2) && (ointnn == 1)))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
-				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
 				results[vindex][lineindex] = m_labels[AGENT_TERN];
 				results[ovoiceindex][lineindex] = m_labels[SUS_TERN];
 			} else if (((odur == .5) || (odur == 1)) && // purely ornamental suspension
-					   ((odurn == .5) || (odurn == 1)) &&
-					   (ointn == -1) && (ointnn == -1) ) {
+						((odurn == .5) || (odurn == 1)) &&
+						(ointn == -1) && (ointnn == -1) ) {
 				results[vindex][lineindex] = m_labels[AGENT_BIN];
 				results[ovoiceindex][lineindex] = m_labels[ORNAMENTAL_SUS];
 			} else { // binary agent and suspension
@@ -1373,10 +1492,10 @@ RECONSIDER:
 			}
 		} else if (valid_ornam_sus_acc && ((ointn == 0) && (ointnn == -1))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
-				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
@@ -1389,10 +1508,10 @@ RECONSIDER:
 			results[ovoiceindex][olineindexn] = m_labels[SUSPENSION_REP];
 		} else if (valid_ornam_sus_acc && ((ointn == 1) && (ointnn == -2))) {
 			if ((durpp == 1) && (durp == 1) && (intpp == -1) && (intp == 1) &&
-				((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
-				 (results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
+					((results[vindex][lineindexpp] == m_labels[THIRD_Q_PASS_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[ACC_PASSING_DOWN]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z7]) ||
+					(results[vindex][lineindexpp] == m_labels[UNLABELED_Z4]))) {
 				results[vindex][lineindexpp] = m_labels[CHANSON_IDIOM];
 			}
 			if (ternAgent) { // ternary agent and suspension
@@ -1409,7 +1528,7 @@ RECONSIDER:
 		if (i < ((int)attacks.size() - 2)) { // expand the analysis window
 
 			double intnn = *attacks[i+2] - *attacks[i+1];
-			HumNum durnn = attacks[i+2]->getDuration();	// dur of note after next
+			HumNum durnn = attacks[i+2]->getDuration();       // dur of note after next
 			// double levnn = attacks[i+2]->getMetricLevel(); // lev of note after next
 
 			if ((dur <= durp) && (lev >= levp) && (lev >= levn) &&
@@ -1429,15 +1548,15 @@ RECONSIDER:
 		bool othLeaptFrom = fabs(ointn) > 1 ? true : false;
 
 		if ((results[vindex][lineindex] == "") && // this voice doesn't already have a dissonance label
-			((olineindexc < lineindex) || // other voice does not attack at this point
+				((olineindexc < lineindex) || // other voice does not attack at this point
 				((olineindexc == lineindex) && (dur < odur)) || // both voices attack together, but ref voice leaves dissonance first
 				(((olineindexc == lineindex) && (dur == odur)) && // both voices enter and leave dissonance simultaneously
-				 ((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step or rep and other voice leaves by leap
-				  (refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
-				  ((fabs(intp) == 1) && (intn == 0) && ((fabs(ointp)) > 0 || (fabs(ointn) > 0))) || // ref voice enters by step, leaves by rep, other v repeats no more than once
-				  ((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
-				  ((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
-				  (!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step or rep and both voices leave by leap
+				((!refLeaptFrom && othLeaptFrom) || // ref voice leaves diss by step or rep and other voice leaves by leap
+				(refLeaptTo && refLeaptFrom && othLeaptTo && othLeaptFrom) || // both voices enter and leave diss by leap
+				((fabs(intp) == 1) && (intn == 0) && ((fabs(ointp)) > 0 || (fabs(ointn) > 0))) || // ref voice enters by step, leaves by rep, other v repeats no more than once
+				((fabs(intp) == 1) && (fabs(intn) == 1) && !othLeaptTo && !othLeaptFrom) || // ref voice enters and leaves by step, other voice by step or rep
+				((fabs(intp) == 1) && (intn == 0) && !othLeaptTo && (ointn == 0)) || // ref enters by step and leaves by rep, other v enters by step or rep and leaves by rep
+				(!refLeaptTo && refLeaptFrom && othLeaptFrom))))) { // ref voice enters diss by step or rep and both voices leave by leap
 			results[vindex][lineindex] = unexp_label;
 		}
 
@@ -1484,7 +1603,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 		sfound = false;
 		for (int j=lineindex + 1; j<=lineindexn; j++) {
 			if ((results[vindex][j].compare(0, 1, "s") == 0) ||
-			    (results[vindex][j].compare(0, 1, "S") == 0)) {
+					(results[vindex][j].compare(0, 1, "S") == 0)) {
 				sfound = true;
 				break;
 			}
@@ -1650,19 +1769,19 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 				results[vindex][lineindex] = m_labels[RES_PITCH];
 				onlyWithValids = false;
 			} else if (((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
-				       ((thisInt > 0) && (thisMod7 == 3) &&
-				        !(((int(pitch-lowestnote) % 7) == 2) ||
-                 	         ((int(pitch-lowestnote) % 7) == 4))) ||
-				       ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 = -3.
-				        !(((int(opitch-lowestnote) % 7) == 2) ||
-                 	         ((int(opitch-lowestnote) % 7) == 4)))) &&
-				      ((results[j][olineindex] == m_labels[AGENT_BIN]) ||
-				       (results[j][olineindex] == m_labels[AGENT_TERN]) ||
-				       (results[j][olineindex] == m_labels[UNLABELED_Z7]) ||
-				       (results[j][olineindex] == m_labels[UNLABELED_Z4]) ||
-				       ((results[j][olineindex] == "") &&
-				        ((results[j][lineindex] != m_labels[SUS_BIN]) &&
-				         (results[j][lineindex] != m_labels[SUS_TERN]))))) {
+					((thisInt > 0) && (thisMod7 == 3) &&
+					!(((int(pitch-lowestnote) % 7) == 2) ||
+					((int(pitch-lowestnote) % 7) == 4))) ||
+					((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 = -3.
+					!(((int(opitch-lowestnote) % 7) == 2) ||
+					((int(opitch-lowestnote) % 7) == 4)))) &&
+					((results[j][olineindex] == m_labels[AGENT_BIN]) ||
+					(results[j][olineindex] == m_labels[AGENT_TERN]) ||
+					(results[j][olineindex] == m_labels[UNLABELED_Z7]) ||
+					(results[j][olineindex] == m_labels[UNLABELED_Z4]) ||
+					((results[j][olineindex] == "") &&
+					((results[j][lineindex] != m_labels[SUS_BIN]) &&
+					(results[j][lineindex] != m_labels[SUS_TERN]))))) {
 				onlyWithValids = false;
 			}
 		}
@@ -1769,12 +1888,12 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 
 			// see if the pair creates a dissonant interval
 			if (!((abs(thisMod7) == 1) || (abs(thisMod7) == 6)  ||
-				 ((thisInt > 0) && (thisMod7 == 3) &&
-				  !(((int(pitch-lowestnote) % 7) == 2) ||
-                 	   ((int(pitch-lowestnote) % 7) == 4))) ||
-				 ((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 == -3.
-				  !(((int(opitch-lowestnote) % 7) == 2) ||
-                 	   ((int(opitch-lowestnote) % 7) == 4))))) {
+					((thisInt > 0) && (thisMod7 == 3) &&
+					!(((int(pitch-lowestnote) % 7) == 2) ||
+					((int(pitch-lowestnote) % 7) == 4))) ||
+					((thisInt < 0) && (thisMod7 == -3) && // a fourth by inversion is -3 and -3%7 == -3.
+					!(((int(opitch-lowestnote) % 7) == 2) ||
+					((int(opitch-lowestnote) % 7) == 4))))) {
 				continue;
 			} else if (((intp == -1) || ant_down) && ((lev <= levn) && (dur <= durn)) &&
 						((results[vindex][lineindex] == m_labels[UNLABELED_Z7]) ||
