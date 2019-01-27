@@ -86,6 +86,10 @@ class Tool_dissonant : public HumTool {
 		void    adjustColorization   (HumdrumFile& infile);
 		void    adjustColorForVoice  (HTp spinestart, vector<string>& labels);
 		void    removeAgentColor     (HTp disslabel, const string& marker, const string& query);
+		void    addLabelToSuspensions(HTp disslabel, const string& marker);
+		bool    isSuspension         (HTp token);
+		void    addSuspensionMarkToNote(HTp start, const string& marks);
+		void    adjustSuspensionColors(HTp speinstart);
 
 	private:
 		vector<HTp> m_kernspines;

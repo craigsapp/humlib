@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 25 14:39:40 EST 2019
+// Last Modified: Sun Jan 27 15:34:28 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -35051,11 +35051,11 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 	suppressQ = getBoolean("suppress");
 	voiceFuncsQ = getBoolean("voice-functions");
 
-	vector<vector<string> > results;
-	vector<vector<string> > results2;
-	vector<vector<string> > voiceFuncs;
-	vector<vector<NoteCell*> > attacks;
-	vector<vector<NoteCell*> > attacks2;
+	vector<vector<string>> results;
+	vector<vector<string>> results2;
+	vector<vector<string>> voiceFuncs;
+	vector<vector<NoteCell*>> attacks;
+	vector<vector<NoteCell*>> attacks2;
 
 	attacks.resize(grid.getVoiceCount());
 	results.resize(grid.getVoiceCount());
@@ -35078,7 +35078,7 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			results2[i].clear();
 			results2[i].resize(infile.getLineCount());
 		}
-		vector<vector<NoteCell*> > attacks2;
+		vector<vector<NoteCell*>> attacks2;
 		doAnalysis(results2, grid2, attacks2, getBoolean("debug"));
 
 	}
@@ -35096,8 +35096,10 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 				infile.insertDataSpineBefore(track, results2[i-1], "", exinterp);
 			}
 			printColorLegend(infile);
+
 			adjustColorization(infile);
 			infile.createLinesFromTokens();
+
 			return true;
 		}
 	} else if (voiceFuncsQ) { // run cadnetial-voice-function analysis if requested
@@ -35122,7 +35124,10 @@ bool Tool_dissonant::run(HumdrumFile& infile) {
 			infile.insertDataSpineBefore(track, voiceFuncs[i-1], "", exinterp);
 		}
 		printColorLegend(infile);
+
 		adjustColorization(infile);
+		infile.createLinesFromTokens();
+
 		infile.createLinesFromTokens();
 		return true;
 	} else {
@@ -35195,6 +35200,11 @@ void Tool_dissonant::adjustColorization(HumdrumFile& infile) {
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		adjustColorForVoice(sstarts[i], markers);
 	}
+
+	for (int i=0; i<(int)sstarts.size(); i++) {
+      adjustSuspensionColors(sstarts[i]);
+	}
+
 }
 
 
@@ -35233,7 +35243,28 @@ void Tool_dissonant::adjustColorForVoice(HTp spinestart, vector<string>& labels)
 			removeAgentColor(current, ternaryAgent, query);
 		}
 
+		current = current->getNextToken();
+	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::adjustSuspensionColors --
+//
+
+void Tool_dissonant::adjustSuspensionColors(HTp spinestart) {
+	HTp current = spinestart->getNextToken();
+	string marks;
+	while (current) {
+		if (current->isData() && !current->isNull()) {
+			marks = current->getValue("auto", "marks");
+			if (!marks.empty()) {
+				addSuspensionMarkToNote(current, marks);
+			}
+		}
 		current = current->getNextToken();
 	}
 }
@@ -35241,6 +35272,49 @@ void Tool_dissonant::adjustColorForVoice(HTp spinestart, vector<string>& labels)
 
 
 //////////////////////////////
+//
+// Tool_dissonant::addSuspensionMarkToNote -- Find the note attack of a suspension, and
+//    add the mark(s) to that note.
+//
+
+void Tool_dissonant::addSuspensionMarkToNote(HTp start, const string& marks) {
+	HTp current = start->getPreviousFieldToken();
+	// first travel back on the line to the first occurrence found of **kern.
+	while (current && !current->isKern()) {
+		current = current->getPreviousFieldToken();
+	}
+	if (!current) {
+		return;
+	}
+	if (!current->isKern()) {
+		cerr << "STRANGE ERROR NOT IN KERN" << endl;
+		return;
+	}
+	while (current) {
+		if (current->isData() && !current->isNull()) {
+			break;
+		}
+		current = current->getPreviousToken();
+	}
+
+	if (current->isNull()) {
+		current = current->resolveNull();
+	}
+	if (!current) {
+		return;
+	}
+	if (!current->isNote()) {
+		// some strange problem if this case occurs
+		return;
+	}
+	string tok = *current;
+	tok += marks;
+	current->setText(tok);
+}
+
+
+
+///////////////////////////////
 //
 // Tool_dissonant::removeAgentColor --
 //
@@ -35257,20 +35331,81 @@ void Tool_dissonant::removeAgentColor(HTp disslabel, const string& marker, const
 		return;
 	}
 	string value = *kern;
+	string query2 = "(" + query + ")";
 	HumRegex hre;
-	hre.replaceDestructive(value, "", query);
-	kern->setText(value);
+	if (hre.search(value, query2)) {
+		string marker = hre.getMatch(1);
+		addLabelToSuspensions(disslabel, marker);
+		hre.replaceDestructive(value, "", query);
+		kern->setText(value);
+	}
 }
 
 
 
-/////////////////////////////
+//////////////////////////////
+//
+// Tool_dissonant::isSuspension -- returns true if the label is for a suspension.
+//
+
+bool Tool_dissonant::isSuspension(HTp token) {
+	if (token->find(m_labels[SUS_BIN])              != string::npos) { return true; }
+	if (token->find(m_labels[SUS_TERN])             != string::npos) { return true; }
+	if (token->find(m_labels[ORNAMENTAL_SUS])       != string::npos) { return true; }
+	if (token->find(m_labels[FAKE_SUSPENSION_STEP]) != string::npos) { return true; }
+	if (token->find(m_labels[SUS_NO_AGENT_LEAP])    != string::npos) { return true; }
+	if (token->find(m_labels[SUS_NO_AGENT_STEP])    != string::npos) { return true; }
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_dissonant::addLabelToSuspensions --
+//
+
+void Tool_dissonant::addLabelToSuspensions(HTp disslabel, const string& marker) {
+	string exinterp = getString("exinterp");
+
+	HTp current = disslabel->getPreviousFieldToken();
+	while (current) {
+		if (current->isDataType(exinterp)) {
+			if (isSuspension(current)) {
+				string marks = current->getValue("auto", "marks");
+				if (marks.find(marker) == string::npos) {
+					marks += marker;
+					current->setValue("auto", "marks", marks);
+				}
+			}
+		}
+		current = current->getPreviousFieldToken();
+	}
+
+	current = disslabel->getNextFieldToken();
+	while (current) {
+		if (current->isDataType(exinterp)) {
+			if (isSuspension(current)) {
+				string marks = current->getValue("auto", "marks");
+				if (marks.find(marker) == string::npos) {
+					marks += marker;
+					current->setValue("auto", "marks", marks);
+				}
+			}
+		}
+		current = current->getNextFieldToken();
+	}
+}
+
+
+
+//////////////////////////////
 //
 // Tool_dissonant::suppressDissonances -- remove dissonances.
 //
 
 void Tool_dissonant::suppressDissonances(HumdrumFile& infile, NoteGrid& grid,
-		vector<vector<NoteCell*> >& attacks, vector<vector<string> >& results) {
+		vector<vector<NoteCell*>>& attacks, vector<vector<string>>& results) {
 
 	// Loop over the dissonance results one full row at a time. The point of doing it
 	// one row at a time instead of one voice at a time is so that a weak dissonance in
@@ -35941,8 +36076,8 @@ void Tool_dissonant::printColorLegend(HumdrumFile& infile) {
 // Tool_dissonant::doAnalysis -- do a basic melodic analysis of all parts.
 //
 
-void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
-		NoteGrid& grid, vector<vector<NoteCell*> >& attacks, bool debug) {
+void Tool_dissonant::doAnalysis(vector<vector<string>>& results,
+		NoteGrid& grid, vector<vector<NoteCell*>>& attacks, bool debug) {
 	attacks.resize(grid.getVoiceCount());
 
 	for (int i=0; i<grid.getVoiceCount(); i++) {
@@ -35975,7 +36110,7 @@ void Tool_dissonant::doAnalysis(vector<vector<string> >& results,
 //     subtracting NoteCells to calculate the diatonic intervals.
 //
 
-void Tool_dissonant::doAnalysisForVoice(vector<vector<string> >& results,
+void Tool_dissonant::doAnalysisForVoice(vector<vector<string>>& results,
 		NoteGrid& grid, vector<NoteCell*>& attacks, int vindex, bool debug) {
 	attacks.clear();
 	grid.getNoteAndRestAttacks(attacks, vindex);
@@ -36493,7 +36628,7 @@ RECONSIDER:
 // Tool_dissonant::findFakeSuspensions --
 //
 
-void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteGrid& grid,
+void Tool_dissonant::findFakeSuspensions(vector<vector<string>>& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
 	double intp;        // abs value of diatonic interval from previous melodic note
 	int lineindexn;     // line index of the next note in the voice
@@ -36544,7 +36679,7 @@ void Tool_dissonant::findFakeSuspensions(vector<vector<string> >& results, NoteG
 //
 // Tool_dissonant::findLs --
 //
-void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
+void Tool_dissonant::findLs(vector<vector<string>>& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
 	HumNum dur;        // duration of current note;
 	HumNum odur;       // duration of current note in other voice which may have started earlier;
@@ -36617,7 +36752,7 @@ void Tool_dissonant::findLs(vector<vector<string> >& results, NoteGrid& grid,
 //
 // Tool_dissonant::findYs --
 //
-void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
+void Tool_dissonant::findYs(vector<vector<string>>& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
 	double intp;       // diatonic interval from previous melodic note
 	double intn;       // diatonic interval to next melodic note
@@ -36710,7 +36845,7 @@ void Tool_dissonant::findYs(vector<vector<string> >& results, NoteGrid& grid,
 //
 // Tool_dissonant::findAppoggiaturas --
 //
-void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGrid& grid,
+void Tool_dissonant::findAppoggiaturas(vector<vector<string>>& results, NoteGrid& grid,
 		vector<NoteCell*>& attacks, int vindex) {
 	HumNum durpp;      // duration of previous previous note
 	HumNum durp;       // duration of previous note
@@ -36866,8 +37001,8 @@ void Tool_dissonant::findAppoggiaturas(vector<vector<string> >& results, NoteGri
 //		Altizans must be found set against any of the other three types for
 //		anything to be detected.
 //
-void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& results, NoteGrid& grid,
-		vector<NoteCell*>& attacks, vector<vector<string> >& voiceFuncs, int vindex) {
+void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string>>& results, NoteGrid& grid,
+		vector<NoteCell*>& attacks, vector<vector<string>>& voiceFuncs, int vindex) {
 	double int2;      // diatonic interval to next melodic note
 	double int3 = -22; // diatonic interval from next melodic note to following note
 	double int4;      // diatonic interval from note three to note four
@@ -37102,13 +37237,13 @@ void Tool_dissonant::findCadentialVoiceFunctions(vector<vector<string> >& result
 // printCountAnalysis --
 //
 
-void Tool_dissonant::printCountAnalysis(vector<vector<string> >& data) {
+void Tool_dissonant::printCountAnalysis(vector<vector<string>>& data) {
 
 	map<string, bool> reduced;
 	bool brief = getBoolean("u");
 	bool percentQ = getBoolean("percent");
 
-	vector<map<string, int> > analysis;
+	vector<map<string, int>> analysis;
 	analysis.resize(data.size());
 	int i;
 	int j;
