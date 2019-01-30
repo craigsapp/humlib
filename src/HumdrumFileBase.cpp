@@ -286,7 +286,7 @@ bool HumdrumFileBase::read(const char* filename) {
 	} else {
 		infile.open(filename);
 		if (!infile.is_open()) {
-			return setParseError("Cannot open file %s for reading. A", filename);
+			return setParseError("Cannot open file >>%s<< for reading. A", filename);
 		}
 	}
 	HumdrumFileBase::read(infile);

@@ -525,7 +525,6 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 
 	GridSlice* newmanip = new GridSlice(curr->getMeasure(), curr->getTimestamp(),
 		curr->getType(), curr);
-
 	lastvoice = NULL;
 	GridStaff* laststaff    = NULL;
 	GridStaff* newstaff     = NULL;
@@ -535,23 +534,33 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	int lastp = 0;
 	int lasts = 0;
 	int partsplit = -1;
+	int voicecount;
 
 	for (p=partcount-1; p>=0; p--) {
 		part  = curr->at(p);
 		staffcount = (int)part->size();
 		for (s=staffcount-1; s>=0; s--) {
 			staff = part->at(s);
+			voicecount = (int)staff->size();
 			voice = staff->back();
+			newstaff = newmanip->at(p)->at(s);
 			if (lastvoice != NULL) {
            	if ((*voice->getToken() == "*v") &&
 						(*lastvoice->getToken() == "*v")) {
                // splitting the slices at this staff boundary
-					newstaff     = newmanip->at(p)->at(s);
+
 					newlaststaff = newmanip->at(lastp)->at(lasts);
 					transferMerges(staff, laststaff, newstaff, newlaststaff);
 					foundnew = true;
 					partsplit = p;
 					break;
+				}
+			} else {
+				if (voicecount > 1) {
+					for (int j=newstaff->size(); j<voicecount; j++) {
+						GridVoice* vdata = new GridVoice("*", 0);
+						newstaff->push_back(vdata);
+					}
 				}
 			}
 			laststaff = staff;
@@ -620,7 +629,6 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 
 void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 		GridStaff* newstaff, GridStaff* newlaststaff) {
-
 	if ((oldstaff == NULL) || (oldlaststaff == NULL)) {
 		cerr << "Weird error in HumGrid::transferMerges()" << endl;
 		return;

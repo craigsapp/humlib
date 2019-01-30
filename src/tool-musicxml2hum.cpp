@@ -205,7 +205,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		if (transpose.hasHumdrumText()) {
 			stringstream ss;
 			transpose.getHumdrumText(ss);
-			outfile.read(ss.str());
+			outfile.readString(ss.str());
 			printResult(out, outfile);
 		}
 	} else {
