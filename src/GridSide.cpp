@@ -154,6 +154,11 @@ void GridSide::setHarmony(HTp token) {
 }
 
 
+void GridSide::setHarmony(const string& token) {
+	HTp newtoken = new HumdrumToken(token);
+	setHarmony(newtoken);
+}
+
 
 //////////////////////////////
 //

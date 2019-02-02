@@ -166,6 +166,7 @@ class Tool_mei2hum : public HumTool {
 		HumNum parseTuplet          (xml_node note, HumNum starttime);
 		void   parseClef            (xml_node clef, HumNum starttime);
 		void   parseDynam           (xml_node dynam, HumNum starttime);
+		void   parseHarm            (xml_node harm, HumNum starttime);
 		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
@@ -257,6 +258,7 @@ class Tool_mei2hum : public HumTool {
 		vector<int>    m_maxverse;
 		vector<HumNum> m_measureDuration;
 		vector<bool>   m_hasDynamics;
+		vector<bool>   m_hasHarm;
 		const int      m_maxstaff = 1000;
 
 		bool           m_fermata = false;     // set priority of note/fermata over note@fermata

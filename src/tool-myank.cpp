@@ -88,9 +88,10 @@ bool Tool_myank::run(HumdrumFile& infile, ostream& out) {
 bool Tool_myank::run(HumdrumFile& infile) {
 	// Max track in enscripten is wrong for some reason,
 	// so making a copy and forcing reanalysis:
-	stringstream ss;
-	ss << infile;
-	infile.read(ss);
+	//perhaps not needed anymore:
+	//stringstream ss;
+	//ss << infile;
+	//infile.read(ss);
 	initialize(infile);
 	processFile(infile);
 	// Re-load the text for each line from their tokens.

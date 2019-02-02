@@ -37,6 +37,7 @@ class GridSide {
 
 		int   getHarmonyCount   (void);
 		void  setHarmony        (HTp token);
+		void  setHarmony        (const std::string& token);
 		void  detachHarmony     (void);
 		HTp   getHarmony        (void);
 

@@ -208,6 +208,20 @@ void HumGrid::setDynamicsPresent(int partindex) {
 
 //////////////////////////////
 //
+// HumGrid::setHarmonyPresent -- Indicate that part needs a **harm spine.
+//
+
+void HumGrid::setHarmonyPresent(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_harmony.size())) {
+		return;
+	}
+	m_harmony[partindex] = true;
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::setHarmonyCount -- part size hardwired to 100 for now.
 //
 

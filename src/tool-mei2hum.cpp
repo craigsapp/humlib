@@ -74,6 +74,9 @@ Tool_mei2hum::Tool_mei2hum(void) {
 
 	m_hasDynamics.resize(m_maxstaff);
 	fill(m_hasDynamics.begin(), m_hasDynamics.end(), false);
+
+	m_hasHarm.resize(m_maxstaff);
+	fill(m_hasHarm.begin(), m_hasHarm.end(), false);
 }
 
 
@@ -146,7 +149,6 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	systemstamp = parseScore(score, systemstamp);
 
 	m_outdata.removeRedundantClefChanges();
-	// m_outdata.removeSibeliusIncipit();
 
 	processHairpins();
 
@@ -168,6 +170,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 			continue;
 		}
 		m_outdata.setDynamicsPresent(i);
+	}
+
+	// Report <harm> presence for each staff to HumGrid:
+	for (int i=0; i<(int)m_hasHarm.size(); i++) {
+		if (m_hasHarm[i] == false) {
+			continue;
+		}
+		m_outdata.setHarmonyPresent(i);
 	}
 
 	auto measure = doc.select_node("/mei/music/body/mdiv/score/section/measure").node();
@@ -288,6 +298,7 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		lastgs = *it;
 		it++;
 	}
+
 	if (lastgs) {
 		GridPart* part = lastgs->at(staffnum-1);
 		part->setDynamics(hairopen);
@@ -1262,6 +1273,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 			parseDynam(children[i], starttime);
 		} else if (nodename == "hairpin") {
 			parseHairpin(children[i], starttime);
+		} else if (nodename == "harm") {
+			parseHarm(children[i], starttime);
 		} else if (nodename == "tempo") {
 			parseTempo(children[i], starttime);
 		} else if (nodename == "dir") {
@@ -3845,6 +3858,130 @@ void Tool_mei2hum::parseTempo(xml_node tempo, HumNum starttime) {
 	if (!inserted) {
 		gm->push_back(gs);
 	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseHarm -- Not yet ready to convert <harm> data.
+//    There will be different types of harm (such as figured bass), which
+//    will need to be subcategorized into different datatypes, such as
+//    *fb for figured bass.  Also free-text can be present in <harm>
+//    data, so the current datatype for that is **cdata  (meaning chord-like
+//    data that will be mapped back into <harm> which converting back to
+//    MEI data.
+//
+// Example:
+//     <harm staff="1" tstamp="1.000000">C major</harm>
+//
+
+void Tool_mei2hum::parseHarm(xml_node harm, HumNum starttime) {
+	NODE_VERIFY(harm, )
+	MAKE_CHILD_LIST(children, harm);
+
+	string text = harm.child_value();
+
+	if (text.empty()) { // looking at <rend> sub-elements
+		int count = 0;
+		for (int i=0; i<(int)children.size(); i++) {
+			string nodename = children[i].name();
+			if (nodename == "rend") {
+				if (count) {
+					text += " ";
+				}
+				count++;
+				text += children[i].child_value();
+				//if (strcmp(children[i].attribute("fontstyle").value(), "normal") == 0) {
+				//	font = "";  // normal is default in Humdrum layout
+				//}
+				//if (strcmp(children[i].attribute("fontweight").value(), "bold") == 0) {
+				//	font += "B";  // normal is default in Humdrum layout
+				//}
+			} else if (nodename == "") {
+				// text node
+				if (count) {
+					text += " ";
+				}
+				count++;
+				text += children[i].value();
+			} else {
+				cerr << DKHTP << harm.name() << "/" << nodename << CURRLOC << endl;
+			}
+		}
+	}
+
+	if (text.empty()) {
+		return;
+	}
+
+   // cerr << "FOUND HARM DATA " << text << endl;
+
+/*
+
+	string startid = harm.attribute("startid").value();
+
+	int staffnum = harm.attribute("staff").as_int();
+	if (staffnum == 0) {
+		cerr << "Error: staff number required on harm element" << endl;
+		return;
+	}
+	double meterunit = m_currentMeterUnit[staffnum - 1];
+
+	if (!startid.empty()) {
+		// Harmony is (or at least should) be attached directly
+		// do a note, so it is handled elsewhere.
+		cerr << "Warning DYNAMIC " << text << " is not yet processed." << endl;
+		return;
+	}
+
+	string ts = harm.attribute("tstamp").value();
+	if (ts.empty()) {
+		cerr << "Error: no timestamp on harm element" << endl;
+		return;
+	}
+	double tsd = (stof(ts)-1) * 4.0 / meterunit;
+	double tolerance = 0.001;
+	GridMeasure* gm = m_outdata.back();
+	double tsm = gm->getTimestamp().getFloat();
+	bool foundslice = false;
+	GridSlice *nextgs = NULL;
+	for (auto gs : *gm) {
+		if (!gs->isDataSlice()) {
+			continue;
+		}
+		double gsts = gs->getTimestamp().getFloat();
+		double difference = (gsts-tsm) - tsd;
+		if (difference < tolerance) {
+			// did not find data line at exact timestamp, so move
+			// the harm to the next event. Need to think about adding
+			// a new timeslice for the harm when it is not attached to
+			// a note.
+			nextgs = gs;
+			break;
+		}
+		if (!(fabs(difference) < tolerance)) {
+			continue;
+		}
+		GridPart* part = gs->at(staffnum-1);
+		part->setHarmony(text);
+		m_outdata.setHarmonyPresent(staffnum-1);
+		foundslice = true;
+		break;
+	}
+	if (!foundslice) {
+		if (nextgs == NULL) {
+			cerr << "Warning: harmony not attched to system events "
+					<< "are not yet supported in measure " << m_currentMeasure << endl;
+		} else {
+			GridPart* part = nextgs->at(staffnum-1);
+			part->setHarmony(text);
+			m_outdata.setHarmonyPresent(staffnum-1);
+			// Give a time offset for displaying the harmmony here.
+		}
+	}
+*/
 
 }
 

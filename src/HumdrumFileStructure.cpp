@@ -1183,26 +1183,39 @@ void HumdrumFileStructure::assignLineDurations(void) {
 
 bool HumdrumFileStructure::assignDurationsToNonRhythmicTrack(
 		HTp endtoken, HTp current) {
+
+	string spineinfo = endtoken->getSpineInfo();
 	HTp token = endtoken;
-	int tcount = token->getPreviousTokenCount();
-	while (tcount > 0) {
-		for (int i=1; i<tcount; i++) {
-			if (!assignDurationsToNonRhythmicTrack(token->getPreviousToken(i),
-					current)) {
-				return isValid();
+
+	while (token) {
+		if (token->getSpineInfo() != spineinfo) {
+			if (token->getSpineInfo().find("b") != std::string::npos) {
+				break;
+			}
+			if (spineinfo.find("b") != std::string::npos) {
+				break;
+			}
+		}
+		int tcount = token->getPreviousTokenCount();
+		if (tcount == 0) {
+			break;
+		}
+		if (tcount > 1) {
+			for (int i=1; i<tcount; i++) {
+				HTp ptok = token->getPreviousToken(i);
+				if (!assignDurationsToNonRhythmicTrack(ptok, current)) {
+					return isValid();
+				}
 			}
 		}
 		if (token->isData()) {
 			if (!token->isNull()) {
 				token->setDuration(current->getDurationFromStart() -
-						token->getDurationFromStart());
+					token->getDurationFromStart());
 				current = token;
 			}
 		}
-		// Data tokens can only be followed by up to one previous token,
-		// so no need to check for more than one next token.
 		token = token->getPreviousToken(0);
-		tcount = token->getPreviousTokenCount();
 	}
 
 	return isValid();

@@ -34,6 +34,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		int  getVerseCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
 		void setDynamicsPresent         (int partindex);
+		void setHarmonyPresent          (int partindex);
 		void setVerseCount              (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
@@ -108,6 +109,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		std::vector<int>              m_harmonyCount;
 		bool                          m_pickup;
 		std::vector<bool>             m_dynamics;
+		std::vector<bool>             m_harmony;
 
 		// options:
 		bool m_recip;               // include **recip spine in output
