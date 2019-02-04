@@ -102,6 +102,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void insertMelodyString            (GridMeasure* measure, const string& melody);
 
 		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
+		void matchVoices                   (GridSlice* current, GridSlice* last);
 
 	private:
 		std::vector<GridSlice*>       m_allslices;

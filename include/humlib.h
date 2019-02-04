@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb  2 03:55:18 EST 2019
+// Last Modified: Mon Feb  4 00:49:30 EST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3204,6 +3204,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void insertMelodyString            (GridMeasure* measure, const string& melody);
 
 		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
+		void matchVoices                   (GridSlice* current, GridSlice* last);
 
 	private:
 		std::vector<GridSlice*>       m_allslices;

@@ -309,11 +309,21 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 //
 
 void HumGrid::cleanupManipulators(void) {
+	GridSlice* current = NULL;
+	GridSlice* last = NULL;
 	vector<GridSlice*> newslices;
 	for (int m=0; m<(int)this->size(); m++) {
 		for (auto it = this->at(m)->begin(); it != this->at(m)->end(); it++) {
+			last = current;
+			current = *it;
 			if ((*it)->getType() != SliceType::Manipulators) {
+				if (last && (last->getType() != SliceType::Manipulators)) {
+					matchVoices(current, last);
+				}
 				continue;
+			}
+			if (last && (last->getType() != SliceType::Manipulators)) {
+				matchVoices(current, last);
 			}
 			// check to see if manipulator needs to be split into
 			// multiple lines.
@@ -323,6 +333,54 @@ void HumGrid::cleanupManipulators(void) {
 				for (int j=0; j<(int)newslices.size(); j++) {
 					this->at(m)->insert(it, newslices.at(j));
 				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::matchVoices --
+//
+
+void HumGrid::matchVoices(GridSlice* current, GridSlice* last) {
+	if (current == NULL) {
+		return;
+	}
+	if (last == NULL) {
+		return;
+	}
+	int pcount1 = (int)current->size();
+	int pcount2 = (int)current->size();
+	if (pcount1 != pcount2) {
+		return;
+	}
+	for (int i=0; i<pcount1; i++) {
+		GridPart* part1 = current->at(i);
+		GridPart* part2 = current->at(i);
+		int scount1 = (int)part1->size();
+		int scount2 = (int)part2->size();
+		if (scount1 != scount2) {
+			continue;
+		}
+		for (int j=0; j<scount1; j++) {
+			GridStaff* staff1 = part1->at(j);
+			GridStaff* staff2 = part2->at(j);
+			int vcount1 = (int)staff1->size();
+			int vcount2 = (int)staff2->size();
+			if (vcount1 == vcount2) {
+				continue;
+			}
+			if (vcount2 > vcount1) {
+				// strange if it happens
+				continue;
+			}
+			int difference = vcount1 - vcount2;
+			for (int k=0; k<difference; k++) {
+				GridVoice* gv = new GridVoice("*", 0);
+				staff2->push_back(gv);
 			}
 		}
 	}
@@ -621,6 +679,24 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 			for (int k=0; k<voices; k++) {
 				oldline->at(i)->at(j)->at(k) = new GridVoice("*", 0);
 			}
+		}
+	}
+
+	for (int p=0; p<(int)newline->size(); p++) {
+			GridPart* newpart = newline->at(p);
+			GridPart* oldpart = oldline->at(p);
+		for (int s=0; s<(int)newpart->size(); s++) {
+			GridStaff* newstaff = newpart->at(s);
+			GridStaff* oldstaff = oldpart->at(s);
+			if (newstaff->size() >= oldstaff->size()) {
+				continue;
+			}
+			int diff = (int)(oldstaff->size() - newstaff->size());
+			for (int v=0; v<diff; v++) {
+				GridVoice* voice = new GridVoice("*", 0);
+				newstaff->push_back(voice);
+			}
+
 		}
 	}
 }
