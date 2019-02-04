@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb  4 00:49:30 EST 2019
+// Last Modified: Mon Feb  4 01:23:59 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6561,6 +6561,20 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 		// than one voices in a staff when splitting a line due to *v merging.
 		for (int j=0; j<(int)oldline->at(i)->size(); j++) {
 			int voices = (int)newline->at(i)->at(j)->size();
+			int adjustment = 0;
+			for (int k=0; k<voices; k++) {
+				if (!newline->at(i)->at(j)->at(k)) {
+					continue;
+				}
+				HTp tok = newline->at(i)->at(j)->at(k)->getToken();
+				if (*tok == "*v") {
+					adjustment++;
+				}
+			}
+			if (adjustment > 0) {
+				adjustment--;
+			}
+			voices -= adjustment;
 			oldline->at(i)->at(j)->resize(voices);
 			for (int k=0; k<voices; k++) {
 				oldline->at(i)->at(j)->at(k) = new GridVoice("*", 0);
@@ -6578,6 +6592,7 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 				continue;
 			}
 			int diff = (int)(oldstaff->size() - newstaff->size());
+
 			for (int v=0; v<diff; v++) {
 				GridVoice* voice = new GridVoice("*", 0);
 				newstaff->push_back(voice);

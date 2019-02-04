@@ -675,6 +675,20 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 		// than one voices in a staff when splitting a line due to *v merging.
 		for (int j=0; j<(int)oldline->at(i)->size(); j++) {
 			int voices = (int)newline->at(i)->at(j)->size();
+			int adjustment = 0;
+			for (int k=0; k<voices; k++) {
+				if (!newline->at(i)->at(j)->at(k)) {
+					continue;
+				}
+				HTp tok = newline->at(i)->at(j)->at(k)->getToken();
+				if (*tok == "*v") {
+					adjustment++;
+				}
+			}
+			if (adjustment > 0) {
+				adjustment--;
+			}
+			voices -= adjustment;
 			oldline->at(i)->at(j)->resize(voices);
 			for (int k=0; k<voices; k++) {
 				oldline->at(i)->at(j)->at(k) = new GridVoice("*", 0);
@@ -692,6 +706,7 @@ void HumGrid::transferOtherParts(GridSlice* oldline, GridSlice* newline, int max
 				continue;
 			}
 			int diff = (int)(oldstaff->size() - newstaff->size());
+
 			for (int v=0; v<diff; v++) {
 				GridVoice* voice = new GridVoice("*", 0);
 				newstaff->push_back(voice);
