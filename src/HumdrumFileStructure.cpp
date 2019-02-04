@@ -232,6 +232,7 @@ bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
 		if (current->isNull()) {
 			// This should not occur in a well-formed **recip spine, but
 			// treat as a zero duration.
+			current = current->getNextToken();
 			continue;
 		}
 

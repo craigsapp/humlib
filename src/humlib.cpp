@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb  4 01:23:59 EST 2019
+// Last Modified: Mon Feb  4 13:31:16 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18303,6 +18303,7 @@ bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
 		if (current->isNull()) {
 			// This should not occur in a well-formed **recip spine, but
 			// treat as a zero duration.
+			current = current->getNextToken();
 			continue;
 		}
 
