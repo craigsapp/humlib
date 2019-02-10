@@ -40,6 +40,7 @@ class GridStaff : public std::vector<GridVoice*>, public GridSide {
 		void appendTokenLayer    (int layerindex, HTp token, HumNum duration,
 		                          const std::string& spacer = " ");
 		int getMaxVerseCount     (void);
+		string getString         (void);
 };
 
 std::ostream& operator<<(std::ostream& output, GridStaff* staff);

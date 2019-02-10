@@ -179,6 +179,34 @@ int GridStaff::getMaxVerseCount(void) {
 
 //////////////////////////////
 //
+// GridStaff::getString --
+//
+
+string GridStaff::getString(void) {
+	string output;
+	for (int v=0; v<(int)size(); v++) {
+		GridVoice* gv = at(v);
+		if (gv == NULL) {
+			output += "{nv}";
+		} else {
+			HTp token = gv->getToken();
+			if (token == NULL) {
+				output += "{n}";
+			} else {
+				output += *token;
+			}
+		}
+		if (v < (int)size() - 1) {
+			output += "\t";
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< --
 //
 

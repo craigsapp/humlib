@@ -81,7 +81,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void transferMerges                (GridStaff* oldstaff,
 		                                    GridStaff* oldlaststaff,
 		                                    GridStaff* newstaff,
-		                                    GridStaff* newlaststaff);
+		                                    GridStaff* newlaststaff, int pindex,
+		                                    int sindex);
 		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
 		void insertExInterpSides           (HumdrumLine* line, int part,
 		                                    int staff);
@@ -100,9 +101,12 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void transferNonDataSlices         (GridMeasure* output, GridMeasure* input);
 		string extractMelody               (GridMeasure* measure);
 		void insertMelodyString            (GridMeasure* measure, const string& melody);
-
+		GridVoice* createVoice             (const string& tok, const string& post, HumNum duration, int pindex, int sindex);
+		HTp createHumdrumToken             (const string& tok, int pindex, int sindex);
 		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
 		void matchVoices                   (GridSlice* current, GridSlice* last);
+		void adjustVoices                  (GridSlice* curr, GridSlice* newmanip, int partsplit);
+		void createMatchedVoiceCount       (GridStaff* snew, GridStaff* sold, int p, int s);
 
 	private:
 		std::vector<GridSlice*>       m_allslices;

@@ -232,6 +232,25 @@ HumNum GridVoice::getDuration(void) const {
 }
 
 
+
+//////////////////////////////
+//
+// GridVoice::getString --
+//
+
+string GridVoice::getString(void) {
+	string output;
+	HTp token = getToken();
+	if (token == NULL) {
+		cout << "{n}";
+	} else {
+		cout << *token;
+	}
+	return output;
+}
+
+
+
 //////////////////////////////
 //
 // operator<< -- print token content of a voice

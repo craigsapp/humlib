@@ -52,6 +52,7 @@ class GridVoice {
 		void   setDurationToPrev  (HumNum dur);
 		void   incrementDuration  (HumNum duration);
 		void   forgetToken        (void);
+		string getString          (void);
 
 	protected:
 		void   setTransfered      (bool state);

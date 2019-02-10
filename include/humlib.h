@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb  4 01:23:59 EST 2019
+// Last Modified: Sat Feb  9 16:07:56 EST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2901,6 +2901,7 @@ class GridStaff : public std::vector<GridVoice*>, public GridSide {
 		void appendTokenLayer    (int layerindex, HTp token, HumNum duration,
 		                          const std::string& spacer = " ");
 		int getMaxVerseCount     (void);
+		string getString         (void);
 };
 
 std::ostream& operator<<(std::ostream& output, GridStaff* staff);
@@ -3107,6 +3108,7 @@ class GridVoice {
 		void   setDurationToPrev  (HumNum dur);
 		void   incrementDuration  (HumNum duration);
 		void   forgetToken        (void);
+		string getString          (void);
 
 	protected:
 		void   setTransfered      (bool state);
@@ -3183,7 +3185,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void transferMerges                (GridStaff* oldstaff,
 		                                    GridStaff* oldlaststaff,
 		                                    GridStaff* newstaff,
-		                                    GridStaff* newlaststaff);
+		                                    GridStaff* newlaststaff, int pindex,
+		                                    int sindex);
 		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
 		void insertExInterpSides           (HumdrumLine* line, int part,
 		                                    int staff);
@@ -3202,9 +3205,12 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void transferNonDataSlices         (GridMeasure* output, GridMeasure* input);
 		string extractMelody               (GridMeasure* measure);
 		void insertMelodyString            (GridMeasure* measure, const string& melody);
-
+		GridVoice* createVoice             (const string& tok, const string& post, HumNum duration, int pindex, int sindex);
+		HTp createHumdrumToken             (const string& tok, int pindex, int sindex);
 		GridSlice* getNextSpinedLine       (const GridMeasure::iterator& it, int measureindex);
 		void matchVoices                   (GridSlice* current, GridSlice* last);
+		void adjustVoices                  (GridSlice* curr, GridSlice* newmanip, int partsplit);
+		void createMatchedVoiceCount       (GridStaff* snew, GridStaff* sold, int p, int s);
 
 	private:
 		std::vector<GridSlice*>       m_allslices;
