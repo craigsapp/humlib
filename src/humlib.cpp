@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb  9 16:07:56 EST 2019
+// Last Modified: Sat Feb  9 21:03:58 EST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6557,7 +6557,7 @@ void HumGrid::adjustVoices(GridSlice* curr, GridSlice* newmanip, int partsplit) 
 	//cerr << "PARTSPLIT " << partsplit << endl;
 	for (int p=0; p<p1count; p++) {
 		int s1count = (int)curr->at(p)->size();
-		int s2count = (int)curr->at(p)->size();
+		// int s2count = (int)curr->at(p)->size();
 		// cerr << "\tCURR STAVES " << s1count << "\tNEWM STAVES " << s2count << endl;
 		// cerr << "\t\tCURR SCOUNT = " << curr->at(p)->size() << "\tNEWM SCOUNT = " << newmanip->at(p)->size() << endl;
 		for (int s=0; s<s1count; s++) {
@@ -18435,6 +18435,7 @@ bool HumdrumFileStructure::assignRhythmFromRecip(HTp spinestart) {
 		if (current->isNull()) {
 			// This should not occur in a well-formed **recip spine, but
 			// treat as a zero duration.
+			current = current->getNextToken();
 			continue;
 		}
 

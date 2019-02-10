@@ -624,7 +624,7 @@ void HumGrid::adjustVoices(GridSlice* curr, GridSlice* newmanip, int partsplit) 
 	//cerr << "PARTSPLIT " << partsplit << endl;
 	for (int p=0; p<p1count; p++) {
 		int s1count = (int)curr->at(p)->size();
-		int s2count = (int)curr->at(p)->size();
+		// int s2count = (int)curr->at(p)->size();
 		// cerr << "\tCURR STAVES " << s1count << "\tNEWM STAVES " << s2count << endl;
 		// cerr << "\t\tCURR SCOUNT = " << curr->at(p)->size() << "\tNEWM SCOUNT = " << newmanip->at(p)->size() << endl;
 		for (int s=0; s<s1count; s++) {
