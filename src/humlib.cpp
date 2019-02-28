@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb  4 13:31:16 EST 2019
+// Last Modified: Wed Feb 27 16:07:59 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -47534,6 +47534,38 @@ string& Tool_musicxml2hum::cleanSpaces(string& input) {
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::cleanSpacesAndColons -- Converts newlines and
+//     tabs to spaces, and removes leading and trailing spaces from the
+//     string.  Another variation would be to use \n to encode newlines
+//     if they need to be preserved, but for now converting them to spaces.
+//     Colons (:) are also converted to &colon;.
+
+string Tool_musicxml2hum::cleanSpacesAndColons(const string& input) {
+	string output;
+	bool foundnonspace = false;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (std::isspace(input[i])) {
+			if (foundnonspace) {
+				output += ' ';
+			}
+		} if (input[i] == ':') {
+			foundnonspace = true;
+			output += "&colon;";
+		} else {
+			output += input[i];
+			foundnonspace = true;
+		}
+	}
+	while ((!output.empty()) && std::isspace(output.back())) {
+		output.resize(output.size() - 1);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addHeaderRecords -- Inserted in reverse order
 //      (last record inserted first).
 //
@@ -48700,7 +48732,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
-	text = cleanSpaces(text);
+	text = cleanSpacesAndColons(text);
 	if (text.empty()) {
 		// no text to display after removing whitespace
 		return;
