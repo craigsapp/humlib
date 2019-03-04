@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 27 16:07:59 PST 2019
+// Last Modified: Fri Mar  1 12:03:09 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -47545,10 +47545,11 @@ string Tool_musicxml2hum::cleanSpacesAndColons(const string& input) {
 	bool foundnonspace = false;
 	for (int i=0; i<(int)input.size(); i++) {
 		if (std::isspace(input[i])) {
-			if (foundnonspace) {
+			if (!foundnonspace) {
 				output += ' ';
 			}
-		} if (input[i] == ':') {
+		}
+		if (input[i] == ':') {
 			foundnonspace = true;
 			output += "&colon;";
 		} else {

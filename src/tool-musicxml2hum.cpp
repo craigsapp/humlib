@@ -350,10 +350,11 @@ string Tool_musicxml2hum::cleanSpacesAndColons(const string& input) {
 	bool foundnonspace = false;
 	for (int i=0; i<(int)input.size(); i++) {
 		if (std::isspace(input[i])) {
-			if (foundnonspace) {
+			if (!foundnonspace) {
 				output += ' ';
 			}
-		} if (input[i] == ':') {
+		}
+		if (input[i] == ':') {
 			foundnonspace = true;
 			output += "&colon;";
 		} else {
