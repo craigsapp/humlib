@@ -350,10 +350,11 @@ string Tool_musicxml2hum::cleanSpacesAndColons(const string& input) {
 	bool foundnonspace = false;
 	for (int i=0; i<(int)input.size(); i++) {
 		if (std::isspace(input[i])) {
-			if (foundnonspace) {
+			if (!foundnonspace) {
 				output += ' ';
 			}
-		} if (input[i] == ':') {
+		}
+		if (input[i] == ':') {
 			foundnonspace = true;
 			output += "&colon;";
 		} else {
@@ -3187,7 +3188,7 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 	}
 
 	int fifths = 0;
-	int mode = -1;
+	//int mode = -1;
 
 	xml_node child = keysig.first_child();
 	while (child) {
@@ -3197,9 +3198,9 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 		if (nodeType(child, "mode")) {
 			string value = child.child_value();
 			if (value == "major") {
-				mode = 0;
+				// mode = 0;
 			} else if (value == "minor") {
-				mode = 1;
+				// mode = 1;
 			}
 		}
 		child = child.next_sibling();
