@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 27 16:07:59 PST 2019
+// Last Modified: Sun Mar  3 22:48:50 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11356,7 +11356,7 @@ void HumRegex::setGlobal(void) {
 
 bool HumRegex::getGlobal(void) {
 	auto value = m_searchflags & std::regex_constants::format_first_only;
-	return !value;
+	return value.none();
 }
 
 
@@ -50382,7 +50382,7 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 	}
 
 	int fifths = 0;
-	int mode = -1;
+	//int mode = -1;
 
 	xml_node child = keysig.first_child();
 	while (child) {
@@ -50392,9 +50392,9 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 		if (nodeType(child, "mode")) {
 			string value = child.child_value();
 			if (value == "major") {
-				mode = 0;
+				// mode = 0;
 			} else if (value == "minor") {
-				mode = 1;
+				// mode = 1;
 			}
 		}
 		child = child.next_sibling();
