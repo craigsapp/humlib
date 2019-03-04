@@ -94,6 +94,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
 		                                   std::vector<HTp>& slurends,
+		                                   std::vector<std::pair<HTp, HTp>>& labels,
+		                                   std::vector<int>& endings,
 		                                   const std::string& linksig = "");
 		bool   analyzeKernTies            (std::vector<std::pair<HTp, int>>& linkedtiestarts,
 		                                   std::vector<std::pair<HTp, int>>& linkedtieends,

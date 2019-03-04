@@ -49,12 +49,60 @@ bool HumdrumFileContent::analyzeMensSlurs(void) {
 	vector<HTp> slurstarts;
 	vector<HTp> slurends;
 
+	vector<HTp> l;
+	vector<pair<HTp, HTp>> labels; // first is previous label, second is next label
+	HumdrumFileBase& infile = *this;
+	labels.resize(infile.getLineCount());
+	l.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		labels[i].first = NULL;
+		labels[i].second = NULL;
+		l[i] = NULL;
+	}
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if ((token->compare(0, 2, "*>") == 0) && (token->find("[") == std::string::npos)) {
+			l[i] = token;
+		}
+	}
+	HTp current = NULL;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (l[i] != NULL) {
+			current = l[i];
+		}
+		labels[i].first = current;
+	}
+	current = NULL;
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (l[i] != NULL) {
+			current = l[i];
+		}
+		labels[i].second = current;
+	}
+
+	vector<int> endings(infile.getLineCount(), 0);
+	int ending = 0;
+	for (int i=0; i<(int)endings.size(); i++) {
+		if (l[i]) {
+			char lastchar = l[i]->back();
+			if (isdigit(lastchar)) {
+				ending = lastchar - '0';
+			} else {
+				ending = 0;
+			}
+		}
+		endings[i] = ending;
+	}
+
 	vector<HTp> mensspines;
 	getSpineStartList(mensspines, "**mens");
 	bool output = true;
 	string linkSignifier = m_signifiers.getKernLinkSignifier();
 	for (int i=0; i<(int)mensspines.size(); i++) {
-		output = output && analyzeKernSlurs(mensspines[i], slurstarts, slurends, linkSignifier);
+		output = output && analyzeKernSlurs(mensspines[i], slurstarts, slurends, labels, endings, linkSignifier);
 	}
 	createLinkedSlurs(slurstarts, slurends);
 	return output;
@@ -72,12 +120,60 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 	vector<HTp> slurstarts;
 	vector<HTp> slurends;
 
+	vector<HTp> l;
+	vector<pair<HTp, HTp>> labels; // first is previous label, second is next label
+	HumdrumFileBase& infile = *this;
+	labels.resize(infile.getLineCount());
+	l.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		labels[i].first = NULL;
+		labels[i].second = NULL;
+		l[i] = NULL;
+	}
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if ((token->compare(0, 2, "*>") == 0) && (token->find("[") == std::string::npos)) {
+			l[i] = token;
+		}
+	}
+	HTp current = NULL;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (l[i] != NULL) {
+			current = l[i];
+		}
+		labels[i].first = current;
+	}
+	current = NULL;
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (l[i] != NULL) {
+			current = l[i];
+		}
+		labels[i].second = current;
+	}
+
+	vector<int> endings(infile.getLineCount(), 0);
+	int ending = 0;
+	for (int i=0; i<(int)endings.size(); i++) {
+		if (l[i]) {
+			char lastchar = l[i]->back();
+			if (isdigit(lastchar)) {
+				ending = lastchar - '0';
+			} else {
+				ending = 0;
+			}
+		}
+		endings[i] = ending;
+	}
+
 	vector<HTp> kernspines;
 	getSpineStartList(kernspines, "**kern");
 	bool output = true;
 	string linkSignifier = m_signifiers.getKernLinkSignifier();
 	for (int i=0; i<(int)kernspines.size(); i++) {
-		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, linkSignifier);
+		output = output && analyzeKernSlurs(kernspines[i], slurstarts, slurends, labels, endings, linkSignifier);
 	}
 
 	createLinkedSlurs(slurstarts, slurends);
@@ -85,8 +181,9 @@ bool HumdrumFileContent::analyzeKernSlurs(void) {
 }
 
 
-bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart, 
-		vector<HTp>& linkstarts, vector<HTp>& linkends, const string& linksig) {
+bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
+		vector<HTp>& linkstarts, vector<HTp>& linkends, vector<pair<HTp, HTp>>& labels,
+		vector<int>& endings, const string& linksig) {
 
 	// linked slurs handled separately, so generate an ignore sequence:
 	string ignorebegin = linksig + "(";
@@ -153,11 +250,36 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 						}
 					}
 					if (!found) {
-						token->setValue("auto", "hangingSlur", "true");
-						token->setValue("auto", "slurSide", "stop");
-						token->setValue("auto", "slurOpenIndex", to_string(i));
-						token->setValue("auto", "slurDration",
-							token->getDurationToEnd());
+						int lineindex = token->getLineIndex();
+						int endnum = endings[lineindex];
+						int pindex = -1;
+						if (labels[lineindex].first) {
+							pindex = labels[lineindex].first->getLineIndex();
+							pindex--;
+						}
+						int endnumpre = -1;
+						if (pindex >= 0) {
+							endnumpre = endings[pindex];
+						}
+
+						if ((endnumpre > 0) && (endnum > 0) && (endnumpre != endnum)) {
+							// This is a slur in an ending that start at the start of an ending.
+							HumNum duration = token->getDurationFromStart();
+							if (labels[token->getLineIndex()].first) {
+								duration -= labels[token->getLineIndex()].first->getDurationFromStart();
+							}
+							token->setValue("auto", "endingSlurBack", "true");
+							token->setValue("auto", "slurSide", "stop");
+							token->setValue("auto", "slurDration",
+								token->getDurationToEnd());
+						} else {
+							// This is a slur closing that does not have a matching opening.
+							token->setValue("auto", "hangingSlur", "true");
+							token->setValue("auto", "slurSide", "stop");
+							token->setValue("auto", "slurOpenIndex", to_string(i));
+							token->setValue("auto", "slurDration",
+								token->getDurationToEnd());
+						}
 					}
 				}
 			}

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb  9 21:03:58 EST 2019
+// Last Modified: Mon Mar  4 02:09:53 EST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2002,6 +2002,8 @@ class HumdrumFileContent : public HumdrumFileStructure {
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
 		                                   std::vector<HTp>& slurends,
+		                                   std::vector<std::pair<HTp, HTp>>& labels,
+		                                   std::vector<int>& endings,
 		                                   const std::string& linksig = "");
 		bool   analyzeKernTies            (std::vector<std::pair<HTp, int>>& linkedtiestarts,
 		                                   std::vector<std::pair<HTp, int>>& linkedtieends,
@@ -5126,13 +5128,14 @@ class Tool_musicxml2hum : public HumTool {
 		                              HumNum nowtime,
 		                              std::vector<MxmlPart>& partdata);
 		void   addGraceLines         (GridMeasure* outdata,
-		                              std::vector<std::vector<std::vector<std::vector<MxmlEvent*> > > >& notes,
+		                              std::vector<std::vector<std::vector<std::vector<MxmlEvent*>>>>& notes,
 		                              std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void   addEventToList        (std::vector<std::vector<std::vector<std::vector<MxmlEvent*> > > >& list,
+		void   addEventToList        (std::vector<std::vector<std::vector<std::vector<MxmlEvent*>>>>& list,
 		                              MxmlEvent* event);
 		void   addHeaderRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
 		void   addFooterRecords      (HumdrumFile& outfile, pugi::xml_document& doc);
 		std::string& cleanSpaces     (std::string& input);
+		std::string cleanSpacesAndColons(const std::string& input);
 		void setEditorialAccidental  (int accidental, GridSlice* slice,
 		                              int partindex, int staffindex, int voiceindex);
 
@@ -5160,9 +5163,9 @@ class Tool_musicxml2hum : public HumTool {
 		void processPrintElement(GridMeasure* outdata, pugi::xml_node element, HumNum timestamp);
 		void insertOffsetHarmonyIntoMeasure(GridMeasure* gm);
 
-		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& clefs,
+		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& clefs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& ottavas,
+		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& ottavas,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
 		void insertPartClefs   (pugi::xml_node clef, GridPart& part);
 		void insertPartOttavas (pugi::xml_node ottava, GridPart& part, int partindex, int partstaffindex, int staffcount);
@@ -5170,11 +5173,11 @@ class Tool_musicxml2hum : public HumTool {
 		pugi::xml_node convertOttavaToHumdrum(pugi::xml_node ottava, HTp& token, int& staffindex,
 		                        int partindex, int partstaffindex, int staffcount);
 
-		void addTranspositionLine(GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& transpositions,
+		void addTranspositionLine(GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& transpositions,
 		                       std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addKeySigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& keysigs,
+		void addKeySigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& keysigs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addKeyDesignationLine(GridMeasure* outdata, vector<vector<xml_node> >& keydesigs, 
+		void addKeyDesignationLine(GridMeasure* outdata, vector<vector<xml_node>>& keydesigs, 
 		                        vector<MxmlPart>& partdata, HumNum nowtime);
 		void insertPartKeySigs (pugi::xml_node keysig, GridPart& part);
 		void insertPartKeyDesignations(xml_node keydeg, GridPart& part);
@@ -5183,7 +5186,7 @@ class Tool_musicxml2hum : public HumTool {
 		pugi::xml_node convertKeySigToHumdrumKeyDesignation(xml_node keysig,
 		                        HTp& token, int& staffindex);
 
-		void addTimeSigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node> >& timesigs,
+		void addTimeSigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& timesigs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
 		bool insertPartTimeSigs (pugi::xml_node timesig, GridPart& part);
 		void insertPartMensurations(pugi::xml_node timesig, GridPart& part);
