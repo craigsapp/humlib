@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 15 12:10:58 PDT 2019
+// Last Modified: Sat Mar 16 13:02:18 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6366,7 +6366,6 @@ GridSlice* HumGrid::checkManipulatorExpand(GridSlice* curr) {
 //   next line.  The "newmanip" will be placed before curr, so
 //
 
-// ggg
 void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int p, int s) {
 	HTp token = NULL;
 	GridVoice* newvoice  = NULL;
@@ -6436,7 +6435,6 @@ void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int 
 //    slice will also be modified if the return value is not NULL).
 //
 
-// ggg
 GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	GridVoice* lastvoice = NULL;
 	GridVoice* voice     = NULL;
@@ -6516,8 +6514,8 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 			} else {
 				if (voicecount > 1) {
 					for (int j=newstaff->size(); j<voicecount; j++) {
-						GridVoice* vdata = createVoice("*", "F", 0, p, s);
-						newstaff->push_back(vdata);
+						// GridVoice* vdata = createVoice("*", "F", 0, p, s);
+						// newstaff->push_back(vdata);
 					}
 				}
 			}
@@ -6551,7 +6549,6 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 //
 
 void HumGrid::adjustVoices(GridSlice* curr, GridSlice* newmanip, int partsplit) {
-// ggg
 	int p1count = (int)curr->size();
 	// int p2count = (int)newmanip->size();
 	//cerr << "PARTSPLIT " << partsplit << endl;
@@ -6646,7 +6643,7 @@ void HumGrid::matchVoices(GridSlice* current, GridSlice* last) {
 
 //////////////////////////////
 //
-// HumGrid::transferOtherParts -- after a line split do to merges 
+// HumGrid::transferOtherParts -- after a line split due to merges 
 //    occurring at the same time.
 //
 
@@ -6793,10 +6790,9 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 //
 
 GridVoice* HumGrid::createVoice(const string& tok, const string& post, HumNum duration, int pindex, int sindex) {
-	std::string token = tok;
-	// token += ":" post + ":" + to_string(pindex) + "," + to_string(sindex);
-	// token += "T";
-	GridVoice* gv = gv = new GridVoice(token.c_str(), 0);
+	//std::string token = tok;
+	//token += ":" + post + ":" + to_string(pindex) + "," + to_string(sindex);
+	GridVoice* gv = gv = new GridVoice(tok.c_str(), 0);
 	return gv;
 }
 
@@ -17368,11 +17364,10 @@ void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeKernStems -- Link start and ends of
-//    slurs to each other.
+// HumdrumFileContent::analyzeKernStemLengths -- 
 //
 
-bool HumdrumFileContent::analyzeKernStems(void) {
+bool HumdrumFileContent::analyzeKernStemLengths(void) {
 	int scount = this->getStrandCount();
 	bool output = true;
 
@@ -17384,13 +17379,13 @@ bool HumdrumFileContent::analyzeKernStems(void) {
 			continue;
 		}
 		HTp send = this->getStrandEnd(i);
-		output = output && analyzeKernStems(sstart, send, centerlines);
+		output = output && analyzeKernStemLengths(sstart, send, centerlines);
 	}
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernStems(HTp stok, HTp etok, vector<vector<int>>& centerlines) {
+bool HumdrumFileContent::analyzeKernStemLengths(HTp stok, HTp etok, vector<vector<int>>& centerlines) {
 	HTp tok = stok;
 	while (tok && (tok != etok)) {
 		if (!tok->isData()) {

@@ -433,7 +433,6 @@ GridSlice* HumGrid::checkManipulatorExpand(GridSlice* curr) {
 //   next line.  The "newmanip" will be placed before curr, so
 //
 
-// ggg
 void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int p, int s) {
 	HTp token = NULL;
 	GridVoice* newvoice  = NULL;
@@ -503,7 +502,6 @@ void HumGrid::adjustExpansionsInStaff(GridSlice* newmanip, GridSlice* curr, int 
 //    slice will also be modified if the return value is not NULL).
 //
 
-// ggg
 GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 	GridVoice* lastvoice = NULL;
 	GridVoice* voice     = NULL;
@@ -583,8 +581,8 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 			} else {
 				if (voicecount > 1) {
 					for (int j=newstaff->size(); j<voicecount; j++) {
-						GridVoice* vdata = createVoice("*", "F", 0, p, s);
-						newstaff->push_back(vdata);
+						// GridVoice* vdata = createVoice("*", "F", 0, p, s);
+						// newstaff->push_back(vdata);
 					}
 				}
 			}
@@ -618,7 +616,6 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 //
 
 void HumGrid::adjustVoices(GridSlice* curr, GridSlice* newmanip, int partsplit) {
-// ggg
 	int p1count = (int)curr->size();
 	// int p2count = (int)newmanip->size();
 	//cerr << "PARTSPLIT " << partsplit << endl;
@@ -713,7 +710,7 @@ void HumGrid::matchVoices(GridSlice* current, GridSlice* last) {
 
 //////////////////////////////
 //
-// HumGrid::transferOtherParts -- after a line split do to merges 
+// HumGrid::transferOtherParts -- after a line split due to merges 
 //    occurring at the same time.
 //
 
@@ -860,10 +857,9 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 //
 
 GridVoice* HumGrid::createVoice(const string& tok, const string& post, HumNum duration, int pindex, int sindex) {
-	std::string token = tok;
-	// token += ":" post + ":" + to_string(pindex) + "," + to_string(sindex);
-	// token += "T";
-	GridVoice* gv = gv = new GridVoice(token.c_str(), 0);
+	//std::string token = tok;
+	//token += ":" + post + ":" + to_string(pindex) + "," + to_string(sindex);
+	GridVoice* gv = gv = new GridVoice(tok.c_str(), 0);
 	return gv;
 }
 

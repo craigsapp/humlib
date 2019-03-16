@@ -25,11 +25,10 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeKernStems -- Link start and ends of
-//    slurs to each other.
+// HumdrumFileContent::analyzeKernStemLengths -- 
 //
 
-bool HumdrumFileContent::analyzeKernStems(void) {
+bool HumdrumFileContent::analyzeKernStemLengths(void) {
 	int scount = this->getStrandCount();
 	bool output = true;
 
@@ -41,13 +40,13 @@ bool HumdrumFileContent::analyzeKernStems(void) {
 			continue;
 		}
 		HTp send = this->getStrandEnd(i);
-		output = output && analyzeKernStems(sstart, send, centerlines);
+		output = output && analyzeKernStemLengths(sstart, send, centerlines);
 	}
 	return output;
 }
 
 
-bool HumdrumFileContent::analyzeKernStems(HTp stok, HTp etok, vector<vector<int>>& centerlines) {
+bool HumdrumFileContent::analyzeKernStemLengths(HTp stok, HTp etok, vector<vector<int>>& centerlines) {
 	HTp tok = stok;
 	while (tok && (tok != etok)) {
 		if (!tok->isData()) {

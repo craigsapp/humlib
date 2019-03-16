@@ -48,7 +48,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void  checkForExplicitVerticalRestPositions (void);
 
 		// in HumdrumFileContent-stem.cpp
-		bool analyzeKernStems             (void);
+		bool analyzeKernStemLengths       (void);
 
 		// in HumdrumFileContent-metlev.cpp
 		void  getMetricLevels             (std::vector<double>& output, int track = 0,
@@ -115,7 +115,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
 		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
 		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
-		bool    analyzeKernStems          (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
+		bool    analyzeKernStemLengths    (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
 		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
 		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts, 
 		                                   std::vector<std::pair<HTp, int>>& ends);
