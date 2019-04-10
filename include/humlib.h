@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 16 13:02:18 EDT 2019
+// Last Modified: Wed Apr 10 14:43:08 EDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3110,7 +3110,7 @@ class GridVoice {
 		void   setDurationToPrev  (HumNum dur);
 		void   incrementDuration  (HumNum duration);
 		void   forgetToken        (void);
-		string getString          (void);
+		std::string getString          (void);
 
 	protected:
 		void   setTransfered      (bool state);
@@ -5471,6 +5471,35 @@ class Tool_phrase : public HumTool {
 		bool                      m_remove2Q;
 		bool                      m_averageQ;
 		string                    m_color;
+
+};
+
+
+
+class Tool_pnum : public HumTool {
+	public:
+		      Tool_pnum               (void);
+		     ~Tool_pnum               () {};
+
+		bool  run                      (HumdrumFile& infile);
+		bool  run                      (const string& indata, ostream& out);
+		bool  run                      (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  initialize               (HumdrumFile& infile);
+		void  processFile              (HumdrumFile& infile);
+		std::string convertSubtokenToBase(const std::string& text);
+		void  convertTokenToBase       (HTp token);
+
+	private:
+		int  m_base = 12;
+		int  m_midiQ;
+		bool m_durationQ;
+		bool m_classQ;
+		bool m_octaveQ;
+		bool m_attacksQ;
+		std::string m_rest;
+		bool m_restQ;
 
 };
 
