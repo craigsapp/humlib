@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 10 14:43:08 EDT 2019
+// Last Modified: Thu May 16 06:19:48 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -20686,7 +20686,7 @@ HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 }
 
 
-HumNum HumdrumLine::getBeat(string beatrecip) const {
+HumNum HumdrumLine::getBeatStr(string beatrecip) const {
 	HumNum beatdur = Convert::recipToDuration(beatrecip);
 	if (beatdur.isZero()) {
 		return beatdur;

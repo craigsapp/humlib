@@ -108,8 +108,8 @@ class HumdrumLine : public std::string, public HumHash {
 		int      getKernNoteAttacks     (void);
 		int      addLinkedParameter     (HTp token);
 
-		HumNum   getBeat                (HumNum beatdur = "1") const;
-		HumNum   getBeat                (std::string beatrecip = "4") const;
+		HumNum   getBeat                (HumNum beatdur = 1) const;
+		HumNum   getBeatStr             (std::string beatrecip = "4") const;
 		HTp      getTrackStart          (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const std::string& separator = ",");

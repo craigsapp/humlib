@@ -796,7 +796,7 @@ HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 }
 
 
-HumNum HumdrumLine::getBeat(string beatrecip) const {
+HumNum HumdrumLine::getBeatStr(string beatrecip) const {
 	HumNum beatdur = Convert::recipToDuration(beatrecip);
 	if (beatdur.isZero()) {
 		return beatdur;
