@@ -2155,7 +2155,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 	HTp token;
 
 	if (m_recip) {
-		token = new HumdrumToken("*Q");
+		token = new HumdrumToken("*");
 		line->appendToken(token);
 	}
 
@@ -2235,7 +2235,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 	HTp token;
 
 	if (m_recip) {
-		token = new HumdrumToken("*R");
+		token = new HumdrumToken("*");
 		line->appendToken(token);
 	}
 
@@ -2279,13 +2279,13 @@ void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
 	if (staffnum < 0) {
 
 		if (hasDynamics(part)) {
-			token = new HumdrumToken("*S");
+			token = new HumdrumToken("*");
 			line->appendToken(token);
 		}
 
 		int harmcount = getHarmonyCount(part);
 		for (int i=0; i<harmcount; i++) {
-			token = new HumdrumToken("*T");
+			token = new HumdrumToken("*");
 			line->appendToken(token);
 		}
 
@@ -2298,7 +2298,7 @@ void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
 			text = "*staff" + to_string(staffnum);
 			token = new HumdrumToken(text);
 		} else {
-			token = new HumdrumToken("*U");
+			token = new HumdrumToken("*");
 		}
 		line->appendToken(token);
 	}
@@ -2579,7 +2579,7 @@ void HumGrid::removeRedundantClefChanges(void) {
 					if (!token) {
 						continue;
 					}
-					if (string(*token) == "*V") {
+					if (string(*token) == "*") {
 						continue;
 					}
 					if (token->find("clef") == string::npos) {
@@ -2600,7 +2600,7 @@ void HumGrid::removeRedundantClefChanges(void) {
 						if (curclef[p][s] == (string)*token) {
 							// clef is already active, so remove this one
 							hasduplicate = true;
-							voice->setToken("*W");
+							voice->setToken("*");
 						} else {
 							// new clef change
 							curclef[p][s] = *token;
