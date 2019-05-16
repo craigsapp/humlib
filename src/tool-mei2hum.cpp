@@ -109,7 +109,7 @@ bool Tool_mei2hum::convert(ostream& out, istream& input) {
 
 bool Tool_mei2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
-	auto result = doc.load(input);
+	auto result = doc.load_string(input);
 	if (!result) {
 		cout << "\nXML content has syntax errors\n";
 		cout << "Error description:\t" << result.description() << "\n";

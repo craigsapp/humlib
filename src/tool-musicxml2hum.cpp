@@ -78,7 +78,7 @@ bool Tool_musicxml2hum::convert(ostream& out, istream& input) {
 
 bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
-	auto result = doc.load(input);
+	auto result = doc.load_string(input);
 	if (!result) {
 		cout << "\nXML content has syntax errors\n";
 		cout << "Error description:\t" << result.description() << "\n";
@@ -391,7 +391,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 
 	// Sibelius method
 	xpath = "/score-partwise/work/work-title";
-	string worktitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string worktitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	bool worktitleQ = false;
 	if ((worktitle != "") && (worktitle != "Title")) {
 		string otl_record = "!!!OTL:\t";
@@ -401,7 +401,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	xpath = "/score-partwise/movement-title";
-	string mtitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string mtitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	if (mtitle != "") {
 		string otl_record = "!!!OTL:\t";
 		if (worktitleQ) {
@@ -414,7 +414,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	// COM: composer /////////////////////////////////////////////////////////
 	// CDT: composer's dates
 	xpath = "/score-partwise/identification/creator[@type='composer']";
-	string composer = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string composer = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	string cdt_record;
 	if (composer != "") {
 		if (hre.search(composer, R"(\((.*?\d.*?)\))")) {
@@ -463,7 +463,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc) {
 
 	// YEM: copyright
-	string copy = doc.select_single_node("/score-partwise/identification/rights").node().child_value();
+	string copy = doc.select_node("/score-partwise/identification/rights").node().child_value();
 	bool validcopy = true;
 	if (copy == "") {
 		validcopy = false;
@@ -3634,12 +3634,12 @@ bool Tool_musicxml2hum::getPartInfo(map<string, xml_node>& partinfo,
 
 string Tool_musicxml2hum::getChildElementText(xml_node root,
 		const char* xpath) {
-	return root.select_single_node(xpath).node().child_value();
+	return root.select_node(xpath).node().child_value();
 }
 
 string Tool_musicxml2hum::getChildElementText(xpath_node root,
 		const char* xpath) {
-	return root.node().select_single_node(xpath).node().child_value();
+	return root.node().select_node(xpath).node().child_value();
 }
 
 

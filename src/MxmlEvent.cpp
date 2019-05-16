@@ -443,7 +443,7 @@ void MxmlEvent::setDurationByTicks(long value, xml_node el) {
 //
 
 bool MxmlEvent::hasChild(const char* query) const {
-	xpath_node result = m_node.select_single_node(query);
+	xpath_node result = m_node.select_node(query);
 	return !result.node().empty();
 }
 
@@ -1786,12 +1786,12 @@ int MxmlEvent::getDotCount(void) const {
 //
 
 string MxmlEvent::getRestPitch(void) const {
-	xpath_node rest = m_node.select_single_node("./rest");
+	xpath_node rest = m_node.select_node("./rest");
 	if (rest.node().empty()) {
 		// not a rest, so no pitch information.
 		return "";
 	}
-	xpath_node step = rest.node().select_single_node("./display-step");
+	xpath_node step = rest.node().select_node("./display-step");
 	if (step.node().empty()) {
 		// no vertical positioning information
 	}
@@ -1799,7 +1799,7 @@ string MxmlEvent::getRestPitch(void) const {
 	if (steptext.empty()) {
 		return "";
 	}
-	xpath_node octave = rest.node().select_single_node("./display-octave");
+	xpath_node octave = rest.node().select_node("./display-octave");
 	if (octave.node().empty()) {
 		// not enough vertical positioning information
 	}

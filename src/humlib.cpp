@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 16 06:19:48 PDT 2019
+// Last Modified: Thu May 16 06:25:51 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -25053,7 +25053,7 @@ void MxmlEvent::setDurationByTicks(long value, xml_node el) {
 //
 
 bool MxmlEvent::hasChild(const char* query) const {
-	xpath_node result = m_node.select_single_node(query);
+	xpath_node result = m_node.select_node(query);
 	return !result.node().empty();
 }
 
@@ -26396,12 +26396,12 @@ int MxmlEvent::getDotCount(void) const {
 //
 
 string MxmlEvent::getRestPitch(void) const {
-	xpath_node rest = m_node.select_single_node("./rest");
+	xpath_node rest = m_node.select_node("./rest");
 	if (rest.node().empty()) {
 		// not a rest, so no pitch information.
 		return "";
 	}
-	xpath_node step = rest.node().select_single_node("./display-step");
+	xpath_node step = rest.node().select_node("./display-step");
 	if (step.node().empty()) {
 		// no vertical positioning information
 	}
@@ -26409,7 +26409,7 @@ string MxmlEvent::getRestPitch(void) const {
 	if (steptext.empty()) {
 		return "";
 	}
-	xpath_node octave = rest.node().select_single_node("./display-octave");
+	xpath_node octave = rest.node().select_node("./display-octave");
 	if (octave.node().empty()) {
 		// not enough vertical positioning information
 	}
@@ -42699,7 +42699,7 @@ bool Tool_mei2hum::convert(ostream& out, istream& input) {
 
 bool Tool_mei2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
-	auto result = doc.load(input);
+	auto result = doc.load_string(input);
 	if (!result) {
 		cout << "\nXML content has syntax errors\n";
 		cout << "Error description:\t" << result.description() << "\n";
@@ -47530,7 +47530,7 @@ bool Tool_musicxml2hum::convert(ostream& out, istream& input) {
 
 bool Tool_musicxml2hum::convert(ostream& out, const char* input) {
 	xml_document doc;
-	auto result = doc.load(input);
+	auto result = doc.load_string(input);
 	if (!result) {
 		cout << "\nXML content has syntax errors\n";
 		cout << "Error description:\t" << result.description() << "\n";
@@ -47843,7 +47843,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 
 	// Sibelius method
 	xpath = "/score-partwise/work/work-title";
-	string worktitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string worktitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	bool worktitleQ = false;
 	if ((worktitle != "") && (worktitle != "Title")) {
 		string otl_record = "!!!OTL:\t";
@@ -47853,7 +47853,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	xpath = "/score-partwise/movement-title";
-	string mtitle = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string mtitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	if (mtitle != "") {
 		string otl_record = "!!!OTL:\t";
 		if (worktitleQ) {
@@ -47866,7 +47866,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	// COM: composer /////////////////////////////////////////////////////////
 	// CDT: composer's dates
 	xpath = "/score-partwise/identification/creator[@type='composer']";
-	string composer = cleanSpaces(doc.select_single_node(xpath.c_str()).node().child_value());
+	string composer = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	string cdt_record;
 	if (composer != "") {
 		if (hre.search(composer, R"(\((.*?\d.*?)\))")) {
@@ -47915,7 +47915,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc) {
 
 	// YEM: copyright
-	string copy = doc.select_single_node("/score-partwise/identification/rights").node().child_value();
+	string copy = doc.select_node("/score-partwise/identification/rights").node().child_value();
 	bool validcopy = true;
 	if (copy == "") {
 		validcopy = false;
@@ -51086,12 +51086,12 @@ bool Tool_musicxml2hum::getPartInfo(map<string, xml_node>& partinfo,
 
 string Tool_musicxml2hum::getChildElementText(xml_node root,
 		const char* xpath) {
-	return root.select_single_node(xpath).node().child_value();
+	return root.select_node(xpath).node().child_value();
 }
 
 string Tool_musicxml2hum::getChildElementText(xpath_node root,
 		const char* xpath) {
-	return root.node().select_single_node(xpath).node().child_value();
+	return root.node().select_node(xpath).node().child_value();
 }
 
 
