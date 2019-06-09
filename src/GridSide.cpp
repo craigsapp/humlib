@@ -181,6 +181,27 @@ void GridSide::setDynamics(const string& token) {
 
 
 
+//////////////////////////////
+//
+// GridSide::setFiguredBass --
+//
+
+void GridSide::setFiguredBass(HTp token) {
+	if (m_figured_bass) {
+		delete m_figured_bass;
+		m_figured_bass = NULL;
+	}
+	m_figured_bass = token;
+}
+
+
+void GridSide::setFiguredBass(const string& token) {
+	HTp newtoken = new HumdrumToken(token);
+	setFiguredBass(newtoken);
+}
+
+
+
 ///////////////////////////
 //
 // GridSide::detachHarmony --
@@ -199,6 +220,17 @@ void GridSide::detachHarmony(void) {
 
 void GridSide::detachDynamics(void) {
 	m_dynamics = NULL;
+}
+
+
+
+///////////////////////////
+//
+// GridSide::detachFiguredBass --
+//
+
+void GridSide::detachFiguredBass(void) {
+	m_figured_bass = NULL;
 }
 
 
@@ -232,6 +264,32 @@ HTp GridSide::getDynamics(void) {
 
 int GridSide::getDynamicsCount(void) {
 	if (m_dynamics == NULL) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GridSide::getFiguredBass --
+//
+
+HTp GridSide::getFiguredBass(void) {
+	return m_figured_bass;
+}
+
+
+
+//////////////////////////////
+//
+// GridSide::getFiguredBassCount --
+//
+
+int GridSide::getFiguredBassCount(void) {
+	if (m_figured_bass == NULL) {
 		return 0;
 	} else {
 		return 1;

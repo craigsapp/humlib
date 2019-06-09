@@ -167,6 +167,7 @@ class Tool_musicxml2hum : public HumTool {
 		int  addLyrics         (GridStaff* staff, MxmlEvent* event);
 		int  addHarmony        (GridPart* oart, MxmlEvent* event, HumNum nowtime, int partindex);
 		void addDynamic        (GridPart* part, MxmlEvent* event);
+		void addFiguredBass    (GridPart* part, MxmlEvent* event);
 		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex,
@@ -175,6 +176,9 @@ class Tool_musicxml2hum : public HumTool {
 		std::string getHarmonyString(pugi::xml_node hnode);
 		std::string getDynamicString(pugi::xml_node element);
 		std::string getDynamicsParameters(pugi::xml_node element);
+		std::string getFiguredBassString(pugi::xml_node element);
+		std::string getFiguredBassParameters(pugi::xml_node element);
+		std::string convertFiguredBassNumber(const xml_node& figure);
 		std::string getHairpinString(pugi::xml_node element);
 		std::string cleanSpaces     (const std::string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
@@ -213,6 +217,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		pugi::xml_node m_current_dynamic = pugi::xml_node(NULL);
+		pugi::xml_node m_current_figured_bass = pugi::xml_node(NULL);
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 
 		bool m_hasTransposition = false;

@@ -364,6 +364,17 @@ void MxmlMeasure::reportDynamicToOwner(void) {
 
 //////////////////////////////
 //
+// MxmlMeasure::reportFiguredBassToOwner --
+//
+
+void MxmlMeasure::reportFiguredBassToOwner(void) {
+	m_owner->receiveFiguredBass();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlMeasure::reportCaesuraToOwner --
 //
 

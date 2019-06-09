@@ -352,8 +352,9 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 
 			int maxvcount = getVerseCount(p, s);
 			int maxhcount = getHarmonyCount(p, s);
+			int maxfcount = getFiguredBassCount(p, s);
 			if (hasSpines()) {
-				transferSides(*line, staff, empty, maxvcount, maxhcount);
+				transferSides(*line, staff, empty, maxvcount, maxhcount, maxfcount);
 			}
 		}
 
@@ -361,9 +362,10 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
+		int maxfcount = getFiguredBassCount(p);
 
 		if (hasSpines()) {
-			transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount);
+			transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount, maxfcount);
 		}
 	}
 
@@ -463,13 +465,34 @@ int GridSlice::getDynamicsCount(int partindex, int staffindex) {
 
 //////////////////////////////
 //
+// GridSlice::getFiguredBassCount -- Return 0 if no figured bass; otherwise,
+//     typically returns 1.
+//
+
+int GridSlice::getFiguredBassCount(int partindex, int staffindex) {
+	HumGrid* grid = getOwner();
+	if (!grid) {
+		return 0;
+	}
+	if (staffindex >= 0) {
+		// ignoring staff-level figured bass
+		return 0;
+	} else {
+		return grid->getFiguredBassCount(partindex);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // GridSlice::transferSides --
 //
 
 // this version is used to transfer Sides from the Part
 void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		int partindex, const string& empty, int maxvcount, int maxhcount,
-		int maxdcount) {
+		int maxdcount, int maxfcount) {
 
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
@@ -503,6 +526,17 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		}
 	}
 
+	if (maxfcount > 0) {
+		HTp figuredbass = sides.getFiguredBass();
+		if (figuredbass) {
+			line.appendToken(figuredbass);
+			sides.detachFiguredBass();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
+	}
+
 	for (int i=0; i<hcount; i++) {
 		HTp harmony = sides.getHarmony();
 		if (harmony) {
@@ -523,10 +557,12 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 
 // this version is used to transfer Sides from the Staff
 void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
-		const string& empty, int maxvcount, int maxhcount) {
+		const string& empty, int maxvcount, int maxhcount, int maxfcount) {
 
 	// existing verses:
 	int vcount = sides.getVerseCount();
+
+	int fcount = sides.getFiguredBassCount();
 
 	// there should not be any harony attached to staves
 	// (only to parts, so hcount should only be zero):
@@ -562,12 +598,31 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 		}
 	}
 
+	for (int i=0; i<fcount; i++) {
+		HTp figuredbass = sides.getFiguredBass();
+		if (figuredbass) {
+			line.appendToken(figuredbass);
+			sides.detachFiguredBass();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
+	}
+
 	if (hcount < maxhcount) {
 		for (int i=hcount; i<maxhcount; i++) {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
 		}
 	}
+
+	if (fcount < maxfcount) {
+		for (int i=fcount; i<maxfcount; i++) {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
+	}
+
 }
 
 

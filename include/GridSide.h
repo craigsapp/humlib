@@ -47,9 +47,16 @@ class GridSide {
 		void  detachDynamics    (void);
 		HTp   getDynamics       (void);
 
+		int   getFiguredBassCount (void);
+		void  setFiguredBass      (HTp token);
+		void  setFiguredBass      (const std::string& token);
+		void  detachFiguredBass   (void);
+		HTp   getFiguredBass      (void);
+
 	private:
 		std::vector<HumdrumToken*> m_verses;
 		HumdrumToken* m_dynamics = NULL;
+		HumdrumToken* m_figured_bass = NULL;
 		HumdrumToken* m_harmony = NULL;
 };
 

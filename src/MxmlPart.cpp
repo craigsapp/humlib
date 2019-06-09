@@ -312,6 +312,17 @@ bool MxmlPart::hasDynamics(void) const {
 
 //////////////////////////////
 //
+// MxmlPart::hasFiguredBass --
+//
+
+bool MxmlPart::hasFiguredBass(void) const {
+	return m_has_figured_bass;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlPart::getVerseCount -- Return the number of verses in the part.
 //
 
@@ -365,6 +376,17 @@ void MxmlPart::receiveHarmonyCount(int count) {
 
 void MxmlPart::receiveDynamic(void) {
 	m_has_dynamics = true;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlPart::receiveFiguredBass --
+//
+
+void MxmlPart::receiveFiguredBass(void) {
+	m_has_figured_bass = true;
 }
 
 

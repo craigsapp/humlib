@@ -31,9 +31,12 @@ class HumGrid : public std::vector<GridMeasure*> {
 		bool transferTokens             (HumdrumFile& outfile, int startbarnum = 0);
 		int  getHarmonyCount            (int partindex);
 		int  getDynamicsCount           (int partindex);
+		int  getFiguredBassCount        (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
+		bool hasFiguredBass             (int partindex);
 		void setDynamicsPresent         (int partindex);
+		void setFiguredBassPresent      (int partindex);
 		void setHarmonyPresent          (int partindex);
 		void setVerseCount              (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
@@ -114,6 +117,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		std::vector<int>              m_harmonyCount;
 		bool                          m_pickup;
 		std::vector<bool>             m_dynamics;
+		std::vector<bool>             m_figured_bass;
 		std::vector<bool>             m_harmony;
 
 		// options:

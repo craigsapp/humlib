@@ -36,7 +36,9 @@ HumGrid::HumGrid(void) {
 	m_verseCount.resize(100);
 	m_harmonyCount.resize(100);
 	m_dynamics.resize(100);
+	m_figured_bass.resize(100);
 	fill(m_dynamics.begin(), m_dynamics.end(), false);
+	fill(m_figured_bass.begin(), m_figured_bass.end(), false);
 	fill(m_harmonyCount.begin(), m_harmonyCount.end(), 0);
 
 	// default options
@@ -160,6 +162,20 @@ int HumGrid::getDynamicsCount(int partindex) {
 
 //////////////////////////////
 //
+// HumGrid::getFiguredBassCount --
+//
+
+int HumGrid::getFiguredBassCount(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_figured_bass.size())) {
+		return 0;
+	}
+	return m_figured_bass[partindex];
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::getVerseCount --
 //
 
@@ -194,6 +210,20 @@ bool HumGrid::hasDynamics(int partindex) {
 
 //////////////////////////////
 //
+// HumGrid::hasFiguredBass -- Return true if there is any figured bass for the part.
+//
+
+bool HumGrid::hasFiguredBass(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_figured_bass.size())) {
+		return false;
+	}
+	return m_figured_bass[partindex];
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::setDynamicsPresent -- Indicate that part needs a **dynam spine.
 //
 
@@ -202,6 +232,20 @@ void HumGrid::setDynamicsPresent(int partindex) {
 		return;
 	}
 	m_dynamics[partindex] = true;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::setFiguredBassPresent -- Indicate that part needs a **fb spine.
+//
+
+void HumGrid::setFiguredBassPresent(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_figured_bass.size())) {
+		return;
+	}
+	m_figured_bass[partindex] = true;
 }
 
 
@@ -2123,6 +2167,11 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 		line->appendToken(token);
 	}
 
+	if ((staff < 0) && hasFiguredBass(part)) {
+		HTp token = new HumdrumToken("**fb");
+		line->appendToken(token);
+	}
+
 	if (staff < 0) {
 		int harmonyCount = getHarmonyCount(part);
 		for (int i=0; i<harmonyCount; i++) {
@@ -2190,6 +2239,12 @@ void HumGrid::insertSidePartInfo(HumdrumLine* line, int part, int staff) {
 	if (staff < 0) {
 
 		if (hasDynamics(part)) {
+			text = "*part" + to_string(part+1);
+			token = new HumdrumToken(text);
+			line->appendToken(token);
+		}
+
+		if (hasFiguredBass(part)) {
 			text = "*part" + to_string(part+1);
 			token = new HumdrumToken(text);
 			line->appendToken(token);
@@ -2283,6 +2338,11 @@ void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
 			line->appendToken(token);
 		}
 
+		if (hasFiguredBass(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
 		int harmcount = getHarmonyCount(part);
 		for (int i=0; i<harmcount; i++) {
 			token = new HumdrumToken("*");
@@ -2359,6 +2419,11 @@ void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
 	if (staff < 0) {
 
 		if (hasDynamics(part)) {
+			token = new HumdrumToken("*-");
+			line->appendToken(token);
+		}
+
+		if (hasFiguredBass(part)) {
 			token = new HumdrumToken("*-");
 			line->appendToken(token);
 		}

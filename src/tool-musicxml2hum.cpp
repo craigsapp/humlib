@@ -170,6 +170,15 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
+	// transfer figured bass boolean for part to HumGrid
+	for (int p=0; p<(int)partdata.size(); p++) {
+		bool fbstate = partdata[p].hasFiguredBass();
+		if (fbstate) {
+			outdata.setFiguredBassPresent(p);
+			break;
+		}
+	}
+
 
 	if (m_recipQ || m_forceRecipQ) {
 		outdata.enableRecipSpine();
@@ -1428,6 +1437,22 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 			}
 		}
 	}
+
+	if (m_current_figured_bass) {
+		event->setFiguredBass(m_current_figured_bass);
+		string fparam = getFiguredBassParameters(m_current_figured_bass);
+		m_current_figured_bass = xml_node(NULL);
+		event->reportFiguredBassToOwner();
+		addFiguredBass(slice->at(partindex), event);
+		if (fparam != "") {
+			GridMeasure *gm = slice->getMeasure();
+			string fullparam = "!LO:FB" + fparam;
+			if (gm) {
+				gm->addFiguredBassLayoutParameters(slice, partindex, fullparam);
+			}
+		}
+	}
+
 }
 
 
@@ -1733,7 +1758,164 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getDynanmicsParameters --  Already presumed to be a dynamic.
+// Tool_musicxml2hum::addFiguredBass -- extract any figured bass for the event
+// ggg: still need to implement
+//
+// Such as:
+//
+//      <figured-bass>
+//        <figure>
+//          <figure-number>0</figure-number>
+//        </figure>
+//      </figured-bass>
+// or:
+//      <figured-bass>
+//        <figure>
+//          <figure-number>5</figure-number>
+//          <suffix>backslash</suffix>
+//        </figure>
+//        <figure>
+//          <figure-number>2</figure-number>
+//          <suffix>cross</suffix>
+//        </figure>
+//      </figured-bass>
+//
+//      <figured-bass parentheses="yes">
+//        <figure>
+//          <prefix>flat</prefix>
+//        </figure>
+//      </figured-bass>
+//
+//      <figured-bass>
+//        <figure>
+//          <figure-number>6</figure-number>
+//          <extend type="start" />
+//        </figure>
+//      <figured-bass>
+//
+//
+
+void Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event) {
+	xml_node fbroot = event->getFiguredBass();
+	if (!fbroot) {
+		return;
+	}
+	string fbstring;
+
+	// Parentheses can only enclose an entire figure stack, not
+	// individual numbers or accidentals on numbers in MusicXML,
+	// so apply an editorial mark for parentheses.
+	string editorial;
+	xml_attribute pattr = fbroot.attribute("parentheses");
+	if (pattr) {
+		string pval = pattr.value();
+		if (pval == "yes") {
+			editorial = "i";
+		}
+	}
+	// There is no bracket for FB in musicxml (3.0).
+
+	auto children = fbroot.select_nodes("figure");
+	for (int i=0; i<(int)children.size(); i++) {
+		fbstring += convertFiguredBassNumber(children[i].node());
+		fbstring += editorial;
+		if (i < (int)children.size() - 1) {
+			fbstring += " ";
+		}
+	}
+
+	HTp fbtok = new HumdrumToken(fbstring);
+	part->setFiguredBass(fbtok);
+}
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::convertFiguredBassNumber --
+//
+
+string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
+	string output;
+	xml_node fnum = figure.select_node("figure-number").node();
+	// assuming one each of prefix/suffix:
+	xml_node prefixelement = figure.select_node("prefix").node();
+	xml_node suffixelement = figure.select_node("suffix").node();
+
+	string prefix;
+	if (prefixelement) {
+		prefix = prefixelement.child_value();
+	}
+
+	string suffix;
+	if (suffixelement) {
+		suffix = suffixelement.child_value();
+	}
+
+	string number;
+	if (fnum) {
+		number = fnum.child_value();
+	}
+
+	string accidental;
+	string slash;
+
+	if (prefix == "flat-flat") {
+		accidental = "--";
+	} else if (prefix == "flat") {
+		accidental = "-";
+	} else if (prefix == "double-sharp") {
+		accidental = "##";
+	} else if (prefix == "sharp") {
+		accidental = "#";
+	} else if (prefix == "natural") {
+		accidental = "n";
+	} else if (suffix == "flat-flat") {
+		accidental = "--r";
+	} else if (suffix == "flat") {
+		accidental = "-r";
+	} else if (suffix == "double-sharp") {
+		accidental = "##r";
+	} else if (suffix == "sharp") {
+		accidental = "#r";
+	} else if (suffix == "natural") {
+		accidental = "nr";
+	}
+
+	// If suffix is "cross", "slash" or "backslash",  then an accidental
+	// should be given (probably either a natural or a sharp in general, but
+	// could be a flat).  At the moment do not assign the accidental, but
+	// in the future assign an accidental to the slashed figure, probably
+	// with a post-processing tool.
+	if (suffix == "cross" || prefix == "cross") {
+		slash = "|";
+	} else if ((suffix == "backslash") || (prefix == "backslash")) {
+		slash = "\\";
+	} else if ((suffix == "slash") || (prefix == "slash")) {
+		slash = "/";
+	}
+
+	string editorial;
+	string extension;
+
+	xml_node extendelement = figure.select_node("extend").node();
+	if (extendelement) {
+		string typestring = extendelement.attribute("type").value();
+		if (typestring == "start") {
+			extension = "_";
+		}
+	}
+
+	output += accidental + number + slash + editorial + extension;
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getDynanmicsParameters --  Already presumed to be
+//     a dynamic.
 //
 
 string Tool_musicxml2hum::getDynamicsParameters(xml_node element) {
@@ -1775,6 +1957,22 @@ string Tool_musicxml2hum::getDynamicsParameters(xml_node element) {
 		output = "";
 	}
 
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getFiguredBassParameters --  Already presumed to be
+//     figured bass.
+//
+
+string Tool_musicxml2hum::getFiguredBassParameters(xml_node element) {
+	string output;
+	if (!nodeType(element, "figured-bass")) {
+		return output;
+	}
 	return output;
 }
 
@@ -2368,7 +2566,8 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 						m_current_dynamic = element;
 					}
 				}
-
+			} else if (nodeType(element, "figured-bass")) {
+				m_current_figured_bass = element;
 			} else if (nodeType(element, "note")) {
 				if (foundnongrace) {
 					addEventToList(graceafter, nowevents[i]->zerodur[j]);

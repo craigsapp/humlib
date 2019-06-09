@@ -235,6 +235,18 @@ void MxmlEvent::reportDynamicToOwner(void) {
 
 //////////////////////////////
 //
+// MxmlEvent::reportFiguredBassToOwner -- inform the owner that there is a dynamic
+//    that needs a spine to store it in.
+//
+
+void MxmlEvent::reportFiguredBassToOwner(void) {
+	m_owner->reportFiguredBassToOwner();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::reportCaesuraToOwner -- inform the owner that there is a caesura
 //    that needs an RDF marker.
 // default value: letter = "Z"
@@ -1984,11 +1996,33 @@ void MxmlEvent::setDynamics(xml_node node) {
 
 //////////////////////////////
 //
+// MxmlEvent::setFiguredBass --
+//
+
+void MxmlEvent::setFiguredBass(xml_node node) {
+	m_figured_bass = node;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::getDynamics --
 //
 
 xml_node MxmlEvent::getDynamics(void) {
 	return m_dynamics;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getFiguredBass --
+//
+
+xml_node MxmlEvent::getFiguredBass(void) {
+	return m_figured_bass;
 }
 
 

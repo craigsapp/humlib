@@ -66,6 +66,7 @@ class MxmlPart {
 		int           getStaffIndex        (int voicenum);
 		bool          hasEditorialAccidental(void) const;
 		bool          hasDynamics          (void) const;
+		bool          hasFiguredBass       (void) const;
 		void          parsePartInfo        (xml_node partdeclaration);
 		string        getPartName          (void) const;
 		string        getPartAbbr          (void) const;
@@ -80,6 +81,7 @@ class MxmlPart {
 		void          receiveHarmonyCount         (int count);
 		void          receiveEditorialAccidental  (void);
 		void          receiveDynamic              (void);
+		void          receiveFiguredBass          (void);
 		void          receiveCaesura              (const string& letter);
 		void          receiveOrnament             (void);
 
@@ -93,6 +95,7 @@ class MxmlPart {
 		bool                 m_editorialAccidental;
 		bool                 m_stems = false;
 		bool                 m_has_dynamics = false;
+		bool                 m_has_figured_bass = false;
 		string               m_partname;
 		string               m_partabbr;
 		string               m_caesura;

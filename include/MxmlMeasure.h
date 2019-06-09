@@ -111,6 +111,7 @@ class MxmlMeasure {
 		void  reportHarmonyCountToOwner           (int count);
 		void  reportEditorialAccidentalToOwner    (void);
 		void  reportDynamicToOwner                (void);
+		void  reportFiguredBassToOwner            (void);
 		void  reportCaesuraToOwner                (const string& letter);
 		void  reportOrnamentToOwner               (void);
 
