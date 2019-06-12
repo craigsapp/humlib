@@ -32,6 +32,7 @@
 #include "tool-satb2gs.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
+#include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-trillspell.h"
 #include "tool-transpose.h"
@@ -167,6 +168,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "slur") {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "tabber") {
+			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
