@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  9 11:53:17 CEST 2019
+// Last Modified: Wed Jun 12 11:27:00 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21069,7 +21069,8 @@ int HumdrumLine::createTokensFromLine(void) {
 	}
 	m_tokens.resize(0);
 	HTp token;
-	char ch;
+	char ch = 0;
+	char lastch = 0;
 	string tstring;
 
 	if (this->size() == 0) {
@@ -21082,12 +21083,17 @@ int HumdrumLine::createTokensFromLine(void) {
 		m_tokens.push_back(token);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
+			lastch = ch;
 			ch = getChar(i);
 			if (ch == '\t') {
-				token = new HumdrumToken(tstring);
-				token->setOwner(this);
-				m_tokens.push_back(token);
-				tstring.clear();
+				// Parser now allows multiple tab characters in a 
+				// row to represent a single tab.
+				if (lastch != '\t') {
+					token = new HumdrumToken(tstring);
+					token->setOwner(this);
+					m_tokens.push_back(token);
+					tstring.clear();
+				}
 			} else {
 				tstring += ch;
 			}
@@ -49619,15 +49625,15 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	} else if (prefix == "natural") {
 		accidental = "n";
 	} else if (suffix == "flat-flat") {
-		accidental = "--";
+		accidental = "--r";
 	} else if (suffix == "flat") {
-		accidental = "-";
+		accidental = "-r";
 	} else if (suffix == "double-sharp") {
-		accidental = "##";
+		accidental = "##r";
 	} else if (suffix == "sharp") {
-		accidental = "#";
+		accidental = "#r";
 	} else if (suffix == "natural") {
-		accidental = "n";
+		accidental = "nr";
 	}
 
 	// If suffix is "cross", "slash" or "backslash",  then an accidental
@@ -49663,7 +49669,8 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getDynanmicsParameters --  Already presumed to be a dynamic.
+// Tool_musicxml2hum::getDynanmicsParameters --  Already presumed to be
+//     a dynamic.
 //
 
 string Tool_musicxml2hum::getDynamicsParameters(xml_node element) {
@@ -49712,7 +49719,8 @@ string Tool_musicxml2hum::getDynamicsParameters(xml_node element) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getFiguredBassParameters --  Already presumed to be figured bass.
+// Tool_musicxml2hum::getFiguredBassParameters --  Already presumed to be
+//     figured bass.
 //
 
 string Tool_musicxml2hum::getFiguredBassParameters(xml_node element) {

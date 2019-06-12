@@ -949,7 +949,8 @@ int HumdrumLine::createTokensFromLine(void) {
 	}
 	m_tokens.resize(0);
 	HTp token;
-	char ch;
+	char ch = 0;
+	char lastch = 0;
 	string tstring;
 
 	if (this->size() == 0) {
@@ -962,12 +963,17 @@ int HumdrumLine::createTokensFromLine(void) {
 		m_tokens.push_back(token);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
+			lastch = ch;
 			ch = getChar(i);
 			if (ch == '\t') {
-				token = new HumdrumToken(tstring);
-				token->setOwner(this);
-				m_tokens.push_back(token);
-				tstring.clear();
+				// Parser now allows multiple tab characters in a 
+				// row to represent a single tab.
+				if (lastch != '\t') {
+					token = new HumdrumToken(tstring);
+					token->setOwner(this);
+					m_tokens.push_back(token);
+					tstring.clear();
+				}
 			} else {
 				tstring += ch;
 			}
