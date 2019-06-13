@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 13 14:48:51 CEST 2019
+// Last Modified: Thu Jun 13 16:17:25 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1027,7 +1027,7 @@ class HumdrumLine : public std::string, public HumHash {
 		std::string   getXmlIdPrefix       (void) const;
 		void          createLineFromTokens (void);
 		void          removeExtraTabs      (void);
-		void          addExtraTabs         (std::vector<int> trackWidths);
+		void          addExtraTabs         (std::vector<int>& trackWidths);
 		int           getLineIndex         (void) const;
 		int           getLineNumber        (void) const;
 		HumdrumFile*  getOwner             (void);
