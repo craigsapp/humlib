@@ -27,6 +27,7 @@ namespace hum {
 
 Tool_tabber::Tool_tabber(void) {
 	// do nothing for now.
+	define("r|remove=b",    "remove any extra tabs");
 }
 
 
@@ -74,66 +75,12 @@ void Tool_tabber::initialize(HumdrumFile& infile) {
 //
 
 void Tool_tabber::processFile(HumdrumFile& infile) {
-	vector<int> trackWidths = getTrackWidths(infile);
-	vector<int> local(trackWidths.size());
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].hasSpines()) {
-			m_free_text << infile[i] << "\n";
-			continue;
-		}
-		fill(local.begin(), local.end(), 0);
-		int lasttrack = 0;
-		int track = 0;
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			lasttrack = track;
-			HTp token = infile.token(i, j);
-			track = token->getTrack();
-			if ((track != lasttrack) && (lasttrack > 0)) {
-				int diff = trackWidths[lasttrack] - local[lasttrack];
-				if (diff > 0) {
-					for (int k=0; k<diff; k++) {
-						m_free_text << '\t';
-					}
-				}
-			}
-			if (j > 0) {
-				m_free_text << '\t';
-			}
-			local[track]++;
-			m_free_text << token;
-		}
-		m_free_text << '\n';
+	if (getBoolean("remove")) {
+		infile.removeExtraTabs();
+	} else {
+		infile.addExtraTabs();
 	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_tabber::getTrackWidths
-//
-
-vector<int> Tool_tabber::getTrackWidths(HumdrumFile& infile) {
-	vector<int> output(infile.getTrackCount() + 1, 1);
-	output[0] = 0;
-	vector<int> local(infile.getTrackCount() + 1);
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].hasSpines()) {
-			continue;
-		}
-		fill(local.begin(), local.end(), 0);
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			int track = token->getTrack();
-			local[track]++;
-		}
-		for (int j=1; j<(int)local.size(); j++) {
-			if (local[j] > output[j]) {
-				output[j] = local[j];
-			}
-		}
-	}
-	return output;
+	infile.createLinesFromTokens();
 }
 
 

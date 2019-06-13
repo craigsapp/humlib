@@ -86,6 +86,8 @@ class HumdrumLine : public std::string, public HumHash {
 		std::string   getXmlId             (const std::string& prefix = "") const;
 		std::string   getXmlIdPrefix       (void) const;
 		void          createLineFromTokens (void);
+		void          removeExtraTabs      (void);
+		void          addExtraTabs         (std::vector<int> trackWidths);
 		int           getLineIndex         (void) const;
 		int           getLineNumber        (void) const;
 		HumdrumFile*  getOwner             (void);
@@ -176,6 +178,11 @@ class HumdrumLine : public std::string, public HumHash {
 		// The contents of this vector should be deleted when deconstructing
 		// a HumdrumLine object.
 		std::vector<HumdrumToken*> m_tokens;
+
+		// m_tabs: Used to store a count of the number of tabs between
+		// each token on a line.  This is the number of tabs after the
+		// token at the given index (so no tabs before the first token).
+		std::vector<int> m_tabs;
 
 		// m_duration: This is the "duration" of a line.  The duration is
 		// equal to the minimum time unit of all durational tokens on the

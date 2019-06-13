@@ -672,6 +672,68 @@ bool HumdrumFileBase::analyzeTokens(void) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::removeExtraTabs --
+//
+
+void HumdrumFileBase::removeExtraTabs(void) {
+	for (int i=0; i<(int)m_lines.size(); i++) {
+		m_lines[i]->removeExtraTabs();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::addExtraTabs --
+//
+
+void HumdrumFileBase::addExtraTabs(void) {
+	vector<int> trackWidths = getTrackWidths();
+
+	HumdrumFileBase& infile = *this;
+	vector<int> local(trackWidths.size());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		infile[i].addExtraTabs(trackWidths);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getTrackWidths -- Return a list of the maximum
+//    subspine count for each track in the file.  The 0th track is
+//    not used, so it will be zero and ignored.
+//
+
+vector<int> HumdrumFileBase::getTrackWidths(void) {
+	HumdrumFileBase& infile = *this;
+	vector<int> output(infile.getTrackCount() + 1, 1);
+	output[0] = 0;
+	vector<int> local(infile.getTrackCount() + 1);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		fill(local.begin(), local.end(), 0);
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			local[track]++;
+		}
+		for (int j=1; j<(int)local.size(); j++) {
+			if (local[j] > output[j]) {
+				output[j] = local[j];
+			}
+		}
+	}
+	return output;
+}
+
+
 
 //////////////////////////////
 //

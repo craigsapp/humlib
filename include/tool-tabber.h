@@ -32,7 +32,6 @@ class Tool_tabber : public HumTool {
 	protected:
 		void  initialize               (HumdrumFile& infile);
 		void  processFile              (HumdrumFile& infile);
-		vector<int> getTrackWidths(HumdrumFile& infile);
 
 	private:
 

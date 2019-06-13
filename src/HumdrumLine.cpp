@@ -72,6 +72,10 @@ HumdrumLine::HumdrumLine(HumdrumLine& line)  : string((string)line) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
 	}
+	m_tabs.resize(line.m_tabs.size());
+	for (int i=0; i<(int)m_tabs.size(); i++) {
+		m_tabs.at(i) = line.m_tabs.at(i);
+	}
 	m_owner = NULL;
 }
 
@@ -85,6 +89,10 @@ HumdrumLine::HumdrumLine(HumdrumLine& line, void* owner) : string((string)line) 
 	m_tokens.resize(line.m_tokens.size());
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
+	}
+	m_tabs.resize(line.m_tabs.size());
+	for (int i=0; i<(int)m_tabs.size(); i++) {
+		m_tabs.at(i) = line.m_tabs.at(i);
 	}
 	m_owner = owner;
 }
@@ -105,6 +113,10 @@ HumdrumLine& HumdrumLine::operator=(HumdrumLine& line) {
 	m_tokens.resize(line.m_tokens.size());
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		m_tokens[i] = new HumdrumToken(*line.m_tokens[i], this);
+	}
+	m_tabs.resize(line.m_tabs.size());
+	for (int i=0; i<(int)m_tabs.size(); i++) {
+		m_tabs.at(i) = line.m_tabs.at(i);
 	}
 	m_owner = NULL;
 	return *this;
@@ -225,6 +237,8 @@ void HumdrumLine::clear(void) {
 			m_tokens[i] = NULL;
 		}
 	}
+	m_tokens.clear();
+	m_tabs.clear();
 }
 
 
@@ -947,7 +961,8 @@ int HumdrumLine::createTokensFromLine(void) {
 		delete m_tokens[i];
 		m_tokens[i] = NULL;
 	}
-	m_tokens.resize(0);
+	m_tokens.clear();
+	m_tabs.clear();
 	HTp token;
 	char ch = 0;
 	char lastch = 0;
@@ -957,10 +972,12 @@ int HumdrumLine::createTokensFromLine(void) {
 		token = new HumdrumToken();
 		token->setOwner(this);
 		m_tokens.push_back(token);
+		m_tokens.push_back(0);
 	} else if (this->compare(0, 2, "!!") == 0) {
 		token = new HumdrumToken(this->c_str());
 		token->setOwner(this);
 		m_tokens.push_back(token);
+		m_tabs.push_back(0);
 	} else {
 		for (int i=0; i<(int)size(); i++) {
 			lastch = ch;
@@ -972,7 +989,15 @@ int HumdrumLine::createTokensFromLine(void) {
 					token = new HumdrumToken(tstring);
 					token->setOwner(this);
 					m_tokens.push_back(token);
+					if (m_tabs.size() > 0) {
+						m_tabs.back()++;
+					}
+					m_tabs.push_back(1);
 					tstring.clear();
+				} else {
+					if (m_tabs.size() > 0) {
+						m_tabs[m_tabs.size() - 1]++;
+					}
 				}
 			} else {
 				tstring += ch;
@@ -983,6 +1008,7 @@ int HumdrumLine::createTokensFromLine(void) {
 		token = new HumdrumToken(tstring);
 		token->setOwner(this);
 		m_tokens.push_back(token);
+		m_tabs.push_back(0);
 		tstring.clear();
 	}
 
@@ -1006,8 +1032,63 @@ void HumdrumLine::createLineFromTokens(void) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		iline += (string)(*m_tokens[i]);
 		if (i < (int)m_tokens.size() - 1) {
-			iline += '\t';
+			if (m_tabs[i] == 0) {
+				m_tabs[i] = 1;
+			}
+			for (int j=0; j<m_tabs[i]; j++) {
+				iline += '\t';
+			}
 		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::removeExtraTabs -- Allow only for one tab between spine fields.
+//    The tab counts are set to 0, but the line creation function knows to use
+//    a minimum of one tab between fields.  The HumdrumFile::createLinesFromtTokens()
+//    function should be called after running this function and before printing
+//    the data so that the tabs in the text line can be updated.
+//
+
+void HumdrumLine::removeExtraTabs(void) {
+	fill(m_tabs.begin(), m_tabs.end(), 0);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::addExtraTabs -- Adds extra tabs between primary spines so that the
+//    first token of a spine is vertically aligned.  The input array to this
+//    function is a list of maximum widths.  This is typically caluclated by
+//    HumdrumFileBase::getTrackWidths().  The first indexed value is unused,
+//    since there is no track 0.
+//
+
+void HumdrumLine::addExtraTabs(vector<int> trackWidths) {
+	if (!this->hasSpines()) {
+		return;
+	}
+
+	fill(m_tabs.begin(), m_tabs.end(), 1);
+	vector<int> local(m_tabs.size(), 0);
+
+	int lasttrack = 0;
+	int track = 0;
+	for (int j=0; j<getFieldCount(); j++) {
+		lasttrack = track;
+		HTp token = this->token(j);
+		track = token->getTrack();
+		if ((track != lasttrack) && (lasttrack > 0)) {
+			int diff = trackWidths[lasttrack] - local[lasttrack];
+			if ((diff > 0) && (j > 0)) {
+				m_tabs[j-1] += diff;
+			}
+		}
+		local[track]++;
 	}
 }
 

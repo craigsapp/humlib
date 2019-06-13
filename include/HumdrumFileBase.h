@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug 14 22:45:49 PDT 2015
+// Last Modified: Thu Jun 13 08:38:17 CEST 2019
 // Filename:      HumdrumFileBase.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileBase.h
 // Syntax:        C++11
@@ -201,7 +201,9 @@ class HumdrumFileBase : public HumHash {
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack) const;
 		void          createLinesFromTokens    (void);
-
+		void          removeExtraTabs          (void);
+		void          addExtraTabs             (void);
+		std::vector<int> getTrackWidths        (void);
 		void          appendLine               (const char* line);
 		void          appendLine               (const std::string& line);
 		void          appendLine               (HumdrumLine* line);
