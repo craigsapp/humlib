@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 13 11:43:27 CEST 2019
+// Last Modified: Thu Jun 13 14:48:51 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21265,9 +21265,9 @@ void HumdrumLine::addExtraTabs(vector<int> trackWidths) {
 		HTp token = this->token(j);
 		track = token->getTrack();
 		if ((track != lasttrack) && (lasttrack > 0)) {
-			int diff = trackWidths[lasttrack] - local[lasttrack];
+			int diff = trackWidths.at(lasttrack) - local.at(lasttrack);
 			if ((diff > 0) && (j > 0)) {
-				m_tabs[j-1] += diff;
+				m_tabs.at(j-1) += diff;
 			}
 		}
 		local[track]++;

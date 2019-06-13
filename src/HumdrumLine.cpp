@@ -1083,9 +1083,9 @@ void HumdrumLine::addExtraTabs(vector<int> trackWidths) {
 		HTp token = this->token(j);
 		track = token->getTrack();
 		if ((track != lasttrack) && (lasttrack > 0)) {
-			int diff = trackWidths[lasttrack] - local[lasttrack];
+			int diff = trackWidths.at(lasttrack) - local.at(lasttrack);
 			if ((diff > 0) && (j > 0)) {
-				m_tabs[j-1] += diff;
+				m_tabs.at(j-1) += diff;
 			}
 		}
 		local[track]++;
