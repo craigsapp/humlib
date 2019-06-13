@@ -87,7 +87,7 @@ class HumdrumLine : public std::string, public HumHash {
 		std::string   getXmlIdPrefix       (void) const;
 		void          createLineFromTokens (void);
 		void          removeExtraTabs      (void);
-		void          addExtraTabs         (std::vector<int> trackWidths);
+		void          addExtraTabs         (std::vector<int>& trackWidths);
 		int           getLineIndex         (void) const;
 		int           getLineNumber        (void) const;
 		HumdrumFile*  getOwner             (void);

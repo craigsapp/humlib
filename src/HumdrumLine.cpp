@@ -1068,7 +1068,7 @@ void HumdrumLine::removeExtraTabs(void) {
 //    since there is no track 0.
 //
 
-void HumdrumLine::addExtraTabs(vector<int> trackWidths) {
+void HumdrumLine::addExtraTabs(vector<int>& trackWidths) {
 	if (!this->hasSpines()) {
 		return;
 	}
