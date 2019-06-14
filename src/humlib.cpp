@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 14 12:31:27 CEST 2019
+// Last Modified: Fri Jun 14 15:20:39 DST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6722,7 +6722,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 				}
 			} else {
 				if (voicecount > 1) {
-					for (int j=newstaff->size(); j<voicecount; j++) {
+					for (int j=(int)newstaff->size(); j<voicecount; j++) {
 						// GridVoice* vdata = createVoice("*", "F", 0, p, s);
 						// newstaff->push_back(vdata);
 					}
@@ -7001,7 +7001,7 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 GridVoice* HumGrid::createVoice(const string& tok, const string& post, HumNum duration, int pindex, int sindex) {
 	//std::string token = tok;
 	//token += ":" + post + ":" + to_string(pindex) + "," + to_string(sindex);
-	GridVoice* gv = gv = new GridVoice(tok.c_str(), 0);
+	GridVoice* gv = new GridVoice(tok.c_str(), 0);
 	return gv;
 }
 
@@ -7902,7 +7902,7 @@ void HumGrid::addNullTokens(void) {
 	int s; // staff index
 	int v; // voice index
 
-	if (0) {
+	if ((0)) {
 		cerr << "SLICE TIMESTAMPS: " << endl;
 		for (int x=0; x<(int)m_allslices.size(); x++) {
 			cerr << "\tTIMESTAMP " << x << "= "
@@ -8021,7 +8021,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	HumNum slicedur = nextts - currts;
 	HumNum timeleft = tokendur - slicedur;
 
-	if (0) {
+	if ((0)) {
 		cerr << "===================" << endl;
 		cerr << "EXTENDING TOKEN    " << token      << endl;
 		cerr << "\tTOKEN DUR:       " << tokendur   << endl;

@@ -903,7 +903,7 @@ void HumGrid::transferMerges(GridStaff* oldstaff, GridStaff* oldlaststaff,
 GridVoice* HumGrid::createVoice(const string& tok, const string& post, HumNum duration, int pindex, int sindex) {
 	//std::string token = tok;
 	//token += ":" + post + ":" + to_string(pindex) + "," + to_string(sindex);
-	GridVoice* gv = gv = new GridVoice(tok.c_str(), 0);
+	GridVoice* gv = new GridVoice(tok.c_str(), 0);
 	return gv;
 }
 
