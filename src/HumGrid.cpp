@@ -624,7 +624,7 @@ GridSlice* HumGrid::checkManipulatorContract(GridSlice* curr) {
 				}
 			} else {
 				if (voicecount > 1) {
-					for (int j=newstaff->size(); j<voicecount; j++) {
+					for (int j=(int)newstaff->size(); j<voicecount; j++) {
 						// GridVoice* vdata = createVoice("*", "F", 0, p, s);
 						// newstaff->push_back(vdata);
 					}
@@ -1804,7 +1804,7 @@ void HumGrid::addNullTokens(void) {
 	int s; // staff index
 	int v; // voice index
 
-	if (0) {
+	if ((0)) {
 		cerr << "SLICE TIMESTAMPS: " << endl;
 		for (int x=0; x<(int)m_allslices.size(); x++) {
 			cerr << "\tTIMESTAMP " << x << "= "
@@ -1923,7 +1923,7 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	HumNum slicedur = nextts - currts;
 	HumNum timeleft = tokendur - slicedur;
 
-	if (0) {
+	if ((0)) {
 		cerr << "===================" << endl;
 		cerr << "EXTENDING TOKEN    " << token      << endl;
 		cerr << "\tTOKEN DUR:       " << tokendur   << endl;
