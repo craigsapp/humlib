@@ -4,7 +4,7 @@
 // Last Modified: Fri Aug 25 18:04:44 PDT 2017
 // Filename:      HumParamSet.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumParamSet.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Set of parameters, specifically for Layout codes.

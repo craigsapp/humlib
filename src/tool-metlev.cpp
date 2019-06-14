@@ -4,7 +4,7 @@
 // Last Modified: Tue Nov 29 01:03:06 PST 2016
 // Filename:      tool-metlev.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-metlev.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Extract metric levels

@@ -4,7 +4,7 @@
 // Last Modified: Sat May  5 21:06:32 PDT 2018
 // Filename:      tool-kern2mens.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-kern2mens.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for fixing early-music MusicXML import where a tied note over a barline

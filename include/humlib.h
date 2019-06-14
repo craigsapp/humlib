@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 13 16:17:25 CEST 2019
+// Last Modified: Fri Jun 14 12:31:27 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5760,6 +5760,25 @@ class Tool_slurcheck : public HumTool {
 	private:
 
 };
+
+
+class Tool_spinetrace : public HumTool {
+	public:
+		      Tool_spinetrace          (void);
+		     ~Tool_spinetrace          () {};
+
+		bool  run                      (HumdrumFile& infile);
+		bool  run                      (const string& indata, ostream& out);
+		bool  run                      (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  initialize               (HumdrumFile& infile);
+		void  processFile              (HumdrumFile& infile);
+
+	private:
+
+};
+
 
 
 class Tool_tabber : public HumTool {

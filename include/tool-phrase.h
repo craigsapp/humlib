@@ -4,7 +4,7 @@
 // Last Modified: Sun Jun  3 19:14:07 PDT 2018
 // Filename:      tool-phrase.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-phrase.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for phrase tool.

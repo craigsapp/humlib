@@ -4,7 +4,7 @@
 // Last Modified: Sun Sep 18 14:16:18 PDT 2016
 // Filename:      musicxml2hum.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/musicxml2hum.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3:noexpandtab
 //
 // Description:   Convert a MusicXML file into a Humdrum file.

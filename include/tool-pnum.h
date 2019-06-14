@@ -4,7 +4,7 @@
 // Last Modified: Wed Apr 10 10:14:50 EDT 2019
 // Filename:      tool-pnum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-pnum.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for pnum tool.

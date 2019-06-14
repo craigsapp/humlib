@@ -4,7 +4,7 @@
 // Last Modified: Wed Nov 30 07:45:42 PST 2016
 // Filename:      humdrum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Include file for working with humlib library.

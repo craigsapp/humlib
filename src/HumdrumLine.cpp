@@ -4,7 +4,7 @@
 // Last Modified: Fri Oct 14 11:41:22 PDT 2016 Added insertion functionality
 // Filename:      HumdrumLine.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumLine.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines and analytic markup
@@ -1074,7 +1074,7 @@ void HumdrumLine::addExtraTabs(vector<int>& trackWidths) {
 	}
 
 	fill(m_tabs.begin(), m_tabs.end(), 1);
-	vector<int> local(m_tabs.size(), 0);
+	vector<int> local(trackWidths.size(), 0);
 
 	int lasttrack = 0;
 	int track = 0;
@@ -1088,7 +1088,7 @@ void HumdrumLine::addExtraTabs(vector<int>& trackWidths) {
 				m_tabs.at(j-1) += diff;
 			}
 		}
-		local[track]++;
+		local.at(track)++;
 	}
 }
 

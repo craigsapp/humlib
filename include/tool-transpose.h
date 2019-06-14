@@ -4,7 +4,7 @@
 // Last Modified: Mon Dec  5 23:09:08 PST 2016
 // Filename:      tool-transpose.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-transpose.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for transpose tool.

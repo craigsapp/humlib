@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 13 16:17:25 CEST 2019
+// Last Modified: Fri Jun 14 12:31:27 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21256,7 +21256,7 @@ void HumdrumLine::addExtraTabs(vector<int>& trackWidths) {
 	}
 
 	fill(m_tabs.begin(), m_tabs.end(), 1);
-	vector<int> local(m_tabs.size(), 0);
+	vector<int> local(trackWidths.size(), 0);
 
 	int lasttrack = 0;
 	int track = 0;
@@ -21270,7 +21270,7 @@ void HumdrumLine::addExtraTabs(vector<int>& trackWidths) {
 				m_tabs.at(j-1) += diff;
 			}
 		}
-		local[track]++;
+		local.at(track)++;
 	}
 }
 
@@ -41968,6 +41968,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "slur") {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "spinetrace") {
+			RUNTOOL(spinetrace, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
@@ -57205,6 +57207,110 @@ void Tool_slurcheck::processFile(HumdrumFile& infile) {
 	infile.createLinesFromTokens();
 }
 
+
+
+
+
+/////////////////////////////////
+//
+// Tool_gridtest::Tool_spinetrace -- Set the recognized options for the tool.
+//
+
+Tool_spinetrace::Tool_spinetrace(void) {
+	define("a|append=b", "append analysis to input data lines");
+	define("p|prepend=b", "prepend analysis to input data lines");
+}
+
+
+
+///////////////////////////////
+//
+// Tool_spinetrace::run -- Primary interfaces to the tool.
+//
+
+bool Tool_spinetrace::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	return run(infile, out);
+}
+
+
+bool Tool_spinetrace::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	return status;
+}
+
+
+bool Tool_spinetrace::run(HumdrumFile& infile) {
+   initialize(infile);
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_spinetrace::initialize --
+//
+
+void Tool_spinetrace::initialize(HumdrumFile& infile) {
+	// do nothing for now
+}
+
+
+
+//////////////////////////////
+//
+// Tool_spinetrace::processFile --
+//
+
+void Tool_spinetrace::processFile(HumdrumFile& infile) {
+	bool appendQ = getBoolean("append");
+	bool prependQ = getBoolean("prepend");
+
+	int linecount = infile.getLineCount();
+	for (int i=0; i<linecount; i++) {
+		if (!infile[i].hasSpines()) {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+		if (appendQ) {
+			m_humdrum_text << infile[i] << "\t";
+		}
+
+		if (!infile[i].isData()) {
+			if (infile[i].isInterpretation()) {
+				int fieldcount = infile[i].getFieldCount();
+				for (int j=0; j<fieldcount; j++) {
+					HTp token = infile.token(i, j);
+					if (token->compare(0, 2, "**") == 0) {
+						m_humdrum_text << "**spine";
+					} else {
+						m_humdrum_text << token;
+					}
+					if (j < fieldcount - 1) {
+						m_humdrum_text << "\t";
+					}
+				}
+			} else {
+				m_humdrum_text << infile[i];
+			}
+		} else {
+			int fieldcount = infile[i].getFieldCount();
+			for (int j=0; j<fieldcount; j++) {
+				m_humdrum_text << infile[i].token(j)->getSpineInfo();
+				if (j < fieldcount - 1) {
+					m_humdrum_text << '\t';
+				}
+			}
+		}
+
+		if (prependQ) {
+			m_humdrum_text << "\t" << infile[i];
+		}
+		m_humdrum_text << "\n";
+	}
+}
 
 
 

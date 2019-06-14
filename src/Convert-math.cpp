@@ -4,7 +4,7 @@
 // Last Modified: Wed Aug 19 00:06:32 PDT 2015
 // Filename:      Convert-math.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-math.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Convert between various data representations.

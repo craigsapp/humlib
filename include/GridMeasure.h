@@ -4,7 +4,7 @@
 // Last Modified: Mon Sep 18 15:46:44 PDT 2017
 // Filename:      GridMeasure.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridMeasure.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   HumGrid is an intermediate container for converting from

@@ -4,7 +4,7 @@
 // Last Modified: Sun Sep 18 14:16:18 PDT 2016
 // Filename:      MxmlEvent.cpp
 // URL:           https://github.com/craigsapp/musicxml2hum/blob/master/include/MxmlEvent.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   MusicXML parsing abstraction for elements which are children

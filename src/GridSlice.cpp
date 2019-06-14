@@ -4,7 +4,7 @@
 // Last Modified: Sun Oct 16 16:08:08 PDT 2016
 // Filename:      GridSlice.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/GridSlice.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   GridSlice store a timestamp, a slice type and data for

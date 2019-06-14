@@ -4,7 +4,7 @@
 // Last Modified: Fri Aug 11 18:25:50 EDT 2017
 // Filename:      tool-imitation.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-imitation.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Counterpoint imitation tool.

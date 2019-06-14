@@ -13,7 +13,7 @@
 // Last Modified: Thu Jun 14 15:30:53 PDT 2018 Added rest position transposition
 // Filename:      tool-transpose.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-transpose.cpp
-// Syntax:        C++11; humlib
+// Syntax:        C++11; humlib; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Transpose **kern musical data.

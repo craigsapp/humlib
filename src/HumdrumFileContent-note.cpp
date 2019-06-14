@@ -3,7 +3,7 @@
 // Last Modified: Mon Nov  5 13:25:51 CET 2018
 // Filename:      HumdrumFileContent-note.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-note.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Content analysis functions related to notes.

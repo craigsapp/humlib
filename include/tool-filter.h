@@ -4,7 +4,7 @@
 // Last Modified: Wed Dec 14 22:21:47 PST 2016
 // Filename:      tool-filter.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-filter.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for filter tool.

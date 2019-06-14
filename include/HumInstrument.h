@@ -6,7 +6,7 @@
 // Filename:      HumInstrument.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumInstrument.h
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 //
 // Description:   Enumeration class for processing Humdrum instrument names.
 //

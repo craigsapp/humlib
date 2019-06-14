@@ -4,7 +4,7 @@
 // Last Modified: Sat May  5 21:04:01 PDT 2018
 // Filename:      tool-kern2mens.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-kern2mens.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Convert **kern data into **mens data.  The conversion is

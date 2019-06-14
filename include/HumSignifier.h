@@ -4,7 +4,7 @@
 // Last Modified: Sun Jun 10 06:47:06 PDT 2018
 // Filename:      HumSignifier.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumSignifier.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   A signifier that extends a Humdrum representation.

@@ -4,7 +4,7 @@
 // Last Modified: Fri Feb  9 21:19:13 PST 2018
 // Filename:      tool-chord.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-chord.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for fixing adjusting chords (order of pitches,

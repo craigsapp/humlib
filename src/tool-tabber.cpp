@@ -3,8 +3,8 @@
 // Creation Date: Wed Jun 12 12:08:10 CEST 2019
 // Last Modified: Wed Jun 12 12:08:13 CEST 2019
 // Filename:      tool-tabber.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-tabber.cpp
-// Syntax:        C++11
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-tabber.cpp
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Add/remove extra spacing tabs from Humdrum data.

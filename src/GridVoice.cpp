@@ -4,7 +4,7 @@
 // Last Modified: Tue Oct 18 12:01:41 PDT 2016
 // Filename:      GridVoice.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridVoice.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   HumGrid is an intermediate container for converting from

@@ -4,7 +4,7 @@
 // Last Modified: Mon Nov 28 08:55:38 PST 2016
 // Filename:      HumTool.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumTool.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Common interface for Humdrum tools.

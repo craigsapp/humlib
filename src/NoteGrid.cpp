@@ -4,7 +4,7 @@
 // Last Modified: Fri Nov 25 19:41:49 PST 2016
 // Filename:      NoteGrid.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/NoteGrid.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Manages a 2D array of NoteCells for each timeslice

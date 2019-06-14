@@ -4,7 +4,7 @@
 // Last Modified: Fri May  4 21:12:53 PDT 2018
 // Filename:      Convert-mens.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-mens.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Conversions related to strings.

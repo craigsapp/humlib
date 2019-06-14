@@ -4,7 +4,7 @@
 // Last Modified: Sun Oct 16 16:08:08 PDT 2016
 // Filename:      GridStaff.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridStaff.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   HumGrid is an intermediate container for converting from

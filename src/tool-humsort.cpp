@@ -4,7 +4,7 @@
 // Last Modified: Sat Jul  8 17:17:21 CEST 2017
 // Filename:      tool-humsort.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-humsort.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Sort data spines in a Humdrum file.

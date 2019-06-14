@@ -4,7 +4,7 @@
 // Last Modified: Thu Sep 20 08:45:05 PDT 2018
 // Filename:      HumdrumFileContent-octave.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-octave.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Marks octave shifts necessary for printing notes

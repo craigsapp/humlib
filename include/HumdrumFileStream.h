@@ -5,7 +5,7 @@
 // Last Modified: Fri Dec  2 19:26:01 PST 2016 Ported to humlib
 // Filename:      HumdrumFileStream.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileStream.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Multi-movement manager for Humdrum files.  The class

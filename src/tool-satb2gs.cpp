@@ -4,7 +4,7 @@
 // Last Modified: Fri Dec 16 01:01:58 PST 2016 Ported to humlib.
 // Filename:      tool-satb2gs.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-satb2gs.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Converts Soprano/Alto/Tenor/Bass staves into

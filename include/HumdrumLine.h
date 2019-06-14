@@ -4,7 +4,7 @@
 // Last Modified: Wed Aug 12 10:42:07 PDT 2015
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumAddress.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines and analytic markup

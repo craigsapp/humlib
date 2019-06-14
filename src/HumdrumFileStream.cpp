@@ -6,7 +6,7 @@
 // Last Modified: Fri Dec  2 19:25:41 PST 2016 Moved to humlib
 // Filename:      HumdrumFileStream.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileStream.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Higher-level functions for processing Humdrum files.

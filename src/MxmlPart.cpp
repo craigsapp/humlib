@@ -4,7 +4,7 @@
 // Last Modified: Sun Sep 18 14:16:18 PDT 2016
 // Filename:      MxmlPart.cpp
 // URL:           https://github.com/craigsapp/musicxml2hum/blob/master/src/MxmlPart.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   MusicXML parsing abstraction for part elements which

@@ -4,7 +4,7 @@
 // Last Modified: Sun Jul 15 09:57:16 CEST 2018
 // Filename:      tool-periodicity.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-periodicity.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   periodicity tool.

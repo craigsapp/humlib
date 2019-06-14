@@ -4,7 +4,7 @@
 // Last Modified: Sun Aug 27 07:18:07 PDT 2017
 // Filename:      tool-msearch.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-msearch.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for msearch tool.

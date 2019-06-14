@@ -4,7 +4,7 @@
 // Last Modified: Sun Sep 18 14:16:18 PDT 2016
 // Filename:      MxmlMeasure.cpp
 // URL:           https://github.com/craigsapp/musicxml2hum/blob/master/include/MxmlMeasure.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   MusicXML parsing abstraction for measure elements which

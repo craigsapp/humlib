@@ -4,7 +4,7 @@
 // Last Modified: Wed Oct 18 13:40:26 PDT 2017
 // Filename:      tool-tassoize.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-tassoize.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Refinements and corrections for TiM scores imported

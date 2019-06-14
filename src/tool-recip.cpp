@@ -4,7 +4,7 @@
 // Last Modified: Wed Dec  7 12:40:28 PST 2016
 // Filename:      tool-recip.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-recip.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Extract **recip data from **kern data.

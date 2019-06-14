@@ -4,7 +4,7 @@
 // Last Modified: Mon Nov 28 08:55:38 PST 2016
 // Filename:      tool-recip.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-recip.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for recip tool.

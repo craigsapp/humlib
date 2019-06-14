@@ -4,7 +4,7 @@
 // Last Modified: Mon Aug  7 20:37:19 EDT 2017
 // Filename:      Convert-harmony.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-harmony.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Conversions related to harmony.

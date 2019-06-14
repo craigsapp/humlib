@@ -4,7 +4,7 @@
 // Last Modified: Wed Apr 10 10:21:32 EDT 2019
 // Filename:      tool-pnum.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-pnum.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Extract numeric pitch data from **kern data.

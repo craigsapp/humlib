@@ -4,7 +4,7 @@
 // Last Modified: Tue Nov  8 19:59:10 PST 2016
 // Filename:      HumGrid.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/HumGrid.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   HumGrid is an intermediate container for converting from

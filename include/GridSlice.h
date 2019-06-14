@@ -4,7 +4,7 @@
 // Last Modified: Sat Oct 21 21:59:45 PDT 2017
 // Filename:      GridSlice.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/GridSlice.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   HumGrid is an intermediate container for converting from

@@ -4,7 +4,7 @@
 // Last Modified: Thu Jun 13 08:38:17 CEST 2019
 // Filename:      HumdrumFileBase.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileBase.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store Humdrum text lines from input stream

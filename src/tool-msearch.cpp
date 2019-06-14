@@ -4,7 +4,7 @@
 // Last Modified: Mon Oct 29 10:38:26 EDT 2018
 // Filename:      tool-msearch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-msearch.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Music searching tool

@@ -4,7 +4,7 @@
 // Last Modified: Sun Aug  9 21:19:53 PDT 2015
 // Filename:      HumAddress.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumAddress.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Used to store the location of a token within a HumdrumFile.

@@ -4,7 +4,7 @@
 // Last Modified: Fri Jul  6 00:16:06 CEST 2018
 // Filename:      tool-slurcheck.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-slurcheck.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for fixing adjusting chords (order of pitches,

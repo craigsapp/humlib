@@ -4,7 +4,7 @@
 // Last Modified: Wed Nov 30 20:36:41 PST 2016
 // Filename:      tool-autobeam.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-autobeam.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for autobeam tool.

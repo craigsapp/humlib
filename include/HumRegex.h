@@ -4,7 +4,7 @@
 // Last Modified: Sat Dec  3 10:09:23 PST 2016
 // Filename:      HumRegex.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumRegex.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 // note:          Requires GCC v4.9 or higher
 //

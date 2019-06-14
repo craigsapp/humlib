@@ -7,7 +7,7 @@
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/Options.h
 // Documentation: http://sig.sapp.org/doc/classes/Options
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 //
 // Description:   Interface to command-line options.
 //

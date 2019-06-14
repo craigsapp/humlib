@@ -4,7 +4,7 @@
 // Last Modified: Mon Oct 17 19:18:43 PDT 2016
 // Filename:      GridMeasure.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/GridMeasure.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   GridMeasure stores the data for each measure in a HumGrid

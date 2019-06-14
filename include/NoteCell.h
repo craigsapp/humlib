@@ -4,7 +4,7 @@
 // Last Modified: Thu Nov 24 08:31:41 PST 2016 Added null token resolving
 // Filename:      HumdrumToken.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumToken.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Keep track of variables related to a single note

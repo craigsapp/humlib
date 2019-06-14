@@ -4,7 +4,7 @@
 // Last Modified: Wed Aug 19 00:06:39 PDT 2015
 // Filename:      Convert-pitch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/Convert-pitch.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Conversions related to pitch.

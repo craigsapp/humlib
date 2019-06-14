@@ -4,7 +4,7 @@
 // Last Modified: Sat Jun 16 06:37:34 PDT 2018
 // Filename:      HumdrumFileContent-stem.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-stem.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Calculate stem lengths, particular for stems off of staff.

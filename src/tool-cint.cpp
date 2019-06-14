@@ -4,7 +4,7 @@
 // Last Modified: Tue May 30 15:35:10 CEST 2017
 // Filename:      tool-cint.cpp
 // URL:           https://github.com/craigsapp/minHumdrum/blob/master/src/tool-cint.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Calculates counterpoint interval modules in polyphonic

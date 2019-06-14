@@ -5,7 +5,7 @@
 // Last Modified: Wed May 24 15:39:19 CEST 2017
 // Filename:      tool-dissonant.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-dissonant.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Dissonance identification and labeling tool.

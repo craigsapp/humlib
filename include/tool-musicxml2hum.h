@@ -4,7 +4,7 @@
 // Last Modified: Wed Oct 26 18:25:45 PDT 2016 Renamed class
 // Filename:      tool-musicxml2hum.h
 // URL:           https://github.com/craigsapp/musicxml2hum/blob/master/include/tool-musicxml2hum.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Inteface to convert a MusicXml file into a Humdrum file.

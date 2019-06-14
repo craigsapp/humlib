@@ -4,7 +4,7 @@
 // Last Modified: Thu Sep 21 14:04:12 PDT 2017
 // Filename:      tool-mei2hum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-mei2hum.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Inteface to convert an MEI file into a Humdrum file.

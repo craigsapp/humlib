@@ -4,7 +4,7 @@
 // Last Modified: Wed Jun 12 12:15:26 CEST 2019
 // Filename:      tool-tabber.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-tabber.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Add/remove spacing tabs between spines.

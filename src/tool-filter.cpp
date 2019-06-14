@@ -4,7 +4,7 @@
 // Last Modified: Sat Jun 17 23:27:51 CEST 2017
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Example of extracting a 2D pitch grid from
@@ -32,6 +32,7 @@
 #include "tool-satb2gs.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
+#include "tool-spinetrace.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-trillspell.h"
@@ -168,6 +169,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "slur") {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
+		} else if (commands[i].first == "spinetrace") {
+			RUNTOOL(spinetrace, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {

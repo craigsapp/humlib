@@ -4,7 +4,7 @@
 // Last Modified: Thu Aug 10 08:25:53 EDT 2017
 // Filename:      tool-ruthfix.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-ruthfix.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for fixing early-music MusicXML import where a tied note over a barline

@@ -4,7 +4,7 @@
 // Last Modified: Mon Nov 28 21:40:41 PST 2016
 // Filename:      HumdrumFileContent-metlev.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-metlev.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:

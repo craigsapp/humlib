@@ -4,7 +4,7 @@
 // Last Modified: Sun Aug  9 21:03:12 PDT 2015
 // Filename:      HumNum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumNum.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Rational number class for durations.

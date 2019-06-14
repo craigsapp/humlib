@@ -48,7 +48,7 @@ LIBDIR    = lib
 LIBFILE   = humlib
 #LIBFILE  = humdrum
 TARGDIR   = bin
-TOOLDIR   = tools
+TOOLDIR   = cli
 PUGIXML   = pugixml
 
 PREFLAGS  = -Wall -I$(INCDIR)

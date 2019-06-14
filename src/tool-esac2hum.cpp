@@ -6,7 +6,7 @@
 // Last Modified: Ported from Humdrum extras
 // Filename:      tool-esac2hum.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-esac2hum.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Converts an EsAC file into Humdrum.

@@ -4,7 +4,7 @@
 // Last Modified: Sun Aug 16 01:23:05 PDT 2015
 // Filename:      HumHash.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumHash.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Key/value parameters systems for Humdrum tokens, lines,

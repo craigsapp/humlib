@@ -4,7 +4,7 @@
 // Last Modified: Sun Jun 10 14:29:19 PDT 2018
 // Filename:      HumSignifiers.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumSignifiers.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   The collection of signifiers in a Humdrum file.

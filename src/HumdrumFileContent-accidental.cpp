@@ -4,7 +4,7 @@
 // Last Modified: Sat Jun 18 17:20:28 PDT 2016
 // Filename:      HumdrumFileContent-accidental.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-accidental.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Content analysis of accidentals.

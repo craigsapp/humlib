@@ -4,7 +4,7 @@
 // Last Modified: Mon Aug  7 20:17:56 EDT 2017
 // Filename:      tool-hproof.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-hproof.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for hproof tool.

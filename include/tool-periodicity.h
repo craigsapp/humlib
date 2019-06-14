@@ -4,7 +4,7 @@
 // Last Modified: Mon Aug 13 06:18:16 PDT 2018
 // Filename:      tool-periodicity.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-periodicity.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for periodicity (polyrhythmic) tool.

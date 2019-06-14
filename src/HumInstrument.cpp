@@ -4,7 +4,7 @@
 // Last Modified: Fri Sep  2 10:16:09 CEST 2016 (added to humlib)
 // Filename:      HumInstrument.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumInstrument.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Special enumeration class for processing Humdrum

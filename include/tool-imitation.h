@@ -4,7 +4,7 @@
 // Last Modified: Sat Jun 17 22:40:59 CEST 2017
 // Filename:      tool-imitation.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-imitation.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for imitation tool.

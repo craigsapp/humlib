@@ -4,7 +4,7 @@
 // Last Modified: Sun Mar  4 21:09:13 PST 2018
 // Filename:      tool-binroll.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-binroll.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Extract a binary pinao roll of note in a score.

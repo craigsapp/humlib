@@ -4,7 +4,7 @@
 // Last Modified: Sun Dec  4 16:15:36 PST 2016 Ported from humextras
 // Filename:      tool-autostem.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-autostem.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Add or remove stems.

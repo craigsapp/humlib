@@ -4,7 +4,7 @@
 // Last Modified: Wed Aug 16 07:14:55 EDT 2017
 // Filename:      tool-hproof.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-hproof.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   **harm proof-reading tool.

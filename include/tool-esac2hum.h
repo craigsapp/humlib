@@ -4,7 +4,7 @@
 // Last Modified: Tue Jun  6 10:07:14 CEST 2017
 // Filename:      tool-esac2hum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-esac2hum.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for esac2hum tool.

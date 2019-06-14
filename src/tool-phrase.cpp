@@ -4,7 +4,7 @@
 // Last Modified: Thu May 31 16:41:39 PDT 2018
 // Filename:      tool-phrase.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-phrase.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Analyses phrases

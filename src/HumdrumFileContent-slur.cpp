@@ -4,7 +4,7 @@
 // Last Modified: Mon Oct  5 23:15:44 PDT 2015
 // Filename:      HumdrumFileContent-slur.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-slur.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Links slur starting/ending points to each other.

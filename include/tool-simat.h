@@ -4,7 +4,7 @@
 // Last Modified: Tue Jul 17 08:18:24 CEST 2018
 // Filename:      tool-simat.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-simat.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for simat (similarity matrix) tool.

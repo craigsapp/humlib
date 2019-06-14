@@ -4,7 +4,7 @@
 // Last Modified: Sun Aug  9 21:03:12 PDT 2015
 // Filename:      Convert.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/Convert.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Convert between various data representations.

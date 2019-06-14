@@ -4,7 +4,7 @@
 // Last Modified: Fri Jul  6 22:06:26 CEST 2018
 // Filename:      tool-slurcheck.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-slurcheck.cpp
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Interface for fixing unmatched slurs.

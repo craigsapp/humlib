@@ -4,7 +4,7 @@
 // Last Modified: Tue May 30 15:19:23 CEST 2017 Ported from Humdrum Extras
 // Filename:      tool-cint.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-dissonant.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Calculates counterpoint interval modules in polyphonic

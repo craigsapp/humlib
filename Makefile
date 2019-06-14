@@ -45,7 +45,7 @@ endif
 BINDIR        = bin
 OBJDIR        = obj
 SRCDIR        = src
-TOOLDIR       = tools
+TOOLDIR       = cli
 SRCDIR_MIN    = src
 INCDIR        = include
 INCDIR_MIN    = include
@@ -102,7 +102,7 @@ OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/tool-*.cpp)))
 OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 # targets which don't actually refer to files
-.PHONY: examples myprograms src include dynamic tools
+.PHONY: examples myprograms src include dynamic cli
 
 
 ###########################################################################
@@ -140,6 +140,7 @@ lib: makedirs $(OBJS)
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE)
 
 
+cli: tools
 tool: tools
 tools:
 	@$(MAKE) -f Makefile.programs

@@ -4,7 +4,7 @@
 // Last Modified: Fri Aug 24 17:32:51 PDT 2018
 // Filename:      tool-trillspell.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-trill.h
-// Syntax:        C++11
+// Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for trillspell tool, which assigns intervals to
