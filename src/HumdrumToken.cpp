@@ -2124,7 +2124,6 @@ void HumdrumToken::storeLinkedParameters(void) {
 	if (m_linkedParameter) {
 		delete m_linkedParameter;
 	}
-cerr << "STORING LINKED PARAMETER OF " << this << endl;
 	m_linkedParameter = new HumParamSet(*((string*)this));
 }
 
