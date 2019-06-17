@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 15 09:21:06 CEST 2019
+// Last Modified: Mon Jun 17 15:16:25 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31400,7 +31400,7 @@ void Tool_autostem::initialize(HumdrumFile& infile) {
 			  << "craig@ccrma.stanford.edu, December 2010" << endl;
 		m_quit = true;
 	} else if (getBoolean("version")) {
-		m_free_text << getCommand() << ", version: 26 December 2010" << endl;
+		m_free_text << getCommand() << ", version: 17 June 2019" << endl;
 		m_free_text << "compiled: " << __DATE__ << endl;
 		m_quit = true;
 	} else if (getBoolean("help")) {
@@ -31761,11 +31761,13 @@ void Tool_autostem::getBeamSegments(vector<vector<Coord> >& beamednotes,
 			if (infile.token(i, j)->isRest()) {
 				continue;
 			}
-			beamchar = beamstates[i][j][0];
-			if (beamchar == '\0') {
+
+			if (beamstates[i][j].empty()) {
 				beambuffer[track][layer].resize(0);  // possible unter. beam
 				continue;
 			}
+			beamchar = beamstates[i][j][0];
+
 			if ((beamchar == '[') || (beamchar == '=')) {
 				// add a beam to the buffer and wait for more
 				tcoord.i = i;
@@ -32401,14 +32403,18 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 		beams[i].resize(infile[i].getFieldCount());
 		for (int j=0; j<(int)beams[i].size(); j++) {
 			beams[i][j].resize(1);
-			beams[i][j][0] = '\0';
+			beams[i][j] = "";
 		}
 
 		fill(curlayer.begin(), curlayer.end(), 0);
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			track = infile.token(i, j)->getTrack();
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			track = token->getTrack();
 			curlayer[track]++;
-			if (infile.token(i, j)->isNull()) {
+			if (token->isNull()) {
 				continue;
 			}
 			if (infile.token(i, j)->isRest()) {
@@ -32443,7 +32449,9 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				contin = gracestate[track][curlayer[track]];
 				contin -= stop;
 				gbinfo.clear();
-				gbinfo.resize(contin);
+				if (contin > 0) {
+					gbinfo.resize(contin);
+				}
 				for (int ii=0; ii<contin; ii++) {
 					gbinfo[ii] = '=';
 				}
