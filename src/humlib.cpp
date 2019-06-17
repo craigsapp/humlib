@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 17 15:54:48 CEST 2019
+// Last Modified: Mon Jun 17 16:34:19 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21171,14 +21171,11 @@ int HumdrumLine::createTokensFromLine(void) {
 					token = new HumdrumToken(tstring);
 					token->setOwner(this);
 					m_tokens.push_back(token);
-					if (m_tabs.size() > 0) {
-						m_tabs.back()++;
-					}
 					m_tabs.push_back(1);
 					tstring.clear();
 				} else {
 					if (m_tabs.size() > 0) {
-						m_tabs[m_tabs.size() - 1]++;
+						m_tabs.back()++;
 					}
 				}
 			} else {

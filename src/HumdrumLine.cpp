@@ -989,14 +989,11 @@ int HumdrumLine::createTokensFromLine(void) {
 					token = new HumdrumToken(tstring);
 					token->setOwner(this);
 					m_tokens.push_back(token);
-					if (m_tabs.size() > 0) {
-						m_tabs.back()++;
-					}
 					m_tabs.push_back(1);
 					tstring.clear();
 				} else {
 					if (m_tabs.size() > 0) {
-						m_tabs[m_tabs.size() - 1]++;
+						m_tabs.back()++;
 					}
 				}
 			} else {
