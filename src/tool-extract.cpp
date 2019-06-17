@@ -506,7 +506,7 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 		vector<int>& subfield, vector<int>& model, const string& astring,
 		HumdrumFile& infile) {
 
-	int finitsize = field.size();
+	int finitsize = (int)field.size();
 	int maxtrack = infile.getMaxTrack();
 
 	vector<HTp> ktracks;

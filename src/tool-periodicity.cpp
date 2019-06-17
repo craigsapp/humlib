@@ -301,7 +301,7 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 
 	int maxrow = getInteger("max-rows");
 	if (maxrow <= 0) {
-		maxrow = analysis.back().size();
+		maxrow = (int)analysis.back().size();
 	}
 
 

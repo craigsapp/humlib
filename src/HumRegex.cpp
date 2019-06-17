@@ -158,7 +158,7 @@ int HumRegex::search(const string& input, const string& exp) {
 		return 0;
 	} else {
 		// return the char+1 position of the first match
-		return m_matches.position(0) + 1;
+		return (int)m_matches.position(0) + 1;
 	}
 }
 
@@ -174,7 +174,7 @@ int HumRegex::search(const string& input, int startindex,
 	} else if (m_matches.size() < 1) {
 		return 0;
 	} else {
-		return m_matches.position(0) + 1;
+		return (int)m_matches.position(0) + 1;
 	}
 }
 
@@ -201,7 +201,7 @@ int HumRegex::search(const string& input, const string& exp,
 	} else if (m_matches.size() < 1) {
 		return 0;
 	} else {
-		return m_matches.position(0) + 1;
+		return (int)m_matches.position(0) + 1;
 	}
 }
 
@@ -217,7 +217,7 @@ int HumRegex::search(const string& input, int startindex, const string& exp,
 	} else if (m_matches.size() < 1) {
 		return 0;
 	} else {
-		return m_matches.position(0) + 1;
+		return (int)m_matches.position(0) + 1;
 	}
 }
 

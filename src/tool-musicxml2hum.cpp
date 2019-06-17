@@ -2097,7 +2097,7 @@ int Tool_musicxml2hum::addHarmony(GridPart* part, MxmlEvent* event, HumNum nowti
 	} else {
 		MusicXmlHarmonyInfo hinfo;
 		hinfo.timestamp = offset;
-		hinfo.timestamp /= event->getQTicks();
+		hinfo.timestamp /= (int)event->getQTicks();
 		hinfo.timestamp += nowtime;
 		hinfo.partindex = partindex;
 		hinfo.token = htok;
