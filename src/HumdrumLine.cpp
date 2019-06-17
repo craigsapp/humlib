@@ -1032,10 +1032,10 @@ void HumdrumLine::createLineFromTokens(void) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		iline += (string)(*m_tokens[i]);
 		if (i < (int)m_tokens.size() - 1) {
-			if (m_tabs[i] == 0) {
-				m_tabs[i] = 1;
+			if (m_tabs.at(i) == 0) {
+				m_tabs.at(i) = 1;
 			}
-			for (int j=0; j<m_tabs[i]; j++) {
+			for (int j=0; j<m_tabs.at(i); j++) {
 				iline += '\t';
 			}
 		}
@@ -1709,27 +1709,31 @@ void HumdrumLine::setParameters(const string& pdata) {
 //      list of tokens in the line.
 //
 
-void HumdrumLine::appendToken(HTp token) {
+void HumdrumLine::appendToken(HTp token, int tabcount) {
 	// deletion will be handled by class.
 	m_tokens.push_back(token);
+	m_tabs.push_back(tabcount);
 }
 
 
-void HumdrumLine::appendToken(const HumdrumToken& token) {
+void HumdrumLine::appendToken(const HumdrumToken& token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.push_back(newtok);
+	m_tabs.push_back(tabcount);
 }
 
 
-void HumdrumLine::appendToken(const string& token) {
+void HumdrumLine::appendToken(const string& token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.push_back(newtok);
+	m_tabs.push_back(tabcount);
 }
 
 
-void HumdrumLine::appendToken(const char* token) {
+void HumdrumLine::appendToken(const char* token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.push_back(newtok);
+	m_tabs.push_back(tabcount);
 }
 
 
@@ -1760,28 +1764,32 @@ int HumdrumLine::getKernNoteAttacks(void) {
 // HumdrumLine::insertToken -- Add a token before the given token position.
 //
 
-void HumdrumLine::insertToken(int index, HTp token) {
+void HumdrumLine::insertToken(int index, HTp token, int tabcount) {
 	// Warning: deletion will be handled by class.  Don't insert if it
 	// already belongs to another HumdrumLine or HumdrumFile.
 	m_tokens.insert(m_tokens.begin() + index, token);
+	m_tabs.insert(m_tabs.begin() + index, tabcount);
 }
 
 
-void HumdrumLine::insertToken(int index, const HumdrumToken& token) {
+void HumdrumLine::insertToken(int index, const HumdrumToken& token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.insert(m_tokens.begin() + index, newtok);
+	m_tabs.insert(m_tabs.begin() + index, tabcount);
 }
 
 
-void HumdrumLine::insertToken(int index, const string& token) {
+void HumdrumLine::insertToken(int index, const string& token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.insert(m_tokens.begin() + index, newtok);
+	m_tabs.insert(m_tabs.begin() + index, tabcount);
 }
 
 
-void HumdrumLine::insertToken(int index, const char* token) {
+void HumdrumLine::insertToken(int index, const char* token, int tabcount) {
 	HTp newtok = new HumdrumToken(token);
 	m_tokens.insert(m_tokens.begin() + index, newtok);
+	m_tabs.insert(m_tabs.begin() + index, tabcount);
 }
 
 
@@ -1791,23 +1799,23 @@ void HumdrumLine::insertToken(int index, const char* token) {
 // HumdrumLine::appendToken -- Add a token after the given token position.
 //
 
-void HumdrumLine::appendToken(int index, HTp token) {
-	HumdrumLine::insertToken(index+1, token);
+void HumdrumLine::appendToken(int index, HTp token, int tabcount) {
+	HumdrumLine::insertToken(index+1, token, tabcount);
 }
 
 
-void HumdrumLine::appendToken(int index, const HumdrumToken& token) {
-	HumdrumLine::insertToken(index+1, token);
+void HumdrumLine::appendToken(int index, const HumdrumToken& token, int tabcount) {
+	HumdrumLine::insertToken(index+1, token, tabcount);
 }
 
 
-void HumdrumLine::appendToken(int index, const string& token) {
-	HumdrumLine::insertToken(index+1, token);
+void HumdrumLine::appendToken(int index, const string& token, int tabcount) {
+	HumdrumLine::insertToken(index+1, token, tabcount);
 }
 
 
-void HumdrumLine::appendToken(int index, const char* token) {
-	HumdrumLine::insertToken(index+1, token);
+void HumdrumLine::appendToken(int index, const char* token, int tabcount) {
+	HumdrumLine::insertToken(index+1, token, tabcount);
 }
 
 
