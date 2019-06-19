@@ -13,3 +13,6 @@ _includes
 doc
 *.zip
 external/pugixml/
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
