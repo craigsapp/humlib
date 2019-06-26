@@ -110,6 +110,11 @@ OBJS += $(notdir $(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/[A-Z]*.cpp)))
 
 all: pugixml library tools
 
+update:
+	git checkout src/humlib.cpp
+	git checkout include/humlib.h
+	git pull
+
 pugi:    pugixml
 pugixml: makedirs pugixml.o
 	@-rm -f $(LIBDIR)/$(LIBFILE_PUGI)
