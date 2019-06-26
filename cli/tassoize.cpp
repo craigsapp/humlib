@@ -3,7 +3,7 @@
 // Creation Date: Wed Oct 18 16:47:39 PDT 2017
 // Last Modified: Wed Oct 18 16:47:41 PDT 2017
 // Filename:      tassoize.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/tools/tassoize.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/cli/tassoize.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //

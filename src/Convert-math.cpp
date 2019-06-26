@@ -160,7 +160,7 @@ double Convert::pearsonCorrelation(const vector<double>& x, const vector<double>
 
 //////////////////////////////
 //
-// Tool_transpose::standardDeviation --
+// Convert::standardDeviation --
 //
 
 double Convert::standardDeviation(const vector<double>& x) {
@@ -175,6 +175,58 @@ double Convert::standardDeviation(const vector<double>& x) {
 	}
 	variance = variance / x.size();
 	return sqrt(variance);
+}
+
+
+
+//////////////////////////////
+//
+// Convert::mean -- calculate the mean (average) of a list of numbers.
+//
+
+double Convert::mean(const std::vector<double>& x) {
+	double output = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		output += x[i];
+	}
+	return output / (int)x.size();
+}
+
+
+
+//////////////////////////////
+//
+// Convert::coefficientOfVariation -- Standard deviation divided by 
+//    mean.  From: Patel, Iversen & Rosenberg (2006): Comparing the
+//    rhythm and melody of speech and music: The case of British
+//    English and French.  JASA 119(5), May 2006, pp. 3034-3047.
+//
+
+double Convert::coefficientOfVariation(const std::vector<double>& x) {
+	double sd = Convert::standardDeviation(x);
+	double mean = Convert::mean(x);
+	return sd / mean;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::nPvi -- normalized pairwise variablity index.
+//    See: Linguistic: Grabe & Lowe 2002.
+//    See: Daniele & Patel 2004.
+//    See: Patel, Iversen & Rosenberg (2006): Comparing the
+//    rhythm and melody of speech and music: The case of British
+//    English and French.  JASA 119(5), May 2006, pp. 3034-3047.
+//
+
+double Convert::nPvi(const std::vector<double>& x) {
+	double output = 0.0;
+	for (int i=0; i<(int)x.size() - 1; i++) {
+		output += fabs((x[i] - x[i+1]) / (x[i] + x[i+1]));
+	}
+	output *= 200.0 / ((int)x.size() - 1);
+	return output;
 }
 
 

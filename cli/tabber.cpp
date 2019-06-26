@@ -3,7 +3,7 @@
 // Creation Date: Wed Jun 12 12:41:59 CEST 2019
 // Last Modified: Wed Jun 12 12:42:02 CEST 2019
 // Filename:      tabber.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/tools/tabber.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/cli/tabber.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //

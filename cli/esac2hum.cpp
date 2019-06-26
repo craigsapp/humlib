@@ -3,7 +3,7 @@
 // Creation Date: Tue Jun  6 15:47:45 CEST 2017
 // Last Modified: Tue Jun  6 15:47:48 CEST 2017
 // Filename:      esac2hum.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/tools/esac2hum.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/cli/esac2hum.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //
