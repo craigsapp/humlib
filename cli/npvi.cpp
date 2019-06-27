@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
 	options.define("k|kern=i:1", "kern spine to analyze");
 	options.define("f|filename=b", "print file name");
 	options.define("n|nationality=b", "print nationality");
+	options.define("p|population=b", "use population standard deviation");
 	options.define("c|cv=b", "print CV analysis");
 	options.define("debug=b", "print debugging info");
 	options.process(argc, argv);
@@ -186,7 +187,6 @@ double calculateCvPitch(HumdrumFile& infile, Options& options) {
 	}
 	HTp token = spinestarts[kindex];
 	vector<double> intervals;
-	intervals.push_back(0);
 	intervals.reserve(infile.getLineCount());
 	double ppitch = -100.0;
 	while (token) {
@@ -213,14 +213,12 @@ double calculateCvPitch(HumdrumFile& infile, Options& options) {
 			continue;
 			
 		}
-		double interval = (double)pitch - (double)ppitch;
+		double interval = fabs((double)pitch - (double)ppitch);
 		intervals.push_back(interval);
 		token = token->getNextToken();
 		ppitch = pitch;
 	}
-	if (ppitch > 0) {
-		intervals.push_back(ppitch);
-	}
+
 	if (options.getBoolean("debug")) {
 		cerr << "INTERVALS =";
 		for (int i=0; i<intervals.size(); i++) {
@@ -228,7 +226,12 @@ double calculateCvPitch(HumdrumFile& infile, Options& options) {
 		}
 		cerr << endl;
 	}
-	return Convert::coefficientOfVariation(intervals);
+
+	if (options.getBoolean("population")) {
+		return Convert::coefficientOfVariationPopulation(intervals);
+	} else {
+		return Convert::coefficientOfVariationSample(intervals);
+	}
 }
 
 

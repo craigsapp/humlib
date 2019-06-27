@@ -181,6 +181,28 @@ double Convert::standardDeviation(const vector<double>& x) {
 
 //////////////////////////////
 //
+// Convert::standardDeviationSample -- Similar to Convert::standardDeviation,
+//     but divide by (size-1) rather than (size).
+//
+
+double Convert::standardDeviationSample(const vector<double>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / ((int)x.size()-1);
+	return sqrt(variance);
+}
+
+
+
+//////////////////////////////
+//
 // Convert::mean -- calculate the mean (average) of a list of numbers.
 //
 
@@ -196,14 +218,30 @@ double Convert::mean(const std::vector<double>& x) {
 
 //////////////////////////////
 //
-// Convert::coefficientOfVariation -- Standard deviation divided by 
+// Convert::coefficientOfVariationPopulation -- Standard deviation divided by 
 //    mean.  From: Patel, Iversen & Rosenberg (2006): Comparing the
 //    rhythm and melody of speech and music: The case of British
 //    English and French.  JASA 119(5), May 2006, pp. 3034-3047.
 //
 
-double Convert::coefficientOfVariation(const std::vector<double>& x) {
+double Convert::coefficientOfVariationPopulation(const std::vector<double>& x) {
 	double sd = Convert::standardDeviation(x);
+	double mean = Convert::mean(x);
+	return sd / mean;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::coefficientOfVariationSample -- Standard deviation divided by 
+//    mean.  From: Patel, Iversen & Rosenberg (2006): Comparing the
+//    rhythm and melody of speech and music: The case of British
+//    English and French.  JASA 119(5), May 2006, pp. 3034-3047.
+//
+
+double Convert::coefficientOfVariationSample(const std::vector<double>& x) {
+	double sd = Convert::standardDeviationSample(x);
 	double mean = Convert::mean(x);
 	return sd / mean;
 }
