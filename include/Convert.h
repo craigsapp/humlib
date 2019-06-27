@@ -194,7 +194,7 @@ class Convert {
 		static bool    isNaN                (double value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
-		static double  standardDeviationSample(const vector<double>& x);
+		static double  standardDeviationSample(const std::vector<double>& x);
 		static double  mean                 (const std::vector<double>& x);
 		static int     romanNumeralToInteger(const std::string& roman);
 		static double  coefficientOfVariationSample(const std::vector<double>& x);

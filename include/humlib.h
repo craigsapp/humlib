@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 27 08:19:00 CEST 2019
+// Last Modified: Thu Jun 27 08:36:37 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2732,7 +2732,7 @@ class Convert {
 		static bool    isNaN                (double value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
-		static double  standardDeviationSample(const vector<double>& x);
+		static double  standardDeviationSample(const std::vector<double>& x);
 		static double  mean                 (const std::vector<double>& x);
 		static int     romanNumeralToInteger(const std::string& roman);
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
