@@ -282,6 +282,7 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 				continue;
 			}
 			int subcount = token->getSubtokenCount();
+			vector<string> subtoks;
 			for (int k=0; k<subcount; k++) {
 				string sub = token->getSubtoken(k);
 				if (sub.find("]") != string::npos) {
@@ -297,7 +298,9 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 				af.token = token;
 				af.subtoken = k;
 				af.text = sub;
-				af.chord_num++;
+				if (subcount > 1) {
+					af.chord_num++;
+				}
 				data.push_back(af);
 			}
 		}
