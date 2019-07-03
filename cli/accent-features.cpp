@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		if (measuresQ) {
 			extractMeasureNumberInfo(measures, infile);
 			printMeasureNumberInfo(measures);
-		} if (partsQ) {
+		} else if (partsQ) {
 			extractPartInfo(parts, infile);
 			printPartInfo(parts, infile);
 		} else {
