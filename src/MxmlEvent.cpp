@@ -1105,9 +1105,9 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 		case mevent_harmony:
 		case mevent_barline:
 		case mevent_bookmark:
-		case mevent_direction:
 		case mevent_grouping:
 		case mevent_link:
+		case mevent_direction:
 		case mevent_print:
 		case mevent_sound:
 		case mevent_unknown:
@@ -2023,6 +2023,18 @@ xml_node MxmlEvent::getDynamics(void) {
 
 xml_node MxmlEvent::getFiguredBass(void) {
 	return m_figured_bass;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::operator<< --
+//
+
+ostream& operator<<(ostream& output, xml_node element) {
+	element.print(output);
+	return output;
 }
 
 

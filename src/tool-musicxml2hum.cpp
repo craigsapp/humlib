@@ -102,6 +102,8 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	map<string, xml_node> partcontent; // mapping of IDs to part elements
 
 	getPartInfo(partinfo, partids, doc);
+	m_current_dynamic.resize(partids.size());
+
 	getPartContent(partcontent, partids, doc);
 	vector<MxmlPart> partdata;
 	partdata.resize(partids.size());
@@ -162,11 +164,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	// transfer dynamics boolean for part to HumGrid
-	for (int p=0; p<(int)partdata.size(); p++) {
+	for (int p = 0; p<(int)partdata.size(); p++) {
 		bool dynstate = partdata[p].hasDynamics();
 		if (dynstate) {
 			outdata.setDynamicsPresent(p);
-			break;
 		}
 	}
 
@@ -1423,10 +1424,15 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		addTexts(slice, outdata, event->getPartIndex(), staffindex, voiceindex, event);
 	}
 
-	if (m_current_dynamic) {
-		event->setDynamics(m_current_dynamic);
-		string dparam = getDynamicsParameters(m_current_dynamic);
-		m_current_dynamic = xml_node(NULL);
+	if (m_current_dynamic[partindex].size()) {
+		// only processing the first dynamic at the current time point for now.
+		// Fix later so that multiple dynamics are handleded in the part at the
+		// same time.  The LO parameters for multiple dynamics will need to be 
+		// qualified with "n=#".
+		event->setDynamics(m_current_dynamic[partindex][0]);
+		string dparam = getDynamicsParameters(m_current_dynamic[partindex][0]);
+
+		m_current_dynamic[partindex].clear();
 		event->reportDynamicToOwner();
 		addDynamic(slice->at(partindex), event);
 		if (dparam != "") {
@@ -1436,6 +1442,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 				gm->addDynamicsLayoutParameters(slice, partindex, fullparam);
 			}
 		}
+
 	}
 
 	if (m_current_figured_bass) {
@@ -2558,12 +2565,12 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					if (nodeType(grandchild, "words")) {
 						m_current_text.emplace_back(std::make_pair(pindex, element));
 					} else if (nodeType(grandchild, "dynamics")) {
-						m_current_dynamic = element;
+						m_current_dynamic[pindex].push_back(element);
 					} else if (nodeType(grandchild, "octave-shift")) {
 						ottavas[pindex].push_back(grandchild);
 						hasottava = true;
 					} else if (nodeType(grandchild, "wedge")) {
-						m_current_dynamic = element;
+						m_current_dynamic[pindex].push_back(element);
 					}
 				}
 			} else if (nodeType(element, "figured-bass")) {

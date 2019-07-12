@@ -216,7 +216,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_software;
 		std::string m_systemDecoration;
 
-		pugi::xml_node m_current_dynamic = pugi::xml_node(NULL);
+		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
 		pugi::xml_node m_current_figured_bass = pugi::xml_node(NULL);
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 

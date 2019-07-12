@@ -178,6 +178,9 @@ class MxmlEvent {
 };
 
 
+ostream& operator<<(ostream& output, xml_node element);
+
+
 // END_MERGE
 
 } // end namespace hum

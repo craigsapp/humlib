@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul  1 13:48:27 CEST 2019
+// Last Modified: Fri Jul 12 15:33:13 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3407,6 +3407,9 @@ class MxmlEvent {
 };
 
 
+ostream& operator<<(ostream& output, xml_node element);
+
+
 
 class MxmlEvent;
 class MxmlPart;
@@ -5287,7 +5290,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_software;
 		std::string m_systemDecoration;
 
-		pugi::xml_node m_current_dynamic = pugi::xml_node(NULL);
+		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
 		pugi::xml_node m_current_figured_bass = pugi::xml_node(NULL);
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 
