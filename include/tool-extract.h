@@ -128,6 +128,7 @@ class Tool_extract : public HumTool {
 		int         interpstate = 0;       // used -I or with -i
 		int         grepQ       = 0;       // used with -g option
 		string      grepString  = "";      // used with -g option
+		string      blankName   = "**blank"; // used with -n option
 
 };
 

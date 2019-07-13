@@ -61,6 +61,7 @@ Tool_extract::Tool_extract(void) {
 	define("M|cospine-model=s:d", "method for extracting cospines");
 	define("Y|no-editoral-rests=b",
 			"do not display yy marks on interpreted rests");
+	define("n|name|b|blank=s:**blank", "Name if exinterp added with 0");
 
 	define("debug=b", "print debugging information");
 	define("author=b");              // author of program
@@ -1213,7 +1214,7 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 		suppress = 0;
 		if (target == 0) {
 			if (infile.token(line, 0)->compare(0, 2, "**") == 0) {
-				storeToken(tempout, "**blank");
+				storeToken(tempout, blankName);
 				tval = 0;
 				vserial.push_back(tval);
 				xserial.push_back(tval);
@@ -1834,6 +1835,19 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 
 	grepQ = getBoolean("grep");
 	grepString = getString("grep");
+
+	if (getBoolean("name")) {
+		blankName = getString("name");
+		if (blankName == "") {
+			blankName = "**blank";
+		} else if (blankName.compare(0, 2, "**") == string::npos) {
+			if (blankName.compare(0, 1, "*") == string::npos) {
+				blankName = "**" + blankName;
+			} else {
+				blankName = "*" + blankName;
+			}
+		}
+	}
 
 }
 
