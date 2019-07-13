@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul 12 15:33:13 CEST 2019
+// Last Modified: Sat Jul 13 22:48:05 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3364,8 +3364,10 @@ class MxmlEvent {
 		void               setTexts           (std::vector<std::pair<int, xml_node>>& nodes);
 		std::vector<std::pair<int, xml_node>>&  getTexts           (void);
 		void               setDynamics        (xml_node node);
+		void               setHairpinEnding   (xml_node node);
 		void               setFiguredBass     (xml_node node);
 		xml_node           getDynamics        (void);
+		xml_node           getHairpinEnding   (void);
 		xml_node           getFiguredBass     (void);
 		std::string        getRestPitch       (void) const;
 
@@ -3388,6 +3390,7 @@ class MxmlEvent {
 		bool               m_stems;      // for preserving stems
 
 		xml_node          m_dynamics;    // dynamics <direction> starting just before note
+		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
 		xml_node          m_figured_bass;// fb starting just before note
 		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note
 
@@ -3407,7 +3410,7 @@ class MxmlEvent {
 };
 
 
-ostream& operator<<(ostream& output, xml_node element);
+std::ostream& operator<<(std::ostream& output, xml_node element);
 
 
 
@@ -4581,6 +4584,7 @@ class Tool_extract : public HumTool {
 		int         interpstate = 0;       // used -I or with -i
 		int         grepQ       = 0;       // used with -g option
 		string      grepString  = "";      // used with -g option
+		string      blankName   = "**blank"; // used with -n option
 
 };
 
@@ -5240,7 +5244,8 @@ class Tool_musicxml2hum : public HumTool {
 		bool isInvisible       (MxmlEvent* event);
 		int  addLyrics         (GridStaff* staff, MxmlEvent* event);
 		int  addHarmony        (GridPart* oart, MxmlEvent* event, HumNum nowtime, int partindex);
-		void addDynamic        (GridPart* part, MxmlEvent* event);
+		void addDynamic        (GridPart* part, MxmlEvent* event, int partindex);
+		void addHairpinEnding  (GridPart* part, MxmlEvent* event, int partindex);
 		void addFiguredBass    (GridPart* part, MxmlEvent* event);
 		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
@@ -5253,7 +5258,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string getFiguredBassString(pugi::xml_node element);
 		std::string getFiguredBassParameters(pugi::xml_node element);
 		std::string convertFiguredBassNumber(const xml_node& figure);
-		std::string getHairpinString(pugi::xml_node element);
+		std::string getHairpinString(pugi::xml_node element, int partindex);
 		std::string cleanSpaces     (const std::string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
 		void reindexVoices     (std::vector<MxmlPart>& partdata);
@@ -5283,6 +5288,7 @@ class Tool_musicxml2hum : public HumTool {
 		bool m_hasOrnamentsQ = false;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 		std::vector<MusicXmlHarmonyInfo> offsetHarmony;
+		std::vector<string> m_stop_char;
 
 		// RDF indications in **kern data:
 		std::string  m_caesura_rdf;
