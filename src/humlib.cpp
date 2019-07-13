@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 13 22:48:05 CEST 2019
+// Last Modified: Sat Jul 13 22:58:44 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -42013,8 +42013,8 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		blankName = getString("name");
 		if (blankName == "") {
 			blankName = "**blank";
-		} else if (blankName.compare(0, 2, "**") == string::npos) {
-			if (blankName.compare(0, 1, "*") == string::npos) {
+		} else if (blankName.compare(0, 2, "**") != 0) {
+			if (blankName.compare(0, 1, "*") != 0) {
 				blankName = "**" + blankName;
 			} else {
 				blankName = "*" + blankName;

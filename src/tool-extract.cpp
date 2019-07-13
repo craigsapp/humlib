@@ -1840,8 +1840,8 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		blankName = getString("name");
 		if (blankName == "") {
 			blankName = "**blank";
-		} else if (blankName.compare(0, 2, "**") == string::npos) {
-			if (blankName.compare(0, 1, "*") == string::npos) {
+		} else if (blankName.compare(0, 2, "**") != 0) {
+			if (blankName.compare(0, 1, "*") != 0) {
 				blankName = "**" + blankName;
 			} else {
 				blankName = "*" + blankName;
