@@ -135,8 +135,10 @@ class MxmlEvent {
 		void               setTexts           (std::vector<std::pair<int, xml_node>>& nodes);
 		std::vector<std::pair<int, xml_node>>&  getTexts           (void);
 		void               setDynamics        (xml_node node);
+		void               setHairpinEnding   (xml_node node);
 		void               setFiguredBass     (xml_node node);
 		xml_node           getDynamics        (void);
+		xml_node           getHairpinEnding   (void);
 		xml_node           getFiguredBass     (void);
 		std::string        getRestPitch       (void) const;
 
@@ -159,6 +161,7 @@ class MxmlEvent {
 		bool               m_stems;      // for preserving stems
 
 		xml_node          m_dynamics;    // dynamics <direction> starting just before note
+		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
 		xml_node          m_figured_bass;// fb starting just before note
 		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note
 
@@ -178,7 +181,7 @@ class MxmlEvent {
 };
 
 
-ostream& operator<<(ostream& output, xml_node element);
+std::ostream& operator<<(std::ostream& output, xml_node element);
 
 
 // END_MERGE

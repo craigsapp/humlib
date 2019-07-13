@@ -1996,6 +1996,17 @@ void MxmlEvent::setDynamics(xml_node node) {
 
 //////////////////////////////
 //
+// MxmlEvent::setHairpinEnding --
+//
+
+void MxmlEvent::setHairpinEnding(xml_node node) {
+	m_hairpin_ending = node;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::setFiguredBass --
 //
 
@@ -2012,6 +2023,17 @@ void MxmlEvent::setFiguredBass(xml_node node) {
 
 xml_node MxmlEvent::getDynamics(void) {
 	return m_dynamics;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getHairpinEnding --
+//
+
+xml_node MxmlEvent::getHairpinEnding(void) {
+	return m_hairpin_ending;
 }
 
 

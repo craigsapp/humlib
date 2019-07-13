@@ -103,6 +103,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	getPartInfo(partinfo, partids, doc);
 	m_current_dynamic.resize(partids.size());
+	m_stop_char.resize(partids.size(), "[");
 
 	getPartContent(partcontent, partids, doc);
 	vector<MxmlPart> partdata;
@@ -1004,6 +1005,8 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 	vector<int> curindex(partdata.size(), 0); // assuming data in a measure...
 	HumNum nexttime = -1;
 
+	vector<vector<MxmlEvent*>> endingDirections(partdata.size());
+
 	HumNum tsdur;
 	for (i=0; i<(int)curtime.size(); i++) {
 		tsdur = measuredata[i]->getTimeSigDur();
@@ -1011,10 +1014,36 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 			tsdur = measuredata[i-1]->getTimeSigDur();
 			measuredata[i]->setTimeSigDur(tsdur);
 		}
+
+		// Keep track of hairpin endings that should be attached
+		// the the previous note (and doubling the ending marker
+		// to indicate that the timestamp of the ending is at the
+		// end rather than the start of the note.
+		vector<MxmlEvent*>& events = measuredata[i]->getEventList();
+		xml_node hairpin = xml_node(NULL);
+		for (int j=events.size() - 1; j >= 0; j--) {
+			if (events[j]->getElementName() == "note") {
+				if (hairpin) {
+					events[j]->setHairpinEnding(hairpin);
+					hairpin = xml_node(NULL);
+				}
+				break;
+			} else if (events[j]->getElementName() == "direction") {
+				stringstream ss;
+				ss.str("");
+				events[j]->getNode().print(ss);
+				if (ss.str().find("wedge") != string::npos) {
+					if (ss.str().find("stop") != string::npos) {
+						hairpin = events[j]->getNode();
+					}
+				}
+			}
+		}
+
 		if (VoiceDebugQ) {
-			vector<MxmlEvent*>& events = measuredata[i]->getEventList();
 			for (int j=0; j<(int)events.size(); j++) {
 				cerr << "!!ELEMENT: ";
+				cerr << "\tTIME:  " << events[j]->getStartTime();
 				cerr << "\tSTi:   " << events[j]->getStaffIndex();
 				cerr << "\tVi:    " << events[j]->getVoiceIndex();
 				cerr << "\tTS:    " << events[j]->getStartTime();
@@ -1023,6 +1052,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 				cerr << "\tNAME:  " << events[j]->getElementName();
 				cerr << endl;
 			}
+			cerr << "======================================" << endl;
 		}
 		if (!(*sevents[i]).empty()) {
 			curtime[i] = (*sevents[i])[curindex[i]].starttime;
@@ -1041,11 +1071,13 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 	vector<SimultaneousEvents*> nowevents;
 	vector<int> nowparts;
 	bool status = true;
+
+	HumNum processtime = nexttime;
 	while (!allend) {
 		nowevents.resize(0);
 		nowparts.resize(0);
 		allend = true;
-		HumNum processtime = nexttime;
+		processtime = nexttime;
 		nexttime = -1;
 		for (i = (int)partdata.size()-1; i >= 0; i--) {
 			if (curindex[i] >= (int)(*sevents[i]).size()) {
@@ -1053,7 +1085,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 			}
 
 			if ((*sevents[i])[curindex[i]].starttime == processtime) {
-				auto thing = &(*sevents[i])[curindex[i]];
+				SimultaneousEvents* thing = &(*sevents[i])[curindex[i]];
 				nowevents.push_back(thing);
 				nowparts.push_back(i);
 				curindex[i]++;
@@ -1069,6 +1101,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		}
 		status &= convertNowEvents(outdata.back(),
 				nowevents, nowparts, processtime, partdata, partstaves);
+
 	}
 
 	if (offsetHarmony.size() > 0) {
@@ -1427,14 +1460,15 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 	if (m_current_dynamic[partindex].size()) {
 		// only processing the first dynamic at the current time point for now.
 		// Fix later so that multiple dynamics are handleded in the part at the
-		// same time.  The LO parameters for multiple dynamics will need to be 
+		// same time.  The LO parameters for multiple dynamics will need to be
 		// qualified with "n=#".
 		event->setDynamics(m_current_dynamic[partindex][0]);
 		string dparam = getDynamicsParameters(m_current_dynamic[partindex][0]);
 
 		m_current_dynamic[partindex].clear();
+
 		event->reportDynamicToOwner();
-		addDynamic(slice->at(partindex), event);
+		addDynamic(slice->at(partindex), event, partindex);
 		if (dparam != "") {
 			GridMeasure *gm = slice->getMeasure();
 			string fullparam = "!LO:DY" + dparam;
@@ -1443,6 +1477,14 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 			}
 		}
 
+	}
+
+	// see if a hairpin ending needs to be added before end of measure:
+	xml_node enode = event->getHairpinEnding();
+	if (enode) {
+		event->reportDynamicToOwner();  // shouldn't be necessary
+		addHairpinEnding(slice->at(partindex), event, partindex);
+		// shouldn't need dynamics layout parameter
 	}
 
 	if (m_current_figured_bass) {
@@ -1710,7 +1752,7 @@ void Tool_musicxml2hum::setEditorialAccidental(int accidental, GridSlice* slice,
 //      </direction>
 //
 
-void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
+void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event, int partindex) {
 	xml_node direction = event->getDynamics();
 	if (!direction) {
 		return;
@@ -1752,11 +1794,62 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event) {
 		if (!hairpin) {
 			return;
 		}
-		string hstring = getHairpinString(hairpin);
+		string hstring = getHairpinString(hairpin, partindex);
 		HTp htok = new HumdrumToken(hstring);
 		if ((hstring != "[") && (hstring != "]") && above) {
 			htok->setValue("LO", "HP", "a", "true");
 		}
+		part->setDynamics(htok);
+	}
+}
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addHairpinEnding -- extract any hairpin ending
+//   at the end of a measure.
+//
+// Hairpins:
+//      <direction>
+//        <direction-type>
+//          <wedge spread="15" type="stop"/>
+//        </direction-type>
+//      </direction>
+//
+
+void Tool_musicxml2hum::addHairpinEnding(GridPart* part, MxmlEvent* event, int partindex) {
+	xml_node direction = event->getHairpinEnding();
+	if (!direction) {
+		return;
+	}
+
+	xml_node child = direction.first_child();
+	if (!child) {
+		return;
+	}
+	if (!nodeType(child, "direction-type")) {
+		return;
+	}
+	xml_node grandchild = child.first_child();
+	if (!grandchild) {
+		return;
+	}
+
+	if (!nodeType(grandchild, "wedge")) {
+		return;
+	}
+
+	if (nodeType(grandchild, "wedge")) {
+		xml_node hairpin = grandchild;
+		if (!hairpin) {
+			return;
+		}
+		string hstring = getHairpinString(hairpin, partindex);
+		if (hstring == "[") {
+			hstring = "[[";
+		} else if (hstring == "]") {
+			hstring = "]]";
+		}
+		HTp htok = new HumdrumToken(hstring);
 		part->setDynamics(htok);
 	}
 }
@@ -2003,8 +2096,7 @@ string Tool_musicxml2hum::getFiguredBassParameters(xml_node element) {
 //      </direction>
 //
 
-string Tool_musicxml2hum::getHairpinString(xml_node element) {
-	static char stopchar = '[';
+string Tool_musicxml2hum::getHairpinString(xml_node element, int partindex) {
 	if (nodeType(element, "wedge")) {
 		xml_attribute wtype = element.attribute("type");
 		if (!wtype) {
@@ -2013,13 +2105,13 @@ string Tool_musicxml2hum::getHairpinString(xml_node element) {
 		string output;
 		string wstring = wtype.value();
 		if (wstring == "diminuendo") {
-			stopchar = ']';
-			output = '>';
+			m_stop_char.at(partindex) = "]";
+			output = ">";
 		} else if (wstring == "crescendo") {
-			stopchar = '[';
-			output = '<';
+			m_stop_char.at(partindex) = "[";
+			output = "<";
 		} else if (wstring == "stop") {
-			output = stopchar;
+			output = m_stop_char.at(partindex);
 		} else {
 			output = "???";
 		}
@@ -2508,6 +2600,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	vector<vector<xml_node>> transpositions(partdata.size());
 	vector<vector<xml_node>> timesigs(partdata.size());
 	vector<vector<xml_node>> ottavas(partdata.size());
+	vector<vector<xml_node>> hairpins(partdata.size());
 
 	vector<vector<vector<vector<MxmlEvent*>>>> gracebefore(partdata.size());
 	vector<vector<vector<vector<MxmlEvent*>>>> graceafter(partdata.size());
@@ -3325,7 +3418,7 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrumKeyDesignation(xml_node keysig
 			case -5: ss << "D-"; break;
 			case -6: ss << "G-"; break;
 			case -7: ss << "C-"; break;
-			default: 
+			default:
 				token = new HumdrumToken("*");
 				return xml_node(NULL);
 		}
