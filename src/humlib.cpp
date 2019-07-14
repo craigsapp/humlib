@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 14 18:01:41 CEST 2019
+// Last Modified: Sun Jul 14 18:08:23 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21473,7 +21473,7 @@ void HumdrumLine::createLineFromTokens(void) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		iline += (string)(*m_tokens.at(i));
 		if (i < (int)m_tokens.size() - 1) {
-			if (m_tabs.size() <= i) {
+			if ((int)m_tabs.size() <= i) {
 				for (int j=0; j<(int)m_tokens.size() - (int)m_tabs.size(); j++) {
 					m_tabs.push_back(1);
 				}

@@ -1094,7 +1094,7 @@ void HumdrumLine::createLineFromTokens(void) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		iline += (string)(*m_tokens.at(i));
 		if (i < (int)m_tokens.size() - 1) {
-			if (m_tabs.size() <= i) {
+			if ((int)m_tabs.size() <= i) {
 				for (int j=0; j<(int)m_tokens.size() - (int)m_tabs.size(); j++) {
 					m_tabs.push_back(1);
 				}
