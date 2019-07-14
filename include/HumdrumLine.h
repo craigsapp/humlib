@@ -94,24 +94,24 @@ class HumdrumLine : public std::string, public HumHash {
 		void          setText              (const std::string& text);
 		std::string   getText              (void);
 
-		HumNum   getDuration            (void) const;
-		HumNum   getDurationFromStart   (void) const;
-		HumNum   getDurationToEnd       (void) const;
-		HumNum   getDurationFromBarline (void) const;
-		HumNum   getDurationToBarline   (void) const;
-		HumNum   getBarlineDuration     (void) const;
+		HumNum      getDuration            (void);
+		HumNum      getDurationFromStart   (void);
+		HumNum      getDurationToEnd       (void);
+		HumNum      getDurationFromBarline (void);
+		HumNum      getDurationToBarline   (void);
+		HumNum      getBarlineDuration     (void);
 
-		HumNum   getDuration            (HumNum scale) const;
-		HumNum   getDurationFromStart   (HumNum scale) const;
-		HumNum   getDurationToEnd       (HumNum scale) const;
-		HumNum   getDurationFromBarline (HumNum scale) const;
-		HumNum   getDurationToBarline   (HumNum scale) const;
-		HumNum   getBarlineDuration     (HumNum scale) const;
-		int      getKernNoteAttacks     (void);
-		int      addLinkedParameter     (HTp token);
+		HumNum      getDuration            (HumNum scale);
+		HumNum      getDurationFromStart   (HumNum scale);
+		HumNum      getDurationToEnd       (HumNum scale);
+		HumNum      getDurationFromBarline (HumNum scale);
+		HumNum      getDurationToBarline   (HumNum scale);
+		HumNum      getBarlineDuration     (HumNum scale);
+		int         getKernNoteAttacks     (void);
+		int         addLinkedParameter     (HTp token);
 
-		HumNum   getBeat                (HumNum beatdur = 1) const;
-		HumNum   getBeatStr             (std::string beatrecip = "4") const;
+		HumNum   getBeat                (HumNum beatdur = 1);
+		HumNum   getBeatStr             (std::string beatrecip = "4");
 		HTp      getTrackStart          (int track) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const std::string& separator = ",");
@@ -213,6 +213,10 @@ class HumdrumLine : public std::string, public HumHash {
 		// m_linkedParameters: List of Humdrum tokens which are parameters
 		// (mostly only layout parameters at the moment)
 		std::vector<HTp> m_linkedParameters;
+
+		// m_rhythm_analyzed: True if duration information from HumdrumFile
+		// has been added to line.
+		bool m_rhythm_analyzed = false;
 
 		// owner: This is the HumdrumFile which manages the given line.
 		void* m_owner;

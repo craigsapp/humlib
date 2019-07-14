@@ -112,28 +112,28 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     hasObliquaLigatureEnd     (void);
 		char     hasStemDirection          (void);
 
-		HumNum   getDuration               (void) const;
-		HumNum   getDuration               (HumNum scale) const;
+		HumNum   getDuration               (void);
+		HumNum   getDuration               (HumNum scale);
 		HumNum   getTiedDuration           (void);
 		HumNum   getTiedDuration           (HumNum scale);
-		HumNum   getDurationNoDots         (void) const;
-		HumNum   getDurationNoDots         (HumNum scale) const;
+		HumNum   getDurationNoDots         (void);
+		HumNum   getDurationNoDots         (HumNum scale);
 		int      getDots                   (char separator = ' ') const;
 
-		HumNum   getDurationFromStart      (void) const;
-		HumNum   getDurationFromStart      (HumNum scale) const;
+		HumNum   getDurationFromStart      (void);
+		HumNum   getDurationFromStart      (HumNum scale);
 
-		HumNum   getDurationToEnd          (void) const;
-		HumNum   getDurationToEnd          (HumNum scale) const;
+		HumNum   getDurationToEnd          (void);
+		HumNum   getDurationToEnd          (HumNum scale);
 
-		HumNum   getDurationFromBarline    (void) const;
-		HumNum   getDurationFromBarline    (HumNum scale) const;
+		HumNum   getDurationFromBarline    (void);
+		HumNum   getDurationFromBarline    (HumNum scale);
 
-		HumNum   getDurationToBarline      (void) const;
-		HumNum   getDurationToBarline      (HumNum scale) const;
+		HumNum   getDurationToBarline      (void);
+		HumNum   getDurationToBarline      (HumNum scale);
 
-		HumNum   getBarlineDuration        (void) const;
-		HumNum   getBarlineDuration        (HumNum scale) const;
+		HumNum   getBarlineDuration        (void);
+		HumNum   getBarlineDuration        (HumNum scale);
 
 		HumdrumLine* getOwner              (void) const;
 		HumdrumLine* getLine               (void) const { return getOwner(); }
@@ -250,7 +250,7 @@ class HumdrumToken : public std::string, public HumHash {
 		void     setDuration               (const HumNum& dur);
 		void     setStrandIndex            (int index);
 
-		bool     analyzeDuration           (std::string& err);
+		bool     analyzeDuration           (void);
 		std::ostream& printXmlBaseInfo     (std::ostream& out = std::cout, int level = 0,
 		                                    const std::string& indent = "\t");
 		std::ostream& printXmlContentInfo  (std::ostream& out = std::cout, int level = 0,
@@ -316,6 +316,9 @@ class HumdrumToken : public std::string, public HumHash {
 		// m_linkedParameter: A single parameter encoded in the text of the
 		// token.
 		HumParamSet* m_linkedParameter = NULL;
+
+		// m_rhythm_analyzed: Set to true when HumdrumFile assigned duration
+		bool m_rhythm_analyzed = false;
 
 	friend class HumdrumLine;
 	friend class HumdrumFileBase;

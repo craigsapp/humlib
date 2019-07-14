@@ -709,7 +709,8 @@ HTp HumdrumToken::getPreviousFieldToken(void) const {
 //   **kern and **recip data.  Add more data types here such as **koto.
 //
 
-bool HumdrumToken::analyzeDuration(string& err) {
+bool HumdrumToken::analyzeDuration(void) {
+	m_rhythm_analyzed = true;
 	if ((*this) == NULL_DATA) {
 		m_duration.setValue(-1);
 		return true;
@@ -785,12 +786,15 @@ bool HumdrumToken::isManipulator(void) const {
 //    in the HumdrumFileStructure class.
 //
 
-HumNum HumdrumToken::getDuration(void) const {
+HumNum HumdrumToken::getDuration(void) {
+	if (!m_rhythm_analyzed) {
+		analyzeDuration();
+	}
 	return m_duration;
 }
 
 
-HumNum HumdrumToken::getDuration(HumNum scale) const {
+HumNum HumdrumToken::getDuration(HumNum scale) {
 	return m_duration * scale;
 }
 
@@ -864,7 +868,7 @@ int HumdrumToken::getDots(char separator) const {
 //   note excluding any dots.
 //
 
-HumNum HumdrumToken::getDurationNoDots(void) const {
+HumNum HumdrumToken::getDurationNoDots(void) {
 
 	int dots = getDots();
 	if (dots == 0) {
@@ -878,7 +882,7 @@ HumNum HumdrumToken::getDurationNoDots(void) const {
 }
 
 
-HumNum HumdrumToken::getDurationNoDots(HumNum scale) const {
+HumNum HumdrumToken::getDurationNoDots(HumNum scale) {
 	int dots = getDots();
 	if (dots == 0) {
 		return getDuration(scale);
@@ -912,12 +916,12 @@ void HumdrumToken::setDuration(const HumNum& dur) {
 //   which may be on another HumdrumLine.
 //
 
-HumNum HumdrumToken::getDurationFromStart(void) const {
+HumNum HumdrumToken::getDurationFromStart(void) {
 	return getLine()->getDurationFromStart();
 }
 
 
-HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
+HumNum HumdrumToken::getDurationFromStart(HumNum scale) {
 	return getLine()->getDurationFromStart() * scale;
 }
 
@@ -932,12 +936,12 @@ HumNum HumdrumToken::getDurationFromStart(HumNum scale) const {
 //   duration line.
 //
 
-HumNum HumdrumToken::getDurationToEnd(void) const {
+HumNum HumdrumToken::getDurationToEnd(void) {
 	return getLine()->getDurationToEnd();
 }
 
 
-HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
+HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 	return getLine()->getDurationToEnd() * scale;
 }
 
@@ -954,7 +958,7 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) const {
 //   analyzeMeter() is not run to analyze the data.
 //
 
-HumNum HumdrumToken::getBarlineDuration(void) const {
+HumNum HumdrumToken::getBarlineDuration(void) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;
@@ -963,7 +967,7 @@ HumNum HumdrumToken::getBarlineDuration(void) const {
 }
 
 
-HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
+HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;
@@ -980,7 +984,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) const {
 //      is set to a value other than 1.
 //
 
-HumNum HumdrumToken::getDurationToBarline(void) const {
+HumNum HumdrumToken::getDurationToBarline(void) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;
@@ -988,7 +992,7 @@ HumNum HumdrumToken::getDurationToBarline(void) const {
 	return own->getDurationToBarline();
 }
 
-HumNum HumdrumToken::getDurationToBarline(HumNum scale) const {
+HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;
@@ -1005,7 +1009,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) const {
 //      is set to a value other than 1.
 //
 
-HumNum HumdrumToken::getDurationFromBarline(void) const {
+HumNum HumdrumToken::getDurationFromBarline(void) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;
@@ -1013,7 +1017,7 @@ HumNum HumdrumToken::getDurationFromBarline(void) const {
 	return own->getDurationFromBarline();
 }
 
-HumNum HumdrumToken::getDurationFromBarline(HumNum scale) const {
+HumNum HumdrumToken::getDurationFromBarline(HumNum scale) {
 	HumdrumLine* own = getOwner();
 	if (own == NULL) {
 		return 0;

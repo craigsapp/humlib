@@ -197,12 +197,54 @@ bool HumdrumFileStructure::readStringCsv(const string& contents,
 //    parameters and rhythmic structure.
 //
 
-
 bool HumdrumFileStructure::analyzeStructure(void) {
-	if (!analyzeStrands()          ) { return isValid(); }
+	m_structure_analyzed = false;
+	if (!m_strands_analyzed) {
+		if (!analyzeStrands()          ) { return isValid(); }
+	}
 	if (!analyzeGlobalParameters() ) { return isValid(); }
 	if (!analyzeLocalParameters()  ) { return isValid(); }
 	if (!analyzeTokenDurations()   ) { return isValid(); }
+	if (!analyzeTokenDurations()   ) { return isValid(); }
+	m_structure_analyzed = true;
+	if (!analyzeRhythmStructure()  ) { return isValid(); }
+	analyzeSignifiers();
+	return isValid();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeStructureNoRhythm -- Analyze global/local
+//    parameters but not rhythmic structure.
+//
+
+bool HumdrumFileStructure::analyzeStructureNoRhythm(void) {
+	m_structure_analyzed = true;
+	if (!m_strands_analyzed) {
+		if (!analyzeStrands()          ) { return isValid(); }
+	}
+	if (!analyzeGlobalParameters() ) { return isValid(); }
+	if (!analyzeLocalParameters()  ) { return isValid(); }
+	if (!analyzeTokenDurations()   ) { return isValid(); }
+	analyzeSignifiers();
+	return isValid();
+}
+
+
+
+/////////////////////////////
+//
+// HumdrumFileStructure::analyzeRhythmStructure --
+//
+
+bool HumdrumFileStructure::analyzeRhythmStructure(void) {
+	m_rhythm_analyzed = true;
+	if (!isStructureAnalyzed()) {
+		if (!analyzeStructureNoRhythm()) { return isValid(); }
+	}
+
 	HTp firstspine = getSpineStart(0);
 	if (firstspine && firstspine->isDataType("**recip")) {
 		assignRhythmFromRecip(firstspine);
@@ -210,9 +252,9 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 		if (!analyzeRhythm()           ) { return isValid(); }
 		if (!analyzeDurationsOfNonRhythmicSpines()) { return isValid(); }
 	}
-	analyzeSignifiers();
 	return isValid();
 }
+
 
 
 //////////////////////////////
@@ -543,6 +585,17 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileStructure::setLineRhythmAnalyzed --
+//
+
+void HumdrumFileStructure::setLineRhythmAnalyzed(void) {
+	for (int i=0; i<m_lines.size(); i++) {
+		m_lines[i]->m_rhythm_analyzed = true;
+	}
+}
+
 
 //////////////////////////////
 //
@@ -551,6 +604,7 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 //
 
 bool HumdrumFileStructure::analyzeRhythm(void) {
+	setLineRhythmAnalyzed();
 	if (getMaxTrack() == 0) {
 		return true;
 	}
@@ -1352,6 +1406,7 @@ void HumdrumFileStructure::checkForLocalParameters(HTp token,
 //
 
 bool HumdrumFileStructure::analyzeStrands(void) {
+	m_strands_analyzed = true;
 	int spines = getSpineCount();
 	m_strand1d.resize(0);
 	m_strand2d.resize(0);
@@ -1474,12 +1529,18 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 // HumdrumFileStructure::getStrandCount --
 //
 
-int HumdrumFileStructure::getStrandCount(void) const {
+int HumdrumFileStructure::getStrandCount(void) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	return (int)m_strand1d.size();
 }
 
 
-int HumdrumFileStructure::getStrandCount(int spineindex) const {
+int HumdrumFileStructure::getStrandCount(int spineindex) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	if (spineindex < 0) {
 		return 0;
 	}
@@ -1497,23 +1558,35 @@ int HumdrumFileStructure::getStrandCount(int spineindex) const {
 //    in the a strand.
 //
 
-HTp HumdrumFileStructure::getStrandStart(int index) const {
+HTp HumdrumFileStructure::getStrandStart(int index) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	return m_strand1d[index].first;
 }
 
 
-HTp HumdrumFileStructure::getStrandEnd(int index) const {
+HTp HumdrumFileStructure::getStrandEnd(int index) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	return m_strand1d[index].last;
 }
 
 
 HTp HumdrumFileStructure::getStrandStart(int sindex,
-		int index) const {
+		int index) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	return m_strand2d[sindex][index].first;
 }
 
 
-HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) const {
+HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) {
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
 	return m_strand2d[sindex][index].last;
 }
 

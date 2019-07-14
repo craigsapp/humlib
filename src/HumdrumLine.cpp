@@ -239,6 +239,7 @@ void HumdrumLine::clear(void) {
 	}
 	m_tokens.clear();
 	m_tabs.clear();
+	m_rhythm_analyzed = false;
 }
 
 
@@ -634,12 +635,22 @@ int HumdrumLine::getLineNumber(void) const {
 //    the current line in the file.
 //
 
-HumNum HumdrumLine::getDuration(void) const {
+HumNum HumdrumLine::getDuration(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_duration;
 }
 
 
-HumNum HumdrumLine::getDuration(HumNum scale) const {
+HumNum HumdrumLine::getDuration(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_duration * scale;
 }
 
@@ -651,7 +662,12 @@ HumNum HumdrumLine::getDuration(HumNum scale) const {
 //    or the duration of the previous barline in the data.
 //
 
-HumNum HumdrumLine::getBarlineDuration(void) const {
+HumNum HumdrumLine::getBarlineDuration(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	if (isBarline()) {
 		return getDurationToBarline();
 	} else {
@@ -660,7 +676,12 @@ HumNum HumdrumLine::getBarlineDuration(void) const {
 }
 
 
-HumNum HumdrumLine::getBarlineDuration(HumNum scale) const {
+HumNum HumdrumLine::getBarlineDuration(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	if (isBarline()) {
 		return getDurationToBarline(scale);
 	} else {
@@ -690,12 +711,22 @@ void HumdrumLine::setDurationFromStart(HumNum dur) {
 //    analysis has not been done in the HumdrumFileStructure class.
 //
 
-HumNum HumdrumLine::getDurationFromStart(void) const {
+HumNum HumdrumLine::getDurationFromStart(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationFromStart;
 }
 
 
-HumNum HumdrumLine::getDurationFromStart(HumNum scale) const {
+HumNum HumdrumLine::getDurationFromStart(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationFromStart * scale;
 }
 
@@ -709,19 +740,27 @@ HumNum HumdrumLine::getDurationFromStart(HumNum scale) const {
 //    otherwise a 0 will probably be returned.
 //
 
-HumNum HumdrumLine::getDurationToEnd(void) const {
-	if (m_owner == NULL) {
+HumNum HumdrumLine::getDurationToEnd(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	} else {
 		return 0;
 	}
-	return ((HumdrumFile*)m_owner)->getScoreDuration() -  m_durationFromStart;
+	return ((HumdrumFile*)getOwner())->getScoreDuration() -  m_durationFromStart;
 }
 
 
-HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
-	if (m_owner == NULL) {
+HumNum HumdrumLine::getDurationToEnd(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	} else {
 		return 0;
 	}
-	return scale * (((HumdrumFile*)m_owner)->getScoreDuration() -
+	return scale * (((HumdrumFile*)getOwner())->getScoreDuration() -
 		m_durationFromStart);
 }
 
@@ -734,12 +773,22 @@ HumNum HumdrumLine::getDurationToEnd(HumNum scale) const {
 //    Analysis of this data is found in HumdrumFileStructure::metricAnalysis.
 //
 
-HumNum HumdrumLine::getDurationFromBarline(void) const {
+HumNum HumdrumLine::getDurationFromBarline(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationFromBarline;
 }
 
 
-HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
+HumNum HumdrumLine::getDurationFromBarline(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationFromBarline * scale;
 }
 
@@ -752,7 +801,7 @@ HumNum HumdrumLine::getDurationFromBarline(HumNum scale) const {
 //
 
 HTp HumdrumLine::getTrackStart(int track) const {
-	if (m_owner == NULL) {
+	if (!m_owner) {
 		return NULL;
 	} else {
 		return ((HumdrumFile*)m_owner)->getTrackStart(track);
@@ -780,12 +829,22 @@ void HumdrumLine::setDurationFromBarline(HumNum dur) {
 //   current note to the next barline.
 //
 
-HumNum HumdrumLine::getDurationToBarline(void) const {
+HumNum HumdrumLine::getDurationToBarline(void) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationToBarline;
 }
 
 
-HumNum HumdrumLine::getDurationToBarline(HumNum scale) const {
+HumNum HumdrumLine::getDurationToBarline(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		if (getOwner()) {
+			getOwner()->analyzeRhythmStructure();
+		}
+	}
 	return m_durationToBarline * scale;
 }
 
@@ -801,7 +860,7 @@ HumNum HumdrumLine::getDurationToBarline(HumNum scale) const {
 //  Default value: beatdur   = 1.
 //
 
-HumNum HumdrumLine::getBeat(HumNum beatdur) const {
+HumNum HumdrumLine::getBeat(HumNum beatdur) {
 	if (beatdur.isZero()) {
 		return beatdur;
 	}
@@ -810,7 +869,7 @@ HumNum HumdrumLine::getBeat(HumNum beatdur) const {
 }
 
 
-HumNum HumdrumLine::getBeatStr(string beatrecip) const {
+HumNum HumdrumLine::getBeatStr(string beatrecip) {
 	HumNum beatdur = Convert::recipToDuration(beatrecip);
 	if (beatdur.isZero()) {
 		return beatdur;
@@ -1193,9 +1252,7 @@ bool HumdrumLine::analyzeTokenDurations(string& err) {
 		return !err.size();
 	}
 	for (int i=0; i<(int)m_tokens.size(); i++) {
-		if (!m_tokens[i]->analyzeDuration(err)) {
-			return !err.size();
-		}
+		m_tokens[i]->analyzeDuration();
 	}
 	return !err.size();
 }
@@ -1560,7 +1617,7 @@ string HumdrumLine::getXmlId(const string& prefix) const {
 //
 
 string HumdrumLine::getXmlIdPrefix(void) const {
-	if (m_owner == NULL) {
+	if (!m_owner) {
 		return "";
 	}
 	return ((HumdrumFileBase*)m_owner)->getXmlIdPrefix();

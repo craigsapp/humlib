@@ -85,17 +85,17 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 
 		// strand functionality:
-		HTp           getStrandStart               (int index) const;
-		HTp           getStrandEnd                 (int index) const;
-		HTp           getStrandStart               (int sindex, int index) const;
-		HTp           getStrandEnd                 (int sindex, int index) const;
-		int           getStrandCount               (void) const;
-		int           getStrandCount               (int spineindex) const;
+		HTp           getStrandStart               (int index);
+		HTp           getStrandEnd                 (int index);
+		HTp           getStrandStart               (int sindex, int index);
+		HTp           getStrandEnd                 (int sindex, int index);
+		int           getStrandCount               (void);
+		int           getStrandCount               (int spineindex);
 		void          resolveNullTokens            (void);
 
-		HTp           getStrand                    (int index) const
+		HTp           getStrand                    (int index)
 		                                        { return getStrandStart(index); }
-		HTp           getStrand                    (int sindex, int index) const
+		HTp           getStrand                    (int sindex, int index)
 		                                { return getStrandStart(sindex, index); }
 
 		// barline/measure functionality:
@@ -106,6 +106,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getBarlineDurationToEnd      (int index) const;
 
 		bool          analyzeStructure             (void);
+		bool          analyzeStructureNoRhythm     (void);
+		bool          analyzeRhythmStructure       (void);
 		bool          analyzeStrands               (void);
 
 		// signifier access
@@ -148,6 +150,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		void          analyzeSpineStrands          (std::vector<TokenPair>& ends,
 		                                            HTp starttok);
 		void          analyzeSignifiers            (void);
+		void          setLineRhythmAnalyzed        (void);
 };
 
 

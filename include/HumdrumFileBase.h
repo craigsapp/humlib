@@ -127,6 +127,9 @@ class HumdrumFileBase : public HumHash {
 		void          setQuietParsing          (void);
 		void          setNoisyParsing          (void);
 		void          clear                    (void);
+		bool          isStructureAnalyzed      (void);
+		bool          isRhythmAnalyzed         (void);
+		bool          areStrandsAnalyzed       (void);
 
 		bool          parse                    (std::istream& contents)
 		                                    { return read(contents); }
@@ -359,6 +362,18 @@ class HumdrumFileBase : public HumHash {
 
 		// m_signifiers: Used to keep track of !!!RDF records.
 		HumSignifiers m_signifiers;
+
+		// m_structure_analyzed: Used to keep track of whether or not
+		// file structure has been analyzed.
+		bool m_structure_analyzed = false;
+
+		// m_rhythm_analyzed: Used to keep track of whether or not
+		// rhythm structure has been analyzed.
+		bool m_rhythm_analyzed = false;
+
+		// m_strands_analyzed: Used to keep track of whether or not
+		// file strands have been analyzed.
+		bool m_strands_analyzed = false;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

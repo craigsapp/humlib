@@ -450,7 +450,7 @@ restarting:
 	}
 	contents << buffer.str();
 	string filename = infile.getFilename();
-	infile.read(contents);
+	infile.readNoRhythm(contents);
 	if (!filename.empty()) {
 		infile.setFilename(filename);
 	}

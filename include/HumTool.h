@@ -82,31 +82,31 @@ class HumTool : public Options {
 //
 //
 
-#define BASIC_INTERFACE(CLASS)                 \
-using namespace std;                           \
-using namespace hum;                           \
-int main(int argc, char** argv) {              \
-	CLASS interface;                            \
-	if (!interface.process(argc, argv)) {       \
-		interface.getError(cerr);                \
-		return -1;                               \
-	}                                           \
-	HumdrumFile infile;                         \
-	if (interface.getArgCount() > 0) {          \
-		infile.read(interface.getArgument(1));   \
-	} else {                                    \
-		infile.read(cin);                        \
-	}                                           \
-	int status = interface.run(infile, cout);   \
-	if (interface.hasWarning()) {               \
-		interface.getWarning(cerr);              \
-		return 0;                                \
-	}                                           \
-	if (interface.hasError()) {                 \
-		interface.getError(cerr);                \
-		return -1;                               \
-	}                                           \
-	return !status;                             \
+#define BASIC_INTERFACE(CLASS)                         \
+using namespace std;                                   \
+using namespace hum;                                   \
+int main(int argc, char** argv) {                      \
+	CLASS interface;                                    \
+	if (!interface.process(argc, argv)) {               \
+		interface.getError(cerr);                        \
+		return -1;                                       \
+	}                                                   \
+	HumdrumFile infile;                                 \
+	if (interface.getArgCount() > 0) {                  \
+		infile.readNoRhythm(interface.getArgument(1));   \
+	} else {                                            \
+		infile.readNoRhythm(cin);                        \
+	}                                                   \
+	int status = interface.run(infile, cout);           \
+	if (interface.hasWarning()) {                       \
+		interface.getWarning(cerr);                      \
+		return 0;                                        \
+	}                                                   \
+	if (interface.hasError()) {                         \
+		interface.getError(cerr);                        \
+		return -1;                                       \
+	}                                                   \
+	return !status;                                     \
 }
 
 

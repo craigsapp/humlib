@@ -29,6 +29,7 @@
 #include "tool-myank.h"
 #include "tool-phrase.h"
 #include "tool-recip.h"
+#include "tool-restfill.h"
 #include "tool-satb2gs.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
@@ -80,11 +81,6 @@ namespace hum {
 	delete tool;
 
 
-////////////////////////////////
-//
-// Tool_filter::Tool_filter -- Set the recognized options for the tool.
-//
-
 
 ////////////////////////////////
 //
@@ -124,6 +120,7 @@ bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
 	return status;
 }
 
+
 //
 // In-place processing of file:
 //
@@ -157,6 +154,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(msearch, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
+		} else if (commands[i].first == "restfill") {
+			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
