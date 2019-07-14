@@ -591,7 +591,7 @@ HumNum HumdrumFileStructure::getBarlineDurationToEnd(int index) const {
 //
 
 void HumdrumFileStructure::setLineRhythmAnalyzed(void) {
-	for (int i=0; i<m_lines.size(); i++) {
+	for (int i=0; i<(int)m_lines.size(); i++) {
 		m_lines[i]->m_rhythm_analyzed = true;
 	}
 }

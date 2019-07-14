@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 14 15:38:39 CEST 2019
+// Last Modified: Sun Jul 14 15:59:13 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3762,31 +3762,31 @@ class HumTool : public Options {
 //
 //
 
-#define BASIC_INTERFACE(CLASS)                 \
-using namespace std;                           \
-using namespace hum;                           \
-int main(int argc, char** argv) {              \
-	CLASS interface;                            \
-	if (!interface.process(argc, argv)) {       \
-		interface.getError(cerr);                \
-		return -1;                               \
-	}                                           \
-	HumdrumFile infile;                         \
-	if (interface.getArgCount() > 0) {          \
+#define BASIC_INTERFACE(CLASS)                         \
+using namespace std;                                   \
+using namespace hum;                                   \
+int main(int argc, char** argv) {                      \
+	CLASS interface;                                    \
+	if (!interface.process(argc, argv)) {               \
+		interface.getError(cerr);                        \
+		return -1;                                       \
+	}                                                   \
+	HumdrumFile infile;                                 \
+	if (interface.getArgCount() > 0) {                  \
 		infile.readNoRhythm(interface.getArgument(1));   \
-	} else {                                    \
+	} else {                                            \
 		infile.readNoRhythm(cin);                        \
-	}                                           \
-	int status = interface.run(infile, cout);   \
-	if (interface.hasWarning()) {               \
-		interface.getWarning(cerr);              \
-		return 0;                                \
-	}                                           \
-	if (interface.hasError()) {                 \
-		interface.getError(cerr);                \
-		return -1;                               \
-	}                                           \
-	return !status;                             \
+	}                                                   \
+	int status = interface.run(infile, cout);           \
+	if (interface.hasWarning()) {                       \
+		interface.getWarning(cerr);                      \
+		return 0;                                        \
+	}                                                   \
+	if (interface.hasError()) {                         \
+		interface.getError(cerr);                        \
+		return -1;                                       \
+	}                                                   \
+	return !status;                                     \
 }
 
 
