@@ -1084,10 +1084,21 @@ int HumdrumLine::createTokensFromLine(void) {
 
 void HumdrumLine::createLineFromTokens(void) {
 	string& iline = *this;
-	iline.clear();
+	iline = "";
+	// needed for empty lines for some reason:
+	if (m_tokens.size()) {
+		if (m_tokens.back() == NULL) {
+			m_tokens.resize(m_tokens.size() - 1);
+		}
+	}
 	for (int i=0; i<(int)m_tokens.size(); i++) {
-		iline += (string)(*m_tokens[i]);
+		iline += (string)(*m_tokens.at(i));
 		if (i < (int)m_tokens.size() - 1) {
+			if (m_tabs.size() <= i) {
+				for (int j=0; j<(int)m_tokens.size() - (int)m_tabs.size(); j++) {
+					m_tabs.push_back(1);
+				}
+			}
 			if (m_tabs.at(i) == 0) {
 				m_tabs.at(i) = 1;
 			}
