@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 14 15:59:13 CEST 2019
+// Last Modified: Sun Jul 14 16:36:52 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -55888,6 +55888,7 @@ void Tool_recip::initialize(HumdrumFile& infile) {
 
 Tool_restfill::Tool_restfill(void) {
 	define("y|hidden-rests=b",        "hide inserted rests");
+	define("i|exinterp=s:kern",       "type of spine to fill with rests");
 }
 
 
@@ -55937,6 +55938,18 @@ bool Tool_restfill::run(HumdrumFile& infile) {
 
 void Tool_restfill::initialize(void) {
 	m_hiddenQ = getBoolean("hidden-rests");
+	m_exinterp = getString("exinterp");
+	if (m_exinterp.empty()) {
+		m_exinterp = "**kern";
+	}
+	if (m_exinterp.compare(0, 2, "**") != 0) {
+		if (m_exinterp.compare(0, 1, "*") != 0) {
+			m_exinterp = "**" + m_exinterp;
+		} else {
+			m_exinterp = "*" + m_exinterp;
+		}
+	}
+	
 }
 
 
@@ -55947,21 +55960,23 @@ void Tool_restfill::initialize(void) {
 //
 
 void Tool_restfill::processFile(HumdrumFile& infile) {
-	vector<HTp> kstarts = infile.getKernSpineStartList();
-	vector<bool> process(kstarts.size(), false);
-	for (int i=0; i<(int)kstarts.size(); i++) {
-		process[i] = hasBlankMeasure(kstarts[i]);
+
+	vector<HTp> starts;
+	infile.getSpineStartList(starts, m_exinterp);
+	vector<bool> process(starts.size(), false);
+	for (int i=0; i<(int)starts.size(); i++) {
+		process[i] = hasBlankMeasure(starts[i]);
 		if (process[i]) {
-			kstarts[i]->setText("**temp-kern");
+			starts[i]->setText("**temp-kern");
 		}
 	}
 	infile.analyzeStructure();
-	for (int i=0; i<(int)kstarts.size(); i++) {
+	for (int i=0; i<(int)starts.size(); i++) {
 		if (!process[i]) {
 			continue;
 		}
-		kstarts[i]->setText("**kern");
-		fillInRests(kstarts[i]);
+		starts[i]->setText("**kern");
+		fillInRests(starts[i]);
 	}
 }
 

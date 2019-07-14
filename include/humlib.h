@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 14 15:59:13 CEST 2019
+// Last Modified: Sun Jul 14 16:36:52 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5605,23 +5605,24 @@ class Tool_recip : public HumTool {
 
 class Tool_restfill : public HumTool {
 	public:
-		         Tool_restfill      (void);
-		        ~Tool_restfill      () {};
+		         Tool_restfill         (void);
+		        ~Tool_restfill         () {};
 
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool        run                (HumdrumFile& infile);
+		bool        run                (const string& indata, ostream& out);
+		bool        run                (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     processFile       (HumdrumFile& infile);
-		void     initialize        (void);
-		bool     hasBlankMeasure   (HTp start);
-		void     fillInRests       (HTp start);
-		void     addRest           (HTp cell, HumNum duration);
-		HumNum   getNextTime       (HTp token);
+		void        processFile        (HumdrumFile& infile);
+		void        initialize         (void);
+		bool        hasBlankMeasure    (HTp start);
+		void        fillInRests        (HTp start);
+		void        addRest            (HTp cell, HumNum duration);
+		HumNum      getNextTime        (HTp token);
 
 	private:
-		bool     m_hiddenQ = false;
+		bool        m_hiddenQ  = false;
+		std::string m_exinterp = "**kern";
 
 };
 
