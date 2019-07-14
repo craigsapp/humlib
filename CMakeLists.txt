@@ -98,6 +98,7 @@ set(SRCS
 	src/tool-musicxml2hum.cpp
 	src/tool-myank.cpp
 	src/tool-recip.cpp
+	src/tool-restfill.cpp
 	src/tool-ruthfix.cpp
 	src/tool-satb2gs.cpp
 	src/tool-tassoize.cpp
