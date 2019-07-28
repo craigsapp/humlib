@@ -148,7 +148,6 @@ set(HDRS
 	include/tool-dissonant.h
 	include/tool-esac2hum.h
 	include/tool-extract.h
-	include/tool-filter.h
 	include/tool-hproof.h
 	include/tool-imitation.h
 	include/tool-mei2hum.h
@@ -163,6 +162,7 @@ set(HDRS
 	include/tool-tassoize.h
 	include/tool-transpose.h
 	include/tool-trillspell.h
+	include/tool-filter.h
 )
 
 add_library(humlib STATIC ${SRCS} ${HDRS})
