@@ -31,7 +31,7 @@ namespace hum {
 
 void HumdrumFileContent::analyzeOttavas(void) {
 	int tcount = getTrackCount();
-	int activeOttava = 0;
+	vector<int> activeOttava(tcount+1, 0);
 	vector<int> octavestate(tcount+1, 0);
 	for (int i=0; i<getLineCount(); i++) {
 		HumdrumLine* line = getLine(i);
@@ -45,32 +45,32 @@ void HumdrumFileContent::analyzeOttavas(void) {
 				int track = token->getTrack();
 				if (*token == "*8va") {
 					octavestate[track] = +1;
-					activeOttava++;
+					activeOttava[track]++;
 				} else if (*token == "*X8va") {
 					octavestate[track] = 0;
-					activeOttava--;
+					activeOttava[track]--;
 				} else if (*token == "*8ba") {
 					octavestate[track] = -1;
-					activeOttava++;
+					activeOttava[track]++;
 				} else if (*token == "*X8ba") {
 					octavestate[track] = 0;
-					activeOttava--;
+					activeOttava[track]--;
 				} else if (*token == "*15ma") {
 					octavestate[track] = +2;
-					activeOttava++;
+					activeOttava[track]++;
 				} else if (*token == "*X15ma") {
 					octavestate[track] = 0;
-					activeOttava--;
+					activeOttava[track]--;
 				} else if (*token == "*15ba") {
 					octavestate[track] = -2;
-					activeOttava++;
+					activeOttava[track]++;
 				} else if (*token == "*X15ba") {
 					octavestate[track] = 0;
-					activeOttava--;
+					activeOttava[track]--;
 				}
 			}
 		}
-		else if (activeOttava && line->isData()) {
+		else if (line->isData()) {
 			int fcount = getLine(i)->getFieldCount();
 			for (int j=0; j<fcount; j++) {
 				HTp token = line->token(j);
@@ -78,6 +78,9 @@ void HumdrumFileContent::analyzeOttavas(void) {
 					continue;
 				}
 				int track = token->getTrack();
+				if (!activeOttava[track]) {
+					continue;
+				}
 				if (octavestate[track] == 0) {
 					continue;
 				}
