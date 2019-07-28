@@ -157,6 +157,7 @@ set(HDRS
 	include/tool-musicxml2hum.h
 	include/tool-myank.h
 	include/tool-recip.h
+	include/tool-restfill.h
 	include/tool-ruthfix.h
 	include/tool-satb2gs.h
 	include/tool-tassoize.h
