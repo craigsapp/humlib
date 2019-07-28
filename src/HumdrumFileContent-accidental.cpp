@@ -32,6 +32,10 @@ namespace hum {
 //
 
 bool HumdrumFileContent::analyzeKernAccidentals(void) {
+
+	// ottava marks must be analyzed first:
+	this->analyzeOttavas();
+	
 	HumdrumFileContent& infile = *this;
 	int i, j, k;
 	int kindex;
@@ -154,9 +158,12 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 
 			int rindex = rtracks[track];
 			for (k=0; k<subcount; k++) {
-				string subtok = infile[i].token(j)->getSubtoken(k);
+				HTp token = infile[i].token(j);
+				string subtok = token->getSubtoken(k);
 				int b40 = Convert::kernToBase40(subtok);
 				int diatonic = Convert::kernToBase7(subtok);
+				int octaveadjust = token->getValueInt("auto", "ottava");
+				diatonic -= octaveadjust * 7;
 				if (diatonic < 0) {
 					// Deal with extra-low notes later.
 					continue;
