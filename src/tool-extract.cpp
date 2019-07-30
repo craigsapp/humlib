@@ -785,7 +785,7 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 					if (infile[i].isLocalComment()) {
 						m_humdrum_text << "!";
 					} else if (infile[i].isBarline()) {
-						m_humdrum_text << infile[i][0];
+						m_humdrum_text << infile[i].token(0);
 					} else if (infile[i].isData()) {
 				       m_humdrum_text << ".";
 					    // interpretations handled in dealWithSpineManipulators()

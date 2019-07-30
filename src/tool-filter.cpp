@@ -19,6 +19,7 @@
 #include "tool-binroll.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
+#include "tool-composite.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-hproof.h"

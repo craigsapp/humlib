@@ -96,6 +96,9 @@ sub createIncludeFile {
 	# HumdrumFileStream depends on Options class:
 	$contents .= getMergeContents("$basedir/HumdrumFileStream.h");
 
+	# HumdrumFileSet depends on Options and HumdrumFileStream classes:
+	$contents .= getMergeContents("$basedir/HumdrumFileSet.h");
+
 	my @tools = glob "$basedir/tool-*.h";
 
 	foreach my $tool (@tools) {
