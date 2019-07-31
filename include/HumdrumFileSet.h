@@ -40,6 +40,7 @@ class HumdrumFileSet {
       int                   getSize          (void);
       int                   getCount         (void) { return getSize(); }
       HumdrumFile&          operator[]       (int index);
+		bool                  swap             (int index1, int index2);
 
       int                   readFile         (const string& filename);
       int                   readString       (const string& contents);

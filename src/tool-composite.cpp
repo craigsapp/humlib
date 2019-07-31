@@ -27,9 +27,11 @@ namespace hum {
 //
 
 Tool_composite::Tool_composite(void) {
-	define("pitch=s:e",  "pitch to display for composite rhythm");
-	define("a|append=b", "append data to end of line");
-	define("p|prepend=b", "prepend data to end of line");
+	define("pitch=s:e",    "pitch to display for composite rhythm");
+	define("a|append=b",   "append data to end of line");
+	define("p|prepend=b",  "prepend data to end of line");
+	define("b|beam=b",     "apply automatic beaming");
+	define("G|no-grace=b", "do not include grace notes");
 }
 
 
@@ -92,12 +94,48 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	Tool_extract extract;
 	bool appendQ = getBoolean("append");
 	bool prependQ = getBoolean("prepend");
+	bool graceQ = !getBoolean("no-grace");
 
 	if (appendQ) {
 		extract.setModified("s", "1-$,0");
 	} else {
 		extract.setModified("s", "0,1-$");
 	}
+
+	vector<HumNum> durations(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		durations[i] = infile[i].getDuration();
+	}
+
+	vector<bool> isRest(infile.getLineCount(), false);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (durations[i] == 0) {
+			continue;
+		}
+		bool allnull = true;
+		bool allrest = true;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp tok = infile.token(i, j);
+			if (!tok->isKern()) {
+				continue;
+			}
+			if (tok->isNote()) {
+				allnull = false;
+				allrest = false;
+				break;
+			}
+			if (tok->isRest()) {
+				allnull = false;
+			}
+		}
+		if (allrest) {
+			isRest[i] = true;
+		}
+	}
+
+	string pstring = getString("pitch");
+
+	HumRegex hre;
 
 	extract.run(infile);
 	infile.readString(extract.getAllText());
@@ -111,12 +149,68 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 			}
 			if (token->compare("**blank") == 0) {
 				token->setText("**kern");
+				continue;
+			}
+			// copy time signature and tempos
+			for (int j=1; j<infile[i].getFieldCount(); j++) {
+				HTp stok = infile.token(i, j);
+				if (stok->isTempo()) {
+					token->setText(*stok);
+				} else if (stok->isTimeSignature()) {
+					token->setText(*stok);
+				} else if (stok->isMensurationSymbol()) {
+					token->setText(*stok);
+				} else if (stok->isKeySignature()) {
+					token->setText(*stok);
+				} else if (stok->isKeyDesignation()) {
+					token->setText(*stok);
+				}
 			}
 		}
 		if (!infile[i].isData()) {
 			continue;
 		}
 		if (infile[i].getDuration() == 0) {
+			// Grace note data line (most likely)
+			if (!graceQ) {
+				continue;
+			}
+			// otherwise, borrow the view of the first grace note found on the line
+			// (beaming, visual duration) and apply the target pitch to the grace note.
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp tok = infile.token(i, j);
+				if (!tok->isKern()) {
+					continue;
+				}
+				if (tok->isNull()) {
+					continue;
+				}
+				if (tok->isGrace()) {
+					string q;
+					string beam;
+					string recip;
+					if (hre.search(tok, "(\\d+%?\\d*\\.*)")) {
+						recip = hre.getMatch(1);
+					}
+					if (hre.search(tok, "([LJk]+)")) {
+						beam = hre.getMatch(1);
+					}
+					if (hre.search(tok, "(q+)")) {
+						q = hre.getMatch(1);
+					}
+					string full;
+					full += recip;
+					full += q;
+					full += pstring;
+					full += beam;
+					HTp targettok = infile.token(i, 0);
+					if (appendQ) {
+						targettok = infile.token(i, infile[i].getFieldCount() - 1);
+					}
+					targettok->setText(full);
+					break;
+				}
+			}
 			continue;
 		}
 		string recip = Convert::durationToRecip(infile[i].getDuration());
@@ -126,7 +220,11 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		} else {
 			token = infile.token(i, 0);
 		}
-		recip += getString("pitch");
+		if (isRest[i]) {
+			recip += "r";
+		} else {
+			recip += pstring;
+		}
 		token->setText(recip);
 	}
 
@@ -135,6 +233,20 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		extract2.setModified("s", "1");
 		extract2.run(infile);
 		infile.readString(extract2.getAllText());
+	}
+
+	if (getBoolean("beam")) {
+		Tool_autobeam autobeam;
+		if (appendQ) {
+			int trackcount =  infile.getTrackCount();
+			string tstring = to_string(trackcount);
+			autobeam.setModified("t", tstring);
+		} else {
+			autobeam.setModified("t", "1");
+		}
+		// need to analyze structure for some reason:
+		infile.analyzeStrands();
+		autobeam.run(infile);
 	}
 
 }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 30 01:58:04 CEST 2019
+// Last Modified: Wed Jul 31 22:12:30 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1242,6 +1242,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isKeySignature            (void);
 		bool     isKeyDesignation          (void);
 		bool     isTimeSignature           (void);
+		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 
 		bool     hasSlurStart              (void);
@@ -3932,6 +3933,7 @@ class HumdrumFileSet {
       int                   getSize          (void);
       int                   getCount         (void) { return getSize(); }
       HumdrumFile&          operator[]       (int index);
+		bool                  swap             (int index1, int index2);
 
       int                   readFile         (const string& filename);
       int                   readString       (const string& contents);

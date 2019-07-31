@@ -31,7 +31,7 @@ Tool_autobeam::Tool_autobeam(void) {
 	define("k|kern=i:0",    "process specific kern spine number");
 	define("t|track=i:0",   "process specific track number");
 	define("r|remove=b",    "remove all beams");
-	define("o|overwrite=b", "over-write existing stems");
+	define("o|overwrite=b", "over-write existing beams");
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul 30 01:58:04 CEST 2019
+// Last Modified: Wed Jul 31 22:12:30 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18393,6 +18393,26 @@ HumdrumFile& HumdrumFileSet::operator[](int index) {
 
 //////////////////////////////
 //
+// HumdrumFileSet::swap -- Switch position of two scores in the set.
+//
+
+bool HumdrumFileSet::swap(int index1, int index2) {
+	if (index1 < 0) { return false; }
+	if (index2 < 0) { return false; }
+	if (index1 >= (int)data.size()) { return false; }
+	if (index2 >= (int)data.size()) { return false; }
+
+	HumdrumFile* temp = data[index1];
+	data[index1] = data[index2];
+	data[index2] = temp;
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileSet::read -- Returns the total number of segments
 //
 
@@ -23723,6 +23743,26 @@ bool HumdrumToken::isTimeSignature(void) {
 		return false;
 	}
 	if (this->find("/") == string::npos) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isTempo -- True if a **kern tempo.
+//
+
+bool HumdrumToken::isTempo(void) {
+	if (this->size() < 4) {
+		return false;
+	}
+	if (this->compare(0, 3, "*MM") != 0) {
+		return false;
+	}
+	if (!isdigit((*this)[3])) {
 		return false;
 	}
 	return true;
@@ -31457,7 +31497,7 @@ Tool_autobeam::Tool_autobeam(void) {
 	define("k|kern=i:0",    "process specific kern spine number");
 	define("t|track=i:0",   "process specific track number");
 	define("r|remove=b",    "remove all beams");
-	define("o|overwrite=b", "over-write existing stems");
+	define("o|overwrite=b", "over-write existing beams");
 }
 
 
@@ -36286,9 +36326,11 @@ void Tool_cint::usage(const string& command) {
 //
 
 Tool_composite::Tool_composite(void) {
-	define("pitch=s:e",  "pitch to display for composite rhythm");
-	define("a|append=b", "append data to end of line");
-	define("p|prepend=b", "prepend data to end of line");
+	define("pitch=s:e",    "pitch to display for composite rhythm");
+	define("a|append=b",   "append data to end of line");
+	define("p|prepend=b",  "prepend data to end of line");
+	define("b|beam=b",     "apply automatic beaming");
+	define("G|no-grace=b", "do not include grace notes");
 }
 
 
@@ -36351,12 +36393,48 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	Tool_extract extract;
 	bool appendQ = getBoolean("append");
 	bool prependQ = getBoolean("prepend");
+	bool graceQ = !getBoolean("no-grace");
 
 	if (appendQ) {
 		extract.setModified("s", "1-$,0");
 	} else {
 		extract.setModified("s", "0,1-$");
 	}
+
+	vector<HumNum> durations(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		durations[i] = infile[i].getDuration();
+	}
+
+	vector<bool> isRest(infile.getLineCount(), false);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (durations[i] == 0) {
+			continue;
+		}
+		bool allnull = true;
+		bool allrest = true;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp tok = infile.token(i, j);
+			if (!tok->isKern()) {
+				continue;
+			}
+			if (tok->isNote()) {
+				allnull = false;
+				allrest = false;
+				break;
+			}
+			if (tok->isRest()) {
+				allnull = false;
+			}
+		}
+		if (allrest) {
+			isRest[i] = true;
+		}
+	}
+
+	string pstring = getString("pitch");
+
+	HumRegex hre;
 
 	extract.run(infile);
 	infile.readString(extract.getAllText());
@@ -36370,12 +36448,68 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 			}
 			if (token->compare("**blank") == 0) {
 				token->setText("**kern");
+				continue;
+			}
+			// copy time signature and tempos
+			for (int j=1; j<infile[i].getFieldCount(); j++) {
+				HTp stok = infile.token(i, j);
+				if (stok->isTempo()) {
+					token->setText(*stok);
+				} else if (stok->isTimeSignature()) {
+					token->setText(*stok);
+				} else if (stok->isMensurationSymbol()) {
+					token->setText(*stok);
+				} else if (stok->isKeySignature()) {
+					token->setText(*stok);
+				} else if (stok->isKeyDesignation()) {
+					token->setText(*stok);
+				}
 			}
 		}
 		if (!infile[i].isData()) {
 			continue;
 		}
 		if (infile[i].getDuration() == 0) {
+			// Grace note data line (most likely)
+			if (!graceQ) {
+				continue;
+			}
+			// otherwise, borrow the view of the first grace note found on the line
+			// (beaming, visual duration) and apply the target pitch to the grace note.
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp tok = infile.token(i, j);
+				if (!tok->isKern()) {
+					continue;
+				}
+				if (tok->isNull()) {
+					continue;
+				}
+				if (tok->isGrace()) {
+					string q;
+					string beam;
+					string recip;
+					if (hre.search(tok, "(\\d+%?\\d*\\.*)")) {
+						recip = hre.getMatch(1);
+					}
+					if (hre.search(tok, "([LJk]+)")) {
+						beam = hre.getMatch(1);
+					}
+					if (hre.search(tok, "(q+)")) {
+						q = hre.getMatch(1);
+					}
+					string full;
+					full += recip;
+					full += q;
+					full += pstring;
+					full += beam;
+					HTp targettok = infile.token(i, 0);
+					if (appendQ) {
+						targettok = infile.token(i, infile[i].getFieldCount() - 1);
+					}
+					targettok->setText(full);
+					break;
+				}
+			}
 			continue;
 		}
 		string recip = Convert::durationToRecip(infile[i].getDuration());
@@ -36385,7 +36519,11 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		} else {
 			token = infile.token(i, 0);
 		}
-		recip += getString("pitch");
+		if (isRest[i]) {
+			recip += "r";
+		} else {
+			recip += pstring;
+		}
 		token->setText(recip);
 	}
 
@@ -36394,6 +36532,20 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		extract2.setModified("s", "1");
 		extract2.run(infile);
 		infile.readString(extract2.getAllText());
+	}
+
+	if (getBoolean("beam")) {
+		Tool_autobeam autobeam;
+		if (appendQ) {
+			int trackcount =  infile.getTrackCount();
+			string tstring = to_string(trackcount);
+			autobeam.setModified("t", tstring);
+		} else {
+			autobeam.setModified("t", "1");
+		}
+		// need to analyze structure for some reason:
+		infile.analyzeStrands();
+		autobeam.run(infile);
 	}
 
 }
@@ -42576,6 +42728,8 @@ bool Tool_filter::run(HumdrumFile& infile) {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
 			RUNTOOL(cint, infile, commands[i].second, status);
+		} else if (commands[i].first == "composite") {
+			RUNTOOL(composite, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {

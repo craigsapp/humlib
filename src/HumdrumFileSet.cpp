@@ -89,6 +89,26 @@ HumdrumFile& HumdrumFileSet::operator[](int index) {
 
 //////////////////////////////
 //
+// HumdrumFileSet::swap -- Switch position of two scores in the set.
+//
+
+bool HumdrumFileSet::swap(int index1, int index2) {
+	if (index1 < 0) { return false; }
+	if (index2 < 0) { return false; }
+	if (index1 >= (int)data.size()) { return false; }
+	if (index2 >= (int)data.size()) { return false; }
+
+	HumdrumFile* temp = data[index1];
+	data[index1] = data[index2];
+	data[index2] = temp;
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileSet::read -- Returns the total number of segments
 //
 

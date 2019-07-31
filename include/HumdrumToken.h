@@ -98,6 +98,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isKeySignature            (void);
 		bool     isKeyDesignation          (void);
 		bool     isTimeSignature           (void);
+		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 
 		bool     hasSlurStart              (void);

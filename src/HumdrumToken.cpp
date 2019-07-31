@@ -1304,6 +1304,26 @@ bool HumdrumToken::isTimeSignature(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isTempo -- True if a **kern tempo.
+//
+
+bool HumdrumToken::isTempo(void) {
+	if (this->size() < 4) {
+		return false;
+	}
+	if (this->compare(0, 3, "*MM") != 0) {
+		return false;
+	}
+	if (!isdigit((*this)[3])) {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isMensurationSymbol -- True if a **kern mensuration Symbol.
 //
 
