@@ -289,6 +289,159 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 }
 
 
+
+//////////////////////////////
+//
+// Convert::extractIntegerList -- Convert a list such as 1-4 into the vector 1,2,3,4.
+//   $ (or %) can be used to represent the maximum value, so if the input
+//   is 1-$ (or 1-%), and the maximum should be 5, then the output will be a
+//   vector 1,2,3,4,5.  In addition commas can be used to generate non-consecutive
+//   sequences, and adding a number after the $/% sign means to subtract that
+//   value from the maximum.  So if the string is 1,$-$2 and the maximum is 5,
+//   then the vector will be 1,5,4,3.  Notice that ranges can be reversed to
+//   place the sequence in reverse order, such as $-1 with a maximum of 5 will
+//   result in the vector 5,4,3,2,1.  This function does not expect negative
+//   values.
+//
+
+std::vector<int> Convert::extractIntegerList(const std::string& input, int maximum) {
+	std::vector<int> output;
+	if (maximum < 0) {
+		maximum = 0;
+	}
+	if (maximum < 1000) {
+		output.reserve(maximum);
+	} else {
+		output.reserve(1000);
+	}
+	HumRegex hre;
+	string buffer = input;
+	hre.replaceDestructive(buffer, "", "\\s", "gs");
+	int start = 0;
+	string tempstr;
+	vector<int> tempdata;
+	while (hre.search(buffer,  start, "^([^,]+,?)")) {
+		tempdata.clear();
+		processSegmentEntry(tempdata, hre.getMatch(1), maximum);
+		start += hre.getMatchEndIndex(1);
+		output.insert(output.end(), tempdata.begin(), tempdata.end());
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::processSegmentEntry --
+//   3-6 expands to 3 4 5 6
+//   $   expands to maximum file number
+//   $-1 expands to maximum file number minus 1, etc.
+//
+
+void Convert::processSegmentEntry(vector<int>& field,
+		const string& astring, int maximum) {
+
+	HumRegex hre;
+	string buffer = astring;
+
+	// remove any comma left at end of input astring (or anywhere else)
+	hre.replaceDestructive(buffer, "", ",", "g");
+
+	// first remove $ symbols and replace with the correct values
+	removeDollarsFromString(buffer, maximum);
+
+	if (hre.search(buffer, "^(\\d+)-(\\d+)$")) {
+		int firstone = hre.getMatchInt(1);
+		int lastone  = hre.getMatchInt(2);
+
+		if ((firstone < 1) && (firstone != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at start: " << firstone << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if ((lastone < 1) && (lastone != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at end: " << lastone << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if (firstone > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at start: " << firstone << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+		if (lastone > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at end: " << lastone << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+
+		if (firstone > lastone) {
+			for (int i=firstone; i>=lastone; i--) {
+				field.push_back(i);
+			}
+		} else {
+			for (int i=firstone; i<=lastone; i++) {
+				field.push_back(i);
+			}
+		}
+	} else if (hre.search(buffer, "^(\\d+)")) {
+		int value = hre.getMatchInt(1);
+		if ((value < 1) && (value != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at end: " << value << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if (value > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at start: " << value << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+		field.push_back(value);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::removeDollarsFromString -- substitute $ sign for maximum file count.
+//
+
+void Convert::removeDollarsFromString(string& buffer, int maximum) {
+	HumRegex hre;
+	string buf2 = to_string(maximum);
+	if (hre.search(buffer, "[%$]$")) {
+		hre.replaceDestructive(buffer, buf2, "[$%]$");
+	} else if (hre.search(buffer, "[%$](?![\\d-])")) {
+		// don't know how this case could happen, however...
+		hre.replaceDestructive(buffer, buf2, "[%$](?![\\d-])", "g");
+	} else if (hre.search(buffer, "[%$]$0")) {
+		// replace $0 with maximum (used for reverse orderings)
+		hre.replaceDestructive(buffer, buf2, "[%$]0", "g");
+	} else if (hre.search(buffer, "^[%$]-")) {
+		// replace $ with maximum at start of string
+		hre.replaceDestructive(buffer, buf2, "^[%$]", "");
+	} 
+
+	while (hre.search(buffer, "[%$](\\d+)")) {
+		int value2 = maximum - abs(hre.getMatchInt(1));
+		buf2 = to_string(value2);
+		hre.replaceDestructive(buffer, buf2, "[%$]\\d+");
+	}
+}
+
+
+
+// END_MERGE
+
+
 // END_MERGE
 
 } // end namespace hum

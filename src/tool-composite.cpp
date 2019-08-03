@@ -12,7 +12,9 @@
 
 #include "tool-composite.h"
 #include "tool-extract.h"
+#include "tool-autobeam.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 using namespace std;
 

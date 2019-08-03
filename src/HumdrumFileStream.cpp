@@ -105,6 +105,18 @@ int HumdrumFileStream::setFileList(const vector<string>& list) {
 
 //////////////////////////////
 //
+// HumdrumFileStream::loadString --
+//
+
+void HumdrumFileStream::loadString(const string& data) {
+	m_curfile = -1;
+	m_stringbuffer << data;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileStream::read -- alias for getFile.
 //
 

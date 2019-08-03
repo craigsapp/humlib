@@ -16,3 +16,6 @@ external/pugixml/
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
+*.krn
+*.svg
+*.mei

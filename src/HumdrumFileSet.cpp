@@ -36,6 +36,10 @@ HumdrumFileSet::HumdrumFileSet(Options& options) {
 	read(options);
 }
 
+HumdrumFileSet::HumdrumFileSet(const string& contents) {
+	readString(contents);
+}
+
 
 
 //////////////////////////////
@@ -55,11 +59,11 @@ HumdrumFileSet::~HumdrumFileSet() {
 //
 
 void HumdrumFileSet::clear(void) {
-	for (int i=0; i<(int)data.size(); i++) {
-		delete data[i];
-		data[i] = NULL;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		delete m_data[i];
+		m_data[i] = NULL;
 	}
-	data.resize(0);
+	m_data.resize(0);
 }
 
 
@@ -71,7 +75,7 @@ void HumdrumFileSet::clear(void) {
 //
 
 int HumdrumFileSet::getSize(void) {
-	return (int)data.size();
+	return (int)m_data.size();
 }
 
 
@@ -82,7 +86,7 @@ int HumdrumFileSet::getSize(void) {
 //
 
 HumdrumFile& HumdrumFileSet::operator[](int index) {
-	return *(data.at(index));
+	return *(m_data.at(index));
 }
 
 
@@ -95,12 +99,12 @@ HumdrumFile& HumdrumFileSet::operator[](int index) {
 bool HumdrumFileSet::swap(int index1, int index2) {
 	if (index1 < 0) { return false; }
 	if (index2 < 0) { return false; }
-	if (index1 >= (int)data.size()) { return false; }
-	if (index2 >= (int)data.size()) { return false; }
+	if (index1 >= (int)m_data.size()) { return false; }
+	if (index2 >= (int)m_data.size()) { return false; }
 
-	HumdrumFile* temp = data[index1];
-	data[index1] = data[index2];
-	data[index2] = temp;
+	HumdrumFile* temp = m_data[index1];
+	m_data[index1] = m_data[index2];
+	m_data[index2] = temp;
 
 	return true;
 }
@@ -120,6 +124,11 @@ int HumdrumFileSet::readFile(const string& filename) {
 int HumdrumFileSet::readString(const string& contents) {
 	clear();
 	return readAppendString(contents);
+}
+
+int HumdrumFileSet::readStringCsv(const string& contents) {
+	clear();
+	return readAppendStringCsv(contents);
 }
 
 int HumdrumFileSet::read(istream& inStream) {
@@ -159,6 +168,11 @@ int HumdrumFileSet::readAppendString(const string& contents) {
 	return readAppend(instream);
 }
 
+int HumdrumFileSet::readAppendStringCsv(const string& contents) {
+	cerr << "NOT implemented yet" << endl;
+	return 0;
+}
+
 
 int HumdrumFileSet::readAppend(istream& inStream) {
 	string contents((istreambuf_iterator<char>(inStream)), istreambuf_iterator<char>());
@@ -176,11 +190,11 @@ int HumdrumFileSet::readAppend(Options& options) {
 int HumdrumFileSet::readAppend(HumdrumFileStream& instream) {
 	HumdrumFile* pfile = new HumdrumFile;
 	while (instream.read(*pfile)) {
-		data.push_back(pfile);
+		m_data.push_back(pfile);
 		pfile = new HumdrumFile;
 	}
 	delete pfile;
-	return (int)data.size();
+	return (int)m_data.size();
 }
 
 

@@ -158,6 +158,37 @@ int main(int argc, char** argv) {                                \
 
 //////////////////////////////
 //
+// STREAM_INTERFACE_DIRECT -- Similar to STREAM_INTERFACE, but
+//    instead of looping through the individually extracted
+//    segments, past the streamer to the tool to allow it to
+//    handle the multiple segments being read from the stream.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFileStream& instream)
+//
+//
+
+#define STREAM_INTERFACE_DIRECT(CLASS)                           \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	bool status = interface.run(streamer);                        \
+	if (interface.hasAnyText()) {                                \
+		interface.getAllText(cout);                                          \
+	}                                                             \
+	return !status;                                               \
+}
+
+
+
+//////////////////////////////
+//
 // STREAM_INTERFACE2 -- Expects two Humdurm files, either from the
 //    first two command-line arguments (left over after options have
 //    been parsed out), or from standard input.

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 31 22:12:30 CEST 2019
+// Last Modified: Sat Aug  3 23:03:16 CEST 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2747,6 +2747,10 @@ class Convert {
 		static void    makeBooleanTrackList(std::vector<bool>& spinelist,
 		                                     const std::string& spinestring,
 		                                     int maxtrack);
+		static std::vector<int> extractIntegerList(const std::string& input, int maximum);
+		// private functions for extractIntegerList:
+		static void processSegmentEntry(std::vector<int>& field, const std::string& astring, int maximum);
+		static void removeDollarsFromString(std::string& buffer, int maximum);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const std::vector<int>& numbers);
@@ -3839,6 +3843,37 @@ int main(int argc, char** argv) {                                \
 
 //////////////////////////////
 //
+// STREAM_INTERFACE_DIRECT -- Similar to STREAM_INTERFACE, but
+//    instead of looping through the individually extracted
+//    segments, past the streamer to the tool to allow it to
+//    handle the multiple segments being read from the stream.
+//
+// function call that the interface must implement:
+//  .run(HumdrumFileStream& instream)
+//
+//
+
+#define STREAM_INTERFACE_DIRECT(CLASS)                           \
+using namespace std;                                             \
+using namespace hum;                                             \
+int main(int argc, char** argv) {                                \
+	CLASS interface;                                              \
+	if (!interface.process(argc, argv)) {                         \
+		interface.getError(cerr);                                  \
+		return -1;                                                 \
+	}                                                             \
+	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
+	bool status = interface.run(streamer);                        \
+	if (interface.hasAnyText()) {                                \
+		interface.getAllText(cout);                                          \
+	}                                                             \
+	return !status;                                               \
+}
+
+
+
+//////////////////////////////
+//
 // STREAM_INTERFACE2 -- Expects two Humdurm files, either from the
 //    first two command-line arguments (left over after options have
 //    been parsed out), or from standard input.
@@ -3892,6 +3927,8 @@ class HumdrumFileStream {
 		                HumdrumFileStream  (Options& options);
 		                HumdrumFileStream  (const string& datastream);
 
+		void            loadString         (const string& data);
+
 		int             setFileList        (char** list);
 		int             setFileList        (const std::vector<std::string>& list);
 
@@ -3927,6 +3964,7 @@ class HumdrumFileSet {
    public:
                             HumdrumFileSet   (void);
                             HumdrumFileSet   (Options& options);
+                            HumdrumFileSet   (const std::string& contents);
                            ~HumdrumFileSet   ();
 
       void                  clear            (void);
@@ -3935,20 +3973,22 @@ class HumdrumFileSet {
       HumdrumFile&          operator[]       (int index);
 		bool                  swap             (int index1, int index2);
 
-      int                   readFile         (const string& filename);
-      int                   readString       (const string& contents);
+      int                   readFile         (const std::string& filename);
+      int                   readString       (const std::string& contents);
+      int                   readStringCsv    (const std::string& contents);
       int                   read             (std::istream& inStream);
       int                   read             (Options& options);
       int                   read             (HumdrumFileStream& instream);
 
-      int                   readAppendFile   (const string& filename);
-      int                   readAppendString (const string& contents);
+      int                   readAppendFile   (const std::string& filename);
+      int                   readAppendString (const std::string& contents);
+      int                   readAppendStringCsv (const std::string& contents);
       int                   readAppend       (std::istream& inStream);
       int                   readAppend       (Options& options);
       int                   readAppend       (HumdrumFileStream& instream);
 
    protected:
-      vector<HumdrumFile*>  data;
+      vector<HumdrumFile*>  m_data;
 
       void                  appendHumdrumFileContent(const std::string& filename, 
                                                std::stringstream& inbuffer);
@@ -4088,6 +4128,29 @@ class Tool_binroll : public HumTool {
 
 	private:
 		HumNum    m_duration;
+
+};
+
+
+class Tool_chooser : public HumTool {
+	public:
+		       	   Tool_chooser       (void);
+		       	  ~Tool_chooser       () {};
+
+		bool        run                (const string& indata);
+		bool        run                (HumdrumFileStream& instream);
+
+	protected:
+		void        processFiles       (HumdrumFileSet& infiles);
+		void        initialize         (void);
+
+		void        expandSegmentList  (vector<int>& field, string& fieldstring,
+		                                int maximum);
+		void        processSegmentEntry(vector<int>& field,
+		                                const string& astring, int maximum);
+		void        removeDollarsFromString(string& buffer, int maximum);
+
+	private:
 
 };
 

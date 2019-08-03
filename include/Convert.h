@@ -183,6 +183,10 @@ class Convert {
 		static void    makeBooleanTrackList(std::vector<bool>& spinelist,
 		                                     const std::string& spinestring,
 		                                     int maxtrack);
+		static std::vector<int> extractIntegerList(const std::string& input, int maximum);
+		// private functions for extractIntegerList:
+		static void processSegmentEntry(std::vector<int>& field, const std::string& astring, int maximum);
+		static void removeDollarsFromString(std::string& buffer, int maximum);
 
 		// Mathematical processing, defined in Convert-math.cpp
 		static int     getLcm               (const std::vector<int>& numbers);

@@ -34,6 +34,7 @@ class HumdrumFileSet {
    public:
                             HumdrumFileSet   (void);
                             HumdrumFileSet   (Options& options);
+                            HumdrumFileSet   (const std::string& contents);
                            ~HumdrumFileSet   ();
 
       void                  clear            (void);
@@ -42,20 +43,22 @@ class HumdrumFileSet {
       HumdrumFile&          operator[]       (int index);
 		bool                  swap             (int index1, int index2);
 
-      int                   readFile         (const string& filename);
-      int                   readString       (const string& contents);
+      int                   readFile         (const std::string& filename);
+      int                   readString       (const std::string& contents);
+      int                   readStringCsv    (const std::string& contents);
       int                   read             (std::istream& inStream);
       int                   read             (Options& options);
       int                   read             (HumdrumFileStream& instream);
 
-      int                   readAppendFile   (const string& filename);
-      int                   readAppendString (const string& contents);
+      int                   readAppendFile   (const std::string& filename);
+      int                   readAppendString (const std::string& contents);
+      int                   readAppendStringCsv (const std::string& contents);
       int                   readAppend       (std::istream& inStream);
       int                   readAppend       (Options& options);
       int                   readAppend       (HumdrumFileStream& instream);
 
    protected:
-      vector<HumdrumFile*>  data;
+      vector<HumdrumFile*>  m_data;
 
       void                  appendHumdrumFileContent(const std::string& filename, 
                                                std::stringstream& inbuffer);

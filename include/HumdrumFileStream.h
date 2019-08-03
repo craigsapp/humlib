@@ -38,6 +38,8 @@ class HumdrumFileStream {
 		                HumdrumFileStream  (Options& options);
 		                HumdrumFileStream  (const string& datastream);
 
+		void            loadString         (const string& data);
+
 		int             setFileList        (char** list);
 		int             setFileList        (const std::vector<std::string>& list);
 

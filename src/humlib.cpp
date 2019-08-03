@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 31 22:12:30 CEST 2019
+// Last Modified: Sat Aug  3 23:03:16 CEST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -3010,6 +3010,156 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Convert::extractIntegerList -- Convert a list such as 1-4 into the vector 1,2,3,4.
+//   $ (or %) can be used to represent the maximum value, so if the input
+//   is 1-$ (or 1-%), and the maximum should be 5, then the output will be a
+//   vector 1,2,3,4,5.  In addition commas can be used to generate non-consecutive
+//   sequences, and adding a number after the $/% sign means to subtract that
+//   value from the maximum.  So if the string is 1,$-$2 and the maximum is 5,
+//   then the vector will be 1,5,4,3.  Notice that ranges can be reversed to
+//   place the sequence in reverse order, such as $-1 with a maximum of 5 will
+//   result in the vector 5,4,3,2,1.  This function does not expect negative
+//   values.
+//
+
+std::vector<int> Convert::extractIntegerList(const std::string& input, int maximum) {
+	std::vector<int> output;
+	if (maximum < 0) {
+		maximum = 0;
+	}
+	if (maximum < 1000) {
+		output.reserve(maximum);
+	} else {
+		output.reserve(1000);
+	}
+	HumRegex hre;
+	string buffer = input;
+	hre.replaceDestructive(buffer, "", "\\s", "gs");
+	int start = 0;
+	string tempstr;
+	vector<int> tempdata;
+	while (hre.search(buffer,  start, "^([^,]+,?)")) {
+		tempdata.clear();
+		processSegmentEntry(tempdata, hre.getMatch(1), maximum);
+		start += hre.getMatchEndIndex(1);
+		output.insert(output.end(), tempdata.begin(), tempdata.end());
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::processSegmentEntry --
+//   3-6 expands to 3 4 5 6
+//   $   expands to maximum file number
+//   $-1 expands to maximum file number minus 1, etc.
+//
+
+void Convert::processSegmentEntry(vector<int>& field,
+		const string& astring, int maximum) {
+
+	HumRegex hre;
+	string buffer = astring;
+
+	// remove any comma left at end of input astring (or anywhere else)
+	hre.replaceDestructive(buffer, "", ",", "g");
+
+	// first remove $ symbols and replace with the correct values
+	removeDollarsFromString(buffer, maximum);
+
+	if (hre.search(buffer, "^(\\d+)-(\\d+)$")) {
+		int firstone = hre.getMatchInt(1);
+		int lastone  = hre.getMatchInt(2);
+
+		if ((firstone < 1) && (firstone != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at start: " << firstone << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if ((lastone < 1) && (lastone != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at end: " << lastone << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if (firstone > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at start: " << firstone << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+		if (lastone > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at end: " << lastone << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+
+		if (firstone > lastone) {
+			for (int i=firstone; i>=lastone; i--) {
+				field.push_back(i);
+			}
+		} else {
+			for (int i=firstone; i<=lastone; i++) {
+				field.push_back(i);
+			}
+		}
+	} else if (hre.search(buffer, "^(\\d+)")) {
+		int value = hre.getMatchInt(1);
+		if ((value < 1) && (value != 0)) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains too small a number at end: " << value << endl;
+			cerr << "Minimum number allowed is " << 1 << endl;
+			return;
+		}
+		if (value > maximum) {
+			cerr << "Error: range token: \"" << astring << "\""
+				  << " contains number too large at start: " << value << endl;
+			cerr << "Maximum number allowed is " << maximum << endl;
+			return;
+		}
+		field.push_back(value);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::removeDollarsFromString -- substitute $ sign for maximum file count.
+//
+
+void Convert::removeDollarsFromString(string& buffer, int maximum) {
+	HumRegex hre;
+	string buf2 = to_string(maximum);
+	if (hre.search(buffer, "[%$]$")) {
+		hre.replaceDestructive(buffer, buf2, "[$%]$");
+	} else if (hre.search(buffer, "[%$](?![\\d-])")) {
+		// don't know how this case could happen, however...
+		hre.replaceDestructive(buffer, buf2, "[%$](?![\\d-])", "g");
+	} else if (hre.search(buffer, "[%$]$0")) {
+		// replace $0 with maximum (used for reverse orderings)
+		hre.replaceDestructive(buffer, buf2, "[%$]0", "g");
+	} else if (hre.search(buffer, "^[%$]-")) {
+		// replace $ with maximum at start of string
+		hre.replaceDestructive(buffer, buf2, "^[%$]", "");
+	} 
+
+	while (hre.search(buffer, "[%$](\\d+)")) {
+		int value2 = maximum - abs(hre.getMatchInt(1));
+		buf2 = to_string(value2);
+		hre.replaceDestructive(buffer, buf2, "[%$]\\d+");
+	}
+}
+
 
 
 
@@ -18340,6 +18490,10 @@ HumdrumFileSet::HumdrumFileSet(Options& options) {
 	read(options);
 }
 
+HumdrumFileSet::HumdrumFileSet(const string& contents) {
+	readString(contents);
+}
+
 
 
 //////////////////////////////
@@ -18359,11 +18513,11 @@ HumdrumFileSet::~HumdrumFileSet() {
 //
 
 void HumdrumFileSet::clear(void) {
-	for (int i=0; i<(int)data.size(); i++) {
-		delete data[i];
-		data[i] = NULL;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		delete m_data[i];
+		m_data[i] = NULL;
 	}
-	data.resize(0);
+	m_data.resize(0);
 }
 
 
@@ -18375,7 +18529,7 @@ void HumdrumFileSet::clear(void) {
 //
 
 int HumdrumFileSet::getSize(void) {
-	return (int)data.size();
+	return (int)m_data.size();
 }
 
 
@@ -18386,7 +18540,7 @@ int HumdrumFileSet::getSize(void) {
 //
 
 HumdrumFile& HumdrumFileSet::operator[](int index) {
-	return *(data.at(index));
+	return *(m_data.at(index));
 }
 
 
@@ -18399,12 +18553,12 @@ HumdrumFile& HumdrumFileSet::operator[](int index) {
 bool HumdrumFileSet::swap(int index1, int index2) {
 	if (index1 < 0) { return false; }
 	if (index2 < 0) { return false; }
-	if (index1 >= (int)data.size()) { return false; }
-	if (index2 >= (int)data.size()) { return false; }
+	if (index1 >= (int)m_data.size()) { return false; }
+	if (index2 >= (int)m_data.size()) { return false; }
 
-	HumdrumFile* temp = data[index1];
-	data[index1] = data[index2];
-	data[index2] = temp;
+	HumdrumFile* temp = m_data[index1];
+	m_data[index1] = m_data[index2];
+	m_data[index2] = temp;
 
 	return true;
 }
@@ -18424,6 +18578,11 @@ int HumdrumFileSet::readFile(const string& filename) {
 int HumdrumFileSet::readString(const string& contents) {
 	clear();
 	return readAppendString(contents);
+}
+
+int HumdrumFileSet::readStringCsv(const string& contents) {
+	clear();
+	return readAppendStringCsv(contents);
 }
 
 int HumdrumFileSet::read(istream& inStream) {
@@ -18463,6 +18622,11 @@ int HumdrumFileSet::readAppendString(const string& contents) {
 	return readAppend(instream);
 }
 
+int HumdrumFileSet::readAppendStringCsv(const string& contents) {
+	cerr << "NOT implemented yet" << endl;
+	return 0;
+}
+
 
 int HumdrumFileSet::readAppend(istream& inStream) {
 	string contents((istreambuf_iterator<char>(inStream)), istreambuf_iterator<char>());
@@ -18480,11 +18644,11 @@ int HumdrumFileSet::readAppend(Options& options) {
 int HumdrumFileSet::readAppend(HumdrumFileStream& instream) {
 	HumdrumFile* pfile = new HumdrumFile;
 	while (instream.read(*pfile)) {
-		data.push_back(pfile);
+		m_data.push_back(pfile);
 		pfile = new HumdrumFile;
 	}
 	delete pfile;
-	return (int)data.size();
+	return (int)m_data.size();
 }
 
 
@@ -18559,6 +18723,18 @@ int HumdrumFileStream::setFileList(char** list) {
 int HumdrumFileStream::setFileList(const vector<string>& list) {
 	m_filelist = list;
 	return (int)list.size();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStream::loadString --
+//
+
+void HumdrumFileStream::loadString(const string& data) {
+	m_curfile = -1;
+	m_stringbuffer << data;
 }
 
 
@@ -33271,6 +33447,74 @@ void Tool_binroll::processStrand(vector<vector<char>>& roll, HTp starting,
 }
 
 
+
+
+
+
+/////////////////////////////////
+//
+// Tool_chooser::Tool_chooser -- Set the recognized options for the tool.
+//
+
+Tool_chooser::Tool_chooser(void) {
+	define("s|segment=s",  "segments to pass to output");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_chooser::run -- Do the main work of the tool.
+//
+
+
+bool Tool_chooser::run(const string& indata) {
+	initialize();
+	HumdrumFileStream instream;
+	instream.loadString(indata);
+	HumdrumFileSet infiles;
+	infiles.read(instream);
+	processFiles(infiles);
+	return true;
+}
+
+
+
+bool Tool_chooser::run(HumdrumFileStream& instream) {
+	initialize();
+	HumdrumFileSet infiles;
+	infiles.read(instream);
+	processFiles(infiles);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_chooser::initialize --
+//
+
+void Tool_chooser::initialize(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// Tool_chooser::processFiles --
+//
+
+void Tool_chooser::processFiles(HumdrumFileSet& infiles) {
+	int maximum = infiles.getCount();
+	string expansion = getString("segment");
+	vector<int> outlist = Convert::extractIntegerList(expansion, maximum);
+
+	for (int i=0; i<(int)outlist.size(); i++) {
+		m_humdrum_text << infiles[outlist[i]-1];
+	}
+}
 
 
 
