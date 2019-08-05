@@ -27,7 +27,7 @@ namespace hum {
 //
 
 Tool_chooser::Tool_chooser(void) {
-	define("s|segment=s",  "segments to pass to output");
+	define("s|n|segment=s",  "segments to pass to output");
 }
 
 
@@ -36,6 +36,11 @@ Tool_chooser::Tool_chooser(void) {
 //
 // Tool_chooser::run -- Do the main work of the tool.
 //
+
+bool Tool_chooser::run(HumdrumFileSet& infiles) {
+	processFiles(infiles);
+	return true;
+}
 
 
 bool Tool_chooser::run(const string& indata) {

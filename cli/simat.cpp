@@ -13,7 +13,7 @@
 
 #include "humlib.h"
 
-STREAM_INTERFACE2(Tool_simat)
+STREAM_INTERFACE(Tool_simat)
 
 
 

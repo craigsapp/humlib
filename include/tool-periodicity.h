@@ -29,6 +29,7 @@ class Tool_periodicity : public HumTool {
 		         Tool_periodicity   (void);
 		        ~Tool_periodicity   () {};
 
+		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
 		bool     run                (const string& indata, ostream& out);
 		bool     run                (HumdrumFile& infile, ostream& out);

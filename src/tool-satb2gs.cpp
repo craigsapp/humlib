@@ -45,6 +45,15 @@ Tool_satb2gs::Tool_satb2gs(void) {
 // Tool_satb2gs::run -- Primary interfaces to the tool.
 //
 
+bool Tool_satb2gs::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_satb2gs::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

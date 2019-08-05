@@ -30,6 +30,7 @@ class Tool_trillspell : public HumTool {
 		      Tool_trillspell     (void);
 		     ~Tool_trillspell     () {};
 
+		bool  run                 (HumdrumFileSet& infiles);
 		bool  run                 (HumdrumFile& infile);
 		bool  run                 (const string& indata, ostream& out);
 		bool  run                 (HumdrumFile& infile, ostream& out);

@@ -46,6 +46,15 @@ Tool_humsort::Tool_humsort(void) {
 // Tool_humsort::run -- Do the main work of the tool.
 //
 
+bool Tool_humsort::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_humsort::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

@@ -888,6 +888,48 @@ vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
 
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::getGlobalReferenceRecords --
+//
+
+vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
+	vector<HumdrumLine*> hlps;
+	hlps.reserve(32);
+	HumdrumLine* hlp;
+	auto& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isGlobalReference()) {
+			hlp = &infile[i];
+			hlps.push_back(hlp);
+		}
+	}
+	return hlps;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getUniversalReferenceRecords --
+//
+
+vector<HumdrumLine*> HumdrumFileBase::getUniversalReferenceRecords(void) {
+	vector<HumdrumLine*> hlps;
+	hlps.reserve(32);
+	HumdrumLine* hlp;
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isUniversalReference()) {
+			hlp = &infile[i];
+			hlps.push_back(hlp);
+		}
+	}
+	return hlps;
+}
+
+
+
 ////////////////////////////
 //
 // HumdrumFileBase::getLineCount -- Returns the number of lines.

@@ -43,6 +43,15 @@ Tool_composite::Tool_composite(void) {
 // Tool_composite::run -- Do the main work of the tool.
 //
 
+bool Tool_composite::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_composite::run(const string& indata, ostream& out) {
 	HumdrumFile infile;
 	infile.readStringNoRhythm(indata);

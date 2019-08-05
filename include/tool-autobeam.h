@@ -14,11 +14,12 @@
 #define _TOOL_AUTOBEAM_H_INCLUDED
 
 #include "HumTool.h"
-#include "HumdrumFile.h"
+#include "HumdrumFileSet.h"
 
 namespace hum {
 
 // START_MERGE
+
 
 class Tool_autobeam : public HumTool {
 	public:
@@ -26,6 +27,7 @@ class Tool_autobeam : public HumTool {
 		        ~Tool_autobeam   () {};
 
 		bool     run             (HumdrumFile& infile);
+		bool     run             (HumdrumFileSet& infiles);
 		bool     run             (const string& indata, ostream& out);
 		bool     run             (HumdrumFile& infile, ostream& out);
 

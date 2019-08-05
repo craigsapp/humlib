@@ -26,6 +26,7 @@ class Tool_chord : public HumTool {
 		         Tool_chord      (void);
 		        ~Tool_chord      () {};
 
+		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);

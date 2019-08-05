@@ -14,7 +14,7 @@
 #define _TOOL_AUTOSTEM_H_INCLUDED
 
 #include "HumTool.h"
-#include "HumdrumFile.h"
+#include "HumdrumFileSet.h"
 
 namespace hum {
 
@@ -35,6 +35,7 @@ class Tool_autostem : public HumTool {
 		         Tool_autostem         (void);
 		        ~Tool_autostem         () {};
 
+		bool     run                   (HumdrumFileSet& infiles);
 		bool     run                   (HumdrumFile& infile);
 		bool     run                   (const string& indata, ostream& out);
 		bool     run                   (HumdrumFile& infile, ostream& out);

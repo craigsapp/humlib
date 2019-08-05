@@ -35,6 +35,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		              HumdrumFileStructure         (std::istream& contents);
 		             ~HumdrumFileStructure         ();
 		bool          hasFilters                   (void);
+		bool          hasGlobalFilters             (void);
+		bool          hasUniversalFilters          (void);
 
 		// TSV reading functions:
 		bool          read                         (std::istream& contents);

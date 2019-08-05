@@ -70,6 +70,21 @@ void HumdrumFileSet::clear(void) {
 
 //////////////////////////////
 //
+// HumdrumFileSet::clearNoFree -- Remove all Humdrum file content from set
+//    but do not delete the contents (since it should be handled externally).
+//
+
+void HumdrumFileSet::clearNoFree(void) {
+	for (int i=0; i<(int)m_data.size(); i++) {
+		m_data[i] = NULL;
+	}
+	m_data.resize(0);
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileSet::getSize -- Return the number of Humdrum files in the
 //     set.
 //
@@ -148,6 +163,7 @@ int HumdrumFileSet::read(HumdrumFileStream& instream) {
 
 
 
+
 //////////////////////////////
 //
 // HumdrumFileSet::readAppend -- Returns the total number of segments
@@ -196,6 +212,133 @@ int HumdrumFileSet::readAppend(HumdrumFileStream& instream) {
 	delete pfile;
 	return (int)m_data.size();
 }
+
+
+int HumdrumFileSet::readAppendHumdrum(HumdrumFile& infile) {
+	stringstream ss;
+	ss << infile;
+	return readAppendString(ss.str());
+}
+
+
+//////////////////////////////
+//
+// appendHumdrumPointer --  The infile will be deleted by the object
+//    (so do not delete outside of the object or allow it to be inserted
+//    from a stack pointer). I.e., this function is dangerous if you do
+//    no know what you are doing.
+//
+
+int HumdrumFileSet::appendHumdrumPointer(HumdrumFile* infile) {
+	m_data.push_back(infile);
+	return 1;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileSet::hasFilters -- Returns true if has any
+//    reference records starting with "!!!!filter:"
+//    (universal filters).
+//
+
+bool HumdrumFileSet::hasFilters(void) {
+	HumdrumFileSet& infiles = *this;
+	for (int i=0; i<infiles.getCount(); i++) {
+		int lcount = infiles[i].getLineCount();
+		for (int j=0; j<lcount; j++) {
+			if (!infiles[i][j].isComment()) {
+				continue;
+			}
+			HTp token = infiles[i].token(j, 0);
+			if (token->compare(0, 11, "!!!!filter:") == 0) {
+				return true;
+			}
+			if (token->compare(0, 10, "!!!filter:") == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileSet::hasGlobalFilters -- Returns true if has any
+//    reference records starting with "!!!!filter:"
+//    (universal filters).
+//
+
+bool HumdrumFileSet::hasGlobalFilters(void) {
+	HumdrumFileSet& infiles = *this;
+	for (int i=0; i<infiles.getCount(); i++) {
+		int lcount = infiles[i].getLineCount();
+		for (int j=0; j<lcount; j++) {
+			if (!infiles[i][j].isComment()) {
+				continue;
+			}
+			HTp token = infiles[i].token(j, 0);
+			if (token->compare(0, 10, "!!!filter:") == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileSet::hasUniversalFilters -- Returns true if has any
+//    reference records starting with "!!!!filter:"
+//    (universal filters).
+//
+
+bool HumdrumFileSet::hasUniversalFilters(void) {
+	HumdrumFileSet& infiles = *this;
+	for (int i=0; i<infiles.getCount(); i++) {
+		int lcount = infiles[i].getLineCount();
+		for (int j=0; j<lcount; j++) {
+			if (!infiles[i][j].isComment()) {
+				continue;
+			}
+			HTp token = infiles[i].token(j, 0);
+			if (token->compare(0, 11, "!!!!filter:") == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileSet::getUniversalReferenceRecords --
+//
+
+vector<HumdrumLine*> HumdrumFileSet::getUniversalReferenceRecords(void) {
+	vector<HumdrumLine*> hlps;
+	hlps.reserve(32);
+	HumdrumLine* hlp;
+	HumdrumFileSet& infiles = *this;
+	for (int i=0; i<infiles.getCount(); i++) {
+		HumdrumFileBase& infile = infiles[i];
+		for (int j=0; j<infile.getLineCount(); j++) {
+			if (infile[j].isUniversalReference()) {
+				hlp = &infile[j];
+				hlps.push_back(hlp);
+			}
+		}
+	}
+	return hlps;
+}
+
 
 
 // END_MERGE

@@ -14,6 +14,7 @@
 #define _HUMTOOL_H_INCLUDED
 
 #include "Options.h"
+#include "HumdrumFileSet.h"
 
 #include <sstream>
 #include <string>
@@ -113,13 +114,8 @@ int main(int argc, char** argv) {                      \
 
 //////////////////////////////
 //
-// STREAM_INTERFACE -- Expects one Humdurm file, either from the
-//    first command-line argument (left over after options have been
-//    parsed out), or from standard input.
-//
-// function call that the interface must implement:
-//  .run(HumdrumFile& infile, ostream& out)
-//
+// STREAM_INTERFACE -- Use HumdrumFileStream (low-memory
+//    usage implementation).
 //
 
 #define STREAM_INTERFACE(CLASS)                                  \
@@ -131,11 +127,11 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
-	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
-	HumdrumFile infile;                                           \
+	HumdrumFileStream instream(static_cast<Options&>(interface)); \
+	HumdrumFileSet infiles;                                       \
 	bool status = true;                                           \
-	while (streamer.read(infile)) {                               \
-		status &= interface.run(infile);                           \
+	while (instream.readSingleSegment(infiles)) {                 \
+		status &= interface.run(infiles);                          \
 		if (interface.hasWarning()) {                              \
 			interface.getWarning(cerr);                             \
 		}                                                          \
@@ -147,7 +143,9 @@ int main(int argc, char** argv) {                                \
          return -1;                                              \
 		}                                                          \
 		if (!interface.hasAnyText()) {                             \
-			cout << infile;                                         \
+			for (int i=0; i<infiles.getCount(); i++) {              \
+				cout << infiles[i];                                  \
+			}                                                       \
 		}                                                          \
 		interface.clearOutput();                                   \
 	}                                                             \
@@ -158,17 +156,12 @@ int main(int argc, char** argv) {                                \
 
 //////////////////////////////
 //
-// STREAM_INTERFACE_DIRECT -- Similar to STREAM_INTERFACE, but
-//    instead of looping through the individually extracted
-//    segments, past the streamer to the tool to allow it to
-//    handle the multiple segments being read from the stream.
-//
-// function call that the interface must implement:
-//  .run(HumdrumFileStream& instream)
-//
+// RAW_STREAM_INTERFACE -- Use HumdrumFileStream but send the
+//    HumdrumFileStream object to the filter rather than individual
+//    Humdrum files.
 //
 
-#define STREAM_INTERFACE_DIRECT(CLASS)                           \
+#define RAW_STREAM_INTERFACE(CLASS)                              \
 using namespace std;                                             \
 using namespace hum;                                             \
 int main(int argc, char** argv) {                                \
@@ -177,11 +170,19 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
-	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
-	bool status = interface.run(streamer);                        \
-	if (interface.hasAnyText()) {                                \
-		interface.getAllText(cout);                                          \
+	HumdrumFileStream instream(static_cast<Options&>(interface)); \
+	bool status = interface.run(instream);                        \
+	if (interface.hasWarning()) {                                 \
+		interface.getWarning(cerr);                                \
 	}                                                             \
+	if (interface.hasAnyText()) {                                 \
+	   interface.getAllText(cout);                                \
+	}                                                             \
+	if (interface.hasError()) {                                   \
+		interface.getError(cerr);                                  \
+        return -1;                                               \
+	}                                                             \
+	interface.clearOutput();                                      \
 	return !status;                                               \
 }
 
@@ -189,16 +190,11 @@ int main(int argc, char** argv) {                                \
 
 //////////////////////////////
 //
-// STREAM_INTERFACE2 -- Expects two Humdurm files, either from the
-//    first two command-line arguments (left over after options have
-//    been parsed out), or from standard input.
-//
-// function call that the interface must implement:
-//  .run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out)
-//
+// SET_INTERFACE -- Use HumdrumFileSet (multiple file high-memory
+//    usage implementation).
 //
 
-#define STREAM_INTERFACE2(CLASS)                                 \
+#define SET_INTERFACE(CLASS)                                     \
 using namespace std;                                             \
 using namespace hum;                                             \
 int main(int argc, char** argv) {                                \
@@ -207,13 +203,10 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
-	HumdrumFileStream streamer(static_cast<Options&>(interface)); \
-	HumdrumFile infile1;                                          \
-	HumdrumFile infile2;                                          \
-	bool status = true;                                           \
-	streamer.read(infile1);                                       \
-	streamer.read(infile2);                                       \
-	status &= interface.run(infile1, infile2);                    \
+	HumdrumFileStream instream(static_cast<Options&>(interface)); \
+	HumdrumFileSet infiles;                                       \
+	instream.read(infiles);                                       \
+	bool status = interface.run(infiles);                         \
 	if (interface.hasWarning()) {                                 \
 		interface.getWarning(cerr);                                \
 	}                                                             \
@@ -225,8 +218,9 @@ int main(int argc, char** argv) {                                \
         return -1;                                               \
 	}                                                             \
 	if (!interface.hasAnyText()) {                                \
-		cout << infile1;                                           \
-		cout << infile2;                                           \
+		for (int i=0; i<infiles.getCount(); i++) {                 \
+			cout << infiles[i];                                     \
+		}                                                          \
 	}                                                             \
 	interface.clearOutput();                                      \
 	return !status;                                               \

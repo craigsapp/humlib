@@ -25,15 +25,16 @@ class Tool_pnum : public HumTool {
 		      Tool_pnum               (void);
 		     ~Tool_pnum               () {};
 
-		bool  run                      (HumdrumFile& infile);
-		bool  run                      (const string& indata, ostream& out);
-		bool  run                      (HumdrumFile& infile, ostream& out);
+		bool  run                     (HumdrumFileSet& infiles);
+		bool  run                     (HumdrumFile& infile);
+		bool  run                     (const string& indata, ostream& out);
+		bool  run                     (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void  initialize               (HumdrumFile& infile);
-		void  processFile              (HumdrumFile& infile);
+		void  initialize              (HumdrumFile& infile);
+		void  processFile             (HumdrumFile& infile);
 		std::string convertSubtokenToBase(const std::string& text);
-		void  convertTokenToBase       (HTp token);
+		void  convertTokenToBase      (HTp token);
 
 	private:
 		int  m_base = 12;

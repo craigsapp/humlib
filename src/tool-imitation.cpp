@@ -62,6 +62,15 @@ Tool_imitation::Tool_imitation(void) {
 // Tool_imitation::run -- Do the main work of the tool.
 //
 
+bool Tool_imitation::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_imitation::run(const string& indata, ostream& out) {
 
 	HumdrumFile infile(indata);

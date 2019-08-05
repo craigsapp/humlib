@@ -15,6 +15,7 @@
 //
 
 #include "HumdrumFileStream.h"
+#include "HumdrumFileSet.h"
 #include "HumRegex.h"
 
 #include <cstring>
@@ -122,6 +123,37 @@ void HumdrumFileStream::loadString(const string& data) {
 
 int HumdrumFileStream::read(HumdrumFile& infile) {
 	return getFile(infile);
+}
+
+
+int HumdrumFileStream::read(HumdrumFileSet& infiles) {
+	infiles.clear();
+	HumdrumFile* infile = new HumdrumFile;
+	while (getFile(*infile)) {
+		infiles.appendHumdrumPointer(infile);
+		infile = new HumdrumFile;
+	}
+	delete infile;
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStream::readSingleSegment -- Get a single file for a set structure.
+//
+
+int HumdrumFileStream::readSingleSegment(HumdrumFileSet& infiles) {
+	infiles.clear();
+	HumdrumFile* infile = new HumdrumFile;
+	int status = getFile(*infile);
+	if (!status) {
+		delete infile;
+	} else {
+		infiles.appendHumdrumPointer(infile);
+	}
+	return status;
 }
 
 
@@ -388,9 +420,9 @@ restarting:
 		}
 		int len = (int)strlen(templine);
 		if ((len > 4) && (strncmp(templine, "!!!!", 4) == 0) &&
-				(templine[4] != '!') && (dataFoundQ == 0)) {
+				(templine[4] != '!') && (dataFoundQ == 0) && (strncmp(templine, "!!!!filter:", 11) != 0)) {
 			// This is a universal comment.  Should it be appended
-			// to the list or should the currnet list be erased and
+			// to the list or should the current list be erased and
 			// this record placed into the first entry?
 			if (foundUniversalQ) {
 				// already found a previous universal, so append.
@@ -458,6 +490,10 @@ restarting:
 	contents.clear(); // reset error flags in buffer
 
 	for (int i=0; i<(int)m_universals.size(); i++) {
+		// Convert universals reference records to globals, but do not demote !!!!filter:
+		if (m_universals[i].compare(0, 11, "!!!!filter:") == 0) {
+			continue;
+		}
 		contents << &(m_universals[i][1]) << "\n";
 	}
 	contents << buffer.str();

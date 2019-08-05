@@ -21,6 +21,7 @@
 #include "HumdrumFile.h"
 #include "Options.h"
 
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -29,6 +30,8 @@
 namespace hum {
 
 // START_MERGE
+
+class HumdrumFileSet;
 
 class HumdrumFileStream {
 	public:
@@ -48,6 +51,8 @@ class HumdrumFileStream {
 
 		int             getFile            (HumdrumFile& infile);
 		int             read               (HumdrumFile& infile);
+		int             read               (HumdrumFileSet& infiles);
+		int             readSingleSegment  (HumdrumFileSet& infiles);
 
 	protected:
 		std::stringstream m_stringbuffer;   // used to read files from a string

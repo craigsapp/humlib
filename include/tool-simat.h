@@ -140,6 +140,7 @@ class Tool_simat : public HumTool {
 		         Tool_simat         (void);
 		        ~Tool_simat         () {};
 
+		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2);
 		bool     run                (const string& indata1, const string& indata2, ostream& out);
 		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2, ostream& out);

@@ -39,6 +39,15 @@ Tool_restfill::Tool_restfill(void) {
 // Tool_restfill::run -- Do the main work of the tool.
 //
 
+bool Tool_restfill::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_restfill::run(const string& indata, ostream& out) {
 	HumdrumFile infile;
 	infile.readStringNoRhythm(indata);

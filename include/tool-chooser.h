@@ -10,8 +10,8 @@
 // Description:   Select particular sections of an input stream.
 //
 
-#ifndef _TOOL_COMPOSITE_H
-#define _TOOL_COMPOSITE_H
+#ifndef _TOOL_CHOOSER_H
+#define _TOOL_CHOOSER_H
 
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
@@ -25,6 +25,7 @@ class Tool_chooser : public HumTool {
 		       	   Tool_chooser       (void);
 		       	  ~Tool_chooser       () {};
 
+		bool        run                (HumdrumFileSet& infiles);
 		bool        run                (const string& indata);
 		bool        run                (HumdrumFileStream& instream);
 
@@ -46,7 +47,7 @@ class Tool_chooser : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_COMPOSITE_H */
+#endif /* _TOOL_CHOOSER_H */
 
 
 

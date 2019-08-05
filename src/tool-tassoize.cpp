@@ -57,6 +57,15 @@ Tool_tassoize::Tool_tassoize(void) {
 // Tool_tassoize::run -- Primary interfaces to the tool.
 //
 
+bool Tool_tassoize::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_tassoize::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

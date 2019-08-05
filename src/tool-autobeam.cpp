@@ -41,6 +41,15 @@ Tool_autobeam::Tool_autobeam(void) {
 // Tool_autobeam::run -- Primary interfaces to the tool.
 //
 
+bool Tool_autobeam::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_autobeam::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

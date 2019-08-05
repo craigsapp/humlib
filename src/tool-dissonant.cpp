@@ -58,6 +58,15 @@ Tool_dissonant::Tool_dissonant(void) {
 // Tool_dissonant::run -- Do the main work of the tool.
 //
 
+bool Tool_dissonant::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_dissonant::run(const string& indata, ostream& out) {
 
 	if (getBoolean("undirected")) {

@@ -1603,14 +1603,55 @@ HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) {
 //////////////////////////////
 //
 // HumdrumFileStructure::hasFilters -- Returns true if has any
-//    reference records starting with "!!!filter:".
+//    reference records starting with "!!!filter:" or "!!!!filter:".
 //
 
 bool HumdrumFileStructure::hasFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getReferenceRecords();
+	vector<HumdrumLine*> refs  = infile.getGlobalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
-		if (refs[i]->getReferenceKey() == "filter") {
+		if (refs[i]->getGlobalReferenceKey() == "filter") {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::hasGlobalFilters -- Returns true if has any
+//    reference records starting with "!!!filter:".
+//
+
+bool HumdrumFileStructure::hasGlobalFilters(void) {
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isComment()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->compare(0, 10, "!!!filter:") == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::hasUniversalFilters -- Returns true if has any
+//    reference records starting with "!!!!filter:".
+//
+
+bool HumdrumFileStructure::hasUniversalFilters(void) {
+	HumdrumFileBase& infile = *this;
+	vector<HumdrumLine*> refs  = infile.getUniversalReferenceRecords();
+	for (int i=0; i<(int)refs.size(); i++) {
+		if (refs[i]->getUniversalReferenceKey() == "filter") {
 			return true;
 		}
 	}

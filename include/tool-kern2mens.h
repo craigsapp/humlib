@@ -27,6 +27,7 @@ class Tool_kern2mens : public HumTool {
 		         Tool_kern2mens           (void);
 		        ~Tool_kern2mens           () {};
 
+		bool     run                      (HumdrumFileSet& infiles);
 		bool     run                      (HumdrumFile& infile);
 		bool     run                      (const string& indata, ostream& out);
 		bool     run                      (HumdrumFile& infile, ostream& out);

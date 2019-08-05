@@ -25,6 +25,7 @@ class Tool_restfill : public HumTool {
 		         Tool_restfill         (void);
 		        ~Tool_restfill         () {};
 
+		bool        run                (HumdrumFileSet& infiles);
 		bool        run                (HumdrumFile& infile);
 		bool        run                (const string& indata, ostream& out);
 		bool        run                (HumdrumFile& infile, ostream& out);

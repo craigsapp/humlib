@@ -38,10 +38,15 @@ class HumdrumFileSet {
                            ~HumdrumFileSet   ();
 
       void                  clear            (void);
+      void                  clearNoFree      (void);
       int                   getSize          (void);
       int                   getCount         (void) { return getSize(); }
       HumdrumFile&          operator[]       (int index);
 		bool                  swap             (int index1, int index2);
+		bool                  hasFilters       (void);
+		bool                  hasGlobalFilters    (void);
+		bool                  hasUniversalFilters (void);
+		std::vector<HumdrumLine*> getUniversalReferenceRecords(void);
 
       int                   readFile         (const std::string& filename);
       int                   readString       (const std::string& contents);
@@ -56,6 +61,8 @@ class HumdrumFileSet {
       int                   readAppend       (std::istream& inStream);
       int                   readAppend       (Options& options);
       int                   readAppend       (HumdrumFileStream& instream);
+      int                   readAppendHumdrum(HumdrumFile& infile);
+		int                   appendHumdrumPointer(HumdrumFile* infile);
 
    protected:
       vector<HumdrumFile*>  m_data;

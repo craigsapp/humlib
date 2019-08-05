@@ -999,6 +999,19 @@ Tool_simat::Tool_simat(void) {
 // Tool_simat::run -- Primary interfaces to the tool.
 //
 
+bool Tool_simat::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	if (infiles.getCount() == 1) {
+		status = run(infiles[0], infiles[0]);
+	} else if (infiles.getCount() > 1) {
+		status = run(infiles[0], infiles[1]);
+	} else {
+		status = false;
+	}
+	return status;
+}
+
+
 bool Tool_simat::run(const string& indata1, const string& indata2, ostream& out) {
 	HumdrumFile infile1(indata1);
 	HumdrumFile infile2;

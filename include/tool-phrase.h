@@ -28,6 +28,7 @@ class Tool_phrase : public HumTool {
 		     Tool_phrase          (void);
 		    ~Tool_phrase          () {};
 
+		bool  run                 (HumdrumFileSet& infiles);
 		bool  run                 (HumdrumFile& infile);
 		bool  run                 (const string& indata, ostream& out);
 		bool  run                 (HumdrumFile& infile, ostream& out);

@@ -37,6 +37,15 @@ Tool_tabber::Tool_tabber(void) {
 // Tool_tabber::run -- Primary interfaces to the tool.
 //
 
+bool Tool_tabber::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_tabber::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	return run(infile, out);

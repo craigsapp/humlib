@@ -25,6 +25,7 @@ class Tool_tassoize : public HumTool {
 		         Tool_tassoize   (void);
 		        ~Tool_tassoize   () {};
 
+		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
 		bool     run                (const string& indata, ostream& out);
 		bool     run                (HumdrumFile& infile, ostream& out);

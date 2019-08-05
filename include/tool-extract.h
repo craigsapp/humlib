@@ -22,9 +22,10 @@ namespace hum {
 
 class Tool_extract : public HumTool {
 	public:
-		         Tool_extract  (void);
-		        ~Tool_extract  () {};
+		         Tool_extract           (void);
+		        ~Tool_extract           () {};
 
+		bool     run                    (HumdrumFileSet& infiles);
 		bool     run                    (HumdrumFile& infile);
 		bool     run                    (const string& indata, ostream& out);
 		bool     run                    (HumdrumFile& infile, ostream& out);

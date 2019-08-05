@@ -38,6 +38,15 @@ Tool_binroll::Tool_binroll(void) {
 // Tool_binroll::run -- Do the main work of the tool.
 //
 
+bool Tool_binroll::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_binroll::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

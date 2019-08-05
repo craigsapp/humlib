@@ -77,6 +77,15 @@ Tool_extract::Tool_extract(void) {
 // Tool_extract::run -- Primary interfaces to the tool.
 //
 
+bool Tool_extract::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_extract::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

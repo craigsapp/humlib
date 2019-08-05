@@ -42,6 +42,14 @@ Tool_kern2mens::Tool_kern2mens(void) {
 // Tool_kern2mens::run -- Do the main work of the tool.
 //
 
+bool Tool_kern2mens::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
 bool Tool_kern2mens::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);

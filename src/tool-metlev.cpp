@@ -50,6 +50,15 @@ Tool_metlev::Tool_metlev(void) {
 // Tool_metlev::run -- Primary interfaces to the tool.
 //
 
+bool Tool_metlev::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
 bool Tool_metlev::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	return run(infile, out);

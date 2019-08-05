@@ -26,6 +26,7 @@ class Tool_dissonant : public HumTool {
 		         Tool_dissonant    (void);
 		        ~Tool_dissonant    () {};
 
+		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);

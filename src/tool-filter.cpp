@@ -17,12 +17,14 @@
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
 #include "tool-binroll.h"
+#include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
 #include "tool-composite.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-hproof.h"
+#include "tool-humdiff.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
 #include "tool-metlev.h"
@@ -67,6 +69,20 @@ namespace hum {
 	}                                               \
 	delete tool;
 
+#define RUNTOOLSET(NAME, INFILES, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILES);                             \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILES.readString(tool->getHumdrumText());  \
+	}                                               \
+	delete tool;
+
 #define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
 	Tool_##NAME *tool = new Tool_##NAME;            \
 	tool->process(COMMAND);                         \
@@ -99,25 +115,36 @@ Tool_filter::Tool_filter(void) {
 // Tool_filter::run -- Primary interfaces to the tool.
 //
 
-bool Tool_filter::run(const string& indata, ostream& out) {
-	HumdrumFile infile(indata);
-	bool status = run(infile);
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile;
-	}
+bool Tool_filter::run(const string& indata) {
+	HumdrumFileSet infiles(indata);
+	bool status = run(infiles);
 	return status;
 }
 
 
-bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
-	bool status = run(infile);
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile;
+bool Tool_filter::run(HumdrumFile& infile) {
+	HumdrumFileSet infiles;
+	infiles.appendHumdrumPointer(&infile);
+	bool status = run(infiles);
+	infiles.clearNoFree();
+	return status;
+}
+
+bool Tool_filter::runUniversal(HumdrumFileSet& infiles) {
+	bool status = true;
+	vector<pair<string, string> > commands;
+	getUniversalCommandList(commands, infiles);
+
+	for (int i=0; i<(int)commands.size(); i++) {
+		if (commands[i].first == "humdiff") {
+			RUNTOOLSET(humdiff, infiles, commands[i].second, status);
+		} else if (commands[i].first == "chooser") {
+			RUNTOOLSET(chooser, infiles, commands[i].second, status);
+		}
 	}
+
+	removeUniversalFilterLines(infiles);
+
 	return status;
 }
 
@@ -126,8 +153,14 @@ bool Tool_filter::run(HumdrumFile& infile, ostream& out) {
 // In-place processing of file:
 //
 
-bool Tool_filter::run(HumdrumFile& infile) {
-	initialize(infile);
+bool Tool_filter::run(HumdrumFileSet& infiles) {
+	if (infiles.getCount() == 0) {
+		return false;
+	}
+
+	initialize(infiles[0]);
+
+	HumdrumFile& infile = infiles[0];
 
 	bool status = true;
 	vector<pair<string, string> > commands;
@@ -190,7 +223,7 @@ bool Tool_filter::run(HumdrumFile& infile) {
 		}
 	}
 
-	removeFilterLines(infile);
+	removeGlobalFilterLines(infile);
 
 	// Re-load the text for each line from their tokens in case any
 	// updates are needed from token changes.
@@ -202,10 +235,10 @@ bool Tool_filter::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_filter::removeFilterLines --
+// Tool_filter::removeGlobalFilterLines --
 //
 
-void Tool_filter::removeFilterLines(HumdrumFile& infile) {
+void Tool_filter::removeGlobalFilterLines(HumdrumFile& infile) {
 	HumRegex hre;
 	string text;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -216,6 +249,33 @@ void Tool_filter::removeFilterLines(HumdrumFile& infile) {
 			text = infile.token(i, 0)->getText();
 			hre.replaceDestructive(text, "!!!Xfilter:", "^!!!filter:");
 			infile.token(i, 0)->setText(text);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_filter::removeUniversalFilterLines --
+//
+
+void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
+	HumRegex hre;
+	string text;
+	for (int i=0; i<infiles.getCount(); i++) {
+		HumdrumFile& infile = infiles[i];
+		for (int j=0; j<infile.getLineCount(); j++) {
+			if (!infile[i].isUniversalReference()) {
+				continue;
+			}
+			HTp token = infile.token(j, 0);
+			if (token->compare(0, 11, "!!!!filter:") == 0) {
+				text = token->getText();
+				hre.replaceDestructive(text, "!!!!Xfilter:", "^!!!!filter:");
+				token->setText(text);
+				infile[j].createLineFromTokens();
+			}
 		}
 	}
 }
@@ -240,10 +300,11 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		tag += m_variant;
 	}
 	for (int i=0; i<(int)refs.size(); i++) {
-		if (refs[i]->getReferenceKey() != tag) {
+		string refkey = refs[i]->getGlobalReferenceKey();
+		if (refkey != tag) {
 			continue;
 		}
-		string command = refs[i]->getReferenceValue();
+		string command = refs[i]->getGlobalReferenceValue();
 		hre.split(clist, command, "\\s*\\|\\s*");
 		for (int j=0; j<(int)clist.size(); j++) {
 			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
@@ -255,6 +316,39 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 	}
 }
 
+
+//////////////////////////////
+//
+// Tool_filter::getUniversalCommandList --
+//
+
+void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& commands,
+		HumdrumFileSet& infiles) {
+
+	vector<HumdrumLine*> refs = infiles.getUniversalReferenceRecords();
+	pair<string, string> entry;
+	string tag = "filter";
+	vector<string> clist;
+	HumRegex hre;
+   if (m_variant.size() > 0) {
+		tag += "-";
+		tag += m_variant;
+	}
+	for (int i=0; i<(int)refs.size(); i++) {
+		if (refs[i]->getUniversalReferenceKey() != tag) {
+			continue;
+		}
+		string command = refs[i]->getUniversalReferenceValue();
+		hre.split(clist, command, "\\s*\\|\\s*");
+		for (int j=0; j<(int)clist.size(); j++) {
+			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
+				entry.first  = hre.getMatch(1);
+				entry.second = clist[j];
+				commands.push_back(entry);
+			}
+		}
+	}
+}
 
 
 //////////////////////////////

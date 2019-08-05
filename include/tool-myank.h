@@ -100,6 +100,7 @@ class Tool_myank : public HumTool {
 		         Tool_myank            (void);
 		        ~Tool_myank            () {};
 
+		bool     run                   (HumdrumFileSet& infiles);
 		bool     run                   (HumdrumFile& infile);
 		bool     run                   (const string& indata, ostream& out);
 		bool     run                   (HumdrumFile& infile, ostream& out);

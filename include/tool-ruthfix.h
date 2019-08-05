@@ -27,6 +27,7 @@ class Tool_ruthfix : public HumTool {
 		         Tool_ruthfix      (void);
 		        ~Tool_ruthfix      () {};
 
+		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
 		bool     run               (const string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);

@@ -63,6 +63,7 @@ class Tool_cint : public HumTool {
 		         Tool_cint    (void);
 		        ~Tool_cint    () {};
 
+		bool     run                    (HumdrumFileSet& infiles);
 		bool     run                    (HumdrumFile& infile);
 		bool     run                    (const string& indata, ostream& out);
 		bool     run                    (HumdrumFile& infile, ostream& out);

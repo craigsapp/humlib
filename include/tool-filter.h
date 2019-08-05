@@ -14,7 +14,7 @@
 #define _TOOL_FILTER_H_INCLUDED
 
 #include "HumTool.h"
-#include "HumdrumFile.h"
+#include "HumdrumFileSet.h"
 
 namespace hum {
 
@@ -25,15 +25,20 @@ class Tool_filter : public HumTool {
 		         Tool_filter        (void);
 		        ~Tool_filter        () {};
 
+		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
-		bool     run                (const string& indata, ostream& out);
-		bool     run                (HumdrumFile& infile, ostream& out);
+		bool     run                (const string& indata);
+
+		bool     runUniversal       (HumdrumFileSet& infiles);
 
 	protected:
 		void     getCommandList     (vector<pair<string, string> >& commands,
 		                             HumdrumFile& infile);
+		void     getUniversalCommandList(std::vector<std::pair<std::string, std::string> >& commands,
+		                             HumdrumFileSet& infiles);
 		void     initialize         (HumdrumFile& infile);
-		void     removeFilterLines  (HumdrumFile& infile);
+		void     removeGlobalFilterLines    (HumdrumFile& infile);
+		void     removeUniversalFilterLines (HumdrumFileSet& infiles);
 
 	private:
 		string   m_variant;        // used with -v option.

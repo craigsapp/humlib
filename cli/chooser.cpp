@@ -12,7 +12,7 @@
 
 #include "humlib.h"
 
-STREAM_INTERFACE_DIRECT(Tool_chooser)
+RAW_STREAM_INTERFACE(Tool_chooser)
 
 
 
