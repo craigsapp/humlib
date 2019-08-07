@@ -365,7 +365,6 @@ restarting:
 				}
 				infile.setFilename(hre.getMatch(2));
 			}
-			continue;
 		}
 
 		if (strncmp(templine, "**", 2) == 0) {
@@ -399,7 +398,6 @@ restarting:
 				// current file stream, not this one, so stop reading the
 				// HumdrumFile content and send what has already been read back
 				// out with new contents.
-				break;
 			}  else {
 				// !!!!SEGMENT: came before any real data was read, so
 				// it is most likely the name of the current file
@@ -415,7 +413,6 @@ restarting:
 					}
 					infile.setFilename(hre.getMatch(2));
 				}
-				continue;
 			}
 		}
 		int len = (int)strlen(templine);
