@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug  7 06:55:50 EDT 2019
+// Last Modified: Thu Aug  8 17:32:43 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -41574,6 +41574,9 @@ Tool_extract::Tool_extract(void) {
 	define("Y|no-editoral-rests=b",
 			"do not display yy marks on interpreted rests");
 	define("n|name|b|blank=s:**blank", "Name if exinterp added with 0");
+	define("no-empty|no-empties=b", "Suppress spines with only null data tokens");
+	define("empty|empties=b", "Only keep spines with only null data tokens");
+	define("spine-list=b", "Show spine list and then exit");
 
 	define("debug=b", "print debugging information");
 	define("author=b");              // author of program
@@ -41651,11 +41654,27 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 				interpstate);
 	} else if (reverseQ) {
 		reverseSpines(field, subfield, model, infile, reverseInterp);
-	} else if (fieldQ || excludeQ) {
-		fillFieldData(field, subfield, model, fieldstring, infile);
 	} else if (grepQ) {
 		fillFieldDataByGrep(field, subfield, model, grepString, infile,
 			interpstate);
+	} else if (emptyQ) {
+		fillFieldDataByEmpty(field, subfield, model, infile, interpstate);
+	} else if (noEmptyQ) {
+		fillFieldDataByNoEmpty(field, subfield, model, infile, interpstate);
+	} else if (fieldQ || excludeQ) {
+		fillFieldData(field, subfield, model, fieldstring, infile);
+	}
+
+	if (spineListQ) {
+		m_free_text << "-s ";
+		for (int i=0; i<(int)field.size(); i++) {
+			m_free_text << field[i];
+			if (i < (int)field.size() - 1) {
+				m_free_text << ",";
+			}
+		}
+		m_free_text << endl;
+		return;
 	}
 
 	if (debugQ && !traceQ) {
@@ -41684,6 +41703,113 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 		extractTrace(infile, tracefile);
 	} else {
 		m_humdrum_text << infile;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_extract::getNullDataTracks --
+//
+
+vector<int> Tool_extract::getNullDataTracks(HumdrumFile& infile) {
+	vector<int> output(infile.getMaxTrack() + 1, 1);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			if (!output[track]) {
+				continue;
+			}
+			if (!token->isNull()) {
+				output[track] = 0;
+			}
+		}
+		// maybe exit here if all tracks are non-null
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_extract::fillFieldDataByEmpty -- Only keep the spines which contain only
+//    null data tokens.
+//
+
+void Tool_extract::fillFieldDataByEmpty(vector<int>& field, vector<int>& subfield,
+		vector<int>& model, HumdrumFile& infile, int negate) {
+
+	field.reserve(infile.getMaxTrack()+1);
+	subfield.reserve(infile.getMaxTrack()+1);
+	model.reserve(infile.getMaxTrack()+1);
+	field.resize(0);
+	subfield.resize(0);
+	model.resize(0);
+	vector<int> nullTrack = getNullDataTracks(infile);
+
+	int zero = 0;
+	for (int i=1; i<(int)nullTrack.size(); i++) {
+		if (negate) {
+			if (!nullTrack[i]) {
+				field.push_back(i);
+				subfield.push_back(zero);
+				model.push_back(zero);
+			}
+		} else {
+			if (nullTrack[i]) {
+				field.push_back(i);
+				subfield.push_back(zero);
+				model.push_back(zero);
+			}
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_extract::fillFieldDataByNoEmpty -- Only keep spines which are not all 
+//   null data tokens.
+//
+
+void Tool_extract::fillFieldDataByNoEmpty(vector<int>& field, vector<int>& subfield,
+		vector<int>& model, HumdrumFile& infile, int negate) {
+
+	field.reserve(infile.getMaxTrack()+1);
+	subfield.reserve(infile.getMaxTrack()+1);
+	model.reserve(infile.getMaxTrack()+1);
+	field.resize(0);
+	subfield.resize(0);
+	model.resize(0);
+	vector<int> nullTrack = getNullDataTracks(infile);
+	for (int i=1; i<(int)nullTrack.size(); i++) {
+		nullTrack[i] = !nullTrack[i];
+	}
+
+	int zero = 0;
+	for (int i=1; i<(int)nullTrack.size(); i++) {
+		if (negate) {
+			if (!nullTrack[i]) {
+				field.push_back(i);
+				subfield.push_back(zero);
+				model.push_back(zero);
+			}
+		} else {
+			if (nullTrack[i]) {
+				field.push_back(i);
+				subfield.push_back(zero);
+				model.push_back(zero);
+			}
+		}
 	}
 }
 
@@ -43310,6 +43436,8 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		}
 	}
 
+	noEmptyQ    = getBoolean("no-empty");
+	emptyQ      = getBoolean("empty");
 	fieldQ      = getBoolean("f");
 	debugQ      = getBoolean("debug");
 	countQ      = getBoolean("count");
@@ -43326,6 +43454,14 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	}
 
 	if (interpQ) {
+		fieldQ = 1;
+	}
+
+	if (emptyQ) {
+		fieldQ = 1;
+	}
+
+	if (noEmptyQ) {
 		fieldQ = 1;
 	}
 
@@ -43354,6 +43490,7 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		fieldQ = 1;
 	}
 
+	spineListQ = getBoolean("spine-list");
 	grepQ = getBoolean("grep");
 	grepString = getString("grep");
 

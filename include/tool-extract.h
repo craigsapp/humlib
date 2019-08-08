@@ -94,6 +94,11 @@ class Tool_extract : public HumTool {
 		void    fillFieldDataByGrep     (vector<int>& field, vector<int>& subfield,
 		                                 vector<int>& model, const string& grepString,
 		                                 HumdrumFile& infile, int state);
+		vector<int> getNullDataTracks(HumdrumFile& infile);
+		void fillFieldDataByEmpty       (vector<int>& field, vector<int>& subfield,
+				                           vector<int>& model, HumdrumFile& infile, int negate);
+		void fillFieldDataByNoEmpty     (vector<int>& field, vector<int>& subfield,
+				                           vector<int>& model, HumdrumFile& infile, int negate);
 
 	private:
 
@@ -130,6 +135,9 @@ class Tool_extract : public HumTool {
 		int         grepQ       = 0;       // used with -g option
 		string      grepString  = "";      // used with -g option
 		string      blankName   = "**blank"; // used with -n option
+		int         noEmptyQ    = 0;       // used with --no-empty option
+		int         emptyQ      = 0;       // used with --empty option
+		int         spineListQ  = 0;       // used with --spine option
 
 };
 
