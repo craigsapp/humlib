@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Aug  8 17:32:43 EDT 2019
+// Last Modified: Fri Aug  9 22:16:33 EDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4790,6 +4790,44 @@ class Tool_filter : public HumTool {
 	private:
 		string   m_variant;        // used with -v option.
 		bool     m_debugQ = false; // used with --debug option
+
+};
+
+
+class HPNote {
+	public:
+		int track = -1;
+		int line = -1;
+		int field = -1;
+		int subfield = -1;
+		HTp token = NULL;
+		std::string text;
+		bool attack = false;
+		bool nullQ = false;
+};
+
+class Tool_homophonic : public HumTool {
+	public:
+		            Tool_homophonic    (void);
+		           ~Tool_homophonic    () {};
+
+		bool        run                (HumdrumFileSet& infiles);
+		bool        run                (HumdrumFile& infile);
+		bool        run                (const string& indata, ostream& out);
+		bool        run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void        processFile        (HumdrumFile& infile);
+		void        analyzeLine        (HumdrumFile& infile, int line);
+		void        initialize         (void);
+		void        markHomophonicNotes(void);
+
+	private:
+		std::vector<std::string> m_homophonic;
+		std::vector<int> m_notecount;
+		std::vector<int> m_attacks;
+		std::vector<std::vector<HPNote>> m_notes;
+		int m_count = 4;
 
 };
 
