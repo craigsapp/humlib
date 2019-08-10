@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug  9 22:16:33 EDT 2019
+// Last Modified: Fri Aug  9 22:21:56 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -43635,6 +43635,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(composite, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
+		} else if (commands[i].first == "homophonic") {
+			RUNTOOL(homophonic, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
@@ -43831,7 +43833,7 @@ Tool_homophonic::Tool_homophonic(void) {
 	define("a|append=b", "Append analysis to end of input data");
 	define("p|prepend=b", "Prepend analysis to end of input data");
 	define("M|no-marks=b", "Do not mark homophonic section notes");
-	define("n=i:4", "number of sonoroties in a row required to define homophonic");
+	define("n=i:4", "number of sonorities in a row required to define homophonic");
 }
 
 
@@ -43992,15 +43994,14 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		}
 	}
 	
-
-	if (getBoolean("append")) {
+	//if (getBoolean("append")) {
 		infile.appendDataSpine(m_homophonic, "", "**color");
-	} else if (getBoolean("prepend")) {
-		infile.prependDataSpine(m_homophonic, "", "**color");
-	}
-	if (!getBoolean("no-marks")) {
-		markHomophonicNotes();
-	}
+	//} else if (getBoolean("prepend")) {
+	//	infile.prependDataSpine(m_homophonic, "", "**color");
+	//}
+	//if (!getBoolean("no-marks")) {
+	//	markHomophonicNotes();
+	//}
 }
 
 
