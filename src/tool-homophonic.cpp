@@ -140,7 +140,7 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 	}
 
 	// change Y N Y patterns to Y Y Y
-	for (int i=1; i<data.size() - 1; i++) {
+	for (int i=1; i<(int)data.size() - 1; i++) {
 		if (m_homophonic[data[i]] == "Y") {
 			continue;
 		}
