@@ -417,7 +417,10 @@ restarting:
 		}
 		int len = (int)strlen(templine);
 		if ((len > 4) && (strncmp(templine, "!!!!", 4) == 0) &&
-				(templine[4] != '!') && (dataFoundQ == 0) && (strncmp(templine, "!!!!filter:", 11) != 0)) {
+				(templine[4] != '!') && 
+				(dataFoundQ == 0) && 
+				(strncmp(templine, "!!!!filter:", strlen("!!!!filter:")) != 0) &&
+				(strncmp(templine, "!!!!SEGMENT:", strlen("!!!!SEGMENT:")) != 0)) {
 			// This is a universal comment.  Should it be appended
 			// to the list or should the current list be erased and
 			// this record placed into the first entry?

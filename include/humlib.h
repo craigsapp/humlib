@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Aug  9 22:27:23 EDT 2019
+// Last Modified: Wed Aug 21 13:34:26 EDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4801,6 +4801,7 @@ class HPNote {
 		int field = -1;
 		int subfield = -1;
 		HTp token = NULL;
+		HumNum duration = 0;
 		std::string text;
 		bool attack = false;
 		bool nullQ = false;
@@ -4821,14 +4822,22 @@ class Tool_homophonic : public HumTool {
 		void        analyzeLine        (HumdrumFile& infile, int line);
 		void        initialize         (void);
 		void        markHomophonicNotes(void);
+		void        printFractionAnalysis(HumdrumFile& infile, std::vector<double>& score);
+		int         getExtantVoiceCount(HumdrumFile& infile);
+		int         getOriginalVoiceCount(HumdrumFile& infile);
+		void        printRawAnalysis   (HumdrumFile& infile, vector<double>& raw);
+		void        printAccumulatedScores(HumdrumFile& infile, vector<double>& score);
+		void        printAttacks(HumdrumFile& infile, vector<int>& attacks);
 
 	private:
 		std::vector<std::string> m_homophonic;
 		std::vector<int> m_notecount;
 		std::vector<int> m_attacks;
 		std::vector<std::vector<HPNote>> m_notes;
-		int m_count = 4;
-
+		double m_threshold = 4.0;
+		double m_score = 1.0;
+		double m_intermediate_score = 0.5;
+		int m_voice_count = 0;
 };
 
 

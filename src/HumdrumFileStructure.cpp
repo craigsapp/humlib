@@ -241,6 +241,7 @@ bool HumdrumFileStructure::analyzeStructureNoRhythm(void) {
 
 bool HumdrumFileStructure::analyzeRhythmStructure(void) {
 	m_rhythm_analyzed = true;
+	setLineRhythmAnalyzed();
 	if (!isStructureAnalyzed()) {
 		if (!analyzeStructureNoRhythm()) { return isValid(); }
 	}
