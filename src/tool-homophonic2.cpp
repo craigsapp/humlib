@@ -76,7 +76,6 @@ bool Tool_homophonic2::run(HumdrumFile& infile, ostream& out) {
 bool Tool_homophonic2::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
-	infile.createLinesFromTokens();
 	return true;
 }
 
@@ -195,7 +194,10 @@ void Tool_homophonic2::processFile(HumdrumFile& infile) {
 		infile.appendDataSpine(m_score, ".", "**cdata", false);
 	}
 	infile.appendDataSpine(color, ".", "**color", true);
+	infile.createLinesFromTokens();
 
+	// problem within emscripten-compiled version, so force to output as string:
+	m_humdrum_text << infile;
 }
 
 
