@@ -131,6 +131,9 @@ class HumdrumFileBase : public HumHash {
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
 
+    	template <class TYPE>
+		   void       initializeArray          (std::vector<std::vector<TYPE>>& array, TYPE value);
+
 		bool          parse                    (std::istream& contents)
 		                                    { return read(contents); }
 		bool          parse                    (const char* contents)
