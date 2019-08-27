@@ -27,8 +27,8 @@ namespace hum {
 //
 
 Tool_homophonic2::Tool_homophonic2(void) {
-	define("t|threshold=d:0.6", "Threshold score sum required for homophonic texture detection");
-	define("u|threshold2=d:0.4", "Threshold score sum required for semi-homophonic texture detection");
+	define("t|threshold=d:1.7", "Threshold score sum required for homophonic texture detection");
+	define("u|threshold2=d:1.4", "Threshold score sum required for semi-homophonic texture detection");
 	define("s|score=b", "Show numeric scores");
 	define("n|length=i:5", "Sonority length to calculate");
 }
@@ -120,6 +120,7 @@ void Tool_homophonic2::processFile(HumdrumFile& infile) {
 	double score;
 	int count;
 	int wsize = getInteger("length");
+
 	for (int i=0; i<grid.getSliceCount()-wsize; i++) {
 		score = 0;
 		count = 0;
@@ -142,8 +143,39 @@ void Tool_homophonic2::processFile(HumdrumFile& infile) {
 			}
 		}
 		int index = grid.getLineIndex(i);
-		m_score[index] = int(score / count * 100.0 + 0.5) / 100.0;
+		m_score[index] = score / count;
 	}
+
+	for (int i=grid.getSliceCount()-1; i>=wsize; i--) {
+		score = 0;
+		count = 0;
+		for (int j=0; j<grid.getVoiceCount(); j++) {
+			for (int k=j+1; k<grid.getVoiceCount(); k++) {
+				for (int m=0; m<wsize; m++) {
+					NoteCell* cell1 = grid.cell(j, i-m);
+					if (cell1->isRest()) {
+						continue;
+					}
+					NoteCell* cell2 = grid.cell(k, i-m);
+					if (cell2->isRest()) {
+						continue;
+					}
+					count++;
+					if (cell1->isAttack() && cell2->isAttack()) {
+						score += 1.0;
+					}
+				}
+			}
+		}
+		int index = grid.getLineIndex(i);
+		m_score[index] += score / count;
+	}
+
+
+	for (int i=0; i<(int)m_score.size(); i++) {
+		m_score[i] = int(m_score[i] * 100.0 + 0.5) / 100.0;
+	}
+
 
 	vector<string> color(infile.getLineCount());;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -163,22 +195,6 @@ void Tool_homophonic2::processFile(HumdrumFile& infile) {
 		infile.appendDataSpine(m_score, ".", "**cdata", false);
 	}
 	infile.appendDataSpine(color, ".", "**color", true);
-
-/*
-	for (int i=0; i<grid.getSliceCount(); i++) {
-		for (int j=0; j<grid.getVoiceCount(); j++) {
-			if (grid.cell(j, i)->isRest()) {
-				m_free_text << "R\t";
-			} else if (grid.cell(j, i)->isAttack()) {
-				m_free_text << "1\t";
-			} else {
-				m_free_text << "0\t";
-			}
-		}
-		m_free_text << endl;
-	}
-*/
-	
 
 }
 

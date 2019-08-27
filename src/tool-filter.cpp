@@ -24,6 +24,7 @@
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-homophonic.h"
+#include "tool-homophonic2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
 #include "tool-imitation.h"
@@ -182,6 +183,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "homophonic") {
 			RUNTOOL(homophonic, infile, commands[i].second, status);
+		} else if (commands[i].first == "homophonic2") {
+			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
