@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 26 14:05:47 EDT 2019
+// Last Modified: Mon Aug 26 23:24:12 EDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2555,7 +2555,7 @@ class NoteGrid {
 		int        getVoiceCount         (void);
 		int        getSliceCount         (void);
 		int        getLineIndex          (int sindex);
-		int        getFieldIndex         (int sindex);
+		int        getFieldIndex         (int vindex);
 
 		void       printDiatonicGrid     (ostream& out);
 		void       printMidiGrid         (ostream& out);
@@ -4841,6 +4841,27 @@ class Tool_homophonic : public HumTool {
 		double m_score = 1.0;
 		double m_intermediate_score = 0.5;
 		int m_voice_count = 0;
+};
+
+
+class Tool_homophonic2 : public HumTool {
+	public:
+		            Tool_homophonic2    (void);
+		           ~Tool_homophonic2    () {};
+
+		bool        run                (HumdrumFileSet& infiles);
+		bool        run                (HumdrumFile& infile);
+		bool        run                (const string& indata, ostream& out);
+		bool        run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void        processFile        (HumdrumFile& infile);
+		void        initialize         (void);
+
+	private:
+		double      m_threshold = 0.6;
+		double      m_threshold2 = 0.4;
+		vector<double> m_score;
 };
 
 

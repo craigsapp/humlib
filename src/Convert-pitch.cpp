@@ -316,7 +316,7 @@ string Convert::base40ToKern(int b40) {
 		repeat = 3 - octave;
 	}
 	if (repeat > 12) {
-		cerr << "Error: unreasonable octave value: " << octave << endl;
+		cerr << "Error: unreasonable octave value: " << octave << " for " << b40 << endl;
 		exit(1);
 	}
 	string output;
