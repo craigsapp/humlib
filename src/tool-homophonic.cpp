@@ -235,8 +235,8 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		infile.appendDataSpine(m_homophonic, "", "**color");
 	}
 
-	// problem with **color spine in javascript, so output via plain text
-	m_free_text << infile;
+	// problem with **color spine in javascript, so output via humdrum text
+	m_humdrum_text << infile;
 }
 
 

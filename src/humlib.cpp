@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 27 15:22:41 EDT 2019
+// Last Modified: Tue Aug 27 16:06:55 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -44075,8 +44075,8 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		infile.appendDataSpine(m_homophonic, "", "**color");
 	}
 
-	// problem with **color spine in javascript, so output via plain text
-	m_free_text << infile;
+	// problem with **color spine in javascript, so output via humdrum text
+	m_humdrum_text << infile;
 }
 
 
