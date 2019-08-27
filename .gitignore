@@ -19,3 +19,4 @@ cmake_install.cmake
 *.krn
 *.svg
 *.mei
+.DS_Store

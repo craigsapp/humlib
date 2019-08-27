@@ -75,8 +75,15 @@ void NoteCell::calculateNumericPitches(void) {
 	if (m_token->isRest()) {
 		m_b40 = NAN;
 	} else {
-		m_b40 = Convert::kernToBase40(m_token->resolveNull());
-		m_b40 = (sustain ? -m_b40 : m_b40);
+		HTp resolve = m_token->resolveNull();
+		if (resolve->isRest()) {
+			m_b40 = NAN;
+		} else if (resolve->isNull()) {
+			m_b40 = NAN;
+		} else {
+			m_b40 = Convert::kernToBase40(m_token->resolveNull());
+			m_b40 = (sustain ? -m_b40 : m_b40);
+		}
 	}
 
 	// convert to base-7 (diatonic pitch numbers)

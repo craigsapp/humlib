@@ -12,6 +12,7 @@
 
 #include "tool-homophonic.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 using namespace std;
 
