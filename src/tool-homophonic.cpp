@@ -215,7 +215,6 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		printFractionAnalysis(infile, score);
 	} else if (getBoolean("attacks")) {
 		printAttacks(infile, m_attacks);
-
 	} else {
 		// Color the notes within homophonic textures.
 		// mark homophonic regions in red,
@@ -233,10 +232,11 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 			}
 		}
 		infile.appendDataSpine(m_homophonic, "", "**color");
+
+		// problem with **color spine in javascript, so output via humdrum text
+		m_humdrum_text << infile;
 	}
 
-	// problem with **color spine in javascript, so output via humdrum text
-	m_humdrum_text << infile;
 }
 
 

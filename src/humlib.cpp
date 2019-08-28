@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 27 18:50:47 EDT 2019
+// Last Modified: Tue Aug 27 20:14:51 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -44055,7 +44055,6 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		printFractionAnalysis(infile, score);
 	} else if (getBoolean("attacks")) {
 		printAttacks(infile, m_attacks);
-
 	} else {
 		// Color the notes within homophonic textures.
 		// mark homophonic regions in red,
@@ -44073,10 +44072,11 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 			}
 		}
 		infile.appendDataSpine(m_homophonic, "", "**color");
+
+		// problem with **color spine in javascript, so output via humdrum text
+		m_humdrum_text << infile;
 	}
 
-	// problem with **color spine in javascript, so output via humdrum text
-	m_humdrum_text << infile;
 }
 
 
@@ -44293,10 +44293,11 @@ void Tool_homophonic::analyzeLine(HumdrumFile& infile, int line) {
 //
 
 Tool_homophonic2::Tool_homophonic2(void) {
-	define("t|threshold=d:1.7", "Threshold score sum required for homophonic texture detection");
-	define("u|threshold2=d:1.4", "Threshold score sum required for semi-homophonic texture detection");
+	define("t|threshold=d:1.6", "Threshold score sum required for homophonic texture detection");
+	define("u|threshold2=d:1.3", "Threshold score sum required for semi-homophonic texture detection");
 	define("s|score=b", "Show numeric scores");
-	define("n|length=i:5", "Sonority length to calculate");
+	define("n|length=i:4", "Sonority length to calculate");
+	define("f|fraction=b", "Report fraction of music that is homophonic");
 }
 
 
@@ -44456,14 +44457,27 @@ void Tool_homophonic2::processFile(HumdrumFile& infile) {
 		}
 	}
 
-	if (getBoolean("score")) {
-		infile.appendDataSpine(m_score, ".", "**cdata", false);
-	}
-	infile.appendDataSpine(color, ".", "**color", true);
-	infile.createLinesFromTokens();
+	if (getBoolean("fraction")) {
+		HumNum sum = 0;
+		HumNum total = infile.getScoreDuration();
+		for (int i=0; i<(int)m_score.size(); i++) {
+			if (m_score[i] >= m_threshold2) {
+				sum += infile[i].getDuration();
+			}
+		}
+		HumNum fraction = sum / total;
+		m_free_text << int(fraction.getFloat() * 1000.0 + 0.5) / 10.0 << endl;
+	} else {
+		if (getBoolean("score")) {
+			infile.appendDataSpine(m_score, ".", "**cdata", false);
+		}
+		infile.appendDataSpine(color, ".", "**color", true);
+		infile.createLinesFromTokens();
 
-	// problem within emscripten-compiled version, so force to output as string:
-	m_humdrum_text << infile;
+		// problem within emscripten-compiled version, so force to output as string:
+		m_humdrum_text << infile;
+	}
+
 }
 
 
