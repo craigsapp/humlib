@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 27 20:14:51 EDT 2019
+// Last Modified: Wed Aug 28 12:50:27 EDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -25135,6 +25135,17 @@ string HumdrumToken::getText(void) const {
 //
 
 int HumdrumToken::addLinkedParameter(HTp token) {
+	if (token->find(":ignore") != string::npos) {
+		// Ignore layout command (store layout command but
+		// do not use it.  This is particularly for adding
+		// layout parameters for notation, but the parameters
+		// currently cause problems in verovio (so they should
+		// be unignored at a future date when the layout 
+		// parameter is handled better).  Note that any 
+		// parameter starting with "ignore" such as "ignored"
+		// will also be suppressed by this if statement.
+		return -1;
+	}
 	for (int i=0; i<(int)m_linkedParameters.size(); i++) {
 		if (m_linkedParameters[i] == token) {
 			return i;
