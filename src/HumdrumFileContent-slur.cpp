@@ -30,6 +30,10 @@ namespace hum {
 
 
 bool HumdrumFileContent::analyzeSlurs(void) {
+	if (m_slurs_analyzed) {
+		return false;
+	}
+	m_slurs_analyzed = true;
 	bool output = true;
 	output &= analyzeKernSlurs();
 	output &= analyzeMensSlurs();

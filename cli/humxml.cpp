@@ -12,8 +12,9 @@ int main(int argc, char** argv) {
    if (!infile.read(argv[1])) {
       return 1;
    }
+	infile.analyzeStructure();
    infile.analyzeKernAccidentals();
-   infile.analyzeKernSlurs();
+   infile.analyzeSlurs();
    infile.printXml();
    return 0;
 }

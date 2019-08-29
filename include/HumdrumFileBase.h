@@ -380,6 +380,10 @@ class HumdrumFileBase : public HumHash {
 		// file strands have been analyzed.
 		bool m_strands_analyzed = false;
 
+		// m_slurs_analyzed: Used to keep track of whether or not
+		// slur endpoints have been linked or not.
+		bool m_slurs_analyzed = false;
+
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
 		// to be shifted between HumdrumFileContent (the top-level default),

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 28 12:50:27 EDT 2019
+// Last Modified: Thu Aug 29 16:30:30 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -13717,6 +13717,7 @@ void HumdrumFileBase::clear(void) {
 	m_segmentlevel = 0;
 	m_structure_analyzed = false;
 	m_rhythm_analyzed = false;
+	m_slurs_analyzed = false;
 }
 
 
@@ -17592,6 +17593,10 @@ int HumdrumFileContent::getRestPositionAboveNotes(HTp rest, vector<int>& vpos) {
 
 
 bool HumdrumFileContent::analyzeSlurs(void) {
+	if (m_slurs_analyzed) {
+		return false;
+	}
+	m_slurs_analyzed = true;
 	bool output = true;
 	output &= analyzeKernSlurs();
 	output &= analyzeMensSlurs();
@@ -61305,7 +61310,7 @@ void Tool_slurcheck::initialize(void) {
 //
 
 void Tool_slurcheck::processFile(HumdrumFile& infile) {
-	infile.analyzeKernSlurs();
+	infile.analyzeSlurs();
 	int opencount = 0;
 	int closecount = 0;
 	int listQ  = getBoolean("list");

@@ -12,6 +12,7 @@
 //
 
 #include "tool-melisma.h"
+#include "HumRegex.h"
 
 using namespace std;
 
