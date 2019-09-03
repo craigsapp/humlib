@@ -407,7 +407,7 @@ bool HumdrumLine::isGlobalReference(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::isUniversalReference -- Returns true if 
+// HumdrumLine::isUniversalReference -- Returns true if
 //     a universal reference record.
 //
 
@@ -503,7 +503,7 @@ string HumdrumLine::getReferenceValue(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getUniversalReferenceKey -- Return reference key if a 
+// HumdrumLine::getUniversalReferenceKey -- Return reference key if a
 //     universal reference record.  Otherwise returns an empty string.
 //
 
@@ -536,7 +536,7 @@ string HumdrumLine::getUniversalReferenceKey(void) const {
 
 //////////////////////////////
 //
-// HumdrumLine::getGlobalReferenceKey -- Return reference key if a 
+// HumdrumLine::getGlobalReferenceKey -- Return reference key if a
 //     universal reference record.  Otherwise returns an empty string.
 //
 
@@ -1198,7 +1198,7 @@ int HumdrumLine::createTokensFromLine(void) {
 			lastch = ch;
 			ch = getChar(i);
 			if (ch == '\t') {
-				// Parser now allows multiple tab characters in a 
+				// Parser now allows multiple tab characters in a
 				// row to represent a single tab.
 				if (lastch != '\t') {
 					token = new HumdrumToken(tstring);

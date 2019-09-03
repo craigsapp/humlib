@@ -163,7 +163,7 @@ void Tool_melisma::initializePartInfo(HumdrumFile& infile) {
 // printWordlist --
 //
 
-void Tool_melisma::printWordlist(HumdrumFile& infile, vector<WordInfo>& wordinfo, 
+void Tool_melisma::printWordlist(HumdrumFile& infile, vector<WordInfo>& wordinfo,
 		map<string, int> words) {
 
 	// for (auto& item : words) {
@@ -365,7 +365,7 @@ void Tool_melisma::getMelismaNoteCounts(vector<int>& ncounts, vector<int>& mcoun
 // Tool_melisma::extractWordlist --
 //
 
-void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>& wordlist, 
+void Tool_melisma::extractWordlist(vector<WordInfo>& wordinfo, map<string, int>& wordlist,
 		HumdrumFile& infile, vector<vector<int>>& notecount) {
 	int mincount = getInteger("min");
 	if (mincount < 2) {
@@ -443,7 +443,7 @@ string Tool_melisma::extractWord(WordInfo& winfo, HTp token, vector<vector<int>>
 	winfo.endtime = m_endtimes[line][field];
 	winfo.bar = m_measures[line];
 
-	transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower); 
+	transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower);
 	if (syllable.back() == '-') {
 		syllable.resize(syllable.size() - 1);
 		winfo.syllables.push_back(syllable);
@@ -454,7 +454,7 @@ string Tool_melisma::extractWord(WordInfo& winfo, HTp token, vector<vector<int>>
 	} else {
 		// single-syllable word
 		winfo.endtime = getEndtime(current);
-		transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower); 
+		transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower);
 		winfo.word = syllable;
 		winfo.syllables.push_back(syllable);
 		winfo.starttimes.push_back(current->getDurationFromStart());
@@ -505,7 +505,7 @@ string Tool_melisma::extractWord(WordInfo& winfo, HTp token, vector<vector<int>>
 		} else {
 			syllable = syllable.substr(1);
 		}
-		transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower); 
+		transform(syllable.begin(), syllable.end(), syllable.begin(), ::tolower);
 		winfo.endtime = getEndtime(current);
 		hre.replaceDestructive(syllable, "", "[<>.:?!;,\"]", "g");
 		winfo.syllables.push_back(syllable);
@@ -647,7 +647,7 @@ void Tool_melisma::getNoteCounts(HumdrumFile& infile, vector<vector<int>>& count
 	initBarlines(infile);
 	HumNum negativeOne = -1;
 	infile.initializeArray(m_endtimes, negativeOne);
-	vector<HTp> lyrics; 
+	vector<HTp> lyrics;
 	infile.getSpineStartList(lyrics, "**text");
 	for (int i=0; i<(int)lyrics.size(); i++) {
 		getNoteCountsForLyric(counts, lyrics[i]);

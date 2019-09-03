@@ -25,7 +25,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeKernStemLengths -- 
+// HumdrumFileContent::analyzeKernStemLengths --
 //
 
 bool HumdrumFileContent::analyzeKernStemLengths(void) {

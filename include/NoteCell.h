@@ -59,7 +59,7 @@ class NoteCell {
 		int    getSliceIndex        (void) { return m_timeslice;         }
 		int    getVoiceIndex        (void) { return m_voice;             }
 
-		bool   isAttack             (void) { return m_b40>0? true:false; }
+		bool   isAttack             (void);
 		bool   isRest               (void);
 		bool   isSustained          (void);
 

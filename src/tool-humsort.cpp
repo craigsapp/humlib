@@ -121,7 +121,7 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 
 	if (getBoolean("numeric")) {
 		std::sort(data.begin(), data.end(),
-			[](HTp a, HTp b) { 
+			[](HTp a, HTp b) {
 				if (*a == *b) {
 					return 0;
 				}
@@ -149,12 +149,12 @@ void Tool_humsort::processFile(HumdrumFile& infile) {
 	} else {
 		// alphabetic sorting
 		if (!getBoolean("do-not-ignore-case")) {
-			std::sort(data.begin(), data.end(), [](HTp a, HTp b) { 
+			std::sort(data.begin(), data.end(), [](HTp a, HTp b) {
 					string A = *a;
 					string B = *b;
 					std::transform(A.begin(), A.end(), A.begin(), ::tolower);
 					std::transform(B.begin(), B.end(), B.begin(), ::tolower);
-					return A < B; 
+					return A < B;
 			});
 		} else {
 			std::sort(data.begin(), data.end(),

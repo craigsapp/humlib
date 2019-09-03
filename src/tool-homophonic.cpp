@@ -215,7 +215,7 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 
 	if (getBoolean("raw-sonority")) {
 		addRawAnalysis(infile, raw);
-	} 
+	}
 	if (getBoolean("raw-score")) {
 		addAccumulatedScores(infile, score);
 	}
@@ -226,7 +226,7 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 
 	if (getBoolean("attacks")) {
 		addAttacks(infile, m_attacks);
-	} 
+	}
 
 	if (1) {
 		// Color the notes within homophonic textures.

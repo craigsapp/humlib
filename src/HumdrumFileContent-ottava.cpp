@@ -26,7 +26,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeOttavas -- 
+// HumdrumFileContent::analyzeOttavas --
 //
 
 void HumdrumFileContent::analyzeOttavas(void) {

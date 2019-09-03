@@ -140,7 +140,7 @@ class Tool_musicxml2hum : public HumTool {
 		                       std::vector<MxmlPart>& partdata, HumNum nowtime);
 		void addKeySigLine    (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& keysigs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addKeyDesignationLine(GridMeasure* outdata, vector<vector<xml_node>>& keydesigs, 
+		void addKeyDesignationLine(GridMeasure* outdata, vector<vector<xml_node>>& keydesigs,
 		                        vector<MxmlPart>& partdata, HumNum nowtime);
 		void insertPartKeySigs (pugi::xml_node keysig, GridPart& part);
 		void insertPartKeyDesignations(xml_node keydeg, GridPart& part);

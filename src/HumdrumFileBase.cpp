@@ -168,6 +168,7 @@ void HumdrumFileBase::clear(void) {
 	m_structure_analyzed = false;
 	m_rhythm_analyzed = false;
 	m_slurs_analyzed = false;
+	m_nulls_analyzed = false;
 }
 
 

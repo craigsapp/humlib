@@ -266,7 +266,7 @@ void Tool_extract::fillFieldDataByEmpty(vector<int>& field, vector<int>& subfiel
 
 //////////////////////////////
 //
-// Tool_extract::fillFieldDataByNoEmpty -- Only keep spines which are not all 
+// Tool_extract::fillFieldDataByNoEmpty -- Only keep spines which are not all
 //   null data tokens.
 //
 

@@ -222,7 +222,7 @@ string Tool_pnum::convertSubtokenToBase(const string& text) {
 		output += recip;
 		output += "/";
 	}
-	
+
 	if (text.find("r") != string::npos) {
 		output += m_rest;
 	} else {

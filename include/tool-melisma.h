@@ -77,7 +77,7 @@ class Tool_melisma : public HumTool {
 		                                HumdrumFile& infile, vector<vector<int>>& notecount);
 		string extractWord             (WordInfo& winfo, HTp token, vector<vector<int>>& counts);
 		HumNum getEndtime              (HTp text);
-		void   printWordlist           (HumdrumFile& infile, vector<WordInfo>& wordinfo, 
+		void   printWordlist           (HumdrumFile& infile, vector<WordInfo>& wordinfo,
 		                                map<string, int>);
 		void   initializePartInfo      (HumdrumFile& infile);
 		void   getMelismaNoteCounts    (vector<int>& ncounts, vector<int>& mcounts,

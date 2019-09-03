@@ -24,7 +24,7 @@ namespace hum {
 // START_MERGE
 
 // A TimePoint records the event times in a file.  These are positions of note attacks
-// in the file.  The "index" variable keeps track of the line in the original file 
+// in the file.  The "index" variable keeps track of the line in the original file
 // (for the first position in index), and other positions in index keep track of the
 // equivalent line position of the timepoint in other file(s) that are being compared.
 class TimePoint {

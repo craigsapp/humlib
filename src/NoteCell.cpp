@@ -81,7 +81,7 @@ void NoteCell::calculateNumericPitches(void) {
 		} else if (resolve->isNull()) {
 			m_b40 = NAN;
 		} else {
-			m_b40 = Convert::kernToBase40(m_token->resolveNull());
+			m_b40 = Convert::kernToBase40(resolve);
 			m_b40 = (sustain ? -m_b40 : m_b40);
 		}
 	}
@@ -420,6 +420,18 @@ double NoteCell::getAbsBase40PitchClass(void) {
 	}
 }
 
+
+//////////////////////////////
+//
+// NoteCell::isAttack --
+//
+
+bool NoteCell::isAttack(void) {
+	if (Convert::isNaN(m_b40)) {
+		return false;
+	}
+	return m_b40>0? true:false;
+}
 
 
 // END_MERGE

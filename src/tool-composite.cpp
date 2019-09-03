@@ -225,7 +225,7 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 			continue;
 		}
 		string recip = Convert::durationToRecip(infile[i].getDuration());
-		
+
 		if (appendQ) {
 			token = infile.token(i, infile[i].getFieldCount() - 1);
 		} else {

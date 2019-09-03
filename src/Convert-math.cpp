@@ -218,7 +218,7 @@ double Convert::mean(const std::vector<double>& x) {
 
 //////////////////////////////
 //
-// Convert::coefficientOfVariationPopulation -- Standard deviation divided by 
+// Convert::coefficientOfVariationPopulation -- Standard deviation divided by
 //    mean.  From: Patel, Iversen & Rosenberg (2006): Comparing the
 //    rhythm and melody of speech and music: The case of British
 //    English and French.  JASA 119(5), May 2006, pp. 3034-3047.
@@ -234,7 +234,7 @@ double Convert::coefficientOfVariationPopulation(const std::vector<double>& x) {
 
 //////////////////////////////
 //
-// Convert::coefficientOfVariationSample -- Standard deviation divided by 
+// Convert::coefficientOfVariationSample -- Standard deviation divided by
 //    mean.  From: Patel, Iversen & Rosenberg (2006): Comparing the
 //    rhythm and melody of speech and music: The case of British
 //    English and French.  JASA 119(5), May 2006, pp. 3034-3047.

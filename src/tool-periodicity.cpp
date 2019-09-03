@@ -206,14 +206,14 @@ void Tool_periodicity::printAttackGrid(ostream& out, HumdrumFile& infile, vector
 		}
 	}
 	out << "\n";
-	
+
 }
 
 
 
 //////////////////////////////
 //
-// Tool_periodicity::fillAttackGrids -- 
+// Tool_periodicity::fillAttackGrids --
 //
 
 void Tool_periodicity::fillAttackGrids(HumdrumFile& infile, vector<vector<double>>& grids, HumNum minrhy) {
@@ -360,7 +360,7 @@ void Tool_periodicity::printSvgAnalysis(ostream& out, vector<vector<double>>& an
 		HumNum rval = (i+1);
 		rval /= minrhy;
 		rval *= 4;
-	
+
 		std::string rhythm = Convert::durationToRecip(rval);
 		rhythm += " (" + to_string(i+1) + ")";
 		label.text().set(rhythm.c_str());

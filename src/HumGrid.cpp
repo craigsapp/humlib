@@ -691,7 +691,7 @@ void HumGrid::adjustVoices(GridSlice* curr, GridSlice* newmanip, int partsplit) 
 
 void HumGrid::createMatchedVoiceCount(GridStaff* snew, GridStaff* sold, int p, int s) {
 	if (snew->size() != 0) {
-		// this function is only for creating a totally new 
+		// this function is only for creating a totally new
 		return;
 	}
 	int count = (int)sold->size();
@@ -754,7 +754,7 @@ void HumGrid::matchVoices(GridSlice* current, GridSlice* last) {
 
 //////////////////////////////
 //
-// HumGrid::transferOtherParts -- after a line split due to merges 
+// HumGrid::transferOtherParts -- after a line split due to merges
 //    occurring at the same time.
 //
 

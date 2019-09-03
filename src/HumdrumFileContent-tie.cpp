@@ -56,7 +56,7 @@ bool HumdrumFileContent::analyzeKernTies(
 	// vector<vector<HTp> > tracktokens;
 	// this->getTrackSeq(tracktokens, spinestart, OPT_DATA | OPT_NOEMPTY);
 
-	// Only analyzing linked ties for now (others ties are handled without analysis in 
+	// Only analyzing linked ties for now (others ties are handled without analysis in
 	// the hum2mei converter, for example.
 	if (linkSignifier.empty()) {
 		return true;

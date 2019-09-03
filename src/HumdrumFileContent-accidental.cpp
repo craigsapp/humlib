@@ -35,7 +35,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 
 	// ottava marks must be analyzed first:
 	this->analyzeOttavas();
-	
+
 	HumdrumFileContent& infile = *this;
 	int i, j, k;
 	int kindex;

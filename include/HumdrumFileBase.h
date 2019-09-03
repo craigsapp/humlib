@@ -384,6 +384,10 @@ class HumdrumFileBase : public HumHash {
 		// slur endpoints have been linked or not.
 		bool m_slurs_analyzed = false;
 
+		// m_nulls_analyzed: Used to keep track of wheter or not
+		// null tokens have been analyzed yet.
+		bool m_nulls_analyzed = false;
+
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance
 		// to be shifted between HumdrumFileContent (the top-level default),

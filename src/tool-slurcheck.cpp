@@ -133,7 +133,7 @@ void Tool_slurcheck::processFile(HumdrumFile& infile) {
 						if (filenameQ) {
 							m_free_text << infile.getFilename() << ":\t";
 						}
-						m_free_text << "UNCLOSED SLUR\tline:" << tok->getLineIndex()+1 
+						m_free_text << "UNCLOSED SLUR\tline:" << tok->getLineIndex()+1
 								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
 					} else if (!countQ) {
 						string data = *tok;
@@ -146,7 +146,7 @@ void Tool_slurcheck::processFile(HumdrumFile& infile) {
 						if (filenameQ) {
 							m_free_text << infile.getFilename() << ":\t";
 						}
-						m_free_text << "UNOPENED SLUR\tline:" << tok->getLineIndex()+1 
+						m_free_text << "UNOPENED SLUR\tline:" << tok->getLineIndex()+1
 								<< "\tfield:" << tok->getFieldIndex()+1 << "\ttoken:" << tok << endl;
 					} else if (!countQ) {
 						string data = *tok;

@@ -67,7 +67,7 @@ class HumdrumFileSet {
    protected:
       vector<HumdrumFile*>  m_data;
 
-      void                  appendHumdrumFileContent(const std::string& filename, 
+      void                  appendHumdrumFileContent(const std::string& filename,
                                                std::stringstream& inbuffer);
 };
 

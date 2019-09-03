@@ -232,7 +232,7 @@ ostream& Tool_humdiff::compareTimePoints(ostream& out, vector<vector<TimePoint>>
 		}
 		found = 0;
 		fill(increment.begin(), increment.end(), 0);
-		
+
 		for (int i=0; i<(int)timepoints.size(); i++) {
 			if (indexes.at(i) >= (int)timepoints.at(i).size()) {
 				// index is too large for file, so skip checking it.
@@ -327,8 +327,8 @@ void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
 			continue;
 		}
 
-		getNoteList(notelist.at(i), humset[i], 
-			timepoints.at(i).at(indexes.at(i)).index[0], 
+		getNoteList(notelist.at(i), humset[i],
+			timepoints.at(i).at(indexes.at(i)).index[0],
 			timepoints.at(i).at(indexes.at(i)).measure, i, indexes.at(i));
 
 
@@ -362,7 +362,7 @@ void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
 	for (int i=0; i<(int)notelist.at(0).size(); i++) {
 		for (int j=1; j<(int)notelist.at(0).at(i).matched.size(); j++) {
 			if (notelist.at(0).at(i).matched.at(j) < 0) {
-				cout << "NOTE " << notelist.at(0).at(i).subtoken 
+				cout << "NOTE " << notelist.at(0).at(i).subtoken
 				     << " DOES NOT HAVE EXACT MATCH IN SOURCE " << j << endl;
 				int humindex = notelist.at(0).at(i).token->getLineIndex();
 				cout << "\tREFERENCE MEASURE\t: " << notelist.at(0).at(i).measure << endl;
@@ -450,7 +450,7 @@ void Tool_humdiff::getNoteList(vector<NotePoint>& notelist, HumdrumFile& infile,
 			notelist.back().subtoken = subtok;
 			notelist.back().subindex = j;
 			notelist.back().measurequarter = token->getDurationFromBarline();
-			notelist.back().measure = 
+			notelist.back().measure =
 			notelist.back().track = track;
 			notelist.back().layer = layer;
 			notelist.back().sourceindex = sourceindex;

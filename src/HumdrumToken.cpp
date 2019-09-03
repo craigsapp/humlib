@@ -2076,8 +2076,8 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 		// do not use it.  This is particularly for adding
 		// layout parameters for notation, but the parameters
 		// currently cause problems in verovio (so they should
-		// be unignored at a future date when the layout 
-		// parameter is handled better).  Note that any 
+		// be unignored at a future date when the layout
+		// parameter is handled better).  Note that any
 		// parameter starting with "ignore" such as "ignored"
 		// will also be suppressed by this if statement.
 		return -1;
@@ -3065,6 +3065,16 @@ HTp HumdrumToken::getSlurEndToken(int number) {
 
 HTp HumdrumToken::resolveNull(void) {
 	if (m_nullresolve == NULL) {
+		HumdrumLine* hline = getOwner();
+		if (hline) {
+			HumdrumFile* infile = hline->getOwner();
+			infile->resolveNullTokens();
+		}
+		if (m_nullresolve == NULL) {
+			return this;
+		} else {
+			return m_nullresolve;
+		}
 		return this;
 	} else {
 		return m_nullresolve;

@@ -1441,6 +1441,14 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
+	if (m_nulls_analyzed) {
+		return;
+	}
+	m_nulls_analyzed = true;
+	if (!areStrandsAnalyzed()) {
+		analyzeStrands();
+	}
+
 	HTp token;
 	HTp data = NULL;
 	HTp strandend;

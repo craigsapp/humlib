@@ -119,7 +119,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
 		bool    analyzeKernStemLengths    (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
 		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
-		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts, 
+		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts,
 		                                   std::vector<std::pair<HTp, int>>& ends);
 		void    checkCrossStaffStems      (HTp token, std::string& above, std::string& below);
 		void    checkDataForCrossStaffStems(HTp token, std::string& above, std::string& below);

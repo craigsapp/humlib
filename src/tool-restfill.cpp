@@ -99,7 +99,7 @@ void Tool_restfill::initialize(void) {
 			m_exinterp = "*" + m_exinterp;
 		}
 	}
-	
+
 }
 
 

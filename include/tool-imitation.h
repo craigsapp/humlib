@@ -60,6 +60,7 @@ class Tool_imitation : public HumTool {
 		vector<int> m_intervals;
 		bool m_mark;
 		char m_marker = '@';
+		bool m_single = false;
 		static int Enumerator;
 };
 

@@ -428,7 +428,7 @@ void Convert::removeDollarsFromString(string& buffer, int maximum) {
 	} else if (hre.search(buffer, "^[%$]-")) {
 		// replace $ with maximum at start of string
 		hre.replaceDestructive(buffer, buf2, "^[%$]", "");
-	} 
+	}
 
 	while (hre.search(buffer, "[%$](\\d+)")) {
 		int value2 = maximum - abs(hre.getMatchInt(1));
