@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 26 18:39:18 PDT 2019
+// Last Modified: Mon Sep  2 18:43:57 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -45426,13 +45426,15 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 		int track = kernspines[i]->getTrack();
 		infile.insertDataSpineBefore(track, results[i-1], "", exinterp);
 	}
-	infile.createLinesFromTokens();
 	if (m_mark && Enumerator) {
 		string rdfline = "!!!RDF**kern: ";
 		rdfline += m_marker;
 		rdfline += " = marked note (color=\"chocolate\")";
 		infile.appendLine(rdfline);
 	}
+	infile.createLinesFromTokens();
+	// updating problem with new spines, so print to string for now:
+	m_humdrum_text << infile;
 	return true;
 }
 
@@ -45512,6 +45514,9 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 	vector<double>& v1i = intervals[v1];
 	vector<double>& v2i = intervals[v2];
 
+	int endi;
+	int endj;
+
 	int min = m_threshold - 1;
 	int count;
 
@@ -45520,6 +45525,9 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 
 	for (int i=0; i<(int)v1i.size() - 1; i++) {
 		for (int j=0; j<(int)v2i.size() - 1; j++) {
+
+cerr << "I = " << i << "\tJ = " << j << endl;
+
 			if (m_rest || m_rest2) {
 				if ((i > 0) && (!Convert::isNaN(attacks[v1][i-1]->getSgnDiatonicPitch()))) {
 					// match initiator must be preceded by a rest (or start of music)
@@ -45545,9 +45553,15 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				continue;
 			}
 
+
 			// cout << "Match length count " << count << endl;
 			HTp token1 = attacks[v1][i]->getToken();
 			HTp token2 = attacks[v2][j]->getToken();
+
+cerr << "\nFOUND MATCH HERE : " << token1 << " AND " << token2 << endl;
+cerr << "\tTOKEN 1 LINE " << token1->getLineIndex() << endl;
+cerr << "\tTOKEN 2 LINE " << token2->getLineIndex() << endl;
+
 			HumNum time1 = token1->getDurationFromStart();
 			HumNum time2 = token2->getDurationFromStart();
 			HumNum distance1 = time2 - time1;
@@ -45615,30 +45629,58 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 				results[v2][line2] += to_string(interval + 1);
 			}
 
-			if (m_mark) {
-				for (int z=0; z<count; z++) {
-					token1 = attacks[v1][i+z]->getToken();
-					token2 = attacks[v2][j+z]->getToken();
+//			if (m_mark) {
+cerr << "IMITATION NOTE COUNT = " << count << endl;
+
+				int counter = 0;
+				int z = i;
+				while ((z < (int)attacks[v1].size()) && (counter < count)) {
+					token1 = attacks[v1][z]->getToken();
+					if (token1->isNull()) {
+						z++;
+						continue;
+					}
+cerr << "\tTOKEN 1 = " << token1 << endl;
 					token1->setText(*token1 + m_marker);
-					token2->setText(*token2 + m_marker);
 
-               if (attacks[v1][i+z]->isRest() && (z < count - 1) ) {
-						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
-					} else if (!attacks[v1][i+z]->isRest()) {
-						markedTiedNotes(attacks[v1][i+z]->m_tiedtokens);
+               if (attacks[v1][z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v1][z]->m_tiedtokens);
+					} else if (!attacks[v1][z]->isRest()) {
+						counter++;
+						markedTiedNotes(attacks[v1][z]->m_tiedtokens);
 					}
-
-               if (attacks[v2][j+z]->isRest() && (z < count - 1) ) {
-						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
-					} else if (!attacks[v2][j+z]->isRest()) {
-						markedTiedNotes(attacks[v2][j+z]->m_tiedtokens);
-					}
-
+					z++;
 				}
-			}
+
+				// don't overlap matches (at least for now)
+				endi = z-1;
+
+
+				counter = 0;
+				z = j;
+				while ((z < (int)attacks[v2].size()) && (counter < count)) {
+					token2 = attacks[v2][z]->getToken();
+					if (token2->isNull()) {
+						z++;
+						continue;
+					}
+cerr << "\tTOKEN 2 = " << token2 << endl;
+               if (attacks[v2][z]->isRest() && (z < count - 1) ) {
+						markedTiedNotes(attacks[v2][z]->m_tiedtokens);
+					} else if (!attacks[v2][z]->isRest()) {
+						counter++;
+						markedTiedNotes(attacks[v2][z]->m_tiedtokens);
+					}
+					z++;
+				}
+
+				// don't overlap matches (at least for now)
+				endj = z-1;
+//			}
 
 			// skip over match (need to do in i as well somehow)
-			j += count;
+			// j += count;
+			j = endj;
 		} // j loop
 	} // i loop
 }
