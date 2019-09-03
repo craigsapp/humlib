@@ -48,12 +48,12 @@ class Tool_homophonic : public HumTool {
 		void        analyzeLine        (HumdrumFile& infile, int line);
 		void        initialize         (void);
 		void        markHomophonicNotes(void);
-		void        printFractionAnalysis(HumdrumFile& infile, std::vector<double>& score);
 		int         getExtantVoiceCount(HumdrumFile& infile);
 		int         getOriginalVoiceCount(HumdrumFile& infile);
-		void        printRawAnalysis   (HumdrumFile& infile, vector<double>& raw);
-		void        printAccumulatedScores(HumdrumFile& infile, vector<double>& score);
-		void        printAttacks(HumdrumFile& infile, vector<int>& attacks);
+		void        addRawAnalysis     (HumdrumFile& infile, vector<double>& raw);
+		void        addAccumulatedScores(HumdrumFile& infile, vector<double>& score);
+		void        addAttacks         (HumdrumFile& infile, vector<int>& attacks);
+		void        addFractionAnalysis(HumdrumFile& infile, std::vector<double>& score);
 
 	private:
 		std::vector<std::string> m_homophonic;
@@ -64,6 +64,7 @@ class Tool_homophonic : public HumTool {
 		double m_score = 1.0;
 		double m_intermediate_score = 0.5;
 		int m_voice_count = 0;
+		bool m_letterQ = false;
 };
 
 // END_MERGE

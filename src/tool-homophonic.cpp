@@ -39,6 +39,7 @@ Tool_homophonic::Tool_homophonic(void) {
 	define("n|t|threshold=d:4.0", "Threshold score sum required for homophonic texture detection");
 	define("s|score=d:1.0", "Score assigned to a sonority with three or more attacks");
 	define("m|intermediate-score=d:0.5", "Score to give sonority between two adjacent attack sonoroties");
+	define("l|letter=b", "Display letter scoress before calculations");
 }
 
 
@@ -85,6 +86,7 @@ bool Tool_homophonic::run(HumdrumFile& infile) {
 	initialize();
 	infile.analyzeStructure();
 	m_voice_count = getExtantVoiceCount(infile);
+	m_letterQ = getBoolean("letter");
 	processFile(infile);
 	infile.createLinesFromTokens();
 	return true;
@@ -207,19 +209,33 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 		}
 	}
 
+	if (getBoolean("raw-score")) {
+		addAccumulatedScores(infile, score);
+	}
+
 	if (getBoolean("raw-sonority")) {
-		printRawAnalysis(infile, raw);
-	} else if (getBoolean("raw-score")) {
-		printAccumulatedScores(infile, score);
-	} else if (getBoolean("fraction")) {
-		printFractionAnalysis(infile, score);
-	} else if (getBoolean("attacks")) {
-		printAttacks(infile, m_attacks);
-	} else {
+		addRawAnalysis(infile, raw);
+	} 
+	if (getBoolean("raw-score")) {
+		addAccumulatedScores(infile, score);
+	}
+
+	if (getBoolean("fraction")) {
+		addFractionAnalysis(infile, score);
+	}
+
+	if (getBoolean("attacks")) {
+		addAttacks(infile, m_attacks);
+	} 
+
+	if (1) {
 		// Color the notes within homophonic textures.
 		// mark homophonic regions in red,
 		// non-homophonic sonorities within these regions in green
 		// and non-homophonic regions in black.
+		if (m_letterQ) {
+			infile.appendDataSpine(m_homophonic, "", "**hp");
+		}
 		for (int i=0; i<(int)data.size(); i++) {
 			if (score[data[i]] >= m_threshold) {
 				if (m_attacks[data[i]] < (int)m_notes[data[i]].size() - 1) {
@@ -243,32 +259,32 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_homophonic::printAccumulatedScores --
+// Tool_homophonic::addAccumulatedScores --
 //
 
-void Tool_homophonic::printAccumulatedScores(HumdrumFile& infile, vector<double>& score) {
-	infile.appendDataSpine(score, "", "**score");
+void Tool_homophonic::addAccumulatedScores(HumdrumFile& infile, vector<double>& score) {
+	infile.appendDataSpine(score, "", "**score", false);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_homophonic::printRawAnalysis --
+// Tool_homophonic::addRawAnalysis --
 //
 
-void Tool_homophonic::printRawAnalysis(HumdrumFile& infile, vector<double>& raw) {
-	infile.appendDataSpine(raw, "", "**raw");
+void Tool_homophonic::addRawAnalysis(HumdrumFile& infile, vector<double>& raw) {
+	infile.appendDataSpine(raw, "", "**raw", false);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_homophonic::printAttacks --
+// Tool_homophonic::addAttacks --
 //
 
-void Tool_homophonic::printAttacks(HumdrumFile& infile, vector<int>& attacks) {
+void Tool_homophonic::addAttacks(HumdrumFile& infile, vector<int>& attacks) {
 	infile.appendDataSpine(attacks, "", "**atks");
 }
 
@@ -276,10 +292,10 @@ void Tool_homophonic::printAttacks(HumdrumFile& infile, vector<int>& attacks) {
 
 //////////////////////////////
 //
-// Tool_homophonic::analyzeLine --
+// Tool_homophonic::addFractionAnalysis --
 //
 
-void Tool_homophonic::printFractionAnalysis(HumdrumFile& infile, vector<double>& score) {
+void Tool_homophonic::addFractionAnalysis(HumdrumFile& infile, vector<double>& score) {
 	double sum = 0.0;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
