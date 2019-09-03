@@ -35,8 +35,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		      ~HumdrumFileContent         ();
 
 		bool   analyzeSlurs               (void);
+	private:
 		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
+	public:
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
 

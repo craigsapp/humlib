@@ -131,6 +131,9 @@ class HumdrumFileBase : public HumHash {
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
 
+    	template <class TYPE>
+		   void       initializeArray          (std::vector<std::vector<TYPE>>& array, TYPE value);
+
 		bool          parse                    (std::istream& contents)
 		                                    { return read(contents); }
 		bool          parse                    (const char* contents)
@@ -376,6 +379,10 @@ class HumdrumFileBase : public HumHash {
 		// m_strands_analyzed: Used to keep track of whether or not
 		// file strands have been analyzed.
 		bool m_strands_analyzed = false;
+
+		// m_slurs_analyzed: Used to keep track of whether or not
+		// slur endpoints have been linked or not.
+		bool m_slurs_analyzed = false;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

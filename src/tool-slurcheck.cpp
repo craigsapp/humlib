@@ -98,7 +98,7 @@ void Tool_slurcheck::initialize(void) {
 //
 
 void Tool_slurcheck::processFile(HumdrumFile& infile) {
-	infile.analyzeKernSlurs();
+	infile.analyzeSlurs();
 	int opencount = 0;
 	int closecount = 0;
 	int listQ  = getBoolean("list");

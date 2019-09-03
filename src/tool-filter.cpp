@@ -24,10 +24,12 @@
 #include "tool-dissonant.h"
 #include "tool-extract.h"
 #include "tool-homophonic.h"
+#include "tool-homophonic2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
+#include "tool-melisma.h"
 #include "tool-metlev.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
@@ -181,12 +183,16 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "homophonic") {
 			RUNTOOL(homophonic, infile, commands[i].second, status);
+		} else if (commands[i].first == "homophonic2") {
+			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
 			RUNTOOL(extract, infile, commands[i].second, status);
+		} else if (commands[i].first == "melisma") {
+			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {

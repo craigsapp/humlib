@@ -167,6 +167,7 @@ void HumdrumFileBase::clear(void) {
 	m_segmentlevel = 0;
 	m_structure_analyzed = false;
 	m_rhythm_analyzed = false;
+	m_slurs_analyzed = false;
 }
 
 
@@ -2321,6 +2322,28 @@ int HumdrumFileBase::getMeasureNumber(int line) {
    }
 	return -1;
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::initializeArray -- adjust the size of the input array
+//     to the same dimensions as the HumdrumFile, filling in each cell of the
+//     array with the given value as a default.
+//
+
+template <class TYPE>
+void HumdrumFileBase::initializeArray(vector<vector<TYPE>>& array, TYPE value) {
+	HumdrumFileBase& infile = *this;
+	array.clear();
+	array.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		array[i].resize(infile[i].getFieldCount());
+		fill(array[i].begin(), array[i].end(), value);
+	}
+}
+
+
 
 
 // END_MERGE
