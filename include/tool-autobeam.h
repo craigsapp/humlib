@@ -38,12 +38,14 @@ class Tool_autobeam : public HumTool {
 		void     addBeam         (HTp startnote, HTp endnote);
 		void     addBeams        (HumdrumFile& infile);
 		void     removeBeams     (HumdrumFile& infile);
+		void     removeEdgeRests (HTp& startnote, HTp& endnote);
 
 	private:
 		vector<vector<pair<int, HumNum> > > m_timesigs;
 		vector<HTp> m_kernspines;
 		bool        m_overwriteQ;
 		int         m_track;
+		bool        m_includerests = false;
 
 };
 

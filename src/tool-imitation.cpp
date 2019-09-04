@@ -141,10 +141,10 @@ bool Tool_imitation::run(HumdrumFile& infile) {
 
 	doAnalysis(results, grid, attacks, intervals, infile, getBoolean("debug"));
 
-	string exinterp = getString("exinterp");
-	vector<HTp> kernspines = infile.getKernSpineStartList();
-	infile.appendDataSpine(results.back(), "", exinterp);
 	if (!getBoolean("no-info")) {
+		string exinterp = getString("exinterp");
+		vector<HTp> kernspines = infile.getKernSpineStartList();
+		infile.appendDataSpine(results.back(), "", exinterp);
 		for (int i = (int)results.size()-1; i>0; i--) {
 			int track = kernspines[i]->getTrack();
 			infile.insertDataSpineBefore(track, results[i-1], "", exinterp);

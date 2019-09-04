@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  3 15:52:25 PDT 2019
+// Last Modified: Wed Sep  4 13:15:04 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1627,6 +1627,7 @@ class HumdrumFileBase : public HumHash {
 		void          usage                    (const std::string& command);
 		void          example                  (void);
 
+		bool          analyzeNonNullDataTokens (void);
 		HTp           getTrackStart            (int track) const;
 		void          getSpineStopList         (std::vector<HTp>& spinestops);
 		HTp           getSpineStart            (int spine) const
@@ -1743,7 +1744,6 @@ class HumdrumFileBase : public HumHash {
 		bool          stitchLinesTogether       (HumdrumLine& previous,
 		                                         HumdrumLine& next);
 		void          addToTrackStarts          (HTp token);
-		bool          analyzeNonNullDataTokens  (void);
 		void          addUniqueTokens           (std::vector<HTp>& target,
 		                                         std::vector<HTp>& source);
 		bool          processNonNullDataTokensForTrackForward(HTp starttoken,
@@ -4043,12 +4043,14 @@ class Tool_autobeam : public HumTool {
 		void     addBeam         (HTp startnote, HTp endnote);
 		void     addBeams        (HumdrumFile& infile);
 		void     removeBeams     (HumdrumFile& infile);
+		void     removeEdgeRests (HTp& startnote, HTp& endnote);
 
 	private:
 		vector<vector<pair<int, HumNum> > > m_timesigs;
 		vector<HTp> m_kernspines;
 		bool        m_overwriteQ;
 		int         m_track;
+		bool        m_includerests = false;
 
 };
 

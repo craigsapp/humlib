@@ -183,6 +183,7 @@ class HumdrumFileBase : public HumHash {
 		void          usage                    (const std::string& command);
 		void          example                  (void);
 
+		bool          analyzeNonNullDataTokens (void);
 		HTp           getTrackStart            (int track) const;
 		void          getSpineStopList         (std::vector<HTp>& spinestops);
 		HTp           getSpineStart            (int spine) const
@@ -299,7 +300,6 @@ class HumdrumFileBase : public HumHash {
 		bool          stitchLinesTogether       (HumdrumLine& previous,
 		                                         HumdrumLine& next);
 		void          addToTrackStarts          (HTp token);
-		bool          analyzeNonNullDataTokens  (void);
 		void          addUniqueTokens           (std::vector<HTp>& target,
 		                                         std::vector<HTp>& source);
 		bool          processNonNullDataTokensForTrackForward(HTp starttoken,

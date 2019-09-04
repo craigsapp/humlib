@@ -28,10 +28,11 @@ namespace hum {
 //
 
 Tool_autobeam::Tool_autobeam(void) {
-	define("k|kern=i:0",    "process specific kern spine number");
-	define("t|track=i:0",   "process specific track number");
-	define("r|remove=b",    "remove all beams");
-	define("o|overwrite=b", "over-write existing beams");
+	define("k|kern=i:0",           "process specific kern spine number");
+	define("t|track=i:0",          "process specific track number");
+	define("r|remove=b",           "remove all beams");
+	define("o|overwrite=b",        "over-write existing beams");
+	define("rest|include-rests=b", "include rests in beam edges");
 }
 
 
@@ -159,6 +160,7 @@ void Tool_autobeam::removeBeams(HumdrumFile& infile) {
 //
 
 void Tool_autobeam::addBeams(HumdrumFile& infile) {
+	infile.analyzeNonNullDataTokens();
 	int strands = infile.getStrandCount();
 	int track;
 	for (int i=0; i<strands; i++) {
@@ -193,6 +195,7 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 	}
 	m_overwriteQ = getBoolean("overwrite");
 	m_track = getInteger("track");
+	m_includerests = getBoolean("include-rests");
 	if ((m_track == 0) && getBoolean("kern")) {
 		int ks = getInteger("kern") - 1;
 		vector<HTp> kernspines = infile.getKernSpineStartList();
@@ -347,6 +350,19 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 //
 
 void Tool_autobeam::addBeam(HTp startnote, HTp endnote) {
+	if (!startnote) {
+		return;
+	}
+	if (!endnote) {
+		return;
+	}
+	if (!m_includerests) {
+		removeEdgeRests(startnote, endnote);
+	}
+	if (startnote == endnote) {
+		// Nothing to do since only one note in beam.
+		return;
+	}
 	if (!m_overwriteQ) {
 		HTp token = startnote;
 		while (token && (token != endnote)) {
@@ -359,6 +375,67 @@ void Tool_autobeam::addBeam(HTp startnote, HTp endnote) {
 	startnote->push_back('L');
 	endnote->push_back('J');
 }
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::removeEdgeRests -- If the regions to be beams contain
+//     beams at the endpoints, shrink the beam until it finds notes.
+//     If there are no notes, then set startnote and endnote both to NULL.
+//
+
+void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
+	HTp current = startnote;
+	HTp previous = startnote;;
+
+	int startindex = startnote->getLineIndex();
+	int endindex = endnote->getLineIndex();
+
+
+	if (startnote->isRest()) {
+		current = current->getNextNNDT();
+		while (current && current->isRest()) {
+			if (current == endnote) {
+				startnote = current;
+				return;
+			}
+			previous = current;
+			current = current->getNextNNDT();
+		}
+
+		if (current->getLineIndex() >= endindex) {
+			startnote = endnote;
+			return;
+		} else {
+			startnote = current;
+		}
+	}
+
+	if (endnote->isRest()) {
+		HTp newcurrent = endnote;
+		previous = endnote;
+
+		newcurrent = newcurrent->getPreviousNNDT();
+		while (newcurrent && newcurrent->isRest()) {
+			if (newcurrent == startnote) {
+				endnote = newcurrent;
+				return;
+			}
+			previous = newcurrent;
+			newcurrent = newcurrent->getPreviousNNDT();
+		}
+
+		if (newcurrent->getLineIndex() <= startindex) {
+			endnote = startnote;
+			return;
+		} else {
+			endnote = newcurrent;
+		}
+	}
+
+}
+
 
 
 // END_MERGE
