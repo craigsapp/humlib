@@ -62,6 +62,30 @@ class Tool_imitation : public HumTool {
 		char m_marker = '@';
 		bool m_single = false;
 		static int Enumerator;
+		bool m_first = false;
+		bool m_nozero = false;
+		bool m_onlyzero = false;
+		bool m_measure = false;
+		bool m_beat    = false;
+		bool m_length  = false;
+
+		bool m_noInfo = false;
+
+		bool m_noN    = false;
+		bool m_noC    = false;
+		bool m_noD    = false;
+		bool m_noI    = false;
+
+		bool m_noNN   = false;
+		bool m_noCC   = false;
+		bool m_noDD   = false;
+		bool m_noII   = false;
+
+		bool m_addsearches  = false;
+		bool m_inversion  = false;
+		bool m_retrograde = false;
+
+		vector<int> m_barlines;
 };
 
 // END_MERGE

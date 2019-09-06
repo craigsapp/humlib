@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep  4 13:15:04 PDT 2019
+// Last Modified: Fri Sep  6 14:16:40 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1616,6 +1616,7 @@ class HumdrumFileBase : public HumHash {
 		                                                { return getMaxTrack(); }
 		int           getSpineCount            (void) const
 		                                                { return getMaxTrack(); }
+		vector<int>   getMeasureNumbers        (void);
 		int           getMeasureNumber         (int line);
 		std::ostream& printSpineInfo           (std::ostream& out = std::cout);
 		std::ostream& printDataTypeInfo        (std::ostream& out = std::cout);
@@ -5058,6 +5059,30 @@ class Tool_imitation : public HumTool {
 		char m_marker = '@';
 		bool m_single = false;
 		static int Enumerator;
+		bool m_first = false;
+		bool m_nozero = false;
+		bool m_onlyzero = false;
+		bool m_measure = false;
+		bool m_beat    = false;
+		bool m_length  = false;
+
+		bool m_noInfo = false;
+
+		bool m_noN    = false;
+		bool m_noC    = false;
+		bool m_noD    = false;
+		bool m_noI    = false;
+
+		bool m_noNN   = false;
+		bool m_noCC   = false;
+		bool m_noDD   = false;
+		bool m_noII   = false;
+
+		bool m_addsearches  = false;
+		bool m_inversion  = false;
+		bool m_retrograde = false;
+
+		vector<int> m_barlines;
 };
 
 

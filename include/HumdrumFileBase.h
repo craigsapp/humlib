@@ -172,6 +172,7 @@ class HumdrumFileBase : public HumHash {
 		                                                { return getMaxTrack(); }
 		int           getSpineCount            (void) const
 		                                                { return getMaxTrack(); }
+		vector<int>   getMeasureNumbers        (void);
 		int           getMeasureNumber         (int line);
 		std::ostream& printSpineInfo           (std::ostream& out = std::cout);
 		std::ostream& printDataTypeInfo        (std::ostream& out = std::cout);
