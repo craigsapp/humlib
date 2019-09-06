@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  6 14:16:40 PDT 2019
+// Last Modified: Fri Sep  6 14:47:28 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1616,7 +1616,7 @@ class HumdrumFileBase : public HumHash {
 		                                                { return getMaxTrack(); }
 		int           getSpineCount            (void) const
 		                                                { return getMaxTrack(); }
-		vector<int>   getMeasureNumbers        (void);
+		std::vector<int> getMeasureNumbers     (void);
 		int           getMeasureNumber         (int line);
 		std::ostream& printSpineInfo           (std::ostream& out = std::cout);
 		std::ostream& printDataTypeInfo        (std::ostream& out = std::cout);
