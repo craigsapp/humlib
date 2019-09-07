@@ -590,11 +590,11 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 
 			if (m_mark) {
 				for (int z=0; z<count; z++) {
-					if (i+z >= attacks.at(v1).size()) {
+					if (i+z >= (int)attacks.at(v1).size()) {
 						break;
 					}
 					token1 = attacks.at(v1).at(i+z)->getToken();
-					if (j+z >= attacks.at(v2).size()) {
+					if (j+z >= (int)attacks.at(v2).size()) {
 						break;
 					}
 					token2 = attacks.at(v2).at(j+z)->getToken();
