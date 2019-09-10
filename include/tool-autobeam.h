@@ -41,8 +41,8 @@ class Tool_autobeam : public HumTool {
 		void     removeEdgeRests (HTp& startnote, HTp& endnote);
 
 	private:
-		vector<vector<pair<int, HumNum> > > m_timesigs;
-		vector<HTp> m_kernspines;
+		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
+		std::vector<HTp> m_kernspines;
 		bool        m_overwriteQ;
 		int         m_track;
 		bool        m_includerests = false;

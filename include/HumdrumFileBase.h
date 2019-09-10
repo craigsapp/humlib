@@ -239,6 +239,7 @@ class HumdrumFileBase : public HumHash {
 		std::vector<HumdrumLine*> getReferenceRecords(void);
 		std::vector<HumdrumLine*> getGlobalReferenceRecords(void);
 		std::vector<HumdrumLine*> getUniversalReferenceRecords(void);
+		std::string getReferenceRecord(const std::string& key);
 
 		// spine analysis functionality:
 		void          getTrackSequence         (std::vector<std::vector<HTp> >& sequence,

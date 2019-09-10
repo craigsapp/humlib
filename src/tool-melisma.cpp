@@ -27,7 +27,6 @@ namespace hum {
 //
 
 Tool_melisma::Tool_melisma(void) {
-	// do nothing for now.
 	define("m|min=i:2",        "minimum length to identify as a melisma");
 	define("r|replace=b",      "replace lyrics with note counts");
 	define("a|average|avg=b",  "calculate note-to-syllable ratio");

@@ -2371,6 +2371,27 @@ void HumdrumFileBase::initializeArray(vector<vector<TYPE>>& array, TYPE value) {
 
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::getReferenceRecord --
+//
+
+std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		string refkey = infile[i].getReferenceKey();
+		if (refkey == key) {
+			string value = infile[i].getReferenceValue();
+			return value;
+		}
+	}
+	return "";
+}
+
+
 
 // END_MERGE
 
