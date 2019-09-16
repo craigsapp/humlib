@@ -313,7 +313,7 @@ void Tool_pccount::printVegaLiteJsonData(void) {
 	stringstream& out = m_free_text;
 
 	double maxpc = 0.0;
-	for (int i=0; i<m_counts[0].size(); i++) {
+	for (int i=0; i<(int)m_counts[0].size(); i++) {
 		if (m_counts[0][i] > maxpc) {
 			maxpc = m_counts[0][i];
 		}
@@ -350,7 +350,7 @@ void Tool_pccount::printVegaLiteJsonData(void) {
 
 void Tool_pccount::setFactorMaximum(void) {
 	m_factor = 0.0;
-	for (int i=0; i<m_counts[0].size(); i++) {
+	for (int i=0; i<(int)m_counts[0].size(); i++) {
 		if (m_counts[0][i] > m_factor) {
 			m_factor = m_counts[0][i];
 		}
@@ -366,7 +366,7 @@ void Tool_pccount::setFactorMaximum(void) {
 
 void Tool_pccount::setFactorNormalize(void) {
 	m_factor = 0.0;
-	for (int i=0; i<m_counts[0].size(); i++) {
+	for (int i=0; i<(int)m_counts[0].size(); i++) {
 		m_factor += m_counts[0][i];
 	}
 }

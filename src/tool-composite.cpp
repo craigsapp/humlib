@@ -80,6 +80,8 @@ bool Tool_composite::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
 	infile.createLinesFromTokens();
+	// need to convert to text for now:
+	m_humdrum_text << infile;
 	return true;
 }
 
@@ -259,6 +261,7 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		infile.analyzeStrands();
 		autobeam.run(infile);
 	}
+
 
 }
 
