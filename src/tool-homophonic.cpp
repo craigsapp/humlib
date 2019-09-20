@@ -182,7 +182,7 @@ void Tool_homophonic::processFile(HumdrumFile& infile) {
 	vector<double> score(infile.getLineCount(), 0);
 	vector<double> raw(infile.getLineCount(), 0);
 
-	double sum;
+	double sum = 0.0;
 	for (int i=0; i<(int)data.size(); i++) {
 		if (m_homophonic[data[i]].find("Y") != string::npos) {
 			if (m_homophonic[data[i]].find("N") != string::npos) {

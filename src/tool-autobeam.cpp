@@ -387,7 +387,6 @@ void Tool_autobeam::addBeam(HTp startnote, HTp endnote) {
 
 void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 	HTp current = startnote;
-	HTp previous = startnote;;
 
 	int startindex = startnote->getLineIndex();
 	int endindex = endnote->getLineIndex();
@@ -400,7 +399,6 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 				startnote = current;
 				return;
 			}
-			previous = current;
 			current = current->getNextNNDT();
 		}
 
@@ -414,7 +412,6 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 
 	if (endnote->isRest()) {
 		HTp newcurrent = endnote;
-		previous = endnote;
 
 		newcurrent = newcurrent->getPreviousNNDT();
 		while (newcurrent && newcurrent->isRest()) {
@@ -422,7 +419,6 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 				endnote = newcurrent;
 				return;
 			}
-			previous = newcurrent;
 			newcurrent = newcurrent->getPreviousNNDT();
 		}
 

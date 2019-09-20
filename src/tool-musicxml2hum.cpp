@@ -3041,7 +3041,7 @@ void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int p
 		return;
 	}
 
-	HTp token;
+	HTp token = NULL;
 	int staffnum = 0;
 	while (ottava) {
 		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex, staffcount);
@@ -3240,7 +3240,7 @@ void Tool_musicxml2hum::insertPartMensurations(xml_node timesig,
 		return;
 	}
 
-	HTp token;
+	HTp token = NULL;
 	int staffnum = 0;
 
 	while (timesig) {

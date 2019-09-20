@@ -347,7 +347,7 @@ void Tool_esac2hum::convertSong(vector<string>& song, ostream& out) {
 	string key;
 	double mindur = 1.0;
 	string meter;
-	int tonic;
+	int tonic = 0;
 	getKeyInfo(song, key, mindur, tonic, meter, out);
 
 	vector<NoteData> songdata;
