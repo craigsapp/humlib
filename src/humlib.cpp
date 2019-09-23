@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 22 22:59:51 PDT 2019
+// Last Modified: Mon Sep 23 09:55:52 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32432,6 +32432,19 @@ void Tool_autobeam::splitBeam(HTp tok, HTp stok, HTp etok) {
 //
 
 void Tool_autobeam::splitBeam2(vector<HTp>& group, HTp tok) {
+	int target = -1;
+	for (int i=0; i<group.size(); i++) {
+		if (group[i] == tok) {
+			target = i;
+			break;
+		}
+	}
+
+	if (target <= 0) {
+		// problem or at start of beam, so do not modify beam.
+		return;
+	}
+
 	m_splitcount++;
 	if (group.size() <= 2) {
 		// remove beam completely

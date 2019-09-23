@@ -251,6 +251,19 @@ void Tool_autobeam::splitBeam(HTp tok, HTp stok, HTp etok) {
 //
 
 void Tool_autobeam::splitBeam2(vector<HTp>& group, HTp tok) {
+	int target = -1;
+	for (int i=0; i<group.size(); i++) {
+		if (group[i] == tok) {
+			target = i;
+			break;
+		}
+	}
+
+	if (target <= 0) {
+		// problem or at start of beam, so do not modify beam.
+		return;
+	}
+
 	m_splitcount++;
 	if (group.size() <= 2) {
 		// remove beam completely
