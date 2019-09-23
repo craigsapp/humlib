@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 20 06:46:55 PDT 2019
+// Last Modified: Sun Sep 22 22:40:40 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32214,6 +32214,8 @@ Tool_autobeam::Tool_autobeam(void) {
 	define("t|track=i:0",          "process specific track number");
 	define("r|remove=b",           "remove all beams");
 	define("o|overwrite=b",        "over-write existing beams");
+	define("l|lyric|lyrics=b",     "break beam by lyric syllables");
+	define("L|lyric-info=b",       "return the number of breaks needed");
 	define("rest|include-rests=b", "include rests in beam edges");
 }
 
@@ -32263,6 +32265,12 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 	initialize(infile);
 	if (getBoolean("remove")) {
 		removeBeams(infile);
+	} else if (getBoolean("lyrics")) {
+		breakBeamsByLyrics(infile);
+	} else if (getBoolean("lyric-info")) {
+		breakBeamsByLyrics(infile);
+		m_free_text << m_splitcount << endl;
+		return true;
 	} else {
 		addBeams(infile);
 	}
@@ -32335,6 +32343,492 @@ void Tool_autobeam::removeBeams(HumdrumFile& infile) {
 }
 
 
+//////////////////////////////
+//
+// Tool_autobeam::breakBeamsByLyrics --
+//
+
+
+void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
+	infile.analyzeNonNullDataTokens();
+	int strands = infile.getStrandCount();
+	int track;
+	for (int i=0; i<strands; i++) {
+		if (m_track > 0) {
+			track = infile.getStrandStart(i)->getTrack();
+			if (track != m_track) {
+				continue;
+			}
+		}
+		HTp starttok = infile.getStrandStart(i);
+		if (!starttok->isKern()) {
+			continue;
+		}
+		HTp curtok = starttok->getNextFieldToken();
+		bool hastext = false;
+		while (curtok && !curtok->isKern()) {
+			if (curtok->isDataType("**text")) {
+				hastext = true;
+				break;
+			}
+			curtok = starttok->getNextFieldToken();
+		}
+		if (!hastext) {
+			continue;
+		}
+		processStrandForLyrics(infile.getStrandStart(i), infile.getStrandEnd(i));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::processStrandForLyrics --
+//
+
+void Tool_autobeam::processStrandForLyrics(HTp stok, HTp etok) {
+	HTp current = stok;
+	current = current->getNextNNDT();
+	while (current && (current != etok)) {
+		if (hasSyllable(current)) {
+			splitBeam(current, stok, etok);
+		}
+		current = current->getNextNNDT();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::splitBeam --
+//
+
+void Tool_autobeam::splitBeam(HTp tok, HTp stok, HTp etok) {
+	HumNum duration = Convert::recipToDuration(tok);
+	if (duration >= 1) {
+		// Should not be beamed
+		return;
+	}
+	vector<HTp> seq;
+	getBeamedNotes(seq, tok, stok, etok);
+	if (seq.size() == 0) {
+		// note is larger than eighth note
+		return;
+	}
+	if (seq.size() == 1) {
+		// Single note with no beam possible
+		return;
+	}
+	splitBeam2(seq, tok);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::splitBeam2 --
+//
+
+void Tool_autobeam::splitBeam2(vector<HTp>& group, HTp tok) {
+	m_splitcount++;
+	if (group.size() <= 2) {
+		// remove beam completely
+		for (int i=0; i<(int)group.size(); i++) {
+			string value = *group[i];
+			string newvalue;
+			for (int j=0; j<(int)value.size(); j++) {
+				if ((value[j] == 'L') || (value[j] == 'J') || (toupper(value[j]) == 'K')) {
+					continue;
+				}
+				newvalue += value[j];
+			}
+			group[i]->setText(newvalue);
+		}
+		return;
+	}
+	int lazyQ = isLazy(group);
+	if (lazyQ) {
+		splitBeamLazy(group, tok);
+	} else {
+		splitBeamNotLazy(group, tok);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::splitBeamNotLazy --
+//
+
+void Tool_autobeam::splitBeamNotLazy(vector<HTp>& group, HTp tok) {
+	int target = -1;
+
+	for (int i=0; i<(int)group.size(); i++) {
+		if (tok == group[i]) {
+			target = i;
+			break;
+		}
+	}
+	if (target < 0) {
+		return;
+	}
+
+	vector<int> sbeam(group.size(), 0);
+	vector<int> ebeam(group.size(), 0);
+
+	for (int i=0; i<(int)group.size(); i++) {
+		string value = *group[i];
+		int Lcount = 0;
+		int Jcount = 0;
+		for (int j=0; j<(int)value.size(); j++) {
+			if (value[j] == 'L') {
+				Lcount++;
+			}
+			if (value[j] == 'J') {
+				Jcount++;
+			}
+		}
+		sbeam[i] = Lcount;
+		ebeam[i] = Jcount;
+	}
+
+	vector<int> sum(group.size(), 0);
+	sum[0] = sbeam[0] - ebeam[0];
+	for (int i=1; i<(int)sum.size(); i++) {
+		sum[i] = sum[i-1] + sbeam[i] - ebeam[i];
+	}
+	vector<int> rsum(group.size(), 0);
+	int rsize = (int)rsum.size();
+	rsum[rsize - 1] = ebeam[rsize - 1] - sbeam[rsize - 1];
+	for (int i=rsize-2; i>=0; i--) {
+		rsum[i] = rsum[i+1] - sbeam[i] + ebeam[i];
+	}
+
+cerr << "BEAM: target to split before" << tok << endl;
+for (int i=0; i<group.size(); i++) {
+cerr << "\tTOKEN " << group[i] << "\t";
+cerr << "SBEAM   " << sbeam[i] << "\t";
+cerr << "EBEAM   " << ebeam[i] << "\t";
+cerr << "SUM     " << sum[i] << "\t";
+cerr << "RSUM    " << rsum[i] << endl;
+}
+cerr << endl;
+
+
+	if (target == 1) {
+		// remove the first note from a beam group
+		removeBeamCharacters(group[0]);
+		string value = *group[1];
+		for (int i=0; i<rsum[1]; i++) {
+			value += 'L';
+		}
+		group[1]->setText(value);
+	} else if (target == (int)group.size() - 2) {
+		// remove the last note from the beam
+		removeBeamCharacters(group[(int)group.size() - 1]);
+		string value = *group[(int)group.size()-2];
+		for (int i=0; i<sum[(int)group.size()-2]; i++) {
+			value += 'J';
+		}
+		group[(int)group.size() - 2]->setText(value);
+	} else {
+		// split beam into two beams
+		string value = *group[target];
+		for (int i=0; i<rsum[target]; i++) {
+			value += 'L';
+		}
+		group[target]->setText(value);
+
+		value = *group[target-1];
+		for (int i=0; i<sum[target-1]; i++) {
+			value += 'J';
+		}
+		group[target-1]->setText(value);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::splitBeamLazy -- Input will have more than two notes in the beam.
+//
+
+void Tool_autobeam::splitBeamLazy(vector<HTp>& group, HTp tok) {
+
+	int target = -1;
+	for (int i=0; i<(int)group.size(); i++) {
+		if (tok == group[i]) {
+			target = i;
+			break;
+		}
+	}
+	if (target < 0) {
+		return;
+	}
+	if (target == 1) {
+		// remove the first note from a beam group
+		removeBeamCharacters(group[0]);
+		string value = *group[1];
+		value += 'L';
+		group[1]->setText(value);
+	} else if (target == (int)group.size() - 2) {
+		// remove the last note from the beam
+		removeBeamCharacters(group[(int)group.size() - 1]);
+		string value = *group[(int)group.size()-2];
+		value += 'J';
+		group[(int)group.size() - 2]->setText(value);
+	} else {
+		// split beam into two beams
+		string value = *group[target];
+		value += 'L';
+		group[target]->setText(value);
+		value = *group[target-1];
+		value += 'J';
+		group[target-1]->setText(value);
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::removeBeamCharacters --
+//
+
+void Tool_autobeam::removeBeamCharacters(HTp token) {
+	string value = *token;
+	string newvalue;
+	for (int i=0; i<(int)value.size(); i++) {
+		if ((value[i] == 'L') || (value[i] == 'J') || (toupper(value[i]) == 'K')) {
+			continue;
+		}
+		newvalue += value[i];
+	}
+	if (newvalue.size()) {
+		token->setText(newvalue);
+	} else {
+		token->setText(".");
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::isLazy -- Return if just a single beam encoded
+//   (even if should only have one beam).
+//
+
+bool Tool_autobeam::isLazy(vector<HTp>& group) {
+	int Lcount = 0;
+	int Jcount = 0;
+	int Kcount = 0;
+	for (int i=0; i<(int)group.size(); i++) {
+		string value = *group[i];
+		for (int j=0; j<(int)value.size(); j++) {
+			if (value[j] == 'L') {
+				Lcount++;
+			} else if (value[j] == 'J') {
+				Jcount++;
+			} else if (toupper(value[j]) == 'K') {
+				Kcount++;
+			}
+		}
+	}
+	if ((Lcount == 1) && (Jcount == 1) && (Kcount == 0)) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::getBeamedNotes --
+//
+
+void Tool_autobeam::getBeamedNotes(vector<HTp>& toks, HTp tok, HTp stok, HTp etok) {
+	toks.resize(0);
+	vector<HTp> backward;
+	vector<HTp> forward;
+	vector<HTp> seq;
+	HTp current = tok;
+	while (current && !current->isBarline()) {
+		if (current->isNull()) {
+			current = current->getNextToken();
+			if (current && (current == etok)) {
+				break;
+			}
+		}
+		HumNum dur = Convert::recipToDuration(current);
+		if (dur >= 1) {
+			// No beams should be on this note
+			break;
+		}
+		forward.push_back(current);
+		current = current->getNextToken();
+		if (current && (current == etok)) {
+			break;
+		}
+	}
+
+	current = tok->getPreviousToken();
+	while (current && !current->isBarline()) {
+		if (current->isNull()) {
+			if (current == stok) {
+				break;
+			}
+			current = current->getPreviousToken();
+			if (current && (current == stok)) {
+				break;
+			}
+			continue;
+		}
+		HumNum dur = Convert::recipToDuration(current);
+		if (dur >= 1) {
+			// No beams should be on this note
+			break;
+		}
+		backward.push_back(current);
+		if (current == stok) {
+			break;
+		}
+		current = current->getPreviousToken();
+	}
+
+	seq.clear();
+	for (int i=(int)backward.size() - 1; i>=0; i--) {
+		seq.push_back(backward[i]);
+	}
+	for (int i=0; i<(int)forward.size(); i++) {
+		seq.push_back(forward[i]);
+	}
+
+	if (seq.size() < 2) {
+		// no beams possible
+		return;
+	}
+
+	vector<int> sbeam(seq.size(), 0);
+	vector<int> ebeam(seq.size(), 0);
+
+	for (int i=0; i<(int)seq.size(); i++) {
+		string value = *seq[i];
+		int Lcount = 0;
+		int Jcount = 0;
+		for (int j=0; j<(int)value.size(); j++) {
+			if (value[j] == 'L') {
+				Lcount++;
+			}
+			if (value[j] == 'J') {
+				Jcount++;
+			}
+		}
+		sbeam[i] = Lcount;
+		ebeam[i] = Jcount;
+	}
+
+	vector<int> sum(seq.size(), 0);
+	sum[0] = sbeam[0] - ebeam[0];
+	for (int i=1; i<(int)sum.size(); i++) {
+		sum[i] = sum[i-1] + sbeam[i] - ebeam[i];
+	}
+
+	int target = -1;
+	for (int i=0; i<(int)sum.size(); i++) {
+		if (seq[i] == tok) {
+			target = i;
+			break;
+		}
+	}
+
+
+	if ((target == 0) && (sum[0] == 0)) {
+		// no beam on note
+		return;
+	}
+
+	int sindex = -1;
+	int eindex = -1;
+	if (sum[target] == 0) {
+		if (sum[target - 1] == 0) {
+			// no beam on note
+			return;
+		} else {
+			// There is a beam on target note and currently at
+			// the end of the beam, so find the start:
+			eindex = target;
+			sindex = target;
+			for (int i=target-1; i>=0; i--) {
+				if (sum[i] != 0) {
+					sindex = i;
+				} else {
+					break;
+				}
+			}
+		}
+	} else {
+		// In the middle of a beam so expand outwards to find
+		// the start and end of the beam group.
+		for (int i=target; i>=0; i--) {
+			if (sum[i] != 0) {
+				sindex = i;
+			} else {
+				break;
+			}
+		}
+		for (int i=target; i<(int)sum.size(); i++) {
+			if (sum[i] == 0) {
+				eindex = i;
+				break;
+			}
+		}
+	}
+
+	if (eindex < 0) {
+		// in case where beam is not closed properly, assume last note is beam end.
+		eindex = (int)sum.size() - 1;
+	}
+	if (sindex < 0) {
+		// in case where beam is not opened properly, assume last note is beam end.
+		sindex = 0;
+	}
+
+	toks.clear();
+	for (int i=sindex; i<=eindex; i++) {
+		toks.push_back(seq[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::hasSyllable -- Only checking the first verse.
+//
+
+bool Tool_autobeam::hasSyllable(HTp token) {
+	HTp current = token->getNextFieldToken();
+	while (current && !current->isKern()) {
+		if (current->isDataType("**text")) {
+			if (current->isNull()) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		current = token->getNextFieldToken();
+	}
+	return false;
+}
+
+
 
 //////////////////////////////
 //
@@ -32369,6 +32863,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 //
 
 void Tool_autobeam::initialize(HumdrumFile& infile) {
+	m_splitcount = 0;
 	m_kernspines = infile.getKernSpineStartList();
 	vector<HTp>& ks = m_kernspines;
 	m_timesigs.resize(infile.getTrackCount() + 1);
@@ -32465,7 +32960,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 		beatpos.push_back(measure[i]->getDurationFromBarline() / beatdur);
 	}
 
-	// Now identify notes which should be beamed together
+	// Now identify notes that should be beamed together
 	// (using lazy beaming for now).
 	HumNum eighthnote(1, 2);
 	int beat1;

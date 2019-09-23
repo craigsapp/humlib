@@ -39,6 +39,16 @@ class Tool_autobeam : public HumTool {
 		void     addBeams        (HumdrumFile& infile);
 		void     removeBeams     (HumdrumFile& infile);
 		void     removeEdgeRests (HTp& startnote, HTp& endnote);
+		void     breakBeamsByLyrics(HumdrumFile& infile);
+		void     processStrandForLyrics(HTp stok, HTp etok);
+		bool     hasSyllable     (HTp token);
+		void     splitBeam       (HTp tok, HTp stok, HTp etok);
+		void     splitBeam2      (vector<HTp>& group, HTp tok);
+		void     getBeamedNotes(vector<HTp>& toks, HTp tok, HTp stok, HTp etok);
+		bool     isLazy          (vector<HTp>& group);
+		void     splitBeamLazy   (vector<HTp>& group, HTp tok);
+		void     splitBeamNotLazy(vector<HTp>& group, HTp tok);
+		void     removeBeamCharacters(HTp token);
 
 	private:
 		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
@@ -46,6 +56,7 @@ class Tool_autobeam : public HumTool {
 		bool        m_overwriteQ;
 		int         m_track;
 		bool        m_includerests = false;
+		int         m_splitcount = 0;
 
 };
 
