@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 22 22:40:40 PDT 2019
+// Last Modified: Sun Sep 22 22:59:51 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32507,17 +32507,6 @@ void Tool_autobeam::splitBeamNotLazy(vector<HTp>& group, HTp tok) {
 		rsum[i] = rsum[i+1] - sbeam[i] + ebeam[i];
 	}
 
-cerr << "BEAM: target to split before" << tok << endl;
-for (int i=0; i<group.size(); i++) {
-cerr << "\tTOKEN " << group[i] << "\t";
-cerr << "SBEAM   " << sbeam[i] << "\t";
-cerr << "EBEAM   " << ebeam[i] << "\t";
-cerr << "SUM     " << sum[i] << "\t";
-cerr << "RSUM    " << rsum[i] << endl;
-}
-cerr << endl;
-
-
 	if (target == 1) {
 		// remove the first note from a beam group
 		removeBeamCharacters(group[0]);
@@ -32526,7 +32515,7 @@ cerr << endl;
 			value += 'L';
 		}
 		group[1]->setText(value);
-	} else if (target == (int)group.size() - 2) {
+	} else if (target == (int)group.size() - 1) {
 		// remove the last note from the beam
 		removeBeamCharacters(group[(int)group.size() - 1]);
 		string value = *group[(int)group.size()-2];
