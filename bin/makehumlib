@@ -49,6 +49,7 @@ sub createIncludeFile {
 		"HumdrumFileStructure.h",
 		"HumdrumFileContent.h",
 		"HumdrumFile.h",
+		"MuseRecordBasic.h",
 		"NoteCell.h",
 		"NoteGrid.h",
 		"Convert.h"

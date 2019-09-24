@@ -652,7 +652,7 @@ int MuseRecordBasic::isTied(void) {
 	if (getNextTiedNoteLineIndex() >= 0) {
 		output += 2;
 	}
-	
+
 	return output;
 }
 

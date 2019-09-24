@@ -141,7 +141,7 @@ ostream& compareTimePoints(ostream& out, vector<vector<TimePoint>>& timepoints, 
 	vector<int> increment(timepoints.size(), 0);
 
 	while ((1)) {
-		if (indexes.at(0) >= timepoints.at(0).size()) {
+		if (indexes.at(0) >= (int)timepoints.at(0).size()) {
 			// at the end of the list of notes for the first file.
 			// break from the comparison for now and figure out how
 			// to report differences of added notes in the other file(s)
@@ -149,12 +149,12 @@ ostream& compareTimePoints(ostream& out, vector<vector<TimePoint>>& timepoints, 
 			break;
 		}
 		timepoints.at(0).at(indexes.at(0)).index.resize(timepoints.size());
-		for (int i=1; i<timepoints.size(); i++) {
+		for (int i=1; i < (int)timepoints.size(); i++) {
 			timepoints.at(0).at(indexes.at(0)).index.at(i) = -1;
 		}
 		minval = timepoints.at(0).at(indexes.at(0)).timestamp;
 		for (int i=1; i<(int)timepoints.size(); i++) {
-			if (indexes.at(i) >= timepoints.at(i).size()) {
+			if (indexes.at(i) >= (int)timepoints.at(i).size()) {
 				continue;
 			}
 			value = timepoints.at(i).at(indexes.at(i)).timestamp;
@@ -166,7 +166,7 @@ ostream& compareTimePoints(ostream& out, vector<vector<TimePoint>>& timepoints, 
 		fill(increment.begin(), increment.end(), 0);
 		
 		for (int i=0; i<(int)timepoints.size(); i++) {
-			if (indexes.at(i) >= timepoints.at(i).size()) {
+			if (indexes.at(i) >= (int)timepoints.at(i).size()) {
 				// index is too large for file, so skip checking it.
 				continue;
 			}
@@ -279,7 +279,7 @@ void compareLines(HumNum minval, vector<int>& indexes,
 	}
 
 	if (options.getBoolean("notes")) {
-		for (int i=0; i<notelist.size(); i++) {
+		for (int i=0; i < (int)notelist.size(); i++) {
 			cerr << "========== NOTES FOR I=" << i << endl;
 			printNotePoints(notelist.at(i));
 			cerr << endl;

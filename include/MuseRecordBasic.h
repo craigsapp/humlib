@@ -19,6 +19,11 @@
 #include <iostream>
 
 
+
+namespace hum {
+
+// START_MERGE
+
 // Reference:     Beyond Midi, page 410.
 #define E_muserec_note_regular       'N'
    //                                'A' --> use type E_muserec_note_regular
@@ -75,28 +80,23 @@
 #define E_musrec_footer               2000
 
 
-namespace hum {
-
-// START_MERGE
-
-
 class MuseRecordBasic {
    public:
 		                  MuseRecordBasic    (void);
 		                  MuseRecordBasic    (const std::string& aLine, int index = -1);
 		                  MuseRecordBasic    (MuseRecordBasic& aRecord);
 		                 ~MuseRecordBasic    ();
-  
+
 		void              clear              (void);
 		int               isEmpty            (void);
 		void              cleanLineEnding    (void);
 		std::string       extract            (int start, int stop);
 		char&             getColumn          (int index);
 		std::string       getColumns         (int startcol, int endcol);
-		void              setColumns         (std::string& data, int startcol, 
+		void              setColumns         (std::string& data, int startcol,
 		                                      int endcol);
 		int               getLength          (void) const;
-		std::string       getLine            (void); 
+		std::string       getLine            (void);
 		int               getLineIndex       (void) { return lineindex; }
 		void              setLineIndex       (int index);
 		int               getLineNumber      (void) { return lineindex+1; }
@@ -108,7 +108,7 @@ class MuseRecordBasic {
 		MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
 		MuseRecordBasic&  operator=          (const std::string& aRecord);
 		char&             operator[]         (int index);
-		void              setLine            (const std::string& aString); 
+		void              setLine            (const std::string& aString);
 		void              setType            (int aType);
 		void              shrink             (void);
 		void              insertString       (int column, const std::string& strang);
@@ -152,7 +152,7 @@ class MuseRecordBasic {
 		int               lineindex;         // index into original file
 		int               type;              // category of MuseRecordBasic record
 		HumNum            absbeat;           // dur in quarter notes from start
-		HumNum            lineduration;      // duration of line 
+		HumNum            lineduration;      // duration of line
 		HumNum            noteduration;      // duration of note
 
 		int               b40pitch;          // base 40 pitch
@@ -163,7 +163,7 @@ class MuseRecordBasic {
 		int               roundBreve;
 
 };
-   
+
 
 std::ostream& operator<<(std::ostream& out, MuseRecordBasic& aRecord);
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 23 23:49:19 PDT 2019
+// Last Modified: Tue 24 Sep 2019 12:09:47 AM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -26897,7 +26897,7 @@ int MuseRecordBasic::isTied(void) {
 	if (getNextTiedNoteLineIndex() >= 0) {
 		output += 2;
 	}
-	
+
 	return output;
 }
 
@@ -33237,7 +33237,7 @@ void Tool_autobeam::splitBeam(HTp tok, HTp stok, HTp etok) {
 
 void Tool_autobeam::splitBeam2(vector<HTp>& group, HTp tok) {
 	int target = -1;
-	for (int i=0; i<group.size(); i++) {
+	for (int i=0; i<(int)group.size(); i++) {
 		if (group[i] == tok) {
 			target = i;
 			break;
