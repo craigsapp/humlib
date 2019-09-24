@@ -135,6 +135,10 @@ class Convert {
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
 
+		// MuseData conversions in Convert-musedata.cpp
+      static int       museToBase40        (const std::string& pitchString);
+      static std::string musePitchToKernPitch(const std::string& museInput);
+
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
 		static std::vector<int> majorScaleBase40 (void);

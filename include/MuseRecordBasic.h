@@ -19,7 +19,6 @@
 #include <iostream>
 
 
-
 namespace hum {
 
 // START_MERGE

@@ -50,6 +50,7 @@ sub createIncludeFile {
 		"HumdrumFileContent.h",
 		"HumdrumFile.h",
 		"MuseRecordBasic.h",
+		"MuseRecord.h",
 		"NoteCell.h",
 		"NoteGrid.h",
 		"Convert.h"
