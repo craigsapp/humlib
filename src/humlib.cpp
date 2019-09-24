@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep 24 12:39:29 PDT 2019
+// Last Modified: Tue 24 Sep 2019 12:58:42 PM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -26398,7 +26398,7 @@ string MuseRecord::getOctaveString(void) {
    while ((index < (int)recordInfo.size()) && !std::isdigit(recordInfo[index])) {
       index++;
    }
-   if (index >= recordInfo.size()) {
+   if (index >= (int)recordInfo.size()) {
       cerr << "Error: no octave specification in note field: " << recordInfo
            << endl;
       exit(1);
@@ -26447,7 +26447,7 @@ int MuseRecord::getPitchClass(void) {
 string MuseRecord::getPitchClassString(void) {
 	string output = getNoteField();
    int index = 0;
-   while ((index < output.size()) &&  !std::isdigit(output[index])) {
+   while ((index < (int)output.size()) &&  !std::isdigit(output[index])) {
       index++;
    }
    output.resize(index);
@@ -26466,7 +26466,7 @@ int MuseRecord::getAccidental(void) {
    string recordInfo = getNoteField();
    int output = 0;
    int index = 0;
-   while ((index < recordInfo.size()) && (index < 16)) {
+   while ((index < (int)recordInfo.size()) && (index < 16)) {
       if (recordInfo[index] == 'f') {
          output--;
       } else if (recordInfo[index] == '#') {
@@ -29423,7 +29423,7 @@ string MuseRecord::getFigure(int index) {
 	HumRegex hre;
 	vector<string> pieces;
 	hre.split(pieces, temp, " +");
-	if (index < pieces.size()) {
+	if (index < (int)pieces.size()) {
    	output = pieces[index];
 	}
    return output;
