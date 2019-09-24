@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 23 09:55:52 PDT 2019
+// Last Modified: Mon Sep 23 23:49:19 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -336,6 +336,7 @@ class HumNum {
 		std::ostream& printMixedFraction (std::ostream& out = std::cout,
 		                             std::string separator = "_") const;
 		std::ostream& printList          (std::ostream& out) const;
+		std::ostream& printTwoPart  (std::ostream& out, const std::string& spacer = "+") const;
 
 	protected:
 		void     reduce             (void);

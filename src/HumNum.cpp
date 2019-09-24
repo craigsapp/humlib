@@ -843,6 +843,53 @@ ostream& HumNum::printMixedFraction(ostream& out,
 
 //////////////////////////////
 //
+// HumNum::printTwoPart --
+//     default value: spacer = "+"
+//
+
+ostream& HumNum::printTwoPart(ostream& out, const string& spacer) const {
+   int tnum = top;
+   int tden = bot;
+   int sign = 1;
+   if (tnum < 0) {
+      tnum = -tnum;
+      sign = -sign;
+   }
+   if (tden < 0) {
+      tden = -tden;
+      sign = -sign;
+   }
+
+   if (tnum < tden) {
+      out << *this;
+      return out;
+   }
+
+   int integ = tnum / tden;
+   tnum = tnum - tden * integ;
+
+   if (sign < 0) {
+      out << '-';
+   }
+   if (integ > 0) {
+      out << integ;
+      if (tnum > 0) {
+         out << spacer;
+         HumNum newone(tnum, tden);
+         out << newone;
+      }
+   } else {
+      HumNum newone(tnum, tden);
+      out << newone;
+   }
+
+   return out;
+}
+
+
+
+//////////////////////////////
+//
 // HumNum::printList -- Print as a list of two numbers, such as
 //    "(1, 2)" for 1/2.
 // default value: out = cout;

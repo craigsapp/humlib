@@ -98,6 +98,7 @@ class HumNum {
 		std::ostream& printMixedFraction (std::ostream& out = std::cout,
 		                             std::string separator = "_") const;
 		std::ostream& printList          (std::ostream& out) const;
+		std::ostream& printTwoPart  (std::ostream& out, const std::string& spacer = "+") const;
 
 	protected:
 		void     reduce             (void);
