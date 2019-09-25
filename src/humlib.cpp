@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed 25 Sep 2019 11:07:31 AM PDT
+// Last Modified: Wed Sep 25 13:41:46 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27044,7 +27044,7 @@ void MuseData::analyzeRhythm(void) {
 	for (int i=0; i<(int)data.size(); i++) {
 		if (data[i]->getType() == E_muserec_musical_attributes) {
 			if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-				tpq = std::stoi(hre.getMatch(1));
+				tpq = hre.getMatchInt(1);
 			}
 		}
 
@@ -27064,7 +27064,7 @@ void MuseData::analyzeRhythm(void) {
 			} else {
 				data[i]->setNoteDuration(primarychordnoteduration);
 			}
-	 data[i]->setLineDuration(0);
+			data[i]->setLineDuration(0);
 		} else {
 			data[i]->setAbsBeat(cumulative);
 			data[i]->setNoteDuration(data[i]->getNoteTickDuration(), tpq);
@@ -27115,7 +27115,7 @@ int MuseData::getInitialTPQ(void) {
 			}
 			if ((*data[i])[0] == '$') {
 				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-					output = std::stoi(hre.getMatch(1));
+					output = hre.getMatchInt(1);
 				}
 				break;
 			}
@@ -27124,7 +27124,7 @@ int MuseData::getInitialTPQ(void) {
 		for (int i=0; i<(int)data.size(); i++) {
 			if (data[i]->getType() == E_muserec_musical_attributes) {
 				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-					output = std::stoi(hre.getMatch(1));
+					output = hre.getMatchInt(1);
 				}
 				break;
 			}
@@ -27496,7 +27496,7 @@ int MuseData::getMembershipPartNumber(const string& mstring) {
 				if (hre.search(data[i]->getLine(),
 					"part\\s*(\\d+)\\s*of\\s*(\\d+)")) {
 					string partnum = hre.getMatch(1);
-					return std::stoi(partnum);
+					return hre.getMatchInt(1);
 				}
 			}
 		}
@@ -28306,6 +28306,9 @@ string MuseRecord::getTickDurationString(void) {
 
 int MuseRecord::getTickDuration(void) {
 	string recordInfo = getTickDurationString();
+	if (recordInfo.empty()) {
+		return 0;
+	}
 	return std::stoi(recordInfo);
 }
 
@@ -28323,6 +28326,9 @@ int MuseRecord::getLineTickDuration(void) {
 	}
 
 	string recordInfo = getTickDurationString();
+	if (recordInfo.empty()) {
+		return 0;
+	}
 	int value = std::stoi(recordInfo);
 	if (getType() == E_muserec_backspace) {
 		return -value;
@@ -28343,7 +28349,11 @@ int MuseRecord::getTicks(void) {
 
 int MuseRecord::getNoteTickDuration(void) {
 	string recordInfo = getTickDurationString();
-	int value = std::stoi(recordInfo);
+	int value = 0;
+	if (recordInfo.empty()) {
+		return value;
+	}
+	value = std::stoi(recordInfo);
 	if (getType() == E_muserec_backspace) {
 		return -value;
 	}
@@ -31412,11 +31422,12 @@ int MuseRecordBasic::isEmpty(void) {
 
 string MuseRecordBasic::extract(int start, int end) {
 	string output;
-	for (int i=0; i<=end-start; i++) {
+	int count = end - start + 1;
+	for (int i=0; i<count; i++) {
 		if (i+start <= getLength()) {
-			output[i] += getColumn(i+start);
+			output += getColumn(i+start);
 		} else {
-			output[i] += ' ';
+			output += ' ';
 		}
 	}
 	return output;

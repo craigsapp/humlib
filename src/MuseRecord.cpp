@@ -423,6 +423,9 @@ string MuseRecord::getTickDurationString(void) {
 
 int MuseRecord::getTickDuration(void) {
 	string recordInfo = getTickDurationString();
+	if (recordInfo.empty()) {
+		return 0;
+	}
 	return std::stoi(recordInfo);
 }
 
@@ -440,6 +443,9 @@ int MuseRecord::getLineTickDuration(void) {
 	}
 
 	string recordInfo = getTickDurationString();
+	if (recordInfo.empty()) {
+		return 0;
+	}
 	int value = std::stoi(recordInfo);
 	if (getType() == E_muserec_backspace) {
 		return -value;
@@ -460,7 +466,11 @@ int MuseRecord::getTicks(void) {
 
 int MuseRecord::getNoteTickDuration(void) {
 	string recordInfo = getTickDurationString();
-	int value = std::stoi(recordInfo);
+	int value = 0;
+	if (recordInfo.empty()) {
+		return value;
+	}
+	value = std::stoi(recordInfo);
 	if (getType() == E_muserec_backspace) {
 		return -value;
 	}

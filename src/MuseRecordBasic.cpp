@@ -126,11 +126,12 @@ int MuseRecordBasic::isEmpty(void) {
 
 string MuseRecordBasic::extract(int start, int end) {
 	string output;
-	for (int i=0; i<=end-start; i++) {
+	int count = end - start + 1;
+	for (int i=0; i<count; i++) {
 		if (i+start <= getLength()) {
-			output[i] += getColumn(i+start);
+			output += getColumn(i+start);
 		} else {
-			output[i] += ' ';
+			output += ' ';
 		}
 	}
 	return output;

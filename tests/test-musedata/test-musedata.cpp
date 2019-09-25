@@ -16,7 +16,15 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	cout << mds;
+	int partcount = mds.getPartCount();
+	cerr << "THERE ARE " << partcount << " parts in data" << endl;
+	MuseData& md = mds[0];
+	for (int i=0; i<md.getLineCount(); i++) {
+		cout << "LINE:" << i 
+		     << "\tABSQ:" << md.getAbsBeat(i).getFloat() << "\t" 
+		     << "\tTDUR:" << md[i].getLineTickDuration() << "\t" 
+		     << md[i] << endl;
+	}
 
 	return 0;
 }

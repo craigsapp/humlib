@@ -756,7 +756,7 @@ void MuseData::analyzeRhythm(void) {
 	for (int i=0; i<(int)data.size(); i++) {
 		if (data[i]->getType() == E_muserec_musical_attributes) {
 			if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-				tpq = std::stoi(hre.getMatch(1));
+				tpq = hre.getMatchInt(1);
 			}
 		}
 
@@ -776,7 +776,7 @@ void MuseData::analyzeRhythm(void) {
 			} else {
 				data[i]->setNoteDuration(primarychordnoteduration);
 			}
-	 data[i]->setLineDuration(0);
+			data[i]->setLineDuration(0);
 		} else {
 			data[i]->setAbsBeat(cumulative);
 			data[i]->setNoteDuration(data[i]->getNoteTickDuration(), tpq);
@@ -827,7 +827,7 @@ int MuseData::getInitialTPQ(void) {
 			}
 			if ((*data[i])[0] == '$') {
 				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-					output = std::stoi(hre.getMatch(1));
+					output = hre.getMatchInt(1);
 				}
 				break;
 			}
@@ -836,7 +836,7 @@ int MuseData::getInitialTPQ(void) {
 		for (int i=0; i<(int)data.size(); i++) {
 			if (data[i]->getType() == E_muserec_musical_attributes) {
 				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
-					output = std::stoi(hre.getMatch(1));
+					output = hre.getMatchInt(1);
 				}
 				break;
 			}
@@ -1208,7 +1208,7 @@ int MuseData::getMembershipPartNumber(const string& mstring) {
 				if (hre.search(data[i]->getLine(),
 					"part\\s*(\\d+)\\s*of\\s*(\\d+)")) {
 					string partnum = hre.getMatch(1);
-					return std::stoi(partnum);
+					return hre.getMatchInt(1);
 				}
 			}
 		}
