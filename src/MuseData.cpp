@@ -5,6 +5,7 @@
 // Filename:      ...sig/src/sigInfo/MuseData.cpp
 // Web Address:   http://sig.sapp.org/src/sigInfo/MuseData.cpp
 // Syntax:        C++
+// vim:           ts=3
 //
 // Description:   A class that multiple MuseRecord lines.
 //
@@ -360,7 +361,7 @@ MuseRecord& MuseData::getRecord(int eindex, int erecord) {
 //   0x0d 0x0a = dos
 //
 
-void MuseData::read(istream& input) {
+int MuseData::read(istream& input) {
 	string dataline;
 	dataline.reserve(256);
 	int character;
@@ -406,12 +407,19 @@ void MuseData::read(istream& input) {
 	}
 
 	doAnalyses();
+	return 1;
 }
 
 
-void MuseData::read(const string& filename) {
-	ifstream infile(filename, ios::in);
-	MuseData::read(infile);
+int MuseData::readFile(const string& filename) {
+	ifstream infile(filename);
+	return MuseData::read(infile);
+}
+
+int MuseData::readString(const string& data) {
+	stringstream ss;
+	ss << data;
+	return MuseData::read(ss);
 }
 
 

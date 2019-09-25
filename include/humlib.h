@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 25 09:29:45 PDT 2019
+// Last Modified: Wed 25 Sep 2019 10:06:12 AM PDT
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2465,13 +2465,13 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 // Reference:     Beyond Midi, page 410.
 #define E_muserec_note_regular       'N'
-   //                                'A' --> use type E_muserec_note_regular
-   //                                'B' --> use type E_muserec_note_regular
-   //                                'C' --> use type E_muserec_note_regular
-   //                                'D' --> use type E_muserec_note_regular
-   //                                'E' --> use type E_muserec_note_regular
-   //                                'F' --> use type E_muserec_note_regular
-   //                                'G' --> use type E_muserec_note_regular
+	//                                'A' --> use type E_muserec_note_regular
+	//                                'B' --> use type E_muserec_note_regular
+	//                                'C' --> use type E_muserec_note_regular
+	//                                'D' --> use type E_muserec_note_regular
+	//                                'E' --> use type E_muserec_note_regular
+	//                                'F' --> use type E_muserec_note_regular
+	//                                'G' --> use type E_muserec_note_regular
 #define E_muserec_note_chord         'C'
 #define E_muserec_note_cue           'c'
 #define E_muserec_note_grace         'g'
@@ -2510,7 +2510,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 #define E_muserec_header_12          'B'  // <name1>: part <x> of <num in group>
 #define E_muserec_unknown            'U'  // unknown record type
 #define E_muserec_empty              'E'  // nothing on line and not header
-                                          // or multi-line comment
+	                                       // or multi-line comment
 #define E_muserec_deleted            'D'  // deleted line
 // non-standard record types for MuseDataSet
 #define E_muserec_filemarker         '+'
@@ -2520,7 +2520,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 
 
 class MuseRecordBasic {
-   public:
+	public:
 		                  MuseRecordBasic    (void);
 		                  MuseRecordBasic    (const std::string& aLine, int index = -1);
 		                  MuseRecordBasic    (MuseRecordBasic& aRecord);
@@ -2584,7 +2584,7 @@ class MuseRecordBasic {
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
 
-   protected:
+	protected:
 		std::string       recordString;      // actual characters on line
 
 		// mark-up data for the line:
@@ -2600,7 +2600,6 @@ class MuseRecordBasic {
 		int               lasttiednote;      // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               roundBreve;
-
 };
 
 
@@ -2880,9 +2879,151 @@ class MuseRecord : public MuseRecordBasic {
 		int              getAddElementIndex           (int& index, std::string& output,
 		                                               const std::string& input);
 		void             zerase                       (std::string& inout, int num);
-
 };
 
+
+
+
+// A MuseEventSet is a timestamp and then a list of pointers to all
+// lines in the original file that occur at that time.
+// The MuseData class contains a variable called "sequence" which is
+// a list of MuseEventSet object pointers which are sorted by time.
+
+class MuseEventSet {
+	public:
+		                   MuseEventSet       (void);
+		                   MuseEventSet       (HumNum atime);
+		                  ~MuseEventSet       ()     { clear(); }
+
+		void               clear              (void);
+		void               setTime            (HumNum abstime);
+		HumNum             getTime            (void);
+		void               appendRecord       (MuseRecord* arecord);
+		MuseRecord&        operator[]         (int index);
+		MuseEventSet       operator=          (MuseEventSet& anevent);
+		int                getEventCount      (void);
+
+	protected:
+		HumNum     absbeat;              // starting time of events
+		std::vector<MuseRecord*> events; // list of events on absbeat
+};
+
+
+
+class MuseData {
+	public:
+		                  MuseData            (void);
+		                  MuseData            (MuseData& input);
+		                 ~MuseData            ();
+
+		void              setFilename         (const std::string& filename);
+		std::string       getFilename         (void);
+		std::string       getPartName         (void);
+		int               isMember            (const std::string& mstring);
+		int               getMembershipPartNumber(const std::string& mstring);
+		void              selectMembership    (const std::string& selectstring);
+		MuseData&         operator=           (MuseData& input);
+		int               getLineCount        (void);
+		int               getNumLines         (void) { return getLineCount(); }
+		MuseRecord&       last                (void);
+		int               isEmpty             (void);
+		int               append              (MuseRecord& arecord);
+		int               append              (MuseData& musedata);
+		int               append              (std::string& charstring);
+		void              insert              (int index, MuseRecord& arecord);
+		void              clear               (void);
+		int               getInitialTPQ       (void);
+
+		int               read                (std::istream& input);
+		int               readString          (const std::string& filename);
+		int               readFile            (const std::string& filename);
+
+		// additional mark-up analysis functions for post-processing:
+		void              doAnalyses          (void);
+		void              analyzeType         (void);
+		void              analyzeRhythm       (void);
+		void              analyzeTies         (void);
+		void              analyzePitch        (void);
+
+		// line-based (file-order indexing) accessor functions:
+		MuseRecord&       operator[]          (int lindex);
+		MuseRecord&       getRecord           (int lindex);
+		HumNum            getTiedDuration     (int lindex);
+
+		HumNum            getAbsBeat         (int lindex);
+
+		int               getLineTickDuration (int lindex);
+
+		// event-based (time-order indexing) accessor functions:
+		MuseEventSet&     getEvent            (int eindex);
+		int               getEventCount       (void);
+		HumNum            getEventTime        (int eindex);
+		MuseRecord&       getRecord           (int eindex, int erecord);
+		int               getLineIndex        (int eindex, int erecord);
+		HumNum            getLineDuration     (int eindex, int erecord);
+		HumNum            getNoteDuration     (int eindex, int erecord);
+		int               getLastTiedNoteLineIndex(int eindex, int erecord);
+		int               getNextTiedNoteLineIndex(int eindex, int erecord);
+		HumNum            getTiedDuration     (int eindex, int erecord);
+		int               getType             (int eindex, int erecord);
+		void              cleanLineEndings    (void);
+
+	private:
+		std::vector<MuseRecord*>    data;
+		std::vector<MuseEventSet*>  sequence;
+		std::string                 name;
+
+	protected:
+		void              processTie          (int eventindex, int recordindex,
+		                                       int lastindex);
+		int               searchForPitch      (int eventindex, int b40,
+		                                       int track);
+		int               getNextEventIndex   (int startindex,
+		                                       HumNum target);
+		void              constructTimeSequence(void);
+		void              insertEventBackwards (HumNum atime,
+		                                        MuseRecord* arecord);
+		int               getPartNameIndex    (void);
+};
+
+
+std::ostream& operator<<(std::ostream& out, MuseData& musedata);
+
+
+
+
+class MuseDataSet {
+	public:
+		                  MuseDataSet         (void);
+		                  MuseDataSet         (MuseDataSet& input);
+		                 ~MuseDataSet         () { clear(); }
+
+		void              clear               (void);
+		int               readPartFile        (const std::string& filename);
+		int               readPartString      (const std::string& data);
+		int               readPart            (std::istream& input);
+		int               readFile            (const std::string& filename);
+		int               readString          (const std::string& data);
+		int               read                (std::istream& input);
+		MuseData&         operator[]          (int index);
+		int               getPartCount        (void);
+		void              deletePart          (int index);
+		void              cleanLineEndings    (void);
+
+	private:
+		std::vector<MuseData*>  part;
+
+	protected:
+		int               appendPart          (MuseData* musedata);
+		void              analyzeSetType      (std::vector<int>& types, 
+		                                       std::vector<std::string>& lines);
+		void              analyzePartSegments (std::vector<int>& startindex, 
+		                                       std::vector<int>& stopindex, 
+		                                       std::vector<std::string>& lines);
+};
+
+
+std::ostream& operator<<(std::ostream& out, MuseDataSet& musedata);
 
 
 

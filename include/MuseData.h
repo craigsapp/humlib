@@ -5,6 +5,7 @@
 // Filename:      humlib/include/MuseData.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/MuseData.h
 // Syntax:        C++
+// vim:           ts=3
 //
 // Description:   A class that stores a list of MuseRecords.
 //
@@ -72,8 +73,9 @@ class MuseData {
 		void              clear               (void);
 		int               getInitialTPQ       (void);
 
-		void              read                (std::istream& input);
-		void              read                (const std::string& filename);
+		int               read                (std::istream& input);
+		int               readString          (const std::string& filename);
+		int               readFile            (const std::string& filename);
 
 		// additional mark-up analysis functions for post-processing:
 		void              doAnalyses          (void);

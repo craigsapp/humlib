@@ -5,7 +5,8 @@
 // Filename:      humlib/src//MuseDataSet.cpp
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/src/MuseDataSet.cpp
 // Syntax:        C++11
-// 
+// vim:           ts=3
+//
 // Description:   A class that stores a collection of MuseDataSet files
 //                representing parts in the same score.
 //
@@ -35,7 +36,7 @@ namespace hum {
 // MuseDataSet::MuseDataSet --
 //
 
-MuseDataSet::MuseDataSet (void) { 
+MuseDataSet::MuseDataSet (void) {
 	part.reserve(100);
 }
 
@@ -46,7 +47,7 @@ MuseDataSet::MuseDataSet (void) {
 // MuseDataSet::clear -- Remove contents of object.
 //
 
-void MuseDataSet::clear(void) { 
+void MuseDataSet::clear(void) {
 	int i;
 	for (i=0; i<(int)part.size(); i++) {
 		delete part[i];
@@ -75,7 +76,7 @@ MuseData& MuseDataSet::operator[](int index) {
 
 int MuseDataSet::readPartFile(const string& filename) {
 	MuseData* md = new MuseData;
-	md->read(filename);
+	md->readFile(filename);
 	md->setFilename(filename);
 	return appendPart(md);
 }
@@ -103,7 +104,7 @@ int MuseDataSet::readPart(istream& input) {
 
 int MuseDataSet::readFile(const string& filename) {
 	MuseDataSet::clear();
-	ifstream infile(filename, ios::in);
+	ifstream infile(filename);
 	return MuseDataSet::read(infile);
 }
 
@@ -169,9 +170,9 @@ int MuseDataSet::appendPart(MuseData* musedata) {
 //    and the ending line index for each part in the input.
 //
 
-void MuseDataSet::analyzePartSegments(vector<int>& startindex, 
+void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 		vector<int>& stopindex, vector<string>& lines) {
- 
+
 	startindex.clear();
 	stopindex.clear();
 	startindex.reserve(1000);
@@ -226,7 +227,7 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 			if (j < 0) {
 				break;
 			}
-			if ((types[j] == E_muserec_comment_line) || 
+			if ((types[j] == E_muserec_comment_line) ||
 				 (types[j] == E_muserec_comment_toggle)) {
 				j--;
 				continue;

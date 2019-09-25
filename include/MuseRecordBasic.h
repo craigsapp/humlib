@@ -5,6 +5,7 @@
 // Filename:      humilb/include/MuseRecordBasic.h
 // URL:           http://github.com/craigsapp/humlib/blob/master/include/MuseRecordBasic.h
 // Syntax:        C++11
+// vim:           ts=3
 //
 // Description:   basic data manipulations for lines in a Musedata file.
 //
@@ -25,13 +26,13 @@ namespace hum {
 
 // Reference:     Beyond Midi, page 410.
 #define E_muserec_note_regular       'N'
-   //                                'A' --> use type E_muserec_note_regular
-   //                                'B' --> use type E_muserec_note_regular
-   //                                'C' --> use type E_muserec_note_regular
-   //                                'D' --> use type E_muserec_note_regular
-   //                                'E' --> use type E_muserec_note_regular
-   //                                'F' --> use type E_muserec_note_regular
-   //                                'G' --> use type E_muserec_note_regular
+	//                                'A' --> use type E_muserec_note_regular
+	//                                'B' --> use type E_muserec_note_regular
+	//                                'C' --> use type E_muserec_note_regular
+	//                                'D' --> use type E_muserec_note_regular
+	//                                'E' --> use type E_muserec_note_regular
+	//                                'F' --> use type E_muserec_note_regular
+	//                                'G' --> use type E_muserec_note_regular
 #define E_muserec_note_chord         'C'
 #define E_muserec_note_cue           'c'
 #define E_muserec_note_grace         'g'
@@ -70,7 +71,7 @@ namespace hum {
 #define E_muserec_header_12          'B'  // <name1>: part <x> of <num in group>
 #define E_muserec_unknown            'U'  // unknown record type
 #define E_muserec_empty              'E'  // nothing on line and not header
-                                          // or multi-line comment
+	                                       // or multi-line comment
 #define E_muserec_deleted            'D'  // deleted line
 // non-standard record types for MuseDataSet
 #define E_muserec_filemarker         '+'
@@ -80,7 +81,7 @@ namespace hum {
 
 
 class MuseRecordBasic {
-   public:
+	public:
 		                  MuseRecordBasic    (void);
 		                  MuseRecordBasic    (const std::string& aLine, int index = -1);
 		                  MuseRecordBasic    (MuseRecordBasic& aRecord);
@@ -144,7 +145,7 @@ class MuseRecordBasic {
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
 
-   protected:
+	protected:
 		std::string       recordString;      // actual characters on line
 
 		// mark-up data for the line:
@@ -160,7 +161,6 @@ class MuseRecordBasic {
 		int               lasttiednote;      // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               roundBreve;
-
 };
 
 

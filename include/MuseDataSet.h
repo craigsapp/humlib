@@ -5,6 +5,7 @@
 // Filename:      humlib/include/MuseDataSet.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/MuseDataSetSet.h
 // Syntax:        C++ 
+// vim:           ts=3
 //
 // Description:   A class that stores a collection of MuseDataSet files
 //                representing parts in the same score.
@@ -22,36 +23,35 @@ namespace hum {
 // START_MERGE
 
 class MuseDataSet {
-   public:
-                        MuseDataSet         (void);
-                        MuseDataSet         (MuseDataSet& input);
-                       ~MuseDataSet         () { clear(); }
+	public:
+		                  MuseDataSet         (void);
+		                  MuseDataSet         (MuseDataSet& input);
+		                 ~MuseDataSet         () { clear(); }
 
-      void              clear               (void);
-      int               readPartFile        (const std::string& filename);
-      int               readPartString      (const std::string& data);
-      int               readPart            (std::istream& input);
-      int               readFile            (const std::string& filename);
-      int               readString          (const std::string& data);
-      int               read                (std::istream& input);
-      MuseData&         operator[]          (int index);
-      int               getPartCount        (void);
-      void              deletePart          (int index);
-      void              cleanLineEndings    (void);
+		void              clear               (void);
+		int               readPartFile        (const std::string& filename);
+		int               readPartString      (const std::string& data);
+		int               readPart            (std::istream& input);
+		int               readFile            (const std::string& filename);
+		int               readString          (const std::string& data);
+		int               read                (std::istream& input);
+		MuseData&         operator[]          (int index);
+		int               getPartCount        (void);
+		void              deletePart          (int index);
+		void              cleanLineEndings    (void);
 
-   private:
-      std::vector<MuseData*>  part;
+	private:
+		std::vector<MuseData*>  part;
 
-   protected:
-      int               appendPart          (MuseData* musedata);
-      void              analyzeSetType      (std::vector<int>& types, 
-                                             std::vector<std::string>& lines);
-      void              analyzePartSegments (std::vector<int>& startindex, 
-                                             std::vector<int>& stopindex, 
-                                             std::vector<std::string>& lines);
-
+	protected:
+		int               appendPart          (MuseData* musedata);
+		void              analyzeSetType      (std::vector<int>& types, 
+		                                       std::vector<std::string>& lines);
+		void              analyzePartSegments (std::vector<int>& startindex, 
+		                                       std::vector<int>& stopindex, 
+		                                       std::vector<std::string>& lines);
 };
-   
+
 
 std::ostream& operator<<(std::ostream& out, MuseDataSet& musedata);
 

@@ -5,6 +5,7 @@
 // Filename:      humlib/src/MuseRecordBasic.cpp
 // URL:           http://github.com/craigsapp/humlib/blob/master/src/MuseRecordBasic.cpp
 // Syntax:        C++11
+// vim:           ts=3
 //
 
 #include "MuseRecordBasic.h"

@@ -294,9 +294,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              getAddElementIndex           (int& index, std::string& output,
 		                                               const std::string& input);
 		void             zerase                       (std::string& inout, int num);
-
 };
-
 
 
 // END_MERGE
