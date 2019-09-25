@@ -517,7 +517,7 @@ void MuseRecord::setNoteheadShape(HumNum duration) {
 	} else if (duration > 8) {           // long
 		setNoteheadLong();
 	} else if (duration > 4) {           // breve
-		if (roundBreve) {
+		if (m_roundBreve) {
 			setNoteheadBreveRound();
 		} else {
 			setNoteheadBreve();
@@ -2319,7 +2319,7 @@ int MuseRecord::findField(char key, int mincol, int maxcol) {
 
 	int i;
 	for (i=start; i<=stop; i++) {
-		if (recordString[i-1] == key) {
+		if (m_recordString[i-1] == key) {
 			return i;   // return the column which is offset from 1
 		}
 	}
@@ -2344,7 +2344,7 @@ int MuseRecord::getSlurStartColumn(void) {
 	}
 	int i;
 	for (i=start; i<=stop; i++) {
-		switch (recordString[i]) {
+		switch (m_recordString[i]) {
 			case '(':   // slur level 1
 			case '[':   // slur level 2
 			case '{':   // slur level 3

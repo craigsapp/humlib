@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 25 13:41:46 PDT 2019
+// Last Modified: Wed Sep 25 15:12:38 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2536,9 +2536,9 @@ class MuseRecordBasic {
 		                                      int endcol);
 		int               getLength          (void) const;
 		std::string       getLine            (void);
-		int               getLineIndex       (void) { return lineindex; }
+		int               getLineIndex       (void) { return m_lineindex; }
 		void              setLineIndex       (int index);
-		int               getLineNumber      (void) { return lineindex+1; }
+		int               getLineNumber      (void) { return m_lineindex+1; }
 		int               getType            (void) const;
 		void              setTypeGraceNote   (void);
 		void              setTypeGraceChordNote(void);
@@ -2584,22 +2584,27 @@ class MuseRecordBasic {
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
 
+		// boolean type fuctions:
+		bool              isBarline          (void);
+		bool              isNote             (void);
+		bool              isRest             (void);
+
 	protected:
-		std::string       recordString;      // actual characters on line
+		std::string       m_recordString;    // actual characters on line
 
 		// mark-up data for the line:
-		int               lineindex;         // index into original file
-		int               type;              // category of MuseRecordBasic record
-		HumNum            absbeat;           // dur in quarter notes from start
-		HumNum            lineduration;      // duration of line
-		HumNum            noteduration;      // duration of note
+		int               m_lineindex;       // index into original file
+		int               m_type;            // category of MuseRecordBasic record
+		HumNum            m_absbeat;         // dur in quarter notes from start
+		HumNum            m_lineduration;    // duration of line
+		HumNum            m_noteduration;    // duration of note
 
-		int               b40pitch;          // base 40 pitch
-		int               nexttiednote;      // line number of next note tied to
+		int               m_b40pitch;        // base 40 pitch
+		int               m_nexttiednote;    // line number of next note tied to
 		                                     // this one (-1 if no tied note)
-		int               lasttiednote;      // line number of previous note tied
+		int               m_lasttiednote;    // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
-		int               roundBreve;
+		int               m_roundBreve;
 };
 
 
@@ -2969,9 +2974,9 @@ class MuseData {
 		void              cleanLineEndings    (void);
 
 	private:
-		std::vector<MuseRecord*>    data;
-		std::vector<MuseEventSet*>  sequence;
-		std::string                 name;
+		std::vector<MuseRecord*>    m_data;
+		std::vector<MuseEventSet*>  m_sequence;
+		std::string                 m_name;
 
 	protected:
 		void              processTie          (int eventindex, int recordindex,
@@ -3011,7 +3016,7 @@ class MuseDataSet {
 		void              cleanLineEndings    (void);
 
 	private:
-		std::vector<MuseData*>  part;
+		std::vector<MuseData*>  m_part;
 
 	protected:
 		int               appendPart          (MuseData* musedata);

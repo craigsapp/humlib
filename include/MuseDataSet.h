@@ -41,7 +41,7 @@ class MuseDataSet {
 		void              cleanLineEndings    (void);
 
 	private:
-		std::vector<MuseData*>  part;
+		std::vector<MuseData*>  m_part;
 
 	protected:
 		int               appendPart          (MuseData* musedata);

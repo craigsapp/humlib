@@ -108,9 +108,9 @@ class MuseData {
 		void              cleanLineEndings    (void);
 
 	private:
-		std::vector<MuseRecord*>    data;
-		std::vector<MuseEventSet*>  sequence;
-		std::string                 name;
+		std::vector<MuseRecord*>    m_data;
+		std::vector<MuseEventSet*>  m_sequence;
+		std::string                 m_name;
 
 	protected:
 		void              processTie          (int eventindex, int recordindex,

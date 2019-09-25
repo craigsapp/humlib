@@ -22,7 +22,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// Convert::museToKern -- Return the Least Common Multiple of a list of numbers.
+// Convert::museToBase40 -- Convert a MuseData pitch into base-40 representation.
 //
 
 int Convert::museToBase40(const string& pitchString) {

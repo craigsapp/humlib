@@ -5,6 +5,8 @@
 using namespace hum;
 using namespace std;
 
+void printKernInfo(MuseRecord& mr);
+
 int main(int argc, char** argv) {
 	Options options;
 	options.process(argc, argv);
@@ -16,15 +18,30 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	int partcount = mds.getPartCount();
-	cerr << "THERE ARE " << partcount << " parts in data" << endl;
+	// int partcount = mds.getPartCount();
 	MuseData& md = mds[0];
 	for (int i=0; i<md.getLineCount(); i++) {
 		cout << "LINE:" << i 
 		     << "\tABSQ:" << md.getAbsBeat(i).getFloat() << "\t" 
-		     << "\tTDUR:" << md[i].getLineTickDuration() << "\t" 
-		     << md[i] << endl;
+		     << "\tTDUR:" << md[i].getLineTickDuration() << "\t";
+		printKernInfo(md[i]);
+		cout << "\t" << md[i] << endl;
 	}
 
 	return 0;
 }
+
+
+void printKernInfo(MuseRecord& mr) {
+	string output = ".";
+	if (mr.isBarline()) {
+		output = "bar";
+	} else if (mr.isNote()) {
+		output = "note";
+	} else if (mr.isRest()) {
+		output = "rest";
+	}
+	cout << output;
+}
+
+

@@ -1,4 +1,4 @@
-//
+/ /
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jun 17 13:27:39 PDT 2010
 // Last Modified: Wed Sep 25 07:08:59 PDT 2019 Convert to STL.
@@ -37,7 +37,7 @@ namespace hum {
 //
 
 MuseDataSet::MuseDataSet (void) {
-	part.reserve(100);
+	m_part.reserve(100);
 }
 
 
@@ -49,8 +49,8 @@ MuseDataSet::MuseDataSet (void) {
 
 void MuseDataSet::clear(void) {
 	int i;
-	for (i=0; i<(int)part.size(); i++) {
-		delete part[i];
+	for (i=0; i<(int)m_part.size(); i++) {
+		delete m_part[i];
 	}
 
 }
@@ -63,7 +63,7 @@ void MuseDataSet::clear(void) {
 //
 
 MuseData& MuseDataSet::operator[](int index) {
-	return *part[index];
+	return *m_part[index];
 }
 
 
@@ -156,9 +156,9 @@ int MuseDataSet::read(istream& infile) {
 //
 
 int MuseDataSet::appendPart(MuseData* musedata) {
-	int index = (int)part.size();
-	part.resize(part.size()+1);
-	part[index] = musedata;
+	int index = (int)m_part.size();
+	m_part.resize(m_part.size()+1);
+	m_part[index] = musedata;
 	return index;
 }
 
@@ -303,7 +303,7 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 //
 
 int MuseDataSet::getPartCount(void) {
-	return (int)part.size();
+	return (int)m_part.size();
 }
 
 
@@ -314,17 +314,17 @@ int MuseDataSet::getPartCount(void) {
 //
 
 void MuseDataSet::deletePart(int index) {
-	if (index < 0 || index > (int)part.size()-1) {
+	if (index < 0 || index > (int)m_part.size()-1) {
 		cerr << "Trying to delete a non-existent part" << endl;
 		exit(1);
 	}
 
-	delete part[index];
+	delete m_part[index];
 	int i;
-	for (i=index+1; i<(int)part.size(); i++) {
-		part[i-1] = part[i];
+	for (i=index+1; i<(int)m_part.size(); i++) {
+		m_part[i-1] = m_part[i];
 	}
-	part.resize(part.size()-1);
+	m_part.resize(m_part.size()-1);
 }
 
 
@@ -335,8 +335,8 @@ void MuseDataSet::deletePart(int index) {
 //
 
 void MuseDataSet::cleanLineEndings(void) {
-	for (int i=0; i<(int)part.size(); i++) {
-		part[i]->cleanLineEndings();
+	for (int i=0; i<(int)m_part.size(); i++) {
+		m_part[i]->cleanLineEndings();
 	}
 }
 

@@ -30,34 +30,34 @@ namespace hum {
 //
 
 MuseRecordBasic::MuseRecordBasic(void) {
-	recordString.reserve(81);
+	m_recordString.reserve(81);
 	setType(E_muserec_unknown);
 
-	lineindex    =   -1;
-	absbeat      =    0;
-	lineduration =    0;
-	noteduration =    0;
-	b40pitch     = -100;
-	nexttiednote =   -1;
-	lasttiednote =   -1;
-	roundBreve   =    0;
+	m_lineindex    =   -1;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
+	m_roundBreve   =    0;
 }
 
 
 // default value: index = -1;
 MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
-	recordString.reserve(81);
+	m_recordString.reserve(81);
 	setLine(aLine);
 	setType(E_muserec_unknown);
-	lineindex = index;
+	m_lineindex = index;
 
-	absbeat      =    0;
-	lineduration =    0;
-	noteduration =    0;
-	b40pitch     = -100;
-	nexttiednote =   -1;
-	lasttiednote =   -1;
-	roundBreve   =    0;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
+	m_roundBreve   =    0;
 }
 
 
@@ -73,15 +73,15 @@ MuseRecordBasic::MuseRecordBasic(MuseRecordBasic& aRecord) {
 //
 
 MuseRecordBasic::~MuseRecordBasic() {
-	recordString.resize(0);
+	m_recordString.resize(0);
 
-	absbeat      =    0;
-	lineduration =    0;
-	noteduration =    0;
-	b40pitch     = -100;
-	nexttiednote =   -1;
-	lasttiednote =   -1;
-	roundBreve   =    0;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
+	m_roundBreve   =    0;
 }
 
 
@@ -92,7 +92,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 //
 
 void MuseRecordBasic::clear(void) {
-	recordString.clear();
+	m_recordString.clear();
 }
 
 
@@ -104,11 +104,11 @@ void MuseRecordBasic::clear(void) {
 //
 
 int MuseRecordBasic::isEmpty(void) {
-	for (int i=0; i<(int)recordString.size(); i++) {
-		if (!std::isprint(recordString[i])) {
+	for (int i=0; i<(int)m_recordString.size(); i++) {
+		if (!std::isprint(m_recordString[i])) {
 			continue;
 		}
-		if (!std::isspace(recordString[i])) {
+		if (!std::isspace(m_recordString[i])) {
 			return 0;
 		}
 	}
@@ -147,7 +147,7 @@ string MuseRecordBasic::extract(int start, int end) {
 
 char& MuseRecordBasic::getColumn(int columnNumber) {
 	int realindex = columnNumber - 1;
-	int length = (int)recordString.size();
+	int length = (int)m_recordString.size();
 	// originally the limit for data columns was 80:
 	// if (realindex < 0 || realindex >= 80) {
 	// the new limit is somewhere above 900, but limit to 180
@@ -156,13 +156,13 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
 		exit(1);
-	} else if (realindex >= (int)recordString.size()) {
-		recordString.resize(realindex+1);
+	} else if (realindex >= (int)m_recordString.size()) {
+		m_recordString.resize(realindex+1);
 		for (int i=length; i<=realindex; i++) {
-			recordString[i] = ' ';
+			m_recordString[i] = ' ';
 		}
 	}
-	return recordString[realindex];
+	return m_recordString[realindex];
 }
 
 
@@ -223,7 +223,7 @@ void MuseRecordBasic::setColumns(string& data, int startcol, int endcol) {
 //
 
 int MuseRecordBasic::getLength(void) const {
-	return (int)recordString.size();
+	return (int)m_recordString.size();
 }
 
 
@@ -234,7 +234,7 @@ int MuseRecordBasic::getLength(void) const {
 //
 
 string MuseRecordBasic::getLine(void) {
-	return recordString;
+	return m_recordString;
 }
 
 
@@ -245,7 +245,7 @@ string MuseRecordBasic::getLine(void) {
 //
 
 int MuseRecordBasic::getType(void) const {
-	return type;
+	return m_type;
 }
 
 
@@ -263,15 +263,15 @@ MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic& aRecord) {
 
 	setLine(aRecord.getLine());
 	setType(aRecord.getType());
-	lineindex = aRecord.lineindex;
+	m_lineindex = aRecord.m_lineindex;
 
-	absbeat = aRecord.absbeat;
-	lineduration = aRecord.lineduration;
-	noteduration = aRecord.noteduration;
+	m_absbeat = aRecord.m_absbeat;
+	m_lineduration = aRecord.m_lineduration;
+	m_noteduration = aRecord.m_noteduration;
 
-	b40pitch     = aRecord.b40pitch;
-	nexttiednote = aRecord.nexttiednote;
-	lasttiednote = aRecord.lasttiednote;
+	m_b40pitch     = aRecord.m_b40pitch;
+	m_nexttiednote = aRecord.m_nexttiednote;
+	m_lasttiednote = aRecord.m_lasttiednote;
 
 	return *this;
 }
@@ -287,13 +287,13 @@ MuseRecordBasic& MuseRecordBasic::operator=(const string& aLine) {
 	setLine(aLine);
 	setType(aLine[0]);
 
-	lineindex    =   -1;
-	absbeat      =    0;
-	lineduration =    0;
-	noteduration =    0;
-	b40pitch     = -100;
-	nexttiednote =   -1;
-	lasttiednote =   -1;
+	m_lineindex    =   -1;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
 
 	return *this;
 }
@@ -317,7 +317,7 @@ char& MuseRecordBasic::operator[](int index) {
 //
 
 void MuseRecordBasic::setLine(const string& aLine) {
-	recordString = aLine;
+	m_recordString = aLine;
 	// Line lengths should not exceed 80 characters according
 	// to MuseData standard, so maybe have a warning or error if exceeded.
 }
@@ -330,7 +330,7 @@ void MuseRecordBasic::setLine(const string& aLine) {
 //
 
 void MuseRecordBasic::setType(int aType) {
-	type = aType;
+	m_type = aType;
 }
 
 
@@ -370,9 +370,9 @@ void MuseRecordBasic::setTypeGraceChordNote(void) {
 //
 
 void MuseRecordBasic::shrink(void) {
-	int i = (int)recordString.size() - 1;
-	while (i >= 0 && recordString[i] == ' ') {
-		recordString.resize((int)recordString.size()-1);
+	int i = (int)m_recordString.size() - 1;
+	while (i >= 0 && m_recordString[i] == ' ') {
+		m_recordString.resize((int)m_recordString.size()-1);
 		i--;
 	}
 }
@@ -528,7 +528,7 @@ void MuseRecordBasic::append(const char* format, ...) {
 //
 
 void MuseRecordBasic::setString(string& astring) {
-	recordString = astring;
+	m_recordString = astring;
 }
 
 
@@ -540,13 +540,13 @@ void MuseRecordBasic::setString(string& astring) {
 
 
 void MuseRecordBasic::setAbsBeat(HumNum value) {
-	absbeat = value;
+	m_absbeat = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setAbsBeat(int topval, int botval) {
-	absbeat.setValue(topval, botval);
+	m_absbeat.setValue(topval, botval);
 }
 
 
@@ -557,7 +557,7 @@ void MuseRecordBasic::setAbsBeat(int topval, int botval) {
 //
 
 HumNum MuseRecordBasic::getAbsBeat(void) {
-	return absbeat;
+	return m_absbeat;
 }
 
 
@@ -569,13 +569,13 @@ HumNum MuseRecordBasic::getAbsBeat(void) {
 //
 
 void MuseRecordBasic::setLineDuration(HumNum value) {
-	lineduration = value;
+	m_lineduration = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setLineDuration(int topval, int botval) {
-	lineduration.setValue(topval, botval);
+	m_lineduration.setValue(topval, botval);
 }
 
 
@@ -587,7 +587,7 @@ void MuseRecordBasic::setLineDuration(int topval, int botval) {
 //
 
 HumNum MuseRecordBasic::getLineDuration(void) {
-	return lineduration;
+	return m_lineduration;
 }
 
 
@@ -600,13 +600,13 @@ HumNum MuseRecordBasic::getLineDuration(void) {
 //
 
 void MuseRecordBasic::setNoteDuration(HumNum value) {
-	noteduration = value;
+	m_noteduration = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setNoteDuration(int topval, int botval) {
-	noteduration.setValue(topval, botval);
+	m_noteduration.setValue(topval, botval);
 }
 
 
@@ -619,7 +619,7 @@ void MuseRecordBasic::setNoteDuration(int topval, int botval) {
 //
 
 HumNum MuseRecordBasic::getNoteDuration(void) {
-	return noteduration;
+	return m_noteduration;
 }
 
 
@@ -630,7 +630,7 @@ HumNum MuseRecordBasic::getNoteDuration(void) {
 //
 
 void MuseRecordBasic::setLineIndex(int index) {
-	lineindex = index;
+	m_lineindex = index;
 }
 
 
@@ -667,7 +667,7 @@ int MuseRecordBasic::isTied(void) {
 
 
 int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
-	return lasttiednote;
+	return m_lasttiednote;
 }
 
 
@@ -679,7 +679,7 @@ int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
 
 
 int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
-	return nexttiednote;
+	return m_nexttiednote;
 }
 
 
@@ -691,7 +691,7 @@ int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
 
 
 void MuseRecordBasic::setLastTiedNoteLineIndex(int index) {
-	lasttiednote = index;
+	m_lasttiednote = index;
 }
 
 
@@ -703,7 +703,7 @@ void MuseRecordBasic::setLastTiedNoteLineIndex(int index) {
 
 
 void MuseRecordBasic::setNextTiedNoteLineIndex(int index) {
-	nexttiednote = index;
+	m_nexttiednote = index;
 }
 
 
@@ -714,7 +714,7 @@ void MuseRecordBasic::setNextTiedNoteLineIndex(int index) {
 //
 
 void MuseRecordBasic::setRoundedBreve(void) {
-	roundBreve = 1;
+	m_roundBreve = 1;
 }
 
 
@@ -727,7 +727,7 @@ void MuseRecordBasic::setRoundedBreve(void) {
 //
 
 void MuseRecordBasic::setMarkupPitch(int aPitch) {
-	b40pitch = aPitch;
+	m_b40pitch = aPitch;
 }
 
 
@@ -740,7 +740,7 @@ void MuseRecordBasic::setMarkupPitch(int aPitch) {
 //
 
 int MuseRecordBasic::getMarkupPitch(void) {
-	return b40pitch;
+	return m_b40pitch;
 }
 
 
@@ -753,13 +753,60 @@ int MuseRecordBasic::getMarkupPitch(void) {
 //
 
 void MuseRecordBasic::cleanLineEnding(void) {
-	int i = (int)recordString.size() - 1;
+	int i = (int)m_recordString.size() - 1;
 	// Don't remove first space on line.
-	while ((i > 0) && (recordString[i] == ' ')) {
-		recordString.resize((int)recordString.size() - 1);
-		i = (int)recordString.size() - 1;
+	while ((i > 0) && (m_recordString[i] == ' ')) {
+		m_recordString.resize((int)m_recordString.size() - 1);
+		i = (int)m_recordString.size() - 1;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBarline --
+//
+
+bool MuseRecordBasic::isBarline(void) {
+	return m_type == E_muserec_measure;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isNote --
+//
+
+bool MuseRecordBasic::isNote(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_cue:
+		case E_muserec_note_grace:
+		case E_muserec_note_grace_chord:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRest --
+//
+
+bool MuseRecordBasic::isRest(void) {
+	switch (m_type) {
+		case E_muserec_rest_invisible:
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////

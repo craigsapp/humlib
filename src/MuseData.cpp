@@ -60,16 +60,16 @@ MuseData& MuseData::operator=(MuseData& input) {
 	if (this == &input) {
 		return *this;
 	}
-	data.resize(input.data.size());
+	m_data.resize(input.m_data.size());
 	MuseRecord* temprec;
 	int i;
-	for (i=0; i<(int)data.size(); i++) {
+	for (i=0; i<(int)m_data.size(); i++) {
 		temprec = new MuseRecord;
-		*temprec = *(input.data[i]);
-		data[i] = temprec;
+		*temprec = *(input.m_data[i]);
+		m_data[i] = temprec;
 	}
-	// do something with sequence...
-	name = input.name;
+	// do something with m_sequence...
+	m_name = input.m_name;
 	return *this;
 }
 
@@ -177,25 +177,25 @@ int MuseEventSet::getEventCount(void) {
 //
 
 MuseData::MuseData(void) {
-	data.reserve(100000);
+	m_data.reserve(100000);
 }
 
 MuseData::MuseData(MuseData& input) {
-	data.resize(input.data.size());
+	m_data.resize(input.m_data.size());
 	MuseRecord* temprec;
 	int i;
-	for (i=0; i<(int)data.size(); i++) {
+	for (i=0; i<(int)m_data.size(); i++) {
 		temprec  = new MuseRecord;
-		*temprec = *(input.data[i]);
-		data[i]  = temprec;
+		*temprec = *(input.m_data[i]);
+		m_data[i]  = temprec;
 	}
-	sequence.resize(input.sequence.size());
-	for (i=0; i<(int)input.sequence.size(); i++) {
-	  sequence[i] = new MuseEventSet;
-	  *(sequence[i]) = *(input.sequence[i]);
+	m_sequence.resize(input.m_sequence.size());
+	for (i=0; i<(int)input.m_sequence.size(); i++) {
+	  m_sequence[i] = new MuseEventSet;
+	  *(m_sequence[i]) = *(input.m_sequence[i]);
 	}
 
-	name = input.name;
+	m_name = input.m_name;
 }
 
 
@@ -207,14 +207,14 @@ MuseData::MuseData(MuseData& input) {
 
 MuseData::~MuseData() {
 	int i;
-	for (i=0; i<(int)data.size(); i++) {
-		if (data[i] != NULL) {
-			delete data[i];
-			data[i] = NULL;
+	for (i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i] != NULL) {
+			delete m_data[i];
+			m_data[i] = NULL;
 		}
 	}
-  data.resize(0);
-  name = "";
+  m_data.resize(0);
+  m_name = "";
 }
 
 
@@ -225,7 +225,7 @@ MuseData::~MuseData() {
 //
 
 int MuseData::getLineCount(void) {
-	return (int)data.size();
+	return (int)m_data.size();
 }
 
 
@@ -239,24 +239,24 @@ int MuseData::append(MuseRecord& arecord) {
 	MuseRecord* temprec;
 	temprec = new MuseRecord;
 	*temprec = arecord;
-	data.push_back(temprec);
-	return (int)data.size()-1;
+	m_data.push_back(temprec);
+	return (int)m_data.size()-1;
 }
 
 
 int MuseData::append(MuseData& musedata) {
-	int oldsize = (int)data.size();
+	int oldsize = (int)m_data.size();
 	int newlinecount = musedata.getLineCount();
 	if (newlinecount <= 0) {
 		return -1;
 	}
 
-	data.resize((int)data.size()+newlinecount);
+	m_data.resize((int)m_data.size()+newlinecount);
 	for (int i=0; i<newlinecount; i++) {
-		data[i+oldsize] = new MuseRecord;
-		*(data[i+oldsize]) = musedata[i];
+		m_data[i+oldsize] = new MuseRecord;
+		*(m_data[i+oldsize]) = musedata[i];
 	}
-	return (int)data.size()-1;
+	return (int)m_data.size()-1;
 }
 
 
@@ -266,8 +266,8 @@ int MuseData::append(string& charstring) {
 	temprec->setString(charstring);
 	temprec->setType(E_muserec_unknown);
 	temprec->setAbsBeat(0);
-	data.push_back(temprec);
-	return (int)data.size()-1;
+	m_data.push_back(temprec);
+	return (int)m_data.size()-1;
 }
 
 
@@ -286,11 +286,11 @@ void MuseData::insert(int lindex, MuseRecord& arecord) {
 	temprec = new MuseRecord;
 	*temprec = arecord;
 
-	data.resize(data.size()+1);
-	for (int i=(int)data.size()-1; i>lindex; i--) {
-		data[i] = data[i-1];
+	m_data.resize(m_data.size()+1);
+	for (int i=(int)m_data.size()-1; i>lindex; i--) {
+		m_data[i] = m_data[i-1];
 	}
-	data[lindex] = temprec;
+	m_data[lindex] = temprec;
 }
 
 
@@ -301,20 +301,20 @@ void MuseData::insert(int lindex, MuseRecord& arecord) {
 //
 
 void MuseData::clear(void) {
-	for (int i=0; i<(int)data.size(); i++) {
-		if (data[i] != NULL) {
-			delete data[i];
-			data[i] = NULL;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i] != NULL) {
+			delete m_data[i];
+			m_data[i] = NULL;
 		}
 	}
-	for (int i=0; i<(int)sequence.size(); i++) {
-		sequence[i]->clear();
-		delete sequence[i];
-		sequence[i] = NULL;
+	for (int i=0; i<(int)m_sequence.size(); i++) {
+		m_sequence[i]->clear();
+		delete m_sequence[i];
+		m_sequence[i] = NULL;
 	}
-	data.clear();
-	sequence.clear();
-	name = "";
+	m_data.clear();
+	m_sequence.clear();
+	m_name = "";
 }
 
 
@@ -325,7 +325,7 @@ void MuseData::clear(void) {
 //
 
 MuseRecord& MuseData::operator[](int lindex) {
-	return *(data[lindex]);
+	return *(m_data[lindex]);
 }
 
 
@@ -336,7 +336,7 @@ MuseRecord& MuseData::operator[](int lindex) {
 //
 
 MuseRecord& MuseData::getRecord(int lindex) {
-	return *(data[lindex]);
+	return *(m_data[lindex]);
 }
 
 
@@ -348,7 +348,7 @@ MuseRecord& MuseData::getRecord(int lindex) {
 //
 
 MuseRecord& MuseData::getRecord(int eindex, int erecord) {
-	return *(data[getEvent(eindex)[erecord].getLineIndex()]);
+	return *(m_data[getEvent(eindex)[erecord].getLineIndex()]);
 }
 
 
@@ -402,8 +402,8 @@ int MuseData::read(istream& input) {
 		}
 	}
 
-	for (int i=0; i<(int)data.size(); i++) {
-		data[i]->setLineIndex(i);
+	for (int i=0; i<(int)m_data.size(); i++) {
+		m_data[i]->setLineIndex(i);
 	}
 
 	doAnalyses();
@@ -447,8 +447,8 @@ void MuseData::doAnalyses(void) {
 //
 
 void MuseData::analyzePitch() {
-	for (int i=0; i<(int)data.size(); i++) {
-		data[i]->setMarkupPitch(data[i]->getBase40());
+	for (int i=0; i<(int)m_data.size(); i++) {
+		m_data[i]->setMarkupPitch(m_data[i]->getBase40());
 	}
 }
 
@@ -460,8 +460,8 @@ void MuseData::analyzePitch() {
 //
 
 void MuseData::analyzeTies(void) {
-	for (int i=0; i<(int)sequence.size(); i++) {
-		for (int j=0; j<sequence[i]->getEventCount(); j++) {
+	for (int i=0; i<(int)m_sequence.size(); i++) {
+		for (int j=0; j<m_sequence[i]->getEventCount(); j++) {
 			if (!getEvent(i)[j].tieQ()) {
 				continue;
 			}
@@ -475,7 +475,7 @@ void MuseData::analyzeTies(void) {
 //////////////////////////////
 //
 // MuseData::processTie -- follow a tied note to the last note
-//   in the tied sequence, filling in the tie information along the way.
+//   in the tied m_sequence, filling in the tie information along the way.
 //   Hanging ties (particularly ties note at the ends of first repeats, etc.)
 //   still need to be considered.
 //
@@ -490,7 +490,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 
 
 	if ((lastindex < 0) &&
-		 (data[lineindex]->getLastTiedNoteLineIndex() >= 0)) {
+		 (m_data[lineindex]->getLastTiedNoteLineIndex() >= 0)) {
 		// If there previously tied note already marked in the data, then
 		// this note has already been processed for ties, so exit function
 		// without doing any further processing.
@@ -498,19 +498,19 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 	}
 
 	// store the location of the note tied to previously:
-	data[lineindex]->setLastTiedNoteLineIndex(lastindex);
+	m_data[lineindex]->setLastTiedNoteLineIndex(lastindex);
 
 	// If the current note contains a tie marker, then there is
 	// another tied note in the future, so go look for it.
-	if (!data[lineindex]->tieQ()) {
-		data[lineindex]->setNextTiedNoteLineIndex(-1);
+	if (!m_data[lineindex]->tieQ()) {
+		m_data[lineindex]->setNextTiedNoteLineIndex(-1);
 		return;
 	}
 
 	// There is another note tied to this one in the future, so
 	// first get the absolute time location of the future tied note
-	HumNum abstime    = data[lineindex]->getAbsBeat();
-	HumNum notedur    = data[lineindex]->getNoteDuration();
+	HumNum abstime    = m_data[lineindex]->getAbsBeat();
+	HumNum notedur    = m_data[lineindex]->getNoteDuration();
 	HumNum searchtime = abstime + notedur;
 
 	// Get the event index which occurs at the search time:
@@ -518,18 +518,18 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 
 	if (nexteindex < 0) {
 		// Couldn't find any data at that absolute time index, so give up:
-		data[lineindex]->setNextTiedNoteLineIndex(-1);
+		m_data[lineindex]->setNextTiedNoteLineIndex(-1);
 		return;
 	}
 
 	// The pitch of the tied note should match this one; otherwise, it
 	// would not be a tied note...
-	int base40 = data[lineindex]->getPitch();
+	int base40 = m_data[lineindex]->getPitch();
 
 	// The tied note will preferrably be found in the same track as the
 	// current note (but there could be a cross-track tie occurring, so
 	// check for that if there is no same-track tie):
-	int track = data[lineindex]->getTrack();
+	int track = m_data[lineindex]->getTrack();
 
 	int nextrindex = searchForPitch(nexteindex, base40, track);
 	if (nextrindex < 0) {
@@ -546,7 +546,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 		// in the music (such as at the beginning of a repeated section).
 		// for now just ignore the hanging tie, but probably mark it in
 		// some way in the future.
-		data[lineindex]->setNextTiedNoteLineIndex(-1);
+		m_data[lineindex]->setNextTiedNoteLineIndex(-1);
 		return;
 	}
 
@@ -555,7 +555,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 
 	int nextindex = getEvent(nexteindex)[nextrindex].getLineIndex();
 
-	data[lineindex]->setNextTiedNoteLineIndex(nextindex);
+	m_data[lineindex]->setNextTiedNoteLineIndex(nextindex);
 
 	processTie(nexteindex, nextrindex, lineindex);
 }
@@ -578,7 +578,7 @@ int MuseData::searchForPitch(int eventindex, int b40, int track) {
 	int targetpitch;
 	int targettype;
 
-	for (int j=0; j<sequence[eventindex]->getEventCount(); j++) {
+	for (int j=0; j<m_sequence[eventindex]->getEventCount(); j++) {
 		targettype = getEvent(eventindex)[j].getType();
 		if ((targettype != E_muserec_note_regular) &&
 			 (targettype != E_muserec_note_chord) ) {
@@ -611,8 +611,8 @@ int MuseData::searchForPitch(int eventindex, int b40, int track) {
 
 int MuseData::getNextEventIndex(int startindex, HumNum target) {
 	int output = -1;
-	for (int i=startindex; i<(int)sequence.size(); i++) {
-		if (sequence[i]->getTime() == target) {
+	for (int i=startindex; i<(int)m_sequence.size(); i++) {
+		if (m_sequence[i]->getTime() == target) {
 			output = i;
 			break;
 		}
@@ -640,7 +640,7 @@ MuseRecord& MuseData::last(void) {
 //
 
 int MuseData::isEmpty(void) {
-	return data.empty();
+	return m_data.empty();
 }
 
 
@@ -753,39 +753,39 @@ void MuseData::analyzeRhythm(void) {
 
 	HumNum primarychordnoteduration(0,1);  // needed for chord notes
 
-	for (int i=0; i<(int)data.size(); i++) {
-		if (data[i]->getType() == E_muserec_musical_attributes) {
-			if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->getType() == E_muserec_musical_attributes) {
+			if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
 				tpq = hre.getMatchInt(1);
 			}
 		}
 
-		if (data[i]->getType() == E_muserec_note_chord) {
+		if (m_data[i]->getType() == E_muserec_note_chord) {
 			// insert an automatic back command for chord tones
 			// also deal with cue-size note chords?
-			data[i]->setAbsBeat(cumulative - primarychordnoteduration);
+			m_data[i]->setAbsBeat(cumulative - primarychordnoteduration);
 
 	 // Check to see if the secondary chord note has a duration.
 	 // If so, then set the note duration to that value; otherwise,
 	 // set the note duration to the duration of the primary chord
 	 // note (first note before the current note which is not a chord
 	 // note).
-	 string buffer = data[i]->getTickDurationField();
+	 string buffer = m_data[i]->getTickDurationField();
 	 if (hre.search(buffer, "\\d", "")) {
-				data[i]->setNoteDuration(data[i]->getNoteTickDuration(), tpq);
+				m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			} else {
-				data[i]->setNoteDuration(primarychordnoteduration);
+				m_data[i]->setNoteDuration(primarychordnoteduration);
 			}
-			data[i]->setLineDuration(0);
+			m_data[i]->setLineDuration(0);
 		} else {
-			data[i]->setAbsBeat(cumulative);
-			data[i]->setNoteDuration(data[i]->getNoteTickDuration(), tpq);
-			data[i]->setLineDuration(data[i]->getNoteDuration());
+			m_data[i]->setAbsBeat(cumulative);
+			m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
+			m_data[i]->setLineDuration(m_data[i]->getNoteDuration());
 		}
-		linedur.setValue(data[i]->getLineTickDuration(), tpq);
+		linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
 		cumulative += linedur;
 
-		switch (data[i]->getType()) {
+		switch (m_data[i]->getType()) {
 			case E_muserec_note_regular:
 			// should also worry about cue and grace note chords?
 			primarychordnoteduration = linedur;
@@ -794,11 +794,11 @@ void MuseData::analyzeRhythm(void) {
 
 	// adjust Sound and Print records so that they occur at the same
 	// absolute time as the note they affect.
-	for (int i=1; i<(int)data.size(); i++) {
-		switch (data[i]->getType()) {
+	for (int i=1; i<(int)m_data.size(); i++) {
+		switch (m_data[i]->getType()) {
 			case E_muserec_print_suggestion:
 			case E_muserec_sound_directives:
-				data[i]->setAbsBeat(data[i-1]->getAbsBeat());
+				m_data[i]->setAbsBeat(m_data[i-1]->getAbsBeat());
 		}
 	}
 
@@ -814,28 +814,28 @@ void MuseData::analyzeRhythm(void) {
 
 int MuseData::getInitialTPQ(void) {
 	int output = 0;
-	if (data.empty()) {
+	if (m_data.empty()) {
 		return output;
 	}
 	HumRegex hre;
 	int i;
-	if (data[0]->getType() == E_muserec_unknown) {
+	if (m_data[0]->getType() == E_muserec_unknown) {
 		// search for first line which starts with '$':
-		for (i=0; i<(int)data.size(); i++) {
-			if (data[i]->getLength() <= 0) {
+		for (i=0; i<(int)m_data.size(); i++) {
+			if (m_data[i]->getLength() <= 0) {
 				continue;
 			}
-			if ((*data[i])[0] == '$') {
-				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
+			if ((*m_data[i])[0] == '$') {
+				if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
 					output = hre.getMatchInt(1);
 				}
 				break;
 			}
 		}
 	} else {
-		for (int i=0; i<(int)data.size(); i++) {
-			if (data[i]->getType() == E_muserec_musical_attributes) {
-				if (hre.search(data[i]->getLine(), "Q:(\\d+)", "")) {
+		for (int i=0; i<(int)m_data.size(); i++) {
+			if (m_data[i]->getType() == E_muserec_musical_attributes) {
+				if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
 					output = hre.getMatchInt(1);
 				}
 				break;
@@ -859,7 +859,7 @@ void MuseData::constructTimeSequence(void) {
 	// * allocate the size to match number of lines (* 2 probably).
 
 	MuseData& thing = *this;
-	for (int i=0; i<(int)data.size(); i++) {
+	for (int i=0; i<(int)m_data.size(); i++) {
 		insertEventBackwards(thing[i].getAbsBeat(), &thing[i]);
 	}
 }
@@ -873,7 +873,7 @@ void MuseData::constructTimeSequence(void) {
 //
 
 int MuseData::getEventCount(void) {
-	return (int)sequence.size();
+	return (int)m_sequence.size();
 }
 
 
@@ -884,7 +884,7 @@ int MuseData::getEventCount(void) {
 //
 
 MuseEventSet& MuseData::getEvent(int eindex) {
-	return *(sequence[eindex]);
+	return *(m_sequence[eindex]);
 }
 
 
@@ -905,9 +905,9 @@ MuseEventSet& MuseData::getEvent(int eindex) {
 //
 //
 
-void printSequenceTimes(vector<MuseEventSet*>& sequence) {
-	for (int i=0; i<(int)sequence.size(); i++) {
-		cout << sequence[i]->getTime().getFloat() << " ";
+void printSequenceTimes(vector<MuseEventSet*>& m_sequence) {
+	for (int i=0; i<(int)m_sequence.size(); i++) {
+		cout << m_sequence[i]->getTime().getFloat() << " ";
 	}
 	cout << endl;
 }
@@ -915,36 +915,36 @@ void printSequenceTimes(vector<MuseEventSet*>& sequence) {
 
 void MuseData::insertEventBackwards(HumNum atime, MuseRecord* arecord) {
 
-	if (sequence.empty()) {
+	if (m_sequence.empty()) {
 		MuseEventSet* anevent = new MuseEventSet;
 		anevent->setTime(atime);
 		anevent->appendRecord(arecord);
-		sequence.push_back(anevent);
+		m_sequence.push_back(anevent);
 		return;
 	}
 
-	for (int i=(int)sequence.size()-1; i>=0; i--) {
-		if (sequence[i]->getTime() == atime) {
-			sequence[i]->appendRecord(arecord);
+	for (int i=(int)m_sequence.size()-1; i>=0; i--) {
+		if (m_sequence[i]->getTime() == atime) {
+			m_sequence[i]->appendRecord(arecord);
 			return;
-		} else if (sequence[i]->getTime() < atime) {
+		} else if (m_sequence[i]->getTime() < atime) {
 			// insert new event entry after the current one since it occurs later.
 			MuseEventSet* anevent = new MuseEventSet;
 			anevent->setTime(atime);
 			anevent->appendRecord(arecord);
-			if (i == (int)sequence.size()-1) {
+			if (i == (int)m_sequence.size()-1) {
 				// just append the event at the end of the list
-				sequence.push_back(anevent);
+				m_sequence.push_back(anevent);
 	    return;
 			} else {
 				// event has to be inserted before end of list, so move
 				// later ones up in list.
-				sequence.resize(sequence.size()+1);
-				for (int j=(int)sequence.size()-1; j>i+1; j--) {
-					sequence[j] = sequence[j-1];
+				m_sequence.resize(m_sequence.size()+1);
+				for (int j=(int)m_sequence.size()-1; j>i+1; j--) {
+					m_sequence[j] = m_sequence[j-1];
 				}
-				// store the newly created event entry in sequence:
-				sequence[i+1] = anevent;
+				// store the newly created event entry in m_sequence:
+				m_sequence[i+1] = anevent;
 				return;
 			}
 		}
@@ -1088,7 +1088,7 @@ int MuseData::getType(int eindex, int erecord) {
 //
 
 HumNum MuseData::getAbsBeat(int lindex) {
-	return data[lindex]->getAbsBeat();
+	return m_data[lindex]->getAbsBeat();
 }
 
 
@@ -1099,7 +1099,7 @@ HumNum MuseData::getAbsBeat(int lindex) {
 //
 
 int MuseData::getLineTickDuration(int lindex) {
-	return data[lindex]->getLineTickDuration();
+	return m_data[lindex]->getLineTickDuration();
 }
 
 
@@ -1109,7 +1109,7 @@ int MuseData::getLineTickDuration(int lindex) {
 //
 
 void MuseData::setFilename(const string& filename) {
-	name = filename;
+	m_name = filename;
 }
 
 
@@ -1120,7 +1120,7 @@ void MuseData::setFilename(const string& filename) {
 //
 
 string MuseData::getFilename(void) {
-	return name;
+	return m_name;
 }
 
 
@@ -1136,7 +1136,7 @@ string MuseData::getPartName(void) {
 		return "";
 	}
 	HumRegex hre;
-	string output = data[line]->getLine();
+	string output = m_data[line]->getLine();
 	hre.replaceDestructive(output, "", "^\\s+");
 	hre.replaceDestructive(output, "", "\\s+$");
 	return output;
@@ -1152,8 +1152,8 @@ string MuseData::getPartName(void) {
 
 int MuseData::getPartNameIndex(void) {
 	int output = -1;
-	for (int i=0; i<(int)data.size(); i++) {
-		if (data[i]->getType() == E_muserec_header_part_name) {
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->getType() == E_muserec_header_part_name) {
 			return i;
 		}
 	}
@@ -1170,15 +1170,15 @@ int MuseData::getPartNameIndex(void) {
 //
 
 int MuseData::isMember(const string& mstring) {
-	for (int i=0; i<(int)data.size(); i++) {
-		if (data[i]->getType() == E_muserec_group_memberships) {
-			if (strstr(data[i]->getLine().c_str(), mstring.c_str()) != NULL) {
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->getType() == E_muserec_group_memberships) {
+			if (strstr(m_data[i]->getLine().c_str(), mstring.c_str()) != NULL) {
 				return 1;
 			} else {
 				return 0;
 			}
 		}
-		if (data[i]->getType() == E_muserec_musical_attributes) {
+		if (m_data[i]->getType() == E_muserec_musical_attributes) {
 			break;
 		}
 	}
@@ -1202,17 +1202,17 @@ int MuseData::getMembershipPartNumber(const string& mstring) {
 	searchstring += ":";
 
 	HumRegex hre;
-	for (int i=0; i<(int)data.size(); i++) {
-		if (data[i]->getType() == E_muserec_header_12) {
-			if (hre.search(data[i]->getLine(), searchstring, "")) {
-				if (hre.search(data[i]->getLine(),
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->getType() == E_muserec_header_12) {
+			if (hre.search(m_data[i]->getLine(), searchstring, "")) {
+				if (hre.search(m_data[i]->getLine(),
 					"part\\s*(\\d+)\\s*of\\s*(\\d+)")) {
 					string partnum = hre.getMatch(1);
 					return hre.getMatchInt(1);
 				}
 			}
 		}
-		if (data[i]->getType() == E_muserec_musical_attributes) {
+		if (m_data[i]->getType() == E_muserec_musical_attributes) {
 			break;
 		}
 	}
