@@ -1,4 +1,4 @@
-/ /
+//
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jun 17 13:27:39 PDT 2010
 // Last Modified: Wed Sep 25 07:08:59 PDT 2019 Convert to STL.
@@ -338,6 +338,38 @@ void MuseDataSet::cleanLineEndings(void) {
 	for (int i=0; i<(int)m_part.size(); i++) {
 		m_part[i]->cleanLineEndings();
 	}
+}
+
+
+//////////////////////////////
+//
+// MuseDataSet::setError --
+//
+
+void MuseDataSet::setError(const std::string& error) {
+	m_error = error;
+}
+
+
+
+//////////////////////////////
+//
+// MuseDataSet::clearError --
+//
+
+void MuseDataSet::clearError(void) {
+	m_error = "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseDataSet::hasError --
+//
+
+bool MuseDataSet::hasError(void) {
+	return !m_error.empty();
 }
 
 

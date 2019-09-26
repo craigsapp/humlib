@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 25 15:12:38 PDT 2019
+// Last Modified: Wed Sep 25 20:33:38 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2937,7 +2937,7 @@ class MuseData {
 		int               append              (std::string& charstring);
 		void              insert              (int index, MuseRecord& arecord);
 		void              clear               (void);
-		int               getInitialTPQ       (void);
+		int               getInitialTpq       (void);
 
 		int               read                (std::istream& input);
 		int               readString          (const std::string& filename);
@@ -3015,8 +3015,13 @@ class MuseDataSet {
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
 
+		std::string       getError            (void);
+		bool              hasError            (void);
+		void              clearError          (void);
+
 	private:
 		std::vector<MuseData*>  m_part;
+		std::string             m_error;
 
 	protected:
 		int               appendPart          (MuseData* musedata);
@@ -3025,6 +3030,8 @@ class MuseDataSet {
 		void              analyzePartSegments (std::vector<int>& startindex, 
 		                                       std::vector<int>& stopindex, 
 		                                       std::vector<std::string>& lines);
+		void              setError            (const std::string& error);
+		
 };
 
 
@@ -4339,6 +4346,7 @@ class HumTool : public Options {
 		bool          hasError        (void);
 		std::string   getError        (void);
 		ostream&      getError        (ostream& out);
+		void          setError        (const string& message);
 
 	protected:
 		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
@@ -5695,6 +5703,33 @@ class Tool_kern2mens : public HumTool {
 		string   m_clef;                   // used with -c option
 
 };
+
+
+class Tool_md2hum : public HumTool {
+	public:
+		        Tool_md2hum          (void);
+		       ~Tool_md2hum          () {}
+
+		bool    convertFile          (ostream& out, const string& filename);
+		bool    convertString        (ostream& out, const string& input);
+		bool    convert              (ostream& out, MuseDataSet& mds);
+		bool    convert              (ostream& out, istream& input);
+
+		void    setOptions           (int argc, char** argv);
+		void    setOptions           (const std::vector<std::string>& argvlist);
+		Options getOptionDefinitions (void);
+
+	protected:
+		void    initialize           (void);
+		void    printKernInfo        (ostream& out, MuseRecord& mr, int tpq);
+
+	private:
+		Options m_options;
+		bool    m_stemsQ = false;    // used with -s option
+		bool    m_recipQ = false;    // used with -r option
+
+};
+
 
 
 class mei_staffDef {

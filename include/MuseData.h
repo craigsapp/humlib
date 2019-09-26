@@ -71,7 +71,7 @@ class MuseData {
 		int               append              (std::string& charstring);
 		void              insert              (int index, MuseRecord& arecord);
 		void              clear               (void);
-		int               getInitialTPQ       (void);
+		int               getInitialTpq       (void);
 
 		int               read                (std::istream& input);
 		int               readString          (const std::string& filename);

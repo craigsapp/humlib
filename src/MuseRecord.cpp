@@ -2487,7 +2487,7 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 			notetype = notetype * 2;
 		}
 	}
-	tempdur << notetype << ends;
+	tempdur << notetype;
 	output = tempdur.str();
 
 	// add any dots of prolongation to the output string
@@ -2595,7 +2595,7 @@ string MuseRecord::getKernRestStyle(int quarter) {
 		if (timeModificationRightQ()) {
 			notetype = notetype * getTimeModificationRight() / 2;
 		}
-		tempdur << notetype << ends;
+		tempdur << notetype;
 		output =  tempdur.str();
 
 		// add any dots of prolongation to the output string

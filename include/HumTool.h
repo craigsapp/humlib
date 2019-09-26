@@ -54,6 +54,7 @@ class HumTool : public Options {
 		bool          hasError        (void);
 		std::string   getError        (void);
 		ostream&      getError        (ostream& out);
+		void          setError        (const string& message);
 
 	protected:
 		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.

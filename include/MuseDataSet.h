@@ -4,7 +4,7 @@
 // Last Modified: Wed Sep 25 07:04:59 PDT 2019 Convert to STL
 // Filename:      humlib/include/MuseDataSet.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/MuseDataSetSet.h
-// Syntax:        C++ 
+// Syntax:        C++
 // vim:           ts=3
 //
 // Description:   A class that stores a collection of MuseDataSet files
@@ -40,16 +40,23 @@ class MuseDataSet {
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
 
+		std::string       getError            (void);
+		bool              hasError            (void);
+		void              clearError          (void);
+
 	private:
 		std::vector<MuseData*>  m_part;
+		std::string             m_error;
 
 	protected:
 		int               appendPart          (MuseData* musedata);
-		void              analyzeSetType      (std::vector<int>& types, 
+		void              analyzeSetType      (std::vector<int>& types,
 		                                       std::vector<std::string>& lines);
-		void              analyzePartSegments (std::vector<int>& startindex, 
-		                                       std::vector<int>& stopindex, 
+		void              analyzePartSegments (std::vector<int>& startindex,
+		                                       std::vector<int>& stopindex,
 		                                       std::vector<std::string>& lines);
+		void              setError            (const std::string& error);
+
 };
 
 

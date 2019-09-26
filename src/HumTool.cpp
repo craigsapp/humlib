@@ -277,6 +277,19 @@ void HumTool::clearOutput(void) {
 }
 
 
+
+///////////////////////////////
+//
+// HumTool::setError --
+//
+
+void HumTool::setError(const string& message) {
+	m_error_text << message << endl;
+}
+
+
+
+
 // END_MERGE
 
 } // end namespace hum

@@ -5,7 +5,7 @@
 using namespace hum;
 using namespace std;
 
-void printKernInfo(MuseRecord& mr);
+void printKernInfo(MuseRecord& mr, int tpq);
 
 int main(int argc, char** argv) {
 	Options options;
@@ -18,13 +18,16 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
+
 	// int partcount = mds.getPartCount();
 	MuseData& md = mds[0];
+	int tpq = md.getInitialTpq();
+
 	for (int i=0; i<md.getLineCount(); i++) {
 		cout << "LINE:" << i 
 		     << "\tABSQ:" << md.getAbsBeat(i).getFloat() << "\t" 
 		     << "\tTDUR:" << md[i].getLineTickDuration() << "\t";
-		printKernInfo(md[i]);
+		printKernInfo(md[i], tpq);
 		cout << "\t" << md[i] << endl;
 	}
 
@@ -32,14 +35,14 @@ int main(int argc, char** argv) {
 }
 
 
-void printKernInfo(MuseRecord& mr) {
+void printKernInfo(MuseRecord& mr, int tpq) {
 	string output = ".";
 	if (mr.isBarline()) {
-		output = "bar";
+		output = mr.getKernMeasureStyle();
 	} else if (mr.isNote()) {
-		output = "note";
+		output = mr.getKernNoteStyle(1, 1);
 	} else if (mr.isRest()) {
-		output = "rest";
+		output = mr.getKernRestStyle(tpq);
 	}
 	cout << output;
 }

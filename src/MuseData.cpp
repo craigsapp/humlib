@@ -808,11 +808,11 @@ void MuseData::analyzeRhythm(void) {
 
 //////////////////////////////
 //
-// MuseData::getInitialTPQ -- return the Q: field in the first $ record
+// MuseData::getInitialTpq -- return the Q: field in the first $ record
 //    at the top of the file.
 //
 
-int MuseData::getInitialTPQ(void) {
+int MuseData::getInitialTpq(void) {
 	int output = 0;
 	if (m_data.empty()) {
 		return output;
