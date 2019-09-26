@@ -43,12 +43,21 @@ class Tool_md2hum : public HumTool {
 
 	protected:
 		void    initialize           (void);
-		void    printKernInfo        (ostream& out, MuseRecord& mr, int tpq);
+		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
+		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
+		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
+		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 
 	private:
+		// options:
 		Options m_options;
 		bool    m_stemsQ = false;    // used with -s option
 		bool    m_recipQ = false;    // used with -r option
+
+		// state variables:
+		int m_tpq      = 1;          // Ticks per quarter note
+		int m_staff    = 0;          // staff index currently being processed
+		int m_maxstaff = 0;          // total number of staves (parts)
 
 };
 

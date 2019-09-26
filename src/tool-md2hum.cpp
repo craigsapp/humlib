@@ -117,18 +117,18 @@ bool Tool_md2hum::convertString(ostream& out, const string& input) {
 
 bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
 	initialize();
-	int status = 1;
 
-	// int partcount = mds.getPartCount();
-	// only first part in file for now:
-	MuseData& md = mds[0];
-	int tpq = md.getInitialTpq();
-
-	out << "**kern\n";
-	for (int i=0; i<md.getLineCount(); i++) {
-		printKernInfo(out, md[i], tpq);
+	HumGrid outdata;
+	int partcount = mds.getPartCount();
+	bool status = true;
+	for (int i=0; i<partcount; i++) {
+		status &= convertPart(outdata, mds, i);
 	}
-	out << "*-\n";
+
+	HumdrumFile outfile;
+	outdata.transferTokens(outfile);
+	outfile.createLinesFromTokens();
+	out << outfile;
 
 	return status;
 }
@@ -137,21 +137,96 @@ bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
 
 //////////////////////////////
 //
-// Tool_md2hum::printKernInfo --
+// Tool_md2hum::convertPart --
 //
 
-void Tool_md2hum::printKernInfo(ostream& out, MuseRecord& mr, int tpq) {
+bool Tool_md2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
+	MuseData& part = mds[index];
+
+	m_tpq = part.getInitialTpq();
+	m_staff = index;
+	m_maxstaff = (int)mds.getPartCount();
+	
+	bool status = true;
+	int i = 0;
+	while (i < part.getLineCount()) {
+		i = convertMeasure(outdata, part, i);
+	}
+
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::convertMeasure --
+//
+
+int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+	HumNum starttime = part[startindex].getAbsBeat();
+	GridMeasure* gm = getMeasure(outdata, starttime);
+	gm->setBarStyle(MeasureStyle::Plain);
+	int i = startindex;
+	for (i=startindex; i<part.getLineCount(); i++) {
+		if ((i != startindex) && part[i].isBarline()) {
+			break;
+		}
+
+		convertLine(gm, part[i]);
+	}
+	return i;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::convertLine --
+//
+
+void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
+	int tpq          = m_tpq;
+	int part         = m_staff;
+	int staff        = m_staff;
+	int maxstaff     = m_maxstaff;
+	int voice        = 0;
+	HumNum timestamp = mr.getAbsBeat();
+	string tok;
+
 	if (mr.isBarline()) {
-		out << mr.getKernMeasureStyle();
-		out << endl;
+		tok = mr.getKernMeasureStyle();
 	} else if (mr.isNote()) {
-		out << mr.getKernNoteStyle(1, 1);
-		out << endl;
+		tok = mr.getKernNoteStyle(1, 1);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 	} else if (mr.isRest()) {
-		out << mr.getKernRestStyle(tpq);
-		out << endl;
+		tok  = mr.getKernRestStyle(tpq);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::getMeasure --  Could be imporoved by NlogN search.
+//
+
+GridMeasure* Tool_md2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
+	for (int i=0; i<(int)outdata.size(); i++) {
+		if (outdata[i]->getTimestamp() == starttime) {
+			return outdata[i];
+		}
+	}
+	// Did not find measure in data, so append to end of list.
+	// Assuming that unknown measures are at a later timestamp
+	// than those in current list, but should fix this later perhaps.
+	GridMeasure* gm = new GridMeasure(&outdata);
+	outdata.push_back(gm);
+	return gm;
+}
+
+
 
 
 // END_MERGE

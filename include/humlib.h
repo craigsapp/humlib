@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 25 20:33:38 PDT 2019
+// Last Modified: Thu Sep 26 13:55:03 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2972,13 +2972,18 @@ class MuseData {
 		HumNum            getTiedDuration     (int eindex, int erecord);
 		int               getType             (int eindex, int erecord);
 		void              cleanLineEndings    (void);
+		std::string       getError            (void);
+		bool              hasError            (void);
 
 	private:
 		std::vector<MuseRecord*>    m_data;
 		std::vector<MuseEventSet*>  m_sequence;
 		std::string                 m_name;
+		std::string                 m_error;
 
 	protected:
+		void              clearError          (void);
+		void              setError            (const std::string& error);
 		void              processTie          (int eventindex, int recordindex,
 		                                       int lastindex);
 		int               searchForPitch      (int eventindex, int b40,
@@ -3025,13 +3030,13 @@ class MuseDataSet {
 
 	protected:
 		int               appendPart          (MuseData* musedata);
-		void              analyzeSetType      (std::vector<int>& types, 
+		void              analyzeSetType      (std::vector<int>& types,
 		                                       std::vector<std::string>& lines);
-		void              analyzePartSegments (std::vector<int>& startindex, 
-		                                       std::vector<int>& stopindex, 
+		void              analyzePartSegments (std::vector<int>& startindex,
+		                                       std::vector<int>& stopindex,
 		                                       std::vector<std::string>& lines);
 		void              setError            (const std::string& error);
-		
+
 };
 
 
@@ -5721,12 +5726,21 @@ class Tool_md2hum : public HumTool {
 
 	protected:
 		void    initialize           (void);
-		void    printKernInfo        (ostream& out, MuseRecord& mr, int tpq);
+		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
+		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
+		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
+		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 
 	private:
+		// options:
 		Options m_options;
 		bool    m_stemsQ = false;    // used with -s option
 		bool    m_recipQ = false;    // used with -r option
+
+		// state variables:
+		int m_tpq      = 1;          // Ticks per quarter note
+		int m_staff    = 0;          // staff index currently being processed
+		int m_maxstaff = 0;          // total number of staves (parts)
 
 };
 

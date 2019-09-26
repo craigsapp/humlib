@@ -312,6 +312,7 @@ void MuseData::clear(void) {
 		delete m_sequence[i];
 		m_sequence[i] = NULL;
 	}
+	m_error.clear();
 	m_data.clear();
 	m_sequence.clear();
 	m_name = "";
@@ -362,6 +363,7 @@ MuseRecord& MuseData::getRecord(int eindex, int erecord) {
 //
 
 int MuseData::read(istream& input) {
+	m_error.clear();
 	string dataline;
 	dataline.reserve(256);
 	int character;
@@ -407,7 +409,12 @@ int MuseData::read(istream& input) {
 	}
 
 	doAnalyses();
-	return 1;
+	if (hasError()) {
+		cerr << m_error << endl;
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 
@@ -432,10 +439,15 @@ int MuseData::readString(const string& data) {
 
 void MuseData::doAnalyses(void) {
 	analyzeType();
+	if (hasError()) { return; }
 	analyzeRhythm();
+	if (hasError()) { return; }
 	constructTimeSequence();
+	if (hasError()) { return; }
 	analyzePitch();
+	if (hasError()) { return; }
 	analyzeTies();
+	if (hasError()) { return; }
 }
 
 
@@ -861,6 +873,9 @@ void MuseData::constructTimeSequence(void) {
 	MuseData& thing = *this;
 	for (int i=0; i<(int)m_data.size(); i++) {
 		insertEventBackwards(thing[i].getAbsBeat(), &thing[i]);
+		if (hasError()) {
+			return;
+		}
 	}
 }
 
@@ -949,9 +964,11 @@ void MuseData::insertEventBackwards(HumNum atime, MuseRecord* arecord) {
 			}
 		}
 	}
-	cerr << "FUNNY ERROR OCCURED at time " << atime << endl;
-	exit(1);
+	stringstream ss;
+	ss << "Funny error occurred at time " << atime;
+	setError(ss.str());
 }
+
 
 
 //////////////////////////////
@@ -1261,6 +1278,49 @@ void MuseData::cleanLineEndings(void) {
 	for (int i=0; i<this->getLineCount(); i++) {
 		(*this)[i].cleanLineEnding();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getError --
+//
+
+std::string MuseData::getError(void) {
+	return m_error;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::hasError --
+//
+
+bool MuseData::hasError(void) {
+	return !m_error.empty();
+}
+
+
+//////////////////////////////
+//
+// MuseData::clearError --
+//
+
+void MuseData::clearError(void) {
+	m_error.clear();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData:::etError --
+//
+
+void MuseData::setError(const string& error) {
+	m_error = error;
 }
 
 

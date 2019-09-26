@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 25 20:33:38 PDT 2019
+// Last Modified: Thu Sep 26 13:55:03 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -26613,6 +26613,7 @@ void MuseData::clear(void) {
 		delete m_sequence[i];
 		m_sequence[i] = NULL;
 	}
+	m_error.clear();
 	m_data.clear();
 	m_sequence.clear();
 	m_name = "";
@@ -26663,6 +26664,7 @@ MuseRecord& MuseData::getRecord(int eindex, int erecord) {
 //
 
 int MuseData::read(istream& input) {
+	m_error.clear();
 	string dataline;
 	dataline.reserve(256);
 	int character;
@@ -26708,7 +26710,12 @@ int MuseData::read(istream& input) {
 	}
 
 	doAnalyses();
-	return 1;
+	if (hasError()) {
+		cerr << m_error << endl;
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 
@@ -26733,10 +26740,15 @@ int MuseData::readString(const string& data) {
 
 void MuseData::doAnalyses(void) {
 	analyzeType();
+	if (hasError()) { return; }
 	analyzeRhythm();
+	if (hasError()) { return; }
 	constructTimeSequence();
+	if (hasError()) { return; }
 	analyzePitch();
+	if (hasError()) { return; }
 	analyzeTies();
+	if (hasError()) { return; }
 }
 
 
@@ -27162,6 +27174,9 @@ void MuseData::constructTimeSequence(void) {
 	MuseData& thing = *this;
 	for (int i=0; i<(int)m_data.size(); i++) {
 		insertEventBackwards(thing[i].getAbsBeat(), &thing[i]);
+		if (hasError()) {
+			return;
+		}
 	}
 }
 
@@ -27250,9 +27265,11 @@ void MuseData::insertEventBackwards(HumNum atime, MuseRecord* arecord) {
 			}
 		}
 	}
-	cerr << "FUNNY ERROR OCCURED at time " << atime << endl;
-	exit(1);
+	stringstream ss;
+	ss << "Funny error occurred at time " << atime;
+	setError(ss.str());
 }
+
 
 
 //////////////////////////////
@@ -27562,6 +27579,49 @@ void MuseData::cleanLineEndings(void) {
 	for (int i=0; i<this->getLineCount(); i++) {
 		(*this)[i].cleanLineEnding();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getError --
+//
+
+std::string MuseData::getError(void) {
+	return m_error;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::hasError --
+//
+
+bool MuseData::hasError(void) {
+	return !m_error.empty();
+}
+
+
+//////////////////////////////
+//
+// MuseData::clearError --
+//
+
+void MuseData::clearError(void) {
+	m_error.clear();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData:::etError --
+//
+
+void MuseData::setError(const string& error) {
+	m_error = error;
 }
 
 
@@ -27880,7 +27940,7 @@ int MuseDataSet::getPartCount(void) {
 void MuseDataSet::deletePart(int index) {
 	if (index < 0 || index > (int)m_part.size()-1) {
 		cerr << "Trying to delete a non-existent part" << endl;
-		exit(1);
+		return;
 	}
 
 	delete m_part[index];
@@ -27905,16 +27965,6 @@ void MuseDataSet::cleanLineEndings(void) {
 }
 
 
-//////////////////////////////
-//
-// MuseDataSet::setError --
-//
-
-void MuseDataSet::setError(const std::string& error) {
-	m_error = error;
-}
-
-
 
 //////////////////////////////
 //
@@ -27934,6 +27984,16 @@ void MuseDataSet::clearError(void) {
 
 bool MuseDataSet::hasError(void) {
 	return !m_error.empty();
+}
+
+
+//////////////////////////////
+//
+// MuseDataSet::setError --
+//
+
+void MuseDataSet::setError(const string& error) {
+	m_error = error;
 }
 
 
@@ -28005,8 +28065,7 @@ string MuseRecord::getNoteField(void) {
 			break;
 		default:
 			cerr << "Error: cannot use getNoteField function on line: "
-				  << getLine() << endl;
-			exit(1);
+			   << getLine() << endl;
 	}
 	return "";
 }
@@ -28029,7 +28088,7 @@ int MuseRecord::getOctave(void) {
 	if (index >= (int)recordInfo.size()) {
 		cerr << "Error: no octave specification in note field: " << recordInfo
 			  << endl;
-		exit(1);
+		return 0;
 	}
 	return recordInfo[index] - '0';
 }
@@ -28044,7 +28103,7 @@ string MuseRecord::getOctaveString(void) {
 	if (index >= (int)recordInfo.size()) {
 		cerr << "Error: no octave specification in note field: " << recordInfo
 			  << endl;
-		exit(1);
+		return "";
 	}
 	string output;
 	output += recordInfo[index];
@@ -28133,7 +28192,7 @@ string MuseRecord::getAccidentalString(void) {
 		default:
 			output = getNoteField();
 			cerr << "Error: unknown type of accidental: " << output << endl;
-			exit(1);
+			return "";
 	}
 	return output;
 }
@@ -28268,7 +28327,7 @@ void MuseRecord::setPitchAtIndex(int index, const string& pitchname) {
 	int len = (int)pitchname.size();
 	if ((len > 4) && (pitchname != "irest")) {
 		cerr << "Error in MuseRecord::setPitchAtIndex: " << pitchname << endl;
-		exit(1);
+		return;
 	}
 	insertString(index+1, pitchname);
 
@@ -28303,7 +28362,7 @@ string MuseRecord::getTickDurationField(void) {
 			return "";
 			// cerr << "Error: cannot use getTickDurationField function on line: "
 			//      << getLine() << endl;
-			// exit(1);
+			// return "";
 	}
 	return "";
 }
@@ -28420,7 +28479,6 @@ void MuseRecord::setDots(int value) {
 		case 3: getColumn(18) = ';';   break;
 		case 4: getColumn(18) = '!';   break;
 		default: cerr << "Error in MuseRecord::setDots : " << value << endl;
-					exit(1);
 	}
 }
 
@@ -28471,7 +28529,7 @@ void MuseRecord::setNoteheadShape(HumNum duration) {
 		setNotehead256th();
 	} else {
 		cerr << "Error in duration: " << duration << endl;
-		exit(1);
+		return;
 	}
 }
 
@@ -28518,7 +28576,7 @@ void MuseRecord::setNoteheadShapeMensural(HumNum duration) {
 		setNotehead256thMensural();
 	} else {
 		cerr << "Error in duration: " << duration << endl;
-		exit(1);
+		return;
 	}
 }
 
@@ -28526,7 +28584,7 @@ void MuseRecord::setNoteheadMaxima(void) {
 	if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
 		cerr << "Error: cue/grace notes cannot be maximas in setNoteheadLong"
 			  << endl;
-		exit(1);
+		return;
 	} else {
 		getColumn(17) = 'M';
 	}
@@ -28536,7 +28594,7 @@ void MuseRecord::setNoteheadLong(void) {
 	if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
 		cerr << "Error: cue/grace notes cannot be longs in setNoteheadLong"
 			  << endl;
-		exit(1);
+		return;
 	} else {
 		getColumn(17) = 'L';
 	}
@@ -28857,7 +28915,7 @@ int MuseRecord::addAdditionalNotation(char symbol) {
 	if (blank < 0) {
 		cerr << "Error in MuseRecord::addAdditionalNotation: "
 			  << "no empty space for notation" << endl;
-		exit(1);
+		return 0;
 	}
 
 	if ((blank <= 32) && (getColumn(33) == ' ')) {
@@ -28905,7 +28963,7 @@ int MuseRecord::addAdditionalNotation(const string& symbol) {
 	if (blank < 0) {
 		cerr << "Error in MuseRecord::addAdditionalNotation2: "
 			  << "no empty space for notation" << endl;
-		exit(1);
+		return 0;
 	}
 
 // cout << "@ GOT HERE symbol = " << symbol << " and blank = " << blank << endl;
@@ -29187,7 +29245,7 @@ int MuseRecord::getGraphicNoteType(void) {
 	string recordInfo = getGraphicNoteTypeField();
 	if (recordInfo[0] == ' ') {
 		cerr << "Error: no graphic note type specified: " << getLine() << endl;
-		exit(1);
+		return 0;
 	}
 
 	switch (recordInfo[0]) {
@@ -29218,7 +29276,6 @@ int MuseRecord::getGraphicNoteType(void) {
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
 				  << getLine() << endl;
-			exit(1);
 	}
 
 	return output;
@@ -29255,7 +29312,7 @@ int MuseRecord::getGraphicNoteTypeSize(void) {
 	if (recordInfo[0] == ' ') {
 		cerr << "Error: not graphic note specified in column 17: "
 			  << getLine() << endl;
-		exit(1);
+		return 0;
 	}
 
 	switch (recordInfo[0]) {
@@ -29270,7 +29327,7 @@ int MuseRecord::getGraphicNoteTypeSize(void) {
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	return output;
@@ -29324,7 +29381,7 @@ int MuseRecord::getProlongation(void) {
 		default:
 			cerr << "Error: unknon prologation character (column 18): "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -29346,7 +29403,7 @@ string MuseRecord::getStringProlongation(void) {
 		default:
 			cerr << "Error: unknown number of prolongation dots (column 18): "
 				  << getLine() << endl;
-			exit(1);
+			return "";
 	}
 	return "";
 }
@@ -29417,7 +29474,7 @@ int MuseRecord::getNotatedAccidental(void) {
 		case 'F':   output = -1;   break;
 		default:
 			cerr << "Error: unknown accidental: " << recordInfo[0] << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -29486,7 +29543,7 @@ string MuseRecord::getTimeModification(void) {
 	if (output[0] == ' ') {
 		cerr << "Error: funny error occured in time modification "
 			  << "(columns 20-22): " << getLine() << endl;
-		exit(1);
+		return "";
 	}
 	return output;
 }
@@ -29691,7 +29748,7 @@ int MuseRecord::getStemDirection(void) {
 		case ' ':   output = 0;   break;
 		default:
 			cerr << "Error: unknown stem direction: " << recordInfo[0] << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -30769,7 +30826,7 @@ string MuseRecord::getAttributeList(void) {
 		default:
 			cerr << "Error: cannot use getAttributeList function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return "";
 	}
 
 	int ending = 0;
@@ -30810,7 +30867,7 @@ int MuseRecord::attributeQ(const string& attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeList function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 
@@ -30851,7 +30908,7 @@ int MuseRecord::getAttributeInt(char attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeInt function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	int output = E_unknown;
@@ -30903,7 +30960,7 @@ int MuseRecord::getAttributeString(string& output, const string& attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeInt function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	int returnValue = 0;
@@ -31102,7 +31159,7 @@ void MuseRecord::allowFigurationOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a figuration record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -31124,7 +31181,7 @@ void MuseRecord::allowFigurationAndNotesOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a figuration record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -31142,7 +31199,7 @@ void MuseRecord::allowMeasuresOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a measure record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -31163,7 +31220,7 @@ void MuseRecord::allowNotesOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a note record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -31226,7 +31283,7 @@ int MuseRecord::getAddElementIndex(int& index, string& output, const string& inp
 					output += input[index++];
 				} else {
 				  cout << "Error at \'m\' in notation field: " << input << endl;
-				  exit(1);
+				  return 0;
 				}
 				break;
 
@@ -31331,7 +31388,7 @@ int MuseRecord::getAddElementIndex(int& index, string& output, const string& inp
 			default:
 				cout << "Error: unknown additional notation: "
 					  << input[index] << endl;
-				exit(1);
+				return 0;
 		}
 		if (count != 0 || index >= 12) {
 			finished = 1;
@@ -31496,7 +31553,8 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 		cerr << "Error trying to access column: " << columnNumber  << endl;
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
-		exit(1);
+		static char x = ' ';
+		return x;
 	} else if (realindex >= (int)m_recordString.size()) {
 		m_recordString.resize(realindex+1);
 		for (int i=length; i<=realindex; i++) {
@@ -53079,18 +53137,18 @@ bool Tool_md2hum::convertString(ostream& out, const string& input) {
 
 bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
 	initialize();
-	int status = 1;
 
-	// int partcount = mds.getPartCount();
-	// only first part in file for now:
-	MuseData& md = mds[0];
-	int tpq = md.getInitialTpq();
-
-	out << "**kern\n";
-	for (int i=0; i<md.getLineCount(); i++) {
-		printKernInfo(out, md[i], tpq);
+	HumGrid outdata;
+	int partcount = mds.getPartCount();
+	bool status = true;
+	for (int i=0; i<partcount; i++) {
+		status &= convertPart(outdata, mds, i);
 	}
-	out << "*-\n";
+
+	HumdrumFile outfile;
+	outdata.transferTokens(outfile);
+	outfile.createLinesFromTokens();
+	out << outfile;
 
 	return status;
 }
@@ -53099,21 +53157,96 @@ bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
 
 //////////////////////////////
 //
-// Tool_md2hum::printKernInfo --
+// Tool_md2hum::convertPart --
 //
 
-void Tool_md2hum::printKernInfo(ostream& out, MuseRecord& mr, int tpq) {
+bool Tool_md2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
+	MuseData& part = mds[index];
+
+	m_tpq = part.getInitialTpq();
+	m_staff = index;
+	m_maxstaff = (int)mds.getPartCount();
+	
+	bool status = true;
+	int i = 0;
+	while (i < part.getLineCount()) {
+		i = convertMeasure(outdata, part, i);
+	}
+
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::convertMeasure --
+//
+
+int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+	HumNum starttime = part[startindex].getAbsBeat();
+	GridMeasure* gm = getMeasure(outdata, starttime);
+	gm->setBarStyle(MeasureStyle::Plain);
+	int i = startindex;
+	for (i=startindex; i<part.getLineCount(); i++) {
+		if ((i != startindex) && part[i].isBarline()) {
+			break;
+		}
+
+		convertLine(gm, part[i]);
+	}
+	return i;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::convertLine --
+//
+
+void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
+	int tpq          = m_tpq;
+	int part         = m_staff;
+	int staff        = m_staff;
+	int maxstaff     = m_maxstaff;
+	int voice        = 0;
+	HumNum timestamp = mr.getAbsBeat();
+	string tok;
+
 	if (mr.isBarline()) {
-		out << mr.getKernMeasureStyle();
-		out << endl;
+		tok = mr.getKernMeasureStyle();
 	} else if (mr.isNote()) {
-		out << mr.getKernNoteStyle(1, 1);
-		out << endl;
+		tok = mr.getKernNoteStyle(1, 1);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 	} else if (mr.isRest()) {
-		out << mr.getKernRestStyle(tpq);
-		out << endl;
+		tok  = mr.getKernRestStyle(tpq);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_md2hum::getMeasure --  Could be imporoved by NlogN search.
+//
+
+GridMeasure* Tool_md2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
+	for (int i=0; i<(int)outdata.size(); i++) {
+		if (outdata[i]->getTimestamp() == starttime) {
+			return outdata[i];
+		}
+	}
+	// Did not find measure in data, so append to end of list.
+	// Assuming that unknown measures are at a later timestamp
+	// than those in current list, but should fix this later perhaps.
+	GridMeasure* gm = new GridMeasure(&outdata);
+	outdata.push_back(gm);
+	return gm;
+}
+
+
 
 
 

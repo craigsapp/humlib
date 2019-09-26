@@ -155,7 +155,8 @@ char& MuseRecordBasic::getColumn(int columnNumber) {
 		cerr << "Error trying to access column: " << columnNumber  << endl;
 		cerr << "CURRENT DATA: ===============================" << endl;
 		cerr << (*this);
-		exit(1);
+		static char x = ' ';
+		return x;
 	} else if (realindex >= (int)m_recordString.size()) {
 		m_recordString.resize(realindex+1);
 		for (int i=length; i<=realindex; i++) {

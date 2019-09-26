@@ -316,7 +316,7 @@ int MuseDataSet::getPartCount(void) {
 void MuseDataSet::deletePart(int index) {
 	if (index < 0 || index > (int)m_part.size()-1) {
 		cerr << "Trying to delete a non-existent part" << endl;
-		exit(1);
+		return;
 	}
 
 	delete m_part[index];
@@ -341,16 +341,6 @@ void MuseDataSet::cleanLineEndings(void) {
 }
 
 
-//////////////////////////////
-//
-// MuseDataSet::setError --
-//
-
-void MuseDataSet::setError(const std::string& error) {
-	m_error = error;
-}
-
-
 
 //////////////////////////////
 //
@@ -370,6 +360,16 @@ void MuseDataSet::clearError(void) {
 
 bool MuseDataSet::hasError(void) {
 	return !m_error.empty();
+}
+
+
+//////////////////////////////
+//
+// MuseDataSet::setError --
+//
+
+void MuseDataSet::setError(const string& error) {
+	m_error = error;
 }
 
 

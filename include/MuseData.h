@@ -106,13 +106,18 @@ class MuseData {
 		HumNum            getTiedDuration     (int eindex, int erecord);
 		int               getType             (int eindex, int erecord);
 		void              cleanLineEndings    (void);
+		std::string       getError            (void);
+		bool              hasError            (void);
 
 	private:
 		std::vector<MuseRecord*>    m_data;
 		std::vector<MuseEventSet*>  m_sequence;
 		std::string                 m_name;
+		std::string                 m_error;
 
 	protected:
+		void              clearError          (void);
+		void              setError            (const std::string& error);
 		void              processTie          (int eventindex, int recordindex,
 		                                       int lastindex);
 		int               searchForPitch      (int eventindex, int b40,

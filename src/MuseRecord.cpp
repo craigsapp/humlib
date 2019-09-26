@@ -77,8 +77,7 @@ string MuseRecord::getNoteField(void) {
 			break;
 		default:
 			cerr << "Error: cannot use getNoteField function on line: "
-				  << getLine() << endl;
-			exit(1);
+			   << getLine() << endl;
 	}
 	return "";
 }
@@ -101,7 +100,7 @@ int MuseRecord::getOctave(void) {
 	if (index >= (int)recordInfo.size()) {
 		cerr << "Error: no octave specification in note field: " << recordInfo
 			  << endl;
-		exit(1);
+		return 0;
 	}
 	return recordInfo[index] - '0';
 }
@@ -116,7 +115,7 @@ string MuseRecord::getOctaveString(void) {
 	if (index >= (int)recordInfo.size()) {
 		cerr << "Error: no octave specification in note field: " << recordInfo
 			  << endl;
-		exit(1);
+		return "";
 	}
 	string output;
 	output += recordInfo[index];
@@ -205,7 +204,7 @@ string MuseRecord::getAccidentalString(void) {
 		default:
 			output = getNoteField();
 			cerr << "Error: unknown type of accidental: " << output << endl;
-			exit(1);
+			return "";
 	}
 	return output;
 }
@@ -340,7 +339,7 @@ void MuseRecord::setPitchAtIndex(int index, const string& pitchname) {
 	int len = (int)pitchname.size();
 	if ((len > 4) && (pitchname != "irest")) {
 		cerr << "Error in MuseRecord::setPitchAtIndex: " << pitchname << endl;
-		exit(1);
+		return;
 	}
 	insertString(index+1, pitchname);
 
@@ -375,7 +374,7 @@ string MuseRecord::getTickDurationField(void) {
 			return "";
 			// cerr << "Error: cannot use getTickDurationField function on line: "
 			//      << getLine() << endl;
-			// exit(1);
+			// return "";
 	}
 	return "";
 }
@@ -492,7 +491,6 @@ void MuseRecord::setDots(int value) {
 		case 3: getColumn(18) = ';';   break;
 		case 4: getColumn(18) = '!';   break;
 		default: cerr << "Error in MuseRecord::setDots : " << value << endl;
-					exit(1);
 	}
 }
 
@@ -543,7 +541,7 @@ void MuseRecord::setNoteheadShape(HumNum duration) {
 		setNotehead256th();
 	} else {
 		cerr << "Error in duration: " << duration << endl;
-		exit(1);
+		return;
 	}
 }
 
@@ -590,7 +588,7 @@ void MuseRecord::setNoteheadShapeMensural(HumNum duration) {
 		setNotehead256thMensural();
 	} else {
 		cerr << "Error in duration: " << duration << endl;
-		exit(1);
+		return;
 	}
 }
 
@@ -598,7 +596,7 @@ void MuseRecord::setNoteheadMaxima(void) {
 	if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
 		cerr << "Error: cue/grace notes cannot be maximas in setNoteheadLong"
 			  << endl;
-		exit(1);
+		return;
 	} else {
 		getColumn(17) = 'M';
 	}
@@ -608,7 +606,7 @@ void MuseRecord::setNoteheadLong(void) {
 	if ((*this)[0] == 'c' || ((*this)[0] == 'g')) {
 		cerr << "Error: cue/grace notes cannot be longs in setNoteheadLong"
 			  << endl;
-		exit(1);
+		return;
 	} else {
 		getColumn(17) = 'L';
 	}
@@ -929,7 +927,7 @@ int MuseRecord::addAdditionalNotation(char symbol) {
 	if (blank < 0) {
 		cerr << "Error in MuseRecord::addAdditionalNotation: "
 			  << "no empty space for notation" << endl;
-		exit(1);
+		return 0;
 	}
 
 	if ((blank <= 32) && (getColumn(33) == ' ')) {
@@ -977,7 +975,7 @@ int MuseRecord::addAdditionalNotation(const string& symbol) {
 	if (blank < 0) {
 		cerr << "Error in MuseRecord::addAdditionalNotation2: "
 			  << "no empty space for notation" << endl;
-		exit(1);
+		return 0;
 	}
 
 // cout << "@ GOT HERE symbol = " << symbol << " and blank = " << blank << endl;
@@ -1259,7 +1257,7 @@ int MuseRecord::getGraphicNoteType(void) {
 	string recordInfo = getGraphicNoteTypeField();
 	if (recordInfo[0] == ' ') {
 		cerr << "Error: no graphic note type specified: " << getLine() << endl;
-		exit(1);
+		return 0;
 	}
 
 	switch (recordInfo[0]) {
@@ -1290,7 +1288,6 @@ int MuseRecord::getGraphicNoteType(void) {
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
 				  << getLine() << endl;
-			exit(1);
 	}
 
 	return output;
@@ -1327,7 +1324,7 @@ int MuseRecord::getGraphicNoteTypeSize(void) {
 	if (recordInfo[0] == ' ') {
 		cerr << "Error: not graphic note specified in column 17: "
 			  << getLine() << endl;
-		exit(1);
+		return 0;
 	}
 
 	switch (recordInfo[0]) {
@@ -1342,7 +1339,7 @@ int MuseRecord::getGraphicNoteTypeSize(void) {
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	return output;
@@ -1396,7 +1393,7 @@ int MuseRecord::getProlongation(void) {
 		default:
 			cerr << "Error: unknon prologation character (column 18): "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -1418,7 +1415,7 @@ string MuseRecord::getStringProlongation(void) {
 		default:
 			cerr << "Error: unknown number of prolongation dots (column 18): "
 				  << getLine() << endl;
-			exit(1);
+			return "";
 	}
 	return "";
 }
@@ -1489,7 +1486,7 @@ int MuseRecord::getNotatedAccidental(void) {
 		case 'F':   output = -1;   break;
 		default:
 			cerr << "Error: unknown accidental: " << recordInfo[0] << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -1558,7 +1555,7 @@ string MuseRecord::getTimeModification(void) {
 	if (output[0] == ' ') {
 		cerr << "Error: funny error occured in time modification "
 			  << "(columns 20-22): " << getLine() << endl;
-		exit(1);
+		return "";
 	}
 	return output;
 }
@@ -1763,7 +1760,7 @@ int MuseRecord::getStemDirection(void) {
 		case ' ':   output = 0;   break;
 		default:
 			cerr << "Error: unknown stem direction: " << recordInfo[0] << endl;
-			exit(1);
+			return 0;
 	}
 	return output;
 }
@@ -2841,7 +2838,7 @@ string MuseRecord::getAttributeList(void) {
 		default:
 			cerr << "Error: cannot use getAttributeList function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return "";
 	}
 
 	int ending = 0;
@@ -2882,7 +2879,7 @@ int MuseRecord::attributeQ(const string& attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeList function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 
@@ -2923,7 +2920,7 @@ int MuseRecord::getAttributeInt(char attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeInt function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	int output = E_unknown;
@@ -2975,7 +2972,7 @@ int MuseRecord::getAttributeString(string& output, const string& attribute) {
 		default:
 			cerr << "Error: cannot use getAttributeInt function on line: "
 				  << getLine() << endl;
-			exit(1);
+			return 0;
 	}
 
 	int returnValue = 0;
@@ -3174,7 +3171,7 @@ void MuseRecord::allowFigurationOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a figuration record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -3196,7 +3193,7 @@ void MuseRecord::allowFigurationAndNotesOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a figuration record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -3214,7 +3211,7 @@ void MuseRecord::allowMeasuresOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a measure record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -3235,7 +3232,7 @@ void MuseRecord::allowNotesOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a note record.  Line is: " << getLine() << endl;
-			exit(1);
+			return;
 	}
 }
 
@@ -3298,7 +3295,7 @@ int MuseRecord::getAddElementIndex(int& index, string& output, const string& inp
 					output += input[index++];
 				} else {
 				  cout << "Error at \'m\' in notation field: " << input << endl;
-				  exit(1);
+				  return 0;
 				}
 				break;
 
@@ -3403,7 +3400,7 @@ int MuseRecord::getAddElementIndex(int& index, string& output, const string& inp
 			default:
 				cout << "Error: unknown additional notation: "
 					  << input[index] << endl;
-				exit(1);
+				return 0;
 		}
 		if (count != 0 || index >= 12) {
 			finished = 1;
