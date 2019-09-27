@@ -141,7 +141,7 @@ class Convert {
 		static std::string museClefToKernClef(const std::string& mclef);
 		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
 		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
-		static std::string museMeterSigToKernMeterSig(const string& mtimesig);
+		static std::string museMeterSigToKernMeterSig(const std::string& mtimesig);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
