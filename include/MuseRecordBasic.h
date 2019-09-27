@@ -147,6 +147,7 @@ class MuseRecordBasic {
 
 		// boolean type fuctions:
 		bool              isBarline          (void);
+		bool              isAttributes       (void);
 		bool              isNote             (void);
 		bool              isRest             (void);
 

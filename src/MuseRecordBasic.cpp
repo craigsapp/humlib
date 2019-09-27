@@ -763,6 +763,15 @@ void MuseRecordBasic::cleanLineEnding(void) {
 }
 
 
+//////////////////////////////
+//
+// MuseRecordBasic::isAttributes --
+//
+
+bool MuseRecordBasic::isAttributes(void) {
+	return m_type == E_muserec_musical_attributes;
+}
+
 
 //////////////////////////////
 //
