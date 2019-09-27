@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 
 namespace hum {
@@ -275,10 +276,11 @@ class MuseRecord : public MuseRecordBasic {
 	//////////////////////////////
 	// functions which work with musical attributes records ('$'):
 
-		std::string      getAttributeList             (void);
+		std::string      getAttributes                (void);
+		void             getAttributeMap              (map<string, string>& amap);
 		int              attributeQ                   (const std::string& attribute);
 		int              getAttributeInt              (char attribute);
-		int              getAttributeString           (std::string& output, const std::string& attribute);
+		int              getAttributeField            (std::string& output, const std::string& attribute);
 
 
 	//

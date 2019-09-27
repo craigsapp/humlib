@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep 26 13:55:03 PDT 2019
+// Last Modified: Fri Sep 27 09:01:58 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1263,6 +1263,252 @@ int Convert::museToBase40(const string& pitchString) {
 string Convert::musePitchToKernPitch(const string& museInput) {
    return base40ToKern(museToBase40(museInput));
 }
+
+
+
+//////////////////////////////
+//
+// Convert::museClefToKernClef --
+//
+
+string Convert::museClefToKernClef(const string& mclef) {
+	if (mclef == "4") {         // treble clef
+		return "*clefG2";
+	} else if (mclef == "22") { // bass clef
+		return "*clefF4";
+	} else if (mclef == "13") { // alto clef
+		return "*clefC3";
+	} else if (mclef == "12") { // tenor clef
+		return "*clefC4";
+	} else if (mclef == "15") { // soprano clef
+		return "*clefC1";
+	} else if (mclef == "14") { // mezzo-soprano clef
+		return "*clefC2";
+	} else if (mclef == "14") { // baritone clef
+		return "*clefC5";
+	} else if (mclef == "5") { // French violin clef
+		return "*clefG1";
+	} else if (mclef == "3") {
+		return "*clefG3";
+	} else if (mclef == "2") {
+		return "*clefG4";
+	} else if (mclef == "1") {
+		return "*clefG5";
+	} else if (mclef == "25") {
+		return "*clefF1";
+	} else if (mclef == "24") {
+		return "*clefF2";
+	} else if (mclef == "23") {
+		return "*clefF3";
+	} else if (mclef == "21") {
+		return "*clefF5";
+	} else if (mclef == "35") {
+		return "*clefGv1";
+	} else if (mclef == "34") {  // vocal tenor clef
+		return "*clefGv2";
+	} else if (mclef == "33") {
+		return "*clefGv3";
+	} else if (mclef == "32") {
+		return "*clefGv3";
+	} else if (mclef == "31") {
+		return "*clefGv5";
+	}
+	// percussion clef?
+	// return unknown clef:
+	return "*";
+}
+
+
+
+//////////////////////////////
+//
+// Convert::museKeySigToKernKeySig --
+//
+
+string Convert::museKeySigToKernKeySig(const string& mkeysig) {
+	if (mkeysig == "0") {
+		return "*k[]";
+	} else if (mkeysig == "1") {
+		return "*k[f#]";
+	} else if (mkeysig == "-1") {
+		return "*k[b-]";
+	} else if (mkeysig == "2") {
+		return "*k[f#c#]";
+	} else if (mkeysig == "-2") {
+		return "*k[b-e-]";
+	} else if (mkeysig == "3") {
+		return "*k[f#c#g#]";
+	} else if (mkeysig == "-3") {
+		return "*k[b-e-a-]";
+	} else if (mkeysig == "4") {
+		return "*k[f#c#g#d#]";
+	} else if (mkeysig == "-4") {
+		return "*k[b-e-a-d-]";
+	} else if (mkeysig == "5") {
+		return "*k[f#c#g#d#a#]";
+	} else if (mkeysig == "-5") {
+		return "*k[b-e-a-d-g-]";
+	} else if (mkeysig == "6") {
+		return "*k[f#c#g#d#a#e#]";
+	} else if (mkeysig == "-6") {
+		return "*k[b-e-a-d-g-c-]";
+	} else if (mkeysig == "7") {
+		return "*k[f#c#g#d#a#e#b#]";
+	} else if (mkeysig == "-7") {
+		return "*k[b-e-a-d-g-c-f-]";
+	}
+	return "*";
+}
+
+
+
+//////////////////////////////
+//
+// Convert::museTimeSigToKernTimeSig --
+//
+
+string Convert::museTimeSigToKernTimeSig(const string& mtimesig) {
+	if (mtimesig == "11/0") {
+		return "*M3/1";    // "*met(O)
+	} else if (mtimesig == "1/1") {
+		return "*M4/4";    // "*met(c)
+	} else if (mtimesig == "0/0") {
+		return "*M2/2";    // "*met(c)
+	} else if (mtimesig == "12/0") {
+		return "";    // "*met(O:)
+	} else if (mtimesig == "21/0") {
+		return "";    // "*met(O.)
+	} else if (mtimesig == "22/0") {
+		return "";    // "*met(O;)
+	} else if (mtimesig == "31/0") {
+		return "*M2/1";    // "*met(C)
+	} else if (mtimesig == "41/0") {
+		return "";    // "*met(C.)
+	} else if (mtimesig == "42/0") {
+		return "";    // "*met(C.3/2)
+	} else if (mtimesig == "43/0") {
+		return "";    // "*met(C.3/8)
+	} else if (mtimesig == "51/0") {
+		return "";    // "*met(Cr)
+	} else if (mtimesig == "52/0") {
+		return "";    // "*met(Cr|)
+	} else if (mtimesig == "61/0") {
+		return "*M2/1"; // "*met(C|)
+	} else if (mtimesig == "62/0") {
+		return "";     // "*met(C|/2)
+	} else if (mtimesig == "63/0") {
+		return "";     // "*met(C|.)
+	} else if (mtimesig == "71/0") {
+		return "";     // "*met(C2)
+	} else if (mtimesig == "72/0") {
+		return "";     // "*met(C2/3)
+	} else if (mtimesig == "81/0") {
+		return "";     // "*met(O2)
+	} else if (mtimesig == "82/0") {
+		return "";     // "*met(O3/2)
+	} else if (mtimesig == "91/0") {
+		return "*M3/1"; // "*met(O|)
+	} else if (mtimesig == "92/0") {
+		return ""; // "*met(O|3)
+	} else if (mtimesig == "93/0") {
+		return ""; // "*met(O|3/2)
+	} else if (mtimesig == "101/0") {
+		return ""; // "*met(C|3)
+	} else if (mtimesig == "102/0") {
+		return ""; // "*met(3)
+	} else if (mtimesig == "103/0") {
+		return ""; // "*met(3/2)
+	} else if (mtimesig == "104/0") {
+		return ""; // "*met(C|/3)
+	} else if (mtimesig == "105/0") {
+		return ""; // "*met(C3)
+	} else if (mtimesig == "106/0") {
+		return ""; // "*met(O/3)
+	} else if (mtimesig == "111/0") {
+		return ""; // "*met(C|2)
+	} else if (mtimesig == "112/0") {
+		return ""; // "*met(2)
+	} else if (mtimesig == "121/0") {
+		return ""; // "*met(Oo)
+	}
+	string output = "*M" + mtimesig;
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::museMeterSigToKernMeterSig --
+//
+
+string Convert::museMeterSigToKernMeterSig(const string& mtimesig) {
+	if (mtimesig == "11/0") {
+		return "*met(O)";
+	} else if (mtimesig == "1/1") {
+		return "*met(c)";
+	} else if (mtimesig == "0/0") {
+		return "*met(c)";
+	} else if (mtimesig == "12/0") {
+		return "*met(O:)";
+	} else if (mtimesig == "21/0") {
+		return "*met(O.)";
+	} else if (mtimesig == "22/0") {
+		return "*met(O;)";
+	} else if (mtimesig == "31/0") {
+		return "*met(C)";
+	} else if (mtimesig == "41/0") {
+		return "*met(C.)";
+	} else if (mtimesig == "42/0") {
+		return "*met(C.3/2)";
+	} else if (mtimesig == "43/0") {
+		return "*met(C.3/8)";
+	} else if (mtimesig == "51/0") {
+		return "*met(Cr)";
+	} else if (mtimesig == "52/0") {
+		return "*met(Cr|)";
+	} else if (mtimesig == "61/0") {
+		return "*met(C|)";
+	} else if (mtimesig == "62/0") {
+		return "*met(C|/2)";
+	} else if (mtimesig == "63/0") {
+		return "*met(C|.)";
+	} else if (mtimesig == "71/0") {
+		return "*met(C2)";
+	} else if (mtimesig == "72/0") {
+		return "*met(C2/3)";
+	} else if (mtimesig == "81/0") {
+		return "*met(O2)";
+	} else if (mtimesig == "82/0") {
+		return "*met(O3/2)";
+	} else if (mtimesig == "91/0") {
+		return "*met(O|)";
+	} else if (mtimesig == "92/0") {
+		return "*met(O|3)";
+	} else if (mtimesig == "93/0") {
+		return "*met(O|3/2)";
+	} else if (mtimesig == "101/0") {
+		return "*met(C|3)";
+	} else if (mtimesig == "102/0") {
+		return "*met(3)";
+	} else if (mtimesig == "103/0") {
+		return "*met(3/2)";
+	} else if (mtimesig == "104/0") {
+		return "*met(C|/3)";
+	} else if (mtimesig == "105/0") {
+		return "*met(C3)";
+	} else if (mtimesig == "106/0") {
+		return "*met(O/3)";
+	} else if (mtimesig == "111/0") {
+		return "*met(C|2)";
+	} else if (mtimesig == "112/0") {
+		return "*met(2)";
+	} else if (mtimesig == "121/0") {
+		return "*met(Oo)";
+	}
+	return "";
+}
+
 
 
 
@@ -30815,16 +31061,81 @@ string MuseRecord::getKernMeasureStyle(void) {
 
 //////////////////////////////
 //
-// MuseRecord::getAttributeList --
+// MuseRecord::getAttributeMap --
 //
 
-string MuseRecord::getAttributeList(void) {
+void MuseRecord::getAttributeMap(map<string, string>& amap) {
+	amap.clear();
+	// Should be "3" on the next line, but "1" or "2" might catch poorly formatted data.
+	string contents = getLine().substr(2);
+	if (contents.empty()) {
+		return;
+	}
+	int i = 0;
+	string key;
+	string value;
+	int state = 0;  // 0 outside, 1 = in key, 2 = in value
+	while (i < (int)contents.size()) {
+		switch (state) {
+			case 0: // outside of key or value
+				if (!isspace(contents[i])) {
+					if (contents[i] == ':') {
+						// Strange: should not happen
+						key.clear();
+						state = 2;
+					} else {
+						state = 1;
+						key += contents[i];
+					}
+				}
+				break;
+			case 1: // in key
+				if (!isspace(contents[i])) {
+					if (contents[i] == ':') {
+						value.clear();
+						state = 2;
+					} else {
+						// Add to key, such as "C2" for second staff clef.
+						key += contents[i];
+					}
+				}
+				break;
+			case 2: // in value
+				if (key == "D") {
+					value += contents[i];
+				} else if (isspace(contents[i])) {
+					// store parameter and clear variables
+					amap[key] = value;
+					state = 0;
+					key.clear();
+					value.clear();
+				} else {
+					value += contents[i];
+				}
+				break;
+		}
+		i++;
+	}
+
+	if ((!key.empty()) && (!value.empty())) {
+		amap[key] = value;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getAttributes --
+//
+
+string MuseRecord::getAttributes(void) {
 	string output;
 	switch (getType()) {
 		case E_muserec_musical_attributes:
 			break;
 		default:
-			cerr << "Error: cannot use getAttributeList function on line: "
+			cerr << "Error: cannot use getAttributes function on line: "
 				  << getLine() << endl;
 			return "";
 	}
@@ -30865,13 +31176,13 @@ int MuseRecord::attributeQ(const string& attribute) {
 		case E_muserec_musical_attributes:
 			break;
 		default:
-			cerr << "Error: cannot use getAttributeList function on line: "
+			cerr << "Error: cannot use getAttributes function on line: "
 				  << getLine() << endl;
 			return 0;
 	}
 
 
-	string attributelist = getAttributeList();
+	string attributelist = getAttributes();
 
 	int output = 0;
 	int attstrlength = (int)attributelist.size();
@@ -30950,10 +31261,10 @@ int MuseRecord::getAttributeInt(char attribute) {
 
 //////////////////////////////
 //
-// MuseRecord::getAttributeString -- returns true if found attribute
+// MuseRecord::getAttributeField -- returns true if found attribute
 //
 
-int MuseRecord::getAttributeString(string& output, const string& attribute) {
+int MuseRecord::getAttributeField(string& value, const string& key) {
 	switch (getType()) {
 		case E_muserec_musical_attributes:
 			break;
@@ -30976,7 +31287,7 @@ int MuseRecord::getAttributeString(string& output, const string& attribute) {
 			}
 			tempcol++;
 			while (tempcol <= column) {
-				if (getColumn(tempcol) == attribute[0]) {
+				if (getColumn(tempcol) == key[0]) {
 					ending = 2;
 				} else if (getColumn(tempcol) == 'D') {
 					ending = 1;
@@ -30990,14 +31301,14 @@ int MuseRecord::getAttributeString(string& output, const string& attribute) {
 		}
 	}
 
-	output.clear();
+	value.clear();
 	if (ending == 0 || ending == 1) {
 		return returnValue;
 	} else {
 		returnValue = 1;
 		column++;
 		while (getColumn(column) != ' ') {
-			output += getColumn(column++);
+			value += getColumn(column++);
 		}
 		return returnValue;
 	}
@@ -32160,6 +32471,15 @@ void MuseRecordBasic::cleanLineEnding(void) {
 	}
 }
 
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAttributes --
+//
+
+bool MuseRecordBasic::isAttributes(void) {
+	return m_type == E_muserec_musical_attributes;
+}
 
 
 //////////////////////////////
@@ -53041,215 +53361,6 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 
 
 
-//////////////////////////////
-//
-// Tool_md2hum::Tool_md2hum --
-//
-
-Tool_md2hum::Tool_md2hum(void) {
-	// Options& options = m_options;
-	// options.define("k|kern=b","display corresponding **kern data");
-
-	define("r|recip=b", "output **recip spine");
-	define("s|stems=b", "include stems in output");
-}
-
-
-
-//////////////////////////////
-//
-// initialize --
-//
-
-void Tool_md2hum::initialize(void) {
-	m_stemsQ = getBoolean("stems");
-	m_recipQ = getBoolean("recip");
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::setOptions --
-//
-
-void Tool_md2hum::setOptions(int argc, char** argv) {
-	m_options.process(argc, argv);
-}
-
-
-void Tool_md2hum::setOptions(const vector<string>& argvlist) {
-    m_options.process(argvlist);
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::getOptionDefinitions -- Used to avoid
-//     duplicating the definitions in the test main() function.
-//
-
-Options Tool_md2hum::getOptionDefinitions(void) {
-	return m_options;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::convert -- Convert a MusicXML file into
-//     Humdrum content.
-//
-
-bool Tool_md2hum::convertFile(ostream& out, const string& filename) {
-	MuseDataSet mds;
-	int result = mds.readFile(filename);
-	if (!result) {
-		cerr << "\nMuseData file [" << filename << "] has syntax errors\n";
-		cerr << "Error description:\t" << mds.getError() << "\n";
-		exit(1);
-	}
-
-	return convert(out, mds);
-}
-
-
-bool Tool_md2hum::convert(ostream& out, istream& input) {
-	MuseDataSet mds;
-	mds.read(input);
-	return convert(out, mds);
-}
-
-
-bool Tool_md2hum::convertString(ostream& out, const string& input) {
-	MuseDataSet mds;
-	int result = mds.readString(input);
-	if (!result) {
-		cout << "\nXML content has syntax errors\n";
-		cout << "Error description:\t" << mds.getError() << "\n";
-		exit(1);
-	}
-	return convert(out, mds);
-}
-
-
-
-bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
-	initialize();
-
-	HumGrid outdata;
-	int partcount = mds.getPartCount();
-	bool status = true;
-	for (int i=0; i<partcount; i++) {
-		status &= convertPart(outdata, mds, i);
-	}
-
-	HumdrumFile outfile;
-	outdata.transferTokens(outfile);
-	outfile.createLinesFromTokens();
-	out << outfile;
-
-	return status;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::convertPart --
-//
-
-bool Tool_md2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
-	MuseData& part = mds[index];
-
-	m_tpq = part.getInitialTpq();
-	m_staff = index;
-	m_maxstaff = (int)mds.getPartCount();
-	
-	bool status = true;
-	int i = 0;
-	while (i < part.getLineCount()) {
-		i = convertMeasure(outdata, part, i);
-	}
-
-	return status;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::convertMeasure --
-//
-
-int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
-	HumNum starttime = part[startindex].getAbsBeat();
-	GridMeasure* gm = getMeasure(outdata, starttime);
-	gm->setBarStyle(MeasureStyle::Plain);
-	int i = startindex;
-	for (i=startindex; i<part.getLineCount(); i++) {
-		if ((i != startindex) && part[i].isBarline()) {
-			break;
-		}
-
-		convertLine(gm, part[i]);
-	}
-	return i;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::convertLine --
-//
-
-void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
-	int tpq          = m_tpq;
-	int part         = m_staff;
-	int staff        = m_staff;
-	int maxstaff     = m_maxstaff;
-	int voice        = 0;
-	HumNum timestamp = mr.getAbsBeat();
-	string tok;
-
-	if (mr.isBarline()) {
-		tok = mr.getKernMeasureStyle();
-	} else if (mr.isNote()) {
-		tok = mr.getKernNoteStyle(1, 1);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
-	} else if (mr.isRest()) {
-		tok  = mr.getKernRestStyle(tpq);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_md2hum::getMeasure --  Could be imporoved by NlogN search.
-//
-
-GridMeasure* Tool_md2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
-	for (int i=0; i<(int)outdata.size(); i++) {
-		if (outdata[i]->getTimestamp() == starttime) {
-			return outdata[i];
-		}
-	}
-	// Did not find measure in data, so append to end of list.
-	// Assuming that unknown measures are at a later timestamp
-	// than those in current list, but should fix this later perhaps.
-	GridMeasure* gm = new GridMeasure(&outdata);
-	outdata.push_back(gm);
-	return gm;
-}
-
-
-
-
-
 
 #define QUARTER_CONVERT * 4
 #define ELEMENT_DEBUG_STATEMENT(X)
@@ -58889,6 +59000,279 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query,
 	}
 
 }
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::Tool_musedata2hum --
+//
+
+Tool_musedata2hum::Tool_musedata2hum(void) {
+	// Options& options = m_options;
+	// options.define("k|kern=b","display corresponding **kern data");
+
+	define("r|recip=b", "output **recip spine");
+	define("s|stems=b", "include stems in output");
+}
+
+
+
+//////////////////////////////
+//
+// initialize --
+//
+
+void Tool_musedata2hum::initialize(void) {
+	m_stemsQ = getBoolean("stems");
+	m_recipQ = getBoolean("recip");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setOptions --
+//
+
+void Tool_musedata2hum::setOptions(int argc, char** argv) {
+	m_options.process(argc, argv);
+}
+
+
+void Tool_musedata2hum::setOptions(const vector<string>& argvlist) {
+    m_options.process(argvlist);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::getOptionDefinitions -- Used to avoid
+//     duplicating the definitions in the test main() function.
+//
+
+Options Tool_musedata2hum::getOptionDefinitions(void) {
+	return m_options;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::convert -- Convert a MusicXML file into
+//     Humdrum content.
+//
+
+bool Tool_musedata2hum::convertFile(ostream& out, const string& filename) {
+	MuseDataSet mds;
+	int result = mds.readFile(filename);
+	if (!result) {
+		cerr << "\nMuseData file [" << filename << "] has syntax errors\n";
+		cerr << "Error description:\t" << mds.getError() << "\n";
+		exit(1);
+	}
+
+	return convert(out, mds);
+}
+
+
+bool Tool_musedata2hum::convert(ostream& out, istream& input) {
+	MuseDataSet mds;
+	mds.read(input);
+	return convert(out, mds);
+}
+
+
+bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
+	MuseDataSet mds;
+	int result = mds.readString(input);
+	if (!result) {
+		cout << "\nXML content has syntax errors\n";
+		cout << "Error description:\t" << mds.getError() << "\n";
+		exit(1);
+	}
+	return convert(out, mds);
+}
+
+
+
+bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
+	initialize();
+
+	HumGrid outdata;
+	int partcount = mds.getPartCount();
+	bool status = true;
+	for (int i=0; i<partcount; i++) {
+		status &= convertPart(outdata, mds, i);
+	}
+
+	HumdrumFile outfile;
+	outdata.transferTokens(outfile);
+	outfile.createLinesFromTokens();
+	out << outfile;
+
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::convertPart --
+//
+
+bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
+	MuseData& part = mds[index];
+
+	m_tpq = part.getInitialTpq();
+	m_staff = index;
+	m_maxstaff = (int)mds.getPartCount();
+	
+	bool status = true;
+	int i = 0;
+	while (i < part.getLineCount()) {
+		i = convertMeasure(outdata, part, i);
+	}
+
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::convertMeasure --
+//
+
+int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+	if (part.getLineCount() == 0) {
+		return 1;
+	}
+	HumNum starttime = part[startindex].getAbsBeat();
+	GridMeasure* gm = getMeasure(outdata, starttime);
+	gm->setBarStyle(MeasureStyle::Plain);
+	int i = startindex;
+	for (i=startindex; i<part.getLineCount(); i++) {
+		if ((i != startindex) && part[i].isBarline()) {
+			break;
+		}
+		convertLine(gm, part[i]);
+	}
+	HumNum endtime = starttime;
+	if (i >= part.getLineCount()) {
+		endtime = part[i-1].getAbsBeat();
+	} else {
+		endtime = part[i].getAbsBeat();
+	}
+
+	// set duration of measures (so it will be printed in conversion to Humdrum):
+	gm->setDuration(endtime - starttime);
+	gm->setTimestamp(starttime);
+	gm->setTimeSigDur(m_timesigdur);
+
+	return i;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::convertLine --
+//
+
+void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
+	int tpq          = m_tpq;
+	int part         = m_staff;
+	int staff        = m_staff;
+	int maxstaff     = m_maxstaff;
+	int voice        = 0;
+	HumNum timestamp = mr.getAbsBeat();
+	string tok;
+
+	if (mr.isBarline()) {
+		tok = mr.getKernMeasureStyle();
+	} else if (mr.isAttributes()) {
+		map<string, string> attributes;
+		mr.getAttributeMap(attributes);
+
+		string mtempo = attributes["D"];
+		if (!mtempo.empty()) {
+			string value = "!!!OMD: " + mtempo;
+			gm->addGlobalComment(value, timestamp);
+		}
+
+		string mclef = attributes["C"];
+		if (!mclef.empty()) {
+			string kclef = Convert::museClefToKernClef(mclef);
+			gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+		}
+
+		string mkeysig = attributes["K"];
+		if (!mkeysig.empty()) {
+			string kkeysig = Convert::museKeySigToKernKeySig(mkeysig);
+			gm->addKeySigToken(kkeysig, timestamp, part, staff, voice, maxstaff);
+		}
+
+		string mtimesig = attributes["T"];
+		if (!mtimesig.empty()) {
+			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
+			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
+			setTimeSigDurInfo(ktimesig);
+		}
+
+	} else if (mr.isNote()) {
+		tok = mr.getKernNoteStyle(1, 1);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+	} else if (mr.isRest()) {
+		tok  = mr.getKernRestStyle(tpq);
+		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setTimeSigDurInfo --
+//
+
+void Tool_musedata2hum::setTimeSigDurInfo(const string& ktimesig) {
+	HumRegex hre;
+	if (hre.search(ktimesig, "(\\d+)/(\\d+)")) {
+		int top = hre.getMatchInt(1);
+		int bot = hre.getMatchInt(2);
+		HumNum value = 1;
+		value /= bot;
+		value *= top;
+		value.invert();
+		value *= 4;  // convert from whole notes to quarter notes
+		m_timesigdur = value;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::getMeasure --  Could be imporoved by NlogN search.
+//
+
+GridMeasure* Tool_musedata2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
+	for (int i=0; i<(int)outdata.size(); i++) {
+		if (outdata[i]->getTimestamp() == starttime) {
+			return outdata[i];
+		}
+	}
+	// Did not find measure in data, so append to end of list.
+	// Assuming that unknown measures are at a later timestamp
+	// than those in current list, but should fix this later perhaps.
+	GridMeasure* gm = new GridMeasure(&outdata);
+	outdata.push_back(gm);
+	return gm;
+}
+
+
 
 
 

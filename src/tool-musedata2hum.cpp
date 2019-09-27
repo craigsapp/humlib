@@ -2,15 +2,15 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:23:06 PDT 2019
 // Last Modified: Wed Sep 25 19:23:08 PDT 2019
-// Filename:      md2hum.cpp
-// URL:           https://github.com/craigsapp/hum2ly/blob/master/src/md2hum.cpp
+// Filename:      musedata2hum.cpp
+// URL:           https://github.com/craigsapp/hum2ly/blob/master/src/musedata2hum.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3:noexpandtab
 //
 // Description:   Convert a MusicXML file into a Humdrum file.
 //
 
-#include "tool-md2hum.h"
+#include "tool-musedata2hum.h"
 #include "Convert.h"
 #include "HumGrid.h"
 
@@ -23,10 +23,10 @@ namespace hum {
 
 //////////////////////////////
 //
-// Tool_md2hum::Tool_md2hum --
+// Tool_musedata2hum::Tool_musedata2hum --
 //
 
-Tool_md2hum::Tool_md2hum(void) {
+Tool_musedata2hum::Tool_musedata2hum(void) {
 	// Options& options = m_options;
 	// options.define("k|kern=b","display corresponding **kern data");
 
@@ -41,7 +41,7 @@ Tool_md2hum::Tool_md2hum(void) {
 // initialize --
 //
 
-void Tool_md2hum::initialize(void) {
+void Tool_musedata2hum::initialize(void) {
 	m_stemsQ = getBoolean("stems");
 	m_recipQ = getBoolean("recip");
 }
@@ -50,15 +50,15 @@ void Tool_md2hum::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_md2hum::setOptions --
+// Tool_musedata2hum::setOptions --
 //
 
-void Tool_md2hum::setOptions(int argc, char** argv) {
+void Tool_musedata2hum::setOptions(int argc, char** argv) {
 	m_options.process(argc, argv);
 }
 
 
-void Tool_md2hum::setOptions(const vector<string>& argvlist) {
+void Tool_musedata2hum::setOptions(const vector<string>& argvlist) {
     m_options.process(argvlist);
 }
 
@@ -66,11 +66,11 @@ void Tool_md2hum::setOptions(const vector<string>& argvlist) {
 
 //////////////////////////////
 //
-// Tool_md2hum::getOptionDefinitions -- Used to avoid
+// Tool_musedata2hum::getOptionDefinitions -- Used to avoid
 //     duplicating the definitions in the test main() function.
 //
 
-Options Tool_md2hum::getOptionDefinitions(void) {
+Options Tool_musedata2hum::getOptionDefinitions(void) {
 	return m_options;
 }
 
@@ -78,11 +78,11 @@ Options Tool_md2hum::getOptionDefinitions(void) {
 
 //////////////////////////////
 //
-// Tool_md2hum::convert -- Convert a MusicXML file into
+// Tool_musedata2hum::convert -- Convert a MusicXML file into
 //     Humdrum content.
 //
 
-bool Tool_md2hum::convertFile(ostream& out, const string& filename) {
+bool Tool_musedata2hum::convertFile(ostream& out, const string& filename) {
 	MuseDataSet mds;
 	int result = mds.readFile(filename);
 	if (!result) {
@@ -95,14 +95,14 @@ bool Tool_md2hum::convertFile(ostream& out, const string& filename) {
 }
 
 
-bool Tool_md2hum::convert(ostream& out, istream& input) {
+bool Tool_musedata2hum::convert(ostream& out, istream& input) {
 	MuseDataSet mds;
 	mds.read(input);
 	return convert(out, mds);
 }
 
 
-bool Tool_md2hum::convertString(ostream& out, const string& input) {
+bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
 	MuseDataSet mds;
 	int result = mds.readString(input);
 	if (!result) {
@@ -115,7 +115,7 @@ bool Tool_md2hum::convertString(ostream& out, const string& input) {
 
 
 
-bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
+bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	initialize();
 
 	HumGrid outdata;
@@ -137,10 +137,10 @@ bool Tool_md2hum::convert(ostream& out, MuseDataSet& mds) {
 
 //////////////////////////////
 //
-// Tool_md2hum::convertPart --
+// Tool_musedata2hum::convertPart --
 //
 
-bool Tool_md2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
+bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
 
 	m_tpq = part.getInitialTpq();
@@ -160,10 +160,13 @@ bool Tool_md2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 
 //////////////////////////////
 //
-// Tool_md2hum::convertMeasure --
+// Tool_musedata2hum::convertMeasure --
 //
 
-int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+	if (part.getLineCount() == 0) {
+		return 1;
+	}
 	HumNum starttime = part[startindex].getAbsBeat();
 	GridMeasure* gm = getMeasure(outdata, starttime);
 	gm->setBarStyle(MeasureStyle::Plain);
@@ -172,9 +175,20 @@ int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex
 		if ((i != startindex) && part[i].isBarline()) {
 			break;
 		}
-
 		convertLine(gm, part[i]);
 	}
+	HumNum endtime = starttime;
+	if (i >= part.getLineCount()) {
+		endtime = part[i-1].getAbsBeat();
+	} else {
+		endtime = part[i].getAbsBeat();
+	}
+
+	// set duration of measures (so it will be printed in conversion to Humdrum):
+	gm->setDuration(endtime - starttime);
+	gm->setTimestamp(starttime);
+	gm->setTimeSigDur(m_timesigdur);
+
 	return i;
 }
 
@@ -182,10 +196,10 @@ int Tool_md2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex
 
 //////////////////////////////
 //
-// Tool_md2hum::convertLine --
+// Tool_musedata2hum::convertLine --
 //
 
-void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
+void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	int tpq          = m_tpq;
 	int part         = m_staff;
 	int staff        = m_staff;
@@ -196,6 +210,35 @@ void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 	if (mr.isBarline()) {
 		tok = mr.getKernMeasureStyle();
+	} else if (mr.isAttributes()) {
+		map<string, string> attributes;
+		mr.getAttributeMap(attributes);
+
+		string mtempo = attributes["D"];
+		if (!mtempo.empty()) {
+			string value = "!!!OMD: " + mtempo;
+			gm->addGlobalComment(value, timestamp);
+		}
+
+		string mclef = attributes["C"];
+		if (!mclef.empty()) {
+			string kclef = Convert::museClefToKernClef(mclef);
+			gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+		}
+
+		string mkeysig = attributes["K"];
+		if (!mkeysig.empty()) {
+			string kkeysig = Convert::museKeySigToKernKeySig(mkeysig);
+			gm->addKeySigToken(kkeysig, timestamp, part, staff, voice, maxstaff);
+		}
+
+		string mtimesig = attributes["T"];
+		if (!mtimesig.empty()) {
+			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
+			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
+			setTimeSigDurInfo(ktimesig);
+		}
+
 	} else if (mr.isNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
@@ -209,10 +252,31 @@ void Tool_md2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 //////////////////////////////
 //
-// Tool_md2hum::getMeasure --  Could be imporoved by NlogN search.
+// Tool_musedata2hum::setTimeSigDurInfo --
 //
 
-GridMeasure* Tool_md2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
+void Tool_musedata2hum::setTimeSigDurInfo(const string& ktimesig) {
+	HumRegex hre;
+	if (hre.search(ktimesig, "(\\d+)/(\\d+)")) {
+		int top = hre.getMatchInt(1);
+		int bot = hre.getMatchInt(2);
+		HumNum value = 1;
+		value /= bot;
+		value *= top;
+		value.invert();
+		value *= 4;  // convert from whole notes to quarter notes
+		m_timesigdur = value;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::getMeasure --  Could be imporoved by NlogN search.
+//
+
+GridMeasure* Tool_musedata2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
 	for (int i=0; i<(int)outdata.size(); i++) {
 		if (outdata[i]->getTimestamp() == starttime) {
 			return outdata[i];

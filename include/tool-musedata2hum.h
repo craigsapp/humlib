@@ -2,16 +2,16 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:16:44 PDT 2019
 // Last Modified: Wed Sep 25 19:16:53 PDT 2019
-// Filename:      tool-md2hum.h
-// URL:           https://github.com/craigsapp/md2hum/blob/master/include/tool-md2hum.h
+// Filename:      tool-musedata2hum.h
+// URL:           https://github.com/craigsapp/musedata2hum/blob/master/include/tool-musedata2hum.h
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
 // Description:   Inteface to convert a MuseData file into a Humdrum file.
 //
 
-#ifndef _TOOL_MD2HUM_H
-#define _TOOL_MD2HUM_H
+#ifndef _TOOL_MUSEDATA2HUM_H
+#define _TOOL_MUSEDATA2HUM_H
 
 #define _USE_HUMLIB_OPTIONS_
 
@@ -27,10 +27,10 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_md2hum : public HumTool {
+class Tool_musedata2hum : public HumTool {
 	public:
-		        Tool_md2hum          (void);
-		       ~Tool_md2hum          () {}
+		        Tool_musedata2hum    (void);
+		       ~Tool_musedata2hum    () {}
 
 		bool    convertFile          (ostream& out, const string& filename);
 		bool    convertString        (ostream& out, const string& input);
@@ -47,6 +47,7 @@ class Tool_md2hum : public HumTool {
 		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
 		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
+		void    setTimeSigDurInfo    (const std::string& mtimesig);
 
 	private:
 		// options:
@@ -58,6 +59,7 @@ class Tool_md2hum : public HumTool {
 		int m_tpq      = 1;          // Ticks per quarter note
 		int m_staff    = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
+		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 
 };
 
@@ -66,6 +68,6 @@ class Tool_md2hum : public HumTool {
 
 }  // end of namespace hum
 
-#endif /* _TOOL_MD2HUM_H */
+#endif /* _TOOL_MUSEDATA2HUM_H */
 
 

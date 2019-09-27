@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep 26 13:55:03 PDT 2019
+// Last Modified: Fri Sep 27 09:01:58 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2586,6 +2586,7 @@ class MuseRecordBasic {
 
 		// boolean type fuctions:
 		bool              isBarline          (void);
+		bool              isAttributes       (void);
 		bool              isNote             (void);
 		bool              isRest             (void);
 
@@ -2865,10 +2866,11 @@ class MuseRecord : public MuseRecordBasic {
 	//////////////////////////////
 	// functions which work with musical attributes records ('$'):
 
-		std::string      getAttributeList             (void);
+		std::string      getAttributes                (void);
+		void             getAttributeMap              (map<string, string>& amap);
 		int              attributeQ                   (const std::string& attribute);
 		int              getAttributeInt              (char attribute);
-		int              getAttributeString           (std::string& output, const std::string& attribute);
+		int              getAttributeField            (std::string& output, const std::string& attribute);
 
 
 	//
@@ -3311,6 +3313,10 @@ class Convert {
 		// MuseData conversions in Convert-musedata.cpp
       static int       museToBase40        (const std::string& pitchString);
       static std::string musePitchToKernPitch(const std::string& museInput);
+		static std::string museClefToKernClef(const std::string& mclef);
+		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
+		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
+		static std::string museMeterSigToKernMeterSig(const string& mtimesig);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
@@ -5710,42 +5716,6 @@ class Tool_kern2mens : public HumTool {
 };
 
 
-class Tool_md2hum : public HumTool {
-	public:
-		        Tool_md2hum          (void);
-		       ~Tool_md2hum          () {}
-
-		bool    convertFile          (ostream& out, const string& filename);
-		bool    convertString        (ostream& out, const string& input);
-		bool    convert              (ostream& out, MuseDataSet& mds);
-		bool    convert              (ostream& out, istream& input);
-
-		void    setOptions           (int argc, char** argv);
-		void    setOptions           (const std::vector<std::string>& argvlist);
-		Options getOptionDefinitions (void);
-
-	protected:
-		void    initialize           (void);
-		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
-		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
-		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
-		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
-
-	private:
-		// options:
-		Options m_options;
-		bool    m_stemsQ = false;    // used with -s option
-		bool    m_recipQ = false;    // used with -r option
-
-		// state variables:
-		int m_tpq      = 1;          // Ticks per quarter note
-		int m_staff    = 0;          // staff index currently being processed
-		int m_maxstaff = 0;          // total number of staves (parts)
-
-};
-
-
-
 class mei_staffDef {
 	public:
 		HumNum timestamp;
@@ -6217,6 +6187,44 @@ class Tool_msearch : public HumTool {
 		string      m_text;
 		string      m_marker;
 };
+
+
+class Tool_musedata2hum : public HumTool {
+	public:
+		        Tool_musedata2hum    (void);
+		       ~Tool_musedata2hum    () {}
+
+		bool    convertFile          (ostream& out, const string& filename);
+		bool    convertString        (ostream& out, const string& input);
+		bool    convert              (ostream& out, MuseDataSet& mds);
+		bool    convert              (ostream& out, istream& input);
+
+		void    setOptions           (int argc, char** argv);
+		void    setOptions           (const std::vector<std::string>& argvlist);
+		Options getOptionDefinitions (void);
+
+	protected:
+		void    initialize           (void);
+		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
+		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
+		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
+		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
+		void    setTimeSigDurInfo    (const std::string& mtimesig);
+
+	private:
+		// options:
+		Options m_options;
+		bool    m_stemsQ = false;    // used with -s option
+		bool    m_recipQ = false;    // used with -r option
+
+		// state variables:
+		int m_tpq      = 1;          // Ticks per quarter note
+		int m_staff    = 0;          // staff index currently being processed
+		int m_maxstaff = 0;          // total number of staves (parts)
+		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
+
+};
+
 
 
 class MusicXmlHarmonyInfo {

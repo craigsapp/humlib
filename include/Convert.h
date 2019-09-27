@@ -138,6 +138,10 @@ class Convert {
 		// MuseData conversions in Convert-musedata.cpp
       static int       museToBase40        (const std::string& pitchString);
       static std::string musePitchToKernPitch(const std::string& museInput);
+		static std::string museClefToKernClef(const std::string& mclef);
+		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
+		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
+		static std::string museMeterSigToKernMeterSig(const string& mtimesig);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
