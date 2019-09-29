@@ -591,6 +591,64 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 //
 // GridMeasure::addFiguredBass --
 //
+GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff) {
+	GridSlice* gs = NULL;
+	bool processed = false;
+
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+		int staff = 0;
+		int voice = 0;
+		string null = ".";
+		gs->addToken(null, part, staff, voice);
+		gs->at(part)->setFiguredBass(token);
+		this->push_back(gs);
+		processed = true;
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				target = *iterator;
+				target->at(part)->setFiguredBass(token);
+				processed = true;
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				// Need to add figured bass data where there are note notes,
+				// so add an emtpy data line and add the figure bass contnet.
+				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+				int staff = 0;
+				int voice = 0;
+				string null = ".";
+				gs->addToken(null, part, staff, voice);
+				gs->at(part)->setFiguredBass(token);
+				this->insert(iterator, gs);
+				processed = true;
+				break;
+			}
+			iterator++;
+		}
+
+		if (!processed) {
+			cerr << "Error: could not insert figured bass: " << token << endl;
+		} else {
+			HumGrid* hg = getOwner();
+			if (hg) {
+				hg->setFiguredBassPresent(part);
+			}
+		}
+	}
+
+	return gs;
+}
+
+//////////////////////////////
+//
+// GridMeasure::addFiguredBass --
+//
 GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int part, int maxstaff) {
 	GridSlice* gs = NULL;
 	bool processed = false;

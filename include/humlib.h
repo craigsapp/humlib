@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 29 00:05:58 PDT 2019
+// Last Modified: Sun Sep 29 08:05:25 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3677,6 +3677,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addFiguredBassLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
+		GridSlice*   addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff);
 		GridSlice*   addFiguredBass(const std::string& tok, HumNum timestamp, int part, int maxstaff);
 		bool         isInvisible(void);
 		bool         isSingleChordMeasure(void);
@@ -6245,6 +6246,8 @@ class Tool_musedata2hum : public HumTool {
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
 		void    addNoteDynamics      (GridSlice* slice, int part, 
 		                              MuseRecord& mr);
+		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
+		                              HumNum timestamp, int part, int maxstaff);
 
 	private:
 		// options:
@@ -6258,6 +6261,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
+		HTp m_lastfigure = NULL;     // last figured bass token
 
 };
 

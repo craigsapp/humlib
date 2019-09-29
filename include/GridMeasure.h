@@ -90,6 +90,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addFiguredBassLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
+		GridSlice*   addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff);
 		GridSlice*   addFiguredBass(const std::string& tok, HumNum timestamp, int part, int maxstaff);
 		bool         isInvisible(void);
 		bool         isSingleChordMeasure(void);

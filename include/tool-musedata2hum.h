@@ -53,6 +53,8 @@ class Tool_musedata2hum : public HumTool {
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
 		void    addNoteDynamics      (GridSlice* slice, int part, 
 		                              MuseRecord& mr);
+		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
+		                              HumNum timestamp, int part, int maxstaff);
 
 	private:
 		// options:
@@ -66,6 +68,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
+		HTp m_lastfigure = NULL;     // last figured bass token
 
 };
 

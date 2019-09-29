@@ -146,6 +146,7 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 
 bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
+	m_lastfigure = NULL;
 
 	m_tpq = part.getInitialTpq();
 	m_part = index;
@@ -293,9 +294,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
-		string fh = mr.getFigureString();
-		fh = Convert::museFiguredBassToKernFiguredBass(fh);
-		gm->addFiguredBass(fh, timestamp, part, maxstaff);
+		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
 		cerr << "PROCESS CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isCueNote()) {
@@ -308,6 +307,95 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		tok  = mr.getKernRestStyle(tpq);
 		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addFiguredHarmony --
+//
+
+void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
+		HumNum timestamp, int part, int maxstaff) {
+	string fh = mr.getFigureString();
+	fh = Convert::museFiguredBassToKernFiguredBass(fh);
+	if (fh.find(":") == string::npos) {
+		HTp fhtok = new HumdrumToken(fh);
+		m_lastfigure = fhtok;
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		return;
+	}
+
+	if (!m_lastfigure) {
+		HTp fhtok = new HumdrumToken(fh);
+		m_lastfigure = fhtok;
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		return;
+	}
+
+	// For now assuming only one line extension needs to be transferred.
+
+	// Has a line extension that should be moved to the previous token:
+	int position = 0;
+	int colpos = -1;
+	if (fh[0] == ':') {
+		colpos = 0;
+	} else {
+		for (int i=1; i<(int)fh.size(); i++) {
+			if (isspace(fh[i]) && !isspace(fh[i-1])) {
+				position++;
+			}
+			if (fh[i] == ':') {
+				colpos = i;
+				break;
+			}
+		}
+	}
+
+	string lastfh = m_lastfigure->getText();
+	vector<string> pieces;
+	int state = 0;
+	for (int i=0; i<(int)lastfh.size(); i++) {
+		if (state) {
+			if (isspace(lastfh[i])) {
+				state = 0;
+			} else {
+				pieces.back() += lastfh[i];
+			}
+		} else {
+			if (isspace(lastfh[i])) {
+				// do nothing
+			} else {
+				pieces.resize(pieces.size()+1);
+				pieces.back() += lastfh[i];
+				state = 1;
+			}
+		}
+	}
+
+	if (pieces.empty() || (position >= (int)pieces.size())) {
+		HTp fhtok = new HumdrumToken(fh);
+		m_lastfigure = fhtok;
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		return;
+	}
+
+	pieces[position] += ':';
+	string oldtok;
+	for (int i=0; i<(int)pieces.size(); i++) {
+		oldtok += pieces[i];
+		if (i<(int)pieces.size() - 1) {
+			oldtok += ' ';
+		}
+	}
+
+	m_lastfigure->setText(oldtok);
+
+	fh.erase(colpos, 1);
+	HTp newtok = new HumdrumToken(fh);
+	m_lastfigure = newtok;
+	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
 }
 
 
