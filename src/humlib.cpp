@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 27 09:01:58 PDT 2019
+// Last Modified: Sun Sep 29 00:05:58 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1507,6 +1507,28 @@ string Convert::museMeterSigToKernMeterSig(const string& mtimesig) {
 		return "*met(Oo)";
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// Convert::museFiguredBassToKernFiguredBass --
+//
+
+string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
+	string output;
+	for (int i=0; i<(int)mfb.size(); i++) {
+		if (mfb[i] == 'b') { // blank spot in figure stack
+			output += 'X';
+		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
+			output += ":";
+			i++;
+		} else {
+			output += mfb[i];
+		}
+	}
+	return output;
 }
 
 
@@ -3693,7 +3715,7 @@ GridSlice* GridMeasure::addTempoToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Tempos, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -3748,7 +3770,7 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::TimeSigs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -3803,7 +3825,7 @@ GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::KeySigs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -3942,7 +3964,7 @@ GridSlice* GridMeasure::addTransposeToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Transpositions, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -3997,7 +4019,7 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Clefs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -4017,6 +4039,66 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 			gs = new GridSlice(this, timestamp, SliceType::Clefs, maxstaff);
 			gs->addToken(tok, part, staff, voice);
 			this->insert(iterator, gs);
+		}
+	}
+
+	return gs;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::addFiguredBass --
+//
+GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int part, int maxstaff) {
+	GridSlice* gs = NULL;
+	bool processed = false;
+
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+		int staff = 0;
+		int voice = 0;
+		string null = ".";
+		gs->addToken(null, part, staff, voice);
+		gs->at(part)->setFiguredBass(tok);
+		this->push_back(gs);
+		processed = true;
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				target = *iterator;
+				target->at(part)->setFiguredBass(tok);
+				processed = true;
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				// Need to add figured bass data where there are note notes,
+				// so add an emtpy data line and add the figure bass contnet.
+				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+				int staff = 0;
+				int voice = 0;
+				string null = ".";
+				gs->addToken(null, part, staff, voice);
+				gs->at(part)->setFiguredBass(tok);
+				this->insert(iterator, gs);
+				processed = true;
+				break;
+			}
+			iterator++;
+		}
+
+		if (!processed) {
+			cerr << "Error: could not inser figured bass: " << tok << endl;
+		} else {
+			HumGrid* hg = getOwner();
+			if (hg) {
+				hg->setFiguredBassPresent(part);
+			}
 		}
 	}
 
@@ -4689,6 +4771,7 @@ ostream& operator<<(ostream& output, GridPart& part) {
 	output << &part;
 	return output;
 }
+
 
 
 
@@ -5779,6 +5862,11 @@ GridMeasure* GridSlice::getMeasure(void) {
 //
 // operator<< -- print token content of a slice
 //
+
+ostream& operator<<(ostream& output, GridSlice& slice) {
+	return output << &slice;
+}
+
 
 ostream& operator<<(ostream& output, GridSlice* slice) {
 	if (slice == NULL) {
@@ -6959,6 +7047,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 		cleanupManipulators();
 	}
 
+	insertPartNames(outfile);
 	insertStaffIndications(outfile);
 	insertPartIndications(outfile);
 	insertExclusiveInterpretationLine(outfile);
@@ -8606,9 +8695,14 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			slicedur = nextts - currts;
 			type = m_allslices[s]->getType();
 
+			if (staffi == (int)m_allslices.at(s)->at(parti)->size()) {
+					cerr << "WARNING: staff index " << staffi << " is probably incorrect: increasing staff count for part to " << staffi + 1 << endl;
+					m_allslices.at(s)->at(parti)->resize(m_allslices.at(s)->at(parti)->size() + 1);
+					m_allslices.at(s)->at(parti)->at(staffi) = new GridStaff();
+			}
 			gs = m_allslices.at(s)->at(parti)->at(staffi);
 			if (gs == NULL) {
-				cerr << "Strange error2 in extendDurationToken()" << endl;
+				cerr << "Strange error6 in extendDurationToken()" << endl;
 				return;
 			}
 
@@ -8637,8 +8731,6 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
-
-
 }
 
 
@@ -8818,6 +8910,47 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 
 //////////////////////////////
 //
+// HumGrid::insertPartNames --
+//
+
+void HumGrid::insertPartNames(HumdrumFile& outfile) {
+	if (m_partnames.size() == 0) {
+		return;
+	}
+	HumdrumLine* line = new HumdrumLine;
+	HTp token;
+
+	if (m_recip) {
+		token = new HumdrumToken("*");
+		line->appendToken(token);
+	}
+
+	string text;
+	GridSlice& slice = *this->at(0)->front();
+	int p; // part index
+	int s; // staff index
+	for (p=(int)slice.size()-1; p>=0; p--) {
+		GridPart& part = *slice[p];
+		for (s=(int)part.size()-1; s>=0; s--) {
+			text = "*";
+			string pname = m_partnames[p];
+			if (!pname.empty()) {
+				text += "I\"";
+				text += pname;
+			}
+			token = new HumdrumToken(text);
+			line->appendToken(token);
+			insertSideNullInterpretations(line, p, s);
+		}
+		insertSideNullInterpretations(line, p, -1);
+	}
+	outfile.insertLine(0, line);
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::insertPartIndications -- Currently presumes
 //    that the first entry contains spines.  And the first measure
 //    in the HumGrid object must contain a slice.  This is the
@@ -8826,6 +8959,7 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 //
 
 void HumGrid::insertPartIndications(HumdrumFile& outfile) {
+
 	if (this->size() == 0) {
 		return;
 	}
@@ -8855,6 +8989,46 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 		insertSidePartInfo(line, p, -1);   // insert part sides
 	}
 	outfile.insertLine(0, line);
+
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::insertSideNullInterpretations --
+//
+
+void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
+		int part, int staff) {
+	HTp token;
+	string text;
+
+	if (staff < 0) {
+
+		if (hasDynamics(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+		if (hasFiguredBass(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+		int harmcount = getHarmonyCount(part);
+		for (int i=0; i<harmcount; i++) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+	} else {
+		int versecount = getVerseCount(part, staff);
+		for (int i=0; i<versecount; i++) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+	}
 }
 
 
@@ -9347,6 +9521,42 @@ void HumGrid::deleteMeasure(int index) {
 
 //////////////////////////////
 //
+// HumGrid::setPartName --
+//
+
+void HumGrid::setPartName(int index, const string& name) {
+	if (index < 0) {
+		return;
+	} else if (index < (int)m_partnames.size()) {
+		m_partnames[index] = name;
+	} else if (index < 100) {
+		// grow the array and then store name
+		m_partnames.resize(index+1);
+		m_partnames.back() = name;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::getPartName --
+//
+
+std::string HumGrid::getPartName(int index) {
+	if (index < 0) {
+		return "";
+	} else if (index < (int)m_partnames.size()) {
+		return m_partnames[index];
+	} else {
+		return "";
+	}
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Debugging printing of Humgrid Contents.
 //
 
@@ -9357,6 +9567,10 @@ ostream& operator<<(ostream& out, HumGrid& grid) {
 	}
 	return out;
 }
+
+
+
+
 
 
 
@@ -27294,7 +27508,7 @@ void MuseData::analyzeType(void) {
 
 //////////////////////////////
 //
-// MuseData::analyzeRhythm -- calulcate the start time in quarter notes
+// MuseData::analyzeRhythm -- calculate the start time in quarter notes
 //   for each note/rest in the file.
 //
 //   Secondary chord notes may or may not have a duration listed.
@@ -27309,40 +27523,54 @@ void MuseData::analyzeRhythm(void) {
 	HumNum linedur(0,1);
 	int tpq = 1;
 	HumRegex hre;
-
+	HumNum figadj = 0;   // needed for figured harmony
 	HumNum primarychordnoteduration(0,1);  // needed for chord notes
 
 	for (int i=0; i<(int)m_data.size(); i++) {
-		if (m_data[i]->getType() == E_muserec_musical_attributes) {
+		if (m_data[i]->isAttributes()) {
 			if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
 				tpq = hre.getMatchInt(1);
 			}
 		}
 
-		if (m_data[i]->getType() == E_muserec_note_chord) {
+		if (m_data[i]->isChordNote()) {
 			// insert an automatic back command for chord tones
 			// also deal with cue-size note chords?
 			m_data[i]->setAbsBeat(cumulative - primarychordnoteduration);
 
-	 // Check to see if the secondary chord note has a duration.
-	 // If so, then set the note duration to that value; otherwise,
-	 // set the note duration to the duration of the primary chord
-	 // note (first note before the current note which is not a chord
-	 // note).
-	 string buffer = m_data[i]->getTickDurationField();
-	 if (hre.search(buffer, "\\d", "")) {
+			// Check to see if the secondary chord note has a duration.
+			// If so, then set the note duration to that value; otherwise,
+			// set the note duration to the duration of the primary chord
+			// note (first note before the current note which is not a chord
+			// note).
+			string buffer = m_data[i]->getTickDurationField();
+			if (hre.search(buffer, "\\d", "")) {
 				m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			} else {
 				m_data[i]->setNoteDuration(primarychordnoteduration);
 			}
 			m_data[i]->setLineDuration(0);
+		} else if (m_data[i]->isFiguredHarmony()) {
+			// Tick values on figured harmony lines do not advance the
+			// cumulative timestamp; instead they temporarily advance
+			// the time placement of the next figure if it occurs 
+			// during the same note as the previous figure.
+			m_data[i]->setAbsBeat(cumulative + figadj);
+			HumNum tick = m_data[i]->getLineTickDuration();
+			if (tick == 0) {
+				figadj = 0;
+			} else {
+				HumNum dur = tick;
+				dur /= tpq;
+				figadj += dur;
+			}
 		} else {
 			m_data[i]->setAbsBeat(cumulative);
 			m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			m_data[i]->setLineDuration(m_data[i]->getNoteDuration());
+			linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
+			cumulative += linedur;
 		}
-		linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
-		cumulative += linedur;
 
 		switch (m_data[i]->getType()) {
 			case E_muserec_note_regular:
@@ -27688,10 +27916,37 @@ string MuseData::getFilename(void) {
 }
 
 
+/*
 
 //////////////////////////////
 //
-// MuseData::getPartName -- return
+// MuseData::getPartName --
+//
+
+string MuseData::getPartName(void) {
+	string output;
+	for (int i=0; i<getLineCount(); i++) {
+		if (isPartName(i)) {
+			output = getPartName(i);
+			break;
+		}
+	}
+	for (int i=(int)output.size() - 1; i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+*/
+
+
+//////////////////////////////
+//
+// MuseData::getPartName -- return name of the part
 //
 
 string MuseData::getPartName(void) {
@@ -27717,7 +27972,7 @@ string MuseData::getPartName(void) {
 int MuseData::getPartNameIndex(void) {
 	int output = -1;
 	for (int i=0; i<(int)m_data.size(); i++) {
-		if (m_data[i]->getType() == E_muserec_header_part_name) {
+		if (m_data[i]->isPartName()) {
 			return i;
 		}
 	}
@@ -27872,6 +28127,39 @@ void MuseData::setError(const string& error) {
 
 
 
+//////////////////////////////
+//
+// MuseData::getFileDuration --
+//
+
+HumNum MuseData::getFileDuration(void) {
+	return getRecord(getLineCount()-1).getAbsBeat();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getLine -- return the textual content of the given line index.
+//
+
+string MuseData::getLine(int index) {
+	return getRecord(index).getLine();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isPartName -- return true if partname line.
+//
+
+bool MuseData::isPartName(int index) {
+	return getRecord(index).isPartName();
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // friendly functions
@@ -28003,16 +28291,17 @@ int MuseDataSet::read(istream& infile) {
 	vector<int> stopindex;
 	analyzePartSegments(startindex, stopindex, datalines);
 
-	stringstream sstream;
+	stringstream *sstream;
 	MuseData* md;
 	for (int i=0; i<(int)startindex.size(); i++) {
+		sstream = new stringstream;
 		for (int j=startindex[i]; j<=stopindex[i]; j++) {
-			 sstream << datalines[j] << '\n';
+			 (*sstream) << datalines[j] << '\n';
 		}
 		md = new MuseData;
-		md->read(sstream);
-		sstream.str("");
+		md->read(*sstream);
 		appendPart(md);
+		delete sstream;
 	}
 	return 1;
 }
@@ -28097,9 +28386,16 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 			if (j < 0) {
 				break;
 			}
+			if (lines[j].compare(0, 4, "/eof") == 0) {
+				// end of previous file
+				found = 1;
+				value = j + 1;
+				startindex.push_back(value);
+				break;
+			}
 			if ((types[j] == E_muserec_comment_line) ||
 				 (types[j] == E_muserec_comment_toggle)) {
-				j--;
+//				j--;
 				continue;
 			}
 			if (j < 0) {
@@ -28156,12 +28452,6 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 	for (int i=0; i<(int)startindex.size()-1; i++) {
 		stopindex[i] = startindex[i+1]-1;
 	}
-
-
-//for (int i=0; i<(int)lines.size(); i++) {
-//   cout << (char)types[i] << "\t" << lines[i] << endl;
-//}
-
 }
 
 
@@ -30562,6 +30852,17 @@ int MuseRecord::findField(char key, int mincol, int maxcol) {
 
 //////////////////////////////
 //
+// MuseRecord::getSlurParameterRegion --
+//
+
+string MuseRecord::getSlurParameterRegion(void) {
+	return getColumns(31, 43);
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getSlurStartColumn -- search column 32 to 43 for a slur
 //    marker.  Returns the first one found from left to right.
 //    returns -1 if a slur character was not found.
@@ -30759,7 +31060,76 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 		output += temp;
 	}
 
+	if (isTied()) {
+		string tiestarts;
+		string tieends;
+		int lasttie = getLastTiedNoteLineIndex();
+		int nexttie = getNextTiedNoteLineIndex();
+		int state = 0;
+		if (lasttie >= 0) {
+			state = 2;
+		}
+		if (nexttie >= 0) {
+			state = 1;
+		}
+		switch (state) {
+			case 1:
+				tiestarts += "[";
+				break;
+			case 2:
+				tieends += "]";
+				break;
+			case 3:
+				tieends += "_";
+				break;
+		}
+		if (state) {
+			output = tiestarts + output + tieends;
+		}
+	}
+
+	string slurstarts;
+	string slurends;
+	getSlurInfo(slurstarts, slurends);
+	if ((!slurstarts.empty()) || (!slurends.empty())) {
+		output = slurstarts + output + slurends;
+	}
+
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getSlurInfo --
+//
+//   ( ) = regular slur
+//   [ ] = second levels slur, convert to &( and &)
+//   { } = third level slur, convert to &&( and &&)
+//   Z   = fourth level slur (how to close?)
+//
+
+void MuseRecord::getSlurInfo(string& slurstarts, string& slurends) {
+	slurstarts.clear();
+	slurends.clear();
+
+	string data = getSlurParameterRegion();
+	for (int i=0; i<(int)data.size(); i++) {
+		if (data[i] == '(') {
+			slurstarts += '(';
+		} else if (data[i] == ')') {
+			slurends += ')';
+		} else if (data[i] == '[') {
+			slurstarts += "&{";
+		} else if (data[i] == ']') {
+			slurends += "&)";
+		} else if (data[i] == '{') {
+			slurstarts += "&&(";
+		} else if (data[i] == '}') {
+			slurends += "&&)";
+		}
+	}
 }
 
 
@@ -31396,6 +31766,25 @@ int MuseRecord::figurePointerQ(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getFigureString --
+//
+
+string MuseRecord::getFigureString(void) {
+	string output = getFigureFields();
+	for (int i=(int)output.size()-1; i>= 0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getFigureFields -- columns 17 -- 80
 //
 
@@ -31403,7 +31792,6 @@ string MuseRecord::getFigureFields(void) {
 	allowFigurationOnly("getFigureFields");
 	return extract(17, 80);
 }
-
 
 
 //////////////////////////////
@@ -31437,10 +31825,13 @@ int MuseRecord::figureFieldsQ(void) {
 string MuseRecord::getFigure(int index) {
 	string output;
 	allowFigurationOnly("getFigure");
-	if (index < 0 || index >= getFigureCount()) {
+	if (index >= getFigureCount()) {
 		return output;
 	}
-	string temp = getFigureFields();
+	string temp = getFigureString();
+	if (index == 0) {
+		return temp;
+	}
 	HumRegex hre;
 	vector<string> pieces;
 	hre.split(pieces, temp, " +");
@@ -32455,7 +32846,6 @@ int MuseRecordBasic::getMarkupPitch(void) {
 
 
 
-
 //////////////////////////////
 //
 // MuseRecordBasic::cleanLineEnding -- remove spaces at the end of the
@@ -32470,6 +32860,18 @@ void MuseRecordBasic::cleanLineEnding(void) {
 		i = (int)m_recordString.size() - 1;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isPartName --
+//
+
+bool MuseRecordBasic::isPartName(void) {
+	return m_type == E_muserec_header_part_name;
+}
+
 
 
 //////////////////////////////
@@ -32489,6 +32891,63 @@ bool MuseRecordBasic::isAttributes(void) {
 
 bool MuseRecordBasic::isBarline(void) {
 	return m_type == E_muserec_measure;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
+//    note in a chord (not the first note in the chord).
+//
+
+bool MuseRecordBasic::isChordNote(void) {
+	return m_type == E_muserec_note_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGraceNote -- A grace note, either a single note or
+//     the first note in a gracenote chord.
+//
+
+bool MuseRecordBasic::isGraceNote(void) {
+	return m_type == E_muserec_note_grace;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isCueNote --
+//
+
+bool MuseRecordBasic::isCueNote(void) {
+	return m_type == E_muserec_note_cue;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote --
+//
+
+bool MuseRecordBasic::isChordGraceNote(void) {
+	return m_type == E_muserec_note_grace_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isFiguredHarmony --
+//
+
+bool MuseRecordBasic::isFiguredHarmony(void) {
+	return m_type == E_muserec_figured_harmony;
 }
 
 
@@ -59110,6 +59569,9 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
 	outfile.createLinesFromTokens();
+	if (!m_omd.empty()) {
+		out << "!!!OMD:\t" << m_omd << endl;
+	}
 	out << outfile;
 
 	return status;
@@ -59126,7 +59588,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	MuseData& part = mds[index];
 
 	m_tpq = part.getInitialTpq();
-	m_staff = index;
+	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
 	
 	bool status = true;
@@ -59135,7 +59597,23 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 		i = convertMeasure(outdata, part, i);
 	}
 
+	storePartName(outdata, part, index);
+
 	return status;
+}
+
+
+
+///////////////////////////////
+//
+// Tool_musedata2hum::storePartName --
+//
+
+void Tool_musedata2hum::storePartName(HumGrid& outdata, MuseData& part, int index) {
+	string name = part.getPartName();
+	if (!name.empty()) {
+		outdata.setPartName(index, name);
+	}
 }
 
 
@@ -59150,6 +59628,13 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 		return 1;
 	}
 	HumNum starttime = part[startindex].getAbsBeat();
+	HumNum filedur = part.getFileDuration();
+	HumNum diff = filedur - starttime;
+	if (diff == 0) {
+		// last barline in score, so ignore
+		return startindex + 1;;
+	}
+
 	GridMeasure* gm = getMeasure(outdata, starttime);
 	gm->setBarStyle(MeasureStyle::Plain);
 	int i = startindex;
@@ -59171,9 +59656,26 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	gm->setTimestamp(starttime);
 	gm->setTimeSigDur(m_timesigdur);
 
+	if ((i < part.getLineCount()) && part[i].isBarline()) {
+		setMeasureStyle(outdata.back(), part[i]);
+	}
+
 	return i;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setMeasureStyle --
+//
+
+void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
+	string line = mr.getLine();
+	if (line.compare(0, 7, "mheavy2") == 0) {
+		gm->setStyle(MeasureStyle::Final);
+	}
+}
 
 
 //////////////////////////////
@@ -59183,8 +59685,8 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 
 void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	int tpq          = m_tpq;
-	int part         = m_staff;
-	int staff        = m_staff;
+	int part         = m_part;
+	int staff        = 0;
 	int maxstaff     = m_maxstaff;
 	int voice        = 0;
 	HumNum timestamp = mr.getAbsBeat();
@@ -59198,8 +59700,12 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 		string mtempo = attributes["D"];
 		if (!mtempo.empty()) {
-			string value = "!!!OMD: " + mtempo;
-			gm->addGlobalComment(value, timestamp);
+			if (timestamp != 0) {
+				string value = "!!!OMD: " + mtempo;
+				gm->addGlobalComment(value, timestamp);
+			} else {
+				setInitialOmd(mtempo);
+			}
 		}
 
 		string mclef = attributes["C"];
@@ -59223,10 +59729,74 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 	} else if (mr.isNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		GridSlice* slice;
+		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		addNoteDynamics(slice, part, mr);
+	} else if (mr.isFiguredHarmony()) {
+		string fh = mr.getFigureString();
+		fh = Convert::museFiguredBassToKernFiguredBass(fh);
+		gm->addFiguredBass(fh, timestamp, part, maxstaff);
+	} else if (mr.isChordNote()) {
+		cerr << "PROCESS CHORD NOTE HERE: " << mr << endl;
+	} else if (mr.isCueNote()) {
+		cerr << "PROCESS CUE NOTE HERE: " << mr << endl;
+	} else if (mr.isGraceNote()) {
+		cerr << "PROCESS GRACE NOTE HERE: " << mr << endl;
+	} else if (mr.isChordGraceNote()) {
+		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isRest()) {
 		tok  = mr.getKernRestStyle(tpq);
 		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addNoteDynamics --
+//
+
+void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part, 
+		MuseRecord& mr) {
+	string notations = mr.getAdditionalNotationsField();
+	vector<string> dynamics(1);
+	int state = 0;
+	for (int i=0; i<(int)notations.size(); i++) {
+		if (state) {
+			switch (notations[i]) {
+				case 'p':
+				case 'm':
+				case 'f':
+					dynamics.back() += notations[i];
+					break;
+				default:
+					state = 0;
+					dynamics.resize(dynamics.size() + 1);
+			}
+		} else {
+			switch (notations[i]) {
+				case 'p':
+				case 'm':
+				case 'f':
+					state = 1;
+					dynamics.back() = notations[i];
+					break;
+			}
+		}
+	}
+
+	for (int i=0; i<(int)dynamics.size(); i++) {
+		if (dynamics[i].empty()) {
+			continue;
+		}
+		slice->at(part)->setDynamics(dynamics[i]);
+		break;  // only one dynamic allowed (at least for now)
+	}
+
+	HumGrid* grid = slice->getOwner();
+	if (grid) {
+		grid->setDynamicsPresent(part);
 	}
 }
 
@@ -59270,6 +59840,17 @@ GridMeasure* Tool_musedata2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
 	GridMeasure* gm = new GridMeasure(&outdata);
 	outdata.push_back(gm);
 	return gm;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setInitialOmd --
+//
+
+void Tool_musedata2hum::setInitialOmd(const string& omd) {
+	m_omd = omd;
 }
 
 

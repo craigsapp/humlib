@@ -111,6 +111,7 @@ class GridSlice : public std::vector<GridPart*> {
 
 
 std::ostream& operator<<(std::ostream& output, GridSlice* slice);
+std::ostream& operator<<(std::ostream& output, GridSlice& slice);
 
 
 // END_MERGE

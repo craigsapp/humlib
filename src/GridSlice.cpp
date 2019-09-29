@@ -796,6 +796,11 @@ GridMeasure* GridSlice::getMeasure(void) {
 // operator<< -- print token content of a slice
 //
 
+ostream& operator<<(ostream& output, GridSlice& slice) {
+	return output << &slice;
+}
+
+
 ostream& operator<<(ostream& output, GridSlice* slice) {
 	if (slice == NULL) {
 		output << "{n}";

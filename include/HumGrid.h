@@ -47,6 +47,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		int  getPartCount               (void);
 		int  getStaffCount              (int partindex);
 		void deleteMeasure              (int index);
+		void setPartName                (int index, const string& name);
+		std::string getPartName         (int index);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -56,6 +58,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    GridSlice& slice);
 		void insertPartIndications         (HumdrumFile& outfile);
 		void insertStaffIndications        (HumdrumFile& outfile);
+		void insertPartNames               (HumdrumFile& outfile);
 		void addNullTokens                 (void);
 		void addNullTokensForGraceNotes    (void);
 		void addNullTokensForClefChanges   (void);
@@ -95,6 +98,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    int staff);
 		void insertSideStaffInfo           (HumdrumLine* line, int part,
 		                                    int staff, int staffnum);
+		void insertSideNullInterpretations (HumdrumLine* line,
+		                                    int part, int staff);
 		void getMetricBarNumbers           (std::vector<int>& barnums);
 		string  createBarToken             (int m, int barnum,
 		                                    GridMeasure* measure);
@@ -119,6 +124,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		std::vector<bool>             m_dynamics;
 		std::vector<bool>             m_figured_bass;
 		std::vector<bool>             m_harmony;
+
+		std::vector<std::string>      m_partnames;
 
 		// options:
 		bool m_recip;               // include **recip spine in output

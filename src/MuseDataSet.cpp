@@ -133,16 +133,17 @@ int MuseDataSet::read(istream& infile) {
 	vector<int> stopindex;
 	analyzePartSegments(startindex, stopindex, datalines);
 
-	stringstream sstream;
+	stringstream *sstream;
 	MuseData* md;
 	for (int i=0; i<(int)startindex.size(); i++) {
+		sstream = new stringstream;
 		for (int j=startindex[i]; j<=stopindex[i]; j++) {
-			 sstream << datalines[j] << '\n';
+			 (*sstream) << datalines[j] << '\n';
 		}
 		md = new MuseData;
-		md->read(sstream);
-		sstream.str("");
+		md->read(*sstream);
 		appendPart(md);
+		delete sstream;
 	}
 	return 1;
 }
@@ -227,9 +228,16 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 			if (j < 0) {
 				break;
 			}
+			if (lines[j].compare(0, 4, "/eof") == 0) {
+				// end of previous file
+				found = 1;
+				value = j + 1;
+				startindex.push_back(value);
+				break;
+			}
 			if ((types[j] == E_muserec_comment_line) ||
 				 (types[j] == E_muserec_comment_toggle)) {
-				j--;
+//				j--;
 				continue;
 			}
 			if (j < 0) {
@@ -286,12 +294,6 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 	for (int i=0; i<(int)startindex.size()-1; i++) {
 		stopindex[i] = startindex[i+1]-1;
 	}
-
-
-//for (int i=0; i<(int)lines.size(); i++) {
-//   cout << (char)types[i] << "\t" << lines[i] << endl;
-//}
-
 }
 
 

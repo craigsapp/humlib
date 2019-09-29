@@ -12,6 +12,7 @@
 
 #include "tool-musedata2hum.h"
 #include "Convert.h"
+#include "HumRegex.h"
 #include "HumGrid.h"
 
 using namespace std;
@@ -128,6 +129,9 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
 	outfile.createLinesFromTokens();
+	if (!m_omd.empty()) {
+		out << "!!!OMD:\t" << m_omd << endl;
+	}
 	out << outfile;
 
 	return status;
@@ -144,7 +148,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	MuseData& part = mds[index];
 
 	m_tpq = part.getInitialTpq();
-	m_staff = index;
+	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
 	
 	bool status = true;
@@ -153,7 +157,23 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 		i = convertMeasure(outdata, part, i);
 	}
 
+	storePartName(outdata, part, index);
+
 	return status;
+}
+
+
+
+///////////////////////////////
+//
+// Tool_musedata2hum::storePartName --
+//
+
+void Tool_musedata2hum::storePartName(HumGrid& outdata, MuseData& part, int index) {
+	string name = part.getPartName();
+	if (!name.empty()) {
+		outdata.setPartName(index, name);
+	}
 }
 
 
@@ -168,6 +188,13 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 		return 1;
 	}
 	HumNum starttime = part[startindex].getAbsBeat();
+	HumNum filedur = part.getFileDuration();
+	HumNum diff = filedur - starttime;
+	if (diff == 0) {
+		// last barline in score, so ignore
+		return startindex + 1;;
+	}
+
 	GridMeasure* gm = getMeasure(outdata, starttime);
 	gm->setBarStyle(MeasureStyle::Plain);
 	int i = startindex;
@@ -189,9 +216,26 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	gm->setTimestamp(starttime);
 	gm->setTimeSigDur(m_timesigdur);
 
+	if ((i < part.getLineCount()) && part[i].isBarline()) {
+		setMeasureStyle(outdata.back(), part[i]);
+	}
+
 	return i;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setMeasureStyle --
+//
+
+void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
+	string line = mr.getLine();
+	if (line.compare(0, 7, "mheavy2") == 0) {
+		gm->setStyle(MeasureStyle::Final);
+	}
+}
 
 
 //////////////////////////////
@@ -201,8 +245,8 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 
 void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	int tpq          = m_tpq;
-	int part         = m_staff;
-	int staff        = m_staff;
+	int part         = m_part;
+	int staff        = 0;
 	int maxstaff     = m_maxstaff;
 	int voice        = 0;
 	HumNum timestamp = mr.getAbsBeat();
@@ -216,8 +260,12 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 		string mtempo = attributes["D"];
 		if (!mtempo.empty()) {
-			string value = "!!!OMD: " + mtempo;
-			gm->addGlobalComment(value, timestamp);
+			if (timestamp != 0) {
+				string value = "!!!OMD: " + mtempo;
+				gm->addGlobalComment(value, timestamp);
+			} else {
+				setInitialOmd(mtempo);
+			}
 		}
 
 		string mclef = attributes["C"];
@@ -241,10 +289,74 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 
 	} else if (mr.isNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		GridSlice* slice;
+		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		addNoteDynamics(slice, part, mr);
+	} else if (mr.isFiguredHarmony()) {
+		string fh = mr.getFigureString();
+		fh = Convert::museFiguredBassToKernFiguredBass(fh);
+		gm->addFiguredBass(fh, timestamp, part, maxstaff);
+	} else if (mr.isChordNote()) {
+		cerr << "PROCESS CHORD NOTE HERE: " << mr << endl;
+	} else if (mr.isCueNote()) {
+		cerr << "PROCESS CUE NOTE HERE: " << mr << endl;
+	} else if (mr.isGraceNote()) {
+		cerr << "PROCESS GRACE NOTE HERE: " << mr << endl;
+	} else if (mr.isChordGraceNote()) {
+		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isRest()) {
 		tok  = mr.getKernRestStyle(tpq);
 		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addNoteDynamics --
+//
+
+void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part, 
+		MuseRecord& mr) {
+	string notations = mr.getAdditionalNotationsField();
+	vector<string> dynamics(1);
+	int state = 0;
+	for (int i=0; i<(int)notations.size(); i++) {
+		if (state) {
+			switch (notations[i]) {
+				case 'p':
+				case 'm':
+				case 'f':
+					dynamics.back() += notations[i];
+					break;
+				default:
+					state = 0;
+					dynamics.resize(dynamics.size() + 1);
+			}
+		} else {
+			switch (notations[i]) {
+				case 'p':
+				case 'm':
+				case 'f':
+					state = 1;
+					dynamics.back() = notations[i];
+					break;
+			}
+		}
+	}
+
+	for (int i=0; i<(int)dynamics.size(); i++) {
+		if (dynamics[i].empty()) {
+			continue;
+		}
+		slice->at(part)->setDynamics(dynamics[i]);
+		break;  // only one dynamic allowed (at least for now)
+	}
+
+	HumGrid* grid = slice->getOwner();
+	if (grid) {
+		grid->setDynamicsPresent(part);
 	}
 }
 
@@ -288,6 +400,17 @@ GridMeasure* Tool_musedata2hum::getMeasure(HumGrid& outdata, HumNum starttime) {
 	GridMeasure* gm = new GridMeasure(&outdata);
 	outdata.push_back(gm);
 	return gm;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setInitialOmd --
+//
+
+void Tool_musedata2hum::setInitialOmd(const string& omd) {
+	m_omd = omd;
 }
 
 

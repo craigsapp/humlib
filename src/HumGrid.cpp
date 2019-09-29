@@ -327,6 +327,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 		cleanupManipulators();
 	}
 
+	insertPartNames(outfile);
 	insertStaffIndications(outfile);
 	insertPartIndications(outfile);
 	insertExclusiveInterpretationLine(outfile);
@@ -1974,9 +1975,14 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 			slicedur = nextts - currts;
 			type = m_allslices[s]->getType();
 
+			if (staffi == (int)m_allslices.at(s)->at(parti)->size()) {
+					cerr << "WARNING: staff index " << staffi << " is probably incorrect: increasing staff count for part to " << staffi + 1 << endl;
+					m_allslices.at(s)->at(parti)->resize(m_allslices.at(s)->at(parti)->size() + 1);
+					m_allslices.at(s)->at(parti)->at(staffi) = new GridStaff();
+			}
 			gs = m_allslices.at(s)->at(parti)->at(staffi);
 			if (gs == NULL) {
-				cerr << "Strange error2 in extendDurationToken()" << endl;
+				cerr << "Strange error6 in extendDurationToken()" << endl;
 				return;
 			}
 
@@ -2005,8 +2011,6 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	}
 	// walk through zero-dur items and fill them in, but stop at
 	// a token (likely a grace note which should not be erased).
-
-
 }
 
 
@@ -2186,6 +2190,47 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 
 //////////////////////////////
 //
+// HumGrid::insertPartNames --
+//
+
+void HumGrid::insertPartNames(HumdrumFile& outfile) {
+	if (m_partnames.size() == 0) {
+		return;
+	}
+	HumdrumLine* line = new HumdrumLine;
+	HTp token;
+
+	if (m_recip) {
+		token = new HumdrumToken("*");
+		line->appendToken(token);
+	}
+
+	string text;
+	GridSlice& slice = *this->at(0)->front();
+	int p; // part index
+	int s; // staff index
+	for (p=(int)slice.size()-1; p>=0; p--) {
+		GridPart& part = *slice[p];
+		for (s=(int)part.size()-1; s>=0; s--) {
+			text = "*";
+			string pname = m_partnames[p];
+			if (!pname.empty()) {
+				text += "I\"";
+				text += pname;
+			}
+			token = new HumdrumToken(text);
+			line->appendToken(token);
+			insertSideNullInterpretations(line, p, s);
+		}
+		insertSideNullInterpretations(line, p, -1);
+	}
+	outfile.insertLine(0, line);
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::insertPartIndications -- Currently presumes
 //    that the first entry contains spines.  And the first measure
 //    in the HumGrid object must contain a slice.  This is the
@@ -2194,6 +2239,7 @@ void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
 //
 
 void HumGrid::insertPartIndications(HumdrumFile& outfile) {
+
 	if (this->size() == 0) {
 		return;
 	}
@@ -2223,6 +2269,46 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 		insertSidePartInfo(line, p, -1);   // insert part sides
 	}
 	outfile.insertLine(0, line);
+
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::insertSideNullInterpretations --
+//
+
+void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
+		int part, int staff) {
+	HTp token;
+	string text;
+
+	if (staff < 0) {
+
+		if (hasDynamics(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+		if (hasFiguredBass(part)) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+		int harmcount = getHarmonyCount(part);
+		for (int i=0; i<harmcount; i++) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
+	} else {
+		int versecount = getVerseCount(part, staff);
+		for (int i=0; i<versecount; i++) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+	}
 }
 
 
@@ -2715,6 +2801,42 @@ void HumGrid::deleteMeasure(int index) {
 
 //////////////////////////////
 //
+// HumGrid::setPartName --
+//
+
+void HumGrid::setPartName(int index, const string& name) {
+	if (index < 0) {
+		return;
+	} else if (index < (int)m_partnames.size()) {
+		m_partnames[index] = name;
+	} else if (index < 100) {
+		// grow the array and then store name
+		m_partnames.resize(index+1);
+		m_partnames.back() = name;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::getPartName --
+//
+
+std::string HumGrid::getPartName(int index) {
+	if (index < 0) {
+		return "";
+	} else if (index < (int)m_partnames.size()) {
+		return m_partnames[index];
+	} else {
+		return "";
+	}
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Debugging printing of Humgrid Contents.
 //
 
@@ -2725,6 +2847,10 @@ ostream& operator<<(ostream& out, HumGrid& grid) {
 	}
 	return out;
 }
+
+
+
+
 
 
 // END_MERGE

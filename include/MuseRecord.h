@@ -208,6 +208,8 @@ class MuseRecord : public MuseRecordBasic {
 		                                               int maxcol);
 		// int           getNotationLevel
 		int              getSlurStartColumn           (void);
+		std::string      getSlurParameterRegion       (void);
+		void             getSlurInfo                  (string& slurstarts, string& slurends);
 
 		// columns 44 -- 80: text underlay
 		std::string      getTextUnderlayField         (void);
@@ -244,8 +246,9 @@ class MuseRecord : public MuseRecordBasic {
 
 		// columns 17 -- 80: figure fields
 		std::string      getFigureFields              (void);
+		std::string      getFigureString              (void);
 		int              figureFieldsQ                (void);
-		std::string      getFigure                    (int index);
+		std::string      getFigure                    (int index = 0);
 
 
 	//////////////////////////////
@@ -277,7 +280,7 @@ class MuseRecord : public MuseRecordBasic {
 	// functions which work with musical attributes records ('$'):
 
 		std::string      getAttributes                (void);
-		void             getAttributeMap              (map<string, string>& amap);
+		void             getAttributeMap              (std::map<std::string, std::string>& amap);
 		int              attributeQ                   (const std::string& attribute);
 		int              getAttributeInt              (char attribute);
 		int              getAttributeField            (std::string& output, const std::string& attribute);

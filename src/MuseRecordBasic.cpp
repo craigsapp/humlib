@@ -746,7 +746,6 @@ int MuseRecordBasic::getMarkupPitch(void) {
 
 
 
-
 //////////////////////////////
 //
 // MuseRecordBasic::cleanLineEnding -- remove spaces at the end of the
@@ -761,6 +760,18 @@ void MuseRecordBasic::cleanLineEnding(void) {
 		i = (int)m_recordString.size() - 1;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isPartName --
+//
+
+bool MuseRecordBasic::isPartName(void) {
+	return m_type == E_muserec_header_part_name;
+}
+
 
 
 //////////////////////////////
@@ -780,6 +791,63 @@ bool MuseRecordBasic::isAttributes(void) {
 
 bool MuseRecordBasic::isBarline(void) {
 	return m_type == E_muserec_measure;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
+//    note in a chord (not the first note in the chord).
+//
+
+bool MuseRecordBasic::isChordNote(void) {
+	return m_type == E_muserec_note_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGraceNote -- A grace note, either a single note or
+//     the first note in a gracenote chord.
+//
+
+bool MuseRecordBasic::isGraceNote(void) {
+	return m_type == E_muserec_note_grace;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isCueNote --
+//
+
+bool MuseRecordBasic::isCueNote(void) {
+	return m_type == E_muserec_note_cue;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote --
+//
+
+bool MuseRecordBasic::isChordGraceNote(void) {
+	return m_type == E_muserec_note_grace_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isFiguredHarmony --
+//
+
+bool MuseRecordBasic::isFiguredHarmony(void) {
+	return m_type == E_muserec_figured_harmony;
 }
 
 

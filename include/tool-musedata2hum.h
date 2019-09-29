@@ -40,6 +40,7 @@ class Tool_musedata2hum : public HumTool {
 		void    setOptions           (int argc, char** argv);
 		void    setOptions           (const std::vector<std::string>& argvlist);
 		Options getOptionDefinitions (void);
+		void    setInitialOmd        (const string& omd);
 
 	protected:
 		void    initialize           (void);
@@ -48,16 +49,21 @@ class Tool_musedata2hum : public HumTool {
 		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
+		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
+		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
+		void    addNoteDynamics      (GridSlice* slice, int part, 
+		                              MuseRecord& mr);
 
 	private:
 		// options:
 		Options m_options;
 		bool    m_stemsQ = false;    // used with -s option
 		bool    m_recipQ = false;    // used with -r option
+		std::string m_omd = "";      // initial tempo designation (store for later output)
 
 		// state variables:
 		int m_tpq      = 1;          // Ticks per quarter note
-		int m_staff    = 0;          // staff index currently being processed
+		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 

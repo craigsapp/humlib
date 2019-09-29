@@ -2328,6 +2328,17 @@ int MuseRecord::findField(char key, int mincol, int maxcol) {
 
 //////////////////////////////
 //
+// MuseRecord::getSlurParameterRegion --
+//
+
+string MuseRecord::getSlurParameterRegion(void) {
+	return getColumns(31, 43);
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getSlurStartColumn -- search column 32 to 43 for a slur
 //    marker.  Returns the first one found from left to right.
 //    returns -1 if a slur character was not found.
@@ -2525,7 +2536,76 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 		output += temp;
 	}
 
+	if (isTied()) {
+		string tiestarts;
+		string tieends;
+		int lasttie = getLastTiedNoteLineIndex();
+		int nexttie = getNextTiedNoteLineIndex();
+		int state = 0;
+		if (lasttie >= 0) {
+			state = 2;
+		}
+		if (nexttie >= 0) {
+			state = 1;
+		}
+		switch (state) {
+			case 1:
+				tiestarts += "[";
+				break;
+			case 2:
+				tieends += "]";
+				break;
+			case 3:
+				tieends += "_";
+				break;
+		}
+		if (state) {
+			output = tiestarts + output + tieends;
+		}
+	}
+
+	string slurstarts;
+	string slurends;
+	getSlurInfo(slurstarts, slurends);
+	if ((!slurstarts.empty()) || (!slurends.empty())) {
+		output = slurstarts + output + slurends;
+	}
+
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getSlurInfo --
+//
+//   ( ) = regular slur
+//   [ ] = second levels slur, convert to &( and &)
+//   { } = third level slur, convert to &&( and &&)
+//   Z   = fourth level slur (how to close?)
+//
+
+void MuseRecord::getSlurInfo(string& slurstarts, string& slurends) {
+	slurstarts.clear();
+	slurends.clear();
+
+	string data = getSlurParameterRegion();
+	for (int i=0; i<(int)data.size(); i++) {
+		if (data[i] == '(') {
+			slurstarts += '(';
+		} else if (data[i] == ')') {
+			slurends += ')';
+		} else if (data[i] == '[') {
+			slurstarts += "&{";
+		} else if (data[i] == ']') {
+			slurends += "&)";
+		} else if (data[i] == '{') {
+			slurstarts += "&&(";
+		} else if (data[i] == '}') {
+			slurends += "&&)";
+		}
+	}
 }
 
 
@@ -3162,6 +3242,25 @@ int MuseRecord::figurePointerQ(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getFigureString --
+//
+
+string MuseRecord::getFigureString(void) {
+	string output = getFigureFields();
+	for (int i=(int)output.size()-1; i>= 0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getFigureFields -- columns 17 -- 80
 //
 
@@ -3169,7 +3268,6 @@ string MuseRecord::getFigureFields(void) {
 	allowFigurationOnly("getFigureFields");
 	return extract(17, 80);
 }
-
 
 
 //////////////////////////////
@@ -3203,10 +3301,13 @@ int MuseRecord::figureFieldsQ(void) {
 string MuseRecord::getFigure(int index) {
 	string output;
 	allowFigurationOnly("getFigure");
-	if (index < 0 || index >= getFigureCount()) {
+	if (index >= getFigureCount()) {
 		return output;
 	}
-	string temp = getFigureFields();
+	string temp = getFigureString();
+	if (index == 0) {
+		return temp;
+	}
 	HumRegex hre;
 	vector<string> pieces;
 	hre.split(pieces, temp, " +");

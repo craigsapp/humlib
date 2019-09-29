@@ -31,6 +31,11 @@ class GridPart : public std::vector<GridStaff*>, public GridSide {
 	public:
 		GridPart(void);
 		~GridPart();
+
+	private:
+		std::string m_partName;
+
+
 };
 
 std::ostream& operator<<(std::ostream& output, GridPart* part);

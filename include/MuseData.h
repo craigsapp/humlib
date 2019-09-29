@@ -77,6 +77,10 @@ class MuseData {
 		int               readString          (const std::string& filename);
 		int               readFile            (const std::string& filename);
 
+		// aliases for access to MuseRecord objects based on line indexes:
+		std::string       getLine             (int index);
+		bool              isPartName          (int index);
+
 		// additional mark-up analysis functions for post-processing:
 		void              doAnalyses          (void);
 		void              analyzeType         (void);
@@ -90,6 +94,7 @@ class MuseData {
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
+		HumNum            getFileDuration    (void);
 
 		int               getLineTickDuration (int lindex);
 
@@ -128,6 +133,7 @@ class MuseData {
 		void              insertEventBackwards (HumNum atime,
 		                                        MuseRecord* arecord);
 		int               getPartNameIndex    (void);
+		std::string       getPartName         (int index);
 };
 
 

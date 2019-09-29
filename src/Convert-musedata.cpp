@@ -311,6 +311,28 @@ string Convert::museMeterSigToKernMeterSig(const string& mtimesig) {
 
 
 
+//////////////////////////////
+//
+// Convert::museFiguredBassToKernFiguredBass --
+//
+
+string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
+	string output;
+	for (int i=0; i<(int)mfb.size(); i++) {
+		if (mfb[i] == 'b') { // blank spot in figure stack
+			output += 'X';
+		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
+			output += ":";
+			i++;
+		} else {
+			output += mfb[i];
+		}
+	}
+	return output;
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

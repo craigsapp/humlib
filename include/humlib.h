@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 27 09:01:58 PDT 2019
+// Last Modified: Sun Sep 29 00:05:58 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2585,9 +2585,15 @@ class MuseRecordBasic {
 		void              setNextTiedNoteLineIndex(int index);
 
 		// boolean type fuctions:
-		bool              isBarline          (void);
 		bool              isAttributes       (void);
+		bool              isBarline          (void);
+		bool              isChordGraceNote   (void);
+		bool              isChordNote        (void);
+		bool              isCueNote          (void);
+		bool              isFiguredHarmony   (void);
+		bool              isGraceNote        (void);
 		bool              isNote             (void);
+		bool              isPartName         (void);
 		bool              isRest             (void);
 
 	protected:
@@ -2798,6 +2804,8 @@ class MuseRecord : public MuseRecordBasic {
 		                                               int maxcol);
 		// int           getNotationLevel
 		int              getSlurStartColumn           (void);
+		std::string      getSlurParameterRegion       (void);
+		void             getSlurInfo                  (string& slurstarts, string& slurends);
 
 		// columns 44 -- 80: text underlay
 		std::string      getTextUnderlayField         (void);
@@ -2834,8 +2842,9 @@ class MuseRecord : public MuseRecordBasic {
 
 		// columns 17 -- 80: figure fields
 		std::string      getFigureFields              (void);
+		std::string      getFigureString              (void);
 		int              figureFieldsQ                (void);
-		std::string      getFigure                    (int index);
+		std::string      getFigure                    (int index = 0);
 
 
 	//////////////////////////////
@@ -2867,7 +2876,7 @@ class MuseRecord : public MuseRecordBasic {
 	// functions which work with musical attributes records ('$'):
 
 		std::string      getAttributes                (void);
-		void             getAttributeMap              (map<string, string>& amap);
+		void             getAttributeMap              (std::map<std::string, std::string>& amap);
 		int              attributeQ                   (const std::string& attribute);
 		int              getAttributeInt              (char attribute);
 		int              getAttributeField            (std::string& output, const std::string& attribute);
@@ -2945,6 +2954,10 @@ class MuseData {
 		int               readString          (const std::string& filename);
 		int               readFile            (const std::string& filename);
 
+		// aliases for access to MuseRecord objects based on line indexes:
+		std::string       getLine             (int index);
+		bool              isPartName          (int index);
+
 		// additional mark-up analysis functions for post-processing:
 		void              doAnalyses          (void);
 		void              analyzeType         (void);
@@ -2958,6 +2971,7 @@ class MuseData {
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
+		HumNum            getFileDuration    (void);
 
 		int               getLineTickDuration (int lindex);
 
@@ -2996,6 +3010,7 @@ class MuseData {
 		void              insertEventBackwards (HumNum atime,
 		                                        MuseRecord* arecord);
 		int               getPartNameIndex    (void);
+		std::string       getPartName         (int index);
 };
 
 
@@ -3316,7 +3331,8 @@ class Convert {
 		static std::string museClefToKernClef(const std::string& mclef);
 		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
 		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
-		static std::string museMeterSigToKernMeterSig(const string& mtimesig);
+		static std::string museMeterSigToKernMeterSig(const std::string& mtimesig);
+		static std::string museFiguredBassToKernFiguredBass(const std::string& mfb);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
@@ -3586,6 +3602,11 @@ class GridPart : public std::vector<GridStaff*>, public GridSide {
 	public:
 		GridPart(void);
 		~GridPart();
+
+	private:
+		std::string m_partName;
+
+
 };
 
 std::ostream& operator<<(std::ostream& output, GridPart* part);
@@ -3656,6 +3677,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addFiguredBassLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
+		GridSlice*   addFiguredBass(const std::string& tok, HumNum timestamp, int part, int maxstaff);
 		bool         isInvisible(void);
 		bool         isSingleChordMeasure(void);
 		bool         isMonophonicMeasure(void);
@@ -3758,6 +3780,7 @@ class GridSlice : public std::vector<GridPart*> {
 
 
 std::ostream& operator<<(std::ostream& output, GridSlice* slice);
+std::ostream& operator<<(std::ostream& output, GridSlice& slice);
 
 
 
@@ -3827,6 +3850,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		int  getPartCount               (void);
 		int  getStaffCount              (int partindex);
 		void deleteMeasure              (int index);
+		void setPartName                (int index, const string& name);
+		std::string getPartName         (int index);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -3836,6 +3861,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    GridSlice& slice);
 		void insertPartIndications         (HumdrumFile& outfile);
 		void insertStaffIndications        (HumdrumFile& outfile);
+		void insertPartNames               (HumdrumFile& outfile);
 		void addNullTokens                 (void);
 		void addNullTokensForGraceNotes    (void);
 		void addNullTokensForClefChanges   (void);
@@ -3875,6 +3901,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    int staff);
 		void insertSideStaffInfo           (HumdrumLine* line, int part,
 		                                    int staff, int staffnum);
+		void insertSideNullInterpretations (HumdrumLine* line,
+		                                    int part, int staff);
 		void getMetricBarNumbers           (std::vector<int>& barnums);
 		string  createBarToken             (int m, int barnum,
 		                                    GridMeasure* measure);
@@ -3899,6 +3927,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		std::vector<bool>             m_dynamics;
 		std::vector<bool>             m_figured_bass;
 		std::vector<bool>             m_harmony;
+
+		std::vector<std::string>      m_partnames;
 
 		// options:
 		bool m_recip;               // include **recip spine in output
@@ -6202,6 +6232,7 @@ class Tool_musedata2hum : public HumTool {
 		void    setOptions           (int argc, char** argv);
 		void    setOptions           (const std::vector<std::string>& argvlist);
 		Options getOptionDefinitions (void);
+		void    setInitialOmd        (const string& omd);
 
 	protected:
 		void    initialize           (void);
@@ -6210,16 +6241,21 @@ class Tool_musedata2hum : public HumTool {
 		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
+		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
+		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
+		void    addNoteDynamics      (GridSlice* slice, int part, 
+		                              MuseRecord& mr);
 
 	private:
 		// options:
 		Options m_options;
 		bool    m_stemsQ = false;    // used with -s option
 		bool    m_recipQ = false;    // used with -r option
+		std::string m_omd = "";      // initial tempo designation (store for later output)
 
 		// state variables:
 		int m_tpq      = 1;          // Ticks per quarter note
-		int m_staff    = 0;          // staff index currently being processed
+		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 

@@ -747,7 +747,7 @@ void MuseData::analyzeType(void) {
 
 //////////////////////////////
 //
-// MuseData::analyzeRhythm -- calulcate the start time in quarter notes
+// MuseData::analyzeRhythm -- calculate the start time in quarter notes
 //   for each note/rest in the file.
 //
 //   Secondary chord notes may or may not have a duration listed.
@@ -762,40 +762,54 @@ void MuseData::analyzeRhythm(void) {
 	HumNum linedur(0,1);
 	int tpq = 1;
 	HumRegex hre;
-
+	HumNum figadj = 0;   // needed for figured harmony
 	HumNum primarychordnoteduration(0,1);  // needed for chord notes
 
 	for (int i=0; i<(int)m_data.size(); i++) {
-		if (m_data[i]->getType() == E_muserec_musical_attributes) {
+		if (m_data[i]->isAttributes()) {
 			if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
 				tpq = hre.getMatchInt(1);
 			}
 		}
 
-		if (m_data[i]->getType() == E_muserec_note_chord) {
+		if (m_data[i]->isChordNote()) {
 			// insert an automatic back command for chord tones
 			// also deal with cue-size note chords?
 			m_data[i]->setAbsBeat(cumulative - primarychordnoteduration);
 
-	 // Check to see if the secondary chord note has a duration.
-	 // If so, then set the note duration to that value; otherwise,
-	 // set the note duration to the duration of the primary chord
-	 // note (first note before the current note which is not a chord
-	 // note).
-	 string buffer = m_data[i]->getTickDurationField();
-	 if (hre.search(buffer, "\\d", "")) {
+			// Check to see if the secondary chord note has a duration.
+			// If so, then set the note duration to that value; otherwise,
+			// set the note duration to the duration of the primary chord
+			// note (first note before the current note which is not a chord
+			// note).
+			string buffer = m_data[i]->getTickDurationField();
+			if (hre.search(buffer, "\\d", "")) {
 				m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			} else {
 				m_data[i]->setNoteDuration(primarychordnoteduration);
 			}
 			m_data[i]->setLineDuration(0);
+		} else if (m_data[i]->isFiguredHarmony()) {
+			// Tick values on figured harmony lines do not advance the
+			// cumulative timestamp; instead they temporarily advance
+			// the time placement of the next figure if it occurs 
+			// during the same note as the previous figure.
+			m_data[i]->setAbsBeat(cumulative + figadj);
+			HumNum tick = m_data[i]->getLineTickDuration();
+			if (tick == 0) {
+				figadj = 0;
+			} else {
+				HumNum dur = tick;
+				dur /= tpq;
+				figadj += dur;
+			}
 		} else {
 			m_data[i]->setAbsBeat(cumulative);
 			m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			m_data[i]->setLineDuration(m_data[i]->getNoteDuration());
+			linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
+			cumulative += linedur;
 		}
-		linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
-		cumulative += linedur;
 
 		switch (m_data[i]->getType()) {
 			case E_muserec_note_regular:
@@ -1141,10 +1155,37 @@ string MuseData::getFilename(void) {
 }
 
 
+/*
 
 //////////////////////////////
 //
-// MuseData::getPartName -- return
+// MuseData::getPartName --
+//
+
+string MuseData::getPartName(void) {
+	string output;
+	for (int i=0; i<getLineCount(); i++) {
+		if (isPartName(i)) {
+			output = getPartName(i);
+			break;
+		}
+	}
+	for (int i=(int)output.size() - 1; i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+*/
+
+
+//////////////////////////////
+//
+// MuseData::getPartName -- return name of the part
 //
 
 string MuseData::getPartName(void) {
@@ -1170,7 +1211,7 @@ string MuseData::getPartName(void) {
 int MuseData::getPartNameIndex(void) {
 	int output = -1;
 	for (int i=0; i<(int)m_data.size(); i++) {
-		if (m_data[i]->getType() == E_muserec_header_part_name) {
+		if (m_data[i]->isPartName()) {
 			return i;
 		}
 	}
@@ -1321,6 +1362,39 @@ void MuseData::clearError(void) {
 
 void MuseData::setError(const string& error) {
 	m_error = error;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getFileDuration --
+//
+
+HumNum MuseData::getFileDuration(void) {
+	return getRecord(getLineCount()-1).getAbsBeat();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getLine -- return the textual content of the given line index.
+//
+
+string MuseData::getLine(int index) {
+	return getRecord(index).getLine();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isPartName -- return true if partname line.
+//
+
+bool MuseData::isPartName(int index) {
+	return getRecord(index).isPartName();
 }
 
 

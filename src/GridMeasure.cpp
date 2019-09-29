@@ -255,7 +255,7 @@ GridSlice* GridMeasure::addTempoToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Tempos, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -310,7 +310,7 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::TimeSigs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -365,7 +365,7 @@ GridSlice* GridMeasure::addKeySigToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::KeySigs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -504,7 +504,7 @@ GridSlice* GridMeasure::addTransposeToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Transpositions, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -559,7 +559,7 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 				break;
 			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
 				// found the correct timestamp, but no clef slice at the timestamp
-				// so add the clef slice before the data slice (eventually keepping
+				// so add the clef slice before the data slice (eventually keeping
 				// track of the order in which the other non-data slices should be placed).
 				gs = new GridSlice(this, timestamp, SliceType::Clefs, maxstaff);
 				gs->addToken(tok, part, staff, voice);
@@ -579,6 +579,66 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 			gs = new GridSlice(this, timestamp, SliceType::Clefs, maxstaff);
 			gs->addToken(tok, part, staff, voice);
 			this->insert(iterator, gs);
+		}
+	}
+
+	return gs;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::addFiguredBass --
+//
+GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int part, int maxstaff) {
+	GridSlice* gs = NULL;
+	bool processed = false;
+
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+		int staff = 0;
+		int voice = 0;
+		string null = ".";
+		gs->addToken(null, part, staff, voice);
+		gs->at(part)->setFiguredBass(tok);
+		this->push_back(gs);
+		processed = true;
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				target = *iterator;
+				target->at(part)->setFiguredBass(tok);
+				processed = true;
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				// Need to add figured bass data where there are note notes,
+				// so add an emtpy data line and add the figure bass contnet.
+				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+				int staff = 0;
+				int voice = 0;
+				string null = ".";
+				gs->addToken(null, part, staff, voice);
+				gs->at(part)->setFiguredBass(tok);
+				this->insert(iterator, gs);
+				processed = true;
+				break;
+			}
+			iterator++;
+		}
+
+		if (!processed) {
+			cerr << "Error: could not inser figured bass: " << tok << endl;
+		} else {
+			HumGrid* hg = getOwner();
+			if (hg) {
+				hg->setFiguredBassPresent(part);
+			}
 		}
 	}
 

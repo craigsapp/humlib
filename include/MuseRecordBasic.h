@@ -146,9 +146,15 @@ class MuseRecordBasic {
 		void              setNextTiedNoteLineIndex(int index);
 
 		// boolean type fuctions:
-		bool              isBarline          (void);
 		bool              isAttributes       (void);
+		bool              isBarline          (void);
+		bool              isChordGraceNote   (void);
+		bool              isChordNote        (void);
+		bool              isCueNote          (void);
+		bool              isFiguredHarmony   (void);
+		bool              isGraceNote        (void);
 		bool              isNote             (void);
+		bool              isPartName         (void);
 		bool              isRest             (void);
 
 	protected:
