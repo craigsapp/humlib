@@ -35,10 +35,11 @@ int Convert::museToBase40(const string& pitchString) {
 
    if (i <= 0) {
       cerr << "Error: could not find octave in string: " << pitchString << endl;
-      exit(1);
-   }
-
-   octave = temp[i] - '0';
+		cerr << "Assigning to octave 4" << endl;
+      octave = 4;
+   } else {
+   	octave = temp[i] - '0';
+	}
    temp.resize(i);
 
 	for (int i=0; i<(int)temp.size(); i++) {
@@ -324,6 +325,20 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
 			output += ":";
 			i++;
+		} else if ((mfb[i] == '/')) {  // assuming means flat
+			output += "-/";
+		} else if ((mfb[i] == '\\')) { // assuming means sharp
+			output += "#/";
+		} else if ((mfb[i] == '+')) {  // assuming means sharp
+			output += "#|";
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '#')) {
+			output += mfb[i];
+			output += mfb[i+1];
+			output += 'r';
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '-')) {
+			output += mfb[i];
+			output += mfb[i+1];
+			output += 'r';
 		} else {
 			output += mfb[i];
 		}

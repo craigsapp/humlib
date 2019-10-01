@@ -2097,10 +2097,10 @@ string MuseRecord::getKernBeamStyle(void) {
 			case ']':                 // end beam
 				output += "J";
 				break;
-			case 'K':                 // forward hook
+			case '/':                 // forward hook
 				output += "K";
 				break;
-			case 'k':                 // backward hook
+			case '\\':                 // backward hook
 				output += "k";
 				break;
 			default:
@@ -2506,6 +2506,26 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string kernpitch = Convert::musePitchToKernPitch(musepitch);
 	output += kernpitch;
 
+	string logicalAccidental = getAccidentalString();
+	string notatedAccidental = getNotatedAccidentalString();
+
+	if (notatedAccidental.empty() && !logicalAccidental.empty()) {
+		// Indicate that the logical accidental should not be 
+		// displayed (because of key signature or previous 
+		// note in the measure that alters the accidental
+		// state of the current note).
+		output += "y";
+	} else if ((logicalAccidental == notatedAccidental) && !notatedAccidental.empty()) {
+		// Indicate that the accidental should be displayed
+		// and is not suppressed by the key signature or a
+		// previous note in the measure.
+		output += "X";
+	}
+	// There can be cases where the logical accidental
+	// is natural but the notated accidetnal is sharp (but
+	// the notated accidental means play a natural accidetnal).
+	// Deal with this later.
+
 	// if there is a notated natural sign, then add it now:
 	string temp = getNotatedAccidentalField();
 	if (temp == "n") {
@@ -2745,6 +2765,9 @@ string MuseRecord::getMeasureNumberString(void) {
 
 int MuseRecord::getMeasureNumber(void) {
 	string measureInfo = getMeasureNumberField();
+	if (measureInfo.empty()) {
+		return 0;
+	}
 	return std::stoi(measureInfo);
 }
 
@@ -3098,8 +3121,13 @@ int MuseRecord::getAttributeInt(char attribute) {
 	if (ending == 0 || ending == 1) {
 		return output;
 	} else {
-		output = std::stoi(&getColumn(column+1));
-		return output;
+		string value = &getColumn(column+1);
+		if (value.empty()) {
+			output = std::stoi(value);
+			return output;
+		} else {
+			return 0;
+		}
 	}
 }
 

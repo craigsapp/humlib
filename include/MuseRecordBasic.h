@@ -54,14 +54,21 @@ namespace hum {
 #define E_muserec_comment_toggle     '&'
 #define E_muserec_comment_line       '@'
 #define E_muserec_musical_directions '*'
+#define E_muserec_copyright          '1'  // reserved for copyright notice
 #define E_muserec_header_1           '1'  // reserved for copyright notice
 #define E_muserec_header_2           '2'  // reserved for identification
+#define E_muserec_id                 '2'  // reserved for identification
 #define E_muserec_header_3           '3'  // reserved
 #define E_muserec_header_4           '4'  // <date> <name of encoder>
+#define E_muserec_encoder            '4'  // <date> <name of encoder>
 #define E_muserec_header_5           '5'  // WK#:<work number> MV#:<mvmt num>
+#define E_muserec_work_info          '5'  // WK#:<work number> MV#:<mvmt num>
 #define E_muserec_header_6           '6'  // <source>
+#define E_muserec_source             '6'  // <source>
 #define E_muserec_header_7           '7'  // <work title>
+#define E_muserec_work_title         '7'  // <work title>
 #define E_muserec_header_8           '8'  // <movement title>
+#define E_muserec_movement_title     '8'  // <movement title>
 #define E_muserec_header_9           '9'  // <name of part>
 #define E_muserec_header_part_name   '9'  // <name of part>
 #define E_muserec_header_10          '0'  // misc designations
@@ -150,12 +157,20 @@ class MuseRecordBasic {
 		bool              isBarline          (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isCopyright        (void);
 		bool              isCueNote          (void);
+		bool              isEncoder          (void);
 		bool              isFiguredHarmony   (void);
 		bool              isGraceNote        (void);
-		bool              isNote             (void);
+		bool              isId               (void);
+		bool              isMovementTitle    (void);
+		bool              isAnyNote          (void);
 		bool              isPartName         (void);
+		bool              isRegularNote      (void);
 		bool              isRest             (void);
+		bool              isSource           (void);
+		bool              isWorkInfo         (void);
+		bool              isWorkTitle        (void);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line

@@ -79,7 +79,33 @@ class MuseData {
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
+
+		bool              isCopyright         (int index);
+		bool              isEncoder           (int index);
+		bool              isId                (int index);
+		bool              isMovementTitle     (int index);
+		bool              isAnyNote           (int index);
+		bool              isRegularNote       (int index);
 		bool              isPartName          (int index);
+		bool              isSource            (int index);
+		bool              isWorkInfo          (int index);
+		bool              isWorkTitle         (int index);
+
+		// header information
+		std::string       getComposer         (void);
+		std::string       getComposerDate     (void);
+		std::string       getCopyright        (void);
+		std::string       getEncoder          (void);
+		std::string       getEncoderDate      (void);
+		std::string       getEncoderName      (void);
+		std::string       getId               (void);
+		std::string       getMovementTitle    (void);
+		std::string       getSource           (void);
+		std::string       getWorkInfo         (void);
+		std::string       getWorkTitle        (void);
+		std::string       getOpus             (void);
+		std::string       getNumber           (void);
+		std::string       getMovementNumber   (void);
 
 		// additional mark-up analysis functions for post-processing:
 		void              doAnalyses          (void);
@@ -114,6 +140,7 @@ class MuseData {
 		std::string       getError            (void);
 		bool              hasError            (void);
 
+
 	private:
 		std::vector<MuseRecord*>    m_data;
 		std::vector<MuseEventSet*>  m_sequence;
@@ -134,6 +161,7 @@ class MuseData {
 		                                        MuseRecord* arecord);
 		int               getPartNameIndex    (void);
 		std::string       getPartName         (int index);
+		std::string       trimSpaces          (std::string);
 };
 
 

@@ -209,7 +209,8 @@ class MuseRecord : public MuseRecordBasic {
 		// int           getNotationLevel
 		int              getSlurStartColumn           (void);
 		std::string      getSlurParameterRegion       (void);
-		void             getSlurInfo                  (string& slurstarts, string& slurends);
+		void             getSlurInfo                  (std::string& slurstarts,
+		                                               std::string& slurends);
 
 		// columns 44 -- 80: text underlay
 		std::string      getTextUnderlayField         (void);

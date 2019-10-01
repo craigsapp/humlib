@@ -340,6 +340,63 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::addMeterSigToken -- Add a meter signature token in the data slice at
+//    the given timestamp (or create a new timesig slice at that timestamp), placing the
+//    token at the specified part, staff, and voice index.
+// 
+//    To do:
+//      The meter signtature should occur immediately after a time signature line.
+//
+
+GridSlice* GridMeasure::addMeterSigToken(const string& tok, HumNum timestamp,
+		int part, int staff, int voice, int maxstaff) {
+	GridSlice* gs = NULL;
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+		gs->addToken(tok, part, staff, voice);
+		this->push_back(gs);
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isMeterSigSlice()) {
+				target = *iterator;
+				target->addToken(tok, part, staff, voice);
+				break;
+			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				// found the correct timestamp, but no clef slice at the timestamp
+				// so add the clef slice before the data slice (eventually keeping
+				// track of the order in which the other non-data slices should be placed).
+				gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			}
+			iterator++;
+		}
+
+		if (iterator == this->end()) {
+			// Couldn't find a place for the key signature, so place at end of measure.
+			gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+			gs->addToken(tok, part, staff, voice);
+			this->insert(iterator, gs);
+		}
+
+	}
+	return gs;
+}
+
+
+//////////////////////////////
+//
 // GridMeasure::addKeySigToken -- Add a key signature  token in a key sig slice at
 //    the given timestamp (or create a new keysig slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
@@ -631,14 +688,14 @@ GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, in
 			}
 			iterator++;
 		}
+	}
 
-		if (!processed) {
-			cerr << "Error: could not insert figured bass: " << token << endl;
-		} else {
-			HumGrid* hg = getOwner();
-			if (hg) {
-				hg->setFiguredBassPresent(part);
-			}
+	if (!processed) {
+		cerr << "Error: could not insert figured bass: " << token << endl;
+	} else {
+		HumGrid* hg = getOwner();
+		if (hg) {
+			hg->setFiguredBassPresent(part);
 		}
 	}
 
@@ -689,14 +746,14 @@ GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int 
 			}
 			iterator++;
 		}
+	}
 
-		if (!processed) {
-			cerr << "Error: could not inser figured bass: " << tok << endl;
-		} else {
-			HumGrid* hg = getOwner();
-			if (hg) {
-				hg->setFiguredBassPresent(part);
-			}
+	if (!processed) {
+		cerr << "Error: could not inser figured bass: " << tok << endl;
+	} else {
+		HumGrid* hg = getOwner();
+		if (hg) {
+			hg->setFiguredBassPresent(part);
 		}
 	}
 

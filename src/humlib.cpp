@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 29 08:05:25 PDT 2019
+// Last Modified: Tue Oct  1 00:36:43 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1235,10 +1235,11 @@ int Convert::museToBase40(const string& pitchString) {
 
    if (i <= 0) {
       cerr << "Error: could not find octave in string: " << pitchString << endl;
-      exit(1);
-   }
-
-   octave = temp[i] - '0';
+		cerr << "Assigning to octave 4" << endl;
+      octave = 4;
+   } else {
+   	octave = temp[i] - '0';
+	}
    temp.resize(i);
 
 	for (int i=0; i<(int)temp.size(); i++) {
@@ -1524,6 +1525,20 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
 			output += ":";
 			i++;
+		} else if ((mfb[i] == '/')) {  // assuming means flat
+			output += "-/";
+		} else if ((mfb[i] == '\\')) { // assuming means sharp
+			output += "#/";
+		} else if ((mfb[i] == '+')) {  // assuming means sharp
+			output += "#|";
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '#')) {
+			output += mfb[i];
+			output += mfb[i+1];
+			output += 'r';
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '-')) {
+			output += mfb[i];
+			output += mfb[i+1];
+			output += 'r';
 		} else {
 			output += mfb[i];
 		}
@@ -3800,6 +3815,63 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::addMeterSigToken -- Add a meter signature token in the data slice at
+//    the given timestamp (or create a new timesig slice at that timestamp), placing the
+//    token at the specified part, staff, and voice index.
+// 
+//    To do:
+//      The meter signtature should occur immediately after a time signature line.
+//
+
+GridSlice* GridMeasure::addMeterSigToken(const string& tok, HumNum timestamp,
+		int part, int staff, int voice, int maxstaff) {
+	GridSlice* gs = NULL;
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+		gs->addToken(tok, part, staff, voice);
+		this->push_back(gs);
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isMeterSigSlice()) {
+				target = *iterator;
+				target->addToken(tok, part, staff, voice);
+				break;
+			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				// found the correct timestamp, but no clef slice at the timestamp
+				// so add the clef slice before the data slice (eventually keeping
+				// track of the order in which the other non-data slices should be placed).
+				gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			}
+			iterator++;
+		}
+
+		if (iterator == this->end()) {
+			// Couldn't find a place for the key signature, so place at end of measure.
+			gs = new GridSlice(this, timestamp, SliceType::MeterSigs, maxstaff);
+			gs->addToken(tok, part, staff, voice);
+			this->insert(iterator, gs);
+		}
+
+	}
+	return gs;
+}
+
+
+//////////////////////////////
+//
 // GridMeasure::addKeySigToken -- Add a key signature  token in a key sig slice at
 //    the given timestamp (or create a new keysig slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
@@ -4091,14 +4163,14 @@ GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, in
 			}
 			iterator++;
 		}
+	}
 
-		if (!processed) {
-			cerr << "Error: could not insert figured bass: " << token << endl;
-		} else {
-			HumGrid* hg = getOwner();
-			if (hg) {
-				hg->setFiguredBassPresent(part);
-			}
+	if (!processed) {
+		cerr << "Error: could not insert figured bass: " << token << endl;
+	} else {
+		HumGrid* hg = getOwner();
+		if (hg) {
+			hg->setFiguredBassPresent(part);
 		}
 	}
 
@@ -4149,14 +4221,14 @@ GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int 
 			}
 			iterator++;
 		}
+	}
 
-		if (!processed) {
-			cerr << "Error: could not inser figured bass: " << tok << endl;
-		} else {
-			HumGrid* hg = getOwner();
-			if (hg) {
-				hg->setFiguredBassPresent(part);
-			}
+	if (!processed) {
+		cerr << "Error: could not inser figured bass: " << tok << endl;
+	} else {
+		HumGrid* hg = getOwner();
+		if (hg) {
+			hg->setFiguredBassPresent(part);
 		}
 	}
 
@@ -12719,15 +12791,22 @@ string HumRegex::getMatch(int index) {
 //////////////////////////////
 //
 // HumRegex::getMatchInt -- Get the match interpreted as a integer.
+//     returns 0 if match does not start with a valid number.
 //
 
 int HumRegex::getMatchInt(int index) {
 	string value = m_matches.str(index);
+	int output = 0;
 	if (value.size() > 0) {
-		return stoi(value);
-	} else {
-		return 0;
+		if (isdigit(value[0])) {
+			output = std::stoi(value);
+		} else if (value[0] == '-') {
+			output = std::stoi(value);
+		} else if (value[0] == '+') {
+			output = std::stoi(value);
+		}
 	}
+	return output;
 }
 
 
@@ -27486,10 +27565,60 @@ void MuseData::analyzeType(void) {
 	int h = 0;
 	MuseData& thing = *this;
 	int foundattributes = 0;
-
 	int foundend = 0;
 
-	for (int i=0; i<getNumLines(); i++) {
+	HumRegex hre;
+	int groupmemberships = -1;
+	for (int i=0; i<getLineCount(); i++) {
+		if (hre.search(thing[i].getLine(), "^Group memberships:")) {
+			groupmemberships = i;
+			break;
+		}
+	}
+	if (groupmemberships < 0) {
+		cerr << "Error cannot parse MuseData content" << endl;
+		return;
+	}
+
+	thing[groupmemberships].setType(E_muserec_header_11);
+
+	h = 11;
+	for (int i=groupmemberships-1; i>=0; i--) {
+		if (thing[i].getLength() > 0) {
+			if (thing[i][0] == '@') {
+				thing[i].setType(E_muserec_comment_line);
+				continue;
+			}
+			if (thing[i][0] == '&') {
+				// start or end of multi-line comment;
+				commentQ = !commentQ;
+				if (!commentQ) {
+					thing[i].setType(E_muserec_comment_toggle);
+	       continue;
+				}
+			}
+			if (commentQ) {
+				thing[i].setType(E_muserec_comment_toggle);
+				continue;
+			}
+		}
+		h--;
+		if      (h==1)  { thing[i].setType(E_muserec_header_1);  continue; }
+		else if (h==2)  { thing[i].setType(E_muserec_header_2);  continue; }
+		else if (h==3)  { thing[i].setType(E_muserec_header_3);  continue; }
+		else if (h==4)  { thing[i].setType(E_muserec_header_4);  continue; }
+		else if (h==5)  { thing[i].setType(E_muserec_header_5);  continue; }
+		else if (h==6)  { thing[i].setType(E_muserec_header_6);  continue; }
+		else if (h==7)  { thing[i].setType(E_muserec_header_7);  continue; }
+		else if (h==8)  { thing[i].setType(E_muserec_header_8);  continue; }
+		else if (h==9)  { thing[i].setType(E_muserec_header_9);  continue; }
+		else if (h==10) { thing[i].setType(E_muserec_header_10); continue; }
+	}
+
+	commentQ = 0;
+	h = 11;
+	for (int i=groupmemberships+1; i<getNumLines(); i++) {
+
 		if (thing[i].getLength() > 0) {
 			if (thing[i][0] == '@') {
 				thing[i].setType(E_muserec_comment_line);
@@ -27519,6 +27648,7 @@ void MuseData::analyzeType(void) {
 		else if (h==8)  { thing[i].setType(E_muserec_header_8);  continue; }
 		else if (h==9)  { thing[i].setType(E_muserec_header_9);  continue; }
 		else if (h==10) { thing[i].setType(E_muserec_header_10); continue; }
+
 		else if (h==11) { thing[i].setType(E_muserec_header_11); continue; }
 		else if (h==12) { thing[i].setType(E_muserec_header_12); continue; }
 
@@ -27611,7 +27741,7 @@ void MuseData::analyzeRhythm(void) {
 		} else if (m_data[i]->isFiguredHarmony()) {
 			// Tick values on figured harmony lines do not advance the
 			// cumulative timestamp; instead they temporarily advance
-			// the time placement of the next figure if it occurs 
+			// the time placement of the next figure if it occurs
 			// during the same note as the previous figure.
 			m_data[i]->setAbsBeat(cumulative + figadj);
 			HumNum tick = m_data[i]->getLineTickDuration();
@@ -28214,6 +28344,399 @@ string MuseData::getLine(int index) {
 
 bool MuseData::isPartName(int index) {
 	return getRecord(index).isPartName();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isWorkInfo -- return true if a work info line.
+//
+
+bool MuseData::isWorkInfo(int index) {
+	return getRecord(index).isWorkInfo();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isWorkTitle -- return true if a work title line.
+//
+
+bool MuseData::isWorkTitle(int index) {
+	return getRecord(index).isWorkTitle();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isCopyright -- return true if a work title line.
+//
+
+bool MuseData::isCopyright(int index) {
+	return getRecord(index).isCopyright();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isMovementTitle -- return true if a movement title line.
+//
+
+bool MuseData::isMovementTitle(int index) {
+	return getRecord(index).isMovementTitle();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isRegularNote -- return true if a regular note line.
+//     This is either a single note, or the first note in a chord.
+//
+
+bool MuseData::isRegularNote(int index) {
+	return getRecord(index).isRegularNote();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isAnyNote -- return true if note line of any time.
+//
+
+bool MuseData::isAnyNote(int index) {
+	return getRecord(index).isAnyNote();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isEncoder -- return true if note line.
+//
+
+bool MuseData::isEncoder(int index) {
+	return getRecord(index).isEncoder();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isId -- return true if Id line.
+//
+
+bool MuseData::isId(int index) {
+	return getRecord(index).isId();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isSource -- return true if note line.
+//
+
+bool MuseData::isSource(int index) {
+	return getRecord(index).isSource();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getWorkInfo --
+//
+
+std::string MuseData::getWorkInfo(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isWorkInfo(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getOpus --
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getOpus(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "^\\s*WK\\s*#\\s*:\\s*(\\d+)")) {
+		return hre.getMatch(1);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getNumber -- Return number of work in opus.
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getNumber(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "^\\s*WK\\s*#\\s*:\\s*(\\d+)\\s*[,/]\\s*(\\d+)")) {
+		return hre.getMatch(2);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getMovementNumber --
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getMovementNumber(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "MV\\s*#\\s*:\\s*(\\d+)")) {
+		return hre.getMatch(1);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getWorkTitle --
+//
+
+std::string MuseData::getWorkTitle(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isWorkTitle(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getCopyright --
+//
+
+std::string MuseData::getCopyright(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isCopyright(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getMovementTitle --
+//
+
+std::string MuseData::getMovementTitle(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isMovementTitle(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getSource --
+//
+
+std::string MuseData::getSource(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isSource(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoder --
+//
+
+std::string MuseData::getEncoder(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isEncoder(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getId --
+//
+
+std::string MuseData::getId(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isId(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getComposer --  The composer is not indicated in a MuseData file.
+//    Infer it from the ID line if a file-location ID is present, since the 
+//    composers name is abbreviated in the directory name.
+//
+
+std::string MuseData::getComposer(void) {
+	string id = getId();
+	if (id.find("{cor/") != string::npos) {
+		return "Corelli, Arcangelo";
+	} else if (id.find("{beet/") != string::npos) {
+		return "Beethoven, Ludwig van";
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getComposerDate --
+//
+
+std::string MuseData::getComposerDate(void) {
+	string id = getId();
+	if (id.find("{cor/") != string::npos) {
+		return "1653/02/17-1713/01/08";
+	} else if (id.find("{beet/") != string::npos) {
+		return "1770/12/17-1827/03/26";
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoderName --
+//
+
+std::string MuseData::getEncoderName(void) {
+	string encoder = getEncoder();
+	HumRegex hre;
+	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
+		return hre.getMatch(4);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoderDate --
+//
+
+std::string MuseData::getEncoderDate(void) {
+	string encoder = getEncoder();
+	HumRegex hre;
+	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
+		string month = hre.getMatch(1);
+		string day   = hre.getMatch(2);
+		string year  = hre.getMatch(3);
+		if (year.size() == 2) {
+			int value = stoi(year);
+			if (value < 70) {
+				value += 2000;
+			} else {
+				value += 1900;
+			}
+			year = to_string(value);
+		}
+		if (month.size() == 1) {
+			month = "0" + month;
+		}
+		if (day.size() == 1) {
+			day = "0" + day;
+		}
+		string value = year + "/" + month + "/" + day;
+		return value;
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::trimSpaces --
+//
+
+std::string MuseData::trimSpaces(std::string input) {
+	string output;
+	int status = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (!status) {
+			if (isspace(input[i])) {
+				continue;
+			}
+			status = 1;
+		}
+		output += input[i];
+	}
+	for (int i=(int)output.size(); i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
 }
 
 
@@ -30679,10 +31202,10 @@ string MuseRecord::getKernBeamStyle(void) {
 			case ']':                 // end beam
 				output += "J";
 				break;
-			case 'K':                 // forward hook
+			case '/':                 // forward hook
 				output += "K";
 				break;
-			case 'k':                 // backward hook
+			case '\\':                 // backward hook
 				output += "k";
 				break;
 			default:
@@ -31088,6 +31611,26 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string kernpitch = Convert::musePitchToKernPitch(musepitch);
 	output += kernpitch;
 
+	string logicalAccidental = getAccidentalString();
+	string notatedAccidental = getNotatedAccidentalString();
+
+	if (notatedAccidental.empty() && !logicalAccidental.empty()) {
+		// Indicate that the logical accidental should not be 
+		// displayed (because of key signature or previous 
+		// note in the measure that alters the accidental
+		// state of the current note).
+		output += "y";
+	} else if ((logicalAccidental == notatedAccidental) && !notatedAccidental.empty()) {
+		// Indicate that the accidental should be displayed
+		// and is not suppressed by the key signature or a
+		// previous note in the measure.
+		output += "X";
+	}
+	// There can be cases where the logical accidental
+	// is natural but the notated accidetnal is sharp (but
+	// the notated accidental means play a natural accidetnal).
+	// Deal with this later.
+
 	// if there is a notated natural sign, then add it now:
 	string temp = getNotatedAccidentalField();
 	if (temp == "n") {
@@ -31327,6 +31870,9 @@ string MuseRecord::getMeasureNumberString(void) {
 
 int MuseRecord::getMeasureNumber(void) {
 	string measureInfo = getMeasureNumberField();
+	if (measureInfo.empty()) {
+		return 0;
+	}
 	return std::stoi(measureInfo);
 }
 
@@ -31680,8 +32226,13 @@ int MuseRecord::getAttributeInt(char attribute) {
 	if (ending == 0 || ending == 1) {
 		return output;
 	} else {
-		output = std::stoi(&getColumn(column+1));
-		return output;
+		string value = &getColumn(column+1);
+		if (value.empty()) {
+			output = std::stoi(value);
+			return output;
+		} else {
+			return 0;
+		}
 	}
 }
 
@@ -32942,6 +33493,40 @@ bool MuseRecordBasic::isAttributes(void) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseRecordBasic::isSource --
+//
+
+bool MuseRecordBasic::isSource(void) {
+	return m_type == E_muserec_source;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isEncoder --
+//
+
+bool MuseRecordBasic::isEncoder(void) {
+	return m_type == E_muserec_encoder;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isId --
+//
+
+bool MuseRecordBasic::isId(void) {
+	return m_type == E_muserec_id;
+}
+
+
+
 //////////////////////////////
 //
 // MuseRecordBasic::isBarline --
@@ -33012,10 +33597,24 @@ bool MuseRecordBasic::isFiguredHarmony(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isNote --
+// MuseRecordBasic::isRegularNote --
 //
 
-bool MuseRecordBasic::isNote(void) {
+bool MuseRecordBasic::isRegularNote(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+			return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyNote --
+//
+
+bool MuseRecordBasic::isAnyNote(void) {
 	switch (m_type) {
 		case E_muserec_note_regular:
 		case E_muserec_note_chord:
@@ -33038,6 +33637,66 @@ bool MuseRecordBasic::isRest(void) {
 	switch (m_type) {
 		case E_muserec_rest_invisible:
 		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isCopyright --
+//
+
+bool MuseRecordBasic::isCopyright(void) {
+	switch (m_type) {
+		case E_muserec_copyright:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isWorkInfo --
+//
+
+bool MuseRecordBasic::isWorkInfo(void) {
+	switch (m_type) {
+		case E_muserec_work_info:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isWorkTitle --
+//
+
+bool MuseRecordBasic::isWorkTitle(void) {
+	switch (m_type) {
+		case E_muserec_work_title:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isMovementTitle --
+//
+
+bool MuseRecordBasic::isMovementTitle(void) {
+	switch (m_type) {
+		case E_muserec_movement_title:
 			return true;
 	}
 	return false;
@@ -59627,10 +60286,110 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
 	outfile.createLinesFromTokens();
-	if (!m_omd.empty()) {
-		out << "!!!OMD:\t" << m_omd << endl;
+
+	// Convert comments in header of first part:
+	for (int i=0; i< mds[0].getLineCount(); i++) {
+		if (mds[0][i].isAnyNote()) {
+			break;
+		}
+		if (mds[0].getLine(i).compare(0, 2, "@@") == 0) {
+			string output = mds[0].getLine(i);
+			for (int j=0; j<(int)output.size(); j++) {
+				if (output[j] == '@') {
+					output[j] = '!';
+				} else {
+					break;
+				}
+			}
+			out << output << endl;
+		}
 	}
+
+	string composer = mds[0].getComposer();
+	if (!composer.empty()) {
+		out << "!!!COM: " << composer << endl;
+	}
+
+	string cdate = mds[0].getComposerDate();
+	if (!cdate.empty()) {
+		out << "!!!CDT: " << cdate << endl;
+	}
+
+	string worktitle = mds[0].getWorkTitle();
+	if (!worktitle.empty()) {
+		out << "!!!OTL: " << worktitle << endl;
+	}
+
+	string movementtitle = mds[0].getMovementTitle();
+	if (!movementtitle.empty()) {
+		out << "!!!OMV: " << movementtitle << endl;
+	}
+
+	string opus = mds[0].getOpus();
+	if (!opus.empty()) {
+		out << "!!!OPS: " << opus << endl;
+	}
+
+	string number = mds[0].getNumber();
+	if (!number.empty()) {
+		out << "!!!ONM: " << number << endl;
+	}
+
+	if (!m_omd.empty()) {
+		out << "!!!OMD: " << m_omd << endl;
+	}
+
 	out << outfile;
+
+	string source = mds[0].getSource();
+	if (!source.empty()) {
+		out << "!!!SMS: " << source << endl;
+	}
+
+	string encoder = mds[0].getEncoderName();
+	if (!encoder.empty()) {
+		out << "!!!ENC: " << encoder << endl;
+	}
+
+	string edate = mds[0].getEncoderDate();
+	if (!edate.empty()) {
+		out << "!!!END: " << edate << endl;
+	}
+
+	stringstream ss;
+	auto nowtime = std::chrono::system_clock::now();
+	time_t currenttime = std::chrono::system_clock::to_time_t(nowtime);
+	ss << std::ctime(&currenttime);
+	out << "!!!ONB: Converted from MuseData with musedata2hum on " << ss.str();
+
+	string copyright = mds[0].getCopyright();
+	if (!copyright.empty()) {
+		out << "!!!YEM: " << copyright << endl;
+	}
+
+	// Convert comments in footer of last part:
+	int lastone = mds.getPartCount() - 1;
+	vector<string> outputs;
+	for (int i=mds[lastone].getLineCount() - 1; i>=0; i--) {
+		if (mds[lastone][i].isAnyNote()) {
+			break;
+		}
+		if (mds[lastone].getLine(i).compare(0, 2, "@@") == 0) {
+			string output = mds[lastone].getLine(i);
+			for (int j=0; j<(int)output.size(); j++) {
+				if (output[j] == '@') {
+					output[j] = '!';
+				} else {
+					break;
+				}
+			}
+			outputs.push_back(output);
+		}
+	}
+
+	for (int i=(int)outputs.size() - 1; i>=0; i--) {
+		out << outputs[i] << endl;
+	}
 
 	return status;
 }
@@ -59770,7 +60529,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		string mclef = attributes["C"];
 		if (!mclef.empty()) {
 			string kclef = Convert::museClefToKernClef(mclef);
-			gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+			if (!kclef.empty()) {
+				gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+			}
 		}
 
 		string mkeysig = attributes["K"];
@@ -59784,9 +60545,13 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
 			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
 			setTimeSigDurInfo(ktimesig);
+			string kmeter = Convert::museMeterSigToKernMeterSig(mtimesig);
+			if (!kmeter.empty()) {
+				gm->addMeterSigToken(kmeter, timestamp, part, staff, voice, maxstaff);
+			}
 		}
 
-	} else if (mr.isNote()) {
+	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		GridSlice* slice;
 		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
@@ -59932,17 +60697,21 @@ void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 		}
 	}
 
+	bool setdynamics = false;
 	for (int i=0; i<(int)dynamics.size(); i++) {
 		if (dynamics[i].empty()) {
 			continue;
 		}
 		slice->at(part)->setDynamics(dynamics[i]);
+		setdynamics = true;
 		break;  // only one dynamic allowed (at least for now)
 	}
 
-	HumGrid* grid = slice->getOwner();
-	if (grid) {
-		grid->setDynamicsPresent(part);
+	if (setdynamics) {
+		HumGrid* grid = slice->getOwner();
+		if (grid) {
+			grid->setDynamicsPresent(part);
+		}
 	}
 }
 

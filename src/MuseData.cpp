@@ -667,10 +667,60 @@ void MuseData::analyzeType(void) {
 	int h = 0;
 	MuseData& thing = *this;
 	int foundattributes = 0;
-
 	int foundend = 0;
 
-	for (int i=0; i<getNumLines(); i++) {
+	HumRegex hre;
+	int groupmemberships = -1;
+	for (int i=0; i<getLineCount(); i++) {
+		if (hre.search(thing[i].getLine(), "^Group memberships:")) {
+			groupmemberships = i;
+			break;
+		}
+	}
+	if (groupmemberships < 0) {
+		cerr << "Error cannot parse MuseData content" << endl;
+		return;
+	}
+
+	thing[groupmemberships].setType(E_muserec_header_11);
+
+	h = 11;
+	for (int i=groupmemberships-1; i>=0; i--) {
+		if (thing[i].getLength() > 0) {
+			if (thing[i][0] == '@') {
+				thing[i].setType(E_muserec_comment_line);
+				continue;
+			}
+			if (thing[i][0] == '&') {
+				// start or end of multi-line comment;
+				commentQ = !commentQ;
+				if (!commentQ) {
+					thing[i].setType(E_muserec_comment_toggle);
+	       continue;
+				}
+			}
+			if (commentQ) {
+				thing[i].setType(E_muserec_comment_toggle);
+				continue;
+			}
+		}
+		h--;
+		if      (h==1)  { thing[i].setType(E_muserec_header_1);  continue; }
+		else if (h==2)  { thing[i].setType(E_muserec_header_2);  continue; }
+		else if (h==3)  { thing[i].setType(E_muserec_header_3);  continue; }
+		else if (h==4)  { thing[i].setType(E_muserec_header_4);  continue; }
+		else if (h==5)  { thing[i].setType(E_muserec_header_5);  continue; }
+		else if (h==6)  { thing[i].setType(E_muserec_header_6);  continue; }
+		else if (h==7)  { thing[i].setType(E_muserec_header_7);  continue; }
+		else if (h==8)  { thing[i].setType(E_muserec_header_8);  continue; }
+		else if (h==9)  { thing[i].setType(E_muserec_header_9);  continue; }
+		else if (h==10) { thing[i].setType(E_muserec_header_10); continue; }
+	}
+
+	commentQ = 0;
+	h = 11;
+	for (int i=groupmemberships+1; i<getNumLines(); i++) {
+
 		if (thing[i].getLength() > 0) {
 			if (thing[i][0] == '@') {
 				thing[i].setType(E_muserec_comment_line);
@@ -700,6 +750,7 @@ void MuseData::analyzeType(void) {
 		else if (h==8)  { thing[i].setType(E_muserec_header_8);  continue; }
 		else if (h==9)  { thing[i].setType(E_muserec_header_9);  continue; }
 		else if (h==10) { thing[i].setType(E_muserec_header_10); continue; }
+
 		else if (h==11) { thing[i].setType(E_muserec_header_11); continue; }
 		else if (h==12) { thing[i].setType(E_muserec_header_12); continue; }
 
@@ -792,7 +843,7 @@ void MuseData::analyzeRhythm(void) {
 		} else if (m_data[i]->isFiguredHarmony()) {
 			// Tick values on figured harmony lines do not advance the
 			// cumulative timestamp; instead they temporarily advance
-			// the time placement of the next figure if it occurs 
+			// the time placement of the next figure if it occurs
 			// during the same note as the previous figure.
 			m_data[i]->setAbsBeat(cumulative + figadj);
 			HumNum tick = m_data[i]->getLineTickDuration();
@@ -1395,6 +1446,399 @@ string MuseData::getLine(int index) {
 
 bool MuseData::isPartName(int index) {
 	return getRecord(index).isPartName();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isWorkInfo -- return true if a work info line.
+//
+
+bool MuseData::isWorkInfo(int index) {
+	return getRecord(index).isWorkInfo();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isWorkTitle -- return true if a work title line.
+//
+
+bool MuseData::isWorkTitle(int index) {
+	return getRecord(index).isWorkTitle();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isCopyright -- return true if a work title line.
+//
+
+bool MuseData::isCopyright(int index) {
+	return getRecord(index).isCopyright();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isMovementTitle -- return true if a movement title line.
+//
+
+bool MuseData::isMovementTitle(int index) {
+	return getRecord(index).isMovementTitle();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isRegularNote -- return true if a regular note line.
+//     This is either a single note, or the first note in a chord.
+//
+
+bool MuseData::isRegularNote(int index) {
+	return getRecord(index).isRegularNote();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isAnyNote -- return true if note line of any time.
+//
+
+bool MuseData::isAnyNote(int index) {
+	return getRecord(index).isAnyNote();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isEncoder -- return true if note line.
+//
+
+bool MuseData::isEncoder(int index) {
+	return getRecord(index).isEncoder();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isId -- return true if Id line.
+//
+
+bool MuseData::isId(int index) {
+	return getRecord(index).isId();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isSource -- return true if note line.
+//
+
+bool MuseData::isSource(int index) {
+	return getRecord(index).isSource();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getWorkInfo --
+//
+
+std::string MuseData::getWorkInfo(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isWorkInfo(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getOpus --
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getOpus(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "^\\s*WK\\s*#\\s*:\\s*(\\d+)")) {
+		return hre.getMatch(1);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getNumber -- Return number of work in opus.
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getNumber(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "^\\s*WK\\s*#\\s*:\\s*(\\d+)\\s*[,/]\\s*(\\d+)")) {
+		return hre.getMatch(2);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getMovementNumber --
+//     WK#:1,1       MV#:1
+//
+
+string MuseData::getMovementNumber(void) {
+	string workinfo = getWorkInfo();
+	HumRegex hre;
+	if (hre.search(workinfo, "MV\\s*#\\s*:\\s*(\\d+)")) {
+		return hre.getMatch(1);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getWorkTitle --
+//
+
+std::string MuseData::getWorkTitle(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isWorkTitle(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getCopyright --
+//
+
+std::string MuseData::getCopyright(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isCopyright(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getMovementTitle --
+//
+
+std::string MuseData::getMovementTitle(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isMovementTitle(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getSource --
+//
+
+std::string MuseData::getSource(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isSource(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoder --
+//
+
+std::string MuseData::getEncoder(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isEncoder(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getId --
+//
+
+std::string MuseData::getId(void) {
+	for (int i=0; i<getLineCount(); i++) {
+		if (isId(i)) {
+			return trimSpaces(getLine(i));
+		} else if (isAnyNote(i)) {
+			break;
+		}
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getComposer --  The composer is not indicated in a MuseData file.
+//    Infer it from the ID line if a file-location ID is present, since the 
+//    composers name is abbreviated in the directory name.
+//
+
+std::string MuseData::getComposer(void) {
+	string id = getId();
+	if (id.find("{cor/") != string::npos) {
+		return "Corelli, Arcangelo";
+	} else if (id.find("{beet/") != string::npos) {
+		return "Beethoven, Ludwig van";
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getComposerDate --
+//
+
+std::string MuseData::getComposerDate(void) {
+	string id = getId();
+	if (id.find("{cor/") != string::npos) {
+		return "1653/02/17-1713/01/08";
+	} else if (id.find("{beet/") != string::npos) {
+		return "1770/12/17-1827/03/26";
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoderName --
+//
+
+std::string MuseData::getEncoderName(void) {
+	string encoder = getEncoder();
+	HumRegex hre;
+	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
+		return hre.getMatch(4);
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getEncoderDate --
+//
+
+std::string MuseData::getEncoderDate(void) {
+	string encoder = getEncoder();
+	HumRegex hre;
+	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
+		string month = hre.getMatch(1);
+		string day   = hre.getMatch(2);
+		string year  = hre.getMatch(3);
+		if (year.size() == 2) {
+			int value = stoi(year);
+			if (value < 70) {
+				value += 2000;
+			} else {
+				value += 1900;
+			}
+			year = to_string(value);
+		}
+		if (month.size() == 1) {
+			month = "0" + month;
+		}
+		if (day.size() == 1) {
+			day = "0" + day;
+		}
+		string value = year + "/" + month + "/" + day;
+		return value;
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::trimSpaces --
+//
+
+std::string MuseData::trimSpaces(std::string input) {
+	string output;
+	int status = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (!status) {
+			if (isspace(input[i])) {
+				continue;
+			}
+			status = 1;
+		}
+		output += input[i];
+	}
+	for (int i=(int)output.size(); i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
 }
 
 

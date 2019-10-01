@@ -15,6 +15,10 @@
 #include "HumRegex.h"
 #include "HumGrid.h"
 
+#include <chrono>
+#include <ctime>
+#include <sstream>
+
 using namespace std;
 using namespace pugi;
 
@@ -129,10 +133,110 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
 	outfile.createLinesFromTokens();
-	if (!m_omd.empty()) {
-		out << "!!!OMD:\t" << m_omd << endl;
+
+	// Convert comments in header of first part:
+	for (int i=0; i< mds[0].getLineCount(); i++) {
+		if (mds[0][i].isAnyNote()) {
+			break;
+		}
+		if (mds[0].getLine(i).compare(0, 2, "@@") == 0) {
+			string output = mds[0].getLine(i);
+			for (int j=0; j<(int)output.size(); j++) {
+				if (output[j] == '@') {
+					output[j] = '!';
+				} else {
+					break;
+				}
+			}
+			out << output << endl;
+		}
 	}
+
+	string composer = mds[0].getComposer();
+	if (!composer.empty()) {
+		out << "!!!COM: " << composer << endl;
+	}
+
+	string cdate = mds[0].getComposerDate();
+	if (!cdate.empty()) {
+		out << "!!!CDT: " << cdate << endl;
+	}
+
+	string worktitle = mds[0].getWorkTitle();
+	if (!worktitle.empty()) {
+		out << "!!!OTL: " << worktitle << endl;
+	}
+
+	string movementtitle = mds[0].getMovementTitle();
+	if (!movementtitle.empty()) {
+		out << "!!!OMV: " << movementtitle << endl;
+	}
+
+	string opus = mds[0].getOpus();
+	if (!opus.empty()) {
+		out << "!!!OPS: " << opus << endl;
+	}
+
+	string number = mds[0].getNumber();
+	if (!number.empty()) {
+		out << "!!!ONM: " << number << endl;
+	}
+
+	if (!m_omd.empty()) {
+		out << "!!!OMD: " << m_omd << endl;
+	}
+
 	out << outfile;
+
+	string source = mds[0].getSource();
+	if (!source.empty()) {
+		out << "!!!SMS: " << source << endl;
+	}
+
+	string encoder = mds[0].getEncoderName();
+	if (!encoder.empty()) {
+		out << "!!!ENC: " << encoder << endl;
+	}
+
+	string edate = mds[0].getEncoderDate();
+	if (!edate.empty()) {
+		out << "!!!END: " << edate << endl;
+	}
+
+	stringstream ss;
+	auto nowtime = std::chrono::system_clock::now();
+	time_t currenttime = std::chrono::system_clock::to_time_t(nowtime);
+	ss << std::ctime(&currenttime);
+	out << "!!!ONB: Converted from MuseData with musedata2hum on " << ss.str();
+
+	string copyright = mds[0].getCopyright();
+	if (!copyright.empty()) {
+		out << "!!!YEM: " << copyright << endl;
+	}
+
+	// Convert comments in footer of last part:
+	int lastone = mds.getPartCount() - 1;
+	vector<string> outputs;
+	for (int i=mds[lastone].getLineCount() - 1; i>=0; i--) {
+		if (mds[lastone][i].isAnyNote()) {
+			break;
+		}
+		if (mds[lastone].getLine(i).compare(0, 2, "@@") == 0) {
+			string output = mds[lastone].getLine(i);
+			for (int j=0; j<(int)output.size(); j++) {
+				if (output[j] == '@') {
+					output[j] = '!';
+				} else {
+					break;
+				}
+			}
+			outputs.push_back(output);
+		}
+	}
+
+	for (int i=(int)outputs.size() - 1; i>=0; i--) {
+		out << outputs[i] << endl;
+	}
 
 	return status;
 }
@@ -272,7 +376,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		string mclef = attributes["C"];
 		if (!mclef.empty()) {
 			string kclef = Convert::museClefToKernClef(mclef);
-			gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+			if (!kclef.empty()) {
+				gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+			}
 		}
 
 		string mkeysig = attributes["K"];
@@ -286,9 +392,13 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
 			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
 			setTimeSigDurInfo(ktimesig);
+			string kmeter = Convert::museMeterSigToKernMeterSig(mtimesig);
+			if (!kmeter.empty()) {
+				gm->addMeterSigToken(kmeter, timestamp, part, staff, voice, maxstaff);
+			}
 		}
 
-	} else if (mr.isNote()) {
+	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		GridSlice* slice;
 		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
@@ -434,17 +544,21 @@ void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 		}
 	}
 
+	bool setdynamics = false;
 	for (int i=0; i<(int)dynamics.size(); i++) {
 		if (dynamics[i].empty()) {
 			continue;
 		}
 		slice->at(part)->setDynamics(dynamics[i]);
+		setdynamics = true;
 		break;  // only one dynamic allowed (at least for now)
 	}
 
-	HumGrid* grid = slice->getOwner();
-	if (grid) {
-		grid->setDynamicsPresent(part);
+	if (setdynamics) {
+		HumGrid* grid = slice->getOwner();
+		if (grid) {
+			grid->setDynamicsPresent(part);
+		}
 	}
 }
 

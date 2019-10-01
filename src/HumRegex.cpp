@@ -273,15 +273,22 @@ string HumRegex::getMatch(int index) {
 //////////////////////////////
 //
 // HumRegex::getMatchInt -- Get the match interpreted as a integer.
+//     returns 0 if match does not start with a valid number.
 //
 
 int HumRegex::getMatchInt(int index) {
 	string value = m_matches.str(index);
+	int output = 0;
 	if (value.size() > 0) {
-		return stoi(value);
-	} else {
-		return 0;
+		if (isdigit(value[0])) {
+			output = std::stoi(value);
+		} else if (value[0] == '-') {
+			output = std::stoi(value);
+		} else if (value[0] == '+') {
+			output = std::stoi(value);
+		}
 	}
+	return output;
 }
 
 

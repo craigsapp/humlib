@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 29 08:05:25 PDT 2019
+// Last Modified: Tue Oct  1 00:36:43 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2493,14 +2493,21 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 #define E_muserec_comment_toggle     '&'
 #define E_muserec_comment_line       '@'
 #define E_muserec_musical_directions '*'
+#define E_muserec_copyright          '1'  // reserved for copyright notice
 #define E_muserec_header_1           '1'  // reserved for copyright notice
 #define E_muserec_header_2           '2'  // reserved for identification
+#define E_muserec_id                 '2'  // reserved for identification
 #define E_muserec_header_3           '3'  // reserved
 #define E_muserec_header_4           '4'  // <date> <name of encoder>
+#define E_muserec_encoder            '4'  // <date> <name of encoder>
 #define E_muserec_header_5           '5'  // WK#:<work number> MV#:<mvmt num>
+#define E_muserec_work_info          '5'  // WK#:<work number> MV#:<mvmt num>
 #define E_muserec_header_6           '6'  // <source>
+#define E_muserec_source             '6'  // <source>
 #define E_muserec_header_7           '7'  // <work title>
+#define E_muserec_work_title         '7'  // <work title>
 #define E_muserec_header_8           '8'  // <movement title>
+#define E_muserec_movement_title     '8'  // <movement title>
 #define E_muserec_header_9           '9'  // <name of part>
 #define E_muserec_header_part_name   '9'  // <name of part>
 #define E_muserec_header_10          '0'  // misc designations
@@ -2589,12 +2596,20 @@ class MuseRecordBasic {
 		bool              isBarline          (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isCopyright        (void);
 		bool              isCueNote          (void);
+		bool              isEncoder          (void);
 		bool              isFiguredHarmony   (void);
 		bool              isGraceNote        (void);
-		bool              isNote             (void);
+		bool              isId               (void);
+		bool              isMovementTitle    (void);
+		bool              isAnyNote          (void);
 		bool              isPartName         (void);
+		bool              isRegularNote      (void);
 		bool              isRest             (void);
+		bool              isSource           (void);
+		bool              isWorkInfo         (void);
+		bool              isWorkTitle        (void);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line
@@ -2805,7 +2820,8 @@ class MuseRecord : public MuseRecordBasic {
 		// int           getNotationLevel
 		int              getSlurStartColumn           (void);
 		std::string      getSlurParameterRegion       (void);
-		void             getSlurInfo                  (string& slurstarts, string& slurends);
+		void             getSlurInfo                  (std::string& slurstarts,
+		                                               std::string& slurends);
 
 		// columns 44 -- 80: text underlay
 		std::string      getTextUnderlayField         (void);
@@ -2956,7 +2972,33 @@ class MuseData {
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
+
+		bool              isCopyright         (int index);
+		bool              isEncoder           (int index);
+		bool              isId                (int index);
+		bool              isMovementTitle     (int index);
+		bool              isAnyNote           (int index);
+		bool              isRegularNote       (int index);
 		bool              isPartName          (int index);
+		bool              isSource            (int index);
+		bool              isWorkInfo          (int index);
+		bool              isWorkTitle         (int index);
+
+		// header information
+		std::string       getComposer         (void);
+		std::string       getComposerDate     (void);
+		std::string       getCopyright        (void);
+		std::string       getEncoder          (void);
+		std::string       getEncoderDate      (void);
+		std::string       getEncoderName      (void);
+		std::string       getId               (void);
+		std::string       getMovementTitle    (void);
+		std::string       getSource           (void);
+		std::string       getWorkInfo         (void);
+		std::string       getWorkTitle        (void);
+		std::string       getOpus             (void);
+		std::string       getNumber           (void);
+		std::string       getMovementNumber   (void);
 
 		// additional mark-up analysis functions for post-processing:
 		void              doAnalyses          (void);
@@ -2991,6 +3033,7 @@ class MuseData {
 		std::string       getError            (void);
 		bool              hasError            (void);
 
+
 	private:
 		std::vector<MuseRecord*>    m_data;
 		std::vector<MuseEventSet*>  m_sequence;
@@ -3011,6 +3054,7 @@ class MuseData {
 		                                        MuseRecord* arecord);
 		int               getPartNameIndex    (void);
 		std::string       getPartName         (int index);
+		std::string       trimSpaces          (std::string);
 };
 
 
@@ -3625,6 +3669,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		GridSlice*   addTempoToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addTimeSigToken(const std::string& tok, HumNum timestamp,
+		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addMeterSigToken(const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addKeySigToken (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
