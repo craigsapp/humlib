@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Oct  1 00:36:43 PDT 2019
+// Last Modified: Tue Oct  1 10:26:35 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1535,10 +1535,12 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			output += mfb[i];
 			output += mfb[i+1];
 			output += 'r';
+			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '-')) {
 			output += mfb[i];
 			output += mfb[i+1];
 			output += 'r';
+			i++;
 		} else {
 			output += mfb[i];
 		}
