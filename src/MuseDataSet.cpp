@@ -365,6 +365,7 @@ bool MuseDataSet::hasError(void) {
 }
 
 
+
 //////////////////////////////
 //
 // MuseDataSet::setError --
@@ -372,6 +373,17 @@ bool MuseDataSet::hasError(void) {
 
 void MuseDataSet::setError(const string& error) {
 	m_error = error;
+}
+
+
+
+//////////////////////////////
+//
+// MuseDataSet::getError --
+//
+
+string MuseDataSet::getError(void) {
+	return m_error;
 }
 
 
