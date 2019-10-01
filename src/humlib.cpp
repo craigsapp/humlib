@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue 01 Oct 2019 11:06:33 AM PDT
+// Last Modified: Tue 01 Oct 2019 03:29:47 PM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -12667,6 +12667,11 @@ void HumRegex::unsetGlobal(void) {
 // HumRegex::search -- Search for the regular expression in the
 //    input string.  Returns the character position + 1 of the first match if any found.
 //    Search results can be accessed with .getSubmatchCount() and .getSubmatch(index).
+//
+//    Warning: a temporary string cannot be used as input to the search function
+//    if you want to call getMatch() later.  If you do a memory leak will occur.
+//    If you have a temporary string, first save it to a variable which remains
+//    in scope while accesssing a match with getMatch().
 //
 
 int HumRegex::search(const string& input, const string& exp) {
@@ -27106,15 +27111,7 @@ MuseData::MuseData(MuseData& input) {
 //
 
 MuseData::~MuseData() {
-	int i;
-	for (i=0; i<(int)m_data.size(); i++) {
-		if (m_data[i] != NULL) {
-			delete m_data[i];
-			m_data[i] = NULL;
-		}
-	}
-  m_data.resize(0);
-  m_name = "";
+	clear();
 }
 
 
@@ -27572,7 +27569,8 @@ void MuseData::analyzeType(void) {
 	HumRegex hre;
 	int groupmemberships = -1;
 	for (int i=0; i<getLineCount(); i++) {
-		if (hre.search(thing[i].getLine(), "^Group memberships:")) {
+		string line = thing[i].getLine();
+		if (hre.search(line, "^Group memberships:")) {
 			groupmemberships = i;
 			break;
 		}
@@ -27718,7 +27716,8 @@ void MuseData::analyzeRhythm(void) {
 
 	for (int i=0; i<(int)m_data.size(); i++) {
 		if (m_data[i]->isAttributes()) {
-			if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
+			string line = m_data[i]->getLine();
+			if (hre.search(line, "Q:(\\d+)", "")) {
 				tpq = hre.getMatchInt(1);
 			}
 		}
@@ -27803,7 +27802,8 @@ int MuseData::getInitialTpq(void) {
 				continue;
 			}
 			if ((*m_data[i])[0] == '$') {
-				if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
+				string line = m_data[i]->getLine();
+				if (hre.search(line, "Q:(\\d+)", "")) {
 					output = hre.getMatchInt(1);
 				}
 				break;
@@ -27812,7 +27812,8 @@ int MuseData::getInitialTpq(void) {
 	} else {
 		for (int i=0; i<(int)m_data.size(); i++) {
 			if (m_data[i]->getType() == E_muserec_musical_attributes) {
-				if (hre.search(m_data[i]->getLine(), "Q:(\\d+)", "")) {
+				string line = m_data[i]->getLine();
+				if (hre.search(line, "Q:(\\d+)", "")) {
 					output = hre.getMatchInt(1);
 				}
 				break;
@@ -27875,14 +27876,9 @@ MuseEventSet& MuseData::getEvent(int eindex) {
 //
 
 
-
 //////////////////////////////
 //
-// MuseData::insertEventBackwards -- insert an event into a time-sorted
-//    organization of the file. Searches for the correct time location to
-//    insert event starting at the end of the list (since MuseData files
-//    are mostly sorted in time.
-//
+// printSequenceTimes --
 //
 
 void printSequenceTimes(vector<MuseEventSet*>& m_sequence) {
@@ -27893,8 +27889,17 @@ void printSequenceTimes(vector<MuseEventSet*>& m_sequence) {
 }
 
 
-void MuseData::insertEventBackwards(HumNum atime, MuseRecord* arecord) {
 
+//////////////////////////////
+//
+// MuseData::insertEventBackwards -- insert an event into a time-sorted
+//    organization of the file. Searches for the correct time location to
+//    insert event starting at the end of the list (since MuseData files
+//    are mostly sorted in time.
+//
+//
+
+void MuseData::insertEventBackwards(HumNum atime, MuseRecord* arecord) {
 	if (m_sequence.empty()) {
 		MuseEventSet* anevent = new MuseEventSet;
 		anevent->setTime(atime);
@@ -28213,9 +28218,9 @@ int MuseData::getMembershipPartNumber(const string& mstring) {
 	HumRegex hre;
 	for (int i=0; i<(int)m_data.size(); i++) {
 		if (m_data[i]->getType() == E_muserec_header_12) {
-			if (hre.search(m_data[i]->getLine(), searchstring, "")) {
-				if (hre.search(m_data[i]->getLine(),
-					"part\\s*(\\d+)\\s*of\\s*(\\d+)")) {
+			string line = m_data[i]->getLine();
+			if (hre.search(line, searchstring)) {
+				if (hre.search(line, "part\\s*(\\d+)\\s*of\\s*(\\d+)")) {
 					string partnum = hre.getMatch(1);
 					return hre.getMatchInt(1);
 				}
@@ -28334,7 +28339,14 @@ HumNum MuseData::getFileDuration(void) {
 //
 
 string MuseData::getLine(int index) {
-	return getRecord(index).getLine();
+	if (index < 0) {
+		return "";
+	}
+	if (index >= getLineCount()) {
+		return "";
+	}
+	string output = getRecord(index).getLine();
+	return output;
 }
 
 

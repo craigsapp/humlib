@@ -148,6 +148,11 @@ void HumRegex::unsetGlobal(void) {
 //    input string.  Returns the character position + 1 of the first match if any found.
 //    Search results can be accessed with .getSubmatchCount() and .getSubmatch(index).
 //
+//    Warning: a temporary string cannot be used as input to the search function
+//    if you want to call getMatch() later.  If you do a memory leak will occur.
+//    If you have a temporary string, first save it to a variable which remains
+//    in scope while accesssing a match with getMatch().
+//
 
 int HumRegex::search(const string& input, const string& exp) {
 	m_regex = regex(exp, m_regexflags);
