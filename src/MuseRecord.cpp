@@ -2795,6 +2795,17 @@ int MuseRecord::measureNumberQ(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getMeasureFlagsString --  Columns 17 to 80.
+//
+
+string MuseRecord::getMeasureFlagsString(void) {
+	return trimSpaces(m_recordString.substr(16));
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::measureFermataQ -- returns true if there is a
 //	fermata above or below the measure
 //

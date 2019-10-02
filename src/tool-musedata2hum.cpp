@@ -336,9 +336,25 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 //
 
 void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
+	// Add bar numbers as well.
 	string line = mr.getLine();
+	string barstyle = mr.getMeasureFlagsString();
 	if (line.compare(0, 7, "mheavy2") == 0) {
-		gm->setStyle(MeasureStyle::Final);
+		if (barstyle.find(":|") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatBackward);
+		} else {
+			gm->setStyle(MeasureStyle::Final);
+		}
+	} else if (line.compare(0, 7, "mheavy3") == 0) {
+		if (barstyle.find("|:") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatForward);
+		}
+	} else if (line.compare(0, 7, "mheavy4") == 0) {
+		if (barstyle.find(":|:") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatBoth);
+		}
+	} else if (line.compare(0, 7, "mdouble") == 0) {
+		gm->setStyle(MeasureStyle::Double);
 	}
 }
 

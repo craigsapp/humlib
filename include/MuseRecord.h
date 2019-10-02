@@ -269,6 +269,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              measureNumberQ               (void);
 
 		// columns 17 -- 80: measure flags
+		std::string      getMeasureFlagsString        (void);
 		int              measureFermataQ              (void);
 		int              measureFlagQ                 (const std::string& key);
 		void             addMeasureFlag               (const std::string& strang);

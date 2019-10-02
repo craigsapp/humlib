@@ -995,6 +995,34 @@ bool MuseRecordBasic::isMovementTitle(void) {
 
 
 
+//////////////////////////////
+//
+// MuseRecordBasic::trimSpaces --
+//
+
+string MuseRecordBasic::trimSpaces(std::string input) {
+	string output;
+	int status = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (!status) {
+			if (isspace(input[i])) {
+				continue;
+			}
+			status = 1;
+		}
+		output += input[i];
+	}
+	for (int i=(int)output.size(); i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue 01 Oct 2019 03:29:47 PM PDT
+// Last Modified: Tue Oct  1 16:46:07 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1536,7 +1536,12 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			output += mfb[i+1];
 			output += 'r';
 			i++;
-		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '-')) {
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'f')) {
+			output += mfb[i];
+			output += mfb[i+1];
+			output += 'r';
+			i++;
+		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'n')) {
 			output += mfb[i];
 			output += mfb[i+1];
 			output += 'r';
@@ -31926,6 +31931,17 @@ int MuseRecord::measureNumberQ(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getMeasureFlagsString --  Columns 17 to 80.
+//
+
+string MuseRecord::getMeasureFlagsString(void) {
+	return trimSpaces(m_recordString.substr(16));
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::measureFermataQ -- returns true if there is a
 //	fermata above or below the measure
 //
@@ -33728,6 +33744,34 @@ bool MuseRecordBasic::isMovementTitle(void) {
 	return false;
 }
 
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::trimSpaces --
+//
+
+string MuseRecordBasic::trimSpaces(std::string input) {
+	string output;
+	int status = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (!status) {
+			if (isspace(input[i])) {
+				continue;
+			}
+			status = 1;
+		}
+		output += input[i];
+	}
+	for (int i=(int)output.size(); i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -60515,9 +60559,25 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 //
 
 void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
+	// Add bar numbers as well.
 	string line = mr.getLine();
+	string barstyle = mr.getMeasureFlagsString();
 	if (line.compare(0, 7, "mheavy2") == 0) {
-		gm->setStyle(MeasureStyle::Final);
+		if (barstyle.find(":|") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatBackward);
+		} else {
+			gm->setStyle(MeasureStyle::Final);
+		}
+	} else if (line.compare(0, 7, "mheavy3") == 0) {
+		if (barstyle.find("|:") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatForward);
+		}
+	} else if (line.compare(0, 7, "mheavy4") == 0) {
+		if (barstyle.find(":|:") != string::npos) {
+			gm->setStyle(MeasureStyle::RepeatBoth);
+		}
+	} else if (line.compare(0, 7, "mdouble") == 0) {
+		gm->setStyle(MeasureStyle::Double);
 	}
 }
 

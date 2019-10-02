@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue 01 Oct 2019 03:29:47 PM PDT
+// Last Modified: Tue Oct  1 16:46:07 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2629,6 +2629,9 @@ class MuseRecordBasic {
 		int               m_lasttiednote;    // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               m_roundBreve;
+
+	public:
+		static std::string       trimSpaces         (std::string input);
 };
 
 
@@ -2882,6 +2885,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              measureNumberQ               (void);
 
 		// columns 17 -- 80: measure flags
+		std::string      getMeasureFlagsString        (void);
 		int              measureFermataQ              (void);
 		int              measureFlagQ                 (const std::string& key);
 		void             addMeasureFlag               (const std::string& strang);

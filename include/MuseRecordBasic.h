@@ -188,6 +188,9 @@ class MuseRecordBasic {
 		int               m_lasttiednote;    // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               m_roundBreve;
+
+	public:
+		static std::string       trimSpaces         (std::string input);
 };
 
 
