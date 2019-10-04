@@ -2710,6 +2710,10 @@ string MuseRecord::getKernRestStyle(int quarter) {
 	// add the pitch to the output string
 	output += "r";
 
+	if (isInvisibleRest()) {
+		output += "yy";
+	}
+
 	return output;
 }
 

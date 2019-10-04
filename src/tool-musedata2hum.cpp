@@ -467,8 +467,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		cerr << "PROCESS GRACE NOTE HERE: " << mr << endl;
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
-	} else if (mr.isRest()) {
-		// maybe split into regular rest and irest?
+	} else if (mr.isAnyRest()) {
 		tok  = mr.getKernRestStyle(tpq);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 	}

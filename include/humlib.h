@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  4 02:58:53 PDT 2019
+// Last Modified: Fri Oct  4 07:57:34 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2621,7 +2621,9 @@ class MuseRecordBasic {
 		bool              isMovementTitle    (void);
 		bool              isPartName         (void);
 		bool              isRegularNote      (void);
-		bool              isRest             (void);
+		bool              isAnyRest          (void);
+		bool              isRegularRest      (void);
+		bool              isInvisibleRest    (void);
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
@@ -2927,7 +2929,7 @@ class MuseRecord : public MuseRecordBasic {
 
 	protected:
 		void             allowNotesOnly               (const std::string& functioName);
-		void             allowNotesAndRestsOnly       (const string& functionName);
+		void             allowNotesAndRestsOnly       (const std::string& functionName);
 		void             allowMeasuresOnly            (const std::string& functioName);
 		void             allowFigurationOnly          (const std::string& functioName);
 		void             allowFigurationAndNotesOnly  (const std::string& functioName);

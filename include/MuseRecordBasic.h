@@ -180,7 +180,9 @@ class MuseRecordBasic {
 		bool              isMovementTitle    (void);
 		bool              isPartName         (void);
 		bool              isRegularNote      (void);
-		bool              isRest             (void);
+		bool              isAnyRest          (void);
+		bool              isRegularRest      (void);
+		bool              isInvisibleRest    (void);
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);

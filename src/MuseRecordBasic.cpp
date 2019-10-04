@@ -1001,10 +1001,40 @@ bool MuseRecordBasic::isAnyNoteOrRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRest -- Also cue-sized rests?
+// MuseRecordBasic::isInvisibleRest -- 
 //
 
-bool MuseRecordBasic::isRest(void) {
+bool MuseRecordBasic::isInvisibleRest(void) {
+	switch (m_type) {
+		case E_muserec_rest_invisible:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRegularRest -- 
+//
+
+bool MuseRecordBasic::isRegularRest(void) {
+	switch (m_type) {
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyRest -- Also cue-sized rests?
+//
+
+bool MuseRecordBasic::isAnyRest(void) {
 	switch (m_type) {
 		case E_muserec_rest_invisible:
 		case E_muserec_rest:

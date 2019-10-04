@@ -295,7 +295,7 @@ class MuseRecord : public MuseRecordBasic {
 
 	protected:
 		void             allowNotesOnly               (const std::string& functioName);
-		void             allowNotesAndRestsOnly       (const string& functionName);
+		void             allowNotesAndRestsOnly       (const std::string& functionName);
 		void             allowMeasuresOnly            (const std::string& functioName);
 		void             allowFigurationOnly          (const std::string& functioName);
 		void             allowFigurationAndNotesOnly  (const std::string& functioName);

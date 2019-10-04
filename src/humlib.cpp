@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  4 02:58:53 PDT 2019
+// Last Modified: Fri Oct  4 07:57:34 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -32156,6 +32156,10 @@ string MuseRecord::getKernRestStyle(int quarter) {
 	// add the pitch to the output string
 	output += "r";
 
+	if (isInvisibleRest()) {
+		output += "yy";
+	}
+
 	return output;
 }
 
@@ -34093,10 +34097,40 @@ bool MuseRecordBasic::isAnyNoteOrRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRest -- Also cue-sized rests?
+// MuseRecordBasic::isInvisibleRest -- 
 //
 
-bool MuseRecordBasic::isRest(void) {
+bool MuseRecordBasic::isInvisibleRest(void) {
+	switch (m_type) {
+		case E_muserec_rest_invisible:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRegularRest -- 
+//
+
+bool MuseRecordBasic::isRegularRest(void) {
+	switch (m_type) {
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyRest -- Also cue-sized rests?
+//
+
+bool MuseRecordBasic::isAnyRest(void) {
 	switch (m_type) {
 		case E_muserec_rest_invisible:
 		case E_muserec_rest:
@@ -61220,8 +61254,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		cerr << "PROCESS GRACE NOTE HERE: " << mr << endl;
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
-	} else if (mr.isRest()) {
-		// maybe split into regular rest and irest?
+	} else if (mr.isAnyRest()) {
 		tok  = mr.getKernRestStyle(tpq);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 	}
