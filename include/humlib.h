@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Oct  1 16:46:07 PDT 2019
+// Last Modified: Fri Oct  4 02:58:53 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2517,6 +2517,7 @@ class HumdrumFile : public HUMDRUMFILE_PARENT {
 #define E_muserec_group_memberships  'A'  // group memberships
 // multiple musered_head_12 lines can occur:
 #define E_muserec_header_12          'B'  // <name1>: part <x> of <num in group>
+#define E_muserec_group              'B'  // <name1>: part <x> of <num in group>
 #define E_muserec_unknown            'U'  // unknown record type
 #define E_muserec_empty              'E'  // nothing on line and not header
 	                                       // or multi-line comment
@@ -2551,6 +2552,7 @@ class MuseRecordBasic {
 		int               getType            (void) const;
 		void              setTypeGraceNote   (void);
 		void              setTypeGraceChordNote(void);
+		void              setHeaderState     (int state);
 
 		MuseRecordBasic&  operator=          (MuseRecordBasic& aRecord);
 		MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
@@ -2585,6 +2587,8 @@ class MuseRecordBasic {
 		void              setMarkupPitch     (int aPitch);
 		int               getMarkupPitch     (void);
 
+		void              setLayer           (int layer);
+		int               getLayer           (void);
 
 		// tied note functions:
 		int               isTied                  (void);
@@ -2594,18 +2598,27 @@ class MuseRecordBasic {
 		void              setNextTiedNoteLineIndex(int index);
 
 		// boolean type fuctions:
+		bool              isAnyNote          (void);
+		bool              isAnyNoteOrRest    (void);
 		bool              isAttributes       (void);
+		bool              isBackup           (void);
 		bool              isBarline          (void);
+		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isAnyComment       (void);
+		bool              isLineComment      (void);
+		bool              isBlockComment     (void);
 		bool              isCopyright        (void);
 		bool              isCueNote          (void);
 		bool              isEncoder          (void);
 		bool              isFiguredHarmony   (void);
 		bool              isGraceNote        (void);
+		bool              isGroup            (void);
+		bool              isGroupMembership  (void);
+		bool              isHeaderRecord     (void);
 		bool              isId               (void);
 		bool              isMovementTitle    (void);
-		bool              isAnyNote          (void);
 		bool              isPartName         (void);
 		bool              isRegularNote      (void);
 		bool              isRest             (void);
@@ -2629,6 +2642,8 @@ class MuseRecordBasic {
 		int               m_lasttiednote;    // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               m_roundBreve;
+		int               m_header = -1;     // -1 = undefined, 0 = no, 1 = yes
+		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
 
 	public:
 		static std::string       trimSpaces         (std::string input);
@@ -2636,6 +2651,7 @@ class MuseRecordBasic {
 
 
 std::ostream& operator<<(std::ostream& out, MuseRecordBasic& aRecord);
+std::ostream& operator<<(std::ostream& out, MuseRecordBasic* aRecord);
 
 
 
@@ -2911,6 +2927,7 @@ class MuseRecord : public MuseRecordBasic {
 
 	protected:
 		void             allowNotesOnly               (const std::string& functioName);
+		void             allowNotesAndRestsOnly       (const string& functionName);
 		void             allowMeasuresOnly            (const std::string& functioName);
 		void             allowFigurationOnly          (const std::string& functioName);
 		void             allowFigurationAndNotesOnly  (const std::string& functioName);
@@ -2975,6 +2992,8 @@ class MuseData {
 		int               read                (std::istream& input);
 		int               readString          (const std::string& filename);
 		int               readFile            (const std::string& filename);
+		void              analyzeLayers       (void);
+		int               analyzeLayersInMeasure(int startindex);
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
@@ -2989,6 +3008,8 @@ class MuseData {
 		bool              isSource            (int index);
 		bool              isWorkInfo          (int index);
 		bool              isWorkTitle         (int index);
+		bool              isHeaderRecord      (int index);
+		bool              isBodyRecord        (int index);
 
 		// header information
 		std::string       getComposer         (void);
@@ -3061,6 +3082,7 @@ class MuseData {
 		int               getPartNameIndex    (void);
 		std::string       getPartName         (int index);
 		std::string       trimSpaces          (std::string);
+		void              assignHeaderBodyState(void);
 };
 
 
@@ -3715,6 +3737,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		void         setFinalBarlineStyle(void) { setStyle(MeasureStyle::Final); }
 		void         setRepeatEndStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 		void         setRepeatBackwardStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
+		void         setMeasureNumber(int value);
+		int          getMeasureNumber(void);
 
 		bool         isDouble(void)
 		                  {return m_style == MeasureStyle::Double;}
@@ -3746,6 +3770,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		HumNum       m_timestamp;
 		HumNum       m_timesigdur;
 		MeasureStyle m_style;
+		int          m_barnum = -1;
 };
 
 std::ostream& operator<<(std::ostream& output, GridMeasure& measure);
@@ -3905,6 +3930,11 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void deleteMeasure              (int index);
 		void setPartName                (int index, const string& name);
 		std::string getPartName         (int index);
+		void addInvisibleRestsInFirstTrack(void);
+		void setPartStaffDimensions     (std::vector<std::vector<GridSlice*>>& nextevent,
+		                                 GridSlice* startslice);
+		void addInvisibleRest           (std::vector<std::vector<GridSlice*>>& nextevent,
+		                                 int index, int p, int s);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -3920,11 +3950,11 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void addNullTokensForClefChanges   (void);
 		void addNullTokensForLayoutComments(void);
 
-		void FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
+		void fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
-		void FillInNullTokensForLayoutComments(GridSlice* layoutslice, GridSlice* lastnote,
+		void fillInNullTokensForLayoutComments(GridSlice* layoutslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
-		void FillInNullTokensForClefChanges (GridSlice* clefslice,
+		void fillInNullTokensForClefChanges (GridSlice* clefslice,
 		                                    GridSlice* lastnote, GridSlice* nextnote);
 		void adjustClefChanges             (void);
 		bool buildSingleList               (void);
@@ -6295,6 +6325,7 @@ class Tool_musedata2hum : public HumTool {
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
 		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
+		void    setMeasureNumber     (GridMeasure* gm, MuseRecord& mr);
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
 		void    addNoteDynamics      (GridSlice* slice, int part, 
 		                              MuseRecord& mr);
@@ -6314,6 +6345,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 		HTp m_lastfigure = NULL;     // last figured bass token
+		int m_lastbarnum = -1;       // barnumber carried over from previous bar
 
 };
 

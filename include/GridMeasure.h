@@ -78,6 +78,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		void         setFinalBarlineStyle(void) { setStyle(MeasureStyle::Final); }
 		void         setRepeatEndStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 		void         setRepeatBackwardStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
+		void         setMeasureNumber(int value);
+		int          getMeasureNumber(void);
 
 		bool         isDouble(void)
 		                  {return m_style == MeasureStyle::Double;}
@@ -109,6 +111,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		HumNum       m_timestamp;
 		HumNum       m_timesigdur;
 		MeasureStyle m_style;
+		int          m_barnum = -1;
 };
 
 std::ostream& operator<<(std::ostream& output, GridMeasure& measure);

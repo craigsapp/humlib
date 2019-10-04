@@ -1158,8 +1158,11 @@ int MuseRecord::levelQ(void) {
 //
 
 string MuseRecord::getTrackField(void) {
-	allowNotesOnly("getTrackField");
-	return extract(15, 15);
+	if (!isAnyNoteOrRest()) {
+		return extract(15, 15);
+	} else {
+		return " ";
+	}
 }
 
 
@@ -1181,14 +1184,15 @@ string MuseRecord::getTrackString(void) {
 
 //////////////////////////////
 //
-// MuseRecord::getTrack --
+// MuseRecord::getTrack -- Return 0 if no track information (implicitly track 1,
+//     or unlabelled higher track).
 //
 
 int MuseRecord::getTrack(void) {
 	int output = 1;
 	string recordInfo = getTrackField();
 	if (recordInfo[0] == ' ') {
-		output = 1;
+		output = 0;
 	} else {
 		output = std::strtol(recordInfo.c_str(), NULL, 36);
 	}
@@ -2510,8 +2514,8 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string notatedAccidental = getNotatedAccidentalString();
 
 	if (notatedAccidental.empty() && !logicalAccidental.empty()) {
-		// Indicate that the logical accidental should not be 
-		// displayed (because of key signature or previous 
+		// Indicate that the logical accidental should not be
+		// displayed (because of key signature or previous
 		// note in the measure that alters the accidental
 		// state of the current note).
 		output += "y";
@@ -2799,7 +2803,11 @@ int MuseRecord::measureNumberQ(void) {
 //
 
 string MuseRecord::getMeasureFlagsString(void) {
-	return trimSpaces(m_recordString.substr(16));
+	if (m_recordString.size() < 17) {
+		return "";
+	} else {
+		return trimSpaces(m_recordString.substr(16));
+	}
 }
 
 
@@ -3437,6 +3445,29 @@ void MuseRecord::allowNotesOnly(const string& functionName) {
 		default:
 			cerr << "Error: can only access " << functionName
 				  << " on a note record.  Line is: " << getLine() << endl;
+			return;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::allowNotesAndRestsOnly --
+//
+
+void MuseRecord::allowNotesAndRestsOnly(const string& functionName) {
+	switch (getType()) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_grace:
+		case E_muserec_note_cue:
+		case E_muserec_rest:
+		case E_muserec_rest_invisible:
+		  break;
+		default:
+			cerr << "Error: can only access " << functionName
+				  << " on a note or rest records.  Line is: " << getLine() << endl;
 			return;
 	}
 }

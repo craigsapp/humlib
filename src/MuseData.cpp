@@ -432,6 +432,8 @@ int MuseData::readString(const string& data) {
 void MuseData::doAnalyses(void) {
 	analyzeType();
 	if (hasError()) { return; }
+	assignHeaderBodyState();
+   analyzeLayers();
 	analyzeRhythm();
 	if (hasError()) { return; }
 	constructTimeSequence();
@@ -1481,6 +1483,28 @@ bool MuseData::isWorkTitle(int index) {
 
 //////////////////////////////
 //
+// MuseData::isHeaderRecord -- return true if in the header.
+//
+
+bool MuseData::isHeaderRecord(int index) {
+	return getRecord(index).isHeaderRecord();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isBodyRecord -- return true if in the body.
+//
+
+bool MuseData::isBodyRecord(int index) {
+	return getRecord(index).isBodyRecord();
+}
+
+
+
+//////////////////////////////
+//
 // MuseData::isCopyright -- return true if a work title line.
 //
 
@@ -1737,7 +1761,7 @@ std::string MuseData::getId(void) {
 //////////////////////////////
 //
 // MuseData::getComposer --  The composer is not indicated in a MuseData file.
-//    Infer it from the ID line if a file-location ID is present, since the 
+//    Infer it from the ID line if a file-location ID is present, since the
 //    composers name is abbreviated in the directory name.
 //
 
@@ -1846,6 +1870,134 @@ std::string MuseData::trimSpaces(std::string input) {
 		}
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeLayers --  When there is a backup command in the
+//   measure and no voice information, provide the voice information.
+//   Primarily use the stem directions to make this determination.
+//   Also, other features can be used:
+//      beaming (do not split beamed notes across layers)
+//      pitch (higher versus lower pitch).
+//   Mostly this is only useful for two-voiced measures.
+//   How to deal with voices on multiple staves will be more complex.
+//
+
+void MuseData::analyzeLayers(void) {
+	int lcount = getLineCount();
+	for (int i=0; i<lcount; i++) {
+		i = analyzeLayersInMeasure(i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeLayersInMeasure -- returns the
+//   index of the next barline.
+//
+
+int MuseData::analyzeLayersInMeasure(int startindex) {
+	int i = startindex;
+	int lcount = getLineCount();
+	if (i >= lcount) {
+		return lcount+1;
+	}
+
+	// Not necessarily a barline, but at least the first
+	// record for the measure (may be missing at start
+	// of music).
+
+	while ((i < lcount) && isHeaderRecord(i)) {
+		i++;
+	}
+	if ((i < lcount) && getRecord(i).isBarline()) {
+		i++;
+	}
+	// Now should be at start of data for a measure.
+
+	if (i >= lcount) {
+		return lcount+1;
+	}
+
+	vector<vector<MuseRecord*>> segments(1);
+	while (i < lcount) {
+		MuseRecord *mr = &getRecord(i);
+		if (mr->isBarline()) {
+			break;
+		}
+		segments.back().push_back(mr);
+		if (mr->isBackup()) {
+			segments.resize(segments.size() + 1);
+		}
+		i++;
+	}
+	int position = i-1;
+
+	if (segments.size() < 2) {
+		// no backup in measure, so single voice/layer
+		return position;
+	}
+
+	// Assign each backup segment to a successive track
+	// if the layer does not have explicit track information.
+	int track;
+
+	for (int i=0; i<(int)segments.size(); i++) {
+		for (int j=0; j<(int)segments[i].size(); j++) {
+			MuseRecord* mr = segments[i][j];
+			int trackfield = mr->getTrack();
+			if (trackfield == 0) {
+				track = i+1;
+			} else {
+				track = trackfield;
+			}
+			mr->setLayer(track);
+		}
+	}
+
+
+	return position;
+}
+
+
+
+//////////////////////////////
+//
+// assignHeaderBodyState --
+//
+
+void MuseData::assignHeaderBodyState(void) {
+	int state = 1;
+	int foundend = 0;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->isAnyComment()) {
+			// Comments inherit state if previous non-comment line
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if (state == 0) {
+			// no longer in the header
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if ((!foundend) && m_data[i]->isGroup()) {
+			foundend = 1;
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if (foundend && !m_data[i]->isGroup()) {
+			state = 0;
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		// still in header
+		m_data[i]->setHeaderState(state);
+	}
 }
 
 

@@ -50,6 +50,7 @@ class Tool_musedata2hum : public HumTool {
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
 		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
+		void    setMeasureNumber     (GridMeasure* gm, MuseRecord& mr);
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
 		void    addNoteDynamics      (GridSlice* slice, int part, 
 		                              MuseRecord& mr);
@@ -69,6 +70,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 		HTp m_lastfigure = NULL;     // last figured bass token
+		int m_lastbarnum = -1;       // barnumber carried over from previous bar
 
 };
 

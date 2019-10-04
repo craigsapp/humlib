@@ -898,14 +898,17 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		// strange case which should never happen.
 		return;
 	}
+	if (getMeasureNumber() > 0) {
+		startbarline = getMeasureNumber();
+	}
 	int fieldcount = infile.back()->getFieldCount();
 	HumdrumLine* line = new HumdrumLine;
 	string tstring = "=";
-	if (startbarline) {
-		tstring += to_string(startbarline);
-	} else {
-		tstring += "1";
-	}
+//	if (startbarline) {
+//		tstring += to_string(startbarline);
+//	} else {
+//		tstring += "1";
+//	}
 	// probably best not to start with an invisible barline since
 	// a plain barline would not be shown before the first measure anyway.
 	// tstring += "-";
@@ -1335,6 +1338,28 @@ GridSlice* GridMeasure::getLastSpinedSlice(void) {
 		return slice;
 	}
 	return NULL;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::setMeasureNumber --
+//
+
+void GridMeasure::setMeasureNumber(int value) { 
+	m_barnum = value;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::getMeasureNumber --
+//
+
+int GridMeasure::getMeasureNumber(void) {
+	return m_barnum;
 }
 
 

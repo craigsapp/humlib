@@ -95,7 +95,6 @@ bool Tool_musedata2hum::convertFile(ostream& out, const string& filename) {
 		cerr << "Error description:\t" << mds.getError() << "\n";
 		exit(1);
 	}
-
 	return convert(out, mds);
 }
 
@@ -117,7 +116,6 @@ bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
 	}
 	return convert(out, mds);
 }
-
 
 
 bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
@@ -251,7 +249,7 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
 	m_lastfigure = NULL;
-
+	m_lastbarnum = -1;
 	m_tpq = part.getInitialTpq();
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
@@ -301,6 +299,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
+	setMeasureNumber(outdata[(int)outdata.size() - 1], part[startindex]);
 	gm->setBarStyle(MeasureStyle::Plain);
 	int i = startindex;
 	for (i=startindex; i<part.getLineCount(); i++) {
@@ -326,6 +325,40 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	}
 
 	return i;
+}
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setMeasureNumber --
+//
+
+void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
+	int pos = -1;
+	string line = mr.getLine();
+	bool space = false;
+	for (int i=0; i<(int)line.size(); i++) {
+		if (isspace(line[i])) {
+			space = true;
+			continue;
+		}
+		if (!space) {
+			continue;
+		}
+		if (isdigit(line[i])) {
+			pos = i;
+			break;
+		}
+	}
+	if (pos < 0) {
+		return;
+	}
+	int num = stoi(line.substr(pos));
+	if (m_lastbarnum >= 0) {
+		int temp = num;
+		num = m_lastbarnum;
+		m_lastbarnum = temp;
+	}
+	gm->setMeasureNumber(num);
 }
 
 
@@ -369,9 +402,15 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	int part         = m_part;
 	int staff        = 0;
 	int maxstaff     = m_maxstaff;
-	int voice        = 0;
+	int layer        = mr.getLayer();
+	if (layer > 0) {
+		// convert to an index:
+		layer = layer - 1;
+	}
+	
 	HumNum timestamp = mr.getAbsBeat();
 	string tok;
+	GridSlice* slice;
 
 	if (mr.isBarline()) {
 		tok = mr.getKernMeasureStyle();
@@ -393,31 +432,30 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		if (!mclef.empty()) {
 			string kclef = Convert::museClefToKernClef(mclef);
 			if (!kclef.empty()) {
-				gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+				gm->addClefToken(kclef, timestamp, part, staff, layer, maxstaff);
 			}
 		}
 
 		string mkeysig = attributes["K"];
 		if (!mkeysig.empty()) {
 			string kkeysig = Convert::museKeySigToKernKeySig(mkeysig);
-			gm->addKeySigToken(kkeysig, timestamp, part, staff, voice, maxstaff);
+			gm->addKeySigToken(kkeysig, timestamp, part, staff, layer, maxstaff);
 		}
 
 		string mtimesig = attributes["T"];
 		if (!mtimesig.empty()) {
 			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
-			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
+			slice = gm->addTimeSigToken(ktimesig, timestamp, part, staff, layer, maxstaff);
 			setTimeSigDurInfo(ktimesig);
 			string kmeter = Convert::museMeterSigToKernMeterSig(mtimesig);
 			if (!kmeter.empty()) {
-				gm->addMeterSigToken(kmeter, timestamp, part, staff, voice, maxstaff);
+				slice = gm->addMeterSigToken(kmeter, timestamp, part, staff, layer, maxstaff);
 			}
 		}
 
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
-		GridSlice* slice;
-		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
@@ -430,8 +468,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isRest()) {
+		// maybe split into regular rest and irest?
 		tok  = mr.getKernRestStyle(tpq);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 	}
 }
 
@@ -446,17 +485,20 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HumNum timestamp, int part, int maxstaff) {
 	string fh = mr.getFigureString();
 	fh = Convert::museFiguredBassToKernFiguredBass(fh);
+	GridSlice* slice;
 	if (fh.find(":") == string::npos) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
 	if (!m_lastfigure) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -503,7 +545,8 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	if (pieces.empty() || (position >= (int)pieces.size())) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -521,7 +564,8 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	fh.erase(colpos, 1);
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
-	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 }
 
 

@@ -49,6 +49,11 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void deleteMeasure              (int index);
 		void setPartName                (int index, const string& name);
 		std::string getPartName         (int index);
+		void addInvisibleRestsInFirstTrack(void);
+		void setPartStaffDimensions     (std::vector<std::vector<GridSlice*>>& nextevent,
+		                                 GridSlice* startslice);
+		void addInvisibleRest           (std::vector<std::vector<GridSlice*>>& nextevent,
+		                                 int index, int p, int s);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -64,11 +69,11 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void addNullTokensForClefChanges   (void);
 		void addNullTokensForLayoutComments(void);
 
-		void FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
+		void fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
-		void FillInNullTokensForLayoutComments(GridSlice* layoutslice, GridSlice* lastnote,
+		void fillInNullTokensForLayoutComments(GridSlice* layoutslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
-		void FillInNullTokensForClefChanges (GridSlice* clefslice,
+		void fillInNullTokensForClefChanges (GridSlice* clefslice,
 		                                    GridSlice* lastnote, GridSlice* nextnote);
 		void adjustClefChanges             (void);
 		bool buildSingleList               (void);

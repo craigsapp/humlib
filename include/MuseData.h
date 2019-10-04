@@ -76,6 +76,8 @@ class MuseData {
 		int               read                (std::istream& input);
 		int               readString          (const std::string& filename);
 		int               readFile            (const std::string& filename);
+		void              analyzeLayers       (void);
+		int               analyzeLayersInMeasure(int startindex);
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
@@ -90,6 +92,8 @@ class MuseData {
 		bool              isSource            (int index);
 		bool              isWorkInfo          (int index);
 		bool              isWorkTitle         (int index);
+		bool              isHeaderRecord      (int index);
+		bool              isBodyRecord        (int index);
 
 		// header information
 		std::string       getComposer         (void);
@@ -162,6 +166,7 @@ class MuseData {
 		int               getPartNameIndex    (void);
 		std::string       getPartName         (int index);
 		std::string       trimSpaces          (std::string);
+		void              assignHeaderBodyState(void);
 };
 
 

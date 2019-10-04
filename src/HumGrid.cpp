@@ -320,6 +320,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	calculateGridDurations();
 
 	addNullTokens();
+	addInvisibleRestsInFirstTrack();
 	addMeasureLines();
 	buildSingleList();
 	addLastMeasure();
@@ -1253,7 +1254,11 @@ void HumGrid::addMeasureLines(void) {
 					lcount = 1;
 				}
 				for (int v=0; v<lcount; v++) {
-					token = createBarToken(m, barnums[m], measure);
+					int num = measure->getMeasureNumber();
+					if (m < (int)barnums.size() - 1) {
+						num = barnums[m+1];
+					}
+					token = createBarToken(m, num, measure);
 					gv = new GridVoice(token, 0);
 					mslice->at(p)->at(s)->push_back(gv);
 				}
@@ -1471,7 +1476,6 @@ bool HumGrid::buildSingleList(void) {
 		dur = (ts2 - ts1); // whole-note units
 		m_allslices[i]->setDuration(dur);
 	}
-
 	return !m_allslices.empty();
 }
 
@@ -1515,7 +1519,7 @@ void HumGrid::addNullTokensForGraceNotes(void) {
 			continue;
 		}
 
-		FillInNullTokensForGraceNotes(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForGraceNotes(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -1559,7 +1563,7 @@ void HumGrid::addNullTokensForLayoutComments(void) {
 			continue;
 		}
 
-		FillInNullTokensForLayoutComments(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForLayoutComments(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -1603,7 +1607,7 @@ void HumGrid::addNullTokensForClefChanges(void) {
 			continue;
 		}
 
-		FillInNullTokensForClefChanges(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForClefChanges(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -1611,10 +1615,10 @@ void HumGrid::addNullTokensForClefChanges(void) {
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForClefChanges --
+// HumGrid::fillInNullTokensForClefChanges --
 //
 
-void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
+void HumGrid::fillInNullTokensForClefChanges(GridSlice* clefslice,
 		GridSlice* lastnote, GridSlice* nextnote) {
 
 	if (clefslice == NULL) { return; }
@@ -1668,10 +1672,10 @@ void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForLayoutComments --
+// HumGrid::fillInNullTokensForLayoutComments --
 //
 
-void HumGrid::FillInNullTokensForLayoutComments(GridSlice* layoutslice,
+void HumGrid::fillInNullTokensForLayoutComments(GridSlice* layoutslice,
 		GridSlice* lastnote, GridSlice* nextnote) {
 
 	if (layoutslice == NULL) { return; }
@@ -1729,10 +1733,10 @@ void HumGrid::FillInNullTokensForLayoutComments(GridSlice* layoutslice,
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForGraceNotes --
+// HumGrid::fillInNullTokensForGraceNotes --
 //
 
-void HumGrid::FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
+void HumGrid::fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		GridSlice* nextnote) {
 
 	if (graceslice == NULL) {
@@ -1855,9 +1859,143 @@ void HumGrid::addNullTokens(void) {
 
 //////////////////////////////
 //
+// HumGrid::setPartStaffDimensions --
+//
+
+void HumGrid::setPartStaffDimensions(vector<vector<GridSlice*>>& nextevent,
+		GridSlice* startslice) {
+	nextevent.clear();
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		if (!m_allslices[i]->isNoteSlice()) {
+			continue;
+		}
+		GridSlice* slice = m_allslices[i];
+		nextevent.resize(slice->size());
+		for (int p=0; p<(int)slice->size(); p++) {
+			nextevent[p].resize(slice[p].size());
+			for (int j=0; j<(int)nextevent[p].size(); j++) {
+				nextevent[p][j] = startslice;
+			}
+		}
+		break;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::addInvisibleRestsInFirstTrack --  If there are any
+//    timing gaps in the first track of a **kern spine, then
+//    fill in with invisible rests.
+//
+
+void HumGrid::addInvisibleRestsInFirstTrack(void) {
+	int i; // slice index
+	int p; // part index
+	int s; // staff index
+	int v = 0; // only looking at first voice
+
+	vector<vector<GridSlice*>> nextevent;
+	GridSlice* lastslice = m_allslices.back();
+	setPartStaffDimensions(nextevent, lastslice);
+
+	for (i=(int)m_allslices.size()-1; i>=0; i--) {
+		GridSlice& slice = *m_allslices.at(i);
+		if (!slice.isNoteSlice()) {
+			continue;
+		}
+      for (p=0; p<(int)slice.size(); p++) {
+			GridPart& part = *slice.at(p);
+      	for (s=0; s<(int)part.size(); s++) {
+				GridStaff& staff = *part.at(s);
+				if (!staff.at(v)) {
+					// in theory should not happen
+					continue;
+				}
+				GridVoice& gv = *staff.at(v);
+				if (gv.isNull()) {
+					continue;
+				}
+
+				// Found a note/rest.  Check if its duration matches
+				// the next non-null data token.  If not, then add
+				// an invisible rest somewhere between the two
+
+				// first check to see if the previous item is a
+				// NULL.  If so, then store and continue.
+				if (nextevent[p][s] == NULL) {
+					nextevent[p][s] = &slice;
+					continue;
+				}
+				addInvisibleRest(nextevent, i, p, s);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::addInvisibleRest --
+//
+
+void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
+		int index, int p, int s) {
+	GridSlice *ending = nextevent[p][s];
+	if (ending == NULL) {
+		cerr << "Not handling this case yet at end of data." << endl;
+		return;
+	}
+	HumNum endtime = ending->getTimestamp();
+
+	GridSlice* starting = m_allslices.at(index);
+	HumNum starttime = starting->getTimestamp();
+	HTp token = starting->at(p)->at(s)->at(0)->getToken();
+	HumNum duration = Convert::recipToDuration(token);
+	HumNum difference = endtime - starttime;
+	HumNum gap = difference - duration;
+	if (gap == 0) {
+		// nothing to do
+		nextevent[p][s] = starting;
+		return;
+	}
+	HumNum target = starttime + duration;
+
+	string kern = Convert::durationToRecip(gap);
+	kern += "ryy";
+
+	for (int i=index+1; i<(int)m_allslices.size(); i++) {
+		GridSlice* slice = m_allslices[i];
+		if (!slice->isNoteSlice()) {
+			continue;
+		}
+		HumNum timestamp = slice->getTimestamp();
+		if (timestamp < target) {
+			continue;
+		}
+		if (timestamp > target) {
+			cerr << "Cannot deal with this slice addition case yet..." << endl;
+			nextevent[p][s] = starting;
+			return;
+		}
+		// At timestamp for adding new token.
+		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		break;
+	}
+
+	// Store the current event in the buffer
+	nextevent[p][s] = starting;
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::adjustClefChanges -- If a clef change starts at the
-// beginning of a meausre, move it to before the measure (unless
-// the measure has zero duration).
+//     beginning of a meausre, move it to before the measure (unless
+//     the measure has zero duration).
 //
 
 void HumGrid::adjustClefChanges(void) {
@@ -2847,10 +2985,6 @@ ostream& operator<<(ostream& out, HumGrid& grid) {
 	}
 	return out;
 }
-
-
-
-
 
 
 // END_MERGE

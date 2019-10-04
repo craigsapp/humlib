@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Oct  1 16:46:07 PDT 2019
+// Last Modified: Fri Oct  4 02:58:53 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4380,14 +4380,17 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		// strange case which should never happen.
 		return;
 	}
+	if (getMeasureNumber() > 0) {
+		startbarline = getMeasureNumber();
+	}
 	int fieldcount = infile.back()->getFieldCount();
 	HumdrumLine* line = new HumdrumLine;
 	string tstring = "=";
-	if (startbarline) {
-		tstring += to_string(startbarline);
-	} else {
-		tstring += "1";
-	}
+//	if (startbarline) {
+//		tstring += to_string(startbarline);
+//	} else {
+//		tstring += "1";
+//	}
 	// probably best not to start with an invisible barline since
 	// a plain barline would not be shown before the first measure anyway.
 	// tstring += "-";
@@ -4817,6 +4820,28 @@ GridSlice* GridMeasure::getLastSpinedSlice(void) {
 		return slice;
 	}
 	return NULL;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::setMeasureNumber --
+//
+
+void GridMeasure::setMeasureNumber(int value) { 
+	m_barnum = value;
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::getMeasureNumber --
+//
+
+int GridMeasure::getMeasureNumber(void) {
+	return m_barnum;
 }
 
 
@@ -5341,7 +5366,6 @@ GridSlice::~GridSlice(void) {
 
 
 
-
 //////////////////////////////
 //
 // GridSlice::addToken -- Will not allocate part array, but will
@@ -5473,7 +5497,7 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				voice = this->at(0)->at(0)->at(0);
 				empty = (string)*voice->getToken();
 			} else {
-				empty = "=";
+				empty = "=YYYYYY";
 			}
 		}
 	} else if (isInterpretationSlice()) {
@@ -5495,7 +5519,7 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				voice = this->at(0)->at(0)->at(0);
 				token = new HumdrumToken((string)*voice->getToken());
 			} else {
-				token = new HumdrumToken("=");
+				token = new HumdrumToken("=XXXXX");
 			}
 			empty = (string)*token;
 		} else if (isInterpretationSlice()) {
@@ -7177,6 +7201,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	calculateGridDurations();
 
 	addNullTokens();
+	addInvisibleRestsInFirstTrack();
 	addMeasureLines();
 	buildSingleList();
 	addLastMeasure();
@@ -8110,7 +8135,11 @@ void HumGrid::addMeasureLines(void) {
 					lcount = 1;
 				}
 				for (int v=0; v<lcount; v++) {
-					token = createBarToken(m, barnums[m], measure);
+					int num = measure->getMeasureNumber();
+					if (m < (int)barnums.size() - 1) {
+						num = barnums[m+1];
+					}
+					token = createBarToken(m, num, measure);
 					gv = new GridVoice(token, 0);
 					mslice->at(p)->at(s)->push_back(gv);
 				}
@@ -8328,7 +8357,6 @@ bool HumGrid::buildSingleList(void) {
 		dur = (ts2 - ts1); // whole-note units
 		m_allslices[i]->setDuration(dur);
 	}
-
 	return !m_allslices.empty();
 }
 
@@ -8372,7 +8400,7 @@ void HumGrid::addNullTokensForGraceNotes(void) {
 			continue;
 		}
 
-		FillInNullTokensForGraceNotes(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForGraceNotes(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -8416,7 +8444,7 @@ void HumGrid::addNullTokensForLayoutComments(void) {
 			continue;
 		}
 
-		FillInNullTokensForLayoutComments(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForLayoutComments(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -8460,7 +8488,7 @@ void HumGrid::addNullTokensForClefChanges(void) {
 			continue;
 		}
 
-		FillInNullTokensForClefChanges(m_allslices[i], lastnote, nextnote);
+		fillInNullTokensForClefChanges(m_allslices[i], lastnote, nextnote);
 	}
 }
 
@@ -8468,10 +8496,10 @@ void HumGrid::addNullTokensForClefChanges(void) {
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForClefChanges --
+// HumGrid::fillInNullTokensForClefChanges --
 //
 
-void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
+void HumGrid::fillInNullTokensForClefChanges(GridSlice* clefslice,
 		GridSlice* lastnote, GridSlice* nextnote) {
 
 	if (clefslice == NULL) { return; }
@@ -8525,10 +8553,10 @@ void HumGrid::FillInNullTokensForClefChanges(GridSlice* clefslice,
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForLayoutComments --
+// HumGrid::fillInNullTokensForLayoutComments --
 //
 
-void HumGrid::FillInNullTokensForLayoutComments(GridSlice* layoutslice,
+void HumGrid::fillInNullTokensForLayoutComments(GridSlice* layoutslice,
 		GridSlice* lastnote, GridSlice* nextnote) {
 
 	if (layoutslice == NULL) { return; }
@@ -8586,10 +8614,10 @@ void HumGrid::FillInNullTokensForLayoutComments(GridSlice* layoutslice,
 
 //////////////////////////////
 //
-// HumGrid::FillInNullTokensForGraceNotes --
+// HumGrid::fillInNullTokensForGraceNotes --
 //
 
-void HumGrid::FillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
+void HumGrid::fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		GridSlice* nextnote) {
 
 	if (graceslice == NULL) {
@@ -8712,9 +8740,143 @@ void HumGrid::addNullTokens(void) {
 
 //////////////////////////////
 //
+// HumGrid::setPartStaffDimensions --
+//
+
+void HumGrid::setPartStaffDimensions(vector<vector<GridSlice*>>& nextevent,
+		GridSlice* startslice) {
+	nextevent.clear();
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		if (!m_allslices[i]->isNoteSlice()) {
+			continue;
+		}
+		GridSlice* slice = m_allslices[i];
+		nextevent.resize(slice->size());
+		for (int p=0; p<(int)slice->size(); p++) {
+			nextevent[p].resize(slice[p].size());
+			for (int j=0; j<(int)nextevent[p].size(); j++) {
+				nextevent[p][j] = startslice;
+			}
+		}
+		break;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::addInvisibleRestsInFirstTrack --  If there are any
+//    timing gaps in the first track of a **kern spine, then
+//    fill in with invisible rests.
+//
+
+void HumGrid::addInvisibleRestsInFirstTrack(void) {
+	int i; // slice index
+	int p; // part index
+	int s; // staff index
+	int v = 0; // only looking at first voice
+
+	vector<vector<GridSlice*>> nextevent;
+	GridSlice* lastslice = m_allslices.back();
+	setPartStaffDimensions(nextevent, lastslice);
+
+	for (i=(int)m_allslices.size()-1; i>=0; i--) {
+		GridSlice& slice = *m_allslices.at(i);
+		if (!slice.isNoteSlice()) {
+			continue;
+		}
+      for (p=0; p<(int)slice.size(); p++) {
+			GridPart& part = *slice.at(p);
+      	for (s=0; s<(int)part.size(); s++) {
+				GridStaff& staff = *part.at(s);
+				if (!staff.at(v)) {
+					// in theory should not happen
+					continue;
+				}
+				GridVoice& gv = *staff.at(v);
+				if (gv.isNull()) {
+					continue;
+				}
+
+				// Found a note/rest.  Check if its duration matches
+				// the next non-null data token.  If not, then add
+				// an invisible rest somewhere between the two
+
+				// first check to see if the previous item is a
+				// NULL.  If so, then store and continue.
+				if (nextevent[p][s] == NULL) {
+					nextevent[p][s] = &slice;
+					continue;
+				}
+				addInvisibleRest(nextevent, i, p, s);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::addInvisibleRest --
+//
+
+void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
+		int index, int p, int s) {
+	GridSlice *ending = nextevent[p][s];
+	if (ending == NULL) {
+		cerr << "Not handling this case yet at end of data." << endl;
+		return;
+	}
+	HumNum endtime = ending->getTimestamp();
+
+	GridSlice* starting = m_allslices.at(index);
+	HumNum starttime = starting->getTimestamp();
+	HTp token = starting->at(p)->at(s)->at(0)->getToken();
+	HumNum duration = Convert::recipToDuration(token);
+	HumNum difference = endtime - starttime;
+	HumNum gap = difference - duration;
+	if (gap == 0) {
+		// nothing to do
+		nextevent[p][s] = starting;
+		return;
+	}
+	HumNum target = starttime + duration;
+
+	string kern = Convert::durationToRecip(gap);
+	kern += "ryy";
+
+	for (int i=index+1; i<(int)m_allslices.size(); i++) {
+		GridSlice* slice = m_allslices[i];
+		if (!slice->isNoteSlice()) {
+			continue;
+		}
+		HumNum timestamp = slice->getTimestamp();
+		if (timestamp < target) {
+			continue;
+		}
+		if (timestamp > target) {
+			cerr << "Cannot deal with this slice addition case yet..." << endl;
+			nextevent[p][s] = starting;
+			return;
+		}
+		// At timestamp for adding new token.
+		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		break;
+	}
+
+	// Store the current event in the buffer
+	nextevent[p][s] = starting;
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::adjustClefChanges -- If a clef change starts at the
-// beginning of a meausre, move it to before the measure (unless
-// the measure has zero duration).
+//     beginning of a meausre, move it to before the measure (unless
+//     the measure has zero duration).
 //
 
 void HumGrid::adjustClefChanges(void) {
@@ -9704,10 +9866,6 @@ ostream& operator<<(ostream& out, HumGrid& grid) {
 	}
 	return out;
 }
-
-
-
-
 
 
 
@@ -27342,6 +27500,8 @@ int MuseData::readString(const string& data) {
 void MuseData::doAnalyses(void) {
 	analyzeType();
 	if (hasError()) { return; }
+	assignHeaderBodyState();
+   analyzeLayers();
 	analyzeRhythm();
 	if (hasError()) { return; }
 	constructTimeSequence();
@@ -28391,6 +28551,28 @@ bool MuseData::isWorkTitle(int index) {
 
 //////////////////////////////
 //
+// MuseData::isHeaderRecord -- return true if in the header.
+//
+
+bool MuseData::isHeaderRecord(int index) {
+	return getRecord(index).isHeaderRecord();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::isBodyRecord -- return true if in the body.
+//
+
+bool MuseData::isBodyRecord(int index) {
+	return getRecord(index).isBodyRecord();
+}
+
+
+
+//////////////////////////////
+//
 // MuseData::isCopyright -- return true if a work title line.
 //
 
@@ -28647,7 +28829,7 @@ std::string MuseData::getId(void) {
 //////////////////////////////
 //
 // MuseData::getComposer --  The composer is not indicated in a MuseData file.
-//    Infer it from the ID line if a file-location ID is present, since the 
+//    Infer it from the ID line if a file-location ID is present, since the
 //    composers name is abbreviated in the directory name.
 //
 
@@ -28756,6 +28938,134 @@ std::string MuseData::trimSpaces(std::string input) {
 		}
 	}
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeLayers --  When there is a backup command in the
+//   measure and no voice information, provide the voice information.
+//   Primarily use the stem directions to make this determination.
+//   Also, other features can be used:
+//      beaming (do not split beamed notes across layers)
+//      pitch (higher versus lower pitch).
+//   Mostly this is only useful for two-voiced measures.
+//   How to deal with voices on multiple staves will be more complex.
+//
+
+void MuseData::analyzeLayers(void) {
+	int lcount = getLineCount();
+	for (int i=0; i<lcount; i++) {
+		i = analyzeLayersInMeasure(i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeLayersInMeasure -- returns the
+//   index of the next barline.
+//
+
+int MuseData::analyzeLayersInMeasure(int startindex) {
+	int i = startindex;
+	int lcount = getLineCount();
+	if (i >= lcount) {
+		return lcount+1;
+	}
+
+	// Not necessarily a barline, but at least the first
+	// record for the measure (may be missing at start
+	// of music).
+
+	while ((i < lcount) && isHeaderRecord(i)) {
+		i++;
+	}
+	if ((i < lcount) && getRecord(i).isBarline()) {
+		i++;
+	}
+	// Now should be at start of data for a measure.
+
+	if (i >= lcount) {
+		return lcount+1;
+	}
+
+	vector<vector<MuseRecord*>> segments(1);
+	while (i < lcount) {
+		MuseRecord *mr = &getRecord(i);
+		if (mr->isBarline()) {
+			break;
+		}
+		segments.back().push_back(mr);
+		if (mr->isBackup()) {
+			segments.resize(segments.size() + 1);
+		}
+		i++;
+	}
+	int position = i-1;
+
+	if (segments.size() < 2) {
+		// no backup in measure, so single voice/layer
+		return position;
+	}
+
+	// Assign each backup segment to a successive track
+	// if the layer does not have explicit track information.
+	int track;
+
+	for (int i=0; i<(int)segments.size(); i++) {
+		for (int j=0; j<(int)segments[i].size(); j++) {
+			MuseRecord* mr = segments[i][j];
+			int trackfield = mr->getTrack();
+			if (trackfield == 0) {
+				track = i+1;
+			} else {
+				track = trackfield;
+			}
+			mr->setLayer(track);
+		}
+	}
+
+
+	return position;
+}
+
+
+
+//////////////////////////////
+//
+// assignHeaderBodyState --
+//
+
+void MuseData::assignHeaderBodyState(void) {
+	int state = 1;
+	int foundend = 0;
+	for (int i=0; i<(int)m_data.size(); i++) {
+		if (m_data[i]->isAnyComment()) {
+			// Comments inherit state if previous non-comment line
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if (state == 0) {
+			// no longer in the header
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if ((!foundend) && m_data[i]->isGroup()) {
+			foundend = 1;
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		if (foundend && !m_data[i]->isGroup()) {
+			state = 0;
+			m_data[i]->setHeaderState(state);
+			continue;
+		}
+		// still in header
+		m_data[i]->setHeaderState(state);
+	}
 }
 
 
@@ -30294,8 +30604,11 @@ int MuseRecord::levelQ(void) {
 //
 
 string MuseRecord::getTrackField(void) {
-	allowNotesOnly("getTrackField");
-	return extract(15, 15);
+	if (!isAnyNoteOrRest()) {
+		return extract(15, 15);
+	} else {
+		return " ";
+	}
 }
 
 
@@ -30317,14 +30630,15 @@ string MuseRecord::getTrackString(void) {
 
 //////////////////////////////
 //
-// MuseRecord::getTrack --
+// MuseRecord::getTrack -- Return 0 if no track information (implicitly track 1,
+//     or unlabelled higher track).
 //
 
 int MuseRecord::getTrack(void) {
 	int output = 1;
 	string recordInfo = getTrackField();
 	if (recordInfo[0] == ' ') {
-		output = 1;
+		output = 0;
 	} else {
 		output = std::strtol(recordInfo.c_str(), NULL, 36);
 	}
@@ -31646,8 +31960,8 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string notatedAccidental = getNotatedAccidentalString();
 
 	if (notatedAccidental.empty() && !logicalAccidental.empty()) {
-		// Indicate that the logical accidental should not be 
-		// displayed (because of key signature or previous 
+		// Indicate that the logical accidental should not be
+		// displayed (because of key signature or previous
 		// note in the measure that alters the accidental
 		// state of the current note).
 		output += "y";
@@ -31935,7 +32249,11 @@ int MuseRecord::measureNumberQ(void) {
 //
 
 string MuseRecord::getMeasureFlagsString(void) {
-	return trimSpaces(m_recordString.substr(16));
+	if (m_recordString.size() < 17) {
+		return "";
+	} else {
+		return trimSpaces(m_recordString.substr(16));
+	}
 }
 
 
@@ -32581,6 +32899,29 @@ void MuseRecord::allowNotesOnly(const string& functionName) {
 
 //////////////////////////////
 //
+// MuseRecord::allowNotesAndRestsOnly --
+//
+
+void MuseRecord::allowNotesAndRestsOnly(const string& functionName) {
+	switch (getType()) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_grace:
+		case E_muserec_note_cue:
+		case E_muserec_rest:
+		case E_muserec_rest_invisible:
+		  break;
+		default:
+			cerr << "Error: can only access " << functionName
+				  << " on a note or rest records.  Line is: " << getLine() << endl;
+			return;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getAddElementIndex -- get the first element pointed
 //	to by the specified index in the additional notations field.
 //	returns 0 if no element was found, or 1 if an element was found.
@@ -32792,6 +33133,8 @@ MuseRecordBasic::MuseRecordBasic(void) {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -32809,6 +33152,8 @@ MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -32833,6 +33178,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_layer        =    0;
 }
 
 
@@ -32844,6 +33190,16 @@ MuseRecordBasic::~MuseRecordBasic() {
 
 void MuseRecordBasic::clear(void) {
 	m_recordString.clear();
+	m_lineindex    =   -1;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
+	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -33582,6 +33938,50 @@ bool MuseRecordBasic::isBarline(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isBackup --
+//
+
+bool MuseRecordBasic::isBackup(void) {
+	return m_type == E_muserec_back;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyComment --
+//
+
+bool MuseRecordBasic::isAnyComment(void) {
+	return isLineComment() || isBlockComment();
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isLineComment --
+//
+
+bool MuseRecordBasic::isLineComment(void) {
+	return m_type == E_muserec_comment_line;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBlockComment --
+//
+
+bool MuseRecordBasic::isBlockComment(void) {
+	return m_type == E_muserec_comment_toggle;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
 //    note in a chord (not the first note in the chord).
 //
@@ -33672,7 +34072,28 @@ bool MuseRecordBasic::isAnyNote(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRest --
+// MuseRecordBasic::isAnyNoteOrRest --
+//
+
+bool MuseRecordBasic::isAnyNoteOrRest(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_cue:
+		case E_muserec_note_grace:
+		case E_muserec_note_grace_chord:
+		case E_muserec_rest_invisible:
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRest -- Also cue-sized rests?
 //
 
 bool MuseRecordBasic::isRest(void) {
@@ -33748,6 +34169,59 @@ bool MuseRecordBasic::isMovementTitle(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isGroup --
+//
+
+bool MuseRecordBasic::isGroup(void) {
+	switch (m_type) {
+		case E_muserec_group:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGroupMembership --
+//
+
+bool MuseRecordBasic::isGroupMembership(void) {
+	switch (m_type) {
+		case E_muserec_group_memberships:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isHeaderRecord -- True if a header, or a comment
+//   occurring before the first non-header record.
+//
+
+bool MuseRecordBasic::isHeaderRecord(void) {
+	return m_header > 0;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBodyRecord -- True if not a header record.
+//
+
+bool MuseRecordBasic::isBodyRecord(void) {
+	return m_header == 0;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::trimSpaces --
 //
 
@@ -33774,6 +34248,57 @@ string MuseRecordBasic::trimSpaces(std::string input) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseRecordBasic::setHeaderState -- 1 = in header, 0 = in body, -1 = undefined.
+//    Access with isHeaderRecord() and isBodyRecord().
+//
+
+void MuseRecordBasic::setHeaderState(int state) {
+	if (state > 0) {
+		m_header = 1;
+	} else if (state < 0) {
+		m_header = -1;
+	} else {
+		m_header = 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::setLayer -- Set the layer for the record.
+//    This information is taken from the track parameter
+//    of records, but may be inferred from its position in 
+//    relation to backup commands.  Zero means implicit layer 1.
+//
+
+void MuseRecordBasic::setLayer(int layer) {
+	if (layer < 0) {
+		m_layer = 0;
+	} else {
+		m_layer = layer;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getLayer -- Get the layer for the record.
+//    This information is taken from the track parameter
+//    of records, but may be inferred from its position in 
+//    relation to backup commands.  Zero means implicit layer 1.
+//
+
+int MuseRecordBasic::getLayer(void) { 
+	return m_layer;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 
@@ -33787,6 +34312,11 @@ ostream& operator<<(ostream& out, MuseRecordBasic& aRecord) {
 						    // muse2ps program chokes on line 9 of header
 						    // if it has more than one space on a blank line.
 	out << aRecord.getLine();
+	return out;
+}
+
+ostream& operator<<(ostream& out, MuseRecordBasic* aRecord) {
+	out << *aRecord;
 	return out;
 }
 
@@ -60318,7 +60848,6 @@ bool Tool_musedata2hum::convertFile(ostream& out, const string& filename) {
 		cerr << "Error description:\t" << mds.getError() << "\n";
 		exit(1);
 	}
-
 	return convert(out, mds);
 }
 
@@ -60340,7 +60869,6 @@ bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
 	}
 	return convert(out, mds);
 }
-
 
 
 bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
@@ -60474,7 +61002,7 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
 	m_lastfigure = NULL;
-
+	m_lastbarnum = -1;
 	m_tpq = part.getInitialTpq();
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
@@ -60524,6 +61052,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
+	setMeasureNumber(outdata[(int)outdata.size() - 1], part[startindex]);
 	gm->setBarStyle(MeasureStyle::Plain);
 	int i = startindex;
 	for (i=startindex; i<part.getLineCount(); i++) {
@@ -60549,6 +61078,40 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	}
 
 	return i;
+}
+
+//////////////////////////////
+//
+// Tool_musedata2hum::setMeasureNumber --
+//
+
+void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
+	int pos = -1;
+	string line = mr.getLine();
+	bool space = false;
+	for (int i=0; i<(int)line.size(); i++) {
+		if (isspace(line[i])) {
+			space = true;
+			continue;
+		}
+		if (!space) {
+			continue;
+		}
+		if (isdigit(line[i])) {
+			pos = i;
+			break;
+		}
+	}
+	if (pos < 0) {
+		return;
+	}
+	int num = stoi(line.substr(pos));
+	if (m_lastbarnum >= 0) {
+		int temp = num;
+		num = m_lastbarnum;
+		m_lastbarnum = temp;
+	}
+	gm->setMeasureNumber(num);
 }
 
 
@@ -60592,9 +61155,15 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	int part         = m_part;
 	int staff        = 0;
 	int maxstaff     = m_maxstaff;
-	int voice        = 0;
+	int layer        = mr.getLayer();
+	if (layer > 0) {
+		// convert to an index:
+		layer = layer - 1;
+	}
+	
 	HumNum timestamp = mr.getAbsBeat();
 	string tok;
+	GridSlice* slice;
 
 	if (mr.isBarline()) {
 		tok = mr.getKernMeasureStyle();
@@ -60616,31 +61185,30 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		if (!mclef.empty()) {
 			string kclef = Convert::museClefToKernClef(mclef);
 			if (!kclef.empty()) {
-				gm->addClefToken(kclef, timestamp, part, staff, voice, maxstaff);
+				gm->addClefToken(kclef, timestamp, part, staff, layer, maxstaff);
 			}
 		}
 
 		string mkeysig = attributes["K"];
 		if (!mkeysig.empty()) {
 			string kkeysig = Convert::museKeySigToKernKeySig(mkeysig);
-			gm->addKeySigToken(kkeysig, timestamp, part, staff, voice, maxstaff);
+			gm->addKeySigToken(kkeysig, timestamp, part, staff, layer, maxstaff);
 		}
 
 		string mtimesig = attributes["T"];
 		if (!mtimesig.empty()) {
 			string ktimesig = Convert::museTimeSigToKernTimeSig(mtimesig);
-			gm->addTimeSigToken(ktimesig, timestamp, part, staff, voice, maxstaff);
+			slice = gm->addTimeSigToken(ktimesig, timestamp, part, staff, layer, maxstaff);
 			setTimeSigDurInfo(ktimesig);
 			string kmeter = Convert::museMeterSigToKernMeterSig(mtimesig);
 			if (!kmeter.empty()) {
-				gm->addMeterSigToken(kmeter, timestamp, part, staff, voice, maxstaff);
+				slice = gm->addMeterSigToken(kmeter, timestamp, part, staff, layer, maxstaff);
 			}
 		}
 
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
-		GridSlice* slice;
-		slice = gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
@@ -60653,8 +61221,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isRest()) {
+		// maybe split into regular rest and irest?
 		tok  = mr.getKernRestStyle(tpq);
-		gm->addDataToken(tok, timestamp, part, staff, voice, maxstaff);
+		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 	}
 }
 
@@ -60669,17 +61238,20 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HumNum timestamp, int part, int maxstaff) {
 	string fh = mr.getFigureString();
 	fh = Convert::museFiguredBassToKernFiguredBass(fh);
+	GridSlice* slice;
 	if (fh.find(":") == string::npos) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
 	if (!m_lastfigure) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -60726,7 +61298,8 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	if (pieces.empty() || (position >= (int)pieces.size())) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -60744,7 +61317,8 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	fh.erase(colpos, 1);
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
-	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 }
 
 

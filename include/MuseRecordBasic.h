@@ -76,6 +76,7 @@ namespace hum {
 #define E_muserec_group_memberships  'A'  // group memberships
 // multiple musered_head_12 lines can occur:
 #define E_muserec_header_12          'B'  // <name1>: part <x> of <num in group>
+#define E_muserec_group              'B'  // <name1>: part <x> of <num in group>
 #define E_muserec_unknown            'U'  // unknown record type
 #define E_muserec_empty              'E'  // nothing on line and not header
 	                                       // or multi-line comment
@@ -110,6 +111,7 @@ class MuseRecordBasic {
 		int               getType            (void) const;
 		void              setTypeGraceNote   (void);
 		void              setTypeGraceChordNote(void);
+		void              setHeaderState     (int state);
 
 		MuseRecordBasic&  operator=          (MuseRecordBasic& aRecord);
 		MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
@@ -144,6 +146,8 @@ class MuseRecordBasic {
 		void              setMarkupPitch     (int aPitch);
 		int               getMarkupPitch     (void);
 
+		void              setLayer           (int layer);
+		int               getLayer           (void);
 
 		// tied note functions:
 		int               isTied                  (void);
@@ -153,18 +157,27 @@ class MuseRecordBasic {
 		void              setNextTiedNoteLineIndex(int index);
 
 		// boolean type fuctions:
+		bool              isAnyNote          (void);
+		bool              isAnyNoteOrRest    (void);
 		bool              isAttributes       (void);
+		bool              isBackup           (void);
 		bool              isBarline          (void);
+		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isAnyComment       (void);
+		bool              isLineComment      (void);
+		bool              isBlockComment     (void);
 		bool              isCopyright        (void);
 		bool              isCueNote          (void);
 		bool              isEncoder          (void);
 		bool              isFiguredHarmony   (void);
 		bool              isGraceNote        (void);
+		bool              isGroup            (void);
+		bool              isGroupMembership  (void);
+		bool              isHeaderRecord     (void);
 		bool              isId               (void);
 		bool              isMovementTitle    (void);
-		bool              isAnyNote          (void);
 		bool              isPartName         (void);
 		bool              isRegularNote      (void);
 		bool              isRest             (void);
@@ -188,6 +201,8 @@ class MuseRecordBasic {
 		int               m_lasttiednote;    // line number of previous note tied
 		                                     // to this one (-1 if no tied note)
 		int               m_roundBreve;
+		int               m_header = -1;     // -1 = undefined, 0 = no, 1 = yes
+		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
 
 	public:
 		static std::string       trimSpaces         (std::string input);
@@ -195,6 +210,7 @@ class MuseRecordBasic {
 
 
 std::ostream& operator<<(std::ostream& out, MuseRecordBasic& aRecord);
+std::ostream& operator<<(std::ostream& out, MuseRecordBasic* aRecord);
 
 
 

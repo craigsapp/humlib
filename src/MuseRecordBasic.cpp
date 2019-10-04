@@ -41,6 +41,8 @@ MuseRecordBasic::MuseRecordBasic(void) {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -58,6 +60,8 @@ MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -82,6 +86,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 	m_nexttiednote =   -1;
 	m_lasttiednote =   -1;
 	m_roundBreve   =    0;
+	m_layer        =    0;
 }
 
 
@@ -93,6 +98,16 @@ MuseRecordBasic::~MuseRecordBasic() {
 
 void MuseRecordBasic::clear(void) {
 	m_recordString.clear();
+	m_lineindex    =   -1;
+	m_absbeat      =    0;
+	m_lineduration =    0;
+	m_noteduration =    0;
+	m_b40pitch     = -100;
+	m_nexttiednote =   -1;
+	m_lasttiednote =   -1;
+	m_roundBreve   =    0;
+	m_header       =   -1;
+	m_layer        =    0;
 }
 
 
@@ -831,6 +846,50 @@ bool MuseRecordBasic::isBarline(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isBackup --
+//
+
+bool MuseRecordBasic::isBackup(void) {
+	return m_type == E_muserec_back;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyComment --
+//
+
+bool MuseRecordBasic::isAnyComment(void) {
+	return isLineComment() || isBlockComment();
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isLineComment --
+//
+
+bool MuseRecordBasic::isLineComment(void) {
+	return m_type == E_muserec_comment_line;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBlockComment --
+//
+
+bool MuseRecordBasic::isBlockComment(void) {
+	return m_type == E_muserec_comment_toggle;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
 //    note in a chord (not the first note in the chord).
 //
@@ -921,7 +980,28 @@ bool MuseRecordBasic::isAnyNote(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRest --
+// MuseRecordBasic::isAnyNoteOrRest --
+//
+
+bool MuseRecordBasic::isAnyNoteOrRest(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_cue:
+		case E_muserec_note_grace:
+		case E_muserec_note_grace_chord:
+		case E_muserec_rest_invisible:
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRest -- Also cue-sized rests?
 //
 
 bool MuseRecordBasic::isRest(void) {
@@ -997,6 +1077,59 @@ bool MuseRecordBasic::isMovementTitle(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isGroup --
+//
+
+bool MuseRecordBasic::isGroup(void) {
+	switch (m_type) {
+		case E_muserec_group:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGroupMembership --
+//
+
+bool MuseRecordBasic::isGroupMembership(void) {
+	switch (m_type) {
+		case E_muserec_group_memberships:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isHeaderRecord -- True if a header, or a comment
+//   occurring before the first non-header record.
+//
+
+bool MuseRecordBasic::isHeaderRecord(void) {
+	return m_header > 0;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBodyRecord -- True if not a header record.
+//
+
+bool MuseRecordBasic::isBodyRecord(void) {
+	return m_header == 0;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::trimSpaces --
 //
 
@@ -1023,6 +1156,57 @@ string MuseRecordBasic::trimSpaces(std::string input) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseRecordBasic::setHeaderState -- 1 = in header, 0 = in body, -1 = undefined.
+//    Access with isHeaderRecord() and isBodyRecord().
+//
+
+void MuseRecordBasic::setHeaderState(int state) {
+	if (state > 0) {
+		m_header = 1;
+	} else if (state < 0) {
+		m_header = -1;
+	} else {
+		m_header = 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::setLayer -- Set the layer for the record.
+//    This information is taken from the track parameter
+//    of records, but may be inferred from its position in 
+//    relation to backup commands.  Zero means implicit layer 1.
+//
+
+void MuseRecordBasic::setLayer(int layer) {
+	if (layer < 0) {
+		m_layer = 0;
+	} else {
+		m_layer = layer;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getLayer -- Get the layer for the record.
+//    This information is taken from the track parameter
+//    of records, but may be inferred from its position in 
+//    relation to backup commands.  Zero means implicit layer 1.
+//
+
+int MuseRecordBasic::getLayer(void) { 
+	return m_layer;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 
@@ -1036,6 +1220,11 @@ ostream& operator<<(ostream& out, MuseRecordBasic& aRecord) {
 						    // muse2ps program chokes on line 9 of header
 						    // if it has more than one space on a blank line.
 	out << aRecord.getLine();
+	return out;
+}
+
+ostream& operator<<(ostream& out, MuseRecordBasic* aRecord) {
+	out << *aRecord;
 	return out;
 }
 
