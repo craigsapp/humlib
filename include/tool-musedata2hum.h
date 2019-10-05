@@ -71,6 +71,7 @@ class Tool_musedata2hum : public HumTool {
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 		HTp m_lastfigure = NULL;     // last figured bass token
 		int m_lastbarnum = -1;       // barnumber carried over from previous bar
+		HTp m_lastnote = NULL;       // for dealing with chords.
 
 };
 

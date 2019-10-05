@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  4 07:57:34 PDT 2019
+// Last Modified: Fri Oct  4 17:07:45 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27447,7 +27447,7 @@ int MuseData::read(istream& input) {
 		} else {
 			isnewline = 0;
 		}
-	
+
 		if (isnewline && (value == 0x0a) && (lastvalue == 0x0d)) {
 			// ignore the second newline character in a dos-style newline.
 			lastvalue = value;
@@ -27455,7 +27455,7 @@ int MuseData::read(istream& input) {
 		} else {
 			lastvalue = value;
 		}
-	
+
 		if (isnewline) {
 			MuseData::append(dataline);
 			dataline.clear();
@@ -27499,6 +27499,7 @@ int MuseData::readString(const string& data) {
 
 void MuseData::doAnalyses(void) {
 	analyzeType();
+	analyzeTpq();
 	if (hasError()) { return; }
 	assignHeaderBodyState();
    analyzeLayers();
@@ -27510,6 +27511,32 @@ void MuseData::doAnalyses(void) {
 	if (hasError()) { return; }
 	analyzeTies();
 	if (hasError()) { return; }
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeTpq -- Read $ records for Q: field values and store
+//    the ticks-per-quarter note value on each line after that $ record.
+//    This is used later to extract the logical duration of notes and rests.
+//
+
+void MuseData::analyzeTpq(void) {
+	HumRegex hre;
+	int ticks = 0;
+	for (int i=0; i<getLineCount(); i++) {
+		MuseRecord* mr = &getRecord(i);
+		if (!mr->isAttributes()) {
+			mr->setTpq(ticks);
+			continue;
+		}
+		string line = getLine(i);
+		if (hre.search(line, " Q:(\\d+)")) {
+			ticks = hre.getMatchInt(1);
+		}
+		mr->setTpq(ticks);
+	}
 }
 
 
@@ -27611,7 +27638,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 		// track, so search for the same pitch in any track at the event time:
 		 nextrindex = searchForPitch(nexteindex, base40, -1);
 	}
-	
+
 	if (nextrindex < 0) {
 		// Failed to find a note at the target event time which could be
 		// tied to the current note (no pitches at that time which match
@@ -28144,7 +28171,7 @@ HumNum MuseData::getTiedDuration(int index) {
 	if (getRecord(index).getNextTiedNoteLineIndex() < 0) {
 		return getRecord(index).getNoteDuration();
 	}
-	
+
 	// this is start of a group of tied notes.  Start figuring out
 	// how long the duration of the tied group is.
 	output = getRecord(index).getNoteDuration();
@@ -29926,7 +29953,7 @@ int MuseRecord::getNoteTickDuration(void) {
 
 //////////////////////////////
 //
-// MuseRecord::setDots -- Only one or two dots allowed
+// MuseRecord::setDots --
 //
 
 void MuseRecord::setDots(int value) {
@@ -29938,6 +29965,25 @@ void MuseRecord::setDots(int value) {
 		case 4: getColumn(18) = '!';   break;
 		default: cerr << "Error in MuseRecord::setDots : " << value << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDotCount --
+//
+
+int MuseRecord::getDotCount(void) {
+	char value = getColumn(18);
+	switch (value) {
+		case ' ': return 0;
+		case '.': return 1;
+		case ':': return 2;
+		case ';': return 3;
+		case '!': return 4;
+	}
+	return 0;
 }
 
 
@@ -30699,6 +30745,30 @@ string MuseRecord::getGraphicNoteTypeString(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getGraphicRecip --
+//
+
+string MuseRecord::getGraphicRecip(void) {
+	int notetype = getGraphicNoteType();
+	string output;
+	switch (notetype) {
+		case -3: output = "0000"; break;  // double-maxima
+		case -2: output = "000"; break;   // maxima
+		case -1: output = "00"; break;    // long
+		default:
+			output = to_string(notetype);  // regular **recip number
+	}
+	int dotcount = getDotCount();
+	for (int i=0; i<dotcount; i++) {
+		output += '.';
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getGraphicNoteType --
 //
 
@@ -30711,29 +30781,29 @@ int MuseRecord::getGraphicNoteType(void) {
 	}
 
 	switch (recordInfo[0]) {
-		case 'M':                            // Maxima
+		case 'M':                          // Maxima
 			output = -2;           break;
-		case 'L':   case 'B':                // Longa
+		case 'L':   case 'B':              // Longa
 			output = -1;           break;
-		case 'b':   case 'A':                // Breve
+		case 'b':   case 'A':              // Breve
 			output = 0;            break;
-		case 'w':   case '9':                // Whole
+		case 'w':   case '9':              // Whole
 			output = 1;            break;
-		case 'h':   case '8':                // Half
+		case 'h':   case '8':              // Half
 			output = 2;            break;
-		case 'q':   case '7':                // Quarter
+		case 'q':   case '7':              // Quarter
 			output = 4;            break;
-		case 'e':   case '6':                // Eighth
+		case 'e':   case '6':              // Eighth
 			output = 8;            break;
-		case 's':   case '5':                // Sixteenth
+		case 's':   case '5':              // Sixteenth
 			output = 16;           break;
-		case 't':   case '4':                // 32nd note
+		case 't':   case '4':              // 32nd note
 			output = 32;           break;
-		case 'x':   case '3':                // 64th note
+		case 'x':   case '3':              // 64th note
 			output = 64;           break;
-		case 'y':   case '2':                // 128th note
+		case 'y':   case '2':              // 128th note
 			output = 128;          break;
-		case 'z':   case '1':                // 256th note
+		case 'z':   case '1':              // 256th note
 			output = 256;          break;
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
@@ -31535,8 +31605,8 @@ int MuseRecord::beam256Q(void) {
 
 string MuseRecord::getKernBeamStyle(void) {
 	string output;
-	string beams = getBeamField();   // 6 characters wide
-	for (int i=0; i<6; i++) {
+	string beams = getBeamField();
+	for (int i=0; i<(int)beams.size(); i++) {
 		switch (beams[i]) {
 			case '[':                 // start beam
 				output += "L";
@@ -31928,7 +31998,7 @@ string MuseRecord::getVerse(int index) {
 //////////////////////////////
 //
 // MuseRecord::getKernNoteStyle --
-//	default values: beams = 0, stems = 0
+//	    default values: beams = 0, stems = 0
 //
 
 string MuseRecord::getKernNoteStyle(int beams, int stems) {
@@ -31945,11 +32015,49 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 			notetype = notetype * 2;
 		}
 	}
-	tempdur << notetype;
-	output = tempdur.str();
 
-	// add any dots of prolongation to the output string
-	output += getStringProlongation();
+	// logical duration of the note
+	HumNum logicalduration = getTicks();
+	logicalduration /= getTpq();
+	string durrecip = Convert::durationToRecip(logicalduration);
+
+	// graphical duration of the note
+	string graphicrecip = getGraphicRecip();
+	HumNum graphicdur = Convert::recipToDuration(graphicrecip);
+
+	string displayrecip;
+
+	if (graphicdur != logicalduration) {
+		// switch to the logical duration and store the graphic
+		// duration.  The logical duration will be used on the
+		// main kern token, and the graphic duration will be stored
+		// as a layout parameter, such as !LO:N:vis=4. to display
+		// the note as a dotted quarter regardless of the logical
+		// duration.
+
+		// Current test file has encoding bug related to triplets, so
+		// disable graphic notation dealing with tuplets for now.
+
+		// for now just looking to see if one has a dot and the other does not
+		if ((durrecip.find(".") != string::npos) &&
+				(graphicrecip.find(".") == string::npos)) {
+			m_graphicrecip = graphicrecip;
+			displayrecip = durrecip;
+		} else if ((durrecip.find(".") == string::npos) &&
+				(graphicrecip.find(".") != string::npos)) {
+			m_graphicrecip = graphicrecip;
+			displayrecip = durrecip;
+		}
+	}
+
+	if (displayrecip.size() > 0) {
+		output = displayrecip;
+	} else {
+		tempdur << notetype;
+		output = tempdur.str();
+		// add any dots of prolongation to the output string
+		output += getStringProlongation();
+	}
 
 	// add the pitch to the output string
 	string musepitch = getPitchString();
@@ -34097,7 +34205,7 @@ bool MuseRecordBasic::isAnyNoteOrRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isInvisibleRest -- 
+// MuseRecordBasic::isInvisibleRest --
 //
 
 bool MuseRecordBasic::isInvisibleRest(void) {
@@ -34112,7 +34220,7 @@ bool MuseRecordBasic::isInvisibleRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRegularRest -- 
+// MuseRecordBasic::isRegularRest --
 //
 
 bool MuseRecordBasic::isRegularRest(void) {
@@ -34305,7 +34413,7 @@ void MuseRecordBasic::setHeaderState(int state) {
 //
 // MuseRecordBasic::setLayer -- Set the layer for the record.
 //    This information is taken from the track parameter
-//    of records, but may be inferred from its position in 
+//    of records, but may be inferred from its position in
 //    relation to backup commands.  Zero means implicit layer 1.
 //
 
@@ -34323,13 +34431,55 @@ void MuseRecordBasic::setLayer(int layer) {
 //
 // MuseRecordBasic::getLayer -- Get the layer for the record.
 //    This information is taken from the track parameter
-//    of records, but may be inferred from its position in 
+//    of records, but may be inferred from its position in
 //    relation to backup commands.  Zero means implicit layer 1.
 //
 
-int MuseRecordBasic::getLayer(void) { 
+int MuseRecordBasic::getLayer(void) {
 	return m_layer;
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:hasTpq --
+//
+
+bool MuseRecordBasic::hasTpq(void) {
+	if (m_tpq) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:getTpq --
+//
+
+int MuseRecordBasic::getTpq(void) {
+	return m_tpq;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:setTpq --
+//
+
+void MuseRecordBasic::setTpq(int value) {
+	if (value <= 0) {
+		m_tpq = 0;
+	} else {
+		m_tpq = value;
+	}
+}
+
 
 
 
@@ -61036,6 +61186,7 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
 	m_lastfigure = NULL;
+	m_lastnote = NULL;
 	m_lastbarnum = -1;
 	m_tpq = part.getInitialTpq();
 	m_part = index;
@@ -61239,15 +61390,23 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 				slice = gm->addMeterSigToken(kmeter, timestamp, part, staff, layer, maxstaff);
 			}
 		}
-
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
+		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
-		cerr << "PROCESS CHORD NOTE HERE: " << mr << endl;
+		tok = mr.getKernNoteStyle(1, 1);
+		if (m_lastnote) {
+			string text = m_lastnote->getText();
+			text += " ";
+			text += tok;
+			m_lastnote->setText(text);
+		} else {
+			cerr << "Warning: found chord note with no regular note to attach to" << endl;
+		}
 	} else if (mr.isCueNote()) {
 		cerr << "PROCESS CUE NOTE HERE: " << mr << endl;
 	} else if (mr.isGraceNote()) {
@@ -61276,7 +61435,6 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -61284,7 +61442,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -61332,7 +61489,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -61351,7 +61507,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
 	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Oct  4 07:57:34 PDT 2019
+// Last Modified: Fri Oct  4 17:07:45 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2627,6 +2627,9 @@ class MuseRecordBasic {
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
+		bool              hasTpq             (void);
+		int               getTpq             (void);
+		void              setTpq             (int value);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line
@@ -2646,6 +2649,8 @@ class MuseRecordBasic {
 		int               m_roundBreve;
 		int               m_header = -1;     // -1 = undefined, 0 = no, 1 = yes
 		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
+		int               m_tpq = 0;         // ticks-per-quarter for durations
+		std::string       m_graphicrecip;    // graphical duration of note/rest
 
 	public:
 		static std::string       trimSpaces         (std::string input);
@@ -2708,6 +2713,7 @@ class MuseRecord : public MuseRecordBasic {
 		void             setTicks                     (int value);
 		void             setBack                      (int value);
 		void             setDots                      (int value);
+		int              getDotCount                  (void);
 		void             setNoteheadShape             (HumNum duration);
 		void             setNoteheadShapeMensural     (HumNum duration);
 		void             setNoteheadMaxima            (void);
@@ -2767,6 +2773,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              getGraphicNoteType           (void);
 		int              getGraphicNoteTypeSize       (void);
 		int              graphicNoteTypeQ             (void);
+		std::string      getGraphicRecip              (void);
 
 		// column 18: dots of prolongation
 		std::string      getProlongationField         (void);
@@ -3035,6 +3042,7 @@ class MuseData {
 		void              analyzeRhythm       (void);
 		void              analyzeTies         (void);
 		void              analyzePitch        (void);
+		void              analyzeTpq          (void);
 
 		// line-based (file-order indexing) accessor functions:
 		MuseRecord&       operator[]          (int lindex);
@@ -3716,6 +3724,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		                             int maxstaff);
 		GridSlice*   addDataToken   (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addDataSubtoken(const std::string& tok, HumNum timestamp,
+		                             int part, int staff, int voice);
 		GridSlice*   addGraceToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff,
 		                             int gracenumber);
@@ -6348,6 +6358,7 @@ class Tool_musedata2hum : public HumTool {
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
 		HTp m_lastfigure = NULL;     // last figured bass token
 		int m_lastbarnum = -1;       // barnumber carried over from previous bar
+		HTp m_lastnote = NULL;       // for dealing with chords.
 
 };
 

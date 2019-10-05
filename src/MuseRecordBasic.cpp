@@ -1001,7 +1001,7 @@ bool MuseRecordBasic::isAnyNoteOrRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isInvisibleRest -- 
+// MuseRecordBasic::isInvisibleRest --
 //
 
 bool MuseRecordBasic::isInvisibleRest(void) {
@@ -1016,7 +1016,7 @@ bool MuseRecordBasic::isInvisibleRest(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isRegularRest -- 
+// MuseRecordBasic::isRegularRest --
 //
 
 bool MuseRecordBasic::isRegularRest(void) {
@@ -1209,7 +1209,7 @@ void MuseRecordBasic::setHeaderState(int state) {
 //
 // MuseRecordBasic::setLayer -- Set the layer for the record.
 //    This information is taken from the track parameter
-//    of records, but may be inferred from its position in 
+//    of records, but may be inferred from its position in
 //    relation to backup commands.  Zero means implicit layer 1.
 //
 
@@ -1227,13 +1227,55 @@ void MuseRecordBasic::setLayer(int layer) {
 //
 // MuseRecordBasic::getLayer -- Get the layer for the record.
 //    This information is taken from the track parameter
-//    of records, but may be inferred from its position in 
+//    of records, but may be inferred from its position in
 //    relation to backup commands.  Zero means implicit layer 1.
 //
 
-int MuseRecordBasic::getLayer(void) { 
+int MuseRecordBasic::getLayer(void) {
 	return m_layer;
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:hasTpq --
+//
+
+bool MuseRecordBasic::hasTpq(void) {
+	if (m_tpq) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:getTpq --
+//
+
+int MuseRecordBasic::getTpq(void) {
+	return m_tpq;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:setTpq --
+//
+
+void MuseRecordBasic::setTpq(int value) {
+	if (value <= 0) {
+		m_tpq = 0;
+	} else {
+		m_tpq = value;
+	}
+}
+
 
 
 

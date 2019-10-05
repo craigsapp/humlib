@@ -249,6 +249,7 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
 	MuseData& part = mds[index];
 	m_lastfigure = NULL;
+	m_lastnote = NULL;
 	m_lastbarnum = -1;
 	m_tpq = part.getInitialTpq();
 	m_part = index;
@@ -452,15 +453,23 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 				slice = gm->addMeterSigToken(kmeter, timestamp, part, staff, layer, maxstaff);
 			}
 		}
-
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
+		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
-		cerr << "PROCESS CHORD NOTE HERE: " << mr << endl;
+		tok = mr.getKernNoteStyle(1, 1);
+		if (m_lastnote) {
+			string text = m_lastnote->getText();
+			text += " ";
+			text += tok;
+			m_lastnote->setText(text);
+		} else {
+			cerr << "Warning: found chord note with no regular note to attach to" << endl;
+		}
 	} else if (mr.isCueNote()) {
 		cerr << "PROCESS CUE NOTE HERE: " << mr << endl;
 	} else if (mr.isGraceNote()) {
@@ -489,7 +498,6 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -497,7 +505,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -545,7 +552,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 		return;
 	}
 
@@ -564,7 +570,6 @@ cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
 	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
-cerr << "ADDED FIGURED BASS SLICE " << slice << endl;
 }
 
 

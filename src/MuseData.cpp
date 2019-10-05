@@ -379,7 +379,7 @@ int MuseData::read(istream& input) {
 		} else {
 			isnewline = 0;
 		}
-	
+
 		if (isnewline && (value == 0x0a) && (lastvalue == 0x0d)) {
 			// ignore the second newline character in a dos-style newline.
 			lastvalue = value;
@@ -387,7 +387,7 @@ int MuseData::read(istream& input) {
 		} else {
 			lastvalue = value;
 		}
-	
+
 		if (isnewline) {
 			MuseData::append(dataline);
 			dataline.clear();
@@ -431,6 +431,7 @@ int MuseData::readString(const string& data) {
 
 void MuseData::doAnalyses(void) {
 	analyzeType();
+	analyzeTpq();
 	if (hasError()) { return; }
 	assignHeaderBodyState();
    analyzeLayers();
@@ -442,6 +443,32 @@ void MuseData::doAnalyses(void) {
 	if (hasError()) { return; }
 	analyzeTies();
 	if (hasError()) { return; }
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::analyzeTpq -- Read $ records for Q: field values and store
+//    the ticks-per-quarter note value on each line after that $ record.
+//    This is used later to extract the logical duration of notes and rests.
+//
+
+void MuseData::analyzeTpq(void) {
+	HumRegex hre;
+	int ticks = 0;
+	for (int i=0; i<getLineCount(); i++) {
+		MuseRecord* mr = &getRecord(i);
+		if (!mr->isAttributes()) {
+			mr->setTpq(ticks);
+			continue;
+		}
+		string line = getLine(i);
+		if (hre.search(line, " Q:(\\d+)")) {
+			ticks = hre.getMatchInt(1);
+		}
+		mr->setTpq(ticks);
+	}
 }
 
 
@@ -543,7 +570,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 		// track, so search for the same pitch in any track at the event time:
 		 nextrindex = searchForPitch(nexteindex, base40, -1);
 	}
-	
+
 	if (nextrindex < 0) {
 		// Failed to find a note at the target event time which could be
 		// tied to the current note (no pitches at that time which match
@@ -1076,7 +1103,7 @@ HumNum MuseData::getTiedDuration(int index) {
 	if (getRecord(index).getNextTiedNoteLineIndex() < 0) {
 		return getRecord(index).getNoteDuration();
 	}
-	
+
 	// this is start of a group of tied notes.  Start figuring out
 	// how long the duration of the tied group is.
 	output = getRecord(index).getNoteDuration();

@@ -117,6 +117,7 @@ class MuseData {
 		void              analyzeRhythm       (void);
 		void              analyzeTies         (void);
 		void              analyzePitch        (void);
+		void              analyzeTpq          (void);
 
 		// line-based (file-order indexing) accessor functions:
 		MuseRecord&       operator[]          (int lindex);

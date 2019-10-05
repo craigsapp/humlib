@@ -480,7 +480,7 @@ int MuseRecord::getNoteTickDuration(void) {
 
 //////////////////////////////
 //
-// MuseRecord::setDots -- Only one or two dots allowed
+// MuseRecord::setDots --
 //
 
 void MuseRecord::setDots(int value) {
@@ -492,6 +492,25 @@ void MuseRecord::setDots(int value) {
 		case 4: getColumn(18) = '!';   break;
 		default: cerr << "Error in MuseRecord::setDots : " << value << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDotCount --
+//
+
+int MuseRecord::getDotCount(void) {
+	char value = getColumn(18);
+	switch (value) {
+		case ' ': return 0;
+		case '.': return 1;
+		case ':': return 2;
+		case ';': return 3;
+		case '!': return 4;
+	}
+	return 0;
 }
 
 
@@ -1253,6 +1272,30 @@ string MuseRecord::getGraphicNoteTypeString(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getGraphicRecip --
+//
+
+string MuseRecord::getGraphicRecip(void) {
+	int notetype = getGraphicNoteType();
+	string output;
+	switch (notetype) {
+		case -3: output = "0000"; break;  // double-maxima
+		case -2: output = "000"; break;   // maxima
+		case -1: output = "00"; break;    // long
+		default:
+			output = to_string(notetype);  // regular **recip number
+	}
+	int dotcount = getDotCount();
+	for (int i=0; i<dotcount; i++) {
+		output += '.';
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getGraphicNoteType --
 //
 
@@ -1265,29 +1308,29 @@ int MuseRecord::getGraphicNoteType(void) {
 	}
 
 	switch (recordInfo[0]) {
-		case 'M':                            // Maxima
+		case 'M':                          // Maxima
 			output = -2;           break;
-		case 'L':   case 'B':                // Longa
+		case 'L':   case 'B':              // Longa
 			output = -1;           break;
-		case 'b':   case 'A':                // Breve
+		case 'b':   case 'A':              // Breve
 			output = 0;            break;
-		case 'w':   case '9':                // Whole
+		case 'w':   case '9':              // Whole
 			output = 1;            break;
-		case 'h':   case '8':                // Half
+		case 'h':   case '8':              // Half
 			output = 2;            break;
-		case 'q':   case '7':                // Quarter
+		case 'q':   case '7':              // Quarter
 			output = 4;            break;
-		case 'e':   case '6':                // Eighth
+		case 'e':   case '6':              // Eighth
 			output = 8;            break;
-		case 's':   case '5':                // Sixteenth
+		case 's':   case '5':              // Sixteenth
 			output = 16;           break;
-		case 't':   case '4':                // 32nd note
+		case 't':   case '4':              // 32nd note
 			output = 32;           break;
-		case 'x':   case '3':                // 64th note
+		case 'x':   case '3':              // 64th note
 			output = 64;           break;
-		case 'y':   case '2':                // 128th note
+		case 'y':   case '2':              // 128th note
 			output = 128;          break;
-		case 'z':   case '1':                // 256th note
+		case 'z':   case '1':              // 256th note
 			output = 256;          break;
 		default:
 			cerr << "Error: unknown graphical note type in column 17: "
@@ -2089,8 +2132,8 @@ int MuseRecord::beam256Q(void) {
 
 string MuseRecord::getKernBeamStyle(void) {
 	string output;
-	string beams = getBeamField();   // 6 characters wide
-	for (int i=0; i<6; i++) {
+	string beams = getBeamField();
+	for (int i=0; i<(int)beams.size(); i++) {
 		switch (beams[i]) {
 			case '[':                 // start beam
 				output += "L";
@@ -2482,7 +2525,7 @@ string MuseRecord::getVerse(int index) {
 //////////////////////////////
 //
 // MuseRecord::getKernNoteStyle --
-//	default values: beams = 0, stems = 0
+//	    default values: beams = 0, stems = 0
 //
 
 string MuseRecord::getKernNoteStyle(int beams, int stems) {
@@ -2499,11 +2542,49 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 			notetype = notetype * 2;
 		}
 	}
-	tempdur << notetype;
-	output = tempdur.str();
 
-	// add any dots of prolongation to the output string
-	output += getStringProlongation();
+	// logical duration of the note
+	HumNum logicalduration = getTicks();
+	logicalduration /= getTpq();
+	string durrecip = Convert::durationToRecip(logicalduration);
+
+	// graphical duration of the note
+	string graphicrecip = getGraphicRecip();
+	HumNum graphicdur = Convert::recipToDuration(graphicrecip);
+
+	string displayrecip;
+
+	if (graphicdur != logicalduration) {
+		// switch to the logical duration and store the graphic
+		// duration.  The logical duration will be used on the
+		// main kern token, and the graphic duration will be stored
+		// as a layout parameter, such as !LO:N:vis=4. to display
+		// the note as a dotted quarter regardless of the logical
+		// duration.
+
+		// Current test file has encoding bug related to triplets, so
+		// disable graphic notation dealing with tuplets for now.
+
+		// for now just looking to see if one has a dot and the other does not
+		if ((durrecip.find(".") != string::npos) &&
+				(graphicrecip.find(".") == string::npos)) {
+			m_graphicrecip = graphicrecip;
+			displayrecip = durrecip;
+		} else if ((durrecip.find(".") == string::npos) &&
+				(graphicrecip.find(".") != string::npos)) {
+			m_graphicrecip = graphicrecip;
+			displayrecip = durrecip;
+		}
+	}
+
+	if (displayrecip.size() > 0) {
+		output = displayrecip;
+	} else {
+		tempdur << notetype;
+		output = tempdur.str();
+		// add any dots of prolongation to the output string
+		output += getStringProlongation();
+	}
 
 	// add the pitch to the output string
 	string musepitch = getPitchString();

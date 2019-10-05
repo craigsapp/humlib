@@ -186,6 +186,9 @@ class MuseRecordBasic {
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
+		bool              hasTpq             (void);
+		int               getTpq             (void);
+		void              setTpq             (int value);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line
@@ -205,6 +208,8 @@ class MuseRecordBasic {
 		int               m_roundBreve;
 		int               m_header = -1;     // -1 = undefined, 0 = no, 1 = yes
 		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
+		int               m_tpq = 0;         // ticks-per-quarter for durations
+		std::string       m_graphicrecip;    // graphical duration of note/rest
 
 	public:
 		static std::string       trimSpaces         (std::string input);

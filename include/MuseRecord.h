@@ -74,6 +74,7 @@ class MuseRecord : public MuseRecordBasic {
 		void             setTicks                     (int value);
 		void             setBack                      (int value);
 		void             setDots                      (int value);
+		int              getDotCount                  (void);
 		void             setNoteheadShape             (HumNum duration);
 		void             setNoteheadShapeMensural     (HumNum duration);
 		void             setNoteheadMaxima            (void);
@@ -133,6 +134,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              getGraphicNoteType           (void);
 		int              getGraphicNoteTypeSize       (void);
 		int              graphicNoteTypeQ             (void);
+		std::string      getGraphicRecip              (void);
 
 		// column 18: dots of prolongation
 		std::string      getProlongationField         (void);

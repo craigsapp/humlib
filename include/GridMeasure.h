@@ -55,6 +55,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		                             int maxstaff);
 		GridSlice*   addDataToken   (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addDataSubtoken(const std::string& tok, HumNum timestamp,
+		                             int part, int staff, int voice);
 		GridSlice*   addGraceToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff,
 		                             int gracenumber);
