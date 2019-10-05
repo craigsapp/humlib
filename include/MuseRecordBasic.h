@@ -113,6 +113,12 @@ class MuseRecordBasic {
 		void              setTypeGraceChordNote(void);
 		void              setHeaderState     (int state);
 
+		// Humdrum conversion variables
+		void              setToken           (HTp token);
+		HTp               getToken           (void);
+		void              setVoice           (GridVoice* voice);
+		GridVoice*        getVoice           (void);
+
 		MuseRecordBasic&  operator=          (MuseRecordBasic& aRecord);
 		MuseRecordBasic&  operator=          (MuseRecordBasic* aRecord);
 		MuseRecordBasic&  operator=          (const std::string& aRecord);
@@ -155,6 +161,8 @@ class MuseRecordBasic {
 		int               getNextTiedNoteLineIndex(void);
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
+
+		std::string       getLayoutVis       (void);
 
 		// boolean type fuctions:
 		bool              isAnyNote          (void);
@@ -210,6 +218,7 @@ class MuseRecordBasic {
 		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
 		int               m_tpq = 0;         // ticks-per-quarter for durations
 		std::string       m_graphicrecip;    // graphical duration of note/rest
+		GridVoice*			m_voice = NULL;    // conversion structure that token is stored in.
 
 	public:
 		static std::string       trimSpaces         (std::string input);

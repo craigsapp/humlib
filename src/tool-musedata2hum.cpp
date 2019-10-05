@@ -456,6 +456,13 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
+		if (slice) {
+			mr.setVoice(slice->at(part)->at(staff)->at(layer));
+			string gr = mr.getLayoutVis();
+			if (gr.size() > 0) {
+				cerr << "GRAPHIC VERSION OF NOTEA " << gr << endl;
+			}
+		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
 	} else if (mr.isFiguredHarmony()) {
@@ -479,6 +486,13 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isAnyRest()) {
 		tok  = mr.getKernRestStyle(tpq);
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
+		if (slice) {
+			mr.setVoice(slice->at(part)->at(staff)->at(layer));
+			string gr = mr.getLayoutVis();
+			if (gr.size() > 0) {
+				cerr << "GRAPHIC VERSION OF NOTEB " << gr << endl;
+			}
+		}
 	}
 }
 

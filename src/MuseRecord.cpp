@@ -371,7 +371,7 @@ string MuseRecord::getTickDurationField(void) {
 		case E_muserec_note_cue:
 		case E_muserec_note_grace:
 		default:
-			return "";
+			return "    ";
 			// cerr << "Error: cannot use getTickDurationField function on line: "
 			//      << getLine() << endl;
 			// return "";
@@ -449,11 +449,29 @@ int MuseRecord::getLineTickDuration(void) {
 	if (getType() == E_muserec_backspace) {
 		return -value;
 	}
+
 	return value;
 }
 
+
+
+//////////////////////////////
+//
+// MuseRecord::getTicks -- similar to getLineTickDuration, but is non-zero
+//    for secondary chord notes.
+//
+
 int MuseRecord::getTicks(void) {
-	return getLineTickDuration();
+	string recordInfo = getTickDurationString();
+	if (recordInfo.empty()) {
+		return 0;
+	}
+	int value = std::stoi(recordInfo);
+	if (getType() == E_muserec_backspace) {
+		return -value;
+	}
+
+	return value;
 }
 
 
@@ -1303,8 +1321,44 @@ int MuseRecord::getGraphicNoteType(void) {
 	int output = 0;
 	string recordInfo = getGraphicNoteTypeField();
 	if (recordInfo[0] == ' ') {
-		cerr << "Error: no graphic note type specified: " << getLine() << endl;
-		return 0;
+		if (isInvisibleRest()) {
+			// invisible rests do not have graphic note types
+			// so make one up from the logical note type
+			HumNum value = getTickDuration();
+			value /= getTpq();
+			if (value >= 32) {
+				return -2;
+			} else if (value >= 16) {
+				return -1;
+			} else if (value >= 8) {
+				return 0;
+			} else if (value >= 4) {
+				return 1;
+			} else if (value >= 2) {
+				return 2;
+			} else if (value >= 1) {
+				return 4;
+			} else if (value.getFloat() >= 0.5) {
+				return 8;
+			} else if (value.getFloat() >= 0.25) {
+				return 16;
+			} else if (value.getFloat() >= 0.125) {
+				return 32;
+			} else if (value.getFloat() >= 0.0625) {
+				return 64;
+			} else if (value.getFloat() >= 1.0/128) {
+				return 128;
+			} else if (value.getFloat() >= 1.0/256) {
+				return 256;
+			} else if (value.getFloat() >= 1.0/512) {
+				return 512;
+			} else {
+				return 0;
+			}
+		} else {
+			cerr << "Error: no graphic note type specified: " << getLine() << endl;
+			return 0;
+		}
 	}
 
 	switch (recordInfo[0]) {

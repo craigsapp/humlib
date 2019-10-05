@@ -1278,6 +1278,40 @@ void MuseRecordBasic::setTpq(int value) {
 
 
 
+//////////////////////////////
+//
+// MuseRecordBasic:setVoice --
+//
+
+void MuseRecordBasic::setVoice(GridVoice* voice) {
+	m_voice = voice;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:getVoice --
+//
+
+GridVoice* MuseRecordBasic::getVoice(void) {
+	return m_voice;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic:LayoutVis -- Return the graphical display of the
+//    rhythm for the note/rest if it was different than the logical version.
+//    This is temporary storage for inserting a layout command into the
+//    MuseData-to-Humdrum converter (tool-musedata2hum.cpp).
+//
+
+std::string MuseRecordBasic::getLayoutVis(void) {
+	return m_graphicrecip;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 

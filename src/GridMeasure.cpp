@@ -1015,7 +1015,8 @@ void GridMeasure::setTimeSigDur(HumNum duration) {
 // GridMeasure::addLayoutParameter --
 //
 
-void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex, const string& locomment) {
+void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex,
+		const string& locomment) {
 	auto iter = this->rbegin();
 	if (iter == this->rend()) {
 		// something strange happened: expecting at least one item in measure.
