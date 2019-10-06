@@ -14,6 +14,8 @@
 #define _MUSERECORDBASIC_H_INCLUDED
 
 #include "HumNum.h"
+#include "HumdrumToken.h"
+#include "GridVoice.h"
 
 #include <stdarg.h>
 

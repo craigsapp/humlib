@@ -1872,9 +1872,9 @@ void HumGrid::setPartStaffDimensions(vector<vector<GridSlice*>>& nextevent,
 		GridSlice* slice = m_allslices[i];
 		nextevent.resize(slice->size());
 		for (int p=0; p<(int)slice->size(); p++) {
-			nextevent[p].resize(slice[p].size());
-			for (int j=0; j<(int)nextevent[p].size(); j++) {
-				nextevent[p][j] = startslice;
+			nextevent.at(p).resize(slice->at(p)->size());
+			for (int j=0; j<(int)nextevent.at(p).size(); j++) {
+				nextevent.at(p).at(j) = startslice;
 			}
 		}
 		break;

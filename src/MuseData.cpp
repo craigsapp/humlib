@@ -1889,7 +1889,7 @@ std::string MuseData::trimSpaces(std::string input) {
 		}
 		output += input[i];
 	}
-	for (int i=(int)output.size(); i>=0; i--) {
+	for (int i=(int)output.size()-1; i>=0; i--) {
 		if (isspace(output[i])) {
 			output.resize((int)output.size() - 1);
 		} else {

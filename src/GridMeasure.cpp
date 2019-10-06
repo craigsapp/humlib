@@ -343,7 +343,7 @@ GridSlice* GridMeasure::addTimeSigToken(const string& tok, HumNum timestamp,
 // GridMeasure::addMeterSigToken -- Add a meter signature token in the data slice at
 //    the given timestamp (or create a new timesig slice at that timestamp), placing the
 //    token at the specified part, staff, and voice index.
-// 
+//
 //    To do:
 //      The meter signtature should occur immediately after a time signature line.
 //
@@ -765,7 +765,9 @@ GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int 
 //////////////////////////////
 //
 // GridMeasure::addGlobalComment -- Add a global comment at the given
-//    timestamp (before any data line at the same timestamp).
+//    timestamp (before any data line at the same timestamp).  Suppress
+//    adding the comment if it matches to another global comment at the
+//    same timestamp with the same text.
 //
 
 GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
@@ -787,8 +789,9 @@ GridSlice* GridMeasure::addGlobalComment(const string& tok, HumNum timestamp) {
 				// before the data slice.  But don't add if the previous
 				// grid slice is a global comment with the same text.
 				if ((iterator != this->end()) && (*iterator)->isGlobalComment()) {
-					if (tok == *(*iterator)->at(0)->at(0)->at(0)->getToken()) {
+					if (tok == (*iterator)->at(0)->at(0)->at(0)->getToken()->getText()) {
 						// do not insert duplicate global comment
+						gs = *iterator;
 						break;
 					}
 				}
@@ -1348,7 +1351,7 @@ GridSlice* GridMeasure::getLastSpinedSlice(void) {
 // GridMeasure::setMeasureNumber --
 //
 
-void GridMeasure::setMeasureNumber(int value) { 
+void GridMeasure::setMeasureNumber(int value) {
 	m_barnum = value;
 }
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Oct  5 00:16:12 PDT 2019
+// Last Modified: Sat Oct  5 22:33:07 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6342,7 +6342,7 @@ class Tool_musedata2hum : public HumTool {
 		void    initialize           (void);
 		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
 		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
-		int     convertMeasure       (HumGrid& outdata, MuseData& part, int startindex);
+		int     convertMeasure       (HumGrid& outdata, MuseData& part, int partindex, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
 		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
@@ -6352,6 +6352,7 @@ class Tool_musedata2hum : public HumTool {
 		                              MuseRecord& mr);
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
 		                              HumNum timestamp, int part, int maxstaff);
+		std::string trimSpaces       (std::string input);
 
 	private:
 		// options:

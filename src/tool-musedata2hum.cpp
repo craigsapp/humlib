@@ -258,7 +258,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	bool status = true;
 	int i = 0;
 	while (i < part.getLineCount()) {
-		i = convertMeasure(outdata, part, i);
+		i = convertMeasure(outdata, part, index, i);
 	}
 
 	storePartName(outdata, part, index);
@@ -287,7 +287,7 @@ void Tool_musedata2hum::storePartName(HumGrid& outdata, MuseData& part, int inde
 // Tool_musedata2hum::convertMeasure --
 //
 
-int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int startindex) {
+int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int partindex, int startindex) {
 	if (part.getLineCount() == 0) {
 		return 1;
 	}
@@ -301,7 +301,9 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
 	setMeasureNumber(outdata[(int)outdata.size() - 1], part[startindex]);
-	gm->setBarStyle(MeasureStyle::Plain);
+	if (partindex == 0) {
+		gm->setBarStyle(MeasureStyle::Plain);
+	}
 	int i = startindex;
 	for (i=startindex; i<part.getLineCount(); i++) {
 		if ((i != startindex) && part[i].isBarline()) {
@@ -322,7 +324,15 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int star
 	gm->setTimeSigDur(m_timesigdur);
 
 	if ((i < part.getLineCount()) && part[i].isBarline()) {
-		setMeasureStyle(outdata.back(), part[i]);
+		if (partindex == 0) {
+			// For now setting the barline style from the 
+			// lowest staff.  This is mostly because
+			// MEI/verovio can handle only one style
+			// on a system barline.  But also because
+			// GridMeasure objects only has a setting
+			// for a single barline style.
+			setMeasureStyle(outdata.back(), part[i]);
+		}
 	}
 
 	return i;
@@ -419,7 +429,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		map<string, string> attributes;
 		mr.getAttributeMap(attributes);
 
-		string mtempo = attributes["D"];
+		string mtempo = trimSpaces(attributes["D"]);
 		if (!mtempo.empty()) {
 			if (timestamp != 0) {
 				string value = "!!!OMD: " + mtempo;
@@ -693,6 +703,34 @@ void Tool_musedata2hum::setInitialOmd(const string& omd) {
 	m_omd = omd;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::trimSpaces --
+//
+
+string Tool_musedata2hum::trimSpaces(string input) {
+	string output;
+	int status = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (!status) {
+			if (isspace(input[i])) {
+				continue;
+			}
+			status = 1;
+		}
+		output += input[i];
+	}
+	for (int i=(int)output.size()-1; i>=0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
 
 
 
