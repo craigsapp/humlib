@@ -99,6 +99,9 @@ class Tool_extract : public HumTool {
 				                           vector<int>& model, HumdrumFile& infile, int negate);
 		void fillFieldDataByNoEmpty     (vector<int>& field, vector<int>& subfield,
 				                           vector<int>& model, HumdrumFile& infile, int negate);
+		void fillFieldDataByNoRest      (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, const string& searchstring,
+		                                 HumdrumFile& infile, int state);
 
 	private:
 
@@ -138,6 +141,7 @@ class Tool_extract : public HumTool {
 		int         noEmptyQ    = 0;       // used with --no-empty option
 		int         emptyQ      = 0;       // used with --empty option
 		int         spineListQ  = 0;       // used with --spine option
+		int         removerestQ = 0;       // used with --no-rest option
 
 };
 

@@ -1,16 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 18 11:23:42 PDT 2005
-// Last Modified: Tue Sep  1 13:54:42 PDT 2009 Added -f, and -p options
-// Last Modified: Wed Sep  2 13:26:58 PDT 2009 Added -t option
-// Last Modified: Sat Sep  5 15:21:29 PDT 2009 Added sub-spine features
-// Last Modified: Tue Sep  8 11:43:46 PDT 2009 Added co-spine extraction
-// Last Modified: Sat Apr  6 00:48:21 PDT 2013 Enabled multiple segment input
-// Last Modified: Thu Oct 24 12:32:47 PDT 2013 Switch to HumdrumStream class
-// Last Modified: Sat Mar 12 18:34:05 PST 2016 Switch to STL
-// Last Modified: Sat Mar 12 18:34:05 PST 2016 Add -k option
-// Last Modified: Tue Dec 13 18:50:58 PST 2016 Ported to humlib
-// Last Modified: Tue Dec 13 18:50:58 PST 2016 Add --no-empty option
+// Last Modified: Mon Oct  7 22:39:02 PDT 2019 Fixed -g option
 // Filename:      tool-extract.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-extract.h
 // Syntax:        C++11;; humlib
@@ -18,7 +9,7 @@
 //
 // Description:   C++ implementation of the Humdrum Toolkit extract command.
 //
-// To do:         Allow *x records to be echoed when using -s 0 insertion
+// To do:       Allow *x records to be echoed when using -s 0 insertion
 //					 Currently spines with *x are unwrapped and the *x is changed
 //					 to *.
 //
@@ -66,6 +57,7 @@ Tool_extract::Tool_extract(void) {
 	define("no-empty|no-empties=b", "Suppress spines with only null data tokens");
 	define("empty|empties=b", "Only keep spines with only null data tokens");
 	define("spine-list=b", "Show spine list and then exit");
+	define("no-rest|no-rests=b", "remove **kern spines containing only rests (and their co-spines)");
 
 	define("debug=b", "print debugging information");
 	define("author=b");              // author of program
@@ -143,6 +135,9 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 				interpstate);
 	} else if (reverseQ) {
 		reverseSpines(field, subfield, model, infile, reverseInterp);
+	} else if (removerestQ) {
+		fillFieldDataByNoRest(field, subfield, model, grepString, infile,
+			interpstate);
 	} else if (grepQ) {
 		fillFieldDataByGrep(field, subfield, model, grepString, infile,
 			interpstate);
@@ -184,7 +179,7 @@ void Tool_extract::processFile(HumdrumFile& infile) {
 	// infile.printNonemptySegmentLabel(m_humdrum_text);
 
 	// analyze the input file according to command-line options
-	if (fieldQ || grepQ) {
+	if (fieldQ || grepQ || removerestQ) {
 		extractFields(infile, field, subfield, model);
 	} else if (excludeQ) {
 		excludeFields(infile, field, subfield, model);
@@ -306,6 +301,93 @@ void Tool_extract::fillFieldDataByNoEmpty(vector<int>& field, vector<int>& subfi
 
 //////////////////////////////
 //
+// Tool_extract::fillFieldDataByNoRest --  Find the spines which
+//    contain only rests and remove them.  Also remove cospines (non-kern spines
+//    to the right of the kern spine containing only rests).
+//
+
+void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfield,
+		vector<int>& model, const string& searchstring, HumdrumFile& infile,
+		int state) {
+
+	field.reserve(infile.getMaxTrack()+1);
+	subfield.reserve(infile.getMaxTrack()+1);
+	model.reserve(infile.getMaxTrack()+1);
+	field.resize(0);
+	subfield.resize(0);
+	model.resize(0);
+
+	vector<int> tracks;
+	tracks.resize(infile.getMaxTrack()+1);
+	fill(tracks.begin(), tracks.end(), 0);
+	int track;
+
+	int i, j;
+	for (i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			track = token->getTrack();
+			tracks[track] = 1;
+		}
+	}
+
+	// deal with co-spines
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts);
+	for (int i=0; i<(int)sstarts.size(); i++) {
+		if (!sstarts[i]->isKern()) {
+			track = sstarts[i]->getTrack();
+			tracks[track] = 1;
+		}
+	}
+
+	// remove co-spines attached to removed kern spines
+	for (int i=0; i<(int)sstarts.size(); i++) {
+		if (!sstarts[i]->isKern()) {
+			continue;
+		}
+		if (tracks[sstarts[i]->getTrack()] != 0) {
+			continue;
+		}
+		for (int j=i+1; j<(int)sstarts.size(); j++) {
+			if (sstarts[j]->isKern()) {
+				break;
+			}
+			track = sstarts[j]->getTrack();
+			tracks[track] = 0;
+		}
+	}
+
+	int zero = 0;
+	for (i=1; i<(int)tracks.size(); i++) {
+		if (state != 0) {
+			tracks[i] = !tracks[i];
+		}
+		if (tracks[i]) {
+			field.push_back(i);
+			subfield.push_back(zero);
+			model.push_back(zero);
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
 // Tool_extract::fillFieldDataByGrep --
 //
 
@@ -328,11 +410,11 @@ void Tool_extract::fillFieldDataByGrep(vector<int>& field, vector<int>& subfield
 
 	int i, j;
 	for (i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].isManipulator()) {
+		if (!infile[i].hasSpines()) {
 			continue;
 		}
 		for (j=0; j<infile[i].getFieldCount(); j++) {
-			if (hre.search(infile.token(i, j), searchstring.c_str(), "")) {
+			if (hre.search(infile.token(i, j), searchstring, "")) {
 				track = infile[i].token(j)->getTrack();
 				tracks[track] = 1;
 			}
@@ -1925,6 +2007,7 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		}
 	}
 
+	removerestQ = getBoolean("no-rest");
 	noEmptyQ    = getBoolean("no-empty");
 	emptyQ      = getBoolean("empty");
 	fieldQ      = getBoolean("f");

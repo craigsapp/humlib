@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Oct  5 22:33:07 PDT 2019
+// Last Modified: Tue Oct  8 08:13:46 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5478,6 +5478,9 @@ class Tool_extract : public HumTool {
 				                           vector<int>& model, HumdrumFile& infile, int negate);
 		void fillFieldDataByNoEmpty     (vector<int>& field, vector<int>& subfield,
 				                           vector<int>& model, HumdrumFile& infile, int negate);
+		void fillFieldDataByNoRest      (vector<int>& field, vector<int>& subfield,
+		                                 vector<int>& model, const string& searchstring,
+		                                 HumdrumFile& infile, int state);
 
 	private:
 
@@ -5517,6 +5520,7 @@ class Tool_extract : public HumTool {
 		int         noEmptyQ    = 0;       // used with --no-empty option
 		int         emptyQ      = 0;       // used with --empty option
 		int         spineListQ  = 0;       // used with --spine option
+		int         removerestQ = 0;       // used with --no-rest option
 
 };
 
