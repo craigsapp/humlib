@@ -130,11 +130,14 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		bool allrest = true;
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp tok = infile.token(i, j);
+			if (tok->isNull()) {
+				continue;
+			}
+			allnull = false;
 			if (!tok->isKern()) {
 				continue;
 			}
 			if (tok->isNote()) {
-				allnull = false;
 				allrest = false;
 				break;
 			}
