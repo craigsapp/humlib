@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Oct  8 08:13:46 PDT 2019
+// Last Modified: Tue Oct  8 12:41:24 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2063,6 +2063,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void   analyzeCrossStaffStemDirections (void);
 		void   analyzeCrossStaffStemDirections (HTp kernstart);
 
+		int    hasPickup                  (void);
 
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
@@ -3324,6 +3325,7 @@ class Convert {
 		                                     HumNum scale = HumNum(1,4));
 		static std::string  durationFloatToRecip (double duration,
 		                                     HumNum scale = HumNum(1,4));
+		static HumNum timeSigToDurationInQuarter(HTp token);
 
 		// Pitch processing, defined in Convert-pitch.cpp
 		static std::string  base40ToKern    (int b40);

@@ -317,6 +317,35 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
 
 
 
+//////////////////////////////
+//
+// Convert::timeSigToDurationInQuarters -- Convert a **kern time signature 
+//   into the duration of the measure for that time signature.
+//   output units are in quarter notes.
+//   Example: 6/8 => 3 quarters
+//   Example: 3/4 => 3 quarters
+//   Example: 3/8 => 3/2 quarters
+//
+
+HumNum Convert::timeSigToDurationInQuarter(HTp token) {
+	HumRegex hre;
+	if (!token->isTimeSignature()) {
+		return 0;
+	}
+	// Handle extended **recip for denominator later...
+	if (!hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
+		return 0;
+	}
+	int top = hre.getMatchInt(1);
+	int bot = hre.getMatchInt(2);
+	HumNum output = 4;
+	output /= bot;
+	output *= top;
+	return output;
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

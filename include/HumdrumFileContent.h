@@ -92,6 +92,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void   analyzeCrossStaffStemDirections (void);
 		void   analyzeCrossStaffStemDirections (HTp kernstart);
 
+		int    hasPickup                  (void);
 
 	protected:
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
