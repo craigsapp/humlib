@@ -33,6 +33,7 @@ class Tool_composite : public HumTool {
 	protected:
 		void        processFile        (HumdrumFile& infile);
 		void        initialize         (void);
+		HumNum      getLineDuration    (HumdrumFile& infile, int index, vector<bool>& isNull);
 
 	private:
 		string      m_pitch = "e";
