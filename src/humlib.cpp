@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct  9 14:56:17 PDT 2019
+// Last Modified: Thu 10 Oct 2019 05:30:24 AM UTC
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -61668,7 +61668,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	
 	HumNum timestamp = mr.getAbsBeat();
 	string tok;
-	GridSlice* slice;
+	GridSlice* slice = NULL;
 
 	if (mr.isBarline()) {
 		tok = mr.getKernMeasureStyle();
@@ -61764,18 +61764,17 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HumNum timestamp, int part, int maxstaff) {
 	string fh = mr.getFigureString();
 	fh = Convert::museFiguredBassToKernFiguredBass(fh);
-	GridSlice* slice;
 	if (fh.find(":") == string::npos) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
 	if (!m_lastfigure) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
@@ -61822,7 +61821,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	if (pieces.empty() || (position >= (int)pieces.size())) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
@@ -61840,7 +61839,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	fh.erase(colpos, 1);
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
-	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
 }
 
 
