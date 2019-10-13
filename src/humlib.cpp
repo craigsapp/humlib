@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 10 10:42:20 PDT 2019
+// Last Modified: Sun Oct 13 12:52:30 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -52937,6 +52937,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsed") {
+			RUNTOOL(humsed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
@@ -54480,6 +54482,140 @@ ostream& operator<<(ostream& out, NotePoint& np) {
 		out << "\t\tindex " << i << " is:\t" << np.matched[i] << endl;
 	}
 	return out;
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_humsed::Tool_humsed -- Set the recognized options for the tool.
+//
+
+Tool_humsed::Tool_humsed(void) {
+	define("s|search=s", "search string");
+	define("r|replace=s", "replace string");
+	define("k|kern=b", "process kern spines only");
+	define("x|exinerp|exclusive-interpretation=s", "process kern spines only");
+	define("i|interpretation=b", "process interpretation tokens only");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_humsed::run -- Do the main work of the tool.
+//
+
+bool Tool_humsed::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_humsed::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_humsed::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_humsed::run(HumdrumFile& infile) {
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsed::processFile --
+//
+
+void Tool_humsed::processFile(HumdrumFile& infile) {
+	m_search = getString("search");
+	if (m_search == "") {
+		// nothing to do
+		return;
+	}
+	m_modified = false;
+	m_replace = getString("replace");
+
+	m_interpretation = getBoolean("interpretation");
+
+	if (!m_interpretation) {
+		// don't know what to do (only interpretation processing is currently implemented)
+		return;
+	}
+
+	if (m_interpretation) {
+		searchAndReplaceInterpretation(infile);
+	}
+
+	if (m_modified) {
+		infile.createLinesFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsed::searchAndReplaceInterpretation --
+//
+
+void Tool_humsed::searchAndReplaceInterpretation(HumdrumFile& infile) {
+	string isearch;
+	if (m_search[0] == '^') {
+		isearch = "^\\*" + m_search.substr(1);
+	} else {
+		isearch = "^\\*.*" + m_search;
+	}
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		} else if (infile[i].isExclusiveInterpretation()) {
+			continue;
+		} else if (infile[i].isManipulator()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (*token == "*") {	
+				// Don't mess with null interpretations
+				continue;
+			}
+			if (hre.search(token, isearch)) {
+				string text = token->getText();
+				hre.replaceDestructive(text, m_replace, isearch);
+				hre.replaceDestructive(text, "", "^\\*+");
+				text = "*" + text;
+				token->setText(text);
+				m_modified = true;
+			}
+		}
+	}
 }
 
 
@@ -61668,7 +61804,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	
 	HumNum timestamp = mr.getAbsBeat();
 	string tok;
-	GridSlice* slice;
+	GridSlice* slice = NULL;
 
 	if (mr.isBarline()) {
 		tok = mr.getKernMeasureStyle();
@@ -61764,18 +61900,17 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HumNum timestamp, int part, int maxstaff) {
 	string fh = mr.getFigureString();
 	fh = Convert::museFiguredBassToKernFiguredBass(fh);
-	GridSlice* slice;
 	if (fh.find(":") == string::npos) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
 	if (!m_lastfigure) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
@@ -61822,7 +61957,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	if (pieces.empty() || (position >= (int)pieces.size())) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
-		slice = gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
 		return;
 	}
 
@@ -61840,7 +61975,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	fh.erase(colpos, 1);
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
-	slice = gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
 }
 
 

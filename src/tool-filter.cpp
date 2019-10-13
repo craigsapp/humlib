@@ -27,6 +27,7 @@
 #include "tool-homophonic2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
+#include "tool-humsed.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
 #include "tool-melisma.h"
@@ -187,6 +188,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsed") {
+			RUNTOOL(humsed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {

@@ -11,6 +11,8 @@
 //
 
 #include "Convert.h"
+#include "HumRegex.h"
+
 #include <algorithm>
 #include <cmath>
 
