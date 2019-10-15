@@ -138,10 +138,18 @@ void Tool_msearch::fillWords(HumdrumFile& infile, vector<TextInfo*>& words) {
 
 void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 		HTp starttoken) {
-	HTp tok = starttoken->getNextNNDT();
+	HTp tok = starttoken->getNextToken();
 	while (tok != NULL) {
 		if (tok->empty()) {
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->isNull()) {
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (!tok->isData()) {
+			tok = tok->getNextToken();
 			continue;
 		}
 		if (tok->at(0) == '-') {
@@ -152,7 +160,7 @@ void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 					words.back()->fullword.pop_back();
 				}
 			}
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
 			continue;
 		} else {
 			// start a new word
@@ -169,7 +177,7 @@ void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 			}
 			temp->starttoken = tok;
 			words.push_back(temp);
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
 			continue;
 		}
 	}
@@ -299,13 +307,23 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	string text;
 	while (tok && (tok != mend)) {
 		if (!tok->isData()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->isNull()) {
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->empty()) {
+			// skip marking null tokens
+			tok = tok->getNextToken();
+			continue;
 		}
 		text = tok->getText() + m_marker;
 		tok->setText(text);
-		tok = tok->getNextNNDT();
+		tok = tok->getNextToken();
 		if (tok && !tok->isKern()) {
-			cerr << "STRANGE LINKING WITH TEXT SPINE IN getNextNNDT()" << endl;
+			cerr << "STRANGE LINKING WITH TEXT SPINE" << endl;
 			break;
 		}
 	}
@@ -315,11 +333,10 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 
 //////////////////////////////
 //
-// Tool_msearch::markTextMatch -- assumes monophonic music.
+// Tool_msearch::markTextMatch -- assumes monophonic voices.
 //
 
 void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
-// ggg
 	HTp mstart = word.starttoken;
 	HTp mnext = word.nexttoken;
 	// while (mstart && !mstart->isKern()) {
@@ -352,6 +369,9 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 		if (!tok->isData()) {
 			return;
 		}
+		if (tok->isNull()) {
+			return;
+		}
 		text = tok->getText();
 		if ((!text.empty()) && (text.back() == '-')) {
 			text.pop_back();
@@ -361,7 +381,7 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 			text += m_marker;
 		}
 		tok->setText(text);
-		tok = tok->getNextNNDT();
+		tok = tok->getNextToken();
 	}
 }
 

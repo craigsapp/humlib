@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Oct 13 12:52:30 PDT 2019
+// Last Modified: Tue Oct 15 10:17:02 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5748,10 +5748,10 @@ ostream& operator<<(ostream& out, NotePoint& np);
 
 
 
-class Tool_humsed : public HumTool {
+class Tool_humsar : public HumTool {
 	public:
-		         Tool_humsed       (void);
-		        ~Tool_humsed       () {};
+		         Tool_humsar       (void);
+		        ~Tool_humsar       () {};
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
@@ -5761,12 +5761,23 @@ class Tool_humsed : public HumTool {
 	protected:
 		void    processFile        (HumdrumFile& infile);
 		void    searchAndReplaceInterpretation(HumdrumFile& infile);
+		void    searchAndReplaceData(HumdrumFile& infile);
+		void    searchAndReplaceBarline(HumdrumFile& infile);
+		void    initialize         (void);
+		void    initializeSegment  (HumdrumFile& infile);
+		bool    isValid            (HTp token);
+		bool    isValidDataType    (HTp token);
+		bool    isValidSpine       (HTp token);
+		void    fillInExInterpList (void);
 
 	private:
 		std::string m_search;      // search string
 		std::string m_replace;     // replace string
 		bool        m_interpretation = false; // process only interpretation records
 		bool        m_modified = false;
+		std::vector<std::string> m_exinterps; // list of exclusive interpretations to process
+		std::vector<bool> m_spines; // usar with -s option
+		std::string m_grepoptions;
 
 };
 

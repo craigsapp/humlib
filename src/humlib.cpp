@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Oct 13 12:52:30 PDT 2019
+// Last Modified: Tue Oct 15 10:17:02 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -52937,8 +52937,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
-		} else if (commands[i].first == "humsed") {
-			RUNTOOL(humsed, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsar") {
+			RUNTOOL(humsar, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
@@ -54490,25 +54490,27 @@ ostream& operator<<(ostream& out, NotePoint& np) {
 
 /////////////////////////////////
 //
-// Tool_humsed::Tool_humsed -- Set the recognized options for the tool.
+// Tool_humsar::Tool_humsar -- Set the recognized options for the tool.
 //
 
-Tool_humsed::Tool_humsed(void) {
-	define("s|search=s", "search string");
+Tool_humsar::Tool_humsar(void) {
+	define("q|query=s", "query string");
 	define("r|replace=s", "replace string");
 	define("k|kern=b", "process kern spines only");
-	define("x|exinerp|exclusive-interpretation=s", "process kern spines only");
-	define("i|interpretation=b", "process interpretation tokens only");
+	define("x|exinterps|exinerp|exclusive-interpretation|exclusive-interpretations=s", "process only specified spines");
+	define("s|spine|spines=s", "list of spines to process");
+	define("I|interpretation=b", "process interpretation tokens only");
+	define("i|ignore-case=b", "Ignore case of letters");
 }
 
 
 
 /////////////////////////////////
 //
-// Tool_humsed::run -- Do the main work of the tool.
+// Tool_humsar::run -- Do the main work of the tool.
 //
 
-bool Tool_humsed::run(HumdrumFileSet& infiles) {
+bool Tool_humsar::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -54517,7 +54519,7 @@ bool Tool_humsed::run(HumdrumFileSet& infiles) {
 }
 
 
-bool Tool_humsed::run(const string& indata, ostream& out) {
+bool Tool_humsar::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
@@ -54529,7 +54531,7 @@ bool Tool_humsed::run(const string& indata, ostream& out) {
 }
 
 
-bool Tool_humsed::run(HumdrumFile& infile, ostream& out) {
+bool Tool_humsar::run(HumdrumFile& infile, ostream& out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -54540,7 +54542,9 @@ bool Tool_humsed::run(HumdrumFile& infile, ostream& out) {
 }
 
 
-bool Tool_humsed::run(HumdrumFile& infile) {
+bool Tool_humsar::run(HumdrumFile& infile) {
+	initialize();
+	initializeSegment(infile);
 	processFile(infile);
 	return true;
 }
@@ -54549,11 +54553,81 @@ bool Tool_humsed::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_humsed::processFile --
+// Tool_humsar::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
 //
 
-void Tool_humsed::processFile(HumdrumFile& infile) {
-	m_search = getString("search");
+void Tool_humsar::initialize(void) {
+	m_search = getString("query");
+	HumRegex hre;
+	hre.replaceDestructive(m_search, "\\\\", "\\", "g");
+	if (getBoolean("kern")) {
+		m_exinterps.push_back("**kern");
+	} else if (getBoolean("exclusive-interpretations")) {
+		fillInExInterpList();
+	}
+	if (getBoolean("ignore-case")) {
+		m_grepoptions += "i";
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_humsar::initializeSegment -- Recalculate variables for each Humdrum input segment.
+//
+
+void Tool_humsar::initializeSegment(HumdrumFile& infile) {
+	m_spines.clear();
+	if (getBoolean("spines")) {
+		int maxtrack = infile.getMaxTrack();
+		Convert::makeBooleanTrackList(m_spines, getString("spines"), maxtrack);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::fillInExInterpList --
+//
+
+void Tool_humsar::fillInExInterpList(void) {
+	m_exinterps.clear();
+	m_exinterps.resize(1);
+	string elist = getString("exclusive-interpretations");
+	for (int i=0; i<(int)elist.size(); i++) {
+		if (isspace(elist[i]) || (elist[i] == ',')) {
+			if (!m_exinterps.back().empty()) {
+				m_exinterps.push_back("");
+			}
+		} else {
+			m_exinterps.back() += elist[i];
+		}
+	}
+	if (m_exinterps.back().empty()) {
+		m_exinterps.resize((int)m_exinterps.size() - 1);
+	}
+	for (int i=0; i<(int)m_exinterps.size(); i++) {
+		if (m_exinterps[i].compare(0, 2, "**") == 0) {
+			continue;
+		}
+		if (m_exinterps[i].compare(0, 1, "*") == 0) {
+			m_exinterps[i] = "*" + m_exinterps[i];
+			continue;
+		}
+		m_exinterps[i] = "**" + m_exinterps[i];
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::processFile --
+//
+
+void Tool_humsar::processFile(HumdrumFile& infile) {
 	if (m_search == "") {
 		// nothing to do
 		return;
@@ -54563,13 +54637,12 @@ void Tool_humsed::processFile(HumdrumFile& infile) {
 
 	m_interpretation = getBoolean("interpretation");
 
-	if (!m_interpretation) {
-		// don't know what to do (only interpretation processing is currently implemented)
-		return;
-	}
-
 	if (m_interpretation) {
 		searchAndReplaceInterpretation(infile);
+	//if (m_barline) {
+	//	searchAndReplaceBarline(infile);
+	} else {
+		searchAndReplaceData(infile);
 	}
 
 	if (m_modified) {
@@ -54581,10 +54654,49 @@ void Tool_humsed::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_humsed::searchAndReplaceInterpretation --
+// Tool_humsar::searchAndReplaceBarline --
 //
 
-void Tool_humsed::searchAndReplaceInterpretation(HumdrumFile& infile) {
+void Tool_humsar::searchAndReplaceBarline(HumdrumFile& infile) {
+	string isearch;
+	if (m_search[0] == '^') {
+		isearch = "^=" + m_search.substr(1);
+	} else {
+		isearch = "^=.*" + m_search;
+	}
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->isNull()) {	
+				// Don't mess with null interpretations
+				continue;
+			}
+			if (!isValid(token)) {
+				continue;
+			}
+			if (hre.search(token, isearch, m_grepoptions)) {
+				string text = token->getText();
+				hre.replaceDestructive(text, m_replace, isearch, m_grepoptions);
+				hre.replaceDestructive(text, "", "^=+");
+				text = "=" + text;
+				token->setText(text);
+				m_modified = true;
+			}
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_humsar::searchAndReplaceInterpretation --
+//
+
+void Tool_humsar::searchAndReplaceInterpretation(HumdrumFile& infile) {
 	string isearch;
 	if (m_search[0] == '^') {
 		isearch = "^\\*" + m_search.substr(1);
@@ -54602,13 +54714,16 @@ void Tool_humsed::searchAndReplaceInterpretation(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (*token == "*") {	
+			if (token->isNull()) {	
 				// Don't mess with null interpretations
 				continue;
 			}
-			if (hre.search(token, isearch)) {
+			if (!isValid(token)) {
+				continue;
+			}
+			if (hre.search(token, isearch, m_grepoptions)) {
 				string text = token->getText();
-				hre.replaceDestructive(text, m_replace, isearch);
+				hre.replaceDestructive(text, m_replace, isearch, m_grepoptions);
 				hre.replaceDestructive(text, "", "^\\*+");
 				text = "*" + text;
 				token->setText(text);
@@ -54616,6 +54731,92 @@ void Tool_humsed::searchAndReplaceInterpretation(HumdrumFile& infile) {
 			}
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::searchAndReplaceData --
+//
+
+void Tool_humsar::searchAndReplaceData(HumdrumFile& infile) {
+	string dsearch = m_search;
+
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->isNull()) {
+				// Don't mess with null interpretations
+				continue;
+			}
+			if (!isValid(token)) {
+				continue;
+			}
+			if (hre.search(token, dsearch, m_grepoptions)) {
+				string text = token->getText();
+				hre.replaceDestructive(text, m_replace, dsearch, m_grepoptions);
+				if (text == "") {
+					text = ".";
+				}
+				token->setText(text);
+				m_modified = true;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::isValidDataType -- usar with -x and -k options.
+//
+
+bool Tool_humsar::isValidDataType(HTp token) {
+	if (m_exinterps.empty()) {
+		return true;
+	}
+	string datatype = token->getDataType();
+	for (int i=0; i<(int)m_exinterps.size(); i++) {
+		if (datatype == m_exinterps[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::isValidSpine -- usar with -s option.
+//
+
+bool Tool_humsar::isValidSpine(HTp token) {
+	if (m_spines.empty()) {
+		return true;
+	}
+	int track = token->getTrack();
+	return m_spines.at(track);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsar::isValid --
+//
+
+bool Tool_humsar::isValid(HTp token) {
+	if (isValidDataType(token) && isValidSpine(token)) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -60921,10 +61122,18 @@ void Tool_msearch::fillWords(HumdrumFile& infile, vector<TextInfo*>& words) {
 
 void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 		HTp starttoken) {
-	HTp tok = starttoken->getNextNNDT();
+	HTp tok = starttoken->getNextToken();
 	while (tok != NULL) {
 		if (tok->empty()) {
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->isNull()) {
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (!tok->isData()) {
+			tok = tok->getNextToken();
 			continue;
 		}
 		if (tok->at(0) == '-') {
@@ -60935,7 +61144,7 @@ void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 					words.back()->fullword.pop_back();
 				}
 			}
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
 			continue;
 		} else {
 			// start a new word
@@ -60952,7 +61161,7 @@ void Tool_msearch::fillWordsForTrack(vector<TextInfo*>& words,
 			}
 			temp->starttoken = tok;
 			words.push_back(temp);
-			tok = tok->getNextNNDT();
+			tok = tok->getNextToken();
 			continue;
 		}
 	}
@@ -61082,13 +61291,23 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	string text;
 	while (tok && (tok != mend)) {
 		if (!tok->isData()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->isNull()) {
+			tok = tok->getNextToken();
+			continue;
+		}
+		if (tok->empty()) {
+			// skip marking null tokens
+			tok = tok->getNextToken();
+			continue;
 		}
 		text = tok->getText() + m_marker;
 		tok->setText(text);
-		tok = tok->getNextNNDT();
+		tok = tok->getNextToken();
 		if (tok && !tok->isKern()) {
-			cerr << "STRANGE LINKING WITH TEXT SPINE IN getNextNNDT()" << endl;
+			cerr << "STRANGE LINKING WITH TEXT SPINE" << endl;
 			break;
 		}
 	}
@@ -61098,11 +61317,10 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 
 //////////////////////////////
 //
-// Tool_msearch::markTextMatch -- assumes monophonic music.
+// Tool_msearch::markTextMatch -- assumes monophonic voices.
 //
 
 void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
-// ggg
 	HTp mstart = word.starttoken;
 	HTp mnext = word.nexttoken;
 	// while (mstart && !mstart->isKern()) {
@@ -61135,6 +61353,9 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 		if (!tok->isData()) {
 			return;
 		}
+		if (tok->isNull()) {
+			return;
+		}
 		text = tok->getText();
 		if ((!text.empty()) && (text.back() == '-')) {
 			text.pop_back();
@@ -61144,7 +61365,7 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 			text += m_marker;
 		}
 		tok->setText(text);
-		tok = tok->getNextNNDT();
+		tok = tok->getNextToken();
 	}
 }
 
