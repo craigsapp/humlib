@@ -201,7 +201,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	HumRegex hre;
 	for (int i=0; i<(int)query.size(); i++) {
 		for (int j=0; j<(int)words.size(); j++) {
-			if (hre.search(words[j]->fullword, query[i].word, "i")) {
+			if (hre.search(words.at(j)->fullword, query.at(i).word, "i")) {
 				tcount++;
 				markTextMatch(infile, *words[j]);
 			}
@@ -367,10 +367,12 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 	string text;
 	while (tok && (tok != mnext)) {
 		if (!tok->isData()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
 		}
 		if (tok->isNull()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
 		}
 		text = tok->getText();
 		if ((!text.empty()) && (text.back() == '-')) {

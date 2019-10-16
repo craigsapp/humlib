@@ -475,6 +475,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
+		addLyrics(slice, part, staff, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -593,6 +594,25 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
 	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addLyrics --
+//
+
+void Tool_musedata2hum::addLyrics(GridSlice* slice, int part, int staff, MuseRecord& mr) {
+	int versecount = mr.getVerseCount();
+	if (versecount == 0) {
+		return;
+	}
+	for (int i=0; i<versecount; i++) {
+		string verse = mr.getVerseUtf8(i);
+		slice->at(part)->at(staff)->setVerse(i, verse);
+	}
+	slice->reportVerseCount(part, staff, versecount);
 }
 
 

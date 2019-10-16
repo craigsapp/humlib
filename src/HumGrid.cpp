@@ -280,6 +280,34 @@ void HumGrid::setHarmonyCount(int partindex, int count) {
 
 //////////////////////////////
 //
+// HumGrid::reportVerseCount --
+//
+
+void HumGrid::reportVerseCount(int partindex, int staffindex, int count) {
+	if (count <= 0) {
+		return;
+	}
+	int staffnumber = staffindex + 1;
+	int partsize = (int)m_verseCount.size();
+	if (partindex >= partsize) {
+		m_verseCount.resize(partindex+1);
+	}
+	int staffcount = (int)m_verseCount.at(partindex).size();
+	if (staffnumber >= staffcount) {
+		m_verseCount.at(partindex).resize(staffnumber+1);
+		for (int i=staffcount; i<=staffnumber; i++) {
+			m_verseCount.at(partindex).at(i) = 0;
+		}
+	}
+	if (count > m_verseCount.at(partindex).at(staffnumber)) {
+		m_verseCount.at(partindex).at(staffnumber) = count;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::setVerseCount --
 //
 

@@ -219,6 +219,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              textUnderlayQ                (void);
 		int              getVerseCount                (void);
 		std::string      getVerse                     (int index);
+		std::string      getVerseUtf8                 (int index);
 
 		// general functions for note records:
 		std::string      getKernNoteStyle             (int beams = 0, int stems = 0);

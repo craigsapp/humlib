@@ -199,6 +199,7 @@ class MuseRecordBasic {
 		bool              hasTpq             (void);
 		int               getTpq             (void);
 		void              setTpq             (int value);
+		static std::string musedataToUtf8    (std::string& input);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line

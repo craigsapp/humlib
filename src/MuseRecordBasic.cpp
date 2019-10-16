@@ -1313,6 +1313,71 @@ std::string MuseRecordBasic::getLayoutVis(void) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseRecordBasic::musedataToUtf8 --
+//
+
+string MuseRecordBasic::musedataToUtf8(string& input) {
+	string output;
+	int isize = (int)input.size();
+	for (int i=0; i<isize; i++) {
+		if (input[i] != '\\') {
+			output += input[i];
+			continue;
+		}
+		if (i+2 >= isize) {
+			output += input[i];
+			continue;
+		}
+		string st = input.substr(i+1, 2);
+
+		// graves
+		if (st == "A8") { output += (char)0xc3; output += (char)0x80; i+=2; continue; }
+		if (st == "E8") { output += (char)0xc3; output += (char)0x88; i+=2; continue; }
+		if (st == "I8") { output += (char)0xc3; output += (char)0x8c; i+=2; continue; }
+		if (st == "O8") { output += (char)0xc3; output += (char)0x92; i+=2; continue; }
+		if (st == "U8") { output += (char)0xc3; output += (char)0x99; i+=2; continue; }
+		if (st == "a8") { output += (char)0xc3; output += (char)0xa0; i+=2; continue; }
+		if (st == "e8") { output += (char)0xc3; output += (char)0xa8; i+=2; continue; }
+		if (st == "i8") { output += (char)0xc3; output += (char)0xac; i+=2; continue; }
+		if (st == "o8") { output += (char)0xc3; output += (char)0xb2; i+=2; continue; }
+		if (st == "u8") { output += (char)0xc3; output += (char)0xb9; i+=2; continue; }
+
+		// acutes
+		if (st == "A7") { output += (char)0xc3; output += (char)0x81; i+=2; continue; }
+		if (st == "E7") { output += (char)0xc3; output += (char)0x89; i+=2; continue; }
+		if (st == "I7") { output += (char)0xc3; output += (char)0x8d; i+=2; continue; }
+		if (st == "O7") { output += (char)0xc3; output += (char)0x93; i+=2; continue; }
+		if (st == "U7") { output += (char)0xc3; output += (char)0x9a; i+=2; continue; }
+		if (st == "a7") { output += (char)0xc3; output += (char)0xa1; i+=2; continue; }
+		if (st == "e7") { output += (char)0xc3; output += (char)0xa9; i+=2; continue; }
+		if (st == "i7") { output += (char)0xc3; output += (char)0xad; i+=2; continue; }
+		if (st == "o7") { output += (char)0xc3; output += (char)0xb3; i+=2; continue; }
+		if (st == "u7") { output += (char)0xc3; output += (char)0xba; i+=2; continue; }
+
+		// umlauts
+		if (st == "A3") { output += (char)0xc3; output += (char)0x84; i+=2; continue; }
+		if (st == "E3") { output += (char)0xc3; output += (char)0x8b; i+=2; continue; }
+		if (st == "I3") { output += (char)0xc3; output += (char)0x8f; i+=2; continue; }
+		if (st == "O3") { output += (char)0xc3; output += (char)0x96; i+=2; continue; }
+		if (st == "U3") { output += (char)0xc3; output += (char)0x9c; i+=2; continue; }
+		if (st == "a3") { output += (char)0xc3; output += (char)0xa4; i+=2; continue; }
+		if (st == "e3") { output += (char)0xc3; output += (char)0xab; i+=2; continue; }
+		if (st == "i3") { output += (char)0xc3; output += (char)0xaf; i+=2; continue; }
+		if (st == "o3") { output += (char)0xc3; output += (char)0xb6; i+=2; continue; }
+		if (st == "u3") { output += (char)0xc3; output += (char)0xbc; i+=2; continue; }
+
+		// other
+		if (st == "s2") { output += (char)0xc3; output += (char)0x9f; i+=2; continue; }  // szlig
+	}
+
+	return output;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 

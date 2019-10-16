@@ -39,6 +39,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void setFiguredBassPresent      (int partindex);
 		void setHarmonyPresent          (int partindex);
 		void setVerseCount              (int partindex, int staffindex, int count);
+		void reportVerseCount           (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
 		void removeSibeliusIncipit      (void);

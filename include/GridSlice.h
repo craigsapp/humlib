@@ -72,6 +72,7 @@ class GridSlice : public std::vector<GridPart*> {
 		void initializePartStaves  (std::vector<MxmlPart>& partdata);
 		void initializeBySlice     (GridSlice* slice);
 		void initializeByStaffCount(int staffcount);
+		void reportVerseCount      (int partindex, int staffindex, int count);
 
 		HumNum       getDuration        (void);
 		void         setDuration        (HumNum duration);

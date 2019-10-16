@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Oct 15 10:17:02 PDT 2019
+// Last Modified: Wed Oct 16 00:24:27 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6139,6 +6139,21 @@ void GridSlice::invalidate(void) {
 
 //////////////////////////////
 //
+// GridSlice::reportVerseCount --
+//
+
+void GridSlice::reportVerseCount(int partindex, int staffindex, int count) {
+	if (!m_owner) {
+		return;
+	}
+	m_owner->reportVerseCount(partindex, staffindex, count);
+}
+
+
+
+
+//////////////////////////////
+//
 // GridStaff::GridStaff -- Constructor.
 //
 
@@ -7188,6 +7203,34 @@ void HumGrid::setHarmonyCount(int partindex, int count) {
 		return;
 	}
 	m_harmonyCount[partindex] = count;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::reportVerseCount --
+//
+
+void HumGrid::reportVerseCount(int partindex, int staffindex, int count) {
+	if (count <= 0) {
+		return;
+	}
+	int staffnumber = staffindex + 1;
+	int partsize = (int)m_verseCount.size();
+	if (partindex >= partsize) {
+		m_verseCount.resize(partindex+1);
+	}
+	int staffcount = (int)m_verseCount.at(partindex).size();
+	if (staffnumber >= staffcount) {
+		m_verseCount.at(partindex).resize(staffnumber+1);
+		for (int i=staffcount; i<=staffnumber; i++) {
+			m_verseCount.at(partindex).at(i) = 0;
+		}
+	}
+	if (count > m_verseCount.at(partindex).at(staffnumber)) {
+		m_verseCount.at(partindex).at(staffnumber) = count;
+	}
 }
 
 
@@ -32139,6 +32182,18 @@ string MuseRecord::getVerse(int index) {
 
 //////////////////////////////
 //
+// MuseRecord::getVerseUtf8 --
+//
+
+string MuseRecord::getVerseUtf8(int index) {
+	string tverse = getVerse(index);
+	return MuseRecord::musedataToUtf8(tverse);
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getKernNoteStyle --
 //	    default values: beams = 0, stems = 0
 //
@@ -33365,6 +33420,7 @@ void MuseRecord::zerase(string& inout, int num) {
 	}
 	inout.resize(inout.size() - num);
 }
+
 
 
 
@@ -34657,6 +34713,71 @@ GridVoice* MuseRecordBasic::getVoice(void) {
 std::string MuseRecordBasic::getLayoutVis(void) {
 	return m_graphicrecip;
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::musedataToUtf8 --
+//
+
+string MuseRecordBasic::musedataToUtf8(string& input) {
+	string output;
+	int isize = (int)input.size();
+	for (int i=0; i<isize; i++) {
+		if (input[i] != '\\') {
+			output += input[i];
+			continue;
+		}
+		if (i+2 >= isize) {
+			output += input[i];
+			continue;
+		}
+		string st = input.substr(i+1, 2);
+
+		// graves
+		if (st == "A8") { output += (char)0xc3; output += (char)0x80; i+=2; continue; }
+		if (st == "E8") { output += (char)0xc3; output += (char)0x88; i+=2; continue; }
+		if (st == "I8") { output += (char)0xc3; output += (char)0x8c; i+=2; continue; }
+		if (st == "O8") { output += (char)0xc3; output += (char)0x92; i+=2; continue; }
+		if (st == "U8") { output += (char)0xc3; output += (char)0x99; i+=2; continue; }
+		if (st == "a8") { output += (char)0xc3; output += (char)0xa0; i+=2; continue; }
+		if (st == "e8") { output += (char)0xc3; output += (char)0xa8; i+=2; continue; }
+		if (st == "i8") { output += (char)0xc3; output += (char)0xac; i+=2; continue; }
+		if (st == "o8") { output += (char)0xc3; output += (char)0xb2; i+=2; continue; }
+		if (st == "u8") { output += (char)0xc3; output += (char)0xb9; i+=2; continue; }
+
+		// acutes
+		if (st == "A7") { output += (char)0xc3; output += (char)0x81; i+=2; continue; }
+		if (st == "E7") { output += (char)0xc3; output += (char)0x89; i+=2; continue; }
+		if (st == "I7") { output += (char)0xc3; output += (char)0x8d; i+=2; continue; }
+		if (st == "O7") { output += (char)0xc3; output += (char)0x93; i+=2; continue; }
+		if (st == "U7") { output += (char)0xc3; output += (char)0x9a; i+=2; continue; }
+		if (st == "a7") { output += (char)0xc3; output += (char)0xa1; i+=2; continue; }
+		if (st == "e7") { output += (char)0xc3; output += (char)0xa9; i+=2; continue; }
+		if (st == "i7") { output += (char)0xc3; output += (char)0xad; i+=2; continue; }
+		if (st == "o7") { output += (char)0xc3; output += (char)0xb3; i+=2; continue; }
+		if (st == "u7") { output += (char)0xc3; output += (char)0xba; i+=2; continue; }
+
+		// umlauts
+		if (st == "A3") { output += (char)0xc3; output += (char)0x84; i+=2; continue; }
+		if (st == "E3") { output += (char)0xc3; output += (char)0x8b; i+=2; continue; }
+		if (st == "I3") { output += (char)0xc3; output += (char)0x8f; i+=2; continue; }
+		if (st == "O3") { output += (char)0xc3; output += (char)0x96; i+=2; continue; }
+		if (st == "U3") { output += (char)0xc3; output += (char)0x9c; i+=2; continue; }
+		if (st == "a3") { output += (char)0xc3; output += (char)0xa4; i+=2; continue; }
+		if (st == "e3") { output += (char)0xc3; output += (char)0xab; i+=2; continue; }
+		if (st == "i3") { output += (char)0xc3; output += (char)0xaf; i+=2; continue; }
+		if (st == "o3") { output += (char)0xc3; output += (char)0xb6; i+=2; continue; }
+		if (st == "u3") { output += (char)0xc3; output += (char)0xbc; i+=2; continue; }
+
+		// other
+		if (st == "s2") { output += (char)0xc3; output += (char)0x9f; i+=2; continue; }  // szlig
+	}
+
+	return output;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -61185,7 +61306,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	HumRegex hre;
 	for (int i=0; i<(int)query.size(); i++) {
 		for (int j=0; j<(int)words.size(); j++) {
-			if (hre.search(words[j]->fullword, query[i].word, "i")) {
+			if (hre.search(words.at(j)->fullword, query.at(i).word, "i")) {
 				tcount++;
 				markTextMatch(infile, *words[j]);
 			}
@@ -61351,10 +61472,12 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 	string text;
 	while (tok && (tok != mnext)) {
 		if (!tok->isData()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
 		}
 		if (tok->isNull()) {
-			return;
+			tok = tok->getNextToken();
+			continue;
 		}
 		text = tok->getText();
 		if ((!text.empty()) && (text.back() == '-')) {
@@ -62079,6 +62202,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
+		addLyrics(slice, part, staff, mr);
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -62197,6 +62321,25 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
 	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addLyrics --
+//
+
+void Tool_musedata2hum::addLyrics(GridSlice* slice, int part, int staff, MuseRecord& mr) {
+	int versecount = mr.getVerseCount();
+	if (versecount == 0) {
+		return;
+	}
+	for (int i=0; i<versecount; i++) {
+		string verse = mr.getVerseUtf8(i);
+		slice->at(part)->at(staff)->setVerse(i, verse);
+	}
+	slice->reportVerseCount(part, staff, versecount);
 }
 
 

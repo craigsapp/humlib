@@ -2578,6 +2578,18 @@ string MuseRecord::getVerse(int index) {
 
 //////////////////////////////
 //
+// MuseRecord::getVerseUtf8 --
+//
+
+string MuseRecord::getVerseUtf8(int index) {
+	string tverse = getVerse(index);
+	return MuseRecord::musedataToUtf8(tverse);
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getKernNoteStyle --
 //	    default values: beams = 0, stems = 0
 //
@@ -3804,6 +3816,7 @@ void MuseRecord::zerase(string& inout, int num) {
 	}
 	inout.resize(inout.size() - num);
 }
+
 
 
 // END_MERGE

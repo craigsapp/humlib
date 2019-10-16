@@ -874,6 +874,21 @@ void GridSlice::invalidate(void) {
 }
 
 
+
+//////////////////////////////
+//
+// GridSlice::reportVerseCount --
+//
+
+void GridSlice::reportVerseCount(int partindex, int staffindex, int count) {
+	if (!m_owner) {
+		return;
+	}
+	m_owner->reportVerseCount(partindex, staffindex, count);
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum
