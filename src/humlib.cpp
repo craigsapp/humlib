@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 16 13:13:14 PDT 2019
+// Last Modified: Wed Oct 16 13:24:58 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1522,14 +1522,16 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 	for (int i=0; i<(int)mfb.size(); i++) {
 		if (mfb[i] == 'b') { // blank spot in figure stack
 			output += 'X';
+		} else if (mfb[i] == 'f') { // flat
+			output += '-';
 		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
 			output += ":";
 			i++;
-		} else if ((mfb[i] == '/')) {  // assuming means flat
+		} else if ((mfb[i] == '/')) {  // assuming slash means flat
 			output += "-/";
-		} else if ((mfb[i] == '\\')) { // assuming means sharp
+		} else if ((mfb[i] == '\\')) { // assuming slash means sharp
 			output += "#/";
-		} else if ((mfb[i] == '+')) {  // assuming means sharp
+		} else if ((mfb[i] == '+')) {  // assuming slash means sharp
 			output += "#|";
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '#')) {
 			output += mfb[i];
