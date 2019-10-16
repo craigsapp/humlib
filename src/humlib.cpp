@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 16 00:24:27 PDT 2019
+// Last Modified: Wed Oct 16 13:13:14 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1538,7 +1538,7 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'f')) {
 			output += mfb[i];
-			output += mfb[i+1];
+			output += '-';
 			output += 'r';
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'n')) {
@@ -4201,6 +4201,21 @@ GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, in
 		}
 	}
 
+
+	if ((!processed) && (!this->empty()) && (this->back()->getTimestamp() == timestamp)) {
+		// This case is related to putting figures on the first note in a measure
+		// but the note is not yet there, but the key signature/meter/clef etc. have already
+		// been added.
+		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+		int staff = 0;
+		int voice = 0;
+		string null = ".";
+		gs->addToken(null, part, staff, voice);
+		gs->at(part)->setFiguredBass(token);
+		this->push_back(gs);
+		processed = true;
+	}
+
 	if (!processed) {
 		cerr << "Error: could not insert figured bass: " << token << endl;
 	} else {
@@ -4213,6 +4228,8 @@ GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, in
 	return gs;
 }
 
+
+
 //////////////////////////////
 //
 // GridMeasure::addFiguredBass --
@@ -4222,6 +4239,7 @@ GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int 
 	bool processed = false;
 
 	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+
 		// add a new GridSlice to an empty list or at end of list if timestamp
 		// is after last entry in list.
 		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
@@ -4257,6 +4275,20 @@ GridSlice* GridMeasure::addFiguredBass(const string& tok, HumNum timestamp, int 
 			}
 			iterator++;
 		}
+	}
+
+	if ((!processed) && (!this->empty()) && (this->back()->getTimestamp() == timestamp)) {
+		// This case is related to putting figures on the first note in a measure
+		// but the note is not yet there, but the key signature/meter/clef etc. have already
+		// been added.
+		gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
+		int staff = 0;
+		int voice = 0;
+		string null = ".";
+		gs->addToken(null, part, staff, voice);
+		gs->at(part)->setFiguredBass(tok);
+		this->push_back(gs);
+		processed = true;
 	}
 
 	if (!processed) {

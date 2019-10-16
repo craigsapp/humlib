@@ -338,7 +338,7 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'f')) {
 			output += mfb[i];
-			output += mfb[i+1];
+			output += '-';
 			output += 'r';
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'n')) {
