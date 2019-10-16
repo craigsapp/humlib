@@ -322,14 +322,16 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 	for (int i=0; i<(int)mfb.size(); i++) {
 		if (mfb[i] == 'b') { // blank spot in figure stack
 			output += 'X';
+		} else if (mfb[i] == 'f') { // flat
+			output += '-';
 		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
 			output += ":";
 			i++;
-		} else if ((mfb[i] == '/')) {  // assuming means flat
+		} else if ((mfb[i] == '/')) {  // assuming slash means flat
 			output += "-/";
-		} else if ((mfb[i] == '\\')) { // assuming means sharp
+		} else if ((mfb[i] == '\\')) { // assuming slash means sharp
 			output += "#/";
-		} else if ((mfb[i] == '+')) {  // assuming means sharp
+		} else if ((mfb[i] == '+')) {  // assuming slash means sharp
 			output += "#|";
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == '#')) {
 			output += mfb[i];
@@ -338,7 +340,7 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'f')) {
 			output += mfb[i];
-			output += mfb[i+1];
+			output += '-';
 			output += 'r';
 			i++;
 		} else if (isdigit(mfb[i]) && (i < (int)mfb.size() - 1) && (mfb[i+1] == 'n')) {
