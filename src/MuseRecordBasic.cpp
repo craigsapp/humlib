@@ -1370,7 +1370,49 @@ string MuseRecordBasic::musedataToUtf8(string& input) {
 		if (st == "u3") { output += (char)0xc3; output += (char)0xbc; i+=2; continue; }
 
 		// other
-		if (st == "s2") { output += (char)0xc3; output += (char)0x9f; i+=2; continue; }  // szlig
+		if (st == "s2") { output += (char)0xc3; output += (char)0x9f; i+=2; continue; }  // eszett
+
+		// Older Musedata files reverse the number and letters:
+
+		// graves
+		if (st == "8A") { output += (char)0xc3; output += (char)0x80; i+=2; continue; }
+		if (st == "8E") { output += (char)0xc3; output += (char)0x88; i+=2; continue; }
+		if (st == "8I") { output += (char)0xc3; output += (char)0x8c; i+=2; continue; }
+		if (st == "8O") { output += (char)0xc3; output += (char)0x92; i+=2; continue; }
+		if (st == "8U") { output += (char)0xc3; output += (char)0x99; i+=2; continue; }
+		if (st == "8a") { output += (char)0xc3; output += (char)0xa0; i+=2; continue; }
+		if (st == "8e") { output += (char)0xc3; output += (char)0xa8; i+=2; continue; }
+		if (st == "8i") { output += (char)0xc3; output += (char)0xac; i+=2; continue; }
+		if (st == "8o") { output += (char)0xc3; output += (char)0xb2; i+=2; continue; }
+		if (st == "8u") { output += (char)0xc3; output += (char)0xb9; i+=2; continue; }
+
+		// acutes
+		if (st == "7A") { output += (char)0xc3; output += (char)0x81; i+=2; continue; }
+		if (st == "7E") { output += (char)0xc3; output += (char)0x89; i+=2; continue; }
+		if (st == "7I") { output += (char)0xc3; output += (char)0x8d; i+=2; continue; }
+		if (st == "7O") { output += (char)0xc3; output += (char)0x93; i+=2; continue; }
+		if (st == "7U") { output += (char)0xc3; output += (char)0x9a; i+=2; continue; }
+		if (st == "7a") { output += (char)0xc3; output += (char)0xa1; i+=2; continue; }
+		if (st == "7e") { output += (char)0xc3; output += (char)0xa9; i+=2; continue; }
+		if (st == "7i") { output += (char)0xc3; output += (char)0xad; i+=2; continue; }
+		if (st == "7o") { output += (char)0xc3; output += (char)0xb3; i+=2; continue; }
+		if (st == "7u") { output += (char)0xc3; output += (char)0xba; i+=2; continue; }
+
+		// umlauts
+		if (st == "3A") { output += (char)0xc3; output += (char)0x84; i+=2; continue; }
+		if (st == "3E") { output += (char)0xc3; output += (char)0x8b; i+=2; continue; }
+		if (st == "3I") { output += (char)0xc3; output += (char)0x8f; i+=2; continue; }
+		if (st == "3O") { output += (char)0xc3; output += (char)0x96; i+=2; continue; }
+		if (st == "3U") { output += (char)0xc3; output += (char)0x9c; i+=2; continue; }
+		if (st == "3a") { output += (char)0xc3; output += (char)0xa4; i+=2; continue; }
+		if (st == "3e") { output += (char)0xc3; output += (char)0xab; i+=2; continue; }
+		if (st == "3i") { output += (char)0xc3; output += (char)0xaf; i+=2; continue; }
+		if (st == "3o") { output += (char)0xc3; output += (char)0xb6; i+=2; continue; }
+		if (st == "3u") { output += (char)0xc3; output += (char)0xbc; i+=2; continue; }
+
+		// other
+		if (st == "2s") { output += (char)0xc3; output += (char)0x9f; i+=2; continue; }  // eszett
+
 	}
 
 	return output;
