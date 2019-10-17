@@ -461,6 +461,7 @@ void MuseData::analyzeTpq(void) {
 		MuseRecord* mr = &getRecord(i);
 		if (!mr->isAttributes()) {
 			mr->setTpq(ticks);
+
 			continue;
 		}
 		string line = getLine(i);

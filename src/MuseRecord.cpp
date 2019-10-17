@@ -2597,6 +2597,11 @@ string MuseRecord::getVerseUtf8(int index) {
 string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string output;
 
+	if (!isAnyNote()) {
+		// not a note, so return nothing
+		return "";
+	}
+
 	// place the rhythm
 	stringstream tempdur;
 	int notetype = getGraphicNoteType();
@@ -2826,13 +2831,25 @@ string MuseRecord::getKernNoteAccents(void) {
 // MuseRecord::getKernRestStyle --
 //
 
-string MuseRecord::getKernRestStyle(int quarter) {
+string MuseRecord::getKernRestStyle(void) {
+
 	string output;
 	string rhythmstring;
 
 	// place the rhythm
 	stringstream tempdur;
 
+	if (!isAnyRest()) {
+		// not a rest, so return nothing
+		return "";
+	}
+
+	// logical duration of the note
+	HumNum logicalduration = getTicks();
+	logicalduration /= getTpq();
+	string durrecip = Convert::durationToRecip(logicalduration);
+
+	/*
 	int notetype;
 	if (graphicNoteTypeQ()) {
 		notetype = getGraphicNoteType();
@@ -2853,6 +2870,9 @@ string MuseRecord::getKernRestStyle(int quarter) {
 		rhythmstring = Convert::durationToRecip(dnotetype);
 		output += rhythmstring;
 	}
+	*/
+
+	output = durrecip;
 
 	// add the pitch to the output string
 	output += "r";

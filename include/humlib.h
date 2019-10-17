@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 16 21:42:23 PDT 2019
+// Last Modified: Thu Oct 17 00:23:09 PDT 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2944,7 +2944,7 @@ class MuseRecord : public MuseRecordBasic {
 	//
 	//////////////////////////////
 
-		std::string      getKernRestStyle             (int quarter = 16);
+		std::string      getKernRestStyle             (void);
 
 	protected:
 		void             allowNotesOnly               (const std::string& functioName);
@@ -6408,7 +6408,6 @@ class Tool_musedata2hum : public HumTool {
 		std::string m_omd = "";      // initial tempo designation (store for later output)
 
 		// state variables:
-		int m_tpq      = 1;          // Ticks per quarter note
 		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes

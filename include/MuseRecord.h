@@ -294,7 +294,7 @@ class MuseRecord : public MuseRecordBasic {
 	//
 	//////////////////////////////
 
-		std::string      getKernRestStyle             (int quarter = 16);
+		std::string      getKernRestStyle             (void);
 
 	protected:
 		void             allowNotesOnly               (const std::string& functioName);

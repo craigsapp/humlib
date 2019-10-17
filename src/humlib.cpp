@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 16 21:42:23 PDT 2019
+// Last Modified: Thu Oct 17 00:23:09 PDT 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27694,6 +27694,7 @@ void MuseData::analyzeTpq(void) {
 		MuseRecord* mr = &getRecord(i);
 		if (!mr->isAttributes()) {
 			mr->setTpq(ticks);
+
 			continue;
 		}
 		string line = getLine(i);
@@ -32235,6 +32236,11 @@ string MuseRecord::getVerseUtf8(int index) {
 string MuseRecord::getKernNoteStyle(int beams, int stems) {
 	string output;
 
+	if (!isAnyNote()) {
+		// not a note, so return nothing
+		return "";
+	}
+
 	// place the rhythm
 	stringstream tempdur;
 	int notetype = getGraphicNoteType();
@@ -32464,13 +32470,25 @@ string MuseRecord::getKernNoteAccents(void) {
 // MuseRecord::getKernRestStyle --
 //
 
-string MuseRecord::getKernRestStyle(int quarter) {
+string MuseRecord::getKernRestStyle(void) {
+
 	string output;
 	string rhythmstring;
 
 	// place the rhythm
 	stringstream tempdur;
 
+	if (!isAnyRest()) {
+		// not a rest, so return nothing
+		return "";
+	}
+
+	// logical duration of the note
+	HumNum logicalduration = getTicks();
+	logicalduration /= getTpq();
+	string durrecip = Convert::durationToRecip(logicalduration);
+
+	/*
 	int notetype;
 	if (graphicNoteTypeQ()) {
 		notetype = getGraphicNoteType();
@@ -32491,6 +32509,9 @@ string MuseRecord::getKernRestStyle(int quarter) {
 		rhythmstring = Convert::durationToRecip(dnotetype);
 		output += rhythmstring;
 	}
+	*/
+
+	output = durrecip;
 
 	// add the pitch to the output string
 	output += "r";
@@ -62054,7 +62075,6 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	m_lastfigure = NULL;
 	m_lastnote = NULL;
 	m_lastbarnum = -1;
-	m_tpq = part.getInitialTpq();
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
 	
@@ -62212,7 +62232,6 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
-	int tpq          = m_tpq;
 	int part         = m_part;
 	int staff        = 0;
 	int maxstaff     = m_maxstaff;
@@ -62298,7 +62317,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isAnyRest()) {
-		tok  = mr.getKernRestStyle(tpq);
+		tok  = mr.getKernRestStyle();
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));

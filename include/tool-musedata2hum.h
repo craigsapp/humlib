@@ -68,7 +68,6 @@ class Tool_musedata2hum : public HumTool {
 		std::string m_omd = "";      // initial tempo designation (store for later output)
 
 		// state variables:
-		int m_tpq      = 1;          // Ticks per quarter note
 		int m_part     = 0;          // staff index currently being processed
 		int m_maxstaff = 0;          // total number of staves (parts)
 		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes

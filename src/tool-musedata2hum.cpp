@@ -251,7 +251,6 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	m_lastfigure = NULL;
 	m_lastnote = NULL;
 	m_lastbarnum = -1;
-	m_tpq = part.getInitialTpq();
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
 	
@@ -409,7 +408,6 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
-	int tpq          = m_tpq;
 	int part         = m_part;
 	int staff        = 0;
 	int maxstaff     = m_maxstaff;
@@ -495,7 +493,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	} else if (mr.isChordGraceNote()) {
 		cerr << "PROCESS GRACE CHORD NOTE HERE: " << mr << endl;
 	} else if (mr.isAnyRest()) {
-		tok  = mr.getKernRestStyle(tpq);
+		tok  = mr.getKernRestStyle();
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
