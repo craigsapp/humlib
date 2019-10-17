@@ -2714,10 +2714,10 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 		int nexttie = getNextTiedNoteLineIndex();
 		int state = 0;
 		if (lasttie >= 0) {
-			state = 2;
+			state |= 2;
 		}
 		if (nexttie >= 0) {
-			state = 1;
+			state |= 1;
 		}
 		switch (state) {
 			case 1:
