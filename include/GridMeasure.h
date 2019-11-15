@@ -94,6 +94,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		bool         isRepeatBoth(void)
 		                  { return m_style == MeasureStyle::RepeatBoth; }
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
+		void         addLayoutParameter(HumNum timestamp, int partindex, int staffindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addFiguredBassLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		GridSlice*   addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff);

@@ -418,6 +418,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	}
 	
 	HumNum timestamp = mr.getAbsBeat();
+cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;
 	GridSlice* slice = NULL;
 
@@ -502,9 +503,46 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 				cerr << "GRAPHIC VERSION OF NOTEB " << gr << endl;
 			}
 		}
+	} else if (mr.isDirection()) {
+
+		cerr << "PROCESS DIRECTION HERE: " << mr << endl;
+		if (mr.isTextDirection()) {
+			addTextDirection(gm, part, staff, mr, timestamp);
+		}
 	}
 }
 
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addTextDirection --
+//
+
+void Tool_musedata2hum::addTextDirection(GridMeasure* gm, int part, int staff,
+		MuseRecord& mr, HumNum timestamp) {
+
+	if (!mr.isTextDirection()) {
+		return;
+	}
+	string text = mr.getTextDirection();
+	if (text == "") {
+		// no text direction to process
+		return;
+	}
+	HumRegex hre;
+	hre.replaceDestructive(text, "&colon;", ":", "g");
+	string output = "!LO:TX";
+	output += ":b";   // text below (figure out above cases)
+	output += ":t=";
+	output += text;
+	cerr << "LAYOUT FOR TEXT IS " << output << endl;
+
+	// add staff index later
+	gm->addLayoutParameter(NULL, part, output);
+
+
+}
 
 
 //////////////////////////////

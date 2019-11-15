@@ -61,6 +61,7 @@ class Tool_pccount : public HumTool {
 		                                 HumdrumFile& infile);
 		std::string getFinal            (HumdrumFile& infile);
 		double  getPercent              (const string& pitchclass);
+		int     getCount                (const string& pitchclass);
 		void    setFactorMaximum        (void);
 		void    setFactorNormalize      (void);
 
@@ -84,6 +85,7 @@ class Tool_pccount : public HumTool {
 		double m_ratio      = 0.67;
 		bool m_key          = true;
 		double m_factor     = 1.0;
+		int m_maxpc         = 0;
 		std::string m_title = "";
 		std::string m_id    = "id";
 		std::map<std::string, std::string> m_vcolor;

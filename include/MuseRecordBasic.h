@@ -175,6 +175,7 @@ class MuseRecordBasic {
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isDirection        (void);
 		bool              isAnyComment       (void);
 		bool              isLineComment      (void);
 		bool              isBlockComment     (void);

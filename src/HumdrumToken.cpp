@@ -316,7 +316,7 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 //    Expand later to handle slur ends and elided slurs.  The function
 //    HumdrumFileContent::analyzeSlurs() should be called before accessing
 //    this function.  If the slur duruation was already calculated, return
-//    thave value; otherwise, calculate from the location of a matching
+//    that value; otherwise, calculate from the location of a matching
 //    slur end.
 //
 

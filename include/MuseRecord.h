@@ -290,6 +290,27 @@ class MuseRecord : public MuseRecordBasic {
 		int              getAttributeInt              (char attribute);
 		int              getAttributeField            (std::string& output, const std::string& attribute);
 
+	//////////////////////////////
+	// functions which work with musical direction records ('$'):
+
+		// columns 17-18: type of direction
+		std::string      getDirectionTypeField        (void);
+		std::string      getDirectionTypeString       (void);
+		bool             isTextDirection              (void);
+		bool             isHairpin                    (void);
+		bool             isHairpinStart               (void);
+		bool             isHairpinStop                (void);
+		bool             isDashStart                  (void);
+		bool             isDashStop                   (void);
+		bool             isPedalStart                 (void);
+		bool             isPedalEnd                   (void);
+		bool             isRehearsal                  (void);
+		bool             isOctaveUpStart              (void);
+		bool             isOctaveDownStart            (void);
+		bool             isOctaveStop                 (void);
+
+		std::string      getDirectionText             (void);
+		std::string      getTextDirection             (void) { return getDirectionText(); }
 
 	//
 	//////////////////////////////
@@ -297,11 +318,12 @@ class MuseRecord : public MuseRecordBasic {
 		std::string      getKernRestStyle             (void);
 
 	protected:
-		void             allowNotesOnly               (const std::string& functioName);
+		void             allowNotesOnly               (const std::string& functionName);
 		void             allowNotesAndRestsOnly       (const std::string& functionName);
 		void             allowMeasuresOnly            (const std::string& functioName);
 		void             allowFigurationOnly          (const std::string& functioName);
 		void             allowFigurationAndNotesOnly  (const std::string& functioName);
+		void             allowDirectionsOnly          (const std::string& functioName);
 		int              getAddElementIndex           (int& index, std::string& output,
 		                                               const std::string& input);
 		void             zerase                       (std::string& inout, int num);

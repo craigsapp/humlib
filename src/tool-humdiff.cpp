@@ -28,11 +28,11 @@ namespace hum {
 //
 
 Tool_humdiff::Tool_humdiff(void) {
-	define("r|reference=i:0",     "sequence number of reference score");
+	define("r|reference=i:1",     "sequence number of reference score");
 	define("report=b",            "display report of differences");
 	define("time-points|times=b", "display timepoint lists for each file");
 	define("note-points|notes=b", "display notepoint lists for each file");
-	define("c|color=s:red",       "color for markers");
+	define("c|color=s:red",       "color for difference markers");
 }
 
 
@@ -43,60 +43,52 @@ Tool_humdiff::Tool_humdiff(void) {
 //
 
 bool Tool_humdiff::run(HumdrumFileSet& infiles) {
-	bool status = true;
-	if (infiles.getCount() >= 2) {
-		status = run(infiles[0], infiles[1]);
-	} else {
-		status = false;
+	int reference = getInteger("reference") - 1;
+	if (reference < 0) {
+		cerr << "Error: reference has to be 1 or higher" << endl;
+		return false;
 	}
-	return status;
-}
-
-
-bool Tool_humdiff::run(const string& indata1, const string& indata2, ostream& out) {
-	HumdrumFile infile1(indata1);
-	HumdrumFile infile2;
-	bool status;
-	if (indata2.empty()) {
-		infile2.read(indata2);
-		status = run(infile1, infile2);
-	} else {
-		status = run(infile1, infile1);
+	if (reference > infiles.getCount()) {
+		cerr << "Error: reference number is too large: " << reference << endl;
+		cerr << "Maximum is " << infiles.getCount() << endl;
+		return false;
 	}
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile1;
-		out << infile2;
-	}
-	return status;
-}
 
-bool Tool_humdiff::run(HumdrumFile& infile1, HumdrumFile& infile2, ostream& out) {
-	bool status;
-	if (infile2.getLineCount() == 0) {
-		status = run(infile1, infile1);
+	if (infiles.getSize() == 0) {
+		cerr << "Usage: " << getCommand() << " files" << endl;
+		return false;
+	} else if (infiles.getSize() < 2) {
+		cerr << "Error: requires two or more files" << endl;
+		cerr << "Usage: " << getCommand() << " files" << endl;
+		return false;
 	} else {
-		status = run(infile1, infile2);
-	}
-	if (hasAnyText()) {
-		getAllText(out);
-	} else {
-		out << infile1;
-		out << infile2;
-	}
-	return status;
-}
+		HumNum targetdur = infiles[0].getScoreDuration();
+		for (int i=1; i<infiles.getSize(); i++) {
+			HumNum dur = infiles[i].getScoreDuration();
+			if (dur != targetdur) {
+				cerr << "Error: all files must have the same duration" << endl;
+				return false;
+			}
+		}
 
-//
-// In-place processing of file:
-//
+		for (int i=0; i<infiles.getCount(); i++) {
+			if (i == reference) {
+				continue;
+			}
+			compareFiles(infiles[reference], infiles[i]);
+		}
 
-bool Tool_humdiff::run(HumdrumFile& infile1, HumdrumFile& infile2) {
-	if (infile2.getLineCount() == 0) {
-		processFile(infile1, infile1);
-	} else {
-		processFile(infile1, infile2);
+		if (!getBoolean("report")) {
+			infiles[reference].createLinesFromTokens();
+			m_humdrum_text << infiles[reference];
+			if (m_marked) {
+				m_humdrum_text << "!!!RDF**kern: @ = marked note";
+				if (getBoolean("color")) {
+					m_humdrum_text << "color=\"" << getString("color") << "\"";
+				}
+				m_humdrum_text << endl;
+			}
+		}
 	}
 
 	return true;
@@ -106,76 +98,20 @@ bool Tool_humdiff::run(HumdrumFile& infile1, HumdrumFile& infile2) {
 
 //////////////////////////////
 //
-// Tool_humdiff::processFile
-//
-
-void Tool_humdiff::processFile(HumdrumFile& infile1, HumdrumFile& infile2) {
-	HumdrumFileSet humset;
-	humset.readAppendHumdrum(infile1);
-	humset.readAppendHumdrum(infile2);
-	int reference = getInteger("reference");
-	if (reference > 1) {
-		if (reference > humset.getCount()) {
-			cerr << "Error: work number is too large: " << reference << endl;
-			cerr << "Maximum is " << humset.getCount() << endl;
-			return;
-		}
-		reference--;
-		humset.swap(0, reference);
-	}
-
-	if (humset.getSize() == 0) {
-		cerr << "Usage: " << getCommand() << " files" << endl;
-		return;
-	} else if (humset.getSize() < 2) {
-		cerr << "Error: requires two or more files" << endl;
-		cerr << "Usage: " << getCommand() << " files" << endl;
-		return;
-	} else {
-		HumNum targetdur = humset[0].getScoreDuration();
-		for (int i=1; i<humset.getSize(); i++) {
-			HumNum dur = humset[i].getScoreDuration();
-			if (dur != targetdur) {
-				cerr << "Error: all files must have the same duration" << endl;
-				return;
-			}
-		}
-		compareFiles(humset);
-	}
-
-	if (!getBoolean("report")) {
-		humset[0].createLinesFromTokens();
-		m_humdrum_text << humset[0];
-		if (m_marked) {
-			m_humdrum_text << "!!!RDF**kern: @ = marked note";
-			if (getBoolean("color")) {
-				m_humdrum_text << "color=\"" << getString("color") << "\"";
-			}
-			m_humdrum_text << endl;
-		}
-	}
-}
-
-
-
-//////////////////////////////
-//
 // Tool_humdiff::compareFiles --
 //
 
-void Tool_humdiff::compareFiles(HumdrumFileSet& humset) {
-	vector<vector<TimePoint>> timepoints(humset.getSize());;
-	for (int i=0; i<humset.getSize(); i++) {
-		extractTimePoints(timepoints.at(i), humset[i]);
-	}
+void Tool_humdiff::compareFiles(HumdrumFile& reference, HumdrumFile& alternate) {
+	vector<vector<TimePoint>> timepoints(2);
+	extractTimePoints(timepoints.at(0), reference);
+	extractTimePoints(timepoints.at(1), alternate);
 
 	if (getBoolean("time-points")) {
-		for (int i=0; i<(int)timepoints.size(); i++) {
-	 		printTimePoints(cout, timepoints[i]);
-		}
+		printTimePoints(timepoints[0]);
+		printTimePoints(timepoints[1]);
 	}
 
-	compareTimePoints(cout, timepoints, humset);
+	compareTimePoints(timepoints, reference, alternate);
 }
 
 
@@ -185,12 +121,11 @@ void Tool_humdiff::compareFiles(HumdrumFileSet& humset) {
 // Tool_humdiff::printTimePoints --
 //
 
-ostream& Tool_humdiff::printTimePoints(ostream& out, vector<TimePoint>& timepoints) {
+void Tool_humdiff::printTimePoints(vector<TimePoint>& timepoints) {
 	for (int i=0; i<(int)timepoints.size(); i++) {
-		out << "TIMEPOINT " << i << ":" << endl;
-		out << timepoints[i] << endl;
+		m_free_text << "TIMEPOINT " << i << ":" << endl;
+		m_free_text << timepoints[i] << endl;
 	}
-	return out;
 }
 
 
@@ -200,11 +135,16 @@ ostream& Tool_humdiff::printTimePoints(ostream& out, vector<TimePoint>& timepoin
 // Tool_humdiff::compareTimePoints --
 //
 
-ostream& Tool_humdiff::compareTimePoints(ostream& out, vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset) {
+void Tool_humdiff::compareTimePoints(vector<vector<TimePoint>>& timepoints,
+		HumdrumFile& reference, HumdrumFile& alternate) {
 	vector<int> indexes(timepoints.size(), 0);
 	HumNum minval;
 	HumNum value;
 	int found;
+
+	vector<HumdrumFile*> infiles(2, NULL);
+	infiles[0] = &reference;
+	infiles[1] = &alternate;
 
 	vector<int> increment(timepoints.size(), 0);
 
@@ -249,13 +189,12 @@ ostream& Tool_humdiff::compareTimePoints(ostream& out, vector<vector<TimePoint>>
 		if (!found) {
 			break;
 		} else {
-			compareLines(minval, indexes, timepoints, humset);
+			compareLines(minval, indexes, timepoints, infiles);
 		}
 		for (int i=0; i<(int)increment.size(); i++) {
 			indexes.at(i) += increment.at(i);
 		}
 	}
-	return out;
 }
 
 
@@ -266,13 +205,13 @@ ostream& Tool_humdiff::compareTimePoints(ostream& out, vector<vector<TimePoint>>
 //
 
 void Tool_humdiff::printNotePoints(vector<NotePoint>& notelist) {
-	cout << "vvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
+	m_free_text << "vvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
 	for (int i=0; i<(int)notelist.size(); i++) {
-		cout << "NOTE " << i << endl;
-		cout << notelist.at(i) << endl;
+		m_free_text << "NOTE " << i << endl;
+		m_free_text << notelist.at(i) << endl;
 	}
-	cout << "^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-	cout << endl;
+	m_free_text << "^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+	m_free_text << endl;
 }
 
 
@@ -312,12 +251,15 @@ void Tool_humdiff::markNote(NotePoint& np) {
 //
 
 void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
-		vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset) {
+		vector<vector<TimePoint>>& timepoints, vector<HumdrumFile*> infiles) {
 
 	bool reportQ = getBoolean("report");
 
 	// cerr << "COMPARING LINES ====================================" << endl;
 	vector<vector<NotePoint>> notelist(indexes.size());
+
+	// Note: timepoints size must be 2
+	// and infiles size must be 2
 	for (int i=0; i<(int)timepoints.size(); i++) {
 		if (indexes.at(i) >= (int)timepoints.at(i).size()) {
 			continue;
@@ -327,7 +269,7 @@ void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
 			continue;
 		}
 
-		getNoteList(notelist.at(i), humset[i],
+		getNoteList(notelist.at(i), *infiles[i],
 			timepoints.at(i).at(indexes.at(i)).index[0],
 			timepoints.at(i).at(indexes.at(i)).measure, i, indexes.at(i));
 
@@ -367,7 +309,7 @@ void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
 				int humindex = notelist.at(0).at(i).token->getLineIndex();
 				cout << "\tREFERENCE MEASURE\t: " << notelist.at(0).at(i).measure << endl;
 				cout << "\tREFERENCE LINE NO.\t: " << humindex+1 << endl;
-				cout << "\tREFERENCE LINE TEXT\t: " << humset[0][humindex] << endl;
+				cout << "\tREFERENCE LINE TEXT\t: " << (*infiles[0])[humindex] << endl;
 
 				cout << "\tTARGET  " << j << " LINE NO. ";
 				if (j < 10) {
@@ -385,7 +327,6 @@ void Tool_humdiff::compareLines(HumNum minval, vector<int>& indexes,
 			}
 		}
 	}
-
 }
 
 

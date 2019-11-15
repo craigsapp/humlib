@@ -101,6 +101,8 @@ class HumdrumLine : public std::string, public HumHash {
 		HumdrumFile*  getOwner             (void);
 		void          setText              (const std::string& text);
 		std::string   getText              (void);
+		int           getBarNumber         (void);
+		int           getMeasureNumber     (void) { return getBarNumber(); }
 
 		HumNum      getDuration            (void);
 		HumNum      getDurationFromStart   (void);

@@ -59,6 +59,8 @@ class Tool_musedata2hum : public HumTool {
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
 		                              HumNum timestamp, int part, int maxstaff);
 		std::string trimSpaces       (std::string input);
+		void    addTextDirection     (GridMeasure* gm, int part, int staff,
+		                              MuseRecord& mr, HumNum timestamp);
 
 	private:
 		// options:

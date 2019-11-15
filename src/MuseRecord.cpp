@@ -3600,6 +3600,23 @@ void MuseRecord::allowMeasuresOnly(const string& functionName) {
 }
 
 
+//////////////////////////////
+//
+// MuseRecord::allDirectionsOnly --
+//
+
+void MuseRecord::allowDirectionsOnly(const std::string& functionName) {
+	switch (getType()) {
+		case E_muserec_musical_directions:
+			break;
+		default:
+			cerr << "Error: can only access " << functionName
+				  << " on a musical direction record.  Line is: " << getLine() << endl;
+			return;
+	}
+}
+
+
 
 //////////////////////////////
 //
@@ -3835,6 +3852,260 @@ void MuseRecord::zerase(string& inout, int num) {
 		}
 	}
 	inout.resize(inout.size() - num);
+}
+
+
+
+/////////////////////////////////////////
+//
+// MuseRecord::getDirectionTypeString -- columns 17 and 18.
+//    A = segno sign
+//    B = right-justified text
+//    C = center-justified text
+//    D = left-justified text
+//    E = dynamics hairpin start
+//    F = dynamics hairpin end
+//    G = letter dynamics (text given starting in column 25)
+//    H = begin dashes (after words)
+//    J = end dashes
+//    P = pedal start
+//    Q = pedal stop
+//    R = rehearsal number or letter
+//    U = octave up start
+//    V = octave down start
+//    W = octave stop
+//
+
+std::string MuseRecord::getDirectionTypeField(void) {
+	allowDirectionsOnly("getDirectionType");
+	return extract(17, 18);
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDirectionTypeString -- Same as the field version, but
+//    trailing spaces are removed (not leading ones, at least for now).
+//
+
+std::string MuseRecord::getDirectionTypeString(void) {
+	string output = getDirectionTypeField();
+	if (output.back() == ' ') {
+		output.resize(output.size() - 1);
+	}
+	if (output.back() == ' ') {
+		output.resize(output.size() - 1);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isTextDirection -- Text is stored starting at column 25.
+//    B = right justified
+//    C = center justified
+//    D = left justified
+//
+
+bool MuseRecord::isTextDirection(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('B') != string::npos) {
+		return true;
+	}
+	if (typefield.find('C') != string::npos) {
+		return true;
+	}
+	if (typefield.find('D') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isHairpin --
+//
+
+bool MuseRecord::isHairpin(void) {
+	string typefield = getDirectionTypeField();
+	if (isHairpinStart()) {
+		return true;
+	}
+	if (isHairpinStop()) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isHairpinStart --
+//
+
+bool MuseRecord::isHairpinStart(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('E') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isHairpinStop --
+//
+
+bool MuseRecord::isHairpinStop(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('F') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isDashStart --
+//
+
+bool MuseRecord::isDashStart(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('H') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isDashStop --
+//
+
+bool MuseRecord::isDashStop(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('J') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isPedalStart --
+//
+
+bool MuseRecord::isPedalStart(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('P') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isPedalEnd --
+//
+
+bool MuseRecord::isPedalEnd(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('Q') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isRehearsal --
+//
+
+bool MuseRecord::isRehearsal(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('R') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isOctiveUpStart --
+//
+
+bool MuseRecord::isOctaveUpStart(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('U') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isOctaveDownStart --
+//
+
+bool MuseRecord::isOctaveDownStart(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('V') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isOctaveStop --
+//
+
+bool MuseRecord::isOctaveStop(void) {
+	string typefield = getDirectionTypeField();
+	if (typefield.find('W') != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDirectionText -- Return the text starting in column 25.
+//
+
+std::string MuseRecord::getDirectionText(void) {
+	int length = (int)m_recordString.size();
+	if (length < 25) {
+		// no text
+		return "";
+	}
+	return trimSpaces(m_recordString.substr(24));
 }
 
 

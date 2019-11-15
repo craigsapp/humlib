@@ -1246,6 +1246,9 @@ void HumdrumFileBase::getTrackSequence(vector<vector<HTp> >& sequence,
 	bool foundTrack;
 
 	for (i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isEmpty()) {
+			continue;
+		}
 		tempout.resize(0);
 		if (!noglobalQ && (infile[i].isGlobal())) {
 			tempout.push_back(infile[i].token(0));

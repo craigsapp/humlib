@@ -132,6 +132,7 @@ void Tool_pccount::initialize(HumdrumFile& infile) {
 	m_vcolor["[Canto 1]"]		=	"#e49689";
 	m_vcolor["[Canto]"]		=	"#e49689";
 	m_vcolor["[Soprano o Tenore]"]	=	"#e49689";
+	m_vcolor["Soprano"]		=	"#e49689";
 
 	m_vcolor["Canto 2."]		=	"#d67365";
 	m_vcolor["Canto II"]		=	"#d67365";
@@ -166,6 +167,7 @@ void Tool_pccount::initialize(HumdrumFile& infile) {
 	m_vcolor["Nona parte [Nono]"]	=	"#a39ce5";
 
 	m_vcolor["Basso"]		=	"#d2aef7";
+	m_vcolor["Bass"]		=	"#d2aef7";
 
 	m_vcolor["Basso II"]		=	"#c69af5";
 	m_vcolor["Basso II [Decimo]"]	=	"#c69af5";
@@ -210,9 +212,20 @@ string Tool_pccount::getFinal(HumdrumFile& infile) {
 void Tool_pccount::processFile(HumdrumFile& infile) {
 	countPitches(infile);
 
-	string datavar = "data_" + m_id;
-	string target = "id_" + m_id;
-	string jsonvar = "vega_" + m_id;
+	string datavar;
+	string target;
+	string jsonvar;
+
+	if (m_attack) {
+		datavar = "data_" + m_id + "_count";
+		target = "id_" + m_id + "_count";
+		jsonvar = "vega_" + m_id + "_count";
+	} else {
+		datavar = "data_" + m_id + "_dur";
+		target = "id_" + m_id + "_dur";
+		jsonvar = "vega_" + m_id + "_dur";
+	}
+
 	if (m_template) {
 		printVegaLiteJsonTemplate(datavar, infile);
 	} else if (m_data) {
@@ -274,7 +287,7 @@ void Tool_pccount::printVegaLiteHtml(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
 	stringstream& out = m_free_text;
 
-	out << "<div id=\"" << target << "\"></div>\n";
+	out << "<div class=\"vega-svg\" id=\"" << target << "\"></div>\n";
 	out << "\n";
 	out << "<script>\n";
 	printVegaLiteScript(jsonvar, target, datavar, infile);
@@ -312,10 +325,10 @@ void Tool_pccount::printVegaLiteScript(const string& jsonvar,
 void Tool_pccount::printVegaLiteJsonData(void) {
 	stringstream& out = m_free_text;
 
-	double maxpc = 0.0;
+	m_maxpc = 0;
 	for (int i=0; i<(int)m_counts[0].size(); i++) {
-		if (m_counts[0][i] > maxpc) {
-			maxpc = m_counts[0][i];
+		if (m_counts[0][i] > m_maxpc) {
+			m_maxpc = m_counts[0][i];
 		}
 	}
 	out << "[\n";
@@ -332,7 +345,11 @@ void Tool_pccount::printVegaLiteJsonData(void) {
 				out << "\t";
 			}
 			commacounter++;
-			out << "{\"percent\":" << m_counts[i][j]/maxpc*percent << ", ";
+			if (m_attack) {
+				out << "{\"count\":" << m_counts[i][j] << ", ";
+			} else {
+				out << "{\"percent\":" << m_counts[i][j]/m_maxpc*percent << ", ";
+			}
 			out << "\"pitch class\":\"" << getPitchClassString(j) << "\", ";
 			out << "\"voice\":\"" << m_names[i] << "\"";
 			out << "}";
@@ -401,20 +418,27 @@ void Tool_pccount::printHumdrumTable(void) {
 	// part names
 	m_free_text << "*";
 	for (int i=0; i<(int)m_counts.size(); i++) {
-		if (!m_names[i].empty()) {
-			m_free_text << "\t*I\"" << m_names[i];
+		if (i < (int)m_names.size()) {
+			m_free_text << "\t*I\"" << m_names.at(i);
+		} else {
+			m_free_text << "\t*";
 		}
 	}
 	m_free_text << endl;
 
-	// part abbreviation
-	m_free_text << "*";
-	for (int i=0; i<(int)m_counts.size(); i++) {
-		if (!m_names[i].empty()) {
-			m_free_text << "\t*I\'" << m_abbreviations[i];
+	if (!m_abbreviations.empty()) {
+
+		// part abbreviation
+		m_free_text << "*";
+		for (int i=0; i<(int)m_counts.size(); i++) {
+			if (i < (int)m_abbreviations.size()) {
+				m_free_text << "\t*I\'" << m_abbreviations.at(i);
+			} else {
+				m_free_text << "\t*";
+			}
 		}
+		m_free_text << endl;
 	}
-	m_free_text << endl;
 
 	for (int i=0; i<(int)m_counts[0].size(); i++) {
 		if (m_counts[0][i] == 0) {
@@ -550,23 +574,39 @@ void Tool_pccount::initializePartInfo(HumdrumFile& infile) {
 
 	vector<HTp> starts = infile.getKernSpineStartList();
 
+	int foundpart = false;
+	int foundabbr = false;
+
 	int track = 0;
 	for (int i=0; i<(int)starts.size(); i++) {
 		track = starts[i]->getTrack();
 		m_rkern[track] = i+1;
 		m_parttracks.push_back(track);
 		HTp current = starts[i];
+		foundpart = false;
+		foundabbr = false;
+		if (!current->isKern()) {
+			continue;
+		}
 		while (current) {
 			if (current->isData()) {
 				break;
 			}
-			if (current->compare(0, 3, "*I\"") == 0) {
+			if ((!foundpart) && (current->compare(0, 3, "*I\"") == 0)) {
 				m_names.emplace_back(current->substr(3));
-			} else if (current->compare(0, 3, "*I\'") == 0) {
+				foundpart = true;
+			} else if ((!foundabbr) && (current->compare(0, 3, "*I\'") == 0)) {
 				m_abbreviations.emplace_back(current->substr(3));
+				foundabbr = true;
 			}
 			current = current->getNextToken();
 		}
+		//if (!foundpart) {
+		//		m_names.emplace_back("");
+		//}
+		//if (!foundabbr) {
+		//		m_names.emplace_back("");
+		//}
 	}
 
 }
@@ -580,6 +620,12 @@ void Tool_pccount::initializePartInfo(HumdrumFile& infile) {
 void Tool_pccount::printVegaLiteJsonTemplate(const string& datavariable, HumdrumFile& infile) {
 	stringstream& out = m_free_text;
 
+	string idinfo;
+	if (m_id.empty() || m_id == "id") {
+		// do nothing
+	} else {
+		idinfo = "for " + m_id;
+	}
 	out << "{\n";
 	out << "	\"$schema\": \"https://vega.github.io/schema/vega-lite/v4.0.0-beta.1.json\",\n";
 	out << "	\"data\": {\"values\": " << datavariable << "},\n";
@@ -587,19 +633,28 @@ void Tool_pccount::printVegaLiteJsonTemplate(const string& datavariable, Humdrum
 		out << "	\"title\": \"" << m_title << "\",\n";
 	} else {
 		if (m_attack) {
-			out << "	\"title\": \"Attack-weighted pitch-class distribution for " << m_id <<" \",\n";
+			out << "	\"title\": \"Note-count pitch-class distribution " << idinfo <<" \",\n";
 		} else {
-			out << "	\"title\": \"Duration-weighted pitch-class distribution for " << m_id <<" \",\n";
+			out << "	\"title\": \"Duration-weighted pitch-class distribution " << idinfo <<" \",\n";
 		}
 	}
 	out << "	\"width\": " << m_width << ",\n";
 	out << "	\"height\": " << int(m_width * m_ratio) << ",\n";
 	out << "	\"encoding\": {\n";
 	out << "		\"y\": {\n";
-	out << "			\"field\": \"percent\",\n";
-	out << "			\"title\": \"Percent of maximum pitch class\",\n";
+	if (m_attack) {
+		out << "			\"field\": \"count\",\n";
+		out << "			\"title\": \"Number of note attacks\",\n";
+	} else {
+		out << "			\"field\": \"percent\",\n";
+		out << "			\"title\": \"Percent of maximum pitch class\",\n";
+	}
 	out << "			\"type\": \"quantitative\",\n";
-	out << "			\"scale\": {\"domain\": [0, 100]},\n";
+	if (m_attack) {
+		out << "			\"scale\": {\"domain\": [0, " << m_maxpc << "]},\n";
+	} else {
+		out << "			\"scale\": {\"domain\": [0, 100]},\n";
+	}
 	out << "			\"aggregate\": \"sum\"\n";
 	out << "		},\n";
 	out << "		\"x\": {\n";
@@ -638,12 +693,17 @@ void Tool_pccount::printVegaLiteJsonTemplate(const string& datavariable, Humdrum
 	out << "		{\"mark\": \"bar\"}";
 
 	string final = getFinal(infile);
-	double percent = getPercent(final);
 	if (m_key && !final.empty()) {
 		out << ",\n";
 		out << "		{\n";
 		out << "			\"mark\": {\"type\":\"text\", \"align\":\"center\", \"fill\":\"black\", \"baseline\":\"bottom\"},\n";
-		out << "			\"data\": {\"values\": [ {\"pitch class\":\"" << final << "\", \"percent\":" << percent << "}]},\n";
+		if (m_attack) {
+			int count = getCount(final);
+			out << "			\"data\": {\"values\": [ {\"pitch class\":\"" << final << "\", \"count\":" << count << "}]},\n";
+		} else {
+			double percent = getPercent(final);
+			out << "			\"data\": {\"values\": [ {\"pitch class\":\"" << final << "\", \"percent\":" << percent << "}]},\n";
+		}
 		out << "			\"encoding\": {\"text\": {\"value\":\"final\"}}\n";
 		out << "		}\n";
 	}
@@ -651,6 +711,20 @@ void Tool_pccount::printVegaLiteJsonTemplate(const string& datavariable, Humdrum
 	out << "	]\n";
 	out << "}\n";
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_pccount::getCount --
+//
+
+int Tool_pccount::getCount(const string& pitchclass) {
+	int b40 = Convert::kernToBase40(pitchclass);
+	int index = b40 % 40;
+	int output = (int)m_counts[0][index];
+	return output;
 }
 
 

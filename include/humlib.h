@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 17 00:23:09 PDT 2019
+// Last Modified: Fri Nov 15 12:54:06 WET 2019
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1044,6 +1044,8 @@ class HumdrumLine : public std::string, public HumHash {
 		HumdrumFile*  getOwner             (void);
 		void          setText              (const std::string& text);
 		std::string   getText              (void);
+		int           getBarNumber         (void);
+		int           getMeasureNumber     (void) { return getBarNumber(); }
 
 		HumNum      getDuration            (void);
 		HumNum      getDurationFromStart   (void);
@@ -2615,6 +2617,7 @@ class MuseRecordBasic {
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
+		bool              isDirection        (void);
 		bool              isAnyComment       (void);
 		bool              isLineComment      (void);
 		bool              isBlockComment     (void);
@@ -2940,6 +2943,27 @@ class MuseRecord : public MuseRecordBasic {
 		int              getAttributeInt              (char attribute);
 		int              getAttributeField            (std::string& output, const std::string& attribute);
 
+	//////////////////////////////
+	// functions which work with musical direction records ('$'):
+
+		// columns 17-18: type of direction
+		std::string      getDirectionTypeField        (void);
+		std::string      getDirectionTypeString       (void);
+		bool             isTextDirection              (void);
+		bool             isHairpin                    (void);
+		bool             isHairpinStart               (void);
+		bool             isHairpinStop                (void);
+		bool             isDashStart                  (void);
+		bool             isDashStop                   (void);
+		bool             isPedalStart                 (void);
+		bool             isPedalEnd                   (void);
+		bool             isRehearsal                  (void);
+		bool             isOctaveUpStart              (void);
+		bool             isOctaveDownStart            (void);
+		bool             isOctaveStop                 (void);
+
+		std::string      getDirectionText             (void);
+		std::string      getTextDirection             (void) { return getDirectionText(); }
 
 	//
 	//////////////////////////////
@@ -2947,11 +2971,12 @@ class MuseRecord : public MuseRecordBasic {
 		std::string      getKernRestStyle             (void);
 
 	protected:
-		void             allowNotesOnly               (const std::string& functioName);
+		void             allowNotesOnly               (const std::string& functionName);
 		void             allowNotesAndRestsOnly       (const std::string& functionName);
 		void             allowMeasuresOnly            (const std::string& functioName);
 		void             allowFigurationOnly          (const std::string& functioName);
 		void             allowFigurationAndNotesOnly  (const std::string& functioName);
+		void             allowDirectionsOnly          (const std::string& functioName);
 		int              getAddElementIndex           (int& index, std::string& output,
 		                                               const std::string& input);
 		void             zerase                       (std::string& inout, int num);
@@ -3776,6 +3801,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		bool         isRepeatBoth(void)
 		                  { return m_style == MeasureStyle::RepeatBoth; }
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
+		void         addLayoutParameter(HumNum timestamp, int partindex, int staffindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addFiguredBassLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);
 		GridSlice*   addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff);
@@ -5725,24 +5751,21 @@ class Tool_humdiff : public HumTool {
 		         Tool_humdiff       (void);
 
 		bool     run                (HumdrumFileSet& infiles);
-		bool     run                (const string& indata1, const string& indata2, ostream& out);
-		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2, ostream& out);
-		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2);
-		void     processFile        (HumdrumFile& infile1, HumdrumFile& infile2);
 
-		void     compareFiles       (HumdrumFileSet& humset);
-		ostream& compareTimePoints  (ostream& out, vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset);
+	protected:
+		void     compareFiles       (HumdrumFile& reference, HumdrumFile& alternate);
+
+		void     compareTimePoints  (vector<vector<TimePoint>>& timepoints, HumdrumFile& reference, HumdrumFile& alternate);
 		void     extractTimePoints  (vector<TimePoint>& points, HumdrumFile& infile);
-		ostream& printTimePoints    (ostream& out, vector<TimePoint>& timepoints);
-		void     compareLines       (HumNum minval, vector<int>& indexes, vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset);
+		void     printTimePoints    (vector<TimePoint>& timepoints);
+		void     compareLines       (HumNum minval, vector<int>& indexes, vector<vector<TimePoint>>& timepoints, vector<HumdrumFile*> infiles);
 		void     getNoteList        (vector<NotePoint>& notelist, HumdrumFile& infile, int line, int measure, int sourceindex, int tpindex);
 		int      findNoteInList     (NotePoint& np, vector<NotePoint>& nps);
 		void     printNotePoints    (vector<NotePoint>& notelist);
 		void     markNote           (NotePoint& np);
 
-
-int m_marked = 0;
-
+	private:
+		int m_marked = 0;
 
 
 };
@@ -5750,40 +5773,6 @@ int m_marked = 0;
 ostream& operator<<(ostream& out, TimePoint& tp);
 ostream& operator<<(ostream& out, NotePoint& np);
 
-
-
-class Tool_humsar : public HumTool {
-	public:
-		         Tool_humsar       (void);
-		        ~Tool_humsar       () {};
-
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
-
-	protected:
-		void    processFile        (HumdrumFile& infile);
-		void    searchAndReplaceInterpretation(HumdrumFile& infile);
-		void    searchAndReplaceData(HumdrumFile& infile);
-		void    searchAndReplaceBarline(HumdrumFile& infile);
-		void    initialize         (void);
-		void    initializeSegment  (HumdrumFile& infile);
-		bool    isValid            (HTp token);
-		bool    isValidDataType    (HTp token);
-		bool    isValidSpine       (HTp token);
-		void    fillInExInterpList (void);
-
-	private:
-		std::string m_search;      // search string
-		std::string m_replace;     // replace string
-		bool        m_interpretation = false; // process only interpretation records
-		bool        m_modified = false;
-		std::vector<std::string> m_exinterps; // list of exclusive interpretations to process
-		std::vector<bool> m_spines; // usar with -s option
-		std::string m_grepoptions;
-
-};
 
 
 class Tool_humsort : public HumTool {
@@ -6399,6 +6388,8 @@ class Tool_musedata2hum : public HumTool {
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
 		                              HumNum timestamp, int part, int maxstaff);
 		std::string trimSpaces       (std::string input);
+		void    addTextDirection     (GridMeasure* gm, int part, int staff,
+		                              MuseRecord& mr, HumNum timestamp);
 
 	private:
 		// options:
@@ -6811,6 +6802,7 @@ class Tool_pccount : public HumTool {
 		                                 HumdrumFile& infile);
 		std::string getFinal            (HumdrumFile& infile);
 		double  getPercent              (const string& pitchclass);
+		int     getCount                (const string& pitchclass);
 		void    setFactorMaximum        (void);
 		void    setFactorNormalize      (void);
 
@@ -6834,6 +6826,7 @@ class Tool_pccount : public HumTool {
 		double m_ratio      = 0.67;
 		bool m_key          = true;
 		double m_factor     = 1.0;
+		int m_maxpc         = 0;
 		std::string m_title = "";
 		std::string m_id    = "id";
 		std::map<std::string, std::string> m_vcolor;
@@ -7031,6 +7024,62 @@ class Tool_satb2gs : public HumTool {
 		int    debugQ    = 0;             // used with --debug option
 };
 
+
+
+class Tool_shed : public HumTool {
+	public:
+		         Tool_shed       (void);
+		        ~Tool_shed       () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    searchAndReplaceInterpretation(HumdrumFile& infile);
+		void    searchAndReplaceExinterp(HumdrumFile& infile);
+		void    searchAndReplaceData(HumdrumFile& infile);
+		void    searchAndReplaceBarline(HumdrumFile& infile);
+		void    searchAndReplaceLocalComment(HumdrumFile& infile);
+		void    initialize         (void);
+		void    initializeSegment  (HumdrumFile& infile);
+		bool    isValid            (HTp token);
+		bool    isValidDataType    (HTp token);
+		bool    isValidSpine       (HTp token);
+		std::vector<std::string> addToExInterpList(void);
+		void    parseExpression    (const string& value);
+		void    prepareSearch      (int index);
+		std::string getExInterp    (const string& value);
+
+	private:
+		std::vector<std::string> m_searches;  // search strings
+		std::vector<std::string> m_replaces;  // replace strings
+		std::vector<std::string> m_options;   // search options
+
+		std::string m_search;
+		std::string m_replace;
+		std::string m_option;
+
+		bool m_data           = true;  // process data
+		bool m_barline        = false; // process barlines
+		bool m_exinterp       = false; // process exclusive interpretations
+		bool m_interpretation = false; // process interpretations
+		bool m_localcomment   = false; // process local comments
+		std::string m_xInterp; // used with -x option
+		std::string m_yInterp; // used with -y option
+		std::string m_zInterp; // used with -z option
+
+		bool m_modified       = false;
+
+		// list of exclusive interpretations to process
+		std::vector<std::string> m_exinterps; 
+
+		std::vector<bool> m_spines; // usar with -s option
+		std::string m_grepoptions;
+
+};
 
 
 class MeasureData {

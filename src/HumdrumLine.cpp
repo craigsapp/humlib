@@ -2054,6 +2054,35 @@ void HumdrumLine::storeGlobalLinkedParameters(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::getBarNumber -- return the bar number on the line.
+//    If the line is not a bar line, then return -1.  If there is
+//    no number at any token position on the line then return -1.
+//
+
+int HumdrumLine::getBarNumber(void) {
+	if (!isBarline()) {
+		return -1;
+	}
+	int output = -1;
+	for (int i=0; i<getFieldCount(); i++) {
+		HTp tok = token(i);
+		if (tok->size() < 2) {
+			return -1;
+		}
+		if (isdigit(tok->at(1))) {
+			sscanf(tok->c_str(), "=%d", &output);
+			if (output >= 0) {
+				return output;
+			}
+		}
+	}
+	return -1;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //

@@ -902,6 +902,18 @@ bool MuseRecordBasic::isChordNote(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isDirection -- Is a musical direction (text)
+//     instruction.
+//
+
+bool MuseRecordBasic::isDirection(void) {
+	return m_type == E_muserec_musical_directions;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::isGraceNote -- A grace note, either a single note or
 //     the first note in a gracenote chord.
 //

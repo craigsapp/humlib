@@ -27,7 +27,7 @@
 #include "tool-homophonic2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
-#include "tool-humsar.h"
+#include "tool-shed.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
 #include "tool-melisma.h"
@@ -73,6 +73,20 @@ namespace hum {
 	}                                               \
 	delete tool;
 
+#define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;            \
+	tool->process(COMMAND);                         \
+	tool->run(INFILE1, INFILE2);                    \
+	if (tool->hasError()) {                         \
+		status = false;                              \
+		tool->getError(cerr);                        \
+		delete tool;                                 \
+		break;                                       \
+	} else if (tool->hasHumdrumText()) {            \
+		INFILE1.readString(tool->getHumdrumText());  \
+	}                                               \
+	delete tool;
+
 #define RUNTOOLSET(NAME, INFILES, COMMAND, STATUS) \
 	Tool_##NAME *tool = new Tool_##NAME;            \
 	tool->process(COMMAND);                         \
@@ -87,18 +101,18 @@ namespace hum {
 	}                                               \
 	delete tool;
 
-#define RUNTOOL2(NAME, INFILE1, INFILE2, COMMAND, STATUS) \
-	Tool_##NAME *tool = new Tool_##NAME;            \
-	tool->process(COMMAND);                         \
-	tool->run(INFILE1, INFILE2);                    \
-	if (tool->hasError()) {                         \
-		status = false;                              \
-		tool->getError(cerr);                        \
-		delete tool;                                 \
-		break;                                       \
-	} else if (tool->hasHumdrumText()) {            \
-		INFILE1.readString(tool->getHumdrumText());  \
-	}                                               \
+#define RUNTOOLSTREAM(NAME, INFILES, COMMAND, STATUS) \
+	Tool_##NAME *tool = new Tool_##NAME;               \
+	tool->process(COMMAND);                            \
+	tool->run(INFILES);                                \
+	if (tool->hasError()) {                            \
+		status = false;                                 \
+		tool->getError(cerr);                           \
+		delete tool;                                    \
+		break;                                          \
+	} else if (tool->hasHumdrumText()) {               \
+		INFILES.readString(tool->getHumdrumText());     \
+	}                                                  \
 	delete tool;
 
 
@@ -144,6 +158,8 @@ bool Tool_filter::runUniversal(HumdrumFileSet& infiles) {
 			RUNTOOLSET(humdiff, infiles, commands[i].second, status);
 		} else if (commands[i].first == "chooser") {
 			RUNTOOLSET(chooser, infiles, commands[i].second, status);
+		} else if (commands[i].first == "myank") {
+			RUNTOOL(myank, infiles, commands[i].second, status);
 		}
 	}
 
@@ -188,8 +204,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homophonic2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
-		} else if (commands[i].first == "humsar") {
-			RUNTOOL(humsar, infile, commands[i].second, status);
+		} else if (commands[i].first == "shed") {
+			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {

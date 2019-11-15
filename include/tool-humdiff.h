@@ -95,24 +95,21 @@ class Tool_humdiff : public HumTool {
 		         Tool_humdiff       (void);
 
 		bool     run                (HumdrumFileSet& infiles);
-		bool     run                (const string& indata1, const string& indata2, ostream& out);
-		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2, ostream& out);
-		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2);
-		void     processFile        (HumdrumFile& infile1, HumdrumFile& infile2);
 
-		void     compareFiles       (HumdrumFileSet& humset);
-		ostream& compareTimePoints  (ostream& out, vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset);
+	protected:
+		void     compareFiles       (HumdrumFile& reference, HumdrumFile& alternate);
+
+		void     compareTimePoints  (vector<vector<TimePoint>>& timepoints, HumdrumFile& reference, HumdrumFile& alternate);
 		void     extractTimePoints  (vector<TimePoint>& points, HumdrumFile& infile);
-		ostream& printTimePoints    (ostream& out, vector<TimePoint>& timepoints);
-		void     compareLines       (HumNum minval, vector<int>& indexes, vector<vector<TimePoint>>& timepoints, HumdrumFileSet& humset);
+		void     printTimePoints    (vector<TimePoint>& timepoints);
+		void     compareLines       (HumNum minval, vector<int>& indexes, vector<vector<TimePoint>>& timepoints, vector<HumdrumFile*> infiles);
 		void     getNoteList        (vector<NotePoint>& notelist, HumdrumFile& infile, int line, int measure, int sourceindex, int tpindex);
 		int      findNoteInList     (NotePoint& np, vector<NotePoint>& nps);
 		void     printNotePoints    (vector<NotePoint>& notelist);
 		void     markNote           (NotePoint& np);
 
-
-int m_marked = 0;
-
+	private:
+		int m_marked = 0;
 
 
 };
