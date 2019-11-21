@@ -1021,7 +1021,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		// end rather than the start of the note.
 		vector<MxmlEvent*>& events = measuredata[i]->getEventList();
 		xml_node hairpin = xml_node(NULL);
-		for (int j=events.size() - 1; j >= 0; j--) {
+		for (size_t j=events.size() - 1; j >= 0; j--) {
 			if (events[j]->getElementName() == "note") {
 				if (hairpin) {
 					events[j]->setHairpinEnding(hairpin);
