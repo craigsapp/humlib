@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 15 12:54:06 WET 2019
+// Last Modified: Thu Nov 21 13:55:10 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -63668,9 +63668,9 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 	MxmlMeasure* xmeasure;
 	vector<MxmlMeasure*> measuredata;
 	vector<vector<SimultaneousEvents>* > sevents;
-	int i;
+	size_t i;
 
-	for (i=0; i<(int)partdata.size(); i++) {
+	for (i=0; i<partdata.size(); i++) {
 		xmeasure = partdata[i].getMeasure(mnum);
 		measuredata.push_back(xmeasure);
 		if (i==0) {
@@ -63688,13 +63688,13 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 
 	vector<HumNum> curtime(partdata.size());
 	vector<HumNum> measuredurs(partdata.size());
-	vector<int> curindex(partdata.size(), 0); // assuming data in a measure...
+	vector<size_t> curindex(partdata.size(), 0); // assuming data in a measure...
 	HumNum nexttime = -1;
 
 	vector<vector<MxmlEvent*>> endingDirections(partdata.size());
 
 	HumNum tsdur;
-	for (i=0; i<(int)curtime.size(); i++) {
+	for (i=0; i<curtime.size(); i++) {
 		tsdur = measuredata[i]->getTimeSigDur();
 		if ((tsdur == 0) && (i > 0)) {
 			tsdur = measuredata[i-1]->getTimeSigDur();
@@ -63707,27 +63707,28 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		// end rather than the start of the note.
 		vector<MxmlEvent*>& events = measuredata[i]->getEventList();
 		xml_node hairpin = xml_node(NULL);
-		for (int j=events.size() - 1; j >= 0; j--) {
-			if (events[j]->getElementName() == "note") {
+		for (size_t j=events.size(); j > 0; j--) {
+            size_t index = j - 1;
+			if (events[index]->getElementName() == "note") {
 				if (hairpin) {
-					events[j]->setHairpinEnding(hairpin);
+					events[index]->setHairpinEnding(hairpin);
 					hairpin = xml_node(NULL);
 				}
 				break;
-			} else if (events[j]->getElementName() == "direction") {
+			} else if (events[index]->getElementName() == "direction") {
 				stringstream ss;
 				ss.str("");
-				events[j]->getNode().print(ss);
+				events[index]->getNode().print(ss);
 				if (ss.str().find("wedge") != string::npos) {
 					if (ss.str().find("stop") != string::npos) {
-						hairpin = events[j]->getNode();
+						hairpin = events[index]->getNode();
 					}
 				}
 			}
 		}
 
 		if (VoiceDebugQ) {
-			for (int j=0; j<(int)events.size(); j++) {
+			for (size_t j=0; j<events.size(); j++) {
 				cerr << "!!ELEMENT: ";
 				cerr << "\tTIME:  " << events[j]->getStartTime();
 				cerr << "\tSTi:   " << events[j]->getStaffIndex();
@@ -63765,23 +63766,24 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		allend = true;
 		processtime = nexttime;
 		nexttime = -1;
-		for (i = (int)partdata.size()-1; i >= 0; i--) {
-			if (curindex[i] >= (int)(*sevents[i]).size()) {
+		for (i = partdata.size(); i > 0; i--) {
+            size_t index = i - 1;
+			if (curindex[index] >= (int)(*sevents[index]).size()) {
 				continue;
 			}
 
-			if ((*sevents[i])[curindex[i]].starttime == processtime) {
-				SimultaneousEvents* thing = &(*sevents[i])[curindex[i]];
+			if ((*sevents[index])[curindex[index]].starttime == processtime) {
+				SimultaneousEvents* thing = &(*sevents[index])[curindex[index]];
 				nowevents.push_back(thing);
-				nowparts.push_back(i);
-				curindex[i]++;
+				nowparts.push_back(index);
+				curindex[index]++;
 			}
 
-			if (curindex[i] < (int)(*sevents[i]).size()) {
+			if (curindex[index] < (int)(*sevents[index]).size()) {
 				allend = false;
 				if ((nexttime < 0) ||
-						((*sevents[i])[curindex[i]].starttime < nexttime)) {
-					nexttime = (*sevents[i])[curindex[i]].starttime;
+						((*sevents[index])[curindex[index]].starttime < nexttime)) {
+					nexttime = (*sevents[index])[curindex[index]].starttime;
 				}
 			}
 		}
