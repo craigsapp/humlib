@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov 25 20:49:29 CET 2019
+// Last Modified: Tue Nov 26 11:43:33 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5653,7 +5653,7 @@ HTp GridSlice::createRecipTokenFromDuration(HumNum duration) {
 	HumNum dotdur;
 	if (duration.getNumerator() == 0) {
 		// if the GridSlice is at the end of a measure, the
-      // time between the starttime/endtime of the GridSlice should
+		// time between the starttime/endtime of the GridSlice should
 		// be subtracted from the endtime of the current GridMeasure.
 		token = new HumdrumToken("g");
 		return token;
@@ -5765,10 +5765,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
 			empty = "!z";
-        } else if (!token) {
-            token = new HumdrumToken();
-        }
-		if (hasSpines()) {
+		}
+		if ((token != NULL) && hasSpines()) {
 			line->appendToken(token);
 		}
 	}

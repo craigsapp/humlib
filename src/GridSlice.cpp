@@ -190,7 +190,7 @@ HTp GridSlice::createRecipTokenFromDuration(HumNum duration) {
 	HumNum dotdur;
 	if (duration.getNumerator() == 0) {
 		// if the GridSlice is at the end of a measure, the
-      // time between the starttime/endtime of the GridSlice should
+		// time between the starttime/endtime of the GridSlice should
 		// be subtracted from the endtime of the current GridMeasure.
 		token = new HumdrumToken("g");
 		return token;
@@ -302,10 +302,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
 			empty = "!z";
-        } else if (!token) {
-            token = new HumdrumToken();
-        }
-		if (hasSpines()) {
+		}
+		if ((token != NULL) && hasSpines()) {
 			line->appendToken(token);
 		}
 	}
