@@ -21,25 +21,6 @@ for compiling and linking executables.
 
 Resources
 =========
-
-<style>
-#resources {
-   -webkit-column-count:3;
-   -moz-column-count:3;
-   -ms-column-count:3;
-   -o-column-count:3;
-   column-count:3;
-   columns:3;
-   padding: 0;
-   margin: 0;
-}
-#resources > li {
-   list-style: disc outside none;
-   display: list-item;
-   margin-left: 4em;
-}
-</style>
-
 <center>
 <table style="display:block; padding:0; margin:0;">
 <tr><td>
