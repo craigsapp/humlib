@@ -258,7 +258,7 @@ bool GridSlice::isDataSlice(void) {
 //
 
 void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
-	HTp token;
+	HTp token = NULL;
 	HumdrumLine* line = new HumdrumLine;
 	GridVoice* voice;
 	string empty = ".";
@@ -302,7 +302,9 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
 			empty = "!z";
-		}
+        } else if (!token) {
+            token = new HumdrumToken();
+        }
 		if (hasSpines()) {
 			line->appendToken(token);
 		}

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 21 16:17:06 WET 2019
+// Last Modified: Mon Nov 25 20:49:29 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5721,7 +5721,7 @@ bool GridSlice::isDataSlice(void) {
 //
 
 void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
-	HTp token;
+	HTp token = NULL;
 	HumdrumLine* line = new HumdrumLine;
 	GridVoice* voice;
 	string empty = ".";
@@ -5765,7 +5765,9 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
 			empty = "!z";
-		}
+        } else if (!token) {
+            token = new HumdrumToken();
+        }
 		if (hasSpines()) {
 			line->appendToken(token);
 		}
