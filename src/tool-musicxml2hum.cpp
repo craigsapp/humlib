@@ -1989,7 +1989,12 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	if (suffix == "cross" || prefix == "cross") {
 		slash = "|";
 	} else if ((suffix == "backslash") || (prefix == "backslash")) {
-		slash = "\\";
+		if (number == "6")
+		{
+			accidental = "#";
+			slash = "|";
+		}
+		else slash = "\\";
 	} else if ((suffix == "slash") || (prefix == "slash")) {
 		slash = "/";
 	}
