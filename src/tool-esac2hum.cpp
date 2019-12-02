@@ -305,7 +305,7 @@ void Tool_esac2hum::printHumdrumHeaderInfo(ostream& out, vector<string>& song) {
 //
 
 void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
-	size_t i = 0;
+	size_t i;
 	for (i=0; i<song.size(); i++) {
 		if (song[i].size() == 0) {
 			continue;
