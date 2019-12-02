@@ -303,8 +303,13 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 			token = new HumdrumToken("55");
 			empty = "!z";
 		}
-		if ((token != NULL) && hasSpines()) {
-			line->appendToken(token);
+		if (token != NULL) {
+			if (hasSpines()) {
+				line->appendToken(token);
+			} else {
+				delete token;
+				token = NULL;
+			}
 		}
 	}
 
