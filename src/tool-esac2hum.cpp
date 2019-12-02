@@ -318,8 +318,7 @@ void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
 		}
 		break;
 	}
-	int j = i;
-	for (j=i; j<(int)song.size(); j++) {
+	for (int j=i; j<(int)song.size(); j++) {
 		if (song[j].compare(0, 2, "!!") == 0) {
 			out << song[j] << "\n";
 		}
