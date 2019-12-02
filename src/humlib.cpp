@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 26 11:43:33 CET 2019
+// Last Modified: Mon Dec  2 19:00:43 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -50016,8 +50016,8 @@ void Tool_esac2hum::printHumdrumHeaderInfo(ostream& out, vector<string>& song) {
 //
 
 void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
-	int i = 0;
-	for (i=0; i<(int)song.size(); i++) {
+	size_t i;
+	for (i=0; i<song.size(); i++) {
 		if (song[i].size() == 0) {
 			continue;
 		}
@@ -50029,8 +50029,7 @@ void Tool_esac2hum::printHumdrumFooterInfo(ostream& out, vector<string>& song) {
 		}
 		break;
 	}
-	int j = i;
-	for (j=i; j<(int)song.size(); j++) {
+	for (size_t j=i; j<song.size(); j++) {
 		if (song[j].compare(0, 2, "!!") == 0) {
 			out << song[j] << "\n";
 		}
