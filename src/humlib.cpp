@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 26 11:43:33 CET 2019
+// Last Modified: Mon Dec  2 18:38:55 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5766,8 +5766,13 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 			token = new HumdrumToken("55");
 			empty = "!z";
 		}
-		if ((token != NULL) && hasSpines()) {
-			line->appendToken(token);
+		if (token != NULL) {
+			if (hasSpines()) {
+				line->appendToken(token);
+			} else {
+				delete token;
+				token = NULL;
+			}
 		}
 	}
 
