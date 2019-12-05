@@ -49,27 +49,30 @@ MuseEventSet::MuseEventSet(HumNum atime) {
 	events.reserve(20);
 }
 
+MuseEventSet::MuseEventSet(const MuseEventSet& aSet) {
+	absbeat = aSet.absbeat;
+	events.resize(aSet.events.size());
+	for (int i=0; i<(int)aSet.events.size(); i++) {
+		events[i] = aSet.events[i];
+	}
+}
+
 
 
 //////////////////////////////
 //
-// MuseData::operator= --
+// MuseEventSet::operator= --
 //
 
-MuseData& MuseData::operator=(MuseData& input) {
-	if (this == &input) {
+MuseEventSet MuseEventSet::operator=(MuseEventSet& anevent) {
+	if (&anevent == this) {
 		return *this;
 	}
-	m_data.resize(input.m_data.size());
-	MuseRecord* temprec;
-	int i;
-	for (i=0; i<(int)m_data.size(); i++) {
-		temprec = new MuseRecord;
-		*temprec = *(input.m_data[i]);
-		m_data[i] = temprec;
+	absbeat = anevent.absbeat;
+	events.resize(anevent.events.size());
+	for (int i=0; i<(int)events.size(); i++) {
+		events[i] = anevent.events[i];
 	}
-	// do something with m_sequence...
-	m_name = input.m_name;
 	return *this;
 }
 
@@ -135,27 +138,6 @@ MuseRecord& MuseEventSet::operator[](int eindex) {
 
 //////////////////////////////
 //
-// MuseEventSet::operator= --
-//
-
-MuseEventSet MuseEventSet::operator=(MuseEventSet& anevent) {
-	if (&anevent == this) {
-		return *this;
-	}
-
-	this->absbeat = anevent.absbeat;
-	this->events.resize(anevent.events.size());
-	int i;
-	for (i=0; i<(int)this->events.size(); i++) {
-		this->events[i] = anevent.events[i];
-	}
-	return *this;
-}
-
-
-
-//////////////////////////////
-//
 // MuseEventSet::getEventCount --
 //
 
@@ -207,6 +189,30 @@ MuseData::MuseData(MuseData& input) {
 
 MuseData::~MuseData() {
 	clear();
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::operator= --
+//
+
+MuseData& MuseData::operator=(MuseData& input) {
+	if (this == &input) {
+		return *this;
+	}
+	m_data.resize(input.m_data.size());
+	MuseRecord* temprec;
+	int i;
+	for (i=0; i<(int)m_data.size(); i++) {
+		temprec = new MuseRecord;
+		*temprec = *(input.m_data[i]);
+		m_data[i] = temprec;
+	}
+	// do something with m_sequence...
+	m_name = input.m_name;
+	return *this;
 }
 
 

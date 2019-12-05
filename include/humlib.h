@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Dec  4 18:33:17 PST 2019
+// Last Modified: Thu 05 Dec 2019 10:01:55 AM PST
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2993,6 +2993,7 @@ class MuseRecord : public MuseRecordBasic {
 class MuseEventSet {
 	public:
 		                   MuseEventSet       (void);
+		                   MuseEventSet       (const MuseEventSet& aSet);
 		                   MuseEventSet       (HumNum atime);
 		                  ~MuseEventSet       ()     { clear(); }
 

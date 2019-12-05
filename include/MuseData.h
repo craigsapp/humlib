@@ -31,6 +31,7 @@ namespace hum {
 class MuseEventSet {
 	public:
 		                   MuseEventSet       (void);
+		                   MuseEventSet       (const MuseEventSet& aSet);
 		                   MuseEventSet       (HumNum atime);
 		                  ~MuseEventSet       ()     { clear(); }
 
