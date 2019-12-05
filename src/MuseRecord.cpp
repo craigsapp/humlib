@@ -53,6 +53,34 @@ MuseRecord::~MuseRecord() {
 
 
 
+//////////////////////////////
+//
+// MuseRecord::operator= -- 
+//
+
+MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
+	// don't copy onto self
+	if (&aRecord == this) {
+		return *this;
+	}
+
+	setLine(aRecord.getLine());
+	setType(aRecord.getType());
+	m_lineindex = aRecord.m_lineindex;
+
+	m_absbeat = aRecord.m_absbeat;
+	m_lineduration = aRecord.m_lineduration;
+	m_noteduration = aRecord.m_noteduration;
+
+	m_b40pitch     = aRecord.m_b40pitch;
+	m_nexttiednote = aRecord.m_nexttiednote;
+	m_lasttiednote = aRecord.m_lasttiednote;
+
+	return *this;
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////
 //
 // functions that work with note records

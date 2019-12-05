@@ -32,6 +32,7 @@ class MuseRecord : public MuseRecordBasic {
 		                  MuseRecord                  (MuseRecord& aRecord);
 		                 ~MuseRecord                  ();
 
+		MuseRecord& operator=(MuseRecord& aRecord);
 
 	//////////////////////////////
 	// functions which work with regular note, cue note, and grace note records

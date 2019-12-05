@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Dec  5 10:09:13 PST 2019
+// Last Modified: Thu 05 Dec 2019 10:35:04 AM PST
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2685,6 +2685,7 @@ class MuseRecord : public MuseRecordBasic {
 		                  MuseRecord                  (MuseRecord& aRecord);
 		                 ~MuseRecord                  ();
 
+		MuseRecord& operator=(MuseRecord& aRecord);
 
 	//////////////////////////////
 	// functions which work with regular note, cue note, and grace note records
