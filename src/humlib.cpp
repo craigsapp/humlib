@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Dec  4 15:59:32 PST 2019
+// Last Modified: Wed 04 Dec 2019 04:17:23 PM PST
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -72154,7 +72154,7 @@ bool Tool_shed::run(HumdrumFile& infile, ostream& out) {
 bool Tool_shed::run(HumdrumFile& infile) {
 	initialize();
 	initializeSegment(infile);
-	for (int i=0; i<m_options.size(); i++) {
+	for (int i=0; i<(int)m_options.size(); i++) {
 		prepareSearch(i);
 		processFile(infile);
 	}

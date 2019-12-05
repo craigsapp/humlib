@@ -78,7 +78,7 @@ bool Tool_shed::run(HumdrumFile& infile, ostream& out) {
 bool Tool_shed::run(HumdrumFile& infile) {
 	initialize();
 	initializeSegment(infile);
-	for (int i=0; i<m_options.size(); i++) {
+	for (int i=0; i<(int)m_options.size(); i++) {
 		prepareSearch(i);
 		processFile(infile);
 	}
