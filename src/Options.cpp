@@ -1182,7 +1182,7 @@ int Options::storeOption(int index, int& position, int& running) {
 			}
 			tempname[position-2] = '\0';
 			optionType = getType(tempname);
-			if (optionType == 0xff) {         // suppressed --options option
+			if ((unsigned char)optionType == 0xff) {         // suppressed --options option
 				m_optionsArgQ = 1;
 				break;
 			}
@@ -1197,7 +1197,7 @@ int Options::storeOption(int index, int& position, int& running) {
 			break;
 	}
 
-	if (optionType == 0xff) {              // suppressed --options option
+	if ((unsigned char)optionType == 0xff) {              // suppressed --options option
 		m_optionsArgQ = 1;
 		index++;
 		position = 0;

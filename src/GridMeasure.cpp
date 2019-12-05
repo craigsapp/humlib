@@ -929,6 +929,7 @@ bool GridMeasure::transferTokens(HumdrumFile& outfile, bool recip,
 //
 
 void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
+	(void)startbarline; // suppress compiler warnings about variable not being used
 	if (infile.getLineCount() == 0) {
 		// strange case which should never happen.
 		return;
