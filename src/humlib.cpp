@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec  2 18:38:55 CET 2019
+// Last Modified: Wed Dec  4 15:59:32 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -64679,10 +64679,19 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	// with a post-processing tool.
 	if (suffix == "cross" || prefix == "cross") {
 		slash = "|";
+		if (accidental.empty()) {
+			accidental = "#";
+		}
 	} else if ((suffix == "backslash") || (prefix == "backslash")) {
 		slash = "\\";
+		if (accidental.empty()) {
+			accidental = "#";
+		}
 	} else if ((suffix == "slash") || (prefix == "slash")) {
 		slash = "/";
+		if (accidental.empty()) {
+			accidental = "-";
+		}
 	}
 
 	string editorial;

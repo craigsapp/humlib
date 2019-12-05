@@ -1988,15 +1988,19 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	// with a post-processing tool.
 	if (suffix == "cross" || prefix == "cross") {
 		slash = "|";
-	} else if ((suffix == "backslash") || (prefix == "backslash")) {
-		if (number == "6")
-		{
+		if (accidental.empty()) {
 			accidental = "#";
-			slash = "|";
 		}
-		else slash = "\\";
+	} else if ((suffix == "backslash") || (prefix == "backslash")) {
+		slash = "\\";
+		if (accidental.empty()) {
+			accidental = "#";
+		}
 	} else if ((suffix == "slash") || (prefix == "slash")) {
 		slash = "/";
+		if (accidental.empty()) {
+			accidental = "-";
+		}
 	}
 
 	string editorial;
