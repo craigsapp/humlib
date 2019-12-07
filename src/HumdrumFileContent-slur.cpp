@@ -28,7 +28,6 @@ namespace hum {
 //    slurs to each other.
 //
 
-
 bool HumdrumFileContent::analyzeSlurs(void) {
 	if (m_slurs_analyzed) {
 		return false;

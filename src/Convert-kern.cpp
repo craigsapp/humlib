@@ -110,13 +110,7 @@ bool Convert::isKernNoteAttack(const string& kerndata) {
 //
 
 bool Convert::hasKernSlurStart(const string& kerndata) {
-	for (int i=0; i < (int)kerndata.size(); i++) {
-		char ch = kerndata[i];
-		if (ch == '(') {
-			return true;
-		}
-	}
-	return false;
+	return kerndata.find('(') != string::npos;
 }
 
 
@@ -124,17 +118,35 @@ bool Convert::hasKernSlurStart(const string& kerndata) {
 //////////////////////////////
 //
 // Convert::hasKernSlurEnd -- Returns true if the input string
-//   has a '('.
+//   has a ')'.
 //
 
 bool Convert::hasKernSlurEnd(const string& kerndata) {
-	for (int i=0; i < (int)kerndata.size(); i++) {
-		char ch = kerndata[i];
-		if (ch == ')') {
-			return true;
-		}
-	}
-	return false;
+	return kerndata.find(')') != string::npos;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernPhraseStart -- Returns true if the input string
+//   has a '{'.
+//
+
+bool Convert::hasKernPhraseStart(const string& kerndata) {
+	return kerndata.find('{') != string::npos;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::hasKernPhraseEnd -- Returns true if the input string
+//   has a '}'.
+//
+
+bool Convert::hasKernPhraseEnd(const string& kerndata) {
+	return kerndata.find('}') != string::npos;
 }
 
 
@@ -209,6 +221,84 @@ int Convert::getKernSlurEndElisionLevel(const string& kerndata, int index) {
 		}
 	}
 	if (!foundSlurEnd) {
+		return -1;
+	} else {
+		return output;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernPhraseStartElisionLevel -- Returns the number of
+//   '&' characters before the given '{' character in a kern token.
+//   Returns -1 if no '{' character in string.
+//
+
+int Convert::getKernPhraseStartElisionLevel(const string& kerndata, int index) {
+	bool foundPhraseStart = false;
+	int output = 0;
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == '{') {
+			count++;
+		}
+		if (count == target) {
+			foundPhraseStart = true;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
+		}
+	}
+	if (!foundPhraseStart) {
+		return -1;
+	} else {
+		return output;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernPhraseEndElisionLevel -- Returns the number of
+//   '&' characters before the last '}' character in a kern token.
+//   Returns -1 if no '}' character in string.
+//
+
+int Convert::getKernPhraseEndElisionLevel(const string& kerndata, int index) {
+	bool foundPhraseEnd = false;
+	int output = 0;
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == '}') {
+			count++;
+		}
+		if (count == target) {
+			foundPhraseEnd = true;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
+		}
+	}
+	if (!foundPhraseEnd) {
 		return -1;
 	} else {
 		return output;

@@ -167,9 +167,13 @@ class HumdrumToken : public std::string, public HumHash {
 		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
 		int      getSlurStartElisionLevel  (int index = 0) const;
+		int      getPhraseStartElisionLevel(int index) const;
 		int      getSlurEndElisionLevel    (int index = 0) const;
+		int      getPhraseEndElisionLevel  (int index = 0) const;
 		HTp      getSlurStartToken         (int number = 0);
 		HTp      getSlurEndToken           (int number = 0);
+		HTp      getPhraseStartToken       (int number = 0);
+		HTp      getPhraseEndToken         (int number = 0);
 		void     storeLinkedParameters     (void);
 		bool     linkedParameterIsGlobal   (int index);
 		std::ostream& printCsv             (std::ostream& out = std::cout);
@@ -186,6 +190,7 @@ class HumdrumToken : public std::string, public HumHash {
 		HumParamSet* getLinkedParameter    (int index);
 		HumParamSet* getLinkedParameter    (void);
 		std::string getSlurLayoutParameter (const std::string& keyname, int subtokenindex = -1);
+		std::string getPhraseLayoutParameter(const std::string& keyname, int subtokenindex = -1);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,
 		                                    int subtokenindex = -1);
 		std::string getLayoutParameterChord(const std::string& category,

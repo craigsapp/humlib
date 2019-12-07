@@ -2401,6 +2401,76 @@ std::string HumdrumToken::getSlurLayoutParameter(const std::string& keyname,
 
 //////////////////////////////
 //
+// HumdrumToken::getPhraseLayoutParameter --
+//
+
+std::string HumdrumToken::getPhraseLayoutParameter(const std::string& keyname,
+		int subtokenindex) {
+	std::string category = "P";
+	std::string output;
+
+	// First check for any local layout parameter:
+	std::string testoutput = this->getValue("LO", category, keyname);
+	if (!testoutput.empty()) {
+		if (subtokenindex >= 0) {
+			int s = this->getValueInt("LO", category, "s");
+			if (s == subtokenindex + 1) {
+				return testoutput;
+			}
+		} else {
+			return testoutput;
+		}
+	}
+
+	int lcount = this->getLinkedParameterCount();
+	if (lcount == 0) {
+		return output;
+	}
+
+	std::string sparam;
+	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameter(p);
+		if (hps == NULL) {
+			continue;
+		}
+		if (hps->getNamespace1() != "LO") {
+			continue;
+		}
+		if (hps->getNamespace2() != category) {
+			continue;
+		}
+		for (int q = 0; q < hps->getCount(); ++q) {
+			string key = hps->getParameterName(q);
+			if (key == "s") {
+				sparam = hps->getParameterValue(q);
+			}
+			if (key == keyname) {
+				output = hps->getParameterValue(q);
+			}
+		}
+	}
+	if (subtokenindex < 0) {
+		// do not filter by s parameter
+		return output;
+	} else if (sparam.empty()) {
+		// parameter is not qualified by a note number, so applies to whole token
+		return output;
+	}
+
+	// currently @s requires a single value (should allow a range or multiple values later)
+	// also not checking validity of string first (needs to start with a digit);
+	int s = stoi(sparam);
+	if (s == subtokenindex + 1) {
+		return output;
+	} else {
+		return "";
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getLayoutParameterChord -- Returns requested layout
 // parameter if it is attached to a token directly or indirectly through
 // a linked parameter.  The parameter must apply to the entire chord, so
@@ -2598,6 +2668,24 @@ int HumdrumToken::getSlurStartElisionLevel(int index) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getPhraseStartElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a phrase start character '{'.
+//   Returns -1 if there is no phrase start character.
+//   Default value: index = 0
+//
+
+int HumdrumToken::getPhraseStartElisionLevel(int index) const {
+	if (isDataType("**kern") || isDataType("**mens")) {
+		return Convert::getKernPhraseStartElisionLevel((string)(*this), index);
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getSlurEndElisionLevel -- Returns the count of
 //   elision marks ('&') preceding a slur end character ')'.
 //   Returns -1 if there is no slur end character.
@@ -2607,6 +2695,24 @@ int HumdrumToken::getSlurStartElisionLevel(int index) const {
 int HumdrumToken::getSlurEndElisionLevel(int index) const {
 	if (isDataType("**kern") || isDataType("**mens")) {
 		return Convert::getKernSlurEndElisionLevel((string)(*this), index);
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPhraseEndElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur end character '}'.
+//   Returns -1 if there is no phrase end character.
+//   Default value: index = 0
+//
+
+int HumdrumToken::getPhraseEndElisionLevel(int index) const {
+	if (isDataType("**kern")) {
+		return Convert::getKernPhraseEndElisionLevel((string)(*this), index);
 	} else {
 		return -1;
 	}
@@ -3050,6 +3156,43 @@ HTp HumdrumToken::getSlurStartToken(int number) {
 
 HTp HumdrumToken::getSlurEndToken(int number) {
 	string tag = "slurEnd";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
+}
+
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPhraseStartToken -- Return a pointer to the token
+//     which starts the given phrase.  Returns NULL if no start.  Assumes that
+//     HumdrumFileContent::analyzeKernPhrasings() has already been run.
+//				<parameter key="phraseEnd" value="HT_140366146702320" idref=""/>
+//
+
+HTp HumdrumToken::getPhraseStartToken(int number) {
+	string tag = "phraseStart";
+	if (number > 1) {
+		tag += to_string(number);
+	}
+	return getValueHTp("auto", tag);
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getPhraseEndToken -- Return a pointer to the token
+//     which ends the given phrase.  Returns NULL if no end.  Assumes that
+//     HumdrumFileContent::analyzeKernPhrasings() has already been run.
+//				<parameter key="phraseStart" value="HT_140366146702320" idref=""/>
+//
+
+HTp HumdrumToken::getPhraseEndToken(int number) {
+	string tag = "phraseEnd";
 	if (number > 1) {
 		tag += to_string(number);
 	}

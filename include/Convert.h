@@ -167,8 +167,12 @@ class Convert {
 		static bool isKernNoteAttack        (const std::string& kerndata);
 		static bool hasKernSlurStart        (const std::string& kerndata);
 		static bool hasKernSlurEnd          (const std::string& kerndata);
+		static bool hasKernPhraseStart      (const std::string& kerndata);
+		static bool hasKernPhraseEnd        (const std::string& kerndata);
 		static int  getKernSlurStartElisionLevel(const std::string& kerndata, int index);
 		static int  getKernSlurEndElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernPhraseStartElisionLevel(const std::string& kerndata, int index);
+		static int  getKernPhraseEndElisionLevel(const std::string& kerndata, int index);
 		static char hasKernStemDirection    (const std::string& kerndata);
 
 		static bool isKernSecondaryTiedNote (const std::string& kerndata);

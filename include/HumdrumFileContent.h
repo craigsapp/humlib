@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
-// Last Modified: Mon Aug 17 02:39:32 PDT 2015
+// Last Modified: Fri Dec  6 19:27:27 PST 2019
 // Filename:      HumdrumFileContent.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileContent.h
 // Syntax:        C++11; humlib
@@ -35,9 +35,11 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		      ~HumdrumFileContent         ();
 
 		bool   analyzeSlurs               (void);
+		bool   analyzePhrasings           (void);
 	private:
 		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
+		bool   analyzeKernPhrasings       (void);
 	public:
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
@@ -95,11 +97,18 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		int    hasPickup                  (void);
 
 	protected:
+
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
 		                                   std::vector<HTp>& slurends,
 		                                   std::vector<std::pair<HTp, HTp>>& labels,
 		                                   std::vector<int>& endings,
 		                                   const std::string& linksig = "");
+		bool   analyzeKernPhrasings       (HTp spinestart,
+		                                   std::vector<HTp>& linkstarts,
+		                                   std::vector<HTp>& linkends,
+		                                   std::vector<std::pair<HTp, HTp>>& labels,
+		                                   std::vector<int>& endings,
+		                                   const std::string& linksig);
 		bool   analyzeKernTies            (std::vector<std::pair<HTp, int>>& linkedtiestarts,
 		                                   std::vector<std::pair<HTp, int>>& linkedtieends,
 		                                   std::string& linkSignifier);
@@ -108,11 +117,15 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
 				                             std::vector<int>& signature);
 		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+		void    linkPhraseEndpoints       (HTp phrasestart, HTp phraseend);
 		void    linkTieEndpoints          (HTp tiestart, int startindex,
 		                                   HTp tieend, int endindex);
 		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
+		bool    isLinkedPhraseBegin       (HTp token, int index, const std::string& pattern);
 		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
+		bool    isLinkedPhraseEnd         (HTp token, int index, const std::string& pattern);
 		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+		void    createLinkedPhrasings     (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
 		void    assignVerticalRestPosition(HTp first, HTp second, int baseline);
 		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
