@@ -181,7 +181,6 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		}
 	}
 
-
 	if (m_recipQ || m_forceRecipQ) {
 		outdata.enableRecipSpine();
 	}
@@ -1107,7 +1106,85 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 	if (offsetHarmony.size() > 0) {
 		insertOffsetHarmonyIntoMeasure(outdata.back());
 	}
+	if (offsetFiguredBass.size() > 0) {
+		insertOffsetFiguredBassIntoMeasure(outdata.back());
+	}
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure --
+//
+
+void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
+	if (offsetFiguredBass.empty()) {
+		return;
+	}
+
+	bool beginQ = true;
+	for (auto it = gm->begin(); it != gm->end(); ++it) {
+		GridSlice* gs = *it;
+		if (!gs->isNoteSlice()) {
+			// Only attached harmony to data lines.
+			continue;
+		}
+		HumNum timestamp = gs->getTimestamp();
+		for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
+			if (offsetFiguredBass[i].token == NULL) {
+				continue;
+ 			}
+			if (offsetFiguredBass[i].timestamp == timestamp) {
+				// this is the slice to insert the harmony
+				gs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+				offsetFiguredBass[i].token = NULL;
+			} else if (offsetFiguredBass[i].timestamp < timestamp) {
+				if (beginQ) {
+					cerr << "Error: Cannot insert harmony " << offsetFiguredBass[i].token
+					     << " at timestamp " << offsetFiguredBass[i].timestamp
+					     << " since first timestamp in measure is " << timestamp << endl;
+				} else {
+					m_forceRecipQ = true;
+					// go back to previous note line and insert
+					// new slice to store the harmony token
+					auto tempit = it;
+					tempit--;
+					while (tempit != gm->end()) {
+						if ((*tempit)->getTimestamp() == (*it)->getTimestamp()) {
+							tempit--;
+							continue;
+						}
+						int partcount = (int)(*tempit)->size();
+						tempit++;
+						GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+								SliceType::Notes, partcount);
+						newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+						gm->insert(tempit, newgs);
+						offsetFiguredBass[i].token = NULL;
+						break;
+					}
+				}
+			}
+		}
+		beginQ = false;
+	}
+	// If there are still valid harmonies in the input list, apppend
+	// them to the end of the measure.
+	for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
+		if (offsetFiguredBass[i].token == NULL) {
+			continue;
+ 		}
+		m_forceRecipQ = true;
+		int partcount = (int)gm->back()->size();
+		GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+				SliceType::Notes, partcount);
+		newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+		gm->insert(gm->end(), newgs);
+		offsetFiguredBass[i].token = NULL;
+	}
+	offsetFiguredBass.clear();
 }
 
 
@@ -1351,7 +1428,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		if (loc != string::npos) {
 			recip.replace(loc, 3, "0");
 		}
-		// will need to fix for exotic tuplest such as 11%4 or 1%42
+		// will need to fix for exotic tuplets such as 11%4 or 1%42
 		loc = recip.find("1%4");
 		if (loc != string::npos) {
 			recip.replace(loc, 3, "00");
@@ -1451,6 +1528,11 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		event->reportHarmonyCountToOwner(hcount);
 	}
 
+	int fcount = addFiguredBass(slice->at(partindex), event, nowtime, partindex);
+	if (fcount > 0) {
+		event->reportFiguredBassToOwner();
+	}
+
 	if (m_current_text.size() > 0) {
 		event->setTexts(m_current_text);
 		m_current_text.clear();
@@ -1485,21 +1567,6 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		event->reportDynamicToOwner();  // shouldn't be necessary
 		addHairpinEnding(slice->at(partindex), event, partindex);
 		// shouldn't need dynamics layout parameter
-	}
-
-	if (m_current_figured_bass) {
-		event->setFiguredBass(m_current_figured_bass);
-		string fparam = getFiguredBassParameters(m_current_figured_bass);
-		m_current_figured_bass = xml_node(NULL);
-		event->reportFiguredBassToOwner();
-		addFiguredBass(slice->at(partindex), event);
-		if (fparam != "") {
-			GridMeasure *gm = slice->getMeasure();
-			string fullparam = "!LO:FB" + fparam;
-			if (gm) {
-				gm->addFiguredBassLayoutParameters(slice, partindex, fullparam);
-			}
-		}
 	}
 
 }
@@ -1858,79 +1925,6 @@ void Tool_musicxml2hum::addHairpinEnding(GridPart* part, MxmlEvent* event, int p
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::addFiguredBass -- extract any figured bass for the event
-// ggg: still need to implement
-//
-// Such as:
-//
-//      <figured-bass>
-//        <figure>
-//          <figure-number>0</figure-number>
-//        </figure>
-//      </figured-bass>
-// or:
-//      <figured-bass>
-//        <figure>
-//          <figure-number>5</figure-number>
-//          <suffix>backslash</suffix>
-//        </figure>
-//        <figure>
-//          <figure-number>2</figure-number>
-//          <suffix>cross</suffix>
-//        </figure>
-//      </figured-bass>
-//
-//      <figured-bass parentheses="yes">
-//        <figure>
-//          <prefix>flat</prefix>
-//        </figure>
-//      </figured-bass>
-//
-//      <figured-bass>
-//        <figure>
-//          <figure-number>6</figure-number>
-//          <extend type="start" />
-//        </figure>
-//      <figured-bass>
-//
-//
-
-void Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event) {
-	xml_node fbroot = event->getFiguredBass();
-	if (!fbroot) {
-		return;
-	}
-	string fbstring;
-
-	// Parentheses can only enclose an entire figure stack, not
-	// individual numbers or accidentals on numbers in MusicXML,
-	// so apply an editorial mark for parentheses.
-	string editorial;
-	xml_attribute pattr = fbroot.attribute("parentheses");
-	if (pattr) {
-		string pval = pattr.value();
-		if (pval == "yes") {
-			editorial = "i";
-		}
-	}
-	// There is no bracket for FB in musicxml (3.0).
-
-	auto children = fbroot.select_nodes("figure");
-	for (int i=0; i<(int)children.size(); i++) {
-		fbstring += convertFiguredBassNumber(children[i].node());
-		fbstring += editorial;
-		if (i < (int)children.size() - 1) {
-			fbstring += " ";
-		}
-	}
-
-	HTp fbtok = new HumdrumToken(fbstring);
-	part->setFiguredBass(fbtok);
-}
-
-
-//////////////////////////////
-//
 // Tool_musicxml2hum::convertFiguredBassNumber --
 //
 
@@ -2183,6 +2177,138 @@ string Tool_musicxml2hum::getDynamicString(xml_node element) {
 }
 
 
+//////////////////////////////
+//
+// Tool_musicxml2hum::addFiguredBass --
+//
+// Such as:
+//
+//      <figured-bass>
+//        <figure>
+//          <figure-number>0</figure-number>
+//        </figure>
+//      </figured-bass>
+// or:
+//      <figured-bass>
+//        <figure>
+//          <figure-number>5</figure-number>
+//          <suffix>backslash</suffix>
+//        </figure>
+//        <figure>
+//          <figure-number>2</figure-number>
+//          <suffix>cross</suffix>
+//        </figure>
+//      </figured-bass>
+//
+//      <figured-bass parentheses="yes">
+//        <figure>
+//          <prefix>flat</prefix>
+//        </figure>
+//      </figured-bass>
+//
+// Case where there is more than one figure attached to a note:
+// (notice <duration> element)
+//
+//      <figured-bass>
+//        <figure>
+//          <figure-number>6</figure-number>
+//          <extend type="start" />
+//        </figure>
+//        <duration>2</duration>
+//      <figured-bass>
+//
+//
+
+int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum nowtime, int partindex) {
+	if (m_current_figured_bass.empty()) {
+		return 0;
+	}
+
+	int dursum = 0;
+	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
+		xml_node fnode = m_current_figured_bass.at(i);
+		if (!fnode) {
+			// strange problem
+			continue;
+		}
+		string fstring = getFiguredBassString(fnode);
+
+		HTp ftok = new HumdrumToken(fstring);
+		if (i == 0) {
+			part->setFiguredBass(ftok);
+		} else {
+			// store the figured bass for later handling at end of 
+			// measure processing.
+			MusicXmlFiguredBassInfo finfo;
+			finfo.timestamp = dursum;
+			finfo.timestamp /= (int)event->getQTicks();
+			finfo.timestamp += nowtime;
+			finfo.partindex = partindex;
+			finfo.token = ftok;
+			offsetFiguredBass.push_back(finfo);
+		}
+		if (i < (int)m_current_figured_bass.size() - 1) {
+			dursum += getFiguredBassDuration(fnode);
+		}
+	}
+	m_current_figured_bass.clear();
+
+	return 1;
+
+/* deal with figured bass layout parameters?:
+			string fparam = getFiguredBassParameters(fnode);
+			if (fparam != "") {
+				GridMeasure *gm = slice->getMeasure();
+				string fullparam = "!LO:FB" + fparam;
+				if (gm) {
+					gm->addFiguredBassLayoutParameters(slice, partindex, fullparam);
+				}
+			}
+		}
+*/
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getFiguredBassString -- extract any figured bass string
+//   from XML node.
+//
+
+string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
+	string output;
+
+	// Parentheses can only enclose an entire figure stack, not
+	// individual numbers or accidentals on numbers in MusicXML,
+	// so apply an editorial mark for parentheses.
+	string editorial;
+	xml_attribute pattr = fnode.attribute("parentheses");
+	if (pattr) {
+		string pval = pattr.value();
+		if (pval == "yes") {
+			editorial = "i";
+		}
+	}
+	// There is no bracket for FB in musicxml (3.0).
+
+	auto children = fnode.select_nodes("figure");
+	for (int i=0; i<(int)children.size(); i++) {
+		output += convertFiguredBassNumber(children[i].node());
+		output += editorial;
+		if (i < (int)children.size() - 1) {
+			output += " ";
+		}
+	}
+
+	return output;
+
+	// HTp fbtok = new HumdrumToken(fbstring);
+	// part->setFiguredBass(fbtok);
+}
+
+
 
 //////////////////////////////
 //
@@ -2242,6 +2368,43 @@ int Tool_musicxml2hum::getHarmonyOffset(xml_node hnode) {
 	}
 	while (child) {
 		if (nodeType(child, "offset")) {
+			return atoi(child.child_value());
+		}
+		child = child.next_sibling();
+	}
+
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getFiguredBaseDuration -- Needed for cases where there is more
+//   than one figure attached to a note.  Return value is the integer of the duration
+//   element.  If will need to be converted to quarter notes later.
+//
+//   <figured-bass>
+//      <figure>
+//         <figure-number>5</figure-number>
+//      </figure>
+//      <figure>
+//         <figure-number>3</figure-number>
+//      </figure>
+//      <duration>2</duration>    <-- get this field if it exists.
+//   </figured-bass>
+//
+
+int Tool_musicxml2hum::getFiguredBassDuration(xml_node fnode) {
+	if (!fnode) {
+		return 0;
+	}
+	xml_node child = fnode.first_child();
+	if (!child) {
+		return 0;
+	}
+	while (child) {
+		if (nodeType(child, "duration")) {
 			return atoi(child.child_value());
 		}
 		child = child.next_sibling();
@@ -2676,7 +2839,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 				}
 			} else if (nodeType(element, "figured-bass")) {
-				m_current_figured_bass = element;
+				m_current_figured_bass.push_back(element);
 			} else if (nodeType(element, "note")) {
 				if (foundnongrace) {
 					addEventToList(graceafter, nowevents[i]->zerodur[j]);

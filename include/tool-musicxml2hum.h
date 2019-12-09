@@ -40,6 +40,13 @@ class MusicXmlHarmonyInfo {
 		int    partindex;
 };
 
+class MusicXmlFiguredBassInfo {
+	public:
+		HTp    token;
+		HumNum timestamp;
+		int    partindex;
+};
+
 
 class Tool_musicxml2hum : public HumTool {
 	public:
@@ -125,6 +132,7 @@ class Tool_musicxml2hum : public HumTool {
 		                        std::vector<HumdrumLine*> measures);
 		void processPrintElement(GridMeasure* outdata, pugi::xml_node element, HumNum timestamp);
 		void insertOffsetHarmonyIntoMeasure(GridMeasure* gm);
+		void insertOffsetFiguredBassIntoMeasure(GridMeasure* gm);
 
 		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& clefs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
@@ -168,7 +176,7 @@ class Tool_musicxml2hum : public HumTool {
 		int  addHarmony        (GridPart* oart, MxmlEvent* event, HumNum nowtime, int partindex);
 		void addDynamic        (GridPart* part, MxmlEvent* event, int partindex);
 		void addHairpinEnding  (GridPart* part, MxmlEvent* event, int partindex);
-		void addFiguredBass    (GridPart* part, MxmlEvent* event);
+		int  addFiguredBass    (GridPart* part, MxmlEvent* event, HumNum nowtime, int partindex);
 		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex,
@@ -180,6 +188,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string getFiguredBassString(pugi::xml_node element);
 		std::string getFiguredBassParameters(pugi::xml_node element);
 		std::string convertFiguredBassNumber(const xml_node& figure);
+		int         getFiguredBassDuration(xml_node fnode);
 		std::string getHairpinString(pugi::xml_node element, int partindex);
 		std::string cleanSpaces     (const std::string& input);
 		void checkForDummyRests(MxmlMeasure* measure);
@@ -210,6 +219,7 @@ class Tool_musicxml2hum : public HumTool {
 		bool m_hasOrnamentsQ = false;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 		std::vector<MusicXmlHarmonyInfo> offsetHarmony;
+		std::vector<MusicXmlFiguredBassInfo> offsetFiguredBass;
 		std::vector<string> m_stop_char;
 
 		// RDF indications in **kern data:
@@ -219,7 +229,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
-		pugi::xml_node m_current_figured_bass = pugi::xml_node(NULL);
+		std::vector<pugi::xml_node> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 
 		bool m_hasTransposition = false;

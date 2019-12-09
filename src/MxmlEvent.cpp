@@ -742,15 +742,16 @@ vector<MxmlEvent*> MxmlEvent::getLinkedNotes(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::printEvent -- Useful for debugging.
+// MxmlEvent::print -- Useful for debugging.
 //
 
-void MxmlEvent::printEvent(void) {
-	cout << getStartTime() << "\t" << getDuration() << "\t" << m_node.name();
+ostream& MxmlEvent::print(ostream& out) {
+	out << getStartTime() << "\t" << getDuration() << "\t" << m_node.name();
 	if (isChord()) {
-		cout << "\tCHORD";
+		out << "\tCHORD";
 	}
-	cout << endl;
+	out << endl;
+	return out;
 }
 
 
@@ -2007,11 +2008,11 @@ void MxmlEvent::setHairpinEnding(xml_node node) {
 
 //////////////////////////////
 //
-// MxmlEvent::setFiguredBass --
+// MxmlEvent::addFiguredBass --
 //
 
-void MxmlEvent::setFiguredBass(xml_node node) {
-	m_figured_bass = node;
+void MxmlEvent::addFiguredBass(xml_node node) {
+	m_figured_bass.push_back(node);
 }
 
 
@@ -2040,11 +2041,22 @@ xml_node MxmlEvent::getHairpinEnding(void) {
 
 //////////////////////////////
 //
+// MxmlEvent::getFiguredBassCount --
+//
+
+int MxmlEvent::getFiguredBassCount(void) {
+	return (int)m_figured_bass.size();
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::getFiguredBass --
 //
 
-xml_node MxmlEvent::getFiguredBass(void) {
-	return m_figured_bass;
+xml_node MxmlEvent::getFiguredBass(int index) {
+	return m_figured_bass.at(index);
 }
 
 
