@@ -3188,7 +3188,7 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 		return;
 	}
 
-	HTp token;
+	HTp token = NULL;
 	int staffnum = 0;
 	while (clef) {
 		clef = convertClefToHumdrum(clef, token, staffnum);
