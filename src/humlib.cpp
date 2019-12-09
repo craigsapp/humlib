@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Dec  8 21:27:47 PST 2019
+// Last Modified: Mon Dec  9 19:08:28 CET 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -66506,7 +66506,7 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 		return;
 	}
 
-	HTp token;
+	HTp token = NULL;
 	int staffnum = 0;
 	while (clef) {
 		clef = convertClefToHumdrum(clef, token, staffnum);
