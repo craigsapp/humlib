@@ -1599,6 +1599,19 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //          <words font-style="italic">Some Text</words>
 //        </direction-type>
 //      </direction>
+//
+// Multi-line example:
+//
+// <direction placement="above">
+//         <direction-type>
+//           <words default-y="40.00" relative-x="-9.47" relative-y="2.71">note
+// </words>
+//           <words>with newline</words>
+//         </direction-type>
+//       <staff>2</staff>
+//       </direction>
+// 
+
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
 		int staffindex, int voiceindex, xml_node node) {
@@ -1621,20 +1634,41 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		return;
 	}
 
-
 	xml_node grandchild = child.first_child();
 	if (!grandchild) {
 		return;
 	}
-	if (!nodeType(grandchild, "words")) {
-		return;
+
+	xml_node sibling = grandchild;
+
+	string text;
+	while (sibling) {
+		if (nodeType(sibling, "words")) {
+			text += sibling.child_value();
+		}
+		sibling = sibling.next_sibling();
 	}
-	string text = grandchild.child_value();
+
 	if (text == "") {
+		// Don't insert an empty text
 		return;
 	}
 
-	/* Problem: these are also possibly for figured bass
+	// Mapping \n (0x0a) to newline (ignoring \r, (0x0d))
+	string newtext;
+	for (int i=0; i<(int)text.size(); i++) {
+		switch (text[i]) {
+			case 0x0a:
+				newtext += "\\n";
+			case 0x0d:
+				break;
+			default:
+				newtext += text[i];
+		}
+	}
+	text = newtext;
+
+	/* Problem: these are also possibly signs for figured bass
 	if (text == "#") {
 		// interpret as an editorial sharp marker
 		setEditorialAccidental(+1, slice, partindex, staffindex, voiceindex);
@@ -1650,6 +1684,13 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		return;
 	}
 	*/
+
+	//
+	// The following code should be merged into the loop to apply
+	// font changes within the text.  Internal formatting code for
+	// the string would need to be developed if so.  For now, just
+	// the first word's style will be processed.
+	//
 
 	string stylestring;
 	bool italic = false;
