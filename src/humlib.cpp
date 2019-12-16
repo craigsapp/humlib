@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec 16 13:07:35 PST 2019
+// Last Modified: Mon Dec 16 14:01:40 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -19840,17 +19840,14 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 				current = current->getNextToken();
 				continue;
 			}
-			if (ijstate == false) {
-				current = current->getNextToken();
-				continue;
-			}
 			if (current->isData()) {
-				if (ijstate) {
-					lastword->setValue("auto", "ij", "true");
-				}
-				if (startij) {
-					lastword->setValue("auto", "ij-begin", "true");
-					startij = false;
+				if (ijstate == true) {
+					current->setValue("auto", "ij", "true");
+					if (startij) {
+						current->setValue("auto", "ij-begin", "true");
+						startij = false;
+					}
+					lastword = current;
 				}
 			}
 			current = current->getNextToken();

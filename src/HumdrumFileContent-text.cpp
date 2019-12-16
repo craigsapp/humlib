@@ -69,17 +69,14 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 				current = current->getNextToken();
 				continue;
 			}
-			if (ijstate == false) {
-				current = current->getNextToken();
-				continue;
-			}
 			if (current->isData()) {
-				if (ijstate) {
-					lastword->setValue("auto", "ij", "true");
-				}
-				if (startij) {
-					lastword->setValue("auto", "ij-begin", "true");
-					startij = false;
+				if (ijstate == true) {
+					current->setValue("auto", "ij", "true");
+					if (startij) {
+						current->setValue("auto", "ij-begin", "true");
+						startij = false;
+					}
+					lastword = current;
 				}
 			}
 			current = current->getNextToken();
