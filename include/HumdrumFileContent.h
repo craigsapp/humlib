@@ -36,6 +36,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 		bool   analyzeSlurs               (void);
 		bool   analyzePhrasings           (void);
+		bool   analyzeTextRepetition      (void);
 	private:
 		bool   analyzeMensSlurs           (void);
 		bool   analyzeKernSlurs           (void);
