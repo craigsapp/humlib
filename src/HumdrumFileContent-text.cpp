@@ -36,12 +36,14 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 	infile.getSpineStartList(sstarts);
 
 	bool output = false;
-
-	bool ijstate = false;
-	bool startij = false;  // true if at the first note in IJ
-	HTp lastword = NULL;   // non-null if last syllable before *Xij 
+	bool ijstate;
+	bool startij;  // true if at the first note in IJ
+	HTp lastword;   // non-null if last syllable before *Xij 
 
 	for (int i=0; i<(int)sstarts.size(); i++) {
+		ijstate = false;
+		startij = false;
+		lastword = NULL;
 		HTp start = sstarts[i];
 		if (!(start->isDataType("**text") || start->isDataType("**sylb"))) {
 			continue;
