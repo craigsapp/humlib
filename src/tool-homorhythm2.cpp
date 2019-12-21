@@ -2,15 +2,15 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Aug  9 17:58:05 EDT 2019
 // Last Modified: Fri Aug  9 17:58:08 EDT 2019
-// Filename:      tool-homophonic2.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-homophonic2.cpp
+// Filename:      tool-homorhythm2.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-homorhythm2.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Identify homophonic2 regions of music.
+// Description:   Identify homorhythm2 regions of music.
 //
 
-#include "tool-homophonic2.h"
+#include "tool-homorhythm2.h"
 #include "Convert.h"
 #include "NoteGrid.h"
 
@@ -23,25 +23,25 @@ namespace hum {
 
 /////////////////////////////////
 //
-// Tool_homophonic2::Tool_homophonic -- Set the recognized options for the tool.
+// Tool_homorhythm2::Tool_homorhythm -- Set the recognized options for the tool.
 //
 
-Tool_homophonic2::Tool_homophonic2(void) {
-	define("t|threshold=d:1.6", "Threshold score sum required for homophonic texture detection");
-	define("u|threshold2=d:1.3", "Threshold score sum required for semi-homophonic texture detection");
+Tool_homorhythm2::Tool_homorhythm2(void) {
+	define("t|threshold=d:1.6", "Threshold score sum required for homorhythm texture detection");
+	define("u|threshold2=d:1.3", "Threshold score sum required for semi-homorhythm texture detection");
 	define("s|score=b", "Show numeric scores");
 	define("n|length=i:4", "Sonority length to calculate");
-	define("f|fraction=b", "Report fraction of music that is homophonic");
+	define("f|fraction=b", "Report fraction of music that is homorhythm");
 }
 
 
 
 /////////////////////////////////
 //
-// Tool_homophonic2::run -- Do the main work of the tool.
+// Tool_homorhythm2::run -- Do the main work of the tool.
 //
 
-bool Tool_homophonic2::run(HumdrumFileSet& infiles) {
+bool Tool_homorhythm2::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -50,7 +50,7 @@ bool Tool_homophonic2::run(HumdrumFileSet& infiles) {
 }
 
 
-bool Tool_homophonic2::run(const string& indata, ostream& out) {
+bool Tool_homorhythm2::run(const string& indata, ostream& out) {
 	HumdrumFile infile;
 	infile.read(indata);
 	bool status = run(infile);
@@ -63,7 +63,7 @@ bool Tool_homophonic2::run(const string& indata, ostream& out) {
 }
 
 
-bool Tool_homophonic2::run(HumdrumFile& infile, ostream& out) {
+bool Tool_homorhythm2::run(HumdrumFile& infile, ostream& out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -74,7 +74,7 @@ bool Tool_homophonic2::run(HumdrumFile& infile, ostream& out) {
 }
 
 
-bool Tool_homophonic2::run(HumdrumFile& infile) {
+bool Tool_homorhythm2::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
 	return true;
@@ -84,10 +84,10 @@ bool Tool_homophonic2::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_homophonic2::initialize --
+// Tool_homorhythm2::initialize --
 //
 
-void Tool_homophonic2::initialize(void) {
+void Tool_homorhythm2::initialize(void) {
 	m_threshold = getDouble("threshold");
 	if (m_threshold < 0.0) {
 		m_threshold = 0.0;
@@ -108,10 +108,10 @@ void Tool_homophonic2::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_homophonic2::processFile --
+// Tool_homorhythm2::processFile --
 //
 
-void Tool_homophonic2::processFile(HumdrumFile& infile) {
+void Tool_homorhythm2::processFile(HumdrumFile& infile) {
 	infile.analyzeStructure();
 	NoteGrid grid(infile);
 	m_score.resize(infile.getLineCount());

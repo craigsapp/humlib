@@ -2,12 +2,12 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Aug  9 17:57:41 EDT 2019
 // Last Modified: Wed Aug 14 07:49:56 EDT 2019
-// Filename:      tool-homophonic.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-homophonic.h
+// Filename:      tool-homorhythm.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-homorhythm.h
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Identify homophonic regions of music.
+// Description:   Identify homorhythm regions of music.
 //
 
 #ifndef _TOOL_HOMOPHONIC_H
@@ -33,10 +33,10 @@ class HPNote {
 		bool nullQ = false;
 };
 
-class Tool_homophonic : public HumTool {
+class Tool_homorhythm : public HumTool {
 	public:
-		            Tool_homophonic    (void);
-		           ~Tool_homophonic    () {};
+		            Tool_homorhythm    (void);
+		           ~Tool_homorhythm    () {};
 
 		bool        run                (HumdrumFileSet& infiles);
 		bool        run                (HumdrumFile& infile);
@@ -56,7 +56,7 @@ class Tool_homophonic : public HumTool {
 		void        addFractionAnalysis(HumdrumFile& infile, std::vector<double>& score);
 
 	private:
-		std::vector<std::string> m_homophonic;
+		std::vector<std::string> m_homorhythm;
 		std::vector<int> m_notecount;
 		std::vector<int> m_attacks;
 		std::vector<std::vector<HPNote>> m_notes;
