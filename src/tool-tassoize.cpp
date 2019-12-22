@@ -15,6 +15,7 @@
 
 #include "Convert.h"
 #include "HumRegex.h"
+#include "tool-shed.h"
 
 #include <algorithm>
 
@@ -182,6 +183,18 @@ void Tool_tassoize::processFile(HumdrumFile& infile) {
 	if (terminalsQ)      { addTerminalLongs(infile); }
 	if (breaksQ)         { deleteBreaks(infile); }
 	if (transpositionsQ) { deleteDummyTranspositions(infile); }
+
+	// Input lyrics may contain "=" signs which are to be converted into
+	// spaces in **text data, and into elisions when displaying with verovio.
+	Tool_shed shed;
+	vector<string> argv;
+	argv.push_back("shed");
+	argv.push_back("-x");     // only apply to **text spines
+	argv.push_back("text");
+	argv.push_back("-e");
+	argv.push_back("s/=/ /g");
+	shed.process(argv);
+	shed.run(infile);
 }
 
 
