@@ -100,7 +100,7 @@ info:
 	@echo "Programs to compile: $(PROGS)" | fmt
 
 install:
-	@(cd bin && sudo cp $(PROGS) /usr/local/bin)
+	@(cd bin && strip * ; sudo cp $(PROGS) /usr/local/bin)
 	@echo "Copied tools to /usr/local/bin"
 
 bin:
