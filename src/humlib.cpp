@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Dec 22 15:43:51 PST 2019
+// Last Modified: Mon Dec 30 06:35:46 PST 2019
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -52734,8 +52734,8 @@ void Tool_extract::expandSpines(vector<int>& field, vector<int>& subfield, vecto
 //   given exclusive interpretation.
 //
 
-void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vector<int>& model,
-		HumdrumFile& infile, const string& exinterp) {
+void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield,
+		vector<int>& model, HumdrumFile& infile, const string& exinterp) {
 
 	vector<int> target;
 	target.resize(infile.getMaxTrack()+1);
@@ -52746,21 +52746,20 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 
 	for (int t=0; t<(int)trackstarts.size(); t++) {
 		if (trackstarts[t]->isDataType(exinterp)) {
-			target[t] = 1;
+			target.at(t + 1) = 1;
 		}
 	}
 
 	field.reserve(infile.getMaxTrack()*2);
 	field.resize(0);
 
-	int i, j;
 	int lasti = (int)target.size();
-	for (i=(int)target.size()-1; i>0; i--) {
+	for (int i=(int)target.size()-1; i>0; i--) {
 		if (target[i]) {
 			lasti = i;
 			field.push_back(i);
-			for (j=i+1; j<(int)target.size(); j++) {
-				if (!target[j]) {
+			for (int j=i+1; j<(int)target.size(); j++) {
+				if (!target.at(j)) {
 					field.push_back(j);
 				} else {
 					break;
@@ -52775,17 +52774,17 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 	if (lasti != 1) {
 		extras = lasti - 1;
 		field.resize(field.size()+extras);
-		for (i=0; i<(int)field.size()-extras; i++) {
+		for (int i=0; i<(int)field.size()-extras; i++) {
 			field[(int)field.size()-1-i] = field[(int)field.size()-1-extras-i];
 		}
-		for (i=0; i<extras; i++) {
+		for (int i=0; i<extras; i++) {
 			field[i] = i+1;
 		}
 	}
 
 	if (debugQ) {
 		m_humdrum_text << "!!reverse: ";
-		for (i=0; i<(int)field.size(); i++) {
+		for (int i=0; i<(int)field.size(); i++) {
 			m_humdrum_text << field[i] << " ";
 		}
 		m_humdrum_text << endl;
@@ -52796,7 +52795,6 @@ void Tool_extract::reverseSpines(vector<int>& field, vector<int>& subfield, vect
 
 	model.resize(field.size());
 	fill(model.begin(), model.end(), 0);
-
 }
 
 
