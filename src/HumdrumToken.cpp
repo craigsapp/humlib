@@ -1072,6 +1072,21 @@ bool HumdrumToken::hasBeam(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::hasFermata --
+//
+
+bool HumdrumToken::hasFermata(void) const {
+	if (this->find(';') != string::npos) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::equalTo --
 //
 
@@ -1335,6 +1350,59 @@ bool HumdrumToken::isMensurationSymbol(void) {
 		return false;
 	}
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentDesignation -- Such as *Iclars for B-flat clarinet.
+//
+
+bool HumdrumToken::isInstrumentDesignation(void) {
+	if (this->compare(0, 2, "*I") != 0) {
+		return false;
+	}
+	for (int i=2; i<(int)this->size(); i++) {
+		if (!isalpha(this->at(i))) {
+			return false;
+		}
+		if (!islower(this->at(i))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentName -- True if an instrument name token.
+//
+
+bool HumdrumToken::isInstrumentName(void) {
+	if (this->compare(0, 3, "*I\"") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentAbbreviation -- True if an instrument abbreviation token.
+//
+
+bool HumdrumToken::isInstrumentAbbreviation(void) {
+	if (this->compare(0, 3, "*I'") != 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 

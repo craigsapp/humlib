@@ -210,6 +210,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "extract") {
 			RUNTOOL(extract, infile, commands[i].second, status);
+		} else if (commands[i].first == "extractx") {
+			// Humdrum Extras emulation
+			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
@@ -221,6 +224,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
+			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "satb2gsx") {
+			// humlib cli emulation
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
 			RUNTOOL2(simat, infile, infile, commands[i].second, status);

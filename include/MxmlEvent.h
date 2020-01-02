@@ -93,7 +93,7 @@ class MxmlEvent {
 		std::vector<MxmlEvent*> getLinkedNotes     (void);
 		void               attachToLastEvent  (void);
 		bool               isChord            (void) const;
-		ostream&           print              (ostream& out);
+		std::ostream&      print              (std::ostream& out);
 		int                getSequenceNumber  (void) const;
 		int                getVoiceNumber     (void) const;
 		void               setVoiceNumber     (int value);

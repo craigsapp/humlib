@@ -1,22 +1,20 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Feb  6 14:33:36 PST 2011
-// Last Modified: Wed Nov 30 20:36:41 PST 2016
+// Last Modified: Wed Jan  1 22:13:58 PST 2020
 // Filename:      tool-satb2gs.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-satb2gs.h
 // Syntax:        C++11; humlib
-// vim:           syntax=cpp ts=3 noexpandtab nowrap
+// vim:           ts=3 noexpandtab
 //
-// Description:   Interface for satb2gs tool.
+// Description:   Sort data spines in a Humdrum file.
 //
 
-#ifndef _TOOL_SATB2GS_H_INCLUDED
-#define _TOOL_SATB2GS_H_INCLUDED
+#ifndef _TOOL_SATB2GS_H
+#define _TOOL_SATB2GS_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
-
-#include <vector>
 
 namespace hum {
 
@@ -24,37 +22,37 @@ namespace hum {
 
 class Tool_satb2gs : public HumTool {
 	public:
-		         Tool_satb2gs    (void);
-		        ~Tool_satb2gs    () {};
+		         Tool_satb2gs      (void);
+		        ~Tool_satb2gs      () {};
 
-		bool     run             (HumdrumFileSet& infiles);
-		bool     run             (HumdrumFile& infile);
-		bool     run             (const string& indata, ostream& out);
-		bool     run             (HumdrumFile& infile, ostream& out);
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     initialize      (HumdrumFile& infile);
-		void     processFile     (HumdrumFile& infile);
-		void     example         (void);
-		void     usage           (const string& command);
-		void     convertData     (HumdrumFile& infile);
-		int      getSatbTracks   (vector<int>& tracks, HumdrumFile& infile);
-		void     printSpine      (HumdrumFile& infile, int row, int col,
-		                          vector<int>& satbtracks);
-		void     printExInterp   (HumdrumFile& infile, int line,
-		                          vector<int>& tracks);
-		void     printLastLine   (HumdrumFile& infile, int line,
-		                          vector<int>& tracks);
-	private:
-		int    debugQ    = 0;             // used with --debug option
-};
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    getTrackInfo       (std::vector<std::vector<int>>& tracks,
+		                            HumdrumFile& infile);
 
+		void    printTerminatorLine(std::vector<std::vector<int>>& tracks);
+		int     getNewTrackCount   (std::vector<std::vector<int>>& tracks);
+		void    printRegularLine   (HumdrumFile& infile, int line,
+		                            std::vector<std::vector<int>>& tracks);
+		void    printSpineMergeLine(std::vector<std::vector<int>>& tracks);
+		void    printSpineSplitLine(std::vector<std::vector<int>>& tracks);
+		void    printHeaderLine    (HumdrumFile& infile, int line,
+		                            std::vector<std::vector<int>>& tracks);
+		bool    validateHeader     (HumdrumFile& infile);
+
+};
 
 // END_MERGE
 
 } // end namespace hum
 
-#endif /* _TOOL_SATB2GS_H_INCLUDED */
+#endif /* _TOOL_SATB2GS_H */
 
 
 

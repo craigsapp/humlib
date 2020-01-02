@@ -84,6 +84,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isLabel                   (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
+		bool     hasFermata                (void) const;
 		bool     equalTo                   (const std::string& pattern);
 
 		// kern-specific functions:
@@ -100,6 +101,9 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isTimeSignature           (void);
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
+		bool     isInstrumentDesignation   (void);
+		bool     isInstrumentName          (void);
+		bool     isInstrumentAbbreviation  (void);
 
 		bool     hasSlurStart              (void);
 		bool     hasSlurEnd                (void);
