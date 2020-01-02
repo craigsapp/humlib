@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan  2 02:21:55 PST 2020
+// Last Modified: Thu Jan  2 12:50:23 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6613,6 +6613,7 @@ class Tool_musicxml2hum : public HumTool {
 		void prepareRdfs       (std::vector<MxmlPart>& partdata);
 		void printRdfs         (ostream& out);
 		void printResult       (ostream& out, HumdrumFile& outfile);
+		void addMeasureOneNumber(HumdrumFile& infile);
 
 	public:
 

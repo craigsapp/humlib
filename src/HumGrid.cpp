@@ -1346,7 +1346,7 @@ string HumGrid::createBarToken(int m, int barnum, GridMeasure* measure) {
 
 //////////////////////////////
 //
-// HumGrid::addMetricBarNumbers --
+// HumGrid::getMetricBarNumbers --
 //
 
 void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
@@ -1375,7 +1375,8 @@ void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
 		}
 	}
 
-	int counter = 1;
+	// int counter = 1;  // this was causing a problem https://github.com/humdrum-tools/verovio-humdrum-viewer/issues/254
+	int counter = 0;
 	if (mdur[start] == tsdur[start]) {
 		m_pickup = false;
 		counter++;

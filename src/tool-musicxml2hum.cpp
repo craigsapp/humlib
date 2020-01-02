@@ -196,6 +196,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	Tool_ruthfix ruthfix;
 	ruthfix.run(outfile);
 
+	addMeasureOneNumber(outfile);
+
+	// Maybe implement barnum tool and apply here based on options.
+
 	Tool_chord chord;
 	chord.run(outfile);
 
@@ -245,6 +249,48 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	printRdfs(out);
 
 	return status;
+}
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addMeasureOneNumber -- For the first measure if it occurs before
+//    the first data, change = to =1.  Maybe check next measure for a number and
+//    addd one less than that number instead of 1.
+//
+
+void Tool_musicxml2hum::addMeasureOneNumber(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		string value = *token;
+		bool hasdigit = false;
+		for (int j=0; j<(int)value.size(); j++) {
+			if (isdigit(value[j])) {
+				hasdigit = true;
+				break;
+			}
+		}
+		if (hasdigit) {
+			break;
+		}
+		// there is no digit on barline, so add one.
+		string newvalue = "=";
+		if (value.size() < 2) {
+			newvalue += "1";
+		} else if (value[1] != '=') {
+			newvalue += "1";
+			newvalue += value.substr(1);
+		}
+		token->setText(newvalue);
+		// add "1" to other spines here?
+		break;
+	}
 }
 
 

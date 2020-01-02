@@ -202,6 +202,7 @@ class Tool_musicxml2hum : public HumTool {
 		void prepareRdfs       (std::vector<MxmlPart>& partdata);
 		void printRdfs         (ostream& out);
 		void printResult       (ostream& out, HumdrumFile& outfile);
+		void addMeasureOneNumber(HumdrumFile& infile);
 
 	public:
 
