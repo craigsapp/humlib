@@ -31,12 +31,16 @@ class Tool_shed : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    processFile        (HumdrumFile& infile);
-		void    searchAndReplaceInterpretation(HumdrumFile& infile);
-		void    searchAndReplaceExinterp(HumdrumFile& infile);
-		void    searchAndReplaceData(HumdrumFile& infile);
-		void    searchAndReplaceBarline(HumdrumFile& infile);
-		void    searchAndReplaceLocalComment(HumdrumFile& infile);
+		void    processFile                      (HumdrumFile& infile);
+		void    searchAndReplaceInterpretation   (HumdrumFile& infile);
+		void    searchAndReplaceExinterp         (HumdrumFile& infile);
+		void    searchAndReplaceData             (HumdrumFile& infile);
+		void    searchAndReplaceBarline          (HumdrumFile& infile);
+		void    searchAndReplaceLocalComment     (HumdrumFile& infile);
+		void    searchAndReplaceReferenceRecords (HumdrumFile& infile);
+		void    searchAndReplaceReferenceKeys    (HumdrumFile& infile);
+		void    searchAndReplaceReferenceValues  (HumdrumFile& infile);
+
 		void    initialize         (void);
 		void    initializeSegment  (HumdrumFile& infile);
 		bool    isValid            (HTp token);
@@ -61,6 +65,9 @@ class Tool_shed : public HumTool {
 		bool m_exinterp       = false; // process exclusive interpretations
 		bool m_interpretation = false; // process interpretations
 		bool m_localcomment   = false; // process local comments
+		bool m_reference      = false; // process reference records
+		bool m_referencekey   = false; // process reference records keys
+		bool m_referencevalue = false; // process reference records values
 		std::string m_xInterp; // used with -x option
 		std::string m_yInterp; // used with -y option
 		std::string m_zInterp; // used with -z option

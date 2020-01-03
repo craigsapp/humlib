@@ -78,6 +78,10 @@ bool Tool_shed::run(HumdrumFile& infile, ostream& out) {
 bool Tool_shed::run(HumdrumFile& infile) {
 	initialize();
 	initializeSegment(infile);
+	if (m_options.empty()) {
+		cerr << "Error: -e option is required" << endl;
+		return false;
+	}
 	for (int i=0; i<(int)m_options.size(); i++) {
 		prepareSearch(i);
 		processFile(infile);
@@ -153,6 +157,20 @@ void Tool_shed::prepareSearch(int index) {
 	}
 	if (m_option.find("L") != std::string::npos) {
 		m_localcomment = true;
+		m_data = false;
+	}
+	if (m_option.find("K") != std::string::npos) {
+		m_referencekey = true;
+		m_data = false;
+	}
+	if (m_option.find("V") != std::string::npos) {
+		m_referencevalue = true;
+		m_data = false;
+	}
+	if (m_option.find("R") != std::string::npos) {
+		m_reference = true;
+		m_referencekey = false;
+		m_referencevalue = false;
 		m_data = false;
 	}
 	if (m_option.find("D") != std::string::npos) {
@@ -372,6 +390,18 @@ void Tool_shed::processFile(HumdrumFile& infile) {
 		searchAndReplaceLocalComment(infile);
 	}
 
+	if (m_reference) {
+		searchAndReplaceReferenceRecords(infile);
+	}
+
+	if (m_referencekey) {
+		searchAndReplaceReferenceKeys(infile);
+	}
+
+	if (m_referencevalue) {
+		searchAndReplaceReferenceValues(infile);
+	}
+
 	if (m_exinterp) {
 		searchAndReplaceExinterp(infile);
 	}
@@ -508,6 +538,93 @@ void Tool_shed::searchAndReplaceLocalComment(HumdrumFile& infile) {
 				token->setText(text);
 				m_modified = true;
 			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_shed::searchAndReplaceReferenceRecords --
+//
+
+void Tool_shed::searchAndReplaceReferenceRecords(HumdrumFile& infile) {
+	string isearch;
+	if (m_search[0] == '^') {
+		isearch = "^!!!" + m_search.substr(1);
+	} else {
+		isearch = "^!!!.*" + m_search;
+	}
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isGlobalReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (hre.search(token, isearch, m_grepoptions)) {
+			string text = token->getText().substr(1);
+			hre.replaceDestructive(text, m_replace, m_search, m_grepoptions);
+			hre.replaceDestructive(text, "", "^!+");
+			text = "!!!" + text;
+			token->setText(text);
+			m_modified = true;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_shed::searchAndReplaceReferenceKeys --
+//
+
+void Tool_shed::searchAndReplaceReferenceKeys(HumdrumFile& infile) {
+	string isearch = m_search;
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isGlobalReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		string key = infile[i].getReferenceKey();
+		if (hre.search(key, isearch, m_grepoptions)) {
+			hre.replaceDestructive(key, m_replace, m_search, m_grepoptions);
+			hre.replaceDestructive(key, "", "^!+");
+			hre.replaceDestructive(key, "", ":+$");
+			string value = infile[i].getReferenceValue();
+			string text = "!!!" + key + ": " + value;
+			token->setText(text);
+			m_modified = true;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_shed::searchAndReplaceReferenceValues --
+//
+
+void Tool_shed::searchAndReplaceReferenceValues(HumdrumFile& infile) {
+	string isearch = m_search;
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isGlobalReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		string value = infile[i].getReferenceValue();
+		if (hre.search(value, isearch, m_grepoptions)) {
+			hre.replaceDestructive(value, m_replace, m_search, m_grepoptions);
+			hre.replaceDestructive(value, "", "^!+");
+			hre.replaceDestructive(value, "", ":+$");
+			string key = infile[i].getReferenceKey();
+			string text = "!!!" + key + ": " + value;
+			token->setText(text);
+			m_modified = true;
 		}
 	}
 }

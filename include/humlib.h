@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan  2 12:50:23 PST 2020
+// Last Modified: Thu Jan  2 23:02:54 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7082,12 +7082,16 @@ class Tool_shed : public HumTool {
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void    processFile        (HumdrumFile& infile);
-		void    searchAndReplaceInterpretation(HumdrumFile& infile);
-		void    searchAndReplaceExinterp(HumdrumFile& infile);
-		void    searchAndReplaceData(HumdrumFile& infile);
-		void    searchAndReplaceBarline(HumdrumFile& infile);
-		void    searchAndReplaceLocalComment(HumdrumFile& infile);
+		void    processFile                      (HumdrumFile& infile);
+		void    searchAndReplaceInterpretation   (HumdrumFile& infile);
+		void    searchAndReplaceExinterp         (HumdrumFile& infile);
+		void    searchAndReplaceData             (HumdrumFile& infile);
+		void    searchAndReplaceBarline          (HumdrumFile& infile);
+		void    searchAndReplaceLocalComment     (HumdrumFile& infile);
+		void    searchAndReplaceReferenceRecords (HumdrumFile& infile);
+		void    searchAndReplaceReferenceKeys    (HumdrumFile& infile);
+		void    searchAndReplaceReferenceValues  (HumdrumFile& infile);
+
 		void    initialize         (void);
 		void    initializeSegment  (HumdrumFile& infile);
 		bool    isValid            (HTp token);
@@ -7112,6 +7116,9 @@ class Tool_shed : public HumTool {
 		bool m_exinterp       = false; // process exclusive interpretations
 		bool m_interpretation = false; // process interpretations
 		bool m_localcomment   = false; // process local comments
+		bool m_reference      = false; // process reference records
+		bool m_referencekey   = false; // process reference records keys
+		bool m_referencevalue = false; // process reference records values
 		std::string m_xInterp; // used with -x option
 		std::string m_yInterp; // used with -y option
 		std::string m_zInterp; // used with -z option
