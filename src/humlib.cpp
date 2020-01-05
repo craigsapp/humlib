@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan  2 23:02:54 PST 2020
+// Last Modified: Sun Jan  5 02:35:44 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -73304,6 +73304,7 @@ bool Tool_satb2gs::validateHeader(HumdrumFile& infile) {
 Tool_shed::Tool_shed(void) {
 	define("s|spine|spines=s", "list of spines to process");
 	define("e|expression=s", "regular expression");
+	define("E|exclusion-expression=s", "regular expression to skip");
 	define("x|exclusive-interpretations=s", "apply only to spine types in list");
 	define("k|kern=b", "apply only to **kern data");
 	define("X=s", "defineable exclusive interpretation x");
@@ -73467,6 +73468,7 @@ void Tool_shed::initialize(void) {
 		string value = getString("expression");
 		parseExpression(value);
 	}
+	m_exclusion = getString("exclusion-expression");
 
 	if (getBoolean("X")) {
 		m_xInterp = getExInterp(getString("X"));
@@ -74008,7 +74010,7 @@ bool Tool_shed::isValidDataType(HTp token) {
 
 //////////////////////////////
 //
-// Tool_shed::isValidSpine -- usar with -s option.
+// Tool_shed::isValidSpine -- used with -s option.
 //
 
 bool Tool_shed::isValidSpine(HTp token) {
@@ -74027,6 +74029,12 @@ bool Tool_shed::isValidSpine(HTp token) {
 //
 
 bool Tool_shed::isValid(HTp token) {
+	if (!m_exclusion.empty()) {
+		HumRegex hre;
+		if (hre.search(token, m_exclusion)) {
+			return false;
+		}
+	}
 	if (isValidDataType(token) && isValidSpine(token)) {
 		return true;
 	}

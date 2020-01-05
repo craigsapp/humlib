@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan  2 23:02:54 PST 2020
+// Last Modified: Sun Jan  5 02:35:44 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7127,6 +7127,7 @@ class Tool_shed : public HumTool {
 
 		// list of exclusive interpretations to process
 		std::vector<std::string> m_exinterps; 
+		std::string m_exclusion;
 
 		std::vector<bool> m_spines; // usar with -s option
 		std::string m_grepoptions;

@@ -29,6 +29,7 @@ namespace hum {
 Tool_shed::Tool_shed(void) {
 	define("s|spine|spines=s", "list of spines to process");
 	define("e|expression=s", "regular expression");
+	define("E|exclusion-expression=s", "regular expression to skip");
 	define("x|exclusive-interpretations=s", "apply only to spine types in list");
 	define("k|kern=b", "apply only to **kern data");
 	define("X=s", "defineable exclusive interpretation x");
@@ -192,6 +193,7 @@ void Tool_shed::initialize(void) {
 		string value = getString("expression");
 		parseExpression(value);
 	}
+	m_exclusion = getString("exclusion-expression");
 
 	if (getBoolean("X")) {
 		m_xInterp = getExInterp(getString("X"));
@@ -733,7 +735,7 @@ bool Tool_shed::isValidDataType(HTp token) {
 
 //////////////////////////////
 //
-// Tool_shed::isValidSpine -- usar with -s option.
+// Tool_shed::isValidSpine -- used with -s option.
 //
 
 bool Tool_shed::isValidSpine(HTp token) {
@@ -752,6 +754,12 @@ bool Tool_shed::isValidSpine(HTp token) {
 //
 
 bool Tool_shed::isValid(HTp token) {
+	if (!m_exclusion.empty()) {
+		HumRegex hre;
+		if (hre.search(token, m_exclusion)) {
+			return false;
+		}
+	}
 	if (isValidDataType(token) && isValidSpine(token)) {
 		return true;
 	}
