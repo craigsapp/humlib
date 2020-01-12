@@ -418,7 +418,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	}
 	
 	HumNum timestamp = mr.getAbsBeat();
-cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
+	// cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;
 	GridSlice* slice = NULL;
 

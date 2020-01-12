@@ -55,6 +55,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                 GridSlice* startslice);
 		void addInvisibleRest           (std::vector<std::vector<GridSlice*>>& nextevent,
 		                                 int index, int p, int s);
+		void cleanTempos                (void);
+		void cleanTempos                (GridSlice* slice);
 
 	protected:
 		void calculateGridDurations        (void);

@@ -115,9 +115,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	// for debugging:
 	//printPartInfo(partids, partinfo, partcontent, partdata);
 
+	m_maxstaff = 0;
 	// check the voice info
 	for (int i=0; i<(int)partdata.size(); i++) {
 		partdata[i].prepareVoiceMapping();
+		m_maxstaff += partdata[i].getStaffCount();
 		// for debugging:
 		if (VoiceDebugQ) {
 			partdata[i].printStaffVoiceInfo();
@@ -1584,6 +1586,11 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		m_current_text.clear();
 		addTexts(slice, outdata, event->getPartIndex(), staffindex, voiceindex, event);
 	}
+	if (m_current_tempo.size() > 0) {
+		event->setTempos(m_current_tempo);
+		m_current_tempo.clear();
+		addTempos(slice, outdata, event->getPartIndex(), staffindex, voiceindex, event);
+	}
 
 	if (m_current_dynamic[partindex].size()) {
 		// only processing the first dynamic at the current time point for now.
@@ -1638,6 +1645,23 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::addTempos -- Add all text direction for a note.
+//
+
+void Tool_musicxml2hum::addTempos(GridSlice* slice, GridMeasure* measure, int partindex,
+		int staffindex, int voiceindex, MxmlEvent* event) {
+	vector<pair<int, xml_node>>& nodes = event->getTempos();
+	for (auto item : nodes) {
+		int newpartindex = item.first;
+		int newstaffindex = 0; // Not allowing addressing text by layer (could be changed).
+		addTempo(slice, measure, newpartindex, newstaffindex, voiceindex, item.second);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addText -- Add a text direction to the grid.
 //
 //      <direction placement="below">
@@ -1650,14 +1674,12 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 //
 // <direction placement="above">
 //         <direction-type>
-//           <words default-y="40.00" relative-x="-9.47" relative-y="2.71">note
-// </words>
+//           <words default-y="40.00" relative-x="-9.47" relative-y="2.71">note</words>
 //           <words>with newline</words>
 //         </direction-type>
 //       <staff>2</staff>
 //       </direction>
 // 
-
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
 		int staffindex, int voiceindex, xml_node node) {
@@ -1669,6 +1691,9 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 			placementstring = ":a";
 		} else if (value == "below") {
 			placementstring = ":b";
+		} else {
+			// force above if no placement specified
+			placementstring = ":a";
 		}
 	}
 
@@ -1782,6 +1807,167 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 	// If there is already an empty layout slice before the current one (with no spine manipulators
 	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
 	measure->addLayoutParameter(slice, partindex, output);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addTempo -- Add a tempo direction to the grid.
+// 
+// <direction placement="above">
+//    <direction-type>
+//       <metronome parentheses="no" default-x="-35.96" relative-y="20.00">
+//          <beat-unit>half</beat-unit>
+//          <per-minute>80</per-minute>
+//       </metronome>
+//    </direction-type>
+//    <sound tempo="160"/>
+// </direction>
+//
+// Dotted tempo example:
+//
+// <direction placement="above">
+//    <direction-type>
+//       <metronome parentheses="no" default-x="-39.10" relative-y="20.00">
+//          <beat-unit>quarter</beat-unit>
+//          <beat-unit-dot/>
+//          <per-minute>80</per-minute>
+//       </metronome>
+//    </direction-type>
+//    <sound tempo="120"/>
+// </direction>
+//
+//
+
+void Tool_musicxml2hum::addTempo(GridSlice* slice, GridMeasure* measure, int partindex,
+		int staffindex, int voiceindex, xml_node node) {
+	string placementstring;
+	xml_attribute placement = node.attribute("placement");
+	if (placement) {
+		string value = placement.value();
+		if (value == "above") {
+			placementstring = ":a";
+		} else if (value == "below") {
+			placementstring = ":b";
+		} else {
+			// force above if no explicit placement:
+			placementstring = ":a";
+		}
+	}
+
+	xml_node child = node.first_child();
+	if (!child) {
+		return;
+	}
+	if (!nodeType(child, "direction-type")) {
+		return;
+	}
+
+	xml_node sound(NULL);
+	xml_node sibling = child;
+	while (sibling) {
+		if (nodeType(sibling, "sound")) {
+			sound = sibling;
+			break;
+		}
+		sibling = sibling.next_sibling();
+	}
+
+	// grandchild should be <metronome> (containing textual display)
+	// and <sound @tempo> which gives *MM data.
+	xml_node metronome(NULL);
+
+	xml_node grandchild = child.first_child();
+	if (!grandchild) {
+		return;
+	}
+	sibling = grandchild;
+
+	while (sibling) {
+		if (nodeType(sibling, "metronome")) {
+			metronome = sibling;
+		}
+		sibling = sibling.next_sibling();
+	}
+	
+	// get metronome parameters
+
+	xml_node beatunit(NULL);
+	xml_node beatunitdot(NULL);
+	xml_node perminute(NULL);
+
+	if (metronome) {
+		sibling = metronome.first_child();
+		while (sibling) {
+			if (nodeType(sibling, "beat-unit")) {
+				beatunit = sibling;
+			} else if (nodeType(sibling, "beat-unit-dot")) {
+				beatunitdot = sibling;
+			} else if (nodeType(sibling, "per-minute")) {
+				perminute = sibling;
+			}
+			sibling = sibling.next_sibling();
+		}
+	}
+
+	string mmvalue;
+	if (sound) {
+		mmvalue = getAttributeValue(sound, "tempo");
+	}
+
+	if (!beatunit) {
+		cerr << "Warning: missing beat-unit in tempo setting" << endl;
+		return;
+	}
+	if (!perminute) {
+		cerr << "Warning: missing per-minute in tempo setting" << endl;
+		return;
+	}
+
+	int staff = 0;
+	int voice = 0;
+
+	if (sound) {
+		string mmtok = "*MM";
+		double mmv = stod(mmvalue);
+		double mmi = int(mmv + 0.001);
+		if (fabs(mmv - mmi) < 0.01) {
+			stringstream sstream;
+			sstream << mmi;
+			mmtok += sstream.str();
+		} else {
+			mmtok += mmvalue;
+		}
+		HumNum timestamp = slice->getTimestamp();
+		measure->addTempoToken(mmtok, timestamp, partindex, staff, voice, m_maxstaff);
+	}
+
+	string butext = beatunit.child_value();
+	string pmtext = perminute.child_value();
+	string stylestring;
+
+	// create textual tempo marking
+	string text;
+	text = "[";
+	text += butext;
+	if (beatunitdot) {
+		text += "-dot";
+	}
+	text += "]";
+	text += "=";
+	text += pmtext;
+
+	string output = "!LO:TX";
+	output += placementstring;
+	output += stylestring;
+	output += ":t=";
+	output += text;
+
+	// The text direction needs to be added before the last line in the measure object.
+	// If there is already an empty layout slice before the current one (with no spine manipulators
+	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
+	measure->addTempoToken(slice, partindex, output);
 }
 
 
@@ -2916,6 +3102,8 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					grandchild = child.first_child();
 					if (nodeType(grandchild, "words")) {
 						m_current_text.emplace_back(std::make_pair(pindex, element));
+					} else if (nodeType(grandchild, "metronome")) {
+						m_current_tempo.emplace_back(std::make_pair(pindex, element));
 					} else if (nodeType(grandchild, "dynamics")) {
 						m_current_dynamic[pindex].push_back(element);
 					} else if (nodeType(grandchild, "octave-shift")) {

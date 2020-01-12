@@ -350,7 +350,8 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	addNullTokens();
 	addInvisibleRestsInFirstTrack();
 	addMeasureLines();
-	buildSingleList();
+	buildSingleList();  // is this needed a second time?
+	cleanTempos();
 	addLastMeasure();
 	if (manipulatorCheck()) {
 		cleanupManipulators();
@@ -2936,6 +2937,70 @@ void HumGrid::removeRedundantClefChanges(void) {
 				slice->invalidate();
 			}
 
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::cleanTempos --
+//
+
+void HumGrid::cleanTempos(void) {
+//		std::vector<GridSlice*>       m_allslices;
+// ggg
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		if (!m_allslices[i]->isTempoSlice()) {
+			continue;
+		}
+		cleanTempos(m_allslices[i]);
+	}
+}
+
+
+void HumGrid::cleanTempos(GridSlice* slice) {
+	if (!slice->isTempoSlice()) {
+		return;
+	}
+	HTp token = NULL;
+
+	for (int part=0; part<(int)slice->size(); part++) {
+		GridPart* gp = slice->at(part);
+		for (int staff=0; staff<(int)gp->size(); staff++) {
+			GridStaff* gs = gp->at(staff);
+			for (int voice=0; voice<(int)gs->size(); voice++) {
+				GridVoice* gv = gs->at(voice);
+				token = gv->getToken();
+				if (token) {
+					break;
+				}
+			}
+			if (token) {
+				break;
+			}
+		}
+		if (token) {
+			break;
+		}
+	}
+
+	if (!token) {
+		return;
+	}
+
+	for (int part=0; part<(int)slice->size(); part++) {
+		GridPart* gp = slice->at(part);
+		for (int staff=0; staff<(int)gp->size(); staff++) {
+			GridStaff* gs = gp->at(staff);
+			for (int voice=0; voice<(int)gs->size(); voice++) {
+				GridVoice* gv = gs->at(voice);
+				if (gv->getToken()) {
+					continue;
+				}
+				gv->setToken(*token);
+			}
 		}
 	}
 }

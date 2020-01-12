@@ -37,6 +37,8 @@ class GridMeasure : public std::list<GridSlice*> {
 
 		GridSlice*   addTempoToken  (const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
+		GridSlice*   addTempoToken  (GridSlice* slice, int partindex,
+		                             const string& tempo);
 		GridSlice*   addTimeSigToken(const std::string& tok, HumNum timestamp,
 		                             int part, int staff, int voice, int maxstaff);
 		GridSlice*   addMeterSigToken(const std::string& tok, HumNum timestamp,

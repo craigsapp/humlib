@@ -181,6 +181,10 @@ class Tool_musicxml2hum : public HumTool {
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, pugi::xml_node node);
+		void addTempos         (GridSlice* slice, GridMeasure* measure, int partindex,
+		                        int staffindex, int voiceindex, MxmlEvent* event);
+		void addTempo          (GridSlice* slice, GridMeasure* measure, int partindex,
+		                        int staffindex, int voiceindex, pugi::xml_node node);
 		int         getHarmonyOffset(pugi::xml_node hnode);
 		std::string getHarmonyString(pugi::xml_node hnode);
 		std::string getDynamicString(pugi::xml_node element);
@@ -212,12 +216,13 @@ class Tool_musicxml2hum : public HumTool {
 		Options m_options;
 		bool DebugQ;
 		bool VoiceDebugQ;
-		bool m_recipQ       = false;
-		bool m_stemsQ       = false;
-		int  m_slurabove    = 0;
-		int  m_slurbelow    = 0;
-		char m_hasEditorial = '\0';
+		bool m_recipQ        = false;
+		bool m_stemsQ        = false;
+		int  m_slurabove     = 0;
+		int  m_slurbelow     = 0;
+		char m_hasEditorial  = '\0';
 		bool m_hasOrnamentsQ = false;
+		int  m_maxstaff      = 0;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 		std::vector<MusicXmlHarmonyInfo> offsetHarmony;
 		std::vector<MusicXmlFiguredBassInfo> offsetFiguredBass;
@@ -232,6 +237,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
 		std::vector<pugi::xml_node> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
+		std::vector<std::pair<int, pugi::xml_node>> m_current_tempo;
 
 		bool m_hasTransposition = false;
 

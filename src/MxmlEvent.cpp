@@ -1986,6 +1986,28 @@ vector<pair<int, xml_node>>&  MxmlEvent::getTexts(void) {
 
 //////////////////////////////
 //
+// MxmlEvent::setTempos --
+//
+
+void MxmlEvent::setTempos(vector<pair<int, xml_node>>& nodes) {
+	m_tempo = nodes;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getTempos --
+//
+
+vector<pair<int, xml_node>>&  MxmlEvent::getTempos(void) {
+	return m_tempo;
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::setDynamics --
 //
 

@@ -133,7 +133,9 @@ class MxmlEvent {
 		bool               isInvisible        (void);
 		void               setBarlineStyle    (xml_node node);
 		void               setTexts           (std::vector<std::pair<int, xml_node>>& nodes);
+		void               setTempos          (std::vector<std::pair<int, xml_node>>& nodes);
 		std::vector<std::pair<int, xml_node>>&  getTexts           (void);
+		std::vector<std::pair<int, xml_node>>&  getTempos          (void);
 		void               setDynamics        (xml_node node);
 		void               setHairpinEnding   (xml_node node);
 		void               addFiguredBass     (xml_node node);
@@ -165,6 +167,7 @@ class MxmlEvent {
 		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
 		std::vector<xml_node>  m_figured_bass; // fb starting just before note
 		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note
+		std::vector<std::pair<int, xml_node>>  m_tempo;   // tempo starting just before note
 
 	private:
    	void   reportStaffNumberToOwner  (int staffnum, int voicenum);
