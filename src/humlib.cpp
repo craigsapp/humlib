@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 12 00:49:39 PST 2020
+// Last Modified: Sat Jan 18 11:46:00 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -2918,6 +2918,99 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 		// grace note, ignore printed rhythm
 		HumNum zero(0);
 		return zero;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<(int)subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciprocal rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = (int)loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<(int)subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
+	} else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but 
+//     do not set grace notes to a zero duration, but rather give their
+//     visual duration.
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
+//
+
+HumNum Convert::recipToDurationIgnoreGrace(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDurationIgnoreGrace(*recip, scale, separator);
+}
+
+
+HumNum Convert::recipToDurationIgnoreGrace(const string& recip, HumNum scale,
+		const string& separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
 	}
 
 	int dotcount = 0;
@@ -42198,6 +42291,7 @@ Tool_autobeam::Tool_autobeam(void) {
 	define("k|kern=i:0",           "process specific kern spine number");
 	define("t|track=i:0",          "process specific track number");
 	define("r|remove=b",           "remove all beams");
+	define("g|grace=b",            "beam grace notes sequences");
 	define("o|overwrite=b",        "over-write existing beams");
 	define("l|lyric|lyrics=b",     "break beam by lyric syllables");
 	define("L|lyric-info=b",       "return the number of breaks needed");
@@ -42250,6 +42344,8 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 	initialize(infile);
 	if (getBoolean("remove")) {
 		removeBeams(infile);
+	} else if (getBoolean("grace")) {
+		beamGraceNotes(infile);
 	} else if (getBoolean("lyrics")) {
 		breakBeamsByLyrics(infile);
 	} else if (getBoolean("lyric-info")) {
@@ -42262,6 +42358,164 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::beamGraceNotes --  Using lazy beaming, and 
+//    not careful checking of beamed notes versus nonbeamed notes
+//    such as a mix of quarter and eighth grace notes in the group.
+//
+
+void Tool_autobeam::beamGraceNotes(HumdrumFile& infile) {
+	int strands = infile.getStrandCount();
+	HTp endtok;
+	HTp starttok;
+	HTp gstart;
+	HTp gend;
+	HTp token;
+	int track;
+	string newstr;
+	for (int i=0; i<strands; i++) {
+		if (m_track > 0) {
+			track = infile.getStrandStart(i)->getTrack();
+			if (track != m_track) {
+				continue;
+			}
+		}
+		starttok = infile.getStrandStart(i);
+		if (!starttok->isKern()) {
+			continue;
+		}
+		endtok   = infile.getStrandEnd(i);
+		token    = starttok;
+		gstart   = NULL;
+		gend     = NULL;
+
+		while (token && (token != endtok)) {
+			if (!token->isData()) {
+				token = token->getNextToken();
+				continue;
+			}
+			if (token->isNull()) {
+				token = token->getNextToken();
+				continue;
+			}
+
+			if (token->isGrace()) {
+				if (!gstart) {
+					gstart = token;
+					gend   = token;
+				} else {
+					gend = token;
+				}
+			} else if (gstart && gend) {
+				if (gstart == gend) {
+					gstart = NULL;
+					gend   = NULL;
+					token = token->getNextToken();
+					continue;
+				}
+				if (gstart->hasBeam() || gend->hasBeam()) {
+					gstart = NULL;
+					gend   = NULL;
+					token = token->getNextToken();
+					continue;
+				}
+				string stext = getBeamFromDur(gstart, "L");
+				string etext = getBeamFromDur(gend, "J");
+				if ((stext.size() == etext.size()) && !stext.empty()) {
+					string text;
+					text = gstart->getText() + stext;
+					gstart->setText(text);
+					text = gend->getText() + etext;
+					gend->setText(text);
+					removeQqMarks(gstart, gend);
+				}
+				gstart = NULL;
+				gend   = NULL;
+			} else {
+				gstart = NULL;
+				gend   = NULL;
+			}
+			token = token->getNextToken();
+		}
+
+		// Handle grace note at the end of a strand:
+		if ((gstart && gend) && (gstart != gend)) {
+			if (!(gstart->hasBeam() || gend->hasBeam())) {
+				string stext = getBeamFromDur(gstart, "L");
+				string etext = getBeamFromDur(gend, "J");
+				if ((stext.size() == etext.size()) && !stext.empty()) {
+					string text;
+					text = gstart->getText() + stext;
+					gstart->setText(text);
+					text = gend->getText() + etext;
+					gend->setText(text);
+					removeQqMarks(gstart, gend);
+				}
+			}
+			gstart = NULL;
+			gend   = NULL;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::removeQqMarks -- qq means a grace note on the beat, and q means a grace note before
+//   the beat.  When there are multiple grace notes, they are typically always considered to be before
+//   the beat.
+//
+
+void Tool_autobeam::removeQqMarks(HTp stok, HTp etok) {
+	if (!stok) {
+		return;
+	}
+	if (!etok) {
+		return;
+	}
+	HTp curr = stok;
+	while (curr && (curr != etok)) {
+		if (curr->isGrace()) {
+			removeQqMarks(curr);
+		}
+		curr = curr->getNextToken();
+	}
+}
+
+
+void Tool_autobeam::removeQqMarks(HTp tok) {
+	HumRegex hre;
+	string text = tok->getText();
+	hre.replaceDestructive(text, "q", "qq", "g");
+	tok->setText(text);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_autobeam::getBeamFromDur -- Not dealing with tuplet grace notes.
+//
+
+string Tool_autobeam::getBeamFromDur(HTp token, const string& text) {
+	HumNum dur = Convert::recipToDurationIgnoreGrace(token);
+	dur.invert();
+	dur *= 2;
+	if (dur.getDenominator() != 1) {
+		return "";
+	}
+	int value = (int)(log(dur.getNumerator()/log(2.0)));
+	string output;
+	for (int i=0; i<value; i++) {
+		output += text;
+	}
+	return output;
 }
 
 

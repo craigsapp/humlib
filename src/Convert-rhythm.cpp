@@ -133,6 +133,99 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 
 //////////////////////////////
 //
+// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but 
+//     do not set grace notes to a zero duration, but rather give their
+//     visual duration.
+// default value: scale = 4 (duration in terms of quarter notes)
+// default value: separator = " " (sub-token separator)
+//
+
+HumNum Convert::recipToDurationIgnoreGrace(string* recip, HumNum scale,
+		const string& separator) {
+	return Convert::recipToDurationIgnoreGrace(*recip, scale, separator);
+}
+
+
+HumNum Convert::recipToDurationIgnoreGrace(const string& recip, HumNum scale,
+		const string& separator) {
+	size_t loc;
+	loc = recip.find(separator);
+	string subtok;
+	if (loc != string::npos) {
+		subtok = recip.substr(0, loc);
+	} else {
+		subtok = recip;
+	}
+
+	int dotcount = 0;
+	int i;
+	int numi = -1;
+	for (i=0; i<(int)subtok.size(); i++) {
+		if (subtok[i] == '.') {
+			dotcount++;
+		}
+		if ((numi < 0) && isdigit(subtok[i])) {
+			numi = i;
+		}
+	}
+	loc = subtok.find("%");
+	int numerator = 1;
+	int denominator = 1;
+	HumNum output;
+	if (loc != string::npos) {
+		// reciprocal rhythm
+		numerator = 1;
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		if ((loc + 1 < subtok.size()) && isdigit(subtok[loc+1])) {
+			int xi = (int)loc + 1;
+			numerator = subtok[xi++] - '0';
+			while ((xi<(int)subtok.size()) && isdigit(subtok[xi])) {
+				numerator = numerator * 10 + (subtok[xi++] - '0');
+			}
+		}
+		output.setValue(numerator, denominator);
+	} else if (numi < 0) {
+		// no rhythm found
+		HumNum zero(0);
+		return zero;
+	} else if (subtok[numi] == '0') {
+		// 0-symbol
+		int zerocount = 1;
+		for (i=numi+1; i<(int)subtok.size(); i++) {
+			if (subtok[i] == '0') {
+				zerocount++;
+			} else {
+				break;
+			}
+		}
+		numerator = (int)pow(2, zerocount);
+		output.setValue(numerator, 1);
+	} else {
+		// plain rhythm
+		denominator = subtok[numi++] - '0';
+		while ((numi<(int)subtok.size()) && isdigit(subtok[numi])) {
+			denominator = denominator * 10 + (subtok[numi++] - '0');
+		}
+		output.setValue(1, denominator);
+	}
+
+	if (dotcount <= 0) {
+		return output * scale;
+	}
+
+	int bot = (int)pow(2.0, dotcount);
+	int top = (int)pow(2.0, dotcount + 1) - 1;
+	HumNum factor(top, bot);
+	return output * factor * scale;
+}
+
+
+
+//////////////////////////////
+//
 // Convert::recipToDurationNoDots -- Same as recipToDuration(), but ignore
 //   any augmentation dots.
 //

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 12 00:49:39 PST 2020
+// Last Modified: Sat Jan 18 11:46:00 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3368,10 +3368,16 @@ class Convert {
 		static HumNum  recipToDuration      (const std::string& recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  recipToDurationNoDots(const std::string& recip,
+		static HumNum  recipToDuration      (std::string* recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  recipToDuration      (std::string* recip,
+		static HumNum  recipToDurationIgnoreGrace(const std::string& recip,
+		                                     HumNum scale = 4,
+		                                     const std::string& separator = " ");
+		static HumNum  recipToDurationIgnoreGrace(std::string* recip,
+		                                     HumNum scale = 4,
+		                                     const std::string& separator = " ");
+		static HumNum  recipToDurationNoDots(const std::string& recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
 		static HumNum  recipToDurationNoDots(std::string* recip,
@@ -4844,6 +4850,10 @@ class Tool_autobeam : public HumTool {
 		void     processMeasure  (vector<HTp>& measure);
 		void     addBeam         (HTp startnote, HTp endnote);
 		void     addBeams        (HumdrumFile& infile);
+		void     beamGraceNotes  (HumdrumFile& infile);
+		string   getBeamFromDur  (HTp token, const string& text);
+		void     removeQqMarks   (HTp stok, HTp etok);
+		void     removeQqMarks   (HTp tok);
 		void     removeBeams     (HumdrumFile& infile);
 		void     removeEdgeRests (HTp& startnote, HTp& endnote);
 		void     breakBeamsByLyrics(HumdrumFile& infile);
@@ -4860,7 +4870,7 @@ class Tool_autobeam : public HumTool {
 	private:
 		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
 		std::vector<HTp> m_kernspines;
-		bool        m_overwriteQ;
+		bool        m_overwriteQ = false;
 		int         m_track;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;

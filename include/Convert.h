@@ -30,10 +30,16 @@ class Convert {
 		static HumNum  recipToDuration      (const std::string& recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  recipToDurationNoDots(const std::string& recip,
+		static HumNum  recipToDuration      (std::string* recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  recipToDuration      (std::string* recip,
+		static HumNum  recipToDurationIgnoreGrace(const std::string& recip,
+		                                     HumNum scale = 4,
+		                                     const std::string& separator = " ");
+		static HumNum  recipToDurationIgnoreGrace(std::string* recip,
+		                                     HumNum scale = 4,
+		                                     const std::string& separator = " ");
+		static HumNum  recipToDurationNoDots(const std::string& recip,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
 		static HumNum  recipToDurationNoDots(std::string* recip,

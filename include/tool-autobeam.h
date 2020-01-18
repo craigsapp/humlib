@@ -37,6 +37,10 @@ class Tool_autobeam : public HumTool {
 		void     processMeasure  (vector<HTp>& measure);
 		void     addBeam         (HTp startnote, HTp endnote);
 		void     addBeams        (HumdrumFile& infile);
+		void     beamGraceNotes  (HumdrumFile& infile);
+		string   getBeamFromDur  (HTp token, const string& text);
+		void     removeQqMarks   (HTp stok, HTp etok);
+		void     removeQqMarks   (HTp tok);
 		void     removeBeams     (HumdrumFile& infile);
 		void     removeEdgeRests (HTp& startnote, HTp& endnote);
 		void     breakBeamsByLyrics(HumdrumFile& infile);
@@ -53,7 +57,7 @@ class Tool_autobeam : public HumTool {
 	private:
 		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
 		std::vector<HTp> m_kernspines;
-		bool        m_overwriteQ;
+		bool        m_overwriteQ = false;
 		int         m_track;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;
