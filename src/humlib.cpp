@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 18 11:46:00 PST 2020
+// Last Modified: Sat Jan 18 12:11:35 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -42479,6 +42479,7 @@ void Tool_autobeam::removeQqMarks(HTp stok, HTp etok) {
 	if (!etok) {
 		return;
 	}
+	removeQqMarks(etok);
 	HTp curr = stok;
 	while (curr && (curr != etok)) {
 		if (curr->isGrace()) {

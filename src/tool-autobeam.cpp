@@ -222,6 +222,7 @@ void Tool_autobeam::removeQqMarks(HTp stok, HTp etok) {
 	if (!etok) {
 		return;
 	}
+	removeQqMarks(etok);
 	HTp curr = stok;
 	while (curr && (curr != etok)) {
 		if (curr->isGrace()) {
