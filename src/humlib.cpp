@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 18 12:11:35 PST 2020
+// Last Modified: Sun Jan 19 11:12:29 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -63977,12 +63977,30 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
+	if (m_software == "sibelius") {
+		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
+		// where grace note groups are not beamed in the MusicXML export.
+		Tool_autobeam gracebeam;
+		vector<string> argv;
+		argv.push_back("autobeam"); // name of program (placeholder)
+		argv.push_back("-g");       // beam adjacent grace notes
+		gracebeam.process(argv);
+		// Need to force a reparsing of the files contents to
+		// analyze strands.  For now just create a temporary
+		// Humdrum file to force the analysis of the strands.
+		stringstream sstream;
+		sstream << outfile;
+		HumdrumFile outfile2;
+		outfile2.readString(sstream.str());
+		gracebeam.run(outfile2);
+		outfile = outfile2;
+	}
+
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
-
 		vector<string> argv;
-		argv.push_back("transpose");
-		argv.push_back("-C");  // transpose to concert pitch
+		argv.push_back("transpose"); // name of program (placeholder)
+		argv.push_back("-C");        // transpose to concert pitch
 		transpose.process(argv);
 		transpose.run(outfile);
 		if (transpose.hasHumdrumText()) {
@@ -64019,6 +64037,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	return status;
 }
+
 
 
 //////////////////////////////

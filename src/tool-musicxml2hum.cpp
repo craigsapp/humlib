@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  6 10:53:40 CEST 2016
-// Last Modified: Sun Sep 18 14:16:18 PDT 2016
+// Last Modified: Sun Jan 19 08:07:04 PST 2020
 // Filename:      musicxml2hum.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/musicxml2hum.cpp
 // Syntax:        C++11; humlib
@@ -10,11 +10,13 @@
 // Description:   Convert a MusicXML file into a Humdrum file.
 //
 
+#include "tool-autobeam.h"
+#include "tool-chord.h"
 #include "tool-musicxml2hum.h"
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
-#include "tool-chord.h"
 #include "tool-trillspell.h"
+
 #include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
@@ -210,12 +212,30 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
+	if (m_software == "sibelius") {
+		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
+		// where grace note groups are not beamed in the MusicXML export.
+		Tool_autobeam gracebeam;
+		vector<string> argv;
+		argv.push_back("autobeam"); // name of program (placeholder)
+		argv.push_back("-g");       // beam adjacent grace notes
+		gracebeam.process(argv);
+		// Need to force a reparsing of the files contents to
+		// analyze strands.  For now just create a temporary
+		// Humdrum file to force the analysis of the strands.
+		stringstream sstream;
+		sstream << outfile;
+		HumdrumFile outfile2;
+		outfile2.readString(sstream.str());
+		gracebeam.run(outfile2);
+		outfile = outfile2;
+	}
+
 	if (m_hasTransposition) {
 		Tool_transpose transpose;
-
 		vector<string> argv;
-		argv.push_back("transpose");
-		argv.push_back("-C");  // transpose to concert pitch
+		argv.push_back("transpose"); // name of program (placeholder)
+		argv.push_back("-C");        // transpose to concert pitch
 		transpose.process(argv);
 		transpose.run(outfile);
 		if (transpose.hasHumdrumText()) {
@@ -252,6 +272,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	return status;
 }
+
 
 
 //////////////////////////////
