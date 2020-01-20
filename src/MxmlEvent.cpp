@@ -1580,6 +1580,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool harmonic       = false;
 	bool breath         = false;
 	bool caesura        = false;
+	bool arpeggio       = false;
 
 	while (child) {
 		if (strcmp(child.name(), "articulations") == 0) {
@@ -1641,6 +1642,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 			}
 		} else if (strcmp(child.name(), "fermata") == 0) {
 			fermata = true;
+		} else if (strcmp(child.name(), "arpeggiate") == 0) {
+			arpeggio = true;
 		}
 
 		child = child.next_sibling();
@@ -1675,6 +1678,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		ss << "Z";
 		reportCaesuraToOwner();
 	}
+	if (arpeggio)     { ss << ":";  }
 
 }
 

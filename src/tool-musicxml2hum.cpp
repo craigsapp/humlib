@@ -3016,10 +3016,10 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 
 	bool primarynote = false;
 	for (int i=0; i<(int)links.size(); i++) {
-		note = links.at(i);
-		pitch   = note->getKernPitch();
-		prefix  = note->getPrefixNoteInfo();
-		postfix = note->getPostfixNoteInfo(primarynote);
+		note      = links.at(i);
+		pitch     = note->getKernPitch();
+		prefix    = note->getPrefixNoteInfo();
+		postfix   = note->getPostfixNoteInfo(primarynote);
 		slurstart = note->hasSlurStart(slurdir);
 		slurstop  = note->hasSlurStop();
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 19 15:59:27 PST 2020
+// Last Modified: Sun Jan 19 20:22:19 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -37810,6 +37810,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool harmonic       = false;
 	bool breath         = false;
 	bool caesura        = false;
+	bool arpeggio       = false;
 
 	while (child) {
 		if (strcmp(child.name(), "articulations") == 0) {
@@ -37871,6 +37872,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 			}
 		} else if (strcmp(child.name(), "fermata") == 0) {
 			fermata = true;
+		} else if (strcmp(child.name(), "arpeggiate") == 0) {
+			arpeggio = true;
 		}
 
 		child = child.next_sibling();
@@ -37905,6 +37908,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		ss << "Z";
 		reportCaesuraToOwner();
 	}
+	if (arpeggio)     { ss << ":";  }
 
 }
 
@@ -66781,10 +66785,10 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 
 	bool primarynote = false;
 	for (int i=0; i<(int)links.size(); i++) {
-		note = links.at(i);
-		pitch   = note->getKernPitch();
-		prefix  = note->getPrefixNoteInfo();
-		postfix = note->getPostfixNoteInfo(primarynote);
+		note      = links.at(i);
+		pitch     = note->getKernPitch();
+		prefix    = note->getPrefixNoteInfo();
+		postfix   = note->getPostfixNoteInfo(primarynote);
 		slurstart = note->hasSlurStart(slurdir);
 		slurstop  = note->hasSlurStop();
 
