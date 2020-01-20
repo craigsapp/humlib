@@ -1616,6 +1616,12 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					upbow = true;
 				} else if (strcmp(grandchild.name(), "down-bow") == 0) {
 					downbow = true;
+				} else if (strcmp(grandchild.name(), "harmonic") == 0) {
+					// natural harmonic
+					xml_node natural = grandchild.select_node("natural").node();
+					if (natural) {
+						harmonic = true;
+					}
 				}
 				grandchild = grandchild.next_sibling();
 			}
