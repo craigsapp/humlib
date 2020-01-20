@@ -3208,7 +3208,7 @@ void Tool_musicxml2hum::storeOttava(int pindex, xml_node octaveShift, xml_node d
 		}
 	}
 	// ottavas presumed to be allocated by part, but not by staff.
-	if (ottavas[pindex].size() <= staffindex) {
+	if ((int)ottavas[pindex].size() <= staffindex) {
 		ottavas[pindex].resize(staffindex+1);
 	}
 	ottavas[pindex][staffindex].push_back(octaveShift);
