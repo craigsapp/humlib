@@ -209,6 +209,7 @@ class Tool_musicxml2hum : public HumTool {
 		void printRdfs         (ostream& out);
 		void printResult       (ostream& out, HumdrumFile& outfile);
 		void addMeasureOneNumber(HumdrumFile& infile);
+		bool isUsedHairpin     (pugi::xml_node hairpin, int partindex);
 
 	public:
 
@@ -237,6 +238,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
+		std::vector<std::vector<pugi::xml_node>> m_used_hairpins;
 		std::vector<pugi::xml_node> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_tempo;

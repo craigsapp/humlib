@@ -139,7 +139,7 @@ class MxmlEvent {
 		void               setDynamics        (xml_node node);
 		void               setHairpinEnding   (xml_node node);
 		void               addFiguredBass     (xml_node node);
-		xml_node           getDynamics        (void);
+		std::vector<xml_node> getDynamics     (void);
 		xml_node           getHairpinEnding   (void);
 		int                getFiguredBassCount(void);
 		xml_node           getFiguredBass     (int index);
@@ -163,7 +163,7 @@ class MxmlEvent {
 		bool               m_invisible;  // for forceInvisible();
 		bool               m_stems;      // for preserving stems
 
-		xml_node          m_dynamics;    // dynamics <direction> starting just before note
+		std::vector<xml_node> m_dynamics;   // dynamics <direction> starting just before note
 		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
 		std::vector<xml_node>  m_figured_bass; // fb starting just before note
 		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note

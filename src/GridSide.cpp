@@ -160,6 +160,7 @@ void GridSide::setHarmony(const string& token) {
 }
 
 
+
 //////////////////////////////
 //
 // GridSide::setDynamics --
@@ -167,6 +168,7 @@ void GridSide::setHarmony(const string& token) {
 
 void GridSide::setDynamics(HTp token) {
 	if (m_dynamics) {
+		cerr << "WARHING: dynamic already exists here, deleting: " << m_dynamics << " and replacing with " << token << endl;
 		delete m_dynamics;
 		m_dynamics = NULL;
 	}

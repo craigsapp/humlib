@@ -1617,9 +1617,10 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 				} else if (strcmp(grandchild.name(), "down-bow") == 0) {
 					downbow = true;
 				} else if (strcmp(grandchild.name(), "harmonic") == 0) {
-					// natural harmonic
-					xml_node natural = grandchild.select_node("natural").node();
-					if (natural) {
+					// check of not an artificial harmonic
+					xml_node artificial = grandchild.select_node("artificial").node();
+					if (!artificial) {
+						// natural harmonic
 						harmonic = true;
 					}
 				}
@@ -2022,7 +2023,7 @@ vector<pair<int, xml_node>>&  MxmlEvent::getTempos(void) {
 //
 
 void MxmlEvent::setDynamics(xml_node node) {
-	m_dynamics = node;
+	m_dynamics.push_back(node);
 }
 
 
@@ -2054,7 +2055,7 @@ void MxmlEvent::addFiguredBass(xml_node node) {
 // MxmlEvent::getDynamics --
 //
 
-xml_node MxmlEvent::getDynamics(void) {
+vector<xml_node> MxmlEvent::getDynamics(void) {
 	return m_dynamics;
 }
 
