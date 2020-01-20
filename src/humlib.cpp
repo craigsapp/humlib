@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 19 21:09:51 PST 2020
+// Last Modified: Sun Jan 19 22:41:57 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -64072,6 +64072,7 @@ void Tool_musicxml2hum::addMeasureOneNumber(HumdrumFile& infile) {
 			break;
 		}
 		// there is no digit on barline, so add one.
+
 		string newvalue = "=";
 		if (value.size() < 2) {
 			newvalue += "1";
@@ -64080,7 +64081,12 @@ void Tool_musicxml2hum::addMeasureOneNumber(HumdrumFile& infile) {
 			newvalue += value.substr(1);
 		}
 		token->setText(newvalue);
-		// add "1" to other spines here?
+
+		// Add "1" to other spines here:
+		for (int j=1; j<infile[i].getFieldCount(); j++) {
+			HTp tok = infile.token(i, j);
+			tok->setText(newvalue);
+		}
 		break;
 	}
 }
