@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 19 11:12:29 PST 2020
+// Last Modified: Sun Jan 19 15:59:27 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -66830,7 +66830,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	vector<vector<xml_node>> keysigs(partdata.size());
 	vector<vector<xml_node>> transpositions(partdata.size());
 	vector<vector<xml_node>> timesigs(partdata.size());
-	vector<vector<xml_node>> ottavas(partdata.size());
+	vector<vector<vector<xml_node>>> ottavas(partdata.size());
 	vector<vector<xml_node>> hairpins(partdata.size());
 
 	vector<vector<vector<vector<MxmlEvent*>>>> gracebefore(partdata.size());
@@ -66893,7 +66893,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					} else if (nodeType(grandchild, "dynamics")) {
 						m_current_dynamic[pindex].push_back(element);
 					} else if (nodeType(grandchild, "octave-shift")) {
-						ottavas[pindex].push_back(grandchild);
+						storeOttava(pindex, grandchild, element, ottavas);
 						hasottava = true;
 					} else if (nodeType(grandchild, "wedge")) {
 						m_current_dynamic[pindex].push_back(element);
@@ -66940,6 +66940,43 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	}
 
 	addGraceLines(outdata, graceafter, partdata, nowtime);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::storeOcttava -- store an ottava mark which has this structure:
+//
+//  octaveShift:
+//     <octave-shift type="down" size="8" number="1" default-y="30.00"/>
+//
+//  For grand staff or multi-staff parts, the staff number needs to be extracted from an uncle element:
+//       <direction placement="below">
+//        <direction-type>
+//          <octave-shift type="up" size="8" number="1" default-y="-83.10"/>
+//        </direction-type>
+//        <staff>2</staff>
+//      </direction>
+//
+// ottavas array has three dimensions: (1) is the part, (2) is the staff, and (3) is the list of ottavas.
+//
+
+void Tool_musicxml2hum::storeOttava(int pindex, xml_node octaveShift, xml_node direction, 
+	vector<vector<vector<xml_node>>>& ottavas) {
+	int staffindex = 0;
+	xml_node staffnode = direction.select_node("staff").node();
+	if (staffnode && staffnode.text()) {
+		int staffnum = staffnode.text().as_int();
+		if (staffnum > 0) {
+			staffindex = staffnum - 1;
+		}
+	}
+	// ottavas presumed to be allocated by part, but not by staff.
+	if (ottavas[pindex].size() <= staffindex) {
+		ottavas[pindex].resize(staffindex+1);
+	}
+	ottavas[pindex][staffindex].push_back(octaveShift);
 }
 
 
@@ -67141,7 +67178,7 @@ void Tool_musicxml2hum::addTimeSigLine(GridMeasure* outdata,
 //
 
 void Tool_musicxml2hum::addOttavaLine(GridMeasure* outdata,
-		vector<vector<xml_node> >& ottavas, vector<MxmlPart>& partdata,
+		vector<vector<vector<xml_node>>>& ottavas, vector<MxmlPart>& partdata,
 		HumNum nowtime) {
 
 	GridSlice* slice = new GridSlice(outdata, nowtime,
@@ -67149,10 +67186,14 @@ void Tool_musicxml2hum::addOttavaLine(GridMeasure* outdata,
 	outdata->push_back(slice);
 	slice->initializePartStaves(partdata);
 
-	for (int i=0; i<(int)partdata.size(); i++) {
-		for (int j=0; j<(int)ottavas[i].size(); j++) {
-			if (ottavas[i][j]) {
-				insertPartOttavas(ottavas[i][j], *slice->at(i), i, j, partdata[i].getStaffCount());
+	for (int p=0; p<(int)ottavas.size(); p++) { // part loop
+		for (int s=0; s<(int)ottavas[p].size(); s++) { // staff loop
+			for (int j=0; j<(int)ottavas[p][s].size(); j++) { // ottava loop
+				if (ottavas[p][s][j]) {
+					// int scount = partdata[p].getStaffCount();
+					// int ss = scount - s - 1;
+					insertPartOttavas(ottavas[p][s][j], *slice->at(p), p, s, partdata[p].getStaffCount());
+				}
 			}
 		}
 	}
@@ -67275,10 +67316,9 @@ void Tool_musicxml2hum::insertPartOttavas(xml_node ottava, GridPart& part, int p
 	}
 
 	HTp token = NULL;
-	int staffnum = 0;
 	while (ottava) {
-		ottava = convertOttavaToHumdrum(ottava, token, staffnum, partindex, partstaffindex, staffcount);
-		part[staffnum]->setTokenLayer(0, token, 0);
+		ottava = convertOttavaToHumdrum(ottava, token, partstaffindex, partindex, partstaffindex, staffcount);
+		part[partstaffindex]->setTokenLayer(0, token, 0);
 	}
 
 	// go back and fill in all NULL pointers with null interpretations
@@ -67968,12 +68008,15 @@ xml_node Tool_musicxml2hum::convertOttavaToHumdrum(xml_node ottava,
 		return ottava;
 	}
 
-	staffindex = 0;
-	xml_attribute sn = ottava.attribute("number");
-	if (sn) {
-		staffindex = atoi(sn.value()) - 1;
-	}
-	staffindex = staffcount - staffindex - 1;
+
+	// Don't use "number" to set the staff index, now use the input parameter
+	// which comes from the direction/staff element that is an uncle of the ottava node.
+	//staffindex = 0;
+	//xml_attribute sn = ottava.attribute("number");
+	//if (sn) {
+	//	staffindex = atoi(sn.value()) - 1;
+	//}
+	//staffindex = staffcount - staffindex - 1;
 
 	int interval = 0;
 

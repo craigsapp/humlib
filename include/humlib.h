@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jan 19 11:12:29 PST 2020
+// Last Modified: Sun Jan 19 15:59:27 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6564,8 +6564,10 @@ class Tool_musicxml2hum : public HumTool {
 
 		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& clefs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& ottavas,
+		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<std::vector<pugi::xml_node>>>& ottavas,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void storeOttava       (int pindex, xml_node octaveShift, xml_node direction,
+		                        std::vector<std::vector<std::vector<xml_node>>>& ottavas);
 		void insertPartClefs   (pugi::xml_node clef, GridPart& part);
 		void insertPartOttavas (pugi::xml_node ottava, GridPart& part, int partindex, int partstaffindex, int staffcount);
 		pugi::xml_node convertClefToHumdrum(pugi::xml_node clef, HTp& token, int& staffindex);

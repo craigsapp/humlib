@@ -136,8 +136,10 @@ class Tool_musicxml2hum : public HumTool {
 
 		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& clefs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
-		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& ottavas,
+		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<std::vector<pugi::xml_node>>>& ottavas,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
+		void storeOttava       (int pindex, xml_node octaveShift, xml_node direction,
+		                        std::vector<std::vector<std::vector<xml_node>>>& ottavas);
 		void insertPartClefs   (pugi::xml_node clef, GridPart& part);
 		void insertPartOttavas (pugi::xml_node ottava, GridPart& part, int partindex, int partstaffindex, int staffcount);
 		pugi::xml_node convertClefToHumdrum(pugi::xml_node clef, HTp& token, int& staffindex);
