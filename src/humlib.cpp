@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jan 20 20:18:39 PST 2020
+// Last Modified: Mon Jan 20 20:38:04 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -65403,7 +65403,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		// Fix later so that multiple dynamics are handleded in the part at the
 		// same time.  The LO parameters for multiple dynamics will need to be
 		// qualified with "n=#".
-		for (int i=0; i<m_current_dynamic[partindex].size(); i++) {
+		for (int i=0; i<(int)m_current_dynamic[partindex].size(); i++) {
 			event->setDynamics(m_current_dynamic[partindex][i]);
 			string dparam = getDynamicsParameters(m_current_dynamic[partindex][i]);
 
@@ -66059,6 +66059,16 @@ void Tool_musicxml2hum::addHairpinEnding(GridPart* part, MxmlEvent* event, int p
 			string text = current->getText();
 			text += " ";
 			text += hstring;
+			// Set single-note crescendos
+			if (text == "< [[") {
+				text = "<[";
+			} else if (text == "> ]]") {
+				text = ">]";
+			} else if (text == "< [") {
+				text = "<[";
+			} else if (text == "> ]") {
+				text = ">]";
+			}
 			current->setText(text);
 		}
 	}
