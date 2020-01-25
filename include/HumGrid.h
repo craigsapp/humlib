@@ -57,6 +57,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                 int index, int p, int s);
 		void cleanTempos                (void);
 		void cleanTempos                (GridSlice* slice);
+		void expandLocalCommentLayers   (void);
+		bool buildSingleList            (void);
 
 	protected:
 		void calculateGridDurations        (void);
@@ -79,7 +81,6 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void fillInNullTokensForClefChanges (GridSlice* clefslice,
 		                                    GridSlice* lastnote, GridSlice* nextnote);
 		void adjustClefChanges             (void);
-		bool buildSingleList               (void);
 		void extendDurationToken           (int slicei, int parti,
 		                                    int staffi, int voicei);
 		GridVoice* getGridVoice(int slicei, int parti, int staffi, int voicei);
@@ -123,6 +124,8 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void matchVoices                   (GridSlice* current, GridSlice* last);
 		void adjustVoices                  (GridSlice* curr, GridSlice* newmanip, int partsplit);
 		void createMatchedVoiceCount       (GridStaff* snew, GridStaff* sold, int p, int s);
+		void matchLayers                   (GridSlice* output, GridSlice* input);
+		void matchLayers                   (GridStaff* output, GridStaff* input);
 
 	private:
 		std::vector<GridSlice*>       m_allslices;

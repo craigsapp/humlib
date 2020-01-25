@@ -3033,6 +3033,95 @@ void HumGrid::deleteMeasure(int index) {
 
 //////////////////////////////
 //
+// HumGrid::expandLocalCommentLayers -- Walk backwards in the
+//   data list, and match the layer count for local comments
+//   to have them match to the next data line.  This is needed
+//   to attach layout parameters properly to data tokens.  Layout
+//   parameters cannot pass through spine manipulator lines, so
+//   this function is necessary to prevent spine manipulators
+//   from orphaning local layout parameter lines.
+//
+//   For now just adjust local layout parameter slices, but maybe
+//   later do all types of local comments.
+//
+
+void HumGrid::expandLocalCommentLayers(void) {
+	GridSlice *dataslice = NULL;
+	GridSlice *localslice = NULL;
+	for (int i=(int)m_allslices.size() - 1; i>=0; i--) {
+		if (m_allslices[i]->isDataSlice()) {
+			dataslice = m_allslices[i];
+		} else if (m_allslices[i]->isMeasureSlice()) {
+			dataslice = m_allslices[i];
+		}
+		// Other slice types should be considered as well,
+		// but definitely not manipulator slices:
+		if (m_allslices[i]->isManipulatorSlice()) {
+			dataslice = m_allslices[i];
+		}
+
+		if (!m_allslices[i]->isLocalLayoutSlice()) {
+			continue;
+		}
+		localslice = m_allslices[i];
+		if (!dataslice) {
+			continue;
+		}
+		matchLayers(localslice, dataslice);
+	}
+}
+
+
+//////////////////////////////
+//
+// HumGrid::matchLayers -- Make sure every staff in both inputs
+//   have the same number of voices.
+//
+
+void HumGrid::matchLayers(GridSlice* output, GridSlice* input) {
+	if (output->size() != input->size()) {
+		// something wrong or one of the slices
+		// could be a non-spined line.
+		return;
+	}
+	int partcount = (int)input->size();
+	for (int part=0; part<partcount; part++) {
+		GridPart* ipart = input->at(part);
+		GridPart* opart = output->at(part);
+		if (ipart->size() != opart->size()) {
+			// something string that should never happen
+			continue;
+		}
+		int scount = (int)ipart->size();
+		for (int staff=0; staff<scount; staff++) {
+			GridStaff* istaff = ipart->at(staff);
+			GridStaff* ostaff = opart->at(staff);
+			matchLayers(ostaff, istaff);
+		}
+	}
+}
+
+
+void HumGrid::matchLayers(GridStaff* output, GridStaff* input) {
+	if (input->size() == output->size()) {
+		// The voice counts match so nothing to do.
+		return;
+	}
+	if (input->size() < output->size()) {
+		// Ignore potentially strange case.
+	}
+
+	int diff = (int)input->size() - (int)output->size();
+	for (int i=0; i<diff; i++) {
+		GridVoice* voice = new GridVoice("!", 0);
+		output->push_back(voice);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::setPartName --
 //
 

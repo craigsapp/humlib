@@ -191,6 +191,9 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		outdata.enableRecipSpine();
 	}
 
+	outdata.buildSingleList();
+	outdata.expandLocalCommentLayers();
+
 	// set the duration of the last slice
 
 	HumdrumFile outfile;
@@ -1721,9 +1724,6 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 			placementstring = ":a";
 		} else if (value == "below") {
 			placementstring = ":b";
-		} else {
-			// force above if no placement specified
-			placementstring = ":a";
 		}
 	}
 
@@ -1742,10 +1742,25 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 
 	xml_node sibling = grandchild;
 
+	bool dyQ = false;
+	xml_attribute defaulty;
+
 	string text;
 	while (sibling) {
 		if (nodeType(sibling, "words")) {
 			text += sibling.child_value();
+			if (!dyQ) {
+				defaulty = sibling.attribute("default-y");
+				if (defaulty) {
+					dyQ = true;
+					double number = std::stod(defaulty.value());
+					if (number >= 0.0) {
+						placementstring = ":a";
+					} else if (number < 0.0) {
+						placementstring = ":b";
+					}
+				}
+			}
 		}
 		sibling = sibling.next_sibling();
 	}
@@ -1825,6 +1840,11 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 	if (text.empty()) {
 		// no text to display after removing whitespace
 		return;
+	}
+
+	if (placementstring.empty()) {
+		// force above if no placement specified
+		placementstring = ":a";
 	}
 
 	string output = "!LO:TX";
@@ -1920,7 +1940,7 @@ void Tool_musicxml2hum::addTempo(GridSlice* slice, GridMeasure* measure, int par
 		}
 		sibling = sibling.next_sibling();
 	}
-	
+
 	// get metronome parameters
 
 	xml_node beatunit(NULL);
