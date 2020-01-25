@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 25 01:08:09 PST 2020
+// Last Modified: Sat Jan 25 10:34:52 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36932,7 +36932,12 @@ bool MxmlEvent::hasGraceSlash(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStart --
+// MxmlEvent::hasSlurStart -- Returns 0 if no slur; otherwise, return the 
+//  slur@number (this value could be used to encode & prefixes on slurs).
+//  Need to deal with multiple slur starts on one event.
+// 
+//   number: used to keep track of overlapping slurs.
+//
 //   direction: 0=unspecified, 1=positive curvature, -1=negative curvature.
 //
 //  <note>
@@ -36948,9 +36953,9 @@ bool MxmlEvent::hasGraceSlash(void) {
 //          <slur number="1" placement="below" type="start"/>
 //
 
-bool MxmlEvent::hasSlurStart(int& direction) {
+int MxmlEvent::hasSlurStart(int& direction) {
 	direction = 0;
-	bool output = false;
+	bool output = 0;
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
 		return output;
@@ -36964,7 +36969,14 @@ bool MxmlEvent::hasSlurStart(int& direction) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "start") == 0) {
-							output = true;
+							output = -1;
+						}
+					}
+					string number = grandchild.attribute("number").value();
+					if (!number.empty()) {
+						int num = stoi(number);
+						if (num != 0) {
+							output = num;
 						}
 					}
 					xml_attribute orientation = grandchild.attribute("orientation");
@@ -36997,17 +37009,17 @@ bool MxmlEvent::hasSlurStart(int& direction) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStop --
+// MxmlEvent::hasSlurStop -- Need to deal with multiple slur stops on same event.
 //
 //  <note>
 //     <notations>
 //         <slur type="start" orientation="under" number="1">
 //
 
-bool MxmlEvent::hasSlurStop(void) {
+int MxmlEvent::hasSlurStop(void) {
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
-		return false;
+		return 0;
 	}
 	child = child.first_child();
 	while (child) {
@@ -37018,7 +37030,15 @@ bool MxmlEvent::hasSlurStop(void) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "stop") == 0) {
-							return true;
+							string number = grandchild.attribute("number").value();
+							if (!number.empty()) {
+								int num = stoi(number);
+								if (num != 0) {
+									return num;
+								} else {
+									return 1;
+								}
+							}
 						}
 					}
 				}
@@ -37027,7 +37047,7 @@ bool MxmlEvent::hasSlurStop(void) {
 		}
 		child = child.next_sibling();
 	}
-	return false;
+	return 0;
 }
 
 

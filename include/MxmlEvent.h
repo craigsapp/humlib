@@ -87,8 +87,8 @@ class MxmlEvent {
 		bool               isGrace            (void);
 		bool               hasGraceSlash      (void);
 		bool               isFloating         (void);
-		bool               hasSlurStart       (int& direction);
-		bool               hasSlurStop        (void);
+		int                hasSlurStart       (int& direction);
+		int                hasSlurStop        (void);
 		void               setLinked          (void);
 		std::vector<MxmlEvent*> getLinkedNotes     (void);
 		void               attachToLastEvent  (void);
