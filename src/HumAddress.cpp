@@ -182,7 +182,11 @@ int HumAddress::getTrack(void) const {
 //
 
 int HumAddress::getSubtrack(void) const {
-	return m_subtrack;
+	if (m_subtrackcount == 1) {
+		return 0;
+	} else {
+		return m_subtrack + 1;
+	}
 }
 
 
