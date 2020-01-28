@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 25 10:34:52 PST 2020
+// Last Modified: Mon Jan 27 23:23:40 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7138,7 +7138,11 @@ int HumAddress::getTrack(void) const {
 //
 
 int HumAddress::getSubtrack(void) const {
-	return m_subtrack;
+	if (m_subtrackcount == 1) {
+		return 0;
+	} else {
+		return m_subtrack + 1;
+	}
 }
 
 
@@ -26921,6 +26925,10 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
+	if ((void*)this == NULL) {
+		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
+		return false;
+	}
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 
@@ -36932,30 +36940,29 @@ bool MxmlEvent::hasGraceSlash(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStart -- Returns 0 if no slur; otherwise, return the 
-//  slur@number (this value could be used to encode & prefixes on slurs).
-//  Need to deal with multiple slur starts on one event.
-// 
-//   number: used to keep track of overlapping slurs.
+// MxmlEvent::hasSlurStart -- Returns 0 if no slur; otherwise, return the
+//  number of slurs attached.  Currently ignoring slur@number.
+//
+//   number: used to keep track of overlapping slurs. (currently ignored).
 //
 //   direction: 0=unspecified, 1=positive curvature, -1=negative curvature.
 //
 //  <note>
 //     <notations>
 //         <slur type="start" orientation="under" number="1">
-//         <slur type="start" orientation="over" number="1">
+//         <slur type="start" orientation="over" number="2">
 //
 //  And also:
 //
 //  <note>
 //     <notations>
 //          <slur number="1" placement="above" type="start"/>
-//          <slur number="1" placement="below" type="start"/>
+//          <slur number="s" placement="below" type="start"/>
 //
 
-int MxmlEvent::hasSlurStart(int& direction) {
-	direction = 0;
-	bool output = 0;
+int MxmlEvent::hasSlurStart(vector<int>& directions) {
+	directions.clear();
+	int output = 0;
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
 		return output;
@@ -36969,33 +36976,39 @@ int MxmlEvent::hasSlurStart(int& direction) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "start") == 0) {
-							output = -1;
+							output++;
+						} else {
+							grandchild = grandchild.next_sibling();
+							continue;
 						}
 					}
-					string number = grandchild.attribute("number").value();
-					if (!number.empty()) {
-						int num = stoi(number);
-						if (num != 0) {
-							output = num;
-						}
-					}
+					// for now ignore the slur numbers
+					//string number = grandchild.attribute("number").value();
+					//if (!number.empty()) {
+					//	int num = stoi(number);
+					//	if (num != 0) {
+					//		xxx = num;
+					//	}
+					//}
 					xml_attribute orientation = grandchild.attribute("orientation");
+					int dir = 0;
 					if (orientation) {
 						if (strcmp(orientation.value(), "over") == 0) {
-							direction = 1;
+							dir = 1;
 						} else if (strcmp(orientation.value(), "under") == 0) {
-							direction = -1;
+							dir = -1;
 						}
 					}
 					xml_attribute placement = grandchild.attribute("placement");
 					if (placement) {
 						if (strcmp(placement.value(), "above") == 0) {
-							direction = 1;
+							dir = 1;
 						} else if (strcmp(placement.value(), "below") == 0) {
-							direction = -1;
+							dir = -1;
 						}
 					}
-					return output;
+
+					directions.push_back(dir);
 				}
 				grandchild = grandchild.next_sibling();
 			}
@@ -37009,7 +37022,7 @@ int MxmlEvent::hasSlurStart(int& direction) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStop -- Need to deal with multiple slur stops on same event.
+// MxmlEvent::hasSlurStop -- Handles multiple stop on the same note now.
 //
 //  <note>
 //     <notations>
@@ -37017,9 +37030,11 @@ int MxmlEvent::hasSlurStart(int& direction) {
 //
 
 int MxmlEvent::hasSlurStop(void) {
+	int output = 0;
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
-		return 0;
+		// maybe allow for other items such as rests?
+		return output;
 	}
 	child = child.first_child();
 	while (child) {
@@ -37030,15 +37045,16 @@ int MxmlEvent::hasSlurStop(void) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "stop") == 0) {
-							string number = grandchild.attribute("number").value();
-							if (!number.empty()) {
-								int num = stoi(number);
-								if (num != 0) {
-									return num;
-								} else {
-									return 1;
-								}
-							}
+							output++;
+							//string number = grandchild.attribute("number").value();
+							//if (!number.empty()) {
+							//	int num = stoi(number);
+							//	if (num != 0) {
+							//		return num;
+							//	} else {
+							//		return 1;
+							//	}
+							//}
 						}
 					}
 				}
@@ -37047,7 +37063,7 @@ int MxmlEvent::hasSlurStop(void) {
 		}
 		child = child.next_sibling();
 	}
-	return 0;
+	return output;
 }
 
 
@@ -52925,31 +52941,37 @@ void Tool_extract::fillFieldDataByNoEmpty(vector<int>& field, vector<int>& subfi
 //
 // Tool_extract::fillFieldDataByNoRest --  Find the spines which
 //    contain only rests and remove them.  Also remove cospines (non-kern spines
-//    to the right of the kern spine containing only rests).
+//    to the right of the kern spine containing only rests).  If there are
+//    *part# interpretations in the data, then any spine which is all rests
+//    will not be removed if there is another **kern spine with the same
+//    part number if it is also not all rests.
 //
 
 void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfield,
 		vector<int>& model, const string& searchstring, HumdrumFile& infile,
 		int state) {
 
-	field.reserve(infile.getMaxTrack()+1);
-	subfield.reserve(infile.getMaxTrack()+1);
-	model.reserve(infile.getMaxTrack()+1);
-	field.resize(0);
-	subfield.resize(0);
-	model.resize(0);
+	field.clear();
+	subfield.clear();
+	model.clear();
 
-	vector<int> tracks;
-	tracks.resize(infile.getMaxTrack()+1);
-	fill(tracks.begin(), tracks.end(), 0);
+
+	// Check every **kern spine for any notes.  If there is a note
+	// then the tracks variable for that spine will be marked
+	// as non-zero.
+	vector<int> tracks(infile.getMaxTrack() + 1, 0);
 	int track;
+	int partline = 0;
+	bool dataQ = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if ((!partline) && (!dataQ) && infile[i].hasSpines()) {
 
-	int i, j;
-	for (i=0; i<infile.getLineCount(); i++) {
+		}
 		if (!infile[i].isData()) {
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
+		dataQ = true;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (!token->isKern()) {
 				continue;
@@ -52964,6 +52986,43 @@ void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfie
 			tracks[track] = 1;
 		}
 	}
+
+	// Go back and mark any empty spines as non-empty if they
+   // are in a part that contains multiple staves. I.e., only
+	// delete a staff if all staves for the part are empty.
+	// There should be a single *part# line at the start of the
+	// score.
+	if (partline > 0) {
+		vector<HTp> kerns;
+		for (int i=0; i<infile[partline].getFieldCount(); i++) {
+			HTp token = infile.token(partline, i);
+			if (!token->isKern()) {
+				continue;
+			}
+			kerns.push_back(token);
+		}
+		for (int i=0; i<(int)kerns.size(); i++) {
+			for (int j=i+1; j<(int)kerns.size(); j++) {
+				if (*kerns[i] != *kerns[j]) {
+					continue;
+				}
+				if (kerns[i]->find("*part") == string::npos) {
+					continue;
+				}
+				int track1 = kerns[i]->getTrack();
+				int track2 = kerns[j]->getTrack();
+				int state1 = tracks[track1];
+				int state2 = tracks[track2];
+				if ((state1 && !state2) || (state2 && !state1)) {
+					// Prevent empty staff from being removed
+					// from a multi-staff part:
+					tracks[track1] = 1;
+					tracks[track2] = 1;
+				}
+			}
+		}
+	}
+
 
 	// deal with co-spines
 	vector<HTp> sstarts;
@@ -52993,7 +53052,7 @@ void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfie
 	}
 
 	int zero = 0;
-	for (i=1; i<(int)tracks.size(); i++) {
+	for (int i=1; i<(int)tracks.size(); i++) {
 		if (state != 0) {
 			tracks[i] = !tracks[i];
 		}
@@ -64370,7 +64429,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	string worktitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	bool worktitleQ = false;
 	if ((worktitle != "") && (worktitle != "Title")) {
-		string otl_record = "!!!OTL:\t";
+		string otl_record = "!!!OTL: ";
 		otl_record += worktitle;
 		outfile.insertLine(0, otl_record);
 		worktitleQ = true;
@@ -64379,9 +64438,9 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	xpath = "/score-partwise/movement-title";
 	string mtitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	if (mtitle != "") {
-		string otl_record = "!!!OTL:\t";
+		string otl_record = "!!!OTL: ";
 		if (worktitleQ) {
-			otl_record = "!!!OMV:\t";
+			otl_record = "!!!OMV: ";
 		}
 		otl_record += mtitle;
 		outfile.insertLine(0, otl_record);
@@ -64410,7 +64469,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 					string replacement = "~";
 					replacement += hre.getMatch(1);
 					hre.replaceDestructive(dates, replacement, R"(\b\d{4}\?)");
-					cdt_record = "!!!CDT:\t";
+					cdt_record = "!!!CDT: ";
 					cdt_record += dates;
 				}
 			}
@@ -64422,7 +64481,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	if ((composer != "") && (composer != "Composer")) {
-		string com_record = "!!!COM:\t";
+		string com_record = "!!!COM: ";
 		com_record += composer;
 		outfile.insertLine(0, com_record);
 	}
@@ -64452,7 +64511,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	if (validcopy) {
-		string yem_record = "!!!YEM:\t";
+		string yem_record = "!!!YEM: ";
 		yem_record += cleanSpaces(copy);
 		outfile.appendLine(yem_record);
 	}
@@ -65385,7 +65444,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 	string postfix;
 	bool invisible = false;
 	bool primarynote = true;
-	int slurdir = 0;
+	vector<int> slurdirs;
 
 	if (!event->isFloating()) {
 		recip     = event->getRecip();
@@ -65403,29 +65462,36 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
 		bool grace     = event->isGrace();
-		bool slurstart = event->hasSlurStart(slurdir);
-		bool slurstop  = event->hasSlurStop();
+		int slurstarts = event->hasSlurStart(slurdirs);
+		int slurstops = event->hasSlurStop();
 
 		if (pitch.find('r') != std::string::npos) {
 			string restpitch =  event->getRestPitch();
 			pitch += restpitch;
 		}
 
-		if (slurstart) {
+		for (int i=0; i<slurstarts; i++) {
 			prefix.insert(0, "(");
-			if (slurdir) {
-				if (slurdir > 0) {
-					prefix.insert(1, ">");
-					m_slurabove++;
-				} else if (slurdir < 0) {
-					prefix.insert(1, "<");
-					m_slurbelow++;
-				}
-			}
+		// Ignoring slur direction for now.
+		// if (slurstart) {
+		// 	prefix.insert(0, "(");
+		// 	if (slurdir) {
+		// 		if (slurdir > 0) {
+		// 			prefix.insert(1, ">");
+		// 			m_slurabove++;
+		// 		} else if (slurdir < 0) {
+		// 			prefix.insert(1, "<");
+		// 			m_slurbelow++;
+		// 		}
+		// 	}
+		// }
 		}
-		if (slurstop) {
+		for (int i=0; i<slurstops; i++) {
 			postfix.push_back(')');
 		}
+		//if (slurstop) {
+		//	postfix.push_back(')');
+		//}
 
 		invisible = isInvisible(event);
 		if (event->isInvisible()) {
@@ -66998,34 +67064,48 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 	string pitch;
 	string prefix;
 	string postfix;
-	bool slurstart = false;
-	bool slurstop  = false;
-	int  slurdir = 0;
+	bool slurstarts = 0;
+	bool slurstops  = 0;
+	vector<int> slurdirs;
 
 	bool primarynote = false;
 	for (int i=0; i<(int)links.size(); i++) {
-		note      = links.at(i);
-		pitch     = note->getKernPitch();
-		prefix    = note->getPrefixNoteInfo();
-		postfix   = note->getPostfixNoteInfo(primarynote);
-		slurstart = note->hasSlurStart(slurdir);
-		slurstop  = note->hasSlurStop();
+		note       = links.at(i);
+		pitch      = note->getKernPitch();
+		prefix     = note->getPrefixNoteInfo();
+		postfix    = note->getPostfixNoteInfo(primarynote);
+		slurstarts = note->hasSlurStart(slurdirs);
+		slurstops  = note->hasSlurStop();
 
-		if (slurstart) {
+		// or maybe walk backwards in the following loop?
+		for (int i=0; i<slurstarts; i++) {
 			prefix.insert(0, "(");
-			if (slurdir) {
-				if (slurdir > 0) {
-					prefix.insert(1, ">");
-					m_slurabove++;
-				} else if (slurdir < 0) {
-					prefix.insert(1, "<");
-					m_slurbelow++;
-				}
+			if (slurdirs[i] > 0) {
+				prefix.insert(1, ">");
+				m_slurabove++;
+			} else if (slurdirs[i] < 0) {
+				prefix.insert(1, "<");
+				m_slurbelow++;
 			}
 		}
-		if (slurstop) {
+		for (int i=0; i<slurstops; i++) {
 			postfix.push_back(')');
 		}
+		//if (slurstart) {
+		//	prefix.insert(0, "(");
+		//	if (slurdir) {
+		//		if (slurdir > 0) {
+		//			prefix.insert(1, ">");
+		//			m_slurabove++;
+		//		} else if (slurdir < 0) {
+		//			prefix.insert(1, "<");
+		//			m_slurbelow++;
+		//		}
+		//	}
+		//}
+		//if (slurstop) {
+		//	postfix.push_back(')');
+		//}
 
 		output << " " << prefix << recip << pitch << postfix;
 	}

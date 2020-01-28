@@ -303,31 +303,37 @@ void Tool_extract::fillFieldDataByNoEmpty(vector<int>& field, vector<int>& subfi
 //
 // Tool_extract::fillFieldDataByNoRest --  Find the spines which
 //    contain only rests and remove them.  Also remove cospines (non-kern spines
-//    to the right of the kern spine containing only rests).
+//    to the right of the kern spine containing only rests).  If there are
+//    *part# interpretations in the data, then any spine which is all rests
+//    will not be removed if there is another **kern spine with the same
+//    part number if it is also not all rests.
 //
 
 void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfield,
 		vector<int>& model, const string& searchstring, HumdrumFile& infile,
 		int state) {
 
-	field.reserve(infile.getMaxTrack()+1);
-	subfield.reserve(infile.getMaxTrack()+1);
-	model.reserve(infile.getMaxTrack()+1);
-	field.resize(0);
-	subfield.resize(0);
-	model.resize(0);
+	field.clear();
+	subfield.clear();
+	model.clear();
 
-	vector<int> tracks;
-	tracks.resize(infile.getMaxTrack()+1);
-	fill(tracks.begin(), tracks.end(), 0);
+
+	// Check every **kern spine for any notes.  If there is a note
+	// then the tracks variable for that spine will be marked
+	// as non-zero.
+	vector<int> tracks(infile.getMaxTrack() + 1, 0);
 	int track;
+	int partline = 0;
+	bool dataQ = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if ((!partline) && (!dataQ) && infile[i].hasSpines()) {
 
-	int i, j;
-	for (i=0; i<infile.getLineCount(); i++) {
+		}
 		if (!infile[i].isData()) {
 			continue;
 		}
-		for (j=0; j<infile[i].getFieldCount(); j++) {
+		dataQ = true;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (!token->isKern()) {
 				continue;
@@ -342,6 +348,43 @@ void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfie
 			tracks[track] = 1;
 		}
 	}
+
+	// Go back and mark any empty spines as non-empty if they
+   // are in a part that contains multiple staves. I.e., only
+	// delete a staff if all staves for the part are empty.
+	// There should be a single *part# line at the start of the
+	// score.
+	if (partline > 0) {
+		vector<HTp> kerns;
+		for (int i=0; i<infile[partline].getFieldCount(); i++) {
+			HTp token = infile.token(partline, i);
+			if (!token->isKern()) {
+				continue;
+			}
+			kerns.push_back(token);
+		}
+		for (int i=0; i<(int)kerns.size(); i++) {
+			for (int j=i+1; j<(int)kerns.size(); j++) {
+				if (*kerns[i] != *kerns[j]) {
+					continue;
+				}
+				if (kerns[i]->find("*part") == string::npos) {
+					continue;
+				}
+				int track1 = kerns[i]->getTrack();
+				int track2 = kerns[j]->getTrack();
+				int state1 = tracks[track1];
+				int state2 = tracks[track2];
+				if ((state1 && !state2) || (state2 && !state1)) {
+					// Prevent empty staff from being removed
+					// from a multi-staff part:
+					tracks[track1] = 1;
+					tracks[track2] = 1;
+				}
+			}
+		}
+	}
+
 
 	// deal with co-spines
 	vector<HTp> sstarts;
@@ -371,7 +414,7 @@ void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfie
 	}
 
 	int zero = 0;
-	for (i=1; i<(int)tracks.size(); i++) {
+	for (int i=1; i<(int)tracks.size(); i++) {
 		if (state != 0) {
 			tracks[i] = !tracks[i];
 		}

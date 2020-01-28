@@ -484,7 +484,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	string worktitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	bool worktitleQ = false;
 	if ((worktitle != "") && (worktitle != "Title")) {
-		string otl_record = "!!!OTL:\t";
+		string otl_record = "!!!OTL: ";
 		otl_record += worktitle;
 		outfile.insertLine(0, otl_record);
 		worktitleQ = true;
@@ -493,9 +493,9 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	xpath = "/score-partwise/movement-title";
 	string mtitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	if (mtitle != "") {
-		string otl_record = "!!!OTL:\t";
+		string otl_record = "!!!OTL: ";
 		if (worktitleQ) {
-			otl_record = "!!!OMV:\t";
+			otl_record = "!!!OMV: ";
 		}
 		otl_record += mtitle;
 		outfile.insertLine(0, otl_record);
@@ -524,7 +524,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 					string replacement = "~";
 					replacement += hre.getMatch(1);
 					hre.replaceDestructive(dates, replacement, R"(\b\d{4}\?)");
-					cdt_record = "!!!CDT:\t";
+					cdt_record = "!!!CDT: ";
 					cdt_record += dates;
 				}
 			}
@@ -536,7 +536,7 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	if ((composer != "") && (composer != "Composer")) {
-		string com_record = "!!!COM:\t";
+		string com_record = "!!!COM: ";
 		com_record += composer;
 		outfile.insertLine(0, com_record);
 	}
@@ -566,7 +566,7 @@ void Tool_musicxml2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc
 	}
 
 	if (validcopy) {
-		string yem_record = "!!!YEM:\t";
+		string yem_record = "!!!YEM: ";
 		yem_record += cleanSpaces(copy);
 		outfile.appendLine(yem_record);
 	}
@@ -1499,7 +1499,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 	string postfix;
 	bool invisible = false;
 	bool primarynote = true;
-	int slurdir = 0;
+	vector<int> slurdirs;
 
 	if (!event->isFloating()) {
 		recip     = event->getRecip();
@@ -1517,29 +1517,36 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
 		bool grace     = event->isGrace();
-		bool slurstart = event->hasSlurStart(slurdir);
-		bool slurstop  = event->hasSlurStop();
+		int slurstarts = event->hasSlurStart(slurdirs);
+		int slurstops = event->hasSlurStop();
 
 		if (pitch.find('r') != std::string::npos) {
 			string restpitch =  event->getRestPitch();
 			pitch += restpitch;
 		}
 
-		if (slurstart) {
+		for (int i=0; i<slurstarts; i++) {
 			prefix.insert(0, "(");
-			if (slurdir) {
-				if (slurdir > 0) {
-					prefix.insert(1, ">");
-					m_slurabove++;
-				} else if (slurdir < 0) {
-					prefix.insert(1, "<");
-					m_slurbelow++;
-				}
-			}
+		// Ignoring slur direction for now.
+		// if (slurstart) {
+		// 	prefix.insert(0, "(");
+		// 	if (slurdir) {
+		// 		if (slurdir > 0) {
+		// 			prefix.insert(1, ">");
+		// 			m_slurabove++;
+		// 		} else if (slurdir < 0) {
+		// 			prefix.insert(1, "<");
+		// 			m_slurbelow++;
+		// 		}
+		// 	}
+		// }
 		}
-		if (slurstop) {
+		for (int i=0; i<slurstops; i++) {
 			postfix.push_back(')');
 		}
+		//if (slurstop) {
+		//	postfix.push_back(')');
+		//}
 
 		invisible = isInvisible(event);
 		if (event->isInvisible()) {
@@ -3112,34 +3119,48 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 	string pitch;
 	string prefix;
 	string postfix;
-	bool slurstart = false;
-	bool slurstop  = false;
-	int  slurdir = 0;
+	bool slurstarts = 0;
+	bool slurstops  = 0;
+	vector<int> slurdirs;
 
 	bool primarynote = false;
 	for (int i=0; i<(int)links.size(); i++) {
-		note      = links.at(i);
-		pitch     = note->getKernPitch();
-		prefix    = note->getPrefixNoteInfo();
-		postfix   = note->getPostfixNoteInfo(primarynote);
-		slurstart = note->hasSlurStart(slurdir);
-		slurstop  = note->hasSlurStop();
+		note       = links.at(i);
+		pitch      = note->getKernPitch();
+		prefix     = note->getPrefixNoteInfo();
+		postfix    = note->getPostfixNoteInfo(primarynote);
+		slurstarts = note->hasSlurStart(slurdirs);
+		slurstops  = note->hasSlurStop();
 
-		if (slurstart) {
+		// or maybe walk backwards in the following loop?
+		for (int i=0; i<slurstarts; i++) {
 			prefix.insert(0, "(");
-			if (slurdir) {
-				if (slurdir > 0) {
-					prefix.insert(1, ">");
-					m_slurabove++;
-				} else if (slurdir < 0) {
-					prefix.insert(1, "<");
-					m_slurbelow++;
-				}
+			if (slurdirs[i] > 0) {
+				prefix.insert(1, ">");
+				m_slurabove++;
+			} else if (slurdirs[i] < 0) {
+				prefix.insert(1, "<");
+				m_slurbelow++;
 			}
 		}
-		if (slurstop) {
+		for (int i=0; i<slurstops; i++) {
 			postfix.push_back(')');
 		}
+		//if (slurstart) {
+		//	prefix.insert(0, "(");
+		//	if (slurdir) {
+		//		if (slurdir > 0) {
+		//			prefix.insert(1, ">");
+		//			m_slurabove++;
+		//		} else if (slurdir < 0) {
+		//			prefix.insert(1, "<");
+		//			m_slurbelow++;
+		//		}
+		//	}
+		//}
+		//if (slurstop) {
+		//	postfix.push_back(')');
+		//}
 
 		output << " " << prefix << recip << pitch << postfix;
 	}

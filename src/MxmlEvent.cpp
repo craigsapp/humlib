@@ -612,30 +612,29 @@ bool MxmlEvent::hasGraceSlash(void) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStart -- Returns 0 if no slur; otherwise, return the 
-//  slur@number (this value could be used to encode & prefixes on slurs).
-//  Need to deal with multiple slur starts on one event.
-// 
-//   number: used to keep track of overlapping slurs.
+// MxmlEvent::hasSlurStart -- Returns 0 if no slur; otherwise, return the
+//  number of slurs attached.  Currently ignoring slur@number.
+//
+//   number: used to keep track of overlapping slurs. (currently ignored).
 //
 //   direction: 0=unspecified, 1=positive curvature, -1=negative curvature.
 //
 //  <note>
 //     <notations>
 //         <slur type="start" orientation="under" number="1">
-//         <slur type="start" orientation="over" number="1">
+//         <slur type="start" orientation="over" number="2">
 //
 //  And also:
 //
 //  <note>
 //     <notations>
 //          <slur number="1" placement="above" type="start"/>
-//          <slur number="1" placement="below" type="start"/>
+//          <slur number="s" placement="below" type="start"/>
 //
 
-int MxmlEvent::hasSlurStart(int& direction) {
-	direction = 0;
-	bool output = 0;
+int MxmlEvent::hasSlurStart(vector<int>& directions) {
+	directions.clear();
+	int output = 0;
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
 		return output;
@@ -649,33 +648,39 @@ int MxmlEvent::hasSlurStart(int& direction) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "start") == 0) {
-							output = -1;
+							output++;
+						} else {
+							grandchild = grandchild.next_sibling();
+							continue;
 						}
 					}
-					string number = grandchild.attribute("number").value();
-					if (!number.empty()) {
-						int num = stoi(number);
-						if (num != 0) {
-							output = num;
-						}
-					}
+					// for now ignore the slur numbers
+					//string number = grandchild.attribute("number").value();
+					//if (!number.empty()) {
+					//	int num = stoi(number);
+					//	if (num != 0) {
+					//		xxx = num;
+					//	}
+					//}
 					xml_attribute orientation = grandchild.attribute("orientation");
+					int dir = 0;
 					if (orientation) {
 						if (strcmp(orientation.value(), "over") == 0) {
-							direction = 1;
+							dir = 1;
 						} else if (strcmp(orientation.value(), "under") == 0) {
-							direction = -1;
+							dir = -1;
 						}
 					}
 					xml_attribute placement = grandchild.attribute("placement");
 					if (placement) {
 						if (strcmp(placement.value(), "above") == 0) {
-							direction = 1;
+							dir = 1;
 						} else if (strcmp(placement.value(), "below") == 0) {
-							direction = -1;
+							dir = -1;
 						}
 					}
-					return output;
+
+					directions.push_back(dir);
 				}
 				grandchild = grandchild.next_sibling();
 			}
@@ -689,7 +694,7 @@ int MxmlEvent::hasSlurStart(int& direction) {
 
 //////////////////////////////
 //
-// MxmlEvent::hasSlurStop -- Need to deal with multiple slur stops on same event.
+// MxmlEvent::hasSlurStop -- Handles multiple stop on the same note now.
 //
 //  <note>
 //     <notations>
@@ -697,9 +702,11 @@ int MxmlEvent::hasSlurStart(int& direction) {
 //
 
 int MxmlEvent::hasSlurStop(void) {
+	int output = 0;
 	xml_node child = this->getNode();
 	if (!nodeType(child, "note")) {
-		return 0;
+		// maybe allow for other items such as rests?
+		return output;
 	}
 	child = child.first_child();
 	while (child) {
@@ -710,15 +717,16 @@ int MxmlEvent::hasSlurStop(void) {
 					xml_attribute slurtype = grandchild.attribute("type");
 					if (slurtype) {
 						if (strcmp(slurtype.value(), "stop") == 0) {
-							string number = grandchild.attribute("number").value();
-							if (!number.empty()) {
-								int num = stoi(number);
-								if (num != 0) {
-									return num;
-								} else {
-									return 1;
-								}
-							}
+							output++;
+							//string number = grandchild.attribute("number").value();
+							//if (!number.empty()) {
+							//	int num = stoi(number);
+							//	if (num != 0) {
+							//		return num;
+							//	} else {
+							//		return 1;
+							//	}
+							//}
 						}
 					}
 				}
@@ -727,7 +735,7 @@ int MxmlEvent::hasSlurStop(void) {
 		}
 		child = child.next_sibling();
 	}
-	return 0;
+	return output;
 }
 
 

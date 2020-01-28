@@ -119,8 +119,8 @@ ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
 	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS) \
-		&& strip $(TARGDIR)/$@$(EXTEN)
+	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)
+#		&& strip $(TARGDIR)/$@$(EXTEN)
 
 
 

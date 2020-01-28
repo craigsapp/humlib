@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 25 10:34:52 PST 2020
+// Last Modified: Mon Jan 27 23:23:40 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4177,7 +4177,7 @@ class MxmlEvent {
 		bool               isGrace            (void);
 		bool               hasGraceSlash      (void);
 		bool               isFloating         (void);
-		int                hasSlurStart       (int& direction);
+		int                hasSlurStart       (std::vector<int>& directions);
 		int                hasSlurStop        (void);
 		void               setLinked          (void);
 		std::vector<MxmlEvent*> getLinkedNotes     (void);
