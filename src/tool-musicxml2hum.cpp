@@ -477,28 +477,68 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 		}
 	}
 
+	xpath = "/score-partwise/credit/credit-words";
+   pugi::xpath_node_set credits = doc.select_nodes(xpath.c_str());
+	map<string, int> keys;
+	vector<string> refs;
+	vector<int> positions; // +1 = above, -1 = below;
+	for (auto it = credits.begin(); it != credits.end(); it++) {
+		string contents = cleanSpaces(it->node().child_value());
+		if (contents.empty()) {
+			continue;
+		}
+		if ((contents[0] != '@') && (contents[0] != '!')) {
+			continue;
+		}
+
+		if (contents.size() >= 3) {
+			// If line starts with "@@" then place at end of score.
+			if ((contents[0] == '@') && (contents[1] == '@')) {
+				positions.push_back(-1);
+			} else {
+				positions.push_back(1);
+			}
+		} else {
+			positions.push_back(1);
+		}
+
+		if (hre.search(contents, "^[@!]+([^\\s]+):")) {
+			// reference record
+			string key = hre.getMatch(1);
+			keys[key] = 1;
+			hre.replaceDestructive(contents, "!!!", "^[!@]+");
+			refs.push_back(contents);
+		} else {
+			// global comment
+			hre.replaceDestructive(contents, "!!", "^[!@]+");
+			refs.push_back(contents);
+		}
+	}
+
 	// OTL: title //////////////////////////////////////////////////////////
 
 	// Sibelius method
 	xpath = "/score-partwise/work/work-title";
 	string worktitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
+	string otl_record;
+	string omv_record;
 	bool worktitleQ = false;
 	if ((worktitle != "") && (worktitle != "Title")) {
-		string otl_record = "!!!OTL: ";
+		otl_record = "!!!OTL: ";
 		otl_record += worktitle;
-		outfile.insertLine(0, otl_record);
 		worktitleQ = true;
 	}
 
 	xpath = "/score-partwise/movement-title";
 	string mtitle = cleanSpaces(doc.select_node(xpath.c_str()).node().child_value());
 	if (mtitle != "") {
-		string otl_record = "!!!OTL: ";
 		if (worktitleQ) {
-			otl_record = "!!!OMV: ";
+			omv_record = "!!!OMV: ";
+			omv_record += mtitle;
+		} else {
+			otl_record = "!!!OTL: ";
+			otl_record += mtitle;
 		}
-		otl_record += mtitle;
-		outfile.insertLine(0, otl_record);
 	}
 
 	// COM: composer /////////////////////////////////////////////////////////
@@ -531,14 +571,39 @@ void Tool_musicxml2hum::addHeaderRecords(HumdrumFile& outfile, xml_document& doc
 		}
 	}
 
-	if (cdt_record != "") {
+
+	for (int i=(int)refs.size()-1; i>=0; i--) {
+		if (positions.at(i) > 0) {
+			// place at start of file
+			outfile.insertLine(0, refs[i]);
+		}
+	}
+
+	for (int i=0; i<(int)refs.size(); i++) {
+		if (positions.at(i) < 0) {
+			// place at end of file
+			outfile.appendLine(refs[i]);
+		}
+	}
+
+	if ((!omv_record.empty()) && (!keys["OMV"])) {
+		outfile.insertLine(0, omv_record);
+	}
+
+	if ((!otl_record.empty()) && (!keys["OTL"])) {
+		outfile.insertLine(0, otl_record);
+	}
+
+	if ((!cdt_record.empty()) && (!keys["CDT"])) {
 		outfile.insertLine(0, cdt_record);
 	}
 
-	if ((composer != "") && (composer != "Composer")) {
-		string com_record = "!!!COM: ";
-		com_record += composer;
-		outfile.insertLine(0, com_record);
+	if ((!composer.empty()) && (!keys["COM"])) {
+		// Don't print composer name if it is "Composer".
+		if (composer != "Composer") {
+			string com_record = "!!!COM: " + composer;
+			outfile.insertLine(0, com_record);
+		}
 	}
 
 }
@@ -1719,7 +1784,7 @@ void Tool_musicxml2hum::addTempos(GridSlice* slice, GridMeasure* measure, int pa
 //         </direction-type>
 //       <staff>2</staff>
 //       </direction>
-// 
+//
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
 		int staffindex, int voiceindex, xml_node node) {
@@ -1871,7 +1936,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 //////////////////////////////
 //
 // Tool_musicxml2hum::addTempo -- Add a tempo direction to the grid.
-// 
+//
 // <direction placement="above">
 //    <direction-type>
 //       <metronome parentheses="no" default-x="-35.96" relative-y="20.00">
@@ -2157,7 +2222,7 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event, int partind
 
 	HTp tok = NULL;
 
-	for (int i=0; i<(int)directions.size(); i++) { 
+	for (int i=0; i<(int)directions.size(); i++) {
 		xml_node direction = directions[i];
 		xml_attribute placement = direction.attribute("placement");
 		bool above = false;
@@ -2235,7 +2300,7 @@ void Tool_musicxml2hum::addDynamic(GridPart* part, MxmlEvent* event, int partind
 //    of hairpins which were stored before a barline so that they
 //    are not also repeated on the first beat of the next barline.
 //    This fuction will remove the hairpin from the used array
-//    when it is checked.  The used array is only for storing 
+//    when it is checked.  The used array is only for storing
 //    hairpins that end on measures, so in theory there should not
 //    be too many, and they will be removed fairly quickly.
 //
@@ -2640,7 +2705,7 @@ int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum n
 		if (i == 0) {
 			part->setFiguredBass(ftok);
 		} else {
-			// store the figured bass for later handling at end of 
+			// store the figured bass for later handling at end of
 			// measure processing.
 			MusicXmlFiguredBassInfo finfo;
 			finfo.timestamp = dursum;
@@ -3320,7 +3385,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 // ottavas array has three dimensions: (1) is the part, (2) is the staff, and (3) is the list of ottavas.
 //
 
-void Tool_musicxml2hum::storeOttava(int pindex, xml_node octaveShift, xml_node direction, 
+void Tool_musicxml2hum::storeOttava(int pindex, xml_node octaveShift, xml_node direction,
 	vector<vector<vector<xml_node>>>& ottavas) {
 	int staffindex = 0;
 	xml_node staffnode = direction.select_node("staff").node();
