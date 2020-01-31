@@ -1908,22 +1908,29 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
-	text = cleanSpacesAndColons(text);
-	if (text.empty()) {
-		// no text to display after removing whitespace
-		return;
-	}
+	string output;
+	if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
+		// embedding a local comment
+		output = text;
+	} else {
+		text = cleanSpacesAndColons(text);
+		if (text.empty()) {
+			// no text to display after removing whitespace
+			return;
+		}
 
-	if (placementstring.empty()) {
-		// force above if no placement specified
-		placementstring = ":a";
-	}
+		if (placementstring.empty()) {
+			// force above if no placement specified
+			placementstring = ":a";
+		}
 
-	string output = "!LO:TX";
-	output += placementstring;
-	output += stylestring;
-	output += ":t=";
-	output += text;
+		output = "!LO:TX";
+		output += placementstring;
+		output += stylestring;
+		output += ":t=";
+		output += text;
+
+	}
 
 	// The text direction needs to be added before the last line in the measure object.
 	// If there is already an empty layout slice before the current one (with no spine manipulators
