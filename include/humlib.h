@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 30 18:04:50 PST 2020
+// Last Modified: Fri Jan 31 20:41:52 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7161,6 +7161,32 @@ class Tool_shed : public HumTool {
 
 		std::vector<bool> m_spines; // usar with -s option
 		std::string m_grepoptions;
+
+};
+
+
+class Tool_sic : public HumTool {
+	public:
+		         Tool_sic       (void);
+		        ~Tool_sic       () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+		void     insertOriginalToken(HTp sictok);
+		void     insertSubstitutionToken(HTp sictok);
+		HTp      getTargetToken     (HTp stok);
+
+	private:
+		bool     m_substituteQ = false;
+		bool     m_originalQ   = false;
+		bool     m_removeQ     = false;
+		bool     m_modifiedQ   = false;
 
 };
 

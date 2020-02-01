@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 30 18:04:50 PST 2020
+// Last Modified: Fri Jan 31 20:41:52 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -65801,6 +65801,10 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 	}
 	text = newtext;
 
+	// Remove newlines encodings at end of text.
+	HumRegex hre;
+	hre.replaceDestructive(text, "", "(\\\\n)+\\s*$");
+
 	/* Problem: these are also possibly signs for figured bass
 	if (text == "#") {
 		// interpret as an editorial sharp marker
@@ -65853,10 +65857,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
+	bool globalQ = false;
 	string output;
-	if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
+	if (text == "!") {
+		// null local comment
+		output = text;
+	} else if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
 		// embedding a local comment
 		output = text;
+	} else if ((text.size() >= 2) && (text[0] == '!') && (text[1] == '!')) {
+		// embedding a global comment (or bibliographic record, etc.).
+		output = text;
+		globalQ = true;
 	} else {
 		text = cleanSpacesAndColons(text);
 		if (text.empty()) {
@@ -65874,13 +65886,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		output += stylestring;
 		output += ":t=";
 		output += text;
-
 	}
 
 	// The text direction needs to be added before the last line in the measure object.
 	// If there is already an empty layout slice before the current one (with no spine manipulators
 	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
-	measure->addLayoutParameter(slice, partindex, output);
+	if (globalQ) {
+		HumNum timestamp = slice->getTimestamp();
+		measure->addGlobalComment(text, timestamp);
+	} else {
+		// adding local comment that is not a layout parameter also goes here:
+		measure->addLayoutParameter(slice, partindex, output);
+	}
 }
 
 
@@ -74967,6 +74984,226 @@ bool Tool_shed::isValid(HTp token) {
 		return true;
 	}
 	return false;
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_sic::Tool_sic -- Set the recognized options for the tool.
+//
+
+Tool_sic::Tool_sic(void) {
+	define("s|substitution=b", "insert substitutions into music");
+	define("o|original=b", "insert originals into music");
+	define("r|remove=b", "remove sic layout tokens");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_sic::run -- Do the main work of the tool.
+//
+
+bool Tool_sic::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_sic::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_sic::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_sic::run(HumdrumFile& infile) {
+	initialize();
+	if (!(m_substituteQ || m_originalQ || m_removeQ)) {
+		return true;
+	}
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_sic::initialize(void) {
+	m_substituteQ = getBoolean("substitution");
+	m_originalQ   = getBoolean("original");
+	m_removeQ     = getBoolean("remove");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::processFile --
+//
+
+void Tool_sic::processFile(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isLocalComment()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile[i].token(j);
+			if (token->compare(0, 8, "!LO:SIC:") != 0) {
+				continue;
+			}
+			if (m_removeQ) {
+				token->setText("!");
+				m_modifiedQ = true;
+			} else if (m_substituteQ) {
+				insertSubstitutionToken(token);
+			} else if (m_originalQ) {
+				insertOriginalToken(token);
+			}
+		}
+	}
+	if (m_modifiedQ) {
+		infile.createLinesFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::getTargetToken -- Get the token that the layout command
+//    applies to.
+//
+
+HTp Tool_sic::getTargetToken(HTp stok) {
+	HTp current = stok->getNextToken();
+	while (current) {
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isManipulator()) {
+			// Layout commands should not apply to manipulators nor be split
+			// from their associated token.
+			current = NULL;
+			break;
+		}
+		if (current->isCommentLocal()) {
+			current = current->getNextToken();
+			continue;
+		}
+		break;
+	}
+	if (!current) {
+		return NULL;
+	}
+	return current;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::insertSubstitutionToken --
+//
+
+void Tool_sic::insertSubstitutionToken(HTp sictok) {
+	HTp target = getTargetToken(sictok);
+	if (!target) {
+		return;
+	}
+	HumRegex hre;
+	vector<string> pieces;
+	hre.split(pieces, *sictok, ":");
+	string tstring = target->getText();
+	string sstring;
+	for (int i=2; i<(int)pieces.size(); i++) {
+		if (pieces[i].compare(0, 2, "s=") == 0) {
+			sstring = pieces[i].substr(2);
+		}
+	}
+	if (sstring.empty()) {
+		return;
+	}
+	target->setText(sstring);
+	m_modifiedQ = true;
+	string newsic = "LO:xSIC";
+	for (int i=2; i<(int)pieces.size(); i++) {
+		if (pieces[i].compare(0, 2, "s=") == 0) {
+			newsic += ":o=" + tstring;
+		} else {
+			newsic += ":" + pieces[i];
+		}
+	}
+	sictok->setText(newsic);
+	m_modifiedQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::insertOriginalToken --
+//
+
+void Tool_sic::insertOriginalToken(HTp sictok) {
+	HTp target = getTargetToken(sictok);
+	if (!target) {
+		return;
+	}
+	HumRegex hre;
+	vector<string> pieces;
+	hre.split(pieces, *sictok, ":");
+	string tstring = target->getText();
+	string sstring;
+	for (int i=2; i<(int)pieces.size(); i++) {
+		if (pieces[i].compare(0, 2, "o=") == 0) {
+			sstring = pieces[i].substr(2);
+		}
+	}
+	if (sstring.empty()) {
+		return;
+	}
+	target->setText(sstring);
+	m_modifiedQ = true;
+	string newsic = "LO:xSIC";
+	for (int i=2; i<(int)pieces.size(); i++) {
+		if (pieces[i].compare(0, 2, "o=") == 0) {
+			newsic += ":s=" + tstring;
+		} else {
+			newsic += ":" + pieces[i];
+		}
+	}
+	sictok->setText(newsic);
+	m_modifiedQ = true;
 }
 
 

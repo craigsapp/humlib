@@ -1856,6 +1856,10 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 	}
 	text = newtext;
 
+	// Remove newlines encodings at end of text.
+	HumRegex hre;
+	hre.replaceDestructive(text, "", "(\\\\n)+\\s*$");
+
 	/* Problem: these are also possibly signs for figured bass
 	if (text == "#") {
 		// interpret as an editorial sharp marker
@@ -1908,10 +1912,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
+	bool globalQ = false;
 	string output;
-	if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
+	if (text == "!") {
+		// null local comment
+		output = text;
+	} else if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
 		// embedding a local comment
 		output = text;
+	} else if ((text.size() >= 2) && (text[0] == '!') && (text[1] == '!')) {
+		// embedding a global comment (or bibliographic record, etc.).
+		output = text;
+		globalQ = true;
 	} else {
 		text = cleanSpacesAndColons(text);
 		if (text.empty()) {
@@ -1929,13 +1941,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		output += stylestring;
 		output += ":t=";
 		output += text;
-
 	}
 
 	// The text direction needs to be added before the last line in the measure object.
 	// If there is already an empty layout slice before the current one (with no spine manipulators
 	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
-	measure->addLayoutParameter(slice, partindex, output);
+	if (globalQ) {
+		HumNum timestamp = slice->getTimestamp();
+		measure->addGlobalComment(text, timestamp);
+	} else {
+		// adding local comment that is not a layout parameter also goes here:
+		measure->addLayoutParameter(slice, partindex, output);
+	}
 }
 
 
