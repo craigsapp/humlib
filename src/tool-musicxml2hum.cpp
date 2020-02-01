@@ -1912,19 +1912,53 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		stylestring = ":B";
 	}
 
+	bool interpQ = false;
+	bool specialQ = false;
 	bool globalQ = false;
+	bool afterQ = false;
 	string output;
 	if (text == "!") {
 		// null local comment
 		output = text;
+		specialQ = true;
+	} else if (text == "*") {
+		// null interpretation
+		output = text;
+		specialQ = true;
+		interpQ = true;
+	} else if ((text.size() > 1) && (text[0] == '*') && (text[1] != '*')) {
+		// regular tandem interpretation, but disallow manipulators:
+		if (text == "*^") {
+			specialQ = false;
+		} else if (text == "*+") {
+			specialQ = false;
+		} else if (text == "*-") {
+			specialQ = false;
+		} else if (text == "*v") {
+			specialQ = false;
+		} else {
+			specialQ = true;
+			interpQ = true;
+			output = text;
+		}
+	} else if ((text.size() > 2) && (text[0] == '*') && (text[1] == '*')) {
+		hre.replaceDestructive(text, "*", "^\\*+");
+		output = text;
+		specialQ = true;
+		afterQ = true;
+		interpQ = true;
 	} else if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
 		// embedding a local comment
 		output = text;
+		specialQ = true;
 	} else if ((text.size() >= 2) && (text[0] == '!') && (text[1] == '!')) {
 		// embedding a global comment (or bibliographic record, etc.).
 		output = text;
 		globalQ = true;
-	} else {
+		specialQ = true;
+	}
+
+	if (!specialQ) {
 		text = cleanSpacesAndColons(text);
 		if (text.empty()) {
 			// no text to display after removing whitespace
@@ -1943,10 +1977,22 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		output += text;
 	}
 
-	// The text direction needs to be added before the last line in the measure object.
-	// If there is already an empty layout slice before the current one (with no spine manipulators
-	// in between), then insert onto the existing layout slice; otherwise create a new layout slice.
-	if (globalQ) {
+	// The text direction needs to be added before the last line
+	// in the measure object.  If there is already an empty layout
+	// slice before the current one (with no spine manipulators
+	// in between), then insert onto the existing layout slice;
+	// otherwise create a new layout slice.
+
+	if (interpQ) {
+		if (afterQ) {
+			HTp token = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
+			HumNum tokdur = Convert::recipToDuration(token);
+			HumNum timestamp = slice->getTimestamp() + tokdur;
+			measure->addInterpretationAfter(slice, partindex, output, timestamp);
+		} else {
+			measure->addInterpretationBefore(slice, partindex, output);
+		}
+	} else if (globalQ) {
 		HumNum timestamp = slice->getTimestamp();
 		measure->addGlobalComment(text, timestamp);
 	} else {

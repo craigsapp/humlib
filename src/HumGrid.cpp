@@ -346,7 +346,6 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 		return false;
 	}
 	calculateGridDurations();
-
 	addNullTokens();
 	addInvisibleRestsInFirstTrack();
 	addMeasureLines();
@@ -1939,6 +1938,10 @@ void HumGrid::addInvisibleRestsInFirstTrack(void) {
 			GridPart& part = *slice.at(p);
       	for (s=0; s<(int)part.size(); s++) {
 				GridStaff& staff = *part.at(s);
+				if (staff.size() == 0) {
+					cerr << "EMPTY STAFF VOICE WILL BE FILLED IN LATER!!!!" << endl;
+					continue;
+				}
 				if (!staff.at(v)) {
 					// in theory should not happen
 					continue;

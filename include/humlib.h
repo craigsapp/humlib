@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 31 20:41:52 PST 2020
+// Last Modified: Sat Feb  1 15:13:02 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3841,6 +3841,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		                  { return m_style == MeasureStyle::RepeatForward; }
 		bool         isRepeatBoth(void)
 		                  { return m_style == MeasureStyle::RepeatBoth; }
+		void         addInterpretationBefore(GridSlice* slice, int partindex, const std::string& interpretation);
+		void         addInterpretationAfter(GridSlice* slice, int partindex, const std::string& interpretation, HumNum timestamp);
 		void         addLayoutParameter(GridSlice* slice, int partindex, const std::string& locomment);
 		void         addLayoutParameter(HumNum timestamp, int partindex, int staffindex, const std::string& locomment);
 		void         addDynamicsLayoutParameters(GridSlice* slice, int partindex, const std::string& locomment);

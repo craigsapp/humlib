@@ -1237,6 +1237,179 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex,
 
 
 
+//////////////////////////////
+//
+// GridMeasure::addInterpretationAfter -- Add an interpretation line after the
+//      given slice, (which is probably a note slice).
+//
+
+void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
+		const string& interpretation, HumNum timestamp) {
+
+	HumNum targettime = slice->getTimestamp();
+
+	auto iter = this->rbegin();
+	if (iter == this->rend()) {
+		// something strange happened: expecting at least one item in measure.
+		return;
+	}
+	GridPart* part;
+	GridStaff* staff;
+	GridVoice* voice;
+
+	auto previous = iter;
+	auto last = previous;
+	previous++;
+	HumNum ptime = (*previous)->getTimestamp();
+	HumNum newtargettime = ptime;
+
+	if (ptime < targettime) {
+		// Insert slice at end of measure.
+		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
+		newslice->initializeBySlice(slice);
+		this->push_back(newslice);
+		HTp newtoken = new HumdrumToken(interpretation);
+		if (newslice->at(partindex)->at(0)->size() == 0) {
+			GridVoice* v = new GridVoice;
+			newslice->at(partindex)->at(0)->push_back(v);
+		}
+		newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
+		return;
+	}
+
+
+
+/* Handle the case where the slice to insert is not at the end of the
+   current measure (such as inserting for a second voice).  Deal with
+	this later when there is an example to test...
+
+	} else {
+		while (previous != this->rend()) {
+			ptime = (*previous)->getTimestamp();
+			if (ptime < targettime) {
+				// insert after previous
+				break;
+			}
+			newtargettime = ptime;
+			previous++;
+		}
+		cerr << "INSERT TARGET TIME = " << newtargettime;
+	}
+
+	// now go back and insert
+
+
+	cerr << "\tPREVIOUS TIMESTAMP = " << (*previous)->getTimestamp() << endl;
+		if ((*previous)->isInterpretationSlice()) {
+			part = (*previous)->at(partindex);
+			staff = part->at(0);
+			if (staff->size() == 0) {
+				GridVoice* v = new GridVoice;
+				staff->push_back(v);
+			}
+			voice = staff->at(0);
+			if (voice) {
+				if (voice->getToken() == NULL) {
+					// create a token with text
+					HTp newtoken = new HumdrumToken(interpretation);
+					voice->setToken(newtoken);
+					return;
+				} else if (*voice->getToken() == "*") {
+					// replace token with text
+					HTp newtoken = new HumdrumToken(interpretation);
+					voice->setToken(newtoken);
+					return;
+				}
+			} else {
+				previous++;
+				continue;
+			}
+		} else {
+			break;
+		}
+		previous++;
+	}
+
+	auto insertpoint = previous.base();
+	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::_Interpretation);
+	newslice->initializeBySlice(*iter);
+	this->insert(insertpoint, newslice);
+	HTp newtoken = new HumdrumToken(interpretation);
+	if (newslice->at(partindex)->at(0)->size() == 0) {
+		GridVoice* v = new GridVoice;
+		newslice->at(partindex)->at(0)->push_back(v);
+	}
+	newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
+*/
+}
+
+
+
+//////////////////////////////
+//
+// GridMeasure::addInterpretationBefore -- Add an interpretation line before the
+//      given slice, (which is probably a note slice).
+//
+
+void GridMeasure::addInterpretationBefore(GridSlice* slice, int partindex,
+		const string& interpretation) {
+
+	auto iter = this->rbegin();
+	if (iter == this->rend()) {
+		// something strange happened: expecting at least one item in measure.
+		return;
+	}
+	GridPart* part;
+	GridStaff* staff;
+	GridVoice* voice;
+
+	auto previous = iter;
+	previous++;
+	while (previous != this->rend()) {
+		if ((*previous)->isInterpretationSlice()) {
+			part = (*previous)->at(partindex);
+			staff = part->at(0);
+			if (staff->size() == 0) {
+				GridVoice* v = new GridVoice;
+				staff->push_back(v);
+			}
+			voice = staff->at(0);
+			if (voice) {
+				if (voice->getToken() == NULL) {
+					// create a token with text
+					HTp newtoken = new HumdrumToken(interpretation);
+					voice->setToken(newtoken);
+					return;
+				} else if (*voice->getToken() == "*") {
+					// replace token with text
+					HTp newtoken = new HumdrumToken(interpretation);
+					voice->setToken(newtoken);
+					return;
+				}
+			} else {
+				previous++;
+				continue;
+			}
+		} else {
+			break;
+		}
+		previous++;
+	}
+
+	auto insertpoint = previous.base();
+	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::_Interpretation);
+	newslice->initializeBySlice(*iter);
+	this->insert(insertpoint, newslice);
+	HTp newtoken = new HumdrumToken(interpretation);
+	if (newslice->at(partindex)->at(0)->size() == 0) {
+		GridVoice* v = new GridVoice;
+		newslice->at(partindex)->at(0)->push_back(v);
+	}
+	newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
+}
+
+
+
 
 //////////////////////////////
 //

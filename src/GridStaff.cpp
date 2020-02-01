@@ -102,11 +102,11 @@ void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 	string nulltoken;
 	if (type < SliceType::_Data) {
 		nulltoken = ".";
-	} else if (type < SliceType::_Measure) {
+	} else if (type <= SliceType::_Measure) {
 		nulltoken = "=";
-	} else if (type < SliceType::_Interpretation) {
+	} else if (type <= SliceType::_Interpretation) {
 		nulltoken = "*";
-	} else if (type < SliceType::_Spined) {
+	} else if (type <= SliceType::_Spined) {
 		nulltoken = "!";
 	} else {
 		cerr << "!!STRANGE ERROR: " << this << endl;

@@ -301,7 +301,7 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 			empty = ".";
 		} else if (hasSpines()) {
 			token = new HumdrumToken("55");
-			empty = "!z";
+			empty = "!";
 		}
 		if (token != NULL) {
 			if (hasSpines()) {
@@ -810,6 +810,7 @@ ostream& operator<<(ostream& output, GridSlice* slice) {
 		output << "{n}";
 		return output;
 	}
+	output << "TS=" << slice->getTimestamp() << " ";
 	for (int p=0; p<(int)slice->size(); p++) {
 		GridPart* part = slice->at(p);
 		output << "(p" << p << ":)";
