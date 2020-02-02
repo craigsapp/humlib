@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Feb  2 01:53:08 PST 2020
+// Last Modified: Sun Feb  2 02:23:45 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -75477,7 +75477,7 @@ void Tool_sic::insertSubstitutionToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:SIC";
+	string newsic = "!LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "s=") == 0) {
 			newsic += ":o=" + tstring;
@@ -75516,7 +75516,7 @@ void Tool_sic::insertOriginalToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:SIC";
+	string newsic = "!LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "o=") == 0) {
 			newsic += ":s=" + tstring;

@@ -233,7 +233,7 @@ void Tool_sic::insertSubstitutionToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:SIC";
+	string newsic = "!LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "s=") == 0) {
 			newsic += ":o=" + tstring;
@@ -272,7 +272,7 @@ void Tool_sic::insertOriginalToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:SIC";
+	string newsic = "!LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "o=") == 0) {
 			newsic += ":s=" + tstring;
