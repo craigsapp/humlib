@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb  1 18:27:35 PST 2020
+// Last Modified: Sun Feb  2 01:53:08 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -11159,6 +11159,43 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
+// HumHas::getParameters -- Return a map of the key/values for a
+//    particular namespace.  If the namespace(s) do not exist
+//    then the map will be empty.
+//
+
+map<string, string> HumHash::getParameters(const string& ns1, const string& ns2) {
+	map<string, string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	for (auto& it : (*parameters)[ns1][ns2]) {
+		output[it.first] = it.second;
+	}
+	return output;
+}
+
+
+map<string, string> HumHash::getParameters(string& ns) {
+	map<string, string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	auto loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getParameters(ns1, ns2);
+	}
+
+	// Search the ns namespace in the root namespace:
+	return getParameters("", ns);
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::getKeys -- Return a list of keys in a particular namespace
 //     combination.  With no parameters, a complete list of all
 //     namespaces/keys will be returned.  Giving one parameter will
@@ -20544,7 +20581,7 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 // HumdrumFileContent::HumdrumFileContent --
 //
 
-HumdrumFileContent::HumdrumFileContent(void) {
+HumdrumFileContent::HumdrumFileContent(void) : HumdrumFileStructure() {
 	// do nothing
 }
 
@@ -21530,7 +21567,7 @@ void HumdrumFileStream::fillUrlBuffer(stringstream& uribuffer,
 //     constructor.
 //
 
-HumdrumFileStructure::HumdrumFileStructure(void) {
+HumdrumFileStructure::HumdrumFileStructure(void) : HumdrumFileBase() {
 	// do nothing
 }
 
@@ -22262,7 +22299,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 
 		for (int j=0; j<(int)m_lines[i]->getFieldCount(); j++) {
 			for (int k=0; k<(int)globals.size(); k++) {
-				m_lines[i]->token(j)->addLinkedParameter(globals[k]->token(0));
+				m_lines[i]->token(j)->addLinkedParameterSet(globals[k]->token(0));
 			}
 		}
 		globals.clear();
@@ -22796,9 +22833,9 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 			dtok = tok;
 		} else if (tok->isCommentLocal()) {
 			if (tok->find("!LO:") == 0) {
-				tok->storeLinkedParameters();
+				tok->storeParameterSet();
 				if (dtok) {
-					dtok->addLinkedParameter(tok);
+					dtok->addLinkedParameterSet(tok);
 				}
 			}
 		}
@@ -22925,6 +22962,8 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	assignStrandsToTokens();
 
 	resolveNullTokens();
+
+	analyzeLocalParameters();
 
 	return isValid();
 }
@@ -25243,7 +25282,7 @@ void HumdrumLine::appendToken(int index, const char* token, int tabcount) {
 //
 
 void HumdrumLine::storeGlobalLinkedParameters(void) {
-	token(0)->storeLinkedParameters();
+	token(0)->storeParameterSet();
 }
 
 
@@ -25477,9 +25516,9 @@ HumdrumToken& HumdrumToken::operator=(const char* token) {
 //
 
 HumdrumToken::~HumdrumToken() {
-	if (m_linkedParameter) {
-		delete m_linkedParameter;
-		m_linkedParameter = NULL;
+	if (m_parameterSet) {
+		delete m_parameterSet;
+		m_parameterSet = NULL;
 	}
 }
 
@@ -27412,7 +27451,7 @@ string HumdrumToken::getText(void) const {
 // HumdrumToken::addLinkedParamter --
 //
 
-int HumdrumToken::addLinkedParameter(HTp token) {
+int HumdrumToken::addLinkedParameterSet(HTp token) {
 	if (token->find(":ignore") != string::npos) {
 		// Ignore layout command (store layout command but
 		// do not use it.  This is particularly for adding
@@ -27424,23 +27463,23 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 		// will also be suppressed by this if statement.
 		return -1;
 	}
-	for (int i=0; i<(int)m_linkedParameters.size(); i++) {
-		if (m_linkedParameters[i] == token) {
+	for (int i=0; i<(int)m_linkedParameterTokens.size(); i++) {
+		if (m_linkedParameterTokens[i] == token) {
 			return i;
 		}
 	}
 
-	if (m_linkedParameters.empty()) {
-		m_linkedParameters.push_back(token);
+	if (m_linkedParameterTokens.empty()) {
+		m_linkedParameterTokens.push_back(token);
 	} else {
 		int lineindex = token->getLineIndex();
-		if (lineindex >= m_linkedParameters.back()->getLineIndex()) {
-			m_linkedParameters.push_back(token);
+		if (lineindex >= m_linkedParameterTokens.back()->getLineIndex()) {
+			m_linkedParameterTokens.push_back(token);
 		} else {
 			// Store sorted by line number
-			for (auto it = m_linkedParameters.begin(); it != m_linkedParameters.end(); it++) {
+			for (auto it = m_linkedParameterTokens.begin(); it != m_linkedParameterTokens.end(); it++) {
 				if (lineindex < (*it)->getLineIndex()) {
-					m_linkedParameters.insert(it, token);
+					m_linkedParameterTokens.insert(it, token);
 					break;
 				}
 			}
@@ -27448,7 +27487,7 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 
 	}
 
-	return (int)m_linkedParameters.size() - 1;
+	return (int)m_linkedParameterTokens.size() - 1;
 }
 
 
@@ -27459,49 +27498,60 @@ int HumdrumToken::addLinkedParameter(HTp token) {
 //
 
 bool HumdrumToken::linkedParameterIsGlobal(int index) {
-	return m_linkedParameters.at(index)->isCommentGlobal();
+	return m_linkedParameterTokens.at(index)->isCommentGlobal();
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumToken::getLinkedParameterCount --
+// HumdrumToken::getLinkedParameterSetCount --
 //
 
-int HumdrumToken::getLinkedParameterCount(void) {
-	return (int)m_linkedParameters.size();
+int HumdrumToken::getLinkedParameterSetCount(void) {
+	return (int)m_linkedParameterTokens.size();
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumToken::getLinkedParameter--
+// HumdrumToken::getParameterSet --
 //
 
-HumParamSet* HumdrumToken::getLinkedParameter(void) {
-	return m_linkedParameter;
-}
-
-
-HumParamSet* HumdrumToken::getLinkedParameter(int index) {
-	return m_linkedParameters.at(index)->getLinkedParameter();
+HumParamSet* HumdrumToken::getParameterSet(void) {
+	return m_parameterSet;
 }
 
 
 
 //////////////////////////////
 //
-// HumdrumToken::storeLinkedParameters -- Store the contents of the token
+// HumdrumToken::getLinkedParameterSet --
+//
+
+HumParamSet* HumdrumToken::getLinkedParameterSet(int index) {
+	return m_linkedParameterTokens.at(index)->getParameterSet();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::storeParameterSet -- Store the contents of the token
 //    in the linked parameter storage.  Used for layout parameters.
 //
 
-void HumdrumToken::storeLinkedParameters(void) {
-	if (m_linkedParameter) {
-		delete m_linkedParameter;
+void HumdrumToken::storeParameterSet(void) {
+	if (m_parameterSet) {
+		delete m_parameterSet;
+		m_parameterSet = NULL;
 	}
-	m_linkedParameter = new HumParamSet(*((string*)this));
+	if (this->isCommentLocal() && (this->find(':') != string::npos)) {
+		m_parameterSet = new HumParamSet(*((string*)this));
+	} else if (this->isCommentGlobal() && (this->find(':') != string::npos)) {
+		m_parameterSet = new HumParamSet(*((string*)this));
+	}
 }
 
 
@@ -27604,14 +27654,14 @@ std::string HumdrumToken::getLayoutParameter(const std::string& category,
 	}
 
 	std::string output;
-	int lcount = this->getLinkedParameterCount();
+	int lcount = this->getLinkedParameterSetCount();
 	if (lcount == 0) {
 		return output;
 	}
 
 	std::string nparam;
-	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
-		hum::HumParamSet *hps = this->getLinkedParameter(p);
+	for (int p = 0; p < this->getLinkedParameterSetCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameterSet(p);
 		if (hps == NULL) {
 			continue;
 		}
@@ -27694,14 +27744,14 @@ std::string HumdrumToken::getSlurLayoutParameter(const std::string& keyname,
 		}
 	}
 
-	int lcount = this->getLinkedParameterCount();
+	int lcount = this->getLinkedParameterSetCount();
 	if (lcount == 0) {
 		return output;
 	}
 
 	std::string sparam;
-	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
-		hum::HumParamSet *hps = this->getLinkedParameter(p);
+	for (int p = 0; p < this->getLinkedParameterSetCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameterSet(p);
 		if (hps == NULL) {
 			continue;
 		}
@@ -27764,14 +27814,14 @@ std::string HumdrumToken::getPhraseLayoutParameter(const std::string& keyname,
 		}
 	}
 
-	int lcount = this->getLinkedParameterCount();
+	int lcount = this->getLinkedParameterSetCount();
 	if (lcount == 0) {
 		return output;
 	}
 
 	std::string sparam;
-	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
-		hum::HumParamSet *hps = this->getLinkedParameter(p);
+	for (int p = 0; p < this->getLinkedParameterSetCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameterSet(p);
 		if (hps == NULL) {
 			continue;
 		}
@@ -27832,14 +27882,14 @@ std::string HumdrumToken::getLayoutParameterChord(const std::string& category,
 	}
 
 	std::string output;
-	int lcount = this->getLinkedParameterCount();
+	int lcount = this->getLinkedParameterSetCount();
 	if (lcount == 0) {
 		return output;
 	}
 
 	std::string nparam;
-	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
-		hum::HumParamSet *hps = this->getLinkedParameter(p);
+	for (int p = 0; p < this->getLinkedParameterSetCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameterSet(p);
 		if (hps == NULL) {
 			continue;
 		}
@@ -27893,14 +27943,14 @@ std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
 	}
 
 	std::string output;
-	int lcount = this->getLinkedParameterCount();
+	int lcount = this->getLinkedParameterSetCount();
 	if (lcount == 0) {
 		return output;
 	}
 
 	std::string nparam;
-	for (int p = 0; p < this->getLinkedParameterCount(); ++p) {
-		hum::HumParamSet *hps = this->getLinkedParameter(p);
+	for (int p = 0; p < this->getLinkedParameterSetCount(); ++p) {
+		hum::HumParamSet *hps = this->getLinkedParameterSet(p);
 		if (hps == NULL) {
 			continue;
 		}
@@ -28196,8 +28246,8 @@ ostream& HumdrumToken::printXml(ostream& out, int level, const string& indent) {
 //
 
 ostream&	HumdrumToken::printXmlLinkedParameters(ostream& out, int level, const string& indent) {
-	if (m_linkedParameter) {
-		m_linkedParameter->printXml(out, level, indent);
+	if (m_parameterSet) {
+		m_parameterSet->printXml(out, level, indent);
 	}
 	return out;
 }
@@ -28210,7 +28260,7 @@ ostream&	HumdrumToken::printXmlLinkedParameters(ostream& out, int level, const s
 //
 
 ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, const string& indent) {
-	if (m_linkedParameters.empty()) {
+	if (m_linkedParameterTokens.empty()) {
 		return out;
 	}
 
@@ -28218,15 +28268,15 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 	out << "<parameters-linked>\n";
 
 	level++;
-	for (int i=0; i<(int)m_linkedParameters.size(); i++) {
+	for (int i=0; i<(int)m_linkedParameterTokens.size(); i++) {
 		out << Convert::repeatString(indent, level);
 		out << "<linked-parameter";
 		out << " idref=\"";
-		HumdrumLine* owner = m_linkedParameters[i]->getOwner();
+		HumdrumLine* owner = m_linkedParameterTokens[i]->getOwner();
 		if (owner && owner->isGlobalComment()) {
 			out << owner->getXmlId();
 		} else {
-			out << m_linkedParameters[i]->getXmlId();
+			out << m_linkedParameterTokens[i]->getXmlId();
 		}
 		out << "\"";
 		out << ">\n";
@@ -75224,6 +75274,8 @@ Tool_sic::Tool_sic(void) {
 	define("s|substitution=b", "insert substitutions into music");
 	define("o|original=b", "insert originals into music");
 	define("r|remove=b", "remove sic layout tokens");
+	define("v|verbose=b", "add verbose parameter");
+	define("q|quiet=b", "remove verbose parameter");
 }
 
 
@@ -75267,7 +75319,7 @@ bool Tool_sic::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_sic::run(HumdrumFile& infile) {
 	initialize();
-	if (!(m_substituteQ || m_originalQ || m_removeQ)) {
+	if (!(m_substituteQ || m_originalQ || m_removeQ || m_verboseQ || m_quietQ)) {
 		return true;
 	}
 	processFile(infile);
@@ -75286,6 +75338,8 @@ void Tool_sic::initialize(void) {
 	m_substituteQ = getBoolean("substitution");
 	m_originalQ   = getBoolean("original");
 	m_removeQ     = getBoolean("remove");
+	m_verboseQ    = getBoolean("verbose");
+	m_quietQ      = getBoolean("quiet");
 }
 
 
@@ -75305,6 +75359,11 @@ void Tool_sic::processFile(HumdrumFile& infile) {
 			if (token->compare(0, 8, "!LO:SIC:") != 0) {
 				continue;
 			}
+			if (m_verboseQ) {
+				addVerboseParameter(token);
+			} else if (m_quietQ) {
+				removeVerboseParameter(token);
+			}
 			if (m_removeQ) {
 				token->setText("!");
 				m_modifiedQ = true;
@@ -75318,6 +75377,44 @@ void Tool_sic::processFile(HumdrumFile& infile) {
 	if (m_modifiedQ) {
 		infile.createLinesFromTokens();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::addVerboseParameter --
+//
+
+void Tool_sic::addVerboseParameter(HTp token) {
+	HumRegex hre;
+	string value = token->getText();
+	if (hre.search(value, "(:v:)|(:v$)")) {
+		return;
+	}
+	string newvalue = value + ":v";
+	token->setText(newvalue);
+	m_modifiedQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_sic::removeVerboseParameter --
+//
+
+void Tool_sic::removeVerboseParameter(HTp token) {
+	HumRegex hre;
+	string value = token->getText();
+	string newvalue = value;
+	hre.replaceDestructive(newvalue, ":", ":v:", "g");
+	hre.replaceDestructive(newvalue, "", ":v$", "");
+	if (value == newvalue) {
+		return;
+	}
+	token->setText(newvalue);
+	m_modifiedQ = true;
 }
 
 
@@ -75380,7 +75477,7 @@ void Tool_sic::insertSubstitutionToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:xSIC";
+	string newsic = "LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "s=") == 0) {
 			newsic += ":o=" + tstring;
@@ -75419,7 +75516,7 @@ void Tool_sic::insertOriginalToken(HTp sictok) {
 	}
 	target->setText(sstring);
 	m_modifiedQ = true;
-	string newsic = "LO:xSIC";
+	string newsic = "LO:SIC";
 	for (int i=2; i<(int)pieces.size(); i++) {
 		if (pieces[i].compare(0, 2, "o=") == 0) {
 			newsic += ":s=" + tstring;

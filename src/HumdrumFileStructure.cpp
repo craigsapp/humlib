@@ -34,7 +34,7 @@ namespace hum {
 //     constructor.
 //
 
-HumdrumFileStructure::HumdrumFileStructure(void) {
+HumdrumFileStructure::HumdrumFileStructure(void) : HumdrumFileBase() {
 	// do nothing
 }
 
@@ -766,7 +766,7 @@ bool HumdrumFileStructure::analyzeGlobalParameters(void) {
 
 		for (int j=0; j<(int)m_lines[i]->getFieldCount(); j++) {
 			for (int k=0; k<(int)globals.size(); k++) {
-				m_lines[i]->token(j)->addLinkedParameter(globals[k]->token(0));
+				m_lines[i]->token(j)->addLinkedParameterSet(globals[k]->token(0));
 			}
 		}
 		globals.clear();
@@ -1300,9 +1300,9 @@ void HumdrumFileStructure::processLocalParametersForStrand(int index) {
 			dtok = tok;
 		} else if (tok->isCommentLocal()) {
 			if (tok->find("!LO:") == 0) {
-				tok->storeLinkedParameters();
+				tok->storeParameterSet();
 				if (dtok) {
-					dtok->addLinkedParameter(tok);
+					dtok->addLinkedParameterSet(tok);
 				}
 			}
 		}
@@ -1429,6 +1429,8 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	assignStrandsToTokens();
 
 	resolveNullTokens();
+
+	analyzeLocalParameters();
 
 	return isValid();
 }

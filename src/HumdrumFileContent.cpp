@@ -25,7 +25,7 @@ namespace hum {
 // HumdrumFileContent::HumdrumFileContent --
 //
 
-HumdrumFileContent::HumdrumFileContent(void) {
+HumdrumFileContent::HumdrumFileContent(void) : HumdrumFileStructure() {
 	// do nothing
 }
 

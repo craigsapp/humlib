@@ -2047,7 +2047,7 @@ void HumdrumLine::appendToken(int index, const char* token, int tabcount) {
 //
 
 void HumdrumLine::storeGlobalLinkedParameters(void) {
-	token(0)->storeLinkedParameters();
+	token(0)->storeParameterSet();
 }
 
 

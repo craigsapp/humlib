@@ -209,10 +209,16 @@ class HumHash {
 		void           deleteValue         (const std::string& ns2, const std::string& key);
 		void           deleteValue         (const std::string& ns1, const std::string& ns2,
 		                                    const std::string& key);
-		std::vector<std::string> getKeys             (void) const;
-		std::vector<std::string> getKeys             (const std::string& ns) const;
-		std::vector<std::string> getKeys             (const std::string& ns1,
+
+		std::vector<std::string> getKeys   (void) const;
+		std::vector<std::string> getKeys   (const std::string& ns) const;
+		std::vector<std::string> getKeys   (const std::string& ns1,
 		                                    const std::string& ns2) const;
+
+		std::map<std::string, std::string> getParameters(std::string& ns1);
+		std::map<std::string, std::string> getParameters(const std::string& ns1,
+		                                    const std::string& ns2);
+
 		bool           hasParameters       (void) const;
 		bool           hasParameters       (const std::string& ns) const;
 		bool           hasParameters       (const std::string& ns1,

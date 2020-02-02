@@ -123,8 +123,8 @@ class HumParamSet {
 		              HumParamSet        (HTp token);
 		             ~HumParamSet        ();
 
-		const std::string& getNamespace1      (void);
-		const std::string& getNamespace2      (void);
+		const std::string& getNamespace1 (void);
+		const std::string& getNamespace2 (void);
 		std::string   getNamespace       (void);
 		void          setNamespace1      (const std::string& name);
 		void          setNamespace2      (const std::string& name);

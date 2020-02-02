@@ -83,7 +83,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 
 		// rhythmic analysis related functionality:
 		HumNum        getScoreDuration             (void) const;
-		std::ostream&      printDurationInfo       (std::ostream& out = std::cout);
+		std::ostream& printDurationInfo            (std::ostream& out = std::cout);
 		int           tpq                          (void);
 
 		// strand functionality:
@@ -124,6 +124,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeGlobalParameters      (void);
 		bool          analyzeLocalParameters       (void);
+		bool          analyzeParameters            (void);
 		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		HumNum        getMinDur                    (std::vector<HumNum>& durs,
 		                                            std::vector<HumNum>& durstate);

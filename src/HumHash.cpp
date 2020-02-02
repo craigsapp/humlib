@@ -640,6 +640,43 @@ void HumHash::setValue(const string& ns1, const string& ns2,
 
 //////////////////////////////
 //
+// HumHas::getParameters -- Return a map of the key/values for a
+//    particular namespace.  If the namespace(s) do not exist
+//    then the map will be empty.
+//
+
+map<string, string> HumHash::getParameters(const string& ns1, const string& ns2) {
+	map<string, string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	for (auto& it : (*parameters)[ns1][ns2]) {
+		output[it.first] = it.second;
+	}
+	return output;
+}
+
+
+map<string, string> HumHash::getParameters(string& ns) {
+	map<string, string> output;
+	if (parameters == NULL) {
+		return output;
+	}
+	auto loc = ns.find(":");
+	if (loc != string::npos) {
+		string ns1 = ns.substr(0, loc);
+		string ns2 = ns.substr(loc+1);
+		return getParameters(ns1, ns2);
+	}
+
+	// Search the ns namespace in the root namespace:
+	return getParameters("", ns);
+}
+
+
+
+//////////////////////////////
+//
 // HumHash::getKeys -- Return a list of keys in a particular namespace
 //     combination.  With no parameters, a complete list of all
 //     namespaces/keys will be returned.  Giving one parameter will
