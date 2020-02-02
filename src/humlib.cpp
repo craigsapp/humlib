@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb  1 15:13:02 PST 2020
+// Last Modified: Sat Feb  1 18:27:35 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -4949,12 +4949,12 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 		// something strange happened: expecting at least one item in measure.
 		return;
 	}
-	GridPart* part;
-	GridStaff* staff;
-	GridVoice* voice;
+	// GridPart* part;
+	// GridStaff* staff;
+	// GridVoice* voice;
 
 	auto previous = iter;
-	auto last = previous;
+	// auto last = previous;
 	previous++;
 	HumNum ptime = (*previous)->getTimestamp();
 	HumNum newtargettime = ptime;
@@ -55109,6 +55109,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "satb2gsx") {
 			// humlib cli emulation
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "sic") {
+			RUNTOOL(sic, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
 			RUNTOOL2(simat, infile, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {

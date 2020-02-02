@@ -1253,12 +1253,12 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 		// something strange happened: expecting at least one item in measure.
 		return;
 	}
-	GridPart* part;
-	GridStaff* staff;
-	GridVoice* voice;
+	// GridPart* part;
+	// GridStaff* staff;
+	// GridVoice* voice;
 
 	auto previous = iter;
-	auto last = previous;
+	// auto last = previous;
 	previous++;
 	HumNum ptime = (*previous)->getTimestamp();
 	HumNum newtargettime = ptime;

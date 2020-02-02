@@ -38,6 +38,7 @@
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-satb2gs.h"
+#include "tool-sic.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
 #include "tool-spinetrace.h"
@@ -228,6 +229,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "satb2gsx") {
 			// humlib cli emulation
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "sic") {
+			RUNTOOL(sic, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
 			RUNTOOL2(simat, infile, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
