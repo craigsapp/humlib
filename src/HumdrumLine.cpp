@@ -1092,6 +1092,26 @@ bool HumdrumLine::isGlobal(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::equalFieldsQ --
+//
+
+bool HumdrumLine::equalFieldsQ(const string& exinterp, const string& value) {
+	for (int i=0; i<getFieldCount(); i++) {
+		HTp token = this->token(i);
+		if (!token->isDataType(exinterp)) {
+			return false;
+		}
+		if (*token != value) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isManipulator -- Returns true if any tokens on the line are
 //   manipulator interpretations.  Only null interpretations are allowed on
 //   lines which contain manipulators, but the parser currently does not

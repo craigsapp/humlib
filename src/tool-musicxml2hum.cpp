@@ -4445,6 +4445,9 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	}
 
 	// Check for percussion clefs, etc., here.
+	if (sign == "percussion") {
+		sign = "X";
+	}
 	stringstream ss;
 	ss << "*clef" << sign;
 	if (octadjust < 0) {

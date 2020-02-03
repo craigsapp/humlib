@@ -37,6 +37,7 @@
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
+#include "tool-rid.h"
 #include "tool-satb2gs.h"
 #include "tool-sic.h"
 #include "tool-simat.h"
@@ -224,6 +225,12 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
+		} else if (commands[i].first == "rid") {
+			RUNTOOL(rid, infile, commands[i].second, status);
+		} else if (commands[i].first == "ridx") {
+			RUNTOOL(rid, infile, commands[i].second, status);
+		} else if (commands[i].first == "ridxx") {
+			RUNTOOL(rid, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gs") {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "satb2gsx") {

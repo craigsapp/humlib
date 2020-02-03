@@ -70,6 +70,7 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isManipulator          (void) const;
 		bool        hasSpines              (void) const;
 		bool        isGlobal               (void) const;
+		bool        equalFieldsQ           (const string& exinterp, const string& value);
 		HTp         token                  (int index) const;
 		void        getTokens              (std::vector<HTp>& list);
 		int         getTokenCount          (void) const;
