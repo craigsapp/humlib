@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 17 02:39:28 PDT 2015
-// Last Modified: Mon Aug 17 02:39:32 PDT 2015
+// Last Modified: Tue Feb  4 21:02:30 PST 2020 Strophe analysis
 // Filename:      HumdrumFileStructure.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/HumdrumFileStructure.h
 // Syntax:        C++11; humlib
@@ -87,13 +87,17 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		int           tpq                          (void);
 
 		// strand functionality:
-		HTp           getStrandStart               (int index);
-		HTp           getStrandEnd                 (int index);
-		HTp           getStrandStart               (int sindex, int index);
-		HTp           getStrandEnd                 (int sindex, int index);
-		int           getStrandCount               (void);
-		int           getStrandCount               (int spineindex);
-		void          resolveNullTokens            (void);
+		HTp           getStrandStart    (int index);
+		HTp           getStrandBegin    (int index) { return getStrandStart(index); }
+		HTp           getStrandEnd      (int index);
+		HTp           getStrandStop     (int index) { return getStrandEnd(index); }
+		HTp           getStrandStart    (int sindex, int index);
+		HTp           getStrandBegin    (int sindex, int index) { return getStrandStart(sindex, index); }
+		HTp           getStrandEnd      (int sindex, int index);
+		HTp           getStrandStop     (int sindex, int index) { return getStrandEnd(sindex, index); }
+		int           getStrandCount    (void);
+		int           getStrandCount    (int spineindex);
+		void          resolveNullTokens (void);
 
 		HTp           getStrand                    (int index)
 		                                        { return getStrandStart(index); }
@@ -124,7 +128,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeTokenDurations        (void);
 		bool          analyzeGlobalParameters      (void);
 		bool          analyzeLocalParameters       (void);
-		bool          analyzeParameters            (void);
+		// bool          analyzeParameters            (void);
+		bool          analyzeStrophes              (void);
 		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		HumNum        getMinDur                    (std::vector<HumNum>& durs,
 		                                            std::vector<HumNum>& durstate);

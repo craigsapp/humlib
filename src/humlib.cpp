@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Feb  2 23:42:11 PST 2020
+// Last Modified: Wed Feb  5 09:14:53 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21733,7 +21733,7 @@ bool HumdrumFileStructure::readStringCsv(const string& contents,
 bool HumdrumFileStructure::analyzeStructure(void) {
 	m_structure_analyzed = false;
 	if (!m_strands_analyzed) {
-		if (!analyzeStrands()          ) { return isValid(); }
+		if (!analyzeStrands()       ) { return isValid(); }
 	}
 	if (!analyzeGlobalParameters() ) { return isValid(); }
 	if (!analyzeLocalParameters()  ) { return isValid(); }
@@ -21744,6 +21744,69 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 	analyzeSignifiers();
 	return isValid();
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::analyzeStrophes --
+//
+
+bool HumdrumFileStructure::analyzeStrophes(void) {
+	vector<HTp> strands;
+	int scount = (int)m_strand1d.size();
+	bool dataQ;
+	vector<HTp> strophestarts;
+	for (int i=0; i<scount; i++) {
+		dataQ = false;
+		HTp current = m_strand1d.at(i).first;
+		HTp send = m_strand1d.at(i).last;
+		if (!send) {
+			continue;
+		}
+		while (current && (current != send)) {
+			if (current->isData()) {
+				// not a strophe (data not allowed in subspine before strophe marker).
+				break;
+			}
+			if (current->compare(0, 3, "*S/") == 0) {
+				int track = current->getTrack();
+				HTp first = current->getPreviousFieldToken();
+				if (first) {
+					int trackp = first->getTrack();
+					if (track == trackp) {
+						if (first->compare(0, 3, "*S/") == 0) {
+							bool found = false;
+							for (int j=0; j<(int)strophestarts.size(); j++) {
+								if (strophestarts[j] == first) {
+									found = true;
+									break;
+								}
+							}
+							if (!found) {
+								strophestarts.push_back(first);
+							}
+						}
+					}
+				}
+				bool found = false;
+				for (int j=0; j<(int)strophestarts.size(); j++) {
+					if (strophestarts[j] == current) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					strophestarts.push_back(current);
+				}
+				break;
+			}
+			current = current->getNextToken();
+		}
+	}
+	return true;
+}
+
 
 
 
@@ -22942,8 +23005,8 @@ void HumdrumFileStructure::checkForLocalParameters(HTp token,
 bool HumdrumFileStructure::analyzeStrands(void) {
 	m_strands_analyzed = true;
 	int spines = getSpineCount();
-	m_strand1d.resize(0);
-	m_strand2d.resize(0);
+	m_strand1d.clear();
+	m_strand2d.clear();
 	int i, j;
 	for (i=0; i<spines; i++) {
 		HTp tok = getSpineStart(i);
@@ -22964,6 +23027,8 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 	resolveNullTokens();
 
 	analyzeLocalParameters();
+
+	analyzeStrophes();
 
 	return isValid();
 }
