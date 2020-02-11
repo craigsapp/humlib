@@ -154,6 +154,7 @@ class HumdrumFileBase : public HumHash {
 		std::string   getXmlIdPrefix           (void);
 		void          setFilename              (const std::string& filename);
 		std::string   getFilename              (void);
+		std::string   getFilenameBase          (void);
 
 		void          setSegmentLevel          (int level = 0);
 		int           getSegmentLevel          (void);

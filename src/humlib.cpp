@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb  5 09:14:53 PST 2020
+// Last Modified: Mon 10 Feb 2020 10:22:59 PM PST
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -15765,6 +15765,29 @@ string HumdrumFileBase::getFilename(void) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getFilenameBase -- Remove any path and any
+//    dot followed by non-dots.
+//
+
+string HumdrumFileBase::getFilenameBase(void) {
+	string output;
+	auto pos = m_filename.rfind('/');
+	if (pos != string::npos) {
+		output = m_filename.substr(pos+1);
+	} else {
+		output = m_filename;
+	}
+	pos = output.rfind('.');
+	if (pos != string::npos) {
+		output = output.substr(0,pos);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::printSegmentLabel --
 //
 
@@ -21755,10 +21778,10 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 bool HumdrumFileStructure::analyzeStrophes(void) {
 	vector<HTp> strands;
 	int scount = (int)m_strand1d.size();
-	bool dataQ;
+	// bool dataQ;
 	vector<HTp> strophestarts;
 	for (int i=0; i<scount; i++) {
-		dataQ = false;
+		// dataQ = false;
 		HTp current = m_strand1d.at(i).first;
 		HTp send = m_strand1d.at(i).last;
 		if (!send) {
@@ -26803,6 +26826,40 @@ bool HumdrumToken::isInstrumentAbbreviation(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::getInstrumentName --
+//
+
+string HumdrumToken::getInstrumentName(void) {
+	if (this->size() < 3) {
+		return "";
+	} else if (this->compare(0, 3, "*I\"") != 0) {
+		return "";
+	} else {
+		return this->substr(3);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getInstrumentAbbreviation --
+//
+
+string HumdrumToken::getInstrumentAbbreviation(void) {
+	if (this->size() < 3) {
+		return "";
+	} else if (this->compare(0, 3, "*I'") != 0) {
+		return "";
+	} else {
+		return this->substr(3);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has
 //     a '(' character.
 //
@@ -27226,7 +27283,7 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
-	if ((void*)this == NULL) {
+	if (((void*)this) == NULL) {
 		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
 		return false;
 	}

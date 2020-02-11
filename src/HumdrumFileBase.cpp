@@ -539,6 +539,29 @@ string HumdrumFileBase::getFilename(void) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::getFilenameBase -- Remove any path and any
+//    dot followed by non-dots.
+//
+
+string HumdrumFileBase::getFilenameBase(void) {
+	string output;
+	auto pos = m_filename.rfind('/');
+	if (pos != string::npos) {
+		output = m_filename.substr(pos+1);
+	} else {
+		output = m_filename;
+	}
+	pos = output.rfind('.');
+	if (pos != string::npos) {
+		output = output.substr(0,pos);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::printSegmentLabel --
 //
 

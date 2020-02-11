@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb  5 09:14:53 PST 2020
+// Last Modified: Mon 10 Feb 2020 10:22:59 PM PST
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1019,7 +1019,7 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isManipulator          (void) const;
 		bool        hasSpines              (void) const;
 		bool        isGlobal               (void) const;
-		bool        equalFieldsQ           (const string& exinterp, const string& value);
+		bool        equalFieldsQ           (const std::string& exinterp, const std::string& value);
 		HTp         token                  (int index) const;
 		void        getTokens              (std::vector<HTp>& list);
 		int         getTokenCount          (void) const;
@@ -1268,6 +1268,9 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isInstrumentDesignation   (void);
 		bool     isInstrumentName          (void);
 		bool     isInstrumentAbbreviation  (void);
+
+		std::string getInstrumentName        (void);
+		std::string getInstrumentAbbreviation(void);
 
 		bool     hasSlurStart              (void);
 		bool     hasSlurEnd                (void);
@@ -1622,6 +1625,7 @@ class HumdrumFileBase : public HumHash {
 		std::string   getXmlIdPrefix           (void);
 		void          setFilename              (const std::string& filename);
 		std::string   getFilename              (void);
+		std::string   getFilenameBase          (void);
 
 		void          setSegmentLevel          (int level = 0);
 		int           getSegmentLevel          (void);

@@ -1409,6 +1409,40 @@ bool HumdrumToken::isInstrumentAbbreviation(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::getInstrumentName --
+//
+
+string HumdrumToken::getInstrumentName(void) {
+	if (this->size() < 3) {
+		return "";
+	} else if (this->compare(0, 3, "*I\"") != 0) {
+		return "";
+	} else {
+		return this->substr(3);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getInstrumentAbbreviation --
+//
+
+string HumdrumToken::getInstrumentAbbreviation(void) {
+	if (this->size() < 3) {
+		return "";
+	} else if (this->compare(0, 3, "*I'") != 0) {
+		return "";
+	} else {
+		return this->substr(3);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::hasSlurStart -- Returns true if the **kern token has
 //     a '(' character.
 //
@@ -1832,7 +1866,7 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
-	if ((void*)this == NULL) {
+	if (((void*)this) == NULL) {
 		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
 		return false;
 	}
