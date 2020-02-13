@@ -4907,9 +4907,9 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getChildrenVector -- Return a list of all children elements
-//   of a given element.  Pugixml does not allow random access, but storing
-//   them in a vector allows that possibility.
+// Tool_musicxml2hum::getChildrenVector -- Return a list of all children
+//   elements of a given element.  Pugixml does not allow random access,
+//   but storing them in a vector allows that possibility.
 //
 
 void Tool_musicxml2hum::getChildrenVector(vector<xml_node>& children,

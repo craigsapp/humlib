@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb  5 09:14:53 PST 2020
+// Last Modified: Wed Feb 12 21:53:19 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -9473,6 +9473,11 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			return;
 		}
 		// At timestamp for adding new token.
+		if (!m_allslices.at(i)->at(p)->at(s)->at(0)) {
+			// Element is null where an invisible rest should be
+			// so allocate space for it.
+			m_allslices.at(i)->at(p)->at(s)->at(0) = new GridVoice();
+		}
 		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
 		break;
 	}
@@ -69172,9 +69177,9 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getChildrenVector -- Return a list of all children elements
-//   of a given element.  Pugixml does not allow random access, but storing
-//   them in a vector allows that possibility.
+// Tool_musicxml2hum::getChildrenVector -- Return a list of all children
+//   elements of a given element.  Pugixml does not allow random access,
+//   but storing them in a vector allows that possibility.
 //
 
 void Tool_musicxml2hum::getChildrenVector(vector<xml_node>& children,

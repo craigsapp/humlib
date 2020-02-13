@@ -2014,6 +2014,11 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			return;
 		}
 		// At timestamp for adding new token.
+		if (!m_allslices.at(i)->at(p)->at(s)->at(0)) {
+			// Element is null where an invisible rest should be
+			// so allocate space for it.
+			m_allslices.at(i)->at(p)->at(s)->at(0) = new GridVoice();
+		}
 		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
 		break;
 	}
