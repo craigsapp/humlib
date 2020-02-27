@@ -27,6 +27,7 @@
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
+#include "tool-humsheet.h"
 #include "tool-shed.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
@@ -206,6 +207,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homorhythm2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsheet") {
+			RUNTOOL(humsheet, infile, commands[i].second, status);
 		} else if (commands[i].first == "shed") {
 			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
