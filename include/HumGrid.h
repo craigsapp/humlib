@@ -73,6 +73,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void addNullTokensForGraceNotes    (void);
 		void addNullTokensForClefChanges   (void);
 		void addNullTokensForLayoutComments(void);
+		void checkForNullDataHoles         (void);
 
 		void fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);

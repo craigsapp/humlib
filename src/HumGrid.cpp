@@ -1851,6 +1851,7 @@ void HumGrid::addNullTokens(void) {
 	}
 
 	for (i=0; i<(int)m_allslices.size(); i++) {
+
 		GridSlice& slice = *m_allslices.at(i);
 		if (!slice.isNoteSlice()) {
 			// probably need to deal with grace note slices here
@@ -1876,12 +1877,85 @@ void HumGrid::addNullTokens(void) {
 				}
 			}
 		}
+
 	}
 
 	addNullTokensForGraceNotes();
 	adjustClefChanges();
 	addNullTokensForClefChanges();
 	addNullTokensForLayoutComments();
+	checkForNullDataHoles();
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::checkForNullData -- identify any spots in the grid which are NULL
+//     pointers and allocate invisible rests for them by finding the next
+//     durational item in the particular staff/layer.
+//
+
+void HumGrid::checkForNullDataHoles(void) {
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		GridSlice& slice = *m_allslices.at(i);
+		if (!slice.isNoteSlice()) {
+			continue;
+		}
+      for (int p=0; p<(int)slice.size(); p++) {
+			GridPart& part = *slice.at(p);
+      	for (int s=0; s<(int)part.size(); s++) {
+				GridStaff& staff = *part.at(s);
+      		for (int v=0; v<(int)staff.size(); v++) {
+					if (!staff.at(v)) {
+						staff.at(v) = new GridVoice();
+						// Calculate duration of void by searching
+						// for the next non-null voice in the current part/staff/voice
+						HumNum duration = slice.getDuration();
+						GridPart *pp;
+						GridStaff *sp;
+						GridVoice *vp;
+						for (int q=i+1; q<m_allslices.size(); q++) {
+							GridSlice *slicep = m_allslices.at(q);
+							if (!slicep->isNoteSlice()) {
+								// or isDataSlice()?
+								continue;
+							}
+							if (p >= (int)slicep->size() - 1) {
+								continue;
+							}
+							pp = slicep->at(p);
+							if (s >= (int)pp->size() - 1) {
+								continue;
+							}
+							sp = pp->at(s);
+							if (v >= (int)sp->size() - 1) {
+								// Found a data line with no data at given voice, so
+								// add slice duration to cumulative duration.
+								duration += slicep->getDuration();
+								continue;
+							}
+							vp = sp->at(v);
+							if (!vp) {
+								// found another null spot which should be dealt with later.
+								break;
+							} else {
+								// there is a token at the same part/staff/voice position.
+								// Maybe check if a null token, but if not a null token,
+								// then break here also.
+								break;
+							}
+						}
+						string recip = Convert::durationToRecip(duration);
+						// ggg @ marker is added to keep track of them for more debugging.
+						recip += "ryy@";
+						staff.at(v)->setToken(recip);
+						continue;
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -1918,6 +1992,7 @@ void HumGrid::setPartStaffDimensions(vector<vector<GridSlice*>>& nextevent,
 //    timing gaps in the first track of a **kern spine, then
 //    fill in with invisible rests.
 //
+// ggg
 
 void HumGrid::addInvisibleRestsInFirstTrack(void) {
 	int i; // slice index
@@ -1973,10 +2048,11 @@ void HumGrid::addInvisibleRestsInFirstTrack(void) {
 //
 // HumGrid::addInvisibleRest --
 //
+// ggg
 
 void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 		int index, int p, int s) {
-	GridSlice *ending = nextevent[p][s];
+	GridSlice *ending = nextevent.at(p).at(s);
 	if (ending == NULL) {
 		cerr << "Not handling this case yet at end of data." << endl;
 		return;
@@ -1991,7 +2067,7 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 	HumNum gap = difference - duration;
 	if (gap == 0) {
 		// nothing to do
-		nextevent[p][s] = starting;
+		nextevent.at(p).at(s) = starting;
 		return;
 	}
 	HumNum target = starttime + duration;
@@ -2014,17 +2090,19 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			return;
 		}
 		// At timestamp for adding new token.
-		if (!m_allslices.at(i)->at(p)->at(s)->at(0)) {
+		if ((m_allslices.at(i)->at(p)->at(s)->size() > 0) && !m_allslices.at(i)->at(p)->at(s)->at(0)) {
 			// Element is null where an invisible rest should be
 			// so allocate space for it.
 			m_allslices.at(i)->at(p)->at(s)->at(0) = new GridVoice();
 		}
-		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		if (m_allslices.at(i)->at(p)->at(s)->size() > 0) {
+			m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		}
 		break;
 	}
 
 	// Store the current event in the buffer
-	nextevent[p][s] = starting;
+	nextevent.at(p).at(s) = starting;
 }
 
 

@@ -1062,6 +1062,19 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			tempvoice = -1;
 			m_staff = -1;
 			tempstaff = -1;
+		} else {
+			// xml_node nel = el.next_sibling();
+			// Need to check if the forward element should be interpreted
+			// as an invisible rests.  Check to see if the previous and next
+			// element are notes.  If so, then check their voice numbers and
+			// if equal, then this forward element should be an invisible rest.
+			// But this is true only if there is no other event happening
+			// at the current position in the other voice(s) on the staff (or
+			// perhaps include other staves on the system and/or part.
+
+			// So this case might need to be addressed at a later stage when
+			// the score is assembled, such as when adding null tokens, and a
+			// null spot is located in the score.
 		}
 	}
 
@@ -1107,7 +1120,11 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 					m_eventtype = mevent_unknown;
 				}
 			} else if (tempduration < 4) {
-				cerr << "FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				// Warn about possible other errors:
+				double fraction = (double)tempduration / getQTicks();
+				if (fraction < 0.01) {
+					cerr << "WARNING: FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				}
 			}
 			setDurationByTicks(tempduration);
 			break;

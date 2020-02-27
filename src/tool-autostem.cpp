@@ -986,7 +986,7 @@ void Tool_autostem::removeStem2(HumdrumFile& infile, int row, int col) {
 void Tool_autostem::addStem(string& input, const string& piece) {
 	string output;
 	HumRegex hre;
-	if (hre.search(input, "(.*[ABCDEFG][n#-]*)(.*)$", "i")) {
+	if (hre.search(input, "(.*[ABCDEFG][n#-]*[xyXY<>]*)(.*)$", "i")) {
 		output = hre.getMatch(1);
 		output += piece;
 		output += hre.getMatch(2);

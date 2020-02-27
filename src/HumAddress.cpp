@@ -185,7 +185,9 @@ int HumAddress::getSubtrack(void) const {
 	if (m_subtrackcount == 1) {
 		return 0;
 	} else {
-		return m_subtrack + 1;
+		// return m_subtrack + 1;
+		// Should already be indexed from one.
+		return m_subtrack;
 	}
 }
 
