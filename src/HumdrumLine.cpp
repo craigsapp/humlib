@@ -362,6 +362,17 @@ bool HumdrumLine::isCommentGlobal(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isCommentUniversal -- Returns true if a universal comment.
+//
+
+bool HumdrumLine::isCommentUniversal(void) const {
+	return equalChar(3, '!') && equalChar(2, '!') && equalChar(1, '!') && equalChar(0, '!');
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isReference -- Returns true if a reference record.
 //
 
