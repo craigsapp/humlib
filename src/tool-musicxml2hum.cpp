@@ -987,6 +987,10 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				// ignore SharpEye dummy part names
 				continue;
 			}
+			if (partname.find("Unnamed") != string::npos) {
+				// ignore Sibelius dummy part names
+				continue;
+			}
 			string name = "*I\"" + partname;
 			maxstaff = outdata.getStaffCount(i);
 			gm->addLabelToken(name, 0, i, maxstaff-1, 0, (int)partdata.size(), maxstaff);
