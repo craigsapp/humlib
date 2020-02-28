@@ -35,16 +35,23 @@ class Tool_humsheet : public HumTool {
       void     printCellClasses  (HTp token);
       void     printHtmlHeader   (void);
       void     printHtmlFooter   (void);
-      void     printStyle        (void);
+      void     printStyle        (HumdrumFile& infile);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
 		void     analyzeTracks     (HumdrumFile& infile);
 		void     printColSpan      (HTp token);
+		void     printTabIndex     (HTp token);
+		void     analyzeTabIndex   (HumdrumFile& infile);
+		void     printId           (HTp token);
+		void     printToken        (HTp token);
+		void     printSpineData    (HTp token);
+		void     printSubspineData (HTp token);
 
 	private:
 		bool             m_htmlQ           = false;
+		bool             m_zebraQ          = false;
 		std::vector<int> m_max_subtrack;
 		int              m_max_track       = 0;
 		int              m_max_field       = 0;

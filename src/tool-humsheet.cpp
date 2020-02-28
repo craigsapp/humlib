@@ -25,7 +25,8 @@ namespace hum {
 //
 
 Tool_humsheet::Tool_humsheet(void) {
-	define("H|html=b", "output table in HTML wrapper");
+	define("h|H|html|HTML=b", "output table in HTML wrapper");
+	define("z|zebra=b", "add zebra striping by spine to style");
 }
 
 
@@ -83,6 +84,7 @@ bool Tool_humsheet::run(HumdrumFile& infile) {
 
 void Tool_humsheet::initialize(void) {
 	m_htmlQ = getBoolean("html");
+	m_zebraQ = getBoolean("zebra");
 }
 
 
@@ -96,9 +98,12 @@ void Tool_humsheet::processFile(HumdrumFile& infile) {
 	analyzeTracks(infile);
 	if (m_htmlQ) {
 		printHtmlHeader();
-		printStyle();
+		printStyle(infile);
 	}
-	m_free_text << "<table class=\"humdrum\">\n";
+	analyzeTabIndex(infile);
+	m_free_text << "<table class=\"humdrum\"";
+	m_free_text << " data-spine-count=\"" << infile.getMaxTrack() << "\"";
+	m_free_text << ">\n";
 	for (int i=0; i<infile.getLineCount(); i++) {
 		m_free_text << "<tr";
 		printRowClasses(infile, i);
@@ -202,12 +207,97 @@ void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
 	for (int i=0; i<fieldcount; i++) {
 		HTp token = infile.token(row, i);
 		m_free_text << "<td";
+		printId(token);
 		printCellClasses(token);
+		printSpineData(token);
+		printSubspineData(token);
+		printTabIndex(token);
 		printColSpan(token);
 		m_free_text << " contenteditable=\"true\">";
-		m_free_text << token;
+		printToken(token);
 		m_free_text << "</td>";
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printSpineData --
+//
+
+void Tool_humsheet::printSpineData(HTp token) {
+	int spine = token->getTrack() - 1;
+	m_free_text << " data-spine=\"" << spine << "\"";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printSubspineData --
+//
+
+void Tool_humsheet::printSubspineData(HTp token) {
+	int spine = token->getSubtrack();
+	if (spine > 0) {
+		spine--;
+	}
+	m_free_text << " data-subspine=\"" << spine << "\"";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printToken --
+//
+
+void Tool_humsheet::printToken(HTp token) {
+	for (int i=0; i<(int)token->size(); i++) {
+		switch (token->at(i)) {
+			case '>':
+				m_free_text << "&gt;";
+				break;
+			case '<':
+				m_free_text << "&lt;";
+				break;
+			default:
+				m_free_text << token->at(i);
+		}
+	}
+}
+
+
+
+///////////////////////////////
+//
+// Tool_humsheet::printId --
+//
+
+void Tool_humsheet::printId(HTp token) {
+	int line = token->getLineNumber();
+	int field = token->getFieldNumber();
+	string id = "tok-L";
+	id += to_string(line);
+	id += "F";
+	id += to_string(field);
+	m_free_text << " id=\"" << id << "\"";
+}
+
+
+
+///////////////////////////////
+//
+// Tool_humsheet::printTabIndex --
+//
+
+void Tool_humsheet::printTabIndex(HTp token) {
+	string number = token->getValue("auto", "tabindex");
+	if (number.empty()) {
+		return;
+	}
+	m_free_text << " tabindex=\"" << number << "\"";
 }
 
 
@@ -253,8 +343,16 @@ void Tool_humsheet::printColSpan(HTp token) {
 //
 
 void Tool_humsheet::printCellClasses(HTp token) {
-
+	int track = token->getTrack();
+	string classlist;
+	if (track % 2 == 0) {
+		classlist = "zebra";
+	}
+	if (!classlist.empty()) {
+		m_free_text << " class=\"" << classlist << "\"";
+	}
 }
+
 
 
 //////////////////////////////
@@ -262,10 +360,16 @@ void Tool_humsheet::printCellClasses(HTp token) {
 // Tool_humsheet::printStyle --
 //
 
-void Tool_humsheet::printStyle(void) {
+void Tool_humsheet::printStyle(HumdrumFile& infile) {
 	m_free_text << "<style>\n";
+	m_free_text << "body {\n";
+	m_free_text << "	padding: 20px;\n";
+	m_free_text << "}\n";
 	m_free_text << "table.humdrum {\n";
 	m_free_text << "	border-collapse: collapse;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum td {\n";
+	m_free_text << "	outline: none;\n";
 	m_free_text << "}\n";
 	m_free_text << "tr.ucomment {\n";
 	m_free_text << "	color: chocolate;\n";
@@ -284,6 +388,11 @@ void Tool_humsheet::printStyle(void) {
 	m_free_text << "	color: gray;\n";
 	m_free_text << "	background: rgba(0, 0, 0, 0.06);\n";
 	m_free_text << "}\n";
+	if (m_zebraQ) {
+		m_free_text << ".zebra {\n";
+		m_free_text << "	background: #ccccff33;\n";
+		m_free_text << "}\n";
+	}
 	m_free_text << "</style>\n";
 }
 
@@ -318,6 +427,28 @@ void Tool_humsheet::analyzeTracks(HumdrumFile& infile) {
 	m_max_field = 0;
 	for (int i=0; i<(int)m_max_subtrack.size(); i++) {
 		m_max_field += m_max_subtrack[i];
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::analyzeTabIndex --
+//
+
+void Tool_humsheet::analyzeTabIndex(HumdrumFile& infile) {
+	int scount = infile.getStrandCount();
+	int counter = 1;
+	for (int i=0; i<scount; i++) {
+		HTp start = infile.getStrandStart(i);
+		HTp stop = infile.getStrandEnd(i);
+		HTp current = start;
+		while (current && (current != stop)) {
+			string number = to_string(counter++);
+			current->setValue("auto", "tabindex", number);
+			current = current->getNextToken();
+		}
 	}
 }
 

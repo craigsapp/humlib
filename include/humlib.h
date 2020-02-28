@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Feb 27 04:50:24 PST 2020
+// Last Modified: Fri Feb 28 08:05:13 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5863,16 +5863,23 @@ class Tool_humsheet : public HumTool {
       void     printCellClasses  (HTp token);
       void     printHtmlHeader   (void);
       void     printHtmlFooter   (void);
-      void     printStyle        (void);
+      void     printStyle        (HumdrumFile& infile);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
 		void     analyzeTracks     (HumdrumFile& infile);
 		void     printColSpan      (HTp token);
+		void     printTabIndex     (HTp token);
+		void     analyzeTabIndex   (HumdrumFile& infile);
+		void     printId           (HTp token);
+		void     printToken        (HTp token);
+		void     printSpineData    (HTp token);
+		void     printSubspineData (HTp token);
 
 	private:
 		bool             m_htmlQ           = false;
+		bool             m_zebraQ          = false;
 		std::vector<int> m_max_subtrack;
 		int              m_max_track       = 0;
 		int              m_max_field       = 0;
