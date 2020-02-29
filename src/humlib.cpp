@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Feb 28 08:05:13 PST 2020
+// Last Modified: Sat Feb 29 14:58:53 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56849,6 +56849,7 @@ ostream& operator<<(ostream& out, NotePoint& np) {
 Tool_humsheet::Tool_humsheet(void) {
 	define("h|H|html|HTML=b", "output table in HTML wrapper");
 	define("z|zebra=b", "add zebra striping by spine to style");
+	define("t|tab-index=b", "vertical tab indexing");
 }
 
 
@@ -56905,8 +56906,9 @@ bool Tool_humsheet::run(HumdrumFile& infile) {
 //
 
 void Tool_humsheet::initialize(void) {
-	m_htmlQ = getBoolean("html");
-	m_zebraQ = getBoolean("zebra");
+	m_htmlQ       = getBoolean("html");
+	m_zebraQ      = getBoolean("zebra");
+	m_tabindexQ   = getBoolean("tab-index");
 }
 
 
@@ -56922,21 +56924,36 @@ void Tool_humsheet::processFile(HumdrumFile& infile) {
 		printHtmlHeader();
 		printStyle(infile);
 	}
-	analyzeTabIndex(infile);
+	if (m_tabindexQ) {
+		analyzeTabIndex(infile);
+	}
 	m_free_text << "<table class=\"humdrum\"";
 	m_free_text << " data-spine-count=\"" << infile.getMaxTrack() << "\"";
 	m_free_text << ">\n";
 	for (int i=0; i<infile.getLineCount(); i++) {
 		m_free_text << "<tr";
 		printRowClasses(infile, i);
+		printRowData(infile, i);
 		m_free_text << ">";
 		printRowContents(infile, i);
 		m_free_text << "</tr>\n";
 	}
 	m_free_text << "</table>";
 	if (m_htmlQ) {
+		printJavascript();
 		printHtmlFooter();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printRowData --
+//
+
+void Tool_humsheet::printRowData(HumdrumFile& infile, int line) {
+	m_free_text << " data-line=\"" << line << "\"";
 }
 
 
@@ -56992,6 +57009,9 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 	}
 	if (hl->isLocalComment()) {
 		classes += "lcomment ";
+		if (isLayout(hl)) {
+			classes += "layout ";
+		}
 	}
 
 	if (hl->isUniversalReference()) {
@@ -57002,6 +57022,9 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 		classes += "reference ";
 	} else if (hl->isGlobalComment()) {
 		classes += "gcomment ";
+		if (isLayout(hl)) {
+			classes += "layout ";
+		}
 	}
 
 	if (hl->isBarline()) {
@@ -57019,6 +57042,34 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 
 
 
+//////////////////////////////
+//
+// Tool_humsheet::isLayout -- check to see if any cell 
+//    starts with "!LO:".
+//
+
+bool Tool_humsheet::isLayout(HumdrumLine* line) {
+	if (line->hasSpines()) {
+		if (!line->isCommentLocal()) {
+			return false;
+		}
+		for (int i=0; i<line->getFieldCount(); i++) {
+			HTp token = line->token(i);
+			if (token->compare(0, 4, "!LO:") == 0) {
+				return true;
+			}
+		}
+	} else {
+		HTp token = line->token(0);
+		if (token->compare(0, 5, "!!LO:") == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
 ///////////////////////////////
 //
 // Tool_humsheet::printRowContents --
@@ -57031,11 +57082,16 @@ void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
 		m_free_text << "<td";
 		printId(token);
 		printCellClasses(token);
-		printSpineData(token);
-		printSubspineData(token);
-		printTabIndex(token);
+		printCellData(token);
+		if (m_tabindexQ) {
+			printTabIndex(token);
+		}
 		printColSpan(token);
-		m_free_text << " contenteditable=\"true\">";
+		if (!infile[row].isManipulator()) {
+			// do not allow manipulators to be edited
+			m_free_text << " contenteditable=\"true\"";
+		}
+		m_free_text << ">";
 		printToken(token);
 		m_free_text << "</td>";
 	}
@@ -57045,27 +57101,23 @@ void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
 
 //////////////////////////////
 //
-// Tool_humsheet::printSpineData --
+// Tool_humsheet::printCellData --
 //
 
-void Tool_humsheet::printSpineData(HTp token) {
-	int spine = token->getTrack() - 1;
-	m_free_text << " data-spine=\"" << spine << "\"";
-}
+void Tool_humsheet::printCellData(HTp token) {
+	int field = token->getFieldIndex();
+	m_free_text << " data-field=\"" << field << "\"";
 
 
+	if (token->getOwner()->hasSpines()) {
+		int spine = token->getTrack() - 1;
+		m_free_text << " data-spine=\"" << spine << "\"";
 
-//////////////////////////////
-//
-// Tool_humsheet::printSubspineData --
-//
-
-void Tool_humsheet::printSubspineData(HTp token) {
-	int spine = token->getSubtrack();
-	if (spine > 0) {
-		spine--;
+		int subspine = token->getSubtrack();
+		if (subspine > 0) {
+			m_free_text << " data-subspine=\"" << subspine << "\"";
+		}
 	}
-	m_free_text << " data-subspine=\"" << spine << "\"";
 }
 
 
@@ -57168,11 +57220,21 @@ void Tool_humsheet::printCellClasses(HTp token) {
 	int track = token->getTrack();
 	string classlist;
 	if (track % 2 == 0) {
-		classlist = "zebra";
+		classlist = "zebra ";
 	}
+
+	if (token->getOwner()->hasSpines()) {
+		int length = (int)token->size();
+		if (length > 20) {
+			classlist += "long ";
+		}
+	}
+
 	if (!classlist.empty()) {
+		classlist.resize((int)classlist.size() - 1);
 		m_free_text << " class=\"" << classlist << "\"";
 	}
+
 }
 
 
@@ -57183,6 +57245,7 @@ void Tool_humsheet::printCellClasses(HTp token) {
 //
 
 void Tool_humsheet::printStyle(HumdrumFile& infile) {
+
 	m_free_text << "<style>\n";
 	m_free_text << "body {\n";
 	m_free_text << "	padding: 20px;\n";
@@ -57190,32 +57253,448 @@ void Tool_humsheet::printStyle(HumdrumFile& infile) {
 	m_free_text << "table.humdrum {\n";
 	m_free_text << "	border-collapse: collapse;\n";
 	m_free_text << "}\n";
+	m_free_text << "table.humdrum td:focus {\n";
+	m_free_text << "	background: #ff000033 !important;\n";
+	m_free_text << "}\n";
 	m_free_text << "table.humdrum td {\n";
 	m_free_text << "	outline: none;\n";
 	m_free_text << "}\n";
-	m_free_text << "tr.ucomment {\n";
+	m_free_text << "table.humdrum td[data-subspine='1'],\n";
+	m_free_text << "table.humdrum td[data-subspine='2'],\n";
+	m_free_text << "table.humdrum td[data-subspine='3'],\n";
+	m_free_text << "table.humdrum td[data-subspine='4'],\n";
+	m_free_text << "table.humdrum td[data-subspine='5'],\n";
+	m_free_text << "table.humdrum td[data-subspine='6'],\n";
+	m_free_text << "table.humdrum td[data-subspine='7'],\n";
+	m_free_text << "table.humdrum td[data-subspine='8'],\n";
+	m_free_text << "table.humdrum td[data-subspine='9'] {\n";
+	m_free_text << "	border-right: solid #0000000A 1px;\n";
+	m_free_text << "	padding-left: 3px;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ucomment {\n";
 	m_free_text << "	color: chocolate;\n";
 	m_free_text << "}\n";
-	m_free_text << "tr.ureference {\n";
+	m_free_text << "table.humdrum tr.ureference {\n";
 	m_free_text << "	color: chocolate;\n";
 	m_free_text << "	background: rgb(255,99,71,0.25);\n";
 	m_free_text << "}\n";
-	m_free_text << "tr.reference {\n";
+	m_free_text << "table.humdrum tr.reference {\n";
 	m_free_text << "	color: green;\n";
 	m_free_text << "}\n";
-	m_free_text << "tr.interp {\n";
+	m_free_text << "table.humdrum tr.interp {\n";
 	m_free_text << "	color: darkviolet;\n";
 	m_free_text << "}\n";
-	m_free_text << "tr.barline {\n";
+	m_free_text << "table.humdrum tr.layout {\n";
+	m_free_text << "	color: orange;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.barline {\n";
 	m_free_text << "	color: gray;\n";
 	m_free_text << "	background: rgba(0, 0, 0, 0.06);\n";
 	m_free_text << "}\n";
+	m_free_text << "table.humdrum td.long {\n";
+	m_free_text << "	white-space: nowrap;\n";
+	m_free_text << "	max-width: 200px;\n";
+	m_free_text << "	background-image: linear-gradient(to right, cornsilk 95%, crimson 100%);\n";
+	m_free_text << "	overflow: scroll;\n";
+	m_free_text << "}\n";
+
 	if (m_zebraQ) {
 		m_free_text << ".zebra {\n";
 		m_free_text << "	background: #ccccff33;\n";
 		m_free_text << "}\n";
 	}
+
 	m_free_text << "</style>\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printJavascript --
+//
+
+void Tool_humsheet::printJavascript(void) {
+
+	m_free_text << "<script>\n";
+	m_free_text << "\n";
+	m_free_text << "var AKey      = 65;\n";
+	m_free_text << "var BKey      = 66;\n";
+	m_free_text << "var CKey      = 67;\n";
+	m_free_text << "var DKey      = 68;\n";
+	m_free_text << "var EKey      = 69;\n";
+	m_free_text << "var FKey      = 70;\n";
+	m_free_text << "var GKey      = 71;\n";
+	m_free_text << "var HKey      = 72;\n";
+	m_free_text << "var IKey      = 73;\n";
+	m_free_text << "var JKey      = 74;\n";
+	m_free_text << "var KKey      = 75;\n";
+	m_free_text << "var LKey      = 76;\n";
+	m_free_text << "var MKey      = 77;\n";
+	m_free_text << "var NKey      = 78;\n";
+	m_free_text << "var OKey      = 79;\n";
+	m_free_text << "var PKey      = 80;\n";
+	m_free_text << "var QKey      = 81;\n";
+	m_free_text << "var RKey      = 82;\n";
+	m_free_text << "var SKey      = 83;\n";
+	m_free_text << "var TKey      = 84;\n";
+	m_free_text << "var UKey      = 85;\n";
+	m_free_text << "var VKey      = 86;\n";
+	m_free_text << "var WKey      = 87;\n";
+	m_free_text << "var XKey      = 88;\n";
+	m_free_text << "var YKey      = 89;\n";
+	m_free_text << "var ZKey      = 90;\n";
+	m_free_text << "var ZeroKey   = 48;\n";
+	m_free_text << "var OneKey    = 49;\n";
+	m_free_text << "var TwoKey    = 50;\n";
+	m_free_text << "var ThreeKey  = 51;\n";
+	m_free_text << "var FourKey   = 52;\n";
+	m_free_text << "var FiveKey   = 53;\n";
+	m_free_text << "var SixKey    = 54;\n";
+	m_free_text << "var SevenKey  = 55;\n";
+	m_free_text << "var EightKey  = 56;\n";
+	m_free_text << "var NineKey   = 57;\n";
+	m_free_text << "var PgUpKey   = 33;\n";
+	m_free_text << "var PgDnKey   = 34;\n";
+	m_free_text << "var EndKey    = 35;\n";
+	m_free_text << "var HomeKey   = 36;\n";
+	m_free_text << "var LeftKey   = 37;\n";
+	m_free_text << "var UpKey     = 38;\n";
+	m_free_text << "var RightKey  = 39;\n";
+	m_free_text << "var DownKey   = 40;\n";
+	m_free_text << "var EnterKey  = 13;\n";
+	m_free_text << "var SpaceKey  = 32;\n";
+	m_free_text << "var SlashKey  = 191;\n";
+	m_free_text << "var EscKey    = 27;\n";
+	m_free_text << "var BackKey   = 8;\n";
+	m_free_text << "var CommaKey  = 188;\n";
+	m_free_text << "var MinusKey  = 189;\n";
+	m_free_text << "var DotKey    = 190;\n";
+	m_free_text << "var SemiColonKey = 186;\n";
+	m_free_text << "var BackQuoteKey   = 192;\n";
+	m_free_text << "var SingleQuoteKey = 222;\n";
+	m_free_text << "\n";
+	m_free_text << "var TARGET_SPINE    = 0;\n";
+	m_free_text << "var TARGET_SUBSPINE = 0;\n";
+	m_free_text << "\n";
+	m_free_text << "window.addEventListener('keydown', processKey, true);\n";
+	m_free_text << "\n";
+	m_free_text << "function processKey(event) {\n";
+	m_free_text << "	var target;\n";
+	m_free_text << "	var spine;\n";
+	m_free_text << "	var subspine;\n";
+	m_free_text << "	var rent;\n";
+	m_free_text << "	var nextline;\n";
+	m_free_text << "	var line;\n";
+	m_free_text << "	var nexttr;\n";
+	m_free_text << "	var newtd;\n";
+	m_free_text << "\n";
+	m_free_text << "	if (!event.preventDefault) {\n";
+	m_free_text << "		event.preventDefault = function() { };\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	if (event.metaKey) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	switch (event.keyCode) {\n";
+	m_free_text << "\n";
+	m_free_text << "		case EnterKey: // Move to next lower row in same spine\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveLine(event.target, -1);\n";
+	m_free_text << "			} else {\n";
+	m_free_text << "				moveLine(event.target, +1);\n";
+	m_free_text << "			}\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case DownKey:  // Move to next lower row in same spine\n";
+	m_free_text << "			moveLine(event.target, +1);\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case UpKey:\n";
+	m_free_text << "			moveLine(event.target, -1);\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case RightKey:\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveField(event.target, +1);\n";
+	m_free_text << "				event.preventDefault();\n";
+	m_free_text << "			}\n";
+	m_free_text << "			 break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case LeftKey:\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveField(event.target, -1);\n";
+	m_free_text << "				event.preventDefault();\n";
+	m_free_text << "			}\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveField -- Move the to the next or previous td on a row.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveField(target, direction) {\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		console.log('TARGET IS NOT TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	rent = target.parentNode;\n";
+	m_free_text << "	if (rent.nodeName !== 'TR') {\n";
+	m_free_text << "		console.log('PARENT IS NOT TR');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var tds = rent.querySelectorAll('TD');\n";
+	m_free_text << "	for (var i=0; i<tds.length; i++) {\n";
+	m_free_text << "		if (target !== tds[i]) {\n";
+	m_free_text << "			console.log('TARGET', target, 'NOT THE SAME AS', tds[i]);\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		var newi = i + direction;\n";
+	m_free_text << "		if (newi < 0) {\n";
+	m_free_text << "			// Don't do anything since there are no more\n";
+	m_free_text << "			// cells to the left of the current cell.\n";
+	m_free_text << "			return;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		if (newi >= tds.length) {\n";
+	m_free_text << "			// Don't do anything since there are no more\n";
+	m_free_text << "			// cells to the right of the current cell.\n";
+	m_free_text << "			return;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		var newtd = tds[newi];\n";
+	m_free_text << "		newtd.focus();\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveLine --\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveLine(target, direction) {\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		console.log('TARGET IS NOT TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	spine = parseInt(target.dataset.spine || -1);\n";
+	m_free_text << "	subspine = parseInt(target.dataset.subspine || -1);\n";
+	m_free_text << "	rent = target.parentNode;\n";
+	m_free_text << "	if (rent.nodeName !== 'TR') {\n";
+	m_free_text << "		console.log('PARENT IS NOT TR');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	line = parseInt(rent.dataset.line || -1);\n";
+	m_free_text << "	nextline = line + direction;\n";
+	m_free_text << "\n";
+	m_free_text << "	nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 2;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 3;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 4;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	if (!nexttr) {\n";
+	m_free_text << "		// nexttr does not exist so do nothing\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	newtd = getNewTd(nexttr, spine, subspine);\n";
+	m_free_text << "	if (!newtd) {\n";
+	m_free_text << "		console.log('CANNOT FIND NEW TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	newtd.focus();\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// getNewTd -- Find the td element with the matching spine and subspine\n";
+	m_free_text << "//        numbers as the starting cell.  If they do not match, then find\n";
+	m_free_text << "//        one that has a matching spine.  If that cannot be found, then\n";
+	m_free_text << "//        store the spine and subspine for recovering the spine position\n";
+	m_free_text << "//        after passing through a global comment.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function getNewTd(tr, spine, subspine) {\n";
+	m_free_text << "	if (spine < 0) {\n";
+	m_free_text << "		spine = TARGET_SPINE;\n";
+	m_free_text << "		subspine = TARGET_SUBSPINE;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var tds = tr.querySelectorAll('td');\n";
+	m_free_text << "	if (tds.length == 1) {\n";
+	m_free_text << "		return tds[0];\n";
+	m_free_text << "	} else if (tds.length == 0) {\n";
+	m_free_text << "		console.log('DID NOT FIND ANY TDS');\n";
+	m_free_text << "		return null;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var list = [];\n";
+	m_free_text << "	var obj;\n";
+	m_free_text << "	var i;\n";
+	m_free_text << "	for (i=0; i<tds.length; i++) {\n";
+	m_free_text << "		obj = {};\n";
+	m_free_text << "		obj.spine = parseInt(tds[i].dataset.spine);\n";
+	m_free_text << "		obj.subspine = parseInt(tds[i].dataset.subspine || -1);\n";
+	m_free_text << "		obj.td = tds[i];\n";
+	m_free_text << "		list.push(obj);\n";
+	m_free_text << "	}\n";
+	m_free_text << "	for (i=0; i<list.length; i++) {\n";
+	m_free_text << "		if (list[i].spine != spine) {\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		if (list[i].subspine != subspine) {\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		return list[i].td;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	// did not find the exact spine/subspine, so go to the first \n";
+	m_free_text << "	// spine that matches (backwards if subspine is not 0).\n";
+	m_free_text << "	if (subspine < 0) {\n";
+	m_free_text << "		for (i=0; i<list.length - 1; i++) {\n";
+	m_free_text << "			if (list[i].spine != spine) {\n";
+	m_free_text << "				continue;\n";
+	m_free_text << "			}\n";
+	m_free_text << "			return list[i].td;\n";
+	m_free_text << "		}\n";
+	m_free_text << "	} else {\n";
+	m_free_text << "		for (i=list.length - 1; i>=0; i--) {\n";
+	m_free_text << "			if (list[i].spine != spine) {\n";
+	m_free_text << "				continue;\n";
+	m_free_text << "			}\n";
+	m_free_text << "			return list[i].td;\n";
+	m_free_text << "		}\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (list.length == 1) {\n";
+	m_free_text << "		return list[0].td;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	console.log('DID NOT FIND NEW TD FOR', spine, subspine);\n";
+	m_free_text << "	return null;\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// focusin eventListener -- When a cell is focused on, and the cell\n";
+	m_free_text << "//     is spined, then store its spine/subspine values in TARGET_SPINE\n";
+	m_free_text << "//     and TARGET_SUBSPINE for navigating through global records.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "document.addEventListener('focusout', function(event) {\n";
+	m_free_text << "	var target = event.target;\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	var tr = target.parentNode;\n";
+	m_free_text << "	if (!tr) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (tr.nodeName !== 'TR') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (!tr.className.match(/\\bspined\\b/)) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var spine = parseInt(target.dataset.spine || -1);\n";
+	m_free_text << "	var subspine = parseInt(target.dataset.subspine || -1);\n";
+	m_free_text << "	TARGET_SPINE = spine;\n";
+	m_free_text << "	TARGET_SUBSPINE = subspine;\n";
+	m_free_text << "});\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// focusout eventListener -- When leaving a cell, check that\n";
+	m_free_text << "//    its contents are syntactically correct.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "document.addEventListener('focusout', function(event) {\n";
+	m_free_text << "	var target = event.target;\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	var tr = target.parentNode;\n";
+	m_free_text << "	if (!tr) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (tr.nodeName !== 'TR') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var empty = '.';\n";
+	m_free_text << "	var classes = tr.className;\n";
+	m_free_text << "	if (classes.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		empty = '*';\n";
+	m_free_text << "	} if (classes.match(/\\binterp\\b/)) {\n";
+	m_free_text << "		empty = '*';\n";
+	m_free_text << "	} else if (classes.match(/\\blcomment\\b/)) {\n";
+	m_free_text << "		empty = '!';\n";
+	m_free_text << "	} else if (classes.match(/comment\\b/)) {\n";
+	m_free_text << "		empty = '!!';\n";
+	m_free_text << "	} else if (classes.match(/reference\\b/)) {\n";
+	m_free_text << "		empty = '!';\n";
+	m_free_text << "	} else if (classes.match(/\\bbarline\\b/)) {\n";
+	m_free_text << "		empty = '=';\n";
+	m_free_text << "	}\n";
+	m_free_text << "	\n";
+	m_free_text << "	var contents = target.textContent;\n";
+	m_free_text << "	if (contents === '') {\n";
+	m_free_text << "		target.textContent = empty;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	\n";
+	m_free_text << "	var firstchar = contents.charAt(0);\n";
+	m_free_text << "	if ((empty === '!') && (firstchar !== '!')) {\n";
+	m_free_text << "		target.textContent = '!' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '*') && (firstchar !== '*')) {\n";
+	m_free_text << "		target.textContent = '*' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '=') && (firstchar !== '=')) {\n";
+	m_free_text << "		target.textContent = '=' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '!')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '*')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '=')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "});\n";
+	m_free_text << "\n";
+	m_free_text << "</script>\n";
+
 }
 
 
