@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 07:33:41 PST 2020
+// Last Modified: Sun Mar  1 11:36:23 PST 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10307,7 +10307,7 @@ void HumGrid::checkForNullDataHoles(void) {
 						GridPart *pp;
 						GridStaff *sp;
 						GridVoice *vp;
-						for (int q=i+1; q<m_allslices.size(); q++) {
+						for (int q=i+1; q<(int)m_allslices.size(); q++) {
 							GridSlice *slicep = m_allslices.at(q);
 							if (!slicep->isNoteSlice()) {
 								// or isDataSlice()?

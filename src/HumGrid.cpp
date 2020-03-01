@@ -1915,7 +1915,7 @@ void HumGrid::checkForNullDataHoles(void) {
 						GridPart *pp;
 						GridStaff *sp;
 						GridVoice *vp;
-						for (int q=i+1; q<m_allslices.size(); q++) {
+						for (int q=i+1; q<(int)m_allslices.size(); q++) {
 							GridSlice *slicep = m_allslices.at(q);
 							if (!slicep->isNoteSlice()) {
 								// or isDataSlice()?
