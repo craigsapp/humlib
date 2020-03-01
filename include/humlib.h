@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 29 14:58:53 PST 2020
+// Last Modified: Sun Mar  1 07:33:41 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3578,6 +3578,11 @@ class Convert {
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);
 		static double  nPvi                 (const std::vector<double>& x);
+
+		// Reference record functions defined in Convert-reference.cpp
+		static std::string getReferenceKeyMeaning(HTp token);
+		static std::string getReferenceKeyMeaning(const string& token);
+		static std::string getLanguageName(const string& abbreviation);
 };
 
 
@@ -5866,6 +5871,7 @@ class Tool_humsheet : public HumTool {
       void     printHtmlFooter   (void);
       void     printStyle        (HumdrumFile& infile);
       void     printJavascript   (void);
+		void     printTitle        (HumdrumFile& infile, int line);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
@@ -5880,6 +5886,9 @@ class Tool_humsheet : public HumTool {
 		bool     isLayout          (HumdrumLine* line);
 
 	private:
+		bool             m_exinterpQ       = false;
+		bool             m_javascriptQ     = false;
+		bool             m_idQ             = false;
 		bool             m_htmlQ           = false;
 		bool             m_zebraQ          = false;
 		bool             m_tabindexQ       = false;

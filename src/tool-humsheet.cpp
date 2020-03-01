@@ -26,8 +26,12 @@ namespace hum {
 
 Tool_humsheet::Tool_humsheet(void) {
 	define("h|H|html|HTML=b", "output table in HTML wrapper");
+	define("i|id|ID=b", "include ID for each cell");
 	define("z|zebra=b", "add zebra striping by spine to style");
 	define("t|tab-index=b", "vertical tab indexing");
+	define("X|no-exinterp=b", "do not embed exclusive interp data");
+	define("J|no-javascript=b", "do not embed javascript code");
+	define("S|no-style=b", "do not embed CSS style element");
 }
 
 
@@ -84,8 +88,11 @@ bool Tool_humsheet::run(HumdrumFile& infile) {
 //
 
 void Tool_humsheet::initialize(void) {
+	m_idQ         = getBoolean("id");
 	m_htmlQ       = getBoolean("html");
 	m_zebraQ      = getBoolean("zebra");
+	m_exinterpQ   = !getBoolean("no-exinterp");
+	m_javascriptQ = !getBoolean("no-javascript");
 	m_tabindexQ   = getBoolean("tab-index");
 }
 
@@ -112,14 +119,34 @@ void Tool_humsheet::processFile(HumdrumFile& infile) {
 		m_free_text << "<tr";
 		printRowClasses(infile, i);
 		printRowData(infile, i);
+		printTitle(infile, i);
 		m_free_text << ">";
 		printRowContents(infile, i);
 		m_free_text << "</tr>\n";
 	}
 	m_free_text << "</table>";
 	if (m_htmlQ) {
-		printJavascript();
+		if (m_javascriptQ) {
+			printJavascript();
+		}
 		printHtmlFooter();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printTitle --
+//
+
+void Tool_humsheet::printTitle(HumdrumFile& infile, int line) {
+	if (!infile[line].isReference()) {
+		return;
+	}
+	string meaning = Convert::getReferenceKeyMeaning(infile[line].token(0));
+	if (!meaning.empty()) {
+		m_free_text << " title=\"" << meaning << "\"";
 	}
 }
 
@@ -184,6 +211,10 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 	}
 	if (hl->isInterpretation()) {
 		classes += "interp ";
+		HTp token = hl->token(0);
+		if (token->compare(0, 2, "*>") == 0) {
+			classes += "label ";
+		}
 	}
 	if (hl->isLocalComment()) {
 		classes += "lcomment ";
@@ -193,15 +224,32 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 	}
 
 	if (hl->isUniversalReference()) {
-		classes += "ureference ";
+		HTp token = hl->token(0);
+		if (token->compare(0, 11, "!!!!filter:") == 0) {
+			classes += "ufilter ";
+		} else if (token->compare(0, 12, "!!!!Xfilter:") == 0) {
+			classes += "usedufilter ";
+		} else {
+			classes += "ureference ";
+			if (token->compare(0, 12, "!!!!SEGMENT:") == 0) {
+				classes += "segment ";
+			}
+		}
 	} else if (hl->isCommentUniversal()) {
 		classes += "ucomment ";
 	} else if (hl->isReference()) {
 		classes += "reference ";
 	} else if (hl->isGlobalComment()) {
-		classes += "gcomment ";
-		if (isLayout(hl)) {
-			classes += "layout ";
+		HTp token = hl->token(0);
+		if (token->compare(0, 10, "!!!filter:") == 0) {
+			classes += "filter ";
+		} else if (token->compare(0, 11, "!!!Xfilter:") == 0) {
+			classes += "usedfilter ";
+		} else {
+			classes += "gcomment ";
+			if (isLayout(hl)) {
+				classes += "layout ";
+			}
 		}
 	}
 
@@ -209,7 +257,12 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 		classes += "barline ";
 	}
 	if (hl->isManipulator()) {
-		classes += "manip ";
+		HTp token = hl->token(0);
+		if (token->compare(0, 2, "**") == 0) {
+			classes += "exinterp ";
+		} else {
+			classes += "manip ";
+		}
 	}
 	if (!classes.empty()) {
       // remove space.
@@ -258,7 +311,9 @@ void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
 	for (int i=0; i<fieldcount; i++) {
 		HTp token = infile.token(row, i);
 		m_free_text << "<td";
-		printId(token);
+		if (m_idQ) {
+			printId(token);
+		}
 		printCellClasses(token);
 		printCellData(token);
 		if (m_tabindexQ) {
@@ -294,6 +349,11 @@ void Tool_humsheet::printCellData(HTp token) {
 		int subspine = token->getSubtrack();
 		if (subspine > 0) {
 			m_free_text << " data-subspine=\"" << subspine << "\"";
+		}
+
+		string exinterp = token->getDataType().substr(2);
+		if (m_exinterpQ && !exinterp.empty()) {
+			m_free_text << " data-x=\"" << exinterp << "\"";
 		}
 	}
 }
@@ -452,15 +512,41 @@ void Tool_humsheet::printStyle(HumdrumFile& infile) {
 	m_free_text << "table.humdrum tr.ucomment {\n";
 	m_free_text << "	color: chocolate;\n";
 	m_free_text << "}\n";
-	m_free_text << "table.humdrum tr.ureference {\n";
+	m_free_text << "table.humdrum tr.segment {\n";
 	m_free_text << "	color: chocolate;\n";
 	m_free_text << "	background: rgb(255,99,71,0.25);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ureference {\n";
+	m_free_text << "	color: chocolate;\n";
 	m_free_text << "}\n";
 	m_free_text << "table.humdrum tr.reference {\n";
 	m_free_text << "	color: green;\n";
 	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.manip {\n";
+	m_free_text << "	color: magenta;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.exinterp {\n";
+	m_free_text << "	color: red;\n";
+	m_free_text << "}\n";
 	m_free_text << "table.humdrum tr.interp {\n";
 	m_free_text << "	color: darkviolet;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.filter {\n";
+	m_free_text << "	color: limegreen;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.usedfilter {\n";
+	m_free_text << "	color: olive;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ufilter {\n";
+	m_free_text << "	color: limegreen;\n";
+	m_free_text << "	background: rgba(0,0,aa,0.3);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.usedufilter {\n";
+	m_free_text << "	color: olive;\n";
+	m_free_text << "	background: rgba(0,0,aa,0.3);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.label {\n";
+	m_free_text << "	background: rgba(75,0,130,0.3);\n";
 	m_free_text << "}\n";
 	m_free_text << "table.humdrum tr.layout {\n";
 	m_free_text << "	color: orange;\n";
@@ -776,11 +862,12 @@ void Tool_humsheet::printJavascript(void) {
 	m_free_text << "//     and TARGET_SUBSPINE for navigating through global records.\n";
 	m_free_text << "//\n";
 	m_free_text << "\n";
-	m_free_text << "document.addEventListener('focusout', function(event) {\n";
+	m_free_text << "document.addEventListener('focusin', function(event) {\n";
 	m_free_text << "	var target = event.target;\n";
 	m_free_text << "	if (target.nodeName !== 'TD') {\n";
 	m_free_text << "		return;\n";
 	m_free_text << "	}\n";
+	m_free_text << "	moveCursorToEndOfText(target);\n";
 	m_free_text << "\n";
 	m_free_text << "	var tr = target.parentNode;\n";
 	m_free_text << "	if (!tr) {\n";
@@ -870,6 +957,26 @@ void Tool_humsheet::printJavascript(void) {
 	m_free_text << "		return;\n";
 	m_free_text << "	}\n";
 	m_free_text << "});\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveCursorToEndOfText --\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveCursorToEndOfText(element) {\n";
+	m_free_text << "	var range;\n";
+	m_free_text << "	var selection;\n";
+	m_free_text << "	if (document.createRange) {\n";
+	m_free_text << "		range = document.createRange();\n";
+	m_free_text << "		range.selectNodeContents(element);\n";
+	m_free_text << "		range.collapse(false);\n";
+	m_free_text << "		selection = window.getSelection();\n";
+	m_free_text << "		selection.removeAllRanges();\n";
+	m_free_text << "		selection.addRange(range);\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
 	m_free_text << "\n";
 	m_free_text << "</script>\n";
 

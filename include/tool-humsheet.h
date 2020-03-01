@@ -38,6 +38,7 @@ class Tool_humsheet : public HumTool {
       void     printHtmlFooter   (void);
       void     printStyle        (HumdrumFile& infile);
       void     printJavascript   (void);
+		void     printTitle        (HumdrumFile& infile, int line);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
@@ -52,6 +53,9 @@ class Tool_humsheet : public HumTool {
 		bool     isLayout          (HumdrumLine* line);
 
 	private:
+		bool             m_exinterpQ       = false;
+		bool             m_javascriptQ     = false;
+		bool             m_idQ             = false;
 		bool             m_htmlQ           = false;
 		bool             m_zebraQ          = false;
 		bool             m_tabindexQ       = false;
