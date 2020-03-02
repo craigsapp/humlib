@@ -227,8 +227,8 @@ class Convert {
 
 		// Reference record functions defined in Convert-reference.cpp
 		static std::string getReferenceKeyMeaning(HTp token);
-		static std::string getReferenceKeyMeaning(const string& token);
-		static std::string getLanguageName(const string& abbreviation);
+		static std::string getReferenceKeyMeaning(const std::string& token);
+		static std::string getLanguageName(const std::string& abbreviation);
 };
 
 

@@ -11,6 +11,7 @@
 //
 
 #include "tool-humsheet.h"
+#include "Convert.h"
 
 using namespace std;
 
