@@ -323,6 +323,9 @@ void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
 		if (!infile[row].isManipulator()) {
 			// do not allow manipulators to be edited
 			m_free_text << " contenteditable=\"true\"";
+		} else if (infile[row].isExclusive()) {
+			// but allow exclusive interpretation to be edited
+			m_free_text << " contenteditable=\"true\"";
 		}
 		m_free_text << ">";
 		printToken(token);
