@@ -1752,6 +1752,8 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 			starttime = parseChord(children[i], starttime, 0);
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
+		} else if (nodename == "clef") { //drizo
+			parseClef(children[i], starttime);
 		} else {
 			cerr << DKHTP << beam.name() << "/" << nodename << CURRLOC << endl;
 		}

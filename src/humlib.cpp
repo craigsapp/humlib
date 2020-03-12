@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  1 23:01:25 PST 2020
+// Last Modified: Wed Mar 11 21:41:10 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -61819,6 +61819,8 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 			starttime = parseChord(children[i], starttime, 0);
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
+		} else if (nodename == "clef") { //drizo
+			parseClef(children[i], starttime);
 		} else {
 			cerr << DKHTP << beam.name() << "/" << nodename << CURRLOC << endl;
 		}
