@@ -1389,6 +1389,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 		gm->setFinalBarlineStyle();
 	} else if (rightstyle == "rptend") {
 		gm->setRepeatBackwardStyle();
+	} else if (rightstyle == "invis") {
+		gm->setInvisibleBarline();
 	}
 
 	if (overfilledQ) {

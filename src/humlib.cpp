@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Mar 11 21:41:10 PDT 2020
+// Last Modified: Wed Mar 11 22:03:03 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -6229,7 +6229,7 @@ bool GridMeasure::isSingleChordMeasure(void) {
 
 //////////////////////////////
 //
-// GridMeasure::isInvisible --
+// GridMeasure::isInvisible --  Return true if all contents is invisible.
 //
 
 bool GridMeasure::isInvisible(void) {
@@ -9810,6 +9810,8 @@ string HumGrid::getBarStyle(GridMeasure* measure) {
 		output = "||";
 	} else if (measure->isFinal()) {
 		output = "=";
+	} else if (measure->isInvisibleBarline()) {
+		output = "-";
 	} else if (measure->isRepeatBoth()) {
 		output = ":|!|:";
 	} else if (measure->isRepeatBackward()) {
@@ -61456,6 +61458,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 		gm->setFinalBarlineStyle();
 	} else if (rightstyle == "rptend") {
 		gm->setRepeatBackwardStyle();
+	} else if (rightstyle == "invis") {
+		gm->setInvisibleBarline();
 	}
 
 	if (overfilledQ) {
