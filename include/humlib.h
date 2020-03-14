@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 13 21:02:40 PDT 2020
+// Last Modified: Fri Mar 13 21:09:28 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3631,6 +3631,7 @@ enum class SliceType {
 // MeasureType is a list of the style types for a measure (ending type for now)
 
 enum class MeasureStyle {
+	Invisible,
 	Plain,
 	RepeatBackward,
 	RepeatForward,
@@ -3846,6 +3847,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		MeasureStyle getBarStyle    (void) { return getStyle(); }
 		void         setStyle       (MeasureStyle style) { m_style = style; }
 		void         setBarStyle    (MeasureStyle style) { setStyle(style); }
+		void         setInvisibleBarline(void) { setStyle(MeasureStyle::Invisible); }
 		void         setFinalBarlineStyle(void) { setStyle(MeasureStyle::Final); }
 		void         setRepeatEndStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 		void         setRepeatBackwardStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
@@ -3858,6 +3860,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		                  {return m_style == MeasureStyle::Final;}
 		bool         isRepeatBackward(void)
 		                  { return m_style == MeasureStyle::RepeatBackward; }
+		bool         isInvisibleBarline(void)
+		                  { return m_style == MeasureStyle::Invisible; }
 		bool         isRepeatForward(void)
 		                  { return m_style == MeasureStyle::RepeatForward; }
 		bool         isRepeatBoth(void)

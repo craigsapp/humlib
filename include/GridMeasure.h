@@ -79,6 +79,7 @@ class GridMeasure : public std::list<GridSlice*> {
 		MeasureStyle getBarStyle    (void) { return getStyle(); }
 		void         setStyle       (MeasureStyle style) { m_style = style; }
 		void         setBarStyle    (MeasureStyle style) { setStyle(style); }
+		void         setInvisibleBarline(void) { setStyle(MeasureStyle::Invisible); }
 		void         setFinalBarlineStyle(void) { setStyle(MeasureStyle::Final); }
 		void         setRepeatEndStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
 		void         setRepeatBackwardStyle(void) { setStyle(MeasureStyle::RepeatBackward); }
@@ -91,6 +92,8 @@ class GridMeasure : public std::list<GridSlice*> {
 		                  {return m_style == MeasureStyle::Final;}
 		bool         isRepeatBackward(void)
 		                  { return m_style == MeasureStyle::RepeatBackward; }
+		bool         isInvisibleBarline(void)
+		                  { return m_style == MeasureStyle::Invisible; }
 		bool         isRepeatForward(void)
 		                  { return m_style == MeasureStyle::RepeatForward; }
 		bool         isRepeatBoth(void)

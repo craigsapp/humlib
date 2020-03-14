@@ -1418,6 +1418,8 @@ string HumGrid::getBarStyle(GridMeasure* measure) {
 		output = "||";
 	} else if (measure->isFinal()) {
 		output = "=";
+	} else if (measure->isInvisibleBarline()) {
+		output = "-";
 	} else if (measure->isRepeatBoth()) {
 		output = ":|!|:";
 	} else if (measure->isRepeatBackward()) {

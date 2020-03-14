@@ -1602,7 +1602,7 @@ bool GridMeasure::isSingleChordMeasure(void) {
 
 //////////////////////////////
 //
-// GridMeasure::isInvisible --
+// GridMeasure::isInvisible --  Return true if all contents is invisible.
 //
 
 bool GridMeasure::isInvisible(void) {
