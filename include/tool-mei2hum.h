@@ -146,6 +146,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseSectionScoreDef (xml_node scoreDef, HumNum starttime);
 		void   processPgHead        (xml_node pgHead, HumNum starttime);
 		void   processPgFoot        (xml_node pgFoot, HumNum starttime);
+		void   processKeySig        (mei_staffDef& staffinfo, xml_node keysig, HumNum starttime);
 		HumNum parseSection         (xml_node section, HumNum starttime);
 		HumNum parseApp             (xml_node app, HumNum starttime);
 		HumNum parseLem             (xml_node lem, HumNum starttime);
