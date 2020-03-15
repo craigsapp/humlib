@@ -58,6 +58,7 @@ class Tool_humsheet : public HumTool {
 		bool             m_idQ             = false;
 		bool             m_htmlQ           = false;
 		bool             m_zebraQ          = false;
+		bool             m_zebra2Q         = false;
 		bool             m_tabindexQ       = false;
 		std::vector<int> m_max_subtrack;
 		int              m_max_track       = 0;

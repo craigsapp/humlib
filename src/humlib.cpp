@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 13 21:09:28 PDT 2020
+// Last Modified: Sat Mar 14 22:41:24 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -57804,6 +57804,7 @@ Tool_humsheet::Tool_humsheet(void) {
 	define("h|H|html|HTML=b", "output table in HTML wrapper");
 	define("i|id|ID=b", "include ID for each cell");
 	define("z|zebra=b", "add zebra striping by spine to style");
+	define("y|z2|zebra2|zebra-2=b", "zebra striping by data type");
 	define("t|tab-index=b", "vertical tab indexing");
 	define("X|no-exinterp=b", "do not embed exclusive interp data");
 	define("J|no-javascript=b", "do not embed javascript code");
@@ -57867,6 +57868,7 @@ void Tool_humsheet::initialize(void) {
 	m_idQ         = getBoolean("id");
 	m_htmlQ       = getBoolean("html");
 	m_zebraQ      = getBoolean("zebra");
+	m_zebra2Q     = getBoolean("zebra2");
 	m_exinterpQ   = !getBoolean("no-exinterp");
 	m_javascriptQ = !getBoolean("no-javascript");
 	m_tabindexQ   = getBoolean("tab-index");
@@ -57998,9 +58000,14 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 			classes += "layout ";
 		}
 	}
+	HTp token = hl->token(0);
+	if (token->compare(0, 2, "!!") == 0) {
+		if ((token->size() == 2) || (token->at(3) != '!')) {
+			classes += "gcommet ";
+		}
+	}
 
 	if (hl->isUniversalReference()) {
-		HTp token = hl->token(0);
 		if (token->compare(0, 11, "!!!!filter:") == 0) {
 			classes += "ufilter ";
 		} else if (token->compare(0, 12, "!!!!Xfilter:") == 0) {
@@ -58236,8 +58243,11 @@ void Tool_humsheet::printColSpan(HTp token) {
 void Tool_humsheet::printCellClasses(HTp token) {
 	int track = token->getTrack();
 	string classlist;
-	if (track % 2 == 0) {
-		classlist = "zebra ";
+
+	if (m_zebraQ) {
+		if (track % 2 == 0) {
+			classlist = "zebra ";
+		}
 	}
 
 	if (token->getOwner()->hasSpines()) {
@@ -58301,6 +58311,15 @@ void Tool_humsheet::printStyle(HumdrumFile& infile) {
 	m_free_text << "table.humdrum tr.reference {\n";
 	m_free_text << "	color: green;\n";
 	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.gcomment {\n";
+	m_free_text << "	color: blue;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ucomment {\n";
+	m_free_text << "	color: violet;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.lcomment {\n";
+	m_free_text << "	color: $#2fc584;\n";
+	m_free_text << "}\n";
 	m_free_text << "table.humdrum tr.interp.manip {\n";
 	m_free_text << "	color: magenta;\n";
 	m_free_text << "}\n";
@@ -58342,8 +58361,18 @@ void Tool_humsheet::printStyle(HumdrumFile& infile) {
 	m_free_text << "}\n";
 
 	if (m_zebraQ) {
-		m_free_text << ".zebra {\n";
+		m_free_text << "table.humdrum .zebra {\n";
 		m_free_text << "	background: #ccccff33;\n";
+		m_free_text << "}\n";
+	} else if (m_zebra2Q) {
+		m_free_text << "table.humdrum td[data-x='kern'] {\n";
+		m_free_text << "	background: #ffcccc33;\n";
+		m_free_text << "}\n";
+		m_free_text << "table.humdrum td[data-x='dynam'] {\n";
+		m_free_text << "	background: #ccccff33;\n";
+		m_free_text << "}\n";
+		m_free_text << "table.humdrum td[data-x='text'] {\n";
+		m_free_text << "	background: #ccffcc33;\n";
 		m_free_text << "}\n";
 	}
 

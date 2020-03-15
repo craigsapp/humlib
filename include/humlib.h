@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 13 21:09:28 PDT 2020
+// Last Modified: Sat Mar 14 22:41:24 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5895,6 +5895,7 @@ class Tool_humsheet : public HumTool {
 		bool             m_idQ             = false;
 		bool             m_htmlQ           = false;
 		bool             m_zebraQ          = false;
+		bool             m_zebra2Q         = false;
 		bool             m_tabindexQ       = false;
 		std::vector<int> m_max_subtrack;
 		int              m_max_track       = 0;
