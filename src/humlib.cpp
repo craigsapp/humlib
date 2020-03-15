@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 14 22:41:24 PDT 2020
+// Last Modified: Sun Mar 15 16:21:05 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -64952,6 +64952,9 @@ void Tool_melisma::getNoteCountsForLyric(vector<vector<int>>& counts, HTp lyricS
 //
 
 int Tool_melisma::getCountForSyllable(HTp token) {
+	if (token->back() == '&') {
+		return 1;
+	}
 	HTp nexttok = token->getNextToken();
 	int eline   = token->getLineIndex();
 	int efield  = token->getFieldIndex();
