@@ -32,7 +32,8 @@ class Tool_kernview : public HumTool {
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
-		void     initialize        (void);
+		void     initialize        (HumdrumFile& infile);
+		std::string getKernString(HumdrumFile& infile, const std::string& list);
 
 	private:
 		std::string m_view_string;

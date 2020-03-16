@@ -28,6 +28,8 @@ namespace hum {
 
 Tool_kernview::Tool_kernview(void) {
 	define("v|view|s|show=s", "view the list of spines");
+	define("g=s", "Regular expression of kern spines to view");
+	define("G=s", "Regular expression of kern spines to hide");
 	define("h|hide|r|remove=s", "hide the list of spines");
 }
 
@@ -71,7 +73,7 @@ bool Tool_kernview::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_kernview::run(HumdrumFile& infile) {
-	initialize();
+	initialize(infile);
 	processFile(infile);
 	return true;
 }
@@ -84,9 +86,65 @@ bool Tool_kernview::run(HumdrumFile& infile) {
 //    for all HumdrumFile segments.
 //
 
-void Tool_kernview::initialize(void) {
+void Tool_kernview::initialize(HumdrumFile& infile) {
 	m_view_string = getString("view");
 	m_hide_string = getString("hide");
+	if (getBoolean("g")) {
+		m_view_string = getKernString(infile, getString("g"));
+	}
+	if (getBoolean("G")) {
+		m_hide_string = getKernString(infile, getString("G"));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernview::getKernString -- Return a list of the **kern spines that match to the given
+//    comman-separated list of patterns.
+//
+
+string Tool_kernview::getKernString(HumdrumFile& infile, const string& list) {
+	HumRegex hre;
+	vector<string> pieces;
+	hre.split(pieces, list, "\\s*,\\s*");
+	string output;
+	vector<HTp> starts = infile.getKernSpineStartList();
+	vector<bool> targets(starts.size(), false);
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces.empty()) {
+			continue;
+		}
+		for (int j=0; j<(int)starts.size(); j++) {
+			if (targets[j]) {
+				continue;
+			}
+			HTp current = starts[j];
+			while (current) {
+				if (current->isData()) {
+					break;
+				}
+				if (hre.search(current, pieces[i])) {
+					targets[j] = true;
+					break;
+				}
+				current = current->getNextToken();
+			}
+		}
+	}
+
+	for (int i=0; i<(int)targets.size(); i++) {
+		if (targets[i]) {
+			if (output.empty()) {
+				output += to_string(i+1);
+			} else {
+				output += "," + to_string(i+1);
+			}
+		}
+	}
+
+	return output;
 }
 
 
