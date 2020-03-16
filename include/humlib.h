@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 15 22:14:23 PDT 2020
+// Last Modified: Mon Mar 16 10:16:42 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7652,7 +7652,6 @@ class Tool_transpose : public HumTool {
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option
-		int      spineQ       = 0;   // used with -s option
 		string   spinestring  = "";  // used with -s option
 		int      octave       = 0;   // used with -o option
 		int      concertQ     = 0;   // used with -C option

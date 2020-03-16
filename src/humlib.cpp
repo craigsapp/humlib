@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 15 22:14:23 PDT 2020
+// Last Modified: Mon Mar 16 10:16:42 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -81206,7 +81206,9 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				}
 
 				// check for key signature in a spine which is being
-				// transposed, and adjust it.
+				// transposed, and adjust it. 
+				// Should also check tandem spines for updating
+				// key signatures in non-kern spines.
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
 						hre.search(infile.token(i, j),
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
@@ -81218,10 +81220,12 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 						continue;
 				}
 
-				// check for key tandem interpretation and tranpose
+				// Check for key designations and tranpose
 				// if the spine data is being transposed.
-
-				if (hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
+				// Should also check tandem spines for updating
+				// key designations in non-kern spines.
+				if (spineprocess[infile.token(i, j)->getTrack()] &&
+						hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
 					diatonic = tolower(hre.getMatch(1)[0]) - 'a';
 					if (diatonic >= 0 && diatonic <= 6) {
 					  	printNewKeyInterpretation(infile[i], j, transval);
@@ -82100,7 +82104,6 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
 	autoQ        =  getBoolean("auto");
 	debugQ       =  getBoolean("debug");
-	spineQ       =  getBoolean("spines");
 	spinestring  =  getString("spines");
 	octave       =  getInteger("octave");
 	concertQ     =  getBoolean("concert");

@@ -684,7 +684,9 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				}
 
 				// check for key signature in a spine which is being
-				// transposed, and adjust it.
+				// transposed, and adjust it. 
+				// Should also check tandem spines for updating
+				// key signatures in non-kern spines.
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
 						hre.search(infile.token(i, j),
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
@@ -696,10 +698,12 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 						continue;
 				}
 
-				// check for key tandem interpretation and tranpose
+				// Check for key designations and tranpose
 				// if the spine data is being transposed.
-
-				if (hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
+				// Should also check tandem spines for updating
+				// key designations in non-kern spines.
+				if (spineprocess[infile.token(i, j)->getTrack()] &&
+						hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
 					diatonic = tolower(hre.getMatch(1)[0]) - 'a';
 					if (diatonic >= 0 && diatonic <= 6) {
 					  	printNewKeyInterpretation(infile[i], j, transval);
@@ -1578,7 +1582,6 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
 	autoQ        =  getBoolean("auto");
 	debugQ       =  getBoolean("debug");
-	spineQ       =  getBoolean("spines");
 	spinestring  =  getString("spines");
 	octave       =  getInteger("octave");
 	concertQ     =  getBoolean("concert");

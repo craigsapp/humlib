@@ -116,7 +116,6 @@ class Tool_transpose : public HumTool {
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option
-		int      spineQ       = 0;   // used with -s option
 		string   spinestring  = "";  // used with -s option
 		int      octave       = 0;   // used with -o option
 		int      concertQ     = 0;   // used with -C option
