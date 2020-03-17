@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul  1 11:49:28 CEST 2019
-// Last Modified: Mon Jul  1 13:24:07 CEST 2019
+// Last Modified: Mon Mar 16 20:45:00 PDT 2020
 // Filename:      accent-features.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
@@ -24,17 +24,26 @@ class AccentFeatures {
 		HTp  nextNote   = NULL;
 		HTp  prevNote   = NULL;
 
-		int staff_num    = 0;
+		int staff_num   = 0;
+		int measure     = -1;
 		int chord_num   = 0;
+		int group       = 0;
 
+		// Accent and articulation features:
 		bool accent     = false;
 		bool marcato    = false;
 		bool sforzando  = false;
 		bool tenuto     = false;
 		bool staccato   = false;
+
+		// Slur features:
 		bool slur_start = false;
 		bool slur_end   = false;
+
+		// Trill and ornament features:
 		bool trill      = false;
+		bool mordent    = false;
+		bool turn       = false;
 
 		double metpos   = 0;
 };
@@ -58,16 +67,16 @@ class PartInfo {
 };
 
 
-
 void   extractNotes             (vector<AccentFeatures>& data, HumdrumFile& infile, Options& options);
 void   extractFeatures          (vector<AccentFeatures>& data);
-void   printData                (vector<AccentFeatures>& data, Options& options);
+void   printData                (vector<AccentFeatures>& data, HumdrumFile& infile, Options& options);
 HTp    getPreviousNote          (HTp starting);
 HTp    getNextNote              (HTp starting);
 void   printMeasureNumberInfo   (vector<MeasureNumberInfo>& measures);
 void   extractMeasureNumberInfo (vector<MeasureNumberInfo>& measures, HumdrumFile& infile);
 void   printPartInfo            (vector<PartInfo>& parts, HumdrumFile& infile);
 void   extractPartInfo          (vector<PartInfo>& parts, HumdrumFile& infile);
+void   printLegend              (ostream& output);
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -78,10 +87,17 @@ int main(int argc, char** argv) {
 	options.define("k|kern=b", "include original kern notes in output feature list");
 	options.define("m|measures=b", "extract measure timings");
 	options.define("p|part-list=b", "extract part list");
+	options.define("t|tsv|TSV=b", "output in TSV format");
+	options.define("l|legend=b", "output description of each column");
 	options.process(argc, argv);
 
 	bool measuresQ = options.getBoolean("measures");
 	bool partsQ    = options.getBoolean("part-list");
+
+	if (options.getBoolean("legend")) {
+		printLegend(cout);
+		return 0;
+	}
 
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
@@ -98,7 +114,7 @@ int main(int argc, char** argv) {
 		} else {
 			extractNotes(data, infile, options);
 			extractFeatures(data);
-			printData(data, options);
+			printData(data, infile, options);
 		}
 	}
 	return 0;
@@ -120,7 +136,8 @@ void extractPartInfo(vector<PartInfo>& parts, HumdrumFile& infile) {
 	vector<int> partNumber(trackcount + 1, 0);
 	for (int i=0; i<(int)kernspines.size(); i++) {
 		int track = kernspines[i]->getTrack();
-		int ktrack = (int)kernspines.size() - i;
+		// 1=top: int ktrack = (int)kernspines.size() - i;
+		int ktrack = i + 1;
 		partNumber[track] = ktrack;
 	}
 
@@ -310,45 +327,76 @@ void extractMeasureNumberInfo(vector<MeasureNumberInfo>& measures, HumdrumFile& 
 // printData --
 //
 
-void printData(vector<AccentFeatures>& data, Options& options) {
+void printData(vector<AccentFeatures>& data, HumdrumFile& infile, Options& options) {
 	int kernQ = options.getBoolean("kern");
 
-	int fcount = 21;          // Number of features in output data.
+	HumNum tickbase = 1;
+	tickbase /= infile.tpq();
+
+	int fcount = 24;          // Number of features in output data.
 	if (kernQ) {
 		fcount += 3;
 	}
 
+	string prefix = "**";
+	bool tsvQ = options.getBoolean("tsv");
+	if (tsvQ) {
+		prefix = "";
+	}
+
 	if (kernQ) {
-		cout << "**kern";	  	  // Humdrum **kern pitch extracted from score.
+		cout << prefix << "kern";	  	       // Humdrum **kern pitch extracted from score.
 		cout << "\t";
 	}
-	cout << "**line";         // Line number in score (offset from 1).
-	cout << "\t**field";	     // Field number on line (offset from 1).
-	cout << "\t**track";      // Spine number on line (offset from 1).
-	cout << "\t**staff";      // Staff number on system (kern spine). 1 = top staff on system.
-	cout << "\t**subtrack";   // Subtrack information (currently a string, convert to integer later).
-	cout << "\t**start";      // Starting time of note in score as quarter notes from start of music.
-	cout << "\t**dur";        // Duration of the note in quarter notes.
-	cout << "\t**pitch";      // MIDI pitch number of note (60 = middle C)
-	cout << "\t**chord";      // Is note in chord; if so, then which note in chord?
-	cout << "\t**accent";     // Does note have an accent (^).
-	cout << "\t**marcato";    // Does note have a marcato accent (^^).
-	cout << "\t**sforzando";  // Does note have a sforzando accent (z) (also check **dynam).
-	cout << "\t**tenuto";     // Does note have a tenuto (~).
-	cout << "\t**staccato";   // Does note have a staccato (', or `).
-	cout << "\t**trill";      // Does note have a trill (or mordent)
-	cout << "\t**slur_start"; // Does note have a slur start?
-	cout << "\t**slur_end";   // Does note have a slur end?
+	cout << prefix << "line";               // Line number in score (offset from 1).
+	cout << "\t" << prefix << "field";	    // Field number on line (offset from 1).
+	cout << "\t" << prefix << "track";      // Spine number on line (offset from 1).
+	cout << "\t" << prefix << "subtrack";   // Subtrack (i.e. layer/voice on staff).
+	cout << "\t" << prefix << "group";      // Rhythmic group (1 = Group A, 2 = Group B).
+	cout << "\t" << prefix << "staff";      // Staff number on system (kern spine). 1 = top staff on system.
+	cout << "\t" << prefix << "measure";    // Measure number that note is in.
+	cout << "\t" << prefix << "qstart";     // Starting time of note in score as quarter notes from start of music.
+	cout << "\t" << prefix << "tstart";     // Starting time of note in score as quarter notes from start of music.
+	cout << "\t" << prefix << "qdur";       // Duration of the note in quarter notes.
+	cout << "\t" << prefix << "tdur";       // Duration of the note in minimum integral ticks.
+	cout << "\t" << prefix << "pitch";      // MIDI pitch number of note (60 = middle C)
+	cout << "\t" << prefix << "chord";      // Is note in chord; if so, then which note in chord?
+
+	// note accents and articulations:
+	cout << "\t" << prefix << "accent";     // Does note have an accent (^)?
+	cout << "\t" << prefix << "marcato";    // Does note have a marcato accent (^^)?
+	cout << "\t" << prefix << "sforzando";  // Does note have a sforzando accent (z) (also check **dynam)?
+	cout << "\t" << prefix << "tenuto";     // Does note have a tenuto (~)?
+	cout << "\t" << prefix << "staccato";   // Does note have a staccato (', or `)?
+
+	// note ornaments:
+	cout << "\t" << prefix << "trill";      // Does note have a trill?
+	cout << "\t" << prefix << "mordent";    // Does note have a mordent?
+	cout << "\t" << prefix << "turn";       // Does note have a turn?
+
+	// slurs:
+	cout << "\t" << prefix << "sslur";      // Does note have a slur start?
+	cout << "\t" << prefix << "eslur";      // Does note have a slur end?
+
+	// previous note information:
 	if (kernQ) {
-		cout << "\t**pkern";   // **kern data for previous note (or chord)
+		cout << "\t" << prefix << "pkern";   // **kern data for previous note (or chord)
 	}
-	cout << "\t**ppitch";     // MIDI note number of note that precedes.
-	cout << "\t**pstart";     // Starting time of the previous note in score (-1 means no previous note)
+	cout << "\t" << prefix << "ppitch";     // MIDI note number of note that precedes.
+	cout << "\t" << prefix << "pqstart";    // Starting time of the previous note in score (-1 means no previous note)
+	cout << "\t" << prefix << "ptstart";    // Starting time of the previous note in score (-1 means no previous note)
+	cout << "\t" << prefix << "pqdur";      // Duration of the previous note in score (-1 means no previous note)
+	cout << "\t" << prefix << "ptdur";      // Duration of the previous note in score (-1 means no previous note)
+
+	// next note information:
 	if (kernQ) {
-		cout << "\t**nkern";   // **kern data for next note (or chord)
+		cout << "\t" << prefix << "nkern";   // **kern data for next note (or chord)
 	}
-	cout << "\t**npitch";     // MIDI note number of note that follows.
-	cout << "\t**nstart";     // Starting time of the next note in score (-1 means no next note)
+	cout << "\t" << prefix << "npitch";     // MIDI note number of note that follows.
+	cout << "\t" << prefix << "nqstart";    // Starting time of the next note in score (-1 means no next note)
+	cout << "\t" << prefix << "ntstart";    // Starting time of the next note in score (-1 means no next note)
+	cout << "\t" << prefix << "nqdur";      // Duration of the next note in score (-1 means no next note)
+	cout << "\t" << prefix << "ntdur";      // Duration of the next note in score (-1 means no next note)
 	cout << endl;
 
 	for (int i=0; i<(int)data.size(); i++) {
@@ -368,18 +416,30 @@ void printData(vector<AccentFeatures>& data, Options& options) {
 		// **track
 		cout << "\t" << data[i].token->getTrack();
 
+		// **subtrack
+		cout << "\t" << data[i].token->getSubtrack();
+
+		// **group
+		cout << "\t" << data[i].group;
+
 		// **staff
 		cout << "\t" << data[i].staff_num;
 
-		// **subtrack
-		cout << "\t" << data[i].token->getSpineInfo();
+		// **measure
+		cout << "\t" << data[i].measure;
 
-		// **start
+		// **qstart
 		HumNum currPos = data[i].token->getDurationFromStart();
 		cout << "\t" << currPos.getFloat();
 
-		// **dur
+		// **tstart
+		cout << "\t" << currPos / tickbase;
+
+		// **qdur
 		cout << "\t" << data[i].token->getTiedDuration().getFloat();
+
+		// **tdur
+		cout << "\t" << (data[i].token->getTiedDuration() / tickbase);
 
 		// **pitch
 		cout << "\t" << Convert::kernToMidiNoteNumber(data[i].text);
@@ -405,21 +465,31 @@ void printData(vector<AccentFeatures>& data, Options& options) {
 		// **trill
 		cout << "\t" << (data[i].trill ? 1 : 0);
 
-		// **slur_start
+		// **mordent
+		cout << "\t" << (data[i].mordent ? 1 : 0);
+
+		// **turn
+		cout << "\t" << (data[i].turn ? 1 : 0);
+
+		// **sslur
 		cout << "\t" << (data[i].slur_start ? 1 : 0);
 
-		// **slur_end
+		// **eslur
 		cout << "\t" << (data[i].slur_end ? 1 : 0);
 
 		// **pkern
 		if (kernQ) {
-			cout << "\t" << (data[i].prevNote ? data[i].prevNote : 0);
+			if (data[i].prevNote) {
+				cout << "\t" << data[i].prevNote;
+			} else {
+				cout << "\t" << ".";
+			}
 		}
 
 		// **ppitch
-		cout << "\t" << (data[i].prevNote ? Convert::kernToMidiNoteNumber(data[i].prevNote) : 0);
+		cout << "\t" << (data[i].prevNote ? Convert::kernToMidiNoteNumber(data[i].prevNote) : -1);
 
-		// **pstart
+		// **pqstart
 		if (data[i].prevNote) {
 			HumNum prevPos = data[i].prevNote->getDurationFromStart();
 			cout << "\t" << prevPos.getFloat();
@@ -427,31 +497,81 @@ void printData(vector<AccentFeatures>& data, Options& options) {
 			cout << "\t" << -1;
 		}
 
+		// **ptstart
+		if (data[i].prevNote) {
+			HumNum prevPos = data[i].prevNote->getDurationFromStart();
+			cout << "\t" << prevPos / tickbase;
+		} else {
+			cout << "\t" << -1;
+		}
+
+		// **pqdir
+		if (data[i].prevNote) {
+			cout << "\t" << data[i].prevNote->getTiedDuration().getFloat();
+		} else {
+			cout << "\t" << -1;
+		}
+
+		// **pqdir
+		if (data[i].prevNote) {
+			cout << "\t" << data[i].prevNote->getTiedDuration() / tickbase;
+		} else {
+			cout << "\t" << -1;
+		}
+
 		// **nkern
 		if (kernQ) {
-			cout << "\t" << (data[i].nextNote ? data[i].nextNote : 0);
+			if (data[i].nextNote) {
+				cout << "\t" << data[i].nextNote;
+			} else {
+				cout << "\t" << ".";
+			}
 		}
 
 		// **npitch
-		cout << "\t" << (data[i].nextNote ? Convert::kernToMidiNoteNumber(data[i].nextNote) : 0);
+		cout << "\t" << (data[i].nextNote ? Convert::kernToMidiNoteNumber(data[i].nextNote) : -1);
 
-		// **nstart
+		// **nqstart
 		if (data[i].nextNote) {
 			HumNum nextPos = data[i].nextNote->getDurationFromStart();
 			cout << "\t" << nextPos.getFloat();
 		} else {
-			cout << "\t" << 0;
+			cout << "\t" << -1;
+		}
+
+		// **ntstart
+		if (data[i].nextNote) {
+			HumNum nextPos = data[i].nextNote->getDurationFromStart();
+			cout << "\t" << nextPos / tickbase;
+		} else {
+			cout << "\t" << -1;
+		}
+
+		// **nqdir
+		if (data[i].nextNote) {
+			cout << "\t" << data[i].nextNote->getTiedDuration().getFloat();
+		} else {
+			cout << "\t" << -1;
+		}
+
+		// **ntdir
+		if (data[i].nextNote) {
+			cout << "\t" << data[i].nextNote->getTiedDuration() / tickbase;
+		} else {
+			cout << "\t" << -1;
 		}
 
 		cout << endl;
 	}
 
-	// print data terminators:
-	cout << "*-";
-	for (int i=1; i<fcount; i++) {
-		cout << "\t*-";
+	if (!tsvQ) {
+		// Print Humdrum data terminators:
+		cout << "*-";
+		for (int i=1; i<fcount; i++) {
+			cout << "\t*-";
+		}
+		cout << endl;
 	}
-	cout << endl;
 }
 
 
@@ -469,6 +589,27 @@ void extractFeatures(vector<AccentFeatures>& data) {
 		}
 		if (data[i].text.find("T") != string::npos) {
 			data[i].trill = true;
+		}
+
+		if (data[i].text.find("M") != string::npos) {
+			data[i].mordent = true;
+		}
+		if (data[i].text.find("m") != string::npos) {
+			data[i].mordent = true;
+		}
+
+		if (data[i].text.find("W") != string::npos) {
+			data[i].mordent = true;
+		}
+		if (data[i].text.find("w") != string::npos) {
+			data[i].mordent = true;
+		}
+
+		if (data[i].text.find("S") != string::npos) {
+			data[i].turn = true;
+		}
+		if (data[i].text.find("$") != string::npos) {
+			data[i].turn = true;
 		}
 
 		if (data[i].text.find("^^") != string::npos) {
@@ -573,11 +714,38 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 		partNumber[track] = ktrack;
 	}
 
+
+	int maxtrack = infile.getMaxTrack();
+	vector<int> cgroup(maxtrack+1, 0);
+	HumRegex hre;
+	int cmeasure = 0;
 	data.clear();
 	data.reserve(infile.getLineCount() + infile.getMaxTrack() * 4);
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
+		}
+		if (infile[i].isBarline()) {
+			if (hre.search(infile.token(i, 0), "(\\d+)")) {
+				cmeasure = hre.getMatchInt(1);
+			}
+		}
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				int track = token->getTrack();
+				if (*token == "*grp:A") {
+					cgroup[track] = 1;
+				} else if (*token == "*grp:B") {
+					cgroup[track] = 2;
+				} else if (*token == "*grp:C") {
+					cgroup[track] = 3;
+				} else if (*token == "*grp:D") {
+					cgroup[track] = 4;
+				} else if (*token == "*grp:E") {
+					cgroup[track] = 5;
+				}
+			}
 		}
 		if (!infile[i].isData()) {
 			continue;
@@ -595,6 +763,7 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 			}
 			int subcount = token->getSubtokenCount();
 			vector<string> subtoks;
+			int track = token->getTrack();
 			for (int k=0; k<subcount; k++) {
 				string sub = token->getSubtoken(k);
 				if (sub.find("]") != string::npos) {
@@ -609,6 +778,8 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 				AccentFeatures af;
 				af.token = token;
 				af.subtoken = k;
+				af.group = cgroup[track];
+				af.measure = cmeasure;
 				af.text = sub;
 				if (subcount > 1) {
 					af.chord_num++;
@@ -618,6 +789,50 @@ void extractNotes(vector<AccentFeatures>& data, HumdrumFile& infile,
 			}
 		}
 	}
+}
+
+
+
+///////////////////////////////
+//
+// printLegend --
+//
+
+void printLegend(ostream& output) {
+	int i = 1;
+	output << i++ << ":\tline       == The line number of the note in original Humdrum file.\n";
+	output << i++ << ":\tfield      == The column number of the note in original Humdrum file.\n";
+	output << i++ << ":\ttrack      == The track number of the note in the original Humdrum file (similar to field).\n";
+	output << i++ << ":\tsubtrack   == The subtrack number of the note.  This is the voice/layer: 0=monophonic in staff; 1=polyphonic instaff and in top layer; 2,3=second, third, etc. layer.\n";
+	output << i++ << ":\tgroup      == This is the rhythmic group number (0=undefined group; 1=group A; 2=group B).\n";
+	output << i++ << ":\tstaff      == This is the staff number (1 = bottom staff).\n";
+	output << i++ << ":\tmeasure    == The measure number the note attack occurs in.\n";
+	output << i++ << ":\tqstart     == The absolute quarter-note start time of the note.\n";
+	output << i++ << ":\ttstart     == The absolute tick start time of the note.\n";
+	output << i++ << ":\tqdur       == The quarter-note duration of the note.\n";
+	output << i++ << ":\ttdur       == The tick duration of the note.\n";
+	output << i++ << ":\tpitch      == The pitch of the note as a MIDI key number (60 = middle C).\n";
+	output << i++ << ":\tchord      == Is the note in a chord? 0=no, 1=yes.\n";
+	output << i++ << ":\taccent     == Does the note have a regular accent?\n";
+	output << i++ << ":\tmarcato    == Does the note have a strong accent?\n";
+	output << i++ << ":\tsforzando  == Does the note have a sforzando?\n";
+	output << i++ << ":\ttenuto     == Does the note have a tenuto?\n";
+	output << i++ << ":\tstaccato   == Does the note have a staccato?\n";
+	output << i++ << ":\ttrill      == Does the note have a trill?\n";
+	output << i++ << ":\tmordent    == Does the note have a mordent?\n";
+	output << i++ << ":\tturn       == Does the note have a turn?\n";
+	output << i++ << ":\tsslur      == Does the note have a slur beginning?\n";
+	output << i++ << ":\teslur      == Does the note have a slur ending?\n";
+	output << i++ << ":\tppitch     == Previous MIDI key number (-1 = no previous note).\n";
+	output << i++ << ":\tpqstart    == Previous note absolute quarter-note start time (-1 = no previous note).\n";
+	output << i++ << ":\tptstart    == Previous note absolute tick start time (-1 = no previous note).\n";
+	output << i++ << ":\tpqdur      == Previous note quarter-note duration (-1 = no previous note).\n";
+	output << i++ << ":\tptdur      == Previous note tick duration (-1 = no previous note).\n";
+	output << i++ << ":\tnpitch     == Next MIDI key number (-1 = no next note).\n";
+	output << i++ << ":\tnqstart    == Next note absolute quarter-note start time (-1 = no next note).\n";
+	output << i++ << ":\tntstart    == Next note absolute tick start time (-1 = no next note).\n";
+	output << i++ << ":\tnqdur      == Next note quarter-note duration (-1 = no next note).\n";
+	output << i++ << ":\tntdur      == Next note tick duration (-1 = no next note).\n";
 }
 
 
