@@ -2114,6 +2114,32 @@ int HumdrumLine::getBarNumber(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::copyStructure -- For data lines only at the moment.
+//
+
+void HumdrumLine::copyStructure(HLp line) {
+		m_tokens.resize(line->m_tokens.size());
+		for (int i=0; i<(int)m_tokens.size(); i++) {
+			m_tokens[i] = new HumdrumToken(".");
+		}
+		createLineFromTokens();
+
+		m_tabs = line->m_tabs;
+		m_linkedParameters.clear();
+		m_rhythm_analyzed = line->m_rhythm_analyzed;
+		m_owner = line->m_owner;
+
+		// Other information that should be set later:
+		//    int m_lineindex;
+		//    HumNum m_durationFromStart;
+		//    HumNum m_durationFromBarline;
+		//    HumNum m_durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -2123,7 +2149,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	return out;
 }
 
-ostream& operator<< (ostream& out, HumdrumLine* line) {
+ostream& operator<< (ostream& out, HLp line) {
 	out << (string)(*line);
 	return out;
 }

@@ -121,15 +121,15 @@ class Tool_musicxml2hum : public HumTool {
 		                       HumNum nowtime,
 		                       std::vector<MxmlPart>& partdata,
 		                       std::vector<int>& partstaves);
-		void appendNullTokens (HumdrumLine* line, MxmlPart& part);
-		void appendEvent      (HumdrumLine* line, MxmlEvent* event);
+		void appendNullTokens (HLp line, MxmlPart& part);
+		void appendEvent      (HLp line, MxmlEvent* event);
 		void insertExclusiveInterpretationLine(HumdrumFile& outfile,
 		                       std::vector<MxmlPart>& partdata);
 		void insertAllToken   (HumdrumFile& outfile, std::vector<MxmlPart>& partdata,
 		                       const std::string& common);
 		void insertSingleMeasure(HumdrumFile& outfile);
 		void cleanupMeasures   (HumdrumFile& outfile,
-		                        std::vector<HumdrumLine*> measures);
+		                        std::vector<HLp> measures);
 		void processPrintElement(GridMeasure* outdata, pugi::xml_node element, HumNum timestamp);
 		void insertOffsetHarmonyIntoMeasure(GridMeasure* gm);
 		void insertOffsetFiguredBassIntoMeasure(GridMeasure* gm);

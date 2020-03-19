@@ -236,7 +236,7 @@ string HumAddress::getTrackString(string separator) const {
 //   a HumdrumLine, the parameter's value should be NULL.
 //
 
-void HumAddress::setOwner(HumdrumLine* aLine) {
+void HumAddress::setOwner(HLp aLine) {
 	m_owner = aLine;
 }
 
@@ -249,7 +249,7 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //    to a HumdrumLine object.
 //
 
-HumdrumLine* HumAddress::getLine(void) const {
+HLp HumAddress::getLine(void) const {
 	return m_owner;
 }
 

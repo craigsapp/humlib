@@ -1055,7 +1055,7 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 //
 
 void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
-		vector<HumdrumLine*> measures) {
+		vector<HLp> measures) {
 
    HumdrumToken* token;
 	for (int i=0; i<outfile.getLineCount(); i++) {
@@ -1080,7 +1080,7 @@ void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
 //
 
 void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 	token = new HumdrumToken("=");
 	line->appendToken(token);
@@ -1098,7 +1098,7 @@ void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
 void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 		vector<MxmlPart>& partdata, const string& common) {
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 
 	int i, j;
@@ -4607,7 +4607,7 @@ bool Tool_musicxml2hum::nodeType(xml_node node, const char* testname) {
 // Tool_musicxml2hum::appendNullTokens --
 //
 
-void Tool_musicxml2hum::appendNullTokens(HumdrumLine* line,
+void Tool_musicxml2hum::appendNullTokens(HLp line,
 		MxmlPart& part) {
 	int i;
 	int staffcount = part.getStaffCount();

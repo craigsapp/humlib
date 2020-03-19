@@ -103,7 +103,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token) :
 
 
 
-HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(const HumdrumToken& token, HLp owner) :
 		string((string)token), HumHash((HumHash)token) {
 	m_address         = token.m_address;
 	m_address.m_owner = owner;
@@ -119,7 +119,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
 }
 
 
-HumdrumToken::HumdrumToken(HumdrumToken* token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(HumdrumToken* token, HLp owner) :
 		string((string)(*token)), HumHash((HumHash)(*token)) {
 	m_address         = token->m_address;
 	m_address.m_owner = owner;
@@ -671,7 +671,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //
 
 HTp HumdrumToken::getNextFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -690,7 +690,7 @@ HTp HumdrumToken::getNextFieldToken(void) const {
 //
 
 HTp HumdrumToken::getPreviousFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -959,7 +959,7 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 //
 
 HumNum HumdrumToken::getBarlineDuration(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -968,7 +968,7 @@ HumNum HumdrumToken::getBarlineDuration(void) {
 
 
 HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -985,7 +985,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationToBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -993,7 +993,7 @@ HumNum HumdrumToken::getDurationToBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1010,7 +1010,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationFromBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1018,7 +1018,7 @@ HumNum HumdrumToken::getDurationFromBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationFromBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1452,7 +1452,7 @@ bool HumdrumToken::hasSlurEnd(void) {
 //
 
 int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -1482,7 +1482,7 @@ int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
 //
 
 int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -1920,7 +1920,7 @@ bool HumdrumToken::noteInLowerSubtrack(void) {
 	int field = this->getFieldIndex();
 	int track = this->getTrack();
 
-	HumdrumLine* owner = this->getOwner();
+	HLp owner = this->getOwner();
 	if (owner == NULL) {
 		return false;
 	}
@@ -2689,7 +2689,7 @@ std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
 // HumdrumToken::setOwner -- Sets the HumdrumLine owner of this token.
 //
 
-void HumdrumToken::setOwner(HumdrumLine* aLine) {
+void HumdrumToken::setOwner(HLp aLine) {
 	m_address.setOwner(aLine);
 }
 
@@ -2701,7 +2701,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 //    owns this token.
 //
 
-HumdrumLine* HumdrumToken::getOwner(void) const {
+HLp HumdrumToken::getOwner(void) const {
 	return m_address.getOwner();
 }
 
@@ -2963,7 +2963,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 		out << Convert::repeatString(indent, level);
 		out << "<linked-parameter";
 		out << " idref=\"";
-		HumdrumLine* owner = m_linkedParameterTokens[i]->getOwner();
+		HLp owner = m_linkedParameterTokens[i]->getOwner();
 		if (owner && owner->isGlobalComment()) {
 			out << owner->getXmlId();
 		} else {
@@ -3291,7 +3291,7 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 
 HTp HumdrumToken::resolveNull(void) {
 	if (m_nullresolve == NULL) {
-		HumdrumLine* hline = getOwner();
+		HLp hline = getOwner();
 		if (hline) {
 			HumdrumFile* infile = hline->getOwner();
 			infile->resolveNullTokens();

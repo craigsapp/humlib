@@ -1002,7 +1002,7 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		startbarline = getMeasureNumber();
 	}
 	int fieldcount = infile.back()->getFieldCount();
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	string tstring = "=";
 //	if (startbarline) {
 //		tstring += to_string(startbarline);

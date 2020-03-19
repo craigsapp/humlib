@@ -545,10 +545,10 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
 //   list.  If the first barline is a pickup measure, then the returned
-//   HumdrumLine* will not be an actual barline line.
+//   HLp will not be an actual barline line.
 //
 
-HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
+HLp HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
 		index += (int)m_barlines.size();
 	}
@@ -794,7 +794,7 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
-	vector<HumdrumLine*> globals;
+	vector<HLp> globals;
 
 //	for (int i=0; i<(int)m_lines.size(); i++) {
 //		if (m_lines[i]->isCommentGlobal()) {
@@ -1105,7 +1105,7 @@ bool HumdrumFileStructure::setLineDurationFromStart(HTp token,
 		// undefined rhythm, so don't assign line duration information:
 		return isValid();
 	}
-	HumdrumLine* line = token->getOwner();
+	HLp line = token->getOwner();
 	if (line->getDurationFromStart().isNegative()) {
 		line->setDurationFromStart(dursum);
 	} else if (line->getDurationFromStart() != dursum) {
@@ -1182,9 +1182,9 @@ bool HumdrumFileStructure::analyzeRhythmOfFloatingSpine(
 //
 
 bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
-	vector<HumdrumLine*> nulllines;
-	HumdrumLine* previous = NULL;
-	HumdrumLine* next = NULL;
+	vector<HLp> nulllines;
+	HLp previous = NULL;
+	HLp next = NULL;
 	HumNum dur;
 	HumNum startdur;
 	HumNum enddur;
@@ -1684,7 +1684,7 @@ HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) {
 
 bool HumdrumFileStructure::hasFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getGlobalReferenceRecords();
+	vector<HLp> refs  = infile.getGlobalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getGlobalReferenceKey() == "filter") {
 			return true;
@@ -1725,7 +1725,7 @@ bool HumdrumFileStructure::hasGlobalFilters(void) {
 
 bool HumdrumFileStructure::hasUniversalFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getUniversalReferenceRecords();
+	vector<HLp> refs  = infile.getUniversalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getUniversalReferenceKey() == "filter") {
 			return true;
@@ -1780,7 +1780,7 @@ std::string HumdrumFileStructure::getKernAboveSignifier(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getKernBelowSignifier -- used to place things
+// HumdrumFileStructure::getKernBelowSignifier -- Used to place things
 //     "below" (note on staff above, slurs/ties with an "below" orientation,
 //     etc.
 //

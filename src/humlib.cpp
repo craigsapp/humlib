@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar 16 21:21:01 PDT 2020
+// Last Modified: Thu Mar 19 02:15:06 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5629,7 +5629,7 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		startbarline = getMeasureNumber();
 	}
 	int fieldcount = infile.back()->getFieldCount();
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	string tstring = "=";
 //	if (startbarline) {
 //		tstring += to_string(startbarline);
@@ -6972,7 +6972,7 @@ bool GridSlice::isDataSlice(void) {
 
 void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	HTp token = NULL;
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	GridVoice* voice;
 	string empty = ".";
 	if (isMeasureSlice()) {
@@ -8297,7 +8297,7 @@ string HumAddress::getTrackString(string separator) const {
 //   a HumdrumLine, the parameter's value should be NULL.
 //
 
-void HumAddress::setOwner(HumdrumLine* aLine) {
+void HumAddress::setOwner(HLp aLine) {
 	m_owner = aLine;
 }
 
@@ -8310,7 +8310,7 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //    to a HumdrumLine object.
 //
 
-HumdrumLine* HumAddress::getLine(void) const {
+HLp HumAddress::getLine(void) const {
 	return m_owner;
 }
 
@@ -10774,7 +10774,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -10804,7 +10804,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 // HumGrid::insertExInterpSides --
 //
 
-void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 
 	if (staff >= 0) {
 		int versecount = getVerseCount(part, staff); // verses related to staff
@@ -10845,7 +10845,7 @@ void HumGrid::insertPartNames(HumdrumFile& outfile) {
 	if (m_partnames.size() == 0) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -10894,7 +10894,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -10927,7 +10927,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideNullInterpretations --
 //
 
-void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
+void HumGrid::insertSideNullInterpretations(HLp line,
 		int part, int staff) {
 	HTp token;
 	string text;
@@ -10966,7 +10966,7 @@ void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
 // HumGrid::insertSidePartInfo --
 //
 
-void HumGrid::insertSidePartInfo(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSidePartInfo(HLp line, int part, int staff) {
 	HTp token;
 	string text;
 
@@ -11020,7 +11020,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -11059,7 +11059,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideStaffInfo --
 //
 
-void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
+void HumGrid::insertSideStaffInfo(HLp line, int part, int staff,
 		int staffnum) {
 	HTp token;
 	string text;
@@ -11117,7 +11117,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -11147,7 +11147,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 // HumGrid::insertSideTerminals --
 //
 
-void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSideTerminals(HLp line, int part, int staff) {
 	HTp token;
 
 	if (staff < 0) {
@@ -16580,7 +16580,7 @@ bool HumdrumFileBase::read(istream& contents) {
 	clear();
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
 		s->setOwner(this);
@@ -16630,7 +16630,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine;
 		s->setLineFromCsv(buffer);
@@ -16924,7 +16924,7 @@ ostream& HumdrumFileBase::printFieldIndex(int fieldind, ostream& out) {
 //     given index in the data storage.
 //
 
-HumdrumLine* HumdrumFileBase::getLine(int index) {
+HLp HumdrumFileBase::getLine(int index) {
 	if (index < 0) {
 		return NULL;
 	} else if (index >= (int)m_lines.size()) {
@@ -17036,18 +17036,18 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 //
 
 void HumdrumFileBase::appendLine(const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
 void HumdrumFileBase::appendLine(const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
-void HumdrumFileBase::appendLine(HumdrumLine* line) {
+void HumdrumFileBase::appendLine(HLp line) {
 	// deletion will be handled by class.
 	m_lines.push_back(line);
 }
@@ -17056,27 +17056,43 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
+// HumdrumFileBase::insertLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
 
 void HumdrumFileBase::insertLine(int index, const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
 void HumdrumFileBase::insertLine(int index, const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
-void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
+void HumdrumFileBase::insertLine(int index, HLp line) {
 	// deletion will be handled by class.
 	m_lines.insert(m_lines.begin() + index, line);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
+
 
 
 //////////////////////////////
@@ -17107,7 +17123,7 @@ void HumdrumFileBase::deleteLine(int index) {
 // HumdrumFileBase::back --
 //
 
-HumdrumLine* HumdrumFileBase::back(void) {
+HLp HumdrumFileBase::back(void) {
 	return m_lines.back();
 }
 
@@ -17118,10 +17134,10 @@ HumdrumLine* HumdrumFileBase::back(void) {
 // HumdrumFileBase::getReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isReference()) {
@@ -17139,10 +17155,10 @@ vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
 // HumdrumFileBase::getGlobalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getGlobalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isGlobalReference()) {
@@ -17160,10 +17176,10 @@ vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
 // HumdrumFileBase::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileBase& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isUniversalReference()) {
@@ -17670,8 +17686,8 @@ bool HumdrumFileBase::analyzeTracks(void) {
 //
 
 bool HumdrumFileBase::analyzeLinks(void) {
-	HumdrumLine* next     = NULL;
-	HumdrumLine* previous = NULL;
+	HLp next     = NULL;
+	HLp previous = NULL;
 
 	for (int i=0; i<(int)m_lines.size(); i++) {
 		if (!m_lines[i]->hasSpines()) {
@@ -18426,7 +18442,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 // new          o    o         *v   *v   *    *v   *v
 // track:       1    2         3    3    4    5    5
 
-	HumdrumLine* newline = new HumdrumLine;
+	HLp newline = new HumdrumLine;
 	newline->setOwner(this);
 	bool foundboundary = false;
 	HTp token;
@@ -18636,6 +18652,68 @@ std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
 		}
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::insertNullDataLine -- Add a null data line at
+//     the given absolute quarter-note timestamp in the file.  If there
+//     is already a data line at the given timestamp, then do not create
+//     a line and instead return a pointer to the existing line.  Returns
+//     NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			return &infile[i];
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(&infile[beforei]);
+
+	infile.insertLine(beforei+1, newline);
+
+	// Set the timestamp information for inserted line:
+	HumNum delta = timestamp - beforet;
+	HumNum durationFromStart = infile[beforei].getDurationFromStart() + delta;
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline() + delta;
+	HumNum durationToBarline = infile[beforei].getDurationToBarline() - delta;
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = infile[beforei].m_duration - delta;
+	infile[beforei].m_duration = delta;
+
+	return newline;
 }
 
 
@@ -19551,7 +19629,7 @@ void HumdrumFileContent::analyzeOttavas(void) {
 	vector<int> activeOttava(tcount+1, 0);
 	vector<int> octavestate(tcount+1, 0);
 	for (int i=0; i<getLineCount(); i++) {
-		HumdrumLine* line = getLine(i);
+		HLp line = getLine(i);
 		if (line->isInterpretation()) {
 			int fcount = getLine(i)->getFieldCount();
 			for (int j=0; j<fcount; j++) {
@@ -22064,10 +22142,10 @@ bool HumdrumFileSet::hasUniversalFilters(void) {
 // HumdrumFileSet::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileSet::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileSet::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileSet& infiles = *this;
 	for (int i=0; i<infiles.getCount(); i++) {
 		HumdrumFileBase& infile = infiles[i];
@@ -23096,10 +23174,10 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
 //   list.  If the first barline is a pickup measure, then the returned
-//   HumdrumLine* will not be an actual barline line.
+//   HLp will not be an actual barline line.
 //
 
-HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
+HLp HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
 		index += (int)m_barlines.size();
 	}
@@ -23345,7 +23423,7 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
-	vector<HumdrumLine*> globals;
+	vector<HLp> globals;
 
 //	for (int i=0; i<(int)m_lines.size(); i++) {
 //		if (m_lines[i]->isCommentGlobal()) {
@@ -23656,7 +23734,7 @@ bool HumdrumFileStructure::setLineDurationFromStart(HTp token,
 		// undefined rhythm, so don't assign line duration information:
 		return isValid();
 	}
-	HumdrumLine* line = token->getOwner();
+	HLp line = token->getOwner();
 	if (line->getDurationFromStart().isNegative()) {
 		line->setDurationFromStart(dursum);
 	} else if (line->getDurationFromStart() != dursum) {
@@ -23733,9 +23811,9 @@ bool HumdrumFileStructure::analyzeRhythmOfFloatingSpine(
 //
 
 bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
-	vector<HumdrumLine*> nulllines;
-	HumdrumLine* previous = NULL;
-	HumdrumLine* next = NULL;
+	vector<HLp> nulllines;
+	HLp previous = NULL;
+	HLp next = NULL;
 	HumNum dur;
 	HumNum startdur;
 	HumNum enddur;
@@ -24235,7 +24313,7 @@ HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) {
 
 bool HumdrumFileStructure::hasFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getGlobalReferenceRecords();
+	vector<HLp> refs  = infile.getGlobalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getGlobalReferenceKey() == "filter") {
 			return true;
@@ -24276,7 +24354,7 @@ bool HumdrumFileStructure::hasGlobalFilters(void) {
 
 bool HumdrumFileStructure::hasUniversalFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getUniversalReferenceRecords();
+	vector<HLp> refs  = infile.getUniversalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getUniversalReferenceKey() == "filter") {
 			return true;
@@ -24331,7 +24409,7 @@ std::string HumdrumFileStructure::getKernAboveSignifier(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getKernBelowSignifier -- used to place things
+// HumdrumFileStructure::getKernBelowSignifier -- Used to place things
 //     "below" (note on staff above, slurs/ties with an "below" orientation,
 //     etc.
 //
@@ -26432,6 +26510,32 @@ int HumdrumLine::getBarNumber(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::copyStructure -- For data lines only at the moment.
+//
+
+void HumdrumLine::copyStructure(HLp line) {
+		m_tokens.resize(line->m_tokens.size());
+		for (int i=0; i<(int)m_tokens.size(); i++) {
+			m_tokens[i] = new HumdrumToken(".");
+		}
+		createLineFromTokens();
+
+		m_tabs = line->m_tabs;
+		m_linkedParameters.clear();
+		m_rhythm_analyzed = line->m_rhythm_analyzed;
+		m_owner = line->m_owner;
+
+		// Other information that should be set later:
+		//    int m_lineindex;
+		//    HumNum m_durationFromStart;
+		//    HumNum m_durationFromBarline;
+		//    HumNum m_durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -26441,7 +26545,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	return out;
 }
 
-ostream& operator<< (ostream& out, HumdrumLine* line) {
+ostream& operator<< (ostream& out, HLp line) {
 	out << (string)(*line);
 	return out;
 }
@@ -26526,7 +26630,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token) :
 
 
 
-HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(const HumdrumToken& token, HLp owner) :
 		string((string)token), HumHash((HumHash)token) {
 	m_address         = token.m_address;
 	m_address.m_owner = owner;
@@ -26542,7 +26646,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
 }
 
 
-HumdrumToken::HumdrumToken(HumdrumToken* token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(HumdrumToken* token, HLp owner) :
 		string((string)(*token)), HumHash((HumHash)(*token)) {
 	m_address         = token->m_address;
 	m_address.m_owner = owner;
@@ -27094,7 +27198,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //
 
 HTp HumdrumToken::getNextFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -27113,7 +27217,7 @@ HTp HumdrumToken::getNextFieldToken(void) const {
 //
 
 HTp HumdrumToken::getPreviousFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -27382,7 +27486,7 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 //
 
 HumNum HumdrumToken::getBarlineDuration(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27391,7 +27495,7 @@ HumNum HumdrumToken::getBarlineDuration(void) {
 
 
 HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27408,7 +27512,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationToBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27416,7 +27520,7 @@ HumNum HumdrumToken::getDurationToBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27433,7 +27537,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationFromBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27441,7 +27545,7 @@ HumNum HumdrumToken::getDurationFromBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationFromBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -27875,7 +27979,7 @@ bool HumdrumToken::hasSlurEnd(void) {
 //
 
 int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -27905,7 +28009,7 @@ int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
 //
 
 int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -28343,7 +28447,7 @@ bool HumdrumToken::noteInLowerSubtrack(void) {
 	int field = this->getFieldIndex();
 	int track = this->getTrack();
 
-	HumdrumLine* owner = this->getOwner();
+	HLp owner = this->getOwner();
 	if (owner == NULL) {
 		return false;
 	}
@@ -29112,7 +29216,7 @@ std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
 // HumdrumToken::setOwner -- Sets the HumdrumLine owner of this token.
 //
 
-void HumdrumToken::setOwner(HumdrumLine* aLine) {
+void HumdrumToken::setOwner(HLp aLine) {
 	m_address.setOwner(aLine);
 }
 
@@ -29124,7 +29228,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 //    owns this token.
 //
 
-HumdrumLine* HumdrumToken::getOwner(void) const {
+HLp HumdrumToken::getOwner(void) const {
 	return m_address.getOwner();
 }
 
@@ -29386,7 +29490,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 		out << Convert::repeatString(indent, level);
 		out << "<linked-parameter";
 		out << " idref=\"";
-		HumdrumLine* owner = m_linkedParameterTokens[i]->getOwner();
+		HLp owner = m_linkedParameterTokens[i]->getOwner();
 		if (owner && owner->isGlobalComment()) {
 			out << owner->getXmlId();
 		} else {
@@ -29714,7 +29818,7 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 
 HTp HumdrumToken::resolveNull(void) {
 	if (m_nullresolve == NULL) {
-		HumdrumLine* hline = getOwner();
+		HLp hline = getOwner();
 		if (hline) {
 			HumdrumFile* infile = hline->getOwner();
 			infile->resolveNullTokens();
@@ -56341,6 +56445,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "tremolo") {
+			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
@@ -56417,7 +56523,7 @@ void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
 void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		HumdrumFile& infile) {
 
-	vector<HumdrumLine*> refs = infile.getReferenceRecords();
+	vector<HLp> refs = infile.getReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;
@@ -56452,7 +56558,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& commands,
 		HumdrumFileSet& infiles) {
 
-	vector<HumdrumLine*> refs = infiles.getUniversalReferenceRecords();
+	vector<HLp> refs = infiles.getUniversalReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;
@@ -57977,7 +58083,7 @@ void Tool_humsheet::printHtmlFooter(void) {
 
 void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 	string classes;
-	HumdrumLine* hl = &infile[row];
+	HLp hl = &infile[row];
 	if (hl->hasSpines()) {
 		classes += "spined ";
 	}
@@ -58062,7 +58168,7 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 //    starts with "!LO:".
 //
 
-bool Tool_humsheet::isLayout(HumdrumLine* line) {
+bool Tool_humsheet::isLayout(HLp line) {
 	if (line->hasSpines()) {
 		if (!line->isCommentLocal()) {
 			return false;
@@ -59395,7 +59501,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data = true;
 						results.at(v1).at(line1) += "b";
-						HumdrumLine* humline = attacks.at(v1).at(i)->getToken()->getOwner();
+						HLp humline = attacks.at(v1).at(i)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();
@@ -59502,7 +59608,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data2 = true;
 						results.at(v2).at(line2) += "b";
-						HumdrumLine* humline = attacks.at(v2).at(j)->getToken()->getOwner();
+						HLp humline = attacks.at(v2).at(j)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();
@@ -67701,7 +67807,7 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 //
 
 void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
-		vector<HumdrumLine*> measures) {
+		vector<HLp> measures) {
 
    HumdrumToken* token;
 	for (int i=0; i<outfile.getLineCount(); i++) {
@@ -67726,7 +67832,7 @@ void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
 //
 
 void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 	token = new HumdrumToken("=");
 	line->appendToken(token);
@@ -67744,7 +67850,7 @@ void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
 void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 		vector<MxmlPart>& partdata, const string& common) {
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 
 	int i, j;
@@ -71253,7 +71359,7 @@ bool Tool_musicxml2hum::nodeType(xml_node node, const char* testname) {
 // Tool_musicxml2hum::appendNullTokens --
 //
 
-void Tool_musicxml2hum::appendNullTokens(HumdrumLine* line,
+void Tool_musicxml2hum::appendNullTokens(HLp line,
 		MxmlPart& part) {
 	int i;
 	int staffcount = part.getStaffCount();
@@ -80116,8 +80222,8 @@ void Tool_tassoize::deleteBreaks(HumdrumFile& infile) {
 //
 
 void Tool_tassoize::addBibliographicRecords(HumdrumFile& infile) {
-	std::vector<HumdrumLine*> refinfo = infile.getReferenceRecords();
-	std::map<string, HumdrumLine*> refs;
+	std::vector<HLp> refinfo = infile.getReferenceRecords();
+	std::map<string, HLp> refs;
 	for (int i=0; i<(int)refinfo.size(); i++) {
 		string key = refinfo[i]->getReferenceKey();
 		refs[key] = refinfo[i];
@@ -82132,6 +82238,113 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	}
 
 	transval += 40 * octave;
+}
+
+
+
+
+/////////////////////////////////
+//
+// Tool_tremolo::Tool_tremolo -- Set the recognized options for the tool.
+//
+
+Tool_tremolo::Tool_tremolo(void) {
+	// add input options here
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_tremolo::run -- Do the main work of the tool.
+//
+
+bool Tool_tremolo::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(HumdrumFile& infile) {
+	processFile(infile);
+	return true;
+}
+
+
+//////////////////////////////
+//
+// Tool_tremolo::processFile --
+//
+
+void Tool_tremolo::processFile(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=infile.getLineCount()-1; i>=0; i--) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (infile[i].getDuration() == 0) {
+			// don't deal with grace notes
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (hre.search(token, "@(\\d+)@")) {
+				int value = hre.getMatchInt(1);
+				HumNum duration = Convert::recipToDuration(token);
+				HumNum count = duration;
+				count *= value;
+				count /= 4;
+				HumNum increment = 4;
+				increment = 4;
+				increment /= value;
+				if (!count.isInteger()) {
+					cerr << "Error: time value cannot be used: " << value << endl;
+					continue;
+				}
+				int kcount = count.getNumerator();
+				HumNum starttime = token->getDurationFromStart();
+				HumNum timestamp;
+				for (int k=1; k<kcount; k++) {
+					timestamp = starttime + (increment * k);
+					infile.insertNullDataLine(timestamp);
+				}
+			}
+		}
+	}
+
+	m_humdrum_text << infile;
 }
 
 

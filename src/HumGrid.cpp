@@ -2382,7 +2382,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -2412,7 +2412,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 // HumGrid::insertExInterpSides --
 //
 
-void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 
 	if (staff >= 0) {
 		int versecount = getVerseCount(part, staff); // verses related to staff
@@ -2453,7 +2453,7 @@ void HumGrid::insertPartNames(HumdrumFile& outfile) {
 	if (m_partnames.size() == 0) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -2502,7 +2502,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -2535,7 +2535,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideNullInterpretations --
 //
 
-void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
+void HumGrid::insertSideNullInterpretations(HLp line,
 		int part, int staff) {
 	HTp token;
 	string text;
@@ -2574,7 +2574,7 @@ void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
 // HumGrid::insertSidePartInfo --
 //
 
-void HumGrid::insertSidePartInfo(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSidePartInfo(HLp line, int part, int staff) {
 	HTp token;
 	string text;
 
@@ -2628,7 +2628,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -2667,7 +2667,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideStaffInfo --
 //
 
-void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
+void HumGrid::insertSideStaffInfo(HLp line, int part, int staff,
 		int staffnum) {
 	HTp token;
 	string text;
@@ -2725,7 +2725,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -2755,7 +2755,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 // HumGrid::insertSideTerminals --
 //
 
-void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSideTerminals(HLp line, int part, int staff) {
 	HTp token;
 
 	if (staff < 0) {

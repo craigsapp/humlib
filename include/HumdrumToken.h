@@ -36,10 +36,8 @@ class HumdrumToken : public std::string, public HumHash {
 		         HumdrumToken              (void);
 		         HumdrumToken              (const HumdrumToken& token);
 		         HumdrumToken              (HumdrumToken* token);
-		         HumdrumToken              (const HumdrumToken& token,
-		                                    HumdrumLine* owner);
-		         HumdrumToken              (HumdrumToken* token,
-		                                    HumdrumLine* owner);
+		         HumdrumToken              (const HumdrumToken& token, HLp owner);
+		         HumdrumToken              (HumdrumToken* token, HLp owner);
 		         HumdrumToken              (const char* token);
 		         HumdrumToken              (const std::string& token);
 		        ~HumdrumToken              ();
@@ -140,8 +138,8 @@ class HumdrumToken : public std::string, public HumHash {
 		HumNum   getBarlineDuration        (void);
 		HumNum   getBarlineDuration        (HumNum scale);
 
-		HumdrumLine* getOwner              (void) const;
-		HumdrumLine* getLine               (void) const { return getOwner(); }
+		HLp      getOwner                  (void) const;
+		HLp      getLine                   (void) const { return getOwner(); }
 		bool     equalChar                 (int index, char ch) const;
 
 		HTp      resolveNull               (void);
@@ -256,7 +254,7 @@ class HumdrumToken : public std::string, public HumHash {
 		void     addNextNonNullToken       (HTp token);
 		void     makeForwardLink           (HumdrumToken& nextToken);
 		void     makeBackwardLink          (HumdrumToken& previousToken);
-		void     setOwner                  (HumdrumLine* aLine);
+		void     setOwner                  (HLp aLine);
 		int      getState                  (void) const;
 		void     incrementState            (void);
 		void     setDuration               (const HumNum& dur);

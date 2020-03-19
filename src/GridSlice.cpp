@@ -259,7 +259,7 @@ bool GridSlice::isDataSlice(void) {
 
 void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	HTp token = NULL;
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	GridVoice* voice;
 	string empty = ".";
 	if (isMeasureSlice()) {

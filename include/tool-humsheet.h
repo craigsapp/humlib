@@ -50,7 +50,7 @@ class Tool_humsheet : public HumTool {
 		void     printId           (HTp token);
 		void     printToken        (HTp token);
 		void     printCellData     (HTp token);
-		bool     isLayout          (HumdrumLine* line);
+		bool     isLayout          (HLp line);
 
 	private:
 		bool             m_exinterpQ       = false;

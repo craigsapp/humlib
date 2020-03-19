@@ -202,7 +202,7 @@ void Tool_humsheet::printHtmlFooter(void) {
 
 void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 	string classes;
-	HumdrumLine* hl = &infile[row];
+	HLp hl = &infile[row];
 	if (hl->hasSpines()) {
 		classes += "spined ";
 	}
@@ -287,7 +287,7 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 //    starts with "!LO:".
 //
 
-bool Tool_humsheet::isLayout(HumdrumLine* line) {
+bool Tool_humsheet::isLayout(HLp line) {
 	if (line->hasSpines()) {
 		if (!line->isCommentLocal()) {
 			return false;
