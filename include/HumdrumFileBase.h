@@ -226,9 +226,11 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, const std::string& line);
 		void          insertLine               (int index, HLp line);
 
-		HLp           insertNullDataLine       (HumNum timestamp);
-		HLp           insertNullInterpretationLine(HumNum timestamp);
-		HLp           getLineForInterpretationInsertion(int index);
+		HLp           insertNullDataLine                    (HumNum timestamp);
+		HLp           insertNullInterpretationLine          (HumNum timestamp);
+		HLp           insertNullInterpretationLineAbove     (HumNum timestamp);
+		HLp           getLineForInterpretationInsertion     (int index);
+		HLp           getLineForInterpretationInsertionAbove(int index);
 
 
 		void          deleteLine               (int index);

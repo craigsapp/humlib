@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Mar 19 23:06:12 PDT 2020
+// Last Modified: Fri Mar 20 11:37:03 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1700,9 +1700,11 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, const std::string& line);
 		void          insertLine               (int index, HLp line);
 
-		HLp           insertNullDataLine       (HumNum timestamp);
-		HLp           insertNullInterpretationLine(HumNum timestamp);
-		HLp           getLineForInterpretationInsertion(int index);
+		HLp           insertNullDataLine                    (HumNum timestamp);
+		HLp           insertNullInterpretationLine          (HumNum timestamp);
+		HLp           insertNullInterpretationLineAbove     (HumNum timestamp);
+		HLp           getLineForInterpretationInsertion     (int index);
+		HLp           getLineForInterpretationInsertionAbove(int index);
 
 
 		void          deleteLine               (int index);

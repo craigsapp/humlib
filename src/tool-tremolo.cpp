@@ -156,6 +156,7 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 //
 
 void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
+
 	// Insert starting *tremolo
 	for (int i=0; i<(int)m_first_tremolo_time.size(); i++) {
 		if (m_first_tremolo_time[i] < 0) {
@@ -174,6 +175,30 @@ void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
 				}
 				if (track == i) {
 					token->setText("*tremolo");
+					line->createLineFromTokens();
+				}
+			}
+		}
+	}
+
+	// Insert ending *Xtremolo
+	for (int i=0; i<(int)m_last_tremolo_time.size(); i++) {
+		if (m_last_tremolo_time[i] < 0) {
+			continue;
+		}
+		HLp line = infile.insertNullInterpretationLineAbove(m_last_tremolo_time[i]);
+		if (line != NULL) {
+			for (int j=0; j<line->getFieldCount(); j++) {
+				HTp token = line->token(j);
+				int track = token->getTrack();
+				int subtrack = token->getSubtrack();
+				if (subtrack > 1) {
+					// Currently *tremolo affects all subtracks, but this
+					// will probably change in the future.
+					continue;
+				}
+				if (track == i) {
+					token->setText("*Xtremolo");
 					line->createLineFromTokens();
 				}
 			}

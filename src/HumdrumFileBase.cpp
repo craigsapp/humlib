@@ -2561,6 +2561,81 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::insertNullInterpretationLineAbove -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added before any other lines at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLineAbove(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertionAbove(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::getLineForInterpretationInsertion --  Search backwards
 //    in the file for the first local comment immediately before a data line
 //    index given as input.  If there are no local comments, then return the
@@ -2580,6 +2655,36 @@ HLp HumdrumFileBase::getLineForInterpretationInsertion(int index) {
 			continue;
 		}
 		if (infile[current].isCommentLocal()) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertionAbove --  Search backwards
+//    in the file for the first line at the same timestamp as the starting line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
+	HumdrumFileBase& infile = *this;
+	HumNum timestamp = infile[index].getDurationFromStart();
+	HumNum teststamp;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		teststamp = infile[current].getDurationFromStart();
+		if (teststamp == timestamp) {
 			previous = current;
 			current--;
 			continue;
