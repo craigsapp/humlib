@@ -15,6 +15,7 @@
 #include "tool-musicxml2hum.h"
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
+#include "tool-tremolo.h"
 #include "tool-trillspell.h"
 
 #include "Convert.h"
