@@ -32,9 +32,14 @@ class Tool_tremolo : public HumTool {
 
 	protected:
 		void    processFile        (HumdrumFile& infile);
+		void    removeMarkup       (void);
+		void    expandTremolos     (void);
+		void    expandTremolo      (HTp token);
 
 	private:
-		// bool    m_modified  = false;
+		bool    m_keepQ      = false;
+		bool    m_modifiedQ  = false;
+		std::vector<HTp> m_markup_tokens;
 
 
 };

@@ -217,6 +217,7 @@ class HumdrumToken : public std::string, public HumHash {
 		HTp         getPreviousToken       (int index = 0) const;
 		std::vector<HTp> getNextTokens     (void) const;
 		std::vector<HTp> getPreviousTokens (void) const;
+		void        insertTokenAfter       (HTp newtoken);
 
 		// next/previous token on line:
 		HTp      getNextFieldToken     (void) const;

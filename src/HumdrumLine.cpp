@@ -2121,6 +2121,7 @@ void HumdrumLine::copyStructure(HLp line) {
 		m_tokens.resize(line->m_tokens.size());
 		for (int i=0; i<(int)m_tokens.size(); i++) {
 			m_tokens[i] = new HumdrumToken(".");
+			m_tokens[i]->setOwner(this);
 		}
 		createLineFromTokens();
 

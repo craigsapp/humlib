@@ -123,6 +123,23 @@ bool Convert::isNaN(double value) {
 
 //////////////////////////////
 //
+// Convert::isPowerOfTwo --
+//
+
+bool Convert::isPowerOfTwo(int value) {
+	if (value < 0) {
+		return (-value & (-value - 1)) == 0;
+	} else if (value > 0) {
+		return (value & (value - 1)) == 0;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_transpose::pearsonCorrelation --
 //
 

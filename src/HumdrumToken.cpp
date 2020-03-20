@@ -250,6 +250,33 @@ int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumToken::insertTokenAfter -- Insert the given token after the this token.
+//    This will sever the link from this token to its next token.  There is only
+//    presumed to be one next token, at least for the moment.
+//
+//
+
+void HumdrumToken::insertTokenAfter(HTp newtoken) {
+	if (m_nextTokens.empty()) {
+		m_nextTokens.push_back(newtoken);
+	} else {
+		HTp oldnexttoken = m_nextTokens[0];
+		m_nextTokens[0] = newtoken;
+		newtoken->m_previousTokens.clear();
+		newtoken->m_previousTokens.push_back(this);
+		newtoken->m_nextTokens.clear();
+		newtoken->m_nextTokens.push_back(oldnexttoken);
+		if (oldnexttoken->m_previousTokens.empty()) {
+			oldnexttoken->m_previousTokens.push_back(newtoken);
+		} else {
+			oldnexttoken->m_previousTokens[0] = newtoken;
+		}
+	}
+}
+
+
 
 //////////////////////////////
 //

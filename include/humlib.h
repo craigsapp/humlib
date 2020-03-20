@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Mar 19 02:15:06 PDT 2020
+// Last Modified: Thu Mar 19 17:39:50 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1387,6 +1387,7 @@ class HumdrumToken : public std::string, public HumHash {
 		HTp         getPreviousToken       (int index = 0) const;
 		std::vector<HTp> getNextTokens     (void) const;
 		std::vector<HTp> getPreviousTokens (void) const;
+		void        insertTokenAfter       (HTp newtoken);
 
 		// next/previous token on line:
 		HTp      getNextFieldToken     (void) const;
@@ -3577,6 +3578,7 @@ class Convert {
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
+		static bool    isPowerOfTwo         (int value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
 		static double  standardDeviationSample(const std::vector<double>& x);
@@ -7676,9 +7678,14 @@ class Tool_tremolo : public HumTool {
 
 	protected:
 		void    processFile        (HumdrumFile& infile);
+		void    removeMarkup       (void);
+		void    expandTremolos     (void);
+		void    expandTremolo      (HTp token);
 
 	private:
-		// bool    m_modified  = false;
+		bool    m_keepQ      = false;
+		bool    m_modifiedQ  = false;
+		std::vector<HTp> m_markup_tokens;
 
 
 };

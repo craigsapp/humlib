@@ -2469,6 +2469,12 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	newline->m_duration = infile[beforei].m_duration - delta;
 	infile[beforei].m_duration = delta;
 
+	for (int i=0; i<infile[beforei].getFieldCount(); i++) {
+		HTp token = infile.token(beforei, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
 	return newline;
 }
 
