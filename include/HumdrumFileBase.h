@@ -227,6 +227,8 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, HLp line);
 
 		HLp           insertNullDataLine       (HumNum timestamp);
+		HLp           insertNullInterpretationLine(HumNum timestamp);
+		HLp           getLineForInterpretationInsertion(int index);
 
 
 		void          deleteLine               (int index);

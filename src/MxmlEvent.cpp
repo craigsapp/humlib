@@ -1618,6 +1618,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool strongaccent   = false;
 	bool fermata        = false;
 	bool trill          = false;
+	int  tremolo        = 0;
 	bool umordent       = false;
 	bool lmordent       = false;
 	bool upbow          = false;
@@ -1679,6 +1680,14 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					trill = true;
 				}
 
+            //  <ornaments>
+            //     <tremolo type="single">2</tremolo>
+            //  </ornaments>
+				if (strcmp(grandchild.name(), "tremolo") == 0) {
+					string tstring = grandchild.child_value();
+					tremolo = 1 << (stoi(tstring) + 2);
+				}
+
 				// umordent
           	// <ornaments>
           	//   <inverted-mordent default-x="-4" default-y="-65" placement="below"/>
@@ -1712,6 +1721,9 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		// figure out whole-tone trills later via trillspell tool:
 		reportOrnamentToOwner();
 	}
+	if (tremolo >= 8) {
+		ss << "@" << tremolo << "@";
+	}
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
@@ -1731,7 +1743,6 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		reportCaesuraToOwner();
 	}
 	if (arpeggio)     { ss << ":";  }
-
 }
 
 

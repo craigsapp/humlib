@@ -217,6 +217,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
+	if (m_hasTremoloQ) {
+		Tool_tremolo tremolo;
+		tremolo.run(outfile);
+	}
+
 	if (m_software == "sibelius") {
 		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
 		// where grace note groups are not beamed in the MusicXML export.
@@ -1585,6 +1590,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
+		if (postfix.find("@") != string::npos) {
+			m_hasTremoloQ = true;
+		}
 		bool grace     = event->isGrace();
 		int slurstarts = event->hasSlurStart(slurdirs);
 		int slurstops = event->hasSlurStop();

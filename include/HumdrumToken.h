@@ -243,6 +243,7 @@ class HumdrumToken : public std::string, public HumHash {
 
 		void     setTrack                  (int aTrack, int aSubtrack);
 		void     setTrack                  (int aTrack);
+		void     copyStructure             (HTp token);
 
 	protected:
 		void     setLineIndex              (int lineindex);

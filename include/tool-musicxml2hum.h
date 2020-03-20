@@ -250,6 +250,9 @@ class Tool_musicxml2hum : public HumTool {
 		// harmony/dynamics side spines.
 		bool m_forceRecipQ = false;
 
+		// m_hasTremoloQ is used to run the tremolo tool.
+		bool m_hasTremoloQ = false;
+
 };
 
 

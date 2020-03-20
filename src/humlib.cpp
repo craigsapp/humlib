@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Mar 19 17:39:50 PDT 2020
+// Last Modified: Thu Mar 19 23:06:12 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -18675,7 +18675,7 @@ std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::insertNullDataLine -- Add a null data line at
+// HumdrumFileBase::insertNullDataLine -- Add a null data line at
 //     the given absolute quarter-note timestamp in the file.  If there
 //     is already a data line at the given timestamp, then do not create
 //     a line and instead return a pointer to the existing line.  Returns
@@ -18713,7 +18713,7 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	}
 	HLp newline = new HumdrumLine;
 	// copyStructure will add null tokens automatically
-	newline->copyStructure(&infile[beforei]);
+	newline->copyStructure(&infile[beforei], ".");
 
 	infile.insertLine(beforei+1, newline);
 
@@ -18737,6 +18737,117 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	}
 
 	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLine -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added after any other interpretation lines at that timestamp, but before any
+//     local comments that appear immediately before the data line(s) at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertion(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertion --  Search backwards
+//    in the file for the first local comment immediately before a data line
+//    index given as input.  If there are no local comments, then return the
+//    data line.  If there are local comment lines immediately before the data
+//    line, then keep searching for the first local comment.  Non-spined lines
+//    (global or empty lines) are ignored.  This function is used to insert
+//    an empty interpretation before a data line at a specific data line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertion(int index) {
+	HumdrumFileBase& infile = *this;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		if (infile[current].isCommentLocal()) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
 }
 
 
@@ -26536,11 +26647,12 @@ int HumdrumLine::getBarNumber(void) {
 // HumdrumLine::copyStructure -- For data lines only at the moment.
 //
 
-void HumdrumLine::copyStructure(HLp line) {
+void HumdrumLine::copyStructure(HLp line, const string& empty) {
 		m_tokens.resize(line->m_tokens.size());
 		for (int i=0; i<(int)m_tokens.size(); i++) {
-			m_tokens[i] = new HumdrumToken(".");
+			m_tokens[i] = new HumdrumToken(empty);
 			m_tokens[i]->setOwner(this);
+			m_tokens[i]->copyStructure(line->m_tokens[i]);
 		}
 		createLineFromTokens();
 
@@ -29894,6 +30006,22 @@ HTp HumdrumToken::resolveNull(void) {
 
 void HumdrumToken::setNullResolution(HTp resolution) {
 	m_nullresolve = resolution;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::copyStucture --
+//
+
+void HumdrumToken::copyStructure(HTp token) {
+	m_strand = token->m_strand;
+	HLp temp_owner = m_address.m_owner;
+	m_address = token->m_address;
+	m_address.m_owner = NULL;  // This will in general be different, so do not copy.
+	m_address.m_owner = temp_owner; // But preserve in case already set.
+	// m_nullresolve: set this?
 }
 
 
@@ -39442,6 +39570,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool strongaccent   = false;
 	bool fermata        = false;
 	bool trill          = false;
+	int  tremolo        = 0;
 	bool umordent       = false;
 	bool lmordent       = false;
 	bool upbow          = false;
@@ -39503,6 +39632,14 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					trill = true;
 				}
 
+            //  <ornaments>
+            //     <tremolo type="single">2</tremolo>
+            //  </ornaments>
+				if (strcmp(grandchild.name(), "tremolo") == 0) {
+					string tstring = grandchild.child_value();
+					tremolo = 1 << (stoi(tstring) + 2);
+				}
+
 				// umordent
           	// <ornaments>
           	//   <inverted-mordent default-x="-4" default-y="-65" placement="below"/>
@@ -39536,6 +39673,9 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		// figure out whole-tone trills later via trillspell tool:
 		reportOrnamentToOwner();
 	}
+	if (tremolo >= 8) {
+		ss << "@" << tremolo << "@";
+	}
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
@@ -39555,7 +39695,6 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		reportCaesuraToOwner();
 	}
 	if (arpeggio)     { ss << ":";  }
-
 }
 
 
@@ -67020,6 +67159,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
+	if (m_hasTremoloQ) {
+		Tool_tremolo tremolo;
+		tremolo.run(outfile);
+	}
+
 	if (m_software == "sibelius") {
 		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
 		// where grace note groups are not beamed in the MusicXML export.
@@ -68388,6 +68532,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
+		if (postfix.find("@") != string::npos) {
+			m_hasTremoloQ = true;
+		}
 		bool grace     = event->isGrace();
 		int slurstarts = event->hasSlurStart(slurdirs);
 		int slurstops = event->hasSlurStop();
@@ -82302,6 +82449,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 Tool_tremolo::Tool_tremolo(void) {
 	define("k|keep=b", "Keep tremolo rhythm markup");
 	define("F|no-fill=b", "Do not fill in tremolo spaces");
+	define("T|no-tremolo-interpretation=b", "Do not add *tremolo/*Xtremolo marks");
 }
 
 
@@ -82355,6 +82503,13 @@ bool Tool_tremolo::run(HumdrumFile& infile) {
 //
 
 void Tool_tremolo::processFile(HumdrumFile& infile) {
+	m_first_tremolo_time.clear();
+	m_last_tremolo_time.clear();
+	int maxtrack = infile.getMaxTrack();
+	m_first_tremolo_time.resize(maxtrack+1);
+	m_last_tremolo_time.resize(maxtrack+1);
+	fill(m_first_tremolo_time.begin(), m_first_tremolo_time.end(), -1);
+	fill(m_last_tremolo_time.begin(), m_last_tremolo_time.end(), -1);
 	HumRegex hre;
 	m_markup_tokens.reserve(1000);
 	for (int i=infile.getLineCount()-1; i>=0; i--) {
@@ -82399,6 +82554,9 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 
 	if (!getBoolean("no-fill")) {
 		expandTremolos();
+		if (!getBoolean("no-tremolo-interpretation")) {
+			addTremoloInterpretations(infile);
+		}
 	} else if (!m_keepQ) {
 		removeMarkup();
 	}
@@ -82407,8 +82565,42 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 		infile.createLinesFromTokens();
 	}
 
-	m_humdrum_text << infile;
+	// m_humdrum_text << infile;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::addTremoloInterpretations --
+//
+
+void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
+	// Insert starting *tremolo
+	for (int i=0; i<(int)m_first_tremolo_time.size(); i++) {
+		if (m_first_tremolo_time[i] < 0) {
+			continue;
+		}
+		HLp line = infile.insertNullInterpretationLine(m_first_tremolo_time[i]);
+		if (line != NULL) {
+			for (int j=0; j<line->getFieldCount(); j++) {
+				HTp token = line->token(j);
+				int track = token->getTrack();
+				int subtrack = token->getSubtrack();
+				if (subtrack > 1) {
+					// Currently *tremolo affects all subtracks, but this
+					// will probably change in the future.
+					continue;
+				}
+				if (track == i) {
+					token->setText("*tremolo");
+					line->createLineFromTokens();
+				}
+			}
+		}
+	}
+}
+
 
 
 //////////////////////////////
@@ -82461,6 +82653,8 @@ void Tool_tremolo::expandTremolo(HTp token) {
 		return;
 	}
 
+	storeFirstTremoloNoteInfo(token);
+
 	int beams = log((double)(value))/log(2.0) - 2;
 	string markup = "@" + to_string(value) + "@";
 	string base = token->getText();
@@ -82510,12 +82704,14 @@ void Tool_tremolo::expandTremolo(HTp token) {
 			continue;
 		}
 		if (cstamp > timestamp) {
-			cerr << "Warning: terminating tremolo insertion early" << endl;
+			cerr << "\tWarning: terminating tremolo insertion early" << endl;
+			cerr << "\tCSTAMP : " << cstamp << " TSTAMP " << timestamp << endl;
 			break;
 		}
 		counter++;
 		if (tnotes == counter) {
 			current->setText(terminal);
+			storeLastTremoloNoteInfo(current);
 		} else {
 			current->setText(base);
 		}
@@ -82547,6 +82743,49 @@ void Tool_tremolo::removeMarkup(void) {
 		hre.replaceDestructive(text, "", "@\\d+@");
 		token->setText(text);
 		token->getOwner()->createLineFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeFirstTremoloNote --
+//
+
+void Tool_tremolo::storeFirstTremoloNoteInfo(HTp token) {
+	int track = token->getTrack();
+	HumNum timestamp = token->getDurationFromStart();
+	if (m_first_tremolo_time.at(track) < 0) {
+		m_first_tremolo_time.at(track) = timestamp;
+	} else if (timestamp < m_first_tremolo_time.at(track)) {
+		// This case is probably not necessary.
+		m_first_tremolo_time.at(track) = timestamp;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeLastTremoloNote --
+//
+
+void Tool_tremolo::storeLastTremoloNoteInfo(HTp token) {
+	if (!token) {
+		return;
+	}
+	int track = token->getTrack();
+	if (track < 1) {
+		cerr << "Track is not set for token: " << track << endl;
+		return;
+	}
+	HumNum timestamp = token->getDurationFromStart();
+	timestamp += token->getDuration();
+	if (m_last_tremolo_time.at(track) < 0) {
+		m_last_tremolo_time.at(track) = timestamp;
+	} else if (timestamp > m_last_tremolo_time.at(track)) {
+		m_last_tremolo_time.at(track) = timestamp;
 	}
 }
 

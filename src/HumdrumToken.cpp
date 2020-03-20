@@ -3347,6 +3347,22 @@ void HumdrumToken::setNullResolution(HTp resolution) {
 
 
 
+//////////////////////////////
+//
+// HumdrumToken::copyStucture --
+//
+
+void HumdrumToken::copyStructure(HTp token) {
+	m_strand = token->m_strand;
+	HLp temp_owner = m_address.m_owner;
+	m_address = token->m_address;
+	m_address.m_owner = NULL;  // This will in general be different, so do not copy.
+	m_address.m_owner = temp_owner; // But preserve in case already set.
+	// m_nullresolve: set this?
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

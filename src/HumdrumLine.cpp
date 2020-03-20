@@ -2117,11 +2117,12 @@ int HumdrumLine::getBarNumber(void) {
 // HumdrumLine::copyStructure -- For data lines only at the moment.
 //
 
-void HumdrumLine::copyStructure(HLp line) {
+void HumdrumLine::copyStructure(HLp line, const string& empty) {
 		m_tokens.resize(line->m_tokens.size());
 		for (int i=0; i<(int)m_tokens.size(); i++) {
-			m_tokens[i] = new HumdrumToken(".");
+			m_tokens[i] = new HumdrumToken(empty);
 			m_tokens[i]->setOwner(this);
+			m_tokens[i]->copyStructure(line->m_tokens[i]);
 		}
 		createLineFromTokens();
 

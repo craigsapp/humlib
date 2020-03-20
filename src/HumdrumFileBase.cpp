@@ -2414,7 +2414,7 @@ std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::insertNullDataLine -- Add a null data line at
+// HumdrumFileBase::insertNullDataLine -- Add a null data line at
 //     the given absolute quarter-note timestamp in the file.  If there
 //     is already a data line at the given timestamp, then do not create
 //     a line and instead return a pointer to the existing line.  Returns
@@ -2452,7 +2452,7 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	}
 	HLp newline = new HumdrumLine;
 	// copyStructure will add null tokens automatically
-	newline->copyStructure(&infile[beforei]);
+	newline->copyStructure(&infile[beforei], ".");
 
 	infile.insertLine(beforei+1, newline);
 
@@ -2476,6 +2476,117 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	}
 
 	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLine -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added after any other interpretation lines at that timestamp, but before any
+//     local comments that appear immediately before the data line(s) at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertion(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertion --  Search backwards
+//    in the file for the first local comment immediately before a data line
+//    index given as input.  If there are no local comments, then return the
+//    data line.  If there are local comment lines immediately before the data
+//    line, then keep searching for the first local comment.  Non-spined lines
+//    (global or empty lines) are ignored.  This function is used to insert
+//    an empty interpretation before a data line at a specific data line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertion(int index) {
+	HumdrumFileBase& infile = *this;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		if (infile[current].isCommentLocal()) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
 }
 
 

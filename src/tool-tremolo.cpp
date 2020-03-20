@@ -29,6 +29,7 @@ namespace hum {
 Tool_tremolo::Tool_tremolo(void) {
 	define("k|keep=b", "Keep tremolo rhythm markup");
 	define("F|no-fill=b", "Do not fill in tremolo spaces");
+	define("T|no-tremolo-interpretation=b", "Do not add *tremolo/*Xtremolo marks");
 }
 
 
@@ -82,6 +83,13 @@ bool Tool_tremolo::run(HumdrumFile& infile) {
 //
 
 void Tool_tremolo::processFile(HumdrumFile& infile) {
+	m_first_tremolo_time.clear();
+	m_last_tremolo_time.clear();
+	int maxtrack = infile.getMaxTrack();
+	m_first_tremolo_time.resize(maxtrack+1);
+	m_last_tremolo_time.resize(maxtrack+1);
+	fill(m_first_tremolo_time.begin(), m_first_tremolo_time.end(), -1);
+	fill(m_last_tremolo_time.begin(), m_last_tremolo_time.end(), -1);
 	HumRegex hre;
 	m_markup_tokens.reserve(1000);
 	for (int i=infile.getLineCount()-1; i>=0; i--) {
@@ -126,6 +134,9 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 
 	if (!getBoolean("no-fill")) {
 		expandTremolos();
+		if (!getBoolean("no-tremolo-interpretation")) {
+			addTremoloInterpretations(infile);
+		}
 	} else if (!m_keepQ) {
 		removeMarkup();
 	}
@@ -134,8 +145,42 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 		infile.createLinesFromTokens();
 	}
 
-	m_humdrum_text << infile;
+	// m_humdrum_text << infile;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::addTremoloInterpretations --
+//
+
+void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
+	// Insert starting *tremolo
+	for (int i=0; i<(int)m_first_tremolo_time.size(); i++) {
+		if (m_first_tremolo_time[i] < 0) {
+			continue;
+		}
+		HLp line = infile.insertNullInterpretationLine(m_first_tremolo_time[i]);
+		if (line != NULL) {
+			for (int j=0; j<line->getFieldCount(); j++) {
+				HTp token = line->token(j);
+				int track = token->getTrack();
+				int subtrack = token->getSubtrack();
+				if (subtrack > 1) {
+					// Currently *tremolo affects all subtracks, but this
+					// will probably change in the future.
+					continue;
+				}
+				if (track == i) {
+					token->setText("*tremolo");
+					line->createLineFromTokens();
+				}
+			}
+		}
+	}
+}
+
 
 
 //////////////////////////////
@@ -188,6 +233,8 @@ void Tool_tremolo::expandTremolo(HTp token) {
 		return;
 	}
 
+	storeFirstTremoloNoteInfo(token);
+
 	int beams = log((double)(value))/log(2.0) - 2;
 	string markup = "@" + to_string(value) + "@";
 	string base = token->getText();
@@ -237,12 +284,14 @@ void Tool_tremolo::expandTremolo(HTp token) {
 			continue;
 		}
 		if (cstamp > timestamp) {
-			cerr << "Warning: terminating tremolo insertion early" << endl;
+			cerr << "\tWarning: terminating tremolo insertion early" << endl;
+			cerr << "\tCSTAMP : " << cstamp << " TSTAMP " << timestamp << endl;
 			break;
 		}
 		counter++;
 		if (tnotes == counter) {
 			current->setText(terminal);
+			storeLastTremoloNoteInfo(current);
 		} else {
 			current->setText(base);
 		}
@@ -274,6 +323,49 @@ void Tool_tremolo::removeMarkup(void) {
 		hre.replaceDestructive(text, "", "@\\d+@");
 		token->setText(text);
 		token->getOwner()->createLineFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeFirstTremoloNote --
+//
+
+void Tool_tremolo::storeFirstTremoloNoteInfo(HTp token) {
+	int track = token->getTrack();
+	HumNum timestamp = token->getDurationFromStart();
+	if (m_first_tremolo_time.at(track) < 0) {
+		m_first_tremolo_time.at(track) = timestamp;
+	} else if (timestamp < m_first_tremolo_time.at(track)) {
+		// This case is probably not necessary.
+		m_first_tremolo_time.at(track) = timestamp;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeLastTremoloNote --
+//
+
+void Tool_tremolo::storeLastTremoloNoteInfo(HTp token) {
+	if (!token) {
+		return;
+	}
+	int track = token->getTrack();
+	if (track < 1) {
+		cerr << "Track is not set for token: " << track << endl;
+		return;
+	}
+	HumNum timestamp = token->getDurationFromStart();
+	timestamp += token->getDuration();
+	if (m_last_tremolo_time.at(track) < 0) {
+		m_last_tremolo_time.at(track) = timestamp;
+	} else if (timestamp > m_last_tremolo_time.at(track)) {
+		m_last_tremolo_time.at(track) = timestamp;
 	}
 }
 

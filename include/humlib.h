@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Mar 19 17:39:50 PDT 2020
+// Last Modified: Thu Mar 19 23:06:12 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1103,7 +1103,7 @@ class HumdrumLine : public std::string, public HumHash {
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
 
-		void     copyStructure          (HLp line);
+		void     copyStructure          (HLp line, const string& empty);
 
 	protected:
 		bool     analyzeTracks          (std::string& err);
@@ -1413,6 +1413,7 @@ class HumdrumToken : public std::string, public HumHash {
 
 		void     setTrack                  (int aTrack, int aSubtrack);
 		void     setTrack                  (int aTrack);
+		void     copyStructure             (HTp token);
 
 	protected:
 		void     setLineIndex              (int lineindex);
@@ -1700,6 +1701,8 @@ class HumdrumFileBase : public HumHash {
 		void          insertLine               (int index, HLp line);
 
 		HLp           insertNullDataLine       (HumNum timestamp);
+		HLp           insertNullInterpretationLine(HumNum timestamp);
+		HLp           getLineForInterpretationInsertion(int index);
 
 
 		void          deleteLine               (int index);
@@ -6783,6 +6786,9 @@ class Tool_musicxml2hum : public HumTool {
 		// harmony/dynamics side spines.
 		bool m_forceRecipQ = false;
 
+		// m_hasTremoloQ is used to run the tremolo tool.
+		bool m_hasTremoloQ = false;
+
 };
 
 
@@ -7681,11 +7687,16 @@ class Tool_tremolo : public HumTool {
 		void    removeMarkup       (void);
 		void    expandTremolos     (void);
 		void    expandTremolo      (HTp token);
+		void    addTremoloInterpretations(HumdrumFile& infile);
+		void    storeFirstTremoloNoteInfo(HTp token);
+		void    storeLastTremoloNoteInfo(HTp token);
 
 	private:
 		bool    m_keepQ      = false;
 		bool    m_modifiedQ  = false;
 		std::vector<HTp> m_markup_tokens;
+		std::vector<HumNum> m_first_tremolo_time;
+		std::vector<HumNum> m_last_tremolo_time;
 
 
 };
