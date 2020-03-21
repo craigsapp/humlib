@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 20 11:37:03 PDT 2020
+// Last Modified: Sat Mar 21 12:44:42 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4240,7 +4240,8 @@ class MxmlEvent {
 		HumNum             getTimeSigDur      (void);
 		std::string        getElementName     (void);
 		void               addNotations       (std::stringstream& ss,
-		                                       xml_node notations) const;
+		                                       xml_node notations,
+		                                       int beamstarts) const;
 		void               reportVerseCountToOwner    (int count);
 		void               reportVerseCountToOwner    (int staffnum, int count);
 		void               reportHarmonyCountToOwner  (int count);
@@ -7688,10 +7689,12 @@ class Tool_tremolo : public HumTool {
 		void    processFile        (HumdrumFile& infile);
 		void    removeMarkup       (void);
 		void    expandTremolos     (void);
+		void    expandFingerTremolo(HTp token);
 		void    expandTremolo      (HTp token);
 		void    addTremoloInterpretations(HumdrumFile& infile);
 		void    storeFirstTremoloNoteInfo(HTp token);
 		void    storeLastTremoloNoteInfo(HTp token);
+		HTp     getNextNote        (HTp token);
 
 	private:
 		bool    m_keepQ      = false;
@@ -7699,7 +7702,6 @@ class Tool_tremolo : public HumTool {
 		std::vector<HTp> m_markup_tokens;
 		std::vector<HumNum> m_first_tremolo_time;
 		std::vector<HumNum> m_last_tremolo_time;
-
 
 };
 

@@ -113,7 +113,8 @@ class MxmlEvent {
 		HumNum             getTimeSigDur      (void);
 		std::string        getElementName     (void);
 		void               addNotations       (std::stringstream& ss,
-		                                       xml_node notations) const;
+		                                       xml_node notations,
+		                                       int beamstarts) const;
 		void               reportVerseCountToOwner    (int count);
 		void               reportVerseCountToOwner    (int staffnum, int count);
 		void               reportHarmonyCountToOwner  (int count);

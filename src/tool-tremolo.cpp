@@ -83,6 +83,7 @@ bool Tool_tremolo::run(HumdrumFile& infile) {
 //
 
 void Tool_tremolo::processFile(HumdrumFile& infile) {
+	m_keepQ = getBoolean("keep");
 	m_first_tremolo_time.clear();
 	m_last_tremolo_time.clear();
 	int maxtrack = infile.getMaxTrack();
@@ -108,6 +109,7 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 			if (token->isNull()) {
 				continue;
 			}
+
 			if (hre.search(token, "@(\\d+)@")) {
 				m_markup_tokens.push_back(token);
 				int value = hre.getMatchInt(1);
@@ -117,6 +119,11 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 				count /= 4;
 				HumNum increment = 4;
 				increment /= value;
+
+				if (token->find("@@") != string::npos) {
+					count *= 2;
+				}
+
 				if (!count.isInteger()) {
 					cerr << "Error: time value cannot be used: " << value << endl;
 					continue;
@@ -129,6 +136,7 @@ void Tool_tremolo::processFile(HumdrumFile& infile) {
 					infile.insertNullDataLine(timestamp);
 				}
 			}
+
 		}
 	}
 
@@ -215,7 +223,11 @@ void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
 
 void Tool_tremolo::expandTremolos(void) {
 	for (int i=0; i<(int)m_markup_tokens.size(); i++) {
-		expandTremolo(m_markup_tokens[i]);
+		if (m_markup_tokens[i]->find("@@") != string::npos) {
+			expandFingerTremolo(m_markup_tokens[i]);
+		} else {
+			expandTremolo(m_markup_tokens[i]);
+		}
 	}
 }
 
@@ -331,6 +343,166 @@ void Tool_tremolo::expandTremolo(HTp token) {
 }
 
 
+//////////////////////////////
+//
+// Tool_tremolo::getNextNote --
+//
+
+HTp Tool_tremolo::getNextNote(HTp token) {
+	HTp output = NULL;
+	HTp current = token->getNextToken();
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->getDuration() == 0) {
+			// ignore grace notes
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull() || current->isRest()) {
+			current = current->getNextToken();
+			continue;
+		}
+		output = current;
+		break;
+	}
+
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Tool_tremolo::expandFingerTremolos --
+//
+
+void Tool_tremolo::expandFingerTremolo(HTp token1) {
+	HTp token2 = getNextNote(token1);
+	if (token2 == NULL) {
+		return;
+	}
+	HumRegex hre;
+	int value = 0;
+	HumNum duration;
+	HumNum repeat;
+	HumNum increment;
+	int tnotes = -1;
+	if (hre.search(token1, "@@(\\d+)@@")) {
+		value = hre.getMatchInt(1);
+		if (!Convert::isPowerOfTwo(value)) {
+			cerr << "Error: not a power of two: " << token1 << endl;
+			return;
+		}
+		if (value < 8) {
+			cerr << "Error: tremolo can only be eighth-notes or shorter" << endl;
+			return;
+		}
+		duration = Convert::recipToDuration(token1);
+		HumNum count = duration;
+
+		count *= value;
+		count /= 4;
+		if (!count.isInteger()) {
+			cerr << "Error: tremolo repetition count must be an integer: " << token1 << endl;
+			return;
+		}
+		increment = 4;
+		increment /= value;
+
+		tnotes = count.getNumerator() * 2;
+	} else {
+		return;
+	}
+
+	storeFirstTremoloNoteInfo(token1);
+
+	int beams = log((double)(value))/log(2.0) - 2;
+	string markup = "@@" + to_string(value) + "@@";
+
+	string base1 = token1->getText();
+	hre.replaceDestructive(base1, "", markup, "g");
+	// Currently not allowed to add tremolo to beamed notes, so remove all beaming:
+	hre.replaceDestructive(base1, "", "[LJKk]+", "g");
+	string startbeam;
+	string endbeam;
+	for (int i=0; i<beams; i++) {
+		startbeam += 'L';
+		endbeam   += 'J';
+	}
+
+	// Set the rhythm of the tremolo notes.
+	// Augmentation dot is expected adjacent to regular rhythm value.
+	// Maybe allow anywhere?
+	hre.replaceDestructive(base1, to_string(value), "\\d+%?\\d*\\.*", "g");
+	string initial = base1 + startbeam;
+	// remove slur end from start of tremolo:
+	hre.replaceDestructive(initial, "", "[)]+[<>]?", "g");
+	if (m_keepQ) {
+		initial += markup;
+	}
+
+	// remove slur information from middle of tremolo:
+	hre.replaceDestructive(base1, "", "[()]+[<>]?", "g");
+
+	token1->setText(initial);
+	token1->getOwner()->createLineFromTokens();
+
+	string base2 = token2->getText();
+	hre.replaceDestructive(base2, "", "[LJKk]+", "g");
+	hre.replaceDestructive(base2, to_string(value), "\\d+%?\\d*\\.*", "g");
+
+	string terminal = base2 + endbeam;
+	// remove slur start information from end of tremolo:
+	hre.replaceDestructive(terminal, "", "[(]+[<>]?", "g");
+
+	bool state = false;
+
+	// Now fill in the rest of the tremolos.
+	HumNum starttime = token1->getDurationFromStart();
+	HumNum timestamp = starttime + increment;
+	HTp current = token1->getNextToken();
+	int counter = 1;
+	while (current) {
+		if (!current->isData()) {
+			// Also check if line is non-zero duration (not a grace-note line).
+			current = current->getNextToken();
+			continue;
+		}
+		HumNum cstamp = current->getDurationFromStart();
+		if (cstamp < timestamp) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (cstamp > timestamp) {
+			cerr << "\tWarning: terminating tremolo insertion early" << endl;
+			cerr << "\tCSTAMP : " << cstamp << " TSTAMP " << timestamp << endl;
+			break;
+		}
+		counter++;
+		if (tnotes == counter) {
+			current->setText(terminal);
+			storeLastTremoloNoteInfo(current);
+		} else {
+			if (state) {
+				current->setText(base1);
+			} else {
+				current->setText(base2);
+			}
+			state = !state;
+		}
+		current->getOwner()->createLineFromTokens();
+		if (counter >= tnotes) {
+			// done with inserting of tremolo notes.
+			break;
+		}
+		timestamp += increment;
+		current = current->getNextToken();
+	}
+}
+
+
 
 //////////////////////////////
 //
@@ -345,7 +517,7 @@ void Tool_tremolo::removeMarkup(void) {
 	for (int i=0; i<(int)m_markup_tokens.size(); i++) {
 		HTp token = m_markup_tokens[i];
 		string text = *token;
-		hre.replaceDestructive(text, "", "@\\d+@");
+		hre.replaceDestructive(text, "", "@+\\d+@+");
 		token->setText(text);
 		token->getOwner()->createLineFromTokens();
 	}

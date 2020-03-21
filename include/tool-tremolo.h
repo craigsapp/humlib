@@ -34,10 +34,12 @@ class Tool_tremolo : public HumTool {
 		void    processFile        (HumdrumFile& infile);
 		void    removeMarkup       (void);
 		void    expandTremolos     (void);
+		void    expandFingerTremolo(HTp token);
 		void    expandTremolo      (HTp token);
 		void    addTremoloInterpretations(HumdrumFile& infile);
 		void    storeFirstTremoloNoteInfo(HTp token);
 		void    storeLastTremoloNoteInfo(HTp token);
+		HTp     getNextNote        (HTp token);
 
 	private:
 		bool    m_keepQ      = false;
@@ -45,7 +47,6 @@ class Tool_tremolo : public HumTool {
 		std::vector<HTp> m_markup_tokens;
 		std::vector<HumNum> m_first_tremolo_time;
 		std::vector<HumNum> m_last_tremolo_time;
-
 
 };
 

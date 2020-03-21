@@ -1559,8 +1559,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	}
 
 	stringstream ss;
-
-	addNotations(ss, notations);
+	addNotations(ss, notations, beamstarts);
 
 	if (primarynote) {
 		// only add these signifiers if this is the first
@@ -1603,7 +1602,8 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 //   TrillTurn (TR or tR).
 //
 
-void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
+void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
+		int beamstarts) const {
 	if (!notations) {
 		return;
 	}
@@ -1619,6 +1619,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool fermata        = false;
 	bool trill          = false;
 	int  tremolo        = 0;
+	bool fingered       = false;
 	bool umordent       = false;
 	bool lmordent       = false;
 	bool upbow          = false;
@@ -1684,8 +1685,16 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
             //     <tremolo type="single">2</tremolo>
             //  </ornaments>
 				if (strcmp(grandchild.name(), "tremolo") == 0) {
-					string tstring = grandchild.child_value();
-					tremolo = 1 << (stoi(tstring) + 2);
+					string ttype = grandchild.attribute("type").value();
+					if (ttype == "start") {
+						fingered = true;
+					} else {
+						fingered = false;
+					}
+					if (ttype != "stop") {
+						string tstring = grandchild.child_value();
+						tremolo = 1 << (stoi(tstring) + 2);
+					}
 				}
 
 				// umordent
@@ -1721,9 +1730,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		// figure out whole-tone trills later via trillspell tool:
 		reportOrnamentToOwner();
 	}
-	if (tremolo >= 8) {
-		ss << "@" << tremolo << "@";
-	}
+
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
@@ -1743,6 +1750,18 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		reportCaesuraToOwner();
 	}
 	if (arpeggio)     { ss << ":";  }
+
+	if (tremolo >= 8) {
+		int tvalue = tremolo;
+		if (fingered) {
+			if (beamstarts) {
+				tvalue *= (1 << beamstarts);
+			}
+			ss << "@@" << tvalue << "@@";
+		} else {
+			ss << "@" << tvalue << "@";
+		}
+	}
 }
 
 
