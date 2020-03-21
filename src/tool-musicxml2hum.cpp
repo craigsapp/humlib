@@ -218,12 +218,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
-/*
 	if (m_hasTremoloQ) {
 		Tool_tremolo tremolo;
 		tremolo.run(outfile);
 	}
-*/
 
 	if (m_software == "sibelius") {
 		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
