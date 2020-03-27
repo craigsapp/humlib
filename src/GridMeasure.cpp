@@ -1260,10 +1260,17 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 	auto previous = iter;
 	// auto last = previous;
 	previous++;
-	HumNum ptime = (*previous)->getTimestamp();
-	HumNum newtargettime = ptime;
+	HumNum ptime;
+	HumNum newtargettime;
+	if (previous != this->rend()) {
+		ptime = (*previous)->getTimestamp();
+		newtargettime = ptime;
+	} else {
+		ptime = targettime;
+		newtargettime = targettime;
+	}
 
-	if (ptime < targettime) {
+	if (ptime <= targettime) {
 		// Insert slice at end of measure.
 		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
 		newslice->initializeBySlice(slice);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 21 13:54:03 PDT 2020
+// Last Modified: Thu Mar 26 22:20:32 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5904,10 +5904,17 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 	auto previous = iter;
 	// auto last = previous;
 	previous++;
-	HumNum ptime = (*previous)->getTimestamp();
-	HumNum newtargettime = ptime;
+	HumNum ptime;
+	HumNum newtargettime;
+	if (previous != this->rend()) {
+		ptime = (*previous)->getTimestamp();
+		newtargettime = ptime;
+	} else {
+		ptime = targettime;
+		newtargettime = targettime;
+	}
 
-	if (ptime < targettime) {
+	if (ptime <= targettime) {
 		// Insert slice at end of measure.
 		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
 		newslice->initializeBySlice(slice);
@@ -82617,8 +82624,16 @@ bool Tool_tremolo::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_tremolo::run(HumdrumFile& infile) {
 	processFile(infile);
+
+	// Force reprocessing of file for now (does not seem to be
+	// completely updated in javascript):
+	stringstream ss;
+	ss << infile;
+	infile.readString(ss.str());
+
 	return true;
 }
+
 
 
 //////////////////////////////

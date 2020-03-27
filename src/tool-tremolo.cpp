@@ -73,8 +73,16 @@ bool Tool_tremolo::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_tremolo::run(HumdrumFile& infile) {
 	processFile(infile);
+
+	// Force reprocessing of file for now (does not seem to be
+	// completely updated in javascript):
+	stringstream ss;
+	ss << infile;
+	infile.readString(ss.str());
+
 	return true;
 }
+
 
 
 //////////////////////////////
