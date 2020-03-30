@@ -150,7 +150,7 @@ class HumdrumLine : public std::string, public HumHash {
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
 
-		void     copyStructure          (HLp line, const string& empty);
+		void     copyStructure          (HLp line, const std::string& empty);
 
 	protected:
 		bool     analyzeTracks          (std::string& err);

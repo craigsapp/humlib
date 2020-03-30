@@ -63,6 +63,11 @@ class Convert {
 		static int     kernToAccidentalCount(const std::string& kerndata);
 		static int     kernToAccidentalCount(HTp token)
 				{ return kernToAccidentalCount((std::string)*token); }
+
+      static int     kernToStaffLocation  (HTp token, HTp clef = NULL);
+      static int     kernToStaffLocation  (HTp token, const std::string& clef);
+      static int     kernToStaffLocation  (const std::string& token, const std::string& clef = "");
+
 		static int     kernToDiatonicPC     (const std::string& kerndata);
 		static int     kernToDiatonicPC     (HTp token)
 				{ return kernToDiatonicPC     ((std::string)*token); }

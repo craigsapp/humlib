@@ -1174,6 +1174,46 @@ bool HumdrumToken::isNote(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isPitched -- True if not a rest or an unpitched note.
+//
+
+bool HumdrumToken::isPitched(void) { 
+	if (this->isKern()) {
+		for (int i=0; i<(int)this->size(); i++) {
+			if ((this->at(i) == 'r') || (this->at(i) == 'R')) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isPitched -- True if has an unpitched marker (could be a rest)
+//
+
+bool HumdrumToken::isUnpitched(void) {
+	if (this->isKern()) {
+		if (this->find('R') != string::npos) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isSustainedNote -- Returns true if the token represents
 //     a sounding note, but not the attack portion.  Should only be
 //     applied to **kern data.

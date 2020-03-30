@@ -10,10 +10,12 @@
 // Description:   Conversions related to pitch.
 //
 
-#include "Convert.h"
 #include <cmath>
 #include <vector>
 #include <ctype.h>
+
+#include "Convert.h"
+#include "HumRegex.h"
 
 using namespace std;
 
@@ -1247,6 +1249,64 @@ int Convert::base7ToBase40(int base7) {
 	}
 	return octave * 40 + 2 + b40pc;
 }
+
+
+
+//////////////////////////////
+//
+// Convert::kernToStaffLocation -- 0 = bottom line of staff, 1 = next space higher,
+//     2 = second line of staff, etc.  -1 = space below bottom line.
+//
+
+int Convert::kernToStaffLocation(HTp token, HTp clef) {
+	if (clef == NULL) {
+		return Convert::kernToStaffLocation(*token, "");
+	} else {
+		return Convert::kernToStaffLocation(*token, *clef);
+	}
+}
+
+
+int Convert::kernToStaffLocation(HTp token, const string& clef) {
+	return Convert::kernToStaffLocation(*token, clef);
+}
+
+
+int Convert::kernToStaffLocation(const string& token, const string& clef) {
+	int offset = 0;
+	HumRegex hre;
+	if (hre.search(clef, "clef([GFC])([v^]*)(\\d+)")) {
+		string letter = hre.getMatch(1);
+		string vcaret = hre.getMatch(2);
+		int line = hre.getMatchInt(3);
+		int octadj = 0;
+		if (!vcaret.empty()) {
+			for (int i=0; i<(int)vcaret.size(); i++) {
+				if (vcaret[i] == '^') {
+					octadj--;
+				} else if (vcaret[i] == 'v') {
+					octadj++;
+				}
+			}
+		}
+		if (letter == "F") {
+			offset = 14 + 4;
+		} else if (letter == "C") {
+			offset = 28;
+		} else {
+			offset = 28 + 4;
+		}
+		offset += (line - 1)  * 2;
+		offset += octadj * 7;
+	} else {
+		// pretend clefG2:
+		offset = 28 + 2;
+	}
+
+	int diatonic = Convert::kernToBase7(token);
+	return diatonic - offset;
+}
+
 
 
 

@@ -3331,6 +3331,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	bool hastransposition  = false;
 	bool hastimesig        = false;
 	bool hasottava         = false;
+	bool hasstafflines     = false;
 
 	vector<vector<xml_node>> clefs(partdata.size());
 	vector<vector<xml_node>> keysigs(partdata.size());
@@ -3338,6 +3339,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	vector<vector<xml_node>> timesigs(partdata.size());
 	vector<vector<vector<xml_node>>> ottavas(partdata.size());
 	vector<vector<xml_node>> hairpins(partdata.size());
+	vector<vector<xml_node>> stafflines(partdata.size());
 
 	vector<vector<vector<vector<MxmlEvent*>>>> gracebefore(partdata.size());
 	vector<vector<vector<vector<MxmlEvent*>>>> graceafter(partdata.size());
@@ -3373,6 +3375,21 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 
 					if (nodeType(child, "transpose")) {
+						transpositions[pindex].push_back(child);
+						hastransposition = true;
+						foundnongrace = true;
+					}
+
+					if (nodeType(child, "staff-details")) {
+						grandchild = child.first_child();
+						while (grandchild) {
+							if (nodeType(grandchild, "staff-lines")) {
+								stafflines[pindex].push_back(grandchild);
+								hasstafflines = true;
+							}
+							grandchild = grandchild.next_sibling();
+						}
+
 						transpositions[pindex].push_back(child);
 						hastransposition = true;
 						foundnongrace = true;
@@ -3420,6 +3437,10 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	}
 
 	addGraceLines(outdata, gracebefore, partdata, nowtime);
+
+	if (hasstafflines) {
+		addStriaLine(outdata, stafflines, partdata, nowtime);
+	}
 
 	if (hasclef) {
 		addClefLine(outdata, clefs, partdata, nowtime);
@@ -3633,6 +3654,33 @@ void Tool_musicxml2hum::addClefLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::addStriaLine --
+//
+
+void Tool_musicxml2hum::addStriaLine(GridMeasure* outdata,
+		vector<vector<xml_node> >& stafflines, vector<MxmlPart>& partdata,
+		HumNum nowtime) {
+
+	GridSlice* slice = new GridSlice(outdata, nowtime,
+		SliceType::Stria);
+	outdata->push_back(slice);
+	slice->initializePartStaves(partdata);
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		for (int j=0; j<(int)stafflines[i].size(); j++) {
+			if (stafflines[i][j]) {
+				string lines = stafflines[i][j].child_value();
+				int linecount = stoi(lines);
+				insertPartStria(linecount, *slice->at(i));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addTimeSigLine --
 //
 
@@ -3802,6 +3850,23 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 		clef = convertClefToHumdrum(clef, token, staffnum);
 		part[staffnum]->setTokenLayer(0, token, 0);
 	}
+
+	// go back and fill in all NULL pointers with null interpretations
+	fillEmpties(&part, "*");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertPartStria --
+//
+
+void Tool_musicxml2hum::insertPartStria(int lines, GridPart& part) {
+	HTp token = new HumdrumToken;
+	string value = "*stria" + to_string(lines);
+	token->setText(value);
+	part[0]->setTokenLayer(0, token, 0);
 
 	// go back and fill in all NULL pointers with null interpretations
 	fillEmpties(&part, "*");

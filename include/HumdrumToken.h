@@ -88,6 +88,8 @@ class HumdrumToken : public std::string, public HumHash {
 		// kern-specific functions:
 		bool     isRest                    (void);
 		bool     isNote                    (void);
+		bool     isUnpitched               (void);
+		bool     isPitched                 (void);
 		bool     isSecondaryTiedNote       (void);
 		bool     isSustainedNote           (void);
 		bool     isNoteAttack              (void);

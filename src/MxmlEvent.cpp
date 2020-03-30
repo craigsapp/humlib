@@ -1355,6 +1355,7 @@ string MxmlEvent::getKernPitch(void) {
 	bool explicitQ    = false;
 	bool naturalQ     = false;
 	bool editorialQ   = false;
+	bool unpitchedQ   = false;
 	// bool sharpQ       = false;
 	// bool flatQ        = false;
 	// bool doubleflatQ  = false;
@@ -1369,6 +1370,7 @@ string MxmlEvent::getKernPitch(void) {
 				rest = true;
 				break;
 			}
+
 			if (nodeType(child, "pitch")) {
 				xml_node grandchild = child.first_child();
 				while (grandchild) {
@@ -1377,6 +1379,19 @@ string MxmlEvent::getKernPitch(void) {
 					} else if (nodeType(grandchild, "alter")) {
 						alter = atoi(grandchild.child_value());
 					} else if (nodeType(grandchild, "octave")) {
+						octave = atoi(grandchild.child_value());
+					}
+					grandchild = grandchild.next_sibling();
+				}
+			} else if (nodeType(child, "unpitched")) {
+				unpitchedQ = true;
+				xml_node grandchild = child.first_child();
+				while (grandchild) {
+					if (nodeType(grandchild, "display-step")) {
+						step = grandchild.child_value();
+					} else if (nodeType(grandchild, "alter")) {
+						alter = atoi(grandchild.child_value());
+					} else if (nodeType(grandchild, "display-octave")) {
 						octave = atoi(grandchild.child_value());
 					}
 					grandchild = grandchild.next_sibling();
@@ -1432,6 +1447,9 @@ string MxmlEvent::getKernPitch(void) {
 		count = 4 - octave;
 	}
 	string output;
+	if (unpitchedQ) {
+		output += "R";
+	}
 	for (int i=0; i<count; i++) {
 		output += pc;
 	}
@@ -1514,6 +1532,9 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	int tiestart     = 0;
 	int tiestop      = 0;
 
+	bool unpitchedQ  = false;
+	bool stemsQ      = m_stems;
+
 	// bool rest = false;
 	xml_node child = m_node.first_child();
 	xml_node notations;
@@ -1534,8 +1555,10 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 			} else if (strcmp(beaminfo, "backward hook") == 0) {
 				hookbacks++;
 			}
+		} else if (nodeType(child, "unpitched")) {
+			unpitchedQ = true;
 		} else if (nodeType(child, "stem")) {
-			if (m_stems || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
+			if (unpitchedQ || stemsQ || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
 				const char* stemdir = child.child_value();
 				if (strcmp(stemdir, "up") == 0) {
 					stem = 1;

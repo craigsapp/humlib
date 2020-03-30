@@ -31,6 +31,7 @@ enum class SliceType {
 		_Data,
 			Measures,
 		_Measure,
+				Stria,
 				Clefs,
 				Transpositions,
 				KeyDesignations,
