@@ -1899,10 +1899,11 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
-	if ((void*)this == NULL) {
-		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
-		return false;
-	}
+	// [20200331] GCC 6+ will print a compiler warning when checking this against NULL.
+	//if ((void*)this == NULL) {
+	//	// This was added perhaps due to a new bug [20100125] that is checking a null pointer
+	//	return false;
+	//}
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 

@@ -222,10 +222,10 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 bool HumdrumFileStructure::analyzeStrophes(void) {
 	vector<HTp> strands;
 	int scount = (int)m_strand1d.size();
-	bool dataQ;
+	// bool dataQ;
 	vector<HTp> strophestarts;
 	for (int i=0; i<scount; i++) {
-		dataQ = false;
+		// dataQ = false;
 		HTp current = m_strand1d.at(i).first;
 		HTp send = m_strand1d.at(i).last;
 		if (!send) {

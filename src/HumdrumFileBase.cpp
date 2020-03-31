@@ -2428,7 +2428,7 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 	HumNum beforet(-1);
 	HumNum aftert(-1);
 	int beforei = -1;
-	int afteri = -1;
+	// int afteri = -1;
 	HumNum current;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
@@ -2442,7 +2442,7 @@ HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
 			beforei = i;
 		} else if (current > timestamp) {
 			aftert = current;
-			afteri = i;
+			// afteri = i;
 			break;
 		}
 	}
@@ -2496,7 +2496,7 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 	HumNum beforet(-1);
 	HumNum aftert(-1);
 	int beforei = -1;
-	int afteri = -1;
+	// int afteri = -1;
 	HumNum current;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
@@ -2511,7 +2511,7 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 			beforei = i;
 		} else if (current > timestamp) {
 			aftert = current;
-			afteri = i;
+			// afteri = i;
 			break;
 		}
 	}
@@ -2574,7 +2574,7 @@ HLp HumdrumFileBase::insertNullInterpretationLineAbove(HumNum timestamp) {
 	HumNum beforet(-1);
 	HumNum aftert(-1);
 	int beforei = -1;
-	int afteri = -1;
+	// int afteri = -1;
 	HumNum current;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		current = infile[i].getDurationFromStart();
@@ -2586,7 +2586,7 @@ HLp HumdrumFileBase::insertNullInterpretationLineAbove(HumNum timestamp) {
 			beforei = i;
 		} else if (current > timestamp) {
 			aftert = current;
-			afteri = i;
+			// afteri = i;
 			break;
 		}
 	}
