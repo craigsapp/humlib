@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue 31 Mar 2020 06:13:36 AM UTC
+// Last Modified: Tue Mar 31 00:42:55 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -71701,7 +71701,7 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	}
 
 	string sign;
-	int line = 0;
+	int line = -1000;
 	int octadjust = 0;
 
 	xml_node child = clef.first_child();
@@ -71731,7 +71731,9 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 			ss << "^";
 		}
 	}
-	ss << line;
+	if (line > 0) {
+		ss << line;
+	}
 	token = new HumdrumToken(ss.str());
 
 	clef = clef.next_sibling();

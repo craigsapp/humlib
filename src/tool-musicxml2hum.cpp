@@ -4507,7 +4507,7 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	}
 
 	string sign;
-	int line = 0;
+	int line = -1000;
 	int octadjust = 0;
 
 	xml_node child = clef.first_child();
@@ -4537,7 +4537,9 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 			ss << "^";
 		}
 	}
-	ss << line;
+	if (line > 0) {
+		ss << line;
+	}
 	token = new HumdrumToken(ss.str());
 
 	clef = clef.next_sibling();
