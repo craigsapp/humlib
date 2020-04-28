@@ -185,7 +185,9 @@ int HumAddress::getSubtrack(void) const {
 	if (m_subtrackcount == 1) {
 		return 0;
 	} else {
-		return m_subtrack + 1;
+		// return m_subtrack + 1;
+		// Should already be indexed from one.
+		return m_subtrack;
 	}
 }
 
@@ -234,7 +236,7 @@ string HumAddress::getTrackString(string separator) const {
 //   a HumdrumLine, the parameter's value should be NULL.
 //
 
-void HumAddress::setOwner(HumdrumLine* aLine) {
+void HumAddress::setOwner(HLp aLine) {
 	m_owner = aLine;
 }
 
@@ -247,7 +249,7 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //    to a HumdrumLine object.
 //
 
-HumdrumLine* HumAddress::getLine(void) const {
+HLp HumAddress::getLine(void) const {
 	return m_owner;
 }
 

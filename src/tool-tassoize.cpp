@@ -467,8 +467,8 @@ void Tool_tassoize::deleteBreaks(HumdrumFile& infile) {
 //
 
 void Tool_tassoize::addBibliographicRecords(HumdrumFile& infile) {
-	std::vector<HumdrumLine*> refinfo = infile.getReferenceRecords();
-	std::map<string, HumdrumLine*> refs;
+	std::vector<HLp> refinfo = infile.getReferenceRecords();
+	std::map<string, HLp> refs;
 	for (int i=0; i<(int)refinfo.size(); i++) {
 		string key = refinfo[i]->getReferenceKey();
 		refs[key] = refinfo[i];

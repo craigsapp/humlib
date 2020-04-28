@@ -322,10 +322,10 @@ bool HumdrumFileSet::hasUniversalFilters(void) {
 // HumdrumFileSet::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileSet::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileSet::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileSet& infiles = *this;
 	for (int i=0; i<infiles.getCount(); i++) {
 		HumdrumFileBase& infile = infiles[i];

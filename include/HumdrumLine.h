@@ -150,6 +150,8 @@ class HumdrumLine : public std::string, public HumHash {
 		void     setDurationFromBarline (HumNum dur);
 		void     setDurationToBarline   (HumNum dur);
 
+		void     copyStructure          (HLp line, const std::string& empty);
+
 	protected:
 		bool     analyzeTracks          (std::string& err);
 		bool     analyzeTokenDurations  (std::string& err);
@@ -239,7 +241,7 @@ class HumdrumLine : public std::string, public HumHash {
 };
 
 std::ostream& operator<< (std::ostream& out, HumdrumLine& line);
-std::ostream& operator<< (std::ostream& out, HumdrumLine* line);
+std::ostream& operator<< (std::ostream& out, HLp line);
 
 
 // END_MERGE

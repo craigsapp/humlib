@@ -162,7 +162,7 @@ class HumdrumFileBase : public HumHash {
 		std::ostream& printNonemptySegmentLabel(std::ostream& out);
 
 		HumdrumLine&  operator[]               (int index);
-		HumdrumLine*  getLine                  (int index);
+		HLp           getLine                  (int index);
 		int           getLineCount             (void) const;
 		HTp           token                    (int lineindex, int fieldindex);
 		std::string   token                    (int lineindex, int fieldindex,
@@ -215,31 +215,38 @@ class HumdrumFileBase : public HumHash {
 		std::vector<int> getTrackWidths        (void);
 		void          appendLine               (const char* line);
 		void          appendLine               (const std::string& line);
-		void          appendLine               (HumdrumLine* line);
+		void          appendLine               (HLp line);
 		void          push_back                (const char* line)
 		                                                    { appendLine(line); }
 		void          push_back                (const std::string& line)
 		                                                    { appendLine(line); }
-		void          push_back                (HumdrumLine* line)
+		void          push_back                (HLp line)
 		                                                    { appendLine(line); }
 
 		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const std::string& line);
-		void          insertLine               (int index, HumdrumLine* line);
+		void          insertLine               (int index, HLp line);
+
+		HLp           insertNullDataLine                    (HumNum timestamp);
+		HLp           insertNullInterpretationLine          (HumNum timestamp);
+		HLp           insertNullInterpretationLineAbove     (HumNum timestamp);
+		HLp           getLineForInterpretationInsertion     (int index);
+		HLp           getLineForInterpretationInsertionAbove(int index);
+
 
 		void          deleteLine               (int index);
 //		void          adjustMergeSpineLines    (void);
 
-		HumdrumLine*  back                     (void);
+		HLp           back                     (void);
 		void          makeBooleanTrackList     (std::vector<bool>& spinelist,
 		                                        const std::string& spinestring);
 		bool          analyzeBaseFromLines     (void);
 		bool          analyzeBaseFromTokens    (void);
 
 
-		std::vector<HumdrumLine*> getReferenceRecords(void);
-		std::vector<HumdrumLine*> getGlobalReferenceRecords(void);
-		std::vector<HumdrumLine*> getUniversalReferenceRecords(void);
+		std::vector<HLp> getReferenceRecords(void);
+		std::vector<HLp> getGlobalReferenceRecords(void);
+		std::vector<HLp> getUniversalReferenceRecords(void);
 		std::string getReferenceRecord(const std::string& key);
 
 		// spine analysis functionality:
@@ -318,7 +325,7 @@ class HumdrumFileBase : public HumHash {
 
 		// m_lines: an array representing lines from the input file.
 		// The contents of lines must be deallocated when deconstructing object.
-		std::vector<HumdrumLine*> m_lines;
+		std::vector<HLp> m_lines;
 
 		// m_filename: name of the file which was loaded.
 		std::string m_filename;
@@ -342,7 +349,7 @@ class HumdrumFileBase : public HumHash {
 		// m_barlines: list of barlines in the data.  If the first measures is
 		// a pickup measure, then the first entry will not point to the first
 		// starting exclusive interpretation line rather than to a barline.
-		std::vector<HumdrumLine*> m_barlines;
+		std::vector<HLp> m_barlines;
 		// Maybe also add "measures" which are complete metrical cycles.
 
 		// m_ticksperquarternote: this is the number of tick
@@ -410,10 +417,10 @@ class HumdrumFileBase : public HumHash {
 		bool readStringNoRhythm(const char*   contents) {return read(contents);};
 		bool readStringNoRhythm(const std::string& contents) {return read(contents);};
 		HumNum       getScoreDuration           (void) const { return 0; };
-		std::ostream&     printDurationInfo          (std::ostream& out=std::cout) {return out;};
+		std::ostream& printDurationInfo         (std::ostream& out=std::cout) {return out;};
 		int          tpq                        (void) { return 0; }
 		int          getBarlineCount            (void) const { return 0; }
-		HumdrumLine* getBarline                 (int index) const { return NULL;};
+		HLp          getBarline                 (int index) const { return NULL;};
 		HumNum       getBarlineDuration         (int index) const { return 0; };
 		HumNum       getBarlineDurationFromStart(int index) const { return 0; };
 		HumNum       getBarlineDurationToEnd    (int index) const { return 0; };

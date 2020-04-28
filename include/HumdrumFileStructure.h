@@ -106,7 +106,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
-		HumdrumLine*  getBarline                   (int index) const;
+		HLp           getBarline                   (int index) const;
 		HumNum        getBarlineDuration           (int index) const;
 		HumNum        getBarlineDurationFromStart  (int index) const;
 		HumNum        getBarlineDurationToEnd      (int index) const;

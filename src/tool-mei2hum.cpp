@@ -538,7 +538,9 @@ void Tool_mei2hum::parseScoreDef(xml_node scoreDef, HumNum starttime) {
 		} else if (nodename == "pgHead") {
 		    processPgHead(item, starttime);
 		} else if (nodename == "pgFoot") {
-		    processPgFoot(item, starttime);
+		   processPgFoot(item, starttime);
+		} else if (nodename == "keySig") { // drizo
+			processKeySig(m_scoreDef.global, item, starttime); // drizo
 		} else {
 			cerr << DKHTP << scoreDef.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -660,6 +662,8 @@ void Tool_mei2hum::getRecursiveSDString(string& output, xml_node current) {
 		return;
 	} else if (name == "pgFoot") {
 		return;
+	} else if (name == "keySig") { // drizo
+		return;
 	} else {
 		cerr << "Unknown element in scoreDef descendant: " << name << endl;
 	}
@@ -687,6 +691,44 @@ void Tool_mei2hum::processPgFoot(xml_node pgFoot, HumNum starttime) {
 void Tool_mei2hum::processPgHead(xml_node pgHead, HumNum starttime) {
 	NODE_VERIFY(pgHead, )
 	return;
+}
+ 
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processKeySig -- Convert MEI key signature to Humdrum.
+//
+
+void Tool_mei2hum::processKeySig(mei_staffDef& staffinfo, xml_node keysig, HumNum starttime) {
+	MAKE_CHILD_LIST(children, keysig);
+	string token = "*k[";
+	for (xml_node item : children) {
+		string pname = item.attribute("pname").value(); 			
+		string accid = item.attribute("accid").value();
+		if (pname.empty()) {
+			continue;
+		}
+		token += pname;
+		if (accid == "s") {
+			token += "#";
+		} else if (accid == "f") {
+			token += "-";
+		} else if (accid.empty() || accid == "n") {
+			token += "n";
+		} else if (accid == "ss") {
+			token += "##";
+		} else if (accid == "x") {
+			token += "##";
+		} else if (accid == "ff") {
+			token += "--";
+		} else {
+			token += "?";
+		}
+	}
+	token += "]";
+
+	staffinfo.keysig = token;
 }
 
 
@@ -1389,6 +1431,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 		gm->setFinalBarlineStyle();
 	} else if (rightstyle == "rptend") {
 		gm->setRepeatBackwardStyle();
+	} else if (rightstyle == "invis") {
+		gm->setInvisibleBarline();
 	}
 
 	if (overfilledQ) {
@@ -1752,6 +1796,8 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 			starttime = parseChord(children[i], starttime, 0);
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
+		} else if (nodename == "clef") { //drizo
+			parseClef(children[i], starttime);
 		} else {
 			cerr << DKHTP << beam.name() << "/" << nodename << CURRLOC << endl;
 		}

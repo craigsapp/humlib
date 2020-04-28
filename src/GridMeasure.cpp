@@ -1002,7 +1002,7 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		startbarline = getMeasureNumber();
 	}
 	int fieldcount = infile.back()->getFieldCount();
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	string tstring = "=";
 //	if (startbarline) {
 //		tstring += to_string(startbarline);
@@ -1260,10 +1260,17 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 	auto previous = iter;
 	// auto last = previous;
 	previous++;
-	HumNum ptime = (*previous)->getTimestamp();
-	HumNum newtargettime = ptime;
+	HumNum ptime;
+	HumNum newtargettime;
+	if (previous != this->rend()) {
+		ptime = (*previous)->getTimestamp();
+		newtargettime = ptime;
+	} else {
+		ptime = targettime;
+		newtargettime = targettime;
+	}
 
-	if (ptime < targettime) {
+	if (ptime <= targettime) {
 		// Insert slice at end of measure.
 		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
 		newslice->initializeBySlice(slice);
@@ -1602,7 +1609,7 @@ bool GridMeasure::isSingleChordMeasure(void) {
 
 //////////////////////////////
 //
-// GridMeasure::isInvisible --
+// GridMeasure::isInvisible --  Return true if all contents is invisible.
 //
 
 bool GridMeasure::isInvisible(void) {

@@ -27,7 +27,7 @@ class Tool_transpose : public HumTool {
 
 		bool     run             (HumdrumFileSet& infiles);
 		bool     run             (HumdrumFile& infile);
-		bool     run             (const string& indata, ostream& out);
+		bool     run             (const std::string& indata, ostream& out);
 		bool     run             (HumdrumFile& infile, ostream& out);
 
 	protected:
@@ -41,10 +41,10 @@ class Tool_transpose : public HumTool {
 		                                 vector<int>& tvals);
 		void     convertToWrittenPitches(HumdrumFile& infile, int line,
 		                                 vector<int>& tvals);
-		void     printNewKeySignature   (const string& keysig, int trans);
+		void     printNewKeySignature   (const std::string& keysig, int trans);
 		void     processInterpretationLine(HumdrumFile& infile, int line,
 		                                 vector<int>& tvals, int style);
-		int      isKeyMarker            (const string& str);
+		int      isKeyMarker            (const std::string& str);
 		void     printNewKeyInterpretation(HumdrumLine& aRecord,
 		                                 int index, int transval);
 		int      hasTrMarkers           (HumdrumFile& infile, int line);
@@ -53,9 +53,9 @@ class Tool_transpose : public HumTool {
 		void     printHumdrumMxhmToken(HumdrumLine& record, int index,
 		                                 int transval);
 		int      checkForDeletedLine    (HumdrumFile& infile, int line);
-		int      getBase40ValueFromInterval(const string& string);
+		int      getBase40ValueFromInterval(const std::string& string);
 		void     example                (void);
-		void     usage                  (const string& command);
+		void     usage                  (const std::string& command);
 		void     printHumdrumDataRecord (HumdrumLine& record,
 		                                 vector<bool>& spineprocess);
 
@@ -107,7 +107,7 @@ class Tool_transpose : public HumTool {
 		                                 vector<bool>& spineprocess,
 		                                 int line, int transval);
 		int      getTransposeInfo       (HumdrumFile& infile, int row, int col);
-		void     printNewKernString     (const string& string, int transval);
+		void     printNewKernString     (const std::string& string, int transval);
 
 	private:
 		int      transval     = 0;   // used with -b option
@@ -116,7 +116,6 @@ class Tool_transpose : public HumTool {
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option
-		int      spineQ       = 0;   // used with -s option
 		string   spinestring  = "";  // used with -s option
 		int      octave       = 0;   // used with -o option
 		int      concertQ     = 0;   // used with -C option

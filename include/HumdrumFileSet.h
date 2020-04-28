@@ -46,7 +46,7 @@ class HumdrumFileSet {
 		bool                  hasFilters       (void);
 		bool                  hasGlobalFilters    (void);
 		bool                  hasUniversalFilters (void);
-		std::vector<HumdrumLine*> getUniversalReferenceRecords(void);
+		std::vector<HLp>      getUniversalReferenceRecords(void);
 
       int                   readFile         (const std::string& filename);
       int                   readString       (const std::string& contents);

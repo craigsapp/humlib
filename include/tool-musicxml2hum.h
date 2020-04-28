@@ -121,19 +121,23 @@ class Tool_musicxml2hum : public HumTool {
 		                       HumNum nowtime,
 		                       std::vector<MxmlPart>& partdata,
 		                       std::vector<int>& partstaves);
-		void appendNullTokens (HumdrumLine* line, MxmlPart& part);
-		void appendEvent      (HumdrumLine* line, MxmlEvent* event);
+		void appendNullTokens (HLp line, MxmlPart& part);
+		void appendEvent      (HLp line, MxmlEvent* event);
 		void insertExclusiveInterpretationLine(HumdrumFile& outfile,
 		                       std::vector<MxmlPart>& partdata);
 		void insertAllToken   (HumdrumFile& outfile, std::vector<MxmlPart>& partdata,
 		                       const std::string& common);
 		void insertSingleMeasure(HumdrumFile& outfile);
 		void cleanupMeasures   (HumdrumFile& outfile,
-		                        std::vector<HumdrumLine*> measures);
+		                        std::vector<HLp> measures);
 		void processPrintElement(GridMeasure* outdata, pugi::xml_node element, HumNum timestamp);
 		void insertOffsetHarmonyIntoMeasure(GridMeasure* gm);
 		void insertOffsetFiguredBassIntoMeasure(GridMeasure* gm);
 
+		void addStriaLine      (GridMeasure* outdata,
+		                        std::vector<std::vector<xml_node> >& stafflines,
+		                        std::vector<MxmlPart>& partdata,
+                              HumNum nowtime);
 		void addClefLine       (GridMeasure* outdata, std::vector<std::vector<pugi::xml_node>>& clefs,
 		                        std::vector<MxmlPart>& partdata, HumNum nowtime);
 		void addOttavaLine     (GridMeasure* outdata, std::vector<std::vector<std::vector<pugi::xml_node>>>& ottavas,
@@ -141,6 +145,7 @@ class Tool_musicxml2hum : public HumTool {
 		void storeOttava       (int pindex, xml_node octaveShift, xml_node direction,
 		                        std::vector<std::vector<std::vector<xml_node>>>& ottavas);
 		void insertPartClefs   (pugi::xml_node clef, GridPart& part);
+		void insertPartStria   (int lines, GridPart& part);
 		void insertPartOttavas (pugi::xml_node ottava, GridPart& part, int partindex, int partstaffindex, int staffcount);
 		pugi::xml_node convertClefToHumdrum(pugi::xml_node clef, HTp& token, int& staffindex);
 		pugi::xml_node convertOttavaToHumdrum(pugi::xml_node ottava, HTp& token, int& staffindex,
@@ -249,6 +254,9 @@ class Tool_musicxml2hum : public HumTool {
 		// when a data line contains no notes or rests.  This is used for
 		// harmony/dynamics side spines.
 		bool m_forceRecipQ = false;
+
+		// m_hasTremoloQ is used to run the tremolo tool.
+		bool m_hasTremoloQ = false;
 
 };
 

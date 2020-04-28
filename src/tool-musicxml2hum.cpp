@@ -15,6 +15,7 @@
 #include "tool-musicxml2hum.h"
 #include "tool-ruthfix.h"
 #include "tool-transpose.h"
+#include "tool-tremolo.h"
 #include "tool-trillspell.h"
 
 #include "Convert.h"
@@ -215,6 +216,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	if (m_hasOrnamentsQ) {
 		Tool_trillspell trillspell;
 		trillspell.run(outfile);
+	}
+
+	if (m_hasTremoloQ) {
+		Tool_tremolo tremolo;
+		tremolo.run(outfile);
 	}
 
 	if (m_software == "sibelius") {
@@ -987,6 +993,10 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				// ignore SharpEye dummy part names
 				continue;
 			}
+			if (partname.find("Unnamed") != string::npos) {
+				// ignore Sibelius dummy part names
+				continue;
+			}
 			string name = "*I\"" + partname;
 			maxstaff = outdata.getStaffCount(i);
 			gm->addLabelToken(name, 0, i, maxstaff-1, 0, (int)partdata.size(), maxstaff);
@@ -1051,7 +1061,7 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 //
 
 void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
-		vector<HumdrumLine*> measures) {
+		vector<HLp> measures) {
 
    HumdrumToken* token;
 	for (int i=0; i<outfile.getLineCount(); i++) {
@@ -1076,7 +1086,7 @@ void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
 //
 
 void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 	token = new HumdrumToken("=");
 	line->appendToken(token);
@@ -1094,7 +1104,7 @@ void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
 void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 		vector<MxmlPart>& partdata, const string& common) {
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 
 	int i, j;
@@ -1581,6 +1591,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
+		if (postfix.find("@") != string::npos) {
+			m_hasTremoloQ = true;
+		}
 		bool grace     = event->isGrace();
 		int slurstarts = event->hasSlurStart(slurdirs);
 		int slurstops = event->hasSlurStop();
@@ -3318,6 +3331,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	bool hastransposition  = false;
 	bool hastimesig        = false;
 	bool hasottava         = false;
+	bool hasstafflines     = false;
 
 	vector<vector<xml_node>> clefs(partdata.size());
 	vector<vector<xml_node>> keysigs(partdata.size());
@@ -3325,6 +3339,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	vector<vector<xml_node>> timesigs(partdata.size());
 	vector<vector<vector<xml_node>>> ottavas(partdata.size());
 	vector<vector<xml_node>> hairpins(partdata.size());
+	vector<vector<xml_node>> stafflines(partdata.size());
 
 	vector<vector<vector<vector<MxmlEvent*>>>> gracebefore(partdata.size());
 	vector<vector<vector<vector<MxmlEvent*>>>> graceafter(partdata.size());
@@ -3360,6 +3375,21 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 
 					if (nodeType(child, "transpose")) {
+						transpositions[pindex].push_back(child);
+						hastransposition = true;
+						foundnongrace = true;
+					}
+
+					if (nodeType(child, "staff-details")) {
+						grandchild = child.first_child();
+						while (grandchild) {
+							if (nodeType(grandchild, "staff-lines")) {
+								stafflines[pindex].push_back(grandchild);
+								hasstafflines = true;
+							}
+							grandchild = grandchild.next_sibling();
+						}
+
 						transpositions[pindex].push_back(child);
 						hastransposition = true;
 						foundnongrace = true;
@@ -3407,6 +3437,10 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	}
 
 	addGraceLines(outdata, gracebefore, partdata, nowtime);
+
+	if (hasstafflines) {
+		addStriaLine(outdata, stafflines, partdata, nowtime);
+	}
 
 	if (hasclef) {
 		addClefLine(outdata, clefs, partdata, nowtime);
@@ -3620,6 +3654,33 @@ void Tool_musicxml2hum::addClefLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::addStriaLine --
+//
+
+void Tool_musicxml2hum::addStriaLine(GridMeasure* outdata,
+		vector<vector<xml_node> >& stafflines, vector<MxmlPart>& partdata,
+		HumNum nowtime) {
+
+	GridSlice* slice = new GridSlice(outdata, nowtime,
+		SliceType::Stria);
+	outdata->push_back(slice);
+	slice->initializePartStaves(partdata);
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		for (int j=0; j<(int)stafflines[i].size(); j++) {
+			if (stafflines[i][j]) {
+				string lines = stafflines[i][j].child_value();
+				int linecount = stoi(lines);
+				insertPartStria(linecount, *slice->at(i));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addTimeSigLine --
 //
 
@@ -3789,6 +3850,23 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 		clef = convertClefToHumdrum(clef, token, staffnum);
 		part[staffnum]->setTokenLayer(0, token, 0);
 	}
+
+	// go back and fill in all NULL pointers with null interpretations
+	fillEmpties(&part, "*");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertPartStria --
+//
+
+void Tool_musicxml2hum::insertPartStria(int lines, GridPart& part) {
+	HTp token = new HumdrumToken;
+	string value = "*stria" + to_string(lines);
+	token->setText(value);
+	part[0]->setTokenLayer(0, token, 0);
 
 	// go back and fill in all NULL pointers with null interpretations
 	fillEmpties(&part, "*");
@@ -4429,7 +4507,7 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	}
 
 	string sign;
-	int line = 0;
+	int line = -1000;
 	int octadjust = 0;
 
 	xml_node child = clef.first_child();
@@ -4459,7 +4537,9 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 			ss << "^";
 		}
 	}
-	ss << line;
+	if (line > 0) {
+		ss << line;
+	}
 	token = new HumdrumToken(ss.str());
 
 	clef = clef.next_sibling();
@@ -4603,7 +4683,7 @@ bool Tool_musicxml2hum::nodeType(xml_node node, const char* testname) {
 // Tool_musicxml2hum::appendNullTokens --
 //
 
-void Tool_musicxml2hum::appendNullTokens(HumdrumLine* line,
+void Tool_musicxml2hum::appendNullTokens(HLp line,
 		MxmlPart& part) {
 	int i;
 	int staffcount = part.getStaffCount();
@@ -4907,9 +4987,9 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getChildrenVector -- Return a list of all children elements
-//   of a given element.  Pugixml does not allow random access, but storing
-//   them in a vector allows that possibility.
+// Tool_musicxml2hum::getChildrenVector -- Return a list of all children
+//   elements of a given element.  Pugixml does not allow random access,
+//   but storing them in a vector allows that possibility.
 //
 
 void Tool_musicxml2hum::getChildrenVector(vector<xml_node>& children,

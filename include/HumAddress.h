@@ -20,7 +20,10 @@ namespace hum {
 // START_MERGE
 
 class HumdrumLine;
+typedef HumdrumLine* HLp;
+
 class HumdrumToken;
+typedef HumdrumToken* HTp;
 
 class HumAddress {
 	public:
@@ -38,12 +41,12 @@ class HumAddress {
 		int                 getSubtrack       (void) const;
 		int                 getSubtrackCount  (void) const;
 		std::string         getTrackString    (std::string separator = ".") const;
-		HumdrumLine*        getLine           (void) const;
-		HumdrumLine*        getOwner          (void) const { return getLine(); }
+		HLp                 getLine           (void) const;
+		HLp                 getOwner          (void) const { return getLine(); }
 		bool                hasOwner          (void) const;
 
 	protected:
-		void                setOwner          (HumdrumLine* aLine);
+		void                setOwner          (HLp aLine);
 		void                setFieldIndex     (int fieldlindex);
 		void                setSpineInfo      (const std::string& spineinfo);
 		void                setTrack          (int aTrack, int aSubtrack);
@@ -88,7 +91,7 @@ class HumAddress {
 		int m_subtrackcount;
 
 		// owner: This is the line which manages the given token.
-		HumdrumLine* m_owner;
+		HLp          m_owner;
 
 	friend class HumdrumToken;
 	friend class HumdrumLine;

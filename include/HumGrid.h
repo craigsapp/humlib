@@ -73,6 +73,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		void addNullTokensForGraceNotes    (void);
 		void addNullTokensForClefChanges   (void);
 		void addNullTokensForLayoutComments(void);
+		void checkForNullDataHoles         (void);
 
 		void fillInNullTokensForGraceNotes(GridSlice* graceslice, GridSlice* lastnote,
 		                                   GridSlice* nextnote);
@@ -99,16 +100,11 @@ class HumGrid : public std::vector<GridMeasure*> {
 		                                    GridStaff* newlaststaff, int pindex,
 		                                    int sindex);
 		void transferOtherParts            (GridSlice* oldline, GridSlice* newline, int maxpart);
-		void insertExInterpSides           (HumdrumLine* line, int part,
-		                                    int staff);
-		void insertSideTerminals           (HumdrumLine* line, int part,
-		                                    int staff);
-		void insertSidePartInfo            (HumdrumLine* line, int part,
-		                                    int staff);
-		void insertSideStaffInfo           (HumdrumLine* line, int part,
-		                                    int staff, int staffnum);
-		void insertSideNullInterpretations (HumdrumLine* line,
-		                                    int part, int staff);
+		void insertExInterpSides           (HLp line, int part, int staff);
+		void insertSideTerminals           (HLp line, int part, int staff);
+		void insertSidePartInfo            (HLp line, int part, int staff);
+		void insertSideStaffInfo           (HLp line, int part, int staff, int staffnum);
+		void insertSideNullInterpretations (HLp line, int part, int staff);
 		void getMetricBarNumbers           (std::vector<int>& barnums);
 		string  createBarToken             (int m, int barnum,
 		                                    GridMeasure* measure);

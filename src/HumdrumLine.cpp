@@ -362,6 +362,17 @@ bool HumdrumLine::isCommentGlobal(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isCommentUniversal -- Returns true if a universal comment.
+//
+
+bool HumdrumLine::isCommentUniversal(void) const {
+	return equalChar(3, '!') && equalChar(2, '!') && equalChar(1, '!') && equalChar(0, '!');
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isReference -- Returns true if a reference record.
 //
 
@@ -2103,6 +2114,34 @@ int HumdrumLine::getBarNumber(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::copyStructure -- For data lines only at the moment.
+//
+
+void HumdrumLine::copyStructure(HLp line, const string& empty) {
+		m_tokens.resize(line->m_tokens.size());
+		for (int i=0; i<(int)m_tokens.size(); i++) {
+			m_tokens[i] = new HumdrumToken(empty);
+			m_tokens[i]->setOwner(this);
+			m_tokens[i]->copyStructure(line->m_tokens[i]);
+		}
+		createLineFromTokens();
+
+		m_tabs = line->m_tabs;
+		m_linkedParameters.clear();
+		m_rhythm_analyzed = line->m_rhythm_analyzed;
+		m_owner = line->m_owner;
+
+		// Other information that should be set later:
+		//    int m_lineindex;
+		//    HumNum m_durationFromStart;
+		//    HumNum m_durationFromBarline;
+		//    HumNum m_durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -2112,7 +2151,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	return out;
 }
 
-ostream& operator<< (ostream& out, HumdrumLine* line) {
+ostream& operator<< (ostream& out, HLp line) {
 	out << (string)(*line);
 	return out;
 }

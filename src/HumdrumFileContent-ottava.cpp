@@ -34,7 +34,7 @@ void HumdrumFileContent::analyzeOttavas(void) {
 	vector<int> activeOttava(tcount+1, 0);
 	vector<int> octavestate(tcount+1, 0);
 	for (int i=0; i<getLineCount(); i++) {
-		HumdrumLine* line = getLine(i);
+		HLp line = getLine(i);
 		if (line->isInterpretation()) {
 			int fcount = getLine(i)->getFieldCount();
 			for (int j=0; j<fcount; j++) {

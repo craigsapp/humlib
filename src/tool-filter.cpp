@@ -27,6 +27,8 @@
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
+#include "tool-humsheet.h"
+#include "tool-kernview.h"
 #include "tool-shed.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
@@ -45,6 +47,7 @@
 #include "tool-spinetrace.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
+#include "tool-tremolo.h"
 #include "tool-trillspell.h"
 #include "tool-transpose.h"
 
@@ -206,6 +209,10 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homorhythm2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsheet") {
+			RUNTOOL(humsheet, infile, commands[i].second, status);
+		} else if (commands[i].first == "kernview") {
+			RUNTOOL(kernview, infile, commands[i].second, status);
 		} else if (commands[i].first == "shed") {
 			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
@@ -258,6 +265,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "tremolo") {
+			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
@@ -334,7 +343,7 @@ void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
 void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		HumdrumFile& infile) {
 
-	vector<HumdrumLine*> refs = infile.getReferenceRecords();
+	vector<HLp> refs = infile.getReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;
@@ -369,7 +378,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& commands,
 		HumdrumFileSet& infiles) {
 
-	vector<HumdrumLine*> refs = infiles.getUniversalReferenceRecords();
+	vector<HLp> refs = infiles.getUniversalReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;

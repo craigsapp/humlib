@@ -710,6 +710,9 @@ void Tool_melisma::getNoteCountsForLyric(vector<vector<int>>& counts, HTp lyricS
 //
 
 int Tool_melisma::getCountForSyllable(HTp token) {
+	if (token->back() == '&') {
+		return 1;
+	}
 	HTp nexttok = token->getNextToken();
 	int eline   = token->getLineIndex();
 	int efield  = token->getFieldIndex();

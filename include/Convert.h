@@ -63,6 +63,11 @@ class Convert {
 		static int     kernToAccidentalCount(const std::string& kerndata);
 		static int     kernToAccidentalCount(HTp token)
 				{ return kernToAccidentalCount((std::string)*token); }
+
+      static int     kernToStaffLocation  (HTp token, HTp clef = NULL);
+      static int     kernToStaffLocation  (HTp token, const std::string& clef);
+      static int     kernToStaffLocation  (const std::string& token, const std::string& clef = "");
+
 		static int     kernToDiatonicPC     (const std::string& kerndata);
 		static int     kernToDiatonicPC     (HTp token)
 				{ return kernToDiatonicPC     ((std::string)*token); }
@@ -216,6 +221,7 @@ class Convert {
 		                                    double delta = 0.00001);
 		static double  significantDigits    (double value, int digits);
 		static bool    isNaN                (double value);
+		static bool    isPowerOfTwo         (int value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
 		static double  standardDeviationSample(const std::vector<double>& x);
@@ -224,6 +230,11 @@ class Convert {
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);
 		static double  nPvi                 (const std::vector<double>& x);
+
+		// Reference record functions defined in Convert-reference.cpp
+		static std::string getReferenceKeyMeaning(HTp token);
+		static std::string getReferenceKeyMeaning(const std::string& token);
+		static std::string getLanguageName(const std::string& abbreviation);
 };
 
 

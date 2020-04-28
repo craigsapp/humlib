@@ -103,7 +103,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token) :
 
 
 
-HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(const HumdrumToken& token, HLp owner) :
 		string((string)token), HumHash((HumHash)token) {
 	m_address         = token.m_address;
 	m_address.m_owner = owner;
@@ -119,7 +119,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
 }
 
 
-HumdrumToken::HumdrumToken(HumdrumToken* token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(HumdrumToken* token, HLp owner) :
 		string((string)(*token)), HumHash((HumHash)(*token)) {
 	m_address         = token->m_address;
 	m_address.m_owner = owner;
@@ -247,6 +247,33 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 	return (int)m_previousNonNullTokens.size();
+}
+
+
+//////////////////////////////
+//
+// HumdrumToken::insertTokenAfter -- Insert the given token after the this token.
+//    This will sever the link from this token to its next token.  There is only
+//    presumed to be one next token, at least for the moment.
+//
+//
+
+void HumdrumToken::insertTokenAfter(HTp newtoken) {
+	if (m_nextTokens.empty()) {
+		m_nextTokens.push_back(newtoken);
+	} else {
+		HTp oldnexttoken = m_nextTokens[0];
+		m_nextTokens[0] = newtoken;
+		newtoken->m_previousTokens.clear();
+		newtoken->m_previousTokens.push_back(this);
+		newtoken->m_nextTokens.clear();
+		newtoken->m_nextTokens.push_back(oldnexttoken);
+		if (oldnexttoken->m_previousTokens.empty()) {
+			oldnexttoken->m_previousTokens.push_back(newtoken);
+		} else {
+			oldnexttoken->m_previousTokens[0] = newtoken;
+		}
+	}
 }
 
 
@@ -671,7 +698,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //
 
 HTp HumdrumToken::getNextFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -690,7 +717,7 @@ HTp HumdrumToken::getNextFieldToken(void) const {
 //
 
 HTp HumdrumToken::getPreviousFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -959,7 +986,7 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 //
 
 HumNum HumdrumToken::getBarlineDuration(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -968,7 +995,7 @@ HumNum HumdrumToken::getBarlineDuration(void) {
 
 
 HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -985,7 +1012,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationToBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -993,7 +1020,7 @@ HumNum HumdrumToken::getDurationToBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1010,7 +1037,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationFromBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1018,7 +1045,7 @@ HumNum HumdrumToken::getDurationFromBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationFromBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -1142,6 +1169,46 @@ bool HumdrumToken::isNote(void) {
 	}
 	return false;
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isPitched -- True if not a rest or an unpitched note.
+//
+
+bool HumdrumToken::isPitched(void) { 
+	if (this->isKern()) {
+		for (int i=0; i<(int)this->size(); i++) {
+			if ((this->at(i) == 'r') || (this->at(i) == 'R')) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isPitched -- True if has an unpitched marker (could be a rest)
+//
+
+bool HumdrumToken::isUnpitched(void) {
+	if (this->isKern()) {
+		if (this->find('R') != string::npos) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
 
 
 
@@ -1486,7 +1553,7 @@ bool HumdrumToken::hasSlurEnd(void) {
 //
 
 int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -1516,7 +1583,7 @@ int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
 //
 
 int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -1866,10 +1933,11 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
-	if (((void*)this) == NULL) {
-		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
-		return false;
-	}
+	// [20200331] GCC 6+ will print a compiler warning when checking this against NULL.
+	//if ((void*)this == NULL) {
+	//	// This was added perhaps due to a new bug [20100125] that is checking a null pointer
+	//	return false;
+	//}
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 
@@ -1954,7 +2022,7 @@ bool HumdrumToken::noteInLowerSubtrack(void) {
 	int field = this->getFieldIndex();
 	int track = this->getTrack();
 
-	HumdrumLine* owner = this->getOwner();
+	HLp owner = this->getOwner();
 	if (owner == NULL) {
 		return false;
 	}
@@ -2723,7 +2791,7 @@ std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
 // HumdrumToken::setOwner -- Sets the HumdrumLine owner of this token.
 //
 
-void HumdrumToken::setOwner(HumdrumLine* aLine) {
+void HumdrumToken::setOwner(HLp aLine) {
 	m_address.setOwner(aLine);
 }
 
@@ -2735,7 +2803,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 //    owns this token.
 //
 
-HumdrumLine* HumdrumToken::getOwner(void) const {
+HLp HumdrumToken::getOwner(void) const {
 	return m_address.getOwner();
 }
 
@@ -2997,7 +3065,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 		out << Convert::repeatString(indent, level);
 		out << "<linked-parameter";
 		out << " idref=\"";
-		HumdrumLine* owner = m_linkedParameterTokens[i]->getOwner();
+		HLp owner = m_linkedParameterTokens[i]->getOwner();
 		if (owner && owner->isGlobalComment()) {
 			out << owner->getXmlId();
 		} else {
@@ -3325,7 +3393,7 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 
 HTp HumdrumToken::resolveNull(void) {
 	if (m_nullresolve == NULL) {
-		HumdrumLine* hline = getOwner();
+		HLp hline = getOwner();
 		if (hline) {
 			HumdrumFile* infile = hline->getOwner();
 			infile->resolveNullTokens();
@@ -3350,6 +3418,22 @@ HTp HumdrumToken::resolveNull(void) {
 
 void HumdrumToken::setNullResolution(HTp resolution) {
 	m_nullresolve = resolution;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::copyStucture --
+//
+
+void HumdrumToken::copyStructure(HTp token) {
+	m_strand = token->m_strand;
+	HLp temp_owner = m_address.m_owner;
+	m_address = token->m_address;
+	m_address.m_owner = NULL;  // This will in general be different, so do not copy.
+	m_address.m_owner = temp_owner; // But preserve in case already set.
+	// m_nullresolve: set this?
 }
 
 

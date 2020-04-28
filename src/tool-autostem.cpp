@@ -104,10 +104,14 @@ bool Tool_autostem::run(HumdrumFile& infile) {
 			return true;
 		}
 	}
-	autostem(infile);
+	bool status = autostem(infile);
 	// Re-load the text for each line from their tokens.
-	infile.createLinesFromTokens();
-	return true;
+	if (status) {
+		infile.createLinesFromTokens();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -197,7 +201,7 @@ void Tool_autostem::removeStems(HumdrumFile& infile) {
 //     that do not already have stem information.
 //
 
-void Tool_autostem::autostem(HumdrumFile& infile) {
+bool Tool_autostem::autostem(HumdrumFile& infile) {
 	vector<vector<int> > baseline;
 	getClefInfo(baseline, infile);
 
@@ -206,7 +210,7 @@ void Tool_autostem::autostem(HumdrumFile& infile) {
 	getNotePositions(notepos, baseline, infile);
 	if (noteposQ) {
 		printNotePositions(infile, notepos);
-		return;
+		return true;
 	}
 
 	// get voice/layer number in track:
@@ -214,13 +218,17 @@ void Tool_autostem::autostem(HumdrumFile& infile) {
 	getVoiceInfo(voice, infile);
 	if (voiceQ) {
 		printVoiceInfo(infile, voice);
-		return;
+		return true;
 	}
 
 	// get stem directions:
 	vector<vector<int> > stemdir;
-	assignStemDirections(stemdir, voice, notepos, infile);
+	bool status = assignStemDirections(stemdir, voice, notepos, infile);
+	if (!status) {
+		return false;
+	}
 	insertStems(infile, stemdir);
+	return true;
 }
 
 
@@ -304,7 +312,7 @@ void Tool_autostem::setStemDirection(HumdrumFile& infile, int row, int col,
 // Tool_autostem::assignStemDirections --
 //
 
-void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
+bool Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 		vector<vector<int> > & voice,
 		vector<vector<vector<int> > >& notepos, HumdrumFile& infile) {
 
@@ -321,7 +329,10 @@ void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 	assignBasicStemDirections(stemdir, voice, notepos, infile);
 
 	vector<vector<string > > beamstates;
-	getBeamState(beamstates, infile);
+	bool status = getBeamState(beamstates, infile);
+	if (!status) {
+		return status;
+	}
 
 	vector<vector<Coord> > beamednotes;
 	getBeamSegments(beamednotes, beamstates, infile, maxlayer);
@@ -353,6 +364,7 @@ void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 			cerr << endl;
 		}
 	}
+	return true;
 }
 
 
@@ -986,7 +998,7 @@ void Tool_autostem::removeStem2(HumdrumFile& infile, int row, int col) {
 void Tool_autostem::addStem(string& input, const string& piece) {
 	string output;
 	HumRegex hre;
-	if (hre.search(input, "(.*[ABCDEFG][n#-]*)(.*)$", "i")) {
+	if (hre.search(input, "(.*[ABCDEFG][n#-]*[xyXY<>]*)(.*)$", "i")) {
 		output = hre.getMatch(1);
 		output += piece;
 		output += hre.getMatch(2);
@@ -1077,7 +1089,7 @@ void Tool_autostem::usage(void) {
 // backward hook  k           \  x
 //
 
-void Tool_autostem::getBeamState(vector<vector<string > >& beams,
+bool Tool_autostem::getBeamState(vector<vector<string > >& beams,
 		HumdrumFile& infile) {
 	int len;
 	int contin;
@@ -1200,9 +1212,9 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 					cerr << "Error too many grace note beams" << endl;
 					exit(1);
 				}
-				beams[i][j] = gbinfo;
-				gracestate[track][curlayer[track]] = contin;
-				gracestate[track][curlayer[track]] += start;
+				beams.at(i).at(j) = gbinfo;
+				gracestate.at(track).at(curlayer.at(track)) = contin;
+				gracestate.at(track).at(curlayer.at(track)) += start;
 
 			} else {
 				// regular notes which are shorter than a quarter note
@@ -1225,8 +1237,13 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				if (flagl > 7) {
 					cerr << "Too many beam flagleft" << endl;
 				}
-				contin = beamstate[track][curlayer[track]];
+				contin = beamstate.at(track).at(curlayer.at(track));
 				contin -= stop;
+				if (contin < 0) {
+					cerr << "ERROR at line " << token->getLineNumber() << " column " << token->getFieldNumber() << ": ";
+					cerr << "Unbalanced beaming information in measure." << endl;
+					return false;
+				}
 				gbinfo.resize(contin);
 				for (int ii=0; ii<contin; ii++) {
 					gbinfo[ii] = '=';
@@ -1249,14 +1266,16 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				len = (int)gbinfo.size();
 				if (len > 6) {
 					cerr << "Error too many grace note beams" << endl;
-					exit(1);
+					return false;
 				}
-				beams[i][j] = gbinfo;
-				beamstate[track][curlayer[track]] = contin;
-				beamstate[track][curlayer[track]] += start;
+				beams.at(i).at(j) = gbinfo;
+				beamstate.at(track).at(curlayer.at(track)) = contin;
+				beamstate.at(track).at(curlayer.at(track)) += start;
 			}
 		}
 	}
+
+	return true;
 }
 
 

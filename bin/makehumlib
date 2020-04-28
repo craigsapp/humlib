@@ -200,6 +200,7 @@ class HumAddress;
 class HumdrumToken;
 typedef HumdrumToken* HTp;
 class HumdrumLine;
+typedef HumdrumLine* HLp;
 class HumdrumFileBase;
 class HumdrumFileStructure;
 class HumdrumFileContent;

@@ -336,7 +336,7 @@ bool HumdrumFileBase::read(istream& contents) {
 	clear();
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
 		s->setOwner(this);
@@ -386,7 +386,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine;
 		s->setLineFromCsv(buffer);
@@ -703,7 +703,7 @@ ostream& HumdrumFileBase::printFieldIndex(int fieldind, ostream& out) {
 //     given index in the data storage.
 //
 
-HumdrumLine* HumdrumFileBase::getLine(int index) {
+HLp HumdrumFileBase::getLine(int index) {
 	if (index < 0) {
 		return NULL;
 	} else if (index >= (int)m_lines.size()) {
@@ -815,18 +815,18 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 //
 
 void HumdrumFileBase::appendLine(const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
 void HumdrumFileBase::appendLine(const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
-void HumdrumFileBase::appendLine(HumdrumLine* line) {
+void HumdrumFileBase::appendLine(HLp line) {
 	// deletion will be handled by class.
 	m_lines.push_back(line);
 }
@@ -835,27 +835,43 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
+// HumdrumFileBase::insertLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
 
 void HumdrumFileBase::insertLine(int index, const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
 void HumdrumFileBase::insertLine(int index, const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
-void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
+void HumdrumFileBase::insertLine(int index, HLp line) {
 	// deletion will be handled by class.
 	m_lines.insert(m_lines.begin() + index, line);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
+
 
 
 //////////////////////////////
@@ -886,7 +902,7 @@ void HumdrumFileBase::deleteLine(int index) {
 // HumdrumFileBase::back --
 //
 
-HumdrumLine* HumdrumFileBase::back(void) {
+HLp HumdrumFileBase::back(void) {
 	return m_lines.back();
 }
 
@@ -897,10 +913,10 @@ HumdrumLine* HumdrumFileBase::back(void) {
 // HumdrumFileBase::getReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isReference()) {
@@ -918,10 +934,10 @@ vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
 // HumdrumFileBase::getGlobalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getGlobalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isGlobalReference()) {
@@ -939,10 +955,10 @@ vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
 // HumdrumFileBase::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileBase& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isUniversalReference()) {
@@ -1449,8 +1465,8 @@ bool HumdrumFileBase::analyzeTracks(void) {
 //
 
 bool HumdrumFileBase::analyzeLinks(void) {
-	HumdrumLine* next     = NULL;
-	HumdrumLine* previous = NULL;
+	HLp next     = NULL;
+	HLp previous = NULL;
 
 	for (int i=0; i<(int)m_lines.size(); i++) {
 		if (!m_lines[i]->hasSpines()) {
@@ -2205,7 +2221,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 // new          o    o         *v   *v   *    *v   *v
 // track:       1    2         3    3    4    5    5
 
-	HumdrumLine* newline = new HumdrumLine;
+	HLp newline = new HumdrumLine;
 	newline->setOwner(this);
 	bool foundboundary = false;
 	HTp token;
@@ -2415,6 +2431,290 @@ std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
 		}
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullDataLine -- Add a null data line at
+//     the given absolute quarter-note timestamp in the file.  If there
+//     is already a data line at the given timestamp, then do not create
+//     a line and instead return a pointer to the existing line.  Returns
+//     NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			return &infile[i];
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(&infile[beforei], ".");
+
+	infile.insertLine(beforei+1, newline);
+
+	// Set the timestamp information for inserted line:
+	HumNum delta = timestamp - beforet;
+	HumNum durationFromStart = infile[beforei].getDurationFromStart() + delta;
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline() + delta;
+	HumNum durationToBarline = infile[beforei].getDurationToBarline() - delta;
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = infile[beforei].m_duration - delta;
+	infile[beforei].m_duration = delta;
+
+	for (int i=0; i<infile[beforei].getFieldCount(); i++) {
+		HTp token = infile.token(beforei, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLine -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added after any other interpretation lines at that timestamp, but before any
+//     local comments that appear immediately before the data line(s) at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertion(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLineAbove -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added before any other lines at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLineAbove(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertionAbove(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertion --  Search backwards
+//    in the file for the first local comment immediately before a data line
+//    index given as input.  If there are no local comments, then return the
+//    data line.  If there are local comment lines immediately before the data
+//    line, then keep searching for the first local comment.  Non-spined lines
+//    (global or empty lines) are ignored.  This function is used to insert
+//    an empty interpretation before a data line at a specific data line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertion(int index) {
+	HumdrumFileBase& infile = *this;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		if (infile[current].isCommentLocal()) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertionAbove --  Search backwards
+//    in the file for the first line at the same timestamp as the starting line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
+	HumdrumFileBase& infile = *this;
+	HumNum timestamp = infile[index].getDurationFromStart();
+	HumNum teststamp;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		teststamp = infile[current].getDurationFromStart();
+		if (teststamp == timestamp) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
 }
 
 

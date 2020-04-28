@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon 10 Feb 2020 10:22:59 PM PST
+// Last Modified: Tue 28 Apr 2020 08:40:02 AM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -10,7 +10,7 @@
 // Description:   Source file for humlib library.
 //
 /*
-Copyright (c) 2015, 2016, 2017, 2018 Craig Stuart Sapp
+Copyright (c) 2015-2020 Craig Stuart Sapp
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -887,6 +887,23 @@ bool Convert::isNaN(double value) {
 	ieee754.f = value;
 	return ( (unsigned)(ieee754.u >> 32) & 0x7fffffff ) +
            ( (unsigned)ieee754.u != 0 ) > 0x7ff00000;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::isPowerOfTwo --
+//
+
+bool Convert::isPowerOfTwo(int value) {
+	if (value < 0) {
+		return (-value & (-value - 1)) == 0;
+	} else if (value > 0) {
+		return (value & (value - 1)) == 0;
+	} else {
+		return false;
+	}
 }
 
 
@@ -2877,6 +2894,995 @@ int Convert::base7ToBase40(int base7) {
 
 
 
+//////////////////////////////
+//
+// Convert::kernToStaffLocation -- 0 = bottom line of staff, 1 = next space higher,
+//     2 = second line of staff, etc.  -1 = space below bottom line.
+//
+
+int Convert::kernToStaffLocation(HTp token, HTp clef) {
+	if (clef == NULL) {
+		return Convert::kernToStaffLocation(*token, "");
+	} else {
+		return Convert::kernToStaffLocation(*token, *clef);
+	}
+}
+
+
+int Convert::kernToStaffLocation(HTp token, const string& clef) {
+	return Convert::kernToStaffLocation(*token, clef);
+}
+
+
+int Convert::kernToStaffLocation(const string& token, const string& clef) {
+	int offset = 0;
+	HumRegex hre;
+	if (hre.search(clef, "clef([GFC])([v^]*)(\\d+)")) {
+		string letter = hre.getMatch(1);
+		string vcaret = hre.getMatch(2);
+		int line = hre.getMatchInt(3);
+		int octadj = 0;
+		if (!vcaret.empty()) {
+			for (int i=0; i<(int)vcaret.size(); i++) {
+				if (vcaret[i] == '^') {
+					octadj--;
+				} else if (vcaret[i] == 'v') {
+					octadj++;
+				}
+			}
+		}
+		if (letter == "F") {
+			offset = 14 + 4;
+		} else if (letter == "C") {
+			offset = 28;
+		} else {
+			offset = 28 + 4;
+		}
+		offset += (line - 1)  * 2;
+		offset += octadj * 7;
+	} else {
+		// pretend clefG2:
+		offset = 28 + 2;
+	}
+
+	int diatonic = Convert::kernToBase7(token);
+	return diatonic - offset;
+}
+
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::getReferenceKeyMeaning -- 
+//
+
+string Convert::getReferenceKeyMeaning(HTp token) {
+	string text = token->getText();
+	return Convert::getReferenceKeyMeaning(text);
+}
+
+string Convert::getReferenceKeyMeaning(const string& token) {
+	string key;
+	string keybase;
+	string translation;
+	string language;
+	string number;
+	HumRegex hre;
+	if (hre.search(token, "^!!!+\\s*([^:]+)\\s*:")) {
+		key = hre.getMatch(1);
+	}
+	if (key.empty()) {
+		return "";
+	}
+	if (islower(key[0])) {
+		// non-standard reference record.
+		return "";
+	}
+
+	// extract language information
+	if (hre.search(key, "^([^@])+@@([^@]+)$")) {
+		key      = hre.getMatch(1);
+		language = hre.getMatch(2);
+	} else if (hre.search(key, "^([^@])+@([^@]+)$")) {
+		key         = hre.getMatch(1);
+		translation = hre.getMatch(2);
+	}
+		
+	// extract number qualifier
+	if (hre.search(key, "^(.*)(\\d+)$")) {
+		key     = hre.getMatch(1);
+		number  = hre.getMatch(2);
+	}
+
+	if (key.empty()) {
+		return "";
+	}
+
+	string meaning;
+	switch (key[0]) {
+		case 'A':	// analytic information
+			if      (key == "ACO") { meaning = "Collection designation"; }
+			else if (key == "AFR") { meaning = "Form designation"; }
+			else if (key == "AGN") { meaning = "genre designation"; }
+			else if (key == "AST") { meaning = "Syle/period"; }
+			else if (key == "AMD") { meaning = "Mode classification"; }
+			else if (key == "AMT") { meaning = "Meter classification"; }
+			else if (key == "AIN") { meaning = "Instrumentation"; }
+			else if (key == "ARE") { meaning = "Geographical region of origin"; }
+			else if (key == "ARL") { meaning = "Origin coordinates"; }
+			break;
+
+		case 'C':	// composer-base reference records
+			if      (key == "COM") { meaning = "Composer"; }
+			else if (key == "CDT") { meaning = "Composer's dates"; }
+			else if (key == "CNT") { meaning = "Composer's nationality"; }
+			else if (key == "COA") { meaning = "Attributed composer"; }
+			else if (key == "COS") { meaning = "Suspected composer"; }
+			else if (key == "COL") { meaning = "Composer's stage name"; }
+			else if (key == "COC") { meaning = "Composer's corporate name"; }
+			else if (key == "CBL") { meaning = "Composer's birth location"; }
+			else if (key == "CDL") { meaning = "Composer's death location"; }
+			break;
+
+		case 'E':	// electronic editor
+			if      (key == "EED") { meaning = "Electronic editor"; }
+			else if (key == "ENC") { meaning = "Electronic encoder"; }
+			else if (key == "END") { meaning = "Electronic encoding date"; }
+			else if (key == "EMD") { meaning = "Modification description"; }
+			else if (key == "EEV") { meaning = "Electronic edition version"; }
+			else if (key == "EFL") { meaning = "Electronic file number"; }
+			else if (key == "EST") { meaning = "Encoding status"; }
+			break;
+
+		case 'G':	// group information
+			if      (key == "GTL") { meaning = "Group title"; }
+			else if (key == "GAW") { meaning = "Associated work"; }
+			else if (key == "GCO") { meaning = "Collection designation"; }
+			break;
+
+		case 'H':	// historical information
+			if      (key == "HAO") { meaning = "Aural history"; }
+			else if (key == "HTX") { meaning = "Vocal text translation"; }
+			break;
+
+		case 'L':	// lyricist/librettis/arranger/orchestrator reference records
+			if      (key == "LYR") { meaning = "Lyricist"; }
+			else if (key == "LIB") { meaning = "Librettist"; }
+			else if (key == "LOR") { meaning = "Orchestrator"; }
+			break;
+
+		case 'M':	// performance information
+			if      (key == "MPN") { meaning = "Performer"; }
+			else if (key == "MPS") { meaning = "Suspected performer"; }
+			else if (key == "MGN") { meaning = "Performance group name"; }
+			else if (key == "MRD") { meaning = "Performance date"; }
+			else if (key == "MLC") { meaning = "Performance location"; }
+			else if (key == "MCN") { meaning = "Conductor"; }
+			else if (key == "MPD") { meaning = "Premier date"; }
+			break;
+
+		case 'O':	// work (opus) information
+			if      (key == "OTL") { meaning = "Work title"; }
+			else if (key == "OTP") { meaning = "Popular title"; }
+			else if (key == "OTA") { meaning = "Alternative title"; }
+			else if (key == "OPR") { meaning = "Parent-work title"; }
+			else if (key == "OAC") { meaning = "Act number"; }
+			else if (key == "OSC") { meaning = "Scene number"; }
+			else if (key == "OMV") { meaning = "Movement number"; }
+			else if (key == "OMD") { meaning = "Movement designation"; }
+			else if (key == "OPS") { meaning = "Opus number"; }
+			else if (key == "ONM") { meaning = "Work number in opus"; }
+			else if (key == "OVM") { meaning = "Volume number"; }
+			else if (key == "ODE") { meaning = "Dedicatee"; }
+			else if (key == "OCO") { meaning = "Commission"; }
+			else if (key == "OCL") { meaning = "Collector"; }
+			else if (key == "OCL") { meaning = "Free-form note"; }
+			else if (key == "OCY") { meaning = "Composition country"; }
+			else if (key == "OPC") { meaning = "Composition city"; }
+			break;
+
+		case 'P':	// publication information
+			if      (key == "PUB") { meaning = "Publication status"; }
+			else if (key == "PPR") { meaning = "First publisher"; }
+			else if (key == "PTL") { meaning = "Publication title"; }
+			else if (key == "PDT") { meaning = "Publication date"; }
+			else if (key == "PPP") { meaning = "Publication location"; }
+			else if (key == "PC#") { meaning = "Publication catalog number"; }
+			else if (key == "SCT") { meaning = "Scholarly catalog abbreviation and number"; }
+			else if (key == "SCA") { meaning = "Scholarly catalog unabbreviated name"; }
+			else if (key == "SMS") { meaning = "Manuscript source name"; }
+			else if (key == "SML") { meaning = "Manuscript location"; }
+			else if (key == "SMA") { meaning = "Manuscript access"; }
+			break;
+
+		case 'R':
+			// recording information
+			if      (key == "RTL") { meaning = "Recording Title"; }
+			else if (key == "RMM") { meaning = "Manufacturer"; }
+			else if (key == "RC#") { meaning = "Catalog number"; }
+			else if (key == "RRD") { meaning = "Recording release date"; }
+			else if (key == "RLC") { meaning = "Recording location"; }
+			else if (key == "RNP") { meaning = "Record producer"; }
+			else if (key == "RDT") { meaning = "Recording date"; }
+			else if (key == "RT#") { meaning = "Recording track number"; }
+			// representation information 
+			else if (key == "RLN") { meaning = "ASCII language setting"; }
+			else if (key == "RDF") { meaning = "User-defined signifiers"; }
+			else if (key == "RDT") { meaning = "Encoding date"; }
+			else if (key == "RNB") { meaning = "Encoding note"; }
+			else if (key == "RWG") { meaning = "Encoding warning"; }
+			break;
+		
+		case 'T':	// translator
+			if      (key == "TRN") { meaning = "Translator"; }
+			break;
+
+		case 'V':	// version
+			if      (key == "VTS") { meaning = "Data checksum"; }
+			break;
+
+		case 'Y':	// copyright information
+			if      (key == "YEP") { meaning = "Publisher of electronic edition"; }
+			else if (key == "YEC") { meaning = "Electronic edition copyright"; }
+			else if (key == "YER") { meaning = "Electronic edition release year"; }
+			else if (key == "YEM") { meaning = "Copyright message"; }
+			else if (key == "YEC") { meaning = "Country of copyright"; }
+			else if (key == "YOR") { meaning = "Original document"; }
+			else if (key == "YOO") { meaning = "Original edition owner"; }
+			else if (key == "YOY") { meaning = "Original edition copyright year"; }
+			else if (key == "YOE") { meaning = "Original edition editor"; }
+			break;
+	}
+
+	if (!number.empty()) {
+		meaning += " #" + number;
+	}
+
+	if (!language.empty()) {
+		meaning += ", original language " + Convert::getLanguageName(language);
+	} else if (!translation.empty()) {
+		meaning += ", translated into " + Convert::getLanguageName(language);
+	}
+
+	return meaning;
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getLanguageName --
+//
+
+string Convert::getLanguageName(const string& abbreviation) {
+	string code;
+	for (int i=0; i<(int)abbreviation.size(); i++) {
+		if (abbreviation[i] == '@') {
+			continue;
+		}
+		code.push_back(tolower(abbreviation[i]));
+	}
+
+	if (code.size() == 2) {
+		// ISO 639-1 language codes
+
+		if (code == "aa") { return "Afar"; }
+		if (code == "ab") { return "Abkhazian"; }
+		if (code == "ae") { return "Avestan"; }
+		if (code == "af") { return "Afrikaans"; }
+		if (code == "ak") { return "Akan"; }
+		if (code == "am") { return "Amharic"; }
+		if (code == "an") { return "Aragonese"; }
+		if (code == "ar") { return "Arabic"; }
+		if (code == "as") { return "Assamese"; }
+		if (code == "av") { return "Avaric"; }
+		if (code == "ay") { return "Aymara"; }
+		if (code == "az") { return "Azerbaijani"; }
+		if (code == "ba") { return "Bashkir"; }
+		if (code == "be") { return "Belarusian"; }
+		if (code == "bg") { return "Bulgarian"; }
+		if (code == "bh") { return "Bihari languages"; }
+		if (code == "bi") { return "Bislama"; }
+		if (code == "bm") { return "Bambara"; }
+		if (code == "bn") { return "Bengali"; }
+		if (code == "bo") { return "Tibetan"; }
+		if (code == "br") { return "Breton"; }
+		if (code == "bs") { return "Bosnian"; }
+		if (code == "ca") { return "Catalan"; }
+		if (code == "ce") { return "Chechen"; }
+		if (code == "ch") { return "Chamorro"; }
+		if (code == "co") { return "Corsican"; }
+		if (code == "cr") { return "Cree"; }
+		if (code == "cs") { return "Czech"; }
+		if (code == "cs") { return "Czech"; }
+		if (code == "cu") { return "Church Slavic"; }
+		if (code == "cv") { return "Chuvash"; }
+		if (code == "cy") { return "Welsh"; }
+		if (code == "cy") { return "Welsh"; }
+		if (code == "da") { return "Danish"; }
+		if (code == "de") { return "German"; }
+		if (code == "dv") { return "Divehi"; }
+		if (code == "dz") { return "Dzongkha"; }
+		if (code == "ee") { return "Ewe"; }
+		if (code == "el") { return "Greek, Modern (1453-)"; }
+		if (code == "en") { return "English"; }
+		if (code == "eo") { return "Esperanto"; }
+		if (code == "es") { return "Spanish"; }
+		if (code == "et") { return "Estonian"; }
+		if (code == "eu") { return "Basque"; }
+		if (code == "eu") { return "Basque"; }
+		if (code == "fa") { return "Persian"; }
+		if (code == "ff") { return "Fulah"; }
+		if (code == "fi") { return "Finnish"; }
+		if (code == "fj") { return "Fijian"; }
+		if (code == "fo") { return "Faroese"; }
+		if (code == "fr") { return "French"; }
+		if (code == "fy") { return "Western Frisian"; }
+		if (code == "ga") { return "Irish"; }
+		if (code == "gd") { return "Gaelic"; }
+		if (code == "gl") { return "Galician"; }
+		if (code == "gn") { return "Guarani"; }
+		if (code == "gu") { return "Gujarati"; }
+		if (code == "gv") { return "Manx"; }
+		if (code == "ha") { return "Hausa"; }
+		if (code == "he") { return "Hebrew"; }
+		if (code == "hi") { return "Hindi"; }
+		if (code == "ho") { return "Hiri Motu"; }
+		if (code == "hr") { return "Croatian"; }
+		if (code == "ht") { return "Haitian"; }
+		if (code == "hu") { return "Hungarian"; }
+		if (code == "hy") { return "Armenian"; }
+		if (code == "hz") { return "Herero"; }
+		if (code == "ia") { return "Interlingua"; }
+		if (code == "id") { return "Indonesian"; }
+		if (code == "ie") { return "Interlingue"; }
+		if (code == "ig") { return "Igbo"; }
+		if (code == "ii") { return "Sichuan Yi"; }
+		if (code == "ik") { return "Inupiaq"; }
+		if (code == "io") { return "Ido"; }
+		if (code == "is") { return "Icelandic"; }
+		if (code == "it") { return "Italian"; }
+		if (code == "iu") { return "Inuktitut"; }
+		if (code == "ja") { return "Japanese"; }
+		if (code == "jv") { return "Javanese"; }
+		if (code == "ka") { return "Georgian"; }
+		if (code == "kg") { return "Kongo"; }
+		if (code == "ki") { return "Kikuyu"; }
+		if (code == "kj") { return "Kuanyama"; }
+		if (code == "kk") { return "Kazakh"; }
+		if (code == "kl") { return "Greenlandic"; }
+		if (code == "km") { return "Central Khmer"; }
+		if (code == "kn") { return "Kannada"; }
+		if (code == "ko") { return "Korean"; }
+		if (code == "kr") { return "Kanuri"; }
+		if (code == "ks") { return "Kashmiri"; }
+		if (code == "ku") { return "Kurdish"; }
+		if (code == "kv") { return "Komi"; }
+		if (code == "kw") { return "Cornish"; }
+		if (code == "ky") { return "Kirghiz"; }
+		if (code == "la") { return "Latin"; }
+		if (code == "lb") { return "Luxembourgish"; }
+		if (code == "lg") { return "Ganda"; }
+		if (code == "li") { return "Limburgan"; }
+		if (code == "ln") { return "Lingala"; }
+		if (code == "lo") { return "Lao"; }
+		if (code == "lt") { return "Lithuanian"; }
+		if (code == "lu") { return "Luba-Katanga"; }
+		if (code == "lv") { return "Latvian"; }
+		if (code == "mg") { return "Malagasy"; }
+		if (code == "mh") { return "Marshallese"; }
+		if (code == "mi") { return "Maori"; }
+		if (code == "mk") { return "Macedonian"; }
+		if (code == "mk") { return "Macedonian"; }
+		if (code == "ml") { return "Malayalam"; }
+		if (code == "mn") { return "Mongolian"; }
+		if (code == "mr") { return "Marathi"; }
+		if (code == "ms") { return "Malay"; }
+		if (code == "mt") { return "Maltese"; }
+		if (code == "my") { return "Burmese"; }
+		if (code == "my") { return "Burmese"; }
+		if (code == "na") { return "Nauru"; }
+		if (code == "nb") { return "Bokmål, Norwegian"; }
+		if (code == "nd") { return "Ndebele, North"; }
+		if (code == "ne") { return "Nepali"; }
+		if (code == "ng") { return "Ndonga"; }
+		if (code == "nl") { return "Dutch"; }
+		if (code == "nl") { return "Dutch"; }
+		if (code == "nn") { return "Norwegian Nynorsk"; }
+		if (code == "no") { return "Norwegian"; }
+		if (code == "nr") { return "Ndebele, South"; }
+		if (code == "nv") { return "Navajo"; }
+		if (code == "ny") { return "Chichewa"; }
+		if (code == "oc") { return "Occitan (post 1500)"; }
+		if (code == "oj") { return "Ojibwa"; }
+		if (code == "om") { return "Oromo"; }
+		if (code == "or") { return "Oriya"; }
+		if (code == "os") { return "Ossetian"; }
+		if (code == "pa") { return "Panjabi"; }
+		if (code == "pi") { return "Pali"; }
+		if (code == "pl") { return "Polish"; }
+		if (code == "ps") { return "Pushto"; }
+		if (code == "pt") { return "Portuguese"; }
+		if (code == "qu") { return "Quechua"; }
+		if (code == "rm") { return "Romansh"; }
+		if (code == "rn") { return "Rundi"; }
+		if (code == "ro") { return "Romanian"; }
+		if (code == "ru") { return "Russian"; }
+		if (code == "rw") { return "Kinyarwanda"; }
+		if (code == "sa") { return "Sanskrit"; }
+		if (code == "sc") { return "Sardinian"; }
+		if (code == "sd") { return "Sindhi"; }
+		if (code == "se") { return "Northern Sami"; }
+		if (code == "sg") { return "Sango"; }
+		if (code == "si") { return "Sinhala"; }
+		if (code == "sl") { return "Slovenian"; }
+		if (code == "sm") { return "Samoan"; }
+		if (code == "sn") { return "Shona"; }
+		if (code == "so") { return "Somali"; }
+		if (code == "sq") { return "Albanian"; }
+		if (code == "sr") { return "Serbian"; }
+		if (code == "ss") { return "Swati"; }
+		if (code == "st") { return "Sotho, Southern"; }
+		if (code == "su") { return "Sundanese"; }
+		if (code == "sv") { return "Swedish"; }
+		if (code == "sw") { return "Swahili"; }
+		if (code == "ta") { return "Tamil"; }
+		if (code == "te") { return "Telugu"; }
+		if (code == "tg") { return "Tajik"; }
+		if (code == "th") { return "Thai"; }
+		if (code == "ti") { return "Tigrinya"; }
+		if (code == "tk") { return "Turkmen"; }
+		if (code == "tl") { return "Tagalog"; }
+		if (code == "tn") { return "Tswana"; }
+		if (code == "to") { return "Tonga (Tonga Islands)"; }
+		if (code == "tr") { return "Turkish"; }
+		if (code == "ts") { return "Tsonga"; }
+		if (code == "tt") { return "Tatar"; }
+		if (code == "tw") { return "Twi"; }
+		if (code == "ty") { return "Tahitian"; }
+		if (code == "ug") { return "Uighur"; }
+		if (code == "uk") { return "Ukrainian"; }
+		if (code == "ur") { return "Urdu"; }
+		if (code == "uz") { return "Uzbek"; }
+		if (code == "ve") { return "Venda"; }
+		if (code == "vi") { return "Vietnamese"; }
+		if (code == "vo") { return "Volapük"; }
+		if (code == "wa") { return "Walloon"; }
+		if (code == "wo") { return "Wolof"; }
+		if (code == "xh") { return "Xhosa"; }
+		if (code == "yi") { return "Yiddish"; }
+		if (code == "yo") { return "Yoruba"; }
+		if (code == "za") { return "Zhuang"; }
+		if (code == "zh") { return "Chinese"; }
+		if (code == "zu") { return "Zulu"; }
+
+	} else if (code.size() == 3) {
+		// ISO 639-2 language codes
+
+		if (code == "aar") { return "Afar"; }
+		if (code == "abk") { return "Abkhazian"; }
+		if (code == "ace") { return "Achinese"; }
+		if (code == "ach") { return "Acoli"; }
+		if (code == "ada") { return "Adangme"; }
+		if (code == "ady") { return "Adyghe"; }
+		if (code == "afa") { return "Afro-Asiatic languages"; }
+		if (code == "afh") { return "Afrihili"; }
+		if (code == "afr") { return "Afrikaans"; }
+		if (code == "ain") { return "Ainu"; }
+		if (code == "aka") { return "Akan"; }
+		if (code == "akk") { return "Akkadian"; }
+		if (code == "alb") { return "Albanian"; }
+		if (code == "ale") { return "Aleut"; }
+		if (code == "alg") { return "Algonquian languages"; }
+		if (code == "alt") { return "Southern Altai"; }
+		if (code == "amh") { return "Amharic"; }
+		if (code == "ang") { return "English, Old (ca.450-1100)"; }
+		if (code == "anp") { return "Angika"; }
+		if (code == "apa") { return "Apache languages"; }
+		if (code == "ara") { return "Arabic"; }
+		if (code == "arc") { return "Aramaic (700-300 BCE)"; }
+		if (code == "arg") { return "Aragonese"; }
+		if (code == "arm") { return "Armenian"; }
+		if (code == "arn") { return "Mapudungun"; }
+		if (code == "arp") { return "Arapaho"; }
+		if (code == "art") { return "Artificial languages"; }
+		if (code == "arw") { return "Arawak"; }
+		if (code == "asm") { return "Assamese"; }
+		if (code == "ast") { return "Asturian"; }
+		if (code == "ath") { return "Athapascan languages"; }
+		if (code == "aus") { return "Australian languages"; }
+		if (code == "ava") { return "Avaric"; }
+		if (code == "ave") { return "Avestan"; }
+		if (code == "awa") { return "Awadhi"; }
+		if (code == "aym") { return "Aymara"; }
+		if (code == "aze") { return "Azerbaijani"; }
+		if (code == "bad") { return "Banda languages"; }
+		if (code == "bai") { return "Bamileke languages"; }
+		if (code == "bak") { return "Bashkir"; }
+		if (code == "bal") { return "Baluchi"; }
+		if (code == "bam") { return "Bambara"; }
+		if (code == "ban") { return "Balinese"; }
+		if (code == "baq") { return "Basque"; }
+		if (code == "baq") { return "Basque"; }
+		if (code == "bas") { return "Basa"; }
+		if (code == "bat") { return "Baltic languages"; }
+		if (code == "bej") { return "Beja"; }
+		if (code == "bel") { return "Belarusian"; }
+		if (code == "bem") { return "Bemba"; }
+		if (code == "ben") { return "Bengali"; }
+		if (code == "ber") { return "Berber languages"; }
+		if (code == "bho") { return "Bhojpuri"; }
+		if (code == "bih") { return "Bihari languages"; }
+		if (code == "bik") { return "Bikol"; }
+		if (code == "bin") { return "Bini"; }
+		if (code == "bis") { return "Bislama"; }
+		if (code == "bla") { return "Siksika"; }
+		if (code == "bnt") { return "Bantu languages"; }
+		if (code == "bod") { return "Tibetan"; }
+		if (code == "bos") { return "Bosnian"; }
+		if (code == "bra") { return "Braj"; }
+		if (code == "bre") { return "Breton"; }
+		if (code == "btk") { return "Batak languages"; }
+		if (code == "bua") { return "Buriat"; }
+		if (code == "bug") { return "Buginese"; }
+		if (code == "bul") { return "Bulgarian"; }
+		if (code == "bur") { return "Burmese"; }
+		if (code == "bur") { return "Burmese"; }
+		if (code == "byn") { return "Blin"; }
+		if (code == "cad") { return "Caddo"; }
+		if (code == "cai") { return "Central American Indian languages"; }
+		if (code == "car") { return "Galibi Carib"; }
+		if (code == "cat") { return "Catalan"; }
+		if (code == "cau") { return "Caucasian languages"; }
+		if (code == "ceb") { return "Cebuano"; }
+		if (code == "cel") { return "Celtic languages"; }
+		if (code == "ces") { return "Czech"; }
+		if (code == "ces") { return "Czech"; }
+		if (code == "cha") { return "Chamorro"; }
+		if (code == "chb") { return "Chibcha"; }
+		if (code == "che") { return "Chechen"; }
+		if (code == "chg") { return "Chagatai"; }
+		if (code == "chi") { return "Chinese"; }
+		if (code == "chk") { return "Chuukese"; }
+		if (code == "chm") { return "Mari"; }
+		if (code == "chn") { return "Chinook jargon"; }
+		if (code == "cho") { return "Choctaw"; }
+		if (code == "chp") { return "Chipewyan"; }
+		if (code == "chr") { return "Cherokee"; }
+		if (code == "chu") { return "Church Slavic"; }
+		if (code == "chv") { return "Chuvash"; }
+		if (code == "chy") { return "Cheyenne"; }
+		if (code == "cmc") { return "Chamic languages"; }
+		if (code == "cnr") { return "Montenegrin"; }
+		if (code == "cop") { return "Coptic"; }
+		if (code == "cor") { return "Cornish"; }
+		if (code == "cos") { return "Corsican"; }
+		if (code == "cpe") { return "Creoles and pidgins, English based"; }
+		if (code == "cpf") { return "Creoles and pidgins, French-based"; }
+		if (code == "cpp") { return "Creoles and pidgins, Portuguese-based"; }
+		if (code == "cre") { return "Cree"; }
+		if (code == "crh") { return "Crimean Tatar"; }
+		if (code == "crp") { return "Creoles and pidgins"; }
+		if (code == "csb") { return "Kashubian"; }
+		if (code == "cus") { return "Cushitic languages"; }
+		if (code == "cym") { return "Welsh"; }
+		if (code == "cym") { return "Welsh"; }
+		if (code == "cze") { return "Czech"; }
+		if (code == "cze") { return "Czech"; }
+		if (code == "dak") { return "Dakota"; }
+		if (code == "dan") { return "Danish"; }
+		if (code == "dar") { return "Dargwa"; }
+		if (code == "day") { return "Land Dayak languages"; }
+		if (code == "del") { return "Delaware"; }
+		if (code == "den") { return "Slave (Athapascan)"; }
+		if (code == "deu") { return "German"; }
+		if (code == "dgr") { return "Dogrib"; }
+		if (code == "din") { return "Dinka"; }
+		if (code == "div") { return "Divehi"; }
+		if (code == "doi") { return "Dogri"; }
+		if (code == "dra") { return "Dravidian languages"; }
+		if (code == "dsb") { return "Lower Sorbian"; }
+		if (code == "dua") { return "Duala"; }
+		if (code == "dum") { return "Dutch, Middle (ca.1050-1350)"; }
+		if (code == "dut") { return "Dutch"; }
+		if (code == "dut") { return "Dutch"; }
+		if (code == "dyu") { return "Dyula"; }
+		if (code == "dzo") { return "Dzongkha"; }
+		if (code == "efi") { return "Efik"; }
+		if (code == "egy") { return "Egyptian (Ancient)"; }
+		if (code == "eka") { return "Ekajuk"; }
+		if (code == "ell") { return "Greek, Modern (1453-)"; }
+		if (code == "elx") { return "Elamite"; }
+		if (code == "eng") { return "English"; }
+		if (code == "enm") { return "English, Middle (1100-1500)"; }
+		if (code == "epo") { return "Esperanto"; }
+		if (code == "est") { return "Estonian"; }
+		if (code == "eus") { return "Basque"; }
+		if (code == "eus") { return "Basque"; }
+		if (code == "ewe") { return "Ewe"; }
+		if (code == "ewo") { return "Ewondo"; }
+		if (code == "fan") { return "Fang"; }
+		if (code == "fao") { return "Faroese"; }
+		if (code == "fas") { return "Persian"; }
+		if (code == "fat") { return "Fanti"; }
+		if (code == "fij") { return "Fijian"; }
+		if (code == "fil") { return "Filipino"; }
+		if (code == "fin") { return "Finnish"; }
+		if (code == "fiu") { return "Finno-Ugrian languages"; }
+		if (code == "fon") { return "Fon"; }
+		if (code == "fra") { return "French"; }
+		if (code == "fre") { return "French"; }
+		if (code == "frm") { return "French, Middle (ca.1400-1600)"; }
+		if (code == "fro") { return "French, Old (842-ca.1400)"; }
+		if (code == "frr") { return "Northern Frisian"; }
+		if (code == "frs") { return "Eastern Frisian"; }
+		if (code == "fry") { return "Western Frisian"; }
+		if (code == "ful") { return "Fulah"; }
+		if (code == "fur") { return "Friulian"; }
+		if (code == "gaa") { return "Ga"; }
+		if (code == "gay") { return "Gayo"; }
+		if (code == "gba") { return "Gbaya"; }
+		if (code == "gem") { return "Germanic languages"; }
+		if (code == "geo") { return "Georgin"; }
+		if (code == "ger") { return "German"; }
+		if (code == "gez") { return "Geez"; }
+		if (code == "gil") { return "Gilbertese"; }
+		if (code == "gla") { return "Gaelic"; }
+		if (code == "gle") { return "Irish"; }
+		if (code == "glg") { return "Galician"; }
+		if (code == "glv") { return "Manx"; }
+		if (code == "gmh") { return "German, Middle High (ca.1050-1500)"; }
+		if (code == "goh") { return "German, Old High (ca.750-1050)"; }
+		if (code == "gon") { return "Gondi"; }
+		if (code == "gor") { return "Gorontalo"; }
+		if (code == "got") { return "Gothic"; }
+		if (code == "grb") { return "Grebo"; }
+		if (code == "grc") { return "Greek, Ancient (to 1453)"; }
+		if (code == "gre") { return "Greek"; }
+		if (code == "grn") { return "Guarani"; }
+		if (code == "gsw") { return "Swiss German"; }
+		if (code == "guj") { return "Gujarati"; }
+		if (code == "gwi") { return "Gwich'in"; }
+		if (code == "hai") { return "Haida"; }
+		if (code == "hat") { return "Haitian"; }
+		if (code == "hau") { return "Hausa"; }
+		if (code == "haw") { return "Hawaiian"; }
+		if (code == "heb") { return "Hebrew"; }
+		if (code == "her") { return "Herero"; }
+		if (code == "hil") { return "Hiligaynon"; }
+		if (code == "him") { return "Himachali languages"; }
+		if (code == "hin") { return "Hindi"; }
+		if (code == "hit") { return "Hittite"; }
+		if (code == "hmn") { return "Hmong"; }
+		if (code == "hmo") { return "Hiri Motu"; }
+		if (code == "hrv") { return "Croatian"; }
+		if (code == "hsb") { return "Upper Sorbian"; }
+		if (code == "hun") { return "Hungarian"; }
+		if (code == "hup") { return "Hupa"; }
+		if (code == "hye") { return "Armenian"; }
+		if (code == "iba") { return "Iban"; }
+		if (code == "ibo") { return "Igbo"; }
+		if (code == "ice") { return "Icelandic"; }
+		if (code == "ido") { return "Ido"; }
+		if (code == "iii") { return "Sichuan Yi"; }
+		if (code == "ijo") { return "Ijo languages"; }
+		if (code == "iku") { return "Inuktitut"; }
+		if (code == "ile") { return "Interlingue"; }
+		if (code == "ilo") { return "Iloko"; }
+		if (code == "ina") { return "Interlingua)"; }
+		if (code == "inc") { return "Indic languages"; }
+		if (code == "ind") { return "Indonesian"; }
+		if (code == "ine") { return "Indo-European languages"; }
+		if (code == "inh") { return "Ingush"; }
+		if (code == "ipk") { return "Inupiaq"; }
+		if (code == "ira") { return "Iranian languages"; }
+		if (code == "iro") { return "Iroquoian languages"; }
+		if (code == "isl") { return "Icelandic"; }
+		if (code == "ita") { return "Italian"; }
+		if (code == "jav") { return "Javanese"; }
+		if (code == "jbo") { return "Lojban"; }
+		if (code == "jpn") { return "Japanese"; }
+		if (code == "jpr") { return "Judeo-Persian"; }
+		if (code == "jrb") { return "Judeo-Arabic"; }
+		if (code == "kaa") { return "Kara-Kalpak"; }
+		if (code == "kab") { return "Kabyle"; }
+		if (code == "kac") { return "Kachin"; }
+		if (code == "kal") { return "Greenlandic"; }
+		if (code == "kam") { return "Kamba"; }
+		if (code == "kan") { return "Kannada"; }
+		if (code == "kar") { return "Karen languages"; }
+		if (code == "kas") { return "Kashmiri"; }
+		if (code == "kat") { return "Georgian"; }
+		if (code == "kau") { return "Kanuri"; }
+		if (code == "kaw") { return "Kawi"; }
+		if (code == "kaz") { return "Kazakh"; }
+		if (code == "kbd") { return "Kabardian"; }
+		if (code == "kha") { return "Khasi"; }
+		if (code == "khi") { return "Khoisan languages"; }
+		if (code == "khm") { return "Central Khmer"; }
+		if (code == "kho") { return "Khotanese"; }
+		if (code == "kik") { return "Kikuyu"; }
+		if (code == "kin") { return "Kinyarwanda"; }
+		if (code == "kir") { return "Kirghiz"; }
+		if (code == "kmb") { return "Kimbundu"; }
+		if (code == "kok") { return "Konkani"; }
+		if (code == "kom") { return "Komi"; }
+		if (code == "kon") { return "Kongo"; }
+		if (code == "kor") { return "Korean"; }
+		if (code == "kos") { return "Kosraean"; }
+		if (code == "kpe") { return "Kpelle"; }
+		if (code == "krc") { return "Karachay-Balkar"; }
+		if (code == "krl") { return "Karelian"; }
+		if (code == "kro") { return "Kru languages"; }
+		if (code == "kru") { return "Kurukh"; }
+		if (code == "kua") { return "Kuanyama"; }
+		if (code == "kum") { return "Kumyk"; }
+		if (code == "kur") { return "Kurdish"; }
+		if (code == "kut") { return "Kutenai"; }
+		if (code == "lad") { return "Ladino"; }
+		if (code == "lah") { return "Lahnda"; }
+		if (code == "lam") { return "Lamba"; }
+		if (code == "lao") { return "Lao"; }
+		if (code == "lat") { return "Latin"; }
+		if (code == "lav") { return "Latvian"; }
+		if (code == "lez") { return "Lezghian"; }
+		if (code == "lim") { return "Limburgan"; }
+		if (code == "lin") { return "Lingala"; }
+		if (code == "lit") { return "Lithuanian"; }
+		if (code == "lol") { return "Mongo"; }
+		if (code == "loz") { return "Lozi"; }
+		if (code == "ltz") { return "Luxembourgish"; }
+		if (code == "lua") { return "Luba-Lulua"; }
+		if (code == "lub") { return "Luba-Katanga"; }
+		if (code == "lug") { return "Ganda"; }
+		if (code == "lui") { return "Luiseno"; }
+		if (code == "lun") { return "Lunda"; }
+		if (code == "luo") { return "Luo (Kenya and Tanzania)"; }
+		if (code == "lus") { return "Lushai"; }
+		if (code == "mac") { return "Macedonian"; }
+		if (code == "mac") { return "Macedonian"; }
+		if (code == "mad") { return "Madurese"; }
+		if (code == "mag") { return "Magahi"; }
+		if (code == "mah") { return "Marshallese"; }
+		if (code == "mai") { return "Maithili"; }
+		if (code == "mak") { return "Makasar"; }
+		if (code == "mal") { return "Malayalam"; }
+		if (code == "man") { return "Mandingo"; }
+		if (code == "mao") { return "Maori"; }
+		if (code == "map") { return "Austronesian languages"; }
+		if (code == "mar") { return "Marathi"; }
+		if (code == "mas") { return "Masai"; }
+		if (code == "may") { return "Malay"; }
+		if (code == "mdf") { return "Moksha"; }
+		if (code == "mdr") { return "Mandar"; }
+		if (code == "men") { return "Mende"; }
+		if (code == "mga") { return "Irish, Middle (900-1200)"; }
+		if (code == "mic") { return "Mi'kmaq"; }
+		if (code == "min") { return "Minangkabau"; }
+		if (code == "mis") { return "Uncoded languages"; }
+		if (code == "mkd") { return "Macedonian"; }
+		if (code == "mkd") { return "Macedonian"; }
+		if (code == "mkh") { return "Mon-Khmer languages"; }
+		if (code == "mlg") { return "Malagasy"; }
+		if (code == "mlt") { return "Maltese"; }
+		if (code == "mnc") { return "Manchu"; }
+		if (code == "mni") { return "Manipuri"; }
+		if (code == "mno") { return "Manobo languages"; }
+		if (code == "moh") { return "Mohawk"; }
+		if (code == "mon") { return "Mongolian"; }
+		if (code == "mos") { return "Mossi"; }
+		if (code == "mri") { return "Maori"; }
+		if (code == "msa") { return "Malay"; }
+		if (code == "mul") { return "Multiple languages"; }
+		if (code == "mun") { return "Munda languages"; }
+		if (code == "mus") { return "Creek"; }
+		if (code == "mwl") { return "Mirandese"; }
+		if (code == "mwr") { return "Marwari"; }
+		if (code == "mya") { return "Burmese"; }
+		if (code == "mya") { return "Burmese"; }
+		if (code == "myn") { return "Mayan languages"; }
+		if (code == "myv") { return "Erzya"; }
+		if (code == "nah") { return "Nahuatl languages"; }
+		if (code == "nai") { return "North American Indian languages"; }
+		if (code == "nap") { return "Neapolitan"; }
+		if (code == "nau") { return "Nauru"; }
+		if (code == "nav") { return "Navajo"; }
+		if (code == "nbl") { return "Ndebele, South"; }
+		if (code == "nde") { return "Ndebele, North"; }
+		if (code == "ndo") { return "Ndonga"; }
+		if (code == "nds") { return "Low German"; }
+		if (code == "nep") { return "Nepali"; }
+		if (code == "new") { return "Nepal Bhasa"; }
+		if (code == "nia") { return "Nias"; }
+		if (code == "nic") { return "Niger-Kordofanian languages"; }
+		if (code == "niu") { return "Niuean"; }
+		if (code == "nld") { return "Dutch"; }
+		if (code == "nld") { return "Dutch"; }
+		if (code == "nno") { return "Norwegian Nynorsk"; }
+		if (code == "nob") { return "Bokmål, Norwegian"; }
+		if (code == "nog") { return "Nogai"; }
+		if (code == "non") { return "Norse, Old"; }
+		if (code == "nor") { return "Norwegian"; }
+		if (code == "nqo") { return "N'Ko"; }
+		if (code == "nso") { return "Pedi"; }
+		if (code == "nub") { return "Nubian languages"; }
+		if (code == "nwc") { return "Classical Newari"; }
+		if (code == "nya") { return "Chichewa"; }
+		if (code == "nym") { return "Nyamwezi"; }
+		if (code == "nyn") { return "Nyankole"; }
+		if (code == "nyo") { return "Nyoro"; }
+		if (code == "nzi") { return "Nzima"; }
+		if (code == "oci") { return "Occitan (post 1500)"; }
+		if (code == "oji") { return "Ojibwa"; }
+		if (code == "ori") { return "Oriya"; }
+		if (code == "orm") { return "Oromo"; }
+		if (code == "osa") { return "Osage"; }
+		if (code == "oss") { return "Ossetian"; }
+		if (code == "ota") { return "Turkish, Ottoman (1500-1928)"; }
+		if (code == "oto") { return "Otomian languages"; }
+		if (code == "paa") { return "Papuan languages"; }
+		if (code == "pag") { return "Pangasinan"; }
+		if (code == "pal") { return "Pahlavi"; }
+		if (code == "pam") { return "Pampanga"; }
+		if (code == "pan") { return "Panjabi"; }
+		if (code == "pap") { return "Papiamento"; }
+		if (code == "pau") { return "Palauan"; }
+		if (code == "peo") { return "Persian, Old (ca.600-400 B.C.)"; }
+		if (code == "per") { return "Persian"; }
+		if (code == "phi") { return "Philippine languages"; }
+		if (code == "phn") { return "Phoenician"; }
+		if (code == "pli") { return "Pali"; }
+		if (code == "pol") { return "Polish"; }
+		if (code == "pon") { return "Pohnpeian"; }
+		if (code == "por") { return "Portuguese"; }
+		if (code == "pra") { return "Prakrit languages"; }
+		if (code == "pro") { return "Provençal, Old (to 1500)"; }
+		if (code == "pus") { return "Pushto"; }
+		if (code == "que") { return "Quechua"; }
+		if (code == "raj") { return "Rajasthani"; }
+		if (code == "rap") { return "Rapanui"; }
+		if (code == "rar") { return "Rarotongan"; }
+		if (code == "roa") { return "Romance languages"; }
+		if (code == "roh") { return "Romansh"; }
+		if (code == "rom") { return "Romany"; }
+		if (code == "ron") { return "Romanian"; }
+		if (code == "rum") { return "Romanian"; }
+		if (code == "run") { return "Rundi"; }
+		if (code == "rup") { return "Aromanian"; }
+		if (code == "rus") { return "Russian"; }
+		if (code == "sad") { return "Sandawe"; }
+		if (code == "sag") { return "Sango"; }
+		if (code == "sah") { return "Yakut"; }
+		if (code == "sai") { return "South American Indian languages"; }
+		if (code == "sal") { return "Salishan languages"; }
+		if (code == "sam") { return "Samaritan Aramaic"; }
+		if (code == "san") { return "Sanskrit"; }
+		if (code == "sas") { return "Sasak"; }
+		if (code == "sat") { return "Santali"; }
+		if (code == "scn") { return "Sicilian"; }
+		if (code == "sco") { return "Scots"; }
+		if (code == "sel") { return "Selkup"; }
+		if (code == "sem") { return "Semitic languages"; }
+		if (code == "sga") { return "Irish, Old (to 900)"; }
+		if (code == "sgn") { return "Sign Languages"; }
+		if (code == "shn") { return "Shan"; }
+		if (code == "sid") { return "Sidamo"; }
+		if (code == "sin") { return "Sinhala"; }
+		if (code == "sio") { return "Siouan languages"; }
+		if (code == "sit") { return "Sino-Tibetan languages"; }
+		if (code == "sla") { return "Slavic languages"; }
+		if (code == "slo") { return "Slovak"; }
+		if (code == "slv") { return "Slovenian"; }
+		if (code == "sma") { return "Southern Sami"; }
+		if (code == "sme") { return "Northern Sami"; }
+		if (code == "smi") { return "Sami languages"; }
+		if (code == "smj") { return "Lule Sami"; }
+		if (code == "smn") { return "Inari Sami"; }
+		if (code == "smo") { return "Samoan"; }
+		if (code == "sms") { return "Skolt Sami"; }
+		if (code == "sna") { return "Shona"; }
+		if (code == "snd") { return "Sindhi"; }
+		if (code == "snk") { return "Soninke"; }
+		if (code == "sog") { return "Sogdian"; }
+		if (code == "som") { return "Somali"; }
+		if (code == "son") { return "Songhai languages"; }
+		if (code == "sot") { return "Sotho, Southern"; }
+		if (code == "spa") { return "Spanish"; }
+		if (code == "sqi") { return "Albanian"; }
+		if (code == "srd") { return "Sardinian"; }
+		if (code == "srn") { return "Sranan Tongo"; }
+		if (code == "srp") { return "Serbian"; }
+		if (code == "srr") { return "Serer"; }
+		if (code == "ssa") { return "Nilo-Saharan languages"; }
+		if (code == "ssw") { return "Swati"; }
+		if (code == "suk") { return "Sukuma"; }
+		if (code == "sun") { return "Sundanese"; }
+		if (code == "sus") { return "Susu"; }
+		if (code == "sux") { return "Sumerian"; }
+		if (code == "swa") { return "Swahili"; }
+		if (code == "swe") { return "Swedish"; }
+		if (code == "syc") { return "Classical Syriac"; }
+		if (code == "syr") { return "Syriac"; }
+		if (code == "tah") { return "Tahitian"; }
+		if (code == "tai") { return "Tai languages"; }
+		if (code == "tam") { return "Tamil"; }
+		if (code == "tat") { return "Tatar"; }
+		if (code == "tel") { return "Telugu"; }
+		if (code == "tem") { return "Timne"; }
+		if (code == "ter") { return "Tereno"; }
+		if (code == "tet") { return "Tetum"; }
+		if (code == "tgk") { return "Tajik"; }
+		if (code == "tgl") { return "Tagalog"; }
+		if (code == "tha") { return "Thai"; }
+		if (code == "tib") { return "Tibetian"; }
+		if (code == "tig") { return "Tigre"; }
+		if (code == "tir") { return "Tigrinya"; }
+		if (code == "tiv") { return "Tiv"; }
+		if (code == "tkl") { return "Tokelau"; }
+		if (code == "tlh") { return "Klingon"; }
+		if (code == "tli") { return "Tlingit"; }
+		if (code == "tmh") { return "Tamashek"; }
+		if (code == "tog") { return "Tonga (Nyasa)"; }
+		if (code == "ton") { return "Tonga (Tonga Islands)"; }
+		if (code == "tpi") { return "Tok Pisin"; }
+		if (code == "tsi") { return "Tsimshian"; }
+		if (code == "tsn") { return "Tswana"; }
+		if (code == "tso") { return "Tsonga"; }
+		if (code == "tuk") { return "Turkmen"; }
+		if (code == "tum") { return "Tumbuka"; }
+		if (code == "tup") { return "Tupi languages"; }
+		if (code == "tur") { return "Turkish"; }
+		if (code == "tut") { return "Altaic languages"; }
+		if (code == "tvl") { return "Tuvalu"; }
+		if (code == "twi") { return "Twi"; }
+		if (code == "tyv") { return "Tuvinian"; }
+		if (code == "udm") { return "Udmurt"; }
+		if (code == "uga") { return "Ugaritic"; }
+		if (code == "uig") { return "Uighur"; }
+		if (code == "ukr") { return "Ukrainian"; }
+		if (code == "umb") { return "Umbundu"; }
+		if (code == "und") { return "Undetermined"; }
+		if (code == "urd") { return "Urdu"; }
+		if (code == "uzb") { return "Uzbek"; }
+		if (code == "vai") { return "Vai"; }
+		if (code == "ven") { return "Venda"; }
+		if (code == "vie") { return "Vietnamese"; }
+		if (code == "vol") { return "Volapük"; }
+		if (code == "vot") { return "Votic"; }
+		if (code == "wak") { return "Wakashan languages"; }
+		if (code == "wal") { return "Wolaitta"; }
+		if (code == "war") { return "Waray"; }
+		if (code == "was") { return "Washo"; }
+		if (code == "wel") { return "Welsh"; }
+		if (code == "wel") { return "Welsh"; }
+		if (code == "wen") { return "Sorbian languages"; }
+		if (code == "wln") { return "Walloon"; }
+		if (code == "wol") { return "Wolof"; }
+		if (code == "xal") { return "Kalmyk"; }
+		if (code == "xho") { return "Xhosa"; }
+		if (code == "yao") { return "Yao"; }
+		if (code == "yap") { return "Yapese"; }
+		if (code == "yid") { return "Yiddish"; }
+		if (code == "yor") { return "Yoruba"; }
+		if (code == "ypk") { return "Yupik languages"; }
+		if (code == "zap") { return "Zapotec"; }
+		if (code == "zbl") { return "Blissymbols"; }
+		if (code == "zen") { return "Zenaga"; }
+		if (code == "zgh") { return "Moroccan"; }
+		if (code == "zha") { return "Zhuang"; }
+		if (code == "zho") { return "Chinese"; }
+		if (code == "znd") { return "Zande languages"; }
+		if (code == "zul") { return "Zulu"; }
+		if (code == "zun") { return "Zuni"; }
+		if (code == "zza") { return "Zaza"; }
+	}
+	return code;
+}
+
+
 
 
 //////////////////////////////
@@ -4698,7 +5704,7 @@ void GridMeasure::appendInitialBarline(HumdrumFile& infile, int startbarline) {
 		startbarline = getMeasureNumber();
 	}
 	int fieldcount = infile.back()->getFieldCount();
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	string tstring = "=";
 //	if (startbarline) {
 //		tstring += to_string(startbarline);
@@ -4956,10 +5962,17 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 	auto previous = iter;
 	// auto last = previous;
 	previous++;
-	HumNum ptime = (*previous)->getTimestamp();
-	HumNum newtargettime = ptime;
+	HumNum ptime;
+	HumNum newtargettime;
+	if (previous != this->rend()) {
+		ptime = (*previous)->getTimestamp();
+		newtargettime = ptime;
+	} else {
+		ptime = targettime;
+		newtargettime = targettime;
+	}
 
-	if (ptime < targettime) {
+	if (ptime <= targettime) {
 		// Insert slice at end of measure.
 		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
 		newslice->initializeBySlice(slice);
@@ -5298,7 +6311,7 @@ bool GridMeasure::isSingleChordMeasure(void) {
 
 //////////////////////////////
 //
-// GridMeasure::isInvisible --
+// GridMeasure::isInvisible --  Return true if all contents is invisible.
 //
 
 bool GridMeasure::isInvisible(void) {
@@ -6041,7 +7054,7 @@ bool GridSlice::isDataSlice(void) {
 
 void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 	HTp token = NULL;
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	GridVoice* voice;
 	string empty = ".";
 	if (isMeasureSlice()) {
@@ -7315,7 +8328,9 @@ int HumAddress::getSubtrack(void) const {
 	if (m_subtrackcount == 1) {
 		return 0;
 	} else {
-		return m_subtrack + 1;
+		// return m_subtrack + 1;
+		// Should already be indexed from one.
+		return m_subtrack;
 	}
 }
 
@@ -7364,7 +8379,7 @@ string HumAddress::getTrackString(string separator) const {
 //   a HumdrumLine, the parameter's value should be NULL.
 //
 
-void HumAddress::setOwner(HumdrumLine* aLine) {
+void HumAddress::setOwner(HLp aLine) {
 	m_owner = aLine;
 }
 
@@ -7377,7 +8392,7 @@ void HumAddress::setOwner(HumdrumLine* aLine) {
 //    to a HumdrumLine object.
 //
 
-HumdrumLine* HumAddress::getLine(void) const {
+HLp HumAddress::getLine(void) const {
 	return m_owner;
 }
 
@@ -8877,6 +9892,8 @@ string HumGrid::getBarStyle(GridMeasure* measure) {
 		output = "||";
 	} else if (measure->isFinal()) {
 		output = "=";
+	} else if (measure->isInvisibleBarline()) {
+		output = "-";
 	} else if (measure->isRepeatBoth()) {
 		output = ":|!|:";
 	} else if (measure->isRepeatBackward()) {
@@ -9310,6 +10327,7 @@ void HumGrid::addNullTokens(void) {
 	}
 
 	for (i=0; i<(int)m_allslices.size(); i++) {
+
 		GridSlice& slice = *m_allslices.at(i);
 		if (!slice.isNoteSlice()) {
 			// probably need to deal with grace note slices here
@@ -9335,12 +10353,85 @@ void HumGrid::addNullTokens(void) {
 				}
 			}
 		}
+
 	}
 
 	addNullTokensForGraceNotes();
 	adjustClefChanges();
 	addNullTokensForClefChanges();
 	addNullTokensForLayoutComments();
+	checkForNullDataHoles();
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::checkForNullData -- identify any spots in the grid which are NULL
+//     pointers and allocate invisible rests for them by finding the next
+//     durational item in the particular staff/layer.
+//
+
+void HumGrid::checkForNullDataHoles(void) {
+	for (int i=0; i<(int)m_allslices.size(); i++) {
+		GridSlice& slice = *m_allslices.at(i);
+		if (!slice.isNoteSlice()) {
+			continue;
+		}
+      for (int p=0; p<(int)slice.size(); p++) {
+			GridPart& part = *slice.at(p);
+      	for (int s=0; s<(int)part.size(); s++) {
+				GridStaff& staff = *part.at(s);
+      		for (int v=0; v<(int)staff.size(); v++) {
+					if (!staff.at(v)) {
+						staff.at(v) = new GridVoice();
+						// Calculate duration of void by searching
+						// for the next non-null voice in the current part/staff/voice
+						HumNum duration = slice.getDuration();
+						GridPart *pp;
+						GridStaff *sp;
+						GridVoice *vp;
+						for (int q=i+1; q<(int)m_allslices.size(); q++) {
+							GridSlice *slicep = m_allslices.at(q);
+							if (!slicep->isNoteSlice()) {
+								// or isDataSlice()?
+								continue;
+							}
+							if (p >= (int)slicep->size() - 1) {
+								continue;
+							}
+							pp = slicep->at(p);
+							if (s >= (int)pp->size() - 1) {
+								continue;
+							}
+							sp = pp->at(s);
+							if (v >= (int)sp->size() - 1) {
+								// Found a data line with no data at given voice, so
+								// add slice duration to cumulative duration.
+								duration += slicep->getDuration();
+								continue;
+							}
+							vp = sp->at(v);
+							if (!vp) {
+								// found another null spot which should be dealt with later.
+								break;
+							} else {
+								// there is a token at the same part/staff/voice position.
+								// Maybe check if a null token, but if not a null token,
+								// then break here also.
+								break;
+							}
+						}
+						string recip = Convert::durationToRecip(duration);
+						// ggg @ marker is added to keep track of them for more debugging.
+						recip += "ryy@";
+						staff.at(v)->setToken(recip);
+						continue;
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -9377,6 +10468,7 @@ void HumGrid::setPartStaffDimensions(vector<vector<GridSlice*>>& nextevent,
 //    timing gaps in the first track of a **kern spine, then
 //    fill in with invisible rests.
 //
+// ggg
 
 void HumGrid::addInvisibleRestsInFirstTrack(void) {
 	int i; // slice index
@@ -9432,10 +10524,11 @@ void HumGrid::addInvisibleRestsInFirstTrack(void) {
 //
 // HumGrid::addInvisibleRest --
 //
+// ggg
 
 void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 		int index, int p, int s) {
-	GridSlice *ending = nextevent[p][s];
+	GridSlice *ending = nextevent.at(p).at(s);
 	if (ending == NULL) {
 		cerr << "Not handling this case yet at end of data." << endl;
 		return;
@@ -9450,7 +10543,7 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 	HumNum gap = difference - duration;
 	if (gap == 0) {
 		// nothing to do
-		nextevent[p][s] = starting;
+		nextevent.at(p).at(s) = starting;
 		return;
 	}
 	HumNum target = starttime + duration;
@@ -9473,12 +10566,19 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			return;
 		}
 		// At timestamp for adding new token.
-		m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		if ((m_allslices.at(i)->at(p)->at(s)->size() > 0) && !m_allslices.at(i)->at(p)->at(s)->at(0)) {
+			// Element is null where an invisible rest should be
+			// so allocate space for it.
+			m_allslices.at(i)->at(p)->at(s)->at(0) = new GridVoice();
+		}
+		if (m_allslices.at(i)->at(p)->at(s)->size() > 0) {
+			m_allslices.at(i)->at(p)->at(s)->at(0)->setToken(kern);
+		}
 		break;
 	}
 
 	// Store the current event in the buffer
-	nextevent[p][s] = starting;
+	nextevent.at(p).at(s) = starting;
 }
 
 
@@ -9756,7 +10856,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -9786,7 +10886,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 // HumGrid::insertExInterpSides --
 //
 
-void HumGrid::insertExInterpSides(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 
 	if (staff >= 0) {
 		int versecount = getVerseCount(part, staff); // verses related to staff
@@ -9827,7 +10927,7 @@ void HumGrid::insertPartNames(HumdrumFile& outfile) {
 	if (m_partnames.size() == 0) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -9876,7 +10976,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -9909,7 +11009,7 @@ void HumGrid::insertPartIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideNullInterpretations --
 //
 
-void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
+void HumGrid::insertSideNullInterpretations(HLp line,
 		int part, int staff) {
 	HTp token;
 	string text;
@@ -9948,7 +11048,7 @@ void HumGrid::insertSideNullInterpretations(HumdrumLine* line,
 // HumGrid::insertSidePartInfo --
 //
 
-void HumGrid::insertSidePartInfo(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSidePartInfo(HLp line, int part, int staff) {
 	HTp token;
 	string text;
 
@@ -10002,7 +11102,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 		return;
 	}
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -10041,7 +11141,7 @@ void HumGrid::insertStaffIndications(HumdrumFile& outfile) {
 // HumGrid::insertSideStaffInfo --
 //
 
-void HumGrid::insertSideStaffInfo(HumdrumLine* line, int part, int staff,
+void HumGrid::insertSideStaffInfo(HLp line, int part, int staff,
 		int staffnum) {
 	HTp token;
 	string text;
@@ -10099,7 +11199,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 	if (this->at(0)->empty()) {
 		return;
 	}
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HTp token;
 
 	if (m_recip) {
@@ -10129,7 +11229,7 @@ void HumGrid::insertDataTerminationLine(HumdrumFile& outfile) {
 // HumGrid::insertSideTerminals --
 //
 
-void HumGrid::insertSideTerminals(HumdrumLine* line, int part, int staff) {
+void HumGrid::insertSideTerminals(HLp line, int part, int staff) {
 	HTp token;
 
 	if (staff < 0) {
@@ -15562,7 +16662,7 @@ bool HumdrumFileBase::read(istream& contents) {
 	clear();
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine(buffer);
 		s->setOwner(this);
@@ -15612,7 +16712,7 @@ bool HumdrumFileBase::readCsv(const char* filename, const string& separator) {
 bool HumdrumFileBase::readCsv(istream& contents, const string& separator) {
 	m_displayError = true;
 	char buffer[123123] = {0};
-	HumdrumLine* s;
+	HLp s;
 	while (contents.getline(buffer, sizeof(buffer), '\n')) {
 		s = new HumdrumLine;
 		s->setLineFromCsv(buffer);
@@ -15929,7 +17029,7 @@ ostream& HumdrumFileBase::printFieldIndex(int fieldind, ostream& out) {
 //     given index in the data storage.
 //
 
-HumdrumLine* HumdrumFileBase::getLine(int index) {
+HLp HumdrumFileBase::getLine(int index) {
 	if (index < 0) {
 		return NULL;
 	} else if (index >= (int)m_lines.size()) {
@@ -16041,18 +17141,18 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 //
 
 void HumdrumFileBase::appendLine(const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
 void HumdrumFileBase::appendLine(const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
 }
 
 
-void HumdrumFileBase::appendLine(HumdrumLine* line) {
+void HumdrumFileBase::appendLine(HLp line) {
 	// deletion will be handled by class.
 	m_lines.push_back(line);
 }
@@ -16061,27 +17161,43 @@ void HumdrumFileBase::appendLine(HumdrumLine* line) {
 
 ////////////////////////////
 //
-// HumdrumFileBase::appendLine -- Add a line to the file's contents.  The file's
+// HumdrumFileBase::insertLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
 
 void HumdrumFileBase::insertLine(int index, const char* line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
 void HumdrumFileBase::insertLine(int index, const string& line) {
-	HumdrumLine* s = new HumdrumLine(line);
+	HLp s = new HumdrumLine(line);
 	m_lines.insert(m_lines.begin() + index, s);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
 
 
-void HumdrumFileBase::insertLine(int index, HumdrumLine* line) {
+void HumdrumFileBase::insertLine(int index, HLp line) {
 	// deletion will be handled by class.
 	m_lines.insert(m_lines.begin() + index, line);
+
+	// Update the line indexes for this line and the following ones:
+	for (int i=index; i<(int)m_lines.size(); i++) {
+		m_lines[i]->setLineIndex(i);
+	}
 }
+
 
 
 //////////////////////////////
@@ -16112,7 +17228,7 @@ void HumdrumFileBase::deleteLine(int index) {
 // HumdrumFileBase::back --
 //
 
-HumdrumLine* HumdrumFileBase::back(void) {
+HLp HumdrumFileBase::back(void) {
 	return m_lines.back();
 }
 
@@ -16123,10 +17239,10 @@ HumdrumLine* HumdrumFileBase::back(void) {
 // HumdrumFileBase::getReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isReference()) {
@@ -16144,10 +17260,10 @@ vector<HumdrumLine*> HumdrumFileBase::getReferenceRecords(void) {
 // HumdrumFileBase::getGlobalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getGlobalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	auto& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isGlobalReference()) {
@@ -16165,10 +17281,10 @@ vector<HumdrumLine*> HumdrumFileBase::getGlobalReferenceRecords(void) {
 // HumdrumFileBase::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileBase::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileBase::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileBase& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isUniversalReference()) {
@@ -16675,8 +17791,8 @@ bool HumdrumFileBase::analyzeTracks(void) {
 //
 
 bool HumdrumFileBase::analyzeLinks(void) {
-	HumdrumLine* next     = NULL;
-	HumdrumLine* previous = NULL;
+	HLp next     = NULL;
+	HLp previous = NULL;
 
 	for (int i=0; i<(int)m_lines.size(); i++) {
 		if (!m_lines[i]->hasSpines()) {
@@ -17431,7 +18547,7 @@ void HumdrumFileBase::fixMerges(int linei) {
 // new          o    o         *v   *v   *    *v   *v
 // track:       1    2         3    3    4    5    5
 
-	HumdrumLine* newline = new HumdrumLine;
+	HLp newline = new HumdrumLine;
 	newline->setOwner(this);
 	bool foundboundary = false;
 	HTp token;
@@ -17641,6 +18757,290 @@ std::string HumdrumFileBase::getReferenceRecord(const std::string& key) {
 		}
 	}
 	return "";
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullDataLine -- Add a null data line at
+//     the given absolute quarter-note timestamp in the file.  If there
+//     is already a data line at the given timestamp, then do not create
+//     a line and instead return a pointer to the existing line.  Returns
+//     NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullDataLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			return &infile[i];
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(&infile[beforei], ".");
+
+	infile.insertLine(beforei+1, newline);
+
+	// Set the timestamp information for inserted line:
+	HumNum delta = timestamp - beforet;
+	HumNum durationFromStart = infile[beforei].getDurationFromStart() + delta;
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline() + delta;
+	HumNum durationToBarline = infile[beforei].getDurationToBarline() - delta;
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = infile[beforei].m_duration - delta;
+	infile[beforei].m_duration = delta;
+
+	for (int i=0; i<infile[beforei].getFieldCount(); i++) {
+		HTp token = infile.token(beforei, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLine -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added after any other interpretation lines at that timestamp, but before any
+//     local comments that appear immediately before the data line(s) at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertion(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::insertNullInterpretationLineAbove -- Add a null interpretation
+//     line at the given absolute quarter-note timestamp in the file.  The line will
+//     be added before any other lines at that timestamp.
+//     Returns NULL if there was a problem.
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLineAbove(HumNum timestamp) {
+	// for now do a linear search for the insertion point, but later
+	// do something more efficient.
+	HumdrumFileBase& infile = *this;
+	HumNum beforet(-1);
+	HumNum aftert(-1);
+	int beforei = -1;
+	// int afteri = -1;
+	HumNum current;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		current = infile[i].getDurationFromStart();
+		if (current == timestamp) {
+			beforei = i;
+			break;
+		} else if (current < timestamp) {
+			beforet = current;
+			beforei = i;
+		} else if (current > timestamp) {
+			aftert = current;
+			// afteri = i;
+			break;
+		}
+	}
+
+	if (beforei < 0) {
+		return NULL;
+	}
+
+	HLp target = getLineForInterpretationInsertionAbove(beforei);
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment beforei by one:
+	beforei++;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertion --  Search backwards
+//    in the file for the first local comment immediately before a data line
+//    index given as input.  If there are no local comments, then return the
+//    data line.  If there are local comment lines immediately before the data
+//    line, then keep searching for the first local comment.  Non-spined lines
+//    (global or empty lines) are ignored.  This function is used to insert
+//    an empty interpretation before a data line at a specific data line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertion(int index) {
+	HumdrumFileBase& infile = *this;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		if (infile[current].isCommentLocal()) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getLineForInterpretationInsertionAbove --  Search backwards
+//    in the file for the first line at the same timestamp as the starting line.
+//
+
+HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
+	HumdrumFileBase& infile = *this;
+	HumNum timestamp = infile[index].getDurationFromStart();
+	HumNum teststamp;
+	int current = index - 1;
+	int previous = index;
+	while (current > 0) {
+		if (!infile[current].hasSpines()) {
+			current--;
+			continue;
+		}
+		teststamp = infile[current].getDurationFromStart();
+		if (teststamp == timestamp) {
+			previous = current;
+			current--;
+			continue;
+		}
+		return &infile[previous];
+	}
+	return &infile[index];
 }
 
 
@@ -18556,7 +19956,7 @@ void HumdrumFileContent::analyzeOttavas(void) {
 	vector<int> activeOttava(tcount+1, 0);
 	vector<int> octavestate(tcount+1, 0);
 	for (int i=0; i<getLineCount(); i++) {
-		HumdrumLine* line = getLine(i);
+		HLp line = getLine(i);
 		if (line->isInterpretation()) {
 			int fcount = getLine(i)->getFieldCount();
 			for (int j=0; j<fcount; j++) {
@@ -21069,10 +22469,10 @@ bool HumdrumFileSet::hasUniversalFilters(void) {
 // HumdrumFileSet::getUniversalReferenceRecords --
 //
 
-vector<HumdrumLine*> HumdrumFileSet::getUniversalReferenceRecords(void) {
-	vector<HumdrumLine*> hlps;
+vector<HLp> HumdrumFileSet::getUniversalReferenceRecords(void) {
+	vector<HLp> hlps;
 	hlps.reserve(32);
-	HumdrumLine* hlp;
+	HLp hlp;
 	HumdrumFileSet& infiles = *this;
 	for (int i=0; i<infiles.getCount(); i++) {
 		HumdrumFileBase& infile = infiles[i];
@@ -22101,10 +23501,10 @@ ostream& HumdrumFileStructure::printDurationInfo(ostream& out) {
 // HumdrumFileStructure::getBarline -- Return the given barline from the file
 //   based on the index number.  Negative index accesses from the end of the
 //   list.  If the first barline is a pickup measure, then the returned
-//   HumdrumLine* will not be an actual barline line.
+//   HLp will not be an actual barline line.
 //
 
-HumdrumLine* HumdrumFileStructure::getBarline(int index) const {
+HLp HumdrumFileStructure::getBarline(int index) const {
 	if (index < 0) {
 		index += (int)m_barlines.size();
 	}
@@ -22350,7 +23750,7 @@ bool HumdrumFileStructure::analyzeTokenDurations (void) {
 //
 
 bool HumdrumFileStructure::analyzeGlobalParameters(void) {
-	vector<HumdrumLine*> globals;
+	vector<HLp> globals;
 
 //	for (int i=0; i<(int)m_lines.size(); i++) {
 //		if (m_lines[i]->isCommentGlobal()) {
@@ -22661,7 +24061,7 @@ bool HumdrumFileStructure::setLineDurationFromStart(HTp token,
 		// undefined rhythm, so don't assign line duration information:
 		return isValid();
 	}
-	HumdrumLine* line = token->getOwner();
+	HLp line = token->getOwner();
 	if (line->getDurationFromStart().isNegative()) {
 		line->setDurationFromStart(dursum);
 	} else if (line->getDurationFromStart() != dursum) {
@@ -22738,9 +24138,9 @@ bool HumdrumFileStructure::analyzeRhythmOfFloatingSpine(
 //
 
 bool HumdrumFileStructure::analyzeNullLineRhythms(void) {
-	vector<HumdrumLine*> nulllines;
-	HumdrumLine* previous = NULL;
-	HumdrumLine* next = NULL;
+	vector<HLp> nulllines;
+	HLp previous = NULL;
+	HLp next = NULL;
 	HumNum dur;
 	HumNum startdur;
 	HumNum enddur;
@@ -23240,7 +24640,7 @@ HTp HumdrumFileStructure::getStrandEnd(int sindex, int index) {
 
 bool HumdrumFileStructure::hasFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getGlobalReferenceRecords();
+	vector<HLp> refs  = infile.getGlobalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getGlobalReferenceKey() == "filter") {
 			return true;
@@ -23281,7 +24681,7 @@ bool HumdrumFileStructure::hasGlobalFilters(void) {
 
 bool HumdrumFileStructure::hasUniversalFilters(void) {
 	HumdrumFileBase& infile = *this;
-	vector<HumdrumLine*> refs  = infile.getUniversalReferenceRecords();
+	vector<HLp> refs  = infile.getUniversalReferenceRecords();
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getUniversalReferenceKey() == "filter") {
 			return true;
@@ -23336,7 +24736,7 @@ std::string HumdrumFileStructure::getKernAboveSignifier(void) {
 
 //////////////////////////////
 //
-// HumdrumFileStructure::getKernBelowSignifier -- used to place things
+// HumdrumFileStructure::getKernBelowSignifier -- Used to place things
 //     "below" (note on staff above, slurs/ties with an "below" orientation,
 //     etc.
 //
@@ -23679,6 +25079,17 @@ bool HumdrumLine::isCommentLocal(void) const {
 
 bool HumdrumLine::isCommentGlobal(void) const {
 	return equalChar(0, '!') && equalChar(1, '!');
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isCommentUniversal -- Returns true if a universal comment.
+//
+
+bool HumdrumLine::isCommentUniversal(void) const {
+	return equalChar(3, '!') && equalChar(2, '!') && equalChar(1, '!') && equalChar(0, '!');
 }
 
 
@@ -25426,6 +26837,34 @@ int HumdrumLine::getBarNumber(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::copyStructure -- For data lines only at the moment.
+//
+
+void HumdrumLine::copyStructure(HLp line, const string& empty) {
+		m_tokens.resize(line->m_tokens.size());
+		for (int i=0; i<(int)m_tokens.size(); i++) {
+			m_tokens[i] = new HumdrumToken(empty);
+			m_tokens[i]->setOwner(this);
+			m_tokens[i]->copyStructure(line->m_tokens[i]);
+		}
+		createLineFromTokens();
+
+		m_tabs = line->m_tabs;
+		m_linkedParameters.clear();
+		m_rhythm_analyzed = line->m_rhythm_analyzed;
+		m_owner = line->m_owner;
+
+		// Other information that should be set later:
+		//    int m_lineindex;
+		//    HumNum m_durationFromStart;
+		//    HumNum m_durationFromBarline;
+		//    HumNum m_durationToBarline;
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -25435,7 +26874,7 @@ ostream& operator<<(ostream& out, HumdrumLine& line) {
 	return out;
 }
 
-ostream& operator<< (ostream& out, HumdrumLine* line) {
+ostream& operator<< (ostream& out, HLp line) {
 	out << (string)(*line);
 	return out;
 }
@@ -25520,7 +26959,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token) :
 
 
 
-HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(const HumdrumToken& token, HLp owner) :
 		string((string)token), HumHash((HumHash)token) {
 	m_address         = token.m_address;
 	m_address.m_owner = owner;
@@ -25536,7 +26975,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token, HumdrumLine* owner) :
 }
 
 
-HumdrumToken::HumdrumToken(HumdrumToken* token, HumdrumLine* owner) :
+HumdrumToken::HumdrumToken(HumdrumToken* token, HLp owner) :
 		string((string)(*token)), HumHash((HumHash)(*token)) {
 	m_address         = token->m_address;
 	m_address.m_owner = owner;
@@ -25664,6 +27103,33 @@ bool HumdrumToken::equalChar(int index, char ch) const {
 
 int HumdrumToken::getPreviousNonNullDataTokenCount(void) {
 	return (int)m_previousNonNullTokens.size();
+}
+
+
+//////////////////////////////
+//
+// HumdrumToken::insertTokenAfter -- Insert the given token after the this token.
+//    This will sever the link from this token to its next token.  There is only
+//    presumed to be one next token, at least for the moment.
+//
+//
+
+void HumdrumToken::insertTokenAfter(HTp newtoken) {
+	if (m_nextTokens.empty()) {
+		m_nextTokens.push_back(newtoken);
+	} else {
+		HTp oldnexttoken = m_nextTokens[0];
+		m_nextTokens[0] = newtoken;
+		newtoken->m_previousTokens.clear();
+		newtoken->m_previousTokens.push_back(this);
+		newtoken->m_nextTokens.clear();
+		newtoken->m_nextTokens.push_back(oldnexttoken);
+		if (oldnexttoken->m_previousTokens.empty()) {
+			oldnexttoken->m_previousTokens.push_back(newtoken);
+		} else {
+			oldnexttoken->m_previousTokens[0] = newtoken;
+		}
+	}
 }
 
 
@@ -26088,7 +27554,7 @@ HumdrumToken* HumdrumToken::getPreviousToken(int index) const {
 //
 
 HTp HumdrumToken::getNextFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -26107,7 +27573,7 @@ HTp HumdrumToken::getNextFieldToken(void) const {
 //
 
 HTp HumdrumToken::getPreviousFieldToken(void) const {
-	HumdrumLine* line = getLine();
+	HLp line = getLine();
 	if (!line) {
 		return NULL;
 	}
@@ -26376,7 +27842,7 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 //
 
 HumNum HumdrumToken::getBarlineDuration(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26385,7 +27851,7 @@ HumNum HumdrumToken::getBarlineDuration(void) {
 
 
 HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26402,7 +27868,7 @@ HumNum HumdrumToken::getBarlineDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationToBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26410,7 +27876,7 @@ HumNum HumdrumToken::getDurationToBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26427,7 +27893,7 @@ HumNum HumdrumToken::getDurationToBarline(HumNum scale) {
 //
 
 HumNum HumdrumToken::getDurationFromBarline(void) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26435,7 +27901,7 @@ HumNum HumdrumToken::getDurationFromBarline(void) {
 }
 
 HumNum HumdrumToken::getDurationFromBarline(HumNum scale) {
-	HumdrumLine* own = getOwner();
+	HLp own = getOwner();
 	if (own == NULL) {
 		return 0;
 	}
@@ -26559,6 +28025,46 @@ bool HumdrumToken::isNote(void) {
 	}
 	return false;
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isPitched -- True if not a rest or an unpitched note.
+//
+
+bool HumdrumToken::isPitched(void) { 
+	if (this->isKern()) {
+		for (int i=0; i<(int)this->size(); i++) {
+			if ((this->at(i) == 'r') || (this->at(i) == 'R')) {
+				return false;
+			}
+		}
+		return true;
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isPitched -- True if has an unpitched marker (could be a rest)
+//
+
+bool HumdrumToken::isUnpitched(void) {
+	if (this->isKern()) {
+		if (this->find('R') != string::npos) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	// Don't know data type so return false for now:
+	return false;
+}
+
 
 
 
@@ -26903,7 +28409,7 @@ bool HumdrumToken::hasSlurEnd(void) {
 //
 
 int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -26933,7 +28439,7 @@ int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
 //
 
 int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
-	HumdrumLine* humrec = getOwner();
+	HLp humrec = getOwner();
 	if (humrec == NULL) {
 		return -1;
 	}
@@ -27283,10 +28789,11 @@ bool HumdrumToken::isSplitInterpretation(void) const {
 //
 
 bool HumdrumToken::isMergeInterpretation(void) const {
-	if (((void*)this) == NULL) {
-		// This was added perhaps due to a new bug [20100125] that is checking a null pointer
-		return false;
-	}
+	// [20200331] GCC 6+ will print a compiler warning when checking this against NULL.
+	//if ((void*)this == NULL) {
+	//	// This was added perhaps due to a new bug [20100125] that is checking a null pointer
+	//	return false;
+	//}
 	return ((string)(*this)) == MERGE_TOKEN;
 }
 
@@ -27371,7 +28878,7 @@ bool HumdrumToken::noteInLowerSubtrack(void) {
 	int field = this->getFieldIndex();
 	int track = this->getTrack();
 
-	HumdrumLine* owner = this->getOwner();
+	HLp owner = this->getOwner();
 	if (owner == NULL) {
 		return false;
 	}
@@ -28140,7 +29647,7 @@ std::string HumdrumToken::getLayoutParameterNote(const std::string& category,
 // HumdrumToken::setOwner -- Sets the HumdrumLine owner of this token.
 //
 
-void HumdrumToken::setOwner(HumdrumLine* aLine) {
+void HumdrumToken::setOwner(HLp aLine) {
 	m_address.setOwner(aLine);
 }
 
@@ -28152,7 +29659,7 @@ void HumdrumToken::setOwner(HumdrumLine* aLine) {
 //    owns this token.
 //
 
-HumdrumLine* HumdrumToken::getOwner(void) const {
+HLp HumdrumToken::getOwner(void) const {
 	return m_address.getOwner();
 }
 
@@ -28414,7 +29921,7 @@ ostream& HumdrumToken::printXmlLinkedParameterInfo(ostream& out, int level, cons
 		out << Convert::repeatString(indent, level);
 		out << "<linked-parameter";
 		out << " idref=\"";
-		HumdrumLine* owner = m_linkedParameterTokens[i]->getOwner();
+		HLp owner = m_linkedParameterTokens[i]->getOwner();
 		if (owner && owner->isGlobalComment()) {
 			out << owner->getXmlId();
 		} else {
@@ -28742,7 +30249,7 @@ HTp HumdrumToken::getPhraseEndToken(int number) {
 
 HTp HumdrumToken::resolveNull(void) {
 	if (m_nullresolve == NULL) {
-		HumdrumLine* hline = getOwner();
+		HLp hline = getOwner();
 		if (hline) {
 			HumdrumFile* infile = hline->getOwner();
 			infile->resolveNullTokens();
@@ -28767,6 +30274,22 @@ HTp HumdrumToken::resolveNull(void) {
 
 void HumdrumToken::setNullResolution(HTp resolution) {
 	m_nullresolve = resolution;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::copyStucture --
+//
+
+void HumdrumToken::copyStructure(HTp token) {
+	m_strand = token->m_strand;
+	HLp temp_owner = m_address.m_owner;
+	m_address = token->m_address;
+	m_address.m_owner = NULL;  // This will in general be different, so do not copy.
+	m_address.m_owner = temp_owner; // But preserve in case already set.
+	// m_nullresolve: set this?
 }
 
 
@@ -37759,6 +39282,19 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			tempvoice = -1;
 			m_staff = -1;
 			tempstaff = -1;
+		} else {
+			// xml_node nel = el.next_sibling();
+			// Need to check if the forward element should be interpreted
+			// as an invisible rests.  Check to see if the previous and next
+			// element are notes.  If so, then check their voice numbers and
+			// if equal, then this forward element should be an invisible rest.
+			// But this is true only if there is no other event happening
+			// at the current position in the other voice(s) on the staff (or
+			// perhaps include other staves on the system and/or part.
+
+			// So this case might need to be addressed at a later stage when
+			// the score is assembled, such as when adding null tokens, and a
+			// null spot is located in the score.
 		}
 	}
 
@@ -37804,7 +39340,11 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 					m_eventtype = mevent_unknown;
 				}
 			} else if (tempduration < 4) {
-				cerr << "FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				// Warn about possible other errors:
+				double fraction = (double)tempduration / getQTicks();
+				if (fraction < 0.01) {
+					cerr << "WARNING: FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				}
 			}
 			setDurationByTicks(tempduration);
 			break;
@@ -38035,6 +39575,7 @@ string MxmlEvent::getKernPitch(void) {
 	bool explicitQ    = false;
 	bool naturalQ     = false;
 	bool editorialQ   = false;
+	bool unpitchedQ   = false;
 	// bool sharpQ       = false;
 	// bool flatQ        = false;
 	// bool doubleflatQ  = false;
@@ -38049,6 +39590,7 @@ string MxmlEvent::getKernPitch(void) {
 				rest = true;
 				break;
 			}
+
 			if (nodeType(child, "pitch")) {
 				xml_node grandchild = child.first_child();
 				while (grandchild) {
@@ -38057,6 +39599,19 @@ string MxmlEvent::getKernPitch(void) {
 					} else if (nodeType(grandchild, "alter")) {
 						alter = atoi(grandchild.child_value());
 					} else if (nodeType(grandchild, "octave")) {
+						octave = atoi(grandchild.child_value());
+					}
+					grandchild = grandchild.next_sibling();
+				}
+			} else if (nodeType(child, "unpitched")) {
+				unpitchedQ = true;
+				xml_node grandchild = child.first_child();
+				while (grandchild) {
+					if (nodeType(grandchild, "display-step")) {
+						step = grandchild.child_value();
+					} else if (nodeType(grandchild, "alter")) {
+						alter = atoi(grandchild.child_value());
+					} else if (nodeType(grandchild, "display-octave")) {
 						octave = atoi(grandchild.child_value());
 					}
 					grandchild = grandchild.next_sibling();
@@ -38112,6 +39667,9 @@ string MxmlEvent::getKernPitch(void) {
 		count = 4 - octave;
 	}
 	string output;
+	if (unpitchedQ) {
+		output += "R";
+	}
 	for (int i=0; i<count; i++) {
 		output += pc;
 	}
@@ -38194,6 +39752,9 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	int tiestart     = 0;
 	int tiestop      = 0;
 
+	bool unpitchedQ  = false;
+	bool stemsQ      = m_stems;
+
 	// bool rest = false;
 	xml_node child = m_node.first_child();
 	xml_node notations;
@@ -38214,8 +39775,10 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 			} else if (strcmp(beaminfo, "backward hook") == 0) {
 				hookbacks++;
 			}
+		} else if (nodeType(child, "unpitched")) {
+			unpitchedQ = true;
 		} else if (nodeType(child, "stem")) {
-			if (m_stems || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
+			if (unpitchedQ || stemsQ || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
 				const char* stemdir = child.child_value();
 				if (strcmp(stemdir, "up") == 0) {
 					stem = 1;
@@ -38239,8 +39802,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	}
 
 	stringstream ss;
-
-	addNotations(ss, notations);
+	addNotations(ss, notations, beamstarts);
 
 	if (primarynote) {
 		// only add these signifiers if this is the first
@@ -38283,7 +39845,8 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 //   TrillTurn (TR or tR).
 //
 
-void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
+void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
+		int beamstarts) const {
 	if (!notations) {
 		return;
 	}
@@ -38298,6 +39861,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool strongaccent   = false;
 	bool fermata        = false;
 	bool trill          = false;
+	int  tremolo        = 0;
+	bool fingered       = false;
 	bool umordent       = false;
 	bool lmordent       = false;
 	bool upbow          = false;
@@ -38359,6 +39924,22 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					trill = true;
 				}
 
+            //  <ornaments>
+            //     <tremolo type="single">2</tremolo>
+            //  </ornaments>
+				if (strcmp(grandchild.name(), "tremolo") == 0) {
+					string ttype = grandchild.attribute("type").value();
+					if (ttype == "start") {
+						fingered = true;
+					} else {
+						fingered = false;
+					}
+					if (ttype != "stop") {
+						string tstring = grandchild.child_value();
+						tremolo = 1 << (stoi(tstring) + 2);
+					}
+				}
+
 				// umordent
           	// <ornaments>
           	//   <inverted-mordent default-x="-4" default-y="-65" placement="below"/>
@@ -38392,6 +39973,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		// figure out whole-tone trills later via trillspell tool:
 		reportOrnamentToOwner();
 	}
+
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
@@ -38412,6 +39994,17 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	}
 	if (arpeggio)     { ss << ":";  }
 
+	if (tremolo >= 8) {
+		int tvalue = tremolo;
+		if (fingered) {
+			if (beamstarts) {
+				tvalue *= (1 << beamstarts);
+			}
+			ss << "@@" << tvalue << "@@";
+		} else {
+			ss << "@" << tvalue << "@";
+		}
+	}
 }
 
 
@@ -43937,10 +45530,14 @@ bool Tool_autostem::run(HumdrumFile& infile) {
 			return true;
 		}
 	}
-	autostem(infile);
+	bool status = autostem(infile);
 	// Re-load the text for each line from their tokens.
-	infile.createLinesFromTokens();
-	return true;
+	if (status) {
+		infile.createLinesFromTokens();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -44030,7 +45627,7 @@ void Tool_autostem::removeStems(HumdrumFile& infile) {
 //     that do not already have stem information.
 //
 
-void Tool_autostem::autostem(HumdrumFile& infile) {
+bool Tool_autostem::autostem(HumdrumFile& infile) {
 	vector<vector<int> > baseline;
 	getClefInfo(baseline, infile);
 
@@ -44039,7 +45636,7 @@ void Tool_autostem::autostem(HumdrumFile& infile) {
 	getNotePositions(notepos, baseline, infile);
 	if (noteposQ) {
 		printNotePositions(infile, notepos);
-		return;
+		return true;
 	}
 
 	// get voice/layer number in track:
@@ -44047,13 +45644,17 @@ void Tool_autostem::autostem(HumdrumFile& infile) {
 	getVoiceInfo(voice, infile);
 	if (voiceQ) {
 		printVoiceInfo(infile, voice);
-		return;
+		return true;
 	}
 
 	// get stem directions:
 	vector<vector<int> > stemdir;
-	assignStemDirections(stemdir, voice, notepos, infile);
+	bool status = assignStemDirections(stemdir, voice, notepos, infile);
+	if (!status) {
+		return false;
+	}
 	insertStems(infile, stemdir);
+	return true;
 }
 
 
@@ -44137,7 +45738,7 @@ void Tool_autostem::setStemDirection(HumdrumFile& infile, int row, int col,
 // Tool_autostem::assignStemDirections --
 //
 
-void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
+bool Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 		vector<vector<int> > & voice,
 		vector<vector<vector<int> > >& notepos, HumdrumFile& infile) {
 
@@ -44154,7 +45755,10 @@ void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 	assignBasicStemDirections(stemdir, voice, notepos, infile);
 
 	vector<vector<string > > beamstates;
-	getBeamState(beamstates, infile);
+	bool status = getBeamState(beamstates, infile);
+	if (!status) {
+		return status;
+	}
 
 	vector<vector<Coord> > beamednotes;
 	getBeamSegments(beamednotes, beamstates, infile, maxlayer);
@@ -44186,6 +45790,7 @@ void Tool_autostem::assignStemDirections(vector<vector<int> >& stemdir,
 			cerr << endl;
 		}
 	}
+	return true;
 }
 
 
@@ -44819,7 +46424,7 @@ void Tool_autostem::removeStem2(HumdrumFile& infile, int row, int col) {
 void Tool_autostem::addStem(string& input, const string& piece) {
 	string output;
 	HumRegex hre;
-	if (hre.search(input, "(.*[ABCDEFG][n#-]*)(.*)$", "i")) {
+	if (hre.search(input, "(.*[ABCDEFG][n#-]*[xyXY<>]*)(.*)$", "i")) {
 		output = hre.getMatch(1);
 		output += piece;
 		output += hre.getMatch(2);
@@ -44910,7 +46515,7 @@ void Tool_autostem::usage(void) {
 // backward hook  k           \  x
 //
 
-void Tool_autostem::getBeamState(vector<vector<string > >& beams,
+bool Tool_autostem::getBeamState(vector<vector<string > >& beams,
 		HumdrumFile& infile) {
 	int len;
 	int contin;
@@ -45033,9 +46638,9 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 					cerr << "Error too many grace note beams" << endl;
 					exit(1);
 				}
-				beams[i][j] = gbinfo;
-				gracestate[track][curlayer[track]] = contin;
-				gracestate[track][curlayer[track]] += start;
+				beams.at(i).at(j) = gbinfo;
+				gracestate.at(track).at(curlayer.at(track)) = contin;
+				gracestate.at(track).at(curlayer.at(track)) += start;
 
 			} else {
 				// regular notes which are shorter than a quarter note
@@ -45058,8 +46663,13 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				if (flagl > 7) {
 					cerr << "Too many beam flagleft" << endl;
 				}
-				contin = beamstate[track][curlayer[track]];
+				contin = beamstate.at(track).at(curlayer.at(track));
 				contin -= stop;
+				if (contin < 0) {
+					cerr << "ERROR at line " << token->getLineNumber() << " column " << token->getFieldNumber() << ": ";
+					cerr << "Unbalanced beaming information in measure." << endl;
+					return false;
+				}
 				gbinfo.resize(contin);
 				for (int ii=0; ii<contin; ii++) {
 					gbinfo[ii] = '=';
@@ -45082,14 +46692,16 @@ void Tool_autostem::getBeamState(vector<vector<string > >& beams,
 				len = (int)gbinfo.size();
 				if (len > 6) {
 					cerr << "Error too many grace note beams" << endl;
-					exit(1);
+					return false;
 				}
-				beams[i][j] = gbinfo;
-				beamstate[track][curlayer[track]] = contin;
-				beamstate[track][curlayer[track]] += start;
+				beams.at(i).at(j) = gbinfo;
+				beamstate.at(track).at(curlayer.at(track)) = contin;
+				beamstate.at(track).at(curlayer.at(track)) += start;
 			}
 		}
 	}
+
+	return true;
 }
 
 
@@ -55277,6 +56889,10 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homorhythm2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humsheet") {
+			RUNTOOL(humsheet, infile, commands[i].second, status);
+		} else if (commands[i].first == "kernview") {
+			RUNTOOL(kernview, infile, commands[i].second, status);
 		} else if (commands[i].first == "shed") {
 			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
@@ -55329,6 +56945,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "tremolo") {
+			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
 		} else if (commands[i].first == "binroll") {
@@ -55405,7 +57023,7 @@ void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
 void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		HumdrumFile& infile) {
 
-	vector<HumdrumLine*> refs = infile.getReferenceRecords();
+	vector<HLp> refs = infile.getReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;
@@ -55440,7 +57058,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& commands,
 		HumdrumFileSet& infiles) {
 
-	vector<HumdrumLine*> refs = infiles.getUniversalReferenceRecords();
+	vector<HLp> refs = infiles.getUniversalReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
 	vector<string> clist;
@@ -56785,6 +58403,1061 @@ ostream& operator<<(ostream& out, NotePoint& np) {
 
 /////////////////////////////////
 //
+// Tool_humsheet::Tool_humsheet -- Set the recognized options for the tool.
+//
+
+Tool_humsheet::Tool_humsheet(void) {
+	define("h|H|html|HTML=b", "output table in HTML wrapper");
+	define("i|id|ID=b", "include ID for each cell");
+	define("z|zebra=b", "add zebra striping by spine to style");
+	define("y|z2|zebra2|zebra-2=b", "zebra striping by data type");
+	define("t|tab-index=b", "vertical tab indexing");
+	define("X|no-exinterp=b", "do not embed exclusive interp data");
+	define("J|no-javascript=b", "do not embed javascript code");
+	define("S|no-style=b", "do not embed CSS style element");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_humsheet::run -- Do the main work of the tool.
+//
+
+bool Tool_humsheet::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_humsheet::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_humsheet::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_humsheet::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_humsheet::initialize(void) {
+	m_idQ         = getBoolean("id");
+	m_htmlQ       = getBoolean("html");
+	m_zebraQ      = getBoolean("zebra");
+	m_zebra2Q     = getBoolean("zebra2");
+	m_exinterpQ   = !getBoolean("no-exinterp");
+	m_javascriptQ = !getBoolean("no-javascript");
+	m_tabindexQ   = getBoolean("tab-index");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::processFile --
+//
+
+void Tool_humsheet::processFile(HumdrumFile& infile) {
+	analyzeTracks(infile);
+	if (m_htmlQ) {
+		printHtmlHeader();
+		printStyle(infile);
+	}
+	if (m_tabindexQ) {
+		analyzeTabIndex(infile);
+	}
+	m_free_text << "<table class=\"humdrum\"";
+	m_free_text << " data-spine-count=\"" << infile.getMaxTrack() << "\"";
+	m_free_text << ">\n";
+	for (int i=0; i<infile.getLineCount(); i++) {
+		m_free_text << "<tr";
+		printRowClasses(infile, i);
+		printRowData(infile, i);
+		printTitle(infile, i);
+		m_free_text << ">";
+		printRowContents(infile, i);
+		m_free_text << "</tr>\n";
+	}
+	m_free_text << "</table>";
+	if (m_htmlQ) {
+		if (m_javascriptQ) {
+			printJavascript();
+		}
+		printHtmlFooter();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printTitle --
+//
+
+void Tool_humsheet::printTitle(HumdrumFile& infile, int line) {
+	if (!infile[line].isReference()) {
+		return;
+	}
+	string meaning = Convert::getReferenceKeyMeaning(infile[line].token(0));
+	if (!meaning.empty()) {
+		m_free_text << " title=\"" << meaning << "\"";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printRowData --
+//
+
+void Tool_humsheet::printRowData(HumdrumFile& infile, int line) {
+	m_free_text << " data-line=\"" << line << "\"";
+}
+
+
+
+///////////////////////////////
+//
+// printHtmlHeader --
+//
+
+void Tool_humsheet::printHtmlHeader(void) {
+	m_free_text << "<html>\n";
+	m_free_text << "<head>\n";
+	m_free_text << "<title>\n";
+	m_free_text << "UNTITLED\n";
+	m_free_text << "</title>\n";
+	m_free_text << "</head>\n";
+	m_free_text << "<body>\n";
+}
+
+
+
+///////////////////////////////
+//
+// printHtmlFooter --
+//
+
+void Tool_humsheet::printHtmlFooter(void) {
+	m_free_text << "</body>\n";
+	m_free_text << "</html>\n";
+}
+
+
+
+///////////////////////////////
+//
+// printRowClasses --
+//
+
+void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
+	string classes;
+	HLp hl = &infile[row];
+	if (hl->hasSpines()) {
+		classes += "spined ";
+	}
+	if (hl->isEmpty()) {
+		classes += "empty ";
+	}
+	if (hl->isData()) {
+		classes += "data ";
+	}
+	if (hl->isInterpretation()) {
+		classes += "interp ";
+		HTp token = hl->token(0);
+		if (token->compare(0, 2, "*>") == 0) {
+			classes += "label ";
+		}
+	}
+	if (hl->isLocalComment()) {
+		classes += "lcomment ";
+		if (isLayout(hl)) {
+			classes += "layout ";
+		}
+	}
+	HTp token = hl->token(0);
+	if (token->compare(0, 2, "!!") == 0) {
+		if ((token->size() == 2) || (token->at(3) != '!')) {
+			classes += "gcommet ";
+		}
+	}
+
+	if (hl->isUniversalReference()) {
+		if (token->compare(0, 11, "!!!!filter:") == 0) {
+			classes += "ufilter ";
+		} else if (token->compare(0, 12, "!!!!Xfilter:") == 0) {
+			classes += "usedufilter ";
+		} else {
+			classes += "ureference ";
+			if (token->compare(0, 12, "!!!!SEGMENT:") == 0) {
+				classes += "segment ";
+			}
+		}
+	} else if (hl->isCommentUniversal()) {
+		classes += "ucomment ";
+	} else if (hl->isReference()) {
+		classes += "reference ";
+	} else if (hl->isGlobalComment()) {
+		HTp token = hl->token(0);
+		if (token->compare(0, 10, "!!!filter:") == 0) {
+			classes += "filter ";
+		} else if (token->compare(0, 11, "!!!Xfilter:") == 0) {
+			classes += "usedfilter ";
+		} else {
+			classes += "gcomment ";
+			if (isLayout(hl)) {
+				classes += "layout ";
+			}
+		}
+	}
+
+	if (hl->isBarline()) {
+		classes += "barline ";
+	}
+	if (hl->isManipulator()) {
+		HTp token = hl->token(0);
+		if (token->compare(0, 2, "**") == 0) {
+			classes += "exinterp ";
+		} else {
+			classes += "manip ";
+		}
+	}
+	if (!classes.empty()) {
+      // remove space.
+		classes.resize((int)classes.size() - 1);
+		m_free_text << " class=\"" << classes << "\"";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::isLayout -- check to see if any cell 
+//    starts with "!LO:".
+//
+
+bool Tool_humsheet::isLayout(HLp line) {
+	if (line->hasSpines()) {
+		if (!line->isCommentLocal()) {
+			return false;
+		}
+		for (int i=0; i<line->getFieldCount(); i++) {
+			HTp token = line->token(i);
+			if (token->compare(0, 4, "!LO:") == 0) {
+				return true;
+			}
+		}
+	} else {
+		HTp token = line->token(0);
+		if (token->compare(0, 5, "!!LO:") == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+///////////////////////////////
+//
+// Tool_humsheet::printRowContents --
+//
+
+void Tool_humsheet::printRowContents(HumdrumFile& infile, int row) {
+	int fieldcount = infile[row].getFieldCount();
+	for (int i=0; i<fieldcount; i++) {
+		HTp token = infile.token(row, i);
+		m_free_text << "<td";
+		if (m_idQ) {
+			printId(token);
+		}
+		printCellClasses(token);
+		printCellData(token);
+		if (m_tabindexQ) {
+			printTabIndex(token);
+		}
+		printColSpan(token);
+		if (!infile[row].isManipulator()) {
+			// do not allow manipulators to be edited
+			m_free_text << " contenteditable=\"true\"";
+		} else if (infile[row].isExclusive()) {
+			// but allow exclusive interpretation to be edited
+			m_free_text << " contenteditable=\"true\"";
+		}
+		m_free_text << ">";
+		printToken(token);
+		m_free_text << "</td>";
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printCellData --
+//
+
+void Tool_humsheet::printCellData(HTp token) {
+	int field = token->getFieldIndex();
+	m_free_text << " data-field=\"" << field << "\"";
+
+
+	if (token->getOwner()->hasSpines()) {
+		int spine = token->getTrack() - 1;
+		m_free_text << " data-spine=\"" << spine << "\"";
+
+		int subspine = token->getSubtrack();
+		if (subspine > 0) {
+			m_free_text << " data-subspine=\"" << subspine << "\"";
+		}
+
+		string exinterp = token->getDataType().substr(2);
+		if (m_exinterpQ && !exinterp.empty()) {
+			m_free_text << " data-x=\"" << exinterp << "\"";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printToken --
+//
+
+void Tool_humsheet::printToken(HTp token) {
+	for (int i=0; i<(int)token->size(); i++) {
+		switch (token->at(i)) {
+			case '>':
+				m_free_text << "&gt;";
+				break;
+			case '<':
+				m_free_text << "&lt;";
+				break;
+			default:
+				m_free_text << token->at(i);
+		}
+	}
+}
+
+
+
+///////////////////////////////
+//
+// Tool_humsheet::printId --
+//
+
+void Tool_humsheet::printId(HTp token) {
+	int line = token->getLineNumber();
+	int field = token->getFieldNumber();
+	string id = "tok-L";
+	id += to_string(line);
+	id += "F";
+	id += to_string(field);
+	m_free_text << " id=\"" << id << "\"";
+}
+
+
+
+///////////////////////////////
+//
+// Tool_humsheet::printTabIndex --
+//
+
+void Tool_humsheet::printTabIndex(HTp token) {
+	string number = token->getValue("auto", "tabindex");
+	if (number.empty()) {
+		return;
+	}
+	m_free_text << " tabindex=\"" << number << "\"";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printColspan -- print any necessary colspan values for
+//    token (to align by primary spines)
+//
+
+void Tool_humsheet::printColSpan(HTp token) {
+	if (!token->getOwner()->hasSpines()) {
+		m_free_text << " colspan=\"" << m_max_field << "\"";
+		return;
+	}
+	int track = token->getTrack() - 1;
+	int scount = m_max_subtrack.at(track);
+	int subtrack = token->getSubtrack();
+	if (subtrack > 1) {
+		subtrack--;
+	}
+	HTp nexttok = token->getNextFieldToken();
+	int ntrack = -1;
+	if (nexttok) {
+		ntrack = nexttok->getTrack() - 1;
+	}
+	if ((ntrack < 0) || (ntrack != track)) {
+		// at the end of a primary spine, so do a colspan with the remaining subtracks
+		if (subtrack < scount-1) {
+			int colspan = scount - subtrack;
+			m_free_text << " colspan=\"" << colspan << "\"";
+		}
+	} else {
+		// do nothing
+	}
+}
+
+
+
+///////////////////////////////
+//
+// printCellClasses --
+//
+
+void Tool_humsheet::printCellClasses(HTp token) {
+	int track = token->getTrack();
+	string classlist;
+
+	if (m_zebraQ) {
+		if (track % 2 == 0) {
+			classlist = "zebra ";
+		}
+	}
+
+	if (token->getOwner()->hasSpines()) {
+		int length = (int)token->size();
+		if (length > 20) {
+			classlist += "long ";
+		}
+	}
+
+	if (!classlist.empty()) {
+		classlist.resize((int)classlist.size() - 1);
+		m_free_text << " class=\"" << classlist << "\"";
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printStyle --
+//
+
+void Tool_humsheet::printStyle(HumdrumFile& infile) {
+
+	m_free_text << "<style>\n";
+	m_free_text << "body {\n";
+	m_free_text << "	padding: 20px;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum {\n";
+	m_free_text << "	border-collapse: collapse;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum td:focus {\n";
+	m_free_text << "	background: #ff000033 !important;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum td {\n";
+	m_free_text << "	outline: none;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum td[data-subspine='1'],\n";
+	m_free_text << "table.humdrum td[data-subspine='2'],\n";
+	m_free_text << "table.humdrum td[data-subspine='3'],\n";
+	m_free_text << "table.humdrum td[data-subspine='4'],\n";
+	m_free_text << "table.humdrum td[data-subspine='5'],\n";
+	m_free_text << "table.humdrum td[data-subspine='6'],\n";
+	m_free_text << "table.humdrum td[data-subspine='7'],\n";
+	m_free_text << "table.humdrum td[data-subspine='8'],\n";
+	m_free_text << "table.humdrum td[data-subspine='9'] {\n";
+	m_free_text << "	border-right: solid #0000000A 1px;\n";
+	m_free_text << "	padding-left: 3px;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ucomment {\n";
+	m_free_text << "	color: chocolate;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.segment {\n";
+	m_free_text << "	color: chocolate;\n";
+	m_free_text << "	background: rgb(255,99,71,0.25);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ureference {\n";
+	m_free_text << "	color: chocolate;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.reference {\n";
+	m_free_text << "	color: green;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.gcomment {\n";
+	m_free_text << "	color: blue;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ucomment {\n";
+	m_free_text << "	color: violet;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.lcomment {\n";
+	m_free_text << "	color: $#2fc584;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.manip {\n";
+	m_free_text << "	color: magenta;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.exinterp {\n";
+	m_free_text << "	color: red;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp {\n";
+	m_free_text << "	color: darkviolet;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.filter {\n";
+	m_free_text << "	color: limegreen;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.usedfilter {\n";
+	m_free_text << "	color: olive;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.ufilter {\n";
+	m_free_text << "	color: limegreen;\n";
+	m_free_text << "	background: rgba(0,0,aa,0.3);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.usedufilter {\n";
+	m_free_text << "	color: olive;\n";
+	m_free_text << "	background: rgba(0,0,aa,0.3);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.interp.label {\n";
+	m_free_text << "	background: rgba(75,0,130,0.3);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.layout {\n";
+	m_free_text << "	color: orange;\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum tr.barline {\n";
+	m_free_text << "	color: gray;\n";
+	m_free_text << "	background: rgba(0, 0, 0, 0.06);\n";
+	m_free_text << "}\n";
+	m_free_text << "table.humdrum td.long {\n";
+	m_free_text << "	white-space: nowrap;\n";
+	m_free_text << "	max-width: 200px;\n";
+	m_free_text << "	background-image: linear-gradient(to right, cornsilk 95%, crimson 100%);\n";
+	m_free_text << "	overflow: scroll;\n";
+	m_free_text << "}\n";
+
+	if (m_zebraQ) {
+		m_free_text << "table.humdrum .zebra {\n";
+		m_free_text << "	background: #ccccff33;\n";
+		m_free_text << "}\n";
+	} else if (m_zebra2Q) {
+		m_free_text << "table.humdrum td[data-x='kern'] {\n";
+		m_free_text << "	background: #ffcccc33;\n";
+		m_free_text << "}\n";
+		m_free_text << "table.humdrum td[data-x='dynam'] {\n";
+		m_free_text << "	background: #ccccff33;\n";
+		m_free_text << "}\n";
+		m_free_text << "table.humdrum td[data-x='text'] {\n";
+		m_free_text << "	background: #ccffcc33;\n";
+		m_free_text << "}\n";
+	}
+
+	m_free_text << "</style>\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::printJavascript --
+//
+
+void Tool_humsheet::printJavascript(void) {
+
+	m_free_text << "<script>\n";
+	m_free_text << "\n";
+	m_free_text << "var AKey      = 65;\n";
+	m_free_text << "var BKey      = 66;\n";
+	m_free_text << "var CKey      = 67;\n";
+	m_free_text << "var DKey      = 68;\n";
+	m_free_text << "var EKey      = 69;\n";
+	m_free_text << "var FKey      = 70;\n";
+	m_free_text << "var GKey      = 71;\n";
+	m_free_text << "var HKey      = 72;\n";
+	m_free_text << "var IKey      = 73;\n";
+	m_free_text << "var JKey      = 74;\n";
+	m_free_text << "var KKey      = 75;\n";
+	m_free_text << "var LKey      = 76;\n";
+	m_free_text << "var MKey      = 77;\n";
+	m_free_text << "var NKey      = 78;\n";
+	m_free_text << "var OKey      = 79;\n";
+	m_free_text << "var PKey      = 80;\n";
+	m_free_text << "var QKey      = 81;\n";
+	m_free_text << "var RKey      = 82;\n";
+	m_free_text << "var SKey      = 83;\n";
+	m_free_text << "var TKey      = 84;\n";
+	m_free_text << "var UKey      = 85;\n";
+	m_free_text << "var VKey      = 86;\n";
+	m_free_text << "var WKey      = 87;\n";
+	m_free_text << "var XKey      = 88;\n";
+	m_free_text << "var YKey      = 89;\n";
+	m_free_text << "var ZKey      = 90;\n";
+	m_free_text << "var ZeroKey   = 48;\n";
+	m_free_text << "var OneKey    = 49;\n";
+	m_free_text << "var TwoKey    = 50;\n";
+	m_free_text << "var ThreeKey  = 51;\n";
+	m_free_text << "var FourKey   = 52;\n";
+	m_free_text << "var FiveKey   = 53;\n";
+	m_free_text << "var SixKey    = 54;\n";
+	m_free_text << "var SevenKey  = 55;\n";
+	m_free_text << "var EightKey  = 56;\n";
+	m_free_text << "var NineKey   = 57;\n";
+	m_free_text << "var PgUpKey   = 33;\n";
+	m_free_text << "var PgDnKey   = 34;\n";
+	m_free_text << "var EndKey    = 35;\n";
+	m_free_text << "var HomeKey   = 36;\n";
+	m_free_text << "var LeftKey   = 37;\n";
+	m_free_text << "var UpKey     = 38;\n";
+	m_free_text << "var RightKey  = 39;\n";
+	m_free_text << "var DownKey   = 40;\n";
+	m_free_text << "var EnterKey  = 13;\n";
+	m_free_text << "var SpaceKey  = 32;\n";
+	m_free_text << "var SlashKey  = 191;\n";
+	m_free_text << "var EscKey    = 27;\n";
+	m_free_text << "var BackKey   = 8;\n";
+	m_free_text << "var CommaKey  = 188;\n";
+	m_free_text << "var MinusKey  = 189;\n";
+	m_free_text << "var DotKey    = 190;\n";
+	m_free_text << "var SemiColonKey = 186;\n";
+	m_free_text << "var BackQuoteKey   = 192;\n";
+	m_free_text << "var SingleQuoteKey = 222;\n";
+	m_free_text << "\n";
+	m_free_text << "var TARGET_SPINE    = 0;\n";
+	m_free_text << "var TARGET_SUBSPINE = 0;\n";
+	m_free_text << "\n";
+	m_free_text << "window.addEventListener('keydown', processKey, true);\n";
+	m_free_text << "\n";
+	m_free_text << "function processKey(event) {\n";
+	m_free_text << "	var target;\n";
+	m_free_text << "	var spine;\n";
+	m_free_text << "	var subspine;\n";
+	m_free_text << "	var rent;\n";
+	m_free_text << "	var nextline;\n";
+	m_free_text << "	var line;\n";
+	m_free_text << "	var nexttr;\n";
+	m_free_text << "	var newtd;\n";
+	m_free_text << "\n";
+	m_free_text << "	if (!event.preventDefault) {\n";
+	m_free_text << "		event.preventDefault = function() { };\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	if (event.metaKey) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	switch (event.keyCode) {\n";
+	m_free_text << "\n";
+	m_free_text << "		case EnterKey: // Move to next lower row in same spine\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveLine(event.target, -1);\n";
+	m_free_text << "			} else {\n";
+	m_free_text << "				moveLine(event.target, +1);\n";
+	m_free_text << "			}\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case DownKey:  // Move to next lower row in same spine\n";
+	m_free_text << "			moveLine(event.target, +1);\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case UpKey:\n";
+	m_free_text << "			moveLine(event.target, -1);\n";
+	m_free_text << "			event.preventDefault();\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case RightKey:\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveField(event.target, +1);\n";
+	m_free_text << "				event.preventDefault();\n";
+	m_free_text << "			}\n";
+	m_free_text << "			 break;\n";
+	m_free_text << "\n";
+	m_free_text << "		case LeftKey:\n";
+	m_free_text << "			if (event.shiftKey) {\n";
+	m_free_text << "				moveField(event.target, -1);\n";
+	m_free_text << "				event.preventDefault();\n";
+	m_free_text << "			}\n";
+	m_free_text << "			break;\n";
+	m_free_text << "\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveField -- Move the to the next or previous td on a row.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveField(target, direction) {\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		console.log('TARGET IS NOT TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	rent = target.parentNode;\n";
+	m_free_text << "	if (rent.nodeName !== 'TR') {\n";
+	m_free_text << "		console.log('PARENT IS NOT TR');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var tds = rent.querySelectorAll('TD');\n";
+	m_free_text << "	for (var i=0; i<tds.length; i++) {\n";
+	m_free_text << "		if (target !== tds[i]) {\n";
+	m_free_text << "			console.log('TARGET', target, 'NOT THE SAME AS', tds[i]);\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		var newi = i + direction;\n";
+	m_free_text << "		if (newi < 0) {\n";
+	m_free_text << "			// Don't do anything since there are no more\n";
+	m_free_text << "			// cells to the left of the current cell.\n";
+	m_free_text << "			return;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		if (newi >= tds.length) {\n";
+	m_free_text << "			// Don't do anything since there are no more\n";
+	m_free_text << "			// cells to the right of the current cell.\n";
+	m_free_text << "			return;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		var newtd = tds[newi];\n";
+	m_free_text << "		newtd.focus();\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveLine --\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveLine(target, direction) {\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		console.log('TARGET IS NOT TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	spine = parseInt(target.dataset.spine || -1);\n";
+	m_free_text << "	subspine = parseInt(target.dataset.subspine || -1);\n";
+	m_free_text << "	rent = target.parentNode;\n";
+	m_free_text << "	if (rent.nodeName !== 'TR') {\n";
+	m_free_text << "		console.log('PARENT IS NOT TR');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	line = parseInt(rent.dataset.line || -1);\n";
+	m_free_text << "	nextline = line + direction;\n";
+	m_free_text << "\n";
+	m_free_text << "	nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 2;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 3;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (nexttr && nexttr.className.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		nextline = line + direction * 4;\n";
+	m_free_text << "		nexttr = document.querySelector('tr[data-line=\"' + nextline + '\"]');\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	if (!nexttr) {\n";
+	m_free_text << "		// nexttr does not exist so do nothing\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	newtd = getNewTd(nexttr, spine, subspine);\n";
+	m_free_text << "	if (!newtd) {\n";
+	m_free_text << "		console.log('CANNOT FIND NEW TD');\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	newtd.focus();\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// getNewTd -- Find the td element with the matching spine and subspine\n";
+	m_free_text << "//        numbers as the starting cell.  If they do not match, then find\n";
+	m_free_text << "//        one that has a matching spine.  If that cannot be found, then\n";
+	m_free_text << "//        store the spine and subspine for recovering the spine position\n";
+	m_free_text << "//        after passing through a global comment.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function getNewTd(tr, spine, subspine) {\n";
+	m_free_text << "	if (spine < 0) {\n";
+	m_free_text << "		spine = TARGET_SPINE;\n";
+	m_free_text << "		subspine = TARGET_SUBSPINE;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var tds = tr.querySelectorAll('td');\n";
+	m_free_text << "	if (tds.length == 1) {\n";
+	m_free_text << "		return tds[0];\n";
+	m_free_text << "	} else if (tds.length == 0) {\n";
+	m_free_text << "		console.log('DID NOT FIND ANY TDS');\n";
+	m_free_text << "		return null;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var list = [];\n";
+	m_free_text << "	var obj;\n";
+	m_free_text << "	var i;\n";
+	m_free_text << "	for (i=0; i<tds.length; i++) {\n";
+	m_free_text << "		obj = {};\n";
+	m_free_text << "		obj.spine = parseInt(tds[i].dataset.spine);\n";
+	m_free_text << "		obj.subspine = parseInt(tds[i].dataset.subspine || -1);\n";
+	m_free_text << "		obj.td = tds[i];\n";
+	m_free_text << "		list.push(obj);\n";
+	m_free_text << "	}\n";
+	m_free_text << "	for (i=0; i<list.length; i++) {\n";
+	m_free_text << "		if (list[i].spine != spine) {\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		if (list[i].subspine != subspine) {\n";
+	m_free_text << "			continue;\n";
+	m_free_text << "		}\n";
+	m_free_text << "		return list[i].td;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	// did not find the exact spine/subspine, so go to the first \n";
+	m_free_text << "	// spine that matches (backwards if subspine is not 0).\n";
+	m_free_text << "	if (subspine < 0) {\n";
+	m_free_text << "		for (i=0; i<list.length - 1; i++) {\n";
+	m_free_text << "			if (list[i].spine != spine) {\n";
+	m_free_text << "				continue;\n";
+	m_free_text << "			}\n";
+	m_free_text << "			return list[i].td;\n";
+	m_free_text << "		}\n";
+	m_free_text << "	} else {\n";
+	m_free_text << "		for (i=list.length - 1; i>=0; i--) {\n";
+	m_free_text << "			if (list[i].spine != spine) {\n";
+	m_free_text << "				continue;\n";
+	m_free_text << "			}\n";
+	m_free_text << "			return list[i].td;\n";
+	m_free_text << "		}\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (list.length == 1) {\n";
+	m_free_text << "		return list[0].td;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	console.log('DID NOT FIND NEW TD FOR', spine, subspine);\n";
+	m_free_text << "	return null;\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// focusin eventListener -- When a cell is focused on, and the cell\n";
+	m_free_text << "//     is spined, then store its spine/subspine values in TARGET_SPINE\n";
+	m_free_text << "//     and TARGET_SUBSPINE for navigating through global records.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "document.addEventListener('focusin', function(event) {\n";
+	m_free_text << "	var target = event.target;\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	moveCursorToEndOfText(target);\n";
+	m_free_text << "\n";
+	m_free_text << "	var tr = target.parentNode;\n";
+	m_free_text << "	if (!tr) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (tr.nodeName !== 'TR') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (!tr.className.match(/\\bspined\\b/)) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var spine = parseInt(target.dataset.spine || -1);\n";
+	m_free_text << "	var subspine = parseInt(target.dataset.subspine || -1);\n";
+	m_free_text << "	TARGET_SPINE = spine;\n";
+	m_free_text << "	TARGET_SUBSPINE = subspine;\n";
+	m_free_text << "});\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// focusout eventListener -- When leaving a cell, check that\n";
+	m_free_text << "//    its contents are syntactically correct.\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "document.addEventListener('focusout', function(event) {\n";
+	m_free_text << "	var target = event.target;\n";
+	m_free_text << "	if (target.nodeName !== 'TD') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "\n";
+	m_free_text << "	var tr = target.parentNode;\n";
+	m_free_text << "	if (!tr) {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	if (tr.nodeName !== 'TR') {\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	var empty = '.';\n";
+	m_free_text << "	var classes = tr.className;\n";
+	m_free_text << "	if (classes.match(/\\bmanip\\b/)) {\n";
+	m_free_text << "		empty = '*';\n";
+	m_free_text << "	} if (classes.match(/\\binterp\\b/)) {\n";
+	m_free_text << "		empty = '*';\n";
+	m_free_text << "	} else if (classes.match(/\\blcomment\\b/)) {\n";
+	m_free_text << "		empty = '!';\n";
+	m_free_text << "	} else if (classes.match(/comment\\b/)) {\n";
+	m_free_text << "		empty = '!!';\n";
+	m_free_text << "	} else if (classes.match(/reference\\b/)) {\n";
+	m_free_text << "		empty = '!';\n";
+	m_free_text << "	} else if (classes.match(/\\bbarline\\b/)) {\n";
+	m_free_text << "		empty = '=';\n";
+	m_free_text << "	}\n";
+	m_free_text << "	\n";
+	m_free_text << "	var contents = target.textContent;\n";
+	m_free_text << "	if (contents === '') {\n";
+	m_free_text << "		target.textContent = empty;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	\n";
+	m_free_text << "	var firstchar = contents.charAt(0);\n";
+	m_free_text << "	if ((empty === '!') && (firstchar !== '!')) {\n";
+	m_free_text << "		target.textContent = '!' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '*') && (firstchar !== '*')) {\n";
+	m_free_text << "		target.textContent = '*' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '=') && (firstchar !== '=')) {\n";
+	m_free_text << "		target.textContent = '=' + contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '!')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '*')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "	else if ((empty === '.') && (firstchar === '=')) {\n";
+	m_free_text << "		contents = contents.replace(/^[!*=]*/, '');\n";
+	m_free_text << "		target.textContent = contents;\n";
+	m_free_text << "		return;\n";
+	m_free_text << "	}\n";
+	m_free_text << "});\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "\n";
+	m_free_text << "//////////////////////////////\n";
+	m_free_text << "//\n";
+	m_free_text << "// moveCursorToEndOfText --\n";
+	m_free_text << "//\n";
+	m_free_text << "\n";
+	m_free_text << "function moveCursorToEndOfText(element) {\n";
+	m_free_text << "	var range;\n";
+	m_free_text << "	var selection;\n";
+	m_free_text << "	if (document.createRange) {\n";
+	m_free_text << "		range = document.createRange();\n";
+	m_free_text << "		range.selectNodeContents(element);\n";
+	m_free_text << "		range.collapse(false);\n";
+	m_free_text << "		selection = window.getSelection();\n";
+	m_free_text << "		selection.removeAllRanges();\n";
+	m_free_text << "		selection.addRange(range);\n";
+	m_free_text << "	}\n";
+	m_free_text << "}\n";
+	m_free_text << "\n";
+	m_free_text << "</script>\n";
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::analyzeTracks --
+//
+
+void Tool_humsheet::analyzeTracks(HumdrumFile& infile) {
+	m_max_track = infile.getMaxTrack();
+	m_max_subtrack.resize(m_max_track);
+	std::fill(m_max_subtrack.begin(), m_max_subtrack.end(), 0);
+	vector<int> current(m_max_track, 0);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		fill(current.begin(), current.end(), 0);
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			track--;  // 0-indexing tracks
+			current.at(track)++;
+			if (current.at(track) > m_max_subtrack.at(track)) {
+				m_max_subtrack[track] = current[track];
+			}
+		}
+	}
+
+	m_max_field = 0;
+	for (int i=0; i<(int)m_max_subtrack.size(); i++) {
+		m_max_field += m_max_subtrack[i];
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_humsheet::analyzeTabIndex --
+//
+
+void Tool_humsheet::analyzeTabIndex(HumdrumFile& infile) {
+	int scount = infile.getStrandCount();
+	int counter = 1;
+	for (int i=0; i<scount; i++) {
+		HTp start = infile.getStrandStart(i);
+		HTp stop = infile.getStrandEnd(i);
+		HTp current = start;
+		while (current && (current != stop)) {
+			string number = to_string(counter++);
+			current->setValue("auto", "tabindex", number);
+			current = current->getNextToken();
+		}
+	}
+}
+
+
+
+
+
+/////////////////////////////////
+//
 // Tool_humsort::Tool_humsort -- Set the recognized options for the tool.
 //
 
@@ -57328,7 +60001,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data = true;
 						results.at(v1).at(line1) += "b";
-						HumdrumLine* humline = attacks.at(v1).at(i)->getToken()->getOwner();
+						HLp humline = attacks.at(v1).at(i)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();
@@ -57435,7 +60108,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data2 = true;
 						results.at(v2).at(line2) += "b";
-						HumdrumLine* humline = attacks.at(v2).at(j)->getToken()->getOwner();
+						HLp humline = attacks.at(v2).at(j)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();
@@ -57925,6 +60598,214 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 	}
 	m_humdrum_text << "\n";
 }
+
+
+
+
+/////////////////////////////////
+//
+// Tool_kernview::Tool_kernview -- Set the recognized options for the tool.
+//
+
+Tool_kernview::Tool_kernview(void) {
+	define("v|view|s|show=s", "view the list of spines");
+	define("g=s", "Regular expression of kern spines to view");
+	define("G=s", "Regular expression of kern spines to hide");
+	define("h|hide|r|remove=s", "hide the list of spines");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_kernview::run -- Do the main work of the tool.
+//
+
+bool Tool_kernview::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_kernview::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_kernview::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_kernview::run(HumdrumFile& infile) {
+	initialize(infile);
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernview::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_kernview::initialize(HumdrumFile& infile) {
+	m_view_string = getString("view");
+	m_hide_string = getString("hide");
+	if (getBoolean("g")) {
+		m_view_string = getKernString(infile, getString("g"));
+	}
+	if (getBoolean("G")) {
+		m_hide_string = getKernString(infile, getString("G"));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernview::getKernString -- Return a list of the **kern spines that match to the given
+//    comman-separated list of patterns.
+//
+
+string Tool_kernview::getKernString(HumdrumFile& infile, const string& list) {
+	HumRegex hre;
+	vector<string> pieces;
+	hre.split(pieces, list, "\\s*,\\s*");
+	string output;
+	vector<HTp> starts = infile.getKernSpineStartList();
+	vector<bool> targets(starts.size(), false);
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces.empty()) {
+			continue;
+		}
+		for (int j=0; j<(int)starts.size(); j++) {
+			if (targets[j]) {
+				continue;
+			}
+			HTp current = starts[j];
+			while (current) {
+				if (current->isData()) {
+					break;
+				}
+				if (hre.search(current, pieces[i])) {
+					targets[j] = true;
+					break;
+				}
+				current = current->getNextToken();
+			}
+		}
+	}
+
+	for (int i=0; i<(int)targets.size(); i++) {
+		if (targets[i]) {
+			if (output.empty()) {
+				output += to_string(i+1);
+			} else {
+				output += "," + to_string(i+1);
+			}
+		}
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernview::processFile --
+//
+
+void Tool_kernview::processFile(HumdrumFile& infile) {
+	if (m_view_string.empty() && m_hide_string.empty()) {
+		return;
+	}
+
+	int count = 0;
+	vector<HTp> spines;
+	infile.getSpineStartList(spines);
+	vector<HTp> kernish;
+	for (int i=0; i<(int)spines.size(); i++) {
+		string exinterp = spines[i]->getDataType();
+		if (exinterp.find("kern") != string::npos) {
+			count++;
+			kernish.push_back(spines[i]);
+		}
+	}
+
+	if (kernish.empty()) {
+		return;
+	}
+
+	vector<int> viewlist;
+	vector<int> hidelist;
+	if (!m_view_string.empty()) {
+		viewlist = Convert::extractIntegerList(m_view_string, count);
+
+		// First hide every kernish spine:
+		for (int i=0; i<(int)kernish.size(); i++) {
+			kernish[i]->setText("**kernyy");
+		}
+		// Then show given kernish spines:
+		for (int i=0; i<(int)viewlist.size(); i++) {
+			int value = viewlist[i];
+			value--;
+			if (value < 0) {
+				continue;
+			}
+			if (value >= (int)kernish.size()) {
+				// invalid: too large of a spine number
+				continue;
+			}
+			kernish[value]->setText("**kern");
+		}
+
+	} else if (!m_hide_string.empty()) {
+		hidelist = Convert::extractIntegerList(m_hide_string, count);
+
+		// First show every kernish spine:
+		for (int i=0; i<(int)kernish.size(); i++) {
+			kernish[i]->setText("**kern");
+		}
+		// Then hide given kernish spines:
+		for (int i=0; i<(int)hidelist.size(); i++) {
+			int value = hidelist[i];
+			value--;
+			if (value < 0) {
+				continue;
+			}
+			if (value >= (int)kernish.size()) {
+				// invalid: too large of a spine number
+				continue;
+			}
+			kernish[value]->setText("**kernyy");
+		}
+	}
+
+	int line = kernish[0]->getLineIndex();
+	infile[line].createLineFromTokens();
+
+}
+
 
 
 
@@ -58438,7 +61319,9 @@ void Tool_mei2hum::parseScoreDef(xml_node scoreDef, HumNum starttime) {
 		} else if (nodename == "pgHead") {
 		    processPgHead(item, starttime);
 		} else if (nodename == "pgFoot") {
-		    processPgFoot(item, starttime);
+		   processPgFoot(item, starttime);
+		} else if (nodename == "keySig") { // drizo
+			processKeySig(m_scoreDef.global, item, starttime); // drizo
 		} else {
 			cerr << DKHTP << scoreDef.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -58560,6 +61443,8 @@ void Tool_mei2hum::getRecursiveSDString(string& output, xml_node current) {
 		return;
 	} else if (name == "pgFoot") {
 		return;
+	} else if (name == "keySig") { // drizo
+		return;
 	} else {
 		cerr << "Unknown element in scoreDef descendant: " << name << endl;
 	}
@@ -58587,6 +61472,44 @@ void Tool_mei2hum::processPgFoot(xml_node pgFoot, HumNum starttime) {
 void Tool_mei2hum::processPgHead(xml_node pgHead, HumNum starttime) {
 	NODE_VERIFY(pgHead, )
 	return;
+}
+ 
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::processKeySig -- Convert MEI key signature to Humdrum.
+//
+
+void Tool_mei2hum::processKeySig(mei_staffDef& staffinfo, xml_node keysig, HumNum starttime) {
+	MAKE_CHILD_LIST(children, keysig);
+	string token = "*k[";
+	for (xml_node item : children) {
+		string pname = item.attribute("pname").value(); 			
+		string accid = item.attribute("accid").value();
+		if (pname.empty()) {
+			continue;
+		}
+		token += pname;
+		if (accid == "s") {
+			token += "#";
+		} else if (accid == "f") {
+			token += "-";
+		} else if (accid.empty() || accid == "n") {
+			token += "n";
+		} else if (accid == "ss") {
+			token += "##";
+		} else if (accid == "x") {
+			token += "##";
+		} else if (accid == "ff") {
+			token += "--";
+		} else {
+			token += "?";
+		}
+	}
+	token += "]";
+
+	staffinfo.keysig = token;
 }
 
 
@@ -59289,6 +62212,8 @@ HumNum Tool_mei2hum::parseMeasure(xml_node measure, HumNum starttime) {
 		gm->setFinalBarlineStyle();
 	} else if (rightstyle == "rptend") {
 		gm->setRepeatBackwardStyle();
+	} else if (rightstyle == "invis") {
+		gm->setInvisibleBarline();
 	}
 
 	if (overfilledQ) {
@@ -59652,6 +62577,8 @@ HumNum Tool_mei2hum::parseBeam(xml_node beam, HumNum starttime) {
 			starttime = parseChord(children[i], starttime, 0);
 		} else if (nodename == "tuplet") {
 			starttime = parseTuplet(children[i], starttime);
+		} else if (nodename == "clef") { //drizo
+			parseClef(children[i], starttime);
 		} else {
 			cerr << DKHTP << beam.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -62689,6 +65616,9 @@ void Tool_melisma::getNoteCountsForLyric(vector<vector<int>>& counts, HTp lyricS
 //
 
 int Tool_melisma::getCountForSyllable(HTp token) {
+	if (token->back() == '&') {
+		return 1;
+	}
 	HTp nexttok = token->getNextToken();
 	int eline   = token->getLineIndex();
 	int efield  = token->getFieldIndex();
@@ -64539,6 +67469,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		trillspell.run(outfile);
 	}
 
+	if (m_hasTremoloQ) {
+		Tool_tremolo tremolo;
+		tremolo.run(outfile);
+	}
+
 	if (m_software == "sibelius") {
 		// Needed at least for Sibelius 19.5/Dolet 6.6 for Sibelius
 		// where grace note groups are not beamed in the MusicXML export.
@@ -65309,6 +68244,10 @@ void Tool_musicxml2hum::insertPartNames(HumGrid& outdata, vector<MxmlPart>& part
 				// ignore SharpEye dummy part names
 				continue;
 			}
+			if (partname.find("Unnamed") != string::npos) {
+				// ignore Sibelius dummy part names
+				continue;
+			}
 			string name = "*I\"" + partname;
 			maxstaff = outdata.getStaffCount(i);
 			gm->addLabelToken(name, 0, i, maxstaff-1, 0, (int)partdata.size(), maxstaff);
@@ -65373,7 +68312,7 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 //
 
 void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
-		vector<HumdrumLine*> measures) {
+		vector<HLp> measures) {
 
    HumdrumToken* token;
 	for (int i=0; i<outfile.getLineCount(); i++) {
@@ -65398,7 +68337,7 @@ void Tool_musicxml2hum::cleanupMeasures(HumdrumFile& outfile,
 //
 
 void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 	token = new HumdrumToken("=");
 	line->appendToken(token);
@@ -65416,7 +68355,7 @@ void Tool_musicxml2hum::insertSingleMeasure(HumdrumFile& outfile) {
 void Tool_musicxml2hum::insertAllToken(HumdrumFile& outfile,
 		vector<MxmlPart>& partdata, const string& common) {
 
-	HumdrumLine* line = new HumdrumLine;
+	HLp line = new HumdrumLine;
 	HumdrumToken* token;
 
 	int i, j;
@@ -65903,6 +68842,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote);
+		if (postfix.find("@") != string::npos) {
+			m_hasTremoloQ = true;
+		}
 		bool grace     = event->isGrace();
 		int slurstarts = event->hasSlurStart(slurdirs);
 		int slurstops = event->hasSlurStop();
@@ -67640,6 +70582,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	bool hastransposition  = false;
 	bool hastimesig        = false;
 	bool hasottava         = false;
+	bool hasstafflines     = false;
 
 	vector<vector<xml_node>> clefs(partdata.size());
 	vector<vector<xml_node>> keysigs(partdata.size());
@@ -67647,6 +70590,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	vector<vector<xml_node>> timesigs(partdata.size());
 	vector<vector<vector<xml_node>>> ottavas(partdata.size());
 	vector<vector<xml_node>> hairpins(partdata.size());
+	vector<vector<xml_node>> stafflines(partdata.size());
 
 	vector<vector<vector<vector<MxmlEvent*>>>> gracebefore(partdata.size());
 	vector<vector<vector<vector<MxmlEvent*>>>> graceafter(partdata.size());
@@ -67682,6 +70626,21 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 
 					if (nodeType(child, "transpose")) {
+						transpositions[pindex].push_back(child);
+						hastransposition = true;
+						foundnongrace = true;
+					}
+
+					if (nodeType(child, "staff-details")) {
+						grandchild = child.first_child();
+						while (grandchild) {
+							if (nodeType(grandchild, "staff-lines")) {
+								stafflines[pindex].push_back(grandchild);
+								hasstafflines = true;
+							}
+							grandchild = grandchild.next_sibling();
+						}
+
 						transpositions[pindex].push_back(child);
 						hastransposition = true;
 						foundnongrace = true;
@@ -67729,6 +70688,10 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 	}
 
 	addGraceLines(outdata, gracebefore, partdata, nowtime);
+
+	if (hasstafflines) {
+		addStriaLine(outdata, stafflines, partdata, nowtime);
+	}
 
 	if (hasclef) {
 		addClefLine(outdata, clefs, partdata, nowtime);
@@ -67942,6 +70905,33 @@ void Tool_musicxml2hum::addClefLine(GridMeasure* outdata,
 
 //////////////////////////////
 //
+// Tool_musicxml2hum::addStriaLine --
+//
+
+void Tool_musicxml2hum::addStriaLine(GridMeasure* outdata,
+		vector<vector<xml_node> >& stafflines, vector<MxmlPart>& partdata,
+		HumNum nowtime) {
+
+	GridSlice* slice = new GridSlice(outdata, nowtime,
+		SliceType::Stria);
+	outdata->push_back(slice);
+	slice->initializePartStaves(partdata);
+
+	for (int i=0; i<(int)partdata.size(); i++) {
+		for (int j=0; j<(int)stafflines[i].size(); j++) {
+			if (stafflines[i][j]) {
+				string lines = stafflines[i][j].child_value();
+				int linecount = stoi(lines);
+				insertPartStria(linecount, *slice->at(i));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_musicxml2hum::addTimeSigLine --
 //
 
@@ -68111,6 +71101,23 @@ void Tool_musicxml2hum::insertPartClefs(xml_node clef, GridPart& part) {
 		clef = convertClefToHumdrum(clef, token, staffnum);
 		part[staffnum]->setTokenLayer(0, token, 0);
 	}
+
+	// go back and fill in all NULL pointers with null interpretations
+	fillEmpties(&part, "*");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::insertPartStria --
+//
+
+void Tool_musicxml2hum::insertPartStria(int lines, GridPart& part) {
+	HTp token = new HumdrumToken;
+	string value = "*stria" + to_string(lines);
+	token->setText(value);
+	part[0]->setTokenLayer(0, token, 0);
 
 	// go back and fill in all NULL pointers with null interpretations
 	fillEmpties(&part, "*");
@@ -68751,7 +71758,7 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	}
 
 	string sign;
-	int line = 0;
+	int line = -1000;
 	int octadjust = 0;
 
 	xml_node child = clef.first_child();
@@ -68781,7 +71788,9 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 			ss << "^";
 		}
 	}
-	ss << line;
+	if (line > 0) {
+		ss << line;
+	}
 	token = new HumdrumToken(ss.str());
 
 	clef = clef.next_sibling();
@@ -68925,7 +71934,7 @@ bool Tool_musicxml2hum::nodeType(xml_node node, const char* testname) {
 // Tool_musicxml2hum::appendNullTokens --
 //
 
-void Tool_musicxml2hum::appendNullTokens(HumdrumLine* line,
+void Tool_musicxml2hum::appendNullTokens(HLp line,
 		MxmlPart& part) {
 	int i;
 	int staffcount = part.getStaffCount();
@@ -69229,9 +72238,9 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getChildrenVector -- Return a list of all children elements
-//   of a given element.  Pugixml does not allow random access, but storing
-//   them in a vector allows that possibility.
+// Tool_musicxml2hum::getChildrenVector -- Return a list of all children
+//   elements of a given element.  Pugixml does not allow random access,
+//   but storing them in a vector allows that possibility.
 //
 
 void Tool_musicxml2hum::getChildrenVector(vector<xml_node>& children,
@@ -77788,8 +80797,8 @@ void Tool_tassoize::deleteBreaks(HumdrumFile& infile) {
 //
 
 void Tool_tassoize::addBibliographicRecords(HumdrumFile& infile) {
-	std::vector<HumdrumLine*> refinfo = infile.getReferenceRecords();
-	std::map<string, HumdrumLine*> refs;
+	std::vector<HLp> refinfo = infile.getReferenceRecords();
+	std::map<string, HLp> refs;
 	for (int i=0; i<(int)refinfo.size(); i++) {
 		string key = refinfo[i]->getReferenceKey();
 		refs[key] = refinfo[i];
@@ -78878,7 +81887,9 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				}
 
 				// check for key signature in a spine which is being
-				// transposed, and adjust it.
+				// transposed, and adjust it. 
+				// Should also check tandem spines for updating
+				// key signatures in non-kern spines.
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
 						hre.search(infile.token(i, j),
 							"^\\*k\\[([a-gA-G#-]*)\\]", "i")) {
@@ -78890,10 +81901,12 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 						continue;
 				}
 
-				// check for key tandem interpretation and tranpose
+				// Check for key designations and tranpose
 				// if the spine data is being transposed.
-
-				if (hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
+				// Should also check tandem spines for updating
+				// key designations in non-kern spines.
+				if (spineprocess[infile.token(i, j)->getTrack()] &&
+						hre.search(infile.token(i, j), "^\\*([A-G])[#-]?:", "i")) {
 					diatonic = tolower(hre.getMatch(1)[0]) - 'a';
 					if (diatonic >= 0 && diatonic <= 6) {
 					  	printNewKeyInterpretation(infile[i], j, transval);
@@ -79772,7 +82785,6 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 	ssettonic    =  Convert::kernToBase40(getString("settonic").c_str());
 	autoQ        =  getBoolean("auto");
 	debugQ       =  getBoolean("debug");
-	spineQ       =  getBoolean("spines");
 	spinestring  =  getString("spines");
 	octave       =  getInteger("octave");
 	concertQ     =  getBoolean("concert");
@@ -79802,6 +82814,563 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 
 	transval += 40 * octave;
 }
+
+
+
+
+/////////////////////////////////
+//
+// Tool_tremolo::Tool_tremolo -- Set the recognized options for the tool.
+//
+
+Tool_tremolo::Tool_tremolo(void) {
+	define("k|keep=b", "Keep tremolo rhythm markup");
+	define("F|no-fill=b", "Do not fill in tremolo spaces");
+	define("T|no-tremolo-interpretation=b", "Do not add *tremolo/*Xtremolo marks");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_tremolo::run -- Do the main work of the tool.
+//
+
+bool Tool_tremolo::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_tremolo::run(HumdrumFile& infile) {
+	processFile(infile);
+
+	// Force reprocessing of file for now (does not seem to be
+	// completely updated in javascript):
+	stringstream ss;
+	ss << infile;
+	infile.readString(ss.str());
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::processFile --
+//
+
+void Tool_tremolo::processFile(HumdrumFile& infile) {
+	m_keepQ = getBoolean("keep");
+	m_first_tremolo_time.clear();
+	m_last_tremolo_time.clear();
+	int maxtrack = infile.getMaxTrack();
+	m_first_tremolo_time.resize(maxtrack+1);
+	m_last_tremolo_time.resize(maxtrack+1);
+	fill(m_first_tremolo_time.begin(), m_first_tremolo_time.end(), -1);
+	fill(m_last_tremolo_time.begin(), m_last_tremolo_time.end(), -1);
+	HumRegex hre;
+	m_markup_tokens.reserve(1000);
+	for (int i=infile.getLineCount()-1; i>=0; i--) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (infile[i].getDuration() == 0) {
+			// don't deal with grace notes
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+
+			if (hre.search(token, "@(\\d+)@")) {
+				m_markup_tokens.push_back(token);
+				int value = hre.getMatchInt(1);
+				HumNum duration = Convert::recipToDuration(token);
+				HumNum count = duration;
+				count *= value;
+				count /= 4;
+				HumNum increment = 4;
+				increment /= value;
+
+				if (token->find("@@") != string::npos) {
+					count *= 2;
+				}
+
+				if (!count.isInteger()) {
+					cerr << "Error: time value cannot be used: " << value << endl;
+					continue;
+				}
+				int kcount = count.getNumerator();
+				HumNum starttime = token->getDurationFromStart();
+				HumNum timestamp;
+				for (int k=1; k<kcount; k++) {
+					timestamp = starttime + (increment * k);
+					infile.insertNullDataLine(timestamp);
+				}
+			}
+
+		}
+	}
+
+	if (!getBoolean("no-fill")) {
+		expandTremolos();
+		if (!getBoolean("no-tremolo-interpretation")) {
+			addTremoloInterpretations(infile);
+		}
+	} else if (!m_keepQ) {
+		removeMarkup();
+	}
+
+	if (m_modifiedQ) {
+		infile.createLinesFromTokens();
+	}
+
+	// m_humdrum_text << infile;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::addTremoloInterpretations --
+//
+
+void Tool_tremolo::addTremoloInterpretations(HumdrumFile& infile) {
+
+	// Insert starting *tremolo
+	for (int i=0; i<(int)m_first_tremolo_time.size(); i++) {
+		if (m_first_tremolo_time[i] < 0) {
+			continue;
+		}
+		HLp line = infile.insertNullInterpretationLine(m_first_tremolo_time[i]);
+		if (line != NULL) {
+			for (int j=0; j<line->getFieldCount(); j++) {
+				HTp token = line->token(j);
+				int track = token->getTrack();
+				int subtrack = token->getSubtrack();
+				if (subtrack > 1) {
+					// Currently *tremolo affects all subtracks, but this
+					// will probably change in the future.
+					continue;
+				}
+				if (track == i) {
+					token->setText("*tremolo");
+					line->createLineFromTokens();
+				}
+			}
+		}
+	}
+
+	// Insert ending *Xtremolo
+	for (int i=0; i<(int)m_last_tremolo_time.size(); i++) {
+		if (m_last_tremolo_time[i] < 0) {
+			continue;
+		}
+		HLp line = infile.insertNullInterpretationLineAbove(m_last_tremolo_time[i]);
+		if (line != NULL) {
+			for (int j=0; j<line->getFieldCount(); j++) {
+				HTp token = line->token(j);
+				int track = token->getTrack();
+				int subtrack = token->getSubtrack();
+				if (subtrack > 1) {
+					// Currently *tremolo affects all subtracks, but this
+					// will probably change in the future.
+					continue;
+				}
+				if (track == i) {
+					token->setText("*Xtremolo");
+					line->createLineFromTokens();
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::expandTremolos --
+//
+
+void Tool_tremolo::expandTremolos(void) {
+	for (int i=0; i<(int)m_markup_tokens.size(); i++) {
+		if (m_markup_tokens[i]->find("@@") != string::npos) {
+			expandFingerTremolo(m_markup_tokens[i]);
+		} else {
+			expandTremolo(m_markup_tokens[i]);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::expandTremolos --
+//
+
+void Tool_tremolo::expandTremolo(HTp token) {
+	HumRegex hre;
+	int value = 0;
+	HumNum duration;
+	HumNum repeat;
+	HumNum increment;
+	int tnotes = -1;
+	if (hre.search(token, "@(\\d+)@")) {
+		value = hre.getMatchInt(1);
+		if (!Convert::isPowerOfTwo(value)) {
+			cerr << "Error: not a power of two: " << token << endl;
+			return;
+		}
+		if (value < 8) {
+			cerr << "Error: tremolo can only be eighth-notes or shorter" << endl;
+			return;
+		}
+		duration = Convert::recipToDuration(token);
+		repeat = duration;
+		repeat *= value;
+		repeat /= 4;
+		increment = 4;
+		increment /= value;
+		if (!repeat.isInteger()) {
+			cerr << "Error: tremolo repetition count must be an integer: " << token << endl;
+			return;
+		}
+		tnotes = repeat.getNumerator();
+	} else {
+		return;
+	}
+
+	storeFirstTremoloNoteInfo(token);
+
+	int beams = log((double)(value))/log(2.0) - 2;
+	string markup = "@" + to_string(value) + "@";
+	string base = token->getText();
+	hre.replaceDestructive(base, "", markup, "g");
+	// Currently not allowed to add tremolo to beamed notes, so remove all beaming:
+	hre.replaceDestructive(base, "", "[LJKk]+", "g");
+	string startbeam;
+	string endbeam;
+	for (int i=0; i<beams; i++) {
+		startbeam += 'L';
+		endbeam   += 'J';
+	}
+	// Set the rhythm of the tremolo notes.
+	// Augmentation dot is expected adjacent to regular rhythm value.
+	// Maybe allow anywhere?
+	hre.replaceDestructive(base, to_string(value), "\\d+%?\\d*\\.*", "g");
+	string initial = base + startbeam;
+	// remove slur end from start of tremolo:
+	hre.replaceDestructive(initial, "", "[)]+[<>]?", "g");
+	if (m_keepQ) {
+		initial += markup;
+	}
+	string terminal = base + endbeam;
+	// remove slur start information from end of tremolo:
+	hre.replaceDestructive(terminal, "", "[(]+[<>]?", "g");
+
+	// remove slur information from middle of tremolo:
+	hre.replaceDestructive(base, "", "[()]+[<>]?", "g");
+
+	token->setText(initial);
+	token->getOwner()->createLineFromTokens();
+
+	// Now fill in the rest of the tremolos.
+	HumNum starttime = token->getDurationFromStart();
+	HumNum timestamp = starttime + increment;
+	HTp current = token->getNextToken();
+	int counter = 1;
+	while (current) {
+		if (!current->isData()) {
+			// Also check if line is non-zero duration (not a grace-note line).
+			current = current->getNextToken();
+			continue;
+		}
+		HumNum cstamp = current->getDurationFromStart();
+		if (cstamp < timestamp) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (cstamp > timestamp) {
+			cerr << "\tWarning: terminating tremolo insertion early" << endl;
+			cerr << "\tCSTAMP : " << cstamp << " TSTAMP " << timestamp << endl;
+			break;
+		}
+		counter++;
+		if (tnotes == counter) {
+			current->setText(terminal);
+			storeLastTremoloNoteInfo(current);
+		} else {
+			current->setText(base);
+		}
+		current->getOwner()->createLineFromTokens();
+		if (counter >= tnotes) {
+			// done with inserting of tremolo notes.
+			break;
+		}
+		timestamp += increment;
+		current = current->getNextToken();
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_tremolo::getNextNote --
+//
+
+HTp Tool_tremolo::getNextNote(HTp token) {
+	HTp output = NULL;
+	HTp current = token->getNextToken();
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->getDuration() == 0) {
+			// ignore grace notes
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull() || current->isRest()) {
+			current = current->getNextToken();
+			continue;
+		}
+		output = current;
+		break;
+	}
+
+	return output;
+}
+
+
+//////////////////////////////
+//
+// Tool_tremolo::expandFingerTremolos --
+//
+
+void Tool_tremolo::expandFingerTremolo(HTp token1) {
+	HTp token2 = getNextNote(token1);
+	if (token2 == NULL) {
+		return;
+	}
+	HumRegex hre;
+	int value = 0;
+	HumNum duration;
+	HumNum repeat;
+	HumNum increment;
+	int tnotes = -1;
+	if (hre.search(token1, "@@(\\d+)@@")) {
+		value = hre.getMatchInt(1);
+		if (!Convert::isPowerOfTwo(value)) {
+			cerr << "Error: not a power of two: " << token1 << endl;
+			return;
+		}
+		if (value < 8) {
+			cerr << "Error: tremolo can only be eighth-notes or shorter" << endl;
+			return;
+		}
+		duration = Convert::recipToDuration(token1);
+		HumNum count = duration;
+
+		count *= value;
+		count /= 4;
+		if (!count.isInteger()) {
+			cerr << "Error: tremolo repetition count must be an integer: " << token1 << endl;
+			return;
+		}
+		increment = 4;
+		increment /= value;
+
+		tnotes = count.getNumerator() * 2;
+	} else {
+		return;
+	}
+
+	storeFirstTremoloNoteInfo(token1);
+
+	int beams = log((double)(value))/log(2.0) - 2;
+	string markup = "@@" + to_string(value) + "@@";
+
+	string base1 = token1->getText();
+	hre.replaceDestructive(base1, "", markup, "g");
+	// Currently not allowed to add tremolo to beamed notes, so remove all beaming:
+	hre.replaceDestructive(base1, "", "[LJKk]+", "g");
+	string startbeam;
+	string endbeam;
+	for (int i=0; i<beams; i++) {
+		startbeam += 'L';
+		endbeam   += 'J';
+	}
+
+	// Set the rhythm of the tremolo notes.
+	// Augmentation dot is expected adjacent to regular rhythm value.
+	// Maybe allow anywhere?
+	hre.replaceDestructive(base1, to_string(value), "\\d+%?\\d*\\.*", "g");
+	string initial = base1 + startbeam;
+	// remove slur end from start of tremolo:
+	hre.replaceDestructive(initial, "", "[)]+[<>]?", "g");
+	if (m_keepQ) {
+		initial += markup;
+	}
+
+	// remove slur information from middle of tremolo:
+	hre.replaceDestructive(base1, "", "[()]+[<>]?", "g");
+
+	token1->setText(initial);
+	token1->getOwner()->createLineFromTokens();
+
+	string base2 = token2->getText();
+	hre.replaceDestructive(base2, "", "[LJKk]+", "g");
+	hre.replaceDestructive(base2, to_string(value), "\\d+%?\\d*\\.*", "g");
+
+	string terminal = base2 + endbeam;
+	// remove slur start information from end of tremolo:
+	hre.replaceDestructive(terminal, "", "[(]+[<>]?", "g");
+
+	bool state = false;
+
+	// Now fill in the rest of the tremolos.
+	HumNum starttime = token1->getDurationFromStart();
+	HumNum timestamp = starttime + increment;
+	HTp current = token1->getNextToken();
+	int counter = 1;
+	while (current) {
+		if (!current->isData()) {
+			// Also check if line is non-zero duration (not a grace-note line).
+			current = current->getNextToken();
+			continue;
+		}
+		HumNum cstamp = current->getDurationFromStart();
+		if (cstamp < timestamp) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (cstamp > timestamp) {
+			cerr << "\tWarning: terminating tremolo insertion early" << endl;
+			cerr << "\tCSTAMP : " << cstamp << " TSTAMP " << timestamp << endl;
+			break;
+		}
+		counter++;
+		if (tnotes == counter) {
+			current->setText(terminal);
+			storeLastTremoloNoteInfo(current);
+		} else {
+			if (state) {
+				current->setText(base1);
+			} else {
+				current->setText(base2);
+			}
+			state = !state;
+		}
+		current->getOwner()->createLineFromTokens();
+		if (counter >= tnotes) {
+			// done with inserting of tremolo notes.
+			break;
+		}
+		timestamp += increment;
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::removeMarkup --  Remove markup such as "@16@" from tokens.
+//
+
+void Tool_tremolo::removeMarkup(void) {
+	if (m_markup_tokens.empty()) {
+		return;
+	}
+	HumRegex hre;
+	for (int i=0; i<(int)m_markup_tokens.size(); i++) {
+		HTp token = m_markup_tokens[i];
+		string text = *token;
+		hre.replaceDestructive(text, "", "@+\\d+@+");
+		token->setText(text);
+		token->getOwner()->createLineFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeFirstTremoloNote --
+//
+
+void Tool_tremolo::storeFirstTremoloNoteInfo(HTp token) {
+	int track = token->getTrack();
+	HumNum timestamp = token->getDurationFromStart();
+	if (m_first_tremolo_time.at(track) < 0) {
+		m_first_tremolo_time.at(track) = timestamp;
+	} else if (timestamp < m_first_tremolo_time.at(track)) {
+		// This case is probably not necessary.
+		m_first_tremolo_time.at(track) = timestamp;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tremolo::storeLastTremoloNote --
+//
+
+void Tool_tremolo::storeLastTremoloNoteInfo(HTp token) {
+	if (!token) {
+		return;
+	}
+	int track = token->getTrack();
+	if (track < 1) {
+		cerr << "Track is not set for token: " << track << endl;
+		return;
+	}
+	HumNum timestamp = token->getDurationFromStart();
+	timestamp += token->getDuration();
+	if (m_last_tremolo_time.at(track) < 0) {
+		m_last_tremolo_time.at(track) = timestamp;
+	} else if (timestamp > m_last_tremolo_time.at(track)) {
+		m_last_tremolo_time.at(track) = timestamp;
+	}
+}
+
 
 
 

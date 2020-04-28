@@ -184,7 +184,7 @@ bool HumdrumFileContent::prependDataSpine(std::vector<DATATYPE> data,
 
 	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
-	HumdrumLine* line;
+	HLp line;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		line = infile.getLine(i);
 		if (!line->hasSpines()) {
@@ -261,7 +261,7 @@ bool HumdrumFileContent::appendDataSpine(std::vector<DATATYPE> data,
 
 	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
-	HumdrumLine* line;
+	HLp line;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		line = infile.getLine(i);
 		if (!line->hasSpines()) {
@@ -341,7 +341,7 @@ bool HumdrumFileContent::insertDataSpineBefore(int nexttrack,
 
 	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
-	HumdrumLine* line;
+	HLp line;
 	int insertionField = -1;
 	int track;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -436,7 +436,7 @@ bool HumdrumFileContent::insertDataSpineAfter(int prevtrack,
 
 	std::stringstream ss;
 	HumdrumFileContent& infile = *this;
-	HumdrumLine* line;
+	HLp line;
 	int insertionField = -1;
 	int track;
 	for (int i=0; i<infile.getLineCount(); i++) {

@@ -44,7 +44,7 @@ class Tool_autostem : public HumTool {
 		void     initialize            (HumdrumFile& infile);
 		void      example              (void);
 		void      usage                (void);
-		void      autostem             (HumdrumFile& infile);
+		bool      autostem             (HumdrumFile& infile);
 		void      getClefInfo          (vector<vector<int> >& baseline,
 		                                HumdrumFile& infile);
 		void      addStem              (string& input, const string& piece);
@@ -65,7 +65,7 @@ class Tool_autostem : public HumTool {
 		                                vector<vector<int> >& baseline, int row, int col);
 		void      getMaxLayers         (vector<int>& maxlayer, vector<vector<int> >& voice,
 		                                HumdrumFile& infile);
-		void      assignStemDirections (vector<vector<int> >& stemdir,
+		bool      assignStemDirections (vector<vector<int> >& stemdir,
 		                                vector<vector<int> > & voice,
 		                                vector<vector<vector<int> > >& notepos,
 		                                HumdrumFile& infile);
@@ -80,7 +80,7 @@ class Tool_autostem : public HumTool {
 		                                vector<vector<int> >& stemdir);
 		void      setStemDirection     (HumdrumFile& infile, int row, int col,
 		                                int direction);
-		void      getBeamState         (vector<vector<string > >& beams,
+		bool      getBeamState         (vector<vector<string > >& beams,
 		                                HumdrumFile& infile);
 		void      countBeamStuff       (const string& token, int& start, int& stop,
 		                                int& flagr, int& flagl);

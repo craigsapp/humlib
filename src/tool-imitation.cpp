@@ -411,7 +411,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data = true;
 						results.at(v1).at(line1) += "b";
-						HumdrumLine* humline = attacks.at(v1).at(i)->getToken()->getOwner();
+						HLp humline = attacks.at(v1).at(i)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();
@@ -518,7 +518,7 @@ void Tool_imitation::analyzeImitation(vector<vector<string>>& results,
 						}
 						data2 = true;
 						results.at(v2).at(line2) += "b";
-						HumdrumLine* humline = attacks.at(v2).at(j)->getToken()->getOwner();
+						HLp humline = attacks.at(v2).at(j)->getToken()->getOwner();
 						stringstream ss;
 						ss.str("");
 						ss << humline->getBeat().getFloat();

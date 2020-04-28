@@ -1062,6 +1062,19 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 			tempvoice = -1;
 			m_staff = -1;
 			tempstaff = -1;
+		} else {
+			// xml_node nel = el.next_sibling();
+			// Need to check if the forward element should be interpreted
+			// as an invisible rests.  Check to see if the previous and next
+			// element are notes.  If so, then check their voice numbers and
+			// if equal, then this forward element should be an invisible rest.
+			// But this is true only if there is no other event happening
+			// at the current position in the other voice(s) on the staff (or
+			// perhaps include other staves on the system and/or part.
+
+			// So this case might need to be addressed at a later stage when
+			// the score is assembled, such as when adding null tokens, and a
+			// null spot is located in the score.
 		}
 	}
 
@@ -1107,7 +1120,11 @@ bool MxmlEvent::parseEvent(xml_node el, xml_node nextel, HumNum starttime) {
 					m_eventtype = mevent_unknown;
 				}
 			} else if (tempduration < 4) {
-				cerr << "FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				// Warn about possible other errors:
+				double fraction = (double)tempduration / getQTicks();
+				if (fraction < 0.01) {
+					cerr << "WARNING: FORWARD WITH A SMALL VALUE " << tempduration << endl;
+				}
 			}
 			setDurationByTicks(tempduration);
 			break;
@@ -1338,6 +1355,7 @@ string MxmlEvent::getKernPitch(void) {
 	bool explicitQ    = false;
 	bool naturalQ     = false;
 	bool editorialQ   = false;
+	bool unpitchedQ   = false;
 	// bool sharpQ       = false;
 	// bool flatQ        = false;
 	// bool doubleflatQ  = false;
@@ -1352,6 +1370,7 @@ string MxmlEvent::getKernPitch(void) {
 				rest = true;
 				break;
 			}
+
 			if (nodeType(child, "pitch")) {
 				xml_node grandchild = child.first_child();
 				while (grandchild) {
@@ -1360,6 +1379,19 @@ string MxmlEvent::getKernPitch(void) {
 					} else if (nodeType(grandchild, "alter")) {
 						alter = atoi(grandchild.child_value());
 					} else if (nodeType(grandchild, "octave")) {
+						octave = atoi(grandchild.child_value());
+					}
+					grandchild = grandchild.next_sibling();
+				}
+			} else if (nodeType(child, "unpitched")) {
+				unpitchedQ = true;
+				xml_node grandchild = child.first_child();
+				while (grandchild) {
+					if (nodeType(grandchild, "display-step")) {
+						step = grandchild.child_value();
+					} else if (nodeType(grandchild, "alter")) {
+						alter = atoi(grandchild.child_value());
+					} else if (nodeType(grandchild, "display-octave")) {
 						octave = atoi(grandchild.child_value());
 					}
 					grandchild = grandchild.next_sibling();
@@ -1415,6 +1447,9 @@ string MxmlEvent::getKernPitch(void) {
 		count = 4 - octave;
 	}
 	string output;
+	if (unpitchedQ) {
+		output += "R";
+	}
 	for (int i=0; i<count; i++) {
 		output += pc;
 	}
@@ -1497,6 +1532,9 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	int tiestart     = 0;
 	int tiestop      = 0;
 
+	bool unpitchedQ  = false;
+	bool stemsQ      = m_stems;
+
 	// bool rest = false;
 	xml_node child = m_node.first_child();
 	xml_node notations;
@@ -1517,8 +1555,10 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 			} else if (strcmp(beaminfo, "backward hook") == 0) {
 				hookbacks++;
 			}
+		} else if (nodeType(child, "unpitched")) {
+			unpitchedQ = true;
 		} else if (nodeType(child, "stem")) {
-			if (m_stems || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
+			if (unpitchedQ || stemsQ || (getVoiceIndex() >= 2) || (getDuration() == 0)) {
 				const char* stemdir = child.child_value();
 				if (strcmp(stemdir, "up") == 0) {
 					stem = 1;
@@ -1542,8 +1582,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	}
 
 	stringstream ss;
-
-	addNotations(ss, notations);
+	addNotations(ss, notations, beamstarts);
 
 	if (primarynote) {
 		// only add these signifiers if this is the first
@@ -1586,7 +1625,8 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 //   TrillTurn (TR or tR).
 //
 
-void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
+void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
+		int beamstarts) const {
 	if (!notations) {
 		return;
 	}
@@ -1601,6 +1641,8 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	bool strongaccent   = false;
 	bool fermata        = false;
 	bool trill          = false;
+	int  tremolo        = 0;
+	bool fingered       = false;
 	bool umordent       = false;
 	bool lmordent       = false;
 	bool upbow          = false;
@@ -1662,6 +1704,22 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 					trill = true;
 				}
 
+            //  <ornaments>
+            //     <tremolo type="single">2</tremolo>
+            //  </ornaments>
+				if (strcmp(grandchild.name(), "tremolo") == 0) {
+					string ttype = grandchild.attribute("type").value();
+					if (ttype == "start") {
+						fingered = true;
+					} else {
+						fingered = false;
+					}
+					if (ttype != "stop") {
+						string tstring = grandchild.child_value();
+						tremolo = 1 << (stoi(tstring) + 2);
+					}
+				}
+
 				// umordent
           	// <ornaments>
           	//   <inverted-mordent default-x="-4" default-y="-65" placement="below"/>
@@ -1695,6 +1753,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 		// figure out whole-tone trills later via trillspell tool:
 		reportOrnamentToOwner();
 	}
+
 	if (fermata)      { ss << ";";  }
 	if (upbow)        { ss << "v";  }
 	if (downbow)      { ss << "u";  }
@@ -1715,6 +1774,17 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations) const {
 	}
 	if (arpeggio)     { ss << ":";  }
 
+	if (tremolo >= 8) {
+		int tvalue = tremolo;
+		if (fingered) {
+			if (beamstarts) {
+				tvalue *= (1 << beamstarts);
+			}
+			ss << "@@" << tvalue << "@@";
+		} else {
+			ss << "@" << tvalue << "@";
+		}
+	}
 }
 
 

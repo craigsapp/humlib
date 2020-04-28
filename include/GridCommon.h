@@ -31,6 +31,7 @@ enum class SliceType {
 		_Data,
 			Measures,
 		_Measure,
+				Stria,
 				Clefs,
 				Transpositions,
 				KeyDesignations,
@@ -61,6 +62,7 @@ enum class SliceType {
 // MeasureType is a list of the style types for a measure (ending type for now)
 
 enum class MeasureStyle {
+	Invisible,
 	Plain,
 	RepeatBackward,
 	RepeatForward,
