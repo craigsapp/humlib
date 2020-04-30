@@ -53,6 +53,9 @@ void processFile(HumdrumFile& infile, Options& options) {
 		trackToPart[track] = part;
 	}
 
+	int tpq = infile.tpq();
+	cout << "# Divisions per quarter = " << tpq << endl;
+	cout << "#tick\tpitch\tabsbeat\tbeat\tid\n";
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isBarline()) {
@@ -65,6 +68,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 		if (!infile[i].isData()) {
 			continue;
 		}
+
 		for (int j = infile[i].getFieldCount() - 1; j >= 0; j--) {
 			HTp token = infile.token(i, j);
 			if (!token->isKern()) {
@@ -90,12 +94,23 @@ void processFile(HumdrumFile& infile, Options& options) {
 					// ignore tie endings
 					continue;
 				}
+
 				int b40 = Convert::kernToBase40(subtokens[k]);
 				int octave = b40 / 40;
 				int accid = Convert::base40ToAccidental(b40);
 				int diatonic = Convert::base40ToDiatonic(b40);
 				diatonic %= 7;
-				cout << allcount++ << "\t";
+
+
+				HumNum absbeat = token->getDurationFromStart();
+				HumNum barpos = token->getDurationFromBarline();
+				HumNum ticks = absbeat * tpq;
+				if (!ticks.isInteger()) {
+					cerr << "Strange problem with ticks: " << ticks << endl;
+				}
+
+				allcount++;
+				cout << ticks << "\t";
 				char pitch = 'C';
 				if (diatonic < 5) {
 					pitch += diatonic;
@@ -115,10 +130,10 @@ void processFile(HumdrumFile& infile, Options& options) {
 				cout << octave;
 
 				cout << "\t";
-				cout << token->getDurationFromStart().getFloat();
+				cout << absbeat.getFloat();
 
 				cout << "\t";
-				cout << token->getDurationFromBarline().getFloat() + 1.0;
+				cout << barpos.getFloat() + 1.0;
 
 				cout << "\t";
 				cout << "P" << part << "-";
