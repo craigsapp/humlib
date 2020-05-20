@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu 30 Apr 2020 12:48:26 PM PDT
+// Last Modified: Wed May 20 00:36:02 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5039,6 +5039,42 @@ class Tool_binroll : public HumTool {
 
 	private:
 		HumNum    m_duration;
+
+};
+
+
+class Tool_chantize : public HumTool {
+	public:
+		         Tool_chantize      (void);
+		        ~Tool_chantize      () {};
+
+		bool     run                (HumdrumFileSet& infiles);
+		bool     run                (HumdrumFile& infile);
+		bool     run                (const string& indata, ostream& out);
+		bool     run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     initialize         (HumdrumFile& infile);
+		void     processFile        (HumdrumFile& infile);
+		void     outputFile         (HumdrumFile& infile);
+		void     updateKeySignatures(HumdrumFile& infile, int lineindex);
+		void     checkDataLine      (HumdrumFile& infile, int lineindex);
+		void     clearStates        (void);
+		void     addBibliographicRecords(HumdrumFile& infile);
+		void     deleteBreaks       (HumdrumFile& infile);
+		void     fixEditorialAccidentals(HumdrumFile& infile);
+		void     fixInstrumentAbbreviations(HumdrumFile& infile);
+		void     addTerminalLongs   (HumdrumFile& infile);
+		void     deleteDummyTranspositions(HumdrumFile& infile);
+		string   getDate            (void);
+		vector<bool> getTerminalRestStates(HumdrumFile& infile);
+		bool     hasDiamondNotes    (HumdrumFile& infile);
+
+	private:
+		vector<vector<int>> m_pstates;
+		vector<vector<int>> m_kstates;
+		vector<vector<bool>> m_estates;
+		bool m_diamondQ = false;
 
 };
 

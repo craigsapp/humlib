@@ -17,6 +17,7 @@
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
 #include "tool-binroll.h"
+#include "tool-chantize.h"
 #include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
@@ -263,6 +264,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "chantize") {
+			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
