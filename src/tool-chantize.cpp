@@ -44,9 +44,6 @@ Tool_chantize::Tool_chantize(void) {
 	define("E|do-not-fix-editorial-accidentals=b", "Do not fix instrument abbreviations");
 	define("e|only-fix-editorial-accidentals=b", "Only fix editorial accidentals");
 
-	define("T|do-not-add-terminal-longs=b", "Do not add terminal long markers");
-	define("t|only-add-terminal-longs=b", "Only add terminal longs");
-
 	define("N|do-not-remove-empty-transpositions=b", "Do not remove empty transposition instructions");
 	define ("n|only-remove-empty-transpositions=b", "Only remove empty transpositions");
 }
@@ -108,7 +105,7 @@ bool Tool_chantize::run(HumdrumFile& infile) {
 //
 // Tool_chantize::outputFile -- 
 //    * remove time signature, 
-//    * remove barlines,
+//    * remove barlines, except double barlines
 //    * convert rests to double barlines (except at the end of the
 //         music).
 //
@@ -140,7 +137,11 @@ void Tool_chantize::outputFile(HumdrumFile& infile) {
 			}
 		} else if (infile[i].isBarline()) {
 			// suppress barlines
-			continue;
+			token = infile.token(i, 0);
+			// but do not suppress double barlines
+			if (token->find("||") == string::npos) {
+				continue;
+			}
 		} else if (infile[i].isData()) {
 			token = infile.token(i, 0);
 			if (token->isRest()) {
@@ -170,8 +171,7 @@ void Tool_chantize::outputFile(HumdrumFile& infile) {
 	if (m_diamondQ) {
 		m_humdrum_text << "!!!RDF**kern: j = diamond note, color=blue\n";
 	}
-	m_humdrum_text << "!!!RDF**kern: { = ligature start\n";
-	m_humdrum_text << "!!!RDF**kern: } = ligature end\n";
+	m_humdrum_text << "!!!RDF**kern: {} = ligature\n";
 }
 
 
@@ -186,7 +186,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 	bool abbreviationsQ  = true;
 	bool accidentalsQ    = true;
 	bool referencesQ     = true;
-	bool terminalsQ      = true;
 	bool breaksQ         = true;
 	bool transpositionsQ = true;
 
@@ -195,7 +194,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = true;
-		terminalsQ      = false;
 		breaksQ         = false;
 		transpositionsQ = false;
 	}
@@ -205,7 +203,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		terminalsQ      = false;
 		breaksQ         = true;
 		transpositionsQ = false;
 	}
@@ -215,7 +212,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = true;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		terminalsQ      = false;
 		breaksQ         = false;
 		transpositionsQ = false;
 	}
@@ -225,17 +221,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = true;
 		referencesQ     = false;
-		terminalsQ      = false;
-		breaksQ         = false;
-		transpositionsQ = false;
-	}
-
-	if (getBoolean("do-not-add-terminal-longs")) { terminalsQ = false; }
-	if (getBoolean("only-add-terminal-longs")) {
-		abbreviationsQ  = false;
-		accidentalsQ    = false;
-		referencesQ     = false;
-		terminalsQ      = true;
 		breaksQ         = false;
 		transpositionsQ = false;
 	}
@@ -245,7 +230,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		terminalsQ      = false;
 		breaksQ         = false;
 		transpositionsQ = true;
 	}
@@ -255,7 +239,6 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 	if (abbreviationsQ)  { fixInstrumentAbbreviations(infile); }
 	if (accidentalsQ)    { fixEditorialAccidentals(infile); }
 	if (referencesQ)     { addBibliographicRecords(infile); }
-	if (terminalsQ)      { addTerminalLongs(infile); }
 //	if (breaksQ)         { deleteBreaks(infile); }
 	if (transpositionsQ) { deleteDummyTranspositions(infile); }
 
@@ -378,54 +361,6 @@ void Tool_chantize::fixEditorialAccidentals(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_chantize::addTerminalLongs -- Convert all last notes to terminal longs
-//    Also probably add terminal longs before double barlines as in JRP.
-//
-
-void Tool_chantize::addTerminalLongs(HumdrumFile& infile) {
-	int scount = infile.getStrandCount();
-	for (int i=0; i<scount; i++) {
-		HTp cur = infile.getStrandEnd(i);
-		if (*cur != "*-") {
-			continue;
-		}
-		if (!cur->isKern()) {
-			continue;
-		}
-		while (cur) {
-			if (!cur->isData()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isNull()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isRest()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->isSecondaryTiedNote()) {
-				cur = cur->getPreviousToken();
-				continue;
-			}
-			if (cur->find("l") != std::string::npos) {
-				// already marked so do not do it again
-				break;
-			}
-			// mark this note with "l"
-			string newtext = *cur;
-			newtext += "l";
-			cur->setText(newtext);
-			break;
-		}
-	}
-}
-
-
-
-//////////////////////////////
-//
 // Tool_chantize::fixInstrumentAbbreviations --
 //
 
@@ -517,11 +452,13 @@ void Tool_chantize::deleteBreaks(HumdrumFile& infile) {
 //
 // Tool_chantize::addBibliographicRecords --
 //
-// !!!AGN: Chant
-// !!!SCT:
-// !!!SCA:
+// !!!folio:
+// !!!system:
+// !!!SMS:
 //
 // At end:
+// !!!SMS-url:
+// !!!AGN: Chant
 // !!!ENC: [Encoder's name]
 // !!!END: [Encoding date]
 // !!!EEV: $DATE
@@ -536,15 +473,37 @@ void Tool_chantize::addBibliographicRecords(HumdrumFile& infile) {
 	}
 
 	// header records
-	if (refs.find("AGN") == refs.end()) {
+
+	if (refs.find("system") == refs.end()) {
+		infile.insertLine(0, "!!!system:");
+	}
+
+	if (refs.find("folio") == refs.end()) {
+		infile.insertLine(0, "!!!folio:");
+	}
+
+	if (refs.find("SMS") == refs.end()) {
+		infile.insertLine(0, "!!!SMS:");
+	}
+
+	if (refs.find("OTL") == refs.end()) {
 		if (infile.token(0, 0)->find("!!!OTL") != std::string::npos) {
-			infile.insertLine(1, "!!!AGN: Chant");
+			// do nothing
 		} else {
-			infile.insertLine(0, "!!!AGN: Chant");
+			infile.insertLine(0, "!!!OTL:");
 		}
 	}
 
 	// trailer records
+
+	if (refs.find("SMS-url") == refs.end()) {
+		infile.appendLine("!!!SMS-url:");
+	}
+
+	if (refs.find("AGN") == refs.end()) {
+		infile.appendLine("!!!AGN: Chant");
+	}
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isReference()) {
 			continue;
@@ -558,7 +517,9 @@ void Tool_chantize::addBibliographicRecords(HumdrumFile& infile) {
 		infile.appendLine("!!!ENC: [Encoder's name]");
 	}
 	if (refs.find("END") == refs.end()) {
-		infile.appendLine("!!!END: [Encoding date]");
+		string date = getDate();
+		string line = "!!!EED: " + date;
+		infile.appendLine(line);
 	}
 	if (refs.find("EEV") == refs.end()) {
 		string date = getDate();

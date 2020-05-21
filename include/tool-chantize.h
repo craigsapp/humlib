@@ -41,7 +41,6 @@ class Tool_chantize : public HumTool {
 		void     deleteBreaks       (HumdrumFile& infile);
 		void     fixEditorialAccidentals(HumdrumFile& infile);
 		void     fixInstrumentAbbreviations(HumdrumFile& infile);
-		void     addTerminalLongs   (HumdrumFile& infile);
 		void     deleteDummyTranspositions(HumdrumFile& infile);
 		string   getDate            (void);
 		vector<bool> getTerminalRestStates(HumdrumFile& infile);

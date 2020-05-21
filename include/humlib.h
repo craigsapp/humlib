@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 20 00:36:02 PDT 2020
+// Last Modified: Thu May 21 12:21:10 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5064,7 +5064,6 @@ class Tool_chantize : public HumTool {
 		void     deleteBreaks       (HumdrumFile& infile);
 		void     fixEditorialAccidentals(HumdrumFile& infile);
 		void     fixInstrumentAbbreviations(HumdrumFile& infile);
-		void     addTerminalLongs   (HumdrumFile& infile);
 		void     deleteDummyTranspositions(HumdrumFile& infile);
 		string   getDate            (void);
 		vector<bool> getTerminalRestStates(HumdrumFile& infile);
