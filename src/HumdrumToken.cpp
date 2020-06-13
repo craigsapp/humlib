@@ -822,6 +822,9 @@ HumNum HumdrumToken::getDuration(void) {
 
 
 HumNum HumdrumToken::getDuration(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		analyzeDuration();
+	}
 	return m_duration * scale;
 }
 
@@ -835,6 +838,9 @@ HumNum HumdrumToken::getDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getTiedDuration(void) {
+	if (!m_rhythm_analyzed) {
+		analyzeDuration();
+	}
 	HumNum output = m_duration;
 	// start of a tied group so add the durations of the other notes.
 	int b40 = Convert::kernToBase40(this);

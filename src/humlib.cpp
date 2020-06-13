@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 21 12:21:10 PDT 2020
+// Last Modified: Sat Jun 13 14:01:30 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -27678,6 +27678,9 @@ HumNum HumdrumToken::getDuration(void) {
 
 
 HumNum HumdrumToken::getDuration(HumNum scale) {
+	if (!m_rhythm_analyzed) {
+		analyzeDuration();
+	}
 	return m_duration * scale;
 }
 
@@ -27691,6 +27694,9 @@ HumNum HumdrumToken::getDuration(HumNum scale) {
 //
 
 HumNum HumdrumToken::getTiedDuration(void) {
+	if (!m_rhythm_analyzed) {
+		analyzeDuration();
+	}
 	HumNum output = m_duration;
 	// start of a tied group so add the durations of the other notes.
 	int b40 = Convert::kernToBase40(this);
