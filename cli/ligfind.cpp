@@ -198,14 +198,14 @@ bool hasText(HTp token) {
 
 void printLigatureCandidate(HTp partname, HTp starting, HTp ending) {
 	HumdrumFile* infile = starting->getOwner()->getOwner();
-	cerr << m_barnum[starting->getLineIndex()];
+	cout << m_barnum[starting->getLineIndex()];
 	if (partname) {
-		cerr << "\t" << partname->substr(3);
+		cout << "\t" << partname->substr(3);
 	} else {
-		cerr << "\t";
+		cout << "\t";
 	}
-	cerr << "\t" << infile->getFilenameBase();
-	cerr << endl;
+	cout << "\t" << infile->getFilenameBase();
+	cout << endl;
 }
 
 
@@ -229,7 +229,7 @@ HTp getNoteList(vector<HTp>& notelist, HTp partstart) {
 				partname = current;
 			}
 		}
-		if (current->isData() && current->isNoteAttack()) {
+		if (current->isData() && current->isNoteAttack() && !current->isNull()) {
 			notelist.push_back(current);
 		}
 		current = current->getNextToken();
