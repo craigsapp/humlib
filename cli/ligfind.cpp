@@ -16,7 +16,7 @@
 //                a ligature mark on the two notes.
 //
 
-/* Example output: (staring measure/part name/filename)
+/* Example output: (starting measure/part name/filename)
 
 19	Quinto	Tam1020468a-Io_che_fin_a_quel_punto_altro_non_volsi--Marotta_1600
 1	Tenore	Tco0806a-Piange_sospira_e_quando_i_caldi_raggi--Monteverdi_1603
