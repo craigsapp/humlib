@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 13 14:01:30 PDT 2020
+// Last Modified: Mon Jun 15 07:16:15 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -786,6 +786,47 @@ char Convert::hasKernStemDirection(const string& kerndata) {
 	}
 	return '\0';
 }
+
+
+
+//////////////////////////////
+//
+// Convert::kernToRecip -- Extract only the **recip data from **kern data.
+//
+
+string Convert::kernToRecip(const std::string& kerndata) {
+	string output;
+	output.reserve(kerndata.size());
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata.at(i) == ' ') {
+			// only process the first subtoken
+			break;
+		}
+		switch (kerndata.at(i)) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case '.':   // augmentation dot
+			case '%':   // rational rhythms
+			case 'q':   // grace note (zero duration)
+				output += kerndata.at(i);
+		}
+	}
+	return output;
+}
+
+
+string Convert::kernToRecip(HTp token) {
+	return Convert::kernToRecip((string)*token);
+}
+
 
 
 
@@ -16491,6 +16532,7 @@ void HumdrumFileBase::clear(void) {
 	m_strand2d.clear();
 	m_filename.clear();
 	m_segmentlevel = 0;
+	m_strands_analyzed = false;
 	m_structure_analyzed = false;
 	m_rhythm_analyzed = false;
 	m_slurs_analyzed = false;
@@ -28094,7 +28136,8 @@ bool HumdrumToken::isSustainedNote(void) {
 //////////////////////////////
 //
 // HumdrumToken::isNoteAttack -- Returns true if the token represents
-//     the attack of a note.  Should only be applied to **kern data.
+//     the attack of a note.  Should only be applied to **kern data, but
+//     this function does not check for that for efficiency reasons.
 //
 
 bool HumdrumToken::isNoteAttack(void) {

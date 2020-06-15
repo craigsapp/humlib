@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 13 14:01:30 PDT 2020
+// Last Modified: Mon Jun 15 07:16:15 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3469,6 +3469,8 @@ class Convert {
 		static int     kernToBase7          (const std::string& kerndata);
 		static int     kernToBase7          (HTp token)
 				{ return kernToBase7          ((std::string)*token); }
+		static string  kernToRecip          (const std::string& kerndata);
+		static string  kernToRecip          (HTp token);
 		static int     kernToMidiNoteNumber (const std::string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((std::string)*token); }

@@ -1238,7 +1238,8 @@ bool HumdrumToken::isSustainedNote(void) {
 //////////////////////////////
 //
 // HumdrumToken::isNoteAttack -- Returns true if the token represents
-//     the attack of a note.  Should only be applied to **kern data.
+//     the attack of a note.  Should only be applied to **kern data, but
+//     this function does not check for that for efficiency reasons.
 //
 
 bool HumdrumToken::isNoteAttack(void) {
