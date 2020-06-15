@@ -367,6 +367,47 @@ char Convert::hasKernStemDirection(const string& kerndata) {
 }
 
 
+
+//////////////////////////////
+//
+// Convert::kernToRecip -- Extract only the **recip data from **kern data.
+//
+
+string Convert::kernToRecip(const std::string& kerndata) {
+	string output;
+	output.reserve(kerndata.size());
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		if (kerndata.at(i) == ' ') {
+			// only process the first subtoken
+			break;
+		}
+		switch (kerndata.at(i)) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case '.':   // augmentation dot
+			case '%':   // rational rhythms
+			case 'q':   // grace note (zero duration)
+				output += kerndata.at(i);
+		}
+	}
+	return output;
+}
+
+
+string Convert::kernToRecip(HTp token) {
+	return Convert::kernToRecip((string)*token);
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum
