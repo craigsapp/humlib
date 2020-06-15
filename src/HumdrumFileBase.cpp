@@ -165,6 +165,7 @@ void HumdrumFileBase::clear(void) {
 	m_strand2d.clear();
 	m_filename.clear();
 	m_segmentlevel = 0;
+	m_strands_analyzed = false;
 	m_structure_analyzed = false;
 	m_rhythm_analyzed = false;
 	m_slurs_analyzed = false;
