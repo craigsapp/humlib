@@ -96,8 +96,8 @@ class Convert {
 		static int     kernToBase7          (const std::string& kerndata);
 		static int     kernToBase7          (HTp token)
 				{ return kernToBase7          ((std::string)*token); }
-		static string  kernToRecip          (const std::string& kerndata);
-		static string  kernToRecip          (HTp token);
+		static std::string  kernToRecip     (const std::string& kerndata);
+		static std::string  kernToRecip     (HTp token);
 		static int     kernToMidiNoteNumber (const std::string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((std::string)*token); }
