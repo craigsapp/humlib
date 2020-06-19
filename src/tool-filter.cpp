@@ -42,6 +42,7 @@
 #include "tool-restfill.h"
 #include "tool-rid.h"
 #include "tool-satb2gs.h"
+#include "tool-scordatura.h"
 #include "tool-sic.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
@@ -244,6 +245,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "satb2gsx") {
 			// humlib cli emulation
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "scordatura") {
+			RUNTOOL(scordatura, infile, commands[i].second, status);
 		} else if (commands[i].first == "sic") {
 			RUNTOOL(sic, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
