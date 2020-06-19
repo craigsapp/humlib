@@ -19,12 +19,12 @@
 // Description:   Draft implementation of a transposition system for verovio.
 //                There is a main() function at the bottom of the file for demo/testing.
 //                There are two classes in this file:
-//                   HumTransPitch: pitch representation as three integers:
-//                            m_diatonic: diatonic pitch class integer from C=0 to B=6.
+//                   HumPitch: pitch representation as three integers:
+//                            m_diatonicpc: diatonic pitch class integer from C=0 to B=6.
 //                            m_accid: chromatic alterations in semitones (0=natural, -1=flat).
 //                            m_oct: octave number (4 = middle-C octave).
-//                   HumTransposer: transposition system which uses HumTransPitch as a user interface.
-//                   (Add MEI to HumTransPitch conversions in HumTransPitch class, or use external
+//                   HumTransposer: transposition system which uses HumPitch as a user interface.
+//                   (Add MEI to HumPitch conversions in HumPitch class, or use external
 //                    code to interface to verovio attributes for <note>).
 //                   The default maximum accidental handling is +/- two sharps/flats (base-40).
 //                   Use the HumTransposer::setMaxAccid() to set the maximum allowed accidental
@@ -38,17 +38,6 @@
 //     to G## is up a diminished second ("d2").
 //
 
-// Diatonic pitch class integers:
-// These could be converted into an enum provided
-// that the same value are assigned to each class.
-#define dpc_C 0 /* Integer for Diatonic pitch class for C */
-#define dpc_D 1
-#define dpc_E 2
-#define dpc_F 3
-#define dpc_G 4
-#define dpc_A 5
-#define dpc_B 6
-
 #include "HumTransposer.h"
 
 #include <cctype>
@@ -59,110 +48,12 @@
 
 using namespace std;
 
-////////////////////////////////////////////////////////////////////////////
-//
-// The HumTransPitch class is an interface for storing information about notes which
-// will be used in the HumTransposer class.  The diatonic pitch class, chromatic alteration
-// of the diatonic pitch and the octave are store in the class.  Names given to the
-// parameters are analogous to MEI note attributes.  Note that note@accid can be also
-// note/accid in MEI data, and other complications that need to be resolved into
-// storing the correct pitch information in HumTransPitch.
-//
 namespace hum { 
 
-
-//////////////////////////////
-//
-// HumTransPitch::HumTransPitch -- HumTransPitch constructor.
-//
-
-HumTransPitch::HumTransPitch(int aDiatonic, int anAccid, int anOct) {
-	setPitch(aDiatonic, anAccid, anOct);
-}
+// START_MERGE
 
 
-HumTransPitch::HumTransPitch(const HumTransPitch &pitch) {
-	m_diatonic = pitch.m_diatonic;
-	m_accid = pitch.m_accid;
-	m_oct = pitch.m_oct;
-}
-
-
-
-//////////////////////////////
-//
-// operator= HumTransPitch -- copy operator for pitches.
-//
-
-HumTransPitch &HumTransPitch::operator=(const HumTransPitch &pitch) {
-	if (this != &pitch) {
-		m_diatonic = pitch.m_diatonic;
-		m_accid = pitch.m_accid;
-		m_oct = pitch.m_oct;
-	}
-	return *this;
-}
-
-
-
-//////////////////////////////
-//
-// HumTransPitch::isValid -- returns true if the absolute value of the accidental
-//     is less than or equal to the max value.
-
-bool HumTransPitch::isValid(int maxAccid) {
-	return abs(m_accid) <= abs(maxAccid);
-}
-
-
-
-//////////////////////////////
-//
-// HumTransPitch::setPitch -- Set the attributes for a pitch all at once.
-//
-
-void HumTransPitch::setPitch(int aDiatonic, int anAccid, int anOct) {
-	m_diatonic = aDiatonic;
-	m_accid = anAccid;
-	m_oct = anOct;
-}
-
-
-
-//////////////////////////////
-//
-// operator<< HumTransPitch -- Print pitch data as string for debugging.
-//
-
-ostream &operator<<(ostream &out, const HumTransPitch &pitch) {
-	switch (pitch.m_diatonic) {
-		case dpc_C: out << "C"; break;
-		case dpc_D: out << "D"; break;
-		case dpc_E: out << "E"; break;
-		case dpc_F: out << "F"; break;
-		case dpc_G: out << "G"; break;
-		case dpc_A: out << "A"; break;
-		case dpc_B: out << "B"; break;
-		default: out << "X";
-	}
-	if (pitch.m_accid > 0) {
-		for (int i = 0; i < pitch.m_accid; i++) {
-			out << "#";
-		}
-	}
-	else if (pitch.m_accid < 0) {
-		for (int i = 0; i < abs(pitch.m_accid); i++) {
-			out << "b";
-		}
-	}
-	out << pitch.m_oct;
-	return out;
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////
-
+const std::vector<int> HumTransposer::m_diatonic2semitone({ 0, 2, 4, 5, 7, 9, 11 });
 
 
 //////////////////////////////
@@ -216,11 +107,11 @@ bool HumTransposer::setTransposition(const string &transString) {
 // Set transposition interval based on two pitches that represent the source data
 // key tonic and the target key tonic.
 
-bool HumTransposer::setTransposition(const HumTransPitch &fromPitch, const string &toString) {
-	HumTransPitch toPitch;
+bool HumTransposer::setTransposition(const HumPitch &fromPitch, const string &toString) {
+	HumPitch toPitch;
 	if (getKeyTonic(toString, toPitch)) {
 		// Determine proper octave offset.
-		int numSigns = toPitch.m_oct;
+		int numSigns = toPitch.getOctave();
 		m_transpose = getInterval(fromPitch, toPitch);
 		// A transposition with n plus or minus signs should never be more than n octaves away.
 		if (numSigns > 0 && m_transpose > perfectOctaveClass() * numSigns) {
@@ -259,6 +150,18 @@ bool HumTransposer::setTransposition(int keyFifths, const string &semitones) {
 bool HumTransposer::setTransposition(int keyFifths, int semitones) {
 	int intervalClass = semitonesToIntervalClass(keyFifths, semitones);
 	return setTransposition(intervalClass);
+}
+
+
+
+//////////////////////////////
+//
+// HumTransposer::setTranspositionDC --
+//
+
+bool HumTransposer::setTranspositionDC(int diatonic, int chromatic) {
+	int interval = HumTransposer::diatonicChromaticToIntervalClass(diatonic, chromatic);
+	return setTransposition(interval);
 }
 
 
@@ -430,10 +333,10 @@ string HumTransposer::getTranspositionIntervalName() {
 //   with a temporary provided integer interval class, or a temporary interval name.
 //
 
-void HumTransposer::transpose(HumTransPitch &pitch) {
-	int ipitch = humTransPitchToIntegerPitch(pitch);
+void HumTransposer::transpose(HumPitch &pitch) {
+	int ipitch = humHumPitchToIntegerPitch(pitch);
 	ipitch += m_transpose;
-	pitch = integerPitchToHumTransPitch(ipitch);
+	pitch = integerPitchToHumPitch(ipitch);
 }
 
 int HumTransposer::transpose(int ipitch) {
@@ -445,17 +348,17 @@ int HumTransposer::transpose(int ipitch) {
 // without specifying the transposition interval, store
 // transposition value with HumTransposer::setTransposition() first.
 
-void HumTransposer::transpose(HumTransPitch &pitch, int transVal) {
-	int ipitch = humTransPitchToIntegerPitch(pitch);
+void HumTransposer::transpose(HumPitch &pitch, int transVal) {
+	int ipitch = humHumPitchToIntegerPitch(pitch);
 	ipitch += transVal;
-	pitch = integerPitchToHumTransPitch(ipitch);
+	pitch = integerPitchToHumPitch(ipitch);
 }
 
-void HumTransposer::transpose(HumTransPitch &pitch, const string &transString) {
+void HumTransposer::transpose(HumPitch &pitch, const string &transString) {
 	int transVal = getInterval(transString);
-	int ipitch = humTransPitchToIntegerPitch(pitch);
+	int ipitch = humHumPitchToIntegerPitch(pitch);
 	ipitch += transVal;
-	pitch = integerPitchToHumTransPitch(ipitch);
+	pitch = integerPitchToHumPitch(ipitch);
 }
 
 
@@ -521,12 +424,12 @@ void HumTransposer::calculateDiatonicMapping() {
 
 //////////////////////////////
 //
-// HumTransposer::getKeyTonic -- Convert a key tonic string into a HumTransPitch
+// HumTransposer::getKeyTonic -- Convert a key tonic string into a HumPitch
 //      where the octave is the direction it should go.
 //      Should conform to the following regular expression:
 //          ([+]*|[-]*)([A-Ga-g])([Ss#]*|[Ffb]*)
 
-bool HumTransposer::getKeyTonic(const string &keyTonic, HumTransPitch &tonic) {
+bool HumTransposer::getKeyTonic(const string &keyTonic, HumPitch &tonic) {
 	int octave = 0;
 	int pitch = 0;
 	int accid = 0;
@@ -581,7 +484,7 @@ bool HumTransposer::getKeyTonic(const string &keyTonic, HumTransPitch &tonic) {
 		}
 	}
 
-	tonic = HumTransPitch(pitch, accid, octave);
+	tonic = HumPitch(pitch, accid, octave);
 	return true;
 }
 
@@ -954,27 +857,27 @@ int HumTransposer::perfectOctaveClass() {
 
 //////////////////////////////
 //
-// HumTransposer::humTransPitchToIntegerPitch -- Convert a pitch (octave/diatonic pitch class/chromatic
+// HumTransposer::humHumPitchToIntegerPitch -- Convert a pitch (octave/diatonic pitch class/chromatic
 //     alteration) into an integer value according to the current base.
 //
 
-int HumTransposer::humTransPitchToIntegerPitch(const HumTransPitch &pitch) {
-	return pitch.m_oct * m_base + m_diatonicMapping[pitch.m_diatonic] + pitch.m_accid;
+int HumTransposer::humHumPitchToIntegerPitch(const HumPitch &pitch) {
+	return pitch.getOctave() * m_base + m_diatonicMapping[pitch.getDiatonicPC()] + pitch.getAccid();
 }
 
 
 
 //////////////////////////////
 //
-// HumTransposer::integerPitchToHumTransPitch -- Convert an integer within the current base
+// HumTransposer::integerPitchToHumPitch -- Convert an integer within the current base
 //    into a pitch (octave/diatonic pitch class/chromatic alteration).  Pitches
 //    with negative octaves will have to be tested.
 //
 
-HumTransPitch HumTransposer::integerPitchToHumTransPitch(int ipitch) {
-	HumTransPitch pitch;
-	pitch.m_oct = ipitch / m_base;
-	int chroma = ipitch - pitch.m_oct * m_base;
+HumPitch HumTransposer::integerPitchToHumPitch(int ipitch) {
+	HumPitch pitch;
+	pitch.setOctave(ipitch / m_base);
+	int chroma = ipitch - pitch.getOctave() * m_base;
 	int mindiff = -1000;
 	int mini = -1;
 
@@ -1010,8 +913,8 @@ HumTransPitch HumTransposer::integerPitchToHumTransPitch(int ipitch) {
 			}
 		}
 	}
-	pitch.m_diatonic = mini;
-	pitch.m_accid = mindiff;
+	pitch.setDiatonicPC(mini);
+	pitch.setAccid(mindiff);
 	return pitch;
 }
 
@@ -1046,14 +949,14 @@ void HumTransposer::setBase600() {
 //    positive; otherwise, the interval will be negative.
 //
 
-int HumTransposer::getInterval(const HumTransPitch &p1, const HumTransPitch &p2) {
-	return humTransPitchToIntegerPitch(p2) - humTransPitchToIntegerPitch(p1);
+int HumTransposer::getInterval(const HumPitch &p1, const HumPitch &p2) {
+	return humHumPitchToIntegerPitch(p2) - humHumPitchToIntegerPitch(p1);
 }
 
 // Similar function to getInterval, but the integer interval class is converted
 // into a string that is not dependent on a base:
 
-string HumTransposer::getIntervalName(const HumTransPitch &p1, const HumTransPitch &p2) {
+string HumTransposer::getIntervalName(const HumPitch &p1, const HumPitch &p2) {
 	int iclass = getInterval(p1, p2);
 	return getIntervalName(iclass);
 }
@@ -1302,9 +1205,9 @@ string HumTransposer::circleOfFifthsToIntervalName(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToMajorTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToMajorTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getCPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getCPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1316,9 +1219,9 @@ HumTransPitch HumTransposer::circleOfFifthsToMajorTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToMinorTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToMinorTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getAPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getAPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1330,9 +1233,9 @@ HumTransPitch HumTransposer::circleOfFifthsToMinorTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToDorianTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToDorianTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getDPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getDPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1344,9 +1247,9 @@ HumTransPitch HumTransposer::circleOfFifthsToDorianTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToPhrygianTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToPhrygianTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getEPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getEPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1358,9 +1261,9 @@ HumTransPitch HumTransposer::circleOfFifthsToPhrygianTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToLydianTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToLydianTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getFPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getFPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1372,9 +1275,9 @@ HumTransPitch HumTransposer::circleOfFifthsToLydianTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToMixolydianTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToMixolydianTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getGPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getGPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1386,9 +1289,9 @@ HumTransPitch HumTransposer::circleOfFifthsToMixolydianTonic(int fifths) {
 //    value is in the 0th octave.
 //
 
-HumTransPitch HumTransposer::circleOfFifthsToLocrianTonic(int fifths) {
+HumPitch HumTransposer::circleOfFifthsToLocrianTonic(int fifths) {
 	int intervalClass = circleOfFifthsToIntervalClass(fifths);
-	return integerPitchToHumTransPitch((getBPitchClass() + intervalClass) % getBase());
+	return integerPitchToHumPitch((getBPitchClass() + intervalClass) % getBase());
 }
 
 
@@ -1929,7 +1832,7 @@ bool HumTransposer::isValidKeyTonic(const string &name) {
 //
 
 int main(void) {
-	HumTransPitch pitch(dpc_C, 0, 4); // middle C
+	HumPitch pitch(dpc_C, 0, 4); // middle C
 
 	HumTransposer transpose;
 
@@ -1967,11 +1870,11 @@ int main(void) {
 	cout << endl;
 	cout << "TESTING INTERVAL NAMES IN BASE-40:" << endl;
 	transpose.setBase40();
-	HumTransPitch p1(dpc_C, 0, 4);
-	HumTransPitch p2(dpc_F, 2, 4);
+	HumPitch p1(dpc_C, 0, 4);
+	HumPitch p2(dpc_F, 2, 4);
 	cout << "\tInterval between " << p1 << " and " << p2;
 	cout << " is " << transpose.getIntervalName(p1, p2) << endl;
-	HumTransPitch p3(dpc_G, -2, 3);
+	HumPitch p3(dpc_G, -2, 3);
 	cout << "\tInterval between " << p1 << " and " << p3;
 	cout << " is " << transpose.getIntervalName(p1, p3) << endl;
 
@@ -2044,5 +1947,7 @@ int main(void) {
 		A4 should be D3,C6:     D3,C6
 
  */
+
+// END_MERGE
 
 } // namespace hum

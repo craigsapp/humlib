@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Dec 03 11:28:21 PDT 2019
-// Last Modified: Mon Jun 15 16:35:52 PDT 2020
+// Last Modified: Thu Jun 18 17:47:07 PDT 2020
 // Filename:      HumHumTransposer.h
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/include/HumHumTransposer.h
 // Related:       https://github.com/rism-ch/verovio/blob/develop/include/vrv/transposition.h
@@ -14,56 +14,22 @@
 #ifndef _HUMTRANSPOSER_H_INCLUDED
 #define _HUMTRANSPOSER_H_INCLUDED
 
+#include "HumPitch.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-#define INVALID_INTERVAL_CLASS -123456789
-
 namespace hum {
 
-class HumHumTransPitch;
-class HumHumTransposer;
-
-////////////////////////////////////////////////////////////////////////////
-//
-// The HumTransPitch class is an interface for storing information about notes that will
-// be used in the HumTransposer class.  The diatonic pitch class, chromatic alteration
-// of the diatonic pitch and the octave are store in the class.  Names given to the
-// parameters are analogous to MEI note attributes.  Note that note@accid can be also
-// note/accid in MEI data, and other complications that need to be resolved into
-// storing the correct pitch information in HumTransPitch.
-//
-
-class HumTransPitch {
-
-	public:
-		// diatonic pitch class name of pitch: C = 0, D = 1, ... B = 6.
-		int m_diatonic;
-
-		// chromatic alteration of pitch: 0 = natural, 1 = sharp, -2 = flat, +2 = double sharp
-		int m_accid;
-
-		// octave number of pitch: 4 = middle-C octave
-		int m_oct;
-
-		            HumTransPitch            (void)   {};
-		            HumTransPitch            (int aDiatonic, int anAccid, int anOct);
-		            HumTransPitch            (const HumTransPitch &pitch);
-		            HumTransPitch &operator= (const HumTransPitch &pitch);
-		bool        isValid                  (int maxAccid);
-		void        setPitch                 (int aDiatonic, int anAccid, int anOct);
-
-};
-
-std::ostream &operator<<(std::ostream &out, const HumTransPitch &pitch);
+// START_MERGE
 
 
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // The HumTransposer class is an interface for transposing notes represented in the
-// HumTransPitch class format.
+// HumPitch class format.
 //
 
 class HumTransposer {
@@ -84,31 +50,32 @@ class HumTransposer {
 		// transposition will be 0/P1/unison.
 		bool         setTransposition    (int transVal);
 		bool         setTransposition    (const std::string &transString);
-		bool         setTransposition    (const HumTransPitch &fromPitch, const std::string &toString);
+		bool         setTransposition    (const HumPitch &fromPitch, const std::string &toString);
 		bool         setTransposition    (int keyFifths, int semitones);
 		bool         setTransposition    (int keyFifths, const std::string &semitones);
+		bool         setTranspositionDC  (int diatonic, int chromatic);
 
 		// Accessor functions for retrieving stored transposition interval.
 		int         getTranspositionIntervalClass  (void);
 		std::string getTranspositionIntervalName   (void);
 
 		// Transpostion based on stored transposition interval.
-		void        transpose            (HumTransPitch &pitch);
+		void        transpose            (HumPitch &pitch);
 		int         transpose            (int iPitch);
 
 		// Transpose based on second input parameter (not with stored transposition interval).
-		void        transpose            (HumTransPitch &pitch, int transVal);
-		void        transpose            (HumTransPitch &pitch, const std::string &transString);
+		void        transpose            (HumPitch &pitch, int transVal);
+		void        transpose            (HumPitch &pitch, const std::string &transString);
 
 		// Convert between integer intervals and interval name strings:
-		std::string getIntervalName      (const HumTransPitch &p1, const HumTransPitch &p2);
+		std::string getIntervalName      (const HumPitch &p1, const HumPitch &p2);
 		std::string getIntervalName      (int intervalClass);
 		int         getInterval          (const std::string &intervalName);
 
-		// Convert between HumTransPitch class and integer pitch and interval representations.
-		int humTransPitchToIntegerPitch  (const HumTransPitch &pitch);
-		HumTransPitch integerPitchToHumTransPitch(int ipitch);
-		int         getInterval          (const HumTransPitch &p1, const HumTransPitch &p2);
+		// Convert between HumPitch class and integer pitch and interval representations.
+		int humHumPitchToIntegerPitch    (const HumPitch &pitch);
+		HumPitch integerPitchToHumPitch  (int ipitch);
+		int         getInterval          (const HumPitch &p1, const HumPitch &p2);
 
 		// Convert between Semitones and integer interval representation.
 		std::string semitonesToIntervalName  (int keyFifths, int semitones);
@@ -123,15 +90,15 @@ class HumTransposer {
 		int         circleOfFifthsToIntervalClass (int fifths);
 
 		// Key-signature related functions.
-		bool          getKeyTonic                     (const std::string &keyTonic,
-		                                               HumTransPitch &tonic);
-		HumTransPitch circleOfFifthsToMajorTonic      (int fifths);
-		HumTransPitch circleOfFifthsToMinorTonic      (int fifths);
-		HumTransPitch circleOfFifthsToDorianTonic     (int fifths);
-		HumTransPitch circleOfFifthsToPhrygianTonic   (int fifths);
-		HumTransPitch circleOfFifthsToLydianTonic     (int fifths);
-		HumTransPitch circleOfFifthsToMixolydianTonic (int fifths);
-		HumTransPitch circleOfFifthsToLocrianTonic    (int fifths);
+		bool       getKeyTonic                     (const std::string &keyTonic,
+		                                            HumPitch &tonic);
+		HumPitch   circleOfFifthsToMajorTonic      (int fifths);
+		HumPitch   circleOfFifthsToMinorTonic      (int fifths);
+		HumPitch   circleOfFifthsToDorianTonic     (int fifths);
+		HumPitch   circleOfFifthsToPhrygianTonic   (int fifths);
+		HumPitch   circleOfFifthsToLydianTonic     (int fifths);
+		HumPitch   circleOfFifthsToMixolydianTonic (int fifths);
+		HumPitch   circleOfFifthsToLocrianTonic    (int fifths);
 
 		// Conversions between diatonic/chromatic system and integer system of intervals.
 		std::string diatonicChromaticToIntervalName(int diatonic, int chromatic);
@@ -184,12 +151,16 @@ class HumTransposer {
 		std::vector<int> m_diatonicMapping;
 
 		// used to calculate semitones between diatonic pitch classes:
-		const std::vector<int> m_diatonic2semitone{ 0, 2, 4, 5, 7, 9, 11 };
+		static const std::vector<int> m_diatonic2semitone;
 
 	private:
 		void calculateDiatonicMapping(void);
 };
 
+
+
+// END_MERGE
+
 } // namespace hum
 
-#endif
+#endif /* _HUMTRANSPOSER_H_INCLUDED */

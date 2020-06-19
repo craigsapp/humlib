@@ -37,6 +37,8 @@ sub createIncludeFile {
 	my @files = (
 		"HumHash.h",
 		"HumNum.h",
+		"HumPitch.h",
+		"HumTransposer.h",
 		"HumRegex.h",
 		"HumSignifier.h",
 		"HumSignifiers.h",
