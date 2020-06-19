@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 19 12:40:59 PDT 2020
+// Last Modified: Fri 19 Jun 2020 01:07:24 PM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -49435,7 +49435,7 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 	bool abbreviationsQ  = true;
 	bool accidentalsQ    = true;
 	bool referencesQ     = true;
-	bool breaksQ         = true;
+	// bool breaksQ         = true;
 	bool transpositionsQ = true;
 
 	if (getBoolean("no-reference-records")) { referencesQ = false; }
@@ -49443,16 +49443,18 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = true;
-		breaksQ         = false;
+		// breaksQ         = false;
 		transpositionsQ = false;
 	}
 
-	if (getBoolean("do-not-delete-breaks")) { breaksQ = false; }
+	if (getBoolean("do-not-delete-breaks")) { 
+		//	breaksQ = false; 
+	}
 	if (getBoolean("only-delete-breaks")) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		breaksQ         = true;
+		// breaksQ         = true;
 		transpositionsQ = false;
 	}
 
@@ -49461,7 +49463,7 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = true;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		breaksQ         = false;
+		// breaksQ         = false;
 		transpositionsQ = false;
 	}
 
@@ -49470,7 +49472,7 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = true;
 		referencesQ     = false;
-		breaksQ         = false;
+		// breaksQ         = false;
 		transpositionsQ = false;
 	}
 
@@ -49479,7 +49481,7 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		abbreviationsQ  = false;
 		accidentalsQ    = false;
 		referencesQ     = false;
-		breaksQ         = false;
+		// breaksQ         = false;
 		transpositionsQ = true;
 	}
 
