@@ -1,0 +1,26 @@
+---
+# See: https://clangformat.com
+
+Language:        Cpp
+
+## BasedOnStyle: default set of options to use.
+BasedOnStyle:  LLVM
+# BasedOnStyle:  Google
+# BasedOnStyle:  Chromium
+# BasedOnStyle:  Mozilla
+# BasedOnStyle:  WebKit
+
+
+## Force overriding of default settings:
+
+AlignTrailingComments:	true
+IndentCaseLabels:	true
+NamespaceIndentation:	None
+PointerBindsToType:	false
+SpaceBeforeParens:	ControlStatements
+SpacesInParentheses:	false
+Standard:		Cpp11
+TabWidth:		3
+UseTab:			ForIndentation
+
+...

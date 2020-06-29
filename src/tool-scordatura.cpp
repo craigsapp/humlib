@@ -12,6 +12,7 @@
 
 #include "tool-scordatura.h"
 #include "HumRegex.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -28,6 +29,14 @@ namespace hum {
 Tool_scordatura::Tool_scordatura(void) {
 	define("s|sounding=b", "generate sounding score");
 	define("w|written=b", "generate written score");
+	define("m|mark|marker=s:@", "marker to add to score");
+	define("p|pitch|pitches=s", "list of pitches to mark");
+	define("i|interval=s", "musical interval of marked pitches");
+	define("I|is-sounding=s", "musical score is in sounding format for marks");
+	define("c|chromatic=i:0", "chromatic interval of marked pitches");
+	define("d|diatonic=i:0", "diatonic interval of marked pitches");
+	define("color=s", "color marked pitches");
+	define("string=s", "string number");
 }
 
 
@@ -86,6 +95,32 @@ bool Tool_scordatura::run(HumdrumFile& infile) {
 void Tool_scordatura::initialize(void) {
 	m_writtenQ  = getBoolean("written");
 	m_soundingQ = getBoolean("sounding");
+	m_pitches.clear();
+	m_marker = getString("mark");
+	m_IQ = getBoolean("I");
+	m_color = getString("color");
+	if (getBoolean("pitches")) {
+		m_pitches = parsePitches(getString("pitches"));
+	}
+	m_cd = getBoolean("diatonic") && getBoolean("chromatic");
+	m_interval.clear();
+	if (m_cd) {
+		m_diatonic = getInteger("diatonic");
+		m_chromatic = getInteger("chromatic");
+	} else {
+		if (getBoolean("interval")) {
+			m_interval = getString("interval");
+		}
+	}
+	if ((abs(m_diatonic) > 28) || (abs(m_chromatic) > 48)) {
+		m_diatonic = 0;
+		m_chromatic = 0;
+		m_cd = false;
+	}
+	if (!m_pitches.empty()) {
+		prepareTranspositionInterval();
+	}
+	m_string = getString("string");
 }
 
 
@@ -98,11 +133,21 @@ void Tool_scordatura::initialize(void) {
 void Tool_scordatura::processFile(HumdrumFile& infile) {
 	m_modifiedQ = false;
 
-	vector<HTp> rdfs;
-	getScordaturaRdfs(rdfs, infile);
-	if (!rdfs.empty()) {
-		processScordaturas(infile, rdfs);
+	if (!m_pitches.empty()) {
+		markPitches(infile);
+		if (m_modifiedQ) {
+			addMarkerRdf(infile);
+		}
 	}
+
+	if (m_writtenQ || m_soundingQ) {
+		vector<HTp> rdfs;
+		getScordaturaRdfs(rdfs, infile);
+		if (!rdfs.empty()) {
+			processScordaturas(infile, rdfs);
+		}
+	}
+
 	if (m_modifiedQ) {
 		infile.createLinesFromTokens();
 	}
@@ -318,6 +363,172 @@ void Tool_scordatura::getScordaturaRdfs(vector<HTp>& rdfs, HumdrumFile& infile) 
 		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_scordatura::parsePitches --
+//
+
+set<int> Tool_scordatura::parsePitches(const string& input) {
+	HumRegex hre;
+	string value = input;
+	hre.replaceDestructive(value, "-", "\\s*-\\s*", "g");
+
+	vector<string> pieces;
+	hre.split(pieces, value, "[^A-Ga-g0-9-]+");
+
+	HumPitch pitcher;
+	set<int> output;
+	string p1;
+	string p2;
+	int d1;
+	int d2;
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (hre.search(pieces[i], "(.*)-(.*)")) {
+			// pitch range
+			p1 = hre.getMatch(1);
+			p2 = hre.getMatch(2);
+			d1 = Convert::kernToBase7(p1);
+			d2 = Convert::kernToBase7(p2);
+			if ((d1 < 0) || (d2 < 0) || (d1 > d2) || (d1 > 127) || (d2 > 127)) {
+				continue;
+			}
+			for (int j=d1; j<=d2; j++) {
+				output.insert(j);
+			}
+		} else {
+			// single pitch
+			d1 = Convert::kernToBase7(pieces[i]);
+			if ((d1 < 0) || (d1 > 127)) {
+				continue;
+			}
+			output.insert(d1);
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_scordatura::markPitches --
+//
+
+void Tool_scordatura::markPitches(HumdrumFile& infile) {
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp sstop = infile.getStrandStop(i);
+		markPitches(sstart, sstop);
+	}
+}
+
+
+void Tool_scordatura::markPitches(HTp sstart, HTp sstop) {
+	HTp current = sstart;
+	while (current && (current != sstop)) {
+		if (current->isNull() || current->isRest()) {
+			current = current->getNextToken();
+			continue;
+		}
+		markPitches(current);
+		current = current->getNextToken();
+	}
+}
+
+
+void Tool_scordatura::markPitches(HTp token) {
+	vector<string> subtokens = token->getSubtokens();
+	int counter = 0;
+	for (int i=0; i<(int)subtokens.size(); i++) {
+		int dia = Convert::kernToBase7(subtokens[i]);
+		if (m_pitches.find(dia) != m_pitches.end()) {
+			counter++;
+			subtokens[i] += m_marker;
+		}
+	}
+	if (counter == 0) {
+		return;
+	}
+	string newtoken;
+	for (int i=0; i<(int)subtokens.size(); i++) {
+		newtoken += subtokens[i];
+		if (i < (int)subtokens.size() - 1) {
+			newtoken += ' ';
+		}
+	}
+	token->setText(newtoken);
+	m_modifiedQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_scordatura::addMarkerRdf --
+//
+
+void Tool_scordatura::addMarkerRdf(HumdrumFile& infile) {
+	string line = "!!!RDF**kern: ";
+	line += m_marker;
+	line += " = ";
+	if (!m_string.empty()) {
+		line += "string=";
+		line += m_string;
+		line += " ";
+	}
+	line += "scordatura=";
+	if (m_IQ) {
+		line += "I";
+	}
+	line += "Tr";
+	if (m_transposition.empty()) {
+		line += "XXX";
+	} else {
+		line += m_transposition;
+	}
+	if (!m_color.empty()) {
+		line += ", color=";
+		line += m_color;
+	}
+	infile.appendLine(line);
+	m_modifiedQ = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_scordatura::prepareTranspositionInterval --
+//
+
+void Tool_scordatura::prepareTranspositionInterval(void) {
+	m_transposition.clear();
+	if (m_cd) {
+		m_transposition = "d";
+		m_transposition += to_string(m_diatonic);
+		m_transposition += "c";
+		m_transposition += to_string(m_chromatic);
+		return;
+	}
+
+	if (m_interval.empty()) {
+		return;
+	}
+
+	HumTransposer trans;
+	trans.intervalToDiatonicChromatic(m_diatonic, m_chromatic, m_interval);
+	m_transposition = "d";
+	m_transposition += to_string(m_diatonic);
+	m_transposition += "c";
+	m_transposition += to_string(m_chromatic);
+}
+
 
 
 // END_MERGE

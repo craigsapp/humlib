@@ -815,12 +815,6 @@ void HumdrumFileBase::createLinesFromTokens(void) {
 //    spine and rhythmic structure should be recalculated after an append.
 //
 
-void HumdrumFileBase::appendLine(const char* line) {
-	HLp s = new HumdrumLine(line);
-	m_lines.push_back(s);
-}
-
-
 void HumdrumFileBase::appendLine(const string& line) {
 	HLp s = new HumdrumLine(line);
 	m_lines.push_back(s);
@@ -839,18 +833,6 @@ void HumdrumFileBase::appendLine(HLp line) {
 // HumdrumFileBase::insertLine -- Add a line to the file's contents.  The file's
 //    spine and rhythmic structure should be recalculated after an append.
 //
-
-
-void HumdrumFileBase::insertLine(int index, const char* line) {
-	HLp s = new HumdrumLine(line);
-	m_lines.insert(m_lines.begin() + index, s);
-
-	// Update the line indexes for this line and the following ones:
-	for (int i=index; i<(int)m_lines.size(); i++) {
-		m_lines[i]->setLineIndex(i);
-	}
-}
-
 
 void HumdrumFileBase::insertLine(int index, const string& line) {
 	HLp s = new HumdrumLine(line);

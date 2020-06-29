@@ -42,12 +42,28 @@ class Tool_scordatura : public HumTool {
 		void     transposeChord    (HTp token, const string& marker);
 		std::string transposeNote     (const string& note);
 		void     transposeMarker   (HumdrumFile& infile, const string& marker, int diatonic, int chromatic);
+		std::set<int> parsePitches(const string& input);
+		void     markPitches       (HumdrumFile& infile);
+		void     markPitches       (HTp sstart, HTp sstop);
+		void     markPitches       (HTp token);
+		void     addMarkerRdf      (HumdrumFile& infile);
+		void     prepareTranspositionInterval(void);
 
 	private:
-		bool          m_writtenQ    = false;
-		bool          m_soundingQ   = false;
-		bool          m_modifiedQ   = false;
-		HumTransposer m_transposer;
+		bool           m_writtenQ    = false;
+		bool           m_soundingQ   = false;
+		bool           m_modifiedQ   = false;
+		bool           m_IQ          = false;  // true: enbed marker in sounding score
+		std::string    m_transposition;
+		std::string    m_color;
+		std::string    m_marker;
+		std::set<int>  m_pitches;
+		HumTransposer  m_transposer;
+		int            m_diatonic;
+		int            m_chromatic;
+		std::string    m_interval;
+		bool           m_cd;
+		std::string    m_string;
 
 };
 

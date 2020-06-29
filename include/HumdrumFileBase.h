@@ -213,17 +213,13 @@ class HumdrumFileBase : public HumHash {
 		void          removeExtraTabs          (void);
 		void          addExtraTabs             (void);
 		std::vector<int> getTrackWidths        (void);
-		void          appendLine               (const char* line);
 		void          appendLine               (const std::string& line);
 		void          appendLine               (HLp line);
-		void          push_back                (const char* line)
-		                                                    { appendLine(line); }
 		void          push_back                (const std::string& line)
 		                                                    { appendLine(line); }
 		void          push_back                (HLp line)
 		                                                    { appendLine(line); }
 
-		void          insertLine               (int index, const char* line);
 		void          insertLine               (int index, const std::string& line);
 		void          insertLine               (int index, HLp line);
 
