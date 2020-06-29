@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 28 16:57:13 PDT 2020
+// Last Modified: Sun Jun 28 18:02:33 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -72437,6 +72437,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 
 	if (interpQ) {
 		if (afterQ) {
+			int voicecount = slice->at(partindex)->at(staffindex)->size();
+			if (voiceindex >= voicecount) {
+				// Adding voices in the new slice.  It might be
+				// better to first check for a previous text line
+				// at the current timestamp that is empty (because there
+				// is text at the same time in another spine).
+				GridStaff* gs = slice->at(partindex)->at(staffindex);
+				gs->resize(voiceindex+1);
+				for (int m=voicecount; m<voiceindex+1; m++) {
+					gs->at(m) = new GridVoice("*", 0);
+				}
+			}
 			HTp token = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
 			HumNum tokdur = Convert::recipToDuration(token);
 			HumNum timestamp = slice->getTimestamp() + tokdur;

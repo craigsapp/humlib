@@ -1998,6 +1998,18 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 
 	if (interpQ) {
 		if (afterQ) {
+			int voicecount = slice->at(partindex)->at(staffindex)->size();
+			if (voiceindex >= voicecount) {
+				// Adding voices in the new slice.  It might be
+				// better to first check for a previous text line
+				// at the current timestamp that is empty (because there
+				// is text at the same time in another spine).
+				GridStaff* gs = slice->at(partindex)->at(staffindex);
+				gs->resize(voiceindex+1);
+				for (int m=voicecount; m<voiceindex+1; m++) {
+					gs->at(m) = new GridVoice("*", 0);
+				}
+			}
 			HTp token = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
 			HumNum tokdur = Convert::recipToDuration(token);
 			HumNum timestamp = slice->getTimestamp() + tokdur;
