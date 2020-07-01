@@ -895,6 +895,27 @@ void GridSlice::reportVerseCount(int partindex, int staffindex, int count) {
 
 
 
+//////////////////////////////
+//
+// GridSlice::getNullTokenForSlice --
+//
+
+string GridSlice::getNullTokenForSlice(void) {
+	if (isDataSlice()) {
+		return ".";
+	} else if (isInterpretationSlice()) {
+		return "*";
+	} else if (isMeasureSlice()) {
+		return "=";
+	} else if (!hasSpines()) {
+		return "!!";
+	} else {
+		return "!";
+	}
+}
+
+
+
 // END_MERGE
 
 } // end namespace hum

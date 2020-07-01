@@ -1740,6 +1740,32 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		// shouldn't need dynamics layout parameter
 	}
 
+	if (m_post_note_text.empty()) {
+		return;
+	}
+
+	// check the text buffer for text which needs to be moved
+	// after the current note.
+	string index;
+	index = to_string(partindex);
+	index += ' ';
+	index += to_string(staffindex);
+	index += ' ';
+	index += to_string(voiceindex);
+
+	auto it = m_post_note_text.find(index);
+	if (it == m_post_note_text.end()) {
+		// There is text waiting, but not for this note
+		// (for some strange reason).
+		return;
+	}
+	vector<xml_node>& tnodes = it->second;
+	for (int i=0; i<(int)tnodes.size(); i++) {
+		addText(slice, outdata, partindex, staffindex, voiceindex, tnodes[i], true);
+	}
+	m_post_note_text.erase(it);
+
+// ggg
 }
 
 
@@ -1755,7 +1781,7 @@ void Tool_musicxml2hum::addTexts(GridSlice* slice, GridMeasure* measure, int par
 	for (auto item : nodes) {
 		int newpartindex = item.first;
 		int newstaffindex = 0; // Not allowing addressing text by layer (could be changed).
-		addText(slice, measure, newpartindex, newstaffindex, voiceindex, item.second);
+		addText(slice, measure, newpartindex, newstaffindex, voiceindex, item.second, false);
 	}
 }
 
@@ -1800,7 +1826,7 @@ void Tool_musicxml2hum::addTempos(GridSlice* slice, GridMeasure* measure, int pa
 //
 
 void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int partindex,
-		int staffindex, int voiceindex, xml_node node) {
+		int staffindex, int voiceindex, xml_node node, bool force) {
 	string placementstring;
 	xml_attribute placement = node.attribute("placement");
 	if (placement) {
@@ -1960,6 +1986,17 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		specialQ = true;
 		afterQ = true;
 		interpQ = true;
+		if (force == false) {
+			// store text for later processing after the next note in the data.
+			string index;
+			index += to_string(partindex);
+			index += ' ';
+			index += to_string(staffindex);
+			index += ' ';
+			index += to_string(voiceindex);
+			m_post_note_text[index].push_back(node);
+			return;
+		}
 	} else if ((text.size() > 1) && (text[0] == '!') && (text[1] != '!')) {
 		// embedding a local comment
 		output = text;
@@ -2006,16 +2043,17 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 				// is text at the same time in another spine).
 				GridStaff* gs = slice->at(partindex)->at(staffindex);
 				gs->resize(voiceindex+1);
+				string null = slice->getNullTokenForSlice();
 				for (int m=voicecount; m<voiceindex+1; m++) {
-					gs->at(m) = new GridVoice("*", 0);
+					gs->at(m) = new GridVoice(null, 0);
 				}
 			}
 			HTp token = slice->at(partindex)->at(staffindex)->at(voiceindex)->getToken();
 			HumNum tokdur = Convert::recipToDuration(token);
 			HumNum timestamp = slice->getTimestamp() + tokdur;
-			measure->addInterpretationAfter(slice, partindex, output, timestamp);
+			measure->addInterpretationAfter(slice, partindex, staffindex, voiceindex, output, timestamp);
 		} else {
-			measure->addInterpretationBefore(slice, partindex, output);
+			measure->addInterpretationBefore(slice, partindex, staffindex, voiceindex, output);
 		}
 	} else if (globalQ) {
 		HumNum timestamp = slice->getTimestamp();

@@ -295,31 +295,29 @@ GridSlice* GridMeasure::addTempoToken(GridSlice* slice, int partindex,
 		// something strange happened: expecting at least one item in measure.
 		return slice;
 	}
-	GridPart* part;
-	GridStaff* staff;
-	GridVoice* voice;
 
 	auto previous = iter;
 	previous++;
 	while (previous != this->rend()) {
 		if ((*previous)->isLayoutSlice()) {
-			part = (*previous)->at(partindex);
-			staff = part->at(0);
-			if (staff->size() == 0) {
-				GridVoice* v = new GridVoice;
-				staff->push_back(v);
+			GridPart* gp = (*previous)->at(partindex);
+			GridStaff* gs = gp->at(0);
+			GridVoice* gv;
+			if (gs->size() == 0) {
+				gv = new GridVoice;
+				gs->push_back(gv);
 			}
-			voice = staff->at(0);
-			if (voice) {
-				if (voice->getToken() == NULL) {
+			gv = gs->at(0);
+			if (gv) {
+				if (gv->getToken() == NULL) {
 					// create a token with text
 					HTp newtoken = new HumdrumToken(tempo);
-					voice->setToken(newtoken);
+					gv->setToken(newtoken);
 					return slice;
-				} else if (*voice->getToken() == "*") {
+				} else if (*gv->getToken() == "*") {
 					// replace token with text
 					HTp newtoken = new HumdrumToken(tempo);
-					voice->setToken(newtoken);
+					gv->setToken(newtoken);
 					return slice;
 				}
 			} else {
@@ -1244,8 +1242,7 @@ void GridMeasure::addLayoutParameter(GridSlice* slice, int partindex,
 //
 
 void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
-		const string& interpretation, HumNum timestamp) {
-
+		int staffindex, int voiceindex, const string& interpretation, HumNum timestamp) {
 	HumNum targettime = slice->getTimestamp();
 
 	auto iter = this->rbegin();
@@ -1270,6 +1267,29 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 		newtargettime = targettime;
 	}
 
+	if (ptime == targettime) {
+
+		auto nextone = previous;
+		nextone--;
+		if ((nextone != this->rend()) && ((*nextone)->isInterpretationSlice())) {
+			GridPart* gp = (*nextone)->at(partindex);
+			GridStaff* gs = gp->at(staffindex);
+			// only place in voice=0 for now:
+			if (gs->size() == 0) {
+				GridVoice* gv = new GridVoice;
+				gs->push_back(gv);
+			}
+			HTp token = gs->at(0)->getToken();
+			if (token == NULL) {
+				gs->at(0)->setToken(interpretation);
+				return;
+			} else if (*token == "*") {
+				gs->at(0)->setToken(interpretation);
+				return;
+			}
+		}
+	}
+
 	if (ptime <= targettime) {
 		// Insert slice at end of measure.
 		GridSlice* newslice = new GridSlice(this, timestamp, SliceType::_Interpretation);
@@ -1283,71 +1303,6 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 		newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
 		return;
 	}
-
-
-
-/* Handle the case where the slice to insert is not at the end of the
-   current measure (such as inserting for a second voice).  Deal with
-	this later when there is an example to test...
-
-	} else {
-		while (previous != this->rend()) {
-			ptime = (*previous)->getTimestamp();
-			if (ptime < targettime) {
-				// insert after previous
-				break;
-			}
-			newtargettime = ptime;
-			previous++;
-		}
-		cerr << "INSERT TARGET TIME = " << newtargettime;
-	}
-
-	// now go back and insert
-
-
-	cerr << "\tPREVIOUS TIMESTAMP = " << (*previous)->getTimestamp() << endl;
-		if ((*previous)->isInterpretationSlice()) {
-			part = (*previous)->at(partindex);
-			staff = part->at(0);
-			if (staff->size() == 0) {
-				GridVoice* v = new GridVoice;
-				staff->push_back(v);
-			}
-			voice = staff->at(0);
-			if (voice) {
-				if (voice->getToken() == NULL) {
-					// create a token with text
-					HTp newtoken = new HumdrumToken(interpretation);
-					voice->setToken(newtoken);
-					return;
-				} else if (*voice->getToken() == "*") {
-					// replace token with text
-					HTp newtoken = new HumdrumToken(interpretation);
-					voice->setToken(newtoken);
-					return;
-				}
-			} else {
-				previous++;
-				continue;
-			}
-		} else {
-			break;
-		}
-		previous++;
-	}
-
-	auto insertpoint = previous.base();
-	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::_Interpretation);
-	newslice->initializeBySlice(*iter);
-	this->insert(insertpoint, newslice);
-	HTp newtoken = new HumdrumToken(interpretation);
-	if (newslice->at(partindex)->at(0)->size() == 0) {
-		GridVoice* v = new GridVoice;
-		newslice->at(partindex)->at(0)->push_back(v);
-	}
-	newslice->at(partindex)->at(0)->at(0)->setToken(newtoken);
-*/
 }
 
 
@@ -1358,51 +1313,46 @@ void GridMeasure::addInterpretationAfter(GridSlice* slice, int partindex,
 //      given slice, (which is probably a note slice).
 //
 
-void GridMeasure::addInterpretationBefore(GridSlice* slice, int partindex,
+void GridMeasure::addInterpretationBefore(GridSlice* slice, int partindex, int staffindex, int voiceindex,
 		const string& interpretation) {
-
 	auto iter = this->rbegin();
 	if (iter == this->rend()) {
 		// something strange happened: expecting at least one item in measure.
 		return;
 	}
-	GridPart* part;
-	GridStaff* staff;
-	GridVoice* voice;
 
 	auto previous = iter;
 	previous++;
-	while (previous != this->rend()) {
-		if ((*previous)->isInterpretationSlice()) {
-			part = (*previous)->at(partindex);
-			staff = part->at(0);
-			if (staff->size() == 0) {
-				GridVoice* v = new GridVoice;
-				staff->push_back(v);
-			}
-			voice = staff->at(0);
-			if (voice) {
-				if (voice->getToken() == NULL) {
-					// create a token with text
-					HTp newtoken = new HumdrumToken(interpretation);
-					voice->setToken(newtoken);
-					return;
-				} else if (*voice->getToken() == "*") {
-					// replace token with text
-					HTp newtoken = new HumdrumToken(interpretation);
-					voice->setToken(newtoken);
-					return;
-				}
-			} else {
-				previous++;
-				continue;
-			}
-		} else {
-			break;
+
+	// Try to insert new token in the current interpretation
+	// line if there is a spot that is empty.  This should usually
+	// work, but there could be times when the interpretation line
+	// has a specific submeaning that will not match the inserted
+	// interpretation.
+	if ((*previous)->isInterpretationSlice()) {
+		GridPart* gp = (*previous)->at(partindex);
+		GridStaff* gs = gp->at(0);
+		GridVoice* gv = NULL;
+		if (gs->empty()) {
+			gv = new GridVoice;
+			gs->push_back(gv);
 		}
-		previous++;
+		// only allowing at index 0 voice for now:
+		// And is asuumed now to be non-null.
+		gv = gs->at(0);
+		HTp token = gv->getToken();
+		if (!token) {
+			gv->setToken(interpretation);
+			return;
+		} else if (token->isNull()) {
+			gv->setToken(interpretation);
+			return;
+		}
 	}
 
+	// Could not insert interpretation on interpretation line immediatly before
+	// the assumed starting data line, so insert a new interpretation slice just before
+	// the data slice.
 	auto insertpoint = previous.base();
 	GridSlice* newslice = new GridSlice(this, (*iter)->getTimestamp(), SliceType::_Interpretation);
 	newslice->initializeBySlice(*iter);

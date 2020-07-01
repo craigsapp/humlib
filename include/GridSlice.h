@@ -55,9 +55,9 @@ class GridSlice : public std::vector<GridPart*> {
 		bool isTimeSigSlice(void)       { return m_type == SliceType::TimeSigs;         }
 		bool isTempoSlice(void)         { return m_type == SliceType::Tempos;           }
 		bool isMeterSigSlice(void)      { return m_type == SliceType::MeterSigs;        }
-		bool isManipulatorSlice(void)   { return m_type==SliceType::Manipulators;       }
-		bool isLayoutSlice(void)        { return m_type ==  SliceType::Layouts;         }
-		bool isLocalLayoutSlice(void)   { return m_type ==  SliceType::Layouts;         }
+		bool isManipulatorSlice(void)   { return m_type == SliceType::Manipulators;     }
+		bool isLayoutSlice(void)        { return m_type == SliceType::Layouts;          }
+		bool isLocalLayoutSlice(void)   { return m_type == SliceType::Layouts;          }
 		bool isInvalidSlice(void)       { return m_type == SliceType::Invalid;          }
 		bool isGlobalComment(void)      { return m_type == SliceType::GlobalComments;   }
 		bool isGlobalLayout(void)       { return m_type == SliceType::GlobalLayouts;    }
@@ -66,6 +66,7 @@ class GridSlice : public std::vector<GridPart*> {
 		bool isInterpretationSlice(void);
 		bool isDataSlice(void);
 		bool hasSpines(void);
+		std::string getNullTokenForSlice(void);
 		SliceType getType(void)    { return m_type; }
 
 		void transferTokens        (HumdrumFile& outfile, bool recip);

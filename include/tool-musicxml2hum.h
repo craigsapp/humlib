@@ -187,7 +187,7 @@ class Tool_musicxml2hum : public HumTool {
 		void addTexts          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addText           (GridSlice* slice, GridMeasure* measure, int partindex,
-		                        int staffindex, int voiceindex, pugi::xml_node node);
+		                        int staffindex, int voiceindex, pugi::xml_node node, bool force = false);
 		void addTempos         (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addTempo          (GridSlice* slice, GridMeasure* measure, int partindex,
@@ -257,6 +257,14 @@ class Tool_musicxml2hum : public HumTool {
 
 		// m_hasTremoloQ is used to run the tremolo tool.
 		bool m_hasTremoloQ = false;
+
+		// m_post_note_text is used to store interpretations that occur
+		// before notes in the MusicXML data, but need to be moved after
+		// the note in the Humdrum data.  The text will be stored and then
+		// when note is processed, any text in this storage will be processed
+		// index is a string: "part staff voice" with a vector list of strings
+		// to process.
+		std::map<std::string, vector<pugi::xml_node>> m_post_note_text;
 
 };
 
