@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 30 19:10:17 PDT 2020
+// Last Modified: Wed Jul  1 18:52:29 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -23751,22 +23751,27 @@ void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 	string durtag = "slurDuration";
 	string endtag = "slurEnd";
 	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");
+	int opencount = (int)count(slurstart->begin(), slurstart->end(), '(');
+	// int closecount = (int)count(slurend->begin(), slurend->end(), ')');
 	slurEndCount++;
-	if (slurEndCount > 1) {
-		endtag += to_string(slurEndCount);
-		durtag += to_string(slurEndCount);
+	int openEnumeration = opencount - slurEndCount + 1;
+	if (openEnumeration > 1) {
+		endtag += to_string(openEnumeration);
+		durtag += to_string(openEnumeration);
 	}
 	string starttag = "slurStart";
 	int slurStartCount = slurend->getValueInt("auto", "slurStartCount");
 	slurStartCount++;
-	if (slurStartCount > 1) {
-		starttag += to_string(slurStartCount);
+	int closeEnumeration = slurStartCount;
+	if (closeEnumeration > 1) {
+		starttag += to_string(closeEnumeration);
 	}
 
 	slurstart->setValue("auto", endtag, slurend);
 	slurstart->setValue("auto", "id", slurstart);
 	slurend->setValue("auto", starttag, slurstart);
 	slurend->setValue("auto", "id", slurend);
+
 	HumNum duration = slurend->getDurationFromStart()
 			- slurstart->getDurationFromStart();
 	slurstart->setValue("auto", durtag, duration);
