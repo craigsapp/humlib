@@ -1381,6 +1381,11 @@ ostream& operator<<(ostream& out, const HumHash& hash) {
 	return out;
 }
 
+ostream& operator<<(ostream& out, HumHash* hash) {
+	out << *hash;
+	return out;
+}
+
 
 // END_MERGE
 

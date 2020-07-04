@@ -177,10 +177,11 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getPhraseStartElisionLevel(int index) const;
 		int      getSlurEndElisionLevel    (int index = 0) const;
 		int      getPhraseEndElisionLevel  (int index = 0) const;
-		HTp      getSlurStartToken         (int number = 0);
-		HTp      getSlurEndToken           (int number = 0);
-		HTp      getPhraseStartToken       (int number = 0);
-		HTp      getPhraseEndToken         (int number = 0);
+		HTp      getSlurStartToken         (int number = 1);
+		int      getSlurStartNumber        (int endnumber);
+		HTp      getSlurEndToken           (int number = 1);
+		HTp      getPhraseStartToken       (int number = 1);
+		HTp      getPhraseEndToken         (int number = 1);
 		void     storeParameterSet         (void);
 		bool     linkedParameterIsGlobal   (int index);
 		std::ostream& printCsv             (std::ostream& out = std::cout);

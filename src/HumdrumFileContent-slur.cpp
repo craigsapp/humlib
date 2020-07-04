@@ -414,34 +414,43 @@ bool HumdrumFileContent::isLinkedSlurBegin(HTp token, int index, const string& p
 
 void HumdrumFileContent::linkSlurEndpoints(HTp slurstart, HTp slurend) {
 	string durtag = "slurDuration";
-	string endtag = "slurEnd";
-	int slurEndCount = slurstart->getValueInt("auto", "slurEndCount");
+	string endtag = "slurEndId";
+	string starttag = "slurStartId";
+	string slurstartnumbertag = "slurStartNumber";
+	string slurendnumbertag = "slurEndNumber";
+
+	int slurStartCount = slurstart->getValueInt("auto", "slurStartCount");
 	int opencount = (int)count(slurstart->begin(), slurstart->end(), '(');
-	// int closecount = (int)count(slurend->begin(), slurend->end(), ')');
-	slurEndCount++;
-	int openEnumeration = opencount - slurEndCount + 1;
+	slurStartCount++;
+	int openEnumeration = opencount - slurStartCount + 1;
+
 	if (openEnumeration > 1) {
 		endtag += to_string(openEnumeration);
 		durtag += to_string(openEnumeration);
-	}
-	string starttag = "slurStart";
-	int slurStartCount = slurend->getValueInt("auto", "slurStartCount");
-	slurStartCount++;
-	int closeEnumeration = slurStartCount;
-	if (closeEnumeration > 1) {
-		starttag += to_string(closeEnumeration);
+		slurendnumbertag += to_string(openEnumeration);
 	}
 
-	slurstart->setValue("auto", endtag, slurend);
-	slurstart->setValue("auto", "id", slurstart);
-	slurend->setValue("auto", starttag, slurstart);
-	slurend->setValue("auto", "id", slurend);
+	int slurEndNumber = slurend->getValueInt("auto", "slurEndCount");
+	slurEndNumber++;
+	int closeEnumeration = slurEndNumber;
+	if (closeEnumeration > 1) {
+		starttag += to_string(closeEnumeration);
+		slurstartnumbertag += to_string(closeEnumeration);
+	}
 
 	HumNum duration = slurend->getDurationFromStart()
 			- slurstart->getDurationFromStart();
-	slurstart->setValue("auto", durtag, duration);
-	slurstart->setValue("auto", "slurEndCount", to_string(slurEndCount));
-	slurend->setValue("auto", "slurStartCount", to_string(slurStartCount));
+
+	slurstart->setValue("auto", endtag,            slurend);
+	slurstart->setValue("auto", "id",              slurstart);
+	slurstart->setValue("auto", slurendnumbertag,  closeEnumeration);
+	slurstart->setValue("auto", durtag,            duration);
+	slurstart->setValue("auto", "slurStartCount",  slurStartCount);
+
+	slurend->setValue("auto", starttag, slurstart);
+	slurend->setValue("auto", "id", slurend);
+	slurend->setValue("auto", slurstartnumbertag, openEnumeration);
+	slurend->setValue("auto", "slurEndCount",  slurEndNumber);
 }
 
 

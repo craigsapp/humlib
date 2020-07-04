@@ -3329,11 +3329,28 @@ ostream& printSequence(vector<HTp>& sequence, ostream& out) {
 //
 
 HTp HumdrumToken::getSlurStartToken(int number) {
-	string tag = "slurStart";
+	string tag = "slurStartId";
 	if (number > 1) {
 		tag += to_string(number);
 	}
-	return getValueHTp("auto", tag);
+	HTp value = getValueHTp("auto", tag);
+	return value;
+}
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSlurStartNumber -- Given a slur ending number, 
+//    return the slur start number that it pairs with.
+//
+
+int HumdrumToken::getSlurStartNumber(int endnumber) {
+	string tag = "slurStartNumber";
+	if (endnumber > 1) {
+		tag += to_string(endnumber);
+	}
+	int value = getValueInt("auto", tag);
+	return value;
 }
 
 

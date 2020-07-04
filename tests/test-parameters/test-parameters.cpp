@@ -3,6 +3,7 @@
 #include "humlib.h"
 
 using namespace hum;
+using namespace std;
 
 int main(int argc, char** argv) {
    if (argc != 2) {
@@ -12,6 +13,8 @@ int main(int argc, char** argv) {
    if (!infile.read(argv[1])) {
       return 1;
    }
+	infile.analyzeSlurs();
+
    // print line parameters:
    cout << "Global parameters in file:" << endl;
    for (int i=0; i<infile.getLineCount(); i++) {
@@ -23,8 +26,9 @@ int main(int argc, char** argv) {
    cout << "Local parameters in file:" << endl;
    for (int i=0; i<infile.getLineCount(); i++) {
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         if (infile[i].token(j).hasParameters()) {
-            cout << (HumHash)infile[i].token(j);
+         if (infile[i].token(j)->hasParameters()) {
+				infile[i].token(j)->printXml();
+            // cout << (HumHash*)infile[i].token(j);
          }
       }
    }

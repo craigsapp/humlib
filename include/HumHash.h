@@ -229,9 +229,9 @@ class HumHash {
 		                                    const std::string& ns2) const;
 		void           setPrefix           (const std::string& value);
 		std::string    getPrefix           (void) const;
-		std::ostream&       printXml            (std::ostream& out = std::cout, int level = 0,
+		std::ostream&  printXml            (std::ostream& out = std::cout, int level = 0,
 		                                    const std::string& indent = "\t");
-		std::ostream&       printXmlAsGlobal    (std::ostream& out = std::cout, int level = 0,
+		std::ostream&  printXmlAsGlobal    (std::ostream& out = std::cout, int level = 0,
 		                                    const std::string& indent = "\t");
 
 		void           setOrigin           (const std::string& key,
@@ -265,6 +265,7 @@ class HumHash {
 		std::string prefix;
 
 	friend std::ostream& operator<<(std::ostream& out, const HumHash& hash);
+	friend std::ostream& operator<<(std::ostream& out, HumHash* hash);
 };
 
 
