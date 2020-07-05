@@ -1164,6 +1164,12 @@ bool HumdrumToken::isRest(void) {
 //
 
 bool HumdrumToken::isNote(void) {
+	if (!isData()) {
+		return false;
+	}
+	if (isNull()) {
+		return false;
+	}
 	if (isKern()) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
