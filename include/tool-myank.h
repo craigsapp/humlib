@@ -149,6 +149,7 @@ class Tool_myank : public HumTool {
 		int       getSectionCount      (HumdrumFile& infile);
 		void      getSectionString     (string& sstring, HumdrumFile& infile,
 		                                int sec);
+		void      collapseSpines       (HumdrumFile& infile, int line);
 
 	private:
 		int    debugQ      = 0;             // used with --debug option
