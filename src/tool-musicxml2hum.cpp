@@ -3439,10 +3439,6 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 							}
 							grandchild = grandchild.next_sibling();
 						}
-
-						transpositions[pindex].push_back(child);
-						hastransposition = true;
-						foundnongrace = true;
 					}
 
 					if (nodeType(child, "time")) {
