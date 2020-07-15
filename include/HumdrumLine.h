@@ -152,6 +152,8 @@ class HumdrumLine : public std::string, public HumHash {
 
 		void     copyStructure          (HLp line, const std::string& empty);
 
+		bool     allSameBarlineStyle    (void);
+
 	protected:
 		bool     analyzeTracks          (std::string& err);
 		bool     analyzeTokenDurations  (std::string& err);

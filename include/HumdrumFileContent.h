@@ -97,6 +97,10 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 		int    hasPickup                  (void);
 
+		// in HumdrumFileContent-barline.cpp
+		void   analyzeBarlines            (void);
+		bool   hasDifferentBarlines       (void);
+
 	protected:
 
 		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,

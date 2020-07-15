@@ -84,6 +84,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     hasBeam                   (void) const;
 		bool     hasFermata                (void) const;
 		bool     equalTo                   (const std::string& pattern);
+		bool     isStaff                   (void) const;
 
 		// kern-specific functions:
 		bool     isRest                    (void);
@@ -119,6 +120,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     hasRectaLigatureEnd       (void);
 		bool     hasObliquaLigatureEnd     (void);
 		char     hasStemDirection          (void);
+		bool     allSameBarlineStyle       (void);
 
 		HumNum   getDuration               (void);
 		HumNum   getDuration               (HumNum scale);

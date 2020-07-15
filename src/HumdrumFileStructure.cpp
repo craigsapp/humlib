@@ -198,15 +198,15 @@ bool HumdrumFileStructure::readStringCsv(const string& contents,
 //
 
 bool HumdrumFileStructure::analyzeStructure(void) {
-	m_structure_analyzed = false;
-	if (!m_strands_analyzed) {
+	m_analyses.m_structure_analyzed = false;
+	if (!m_analyses.m_strands_analyzed) {
 		if (!analyzeStrands()       ) { return isValid(); }
 	}
 	if (!analyzeGlobalParameters() ) { return isValid(); }
 	if (!analyzeLocalParameters()  ) { return isValid(); }
 	if (!analyzeTokenDurations()   ) { return isValid(); }
 	if (!analyzeTokenDurations()   ) { return isValid(); }
-	m_structure_analyzed = true;
+	m_analyses.m_structure_analyzed = true;
 	if (!analyzeRhythmStructure()  ) { return isValid(); }
 	analyzeSignifiers();
 	return isValid();
@@ -284,8 +284,8 @@ bool HumdrumFileStructure::analyzeStrophes(void) {
 //
 
 bool HumdrumFileStructure::analyzeStructureNoRhythm(void) {
-	m_structure_analyzed = true;
-	if (!m_strands_analyzed) {
+	m_analyses.m_structure_analyzed = true;
+	if (!m_analyses.m_strands_analyzed) {
 		if (!analyzeStrands()          ) { return isValid(); }
 	}
 	if (!analyzeGlobalParameters() ) { return isValid(); }
@@ -303,7 +303,7 @@ bool HumdrumFileStructure::analyzeStructureNoRhythm(void) {
 //
 
 bool HumdrumFileStructure::analyzeRhythmStructure(void) {
-	m_rhythm_analyzed = true;
+	m_analyses.m_rhythm_analyzed = true;
 	setLineRhythmAnalyzed();
 	if (!isStructureAnalyzed()) {
 		if (!analyzeStructureNoRhythm()) { return isValid(); }
@@ -1470,7 +1470,7 @@ void HumdrumFileStructure::checkForLocalParameters(HTp token,
 //
 
 bool HumdrumFileStructure::analyzeStrands(void) {
-	m_strands_analyzed = true;
+	m_analyses.m_strands_analyzed = true;
 	int spines = getSpineCount();
 	m_strand1d.clear();
 	m_strand2d.clear();
@@ -1508,10 +1508,10 @@ bool HumdrumFileStructure::analyzeStrands(void) {
 //
 
 void HumdrumFileStructure::resolveNullTokens(void) {
-	if (m_nulls_analyzed) {
+	if (m_analyses.m_nulls_analyzed) {
 		return;
 	}
-	m_nulls_analyzed = true;
+	m_analyses.m_nulls_analyzed = true;
 	if (!areStrandsAnalyzed()) {
 		analyzeStrands();
 	}

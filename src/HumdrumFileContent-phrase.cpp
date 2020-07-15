@@ -29,10 +29,10 @@ namespace hum {
 //
 
 bool HumdrumFileContent::analyzePhrasings(void) {
-	if (m_phrases_analyzed) {
+	if (m_analyses.m_phrases_analyzed) {
 		return false;
 	}
-	m_phrases_analyzed = true;
+	m_analyses.m_phrases_analyzed = true;
 	bool output = true;
 	output &= analyzeKernPhrasings();
 	return output;

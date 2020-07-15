@@ -93,6 +93,57 @@ class TokenPair {
 };
 
 
+// HumFileAnalysis: class used to manage analysis states for a Humdrum file.
+
+class HumFileAnalysis {
+	public:
+		HumFileAnalysis(void) {}
+		~HumFileAnalysis() { clear(); }
+		void clear(void) {
+			m_structure_analyzed = false;
+			m_rhythm_analyzed    = false;
+			m_strands_analyzed   = false;
+			m_slurs_analyzed     = false;
+			m_phrases_analyzed   = false;
+			m_nulls_analyzed     = false;
+
+			m_barlines_analyzed  = false;
+			m_barlines_different = false;
+		}
+
+		// m_structure_analyzed: Used to keep track of whether or not
+		// file structure has been analyzed.
+		bool m_structure_analyzed = false;
+
+		// m_rhythm_analyzed: Used to keep track of whether or not
+		// rhythm structure has been analyzed.
+		bool m_rhythm_analyzed = false;
+
+		// m_strands_analyzed: Used to keep track of whether or not
+		// file strands have been analyzed.
+		bool m_strands_analyzed = false;
+
+		// m_slurs_analyzed: Used to keep track of whether or not
+		// slur endpoints have been linked or not.
+		bool m_slurs_analyzed = false;
+
+		// m_phrases_analyzed: Used to keep track of whether or not
+		// phrase endpoints have been linked or not.
+		bool m_phrases_analyzed = false;
+
+		// m_nulls_analyzed: Used to keep track of wheter or not
+		// null tokens have been analyzed yet.
+		bool m_nulls_analyzed = false;
+
+		// m_barlines_analyzed: Used to keep track of wheter or not
+		// barlines have beena analyzed yet.
+		bool m_barlines_analyzed = false;
+		// m_barlines_different: Set to true when the file contains
+		// any barlines that are not all of the same at the same
+		// times.
+		bool m_barlines_different = false;
+};
+
 bool sortTokenPairsByLineIndex(const TokenPair& a, const TokenPair& b);
 
 
@@ -374,29 +425,8 @@ class HumdrumFileBase : public HumHash {
 		// m_signifiers: Used to keep track of !!!RDF records.
 		HumSignifiers m_signifiers;
 
-		// m_structure_analyzed: Used to keep track of whether or not
-		// file structure has been analyzed.
-		bool m_structure_analyzed = false;
-
-		// m_rhythm_analyzed: Used to keep track of whether or not
-		// rhythm structure has been analyzed.
-		bool m_rhythm_analyzed = false;
-
-		// m_strands_analyzed: Used to keep track of whether or not
-		// file strands have been analyzed.
-		bool m_strands_analyzed = false;
-
-		// m_slurs_analyzed: Used to keep track of whether or not
-		// slur endpoints have been linked or not.
-		bool m_slurs_analyzed = false;
-
-		// m_phrases_analyzed: Used to keep track of whether or not
-		// phrase endpoints have been linked or not.
-		bool m_phrases_analyzed = false;
-
-		// m_nulls_analyzed: Used to keep track of wheter or not
-		// null tokens have been analyzed yet.
-		bool m_nulls_analyzed = false;
+		// m_analysis: Used to keep track of analysis states for the file.
+		HumFileAnalysis m_analyses;
 
 	public:
 		// Dummy functions to allow the HumdrumFile class's inheritance

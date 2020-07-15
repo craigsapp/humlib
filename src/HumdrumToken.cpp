@@ -1135,6 +1135,24 @@ bool HumdrumToken::equalTo(const string& pattern) {
 
 //////////////////////////////
 //
+// HumdrumToken::isStaff -- Returns true if the spine type represents
+//   a notated staff.
+//
+
+bool HumdrumToken::isStaff(void) const {
+	if (isKern()) {
+		return true;
+	}
+	if (isMens()) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isRest -- Returns true if the token is a (kern) rest.
 //
 
@@ -1673,6 +1691,22 @@ char HumdrumToken::hasStemDirection(void) {
 		return '\0';
 	}
 }
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::allSameBarlineStyle --
+//
+
+bool HumdrumToken::allSameBarlineStyle(void) {
+	HLp owner = getOwner();
+	if (!owner) {
+		return true;
+	}
+	return owner->allSameBarlineStyle();
+}
+
 
 
 //////////////////////////////

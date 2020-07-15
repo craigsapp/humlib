@@ -165,11 +165,7 @@ void HumdrumFileBase::clear(void) {
 	m_strand2d.clear();
 	m_filename.clear();
 	m_segmentlevel = 0;
-	m_strands_analyzed = false;
-	m_structure_analyzed = false;
-	m_rhythm_analyzed = false;
-	m_slurs_analyzed = false;
-	m_nulls_analyzed = false;
+	m_analyses.clear();
 }
 
 
@@ -180,7 +176,7 @@ void HumdrumFileBase::clear(void) {
 //
 
 bool HumdrumFileBase::isStructureAnalyzed(void) {
-	return m_structure_analyzed;
+	return m_analyses.m_structure_analyzed;
 }
 
 
@@ -191,7 +187,7 @@ bool HumdrumFileBase::isStructureAnalyzed(void) {
 //
 
 bool HumdrumFileBase::isRhythmAnalyzed(void) {
-	return m_rhythm_analyzed;
+	return m_analyses.m_rhythm_analyzed;
 }
 
 
@@ -202,7 +198,7 @@ bool HumdrumFileBase::isRhythmAnalyzed(void) {
 //
 
 bool HumdrumFileBase::areStrandsAnalyzed(void) {
-	return m_strands_analyzed;
+	return m_analyses.m_strands_analyzed;
 }
 
 
