@@ -36,11 +36,15 @@ class Tool_tie : public HumTool {
 		void     initialize        (void);
 		void     mergeTies         (HumdrumFile& infile);
 		void     mergeTie          (HTp token);
+		int      markOverfills     (HumdrumFile& infile);
+		bool     checkForOverfill  (HTp tok);
 
 	private:
-		bool     printQ = false;
-		bool     mergeQ = false;
-		bool     splitQ = false;
+		bool     m_printQ = false;
+		bool     m_mergeQ = false;
+		bool     m_splitQ = false;
+		bool     m_markQ  = false;
+		string   m_mark   = "@";
 
 };
 

@@ -35,6 +35,7 @@ Tool_tie::Tool_tie(void) {
 	define("s|split=b", "split overfill notes into tied notes across barlines.");
 	define("m|merge=b", "merge tied notes into a single note.");
 	define("p|printable=b", "merge tied notes only if single note is a printable note.");
+	define("M|mark=b", "Mark overfill notes.");
 }
 
 
@@ -91,9 +92,10 @@ bool Tool_tie::run(HumdrumFile& infile) {
 //
 
 void Tool_tie::initialize(void) {
-	printQ = getBoolean("printable");
-	mergeQ = getBoolean("merge");
-	splitQ = getBoolean("split");
+	m_printQ = getBoolean("printable");
+	m_mergeQ = getBoolean("merge");
+	m_splitQ = getBoolean("split");
+	m_markQ  = getBoolean("mark");
 }
 
 
@@ -104,8 +106,18 @@ void Tool_tie::initialize(void) {
 //
 
 void Tool_tie::processFile(HumdrumFile& infile) {
-	if (mergeQ) {
+	if (m_mergeQ) {
 		mergeTies(infile);
+	} else if (m_markQ) {
+		int count = markOverfills(infile);
+		if (count > 0) {
+			string rdfline = "!!!RDF**kern: ";
+			rdfline += m_mark;
+			rdfline += " = marked note, overfill (total: ";
+			rdfline += to_string(count);
+			rdfline += ")";
+			infile.appendLine(rdfline);
+		}
 	}
 }
 
@@ -115,7 +127,7 @@ void Tool_tie::processFile(HumdrumFile& infile) {
 //
 
 void Tool_tie::mergeTies(HumdrumFile& infile) {
-	infile.analyzeKernTies();
+	// infile.analyzeKernTies();
 
 	for (int i=0; i<infile.getStrandCount(); i++) {
 		HTp stok = infile.getStrandStart(i);
@@ -200,6 +212,62 @@ void Tool_tie::mergeTie(HTp token) {
 	token->setText(text);
 }
 
+
+
+//////////////////////////////
+//
+// Tool_tie::markOverfills --
+//
+
+int Tool_tie::markOverfills(HumdrumFile& infile) {
+	int counter = 0;
+
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp stok = infile.getStrandStart(i);
+		if (!stok->isKern()) {
+			continue;
+		}
+		HTp etok = infile.getStrandEnd(i);
+		HTp tok = stok;
+		while (tok && (tok != etok)) {
+			if (!tok->isData()) {
+				tok = tok->getNextToken();
+				continue;
+			}
+			if (tok->isNull()) {
+				tok = tok->getNextToken();
+				continue;
+			}
+			bool overQ = checkForOverfill(tok);
+			if (overQ) {
+				string text = *tok;
+				text += m_mark;
+				tok->setText(text);
+				counter++;
+			}
+
+			tok = tok->getNextToken();
+		}
+	}
+	return counter;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tie::checkForOverfill --
+//
+
+bool Tool_tie::checkForOverfill(HTp tok) {
+	HumNum duration = tok->getDuration();
+	HumNum tobarline = tok->getDurationToBarline();
+	if (duration > tobarline) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 
 // END_MERGE
