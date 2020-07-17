@@ -16,6 +16,7 @@
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
+#include <string>
 
 namespace hum {
 
@@ -23,28 +24,31 @@ namespace hum {
 
 class Tool_tie : public HumTool {
 	public:
-		         Tool_tie          (void);
-		        ~Tool_tie          () {};
+		         Tool_tie                (void);
+		        ~Tool_tie                () {};
 
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run                     (HumdrumFileSet& infiles);
+		bool     run                     (HumdrumFile& infile);
+		bool     run                     (const string& indata, std::ostream& out);
+		bool     run                     (HumdrumFile& infile, std::ostream& out);
 
 	protected:
-		void     processFile       (HumdrumFile& infile);
-		void     initialize        (void);
-		void     mergeTies         (HumdrumFile& infile);
-		void     mergeTie          (HTp token);
-		int      markOverfills     (HumdrumFile& infile);
-		bool     checkForOverfill  (HTp tok);
+		void     processFile             (HumdrumFile& infile);
+		void     initialize              (void);
+		void     mergeTies               (HumdrumFile& infile);
+		void     mergeTie                (HTp token);
+		int      markOverfills           (HumdrumFile& infile);
+		bool     checkForOverfill        (HTp tok);
+		bool     checkForInvisible       (HTp tok);
+		void     markNextBarlineInvisible(HTp tok);
 
 	private:
-		bool     m_printQ = false;
-		bool     m_mergeQ = false;
-		bool     m_splitQ = false;
-		bool     m_markQ  = false;
-		string   m_mark   = "@";
+		bool          m_printQ      = false;
+		bool          m_mergeQ      = false;
+		bool          m_splitQ      = false;
+		bool          m_markQ       = false;
+		bool          m_invisibleQ  = false;
+		std::string   m_mark        = "@";
 
 };
 
