@@ -49,6 +49,7 @@
 #include "tool-spinetrace.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
+#include "tool-tie.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
 #include "tool-transpose.h"
@@ -269,6 +270,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
 			RUNTOOL(chantize, infile, commands[i].second, status);
+		} else if (commands[i].first == "tie") {
+			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {

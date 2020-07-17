@@ -31,8 +31,8 @@ bool HumdrumFileContent::analyzeKernTies(void) {
 	vector<pair<HTp, int>> linkedtiestarts;
 	vector<pair<HTp, int>> linkedtieends;
 
-	vector<HTp> kernspines;
-	getSpineStartList(kernspines, "**kern");
+	// vector<HTp> kernspines;
+	// getSpineStartList(kernspines, "**kern");
 	bool output = true;
 	string linkSignifier = m_signifiers.getKernLinkSignifier();
 	output = analyzeKernTies(linkedtiestarts, linkedtieends, linkSignifier);
