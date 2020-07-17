@@ -82,6 +82,7 @@ bool Tool_tie::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
 	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 	return true;
 }
 
