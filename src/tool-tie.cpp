@@ -10,9 +10,14 @@
 // Description:   Interface for splitting or merging tied notes.
 //
 // Todo:          Currently does not handle chords in a fully generalized manner (all
-//                notes in chord have to have the same duration.
+//                notes in chord have to have the same duration.  But splitting
+//                does not even allow ties for now as well.
 //
-//                Only does merging (need to add splitting and printable test).
+//                Fix case where merged tie group exceeds one measure and -i is also used.
+//
+// Limitation:    At least one part in a score must not have an overfill note
+//                at the end of any given measure in order for the timing analysis
+//                to be done correctly.
 //
 
 #include "tool-tie.h"
@@ -111,6 +116,8 @@ void Tool_tie::initialize(void) {
 void Tool_tie::processFile(HumdrumFile& infile) {
 	if (m_mergeQ) {
 		mergeTies(infile);
+	} else if (m_splitQ) {
+		splitOverfills(infile);
 	} else if (m_markQ) {
 		int count = markOverfills(infile);
 		if (count > 0) {
@@ -123,6 +130,183 @@ void Tool_tie::processFile(HumdrumFile& infile) {
 		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_tie::splitOverfills -- Both notes and rests that extend
+//    past the end of the measure are split into two or more notes/rests,
+//    with the notes connected with ties.
+//
+
+void Tool_tie::splitOverfills(HumdrumFile& infile) {
+
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp stok = infile.getStrandStart(i);
+		if (!stok->isKern()) {
+			continue;
+		}
+		HTp etok = infile.getStrandEnd(i);
+		HTp tok = stok;
+		while (tok && (tok != etok)) {
+			if (!tok->isData()) {
+				tok = tok->getNextToken();
+				continue;
+			}
+			if (tok->isNull()) {
+				tok = tok->getNextToken();
+				continue;
+			}
+			bool overQ = checkForOverfill(tok);
+			if (overQ) {
+				splitToken(tok);
+			}
+			tok = tok->getNextToken();
+		}
+	}
+	infile.createLinesFromTokens();
+
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tie::splitToken --
+//
+
+void Tool_tie::splitToken(HTp tok) {
+	HumNum duration = tok->getDuration();
+	HumNum toBarline = tok->getDurationToBarline();
+	HumNum newdur = toBarline;
+	duration = duration - toBarline;
+	string text = "[";
+	text += tok->getText();
+	HumRegex hre;
+	string recip = Convert::durationToRecip(newdur);
+	hre.replaceDestructive(text, recip, "\\d+(?:%\\d+)?\\.*", "g");
+	tok->setText(text);
+	carryForwardLeftoverDuration(duration, tok);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tie::carryForwardLeftoverDuration --
+//
+
+void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
+
+	if (duration <= 0) {
+		return;
+	}
+	HTp current = tok->getNextToken();
+	// find next barline:
+	while (current) {
+		if (current->isBarline()) {
+			break;
+		}
+		current = current->getNextToken();
+	}
+	if (!current) {
+		// strange problem: no next barline
+		return;
+	}
+	if (!current->isBarline()) {
+		// strange problem that cannot happen
+		return;
+	}
+	HTp barline = current;
+	if (m_invisibleQ && (barline->find('-') != string::npos)) {
+		HumRegex hre;
+		string text = *barline;
+		hre.replaceDestructive(text, "", "-", "g");
+		barline->setText(text);
+	}
+	HumNum bardur = current->getDurationToBarline();
+
+	// find first null token after barline (that is not on a grace-note line)
+	// if the original note is an overfill note, there must be
+	// a null data token.
+	current = current->getNextToken();
+	bool foundQ = false;
+	while (current) {
+		if (current->isNull()) {
+			HLp line = current->getOwner();
+			if (!line) {
+				// strange error
+				return;
+			}
+			if (line->getDuration() > 0) {
+				// non-grace note null token to exit loop
+				foundQ = true;
+				break;
+			}
+		}
+		current = current->getNextToken();
+	}
+	if (!foundQ) {
+		// strange error
+		return;
+	}
+	if (!current->isNull()) {
+		// strange error
+		return;
+	}
+	HTp storage = current;
+	// get next note or barline after null token
+	current = current->getNextToken();
+	foundQ = 0;
+	while (current) {
+		if (current->isBarline()) {
+			foundQ = true;
+			break;
+		}
+		if (current->isData()) {
+			foundQ = true;
+			break;
+		}
+		current = current->getNextToken();
+	}
+	if (!foundQ) {
+		// strange error
+		return;
+	}
+	HumNum barstart = barline->getDurationFromStart();
+	HumNum nextstart = current->getDurationFromStart();
+	HumNum available = nextstart - barstart;
+	if (duration < available) {
+		cerr << "DURATION " << duration << " IS LESS THAN AVAILABLE " << available << endl;
+		// strange error
+		return;
+	}
+
+	string text = *tok;
+	HumRegex hre;
+	hre.replaceDestructive(text, "", "[_[]", "g");
+	string recip = Convert::durationToRecip(available);
+	hre.replaceDestructive(text, recip, "\\d+(?:%\\d+)?\\.*", "g");
+
+	if (available == duration) {
+		// this is the last note in the tie group;
+		text += ']';
+		storage->setText(text);
+		return;
+	}
+
+	// There is some more space for the remaining duration, but not
+	// big enough for all of it.  Place the piece that can fit here
+	// and then kick the can down the road for the remainder.
+	text += '_';
+	storage->setText(text);
+	duration = duration - available;
+	carryForwardLeftoverDuration(duration, storage);
+}
+
+
 
 //////////////////////////////
 //
@@ -152,15 +336,12 @@ void Tool_tie::mergeTies(HumdrumFile& infile) {
 				tok = tok->getNextToken();
 				continue;
 			}
-
 			mergeTie(tok);
-
 			tok = tok->getNextToken();
 		}
 	}
-
-
 	infile.createLinesFromTokens();
+
 }
 
 
@@ -224,6 +405,7 @@ void Tool_tie::mergeTie(HTp token) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_tie::markNextBarlineInvisible --  Multiple layers are not dealt with yet.
@@ -244,8 +426,6 @@ void Tool_tie::markNextBarlineInvisible(HTp tok) {
 		current->setText(text);
 		break;
 	}
-	
-
 }
 
 

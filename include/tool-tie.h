@@ -41,6 +41,9 @@ class Tool_tie : public HumTool {
 		bool     checkForOverfill        (HTp tok);
 		bool     checkForInvisible       (HTp tok);
 		void     markNextBarlineInvisible(HTp tok);
+		void     splitOverfills          (HumdrumFile& infile);
+		void     splitToken              (HTp tok);
+		void     carryForwardLeftoverDuration(HumNum duration, HTp tok);
 
 	private:
 		bool          m_printQ      = false;
