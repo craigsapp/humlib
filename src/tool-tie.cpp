@@ -345,6 +345,7 @@ void Tool_tie::mergeTies(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_tie::mergeTie --
@@ -354,6 +355,7 @@ void Tool_tie::mergeTie(HTp token) {
 	if (token->find('[') == string::npos) {
 		return;
 	}
+
 	vector<HTp> tiednotes;
 
 	HumNum totaldur = token->getDuration();
@@ -389,7 +391,13 @@ void Tool_tie::mergeTie(HTp token) {
 	if (m_invisibleQ) {
 		makeinvis = checkForInvisible(token);
 	}
+
 	for (int i=0; i<(int)tiednotes.size(); i++) {
+		if (m_invisibleQ) {
+			if (checkForInvisible(tiednotes[i])) {
+				markNextBarlineInvisible(tiednotes[i]);
+			}
+		}
 		tiednotes[i]->setText(".");
 	}
 	// set initial tied notes with updated recip.
@@ -478,7 +486,8 @@ int Tool_tie::markOverfills(HumdrumFile& infile) {
 bool Tool_tie::checkForInvisible(HTp tok) {
 	HumNum duration = tok->getDuration();
 	HumNum tobarline = tok->getDurationToBarline();
-	if (tok->find('[') != string::npos) {
+	if ((tok->find('[') != string::npos) ||
+	   (tok->find('_') != string::npos)) {
 		if (duration >= tobarline) {
 			return true;
 		} else {
