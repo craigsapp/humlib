@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul 18 14:28:54 PDT 2020
+// Last Modified: Sun Jul 19 16:04:39 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -14345,7 +14345,7 @@ HumParamSet::HumParamSet(const string& token) {
 }
 
 HumParamSet::HumParamSet(HTp token) {
-	readString(*((string*)token));
+	readString(token);
 }
 
 
@@ -14526,6 +14526,13 @@ void HumParamSet::clear(void) {
 //
 // HumParamSet::readString --
 //
+
+
+void HumParamSet::readString(HTp token) {
+	m_token = token;
+	readString(*token);
+}
+
 
 void HumParamSet::readString(const string& text) {
 	vector<string> pieces(1);

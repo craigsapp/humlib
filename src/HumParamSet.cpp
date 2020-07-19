@@ -124,7 +124,7 @@ HumParamSet::HumParamSet(const string& token) {
 }
 
 HumParamSet::HumParamSet(HTp token) {
-	readString(*((string*)token));
+	readString(token);
 }
 
 
@@ -305,6 +305,13 @@ void HumParamSet::clear(void) {
 //
 // HumParamSet::readString --
 //
+
+
+void HumParamSet::readString(HTp token) {
+	m_token = token;
+	readString(*token);
+}
+
 
 void HumParamSet::readString(const string& text) {
 	vector<string> pieces(1);
