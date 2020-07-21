@@ -107,7 +107,7 @@ class MxmlEvent {
 		std::string        getRecip           (void) const;
 		std::string        getKernPitch       (void);
 		std::string        getPrefixNoteInfo  (void) const;
-		std::string        getPostfixNoteInfo (bool primarynote, const string& recip) const;
+		std::string        getPostfixNoteInfo (bool primarynote, const std::string& recip) const;
 		xml_node           getNode            (void);
 		xml_node           getHNode           (void);
 		HumNum             getTimeSigDur      (void);
@@ -115,7 +115,7 @@ class MxmlEvent {
 		void               addNotations       (std::stringstream& ss,
 		                                       xml_node notations,
 		                                       int beamstarts,
-		                                       const string& recip) const;
+		                                       const std::string& recip) const;
 		void               reportVerseCountToOwner    (int count);
 		void               reportVerseCountToOwner    (int staffnum, int count);
 		void               reportHarmonyCountToOwner  (int count);
