@@ -1329,7 +1329,7 @@ void GridMeasure::addInterpretationBefore(GridSlice* slice, int partindex, int s
 	// work, but there could be times when the interpretation line
 	// has a specific submeaning that will not match the inserted
 	// interpretation.
-	if ((*previous)->isInterpretationSlice()) {
+	if ((previous != this->rend()) && (*previous)->isInterpretationSlice()) {
 		GridPart* gp = (*previous)->at(partindex);
 		GridStaff* gs = gp->at(0);
 		GridVoice* gv = NULL;

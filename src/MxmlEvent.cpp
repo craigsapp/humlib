@@ -1784,7 +1784,7 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
 			ss << "@@" << tvalue << "@@";
 		} else {
 			HumNum duration = Convert::recipToDurationNoDots(recip);
-			if (duration > 0) {
+			if ((duration > 0) && (duration < 1)) {
 				double dval = -log2(duration.getFloat());
 				int twopow = int(dval);
 				tvalue *= (1 << twopow);

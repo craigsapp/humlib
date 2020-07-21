@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 13 11:41:16 PDT 2019
-// Last Modified: Mon Oct 28 21:56:33 PDT 2019
+// Last Modified: Tue Jul 21 09:33:26 PDT 2020
 // Filename:      tool-tremolo.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-tremolo.cpp
 // Syntax:        C++11; humlib
@@ -252,6 +252,7 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	HumNum duration;
 	HumNum repeat;
 	HumNum increment;
+	bool addBeam = false;
 	int tnotes = -1;
 	if (hre.search(token, "@(\\d+)@")) {
 		value = hre.getMatchInt(1);
@@ -264,6 +265,17 @@ void Tool_tremolo::expandTremolo(HTp token) {
 			return;
 		}
 		duration = Convert::recipToDuration(token);
+		if (duration >= 1) {
+			addBeam = true;
+		}
+
+		// There are cases where duration < 1 need added beams
+		// when the note is not already in a beam.  Such as
+		// a plain 8th note with a slash.  This needs to be 
+		// converted into two 16th notes with a beam so that
+		// *tremolo can reduce it back into a tremolo, since
+		// it will only reduce beam groups.
+
 		repeat = duration;
 		repeat *= value;
 		repeat /= 4;
@@ -288,6 +300,11 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	// complicated beamings are not allowed yet (no internal L/J markers in tremolo beam)
 	bool hasBeamStart = base.find('L') != string::npos;
 	bool hasBeamStop  = base.find('J') != string::npos;
+
+	if (addBeam) {
+		hasBeamStart = true;
+		hasBeamStop = true;
+	}
 
 	// Currently not allowed to add tremolo to beamed notes, so remove all beaming:
 	hre.replaceDestructive(base, "", "[LJKk]+", "g");
