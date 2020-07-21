@@ -3317,8 +3317,8 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 	string pitch;
 	string prefix;
 	string postfix;
-	bool slurstarts = 0;
-	bool slurstops  = 0;
+	int slurstarts = 0;
+	int slurstops  = 0;
 	vector<int> slurdirs;
 
 	bool primarynote = false;

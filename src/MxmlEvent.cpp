@@ -13,6 +13,7 @@
 
 #include "MxmlEvent.h"
 #include "MxmlMeasure.h"
+#include "Convert.h"
 
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
