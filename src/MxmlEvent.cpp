@@ -1522,7 +1522,7 @@ string MxmlEvent::getPrefixNoteInfo(void) const {
 // MxmlEvent::getPostfixNoteInfo --
 //
 
-string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
+string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) const {
 	int beamstarts   = 0;
 	int beamends     = 0;
 	int beamconts    = 0;
@@ -1582,7 +1582,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 	}
 
 	stringstream ss;
-	addNotations(ss, notations, beamstarts);
+	addNotations(ss, notations, beamstarts, recip);
 
 	if (primarynote) {
 		// only add these signifiers if this is the first
@@ -1626,7 +1626,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote) const {
 //
 
 void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
-		int beamstarts) const {
+		int beamstarts, const string& recip) const {
 	if (!notations) {
 		return;
 	}
@@ -1782,6 +1782,12 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
 			}
 			ss << "@@" << tvalue << "@@";
 		} else {
+			HumNum duration = Convert::recipToDurationNoDots(recip);
+			if (duration > 0) {
+				double dval = -log2(duration.getFloat());
+				int twopow = int(dval);
+				tvalue *= (1 << twopow);
+			}
 			ss << "@" << tvalue << "@";
 		}
 	}

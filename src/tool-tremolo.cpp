@@ -284,6 +284,11 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	string markup = "@" + to_string(value) + "@";
 	string base = token->getText();
 	hre.replaceDestructive(base, "", markup, "g");
+
+	// complicated beamings are not allowed yet (no internal L/J markers in tremolo beam)
+	bool hasBeamStart = base.find('L') != string::npos;
+	bool hasBeamStop  = base.find('J') != string::npos;
+
 	// Currently not allowed to add tremolo to beamed notes, so remove all beaming:
 	hre.replaceDestructive(base, "", "[LJKk]+", "g");
 	string startbeam;
@@ -296,13 +301,19 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	// Augmentation dot is expected adjacent to regular rhythm value.
 	// Maybe allow anywhere?
 	hre.replaceDestructive(base, to_string(value), "\\d+%?\\d*\\.*", "g");
-	string initial = base + startbeam;
+	string initial = base;
+	if (hasBeamStart) {
+		initial += startbeam;
+	}
+	string terminal = base;
+	if (hasBeamStop) {
+		terminal += endbeam;
+	}
 	// remove slur end from start of tremolo:
 	hre.replaceDestructive(initial, "", "[)]+[<>]?", "g");
 	if (m_keepQ) {
 		initial += markup;
 	}
-	string terminal = base + endbeam;
 	// remove slur start information from end of tremolo:
 	hre.replaceDestructive(terminal, "", "[(]+[<>]?", "g");
 

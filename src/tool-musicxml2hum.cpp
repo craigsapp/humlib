@@ -1590,7 +1590,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		}
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
-		postfix   = event->getPostfixNoteInfo(primarynote);
+		postfix   = event->getPostfixNoteInfo(primarynote, recip);
 		if (postfix.find("@") != string::npos) {
 			m_hasTremoloQ = true;
 		}
@@ -3326,7 +3326,7 @@ void Tool_musicxml2hum::addSecondaryChordNotes(ostream& output,
 		note       = links.at(i);
 		pitch      = note->getKernPitch();
 		prefix     = note->getPrefixNoteInfo();
-		postfix    = note->getPostfixNoteInfo(primarynote);
+		postfix    = note->getPostfixNoteInfo(primarynote, recip);
 		slurstarts = note->hasSlurStart(slurdirs);
 		slurstops  = note->hasSlurStop();
 

@@ -2388,9 +2388,9 @@ void HumdrumToken::storeParameterSet(void) {
 		m_parameterSet = NULL;
 	}
 	if (this->isCommentLocal() && (this->find(':') != string::npos)) {
-		m_parameterSet = new HumParamSet(*((string*)this));
+		m_parameterSet = new HumParamSet(this);
 	} else if (this->isCommentGlobal() && (this->find(':') != string::npos)) {
-		m_parameterSet = new HumParamSet(*((string*)this));
+		m_parameterSet = new HumParamSet(this);
 	}
 }
 
