@@ -2006,6 +2006,12 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 		output = text;
 		globalQ = true;
 		specialQ = true;
+	} else if (hre.search(text, "\\s*problem\\s*:\\s*(.*)\\s*$")) {
+		specialQ = true;
+		output = "!LO:TX:t=P:problem:";
+		output += hre.getMatch(1);
+		hre.replaceDestructive(output, "\\n", "\n", "g");
+		hre.replaceDestructive(output, " ", "\t", "g");
 	}
 
 	if (!specialQ) {
