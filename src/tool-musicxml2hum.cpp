@@ -1255,7 +1255,6 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		}
 		status &= convertNowEvents(outdata.back(),
 				nowevents, nowparts, processtime, partdata, partstaves);
-
 	}
 
 	if (offsetHarmony.size() > 0) {
@@ -1539,7 +1538,26 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 
 	GridSlice* slice = new GridSlice(outdata, nowtime,
 			SliceType::Notes);
-	outdata->push_back(slice);
+	if (outdata->empty()) {
+		outdata->push_back(slice);
+	} else {
+		HumNum lasttime = outdata->back()->getTimestamp();
+		if (nowtime >= lasttime) {
+			outdata->push_back(slice);
+		} else {
+			// travel backwards in the measure until the correct
+			// time position is found.
+			auto it = outdata->rbegin();
+			while (it != outdata->rend()) {
+				lasttime = (*it)->getTimestamp();
+				if (nowtime >= lasttime) {
+					outdata->insert(it.base(), slice);
+					break;
+				}
+				it++;
+			}
+		}
+	}
 	slice->initializePartStaves(partdata);
 
 	for (int i=0; i<(int)nowevents.size(); i++) {
@@ -1559,7 +1577,6 @@ void Tool_musicxml2hum::appendNonZeroEvents(GridMeasure* outdata,
 
 void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEvent* event,
 		HumNum nowtime) {
-
 	int partindex;  // which part the event occurs in
 	int staffindex; // which staff the event occurs in (need to fix)
 	int voiceindex; // which voice the event occurs in (use for staff)
@@ -1632,7 +1649,8 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		}
 
 		if (grace) {
-			HumNum dur = event->getEmbeddedDuration(event->getNode()) / 4;
+			HumNum modification;
+			HumNum dur = event->getEmbeddedDuration(modification, event->getNode()) / 4;
 			if (dur.getNumerator() == 1) {
 				recip = to_string(dur.getDenominator()) + "q";
 			} else {
@@ -1764,8 +1782,6 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		addText(slice, outdata, partindex, staffindex, voiceindex, tnodes[i], true);
 	}
 	m_post_note_text.erase(it);
-
-// ggg
 }
 
 

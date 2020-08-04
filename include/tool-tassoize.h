@@ -43,6 +43,7 @@ class Tool_tassoize : public HumTool {
 		void     addTerminalLongs   (HumdrumFile& infile);
 		void     deleteDummyTranspositions(HumdrumFile& infile);
 		string   getDate            (void);
+		void     adjustSystemDecoration(HumdrumFile& infile);
 
 	private:
 		vector<vector<int>> m_pstates;

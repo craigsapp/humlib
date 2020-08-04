@@ -124,6 +124,7 @@ class HumdrumLine : public std::string, public HumHash {
 		HumNum   getBeat                (HumNum beatdur = 1);
 		HumNum   getBeatStr             (std::string beatrecip = "4");
 		HTp      getTrackStart          (int track) const;
+		HTp      getTrackEnd            (int track, int subtrack = 0) const;
 		void     setLineFromCsv         (const char* csv,
 		                                 const std::string& separator = ",");
 		void     setLineFromCsv         (const std::string& csv,

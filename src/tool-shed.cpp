@@ -156,6 +156,11 @@ void Tool_shed::prepareSearch(int index) {
 		m_barline = true;
 		m_data = false;
 	}
+	if (m_option.find("M") != std::string::npos) {
+		// measure is an alias for barline
+		m_barline = true;
+		m_data = false;
+	}
 	if (m_option.find("L") != std::string::npos) {
 		m_localcomment = true;
 		m_data = false;

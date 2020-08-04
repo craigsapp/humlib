@@ -74,6 +74,7 @@ MxmlEvent::~MxmlEvent() {
 
 void MxmlEvent::clear(void) {
 	m_starttime = m_duration = 0;
+	m_modification = 1;
 	m_eventtype = mevent_unknown;
 	m_owner = NULL;
 	m_linked = false;
@@ -149,6 +150,28 @@ void MxmlEvent::setStartTime(HumNum value) {
 
 void MxmlEvent::setDuration(HumNum value) {
 	m_duration = value;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getModification -- Get the tuplet scaling of the note's duration.
+//
+
+HumNum MxmlEvent::getModification(void) const {
+	return m_modification;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::setModification -- Set the tuplet scaling of the note's duration.
+//
+
+void MxmlEvent::setModification(HumNum value) {
+	m_modification = value;
 }
 
 
@@ -427,8 +450,9 @@ void MxmlEvent::setDurationByTicks(long value, xml_node el) {
 	HumNum val = (int)value;
 	val /= (int)ticks;
 
+	HumNum modification;
 	if (el) {
-		HumNum checkval = getEmbeddedDuration(el);
+		HumNum checkval = getEmbeddedDuration(modification, el);
 		if ((checkval == 0) && isRest()) {
 			// This is a whole rest.
 			// val = val
@@ -445,6 +469,7 @@ void MxmlEvent::setDurationByTicks(long value, xml_node el) {
 		}
 	}
 	setDuration(val);
+	setModification(modification);
 }
 
 
@@ -1776,12 +1801,17 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
 	if (arpeggio)     { ss << ":";  }
 
 	if (tremolo >= 8) {
-		int tvalue = tremolo;
+		HumNum tvalue = tremolo;
 		if (fingered) {
 			if (beamstarts) {
 				tvalue *= (1 << beamstarts);
 			}
-			ss << "@@" << tvalue << "@@";
+			tvalue *= m_modification;
+			if (tvalue.isInteger()) {
+				ss << "@@" << tvalue << "@@";
+			} else {
+				ss << "@@" << tvalue.getNumerator() << "%" << tvalue.getDenominator() << "@@";
+			}
 		} else {
 			HumNum duration = Convert::recipToDurationNoDots(recip);
 			if ((duration > 0) && (duration < 1)) {
@@ -1789,7 +1819,12 @@ void MxmlEvent::addNotations(stringstream& ss, xml_node notations,
 				int twopow = int(dval);
 				tvalue *= (1 << twopow);
 			}
-			ss << "@" << tvalue << "@";
+			tvalue *= m_modification;
+			if (tvalue.isInteger()) {
+				ss << "@" << tvalue << "@";
+			} else {
+				ss << "@" << tvalue.getNumerator() << "%" << tvalue.getDenominator() << "@";
+			}
 		}
 	}
 }
@@ -1972,19 +2007,20 @@ string MxmlEvent::getRestPitch(void) const {
 //   duration of notes in MusicXML output from Sibelius.
 //
 
-HumNum MxmlEvent::getEmbeddedDuration(xml_node el) {
+HumNum MxmlEvent::getEmbeddedDuration(HumNum& modification, xml_node el) {
 	if (!el) {
 		return 0;
 	}
 	xml_node child = el.first_child();
-   int dots          = 0;  // count of <dot /> elements
-   HumNum type       = 0;  // powoftwo note type (as duration)
+   int dots          = 0;      // count of <dot /> elements
+   HumNum type       = 0;      // powoftwo note type (as duration)
    bool tuplet       = false;  // is a tuplet
    int actualnotes   = 1;      // numerator of tuplet factor
    int normalnotes   = 1;      // denominator of tuplet factor
    HumNum normaltype = 0;      // poweroftwo duration of tuplet
    int tupdots       = 0;      // dots of "normal type" duration
 	HumNum tfactor    = 1;
+	modification      = 1;
 
 	while (child) {
 		if (strcmp(child.name(), "dot") == 0) {
@@ -2021,7 +2057,7 @@ HumNum MxmlEvent::getEmbeddedDuration(xml_node el) {
 		duration = newdur;
 	}
 	if (tuplet) {
-		HumNum modification(actualnotes, normalnotes);
+		modification.setValue(actualnotes, normalnotes);
 		duration /= modification;
       if (normaltype != type) {
 			cerr << "Warning: cannot handle this tuplet type yet" << endl;

@@ -979,6 +979,22 @@ HTp HumdrumLine::getTrackStart(int track) const {
 
 //////////////////////////////
 //
+// HumdrumLine::getTrackEnd --  Returns the ending exclusive interpretation
+//    for the given spine/track.
+//
+
+HTp HumdrumLine::getTrackEnd(int track, int subspine) const {
+	if (!m_owner) {
+		return NULL;
+	} else {
+		return ((HumdrumFile*)m_owner)->getTrackEnd(track, subspine);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::setDurationFromBarline -- Time from the previous
 //    barline to the current line.  This function is used in analyzeMeter in
 //    the HumdrumFileStructure class.

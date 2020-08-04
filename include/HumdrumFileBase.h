@@ -259,7 +259,7 @@ class HumdrumFileBase : public HumHash {
 		                    { return getSpineStartList(spinestarts, exinterps); }
 
 		int           getTrackEndCount         (int track) const;
-		HTp           getTrackEnd              (int track, int subtrack) const;
+		HTp           getTrackEnd              (int track, int subtrack = 0) const;
 		void          createLinesFromTokens    (void);
 		void          removeExtraTabs          (void);
 		void          addExtraTabs             (void);
@@ -403,7 +403,7 @@ class HumdrumFileBase : public HumHash {
 		int m_ticksperquarternote;
 
 		// m_idprefix: an XML id prefix used to avoid id collisions when
-		// includeing multiple HumdrumFile XML in a single group.
+		// including multiple HumdrumFile XML in a single group.
 		std::string m_idprefix;
 
 		// m_strands1d: one-dimensional list of spine strands.

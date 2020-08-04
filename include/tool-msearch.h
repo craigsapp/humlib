@@ -27,6 +27,7 @@ class MSearchQueryToken {
 			clear();
 		}
 		MSearchQueryToken(const MSearchQueryToken& token) {
+			anypitch  = false;
 			pc        = token.pc;
 			base      = token.base;
 			direction = token.direction;
@@ -47,6 +48,7 @@ class MSearchQueryToken {
 			return *this;
 		}
 		void clear(void) {
+			anypitch  = false;
 			pc        = NAN;
 			base      = 0;
 			direction = 0;
@@ -54,6 +56,8 @@ class MSearchQueryToken {
 			rhythm    = "";
 			anything  = false;
 		}
+
+		bool   anypitch;
 		double pc;           // NAN = rest
 		int    base;
 		int    direction;
@@ -63,6 +67,7 @@ class MSearchQueryToken {
 };
 
 
+ostream& operator<<(ostream& out, MSearchQueryToken& item);
 
 class MSearchTextQuery {
 	public:
@@ -127,7 +132,7 @@ class Tool_msearch : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
+		bool     run               (const std::string& indata, ostream& out);
 		bool     run               (HumdrumFile& infile, ostream& out);
 
 	protected:
@@ -136,10 +141,17 @@ class Tool_msearch : public HumTool {
 		                            vector<MSearchQueryToken>& query);
 		void    doTextSearch       (HumdrumFile& infile, NoteGrid& grid,
 		                            vector<MSearchTextQuery>& query);
-		void    fillMusicQuery     (vector<MSearchQueryToken>& query,
-		                            const string& input);
+		void    fillMusicQuery     (vector<MSearchQueryToken>& query);
+		void    fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
+		                            const std::string& input, bool rhythmQ = false);
+		void    fillMusicQueryPitch(vector<MSearchQueryToken>& query,
+		                            const std::string& input);
+		void    fillMusicQueryInterval(vector<MSearchQueryToken>& query,
+		                            const std::string& input);
+		void    fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
+		                            const std::string& input);
 		void    fillTextQuery      (vector<MSearchTextQuery>& query,
-		                            const string& input);
+		                            const std::string& input);
 		bool    checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		                            vector<MSearchQueryToken>& dpcQuery,
 		                            vector<NoteCell*>& match);
@@ -150,11 +162,13 @@ class Tool_msearch : public HumTool {
 		                            vector<TextInfo*>& words);
 		void    fillWordsForTrack  (vector<TextInfo*>& words,
 		                            HTp starttoken);
+		void    printQuery         (vector<MSearchQueryToken>& query);
 
 	private:
 	 	vector<HTp> m_kernspines;
 		string      m_text;
 		string      m_marker;
+		bool        m_debugQ = false;
 };
 
 // END_MERGE

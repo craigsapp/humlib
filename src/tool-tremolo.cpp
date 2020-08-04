@@ -248,7 +248,7 @@ void Tool_tremolo::expandTremolos(void) {
 
 void Tool_tremolo::expandTremolo(HTp token) {
 	HumRegex hre;
-	int value = 0;
+	HumNum value = 0;
 	HumNum duration;
 	HumNum repeat;
 	HumNum increment;
@@ -256,16 +256,18 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	int tnotes = -1;
 	if (hre.search(token, "@(\\d+)@")) {
 		value = hre.getMatchInt(1);
-		if (!Convert::isPowerOfTwo(value)) {
-			cerr << "Error: not a power of two: " << token << endl;
+		duration = Convert::recipToDuration(token);
+		HumNum count = value / duration;
+		if (!count.isInteger()) {
+			cerr << "Error: non-integer number of tremolo notes: " << token << endl;
 			return;
 		}
 		if (value < 8) {
-			cerr << "Error: tremolo can only be eighth-notes or shorter" << endl;
+			cerr << "Error: tremolo notes can only be eighth-notes or shorter" << endl;
 			return;
 		}
-		duration = Convert::recipToDuration(token);
-		if (duration >= 1) {
+		if (duration.getFloat() > 0.5) {
+			// needs to be less that one for tuplet quarter note tremolos
 			addBeam = true;
 		}
 
@@ -292,8 +294,8 @@ void Tool_tremolo::expandTremolo(HTp token) {
 
 	storeFirstTremoloNoteInfo(token);
 
-	int beams = log((double)(value))/log(2.0) - 2;
-	string markup = "@" + to_string(value) + "@";
+	int beams = log((double)(value.getFloat()))/log(2.0) - 2;
+	string markup = "@" + to_string(value.getNumerator()) + "@";
 	string base = token->getText();
 	hre.replaceDestructive(base, "", markup, "g");
 
@@ -317,7 +319,7 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	// Set the rhythm of the tremolo notes.
 	// Augmentation dot is expected adjacent to regular rhythm value.
 	// Maybe allow anywhere?
-	hre.replaceDestructive(base, to_string(value), "\\d+%?\\d*\\.*", "g");
+	hre.replaceDestructive(base, to_string(value.getNumerator()), "\\d+%?\\d*\\.*", "g");
 	string initial = base;
 	if (hasBeamStart) {
 		initial += startbeam;

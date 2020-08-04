@@ -184,6 +184,8 @@ void Tool_tassoize::processFile(HumdrumFile& infile) {
 	if (breaksQ)         { deleteBreaks(infile); }
 	if (transpositionsQ) { deleteDummyTranspositions(infile); }
 
+	adjustSystemDecoration(infile);
+
 	// Input lyrics may contain "=" signs which are to be converted into
 	// spaces in **text data, and into elisions when displaying with verovio.
 	Tool_shed shed;
@@ -195,6 +197,29 @@ void Tool_tassoize::processFile(HumdrumFile& infile) {
 	argv.push_back("s/=/ /g");
 	shed.process(argv);
 	shed.run(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tassoize::adjustSystemDecoration --
+//    !!!system-decoration: [(s1)(s2)(s3)(s4)]
+// to:
+//    !!!system-decoration: [*]
+//
+
+void Tool_tassoize::adjustSystemDecoration(HumdrumFile& infile) {
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->compare(0, 21, "!!!system-decoration:") == 0) {
+			token->setText("!!!system-decoration: [*]");
+			break;
+		}
+	}
 }
 
 

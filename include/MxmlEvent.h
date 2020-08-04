@@ -70,10 +70,11 @@ class MxmlEvent {
 		void               setTickDur         (long value, long ticks);
 		void               setStartTime       (HumNum value);
 		void               setDuration        (HumNum value);
-		void               setDurationByTicks (long value,
-		                                       xml_node el = xml_node(NULL));
+		void               setDurationByTicks (long value, xml_node el = xml_node(NULL));
+		void               setModification    (HumNum value);
 		HumNum             getStartTime       (void) const;
 		HumNum             getDuration        (void) const;
+		HumNum             getModification    (void) const;
 		void               setOwner           (MxmlMeasure* measure);
 		MxmlMeasure*       getOwner           (void) const;
 		const char*        getName            (void) const;
@@ -148,22 +149,23 @@ class MxmlEvent {
 		std::string        getRestPitch       (void) const;
 
 	protected:
-		HumNum             m_starttime;  // start time in quarter notes of event
-		HumNum             m_duration;   // duration in quarter notes of event
-		measure_event_type m_eventtype;  // enumeration type of event
-		xml_node           m_node;       // pointer to event in XML structure
-		MxmlMeasure*       m_owner;      // measure that contains this event
-		std::vector<MxmlEvent*> m_links; // list of secondary chord notes
-		bool               m_linked;     // true if a secondary chord note
-		int                m_sequence;   // ordering of event in XML file
-		static int         m_counter;    // counter for sequence variable
-		short              m_staff;      // staff number in part for event
-		short              m_voice;      // voice number in part for event
-		int                m_voiceindex; // voice index of item (remapping)
-      int                m_maxstaff;   // maximum staff number for measure
-		xml_node           m_hnode;      // harmony label starting at note event
-		bool               m_invisible;  // for forceInvisible();
-		bool               m_stems;      // for preserving stems
+		HumNum             m_starttime;    // start time in quarter notes of event
+		HumNum             m_duration;     // duration in quarter notes of event
+      HumNum             m_modification; // tuplet time adjustment of note
+		measure_event_type m_eventtype;    // enumeration type of event
+		xml_node           m_node;         // pointer to event in XML structure
+		MxmlMeasure*       m_owner;        // measure that contains this event
+		std::vector<MxmlEvent*> m_links;   // list of secondary chord notes
+		bool               m_linked;       // true if a secondary chord note
+		int                m_sequence;     // ordering of event in XML file
+		static int         m_counter;      // counter for sequence variable
+		short              m_staff;        // staff number in part for event
+		short              m_voice;        // voice number in part for event
+		int                m_voiceindex;   // voice index of item (remapping)
+      int                m_maxstaff;     // maximum staff number for measure
+		xml_node           m_hnode;        // harmony label starting at note event
+		bool               m_invisible;    // for forceInvisible();
+		bool               m_stems;        // for preserving stems
 
 		std::vector<xml_node> m_dynamics;   // dynamics <direction> starting just before note
 		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
@@ -177,9 +179,9 @@ class MxmlEvent {
 		int    getDotCount               (void) const;
 
 	public:
-		static HumNum getEmbeddedDuration  (xml_node el = xml_node(NULL));
 		static HumNum getQuarterDurationFromType (const char* type);
 		static bool   nodeType             (xml_node node, const char* testname);
+		static HumNum getEmbeddedDuration  (HumNum& modification, xml_node el = xml_node(NULL));
 
 
 	friend MxmlMeasure;

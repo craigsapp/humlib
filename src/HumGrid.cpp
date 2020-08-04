@@ -2016,7 +2016,7 @@ void HumGrid::addInvisibleRestsInFirstTrack(void) {
       	for (s=0; s<(int)part.size(); s++) {
 				GridStaff& staff = *part.at(s);
 				if (staff.size() == 0) {
-					cerr << "EMPTY STAFF VOICE WILL BE FILLED IN LATER!!!!" << endl;
+					// cerr << "EMPTY STAFF VOICE WILL BE FILLED IN LATER!!!!" << endl;
 					continue;
 				}
 				if (!staff.at(v)) {
