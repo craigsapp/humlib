@@ -98,6 +98,10 @@ bool Tool_tassoize::run(HumdrumFile& infile) {
 
 	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
+
+	// Need to adjust the line numbers for tokens for later
+	// processing.
+	m_humdrum_text << infile;
 	return true;
 }
 

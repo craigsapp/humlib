@@ -39,6 +39,7 @@ class Tool_filter : public HumTool {
 		void     initialize         (HumdrumFile& infile);
 		void     removeGlobalFilterLines    (HumdrumFile& infile);
 		void     removeUniversalFilterLines (HumdrumFileSet& infiles);
+		void     splitPipeline      (vector<string>& clist, const string& command);
 
 	private:
 		string   m_variant;        // used with -v option.

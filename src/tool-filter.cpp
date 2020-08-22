@@ -367,7 +367,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 			continue;
 		}
 		string command = refs[i]->getGlobalReferenceValue();
-		hre.split(clist, command, "\\s*\\|\\s*");
+		splitPipeline(clist, command);
 		for (int j=0; j<(int)clist.size(); j++) {
 			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
 				entry.first  = hre.getMatch(1);
@@ -377,6 +377,103 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+//  Tool_filter::splitPipeline --
+//
+
+void Tool_filter::splitPipeline(vector<string>& clist, const string& command) {
+	clist.clear();
+	clist.resize(1);
+	clist[0] = "";
+	int inDoubleQuotes = -1;
+	int inSingleQuotes = -1;
+	char ch = '\0';
+	char lastch;
+	for (int i=0; i<(int)command.size(); i++) {
+		lastch = ch;
+		ch = command[i];
+
+		if (ch == '"') {
+			if (lastch == '\\') {
+				// escaped double quote, so treat as regular character
+				clist.back() += ch;
+				continue;
+			} else if (inDoubleQuotes >= 0) {
+				// turn off previous double quote sequence
+				clist.back() += ch;
+				inDoubleQuotes = -1;
+				continue;
+			} else if (inSingleQuotes >= 0) {
+				// in an active single quote, so this is not a closing double quote
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is the start of a double quote sequence
+				clist.back() += ch;
+				inDoubleQuotes = i;
+				continue;
+			}
+		}
+
+		if (ch == '\'') {
+			if (lastch == '\\') {
+				// escaped single quote, so treat as regular character
+				clist.back() += ch;
+				continue;
+			} else if (inSingleQuotes >= 0) {
+				// turn off previous single quote sequence
+				clist.back() += ch;
+				inSingleQuotes = -1;
+				continue;
+			} else if (inDoubleQuotes >= 0) {
+				// in an active double quote, so this is not a closing single quote
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is the start of a single quote sequence
+				clist.back() += ch;
+				inSingleQuotes = i;
+				continue;
+			}
+		}
+
+		if (ch == '|') {
+			if (inSingleQuotes || inDoubleQuotes) {
+				// pipe character
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is a real pipe
+				clist.resize(clist.size() + 1);
+				continue;
+			}
+		}
+
+		if (isspace(ch) && (!inSingleQuotes) && (!inDoubleQuotes)) {
+			if (isspace(lastch)) {
+				// don't repeat spaces outside of quotes.
+				continue;
+			} else {
+				clist.back() += ' ';
+			}
+		}
+
+		// regular character
+		clist.back() += ch;
+	}
+
+	// remove leading and trailing spaces
+	HumRegex hre;
+	for (int i=0; i<(int)clist.size(); i++) {
+		hre.replaceDestructive(clist[i], "", "^\\s+");
+		hre.replaceDestructive(clist[i], "", "\\s+$");
+	}
+}
+
 
 
 //////////////////////////////

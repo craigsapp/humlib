@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug  4 16:47:44 PDT 2020
+// Last Modified: Tue Aug 18 03:19:15 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5980,6 +5980,7 @@ class Tool_filter : public HumTool {
 		void     initialize         (HumdrumFile& infile);
 		void     removeGlobalFilterLines    (HumdrumFile& infile);
 		void     removeUniversalFilterLines (HumdrumFileSet& infiles);
+		void     splitPipeline      (vector<string>& clist, const string& command);
 
 	private:
 		string   m_variant;        // used with -v option.
@@ -6698,43 +6699,58 @@ class MSearchQueryToken {
 			clear();
 		}
 		MSearchQueryToken(const MSearchQueryToken& token) {
-			anypitch  = false;
-			pc        = token.pc;
-			base      = token.base;
-			direction = token.direction;
-			duration  = token.duration;
-			rhythm    = token.rhythm;
-			anything  = token.anything;
+			anything    = token.anything;
+			anypitch    = token.anypitch;
+			anyinterval = token.anyinterval;
+			anyrhythm   = token.anyrhythm;
+			pc          = token.pc;
+			base        = token.base;
+			direction   = token.direction;
+			duration    = token.duration;
+			rhythm      = token.rhythm;
 		}
 		MSearchQueryToken& operator=(const MSearchQueryToken& token) {
 			if (this == &token) {
 				return *this;
 			}
-			pc        = token.pc;
-			base      = token.base;
-			direction = token.direction;
-			duration  = token.duration;
-			rhythm    = token.rhythm;
-			anything  = token.anything;
+			anything    = token.anything;
+			anypitch    = token.anypitch;
+			anyinterval = token.anyinterval;
+			anyrhythm   = token.anyrhythm;
+			pc          = token.pc;
+			base        = token.base;
+			direction   = token.direction;
+			duration    = token.duration;
+			rhythm      = token.rhythm;
 			return *this;
 		}
 		void clear(void) {
-			anypitch  = false;
-			pc        = NAN;
-			base      = 0;
-			direction = 0;
-			duration  = -1;
-			rhythm    = "";
-			anything  = false;
+			anything     = true;
+			anypitch     = true;
+			anyrhythm    = true;
+			anyinterval  = true;
+			pc           = NAN;
+			base         = 0;
+			direction    = -123456789;
+			duration     = -1;
+			rhythm       = "";
 		}
 
-		bool   anypitch;
+		bool   anything    = true;  // element can match any note/rest
+		bool   anypitch    = true;  // element can match any pitch class
+		bool   anyrhythm   = true;  // element can match any rhythm
+		bool   anyinterval = true;  // element can match any interval
+
+		// pitch features
 		double pc;           // NAN = rest
 		int    base;
+
+		// interval features:
 		int    direction;
+
+		// rhythm features:
 		HumNum duration;
 		string rhythm;
-		bool   anything;
 };
 
 
@@ -6834,12 +6850,17 @@ class Tool_msearch : public HumTool {
 		void    fillWordsForTrack  (vector<TextInfo*>& words,
 		                            HTp starttoken);
 		void    printQuery         (vector<MSearchQueryToken>& query);
+		void    addMusicSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
+		void    addTextSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
 
 	private:
 	 	vector<HTp> m_kernspines;
 		string      m_text;
 		string      m_marker;
-		bool        m_debugQ = false;
+		bool        m_markQ      = false;
+		bool        m_quietQ     = false;
+		bool        m_debugQ     = false;
+		bool        m_nooverlapQ = false;
 };
 
 
@@ -7183,6 +7204,8 @@ class MeasureInfo {
 			tracks = tcount;
 		}
 		int num;          // measure number
+		string stopStyle;  // styling for end of last measure
+		string startStyle; // styling for start of first measure
 		int seg;          // measure segment
 		int start;        // starting line of segment
 		int stop;         // ending line of segment
@@ -7263,6 +7286,7 @@ class Tool_myank : public HumTool {
 		void      getSectionString     (string& sstring, HumdrumFile& infile,
 		                                int sec);
 		void      collapseSpines       (HumdrumFile& infile, int line);
+		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
 
 	private:
 		int    debugQ      = 0;             // used with --debug option

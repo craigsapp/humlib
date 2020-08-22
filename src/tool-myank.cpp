@@ -123,10 +123,12 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
 	}
 	HumdrumFile& infile = *(info.file);
 	out << "================================== " << endl;
-	out << "NUMBER         = " << info.num << endl;
-	out << "SEGMENT        = " << info.seg << endl;
-	out << "START          = " << info.start << endl;
-	out << "STOP           = " << info.stop << endl;
+	out << "NUMBER      = " << info.num   << endl;
+	out << "SEGMENT     = " << info.seg   << endl;
+	out << "START       = " << info.start << endl;
+	out << "STOP        = " << info.stop  << endl;
+	out << "STOP_STYLE  = " << info.stopStyle << endl;
+	out << "START_STYLE = " << info.startStyle << endl;
 
 	for (int i=1; i<(int)info.sclef.size(); i++) {
 		out << "TRACK " << i << ":" << endl;
@@ -243,7 +245,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	getMetStates(metstates, infile);
 	getMeasureStartStop(MeasureInList, infile);
 
-	string measurestring = getString("measure");
+	string measurestring = getString("measures");
 	if (markQ) {
 		stringstream mstring;
 		getMarkString(mstring, infile);
@@ -280,6 +282,12 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	if (MeasureOutList.size() == 0) {
 		// disallow processing files with no barlines
 		return;
+	}
+
+	// move stopStyle to startStyle of next measure group.
+	for (int i=(int)MeasureOutList.size()-1; i>0; i--) {
+		MeasureOutList[i].startStyle = MeasureOutList[i-1].stopStyle;
+		MeasureOutList[i-1].stopStyle = "";
 	}
 
 	myank(infile, MeasureOutList);
@@ -495,6 +503,7 @@ outerforloop: ;
 //
 
 void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
+
 	if (outmeasures.size() > 0) {
 		printStarting(infile);
 	}
@@ -551,6 +560,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 			} else if (doubleQ && measurestart) {
 				printDoubleBarline(infile, i);
 				measurestart = 0;
+			} else if (measurestart && infile[i].isBarline()) {
+				printMeasureStart(infile, i, outmeasures[h].startStyle);
+				measurestart = 0;
 			} else {
 				m_humdrum_text << infile[i] << "\n";
 				if (barnumtextQ && (bartextcount++ == 0) && infile[i].isBarline()) {
@@ -576,7 +588,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	if ((!nolastbarQ) &&  (lasti >= 0) && infile[lasti].isBarline()) {
 		for (j=0; j<infile[lasti].getFieldCount(); j++) {
 			token = *infile.token(lasti, j);
-			hre.replaceDestructive(token, "", "\\d+");
+			hre.replaceDestructive(token, outmeasures.back().stopStyle, "\\d+.*");
+			// collapse final barlines
+			hre.replaceDestructive(token, "==", "===+");
 			if (doubleQ) {
 				if (hre.search(token, "=(.+)")) {
 					// don't add double barline, there is already
@@ -601,7 +615,6 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	}
 
 	if (lastline >= 0) {
-		//printEnding(infile, lastline);
 		printEnding(infile, outmeasures.back().stop, lasti);
 	}
 }
@@ -1108,6 +1121,51 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 }
 
 
+//////////////////////////////
+//
+// Tool_myank::printMeasureStart -- print a starting measure of a segment.
+//
+
+void Tool_myank::printMeasureStart(HumdrumFile& infile, int line, const string& style) {
+	if (!infile[line].isBarline()) {
+		m_humdrum_text << infile[line] << "\n";
+		return;
+	}
+
+	HumRegex hre;
+	int j;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (hre.search(infile.token(line, j), "=(\\d*)(.*)", "")) {
+			if (style == "==") {
+				m_humdrum_text << "==";
+				m_humdrum_text << hre.getMatch(1);
+			} else {
+				m_humdrum_text << "=";
+				m_humdrum_text << hre.getMatch(1);
+				m_humdrum_text << style;
+			}
+		} else {
+			if (style == "==") {
+				m_humdrum_text << "==";
+			} else {
+				m_humdrum_text << "=" << style;
+			}
+		}
+		if (j < infile[line].getFieldCount()-1) {
+			m_humdrum_text << "\t";
+		}
+	}
+	m_humdrum_text << "\n";
+
+	if (barnumtextQ) {
+		int barline = 0;
+		sscanf(infile.token(line, 0)->c_str(), "=%d", &barline);
+		if (barline > 0) {
+			m_humdrum_text << "!!LO:TX:Z=20:X=-25:t=" << barline << endl;
+		}
+	}
+}
+
 
 //////////////////////////////
 //
@@ -1115,7 +1173,6 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 //
 
 void Tool_myank::printDoubleBarline(HumdrumFile& infile, int line) {
-
 
 	if (!infile[line].isBarline()) {
 		m_humdrum_text << infile[line] << "\n";
@@ -1408,7 +1465,8 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_myank::printEnding -- print the measure
+// Tool_myank::printEnding -- print the spine terminators and any
+//     content after the end of the data.
 //
 
 void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
@@ -1786,13 +1844,14 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	int start = 0;
 	vector<MeasureInfo>& range = measureout;
 	range.reserve(10000);
-	value = hre.search(ostring, "^([^,]+,?)");
+	string searchexp = "^([\\d$-]+[^\\d$-]*)";
+	value = hre.search(ostring, searchexp);
 	while (value != 0) {
 		start += value - 1;
 		start += (int)hre.getMatch(1).size();
 		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
 			 measurein, inmap);
-		value = hre.search(ostring, start, "^([^,]+,?)");
+		value = hre.search(ostring, start, searchexp);
 	}
 }
 
@@ -2166,7 +2225,14 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 	// remove any comma left at end of input string (or anywhere else)
 	hre.replaceDestructive(buffer, "", ",", "g");
 
+	string measureStyling = "";
+	if (hre.search(buffer, "([|:!=]+)$")) {
+		measureStyling = hre.getMatch(1);
+		hre.replaceDestructive(buffer, "", "([|:!=]+)$");
+	}
+
 	if (hre.search(buffer, "^(\\d+)[a-z]?-(\\d+)[a-z]?$")) {
+		// processing a measure range
 		int firstone = hre.getMatchInt(1);
 		int lastone  = hre.getMatchInt(2);
 
@@ -2190,69 +2256,62 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		}
 
 		if (firstone > lastone) {
+			// reverse the order of the measures
 			for (int i=firstone; i>=lastone; i--) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) &&
-							(field.back().stop == inmeasures[inmap[i]].start)) {
-						field.back().stop = inmeasures[inmap[i]].stop;
-					} else {
-						current.clear();
-						current.file = &infile;
-						current.num = i;
-						current.start = inmeasures[inmap[i]].start;
-						current.stop = inmeasures[inmap[i]].stop;
+					current.clear();
+					current.file = &infile;
+					current.num = i;
+					current.start = inmeasures[inmap[i]].start;
+					current.stop = inmeasures[inmap[i]].stop;
 
-						current.sclef    = inmeasures[inmap[i]].sclef;
-						current.skeysig  = inmeasures[inmap[i]].skeysig;
-						current.skey     = inmeasures[inmap[i]].skey;
-						current.stimesig = inmeasures[inmap[i]].stimesig;
-						current.smet     = inmeasures[inmap[i]].smet;
-						current.stempo   = inmeasures[inmap[i]].stempo;
+					current.sclef    = inmeasures[inmap[i]].sclef;
+					current.skeysig  = inmeasures[inmap[i]].skeysig;
+					current.skey     = inmeasures[inmap[i]].skey;
+					current.stimesig = inmeasures[inmap[i]].stimesig;
+					current.smet     = inmeasures[inmap[i]].smet;
+					current.stempo   = inmeasures[inmap[i]].stempo;
 
-						current.eclef    = inmeasures[inmap[i]].eclef;
-						current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-						current.ekey     = inmeasures[inmap[i]].ekey;
-						current.etimesig = inmeasures[inmap[i]].etimesig;
-						current.emet     = inmeasures[inmap[i]].emet;
-						current.etempo   = inmeasures[inmap[i]].etempo;
+					current.eclef    = inmeasures[inmap[i]].eclef;
+					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
+					current.ekey     = inmeasures[inmap[i]].ekey;
+					current.etimesig = inmeasures[inmap[i]].etimesig;
+					current.emet     = inmeasures[inmap[i]].emet;
+					current.etempo   = inmeasures[inmap[i]].etempo;
 
-						field.push_back(current);
-					}
+					field.push_back(current);
 				}
 			}
 		} else {
+			// measure range not reversed
 			for (int i=firstone; i<=lastone; i++) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) &&
-							(field.back().stop == inmeasures[inmap[i]].start)) {
-						field.back().stop = inmeasures[inmap[i]].stop;
-					} else {
-						current.clear();
-						current.file = &infile;
-						current.num = i;
-						current.start = inmeasures[inmap[i]].start;
-						current.stop = inmeasures[inmap[i]].stop;
+					current.clear();
+					current.file = &infile;
+					current.num = i;
+					current.start = inmeasures[inmap[i]].start;
+					current.stop = inmeasures[inmap[i]].stop;
 
-						current.sclef    = inmeasures[inmap[i]].sclef;
-						current.skeysig  = inmeasures[inmap[i]].skeysig;
-						current.skey     = inmeasures[inmap[i]].skey;
-						current.stimesig = inmeasures[inmap[i]].stimesig;
-						current.smet     = inmeasures[inmap[i]].smet;
-						current.stempo   = inmeasures[inmap[i]].stempo;
+					current.sclef    = inmeasures[inmap[i]].sclef;
+					current.skeysig  = inmeasures[inmap[i]].skeysig;
+					current.skey     = inmeasures[inmap[i]].skey;
+					current.stimesig = inmeasures[inmap[i]].stimesig;
+					current.smet     = inmeasures[inmap[i]].smet;
+					current.stempo   = inmeasures[inmap[i]].stempo;
 
-						current.eclef    = inmeasures[inmap[i]].eclef;
-						current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-						current.ekey     = inmeasures[inmap[i]].ekey;
-						current.etimesig = inmeasures[inmap[i]].etimesig;
-						current.emet     = inmeasures[inmap[i]].emet;
-						current.etempo   = inmeasures[inmap[i]].etempo;
+					current.eclef    = inmeasures[inmap[i]].eclef;
+					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
+					current.ekey     = inmeasures[inmap[i]].ekey;
+					current.etimesig = inmeasures[inmap[i]].etimesig;
+					current.emet     = inmeasures[inmap[i]].emet;
+					current.etempo   = inmeasures[inmap[i]].etempo;
 
-						field.push_back(current);
-					}
+					field.push_back(current);
 				}
 			}
 		}
 	} else if (hre.search(buffer, "^(\\d+)([a-z]*)")) {
+		// processing a single measure number
 		int value = hre.getMatchInt(1);
 		// do something with letter later...
 
@@ -2263,34 +2322,32 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 			exit(1);
 		}
 		if (inmap[value] >= 0) {
-			if ((field.size() > 0) &&
-					(field.back().stop == inmeasures[inmap[value]].start)) {
-				field.back().stop = inmeasures[inmap[value]].stop;
-			} else {
-				current.clear();
-				current.file = &infile;
-				current.num = value;
-				current.start = inmeasures[inmap[value]].start;
-				current.stop = inmeasures[inmap[value]].stop;
+			current.clear();
+			current.file = &infile;
+			current.num = value;
+			current.start = inmeasures[inmap[value]].start;
+			current.stop = inmeasures[inmap[value]].stop;
 
-				current.sclef    = inmeasures[inmap[value]].sclef;
-				current.skeysig  = inmeasures[inmap[value]].skeysig;
-				current.skey     = inmeasures[inmap[value]].skey;
-				current.stimesig = inmeasures[inmap[value]].stimesig;
-				current.smet     = inmeasures[inmap[value]].smet;
-				current.stempo   = inmeasures[inmap[value]].stempo;
+			current.sclef    = inmeasures[inmap[value]].sclef;
+			current.skeysig  = inmeasures[inmap[value]].skeysig;
+			current.skey     = inmeasures[inmap[value]].skey;
+			current.stimesig = inmeasures[inmap[value]].stimesig;
+			current.smet     = inmeasures[inmap[value]].smet;
+			current.stempo   = inmeasures[inmap[value]].stempo;
 
-				current.eclef    = inmeasures[inmap[value]].eclef;
-				current.ekeysig  = inmeasures[inmap[value]].ekeysig;
-				current.ekey     = inmeasures[inmap[value]].ekey;
-				current.etimesig = inmeasures[inmap[value]].etimesig;
-				current.emet     = inmeasures[inmap[value]].emet;
-				current.etempo   = inmeasures[inmap[value]].etempo;
+			current.eclef    = inmeasures[inmap[value]].eclef;
+			current.ekeysig  = inmeasures[inmap[value]].ekeysig;
+			current.ekey     = inmeasures[inmap[value]].ekey;
+			current.etimesig = inmeasures[inmap[value]].etimesig;
+			current.emet     = inmeasures[inmap[value]].emet;
+			current.etempo   = inmeasures[inmap[value]].etempo;
 
-				field.push_back(current);
-			}
+			field.push_back(current);
 		}
 	}
+
+	field.back().stopStyle = measureStyling;
+
 }
 
 

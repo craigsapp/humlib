@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug  4 16:47:44 PDT 2020
+// Last Modified: Tue Aug 18 03:19:15 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -60445,7 +60445,7 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 			continue;
 		}
 		string command = refs[i]->getGlobalReferenceValue();
-		hre.split(clist, command, "\\s*\\|\\s*");
+		splitPipeline(clist, command);
 		for (int j=0; j<(int)clist.size(); j++) {
 			if (hre.search(clist[j], "^\\s*([^\\s]+)")) {
 				entry.first  = hre.getMatch(1);
@@ -60455,6 +60455,103 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+//  Tool_filter::splitPipeline --
+//
+
+void Tool_filter::splitPipeline(vector<string>& clist, const string& command) {
+	clist.clear();
+	clist.resize(1);
+	clist[0] = "";
+	int inDoubleQuotes = -1;
+	int inSingleQuotes = -1;
+	char ch = '\0';
+	char lastch;
+	for (int i=0; i<(int)command.size(); i++) {
+		lastch = ch;
+		ch = command[i];
+
+		if (ch == '"') {
+			if (lastch == '\\') {
+				// escaped double quote, so treat as regular character
+				clist.back() += ch;
+				continue;
+			} else if (inDoubleQuotes >= 0) {
+				// turn off previous double quote sequence
+				clist.back() += ch;
+				inDoubleQuotes = -1;
+				continue;
+			} else if (inSingleQuotes >= 0) {
+				// in an active single quote, so this is not a closing double quote
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is the start of a double quote sequence
+				clist.back() += ch;
+				inDoubleQuotes = i;
+				continue;
+			}
+		}
+
+		if (ch == '\'') {
+			if (lastch == '\\') {
+				// escaped single quote, so treat as regular character
+				clist.back() += ch;
+				continue;
+			} else if (inSingleQuotes >= 0) {
+				// turn off previous single quote sequence
+				clist.back() += ch;
+				inSingleQuotes = -1;
+				continue;
+			} else if (inDoubleQuotes >= 0) {
+				// in an active double quote, so this is not a closing single quote
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is the start of a single quote sequence
+				clist.back() += ch;
+				inSingleQuotes = i;
+				continue;
+			}
+		}
+
+		if (ch == '|') {
+			if (inSingleQuotes || inDoubleQuotes) {
+				// pipe character
+				clist.back() += ch;
+				continue;
+			} else {
+				// this is a real pipe
+				clist.resize(clist.size() + 1);
+				continue;
+			}
+		}
+
+		if (isspace(ch) && (!inSingleQuotes) && (!inDoubleQuotes)) {
+			if (isspace(lastch)) {
+				// don't repeat spaces outside of quotes.
+				continue;
+			} else {
+				clist.back() += ' ';
+			}
+		}
+
+		// regular character
+		clist.back() += ch;
+	}
+
+	// remove leading and trailing spaces
+	HumRegex hre;
+	for (int i=0; i<(int)clist.size(); i++) {
+		hre.replaceDestructive(clist[i], "", "^\\s+");
+		hre.replaceDestructive(clist[i], "", "\\s+$");
+	}
+}
+
 
 
 //////////////////////////////
@@ -69308,15 +69405,18 @@ void Tool_metlev::fillVoiceResults(vector<vector<double> >& results,
 //
 
 Tool_msearch::Tool_msearch(void) {
-	define("debug=b",           "diatonic search");
+	define("debug=b",               "diatonic search");
 	define("q|query=s:4c4d4e4f4g",  "combined rhythm/pitch query string");
-	define("p|pitch=s:cdefg",   "pitch query string");
-	define("i|interval=s:2222", "interval query string");
-	define("r|d|rhythm|duration=s:44444",   "rhythm query string");
-	define("t|text=s:",         "lyrical text query string");
-	define("x|cross=b",         "search across parts");
-	define("c|color=s",         "highlight color");
-	define("m|mark|marker=s:@", "marking character");
+	define("p|pitch=s:cdefg",       "pitch query string");
+	define("i|interval=s:2222",     "interval query string");
+	define("r|d|rhythm|duration=s:44444", "rhythm query string");
+	define("t|text=s:",             "lyrical text query string");
+	define("O|no-overlap=b",        "do not allow matches to overlap");
+	define("x|cross=b",             "search across parts");
+	define("c|color=s",             "highlight color");
+	define("m|mark|marker=s:@",     "marking character");
+	define("M|no-mark|no-marker=b", "do not mark matches");
+	define("Q|quiet=b",             "quite mode: do not summarize matches");
 }
 
 
@@ -69360,6 +69460,8 @@ bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_msearch::run(HumdrumFile& infile) {
 	m_debugQ = getBoolean("debug");
+	m_quietQ = getBoolean("quiet");
+	m_nooverlapQ = getBoolean("no-overlap");
 	NoteGrid grid(infile);
 	if (m_debugQ) {
 		grid.printGridInfo(cerr);
@@ -69392,8 +69494,13 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 
 void Tool_msearch::initialize(void) {
 	m_marker = getString("marker");
-	m_marker = m_marker[0];
-
+	// only allowing a single character for now:
+	m_markQ = !getBoolean("no-marker");
+	if (!m_markQ) {
+		m_marker.clear();
+	} else if (!m_marker.empty()) {
+		m_marker = m_marker[0];
+	}
 }
 
 
@@ -69511,7 +69618,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 		textinterp = "**silbe";
 	}
 
-	if (tcount) {
+	if (tcount && m_markQ) {
 		string content = "!!!RDF";
 		content += textinterp;
 		content += ": ";
@@ -69527,6 +69634,10 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 	for (int i=0; i<(int)words.size(); i++) {
 		delete words[i];
 		words[i] = NULL;
+	}
+
+	if (!m_quietQ) {
+		addTextSearchSummary(infile, tcount, m_marker);
 	}
 }
 
@@ -69575,7 +69686,7 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		}
 	}
 
-	if (mcount) {
+	if (mcount && m_markQ) {
 		string content = "!!!RDF**kern: " + m_marker + " = marked note";
 		if (getBoolean("color")) {
 			content += ", color=\"" + getString("color") + "\"";
@@ -69583,8 +69694,127 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		infile.appendLine(content);
 		infile.createLinesFromTokens();
 	}
+	if (!m_quietQ) {
+		addMusicSearchSummary(infile, mcount, m_marker);
+	}
 }
 
+
+//////////////////////////////
+//
+// Tool_msearch::addMusicSearchSummary --
+//
+
+void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const string& marker) {
+	infile.appendLine("!!@@BEGIN: MUSIC_SEARCH_RESULT");
+	string line;
+
+	line = "!!@QUERY:\t";
+
+	if (getBoolean("query")) {
+		line += " -q ";
+		string qstring = getString("query");
+		if (qstring.find(' ') != string::npos) {
+			line += '"';
+			line += qstring;
+			line += '"';
+		} else {
+			line += qstring;
+		}
+	}
+
+	if (getBoolean("pitch")) {
+		line += " -p ";
+		string pstring = getString("pitch");
+		if (pstring.find(' ') != string::npos) {
+			line += '"';
+			line += pstring;
+			line += '"';
+		} else {
+			line += pstring;
+		}
+	}
+
+	if (getBoolean("rhythm")) {
+		line += " -r ";
+		string rstring = getString("rhythm");
+		if (rstring.find(' ') != string::npos) {
+			line += '"';
+			line += rstring;
+			line += '"';
+		} else {
+			line += rstring;
+		}
+	}
+
+	if (getBoolean("interval")) {
+		line += " -i ";
+		string istring = getString("interval");
+		if (istring.find(' ') != string::npos) {
+			line += '"';
+			line += istring;
+			line += '"';
+		} else {
+			line += istring;
+		}
+	}
+
+	infile.appendLine(line);
+
+	line = "!!@MATCHES:\t";
+	line += to_string(mcount);
+	infile.appendLine(line);
+
+	if (m_markQ) {
+		line = "!!@MARKER:\t";
+		line += marker;
+		infile.appendLine(line);
+	}
+
+	// Print match location here.
+	infile.appendLine("!!@@END: MUSIC_SEARCH_RESULT");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::addTextSearchSummary --
+//
+
+void Tool_msearch::addTextSearchSummary(HumdrumFile& infile, int mcount, const string& marker) {
+	infile.appendLine("!!@@BEGIN: TEXT_SEARCH_RESULT");
+	string line;
+
+	line = "!!@QUERY:\t";
+
+	if (getBoolean("text")) {
+		line += " -t ";
+		string tstring = getString("text");
+		if (tstring.find(' ') != string::npos) {
+			line += '"';
+			line += tstring;
+			line += '"';
+		} else {
+			line += tstring;
+		}
+	}
+
+	infile.appendLine(line);
+
+	line = "!!@MATCHES:\t";
+	line += to_string(mcount);
+	infile.appendLine(line);
+
+	if (m_markQ) {
+		line = "!!@MARKER:\t";
+		line += marker;
+		infile.appendLine(line);
+	}
+
+	// Print match location here.
+	infile.appendLine("!!@@END: TEXT_SEARCH_RESULT");
+}
 
 
 //////////////////////////////
@@ -69691,122 +69921,189 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 
 //////////////////////////////
 //
-// Tool_msearch::checkForMatchDiatonicPC --
+// Tool_msearch::checkForMatchDiatonicPC -- See if the given position
+//    in the music matches the query.
 //
 
 bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
-		vector<MSearchQueryToken>& dpcQuery, vector<NoteCell*>& match) {
+		vector<MSearchQueryToken>& query, vector<NoteCell*>& match) {
+
 	match.clear();
 	int maxi = (int)notes.size() - index;
-	if ((int)dpcQuery.size() > maxi) {
+	if ((int)query.size() > maxi) {
+		// Search would extend off of the end of the music, so cannot be a match.
 		return false;
 	}
-	bool lastIsInterval = false;
-	int interval;
-	bool rhymatch;
+
 	int c = 0;
-	for (int i=0; i<(int)dpcQuery.size(); i++) {
-		if (dpcQuery[i].anything) {
-			match.push_back(notes[index+i-c]);
+
+	for (int i=0; i<(int)query.size(); i++) {
+
+		int currindex = index + i - c;
+		int lastindex = index + i -c - 1;
+		int nextindex = index + i -c + 1;
+		if (nextindex >= (int)notes.size()) {
+			nextindex = -1;
+		}
+
+		if (currindex < 0) {
+			cerr << "STRANGE NEGATIVE INDEX " << currindex << endl;
+			break;
+		}
+
+		// If the query item can be anything, it automatically matches:
+		if (query[i].anything) {
+			match.push_back(notes[currindex]);
 			continue;
 		}
-		rhymatch = true;
-		if ((!dpcQuery[i].rhythm.empty())
-				&& (notes[index+i-c]->getDuration() != dpcQuery[i].duration)) {
-			// duration needs to match query, but does not
-			rhymatch = false;
-		}
 
-		
-		// check for gross-contour queries:
-		if (dpcQuery[i].base <= 0) {
-			lastIsInterval = true;
-			// Search by gross contour
-			if ((dpcQuery[i].direction == 1) && (notes[index+i-c]->getAbsMidiPitch() >
-					notes[index+i-1-c]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i-c]);
-				continue;
-			} else if ((dpcQuery[i].direction == -1) && (notes[index+i-c]->getAbsMidiPitch() <
-					notes[index+i-1-c]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i-c]);
-				continue;
-			} else if ((dpcQuery[i].direction == 0) && (notes[index+i-c]->getAbsMidiPitch() ==
-					notes[index+i-1-c]->getAbsMidiPitch())) {
-				match.push_back(notes[index+i-c]);
-				continue;
-			} else {
+		//////////////////////////////
+		//
+		// RHYTHM
+		//
+
+		if (!query[i].anyrhythm) {
+			if (notes[currindex]->getDuration() != query[i].duration) {
 				match.clear();
 				return false;
 			}
 		}
 
-		// Interface between interval moving to pitch:
-		if (lastIsInterval) {
-			c++;
-			match.pop_back();
-			lastIsInterval = false;
-		}
+		//////////////////////////////
+		//
+		// INTERVAL
+		//
 
-		// Search by pitch/rest
-		if (dpcQuery[i].base == 40) {
-			if ((Convert::isNaN(notes[index+i-c]->getAbsBase40PitchClass()) &&
-					Convert::isNaN(dpcQuery[i].pc)) ||
-					(notes[index+i-c]->getAbsBase40PitchClass() == dpcQuery[i].pc)) {
-				if ((index+i-c>0) && dpcQuery[i].direction) {
-					interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
-							notes[index+i-1-c]->getAbsBase40Pitch());
-					if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
-						match.clear();
-						return false;
-					}
-					if ((dpcQuery[i].direction < 0) && (interval >= 0)) {
-						match.clear();
-						return false;
-					}
-				}
-				if (rhymatch) {
-					match.push_back(notes[index+i-c]);
+		if (!query[i].anyinterval) {
+			double currpitch;
+			double nextpitch;
+			double lastpitch;
+
+			currpitch = notes[currindex]->getAbsMidiPitch();
+
+			if (nextindex >= 0) {
+				nextpitch = notes[nextindex]->getAbsMidiPitch();
+			} else {
+				nextpitch = -123456789.0;
+			}
+
+			if (lastindex >= 0) {
+				lastpitch = notes[nextindex]->getAbsMidiPitch();
+			} else {
+				lastpitch = -987654321.0;
+			}
+
+			if (query[i].anypitch) {
+				// search forward interval
+				if (nextindex < 0) {
+					// Match can not go off the edge of the music.
+					match.clear();
+					return false;
 				} else {
-					match.clear();
-					return false;
-				}
-			} else {
-				// not a match
-				match.clear();
-				return false;
-			}
-		} else if ((Convert::isNaN(notes[index+i-c]->getAbsDiatonicPitchClass()) &&
-				Convert::isNaN(dpcQuery[i].pc)) ||
-				(notes[index+i-c]->getAbsDiatonicPitchClass() == dpcQuery[i].pc)) {
-			if ((index+i-c>0) && dpcQuery[i].direction) {
-				interval = (int)(notes[index+i-c]->getAbsBase40Pitch() -
-						notes[index+i-1-c]->getAbsBase40Pitch());
-				if ((dpcQuery[i].direction > 0) && (interval <= 0)) {
-					match.clear();
-					return false;
-				}
-				if ((dpcQuery[i].direction < 0) && (interval >= 0)) {
-					match.clear();
-					return false;
-				}
-			}
-			if (rhymatch) {
-				match.push_back(notes[index+i-c]);
-			} else {
-				match.clear();
-				return false;
-			}
+					// check here if either note is a rest
+					if (notes[currindex]->isRest() || notes[nextindex]->isRest()) {
+						match.clear();
+						return false;
+					}
 
-		} else {
-			// not a match
-			match.clear();
-			return false;
+					if (query[i].direction > 0) {
+						if (nextpitch - currpitch <= 0.0) {
+							match.clear();
+							return false;
+						}
+					} if (query[i].direction < 0) {
+						if (nextpitch - currpitch >= 0.0) {
+							match.clear();
+							return false;
+						}
+					} else if (query[i].direction == 0.0) {
+						if (nextpitch - currpitch != 0) {
+							match.clear();
+							return false;
+						}
+					}
+				}
+			} else {
+				// search backward interval
+				if (lastindex < 0) {
+					// Match can not go off the edge of the music.
+					match.clear();
+					return false;
+				} else {
+					// check here if either note is a rest.
+					if (notes[currindex]->isRest() || notes[nextindex]->isRest()) {
+						match.clear();
+						return false;
+					}
+
+					if (query[i].direction > 0) {
+						if (lastpitch - currpitch <= 0.0) {
+							match.clear();
+							return false;
+						}
+					} if (query[i].direction < 0) {
+						if (lastpitch - currpitch >= 0.0) {
+							match.clear();
+							return false;
+						}
+					} else if (query[i].direction == 0.0) {
+						if (lastpitch - currpitch != 0) {
+							match.clear();
+							return false;
+						}
+					}
+				}
+			}
 		}
-	}
 
+		//////////////////////////////
+		//
+		// INTERVAL
+		//
+			
+		if (!query[i].anypitch) {
+			double qpitch = query[i].pc;
+			double npitch = 0;
+			if (notes[currindex]->isRest()) {
+				if (Convert::isNaN(qpitch)) {
+					// both notes are rests, so they match
+					match.push_back(notes[currindex]);
+					continue;
+				} else {
+					// query is not a rest but test note is
+					match.clear();
+					return false;
+				}
+			} else if (Convert::isNaN(qpitch)) {
+				// query is a rest but test note is not
+				match.clear();
+				return false;
+			}
+
+			if (query[i].base == 40) {
+				npitch = notes[currindex]->getAbsBase40PitchClass();
+			} else if (query[i].base == 12) {
+				npitch = ((int)notes[currindex]->getAbsMidiPitch()) % 12;
+			} else if (query[i].base == 7) {
+				npitch = ((int)notes[currindex]->getAbsDiatonicPitch()) % 7;
+			} else {
+				npitch = notes[currindex]->getAbsBase40PitchClass();
+			}
+
+			if (qpitch != npitch) {
+				match.clear();
+				return false;
+			}
+		}
+
+		// All requirements for the note were matched, so store note
+		// and continue to next note if needed.
+		match.push_back(notes[currindex]);
+	}
+	
 	// Add extra token for marking tied notes at end of match
-	if (index + (int)dpcQuery.size() < (int)notes.size()) {
-		match.push_back(notes[index + (int)dpcQuery.size() - c]);
+	if (index + (int)query.size() < (int)notes.size()) {
+		match.push_back(notes[index + (int)query.size() - c]);
 	} else {
 		match.push_back(NULL);
 	}
@@ -69901,7 +70198,7 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query) {
 //
 
 void Tool_msearch::fillMusicQueryPitch(vector<MSearchQueryToken>& query,
-		const string& input) { 
+		const string& input) {
 	fillMusicQueryInterleaved(query, input);
 }
 
@@ -69925,7 +70222,10 @@ void Tool_msearch::fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
 //
 
 void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
-		const string& input) { 
+		const string& input) {
+
+
+
 }
 
 
@@ -69937,19 +70237,23 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 
 void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		const string& input, bool rhythmQ) {
+
 	char ch;
 	int counter = 0;
 	MSearchQueryToken temp;
 	MSearchQueryToken *active = &temp;
+
 	if (query.size() > 0) {
 		active = &query.at(counter);
 	} else {
+		// what is this for?
 	}
 
 	for (int i=0; i<(int)input.size(); i++) {
 		ch = tolower(input[i]);
 
 		if (ch == ' ') {
+			// skip over multiple spaces
 			if (i > 0) {
             if (input[i-1] == ' ') {
 					continue;
@@ -69958,15 +70262,22 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		}
 
 		if (ch == '^') {
-			active->direction = 1;
-			continue;
-		}
-		if (ch == 'v') {
+			active->anything = false;
+			active->anyinterval = false;
 			active->direction = -1;
 			continue;
 		}
+		if (ch == 'v') {
+			active->anything = false;
+			active->anyinterval = false;
+			active->direction = 1;
+			continue;
+		}
 
+		// process rhythm.  This must go first then intervals then pitches
 		if (isdigit(ch) || (ch == '.')) {
+			active->anything = false;
+			active->anyrhythm = false;
 			active->rhythm += ch;
 			if (i < (int)input.size() - 1) {
 				if (input[i+1] == ' ') {
@@ -69984,7 +70295,6 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 				}
 			} else {
 				// this is the last charcter in the input string
-				cerr << "LAST CHARACTER IN THE INPUT STRING" << endl;
 				if (active == &temp) {
 						query.push_back(temp);
 						temp.clear();
@@ -69998,10 +70308,14 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			}
 		}
 
+		// check for intervals.  Intervals will trigger a
+		// new element in the query list
+		// A new type ^ or v will not increment the query list
+		// (and they will expect a pitch after them).
 		if (ch == '/') {
+			active->anything = false;
+			active->anyinterval = false;
 			active->direction = 1;
-			active->base = -1;
-			active->pc = -1;
 			if (active == &temp) {
 				query.push_back(temp);
 				temp.clear();
@@ -70014,9 +70328,9 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			}
 			continue;
 		} else if (ch == '\\') {
+			active->anything = false;
+			active->anyinterval = false;
 			active->direction = -1;
-			active->base = -1;
-			active->pc = -1;
 			if (active == &temp) {
 				query.push_back(temp);
 				temp.clear();
@@ -70029,9 +70343,9 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			}
 			continue;
 		} else if (ch == '=') {
+			active->anything = false;
+			active->anyinterval = false;
 			active->direction = 0;
-			active->base = -1;
-			active->pc = -1;
 			if (active == &temp) {
 				query.push_back(temp);
 				temp.clear();
@@ -70045,7 +70359,11 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			continue;
 		}
 
+
+		// check for actual pitches
 		if ((ch >= 'a' && ch <= 'g')) {
+			active->anything = false;
+			active->anypitch = false;
 			active->base = 7;
 			active->pc = (ch - 'a' + 5) % 7;
 			if (active == &temp) {
@@ -70060,6 +70378,8 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			}
 			continue;
 		} else if (ch == 'r') {
+			active->anything = false;
+			active->anypitch = false;
 			active->base = 7;
 			active->pc = GRIDREST;
 			if (active == &temp) {
@@ -70089,21 +70409,18 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		// deal with double sharps and double flats here
 	}
 
-	if (rhythmQ) {
-		for (int i=0; i<(int)query.size(); i++) {
-			query[i].anypitch = true;
-		}
-	}
-
 	// Convert rhythms to durations
 	for (int i=0; i<(int)query.size(); i++) {
+		if (query[i].anyrhythm) {
+			continue;
+		}
 		if (query[i].rhythm.empty()) {
 			continue;
 		}
 		query[i].duration = Convert::recipToDuration(query[i].rhythm);
 	}
 
-	// what is this for?:
+	// what is this for (end condition)?
 	//if ((!query.empty()) && (query[0].base <= 0)) {
 	//	temp.clear();
 	//	temp.anything = true;
@@ -70118,13 +70435,16 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 //
 
 ostream& operator<<(ostream& out, MSearchQueryToken& item) {
-	out << "ITEM: "         << endl;
-	out << "\tPC:\t\t"      << item.pc        << endl;
-	out << "\tBASE:\t\t"    << item.base      << endl;
-	out << "\tDIRECTION:\t" << item.direction << endl;
-	out << "\tDURATION:\t"  << item.duration  << endl;
-	out << "\tRHYTHM:\t\t"  << item.rhythm    << endl;
-	out << "\tANYTHING:\t"  << item.anything  << endl;
+	out << "ITEM: "           << endl;
+	out << "\tANYTHING:\t"    << item.anything    << endl;
+	out << "\tANYPITCH:\t"    << item.anypitch    << endl;
+	out << "\tANYINTERVAL:\t" << item.anyinterval << endl;
+	out << "\tANYRHYTHM:\t"   << item.anyrhythm   << endl;
+	out << "\tPC:\t\t"        << item.pc          << endl;
+	out << "\tBASE:\t\t"      << item.base        << endl;
+	out << "\tDIRECTION:\t"   << item.direction   << endl;
+	out << "\tRHYTHM:\t\t"    << item.rhythm      << endl;
+	out << "\tDURATION:\t"    << item.duration    << endl;
 	return out;
 }
 
@@ -76028,10 +76348,12 @@ ostream& operator<<(ostream& out, MeasureInfo& info) {
 	}
 	HumdrumFile& infile = *(info.file);
 	out << "================================== " << endl;
-	out << "NUMBER         = " << info.num << endl;
-	out << "SEGMENT        = " << info.seg << endl;
-	out << "START          = " << info.start << endl;
-	out << "STOP           = " << info.stop << endl;
+	out << "NUMBER      = " << info.num   << endl;
+	out << "SEGMENT     = " << info.seg   << endl;
+	out << "START       = " << info.start << endl;
+	out << "STOP        = " << info.stop  << endl;
+	out << "STOP_STYLE  = " << info.stopStyle << endl;
+	out << "START_STYLE = " << info.startStyle << endl;
 
 	for (int i=1; i<(int)info.sclef.size(); i++) {
 		out << "TRACK " << i << ":" << endl;
@@ -76148,7 +76470,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	getMetStates(metstates, infile);
 	getMeasureStartStop(MeasureInList, infile);
 
-	string measurestring = getString("measure");
+	string measurestring = getString("measures");
 	if (markQ) {
 		stringstream mstring;
 		getMarkString(mstring, infile);
@@ -76185,6 +76507,12 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	if (MeasureOutList.size() == 0) {
 		// disallow processing files with no barlines
 		return;
+	}
+
+	// move stopStyle to startStyle of next measure group.
+	for (int i=(int)MeasureOutList.size()-1; i>0; i--) {
+		MeasureOutList[i].startStyle = MeasureOutList[i-1].stopStyle;
+		MeasureOutList[i-1].stopStyle = "";
 	}
 
 	myank(infile, MeasureOutList);
@@ -76400,6 +76728,7 @@ outerforloop: ;
 //
 
 void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
+
 	if (outmeasures.size() > 0) {
 		printStarting(infile);
 	}
@@ -76456,6 +76785,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 			} else if (doubleQ && measurestart) {
 				printDoubleBarline(infile, i);
 				measurestart = 0;
+			} else if (measurestart && infile[i].isBarline()) {
+				printMeasureStart(infile, i, outmeasures[h].startStyle);
+				measurestart = 0;
 			} else {
 				m_humdrum_text << infile[i] << "\n";
 				if (barnumtextQ && (bartextcount++ == 0) && infile[i].isBarline()) {
@@ -76481,7 +76813,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	if ((!nolastbarQ) &&  (lasti >= 0) && infile[lasti].isBarline()) {
 		for (j=0; j<infile[lasti].getFieldCount(); j++) {
 			token = *infile.token(lasti, j);
-			hre.replaceDestructive(token, "", "\\d+");
+			hre.replaceDestructive(token, outmeasures.back().stopStyle, "\\d+.*");
+			// collapse final barlines
+			hre.replaceDestructive(token, "==", "===+");
 			if (doubleQ) {
 				if (hre.search(token, "=(.+)")) {
 					// don't add double barline, there is already
@@ -76506,7 +76840,6 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	}
 
 	if (lastline >= 0) {
-		//printEnding(infile, lastline);
 		printEnding(infile, outmeasures.back().stop, lasti);
 	}
 }
@@ -77013,6 +77346,51 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 }
 
 
+//////////////////////////////
+//
+// Tool_myank::printMeasureStart -- print a starting measure of a segment.
+//
+
+void Tool_myank::printMeasureStart(HumdrumFile& infile, int line, const string& style) {
+	if (!infile[line].isBarline()) {
+		m_humdrum_text << infile[line] << "\n";
+		return;
+	}
+
+	HumRegex hre;
+	int j;
+	for (j=0; j<infile[line].getFieldCount(); j++) {
+		if (hre.search(infile.token(line, j), "=(\\d*)(.*)", "")) {
+			if (style == "==") {
+				m_humdrum_text << "==";
+				m_humdrum_text << hre.getMatch(1);
+			} else {
+				m_humdrum_text << "=";
+				m_humdrum_text << hre.getMatch(1);
+				m_humdrum_text << style;
+			}
+		} else {
+			if (style == "==") {
+				m_humdrum_text << "==";
+			} else {
+				m_humdrum_text << "=" << style;
+			}
+		}
+		if (j < infile[line].getFieldCount()-1) {
+			m_humdrum_text << "\t";
+		}
+	}
+	m_humdrum_text << "\n";
+
+	if (barnumtextQ) {
+		int barline = 0;
+		sscanf(infile.token(line, 0)->c_str(), "=%d", &barline);
+		if (barline > 0) {
+			m_humdrum_text << "!!LO:TX:Z=20:X=-25:t=" << barline << endl;
+		}
+	}
+}
+
 
 //////////////////////////////
 //
@@ -77020,7 +77398,6 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 //
 
 void Tool_myank::printDoubleBarline(HumdrumFile& infile, int line) {
-
 
 	if (!infile[line].isBarline()) {
 		m_humdrum_text << infile[line] << "\n";
@@ -77313,7 +77690,8 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_myank::printEnding -- print the measure
+// Tool_myank::printEnding -- print the spine terminators and any
+//     content after the end of the data.
 //
 
 void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
@@ -77691,13 +78069,14 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	int start = 0;
 	vector<MeasureInfo>& range = measureout;
 	range.reserve(10000);
-	value = hre.search(ostring, "^([^,]+,?)");
+	string searchexp = "^([\\d$-]+[^\\d$-]*)";
+	value = hre.search(ostring, searchexp);
 	while (value != 0) {
 		start += value - 1;
 		start += (int)hre.getMatch(1).size();
 		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
 			 measurein, inmap);
-		value = hre.search(ostring, start, "^([^,]+,?)");
+		value = hre.search(ostring, start, searchexp);
 	}
 }
 
@@ -78071,7 +78450,14 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 	// remove any comma left at end of input string (or anywhere else)
 	hre.replaceDestructive(buffer, "", ",", "g");
 
+	string measureStyling = "";
+	if (hre.search(buffer, "([|:!=]+)$")) {
+		measureStyling = hre.getMatch(1);
+		hre.replaceDestructive(buffer, "", "([|:!=]+)$");
+	}
+
 	if (hre.search(buffer, "^(\\d+)[a-z]?-(\\d+)[a-z]?$")) {
+		// processing a measure range
 		int firstone = hre.getMatchInt(1);
 		int lastone  = hre.getMatchInt(2);
 
@@ -78095,69 +78481,62 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 		}
 
 		if (firstone > lastone) {
+			// reverse the order of the measures
 			for (int i=firstone; i>=lastone; i--) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) &&
-							(field.back().stop == inmeasures[inmap[i]].start)) {
-						field.back().stop = inmeasures[inmap[i]].stop;
-					} else {
-						current.clear();
-						current.file = &infile;
-						current.num = i;
-						current.start = inmeasures[inmap[i]].start;
-						current.stop = inmeasures[inmap[i]].stop;
+					current.clear();
+					current.file = &infile;
+					current.num = i;
+					current.start = inmeasures[inmap[i]].start;
+					current.stop = inmeasures[inmap[i]].stop;
 
-						current.sclef    = inmeasures[inmap[i]].sclef;
-						current.skeysig  = inmeasures[inmap[i]].skeysig;
-						current.skey     = inmeasures[inmap[i]].skey;
-						current.stimesig = inmeasures[inmap[i]].stimesig;
-						current.smet     = inmeasures[inmap[i]].smet;
-						current.stempo   = inmeasures[inmap[i]].stempo;
+					current.sclef    = inmeasures[inmap[i]].sclef;
+					current.skeysig  = inmeasures[inmap[i]].skeysig;
+					current.skey     = inmeasures[inmap[i]].skey;
+					current.stimesig = inmeasures[inmap[i]].stimesig;
+					current.smet     = inmeasures[inmap[i]].smet;
+					current.stempo   = inmeasures[inmap[i]].stempo;
 
-						current.eclef    = inmeasures[inmap[i]].eclef;
-						current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-						current.ekey     = inmeasures[inmap[i]].ekey;
-						current.etimesig = inmeasures[inmap[i]].etimesig;
-						current.emet     = inmeasures[inmap[i]].emet;
-						current.etempo   = inmeasures[inmap[i]].etempo;
+					current.eclef    = inmeasures[inmap[i]].eclef;
+					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
+					current.ekey     = inmeasures[inmap[i]].ekey;
+					current.etimesig = inmeasures[inmap[i]].etimesig;
+					current.emet     = inmeasures[inmap[i]].emet;
+					current.etempo   = inmeasures[inmap[i]].etempo;
 
-						field.push_back(current);
-					}
+					field.push_back(current);
 				}
 			}
 		} else {
+			// measure range not reversed
 			for (int i=firstone; i<=lastone; i++) {
 				if (inmap[i] >= 0) {
-					if ((field.size() > 0) &&
-							(field.back().stop == inmeasures[inmap[i]].start)) {
-						field.back().stop = inmeasures[inmap[i]].stop;
-					} else {
-						current.clear();
-						current.file = &infile;
-						current.num = i;
-						current.start = inmeasures[inmap[i]].start;
-						current.stop = inmeasures[inmap[i]].stop;
+					current.clear();
+					current.file = &infile;
+					current.num = i;
+					current.start = inmeasures[inmap[i]].start;
+					current.stop = inmeasures[inmap[i]].stop;
 
-						current.sclef    = inmeasures[inmap[i]].sclef;
-						current.skeysig  = inmeasures[inmap[i]].skeysig;
-						current.skey     = inmeasures[inmap[i]].skey;
-						current.stimesig = inmeasures[inmap[i]].stimesig;
-						current.smet     = inmeasures[inmap[i]].smet;
-						current.stempo   = inmeasures[inmap[i]].stempo;
+					current.sclef    = inmeasures[inmap[i]].sclef;
+					current.skeysig  = inmeasures[inmap[i]].skeysig;
+					current.skey     = inmeasures[inmap[i]].skey;
+					current.stimesig = inmeasures[inmap[i]].stimesig;
+					current.smet     = inmeasures[inmap[i]].smet;
+					current.stempo   = inmeasures[inmap[i]].stempo;
 
-						current.eclef    = inmeasures[inmap[i]].eclef;
-						current.ekeysig  = inmeasures[inmap[i]].ekeysig;
-						current.ekey     = inmeasures[inmap[i]].ekey;
-						current.etimesig = inmeasures[inmap[i]].etimesig;
-						current.emet     = inmeasures[inmap[i]].emet;
-						current.etempo   = inmeasures[inmap[i]].etempo;
+					current.eclef    = inmeasures[inmap[i]].eclef;
+					current.ekeysig  = inmeasures[inmap[i]].ekeysig;
+					current.ekey     = inmeasures[inmap[i]].ekey;
+					current.etimesig = inmeasures[inmap[i]].etimesig;
+					current.emet     = inmeasures[inmap[i]].emet;
+					current.etempo   = inmeasures[inmap[i]].etempo;
 
-						field.push_back(current);
-					}
+					field.push_back(current);
 				}
 			}
 		}
 	} else if (hre.search(buffer, "^(\\d+)([a-z]*)")) {
+		// processing a single measure number
 		int value = hre.getMatchInt(1);
 		// do something with letter later...
 
@@ -78168,34 +78547,32 @@ void Tool_myank::processFieldEntry(vector<MeasureInfo>& field,
 			exit(1);
 		}
 		if (inmap[value] >= 0) {
-			if ((field.size() > 0) &&
-					(field.back().stop == inmeasures[inmap[value]].start)) {
-				field.back().stop = inmeasures[inmap[value]].stop;
-			} else {
-				current.clear();
-				current.file = &infile;
-				current.num = value;
-				current.start = inmeasures[inmap[value]].start;
-				current.stop = inmeasures[inmap[value]].stop;
+			current.clear();
+			current.file = &infile;
+			current.num = value;
+			current.start = inmeasures[inmap[value]].start;
+			current.stop = inmeasures[inmap[value]].stop;
 
-				current.sclef    = inmeasures[inmap[value]].sclef;
-				current.skeysig  = inmeasures[inmap[value]].skeysig;
-				current.skey     = inmeasures[inmap[value]].skey;
-				current.stimesig = inmeasures[inmap[value]].stimesig;
-				current.smet     = inmeasures[inmap[value]].smet;
-				current.stempo   = inmeasures[inmap[value]].stempo;
+			current.sclef    = inmeasures[inmap[value]].sclef;
+			current.skeysig  = inmeasures[inmap[value]].skeysig;
+			current.skey     = inmeasures[inmap[value]].skey;
+			current.stimesig = inmeasures[inmap[value]].stimesig;
+			current.smet     = inmeasures[inmap[value]].smet;
+			current.stempo   = inmeasures[inmap[value]].stempo;
 
-				current.eclef    = inmeasures[inmap[value]].eclef;
-				current.ekeysig  = inmeasures[inmap[value]].ekeysig;
-				current.ekey     = inmeasures[inmap[value]].ekey;
-				current.etimesig = inmeasures[inmap[value]].etimesig;
-				current.emet     = inmeasures[inmap[value]].emet;
-				current.etempo   = inmeasures[inmap[value]].etempo;
+			current.eclef    = inmeasures[inmap[value]].eclef;
+			current.ekeysig  = inmeasures[inmap[value]].ekeysig;
+			current.ekey     = inmeasures[inmap[value]].ekey;
+			current.etimesig = inmeasures[inmap[value]].etimesig;
+			current.emet     = inmeasures[inmap[value]].emet;
+			current.etempo   = inmeasures[inmap[value]].etempo;
 
-				field.push_back(current);
-			}
+			field.push_back(current);
 		}
 	}
+
+	field.back().stopStyle = measureStyling;
+
 }
 
 
@@ -84675,6 +85052,10 @@ bool Tool_tassoize::run(HumdrumFile& infile) {
 
 	// Re-load the text for each line from their tokens.
 	infile.createLinesFromTokens();
+
+	// Need to adjust the line numbers for tokens for later
+	// processing.
+	m_humdrum_text << infile;
 	return true;
 }
 
