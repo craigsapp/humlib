@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 18 03:19:15 PDT 2020
+// Last Modified: Wed Aug 26 20:35:26 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5989,6 +5989,38 @@ class Tool_filter : public HumTool {
 };
 
 
+class Tool_flipper : public HumTool {
+	public:
+		         Tool_flipper      (void);
+		        ~Tool_flipper      () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+
+		void     processLine        (HumdrumFile& infile, int index);
+		void     checkForFlipChanges(HumdrumFile& infile, int index);
+		bool     flipSubspines      (vector<vector<HTp>>& flipees);
+		void     flipSpineTokens    (vector<HTp>& subtokens);
+		void     extractFlipees     (vector<vector<HTp>>& flipees,
+		                             HumdrumFile& infile, int index);
+
+	private:
+		bool     m_allQ    = false;
+		bool     m_keepQ   = false;
+		bool     m_kernQ   = false;
+		std::string m_interp;
+		std::vector<bool> m_flipState;
+		std::vector<bool> m_fliplines;
+
+};
+
+
 class HPNote {
 	public:
 		int track = -1;
@@ -6706,6 +6738,7 @@ class MSearchQueryToken {
 			pc          = token.pc;
 			base        = token.base;
 			direction   = token.direction;
+			dinterval   = token.dinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 		}
@@ -6720,6 +6753,7 @@ class MSearchQueryToken {
 			pc          = token.pc;
 			base        = token.base;
 			direction   = token.direction;
+			dinterval   = token.dinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 			return *this;
@@ -6732,6 +6766,7 @@ class MSearchQueryToken {
 			pc           = NAN;
 			base         = 0;
 			direction    = -123456789;
+			dinterval    = -123456789;
 			duration     = -1;
 			rhythm       = "";
 		}
@@ -6746,7 +6781,8 @@ class MSearchQueryToken {
 		int    base;
 
 		// interval features:
-		int    direction;
+		int    direction;   // which melodic direction for interval?
+		int    dinterval;   // diatonic interval
 
 		// rhythm features:
 		HumNum duration;

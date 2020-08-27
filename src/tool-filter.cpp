@@ -24,15 +24,15 @@
 #include "tool-composite.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
+#include "tool-flipper.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
 #include "tool-humsheet.h"
-#include "tool-kernview.h"
-#include "tool-shed.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
+#include "tool-kernview.h"
 #include "tool-melisma.h"
 #include "tool-metlev.h"
 #include "tool-msearch.h"
@@ -43,6 +43,7 @@
 #include "tool-rid.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
+#include "tool-shed.h"
 #include "tool-sic.h"
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
@@ -50,9 +51,9 @@
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-tie.h"
+#include "tool-transpose.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
-#include "tool-transpose.h"
 
 #include "HumRegex.h"
 
@@ -225,6 +226,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "extractx") {
 			// Humdrum Extras emulation
 			RUNTOOL(extract, infile, commands[i].second, status);
+		} else if (commands[i].first == "flipper") {
+			RUNTOOL(flipper, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {

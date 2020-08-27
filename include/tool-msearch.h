@@ -34,6 +34,7 @@ class MSearchQueryToken {
 			pc          = token.pc;
 			base        = token.base;
 			direction   = token.direction;
+			dinterval   = token.dinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 		}
@@ -48,6 +49,7 @@ class MSearchQueryToken {
 			pc          = token.pc;
 			base        = token.base;
 			direction   = token.direction;
+			dinterval   = token.dinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 			return *this;
@@ -60,6 +62,7 @@ class MSearchQueryToken {
 			pc           = NAN;
 			base         = 0;
 			direction    = -123456789;
+			dinterval    = -123456789;
 			duration     = -1;
 			rhythm       = "";
 		}
@@ -74,7 +77,8 @@ class MSearchQueryToken {
 		int    base;
 
 		// interval features:
-		int    direction;
+		int    direction;   // which melodic direction for interval?
+		int    dinterval;   // diatonic interval
 
 		// rhythm features:
 		HumNum duration;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Aug 18 03:19:15 PDT 2020
+// Last Modified: Wed Aug 26 20:35:26 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -60303,6 +60303,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "extractx") {
 			// Humdrum Extras emulation
 			RUNTOOL(extract, infile, commands[i].second, status);
+		} else if (commands[i].first == "flipper") {
+			RUNTOOL(flipper, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
@@ -60596,6 +60598,251 @@ void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& command
 
 void Tool_filter::initialize(HumdrumFile& infile) {
 	m_debugQ = getBoolean("debug");
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_flipper::Tool_flipper -- Set the recognized options for the tool.
+//
+
+Tool_flipper::Tool_flipper(void) {
+	define("k|keep=b",     "keep *flip/*Xflip instructions");
+	define("a|all=b",     "flip globally, not just inside *flip/*Xflip regions");
+	define("i|interp=s:kern", "flip only in this interpretation");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_flipper::run -- Do the main work of the tool.
+//
+
+bool Tool_flipper::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_flipper::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_flipper::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_flipper::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_flipper::initialize(void) {
+	m_allQ = getBoolean("all");
+	m_keepQ = getBoolean("keep");
+	m_kernQ = true;
+	m_interp = getString("interp");
+	if (m_interp != "kern") {
+		m_kernQ = false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::processFile --
+//
+
+void Tool_flipper::processFile(HumdrumFile& infile) {
+	m_fliplines.resize(infile.getLineCount());
+	fill(m_fliplines.begin(), m_fliplines.end(), false);
+	m_flipState.resize(infile.getMaxTrack()+1);
+	if (m_allQ) {
+		fill(m_flipState.begin(), m_flipState.end(), true);
+	} else {
+		fill(m_flipState.begin(), m_flipState.end(), false);
+	}
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		processLine(infile, i);
+		if (!m_keepQ) {
+			if (!m_fliplines[i]) {
+				m_humdrum_text << infile[i] << endl;
+			}
+		}
+	}
+
+	if (m_keepQ) {
+		m_humdrum_text << infile;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::checkForFlipChanges --
+//
+
+void Tool_flipper::checkForFlipChanges(HumdrumFile& infile, int index) {
+	if (!infile[index].isInterpretation()) {
+		return;
+	}
+	if (m_allQ) {
+		// state always stays on in this case
+		return;
+	}
+	int track;
+	for (int i=0; i<infile[index].getFieldCount(); i++) {
+		HTp token = infile.token(index, i);
+		if (*token == "*flip") {
+			track = token->getTrack();
+			m_flipState[track] = true;
+			m_fliplines[i] = true;
+		} else if (*token == "*Xflip") {
+			track = token->getTrack();
+			m_flipState[track] = false;
+			m_fliplines[i] = true;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::processLine -- 
+//
+
+void Tool_flipper::processLine(HumdrumFile& infile, int index) {
+	if (!infile[index].hasSpines()) {
+		return;
+	}
+	if ((!m_allQ) && infile[index].isInterpretation()) {
+		checkForFlipChanges(infile, index);
+	}
+
+	vector<vector<HTp>> flipees;
+	extractFlipees(flipees, infile, index);
+	if (!flipees.empty()) {
+		int status = flipSubspines(flipees);
+		if (status) {
+			infile[index].createLineFromTokens();
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::flipSubspines --
+//
+
+bool Tool_flipper::flipSubspines(vector<vector<HTp>>& flipees) {
+	bool regenerateLine = false;
+	for (int i=0; i<(int)flipees.size(); i++) {
+		if (flipees[i].size() > 1) {
+			flipSpineTokens(flipees[i]);
+			regenerateLine = true;
+		}
+	}
+	return regenerateLine;
+}
+
+
+//////////////////////////////
+//
+// Tool_flipper::flipSpineTokens --
+//
+
+void Tool_flipper::flipSpineTokens(vector<HTp>& subtokens) {
+	if (subtokens.size() < 2) {
+		return;
+	}
+	int count = (int)subtokens.size();
+	count = count / 2;
+	HTp tok1;
+	HTp tok2;
+	string str1;
+	string str2;
+	for (int i=0; i<count; i++) {
+		tok1 = subtokens[i];
+		tok2 = subtokens[subtokens.size() - 1 - i];
+		str1 = *tok1;
+		str2 = *tok2;
+		tok1->setText(str2);
+		tok2->setText(str1);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_flipper::extractFlipees --
+//
+
+void Tool_flipper::extractFlipees(vector<vector<HTp>>& flipees,
+		 HumdrumFile& infile, int index) {
+	flipees.clear();
+
+	HLp line = &infile[index];
+	int track;
+	int lastInsertTrack = -1;
+	for (int i=0; i<line->getFieldCount(); i++) {
+		HTp token = line->token(i);
+		track = token->getTrack();
+		if (!m_flipState[track]) {
+			continue;
+		}
+		if (m_kernQ) {
+			if (!token->isKern()) {
+				continue;
+			}
+		} else {
+			if (!token->isDataType(m_interp)) {
+				continue;
+			}
+		}
+		if (lastInsertTrack != track) {
+			flipees.resize(flipees.size() + 1);
+			lastInsertTrack = track;
+		}
+		flipees.back().push_back(token);
+	}
 }
 
 
@@ -69676,8 +69923,8 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 	int mcount = 0;
 	for (int i=0; i<(int)attacks.size(); i++) {
 		for (int j=0; j<(int)attacks[i].size(); j++) {
-			checkForMatchDiatonicPC(attacks[i], j, query, match);
-			if (!match.empty()) {
+			bool status = checkForMatchDiatonicPC(attacks[i], j, query, match);
+			if (status && !match.empty()) {
 				mcount++;
 				markMatch(infile, match);
 				// cerr << "FOUND MATCH AT " << i << ", " << j << endl;
@@ -69831,7 +70078,8 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	if (match.back() != NULL) {
 		mend = match.back()->getToken();
 	} else {
-		cerr << "GOT TO THIS STRANGE PLACE start=" << mstart << endl;
+		// there is an extra NULL token at the end of the music to allow
+		// marking tied notes.
 	}
 	HTp tok = mstart;
 	string text;
@@ -69932,6 +70180,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	int maxi = (int)notes.size() - index;
 	if ((int)query.size() > maxi) {
 		// Search would extend off of the end of the music, so cannot be a match.
+		match.clear();
 		return false;
 	}
 
@@ -69974,21 +70223,43 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 		// INTERVAL
 		//
 
-		if (!query[i].anyinterval) {
+		if (query[i].dinterval > -1000) {
+			// match to a specific interval to the next note
+
+			double currpitch;
+			double nextpitch;
+
+			currpitch = notes[currindex]->getAbsDiatonicPitch();
+
+			if (nextindex >= 0) {
+				nextpitch = notes[nextindex]->getAbsDiatonicPitch();
+			} else {
+				nextpitch = -123456789.0;
+			}
+
+			int interval = nextpitch - currpitch;
+
+			if (interval != query[i].dinterval) {
+				match.clear();
+				return false;
+			}
+
+		} else if (!query[i].anyinterval) {
+
 			double currpitch;
 			double nextpitch;
 			double lastpitch;
 
-			currpitch = notes[currindex]->getAbsMidiPitch();
+			currpitch = notes[currindex]->getAbsDiatonicPitchClass();
 
 			if (nextindex >= 0) {
-				nextpitch = notes[nextindex]->getAbsMidiPitch();
+				nextpitch = notes[nextindex]->getAbsDiatonicPitchClass();
 			} else {
 				nextpitch = -123456789.0;
 			}
 
 			if (lastindex >= 0) {
-				lastpitch = notes[nextindex]->getAbsMidiPitch();
+				lastpitch = notes[nextindex]->getAbsDiatonicPitchClass();
 			} else {
 				lastpitch = -987654321.0;
 			}
@@ -70058,7 +70329,7 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 		//////////////////////////////
 		//
-		// INTERVAL
+		// PITCH
 		//
 			
 		if (!query[i].anypitch) {
@@ -70224,9 +70495,67 @@ void Tool_msearch::fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
 void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		const string& input) {
 
+	char ch;
+	int counter = 0;
+	MSearchQueryToken temp;
+	MSearchQueryToken *active = &temp;
+
+	if (query.size() > 0) {
+		active = &query.at(counter);
+	} else {
+		// what is this for?
+	}
+
+	for (int i=0; i<(int)input.size(); i++) {
+		ch = tolower(input[i]);
+
+		if (ch == ' ') {
+			// skip over spaces
+			continue;
+		}
+
+		if (!isdigit(ch)) {
+			// skip over non-digits (sign of interval
+			// will be read retroactively).
+			continue;
+		}
+
+		// check for intervals.  Intervals will trigger a
+		// new element in the query list
+
+		active->anything = false;
+		active->anyinterval = false;
+		// active->direction = 1;
+		active->dinterval = (ch - '0') - 1; // zero-indexed interval
+		if ((i>0) && (input[i-1] == '-')) {
+			active->dinterval *= -1;
+		}
+		if (active == &temp) {
+			query.push_back(temp);
+			temp.clear();
+		}
+		counter++;
+		if ((int)query.size() > counter) {
+			active = &query.at(counter);
+		} else {
+			active = &temp;
+		}
+	}
+
+	// The last element in the interval search is set to 
+	// any pitch, because the interval was already checked
+	// to the next note, and this value is needed to highlight
+	// the next note of the interval.
+	active->anything = true;
+	active->anyinterval = true;
+	if (active == &temp) {
+		query.push_back(temp);
+		temp.clear();
+	}
 
 
 }
+
 
 
 
@@ -70443,6 +70772,7 @@ ostream& operator<<(ostream& out, MSearchQueryToken& item) {
 	out << "\tPC:\t\t"        << item.pc          << endl;
 	out << "\tBASE:\t\t"      << item.base        << endl;
 	out << "\tDIRECTION:\t"   << item.direction   << endl;
+	out << "\tDINTERVAL:\t"   << item.dinterval   << endl;
 	out << "\tRHYTHM:\t\t"    << item.rhythm      << endl;
 	out << "\tDURATION:\t"    << item.duration    << endl;
 	return out;
