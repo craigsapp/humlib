@@ -108,6 +108,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string cleanSpacesAndColons(const std::string& input);
 		void setEditorialAccidental  (int accidental, GridSlice* slice,
 		                              int partindex, int staffindex, int voiceindex);
+		void moveBreaksToEndOfPreviousMeasure(HumGrid& outdata);
 
 		bool convert          (ostream& out);
 		bool convertPart      (ostream& out, const std::string& partname,

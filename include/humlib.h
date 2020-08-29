@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 26 20:35:26 PDT 2020
+// Last Modified: Sat Aug 29 13:28:27 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7028,6 +7028,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::string cleanSpacesAndColons(const std::string& input);
 		void setEditorialAccidental  (int accidental, GridSlice* slice,
 		                              int partindex, int staffindex, int voiceindex);
+		void moveBreaksToEndOfPreviousMeasure(HumGrid& outdata);
 
 		bool convert          (ostream& out);
 		bool convertPart      (ostream& out, const std::string& partname,

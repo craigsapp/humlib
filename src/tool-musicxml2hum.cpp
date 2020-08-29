@@ -1046,9 +1046,55 @@ bool Tool_musicxml2hum::stitchParts(HumGrid& outdata,
 		// measures.push_back(&outfile[outfile.getLineCount()-1]);
 	}
 
+	moveBreaksToEndOfPreviousMeasure(outdata);
+
 	insertPartNames(outdata, partdata);
 
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// moveBreaksToEndOfPreviousMeasure --
+//
+
+void Tool_musicxml2hum::moveBreaksToEndOfPreviousMeasure(HumGrid& outdata) {
+	for (int i=1; i<(int)outdata.size(); i++) {
+		GridMeasure* gm = outdata[i];
+		GridMeasure* gmlast = outdata[i-1];
+		if (!gm || !gmlast) {
+			continue;
+		}
+		if (gm->begin() == gm->end()) {
+			// empty measure
+			return;
+		}
+		GridSlice *firstit = *(gm->begin());
+		HumNum starttime = firstit->getTimestamp();
+		for (auto it = gm->begin(); it != gm->end(); it++) {
+			HumNum time2 = (*it)->getTimestamp();
+			if (time2 > starttime) {
+				break;
+			}
+			if (!(*it)->isGlobalComment()) {
+				continue;
+			}
+			HTp token = (*it)->at(0)->at(0)->at(0)->getToken();
+			if (!token) {
+				continue;
+			}
+			if ((*token == "!!linebreak:original") ||
+			    (*token == "!!pagebreak:original")) {
+				GridSlice *swapper = *it;
+				gm->erase(it);
+				gmlast->push_back(swapper);
+				// there can be only one break, so quit the loop now.
+				break;
+			}
+		}
+	}
 }
 
 
