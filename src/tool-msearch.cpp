@@ -472,7 +472,15 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 			tok = tok->getNextToken();
 			continue;
 		}
-		text = tok->getText() + m_marker;
+		text = tok->getText();
+		size_t pos = text.find(' ');
+		if (pos == string::npos) {
+			// append to end of non-chord token
+			text += m_marker;
+		} else {
+			// insert marker after first note:
+			text.insert(pos, "@");
+		}
 		tok->setText(text);
 		tok = tok->getNextToken();
 		if (tok && !tok->isKern()) {
@@ -857,7 +865,39 @@ void Tool_msearch::fillMusicQueryPitch(vector<MSearchQueryToken>& query,
 
 void Tool_msearch::fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
 		const string& input) {
-	fillMusicQueryInterleaved(query, input, true);
+	string output;
+	output.reserve(input.size() * 4);
+
+	for (int i=0; i<(int)input.size(); i++) {
+		output += input[i];
+		output += ' ';
+	}
+	
+	// remove spaces to allow rhythms:
+	// 64 => 64
+   // 32 => 32
+	// 16 => 16
+	for (int i=0; i<(int)output.size(); i++) {
+		if ((i > 1) && (output[i] == '6') && (output[i-1] == ' ') && (output[i-2] == '1')) {
+			output.erase(i-1, 1);
+			i--;
+		}
+		if ((i > 1) && (output[i] == '2') && (output[i-1] == ' ') && (output[i-2] == '3')) {
+			output.erase(i-1, 1);
+			i--;
+		}
+		if ((i > 1) && (output[i] == '4') && (output[i-1] == ' ') && (output[i-2] == '6')) {
+			output.erase(i-1, 1);
+			i--;
+		}
+      if ((i > 0) && (output[i] == '.')) {
+			output.erase(i-1, 1);
+			i--;
+		}
+	}
+
+	fillMusicQueryInterleaved(query, output, true);
+
 }
 
 
