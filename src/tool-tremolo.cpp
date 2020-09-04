@@ -257,7 +257,7 @@ void Tool_tremolo::expandTremolo(HTp token) {
 	if (hre.search(token, "@(\\d+)@")) {
 		value = hre.getMatchInt(1);
 		duration = Convert::recipToDuration(token);
-		HumNum count = value / duration;
+		HumNum count = duration * value / 4;
 		if (!count.isInteger()) {
 			cerr << "Error: non-integer number of tremolo notes: " << token << endl;
 			return;

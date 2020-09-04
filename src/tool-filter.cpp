@@ -445,7 +445,7 @@ void Tool_filter::splitPipeline(vector<string>& clist, const string& command) {
 		}
 
 		if (ch == '|') {
-			if (inSingleQuotes || inDoubleQuotes) {
+			if ((inSingleQuotes > -1) || (inDoubleQuotes > -1)) {
 				// pipe character
 				clist.back() += ch;
 				continue;
@@ -456,12 +456,10 @@ void Tool_filter::splitPipeline(vector<string>& clist, const string& command) {
 			}
 		}
 
-		if (isspace(ch) && (!inSingleQuotes) && (!inDoubleQuotes)) {
+		if (isspace(ch) && (!(inSingleQuotes > -1)) && (!(inDoubleQuotes > -1))) {
 			if (isspace(lastch)) {
 				// don't repeat spaces outside of quotes.
 				continue;
-			} else {
-				clist.back() += ' ';
 			}
 		}
 
@@ -475,6 +473,7 @@ void Tool_filter::splitPipeline(vector<string>& clist, const string& command) {
 		hre.replaceDestructive(clist[i], "", "^\\s+");
 		hre.replaceDestructive(clist[i], "", "\\s+$");
 	}
+
 }
 
 
