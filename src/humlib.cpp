@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Sep  3 18:41:07 PDT 2020
+// Last Modified: Fri Sep  4 20:32:33 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77154,9 +77154,12 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	int printed = 0;
 	int mcount = 0;
 	int measurestart = 1;
+	int lastbarnum = -1;
+	int barnum = -1;
 	int datastart = 0;
 	int bartextcount = 0;
 	for (h=0; h<(int)outmeasures.size(); h++) {
+		barnum = outmeasures[h].num;
 		measurestart = 1;
 		printed = 0;
 		counter = 0;
@@ -77197,7 +77200,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 						m_humdrum_text << "!!LO:TX:Z=20:X=-90:t=" << barline << endl;
 					}
 				}
-			} else if (doubleQ && measurestart) {
+			} else if (doubleQ && (lastbarnum > -1) && (fabs(barnum - lastbarnum) > 1)) {
 				printDoubleBarline(infile, i);
 				measurestart = 0;
 			} else if (measurestart && infile[i].isBarline()) {
@@ -77215,6 +77218,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 			}
 			lastline = i;
 		}
+		lastbarnum = barnum;
 	}
 
 	HumRegex hre;
