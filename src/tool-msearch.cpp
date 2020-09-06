@@ -98,7 +98,9 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 	if (m_text.empty()) {
 		vector<MSearchQueryToken> query;
 		fillMusicQuery(query);
-		doMusicSearch(infile, grid, query);
+		if (!query.empty()) {
+			doMusicSearch(infile, grid, query);
+		}
 	} else {
 		vector<MSearchTextQuery> query;
 		fillTextQuery(query, getString("text"));
@@ -860,6 +862,12 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query) {
 
 	if (!iinput.empty()) {
 		fillMusicQueryInterval(query, iinput);
+	}
+
+	if (query.size() == 1) {
+		if (query[0].anything) {
+			query.clear();
+		}
 	}
 
 }
