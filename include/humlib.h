@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  4 20:32:33 PDT 2020
+// Last Modified: Sat Sep  5 17:56:45 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6739,6 +6739,7 @@ class MSearchQueryToken {
 			base        = token.base;
 			direction   = token.direction;
 			dinterval   = token.dinterval;
+			cinterval   = token.cinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 		}
@@ -6754,6 +6755,7 @@ class MSearchQueryToken {
 			base        = token.base;
 			direction   = token.direction;
 			dinterval   = token.dinterval;
+			cinterval   = token.cinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 			return *this;
@@ -6765,8 +6767,9 @@ class MSearchQueryToken {
 			anyinterval  = true;
 			pc           = NAN;
 			base         = 0;
-			direction    = -123456789;
-			dinterval    = -123456789;
+			direction    = -123456789; // interval direction
+			dinterval    = -123456789; // diatonic interval
+			cinterval    = -123456789; // chromatic interval
 			duration     = -1;
 			rhythm       = "";
 		}
@@ -6783,6 +6786,7 @@ class MSearchQueryToken {
 		// interval features:
 		int    direction;   // which melodic direction for interval?
 		int    dinterval;   // diatonic interval
+		int    cinterval;   // chromatic interval (base-40; up to 2 sharps/flats)
 
 		// rhythm features:
 		HumNum duration;
@@ -6888,6 +6892,7 @@ class Tool_msearch : public HumTool {
 		void    printQuery         (vector<MSearchQueryToken>& query);
 		void    addMusicSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
 		void    addTextSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
+		int     makeBase40Interval  (int diatonic, const string& alteration);
 
 	private:
 	 	vector<HTp> m_kernspines;

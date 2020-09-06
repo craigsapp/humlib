@@ -35,6 +35,7 @@ class MSearchQueryToken {
 			base        = token.base;
 			direction   = token.direction;
 			dinterval   = token.dinterval;
+			cinterval   = token.cinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 		}
@@ -50,6 +51,7 @@ class MSearchQueryToken {
 			base        = token.base;
 			direction   = token.direction;
 			dinterval   = token.dinterval;
+			cinterval   = token.cinterval;
 			duration    = token.duration;
 			rhythm      = token.rhythm;
 			return *this;
@@ -61,8 +63,9 @@ class MSearchQueryToken {
 			anyinterval  = true;
 			pc           = NAN;
 			base         = 0;
-			direction    = -123456789;
-			dinterval    = -123456789;
+			direction    = -123456789; // interval direction
+			dinterval    = -123456789; // diatonic interval
+			cinterval    = -123456789; // chromatic interval
 			duration     = -1;
 			rhythm       = "";
 		}
@@ -79,6 +82,7 @@ class MSearchQueryToken {
 		// interval features:
 		int    direction;   // which melodic direction for interval?
 		int    dinterval;   // diatonic interval
+		int    cinterval;   // chromatic interval (base-40; up to 2 sharps/flats)
 
 		// rhythm features:
 		HumNum duration;
@@ -184,6 +188,7 @@ class Tool_msearch : public HumTool {
 		void    printQuery         (vector<MSearchQueryToken>& query);
 		void    addMusicSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
 		void    addTextSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
+		int     makeBase40Interval  (int diatonic, const string& alteration);
 
 	private:
 	 	vector<HTp> m_kernspines;

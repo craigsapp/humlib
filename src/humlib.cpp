@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep  4 20:32:33 PDT 2020
+// Last Modified: Sat Sep  5 17:56:45 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70227,11 +70227,11 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 
 		//////////////////////////////
 		//
-		// INTERVAL
+		// INTERVALS
 		//
 
 		if (query[i].dinterval > -1000) {
-			// match to a specific interval to the next note
+			// match to a specific diatonic interval to the next note
 
 			double currpitch;
 			double nextpitch;
@@ -70247,6 +70247,26 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			int interval = nextpitch - currpitch;
 
 			if (interval != query[i].dinterval) {
+				match.clear();
+				return false;
+			}
+		} else if (query[i].cinterval > -1000) {
+			// match to a specific chromatic interval to the next note
+
+			double currpitch;
+			double nextpitch;
+
+			currpitch = notes[currindex]->getAbsBase40Pitch();
+
+			if (nextindex >= 0) {
+				nextpitch = notes[nextindex]->getAbsBase40Pitch();
+			} else {
+				nextpitch = -123456789.0;
+			}
+
+			int interval = nextpitch - currpitch;
+
+			if (interval != query[i].cinterval) {
 				match.clear();
 				return false;
 			}
@@ -70545,13 +70565,47 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		// what is this for?
 	}
 
+	int sign = 1;
+	string alteration;
 	for (int i=0; i<(int)input.size(); i++) {
-		ch = tolower(input[i]);
-
+		ch = input[i];
 		if (ch == ' ') {
 			// skip over spaces
 			continue;
 		}
+		if ((ch == 'P') ||  (ch == 'p')) {
+			alteration = "P";
+			continue;
+		}
+		if ((ch == 'd') ||  (ch == 'D')) {
+			if ((!alteration.empty()) && (alteration[0] == 'd')) {
+				alteration += "d";
+			} else {
+				alteration = "d";
+			}
+			continue;
+		}
+		if ((ch == 'A') ||  (ch == 'a')) {
+			if ((!alteration.empty()) && (alteration[0] == 'A')) {
+				alteration += "A";
+			} else {
+				alteration = "A";
+			}
+			continue;
+		}
+		if ((ch == 'M') ||  (ch == 'm')) {
+			alteration = ch;
+			continue;
+		}
+		if (ch == '-') {
+			sign = -1;
+			continue;
+		}
+		if (ch == '+') {
+			sign = +1;
+			continue;
+		}
+		ch = tolower(ch);
 
 		if (!isdigit(ch)) {
 			// skip over non-digits (sign of interval
@@ -70565,10 +70619,18 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		active->anything = false;
 		active->anyinterval = false;
 		// active->direction = 1;
-		active->dinterval = (ch - '0') - 1; // zero-indexed interval
-		if ((i>0) && (input[i-1] == '-')) {
-			active->dinterval *= -1;
+
+		if (alteration.empty()) {
+			// store a diatonic interval
+			active->dinterval = (ch - '0') - 1; // zero-indexed interval
+			active->dinterval *= sign;
+		} else {
+			active->cinterval = makeBase40Interval((ch - '0') - 1, alteration);
+			active->cinterval *= sign;
 		}
+		sign = 1;
+		alteration.clear();
+
 		if (active == &temp) {
 			query.push_back(temp);
 			temp.clear();
@@ -70595,6 +70657,106 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 
 }
 
+
+
+//////////////////////////////
+//
+// Tool_msearch::makeBase40Interval --
+//
+
+int Tool_msearch::makeBase40Interval(int diatonic, const string& alteration) {
+	int sign = 1;
+	if (diatonic < 0) {
+		sign = -1;
+		diatonic = -diatonic;
+	}
+	bool perfectQ = false;
+	int base40 = 0;
+	switch (diatonic) {
+		case 0:  // unison
+			base40 = 0;
+			perfectQ = true;
+			break;
+		case 1:  // second
+			base40 = 6;
+			perfectQ = false;
+			break;
+		case 2:  // third
+			base40 = 12;
+			perfectQ = false;
+			break;
+		case 3:  // fourth
+			base40 = 17;
+			perfectQ = true;
+			break;
+		case 4:  // fifth
+			base40 = 23;
+			perfectQ = true;
+			break;
+		case 5:  // sixth
+			base40 = 29;
+			perfectQ = false;
+			break;
+		case 6:  // seventh
+			base40 = 35;
+			perfectQ = false;
+			break;
+		case 7:  // octave
+			base40 = 40;
+			perfectQ = true;
+			break;
+		case 8:  // ninth
+			base40 = 46;
+			perfectQ = false;
+			break;
+		case 9:  // tenth
+			base40 = 52;
+			perfectQ = false;
+			break;
+		default:
+			cerr << "cannot handle this interval yet.  Setting to unison" << endl;
+			base40 = 0;
+			perfectQ = 1;
+	}
+
+	if (perfectQ) {
+		if (alteration == "P") {
+			// do nothing since the interval is already perfect
+		} else if ((!alteration.empty()) && (alteration[0] == 'd')) {
+			if (alteration.size() <= 2) {
+				base40 -= (int)alteration.size();
+			} else {
+				cerr << "TOO MUCH DIMINISHED, IGNORING" << endl;
+			}
+		} else if ((!alteration.empty()) && (alteration[0] == 'A')) {
+			if (alteration.size() <= 2) {
+				base40 += (int)alteration.size();
+			} else {
+				cerr << "TOO MUCH AUGMENTED, IGNORING" << endl;
+			}
+		}
+	} else {
+		if (alteration == "M") {
+			// do nothing since the interval is already major
+		} else if (alteration == "m") {
+			base40--;
+		} else if ((!alteration.empty()) && (alteration[0] == 'd')) {
+			if (alteration.size() <= 2) {
+				base40 -= (int)alteration.size() - 1;
+			} else {
+				cerr << "TOO MUCH DIMINISHED, IGNORING" << endl;
+			}
+		} else if ((!alteration.empty()) && (alteration[0] == 'A')) {
+			if (alteration.size() <= 2) {
+				base40 += (int)alteration.size();
+			} else {
+				cerr << "TOO MUCH AUGMENTED, IGNORING" << endl;
+			}
+		}
+	}
+	base40 *= sign;
+	return base40;
+}
 
 
 
@@ -70812,6 +70974,7 @@ ostream& operator<<(ostream& out, MSearchQueryToken& item) {
 	out << "\tBASE:\t\t"      << item.base        << endl;
 	out << "\tDIRECTION:\t"   << item.direction   << endl;
 	out << "\tDINTERVAL:\t"   << item.dinterval   << endl;
+	out << "\tCINTERVAL:\t"   << item.cinterval   << endl;
 	out << "\tRHYTHM:\t\t"    << item.rhythm      << endl;
 	out << "\tDURATION:\t"    << item.duration    << endl;
 	return out;
