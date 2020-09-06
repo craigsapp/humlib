@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Aug 27 06:15:38 PDT 2017
-// Last Modified: Mon Oct 29 10:38:26 EDT 2018
+// Last Modified: Sat Sep  5 18:55:53 PDT 2020
 // Filename:      tool-msearch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-msearch.cpp
 // Syntax:        C++11; humlib
@@ -1118,7 +1118,7 @@ int Tool_msearch::makeBase40Interval(int diatonic, const string& alteration) {
 			base40--;
 		} else if ((!alteration.empty()) && (alteration[0] == 'd')) {
 			if (alteration.size() <= 2) {
-				base40 -= (int)alteration.size() - 1;
+				base40 -= (int)alteration.size() + 1;
 			} else {
 				cerr << "TOO MUCH DIMINISHED, IGNORING" << endl;
 			}

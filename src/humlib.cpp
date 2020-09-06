@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep  5 17:56:45 PDT 2020
+// Last Modified: Sat Sep  5 19:43:36 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70742,7 +70742,7 @@ int Tool_msearch::makeBase40Interval(int diatonic, const string& alteration) {
 			base40--;
 		} else if ((!alteration.empty()) && (alteration[0] == 'd')) {
 			if (alteration.size() <= 2) {
-				base40 -= (int)alteration.size() - 1;
+				base40 -= (int)alteration.size() + 1;
 			} else {
 				cerr << "TOO MUCH DIMINISHED, IGNORING" << endl;
 			}
