@@ -186,9 +186,10 @@ class Tool_msearch : public HumTool {
 		void    fillWordsForTrack  (vector<TextInfo*>& words,
 		                            HTp starttoken);
 		void    printQuery         (vector<MSearchQueryToken>& query);
-		void    addMusicSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
-		void    addTextSearchSummary (HumdrumFile& infile, int mcount, const string& marker);
-		int     makeBase40Interval  (int diatonic, const string& alteration);
+		void    addMusicSearchSummary (HumdrumFile& infile, int mcount, const std::string& marker);
+		void    addTextSearchSummary  (HumdrumFile& infile, int mcount, const std::string& marker);
+		int     makeBase40Interval    (int diatonic, const std::string& alteration);
+		std::string convertPitchesToIntervals(const std::string& input);
 
 	private:
 	 	vector<HTp> m_kernspines;

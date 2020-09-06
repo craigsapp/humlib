@@ -932,11 +932,126 @@ void Tool_msearch::fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
 
 //////////////////////////////
 //
+// Tool_msearch::convertPitchesToIntervals --
+//
+
+string Tool_msearch::convertPitchesToIntervals(const string& input) {
+	if (input.empty()) {
+		return "";
+	}
+	for (int i=0; i<(int)input.size(); i++) {
+		if (isdigit(input[i])) {
+			return input;
+		}
+		if (tolower(input[i] == 'r')) {
+			// not allowing rests for now
+			return input;
+		}
+	}
+	vector<string> pitches;
+	
+	for (int i=0; i<input.size(); i++) {
+		char ch = tolower(input[i]);
+		if (ch >= 'a' && ch <= 'g') {
+			string val;
+			val += ch;
+			pitches.push_back(val);
+			if (i > 0) {
+				if (input[i-1] == '^') {
+					pitches.back().insert(0, "^");
+				}
+				if (input[i-1] == 'v') {
+					pitches.back().insert(0, "v");
+				}
+			}
+			continue;
+		}
+		if (!pitches.empty()) {
+			if (ch == 'n') {
+				pitches.back() += 'n';
+			} else if (ch == '-') {
+				pitches.back() += '-';
+			} else if (ch == '#') {
+				pitches.back() += '#';
+			}
+		}
+	}
+
+	if (pitches.size() <= 1) {
+		return "";
+	}
+
+	vector<bool> chromatic(pitches.size(), false);
+	for (int i=0; i<pitches.size(); i++) {
+		for (int j=pitches[i].size()-1; j>0; j--) {
+			int ch = pitches[i][j];
+			if ((ch == 'n') || (ch == '-') || (ch == '#')) {
+				chromatic[i] = true;
+				break;
+			}
+		}
+	}
+
+	string output;
+	int p1;
+	int p2;
+	int base40;
+	int base7;
+	int sign;
+	for (int i=0; i<pitches.size() - 1; i++) {
+		if (chromatic[i] && chromatic[i+1]) {
+			p1 = Convert::kernToBase40(pitches[i]);
+			p2 = Convert::kernToBase40(pitches[i+1]);
+			base40 = p2 - p1;
+			sign = base40 < 0 ? -1 : +1;
+			if (sign < 0) {
+				base40 = -base40;
+			}
+			string value = "";
+			if (sign < 0) {
+				value += "-";
+			}
+			value += Convert::base40ToIntervalAbbr(base40);
+			output += value;
+			output += " ";
+		} else {
+			p1 = Convert::kernToBase7(pitches[i]);
+			p2 = Convert::kernToBase7(pitches[i+1]);
+			base7 = p2 - p1;
+			sign = base7 < 0 ? -1 : +1;
+			if (sign < 0) {
+				base7 = -base7;
+			}
+			string value = "";
+			if (sign < 0) {
+				value += "-";
+			}
+			value += to_string(base7 + 1);
+			output += value;
+			output += " ";
+		}
+	}
+
+	if (output.size() > 0) {
+		if (output.back() == ' ') {
+			output.resize((int)output.size() - 1);
+		}
+	}
+
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_msearch::fillMusicQueryInterval --
 //
 
 void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		const string& input) {
+
+	string newinput = convertPitchesToIntervals(input);
 
 	char ch;
 	int counter = 0;
@@ -951,8 +1066,8 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 
 	int sign = 1;
 	string alteration;
-	for (int i=0; i<(int)input.size(); i++) {
-		ch = input[i];
+	for (int i=0; i<(int)newinput.size(); i++) {
+		ch = newinput[i];
 		if (ch == ' ') {
 			// skip over spaces
 			continue;
