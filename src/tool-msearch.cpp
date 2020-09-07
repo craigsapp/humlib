@@ -21,6 +21,74 @@ namespace hum {
 // START_MERGE
 
 
+//////////////////////////////
+//
+// SonorityDatabase::buildDatabase --
+//
+
+void SonorityDatabase::buildDatabase(HLp line) {
+	clear();
+	if (line == NULL) {
+		return;
+	}
+	m_line = line;
+	bool nullQ = false;
+	if (!line->isData()) {
+		return;
+	}
+	for (int i=0; i<line->getFieldCount(); i++) {
+		HTp token = m_line->token(i);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isRest()) {
+			// ignoring rests, at least for now
+			continue;
+		}
+		if (token->isNull()) {
+			nullQ = true;
+			token = token->resolveNull();
+		}
+		if (token->isNull()) {
+			continue;
+		}
+		int scount = token->getSubtokenCount();
+		for (int j=0; j<scount; j++) {
+			expandList();
+			m_notes.back().setToken(token, nullQ, j);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MSearchQueryToken::parseHarmonicQuery --
+//
+
+void MSearchQueryToken::parseHarmonicQuery(void) {
+	if (!hpieces.empty()) {
+		// do not reparse
+		return;
+	}
+	for (int i=0; i<(int)harmonic.size(); i++) {
+		char ch = tolower(harmonic[i]);
+		if (ch >= 'a' && ch <= 'g') {
+			hpieces.resize(hpieces.size() + 1);
+			hpieces.back() += ch;
+		} else if (ch == '-') {
+			hpieces.back() += ch;
+		} else if (ch == 'n') {
+			hpieces.back() += ch;
+		} else if (ch == '#') {
+			hpieces.back() += ch;
+		}
+	}
+}
+
+
+
 /////////////////////////////////
 //
 // Tool_msearch::Tool_msearch -- Set the recognized options for the tool.
@@ -81,6 +149,7 @@ bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_msearch::run(HumdrumFile& infile) {
+	m_sonorities.resize(infile.getLineCount());
 	m_debugQ = getBoolean("debug");
 	m_quietQ = getBoolean("quiet");
 	m_nooverlapQ = getBoolean("no-overlap");
@@ -300,7 +369,8 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 	int mcount = 0;
 	for (int i=0; i<(int)attacks.size(); i++) {
 		for (int j=0; j<(int)attacks[i].size(); j++) {
-			bool status = checkForMatchDiatonicPC(attacks[i], j, query, match);
+			m_tomark.clear();
+			bool status = checkForMusicMatch(attacks[i], j, query, match);
 			if (status && !match.empty()) {
 				mcount++;
 				markMatch(infile, match);
@@ -441,12 +511,46 @@ void Tool_msearch::addTextSearchSummary(HumdrumFile& infile, int mcount, const s
 }
 
 
+
+//////////////////////////////
+//
+// Tool_msearch::markNote --
+//
+
+void Tool_msearch::markNote(HTp token, int index) {
+	if (index < 0) {
+		return;
+	}
+	if (!token->isChord()) {
+		string text = *token;
+		text += m_marker;
+		token->setText(text);
+		return;
+	}
+	vector<std::string> subtoks = token->getSubtokens();
+	if (index >= (int)subtoks.size()) {
+		return;
+	}
+	subtoks[index] += m_marker;
+	string output = subtoks[0];
+	for (int i=1; i<(int)subtoks.size(); i++) {
+		output += " ";
+		output += subtoks[i];
+	}
+	token->setText(output);
+}
+
+
+
 //////////////////////////////
 //
 // Tool_msearch::markMatch -- assumes monophonic music.
 //
 
 void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
+	for (int i=0; i<(int)m_tomark.size(); i++) {
+		markNote(m_tomark[i].first, m_tomark[i].second);
+	}
 	if (match.empty()) {
 		return;
 	}
@@ -554,11 +658,11 @@ void Tool_msearch::markTextMatch(HumdrumFile& infile, TextInfo& word) {
 
 //////////////////////////////
 //
-// Tool_msearch::checkForMatchDiatonicPC -- See if the given position
+// Tool_msearch::checkForMusicMatch -- See if the given position
 //    in the music matches the query.
 //
 
-bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
+bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 		vector<MSearchQueryToken>& query, vector<NoteCell*>& match) {
 
 	match.clear();
@@ -772,6 +876,14 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 			}
 		}
 
+		if (!query[i].harmonic.empty()) {
+			query[i].parseHarmonicQuery();
+			bool match = doHarmonicSearch(query[i], notes[currindex]->getToken());
+			if (!match) {
+				return false;
+			}
+		}
+
 		// All requirements for the note were matched, so store note
 		// and continue to next note if needed.
 		match.push_back(notes[currindex]);
@@ -785,6 +897,79 @@ bool Tool_msearch::checkForMatchDiatonicPC(vector<NoteCell*>& notes, int index,
 	}
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::doHarmonicSearch --
+//
+
+bool Tool_msearch::doHarmonicSearch(MSearchQueryToken& query, HTp token) {
+	if (query.harmonic.empty()) {
+		return true;
+	}
+
+	for (int i=0; i<(int)query.hpieces.size(); i++) {
+		bool status = checkHarmonicMatch(query.hpieces[i], token);
+		if (!status) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::checkHarmonicMatch --
+//
+
+bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
+	bool isChromatic = false;
+	if (query.find("n") != string::npos) {
+		isChromatic = true;
+	} else if (query.find("-") != string::npos) {
+		isChromatic = true;
+	} else if (query.find("#") != string::npos) {
+		isChromatic = true;
+	}
+	
+	int lindex = token->getLineIndex();
+	SonorityDatabase& sonorities = m_sonorities[lindex];
+	if (sonorities.isEmpty()) {
+		sonorities.buildDatabase(token->getLine());
+	}
+
+	pair<HTp, int> tomark;
+
+	if (isChromatic) {
+		int cpitch = Convert::kernToBase40(query);
+		int cpc = cpitch % 40;
+		for (int i=0; i<sonorities.getCount(); i++) {
+			if (cpc == sonorities[i].getBase40Pc()) {
+				tomark.first = sonorities[i].getToken();
+				tomark.second = sonorities[i].getIndex();
+				m_tomark.push_back(tomark);
+				return true;
+			}
+		}
+	} else {
+		int dpitch = Convert::kernToBase7(query);
+		int dpc = dpitch % 7;
+		for (int i=0; i<sonorities.getCount(); i++) {
+			if (dpc == sonorities[i].getBase7Pc()) {
+				tomark.first = sonorities[i].getToken();
+				tomark.second = sonorities[i].getIndex();
+				m_tomark.push_back(tomark);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 
@@ -950,7 +1135,7 @@ string Tool_msearch::convertPitchesToIntervals(const string& input) {
 	}
 	vector<string> pitches;
 	
-	for (int i=0; i<input.size(); i++) {
+	for (int i=0; i<(int)input.size(); i++) {
 		char ch = tolower(input[i]);
 		if (ch >= 'a' && ch <= 'g') {
 			string val;
@@ -982,8 +1167,8 @@ string Tool_msearch::convertPitchesToIntervals(const string& input) {
 	}
 
 	vector<bool> chromatic(pitches.size(), false);
-	for (int i=0; i<pitches.size(); i++) {
-		for (int j=pitches[i].size()-1; j>0; j--) {
+	for (int i=0; i<(int)pitches.size(); i++) {
+		for (int j=(int)pitches[i].size()-1; j>0; j--) {
 			int ch = pitches[i][j];
 			if ((ch == 'n') || (ch == '-') || (ch == '#')) {
 				chromatic[i] = true;
@@ -998,7 +1183,7 @@ string Tool_msearch::convertPitchesToIntervals(const string& input) {
 	int base40;
 	int base7;
 	int sign;
-	for (int i=0; i<pitches.size() - 1; i++) {
+	for (int i=0; i<(int)pitches.size() - 1; i++) {
 		if (chromatic[i] && chromatic[i+1]) {
 			p1 = Convert::kernToBase40(pitches[i]);
 			p2 = Convert::kernToBase40(pitches[i+1]);
@@ -1267,10 +1452,12 @@ int Tool_msearch::makeBase40Interval(int diatonic, const string& alteration) {
 void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		const string& input, bool rhythmQ) {
 
+	string newinput = input;
 	char ch;
 	int counter = 0;
 	MSearchQueryToken temp;
 	MSearchQueryToken *active = &temp;
+	string paren;
 
 	if (query.size() > 0) {
 		active = &query.at(counter);
@@ -1278,13 +1465,46 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		// what is this for?
 	}
 
-	for (int i=0; i<(int)input.size(); i++) {
-		ch = tolower(input[i]);
+	for (int i=0; i<(int)newinput.size(); i++) {
+		paren.clear();
+		ch = tolower(newinput[i]);
+		if (ch == '(') {
+			newinput[i] = ' ';
+			// A harmonic search initiated
+			int j = i;
+			bool keepQ = true;
+			bool diatonicQ = false;
+			for (j=i+1; j<(int)newinput.size(); j++) {
+				char ch2 = tolower(newinput[j]);
+				if (ch2 == ')') {
+					newinput[j] = ' ';
+					break;
+				}
+				if (ch2 >= 'a' && ch2 <= 'g') {
+					if (diatonicQ) {
+						keepQ = false;
+					} else {
+						diatonicQ = true;
+					}
+				}
+				if (keepQ) {
+					continue;
+				} else {
+					paren += newinput[j];
+					newinput[j] = ' ';
+				}
+			}
+			if (!paren.empty()) {
+				active->harmonic = paren;
+				paren.clear();
+			}
+			continue;
+		}
 
 		if (ch == ' ') {
 			// skip over multiple spaces
 			if (i > 0) {
-            if (input[i-1] == ' ') {
+            if (newinput[i-1] == ' ') {
 					continue;
 				}
 			}
@@ -1308,8 +1528,8 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			active->anything = false;
 			active->anyrhythm = false;
 			active->rhythm += ch;
-			if (i < (int)input.size() - 1) {
-				if (input[i+1] == ' ') {
+			if (i < (int)newinput.size() - 1) {
+				if (newinput[i+1] == ' ') {
 					if (active == &temp) {
 						query.push_back(temp);
 						temp.clear();
@@ -1476,6 +1696,9 @@ ostream& operator<<(ostream& out, MSearchQueryToken& item) {
 	out << "\tCINTERVAL:\t"   << item.cinterval   << endl;
 	out << "\tRHYTHM:\t\t"    << item.rhythm      << endl;
 	out << "\tDURATION:\t"    << item.duration    << endl;
+	if (!item.harmonic.empty()) {
+		out << "\tHARMONIC:\t" << item.harmonic    << endl;
+	}
 	return out;
 }
 
