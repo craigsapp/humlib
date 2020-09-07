@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep  6 21:10:32 PDT 2020
+// Last Modified: Mon Sep  7 13:21:42 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69660,6 +69660,9 @@ void SonorityDatabase::buildDatabase(HLp line) {
 	if (!line->isData()) {
 		return;
 	}
+	int lowesti = 0;
+	int lowest12 = 1000;
+	
 	for (int i=0; i<line->getFieldCount(); i++) {
 		HTp token = m_line->token(i);
 		if (!token->isKern()) {
@@ -69680,7 +69683,14 @@ void SonorityDatabase::buildDatabase(HLp line) {
 		for (int j=0; j<scount; j++) {
 			expandList();
 			m_notes.back().setToken(token, nullQ, j);
+			if (m_notes.back().getBase12() < lowest12) {
+				lowesti = m_notes.size() - 1;
+				lowest12 = m_notes.back().getBase12();
+			}
 		}
+	}
+	if (!m_notes.empty()) {
+		m_lowest = m_notes[lowesti];
 	}
 }
 
@@ -69700,7 +69710,7 @@ void MSearchQueryToken::parseHarmonicQuery(void) {
 		char ch = tolower(harmonic[i]);
 		if (ch >= 'a' && ch <= 'g') {
 			hpieces.resize(hpieces.size() + 1);
-			hpieces.back() += ch;
+			hpieces.back() += harmonic[i];
 		} else if (ch == '-') {
 			hpieces.back() += ch;
 		} else if (ch == 'n') {
@@ -70553,22 +70563,43 @@ bool Tool_msearch::doHarmonicSearch(MSearchQueryToken& query, HTp token) {
 
 bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
 	bool isChromatic = false;
-	if (query.find("n") != string::npos) {
-		isChromatic = true;
-	} else if (query.find("-") != string::npos) {
-		isChromatic = true;
-	} else if (query.find("#") != string::npos) {
-		isChromatic = true;
+	bool isLowest = false;
+	for (int i=0; i<(int)query.size(); i++) {
+		if (query[i] == 'n' || query[i] == 'N') {
+			isChromatic = true;
+		} else if (query[i] == '-') {
+			isChromatic = true;
+		} else if (query[i] == '#') {
+			isChromatic = true;
+		} else if (query[i] >= 'A' && query[i] <= 'G') {
+			isLowest = true;
+		}
 	}
-	
+
 	int lindex = token->getLineIndex();
 	SonorityDatabase& sonorities = m_sonorities[lindex];
 	if (sonorities.isEmpty()) {
 		sonorities.buildDatabase(token->getLine());
 	}
 
+	if (isLowest) {
+		if (isChromatic) {
+			int cpc = Convert::kernToBase40PC(query);
+			if (cpc != sonorities.getLowest().getBase40Pc()) {
+				return false;
+			}
+		} else {
+			int dpc = Convert::kernToBase7PC(query);
+			if (dpc != sonorities.getLowest().getBase7Pc()) {
+				return false;
+			}
+		}
+	}
+
 	pair<HTp, int> tomark;
 
+	// this algorithm highlights all vertical sonorities of given pitch class.
+	bool output = false;
 	if (isChromatic) {
 		int cpitch = Convert::kernToBase40(query);
 		int cpc = cpitch % 40;
@@ -70577,7 +70608,7 @@ bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
 				tomark.first = sonorities[i].getToken();
 				tomark.second = sonorities[i].getIndex();
 				m_tomark.push_back(tomark);
-				return true;
+				output = true;
 			}
 		}
 	} else {
@@ -70588,12 +70619,12 @@ bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
 				tomark.first = sonorities[i].getToken();
 				tomark.second = sonorities[i].getIndex();
 				m_tomark.push_back(tomark);
-				return true;
+				output = true;
 			}
 		}
 	}
 
-	return false;
+	return output;
 }
 
 
@@ -71093,6 +71124,7 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 		paren.clear();
 		ch = tolower(newinput[i]);
 		if (ch == '(') {
+			paren += ch;
 			newinput[i] = ' ';
 			// A harmonic search initiated
 			int j = i;
@@ -71101,6 +71133,7 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			for (j=i+1; j<(int)newinput.size(); j++) {
 				char ch2 = tolower(newinput[j]);
 				if (ch2 == ')') {
+					paren += ch2;
 					newinput[j] = ' ';
 					break;
 				}
@@ -71112,6 +71145,7 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 					}
 				}
 				if (keepQ) {
+					paren += newinput[j];
 					continue;
 				} else {
 					paren += newinput[j];
