@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep  7 13:21:42 PDT 2020
+// Last Modified: Tue Sep  8 10:20:12 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69698,6 +69698,19 @@ void SonorityDatabase::buildDatabase(HLp line) {
 
 //////////////////////////////
 //
+// SonorityDatabase::addNote --
+//
+
+void SonorityDatabase::addNote(const std::string& text) {
+	expandList();
+	m_notes.back().setString(text);
+	// not dealing with lowest note
+}
+
+
+
+//////////////////////////////
+//
 // MSearchQueryToken::parseHarmonicQuery --
 //
 
@@ -69718,6 +69731,11 @@ void MSearchQueryToken::parseHarmonicQuery(void) {
 		} else if (ch == '#') {
 			hpieces.back() += ch;
 		}
+	}
+
+	hquery.resize(hpieces.size());
+	for (int i=0; i<(int)hpieces.size(); i++) {
+		hquery[i].setString(hpieces[i]);
 	}
 }
 
@@ -70005,6 +70023,9 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		for (int j=0; j<(int)attacks[i].size(); j++) {
 			m_tomark.clear();
 			bool status = checkForMusicMatch(attacks[i], j, query, match);
+			if (!status) {
+				m_tomark.clear();
+			}
 			if (status && !match.empty()) {
 				mcount++;
 				markMatch(infile, match);
@@ -70042,7 +70063,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("query")) {
 		line += " -q ";
 		string qstring = getString("query");
-		if (qstring.find(' ') != string::npos) {
+		if ((qstring.find(' ') != string::npos) || (qstring.find('(') != string::npos)) {
 			line += '"';
 			line += qstring;
 			line += '"';
@@ -70054,7 +70075,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("pitch")) {
 		line += " -p ";
 		string pstring = getString("pitch");
-		if (pstring.find(' ') != string::npos) {
+		if ((pstring.find(' ') != string::npos) || (pstring.find('(') != string::npos)) {
 			line += '"';
 			line += pstring;
 			line += '"';
@@ -70066,7 +70087,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("rhythm")) {
 		line += " -r ";
 		string rstring = getString("rhythm");
-		if (rstring.find(' ') != string::npos) {
+		if ((rstring.find(' ') != string::npos) || (rstring.find('(') != string::npos)) {
 			line += '"';
 			line += rstring;
 			line += '"';
@@ -70078,7 +70099,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("interval")) {
 		line += " -i ";
 		string istring = getString("interval");
-		if (istring.find(' ') != string::npos) {
+		if ((istring.find(' ') != string::npos) || (istring.find('(') != string::npos)) {
 			line += '"';
 			line += istring;
 			line += '"';
@@ -70156,22 +70177,26 @@ void Tool_msearch::markNote(HTp token, int index) {
 		return;
 	}
 	if (!token->isChord()) {
-		string text = *token;
-		text += m_marker;
-		token->setText(text);
+		if (token->find(m_marker) == string::npos) {
+			string text = *token;
+			text += m_marker;
+			token->setText(text);
+		}
 		return;
 	}
 	vector<std::string> subtoks = token->getSubtokens();
 	if (index >= (int)subtoks.size()) {
 		return;
 	}
-	subtoks[index] += m_marker;
-	string output = subtoks[0];
-	for (int i=1; i<(int)subtoks.size(); i++) {
-		output += " ";
-		output += subtoks[i];
+	if (subtoks[index].find(m_marker) == string::npos) {
+		subtoks[index] += m_marker;
+		string output = subtoks[0];
+		for (int i=1; i<(int)subtoks.size(); i++) {
+			output += " ";
+			output += subtoks[i];
+		}
+		token->setText(output);
 	}
-	token->setText(output);
 }
 
 
@@ -70212,16 +70237,7 @@ void Tool_msearch::markMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 			tok = tok->getNextToken();
 			continue;
 		}
-		text = tok->getText();
-		size_t pos = text.find(' ');
-		if (pos == string::npos) {
-			// append to end of non-chord token
-			text += m_marker;
-		} else {
-			// insert marker after first note:
-			text.insert(pos, "@");
-		}
-		tok->setText(text);
+		markNote(tok, 0);
 		tok = tok->getNextToken();
 		if (tok && !tok->isKern()) {
 			cerr << "STRANGE LINKING WITH TEXT SPINE" << endl;
@@ -70310,7 +70326,6 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 	int c = 0;
 
 	for (int i=0; i<(int)query.size(); i++) {
-
 		int currindex = index + i - c;
 		int lastindex = index + i -c - 1;
 		int nextindex = index + i -c + 1;
@@ -70512,8 +70527,8 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 
 		if (!query[i].harmonic.empty()) {
 			query[i].parseHarmonicQuery();
-			bool match = doHarmonicSearch(query[i], notes[currindex]->getToken());
-			if (!match) {
+			bool status = doHarmonicPitchSearch(query[i], notes[currindex]->getToken());
+			if (!status) {
 				return false;
 			}
 		}
@@ -70537,20 +70552,125 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 
 //////////////////////////////
 //
-// Tool_msearch::doHarmonicSearch --
+// Tool_msearch::doHarmonicPitchSearch --
 //
 
-bool Tool_msearch::doHarmonicSearch(MSearchQueryToken& query, HTp token) {
+bool Tool_msearch::doHarmonicPitchSearch(MSearchQueryToken& query, HTp token) {
 	if (query.harmonic.empty()) {
 		return true;
 	}
 
-	for (int i=0; i<(int)query.hpieces.size(); i++) {
-		bool status = checkHarmonicMatch(query.hpieces[i], token);
+	int lindex = token->getLineIndex();
+	SonorityDatabase& sonorities = m_sonorities[lindex];
+	if (sonorities.isEmpty()) {
+		sonorities.buildDatabase(token->getLine());
+	} else if (m_verticalOnlyQ) {
+		// Only count once if searching only for vertical sonoroties
+		// Later make this more efficient perhaps by not searching every
+		// note for vertical-only searches, but rather search
+		// the sonorities in one pass (but maybe this will not actually
+		// be more efficient).
+		return false;
+	}
+
+	bool exactQ = false;
+	bool onlyQ = false;
+
+	if (query.harmonic.find("==") != string::npos) {
+		exactQ = true;
+	} else if (query.harmonic.find("=") != string::npos) {
+		onlyQ = true;
+	}
+
+	vector<int> diatonicCountsQuery(7, 0);
+	vector<int> diatonicCountsMatch(7, 0);
+	vector<int> diatonicCountsData(7, 0);
+	vector<int> chromaticCountsQuery(40, 0);
+	vector<int> chromaticCountsMatch(40, 0);
+	vector<int> chromaticCountsData(40, 0);
+
+	for (int i=0; i<sonorities.getNoteCount(); i++) {
+		diatonicCountsData.at(sonorities[i].getBase7Pc())++;
+		chromaticCountsData.at(sonorities[i].getBase40Pc())++;
+	}
+
+	int sum = 0;
+	for(int i=0; i<(int)query.hquery.size(); i++) {
+		if (query.hquery[i].hasAccidental()) {
+			diatonicCountsQuery.at(query.hquery[i].getBase7Pc())++;
+			if (query.hquery[i].hasUpperCase()) {
+				if (query.hquery[i].getBase7Pc() != sonorities.getLowest().getBase7Pc()) {
+					return false;
+				}
+			}
+
+			// Don't check for same pitch-class twice:
+			if (chromaticCountsMatch.at(query.hquery[i].getBase40Pc())) {
+				continue;
+			}
+		} else {
+			diatonicCountsQuery.at(query.hquery[i].getBase7Pc())++;
+			if (query.hquery[i].hasUpperCase()) {
+				if (query.hquery[i].getBase7Pc() != sonorities.getLowest().getBase7Pc()) {
+					return false;
+				}
+			}
+
+			// Don't check for same pitch-class twice:
+			if (diatonicCountsMatch.at(query.hquery[i].getBase7Pc())) {
+				continue;
+			}
+		}
+
+		int status = checkHarmonicPitchMatch(query.hquery[i], sonorities, false);
+
 		if (!status) {
 			return false;
 		}
+
+		if (query.hquery[i].hasAccidental()) {
+			chromaticCountsMatch.at(query.hquery[i].getBase40Pc()) += status;
+		} else {
+			diatonicCountsMatch.at(query.hquery[i].getBase7Pc()) += status;
+		}
+		sum += status;
+
 	}
+
+	if ((!exactQ) && (!onlyQ)) {
+		return true;
+	}
+
+
+	if (exactQ && (sum != sonorities.getNoteCount())) {
+		return false;
+	}
+
+	if (exactQ) {
+		for (int i=0; i<(int)diatonicCountsMatch.size(); i++) {
+			if (diatonicCountsMatch[i] != diatonicCountsQuery[i]) {
+				return false;
+			}
+		}
+		for (int i=0; i<chromaticCountsMatch.size(); i++) {
+			if (chromaticCountsMatch[i] != chromaticCountsQuery[i]) {
+				return false;
+			}
+		}
+	} else if (onlyQ) {
+		SonorityDatabase son2;
+		for (int i=0; i<(int)query.hpieces.size(); i++) {
+			son2.addNote(query.hpieces[i]);
+		}
+
+		for (int k=0; k<sonorities.getNoteCount(); k++) {
+			int status2 = checkHarmonicPitchMatch(sonorities[k], son2, true);
+			if (!status2) {
+				return false;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -70558,40 +70678,24 @@ bool Tool_msearch::doHarmonicSearch(MSearchQueryToken& query, HTp token) {
 
 //////////////////////////////
 //
-// Tool_msearch::checkHarmonicMatch --
+// Tool_msearch::checkHarmonicPitchMatch -- Returns the number of matched notes.
 //
 
-bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
-	bool isChromatic = false;
-	bool isLowest = false;
-	for (int i=0; i<(int)query.size(); i++) {
-		if (query[i] == 'n' || query[i] == 'N') {
-			isChromatic = true;
-		} else if (query[i] == '-') {
-			isChromatic = true;
-		} else if (query[i] == '#') {
-			isChromatic = true;
-		} else if (query[i] >= 'A' && query[i] <= 'G') {
-			isLowest = true;
-		}
-	}
-
-	int lindex = token->getLineIndex();
-	SonorityDatabase& sonorities = m_sonorities[lindex];
-	if (sonorities.isEmpty()) {
-		sonorities.buildDatabase(token->getLine());
-	}
+int Tool_msearch::checkHarmonicPitchMatch(SonorityNoteData& query,
+		SonorityDatabase& sonorities, bool suppressQ) {
+	bool isChromatic = query.hasAccidental();
+	bool isLowest = query.hasUpperCase();
 
 	if (isLowest) {
 		if (isChromatic) {
-			int cpc = Convert::kernToBase40PC(query);
+			int cpc = query.getBase40Pc();
 			if (cpc != sonorities.getLowest().getBase40Pc()) {
-				return false;
+				return 0;
 			}
 		} else {
-			int dpc = Convert::kernToBase7PC(query);
+			int dpc = query.getBase7Pc();
 			if (dpc != sonorities.getLowest().getBase7Pc()) {
-				return false;
+				return 0;
 			}
 		}
 	}
@@ -70599,27 +70703,31 @@ bool Tool_msearch::checkHarmonicMatch(const string& query, HTp token) {
 	pair<HTp, int> tomark;
 
 	// this algorithm highlights all vertical sonorities of given pitch class.
-	bool output = false;
+	int output = 0;
 	if (isChromatic) {
-		int cpitch = Convert::kernToBase40(query);
+		int cpitch = query.getBase40Pc();
 		int cpc = cpitch % 40;
 		for (int i=0; i<sonorities.getCount(); i++) {
 			if (cpc == sonorities[i].getBase40Pc()) {
-				tomark.first = sonorities[i].getToken();
-				tomark.second = sonorities[i].getIndex();
-				m_tomark.push_back(tomark);
-				output = true;
+				if (!suppressQ) {
+					tomark.first = sonorities[i].getToken();
+					tomark.second = sonorities[i].getIndex();
+					m_tomark.push_back(tomark);
+				}
+				output += 1;
 			}
 		}
 	} else {
-		int dpitch = Convert::kernToBase7(query);
+		int dpitch = query.getBase7Pc();
 		int dpc = dpitch % 7;
 		for (int i=0; i<sonorities.getCount(); i++) {
 			if (dpc == sonorities[i].getBase7Pc()) {
-				tomark.first = sonorities[i].getToken();
-				tomark.second = sonorities[i].getIndex();
-				m_tomark.push_back(tomark);
-				output = true;
+				if (!suppressQ) {
+					tomark.first = sonorities[i].getToken();
+					tomark.second = sonorities[i].getIndex();
+					m_tomark.push_back(tomark);
+				}
+				output += 1;
 			}
 		}
 	}
@@ -70678,6 +70786,7 @@ void Tool_msearch::fillMusicQuery(vector<MSearchQueryToken>& query) {
 
 	if (getBoolean("pitch")) {
 		pinput = getString("pitch");
+		m_verticalOnlyQ = checkVerticalOnly(pinput);
 	}
 
 	if (getBoolean("interval")) {
@@ -70982,7 +71091,7 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		}
 	}
 
-	// The last element in the interval search is set to 
+	// The last element in the interval search is set to
 	// any pitch, because the interval was already checked
 	// to the next note, and this value is needed to highlight
 	// the next note of the interval.
@@ -71159,6 +71268,9 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			continue;
 		}
 
+		if (ch == '=') {
+			continue;
+		}
 		if (ch == ' ') {
 			// skip over multiple spaces
 			if (i > 0) {
@@ -71266,7 +71378,6 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 			continue;
 		}
 
-
 		// check for actual pitches
 		if ((ch >= 'a' && ch <= 'g')) {
 			active->anything = false;
@@ -71334,6 +71445,40 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 	//	query.insert(query.begin(), temp);
 	//}
 }
+
+
+
+//////////////////////////////
+//
+// checkVerticalOnly --
+//
+
+
+bool Tool_msearch::checkVerticalOnly(const string& input) {
+	if (input.empty()) {
+		return false;
+	}
+	if (input.size() < 2) {
+		return false;
+	}
+	if (input[0] != '(') {
+		return false;
+	}
+	if (input.back() != ')') {
+		return false;
+	}
+	for (int i=1; i<(int)input.size()-1; i++) {
+		// Maybe allow internal () if there is nothing outside of them.
+		if (input[i] == '(') {
+			return false;
+		}
+		if (input[i] == ')') {
+			return false;
+		}
+	}
+	return true;
+}
+
 
 
 //////////////////////////////
