@@ -60,7 +60,7 @@ void SonorityDatabase::buildDatabase(HLp line) {
 			expandList();
 			m_notes.back().setToken(token, nullQ, j);
 			if (m_notes.back().getBase12() < lowest12) {
-				lowesti = m_notes.size() - 1;
+				lowesti = (int)m_notes.size() - 1;
 				lowest12 = m_notes.back().getBase12();
 			}
 		}
@@ -756,7 +756,8 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 				nextpitch = -123456789.0;
 			}
 
-			int interval = nextpitch - currpitch;
+			// maybe be careful of rests getting into this calculation:
+			int interval = (int)(nextpitch - currpitch);
 
 			if (interval != query[i].dinterval) {
 				match.clear();
@@ -776,7 +777,8 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 				nextpitch = -123456789.0;
 			}
 
-			int interval = nextpitch - currpitch;
+			// maybe be careful of rests getting into this calculation:
+			int interval = (int)(nextpitch - currpitch);
 
 			if (interval != query[i].cinterval) {
 				match.clear();

@@ -1221,7 +1221,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		// end rather than the start of the note.
 		vector<MxmlEvent*>& events = measuredata[i]->getEventList();
 		xml_node hairpin = xml_node(NULL);
-		for (int j=events.size() - 1; j >= 0; j--) {
+		for (int j=(int)events.size() - 1; j >= 0; j--) {
 			if (events[j]->getElementName() == "note") {
 				if (hairpin) {
 					events[j]->setHairpinEnding(hairpin);
@@ -2103,7 +2103,7 @@ void Tool_musicxml2hum::addText(GridSlice* slice, GridMeasure* measure, int part
 
 	if (interpQ) {
 		if (afterQ) {
-			int voicecount = slice->at(partindex)->at(staffindex)->size();
+			int voicecount = (int)slice->at(partindex)->at(staffindex)->size();
 			if (voiceindex >= voicecount) {
 				// Adding voices in the new slice.  It might be
 				// better to first check for a previous text line
