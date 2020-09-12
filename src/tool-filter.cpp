@@ -53,6 +53,7 @@
 #include "tool-tie.h"
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
+#include "tool-colortriads.h"
 #include "tool-trillspell.h"
 
 #include "HumRegex.h"
@@ -277,6 +278,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "colortriads") {
+			RUNTOOL(colortriads, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
 			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {

@@ -178,6 +178,8 @@ bool Tool_msearch::run(HumdrumFile& infile, ostream& out) {
 
 bool Tool_msearch::run(HumdrumFile& infile) {
 	m_sonorities.resize(infile.getLineCount());
+	m_sonoritiesChecked.resize(infile.getLineCount());
+	fill(m_sonoritiesChecked.begin(), m_sonoritiesChecked.end(), false);
 	m_debugQ = getBoolean("debug");
 	m_quietQ = getBoolean("quiet");
 	m_nooverlapQ = getBoolean("no-overlap");
@@ -203,6 +205,9 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 		fillTextQuery(query, getString("text"));
 		doTextSearch(infile, grid, query);
 	}
+
+	infile.createLinesFromTokens();
+	m_humdrum_text << infile;
 
 	return 1;
 }
@@ -937,16 +942,18 @@ bool Tool_msearch::doHarmonicPitchSearch(MSearchQueryToken& query, HTp token) {
 	}
 
 	int lindex = token->getLineIndex();
-	SonorityDatabase& sonorities = m_sonorities[lindex];
-	if (sonorities.isEmpty()) {
-		sonorities.buildDatabase(token->getLine());
-	} else if (m_verticalOnlyQ) {
+	if (m_verticalOnlyQ && m_sonoritiesChecked[lindex]) {
 		// Only count once if searching only for vertical sonoroties
 		// Later make this more efficient perhaps by not searching every
 		// note for vertical-only searches, but rather search
 		// the sonorities in one pass (but maybe this will not actually
 		// be more efficient).
 		return false;
+	}
+	m_sonoritiesChecked[lindex] = true;
+	SonorityDatabase& sonorities = m_sonorities[lindex];
+	if (sonorities.isEmpty()) {
+		sonorities.buildDatabase(token->getLine());
 	}
 
 	bool exactQ = false;
@@ -1028,7 +1035,7 @@ bool Tool_msearch::doHarmonicPitchSearch(MSearchQueryToken& query, HTp token) {
 				return false;
 			}
 		}
-		for (int i=0; i<chromaticCountsMatch.size(); i++) {
+		for (int i=0; i<(int)chromaticCountsMatch.size(); i++) {
 			if (chromaticCountsMatch[i] != chromaticCountsQuery[i]) {
 				return false;
 			}

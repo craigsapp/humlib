@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep  8 10:20:12 PDT 2020
+// Last Modified: Thu Sep 10 22:20:59 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5573,6 +5573,34 @@ class Tool_cint : public HumTool {
 };
 
 
+class Tool_colortriads : public HumTool {
+	public:
+		         Tool_colortriads  (void);
+		        ~Tool_colortriads  () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+		int      getDiatonicTransposition(HumdrumFile& infile);
+
+	private:
+		std::vector<bool> m_colorState;
+		std::vector<std::string> m_color;
+		std::vector<std::string> m_searches;
+		std::vector<std::string> m_marks;
+		bool m_filtersQ  = false;
+		bool m_commandsQ = false;
+		bool m_relativeQ = false;
+		std::string m_key;
+
+};
+
+
 class Tool_composite : public HumTool {
 	public:
 		       	   Tool_composite      (void);
@@ -7079,6 +7107,7 @@ class Tool_msearch : public HumTool {
 		bool        m_debugQ     = false;
 		bool        m_nooverlapQ = false;
 		std::vector<SonorityDatabase> m_sonorities;
+		std::vector<bool> m_sonoritiesChecked;
 		std::vector<pair<HTp, int>> m_tomark;
 };
 

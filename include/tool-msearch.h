@@ -376,6 +376,7 @@ class Tool_msearch : public HumTool {
 		bool        m_debugQ     = false;
 		bool        m_nooverlapQ = false;
 		std::vector<SonorityDatabase> m_sonorities;
+		std::vector<bool> m_sonoritiesChecked;
 		std::vector<pair<HTp, int>> m_tomark;
 };
 
