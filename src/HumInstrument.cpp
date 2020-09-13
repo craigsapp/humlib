@@ -21,7 +21,7 @@ namespace hum {
 
 // START_MERGE
 
-typedef long TEMP64BITFIX;
+typedef unsigned long long TEMP64BITFIX;
 
 // declare static variables
 vector<_HumInstrument> HumInstrument::data;
