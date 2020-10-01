@@ -21,6 +21,8 @@
 #include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
+#include "tool-colorgroups.h"
+#include "tool-colortriads.h"
 #include "tool-composite.h"
 #include "tool-dissonant.h"
 #include "tool-extract.h"
@@ -53,7 +55,6 @@
 #include "tool-tie.h"
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
-#include "tool-colortriads.h"
 #include "tool-trillspell.h"
 
 #include "HumRegex.h"
@@ -270,16 +271,26 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "tassoise") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
+			RUNTOOL(chantize, infile, commands[i].second, status);
+		} else if (commands[i].first == "chantise") {
 			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourtriads") {
+			RUNTOOL(colortriads, infile, commands[i].second, status);
 		} else if (commands[i].first == "colortriads") {
 			RUNTOOL(colortriads, infile, commands[i].second, status);
+		} else if (commands[i].first == "colorgroups") {
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourgroups") {
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
 			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {

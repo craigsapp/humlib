@@ -354,7 +354,7 @@ void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
 				hastext = true;
 				break;
 			}
-			curtok = starttok->getNextFieldToken();
+			curtok = curtok->getNextFieldToken();
 		}
 		if (!hastext) {
 			continue;
@@ -808,7 +808,7 @@ bool Tool_autobeam::hasSyllable(HTp token) {
 				return true;
 			}
 		}
-		current = token->getNextFieldToken();
+		current = current->getNextFieldToken();
 	}
 	return false;
 }

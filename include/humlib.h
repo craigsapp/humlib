@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 19:49:01 PDT 2020
+// Last Modified: Thu Oct  1 05:42:47 PDT 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5573,6 +5573,23 @@ class Tool_cint : public HumTool {
 };
 
 
+class Tool_colorgroups : public HumTool {
+	public:
+		         Tool_colorgroups  (void);
+		        ~Tool_colorgroups  () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+
+};
+
+
 class Tool_colortriads : public HumTool {
 	public:
 		         Tool_colortriads  (void);
@@ -6039,12 +6056,14 @@ class Tool_flipper : public HumTool {
 		                             HumdrumFile& infile, int index);
 
 	private:
-		bool     m_allQ    = false;
-		bool     m_keepQ   = false;
-		bool     m_kernQ   = false;
+		bool     m_allQ         = false;
+		bool     m_keepQ        = false;
+		bool     m_kernQ        = false;
+		bool     m_stropheQ     = false;
 		std::string m_interp;
 		std::vector<bool> m_flipState;
 		std::vector<bool> m_fliplines;
+		std::vector<bool> m_strophe;
 
 };
 

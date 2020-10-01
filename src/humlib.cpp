@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 12 19:49:01 PDT 2020
+// Last Modified: Thu Oct  1 05:42:47 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -47238,7 +47238,7 @@ void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
 				hastext = true;
 				break;
 			}
-			curtok = starttok->getNextFieldToken();
+			curtok = curtok->getNextFieldToken();
 		}
 		if (!hastext) {
 			continue;
@@ -47692,7 +47692,7 @@ bool Tool_autobeam::hasSyllable(HTp token) {
 				return true;
 			}
 		}
-		current = token->getNextFieldToken();
+		current = current->getNextFieldToken();
 	}
 	return false;
 }
@@ -53479,6 +53479,114 @@ void Tool_cint::usage(const string& command) {
 	"                                                                         \n"
 	<< endl;
 }
+
+
+
+
+/////////////////////////////////
+//
+// Tool_colorgroups::Tool_colorgroups -- Set the recognized options for the tool.
+//
+
+Tool_colorgroups::Tool_colorgroups(void) {
+	define("A=s:crimson",    "Color for group A");
+	define("B=s:dodgerblue", "Color for group B");
+	define("C=s:limegreen",  "Color for group C");
+	define("command=b",     "print shed command only");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_colorgroups::run -- Do the main work of the tool.
+//
+
+bool Tool_colorgroups::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_colorgroups::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_colorgroups::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_colorgroups::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_colorgroups::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_colorgroups::initialize(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// Tool_colorgroups::processFile --
+//
+
+void Tool_colorgroups::processFile(HumdrumFile& infile) {
+	Tool_shed shed;
+	vector<string> argv;
+	
+	string command = "s/grp:A/color:";
+	command += getString("A");
+	command += "/I; ";
+	command += "s/grp:B/color:";
+	command += getString("B");
+	command += "/I; ";
+	command += "s/grp:C/color:";
+	command += getString("C");
+	command += "/I";
+
+	if (getBoolean("command")) {
+		m_free_text << command << endl;
+		return;
+	}
+
+	argv.clear();
+	argv.push_back("shed"); // name of program (placeholder)
+	argv.push_back("-e");
+	argv.push_back(command);
+
+	shed.process(argv);
+	shed.run(infile);
+}
+
 
 
 
@@ -60596,16 +60704,26 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "tassoise") {
+			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
+			RUNTOOL(chantize, infile, commands[i].second, status);
+		} else if (commands[i].first == "chantise") {
 			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourtriads") {
+			RUNTOOL(colortriads, infile, commands[i].second, status);
 		} else if (commands[i].first == "colortriads") {
 			RUNTOOL(colortriads, infile, commands[i].second, status);
+		} else if (commands[i].first == "colorgroups") {
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourgroups") {
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
 			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
@@ -60861,9 +60979,11 @@ void Tool_filter::initialize(HumdrumFile& infile) {
 //
 
 Tool_flipper::Tool_flipper(void) {
-	define("k|keep=b",     "keep *flip/*Xflip instructions");
-	define("a|all=b",     "flip globally, not just inside *flip/*Xflip regions");
-	define("i|interp=s:kern", "flip only in this interpretation");
+	define("k|keep=b",         "keep *flip/*Xflip instructions");
+	define("a|all=b",          "flip globally, not just inside *flip/*Xflip regions");
+	define("s|strophe=b",      "flip inside of strophes as well");
+	define("S|strophe-only|only-strophe=b", "flip only inside of strophes as well");
+	define("i|interp=s:kern",  "flip only in this interpretation");
 }
 
 
@@ -60920,10 +61040,11 @@ bool Tool_flipper::run(HumdrumFile& infile) {
 //
 
 void Tool_flipper::initialize(void) {
-	m_allQ = getBoolean("all");
-	m_keepQ = getBoolean("keep");
-	m_kernQ = true;
-	m_interp = getString("interp");
+	m_allQ         = getBoolean("all");
+	m_keepQ        = getBoolean("keep");
+	m_kernQ        = true;
+	m_stropheQ     = getBoolean("strophe");
+	m_interp       = getString("interp");
 	if (m_interp != "kern") {
 		m_kernQ = false;
 	}
@@ -60937,14 +61058,19 @@ void Tool_flipper::initialize(void) {
 //
 
 void Tool_flipper::processFile(HumdrumFile& infile) {
+
 	m_fliplines.resize(infile.getLineCount());
 	fill(m_fliplines.begin(), m_fliplines.end(), false);
+
 	m_flipState.resize(infile.getMaxTrack()+1);
 	if (m_allQ) {
 		fill(m_flipState.begin(), m_flipState.end(), true);
 	} else {
 		fill(m_flipState.begin(), m_flipState.end(), false);
 	}
+
+	m_strophe.resize(infile.getMaxTrack()+1);
+	fill(m_strophe.begin(), m_strophe.end(), false);
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		processLine(infile, i);
@@ -60971,11 +61097,26 @@ void Tool_flipper::checkForFlipChanges(HumdrumFile& infile, int index) {
 	if (!infile[index].isInterpretation()) {
 		return;
 	}
+
+	int track;
+
+	for (int i=0; i<infile[index].getFieldCount(); i++) {
+		HTp token = infile.token(index, i);
+		if (*token == "*strophe") {
+			track = token->getTrack();
+			m_strophe[track] = true;
+		} else if (*token == "*Xstrophe") {
+			track = token->getTrack();
+			m_strophe[track] = false;
+		}
+	}
+
+
 	if (m_allQ) {
 		// state always stays on in this case
 		return;
 	}
-	int track;
+
 	for (int i=0; i<infile[index].getFieldCount(); i++) {
 		HTp token = infile.token(index, i);
 		if (*token == "*flip") {
@@ -60988,6 +61129,7 @@ void Tool_flipper::checkForFlipChanges(HumdrumFile& infile, int index) {
 			m_fliplines[i] = true;
 		}
 	}
+
 }
 
 
@@ -61001,7 +61143,7 @@ void Tool_flipper::processLine(HumdrumFile& infile, int index) {
 	if (!infile[index].hasSpines()) {
 		return;
 	}
-	if ((!m_allQ) && infile[index].isInterpretation()) {
+	if (infile[index].isInterpretation()) {
 		checkForFlipChanges(infile, index);
 	}
 
@@ -61076,6 +61218,9 @@ void Tool_flipper::extractFlipees(vector<vector<HTp>>& flipees,
 	for (int i=0; i<line->getFieldCount(); i++) {
 		HTp token = line->token(i);
 		track = token->getTrack();
+		if ((!m_stropheQ) && m_strophe[track]) {
+			continue;
+		}
 		if (!m_flipState[track]) {
 			continue;
 		}
