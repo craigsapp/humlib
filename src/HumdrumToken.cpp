@@ -51,6 +51,7 @@ HumdrumToken::HumdrumToken(void) : string() {
 	setPrefix("!");
 	m_strand = -1;
 	m_nullresolve = NULL;
+	m_strophe     = NULL;
 }
 
 
@@ -59,6 +60,7 @@ HumdrumToken::HumdrumToken(const string& aString) : string(aString) {
 	setPrefix("!");
 	m_strand = -1;
 	m_nullresolve = NULL;
+	m_strophe     = NULL;
 }
 
 
@@ -67,6 +69,7 @@ HumdrumToken::HumdrumToken(const char* aString) : string(aString) {
 	setPrefix("!");
 	m_strand = -1;
 	m_nullresolve = NULL;
+	m_strophe     = NULL;
 }
 
 
@@ -82,6 +85,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token) :
 	m_rhycheck        = token.m_rhycheck;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix(token.getPrefix());
 }
 
@@ -98,6 +102,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token) :
 	m_rhycheck        = token->m_rhycheck;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix(token->getPrefix());
 }
 
@@ -115,6 +120,7 @@ HumdrumToken::HumdrumToken(const HumdrumToken& token, HLp owner) :
 	m_rhycheck        = token.m_rhycheck;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix(token.getPrefix());
 }
 
@@ -131,6 +137,7 @@ HumdrumToken::HumdrumToken(HumdrumToken* token, HLp owner) :
 	m_rhycheck        = token->m_rhycheck;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix(token->getPrefix());
 }
 
@@ -158,6 +165,7 @@ HumdrumToken& HumdrumToken::operator=(HumdrumToken& token) {
 	m_rhycheck        = token.m_rhycheck;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix(token.getPrefix());
 
 	return *this;
@@ -176,6 +184,7 @@ HumdrumToken& HumdrumToken::operator=(const string& token) {
 	m_rhycheck        = -1;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix("!");
 
 	return *this;
@@ -194,6 +203,7 @@ HumdrumToken& HumdrumToken::operator=(const char* token) {
 	m_rhycheck        = -1;
 	m_strand          = -1;
 	m_nullresolve     = NULL;
+	m_strophe         = NULL;
 	setPrefix("!");
 
 	return *this;
@@ -3498,6 +3508,143 @@ void HumdrumToken::copyStructure(HTp token) {
 	m_address.m_owner = NULL;  // This will in general be different, so do not copy.
 	m_address.m_owner = temp_owner; // But preserve in case already set.
 	// m_nullresolve: set this?
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getStrophe -- return the strophe that the token belongs to,
+//    or NULL if it is not in a strophe.
+//
+
+HTp HumdrumToken::getStrophe(void) {
+	return m_strophe;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::setStrophe -- Set the *S/ line of the strophe
+//    or NULL if it is not formatted correctly.
+//
+
+void HumdrumToken::setStrophe(HTp strophe) {
+	if (!strophe) {
+		clearStrophe();
+		return;
+	}
+	if (strophe->compare(0, 3, "*S/") != 0) {
+		// invalid strophe marker.
+		clearStrophe();
+		return;
+	}
+	m_strophe = strophe;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::hasStrophe -- return true if the token is in a strophe; otherwise,
+//    return false.
+//
+
+bool HumdrumToken::hasStrophe(void) {
+	return m_strophe ? true : false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::clearStrophe -- return true if the token is in a strophe; otherwise,
+//    return false.
+//
+
+void HumdrumToken::clearStrophe(void) {
+	m_strophe = NULL;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getStropheStartIndex -- return the starting line of the strophe
+//    sequence.  Returns -1 if not in a strophe.
+//
+
+bool HumdrumToken::getStropheStartIndex(void) {
+	if (!m_strophe) {
+		return -1;
+	}
+	return m_strophe->getLineIndex();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isFirstStrophe -- Returns true if the token is in the first 
+//    strophe variant.  Returns true if not in a strophe.
+//
+
+bool HumdrumToken::isFirstStrophe(void) {
+	if (!m_strophe) {
+		return true;
+	}
+	HTp toleft = m_strophe->getPreviousField();
+	if (!toleft) {
+		return true;
+	}
+	int track = m_strophe->getTrack();
+	int ltrack = toleft->getTrack();
+	return track != ltrack;
+}
+
+
+bool HumdrumToken::isPrimaryStrophe(void) {
+	return isFirstStrophe();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isStrophe -- Return true if the token has the given strophe
+//   label.
+//
+
+bool HumdrumToken::isStrophe(const string& label) {
+	if (!m_strophe) {
+		return false;
+	}
+	if (label.empty()) {
+		return *m_strophe == "*S/";
+	}
+	if (label[0] == '*') {
+		return *m_strophe == label;
+	}
+	return m_strophe->substr(3) == label;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getStropheLabel -- Return the strophe label after *S/ in the
+//    strophe token.  Returns the empty string when not in a strophe.
+//
+
+string HumdrumToken::getStropheLabel(void) {
+	if (!m_strophe) {
+		return "";
+	}
+	if (*m_strophe == "*S/") {
+		return "";
+	}
+	return m_strophe->substr(3);
 }
 
 

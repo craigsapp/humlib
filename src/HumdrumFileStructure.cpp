@@ -220,10 +220,10 @@ bool HumdrumFileStructure::analyzeStructure(void) {
 //
 
 bool HumdrumFileStructure::analyzeStrophes(void) {
-	vector<HTp> strands;
 	int scount = (int)m_strand1d.size();
 	// bool dataQ;
 	vector<HTp> strophestarts;
+	strophestarts.reserve(100);
 	for (int i=0; i<scount; i++) {
 		// dataQ = false;
 		HTp current = m_strand1d.at(i).first;
@@ -271,6 +271,29 @@ bool HumdrumFileStructure::analyzeStrophes(void) {
 			current = current->getNextToken();
 		}
 	}
+
+	// Now store strophe information in tokens.  Currently
+	// spine splits are not allowed in strophes.  Spine merges
+	// are OK: the first strophe will dominate in a merge.
+	for (int i=0; i<(int)strophestarts.size(); i++) {
+		HTp current = strophestarts[i];
+		if (current->hasStrophe()) {
+			continue;
+		}
+		current->setStrophe(strophestarts[i]);
+		current = current->getNextToken();
+		while (current) {
+			if (current->hasStrophe()) {
+				break;
+			}
+			if (*current == "*Xstrophe") {
+				break;
+			}
+			current->setStrophe(strophestarts[i]);
+			current = current->getNextToken();
+		}
+	}
+
 	return true;
 }
 
