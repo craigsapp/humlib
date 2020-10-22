@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 21 21:28:55 PDT 2020
+// Last Modified: Wed Oct 21 21:42:12 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -25571,7 +25571,7 @@ int HumdrumFileStructure::getStropheCount(void) {
 
 
 int HumdrumFileStructure::getStropheCount(int spineindex) {
-	if ((spineindex < 0) || (spineindex >= m_strophes2d.size())) {
+	if ((spineindex < 0) || (spineindex >= (int)m_strophes2d.size())) {
 		return 0;
 	}
 	return (int)m_strophes2d.at(spineindex).size();

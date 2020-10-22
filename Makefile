@@ -66,7 +66,7 @@ endif
 AR            = ar
 RANLIB        = ranlib
 
-PREFLAGS  = -c -g $(CFLAGS) $(DEFINES) -I$(INCDIR) 
+PREFLAGS  = -c -g $(CFLAGS) $(DEFINES) -I$(INCDIR) -Wsign-compare
 PREFLAGS += -O3 -Wall
 
 # using C++ 2011 standard in Humlib:

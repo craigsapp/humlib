@@ -194,7 +194,7 @@ int HumdrumFileStructure::getStropheCount(void) {
 
 
 int HumdrumFileStructure::getStropheCount(int spineindex) {
-	if ((spineindex < 0) || (spineindex >= m_strophes2d.size())) {
+	if ((spineindex < 0) || (spineindex >= (int)m_strophes2d.size())) {
 		return 0;
 	}
 	return (int)m_strophes2d.at(spineindex).size();
