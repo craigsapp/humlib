@@ -50,6 +50,7 @@
 #include "tool-simat.h"
 #include "tool-slurcheck.h"
 #include "tool-spinetrace.h"
+#include "tool-strophe.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-tie.h"
@@ -267,6 +268,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "spinetrace") {
 			RUNTOOL(spinetrace, infile, commands[i].second, status);
+		} else if (commands[i].first == "strophe") {
+			RUNTOOL(strophe, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {

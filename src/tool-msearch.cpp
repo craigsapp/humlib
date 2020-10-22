@@ -444,6 +444,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("query")) {
 		line += " -q ";
 		string qstring = getString("query");
+		makeLowerCase(qstring);
 		if ((qstring.find(' ') != string::npos) || (qstring.find('(') != string::npos)) {
 			line += '"';
 			line += qstring;
@@ -456,6 +457,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("pitch")) {
 		line += " -p ";
 		string pstring = getString("pitch");
+		makeLowerCase(pstring);
 		if ((pstring.find(' ') != string::npos) || (pstring.find('(') != string::npos)) {
 			line += '"';
 			line += pstring;
@@ -468,6 +470,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("rhythm")) {
 		line += " -r ";
 		string rstring = getString("rhythm");
+		makeLowerCase(rstring);
 		if ((rstring.find(' ') != string::npos) || (rstring.find('(') != string::npos)) {
 			line += '"';
 			line += rstring;
@@ -480,6 +483,7 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 	if (getBoolean("interval")) {
 		line += " -i ";
 		string istring = getString("interval");
+		makeLowerCase(istring);
 		if ((istring.find(' ') != string::npos) || (istring.find('(') != string::npos)) {
 			line += '"';
 			line += istring;
@@ -503,6 +507,19 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 
 	// Print match location here.
 	infile.appendLine("!!@@END: MUSIC_SEARCH_RESULT");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::makeLowerCase --
+//
+
+void Tool_msearch::makeLowerCase(string& inout) {
+	for (int i=0; i<(int)inout.size(); i++) {
+		inout[i] = tolower(inout[i]);
+	}
 }
 
 

@@ -4660,6 +4660,8 @@ xml_node Tool_musicxml2hum::convertClefToHumdrum(xml_node clef,
 	// Check for percussion clefs, etc., here.
 	if (sign == "percussion") {
 		sign = "X";
+		// ignore line of percussion clef (assume it is centered on staff).
+		line = -1000;
 	}
 	stringstream ss;
 	ss << "*clef" << sign;

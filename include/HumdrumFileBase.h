@@ -106,6 +106,7 @@ class HumFileAnalysis {
 			m_slurs_analyzed     = false;
 			m_phrases_analyzed   = false;
 			m_nulls_analyzed     = false;
+			m_strophes_analyzed  = false;
 
 			m_barlines_analyzed  = false;
 			m_barlines_different = false;
@@ -122,6 +123,10 @@ class HumFileAnalysis {
 		// m_strands_analyzed: Used to keep track of whether or not
 		// file strands have been analyzed.
 		bool m_strands_analyzed = false;
+
+		// m_strophes_analyzed: Used to keep track of whether or not
+		// file strands have been analyzed.
+		bool m_strophes_analyzed = false;
 
 		// m_slurs_analyzed: Used to keep track of whether or not
 		// slur endpoints have been linked or not.
@@ -181,6 +186,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isStructureAnalyzed      (void);
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
+		bool          areStrophesAnalyzed      (void);
 
     	template <class TYPE>
 		   void       initializeArray          (std::vector<std::vector<TYPE>>& array, TYPE value);
@@ -411,6 +417,12 @@ class HumdrumFileBase : public HumHash {
 
 		// m_strands2d: two-dimensional list of spine strands.
 		std::vector<std::vector<TokenPair> > m_strand2d;
+
+		// m_strophes1d: one-dimensional list of all *strophe/*Xstrophe pairs.
+		std::vector<TokenPair> m_strophes1d;
+
+		// m_strophes2d: two-dimensional list of all *strophe/*Xstrophe pairs.
+		std::vector<std::vector<TokenPair> > m_strophes2d;
 
 		// m_quietParse: Set to true if error messages should not be
 		// printed to the console when reading.

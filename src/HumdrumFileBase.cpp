@@ -77,6 +77,8 @@ HumdrumFileBase::HumdrumFileBase(HumdrumFileBase& infile) {
 	m_idprefix = infile.m_idprefix;
 	m_strand1d.clear();
 	m_strand2d.clear();
+	m_strophes1d.clear();
+	m_strophes2d.clear();
 	m_quietParse = infile.m_quietParse;
 	m_parseError = infile.m_parseError;
 	m_displayError = infile.m_displayError;
@@ -113,6 +115,8 @@ HumdrumFileBase& HumdrumFileBase::operator=(HumdrumFileBase& infile) {
 	m_idprefix = infile.m_idprefix;
 	m_strand1d.clear();
 	m_strand2d.clear();
+	m_strophes1d.clear();
+	m_strophes2d.clear();
 	m_quietParse = infile.m_quietParse;
 	m_parseError = infile.m_parseError;
 	m_displayError = infile.m_displayError;
@@ -163,6 +167,8 @@ void HumdrumFileBase::clear(void) {
 	m_idprefix.clear();
 	m_strand1d.clear();
 	m_strand2d.clear();
+	m_strophes1d.clear();
+	m_strophes2d.clear();
 	m_filename.clear();
 	m_segmentlevel = 0;
 	m_analyses.clear();
@@ -199,6 +205,17 @@ bool HumdrumFileBase::isRhythmAnalyzed(void) {
 
 bool HumdrumFileBase::areStrandsAnalyzed(void) {
 	return m_analyses.m_strands_analyzed;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::areStrandsAnalyzed --
+//
+
+bool HumdrumFileBase::areStrophesAnalyzed(void) {
+	return m_analyses.m_strophes_analyzed;
 }
 
 
@@ -1072,6 +1089,7 @@ void HumdrumFileBase::getSpineStopList(vector<HTp>& spinestops) {
 		}
 	}
 }
+
 
 
 //////////////////////////////

@@ -86,7 +86,10 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		std::ostream& printDurationInfo            (std::ostream& out = std::cout);
 		int           tpq                          (void);
 
+		void          resolveNullTokens (void);
+
 		// strand functionality:
+		int           getStrandCount    (void);
 		HTp           getStrandStart    (int index);
 		HTp           getStrandBegin    (int index) { return getStrandStart(index); }
 		HTp           getStrandEnd      (int index);
@@ -95,14 +98,26 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HTp           getStrandBegin    (int sindex, int index) { return getStrandStart(sindex, index); }
 		HTp           getStrandEnd      (int sindex, int index);
 		HTp           getStrandStop     (int sindex, int index) { return getStrandEnd(sindex, index); }
-		int           getStrandCount    (void);
 		int           getStrandCount    (int spineindex);
-		void          resolveNullTokens (void);
 
 		HTp           getStrand                    (int index)
 		                                        { return getStrandStart(index); }
 		HTp           getStrand                    (int sindex, int index)
 		                                { return getStrandStart(sindex, index); }
+
+		// strophe functionality (located in src/HumdrumFileStructure-strophe.cpp)
+		bool         analyzeStrophes    (void);
+		void         analyzeStropheMarkers(void);
+		int          getStropheCount    (void);
+		int          getStropheCount    (int spineindex);
+		HTp          getStropheStart    (int index);
+		HTp          getStropheBegin    (int index) { return getStropheStart(index); }
+		HTp          getStropheEnd      (int index);
+		HTp          getStropheStop     (int index) { return getStropheStart(index); }
+		HTp          getStropheStart    (int spine, int index);
+		HTp          getStropheBegin    (int spine, int index) { return getStropheStart(index); }
+		HTp          getStropheEnd      (int spine, int index);
+		HTp          getStropheStop     (int spine, int index) { return getStropheStart(index); }
 
 		// barline/measure functionality:
 		int           getBarlineCount              (void) const;
@@ -121,6 +136,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		std::string   getKernAboveSignifier        (void);
 		std::string   getKernBelowSignifier        (void);
 
+
 	protected:
 		bool          analyzeRhythm                (void);
 		bool          assignRhythmFromRecip        (HTp spinestart);
@@ -129,7 +145,6 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		bool          analyzeGlobalParameters      (void);
 		bool          analyzeLocalParameters       (void);
 		// bool          analyzeParameters            (void);
-		bool          analyzeStrophes              (void);
 		bool          analyzeDurationsOfNonRhythmicSpines(void);
 		HumNum        getMinDur                    (std::vector<HumNum>& durs,
 		                                            std::vector<HumNum>& durstate);
