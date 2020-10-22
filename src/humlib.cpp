@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Oct 21 21:42:12 PDT 2020
+// Last Modified: Wed Oct 21 22:16:03 PDT 2020
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -33048,7 +33048,7 @@ void HumdrumToken::clearStrophe(void) {
 //    sequence.  Returns -1 if not in a strophe.
 //
 
-bool HumdrumToken::getStropheStartIndex(void) {
+int HumdrumToken::getStropheStartIndex(void) {
 	if (!m_strophe) {
 		return -1;
 	}
