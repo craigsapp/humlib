@@ -3575,7 +3575,7 @@ void HumdrumToken::clearStrophe(void) {
 //    sequence.  Returns -1 if not in a strophe.
 //
 
-bool HumdrumToken::getStropheStartIndex(void) {
+int HumdrumToken::getStropheStartIndex(void) {
 	if (!m_strophe) {
 		return -1;
 	}

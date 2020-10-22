@@ -260,7 +260,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     hasStrophe                (void);
 		void     clearStrophe              (void);
 		bool     isStrophe                 (const std::string& label);
-		bool     getStropheStartIndex      (void);
+		int      getStropheStartIndex      (void);
 		bool     isFirstStrophe            (void);
 		bool     isPrimaryStrophe          (void);
 
