@@ -239,7 +239,7 @@ void Tool_homorhythm::processFile(HumdrumFile& infile) {
 		for (int i=0; i<(int)data.size(); i++) {
 			if (score[data[i]] >= m_threshold) {
 				if (m_attacks[data[i]] < (int)m_notes[data[i]].size() - 1) {
-					m_homorhythm[data[i]] = "chartreuse";
+					m_homorhythm[data[i]] = "dodgerblue";
 				} else {
 					m_homorhythm[data[i]] = "red";
 				}
