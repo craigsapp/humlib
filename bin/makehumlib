@@ -57,7 +57,8 @@ sub createIncludeFile {
 		"MuseDataSet.h",
 		"NoteCell.h",
 		"NoteGrid.h",
-		"Convert.h"
+		"Convert.h",
+		"PixelColor.h"
 	);
 
 	# musicxml2hum converter related files:

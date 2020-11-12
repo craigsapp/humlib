@@ -22,14 +22,21 @@ void   extractData     (HumdrumFile& infile, vector<double>& x, vector<double>&y
 bool   getCorrelation  (double& output, vector<double>& x, int xstart, vector<double>& y, int ystart, int len);
 void   printRawAnalysis(vector<vector<double>>& analysis);
 void   doRowAnalysis   (vector<double>& row, int windowlen, vector<double>& x, vector<double>& y);
+void   printCorrelationScape(vector<vector<double>>& correlations);
+void   printPixelRow   (ostream& out, vector<PixelColor>& row, int repeat);
+void   getPixelRow     (vector<PixelColor>& row, vector<double>& cor);
 
 Options options;
 
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-	options.define("i|input=b", "print input data");
-	options.define("r|raw=b", "print raw correlation data");
+	options.define("d|data=b", "print input data");
+   options.define("n|min=i:2", "minimum correlation vector size to process");
+   options.define("m|max=i:0", "maximum correlation vector size to process");
+	options.define("c|correlations=b", "print raw correlation data");
+	options.define("l|lowest=d:-1.0", "lowest correlation value");
+	options.define("coolest=d:0.95", "coolest hue");
 	options.process(argc, argv);
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
@@ -58,7 +65,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 	if (y.empty()) {
 		return;
 	}
-	if (options.getBoolean("raw")) {
+	if (options.getBoolean("data")) {
       printInputData(x, y);
       return;
    }
@@ -71,8 +78,38 @@ void processFile(HumdrumFile& infile, Options& options) {
 		fill(analysis.at(i).begin(), analysis.at(i).end(), -123456789.0);
 		doRowAnalysis(analysis.at(i), tsize-i, x, y);
 	}
-	
-	printRawAnalysis(analysis);
+
+	// Set the min an max row.  Make more efficient by not
+	// calculating values outside of the min/max range.
+
+	if (options.getBoolean("max")) {
+		int max = options.getInteger("max");
+		if (max > 0) {
+         // absolute value maxiumum
+			max = (int)analysis.size() - max;
+			if (max < analysis.size()) {
+				analysis.erase(analysis.begin(), analysis.begin() + max);
+			}
+		} else if (max < 0) {
+         // subtract from top of triangle
+			max = -max;
+			if (max < analysis.size()) {
+				analysis.erase(analysis.begin(), analysis.begin() + max);
+			}
+		}
+	}
+
+	int min = options.getInteger("min") - 1;
+	if ((min > 0) && (min < (int)analysis.size())) {
+		analysis.resize((int)analysis.size() - min);
+	}
+
+	if (options.getBoolean("correlations")) {
+		printRawAnalysis(analysis);
+		return;
+	}
+
+	printCorrelationScape(analysis);
 
 /*
 	double cor;
@@ -125,7 +162,7 @@ void printRawAnalysis(vector<vector<double>>& analysis) {
 	for (int i=0; i<(int)analysis.size(); i++) {
 		for (int j=0; j<(int)analysis[i].size(); j++) {
 			double datum = analysis.at(i).at(j);
-			// limiit to two decimal places:
+			// limit to two decimal places:
 			if (datum > 0) {
 				datum = int(datum * 100.0 + 0.5) / 100.0;
 			} else {
@@ -249,7 +286,83 @@ void printInputData(vector<double>& x, vector<double>& y) {
 
 
 
+//////////////////////////////
+//
+// printCorrelationScape --
+//
 
+void printCorrelationScape(vector<vector<double>>& correlations) {
+	int rrepeat = 2;
+	int crepeat = 2;
+	int maxrows = (int)correlations.size();
+	int maxcols = (int)correlations.back().size();
+
+   cout << "P3\n";
+   cout << (crepeat * maxcols) << " " << (rrepeat * maxrows) << "\n";
+   cout << "255\n";
+
+
+	vector<PixelColor> row(maxcols);
+
+	for (int i=0; i<correlations.size(); i++) {
+		getPixelRow(row, correlations[i]);
+		for (int j=0; j<rrepeat; j++) {
+			printPixelRow(cout, row, crepeat);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// getPixelRow --  cor vector size is the number of columns for the image
+//   (divided by 2).  The correlation values should be centered in this
+//   region, with black (or white) for the border color.
+//
+
+void getPixelRow(vector<PixelColor>& row, vector<double>& cor) {
+	double lowest = options.getDouble("lowest");
+	double range = 1.0 - lowest;
+	double coolest = options.getDouble("coolest");
+	if (range <= 0) {
+		lowest = -1.0;
+		range = 2.0;
+	}
+	for (int i=0; i<(int)row.size(); i++) {
+		row[i].setRed(0);
+		row[i].setGreen(0);
+		row[i].setBlue(0);
+	}
+	int offset = ((int)row.size() - (int)cor.size()) / 2;
+	if (offset < 0) {
+		offset = 0;
+	}
+	for (int i=0; i<(int)cor.size(); i++) {
+		int ii = i + offset;
+		if (ii >= row.size()) {
+			break;
+		}
+		double value = -(cor.at(i) - 1)/range * coolest;
+		row.at(ii).setHue(value);
+   }
+}
+
+
+
+//////////////////////////////
+//
+// printPixelRow --
+//
+
+void printPixelRow(ostream& out, vector<PixelColor>& row, int repeat) {
+	for (int i=0; i<(int)row.size(); i++) {
+		for (int j=0; j<repeat; j++) {
+			out << row[i] << ' ';
+		}
+	}
+	out << "\n";
+}
 
 
 
