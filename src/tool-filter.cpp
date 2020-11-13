@@ -45,6 +45,7 @@
 #include "tool-rid.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
+#include "tool-semitones.h"
 #include "tool-shed.h"
 #include "tool-sic.h"
 #include "tool-simat.h"
@@ -254,6 +255,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
 			RUNTOOL(scordatura, infile, commands[i].second, status);
+		} else if (commands[i].first == "semitones") {
+			RUNTOOL(semitones, infile, commands[i].second, status);
 		} else if (commands[i].first == "sic") {
 			RUNTOOL(sic, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Nov 12 14:43:14 PST 2020
+// Last Modified: Fri Nov 13 00:11:32 PST 2020
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8037,6 +8037,33 @@ class Tool_scordatura : public HumTool {
 		std::string    m_string;
 
 };
+
+
+class Tool_semitones : public HumTool {
+	public:
+		      Tool_semitones   (void);
+		     ~Tool_semitones   () {};
+
+		bool  run              (HumdrumFileSet& infiles);
+		bool  run              (HumdrumFile& infile);
+		bool  run              (const string& indata, ostream& out);
+		bool  run              (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void   processFile(HumdrumFile& infile);
+		void   initialize(void);
+		void   analyzeLine(HumdrumFile& infile, int line);
+		int    processKernSpines(HumdrumFile& infile, int line, int start);
+		void   printTokens(const string& value, int count);
+		string getTwelveToneIntervalString(HTp token);
+		string getNextNoteAttack(HTp token);
+
+	private:
+		bool m_cdata = false; // used **cdata (to display in VHV notation)
+		bool m_midi  = false; // give the MIDI note number rather than inteval.
+
+};
+
 
 
 class Tool_shed : public HumTool {
