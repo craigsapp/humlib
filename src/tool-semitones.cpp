@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Wed Aug 26 15:24:30 PDT 2020
-// Last Modified: Sun Sep 20 12:36:46 PDT 2020
+// Creation Date: Fri Nov 13 02:39:59 PST 2020
+// Last Modified: Fri Nov 13 02:40:02 PST 2020
 // Filename:      tool-semitones.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-semitones.cpp
 // Syntax:        C++11; humlib
