@@ -257,13 +257,15 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 	int toksize = (int)toks.size();
 
 	// calculate intervals/MIDI note numbers if appropriate
-	bool m_allQ = m_stepQ || m_leapQ || m_upQ || m_downQ || m_repeatQ;
+	bool allQ = m_stepQ || m_leapQ || m_upQ || m_downQ || m_repeatQ;
+	bool dirQ = m_upQ || m_downQ;
+	bool typeQ = m_stepQ || m_leapQ;
 	vector<string> intervals(toksize);
 	if (infile[line].isData()) {
 		for (int i=0; i<toksize; i++) {
 			intervals[i] = getTwelveToneIntervalString(toks[i]);
 		}
-		if (m_allQ && !m_midiQ) {
+		if (allQ && !m_midiQ) {
 			for (int i=0; i<(int)intervals.size(); i++) {
 				if (intervals[i].empty()) {
 					continue;
@@ -274,21 +276,23 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 				int value = stoi(intervals[i]);
 				if (m_upQ && m_stepQ && (value > 0) && (value < m_leap)) {
 					markInterval(toks[i]);
-				} else if (m_upQ && m_leapQ && (value > 0) && (value >= m_leap)) {
-					markInterval(toks[i]);
 				} else if (m_downQ && m_stepQ && (value < 0) && (value > -m_leap)) {
+					markInterval(toks[i]);
+				} else if (!dirQ && m_stepQ && (value != 0) && (abs(value) < m_leap)) {
+					markInterval(toks[i]);
+
+				} else if (m_upQ && m_leapQ && (value > 0) && (value >= m_leap)) {
 					markInterval(toks[i]);
 				} else if (m_downQ && m_leapQ && (value < 0) && (value <= -m_leap)) {
 					markInterval(toks[i]);
-				} else if (m_stepQ && (value != 0) && (abs(value) < m_leap)) {
+				} else if (!dirQ && m_leapQ && (value != 0) && (abs(value) >= m_leap)) {
 					markInterval(toks[i]);
-				} else if (m_leapQ && (value != 0) && (abs(value) >= m_leap)) {
-					markInterval(toks[i]);
+
 				} else if (m_repeatQ && (value == 0)) {
 					markInterval(toks[i]);
-				} else if (m_upQ && (value > 0)) {
+				} else if (!typeQ && m_upQ && (value > 0)) {
 					markInterval(toks[i]);
-				} else if (m_downQ && (value < 0)) {
+				} else if (!typeQ && m_downQ && (value < 0)) {
 					markInterval(toks[i]);
 				}
 			}
