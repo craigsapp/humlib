@@ -43,6 +43,7 @@ Tool_semitones::Tool_semitones(void) {
 	define("mark=s:@", "mark character");
 	define("m|midi=b", "show MIDI note number for pitches");
 	define("n|count=b", "output count of intervals being marked");
+	define("p|pc=b", "output pitch classes from C=0 instead of MIDI notes for -m option");
 	define("r|same|repeat|repeated=b", "highlight notes that are repeated ");
 	define("s|step=b", "highlight notes that have step-wise motion");
 	define("u|up=b", "highlight notes that that have a positive semitone interval");
@@ -115,6 +116,7 @@ void Tool_semitones::initialize(void) {
 	m_noinputQ    = getBoolean("no-input");
 	m_nomarkQ     = getBoolean("no-marks");
 	m_notiesQ     = getBoolean("no-ties");
+	m_pcQ         = getBoolean("pc");
 	m_repeatQ     = getBoolean("repeat");
 	m_norestsQ    = getBoolean("no-rests");
 	m_secondQ     = getBoolean("second");
@@ -146,7 +148,7 @@ void Tool_semitones::processFile(HumdrumFile& infile) {
 	for (int i=0; i<infile.getLineCount(); i++) {
 		analyzeLine(infile, i);
 	}
-	if (m_markCount > 0) {
+	if ((m_markCount > 0) && !m_nomarkQ) {
 		m_humdrum_text << "!!!RDF**kern: ";
 		m_humdrum_text << m_marker;
 		m_humdrum_text << " = marked note";
@@ -248,7 +250,7 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 		HTp newtok = infile.token(line, i);
 		int newtrack = newtok->getTrack();
 		if (newtrack == track) {
-			toks.push_back(token);
+			toks.push_back(newtok);
 			continue;
 		}
 		break;
@@ -325,7 +327,11 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 					if (m_cdataQ) {
 						printTokens("**cdata", toksize);
 					} else if (m_midiQ) {
-						printTokens("**mnn", toksize);
+						if (m_pcQ) {
+							printTokens("**mpc", toksize);
+						} else {
+							printTokens("**mnn", toksize);
+						}
 					} else {
 						printTokens("**tti", toksize);
 					}
@@ -526,8 +532,10 @@ string Tool_semitones::getTwelveToneIntervalString(HTp token) {
 	}
 	if ((m_include.size() > 0) || (m_exclude.size() > 0)) {
 		int status = filterData(token);
-		if (!status) {
+		if (status == 0) {
 			return ".";
+		} else if (status < 0) {
+			return "x"; // excluded note
 		}
 	}
 	string tok = token->getSubtoken(0);
@@ -541,6 +549,9 @@ string Tool_semitones::getTwelveToneIntervalString(HTp token) {
 
 	if (m_midiQ) {
 		string output;
+		if (m_pcQ) {
+			value = value % 12;
+		}
 		output = to_string(value);
 		return output;
 	}
@@ -621,25 +632,25 @@ string Tool_semitones::getNextNoteAttack(HTp token) {
 //    be kept; otherwise, return false.
 //
 
-bool Tool_semitones::filterData(HTp token) {
+int Tool_semitones::filterData(HTp token) {
 	vector<HTp> toks = getTieGroup(token);
 	HumRegex hre;
 	if (!m_exclude.empty()) {
 		for (int i=0; i<(int)toks.size(); i++) {
 			if (hre.search(toks[i], m_exclude)) {
-				return false;
+				return -1;
 			}
 		}
-		return true;
+		return 1;
 	} else if (!m_include.empty()) {
 		for (int i=0; i<(int)toks.size(); i++) {
 			if (hre.search(toks[i], m_include)) {
-				return true;
+				return 1;
 			}
 		}
-		return false;
+		return 0;
 	}
-	return false;
+	return 0;
 }
 
 

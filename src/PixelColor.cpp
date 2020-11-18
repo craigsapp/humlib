@@ -793,13 +793,17 @@ PixelColor& PixelColor::setHue(float value) {
 		Blue  = 255;
 		Green = (unsigned char)limit(255 - floatToChar(6.0 * (fraction - 3.0/6.0)), 0,255);
 	} else if (fraction < 5.0/6.0) {
-		Red   = 0;
-		Green = (unsigned char)limit(floatToChar(6.0 * (fraction - 4.0/6.0)), 0,255);
+		Red   = (unsigned char)limit(floatToChar(6.0 * (fraction - 4.0/6.0)), 0,255);
+		Green = 0;
 		Blue  = 255;
-	} else {
+	} else if (fraction <= 6.0/6.0) {
 		Red   = 255;
 		Green = 0;
 		Blue  = (unsigned char)limit(255 - floatToChar(6.0 * (fraction - 5.0/6.0)), 0,255);
+	} else {
+		Red   = 0;
+		Green = 0;
+		Blue  = 0;
 	}
 
 	return *this;

@@ -42,7 +42,7 @@ class Tool_semitones : public HumTool {
 		HTp         markNote(HTp token, bool markQ);
 		void        addMarker(HTp token);
 		void        showCount(void);
-		bool        filterData(HTp token);
+		int         filterData(HTp token);
 		std::vector<HTp> getTieGroup(HTp token);
 		HTp         getNextNote(HTp token);
 		bool        hasTieContinue(const string& value);
@@ -59,6 +59,7 @@ class Tool_semitones : public HumTool {
 		bool        m_nomarkQ     = false; // do not mark notes (just count intervals)
 		bool        m_norestsQ    = false; // ignore rests
 		bool        m_notiesQ     = false; // do not mark secondary tied notes
+		bool        m_pcQ         = false; // give pitch class rather than MIDI note num.
 		bool        m_repeatQ     = false; // make/count notes that repeat
 		bool        m_secondQ     = false; // mark only second note in interval
 		bool        m_stepQ       = false; // mark/count notes in stepwise motion
