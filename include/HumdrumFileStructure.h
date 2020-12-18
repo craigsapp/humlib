@@ -85,6 +85,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HumNum        getScoreDuration             (void) const;
 		std::ostream& printDurationInfo            (std::ostream& out = std::cout);
 		int           tpq                          (void);
+		int           getTpq                       (void) { return tpq(); }
 
 		void          resolveNullTokens (void);
 

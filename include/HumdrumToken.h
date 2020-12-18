@@ -97,11 +97,18 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isInvisible               (void);
 		bool     isGrace                   (void);
 		bool     isClef                    (void);
+		bool     isModernClef              (void);
+		bool     isOriginalClef            (void);
 		bool     isKeySignature            (void);
+		bool     isModernKeySignature      (void);
+		bool     isOriginalKeySignature    (void);
 		bool     isKeyDesignation          (void);
 		bool     isTimeSignature           (void);
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
+		bool     isMensuration             (void) { return isMensurationSymbol(); }
+		bool     isOriginalMensurationSymbol(void);
+		bool     isOriginalMensuration     (void) { return isOriginalMensurationSymbol(); }
 		bool     isInstrumentDesignation   (void);
 		bool     isInstrumentName          (void);
 		bool     isInstrumentAbbreviation  (void);

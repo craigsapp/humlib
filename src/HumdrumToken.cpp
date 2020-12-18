@@ -1338,7 +1338,7 @@ bool HumdrumToken::isGrace(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isClef -- True if a **kern clef.
+// HumdrumToken::isClef -- True if a clef.
 //
 
 bool HumdrumToken::isClef(void) {
@@ -1358,11 +1358,85 @@ bool HumdrumToken::isClef(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isKeySignature -- True if a **kern key signature.
+// HumdrumToken::isModernClef -- True if a modern clef.
+//
+
+bool HumdrumToken::isModernClef(void) {
+	if (!(isDataType("**kern") || isDataType("**mens"))) {
+			return false;
+	}
+	if (!isInterpretation()) {
+		return false;
+	} else if (this->compare(0, 6, "*mclef") == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isOriginalClef -- True if an original clef.
+//
+
+bool HumdrumToken::isOriginalClef(void) {
+	if (!(isDataType("**kern") || isDataType("**mens"))) {
+			return false;
+	}
+	if (!isInterpretation()) {
+		return false;
+	} else if (this->compare(0, 6, "*oclef") == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKeySignature -- True if a key signature.
 //
 
 bool HumdrumToken::isKeySignature(void) {
 	if (this->compare(0, 3, "*k[") != 0) {
+		return false;
+	}
+	if (this->back() != ']') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isOriginalKeySignature -- True if an original key signature.
+//
+
+bool HumdrumToken::isOriginalKeySignature(void) {
+	if (this->compare(0, 4, "*ok[") != 0) {
+		return false;
+	}
+	if (this->back() != ']') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isModernKeySignature -- True if a modern key signature.
+//
+
+bool HumdrumToken::isModernKeySignature(void) {
+	if (this->compare(0, 4, "*mk[") != 0) {
 		return false;
 	}
 	if (this->back() != ']') {
@@ -1452,6 +1526,23 @@ bool HumdrumToken::isTempo(void) {
 
 bool HumdrumToken::isMensurationSymbol(void) {
 	if (this->compare(0, 5, "*met(") != 0) {
+		return false;
+	}
+	if ((*this)[this->size()-1] != ')') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isOriginalMensurationSymbol -- True if a **kern mensuration Symbol.
+//
+
+bool HumdrumToken::isOriginalMensurationSymbol(void) {
+	if (this->compare(0, 6, "*omet(") != 0) {
 		return false;
 	}
 	if ((*this)[this->size()-1] != ')') {

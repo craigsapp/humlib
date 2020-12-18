@@ -37,6 +37,7 @@
 #include "tool-kernview.h"
 #include "tool-melisma.h"
 #include "tool-metlev.h"
+#include "tool-modori.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
 #include "tool-phrase.h"
@@ -236,6 +237,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second, status);
+		} else if (commands[i].first == "modori") {
+			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {

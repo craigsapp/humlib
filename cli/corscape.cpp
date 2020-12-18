@@ -25,12 +25,14 @@ bool   getCorrelation2  (double& output, vector<double>& x, int xstart, vector<d
 void   printRawAnalysis (vector<vector<double>>& analysis);
 void   doRowAnalysis    (vector<double>& row, int windowlen, vector<double>& x, vector<double>& y);
 void   doArchRowAnalysis(vector<double>& row, int windowlen, vector<double>& x);
+void   doCombRowAnalysis(vector<double>& row, int windowlen, vector<double>& x);
 void   printCorrelationScape(vector<vector<double>>& correlations,
                          vector<double>& x, vector<double>& xsmooth,
                          vector<double>& y, vector<double>& ysmooth);
 void   printPixelRow    (ostream& out, vector<PixelColor>& row, int repeat, bool adjust = false);
 void   getPixelRow      (vector<PixelColor>& row, vector<double>& cor);
 void   getArch          (vector<double>& arch);
+void   getComb          (vector<double>& comb, int cycle);
 void   printInputPlot   (vector<double>& x, vector<double>& y, int cols, int crepeat, int rows);
 void   printInputPlot2  (vector<double>& x, vector<double>& y, int cols, int crepeat, int rows);
 void   printInputPlotSmooth(vector<double>& x, vector<double>& xsmooth, int cols,
@@ -42,30 +44,37 @@ void   storeDataInPlot  (vector<vector<int>>& plot, vector<double>& x, int xpoin
 		                   double minvalue, double maxvalue, int crepeat);
 void   printColorMap    (int maxcols, int crepeat, int plotrows);
 vector<double> smoothSequence(vector<double>& input);
+vector<double> unsmoothSequence(vector<double>& input);
+int    getColumnIndex   (HumdrumFile& infile, const string& query, int dvalue);
+double calculateAverage (HumdrumFile& infile, int index);
 
 Options options;
+int Negate = 1.0;
 
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-	vector<double> testing(100);
-	getArch(testing);
 	options.define("d|data=b", "print input data");
 	options.define("n|min=i:2", "minimum correlation vector size to process");
+	options.define("N|negate=b", "reverse the correlation values");
 	options.define("m|max=i:0", "maximum correlation vector size to process");
 	options.define("c|correlations=b", "print raw correlation data");
 	options.define("l|lowest=d:-1.0", "lowest correlation value");
-	options.define("x=i:1", "first sequence to use in analysis");
-	options.define("y=i:2", "second sequence to use in analysis");
+	options.define("x=s:1", "first sequence to use in analysis");
+	options.define("X=s", "extract x data from column that has regular expression");
+	options.define("y=s:2", "second sequence to use in analysis");
+	options.define("Y=s", "extract y data from column that has regular expression");
 	options.define("coolest=d:0.80", "coolest hue");
 	options.define("arch=b", "Do an arch correlation plot");
+	options.define("comb=i:3", "Do a comb correlation plot");
 	options.define("plot=b", "Display plot of input data under triangle plot, overlaid");
 	options.define("plot2=b", "Display plot of input data under triangle plot, separately");
 	options.define("aspect-ratio=d:2.59", "Apspect ratio for input data plot");
 	options.define("color-map=b", "print color map for testing");
 	options.define("map-rows=i:25", "height of color map");
 	options.define("s|smooth=b", "smooth input data");
-	options.define("S|sf|smooth-factor=d:0.25", "smoothing factor");
+	options.define("S|unsmooth=b", "unsmooth input data");
+	options.define("sf|smooth-factor=d:0.4", "smoothing factor");
 	options.process(argc, argv);
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
@@ -88,9 +97,41 @@ void processFile(HumdrumFile& infile, Options& options) {
 	vector<double> x;
 	vector<double> y;
 
-	int xcol = options.getInteger("x") - 1;
-	int ycol = options.getInteger("y") - 1;
-	if (options.getBoolean("arch")) {
+	HumRegex hre;
+
+	string xval = options.getString("x");
+	int xcol = 0;
+	int ycol = 1;
+	if (hre.match(xval, "^\\d+$")) {
+		xcol = options.getInteger("x") - 1;
+	} else if (hre.match(xval, "^-\\d+$")) {
+		xcol = -1; // calculate an average of all columns
+	} else if (hre.match(xval, "average", "i")) {
+		xcol = -1;
+	}
+
+	string yval = options.getString("y");
+	if (hre.match(xval, "^\\d+$")) {
+		ycol = options.getInteger("y") - 1;
+	} else if (hre.match(yval, "^-\\d+$")) {
+		ycol = -1; // calculate an average of all columns
+	} else if (hre.match(yval, "average", "i")) {
+		ycol = -1;
+	}
+
+	if (options.getBoolean("X")) {
+		xcol = getColumnIndex(infile, options.getString("X"), 1);
+	}
+	if (options.getBoolean("Y")) {
+		ycol = getColumnIndex(infile, options.getString("Y"), 2);
+	}
+
+	Negate = options.getBoolean("negate") ? -1.0 : +1.0;
+	int archQ = options.getBoolean("arch");
+	int combQ = options.getBoolean("comb");
+	int singleQ = archQ || combQ;
+
+	if (singleQ) {
 		ycol = -1;
 	}
 
@@ -101,28 +142,32 @@ void processFile(HumdrumFile& infile, Options& options) {
 	}
 
 	if (y.empty()) {
-		if (!options.getBoolean("arch")) {
+		if (!singleQ) {
 			return;
 		}
 	}
 
-	int smoothQ = options.getBoolean("smooth");
+	bool smoothQ = options.getBoolean("smooth");
+	bool unsmoothQ = options.getBoolean("unsmooth");
 	vector<double> xsmooth;
 	vector<double> ysmooth;
 	if (smoothQ) {
 		xsmooth = smoothSequence(x);
 		ysmooth = smoothSequence(y);
+	} else if (unsmoothQ) {
+		xsmooth = unsmoothSequence(x);
+		ysmooth = unsmoothSequence(y);
 	}
 
 	if (options.getBoolean("data")) {
-		if (options.getBoolean("arch")) {
-			if (smoothQ) {
+		if (singleQ) {
+			if (smoothQ || unsmoothQ) {
 				printInputData(x, xsmooth);
 			} else {
 				printInputData(x);
 			}
 		} else {
-			if (smoothQ) {
+			if (smoothQ || unsmoothQ) {
 				printInputData(xsmooth, ysmooth);
 			} else {
 				printInputData(x, y);
@@ -137,15 +182,21 @@ void processFile(HumdrumFile& infile, Options& options) {
 	for (int i=0; i<tsize-1; i++) {
 		analysis.at(i).resize(i+1);
 		fill(analysis.at(i).begin(), analysis.at(i).end(), -123456789.0);
-		if (options.getBoolean("arch")) {
-			if (smoothQ) {
+		if (archQ) {
+			if (smoothQ || unsmoothQ) {
 				doArchRowAnalysis(analysis.at(i), tsize-i, xsmooth);
 			} else {
 				doArchRowAnalysis(analysis.at(i), tsize-i, x);
 			}
+		} else if (combQ) {
+			if (smoothQ || unsmoothQ) {
+				doCombRowAnalysis(analysis.at(i), tsize-i, xsmooth);
+			} else {
+				doCombRowAnalysis(analysis.at(i), tsize-i, x);
+			}
 		} else {
 			// Regular correlation plot comparing two sequences
-			if (smoothQ) {
+			if (smoothQ || unsmoothQ) {
 				doRowAnalysis(analysis.at(i), tsize-i, xsmooth, ysmooth);
 			} else {
 				doRowAnalysis(analysis.at(i), tsize-i, x, y);
@@ -196,6 +247,39 @@ void processFile(HumdrumFile& infile, Options& options) {
 void doArchRowAnalysis(vector<double>& row, int windowlen, vector<double>& x) {
 	vector<double> y(windowlen);
 	getArch(y);
+
+	for (int i=0; i<(int)row.size(); i++) {
+		double value;
+		int status;
+		status = getCorrelation2(value, x, i, y);
+		if (!status) {
+			cerr << "Error" << endl;
+			return;
+		}
+		if (Convert::isNaN(value)) {
+			// suppressing 0/0 cases (converting them to zeros).
+			// This will happen most likely at length-2 correlations, but
+			// can happen with vastly decreasing likelihood for larger
+			// correlations when comparing flat sequences that have a
+			// zero standard devaition.
+			row.at(i) = -0.0;
+		} else {
+			row.at(i) = value;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// doCombRowAnalysis --
+//
+
+void doCombRowAnalysis(vector<double>& row, int windowlen, vector<double>& x) {
+	vector<double> y(windowlen);
+	int cycle = options.getInteger("comb");
+	getComb(y, cycle);
 
 	for (int i=0; i<(int)row.size(); i++) {
 		double value;
@@ -284,6 +368,7 @@ bool getCorrelation(double& output, vector<double>& x, int xstart, vector<double
 	if ((xstart == 0) && (len == (int)x.size())) {
 		if ((ystart == 0) && (len == (int)y.size())) {
 			output = Convert::pearsonCorrelation(x, y);
+			output *= Negate;
 			return 1;
 		}
 	}
@@ -309,6 +394,7 @@ bool getCorrelation(double& output, vector<double>& x, int xstart, vector<double
 	vector<double> yy(y1, y2);
 
 	output = Convert::pearsonCorrelation(xx, yy);
+	output *= Negate;
 	return 1;
 }
 
@@ -327,6 +413,7 @@ bool getCorrelation2(double& output, vector<double>& x, int xstart, vector<doubl
 	if ((xstart == 0) && (len == (int)x.size())) {
 		if ((ystart == 0) && (len == (int)y.size())) {
 			output = Convert::pearsonCorrelation(x, y);
+			output *= Negate;
 			return 1;
 		}
 	}
@@ -343,6 +430,7 @@ bool getCorrelation2(double& output, vector<double>& x, int xstart, vector<doubl
 	vector<double> xx(x1, x2);
 
 	output = Convert::pearsonCorrelation(xx, y);
+	output *= Negate;
 	return 1;
 }
 
@@ -359,6 +447,8 @@ void extractData(HumdrumFile& infile, vector<double>& x, int xindex, vector<doub
 	x.reserve(infile.getLineCount());
 	y.reserve(infile.getLineCount());
 	int archQ = options.getBoolean("arch");
+	int combQ = options.getBoolean("comb");
+	int singleQ = archQ || combQ;
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
@@ -367,7 +457,7 @@ void extractData(HumdrumFile& infile, vector<double>& x, int xindex, vector<doub
 		if (infile[i].isAllNull()) {
 			continue;
 		}
-		if (archQ) {
+		if (singleQ) {
 			if (infile[i].getFieldCount() < 1) {
 				cerr << "Error: data file needs at least one spine, but has only"
 				     << infile[i].getFieldCount() << endl;
@@ -384,48 +474,110 @@ void extractData(HumdrumFile& infile, vector<double>& x, int xindex, vector<doub
 		HTp token1 = NULL;
 		HTp token2 = NULL;
 
-		if ((xindex >= 0) && (xindex < infile[i].getFieldCount())) {
-			token1 = infile.token(i, xindex);
-		}
-		if ((!archQ) && (yindex >= 0) && (yindex < infile[i].getFieldCount())) {
-			token2 = infile.token(i, yindex);
-		}
-		if ((token1 == NULL) && (token2 == NULL)) {
-			cerr << "Problem extrcting tokens.  All indexes are out of range" << endl;
-			cerr << "x-index = " << xindex << endl;
-			cerr << "y-index = " << yindex << endl;
-			return;
+		if (xindex >= 0) {
+			if (xindex < infile[i].getFieldCount()) {
+				token1 = infile.token(i, xindex);
+			}
+			if ((!singleQ) && (yindex >= 0) && (yindex < infile[i].getFieldCount())) {
+				token2 = infile.token(i, yindex);
+			}
+			if ((token1 == NULL) && (token2 == NULL)) {
+				cerr << "Problem extrcting tokens.  All indexes are out of range" << endl;
+				cerr << "x-index = " << xindex << endl;
+				cerr << "y-index = " << yindex << endl;
+				return;
+			}
 		}
 
 		double value1 = 0.0;
 		double value2 = 0.0;
 
-		if (token1 && (token1->isNull())) {
-			cerr << "Token in column " << token1->getFieldNumber() << " on line "
-			     << token1->getLineNumber() << " is empty.  Giving up." << endl;
-		}
-		if (token2 && (token2->isNull())) {
-			cerr << "Token in column " << token2->getFieldNumber() << " on line "
-			     << token2->getLineNumber() << " is empty.  Giving up." << endl;
-		}
-		if (token1 && !hre.search(token1, "([+-]?\\d*\\.?\\d+)")) {
-			cerr << "Cannot find number in token : " << token1 << " in column "
-			     << token1->getFieldNumber() << " on line "
-			     << token1->getLineNumber() << " Giving up." << endl;
-		}
-		if (token1) {
-			value1 = hre.getMatchDouble(1);
+		if (xindex >= 0) {
+			if (token1 && (token1->isNull())) {
+				cerr << "Token in column " << token1->getFieldNumber() << " on line "
+			     	<< token1->getLineNumber() << " is empty.  Giving up." << endl;
+			}
+			if (token1 && !hre.search(token1, "([+-]?\\d*\\.?\\d+)")) {
+				cerr << "Cannot find number in token : " << token1 << " in column "
+			     	<< token1->getFieldNumber() << " on line "
+			     	<< token1->getLineNumber() << " Giving up." << endl;
+			}
+			if (token1) {
+				value1 = hre.getMatchDouble(1);
+				x.push_back(value1);
+			}
+		} else {
+			value1 = calculateAverage(infile, i);
 			x.push_back(value1);
 		}
-		if (token2 && !hre.search(token2, "([+-]?\\d*\\.?\\d+)")) {
-			cerr << "Cannot find number in token : " << token2 << " in column "
-			     << token2->getFieldNumber() << " on line "
-			     << token2->getLineNumber() << " Giving up." << endl;
+
+		if (yindex >= 0) {
+			if (token2 && (token2->isNull())) {
+				cerr << "Token in column " << token2->getFieldNumber() << " on line "
+			     	<< token2->getLineNumber() << " is empty.  Giving up." << endl;
+			}
+			if (token2 && !hre.search(token2, "([+-]?\\d*\\.?\\d+)")) {
+				cerr << "Cannot find number in token : " << token2 << " in column "
+			     	<< token2->getFieldNumber() << " on line "
+			     	<< token2->getLineNumber() << " Giving up." << endl;
+			}
+			if (token2) {
+				value2 = hre.getMatchDouble(1);
+				y.push_back(value2);
+			}
+		} else {
+			value1 = calculateAverage(infile, i);
+			x.push_back(value1);
 		}
-		if (token2) {
-			value2 = hre.getMatchDouble(1);
-			y.push_back(value2);
+	}
+}
+
+
+//////////////////////////////
+//
+// calculateAverage --
+//
+
+double calculateAverage(HumdrumFile& infile, int index) {
+	double sum = 0.0;
+	int count = 0;
+	HumRegex hre;
+	double value;
+	if (!infile[index].isData()) {
+		return 0.0;
+	}
+	for (int i=0; i<infile[index].getFieldCount(); i++) {
+		value = 0;
+		HTp token = infile.token(index, i);
+		if (token->isKern()) {
+			continue;
 		}
+		if (token->isNull()) {
+			continue;
+		}
+		if (token->isDataType("**recip")) {
+			continue;
+		}
+		if (token->isDataType("**text")) {
+			continue;
+		}
+		if (!hre.search(token, "\\d")) {
+			continue;
+		}
+		if (hre.search(token, "^([-+]?\\d+\\.?\\d*)$")) {
+			value = hre.getMatchDouble(1);
+		} else if (hre.search(token, "^([-+]?\\d*\\.?\\d+)$")) {
+			value = hre.getMatchDouble(1);
+		} else {	
+			continue;
+		}
+		sum += value;
+		count++;
+	}
+	if (count > 0.0) {
+		return sum / count;
+	} else {
+		return 0.0;
 	}
 }
 
@@ -466,7 +618,10 @@ void printCorrelationScape(vector<vector<double>>& correlations,
 	int maxcols = (int)correlations.back().size();
 
 	bool archQ = options.getBoolean("arch");
+	bool combQ = options.getBoolean("comb");
+	bool singleQ = archQ || combQ;
 	bool smoothQ = options.getBoolean("smooth");
+	bool unsmoothQ = options.getBoolean("unsmooth");
 	bool plotQ = options.getBoolean("plot");
 	bool plot2Q = options.getBoolean("plot2");
 	double aspectratio = options.getDouble("aspect-ratio");
@@ -481,6 +636,7 @@ void printCorrelationScape(vector<vector<double>>& correlations,
 	}
 	if (!(plotQ || plot2Q)) {
 		plotrows = 0;
+		prows = 0;
 	}
 	if (plotQ) {
 		// force the width of the plot to match the full sequence length
@@ -510,15 +666,15 @@ void printCorrelationScape(vector<vector<double>>& correlations,
 		printColorMap(maxcols, crepeat, maprows);
 	}
 	if (plotQ) {
-		if (archQ && smoothQ) {
+		if (singleQ && (smoothQ || unsmoothQ)) {
 			printInputPlotSmooth(x, xsmooth, maxcols, crepeat, plotrows);
 		} else {
 			printInputPlot(x, y, maxcols, crepeat, plotrows);
 		}
 	} else if (plot2Q) {
-		if (archQ && !smoothQ) {
+		if (singleQ && !(smoothQ || unsmoothQ)) {
 			printInputPlot(x, y, maxcols, crepeat, plotrows);
-		} else if (archQ && smoothQ) {
+		} else if (singleQ && (smoothQ || unsmoothQ)) {
 			vector<double> empty;
 			printInputPlotSmooth(x, empty, maxcols, crepeat, plotrows);
 			printInputPlotSmooth(empty, xsmooth, maxcols, crepeat, plotrows);
@@ -547,7 +703,6 @@ void printColorMap(int maxcols, int crepeat, int plotrows) {
 		cout << endl;
 	}
 }
-
 
 
 
@@ -619,7 +774,7 @@ int scaleValue(double input, double minvalue, double maxvalue, int maxout) {
 
 //////////////////////////////
 //
-// printInputPlot --
+// printInputPlot2 -- Print two separate plots of data.
 //
 
 void printInputPlot2(vector<double>& x, vector<double>& y, int cols,
@@ -832,6 +987,39 @@ void getArch(vector<double>& arch) {
 
 //////////////////////////////
 //
+// getComb -- return a comb sequence for metric analysis.
+//
+
+void getComb(vector<double>& comb, int cycle) {
+	int vsize = (int)comb.size();
+	if (vsize == 1) {
+		comb[0] = 0.0;
+		return;
+	}
+	for (int i=0; i<vsize; i++) {
+		comb[i] = -(i%cycle);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// unsmoothSequence --
+//
+
+vector<double> unsmoothSequence(vector<double>& input) {
+	vector<double> output = smoothSequence(input);
+	for (int i=0; i<(int)output.size(); i++) {
+		output[i] = input[i] - output[i];
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // smoothSequence --
 //
 
@@ -841,6 +1029,11 @@ vector<double> smoothSequence(vector<double>& input) {
 		return output;
 	}
 	double gain = options.getDouble("smooth-factor");
+	if (!options.getBoolean("smooth-factor")) {
+		if (options.getBoolean("unsmooth")) {
+			gain = 0.75;
+		}
+	}
 	double feedback = 1.0 - gain;
 	double lastvalue = input[0];
 	for (int i=0; i<input.size(); i++) {
@@ -851,6 +1044,35 @@ vector<double> smoothSequence(vector<double>& input) {
 	for (int i=(int)output.size()-1; i>=0; i--) {
 		output[i] = gain * output[i] + feedback * lastvalue;
 		lastvalue = output[i];
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// getColumnIndex --
+//
+
+int getColumnIndex(HumdrumFile& infile, const string& query, int dvalue) {
+	int output = dvalue;
+	HumRegex hre;
+	bool found = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (hre.search(token, query)) {
+				output = token->getFieldIndex();
+				break;
+			}
+		}
+		if (found) {
+			break;
+		}
 	}
 	return output;
 }
