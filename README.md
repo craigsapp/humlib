@@ -23,6 +23,15 @@ importing Humdrum data, placing `humlib.h`
 (see the `.download` scripts in those directories for how updates
 are managed).
 
+Most command-line tools are implemented as C++ classes, found in
+files that start with `tool-` in the
+[src](https://github.com/craigsapp/humlib/blob/master/src). For
+example, here is a use of the `colortriads` and `satb2gs` tools
+inside of verovio to create [colorized version of Bach chorales on
+the Grand
+Staff](https://verovio.humdrum.org/?file=chorales&filter=colortriads%7csatb2gs).
+
+
 Resources
 =========
 <center>
