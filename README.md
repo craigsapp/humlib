@@ -170,14 +170,15 @@ int main(int argc, char** argv) {
       if (!infile[i].isData()) {
          continue;
       }
-      for (int j=0; j<infile[i].getTokenCount(); j++) {
+      for (int j=0; j<infile[i].getFieldCount(); j++) {
          HTp token = infile.token(i, j);
-         if (token->isNull()) {
+         if (!token->isKern()) {
             continue;
          }
-         if (token->isDataType("kern")) {
-            printNoteInformation(token, tpq);
+         if (token->isNull() || token->isRest()) {
+            continue;
          }
+         printNoteInformation(token, tpq);
       }
    }
    return 0;
@@ -194,18 +195,18 @@ Test data for use with the above program:
 <tr><td style="border:0">
 Example input:<br>
 <pre style="tab-stop: 12; font-family: Courier; text-align:left">
-**kern  **kern
-*M3/4   *M3/4
-8C      12d
-.       12e
-8B      .
-.       12f
-*       *^
-4A      2g      4d
-4G      .       4c
-*       *v      *v
-=       =
-*-      *-
+**kern	**kern
+*M3/4	*M3/4
+8C	12d
+.	12e
+8B	.
+.	12f
+*	*^
+4A	2g	4d
+4G	.	4c
+*	*v	*v
+=	=
+*-	*-
 </pre>
 </td>
 <td style="border:0">
