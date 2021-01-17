@@ -25,7 +25,7 @@ are managed).
 
 Most command-line tools are implemented as C++ classes, found in
 files that start with `tool-` in the
-[src](https://github.com/craigsapp/humlib/blob/master/src). For
+[src](https://github.com/craigsapp/humlib/blob/master/src) directory. For
 example, here is a use of the `colortriads` and `satb2gs` tools
 inside of verovio to create [colorized version of Bach chorales on
 the Grand
@@ -142,12 +142,16 @@ a Humdrum file into a MIDI-like listing of notes.
 using namespace std;
 using namespace hum;
 
-void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
-   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
-   int duration  = infile.token(line, field)->getDuration(tpq).getInteger();
-   cout << Convert::kernToSciPitch(*infile.token(line, field))
-        << '\t' << infile.token(line, field)->getTrackString()
-        << '\t' << starttime << '\t' << duration << endl;
+void printNoteInformation(HTp token, int tpq) {
+   int duration  = token->getTiedDuration(tpq).getInteger();
+   int starttime = token->getDurationFromStart(tpq).getInteger();
+   vector<string> subtokens = token->getSubtokens();
+   for (size_t i=0; i<subtokens.size(); i++) {
+      cout << Convert::kernToSciPitch(subtokens[i])
+         << '\t' << token->getTrackString()
+         << '\t' << starttime
+         << '\t' << duration << endl;
+   }
 }
 
 int main(int argc, char** argv) {
@@ -167,11 +171,12 @@ int main(int argc, char** argv) {
          continue;
       }
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         if (infile.token(i, j)->isNull()) {
+         HTp token = infile.token(i, j);
+         if (token->isNull()) {
             continue;
          }
-         if (infile.token(i, j)->isDataType("kern")) {
-            printNoteInformation(infile, i, j, tpq);
+         if (token->isDataType("kern")) {
+            printNoteInformation(token, tpq);
          }
       }
    }
