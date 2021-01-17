@@ -231,17 +231,15 @@ If you are using the humlib project directory to compile your own programs (or t
 into the [cli](https://github.com/craigsapp/humlib/blob/master/cli)
 (Command-Line Interface) subdirectory. 
 
-Then to compile, go to
-the base directory of the humlib repository and type `make myprogram` if
-the program is called `humlib/cli/myprogram.cpp`.  
+Then to compile, go to the base directory of the humlib repository
+and type `make myprogram` if the program is called
+`humlib/cli/myprogram.cpp`.  The compiled program will be created
+as `bin/myprogram`.
 
-The compiled
-program will be created as `bin/myprogram`.  
-
-To run from the `humlib
-directory type `bin/myprogram file.krn`, for example.  You can also
-either copy your program to `/usr/local/bin` or set the `$PATH`
-variable to include `humlib/bin` in the executable search path.
+To run from the `humlib` directory type `bin/myprogram file.krn`,
+for example.  You can also either copy your program to `/usr/local/bin`
+or set the `$PATH` variable to include `humlib/bin` in the executable
+search path.
 
 See the [Coding-examples](http://humlib.humdrum.org/doc/example) documentation for more programming examples.
 
