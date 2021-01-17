@@ -145,9 +145,9 @@ using namespace hum;
 void printNoteInformation(HTp token, int tpq) {
    int duration  = token->getTiedDuration(tpq).getInteger();
    int starttime = token->getDurationFromStart(tpq).getInteger();
-   vector<string> subtokens = token->getSubtokens();
-   for (size_t i=0; i<subtokens.size(); i++) {
-      cout << Convert::kernToSciPitch(subtokens[i])
+   vector<string> chordnotes = token->getSubtokens();
+   for (size_t i=0; i<chordnotes.size(); i++) {
+      cout << Convert::kernToSciPitch(chordnotes[i])
          << '\t' << token->getTrackString()
          << '\t' << starttime
          << '\t' << duration << endl;
