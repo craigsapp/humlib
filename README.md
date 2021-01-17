@@ -5,7 +5,7 @@ humlib
 
 
 The humlib library consists of a set of C++ classes for parsing
-[Humdrum](http://www.humdrum.org) data files for digital encodings
+[Humdrum](http://www.humdrum.org) data files, used for digital encodings
 of musical scores.  The library is designed to be portable with
 only two source-code files to copy into your project:
 
@@ -174,6 +174,8 @@ int main(int argc, char** argv) {
 Test data for use with the above program:
 </p>
 
+<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/humlib/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
+
 <table style="width:100%">
 <tr><td style="border:0">
 Example input:<br>
@@ -193,9 +195,6 @@ Example input:<br>
 </pre>
 </td>
 <td style="border:0">
-<img style="width:300px" src="https://cdn.rawgit.com/humdrum-tools/humlib/gh-pages/images/hum2notelist.svg" title="Equivalent graphical representation of Humdrum data.">
-</td>
-<td style="border:0">
 Example output:<br>
 <pre style="font-family: Courier; text-align:left">
 TPQ: 6
@@ -213,12 +212,18 @@ C4      2.2     12      6
 </pre>
 </td></tr></table>
 
-If you are using the humlib project directory, place your own
-programs into the [cli](https://github.com/craigsapp/humlib/blob/master/cli)
-(Command-Line Interface) subdirectory, and then to compile, go to
-the base directory of the humlib code and type `make myprogram` if
-the program is called `humlib/cli/myprogram.cpp`.  The compiled
-program will be created as `bin/myprogram`.  To run from the `humlib
+If you are using the humlib project directory to compile your own programs (or this test program), place them
+into the [cli](https://github.com/craigsapp/humlib/blob/master/cli)
+(Command-Line Interface) subdirectory. 
+
+Then to compile, go to
+the base directory of the humlib repository and type `make myprogram` if
+the program is called `humlib/cli/myprogram.cpp`.  
+
+The compiled
+program will be created as `bin/myprogram`.  
+
+To run from the `humlib
 directory type `bin/myprogram file.krn`, for example.  You can also
 either copy your program to `/usr/local/bin` or set the `$PATH`
 variable to include `humlib/bin` in the executable search path.
