@@ -10,8 +10,13 @@ designed to be portable with only two code files to copy into your
 project:
 
 1. An include file [humlib.h](https://github.com/craigsapp/humlib/blob/master/include/humlib.h)
-2. and a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/src/humlib.cppp)
+2. And a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/src/humlib.cppp)
 
+All other source-code files are irrelevant unless you are developing the library or need to create the command-line tools.
+For example [verovio](https://github.com/rism-ch/verovio) uses humlib as an internal sublibrary, placing
+`humlib.h` [here](https://github.com/rism-ch/verovio/blob/master/include/hum), and
+`humlib.cpp` [here](https://github.com/rism-ch/verovio/blob/master/src/hum). (see
+the download scripts in those directories for how updates are managed).
 
 Resources
 =========
@@ -197,7 +202,8 @@ C4      2.2     12      6
 </td></tr></table>
 
 If you are using the humlib project directory, place your own
-programs into the `cli` subdirectory, and then to compile, go to
+programs into the [cli](https://github.com/craigsapp/humlib/blob/master/cli)
+(Command-Line Interface) subdirectory, and then to compile, go to
 the base directory of the humlib code and type `make myprogram` if
 the program is called `humlib/cli/myprogram.cpp`.  The compiled
 program will be created as `bin/myprogram`.  To run from the `humlib
