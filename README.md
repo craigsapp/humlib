@@ -5,18 +5,23 @@ humlib
 
 
 The humlib library consists of a set of C++ classes for parsing
-[Humdrum](http://www.humdrum.org) data files.  The library is
-designed to be portable with only two code files to copy into your
-project:
+[Humdrum](http://www.humdrum.org) data files for digital encodings
+of musical scores.  The library is designed to be portable with
+only two source-code files to copy into your project:
 
 1. An include file [humlib.h](https://github.com/craigsapp/humlib/blob/master/include/humlib.h)
-2. And a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/src/humlib.cppp)
+2. And a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp)
 
-All other source-code files are irrelevant unless you are developing the library or need to create the command-line tools.
-For example [verovio](https://github.com/rism-ch/verovio) uses humlib as an internal sublibrary, placing
-`humlib.h` [here](https://github.com/rism-ch/verovio/blob/master/include/hum), and
-`humlib.cpp` [here](https://github.com/rism-ch/verovio/blob/master/src/hum). (see
-the download scripts in those directories for how updates are managed).
+All other source-code files are irrelevant unless you are developing
+the library or need to create the command-line tools.  For example
+[verovio](https://github.com/rism-ch/verovio), a music notation
+rendering library,  uses humlib as an internal sublibrary for
+importing Humdrum data, placing `humlib.h`
+[here](https://github.com/rism-ch/verovio/blob/master/include/hum), and
+`humlib.cpp`
+[here](https://github.com/rism-ch/verovio/blob/master/src/hum).
+(see the `.download` scripts in those directories for how updates
+are managed).
 
 Resources
 =========
@@ -26,7 +31,7 @@ Resources
 <ul id="resources">
 <li style="margin-top:0"> <a href=http://humlib.humdrum.org>Humlib website</a> </li>
 <li> <a href=http://humlib.humdrum.org/doc>Documentation</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/class>Classes</a> </li>
+<li> <a href=http://humlib.humdrum.org/doc/class>Class overview</a> </li>
 <li> <a href=http://humlib.humdrum.org/doc/snippet>Code snippets</a> </li>
 <li> <a href=http://humlib.humdrum.org/doc/example>Example programs</a> </li>
 <li> <a href=http://humlib.humdrum.org/doc/topic>Topics</a> </li>
@@ -94,18 +99,25 @@ compile the library with the command:
 make
 ```
 
-This should create the file `lib/libhumlib.a`, which can be
-used to link to other program code. (But note that you can also
-simply copy the .h and .cpp files listed above into your own project
-files if you don't want to link against a separately compiled library
-file).  Primarily for testing purposes, another form of the library
-can be compiled from the individual source files for each class:
+This should compile the file `lib/libhumlib.a` as well as the
+command-line tools in
+[cli](https://github.com/craigsapp/humlib/blob/master/cli) into the
+`humlib/bin` directory..
+
+```console
+make library
+```
+
+This is similar to `make`, but only compiles the library file and
+not the command-line tools.
 
 ```console
 make lib
 ```
 
-This will create the file `lib/libhumdrum.a`.
+Used for testing purposes only, this make target compiles
+the uncollated library files, making it easier to debug
+the source code.
 
 
 
