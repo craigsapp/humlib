@@ -72,7 +72,9 @@ class HumdrumToken : public std::string, public HumHash {
 
 		bool     isBarline                 (void) const;
 		bool     isCommentLocal            (void) const;
+		bool     isLocalComment            (void) const { return isCommentLocal(); }
 		bool     isCommentGlobal           (void) const;
+		bool     isGlobalComment           (void) const { return isCommentGlobal(); }
 		bool     isComment                 (void) const;
 		bool     isData                    (void) const;
 		bool     isInterpretation          (void) const;
