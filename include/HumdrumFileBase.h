@@ -226,6 +226,7 @@ class HumdrumFileBase : public HumHash {
 		                                        int subtokenindex,
 		                                        const std::string& separator = " ");
 		int           getMaxTrack              (void) const;
+		int           getMaxTracks             (void) const { return getMaxTrack(); }
 		int           getTrackCount            (void) const
 		                                                { return getMaxTrack(); }
 		int           getSpineCount            (void) const

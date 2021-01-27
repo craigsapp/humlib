@@ -51,6 +51,9 @@ class Convert {
 		                                     HumNum scale = HumNum(1,4));
 		static HumNum timeSigToDurationInQuarter(HTp token);
 
+		// Tempo processing, defined in Convert-tempo.cpp
+		static int tempoNameToMm (const std::string& name, int bot = 4, int top = 4);
+
 		// Pitch processing, defined in Convert-pitch.cpp
 		static std::string  base40ToKern    (int b40);
 		static int     base40ToAccidental   (int b40);

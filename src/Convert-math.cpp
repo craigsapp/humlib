@@ -140,7 +140,7 @@ bool Convert::isPowerOfTwo(int value) {
 
 //////////////////////////////
 //
-// Tool_transpose::pearsonCorrelation --
+// Convert::pearsonCorrelation --
 //
 
 double Convert::pearsonCorrelation(const vector<double>& x, const vector<double>& y) {

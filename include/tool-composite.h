@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 29 16:48:22 CEST 2019
-// Last Modified: Mon Jul 29 16:48:25 CEST 2019
+// Last Modified: Mon Jan 18 11:30:01 PST 2021
 // Filename:      tool-composite.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-composite.h
 // Syntax:        C++11; humlib
@@ -34,6 +34,13 @@ class Tool_composite : public HumTool {
 		void        processFile        (HumdrumFile& infile);
 		void        initialize         (void);
 		HumNum      getLineDuration    (HumdrumFile& infile, int index, vector<bool>& isNull);
+		void        setupGrouping      (vector<vector<string>>& grouping, HumdrumFile& infile);
+		void        printGroupingInfo  (vector<vector<string>>& gouping);
+		string      getGroup           (vector<vector<string>>& current, int spine, int subspine);
+		bool        hasGroup           (vector<vector<string>>& grouping, HumdrumFile& infile, int line,
+		                                const string& group);
+		int         getGroupNoteType   (vector<vector<string>>& grouping, HumdrumFile& infile,
+		                                int line, const string& group);
 
 	private:
 		string      m_pitch = "e";
