@@ -8,7 +8,7 @@
 // vim:           ts=3 noexpandtab nowrap
 //
 // Description:   Reveal data structure of Humdrum file and internal parameters.
-//                Optionally run various alysises of the data to calculate
+//                Optionally run various analyses of the data to calculate
 //                content-based parameters.
 //
 
