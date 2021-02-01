@@ -1525,13 +1525,11 @@ bool HumdrumToken::isTempo(void) {
 //
 
 bool HumdrumToken::isMensurationSymbol(void) {
-	if (this->compare(0, 5, "*met(") != 0) {
-		return false;
+	if (this->compare(0, 5, "*met(") == 0) {
+		return true;
 	}
-	if ((*this)[this->size()-1] != ')') {
-		return false;
-	}
-	return true;
+	// extended mensuration symbol allows for an underscore and up to four digits after it.
+	return false;
 }
 
 
