@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  7 09:43:41 PST 2021
+// Last Modified: Sun  7 Mar 2021 12:47:01 EST
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -72796,7 +72796,6 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 			cerr << "Error: token " << melody[i] << " has no rhythm" << endl;
 			cerr << "   ON LINE: "  << melody[i]->getLineNumber()    << endl;
 			continue;
-			// WHAT IS HAPPENING WITH THOSE LINES OF ERROR TOKENS PRINTED IN THE TERMINAL???
 		}
 
 		string kernRhythm = mens2kernRhythm(rhythm, altera, perfecta, imperfecta, maxima_def, longa_def, brevis_def, semibrevis_def);
@@ -72805,10 +72804,7 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 		// Remove any dot of division/augmentation
 		hre.replaceDestructive(text, "", ":");
 		// remove perfection/imperfection/alteration markers
-		// IT IS NOT HANDLING CORRECLTY DOUBLE PPs AND DOUBLE IIs (see error in terminal and result)
-		// DO WE STILL NEED THAT IN THE FIRST PLACE??? TO HANDLE PP AND II?
 		hre.replaceDestructive(text, "", "[pi\\+]");
-		// TO DO: remove the line for mensuration tokens !!!!!!!!
 		if (text.empty()) {
 			text = ".";
 		}
