@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb  3 23:31:08 PST 2021
+// Last Modified: Sun Mar  7 08:16:28 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1490,6 +1490,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isPitched                 (void);
 		bool     isSecondaryTiedNote       (void);
 		bool     isSustainedNote           (void);
+		bool     isNoteSustain             (void) { return isSustainedNote(); }
 		bool     isNoteAttack              (void);
 		bool     isInvisible               (void);
 		bool     isGrace                   (void);
@@ -5276,6 +5277,33 @@ class HumdrumFileSet {
 
 
 
+class Tool_autoaccid : public HumTool {
+	public:
+		         Tool_autoaccid    (void);
+		        ~Tool_autoaccid    () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    addAccidentalInfo  (HTp token);
+		void    removeAccidentalQualifications(HumdrumFile& infile);
+		void    addAccidentalQualifications(HumdrumFile& infile);
+		string  setVisualState     (const string& input, bool state);
+
+	private:
+		bool    m_visualQ;
+		bool    m_hiddenQ;
+		bool    m_removeQ;
+		bool    m_cautionQ;
+
+};
+
+
 
 class Tool_autobeam : public HumTool {
 	public:
@@ -5747,28 +5775,47 @@ class Tool_colortriads : public HumTool {
 
 class Tool_composite : public HumTool {
 	public:
-		       	   Tool_composite      (void);
-		       	  ~Tool_composite      () {};
+		       	   Tool_composite        (void);
+		       	  ~Tool_composite        () {};
 
-		bool        run                (HumdrumFileSet& infiles);
-		bool        run                (HumdrumFile& infile);
-		bool        run                (const string& indata, ostream& out);
-		bool        run                (HumdrumFile& infile, ostream& out);
+		bool        run                  (HumdrumFileSet& infiles);
+		bool        run                  (HumdrumFile& infile);
+		bool        run                  (const string& indata, ostream& out);
+		bool        run                  (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void        processFile        (HumdrumFile& infile);
-		void        initialize         (void);
-		HumNum      getLineDuration    (HumdrumFile& infile, int index, vector<bool>& isNull);
-		void        setupGrouping      (vector<vector<string>>& grouping, HumdrumFile& infile);
-		void        printGroupingInfo  (vector<vector<string>>& gouping);
-		string      getGroup           (vector<vector<string>>& current, int spine, int subspine);
-		bool        hasGroup           (vector<vector<string>>& grouping, HumdrumFile& infile, int line,
-		                                const string& group);
-		int         getGroupNoteType   (vector<vector<string>>& grouping, HumdrumFile& infile,
-		                                int line, const string& group);
+		void        processFile          (HumdrumFile& infile);
+		void        prepareMultipleGroups(HumdrumFile& infile);
+		void        prepareSingleGroup   (HumdrumFile& infile);
+		void        initialize           (void);
+		int         typeStringToInt      (const string& value);
+		HumNum      getLineDuration      (HumdrumFile& infile, int index, vector<bool>& isNull);
+		void        getGroupStates       (vector<vector<int>>& groupstates, HumdrumFile& infile);
+		void        assignGroups         (HumdrumFile& infile);
+		void        analyzeLineGroups    (HumdrumFile& infile);
+		void        analyzeLineGroup     (HumdrumFile& infile, int line, const string& target);
+		void        printGroupAssignments(HumdrumFile& infile);
+		string      getGroup             (vector<vector<string>>& current, int spine, int subspine);
+		int         getGroupNoteType     (HumdrumFile& infile, int line, const string& group);
+		void        getGroupDurations    (vector<vector<HumNum>>& groupdurs,
+		                                  vector<vector<int>>& groupstates, HumdrumFile& infile);
+		void        getGroupDurations    (vector<HumNum>& groupdurs, vector<int>& groupstates,
+		                                  HumdrumFile& infile);
+		void        getGroupRhythms      (vector<vector<string>>& rhythms, 
+		                                  vector<vector<HumNum>>& groupdurs, 
+		                                  vector<vector<int>>& groupstates, 
+		                                  HumdrumFile& infile);
+		void        getGroupRhythms      (vector<string>& rhythms, vector<HumNum>& durs,
+		                                  vector<int>& states, HumdrumFile& infile);
+		bool        hasGroupInterpretations(HumdrumFile& infile);
 
 	private:
-		string      m_pitch = "e";
+		string      m_pitch     = "eR";   // pitch to display for composite rhythm
+		bool        m_nogroupsQ = false;  // do not split composite rhythms into markup groups
+		bool        m_extractQ  = false;  // output only composite rhythm analysis (not input data)
+		bool        m_appendQ   = false;  // display analysis at top of system
+		bool        m_debugQ    = false;  // display debug information
+		bool        m_graceQ    = false;  // include grace notes in composite rhythm
 
 };
 
@@ -6906,6 +6953,34 @@ class Tool_melisma : public HumTool {
 
 };
 
+
+
+class Tool_mens2kern : public HumTool {
+	public:
+		         Tool_mens2kern      (void);
+		        ~Tool_mens2kern      () {};
+
+		bool     run                 (HumdrumFileSet& infiles);
+		bool     run                 (HumdrumFile& infile);
+		bool     run                 (const string& indata, ostream& out);
+		bool     run                 (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile         (HumdrumFile& infile);
+		void     initialize          (void);
+		void     processMelody       (vector<HTp>& melody);
+		std::string mens2kernRhythm  (const std::string& rhythm,
+		                              bool altera,  bool perfecta,
+		                              bool imperfecta, int maxima_def, int longa_def,
+		                              int brevis_def, int semibrevis_def);
+		void     getMensuralInfo     (HTp token, int& maximodus, int& modus,
+		                              int& tempus, int& prolatio);
+
+	private:
+		bool     m_debugQ;
+
+
+};
 
 
 class Tool_metlev : public HumTool {

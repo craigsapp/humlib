@@ -34,6 +34,11 @@ int main(int argc, char** argv) {
 		filename = converter.getArg(1);
 		infile.readFile(filename);
 	}
+	int partcount = infile.getPartCount();
+	if (partcount == 0) {
+		cerr << "Error: no parts found in file" << endl;
+		return 1;
+	}
 
 	stringstream out;
 	bool status = converter.convert(out, infile);

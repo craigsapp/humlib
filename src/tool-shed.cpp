@@ -413,8 +413,9 @@ void Tool_shed::processFile(HumdrumFile& infile) {
 		searchAndReplaceExinterp(infile);
 	}
 
-	//if (m_barline) {
-	//	searchAndReplaceBarline(infile);
+	if (m_barline) {
+		searchAndReplaceBarline(infile);
+	}
 
 	if (m_data) {
 		searchAndReplaceData(infile);

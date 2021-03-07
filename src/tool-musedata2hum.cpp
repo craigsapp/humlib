@@ -119,10 +119,15 @@ bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
 
 
 bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
+	int partcount = mds.getPartCount();
+	if (partcount == 0) {
+		cerr << "Error: No parts found in data:" << endl;
+		cerr << mds << endl;
+		return false;
+	}
 	initialize();
 
 	HumGrid outdata;
-	int partcount = mds.getPartCount();
 	bool status = true;
 	for (int i=0; i<partcount; i++) {
 		status &= convertPart(outdata, mds, i);

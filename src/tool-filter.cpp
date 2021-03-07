@@ -14,6 +14,7 @@
 #include "tool-filter.h"
 
 // tools which filter can process:
+#include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
 #include "tool-binroll.h"
@@ -36,6 +37,7 @@
 #include "tool-kern2mens.h"
 #include "tool-kernview.h"
 #include "tool-melisma.h"
+#include "tool-mens2hum.h"
 #include "tool-metlev.h"
 #include "tool-modori.h"
 #include "tool-msearch.h"
@@ -200,7 +202,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
-		if (commands[i].first == "autobeam") {
+		if (commands[i].first == "autoaccid") {
+			RUNTOOL(autoaccid, infile, commands[i].second, status);
+		} else if (commands[i].first == "autobeam") {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
@@ -235,6 +239,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(flipper, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
+		} else if (commands[i].first == "mens2kern") {
+			RUNTOOL(mens2kern, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "modori") {

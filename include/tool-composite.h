@@ -22,28 +22,47 @@ namespace hum {
 
 class Tool_composite : public HumTool {
 	public:
-		       	   Tool_composite      (void);
-		       	  ~Tool_composite      () {};
+		       	   Tool_composite        (void);
+		       	  ~Tool_composite        () {};
 
-		bool        run                (HumdrumFileSet& infiles);
-		bool        run                (HumdrumFile& infile);
-		bool        run                (const string& indata, ostream& out);
-		bool        run                (HumdrumFile& infile, ostream& out);
+		bool        run                  (HumdrumFileSet& infiles);
+		bool        run                  (HumdrumFile& infile);
+		bool        run                  (const string& indata, ostream& out);
+		bool        run                  (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void        processFile        (HumdrumFile& infile);
-		void        initialize         (void);
-		HumNum      getLineDuration    (HumdrumFile& infile, int index, vector<bool>& isNull);
-		void        setupGrouping      (vector<vector<string>>& grouping, HumdrumFile& infile);
-		void        printGroupingInfo  (vector<vector<string>>& gouping);
-		string      getGroup           (vector<vector<string>>& current, int spine, int subspine);
-		bool        hasGroup           (vector<vector<string>>& grouping, HumdrumFile& infile, int line,
-		                                const string& group);
-		int         getGroupNoteType   (vector<vector<string>>& grouping, HumdrumFile& infile,
-		                                int line, const string& group);
+		void        processFile          (HumdrumFile& infile);
+		void        prepareMultipleGroups(HumdrumFile& infile);
+		void        prepareSingleGroup   (HumdrumFile& infile);
+		void        initialize           (void);
+		int         typeStringToInt      (const string& value);
+		HumNum      getLineDuration      (HumdrumFile& infile, int index, vector<bool>& isNull);
+		void        getGroupStates       (vector<vector<int>>& groupstates, HumdrumFile& infile);
+		void        assignGroups         (HumdrumFile& infile);
+		void        analyzeLineGroups    (HumdrumFile& infile);
+		void        analyzeLineGroup     (HumdrumFile& infile, int line, const string& target);
+		void        printGroupAssignments(HumdrumFile& infile);
+		string      getGroup             (vector<vector<string>>& current, int spine, int subspine);
+		int         getGroupNoteType     (HumdrumFile& infile, int line, const string& group);
+		void        getGroupDurations    (vector<vector<HumNum>>& groupdurs,
+		                                  vector<vector<int>>& groupstates, HumdrumFile& infile);
+		void        getGroupDurations    (vector<HumNum>& groupdurs, vector<int>& groupstates,
+		                                  HumdrumFile& infile);
+		void        getGroupRhythms      (vector<vector<string>>& rhythms, 
+		                                  vector<vector<HumNum>>& groupdurs, 
+		                                  vector<vector<int>>& groupstates, 
+		                                  HumdrumFile& infile);
+		void        getGroupRhythms      (vector<string>& rhythms, vector<HumNum>& durs,
+		                                  vector<int>& states, HumdrumFile& infile);
+		bool        hasGroupInterpretations(HumdrumFile& infile);
 
 	private:
-		string      m_pitch = "e";
+		string      m_pitch     = "eR";   // pitch to display for composite rhythm
+		bool        m_nogroupsQ = false;  // do not split composite rhythms into markup groups
+		bool        m_extractQ  = false;  // output only composite rhythm analysis (not input data)
+		bool        m_appendQ   = false;  // display analysis at top of system
+		bool        m_debugQ    = false;  // display debug information
+		bool        m_graceQ    = false;  // include grace notes in composite rhythm
 
 };
 

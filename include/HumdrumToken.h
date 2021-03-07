@@ -95,6 +95,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isPitched                 (void);
 		bool     isSecondaryTiedNote       (void);
 		bool     isSustainedNote           (void);
+		bool     isNoteSustain             (void) { return isSustainedNote(); }
 		bool     isNoteAttack              (void);
 		bool     isInvisible               (void);
 		bool     isGrace                   (void);
