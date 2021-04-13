@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 13 09:04:18 PDT 2021
+// Last Modified: Tue Apr 13 09:39:53 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56423,14 +56423,6 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 		infile.readString(extract2.getAllText());
 	}
 
-	if (m_appendQ) {
-		addLabels(infile, -2);
-		addStria(infile, -2);
-	} else {
-		addLabels(infile, +2);
-		addStria(infile, +2);
-	}
-
 	if (!getBoolean("no-beam")) {
 		Tool_autobeam autobeam;
 		if (m_appendQ) {
@@ -56448,6 +56440,14 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 		infile.analyzeStructure();
 		autobeam.run(infile);
 
+	}
+
+	if (m_appendQ) {
+		addLabels(infile, -2);
+		addStria(infile, -2);
+	} else {
+		addLabels(infile, +2);
+		addStria(infile, +2);
 	}
 }
 
@@ -56667,9 +56667,13 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 		}
 		if (allrest) {
 			isRest[i] = true;
+		} else {
+			isRest[i] = false;
 		}
 		if (allnull) {
 			isNull[i] = true;
+		} else {
+			isNull[i] = false;
 		}
 	}
 
@@ -56681,14 +56685,6 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	infile.readString(extract.getAllText());
 	// need to redo tremolo analyses...
 	reduceTremolos(infile);
-
-	if (m_appendQ) {
-		addLabels(infile, -1);
-		addStria(infile, -1);
-	} else {
-		addLabels(infile, +1);
-		addStria(infile, +1);
-	}
 
 	HTp token;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -56823,6 +56819,14 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	}
 
 	removeAuxTremolosFromCompositeRhythm(infile);
+
+	if (m_appendQ) {
+		addLabels(infile, -1);
+		addStria(infile, -1);
+	} else {
+		addLabels(infile, +1);
+		addStria(infile, +1);
+	}
 }
 
 
