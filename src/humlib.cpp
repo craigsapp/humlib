@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr 12 23:19:28 PDT 2021
+// Last Modified: Tue Apr 13 09:04:18 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56445,6 +56445,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 
 		// need to analyze structure for some reason:
 		// infile.analyzeStrands();
+		infile.analyzeStructure();
 		autobeam.run(infile);
 
 	}
@@ -56817,6 +56818,7 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 
 		// need to analyze structure for some reason:
 		//	 infile.analyzeStrands();
+		infile.analyzeStructure();
 		autobeam.run(infile);
 	}
 

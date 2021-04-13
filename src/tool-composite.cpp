@@ -435,6 +435,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 
 		// need to analyze structure for some reason:
 		// infile.analyzeStrands();
+		infile.analyzeStructure();
 		autobeam.run(infile);
 
 	}
@@ -807,6 +808,7 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 
 		// need to analyze structure for some reason:
 		//	 infile.analyzeStrands();
+		infile.analyzeStructure();
 		autobeam.run(infile);
 	}
 
