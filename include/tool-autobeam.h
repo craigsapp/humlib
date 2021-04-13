@@ -58,7 +58,7 @@ class Tool_autobeam : public HumTool {
 		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
 		std::vector<HTp> m_kernspines;
 		bool        m_overwriteQ = false;
-		int         m_track;
+		std::vector<bool> m_tracks;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;
 

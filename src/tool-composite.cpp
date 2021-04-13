@@ -367,7 +367,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 			recip = ".";
 		} else {
 			if (groupstates[0][i] == TYPE_RestAttack) {
-				recip += "rRb";
+				recip += "rR";
 			}
 			else if (groupstates[0][i] == TYPE_UNDEFINED) {
 				// make invisible rest (rest not part of group)
@@ -383,7 +383,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 			recip2 += ".";
 		} else {
 			if (groupstates[1][i] == TYPE_RestAttack) {
-				recip2 += "rRb";
+				recip2 += "rR";
 			}
 			else if (groupstates[1][i] == TYPE_UNDEFINED) {
 				// make invisible rest (rest not part of group)
@@ -415,13 +415,14 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 
 	if (m_appendQ) {
 		addLabels(infile, -2);
+		addStria(infile, -2);
 	} else {
 		addLabels(infile, +2);
+		addStria(infile, +2);
 	}
 
 	if (!getBoolean("no-beam")) {
 		Tool_autobeam autobeam;
-
 		if (m_appendQ) {
 			int trackcount =  infile.getTrackCount();
 			string tstring = to_string(trackcount-1);
@@ -432,17 +433,9 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 			autobeam.setModified("t", "1,2");
 		}
 
-		if (m_appendQ) {
-			int trackcount =  infile.getTrackCount();
-			string tstring = to_string(trackcount);
-			autobeam.setModified("t", tstring);
-		} else {
-			autobeam.setModified("t", "1");
-		}
-
 		// need to analyze structure for some reason:
-//		infile.analyzeStrands();
-//		autobeam.run(infile);
+		// infile.analyzeStrands();
+		autobeam.run(infile);
 
 	}
 }
@@ -678,6 +671,14 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	// need to redo tremolo analyses...
 	reduceTremolos(infile);
 
+	if (m_appendQ) {
+		addLabels(infile, -1);
+		addStria(infile, -1);
+	} else {
+		addLabels(infile, +1);
+		addStria(infile, +1);
+	}
+
 	HTp token;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isInterpretation()) {
@@ -798,16 +799,6 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 
 		if (m_appendQ) {
 			int trackcount =  infile.getTrackCount();
-			string tstring = to_string(trackcount-1);
-			tstring += ",";
-			tstring += to_string(trackcount);
-			autobeam.setModified("t", tstring);
-		} else {
-			autobeam.setModified("t", "1,2");
-		}
-
-		if (m_appendQ) {
-			int trackcount =  infile.getTrackCount();
 			string tstring = to_string(trackcount);
 			autobeam.setModified("t", tstring);
 		} else {
@@ -816,7 +807,7 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 
 		// need to analyze structure for some reason:
 		//	 infile.analyzeStrands();
-		//	 autobeam.run(infile);
+		autobeam.run(infile);
 	}
 
 	removeAuxTremolosFromCompositeRhythm(infile);
@@ -1494,6 +1485,8 @@ void Tool_composite::getBeamedNotes(vector<HTp>& notes, HTp starting) {
 //
 
 void Tool_composite::addLabels(HumdrumFile& infile, int amount) {
+	int hasLabel = 0;
+	int hasLabelAbbr = 0;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
 			break;
@@ -1501,8 +1494,6 @@ void Tool_composite::addLabels(HumdrumFile& infile, int amount) {
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		int hasLabel = 0;
-		int hasLabelAbbr = 0;
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (!token->isKern()) {
@@ -1515,38 +1506,144 @@ void Tool_composite::addLabels(HumdrumFile& infile, int amount) {
 				hasLabelAbbr = i;
 			}
 		}
-		if (hasLabel) {
-			if (amount == 2) {
-				HTp token = infile.token(hasLabel, 0);
-				token->setText("*I\"Group A");
-				token = infile.token(hasLabel, 1);
-				token->setText("*I\"Group B");
-			} else if (amount == -2) {
-				int fcount = infile[hasLabel].getFieldCount();
-				HTp token = infile.token(hasLabel, fcount-1);
-				token->setText("*I\"Group B");
-				token = infile.token(hasLabel, fcount-2);
-				token->setText("*I\"Group A");
-			}
+	}
+	if (hasLabel) {
+		if (amount == 2) {
+			HTp token = infile.token(hasLabel, 0);
+			token->setText("*I\"Group A");
+			token = infile.token(hasLabel, 1);
+			token->setText("*I\"Group B");
+		} else if (amount == -2) {
+			int fcount = infile[hasLabel].getFieldCount();
+			HTp token = infile.token(hasLabel, fcount-1);
+			token->setText("*I\"Group B");
+			token = infile.token(hasLabel, fcount-2);
+			token->setText("*I\"Group A");
+		} else if (amount == 1) {
+			HTp token = infile.token(hasLabel, 0);
+			token->setText("*I\"Composite");
+		} else if (amount == -1) {
+			int fcount = infile[hasLabel].getFieldCount();
+			HTp token = infile.token(hasLabel, fcount-1);
+			token->setText("*I\"Composite");
 		}
-		if (hasLabelAbbr) {
-			if (amount == 2) {
-				HTp token = infile.token(hasLabelAbbr, 0);
-				token->setText("*I'Gr.A");
-				token = infile.token(hasLabelAbbr, 1);
-				token->setText("*I'Gr.B");
-			} else if (amount == -2) {
-				int fcount = infile[hasLabelAbbr].getFieldCount();
-				HTp token = infile.token(hasLabelAbbr, fcount-1);
-				token->setText("*I\'Gr.B");
-				token = infile.token(hasLabelAbbr, fcount-2);
-				token->setText("*I\'Gr.A");
-			}
+	}
+	if (hasLabelAbbr) {
+		if (amount == 2) {
+			HTp token = infile.token(hasLabelAbbr, 0);
+			token->setText("*I'Gr.A");
+			token = infile.token(hasLabelAbbr, 1);
+			token->setText("*I'Gr.B");
+		} else if (amount == -2) {
+			int fcount = infile[hasLabelAbbr].getFieldCount();
+			HTp token = infile.token(hasLabelAbbr, fcount-1);
+			token->setText("*I\'Gr.B");
+			token = infile.token(hasLabelAbbr, fcount-2);
+			token->setText("*I\'Gr.A");
+		} else if (amount == 1) {
+			HTp token = infile.token(hasLabelAbbr, 0);
+			token->setText("*I'Comp.");
+		} else if (amount == -1) {
+			int fcount = infile[hasLabelAbbr].getFieldCount();
+			HTp token = infile.token(hasLabelAbbr, fcount-1);
+			token->setText("*I\'Comp.");
 		}
 	}
 
 }
 
+
+
+//////////////////////////////
+//
+// Tool_composite::addStria -- add stria lines for composite rhythms.
+//
+
+void Tool_composite::addStria(HumdrumFile& infile, int amount) {
+	HumRegex hre;
+	HTp token;
+	int hasStria = 0;
+	int hasClef = 0;
+	int firstInterpretationLine = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		if ((!firstInterpretationLine) && (!infile[i].isManipulator())) {
+			firstInterpretationLine = i;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if ((!hasStria) && hre.search(token, "^\\*stria\\d")) {
+				hasStria = i;
+			}
+			if ((!hasClef) && hre.search(token, "^\\*clef")) {
+				hasClef = i;
+			}
+		}
+	}
+
+	if (hasStria) {
+		if (amount == 2) {
+			token = infile.token(hasStria, 0);
+			token->setText("*stria1");
+			token = infile.token(hasStria, 1);
+			token->setText("*stria1");
+		} else if (amount == -2) {
+			int fcount = infile[hasStria].getFieldCount();
+			token = infile.token(hasStria, fcount-1);
+			token->setText("*stria1");
+			token = infile.token(hasStria, fcount-2);
+			token->setText("*stria1");
+		} else if (amount == 1) {
+			token = infile.token(hasStria, 0);
+			token->setText("*stria1");
+		} else if (amount == -1) {
+			int fcount = infile[hasStria].getFieldCount();
+			token = infile.token(hasStria, fcount-1);
+			token->setText("*stria1");
+		}
+	} else {
+		// No stria line, so add one perferrably before clef line;
+		// otherwise, before first data line
+		int targetLine = 0;
+		if (hasClef) {
+			targetLine = hasClef;
+		} else if (firstInterpretationLine) {
+			targetLine = firstInterpretationLine;
+		}
+		if (targetLine) {
+			HLp line = infile.insertNullInterpretationLineAboveIndex(targetLine);
+			if (line) {
+				if (amount == 2) {
+					token = line->token(0);
+					token->setText("*stria1");
+					token = line->token(1);
+					token->setText("*stria1");
+				} else if (amount == -2) {
+					token = line->token(line->getFieldCount() - 1);
+					token->setText("*stria1");
+					token = line->token(line->getFieldCount() - 2);
+					token->setText("*stria1");
+				} else if (amount == 1) {
+					token = line->token(0);
+					token->setText("*stria1");
+				} else if (amount == -1) {
+					token = line->token(line->getFieldCount() - 1);
+					token->setText("*stria1");
+				}
+				line->createLineFromTokens();
+			}
+		}
+	}
+
+}
 
 
 

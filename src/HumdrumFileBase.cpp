@@ -2581,6 +2581,60 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 
 //////////////////////////////
 //
+// HumdrumFileBase::insertNullInterpretationLieAboveIndex -- 
+//
+
+HLp HumdrumFileBase::insertNullInterpretationLineAboveIndex(int index) {
+	if (index < 1) {
+		return NULL;
+	}
+	if (index >= this->getLineCount()) {
+		return NULL;
+	}
+
+	HumdrumFileBase& infile = *this;
+
+	HLp target = &infile[index];
+
+	HLp newline = new HumdrumLine;
+	// copyStructure will add null tokens automatically
+	newline->copyStructure(target, "*");
+
+	int targeti = target->getLineIndex();
+
+	// There will be problems with linking to previous line if it is
+	// a manipulator.
+	// infile.insertLine(targeti-1, newline);
+	infile.insertLine(targeti, newline);
+
+	// inserted line will increment insertion line by one:
+	int beforei = index + 1;
+
+	// Set the timestamp information for inserted line:
+	HumNum durationFromStart = infile[beforei].getDurationFromStart();
+	HumNum durationFromBarline = infile[beforei].getDurationFromBarline();
+	HumNum durationToBarline = infile[beforei].getDurationToBarline();
+
+	newline->m_durationFromStart = durationFromStart;
+	newline->m_durationFromBarline = durationFromBarline;
+	newline->m_durationToBarline = durationToBarline;
+
+	newline->m_duration = 0;
+
+	// Problems here if targeti line is a manipulator.
+	for (int i=0; i<infile[targeti].getFieldCount(); i++) {
+		HTp token = infile.token(targeti, i);
+		HTp newtoken = newline->token(i);
+		token->insertTokenAfter(newtoken);
+	}
+
+	return newline;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileBase::insertNullInterpretationLineAbove -- Add a null interpretation
 //     line at the given absolute quarter-note timestamp in the file.  The line will
 //     be added before any other lines at that timestamp.

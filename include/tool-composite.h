@@ -62,6 +62,7 @@ class Tool_composite : public HumTool {
 		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
       void        getPitches           (std::vector<int>& pitches, HTp token);
 		void        addLabels            (HumdrumFile& infile, int amount);
+		void        addStria             (HumdrumFile& infile, int amount);
 		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);

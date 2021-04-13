@@ -32,7 +32,7 @@ namespace hum {
 
 Tool_autobeam::Tool_autobeam(void) {
 	define("k|kern=i:0",           "process specific kern spine number");
-	define("t|track=i:0",          "process specific track number");
+	define("t|track|tracks=s:0",   "process specific track number(s)");
 	define("r|remove=b",           "remove all beams");
 	define("g|grace=b",            "beam grace notes sequences");
 	define("o|overwrite=b",        "over-write existing beams");
@@ -122,13 +122,11 @@ void Tool_autobeam::beamGraceNotes(HumdrumFile& infile) {
 	int track;
 	string newstr;
 	for (int i=0; i<strands; i++) {
-		if (m_track > 0) {
-			track = infile.getStrandStart(i)->getTrack();
-			if (track != m_track) {
-				continue;
-			}
-		}
 		starttok = infile.getStrandStart(i);
+		track = starttok->getTrack();
+		if (!m_tracks.at(track)) {
+			continue;
+		}
 		if (!starttok->isKern()) {
 			continue;
 		}
@@ -278,14 +276,11 @@ void Tool_autobeam::removeBeams(HumdrumFile& infile) {
 	bool bfound = false;
 	string newstr;
 	for (int i=0; i<strands; i++) {
-		if (m_track > 0) {
-			track = infile.getStrandStart(i)->getTrack();
-			if (track != m_track) {
-				continue;
-			}
-		}
 		starttok = infile.getStrandStart(i);
-
+		track = starttok->getTrack();
+		if (!m_tracks.at(track)) {
+			continue;
+		}
 		if (!starttok->isKern()) {
 			continue;
 		}
@@ -337,13 +332,11 @@ void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
 	int strands = infile.getStrandCount();
 	int track;
 	for (int i=0; i<strands; i++) {
-		if (m_track > 0) {
-			track = infile.getStrandStart(i)->getTrack();
-			if (track != m_track) {
-				continue;
-			}
-		}
 		HTp starttok = infile.getStrandStart(i);
+		track = starttok->getTrack();
+		if (!m_tracks.at(track)) {
+			continue;
+		}
 		if (!starttok->isKern()) {
 			continue;
 		}
@@ -825,13 +818,11 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 	int strands = infile.getStrandCount();
 	int track;
 	for (int i=0; i<strands; i++) {
-		if (m_track > 0) {
-			track = infile.getStrandStart(i)->getTrack();
-			if (track != m_track) {
-				continue;
-			}
-		}
 		HTp starttok = infile.getStrandStart(i);
+		track = starttok->getTrack();
+		if (!m_tracks.at(track)) {
+				continue;
+		}
 		if (!starttok->isKern()) {
 			continue;
 		}
@@ -856,15 +847,18 @@ void Tool_autobeam::initialize(HumdrumFile& infile) {
 		infile.getTimeSigs(m_timesigs[ks[i]->getTrack()], ks[i]->getTrack());
 	}
 	m_overwriteQ = getBoolean("overwrite");
-	m_track = getInteger("track");
-	m_includerests = getBoolean("include-rests");
-	if ((m_track == 0) && getBoolean("kern")) {
-		int ks = getInteger("kern") - 1;
-		vector<HTp> kernspines = infile.getKernSpineStartList();
-		if ((ks >= 0) && (ks <(int)kernspines.size())) {
-			m_track = kernspines[ks]->getTrack();
-		}
+
+	int maxtrack = infile.getMaxTrack();
+	if (getBoolean("track")) {
+		string tracklist = getString("track");
+		Convert::makeBooleanTrackList(m_tracks, tracklist, maxtrack);
+	} else {
+		// process all (kern) tracks:
+		m_tracks.resize(maxtrack+1);
+		fill(m_tracks.begin(), m_tracks.end(), true);
 	}
+
+	m_includerests = getBoolean("include-rests");
 }
 
 

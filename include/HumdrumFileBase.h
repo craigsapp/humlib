@@ -284,6 +284,7 @@ class HumdrumFileBase : public HumHash {
 		HLp           insertNullDataLine                    (HumNum timestamp);
 		HLp           insertNullInterpretationLine          (HumNum timestamp);
 		HLp           insertNullInterpretationLineAbove     (HumNum timestamp);
+		HLp           insertNullInterpretationLineAboveIndex(int index);
 		HLp           getLineForInterpretationInsertion     (int index);
 		HLp           getLineForInterpretationInsertionAbove(int index);
 

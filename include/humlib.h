@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr 12 17:57:03 PDT 2021
+// Last Modified: Mon Apr 12 23:19:28 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2016,6 +2016,7 @@ class HumdrumFileBase : public HumHash {
 		HLp           insertNullDataLine                    (HumNum timestamp);
 		HLp           insertNullInterpretationLine          (HumNum timestamp);
 		HLp           insertNullInterpretationLineAbove     (HumNum timestamp);
+		HLp           insertNullInterpretationLineAboveIndex(int index);
 		HLp           getLineForInterpretationInsertion     (int index);
 		HLp           getLineForInterpretationInsertionAbove(int index);
 
@@ -5358,7 +5359,7 @@ class Tool_autobeam : public HumTool {
 		std::vector<std::vector<pair<int, HumNum> > > m_timesigs;
 		std::vector<HTp> m_kernspines;
 		bool        m_overwriteQ = false;
-		int         m_track;
+		std::vector<bool> m_tracks;
 		bool        m_includerests = false;
 		int         m_splitcount = 0;
 
@@ -5831,6 +5832,7 @@ class Tool_composite : public HumTool {
 		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
       void        getPitches           (std::vector<int>& pitches, HTp token);
 		void        addLabels            (HumdrumFile& infile, int amount);
+		void        addStria             (HumdrumFile& infile, int amount);
 		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
