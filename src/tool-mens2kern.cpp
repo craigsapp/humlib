@@ -177,7 +177,6 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 			cerr << "Error: token " << melody[i] << " has no rhythm" << endl;
 			cerr << "   ON LINE: "  << melody[i]->getLineNumber()    << endl;
 			continue;
-			// WHAT IS HAPPENING WITH THOSE LINES OF ERROR TOKENS PRINTED IN THE TERMINAL???
 		}
 
 		string kernRhythm = mens2kernRhythm(rhythm, altera, perfecta, imperfecta, maxima_def, longa_def, brevis_def, semibrevis_def);
@@ -186,10 +185,7 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 		// Remove any dot of division/augmentation
 		hre.replaceDestructive(text, "", ":");
 		// remove perfection/imperfection/alteration markers
-		// IT IS NOT HANDLING CORRECLTY DOUBLE PPs AND DOUBLE IIs (see error in terminal and result)
-		// DO WE STILL NEED THAT IN THE FIRST PLACE??? TO HANDLE PP AND II?
 		hre.replaceDestructive(text, "", "[pi\\+]");
-		// TO DO: remove the line for mensuration tokens !!!!!!!!
 		if (text.empty()) {
 			text = ".";
 		}
