@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 13 14:55:58 PDT 2017
-// Last Modified: Thu Sep 21 14:04:12 PDT 2017
+// Last Modified: Tue Mar  9 22:03:48 PST 2021
 // Filename:      tool-mei2hum.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-mei2hum.h
 // Syntax:        C++11; humlib
@@ -39,14 +39,23 @@ namespace hum {
 class mei_staffDef {
 	public:
 		HumNum timestamp;
-		string clef;       // such as *clefG2
-		string timesig;    // such as *M4/4
-		string keysig;     // such as *k[f#]
-		string midibpm;    // such as *MM120
-		string transpose;  // such as *Trd-1c-2
-		int base40 = 0;    // used for transposing to C score
-		string label;      // such as *I"violin 1
-		string labelabbr;  // such as *I'v1
+		string clef;           // such as *clefG2
+		string timesig;        // such as *M4/4
+		string keysig;         // such as *k[f#]
+		string midibpm;        // such as *MM120
+		string transpose;      // such as *Trd-1c-2
+		int base40 = 0;        // used for transposing to C score
+		string label;          // such as *I"violin 1
+		string labelabbr;      // such as *I'v1
+		bool mensural = false; // true if notationtype="mensural", "mensural.white" or "mensural.black"
+		bool black = false;    // true if notationtype="mensural.black"
+		int  maximodus = 0;    // number of longs in maxima (2 or 3)
+		int  modus = 0;        // number of breves in long (2 or 3)
+		int  tempus = 0;       // number of semibreves in breve (2 or 3)
+		int  prolatio = 0;     // number of minims in semibreve (2 or 3)
+		// always two semiminims in a minim
+		// always two fusa in a semiminim
+		// always two semifusa in a fusa
 
 		void clear(void) {
 			clef.clear();
@@ -70,6 +79,12 @@ class mei_staffDef {
 			base40     = staffDef.base40;
 			label      = staffDef.label;
 			labelabbr  = staffDef.labelabbr;
+			mensural   = staffDef.mensural;
+			black      = staffDef.black;
+			maximodus  = staffDef.maximodus;
+			modus      = staffDef.modus;
+			tempus     = staffDef.tempus;
+			prolatio   = staffDef.prolatio;
 			return *this;
 		}
 		mei_staffDef(void) {
@@ -84,6 +99,12 @@ class mei_staffDef {
 			base40     = staffDef.base40;
 			label      = staffDef.label;
 			labelabbr  = staffDef.labelabbr;
+			mensural   = staffDef.mensural;
+			black      = staffDef.black;
+			maximodus  = staffDef.maximodus;
+			modus      = staffDef.modus;
+			tempus     = staffDef.tempus;
+			prolatio   = staffDef.prolatio;
 		}
 };
 
@@ -156,13 +177,18 @@ class Tool_mei2hum : public HumTool {
 		void   fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node element);
 		HumNum parseMeasure         (xml_node measure, HumNum starttime);
 		HumNum parseStaff           (xml_node staff, HumNum starttime);
+		HumNum parseStaff_mensural  (xml_node staff, HumNum starttime);
 		void   parseReh             (xml_node reh, HumNum starttime);
 		HumNum parseLayer           (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
-		int    extractStaffCount    (xml_node element);
+		HumNum parseLayer_mensural  (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
+		int    extractStaffCountByFirstMeasure    (xml_node element);
+		int    extractStaffCountByScoreDef        (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);
+		HumNum parseRest_mensural   (xml_node chord, HumNum starttime);
 		HumNum parseMRest           (xml_node mrest, HumNum starttime);
 		HumNum parseChord           (xml_node chord, HumNum starttime, int gracenumber);
 		HumNum parseNote            (xml_node note, xml_node chord, string& output, HumNum starttime, int gracenumber);
+		HumNum parseNote_mensural   (xml_node note, xml_node chord, string& output, HumNum starttime, int gracenumber);
 		HumNum parseBeam            (xml_node note, HumNum starttime);
 		HumNum parseTuplet          (xml_node note, HumNum starttime);
 		void   parseClef            (xml_node clef, HumNum starttime);
@@ -171,6 +197,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
+		HumNum getDuration_mensural (xml_node element, int& dotcount);
 		string getHumdrumPitch      (xml_node note, vector<xml_node>& children);
 		string getHumdrumRecip      (HumNum duration, int dotcount);
 		void   buildIdLinkMap       (xml_document& doc);

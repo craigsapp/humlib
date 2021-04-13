@@ -175,6 +175,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HTp starttok);
 		void          analyzeSignifiers            (void);
 		void          setLineRhythmAnalyzed        (void);
+		bool          prepareMensurationInformation(void);
 };
 
 

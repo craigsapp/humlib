@@ -132,7 +132,7 @@ class Convert {
 		static int     base40IntervalToDiatonic(int base40interval);
 
 
-		// **mens, white mensual notation, defiend in Convert-mens.cpp
+		// **mens, mensual notation, defiend in Convert-mens.cpp
 		static bool    isMensRest           (const std::string& mensdata);
 		static bool    isMensNote           (const std::string& mensdata);
 		static bool    hasLigatureBegin     (const std::string& mensdata);
@@ -142,10 +142,25 @@ class Convert {
 		static bool    hasRectaLigatureEnd  (const std::string& mensdata);
 		static bool    hasObliquaLigatureEnd(const std::string& mensdata);
 		static bool    getMensStemDirection (const std::string& mensdata);
+
+		static std::string mensToRecip      (char rhythm, bool altera,
+		                                     bool perfecta, bool imperfecta,
+		                                     int maximodus, int modus,
+		                                     int tempus, int prolatio);
+		static HumNum  mensToDuration       (char rhythm, bool altera,
+		                                     bool perfecta, bool imperfecta,
+		                                     int maximodus, int modus,
+		                                     int tempus, int prolatio);
+		static int metToMensurationLevels   (const std::string& metsig);
+		static HumNum mensToDuration        (const std::string& menstok, int rlev);
+		static HumNum mensToDuration        (HTp menstok, const std::string& mettok);
+		static HumNum mensToDuration        (HTp menstok);
+
+		// older functions to enhance or remove:
 		static HumNum  mensToDuration       (const std::string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static std::string  mensToRecip          (const std::string& mensdata,
+		static std::string  mensToRecip     (const std::string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
 		static HumNum  mensToDurationNoDots(const std::string& mensdata,

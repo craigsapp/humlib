@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 13 14:58:26 PDT 2017
-// Last Modified: Thu Sep 21 13:10:56 PDT 2017
+// Last Modified: Tue Mar  9 22:03:56 PST 2021
 // Filename:      mei2hum.cpp
 // URL:           https://github.com/craigsapp/mei2hum/blob/master/src/mei2hum.cpp
 // Syntax:        C++11; humlib
@@ -139,7 +139,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 		return false;
 	}
 
-	m_staffcount = extractStaffCount(score);
+	m_staffcount = extractStaffCountByFirstMeasure(score);
+	if (m_staffcount == 0) {
+		// probably mensural music
+		m_staffcount = extractStaffCountByScoreDef(score);
+		if (m_staffcount == 0) {
+			cerr << "error: no music detected in <score>" << endl;
+		}
+	}
 
 	if (m_recipQ) {
 		m_outdata.enableRecipSpine();
@@ -467,10 +474,12 @@ void Tool_mei2hum::addFooterRecords(HumdrumFile& outfile, xml_document& doc) {
 
 //////////////////////////////
 //
-// Tool_mei2hum::extractStaffCount -- Count the number of staves in the score.
+// Tool_mei2hum::extractStaffCountByFirstMeasure -- Count the number of staves
+//    in the score by looking at the first measure of the score.  Input is the
+//    <score> element.
 //
 
-int Tool_mei2hum::extractStaffCount(xml_node element) {
+int Tool_mei2hum::extractStaffCountByFirstMeasure(xml_node element) {
 	auto measure = element.select_node("//measure").node();
 	if (!measure) {
 		return 0;
@@ -484,6 +493,25 @@ int Tool_mei2hum::extractStaffCount(xml_node element) {
 		}
 	}
 	return count;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::extractStaffCountByScoreDef -- Count the number of staves
+//    in the score by counting <staffDef> entries in the first <scoreDef>.
+//     Input is the <score> element.
+//
+
+int Tool_mei2hum::extractStaffCountByScoreDef(xml_node element) {
+	xml_node scoredef = element.select_node("//scoreDef").node();
+	if (!scoredef) {
+		return 0;
+	}
+
+	pugi::xpath_node_set staffdefs = element.select_nodes(".//staffDef");
+	return (int)staffdefs.size();
 }
 
 
@@ -810,20 +838,21 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 	}
 
 	m_scoreDef.minresize(num);
-	m_scoreDef.staves[num-1].clear();
-	m_scoreDef.staves[num-1] = m_scoreDef.global;
+	m_scoreDef.staves.at(num-1).clear();
+	m_scoreDef.staves.at(num-1) = m_scoreDef.global;
 
-	fillWithStaffDefAttributes(m_scoreDef.staves[num-1], staffDef);
+	fillWithStaffDefAttributes(m_scoreDef.staves.at(num-1), staffDef);
 
 	// see leaky memory note below for why there are separate
 	// variables for clef, keysig, etc.
-	string clef = m_scoreDef.staves[num-1].clef;
-	string keysig = m_scoreDef.staves[num-1].keysig;
-	string timesig = m_scoreDef.staves[num-1].timesig;
-	string midibpm = m_scoreDef.staves[num-1].midibpm;
-	string transpose = m_scoreDef.staves[num-1].transpose;
-	string label = m_scoreDef.staves[num-1].label;
-	string labelabbr = m_scoreDef.staves[num-1].labelabbr;
+	mei_staffDef& staffdef = m_scoreDef.staves.at(num-1);
+	string clef      = staffdef.clef;
+	string keysig    = staffdef.keysig;
+	string timesig   = staffdef.timesig;
+	string midibpm   = staffdef.midibpm;
+	string transpose = staffdef.transpose;
+	string label     = staffdef.label;
+	string labelabbr = staffdef.labelabbr;
 
 	// Incorporate label into HumGrid:
 	if (label.empty()) {
@@ -915,6 +944,8 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 				0, 0, m_staffcount);
 	}
 
+	// Add metric signature/mensuration sign here.
+
 	// Incorporate tempo into HumGrid:
 	if (midibpm.empty()) {
 		midibpm = m_scoreDef.global.midibpm;
@@ -951,6 +982,11 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 	string midibpm;
 	string label;
 	string labelabbr;
+	string notationtype;
+	int maximodus = 0;
+	int modus     = 0;
+	int tempus    = 0;
+	int prolatio  = 0;
 	int transsemi = 0;
 	int transdiat = 0;
 
@@ -985,6 +1021,16 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 			transsemi = atti->as_int();
 		} else if (attname == "trans.diat") {
 			transdiat = atti->as_int();
+		} else if (attname == "notationtype") {
+			notationtype = atti->value();
+		} else if (attname == "prolatio") {
+			prolatio = atti->as_int();
+		} else if (attname == "tempus") {
+			tempus = atti->as_int();
+		} else if (attname == "modusminor") {
+			modus = atti->as_int();
+		} else if (attname == "modusmaior") {
+			maximodus = atti->as_int();
 		} else if (attname == "n") {
 			nnum = atoi(atti->value());
 		}
@@ -1076,7 +1122,28 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 	if (!labelabbr.empty()) {
 		staffinfo.labelabbr = "*I'" + labelabbr;
 	}
-
+	if (notationtype.empty()) {
+		staffinfo.mensural = false;
+		staffinfo.black = false;
+	} else {
+		if (notationtype == "mensural") {
+			staffinfo.mensural = true;
+			staffinfo.black = false;
+		} else if (notationtype == "mensural.white") {
+			staffinfo.mensural = true;
+			staffinfo.black = false;
+		} else if (notationtype == "mensural.black") {
+			staffinfo.mensural = true;
+			staffinfo.black = true;
+		}
+		if (staffinfo.mensural) {
+			if (maximodus > 0) { staffinfo.maximodus = maximodus; }
+			if (modus > 0)     { staffinfo.modus = modus; }
+			if (tempus > 0)    { staffinfo.tempus = tempus; }
+			if (prolatio > 0)  { staffinfo.prolatio = prolatio; }
+		}
+		// deal with mensuration sign, or calculate from maximodus/modus/tempus/prolatio
+	}
 }
 
 
@@ -1106,6 +1173,9 @@ HumNum Tool_mei2hum::parseSection(xml_node section, HumNum starttime) {
 			parseScoreDef(children[i], starttime);
 		} else if (nodename == "staffDef") {   // will this have any useful info?
 		   // ignore for now
+		} else if (nodename == "staff") {
+			// section/staff is possible in mensural music.
+			parseStaff_mensural(children[i], starttime);
 		} else {
 			cerr << DKHTP << section.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -1575,6 +1645,78 @@ HumNum Tool_mei2hum::parseStaff(xml_node staff, HumNum starttime) {
 
 
 
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseStaff_mensural -- Process an MEI staff element for mensural
+//   music.
+//
+
+HumNum Tool_mei2hum::parseStaff_mensural(xml_node staff, HumNum starttime) {
+	NODE_VERIFY(staff, starttime);
+	MAKE_CHILD_LIST(children, staff);
+
+	string n = staff.attribute("n").value();
+	int nnum = 0;
+	if (n.empty()) {
+		cerr << "Warning: no staff number on staff element in measure " << m_currentMeasure << endl;
+	} else {
+		nnum = stoi(n);
+	}
+	if (nnum < 1) {
+		cerr << "Error: invalid staff number: " << nnum << endl;
+		m_currentStaff++;
+	} else {
+		m_currentStaff = nnum;
+	}
+
+	if (m_maxStaffInFile < m_currentStaff) {
+		m_maxStaffInFile = m_currentStaff;
+	}
+
+	vector<bool> layerPresent;
+	vector<HumNum> durations;
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "layer") {
+			durations.push_back(parseLayer_mensural(children[i], starttime, layerPresent) - starttime);
+		} else {
+			cerr << DKHTP << staff.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+	bool complete = true;
+	for (int i=0; i<(int)layerPresent.size(); i++) {
+		complete &= layerPresent[i];
+	}
+	if (!complete) {
+		// need to add invisible rests in un-specified layers.
+		cerr << "INCOMPLETE LAYERS IN STAFF" << endl;
+	}
+
+	// Check that the duration of each layer is the same here.
+
+	if (durations.empty()) {
+		return starttime;
+	}
+
+	// bool allequal = true;
+	for (int i=1; i<(int)durations.size(); i++) {
+		if (durations[i] != durations[0]) {
+			// allequal = false;
+			break;
+		}
+	}
+
+	HumNum staffdur = durations[0];
+	m_currentStaff = 0;
+
+	return starttime + staffdur;
+}
+
+
+
 //////////////////////////////
 //
 // Tool_mei2hum::parseLayer --
@@ -1665,6 +1807,99 @@ HumNum Tool_mei2hum::parseLayer(xml_node layer, HumNum starttime, vector<bool>& 
 	if (!m_gracenotes.empty()) {
 		processGraceNotes(starttime);
 	}
+
+	m_currentLayer = 0;
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseLayer_mensural --
+//
+
+HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vector<bool>& layerPresent) {
+	NODE_VERIFY(layer, starttime)
+	MAKE_CHILD_LIST(children, layer);
+
+	int nnum = 0;
+	xml_attribute nattr = layer.attribute("n");
+	if (!nattr) {
+		// No number on layer, assuming next available number should be used.
+		m_currentLayer++;
+		nnum = m_currentLayer;
+	} else {
+		nnum = nattr.as_int();
+	}
+	if (nnum < 1) {
+		cerr << "Error: Ignoring layer with invalid number: " << nnum
+		     << " in measure " << m_currentMeasure
+		     << ", staff " << m_currentStaff << endl;
+		return starttime;
+	}
+	if (nnum > 8) {
+		cerr << "Error: Ignoring layer with ridiculous number: " << nnum
+		     << " in measure " << m_currentMeasure
+		     << ", staff " << m_currentStaff << endl;
+		return starttime;
+	}
+	m_currentLayer = nnum;
+
+	// grow Layer array if necessary:
+	if ((int)layerPresent.size() < m_currentLayer) {
+		int oldsize = (int)layerPresent.size();
+		layerPresent.resize(m_currentLayer);
+		for (int i=oldsize; i<m_currentLayer; i++) {
+			layerPresent.at(i) = false;
+		}
+   }
+
+	if (layerPresent.at(m_currentLayer - 1)) {
+		cerr << "Error: measure " << m_currentMeasure
+		     << ", staff " << m_currentStaff
+		     << ": layer " << m_currentLayer << " is duplicated on staff: "
+		     << m_currentStaff << ". Ignoring duplicate layer." << endl;
+		return starttime;
+	} else {
+		layerPresent.at(m_currentLayer - 1) = true;
+	}
+
+	HumNum  starting = starttime;
+	string dummy;
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			starttime = parseNote_mensural(children[i], xml_node(NULL), dummy, starttime, 0);
+		} else if (nodename == "chord") {
+			// starttime = parseChord(children[i], starttime, 0);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "rest") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "space") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "mRest") {
+			// starttime = parseMRest(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "beam") {
+			// starttime = parseBeam(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "tuplet") {
+			// starttime = parseTuplet(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "clef") {
+			parseClef(children[i], starttime);
+		} else if (nodename == "barLine") {
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else {
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+	//if (!m_gracenotes.empty()) {
+	//	processGraceNotes(starttime);
+	//}
 
 	m_currentLayer = 0;
 	return starttime;
@@ -2060,6 +2295,151 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 
 //////////////////////////////
 //
+// Tool_mei2hum::parseNote_mensural --
+//
+
+HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& output,
+		HumNum starttime, int gracenumber) {
+	NODE_VERIFY(note, starttime)
+	MAKE_CHILD_LIST(children, note);
+
+	HumNum duration;
+	int dotcount;
+
+	string grace = note.attribute("grace").value();
+	bool graceQ = !grace.empty();
+	if (graceQ) {
+		// cannot have grace notes in mensural music
+		return starttime;
+	}
+
+	processPreliminaryLinkedNodes(note);
+
+	if (chord) {
+		duration = getDuration_mensural(chord, dotcount);
+		// maybe allow different durations on notes in a chord if the
+		// first one is the same as the duration of the chord.
+	} else {
+		duration = getDuration_mensural(note, dotcount);
+	}
+
+	string meidur = note.attribute("dur").value();
+	string mensrhy;
+	if      (meidur == "maxima")      { mensrhy = "X"; }
+	else if (meidur == "longa")       { mensrhy = "L"; }
+	else if (meidur == "brevis")      { mensrhy = "S"; }
+	else if (meidur == "semibrevis")  { mensrhy = "s"; }
+	else if (meidur == "minima")      { mensrhy = "M"; }
+	else if (meidur == "semiminima")  { mensrhy = "m"; }
+	else if (meidur == "fusa")        { mensrhy = "U"; }
+	else if (meidur == "semifusa")    { mensrhy = "u"; }
+	else { mensrhy = "?"; }
+
+	string recip = getHumdrumRecip(duration/4, dotcount);
+	string humpitch   = getHumdrumPitch(note, children);
+	string editorial  = getEditorialAccidental(children);
+	string cautionary = getCautionaryAccidental(children);
+
+	xml_attribute dur_qual = note.attribute("dur.quality");
+	string durquality = dur_qual.value();
+	string quality;
+	if (durquality == "perfecta") {
+		quality = "p";
+	} else if (durquality == "imperfecta") {
+		quality = "i";
+	} else if (durquality == "altera") {
+		quality = "+";
+	}
+
+	humpitch = mensrhy + quality + humpitch;
+
+	if (!editorial.empty()) {
+		humpitch += editorial;
+	}
+	if (!cautionary.empty()) {
+		humpitch += cautionary;
+	}
+
+	// string articulations = getNoteArticulations(note, chord);
+	string articulations;
+
+	string stemdir = note.attribute("stem.dir").value();
+
+	// if (!m_stemsQ) {
+	// 	// suppress note stems
+	// 	stemdir = "";
+	// }
+
+	if (stemdir == "up") {
+		stemdir = "/";
+	} else if (stemdir == "down") {
+		stemdir = "\\";
+	} else {
+		stemdir = "";
+	}
+	string gracelabel = "";
+	if (graceQ) {
+		gracelabel = "q";
+	}
+
+	string tok = /* recip + */ gracelabel + humpitch + articulations + stemdir
+			+ m_beamPrefix + m_beamPostfix;
+	m_beamPrefix.clear();
+	m_beamPostfix.clear();
+
+	m_fermata = false;
+	processLinkedNodes(tok, note);
+	if (!m_fermata) {
+		processFermataAttribute(tok, note);
+	}
+
+	GridSlice* dataslice = NULL;
+
+	if (!chord) {
+		if (gracenumber == 0) {
+			dataslice = m_outdata.back()->addDataToken(tok, starttime QUARTER_CONVERT,
+					m_currentStaff-1, 0, m_currentLayer-1, m_staffcount);
+		} else {
+			dataslice = m_outdata.back()->addGraceToken(tok, starttime QUARTER_CONVERT,
+					m_currentStaff-1, 0, m_currentLayer-1, m_staffcount, gracenumber);
+		}
+	} else {
+		output += tok;
+	}
+
+	bool hasverse = false;
+
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if ((nodename == "verse") && (dataslice != NULL)) {
+			hasverse = true;
+			parseVerse(children[i], dataslice->at(m_currentStaff-1)->at(0));
+		} else if ((nodename == "syl") && (dataslice != NULL)) {
+			hasverse = true;
+			parseBareSyl(children[i], dataslice->at(m_currentStaff-1)->at(0));
+		} else if (nodename == "artic") {
+			// handled elsewhere: don't do anything
+		} else if (nodename == "accid") {
+			// handled elsewhere: don't do anything
+		} else {
+			cerr << DKHTP << note.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+	if (!hasverse) {
+		string attsyl = note.attribute("syl").value();
+		if (!attsyl.empty()) {
+			parseSylAttribute(attsyl, dataslice->at(m_currentStaff-1)->at(0));
+		}
+	}
+
+	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_mei2hum::parseSylAttribute --
 //
 
@@ -2286,6 +2666,82 @@ HumNum Tool_mei2hum::parseRest(xml_node rest, HumNum starttime) {
 	}
 
 	string output = recip + "r" + invisible + m_beamPrefix + m_beamPostfix;
+	m_beamPrefix.clear();
+	m_beamPostfix.clear();
+
+	processLinkedNodes(output, rest);
+	processFermataAttribute(output, rest);
+
+	m_outdata.back()->addDataToken(output, starttime QUARTER_CONVERT,
+			m_currentStaff-1, 0, m_currentLayer-1, m_staffcount);
+
+	return starttime + duration;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseRest_mensural --
+//
+
+HumNum Tool_mei2hum::parseRest_mensural(xml_node rest, HumNum starttime) {
+	if (!rest) {
+		return starttime;
+	}
+	string nodename = rest.name();
+	if (!((nodename == "rest") || (nodename == "space"))) {
+		return starttime;
+	}
+	if (nodename == "rest") {
+		ELEMENT_DEBUG_STATEMENT(rest)
+	} else if (nodename == "space") {
+		ELEMENT_DEBUG_STATEMENT(space)
+	}
+
+	MAKE_CHILD_LIST(children, rest);
+
+	processPreliminaryLinkedNodes(rest);
+
+	string meidur = rest.attribute("dur").value();
+	string mensrhy;
+	if      (meidur == "maxima")      { mensrhy = "X"; }
+	else if (meidur == "longa")       { mensrhy = "L"; }
+	else if (meidur == "brevis")      { mensrhy = "S"; }
+	else if (meidur == "semibrevis")  { mensrhy = "s"; }
+	else if (meidur == "minima")      { mensrhy = "M"; }
+	else if (meidur == "semiminima")  { mensrhy = "m"; }
+	else if (meidur == "fusa")        { mensrhy = "U"; }
+	else if (meidur == "semifusa")    { mensrhy = "u"; }
+	else { mensrhy = "?"; }
+
+	int dotcount = 0;
+	HumNum duration = getDuration_mensural(rest, dotcount);
+
+	string invisible;
+	if (nodename == "space") {
+		invisible = "yy";
+	}
+
+	string recip = getHumdrumRecip(duration/4, dotcount);
+	string humpitch   = ""; // getHumdrumPitch(rest, children);
+	string editorial  = getEditorialAccidental(children);
+	string cautionary = getCautionaryAccidental(children);
+
+	xml_attribute dur_qual = rest.attribute("dur.quality");
+	string durquality = dur_qual.value();
+	string quality;
+	if (durquality == "perfecta") {
+		quality = "p";
+	} else if (durquality == "imperfecta") {
+		quality = "i";
+	} else if (durquality == "altera") {
+		quality = "+";
+	}
+
+	humpitch = mensrhy + quality + humpitch;
+
+	string output = mensrhy + "r" + invisible + m_beamPrefix + m_beamPostfix;
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 
@@ -3119,6 +3575,105 @@ HumNum Tool_mei2hum::getDuration(xml_node element) {
 
 	return output;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::getDuration_mensural -- Get duration from note or chord.  If chord does not
+//    have @dur then use @dur of first note in children elements.
+//
+// @dur: https://music-encoding.org/guidelines/v4/data-types/data.duration.mensural.html
+//          X = maxima
+//          L = longa
+//          S = brevis
+//          s = semibrevis
+//          M = minima
+//          m = semiminima
+//          U = fusa
+//          u = semifusa
+// @dur.quality:
+//          i = imperfecta  :: remove augmentation dot
+//          p = perfecta    :: add augmentation dot
+//          altera = altera :: duration is double the rhythmic value of notes
+//
+
+HumNum Tool_mei2hum::getDuration_mensural(xml_node element, int& dotcount) {
+	dotcount = 0;
+
+	xml_attribute dur_qual = element.attribute("dur.quality");
+	xml_attribute dur_attr = element.attribute("dur");
+	string name = element.name();
+
+	if ((!dur_attr) && (name == "note")) {
+		// real notes must have durations, but this one
+		// does not, so assign zero duration
+		return 0;
+	}
+	if ((!dur_attr) && (name == "chord")) {
+		// if there is no dur attribute on a chord, then look for it
+		// on the first note subelement of the chord.
+		auto newelement = element.select_node(".//note").node();
+		if (newelement) {
+			element = newelement;
+			dur_attr = element.attribute("dur");
+			name = element.name();
+			dur_qual = element.attribute("dur.quality");
+		} else {
+			return 0;
+		}
+	}
+
+	string dur = dur_attr.value();
+	if (dur == "") {
+		return 0;
+	}
+	string durquality = dur_qual.value();
+
+	char rhythm = '\0';
+	if (dur == "maxima") {
+		rhythm = 'X';
+	} else if (dur == "longa") {
+		rhythm = 'L';
+	} else if (dur == "brevis") {
+		rhythm = 'S';
+	} else if (dur == "semibrevis") {
+		rhythm = 's';
+	} else if (dur == "minima") {
+		rhythm = 'M';
+	} else if (dur == "semiminima") {
+		rhythm = 'm';
+	} else if (dur == "fusa") {
+		rhythm = 'U';
+	} else if (dur == "semifusa") {
+		rhythm = 'u';
+	} else {
+		cerr << "Error: unknown rhythm" << element.name() << "@dur: " << dur << endl;
+		return 0;
+	}
+
+	mei_staffDef& ss = m_scoreDef.staves.at(m_currentStaff - 1);
+	int maximodus = ss.maximodus == 3 ? 3 : 2;
+	int modus     = ss.modus     == 3 ? 3 : 2;
+	int tempus    = ss.tempus    == 3 ? 3 : 2;
+	int prolatio  = ss.prolatio  == 3 ? 3 : 2;
+
+	bool altera     = false;
+	bool perfecta   = false;
+	bool imperfecta = false;
+
+	if (durquality == "imperfecta") {
+		imperfecta = true;
+	} else if (durquality == "perfecta") {
+		perfecta = true;
+	} else if (durquality == "altera") {
+		altera = true;
+	}
+
+	HumNum output = Convert::mensToDuration(rhythm, altera, perfecta, imperfecta, maximodus, modus, tempus, prolatio);
+	return output;
+}
+
 
 
 

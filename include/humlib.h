@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar  7 09:43:41 PST 2021
+// Last Modified: Fri Apr  9 12:53:13 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2352,6 +2352,7 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		                                            HTp starttok);
 		void          analyzeSignifiers            (void);
 		void          setLineRhythmAnalyzed        (void);
+		bool          prepareMensurationInformation(void);
 };
 
 
@@ -3817,7 +3818,7 @@ class Convert {
 		static int     base40IntervalToDiatonic(int base40interval);
 
 
-		// **mens, white mensual notation, defiend in Convert-mens.cpp
+		// **mens, mensual notation, defiend in Convert-mens.cpp
 		static bool    isMensRest           (const std::string& mensdata);
 		static bool    isMensNote           (const std::string& mensdata);
 		static bool    hasLigatureBegin     (const std::string& mensdata);
@@ -3827,10 +3828,25 @@ class Convert {
 		static bool    hasRectaLigatureEnd  (const std::string& mensdata);
 		static bool    hasObliquaLigatureEnd(const std::string& mensdata);
 		static bool    getMensStemDirection (const std::string& mensdata);
+
+		static std::string mensToRecip      (char rhythm, bool altera,
+		                                     bool perfecta, bool imperfecta,
+		                                     int maximodus, int modus,
+		                                     int tempus, int prolatio);
+		static HumNum  mensToDuration       (char rhythm, bool altera,
+		                                     bool perfecta, bool imperfecta,
+		                                     int maximodus, int modus,
+		                                     int tempus, int prolatio);
+		static int metToMensurationLevels   (const std::string& metsig);
+		static HumNum mensToDuration        (const std::string& menstok, int rlev);
+		static HumNum mensToDuration        (HTp menstok, const std::string& mettok);
+		static HumNum mensToDuration        (HTp menstok);
+
+		// older functions to enhance or remove:
 		static HumNum  mensToDuration       (const std::string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static std::string  mensToRecip          (const std::string& mensdata,
+		static std::string  mensToRecip     (const std::string& mensdata,
 		                                     HumNum scale = 4,
 		                                     const std::string& separator = " ");
 		static HumNum  mensToDurationNoDots(const std::string& mensdata,
@@ -5780,7 +5796,7 @@ class Tool_composite : public HumTool {
 
 		bool        run                  (HumdrumFileSet& infiles);
 		bool        run                  (HumdrumFile& infile);
-		bool        run                  (const string& indata, ostream& out);
+		bool        run                  (const std::string& indata, ostream& out);
 		bool        run                  (HumdrumFile& infile, ostream& out);
 
 	protected:
@@ -5788,29 +5804,40 @@ class Tool_composite : public HumTool {
 		void        prepareMultipleGroups(HumdrumFile& infile);
 		void        prepareSingleGroup   (HumdrumFile& infile);
 		void        initialize           (void);
-		int         typeStringToInt      (const string& value);
-		HumNum      getLineDuration      (HumdrumFile& infile, int index, vector<bool>& isNull);
-		void        getGroupStates       (vector<vector<int>>& groupstates, HumdrumFile& infile);
+		int         typeStringToInt      (const std::string& value);
+		HumNum      getLineDuration      (HumdrumFile& infile, int index, std::vector<bool>& isNull);
+		void        getGroupStates       (std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
 		void        assignGroups         (HumdrumFile& infile);
 		void        analyzeLineGroups    (HumdrumFile& infile);
-		void        analyzeLineGroup     (HumdrumFile& infile, int line, const string& target);
+		void        analyzeLineGroup     (HumdrumFile& infile, int line, const std::string& target);
 		void        printGroupAssignments(HumdrumFile& infile);
-		string      getGroup             (vector<vector<string>>& current, int spine, int subspine);
-		int         getGroupNoteType     (HumdrumFile& infile, int line, const string& group);
-		void        getGroupDurations    (vector<vector<HumNum>>& groupdurs,
-		                                  vector<vector<int>>& groupstates, HumdrumFile& infile);
-		void        getGroupDurations    (vector<HumNum>& groupdurs, vector<int>& groupstates,
+		std::string getGroup             (std::vector<std::vector<std::string>>& current, int spine, int subspine);
+		int         getGroupNoteType     (HumdrumFile& infile, int line, const std::string& group);
+		void        getGroupDurations    (std::vector<std::vector<HumNum>>& groupdurs,
+		                                  std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
+		void        getGroupDurations    (std::vector<HumNum>& groupdurs, std::vector<int>& groupstates,
 		                                  HumdrumFile& infile);
-		void        getGroupRhythms      (vector<vector<string>>& rhythms, 
-		                                  vector<vector<HumNum>>& groupdurs, 
-		                                  vector<vector<int>>& groupstates, 
+		void        getGroupRhythms      (std::vector<std::vector<std::string>>& rhythms, 
+		                                  std::vector<std::vector<HumNum>>& groupdurs, 
+		                                  std::vector<std::vector<int>>& groupstates, 
 		                                  HumdrumFile& infile);
-		void        getGroupRhythms      (vector<string>& rhythms, vector<HumNum>& durs,
-		                                  vector<int>& states, HumdrumFile& infile);
+		void        getGroupRhythms      (std::vector<std::string>& rhythms,
+                                        std::vector<HumNum>& durs,
+		                                  std::vector<int>& states, HumdrumFile& infile);
 		bool        hasGroupInterpretations(HumdrumFile& infile);
+		void        checkForTremoloReduction(HumdrumFile& infile, int line, int field);
+		void        reduceTremolos       (HumdrumFile& infile);
+		bool        areAllEqual          (std::vector<HTp>& notes);
+		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
+      void        getPitches           (std::vector<int>& pitches, HTp token);
+		void        addLabels            (HumdrumFile& infile, int amount);
+		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
+		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
+		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
+		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
 
 	private:
-		string      m_pitch     = "eR";   // pitch to display for composite rhythm
+		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
 		bool        m_nogroupsQ = false;  // do not split composite rhythms into markup groups
 		bool        m_extractQ  = false;  // output only composite rhythm analysis (not input data)
 		bool        m_appendQ   = false;  // display analysis at top of system
@@ -6643,14 +6670,23 @@ class Tool_kernview : public HumTool {
 class mei_staffDef {
 	public:
 		HumNum timestamp;
-		string clef;       // such as *clefG2
-		string timesig;    // such as *M4/4
-		string keysig;     // such as *k[f#]
-		string midibpm;    // such as *MM120
-		string transpose;  // such as *Trd-1c-2
-		int base40 = 0;    // used for transposing to C score
-		string label;      // such as *I"violin 1
-		string labelabbr;  // such as *I'v1
+		string clef;           // such as *clefG2
+		string timesig;        // such as *M4/4
+		string keysig;         // such as *k[f#]
+		string midibpm;        // such as *MM120
+		string transpose;      // such as *Trd-1c-2
+		int base40 = 0;        // used for transposing to C score
+		string label;          // such as *I"violin 1
+		string labelabbr;      // such as *I'v1
+		bool mensural = false; // true if notationtype="mensural", "mensural.white" or "mensural.black"
+		bool black = false;    // true if notationtype="mensural.black"
+		int  maximodus = 0;    // number of longs in maxima (2 or 3)
+		int  modus = 0;        // number of breves in long (2 or 3)
+		int  tempus = 0;       // number of semibreves in breve (2 or 3)
+		int  prolatio = 0;     // number of minims in semibreve (2 or 3)
+		// always two semiminims in a minim
+		// always two fusa in a semiminim
+		// always two semifusa in a fusa
 
 		void clear(void) {
 			clef.clear();
@@ -6674,6 +6710,12 @@ class mei_staffDef {
 			base40     = staffDef.base40;
 			label      = staffDef.label;
 			labelabbr  = staffDef.labelabbr;
+			mensural   = staffDef.mensural;
+			black      = staffDef.black;
+			maximodus  = staffDef.maximodus;
+			modus      = staffDef.modus;
+			tempus     = staffDef.tempus;
+			prolatio   = staffDef.prolatio;
 			return *this;
 		}
 		mei_staffDef(void) {
@@ -6688,6 +6730,12 @@ class mei_staffDef {
 			base40     = staffDef.base40;
 			label      = staffDef.label;
 			labelabbr  = staffDef.labelabbr;
+			mensural   = staffDef.mensural;
+			black      = staffDef.black;
+			maximodus  = staffDef.maximodus;
+			modus      = staffDef.modus;
+			tempus     = staffDef.tempus;
+			prolatio   = staffDef.prolatio;
 		}
 };
 
@@ -6760,13 +6808,18 @@ class Tool_mei2hum : public HumTool {
 		void   fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node element);
 		HumNum parseMeasure         (xml_node measure, HumNum starttime);
 		HumNum parseStaff           (xml_node staff, HumNum starttime);
+		HumNum parseStaff_mensural  (xml_node staff, HumNum starttime);
 		void   parseReh             (xml_node reh, HumNum starttime);
 		HumNum parseLayer           (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
-		int    extractStaffCount    (xml_node element);
+		HumNum parseLayer_mensural  (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
+		int    extractStaffCountByFirstMeasure    (xml_node element);
+		int    extractStaffCountByScoreDef        (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);
+		HumNum parseRest_mensural   (xml_node chord, HumNum starttime);
 		HumNum parseMRest           (xml_node mrest, HumNum starttime);
 		HumNum parseChord           (xml_node chord, HumNum starttime, int gracenumber);
 		HumNum parseNote            (xml_node note, xml_node chord, string& output, HumNum starttime, int gracenumber);
+		HumNum parseNote_mensural   (xml_node note, xml_node chord, string& output, HumNum starttime, int gracenumber);
 		HumNum parseBeam            (xml_node note, HumNum starttime);
 		HumNum parseTuplet          (xml_node note, HumNum starttime);
 		void   parseClef            (xml_node clef, HumNum starttime);
@@ -6775,6 +6828,7 @@ class Tool_mei2hum : public HumTool {
 		void   parseTempo           (xml_node tempo, HumNum starttime);
 		void   parseDir             (xml_node dir, HumNum starttime);
 		HumNum getDuration          (xml_node element);
+		HumNum getDuration_mensural (xml_node element, int& dotcount);
 		string getHumdrumPitch      (xml_node note, vector<xml_node>& children);
 		string getHumdrumRecip      (HumNum duration, int dotcount);
 		void   buildIdLinkMap       (xml_document& doc);

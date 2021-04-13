@@ -711,12 +711,64 @@ bool HumdrumFileStructure::analyzeMeter(void) {
 //
 
 bool HumdrumFileStructure::analyzeTokenDurations (void) {
+	prepareMensurationInformation();
 	for (int i=0; i<getLineCount(); i++) {
 		if (!m_lines[i]->analyzeTokenDurations(m_parseError)) {
 			return isValid();
 		}
 	}
 	return isValid();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileStructure::prepareMensurationInformation --
+//
+
+bool HumdrumFileStructure::prepareMensurationInformation(void) {
+	vector<HTp> menstarts;
+	getSpineStartList(menstarts, "**mens");
+	if (menstarts.empty()) {
+		return true;
+	}
+	int tracks = getMaxTrack();
+	HumdrumFileStructure& infile = *this;
+	vector<int> menlev(tracks+1, 2222);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (!token->isMens()) {
+					continue;
+				}
+				if (!token->isMensurationSymbol()) {
+					continue;
+				}
+				int track = token->getTrack();
+				int mlev = Convert::metToMensurationLevels(*token);
+				if (mlev > 0) {
+					menlev[track] = mlev;
+				}
+			}
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isMens()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			int track = token->getTrack();
+			token->setValue("auto", "mensuration", "levels", menlev.at(track));
+		}
+	}
+	return true;
 }
 
 

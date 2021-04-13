@@ -23,6 +23,7 @@ namespace hum {
 // START_MERGE
 
 // Note state variables for grouping:
+#define TYPE_UNDEFINED           9 /* for inactive groupings */
 #define TYPE_NoteSustainAttack   3
 #define TYPE_NoteAttack          2
 #define TYPE_RestAttack          1
@@ -31,6 +32,7 @@ namespace hum {
 #define TYPE_NoteSustain        -2
 #define TYPE_NoteSustainSustain -3
 
+#define COMPOSITE_TREMOLO_MARKER "||"
 
 /////////////////////////////////
 //
@@ -123,6 +125,7 @@ void Tool_composite::initialize(void) {
 //
 
 void Tool_composite::processFile(HumdrumFile& infile) {
+	reduceTremolos(infile);
 	bool autogroup = false;
 	if (!m_nogroupsQ) {
 		autogroup = hasGroupInterpretations(infile);
@@ -192,6 +195,10 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 		bool allrest = true;
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp tok = infile.token(i, j);
+			string value = tok->getValue("auto", "ignoreTremoloNote");
+			if (value == "1") {
+				continue;
+			}
 			if (tok->isNull()) {
 				continue;
 			}
@@ -228,6 +235,8 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 	originalfile.readString(sstream.str());
 	extract.run(originalfile);
 	infile.readString(extract.getAllText());
+	// need to redo tremolo analyses...
+	reduceTremolos(infile);
 
 	assignGroups(infile);
 	analyzeLineGroups(infile);
@@ -358,17 +367,30 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 			recip = ".";
 		} else {
 			if (groupstates[0][i] == TYPE_RestAttack) {
-				recip += "r";
+				recip += "rRb";
 			}
-			recip += m_pitch;
+			else if (groupstates[0][i] == TYPE_UNDEFINED) {
+				// make invisible rest (rest not part of group)
+				recip += "ryy";
+			} else {
+				recip += m_pitch;
+			}
 		}
 		if (recip2.empty()) {
-			recip2 = ".";
+			// null group: add invisible rest to rhythm
+			// HumNum linedur = infile[i].getDuration();
+			// recip2 = Convert::durationToRecip(linedur);
+			recip2 += ".";
 		} else {
 			if (groupstates[1][i] == TYPE_RestAttack) {
-				recip2 += "r";
+				recip2 += "rRb";
 			}
-			recip2 += m_pitch;
+			else if (groupstates[1][i] == TYPE_UNDEFINED) {
+				// make invisible rest (rest not part of group)
+				recip2 += "ryy";
+			} else {
+				recip2 += m_pitch;
+			}
 		}
 
 		HTp token2 = NULL;
@@ -389,6 +411,12 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 		extract2.setModified("s", "1-2");
 		extract2.run(infile);
 		infile.readString(extract2.getAllText());
+	}
+
+	if (m_appendQ) {
+		addLabels(infile, -2);
+	} else {
+		addLabels(infile, +2);
 	}
 
 	if (!getBoolean("no-beam")) {
@@ -426,8 +454,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 //
 
 void Tool_composite::getGroupRhythms(vector<vector<string>>& rhythms,
-		vector<vector<HumNum>>& groupdurs,
-		vector<vector<int>>& groupstates,
+		vector<vector<HumNum>>& groupdurs, vector<vector<int>>& groupstates,
 		HumdrumFile& infile) {
 	rhythms.resize(groupdurs.size());
 	for (int i=0; i<(int)rhythms.size(); i++) {
@@ -448,12 +475,14 @@ void Tool_composite::getGroupRhythms(vector<string>& rhythms, vector<HumNum>& du
 		string prefix = "";
 		string postfix = "";
 		for (int j=i+1; j<(int)rhythms.size(); j++) {
-			if (states[j] > 0) {
+			if ((states[j]) > 0 && (states[j] < 5)) {
 				if ((states[i] == TYPE_NoteAttack) && (states[j] == TYPE_NoteSustainAttack)) {
 					prefix = "[";
 				} else if ((states[i] == TYPE_NoteSustainAttack) && (states[j] == TYPE_NoteSustainAttack)) {
 					postfix = "_";
 				} else if ((states[i] == TYPE_NoteSustainAttack) && (states[j] == TYPE_NoteAttack)) {
+					postfix = "]";
+				} else if ((states[i] == TYPE_NoteSustainAttack) && (states[j] == TYPE_RestAttack)) {
 					postfix = "]";
 				}
 				lastnotei = j;
@@ -538,6 +567,7 @@ void Tool_composite::getGroupDurations(vector<HumNum>& groupdurs,
 //    group:A:type = "none"   if there is no activity for group A on the line.
 //
 //    Numeric equivalents:
+//     9 = TYPE_UNDEFINED           = "undefined"
 //     3 = TYPE_NoteSustainAttack   = "snote"
 //     2 = TYPE_NoteAttack          = "note"
 //     1 = TYPE_RestAttack          = "rest"
@@ -582,7 +612,7 @@ int Tool_composite::typeStringToInt(const string& value) {
 	if (value == "rcont") { return TYPE_RestSustain;        }
 	if (value == "ncont") { return TYPE_NoteSustain;        }
 	if (value == "scont") { return TYPE_NoteSustainSustain; }
-	return TYPE_NONE;
+	return TYPE_UNDEFINED;
 }
 
 
@@ -645,6 +675,9 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 
 	extract.run(infile);
 	infile.readString(extract.getAllText());
+	// need to redo tremolo analyses...
+	reduceTremolos(infile);
+
 	HTp token;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isInterpretation()) {
@@ -732,6 +765,12 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 			recip = Convert::durationToRecip(duration);
 		}
 
+		if (onlyAuxTremoloNotes(infile, i)) {
+			// mark auxiliary notes so that they can be merged
+			// with a preceding note later.
+			recip += COMPOSITE_TREMOLO_MARKER;
+		}
+
 		if (m_appendQ) {
 			token = infile.token(i, infile[i].getFieldCount() - 1);
 		} else {
@@ -779,6 +818,103 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 		//	 infile.analyzeStrands();
 		//	 autobeam.run(infile);
 	}
+
+	removeAuxTremolosFromCompositeRhythm(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::removeAuxTremolosFromCompositeRhythm --
+//
+
+void Tool_composite::removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile) {
+	vector<HTp> starts = infile.getKernSpineStartList();
+	vector<HTp> stops;
+	infile.getSpineStopList(stops);
+
+	if (stops.empty()) {
+		return;
+	}
+	HTp current = NULL;
+	if (m_appendQ) {
+		current = stops.back();
+	} else {
+		current = stops[0];
+	}
+	if (current == NULL) {
+		return;
+	}
+	current = current->getPreviousToken();
+	HumNum accumulator = 0;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (*current == ".") {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (current->find(COMPOSITE_TREMOLO_MARKER) != string::npos) {
+			string text = current->getText();
+			accumulator += Convert::recipToDuration(text);
+			current->setText(".");
+		} else if (accumulator > 0) {
+			string text = current->getText();
+			HumNum totaldur = Convert::recipToDuration(text);
+			totaldur += accumulator;
+			accumulator = 0;
+			string newrhy = Convert::durationToRecip(totaldur);
+			HumRegex hre;
+			hre.replaceDestructive(text, newrhy, "\\d+%?\\d*\\.*");
+			current->setText(text);
+		}
+		current = current->getPreviousToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::onlyAuxTremoloNotes -- True if note attacks on line are only for
+//     auxiliary tremolo notes.
+//
+
+bool Tool_composite::onlyAuxTremoloNotes(HumdrumFile& infile, int line) {
+	int attackcount = 0;
+	int sustaincount = 0;
+	int auxcount = 0;
+	for (int i=0; i<infile[line].getFieldCount(); i++) {
+		HTp token = infile.token(line, i);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isNull()) {
+			continue;
+		}
+		if (token->isRest()) {
+			continue;
+		}
+		bool attack = token->isNoteAttack();
+		if (!attack) {
+			sustaincount++;
+			continue;
+		}
+		attackcount++;
+		string value = token->getValue("auto", "ignoreTremoloNote");
+		if (value == "1") {
+			auxcount++;
+		}
+	}
+
+	if ((auxcount > 0) && (auxcount == attackcount)) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -813,6 +949,7 @@ void Tool_composite::analyzeLineGroups(HumdrumFile& infile) {
 //
 // Tool_composite::analyzeLineGroup --
 //
+//     9 = TYPE_UNDEFINED           = "undefined"
 //     3 = TYPE_NoteSustainAttack   = "snote"
 //     2 = TYPE_NoteAttack          = "note"
 //     1 = TYPE_RestAttack          = "rest"
@@ -843,8 +980,11 @@ void Tool_composite::analyzeLineGroup(HumdrumFile& infile, int line, const strin
 		case TYPE_NoteSustainSustain:
 			infile[line].setValue("group", target, "type", "scont");
 			break;
-		default:
+		case TYPE_NONE:
 			infile[line].setValue("group", target, "type", "none");
+			break;
+		default:
+			infile[line].setValue("group", target, "type", "undefined");
 			break;
 	}
 }
@@ -855,6 +995,7 @@ void Tool_composite::analyzeLineGroup(HumdrumFile& infile, int line, const strin
 //
 // Tool_composite::getGroupNoteType --
 //
+//  9 = TYPE_UNDEFINED
 //  3 = TYPE_NoteSustainAttack
 //  2 = TYPE_NoteAttack
 //  1 = TYPE_RestAttack
@@ -882,7 +1023,7 @@ int Tool_composite::getGroupNoteType(HumdrumFile& infile, int line, const string
 	}
 
 	if (grouptokens.empty()) {
-		return TYPE_NONE;
+		return TYPE_UNDEFINED;
 	}
 
 	bool hasRestAttack    = false;
@@ -894,6 +1035,12 @@ int Tool_composite::getGroupNoteType(HumdrumFile& infile, int line, const string
 
 	for (int i=0; i<(int)grouptokens.size(); i++) {
 		HTp token = grouptokens[i];
+		string value = token->getValue("auto", "ignoreTremoloNote");
+		if (value == "1") {
+			hasNoteSustain = true;
+			// need to check for tie on head note...
+			continue;
+		}
 		if (token->isNull()) {
 			HTp resolved = token->resolveNull();
 			if (resolved && !resolved->isNull()) {
@@ -914,7 +1061,10 @@ int Tool_composite::getGroupNoteType(HumdrumFile& infile, int line, const string
 			continue;
 		}
 		if (token->isNoteAttack()) {
-			hasNoteAttack = true;
+			string value = token->getValue("auto", "ignoreTremoloNote");
+			if (value != "1") {
+				hasNoteAttack = true;
+			}
 			continue;
 		}
 		if (token->isNoteSustain()) {
@@ -1089,6 +1239,315 @@ void Tool_composite::printGroupAssignments(HumdrumFile& infile) {
 		cerr << endl;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_composite::reduceTremolos --  Does not do split parallel tremolo states.
+//
+
+void Tool_composite::reduceTremolos(HumdrumFile& infile) {
+	int maxtrack = infile.getMaxTrack();
+	vector<bool> tstates(maxtrack + 1, false);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (infile[i].isInterpretation()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				int track = token->getTrack();
+				if (*token == "*tremolo") {
+					tstates[track] = true;
+				} else if (*token == "*Xtremolo") {
+					tstates[track] = false;
+				}
+			}
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			int track = token->getTrack();
+			if (!tstates[track]) {
+				continue;
+			}
+			if (token->find("L") != string::npos) {
+				checkForTremoloReduction(infile, i, j);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::checkForTremoloReduction -- 
+//
+
+void Tool_composite::checkForTremoloReduction(HumdrumFile& infile, int line, int field) {
+	HTp token = infile.token(line, field);
+	vector<HTp> notes;
+	getBeamedNotes(notes, token);
+
+	if (notes.empty()) {
+		return;
+	}
+	if (notes.size() == 1) {
+		return;
+	}
+
+	vector<HumNum> durations(notes.size(), 0);
+	vector<vector<int>> pitches(notes.size());
+	for (int i=0; i<(int)notes.size(); i++) {
+		durations[i] = notes[i]->getDuration();
+		getPitches(pitches[i], notes[i]);
+
+	}
+
+	vector<int> tgroup(notes.size(), 0);
+	int curgroup = 0;
+	for (int i=1; i<(int)notes.size(); i++) {
+		if (durations[i] != durations[i-1]) {
+			tgroup[i] = ++curgroup;
+			continue;
+		}
+		if (!pitchesEqual(pitches[i], pitches[i-1])) {
+			tgroup[i] = ++curgroup;
+			continue;
+		}
+		tgroup[i] = curgroup;
+	}
+
+	int groupcount = tgroup.back() + 1;
+	for (int i=0; i<groupcount; i++) {
+		mergeTremoloGroup(notes, tgroup, i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::mergeTremoloGroup --
+//
+
+void Tool_composite::mergeTremoloGroup(vector<HTp>& notes, vector<int> groups, int group) {
+	vector<int> tindex;
+	for (int i=0; i<(int)notes.size(); i++) {
+		if (groups[i] == group) {
+			tindex.push_back(i);
+		}
+	}
+	if (tindex.empty()) {
+		return;
+	}
+	if (tindex.size() == 1) {
+		return;
+	}
+	// Consider complicated groups that should not be grouped into a single note (such as 5 16ths).
+	// These cases need LO information in any case.
+
+	int starti = tindex[0];
+	int endi = tindex.back();
+
+	// Remove (repeating) tremolo notes.
+	HumNum starttime = notes[starti]->getDurationFromStart();
+	HumNum endtime = notes[endi]->getDurationFromStart();
+	HumNum lastdur = notes[endi]->getDuration();
+	HumNum duration = endtime - starttime + lastdur;
+	string recip = Convert::durationToRecip(duration);
+	notes[starti]->setValue("auto", "tremoloRhythm", recip);
+	// string text = *notes[0];
+	// HumRegex hre;
+	// hre.replaceDestructive(text, recip, "\\d+%?\\d*\\.*", "g");
+	// hre.replaceDestructive(text, "", "[LJkK]+", "g");
+	// notes[0]->setText(text);
+	for (int i=starti+1; i<=endi; i++) {
+		notes[i]->setValue("auto", "ignoreTremoloNote", 1);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::pitchesEqual -- also consider ties...
+//
+
+bool Tool_composite::pitchesEqual(vector<int>& pitches1, vector<int>& pitches2) {
+	if (pitches1.size() != pitches2.size()) {
+		return false;
+	}
+	for (int i=0; i<(int)pitches1.size(); i++) {
+		if (pitches1[i] != pitches2[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::areAllEqual -- 
+//
+
+bool Tool_composite::areAllEqual(vector<HTp>& notes) {
+	if (notes.empty()) {
+		return false;
+	}
+	vector<int> pitches;
+	getPitches(pitches, notes[0]);
+	vector<int> others;
+	for (int i=1; i<(int)notes.size(); i++) {
+		getPitches(others, notes[i]);
+		if (others.size() != pitches.size()) {
+			return false;
+		}
+		for (int j=0; j<(int)others.size(); j++) {
+			if (others[j] != pitches[j]) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::getPitches -- 
+//
+
+void Tool_composite::getPitches(vector<int>& pitches, HTp token) {
+	vector<string> subtokens;
+	subtokens = token->getSubtokens();
+	pitches.clear();
+	pitches.resize(subtokens.size());
+	fill(pitches.begin(), pitches.end(), 0);
+	for (int i=0; i<(int)subtokens.size(); i++) {
+		if (subtokens[i].find("r") != string::npos) {
+			continue;
+		}
+		pitches[i] = Convert::kernToBase40(subtokens[i]);
+	}
+	if (pitches.size() > 1) {
+		sort(pitches.begin(), pitches.end());
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::checkForTremoloReduction -- 
+//
+
+void Tool_composite::getBeamedNotes(vector<HTp>& notes, HTp starting) {
+	notes.clear();
+	notes.push_back(starting);
+	int Lcount = (int)count(starting->begin(), starting->end(), 'L');
+	int Jcount = (int)count(starting->begin(), starting->end(), 'J');
+	int beamcounter = Lcount - Jcount;
+	if (beamcounter <= 0) {
+		notes.clear();
+		return;
+	}
+	HTp current = starting->getNextToken();
+	while (current) {
+		if (current->isBarline()) {
+			break;
+		}
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (*current == ".") {
+			current = current->getNextToken();
+			continue;
+		}
+		notes.push_back(current);
+		Lcount = (int)count(starting->begin(), starting->end(), 'L');
+		Jcount = (int)count(starting->begin(), starting->end(), 'J');
+		beamcounter += Lcount - Jcount;
+		if (beamcounter <= 0) {
+			break;
+		}
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::addLabels -- add Grouping labels to composite rhythm groups.
+//
+
+void Tool_composite::addLabels(HumdrumFile& infile, int amount) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		int hasLabel = 0;
+		int hasLabelAbbr = 0;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->compare(0, 3, "*I\"") == 0) {
+				hasLabel = i;
+			}
+			if (token->compare(0, 3, "*I'") == 0) {
+				hasLabelAbbr = i;
+			}
+		}
+		if (hasLabel) {
+			if (amount == 2) {
+				HTp token = infile.token(hasLabel, 0);
+				token->setText("*I\"Group A");
+				token = infile.token(hasLabel, 1);
+				token->setText("*I\"Group B");
+			} else if (amount == -2) {
+				int fcount = infile[hasLabel].getFieldCount();
+				HTp token = infile.token(hasLabel, fcount-1);
+				token->setText("*I\"Group B");
+				token = infile.token(hasLabel, fcount-2);
+				token->setText("*I\"Group A");
+			}
+		}
+		if (hasLabelAbbr) {
+			if (amount == 2) {
+				HTp token = infile.token(hasLabelAbbr, 0);
+				token->setText("*I'Gr.A");
+				token = infile.token(hasLabelAbbr, 1);
+				token->setText("*I'Gr.B");
+			} else if (amount == -2) {
+				int fcount = infile[hasLabelAbbr].getFieldCount();
+				HTp token = infile.token(hasLabelAbbr, fcount-1);
+				token->setText("*I\'Gr.B");
+				token = infile.token(hasLabelAbbr, fcount-2);
+				token->setText("*I\'Gr.A");
+			}
+		}
+	}
+
+}
+
+
 
 
 // END_MERGE

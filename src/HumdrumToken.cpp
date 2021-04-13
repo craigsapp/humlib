@@ -764,7 +764,6 @@ bool HumdrumToken::analyzeDuration(void) {
 		m_duration.setValue(-1);
 		return true;
 	}
-	string dtype = getDataType();
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
@@ -775,7 +774,13 @@ bool HumdrumToken::analyzeDuration(void) {
 						m_duration = Convert::recipToDuration((string)(*this));
 					}
 				} else if (isMens()) {
-					m_duration = Convert::mensToDuration((string)(*this));
+					int rlev = this->getValueInt("auto", "mensuration", "levels");
+					if (rlev < 2222) {
+						cerr << "Warning: mensuration levels not analyzed yet" << endl;
+						rlev = 2222;
+					}
+					m_duration = Convert::mensToDuration((string)(*this), rlev);
+cerr << "MENSURATION DURATION SET TO " << m_duration << " FOR " << this << endl;
 				}
 			} else {
 				m_duration.setValue(-1);

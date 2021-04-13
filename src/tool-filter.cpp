@@ -37,7 +37,7 @@
 #include "tool-kern2mens.h"
 #include "tool-kernview.h"
 #include "tool-melisma.h"
-#include "tool-mens2hum.h"
+#include "tool-mens2kern.h"
 #include "tool-metlev.h"
 #include "tool-modori.h"
 #include "tool-msearch.h"
