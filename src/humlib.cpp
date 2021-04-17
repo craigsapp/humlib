@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 13 09:39:53 PDT 2021
+// Last Modified: Fri Apr 16 19:59:25 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56052,6 +56052,7 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 Tool_composite::Tool_composite(void) {
 	define("a|append=b",    "append data to end of line (top of system)");
 	define("g|grace=b",     "include grace notes in composite rhythm");
+	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
 	define("B|no-beam=b",   "do not apply automatic beaming");
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
@@ -56120,10 +56121,14 @@ void Tool_composite::initialize(void) {
 	m_extractQ  = getBoolean("extract");
 	m_nogroupsQ = getBoolean("no-groups");
 	m_graceQ    = getBoolean("grace");
+	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
 	if (m_extractQ) {
 		m_appendQ = false;
+	}
+	if (m_upQ) {
+		m_pitch += "/";
 	}
 }
 

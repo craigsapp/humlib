@@ -75,6 +75,7 @@ class Tool_composite : public HumTool {
 		bool        m_appendQ   = false;  // display analysis at top of system
 		bool        m_debugQ    = false;  // display debug information
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
+		bool        m_upQ       = false;  // force stem up
 
 };
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 13 09:39:53 PDT 2021
+// Last Modified: Fri Apr 16 19:59:25 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5845,6 +5845,7 @@ class Tool_composite : public HumTool {
 		bool        m_appendQ   = false;  // display analysis at top of system
 		bool        m_debugQ    = false;  // display debug information
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
+		bool        m_upQ       = false;  // force stem up
 
 };
 
