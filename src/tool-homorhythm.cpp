@@ -228,7 +228,7 @@ void Tool_homorhythm::processFile(HumdrumFile& infile) {
 		addAttacks(infile, m_attacks);
 	}
 
-	if (1) {
+	if (!getBoolean("fraction")) {
 		// Color the notes within homorhythm textures.
 		// mark homorhythm regions in red,
 		// non-homorhythm sonorities within these regions in green

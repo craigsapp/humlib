@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 16 19:59:25 PDT 2021
+// Last Modified: Tue Apr 20 21:36:04 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5818,9 +5818,9 @@ class Tool_composite : public HumTool {
 		                                  std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
 		void        getGroupDurations    (std::vector<HumNum>& groupdurs, std::vector<int>& groupstates,
 		                                  HumdrumFile& infile);
-		void        getGroupRhythms      (std::vector<std::vector<std::string>>& rhythms, 
-		                                  std::vector<std::vector<HumNum>>& groupdurs, 
-		                                  std::vector<std::vector<int>>& groupstates, 
+		void        getGroupRhythms      (std::vector<std::vector<std::string>>& rhythms,
+		                                  std::vector<std::vector<HumNum>>& groupdurs,
+		                                  std::vector<std::vector<int>>& groupstates,
 		                                  HumdrumFile& infile);
 		void        getGroupRhythms      (std::vector<std::string>& rhythms,
                                         std::vector<HumNum>& durs,
@@ -5845,6 +5845,7 @@ class Tool_composite : public HumTool {
 		bool        m_appendQ   = false;  // display analysis at top of system
 		bool        m_debugQ    = false;  // display debug information
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
+		bool        m_tremoloQ  = false;  // preserve tremolos
 		bool        m_upQ       = false;  // force stem up
 
 };
@@ -7886,6 +7887,7 @@ class Tool_myank : public HumTool {
 		                                int sec);
 		void      collapseSpines       (HumdrumFile& infile, int line);
 		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
+		std::string expandMultipliers  (const string& inputstring);
 
 	private:
 		int    debugQ      = 0;             // used with --debug option

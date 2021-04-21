@@ -44,6 +44,7 @@ Tool_composite::Tool_composite(void) {
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
+	define("t|tremolo=b",   "preserve tremolos");
 	define("B|no-beam=b",   "do not apply automatic beaming");
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
 	define("pitch=s:eR",    "pitch to display for composite rhythm");
@@ -111,6 +112,7 @@ void Tool_composite::initialize(void) {
 	m_extractQ  = getBoolean("extract");
 	m_nogroupsQ = getBoolean("no-groups");
 	m_graceQ    = getBoolean("grace");
+	m_tremoloQ  = getBoolean("tremolo");
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
@@ -130,7 +132,9 @@ void Tool_composite::initialize(void) {
 //
 
 void Tool_composite::processFile(HumdrumFile& infile) {
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 	bool autogroup = false;
 	if (!m_nogroupsQ) {
 		autogroup = hasGroupInterpretations(infile);
@@ -241,7 +245,9 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 	extract.run(originalfile);
 	infile.readString(extract.getAllText());
 	// need to redo tremolo analyses...
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 
 	assignGroups(infile);
 	analyzeLineGroups(infile);
@@ -679,7 +685,9 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	extract.run(infile);
 	infile.readString(extract.getAllText());
 	// need to redo tremolo analyses...
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 
 	HTp token;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -1290,7 +1298,7 @@ void Tool_composite::reduceTremolos(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_composite::checkForTremoloReduction -- 
+// Tool_composite::checkForTremoloReduction --
 //
 
 void Tool_composite::checkForTremoloReduction(HumdrumFile& infile, int line, int field) {
@@ -1399,7 +1407,7 @@ bool Tool_composite::pitchesEqual(vector<int>& pitches1, vector<int>& pitches2) 
 
 //////////////////////////////
 //
-// Tool_composite::areAllEqual -- 
+// Tool_composite::areAllEqual --
 //
 
 bool Tool_composite::areAllEqual(vector<HTp>& notes) {
@@ -1427,7 +1435,7 @@ bool Tool_composite::areAllEqual(vector<HTp>& notes) {
 
 //////////////////////////////
 //
-// Tool_composite::getPitches -- 
+// Tool_composite::getPitches --
 //
 
 void Tool_composite::getPitches(vector<int>& pitches, HTp token) {
@@ -1451,7 +1459,7 @@ void Tool_composite::getPitches(vector<int>& pitches, HTp token) {
 
 //////////////////////////////
 //
-// Tool_composite::checkForTremoloReduction -- 
+// Tool_composite::checkForTremoloReduction --
 //
 
 void Tool_composite::getBeamedNotes(vector<HTp>& notes, HTp starting) {

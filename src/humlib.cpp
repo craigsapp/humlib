@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 16 19:59:25 PDT 2021
+// Last Modified: Tue Apr 20 21:36:04 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56054,6 +56054,7 @@ Tool_composite::Tool_composite(void) {
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
+	define("t|tremolo=b",   "preserve tremolos");
 	define("B|no-beam=b",   "do not apply automatic beaming");
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
 	define("pitch=s:eR",    "pitch to display for composite rhythm");
@@ -56121,6 +56122,7 @@ void Tool_composite::initialize(void) {
 	m_extractQ  = getBoolean("extract");
 	m_nogroupsQ = getBoolean("no-groups");
 	m_graceQ    = getBoolean("grace");
+	m_tremoloQ  = getBoolean("tremolo");
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
@@ -56140,7 +56142,9 @@ void Tool_composite::initialize(void) {
 //
 
 void Tool_composite::processFile(HumdrumFile& infile) {
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 	bool autogroup = false;
 	if (!m_nogroupsQ) {
 		autogroup = hasGroupInterpretations(infile);
@@ -56251,7 +56255,9 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 	extract.run(originalfile);
 	infile.readString(extract.getAllText());
 	// need to redo tremolo analyses...
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 
 	assignGroups(infile);
 	analyzeLineGroups(infile);
@@ -56689,7 +56695,9 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	extract.run(infile);
 	infile.readString(extract.getAllText());
 	// need to redo tremolo analyses...
-	reduceTremolos(infile);
+	if (!m_tremoloQ) {
+		reduceTremolos(infile);
+	}
 
 	HTp token;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -57300,7 +57308,7 @@ void Tool_composite::reduceTremolos(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_composite::checkForTremoloReduction -- 
+// Tool_composite::checkForTremoloReduction --
 //
 
 void Tool_composite::checkForTremoloReduction(HumdrumFile& infile, int line, int field) {
@@ -57409,7 +57417,7 @@ bool Tool_composite::pitchesEqual(vector<int>& pitches1, vector<int>& pitches2) 
 
 //////////////////////////////
 //
-// Tool_composite::areAllEqual -- 
+// Tool_composite::areAllEqual --
 //
 
 bool Tool_composite::areAllEqual(vector<HTp>& notes) {
@@ -57437,7 +57445,7 @@ bool Tool_composite::areAllEqual(vector<HTp>& notes) {
 
 //////////////////////////////
 //
-// Tool_composite::getPitches -- 
+// Tool_composite::getPitches --
 //
 
 void Tool_composite::getPitches(vector<int>& pitches, HTp token) {
@@ -57461,7 +57469,7 @@ void Tool_composite::getPitches(vector<int>& pitches, HTp token) {
 
 //////////////////////////////
 //
-// Tool_composite::checkForTremoloReduction -- 
+// Tool_composite::checkForTremoloReduction --
 //
 
 void Tool_composite::getBeamedNotes(vector<HTp>& notes, HTp starting) {
@@ -65295,7 +65303,7 @@ void Tool_homorhythm::processFile(HumdrumFile& infile) {
 		addAttacks(infile, m_attacks);
 	}
 
-	if (1) {
+	if (!getBoolean("fraction")) {
 		// Color the notes within homorhythm textures.
 		// mark homorhythm regions in red,
 		// non-homorhythm sonorities within these regions in green
@@ -83306,6 +83314,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	getMeasureStartStop(MeasureInList, infile);
 
 	string measurestring = getString("measures");
+	measurestring = expandMultipliers(measurestring);
 	if (markQ) {
 		stringstream mstring;
 		getMarkString(mstring, infile);
@@ -83355,7 +83364,37 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 
 
 
-////////////////////////
+//////////////////////////////
+//
+// Tool_myank::expandMultipliers -- 2*5 => 2,2,2,2,2
+//    Limit of 100 times expansion
+//
+
+string Tool_myank::expandMultipliers(const string& inputstring) {
+	HumRegex hre;
+	if (!hre.search(inputstring, "\\*")) {
+		return inputstring;
+	}
+	string outputstring = inputstring;
+	while (hre.search(outputstring, "(\\d+)\\*([1-9]+[0-9]*)")) {
+		string measurenum = hre.getMatch(1);
+		int multiplier = hre.getMatchInt(2);
+		if (multiplier > 100) {
+			cerr << "Reducing multiplier from " << multiplier << " to 100" << endl;
+			multiplier = 100;
+		}
+		string expansion = measurenum;
+		for (int i=1; i<multiplier; i++) {
+			expansion += ",";
+			expansion += measurenum;
+		}
+		hre.replaceDestructive(outputstring, expansion, "(\\d+)\\*([1-9]+[0-9]*)");
+	}
+	return outputstring;
+}
+
+
+//////////////////////////////
 //
 // Tool_myank::getMetStates --  Store the current *met for every token
 // in the score, keeping track of meter without metric symbols.

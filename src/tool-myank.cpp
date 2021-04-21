@@ -246,6 +246,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	getMeasureStartStop(MeasureInList, infile);
 
 	string measurestring = getString("measures");
+	measurestring = expandMultipliers(measurestring);
 	if (markQ) {
 		stringstream mstring;
 		getMarkString(mstring, infile);
@@ -295,7 +296,37 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 
 
 
-////////////////////////
+//////////////////////////////
+//
+// Tool_myank::expandMultipliers -- 2*5 => 2,2,2,2,2
+//    Limit of 100 times expansion
+//
+
+string Tool_myank::expandMultipliers(const string& inputstring) {
+	HumRegex hre;
+	if (!hre.search(inputstring, "\\*")) {
+		return inputstring;
+	}
+	string outputstring = inputstring;
+	while (hre.search(outputstring, "(\\d+)\\*([1-9]+[0-9]*)")) {
+		string measurenum = hre.getMatch(1);
+		int multiplier = hre.getMatchInt(2);
+		if (multiplier > 100) {
+			cerr << "Reducing multiplier from " << multiplier << " to 100" << endl;
+			multiplier = 100;
+		}
+		string expansion = measurenum;
+		for (int i=1; i<multiplier; i++) {
+			expansion += ",";
+			expansion += measurenum;
+		}
+		hre.replaceDestructive(outputstring, expansion, "(\\d+)\\*([1-9]+[0-9]*)");
+	}
+	return outputstring;
+}
+
+
+//////////////////////////////
 //
 // Tool_myank::getMetStates --  Store the current *met for every token
 // in the score, keeping track of meter without metric symbols.

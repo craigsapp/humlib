@@ -153,6 +153,7 @@ class Tool_myank : public HumTool {
 		                                int sec);
 		void      collapseSpines       (HumdrumFile& infile, int line);
 		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
+		std::string expandMultipliers  (const string& inputstring);
 
 	private:
 		int    debugQ      = 0;             // used with --debug option
