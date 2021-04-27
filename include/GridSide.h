@@ -35,6 +35,12 @@ class GridSide {
 		void  setVerse          (int index, HTp token);
 		void  setVerse          (int index, const std::string& token);
 
+		int   getXmlidCount     (void);
+		void  setXmlid          (HTp token);
+		void  setXmlid          (const std::string& token);
+		void  detachXmlid       (void);
+		HTp   getXmlid          (void);
+
 		int   getHarmonyCount   (void);
 		void  setHarmony        (HTp token);
 		void  setHarmony        (const std::string& token);
@@ -54,10 +60,11 @@ class GridSide {
 		HTp   getFiguredBass      (void);
 
 	private:
+		HumdrumToken* m_xmlid        = NULL;
 		std::vector<HumdrumToken*> m_verses;
-		HumdrumToken* m_dynamics = NULL;
+		HumdrumToken* m_dynamics     = NULL;
 		HumdrumToken* m_figured_bass = NULL;
-		HumdrumToken* m_harmony = NULL;
+		HumdrumToken* m_harmony      = NULL;
 };
 
 std::ostream& operator<<(std::ostream& output, GridSide* side);

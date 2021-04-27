@@ -163,6 +163,42 @@ void GridSide::setHarmony(const string& token) {
 
 //////////////////////////////
 //
+// GridSide::getXmlidCount --
+//
+
+int GridSide::getXmlidCount(void) {
+	if (m_xmlid == NULL) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// GridSide::setXmlid --
+//
+
+void GridSide::setXmlid(HTp token) {
+	if (m_xmlid) {
+		delete m_xmlid;
+		m_xmlid = NULL;
+	}
+	m_xmlid = token;
+}
+
+
+void GridSide::setXmlid(const string& token) {
+	HTp newtoken = new HumdrumToken(token);
+	setXmlid(newtoken);
+}
+
+
+
+//////////////////////////////
+//
 // GridSide::setDynamics --
 //
 
@@ -216,6 +252,17 @@ void GridSide::detachHarmony(void) {
 
 ///////////////////////////
 //
+// GridSide::detachXmlid --
+//
+
+void GridSide::detachXmlid(void) {
+	m_xmlid = NULL;
+}
+
+
+
+///////////////////////////
+//
 // GridSide::detachDynamics --
 //
 
@@ -243,6 +290,17 @@ void GridSide::detachFiguredBass(void) {
 
 HTp GridSide::getHarmony(void) {
 	return m_harmony;
+}
+
+
+
+//////////////////////////////
+//
+// GridSide::getXmlid --
+//
+
+HTp GridSide::getXmlid(void) {
+	return m_xmlid;
 }
 
 
@@ -306,6 +364,10 @@ int GridSide::getFiguredBassCount(void) {
 
 ostream& operator<<(ostream& output, GridSide* side) {
 	output << " [";
+
+	if (side->getXmlidCount() > 0) {
+		output << "xmlid:" << side->getXmlid();
+	}
 
 	if (side->getVerseCount() > 0) {
 		output << " verse:";

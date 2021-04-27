@@ -354,22 +354,24 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 				continue;
 			}
 
+			int maxxcount = getXmlidCount(p, s);
 			int maxvcount = getVerseCount(p, s);
 			int maxhcount = getHarmonyCount(p, s);
 			int maxfcount = getFiguredBassCount(p, s);
 			if (hasSpines()) {
-				transferSides(*line, staff, empty, maxvcount, maxhcount, maxfcount);
+				transferSides(*line, staff, empty, maxxcount, maxvcount, maxhcount, maxfcount);
 			}
 		}
 
 		// Transfer the sides at the part level
+		int maxxcount = getXmlidCount(p);
 		int maxhcount = getHarmonyCount(p);
 		int maxvcount = getVerseCount(p, -1);
 		int maxdcount = getDynamicsCount(p);
 		int maxfcount = getFiguredBassCount(p);
 
 		if (hasSpines()) {
-			transferSides(*line, part, p, empty, maxvcount, maxhcount, maxdcount, maxfcount);
+			transferSides(*line, part, p, empty, maxxcount, maxvcount, maxhcount, maxdcount, maxfcount);
 		}
 	}
 
@@ -449,6 +451,23 @@ int GridSlice::getHarmonyCount(int partindex, int staffindex) {
 
 //////////////////////////////
 //
+// GridSlice::getXmlidCount --
+//    default value: staffindex = -1; (currently not looking for
+//        harmony data attached directly to staff (only to part.)
+//
+
+int GridSlice::getXmlidCount(int partindex, int staffindex) {
+	HumGrid* grid = getOwner();
+	if (!grid) {
+		return 0;
+	}
+	return grid->getVerseCount(partindex, staffindex);
+}
+
+
+
+//////////////////////////////
+//
 // GridSlice::getDynamicsCount -- Return 0 if no dynamics, otherwise typically returns 1.
 //
 
@@ -495,19 +514,31 @@ int GridSlice::getFiguredBassCount(int partindex, int staffindex) {
 
 // this version is used to transfer Sides from the Part
 void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
-		int partindex, const string& empty, int maxvcount, int maxhcount,
-		int maxdcount, int maxfcount) {
+		int partindex, const string& empty, int maxxcount, int maxvcount,
+		int maxhcount, int maxdcount, int maxfcount) {
 
+	int xcount = sides.getXmlidCount();
 	int hcount = sides.getHarmonyCount();
 	int vcount = sides.getVerseCount();
 
 	HTp newtoken;
 
+	if (xcount > 0) {
+		HTp xmlid = sides.getXmlid();
+		if (xmlid) {
+			line.appendToken(xmlid);
+			sides.detachXmlid();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
+	}
+
 	for (int i=0; i<vcount; i++) {
 		HTp verse = sides.getVerse(i);
 		if (verse) {
 			line.appendToken(verse);
-			sides.detachHarmony();
+			sides.detachHarmony();  // why detaching harmony in verses?
 		} else {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
@@ -561,17 +592,29 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 
 // this version is used to transfer Sides from the Staff
 void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
-		const string& empty, int maxvcount, int maxhcount, int maxfcount) {
+		const string& empty, int maxxcount, int maxvcount, int maxhcount, int maxfcount) {
 
 	// existing verses:
 	int vcount = sides.getVerseCount();
 
+	int xcount = sides.getXmlidCount();
 	int fcount = sides.getFiguredBassCount();
 
-	// there should not be any harony attached to staves
+	// there should not be any harmony attached to staves
 	// (only to parts, so hcount should only be zero):
 	int hcount = sides.getHarmonyCount();
 	HTp newtoken;
+
+	if (xcount > 0) {
+		HTp xmlid = sides.getXmlid();
+		if (xmlid) {
+			line.appendToken(xmlid);
+			sides.detachXmlid();
+		} else {
+			newtoken = new HumdrumToken(empty);
+			line.appendToken(newtoken);
+		}
+	}
 
 	for (int i=0; i<vcount; i++) {
 		HTp verse = sides.getVerse(i);

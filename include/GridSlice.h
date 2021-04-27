@@ -87,14 +87,15 @@ class GridSlice : public std::vector<GridPart*> {
 		void         invalidate         (void);
 
 		void transferSides        (HumdrumLine& line, GridStaff& sides,
-		                           const std::string& empty, int maxvcount,
-		                           int maxhcount, int maxfcount);
+		                           const std::string& empty, int maxxcount,
+		                           int maxvcount, int maxhcount, int maxfcount);
 		void transferSides        (HumdrumLine& line, GridPart& sides,
 		                           int partindex, const std::string& empty,
-		                           int maxvcount, int maxhcount,
+		                           int maxxcount, int maxvcount, int maxhcount,
 		                           int maxdcount, int maxfcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
+		int getXmlidCount         (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
 		int getFiguredBassCount   (int partindex, int staffindex = -1);
 		void addToken             (const std::string& tok, int parti, int staffi, int voicei);

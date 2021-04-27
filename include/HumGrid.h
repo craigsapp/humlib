@@ -33,13 +33,16 @@ class HumGrid : public std::vector<GridMeasure*> {
 		int  getDynamicsCount           (int partindex);
 		int  getFiguredBassCount        (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
+		int  getXmlidCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
 		bool hasFiguredBass             (int partindex);
 		void setDynamicsPresent         (int partindex);
 		void setFiguredBassPresent      (int partindex);
 		void setHarmonyPresent          (int partindex);
 		void setVerseCount              (int partindex, int staffindex, int count);
+		void setXmlidCount              (int partindex, int staffindex, int count);
 		void reportVerseCount           (int partindex, int staffindex, int count);
+		void reportXmlidCount           (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
 		void removeSibeliusIncipit      (void);
@@ -126,6 +129,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 	private:
 		std::vector<GridSlice*>       m_allslices;
 		std::vector<std::vector<int>> m_verseCount;
+		std::vector<std::vector<int>> m_xmlidCount;
 		std::vector<int>              m_harmonyCount;
 		bool                          m_pickup;
 		std::vector<bool>             m_dynamics;

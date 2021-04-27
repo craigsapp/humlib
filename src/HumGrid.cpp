@@ -196,6 +196,26 @@ int HumGrid::getVerseCount(int partindex, int staffindex) {
 
 //////////////////////////////
 //
+// HumGrid::getXmlidCount --
+//
+
+int HumGrid::getXmlidCount(int partindex, int staffindex) {
+	if ((partindex < 0) || (partindex >= (int)m_xmlidCount.size())) {
+		return 0;
+	}
+	int staffnumber = staffindex + 1;
+	if ((staffnumber < 1) ||
+			(staffnumber >= (int)m_xmlidCount.at(partindex).size())) {
+		return 0;
+	}
+	int value = m_xmlidCount.at(partindex).at(staffnumber);
+	return value;
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::hasDynamics -- Return true if there are any dyanmics for the part.
 //
 
@@ -308,6 +328,34 @@ void HumGrid::reportVerseCount(int partindex, int staffindex, int count) {
 
 //////////////////////////////
 //
+// HumGrid::reportXmlidCount --
+//
+
+void HumGrid::reportXmlidCount(int partindex, int staffindex, int count) {
+	if (count <= 0) {
+		return;
+	}
+	int staffnumber = staffindex + 1;
+	int partsize = (int)m_xmlidCount.size();
+	if (partindex >= partsize) {
+		m_xmlidCount.resize(partindex+1);
+	}
+	int staffcount = (int)m_xmlidCount.at(partindex).size();
+	if (staffnumber >= staffcount) {
+		m_xmlidCount.at(partindex).resize(staffnumber+1);
+		for (int i=staffcount; i<=staffnumber; i++) {
+			m_xmlidCount.at(partindex).at(i) = 0;
+		}
+	}
+	if (count > m_xmlidCount.at(partindex).at(staffnumber)) {
+		m_xmlidCount.at(partindex).at(staffnumber) = count;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumGrid::setVerseCount --
 //
 
@@ -329,6 +377,34 @@ void HumGrid::setVerseCount(int partindex, int staffindex, int count) {
 			m_verseCount.at(partindex).at(i) = 0;
 		}
 		m_verseCount.at(partindex).at(staffnumber) = count;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::setXmlidCount --
+//
+
+void HumGrid::setXmlidCount(int partindex, int staffindex, int count) {
+	if ((partindex < 0) || (partindex > (int)m_xmlidCount.size())) {
+		return;
+	}
+	int staffnumber = staffindex + 1;
+	if (staffnumber < 0) {
+		return;
+	}
+	if (staffnumber < (int)m_xmlidCount.at(partindex).size()) {
+		m_xmlidCount.at(partindex).at(staffnumber) = count;
+	} else {
+		int oldsize = (int)m_xmlidCount.at(partindex).size();
+		int newsize = staffnumber + 1;
+		m_xmlidCount.at(partindex).resize(newsize);
+		for (int i=oldsize; i<newsize; i++) {
+			m_xmlidCount.at(partindex).at(i) = 0;
+		}
+		m_xmlidCount.at(partindex).at(staffnumber) = count;
 	}
 }
 
@@ -2415,6 +2491,14 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 
 	if (staff >= 0) {
+		int xmlidcount = getXmlidCount(part, staff); // xmlids related to staff
+		for (int i=0; i<xmlidcount; i++) {
+			HTp token = new HumdrumToken("**xmlid");
+			line->appendToken(token);
+		}
+	}
+
+	if (staff >= 0) {
 		int versecount = getVerseCount(part, staff); // verses related to staff
 		for (int i=0; i<versecount; i++) {
 			HTp token = new HumdrumToken("**text");
@@ -2559,11 +2643,19 @@ void HumGrid::insertSideNullInterpretations(HLp line,
 		}
 
 	} else {
+
+		int xmlidcount = getXmlidCount(part, staff);
+		for (int i=0; i<xmlidcount; i++) {
+			token = new HumdrumToken("*");
+			line->appendToken(token);
+		}
+
 		int versecount = getVerseCount(part, staff);
 		for (int i=0; i<versecount; i++) {
 			token = new HumdrumToken("*");
 			line->appendToken(token);
 		}
+
 	}
 }
 
@@ -2600,12 +2692,21 @@ void HumGrid::insertSidePartInfo(HLp line, int part, int staff) {
 		}
 
 	} else {
+
+		int xmlidcount = getXmlidCount(part, staff);
+		for (int i=0; i<xmlidcount; i++) {
+			text = "*part" + to_string(part+1);
+			token = new HumdrumToken(text);
+			line->appendToken(token);
+		}
+
 		int versecount = getVerseCount(part, staff);
 		for (int i=0; i<versecount; i++) {
 			text = "*part" + to_string(part+1);
 			token = new HumdrumToken(text);
 			line->appendToken(token);
 		}
+
 	}
 }
 
@@ -2694,6 +2795,17 @@ void HumGrid::insertSideStaffInfo(HLp line, int part, int staff,
 		return;
 	}
 
+	int xmlidcount = getXmlidCount(part, staff);
+	for (int i=0; i<xmlidcount; i++) {
+		if (staffnum > 0) {
+			text = "*staff" + to_string(staffnum);
+			token = new HumdrumToken(text);
+		} else {
+			token = new HumdrumToken("*");
+		}
+		line->appendToken(token);
+	}
+
 	int versecount = getVerseCount(part, staff);
 	for (int i=0; i<versecount; i++) {
 		if (staffnum > 0) {
@@ -2777,6 +2889,12 @@ void HumGrid::insertSideTerminals(HLp line, int part, int staff) {
 		}
 
 	} else {
+		int xmlidcount = getXmlidCount(part, staff);
+		for (int i=0; i<xmlidcount; i++) {
+			token = new HumdrumToken("*-");
+			line->appendToken(token);
+		}
+
 		int versecount = getVerseCount(part, staff);
 		for (int i=0; i<versecount; i++) {
 			token = new HumdrumToken("*-");

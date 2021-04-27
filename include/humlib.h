@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 20 21:36:04 PDT 2021
+// Last Modified: Tue Apr 27 15:28:13 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4165,6 +4165,12 @@ class GridSide {
 		void  setVerse          (int index, HTp token);
 		void  setVerse          (int index, const std::string& token);
 
+		int   getXmlidCount     (void);
+		void  setXmlid          (HTp token);
+		void  setXmlid          (const std::string& token);
+		void  detachXmlid       (void);
+		HTp   getXmlid          (void);
+
 		int   getHarmonyCount   (void);
 		void  setHarmony        (HTp token);
 		void  setHarmony        (const std::string& token);
@@ -4184,10 +4190,11 @@ class GridSide {
 		HTp   getFiguredBass      (void);
 
 	private:
+		HumdrumToken* m_xmlid        = NULL;
 		std::vector<HumdrumToken*> m_verses;
-		HumdrumToken* m_dynamics = NULL;
+		HumdrumToken* m_dynamics     = NULL;
 		HumdrumToken* m_figured_bass = NULL;
-		HumdrumToken* m_harmony = NULL;
+		HumdrumToken* m_harmony      = NULL;
 };
 
 std::ostream& operator<<(std::ostream& output, GridSide* side);
@@ -4383,14 +4390,15 @@ class GridSlice : public std::vector<GridPart*> {
 		void         invalidate         (void);
 
 		void transferSides        (HumdrumLine& line, GridStaff& sides,
-		                           const std::string& empty, int maxvcount,
-		                           int maxhcount, int maxfcount);
+		                           const std::string& empty, int maxxcount,
+		                           int maxvcount, int maxhcount, int maxfcount);
 		void transferSides        (HumdrumLine& line, GridPart& sides,
 		                           int partindex, const std::string& empty,
-		                           int maxvcount, int maxhcount,
+		                           int maxxcount, int maxvcount, int maxhcount,
 		                           int maxdcount, int maxfcount);
 		int getVerseCount         (int partindex, int staffindex);
 		int getHarmonyCount       (int partindex, int staffindex = -1);
+		int getXmlidCount         (int partindex, int staffindex = -1);
 		int getDynamicsCount      (int partindex, int staffindex = -1);
 		int getFiguredBassCount   (int partindex, int staffindex = -1);
 		void addToken             (const std::string& tok, int parti, int staffi, int voicei);
@@ -4465,13 +4473,16 @@ class HumGrid : public std::vector<GridMeasure*> {
 		int  getDynamicsCount           (int partindex);
 		int  getFiguredBassCount        (int partindex);
 		int  getVerseCount              (int partindex, int staffindex);
+		int  getXmlidCount              (int partindex, int staffindex);
 		bool hasDynamics                (int partindex);
 		bool hasFiguredBass             (int partindex);
 		void setDynamicsPresent         (int partindex);
 		void setFiguredBassPresent      (int partindex);
 		void setHarmonyPresent          (int partindex);
 		void setVerseCount              (int partindex, int staffindex, int count);
+		void setXmlidCount              (int partindex, int staffindex, int count);
 		void reportVerseCount           (int partindex, int staffindex, int count);
+		void reportXmlidCount           (int partindex, int staffindex, int count);
 		void setHarmonyCount            (int partindex, int count);
 		void removeRedundantClefChanges (void);
 		void removeSibeliusIncipit      (void);
@@ -4558,6 +4569,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 	private:
 		std::vector<GridSlice*>       m_allslices;
 		std::vector<std::vector<int>> m_verseCount;
+		std::vector<std::vector<int>> m_xmlidCount;
 		std::vector<int>              m_harmonyCount;
 		bool                          m_pickup;
 		std::vector<bool>             m_dynamics;

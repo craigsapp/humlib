@@ -732,7 +732,7 @@ void Tool_mei2hum::processKeySig(mei_staffDef& staffinfo, xml_node keysig, HumNu
 	MAKE_CHILD_LIST(children, keysig);
 	string token = "*k[";
 	for (xml_node item : children) {
-		string pname = item.attribute("pname").value(); 			
+		string pname = item.attribute("pname").value(); 
 		string accid = item.attribute("accid").value();
 		if (pname.empty()) {
 			continue;
@@ -846,13 +846,18 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 	// see leaky memory note below for why there are separate
 	// variables for clef, keysig, etc.
 	mei_staffDef& staffdef = m_scoreDef.staves.at(num-1);
-	string clef      = staffdef.clef;
-	string keysig    = staffdef.keysig;
-	string timesig   = staffdef.timesig;
-	string midibpm   = staffdef.midibpm;
-	string transpose = staffdef.transpose;
-	string label     = staffdef.label;
-	string labelabbr = staffdef.labelabbr;
+	string clef         = staffdef.clef;
+	string keysig       = staffdef.keysig;
+	string timesig      = staffdef.timesig;
+	string midibpm      = staffdef.midibpm;
+	string transpose    = staffdef.transpose;
+	string label        = staffdef.label;
+	string labelabbr    = staffdef.labelabbr;
+	int maximodus       = staffdef.maximodus;
+	int modus           = staffdef.modus;
+	int tempus          = staffdef.tempus;
+	int prolatio        = staffdef.prolatio;
+	int hasMensuration  = maximodus | modus | tempus | prolatio;
 
 	// Incorporate label into HumGrid:
 	if (label.empty()) {
@@ -945,6 +950,21 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 	}
 
 	// Add metric signature/mensuration sign here.
+
+	if (hasMensuration) {
+		if (m_outdata.empty()) {
+			m_outdata.addMeasureToBack();
+		}
+		string metsigtok = "*";
+		metsigtok += "met()_";
+		metsigtok += to_string(maximodus);
+		metsigtok += to_string(modus);
+		metsigtok += to_string(tempus);
+		metsigtok += to_string(prolatio);
+
+		m_outdata.back()->addMeterSigToken(metsigtok, starttime QUARTER_CONVERT,
+		      num-1, 0, 0, m_staffcount);
+	}
 
 	// Incorporate tempo into HumGrid:
 	if (midibpm.empty()) {
