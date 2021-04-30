@@ -67,6 +67,7 @@ class Tool_composite : public HumTool {
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
 		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
+		void        markTogether         (HumdrumFile& infile, int direction);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -77,6 +78,7 @@ class Tool_composite : public HumTool {
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
 		bool        m_tremoloQ  = false;  // preserve tremolos
 		bool        m_upQ       = false;  // force stem up
+		std::string m_together;           // used with -m option
 
 };
 

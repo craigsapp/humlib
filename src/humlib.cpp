@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 27 15:28:13 PDT 2021
+// Last Modified: Tue Apr 27 16:22:23 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56280,6 +56280,8 @@ Tool_composite::Tool_composite(void) {
 	define("t|tremolo=b",   "preserve tremolos");
 	define("B|no-beam=b",   "do not apply automatic beaming");
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
+	define("m|match|together=s:limegreen", "mark alignments in group composite analyses");
+	define("M=b",           "equivalent to -m limegreen");
 	define("pitch=s:eR",    "pitch to display for composite rhythm");
 	define("debug=b",       "print debugging information");
 }
@@ -56349,6 +56351,12 @@ void Tool_composite::initialize(void) {
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
+	if (getBoolean("together")) {
+		m_together = getString("together");
+	}
+	if (getBoolean("M")) {
+		m_together = "limegreen";
+	}
 	if (m_extractQ) {
 		m_appendQ = false;
 	}
@@ -56376,6 +56384,13 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		prepareMultipleGroups(infile);
 	} else {
 		prepareSingleGroup(infile);
+	}
+
+	if (!m_together.empty()) {
+		string text = "!!!RDF**kern: | = marked note, color=\"";
+		text += m_together;
+		text += "\"";
+		infile.appendLine(text);
 	}
 }
 
@@ -56683,7 +56698,78 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 		addLabels(infile, +2);
 		addStria(infile, +2);
 	}
+
+	if (!m_together.empty()) {
+		if (m_appendQ) {
+			markTogether(infile, -2);
+		} else {
+			markTogether(infile, 2);
+		}
+	}
 }
+
+
+//////////////////////////////
+//
+// Tool_compare::markTogether --
+//
+
+void Tool_composite::markTogether(HumdrumFile& infile, int direction) {
+	if (m_together.empty()) {
+		return;
+	}
+	HTp groupA = NULL;
+	HTp groupB = NULL;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (direction == 2) {
+			groupA = infile.token(i, 1);
+			groupB = infile.token(i, 0);
+		} else if (direction == -2) {
+			groupA = infile.token(i, infile[i].getFieldCount() - 1);
+			groupB = infile.token(i, infile[i].getFieldCount() - 2);
+		} else {
+			cerr << "Unknown direction " << direction << " in Tool_compare::markTogether" << endl;
+			return;
+		}
+		if ((groupA == NULL) || (groupB == NULL)) {
+			cerr << "STRANGE problem here in Tool_compare::markTogether" << endl;
+			continue;
+		}
+		if (groupA->isNull()) {
+			continue;
+		}
+		if (groupB->isNull()) {
+			continue;
+		}
+		if (groupA->isRest()) {
+			continue;
+		}
+		if (groupB->isRest()) {
+			continue;
+		}
+		if (groupA->isSustainedNote()) {
+			continue;
+		}
+		if (groupB->isSustainedNote()) {
+			continue;
+		}
+		// the two notes are attacking at the same time to add marker
+		string text = groupA->getText();
+		text += "|";
+		groupA->setText(text);
+		text = groupB->getText();
+		text += "|";
+		groupB->setText(text);
+	}
+
+}
+
 
 
 //////////////////////////////

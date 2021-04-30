@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 27 15:28:13 PDT 2021
+// Last Modified: Tue Apr 27 16:22:23 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5849,6 +5849,7 @@ class Tool_composite : public HumTool {
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
 		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
+		void        markTogether         (HumdrumFile& infile, int direction);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -5859,6 +5860,7 @@ class Tool_composite : public HumTool {
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
 		bool        m_tremoloQ  = false;  // preserve tremolos
 		bool        m_upQ       = false;  // force stem up
+		std::string m_together;           // used with -m option
 
 };
 
