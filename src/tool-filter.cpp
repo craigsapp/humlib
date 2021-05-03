@@ -58,6 +58,7 @@
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-tie.h"
+#include "tool-timebase.h"
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
@@ -294,6 +295,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantise") {
 			RUNTOOL(chantize, infile, commands[i].second, status);
+		} else if (commands[i].first == "timebase") {
+			RUNTOOL(timebase, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 30 13:44:18 PDT 2021
+// Last Modified: Mon May  3 12:30:56 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8717,6 +8717,30 @@ class Tool_tie : public HumTool {
 		std::string   m_mark        = "@";
 
 };
+
+
+class Tool_timebase : public HumTool {
+	public:
+		      Tool_timebase       (void);
+		     ~Tool_timebase       () {};
+
+		bool  run                 (HumdrumFileSet& infiles);
+		bool  run                 (HumdrumFile& infile);
+		bool  run                 (const string& indata, ostream& out);
+		bool  run                 (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void   processFile         (HumdrumFile& infile);
+		HumNum getMinimumTime      (HumdrumFile& infile);
+		void   expandScore         (HumdrumFile& infile, HumNum mindur);
+
+	private:
+		bool   m_grace   = false;
+		bool   m_quiet   = false;
+		HumNum m_basedur = false;
+
+};
+
 
 
 class Tool_transpose : public HumTool {
