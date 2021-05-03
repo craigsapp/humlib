@@ -212,13 +212,13 @@ void processFile(HumdrumFile& infile, Options& options) {
 		if (max > 0) {
 			// absolute value maxiumum
 			max = (int)analysis.size() - max;
-			if (max < analysis.size()) {
+			if (max < (int)analysis.size()) {
 				analysis.erase(analysis.begin(), analysis.begin() + max);
 			}
 		} else if (max < 0) {
 			// subtract from top of triangle
 			max = -max;
-			if (max < analysis.size()) {
+			if (max < (int)analysis.size()) {
 				analysis.erase(analysis.begin(), analysis.begin() + max);
 			}
 		}
@@ -655,7 +655,7 @@ void printCorrelationScape(vector<vector<double>>& correlations,
 
 	vector<PixelColor> row(maxcols);
 
-	for (int i=0; i<correlations.size(); i++) {
+	for (int i=0; i<(int)correlations.size(); i++) {
 		getPixelRow(row, correlations[i]);
 		for (int j=0; j<rrepeat; j++) {
 			printPixelRow(cout, row, crepeat, !(i%2));
@@ -928,7 +928,7 @@ void getPixelRow(vector<PixelColor>& row, vector<double>& cor) {
 		if (ii < 0) {
 			ii = 0;
 		}
-		if (ii >= row.size()) {
+		if (ii >= (int)row.size()) {
 			break;
 		}
 		double value = -(cor.at(i) - 1)/range * coolest;
@@ -1036,7 +1036,7 @@ vector<double> smoothSequence(vector<double>& input) {
 	}
 	double feedback = 1.0 - gain;
 	double lastvalue = input[0];
-	for (int i=0; i<input.size(); i++) {
+	for (int i=0; i<(int)input.size(); i++) {
 		output[i] = gain * input[i] + feedback * lastvalue;
 		lastvalue = output[0];
 	}
