@@ -68,6 +68,9 @@ class Tool_composite : public HumTool {
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
 		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
 		void        markTogether         (HumdrumFile& infile, int direction);
+		void        markCoincidences     (HumdrumFile& infile, int direction);
+		void        markCoincidencesMusic(HumdrumFile& infile);
+		bool        isAttackInBothGroups (HumdrumFile& infile, int line);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -78,6 +81,9 @@ class Tool_composite : public HumTool {
 		bool        m_graceQ    = false;  // include grace notes in composite rhythm
 		bool        m_tremoloQ  = false;  // preserve tremolos
 		bool        m_upQ       = false;  // force stem up
+		bool        m_hasGroupsQ = false; // used with -M, -N option
+		bool        m_assignedGroups = false;
+		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option
 
 };

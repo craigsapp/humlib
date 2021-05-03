@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 27 16:22:23 PDT 2021
+// Last Modified: Fri Apr 30 13:44:18 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56282,6 +56282,8 @@ Tool_composite::Tool_composite(void) {
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
 	define("m|match|together=s:limegreen", "mark alignments in group composite analyses");
 	define("M=b",           "equivalent to -m limegreen");
+	define("n|together-in-score=s:limegreen", "mark alignments in group in SCORE (not analyses)");
+	define("N=b",           "equivalent to -n limegreen");
 	define("pitch=s:eR",    "pitch to display for composite rhythm");
 	define("debug=b",       "print debugging information");
 }
@@ -56351,18 +56353,29 @@ void Tool_composite::initialize(void) {
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
+
+	if (getBoolean("together-in-score")) {
+		m_togetherInScore = getString("together-in-score");
+	}
+	if (getBoolean("N")) {
+		m_togetherInScore = "limegreen";
+	}
+
 	if (getBoolean("together")) {
 		m_together = getString("together");
 	}
 	if (getBoolean("M")) {
 		m_together = "limegreen";
 	}
+
 	if (m_extractQ) {
 		m_appendQ = false;
 	}
 	if (m_upQ) {
 		m_pitch += "/";
 	}
+	m_hasGroupsQ = false;
+	m_assignedGroups = false;
 }
 
 
@@ -56376,17 +56389,18 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	if (!m_tremoloQ) {
 		reduceTremolos(infile);
 	}
-	bool autogroup = false;
-	if (!m_nogroupsQ) {
-		autogroup = hasGroupInterpretations(infile);
-	}
-	if (autogroup) {
+	m_hasGroupsQ = hasGroupInterpretations(infile);
+	if (m_hasGroupsQ && (!m_nogroupsQ)) {
 		prepareMultipleGroups(infile);
 	} else {
 		prepareSingleGroup(infile);
 	}
 
-	if (!m_together.empty()) {
+	if (m_hasGroupsQ && !m_togetherInScore.empty()) {
+		markCoincidencesMusic(infile);
+	}
+
+	if ((!m_together.empty()) || (!m_togetherInScore.empty())) {
 		string text = "!!!RDF**kern: | = marked note, color=\"";
 		text += m_together;
 		text += "\"";
@@ -56718,6 +56732,7 @@ void Tool_composite::markTogether(HumdrumFile& infile, int direction) {
 	if (m_together.empty()) {
 		return;
 	}
+
 	HTp groupA = NULL;
 	HTp groupB = NULL;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -57149,6 +57164,158 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 		addLabels(infile, +1);
 		addStria(infile, +1);
 	}
+
+	if ((!m_together.empty()) && m_hasGroupsQ) {
+		if (m_appendQ) {
+			markCoincidences(infile, -1);
+		} else {
+			markCoincidences(infile, +1);
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_composite::markCoincidencesMusic -- Mark notes that are attacked
+//   at the same time as notes in the other composite group (only two groups
+//   considered).
+//
+
+void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
+	if (!m_assignedGroups) {
+		assignGroups(infile);
+	}
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		bool both = isAttackInBothGroups(infile, i);
+		if (!both) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			if (!token->isNoteAttack()) {
+				continue;
+			}
+			if (token->find("|") != string::npos) {
+				continue;
+			}
+			string group = token->getValue("auto", "group");
+			if (group.empty()) {
+				continue;
+			}
+			string text = token->getText();
+			text += "|";
+			token->setText(text);
+		}
+	}
+}
+
+
+
+
+//////////////////////////////
+//
+// Tool_composite::markCoincidences -- Similar to markTogether() for 
+//    marking grouped composite rhythms, but this one is for the single-
+//    streamed composite rhythm when there are groupings.
+//
+
+void Tool_composite::markCoincidences(HumdrumFile& infile, int direction) {
+	if (!m_assignedGroups) {
+		assignGroups(infile);
+	}
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts);
+	if (sstarts.empty()) {
+		return;
+	}
+
+	HTp composite;
+	if (direction > 0) {
+		composite = sstarts[0];
+	} else {
+		composite = sstarts.back();
+	}
+
+	HTp current = composite;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isRest()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (!current->isNoteAttack()) {
+			current = current->getNextToken();
+			continue;
+		}
+		// composite rhythm note is an attack, so see if it
+		// occurs in both groups (only two groups considered for now)
+		int line = current->getLineIndex();
+		bool bothGroups = isAttackInBothGroups(infile, line);
+		if (bothGroups) {
+			string text = current->getText();
+			text += "|";
+			current->setText(text);
+		}
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::isAttackInBothGroups --
+//
+
+bool Tool_composite::isAttackInBothGroups(HumdrumFile& infile, int line) {
+	bool hasA = false;
+	bool hasB = false;
+	for (int i=0; i<infile[line].getFieldCount(); i++) {
+		HTp token = infile.token(line, i);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isNull()) {
+			continue;
+		}
+		if (token->isRest()) {
+			continue;
+		}
+		if (!token->isNoteAttack()) {
+			continue;
+		}
+		string group = token->getValue("auto", "group");
+		if (group.empty()) {
+			continue;
+		}
+		if (group == "A") {
+			hasA = true;
+		} else if (group == "B") {
+			hasB = true;
+		}
+		if (hasA && hasB) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -57465,13 +57632,17 @@ HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<bo
 
 //////////////////////////////
 //
-// Tool_composite::assignGroups -- Add a parameter auto:grouping = "A" or "B" depending on the
-//    group.  This can be generalized later to more letters, or arbitrary strings perhaps.
-//    This comes from an interpretation such as *grp:A or *grp:B in the data.  If *grp: is found
-//    without a letter, than that group will be null group.
-//
+// Tool_composite::assignGroups -- Add a parameter 
+//   auto:grouping = "A" or "B" depending on the group.  This
+//   can be generalized later to more letters, or arbitrary
+//   strings perhaps.  This comes from an interpretation such
+//   as *grp:A or *grp:B in the data.  If *grp: is found without
+//   a letter, than that group will be null group.
+
 
 void Tool_composite::assignGroups(HumdrumFile& infile) {
+
+	m_assignedGroups = true;
 
 	int maxtrack = infile.getMaxTrack();
 	vector<vector<string>> current;
@@ -57506,7 +57677,6 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 			}
          string group = getGroup(current, track-1, subtrack-1);
 			token->setValue("auto", "group", group);
-// cerr << "$$$ SETTING TOKEN " << token << " GROUP TO " << token->getValue("auto", "group") << endl;
 		}
 	}
 }
