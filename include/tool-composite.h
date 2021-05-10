@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 29 16:48:22 CEST 2019
-// Last Modified: Mon Jan 18 11:30:01 PST 2021
+// Last Modified: Mon May  3 15:45:21 PDT 2021
 // Filename:      tool-composite.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-composite.h
 // Syntax:        C++11; humlib
@@ -71,6 +71,10 @@ class Tool_composite : public HumTool {
 		void        markCoincidences     (HumdrumFile& infile, int direction);
 		void        markCoincidencesMusic(HumdrumFile& infile);
 		bool        isAttackInBothGroups (HumdrumFile& infile, int line);
+		void        extractNestingData   (HumdrumFile& infile);
+		void        analyzeNestingDataGroups(HumdrumFile& infile, int direction);
+		void        analyzeNestingDataAll(HumdrumFile& infile, int direction);
+		void        getNestData          (HTp spine, int& total, int& coincide);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -82,6 +86,7 @@ class Tool_composite : public HumTool {
 		bool        m_tremoloQ  = false;  // preserve tremolos
 		bool        m_upQ       = false;  // force stem up
 		bool        m_hasGroupsQ = false; // used with -M, -N option
+		bool        m_nestQ     = false;  // used with --nest option
 		bool        m_assignedGroups = false;
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option

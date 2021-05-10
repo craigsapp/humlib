@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  3 12:30:56 PDT 2021
+// Last Modified: Mon May 10 11:17:54 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56376,6 +56376,8 @@ void Tool_composite::initialize(void) {
 	}
 	m_hasGroupsQ = false;
 	m_assignedGroups = false;
+
+	m_nestQ = true;;
 }
 
 
@@ -56405,6 +56407,174 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		text += m_together;
 		text += "\"";
 		infile.appendLine(text);
+	}
+
+	if (m_nestQ) {
+		extractNestingData(infile);
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// extractNestingData -- Count the number of notes in the composite
+//
+
+void Tool_composite::extractNestingData(HumdrumFile& infile) {
+	if (m_hasGroupsQ && !m_nogroupsQ) {
+		if (m_appendQ) {
+			analyzeNestingDataGroups(infile, -2);
+		} else {
+			analyzeNestingDataGroups(infile, +2);
+		}
+	} else {
+		if (m_appendQ) {
+			analyzeNestingDataAll(infile, -1);
+		} else {
+			analyzeNestingDataAll(infile, +1);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// analyzeNestingDataGroups --
+//
+
+void Tool_composite::analyzeNestingDataGroups(HumdrumFile& infile, int direction) {
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts);
+	if (sstarts.empty()) {
+		// strange problem
+		return;
+	}
+	if (sstarts.size() < 2) {
+		// strange problem
+		return;
+	}
+	HTp spineA = NULL;
+	HTp spineB = NULL;
+	if (direction == 2) {
+		spineA = sstarts[1];
+		spineB = sstarts[0];
+	} else if (direction == -2) {
+ 		spineA = sstarts.back();
+ 		spineB = sstarts.at(sstarts.size() - 2);
+	} else {
+		// strange problem
+		return;
+	}
+	if (!spineA) {
+		// strange problem
+		return;
+	}
+	if (!spineB) {
+		// strange problem
+		return;
+	}
+	int totalA = 0;
+	int coincideA = 0;
+	int totalB = 0;
+	int coincideB = 0;
+
+	getNestData(spineA, totalA, coincideA);
+	getNestData(spineB, totalB, coincideB);
+
+	string output1a = "!!!group-A-total-notes: ";
+	output1a += to_string(totalA);
+	infile.appendLine(output1a);
+
+	if (!m_together.empty()) {
+		string output2a = "!!!group-A-coincide-notes: ";
+		output2a += to_string(coincideA);
+		infile.appendLine(output2a);
+	}
+
+	string output1b = "!!!group-B-total-notes: ";
+	output1b += to_string(totalB);
+	infile.appendLine(output1b);
+
+	if (!m_together.empty()) {
+		string output2b = "!!!group-B-coincide-notes: ";
+		output2b += to_string(coincideB);
+		infile.appendLine(output2b);
+	}
+}
+
+
+
+
+//////////////////////////////
+//
+// analyzeNestingDataGroups --
+//
+
+void Tool_composite::analyzeNestingDataAll(HumdrumFile& infile, int direction) {
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts);
+	if (sstarts.empty()) {
+		// strange problem
+		return;
+	}
+	HTp spine = NULL;
+	if (direction == -1) {
+		spine = sstarts.back();
+	} else if (direction == 1) {
+		spine = sstarts[0];
+	}
+	if (spine == NULL) {
+		// strange problem
+		return;
+	}
+	int total = 0;
+	int coincide = 0;
+
+	getNestData(spine, total, coincide);
+	string output1 = "!!!composite-total-notes: ";
+	output1 += to_string(total);
+	infile.appendLine(output1);
+
+	if (!m_together.empty()) {
+		string output2 = "!!!composite-coincide-notes: ";
+		output2 += to_string(coincide);
+		infile.appendLine(output2);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::getNestData -- return total number of mononphonic note
+//   attacks in primary spine as well as those marked with "|" (for coincidences).
+//
+
+void Tool_composite::getNestData(HTp spine, int& total, int& coincide) {
+	total = 0;
+	coincide = 0;
+	HTp current = spine;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (!current->isNoteAttack()) {
+			current = current->getNextToken();
+			continue;
+		}
+		total++;
+		if (current->find("|") != string::npos) {
+			coincide++;
+		}
+		current = current->getNextToken();
 	}
 }
 
@@ -57224,7 +57394,7 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_composite::markCoincidences -- Similar to markTogether() for 
+// Tool_composite::markCoincidences -- Similar to markTogether() for
 //    marking grouped composite rhythms, but this one is for the single-
 //    streamed composite rhythm when there are groupings.
 //
@@ -57632,7 +57802,7 @@ HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<bo
 
 //////////////////////////////
 //
-// Tool_composite::assignGroups -- Add a parameter 
+// Tool_composite::assignGroups -- Add a parameter
 //   auto:grouping = "A" or "B" depending on the group.  This
 //   can be generalized later to more letters, or arbitrary
 //   strings perhaps.  This comes from an interpretation such
