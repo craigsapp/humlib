@@ -115,6 +115,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isInstrumentDesignation   (void);
 		bool     isInstrumentName          (void);
 		bool     isInstrumentAbbreviation  (void);
+		bool     isStria                   (void);
 
 		std::string getInstrumentName        (void);
 		std::string getInstrumentAbbreviation(void);

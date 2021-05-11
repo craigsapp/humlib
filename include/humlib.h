@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May 10 11:17:54 PDT 2021
+// Last Modified: Mon May 10 23:25:47 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1510,6 +1510,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isInstrumentDesignation   (void);
 		bool     isInstrumentName          (void);
 		bool     isInstrumentAbbreviation  (void);
+		bool     isStria                   (void);
 
 		std::string getInstrumentName        (void);
 		std::string getInstrumentAbbreviation(void);
@@ -5857,6 +5858,11 @@ class Tool_composite : public HumTool {
 		void        analyzeNestingDataGroups(HumdrumFile& infile, int direction);
 		void        analyzeNestingDataAll(HumdrumFile& infile, int direction);
 		void        getNestData          (HTp spine, int& total, int& coincide);
+		void        getCoincidenceRhythms(vector<string>& rhythms, vector<int>& coincidences,
+		                                  HumdrumFile& infile);
+		void        fillInCoincidenceRhythm(vector<int>& coincidences,
+		                                  HumdrumFile& infile, int direction);
+		void        processCoincidenceInterpretation(HumdrumFile& infile, HTp token);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -5869,6 +5875,7 @@ class Tool_composite : public HumTool {
 		bool        m_upQ       = false;  // force stem up
 		bool        m_hasGroupsQ = false; // used with -M, -N option
 		bool        m_nestQ     = false;  // used with --nest option
+		bool        m_coincidenceQ = false; // used with -c option
 		bool        m_assignedGroups = false;
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option

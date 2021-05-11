@@ -1611,6 +1611,21 @@ bool HumdrumToken::isInstrumentAbbreviation(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isStria -- True if a staff-line count.
+//
+
+bool HumdrumToken::isStria(void) {
+	if (this->compare(0, 6, "*stria'") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getInstrumentName --
 //
 
