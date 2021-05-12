@@ -80,6 +80,7 @@ class Tool_composite : public HumTool {
 		void        fillInCoincidenceRhythm(vector<int>& coincidences,
 		                                  HumdrumFile& infile, int direction);
 		void        processCoincidenceInterpretation(HumdrumFile& infile, HTp token);
+		bool        hasPipeRdf           (HumdrumFile& infile);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -94,6 +95,7 @@ class Tool_composite : public HumTool {
 		bool        m_nestQ     = false;  // used with --nest option
 		bool        m_coincidenceQ = false; // used with -c option
 		bool        m_assignedGroups = false;
+		bool        m_suppressCMarkQ = false; // used with -c option when -M -m -N and -n not present
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option
 

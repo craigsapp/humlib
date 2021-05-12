@@ -118,10 +118,10 @@ void Tool_composite::initialize(void) {
 	m_nogroupsQ = getBoolean("no-groups");
 	m_graceQ    = getBoolean("grace");
 	m_tremoloQ  = getBoolean("tremolo");
-	m_coincidenceQ = getBoolean("coincidence-rhythm");
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
+	m_coincidenceQ = getBoolean("coincidence-rhythm");
 
 	if (getBoolean("together-in-score")) {
 		m_togetherInScore = getString("together-in-score");
@@ -146,7 +146,13 @@ void Tool_composite::initialize(void) {
 	m_hasGroupsQ = false;
 	m_assignedGroups = false;
 
-	m_nestQ = true;;
+	m_nestQ = true;
+
+	if (m_coincidenceQ) {
+		if (m_together.empty() && m_togetherInScore.empty()) {
+			m_suppressCMarkQ = true;
+		}
+	}
 }
 
 
@@ -169,19 +175,44 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 
 	if (m_hasGroupsQ && !m_togetherInScore.empty()) {
 		markCoincidencesMusic(infile);
+	} else if (m_hasGroupsQ && m_coincidenceQ) {
+		markCoincidencesMusic(infile);
 	}
 
 	if ((!m_together.empty()) || (!m_togetherInScore.empty())) {
-		string text = "!!!RDF**kern: | = marked note, color=\"";
-		text += m_together;
-		text += "\"";
-		infile.appendLine(text);
+		if (!hasPipeRdf(infile)) {
+			string text = "!!!RDF**kern: | = marked note, color=\"";
+			text += m_together;
+			text += "\"";
+			infile.appendLine(text);
+		}
 	}
 
 	if (m_nestQ) {
 		extractNestingData(infile);
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::hasPipeRdf -- True if already has:
+//     !!!RDF**kern: | = marked note, color=\"";
+//
+
+bool Tool_composite::hasPipeRdf(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->find("!!!RDF**kern: | = marked note") != string::npos) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -262,21 +293,21 @@ void Tool_composite::analyzeNestingDataGroups(HumdrumFile& infile, int direction
 	output1a += to_string(totalA);
 	infile.appendLine(output1a);
 
-	if (!m_together.empty()) {
+//	if (!m_together.empty()) {
 		string output2a = "!!!group-A-coincide-notes: ";
 		output2a += to_string(coincideA);
 		infile.appendLine(output2a);
-	}
+//	}
 
 	string output1b = "!!!group-B-total-notes: ";
 	output1b += to_string(totalB);
 	infile.appendLine(output1b);
 
-	if (!m_together.empty()) {
+//	if (!m_together.empty()) {
 		string output2b = "!!!group-B-coincide-notes: ";
 		output2b += to_string(coincideB);
 		infile.appendLine(output2b);
-	}
+//	}
 }
 
 
@@ -705,6 +736,7 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_compare::markTogether --
@@ -726,11 +758,11 @@ void Tool_composite::markTogether(HumdrumFile& infile, int direction) {
 		}
 		if (direction == 2) {
 			if (m_coincidenceQ) {
-				groupA = infile.token(i, 1);
-				groupB = infile.token(i, 0);
-			} else {
 				groupA = infile.token(i, 2);
 				groupB = infile.token(i, 1);
+			} else {
+				groupA = infile.token(i, 1);
+				groupB = infile.token(i, 0);
 			}
 		} else if (direction == -2) {
 			groupA = infile.token(i, infile[i].getFieldCount() - 1);
@@ -763,10 +795,10 @@ void Tool_composite::markTogether(HumdrumFile& infile, int direction) {
 		}
 		// the two notes are attacking at the same time to add marker
 		string text = groupA->getText();
-		text += "|";
+		text += "|z";
 		groupA->setText(text);
 		text = groupB->getText();
-		text += "|";
+		text += "|z";
 		groupB->setText(text);
 	}
 
@@ -1203,6 +1235,15 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 	if (!m_assignedGroups) {
 		assignGroups(infile);
 	}
+
+	bool suppress = false;
+	if (m_suppressCMarkQ) {
+		suppress = true;
+	}
+	if (m_togetherInScore.empty()) {
+		suppress = true;
+	}
+	vector<int> coincidences(infile.getLineCount(), 0);
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
 			continue;
@@ -1229,10 +1270,21 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 			if (group.empty()) {
 				continue;
 			}
-			string text = token->getText();
-			text += "|";
-			token->setText(text);
+			if (!suppress) {
+				string text = token->getText();
+				text += "|";
+				token->setText(text);
+			}
+			coincidences[i] = 1;
 		}
+	}
+
+	if (m_coincidenceQ) {
+		int direction = 2;
+		if (m_appendQ) {
+			direction = -2;
+		}
+		fillInCoincidenceRhythm(coincidences, infile, direction);
 	}
 }
 
@@ -1338,7 +1390,44 @@ void Tool_composite::getCoincidenceRhythms(vector<string>& rhythms, vector<int>&
 		}
 	}
 
+	// go back and insert rests at starts of measures.
+	bool barline = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (infile[i].isBarline()) {
+			barline = true;
+			continue;
+		}
+		if (barline && infile[i].isData()) {
+			barline = false;
+			if (coincidences[i]) {
+				continue;
+			}
+			// need to add a rests
+			int startindex = i;
+			int endindex = -1;
+			for (int j=i+1; j<(int)coincidences.size(); j++) {
+				if (infile[j].isBarline()) {
+					endindex = j;
+					break;
+				} else if (coincidences[j]) {
+					endindex = j;
+					 break;
+				}
+			}
+			if (endindex < 0) {
+				endindex = infile.getLineCount() - 1;
+			}
+			HumNum duration = infile[endindex].getDurationFromStart() - infile[startindex].getDurationFromStart();
+			string rhythm = Convert::durationToRecip(duration) + "r";
+			// check here if contains "%" character.
+			rhythms[startindex] = rhythm;
+		}
+	}
 }
+
 
 
 //////////////////////////////
