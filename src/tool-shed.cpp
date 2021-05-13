@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Oct 13 11:41:16 PDT 2019
-// Last Modified: Mon Oct 28 21:56:33 PDT 2019
+// Last Modified: Thu May 13 09:42:30 PDT 2021
 // Filename:      tool-shed.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-shed.cpp
 // Syntax:        C++11; humlib
@@ -163,6 +163,10 @@ void Tool_shed::prepareSearch(int index) {
 	}
 	if (m_option.find("L") != std::string::npos) {
 		m_localcomment = true;
+		m_data = false;
+	}
+	if (m_option.find("G") != std::string::npos) {
+		m_globalcomment = true;
 		m_data = false;
 	}
 	if (m_option.find("K") != std::string::npos) {
@@ -397,6 +401,10 @@ void Tool_shed::processFile(HumdrumFile& infile) {
 		searchAndReplaceLocalComment(infile);
 	}
 
+	if (m_globalcomment) {
+		searchAndReplaceGlobalComment(infile);
+	}
+
 	if (m_reference) {
 		searchAndReplaceReferenceRecords(infile);
 	}
@@ -546,6 +554,41 @@ void Tool_shed::searchAndReplaceLocalComment(HumdrumFile& infile) {
 				token->setText(text);
 				m_modified = true;
 			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_shed::searchAndReplaceGlobalComment --
+//
+
+void Tool_shed::searchAndReplaceGlobalComment(HumdrumFile& infile) {
+	string isearch;
+	if (m_search[0] == '^') {
+		isearch = "^!!" + m_search.substr(1);
+	} else {
+		isearch = "^!!.*" + m_search;
+	}
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isGlobalComment()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->size() < 3) {
+			// Don't mess with null comments
+			continue;
+		}
+		if (hre.search(token, isearch, m_grepoptions)) {
+			string text = token->getText().substr(1);
+			hre.replaceDestructive(text, m_replace, m_search, m_grepoptions);
+			hre.replaceDestructive(text, "", "^!+");
+			text = "!!" + text;
+			token->setText(text);
+			m_modified = true;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue May 11 20:40:15 PDT 2021
+// Last Modified: Thu May 13 09:43:37 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8368,6 +8368,7 @@ class Tool_shed : public HumTool {
 		void    searchAndReplaceData             (HumdrumFile& infile);
 		void    searchAndReplaceBarline          (HumdrumFile& infile);
 		void    searchAndReplaceLocalComment     (HumdrumFile& infile);
+		void    searchAndReplaceGlobalComment    (HumdrumFile& infile);
 		void    searchAndReplaceReferenceRecords (HumdrumFile& infile);
 		void    searchAndReplaceReferenceKeys    (HumdrumFile& infile);
 		void    searchAndReplaceReferenceValues  (HumdrumFile& infile);
@@ -8396,6 +8397,7 @@ class Tool_shed : public HumTool {
 		bool m_exinterp       = false; // process exclusive interpretations
 		bool m_interpretation = false; // process interpretations
 		bool m_localcomment   = false; // process local comments
+		bool m_globalcomment  = false; // process global comments
 		bool m_reference      = false; // process reference records
 		bool m_referencekey   = false; // process reference records keys
 		bool m_referencevalue = false; // process reference records values
