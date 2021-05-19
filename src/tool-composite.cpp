@@ -1580,6 +1580,10 @@ bool Tool_composite::isAttackInBothGroups(HumdrumFile& infile, int line) {
 		if (!token->isNoteAttack()) {
 			continue;
 		}
+		string value = token->getValue("auto", "ignoreTremoloNote");
+		if (value == "1") {
+			continue;
+		}
 		string group = token->getValue("auto", "group");
 		if (group.empty()) {
 			continue;
