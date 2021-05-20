@@ -505,7 +505,7 @@ void MuseRecordBasic::append(const char* format, ...) {
 
 	HumNum rn;
 
-	int len = strlen(format);
+	int len = (int)strlen(format);
 	for (i=0; i<len; i++) {
 		switch (format[i]) {   // Type to expect.
 			case 'i':
