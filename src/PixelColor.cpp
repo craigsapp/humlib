@@ -512,7 +512,6 @@ PixelColor PixelColor::operator/(int number) {
 
 PixelColor PixelColor::getColor(const string& colorstring) {
 	PixelColor output;
-	int i = 0;
 	int start = 0;
 	int hasdigit  = 0;
 	int length = (int)colorstring.size();
@@ -528,7 +527,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	} else if (length == 6) {
 		int allxdigit = 1;
 		start = 0;
-		for (i=start; i<length; i++) {
+		for (int i=start; i<length; i++) {
 			allxdigit = allxdigit && isxdigit(colorstring[i]);
 		}
 		if (allxdigit) {
@@ -576,9 +575,9 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 		strcpy(rv, piece1.c_str());
 		strcpy(gv, piece1.c_str());
 		strcpy(bv, piece1.c_str());
-		int rval = strtol(rv, NULL, 16);
-		int gval = strtol(gv, NULL, 16);
-		int bval = strtol(bv, NULL, 16);
+		int rval = (int)strtol(rv, NULL, 16);
+		int gval = (int)strtol(gv, NULL, 16);
+		int bval = (int)strtol(bv, NULL, 16);
 		output.setColor(rval, gval, bval);
 		return output;
 	}
@@ -586,8 +585,8 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	// color string
 	char buffer[128] = {0};
 	strncpy(buffer, colorstring.c_str(), 100);
-	length = strlen(buffer);
-	for (i=0; i<length; i++) {
+	length = (int)strlen(buffer);
+	for (int i=0; i<length; i++) {
 		buffer[i] = std::tolower(buffer[i]);
 	}
 	output.setColor(0,0,0);

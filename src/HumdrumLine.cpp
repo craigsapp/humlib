@@ -399,16 +399,16 @@ bool HumdrumLine::isGlobalReference(void) const {
 	if (this->at(3) == '!') {
 		return false;
 	}
-	int spaceloc = (int)this->find(" ");
-	int tabloc = (int)this->find("\t");
-	int colloc = (int)this->find(":");
-	if (colloc == (int)string::npos) {
+	size_t spaceloc = this->find(" ");
+	size_t tabloc = this->find("\t");
+	size_t colloc = this->find(":");
+	if (colloc == string::npos) {
 		return false;
 	}
-	if ((spaceloc != (int)string::npos) && (spaceloc < colloc)) {
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
 		return false;
 	}
-	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
 		return false;
 	}
 	return true;
@@ -433,16 +433,16 @@ bool HumdrumLine::isUniversalReference(void) const {
 	if ((*this)[4] == '!') {
 		return false;
 	}
-	int spaceloc = (int)this->find(" ");
-	int tabloc = (int)this->find("\t");
-	int colloc = (int)this->find(":");
-	if (colloc == (int)string::npos) {
+	size_t spaceloc = this->find(" ");
+	size_t tabloc = this->find("\t");
+	size_t colloc = this->find(":");
+	if (colloc == string::npos) {
 		return false;
 	}
-	if ((spaceloc != (int)string::npos) && (spaceloc < colloc)) {
+	if ((spaceloc != string::npos) && (spaceloc < colloc)) {
 		return false;
 	}
-	if ((tabloc != (int)string::npos) && (tabloc < colloc)) {
+	if ((tabloc != string::npos) && (tabloc < colloc)) {
 		return false;
 	}
 	return true;
@@ -634,7 +634,7 @@ string HumdrumLine::getGlobalReferenceKey(void) const {
 	if (index >= (int)colloc) {
 		return "";
 	}
-	int length = colloc - index;
+	int length = (int)colloc - index;
 	string output = this->substr(index, length);
 	for (int i=(int)output.size()-1; i>=0; i--) {
 		if (isspace(output.at(i))) {
@@ -679,7 +679,7 @@ string HumdrumLine::getUniversalReferenceKey(void) const {
 	if (index >= (int)colloc) {
 		return "";
 	}
-	int length = colloc - index;
+	int length = (int)colloc - index;
 	string output = this->substr(index, length);
 	for (int i=(int)output.size()-1; i>=0; i--) {
 		if (isspace(output.at(i))) {

@@ -1135,7 +1135,7 @@ int MuseRecord::getFootnoteFlag(void) {
 	if (recordInfo[0] == ' ') {
 		output = -1;
 	} else {
-		output = std::strtol(recordInfo.c_str(), NULL, 36);
+		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -1192,7 +1192,7 @@ int MuseRecord::getLevel(void) {
 	if (recordInfo[0] == ' ') {
 		output = 1;
 	} else {
-		output = std::strtol(recordInfo.c_str(), NULL, 36);
+		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -1259,7 +1259,7 @@ int MuseRecord::getTrack(void) {
 	if (recordInfo[0] == ' ') {
 		output = 0;
 	} else {
-		output = std::strtol(recordInfo.c_str(), NULL, 36);
+		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -1732,7 +1732,7 @@ int MuseRecord::getTimeModificationLeft(void) {
 	if (recordInfo[0] == ' ') {
 		output = 0;
 	} else {
-		output = std::strtol(recordInfo.c_str(), NULL, 36);
+		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -1781,7 +1781,7 @@ int MuseRecord::getTimeModificationRight(void) {
 		output = 0;
 	} else {
 		string temp = recordInfo.substr(2);
-		output = std::strtol(temp.c_str(), NULL, 36);
+		output = (int)strtol(temp.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -1958,7 +1958,7 @@ int MuseRecord::getStaff(void) {
 	if (recordInfo[0] == ' ') {
 		output = 1;
 	} else {
-		output = std::strtol(recordInfo.c_str(), NULL, 36);
+		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
 	return output;
 }
@@ -2347,7 +2347,7 @@ repeating:
 		goto repeating;
 	} else if (addString[index] == '&') {
 		number = addString[index+1];
-		output = std::strtol(number.c_str(), NULL, 36);
+		output = (int)strtol(number.c_str(), NULL, 36);
 	}
 
 	return output;
@@ -3450,7 +3450,7 @@ string MuseRecord::getFigureCountString(void) {
 int MuseRecord::getFigureCount(void) {
 	allowFigurationOnly("getFigureCount");
 	string temp = getFigureCountString();
-	int output = std::strtol(temp.c_str(), NULL, 36);
+	int output = (int)strtol(temp.c_str(), NULL, 36);
 	return output;
 }
 
