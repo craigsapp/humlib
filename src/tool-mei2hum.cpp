@@ -61,6 +61,7 @@ Tool_mei2hum::Tool_mei2hum(void) {
 	define("app|app-label=s", "app label to follow");
 	define("r|recip=b", "output **recip spine");
 	define("s|stems=b", "include stems in output");
+	define("x|xmlids=b", "include xmlids in output");
 	define("P|no-place=b", "Do not convert placement attribute");
 
 	m_maxverse.resize(m_maxstaff);
@@ -74,6 +75,9 @@ Tool_mei2hum::Tool_mei2hum(void) {
 
 	m_hasDynamics.resize(m_maxstaff);
 	fill(m_hasDynamics.begin(), m_hasDynamics.end(), false);
+
+	m_hasXmlids.resize(m_maxstaff);
+	fill(m_hasXmlids.begin(), m_hasXmlids.end(), false);
 
 	m_hasHarm.resize(m_maxstaff);
 	fill(m_hasHarm.begin(), m_hasHarm.end(), false);
@@ -185,6 +189,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 			continue;
 		}
 		m_outdata.setHarmonyPresent(i);
+	}
+
+	// Report xmlid presence for each staff to HumGrid:
+	for (int i=0; i<(int)m_hasXmlids.size(); i++) {
+		if (m_hasXmlids[i] == false) {
+			continue;
+		}
+		m_outdata.setXmlidsPresent(i);
 	}
 
 	auto measure = doc.select_node("/mei/music/body/mdiv/score/section/measure").node();
@@ -2274,6 +2286,16 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 		output += tok;
 	}
 
+	if (m_xmlidQ) {
+		GridStaff* staff = dataslice->at(m_currentStaff-1)->at(0);
+		// not keeping track of overwriting ids at the moment:
+		string xmlid = note.attribute("xml:id").value();
+		if (!xmlid.empty()) {
+			staff->setXmlid(xmlid);
+			m_outdata.setXmlidsPresent(m_currentStaff-1);
+		}
+	}
+
 	bool hasverse = false;
 
 	for (int i=0; i<(int)children.size(); i++) {
@@ -2425,6 +2447,16 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		}
 	} else {
 		output += tok;
+	}
+
+	if (m_xmlidQ) {
+		GridStaff* staff = dataslice->at(m_currentStaff-1)->at(0);
+		// not keeping track of overwriting ids at the moment:
+		string xmlid = note.attribute("xml:id").value();
+		if (!xmlid.empty()) {
+			staff->setXmlid(xmlid);
+			m_outdata.setXmlidsPresent(m_currentStaff-1);
+		}
 	}
 
 	bool hasverse = false;
@@ -3961,6 +3993,8 @@ void Tool_mei2hum::getChildrenVector(vector<xml_node>& children,
 void Tool_mei2hum::initialize(void) {
 	m_recipQ   =  getBoolean("recip");
 	m_stemsQ   =  getBoolean("stems");
+	m_xmlidQ   =  getBoolean("xmlids");
+	m_xmlidQ   = 1;  // for testing
 	m_appLabel =  getString("app-label");
 	m_placeQ   = !getBoolean("no-place");
 }

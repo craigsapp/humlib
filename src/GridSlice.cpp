@@ -538,7 +538,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		HTp verse = sides.getVerse(i);
 		if (verse) {
 			line.appendToken(verse);
-			sides.detachHarmony();  // why detaching harmony in verses?
+			sides.detachHarmony();
 		} else {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
@@ -597,7 +597,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	// existing verses:
 	int vcount = sides.getVerseCount();
 
-	int xcount = sides.getXmlidCount();
+	// int xcount = sides.getXmlidCount();
 	int fcount = sides.getFiguredBassCount();
 
 	// there should not be any harmony attached to staves
@@ -605,7 +605,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	int hcount = sides.getHarmonyCount();
 	HTp newtoken;
 
-	if (xcount > 0) {
+	if (maxxcount > 0) {
 		HTp xmlid = sides.getXmlid();
 		if (xmlid) {
 			line.appendToken(xmlid);

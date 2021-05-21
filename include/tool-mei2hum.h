@@ -265,6 +265,7 @@ class Tool_mei2hum : public HumTool {
 		bool           m_stemsQ = false;
 		bool           m_recipQ = false;
 		bool           m_placeQ = false;
+		bool           m_xmlidQ = false;
 
 		mei_scoreDef   m_scoreDef;    // for keeping track of key/meter/clef etc.
 		int            m_staffcount;  // number of staves in score.
@@ -287,6 +288,7 @@ class Tool_mei2hum : public HumTool {
 		vector<HumNum> m_measureDuration;
 		vector<bool>   m_hasDynamics;
 		vector<bool>   m_hasHarm;
+		vector<bool>   m_hasXmlids;
 		const int      m_maxstaff = 1000;
 
 		bool           m_fermata = false;     // set priority of note/fermata over note@fermata

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 20 08:48:54 PDT 2021
+// Last Modified: Fri May 21 14:59:43 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -7316,6 +7316,10 @@ ostream& operator<<(ostream& output, GridSide* side) {
 		output << "harm:" << side->getHarmony();
 	}
 
+	if (side->getXmlidCount() > 0) {
+		output << "harm:" << side->getXmlid();
+	}
+
 	output << "] ";
 	return output;
 }
@@ -7841,7 +7845,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridPart& sides,
 		HTp verse = sides.getVerse(i);
 		if (verse) {
 			line.appendToken(verse);
-			sides.detachHarmony();  // why detaching harmony in verses?
+			sides.detachHarmony();
 		} else {
 			newtoken = new HumdrumToken(empty);
 			line.appendToken(newtoken);
@@ -7900,7 +7904,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	// existing verses:
 	int vcount = sides.getVerseCount();
 
-	int xcount = sides.getXmlidCount();
+	// int xcount = sides.getXmlidCount();
 	int fcount = sides.getFiguredBassCount();
 
 	// there should not be any harmony attached to staves
@@ -7908,7 +7912,7 @@ void GridSlice::transferSides(HumdrumLine& line, GridStaff& sides,
 	int hcount = sides.getHarmonyCount();
 	HTp newtoken;
 
-	if (xcount > 0) {
+	if (maxxcount > 0) {
 		HTp xmlid = sides.getXmlid();
 		if (xmlid) {
 			line.appendToken(xmlid);
@@ -9082,8 +9086,10 @@ HumGrid::HumGrid(void) {
 	m_verseCount.resize(100);
 	m_harmonyCount.resize(100);
 	m_dynamics.resize(100);
+	m_xmlids.resize(100);
 	m_figured_bass.resize(100);
 	fill(m_dynamics.begin(), m_dynamics.end(), false);
+	fill(m_xmlids.begin(), m_xmlids.end(), false);
 	fill(m_figured_bass.begin(), m_figured_bass.end(), false);
 	fill(m_harmonyCount.begin(), m_harmonyCount.end(), 0);
 
@@ -9245,17 +9251,25 @@ int HumGrid::getVerseCount(int partindex, int staffindex) {
 // HumGrid::getXmlidCount --
 //
 
-int HumGrid::getXmlidCount(int partindex, int staffindex) {
-	if ((partindex < 0) || (partindex >= (int)m_xmlidCount.size())) {
+int HumGrid::getXmlidCount(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_xmlids.size())) {
 		return 0;
 	}
-	int staffnumber = staffindex + 1;
-	if ((staffnumber < 1) ||
-			(staffnumber >= (int)m_xmlidCount.at(partindex).size())) {
-		return 0;
+	return m_xmlids[partindex];
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::hasXmlids -- Return true if there are any xmlids for the part.
+//
+
+bool HumGrid::hasXmlids(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_xmlids.size())) {
+		return false;
 	}
-	int value = m_xmlidCount.at(partindex).at(staffnumber);
-	return value;
+	return m_xmlids[partindex];
 }
 
 
@@ -9298,6 +9312,20 @@ void HumGrid::setDynamicsPresent(int partindex) {
 		return;
 	}
 	m_dynamics[partindex] = true;
+}
+
+
+
+//////////////////////////////
+//
+// HumGrid::setXmlidsPresent -- Indicate that part needs an **xmlid spine.
+//
+
+void HumGrid::setXmlidsPresent(int partindex) {
+	if ((partindex < 0) || (partindex >= (int)m_xmlids.size())) {
+		return;
+	}
+	m_xmlids[partindex] = true;
 }
 
 
@@ -9374,34 +9402,6 @@ void HumGrid::reportVerseCount(int partindex, int staffindex, int count) {
 
 //////////////////////////////
 //
-// HumGrid::reportXmlidCount --
-//
-
-void HumGrid::reportXmlidCount(int partindex, int staffindex, int count) {
-	if (count <= 0) {
-		return;
-	}
-	int staffnumber = staffindex + 1;
-	int partsize = (int)m_xmlidCount.size();
-	if (partindex >= partsize) {
-		m_xmlidCount.resize(partindex+1);
-	}
-	int staffcount = (int)m_xmlidCount.at(partindex).size();
-	if (staffnumber >= staffcount) {
-		m_xmlidCount.at(partindex).resize(staffnumber+1);
-		for (int i=staffcount; i<=staffnumber; i++) {
-			m_xmlidCount.at(partindex).at(i) = 0;
-		}
-	}
-	if (count > m_xmlidCount.at(partindex).at(staffnumber)) {
-		m_xmlidCount.at(partindex).at(staffnumber) = count;
-	}
-}
-
-
-
-//////////////////////////////
-//
 // HumGrid::setVerseCount --
 //
 
@@ -9423,34 +9423,6 @@ void HumGrid::setVerseCount(int partindex, int staffindex, int count) {
 			m_verseCount.at(partindex).at(i) = 0;
 		}
 		m_verseCount.at(partindex).at(staffnumber) = count;
-	}
-}
-
-
-
-//////////////////////////////
-//
-// HumGrid::setXmlidCount --
-//
-
-void HumGrid::setXmlidCount(int partindex, int staffindex, int count) {
-	if ((partindex < 0) || (partindex > (int)m_xmlidCount.size())) {
-		return;
-	}
-	int staffnumber = staffindex + 1;
-	if (staffnumber < 0) {
-		return;
-	}
-	if (staffnumber < (int)m_xmlidCount.at(partindex).size()) {
-		m_xmlidCount.at(partindex).at(staffnumber) = count;
-	} else {
-		int oldsize = (int)m_xmlidCount.at(partindex).size();
-		int newsize = staffnumber + 1;
-		m_xmlidCount.at(partindex).resize(newsize);
-		for (int i=oldsize; i<newsize; i++) {
-			m_xmlidCount.at(partindex).at(i) = 0;
-		}
-		m_xmlidCount.at(partindex).at(staffnumber) = count;
 	}
 }
 
@@ -11172,7 +11144,6 @@ void HumGrid::addInvisibleRestsInFirstTrack(void) {
 //
 // HumGrid::addInvisibleRest --
 //
-// ggg
 
 void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 		int index, int p, int s) {
@@ -11537,7 +11508,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 
 	if (staff >= 0) {
-		int xmlidcount = getXmlidCount(part, staff); // xmlids related to staff
+		int xmlidcount = getXmlidCount(part); // xmlids related to staff
 		for (int i=0; i<xmlidcount; i++) {
 			HTp token = new HumdrumToken("**xmlid");
 			line->appendToken(token);
@@ -11690,7 +11661,7 @@ void HumGrid::insertSideNullInterpretations(HLp line,
 
 	} else {
 
-		int xmlidcount = getXmlidCount(part, staff);
+		int xmlidcount = getXmlidCount(part);
 		for (int i=0; i<xmlidcount; i++) {
 			token = new HumdrumToken("*");
 			line->appendToken(token);
@@ -11739,7 +11710,7 @@ void HumGrid::insertSidePartInfo(HLp line, int part, int staff) {
 
 	} else {
 
-		int xmlidcount = getXmlidCount(part, staff);
+		int xmlidcount = getXmlidCount(part);
 		for (int i=0; i<xmlidcount; i++) {
 			text = "*part" + to_string(part+1);
 			token = new HumdrumToken(text);
@@ -11841,7 +11812,7 @@ void HumGrid::insertSideStaffInfo(HLp line, int part, int staff,
 		return;
 	}
 
-	int xmlidcount = getXmlidCount(part, staff);
+	int xmlidcount = getXmlidCount(part);
 	for (int i=0; i<xmlidcount; i++) {
 		if (staffnum > 0) {
 			text = "*staff" + to_string(staffnum);
@@ -11935,8 +11906,8 @@ void HumGrid::insertSideTerminals(HLp line, int part, int staff) {
 		}
 
 	} else {
-		int xmlidcount = getXmlidCount(part, staff);
-		for (int i=0; i<xmlidcount; i++) {
+
+		if (hasXmlids(part)) {
 			token = new HumdrumToken("*-");
 			line->appendToken(token);
 		}
@@ -12202,7 +12173,6 @@ void HumGrid::removeRedundantClefChanges(void) {
 
 void HumGrid::cleanTempos(void) {
 //		std::vector<GridSlice*>       m_allslices;
-// ggg
 	for (int i=0; i<(int)m_allslices.size(); i++) {
 		if (!m_allslices[i]->isTempoSlice()) {
 			continue;
@@ -69942,6 +69912,7 @@ Tool_mei2hum::Tool_mei2hum(void) {
 	define("app|app-label=s", "app label to follow");
 	define("r|recip=b", "output **recip spine");
 	define("s|stems=b", "include stems in output");
+	define("x|xmlids=b", "include xmlids in output");
 	define("P|no-place=b", "Do not convert placement attribute");
 
 	m_maxverse.resize(m_maxstaff);
@@ -69955,6 +69926,9 @@ Tool_mei2hum::Tool_mei2hum(void) {
 
 	m_hasDynamics.resize(m_maxstaff);
 	fill(m_hasDynamics.begin(), m_hasDynamics.end(), false);
+
+	m_hasXmlids.resize(m_maxstaff);
+	fill(m_hasXmlids.begin(), m_hasXmlids.end(), false);
 
 	m_hasHarm.resize(m_maxstaff);
 	fill(m_hasHarm.begin(), m_hasHarm.end(), false);
@@ -70066,6 +70040,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 			continue;
 		}
 		m_outdata.setHarmonyPresent(i);
+	}
+
+	// Report xmlid presence for each staff to HumGrid:
+	for (int i=0; i<(int)m_hasXmlids.size(); i++) {
+		if (m_hasXmlids[i] == false) {
+			continue;
+		}
+		m_outdata.setXmlidsPresent(i);
 	}
 
 	auto measure = doc.select_node("/mei/music/body/mdiv/score/section/measure").node();
@@ -72155,6 +72137,16 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 		output += tok;
 	}
 
+	if (m_xmlidQ) {
+		GridStaff* staff = dataslice->at(m_currentStaff-1)->at(0);
+		// not keeping track of overwriting ids at the moment:
+		string xmlid = note.attribute("xml:id").value();
+		if (!xmlid.empty()) {
+			staff->setXmlid(xmlid);
+			m_outdata.setXmlidsPresent(m_currentStaff-1);
+		}
+	}
+
 	bool hasverse = false;
 
 	for (int i=0; i<(int)children.size(); i++) {
@@ -72306,6 +72298,16 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		}
 	} else {
 		output += tok;
+	}
+
+	if (m_xmlidQ) {
+		GridStaff* staff = dataslice->at(m_currentStaff-1)->at(0);
+		// not keeping track of overwriting ids at the moment:
+		string xmlid = note.attribute("xml:id").value();
+		if (!xmlid.empty()) {
+			staff->setXmlid(xmlid);
+			m_outdata.setXmlidsPresent(m_currentStaff-1);
+		}
 	}
 
 	bool hasverse = false;
@@ -73842,6 +73844,8 @@ void Tool_mei2hum::getChildrenVector(vector<xml_node>& children,
 void Tool_mei2hum::initialize(void) {
 	m_recipQ   =  getBoolean("recip");
 	m_stemsQ   =  getBoolean("stems");
+	m_xmlidQ   =  getBoolean("xmlids");
+	m_xmlidQ   = 1;  // for testing
 	m_appLabel =  getString("app-label");
 	m_placeQ   = !getBoolean("no-place");
 }

@@ -388,6 +388,10 @@ ostream& operator<<(ostream& output, GridSide* side) {
 		output << "harm:" << side->getHarmony();
 	}
 
+	if (side->getXmlidCount() > 0) {
+		output << "harm:" << side->getXmlid();
+	}
+
 	output << "] ";
 	return output;
 }
