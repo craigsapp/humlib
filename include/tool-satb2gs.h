@@ -45,6 +45,7 @@ class Tool_satb2gs : public HumTool {
 		void    printHeaderLine    (HumdrumFile& infile, int line,
 		                            std::vector<std::vector<int>>& tracks);
 		bool    validateHeader     (HumdrumFile& infile);
+		vector<HTp> getClefs       (HumdrumFile& infile, int line);
 
 };
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 21 14:59:43 PDT 2021
+// Last Modified: Mon May 24 04:13:17 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -89866,10 +89866,19 @@ void Tool_satb2gs::printHeaderLine(HumdrumFile& infile, int line,
 					// suppress instrument designations (such as *Itenor)
 					m_humdrum_text << "*";
 				} else if (token->isClef()) {
+					vector<HTp> clefs = getClefs(infile, line);
 					if (i == 1) {
-						m_humdrum_text << "*clefF4";
+						if (clefs.size() == 4) {
+							m_humdrum_text << clefs[0];
+						} else {
+							m_humdrum_text << "*clefF4";
+						}
 					} else {
-						m_humdrum_text << "*clefG2";
+						if (clefs.size() == 4) {
+							m_humdrum_text << clefs.back();
+						} else {
+							m_humdrum_text << "*clefG2";
+						}
 					}
 				} else {
 					m_humdrum_text << token;
@@ -89882,6 +89891,27 @@ void Tool_satb2gs::printHeaderLine(HumdrumFile& infile, int line,
 		}
 	}
 	m_humdrum_text << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_satb2gs::getClefs -- get a list of the clefs on the current line.
+//
+
+vector<HTp> Tool_satb2gs::getClefs(HumdrumFile& infile, int line) {
+	vector<HTp> output;
+	for (int i=0; i<infile[line].getFieldCount(); i++) {
+		HTp token = infile[line].token(i);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isClef()) {
+			output.push_back(token);
+		}
+	}
+	return output;
 }
 
 
