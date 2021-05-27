@@ -137,6 +137,14 @@ void Tool_composite::initialize(void) {
 		m_together = "limegreen";
 	}
 
+	m_coincideDisplayQ = false;
+	if (!m_together.empty()) {
+		m_coincideDisplayQ = true;
+	}
+	if (!m_togetherInScore.empty()) {
+		m_coincideDisplayQ = true;
+	}
+
 	if (m_extractQ) {
 		m_appendQ = false;
 	}
@@ -293,21 +301,21 @@ void Tool_composite::analyzeNestingDataGroups(HumdrumFile& infile, int direction
 	output1a += to_string(totalA);
 	infile.appendLine(output1a);
 
-//	if (!m_together.empty()) {
+	if (m_coincideDisplayQ) {
 		string output2a = "!!!group-A-coincide-notes: ";
 		output2a += to_string(coincideA);
 		infile.appendLine(output2a);
-//	}
+	}
 
 	string output1b = "!!!group-B-total-notes: ";
 	output1b += to_string(totalB);
 	infile.appendLine(output1b);
 
-//	if (!m_together.empty()) {
+	if (m_coincideDisplayQ) {
 		string output2b = "!!!group-B-coincide-notes: ";
 		output2b += to_string(coincideB);
 		infile.appendLine(output2b);
-//	}
+	}
 }
 
 
@@ -1932,70 +1940,56 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 	m_assignedGroups = true;
 
 	int maxtrack = infile.getMaxTrack();
-	vector<vector<string>> current;
-	current.resize(maxtrack);
+	vector<vector<string>> curgroup;
+	curgroup.resize(maxtrack + 1);
+	for (int i=0; i<(int)curgroup.size(); i++) {
+		curgroup[i].resize(100);
+	}
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
 		}
-		int lasttrack = 1;
-		int subtrack = 1;
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			// checking all spines (not just **kern data).
 			HTp token = infile.token(i, j);
 			int track = token->getTrack();
-			if (track != lasttrack) {
-				subtrack = 1;
-			} else {
-				subtrack++;
+			int subtrack = token->getSubtrack();
+			if (subtrack > 99) {
+				cerr << "Too many subspines!" << endl;
+				continue;
 			}
-			if (subtrack > (int)current.at(track-1).size()) {
-				current.at(track-1).resize(subtrack);
-			}
+
 			if (*token == "*grp:A") {
-  				current.at(track-1).at(subtrack-1) = "A";
+  				curgroup.at(track).at(subtrack) = "A";
+				if (subtrack == 0) {
+					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
+						curgroup.at(track).at(k) = "A";
+					}
+				}
 			}
 			if (*token == "*grp:B") {
-  				current.at(track-1).at(subtrack-1) = "B";
+  				curgroup.at(track).at(subtrack) = "B";
+				if (subtrack == 0) {
+					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
+						curgroup.at(track).at(k) = "B";
+					}
+				}
 			}
 			if (*token == "*grp:") {
 				// clear a group:
-  				current.at(track-1).at(subtrack-1) = "";
+  				curgroup.at(track).at(subtrack) = "";
+				if (subtrack == 0) {
+					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
+						curgroup.at(track).at(k) = "";
+					}
+				}
 			}
-         string group = getGroup(current, track-1, subtrack-1);
+
+         string group = curgroup.at(track).at(subtrack);
 			token->setValue("auto", "group", group);
 		}
 	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_composite::getGroup --
-//
-
-string Tool_composite::getGroup(vector<vector<string>>& current, int spine, int subspine) {
-	if (spine >= (int)current.size()) {
-		return "";
-	}
-	if (subspine >= (int)current.at(spine).size()) {
-		return "";
-	}
-	string output = current[spine][subspine];
-	if (!output.empty()) {
-		return output;
-	}
-	// Grouping is empty for the subspine, so walk backwards through the
-	// subspine array to find any non-empty grouping, which will be assumed
-	// to apply to the current subspine.
-	for (int i=subspine-1; i>=0; --i) {
-		if (!current[spine][i].empty()) {
-			return current[spine][i];
-		}
-	}
-
-	return "";
 }
 
 

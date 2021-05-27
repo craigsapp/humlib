@@ -42,7 +42,6 @@ class Tool_composite : public HumTool {
 		void        analyzeLineGroups    (HumdrumFile& infile);
 		void        analyzeLineGroup     (HumdrumFile& infile, int line, const std::string& target);
 		void        printGroupAssignments(HumdrumFile& infile);
-		std::string getGroup             (std::vector<std::vector<std::string>>& current, int spine, int subspine);
 		int         getGroupNoteType     (HumdrumFile& infile, int line, const std::string& group);
 		void        getGroupDurations    (std::vector<std::vector<HumNum>>& groupdurs,
 		                                  std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
@@ -98,6 +97,7 @@ class Tool_composite : public HumTool {
 		bool        m_suppressCMarkQ = false; // used with -c option when -M -m -N and -n not present
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option
+		bool        m_coincideDisplayQ = true; // used with m_together and m_togetherInScore
 
 };
 

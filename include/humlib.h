@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May 24 04:13:17 PDT 2021
+// Last Modified: Thu May 27 16:23:14 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5826,7 +5826,6 @@ class Tool_composite : public HumTool {
 		void        analyzeLineGroups    (HumdrumFile& infile);
 		void        analyzeLineGroup     (HumdrumFile& infile, int line, const std::string& target);
 		void        printGroupAssignments(HumdrumFile& infile);
-		std::string getGroup             (std::vector<std::vector<std::string>>& current, int spine, int subspine);
 		int         getGroupNoteType     (HumdrumFile& infile, int line, const std::string& group);
 		void        getGroupDurations    (std::vector<std::vector<HumNum>>& groupdurs,
 		                                  std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
@@ -5882,6 +5881,7 @@ class Tool_composite : public HumTool {
 		bool        m_suppressCMarkQ = false; // used with -c option when -M -m -N and -n not present
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option
+		bool        m_coincideDisplayQ = true; // used with m_together and m_togetherInScore
 
 };
 
