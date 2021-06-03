@@ -294,6 +294,7 @@ class Tool_mei2hum : public HumTool {
 		bool           m_fermata = false;     // set priority of note/fermata over note@fermata
 		vector<grace_info> m_gracenotes;      // buffer for storing grace notes
 		HumNum			m_gracetime = 0;       // performance time of buffered grace notes
+		bool           m_mensuralQ = false;
 
 		vector<hairpin_info> m_hairpins;
 

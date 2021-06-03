@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 27 16:23:14 PDT 2021
+// Last Modified: Thu Jun  3 07:32:35 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4469,7 +4469,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 		HumGrid(void);
 		~HumGrid();
 		void enableRecipSpine           (void);
-		bool transferTokens             (HumdrumFile& outfile, int startbarnum = 0);
+		bool transferTokens             (HumdrumFile& outfile, int startbarnum = 0, const string& interp = "**kern");
 		int  getHarmonyCount            (int partindex);
 		int  getDynamicsCount           (int partindex);
 		int  getFiguredBassCount        (int partindex);
@@ -4507,7 +4507,7 @@ class HumGrid : public std::vector<GridMeasure*> {
 
 	protected:
 		void calculateGridDurations        (void);
-		void insertExclusiveInterpretationLine (HumdrumFile& outfile);
+		void insertExclusiveInterpretationLine (HumdrumFile& outfile, const string& interp);
 		void insertDataTerminationLine     (HumdrumFile& outfile);
 		void appendMeasureLine             (HumdrumFile& outfile,
 		                                    GridSlice& slice);
@@ -6964,6 +6964,7 @@ class Tool_mei2hum : public HumTool {
 		bool           m_fermata = false;     // set priority of note/fermata over note@fermata
 		vector<grace_info> m_gracenotes;      // buffer for storing grace notes
 		HumNum			m_gracetime = 0;       // performance time of buffered grace notes
+		bool           m_mensuralQ = false;
 
 		vector<hairpin_info> m_hairpins;
 

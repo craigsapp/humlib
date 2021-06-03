@@ -384,7 +384,7 @@ void HumGrid::setVerseCount(int partindex, int staffindex, int count) {
 //   default value: startbarnum = 0.
 //
 
-bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
+bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum, const string& interp) {
 	bool status = buildSingleList();
 	if (!status) {
 		return false;
@@ -403,7 +403,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	insertPartNames(outfile);
 	insertStaffIndications(outfile);
 	insertPartIndications(outfile);
-	insertExclusiveInterpretationLine(outfile);
+	insertExclusiveInterpretationLine(outfile, interp);
 	bool addstartbar = (!hasPickup()) && (!m_musicxmlbarlines);
 	for (int m=0; m<(int)this->size(); m++) {
 		if (addstartbar && m == 0) {
@@ -2417,7 +2417,7 @@ void HumGrid::calculateGridDurations(void) {
 //    in the HumGrid object must contain a slice.
 //
 
-void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
+void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile, const string& interp) {
 	if (this->size() == 0) {
 		return;
 	}
@@ -2439,7 +2439,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 	for (p=(int)slice.size()-1; p>=0; p--) {
 		GridPart& part = *slice[p];
 		for (s=(int)part.size()-1; s>=0; s--) {
-			token = new HumdrumToken("**kern");
+			token = new HumdrumToken(interp);
 			line->appendToken(token);
 			insertExInterpSides(line, p, s); // insert staff sides
 		}

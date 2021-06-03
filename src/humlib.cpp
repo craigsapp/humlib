@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 27 16:23:14 PDT 2021
+// Last Modified: Thu Jun  3 07:32:35 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -9434,7 +9434,7 @@ void HumGrid::setVerseCount(int partindex, int staffindex, int count) {
 //   default value: startbarnum = 0.
 //
 
-bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
+bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum, const string& interp) {
 	bool status = buildSingleList();
 	if (!status) {
 		return false;
@@ -9453,7 +9453,7 @@ bool HumGrid::transferTokens(HumdrumFile& outfile, int startbarnum) {
 	insertPartNames(outfile);
 	insertStaffIndications(outfile);
 	insertPartIndications(outfile);
-	insertExclusiveInterpretationLine(outfile);
+	insertExclusiveInterpretationLine(outfile, interp);
 	bool addstartbar = (!hasPickup()) && (!m_musicxmlbarlines);
 	for (int m=0; m<(int)this->size(); m++) {
 		if (addstartbar && m == 0) {
@@ -11467,7 +11467,7 @@ void HumGrid::calculateGridDurations(void) {
 //    in the HumGrid object must contain a slice.
 //
 
-void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
+void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile, const string& interp) {
 	if (this->size() == 0) {
 		return;
 	}
@@ -11489,7 +11489,7 @@ void HumGrid::insertExclusiveInterpretationLine(HumdrumFile& outfile) {
 	for (p=(int)slice.size()-1; p>=0; p--) {
 		GridPart& part = *slice[p];
 		for (s=(int)part.size()-1; s>=0; s--) {
-			token = new HumdrumToken("**kern");
+			token = new HumdrumToken(interp);
 			line->appendToken(token);
 			insertExInterpSides(line, p, s); // insert staff sides
 		}
@@ -56491,8 +56491,8 @@ void Tool_composite::analyzeNestingDataGroups(HumdrumFile& infile, int direction
 			spineB = sstarts[1];
 		}
 	} else if (direction == -2) {
- 		spineA = sstarts.at(sstarts.size() - 2);
- 		spineB = sstarts.back();
+		spineA = sstarts.at(sstarts.size() - 2);
+		spineB = sstarts.back();
 	} else {
 		// strange problem
 		return;
@@ -57459,6 +57459,7 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 	if (!m_assignedGroups) {
 		assignGroups(infile);
 	}
+	HumRegex hre;
 
 	bool suppress = false;
 	if (m_suppressCMarkQ) {
@@ -57499,6 +57500,7 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 			}
 			if (!suppress) {
 				string text = token->getText();
+				hre.replaceDestructive(text, "| ", " ", "g");
 				text += "|";
 				token->setText(text);
 			}
@@ -57548,6 +57550,7 @@ void Tool_composite::markCoincidences(HumdrumFile& infile, int direction) {
 		composite = sstarts.back();
 	}
 
+	HumRegex hre;
 	HTp current = composite;
 	while (current) {
 		if (!current->isData()) {
@@ -57572,6 +57575,8 @@ void Tool_composite::markCoincidences(HumdrumFile& infile, int direction) {
 		bool bothGroups = isAttackInBothGroups(infile, line);
 		if (bothGroups) {
 			string text = current->getText();
+			// mark all notes in chords:
+			hre.replaceDestructive(text, "| ", " ", "g");
 			text += "|";
 			current->setText(text);
 			coincidences[current->getLineIndex()] = 1;
@@ -58177,7 +58182,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 			}
 
 			if (*token == "*grp:A") {
-  				curgroup.at(track).at(subtrack) = "A";
+				curgroup.at(track).at(subtrack) = "A";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "A";
@@ -58185,7 +58190,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 				}
 			}
 			if (*token == "*grp:B") {
-  				curgroup.at(track).at(subtrack) = "B";
+				curgroup.at(track).at(subtrack) = "B";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "B";
@@ -58194,7 +58199,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 			}
 			if (*token == "*grp:") {
 				// clear a group:
-  				curgroup.at(track).at(subtrack) = "";
+				curgroup.at(track).at(subtrack) = "";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "";
@@ -58202,7 +58207,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 				}
 			}
 
-         string group = curgroup.at(track).at(subtrack);
+			string group = curgroup.at(track).at(subtrack);
 			token->setValue("auto", "group", group);
 		}
 	}
@@ -70054,10 +70059,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 		measurenumber = 0;
 	}
 
+	string interp = "**kern";
+	if (m_mensuralQ) {
+		interp = "**mens";
+	}
 	if (measurenumber > 1) {
-		m_outdata.transferTokens(outfile, measurenumber);
+		m_outdata.transferTokens(outfile, measurenumber, interp);
 	} else {
-		m_outdata.transferTokens(outfile);
+		m_outdata.transferTokens(outfile, 0, interp);
 	}
 
 	addHeaderRecords(outfile, doc);
@@ -71014,6 +71023,7 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 			staffinfo.black = true;
 		}
 		if (staffinfo.mensural) {
+			m_mensuralQ = true; // used to print **mens later
 			if (maximodus > 0) { staffinfo.maximodus = maximodus; }
 			if (modus > 0)     { staffinfo.modus = modus; }
 			if (tempus > 0)    { staffinfo.tempus = tempus; }

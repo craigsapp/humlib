@@ -275,8 +275,8 @@ void Tool_composite::analyzeNestingDataGroups(HumdrumFile& infile, int direction
 			spineB = sstarts[1];
 		}
 	} else if (direction == -2) {
- 		spineA = sstarts.at(sstarts.size() - 2);
- 		spineB = sstarts.back();
+		spineA = sstarts.at(sstarts.size() - 2);
+		spineB = sstarts.back();
 	} else {
 		// strange problem
 		return;
@@ -1243,6 +1243,7 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 	if (!m_assignedGroups) {
 		assignGroups(infile);
 	}
+	HumRegex hre;
 
 	bool suppress = false;
 	if (m_suppressCMarkQ) {
@@ -1283,6 +1284,7 @@ void Tool_composite::markCoincidencesMusic(HumdrumFile& infile) {
 			}
 			if (!suppress) {
 				string text = token->getText();
+				hre.replaceDestructive(text, "| ", " ", "g");
 				text += "|";
 				token->setText(text);
 			}
@@ -1332,6 +1334,7 @@ void Tool_composite::markCoincidences(HumdrumFile& infile, int direction) {
 		composite = sstarts.back();
 	}
 
+	HumRegex hre;
 	HTp current = composite;
 	while (current) {
 		if (!current->isData()) {
@@ -1356,6 +1359,8 @@ void Tool_composite::markCoincidences(HumdrumFile& infile, int direction) {
 		bool bothGroups = isAttackInBothGroups(infile, line);
 		if (bothGroups) {
 			string text = current->getText();
+			// mark all notes in chords:
+			hre.replaceDestructive(text, "| ", " ", "g");
 			text += "|";
 			current->setText(text);
 			coincidences[current->getLineIndex()] = 1;
@@ -1961,7 +1966,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 			}
 
 			if (*token == "*grp:A") {
-  				curgroup.at(track).at(subtrack) = "A";
+				curgroup.at(track).at(subtrack) = "A";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "A";
@@ -1969,7 +1974,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 				}
 			}
 			if (*token == "*grp:B") {
-  				curgroup.at(track).at(subtrack) = "B";
+				curgroup.at(track).at(subtrack) = "B";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "B";
@@ -1978,7 +1983,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 			}
 			if (*token == "*grp:") {
 				// clear a group:
-  				curgroup.at(track).at(subtrack) = "";
+				curgroup.at(track).at(subtrack) = "";
 				if (subtrack == 0) {
 					for (int k=1; k<(int)curgroup.at(track).size(); k++) {
 						curgroup.at(track).at(k) = "";
@@ -1986,7 +1991,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 				}
 			}
 
-         string group = curgroup.at(track).at(subtrack);
+			string group = curgroup.at(track).at(subtrack);
 			token->setValue("auto", "group", group);
 		}
 	}

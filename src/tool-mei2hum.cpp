@@ -209,10 +209,14 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 		measurenumber = 0;
 	}
 
+	string interp = "**kern";
+	if (m_mensuralQ) {
+		interp = "**mens";
+	}
 	if (measurenumber > 1) {
-		m_outdata.transferTokens(outfile, measurenumber);
+		m_outdata.transferTokens(outfile, measurenumber, interp);
 	} else {
-		m_outdata.transferTokens(outfile);
+		m_outdata.transferTokens(outfile, 0, interp);
 	}
 
 	addHeaderRecords(outfile, doc);
@@ -1169,6 +1173,7 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 			staffinfo.black = true;
 		}
 		if (staffinfo.mensural) {
+			m_mensuralQ = true; // used to print **mens later
 			if (maximodus > 0) { staffinfo.maximodus = maximodus; }
 			if (modus > 0)     { staffinfo.modus = modus; }
 			if (tempus > 0)    { staffinfo.tempus = tempus; }
