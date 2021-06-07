@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun  3 07:32:35 PDT 2021
+// Last Modified: Sun Jun  6 15:26:29 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5906,6 +5906,61 @@ GridSlice* GridMeasure::addClefToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::addBarlineToken -- Add a barline token in the data slice at the given
+//    timestamp (or create a new barline slice at that timestamp), placing the
+//    token at the specified part, staff, and voice index.
+//
+
+GridSlice* GridMeasure::addBarlineToken(const string& tok, HumNum timestamp,
+		int part, int staff, int voice, int maxstaff) {
+	GridSlice* gs = NULL;
+	if (this->empty() || (this->back()->getTimestamp() < timestamp)) {
+		// add a new GridSlice to an empty list or at end of list if timestamp
+		// is after last entry in list.
+		gs = new GridSlice(this, timestamp, SliceType::Measures, maxstaff);
+		gs->addToken(tok, part, staff, voice);
+		this->push_back(gs);
+	} else {
+		// search for existing line with same timestamp and the same slice type
+		GridSlice* target = NULL;
+		auto iterator = this->begin();
+		while (iterator != this->end()) {
+			if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isMeasureSlice()) {
+				target = *iterator;
+				target->addToken(tok, part, staff, voice);
+				break;
+			} else if (((*iterator)->getTimestamp() == timestamp) && (*iterator)->isDataSlice()) {
+				// found the correct timestamp, but no barline slice at the timestamp
+				// so add the clef slice before the data slice (eventually keeping
+				// track of the order in which the other non-data slices should be placed).
+				gs = new GridSlice(this, timestamp, SliceType::Measures, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			} else if ((*iterator)->getTimestamp() > timestamp) {
+				gs = new GridSlice(this, timestamp, SliceType::Measures, maxstaff);
+				gs->addToken(tok, part, staff, voice);
+				this->insert(iterator, gs);
+				break;
+			}
+			iterator++;
+		}
+
+		if (iterator == this->end()) {
+			// Couldn't find a place for the key signature, so place at end of measure.
+			gs = new GridSlice(this, timestamp, SliceType::Measures, maxstaff);
+			gs->addToken(tok, part, staff, voice);
+			this->insert(iterator, gs);
+		}
+	}
+
+	return gs;
+}
+
+
+
+//////////////////////////////
+//
 // GridMeasure::addFiguredBass --
 //
 GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff) {
@@ -7317,7 +7372,7 @@ ostream& operator<<(ostream& output, GridSide* side) {
 	}
 
 	if (side->getXmlidCount() > 0) {
-		output << "harm:" << side->getXmlid();
+		output << "xmlid:" << side->getXmlid();
 	}
 
 	output << "] ";
@@ -7573,7 +7628,10 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		if (this->size() > 0) {
 			if (this->at(0)->at(0)->size() > 0) {
 				voice = this->at(0)->at(0)->at(0);
-				empty = (string)*voice->getToken();
+				HTp tok = voice->getToken();
+				if (tok != NULL) {
+					empty = (string)*tok;
+				}
 			} else {
 				empty = "=YYYYYY";
 			}
@@ -7582,6 +7640,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		empty = "*";
 	} else if (isLayoutSlice()) {
 		empty = "!";
+	} else if (isMeasureSlice()) {
+		empty = "=";
 	} else if (!hasSpines()) {
 		empty = "???";
 	}
@@ -7768,7 +7828,8 @@ int GridSlice::getXmlidCount(int partindex, int staffindex) {
 	if (!grid) {
 		return 0;
 	}
-	return grid->getVerseCount(partindex, staffindex);
+	// should probably adjust to staffindex later:
+	return grid->getXmlidCount(partindex);
 }
 
 
@@ -11158,6 +11219,10 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 	HumNum starttime = starting->getTimestamp();
 	HTp token = starting->at(p)->at(s)->at(0)->getToken();
 	HumNum duration = Convert::recipToDuration(token);
+	if (duration == 0) {
+		// Do not deal with zero duration items (maybe **mens data)
+		return;
+	}
 	HumNum difference = endtime - starttime;
 	HumNum gap = difference - duration;
 	if (gap == 0) {
@@ -11180,7 +11245,8 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			continue;
 		}
 		if (timestamp > target) {
-			cerr << "Cannot deal with this slice addition case yet..." << endl;
+			cerr << "Cannot deal with this slice addition case yet for invisible rests..." << endl;
+			cerr << "\tTIMESTAMP = " << timestamp << "\t>\t" << target << endl;
 			nextevent[p][s] = starting;
 			return;
 		}
@@ -11272,6 +11338,12 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	HumNum nextts   = m_allslices.at(slicei+1)->getTimestamp();
 	HumNum slicedur = nextts - currts;
 	HumNum timeleft = tokendur - slicedur;
+
+	if (tokendur == 0) {
+		// Do not try to extend tokens with zero duration
+		// These are most likely **mens notes.
+		return;
+	}
 
 	if ((0)) {
 		cerr << "===================" << endl;
@@ -31057,7 +31129,6 @@ bool HumdrumToken::analyzeDuration(void) {
 						rlev = 2222;
 					}
 					m_duration = Convert::mensToDuration((string)(*this), rlev);
-cerr << "MENSURATION DURATION SET TO " << m_duration << " FOR " << this << endl;
 				}
 			} else {
 				m_duration.setValue(-1);
@@ -71778,7 +71849,9 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 		} else if (nodename == "clef") {
 			parseClef(children[i], starttime);
 		} else if (nodename == "barLine") {
-			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+			parseBarline(children[i], starttime);
+		} else if (nodename == "dot") {
+			// dot is processed in parseNote_mensural;
 		} else {
 			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -71791,6 +71864,21 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 	m_currentLayer = 0;
 	return starttime;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseBarline --
+//
+
+void Tool_mei2hum::parseBarline(xml_node barLine, HumNum starttime) {
+	NODE_VERIFY(barLine, )
+
+	// m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
+	// 		m_currentStaff-1, 0, 0, m_staffcount);
+}
+
 
 
 //////////////////////////////
@@ -72232,7 +72320,7 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 	else if (meidur == "semifusa")    { mensrhy = "u"; }
 	else { mensrhy = "?"; }
 
-	string recip = getHumdrumRecip(duration/4, dotcount);
+	string recip      = getHumdrumRecip(duration/4, dotcount);
 	string humpitch   = getHumdrumPitch(note, children);
 	string editorial  = getEditorialAccidental(children);
 	string cautionary = getCautionaryAccidental(children);
@@ -72279,8 +72367,16 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		gracelabel = "q";
 	}
 
+	string mensdot = "";
+	xml_node nextsibling = note.next_sibling();
+	if (strcmp(nextsibling.name(), "barLine") == 0) {
+		nextsibling = nextsibling.next_sibling();
+	}
+	if (strcmp(nextsibling.name(), "dot") == 0) {
+		mensdot = ":";
+	}
 	string tok = /* recip + */ gracelabel + humpitch + articulations + stemdir
-			+ m_beamPrefix + m_beamPostfix;
+			+ m_beamPrefix + m_beamPostfix + mensdot;
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 
@@ -80724,16 +80820,30 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 
 	if (!event->isFloating()) {
 		recip     = event->getRecip();
-		// will need to fix for exotic tuplest such as 11%2 or 1%23
-		auto loc = recip.find("1%2");
-		if (loc != string::npos) {
-			recip.replace(loc, 3, "0");
+		HumRegex hre;
+		if (hre.search(recip, "(\\d+)%(\\d+)(\\.*)")) {
+			int first = hre.getMatchInt(1);
+			int second = hre.getMatchInt(2);
+			string dots = hre.getMatch(3);
+			if (dots.empty()) {
+				if ((first == 1) && (second == 2)) {
+					hre.replaceDestructive(recip, "0", "1%2");
+				}
+				if ((first == 1) && (second == 4)) {
+					hre.replaceDestructive(recip, "00", "1%4");
+				}
+				if ((first == 1) && (second == 3)) {
+					hre.replaceDestructive(recip, "0.", "1%3");
+				}
+			} else {
+				if ((first == 1) && (second == 2)) {
+					string original = "1%2" + dots;
+					string replacement = "0" + dots;
+					hre.replaceDestructive(recip, replacement, original);
+				}
+			}
 		}
-		// will need to fix for exotic tuplets such as 11%4 or 1%42
-		loc = recip.find("1%4");
-		if (loc != string::npos) {
-			recip.replace(loc, 3, "00");
-		}
+
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote, recip);

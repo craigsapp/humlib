@@ -2108,6 +2108,10 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 	HumNum starttime = starting->getTimestamp();
 	HTp token = starting->at(p)->at(s)->at(0)->getToken();
 	HumNum duration = Convert::recipToDuration(token);
+	if (duration == 0) {
+		// Do not deal with zero duration items (maybe **mens data)
+		return;
+	}
 	HumNum difference = endtime - starttime;
 	HumNum gap = difference - duration;
 	if (gap == 0) {
@@ -2130,7 +2134,8 @@ void HumGrid::addInvisibleRest(vector<vector<GridSlice*>>& nextevent,
 			continue;
 		}
 		if (timestamp > target) {
-			cerr << "Cannot deal with this slice addition case yet..." << endl;
+			cerr << "Cannot deal with this slice addition case yet for invisible rests..." << endl;
+			cerr << "\tTIMESTAMP = " << timestamp << "\t>\t" << target << endl;
 			nextevent[p][s] = starting;
 			return;
 		}
@@ -2222,6 +2227,12 @@ void HumGrid::extendDurationToken(int slicei, int parti, int staffi,
 	HumNum nextts   = m_allslices.at(slicei+1)->getTimestamp();
 	HumNum slicedur = nextts - currts;
 	HumNum timeleft = tokendur - slicedur;
+
+	if (tokendur == 0) {
+		// Do not try to extend tokens with zero duration
+		// These are most likely **mens notes.
+		return;
+	}
 
 	if ((0)) {
 		cerr << "===================" << endl;

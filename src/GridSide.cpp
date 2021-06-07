@@ -389,7 +389,7 @@ ostream& operator<<(ostream& output, GridSide* side) {
 	}
 
 	if (side->getXmlidCount() > 0) {
-		output << "harm:" << side->getXmlid();
+		output << "xmlid:" << side->getXmlid();
 	}
 
 	output << "] ";

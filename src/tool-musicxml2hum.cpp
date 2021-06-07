@@ -1641,16 +1641,30 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 
 	if (!event->isFloating()) {
 		recip     = event->getRecip();
-		// will need to fix for exotic tuplest such as 11%2 or 1%23
-		auto loc = recip.find("1%2");
-		if (loc != string::npos) {
-			recip.replace(loc, 3, "0");
+		HumRegex hre;
+		if (hre.search(recip, "(\\d+)%(\\d+)(\\.*)")) {
+			int first = hre.getMatchInt(1);
+			int second = hre.getMatchInt(2);
+			string dots = hre.getMatch(3);
+			if (dots.empty()) {
+				if ((first == 1) && (second == 2)) {
+					hre.replaceDestructive(recip, "0", "1%2");
+				}
+				if ((first == 1) && (second == 4)) {
+					hre.replaceDestructive(recip, "00", "1%4");
+				}
+				if ((first == 1) && (second == 3)) {
+					hre.replaceDestructive(recip, "0.", "1%3");
+				}
+			} else {
+				if ((first == 1) && (second == 2)) {
+					string original = "1%2" + dots;
+					string replacement = "0" + dots;
+					hre.replaceDestructive(recip, replacement, original);
+				}
+			}
 		}
-		// will need to fix for exotic tuplets such as 11%4 or 1%42
-		loc = recip.find("1%4");
-		if (loc != string::npos) {
-			recip.replace(loc, 3, "00");
-		}
+
 		pitch     = event->getKernPitch();
 		prefix    = event->getPrefixNoteInfo();
 		postfix   = event->getPostfixNoteInfo(primarynote, recip);

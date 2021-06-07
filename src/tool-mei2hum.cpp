@@ -1928,7 +1928,9 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 		} else if (nodename == "clef") {
 			parseClef(children[i], starttime);
 		} else if (nodename == "barLine") {
-			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+			parseBarline(children[i], starttime);
+		} else if (nodename == "dot") {
+			// dot is processed in parseNote_mensural;
 		} else {
 			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
 		}
@@ -1941,6 +1943,21 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 	m_currentLayer = 0;
 	return starttime;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseBarline --
+//
+
+void Tool_mei2hum::parseBarline(xml_node barLine, HumNum starttime) {
+	NODE_VERIFY(barLine, )
+
+	// m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
+	// 		m_currentStaff-1, 0, 0, m_staffcount);
+}
+
 
 
 //////////////////////////////
@@ -2382,7 +2399,7 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 	else if (meidur == "semifusa")    { mensrhy = "u"; }
 	else { mensrhy = "?"; }
 
-	string recip = getHumdrumRecip(duration/4, dotcount);
+	string recip      = getHumdrumRecip(duration/4, dotcount);
 	string humpitch   = getHumdrumPitch(note, children);
 	string editorial  = getEditorialAccidental(children);
 	string cautionary = getCautionaryAccidental(children);
@@ -2429,8 +2446,16 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		gracelabel = "q";
 	}
 
+	string mensdot = "";
+	xml_node nextsibling = note.next_sibling();
+	if (strcmp(nextsibling.name(), "barLine") == 0) {
+		nextsibling = nextsibling.next_sibling();
+	}
+	if (strcmp(nextsibling.name(), "dot") == 0) {
+		mensdot = ":";
+	}
 	string tok = /* recip + */ gracelabel + humpitch + articulations + stemdir
-			+ m_beamPrefix + m_beamPostfix;
+			+ m_beamPrefix + m_beamPostfix + mensdot;
 	m_beamPrefix.clear();
 	m_beamPostfix.clear();
 

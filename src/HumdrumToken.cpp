@@ -780,7 +780,6 @@ bool HumdrumToken::analyzeDuration(void) {
 						rlev = 2222;
 					}
 					m_duration = Convert::mensToDuration((string)(*this), rlev);
-cerr << "MENSURATION DURATION SET TO " << m_duration << " FOR " << this << endl;
 				}
 			} else {
 				m_duration.setValue(-1);

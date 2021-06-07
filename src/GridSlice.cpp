@@ -266,7 +266,10 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		if (this->size() > 0) {
 			if (this->at(0)->at(0)->size() > 0) {
 				voice = this->at(0)->at(0)->at(0);
-				empty = (string)*voice->getToken();
+				HTp tok = voice->getToken();
+				if (tok != NULL) {
+					empty = (string)*tok;
+				}
 			} else {
 				empty = "=YYYYYY";
 			}
@@ -275,6 +278,8 @@ void GridSlice::transferTokens(HumdrumFile& outfile, bool recip) {
 		empty = "*";
 	} else if (isLayoutSlice()) {
 		empty = "!";
+	} else if (isMeasureSlice()) {
+		empty = "=";
 	} else if (!hasSpines()) {
 		empty = "???";
 	}
@@ -461,7 +466,8 @@ int GridSlice::getXmlidCount(int partindex, int staffindex) {
 	if (!grid) {
 		return 0;
 	}
-	return grid->getVerseCount(partindex, staffindex);
+	// should probably adjust to staffindex later:
+	return grid->getXmlidCount(partindex);
 }
 
 
