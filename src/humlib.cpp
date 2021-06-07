@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  6 15:26:29 PDT 2021
+// Last Modified: Sun Jun  6 23:12:30 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -83380,7 +83380,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 	while (timesig) {
 		hasmensuration |= checkForMensuration(timesig);
 		timesig = convertTimeSigToHumdrum(timesig, token, staffnum);
-		if (staffnum < 0) {
+		if (token && (staffnum < 0)) {
 			// time signature applies to all staves in part (most common case)
 			for (int s=0; s<(int)part.size(); s++) {
 				if (s==0) {
@@ -83390,7 +83390,7 @@ bool Tool_musicxml2hum::insertPartTimeSigs(xml_node timesig, GridPart& part) {
 					part[s]->setTokenLayer(0, token2, 0);
 				}
 			}
-		} else {
+		} else if (token) {
 			part[staffnum]->setTokenLayer(0, token, 0);
 		}
 	}
@@ -83728,8 +83728,10 @@ xml_node Tool_musicxml2hum::convertKeySigToHumdrum(xml_node keysig,
 xml_node Tool_musicxml2hum::convertTimeSigToHumdrum(xml_node timesig,
 		HTp& token, int& staffindex) {
 
+	token = NULL;
+
 	if (!timesig) {
-		return timesig;
+		return xml_node(NULL);
 	}
 
 	staffindex = -1;
@@ -83749,6 +83751,14 @@ xml_node Tool_musicxml2hum::convertTimeSigToHumdrum(xml_node timesig,
 			beattype = atoi(child.child_value());
 		}
 		child = child.next_sibling();
+	}
+
+	if ((beats == -1) && (beattype == -1)) {
+		// No time signature, such as:
+		// <time print-object="no">
+		//   <senza-misura/>
+		// </time>
+		return xml_node(NULL);
 	}
 
 	stringstream ss;
