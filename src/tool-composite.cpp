@@ -1408,6 +1408,7 @@ void Tool_composite::getCoincidenceRhythms(vector<string>& rhythms, vector<int>&
 
 	// go back and insert rests at starts of measures.
 	bool barline = false;
+	bool founddata = false;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
@@ -1416,7 +1417,8 @@ void Tool_composite::getCoincidenceRhythms(vector<string>& rhythms, vector<int>&
 			barline = true;
 			continue;
 		}
-		if (barline && infile[i].isData()) {
+		if ((barline && infile[i].isData()) || (!founddata && infile[i].isData())) {
+			founddata = true;
 			barline = false;
 			if (coincidences[i]) {
 				continue;

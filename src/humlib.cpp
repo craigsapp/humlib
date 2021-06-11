@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 11 00:18:44 PDT 2021
+// Last Modified: Fri Jun 11 11:49:33 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -57717,6 +57717,7 @@ void Tool_composite::getCoincidenceRhythms(vector<string>& rhythms, vector<int>&
 
 	// go back and insert rests at starts of measures.
 	bool barline = false;
+	bool founddata = false;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			continue;
@@ -57725,7 +57726,8 @@ void Tool_composite::getCoincidenceRhythms(vector<string>& rhythms, vector<int>&
 			barline = true;
 			continue;
 		}
-		if (barline && infile[i].isData()) {
+		if ((barline && infile[i].isData()) || (!founddata && infile[i].isData())) {
+			founddata = true;
 			barline = false;
 			if (coincidences[i]) {
 				continue;
@@ -70087,11 +70089,9 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	m_staffcount = extractStaffCountByFirstMeasure(score);
-cerr << "STAFFCOUNT " << m_staffcount << endl;
 	if (m_staffcount == 0) {
 		// probably mensural music
 		m_staffcount = extractStaffCountByScoreDef(score);
-cerr << "STAFFCOUNTB " << m_staffcount << endl;
 		if (m_staffcount == 0) {
 			cerr << "error: no music detected in <score>" << endl;
 		}
