@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  6 23:12:30 PDT 2021
+// Last Modified: Thu Jun 10 23:21:57 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -44202,6 +44202,17 @@ void MxmlEvent::setDynamics(xml_node node) {
 
 //////////////////////////////
 //
+// MxmlEvent::setBracket --
+//
+
+void MxmlEvent::setBracket(xml_node node) {
+	m_brackets.push_back(node);
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::setHairpinEnding --
 //
 
@@ -44229,6 +44240,17 @@ void MxmlEvent::addFiguredBass(xml_node node) {
 
 vector<xml_node> MxmlEvent::getDynamics(void) {
 	return m_dynamics;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getBrackets --
+//
+
+vector<xml_node> MxmlEvent::getBrackets(void) {
+	return m_brackets;
 }
 
 
@@ -72235,6 +72257,7 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
+cerr << "TIMESTAMP FOR XMLID " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
@@ -72406,6 +72429,7 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
+cerr << "TIMESTAMP FOR XMLIDB " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
@@ -79287,6 +79311,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	m_used_hairpins.resize(partinfo.size());
 
 	m_current_dynamic.resize(partids.size());
+	m_current_brackets.resize(partids.size());
 	m_stop_char.resize(partids.size(), "[");
 
 	getPartContent(partcontent, partids, doc);
@@ -80955,11 +80980,20 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		event->reportFiguredBassToOwner();
 	}
 
+	if (m_current_brackets[partindex].size() > 0) {
+		for (int i=0; i<(int)m_current_brackets[partindex].size(); i++) {
+			event->setBracket(m_current_brackets[partindex].at(i));
+		}
+		m_current_brackets[partindex].clear();
+		addBrackets(slice, outdata, event, nowtime, partindex);
+	}
+
 	if (m_current_text.size() > 0) {
 		event->setTexts(m_current_text);
 		m_current_text.clear();
 		addTexts(slice, outdata, event->getPartIndex(), staffindex, voiceindex, event);
 	}
+
 	if (m_current_tempo.size() > 0) {
 		event->setTempos(m_current_tempo);
 		m_current_tempo.clear();
@@ -81054,6 +81088,71 @@ void Tool_musicxml2hum::addTempos(GridSlice* slice, GridMeasure* measure, int pa
 		int newpartindex = item.first;
 		int newstaffindex = 0; // Not allowing addressing text by layer (could be changed).
 		addTempo(slice, measure, newpartindex, newstaffindex, voiceindex, item.second);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::addBrackets --
+//
+//
+//    <direction placement="above">
+//      <direction-type>
+//        <bracket default-y="12" line-end="down" line-type="dashed" number="1" type="start"/>
+//      </direction-type>
+//      <offset>4</offset>
+//    </direction>
+//
+//    <direction placement="above">
+//      <direction-type>
+//        <bracket line-end="down" number="1" type="stop"/>
+//      </direction-type>
+//      <offset>5</offset>
+//    </direction>
+//
+
+void Tool_musicxml2hum::addBrackets(GridSlice* slice, GridMeasure* measure, MxmlEvent* event,
+	HumNum nowtime, int partindex) {
+	int staffindex = 0;
+	int voiceindex = 0;
+	string token;
+	HumNum timestamp;
+	vector<xml_node> brackets = event->getBrackets();
+	for (int i=0; i<(int)brackets.size(); i++) {
+		xml_node bracket = brackets[i].child("direction-type").child("bracket");
+		if (!bracket) {
+			continue;
+		}
+		string linetype = bracket.attribute("line-type").as_string();
+		string endtype = bracket.attribute("type").as_string();
+		int number = bracket.attribute("number").as_int();
+		if (endtype == "stop") {
+			linetype = m_bracket_type_buffer[number];
+		} else {
+			m_bracket_type_buffer[number] = linetype;
+		}
+
+		if (linetype == "solid") {
+			if (endtype == "start") {
+				token = "*lig";
+				measure->addInterpretationBefore(slice, partindex, staffindex, voiceindex, token);
+			} else if (endtype == "stop") {
+				token = "*Xlig";
+				timestamp = nowtime + event->getDuration();
+				measure->addInterpretationAfter(slice, partindex, staffindex, voiceindex, token, timestamp);
+			}
+		} else if (linetype == "dashed") {
+			if (endtype == "start") {
+				token = "*col";
+				measure->addInterpretationBefore(slice, partindex, staffindex, voiceindex, token);
+			} else if (endtype == "stop") {
+				token = "*Xcol";
+				timestamp = nowtime + event->getDuration();
+				measure->addInterpretationAfter(slice, partindex, staffindex, voiceindex, token, timestamp);
+			}
+		}
 	}
 }
 
@@ -82748,6 +82847,8 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 						hasottava = true;
 					} else if (nodeType(grandchild, "wedge")) {
 						m_current_dynamic[pindex].push_back(element);
+					} else if (nodeType(grandchild, "bracket")) {
+						m_current_brackets[pindex].push_back(element);
 					}
 				}
 			} else if (nodeType(element, "figured-bass")) {

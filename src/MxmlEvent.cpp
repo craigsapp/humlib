@@ -2171,6 +2171,17 @@ void MxmlEvent::setDynamics(xml_node node) {
 
 //////////////////////////////
 //
+// MxmlEvent::setBracket --
+//
+
+void MxmlEvent::setBracket(xml_node node) {
+	m_brackets.push_back(node);
+}
+
+
+
+//////////////////////////////
+//
 // MxmlEvent::setHairpinEnding --
 //
 
@@ -2198,6 +2209,17 @@ void MxmlEvent::addFiguredBass(xml_node node) {
 
 vector<xml_node> MxmlEvent::getDynamics(void) {
 	return m_dynamics;
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getBrackets --
+//
+
+vector<xml_node> MxmlEvent::getBrackets(void) {
+	return m_brackets;
 }
 
 

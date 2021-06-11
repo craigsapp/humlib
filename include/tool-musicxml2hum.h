@@ -193,6 +193,8 @@ class Tool_musicxml2hum : public HumTool {
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addTempo          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, pugi::xml_node node);
+		void addBrackets       (GridSlice* slice, GridMeasure* measure, MxmlEvent* event, HumNum nowtime,
+		                        int partindex);
 		int         getHarmonyOffset(pugi::xml_node hnode);
 		std::string getHarmonyString(pugi::xml_node hnode);
 		std::string getDynamicString(pugi::xml_node element);
@@ -244,6 +246,8 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
+		std::vector<std::vector<pugi::xml_node>> m_current_brackets;
+		std::map<int, string> m_bracket_type_buffer;
 		std::vector<std::vector<pugi::xml_node>> m_used_hairpins;
 		std::vector<pugi::xml_node> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;

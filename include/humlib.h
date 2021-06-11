@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  6 23:12:30 PDT 2021
+// Last Modified: Thu Jun 10 23:21:57 PDT 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4700,9 +4700,11 @@ class MxmlEvent {
 		std::vector<std::pair<int, xml_node>>&  getTexts           (void);
 		std::vector<std::pair<int, xml_node>>&  getTempos          (void);
 		void               setDynamics        (xml_node node);
+		void               setBracket         (xml_node node);
 		void               setHairpinEnding   (xml_node node);
 		void               addFiguredBass     (xml_node node);
 		std::vector<xml_node> getDynamics     (void);
+		std::vector<xml_node> getBrackets     (void);
 		xml_node           getHairpinEnding   (void);
 		int                getFiguredBassCount(void);
 		xml_node           getFiguredBass     (int index);
@@ -4730,6 +4732,7 @@ class MxmlEvent {
 		std::vector<xml_node> m_dynamics;   // dynamics <direction> starting just before note
 		xml_node          m_hairpin_ending; // hairpin <direction> starting just after note and before new measure
 		std::vector<xml_node>  m_figured_bass; // fb starting just before note
+		std::vector<xml_node>  m_brackets;  // brackets to start/end before/after note
 		std::vector<std::pair<int, xml_node>>  m_text;   // text <direction> starting just before note
 		std::vector<std::pair<int, xml_node>>  m_tempo;   // tempo starting just before note
 
@@ -7719,6 +7722,8 @@ class Tool_musicxml2hum : public HumTool {
 		                        int staffindex, int voiceindex, MxmlEvent* event);
 		void addTempo          (GridSlice* slice, GridMeasure* measure, int partindex,
 		                        int staffindex, int voiceindex, pugi::xml_node node);
+		void addBrackets       (GridSlice* slice, GridMeasure* measure, MxmlEvent* event, HumNum nowtime,
+		                        int partindex);
 		int         getHarmonyOffset(pugi::xml_node hnode);
 		std::string getHarmonyString(pugi::xml_node hnode);
 		std::string getDynamicString(pugi::xml_node element);
@@ -7770,6 +7775,8 @@ class Tool_musicxml2hum : public HumTool {
 		std::string m_systemDecoration;
 
 		std::vector<std::vector<pugi::xml_node>> m_current_dynamic;
+		std::vector<std::vector<pugi::xml_node>> m_current_brackets;
+		std::map<int, string> m_bracket_type_buffer;
 		std::vector<std::vector<pugi::xml_node>> m_used_hairpins;
 		std::vector<pugi::xml_node> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;

@@ -2314,6 +2314,7 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
+cerr << "TIMESTAMP FOR XMLID " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
@@ -2485,6 +2486,7 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
+cerr << "TIMESTAMP FOR XMLIDB " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
