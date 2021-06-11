@@ -888,7 +888,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelToken(label, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount, m_staffcount);
+				0, 0, m_staffcount, 1);
 	}
 
 	// Incorporate labelabbr into HumGrid:
@@ -904,7 +904,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelAbbrToken(labelabbr, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount, m_staffcount);
+				0, 0, m_staffcount, 1);
 	}
 
 	// Incorporate clef into HumGrid:

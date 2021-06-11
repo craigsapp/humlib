@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 10 23:21:57 PDT 2021
+// Last Modified: Fri Jun 11 00:18:44 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70087,9 +70087,11 @@ bool Tool_mei2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	m_staffcount = extractStaffCountByFirstMeasure(score);
+cerr << "STAFFCOUNT " << m_staffcount << endl;
 	if (m_staffcount == 0) {
 		// probably mensural music
 		m_staffcount = extractStaffCountByScoreDef(score);
+cerr << "STAFFCOUNTB " << m_staffcount << endl;
 		if (m_staffcount == 0) {
 			cerr << "error: no music detected in <score>" << endl;
 		}
@@ -70831,7 +70833,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelToken(label, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount, m_staffcount);
+				0, 0, m_staffcount, 1);
 	}
 
 	// Incorporate labelabbr into HumGrid:
@@ -70847,7 +70849,7 @@ void Tool_mei2hum::parseStaffDef(xml_node staffDef, HumNum starttime) {
 		// m_scoreDef.staves[num-1].keysig disappears after this line, so some
 		// leaky memory is likey to happen here.
 		m_outdata.back()->addLabelAbbrToken(labelabbr, starttime QUARTER_CONVERT, num-1,
-				0, 0, m_staffcount, m_staffcount);
+				0, 0, m_staffcount, 1);
 	}
 
 	// Incorporate clef into HumGrid:
