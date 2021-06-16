@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun 11 11:49:33 PDT 2021
+// Last Modified: Wed Jun 16 07:24:22 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70306,7 +70306,6 @@ void Tool_mei2hum::processHairpin(hairpin_info& info) {
 		m_outdata.setDynamicsPresent(staffnum-1);
 	}
 
-// ggg
 }
 
 
@@ -70681,7 +70680,7 @@ void Tool_mei2hum::processPgHead(xml_node pgHead, HumNum starttime) {
 	NODE_VERIFY(pgHead, )
 	return;
 }
- 
+
 
 
 //////////////////////////////
@@ -70693,7 +70692,7 @@ void Tool_mei2hum::processKeySig(mei_staffDef& staffinfo, xml_node keysig, HumNu
 	MAKE_CHILD_LIST(children, keysig);
 	string token = "*k[";
 	for (xml_node item : children) {
-		string pname = item.attribute("pname").value(); 
+		string pname = item.attribute("pname").value();
 		string accid = item.attribute("accid").value();
 		if (pname.empty()) {
 			continue;
@@ -70975,8 +70974,7 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 
 	int nnum = 0;  // For staffnumber of element is staffDef.
 
-	for (auto atti = element.attributes_begin(); atti != element.attributes_end();
-				atti++) {
+	for (auto atti = element.attributes_begin(); atti != element.attributes_end(); atti++) {
 		string attname = atti->name();
 		if (attname == "clef.shape") {
 			clefshape = atti->value();
@@ -71019,6 +71017,47 @@ void Tool_mei2hum::fillWithStaffDefAttributes(mei_staffDef& staffinfo, xml_node 
 	if (nnum < 1) {
 		nnum = 1;
 	}
+
+	// Fill in possible child element attributes:
+
+	// staffDef/mensur
+	xml_node mensurNode = element.select_node(".//mensur").node();
+	if (mensurNode) {
+		for (auto atti = mensurNode.attributes_begin(); atti != mensurNode.attributes_end(); atti++) {
+			string attname = atti->name();
+			if (attname == "prolatio") {
+				prolatio = atti->as_int();
+			} else if (attname == "tempus") {
+				tempus = atti->as_int();
+			} else if (attname == "modusminor") {
+				modus = atti->as_int();
+			} else if (attname == "modusmaior") {
+				maximodus = atti->as_int();
+			}
+		}
+	}
+
+	// staffDef/label
+	xml_node labelNode = element.select_node(".//label").node();
+	if (labelNode) {
+		string testlabel = labelNode.child_value();
+		if (!testlabel.empty()) {
+			label = testlabel;
+		}
+	}
+
+	// staffDef/labelAbbr
+	xml_node labelAbbrNode = element.select_node(".//labelAbbr").node();
+	if (labelAbbrNode) {
+		string testlabelabbr = labelAbbrNode.child_value();
+		if (!testlabelabbr.empty()) {
+			labelabbr = testlabelabbr;
+		}
+	}
+
+
+// ggg
+
 
 	if ((transsemi != 0) || (transdiat != 0)) {
 		// Fix octave transposition problems:
@@ -72259,7 +72298,6 @@ HumNum Tool_mei2hum::parseNote(xml_node note, xml_node chord, string& output,
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
-cerr << "TIMESTAMP FOR XMLID " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
@@ -72431,7 +72469,6 @@ HumNum Tool_mei2hum::parseNote_mensural(xml_node note, xml_node chord, string& o
 		string xmlid = note.attribute("xml:id").value();
 		if (!xmlid.empty()) {
 			staff->setXmlid(xmlid);
-cerr << "TIMESTAMP FOR XMLIDB " << xmlid << " IS " << starttime << " WHOLE NOTES" << endl;
 			m_outdata.setXmlidsPresent(m_currentStaff-1);
 		}
 	}
