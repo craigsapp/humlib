@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 16 07:24:22 PDT 2021
+// Last Modified: Sat Jun 19 23:41:10 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56353,6 +56353,7 @@ Tool_composite::Tool_composite(void) {
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
+	define("o|only=s",      "output notes of given group");
 	define("t|tremolo=b",   "preserve tremolos");
 	define("B|no-beam=b",   "do not apply automatic beaming");
 	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
@@ -56408,9 +56409,11 @@ bool Tool_composite::run(HumdrumFile& infile, ostream& out) {
 bool Tool_composite::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
-	infile.createLinesFromTokens();
-	// need to convert to text for now:
-	m_humdrum_text << infile;
+	if (!m_onlyQ) {
+		infile.createLinesFromTokens();
+		// need to convert to text for now:
+		m_humdrum_text << infile;
+	}
 	return true;
 }
 
@@ -56430,6 +56433,8 @@ void Tool_composite::initialize(void) {
 	m_upQ       = getBoolean("stem-up");
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
+	m_onlyQ     = getBoolean("only");
+	m_only      = getString("only");
 	m_coincidenceQ = getBoolean("coincidence-rhythm");
 
 	if (getBoolean("together-in-score")) {
@@ -56483,7 +56488,16 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	if (!m_tremoloQ) {
 		reduceTremolos(infile);
 	}
+
 	m_hasGroupsQ = hasGroupInterpretations(infile);
+
+	if (m_onlyQ) {
+		assignGroups(infile);
+		analyzeLineGroups(infile);
+		extractGroup(infile, m_only);
+		return;
+	}
+
 	if (m_hasGroupsQ && (!m_nogroupsQ)) {
 		prepareMultipleGroups(infile);
 	} else {
@@ -56509,6 +56523,51 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		extractNestingData(infile);
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::extractGroup --
+//
+
+void Tool_composite::extractGroup(HumdrumFile& infile, const string &target) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile[i].token(j);
+			if ((!token->isData()) || token->isNull()) {
+				m_humdrum_text << token;
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+				continue;
+			}
+			string group = token->getValue("auto", "group");
+			if (group == target) {
+				m_humdrum_text << token;
+			} else {
+				if (token->isRest()) {
+					m_humdrum_text << token << "yy";
+				} else {
+					HumRegex hre;
+					string rhythm = "4";
+					if (hre.search(token, "(\\d+%?\\d*\\.*)")) {
+						rhythm = hre.getMatch(1);
+					}
+					m_humdrum_text << rhythm << "ryy";
+				}
+			}
+			if (j < infile[i].getFieldCount() - 1) {
+				m_humdrum_text << "\t";
+			}
+		}
+		m_humdrum_text << endl;
+	}
 }
 
 
@@ -56737,6 +56796,7 @@ bool Tool_composite::hasGroupInterpretations(HumdrumFile& infile) {
 //
 
 void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
+
 	Tool_extract extract;
 
 	// add two columns, one for each rhythm stream:
