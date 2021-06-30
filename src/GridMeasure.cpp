@@ -198,7 +198,11 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 				iterator++;
 				continue;
 			}
-			if (!(*iterator)->isDataSlice()) {
+			if ((timestamp == (*iterator)->getTimestamp()) && ((*iterator)->isMeasureSlice())) {
+				iterator++;
+				continue;
+			}
+			if ((!(*iterator)->isDataSlice()) && (timestamp >= (*iterator)->getTimestamp())) {
 				iterator++;
 				continue;
 			} else if ((*iterator)->getTimestamp() == timestamp) {
@@ -206,7 +210,7 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 				target->addToken(tok, part, staff, voice);
 				gs = target;
 				break;
-			} else if ((*iterator)->getTimestamp() > timestamp) {
+			} else if (timestamp < (*iterator)->getTimestamp()) {
 				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
 				gs->addToken(tok, part, staff, voice);
 				this->insert(iterator, gs);

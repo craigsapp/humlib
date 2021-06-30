@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 19 23:41:10 PDT 2021
+// Last Modified: Wed Jun 30 15:12:53 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5396,7 +5396,11 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 				iterator++;
 				continue;
 			}
-			if (!(*iterator)->isDataSlice()) {
+			if ((timestamp == (*iterator)->getTimestamp()) && ((*iterator)->isMeasureSlice())) {
+				iterator++;
+				continue;
+			}
+			if ((!(*iterator)->isDataSlice()) && (timestamp >= (*iterator)->getTimestamp())) {
 				iterator++;
 				continue;
 			} else if ((*iterator)->getTimestamp() == timestamp) {
@@ -5404,7 +5408,7 @@ GridSlice* GridMeasure::addDataToken(const string& tok, HumNum timestamp,
 				target->addToken(tok, part, staff, voice);
 				gs = target;
 				break;
-			} else if ((*iterator)->getTimestamp() > timestamp) {
+			} else if (timestamp < (*iterator)->getTimestamp()) {
 				gs = new GridSlice(this, timestamp, SliceType::Notes, maxstaff);
 				gs->addToken(tok, part, staff, voice);
 				this->insert(iterator, gs);
@@ -56887,6 +56891,9 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 	vector<vector<string>> rhythms;
 	getGroupRhythms(rhythms, groupdurs, groupstates, infile);
 
+	string curtimesigA;
+	string curtimesigB;
+
 	HTp token = NULL;
 	HTp token2 = NULL;
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -56916,15 +56923,28 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 			// copy time signature and tempos
 			for (int j=2; j<infile[i].getFieldCount(); j++) {
 				HTp stok = infile.token(i, j);
+				string tokgroup = stok->getValue("auto", "group");
 				if (stok->isTempo()) {
 					token->setText(*stok);
 					token2->setText(*stok);
 				} else if (stok->isTimeSignature()) {
-					token->setText(*stok);
-					token2->setText(*stok);
+					if (tokgroup == "A") {
+						if (curtimesigA != *stok) {
+							token->setText(*stok);
+							curtimesigA = *stok;
+						}
+					} else if (tokgroup == "B") {
+						if (curtimesigB != *stok) {
+							token2->setText(*stok);
+							curtimesigB = *stok;
+						}
+					}
 				} else if (stok->isMensurationSymbol()) {
-					token->setText(*stok);
-					token2->setText(*stok);
+					if (tokgroup == "A") {
+						token->setText(*stok);
+					} else if (tokgroup == "B") {
+						token2->setText(*stok);
+					}
 				} else if (stok->isKeySignature()) {
 					// Don't transfer key signature, but maybe add as an option.
 					// token->setText(*stok);
@@ -58343,6 +58363,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 						curgroup.at(track).at(k) = "A";
 					}
 				}
+				backfillGroup(curgroup, infile, i, track, subtrack, "A");
 			}
 			if (*token == "*grp:B") {
 				curgroup.at(track).at(subtrack) = "B";
@@ -58351,6 +58372,7 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 						curgroup.at(track).at(k) = "B";
 					}
 				}
+				backfillGroup(curgroup, infile, i, track, subtrack, "B");
 			}
 			if (*token == "*grp:") {
 				// clear a group:
@@ -58360,8 +58382,56 @@ void Tool_composite::assignGroups(HumdrumFile& infile) {
 						curgroup.at(track).at(k) = "";
 					}
 				}
+				backfillGroup(curgroup, infile, i, track, subtrack, "");
 			}
 
+			string group = curgroup.at(track).at(subtrack);
+			token->setValue("auto", "group", group);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::backfillGroup -- Go back and reassign a group to all lines
+//   before *grp:A or *grp:B so that time signatures and the like are used as
+//   desired even if they come before a new group definition.
+//
+
+void Tool_composite::backfillGroup(vector<vector<string>>& curgroup, HumdrumFile& infile,
+		int line, int track, int subtrack, const string& group) {
+	int lastline = -1;
+	for (int i=line-1; i>=0; i--) {
+		if (infile[i].isData()) {
+			lastline = i+1;
+			break;
+		}
+		curgroup.at(track).at(subtrack) = group;
+		if (subtrack == 0) {
+			for (int k=1; k<(int)curgroup.at(track).size(); k++) {
+				curgroup.at(track).at(k) = group;
+			}
+		}
+	}
+	if (lastline < 0) {
+		lastline = 0;
+	}
+	for (int i=lastline; i<line; i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int ttrack = token->getTrack();
+			if (ttrack != track) {
+				continue;
+			}
+			int tsubtrack = token->getSubtrack();
+			if (tsubtrack != subtrack) {
+				continue;
+			}
 			string group = curgroup.at(track).at(subtrack);
 			token->setValue("auto", "group", group);
 		}
@@ -70034,7 +70104,9 @@ void Tool_kernview::processFile(HumdrumFile& infile) {
 
 
 
-#define QUARTER_CONVERT * 4
+// #define QUARTER_CONVERT * 4
+#define QUARTER_CONVERT
+
 #define ELEMENT_DEBUG_STATEMENT(X)
 //#define ELEMENT_DEBUG_STATEMENT(X)  cerr << #X << endl;
 
@@ -71998,8 +72070,15 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 void Tool_mei2hum::parseBarline(xml_node barLine, HumNum starttime) {
 	NODE_VERIFY(barLine, )
 
-	// m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
-	// 		m_currentStaff-1, 0, 0, m_staffcount);
+	// Check to see if there is another barline following this one, and if so
+	// do not insert this barline.
+	xml_node nextsibling = barLine.next_sibling();
+	if (strcmp(nextsibling.name(), "barLine") == 0) {
+		return;
+	}
+
+	m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
+ 		m_currentStaff-1, 0, 0, m_staffcount);
 }
 
 

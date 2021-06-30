@@ -81,6 +81,8 @@ class Tool_composite : public HumTool {
 		void        processCoincidenceInterpretation(HumdrumFile& infile, HTp token);
 		bool        hasPipeRdf           (HumdrumFile& infile);
 		void        extractGroup         (HumdrumFile& infile, const string &target);
+		void        backfillGroup        (vector<vector<string>>& curgroup, HumdrumFile& infile,
+		                                  int line, int track, int subtrack, const string& group);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm

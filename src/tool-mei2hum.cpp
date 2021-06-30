@@ -29,7 +29,9 @@ namespace hum {
 // START_MERGE
 
 
-#define QUARTER_CONVERT * 4
+// #define QUARTER_CONVERT * 4
+#define QUARTER_CONVERT
+
 #define ELEMENT_DEBUG_STATEMENT(X)
 //#define ELEMENT_DEBUG_STATEMENT(X)  cerr << #X << endl;
 
@@ -1993,8 +1995,15 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 void Tool_mei2hum::parseBarline(xml_node barLine, HumNum starttime) {
 	NODE_VERIFY(barLine, )
 
-	// m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
-	// 		m_currentStaff-1, 0, 0, m_staffcount);
+	// Check to see if there is another barline following this one, and if so
+	// do not insert this barline.
+	xml_node nextsibling = barLine.next_sibling();
+	if (strcmp(nextsibling.name(), "barLine") == 0) {
+		return;
+	}
+
+	m_outdata.back()->addBarlineToken("=", starttime QUARTER_CONVERT,
+ 		m_currentStaff-1, 0, 0, m_staffcount);
 }
 
 
