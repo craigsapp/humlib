@@ -26,7 +26,7 @@
 #include "tool-colortriads.h"
 #include "tool-composite.h"
 #include "tool-dissonant.h"
-:include "tool-double.h"
+#include "tool-double.h"
 #include "tool-extract.h"
 #include "tool-flipper.h"
 #include "tool-gasparize.h"
