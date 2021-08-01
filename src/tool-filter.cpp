@@ -26,8 +26,10 @@
 #include "tool-colortriads.h"
 #include "tool-composite.h"
 #include "tool-dissonant.h"
+:include "tool-double.h"
 #include "tool-extract.h"
 #include "tool-flipper.h"
+#include "tool-gasparize.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
@@ -218,6 +220,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(composite, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
+		} else if (commands[i].first == "double") {
+			RUNTOOL(double, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
 			RUNTOOL(homorhythm, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm2") {
@@ -239,6 +243,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "flipper") {
 			RUNTOOL(flipper, infile, commands[i].second, status);
+		} else if (commands[i].first == "gasparize") {
+			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "mens2kern") {

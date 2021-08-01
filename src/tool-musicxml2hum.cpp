@@ -3343,6 +3343,7 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 	}
 
 	string finaltext;
+	string fontstyle;
 	HTp token;
 	for (int i=0; i<(int)verses.size(); i++) {
 		if (!verses[i]) {
@@ -3356,7 +3357,11 @@ int Tool_musicxml2hum::addLyrics(GridStaff* staff, MxmlEvent* event) {
 					child = child.next_sibling();
 					continue;
 				} else if (nodeType(child, "text")) {
+					fontstyle = child.attribute("font-style").value();
 					text = cleanSpaces(child.child_value());
+					if (fontstyle == "italic") {
+						text = "<i>" + text + "</i>";
+					}
 				} else if (nodeType(child, "elision")) {
 					finaltext += " ";
 					child = child.next_sibling();
