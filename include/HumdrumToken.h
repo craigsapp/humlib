@@ -210,6 +210,7 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getLinkedParameterSetCount(void);
 		HumParamSet* getLinkedParameterSet (int index);
 		HumParamSet* getParameterSet       (void);
+		void         clearLinkInfo         (void);
 		std::string getSlurLayoutParameter (const std::string& keyname, int subtokenindex = -1);
 		std::string getPhraseLayoutParameter(const std::string& keyname, int subtokenindex = -1);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,

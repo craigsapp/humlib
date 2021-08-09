@@ -94,6 +94,7 @@ class HumdrumLine : public std::string, public HumHash {
 		                                    const std::string& indent);
 		std::string   getXmlId             (const std::string& prefix = "") const;
 		std::string   getXmlIdPrefix       (void) const;
+		void          clearTokenLinkInfo   (void);
 		void          createLineFromTokens (void);
 		void          removeExtraTabs      (void);
 		void          addExtraTabs         (std::vector<int>& trackWidths);

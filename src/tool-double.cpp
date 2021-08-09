@@ -94,17 +94,142 @@ bool Tool_double::run(HumdrumFile& infile) {
 //
 
 void Tool_double::processFile(HumdrumFile& infile) {
-	doubleRhythm(infile);
+	terminalBreveToTerminalLong(infile);
+	doubleRhythms(infile);
+	adjustBeams(infile);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_double::doubleRhythm --
+// Tool_double::terminalBreveToTerminalLong --
 //
 
-void Tool_double::doubleRhythm(HumdrumFile& infile) {
+void Tool_double::terminalBreveToTerminalLong(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->find("terminal breve") == string::npos) {
+			continue;
+		}
+		string text = *token;
+		hre.replaceDestructive(text, "terminal long", "terminal breve", "g");
+		token->setText(text);
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_double::adjustBeams -- Assuming non-lazy beams.
+//
+
+void Tool_double::adjustBeams(HumdrumFile& infile) {
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send   = infile.getStrandEnd(i);
+		adjustBeams(sstart, send);
+	}
+}
+
+
+void Tool_double::adjustBeams(HTp sstart, HTp send) {
+	// Remove one level of beaming from notes.  This method
+	// requires non-lazy beaming.
+	HTp current = sstart;
+	vector<HTp> notes;
+	current = current->getNextToken();
+	while (current) {
+		if (current->isBarline()) {
+			processBeamsForMeasure(notes);
+			notes.clear();
+			current = current->getNextToken();
+			continue;
+		}
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		notes.push_back(current);
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_double::processBeamsForMeasure --
+//
+
+void Tool_double::processBeamsForMeasure(vector<HTp>& notes) {
+	int lastlevel = 0;
+	int level = 0;
+	HumRegex hre;
+	for (int i=0; i<(int)notes.size(); i++) {
+		int Lcount = 0;
+		int Jcount = 0;
+		for (int j=0; j<(int)notes[i]->size(); j++) {
+			if (notes[i]->at(j) == 'L') {
+				Lcount++;
+			} else if (notes[i]->at(j) == 'J') {
+				Jcount++;
+			}
+		}
+		level += Lcount - Jcount;
+		if ((lastlevel == 0) && (level > 0)) {
+			// remove one L:
+			string text = *notes[i];
+			hre.replaceDestructive(text, "", "L");
+			notes[i]->setText(text);
+		} else if ((level == 0) && (lastlevel > 0)) {
+			// remove one J:
+			string text = *notes[i];
+			hre.replaceDestructive(text, "", "J");
+			notes[i]->setText(text);
+		}
+
+		if (notes[i]->find("k") != string::npos) {
+			if ((level == 0) && (lastlevel == 1)) {
+				// remove k:
+				string text = *notes[i];
+				hre.replaceDestructive(text, "", "k");
+				notes[i]->setText(text);
+			}
+		}
+
+		if (notes[i]->find("K") != string::npos) {
+			if ((level == 1) && (lastlevel == 0)) {
+				// remove K:
+				string text = *notes[i];
+				hre.replaceDestructive(text, "", "K");
+				notes[i]->setText(text);
+			}
+		}
+
+		lastlevel = level;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_double::doubleRhythms --
+//
+
+void Tool_double::doubleRhythms(HumdrumFile& infile) {
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
@@ -116,21 +241,9 @@ void Tool_double::doubleRhythm(HumdrumFile& infile) {
 				if (token->isNull()) {
 					continue;
 				}
-cerr << "PROCESSING NOTE " << token << endl;
-
-				// remove L or J, convert LL to L and JJ to J, double numbers
-				string text = *token;
-				if (text.find("LL") != string::npos) {
-					hre.replaceDestructive(text, "L", "LL");
-				} else if (text.find("JJ") != string::npos) {
-					hre.replaceDestructive(text, "J", "JJ");
-				} else if (text.find("L") != string::npos) {
-					hre.replaceDestructive(text, "", "L");
-				} else if (text.find("J") != string::npos) {
-					hre.replaceDestructive(text, "", "J");
-				}
 
 				// extract duration without dot
+				string text = token->getText();
 				HumNum durnodot = Convert::recipToDurationNoDots(text);
 				durnodot *= 2;
 				string newrhythm = Convert::durationToRecip(durnodot);
@@ -138,7 +251,7 @@ cerr << "PROCESSING NOTE " << token << endl;
 				token->setText(text);
 			}
 		} else if (infile[i].isInterpretation()) {
-			// double time signatures
+			// Double time signature bottom numbers:
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {

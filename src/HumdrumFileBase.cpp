@@ -1462,6 +1462,9 @@ bool HumdrumFileBase::analyzeTracks(void) {
 //
 
 bool HumdrumFileBase::analyzeLinks(void) {
+	HumdrumFileBase& infile = *this;
+	infile.clearTokenLinkInfo();
+
 	HLp next     = NULL;
 	HLp previous = NULL;
 
@@ -2766,6 +2769,20 @@ HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
 		return &infile[previous];
 	}
 	return &infile[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::clearTokenLinkInfo --  
+//
+
+void HumdrumFileBase::clearTokenLinkInfo(void) {
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		infile[i].clearTokenLinkInfo();
+	}
 }
 
 

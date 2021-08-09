@@ -2221,6 +2221,19 @@ bool HumdrumLine::allSameBarlineStyle(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::clearTokenLinkInfo --
+//
+
+void HumdrumLine::clearTokenLinkInfo(void) {
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i)->clearLinkInfo();
+	}
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //

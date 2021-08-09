@@ -30,6 +30,7 @@
 #include "tool-extract.h"
 #include "tool-flipper.h"
 #include "tool-gasparize.h"
+#include "tool-half.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
@@ -222,6 +223,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "double") {
 			RUNTOOL(double, infile, commands[i].second, status);
+		} else if (commands[i].first == "half") {
+			RUNTOOL(half, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
 			RUNTOOL(homorhythm, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm2") {

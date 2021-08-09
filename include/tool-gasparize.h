@@ -8,18 +8,21 @@
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Interface for gasparize tool.
-//                ** create tied notes across barlines where there is an invisible rest
+//                ** Create tied notes across barlines where there is an invisible rest
 //                  afterwards.
-//                ** remove staccatos (these were used to create visual augmentation dots
+//                ** Remove staccatos (these were used to create visual augmentation dots
 //                  across invisible barlines.
-//                * Expand instrument names.
-//                * Create instrument abbreviations.
+//                ** Expand instrument names.
+//                ** Create instrument abbreviations.
 //                ** Add bibliographic records.
 //                ** Adjust system decoration (to "[*]").
 //                ** Delete dummy transpositions (if present)
 //                ** Delete finale page breaks (hand-encoded printed edition breaks)
-//                * Remove key designations
-//                * Convert medial == to =||.
+//                ** Remove key designations
+//                ** Convert medial == to =||.
+//                ** Add terminal ==
+//                ** Remove double sharp/flats (usually related to transpositions)
+//                ** Interpret "(   )" as "j" editorial accidental
 //
 
 #ifndef _TOOL_GASPARIZE_H_INCLUDED
@@ -69,6 +72,15 @@ class Tool_gasparize : public HumTool {
 		string   getEditLine        (const string& text, int fieldindex, HLp line);
 		bool     insertEditText     (const string& text, HumdrumFile& infile, int line, int field);
 		void     adjustIntrumentNames(HumdrumFile& infile);
+		void     removeKeyDesignations(HumdrumFile& infile);
+		void     fixBarlines        (HumdrumFile& infile);
+		void     fixFinalBarline    (HumdrumFile& infile);
+		void     removeDoubledAccidentals(HumdrumFile& infile);
+		void     createJEditorialAccidentals(HumdrumFile& infile);
+		void     createJEditorialAccidentals(HTp sstart, HTp send);
+		void     convertNextNoteToJAccidental(HTp current);
+		void     fixTieStartEnd(HumdrumFile& infile);
+		void     fixTiesStartEnd(HTp starts, HTp ends);
 
 	private:
 		vector<vector<int>> m_pstates;

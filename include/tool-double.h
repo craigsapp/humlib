@@ -33,7 +33,11 @@ class Tool_double : public HumTool {
 	protected:
 		void     initialize         (HumdrumFile& infile);
 		void     processFile        (HumdrumFile& infile);
-		void     doubleRhythm       (HumdrumFile& infile);
+		void     doubleRhythms      (HumdrumFile& infile);
+		void     terminalBreveToTerminalLong(HumdrumFile& infile);
+		void     processBeamsForMeasure(vector<HTp>& notes);
+		void     adjustBeams        (HumdrumFile& infile);
+		void     adjustBeams        (HTp sstart, HTp send);
 
 	private:
 

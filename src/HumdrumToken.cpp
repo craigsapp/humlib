@@ -2516,6 +2516,33 @@ void HumdrumToken::storeParameterSet(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::clearLinkInfo -- clear structural analyses so that they
+//      can be recalculated.
+//
+
+void HumdrumToken::clearLinkInfo(void) {
+	// Possibly clear parameter set (but this info is not typically
+	// dependent on links to other tokens).
+	//
+	// if (m_parameterSet) {
+	// 	delete m_parameterSet;
+	// 	m_parameterSet = NULL;
+	// }
+
+	// also clear linked parameters
+	m_linkedParameterTokens.clear();
+
+	// clear pointers to adjacent tokens
+	m_nextTokens.clear();
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::makeForwardLink -- Line a following spine token to this one.
 //    Used by the HumdrumFileBase::analyzeLinks function.
 //

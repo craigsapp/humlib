@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug  1 23:04:04 CEST 2021
+// Last Modified: Mon Aug  9 09:41:34 CEST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -20816,6 +20816,9 @@ bool HumdrumFileBase::analyzeTracks(void) {
 //
 
 bool HumdrumFileBase::analyzeLinks(void) {
+	HumdrumFileBase& infile = *this;
+	infile.clearTokenLinkInfo();
+
 	HLp next     = NULL;
 	HLp previous = NULL;
 
@@ -22120,6 +22123,20 @@ HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
 		return &infile[previous];
 	}
 	return &infile[index];
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::clearTokenLinkInfo --  
+//
+
+void HumdrumFileBase::clearTokenLinkInfo(void) {
+	HumdrumFileBase& infile = *this;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		infile[i].clearTokenLinkInfo();
+	}
 }
 
 
@@ -30364,6 +30381,19 @@ bool HumdrumLine::allSameBarlineStyle(void) {
 
 //////////////////////////////
 //
+// HumdrumLine::clearTokenLinkInfo --
+//
+
+void HumdrumLine::clearTokenLinkInfo(void) {
+	for (int i=0; i<getFieldCount(); i++) {
+		token(i)->clearLinkInfo();
+	}
+}
+
+
+
+//////////////////////////////
+//
 // operator<< -- Print a HumdrumLine. Needed to avoid interaction with
 //     HumHash parent class.
 //
@@ -32865,6 +32895,33 @@ void HumdrumToken::storeParameterSet(void) {
 	} else if (this->isCommentGlobal() && (this->find(':') != string::npos)) {
 		m_parameterSet = new HumParamSet(this);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::clearLinkInfo -- clear structural analyses so that they
+//      can be recalculated.
+//
+
+void HumdrumToken::clearLinkInfo(void) {
+	// Possibly clear parameter set (but this info is not typically
+	// dependent on links to other tokens).
+	//
+	// if (m_parameterSet) {
+	// 	delete m_parameterSet;
+	// 	m_parameterSet = NULL;
+	// }
+
+	// also clear linked parameters
+	m_linkedParameterTokens.clear();
+
+	// clear pointers to adjacent tokens
+	m_nextTokens.clear();
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
 }
 
 
@@ -61611,17 +61668,142 @@ bool Tool_double::run(HumdrumFile& infile) {
 //
 
 void Tool_double::processFile(HumdrumFile& infile) {
-	doubleRhythm(infile);
+	terminalBreveToTerminalLong(infile);
+	doubleRhythms(infile);
+	adjustBeams(infile);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_double::doubleRhythm --
+// Tool_double::terminalBreveToTerminalLong --
 //
 
-void Tool_double::doubleRhythm(HumdrumFile& infile) {
+void Tool_double::terminalBreveToTerminalLong(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->find("terminal breve") == string::npos) {
+			continue;
+		}
+		string text = *token;
+		hre.replaceDestructive(text, "terminal long", "terminal breve", "g");
+		token->setText(text);
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_double::adjustBeams -- Assuming non-lazy beams.
+//
+
+void Tool_double::adjustBeams(HumdrumFile& infile) {
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send   = infile.getStrandEnd(i);
+		adjustBeams(sstart, send);
+	}
+}
+
+
+void Tool_double::adjustBeams(HTp sstart, HTp send) {
+	// Remove one level of beaming from notes.  This method
+	// requires non-lazy beaming.
+	HTp current = sstart;
+	vector<HTp> notes;
+	current = current->getNextToken();
+	while (current) {
+		if (current->isBarline()) {
+			processBeamsForMeasure(notes);
+			notes.clear();
+			current = current->getNextToken();
+			continue;
+		}
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		notes.push_back(current);
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_double::processBeamsForMeasure --
+//
+
+void Tool_double::processBeamsForMeasure(vector<HTp>& notes) {
+	int lastlevel = 0;
+	int level = 0;
+	HumRegex hre;
+	for (int i=0; i<(int)notes.size(); i++) {
+		int Lcount = 0;
+		int Jcount = 0;
+		for (int j=0; j<(int)notes[i]->size(); j++) {
+			if (notes[i]->at(j) == 'L') {
+				Lcount++;
+			} else if (notes[i]->at(j) == 'J') {
+				Jcount++;
+			}
+		}
+		level += Lcount - Jcount;
+		if ((lastlevel == 0) && (level > 0)) {
+			// remove one L:
+			string text = *notes[i];
+			hre.replaceDestructive(text, "", "L");
+			notes[i]->setText(text);
+		} else if ((level == 0) && (lastlevel > 0)) {
+			// remove one J:
+			string text = *notes[i];
+			hre.replaceDestructive(text, "", "J");
+			notes[i]->setText(text);
+		}
+
+		if (notes[i]->find("k") != string::npos) {
+			if ((level == 0) && (lastlevel == 1)) {
+				// remove k:
+				string text = *notes[i];
+				hre.replaceDestructive(text, "", "k");
+				notes[i]->setText(text);
+			}
+		}
+
+		if (notes[i]->find("K") != string::npos) {
+			if ((level == 1) && (lastlevel == 0)) {
+				// remove K:
+				string text = *notes[i];
+				hre.replaceDestructive(text, "", "K");
+				notes[i]->setText(text);
+			}
+		}
+
+		lastlevel = level;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_double::doubleRhythms --
+//
+
+void Tool_double::doubleRhythms(HumdrumFile& infile) {
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
@@ -61633,21 +61815,9 @@ void Tool_double::doubleRhythm(HumdrumFile& infile) {
 				if (token->isNull()) {
 					continue;
 				}
-cerr << "PROCESSING NOTE " << token << endl;
-
-				// remove L or J, convert LL to L and JJ to J, double numbers
-				string text = *token;
-				if (text.find("LL") != string::npos) {
-					hre.replaceDestructive(text, "L", "LL");
-				} else if (text.find("JJ") != string::npos) {
-					hre.replaceDestructive(text, "J", "JJ");
-				} else if (text.find("L") != string::npos) {
-					hre.replaceDestructive(text, "", "L");
-				} else if (text.find("J") != string::npos) {
-					hre.replaceDestructive(text, "", "J");
-				}
 
 				// extract duration without dot
+				string text = token->getText();
 				HumNum durnodot = Convert::recipToDurationNoDots(text);
 				durnodot *= 2;
 				string newrhythm = Convert::durationToRecip(durnodot);
@@ -61655,7 +61825,7 @@ cerr << "PROCESSING NOTE " << token << endl;
 				token->setText(text);
 			}
 		} else if (infile[i].isInterpretation()) {
-			// double time signatures
+			// Double time signature bottom numbers:
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
@@ -65632,6 +65802,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "double") {
 			RUNTOOL(double, infile, commands[i].second, status);
+		} else if (commands[i].first == "half") {
+			RUNTOOL(half, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
 			RUNTOOL(homorhythm, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm2") {
@@ -66640,6 +66812,9 @@ void Tool_gasparize::processFile(HumdrumFile& infile) {
    bool tieQ            = true;
    bool teditQ          = true;
    bool instrumentQ     = true;
+   bool removekeydesigQ = true;
+   bool fixbarlinesQ    = true;
+   bool parenthesesQ    = true;
 
 	if (getBoolean("no-reference-records")) { referencesQ = false; }
 	if (getBoolean("only-add-reference-records")) {
@@ -66705,9 +66880,11 @@ void Tool_gasparize::processFile(HumdrumFile& infile) {
 	}
 
 	if (articulationsQ)  { removeArticulations(infile); }
+	if (fixbarlinesQ)    { fixBarlines(infile); }
 	if (tieQ)            { fixTies(infile); }
 	if (abbreviationsQ)  { fixInstrumentAbbreviations(infile); }
 	if (accidentalsQ)    { fixEditorialAccidentals(infile); }
+	if (parenthesesQ)    { createJEditorialAccidentals(infile); }
 	if (referencesQ)     { addBibliographicRecords(infile); }
 	if (breaksQ)         { deleteBreaks(infile); }
 	if (terminalsQ)      { addTerminalLongs(infile); }
@@ -66715,6 +66892,7 @@ void Tool_gasparize::processFile(HumdrumFile& infile) {
 	if (mensurationQ)    { addMensurations(infile); }
 	if (teditQ)          { createEditText(infile); }
    if (instrumentQ)     { adjustIntrumentNames(infile); }
+   if (removekeydesigQ) { removeKeyDesignations(infile); }
 
 	adjustSystemDecoration(infile);
 
@@ -66869,6 +67047,8 @@ void Tool_gasparize::deleteDummyTranspositions(HumdrumFile& infile) {
 //
 
 void Tool_gasparize::fixEditorialAccidentals(HumdrumFile& infile) {
+	removeDoubledAccidentals(infile);
+
 	m_pstates.resize(infile.getMaxTrack() + 1);
 	m_estates.resize(infile.getMaxTrack() + 1);
 	m_kstates.resize(infile.getMaxTrack() + 1);
@@ -66891,6 +67071,43 @@ void Tool_gasparize::fixEditorialAccidentals(HumdrumFile& infile) {
 			continue;
 		} else if (infile[i].isData()) {
 			checkDataLine(infile, i);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_gasparize::removeDoubledAccidentals -- Often caused by transposition
+//    differences between parts in the MusicXML export from Finale.  Also some
+//    strange double sharps appear randomly.
+//
+
+void Tool_gasparize::removeDoubledAccidentals(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			if (token->find("--") != string::npos) {
+				string text = *token;
+				hre.replaceDestructive(text, "-", "--", "g");
+			} else if (token->find("--") != string::npos) {
+				string text = *token;
+				hre.replaceDestructive(text, "#", "##", "g");
+			}
 		}
 	}
 }
@@ -67136,7 +67353,7 @@ void Tool_gasparize::addBibliographicRecords(HumdrumFile& infile) {
 		if (token->find("!!!RDF**kern:") == string::npos) {
 			continue;
 		}
-		if (token->find("terminal long") != string::npos) {
+		if (token->find("terminal breve") != string::npos) {
 			foundl = true;
 		} else if (token->find("editorial accidental") != string::npos) {
 			if (token->find("i =") != string::npos) {
@@ -67166,13 +67383,22 @@ void Tool_gasparize::addBibliographicRecords(HumdrumFile& infile) {
 		infile.appendLine("!!!PC#: Corpus Mensurabilis Musicae 106/V");
 	}
 	if (refs.find("PDT") == refs.end()) {
-		infile.appendLine("!!!PDT: 2020");
+		infile.appendLine("!!!PDT: {YEAR}");
 	}
 	if (refs.find("PED") == refs.end()) {
-		infile.appendLine("!!!PDT: Kolb, Paul");
+		infile.appendLine("!!!PED: Kolb, Paul");
+		infile.appendLine("!!!PED: Pavanello, Agnese");
+	}
+	if (refs.find("YEC") == refs.end()) {
+		infile.appendLine("!!!YEC: Copyright {YEAR}, Kolb, Paul");
+		infile.appendLine("!!!YEC: Copyright {YEAR}, Pavanello, Agnese");
+	}
+	if (refs.find("YEM") == refs.end()) {
+		infile.appendLine("!!!YEM: CC-BY-SA 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)");
 	}
 	if (refs.find("EED") == refs.end()) {
 		infile.appendLine("!!!EED: Zybina, Karina");
+		infile.appendLine("!!!EED: Mair-Gruber, Roland");
 	}
 	if (refs.find("EEV") == refs.end()) {
 		string date = getDate();
@@ -67208,6 +67434,9 @@ void Tool_gasparize::checkDataLine(HumdrumFile& infile, int lineindex) {
 			continue;
 		}
 		if (token->isRest()) {
+			continue;
+		}
+		if (token->find('j') != string::npos) {
 			continue;
 		}
 		if (token->isSecondaryTiedNote()) {
@@ -67320,6 +67549,9 @@ void Tool_gasparize::checkDataLine(HumdrumFile& infile, int lineindex) {
 		m_pstates[track][base7] = accid;
 
 		string text = token->getText();
+		HumRegex hre;
+		hre.replaceDestructive(text, "#", "##+", "g");
+		hre.replaceDestructive(text, "-", "--+", "g");
 		string output = "";
 		bool foundQ = false;
 		for (int j=0; j<(int)text.size(); j++) {
@@ -67511,7 +67743,6 @@ string Tool_gasparize::getDate(void) {
 //
 
 void Tool_gasparize::fixTies(HumdrumFile& infile) {
-	vector<HTp> starts;
 	int strands = infile.getStrandCount();
 	for (int i=0; i<strands; i++) {
 		HTp sstart = infile.getStrandStart(i);
@@ -67524,8 +67755,47 @@ void Tool_gasparize::fixTies(HumdrumFile& infile) {
 		HTp send   = infile.getStrandEnd(i);
 		fixTiesForStrand(sstart, send);
 	}
+	fixTieStartEnd(infile);
 }
 
+
+
+void Tool_gasparize::fixTieStartEnd(HumdrumFile& infile) {
+	int strands = infile.getStrandCount();
+	for (int i=0; i<strands; i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart) {
+			continue;
+		}
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send   = infile.getStrandEnd(i);
+		fixTiesStartEnd(sstart, send);
+	}
+}
+
+
+
+void Tool_gasparize::fixTiesStartEnd(HTp starts, HTp ends) {
+	HTp current = starts;
+	HumRegex hre;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if ((current->find('[') != string::npos) && 
+				(current->find(']') != string::npos) &&
+				(current->find(' ') == string::npos)) {
+			string text = *current;
+			hre.replaceDestructive(text, "", "\\[", "g");
+			hre.replaceDestructive(text, "_", "\\]", "g");
+			current->setText(text);
+		}
+		current = current->getNextToken();
+	}
+}
 
 
 //////////////////////////////
@@ -67674,6 +67944,10 @@ void Tool_gasparize::addMensuration(int top, HumdrumFile& infile, int index) {
 //
 
 void Tool_gasparize::createEditText(HumdrumFile& infile) {
+	// previous process manipulated the structure so reanalyze here for now:
+	infile.analyzeBaseFromTokens();
+	infile.analyzeStructureNoRhythm();
+
 	int strands = infile.getStrandCount();
 	for (int i=0; i<strands; i++) {
 		HTp sstart = infile.getStrandStart(i);
@@ -67684,10 +67958,10 @@ void Tool_gasparize::createEditText(HumdrumFile& infile) {
 			continue;
 		}
 		HTp send   = infile.getStrandEnd(i);
-		bool state = addEditStylingForText(infile, sstart, send);
-		if (state) {
-			infile.analyzeStructure();
-			// infile.analyzeStrands();
+		bool status = addEditStylingForText(infile, sstart, send);
+		if (status) {
+			infile.analyzeBaseFromTokens();
+			infile.analyzeStructureNoRhythm();
 		}
 	}
 }
@@ -67722,7 +67996,8 @@ bool Tool_gasparize::addEditStylingForText(HumdrumFile& infile, HTp sstart, HTp 
 			hre.replaceDestructive(text, "", "<i>", "g");
 			hre.replaceDestructive(text, "", "</i>", "g");
 			current->setText(text);
-		}
+		} else {
+}
 		if (laststate == "") {
 			if (italicQ) {
 				laststate = "italic";
@@ -67739,13 +68014,13 @@ bool Tool_gasparize::addEditStylingForText(HumdrumFile& infile, HTp sstart, HTp 
 			}
 		}
 		if (state != laststate) {
-			if (laststate == "italic") {
+			if (lastdata && (laststate == "italic")) {
 				output = true;
 				if (!insertEditText("*edit", infile, lastdata->getLineIndex() - 1, lastdata->getFieldIndex())) {
 					string line = getEditLine("*edit", lastdata->getFieldIndex(), lastdata->getOwner());
 					infile.insertLine(lastdata->getLineIndex(), line);
 				}
-			} else if (laststate == "regular") {
+			} else if (lastdata && (laststate == "regular")) {
 				output = true;
 				if (!insertEditText("*Xedit", infile, lastdata->getLineIndex() - 1, lastdata->getFieldIndex())) {
 					string line = getEditLine("*Xedit", lastdata->getFieldIndex(), lastdata->getOwner());
@@ -67858,7 +68133,17 @@ void Tool_gasparize::adjustIntrumentNames(HumdrumFile& infile) {
 	}
 	for (int i=0; i<infile[instrumentLine].getFieldCount(); i++) {
 		HTp token = infile.token(instrumentLine, i);
-		if (*token == "*I\"S") {
+		if (*token == "*I\"CT I") {
+			token->setText("*I\"Contratenor 1");
+		} else if (*token == "*I\"CTI") {
+			token->setText("*I\"Contratenor 1");
+		} else if (*token == "*I\"CTII") {
+			token->setText("*I\"Contratenor 2");
+		} else if (*token == "*I\"CT II") {
+			token->setText("*I\"Contratenor 2");
+		} else if (*token == "*I\"CT") {
+			token->setText("*I\"Contratenor");
+		} else if (*token == "*I\"S") {
 			token->setText("*I\"Superius");
 		} else if (*token == "*I\"A") {
 			token->setText("*I\"Altus");
@@ -67866,6 +68151,10 @@ void Tool_gasparize::adjustIntrumentNames(HumdrumFile& infile) {
 			token->setText("*I\"Tenor");
 		} else if (*token == "*I\"B") {
 			token->setText("*I\"Bassus");
+		} else if (*token == "*I\"V") {
+			token->setText("*I\"Quintus");
+		} else if (*token == "*I\"VI") {
+			token->setText("*I\"Sextus");
 		}
 	}
 	if (abbrLine >= 0) {
@@ -67876,7 +68165,17 @@ void Tool_gasparize::adjustIntrumentNames(HumdrumFile& infile) {
 	for (int i=0; i<infile[instrumentLine].getFieldCount(); i++) {
 		HTp token = infile.token(instrumentLine, i);
 		string text = *token;
-		if (hre.search(text, "^\\*I\"([A-Z])")) {
+		if (text == "*I\"Quintus") {
+			abbr += "*I'V";
+		} else if (text == "*I\"Contratenor") {
+			abbr += "*I'Ct";
+		} else if (text == "*I\"Sextus") {
+			abbr += "*I'VI";
+		} else if (text == "*I\"Contratenor 1") {
+			abbr += "*I'Ct1";
+		} else if (text == "*I\"Contratenor 2") {
+			abbr += "*I'Ct2";
+		} else if (hre.search(text, "^\\*I\"([A-Z])")) {
 			abbr += "*I'";
 			abbr += hre.getMatch(1);
 		} else {
@@ -67887,7 +68186,173 @@ void Tool_gasparize::adjustIntrumentNames(HumdrumFile& infile) {
 		}
 	}
 	infile.insertLine(instrumentLine+1, abbr);
+	infile.analyzeBaseFromTokens();
+	infile.analyzeStructureNoRhythm();
 }
+
+
+//////////////////////////////
+//
+// Tool_gaspar::removeKeyDesignations --
+//
+
+void Tool_gasparize::removeKeyDesignations(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (*token == "*") {
+				continue;
+			}
+			if (!token->isKern()) {
+				continue;
+			}
+			if (hre.search(token, "^\\*[A-Ga-g][#n-]*:$")) {
+				// suppress the key desingation
+				infile.deleteLine(i);
+				break;
+			}
+		}
+	}
+
+}
+
+
+//////////////////////////////
+//
+// Tool_gasparize::fixBarlines -- Add final double barline and convert
+//    any intermediate final barlines to double barlines.
+//
+
+void Tool_gasparize::fixBarlines(HumdrumFile& infile) {
+	fixFinalBarline(infile);
+	HumRegex hre;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		if (infile[i].getDurationToEnd() == 0) {
+			break;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->find("==") == string::npos) {
+				continue;
+			}
+			if (hre.search(token, "^==(\\d*)")) {
+				string text = "=";
+				text += hre.getMatch(1);
+				text += "||";
+				token->setText(text);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_gasparize::fixFinalBarline --
+//
+
+void Tool_gasparize::fixFinalBarline(HumdrumFile& infile) {
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (*token != "==") {
+				token->setText("==");
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_gasparize::createJEditorialAccidentals --
+// convert
+// 	!LO:TX:a:t=(    )
+// 	4F#
+//
+
+void Tool_gasparize::createJEditorialAccidentals(HumdrumFile& infile) {
+	int strands = infile.getStrandCount();
+	for (int i=0; i<strands; i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart) {
+			continue;
+		}
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send   = infile.getStrandEnd(i);
+		createJEditorialAccidentals(sstart, send);
+	}
+}
+
+void Tool_gasparize::createJEditorialAccidentals(HTp sstart, HTp send) {
+	HTp current = sstart->getNextToken();
+	HumRegex hre;
+	while (current && (current != send)) {
+		if (!current->isCommentLocal()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (hre.search(current, "^!LO:TX:a:t=\\(\\s*\\)$")) {
+			current->setText("!");
+			convertNextNoteToJAccidental(current);
+		}
+		current = current->getNextToken();
+	}
+}
+
+void Tool_gasparize::convertNextNoteToJAccidental(HTp current) {
+	current = current->getNextToken();
+	HumRegex hre;
+	while (current) {
+		if (!current->isData()) {
+			// Does not handle LO for non-data.
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			break;
+		}
+		if (current->isRest()) {
+			break;
+		}
+		string text = *current;
+		if (hre.search(text, "i")) {
+			hre.replaceDestructive(text, "j", "i");
+			current->setText(text);
+			break;
+		} else if (hre.search(text, "[-#n]")) {
+			hre.replaceDestructive(text, "$1j", "(.*[-#n]+)");
+			current->setText(text);
+			break;
+		} else {
+			// Need to add a natural sign as well.
+			hre.replaceDestructive(text, "$1nj", "(.*[A-Ga-g]+)");
+			current->setText(text);
+			break;
+		}
+		break;
+	}
+	current = current->getNextToken();
+}
+
 
 
 
@@ -67898,6 +68363,7 @@ void Tool_gasparize::adjustIntrumentNames(HumdrumFile& infile) {
 //
 
 Tool_half::Tool_half(void) {
+	define("l|lyric-beam-break=b", "Break beams at syllable starts");
 }
 
 
@@ -67962,17 +68428,38 @@ bool Tool_half::run(HumdrumFile& infile) {
 //
 
 void Tool_half::processFile(HumdrumFile& infile) {
-	halfRhythm(infile);
+	m_lyricBreakQ = getBoolean("lyric-beam-break");
+	terminalLongToTerminalBreve(infile);
+	halfRhythms(infile);
+	adjustBeams(infile);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_half::halfRhythm --
+// Tool_half::adjustBeams --
 //
 
-void Tool_half::halfRhythm(HumdrumFile& infile) {
+void Tool_half::adjustBeams(HumdrumFile& infile) {
+	Tool_autobeam autobeam;
+	vector<string> argv;
+	argv.push_back("autobeam");
+	if (m_lyricBreakQ) {
+		argv.push_back("-l");
+	}
+	autobeam.process(argv);
+	autobeam.run(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_half::halfRhythms --
+//
+
+void Tool_half::halfRhythms(HumdrumFile& infile) {
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
@@ -67985,18 +68472,7 @@ void Tool_half::halfRhythm(HumdrumFile& infile) {
 					continue;
 				}
 
-				// remove L or J, convert LL to L and JJ to J, half numbers
 				string text = *token;
-				if (text.find("LL") != string::npos) {
-					hre.replaceDestructive(text, "L", "LL");
-				} else if (text.find("JJ") != string::npos) {
-					hre.replaceDestructive(text, "J", "JJ");
-				} else if (text.find("L") != string::npos) {
-					hre.replaceDestructive(text, "", "L");
-				} else if (text.find("J") != string::npos) {
-					hre.replaceDestructive(text, "", "J");
-				}
-
 				// extract duration without dot
 				HumNum durnodot = Convert::recipToDurationNoDots(text);
 				durnodot /= 2;
@@ -68011,11 +68487,13 @@ void Tool_half::halfRhythm(HumdrumFile& infile) {
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
 					int bot = hre.getMatchInt(2); 
 					if (bot == 4) {
-						bot = 2;
+						bot = 8;
 					} else if (bot == 2) {
-						bot = 1;
+						bot = 4;
 					} else if (bot == 1) {
-						bot = 0;
+						bot = 2;
+					} else if (bot == 0) {
+						bot = 1;
 					} else {
 						cerr << "Warning: ignored time signature: " << token << endl;
 					}
@@ -68026,6 +68504,29 @@ void Tool_half::halfRhythm(HumdrumFile& infile) {
 				}
 			}
 		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_half::terminalLongToTerminalBreve --
+//
+
+void Tool_half::terminalLongToTerminalBreve(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReference()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->find("terminal long") == string::npos) {
+			continue;
+		}
+		string text = *token;
+		hre.replaceDestructive(text, "terminal breve", "terminal long", "g");
+		token->setText(text);
 	}
 }
 
