@@ -3214,6 +3214,9 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	string bass;
 	int rootalter = 0;
 	int bassalter = 0;
+	int degreevalue = 0;
+	int degreealter = 0;
+	string degreetype
 	xml_node grandchild;
 	while (child) {
 		if (nodeType(child, "root")) {
@@ -3240,6 +3243,18 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 					bass = grandchild.child_value();
 				} if (nodeType(grandchild, "bass-alter")) {
 					bassalter = atoi(grandchild.child_value());
+				}
+				grandchild = grandchild.next_sibling();
+			}
+		} else if (nodeType(child, "degree")){
+			grandchild = child.first_child();
+			while(grandchild){
+				if (nodeType(grandchild, "degree-value")){
+					degreevalue = atoi(grandchild.child_value());
+				} if (nodeType(grandchild, "degree-alter")){
+					degreealter = atoi(grandchild.child_value());
+				} if (nodeType(grandchild, "degree-type")){
+					degreetype = grandchild.child_value();
 				}
 				grandchild = grandchild.next_sibling();
 			}
@@ -3283,6 +3298,20 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		for (int i=0; i<-bassalter; i++) {
 			ss << "-";
 		}
+	}
+
+	if (degreevalue.size()){
+		ss << degreetype
+		if (degreealter > 0) {
+			for (int i=0; i<degreealter; i++) {
+				ss << "#";
+			}
+		} else if (rootalter < 0) {
+			for (int i=0; i<-degreealter; i++) {
+				ss << "-";
+			}
+		}
+		ss << degreevalue
 	}
 
 	string output = cleanSpaces(ss.str());
