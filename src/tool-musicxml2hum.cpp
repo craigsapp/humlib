@@ -27,6 +27,8 @@
 
 #include <cctype>
 #include <algorithm>
+#include <regex>
+// #include <vector>
 
 using namespace std;
 using namespace pugi;
@@ -3214,9 +3216,14 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	string bass;
 	int rootalter = 0;
 	int bassalter = 0;
-	int degreevalue = 0;
-	int degreealter = 0;
-	string degreetype
+	//Vectors to store altered degree information
+	vector<int> degreeValue;
+	vector<int> degreeAlter;
+	vector<string> degreeType;
+	//Variables to help convert musicxml kind and degree information into appropriate Harte syntax
+	string harteKind;
+	string harteAlt;
+	vector<string> strHarteDegrees;
 	xml_node grandchild;
 	while (child) {
 		if (nodeType(child, "root")) {
@@ -3250,11 +3257,11 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 			grandchild = child.first_child();
 			while(grandchild){
 				if (nodeType(grandchild, "degree-value")){
-					degreevalue = atoi(grandchild.child_value());
+					degreeValue.push_back(atoi(grandchild.child_value()));
 				} if (nodeType(grandchild, "degree-alter")){
-					degreealter = atoi(grandchild.child_value());
+					degreeAlter.push_back(atoi(grandchild.child_value()));
 				} if (nodeType(grandchild, "degree-type")){
-					degreetype = grandchild.child_value();
+					degreeType.push_back(grandchild.child_value());
 				}
 				grandchild = grandchild.next_sibling();
 			}
@@ -3300,19 +3307,113 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		}
 	}
 
-	if (degreevalue.size()){
-		ss << degreetype
-		if (degreealter > 0) {
-			for (int i=0; i<degreealter; i++) {
-				ss << "#";
-			}
-		} else if (rootalter < 0) {
-			for (int i=0; i<-degreealter; i++) {
-				ss << "-";
-			}
+	//convert degree-alter integers into sharps and flats
+	map<int, string> alterations{ 
+		{-2, "double-flat "},
+		{-1, "flat "},
+		{0, ""},
+		{1, "sharp "},
+		{2, "double-sharp "}
+	};
+
+	//map between musicxml kindtext and Harte syntax chord abbreviations
+	map<string, string> kindMappingsShort{
+		{"major", "maj"},
+		{"minor", "min"},
+		{"diminished", "dim"},
+		{"augmented", "aug"},
+		{"major-seventh", "maj7"},
+		{"minor-seventh", "min7"},
+		{"dominant", "7"},
+		{"diminished-seventh", "dim7"},
+		{"half-diminished", "hdim7"},
+		{"major-minor", "minmaj7"},
+		{"major-sixth", "maj6"},
+		{"minor-sixth", "min6"},
+		{"dominant-ninth", "9"},
+		{"major-ninth", "maj9"},
+		{"minor-ninth", "min9"},
+		{"suspended-fourth", "sus4"}
+	};
+
+	//map between musicxml kindtext and long-form Harte syntax
+	map<string, vector<string>> kindMappingsLong{
+		{"augmented", {"3", "#5"}},
+		{"augmented-seventh", {"3", "#5", "b7"}},
+		{"diminished", {"b3", "b5"}},
+		{"diminished-seventh", {"b3", "b5", "bb7"}},
+		{"dominant", {"3", "5", "b7"}},
+		{"dominant-11th", {"3", "5", "b7", "9", "11"}},
+		{"dominant-13th", {"3", "5", "b7", "9", "11", "13"}},
+		{"dominant-ninth", {"3", "5", "b7", "9"}},
+		{"French", {}},
+		{"German", {}},
+		{"half-diminished", {"b3", "b5", "b7"}},
+		{"Italian", {}},
+		{"major", {"3", "5"}},
+		{"major-11th", {"3", "5", "7", "9", "11"}},
+		{"major-13th", {"3", "5", "7", "9", "11"}},
+		{"major-ninth", {"3", "5", "7", "9"}},
+		{"major-minor", {"b3", "5", "7"}},
+		{"major-seventh", {"3", "5", "7"}},
+		{"major-sixth", {"3", "5", "6"}},
+		{"minor", {"b3", "5"}},
+		{"minor-11th", {"b3", "5", "b7", "9", "11"}},
+		{"minor-13th", {"b3", "5", "b7", "9", "11", "13"}},
+		{"minor-ninth", {"b3", "5", "b7", "9"}},
+		{"minor-seventh", {"b3", "5", "b7"}},
+		{"minor-sixth", {"b3", "5", "6"}},
+		{"Neapolitan", {}},
+		{"none", {}},
+		{"other", {}},
+		{"pedal", {}},
+		{"power", {"5"}},
+		{"suspended-fourth", {"4", "5"}},
+		{"suspended-second", {"2", "5"}},
+		{"Tristan", {"#4", "#6", "#9"}}
+	};
+
+	for (int i = 0; i < degreeValue.size(); i++){
+		ss << " ";
+		if(degreeType[i]!="alter"){
+			ss << degreeType[i];
 		}
-		ss << degreevalue
+		ss << " ";
+		ss << alterations[degreeAlter[i]];
+		ss << degreeValue[i];
 	}
+
+	//convert the list of strings into a list of ints, so that we know where to insert additional degrees later on.
+	strHarteDegrees = kindMappingsLong[kind];
+	stringstream hartess;
+	hartess << root << ":(";
+
+    vector<int> numHarteDegrees;
+    regex re("[0-9]+");
+    smatch m;
+    for (int i=0; i<strHarteDegrees.size(); i++){
+        regex_search(strHartedegrees[i], m, re);
+        numHarteDegrees.push_back(stoi(m[0]));
+		hartess << strHarteDegrees[i];
+		if (i < strHarteDegrees.size()-1){
+			hartess << ",";
+		}
+    }
+
+	//modify the strHarteDegress vector with the degree information
+	// for (int i = 0; i < degressValue.size(); i++){
+	// 	if(degreeType[i]=="add"){
+
+	// 	} else if(degreeType[i]=="subtract"){
+
+	// 	} else if(degreeType[i]=="alter"){
+
+	// 	}
+	// }
+
+    hartess << ")";
+	ss << " " << hartess.str();
+
 
 	string output = cleanSpaces(ss.str());
 	return output;
