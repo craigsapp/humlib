@@ -3202,6 +3202,117 @@ int Tool_musicxml2hum::getFiguredBassDuration(xml_node fnode) {
 // if they are both "C" and "none".
 //
 
+//retrieved from https://www.geeksforgeeks.org/how-to-find-index-of-a-given-element-in-a-vector-in-cpp/
+int getIndex(vector<string> v, string K) {
+    auto it = find(v.begin(), v.end(), K);
+	int index = -1;
+    // If element was found
+    if (it != v.end())
+    {
+        // calculating the index of K
+        int index = it - v.begin();
+
+    }
+	return index;
+}
+
+string getInterval(string bottomNote, string topNote, int bottomAcc = 0, int topAcc = 0){
+	map<string, int> notes = {
+    	{"C", 0}, {"D",1}, {"E",2}, {"F",3},  {"G",4}, {"A",5}, {"B",6}
+	};
+	int bottomInd = notes[bottomNote];
+	int topInd = notes[topNote];
+	int noteInterval = topInd - bottomInd + 1;
+	if (noteInterval < 2){
+		noteInterval += 7;
+	}
+	map<string, int> clockVals{
+		{"C", 0},
+		{"D", 2},
+		{"E", 4},
+		{"F", 5},
+		{"G", 7},
+		{"A", 9},
+		{"B", 11}
+	};
+
+	map<int, int> intervalToClock {
+		{1, 0},
+		{2, 2},
+		{3, 4},
+		{4, 5},
+		{5, 7},
+		{6, 9},
+		{7, 11}
+	};
+
+	int bottomClock = clockVals[bottomNote] + bottomAcc;
+	int topClock = clockVals[topNote] + topAcc;
+	int clockValue = topClock - bottomClock;
+	if (clockValue < 0){
+		clockValue += 12;
+	}
+	int noteToClock = intervalToClock[noteInterval];
+	int diff = clockValue - noteToClock;
+
+	stringstream ss;
+	if (diff > 0) {
+		for (int i=0; i<diff; i++) {
+			ss << "#";
+		}
+	} else if (diff < 0) {
+		for (int i=0; i<-diff; i++) {
+			ss << "b";
+		}
+	}
+	string interval =  ss.str() + std::to_string(noteInterval);
+	return interval;
+
+}
+
+string decipherHarte(vector<int> degrees){
+	map<int, string> altStrings{
+		{0, "*"},
+		{1, "bbbb"},
+		{2, "bbb"},
+		{3, "bb"},
+		{4, "b"},
+		{5, ""},
+		{6, "#"},
+		{7, "##"},
+		{8, "###"},
+		{9, "####"}
+	};
+	stringstream hartess;
+	hartess << "(";
+	for (int i=0; i < degrees.size(); i++){
+		int harteDegree = degrees[i] / 10;
+		int harteAlter = degrees[i] % 10;
+		hartess << altStrings[harteAlter];
+		hartess << std::to_string(harteDegree);
+		if (i < degrees.size()-1){
+			hartess << ",";
+		}
+	}
+	hartess << ")";
+	return hartess.str();
+}
+
+string alterRoot(int rootalter){
+	stringstream ss;
+	ss << "";
+	if (rootalter > 0) {
+		for (int i=0; i<rootalter; i++) {
+			ss << "#";
+		}
+	} else if (rootalter < 0) {
+		for (int i=0; i<-rootalter; i++) {
+			ss << "b";
+		}
+	}
+	return ss.str();
+}
+
 string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	if (!hnode) {
 		return "";
@@ -3220,10 +3331,6 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	vector<int> degreeValue;
 	vector<int> degreeAlter;
 	vector<string> degreeType;
-	//Variables to help convert musicxml kind and degree information into appropriate Harte syntax
-	string harteKind;
-	string harteAlt;
-	vector<string> strHarteDegrees;
 	xml_node grandchild;
 	while (child) {
 		if (nodeType(child, "root")) {
@@ -3275,18 +3382,8 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		string output = cleanSpaces(ss.str());
 		return output;
 	}
-
-	ss << root;
-
-	if (rootalter > 0) {
-		for (int i=0; i<rootalter; i++) {
-			ss << "#";
-		}
-	} else if (rootalter < 0) {
-		for (int i=0; i<-rootalter; i++) {
-			ss << "-";
-		}
-	}
+	string rootacc = alterRoot(rootalter);
+	ss << root << rootacc;
 
 	if (root.size() && kind.size()) {
 		ss << " ";
@@ -3294,6 +3391,7 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	ss << kind;
 	if (bass.size()) {
 		ss << "/";
+
 	}
 	ss << bass;
 
@@ -3317,64 +3415,104 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	};
 
 	//map between musicxml kindtext and Harte syntax chord abbreviations
-	map<string, string> kindMappingsShort{
-		{"major", "maj"},
-		{"minor", "min"},
-		{"diminished", "dim"},
+	map<string, string> kindMappingsShort {
 		{"augmented", "aug"},
-		{"major-seventh", "maj7"},
-		{"minor-seventh", "min7"},
-		{"dominant", "7"},
+		{"augmented-seventh", "aug7"},
+		{"diminished", "dim"},
 		{"diminished-seventh", "dim7"},
-		{"half-diminished", "hdim7"},
-		{"major-minor", "minmaj7"},
-		{"major-sixth", "maj6"},
-		{"minor-sixth", "min6"},
+		{"dominant", "7"},
+		{"dominant-11th", "11"},
+		{"dominant-13th", "13"},
 		{"dominant-ninth", "9"},
+		{"French", "fr6"},
+		{"German", "ge6"},
+		{"half-diminished", "hdim7"},
+		{"Italian", "it6"},
+		{"major", "maj"},
+		{"major-11th", "maj11"},
+		{"major-13th", "maj13"},
 		{"major-ninth", "maj9"},
+		{"major-minor", "minmaj7"},
+		{"major-seventh", "maj7"},
+		{"major-sixth", "maj6"},
+		{"minor", "min"},
+		{"minor-11th", "min11"},
+		{"minor-13th", "min13"},
 		{"minor-ninth", "min9"},
-		{"suspended-fourth", "sus4"}
+		{"minor-seventh", "min7"},
+		{"minor-sixth", "min6"},
+		{"Neapolitan", "N"},
+		{"none", "none"},
+		{"other", "other"},
+		{"pedal", "ped"},
+		{"power", "pow"},
+		{"suspended-fourth", "sus4"},
+		{"suspended-second", "sus2"},
+		{"Tristan", "tris"}
+
 	};
 
 	//map between musicxml kindtext and long-form Harte syntax
-	map<string, vector<string>> kindMappingsLong{
-		{"augmented", {"3", "#5"}},
-		{"augmented-seventh", {"3", "#5", "b7"}},
-		{"diminished", {"b3", "b5"}},
-		{"diminished-seventh", {"b3", "b5", "bb7"}},
-		{"dominant", {"3", "5", "b7"}},
-		{"dominant-11th", {"3", "5", "b7", "9", "11"}},
-		{"dominant-13th", {"3", "5", "b7", "9", "11", "13"}},
-		{"dominant-ninth", {"3", "5", "b7", "9"}},
+	map<string, vector<int>> kindMappingsLong{
+		{"augmented", {35, 56}},
+		{"augmented-seventh", {35, 56, 74}},
+		{"diminished", {34, 54}},
+		{"diminished-seventh", {34, 54, 73}},
+		{"dominant", {35, 55, 74}},
+		{"dominant-11th", {35, 55, 74, 95, 115}},
+		{"dominant-13th", {35, 55, 74, 95, 115, 135}},
+		{"dominant-ninth", {35, 55, 74, 95}},
 		{"French", {}},
 		{"German", {}},
-		{"half-diminished", {"b3", "b5", "b7"}},
+		{"half-diminished", {34, 55, 74}},
 		{"Italian", {}},
-		{"major", {"3", "5"}},
-		{"major-11th", {"3", "5", "7", "9", "11"}},
-		{"major-13th", {"3", "5", "7", "9", "11"}},
-		{"major-ninth", {"3", "5", "7", "9"}},
-		{"major-minor", {"b3", "5", "7"}},
-		{"major-seventh", {"3", "5", "7"}},
-		{"major-sixth", {"3", "5", "6"}},
-		{"minor", {"b3", "5"}},
-		{"minor-11th", {"b3", "5", "b7", "9", "11"}},
-		{"minor-13th", {"b3", "5", "b7", "9", "11", "13"}},
-		{"minor-ninth", {"b3", "5", "b7", "9"}},
-		{"minor-seventh", {"b3", "5", "b7"}},
-		{"minor-sixth", {"b3", "5", "6"}},
+		{"major", {35, 55}},
+		{"major-11th", {35, 55, 75, 95, 115}},
+		{"major-13th", {35, 55, 75, 95, 115 ,135}},
+		{"major-ninth", {35, 55, 75, 95}},
+		{"major-minor", {34, 55, 75}},
+		{"major-seventh", {35, 55, 75}},
+		{"major-sixth", {35, 55, 65}},
+		{"minor", {34, 55}},
+		{"minor-11th", {34, 55, 74, 95, 115}},
+		{"minor-13th", {34, 55, 74, 95, 115, 135}},
+		{"minor-ninth", {34, 55, 74, 95}},
+		{"minor-seventh", {34, 55, 74}},
+		{"minor-sixth", {34, 55, 65}},
 		{"Neapolitan", {}},
 		{"none", {}},
 		{"other", {}},
 		{"pedal", {}},
-		{"power", {"5"}},
-		{"suspended-fourth", {"4", "5"}},
-		{"suspended-second", {"2", "5"}},
-		{"Tristan", {"#4", "#6", "#9"}}
+		{"power", {55}},
+		{"suspended-fourth", {45, 55}},
+		{"suspended-second", {25, 55}},
+		{"Tristan", {46, 66, 96}}
 	};
+	
+	//Degree information for long Harte notation (i.e. just root and scale degrees, no chord kind)
+	vector<int> harteDegrees = kindMappingsLong[kind];
+	string shortHarteChord = kindMappingsShort[kind];
+	vector<int> shortHarteDegrees = {};
 
 	for (int i = 0; i < degreeValue.size(); i++){
 		ss << " ";
+		//Remove elements of the specified degree
+		if(degreeType[i] == "subtract" || degreeType[i] == "alter"){
+			vector<int>::iterator it = remove_if(harteDegrees.begin(), harteDegrees.end(), [&](int k){
+				return((k/10)==degreeValue[i]);
+			});
+
+			if(degreeType[i] == "subtract"){
+				shortHarteDegrees.push_back(10*degreeValue[i]);
+			}
+		}
+
+		//Add in added or altered degrees
+		if(degreeType[i] == "add" || degreeType[i] == "alter"){
+			int addedDegree = 10*degreeValue[i]+5+degreeAlter[i];
+			harteDegrees.push_back(addedDegree);
+			shortHarteDegrees.push_back(addedDegree);
+		}
 		if(degreeType[i]!="alter"){
 			ss << degreeType[i];
 		}
@@ -3383,36 +3521,32 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		ss << degreeValue[i];
 	}
 
-	//convert the list of strings into a list of ints, so that we know where to insert additional degrees later on.
-	strHarteDegrees = kindMappingsLong[kind];
+	//Put the notes in the correct order.
+	sort(harteDegrees.begin(), harteDegrees.end());
+	harteDegrees.erase( unique( harteDegrees.begin(), harteDegrees.end() ), harteDegrees.end() );
+
+	sort(shortHarteDegrees.begin(), shortHarteDegrees.end());
+	shortHarteDegrees.erase( unique( shortHarteDegrees.begin(), shortHarteDegrees.end() ), shortHarteDegrees.end() );
+
 	stringstream hartess;
-	hartess << root << ":(";
+	hartess << root << rootacc << ":" << decipherHarte(harteDegrees);
 
-    vector<int> numHarteDegrees;
-    regex re("[0-9]+");
-    smatch m;
-    for (int i=0; i<strHarteDegrees.size(); i++){
-        regex_search(strHartedegrees[i], m, re);
-        numHarteDegrees.push_back(stoi(m[0]));
-		hartess << strHarteDegrees[i];
-		if (i < strHarteDegrees.size()-1){
-			hartess << ",";
-		}
-    }
-
-	//modify the strHarteDegress vector with the degree information
-	// for (int i = 0; i < degressValue.size(); i++){
-	// 	if(degreeType[i]=="add"){
-
-	// 	} else if(degreeType[i]=="subtract"){
-
-	// 	} else if(degreeType[i]=="alter"){
-
-	// 	}
-	// }
-
-    hartess << ")";
+	if(bass.size()){
+		hartess << "/" << getInterval(root, bass, rootalter, bassalter);
+	}
 	ss << " " << hartess.str();
+
+	stringstream shortHartess;
+	shortHartess << root << rootacc;
+	if (shortHarteDegrees.size()){
+		shortHartess << ":" << shortHarteChord << decipherHarte(shortHarteDegrees);
+	} else if (shortHarteChord != "maj"){
+		shortHartess << ":" << shortHarteChord;
+	}
+	if(bass.size()){
+		shortHartess << "/" << getInterval(root, bass, rootalter, bassalter);
+	}
+	ss << " " << shortHartess.str();
 
 
 	string output = cleanSpaces(ss.str());
