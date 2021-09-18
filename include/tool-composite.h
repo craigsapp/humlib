@@ -83,9 +83,16 @@ class Tool_composite : public HumTool {
 		void        extractGroup         (HumdrumFile& infile, const string &target);
 		void        backfillGroup        (vector<vector<string>>& curgroup, HumdrumFile& infile,
 		                                  int line, int track, int subtrack, const string& group);
+		void        analyzeComposite     (HumdrumFile& infile);
+		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
+		std::string getExpansionString(std::vector<int>& tracks, int maxtrack);
+		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
+		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile, int atrack, int btrack);
+		int         countNoteAttacks(HTp token);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
+		bool        m_analysisQ = false;  // calculate analyses, used with -A option
 		bool        m_nogroupsQ = false;  // do not split composite rhythms into markup groups
 		bool        m_extractQ  = false;  // output only composite rhythm analysis (not input data)
 		bool        m_appendQ   = false;  // display analysis at top of system
