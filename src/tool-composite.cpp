@@ -124,6 +124,28 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 	vector<HTp> groups;
 	getCompositeSpineStarts(groups, infile);
 
+	// Invalidate composite spines that already have analysises:
+	// **text spine after composite spine:
+	for (int i=0; i<(int)groups.size(); i++) {
+		if (!groups[i]) {
+			continue;
+		}
+		int track = groups[i]->getTrack();
+		HTp current = groups[i];
+		current = current->getNextField();
+		while (current) {
+			int track2 = current->getTrack();
+			if (track2 == track) {
+				current = current->getNextField();
+				continue;
+			}
+			if (current->isDataType("**text")) {
+				groups[i] = NULL;
+			}
+			break;
+		}
+	}
+
 	vector<int> tracks;
 	for (int i=0; i<(int)groups.size(); i++) {
 		if (groups[i] == NULL) {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Sep 17 19:10:48 PDT 2021
+// Last Modified: Fri Sep 17 19:59:10 PDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56495,6 +56495,28 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 	infile.analyzeStructureNoRhythm();
 	vector<HTp> groups;
 	getCompositeSpineStarts(groups, infile);
+
+	// Invalidate composite spines that already have analysises:
+	// **text spine after composite spine:
+	for (int i=0; i<(int)groups.size(); i++) {
+		if (!groups[i]) {
+			continue;
+		}
+		int track = groups[i]->getTrack();
+		HTp current = groups[i];
+		current = current->getNextField();
+		while (current) {
+			int track2 = current->getTrack();
+			if (track2 == track) {
+				current = current->getNextField();
+				continue;
+			}
+			if (current->isDataType("**text")) {
+				groups[i] = NULL;
+			}
+			break;
+		}
+	}
 
 	vector<int> tracks;
 	for (int i=0; i<(int)groups.size(); i++) {
