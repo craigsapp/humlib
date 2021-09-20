@@ -2497,7 +2497,7 @@ void HumGrid::insertExInterpSides(HLp line, int part, int staff) {
 	if (staff < 0) {
 		int harmonyCount = getHarmonyCount(part);
 		for (int i=0; i<harmonyCount; i++) {
-			HTp token = new HumdrumToken("**mxhm");
+			HTp token = new HumdrumToken("**harte");
 			line->appendToken(token);
 		}
 
