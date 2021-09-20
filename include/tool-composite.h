@@ -86,6 +86,8 @@ class Tool_composite : public HumTool {
 		void        analyzeComposite     (HumdrumFile& infile);
 		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
 		std::string getExpansionString(std::vector<int>& tracks, int maxtrack);
+		void        doCoincidenceAnalysis(HumdrumFile& outfile, HumdrumFile& infile,
+		                                  int ctrack, HTp compositeStart);
 		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
 		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile, int atrack, int btrack);
 		int         countNoteAttacks(HTp token);
