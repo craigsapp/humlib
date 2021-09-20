@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 13 13:47:44 EDT 2021
+// Last Modified: Mon Sep 20 14:44:18 EDT 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -84895,35 +84895,7 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		}
 		child = child.next_sibling();
 	}
-	stringstream ss;
 
-	if ((kind == "none") && (root == "C") && !kindtext.empty()) {
-		ss << kindtext;
-		string output = cleanSpaces(ss.str());
-		return output;
-	}
-	string rootacc = alterRoot(rootalter);
-	ss << root << rootacc;
-
-	if (root.size() && kind.size()) {
-		ss << " ";
-	}
-	ss << kind;
-	if (bass.size()) {
-		ss << "/";
-
-	}
-	ss << bass;
-
-	if (bassalter > 0) {
-		for (int i=0; i<bassalter; i++) {
-			ss << "#";
-		}
-	} else if (bassalter < 0) {
-		for (int i=0; i<-bassalter; i++) {
-			ss << "-";
-		}
-	}
 
 	//convert degree-alter integers into sharps and flats
 	map<int, string> alterations{ 
@@ -85010,51 +84982,26 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	};
 	
 	//Degree information for long Harte notation (i.e. just root and scale degrees, no chord kind)
-	vector<int> harteDegrees = kindMappingsLong[kind];
 	string shortHarteChord = kindMappingsShort[kind];
 	vector<int> shortHarteDegrees = {};
 
 	for (int i = 0; i < degreeValue.size(); i++){
-		ss << " ";
 		//Remove elements of the specified degree
-		if(degreeType[i] == "subtract" || degreeType[i] == "alter"){
-			vector<int>::iterator it = remove_if(harteDegrees.begin(), harteDegrees.end(), [&](int k){
-				return((k/10)==degreeValue[i]);
-			});
-
-			if(degreeType[i] == "subtract"){
-				shortHarteDegrees.push_back(10*degreeValue[i]);
-			}
+		if(degreeType[i] == "subtract"){
+			shortHarteDegrees.push_back(10*degreeValue[i]);
 		}
 
 		//Add in added or altered degrees
 		if(degreeType[i] == "add" || degreeType[i] == "alter"){
 			int addedDegree = 10*degreeValue[i]+5+degreeAlter[i];
-			harteDegrees.push_back(addedDegree);
 			shortHarteDegrees.push_back(addedDegree);
 		}
-		if(degreeType[i]!="alter"){
-			ss << degreeType[i];
-		}
-		ss << " ";
-		ss << alterations[degreeAlter[i]];
-		ss << degreeValue[i];
 	}
 
 	//Put the notes in the correct order.
-	sort(harteDegrees.begin(), harteDegrees.end());
-	harteDegrees.erase( unique( harteDegrees.begin(), harteDegrees.end() ), harteDegrees.end() );
-
 	sort(shortHarteDegrees.begin(), shortHarteDegrees.end());
 	shortHarteDegrees.erase( unique( shortHarteDegrees.begin(), shortHarteDegrees.end() ), shortHarteDegrees.end() );
 
-	stringstream hartess;
-	hartess << root << rootacc << ":" << decipherHarte(harteDegrees);
-
-	if(bass.size()){
-		hartess << "/" << getInterval(root, bass, rootalter, bassalter);
-	}
-	ss << " " << hartess.str();
 
 	stringstream shortHartess;
 	shortHartess << root << rootacc;
@@ -85066,10 +85013,9 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	if(bass.size()){
 		shortHartess << "/" << getInterval(root, bass, rootalter, bassalter);
 	}
-	ss << " " << shortHartess.str();
 
 
-	string output = cleanSpaces(ss.str());
+	string output = cleanSpaces(shortHartess.str());
 	return output;
 }
 
