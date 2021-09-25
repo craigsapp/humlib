@@ -1567,7 +1567,9 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 	int index = (int)ends.size()-1;
 	ends[index].first = starttok;
 	HTp tok = starttok;
+	HTp lasttok = starttok;
 	while (tok != NULL) {
+		lasttok = tok;
 		if ((tok->getSubtrack() > 1) && (tok->isMerge())) {
 			// check to the left: if the left primary/sub spine also has
 			// a *v, then this is the end of this strand; otherwise, the
@@ -1594,6 +1596,7 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 	}
 
 	cerr << "Should not get here in analyzeSpineStrands()\n";
+	ends[index].last = lasttok;
 }
 
 
