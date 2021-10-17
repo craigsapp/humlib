@@ -186,7 +186,7 @@ vector<int> getSectionStarts(HumdrumFile& infile) {
 	}
 
 	if (infile.token(output.back(), 0)->getDurationToEnd() == 0) {
-		output.resize(output.size() - 1);
+		output.resize((int)output.size() - 1);
 	}
 
 	return output;
