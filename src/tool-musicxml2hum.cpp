@@ -3255,6 +3255,15 @@ string getInterval(string bottomNote, string topNote, int bottomAcc = 0, int top
 	int noteToClock = intervalToClock[noteInterval];
 	int diff = clockValue - noteToClock;
 
+	// The most we'd expect to have to alter an interval is by 4 semitones. Otherwise, something's amis.
+	if (abs(diff) > 6){
+		if (diff > 0){
+			diff -=12;
+		} else {
+			diff += 12;
+		}
+	}
+
 	stringstream ss;
 	if (diff > 0) {
 		for (int i=0; i<diff; i++) {
@@ -3396,10 +3405,10 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		{"dominant-11th", "11"},
 		{"dominant-13th", "13"},
 		{"dominant-ninth", "9"},
-		{"French", "fr6"},
-		{"German", "ge6"},
+		{"French", "Fr6"},
+		{"German", "Ge6"},
 		{"half-diminished", "hdim7"},
-		{"Italian", "it6"},
+		{"Italian", "It6"},
 		{"major", "maj"},
 		{"major-11th", "maj11"},
 		{"major-13th", "maj13"},
@@ -3484,6 +3493,7 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 
 
 	stringstream shortHartess;
+	string rootacc = alterRoot(rootalter);
 	shortHartess << root << rootacc;
 	if (shortHarteDegrees.size()){
 		shortHartess << ":" << shortHarteChord << decipherHarte(shortHarteDegrees);
