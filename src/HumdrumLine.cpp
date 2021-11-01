@@ -2226,7 +2226,11 @@ bool HumdrumLine::allSameBarlineStyle(void) {
 
 void HumdrumLine::clearTokenLinkInfo(void) {
 	for (int i=0; i<getFieldCount(); i++) {
-		token(i)->clearLinkInfo();
+		if (token(i)) {
+			token(i)->clearLinkInfo();
+		} else {
+			cerr << "Warning: non-existent token at field " << (i+1) << " on line " << (m_lineindex+1) << endl;
+		}
 	}
 }
 
