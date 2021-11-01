@@ -219,6 +219,12 @@ class Tool_musicxml2hum : public HumTool {
 		void addMeasureOneNumber(HumdrumFile& infile);
 		bool isUsedHairpin     (pugi::xml_node hairpin, int partindex);
 
+		int getIndex(std::vector<std::string>& v, const std::string& K);
+		std::string getInterval(const std::string& bottomNote, const std::string& topNote,
+		                        int bottomAcc = 0, int topAcc = 0);
+		std::string decipherHarte(std::vector<int>& degrees);
+		std::string alterRoot    (int rootalter);
+
 	public:
 
 	static bool nodeType      (pugi::xml_node node, const char* testname);

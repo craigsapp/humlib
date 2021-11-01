@@ -3177,53 +3177,47 @@ int Tool_musicxml2hum::getFiguredBassDuration(xml_node fnode) {
 
 //////////////////////////////
 //
-// Tool_musicxml2hum::getHarmonyString --
-//   <harmony default-y="40">
-//       <root>
-//           <root-step>C</root-step>
-//       </root>
-//       <kind>major-ninth</kind>
-//       <bass>
-//           <bass-step>E</bass-step>
-//       </bass>
-//       <offset>-8</offset>
-//   </harmony>
+// Tool_musicxml2hum::getIndex -- Return the vector index of
+//     the first item that matches the query string K.
 //
-// For harmony labels from Musescore:
-//
-//    <harmony print-frame="no">
-//      <root>
-//        <root-step text="">C</root-step>
-//        </root>
-//      <kind text="V43">none</kind>
-//      </harmony>
-//
-// Converts to: "V43" ignoring the root-step and kind contents
-// if they are both "C" and "none".
+// Reference: https://www.geeksforgeeks.org/how-to-find-index-of-a-given-element-in-a-vector-in-cpp
 //
 
-//retrieved from https://www.geeksforgeeks.org/how-to-find-index-of-a-given-element-in-a-vector-in-cpp/
-int getIndex(vector<string> v, string K) {
-    auto it = find(v.begin(), v.end(), K);
+int Tool_musicxml2hum::getIndex(vector<string>& v, const string& K) {
+	auto it = find(v.begin(), v.end(), K);
 	int index = -1;
-    // If element was found
-    if (it != v.end())
-    {
-        // calculating the index of K
-        int index = it - v.begin();
-
-    }
+	if (it != v.end()) {
+		// Element was found, so calculate its index in the vector.
+		index = int(it - v.begin());
+	}
 	return index;
 }
 
-string getInterval(string bottomNote, string topNote, int bottomAcc = 0, int topAcc = 0){
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getInterval --
+// Takes two notes and converts the inveral between them:
+// Examples: bottomNote = C, topNote = A -> 6
+//			 bottomNote = A, topNote = C -> b3
+//			 bottomNote = A, topNote = Cb -> bb3
+//			 bottomNote = A, topNOte = B -> 2
+// 
+// Default values
+//    bottomAcc = 0
+//    topAcc = 0
+//
+
+string Tool_musicxml2hum::getInterval(const string& bottomNote, const string& topNote,
+		int bottomAcc, int topAcc) {
 	map<string, int> notes = {
     	{"C", 0}, {"D",1}, {"E",2}, {"F",3},  {"G",4}, {"A",5}, {"B",6}
 	};
 	int bottomInd = notes[bottomNote];
 	int topInd = notes[topNote];
 	int noteInterval = topInd - bottomInd + 1;
-	if (noteInterval < 2){
+	if (noteInterval < 2) {
 		noteInterval += 7;
 	}
 	map<string, int> clockVals{
@@ -3249,15 +3243,16 @@ string getInterval(string bottomNote, string topNote, int bottomAcc = 0, int top
 	int bottomClock = clockVals[bottomNote] + bottomAcc;
 	int topClock = clockVals[topNote] + topAcc;
 	int clockValue = topClock - bottomClock;
-	if (clockValue < 0){
+	if (clockValue < 0) {
 		clockValue += 12;
 	}
 	int noteToClock = intervalToClock[noteInterval];
 	int diff = clockValue - noteToClock;
 
-	// The most we'd expect to have to alter an interval is by 4 semitones. Otherwise, something's amis.
-	if (abs(diff) > 6){
-		if (diff > 0){
+	// The most we'd expect to have to alter an interval is by 6 semitones;
+	// otherwise, something is wrong.
+	if (abs(diff) > 6) {
+		if (diff > 0) {
 			diff -=12;
 		} else {
 			diff += 12;
@@ -3276,11 +3271,21 @@ string getInterval(string bottomNote, string topNote, int bottomAcc = 0, int top
 	}
 	string interval =  ss.str() + std::to_string(noteInterval);
 	return interval;
-
 }
 
-string decipherHarte(vector<int> degrees){
-	map<int, string> altStrings{
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::decipherHarte --
+// Converts the intermediary numerical representation of a note to scale degree used in **harte notation
+// Examples: 35 -> 3
+// 			 34 -> b3
+//			 36 -> #3 
+//
+
+string Tool_musicxml2hum::decipherHarte(vector<int>& degrees) {
+	map<int, string> altStrings {
 		{0, "*"},
 		{1, "bbbb"},
 		{2, "bbb"},
@@ -3294,12 +3299,12 @@ string decipherHarte(vector<int> degrees){
 	};
 	stringstream hartess;
 	hartess << "(";
-	for (int i=0; i < degrees.size(); i++){
+	for (int i=0; i < (int)degrees.size(); i++) {
 		int harteDegree = degrees[i] / 10;
 		int harteAlter = degrees[i] % 10;
 		hartess << altStrings[harteAlter];
 		hartess << std::to_string(harteDegree);
-		if (i < degrees.size()-1){
+		if (i < (int)degrees.size()-1) {
 			hartess << ",";
 		}
 	}
@@ -3307,7 +3312,15 @@ string decipherHarte(vector<int> degrees){
 	return hartess.str();
 }
 
-string alterRoot(int rootalter){
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::alterRoot --
+// Add sharps and flats to chord root notes.
+//
+
+string Tool_musicxml2hum::alterRoot(int rootalter) {
 	stringstream ss;
 	ss << "";
 	if (rootalter > 0) {
@@ -3321,6 +3334,37 @@ string alterRoot(int rootalter){
 	}
 	return ss.str();
 }
+
+
+
+//////////////////////////////
+//
+// Tool_musicxml2hum::getHarmonyString --
+//   <harmony default-y="40">
+//       <root>
+//           <root-step>C</root-step>
+//       </root>
+//       <kind>major-ninth</kind>
+//       <bass>
+//           <bass-step>E</bass-step>
+//       </bass>
+//       <offset>-8</offset>
+//   </harmony>
+//
+// Converts to C9/E
+//
+// For harmony labels from Musescore:
+//
+//    <harmony print-frame="no">
+//      <root>
+//        <root-step text="">C</root-step>
+//        </root>
+//      <kind text="V43">none</kind>
+//      </harmony>
+//
+// Converts to: "V43" ignoring the root-step and kind contents
+// if they are both "C" and "none".
+//
 
 string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	if (!hnode) {
@@ -3369,14 +3413,14 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 				}
 				grandchild = grandchild.next_sibling();
 			}
-		} else if (nodeType(child, "degree")){
+		} else if (nodeType(child, "degree")) {
 			grandchild = child.first_child();
-			while(grandchild){
-				if (nodeType(grandchild, "degree-value")){
+			while(grandchild) {
+				if (nodeType(grandchild, "degree-value")) {
 					degreeValue.push_back(atoi(grandchild.child_value()));
-				} if (nodeType(grandchild, "degree-alter")){
+				} if (nodeType(grandchild, "degree-alter")) {
 					degreeAlter.push_back(atoi(grandchild.child_value()));
-				} if (nodeType(grandchild, "degree-type")){
+				} if (nodeType(grandchild, "degree-type")) {
 					degreeType.push_back(grandchild.child_value());
 				}
 				grandchild = grandchild.next_sibling();
@@ -3384,7 +3428,6 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 		}
 		child = child.next_sibling();
 	}
-
 
 	//convert degree-alter integers into sharps and flats
 	map<int, string> alterations{ 
@@ -3434,6 +3477,9 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	};
 
 	//map between musicxml kindtext and long-form Harte syntax
+	//Key: Tens place of the number represents scale degree of the chord notes.
+	//	   Ones place represents alterations (5 = natural, 4 = b, 3 = bb, etc. 6 = #, 7 = ##, etc. , 0 = removed)
+	// This map is not currently used in any calculations. It can be used instead of the "kindMappingsShort" map to use the "long-form" harte representation instead of the short form.
 	map<string, vector<int>> kindMappingsLong{
 		{"augmented", {35, 56}},
 		{"augmented-seventh", {35, 56, 74}},
@@ -3474,14 +3520,14 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	string shortHarteChord = kindMappingsShort[kind];
 	vector<int> shortHarteDegrees = {};
 
-	for (int i = 0; i < degreeValue.size(); i++){
+	for (int i = 0; i < (int)degreeValue.size(); i++) {
 		//Remove elements of the specified degree
-		if(degreeType[i] == "subtract"){
+		if(degreeType[i] == "subtract") {
 			shortHarteDegrees.push_back(10*degreeValue[i]);
 		}
 
 		//Add in added or altered degrees
-		if(degreeType[i] == "add" || degreeType[i] == "alter"){
+		if(degreeType[i] == "add" || degreeType[i] == "alter") {
 			int addedDegree = 10*degreeValue[i]+5+degreeAlter[i];
 			shortHarteDegrees.push_back(addedDegree);
 		}
@@ -3495,12 +3541,12 @@ string Tool_musicxml2hum::getHarmonyString(xml_node hnode) {
 	stringstream shortHartess;
 	string rootacc = alterRoot(rootalter);
 	shortHartess << root << rootacc;
-	if (shortHarteDegrees.size()){
+	if (shortHarteDegrees.size()) {
 		shortHartess << ":" << shortHarteChord << decipherHarte(shortHarteDegrees);
-	} else if (shortHarteChord != "maj"){
+	} else if (shortHarteChord != "maj") {
 		shortHartess << ":" << shortHarteChord;
 	}
-	if(bass.size()){
+	if(bass.size()) {
 		shortHartess << "/" << getInterval(root, bass, rootalter, bassalter);
 	}
 
