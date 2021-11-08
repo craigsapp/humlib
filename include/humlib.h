@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  1 14:46:03 PDT 2021
+// Last Modified: Mon Nov  8 12:40:28 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5888,13 +5888,13 @@ class Tool_composite : public HumTool {
 		void        doCoincidenceAnalysis(HumdrumFile& outfile, HumdrumFile& infile,
 		                                  int ctrack, HTp compositeStart);
 		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
-		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile, int atrack, int btrack);
+		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile);
 		int         countNoteAttacks(HTp token);
 		void        doTotalAttackAnalysis(vector<double>& analysis, HumdrumFile& infile,
 		                                  int track, vector<bool>& tracks);
 		void        doGroupAttackAnalyses(vector<double>& analysisA,
-		                                  vector<double>& analysisB, HumdrumFile& infile,
-		                                  int trackA, int trackB, vector<bool>& tracks);
+		                                  vector<double>& analysisB,
+		                                  HumdrumFile& infile);
 		void        doCoincidenceAttackAnalysis(vector<vector<double>>& analysis);
 		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
 		                                   vector<int>& trackMap, vector<bool>& tracks);

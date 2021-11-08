@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  1 14:46:03 PDT 2021
+// Last Modified: Mon Nov  8 12:40:28 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56762,13 +56762,13 @@ void Tool_composite::analyzeCompositeAttacks(HumdrumFile& infile,
 		fill(m_analysisNoteAttacks[i].begin(), m_analysisNoteAttacks[i].end(), -1.0);
 	}
 
-	if (groups[0] || groups[3]) {
+//	if (groups[0] || groups[3]) {
+	if (groups[0]) {
 		doTotalAttackAnalysis(m_analysisNoteAttacks[0], infile, groups[0]->getTrack(), tracks);
 	}
 
 	if ((groups[1] && groups[2]) || groups[3]) {
-		doGroupAttackAnalyses(m_analysisNoteAttacks.at(1), m_analysisNoteAttacks.at(2), infile,
-			groups.at(1)->getTrack(), groups.at(2)->getTrack(), tracks);
+		doGroupAttackAnalyses(m_analysisNoteAttacks.at(1), m_analysisNoteAttacks.at(2), infile);
 	}
 
 	if (groups[3]) {
@@ -56819,30 +56819,14 @@ void Tool_composite::doCoincidenceAttackAnalysis(vector<vector<double>>& analysi
 //
 
 void Tool_composite::doGroupAttackAnalyses(vector<double>& analysisA,
-      vector<double>& analysisB, HumdrumFile& infile, int trackA, int trackB,
-      vector<bool>& tracks) {
+      vector<double>& analysisB, HumdrumFile& infile) {
 
-	HTp atok = NULL;
-	HTp btok = NULL;
 	int asum = 0;
 	int bsum = 0;
 	for (int i=0; i<(int)infile.getLineCount(); i++) {
 		if (!infile[i].isData()) {
 			continue;
 		}
-		atok = NULL;
-		btok = NULL;
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			int track = token->getTrack();
-			if (track == trackA) {
-				atok = token;
-			}
-			if (track == trackB) {
-				btok = token;
-			}
-		}
-
 		asum = 0;
 		bsum = 0;
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
@@ -57047,7 +57031,7 @@ int Tool_composite::countNoteAttacks(HTp token) {
 
 //////////////////////////////
 //
-// Tool_composite::getExpansionList --  Add an extra spine after
+// Tool_composite::getexpansionList --  Add an extra spine after
 //      every track in the input list, up to maxtrack.
 //
 
