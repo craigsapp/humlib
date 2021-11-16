@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  8 12:40:28 PST 2021
+// Last Modified: Mon Nov 15 21:51:24 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1566,7 +1566,9 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getTokenNumber            (void) const;
 		const std::string& getDataType     (void) const;
 		bool     isDataType                (const std::string& dtype) const;
+		bool     isDataTypeLike            (const std::string& dtype) const;
 		bool     isKern                    (void) const;
+		bool     isKernLike                (void) const;
 		bool     isMens                    (void) const;
 		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;
@@ -1988,6 +1990,10 @@ class HumdrumFileBase : public HumHash {
 		                                        const std::string& exinterp);
 		void          getKernSpineStartList    (std::vector<HTp>& spinestarts);
 		std::vector<HTp> getKernSpineStartList (void);
+		void          getKernLikeSpineStartList(std::vector<HTp>& spinestarts);
+		std::vector<HTp> getKernLikeSpineStartList(void);
+		void          getStaffLikeSpineStartList(std::vector<HTp>& spinestarts);
+		std::vector<HTp> getStaffLikeSpineStartList(void);
 		int           getExinterpCount         (const std::string& exinterp);
 		void          getSpineStartList        (std::vector<HTp>& spinestarts,
 		                                        const std::vector<std::string>& exinterps);
@@ -4004,7 +4010,7 @@ class PixelColor {
 		void         writePpm3      (std::ostream& out);
 
 	public:
-		unsigned char   Red; 
+		unsigned char   Red;
 		unsigned char   Green;
 		unsigned char   Blue;
 
@@ -5898,9 +5904,8 @@ class Tool_composite : public HumTool {
 		void        doCoincidenceAttackAnalysis(vector<vector<double>>& analysis);
 		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
 		                                   vector<int>& trackMap, vector<bool>& tracks);
-		void        assignAnalysesToTextTracks(vector<vector<double>*>& data,
-		                                   vector<string>& spines, vector<bool>& tracks,
-		                                   vector<int>& trackMap);
+		void        assignAnalysesToVdataTracks(vector<vector<double>*>& data,
+		                                   vector<string>& spines, HumdrumFile& outfile);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -5928,11 +5933,11 @@ class Tool_composite : public HumTool {
 		bool        m_analysisOrnamentsQ     = false;  // used with -O option
 		bool        m_analysisSlursQ         = false;  // used with -S option
 		bool        m_analysisQ              = false;  // union of -AROS options
-		vector<vector<double>> m_analysisNoteAttacks;       // used with -A
-		vector<vector<double>> m_analysisNoteArticulations; // used with -R
-		vector<vector<double>> m_analysisNoteOrnaments;     // used with -O
-		vector<vector<double>> m_analysisNoteSlurs;         // used with -S
-		vector<vector<double>> m_analysisTotals;            // Sum when multiple features are analyzed.
+		vector<vector<double>> m_analysisAttacks;       // used with -K
+		vector<vector<double>> m_analysisArticulations; // used with -A
+		vector<vector<double>> m_analysisOrnaments;     // used with -O
+		vector<vector<double>> m_analysisSlurs;         // used with -S
+		vector<vector<double>> m_analysisTotals;        // used with -T sum when multiple features are analyzed
 
 };
 
@@ -7682,7 +7687,7 @@ class Tool_musedata2hum : public HumTool {
 		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
 		void    setMeasureNumber     (GridMeasure* gm, MuseRecord& mr);
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
-		void    addNoteDynamics      (GridSlice* slice, int part, 
+		void    addNoteDynamics      (GridSlice* slice, int part,
 		                              MuseRecord& mr);
 		void    addLyrics            (GridSlice* slice, int part, int staff, MuseRecord& mr);
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
@@ -8120,7 +8125,7 @@ class Tool_pccount : public HumTool {
 		bool  run                       (HumdrumFile& infile);
 		bool  run                       (const string& indata, ostream& out);
 		bool  run                       (HumdrumFile& infile, ostream& out);
- 
+
 	protected:
 		void   initialize               (HumdrumFile& infile);
 		void   processFile              (HumdrumFile& infile);
@@ -8573,7 +8578,7 @@ class Tool_shed : public HumTool {
 		bool m_modified       = false;
 
 		// list of exclusive interpretations to process
-		std::vector<std::string> m_exinterps; 
+		std::vector<std::string> m_exinterps;
 		std::string m_exclusion;
 
 		std::vector<bool> m_spines; // usar with -s option
@@ -8805,8 +8810,8 @@ class Tool_strophe : public HumTool {
 
 	private:
 		bool         m_listQ;      // boolean for showing a list of variants
-		bool         m_markQ;      // boolean for marking strophes 
-		std::string  m_marker;     // character for marking strophes 
+		bool         m_markQ;      // boolean for marking strophes
+		std::string  m_marker;     // character for marking strophes
 		std::string  m_color;      // color for strphe notes/rests
       std::set<std::string> m_variants;  // used for --list option
 

@@ -40,7 +40,7 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 	bool output = false;
 	bool ijstate;
 	bool startij;  // true if at the first note in IJ
-	HTp lastword;   // non-null if last syllable before *Xij 
+	HTp lastword;   // non-null if last syllable before *Xij
 
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		ijstate = false;

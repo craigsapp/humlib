@@ -94,7 +94,7 @@ void Tool_mens2kern::initialize(void) {
 //
 
 void Tool_mens2kern::processFile(HumdrumFile& infile) {
-	vector<HTp> melody; 
+	vector<HTp> melody;
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandBegin(i);
@@ -157,9 +157,9 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 			longa_def      = modus     * brevis_def;
 			maxima_def     = maximodus * longa_def;
 			if (m_debugQ) {
-				cerr << "LEVELS X_def = "    << maxima_def 
-					  << " | L_def = " << longa_def 
-					  << " | S_def = " << brevis_def 
+				cerr << "LEVELS X_def = "    << maxima_def
+					  << " | L_def = " << longa_def
+					  << " | S_def = " << brevis_def
 					  << " | s_def = " << semibrevis_def << endl;
 			}
 		}
@@ -292,9 +292,9 @@ void Tool_mens2kern::getMensuralInfo(HTp token, int& maximodus, int& modus,
 	}
 
 	if (m_debugQ) {
-		cerr << "MENSURAL INFO: maximodus = "   << maximodus 
-			  << " | modus = "    << modus 
-			  << " | tempus = "   << tempus 
+		cerr << "MENSURAL INFO: maximodus = "   << maximodus
+			  << " | modus = "    << modus
+			  << " | tempus = "   << tempus
 			  << " | prolatio = " << prolatio << endl;
 	}
 }
@@ -368,9 +368,9 @@ string Tool_mens2kern::mens2kernRhythm(const string& rhythm, bool altera, bool p
 		case 30000:    return "1.";   break;   // dotted whole note
 		case 40000:    return "0";    break;   // breve note
 		case 60000:    return "0.";   break;   // dotted breve note
-		case 90000:    return "2%9";  break;   // or ["0.", "1."]; 
+		case 90000:    return "2%9";  break;   // or ["0.", "1."];
 		case 80000:    return "00";   break;   // long note
-		case 120000:   return "00.";  break;   // dotted long note 
+		case 120000:   return "00.";  break;   // dotted long note
 		case 180000:   return "1%9";  break;   // or ["00.", "0."];
 		case 270000:   return "2%27"; break;   // or ["0.", "1.", "0.", "1.", "0.", "1."];
 		case 160000:   return "000";  break;   // maxima note

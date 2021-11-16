@@ -245,7 +245,7 @@ string Tool_shed::getExInterp(const string& value) {
 // Tool_shed::parseExpression --
 //     Form of string:
 //        s/search/replace/options; s/search2/replace2/options2
-// 
+//
 //
 
 void Tool_shed::parseExpression(const string& expression) {
@@ -273,7 +273,7 @@ void Tool_shed::parseExpression(const string& expression) {
 					m_searches.push_back("");
 				}
 			} else {
-				cerr << "Error at position " << i 
+				cerr << "Error at position " << i
 				     << " in expression: " << expression << endl;
 				return;
 			}
@@ -332,7 +332,7 @@ void Tool_shed::parseExpression(const string& expression) {
 
 //////////////////////////////
 //
-// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum 
+// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum
 //      input segment.
 //
 

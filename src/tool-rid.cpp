@@ -153,14 +153,14 @@ void Tool_rid::processFile(HumdrumFile& infile) {
       }
       if (option_d) {
          // remove null data lines if -d is specified
-         if (option_k && infile[i].isData() && 
+         if (option_k && infile[i].isData() &&
                infile[i].equalFieldsQ("**kern", ".")) {
             // remove if only all **kern spines are null.
             if (revQ) {
                m_humdrum_text << infile[i] << "\n";
             }
             continue;
-         } else if (!option_k && infile[i].isData() && 
+         } else if (!option_k && infile[i].isData() &&
                infile[i].isAllNull()) {
             // remove null data lines if all spines are null.
             if (revQ) {
@@ -169,7 +169,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
             continue;
          }
       }
-      if (option_G && (infile[i].isGlobalComment() || 
+      if (option_G && (infile[i].isGlobalComment() ||
             infile[i].isReference())) {
          // remove global comments if -G is specified
          if (revQ) {
@@ -191,7 +191,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_i && infile[i].isInterpretation() && 
+      if (option_i && infile[i].isInterpretation() &&
             infile[i].isAllNull()) {
          // remove null interpretation records
          if (revQ) {
@@ -206,7 +206,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_l && infile[i].isLocalComment() && 
+      if (option_l && infile[i].isLocalComment() &&
             infile[i].isAllNull()) {
          // remove null local comments
          if (revQ) {
@@ -243,7 +243,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_c && (infile[i].isLocalComment() || 
+      if (option_c && (infile[i].isLocalComment() ||
             infile[i].isGlobalComment())) {
          // remove all comments (local & global)
          if (revQ) {

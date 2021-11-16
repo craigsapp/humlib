@@ -103,8 +103,8 @@ bool Tool_chantize::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_chantize::outputFile -- 
-//    * remove time signature, 
+// Tool_chantize::outputFile --
+//    * remove time signature,
 //    * remove barlines, except double barlines
 //    * convert rests to double barlines (except at the end of the
 //         music).
@@ -160,7 +160,7 @@ void Tool_chantize::outputFile(HumdrumFile& infile) {
 					// 	}
 					// }
 					// m_humdrum_text << "\n";
-				} 
+				}
 				continue;
 			} else {
 				restQ = false;
@@ -198,8 +198,8 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		transpositionsQ = false;
 	}
 
-	if (getBoolean("do-not-delete-breaks")) { 
-		//	breaksQ = false; 
+	if (getBoolean("do-not-delete-breaks")) {
+		//	breaksQ = false;
 	}
 	if (getBoolean("only-delete-breaks")) {
 		abbreviationsQ  = false;
@@ -856,7 +856,7 @@ string Tool_chantize::getDate(void) {
 //////////////////////////////
 //
 // Tool_chantize::getTerminalRestStates -- return a vector of each line,
-//    setting true if the line is a data line containing a rest at the end of the 
+//    setting true if the line is a data line containing a rest at the end of the
 //    music after the last note.
 //
 

@@ -7,7 +7,7 @@
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Switch between original and modern 
+// Description:   Switch between original and modern
 //                clefs/keysig/mensuration/time sig.
 //
 //                *k[] == key signature (displayed)

@@ -598,6 +598,7 @@ void HumdrumFileStructure::setLineRhythmAnalyzed(void) {
 }
 
 
+
 //////////////////////////////
 //
 // HumdrumFileStructure::analyzeRhythm -- Analyze the rhythmic structure

@@ -186,7 +186,7 @@ void Tool_pccount::initialize(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_pccount::getFinal -- Extract the last unparenthesed letter from a ref record like this:
-// 
+//
 // !!!final: (A)D
 //
 
@@ -246,7 +246,7 @@ void Tool_pccount::processFile(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_pccount::printVegaLitePage --
-// 
+//
 
 void Tool_pccount::printVegaLitePage(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
@@ -281,7 +281,7 @@ void Tool_pccount::printVegaLitePage(const string& jsonvar,
 //////////////////////////////
 //
 // Tool_pccount::printVegaLiteHtml --
-// 
+//
 
 void Tool_pccount::printVegaLiteHtml(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
@@ -299,7 +299,7 @@ void Tool_pccount::printVegaLiteHtml(const string& jsonvar,
 //////////////////////////////
 //
 // Tool_pccount::printVegaLiteScript --
-// 
+//
 
 void Tool_pccount::printVegaLiteScript(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {

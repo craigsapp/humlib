@@ -273,7 +273,7 @@ void Tool_tremolo::expandTremolo(HTp token) {
 
 		// There are cases where duration < 1 need added beams
 		// when the note is not already in a beam.  Such as
-		// a plain 8th note with a slash.  This needs to be 
+		// a plain 8th note with a slash.  This needs to be
 		// converted into two 16th notes with a beam so that
 		// *tremolo can reduce it back into a tremolo, since
 		// it will only reduce beam groups.

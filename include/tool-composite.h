@@ -106,9 +106,8 @@ class Tool_composite : public HumTool {
 		void        doCoincidenceAttackAnalysis(vector<vector<double>>& analysis);
 		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
 		                                   vector<int>& trackMap, vector<bool>& tracks);
-		void        assignAnalysesToTextTracks(vector<vector<double>*>& data,
-		                                   vector<string>& spines, vector<bool>& tracks,
-		                                   vector<int>& trackMap);
+		void        assignAnalysesToVdataTracks(vector<vector<double>*>& data,
+		                                   vector<string>& spines, HumdrumFile& outfile);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -136,11 +135,11 @@ class Tool_composite : public HumTool {
 		bool        m_analysisOrnamentsQ     = false;  // used with -O option
 		bool        m_analysisSlursQ         = false;  // used with -S option
 		bool        m_analysisQ              = false;  // union of -AROS options
-		vector<vector<double>> m_analysisNoteAttacks;       // used with -A
-		vector<vector<double>> m_analysisNoteArticulations; // used with -R
-		vector<vector<double>> m_analysisNoteOrnaments;     // used with -O
-		vector<vector<double>> m_analysisNoteSlurs;         // used with -S
-		vector<vector<double>> m_analysisTotals;            // Sum when multiple features are analyzed.
+		vector<vector<double>> m_analysisAttacks;       // used with -K
+		vector<vector<double>> m_analysisArticulations; // used with -A
+		vector<vector<double>> m_analysisOrnaments;     // used with -O
+		vector<vector<double>> m_analysisSlurs;         // used with -S
+		vector<vector<double>> m_analysisTotals;        // used with -T sum when multiple features are analyzed
 
 };
 

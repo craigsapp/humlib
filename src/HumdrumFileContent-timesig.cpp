@@ -45,7 +45,7 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 	pair<int, HumNum> current(0, 0);
 	fill(output.begin(), output.end(), current);
 	if (track == 0) {
-		vector<HTp> kernspines = infile.getKernSpineStartList();
+		vector<HTp> kernspines = infile.getKernLikeSpineStartList();
 		if (kernspines.size() > 0) {
 			track = kernspines[0]->getTrack();
 		}

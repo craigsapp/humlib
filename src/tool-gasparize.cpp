@@ -604,7 +604,7 @@ void Tool_gasparize::deleteBreaks(HumdrumFile& infile) {
 // At end:
 // !!!RDF**kern: l = terminal long
 // !!!RDF**kern: i = editorial accidental
-// !!!EED: 
+// !!!EED:
 // !!!EEV: $DATE
 //
 
@@ -1100,7 +1100,7 @@ void Tool_gasparize::fixTiesStartEnd(HTp starts, HTp ends) {
 			current = current->getNextToken();
 			continue;
 		}
-		if ((current->find('[') != string::npos) && 
+		if ((current->find('[') != string::npos) &&
 				(current->find(']') != string::npos) &&
 				(current->find(' ') == string::npos)) {
 			string text = *current;

@@ -1156,6 +1156,11 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::getKernSpineStartList -- return only the spines that are **kern.
+//
+
 void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
 	getSpineStartList(spinestarts, "**kern");
 }
@@ -1163,6 +1168,60 @@ void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
 vector<HTp> HumdrumFileBase::getKernSpineStartList(void) {
 	vector<HTp> starts;
 	HumdrumFileBase::getKernSpineStartList(starts);
+	return starts;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getKernLikeSpineStartList -- return spines that are "kern-like".  These
+//    can be either **kern or forms matching **kern-tag pattern.
+//
+
+void HumdrumFileBase::getKernLikeSpineStartList(vector<HTp>& spinestarts) {
+	vector <HTp> starts;
+	HumdrumFileBase::getSpineStartList(starts);
+	spinestarts.clear();
+	for (int i=0; i<(int)starts.size(); i++) {
+		if (*(starts.at(i)) == "**kern") {
+			spinestarts.push_back(starts[i]);
+		} else if (starts.at(i)->compare(0, 7, "**kern-") == 0) {
+			spinestarts.push_back(starts[i]);
+		}
+	}
+}
+
+
+vector<HTp> HumdrumFileBase::getKernLikeSpineStartList(void) {
+	vector<HTp> starts;
+	HumdrumFileBase::getKernLikeSpineStartList(starts);
+	return starts;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getStaffLikeSpineStartList -- return spines that have isSpine()
+//    being true.  These can be either **kern or forms matching **kern-tag pattern.
+//
+
+void HumdrumFileBase::getStaffLikeSpineStartList(vector<HTp>& spinestarts) {
+	vector <HTp> starts;
+	HumdrumFileBase::getSpineStartList(starts);
+	spinestarts.clear();
+	for (int i=0; i<(int)starts.size(); i++) {
+		if (starts.at(i)->isStaff()) {
+			spinestarts.push_back(starts[i]);
+		}
+	}
+}
+
+
+vector<HTp> HumdrumFileBase::getStaffLikeSpineStartList(void) {
+	vector<HTp> starts;
+	HumdrumFileBase::getStaffLikeSpineStartList(starts);
 	return starts;
 }
 
@@ -2584,7 +2643,7 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::insertNullInterpretationLieAboveIndex -- 
+// HumdrumFileBase::insertNullInterpretationLieAboveIndex --
 //
 
 HLp HumdrumFileBase::insertNullInterpretationLineAboveIndex(int index) {
@@ -2775,7 +2834,7 @@ HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::clearTokenLinkInfo --  
+// HumdrumFileBase::clearTokenLinkInfo --
 //
 
 void HumdrumFileBase::clearTokenLinkInfo(void) {

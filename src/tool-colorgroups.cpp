@@ -13,7 +13,7 @@
 //                   *grp:B
 //                   *grp:C
 //                Maybe allow more groups and allow for *Xgrp: to turn off a group.
-//                
+//
 //                Essentially the commands:
 //                   shed -e "s/grp:A/color:crimson/I; s/grp:B/color:dodgerblue/I; s/grp:C/color:limegreen/I"
 //

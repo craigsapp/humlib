@@ -107,7 +107,7 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::beamGraceNotes --  Using lazy beaming, and 
+// Tool_autobeam::beamGraceNotes --  Using lazy beaming, and
 //    not careful checking of beamed notes versus nonbeamed notes
 //    such as a mix of quarter and eighth grace notes in the group.
 //
@@ -127,7 +127,7 @@ void Tool_autobeam::beamGraceNotes(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		endtok   = infile.getStrandEnd(i);
@@ -281,7 +281,7 @@ void Tool_autobeam::removeBeams(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		endtok   = infile.getStrandEnd(i);
@@ -337,12 +337,12 @@ void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		HTp curtok = starttok->getNextFieldToken();
 		bool hastext = false;
-		while (curtok && !curtok->isKern()) {
+		while (curtok && !curtok->isKernLike()) {
 			if (curtok->isDataType("**text")) {
 				hastext = true;
 				break;
@@ -793,7 +793,7 @@ void Tool_autobeam::getBeamedNotes(vector<HTp>& toks, HTp tok, HTp stok, HTp eto
 
 bool Tool_autobeam::hasSyllable(HTp token) {
 	HTp current = token->getNextFieldToken();
-	while (current && !current->isKern()) {
+	while (current && !current->isKernLike()) {
 		if (current->isDataType("**text")) {
 			if (current->isNull()) {
 				return false;
@@ -823,7 +823,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 				continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		processStrand(infile.getStrandStart(i), infile.getStrandEnd(i));
@@ -840,7 +840,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 
 void Tool_autobeam::initialize(HumdrumFile& infile) {
 	m_splitcount = 0;
-	m_kernspines = infile.getKernSpineStartList();
+	m_kernspines = infile.getKernLikeSpineStartList();
 	vector<HTp>& ks = m_kernspines;
 	m_timesigs.resize(infile.getTrackCount() + 1);
 	for (int i=0; i<(int)ks.size(); i++) {
@@ -919,8 +919,8 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
-		if ((current.first != timesig[line].first) ||
-		    (current.second != timesig[line].second)) {
+		if ((current.first != timesig.at(line).first) ||
+		    (current.second != timesig.at(line).second)) {
 			current = timesig[line];
 			beatdur = 1;
 			beatdur /= current.second;

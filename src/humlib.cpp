@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  8 12:40:28 PST 2021
+// Last Modified: Mon Nov 15 21:51:24 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1367,7 +1367,7 @@ string Convert::mensToRecip(const string& mensdata, HumNum scale, const string& 
 
 //////////////////////////////
 //
-// Convert::mensToRecip -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and 
+// Convert::mensToRecip -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and
 //      divisions of rhythmic levels based on prevailing mensuration.
 //
 
@@ -1451,9 +1451,9 @@ string Convert::mensToRecip(char rhythm, bool altera, bool perfecta, bool imperf
 		case 30000:    return "1.";   break;   // dotted whole note
 		case 40000:    return "0";    break;   // breve note
 		case 60000:    return "0.";   break;   // dotted breve note
-		case 90000:    return "2%9";  break;   // or ["0.", "1."]; 
+		case 90000:    return "2%9";  break;   // or ["0.", "1."];
 		case 80000:    return "00";   break;   // long note
-		case 120000:   return "00.";  break;   // dotted long note 
+		case 120000:   return "00.";  break;   // dotted long note
 		case 180000:   return "1%9";  break;   // or ["00.", "0."];
 		case 270000:   return "2%27"; break;   // or ["0.", "1.", "0.", "1.", "0.", "1."];
 		case 160000:   return "000";  break;   // maxima note
@@ -1473,7 +1473,7 @@ string Convert::mensToRecip(char rhythm, bool altera, bool perfecta, bool imperf
 
 //////////////////////////////
 //
-// Convert::mensToDuration -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and 
+// Convert::mensToDuration -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and
 //      divisions of rhythmic levels based on prevailing mensuration.
 //
 
@@ -1774,7 +1774,7 @@ int Convert::museToBase40(const string& pitchString) {
 
 //////////////////////////////
 //
-// Convert::musePitchToKernPitch -- 
+// Convert::musePitchToKernPitch --
 //
 
 string Convert::musePitchToKernPitch(const string& museInput) {
@@ -3365,7 +3365,7 @@ int Convert::kernToStaffLocation(const string& token, const string& clef) {
 
 //////////////////////////////
 //
-// Convert::getReferenceKeyMeaning -- 
+// Convert::getReferenceKeyMeaning --
 //
 
 string Convert::getReferenceKeyMeaning(HTp token) {
@@ -3517,7 +3517,7 @@ string Convert::getReferenceKeyMeaning(const string& token) {
 			else if (key == "RNP") { meaning = "Record producer"; }
 			else if (key == "RDT") { meaning = "Recording date"; }
 			else if (key == "RT#") { meaning = "Recording track number"; }
-			// representation information 
+			// representation information
 			else if (key == "RLN") { meaning = "ASCII language setting"; }
 			else if (key == "RDF") { meaning = "User-defined signifiers"; }
 			else if (key == "RDT") { meaning = "Encoding date"; }
@@ -4404,7 +4404,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 
 //////////////////////////////
 //
-// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but 
+// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but
 //     do not set grace notes to a zero duration, but rather give their
 //     visual duration.
 // default value: scale = 4 (duration in terms of quarter notes)
@@ -4685,7 +4685,7 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
 
 //////////////////////////////
 //
-// Convert::timeSigToDurationInQuarters -- Convert a **kern time signature 
+// Convert::timeSigToDurationInQuarters -- Convert a **kern time signature
 //   into the duration of the measure for that time signature.
 //   output units are in quarter notes.
 //   Example: 6/8 => 3 quarters
@@ -5136,8 +5136,8 @@ void Convert::removeDollarsFromString(string& buffer, int maximum) {
 //
 // Convert::tempoNameToMm -- Guess what the MM tempo should be given
 //    a tempo name.  Returns 0 if no guess is made.
-// 
-// Also add cases where there is a tempo marking, such as [quarter] = 132 
+//
+// Also add cases where there is a tempo marking, such as [quarter] = 132
 // in the input text.
 //
 
@@ -15444,7 +15444,7 @@ bool HumPitch::isRest(void) const {
 
 //////////////////////////////
 //
-// HumPitch::makeRest -- 
+// HumPitch::makeRest --
 //
 
 void HumPitch::makeRest(void) {
@@ -20510,6 +20510,11 @@ void HumdrumFileBase::getSpineStartList(vector<HTp>& spinestarts,
 }
 
 
+//////////////////////////////
+//
+// HumdrumFileBase::getKernSpineStartList -- return only the spines that are **kern.
+//
+
 void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
 	getSpineStartList(spinestarts, "**kern");
 }
@@ -20517,6 +20522,60 @@ void HumdrumFileBase::getKernSpineStartList(vector<HTp>& spinestarts) {
 vector<HTp> HumdrumFileBase::getKernSpineStartList(void) {
 	vector<HTp> starts;
 	HumdrumFileBase::getKernSpineStartList(starts);
+	return starts;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getKernLikeSpineStartList -- return spines that are "kern-like".  These
+//    can be either **kern or forms matching **kern-tag pattern.
+//
+
+void HumdrumFileBase::getKernLikeSpineStartList(vector<HTp>& spinestarts) {
+	vector <HTp> starts;
+	HumdrumFileBase::getSpineStartList(starts);
+	spinestarts.clear();
+	for (int i=0; i<(int)starts.size(); i++) {
+		if (*(starts.at(i)) == "**kern") {
+			spinestarts.push_back(starts[i]);
+		} else if (starts.at(i)->compare(0, 7, "**kern-") == 0) {
+			spinestarts.push_back(starts[i]);
+		}
+	}
+}
+
+
+vector<HTp> HumdrumFileBase::getKernLikeSpineStartList(void) {
+	vector<HTp> starts;
+	HumdrumFileBase::getKernLikeSpineStartList(starts);
+	return starts;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileBase::getStaffLikeSpineStartList -- return spines that have isSpine()
+//    being true.  These can be either **kern or forms matching **kern-tag pattern.
+//
+
+void HumdrumFileBase::getStaffLikeSpineStartList(vector<HTp>& spinestarts) {
+	vector <HTp> starts;
+	HumdrumFileBase::getSpineStartList(starts);
+	spinestarts.clear();
+	for (int i=0; i<(int)starts.size(); i++) {
+		if (starts.at(i)->isStaff()) {
+			spinestarts.push_back(starts[i]);
+		}
+	}
+}
+
+
+vector<HTp> HumdrumFileBase::getStaffLikeSpineStartList(void) {
+	vector<HTp> starts;
+	HumdrumFileBase::getStaffLikeSpineStartList(starts);
 	return starts;
 }
 
@@ -21938,7 +21997,7 @@ HLp HumdrumFileBase::insertNullInterpretationLine(HumNum timestamp) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::insertNullInterpretationLieAboveIndex -- 
+// HumdrumFileBase::insertNullInterpretationLieAboveIndex --
 //
 
 HLp HumdrumFileBase::insertNullInterpretationLineAboveIndex(int index) {
@@ -22129,7 +22188,7 @@ HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::clearTokenLinkInfo --  
+// HumdrumFileBase::clearTokenLinkInfo --
 //
 
 void HumdrumFileBase::clearTokenLinkInfo(void) {
@@ -22636,7 +22695,7 @@ void HumdrumFileContent::resetDiatonicStatesWithKeySignature(vector<int>&
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeBarlines -- 
+// HumdrumFileContent::analyzeBarlines --
 //
 
 void HumdrumFileContent::analyzeBarlines(void) {
@@ -24868,7 +24927,7 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 	bool output = false;
 	bool ijstate;
 	bool startij;  // true if at the first note in IJ
-	HTp lastword;   // non-null if last syllable before *Xij 
+	HTp lastword;   // non-null if last syllable before *Xij
 
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		ijstate = false;
@@ -25134,7 +25193,7 @@ void HumdrumFileContent::getTimeSigs(vector<pair<int, HumNum> >& output,
 	pair<int, HumNum> current(0, 0);
 	fill(output.begin(), output.end(), current);
 	if (track == 0) {
-		vector<HTp> kernspines = infile.getKernSpineStartList();
+		vector<HTp> kernspines = infile.getKernLikeSpineStartList();
 		if (kernspines.size() > 0) {
 			track = kernspines[0]->getTrack();
 		}
@@ -26388,7 +26447,7 @@ HTp HumdrumFileStructure::getStropheStart(int index) {
 	return m_strophes1d.at(index).first;
 }
 
-HTp HumdrumFileStructure::getStropheStart(int spine, int index) { 
+HTp HumdrumFileStructure::getStropheStart(int spine, int index) {
 		if ((spine < 0) || (index < 0)) {
 			return NULL;
 		}
@@ -27000,6 +27059,7 @@ void HumdrumFileStructure::setLineRhythmAnalyzed(void) {
 		m_lines[i]->m_rhythm_analyzed = true;
 	}
 }
+
 
 
 //////////////////////////////
@@ -30371,7 +30431,7 @@ void HumdrumLine::copyStructure(HLp line, const string& empty) {
 
 /////////////////////////////
 //
-// HumdrumLine::allSameStyle -- return true if barlines through all 
+// HumdrumLine::allSameStyle -- return true if barlines through all
 //     staves are the same. Requires HumdrumFile::analyzeBarlines() to be
 //     run first.
 //
@@ -30750,7 +30810,7 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 //
 
 HumNum HumdrumToken::getSlurDuration(HumNum scale) {
-	if (!isDataType("**kern")) {
+	if (!isDataTypeLike("**kern")) {
 		return 0;
 	}
 	if (isDefined("auto", "slurDuration")) {
@@ -30798,6 +30858,42 @@ bool HumdrumToken::isDataType(const string& dtype) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isDataTypeLike -- Returns true if the data type of the token
+//   matches the test data type plus a dash followed by any text.
+// @SEEALSO: getDataType getKern
+//
+
+bool HumdrumToken::isDataTypeLike(const string& dtype) const {
+	if (isDataType(dtype)) {
+		return true;
+	}
+	if (dtype.compare(0, 2, "**") == 0) {
+		string comparison = dtype;
+		comparison += "-";
+		string tokentype = getDataType();
+		if (tokentype.compare(0, comparison.size(), comparison) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+		return dtype == getDataType();
+	} else {
+		string comparison = "**";
+		comparison += dtype;
+		comparison += "-";
+		string tokentype = getDataType();
+		if (tokentype.compare(0, comparison.size(), comparison) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isKern -- Returns true if the data type of the token
 //    is **kern.
 // @SEEALSO: isDataType
@@ -30805,6 +30901,28 @@ bool HumdrumToken::isDataType(const string& dtype) const {
 
 bool HumdrumToken::isKern(void) const {
 	return isDataType("**kern");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKernLike -- Returns true if the data type of the token
+//    is **kern, or **kern- plus a tag.  This Allows for **kern-tag to be
+//    treated as a staff for printing in verovio.  This can be used to separate
+//    analysis spines that are output as **kern data to be prevented for use
+//    as input to another analysis as real **kern data.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isKernLike(void) const {
+	string dtype = getDataType();
+	if (dtype == "**kern") {
+		return true;
+	} else if (dtype.compare(0, 7, "**kern-") == 0) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -31159,7 +31277,7 @@ bool HumdrumToken::analyzeDuration(void) {
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
-				if (isKern()) {
+				if (isKernLike()) {
 					if (strchr(this->c_str(), 'q') != NULL) {
 						m_duration = 0;
 					} else {
@@ -31478,6 +31596,9 @@ bool HumdrumToken::hasRhythm(void) const {
 	if (type == "**kern") {
 		return true;
 	}
+	if (type.compare(0, 7, "**kern-") == 0) {
+		return true;
+	}
 	if (type == "**recip") {
 		return true;
 	}
@@ -31546,12 +31667,13 @@ bool HumdrumToken::equalTo(const string& pattern) {
 //
 
 bool HumdrumToken::isStaff(void) const {
-	if (isKern()) {
+	if (isKernLike()) {
 		return true;
 	}
 	if (isMens()) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -31563,7 +31685,7 @@ bool HumdrumToken::isStaff(void) const {
 //
 
 bool HumdrumToken::isRest(void) {
-	if (isKern()) {
+	if (isKernLike()) {
 		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isKernRest((string)(*this))) {
@@ -31594,7 +31716,7 @@ bool HumdrumToken::isNote(void) {
 	if (isNull()) {
 		return false;
 	}
-	if (isKern()) {
+	if (isKernLike()) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
 		}
@@ -31613,8 +31735,8 @@ bool HumdrumToken::isNote(void) {
 // HumdrumToken::isPitched -- True if not a rest or an unpitched note.
 //
 
-bool HumdrumToken::isPitched(void) { 
-	if (this->isKern()) {
+bool HumdrumToken::isPitched(void) {
+	if (this->isKernLike()) {
 		for (int i=0; i<(int)this->size(); i++) {
 			if ((this->at(i) == 'r') || (this->at(i) == 'R')) {
 				return false;
@@ -31634,7 +31756,7 @@ bool HumdrumToken::isPitched(void) {
 //
 
 bool HumdrumToken::isUnpitched(void) {
-	if (this->isKern()) {
+	if (this->isKernLike()) {
 		if (this->find('R') != string::npos) {
 			return 1;
 		} else {
@@ -32194,7 +32316,7 @@ bool HumdrumToken::hasObliquaLigatureBegin(void) {
 //
 
 char HumdrumToken::hasStemDirection(void) {
-	if (isKern()) {
+	if (isKernLike()) {
 		return Convert::hasKernStemDirection(*this);
 	} else {
 		// don't know what a stem in this datatype is
@@ -33917,7 +34039,7 @@ HTp HumdrumToken::getSlurStartToken(int number) {
 
 //////////////////////////////
 //
-// HumdrumToken::getSlurStartNumber -- Given a slur ending number, 
+// HumdrumToken::getSlurStartNumber -- Given a slur ending number,
 //    return the slur start number that it pairs with.
 //
 
@@ -34113,7 +34235,7 @@ int HumdrumToken::getStropheStartIndex(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isFirstStrophe -- Returns true if the token is in the first 
+// HumdrumToken::isFirstStrophe -- Returns true if the token is in the first
 //    strophe variant.  Returns true if not in a strophe.
 //
 
@@ -36618,7 +36740,7 @@ MuseRecord::~MuseRecord() {
 
 //////////////////////////////
 //
-// MuseRecord::operator= -- 
+// MuseRecord::operator= --
 //
 
 MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
@@ -48332,11 +48454,11 @@ ostream& Options::getParseError(ostream& out) {
 // PixelColor::PixelColor --
 //
 
-PixelColor::PixelColor(void) { 
+PixelColor::PixelColor(void) {
 	// do nothing
 }
 
-PixelColor::PixelColor(const PixelColor& color) { 
+PixelColor::PixelColor(const PixelColor& color) {
 	Red   = color.Red;
 	Green = color.Green;
 	Blue  = color.Blue;
@@ -48348,7 +48470,7 @@ PixelColor::PixelColor(const string& color) {
 }
 
 
-PixelColor::PixelColor(int red, int green, int blue) { 
+PixelColor::PixelColor(int red, int green, int blue) {
 	Red   = (unsigned int)limit(red, 0, 255);
 	Green = (unsigned int)limit(green, 0, 255);
 	Blue  = (unsigned int)limit(blue, 0, 255);
@@ -48373,7 +48495,7 @@ PixelColor::PixelColor(double red, double green, double blue) {
 // PixelColor::~PixelColor --
 //
 
-PixelColor::~PixelColor() { 
+PixelColor::~PixelColor() {
 	// do nothing
 }
 
@@ -48397,7 +48519,7 @@ void PixelColor::invert(void) {
 // PixelColor::setColor -- set the contents to the specified value.
 //
 
-PixelColor& PixelColor::setColor(const string& colorstring) { 
+PixelColor& PixelColor::setColor(const string& colorstring) {
 	PixelColor color;
 	color = getColor(colorstring);
 	Red   = color.Red;
@@ -48447,7 +48569,7 @@ int PixelColor::getBlue(void) {
 // PixelColor::setRed --
 //
 
-void PixelColor::setRed(int value) { 
+void PixelColor::setRed(int value) {
 	Red = (unsigned char)limit(value, 0, 255);
 }
 
@@ -48480,7 +48602,7 @@ void PixelColor::setBlue(int value) {
 // PixelColor::getRedF --
 //
 
-float PixelColor::getRedF(void) { 
+float PixelColor::getRedF(void) {
 	return charToFloat(Red);
 }
 
@@ -48510,7 +48632,7 @@ float PixelColor::getBlueF(void) {
 // PixelColor::setRedF --
 //
 
-void PixelColor::setRedF(float value) { 
+void PixelColor::setRedF(float value) {
 	Red = (unsigned int)floatToChar(value);
 }
 
@@ -48540,7 +48662,7 @@ void PixelColor::setBlueF(float value) {
 // PixelColor::setColor --
 //
 
-void PixelColor::setColor(PixelColor color) { 
+void PixelColor::setColor(PixelColor color) {
 	Red   = color.Red;
 	Green = color.Green;
 	Blue  = color.Blue;
@@ -48567,7 +48689,7 @@ PixelColor& PixelColor::setColor(int red, int green, int blue) {
 // PixelColor::makeGrey --
 //
 
-PixelColor& PixelColor::makeGrey(void) { 
+PixelColor& PixelColor::makeGrey(void) {
 	unsigned char average = limit((int)(((int)Red+(int)Green+(int)Blue)/3.0+0.5),0,255);
 	Red = Green = Blue = average;
 	return *this;
@@ -48601,7 +48723,7 @@ PixelColor& PixelColor::setGreyNormalized(double value) {
 // PixelColor::makeGray --
 //
 
-PixelColor& PixelColor::makeGray(void) { 
+PixelColor& PixelColor::makeGray(void) {
 	return makeGrey();
 }
 
@@ -48688,7 +48810,7 @@ PixelColor& PixelColor::operator*=(double number) {
 // PixelColor::operator= --
 //
 
-PixelColor& PixelColor::operator=(PixelColor color) { 
+PixelColor& PixelColor::operator=(PixelColor color) {
 	if (this == &color) {
 		return *this;
 	}
@@ -48699,7 +48821,7 @@ PixelColor& PixelColor::operator=(PixelColor color) {
 }
 
 
-PixelColor& PixelColor::operator=(int value) { 
+PixelColor& PixelColor::operator=(int value) {
 	Red   = (unsigned char)limit(value, 0, 255);
 	Green = Red;
 	Blue  = Red;
@@ -48713,7 +48835,7 @@ PixelColor& PixelColor::operator=(int value) {
 // PixelColor::operator+ --
 //
 
-PixelColor PixelColor::operator+(PixelColor color) { 
+PixelColor PixelColor::operator+(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit((int)Red   + color.Red,   0, 255);
 	output.Green = (unsigned char)limit((int)Green + color.Green, 0, 255);
@@ -48728,7 +48850,7 @@ PixelColor PixelColor::operator+(PixelColor color) {
 // PixelColor::operator+= --
 //
 
-PixelColor& PixelColor::operator+=(int number) { 
+PixelColor& PixelColor::operator+=(int number) {
 	setRed(getRed()     + number);
 	setGreen(getGreen() + number);
 	setBlue(getBlue()   + number);
@@ -48740,7 +48862,7 @@ PixelColor& PixelColor::operator+=(int number) {
 // PixelColor::operator- --
 //
 
-PixelColor PixelColor::operator-(PixelColor color) { 
+PixelColor PixelColor::operator-(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit((int)Red   - color.Red,   0, 255);
 	output.Green = (unsigned char)limit((int)Green - color.Green, 0, 255);
@@ -48755,7 +48877,7 @@ PixelColor PixelColor::operator-(PixelColor color) {
 // PixelColor::operator* --
 //
 
-PixelColor PixelColor::operator*(PixelColor color) { 
+PixelColor PixelColor::operator*(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*charToFloat(color.Red)), 0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*charToFloat(color.Green)), 0, 255);
@@ -48764,7 +48886,7 @@ PixelColor PixelColor::operator*(PixelColor color) {
 }
 
 
-PixelColor PixelColor::operator*(double number) { 
+PixelColor PixelColor::operator*(double number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*number), 0, 255);
@@ -48773,7 +48895,7 @@ PixelColor PixelColor::operator*(double number) {
 }
 
 
-PixelColor PixelColor::operator*(int number) { 
+PixelColor PixelColor::operator*(int number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*number), 0, 255);
@@ -48788,7 +48910,7 @@ PixelColor PixelColor::operator*(int number) {
 // PixelColor::operator/ --
 //
 
-PixelColor PixelColor::operator/(double number) { 
+PixelColor PixelColor::operator/(double number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)/number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)/number), 0, 255);
@@ -48796,7 +48918,7 @@ PixelColor PixelColor::operator/(double number) {
 	return output;
 }
 
-PixelColor PixelColor::operator/(int number) { 
+PixelColor PixelColor::operator/(int number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)/(double)number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)/(double)number), 0, 255);
@@ -48839,7 +48961,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	}
 
 	// check for decimal strings with spaces around numbers: "255 255 255"
-	if ((colorstring.find(' ') != string::npos) || 
+	if ((colorstring.find(' ') != string::npos) ||
 		 (colorstring.find('\t') != string::npos)) {
 		char buffer[256] = {0};
 		strcpy(buffer, colorstring.c_str());
@@ -49038,7 +49160,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	if (strcmp("yellow",             buffer) == 0)  return getColor("#ffff00");
 	if (strcmp("yellowgreen",        buffer) == 0)  return getColor("#9acd32");
 
-// References: 
+// References:
 //            http://netdancer.com/rgbblk.htm
 //            http://www.htmlhelp.com/cgi-bin/color.cgi?rgb=FFFFFF
 //            http://www.brobstsystems.com/colors1.htm
@@ -49058,8 +49180,8 @@ void PixelColor::writePpm6(ostream& out) {
 }
 
 void PixelColor::writePpm3(ostream& out) {
-	out << (int)getRed()   << " " 
-		 << (int)getGreen() << " " 
+	out << (int)getRed()   << " "
+		 << (int)getGreen() << " "
 		 << (int)getBlue()  << " ";
 }
 
@@ -49152,7 +49274,7 @@ PixelColor& PixelColor::setTriHue(float value) {
 // PixelColor::charToFloat --
 //
 
-float PixelColor::charToFloat(int value) { 
+float PixelColor::charToFloat(int value) {
 	return value / 255.0;
 }
 
@@ -49162,7 +49284,7 @@ float PixelColor::charToFloat(int value) {
 // PixelColor::floatToChar --
 //
 
-int PixelColor::floatToChar(float value) { 
+int PixelColor::floatToChar(float value) {
 	return limit((int)(value * 255.0 + 0.5), 0, 255);
 }
 
@@ -49179,7 +49301,7 @@ int PixelColor::limit(int value, int min, int max) {
 		value = max;
 	}
 	return value;
-} 
+}
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -49340,8 +49462,8 @@ void Tool_autoaccid::addAccidentalQualifications(HumdrumFile& infile) {
 //      visualAccidental = true :: need to add an X after the accidental
 //      visualAccidental = false :: need to add an y after the accidental
 // also:
-//      cautionaryAccidental = "true" :: 
-//      obligatoryAccidental = "true" :: 
+//      cautionaryAccidental = "true" ::
+//      obligatoryAccidental = "true" ::
 //
 
 void Tool_autoaccid::addAccidentalInfo(HTp token) {
@@ -49370,7 +49492,7 @@ void Tool_autoaccid::addAccidentalInfo(HTp token) {
 
 //////////////////////////////
 //
-// Tool_autoaccid::setVisualState -- 
+// Tool_autoaccid::setVisualState --
 //
 
 string Tool_autoaccid::setVisualState(const string& input, bool state) {
@@ -49559,7 +49681,7 @@ bool Tool_autobeam::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_autobeam::beamGraceNotes --  Using lazy beaming, and 
+// Tool_autobeam::beamGraceNotes --  Using lazy beaming, and
 //    not careful checking of beamed notes versus nonbeamed notes
 //    such as a mix of quarter and eighth grace notes in the group.
 //
@@ -49579,7 +49701,7 @@ void Tool_autobeam::beamGraceNotes(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		endtok   = infile.getStrandEnd(i);
@@ -49733,7 +49855,7 @@ void Tool_autobeam::removeBeams(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		endtok   = infile.getStrandEnd(i);
@@ -49789,12 +49911,12 @@ void Tool_autobeam::breakBeamsByLyrics(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 			continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		HTp curtok = starttok->getNextFieldToken();
 		bool hastext = false;
-		while (curtok && !curtok->isKern()) {
+		while (curtok && !curtok->isKernLike()) {
 			if (curtok->isDataType("**text")) {
 				hastext = true;
 				break;
@@ -50245,7 +50367,7 @@ void Tool_autobeam::getBeamedNotes(vector<HTp>& toks, HTp tok, HTp stok, HTp eto
 
 bool Tool_autobeam::hasSyllable(HTp token) {
 	HTp current = token->getNextFieldToken();
-	while (current && !current->isKern()) {
+	while (current && !current->isKernLike()) {
 		if (current->isDataType("**text")) {
 			if (current->isNull()) {
 				return false;
@@ -50275,7 +50397,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 		if (!m_tracks.at(track)) {
 				continue;
 		}
-		if (!starttok->isKern()) {
+		if (!starttok->isKernLike()) {
 			continue;
 		}
 		processStrand(infile.getStrandStart(i), infile.getStrandEnd(i));
@@ -50292,7 +50414,7 @@ void Tool_autobeam::addBeams(HumdrumFile& infile) {
 
 void Tool_autobeam::initialize(HumdrumFile& infile) {
 	m_splitcount = 0;
-	m_kernspines = infile.getKernSpineStartList();
+	m_kernspines = infile.getKernLikeSpineStartList();
 	vector<HTp>& ks = m_kernspines;
 	m_timesigs.resize(infile.getTrackCount() + 1);
 	for (int i=0; i<(int)ks.size(); i++) {
@@ -50371,8 +50493,8 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 	vector<pair<int, HumNum> >& timesig = m_timesigs[measure[0]->getTrack()];
 	for (int i=0; i<(int)measure.size(); i++) {
 		int line = measure[i]->getLineIndex();
-		if ((current.first != timesig[line].first) ||
-		    (current.second != timesig[line].second)) {
+		if ((current.first != timesig.at(line).first) ||
+		    (current.second != timesig.at(line).second)) {
 			current = timesig[line];
 			beatdur = 1;
 			beatdur /= current.second;
@@ -52112,8 +52234,8 @@ bool Tool_chantize::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_chantize::outputFile -- 
-//    * remove time signature, 
+// Tool_chantize::outputFile --
+//    * remove time signature,
 //    * remove barlines, except double barlines
 //    * convert rests to double barlines (except at the end of the
 //         music).
@@ -52169,7 +52291,7 @@ void Tool_chantize::outputFile(HumdrumFile& infile) {
 					// 	}
 					// }
 					// m_humdrum_text << "\n";
-				} 
+				}
 				continue;
 			} else {
 				restQ = false;
@@ -52207,8 +52329,8 @@ void Tool_chantize::processFile(HumdrumFile& infile) {
 		transpositionsQ = false;
 	}
 
-	if (getBoolean("do-not-delete-breaks")) { 
-		//	breaksQ = false; 
+	if (getBoolean("do-not-delete-breaks")) {
+		//	breaksQ = false;
 	}
 	if (getBoolean("only-delete-breaks")) {
 		abbreviationsQ  = false;
@@ -52865,7 +52987,7 @@ string Tool_chantize::getDate(void) {
 //////////////////////////////
 //
 // Tool_chantize::getTerminalRestStates -- return a vector of each line,
-//    setting true if the line is a data line containing a rest at the end of the 
+//    setting true if the line is a data line containing a rest at the end of the
 //    music after the last note.
 //
 
@@ -56357,7 +56479,7 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 	int index;
 	for (int i=0; i<7; i++) {
 		if (dtranspose) {
-			index = (i + dtranspose + 70) % 7; 
+			index = (i + dtranspose + 70) % 7;
 		} else {
 			index = i;
 		}
@@ -56420,10 +56542,11 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 
 Tool_composite::Tool_composite(void) {
 	define("a|append=b",    "append data to end of line (top of system)");
-	define("A|analysis-attacks=b",       "analyze composite rhythm note attacks");
-	define("R|analysis-articulations=b", "analyze composite rhythm note articulations");
-	define("O|analysis-ornaments=b",     "analyze composite rhythm note ornaments");
-	define("S|analysis-slurs=b",         "analyze composite rhythm slurs");
+	define("K|analysis-note-density=b",  "count number of note attacks in feature");
+	define("A|analysis-articulations=b", "count number of articulations in feature");
+	define("O|analysis-ornaments=b",     "count number of ornaments in feature");
+	define("S|analysis-slurs=b",         "count number of slur beginnings/ending in feature");
+	define("T|analysis-total=b",         "count total number of analysis features for each note");
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
@@ -56609,7 +56732,7 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 	HumdrumFile einput;
 	einput.readString(edata.str());
 	extract.setModified("s", expansion);
-	extract.setModified("n", "text");
+	extract.setModified("n", "vdata");
 	extract.run(einput);
 	HumdrumFile outfile;
 	outfile.readString(extract.getAllText());
@@ -56637,7 +56760,7 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 //     spines   -- List of string for analysis types requested.
 //
 //     spineMap -- Expansion list that was applied to the output file to add
-//                 extra **text spines for storing anlayses.  Index according
+//                 extra **text spines for storing analyses.  Index according
 //                 to the new track numberes and the value is the old track
 //                 value or 0 if it is a new analysis spine that was added.
 //
@@ -56671,9 +56794,10 @@ void Tool_composite::insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>
 	// value is a pointer to the vector containing the analysis to place in that
 	// track.
 	vector<vector<double>*> dataByTrack;
-	assignAnalysesToTextTracks(dataByTrack, spines, tracks, trackMap);
+	assignAnalysesToVdataTracks(dataByTrack, spines, outfile);
 
 	stringstream ss;
+
 	for (int i=0; i<outfile.getLineCount(); i++) {
 		if (!outfile[i].isData()) {
 			continue;
@@ -56699,9 +56823,10 @@ void Tool_composite::insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>
 
 //////////////////////////////
 //
-// Tool_composite::assignAnalysesToTextTracks -- temp. algo.
-//    * spines is a list of the analysis/analyses that are done.
-//    * tracks is a bookean to indicate that there is a **text spine
+// Tool_composite::assignAnalysesToVdataTracks --
+//    * spines is a list of the analysis/analyses that are done. Values are:
+//         attack = note attacks
+//    * tracks is a boolean to indicate that there is a **vdata spine
 //      at that position in the file (zero-indexed spine position)
 //      that should be filled in with an analysis.
 //    * dataByTrack is a list of analysis data (pointers) that should be filling
@@ -56710,38 +56835,89 @@ void Tool_composite::insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>
 //
 //
 
-void Tool_composite::assignAnalysesToTextTracks(vector<vector<double>*>& dataByTrack,
-		vector<string>& spines, vector<bool>& tracks, vector<int>& trackMap) {
+void Tool_composite::assignAnalysesToVdataTracks(vector<vector<double>*>& dataByTrack,
+		vector<string>& spines, HumdrumFile& outfile) {
+
+	vector<HTp> spinestarts;
+	outfile.getSpineStartList(spinestarts);
 
 	// spineMap is a 0-index track map.
-	dataByTrack.resize(trackMap.size());
+	dataByTrack.resize(spinestarts.size()+1);
 	for (int i=0; i<(int)dataByTrack.size(); i++) {
 		dataByTrack[i] = NULL;
 	}
 
-	int zerocount = 0;
-	bool coincidence = false; // composite spine has not been added
-	bool total     = false;   // total spine has not been added
-	for (int i=1; i<(int)trackMap.size(); i++) {
-		if (trackMap[i] != 0) {
+	for (int i=0; i<(int)spinestarts.size(); i++) {
+		HTp token = spinestarts[i];
+		if (!((*token == "**kern-grpA") || (*token == "**kern-grpB") ||
+		      (*token == "**kern-comp") || (*token == "**kern-coin"))) {
 			continue;
 		}
-		if (m_coincidenceQ && !coincidence) {
-			dataByTrack[i] = &m_analysisNoteAttacks[3];
-			coincidence = true;
-		} else if (m_nogroupsQ && !total) {
-			dataByTrack[i] = &m_analysisNoteAttacks[0];
-			total = true;
-		} else {
-			if (zerocount == 0) {
-				dataByTrack[i] = &m_analysisNoteAttacks[1];
-				zerocount++;
-			} else {
-				dataByTrack[i] = &m_analysisNoteAttacks[2];
-				zerocount++;
+		for (int j=0; j<(int)spines.size(); j++) {
+			if (i + 1 + j > (int)spinestarts.size() - 1) {
 				break;
 			}
+			HTp vtoken = spinestarts[i+j+1];
+			if (*vtoken != "**vdata") {
+				continue;
+			}
+			string text = "**vdata-";
+			text += spines[j];
+			vtoken->setText(text);
+			int track = vtoken->getTrack();
+			if (spines[j] == "attack") {
+				if (*token == "**kern-grpA") {
+					dataByTrack[track] = &m_analysisAttacks.at(1);
+				} else if (*token == "**kern-grpB") {
+					dataByTrack[track] = &m_analysisAttacks.at(2);
+				} else if (*token == "**kern-comp") {
+					dataByTrack[track] = &m_analysisAttacks.at(0);
+				} else if (*token == "**kern-coin") {
+					dataByTrack[track] = &m_analysisAttacks.at(3);
+				}
+			} else if (spines[j] == "artic") {
+				if (*token == "**kern-grpA") {
+					dataByTrack[track] = &m_analysisArticulations.at(1);
+				} else if (*token == "**kern-grpB") {
+					dataByTrack[track] = &m_analysisArticulations.at(2);
+				} else if (*token == "**kern-comp") {
+					dataByTrack[track] = &m_analysisArticulations.at(0);
+				} else if (*token == "**kern-coin") {
+					dataByTrack[track] = &m_analysisArticulations.at(3);
+				}
+			} else if (spines[j] == "ornament") {
+				if (*token == "**kern-grpA") {
+					dataByTrack[track] = &m_analysisOrnaments.at(1);
+				} else if (*token == "**kern-grpB") {
+					dataByTrack[track] = &m_analysisOrnaments.at(2);
+				} else if (*token == "**kern-comp") {
+					dataByTrack[track] = &m_analysisOrnaments.at(0);
+				} else if (*token == "**kern-coin") {
+					dataByTrack[track] = &m_analysisOrnaments.at(3);
+				}
+			} else if (spines[j] == "slur") {
+				if (*token == "**kern-grpA") {
+					dataByTrack[track] = &m_analysisSlurs.at(1);
+				} else if (*token == "**kern-grpB") {
+					dataByTrack[track] = &m_analysisSlurs.at(2);
+				} else if (*token == "**kern-comp") {
+					dataByTrack[track] = &m_analysisSlurs.at(0);
+				} else if (*token == "**kern-coin") {
+					dataByTrack[track] = &m_analysisSlurs.at(3);
+				}
+			} else if (spines[j] == "total") {
+				if (*token == "**kern-grpA") {
+					dataByTrack[track] = &m_analysisTotals.at(1);
+				} else if (*token == "**kern-grpB") {
+					dataByTrack[track] = &m_analysisTotals.at(2);
+				} else if (*token == "**kern-comp") {
+					dataByTrack[track] = &m_analysisTotals.at(0);
+				} else if (*token == "**kern-coin") {
+					dataByTrack[track] = &m_analysisTotals.at(3);
+				}
+			}
 		}
+		i += (int)spines.size();
 	}
 }
 
@@ -56755,30 +56931,30 @@ void Tool_composite::assignAnalysesToTextTracks(vector<vector<double>*>& dataByT
 void Tool_composite::analyzeCompositeAttacks(HumdrumFile& infile,
 		vector<HTp>& groups, vector<bool>& tracks) {
 
-	m_analysisNoteAttacks.resize(4);
+	m_analysisAttacks.resize(4);
 
-	for (int i=0; i<(int)m_analysisNoteAttacks.size(); i++) {
-		m_analysisNoteAttacks[i].resize(infile.getLineCount());
-		fill(m_analysisNoteAttacks[i].begin(), m_analysisNoteAttacks[i].end(), -1.0);
+	for (int i=0; i<(int)m_analysisAttacks.size(); i++) {
+		m_analysisAttacks[i].resize(infile.getLineCount());
+		fill(m_analysisAttacks[i].begin(), m_analysisAttacks[i].end(), -1.0);
 	}
 
 //	if (groups[0] || groups[3]) {
 	if (groups[0]) {
-		doTotalAttackAnalysis(m_analysisNoteAttacks[0], infile, groups[0]->getTrack(), tracks);
+		doTotalAttackAnalysis(m_analysisAttacks[0], infile, groups[0]->getTrack(), tracks);
 	}
 
 	if ((groups[1] && groups[2]) || groups[3]) {
-		doGroupAttackAnalyses(m_analysisNoteAttacks.at(1), m_analysisNoteAttacks.at(2), infile);
+		doGroupAttackAnalyses(m_analysisAttacks.at(1), m_analysisAttacks.at(2), infile);
 	}
 
 	if (groups[3]) {
-		doCoincidenceAttackAnalysis(m_analysisNoteAttacks);
+		doCoincidenceAttackAnalysis(m_analysisAttacks);
 	}
 
 	if (m_debugQ) {
-		for (int i=0; i<(int)m_analysisNoteAttacks[0].size(); i++) {
+		for (int i=0; i<(int)m_analysisAttacks[0].size(); i++) {
 			for (int j=0; j<4; j++) {
-				cout << m_analysisNoteAttacks[j][i] << "\t";
+				cout << m_analysisAttacks[j][i] << "\t";
 			}
 			cout << endl;
 		}
@@ -57032,7 +57208,8 @@ int Tool_composite::countNoteAttacks(HTp token) {
 //////////////////////////////
 //
 // Tool_composite::getexpansionList --  Add an extra spine after
-//      every track in the input list, up to maxtrack.
+//      every track in the input list, up to maxtrack.  Adding
+//      analysis spines is also handleded in this funtion.
 //
 
 vector<int> Tool_composite::getExpansionList(vector<bool>& tracks, int maxtrack, int count) {
@@ -57079,69 +57256,36 @@ string Tool_composite::makeExpansionString(vector<int>& tracks) {
 //////////////////////////////
 //
 // Tool_composite::getCompositeSpineStarts --
+//    **kern-grpA == Group A composite analysis
+//    **kern-grpB == Group B composite analysis
+//    **kern-comp == (Total group) Composite analysis
+//    **kern-coin == Group A + B coincidence analysis
 //
 
 void Tool_composite::getCompositeSpineStarts(vector<HTp>& groups, HumdrumFile& infile) {
 	groups.resize(4);
+	// 0: full composite rhythm analysis (union of Group A and Group B)
+	// 1: Group A
+	// 2: Group B
+	// 3: Coincidence (intersection of Group A and Group B)
 	for (int i=0; i<(int)groups.size(); i++) {
 		groups[i] = NULL;
 	}
-	// 0th index is the full composite (Identified by *I"Composite instrument label)
-	// 1st index is Group A (Identified by I"Group A insturment label)
-	// 2nd index is Group A (Identified by I"Group B insturment label)
-	// 3nd index is Coincidence (Identified by I"Coincidence insturment label)
 
 	vector<HTp> spines;
-	infile.getSpineStartList(spines);
+	infile.getKernLikeSpineStartList(spines);
 	for (int i=0; i<(int)spines.size(); i++) {
-		if (!spines[i]->isKern()) {
-			continue;
-		}
-		HTp current = spines[i]->getNextToken();
-		bool clefx     = false;  // *clefX is required in composite spine
-		bool part      = false;  // *part# must not be present.
-		bool groupA    = false;  // *I"Group A is required in composite A spine
-		bool groupB    = false;  // *I"Group A is required in composite A spine
-		bool composite = false;  // *I"Composite is required in full composite spine
-		bool coincidence = false; // *I"Coincidence is the name of the "instrument"
-		while (current) {
-			if (current->isData()) {
-				break;
-			}
-			if (!current->isInterpretation()) {
-				current = current->getNextToken();
-				continue;
-			}
-			if (*current == "*I\"Composite") {
-				composite = true;
-			} else if (*current == "*I\"Group A") {
-				groupA = true;
-			} else if (*current == "*I\"Group B") {
-				groupB = true;
-			} else if (*current == "*I\"Coincidence") {
-				coincidence = true;
-			}
-			if (*current == "*clefX") {
-				clefx = true;
-			}
-			if (current->compare(0, 5, "*part") == 0) {
-				part = true;
-			}
-			current = current->getNextToken();
-		}
-		if (part) {
-			continue;
-		}
-		if (!clefx) {
-			continue;
-		}
-		if (composite) {
+		string dtype = spines[i]->getDataType();
+		if (dtype == "**kern-comp") {
 			groups[0] = spines[i];
-		} else if (groupA) {
+		}
+		if (dtype == "**kern-grpA") {
 			groups[1] = spines[i];
-		} else if (groupB) {
+		}
+		if (dtype == "**kern-grpB") {
 			groups[2] = spines[i];
-		} else if (coincidence) {
+		}
+		if (dtype == "**kern-coin") {
 			groups[3] = spines[i];
 		}
 	}
@@ -57164,7 +57308,7 @@ void Tool_composite::initialize(void) {
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
 	m_onlyQ     = getBoolean("only");
-	m_analysisAttacksQ       = getBoolean("analysis-attacks");
+	m_analysisAttacksQ       = getBoolean("analysis-note-density");
 	m_analysisArticulationsQ = getBoolean("analysis-articulations");
 	m_analysisOrnamentsQ     = getBoolean("analysis-ornaments");
 	m_analysisSlursQ         = getBoolean("analysis-slurs");
@@ -57647,10 +57791,10 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 				}
 			}
 			if (token && token->compare("**blank") == 0) {
-				token->setText("**kern");
+				token->setText("**kern-grpA");
 			}
 			if (token2 && token2->compare("**blank") == 0) {
-				token2->setText("**kern");
+				token2->setText("**kern-grpB");
 			}
 			// continue;
 
@@ -58194,7 +58338,7 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 				}
 			}
 			if (token->compare("**blank") == 0) {
-				token->setText("**kern");
+				token->setText("**kern-comp");
 				continue;
 			}
 			// copy time signature and tempos
@@ -58689,7 +58833,7 @@ void Tool_composite::processCoincidenceInterpretation(HumdrumFile& infile, HTp t
 		token->setText("*I'Coin.");
 	}
 	if (exinterp) {
-		token->setText("**kern");
+		token->setText("**kern-coin");
 	}
 
 }
@@ -62504,7 +62648,7 @@ void Tool_double::doubleRhythms(HumdrumFile& infile) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
-					int bot = hre.getMatchInt(2); 
+					int bot = hre.getMatchInt(2);
 					if (bot == 4) {
 						bot = 2;
 					} else if (bot == 2) {
@@ -67277,7 +67421,7 @@ void Tool_flipper::checkForFlipChanges(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_flipper::processLine -- 
+// Tool_flipper::processLine --
 //
 
 void Tool_flipper::processLine(HumdrumFile& infile, int index) {
@@ -67964,7 +68108,7 @@ void Tool_gasparize::deleteBreaks(HumdrumFile& infile) {
 // At end:
 // !!!RDF**kern: l = terminal long
 // !!!RDF**kern: i = editorial accidental
-// !!!EED: 
+// !!!EED:
 // !!!EEV: $DATE
 //
 
@@ -68460,7 +68604,7 @@ void Tool_gasparize::fixTiesStartEnd(HTp starts, HTp ends) {
 			current = current->getNextToken();
 			continue;
 		}
-		if ((current->find('[') != string::npos) && 
+		if ((current->find('[') != string::npos) &&
 				(current->find(']') != string::npos) &&
 				(current->find(' ') == string::npos)) {
 			string text = *current;
@@ -69160,7 +69304,7 @@ void Tool_half::halfRhythms(HumdrumFile& infile) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
-					int bot = hre.getMatchInt(2); 
+					int bot = hre.getMatchInt(2);
 					if (bot == 4) {
 						bot = 8;
 					} else if (bot == 2) {
@@ -70774,7 +70918,7 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 
 //////////////////////////////
 //
-// Tool_humsheet::isLayout -- check to see if any cell 
+// Tool_humsheet::isLayout -- check to see if any cell
 //    starts with "!LO:".
 //
 
@@ -72382,7 +72526,7 @@ int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
 ///////////////////////////////
 //
 // Tool_imitation::compareSequences -- Returns the number of notes that
-//     match between the two sequences (which is one more than the 
+//     match between the two sequences (which is one more than the
 //     interval count).
 //
 
@@ -78559,7 +78703,7 @@ void Tool_mens2kern::initialize(void) {
 //
 
 void Tool_mens2kern::processFile(HumdrumFile& infile) {
-	vector<HTp> melody; 
+	vector<HTp> melody;
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandBegin(i);
@@ -78622,9 +78766,9 @@ void Tool_mens2kern::processMelody(vector<HTp>& melody) {
 			longa_def      = modus     * brevis_def;
 			maxima_def     = maximodus * longa_def;
 			if (m_debugQ) {
-				cerr << "LEVELS X_def = "    << maxima_def 
-					  << " | L_def = " << longa_def 
-					  << " | S_def = " << brevis_def 
+				cerr << "LEVELS X_def = "    << maxima_def
+					  << " | L_def = " << longa_def
+					  << " | S_def = " << brevis_def
 					  << " | s_def = " << semibrevis_def << endl;
 			}
 		}
@@ -78757,9 +78901,9 @@ void Tool_mens2kern::getMensuralInfo(HTp token, int& maximodus, int& modus,
 	}
 
 	if (m_debugQ) {
-		cerr << "MENSURAL INFO: maximodus = "   << maximodus 
-			  << " | modus = "    << modus 
-			  << " | tempus = "   << tempus 
+		cerr << "MENSURAL INFO: maximodus = "   << maximodus
+			  << " | modus = "    << modus
+			  << " | tempus = "   << tempus
 			  << " | prolatio = " << prolatio << endl;
 	}
 }
@@ -78833,9 +78977,9 @@ string Tool_mens2kern::mens2kernRhythm(const string& rhythm, bool altera, bool p
 		case 30000:    return "1.";   break;   // dotted whole note
 		case 40000:    return "0";    break;   // breve note
 		case 60000:    return "0.";   break;   // dotted breve note
-		case 90000:    return "2%9";  break;   // or ["0.", "1."]; 
+		case 90000:    return "2%9";  break;   // or ["0.", "1."];
 		case 80000:    return "00";   break;   // long note
-		case 120000:   return "00.";  break;   // dotted long note 
+		case 120000:   return "00.";  break;   // dotted long note
 		case 180000:   return "1%9";  break;   // or ["00.", "0."];
 		case 270000:   return "2%27"; break;   // or ["0.", "1.", "0.", "1.", "0.", "1."];
 		case 160000:   return "000";  break;   // maxima note
@@ -81766,7 +81910,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 
 	if ((i < part.getLineCount()) && part[i].isBarline()) {
 		if (partindex == 0) {
-			// For now setting the barline style from the 
+			// For now setting the barline style from the
 			// lowest staff.  This is mostly because
 			// MEI/verovio can handle only one style
 			// on a system barline.  But also because
@@ -82100,7 +82244,7 @@ void Tool_musedata2hum::addLyrics(GridSlice* slice, int part, int staff, MuseRec
 // Tool_musedata2hum::addNoteDynamics --
 //
 
-void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part, 
+void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 		MuseRecord& mr) {
 	string notations = mr.getAdditionalNotationsField();
 	vector<string> dynamics(1);
@@ -90038,7 +90182,7 @@ void Tool_pccount::initialize(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_pccount::getFinal -- Extract the last unparenthesed letter from a ref record like this:
-// 
+//
 // !!!final: (A)D
 //
 
@@ -90098,7 +90242,7 @@ void Tool_pccount::processFile(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_pccount::printVegaLitePage --
-// 
+//
 
 void Tool_pccount::printVegaLitePage(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
@@ -90133,7 +90277,7 @@ void Tool_pccount::printVegaLitePage(const string& jsonvar,
 //////////////////////////////
 //
 // Tool_pccount::printVegaLiteHtml --
-// 
+//
 
 void Tool_pccount::printVegaLiteHtml(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
@@ -90151,7 +90295,7 @@ void Tool_pccount::printVegaLiteHtml(const string& jsonvar,
 //////////////////////////////
 //
 // Tool_pccount::printVegaLiteScript --
-// 
+//
 
 void Tool_pccount::printVegaLiteScript(const string& jsonvar,
 		const string& target, const string& datavar, HumdrumFile& infile) {
@@ -92387,14 +92531,14 @@ void Tool_rid::processFile(HumdrumFile& infile) {
       }
       if (option_d) {
          // remove null data lines if -d is specified
-         if (option_k && infile[i].isData() && 
+         if (option_k && infile[i].isData() &&
                infile[i].equalFieldsQ("**kern", ".")) {
             // remove if only all **kern spines are null.
             if (revQ) {
                m_humdrum_text << infile[i] << "\n";
             }
             continue;
-         } else if (!option_k && infile[i].isData() && 
+         } else if (!option_k && infile[i].isData() &&
                infile[i].isAllNull()) {
             // remove null data lines if all spines are null.
             if (revQ) {
@@ -92403,7 +92547,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
             continue;
          }
       }
-      if (option_G && (infile[i].isGlobalComment() || 
+      if (option_G && (infile[i].isGlobalComment() ||
             infile[i].isReference())) {
          // remove global comments if -G is specified
          if (revQ) {
@@ -92425,7 +92569,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_i && infile[i].isInterpretation() && 
+      if (option_i && infile[i].isInterpretation() &&
             infile[i].isAllNull()) {
          // remove null interpretation records
          if (revQ) {
@@ -92440,7 +92584,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_l && infile[i].isLocalComment() && 
+      if (option_l && infile[i].isLocalComment() &&
             infile[i].isAllNull()) {
          // remove null local comments
          if (revQ) {
@@ -92477,7 +92621,7 @@ void Tool_rid::processFile(HumdrumFile& infile) {
          }
          continue;
       }
-      if (option_c && (infile[i].isLocalComment() || 
+      if (option_c && (infile[i].isLocalComment() ||
             infile[i].isGlobalComment())) {
          // remove all comments (local & global)
          if (revQ) {
@@ -94097,7 +94241,7 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 			if (infile[line].isLocalComment()) {
 				printTokens("!", toksize);
 	 		} else if (infile[line].isInterpretation()) {
-				if (toks[0]->compare(0, 2, "**") == 0) { 
+				if (toks[0]->compare(0, 2, "**") == 0) {
 					if (m_cdataQ) {
 						printTokens("**cdata", toksize);
 					} else if (m_midiQ) {
@@ -94735,7 +94879,7 @@ string Tool_shed::getExInterp(const string& value) {
 // Tool_shed::parseExpression --
 //     Form of string:
 //        s/search/replace/options; s/search2/replace2/options2
-// 
+//
 //
 
 void Tool_shed::parseExpression(const string& expression) {
@@ -94763,7 +94907,7 @@ void Tool_shed::parseExpression(const string& expression) {
 					m_searches.push_back("");
 				}
 			} else {
-				cerr << "Error at position " << i 
+				cerr << "Error at position " << i
 				     << " in expression: " << expression << endl;
 				return;
 			}
@@ -94822,7 +94966,7 @@ void Tool_shed::parseExpression(const string& expression) {
 
 //////////////////////////////
 //
-// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum 
+// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum
 //      input segment.
 //
 
@@ -99370,7 +99514,7 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				}
 
 				// check for key signature in a spine which is being
-				// transposed, and adjust it. 
+				// transposed, and adjust it.
 				// Should also check tandem spines for updating
 				// key signatures in non-kern spines.
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
@@ -99583,15 +99727,21 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 //
 
 void Tool_transpose::printNewKernString(const string& input, int transval) {
+
 	HumRegex hre;
-	if (input.rfind('R') != string::npos) {
-		// don't transpose unpitched notes...
+	if (input == ".") {
+		// Don't transpose null tokens.
 		m_humdrum_text << input;
 		return;
-	} else if(input.rfind('r') != string::npos) {
+	} else if (input.rfind('R') != string::npos) {
+		// Don't transpose unpitched notes (percussion parts).
+		m_humdrum_text << input;
+		return;
+	} else if (input.rfind('r') != string::npos) {
+		// Transpose rests only if they contain a pitch component.
 		string output = input;
 		if (hre.search(input, "([A-Ga-g]+[#n-]*)")) {
-			// transpose pitch portion of rest (indicating vertical position)
+			// Transpose pitch portion of rest (indicating vertical position).
 			string pitch = hre.getMatch(1);
 			int base40 = Convert::kernToBase40(pitch);
 			string newpitch = Convert::base40ToKern(base40 + transval);
@@ -99601,12 +99751,13 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 		// don't transpose rests...
 		m_humdrum_text << output;
 		return;
-	}
-	if (input == ".") {
-		// don't transpose null tokens...
+	} else if (!hre.search(input, "([A-Ga-g]+[#n-]*)")) {
+		// This is a form of invisible rest with no "r", just **recip.
 		m_humdrum_text << input;
 		return;
 	}
+
+	// Now the only thing left are regular pitches.
 
 	int base40 = Convert::kernToBase40(input);
 	string newpitch = Convert::base40ToKern(base40 + transval);
@@ -100557,7 +100708,7 @@ void Tool_tremolo::expandTremolo(HTp token) {
 
 		// There are cases where duration < 1 need added beams
 		// when the note is not already in a beam.  Such as
-		// a plain 8th note with a slash.  This needs to be 
+		// a plain 8th note with a slash.  This needs to be
 		// converted into two 16th notes with a beam so that
 		// *tremolo can reduce it back into a tremolo, since
 		// it will only reduce beam groups.

@@ -21,7 +21,7 @@
 
 using namespace std;
 
-namespace hum { 
+namespace hum {
 
 // START_MERGE
 
@@ -111,7 +111,7 @@ bool HumPitch::isRest(void) const {
 
 //////////////////////////////
 //
-// HumPitch::makeRest -- 
+// HumPitch::makeRest --
 //
 
 void HumPitch::makeRest(void) {

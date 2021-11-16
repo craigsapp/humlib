@@ -255,7 +255,7 @@ void Tool_double::doubleRhythms(HumdrumFile& infile) {
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
 				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
-					int bot = hre.getMatchInt(2); 
+					int bot = hre.getMatchInt(2);
 					if (bot == 4) {
 						bot = 2;
 					} else if (bot == 2) {

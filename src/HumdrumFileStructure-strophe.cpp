@@ -214,7 +214,7 @@ HTp HumdrumFileStructure::getStropheStart(int index) {
 	return m_strophes1d.at(index).first;
 }
 
-HTp HumdrumFileStructure::getStropheStart(int spine, int index) { 
+HTp HumdrumFileStructure::getStropheStart(int spine, int index) {
 		if ((spine < 0) || (index < 0)) {
 			return NULL;
 		}

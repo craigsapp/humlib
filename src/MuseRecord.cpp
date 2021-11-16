@@ -55,7 +55,7 @@ MuseRecord::~MuseRecord() {
 
 //////////////////////////////
 //
-// MuseRecord::operator= -- 
+// MuseRecord::operator= --
 //
 
 MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {

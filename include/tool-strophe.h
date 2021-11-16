@@ -41,8 +41,8 @@ class Tool_strophe : public HumTool {
 
 	private:
 		bool         m_listQ;      // boolean for showing a list of variants
-		bool         m_markQ;      // boolean for marking strophes 
-		std::string  m_marker;     // character for marking strophes 
+		bool         m_markQ;      // boolean for marking strophes
+		std::string  m_marker;     // character for marking strophes
 		std::string  m_color;      // color for strphe notes/rests
       std::set<std::string> m_variants;  // used for --list option
 

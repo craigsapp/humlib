@@ -170,7 +170,9 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getTokenNumber            (void) const;
 		const std::string& getDataType     (void) const;
 		bool     isDataType                (const std::string& dtype) const;
+		bool     isDataTypeLike            (const std::string& dtype) const;
 		bool     isKern                    (void) const;
+		bool     isKernLike                (void) const;
 		bool     isMens                    (void) const;
 		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;

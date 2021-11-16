@@ -2208,7 +2208,7 @@ void HumdrumLine::copyStructure(HLp line, const string& empty) {
 
 /////////////////////////////
 //
-// HumdrumLine::allSameStyle -- return true if barlines through all 
+// HumdrumLine::allSameStyle -- return true if barlines through all
 //     staves are the same. Requires HumdrumFile::analyzeBarlines() to be
 //     run first.
 //

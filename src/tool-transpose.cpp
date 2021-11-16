@@ -683,7 +683,7 @@ void Tool_transpose::processFile(HumdrumFile& infile,
 				}
 
 				// check for key signature in a spine which is being
-				// transposed, and adjust it. 
+				// transposed, and adjust it.
 				// Should also check tandem spines for updating
 				// key signatures in non-kern spines.
 				if (spineprocess[infile.token(i, j)->getTrack()] &&
