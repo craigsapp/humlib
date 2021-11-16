@@ -896,15 +896,21 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 //
 
 void Tool_transpose::printNewKernString(const string& input, int transval) {
+
 	HumRegex hre;
-	if (input.rfind('R') != string::npos) {
-		// don't transpose unpitched notes...
+	if (input == ".") {
+		// Don't transpose null tokens.
 		m_humdrum_text << input;
 		return;
-	} else if(input.rfind('r') != string::npos) {
+	} else if (input.rfind('R') != string::npos) {
+		// Don't transpose unpitched notes (percussion parts).
+		m_humdrum_text << input;
+		return;
+	} else if (input.rfind('r') != string::npos) {
+		// Transpose rests only if they contain a pitch component.
 		string output = input;
 		if (hre.search(input, "([A-Ga-g]+[#n-]*)")) {
-			// transpose pitch portion of rest (indicating vertical position)
+			// Transpose pitch portion of rest (indicating vertical position).
 			string pitch = hre.getMatch(1);
 			int base40 = Convert::kernToBase40(pitch);
 			string newpitch = Convert::base40ToKern(base40 + transval);
@@ -914,12 +920,13 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 		// don't transpose rests...
 		m_humdrum_text << output;
 		return;
-	}
-	if (input == ".") {
-		// don't transpose null tokens...
+	} else if (!hre.search(input, "([A-Ga-g]+[#n-]*)")) {
+		// This is a form of invisible rest with no "r", just **recip.
 		m_humdrum_text << input;
 		return;
 	}
+
+	// Now the only thing left are regular pitches.
 
 	int base40 = Convert::kernToBase40(input);
 	string newpitch = Convert::base40ToKern(base40 + transval);
