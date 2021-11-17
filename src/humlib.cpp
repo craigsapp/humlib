@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 16 00:06:11 PST 2021
+// Last Modified: Tue Nov 16 20:30:13 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56535,6 +56535,7 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 
 #define COMPOSITE_TREMOLO_MARKER "||"
 
+
 /////////////////////////////////
 //
 // Tool_composite::Tool_composite -- Set the recognized options for the tool.
@@ -56542,11 +56543,14 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 
 Tool_composite::Tool_composite(void) {
 	define("a|append=b",    "append data to end of line (top of system)");
+
 	define("P|analysis-onsets=b",    "count number of note (pitch) onsets in feature");
 	define("A|analysis-accents=b",   "count number of accents in feature");
 	define("O|analysis-ornaments=b", "count number of ornaments in feature");
 	define("S|analysis-slurs=b",     "count number of slur beginnings/ending in feature");
 	define("T|analysis-total=b",     "count total number of analysis features for each note");
+	define("Z|all|all-analyses=b",   "do all analyses");
+
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
@@ -56628,6 +56632,8 @@ bool Tool_composite::run(HumdrumFile& infile) {
 
 void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 	infile.analyzeStructureNoRhythm();
+
+	initializeAnalysisArrays(infile);
 
 	// groups is a list of the spine starts for composite rhythms.
 	// the value is null if there is no analysis of that type, or
@@ -56712,8 +56718,8 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 		analyzeCompositeSlurs(infile, groups, tracks);
 	}
 
-	if (spines.size() > 1) {
-		spines.push_back("total");
+	if ((spines.size() > 1) && m_analysisTotalsQ) {
+		spines.push_back("totals");
 		analyzeCompositeTotals(infile, groups, tracks);
 	}
 
@@ -56882,13 +56888,13 @@ void Tool_composite::assignAnalysesToVdataTracks(vector<vector<double>*>& dataBy
 				}
 			} else if (spines[j] == "accents") {
 				if (*token == "**kern-grpA") {
-					dataByTrack[track] = &m_analysisOnsets.at(1);
+					dataByTrack[track] = &m_analysisAccents.at(1);
 				} else if (*token == "**kern-grpB") {
-					dataByTrack[track] = &m_analysisOnsets.at(2);
+					dataByTrack[track] = &m_analysisAccents.at(2);
 				} else if (*token == "**kern-comp") {
-					dataByTrack[track] = &m_analysisOnsets.at(0);
+					dataByTrack[track] = &m_analysisAccents.at(0);
 				} else if (*token == "**kern-coin") {
-					dataByTrack[track] = &m_analysisOnsets.at(3);
+					dataByTrack[track] = &m_analysisAccents.at(3);
 				}
 			} else if (spines[j] == "ornaments") {
 				if (*token == "**kern-grpA") {
@@ -56910,7 +56916,7 @@ void Tool_composite::assignAnalysesToVdataTracks(vector<vector<double>*>& dataBy
 				} else if (*token == "**kern-coin") {
 					dataByTrack[track] = &m_analysisSlurs.at(3);
 				}
-			} else if (spines[j] == "total") {
+			} else if (spines[j] == "totals") {
 				if (*token == "**kern-grpA") {
 					dataByTrack[track] = &m_analysisTotals.at(1);
 				} else if (*token == "**kern-grpB") {
@@ -56936,14 +56942,6 @@ void Tool_composite::assignAnalysesToVdataTracks(vector<vector<double>*>& dataBy
 void Tool_composite::analyzeCompositeOnsets(HumdrumFile& infile,
 		vector<HTp>& groups, vector<bool>& tracks) {
 
-	m_analysisOnsets.resize(4);
-
-	for (int i=0; i<(int)m_analysisOnsets.size(); i++) {
-		m_analysisOnsets[i].resize(infile.getLineCount());
-		fill(m_analysisOnsets[i].begin(), m_analysisOnsets[i].end(), -1.0);
-	}
-
-//	if (groups[0] || groups[3]) {
 	if (groups[0]) {
 		doTotalOnsetAnalysis(m_analysisOnsets[0], infile, groups[0]->getTrack(), tracks);
 	}
@@ -57087,19 +57085,113 @@ void Tool_composite::doTotalOnsetAnalysis(vector<double>& analysis, HumdrumFile&
 
 //////////////////////////////
 //
+// Tool_composite::initializeAnalysisArrays --
+//
+
+void Tool_composite::initializeAnalysisArrays(HumdrumFile& infile) {
+
+	m_analysisOnsets.resize(4);
+	for (int i=0; i<(int)m_analysisOnsets.size(); i++) {
+		m_analysisOnsets[i].resize(infile.getLineCount());
+		fill(m_analysisOnsets[i].begin(), m_analysisOnsets[i].end(), 0.0);
+	}
+
+	m_analysisAccents.resize(4);
+	for (int i=0; i<(int)m_analysisAccents.size(); i++) {
+		m_analysisAccents[i].resize(infile.getLineCount());
+		fill(m_analysisAccents[i].begin(), m_analysisAccents[i].end(), 0.0);
+	}
+
+	m_analysisOrnaments.resize(4);
+	for (int i=0; i<(int)m_analysisOrnaments.size(); i++) {
+		m_analysisOrnaments[i].resize(infile.getLineCount());
+		fill(m_analysisOrnaments[i].begin(), m_analysisOrnaments[i].end(), 0.0);
+	}
+
+	m_analysisSlurs.resize(4);
+	for (int i=0; i<(int)m_analysisSlurs.size(); i++) {
+		m_analysisSlurs[i].resize(infile.getLineCount());
+		fill(m_analysisSlurs[i].begin(), m_analysisSlurs[i].end(), 0.0);
+	}
+
+	m_analysisTotals.resize(4);
+	for (int i=0; i<(int)m_analysisTotals.size(); i++) {
+		m_analysisTotals[i].resize(infile.getLineCount());
+		fill(m_analysisTotals[i].begin(), m_analysisTotals[i].end(), 0.0);
+	}
+
+}
+
+//////////////////////////////
+//
 // Tool_composite::analyzeCompositeAccents --
 //
 
 void Tool_composite::analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& groups,
 		vector<bool>& tracks) {
 
-	m_analysisAccents.resize(4);
-
-	for (int i=0; i<(int)m_analysisAccents.size(); i++) {
-		m_analysisAccents[i].resize(infile.getLineCount());
-		fill(m_analysisAccents[i].begin(), m_analysisAccents[i].end(), -1.0);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			vector<string> subtoks = token->getSubtokens();
+			int sum = 0;
+			for (int k=0; k<(int)subtoks.size(); k++) {
+				int staccato      = 0;
+				int staccatissimo = 0;
+				int tenuto        = 0;
+				int marcato       = 0;
+				int sforzando     = 0;
+				for (int m=0; m<(int)subtoks[k].size(); m++) {
+					int value = subtoks.at(k).at(m);
+					if (value == '\'') { // staccato or staccatissimo
+						staccato++;
+					} else if (value == '`') { // staccatissimo
+						staccatissimo++;
+					} else if (value == '^') { // accent or heavy accent
+						marcato++;
+					} else if (value == '~') { // tenuto
+						tenuto++;
+					} else if (value == 'z') { // sforzando
+						// also check in **dynam spines?
+						sforzando++;
+					}
+				}
+				if (staccato)      { sum++; }
+				if (staccatissimo) { sum++; }
+				if (tenuto)        { sum++; }
+				if (marcato)       { sum++; }
+				if (sforzando)     { sum++; }
+			}
+			string group = token->getValue("auto", "group");
+			m_analysisAccents.at(0).at(i) += sum;
+			if (group == "A") {
+				m_analysisAccents.at(1).at(i) += sum;
+			}
+			if (group == "B") {
+				m_analysisAccents.at(2).at(i) += sum;
+			}
+		}
 	}
 
+	// Calculate coincidence accents:
+	for (int i=0; i<(int)m_analysisAccents[0].size(); i++) {
+		if ((m_analysisAccents[1][i] > 0) && (m_analysisAccents[2][i] > 0)) {
+			m_analysisAccents[3][i] += m_analysisAccents[1][i];
+			m_analysisAccents[3][i] += m_analysisAccents[2][i];
+		}
+	}
 }
 
 
@@ -57112,13 +57204,71 @@ void Tool_composite::analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& g
 void Tool_composite::analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>& groups,
 		vector<bool>& tracks) {
 
-	m_analysisOrnaments.resize(4);
-
-	for (int i=0; i<(int)m_analysisOrnaments.size(); i++) {
-		m_analysisOrnaments[i].resize(infile.getLineCount());
-		fill(m_analysisOrnaments[i].begin(), m_analysisOrnaments[i].end(), -1.0);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			vector<string> subtoks = token->getSubtokens();
+			int sum = 0;
+			for (int k=0; k<(int)subtoks.size(); k++) {
+				int trill     = 0;
+				int mordent   = 0;
+				int turn      = 0;
+				for (int m=0; m<(int)subtoks[k].size(); m++) {
+					int value = subtoks.at(k).at(m);
+					if (value == 'T') { // major-second trill
+						trill++;
+					} else if (value == 't') { // minor-second trill
+						trill++;
+					} else if (value == 'M') { // mordent
+						mordent++;
+					} else if (value == 'm') { // mordent
+						mordent++;
+					} else if (value == 'W') { // mordent
+						mordent++;
+					} else if (value == 'w') { // mordent
+						mordent++;
+					} else if (value == 'S') { // turn
+						turn++;
+					} else if (value == 's') { // turn
+						turn++;
+					} else if (value == '$') { // inverted turn
+						turn++;
+					}
+				}
+				if (trill)      { sum++; }
+				if (turn)       { sum++; }
+				if (mordent)    { sum++; }
+			}
+			string group = token->getValue("auto", "group");
+			m_analysisOrnaments.at(0).at(i) += sum;
+			if (group == "A") {
+				m_analysisOrnaments.at(1).at(i) += sum;
+			}
+			if (group == "B") {
+				m_analysisOrnaments.at(2).at(i) += sum;
+			}
+		}
 	}
 
+	// Calculate coincidence accents:
+	for (int i=0; i<(int)m_analysisOrnaments[0].size(); i++) {
+		if ((m_analysisOrnaments[1][i] > 0) && (m_analysisOrnaments[2][i] > 0)) {
+			m_analysisOrnaments[3][i] += m_analysisOrnaments[1][i];
+			m_analysisOrnaments[3][i] += m_analysisOrnaments[2][i];
+		}
+	}
 }
 
 
@@ -57128,15 +57278,65 @@ void Tool_composite::analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>&
 // Tool_composite::analyzeCompositeSlurs --
 //
 
-void Tool_composite::analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks) {
+void Tool_composite::analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups,
+		vector<bool>& tracks) {
 
 	m_analysisSlurs.resize(4);
 
 	for (int i=0; i<(int)m_analysisSlurs.size(); i++) {
 		m_analysisSlurs[i].resize(infile.getLineCount());
-		fill(m_analysisSlurs[i].begin(), m_analysisSlurs[i].end(), -1.0);
+		fill(m_analysisSlurs[i].begin(), m_analysisSlurs[i].end(), 0.0);
 	}
 
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			vector<string> subtoks = token->getSubtokens();
+			int sum = 0;
+			for (int k=0; k<(int)subtoks.size(); k++) {
+				int slurstart = 0;
+				int slurend   = 0;
+				for (int m=0; m<(int)subtoks[k].size(); m++) {
+					int value = subtoks.at(k).at(m);
+					if (value == '(') { // slur start
+						slurstart++;
+					} else if (value == ')') { // slur end
+						slurend++;
+					}
+				}
+				if (slurstart) { sum++; }
+				if (slurend)   { sum++; }
+			}
+			string group = token->getValue("auto", "group");
+			m_analysisSlurs.at(0).at(i) += sum;
+			if (group == "A") {
+				m_analysisSlurs.at(1).at(i) += sum;
+			}
+			if (group == "B") {
+				m_analysisSlurs.at(2).at(i) += sum;
+			}
+		}
+	}
+
+	// Calculate coincidence accents:
+	for (int i=0; i<(int)m_analysisSlurs[0].size(); i++) {
+		if ((m_analysisSlurs[1][i] > 0) && (m_analysisSlurs[2][i] > 0)) {
+			m_analysisSlurs[3][i] += m_analysisSlurs[1][i];
+			m_analysisSlurs[3][i] += m_analysisSlurs[2][i];
+		}
+	}
 }
 
 
@@ -57152,7 +57352,16 @@ void Tool_composite::analyzeCompositeTotals(HumdrumFile& infile, vector<HTp>& gr
 
 	for (int i=0; i<(int)m_analysisTotals.size(); i++) {
 		m_analysisTotals[i].resize(infile.getLineCount());
-		fill(m_analysisTotals[i].begin(), m_analysisTotals[i].end(), -1.0);
+		fill(m_analysisTotals[i].begin(), m_analysisTotals[i].end(), 0.0);
+	}
+
+	for (int i=0; i<(int)m_analysisTotals[0].size(); i++) {
+		for (int j=0; j<(int)m_analysisTotals.size(); j++) {
+			if (m_analysisOnsets[0][i]    > 0) { m_analysisOnsets[0][i]  += m_analysisOnsets[0][i];    }
+			if (m_analysisAccents[0][i]   > 0) { m_analysisAccents[0][i] += m_analysisAccents[0][i];   }
+			if (m_analysisOrnaments[0][i] > 0) { m_analysisTotals[0][i]  += m_analysisOrnaments[0][i]; }
+			if (m_analysisSlurs[0][i]     > 0) { m_analysisTotals[0][i]  += m_analysisSlurs[0][i];     }
+		}
 	}
 
 }
@@ -57360,10 +57569,21 @@ void Tool_composite::initialize(void) {
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
 	m_onlyQ     = getBoolean("only");
+
 	m_analysisOnsetsQ    = getBoolean("analysis-onsets");
 	m_analysisAccentsQ   = getBoolean("analysis-accents");
 	m_analysisOrnamentsQ = getBoolean("analysis-ornaments");
 	m_analysisSlursQ     = getBoolean("analysis-slurs");
+	m_analysisTotalsQ    = getBoolean("analysis-total");
+
+	if (getBoolean("all-analyses")) {
+		m_analysisOnsetsQ    = true;
+		m_analysisAccentsQ   = true;
+		m_analysisOrnamentsQ = true;
+		m_analysisSlursQ     = true;
+		m_analysisTotalsQ    = true;
+	}
+
 	m_analysisQ = m_analysisOnsetsQ;
 	m_analysisQ |= m_analysisAccentsQ;
 	m_analysisQ |= m_analysisOrnamentsQ;

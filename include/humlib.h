@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 16 00:06:11 PST 2021
+// Last Modified: Tue Nov 16 20:30:13 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5833,6 +5833,7 @@ class Tool_composite : public HumTool {
 		void        prepareMultipleGroups(HumdrumFile& infile);
 		void        prepareSingleGroup   (HumdrumFile& infile);
 		void        initialize           (void);
+		void        initializeAnalysisArrays(HumdrumFile& infile);
 		int         typeStringToInt      (const std::string& value);
 		HumNum      getLineDuration      (HumdrumFile& infile, int index, std::vector<bool>& isNull);
 		void        getGroupStates       (std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
@@ -5935,12 +5936,13 @@ class Tool_composite : public HumTool {
 		bool        m_analysisAccentsQ   = false;   // used with -A option
 		bool        m_analysisOrnamentsQ = false;   // used with -O option
 		bool        m_analysisSlursQ     = false;   // used with -S option
-		bool        m_analysisQ          = false;   // union of -AROS options
+		bool        m_analysisTotalsQ    = false;   // used with -T option
+		bool        m_analysisQ          = false;   // union of -paost options
 		vector<vector<double>> m_analysisOnsets;    // used with -P
 		vector<vector<double>> m_analysisAccents;   // used with -A
 		vector<vector<double>> m_analysisOrnaments; // used with -O
 		vector<vector<double>> m_analysisSlurs;     // used with -S
-		vector<vector<double>> m_analysisTotals;    // used with -T sum when multiple features are analyzed
+		vector<vector<double>> m_analysisTotals;    // used with -T
 
 };
 

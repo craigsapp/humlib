@@ -35,6 +35,7 @@ class Tool_composite : public HumTool {
 		void        prepareMultipleGroups(HumdrumFile& infile);
 		void        prepareSingleGroup   (HumdrumFile& infile);
 		void        initialize           (void);
+		void        initializeAnalysisArrays(HumdrumFile& infile);
 		int         typeStringToInt      (const std::string& value);
 		HumNum      getLineDuration      (HumdrumFile& infile, int index, std::vector<bool>& isNull);
 		void        getGroupStates       (std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
@@ -137,12 +138,13 @@ class Tool_composite : public HumTool {
 		bool        m_analysisAccentsQ   = false;   // used with -A option
 		bool        m_analysisOrnamentsQ = false;   // used with -O option
 		bool        m_analysisSlursQ     = false;   // used with -S option
-		bool        m_analysisQ          = false;   // union of -AROS options
+		bool        m_analysisTotalsQ    = false;   // used with -T option
+		bool        m_analysisQ          = false;   // union of -paost options
 		vector<vector<double>> m_analysisOnsets;    // used with -P
 		vector<vector<double>> m_analysisAccents;   // used with -A
 		vector<vector<double>> m_analysisOrnaments; // used with -O
 		vector<vector<double>> m_analysisSlurs;     // used with -S
-		vector<vector<double>> m_analysisTotals;    // used with -T sum when multiple features are analyzed
+		vector<vector<double>> m_analysisTotals;    // used with -T
 
 };
 
