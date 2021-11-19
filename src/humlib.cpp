@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 16 20:30:13 PST 2021
+// Last Modified: Thu Nov 18 18:04:37 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -75105,6 +75105,59 @@ HumNum Tool_mei2hum::parseStaff_mensural(xml_node staff, HumNum starttime) {
 
 //////////////////////////////
 //
+// Tool_mei2hum::parseLigature -- Process an MEI ligature element.
+//
+
+HumNum Tool_mei2hum::parseLigature(xml_node ligature, HumNum starttime) {
+	NODE_VERIFY(ligature, starttime);
+	MAKE_CHILD_LIST(children, ligature);
+
+	string dummy;
+
+	// Same parsing as layer:
+	xml_node layer = ligature;
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			starttime = parseNote_mensural(children[i], xml_node(NULL), dummy, starttime, 0);
+		} else if (nodename == "ligature") {
+			starttime = parseLigature(children[i], starttime);
+		} else if (nodename == "choice") {
+			starttime = parseChoice_mensural(children[i], starttime);
+		} else if (nodename == "chord") {
+			// starttime = parseChord(children[i], starttime, 0);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "rest") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "space") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "mRest") {
+			// starttime = parseMRest(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "beam") {
+			// starttime = parseBeam(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "tuplet") {
+			// starttime = parseTuplet(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "clef") {
+			parseClef(children[i], starttime);
+		} else if (nodename == "barLine") {
+			parseBarline(children[i], starttime);
+		} else if (nodename == "dot") {
+			// dot is processed in parseNote_mensural;
+		} else {
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_mei2hum::parseLayer --
 //
 
@@ -75258,6 +75311,10 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 		string nodename = children[i].name();
 		if (nodename == "note") {
 			starttime = parseNote_mensural(children[i], xml_node(NULL), dummy, starttime, 0);
+		} else if (nodename == "ligature") {
+			starttime = parseLigature(children[i], starttime);
+		} else if (nodename == "choice") {
+			starttime = parseChoice_mensural(children[i], starttime);
 		} else if (nodename == "chord") {
 			// starttime = parseChord(children[i], starttime, 0);
 			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
@@ -75290,6 +75347,82 @@ HumNum Tool_mei2hum::parseLayer_mensural(xml_node layer, HumNum starttime, vecto
 	//}
 
 	m_currentLayer = 0;
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseChoice_mensural -- Process an MEI choice element (within mensural music).
+//
+
+HumNum Tool_mei2hum::parseChoice_mensural(xml_node choice, HumNum starttime) {
+	NODE_VERIFY(choice, starttime);
+	MAKE_CHILD_LIST(children, choice);
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "corr") {
+			starttime = parseCorr_mensural(children[i], starttime);
+		} else if (nodename == "sic") {
+			// Ignoring sic in conversion (at least for now)
+		} else {
+			cerr << DKHTP << choice.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+	return starttime;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_mei2hum::parseCorr_mensural -- Process an MEI corr element (within mensural music).
+//
+
+HumNum Tool_mei2hum::parseCorr_mensural(xml_node corr, HumNum starttime) {
+	NODE_VERIFY(corr, starttime);
+	MAKE_CHILD_LIST(children, corr);
+
+	string dummy;
+
+	// Same parsing as layer:
+	xml_node layer = corr;
+	for (int i=0; i<(int)children.size(); i++) {
+		string nodename = children[i].name();
+		if (nodename == "note") {
+			starttime = parseNote_mensural(children[i], xml_node(NULL), dummy, starttime, 0);
+		} else if (nodename == "ligature") {
+			starttime = parseLigature(children[i], starttime);
+		} else if (nodename == "choice") {
+			starttime = parseChoice_mensural(children[i], starttime);
+		} else if (nodename == "chord") {
+			// starttime = parseChord(children[i], starttime, 0);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "rest") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "space") {
+			starttime = parseRest_mensural(children[i], starttime);
+		} else if (nodename == "mRest") {
+			// starttime = parseMRest(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "beam") {
+			// starttime = parseBeam(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "tuplet") {
+			// starttime = parseTuplet(children[i], starttime);
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		} else if (nodename == "clef") {
+			parseClef(children[i], starttime);
+		} else if (nodename == "barLine") {
+			parseBarline(children[i], starttime);
+		} else if (nodename == "dot") {
+			// dot is processed in parseNote_mensural;
+		} else {
+			cerr << DKHTP << layer.name() << "/" << nodename << CURRLOC << endl;
+		}
+	}
+
 	return starttime;
 }
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Nov 16 20:30:13 PST 2021
+// Last Modified: Thu Nov 18 18:04:37 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7014,6 +7014,9 @@ class Tool_mei2hum : public HumTool {
 		void   parseReh             (xml_node reh, HumNum starttime);
 		HumNum parseLayer           (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
 		HumNum parseLayer_mensural  (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
+		HumNum parseCorr_mensural   (xml_node corr, HumNum starttime);
+		HumNum parseChoice_mensural (xml_node corr, HumNum starttime);
+		HumNum parseLigature        (xml_node staff, HumNum starttime);
 		int    extractStaffCountByFirstMeasure    (xml_node element);
 		int    extractStaffCountByScoreDef        (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);
