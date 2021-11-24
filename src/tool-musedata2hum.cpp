@@ -258,7 +258,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	m_lastbarnum = -1;
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
-	
+
 	bool status = true;
 	int i = 0;
 	while (i < part.getLineCount()) {
@@ -421,7 +421,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		// convert to an index:
 		layer = layer - 1;
 	}
-	
+
 	HumNum timestamp = mr.getAbsBeat();
 	// cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;

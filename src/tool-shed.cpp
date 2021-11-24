@@ -250,7 +250,7 @@ string Tool_shed::getExInterp(const string& value) {
 
 void Tool_shed::parseExpression(const string& expression) {
 	int state = 0;
-	
+
 	m_searches.clear();
 	m_replaces.clear();
 	m_options.clear();
@@ -455,7 +455,7 @@ void Tool_shed::searchAndReplaceBarline(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -499,7 +499,7 @@ void Tool_shed::searchAndReplaceInterpretation(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -539,7 +539,7 @@ void Tool_shed::searchAndReplaceLocalComment(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -704,7 +704,7 @@ void Tool_shed::searchAndReplaceExinterp(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}

@@ -107,7 +107,7 @@ void Tool_colorgroups::initialize(void) {
 void Tool_colorgroups::processFile(HumdrumFile& infile) {
 	Tool_shed shed;
 	vector<string> argv;
-	
+
 	string command = "s/grp:A/color:";
 	command += getString("A");
 	command += "/I; ";

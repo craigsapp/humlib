@@ -563,7 +563,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 			return output;
 		}
 	}
-		
+
 	if (hasdigit) {
 		char rv[3] = {0};
 		char gv[3] = {0};
@@ -741,7 +741,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 //            http://netdancer.com/rgbblk.htm
 //            http://www.htmlhelp.com/cgi-bin/color.cgi?rgb=FFFFFF
 //            http://www.brobstsystems.com/colors1.htm
-	
+
 	return output;
 }
 

@@ -1384,7 +1384,7 @@ bool Tool_gasparize::insertEditText(const string& text, HumdrumFile& infile, int
 	}
 	token = infile.token(line, field);
 	token->setText(text);
-	
+
 	return true;
 }
 

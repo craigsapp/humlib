@@ -56,7 +56,7 @@ string Convert::getReferenceKeyMeaning(const string& token) {
 		key         = hre.getMatch(1);
 		translation = hre.getMatch(2);
 	}
-		
+
 	// extract number qualifier
 	if (hre.search(key, "^(.*)(\\d+)$")) {
 		key     = hre.getMatch(1);
@@ -181,7 +181,7 @@ string Convert::getReferenceKeyMeaning(const string& token) {
 			else if (key == "RNB") { meaning = "Encoding note"; }
 			else if (key == "RWG") { meaning = "Encoding warning"; }
 			break;
-		
+
 		case 'T':	// translator
 			if      (key == "TRN") { meaning = "Translator"; }
 			break;

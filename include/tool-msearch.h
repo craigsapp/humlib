@@ -351,6 +351,7 @@ class Tool_msearch : public HumTool {
 		                            vector<NoteCell*>& match);
 		void    markMatch          (HumdrumFile& infile,
 		                            vector<NoteCell*>& match);
+		void    storeMatch         (vector<NoteCell*>& match);
 		void    markTextMatch      (HumdrumFile& infile, TextInfo& word);
 		void    fillWords          (HumdrumFile& infile,
 		                            vector<TextInfo*>& words);
@@ -359,6 +360,7 @@ class Tool_msearch : public HumTool {
 		void    printQuery         (vector<MSearchQueryToken>& query);
 		void    addMusicSearchSummary(HumdrumFile& infile, int mcount, const std::string& marker);
 		void    addTextSearchSummary(HumdrumFile& infile, int mcount, const std::string& marker);
+		void    addMatch           (HumdrumFile& infile, vector<NoteCell*>& match);
 		int     makeBase40Interval (int diatonic, const std::string& alteration);
 		std::string convertPitchesToIntervals(const std::string& input);
 		void    markNote           (HTp token, int index);
@@ -376,6 +378,8 @@ class Tool_msearch : public HumTool {
 		bool        m_quietQ     = false;
 		bool        m_debugQ     = false;
 		bool        m_nooverlapQ = false;
+		std::vector<int> m_barnums;
+		std::vector<std::vector<NoteCell*>> m_matches;
 		std::vector<SonorityDatabase> m_sonorities;
 		std::vector<bool> m_sonoritiesChecked;
 		std::vector<pair<HTp, int>> m_tomark;

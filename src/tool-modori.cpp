@@ -175,7 +175,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		// nothing to do
 		return;
 	}
-	
+
 	switchModernOriginal(infile);
 }
 
