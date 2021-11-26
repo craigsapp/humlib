@@ -1397,7 +1397,7 @@ bool HumdrumFileStructure::processLocalParametersForTrack(
 				// terminate if not most primary subspine
 				return true;
 			}
-		} else if (!(token->isNull() & token->isManipulator())) {
+		} else if (!(token->isNull() && token->isManipulator())) {
 			if (token->isCommentLocal()) {
 				checkForLocalParameters(token, current);
 			} else {
