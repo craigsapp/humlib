@@ -73,6 +73,10 @@ void HumdrumFileContent::analyzeBarlines(void) {
 						// maybe ignore fermatas
 						continue;
 					}
+					if (token->at(k) == ';') {
+						// ignore fermatas in comparison
+						continue;
+					}
 					baseline += token->at(k);
 				}
 				baseQ = true;
@@ -82,6 +86,10 @@ void HumdrumFileContent::analyzeBarlines(void) {
 					if (isdigit(token->at(k))) {
 						// ignore barnumbers;
 						// maybe ignore fermatas
+						continue;
+					}
+					if (token->at(k) == ';') {
+						// ignore fermatas in comparison
 						continue;
 					}
 					comparison += token->at(k);
