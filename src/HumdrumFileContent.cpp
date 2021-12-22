@@ -127,6 +127,10 @@ bool HumdrumFileContent::analyzeRScale(void) {
 				vis += '.';
 			}
 			token->setValue("LO", "N", "vis", vis);
+			string rvalue = to_string(rscales[track].getNumerator());
+			rvalue += '/';
+			rvalue += to_string(rscales[track].getDenominator());
+			token->setValue("auto", "rscale", rvalue);
 		}
 	}
 
