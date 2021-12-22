@@ -133,7 +133,7 @@ HumNum Convert::recipToDuration(const string& recip, HumNum scale,
 
 //////////////////////////////
 //
-// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but 
+// Convert::recipToDurationIgnoreGrace -- Similar to recipToDuration(), but
 //     do not set grace notes to a zero duration, but rather give their
 //     visual duration.
 // default value: scale = 4 (duration in terms of quarter notes)
@@ -414,7 +414,7 @@ string Convert::durationFloatToRecip(double input, HumNum timebase) {
 
 //////////////////////////////
 //
-// Convert::timeSigToDurationInQuarters -- Convert a **kern time signature 
+// Convert::timeSigToDurationInQuarters -- Convert a **kern time signature
 //   into the duration of the measure for that time signature.
 //   output units are in quarter notes.
 //   Example: 6/8 => 3 quarters

@@ -227,7 +227,7 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 	int index;
 	for (int i=0; i<7; i++) {
 		if (dtranspose) {
-			index = (i + dtranspose + 70) % 7; 
+			index = (i + dtranspose + 70) % 7;
 		} else {
 			index = i;
 		}

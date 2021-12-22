@@ -13,7 +13,7 @@
 //                   *grp:B
 //                   *grp:C
 //                Maybe allow more groups and allow for *Xgrp: to turn off a group.
-//                
+//
 //                Essentially the commands:
 //                   shed -e "s/grp:A/color:crimson/I; s/grp:B/color:dodgerblue/I; s/grp:C/color:limegreen/I"
 //
@@ -107,7 +107,7 @@ void Tool_colorgroups::initialize(void) {
 void Tool_colorgroups::processFile(HumdrumFile& infile) {
 	Tool_shed shed;
 	vector<string> argv;
-	
+
 	string command = "s/grp:A/color:";
 	command += getString("A");
 	command += "/I; ";

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Aug 27 06:15:38 PDT 2017
-// Last Modified: Sat Sep  5 18:55:53 PDT 2020
+// Last Modified: Tue Nov 23 16:00:54 CET 2021
 // Filename:      tool-msearch.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-msearch.cpp
 // Syntax:        C++11; humlib
@@ -38,7 +38,7 @@ void SonorityDatabase::buildDatabase(HLp line) {
 	}
 	int lowesti = 0;
 	int lowest12 = 1000;
-	
+
 	for (int i=0; i<line->getFieldCount(); i++) {
 		HTp token = m_line->token(i);
 		if (!token->isKern()) {
@@ -213,6 +213,7 @@ bool Tool_msearch::run(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_msearch::initialize --
@@ -368,6 +369,7 @@ void Tool_msearch::doTextSearch(HumdrumFile& infile, NoteGrid& grid,
 }
 
 
+
 //////////////////////////////
 //
 // Tool_msearch::printQuery --
@@ -380,6 +382,7 @@ void Tool_msearch::printQuery(vector<MSearchQueryToken>& query) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_msearch::doMusicSearch -- do a basic melodic search of all parts.
@@ -387,6 +390,8 @@ void Tool_msearch::printQuery(vector<MSearchQueryToken>& query) {
 
 void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		vector<MSearchQueryToken>& query) {
+
+	m_matches.clear();
 
 	if (m_debugQ) {
 		printQuery(query);
@@ -398,7 +403,7 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 		grid.getNoteAndRestAttacks(attacks[i], i);
 	}
 
-	vector<NoteCell*>  match;
+	vector<NoteCell*> match;
 	int mcount = 0;
 	for (int i=0; i<(int)attacks.size(); i++) {
 		for (int j=0; j<(int)attacks[i].size(); j++) {
@@ -410,6 +415,7 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 			if (status && !match.empty()) {
 				mcount++;
 				markMatch(infile, match);
+				storeMatch(match);
 				// cerr << "FOUND MATCH AT " << i << ", " << j << endl;
 				// markNotes(attacks[i], j, (int)query.size());
 			}
@@ -430,12 +436,16 @@ void Tool_msearch::doMusicSearch(HumdrumFile& infile, NoteGrid& grid,
 }
 
 
+
 //////////////////////////////
 //
 // Tool_msearch::addMusicSearchSummary --
 //
 
 void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const string& marker) {
+
+	m_barnums = infile.getMeasureNumbers();
+
 	infile.appendLine("!!@@BEGIN: MUSIC_SEARCH_RESULT");
 	string line;
 
@@ -505,8 +515,45 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 		infile.appendLine(line);
 	}
 
-	// Print match location here.
+	// Print music match location here.
+	for (int i=0; i<(int)m_matches.size(); i++) {
+		addMatch(infile, m_matches[i]);
+	}
+
 	infile.appendLine("!!@@END: MUSIC_SEARCH_RESULT");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::addMatch --
+//
+// Todo:
+//		* add duration of match
+//
+
+void Tool_msearch::addMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
+	if (match.empty()) {
+		return;
+	}
+	int startIndex   = match.at(0)->getLineIndex();
+	int endIndex     = match.back()->getLineIndex();
+	int startMeasure = m_barnums.at(startIndex);
+	int endMeasure   = m_barnums.at(endIndex);
+
+	infile.appendLine("!!@@BEGIN:\tMATCH");
+
+	string measure = "!!@MEASURE: ";
+
+	measure += to_string(startMeasure);
+	if (startMeasure != endMeasure) {
+		measure += " ";
+		measure += to_string(endMeasure);
+	}
+	infile.appendLine(measure);
+
+	infile.appendLine("!!@@END:\tMATCH");
 }
 
 
@@ -889,7 +936,7 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 		//
 		// PITCH
 		//
-			
+
 		if (!query[i].anypitch) {
 			double qpitch = query[i].pc;
 			double npitch = 0;
@@ -937,7 +984,7 @@ bool Tool_msearch::checkForMusicMatch(vector<NoteCell*>& notes, int index,
 		// and continue to next note if needed.
 		match.push_back(notes[currindex]);
 	}
-	
+
 	// Add extra token for marking tied notes at end of match
 	if (index + (int)query.size() < (int)notes.size()) {
 		match.push_back(notes[index + (int)query.size() - c]);
@@ -1251,7 +1298,7 @@ void Tool_msearch::fillMusicQueryRhythm(vector<MSearchQueryToken>& query,
 		output += input[i];
 		output += ' ';
 	}
-	
+
 	// remove spaces to allow rhythms:
 	// 64 => 64
    // 32 => 32
@@ -1300,7 +1347,7 @@ string Tool_msearch::convertPitchesToIntervals(const string& input) {
 		}
 	}
 	vector<string> pitches;
-	
+
 	for (int i=0; i<(int)input.size(); i++) {
 		char ch = tolower(input[i]);
 		if (ch >= 'a' && ch <= 'g') {
@@ -1503,7 +1550,6 @@ void Tool_msearch::fillMusicQueryInterval(vector<MSearchQueryToken>& query,
 		query.push_back(temp);
 		temp.clear();
 	}
-
 
 }
 
@@ -1855,7 +1901,6 @@ void Tool_msearch::fillMusicQueryInterleaved(vector<MSearchQueryToken>& query,
 // checkVerticalOnly --
 //
 
-
 bool Tool_msearch::checkVerticalOnly(const string& input) {
 	if (input.empty()) {
 		return false;
@@ -1879,6 +1924,22 @@ bool Tool_msearch::checkVerticalOnly(const string& input) {
 		}
 	}
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_msearch::storeMatch -- Store a search result for later printing
+//    in the input file footer.
+//
+
+void Tool_msearch::storeMatch(vector<NoteCell*>& match) {
+	m_matches.resize(m_matches.size() + 1);
+	m_matches.back().resize(match.size());
+	for (int i=0; i<(int)match.size(); i++) {
+		m_matches.back().at(i) = match.at(i);
+	}
 }
 
 

@@ -253,6 +253,10 @@ class HumdrumFileBase : public HumHash {
 		                                        const std::string& exinterp);
 		void          getKernSpineStartList    (std::vector<HTp>& spinestarts);
 		std::vector<HTp> getKernSpineStartList (void);
+		void          getKernLikeSpineStartList(std::vector<HTp>& spinestarts);
+		std::vector<HTp> getKernLikeSpineStartList(void);
+		void          getStaffLikeSpineStartList(std::vector<HTp>& spinestarts);
+		std::vector<HTp> getStaffLikeSpineStartList(void);
 		int           getExinterpCount         (const std::string& exinterp);
 		void          getSpineStartList        (std::vector<HTp>& spinestarts,
 		                                        const std::vector<std::string>& exinterps);
@@ -288,6 +292,7 @@ class HumdrumFileBase : public HumHash {
 		HLp           getLineForInterpretationInsertion     (int index);
 		HLp           getLineForInterpretationInsertionAbove(int index);
 
+		void          clearTokenLinkInfo       (void);
 
 		void          deleteLine               (int index);
 //		void          adjustMergeSpineLines    (void);
@@ -356,7 +361,6 @@ class HumdrumFileBase : public HumHash {
 		bool          analyzeSpines             (void);
 		bool          analyzeLinks              (void);
 		bool          analyzeTracks             (void);
-		bool          analyzeLines              (void);
 		bool          adjustSpines              (HumdrumLine& line,
 		                                         std::vector<std::string>& datatype,
 		                                         std::vector<std::string>& sinfo);
@@ -374,6 +378,7 @@ class HumdrumFileBase : public HumHash {
 		bool          setParseError             (std::stringstream& err);
 		bool          setParseError             (const std::string& err);
 		bool          setParseError             (const char* format, ...);
+		bool          analyzeLines              (void);
 //		void          fixMerges                 (int linei);
 
 	protected:

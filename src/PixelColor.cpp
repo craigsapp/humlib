@@ -31,11 +31,11 @@ namespace hum {
 // PixelColor::PixelColor --
 //
 
-PixelColor::PixelColor(void) { 
+PixelColor::PixelColor(void) {
 	// do nothing
 }
 
-PixelColor::PixelColor(const PixelColor& color) { 
+PixelColor::PixelColor(const PixelColor& color) {
 	Red   = color.Red;
 	Green = color.Green;
 	Blue  = color.Blue;
@@ -47,7 +47,7 @@ PixelColor::PixelColor(const string& color) {
 }
 
 
-PixelColor::PixelColor(int red, int green, int blue) { 
+PixelColor::PixelColor(int red, int green, int blue) {
 	Red   = (unsigned int)limit(red, 0, 255);
 	Green = (unsigned int)limit(green, 0, 255);
 	Blue  = (unsigned int)limit(blue, 0, 255);
@@ -72,7 +72,7 @@ PixelColor::PixelColor(double red, double green, double blue) {
 // PixelColor::~PixelColor --
 //
 
-PixelColor::~PixelColor() { 
+PixelColor::~PixelColor() {
 	// do nothing
 }
 
@@ -96,7 +96,7 @@ void PixelColor::invert(void) {
 // PixelColor::setColor -- set the contents to the specified value.
 //
 
-PixelColor& PixelColor::setColor(const string& colorstring) { 
+PixelColor& PixelColor::setColor(const string& colorstring) {
 	PixelColor color;
 	color = getColor(colorstring);
 	Red   = color.Red;
@@ -146,7 +146,7 @@ int PixelColor::getBlue(void) {
 // PixelColor::setRed --
 //
 
-void PixelColor::setRed(int value) { 
+void PixelColor::setRed(int value) {
 	Red = (unsigned char)limit(value, 0, 255);
 }
 
@@ -179,7 +179,7 @@ void PixelColor::setBlue(int value) {
 // PixelColor::getRedF --
 //
 
-float PixelColor::getRedF(void) { 
+float PixelColor::getRedF(void) {
 	return charToFloat(Red);
 }
 
@@ -209,7 +209,7 @@ float PixelColor::getBlueF(void) {
 // PixelColor::setRedF --
 //
 
-void PixelColor::setRedF(float value) { 
+void PixelColor::setRedF(float value) {
 	Red = (unsigned int)floatToChar(value);
 }
 
@@ -239,7 +239,7 @@ void PixelColor::setBlueF(float value) {
 // PixelColor::setColor --
 //
 
-void PixelColor::setColor(PixelColor color) { 
+void PixelColor::setColor(PixelColor color) {
 	Red   = color.Red;
 	Green = color.Green;
 	Blue  = color.Blue;
@@ -266,7 +266,7 @@ PixelColor& PixelColor::setColor(int red, int green, int blue) {
 // PixelColor::makeGrey --
 //
 
-PixelColor& PixelColor::makeGrey(void) { 
+PixelColor& PixelColor::makeGrey(void) {
 	unsigned char average = limit((int)(((int)Red+(int)Green+(int)Blue)/3.0+0.5),0,255);
 	Red = Green = Blue = average;
 	return *this;
@@ -300,7 +300,7 @@ PixelColor& PixelColor::setGreyNormalized(double value) {
 // PixelColor::makeGray --
 //
 
-PixelColor& PixelColor::makeGray(void) { 
+PixelColor& PixelColor::makeGray(void) {
 	return makeGrey();
 }
 
@@ -387,7 +387,7 @@ PixelColor& PixelColor::operator*=(double number) {
 // PixelColor::operator= --
 //
 
-PixelColor& PixelColor::operator=(PixelColor color) { 
+PixelColor& PixelColor::operator=(PixelColor color) {
 	if (this == &color) {
 		return *this;
 	}
@@ -398,7 +398,7 @@ PixelColor& PixelColor::operator=(PixelColor color) {
 }
 
 
-PixelColor& PixelColor::operator=(int value) { 
+PixelColor& PixelColor::operator=(int value) {
 	Red   = (unsigned char)limit(value, 0, 255);
 	Green = Red;
 	Blue  = Red;
@@ -412,7 +412,7 @@ PixelColor& PixelColor::operator=(int value) {
 // PixelColor::operator+ --
 //
 
-PixelColor PixelColor::operator+(PixelColor color) { 
+PixelColor PixelColor::operator+(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit((int)Red   + color.Red,   0, 255);
 	output.Green = (unsigned char)limit((int)Green + color.Green, 0, 255);
@@ -427,7 +427,7 @@ PixelColor PixelColor::operator+(PixelColor color) {
 // PixelColor::operator+= --
 //
 
-PixelColor& PixelColor::operator+=(int number) { 
+PixelColor& PixelColor::operator+=(int number) {
 	setRed(getRed()     + number);
 	setGreen(getGreen() + number);
 	setBlue(getBlue()   + number);
@@ -439,7 +439,7 @@ PixelColor& PixelColor::operator+=(int number) {
 // PixelColor::operator- --
 //
 
-PixelColor PixelColor::operator-(PixelColor color) { 
+PixelColor PixelColor::operator-(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit((int)Red   - color.Red,   0, 255);
 	output.Green = (unsigned char)limit((int)Green - color.Green, 0, 255);
@@ -454,7 +454,7 @@ PixelColor PixelColor::operator-(PixelColor color) {
 // PixelColor::operator* --
 //
 
-PixelColor PixelColor::operator*(PixelColor color) { 
+PixelColor PixelColor::operator*(PixelColor color) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*charToFloat(color.Red)), 0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*charToFloat(color.Green)), 0, 255);
@@ -463,7 +463,7 @@ PixelColor PixelColor::operator*(PixelColor color) {
 }
 
 
-PixelColor PixelColor::operator*(double number) { 
+PixelColor PixelColor::operator*(double number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*number), 0, 255);
@@ -472,7 +472,7 @@ PixelColor PixelColor::operator*(double number) {
 }
 
 
-PixelColor PixelColor::operator*(int number) { 
+PixelColor PixelColor::operator*(int number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)*number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)*number), 0, 255);
@@ -487,7 +487,7 @@ PixelColor PixelColor::operator*(int number) {
 // PixelColor::operator/ --
 //
 
-PixelColor PixelColor::operator/(double number) { 
+PixelColor PixelColor::operator/(double number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)/number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)/number), 0, 255);
@@ -495,7 +495,7 @@ PixelColor PixelColor::operator/(double number) {
 	return output;
 }
 
-PixelColor PixelColor::operator/(int number) { 
+PixelColor PixelColor::operator/(int number) {
 	PixelColor output;
 	output.Red   = (unsigned char)limit(floatToChar(charToFloat(Red)/(double)number),   0, 255);
 	output.Green = (unsigned char)limit(floatToChar(charToFloat(Green)/(double)number), 0, 255);
@@ -538,7 +538,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	}
 
 	// check for decimal strings with spaces around numbers: "255 255 255"
-	if ((colorstring.find(' ') != string::npos) || 
+	if ((colorstring.find(' ') != string::npos) ||
 		 (colorstring.find('\t') != string::npos)) {
 		char buffer[256] = {0};
 		strcpy(buffer, colorstring.c_str());
@@ -563,7 +563,7 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 			return output;
 		}
 	}
-		
+
 	if (hasdigit) {
 		char rv[3] = {0};
 		char gv[3] = {0};
@@ -737,11 +737,11 @@ PixelColor PixelColor::getColor(const string& colorstring) {
 	if (strcmp("yellow",             buffer) == 0)  return getColor("#ffff00");
 	if (strcmp("yellowgreen",        buffer) == 0)  return getColor("#9acd32");
 
-// References: 
+// References:
 //            http://netdancer.com/rgbblk.htm
 //            http://www.htmlhelp.com/cgi-bin/color.cgi?rgb=FFFFFF
 //            http://www.brobstsystems.com/colors1.htm
-	
+
 	return output;
 }
 
@@ -757,8 +757,8 @@ void PixelColor::writePpm6(ostream& out) {
 }
 
 void PixelColor::writePpm3(ostream& out) {
-	out << (int)getRed()   << " " 
-		 << (int)getGreen() << " " 
+	out << (int)getRed()   << " "
+		 << (int)getGreen() << " "
 		 << (int)getBlue()  << " ";
 }
 
@@ -851,7 +851,7 @@ PixelColor& PixelColor::setTriHue(float value) {
 // PixelColor::charToFloat --
 //
 
-float PixelColor::charToFloat(int value) { 
+float PixelColor::charToFloat(int value) {
 	return value / 255.0;
 }
 
@@ -861,7 +861,7 @@ float PixelColor::charToFloat(int value) {
 // PixelColor::floatToChar --
 //
 
-int PixelColor::floatToChar(float value) { 
+int PixelColor::floatToChar(float value) {
 	return limit((int)(value * 255.0 + 0.5), 0, 255);
 }
 
@@ -878,7 +878,7 @@ int PixelColor::limit(int value, int min, int max) {
 		value = max;
 	}
 	return value;
-} 
+}
 
 
 ///////////////////////////////////////////////////////////////////////////

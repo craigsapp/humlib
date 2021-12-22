@@ -323,7 +323,7 @@ int Tool_semitones::processKernSpines(HumdrumFile& infile, int line, int start, 
 			if (infile[line].isLocalComment()) {
 				printTokens("!", toksize);
 	 		} else if (infile[line].isInterpretation()) {
-				if (toks[0]->compare(0, 2, "**") == 0) { 
+				if (toks[0]->compare(0, 2, "**") == 0) {
 					if (m_cdataQ) {
 						printTokens("**cdata", toksize);
 					} else if (m_midiQ) {

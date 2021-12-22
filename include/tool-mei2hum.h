@@ -181,6 +181,9 @@ class Tool_mei2hum : public HumTool {
 		void   parseReh             (xml_node reh, HumNum starttime);
 		HumNum parseLayer           (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
 		HumNum parseLayer_mensural  (xml_node layer, HumNum starttime, vector<bool>& layerPresent);
+		HumNum parseCorr_mensural   (xml_node corr, HumNum starttime);
+		HumNum parseChoice_mensural (xml_node corr, HumNum starttime);
+		HumNum parseLigature        (xml_node staff, HumNum starttime);
 		int    extractStaffCountByFirstMeasure    (xml_node element);
 		int    extractStaffCountByScoreDef        (xml_node element);
 		HumNum parseRest            (xml_node chord, HumNum starttime);

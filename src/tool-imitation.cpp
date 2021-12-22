@@ -682,7 +682,7 @@ int Tool_imitation::checkForIntervalSequence(vector<int>& m_intervals,
 ///////////////////////////////
 //
 // Tool_imitation::compareSequences -- Returns the number of notes that
-//     match between the two sequences (which is one more than the 
+//     match between the two sequences (which is one more than the
 //     interval count).
 //
 

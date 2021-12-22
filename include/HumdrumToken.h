@@ -170,7 +170,9 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getTokenNumber            (void) const;
 		const std::string& getDataType     (void) const;
 		bool     isDataType                (const std::string& dtype) const;
+		bool     isDataTypeLike            (const std::string& dtype) const;
 		bool     isKern                    (void) const;
+		bool     isKernLike                (void) const;
 		bool     isMens                    (void) const;
 		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;
@@ -210,6 +212,7 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getLinkedParameterSetCount(void);
 		HumParamSet* getLinkedParameterSet (int index);
 		HumParamSet* getParameterSet       (void);
+		void         clearLinkInfo         (void);
 		std::string getSlurLayoutParameter (const std::string& keyname, int subtokenindex = -1);
 		std::string getPhraseLayoutParameter(const std::string& keyname, int subtokenindex = -1);
 		std::string getLayoutParameter     (const std::string& category, const std::string& keyname,

@@ -283,7 +283,7 @@ void Tool_humsheet::printRowClasses(HumdrumFile& infile, int row) {
 
 //////////////////////////////
 //
-// Tool_humsheet::isLayout -- check to see if any cell 
+// Tool_humsheet::isLayout -- check to see if any cell
 //    starts with "!LO:".
 //
 

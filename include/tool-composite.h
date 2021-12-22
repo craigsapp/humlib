@@ -22,8 +22,8 @@ namespace hum {
 
 class Tool_composite : public HumTool {
 	public:
-		       	   Tool_composite        (void);
-		       	  ~Tool_composite        () {};
+		            Tool_composite        (void);
+		           ~Tool_composite        () {};
 
 		bool        run                  (HumdrumFileSet& infiles);
 		bool        run                  (HumdrumFile& infile);
@@ -35,6 +35,7 @@ class Tool_composite : public HumTool {
 		void        prepareMultipleGroups(HumdrumFile& infile);
 		void        prepareSingleGroup   (HumdrumFile& infile);
 		void        initialize           (void);
+		void        initializeAnalysisArrays(HumdrumFile& infile);
 		int         typeStringToInt      (const std::string& value);
 		HumNum      getLineDuration      (HumdrumFile& infile, int index, std::vector<bool>& isNull);
 		void        getGroupStates       (std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
@@ -52,15 +53,17 @@ class Tool_composite : public HumTool {
 		                                  std::vector<std::vector<int>>& groupstates,
 		                                  HumdrumFile& infile);
 		void        getGroupRhythms      (std::vector<std::string>& rhythms,
-                                        std::vector<HumNum>& durs,
+		                                  std::vector<HumNum>& durs,
 		                                  std::vector<int>& states, HumdrumFile& infile);
 		bool        hasGroupInterpretations(HumdrumFile& infile);
 		void        checkForTremoloReduction(HumdrumFile& infile, int line, int field);
 		void        reduceTremolos       (HumdrumFile& infile);
 		bool        areAllEqual          (std::vector<HTp>& notes);
 		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
-      void        getPitches           (std::vector<int>& pitches, HTp token);
-		void        addLabels            (HumdrumFile& infile, int amount);
+		void        getPitches           (std::vector<int>& pitches, HTp token);
+		void        addLabelsAndStria    (HumdrumFile& infile);
+		void        addLabels            (HTp sstart, int labelIndex, const string& label,
+		                                  int abbrIndex, const string& abbr);
 		void        addStria             (HumdrumFile& infile, int amount);
 		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
@@ -69,7 +72,7 @@ class Tool_composite : public HumTool {
 		void        markTogether         (HumdrumFile& infile, int direction);
 		void        markCoincidences     (HumdrumFile& infile, int direction);
 		void        markCoincidencesMusic(HumdrumFile& infile);
-		bool        isAttackInBothGroups (HumdrumFile& infile, int line);
+		bool        isOnsetInBothGroups (HumdrumFile& infile, int line);
 		void        extractNestingData   (HumdrumFile& infile);
 		void        analyzeNestingDataGroups(HumdrumFile& infile, int direction);
 		void        analyzeNestingDataAll(HumdrumFile& infile, int direction);
@@ -83,6 +86,32 @@ class Tool_composite : public HumTool {
 		void        extractGroup         (HumdrumFile& infile, const string &target);
 		void        backfillGroup        (vector<vector<string>>& curgroup, HumdrumFile& infile,
 		                                  int line, int track, int subtrack, const string& group);
+
+		void        analyzeComposite      (HumdrumFile& infile);
+		void        analyzeCompositeOnsets(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeTotals(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+
+		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
+		std::vector<int> getExpansionList(vector<bool>& tracks, int maxtrack, int count);
+		std::string makeExpansionString(vector<int>& tracks);
+		void        doCoincidenceAnalysis(HumdrumFile& outfile, HumdrumFile& infile,
+		                                  int ctrack, HTp compositeStart);
+		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
+		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile);
+		int         countNoteOnsets(HTp token);
+		void        doTotalOnsetAnalysis(vector<double>& analysis, HumdrumFile& infile,
+		                                  int track, vector<bool>& tracks);
+		void        doGroupOnsetAnalyses(vector<double>& analysisA,
+		                                  vector<double>& analysisB,
+		                                  HumdrumFile& infile);
+		void        doCoincidenceOnsetAnalysis(vector<vector<double>>& analysis);
+		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
+		                                   vector<int>& trackMap, vector<bool>& tracks);
+		void        assignAnalysesToVdataTracks(vector<vector<double>*>& data,
+		                                   vector<string>& spines, HumdrumFile& outfile);
 
 	private:
 		std::string m_pitch     = "eR";   // pitch to display for composite rhythm
@@ -103,6 +132,19 @@ class Tool_composite : public HumTool {
 		std::string m_togetherInScore;    // used with -n option
 		std::string m_together;           // used with -m option
 		bool        m_coincideDisplayQ = true; // used with m_together and m_togetherInScore
+
+		// Analysis variables:
+		bool        m_analysisOnsetsQ    = false;   // used with -P option
+		bool        m_analysisAccentsQ   = false;   // used with -A option
+		bool        m_analysisOrnamentsQ = false;   // used with -O option
+		bool        m_analysisSlursQ     = false;   // used with -S option
+		bool        m_analysisTotalsQ    = false;   // used with -T option
+		bool        m_analysisQ          = false;   // union of -paost options
+		vector<vector<double>> m_analysisOnsets;    // used with -P
+		vector<vector<double>> m_analysisAccents;   // used with -A
+		vector<vector<double>> m_analysisOrnaments; // used with -O
+		vector<vector<double>> m_analysisSlurs;     // used with -S
+		vector<vector<double>> m_analysisTotals;    // used with -T
 
 };
 

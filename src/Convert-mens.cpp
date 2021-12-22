@@ -256,7 +256,7 @@ string Convert::mensToRecip(const string& mensdata, HumNum scale, const string& 
 
 //////////////////////////////
 //
-// Convert::mensToRecip -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and 
+// Convert::mensToRecip -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and
 //      divisions of rhythmic levels based on prevailing mensuration.
 //
 
@@ -340,9 +340,9 @@ string Convert::mensToRecip(char rhythm, bool altera, bool perfecta, bool imperf
 		case 30000:    return "1.";   break;   // dotted whole note
 		case 40000:    return "0";    break;   // breve note
 		case 60000:    return "0.";   break;   // dotted breve note
-		case 90000:    return "2%9";  break;   // or ["0.", "1."]; 
+		case 90000:    return "2%9";  break;   // or ["0.", "1."];
 		case 80000:    return "00";   break;   // long note
-		case 120000:   return "00.";  break;   // dotted long note 
+		case 120000:   return "00.";  break;   // dotted long note
 		case 180000:   return "1%9";  break;   // or ["00.", "0."];
 		case 270000:   return "2%27"; break;   // or ["0.", "1.", "0.", "1.", "0.", "1."];
 		case 160000:   return "000";  break;   // maxima note
@@ -362,7 +362,7 @@ string Convert::mensToRecip(char rhythm, bool altera, bool perfecta, bool imperf
 
 //////////////////////////////
 //
-// Convert::mensToDuration -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and 
+// Convert::mensToDuration -- Convert from **mens rhythmic levels according to alteration/perfections/imperfection and
 //      divisions of rhythmic levels based on prevailing mensuration.
 //
 

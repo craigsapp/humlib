@@ -32,7 +32,7 @@ class Tool_pccount : public HumTool {
 		bool  run                       (HumdrumFile& infile);
 		bool  run                       (const string& indata, ostream& out);
 		bool  run                       (HumdrumFile& infile, ostream& out);
- 
+
 	protected:
 		void   initialize               (HumdrumFile& infile);
 		void   processFile              (HumdrumFile& infile);

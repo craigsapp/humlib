@@ -58,7 +58,7 @@ int Convert::museToBase40(const string& pitchString) {
 
 //////////////////////////////
 //
-// Convert::musePitchToKernPitch -- 
+// Convert::musePitchToKernPitch --
 //
 
 string Convert::musePitchToKernPitch(const string& museInput) {

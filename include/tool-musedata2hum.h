@@ -53,7 +53,7 @@ class Tool_musedata2hum : public HumTool {
 		void    setMeasureStyle      (GridMeasure* gm, MuseRecord& mr);
 		void    setMeasureNumber     (GridMeasure* gm, MuseRecord& mr);
 		void    storePartName        (HumGrid& outdata, MuseData& part, int index);
-		void    addNoteDynamics      (GridSlice* slice, int part, 
+		void    addNoteDynamics      (GridSlice* slice, int part,
 		                              MuseRecord& mr);
 		void    addLyrics            (GridSlice* slice, int part, int staff, MuseRecord& mr);
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,

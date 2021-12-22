@@ -245,12 +245,12 @@ string Tool_shed::getExInterp(const string& value) {
 // Tool_shed::parseExpression --
 //     Form of string:
 //        s/search/replace/options; s/search2/replace2/options2
-// 
+//
 //
 
 void Tool_shed::parseExpression(const string& expression) {
 	int state = 0;
-	
+
 	m_searches.clear();
 	m_replaces.clear();
 	m_options.clear();
@@ -273,7 +273,7 @@ void Tool_shed::parseExpression(const string& expression) {
 					m_searches.push_back("");
 				}
 			} else {
-				cerr << "Error at position " << i 
+				cerr << "Error at position " << i
 				     << " in expression: " << expression << endl;
 				return;
 			}
@@ -332,7 +332,7 @@ void Tool_shed::parseExpression(const string& expression) {
 
 //////////////////////////////
 //
-// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum 
+// Tool_shed::initializeSegment -- Recalculate variables for each Humdrum
 //      input segment.
 //
 
@@ -455,7 +455,7 @@ void Tool_shed::searchAndReplaceBarline(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -499,7 +499,7 @@ void Tool_shed::searchAndReplaceInterpretation(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -539,7 +539,7 @@ void Tool_shed::searchAndReplaceLocalComment(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}
@@ -704,7 +704,7 @@ void Tool_shed::searchAndReplaceExinterp(HumdrumFile& infile) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (token->isNull()) {	
+			if (token->isNull()) {
 				// Don't mess with null interpretations
 				continue;
 			}

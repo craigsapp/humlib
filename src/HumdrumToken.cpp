@@ -358,7 +358,7 @@ HumdrumToken* HumdrumToken::getNextNonNullDataToken(int index) {
 //
 
 HumNum HumdrumToken::getSlurDuration(HumNum scale) {
-	if (!isDataType("**kern")) {
+	if (!isDataTypeLike("**kern")) {
 		return 0;
 	}
 	if (isDefined("auto", "slurDuration")) {
@@ -406,6 +406,42 @@ bool HumdrumToken::isDataType(const string& dtype) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isDataTypeLike -- Returns true if the data type of the token
+//   matches the test data type plus a dash followed by any text.
+// @SEEALSO: getDataType getKern
+//
+
+bool HumdrumToken::isDataTypeLike(const string& dtype) const {
+	if (isDataType(dtype)) {
+		return true;
+	}
+	if (dtype.compare(0, 2, "**") == 0) {
+		string comparison = dtype;
+		comparison += "-";
+		string tokentype = getDataType();
+		if (tokentype.compare(0, comparison.size(), comparison) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+		return dtype == getDataType();
+	} else {
+		string comparison = "**";
+		comparison += dtype;
+		comparison += "-";
+		string tokentype = getDataType();
+		if (tokentype.compare(0, comparison.size(), comparison) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isKern -- Returns true if the data type of the token
 //    is **kern.
 // @SEEALSO: isDataType
@@ -413,6 +449,28 @@ bool HumdrumToken::isDataType(const string& dtype) const {
 
 bool HumdrumToken::isKern(void) const {
 	return isDataType("**kern");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isKernLike -- Returns true if the data type of the token
+//    is **kern, or **kern- plus a tag.  This Allows for **kern-tag to be
+//    treated as a staff for printing in verovio.  This can be used to separate
+//    analysis spines that are output as **kern data to be prevented for use
+//    as input to another analysis as real **kern data.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isKernLike(void) const {
+	string dtype = getDataType();
+	if (dtype == "**kern") {
+		return true;
+	} else if (dtype.compare(0, 7, "**kern-") == 0) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -767,7 +825,7 @@ bool HumdrumToken::analyzeDuration(void) {
 	if (hasRhythm()) {
 		if (isData()) {
 			if (!isNull()) {
-				if (isKern()) {
+				if (isKernLike()) {
 					if (strchr(this->c_str(), 'q') != NULL) {
 						m_duration = 0;
 					} else {
@@ -1086,6 +1144,9 @@ bool HumdrumToken::hasRhythm(void) const {
 	if (type == "**kern") {
 		return true;
 	}
+	if (type.compare(0, 7, "**kern-") == 0) {
+		return true;
+	}
 	if (type == "**recip") {
 		return true;
 	}
@@ -1154,12 +1215,13 @@ bool HumdrumToken::equalTo(const string& pattern) {
 //
 
 bool HumdrumToken::isStaff(void) const {
-	if (isKern()) {
+	if (isKernLike()) {
 		return true;
 	}
 	if (isMens()) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -1171,7 +1233,7 @@ bool HumdrumToken::isStaff(void) const {
 //
 
 bool HumdrumToken::isRest(void) {
-	if (isKern()) {
+	if (isKernLike()) {
 		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isKernRest((string)(*this))) {
@@ -1202,7 +1264,7 @@ bool HumdrumToken::isNote(void) {
 	if (isNull()) {
 		return false;
 	}
-	if (isKern()) {
+	if (isKernLike()) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
 		}
@@ -1221,8 +1283,8 @@ bool HumdrumToken::isNote(void) {
 // HumdrumToken::isPitched -- True if not a rest or an unpitched note.
 //
 
-bool HumdrumToken::isPitched(void) { 
-	if (this->isKern()) {
+bool HumdrumToken::isPitched(void) {
+	if (this->isKernLike()) {
 		for (int i=0; i<(int)this->size(); i++) {
 			if ((this->at(i) == 'r') || (this->at(i) == 'R')) {
 				return false;
@@ -1242,7 +1304,7 @@ bool HumdrumToken::isPitched(void) {
 //
 
 bool HumdrumToken::isUnpitched(void) {
-	if (this->isKern()) {
+	if (this->isKernLike()) {
 		if (this->find('R') != string::npos) {
 			return 1;
 		} else {
@@ -1802,7 +1864,7 @@ bool HumdrumToken::hasObliquaLigatureBegin(void) {
 //
 
 char HumdrumToken::hasStemDirection(void) {
-	if (isKern()) {
+	if (isKernLike()) {
 		return Convert::hasKernStemDirection(*this);
 	} else {
 		// don't know what a stem in this datatype is
@@ -2510,6 +2572,33 @@ void HumdrumToken::storeParameterSet(void) {
 	} else if (this->isCommentGlobal() && (this->find(':') != string::npos)) {
 		m_parameterSet = new HumParamSet(this);
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::clearLinkInfo -- clear structural analyses so that they
+//      can be recalculated.
+//
+
+void HumdrumToken::clearLinkInfo(void) {
+	// Possibly clear parameter set (but this info is not typically
+	// dependent on links to other tokens).
+	//
+	// if (m_parameterSet) {
+	// 	delete m_parameterSet;
+	// 	m_parameterSet = NULL;
+	// }
+
+	// also clear linked parameters
+	m_linkedParameterTokens.clear();
+
+	// clear pointers to adjacent tokens
+	m_nextTokens.clear();
+	m_previousTokens.clear();
+	m_nextNonNullTokens.clear();
+	m_previousNonNullTokens.clear();
 }
 
 
@@ -3498,7 +3587,7 @@ HTp HumdrumToken::getSlurStartToken(int number) {
 
 //////////////////////////////
 //
-// HumdrumToken::getSlurStartNumber -- Given a slur ending number, 
+// HumdrumToken::getSlurStartNumber -- Given a slur ending number,
 //    return the slur start number that it pairs with.
 //
 
@@ -3694,7 +3783,7 @@ int HumdrumToken::getStropheStartIndex(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isFirstStrophe -- Returns true if the token is in the first 
+// HumdrumToken::isFirstStrophe -- Returns true if the token is in the first
 //    strophe variant.  Returns true if not in a strophe.
 //
 

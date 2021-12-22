@@ -22,7 +22,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// Convert::getReferenceKeyMeaning -- 
+// Convert::getReferenceKeyMeaning --
 //
 
 string Convert::getReferenceKeyMeaning(HTp token) {
@@ -56,7 +56,7 @@ string Convert::getReferenceKeyMeaning(const string& token) {
 		key         = hre.getMatch(1);
 		translation = hre.getMatch(2);
 	}
-		
+
 	// extract number qualifier
 	if (hre.search(key, "^(.*)(\\d+)$")) {
 		key     = hre.getMatch(1);
@@ -174,14 +174,14 @@ string Convert::getReferenceKeyMeaning(const string& token) {
 			else if (key == "RNP") { meaning = "Record producer"; }
 			else if (key == "RDT") { meaning = "Recording date"; }
 			else if (key == "RT#") { meaning = "Recording track number"; }
-			// representation information 
+			// representation information
 			else if (key == "RLN") { meaning = "ASCII language setting"; }
 			else if (key == "RDF") { meaning = "User-defined signifiers"; }
 			else if (key == "RDT") { meaning = "Encoding date"; }
 			else if (key == "RNB") { meaning = "Encoding note"; }
 			else if (key == "RWG") { meaning = "Encoding warning"; }
 			break;
-		
+
 		case 'T':	// translator
 			if      (key == "TRN") { meaning = "Translator"; }
 			break;

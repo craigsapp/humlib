@@ -184,7 +184,7 @@ void Tool_flipper::checkForFlipChanges(HumdrumFile& infile, int index) {
 
 //////////////////////////////
 //
-// Tool_flipper::processLine -- 
+// Tool_flipper::processLine --
 //
 
 void Tool_flipper::processLine(HumdrumFile& infile, int index) {

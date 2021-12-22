@@ -48,7 +48,7 @@
 
 using namespace std;
 
-namespace hum { 
+namespace hum {
 
 // START_MERGE
 

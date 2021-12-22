@@ -9,7 +9,7 @@
 //
 // Description:   Analyze barlines.  This is used to identify if all barlines
 //                on a line are the same style or not.  This information is used
-//                to convert the music notation into MEI data, with a hybrid 
+//                to convert the music notation into MEI data, with a hybrid
 //                system of measure/barline elements when the barlines
 //                are the same or not.
 //
@@ -26,7 +26,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// HumdrumFileContent::analyzeBarlines -- 
+// HumdrumFileContent::analyzeBarlines --
 //
 
 void HumdrumFileContent::analyzeBarlines(void) {

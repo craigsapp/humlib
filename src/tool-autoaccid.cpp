@@ -156,8 +156,8 @@ void Tool_autoaccid::addAccidentalQualifications(HumdrumFile& infile) {
 //      visualAccidental = true :: need to add an X after the accidental
 //      visualAccidental = false :: need to add an y after the accidental
 // also:
-//      cautionaryAccidental = "true" :: 
-//      obligatoryAccidental = "true" :: 
+//      cautionaryAccidental = "true" ::
+//      obligatoryAccidental = "true" ::
 //
 
 void Tool_autoaccid::addAccidentalInfo(HTp token) {
@@ -186,7 +186,7 @@ void Tool_autoaccid::addAccidentalInfo(HTp token) {
 
 //////////////////////////////
 //
-// Tool_autoaccid::setVisualState -- 
+// Tool_autoaccid::setVisualState --
 //
 
 string Tool_autoaccid::setVisualState(const string& input, bool state) {

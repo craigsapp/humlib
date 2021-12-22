@@ -77,7 +77,7 @@ class Tool_shed : public HumTool {
 		bool m_modified       = false;
 
 		// list of exclusive interpretations to process
-		std::vector<std::string> m_exinterps; 
+		std::vector<std::string> m_exinterps;
 		std::string m_exclusion;
 
 		std::vector<bool> m_spines; // usar with -s option

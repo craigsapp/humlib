@@ -29,6 +29,8 @@ namespace hum {
 //
 // Returns true if there are any *ij/*Xij markers in the data.
 //
+// Also consider *edit/*Xedit and *italic/*Xitalic as *ij/*Xij for printing.
+//
 
 bool HumdrumFileContent::analyzeTextRepetition(void) {
 	HumdrumFileContent& infile = *this;
@@ -38,7 +40,7 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 	bool output = false;
 	bool ijstate;
 	bool startij;  // true if at the first note in IJ
-	HTp lastword;   // non-null if last syllable before *Xij 
+	HTp lastword;   // non-null if last syllable before *Xij
 
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		ijstate = false;
@@ -55,11 +57,11 @@ bool HumdrumFileContent::analyzeTextRepetition(void) {
 				continue;;
 			}
 			if (current->isInterpretation()) {
-				if (*current == "*ij") {
+				if ((*current == "*ij") || (*current == "*edit") || (*current == "*italic")) {
 					output = true;
 					startij = true;
 					ijstate = true;
-				} else if (*current == "*Xij") {
+				} else if ((*current == "*Xij") || (*current == "*Xedit") || (*current == "*Xitalic")) {
 					output = true;
 					startij = false;
 					ijstate = false;

@@ -2208,13 +2208,30 @@ void HumdrumLine::copyStructure(HLp line, const string& empty) {
 
 /////////////////////////////
 //
-// HumdrumLine::allSameStyle -- return true if barlines through all 
+// HumdrumLine::allSameStyle -- return true if barlines through all
 //     staves are the same. Requires HumdrumFile::analyzeBarlines() to be
 //     run first.
 //
 
 bool HumdrumLine::allSameBarlineStyle(void) {
 	return !this->getValueInt("auto", "barlinesDifferent");
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::clearTokenLinkInfo --
+//
+
+void HumdrumLine::clearTokenLinkInfo(void) {
+	for (int i=0; i<getFieldCount(); i++) {
+		if (token(i)) {
+			token(i)->clearLinkInfo();
+		} else {
+			cerr << "Warning: non-existent token at field " << (i+1) << " on line " << (m_lineindex+1) << endl;
+		}
+	}
 }
 
 

@@ -258,7 +258,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	m_lastbarnum = -1;
 	m_part = index;
 	m_maxstaff = (int)mds.getPartCount();
-	
+
 	bool status = true;
 	int i = 0;
 	while (i < part.getLineCount()) {
@@ -329,7 +329,7 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 
 	if ((i < part.getLineCount()) && part[i].isBarline()) {
 		if (partindex == 0) {
-			// For now setting the barline style from the 
+			// For now setting the barline style from the
 			// lowest staff.  This is mostly because
 			// MEI/verovio can handle only one style
 			// on a system barline.  But also because
@@ -421,7 +421,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		// convert to an index:
 		layer = layer - 1;
 	}
-	
+
 	HumNum timestamp = mr.getAbsBeat();
 	// cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;
@@ -663,7 +663,7 @@ void Tool_musedata2hum::addLyrics(GridSlice* slice, int part, int staff, MuseRec
 // Tool_musedata2hum::addNoteDynamics --
 //
 
-void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part, 
+void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 		MuseRecord& mr) {
 	string notations = mr.getAdditionalNotationsField();
 	vector<string> dynamics(1);

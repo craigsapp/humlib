@@ -25,8 +25,8 @@ namespace hum {
 //
 // Convert::tempoNameToMm -- Guess what the MM tempo should be given
 //    a tempo name.  Returns 0 if no guess is made.
-// 
-// Also add cases where there is a tempo marking, such as [quarter] = 132 
+//
+// Also add cases where there is a tempo marking, such as [quarter] = 132
 // in the input text.
 //
 
