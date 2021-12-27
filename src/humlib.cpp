@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 26 22:38:47 CET 2021
+// Last Modified: Mon Dec 27 14:06:33 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22742,6 +22742,10 @@ void HumdrumFileContent::analyzeBarlines(void) {
 						// maybe ignore fermatas
 						continue;
 					}
+					if (token->at(k) == ';') {
+						// ignore fermatas in comparison
+						continue;
+					}
 					baseline += token->at(k);
 				}
 				baseQ = true;
@@ -22751,6 +22755,10 @@ void HumdrumFileContent::analyzeBarlines(void) {
 					if (isdigit(token->at(k))) {
 						// ignore barnumbers;
 						// maybe ignore fermatas
+						continue;
+					}
+					if (token->at(k) == ';') {
+						// ignore fermatas in comparison
 						continue;
 					}
 					comparison += token->at(k);
@@ -25373,6 +25381,10 @@ bool HumdrumFileContent::analyzeRScale(void) {
 				vis += '.';
 			}
 			token->setValue("LO", "N", "vis", vis);
+			string rvalue = to_string(rscales[track].getNumerator());
+			rvalue += '/';
+			rvalue += to_string(rscales[track].getDenominator());
+			token->setValue("auto", "rscale", rvalue);
 		}
 	}
 
@@ -56549,7 +56561,7 @@ Tool_composite::Tool_composite(void) {
 	define("O|analysis-ornaments=b", "count number of ornaments in feature");
 	define("S|analysis-slurs=b",     "count number of slur beginnings/ending in feature");
 	define("T|analysis-total=b",     "count total number of analysis features for each note");
-	define("Z|all|all-analyses=b",   "do all analyses");
+	define("all|all-analyses=b",     "do all analyses");
 
 	define("g|grace=b",     "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
@@ -56563,6 +56575,7 @@ Tool_composite::Tool_composite(void) {
 	define("M=b",           "equivalent to -m limegreen");
 	define("n|together-in-score=s:limegreen", "mark alignments in group in SCORE (not analyses)");
 	define("N=b",           "equivalent to -n limegreen");
+	define("Z|no-zeros|no-zeroes=b",  "do not show zeros in analyses.");
 	define("pitch=s:eR",    "pitch to display for composite rhythm");
 	define("debug=b",       "print debugging information");
 }
@@ -56747,7 +56760,6 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 	// Now go back an insert analyses into outfile.
 	insertAnalysesIntoFile(outfile, spines, expansionList, tracks);
 
-
 	// Replace contents of infile with the analysis:
 	bool done = 1;
 	if (done) {
@@ -56816,7 +56828,14 @@ void Tool_composite::insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>
 				continue;
 			}
 			double value = dataByTrack.at(track)->at(i);
-			if (value > 0) {
+			if (m_nozerosQ) {
+				if (value > 0) {
+					ss.str("");
+					ss << value;
+					string newvalue = ss.str();
+					token->setText(newvalue);
+				}
+			} else {
 				ss.str("");
 				ss << value;
 				string newvalue = ss.str();
@@ -57569,6 +57588,7 @@ void Tool_composite::initialize(void) {
 	m_appendQ   = getBoolean("append");
 	m_debugQ    = getBoolean("debug");
 	m_onlyQ     = getBoolean("only");
+	m_nozerosQ  = getBoolean("no-zeros");
 
 	m_analysisOnsetsQ    = getBoolean("analysis-onsets");
 	m_analysisAccentsQ   = getBoolean("analysis-accents");
@@ -59893,12 +59913,16 @@ void Tool_composite::addLabelsAndStria(HumdrumFile& infile) {
 	for (int i=0; i<(int)sstarts.size(); i++) {
 		if (*sstarts[i] == "**kern-grpA") {
 			addLabels(sstarts[i], hasLabel, "*I\"Group A", hasLabelAbbr, "*I'Gr.A");
+			addStria(infile, sstarts[i]);
 		} else if (*sstarts[i] == "**kern-grpB") {
 			addLabels(sstarts[i], hasLabel, "*I\"Group B", hasLabelAbbr, "*I'Gr.B");
+			addStria(infile, sstarts[i]);
 		} else if (*sstarts[i] == "**kern-comp") {
 			addLabels(sstarts[i], hasLabel, "*I\"Composite", hasLabelAbbr, "*I'Comp.");
+			addStria(infile, sstarts[i]);
 		} else if (*sstarts[i] == "**kern-coin") {
 			addLabels(sstarts[i], hasLabel, "*I\"Coincident", hasLabelAbbr, "*I'Coin.");
+			addStria(infile, sstarts[i]);
 		}
 	}
 }
@@ -59968,155 +59992,87 @@ void Tool_composite::addLabels(HTp sstart, int labelIndex, const string& label,
 // Tool_composite::addStria -- add stria lines for composite rhythms.
 //
 
-void Tool_composite::addStria(HumdrumFile& infile, int amount) {
+void Tool_composite::addStria(HumdrumFile& infile, HTp spinestart) {
+	if (!spinestart) {
+		return;
+	}
 	HumRegex hre;
-	HTp token;
-	int hasStria = 0;
-	int hasClef = 0;
-	int firstInterpretationLine = 0;
+	int ttrack = spinestart->getTrack();
+
+	HTp current = spinestart;
+	while (current) {
+		if (current->isData()) {
+			break;
+		}
+		if (!current->isInterpretation()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (*current == "*") {
+			current = current->getNextToken();
+			continue;
+		}
+		if (hre.search(current, "^\\*stria")) {
+			// do not add stria token.
+			return;
+		}
+		current = current->getNextToken();
+	}
+
+	HLp clefLine  = NULL;
+	HLp striaLine = NULL;
+	// Check for stria in other parts
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
 			break;
 		}
-		if (!infile[i].isInterpretation()) {
-			continue;
-		}
-		if ((!firstInterpretationLine) && (!infile[i].isManipulator())) {
-			firstInterpretationLine = i;
-		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			token = infile.token(i, j);
-			if (!token->isKern()) {
+			HTp token = infile.token(i, j);
+			if (hre.search(token, "^\\*clef")) {
+				clefLine = &infile[i];
 				continue;
 			}
-			if ((!hasStria) && hre.search(token, "^\\*stria\\d")) {
-				hasStria = i;
-			}
-			if ((!hasClef) && hre.search(token, "^\\*clef")) {
-				hasClef = i;
+			if (hre.search(token, "^\\*stria")) {
+				striaLine = &infile[i];
+				continue;
 			}
 		}
 	}
 
-	if (hasStria) {
-		if (amount == 2) {
-			if (m_coincidenceQ) {
-				token = infile.token(hasStria, 0);
-				token->setText("*stria1");
-				token = infile.token(hasStria, 1);
-				token->setText("*stria1");
-				token = infile.token(hasStria, 2);
-				token->setText("*stria1");
-			} else {
-				token = infile.token(hasStria, 0);
-				token->setText("*stria1");
-				token = infile.token(hasStria, 1);
-				token->setText("*stria1");
-			}
-		} else if (amount == -2) {
-			if (m_coincidenceQ) {
-				int fcount = infile[hasStria].getFieldCount();
-				token = infile.token(hasStria, fcount-1);
-				token->setText("*stria1");
-				token = infile.token(hasStria, fcount-2);
-				token->setText("*stria1");
-				token = infile.token(hasStria, fcount-3);
-				token->setText("*stria1");
-			} else {
-				int fcount = infile[hasStria].getFieldCount();
-				token = infile.token(hasStria, fcount-1);
-				token->setText("*stria1");
-				token = infile.token(hasStria, fcount-2);
-				token->setText("*stria1");
-			}
-		} else if (amount == 1) {
-			if (m_coincidenceQ) {
-				token = infile.token(hasStria, 0);
-				token->setText("*stria1");
-				token = infile.token(hasStria, 1);
-				token->setText("*stria1");
-			} else {
-				token = infile.token(hasStria, 0);
-				token->setText("*stria1");
-			}
-		} else if (amount == -1) {
-			if (m_coincidenceQ) {
-				int fcount = infile[hasStria].getFieldCount();
-				token = infile.token(hasStria, fcount-1);
-				token->setText("*stria1");
-				token = infile.token(hasStria, fcount-2);
-				token->setText("*stria1");
-			} else {
-				int fcount = infile[hasStria].getFieldCount();
-				token = infile.token(hasStria, fcount-1);
-				token->setText("*stria1");
-			}
-		}
-	} else {
-		// No stria line, so add one perferrably before clef line;
-		// otherwise, before first data line
-		int targetLine = 0;
-		if (hasClef) {
-			targetLine = hasClef;
-		} else if (firstInterpretationLine) {
-			targetLine = firstInterpretationLine;
-		}
-		if (targetLine) {
-			HLp line = infile.insertNullInterpretationLineAboveIndex(targetLine);
-			if (line) {
-				if (amount == 2) {
-					if (m_coincidenceQ) {
-						token = line->token(0);
-						token->setText("*stria1");
-						token = line->token(1);
-						token->setText("*stria1");
-						token = line->token(2);
-						token->setText("*stria1");
-					} else {
-						token = line->token(0);
-						token->setText("*stria1");
-						token = line->token(1);
-						token->setText("*stria1");
-					}
-				} else if (amount == -2) {
-					if (m_coincidenceQ) {
-						token = line->token(line->getFieldCount() - 1);
-						token->setText("*stria1");
-						token = line->token(line->getFieldCount() - 2);
-						token->setText("*stria1");
-					} else {
-						token = line->token(line->getFieldCount() - 1);
-						token->setText("*stria1");
-						token = line->token(line->getFieldCount() - 2);
-						token->setText("*stria1");
-						token = line->token(line->getFieldCount() - 3);
-						token->setText("*stria1");
-					}
-				} else if (amount == 1) {
-					if (m_coincidenceQ) {
-						token = line->token(0);
-						token->setText("*stria1");
-						token = line->token(1);
-						token->setText("*stria1");
-					} else {
-						token = line->token(0);
-						token->setText("*stria1");
-					}
-				} else if (amount == -1) {
-					if (m_coincidenceQ) {
-						token = line->token(line->getFieldCount() - 1);
-						token->setText("*stria1");
-						token = line->token(line->getFieldCount() - 2);
-						token->setText("*stria1");
-					} else {
-						token = line->token(line->getFieldCount() - 1);
-						token->setText("*stria1");
-					}
+	if (striaLine) {
+		// place stria token on line 
+		int track;
+		for (int j=0; j<striaLine->getFieldCount(); j++) {
+			HTp token = striaLine->token(j);
+			track = token->getTrack();
+			if (track == ttrack) {
+				if (*token == "*") {
+					token->setText("*stria1");
+					striaLine->createLineFromTokens();
 				}
-				line->createLineFromTokens();
+				return;
 			}
 		}
 	}
+
+	if (clefLine) {
+		// add stria line to just before clef line.
+		HLp striaLine = infile.insertNullInterpretationLineAboveIndex(clefLine->getLineIndex());
+		for (int j=0; j<striaLine->getFieldCount(); j++) {
+			HTp token = striaLine->token(j);
+			HTp ctoken = clefLine->token(j);
+			int track = clefLine->token(j)->getTrack();
+			if (track == ttrack) {
+				if (*token == "*") {
+					token->setText("*stria1");
+					striaLine->createLineFromTokens();
+				}
+				return;
+			}
+			// token->setTrack(ctoken->getTrack());
+		}
+	}
+	
 }
 
 

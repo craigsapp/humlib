@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Nov 26 22:38:47 CET 2021
+// Last Modified: Mon Dec 27 14:06:33 PST 2021
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5862,7 +5862,7 @@ class Tool_composite : public HumTool {
 		void        addLabelsAndStria    (HumdrumFile& infile);
 		void        addLabels            (HTp sstart, int labelIndex, const string& label,
 		                                  int abbrIndex, const string& abbr);
-		void        addStria             (HumdrumFile& infile, int amount);
+		void        addStria             (HumdrumFile& infile, HTp spinestart);
 		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
 		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
@@ -5938,6 +5938,7 @@ class Tool_composite : public HumTool {
 		bool        m_analysisSlursQ     = false;   // used with -S option
 		bool        m_analysisTotalsQ    = false;   // used with -T option
 		bool        m_analysisQ          = false;   // union of -paost options
+		bool        m_nozerosQ           = false;   // used with -Z option
 		vector<vector<double>> m_analysisOnsets;    // used with -P
 		vector<vector<double>> m_analysisAccents;   // used with -A
 		vector<vector<double>> m_analysisOrnaments; // used with -O
