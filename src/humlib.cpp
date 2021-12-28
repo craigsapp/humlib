@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec 27 14:06:33 PST 2021
+// Last Modified: Mon Dec 27 19:16:32 PST 2021
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56563,13 +56563,14 @@ Tool_composite::Tool_composite(void) {
 	define("T|analysis-total=b",     "count total number of analysis features for each note");
 	define("all|all-analyses=b",     "do all analyses");
 
-	define("g|grace=b",     "include grace notes in composite rhythm");
+	define("grace=b",       "include grace notes in composite rhythm");
 	define("u|stem-up=b",   "stem-up for composite rhythm parts");
 	define("x|extract=b",   "only output composite rhythm spines");
 	define("o|only=s",      "output notes of given group");
 	define("t|tremolo=b",   "preserve tremolos");
 	define("B|no-beam=b",   "do not apply automatic beaming");
-	define("G|no-groups=b", "do not split composite rhythm into separate streams by group markers");
+	define("G|only-groups=b", "only split composite rhythm into separate streams by group markers");
+	define("g|add-groups=b", "also split composite rhythm into separate streams by group markers");
 	define("c|coincidence-rhythm=b", "add coincidence rhythm for groups");
 	define("m|match|together=s:limegreen", "mark alignments in group composite analyses");
 	define("M=b",           "equivalent to -m limegreen");
@@ -56626,6 +56627,7 @@ bool Tool_composite::run(HumdrumFile& infile) {
 	if (m_analysisQ) {
 		analyzeComposite(infile);
 	}
+	addLabelsAndStria(infile);
 	if (!m_onlyQ) {
 		infile.createLinesFromTokens();
 		// need to convert to text for now:
@@ -56768,7 +56770,6 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 		temp << outfile;
 		infile.readString(temp.str());
 	}
-
 }
 
 
@@ -57579,16 +57580,18 @@ void Tool_composite::getCompositeSpineStarts(vector<HTp>& groups, HumdrumFile& i
 //
 
 void Tool_composite::initialize(void) {
-	m_pitch     = getString("pitch");
-	m_extractQ  = getBoolean("extract");
-	m_nogroupsQ = getBoolean("no-groups");
-	m_graceQ    = getBoolean("grace");
-	m_tremoloQ  = getBoolean("tremolo");
-	m_upQ       = getBoolean("stem-up");
-	m_appendQ   = getBoolean("append");
-	m_debugQ    = getBoolean("debug");
-	m_onlyQ     = getBoolean("only");
-	m_nozerosQ  = getBoolean("no-zeros");
+	m_pitch       = getString("pitch");
+	m_extractQ    = getBoolean("extract");
+	m_onlygroupsQ = getBoolean("only-groups");
+	m_addgroupsQ  = getBoolean("add-groups");
+	m_nogroupsQ   = !(m_onlygroupsQ || m_addgroupsQ);
+	m_graceQ      = getBoolean("grace");
+	m_tremoloQ    = getBoolean("tremolo");
+	m_upQ         = getBoolean("stem-up");
+	m_appendQ     = getBoolean("append");
+	m_debugQ      = getBoolean("debug");
+	m_onlyQ       = getBoolean("only");
+	m_nozerosQ    = getBoolean("no-zeros");
 
 	m_analysisOnsetsQ    = getBoolean("analysis-onsets");
 	m_analysisAccentsQ   = getBoolean("analysis-accents");
@@ -57672,9 +57675,10 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		return;
 	}
 
-	if (m_hasGroupsQ && (!m_nogroupsQ)) {
+	if (m_hasGroupsQ && !m_nogroupsQ) {
 		prepareMultipleGroups(infile);
-	} else {
+	}
+	if (!m_onlygroupsQ) {
 		prepareSingleGroup(infile);
 	}
 
@@ -58285,8 +58289,6 @@ void Tool_composite::prepareMultipleGroups(HumdrumFile& infile) {
 
 	}
 
-	addLabelsAndStria(infile);
-
 	if (!m_together.empty()) {
 		if (m_appendQ) {
 			markTogether(infile, -2);
@@ -58766,8 +58768,6 @@ void Tool_composite::prepareSingleGroup(HumdrumFile& infile) {
 	}
 
 	removeAuxTremolosFromCompositeRhythm(infile);
-
-	addLabelsAndStria(infile);
 
 	if ((!m_together.empty()) && m_hasGroupsQ) {
 		if (m_appendQ) {
@@ -59914,15 +59914,27 @@ void Tool_composite::addLabelsAndStria(HumdrumFile& infile) {
 		if (*sstarts[i] == "**kern-grpA") {
 			addLabels(sstarts[i], hasLabel, "*I\"Group A", hasLabelAbbr, "*I'Gr.A");
 			addStria(infile, sstarts[i]);
+			if (m_analysisQ) {
+				addVerseLabels(infile, sstarts[i]);
+			}
 		} else if (*sstarts[i] == "**kern-grpB") {
 			addLabels(sstarts[i], hasLabel, "*I\"Group B", hasLabelAbbr, "*I'Gr.B");
 			addStria(infile, sstarts[i]);
+			if (m_analysisQ) {
+				addVerseLabels(infile, sstarts[i]);
+			}
 		} else if (*sstarts[i] == "**kern-comp") {
 			addLabels(sstarts[i], hasLabel, "*I\"Composite", hasLabelAbbr, "*I'Comp.");
 			addStria(infile, sstarts[i]);
+			if (m_analysisQ) {
+				addVerseLabels(infile, sstarts[i]);
+			}
 		} else if (*sstarts[i] == "**kern-coin") {
 			addLabels(sstarts[i], hasLabel, "*I\"Coincident", hasLabelAbbr, "*I'Coin.");
 			addStria(infile, sstarts[i]);
+			if (m_analysisQ) {
+				addVerseLabels(infile, sstarts[i]);
+			}
 		}
 	}
 }
@@ -60060,7 +60072,6 @@ void Tool_composite::addStria(HumdrumFile& infile, HTp spinestart) {
 		HLp striaLine = infile.insertNullInterpretationLineAboveIndex(clefLine->getLineIndex());
 		for (int j=0; j<striaLine->getFieldCount(); j++) {
 			HTp token = striaLine->token(j);
-			HTp ctoken = clefLine->token(j);
 			int track = clefLine->token(j)->getTrack();
 			if (track == ttrack) {
 				if (*token == "*") {
@@ -60069,12 +60080,140 @@ void Tool_composite::addStria(HumdrumFile& infile, HTp spinestart) {
 				}
 				return;
 			}
-			// token->setTrack(ctoken->getTrack());
 		}
 	}
-	
+
 }
 
+
+
+//////////////////////////////
+//
+// Tool_composite::addVerseLabels -- add labels in notation for anlsyses.
+//   Input spinestart is analysis spine which is kern-like.  Search for any
+//   vdata-like spines to the right of the targetspine to label.
+//   If there are no verse labels already, then they will be added just above
+//   the first barline (if there is a barline before the first data line), or
+//   just before the first data line if there are no starting barlines.
+//
+
+void Tool_composite::addVerseLabels(HumdrumFile& infile, HTp spinestart) {
+	if (!spinestart) {
+		return;
+	}
+	int startline = spinestart->getLineIndex();
+	int startfield = spinestart->getFieldIndex();
+	for (int j=startfield+1; j<infile[startline].getFieldCount(); j++) {
+		HTp token = infile.token(startline, j);
+		if (!token->isDataTypeLike("**vdata")) {
+			break;
+		}
+		addVerseLabels2(infile, token);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::addVerseLabels2 -- add verse labels to specific analysis spine.
+//
+
+void Tool_composite::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
+	HTp current = spinestart;
+	int ttrack = spinestart->getTrack();
+	string vlabel = spinestart->getDataType();
+	HumRegex hre;
+	hre.replaceDestructive(vlabel, "", "^[^-]+-");
+	hre.replaceDestructive(vlabel, "", "^\\*+");
+	if (vlabel == "") {
+		// nothing to do
+		return;
+	}
+	while (current) {
+		if (current->isData()) {
+			break;
+		}
+		if (!current->isInterpretation()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (*current == "*") {
+			current = current->getNextToken();
+			continue;
+		}
+		if (hre.search(current, "^\\*v:")) {
+			// do not add verse label token.
+			return;
+		}
+		current = current->getNextToken();
+	}
+
+	HLp labelLine  = NULL;
+	// Check for verse label in other parts
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (hre.search(token, "^\\*v:")) {
+				labelLine = &infile[i];
+				continue;
+			}
+		}
+	}
+
+	if (labelLine) {
+		// place verse label token on line 
+		int track;
+		for (int j=0; j<labelLine->getFieldCount(); j++) {
+			HTp token = labelLine->token(j);
+			track = token->getTrack();
+			if (track == ttrack) {
+				if (*token == "*") {
+					string newlabel = "*v:";
+					newlabel += vlabel;
+					token->setText(newlabel);
+					labelLine->createLineFromTokens();
+				}
+				return;
+			}
+		}
+	}
+
+	// no label line, so create one before first barline or before first data line
+	HLp tline = NULL;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			tline = &infile[i];
+			break;
+		}
+		if (infile[i].isData()) {
+			tline = &infile[i];
+			break;
+		}
+	}
+
+	if (tline) {
+		// add verse label line just before first barline or data line.
+		HLp labelLine = infile.insertNullInterpretationLineAboveIndex(tline->getLineIndex());
+		for (int j=0; j<labelLine->getFieldCount(); j++) {
+			HTp token = labelLine->token(j);
+			int track = tline->token(j)->getTrack();
+			if (track == ttrack) {
+				if (*token == "*") {
+					string newlabel = "*v:";
+					newlabel += vlabel;
+					token->setText(newlabel);
+					labelLine->createLineFromTokens();
+				}
+				return;
+			}
+		}
+	}
+
+}
 
 
 
