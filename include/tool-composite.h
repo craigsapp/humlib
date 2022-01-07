@@ -94,7 +94,7 @@ class Tool_composite : public HumTool {
 		void        analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
 		void        analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
 		void        analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeTotals(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeTotal(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
 
 		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
 		std::vector<int> getExpansionList(vector<bool>& tracks, int maxtrack, int count);
@@ -142,14 +142,14 @@ class Tool_composite : public HumTool {
 		bool        m_analysisAccentsQ   = false;   // used with -A option
 		bool        m_analysisOrnamentsQ = false;   // used with -O option
 		bool        m_analysisSlursQ     = false;   // used with -S option
-		bool        m_analysisTotalsQ    = false;   // used with -T option
+		bool        m_analysisTotalQ    = false;   // used with -T option
 		bool        m_analysisQ          = false;   // union of -paost options
 		bool        m_nozerosQ           = false;   // used with -Z option
 		vector<vector<double>> m_analysisOnsets;    // used with -P
 		vector<vector<double>> m_analysisAccents;   // used with -A
 		vector<vector<double>> m_analysisOrnaments; // used with -O
 		vector<vector<double>> m_analysisSlurs;     // used with -S
-		vector<vector<double>> m_analysisTotals;    // used with -T
+		vector<vector<double>> m_analysisTotal;    // used with -T
 
 };
 

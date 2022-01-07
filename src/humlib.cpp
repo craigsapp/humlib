@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Dec 27 19:16:32 PST 2021
+// Last Modified: Fri Jan  7 15:28:30 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -56535,6 +56535,7 @@ void Tool_colortriads::processFile(HumdrumFile& infile) {
 
 
 
+
 // Note state variables for grouping:
 #define TYPE_UNDEFINED           9 /* for inactive groupings */
 #define TYPE_NoteSustainAttack   3
@@ -56733,9 +56734,9 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 		analyzeCompositeSlurs(infile, groups, tracks);
 	}
 
-	if ((spines.size() > 1) && m_analysisTotalsQ) {
-		spines.push_back("totals");
-		analyzeCompositeTotals(infile, groups, tracks);
+	if ((spines.size() > 1) && m_analysisTotalQ) {
+		spines.push_back("total");
+		analyzeCompositeTotal(infile, groups, tracks);
 	}
 
 	if (spines.size() == 0) {
@@ -56793,7 +56794,6 @@ void Tool_composite::analyzeComposite(HumdrumFile& infile) {
 //                 slurs. The track values are the old track assignments
 //                 before extra analysis spines are added (see spineMap which
 //                 is similar
-
 
 void Tool_composite::insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
 		vector<int>& spineMap, vector<bool>& tracks) {
@@ -56936,15 +56936,15 @@ void Tool_composite::assignAnalysesToVdataTracks(vector<vector<double>*>& dataBy
 				} else if (*token == "**kern-coin") {
 					dataByTrack[track] = &m_analysisSlurs.at(3);
 				}
-			} else if (spines[j] == "totals") {
+			} else if (spines[j] == "total") {
 				if (*token == "**kern-grpA") {
-					dataByTrack[track] = &m_analysisTotals.at(1);
+					dataByTrack[track] = &m_analysisTotal.at(1);
 				} else if (*token == "**kern-grpB") {
-					dataByTrack[track] = &m_analysisTotals.at(2);
+					dataByTrack[track] = &m_analysisTotal.at(2);
 				} else if (*token == "**kern-comp") {
-					dataByTrack[track] = &m_analysisTotals.at(0);
+					dataByTrack[track] = &m_analysisTotal.at(0);
 				} else if (*token == "**kern-coin") {
-					dataByTrack[track] = &m_analysisTotals.at(3);
+					dataByTrack[track] = &m_analysisTotal.at(3);
 				}
 			}
 		}
@@ -57109,7 +57109,6 @@ void Tool_composite::doTotalOnsetAnalysis(vector<double>& analysis, HumdrumFile&
 //
 
 void Tool_composite::initializeAnalysisArrays(HumdrumFile& infile) {
-
 	m_analysisOnsets.resize(4);
 	for (int i=0; i<(int)m_analysisOnsets.size(); i++) {
 		m_analysisOnsets[i].resize(infile.getLineCount());
@@ -57134,13 +57133,14 @@ void Tool_composite::initializeAnalysisArrays(HumdrumFile& infile) {
 		fill(m_analysisSlurs[i].begin(), m_analysisSlurs[i].end(), 0.0);
 	}
 
-	m_analysisTotals.resize(4);
-	for (int i=0; i<(int)m_analysisTotals.size(); i++) {
-		m_analysisTotals[i].resize(infile.getLineCount());
-		fill(m_analysisTotals[i].begin(), m_analysisTotals[i].end(), 0.0);
+	m_analysisTotal.resize(4);
+	for (int i=0; i<(int)m_analysisTotal.size(); i++) {
+		m_analysisTotal[i].resize(infile.getLineCount());
+		fill(m_analysisTotal[i].begin(), m_analysisTotal[i].end(), 0.0);
 	}
-
 }
+
+
 
 //////////////////////////////
 //
@@ -57363,24 +57363,24 @@ void Tool_composite::analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& gro
 
 //////////////////////////////
 //
-// Tool_composite::analyzeCompositeTotals --
+// Tool_composite::analyzeCompositeTotal --
 //
 
-void Tool_composite::analyzeCompositeTotals(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks) {
+void Tool_composite::analyzeCompositeTotal(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks) {
 
-	m_analysisTotals.resize(4);
+	m_analysisTotal.resize(4);
 
-	for (int i=0; i<(int)m_analysisTotals.size(); i++) {
-		m_analysisTotals[i].resize(infile.getLineCount());
-		fill(m_analysisTotals[i].begin(), m_analysisTotals[i].end(), 0.0);
+	for (int i=0; i<(int)m_analysisTotal.size(); i++) {
+		m_analysisTotal[i].resize(infile.getLineCount());
+		fill(m_analysisTotal[i].begin(), m_analysisTotal[i].end(), 0.0);
 	}
 
-	for (int i=0; i<(int)m_analysisTotals[0].size(); i++) {
-		for (int j=0; j<(int)m_analysisTotals.size(); j++) {
-			if (m_analysisOnsets[0][i]    > 0) { m_analysisOnsets[0][i]  += m_analysisOnsets[0][i];    }
-			if (m_analysisAccents[0][i]   > 0) { m_analysisAccents[0][i] += m_analysisAccents[0][i];   }
-			if (m_analysisOrnaments[0][i] > 0) { m_analysisTotals[0][i]  += m_analysisOrnaments[0][i]; }
-			if (m_analysisSlurs[0][i]     > 0) { m_analysisTotals[0][i]  += m_analysisSlurs[0][i];     }
+	for (int i=0; i<(int)m_analysisTotal[0].size(); i++) {
+		for (int j=0; j<(int)m_analysisTotal.size(); j++) {
+			if (m_analysisOnsets[j][i]    > 0) { m_analysisTotal[j][i]  += m_analysisOnsets[j][i];    }
+			if (m_analysisAccents[j][i]   > 0) { m_analysisTotal[j][i]  += m_analysisAccents[j][i];   }
+			if (m_analysisOrnaments[j][i] > 0) { m_analysisTotal[j][i]  += m_analysisOrnaments[j][i]; }
+			if (m_analysisSlurs[j][i]     > 0) { m_analysisTotal[j][i]  += m_analysisSlurs[j][i];     }
 		}
 	}
 
@@ -57597,14 +57597,14 @@ void Tool_composite::initialize(void) {
 	m_analysisAccentsQ   = getBoolean("analysis-accents");
 	m_analysisOrnamentsQ = getBoolean("analysis-ornaments");
 	m_analysisSlursQ     = getBoolean("analysis-slurs");
-	m_analysisTotalsQ    = getBoolean("analysis-total");
+	m_analysisTotalQ    = getBoolean("analysis-total");
 
 	if (getBoolean("all-analyses")) {
 		m_analysisOnsetsQ    = true;
 		m_analysisAccentsQ   = true;
 		m_analysisOrnamentsQ = true;
 		m_analysisSlursQ     = true;
-		m_analysisTotalsQ    = true;
+		m_analysisTotalQ    = true;
 	}
 
 	m_analysisQ = m_analysisOnsetsQ;
@@ -57691,7 +57691,11 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	if ((!m_together.empty()) || (!m_togetherInScore.empty())) {
 		if (!hasPipeRdf(infile)) {
 			string text = "!!!RDF**kern: | = marked note, color=\"";
-			text += m_together;
+			if (!m_together.empty()) {
+				text += m_together;
+			} else {
+				text += m_togetherInScore;
+			}
 			text += "\"";
 			infile.appendLine(text);
 		}
@@ -60142,7 +60146,7 @@ void Tool_composite::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 			current = current->getNextToken();
 			continue;
 		}
-		if (hre.search(current, "^\\*v:")) {
+		if (hre.search(current, "^\\*vv:")) {
 			// do not add verse label token.
 			return;
 		}
@@ -60157,7 +60161,7 @@ void Tool_composite::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 		}
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
-			if (hre.search(token, "^\\*v:")) {
+			if (hre.search(token, "^\\*vv:")) {
 				labelLine = &infile[i];
 				continue;
 			}
@@ -60172,7 +60176,7 @@ void Tool_composite::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 			track = token->getTrack();
 			if (track == ttrack) {
 				if (*token == "*") {
-					string newlabel = "*v:";
+					string newlabel = "*vv:";
 					newlabel += vlabel;
 					token->setText(newlabel);
 					labelLine->createLineFromTokens();
@@ -60203,7 +60207,7 @@ void Tool_composite::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 			int track = tline->token(j)->getTrack();
 			if (track == ttrack) {
 				if (*token == "*") {
-					string newlabel = "*v:";
+					string newlabel = "*vv:";
 					newlabel += vlabel;
 					token->setText(newlabel);
 					labelLine->createLineFromTokens();
