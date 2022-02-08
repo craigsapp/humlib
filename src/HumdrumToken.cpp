@@ -1567,6 +1567,26 @@ bool HumdrumToken::isTimeSignature(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isMetricSymbol -- True if a **kern metric symbol
+//
+
+bool HumdrumToken::isMetricSymbol(void) {
+	if (this->size() < 6) {
+		return false;
+	}
+	if (this->compare(0, 5, "*met(") != 0) {
+		return false;
+	}
+	if (this->back() != ')') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isTempo -- True if a **kern tempo.
 //
 

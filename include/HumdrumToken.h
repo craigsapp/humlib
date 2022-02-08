@@ -107,6 +107,10 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isOriginalKeySignature    (void);
 		bool     isKeyDesignation          (void);
 		bool     isTimeSignature           (void);
+		bool     isMetricSymbol            (void);
+		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
+		bool     isMeterSignature          (void) { return isMetricSymbol(); }
+		bool     isMetericSignature        (void) { return isMetricSymbol(); }
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 		bool     isMensuration             (void) { return isMensurationSymbol(); }
@@ -169,6 +173,7 @@ class HumdrumToken : public std::string, public HumHash {
 		int      getTokenIndex             (void) const;
 		int      getTokenNumber            (void) const;
 		const std::string& getDataType     (void) const;
+		const std::string& getExInterp     (void) { return getDataType(); }
 		bool     isDataType                (const std::string& dtype) const;
 		bool     isDataTypeLike            (const std::string& dtype) const;
 		bool     isKern                    (void) const;

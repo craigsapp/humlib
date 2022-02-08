@@ -1922,7 +1922,7 @@ void Tool_composite::getGroupRhythms(vector<string>& rhythms, vector<HumNum>& du
 }
 
 
-
+ 
 //////////////////////////////
 //
 // Tool_composite::getGroupDurations --
@@ -2939,6 +2939,7 @@ int Tool_composite::getGroupNoteType(HumdrumFile& infile, int line, const string
 
 	return 0;
 }
+
 
 
 //////////////////////////////
