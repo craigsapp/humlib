@@ -254,14 +254,50 @@ void Tool_double::doubleRhythms(HumdrumFile& infile) {
 			// Double time signature bottom numbers:
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
+				if (hre.search(token, "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					int bot1 = hre.getMatchInt(2);
+					int bot2 = hre.getMatchInt(3);
+					string text = *token;
+					string replacement = "/" + to_string(bot1);
+					replacement += "%" + to_string(bot2*2);
+					hre.replaceDestructive(text, replacement, "/\\d+");
+					token->setText(text);
+
+				} else if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
 					int bot = hre.getMatchInt(2);
+					int bot2 = -100;
 					if (bot == 4) {
 						bot = 2;
 					} else if (bot == 2) {
 						bot = 1;
 					} else if (bot == 1) {
 						bot = 0;
+					} else if (bot == 3) {
+						bot = 3;
+						bot2 = 2;
+					} else {
+						cerr << "Warning: ignored time signature: " << token << endl;
+					}
+					string text = *token;
+					string replacement = "/" + to_string(bot);
+					if (bot2 >= 0) {
+						replacement += "%" + to_string(bot2);
+					}
+					hre.replaceDestructive(text, replacement, "/\\d+");
+					token->setText(text);
+				}
+			}
+		}
+	}
+}
+
+
+// END_MERGE
+
+} // end namespace hum
+
+
+
 					} else {
 						cerr << "Warning: ignored time signature: " << token << endl;
 					}

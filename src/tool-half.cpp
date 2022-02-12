@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Jul 30 07:07:48 CEST 2021
-// Last Modified: Sun Aug  8 10:16:05 CEST 2021
+// Last Modified: Sat Feb 12 10:53:23 PST 2022
 // Filename:      tool-half.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-half.cpp
 // Syntax:        C++11; humlib
@@ -152,12 +152,34 @@ void Tool_half::halfRhythms(HumdrumFile& infile) {
 			// half time signatures
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
+				if (hre.search(token, "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					int bot1 = hre.getMatchInt(2);
+					int bot2 = hre.getMatchInt(3);
+					if (bot2 % 2) {
+						cerr << "Cannot handle conversion of time signature " << token << endl;
+						continue;
+					}
+					bot2 /= 2;
+					if (bot2 == 1) {
+						string text = *token;
+						string replacement = "/" + to_string(bot1);
+						hre.replaceDestructive(text, replacement, "/\\d+");
+						token->setText(text);
+					} else {
+						string text = *token;
+						string replacement = "/" + to_string(bot1);
+						replacement += "%" + to_string(bot2);
+						hre.replaceDestructive(text, replacement, "/\\d+");
+						token->setText(text);
+					}
+				} else if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
 					int bot = hre.getMatchInt(2);
 					if (bot == 4) {
 						bot = 8;
 					} else if (bot == 2) {
 						bot = 4;
+					} else if (bot == 3) {
+						bot = 6;
 					} else if (bot == 1) {
 						bot = 2;
 					} else if (bot == 0) {

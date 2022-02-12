@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb  7 23:20:24 PST 2022
+// Last Modified: Sat Feb 12 10:58:41 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -64961,19 +64961,35 @@ void Tool_double::doubleRhythms(HumdrumFile& infile) {
 			// Double time signature bottom numbers:
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
+				if (hre.search(token, "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					int bot1 = hre.getMatchInt(2);
+					int bot2 = hre.getMatchInt(3);
+					string text = *token;
+					string replacement = "/" + to_string(bot1);
+					replacement += "%" + to_string(bot2*2);
+					hre.replaceDestructive(text, replacement, "/\\d+");
+					token->setText(text);
+
+				} else if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
 					int bot = hre.getMatchInt(2);
+					int bot2 = -100;
 					if (bot == 4) {
 						bot = 2;
 					} else if (bot == 2) {
 						bot = 1;
 					} else if (bot == 1) {
 						bot = 0;
+					} else if (bot == 3) {
+						bot = 3;
+						bot2 = 2;
 					} else {
 						cerr << "Warning: ignored time signature: " << token << endl;
 					}
 					string text = *token;
 					string replacement = "/" + to_string(bot);
+					if (bot2 >= 0) {
+						replacement += "%" + to_string(bot2);
+					}
 					hre.replaceDestructive(text, replacement, "/\\d+");
 					token->setText(text);
 				}
@@ -71617,12 +71633,34 @@ void Tool_half::halfRhythms(HumdrumFile& infile) {
 			// half time signatures
 			for (int j=0; j<infile[i].getFieldCount(); j++) {
 				HTp token = infile.token(i, j);
-				if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
+				if (hre.search(token, "^\\*M(\\d+)/(\\d+)%(\\d+)")) {
+					int bot1 = hre.getMatchInt(2);
+					int bot2 = hre.getMatchInt(3);
+					if (bot2 % 2) {
+						cerr << "Cannot handle conversion of time signature " << token << endl;
+						continue;
+					}
+					bot2 /= 2;
+					if (bot2 == 1) {
+						string text = *token;
+						string replacement = "/" + to_string(bot1);
+						hre.replaceDestructive(text, replacement, "/\\d+");
+						token->setText(text);
+					} else {
+						string text = *token;
+						string replacement = "/" + to_string(bot1);
+						replacement += "%" + to_string(bot2);
+						hre.replaceDestructive(text, replacement, "/\\d+");
+						token->setText(text);
+					}
+				} else if (hre.search(token, "^\\*M(\\d+)/(\\d+)")) {
 					int bot = hre.getMatchInt(2);
 					if (bot == 4) {
 						bot = 8;
 					} else if (bot == 2) {
 						bot = 4;
+					} else if (bot == 3) {
+						bot = 6;
 					} else if (bot == 1) {
 						bot = 2;
 					} else if (bot == 0) {
