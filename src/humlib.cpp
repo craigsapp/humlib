@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 12 10:58:41 PST 2022
+// Last Modified: Sat Feb 12 11:08:53 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -71644,7 +71644,7 @@ void Tool_half::halfRhythms(HumdrumFile& infile) {
 					if (bot2 == 1) {
 						string text = *token;
 						string replacement = "/" + to_string(bot1);
-						hre.replaceDestructive(text, replacement, "/\\d+");
+						hre.replaceDestructive(text, replacement, "/\\d+%\\d+");
 						token->setText(text);
 					} else {
 						string text = *token;

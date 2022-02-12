@@ -163,7 +163,7 @@ void Tool_half::halfRhythms(HumdrumFile& infile) {
 					if (bot2 == 1) {
 						string text = *token;
 						string replacement = "/" + to_string(bot1);
-						hre.replaceDestructive(text, replacement, "/\\d+");
+						hre.replaceDestructive(text, replacement, "/\\d+%\\d+");
 						token->setText(text);
 					} else {
 						string text = *token;
