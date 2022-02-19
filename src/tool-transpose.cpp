@@ -227,6 +227,10 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 
 	for (int j=0; j<infile[line].getFieldCount(); j++) {
 		int ptrack = infile.token(line, j)->getTrack();
+		if (ptrack < 0) {
+			cerr << "Track is negative on line " << (line+1) << ", spine " << (j+1) << endl;
+			return;
+		}
 
 		// check for *ITr or *Tr markers
 		// ignore *ITr markers when creating a Concert-pitch score
@@ -234,7 +238,7 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 		HumRegex hre;
 		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
 			// transpose *k[] markers if necessary
-			if (tvals[ptrack] != 0) {
+			if (tvals.at(ptrack) != 0) {
 				string value = hre.getMatch(1);
 				printNewKeySignature(value, tvals[ptrack]);
 			} else {

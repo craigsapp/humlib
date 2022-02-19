@@ -249,7 +249,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		argv.push_back("transpose"); // name of program (placeholder)
 		argv.push_back("-C");        // transpose to concert pitch
 		transpose.process(argv);
-		transpose.run(outfile);
+		stringstream sstream;
+		sstream << outfile;
+		HumdrumFile outfile2;
+		outfile2.readString(sstream.str());
+		transpose.run(outfile2);
 		if (transpose.hasHumdrumText()) {
 			stringstream ss;
 			transpose.getHumdrumText(ss);
@@ -1656,6 +1660,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 				}
 				if ((first == 1) && (second == 3)) {
 					hre.replaceDestructive(recip, "0.", "1%3");
+				}
+				if ((first == 2) && (second == 3)) {
+					hre.replaceDestructive(recip, "1.", "2%3");
 				}
 			} else {
 				if ((first == 1) && (second == 2)) {

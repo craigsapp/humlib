@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 12 11:08:53 PST 2022
+// Last Modified: Fri Feb 18 21:54:13 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -60359,6 +60359,7 @@ void Tool_composite2::initialize(HumdrumFile& infile) {
 	}
 
 	initializeNumericAnalyses(infile);
+	m_assignedQ = false;
 }
 
 
@@ -60457,12 +60458,17 @@ bool Tool_composite2::run(HumdrumFile& infile) {
 void Tool_composite2::processFile(HumdrumFile& infile) {
 	initialize(infile);
 	if (m_onlyQ) {
-		assignGroups(infile);
+		if (!m_assignedQ) {
+			assignGroups(infile);
+		}
 		analyzeLineGroups(infile);
 		extractGroup(infile, m_only);
 		return;
 	}
 
+	if (m_coincidenceQ) {
+		analyzeCoincidenceRhythms(infile);
+	}
 	if (m_fullCompositeQ) {
 		analyzeFullCompositeRhythm(infile);
 	}
@@ -61122,6 +61128,225 @@ void Tool_composite2::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_composite2::analyzeCoincidenceRhythms --
+//
+
+void Tool_composite2::analyzeCoincidenceRhythms(HumdrumFile& infile) {
+	if (!m_assignedQ) {
+		assignGroups(infile);
+	}
+	vector<int> groupAstates;
+	vector<int> groupBstates;
+
+
+	// -2 = sustain tied note -1 = sustain, 0 = rest (or non-data), +1 = note attack
+	getNumericGroupStates(groupAstates, infile, "A");
+	getNumericGroupStates(groupBstates, infile, "B");
+
+	vector<HumNum> timestamps(infile.getLineCount(), 0);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		timestamps[i] = infile[i].getDurationFromStart();
+	}
+
+	vector<int> merged(infile.getLineCount(), 0);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (groupAstates.at(i) == groupBstates.at(i)) {
+			merged[i] = groupAstates.at(i);
+		} else if (groupAstates[i] == 0 || (groupBstates[i] == 0)) {
+			merged[i] = 0;
+		} else if ((groupAstates[i] > 0) && (groupBstates[i] < 0)) {
+			merged[i] = groupBstates[i];
+		} else if ((groupAstates[i] < 0) && (groupBstates[i] > 0)) {
+			merged[i] = groupAstates[i];
+		} else {
+			merged[i] = -1;
+		}
+	}
+
+	m_coincidence.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		m_coincidence[i] = "";
+	}
+
+	vector<int> noteAttack(infile.getLineCount(), 0);
+	int currValue = -1000;
+	int lastValue = -1000;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		lastValue = currValue;
+		currValue = merged[i];
+		if (currValue == 1) {
+			noteAttack[i] = 1;
+		} else if (currValue == -2) {
+			// sustained note attack
+			noteAttack[i] = -2;
+		} else if ((currValue == 0) && (lastValue != 0)) {
+			noteAttack[i] = 2; // 2 means a "rest" note.
+		}
+	}
+
+	// Need to split rests across barlines (at least non-invisible ones).
+	// Also split rests if they generate an unprintable rhythm...
+
+	vector<int> nextAttackIndex(infile.getLineCount(), -1);
+	vector<int> prevAttackIndex(infile.getLineCount(), -1);
+	int lasti = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (noteAttack[i] != 0) {
+			prevAttackIndex[i] = lasti;
+			lasti = i;
+		}
+	}
+	int nexti = infile.getLineCount() - 1;
+	for (int i=infile.getLineCount()-1; i>=0; i--) {
+		if (noteAttack[i] != 0) {
+			nextAttackIndex[i] = nexti;
+			nexti = i;
+		}
+	}
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (noteAttack[i]) {
+			HumNum duration = infile[nextAttackIndex[i]].getDurationFromStart() -
+				infile[i].getDurationFromStart();
+			string recip = Convert::durationToRecip(duration);
+			string text;
+			if (noteAttack[i] == -2) {
+				text = recip + "eR";
+				// this is either a middle tie if next note is also a tie
+				// or is a tie end if the next note is an attack (1) or rest (2)
+				if (noteAttack[nextAttackIndex[i]] > 0) {
+					// tie end
+					m_coincidence[i] = text + "]";
+				} else {
+					// tie middle
+					m_coincidence[i] = text + "_";
+				}
+			} else if (noteAttack[i] == 1) {
+				text = recip + "eR";
+				// Start a tie if the next note is a tied note
+				if (noteAttack[nextAttackIndex[i]] == -2) {
+					m_coincidence[i] = "[" + text;
+				} else {
+					m_coincidence[i] = text;
+				}
+			} else if (noteAttack[i] == 2) {
+				// rest
+				text = recip + "r";
+				m_coincidence[i] = text;
+			}
+		}
+	}
+
+	if (m_debugQ) {
+		cerr << "MERGED Coincidence states:" << endl;
+		cerr << "TS\tA\tB\tMerged\tAttack\tIndex\tNext\tPrev\tCoin\tInput\n";
+		for (int i=0; i<(int)merged.size(); i++) {
+			cerr << timestamps[i] << "\t";
+			cerr << groupAstates[i] << "\t" << groupBstates[i];
+			cerr << "\t" << merged[i] << "\t" << noteAttack[i];
+			cerr << "\t" << i;
+			cerr << "\t" << nextAttackIndex[i] << "\t" << prevAttackIndex[i];
+			cerr << "\t" << m_coincidence[i];
+			cerr << "\t" << infile[i] << endl;
+		}
+		cerr << "==================================" << endl;
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite2::getNumericGroupStates -- return +1 if there is a note
+//     attack in a given group, -1 if there is a sustained note in the group,
+//     or 0 if there is a rest in the group.
+//
+
+void Tool_composite2::getNumericGroupStates(vector<int>& states,
+		HumdrumFile& infile, const string& tgroup) {
+	states.resize(infile.getLineCount());
+	fill(states.begin(), states.end(), 0);
+	bool nullSustain = false;
+	bool tieNote = false;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			string group = token->getValue("auto", "group");
+			if (group != tgroup) {
+				// need to check if null tokens have groups
+				continue;
+			}
+			nullSustain = false;
+			if (token->isNull()) {
+				nullSustain = true;
+				token = token->resolveNull();
+				if (!token) {
+					continue;
+				}
+			}
+			if (token->isRest()) {
+				// resting is the default state.
+				continue;
+			}
+			vector<string> subtoks = token->getSubtokens();
+			bool sus2 = true;
+			for (int k=0; k<(int)subtoks.size(); k++) {
+				if (subtoks[k].find("r") != string::npos) {
+					continue;
+				}
+				if (subtoks[k] == ".") {
+					// Strange null subtoken.
+					continue;
+				}
+				if ((subtoks[k].find("]") == string::npos) &&
+						(subtoks[k].find("_") == string::npos)) {
+					sus2 = false;
+				}
+				if (!nullSustain) {
+					if ((subtoks[k].find("]") != string::npos) ||
+						 	(subtoks[k].find("_") != string::npos)) {
+						tieNote = true;
+					} else {
+						tieNote = false;
+					}
+				} else {
+					tieNote = false;
+				}
+
+				if (sus2 && nullSustain) {
+					states[i] = -1;
+				} else if (nullSustain) {
+					if (states[i] <= 0) {
+						states[i] = -1;
+					}
+				} else if (sus2) {
+					if (tieNote) {
+						states[i] = -2;
+					} else {
+						states[i] = -1;
+					}
+				} else {
+					states[i] = 1;
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_composite2::analyzeGroupCompositeRhythms --
 //
 
@@ -61172,7 +61397,9 @@ void Tool_composite2::analyzeGroupCompositeRhythms(HumdrumFile& infile) {
 
 	HumRegex hre;
 
-	assignGroups(infile);
+	if (!m_assignedQ) {
+		assignGroups(infile);
+	}
 	analyzeLineGroups(infile);
 	if (m_debugQ) {
 		printGroupAssignments(infile);
@@ -61549,6 +61776,7 @@ void Tool_composite2::assignGroups(HumdrumFile& infile) {
 			token->setValue("auto", "group", group);
 		}
 	}
+	m_assignedQ = true;
 }
 
 
@@ -85136,7 +85364,11 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		argv.push_back("transpose"); // name of program (placeholder)
 		argv.push_back("-C");        // transpose to concert pitch
 		transpose.process(argv);
-		transpose.run(outfile);
+		stringstream sstream;
+		sstream << outfile;
+		HumdrumFile outfile2;
+		outfile2.readString(sstream.str());
+		transpose.run(outfile2);
 		if (transpose.hasHumdrumText()) {
 			stringstream ss;
 			transpose.getHumdrumText(ss);
@@ -86543,6 +86775,9 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 				}
 				if ((first == 1) && (second == 3)) {
 					hre.replaceDestructive(recip, "0.", "1%3");
+				}
+				if ((first == 2) && (second == 3)) {
+					hre.replaceDestructive(recip, "1.", "2%3");
 				}
 			} else {
 				if ((first == 1) && (second == 2)) {
@@ -101604,6 +101839,10 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 
 	for (int j=0; j<infile[line].getFieldCount(); j++) {
 		int ptrack = infile.token(line, j)->getTrack();
+		if (ptrack < 0) {
+			cerr << "Track is negative on line " << (line+1) << ", spine " << (j+1) << endl;
+			return;
+		}
 
 		// check for *ITr or *Tr markers
 		// ignore *ITr markers when creating a Concert-pitch score
@@ -101611,7 +101850,7 @@ void Tool_transpose::processInterpretationLine(HumdrumFile& infile, int line,
 		HumRegex hre;
 		if (hre.search(infile.token(line, j), "^\\*k\\[([a-gA-G\\#-]*)\\]", "")) {
 			// transpose *k[] markers if necessary
-			if (tvals[ptrack] != 0) {
+			if (tvals.at(ptrack) != 0) {
 				string value = hre.getMatch(1);
 				printNewKeySignature(value, tvals[ptrack]);
 			} else {

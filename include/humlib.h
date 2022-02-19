@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Feb 12 11:08:53 PST 2022
+// Last Modified: Fri Feb 18 21:54:13 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5975,11 +5975,13 @@ class Tool_composite2 : public HumTool {
 		void        prepareOutput             (HumdrumFile& infile);
 		void        analyzeFullCompositeRhythm(HumdrumFile& infile);
 		void        analyzeGroupCompositeRhythms(HumdrumFile& infile);
+		void        analyzeCoincidenceRhythms (HumdrumFile& infiel);
 		void        assignGroups              (HumdrumFile& infile);
 		void        analyzeLineGroups         (HumdrumFile& infile);
 		void        analyzeLineGroup          (HumdrumFile& infile, int line,
 		                                       const string& target);
 		void        extractGroup              (HumdrumFile& infile, const std::string &target);
+		void        getNumericGroupStates     (vector<int>& states, HumdrumFile& infile, const string& tgroup);
 		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
 		HumNum      getLineDuration           (HumdrumFile& infile, int index,
 		                                       std::vector<bool>& isNull);
@@ -6073,6 +6075,8 @@ class Tool_composite2 : public HumTool {
 		bool        m_analysesQ          = false;    // union of -PAOST options
 		int         m_numericAnalysisSpineCount = 0; // sum of -PAOST options
 		bool        m_nozerosQ           = false;    // used with -Z option
+
+		bool        m_assignedQ          = false;    // used to keep track of group analysis initialization
 
 		// Data storage for numerical anslysis.
 		//
