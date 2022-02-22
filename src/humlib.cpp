@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 21 19:41:52 PST 2022
+// Last Modified: Mon Feb 21 21:19:17 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -36238,14 +36238,403 @@ string MuseData::convertAccents(const string& input) {
 	int isize = (int)input.size();
 	for (int i=0; i<isize; i++) {
 		if (input[i] == '\\') {
-			// check for escaped character
 			if (i <= isize - 3) {
+				// check for escaped characters
+				// Newer form is [a-zA-Z]\d
+				// Older form is \d[a-zA-Z]
+
+				// 0 = ?
+
+
+				// 1 = tilde accents
+				if (((input[i+1] == 'n') && (input[i+2] == '1')) ||
+				    ((input[i+2] == 'n') && (input[i+1] == '1'))) {
+					output += "ñ";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'N') && (input[i+2] == '1')) ||
+				    ((input[i+2] == 'N') && (input[i+1] == '1'))) {
+					output += "Ñ";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '1')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '1'))) {
+					output += "õ";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '1')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '1'))) {
+					output += "Õ";
+					i += 2;
+					continue;
+				}
+
+
+				// 2 = misc or cedilla/slash accents
+				if (((input[i+1] == 'c') && (input[i+2] == '2')) ||
+				    ((input[i+2] == 'c') && (input[i+1] == '2'))) {
+					output += "ç";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'C') && (input[i+2] == '2')) ||
+				    ((input[i+2] == 'C') && (input[i+1] == '2'))) {
+					output += "Ç";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '2')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '2'))) {
+					output += "ø";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '2')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '2'))) {
+					output += "Ø";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 's') && (input[i+2] == '2')) ||
+				    ((input[i+2] == 's') && (input[i+1] == '2'))) {
+					output += "ß";
+					i += 2;
+					continue;
+				}
+
+
+				// 3 = umlaut accent
+				// Lower case:
+				if (((input[i+1] == 'a') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'a') && (input[i+1] == '3'))) {
+					output += "ä";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'e') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'e') && (input[i+1] == '3'))) {
+					output += "ë";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'i') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'i') && (input[i+1] == '3'))) {
+					output += "ï";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '3'))) {
+					output += "ö";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'u') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'u') && (input[i+1] == '3'))) {
+					output += "ü";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'y') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'y') && (input[i+1] == '3'))) {
+					output += "ÿ";
+					i += 2;
+					continue;
+				}
+				// Upper case:
+				if (((input[i+1] == 'A') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'A') && (input[i+1] == '3'))) {
+					output += "Ä";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'E') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'E') && (input[i+1] == '3'))) {
+					output += "Ë";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'I') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'I') && (input[i+1] == '3'))) {
+					output += "Ï";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '3'))) {
+					output += "Ö";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'U') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'U') && (input[i+1] == '3'))) {
+					output += "Ü";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'Y') && (input[i+2] == '3')) ||
+				    ((input[i+2] == 'Y') && (input[i+1] == '3'))) {
+					output += "Ÿ";
+					i += 2;
+					continue;
+				}
+
+
+				// 4 = misc or ring accents
+				if (((input[i+1] == 'a') && (input[i+2] == '4')) ||
+				    ((input[i+2] == 'a') && (input[i+1] == '4'))) {
+					output += "å";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'A') && (input[i+2] == '4')) ||
+				    ((input[i+2] == 'A') && (input[i+1] == '4'))) {
+					output += "Å";
+					i += 2;
+					continue;
+				}
+
+
+				// 5 = misc or hacheck accents
+				if (((input[i+1] == 'r') && (input[i+2] == '5')) ||
+				    ((input[i+2] == 'r') && (input[i+1] == '5'))) {
+					output += "ř";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'R') && (input[i+2] == '5')) ||
+				    ((input[i+2] == 'R') && (input[i+1] == '5'))) {
+					output += "Ř";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 's') && (input[i+2] == '5')) ||
+				    ((input[i+2] == 's') && (input[i+1] == '5'))) {
+					output += "š";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'S') && (input[i+2] == '5')) ||
+				    ((input[i+2] == 'S') && (input[i+1] == '5'))) {
+					output += "Š";
+					i += 2;
+					continue;
+				}
+
+
+				// 6 = ?
+
+
+				// 7 = acute accent:
+				// Lower case:
+				if (((input[i+1] == 'a') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'a') && (input[i+1] == '7'))) {
+					output += "á";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'e') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'e') && (input[i+1] == '7'))) {
+					output += "é";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'i') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'i') && (input[i+1] == '7'))) {
+					output += "í";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '7'))) {
+					output += "ó";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'u') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'u') && (input[i+1] == '7'))) {
+					output += "ú";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'y') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'y') && (input[i+1] == '7'))) {
+					output += "ý";
+					i += 2;
+					continue;
+				}
+				// Upper case:
+				if (((input[i+1] == 'A') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'A') && (input[i+1] == '7'))) {
+					output += "Á";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'E') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'E') && (input[i+1] == '7'))) {
+					output += "É";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'I') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'I') && (input[i+1] == '7'))) {
+					output += "Í";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '7'))) {
+					output += "Ó";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'U') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'U') && (input[i+1] == '7'))) {
+					output += "Ú";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'Y') && (input[i+2] == '7')) ||
+				    ((input[i+2] == 'Y') && (input[i+1] == '7'))) {
+					output += "Ý";
+					i += 2;
+					continue;
+				}
+
+
+				// 8 = grave accent:
+				// Lower case:
+				if (((input[i+1] == 'a') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'a') && (input[i+1] == '8'))) {
+					output += "à";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'e') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'e') && (input[i+1] == '8'))) {
+					output += "è";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'i') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'i') && (input[i+1] == '8'))) {
+					output += "ì";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '8'))) {
+					output += "ò";
+					i += 2;
+					continue;
+				}
 				if (((input[i+1] == 'u') && (input[i+2] == '8')) ||
 				    ((input[i+2] == 'u') && (input[i+1] == '8'))) {
 					output += "ù";
 					i += 2;
 					continue;
 				}
+				// Upper case:
+				if (((input[i+1] == 'A') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'A') && (input[i+1] == '8'))) {
+					output += "À";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'E') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'E') && (input[i+1] == '8'))) {
+					output += "È";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'I') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'I') && (input[i+1] == '8'))) {
+					output += "Ì";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '8'))) {
+					output += "Ò";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'U') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'U') && (input[i+1] == '8'))) {
+					output += "Ù";
+					i += 2;
+					continue;
+				}
+
+
+				// 9 = circumflex accent:
+				// Lower case:
+				if (((input[i+1] == 'a') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'a') && (input[i+1] == '9'))) {
+					output += "â";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'e') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'e') && (input[i+1] == '9'))) {
+					output += "ê";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'i') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'i') && (input[i+1] == '9'))) {
+					output += "î";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'o') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'o') && (input[i+1] == '9'))) {
+					output += "ô";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'u') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'u') && (input[i+1] == '9'))) {
+					output += "û";
+					i += 2;
+					continue;
+				}
+				// Upper case:
+				if (((input[i+1] == 'A') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'A') && (input[i+1] == '9'))) {
+					output += "Â";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'E') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'E') && (input[i+1] == '9'))) {
+					output += "Ê";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'I') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'I') && (input[i+1] == '9'))) {
+					output += "Î";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'O') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'O') && (input[i+1] == '9'))) {
+					output += "Ô";
+					i += 2;
+					continue;
+				}
+				if (((input[i+1] == 'U') && (input[i+2] == '9')) ||
+				    ((input[i+2] == 'U') && (input[i+1] == '9'))) {
+					output += "Û";
+					i += 2;
+					continue;
+				}
+
+
 			}
 		}
 		if (i <= isize - 3) {
