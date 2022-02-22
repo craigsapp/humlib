@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:35:54 PDT 2019
-// Last Modified: Wed Sep 25 19:35:57 PDT 2019
+// Last Modified: Mon Feb 21 18:31:59 PST 2022
 // Filename:      musedata2hum.cpp
 // URL:           https://github.com/craigsapp/musedata2hum/blob/master/src/musedata2hum.cpp
 // Syntax:        C++11
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 		filename = converter.getArg(1);
 		infile.readFile(filename);
 	}
-	int partcount = infile.getPartCount();
+	int partcount = infile.getFileCount();
 	if (partcount == 0) {
 		cerr << "Error: no parts found in file" << endl;
 		return 1;

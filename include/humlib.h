@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Feb 18 22:58:35 PST 2022
+// Last Modified: Mon Feb 21 19:41:52 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -3508,21 +3508,22 @@ class MuseData {
 		std::string                 m_error;
 
 	protected:
-		void              clearError          (void);
-		void              setError            (const std::string& error);
-		void              processTie          (int eventindex, int recordindex,
-		                                       int lastindex);
-		int               searchForPitch      (int eventindex, int b40,
-		                                       int track);
-		int               getNextEventIndex   (int startindex,
-		                                       HumNum target);
-		void              constructTimeSequence(void);
-		void              insertEventBackwards (HumNum atime,
-		                                        MuseRecord* arecord);
-		int               getPartNameIndex    (void);
-		std::string       getPartName         (int index);
-		std::string       trimSpaces          (std::string);
-		void              assignHeaderBodyState(void);
+		void         clearError           (void);
+		void         setError             (const std::string& error);
+		void         processTie           (int eventindex, int recordindex,
+		                                        int lastindex);
+		int          searchForPitch       (int eventindex, int b40, int track);
+		int          getNextEventIndex    (int startindex, HumNum target);
+		void         constructTimeSequence(void);
+		void         insertEventBackwards (HumNum atime, MuseRecord* arecord);
+		int          getPartNameIndex     (void);
+		std::string  getPartName          (int index);
+		void         assignHeaderBodyState(void);
+
+	public:
+		static std::string  trimSpaces    (const std::string& input);
+		static std::string  convertAccents(const std::string& input);
+		static std::string  cleanString   (const std::string& input);
 };
 
 
@@ -3545,9 +3546,10 @@ class MuseDataSet {
 		int               readString          (const std::string& data);
 		int               read                (std::istream& input);
 		MuseData&         operator[]          (int index);
-		int               getPartCount        (void);
+		int               getFileCount        (void);
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
+		std::vector<int>  getGroupIndexList   (const std::string& group);
 
 		std::string       getError            (void);
 		bool              hasError            (void);
@@ -7873,7 +7875,7 @@ class Tool_musedata2hum : public HumTool {
 	protected:
 		void    initialize           (void);
 		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
-		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
+		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index, int partindex, int partcount);
 		int     convertMeasure       (HumGrid& outdata, MuseData& part, int partindex, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
@@ -7885,24 +7887,25 @@ class Tool_musedata2hum : public HumTool {
 		void    addLyrics            (GridSlice* slice, int part, int staff, MuseRecord& mr);
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
 		                              HumNum timestamp, int part, int maxstaff);
-		std::string trimSpaces       (std::string input);
+		std::string cleanString      (const std::string& input);
 		void    addTextDirection     (GridMeasure* gm, int part, int staff,
 		                              MuseRecord& mr, HumNum timestamp);
 
 	private:
 		// options:
 		Options m_options;
-		bool    m_stemsQ = false;    // used with -s option
-		bool    m_recipQ = false;    // used with -r option
-		std::string m_omd = "";      // initial tempo designation (store for later output)
+		bool m_stemsQ = false;         // used with -s option
+		bool m_recipQ = false;         // used with -r option
+      std::string m_group = "score"; // used with -g option
+		std::string m_omd = "";        // initial tempo designation (store for later output)
 
 		// state variables:
-		int m_part     = 0;          // staff index currently being processed
-		int m_maxstaff = 0;          // total number of staves (parts)
-		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
-		HTp m_lastfigure = NULL;     // last figured bass token
-		int m_lastbarnum = -1;       // barnumber carried over from previous bar
-		HTp m_lastnote = NULL;       // for dealing with chords.
+		int m_part     = 0;            // staff index currently being processed
+		int m_maxstaff = 0;            // total number of staves (parts)
+		HumNum m_timesigdur = 4;       // duration of current time signature in quarter notes
+		HTp m_lastfigure = NULL;       // last figured bass token
+		int m_lastbarnum = -1;         // barnumber carried over from previous bar
+		HTp m_lastnote = NULL;         // for dealing with chords.
 
 };
 

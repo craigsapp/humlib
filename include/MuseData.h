@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jun  3 00:00:21 PDT 2010
-// Last Modified: Tue Sep 24 20:24:07 PDT 2019
+// Last Modified: Mon Feb 21 10:29:48 PST 2022
 // Filename:      humlib/include/MuseData.h
 // Web Address:   https://github.com/craigsapp/humlib/blob/master/include/MuseData.h
 // Syntax:        C++
@@ -154,21 +154,22 @@ class MuseData {
 		std::string                 m_error;
 
 	protected:
-		void              clearError          (void);
-		void              setError            (const std::string& error);
-		void              processTie          (int eventindex, int recordindex,
-		                                       int lastindex);
-		int               searchForPitch      (int eventindex, int b40,
-		                                       int track);
-		int               getNextEventIndex   (int startindex,
-		                                       HumNum target);
-		void              constructTimeSequence(void);
-		void              insertEventBackwards (HumNum atime,
-		                                        MuseRecord* arecord);
-		int               getPartNameIndex    (void);
-		std::string       getPartName         (int index);
-		std::string       trimSpaces          (std::string);
-		void              assignHeaderBodyState(void);
+		void         clearError           (void);
+		void         setError             (const std::string& error);
+		void         processTie           (int eventindex, int recordindex,
+		                                        int lastindex);
+		int          searchForPitch       (int eventindex, int b40, int track);
+		int          getNextEventIndex    (int startindex, HumNum target);
+		void         constructTimeSequence(void);
+		void         insertEventBackwards (HumNum atime, MuseRecord* arecord);
+		int          getPartNameIndex     (void);
+		std::string  getPartName          (int index);
+		void         assignHeaderBodyState(void);
+
+	public:
+		static std::string  trimSpaces    (const std::string& input);
+		static std::string  convertAccents(const std::string& input);
+		static std::string  cleanString   (const std::string& input);
 };
 
 

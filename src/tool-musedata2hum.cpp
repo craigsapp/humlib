@@ -35,8 +35,9 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 	// Options& options = m_options;
 	// options.define("k|kern=b","display corresponding **kern data");
 
-	define("r|recip=b", "output **recip spine");
-	define("s|stems=b", "include stems in output");
+	define("g|group=s:score", "the data group to process");
+	define("r|recip=b",       "output **recip spine");
+	define("s|stems=b",       "include stems in output");
 }
 
 
@@ -49,6 +50,7 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 void Tool_musedata2hum::initialize(void) {
 	m_stemsQ = getBoolean("stems");
 	m_recipQ = getBoolean("recip");
+	m_group  = getString("group");
 }
 
 
@@ -119,7 +121,7 @@ bool Tool_musedata2hum::convertString(ostream& out, const string& input) {
 
 
 bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
-	int partcount = mds.getPartCount();
+	int partcount = mds.getFileCount();
 	if (partcount == 0) {
 		cerr << "Error: No parts found in data:" << endl;
 		cerr << mds << endl;
@@ -127,10 +129,16 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	}
 	initialize();
 
+	vector<int> groupMemberIndex = mds.getGroupIndexList(m_group);
+	if (groupMemberIndex.empty()) {
+		cerr << "Error: no files in the " << m_group << " membership." << endl;
+		return false;
+	}
+
 	HumGrid outdata;
 	bool status = true;
-	for (int i=0; i<partcount; i++) {
-		status &= convertPart(outdata, mds, i);
+	for (int i=0; i<(int)groupMemberIndex.size(); i++) {
+		status &= convertPart(outdata, mds, groupMemberIndex[i], i, (int)groupMemberIndex.size());
 	}
 
 	HumdrumFile outfile;
@@ -138,12 +146,13 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	outfile.createLinesFromTokens();
 
 	// Convert comments in header of first part:
-	for (int i=0; i< mds[0].getLineCount(); i++) {
-		if (mds[0][i].isAnyNote()) {
+	int ii = groupMemberIndex[0];
+	for (int i=0; i< mds[ii].getLineCount(); i++) {
+		if (mds[ii][i].isAnyNote()) {
 			break;
 		}
-		if (mds[0].getLine(i).compare(0, 2, "@@") == 0) {
-			string output = mds[0].getLine(i);
+		if (mds[ii].getLine(i).compare(0, 2, "@@") == 0) {
+			string output = mds[ii].getLine(i);
 			for (int j=0; j<(int)output.size(); j++) {
 				if (output[j] == '@') {
 					output[j] = '!';
@@ -155,32 +164,32 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 		}
 	}
 
-	string composer = mds[0].getComposer();
+	string composer = mds[ii].getComposer();
 	if (!composer.empty()) {
 		out << "!!!COM: " << composer << endl;
 	}
 
-	string cdate = mds[0].getComposerDate();
+	string cdate = mds[ii].getComposerDate();
 	if (!cdate.empty()) {
 		out << "!!!CDT: " << cdate << endl;
 	}
 
-	string worktitle = mds[0].getWorkTitle();
+	string worktitle = mds[ii].getWorkTitle();
 	if (!worktitle.empty()) {
 		out << "!!!OTL: " << worktitle << endl;
 	}
 
-	string movementtitle = mds[0].getMovementTitle();
+	string movementtitle = mds[ii].getMovementTitle();
 	if (!movementtitle.empty()) {
 		out << "!!!OMV: " << movementtitle << endl;
 	}
 
-	string opus = mds[0].getOpus();
+	string opus = mds[ii].getOpus();
 	if (!opus.empty()) {
 		out << "!!!OPS: " << opus << endl;
 	}
 
-	string number = mds[0].getNumber();
+	string number = mds[ii].getNumber();
 	if (!number.empty()) {
 		out << "!!!ONM: " << number << endl;
 	}
@@ -191,17 +200,17 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 
 	out << outfile;
 
-	string source = mds[0].getSource();
+	string source = mds[ii].getSource();
 	if (!source.empty()) {
 		out << "!!!SMS: " << source << endl;
 	}
 
-	string encoder = mds[0].getEncoderName();
+	string encoder = mds[ii].getEncoderName();
 	if (!encoder.empty()) {
 		out << "!!!ENC: " << encoder << endl;
 	}
 
-	string edate = mds[0].getEncoderDate();
+	string edate = mds[ii].getEncoderDate();
 	if (!edate.empty()) {
 		out << "!!!END: " << edate << endl;
 	}
@@ -212,13 +221,13 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	ss << std::ctime(&currenttime);
 	out << "!!!ONB: Converted from MuseData with musedata2hum on " << ss.str();
 
-	string copyright = mds[0].getCopyright();
+	string copyright = mds[ii].getCopyright();
 	if (!copyright.empty()) {
 		out << "!!!YEM: " << copyright << endl;
 	}
 
 	// Convert comments in footer of last part:
-	int lastone = mds.getPartCount() - 1;
+	int lastone = groupMemberIndex.back();
 	vector<string> outputs;
 	for (int i=mds[lastone].getLineCount() - 1; i>=0; i--) {
 		if (mds[lastone][i].isAnyNote()) {
@@ -251,21 +260,22 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 // Tool_musedata2hum::convertPart --
 //
 
-bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index) {
+bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int index, int partindex, int maxstaff) {
 	MuseData& part = mds[index];
 	m_lastfigure = NULL;
 	m_lastnote = NULL;
 	m_lastbarnum = -1;
-	m_part = index;
-	m_maxstaff = (int)mds.getPartCount();
+	m_part = partindex;
+	// maybe maxpart?
+	m_maxstaff = maxstaff;
 
 	bool status = true;
 	int i = 0;
 	while (i < part.getLineCount()) {
-		i = convertMeasure(outdata, part, index, i);
+		i = convertMeasure(outdata, part, partindex, i);
 	}
 
-	storePartName(outdata, part, index);
+	storePartName(outdata, part, partindex);
 
 	return status;
 }
@@ -433,7 +443,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		map<string, string> attributes;
 		mr.getAttributeMap(attributes);
 
-		string mtempo = trimSpaces(attributes["D"]);
+		string mtempo = cleanString(attributes["D"]);
 		if (!mtempo.empty()) {
 			if (timestamp != 0) {
 				string value = "!!!OMD: " + mtempo;
@@ -509,7 +519,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			}
 		}
 	} else if (mr.isDirection()) {
-
 		cerr << "PROCESS DIRECTION HERE: " << mr << endl;
 		if (mr.isTextDirection()) {
 			addTextDirection(gm, part, staff, mr, timestamp);
@@ -541,7 +550,6 @@ void Tool_musedata2hum::addTextDirection(GridMeasure* gm, int part, int staff,
 	output += ":b";   // text below (figure out above cases)
 	output += ":t=";
 	output += text;
-	cerr << "LAYOUT FOR TEXT IS " << output << endl;
 
 	// add staff index later
 	gm->addLayoutParameter(NULL, part, output);
@@ -767,29 +775,11 @@ void Tool_musedata2hum::setInitialOmd(const string& omd) {
 
 //////////////////////////////
 //
-// Tool_musedata2hum::trimSpaces --
+// Tool_musedata2hum::cleanString --
 //
 
-string Tool_musedata2hum::trimSpaces(string input) {
-	string output;
-	int status = 0;
-	for (int i=0; i<(int)input.size(); i++) {
-		if (!status) {
-			if (isspace(input[i])) {
-				continue;
-			}
-			status = 1;
-		}
-		output += input[i];
-	}
-	for (int i=(int)output.size()-1; i>=0; i--) {
-		if (isspace(output[i])) {
-			output.resize((int)output.size() - 1);
-		} else {
-			break;
-		}
-	}
-	return output;
+string Tool_musedata2hum::cleanString(const string& input) {
+	return MuseData::cleanString(input);
 }
 
 

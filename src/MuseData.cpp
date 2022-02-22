@@ -1415,7 +1415,7 @@ void MuseData::cleanLineEndings(void) {
 // MuseData::getError --
 //
 
-std::string MuseData::getError(void) {
+string MuseData::getError(void) {
 	return m_error;
 }
 
@@ -1620,10 +1620,10 @@ bool MuseData::isSource(int index) {
 // MuseData::getWorkInfo --
 //
 
-std::string MuseData::getWorkInfo(void) {
+string MuseData::getWorkInfo(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isWorkInfo(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1689,10 +1689,10 @@ string MuseData::getMovementNumber(void) {
 // MuseData::getWorkTitle --
 //
 
-std::string MuseData::getWorkTitle(void) {
+string MuseData::getWorkTitle(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isWorkTitle(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1707,10 +1707,10 @@ std::string MuseData::getWorkTitle(void) {
 // MuseData::getCopyright --
 //
 
-std::string MuseData::getCopyright(void) {
+string MuseData::getCopyright(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isCopyright(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1725,10 +1725,10 @@ std::string MuseData::getCopyright(void) {
 // MuseData::getMovementTitle --
 //
 
-std::string MuseData::getMovementTitle(void) {
+string MuseData::getMovementTitle(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isMovementTitle(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1743,10 +1743,10 @@ std::string MuseData::getMovementTitle(void) {
 // MuseData::getSource --
 //
 
-std::string MuseData::getSource(void) {
+string MuseData::getSource(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isSource(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1761,10 +1761,10 @@ std::string MuseData::getSource(void) {
 // MuseData::getEncoder --
 //
 
-std::string MuseData::getEncoder(void) {
+string MuseData::getEncoder(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isEncoder(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1779,10 +1779,10 @@ std::string MuseData::getEncoder(void) {
 // MuseData::getId --
 //
 
-std::string MuseData::getId(void) {
+string MuseData::getId(void) {
 	for (int i=0; i<getLineCount(); i++) {
 		if (isId(i)) {
-			return trimSpaces(getLine(i));
+			return cleanString(getLine(i));
 		} else if (isAnyNote(i)) {
 			break;
 		}
@@ -1799,7 +1799,7 @@ std::string MuseData::getId(void) {
 //    composers name is abbreviated in the directory name.
 //
 
-std::string MuseData::getComposer(void) {
+string MuseData::getComposer(void) {
 	string id = getId();
 	if (id.find("{cor/") != string::npos) {
 		return "Corelli, Arcangelo";
@@ -1816,7 +1816,7 @@ std::string MuseData::getComposer(void) {
 // MuseData::getComposerDate --
 //
 
-std::string MuseData::getComposerDate(void) {
+string MuseData::getComposerDate(void) {
 	string id = getId();
 	if (id.find("{cor/") != string::npos) {
 		return "1653/02/17-1713/01/08";
@@ -1833,7 +1833,7 @@ std::string MuseData::getComposerDate(void) {
 // MuseData::getEncoderName --
 //
 
-std::string MuseData::getEncoderName(void) {
+string MuseData::getEncoderName(void) {
 	string encoder = getEncoder();
 	HumRegex hre;
 	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
@@ -1849,7 +1849,7 @@ std::string MuseData::getEncoderName(void) {
 // MuseData::getEncoderDate --
 //
 
-std::string MuseData::getEncoderDate(void) {
+string MuseData::getEncoderDate(void) {
 	string encoder = getEncoder();
 	HumRegex hre;
 	if (hre.search(encoder, "^\\s*(\\d+)/(\\d+)/(\\d+)\\s+(.*)\\s*$")) {
@@ -1881,10 +1881,23 @@ std::string MuseData::getEncoderDate(void) {
 
 //////////////////////////////
 //
+// MuseData::cleanString --
+//
+
+string MuseData::cleanString(const string& input) {
+	string output1 = trimSpaces(input);
+	string output = convertAccents(input);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // MuseData::trimSpaces --
 //
 
-std::string MuseData::trimSpaces(std::string input) {
+string MuseData::trimSpaces(const string& input) {
 	string output;
 	int status = 0;
 	for (int i=0; i<(int)input.size(); i++) {
@@ -1903,6 +1916,167 @@ std::string MuseData::trimSpaces(std::string input) {
 			break;
 		}
 	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::convertAccents -- Convert MuseData character encodings into
+//     UTF-8.   Also need to convert upper bit ASCII to UTF-8.
+//
+
+string MuseData::convertAccents(const string& input) {
+	string output;
+	output.reserve(input.size());
+	int isize = (int)input.size();
+	for (int i=0; i<isize; i++) {
+		if (input[i] == '\\') {
+			// check for escaped character
+			if (i <= isize - 3) {
+				if (((input[i+1] == 'u') && (input[i+2] == '8')) ||
+				    ((input[i+2] == 'u') && (input[i+1] == '8'))) {
+					output += "ù";
+					i += 2;
+					continue;
+				}
+			}
+		}
+		if (i <= isize - 3) {
+			if (((unsigned char)input[i] == 0xef) && ((unsigned char)input[i+1] == 0xbf) && ((unsigned char)input[i+2] == 0xbd)) {
+				// UTF-8 replacement character (could mean multiple things)
+				// but assume it is ä:
+				output += "ä";
+				i += 2;
+				continue;
+			}
+		}
+
+		// Reference: https://wiki.ccarh.org/wiki/Dmuse:_Color_and_upper-ASCII_codes
+
+		if ((input[i] >= 32) || (input[i] <= 126)) {
+			// regular ASCII character
+			output += input[i];
+			continue;
+		}
+
+		switch (input[i]) {
+
+			case 0x00: output += "";  break;
+			case 0x01: output += "♯"; break;
+			case 0x02: output += "♭"; break;
+			case 0x03: output += "♮"; break;
+			case 0x04: output += "◆"; break;
+			case 0x05: output += "⎛"; break;
+			case 0x06: output += "⎝"; break;
+			case 0x07: output += "●"; break;
+			case 0x08: output += "⎞"; break;
+			case 0x09: output += "┊"; break;
+			case 0x0a: output += 0x0a; break;
+			case 0x0b: output += "©"; break;
+			case 0x0c: output += "⎠"; break;
+			case 0x0d: output += 0x0d; break;
+			case 0x0e: output += "→"; break;
+			case 0x0f: output += "☼"; break;
+
+			case 0x10: output += "▶"; break;
+			case 0x11: output += "◀"; break;
+			case 0x12: output += "√"; break;
+			case 0x13: output += "▔"; break;
+			case 0x14: output += "¶"; break;
+			case 0x15: output += "§"; break;
+			case 0x16: output += "⟋"; break;
+			case 0x17: output += "⟍"; break;
+			case 0x18: output += "↑"; break;
+			case 0x19: output += "↓"; break;
+			case 0x1a: output += "±"; break;
+			case 0x1b: output += 0x1b; break; // esc
+			case 0x1c: output += "←"; break;
+			case 0x1d: output += "↔"; break;
+			case 0x1e: output += "▲"; break;
+			case 0x1f: output += "▼"; break;
+
+			// 0x20 to 0x7e are regular ASCII characters handled above
+
+			case 0x7f: output += "⌂"; break;
+
+			case 0x80: output += "Ç"; break; case 0x81: output += "ü"; break;
+			case 0x82: output += "é"; break; case 0x83: output += "â"; break;
+			case 0x84: output += "ä"; break; case 0x85: output += "à"; break;
+			case 0x86: output += "å"; break; case 0x87: output += "ç"; break;
+			case 0x88: output += "ê"; break; case 0x89: output += "ë"; break;
+			case 0x8a: output += "è"; break; case 0x8b: output += "ï"; break;
+			case 0x8c: output += "î"; break; case 0x8d: output += "ì"; break;
+			case 0x8e: output += "Ä"; break; case 0x8f: output += "Å"; break;
+
+			case 0x90: output += "É"; break; case 0x91: output += "æ"; break;
+			case 0x92: output += "Æ"; break; case 0x93: output += "ô"; break;
+			case 0x94: output += "ö"; break; case 0x95: output += "ò"; break;
+			case 0x96: output += "û"; break; case 0x97: output += "ù"; break;
+			case 0x98: output += "ÿ"; break; case 0x99: output += "Ö"; break;
+			case 0x9a: output += "Ü"; break; case 0x9b: output += "¢"; break;
+			case 0x9c: output += "£"; break; case 0x9d: output += "¥"; break;
+			case 0x9e: output += "Pt"; break; case 0x9f: output += "𝑓"; break;
+
+			case 0xa0: output += "á"; break; case 0xa1: output += "í"; break;
+			case 0xa2: output += "ó"; break; case 0xa3: output += "ú"; break;
+			case 0xa4: output += "ñ"; break; case 0xa5: output += "Ñ"; break;
+			case 0xa6: output += "Ř"; break; case 0xa7: output += "ř"; break;
+			case 0xa8: output += "¿"; break; case 0xa9: output += "┌"; break;
+			case 0xaa: output += "┐"; break; case 0xab: output += "½"; break;
+			case 0xac: output += "¼"; break; case 0xad: output += "¡"; break;
+			case 0xae: output += "«"; break; case 0xaf: output += "»"; break;
+
+			case 0xb0: output += "▓"; break; case 0xb1: output += "▒"; break;
+			case 0xb2: output += "░"; break; case 0xb3: output += "│"; break;
+			case 0xb4: output += "┤"; break; case 0xb5: output += "╡"; break;
+			case 0xb6: output += "╢"; break; case 0xb7: output += "╖"; break;
+			case 0xb8: output += "╕"; break; case 0xb9: output += "╣"; break;
+			case 0xba: output += "║"; break; case 0xbb: output += "╗"; break;
+			case 0xbc: output += "╝"; break; case 0xbd: output += "╜"; break;
+			case 0xbe: output += "╛"; break; case 0xbf: output += "┐"; break;
+
+			case 0xc0: output += "└"; break; case 0xc1: output += "┴"; break;
+			case 0xc2: output += "┬"; break; case 0xc3: output += "├"; break;
+			case 0xc4: output += "─"; break; case 0xc5: output += "┼"; break;
+			case 0xc6: output += "╞"; break; case 0xc7: output += "╟"; break;
+			case 0xc8: output += "╚"; break; case 0xc9: output += "╔"; break;
+			case 0xca: output += "╩"; break; case 0xcb: output += "╦"; break;
+			case 0xcc: output += "╠"; break; case 0xcd: output += "═"; break;
+			case 0xce: output += "╬"; break; case 0xcf: output += "╧"; break;
+
+			case 0xd0: output += "╨"; break; case 0xd1: output += "╤"; break;
+			case 0xd2: output += "╥"; break; case 0xd3: output += "╙"; break;
+			case 0xd4: output += "╘"; break; case 0xd5: output += "╒"; break;
+			case 0xd6: output += "╓"; break; case 0xd7: output += "╫"; break;
+			case 0xd8: output += "╪"; break; case 0xd9: output += "┘"; break;
+			case 0xda: output += "┌"; break; case 0xdb: output += "█"; break;
+			case 0xdc: output += "▄"; break; case 0xdd: output += "▌"; break;
+			case 0xde: output += "▐"; break; case 0xdf: output += "▀"; break;
+
+			case 0xe0: output += "Â"; break; case 0xe1: output += "À"; break;
+			case 0xe2: output += "Á"; break; case 0xe3: output += "Ê"; break;
+			case 0xe4: output += "Ë"; break; case 0xe5: output += "È"; break;
+			case 0xe6: output += "Î"; break; case 0xe7: output += "Ì"; break;
+			case 0xe8: output += "Í"; break; case 0xe9: output += "Ï"; break;
+			case 0xea: output += "Ô"; break; case 0xeb: output += "Ò"; break;
+			case 0xec: output += "Ó"; break; case 0xed: output += "Û"; break;
+			case 0xee: output += "Ù"; break; case 0xef: output += "Ú"; break;
+
+			case 0xf0: output += "Ÿ"; break; case 0xf1: output += "ý"; break;
+			case 0xf2: output += "Ý"; break; case 0xf3: output += "ø"; break;
+			case 0xf4: output += "Ø"; break; case 0xf5: output += "õ"; break;
+			case 0xf6: output += "Õ"; break; case 0xf7: output += "ß"; break;
+			case 0xf8: output += "Š"; break; case 0xf9: output += "š"; break;
+			case 0xfa: output += "·"; break; case 0xfb: output += "ϕ"; break;
+			case 0xfc: output += "Φ"; break; case 0xfd: output += "°"; break;
+			case 0xfe: output += "·"; break; case 0xff: output += "▁"; break;
+
+			default:   output += input[i]; break;
+		}
+	}
+
 	return output;
 }
 

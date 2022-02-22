@@ -14,6 +14,9 @@
 // (4) Add ties that are missing from composite notation
 // (5) Unmetered tremolos as ornaments in analyses
 // (6) Grace notes counted as ornaments (deal with trill endings later)
+// Add marker (green).
+// Cannot see full composite and coincidence at the same time (tab charcter).
+// Ties unmetered tremolo and grace notes (accent tool)
 //
 //
 

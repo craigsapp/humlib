@@ -300,11 +300,11 @@ void MuseDataSet::analyzePartSegments(vector<int>& startindex,
 
 //////////////////////////////
 //
-// MuseDataSet::getPartCount -- return the number of parts found
+// MuseDataSet::getFileCount -- return the number of parts found
 //      in the MuseDataSet
 //
 
-int MuseDataSet::getPartCount(void) {
+int MuseDataSet::getFileCount(void) {
 	return (int)m_part.size();
 }
 
@@ -388,6 +388,40 @@ string MuseDataSet::getError(void) {
 
 
 
+//////////////////////////////
+//
+// MuseDataSet::getGroupIndexList -- Return the index number of files that
+//    belong to the given target group.  If the group files are in a random
+//    order, they will be returned in that order.
+//
+
+vector<int> MuseDataSet::getGroupIndexList(const string& group) {
+	vector<int> output;
+	MuseDataSet& mds = *this;
+	HumRegex hre;
+	string query = "^" + group;
+	query += ":\\s*part\\s*(\\d+)\\s*of\\s*(\\d+)";
+	bool groupMembership;
+	for (int i=0; i<mds.getFileCount(); i++) {
+		groupMembership = false;
+		for (int j=0; j<mds[i].getLineCount(); j++) {
+			if (hre.search(mds[i][j].getLine(), "^Group\\s+memberships?\\s*:", "i")) {
+				groupMembership = true;
+			}
+			if (!groupMembership) {
+				continue;
+			}
+			if (hre.search(mds[i][j].getLine(), query)) {
+				output.push_back(i);
+				break;
+			}
+		}
+	}
+	return output;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////
@@ -396,7 +430,7 @@ string MuseDataSet::getError(void) {
 //
 
 ostream& operator<<(ostream& out, MuseDataSet& musedataset) {
-	for (int i=0; i<musedataset.getPartCount(); i++) {
+	for (int i=0; i<musedataset.getFileCount(); i++) {
 		for (int j=0; j<musedataset[i].getNumLines(); j++) {
 			out << musedataset[i][j] << '\n';
 		}

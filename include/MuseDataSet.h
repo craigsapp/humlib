@@ -15,6 +15,7 @@
 #define _MUSEDATASET_H_INCLUDED
 
 #include "MuseData.h"
+#include "HumRegex.h"
 
 #include <vector>
 
@@ -36,9 +37,10 @@ class MuseDataSet {
 		int               readString          (const std::string& data);
 		int               read                (std::istream& input);
 		MuseData&         operator[]          (int index);
-		int               getPartCount        (void);
+		int               getFileCount        (void);
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
+		std::vector<int>  getGroupIndexList   (const std::string& group);
 
 		std::string       getError            (void);
 		bool              hasError            (void);

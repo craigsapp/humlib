@@ -46,7 +46,7 @@ class Tool_musedata2hum : public HumTool {
 	protected:
 		void    initialize           (void);
 		void    convertLine          (GridMeasure* gm, MuseRecord& mr);
-		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index);
+		bool    convertPart          (HumGrid& outdata, MuseDataSet& mds, int index, int partindex, int partcount);
 		int     convertMeasure       (HumGrid& outdata, MuseData& part, int partindex, int startindex);
 		GridMeasure* getMeasure      (HumGrid& outdata, HumNum starttime);
 		void    setTimeSigDurInfo    (const std::string& mtimesig);
@@ -58,24 +58,25 @@ class Tool_musedata2hum : public HumTool {
 		void    addLyrics            (GridSlice* slice, int part, int staff, MuseRecord& mr);
 		void    addFiguredHarmony    (MuseRecord& mr, GridMeasure* gm,
 		                              HumNum timestamp, int part, int maxstaff);
-		std::string trimSpaces       (std::string input);
+		std::string cleanString      (const std::string& input);
 		void    addTextDirection     (GridMeasure* gm, int part, int staff,
 		                              MuseRecord& mr, HumNum timestamp);
 
 	private:
 		// options:
 		Options m_options;
-		bool    m_stemsQ = false;    // used with -s option
-		bool    m_recipQ = false;    // used with -r option
-		std::string m_omd = "";      // initial tempo designation (store for later output)
+		bool m_stemsQ = false;         // used with -s option
+		bool m_recipQ = false;         // used with -r option
+      std::string m_group = "score"; // used with -g option
+		std::string m_omd = "";        // initial tempo designation (store for later output)
 
 		// state variables:
-		int m_part     = 0;          // staff index currently being processed
-		int m_maxstaff = 0;          // total number of staves (parts)
-		HumNum m_timesigdur = 4;     // duration of current time signature in quarter notes
-		HTp m_lastfigure = NULL;     // last figured bass token
-		int m_lastbarnum = -1;       // barnumber carried over from previous bar
-		HTp m_lastnote = NULL;       // for dealing with chords.
+		int m_part     = 0;            // staff index currently being processed
+		int m_maxstaff = 0;            // total number of staves (parts)
+		HumNum m_timesigdur = 4;       // duration of current time signature in quarter notes
+		HTp m_lastfigure = NULL;       // last figured bass token
+		int m_lastbarnum = -1;         // barnumber carried over from previous bar
+		HTp m_lastnote = NULL;         // for dealing with chords.
 
 };
 
