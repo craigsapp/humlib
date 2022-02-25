@@ -97,15 +97,22 @@ void processSpine(HTp startok) {
 // identifyLocalPeaks -- Identify notes that are higher than their
 //    adjacent neighbors.  The midinumbs are MIDI note numbers (integers)
 //    for the pitch, with higher number meaning higher pitches.  Rests are
-//    the value 0.  Do not assign a note as a peak note if one of the 
+//    the value 0.  Do not assign a note as a peak note if one of the
 //    adjacent notes is a rest. (This could be refined later, such as ignoring
 //    short rests).
 //
 
-void identifyLocalPeaks(vector<bool>& peaknotes, vector<int>& notelist) {
-
-	// Fill in code here to identify local pitch peak.
-
+void identifyLocalPeaks(vector<bool>& peaknotes, vector<int>& midinums) { //changed to midinums from 'notelist'
+  for (int i=1; i<(int)midinums.size() - 1; i++) {
+    if ((midinums[i - 1] <= 0) || (midinums[i + 1] <= 0)) { //not next to a rest
+      continue;
+    } else if (midinums[i] <= 0) {
+      continue;
+    }
+    if ((midinums[i] > midinums[i - 1]) && (midinums[i] > midinums[i + 1])) { //check neighboring notes
+      peaknotes[i] = 1;
+    }
+  }
 }
 
 
@@ -184,6 +191,3 @@ vector<vector<HTp>> getNoteList(HTp starting) {
 	}
 	return output;
 }
-
-
-
