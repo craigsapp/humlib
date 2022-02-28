@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 28 11:03:49 PST 2022
+// Last Modified: Mon Feb 28 11:29:51 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8405,6 +8405,39 @@ class Tool_pccount : public HumTool {
 
 };
 
+
+
+class Tool_peak : public HumTool {
+	public:
+		                              Tool_peak          (void);
+		                             ~Tool_peak          () {};
+
+		bool                          run                (HumdrumFileSet& infiles);
+		bool                          run                (HumdrumFile& infile);
+		bool                          run                (const string& indata, ostream& out);
+		bool                          run                (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void                          processFile        (HumdrumFile& infile);
+		void                          initialize         (void);
+		void                          processFile        (HumdrumFile& infile, Options& options);
+		void                          processSpine       (HTp startok);
+		void                          identifyLocalPeaks (std::vector<bool>& peaknotes, std::vector<int>& notelist);
+		std::vector<int>              getMidiNumbers     (std::vector<std::vector<HTp>>& notelist);
+		std::vector<std::vector<HTp>> getNoteList        (HTp starting);
+		void                          printData          (std::vector<std::vector<HTp>>& notelist,
+		                                                  std::vector<int>& midinums,
+		                                                  std::vector<bool>& peaknotes);
+		void                          markNotesInScore   (std::vector<std::vector<HTp>>& notelist,
+		                                                  std::vector<bool>& peaknotes);
+
+	private:
+		bool m_rawQ          = false;
+		std::string m_marker = "@";
+		std::string m_color  = "red";
+
+
+};
 
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Sat Jun 17 23:27:51 CEST 2017
+// Last Modified: Mon Feb 28 11:29:18 PST 2022
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -46,6 +46,7 @@
 #include "tool-modori.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
+#include "tool-peak.h"
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
@@ -258,6 +259,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "peak") {
+			RUNTOOL(peak, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {

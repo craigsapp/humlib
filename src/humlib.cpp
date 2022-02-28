@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 28 11:03:49 PST 2022
+// Last Modified: Mon Feb 28 11:29:51 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70015,6 +70015,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "peak") {
+			RUNTOOL(peak, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
@@ -94546,6 +94548,265 @@ string Tool_pccount::getPitchClassString(int b40) {
 	}
 
 	return "?";
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_peak::Tool_peak -- Set the recognized options for the tool.
+//
+
+Tool_peak::Tool_peak(void) {
+	define("r|raw|raw-data=b",  "print input/output data"); 
+	define("m|mark|marker=s:@", "symbol to mark peak notes");
+	define("c|color=s:red",     "color of marked notes");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_peak::run -- Do the main work of the tool.
+//
+
+bool Tool_peak::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_peak::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_peak::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_peak::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_peak::initialize(void) {
+	m_rawQ   = getBoolean("raw-data");
+	m_marker = getString("marker");
+	m_color  = getString("color");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::processFile --
+//
+
+void Tool_peak::processFile(HumdrumFile& infile) {
+	// get list of music spines (columns):
+	vector<HTp> starts = infile.getKernSpineStartList();
+
+	// The first "spine" is the lowest part on the system.
+	// The last "spine" is the highest part on the system.
+	for (int i=0; i<(int)starts.size(); i++) {
+		processSpine(starts[i]);
+		if (!m_rawQ) {
+			infile.createLinesFromTokens();
+			cout << infile;
+			cout << "!!!RDF**kern: ";
+			cout << m_marker;
+			cout << " = marked note, color=";
+			cout << m_color;
+			cout << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::processSpine -- Process one line of music.
+//
+
+void Tool_peak::processSpine(HTp startok) {
+	// notelist is a two dimensional array of notes.   The
+	// first dimension is a list of the note attacks in time
+	// (plus rests), and the second dimension is for a list of the
+	// tied notes after the first one (this is so that we can
+	// highlight both the starting note and any tied notes to that
+	// starting note later).
+	vector<vector<HTp>> notelist = getNoteList(startok);
+
+	// MIDI note numbers for each note (with rests being 0).
+	vector<int> midinums = getMidiNumbers(notelist);
+
+	// True = the note is a local high pitch.
+	vector<bool> peaknotes(midinums.size(), false);
+
+	identifyLocalPeaks(peaknotes, midinums);
+
+	if (m_rawQ) {
+		printData(notelist, midinums, peaknotes);
+	} else {
+		markNotesInScore(notelist, peaknotes);
+	}
+
+}
+
+
+//////////////////////////////
+//
+// Tool_peak::markNotesInScore --
+//
+
+void Tool_peak::markNotesInScore(vector<vector<HTp>>& notelist, vector<bool>& peaknotes) {
+	for (int i=0; i<(int)peaknotes.size(); i++) {
+		if (!peaknotes[i]) {
+			continue;
+		}
+		for (int j=0; j<(int)notelist[i].size(); j++) {
+			string text = *(notelist[i][j]);
+			text += m_marker;
+			notelist[i][j]->setText(text);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::identifyLocalPeaks -- Identify notes that are higher than their
+//    adjacent neighbors.  The midinumbs are MIDI note numbers (integers)
+//    for the pitch, with higher number meaning higher pitches.  Rests are
+//    the value 0.  Do not assign a note as a peak note if one of the
+//    adjacent notes is a rest. (This could be refined later, such as ignoring
+//    short rests).
+//
+
+void Tool_peak::identifyLocalPeaks(vector<bool>& peaknotes, vector<int>& midinums) { //changed to midinums from 'notelist'
+  for (int i=1; i<(int)midinums.size() - 1; i++) {
+    if ((midinums[i - 1] <= 0) || (midinums[i + 1] <= 0)) { //not next to a rest
+      continue;
+    } else if (midinums[i] <= 0) {
+      continue;
+    }
+    if ((midinums[i] > midinums[i - 1]) && (midinums[i] > midinums[i + 1])) { //check neighboring notes
+      peaknotes[i] = 1;
+    }
+  }
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::printData -- Print input and output data.  First column is the MIDI note
+//      number, second one is the peak analysis (true=local maximum note)
+//
+
+void Tool_peak::printData(vector<vector<HTp>>& notelist, vector<int>& midinums, vector<bool>& peaknotes) {
+	cout << "MIDI\tPEAK\tKERN" << endl;
+	for (int i=0; i<(int)notelist.size(); i++) {
+		cout << midinums.at(i) << "\t";
+		cout << peaknotes.at(i);
+		for (int j=0; j<(int)notelist[i].size(); j++) {
+			cout << "\t" << notelist[i][j];
+		}
+		cout << endl;
+	}
+	cout << "******************************************" << endl;
+	cout << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::getMidiNumbers -- convert note tokens into MIDI note numbers.
+//    60 = middle C (C4), 62 = D4, 72 = C5, 48 = C3.
+//
+
+vector<int> Tool_peak::getMidiNumbers(vector<vector<HTp>>& notelist) {
+	vector<int> output(notelist.size(), 0);  // fill with rests by default
+	for (int i=0; i<(int)notelist.size(); i++) {
+		output[i] = Convert::kernToMidiNoteNumber(notelist.at(i).at(0));
+		if (output[i] < 0) {
+			// Set rests to be 0
+			output[i] = 0;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::getNoteList -- Return a list of the notes and rests for
+//     a part, with the input being the starting token of the part from
+//     which the note list should be extracted.  The output is a two-
+//     dimensional vector.  The first dimension is for the list of notes,
+//     and the second dimension is used to store any subsequent tied notes
+//     so that they can be marked and highlighted in the score.
+//
+
+vector<vector<HTp>> Tool_peak::getNoteList(HTp starting) {
+	vector<vector<HTp>> output;
+	output.reserve(2000);
+
+	HTp current = starting;
+	while (current) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNoteSustain()) {
+			if (output.size() > 0) {
+				output.back().push_back(current);
+			}
+			current = current->getNextToken();
+			continue;
+		}
+		output.resize(output.size() + 1);
+		output.back().push_back(current);
+		current = current->getNextToken();
+	}
+	return output;
 }
 
 
