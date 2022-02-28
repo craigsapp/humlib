@@ -77,6 +77,10 @@ class Tool_musedata2hum : public HumTool {
 		HTp m_lastfigure = NULL;       // last figured bass token
 		int m_lastbarnum = -1;         // barnumber carried over from previous bar
 		HTp m_lastnote = NULL;         // for dealing with chords.
+		double m_tempo = 0.0;          // for initial tempo from MIDI settings
+
+		std::map<std::string, bool> m_usedReferences;
+		std::vector<std::string> m_postReferences;
 
 };
 

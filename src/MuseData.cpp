@@ -170,6 +170,8 @@ MuseData::MuseData(MuseData& input) {
 		temprec  = new MuseRecord;
 		*temprec = *(input.m_data[i]);
 		m_data[i]  = temprec;
+		m_data[i]->setLineIndex(i);
+		m_data[i]->setOwner(this);
 	}
 	m_sequence.resize(input.m_sequence.size());
 	for (i=0; i<(int)input.m_sequence.size(); i++) {
@@ -209,6 +211,8 @@ MuseData& MuseData::operator=(MuseData& input) {
 		temprec = new MuseRecord;
 		*temprec = *(input.m_data[i]);
 		m_data[i] = temprec;
+		m_data[i]->setLineIndex(i);
+		m_data[i]->setOwner(this);
 	}
 	// do something with m_sequence...
 	m_name = input.m_name;
@@ -234,10 +238,11 @@ int MuseData::getLineCount(void) {
 //
 
 int MuseData::append(MuseRecord& arecord) {
-	MuseRecord* temprec;
-	temprec = new MuseRecord;
+	MuseRecord* temprec = new MuseRecord;
 	*temprec = arecord;
+	temprec->setOwner(this);
 	m_data.push_back(temprec);
+	m_data.back()->setLineIndex((int)m_data.size() - 1);
 	return (int)m_data.size()-1;
 }
 
@@ -253,6 +258,8 @@ int MuseData::append(MuseData& musedata) {
 	for (int i=0; i<newlinecount; i++) {
 		m_data[i+oldsize] = new MuseRecord;
 		*(m_data[i+oldsize]) = musedata[i];
+		m_data[i+oldsize]->setLineIndex(i+oldsize);
+		m_data[i+oldsize]->setOwner(this);
 	}
 	return (int)m_data.size()-1;
 }
@@ -265,6 +272,8 @@ int MuseData::append(string& charstring) {
 	temprec->setType(E_muserec_unknown);
 	temprec->setAbsBeat(0);
 	m_data.push_back(temprec);
+	temprec->setLineIndex((int)m_data.size() - 1);
+	temprec->setOwner(this);
 	return (int)m_data.size()-1;
 }
 
@@ -283,12 +292,15 @@ void MuseData::insert(int lindex, MuseRecord& arecord) {
 	MuseRecord* temprec;
 	temprec = new MuseRecord;
 	*temprec = arecord;
+	temprec->setOwner(this);
 
 	m_data.resize(m_data.size()+1);
 	for (int i=(int)m_data.size()-1; i>lindex; i--) {
 		m_data[i] = m_data[i-1];
+		m_data[i]->setLineIndex(i);
 	}
 	m_data[lindex] = temprec;
+	temprec->setLineIndex(lindex);
 }
 
 

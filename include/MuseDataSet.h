@@ -46,6 +46,10 @@ class MuseDataSet {
 		bool              hasError            (void);
 		void              clearError          (void);
 
+		// MIDI related information
+		double            getMidiTempo        (void);
+
+
 	private:
 		std::vector<MuseData*>  m_part;
 		std::string             m_error;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Feb 23 13:56:52 PST 2022
+// Last Modified: Mon Feb 28 11:03:49 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -112,6 +112,10 @@ class HumdrumFileBase;
 class HumdrumFileStructure;
 class HumdrumFileContent;
 class HumdrumFile;
+class MuseRecordBase;
+class MuseRecord;
+class MuseData;
+class MuseDataSet;
 class GridVoice;
 
 
@@ -2014,6 +2018,7 @@ class HumdrumFileBase : public HumHash {
 		int           getTrackEndCount         (int track) const;
 		HTp           getTrackEnd              (int track, int subtrack = 0) const;
 		void          createLinesFromTokens    (void);
+		void          generateLinesFromTokens  (void) { createLinesFromTokens(); }
 		void          removeExtraTabs          (void);
 		void          addExtraTabs             (void);
 		std::vector<int> getTrackWidths        (void);
@@ -2947,6 +2952,7 @@ class MuseRecordBasic {
 		void              setTypeGraceNote   (void);
 		void              setTypeGraceChordNote(void);
 		void              setHeaderState     (int state);
+		MuseData*         getOwner           (void);
 
 		// Humdrum conversion variables
 		void              setToken           (HTp token);
@@ -3027,6 +3033,7 @@ class MuseRecordBasic {
 		bool              isAnyRest          (void);
 		bool              isRegularRest      (void);
 		bool              isInvisibleRest    (void);
+		bool              isPrintSuggestion  (void);
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
@@ -3056,9 +3063,14 @@ class MuseRecordBasic {
 		int               m_tpq = 0;         // ticks-per-quarter for durations
 		std::string       m_graphicrecip;    // graphical duration of note/rest
 		GridVoice*			m_voice = NULL;    // conversion structure that token is stored in.
+		MuseData*         m_owner = NULL;
+
+		void              setOwner    (MuseData* owner);
 
 	public:
 		static std::string       trimSpaces         (std::string input);
+
+		friend class MuseData;
 };
 
 
@@ -3362,6 +3374,10 @@ class MuseRecord : public MuseRecordBasic {
 
 		std::string      getKernRestStyle             (void);
 
+		bool             hasPrintSuggestions          (void);
+		void             getAllPrintSuggestions       (std::vector<std::string>& suggestions);
+		void             getPrintSuggestions          (std::vector<std::string>& suggestions, int column);
+
 	protected:
 		void             allowNotesOnly               (const std::string& functionName);
 		void             allowNotesAndRestsOnly       (const std::string& functionName);
@@ -3554,6 +3570,10 @@ class MuseDataSet {
 		std::string       getError            (void);
 		bool              hasError            (void);
 		void              clearError          (void);
+
+		// MIDI related information
+		double            getMidiTempo        (void);
+
 
 	private:
 		std::vector<MuseData*>  m_part;
@@ -7906,6 +7926,10 @@ class Tool_musedata2hum : public HumTool {
 		HTp m_lastfigure = NULL;       // last figured bass token
 		int m_lastbarnum = -1;         // barnumber carried over from previous bar
 		HTp m_lastnote = NULL;         // for dealing with chords.
+		double m_tempo = 0.0;          // for initial tempo from MIDI settings
+
+		std::map<std::string, bool> m_usedReferences;
+		std::vector<std::string> m_postReferences;
 
 };
 

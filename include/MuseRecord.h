@@ -318,6 +318,10 @@ class MuseRecord : public MuseRecordBasic {
 
 		std::string      getKernRestStyle             (void);
 
+		bool             hasPrintSuggestions          (void);
+		void             getAllPrintSuggestions       (std::vector<std::string>& suggestions);
+		void             getPrintSuggestions          (std::vector<std::string>& suggestions, int column);
+
 	protected:
 		void             allowNotesOnly               (const std::string& functionName);
 		void             allowNotesAndRestsOnly       (const std::string& functionName);

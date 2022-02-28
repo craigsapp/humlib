@@ -208,6 +208,10 @@ class HumdrumFileBase;
 class HumdrumFileStructure;
 class HumdrumFileContent;
 class HumdrumFile;
+class MuseRecordBase;
+class MuseRecord;
+class MuseData;
+class MuseDataSet;
 class GridVoice;
 
 EOT

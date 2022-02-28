@@ -32,7 +32,7 @@ namespace hum {
 MuseRecordBasic::MuseRecordBasic(void) {
 	m_recordString.reserve(81);
 	setType(E_muserec_unknown);
-
+	m_owner        = NULL;
 	m_lineindex    =   -1;
 	m_absbeat      =    0;
 	m_lineduration =    0;
@@ -52,7 +52,7 @@ MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
 	setLine(aLine);
 	setType(E_muserec_unknown);
 	m_lineindex = index;
-
+	m_owner        = NULL;
 	m_absbeat      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
@@ -78,7 +78,8 @@ MuseRecordBasic::MuseRecordBasic(MuseRecordBasic& aRecord) {
 
 MuseRecordBasic::~MuseRecordBasic() {
 	m_recordString.resize(0);
-
+	m_owner        = NULL;
+	m_lineindex    =   -1;
 	m_absbeat      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
@@ -98,8 +99,9 @@ MuseRecordBasic::~MuseRecordBasic() {
 
 void MuseRecordBasic::clear(void) {
 	m_recordString.clear();
-	m_lineindex    =   -1;
+	m_owner        = NULL;
 	m_absbeat      =    0;
+	m_lineindex    =   -1;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -959,6 +961,21 @@ bool MuseRecordBasic::isFiguredHarmony(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isPrintSuggestion --
+//
+
+bool MuseRecordBasic::isPrintSuggestion(void) {
+	switch (m_type) {
+		case E_muserec_print_suggestion:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::isRegularNote --
 //
 
@@ -1428,6 +1445,28 @@ string MuseRecordBasic::musedataToUtf8(string& input) {
 	}
 
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::setOwner --
+//
+
+void MuseRecordBasic::setOwner(MuseData* owner) {
+	m_owner = owner;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getOwner --
+//
+
+MuseData* MuseRecordBasic::getOwner(void) {
+	return m_owner;
 }
 
 

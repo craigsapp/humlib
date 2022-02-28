@@ -422,6 +422,51 @@ vector<int> MuseDataSet::getGroupIndexList(const string& group) {
 
 
 
+//////////////////////////////
+//
+// MuseData::getMidiTempo -- return the MIDI tempo (initial) for the score.
+//    The MIDI tempo is in a file that has the string "Midi assignment" and/or
+//    Group memberships: midi at the start of the file.  And a tempo after
+//    Group memberhsips in the form:
+//         192 quarter notes per minute
+//    Returns 0.0 if there is no tempo specified.
+//
+
+double MuseDataSet::getMidiTempo(void) {
+	int foundi = -1;
+	int foundj = -1;
+	for (int i=this->getFileCount() - 1; i>=0; i--) {
+		for (int j=0; j<(*this)[i].getLineCount(); j++) {
+			string line = (*this)[i].getRecord(j).getLine();
+			if (line.compare(0, 15, "Midi assignment") == 0) {
+				foundi = i;
+				foundj = j;
+				break;
+			}
+		}
+		if (foundi >= 0) {
+			break;
+		}
+	}
+	if (foundi < 0) {
+		// no tempo found
+		return 0.0;
+	}
+
+	// continue to find the MIDI tempo line
+	HumRegex hre;
+	for (int j=foundj+1; j<(*this)[foundi].getLineCount(); j++) {
+		string line = (*this)[foundi].getRecord(j).getLine();
+		if (hre.search(line, "(\\d+\\.?\\d*)\\s*quarter notes per minute")) {
+			return hre.getMatchDouble(1);
+		}
+	}
+
+	return 0.0;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////

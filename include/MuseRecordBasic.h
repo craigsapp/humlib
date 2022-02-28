@@ -24,6 +24,8 @@
 
 namespace hum {
 
+class MuseData;
+
 // START_MERGE
 
 // Reference:     Beyond Midi, page 410.
@@ -114,6 +116,7 @@ class MuseRecordBasic {
 		void              setTypeGraceNote   (void);
 		void              setTypeGraceChordNote(void);
 		void              setHeaderState     (int state);
+		MuseData*         getOwner           (void);
 
 		// Humdrum conversion variables
 		void              setToken           (HTp token);
@@ -194,6 +197,7 @@ class MuseRecordBasic {
 		bool              isAnyRest          (void);
 		bool              isRegularRest      (void);
 		bool              isInvisibleRest    (void);
+		bool              isPrintSuggestion  (void);
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
@@ -223,9 +227,14 @@ class MuseRecordBasic {
 		int               m_tpq = 0;         // ticks-per-quarter for durations
 		std::string       m_graphicrecip;    // graphical duration of note/rest
 		GridVoice*			m_voice = NULL;    // conversion structure that token is stored in.
+		MuseData*         m_owner = NULL;
+
+		void              setOwner    (MuseData* owner);
 
 	public:
 		static std::string       trimSpaces         (std::string input);
+
+		friend class MuseData;
 };
 
 

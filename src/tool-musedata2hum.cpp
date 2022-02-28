@@ -1,13 +1,13 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:23:06 PDT 2019
-// Last Modified: Wed Sep 25 19:23:08 PDT 2019
+// Last Modified: Sun Feb 27 02:39:41 PST 2022
 // Filename:      musedata2hum.cpp
 // URL:           https://github.com/craigsapp/hum2ly/blob/master/src/musedata2hum.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3:noexpandtab
 //
-// Description:   Convert a MusicXML file into a Humdrum file.
+// Description:   Convert a MuseData file into a Humdrum file.
 //
 
 #include "tool-musedata2hum.h"
@@ -129,6 +129,9 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	}
 	initialize();
 
+	m_tempo = mds.getMidiTempo();
+cerr << "TEMPO " << m_tempo << endl;
+
 	vector<int> groupMemberIndex = mds.getGroupIndexList(m_group);
 	if (groupMemberIndex.empty()) {
 		cerr << "Error: no files in the " << m_group << " membership." << endl;
@@ -145,14 +148,21 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	outdata.transferTokens(outfile);
 	outfile.createLinesFromTokens();
 
+
 	// Convert comments in header of first part:
 	int ii = groupMemberIndex[0];
+	bool ending = false;
+	HumRegex hre;
 	for (int i=0; i< mds[ii].getLineCount(); i++) {
 		if (mds[ii][i].isAnyNote()) {
 			break;
 		}
 		if (mds[ii].getLine(i).compare(0, 2, "@@") == 0) {
 			string output = mds[ii].getLine(i);
+			if (output == "@@@") {
+				ending = true;
+				continue;
+			}
 			for (int j=0; j<(int)output.size(); j++) {
 				if (output[j] == '@') {
 					output[j] = '!';
@@ -160,60 +170,93 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 					break;
 				}
 			}
-			out << output << endl;
+			if (hre.search(output, "!!!\\s*([^!:]+)\\s*:")) {
+				string key = hre.getMatch(1);
+				m_usedReferences[key] = true;
+			}
+			if (ending) {
+           m_postReferences.push_back(output);
+			} else {
+				out << output << endl;
+			}
 		}
 	}
 
-	string composer = mds[ii].getComposer();
-	if (!composer.empty()) {
-		out << "!!!COM: " << composer << endl;
+	if (!m_usedReferences["COM"]) {
+		string composer = mds[ii].getComposer();
+		if (!composer.empty()) {
+				out << "!!!COM: " << composer << endl;
+		}
 	}
 
-	string cdate = mds[ii].getComposerDate();
-	if (!cdate.empty()) {
-		out << "!!!CDT: " << cdate << endl;
+	if (!m_usedReferences["CDT"]) {
+		string cdate = mds[ii].getComposerDate();
+		if (!cdate.empty()) {
+			out << "!!!CDT: " << cdate << endl;
+		}
 	}
 
-	string worktitle = mds[ii].getWorkTitle();
-	if (!worktitle.empty()) {
-		out << "!!!OTL: " << worktitle << endl;
+	if (!m_usedReferences["OTL"]) {
+		string worktitle = mds[ii].getWorkTitle();
+		if (!worktitle.empty()) {
+			out << "!!!OTL: " << worktitle << endl;
+		}
 	}
 
-	string movementtitle = mds[ii].getMovementTitle();
-	if (!movementtitle.empty()) {
-		out << "!!!OMV: " << movementtitle << endl;
+	if (!m_usedReferences["OMV"]) {
+		string movementtitle = mds[ii].getMovementTitle();
+		if (!movementtitle.empty()) {
+			out << "!!!OMV: " << movementtitle << endl;
+		}
 	}
 
-	string opus = mds[ii].getOpus();
-	if (!opus.empty()) {
-		out << "!!!OPS: " << opus << endl;
+	if (!m_usedReferences["OPS"]) {
+		string opus = mds[ii].getOpus();
+		if (!opus.empty()) {
+			out << "!!!OPS: " << opus << endl;
+		}
 	}
 
-	string number = mds[ii].getNumber();
-	if (!number.empty()) {
-		out << "!!!ONM: " << number << endl;
+	if (!m_usedReferences["ONM"]) {
+		string number = mds[ii].getNumber();
+		if (!number.empty()) {
+			out << "!!!ONM: " << number << endl;
+		}
 	}
 
-	if (!m_omd.empty()) {
-		out << "!!!OMD: " << m_omd << endl;
+	if (!m_usedReferences["OMD"]) {
+		if (!m_omd.empty()) {
+			out << "!!!OMD: " << m_omd << endl;
+		}
 	}
 
 	out << outfile;
 
-	string source = mds[ii].getSource();
-	if (!source.empty()) {
-		out << "!!!SMS: " << source << endl;
+	if (!m_usedReferences["SMS"]) {
+		string source = mds[ii].getSource();
+		if (!source.empty()) {
+			out << "!!!SMS: " << source << endl;
+		}
 	}
 
-	string encoder = mds[ii].getEncoderName();
-	if (!encoder.empty()) {
-		out << "!!!ENC: " << encoder << endl;
+	if (!m_usedReferences["ENC"]) {
+		string encoder = mds[ii].getEncoderName();
+		if (!encoder.empty()) {
+			out << "!!!ENC: " << encoder << endl;
+		}
 	}
 
-	string edate = mds[ii].getEncoderDate();
-	if (!edate.empty()) {
-		out << "!!!END: " << edate << endl;
+	if (!m_usedReferences["END"]) {
+		string edate = mds[ii].getEncoderDate();
+		if (!edate.empty()) {
+			out << "!!!END: " << edate << endl;
+		}
 	}
+
+	for (int i=0; i<(int)m_postReferences.size(); i++) {
+		out << m_postReferences[i] << endl;
+	}
+	m_postReferences.clear();
 
 	stringstream ss;
 	auto nowtime = std::chrono::system_clock::now();
@@ -352,6 +395,8 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 	return i;
 }
 
+
+
 //////////////////////////////
 //
 // Tool_musedata2hum::setMeasureNumber --
@@ -475,6 +520,11 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			string kmeter = Convert::museMeterSigToKernMeterSig(mtimesig);
 			if (!kmeter.empty()) {
 				slice = gm->addMeterSigToken(kmeter, timestamp, part, staff, layer, maxstaff);
+			}
+			if (m_tempo > 0.00) {
+				int value = (int)(m_tempo + 0.5);
+				string tempotok = "*MM" + to_string(value);
+				slice = gm->addTempoToken(tempotok, timestamp, part, staff, layer, maxstaff);
 			}
 		}
 	} else if (mr.isRegularNote()) {
@@ -668,13 +718,14 @@ void Tool_musedata2hum::addLyrics(GridSlice* slice, int part, int staff, MuseRec
 
 //////////////////////////////
 //
-// Tool_musedata2hum::addNoteDynamics --
+// Tool_musedata2hum::addNoteDynamics -- only one contiguous dynamic allowed
 //
 
 void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 		MuseRecord& mr) {
 	string notations = mr.getAdditionalNotationsField();
 	vector<string> dynamics(1);
+	vector<int> column(1, -1);
 	int state = 0;
 	for (int i=0; i<(int)notations.size(); i++) {
 		if (state) {
@@ -695,16 +746,29 @@ void Tool_musedata2hum::addNoteDynamics(GridSlice* slice, int part,
 				case 'f':
 					state = 1;
 					dynamics.back() = notations[i];
+					column.back() = i;
 					break;
 			}
 		}
 	}
 
 	bool setdynamics = false;
+	vector<string> ps;
+	HumRegex hre;
 	for (int i=0; i<(int)dynamics.size(); i++) {
 		if (dynamics[i].empty()) {
 			continue;
 		}
+		mr.getPrintSuggestions(ps, column[i]+32);
+		if (ps.size() > 0) {
+			cerr << "\tPRINT SUGGESTION: " << ps[0] << endl;
+			// only checking the first entry (first parameter):
+			if (hre.search(ps[0], "Y(-?\\d+)")) {
+				int y = hre.getMatchInt(1);
+				cerr << "Y = " << y << endl;
+			}
+		}
+
 		slice->at(part)->setDynamics(dynamics[i]);
 		setdynamics = true;
 		break;  // only one dynamic allowed (at least for now)

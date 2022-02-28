@@ -28,14 +28,16 @@ vector<vector<HTp>> getNoteList        (HTp starting);
 void                printData          (vector<vector<HTp>>& notelist,
                                         vector<int>& midinums,
                                         vector<bool>& peaknotes);
+void                markNotesInScore   (vector<vector<HTp>>& notelist,
+                                        vector<bool>& peaknotes);
 
 
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-	options.define("d|data=b",       "print input/output data");    // used later
-	options.define("m|mark=s:@",     "symbol to mark peak notes");  // used later
-	options.define("c|color=s:red",  "color of marked notes");      // used later
+	options.define("r|raw|raw-data=b",  "print input/output data"); 
+	options.define("m|mark|marker=s:@", "symbol to mark peak notes");
+	options.define("c|color=s:red",     "color of marked notes");
 	options.process(argc, argv);
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
@@ -60,6 +62,15 @@ void processFile(HumdrumFile& infile, Options& options) {
 	// The last "spine" is the highest part on the system.
 	for (int i=0; i<(int)starts.size(); i++) {
 		processSpine(starts[i]);
+		if (!options.getBoolean("raw-data")) {
+			infile.createLinesFromTokens();
+			cout << infile;
+			cout << "!!!RDF**kern: ";
+			cout << options.getString("marker");
+			cout << " = marked note, color=";
+			cout << options.getString("color");
+			cout << endl;
+		}
 	}
 }
 
@@ -87,7 +98,31 @@ void processSpine(HTp startok) {
 
 	identifyLocalPeaks(peaknotes, midinums);
 
-	printData(notelist, midinums, peaknotes);
+	if (options.getBoolean("raw-data")) {
+		printData(notelist, midinums, peaknotes);
+	} else {
+		markNotesInScore(notelist, peaknotes);
+	}
+
+}
+
+
+//////////////////////////////
+//
+// markNotesInScore --
+//
+
+void markNotesInScore(vector<vector<HTp>>& notelist, vector<bool>& peaknotes) {
+	for (int i=0; i<(int)peaknotes.size(); i++) {
+		if (!peaknotes[i]) {
+			continue;
+		}
+		for (int j=0; j<(int)notelist[i].size(); j++) {
+			string text = *(notelist[i][j]);
+			text += options.getString("marker");
+			notelist[i][j]->setText(text);
+		}
+	}
 }
 
 

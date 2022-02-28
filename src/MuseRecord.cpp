@@ -14,6 +14,7 @@
 
 #include "Convert.h"
 #include "MuseRecord.h"
+#include "MuseData.h"
 #include "HumRegex.h"
 
 #include <string.h>
@@ -4135,6 +4136,114 @@ std::string MuseRecord::getDirectionText(void) {
 	}
 	return trimSpaces(m_recordString.substr(24));
 }
+
+
+
+//////////////////////////////
+//
+// MuseRecord::hasPrintSuggestions --
+//
+
+bool MuseRecord::hasPrintSuggestions(void) {
+	MuseData* md = getOwner();
+	if (md == NULL) {
+		return false;
+	}
+	if (m_lineindex < 0) {
+		return false;
+	}
+	if (m_lineindex >= md->getLineCount() - 1) {
+		return false;
+	}
+	if (md->getRecord(m_lineindex).isPrintSuggestion()) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getPrintSuggestions -- Return any print suggestions
+//     for the given column number
+//
+
+void MuseRecord::getPrintSuggestions(vector<string>& suggestions, int column) {
+	suggestions.clear();
+
+	MuseData* md = getOwner();
+	if (md == NULL) {
+		return;
+	}
+	if (m_lineindex < 0) {
+		return;
+	}
+	if (m_lineindex >= md->getLineCount() - 1) {
+		return;
+	}
+	if (!md->getRecord(m_lineindex+1).isPrintSuggestion()) {
+		return;
+	}
+
+	string pline = md->getLine(m_lineindex+1);
+	HumRegex hre;
+	vector<string> entries;
+	hre.split(entries, pline, "\\s+");
+	for (int i=0; i<(int)entries.size(); i++) {
+		if (entries[i][0] != 'C') {
+			continue;
+		}
+		if (hre.search(entries[i], "C(\\d+):([^\\s]+)")) {
+			int value = hre.getMatchInt(1);
+			if (value == column) {
+				suggestions.push_back(hre.getMatch(2));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getAllPrintSuggestions -- Return all print suggestions.
+//
+
+void MuseRecord::getAllPrintSuggestions(vector<string>& suggestions) {
+	suggestions.clear();
+
+	MuseData* md = getOwner();
+	if (md == NULL) {
+		return;
+	}
+	if (m_lineindex < 0) {
+		return;
+	}
+	if (m_lineindex >= md->getLineCount() - 1) {
+		return;
+	}
+	if (!md->getRecord(m_lineindex+1).isPrintSuggestion()) {
+		return;
+	}
+
+	string pline = md->getLine(m_lineindex+1);
+	HumRegex hre;
+	vector<string> entries;
+	hre.split(entries, pline, " ");
+	for (int i=0; i<(int)entries.size(); i++) {
+		if (entries[i][0] != 'C') {
+			continue;
+		}
+		if (hre.search(entries[i], "C(\\d+):([^\\s]+)")) {
+			suggestions.push_back(entries[i]);
+		}
+	}
+}
+
+
+
 
 
 
