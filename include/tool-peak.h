@@ -56,9 +56,9 @@ class Tool_peak : public HumTool {
 		bool m_rawQ             = false;
 		std::string m_marker    = "@";
 		std::string m_color     = "red";
-		double      m_smallRest = 4.0;  // ignore rests that are 4 quarter notes or less.
-		double      m_peakDur   = 24;
-		double      m_peakNum   = 3;
+		double      m_smallRest = 4.0;   // Ignore rests that are 1 whole note or less.
+		double      m_peakDur   = 24.0;  // 6 whole notes maximum between m_peakNum local maximums.
+		double      m_peakNum   = 3;    // Number of local maximums in a row needed to mark in score.
 
 
 };
