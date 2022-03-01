@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Feb 28 18:46:02 PST 2022
+// Last Modified: Mon Feb 28 21:05:27 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8429,19 +8429,29 @@ class Tool_peak : public HumTool {
 		void                          initialize         (void);
 		void                          processFile        (HumdrumFile& infile, Options& options);
 		void                          processSpine       (HTp startok);
-		void                          identifyLocalPeaks (std::vector<bool>& peaknotes, std::vector<int>& notelist);
+		void                          identifyLocalPeaks (std::vector<bool>& peaknotes,
+		                                                  std::vector<int>& notelist);
+		void                          getLocalPeakNotes  (vector<vector<HTp>>& newnotelist,
+		                                                  vector<vector<HTp>>& oldnotelist,
+		                                                  vector<bool>& peaknotes);
+		void                          identifyPeakSequence(vector<bool>& globalpeaknotes,
+		                                                   vector<int>& peakmidinums,
+		                                                   vector<vector<HTp>>& notes);
 		std::vector<int>              getMidiNumbers     (std::vector<std::vector<HTp>>& notelist);
 		std::vector<std::vector<HTp>> getNoteList        (HTp starting);
 		void                          printData          (std::vector<std::vector<HTp>>& notelist,
 		                                                  std::vector<int>& midinums,
 		                                                  std::vector<bool>& peaknotes);
-		void                          markNotesInScore   (std::vector<std::vector<HTp>>& notelist,
-		                                                  std::vector<bool>& peaknotes);
+		void                          markNotesInScore   (vector<vector<HTp>>& peaknotelist,
+		                                                  vector<bool>& ispeak);
 
 	private:
-		bool m_rawQ          = false;
-		std::string m_marker = "@";
-		std::string m_color  = "red";
+		bool m_rawQ             = false;
+		std::string m_marker    = "@";
+		std::string m_color     = "red";
+		double      m_smallRest = 4.0;  // ignore rests that are 4 quarter notes or less.
+		double      m_peakDur   = 24;
+		double      m_peakNum   = 3;
 
 
 };
