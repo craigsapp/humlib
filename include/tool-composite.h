@@ -22,134 +22,178 @@ namespace hum {
 
 class Tool_composite : public HumTool {
 	public:
-		            Tool_composite        (void);
-		           ~Tool_composite        () {};
+		            Tool_composite       (void);
+		           ~Tool_composite       () {};
 
 		bool        run                  (HumdrumFileSet& infiles);
 		bool        run                  (HumdrumFile& infile);
-		bool        run                  (const std::string& indata, ostream& out);
-		bool        run                  (HumdrumFile& infile, ostream& out);
+		bool        run                  (const std::string& indata, std::ostream& out);
+		bool        run                  (HumdrumFile& infile, std::ostream& out);
 
 	protected:
-		void        processFile          (HumdrumFile& infile);
-		void        prepareMultipleGroups(HumdrumFile& infile);
-		void        prepareSingleGroup   (HumdrumFile& infile);
-		void        initialize           (void);
-		void        initializeAnalysisArrays(HumdrumFile& infile);
-		int         typeStringToInt      (const std::string& value);
-		HumNum      getLineDuration      (HumdrumFile& infile, int index, std::vector<bool>& isNull);
-		void        getGroupStates       (std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
-		void        assignGroups         (HumdrumFile& infile);
-		void        analyzeLineGroups    (HumdrumFile& infile);
-		void        analyzeLineGroup     (HumdrumFile& infile, int line, const std::string& target);
-		void        printGroupAssignments(HumdrumFile& infile);
-		int         getGroupNoteType     (HumdrumFile& infile, int line, const std::string& group);
-		void        getGroupDurations    (std::vector<std::vector<HumNum>>& groupdurs,
-		                                  std::vector<std::vector<int>>& groupstates, HumdrumFile& infile);
-		void        getGroupDurations    (std::vector<HumNum>& groupdurs, std::vector<int>& groupstates,
-		                                  HumdrumFile& infile);
-		void        getGroupRhythms      (std::vector<std::vector<std::string>>& rhythms,
-		                                  std::vector<std::vector<HumNum>>& groupdurs,
-		                                  std::vector<std::vector<int>>& groupstates,
-		                                  HumdrumFile& infile);
-		void        getGroupRhythms      (std::vector<std::string>& rhythms,
-		                                  std::vector<HumNum>& durs,
-		                                  std::vector<int>& states, HumdrumFile& infile);
-		bool        hasGroupInterpretations(HumdrumFile& infile);
-		void        checkForTremoloReduction(HumdrumFile& infile, int line, int field);
-		void        reduceTremolos       (HumdrumFile& infile);
-		bool        areAllEqual          (std::vector<HTp>& notes);
-		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
-		void        getPitches           (std::vector<int>& pitches, HTp token);
-		void        addLabelsAndStria    (HumdrumFile& infile);
-		void        addLabels            (HTp sstart, int labelIndex, const string& label,
-		                                  int abbrIndex, const string& abbr);
-		void        addStria             (HumdrumFile& infile, HTp spinestart);
-		void        addVerseLabels       (HumdrumFile& infile, HTp spinestart);
-		void        addVerseLabels2      (HumdrumFile& infile, HTp spinestart);
-		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
-		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
-		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
-		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
-		void        markTogether         (HumdrumFile& infile, int direction);
-		void        markCoincidences     (HumdrumFile& infile, int direction);
-		void        markCoincidencesMusic(HumdrumFile& infile);
-		bool        isOnsetInBothGroups (HumdrumFile& infile, int line);
-		void        extractNestingData   (HumdrumFile& infile);
-		void        analyzeNestingDataGroups(HumdrumFile& infile, int direction);
-		void        analyzeNestingDataAll(HumdrumFile& infile, int direction);
-		void        getNestData          (HTp spine, int& total, int& coincide);
-		void        getCoincidenceRhythms(vector<string>& rhythms, vector<int>& coincidences,
-		                                  HumdrumFile& infile);
-		void        fillInCoincidenceRhythm(vector<int>& coincidences,
-		                                  HumdrumFile& infile, int direction);
-		void        processCoincidenceInterpretation(HumdrumFile& infile, HTp token);
-		bool        hasPipeRdf           (HumdrumFile& infile);
-		void        extractGroup         (HumdrumFile& infile, const string &target);
-		void        backfillGroup        (vector<vector<string>>& curgroup, HumdrumFile& infile,
-		                                  int line, int track, int subtrack, const string& group);
+		void        processFile               (HumdrumFile& infile);
+		void        initialize                (HumdrumFile& infile);
+		void        initializeNumericAnalyses (HumdrumFile& infile);
+		bool        hasGroupInterpretations   (HumdrumFile& infile);
+		void        prepareOutput             (HumdrumFile& infile);
+		void        analyzeFullCompositeRhythm(HumdrumFile& infile);
+		void        analyzeGroupCompositeRhythms(HumdrumFile& infile);
+		void        analyzeCoincidenceRhythms (HumdrumFile& infiel);
+		void        assignGroups              (HumdrumFile& infile);
+		void        analyzeLineGroups         (HumdrumFile& infile);
+		void        analyzeLineGroup          (HumdrumFile& infile, int line,
+		                                       const string& target);
+		void        extractGroup              (HumdrumFile& infile, const std::string &target);
+		void        getNumericGroupStates     (vector<int>& states, HumdrumFile& infile, const string& tgroup);
+		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
+		HumNum      getLineDuration           (HumdrumFile& infile, int index,
+		                                       std::vector<bool>& isNull);
+		void        backfillGroup             (std::vector<std::vector<std::string>>& curgroup,
+		                                       HumdrumFile& infile, int line, int track,
+		                                       int subtrack, const std::string& group);
 
-		void        analyzeComposite      (HumdrumFile& infile);
-		void        analyzeCompositeOnsets(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeTotal(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        getAnalysisOutputLine     (std::ostream& output, HumdrumFile& infile,
+		                                       int line);
+		std::string getFullCompositeToken     (HumdrumFile& infile, int line);
+		std::string getCoincidenceToken       (HumdrumFile& infile, int line);
+		std::string getGroupCompositeToken    (HumdrumFile& infile, int line, int group);
+		void        getGroupStates            (std::vector<std::vector<int>>& groupstates,
+		                                       HumdrumFile& infile);
+		void        getGroupDurations         (std::vector<std::vector<HumNum>>& groupdurs,
+		                                       std::vector<std::vector<int>>& groupstates,
+		                                       HumdrumFile& infile);
+		void        getGroupDurations         (std::vector<HumNum>& groupdurs,
+		                                       std::vector<int>& groupstates,
+		                                       HumdrumFile& infile);
+		void        printGroupAssignments     (HumdrumFile& infile);
+		void        getGroupRhythms           (std::vector<std::vector<std::string>>& rhythms,
+		                                       std::vector<std::vector<HumNum>>& groupdurs,
+		                                       std::vector<std::vector<int>>& groupstates,
+		                                       HumdrumFile& infile);
+		void        getGroupRhythms           (std::vector<std::string>& rhythms,
+		                                       std::vector<HumNum>& durs, std::vector<int>& states,
+		                                       HumdrumFile& infile);
+		int         typeStringToInt           (const string& value);
+		void        addNumericAnalyses        (ostream& output, HumdrumFile& infile, int line,
+		                                       std::vector<std::vector<double>>&  rhythmIndex);
+		void        analyzeOutputVariables(HumdrumFile& infile);
+		std::string getTimeSignature          (HumdrumFile& infile, int line, const std::string& group);
+		std::string getMeterSymbol            (HumdrumFile& infile, int line, const std::string& group);
+		std::string generateVerseLabelLine    (HumdrumFile& output, HumdrumFile& input, int line);
+		std::string generateStriaLine         (HumdrumFile& output, HumdrumFile& input, int line);
 
-		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
-		std::vector<int> getExpansionList(vector<bool>& tracks, int maxtrack, int count);
-		std::string makeExpansionString(vector<int>& tracks);
-		void        doCoincidenceAnalysis(HumdrumFile& outfile, HumdrumFile& infile,
-		                                  int ctrack, HTp compositeStart);
-		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
-		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile);
-		int         countNoteOnsets(HTp token);
-		void        doTotalOnsetAnalysis(vector<double>& analysis, HumdrumFile& infile,
-		                                  int track, vector<bool>& tracks);
-		void        doGroupOnsetAnalyses(vector<double>& analysisA,
-		                                  vector<double>& analysisB,
-		                                  HumdrumFile& infile);
-		void        doCoincidenceOnsetAnalysis(vector<vector<double>>& analysis);
-		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
-		                                   vector<int>& trackMap, vector<bool>& tracks);
-		void        assignAnalysesToVdataTracks(vector<vector<double>*>& data,
-		                                   vector<string>& spines, HumdrumFile& outfile);
+		// Numeric analysis functions:
+		void        doNumericAnalyses         (HumdrumFile& infile);
+		void        doOnsetAnalyses           (HumdrumFile& infile);
+		void        doOnsetAnalysis           (vector<double>& analysis,
+		                                       HumdrumFile& infile,
+		                                       const string& targetGroup);
+
+		void        doAccentAnalyses          (HumdrumFile& infile);
+
+		void        doOrnamentAnalyses        (HumdrumFile& infile);
+
+		void        doSlurAnalyses            (HumdrumFile& infile);
+
+		void        doTotalAnalyses           (HumdrumFile& infile);
+
+		// Numeric analysis support functions:
+		int         countNoteOnsets           (HTp token);
+
+		bool        needsCoincidenceMarker    (int line);
+		void        addCoincidenceMarks       (HumdrumFile& infile);
 
 	private:
+		bool        m_debugQ      = false;  // used with --debug option
+		bool        m_appendQ     = false;  // append analysis data to input data spines
+		bool        m_prependQ    = true;   // default position is to place output at start of line
+		bool        m_extractQ    = false;  // output only comp. rhythm analyses (no input)
+		bool        m_beamQ       = true;   // used with -B option
+		bool        m_hasGroupsQ  = false;  // true if contains *grp:(A|B) interpretations
 		std::string m_pitch       = "eR";   // pitch to display for composite rhythm
-		bool        m_onlygroupsQ = false;  // only split composite rhythms into markup groups
-		bool        m_addgroupsQ  = false;  // do not split composite rhythms into markup groups
-		bool        m_nogroupsQ   = false;  // has no groups in output
-		bool        m_extractQ    = false;  // output only composite rhythm analysis (not input data)
-		bool        m_appendQ     = false;  // display analysis at top of system
-		bool        m_debugQ      = false;  // display debug information
 		bool        m_graceQ      = false;  // include grace notes in composite rhythm
-		bool        m_tremoloQ    = false;  // preserve tremolos
-		bool        m_upQ         = false;  // force stem up
-		bool        m_hasGroupsQ  = false;  // used with -M, -N option
-		bool        m_nestQ       = false;  // used with --nest option
-		bool        m_onlyQ       = false;  // used with --only option
-		std::string m_only;                 // used with --only option
-		bool        m_coincidenceQ = false; // used with -c option
-		bool        m_assignedGroups = false;
-		bool        m_suppressCMarkQ = false; // used with -c option when -M -m -N and -n not present
-		std::string m_togetherInScore;    // used with -n option
-		std::string m_together;           // used with -m option
-		bool        m_coincideDisplayQ = true; // used with m_together and m_togetherInScore
 
-		// Analysis variables:
-		bool        m_analysisOnsetsQ    = false;   // used with -P option
-		bool        m_analysisAccentsQ   = false;   // used with -A option
-		bool        m_analysisOrnamentsQ = false;   // used with -O option
-		bool        m_analysisSlursQ     = false;   // used with -S option
-		bool        m_analysisTotalQ    = false;   // used with -T option
-		bool        m_analysisQ          = false;   // union of -paost options
-		bool        m_nozerosQ           = false;   // used with -Z option
-		vector<vector<double>> m_analysisOnsets;    // used with -P
-		vector<vector<double>> m_analysisAccents;   // used with -A
-		vector<vector<double>> m_analysisOrnaments; // used with -O
-		vector<vector<double>> m_analysisSlurs;     // used with -S
-		vector<vector<double>> m_analysisTotal;    // used with -T
+		// Composite rhythm analysis variables:
+		bool        m_fullCompositeQ  = true;  // used with -F option
+		bool        m_coincidenceQ    = false; // used with -c option
+		bool        m_groupsQ         = false; // used with -g option
+		bool        m_upstemQ         = false; // used with -u option
+
+
+		bool        m_onlyQ = false; // used with -o option
+		std::string m_only;          // used with -o option
+
+		bool        m_assignedGroups = false; // Have group labels been added to notes?
+
+		// Storage for composite rhythm analysis spines:
+		std::vector<std::string> m_fullComposite;
+		std::vector<std::string> m_coincidence;
+		std::vector<std::vector<std::string>> m_groups;  // Groups A and B
+
+		// Numerical analysis variables:
+		bool        m_analysisOnsetsQ    = false;    // used with -P option
+		bool        m_analysisAccentsQ   = false;    // used with -A option
+		bool        m_analysisOrnamentsQ = false;    // used with -O option
+		bool        m_analysisSlursQ     = false;    // used with -S option
+		bool        m_analysisTotalQ     = false;    // used with -T option
+		std::vector<bool> m_analysisIndex;           // -PAOST booleans in array
+
+		bool        m_analysesQ          = false;    // union of -PAOST options
+		int         m_numericAnalysisSpineCount = 0; // sum of -PAOST options
+		bool        m_nozerosQ           = false;    // used with -Z option
+
+		bool        m_assignedQ          = false;    // used to keep track of group analysis initialization
+
+		// Data storage for numerical anslysis.
+		//
+		// First index is the rhythm type:
+		//    0 index for Coincidence rhythm
+		//    1 index for full Composite rhythm
+		//    2 index for Group A composite rhythym
+		//    3 index for Group B composite rhythym
+		//    [4 and higher: index for Group C (future?)]
+		//
+		// Second index is type of analysis:
+		//    0 = onsets
+		//    1 = accents
+		//    2 = ornaments
+		//    3 = slurs
+		//    4 = total
+		//
+		// Third index is line number in original file
+		//
+		std::vector<std::vector<std::vector<double>>> m_analyses;
+
+		// first two dimension indexes into m_analyses:
+
+		const int m_ANALYSES_DIM1  = 4;
+		const int m_COINCIDENCE    = 0;
+		const int m_COMPOSITE_FULL = 1;
+		const int m_COMPOSITE_A    = 2;
+		const int m_COMPOSITE_B    = 3;
+
+		const int m_ANALYSES_DIM2  = 5;
+		const int m_ONSET          = 0;
+		const int m_ACCENT         = 1;
+		const int m_ORNAMENT       = 2;
+		const int m_SLUR           = 3;
+		const int m_TOTAL          = 4;
+
+		// output line variables (zero means unset, and negative means add
+		// before next line.
+		int m_clefIndex            = 0;
+		int m_striaIndex           = 0;
+		int m_firstDataIndex       = 0;
+		int m_instrumentNameIndex  = 0;
+		int m_instrumentAbbrIndex  = 0;
+		int m_timeSignatureIndex   = 0;
+		int m_meterSymbolIndex     = 0;
+		int m_groupAssignmentIndex = 0;
+		int m_verseLabelIndex      = 0;
+
+		bool m_coinMarkQ            = false;
+		std::string m_coinMark      = "|";
+		std::string m_coinMarkColor = "limegreen";
 
 };
 
