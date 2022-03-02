@@ -2362,7 +2362,7 @@ string MuseData::convertAccents(const string& input) {
 			continue;
 		}
 
-		switch (input[i]) {
+		switch ((unsigned char)input[i]) {
 
 			case 0x00: output += "";  break;
 			case 0x01: output += "♯"; break;

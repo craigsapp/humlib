@@ -113,11 +113,10 @@ void Tool_composite::initialize(HumdrumFile& infile) {
 	if (m_fullCompositeQ) {
 		m_fullComposite.resize(infile.getLineCount());
 	}
-	if (m_groupsQ) {
-		m_groups.resize(2);
-		m_groups[0].resize(infile.getLineCount());
-		m_groups[1].resize(infile.getLineCount());
-	}
+
+	m_groups.resize(2);
+	m_groups[0].resize(infile.getLineCount());
+	m_groups[1].resize(infile.getLineCount());
 
 	m_analysisOnsetsQ    = getBoolean("onsets");
 	m_analysisAccentsQ   = getBoolean("accents");
@@ -1349,20 +1348,20 @@ void Tool_composite::analyzeGroupCompositeRhythms(HumdrumFile& infile) {
 					full += q;
 					full += pstring;
 					full += beam;
-					HTp targettok = NULL;
-					HTp targettok2 = NULL;
-					if (m_appendQ) {
-						targettok = infile.token(i, infile[i].getFieldCount()-2);
-						targettok2 = infile.token(i, infile[i].getFieldCount()-1);
-					} else {
-						if (m_coincidenceQ) {
-							targettok = infile.token(i, 1);
-							targettok2 = infile.token(i, 2);
-						} else {
-							targettok = infile.token(i, 0);
-							targettok2 = infile.token(i, 1);
-						}
-					}
+					// HTp targettok = NULL;
+					// HTp targettok2 = NULL;
+					//if (m_appendQ) {
+					//	targettok = infile.token(i, infile[i].getFieldCount()-2);
+					//	targettok2 = infile.token(i, infile[i].getFieldCount()-1);
+					//} else {
+					//	if (m_coincidenceQ) {
+					//		targettok = infile.token(i, 1);
+					//		targettok2 = infile.token(i, 2);
+					//	} else {
+					//		targettok = infile.token(i, 0);
+					//		targettok2 = infile.token(i, 1);
+					//	}
+					//}
 
 					string group = infile.token(i, j)->getValue("auto", "group");
 					if (group == "A") {
