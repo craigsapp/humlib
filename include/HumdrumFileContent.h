@@ -100,6 +100,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-barline.cpp
 		void   analyzeBarlines            (void);
 		bool   hasDifferentBarlines       (void);
+		bool   hasStraddlingData          (int line);
 
 	protected:
 

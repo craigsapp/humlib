@@ -101,11 +101,57 @@ void HumdrumFileContent::analyzeBarlines(void) {
 			}
 		}
 
+		if (hasStraddlingData(i)) {
+				infile[i].setValue("auto", "straddlingData", 1);
+		} else {
+				infile[i].setValue("auto", "straddlingData", 0);
+		}
+
 		if (!allSame) {
 			infile[i].setValue("auto", "barlinesDifferent", 1);
 			m_analyses.m_barlines_different = true;
+		} else {
+			infile[i].setValue("auto", "barlinesDifferent", 0);
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::hasStraddlingData -- Returns true if the next
+//    data line after a barline has null tokens on isStaff() tokens.
+//    If there are no data lines after the barline, then it will
+//    return false;
+//
+
+bool HumdrumFileContent::hasStraddlingData(int line) {
+	HumdrumFileContent& infile = *this;
+	if (infile[line].isBarline()) {
+		return false;
+	}
+	for (int i=line+1; i<infile.getLineCount(); i++) {
+		if (infile[i].isInterpretation()) {
+			HTp token = infile.token(i, 0);
+			if (*token == "*-") {
+				return false;
+			}
+		}
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isStaff()) {
+				continue;
+			}
+			if (token->isNull()) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
