@@ -292,6 +292,24 @@ bool HumdrumLine::isKernBoundaryStart(void) const {
 
 //////////////////////////////
 //
+// HumdrumLine::isGraceLine --
+//
+
+bool HumdrumLine::isGraceLine(void) {
+	if (!this->isData()) {
+		return false;
+	}
+	if (this->getDuration() == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumLine::isKernBoundaryEnd -- Return true if the next
 //    data line contains no null tokens in the **kern spines.
 //    Assuming that a **kern spine split always starts with
@@ -2215,6 +2233,19 @@ void HumdrumLine::copyStructure(HLp line, const string& empty) {
 
 bool HumdrumLine::allSameBarlineStyle(void) {
 	return !this->getValueInt("auto", "barlinesDifferent");
+}
+
+
+
+/////////////////////////////
+//
+// HumdrumLine::hasDataStraddle -- return true if barlines has any staff
+//     that has data straddling it (the next measure starts with a null
+//     data token (excluding grace-note lines).
+//
+
+bool HumdrumLine::hasDataStraddle(void) {
+	return this->getValueInt("auto", "straddlingData");
 }
 
 

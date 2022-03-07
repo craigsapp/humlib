@@ -63,6 +63,7 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isInterpretation       (void) const { return isInterp(); }
 		bool        isBarline              (void) const;
 		bool        isData                 (void) const;
+		bool        isGraceLine            (void);
 		bool        isAllNull              (void) const;
 		bool        isAllRhythmicNull      (void) const;
 		bool        isEmpty                (void) const;
@@ -155,6 +156,7 @@ class HumdrumLine : public std::string, public HumHash {
 		void     copyStructure          (HLp line, const std::string& empty);
 
 		bool     allSameBarlineStyle    (void);
+		bool     hasDataStraddle        (void);
 
 	protected:
 		bool     analyzeTracks          (std::string& err);
