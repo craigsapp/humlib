@@ -94885,10 +94885,10 @@ void Tool_peak::processSpine(HTp startok) {
 	if (m_rawQ) {
 		printData(notelist, midinums, peaknotes);
 	} else {
-		markNotesInScore(notelist, peaknotes);
+		//markNotesInScore(notelist, peaknotes);
 		// Uncomment out the following line, and comment the above line,
 		// when identifyPeakSequence() is implemented:
-		// markNotesInScore(peaknotelist, globalpeaknotes);
+		markNotesInScore(peaknotelist, globalpeaknotes);
 	}
 }
 
@@ -94991,7 +94991,6 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 		timestamps[i] = notes[i][0]->getDurationFromStart().getFloat();
 	}
 
-
 	///////////////////////////////////////////
 	//
 	// Algorithm:
@@ -95010,10 +95009,53 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 	//
 	//////////////////////////////////////////
 
-
+// 	int previousNote = -1;
+// 	int sequenceNum = 0;
+// 	int sequenceStart = 0;
+//
+// 	for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
+// 		if (peakmidinums[i] == previousNote) { //check if same as previous peak
+// 			sequenceNum += 1;
+// 		} else {
+// 			sequenceNum = 0;
+// 		}
+// 		if (sequenceNum == 1) { //identify beginning of peak sequence
+// 			sequenceStart = i - 1;
+// 		}
+// 		if (sequenceNum >= m_peakNum - 1) {
+// 			int duration = timestamps[i] - timestamps[sequenceStart];
+// 			if (duration <= m_peakDur) {
+// 				for (int j=0; j<m_peakNum; j++) {
+// 					globalpeaknotes[sequenceStart + j] = true;
+// 				}
+// 		  } else {
+// 				sequenceStart += 1;
+// 		  }
+// 	  }
+// 		previousNote = peakmidinums[i];
+//   }
+// }
+	   for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
+			 bool match = true;
+			 for (int j=1; j<m_peakNum; j++) {
+				 if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
+					 match = false;
+					 break;
+				 }
+			 }
+			 if (match != true) {
+			 	continue;
+			 }
+			 HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
+			 cerr << duration.getFloat() << "   " << m_peakDur << endl;
+			 if (duration.getFloat() > m_peakDur) {
+				 continue;
+			 }
+			 for (int j=0; j<m_peakNum; j++) {
+				 globalpeaknotes[i+j] = true;
+				 }
+			 }
 }
-
-
 
 //////////////////////////////
 //
