@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 11 20:42:55 PST 2022
+// Last Modified: Sat Mar 12 12:54:58 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6019,6 +6019,7 @@ class Tool_composite : public HumTool {
 		int m_groupAssignmentIndex = 0;
 		int m_verseLabelIndex      = 0;
 
+		bool m_extractInputQ        = false;
 		bool m_coinMarkQ            = false;
 		std::string m_coinMark      = "|";
 		std::string m_coinMarkColor = "limegreen";
@@ -6549,6 +6550,41 @@ class Tool_extract : public HumTool {
 
 };
 
+
+
+class Tool_fb : public HumTool {
+	public:
+		         Tool_fb           (void);
+		        ~Tool_fb           () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void     processFile       (HumdrumFile& infile);
+		void     initialize        (void);
+		void     processLine       (HumdrumFile& infile, int index);
+		void     setupScoreData    (HumdrumFile& infile);
+		void     getAnalyses       (HumdrumFile& infile);
+		void     getHarmonicIntervals(HumdrumFile& infile);
+		void     calculateIntervals(vector<int>& intervals, vector<HTp>& tokens, int bassIndex);
+		void     printOutput       (HumdrumFile& infile);
+		void     printLineStyle3   (HumdrumFile& infile, int line);
+		std::string getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field);
+
+	private:
+		std::vector<HTp>              m_kernspines;
+		std::vector<int>              m_kerntracks;
+		std::vector<int>              m_track2index;
+		std::vector<std::vector<int>> m_keyaccid;
+		std::vector<std::vector<int>> m_intervals;
+		const int m_rest = -1000;
+		int       m_reference = 0; // currently fixed to bass
+		int       m_debugQ = false;
+
+};
 
 
 class Tool_filter : public HumTool {

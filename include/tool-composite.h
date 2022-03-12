@@ -191,6 +191,7 @@ class Tool_composite : public HumTool {
 		int m_groupAssignmentIndex = 0;
 		int m_verseLabelIndex      = 0;
 
+		bool m_extractInputQ        = false;
 		bool m_coinMarkQ            = false;
 		std::string m_coinMark      = "|";
 		std::string m_coinMarkColor = "limegreen";

@@ -64,6 +64,7 @@ Tool_composite::Tool_composite(void) {
 	define("c|coincidence=b", "Do coincidence rhythm analysis");
 	define("g|group|groups|grouping|groupings=b", "Do group rhythm analysis");
 	define("m|mark=b",        "Mark coincidences in group analysis and input score");
+	define("M|mark-input=b",  "Mark coincidences in input score");
 
 	// Numeric analysis options:
 	define("P|onsets=b",             "count number of note (pitch) onsets in feature");
@@ -151,6 +152,10 @@ void Tool_composite::initialize(HumdrumFile& infile) {
 	initializeNumericAnalyses(infile);
 	m_assignedQ = false;
 	m_coinMarkQ = getBoolean("mark");
+	if (getBoolean("mark-input")) {
+		m_coinMarkQ = true;
+		m_extractInputQ = true;
+	}
 }
 
 
@@ -263,9 +268,7 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	if (m_fullCompositeQ) {
 		analyzeFullCompositeRhythm(infile);
 	}
-	if (m_groupsQ) {
-		analyzeGroupCompositeRhythms(infile);
-	}
+	analyzeGroupCompositeRhythms(infile);
 	if (m_analysesQ) {
 		doNumericAnalyses(infile);
 	}
@@ -334,6 +337,7 @@ void Tool_composite::addCoincidenceMarks(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_composite::prepareOutput --
@@ -360,51 +364,70 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 		analysis << endl;
 	}
 
-	// Now either print the output data by itself, or
-	// merge with input score:
-	if (m_extractQ) {
-		// output only analysis data
-		m_humdrum_text << analysis.str();
-	} else {
-		// merge analysis data with input file
-		HumdrumFile output;
-		output.readString(analysis.str());
-		if (m_beamQ) {
-			Tool_autobeam autobeam;
-			autobeam.run(output);
+	HumdrumFile output;
+	output.readString(analysis.str());
+
+	stringstream tempout;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+
+		if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
+			string labelLine = generateVerseLabelLine(output, infile, i);
+			if (!labelLine.empty()) {
+				tempout << labelLine;
+				tempout << endl;
+			}
 		}
 
-		for (int i=0; i<infile.getLineCount(); i++) {
-
-			if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
-				m_humdrum_text << generateVerseLabelLine(output, infile, i);
-				m_humdrum_text << endl;
+		if (m_striaIndex && (m_striaIndex == -i)) {
+			string striaLine =  generateStriaLine(output, infile, i);
+			if (!striaLine.empty()) {
+				tempout << striaLine;
+				tempout << endl;
 			}
-
-			if (m_striaIndex && (m_striaIndex == -i)) {
-				m_humdrum_text << generateStriaLine(output, infile, i);
-				m_humdrum_text << endl;
-			}
-
-			if (!infile[i].hasSpines()) {
-				m_humdrum_text << infile[i];
-			} else if (m_appendQ) {
-				// analysis data at end of line
-				m_humdrum_text << infile[i];
-				m_humdrum_text << "\t";
-				m_humdrum_text << output[i];
-			} else if (m_prependQ) {
-				// analysis data at start of line (default)
-				m_humdrum_text << output[i];
-				m_humdrum_text << "\t";
-				m_humdrum_text << infile[i];
-			} else {
-				// output data only
-				m_humdrum_text << output[i];
-			}
-			m_humdrum_text << endl;
 		}
+
+		if (!infile[i].hasSpines()) {
+			tempout << infile[i];
+		} else if (m_appendQ) {
+			// analysis data at end of line
+			if (m_extractInputQ || !m_extractQ) {
+				tempout << infile[i];
+			}
+			if (!(m_extractQ || m_extractInputQ)) {
+				tempout << "\t";
+			}
+			if (m_extractQ || !m_extractInputQ) {
+				tempout << output[i];
+			}
+		} else if (m_prependQ) {
+			// analysis data at start of line (default)
+			if (!m_extractInputQ || m_extractQ) {
+				tempout << output[i];
+			}
+			if (!(m_extractQ || m_extractInputQ)) {
+				tempout << "\t";
+			}
+			if (!m_extractQ || m_extractInputQ) {
+				tempout << infile[i];
+			}
+		} else {
+			// output data only
+			tempout << output[i];
+		}
+		tempout << endl;
 	}
+
+	if (m_beamQ) {
+		HumdrumFile finaloutput;
+		finaloutput.readString(tempout.str());
+		Tool_autobeam autobeam;
+		autobeam.run(finaloutput);
+		m_humdrum_text << finaloutput;
+	} else {
+		m_humdrum_text << tempout.str();
+	}
+
 	if (m_coinMarkQ) {
 		m_humdrum_text << "!!!RDF**kern: " << m_coinMark;
 		m_humdrum_text << " = marked note, color=\"";
@@ -421,41 +444,55 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 //
 
 string Tool_composite::generateVerseLabelLine(HumdrumFile& output, HumdrumFile& input, int line) {
+
+	if (m_extractInputQ) {
+		return "";
+	}
+
 	string outstring;
 	string inputBlanks;
-	for (int i=0; i<input[line].getFieldCount(); i++) {
-		inputBlanks += "*";
-		if (i < input[line].getFieldCount() - 1) {
-			inputBlanks += "\t";
+	if (!m_extractQ) {
+		for (int i=0; i<input[line].getFieldCount(); i++) {
+			inputBlanks += "*";
+			if (i < input[line].getFieldCount() - 1) {
+				inputBlanks += "\t";
+			}
 		}
 	}
-	if (m_appendQ) {
-		outstring += inputBlanks;
-		outstring += "\t";
+	if (!(m_extractQ || m_extractInputQ)) {
+		if (m_appendQ) {
+			outstring += inputBlanks;
+			outstring += "\t";
+		}
 	}
 	string outputLabels;
-	for (int i=0; i<output[line].getFieldCount(); i++) {
-		HTp token = output.token(line, i);
-		string exinterp = token->getExInterp();
-		if (exinterp.compare(0, 8, "**vdata-") != 0) {
-			outputLabels += "*";
-			if (output[line].getFieldCount()) {
+	if (!m_extractInputQ) {
+		for (int i=0; i<output[line].getFieldCount(); i++) {
+			HTp token = output.token(line, i);
+			string exinterp = token->getExInterp();
+			if (exinterp.compare(0, 8, "**vdata-") != 0) {
+				outputLabels += "*";
+				if (i < output[line].getFieldCount() - 1) {
+					outputLabels += "\t";
+				}
+				continue;
+			}
+			string label = exinterp.substr(8);
+			outputLabels += "*v:";
+			outputLabels += label;
+			if (i < output[line].getFieldCount() - 1) {
 				outputLabels += "\t";
 			}
-			continue;
-		}
-		string label = exinterp.substr(8);
-		outputLabels += "*v:";
-		outputLabels += label;
-		if (i < output[line].getFieldCount() - 1) {
-			outputLabels += "\t";
 		}
 	}
 	outstring += outputLabels;
-	if (m_prependQ) {
-		outstring += "\t";
+	if (m_prependQ || m_extractQ) {
+		if (!(m_extractQ || m_extractInputQ)) {
+			outstring += "\t";
+		}
 		outstring += inputBlanks;
 	}
+
 	return outstring;
 }
 
@@ -464,42 +501,60 @@ string Tool_composite::generateVerseLabelLine(HumdrumFile& output, HumdrumFile& 
 //////////////////////////////
 //
 // Tool_composite::generateStriaLine --
+// m_extractQ      == output only
+// m_extractInputQ == input only
 //
 
 string Tool_composite::generateStriaLine(HumdrumFile& output, HumdrumFile& input, int line) {
+
+	if (m_extractInputQ) {
+		return "";
+	}
+
 	string outstring;
 	string inputBlanks;
-	for (int i=0; i<input[line].getFieldCount(); i++) {
-		inputBlanks += "*";
-		if (i < input[line].getFieldCount() - 1) {
-			inputBlanks += "\t";
+	if (!m_extractQ) {
+		for (int i=0; i<input[line].getFieldCount(); i++) {
+			inputBlanks += "*";
+			if (i < input[line].getFieldCount() - 1) {
+				inputBlanks += "\t";
+			}
+		}
+		if (m_appendQ) {
+			outstring += inputBlanks;
+			if (!m_extractInputQ) {
+				outstring += "\t";
+			}
 		}
 	}
-	if (m_appendQ) {
-		outstring += inputBlanks;
-		outstring += "\t";
-	}
+
 	string outputStria;
-	for (int i=0; i<output[line].getFieldCount(); i++) {
-		HTp token = output.token(line, i);
-		string exinterp = token->getExInterp();
-		if (exinterp.compare(0, 6, "**kern") != 0) {
-			outputStria += "*";
-			if (output[line].getFieldCount()) {
+	if (!m_extractInputQ) {
+		for (int i=0; i<output[line].getFieldCount(); i++) {
+			HTp token = output.token(line, i);
+			string exinterp = token->getExInterp();
+			if (exinterp.compare(0, 6, "**kern") != 0) {
+				outputStria += "*";
+				if (output[line].getFieldCount()) {
+					outputStria += "\t";
+				}
+				continue;
+			}
+			outputStria += "*stria1";
+			if (i < output[line].getFieldCount() - 1) {
 				outputStria += "\t";
 			}
-			continue;
-		}
-		outputStria += "*stria1";
-		if (i < output[line].getFieldCount() - 1) {
-			outputStria += "\t";
 		}
 	}
+	
 	outstring += outputStria;
-	if (m_prependQ) {
-		outstring += "\t";
+	if (m_prependQ || m_extractQ) {
+		if (!(m_extractQ || m_extractInputQ)) {
+			outstring += "\t";
+		}
 		outstring += inputBlanks;
 	}
+
 	return outstring;
 }
 

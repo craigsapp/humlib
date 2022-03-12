@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Mar 11 20:42:55 PST 2022
+// Last Modified: Sat Mar 12 12:54:58 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -57470,6 +57470,7 @@ Tool_composite::Tool_composite(void) {
 	define("c|coincidence=b", "Do coincidence rhythm analysis");
 	define("g|group|groups|grouping|groupings=b", "Do group rhythm analysis");
 	define("m|mark=b",        "Mark coincidences in group analysis and input score");
+	define("M|mark-input=b",  "Mark coincidences in input score");
 
 	// Numeric analysis options:
 	define("P|onsets=b",             "count number of note (pitch) onsets in feature");
@@ -57557,6 +57558,10 @@ void Tool_composite::initialize(HumdrumFile& infile) {
 	initializeNumericAnalyses(infile);
 	m_assignedQ = false;
 	m_coinMarkQ = getBoolean("mark");
+	if (getBoolean("mark-input")) {
+		m_coinMarkQ = true;
+		m_extractInputQ = true;
+	}
 }
 
 
@@ -57669,9 +57674,7 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 	if (m_fullCompositeQ) {
 		analyzeFullCompositeRhythm(infile);
 	}
-	if (m_groupsQ) {
-		analyzeGroupCompositeRhythms(infile);
-	}
+	analyzeGroupCompositeRhythms(infile);
 	if (m_analysesQ) {
 		doNumericAnalyses(infile);
 	}
@@ -57740,6 +57743,7 @@ void Tool_composite::addCoincidenceMarks(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_composite::prepareOutput --
@@ -57766,51 +57770,70 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 		analysis << endl;
 	}
 
-	// Now either print the output data by itself, or
-	// merge with input score:
-	if (m_extractQ) {
-		// output only analysis data
-		m_humdrum_text << analysis.str();
-	} else {
-		// merge analysis data with input file
-		HumdrumFile output;
-		output.readString(analysis.str());
-		if (m_beamQ) {
-			Tool_autobeam autobeam;
-			autobeam.run(output);
+	HumdrumFile output;
+	output.readString(analysis.str());
+
+	stringstream tempout;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+
+		if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
+			string labelLine = generateVerseLabelLine(output, infile, i);
+			if (!labelLine.empty()) {
+				tempout << labelLine;
+				tempout << endl;
+			}
 		}
 
-		for (int i=0; i<infile.getLineCount(); i++) {
-
-			if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
-				m_humdrum_text << generateVerseLabelLine(output, infile, i);
-				m_humdrum_text << endl;
+		if (m_striaIndex && (m_striaIndex == -i)) {
+			string striaLine =  generateStriaLine(output, infile, i);
+			if (!striaLine.empty()) {
+				tempout << striaLine;
+				tempout << endl;
 			}
-
-			if (m_striaIndex && (m_striaIndex == -i)) {
-				m_humdrum_text << generateStriaLine(output, infile, i);
-				m_humdrum_text << endl;
-			}
-
-			if (!infile[i].hasSpines()) {
-				m_humdrum_text << infile[i];
-			} else if (m_appendQ) {
-				// analysis data at end of line
-				m_humdrum_text << infile[i];
-				m_humdrum_text << "\t";
-				m_humdrum_text << output[i];
-			} else if (m_prependQ) {
-				// analysis data at start of line (default)
-				m_humdrum_text << output[i];
-				m_humdrum_text << "\t";
-				m_humdrum_text << infile[i];
-			} else {
-				// output data only
-				m_humdrum_text << output[i];
-			}
-			m_humdrum_text << endl;
 		}
+
+		if (!infile[i].hasSpines()) {
+			tempout << infile[i];
+		} else if (m_appendQ) {
+			// analysis data at end of line
+			if (m_extractInputQ || !m_extractQ) {
+				tempout << infile[i];
+			}
+			if (!(m_extractQ || m_extractInputQ)) {
+				tempout << "\t";
+			}
+			if (m_extractQ || !m_extractInputQ) {
+				tempout << output[i];
+			}
+		} else if (m_prependQ) {
+			// analysis data at start of line (default)
+			if (!m_extractInputQ || m_extractQ) {
+				tempout << output[i];
+			}
+			if (!(m_extractQ || m_extractInputQ)) {
+				tempout << "\t";
+			}
+			if (!m_extractQ || m_extractInputQ) {
+				tempout << infile[i];
+			}
+		} else {
+			// output data only
+			tempout << output[i];
+		}
+		tempout << endl;
 	}
+
+	if (m_beamQ) {
+		HumdrumFile finaloutput;
+		finaloutput.readString(tempout.str());
+		Tool_autobeam autobeam;
+		autobeam.run(finaloutput);
+		m_humdrum_text << finaloutput;
+	} else {
+		m_humdrum_text << tempout.str();
+	}
+
 	if (m_coinMarkQ) {
 		m_humdrum_text << "!!!RDF**kern: " << m_coinMark;
 		m_humdrum_text << " = marked note, color=\"";
@@ -57827,41 +57850,55 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 //
 
 string Tool_composite::generateVerseLabelLine(HumdrumFile& output, HumdrumFile& input, int line) {
+
+	if (m_extractInputQ) {
+		return "";
+	}
+
 	string outstring;
 	string inputBlanks;
-	for (int i=0; i<input[line].getFieldCount(); i++) {
-		inputBlanks += "*";
-		if (i < input[line].getFieldCount() - 1) {
-			inputBlanks += "\t";
+	if (!m_extractQ) {
+		for (int i=0; i<input[line].getFieldCount(); i++) {
+			inputBlanks += "*";
+			if (i < input[line].getFieldCount() - 1) {
+				inputBlanks += "\t";
+			}
 		}
 	}
-	if (m_appendQ) {
-		outstring += inputBlanks;
-		outstring += "\t";
+	if (!(m_extractQ || m_extractInputQ)) {
+		if (m_appendQ) {
+			outstring += inputBlanks;
+			outstring += "\t";
+		}
 	}
 	string outputLabels;
-	for (int i=0; i<output[line].getFieldCount(); i++) {
-		HTp token = output.token(line, i);
-		string exinterp = token->getExInterp();
-		if (exinterp.compare(0, 8, "**vdata-") != 0) {
-			outputLabels += "*";
-			if (output[line].getFieldCount()) {
+	if (!m_extractInputQ) {
+		for (int i=0; i<output[line].getFieldCount(); i++) {
+			HTp token = output.token(line, i);
+			string exinterp = token->getExInterp();
+			if (exinterp.compare(0, 8, "**vdata-") != 0) {
+				outputLabels += "*";
+				if (i < output[line].getFieldCount() - 1) {
+					outputLabels += "\t";
+				}
+				continue;
+			}
+			string label = exinterp.substr(8);
+			outputLabels += "*v:";
+			outputLabels += label;
+			if (i < output[line].getFieldCount() - 1) {
 				outputLabels += "\t";
 			}
-			continue;
-		}
-		string label = exinterp.substr(8);
-		outputLabels += "*v:";
-		outputLabels += label;
-		if (i < output[line].getFieldCount() - 1) {
-			outputLabels += "\t";
 		}
 	}
 	outstring += outputLabels;
-	if (m_prependQ) {
-		outstring += "\t";
+	if (m_prependQ || m_extractQ) {
+		if (!(m_extractQ || m_extractInputQ)) {
+			outstring += "\t";
+		}
 		outstring += inputBlanks;
 	}
+
 	return outstring;
 }
 
@@ -57870,42 +57907,60 @@ string Tool_composite::generateVerseLabelLine(HumdrumFile& output, HumdrumFile& 
 //////////////////////////////
 //
 // Tool_composite::generateStriaLine --
+// m_extractQ      == output only
+// m_extractInputQ == input only
 //
 
 string Tool_composite::generateStriaLine(HumdrumFile& output, HumdrumFile& input, int line) {
+
+	if (m_extractInputQ) {
+		return "";
+	}
+
 	string outstring;
 	string inputBlanks;
-	for (int i=0; i<input[line].getFieldCount(); i++) {
-		inputBlanks += "*";
-		if (i < input[line].getFieldCount() - 1) {
-			inputBlanks += "\t";
+	if (!m_extractQ) {
+		for (int i=0; i<input[line].getFieldCount(); i++) {
+			inputBlanks += "*";
+			if (i < input[line].getFieldCount() - 1) {
+				inputBlanks += "\t";
+			}
+		}
+		if (m_appendQ) {
+			outstring += inputBlanks;
+			if (!m_extractInputQ) {
+				outstring += "\t";
+			}
 		}
 	}
-	if (m_appendQ) {
-		outstring += inputBlanks;
-		outstring += "\t";
-	}
+
 	string outputStria;
-	for (int i=0; i<output[line].getFieldCount(); i++) {
-		HTp token = output.token(line, i);
-		string exinterp = token->getExInterp();
-		if (exinterp.compare(0, 6, "**kern") != 0) {
-			outputStria += "*";
-			if (output[line].getFieldCount()) {
+	if (!m_extractInputQ) {
+		for (int i=0; i<output[line].getFieldCount(); i++) {
+			HTp token = output.token(line, i);
+			string exinterp = token->getExInterp();
+			if (exinterp.compare(0, 6, "**kern") != 0) {
+				outputStria += "*";
+				if (output[line].getFieldCount()) {
+					outputStria += "\t";
+				}
+				continue;
+			}
+			outputStria += "*stria1";
+			if (i < output[line].getFieldCount() - 1) {
 				outputStria += "\t";
 			}
-			continue;
-		}
-		outputStria += "*stria1";
-		if (i < output[line].getFieldCount() - 1) {
-			outputStria += "\t";
 		}
 	}
+	
 	outstring += outputStria;
-	if (m_prependQ) {
-		outstring += "\t";
+	if (m_prependQ || m_extractQ) {
+		if (!(m_extractQ || m_extractInputQ)) {
+			outstring += "\t";
+		}
 		outstring += inputBlanks;
 	}
+
 	return outstring;
 }
 
@@ -70018,6 +70073,354 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		}
 	}
 
+}
+
+
+
+
+/////////////////////////////////
+//
+// Tool_fb::Tool_fb -- Set the recognized options for the tool.
+//
+
+Tool_fb::Tool_fb(void) {
+	define("d|debug=b", "Print debug information");
+	define("r|reference=i:0", "Reference kern spine (1 indexed)");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_fb::run -- Do the main work of the tool.
+//
+
+bool Tool_fb::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_fb::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_fb::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_fb::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_fb::initialize(void) {
+	m_debugQ = getBoolean("debug");
+	m_reference = getInteger("reference") - 1;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::processFile --
+//
+
+void Tool_fb::processFile(HumdrumFile& infile) {
+	setupScoreData(infile);
+	getHarmonicIntervals(infile);
+	printOutput(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::getHarmonicIntervals -- Fill in
+//
+
+void Tool_fb::getHarmonicIntervals(HumdrumFile& infile) {
+	m_intervals.resize(infile.getLineCount());
+
+	vector<HTp> tokens(m_kernspines.size(), NULL);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		m_intervals[i].resize(0);
+		if (!infile[i].isData()) {
+			continue;
+		}
+		fill(tokens.begin(), tokens.end(), (HTp)NULL);
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			int track = token->getTrack();
+			int index = m_track2index.at(track);
+			tokens[index] = token;
+			// cerr << token << "\t";
+		}
+		m_intervals[i].resize(m_kernspines.size());
+		calculateIntervals(m_intervals[i], tokens, m_reference);
+		// cerr << endl;
+
+		if (m_debugQ) {
+			for (int j=0; j<(int)m_intervals[i].size(); j++) {
+				m_free_text << tokens[j] << "\t(";
+				if (m_intervals[i][j] == m_rest) {
+					m_free_text << "R";
+				} else {
+					m_free_text << m_intervals[i][j];
+				}
+				m_free_text << ")";
+				if (j < (int)m_intervals[i].size() - 1) {
+					m_free_text << "\t";
+				}
+			}
+			m_free_text << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::calculateIntervals --
+//
+
+void Tool_fb::calculateIntervals(vector<int>& intervals,
+		vector<HTp>& tokens, int bassIndex) {
+	if (intervals.size() != tokens.size()) {
+		cerr << "ERROR: Size if vectors do not match" << endl;
+		return;
+	}
+
+	HTp reftok = tokens[m_reference];
+	if (reftok->isNull()) {
+		reftok = reftok->resolveNull();
+	}
+
+	if (!reftok || reftok->isRest()) {
+		for (int i=0; i<(int)tokens.size(); i++) {
+			intervals[i] = m_rest;
+		}
+		return;
+	}
+
+	int base40ref = Convert::kernToBase40(reftok);
+
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (i == m_reference) {
+			intervals[i] = m_rest;
+			continue;
+		}
+		if (tokens[i]->isRest()) {
+			intervals[i] = m_rest;
+			continue;
+		}
+		if (tokens[m_reference]->isRest()) {
+			intervals[i] = m_rest;
+			continue;
+		}
+		if (tokens[i]->isNull()) {
+			continue;
+		}
+		int base40 = Convert::kernToBase40(tokens[i]);
+		int interval = base40 - base40ref;
+		intervals[i] = interval;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::setupScoreData --
+//
+
+void Tool_fb::setupScoreData(HumdrumFile& infile) {
+	infile.getKernSpineStartList(m_kernspines);
+	m_kerntracks.resize(m_kernspines.size());
+	for (int i=0; i<(int)m_kernspines.size(); i++) {
+		m_kerntracks[i] = m_kernspines[i]->getTrack();
+	}
+
+	int maxtrack = infile.getMaxTrack();
+	m_track2index.resize(maxtrack + 1);
+	fill(m_track2index.begin(), m_track2index.end(), -1);
+	for (int i=0; i<(int)m_kerntracks.size(); i++) {
+		m_track2index.at(m_kerntracks[i]) = i;
+	}
+
+	if (m_reference >= (int)m_kernspines.size()) {
+		m_reference = (int)m_kernspines.size() - 1;
+	}
+	if (m_reference < 0) {
+		m_reference = 0;
+	}
+
+	vector<int> pcs(7, 0);
+
+	m_keyaccid.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isKeySignature()) {
+				fill(pcs.begin(), pcs.end(), 0);
+				HumRegex hre;
+				if (hre.search(token, "c#")) { pcs[0] = +1;}
+				if (hre.search(token, "d#")) { pcs[1] = +1;}
+				if (hre.search(token, "e#")) { pcs[2] = +1;}
+				if (hre.search(token, "f#")) { pcs[3] = +1;}
+				if (hre.search(token, "g#")) { pcs[4] = +1;}
+				if (hre.search(token, "a#")) { pcs[5] = +1;}
+				if (hre.search(token, "b#")) { pcs[6] = +1;}
+				if (hre.search(token, "c-")) { pcs[0] = -1;}
+				if (hre.search(token, "d-")) { pcs[1] = -1;}
+				if (hre.search(token, "e-")) { pcs[2] = -1;}
+				if (hre.search(token, "f-")) { pcs[3] = -1;}
+				if (hre.search(token, "g-")) { pcs[4] = -1;}
+				if (hre.search(token, "a-")) { pcs[5] = -1;}
+				if (hre.search(token, "b-")) { pcs[6] = -1;}
+				m_keyaccid[i] = pcs;
+			}
+		}
+	}
+
+	for (int i=1; i<infile.getLineCount(); i++) {
+		if (m_keyaccid[i].empty()) {
+			m_keyaccid[i] = m_keyaccid[i-1];
+		}
+	}
+	for (int i=infile.getLineCount() - 2; i>=0; i--) {
+		if (m_keyaccid[i].empty()) {
+			m_keyaccid[i] = m_keyaccid[i+1];
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb:printOutput --
+//
+
+void Tool_fb::printOutput(HumdrumFile& infile) {
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+		printLineStyle3(infile, i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::printLineStyle3 --
+//
+
+void Tool_fb::printLineStyle3(HumdrumFile& infile, int line) {
+	bool printed = false;
+	int reftrack = m_kerntracks[m_reference];
+
+	for (int i=0; i<infile[line].getFieldCount(); i++) {
+		HTp token = infile.token(line, i);
+		int track = token->getTrack();
+		if (printed || (track != reftrack + 1)) {
+			m_humdrum_text << token;
+			if (i < infile[line].getFieldCount()) {
+				m_humdrum_text << token;
+			}
+			continue;
+		}
+		// print analysis spine and then next spine
+		m_humdrum_text << getAnalysisTokenStyle3(infile, line, i);
+		printed = true;
+		m_humdrum_text << "\t" << token;
+	}
+
+	m_humdrum_text << "\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::getAnalysisTokenStyle3 --
+//
+
+string Tool_fb::getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field) {
+	if (infile[line].isCommentLocal()) {
+		return "!";
+	}
+	if (infile[line].isInterpretation()) {
+		HTp token = infile.token(line, 0);
+		if (token->compare(0, 2, "**") == 0) {
+			return "**fb";
+		} else if (*token == "*-") {
+			return "*-";
+		} else {
+			return "*";
+		}
+	}
+	if (infile[line].isBarline()) {
+		HTp token = infile.token(line, 0);
+		return *token;
+	}
+
+	// create data token
+	string output;
+
+	for (int i=(int)m_intervals[line].size()-1; i>=0; i--) {
+		if (i == m_reference) {
+			continue;
+		}
+		string value = to_string(m_intervals[line][i]);
+		output += value;
+		output += " ";
+	}
+	if (!output.empty()) {
+		output.resize((int)output.size() - 1);
+	}
+
+	return output;
 }
 
 
