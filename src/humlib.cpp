@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 12 12:54:58 PST 2022
+// Last Modified: Sat Mar 12 14:15:15 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31451,8 +31451,10 @@ HumNum HumdrumToken::getDuration(HumNum scale) {
 //////////////////////////////
 //
 // HumdrumToken::getTiedDuration -- Returns the duration of the token and any
-//    tied notes attached to it.  Does not work well which chords.  Does
-//    not work well with secondary spine splits.
+//    tied notes attached to it.  Does not work well which chords that have
+//    notes with different tie states.  Does not work well with secondary spine splits
+//    (only follows left side of spine split).  Does not deal with disjunct ties or
+//    linked ties (ties across staves).   Does handle enharmonic spelling of tied notes.
 //
 
 HumNum HumdrumToken::getTiedDuration(void) {
@@ -31460,25 +31462,37 @@ HumNum HumdrumToken::getTiedDuration(void) {
 		analyzeDuration();
 	}
 	HumNum output = m_duration;
+
+	if (this->find("[") == string::npos) {
+		return output;
+	}
+
 	// start of a tied group so add the durations of the other notes.
-	int b40 = Convert::kernToBase40(this);
-	HTp note = this;
-	HTp nnote = NULL;
+	int b12 = Convert::kernToBase12(this);
+	HTp note = this->getNextToken();
 	while (note) {
-		nnote = note->getNextNNDT();
-		if (!nnote) {
+		if (!note->isData()) {
+         // The algorithm should be improved here, since only a lefthand
+			// spine split will be followed (but the tie could be going to
+			// a note on the right side of the split).
+			note = note->getNextToken();
+			continue;
+		}
+		if (note->isNull()) {
+			note = note->getNextToken();
+			continue;
+		}
+		if (!note->isSecondaryTiedNote()) {
 			break;
 		}
-		if (!nnote->isSecondaryTiedNote()) {
+		int nb12 = Convert::kernToBase12(note);
+		if (nb12 != b12) {
+			// bad or incomplete tie (or cross-spine complexity, or disjunct tie):
 			break;
 		}
-		int nb40 = Convert::kernToBase40(this);
-		if (nb40 != b40) {
-			break;
-		}
-		// note is tied to previous one, so add its curation to output.
-		output += nnote->getDuration();
-		note = nnote;
+		// Note is tied to previous one, so add its curation to output.
+		output += note->getDuration();
+		note = note->getNextToken();
 	}
 
 	return output;
