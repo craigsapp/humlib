@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar  7 14:53:26 PST 2022
+// Last Modified: Fri Mar 11 20:42:55 PST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8434,9 +8434,15 @@ class Tool_peak : public HumTool {
 		void                          processSpine       (HTp startok);
 		void                          identifyLocalPeaks (std::vector<bool>& peaknotes,
 		                                                  std::vector<int>& notelist);
+		void                          getDurations       (vector<double>& durations,
+		                                                  vector<vector<HTp>>& notelist);
+		void                          getBeat            (vector<bool>& metpos,
+		                                                  vector<vector<HTp>>& notelist);
+
 		void                          getLocalPeakNotes  (vector<vector<HTp>>& newnotelist,
 		                                                  vector<vector<HTp>>& oldnotelist,
 		                                                  vector<bool>& peaknotes);
+
 		void                          identifyPeakSequence(vector<bool>& globalpeaknotes,
 		                                                   vector<int>& peakmidinums,
 		                                                   vector<vector<HTp>>& notes);
@@ -8455,7 +8461,6 @@ class Tool_peak : public HumTool {
 		double      m_smallRest = 4.0;   // Ignore rests that are 1 whole note or less.
 		double      m_peakDur   = 24.0;  // 6 whole notes maximum between m_peakNum local maximums.
 		double      m_peakNum   = 3;    // Number of local maximums in a row needed to mark in score.
-
 
 };
 

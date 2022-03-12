@@ -298,23 +298,3 @@ void Tool_double::doubleRhythms(HumdrumFile& infile) {
 
 
 
-					} else {
-						cerr << "Warning: ignored time signature: " << token << endl;
-					}
-					string text = *token;
-					string replacement = "/" + to_string(bot);
-					hre.replaceDestructive(text, replacement, "/\\d+");
-					token->setText(text);
-				}
-			}
-		}
-	}
-}
-
-
-// END_MERGE
-
-} // end namespace hum
-
-
-

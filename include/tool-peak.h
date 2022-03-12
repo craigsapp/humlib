@@ -38,9 +38,15 @@ class Tool_peak : public HumTool {
 		void                          processSpine       (HTp startok);
 		void                          identifyLocalPeaks (std::vector<bool>& peaknotes,
 		                                                  std::vector<int>& notelist);
+		void                          getDurations       (vector<double>& durations,
+		                                                  vector<vector<HTp>>& notelist);
+		void                          getBeat            (vector<bool>& metpos,
+		                                                  vector<vector<HTp>>& notelist);
+
 		void                          getLocalPeakNotes  (vector<vector<HTp>>& newnotelist,
 		                                                  vector<vector<HTp>>& oldnotelist,
 		                                                  vector<bool>& peaknotes);
+
 		void                          identifyPeakSequence(vector<bool>& globalpeaknotes,
 		                                                   vector<int>& peakmidinums,
 		                                                   vector<vector<HTp>>& notes);
@@ -59,7 +65,6 @@ class Tool_peak : public HumTool {
 		double      m_smallRest = 4.0;   // Ignore rests that are 1 whole note or less.
 		double      m_peakDur   = 24.0;  // 6 whole notes maximum between m_peakNum local maximums.
 		double      m_peakNum   = 3;    // Number of local maximums in a row needed to mark in score.
-
 
 };
 

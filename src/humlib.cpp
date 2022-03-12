@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Mar  7 14:53:26 PST 2022
+// Last Modified: Fri Mar 11 20:42:55 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -94861,10 +94861,10 @@ void Tool_peak::processSpine(HTp startok) {
 	// starting note later).
 	vector<vector<HTp>> notelist = getNoteList(startok);
 
-	// MIDI note numbers for each note (with rests being 0).
+	// midinums: MIDI note numbers for each note (with rests being 0).
 	vector<int> midinums = getMidiNumbers(notelist);
 
-	// True = the note is a local high pitch.
+	// peaknotes: True = the note is a local high pitch.
 	vector<bool> peaknotes(midinums.size(), false);
 	identifyLocalPeaks(peaknotes, midinums);
 
@@ -94921,12 +94921,32 @@ void Tool_peak::markNotesInScore(vector<vector<HTp>>& peaknotelist, vector<bool>
 
 void Tool_peak::getLocalPeakNotes(vector<vector<HTp>>& newnotelist,
 		vector<vector<HTp>>& oldnotelist, vector<bool>& peaknotes) {
+
+	// durations == duration of notes in quarter-note units
+	vector<double> durations;
+	getDurations(durations, oldnotelist);
+
+	// strongbeat == true if on a beat (whole-note metric postion).
+	vector<bool> strongbeat;
+	getBeat(strongbeat, oldnotelist);
+
+
+	////////////////////////////
+	//
+	// Refinement to add to following loop: If the note has
+   // a duration less than or equal two 2 (half note), and
+	// the note is not on a beat then do not add it to the
+	// newnotelist vector.
+	//
+	////////////////////////////
+
 	newnotelist.clear();
 	for (int i=0; i<(int)peaknotes.size(); i++) {
 		if (peaknotes[i]) {
 			newnotelist.push_back(oldnotelist[i]);
 		}
 	}
+
 }
 
 
@@ -95057,6 +95077,8 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 			 }
 }
 
+
+
 //////////////////////////////
 //
 // Tool_peak::printData -- Print input and output data.  First column is the MIDI note
@@ -95167,6 +95189,47 @@ vector<vector<HTp>> Tool_peak::getNoteList(HTp starting) {
 
 	return output;
 }
+
+
+
+//////////////////////////////
+//
+// getNoteDurations --
+//
+
+void  Tool_peak::getDurations(vector<double>& durations, vector<vector<HTp>>& notelist) {
+	durations.resize(notelist.size());
+	for (int i=0; i<(int)notelist.size(); i++) {
+		HumNum duration = notelist[i][0]->getTiedDuration();
+		durations[i] = duration.getFloat();
+		// cerr << "DURATION FOR " << notelist[i][0] << " IS " << durations[i] << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// getBeat --
+//
+
+void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
+	metpos.resize(notelist.size());
+	for (int i=0; i<(int)notelist.size(); i++) {
+		HumNum position = notelist[i][0]->getDurationFromBarline();
+		if (position.getDenominator() != 1) {
+			metpos[i] = false;
+		} if (position.getNumerator() % 4 == 0) {
+			metpos[i] = true;
+		} else {
+			metpos[i] = false;
+		}
+		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << endl;
+	}
+}
+
+
+
 
 
 
