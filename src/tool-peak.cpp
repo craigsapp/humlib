@@ -223,6 +223,9 @@ void Tool_peak::getLocalPeakNotes(vector<vector<HTp>>& newnotelist,
 
 	newnotelist.clear();
 	for (int i=0; i<(int)peaknotes.size(); i++) {
+		if ((durations[i] <= 2) && (strongbeat[i] == false)) {
+			continue;
+		}
 		if (peaknotes[i]) {
 			newnotelist.push_back(oldnotelist[i]);
 		}
@@ -505,7 +508,7 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos[i] = false;
 		}
-		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << endl;
+		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
 	}
 }
 

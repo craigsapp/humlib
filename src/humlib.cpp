@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 12 14:15:15 PST 2022
+// Last Modified: Thu Mar 17 12:22:09 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -95359,6 +95359,9 @@ void Tool_peak::getLocalPeakNotes(vector<vector<HTp>>& newnotelist,
 
 	newnotelist.clear();
 	for (int i=0; i<(int)peaknotes.size(); i++) {
+		if ((durations[i] <= 2) && (strongbeat[i] == false)) {
+			continue;
+		}
 		if (peaknotes[i]) {
 			newnotelist.push_back(oldnotelist[i]);
 		}
@@ -95641,7 +95644,7 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos[i] = false;
 		}
-		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << endl;
+		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
 	}
 }
 
