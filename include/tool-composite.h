@@ -44,7 +44,7 @@ class Tool_composite : public HumTool {
 		void        analyzeLineGroup          (HumdrumFile& infile, int line,
 		                                       const string& target);
 		void        extractGroup              (HumdrumFile& infile, const std::string &target);
-		void        getNumericGroupStates     (vector<int>& states, HumdrumFile& infile, const string& tgroup);
+		void        getNumericGroupStates     (std::vector<int>& states, HumdrumFile& infile, const std::string& tgroup);
 		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
 		HumNum      getLineDuration           (HumdrumFile& infile, int index,
 		                                       std::vector<bool>& isNull);
@@ -81,6 +81,7 @@ class Tool_composite : public HumTool {
 		std::string getMeterSymbol            (HumdrumFile& infile, int line, const std::string& group);
 		std::string generateVerseLabelLine    (HumdrumFile& output, HumdrumFile& input, int line);
 		std::string generateStriaLine         (HumdrumFile& output, HumdrumFile& input, int line);
+		std::string getFullCompositeMarker    (int line);
 
 		// Numeric analysis functions:
 		void        doNumericAnalyses         (HumdrumFile& infile);
@@ -100,7 +101,7 @@ class Tool_composite : public HumTool {
 		// Numeric analysis support functions:
 		int         countNoteOnsets           (HTp token);
 
-		bool        needsCoincidenceMarker    (int line);
+		bool        needsCoincidenceMarker    (int line, bool forceQ = false);
 		void        addCoincidenceMarks       (HumdrumFile& infile);
 
 	private:
@@ -191,10 +192,15 @@ class Tool_composite : public HumTool {
 		int m_groupAssignmentIndex = 0;
 		int m_verseLabelIndex      = 0;
 
+		bool m_colorFullCompositeQ  = false;
 		bool m_extractInputQ        = false;
 		bool m_coinMarkQ            = false;
 		std::string m_coinMark      = "|";
 		std::string m_coinMarkColor = "limegreen";
+		std::string m_AMark         = "@";
+		std::string m_AMarkColor    = "crimson";
+		std::string m_BMark         = "Z";
+		std::string m_BMarkColor    = "dodgerblue";
 
 };
 

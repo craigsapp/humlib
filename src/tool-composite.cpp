@@ -11,11 +11,13 @@
 //
 // To do:
 // composite -F is not working.
-// composite -x should allow beamaing.
+// composite -x should allow beaming.
 // (1) Add ties that are missing from composite notation
 // (2) Unmetered tremolos as ornaments in analyses
 // (3) Grace notes counted as ornaments (deal with trill endings later)
 // (5) Ties unmetered tremolo and grace notes (accent tool)
+// (*) stem up for coincidence
+// (R130) has a problem in coincidence (ties)
 //
 
 #include "tool-composite.h"
@@ -57,6 +59,7 @@ Tool_composite::Tool_composite(void) {
 	define("x|extract=b",   "only output composite rhythm spines");
 	define("grace=b",       "include grace notes in composite rhythms");
 	define("u|up-stem=b",   "force notes to be up-stem");
+	define("C|color-full-composite=b", "Color full composite rhythm if score has groups.");
 
 	define("o|only=s",      "output notes of given group (A or B)");
 
@@ -97,10 +100,11 @@ void Tool_composite::initialize(HumdrumFile& infile) {
 
 	m_hasGroupsQ = hasGroupInterpretations(infile);
 
-	m_fullCompositeQ = !getBoolean("no-full-composite");
-	m_coincidenceQ   =  getBoolean("coincidence");
-	m_groupsQ        =  getBoolean("groups");
-	m_upstemQ        =  getBoolean("up-stem");
+	m_colorFullCompositeQ =  getBoolean("color-full-composite");
+	m_fullCompositeQ      = !getBoolean("no-full-composite");
+	m_coincidenceQ        =  getBoolean("coincidence");
+	m_groupsQ             =  getBoolean("groups");
+	m_upstemQ             =  getBoolean("up-stem");
 
 	// There must be at least one analysis being done (excluding -o options):
 	if (!m_groupsQ && !m_coincidenceQ) {
@@ -430,9 +434,21 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 
 	if (m_coinMarkQ) {
 		m_humdrum_text << "!!!RDF**kern: " << m_coinMark;
-		m_humdrum_text << " = marked note, color=\"";
-		m_humdrum_text << "limegreen\"";
-		m_humdrum_text << endl;
+		m_humdrum_text << " = marked note, coincidence note, color=\"";
+		m_humdrum_text << m_coinMarkColor << "\"" << endl;
+	}
+	if (m_colorFullCompositeQ) {
+		m_humdrum_text << "!!!RDF**kern: " << m_AMark;
+      m_humdrum_text << " = marked note, polyrhythm group A, color=\"";
+		m_humdrum_text << m_AMarkColor << "\"" << endl;
+		m_humdrum_text << "!!!RDF**kern: " << m_BMark;
+      m_humdrum_text << " = marked note, polyrhythm group B, color=\"";
+		m_humdrum_text << m_BMarkColor << "\"" << endl;
+		if (!m_coinMarkQ) {
+			m_humdrum_text << "!!!RDF**kern: " << m_coinMark;
+			m_humdrum_text << " = marked note, coincidence note, color=\"";
+			m_humdrum_text << m_coinMarkColor << "\"" << endl;
+		}
 	}
 }
 
@@ -574,7 +590,13 @@ void Tool_composite::getAnalysisOutputLine(ostream& output, HumdrumFile& infile,
 	stringstream tempout;
 
 	if (m_coincidenceQ) {
-		tempout << getCoincidenceToken(infile, line);
+		string value = getCoincidenceToken(infile, line);
+		tempout << value;
+		if (m_upstemQ) {
+			if (value.find("R") != string::npos) {
+				tempout << "/";
+			}
+		}
 		if (processedQ) {
 			tempout << "\t";
 		}
@@ -738,6 +760,8 @@ string Tool_composite::getFullCompositeToken(HumdrumFile& infile, int line) {
 			string output = m_fullComposite[line];
 			if (domark) {
 				output += m_coinMark;
+			} else if (m_colorFullCompositeQ) {
+				output += getFullCompositeMarker(line);
 			}
 			return output;
 		} else {
@@ -776,41 +800,89 @@ string Tool_composite::getFullCompositeToken(HumdrumFile& infile, int line) {
 
 //////////////////////////////
 //
+// Tool_composite::getFullCompositeMarker --
+//
+
+string Tool_composite::getFullCompositeMarker(int line) {
+
+	bool domark = needsCoincidenceMarker(line, true);
+	if (domark) {
+		return m_coinMark;
+	}
+
+	string Avalue = m_groups.at(0).at(line);
+	string Bvalue = m_groups.at(1).at(line);
+
+	if ((Avalue == ".") && (Bvalue == ".")) {
+		return "";
+	}
+
+	bool Arest = Avalue.find("r") != string::npos;
+	bool Brest = Bvalue.find("r") != string::npos;
+	bool Anote = Avalue.find("R") != string::npos;
+	bool Bnote = Bvalue.find("R") != string::npos;
+	bool Anull = Avalue == ".";
+	bool Bnull = Bvalue == ".";
+
+	// deal with tied note sustains?
+	if (Anote && Brest) {
+		return m_AMark;
+	}
+	if (Bnote && Arest) {
+		return m_BMark;
+	}
+	if (Anote && Bnull) {
+		return m_AMark;
+	}
+	if (Bnote && Anull) {
+		return m_BMark;
+	}
+
+	return "";
+}
+
+
+
+//////////////////////////////
+//
 // Tool_composite::needsCoincidenceMarker -- return composite marker if there
 //     is a coincidence between two groups on the given line (from group analysis data).
 //
 
-bool Tool_composite::needsCoincidenceMarker(int line) {
+bool Tool_composite::needsCoincidenceMarker(int line, bool forceQ) {
 	string group1 = m_groups.at(0).at(line);
 	string group2 = m_groups.at(1).at(line);
 
-	bool domark = true;
 	if (!m_coinMarkQ) {
-		return false;
-	} else { 
-		// coincidence if there are no ties or rests, or null tokens involved.
-		if (group1 == "") {
-			domark = false;
-		} else if (group2 == "") {
-			domark = false;
-		} else if (group1.find("r") != string::npos) {
-			domark = false;
-		} else if (group2.find("r") != string::npos) {
-			domark = false;
-		} else if (group1.find("_") != string::npos) {
-			domark = false;
-		} else if (group2.find("_") != string::npos) {
-			domark = false;
-		} else if (group1.find("]") != string::npos) {
-			domark = false;
-		} else if (group2.find("]") != string::npos) {
-			domark = false;
-		} else if (group1 == ".") {
-			domark = false;
-		} else if (group2 == ".") {
-			domark = false;
+		if (!forceQ) {
+			return false;
 		}
+	} 
+
+	// Coincidence if there are no ties or rests, or null tokens involved.
+	bool domark = true;
+	if (group1 == "") {
+		domark = false;
+	} else if (group2 == "") {
+		domark = false;
+	} else if (group1.find("r") != string::npos) {
+		domark = false;
+	} else if (group2.find("r") != string::npos) {
+		domark = false;
+	} else if (group1.find("_") != string::npos) {
+		domark = false;
+	} else if (group2.find("_") != string::npos) {
+		domark = false;
+	} else if (group1.find("]") != string::npos) {
+		domark = false;
+	} else if (group2.find("]") != string::npos) {
+		domark = false;
+	} else if (group1 == ".") {
+		domark = false;
+	} else if (group2 == ".") {
+		domark = false;
 	}
+
 	return domark;
 }
 
