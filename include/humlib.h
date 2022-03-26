@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 20 13:06:29 PDT 2022
+// Last Modified: Fri Mar 25 21:57:05 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1513,7 +1513,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isMetricSymbol            (void);
 		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
 		bool     isMeterSignature          (void) { return isMetricSymbol(); }
-		bool     isMetericSignature        (void) { return isMetricSymbol(); }
+		bool     isMetricSignature         (void) { return isMetricSymbol(); }
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 		bool     isMensuration             (void) { return isMensurationSymbol(); }
@@ -2000,6 +2000,8 @@ class HumdrumFileBase : public HumHash {
 		void          getSpineStartList        (std::vector<HTp>& spinestarts);
 		void          getSpineStartList        (std::vector<HTp>& spinestarts,
 		                                        const std::string& exinterp);
+		void          getSpineStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::vector<std::string>& exinterps);
 		void          getKernSpineStartList    (std::vector<HTp>& spinestarts);
 		std::vector<HTp> getKernSpineStartList (void);
 		void          getKernLikeSpineStartList(std::vector<HTp>& spinestarts);
@@ -2007,8 +2009,6 @@ class HumdrumFileBase : public HumHash {
 		void          getStaffLikeSpineStartList(std::vector<HTp>& spinestarts);
 		std::vector<HTp> getStaffLikeSpineStartList(void);
 		int           getExinterpCount         (const std::string& exinterp);
-		void          getSpineStartList        (std::vector<HTp>& spinestarts,
-		                                        const std::vector<std::string>& exinterps);
 		void          getTrackStartList        (std::vector<HTp>& spinestarts)
 		                               { return getSpineStartList(spinestarts); }
 		void          getTrackStartList        (std::vector<HTp>& spinestarts,
@@ -5908,15 +5908,24 @@ class Tool_composite : public HumTool {
 		                                       std::vector<std::vector<double>>&  rhythmIndex);
 		void        analyzeOutputVariables(HumdrumFile& infile);
 		std::string getTimeSignature          (HumdrumFile& infile, int line, const std::string& group);
-		std::string getMeterSymbol            (HumdrumFile& infile, int line, const std::string& group);
+		std::string getMetricSymbol           (HumdrumFile& infile, int line, const std::string& group);
 		std::string generateVerseLabelLine    (HumdrumFile& output, HumdrumFile& input, int line);
 		std::string generateStriaLine         (HumdrumFile& output, HumdrumFile& input, int line);
 		std::string getFullCompositeMarker    (int line);
+		void        addStaffInfo              (HumdrumFile& output, HumdrumFile& infile);
+		void        addTimeSignatureChanges   (HumdrumFile& output, HumdrumFile& infile);
+		void        addMeterSignatureChanges  (HumdrumFile& output, HumdrumFile& infile);
+		void        adjustBadCoincidenceRests (HumdrumFile& output, HumdrumFile& infile);
+		HTp         fixBadRestRhythm          (HTp token, string& rhythm, HumNum tstop, HumNum tsbot);
+		std::string generateSizeLine          (HumdrumFile& output, HumdrumFile& input, int line);
+		void        convertNotesToRhythms     (HumdrumFile& infile);
+		int         getEventCount             (std::vector<string>& data);
+		void        fixTiedNotes              (std::vector<string>& data, HumdrumFile& infile);
 
 		// Numeric analysis functions:
 		void        doNumericAnalyses         (HumdrumFile& infile);
 		void        doOnsetAnalyses           (HumdrumFile& infile);
-		void        doOnsetAnalysis           (vector<double>& analysis,
+		void        doOnsetAnalysis           (std::vector<double>& analysis,
 		                                       HumdrumFile& infile,
 		                                       const string& targetGroup);
 
@@ -6012,16 +6021,27 @@ class Tool_composite : public HumTool {
 
 		// output line variables (zero means unset, and negative means add
 		// before next line.
-		int m_clefIndex            = 0;
-		int m_striaIndex           = 0;
-		int m_firstDataIndex       = 0;
-		int m_instrumentNameIndex  = 0;
-		int m_instrumentAbbrIndex  = 0;
-		int m_timeSignatureIndex   = 0;
-		int m_meterSymbolIndex     = 0;
-		int m_groupAssignmentIndex = 0;
-		int m_verseLabelIndex      = 0;
+		int m_clefIndex             = 0;
+		int m_striaIndex            = 0;
+		int m_sizeIndex             = 0;
+		int m_firstDataIndex        = 0;
+		int m_instrumentNameIndex   = 0;
+		int m_instrumentAbbrIndex   = 0;
+		int m_timeSignatureIndex    = 0;
+		int m_meterSymbolIndex      = 0;
+		int m_groupAssignmentIndex  = 0;
+		int m_verseLabelIndex       = 0;
 
+		int m_coincidenceEventCount   = -1;
+		int m_fullCompositeEventCount = -1;
+		int m_groupAEventCount        = -1;
+		int m_groupBEventCount        = -1;
+
+		double m_scoreSize          = 100.0;
+		double m_analysisSize       = 100.0;
+
+		bool m_eventQ                = false;
+		bool m_rhythmQ              = false;
 		bool m_colorFullCompositeQ  = false;
 		bool m_extractInputQ        = false;
 		bool m_coinMarkQ            = false;
@@ -7559,10 +7579,12 @@ class Tool_modori : public HumTool {
 		bool m_nokeyQ         = false; // -K option: don't change key signatures
 		bool m_noclefQ        = false; // -C option: don't change clefs
 		bool m_nomensurationQ = false; // -M option: don't change mensurations
+		bool m_notextQ        = false; // -T option: don't change **text
 
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_keys;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_clefs;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_mensurations;
+		std::vector<std::map<HumNum, std::vector<HTp>>> m_lyrics;
 
 };
 

@@ -111,7 +111,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isMetricSymbol            (void);
 		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
 		bool     isMeterSignature          (void) { return isMetricSymbol(); }
-		bool     isMetericSignature        (void) { return isMetricSymbol(); }
+		bool     isMetricSignature         (void) { return isMetricSymbol(); }
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 		bool     isMensuration             (void) { return isMensurationSymbol(); }
