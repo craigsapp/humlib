@@ -49,7 +49,8 @@ Tool_modori::Tool_modori(void) {
 	define("d|info=b", "display key/clef/mensuration information");
 	define("K|no-key|no-keys=b", "Do not change key signatures");
 	define("C|no-clef|no-clefs=b", "Do not change clefs");
-	define("T|no-text=b", "Do not change **text exclusive interpretations");
+	define("T|no-text=b",    "Do not change !LO:TX layout parameters");
+	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
 	define("M|no-mensuration|no-mensurations=b", "Do not change mensurations");
 }
 
@@ -116,7 +117,8 @@ void Tool_modori::initialize(void) {
 	}
 	m_nokeyQ         = getBoolean("no-key");
 	m_noclefQ        = getBoolean("no-clef");
-	m_notextQ        = getBoolean("no-text");
+	m_nolotextQ      = getBoolean("no-text");
+	m_nolyricsQ      = getBoolean("no-lyrics");
 	m_nomensurationQ = getBoolean("no-mensuration");
 }
 
@@ -132,14 +134,31 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	m_clefs.clear();
 	m_mensurations.clear();
 	m_lyrics.clear();
+	m_lotext.clear();
 
 	int maxtrack = infile.getMaxTrack();
 	m_keys.resize(maxtrack+1);
 	m_clefs.resize(maxtrack+1);
 	m_mensurations.resize(maxtrack+1);
-	m_lyrics.resize(maxtrack+1);
+	m_lyrics.reserve(1000);
+	m_lotext.reserve(1000);
+
+	HumRegex hre;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isCommentLocal() || infile[i].isCommentGlobal()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (*token == "!") {
+					continue;
+				}
+				if (hre.search(token, "^!!?LO:TX.*:mod=")) {
+					m_lotext.push_back(token);
+				} else if (hre.search(token, "^!!?LO:TX.*:ori=")) {
+					m_lotext.push_back(token);
+				}
+			}
+		}
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
@@ -147,16 +166,16 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (token->isExclusiveInterpretation()) {
-				int track = token->getTrack();
 				if (*token == "**text") {
-					m_lyrics[track][timeval].push_back(token);
+					m_lyrics.push_back(token);
 				}
 				if (*token == "**mod-text") {
-					m_lyrics[track][timeval].push_back(token);
+					m_lyrics.push_back(token);
 				}
 				if (*token == "**ori-text") {
-					m_lyrics[track][timeval].push_back(token);
+					m_lyrics.push_back(token);
 				}
+				continue;
 			}
 			if (!token->isKern()) {
 				continue;
@@ -198,6 +217,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	}
 
 	switchModernOriginal(infile);
+	m_humdrum_text << infile;
 }
 
 
@@ -244,32 +264,51 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 		}
 	}
 
-	if (!m_notextQ) {
-		int line = -1;
+	if (!m_nolyricsQ) {
 		bool adjust = false;
-		for (int t=0; t<(int)m_lyrics.size(); ++t) {
-			for (auto it = m_lyrics.at(t).begin(); it != m_lyrics.at(t).end(); ++it) {
-				HTp token = it->second.at(0);
-				line = token->getLineIndex();
-				if (m_modernQ) {
-					if (*token == "**text") {
-						adjust = true;
-						token->setText("**ori-text");
-					} else if (*token == "**mod-text") {
-						adjust = true;
-						token->setText("**text");
-					}
-				} else {
-					if (*token == "**text") {
-						adjust = true;
-						token->setText("**mod-text");
-					} else if (*token == "**ori-text") {
-						adjust = true;
-						token->setText("**text");
-					}
+		int line = -1;
+		for (int i=0; i<(int)m_lyrics.size(); i++) {
+			HTp token = m_lyrics[i];
+			line = token->getLineIndex();
+			if (m_modernQ) {
+				if (*token == "**text") {
+					adjust = true;
+					token->setText("**ori-text");
+				} else if (*token == "**mod-text") {
+					adjust = true;
+					token->setText("**text");
+				}
+			} else {
+				if (*token == "**text") {
+					adjust = true;
+					token->setText("**mod-text");
+				} else if (*token == "**ori-text") {
+					adjust = true;
+					token->setText("**text");
 				}
 			}
-			if (adjust && (line >= 0)) {
+		}
+		if (adjust && (line >= 0)) {
+			infile[line].createLineFromTokens();
+		}
+	}
+
+	if (!m_nolotextQ) {
+		HumRegex hre;
+		for (int i=0; i<(int)m_lotext.size(); i++) {
+			HTp token = m_lotext[i];
+			int line = token->getLineIndex();
+			if (hre.search(token, "^!!?LO:TX.*:mod=")) {
+				string text = *token;
+				hre.replaceDestructive(text, ":ori=", ":t=");
+				hre.replaceDestructive(text, ":t=", ":mod=");
+				token->setText(text);
+				changed.insert(line);
+			} else if (hre.search(token, "^!!?LO:TX.*:ori=")) {
+				string text = *token;
+				hre.replaceDestructive(text, ":mod=", ":t=");
+				hre.replaceDestructive(text, ":t=", ":ori=");
+				token->setText(text);
 				changed.insert(line);
 			}
 		}
@@ -559,7 +598,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_keys.size(); ++t) {
 		for (auto it = m_keys.at(t).begin(); it != m_keys.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); ++j) {
 				m_humdrum_text << '\t' << it->second.at(j);
 		}
@@ -572,7 +611,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_keys.size(); ++t) {
 		for (auto it = m_clefs.at(t).begin(); it != m_clefs.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); ++j) {
 				m_humdrum_text << '\t' << it->second.at(j);
 			}
@@ -585,7 +624,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_mensurations.size(); ++t) {
 		for (auto it = m_mensurations.at(t).begin(); it != m_mensurations.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); j++) {
 				m_humdrum_text << '\t' << it->second.at(j);
 			}
@@ -596,14 +635,18 @@ void Tool_modori::printInfo(void) {
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	m_humdrum_text << "!! LYRICS:" << endl;
 
-	for (int t=1; t<(int)m_lyrics.size(); ++t) {
-		for (auto it = m_lyrics.at(t).begin(); it != m_lyrics.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
-			for (int j=0; j<(int)it->second.size(); j++) {
-				m_humdrum_text << '\t' << it->second.at(j);
-			}
-			m_humdrum_text << endl;
-		}
+	for (int i=0; i<(int)m_lyrics.size(); i++) {
+		HTp token = m_lyrics[i];
+		m_humdrum_text << "!!\t";
+		m_humdrum_text << token;
+		m_humdrum_text << endl;
+	}
+
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	m_humdrum_text << "!! TEXT:" << endl;
+
+	for (int i=0; i<(int)m_lotext.size(); i++) {
+		m_humdrum_text << "!!\t" << m_lotext[i] << endl;
 	}
 
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;

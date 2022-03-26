@@ -52,12 +52,14 @@ class Tool_modori : public HumTool {
 		bool m_nokeyQ         = false; // -K option: don't change key signatures
 		bool m_noclefQ        = false; // -C option: don't change clefs
 		bool m_nomensurationQ = false; // -M option: don't change mensurations
-		bool m_notextQ        = false; // -T option: don't change **text
+		bool m_nolyricsQ      = false; // -L option: don't change **text
+		bool m_nolotextQ      = false; // -T option: don't change !LO:TX
 
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_keys;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_clefs;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_mensurations;
-		std::vector<std::map<HumNum, std::vector<HTp>>> m_lyrics;
+		std::vector<HTp> m_lyrics;
+		std::vector<HTp> m_lotext;
 
 };
 
