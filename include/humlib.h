@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 26 14:47:29 PDT 2022
+// Last Modified: Sun Mar 27 01:33:04 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7571,20 +7571,25 @@ class Tool_modori : public HumTool {
 		void     convertClefToModern          (HTp token);
 		void     convertClefToOriginal        (HTp token);
 		void     convertClefToRegular         (HTp token);
+		int      getPairedReference  (int index, vector<string>& keys);
+		void     storeModOriReferenceRecords(HumdrumFile& infile);
 
 	private:
-		bool m_modernQ        = false; // show modern key/clef/time signatures
-		bool m_originalQ      = false; // show original key/clef/mensuration
+		bool m_modernQ        = false; // -m option: show modern key/clef/time signatures
+		bool m_originalQ      = false; // -o option: show original key/clef/mensuration
 		bool m_infoQ          = false; // show key/clef/mensuration tokens in data
+
 		bool m_nokeyQ         = false; // -K option: don't change key signatures
 		bool m_noclefQ        = false; // -C option: don't change clefs
 		bool m_nomensurationQ = false; // -M option: don't change mensurations
 		bool m_nolyricsQ      = false; // -L option: don't change **text
 		bool m_nolotextQ      = false; // -T option: don't change !LO:TX
+		bool m_norefsQ        = false; // -R option: don't change !LO:TX
 
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_keys;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_clefs;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_mensurations;
+		std::vector<std::pair<HTp, HTp>> m_references;
 		std::vector<HTp> m_lyrics;
 		std::vector<HTp> m_lotext;
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Mar 26 14:47:29 PDT 2022
+// Last Modified: Sun Mar 27 01:33:04 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -84227,11 +84227,13 @@ Tool_modori::Tool_modori(void) {
 	define("m|modern=b",    "prepare score for modern style");
 	define("o|original=b", "prepare score for original style");
 	define("d|info=b", "display key/clef/mensuration information");
-	define("K|no-key|no-keys=b", "Do not change key signatures");
+
 	define("C|no-clef|no-clefs=b", "Do not change clefs");
-	define("T|no-text=b",    "Do not change !LO:TX layout parameters");
+	define("K|no-key|no-keys=b", "Do not change key signatures");
 	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
 	define("M|no-mensuration|no-mensurations=b", "Do not change mensurations");
+	define("R|no-references=b", "Do not change reference records keys");
+	define("T|no-text=b",    "Do not change !LO:TX layout parameters");
 }
 
 
@@ -84299,6 +84301,7 @@ void Tool_modori::initialize(void) {
 	m_noclefQ        = getBoolean("no-clef");
 	m_nolotextQ      = getBoolean("no-text");
 	m_nolyricsQ      = getBoolean("no-lyrics");
+	m_norefsQ        = getBoolean("no-references");
 	m_nomensurationQ = getBoolean("no-mensuration");
 }
 
@@ -84313,6 +84316,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	m_keys.clear();
 	m_clefs.clear();
 	m_mensurations.clear();
+	m_references.clear();
 	m_lyrics.clear();
 	m_lotext.clear();
 
@@ -84320,6 +84324,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	m_keys.resize(maxtrack+1);
 	m_clefs.resize(maxtrack+1);
 	m_mensurations.resize(maxtrack+1);
+	m_references.reserve(1000);
 	m_lyrics.reserve(1000);
 	m_lotext.reserve(1000);
 
@@ -84384,6 +84389,8 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		}
 	}
 
+	storeModOriReferenceRecords(infile);
+
 	if (m_infoQ) {
 		if (m_modernQ || m_originalQ) {
 			m_humdrum_text << infile;
@@ -84396,9 +84403,104 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		return;
 	}
 
+
 	switchModernOriginal(infile);
 	m_humdrum_text << infile;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_modori::storeModOriReferenceRecors --
+//
+
+void Tool_modori::storeModOriReferenceRecords(HumdrumFile& infile) {
+	m_references.clear();
+
+	vector<HLp> refs = infile.getGlobalReferenceRecords();
+	vector<string> keys(refs.size());
+	for (int i=0; i<(int)refs.size(); i++) {
+		string key = refs.at(i)->getReferenceKey();
+		keys.at(i) = key;
+	}
+
+	vector<int> modernIndex;
+	vector<int> originalIndex;
+
+	HumRegex hre;
+	for (int i=0; i<(int)keys.size(); i++) {
+		if (m_modernQ || m_infoQ) {
+			if (hre.search(keys[i], "-mod$")) {
+				modernIndex.push_back(i);
+			}
+		} else if (m_originalQ || m_infoQ) {
+			if (hre.search(keys[i], "-ori$")) {
+				originalIndex.push_back(i);
+			}
+		}
+	}
+
+	if (m_modernQ || m_infoQ) {
+		// Store *-mod reference records if there is a pairing:
+		int pairing = -1;
+		for (int i=0; i<(int)modernIndex.size(); i++) {
+			int index = modernIndex[i];
+			pairing = getPairedReference(index, keys);
+			if (pairing >= 0) {
+				m_references.push_back(make_pair(refs[index]->token(0), refs[pairing]->token(0)));
+			}
+		}
+	}
+
+	if (m_originalQ || m_infoQ) {
+		// Store *-ori reference records if there is a pairing:
+		int pairing = -1;
+		string target;
+		for (int i=0; i<(int)originalIndex.size(); i++) {
+			int index = originalIndex[i];
+			pairing = getPairedReference(index, keys);
+			if (pairing >= 0) {
+				target = keys[index];
+				m_references.push_back(make_pair(refs[index]->token(0), refs[pairing]->token(0)));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::getPairedReference --
+//
+
+int Tool_modori::getPairedReference(int index, vector<string>& keys) {
+	string key = keys.at(index);
+	string tkey = key;
+	if (tkey.size() > 4) {
+		tkey.resize(tkey.size() - 4);
+	} else {
+		return -1;
+	}
+
+	for (int i=0; i<(int)keys.size(); i++) {
+		int ii = index + i;
+		if (ii < (int)keys.size()) {
+			if (tkey == keys.at(ii)) {
+				return ii;
+			}
+		}
+		ii = index - i;
+		if (ii >= 0) {
+			if (tkey == keys.at(ii)) {
+				return ii;
+			}
+		}
+	}
+	return -1;
+}
+
 
 
 //////////////////////////////
@@ -84491,6 +84593,41 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 				token->setText(text);
 				changed.insert(line);
 			}
+		}
+	}
+
+	if (!m_norefsQ) {
+		HumRegex hre;
+		for (int i=0; i<(int)m_references.size(); i++) {
+			HTp first = m_references[i].first;
+			HTp second = m_references[i].second;
+
+			if (m_modernQ) {
+				if (hre.search(first, "^!!![^:]*?-mod:")) {
+					string text = *first;
+					hre.replaceDestructive(text, ":", "-...:");
+					first->setText(text);
+					infile[first->getLineIndex()].createLineFromTokens();
+
+					text = *second;
+					hre.replaceDestructive(text, "-ori:", ":");
+					second->setText(text);
+					infile[second->getLineIndex()].createLineFromTokens();
+				}
+			} else if (m_originalQ) {
+				if (hre.search(first, "^!!![^:]*?-ori:")) {
+					string text = *first;
+					hre.replaceDestructive(text, ":", "-...:");
+					first->setText(text);
+					infile[first->getLineIndex()].createLineFromTokens();
+
+					text = *second;
+					hre.replaceDestructive(text, "-mod:", ":");
+					second->setText(text);
+					infile[second->getLineIndex()].createLineFromTokens();
+				}
+			}
+
 		}
 	}
 
@@ -84827,6 +84964,15 @@ void Tool_modori::printInfo(void) {
 
 	for (int i=0; i<(int)m_lotext.size(); i++) {
 		m_humdrum_text << "!!\t" << m_lotext[i] << endl;
+	}
+
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	m_humdrum_text << "!! REFERENCES:" << endl;
+
+	for (int i=0; i<(int)m_references.size(); i++) {
+		m_humdrum_text << "!!\t" << m_references[i].first << endl;
+		m_humdrum_text << "!!\t" << m_references[i].second << endl;
+		m_humdrum_text << "!!\n";
 	}
 
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
