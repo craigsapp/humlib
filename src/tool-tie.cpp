@@ -199,7 +199,6 @@ void Tool_tie::splitToken(HTp tok) {
 //
 
 void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
-
 	if (duration <= 0) {
 		return;
 	}
@@ -266,11 +265,14 @@ void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
 			break;
 		}
 		if (current->isData()) {
-			foundQ = true;
-			break;
+			if (!current->isNull()) {
+				foundQ = true;
+				break;
+			}
 		}
 		current = current->getNextToken();
 	}
+
 	if (!foundQ) {
 		// strange error
 		return;
