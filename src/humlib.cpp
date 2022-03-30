@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar 29 23:56:15 PDT 2022
+// Last Modified: Wed Mar 30 07:53:21 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -84232,7 +84232,7 @@ Tool_modori::Tool_modori(void) {
 	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
 	define("M|no-mensuration|no-mensurations=b", "Do not change mensurations");
 	define("R|no-references=b", "Do not change reference records keys");
-	define("T|no-text=b",    "Do not change !LO:TX layout parameters");
+	define("T|no-text=b",    "Do not change !LO:(TX|DY) layout parameters");
 }
 
 
@@ -84336,9 +84336,9 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 				if (*token == "!") {
 					continue;
 				}
-				if (hre.search(token, "^!!?LO:TX.*:mod=")) {
+				if (hre.search(token, "^!!?LO:(TX|DY).*:mod=")) {
 					m_lotext.push_back(token);
-				} else if (hre.search(token, "^!!?LO:TX.*:ori=")) {
+				} else if (hre.search(token, "^!!?LO:(TX|DY).*:ori=")) {
 					m_lotext.push_back(token);
 				}
 			}
@@ -84579,13 +84579,13 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 		for (int i=0; i<(int)m_lotext.size(); i++) {
 			HTp token = m_lotext[i];
 			int line = token->getLineIndex();
-			if (hre.search(token, "^!!?LO:TX.*:mod=")) {
+			if (hre.search(token, "^!!?LO:(TX|DY).*:mod=")) {
 				string text = *token;
 				hre.replaceDestructive(text, ":ori=", ":t=");
 				hre.replaceDestructive(text, ":t=", ":mod=");
 				token->setText(text);
 				changed.insert(line);
-			} else if (hre.search(token, "^!!?LO:TX.*:ori=")) {
+			} else if (hre.search(token, "^!!?LO:(TX|DY).*:ori=")) {
 				string text = *token;
 				hre.replaceDestructive(text, ":mod=", ":t=");
 				hre.replaceDestructive(text, ":t=", ":ori=");
