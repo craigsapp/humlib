@@ -1259,12 +1259,11 @@ void Tool_composite::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 				if ((tok->find("_") == string::npos) && 
 				    (tok->find("]") == string::npos)) {
 					allsustain = false;
-					cerr << "NOTE THAT IS NOT SUSTAIND: " << tok << endl;
 				} else {
-					cerr << "NOTE THAT IS SUSTAIN: " << tok << endl;
+				// 	cerr << "NOTE THAT IS SUSTAIN: " << tok << endl;
 				}
 			} else {
-				cerr << "TOKEN IS NOT NOTE " << tok << endl;
+				// cerr << "TOKEN IS NOT NOTE " << tok << endl;
 			}
 			if (tok->isRest()) {
 				allnull = false;

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Mar 27 01:33:04 PDT 2022
+// Last Modified: Sun Mar 27 18:41:03 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -58702,12 +58702,11 @@ void Tool_composite::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 				if ((tok->find("_") == string::npos) && 
 				    (tok->find("]") == string::npos)) {
 					allsustain = false;
-					cerr << "NOTE THAT IS NOT SUSTAIND: " << tok << endl;
 				} else {
-					cerr << "NOTE THAT IS SUSTAIN: " << tok << endl;
+				// 	cerr << "NOTE THAT IS SUSTAIN: " << tok << endl;
 				}
 			} else {
-				cerr << "TOKEN IS NOT NOTE " << tok << endl;
+				// cerr << "TOKEN IS NOT NOTE " << tok << endl;
 			}
 			if (tok->isRest()) {
 				allnull = false;
