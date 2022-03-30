@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar 29 21:44:56 PDT 2022
+// Last Modified: Tue Mar 29 23:56:15 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -9244,14 +9244,17 @@ class Tool_tie : public HumTool {
 		void     splitOverfills          (HumdrumFile& infile);
 		void     splitToken              (HTp tok);
 		void     carryForwardLeftoverDuration(HumNum duration, HTp tok);
+		HumNum   getDurationToNextVisibleBarline(HTp tok);
+		HumNum   getDurationToNextBarline(HTp tok);
 
 	private:
-		bool          m_printQ      = false;
-		bool          m_mergeQ      = false;
-		bool          m_splitQ      = false;
-		bool          m_markQ       = false;
-		bool          m_invisibleQ  = false;
-		std::string   m_mark        = "@";
+		bool          m_printQ         = false;
+		bool          m_mergeQ         = false;
+		bool          m_splitQ         = false;
+		bool          m_markQ          = false;
+		bool          m_invisibleQ     = false;
+		bool          m_skipInvisibleQ = false;
+		std::string   m_mark           = "@";
 
 };
 

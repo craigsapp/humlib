@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Jul 16 17:58:16 PDT 2020
-// Last Modified: Thu Jul 16 19:05:13 PDT 2020
+// Last Modified: Tue Mar 29 22:13:01 PDT 2022
 // Filename:      tool-tie.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-tie.cpp
 // Syntax:        C++11; humlib
@@ -42,6 +42,7 @@ Tool_tie::Tool_tie(void) {
 	define("p|printable=b", "merge tied notes only if single note is a printable note.");
 	define("M|mark=b", "Mark overfill notes.");
 	define("i|invisible=b", "Mark overfill barlines invisible.");
+	define("I|skip-invisible=b", "Skip invisible measures when splitting overfill durations.");
 }
 
 
@@ -99,11 +100,12 @@ bool Tool_tie::run(HumdrumFile& infile) {
 //
 
 void Tool_tie::initialize(void) {
-	m_printQ      = getBoolean("printable");
-	m_mergeQ      = getBoolean("merge");
-	m_splitQ      = getBoolean("split");
-	m_markQ       = getBoolean("mark");
-	m_invisibleQ  = getBoolean("invisible");
+	m_printQ         = getBoolean("printable");
+	m_mergeQ         = getBoolean("merge");
+	m_splitQ         = getBoolean("split");
+	m_markQ          = getBoolean("mark");
+	m_invisibleQ     = getBoolean("invisible");
+	m_skipInvisibleQ = getBoolean("skip-invisible");
 }
 
 
@@ -179,7 +181,7 @@ void Tool_tie::splitOverfills(HumdrumFile& infile) {
 
 void Tool_tie::splitToken(HTp tok) {
 	HumNum duration = tok->getDuration();
-	HumNum toBarline = tok->getDurationToBarline();
+	HumNum toBarline = getDurationToNextBarline(tok);
 	HumNum newdur = toBarline;
 	duration = duration - toBarline;
 	string text = "[";
@@ -206,7 +208,13 @@ void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
 	// find next barline:
 	while (current) {
 		if (current->isBarline()) {
-			break;
+			if (m_skipInvisibleQ) {
+				if (current->find("-") == string::npos) {
+					break;
+				}
+			} else {
+				break;
+			}
 		}
 		current = current->getNextToken();
 	}
@@ -225,7 +233,7 @@ void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
 		hre.replaceDestructive(text, "", "-", "g");
 		barline->setText(text);
 	}
-	HumNum bardur = current->getDurationToBarline();
+	HumNum bardur = getDurationToNextBarline(current);
 
 	// find first null token after barline (that is not on a grace-note line)
 	// if the original note is an overfill note, there must be
@@ -261,8 +269,15 @@ void Tool_tie::carryForwardLeftoverDuration(HumNum duration, HTp tok) {
 	foundQ = 0;
 	while (current) {
 		if (current->isBarline()) {
-			foundQ = true;
-			break;
+			if (m_skipInvisibleQ) {
+				if (current->find("-") == string::npos) {
+					foundQ = true;
+					break;
+				}
+			} else {
+				foundQ = true;
+				break;
+			}
 		}
 		if (current->isData()) {
 			if (!current->isNull()) {
@@ -429,6 +444,7 @@ void Tool_tie::markNextBarlineInvisible(HTp tok) {
 			continue;
 		}
 		if (current->find('-') != string::npos) {
+			// Already invisible
 			break;
 		}
 		string text = *current;
@@ -512,11 +528,59 @@ bool Tool_tie::checkForInvisible(HTp tok) {
 
 bool Tool_tie::checkForOverfill(HTp tok) {
 	HumNum duration = tok->getDuration();
-	HumNum tobarline = tok->getDurationToBarline();
+	HumNum tobarline = getDurationToNextBarline(tok);
 	if (duration > tobarline) {
 		return true;
 	} else {
 		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tie::getDurationToNextVisibleBarline --
+//
+
+HumNum Tool_tie::getDurationToNextVisibleBarline(HTp tok) {
+	HTp current = tok;
+	HTp barline = NULL;
+	while (current) {
+		if (!current->isBarline()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->find("-") != string::npos) {
+			// invisible so skip this barline
+			current = current->getNextToken();
+			continue;
+		}
+		barline = current;
+		break;
+	}
+
+	if (!barline) {
+		return tok->getDurationToEnd();
+	}
+	HumNum startpos   = tok->getDurationFromStart();
+	HumNum endpos     = barline->getDurationFromStart();
+	HumNum difference = endpos - startpos;
+	return difference;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tie::getDurationToNextBarline --
+//
+
+HumNum Tool_tie::getDurationToNextBarline(HTp tok) {
+	if (m_skipInvisibleQ) {
+		return getDurationToNextVisibleBarline(tok);
+	} else {
+		return tok->getDurationToBarline();
 	}
 }
 
