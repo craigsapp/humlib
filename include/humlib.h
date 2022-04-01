@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Mar 30 07:53:21 PDT 2022
+// Last Modified: Fri Apr  1 09:37:37 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8533,7 +8533,11 @@ class Tool_peak : public HumTool {
 		std::string m_color     = "red";
 		double      m_smallRest = 4.0;   // Ignore rests that are 1 whole note or less.
 		double      m_peakDur   = 24.0;  // 6 whole notes maximum between m_peakNum local maximums.
-		double      m_peakNum   = 3;    // Number of local maximums in a row needed to mark in score.
+		double      m_peakNum   = 3;     // Number of local maximums in a row needed to mark in score.
+
+
+		bool        m_infoQ     = false; // Used with -i option.
+		int         m_count     = 0;     // Number of peaks in score.
 
 };
 
