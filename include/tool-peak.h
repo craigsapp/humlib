@@ -70,6 +70,12 @@ class Tool_peak : public HumTool {
 		bool        m_infoQ     = false; // Used with -i option.
 		int         m_count     = 0;     // Number of peaks in score.
 
+		std::vector<int>    m_peakMeasureBegin;
+		std::vector<int>    m_peakMeasureEnd;
+		std::vector<HumNum> m_peakDuration;
+		std::vector<string> m_peakPitch;
+		std::vector<int>    m_peakPitchCount;
+
 };
 
 // END_MERGE
