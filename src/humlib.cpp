@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr  1 09:37:37 PDT 2022
+// Last Modified: Fri Apr  1 10:06:01 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -96405,7 +96405,7 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		m_humdrum_text << endl;
 	}
 
-	if (!m_infoQ) {
+	if (m_infoQ) {
 		m_humdrum_text << "!!!peaks: " << m_count << endl;
 	}
 

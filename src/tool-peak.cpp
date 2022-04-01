@@ -127,7 +127,7 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		m_humdrum_text << endl;
 	}
 
-	if (!m_infoQ) {
+	if (m_infoQ) {
 		m_humdrum_text << "!!!peaks: " << m_count << endl;
 	}
 
