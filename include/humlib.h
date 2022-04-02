@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr  2 16:40:15 PDT 2022
+// Last Modified: Sat Apr  2 16:46:26 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8540,6 +8540,12 @@ class Tool_peak : public HumTool {
 
 		bool        m_infoQ     = false; // Used with -i option.
 		int         m_count     = 0;     // Number of peaks in score.
+
+		std::vector<int>    m_peakMeasureBegin;
+		std::vector<int>    m_peakMeasureEnd;
+		std::vector<HumNum> m_peakDuration;
+		std::vector<string> m_peakPitch;
+		std::vector<int>    m_peakPitchCount;
 
 };
 
