@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr  1 10:06:01 PDT 2022
+// Last Modified: Sat Apr  2 16:40:15 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -58699,7 +58699,7 @@ void Tool_composite::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 			if (tok->isNote()) {
 				allrest = false;
 				allnull = false;
-				if ((tok->find("_") == string::npos) && 
+				if ((tok->find("_") == string::npos) &&
 				    (tok->find("]") == string::npos)) {
 					allsustain = false;
 				} else {
@@ -59911,8 +59911,8 @@ void Tool_composite::doNumericAnalyses(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_composite::doOnsetAnalyses -- targetGroup == "" means full composite onsets.
-//
-// First index of m_analyses is rhythm type, and second index is analysis type, with "0" being onsets.
+//     First index of m_analyses is rhythm type, and second index is analysis type,
+//     with "0" being onsets.
 //
 
 void Tool_composite::doOnsetAnalyses(HumdrumFile& infile) {
@@ -59929,7 +59929,26 @@ void Tool_composite::doOnsetAnalyses(HumdrumFile& infile) {
 	// Coincidence onset analysis must come after other onset analyses since it
 	// relies on group A + group B.
 	if (m_analyses.at(m_COINCIDENCE).at(m_ONSET).size() > 0) {
-		// doOnsetAnalysisCoincidence(m_analyses.at(m_COINCIDENCE).at(m_ONSET), infile, m_analyses.at(0));
+		doOnsetAnalysisCoincidence(m_analyses.at(m_COINCIDENCE).at(m_ONSET),
+		                           m_analyses.at(m_COMPOSITE_A).at(m_ONSET),
+		                           m_analyses.at(m_COMPOSITE_B).at(m_ONSET));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_composite::doOnsetAnalysisCoincidence -- Note onset analysis for coincidence analysis.
+//
+
+void Tool_composite::doOnsetAnalysisCoincidence(vector<double>& output,
+		vector<double>& inputA, vector<double>& inputB) {
+	fill(output.begin(), output.end(), 0);
+	for (int i=0; i<(int)inputA.size(); i++) {
+		if ((inputA[i] > 0) && (inputB[i] > 0)) {
+			output[i] = inputA[i] + inputB[i];
+		}
 	}
 }
 

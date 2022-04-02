@@ -91,6 +91,8 @@ class Tool_composite : public HumTool {
 		void        convertNotesToRhythms     (HumdrumFile& infile);
 		int         getEventCount             (std::vector<string>& data);
 		void        fixTiedNotes              (std::vector<string>& data, HumdrumFile& infile);
+		void        doOnsetAnalysisCoincidence(vector<double>& output,
+		                                       vector<double>& inputA, vector<double>& inputB);
 
 		// Numeric analysis functions:
 		void        doNumericAnalyses         (HumdrumFile& infile);
