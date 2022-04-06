@@ -33,6 +33,7 @@ Tool_peak::Tool_peak(void) {
 	define("r|ignore-rest=d:1.0",  "ignore rests smaller than given value (in whole notes)");
 	define("n|number=i:3",         "number of high notes in a row");
 	define("d|dur|duration=d:6.0", "maximum duration between peak note attacks in whole notes");
+	define("i|info=b",             "print peak info");
 }
 
 
@@ -95,6 +96,8 @@ void Tool_peak::initialize(void) {
 	m_smallRest = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
 	m_peakNum   = getInteger("number");
 	m_peakDur   = getInteger("duration") * 4.0;    // convert to quarter notes
+	m_infoQ     = getBoolean("info");
+	m_count     = 0;
 }
 
 
@@ -122,6 +125,10 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		m_humdrum_text << " = marked note, color=";
 		m_humdrum_text << m_color;
 		m_humdrum_text << endl;
+	}
+
+	if (m_infoQ) {
+		m_humdrum_text << "!!!peaks: " << m_count << endl;
 	}
 
 }

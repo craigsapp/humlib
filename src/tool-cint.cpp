@@ -77,6 +77,7 @@ Tool_cint::Tool_cint(void) {
 	define("R|no-rest|no-rests|norest|norests=b", "number of sequential modules");
 	define("O|octave-all=b", "transpose all harmonic intervals to within an octave");
 	define("chromatic=b", "display intervals as diatonic intervals with chromatic alterations");
+	define("color=s:red", "color of marked notes");
 	define("search=s:", "search string");
 	define("mark=b", "mark matches notes from searches in data");
 	define("count=b", "count matched modules from search query");
@@ -196,7 +197,7 @@ NoteNode::~NoteNode(void) {
 void NoteNode::clear(void) {
 	mark = measure = serial = b40 = 0;
 	beatsize = 0.0;
-	notemarker = 0;
+	notemarker = "";
 	line = spine = -1;
 	protected_id = "";
 }
@@ -288,7 +289,7 @@ int Tool_cint::processFile(HumdrumFile& infile) {
 		}
 		infile.createLinesFromTokens();
 		m_humdrum_text << infile;
-		m_humdrum_text << "!!!RDF**kern: @ = matched note, color=\"#ff0000\"\n";
+		m_humdrum_text << "!!!RDF**kern: " << NoteMarker << " = matched note, color=\"" << MarkColor << "\"\n";
 	}
 
 	if (debugQ) {
@@ -662,7 +663,7 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 	HumRegex hre;
 	stringstream tempstream;
 	int match;
-	char notemarker = '\0';
+	string notemarker;
 // ggg
 	int status = printCombinationModule(tempstream, filename, notes,
 			n, startline, part1, part2, retrospective, notemarker);
@@ -670,8 +671,8 @@ int Tool_cint::printCombinationModulePrepare(ostream& out, const string& filenam
 		if (raw2Q || rawQ) {
 			tempstream << "\n";
 		}
-		if (NoteMarker && (notemarker == NoteMarker)) {
-			out << (char)NoteMarker;
+		if ((!NoteMarker.empty()) && (notemarker == NoteMarker)) {
+			out << NoteMarker;
 		}
 		if (searchQ) {
 			// Check to see if the extracted module matches to the
@@ -891,10 +892,10 @@ void Tool_cint::addMarksToInputData(HumdrumFile& infile,
 //
 
 void Tool_cint::markNote(HumdrumFile& infile, int line, int col) {
-	// string text = *infile.token(line, col);
-	// text += "@";
-	// infile.token(line, col)->setText(text);
-	*infile.token(line, col) += "@";
+	HTp token = infile.token(line, col);
+	string text = *token;
+	text += NoteMarker;
+	token->setText(text);
 }
 
 
@@ -1027,10 +1028,10 @@ int Tool_cint::getOctaveAdjustForCombinationModule(vector<vector<NoteNode> >& no
 
 int Tool_cint::printCombinationModule(ostream& out, const string& filename,
 		vector<vector<NoteNode> >& notes, int n, int startline, int part1,
-		int part2, vector<vector<string> >& retrospective, char& notemarker,
+		int part2, vector<vector<string> >& retrospective, string& notemarker,
 		int markstate) {
 
-	notemarker = '\0';
+	notemarker = "";
 
 	if (norestsQ) {
 		if (notes[part1][startline].b40 == 0) {
@@ -2022,8 +2023,8 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 				m_humdrum_text << beat << "\t";
 			}
 			for (j=0; j<(int)notes.size(); j++) {
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				m_humdrum_text << notes[j][i].b40;
 				if (j < (int)notes.size()-1) {
@@ -2069,8 +2070,8 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 				m_humdrum_text << beat << "\t";
 			}
 			for (j=0; j<(int)notes.size(); j++) {
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				pitch = notes[j][i].b40;
 				abspitch = abs(pitch);
@@ -2122,16 +2123,16 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 			if (rhythmQ) {
 				line = notes[0][i].line;
 				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				m_humdrum_text << infile[line].getDurationFromStart() << "\t";
 				m_humdrum_text << notes[0][i].measure << "\t";
 				m_humdrum_text << beat << "\t";
 			}
 			for (j=0; j<(int)notes.size(); j++) {
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				pitch = notes[j][i].b40;
 				if (pitch == 0) {
@@ -2184,16 +2185,16 @@ void Tool_cint::printPitchGrid(vector<vector<NoteNode> >& notes, HumdrumFile& in
 			if (rhythmQ) {
 				line = notes[0][i].line;
 				beat = infile[line].getDurationFromBarline().getFloat() * notes[0][i].beatsize + 1;
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				m_humdrum_text << infile[line].getDurationFromStart() << "\t";
 				m_humdrum_text << notes[0][i].measure << "\t";
 				m_humdrum_text << beat << "\t";
 			}
 			for (j=0; j<(int)notes.size(); j++) {
-				if (notes[j][i].notemarker) {
-					m_humdrum_text << (char)notes[j][i].notemarker;
+				if (!notes[j][i].notemarker.empty()) {
+					m_humdrum_text << notes[j][i].notemarker;
 				}
 				pitch = notes[j][i].b40;
 				abspitch = abs(pitch);
@@ -2605,7 +2606,7 @@ void Tool_cint::initialize(void) {
 			  << "craig@ccrma.stanford.edu, September 2013" << endl;
 		exit(0);
 	} else if (getBoolean("version")) {
-		m_humdrum_text << getCommand() << ", version: 31 May 2017" << endl;
+		m_humdrum_text << getCommand() << ", version: 16 March 2022" << endl;
 		m_humdrum_text << "compiled: " << __DATE__ << endl;
 		exit(0);
 	} else if (getBoolean("help")) {
@@ -2679,9 +2680,13 @@ void Tool_cint::initialize(void) {
 	uncrossQ     = getBoolean("uncross");
 	locationQ    = getBoolean("location");
 	retroQ       = getBoolean("retrospective");
-	NoteMarker   = 0;
+	MarkColor    = getString("color");
+	NoteMarker   = "";
 	if (getBoolean("note-marker")) {
-		NoteMarker = getString("note-marker").c_str()[0];
+		NoteMarker = getString("note-marker");
+	}
+	if (searchQ) {
+		NoteMarker = getString("note-marker");
 	}
 	if (Chaincount < 0) {
 		Chaincount = 0;

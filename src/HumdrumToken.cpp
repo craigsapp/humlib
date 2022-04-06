@@ -2139,13 +2139,30 @@ bool HumdrumToken::isNullData(void) const {
 //
 
 bool HumdrumToken::isLabel(void) const {
-	if (string::compare(0, 2, "*>") != 0) {
+	if (this->compare(0, 2, "*>") != 0) {
 		return false;
 	}
-	if (string::find("[") != string::npos) {
+	if (this->find("[") != string::npos) {
 		return false;
 	}
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isExpansionList -- Returns true if a thru expansion list (such as *>[A,A,B], or *>norep[A,B]).
+//
+
+bool HumdrumToken::isExpansionList(void) const {
+	if (this->compare(0, 2, "*>") != 0) {
+		return false;
+	}
+	if ((this->find("[") != string::npos) && (this->back() == ']')) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -2371,7 +2388,7 @@ string HumdrumToken::getSubtoken(int index, const string& separator) const {
 
 	int count = 0;
 	for (int i=0; i<(int)size(); i++) {
-		if (string::compare(i, separator.size(), separator) == 0) {
+		if (this->compare(i, separator.size(), separator) == 0) {
 			count++;
 			if (count > index) {
 				break;

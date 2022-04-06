@@ -44,7 +44,7 @@ class Tool_composite : public HumTool {
 		void        analyzeLineGroup          (HumdrumFile& infile, int line,
 		                                       const string& target);
 		void        extractGroup              (HumdrumFile& infile, const std::string &target);
-		void        getNumericGroupStates     (vector<int>& states, HumdrumFile& infile, const string& tgroup);
+		void        getNumericGroupStates     (std::vector<int>& states, HumdrumFile& infile, const std::string& tgroup);
 		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
 		HumNum      getLineDuration           (HumdrumFile& infile, int index,
 		                                       std::vector<bool>& isNull);
@@ -78,14 +78,26 @@ class Tool_composite : public HumTool {
 		                                       std::vector<std::vector<double>>&  rhythmIndex);
 		void        analyzeOutputVariables(HumdrumFile& infile);
 		std::string getTimeSignature          (HumdrumFile& infile, int line, const std::string& group);
-		std::string getMeterSymbol            (HumdrumFile& infile, int line, const std::string& group);
+		std::string getMetricSymbol           (HumdrumFile& infile, int line, const std::string& group);
 		std::string generateVerseLabelLine    (HumdrumFile& output, HumdrumFile& input, int line);
 		std::string generateStriaLine         (HumdrumFile& output, HumdrumFile& input, int line);
+		std::string getFullCompositeMarker    (int line);
+		void        addStaffInfo              (HumdrumFile& output, HumdrumFile& infile);
+		void        addTimeSignatureChanges   (HumdrumFile& output, HumdrumFile& infile);
+		void        addMeterSignatureChanges  (HumdrumFile& output, HumdrumFile& infile);
+		void        adjustBadCoincidenceRests (HumdrumFile& output, HumdrumFile& infile);
+		HTp         fixBadRestRhythm          (HTp token, string& rhythm, HumNum tstop, HumNum tsbot);
+		std::string generateSizeLine          (HumdrumFile& output, HumdrumFile& input, int line);
+		void        convertNotesToRhythms     (HumdrumFile& infile);
+		int         getEventCount             (std::vector<string>& data);
+		void        fixTiedNotes              (std::vector<string>& data, HumdrumFile& infile);
+		void        doOnsetAnalysisCoincidence(vector<double>& output,
+		                                       vector<double>& inputA, vector<double>& inputB);
 
 		// Numeric analysis functions:
 		void        doNumericAnalyses         (HumdrumFile& infile);
 		void        doOnsetAnalyses           (HumdrumFile& infile);
-		void        doOnsetAnalysis           (vector<double>& analysis,
+		void        doOnsetAnalysis           (std::vector<double>& analysis,
 		                                       HumdrumFile& infile,
 		                                       const string& targetGroup);
 
@@ -100,7 +112,7 @@ class Tool_composite : public HumTool {
 		// Numeric analysis support functions:
 		int         countNoteOnsets           (HTp token);
 
-		bool        needsCoincidenceMarker    (int line);
+		bool        needsCoincidenceMarker    (int line, bool forceQ = false);
 		void        addCoincidenceMarks       (HumdrumFile& infile);
 
 	private:
@@ -181,20 +193,36 @@ class Tool_composite : public HumTool {
 
 		// output line variables (zero means unset, and negative means add
 		// before next line.
-		int m_clefIndex            = 0;
-		int m_striaIndex           = 0;
-		int m_firstDataIndex       = 0;
-		int m_instrumentNameIndex  = 0;
-		int m_instrumentAbbrIndex  = 0;
-		int m_timeSignatureIndex   = 0;
-		int m_meterSymbolIndex     = 0;
-		int m_groupAssignmentIndex = 0;
-		int m_verseLabelIndex      = 0;
+		int m_clefIndex             = 0;
+		int m_striaIndex            = 0;
+		int m_sizeIndex             = 0;
+		int m_firstDataIndex        = 0;
+		int m_instrumentNameIndex   = 0;
+		int m_instrumentAbbrIndex   = 0;
+		int m_timeSignatureIndex    = 0;
+		int m_meterSymbolIndex      = 0;
+		int m_groupAssignmentIndex  = 0;
+		int m_verseLabelIndex       = 0;
 
+		int m_coincidenceEventCount   = -1;
+		int m_fullCompositeEventCount = -1;
+		int m_groupAEventCount        = -1;
+		int m_groupBEventCount        = -1;
+
+		double m_scoreSize          = 100.0;
+		double m_analysisSize       = 100.0;
+
+		bool m_eventQ                = false;
+		bool m_rhythmQ              = false;
+		bool m_colorFullCompositeQ  = false;
 		bool m_extractInputQ        = false;
 		bool m_coinMarkQ            = false;
 		std::string m_coinMark      = "|";
 		std::string m_coinMarkColor = "limegreen";
+		std::string m_AMark         = "@";
+		std::string m_AMarkColor    = "crimson";
+		std::string m_BMark         = "Z";
+		std::string m_BMarkColor    = "dodgerblue";
 
 };
 

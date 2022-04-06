@@ -44,14 +44,17 @@ class Tool_tie : public HumTool {
 		void     splitOverfills          (HumdrumFile& infile);
 		void     splitToken              (HTp tok);
 		void     carryForwardLeftoverDuration(HumNum duration, HTp tok);
+		HumNum   getDurationToNextVisibleBarline(HTp tok);
+		HumNum   getDurationToNextBarline(HTp tok);
 
 	private:
-		bool          m_printQ      = false;
-		bool          m_mergeQ      = false;
-		bool          m_splitQ      = false;
-		bool          m_markQ       = false;
-		bool          m_invisibleQ  = false;
-		std::string   m_mark        = "@";
+		bool          m_printQ         = false;
+		bool          m_mergeQ         = false;
+		bool          m_splitQ         = false;
+		bool          m_markQ          = false;
+		bool          m_invisibleQ     = false;
+		bool          m_skipInvisibleQ = false;
+		std::string   m_mark           = "@";
 
 };
 

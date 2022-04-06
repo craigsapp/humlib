@@ -303,23 +303,30 @@ void Tool_fb::printOutput(HumdrumFile& infile) {
 void Tool_fb::printLineStyle3(HumdrumFile& infile, int line) {
 	bool printed = false;
 	int reftrack = m_kerntracks[m_reference];
+	bool tab = false;
 
 	for (int i=0; i<infile[line].getFieldCount(); i++) {
 		HTp token = infile.token(line, i);
 		int track = token->getTrack();
 		if (printed || (track != reftrack + 1)) {
-			m_humdrum_text << token;
-			if (i < infile[line].getFieldCount()) {
+			if (tab) {
+				m_humdrum_text << "\t" << token;
+			} else {
+				tab = true;
 				m_humdrum_text << token;
 			}
 			continue;
 		}
 		// print analysis spine and then next spine
+		if (tab) {
+			m_humdrum_text << "\t";
+		} else {
+			tab = true;
+		}
 		m_humdrum_text << getAnalysisTokenStyle3(infile, line, i);
 		printed = true;
 		m_humdrum_text << "\t" << token;
 	}
-
 	m_humdrum_text << "\n";
 }
 
@@ -340,6 +347,14 @@ string Tool_fb::getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field)
 			return "**fb";
 		} else if (*token == "*-") {
 			return "*-";
+		} else if (token->isLabel()) {
+			return *token;
+		} else if (token->isExpansionList()) {
+			return *token;
+		} else if (token->isKeySignature()) {
+			return *token;
+		} else if (token->isKeyDesignation()) {
+			return *token;
 		} else {
 			return "*";
 		}
@@ -356,8 +371,9 @@ string Tool_fb::getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field)
 		if (i == m_reference) {
 			continue;
 		}
-		string value = to_string(m_intervals[line][i]);
-		output += value;
+		int base40int = m_intervals[line][i];
+		string iname = Convert::base40ToIntervalAbbr(base40int);
+		output += iname;
 		output += " ";
 	}
 	if (!output.empty()) {

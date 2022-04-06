@@ -251,6 +251,8 @@ class HumdrumFileBase : public HumHash {
 		void          getSpineStartList        (std::vector<HTp>& spinestarts);
 		void          getSpineStartList        (std::vector<HTp>& spinestarts,
 		                                        const std::string& exinterp);
+		void          getSpineStartList        (std::vector<HTp>& spinestarts,
+		                                        const std::vector<std::string>& exinterps);
 		void          getKernSpineStartList    (std::vector<HTp>& spinestarts);
 		std::vector<HTp> getKernSpineStartList (void);
 		void          getKernLikeSpineStartList(std::vector<HTp>& spinestarts);
@@ -258,8 +260,6 @@ class HumdrumFileBase : public HumHash {
 		void          getStaffLikeSpineStartList(std::vector<HTp>& spinestarts);
 		std::vector<HTp> getStaffLikeSpineStartList(void);
 		int           getExinterpCount         (const std::string& exinterp);
-		void          getSpineStartList        (std::vector<HTp>& spinestarts,
-		                                        const std::vector<std::string>& exinterps);
 		void          getTrackStartList        (std::vector<HTp>& spinestarts)
 		                               { return getSpineStartList(spinestarts); }
 		void          getTrackStartList        (std::vector<HTp>& spinestarts,

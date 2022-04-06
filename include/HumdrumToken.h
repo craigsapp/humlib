@@ -82,6 +82,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isNullData                (void) const;
 		bool     isChord                   (const std::string& separator = " ");
 		bool     isLabel                   (void) const;
+		bool     isExpansionList           (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
 		bool     hasFermata                (void) const;
@@ -110,7 +111,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isMetricSymbol            (void);
 		bool     isMeterSymbol             (void) { return isMetricSymbol(); }
 		bool     isMeterSignature          (void) { return isMetricSymbol(); }
-		bool     isMetericSignature        (void) { return isMetricSymbol(); }
+		bool     isMetricSignature         (void) { return isMetricSymbol(); }
 		bool     isTempo                   (void);
 		bool     isMensurationSymbol       (void);
 		bool     isMensuration             (void) { return isMensurationSymbol(); }

@@ -21,6 +21,11 @@
 //                *met(C) == mensuration (displayed)
 //                *omet(C) == original mensuration (time sig. is instead)
 //
+//                **mod-text == modern text (converts to **text with -m option)
+//                **ori-text == original text (converts to **text with -o option)
+//                **text-ori == original text (does not get suppressed with -m option)
+//                **text-mod == modern text (does not get suppressed with -o option)
+//
 
 #include "tool-modori.h"
 #include "tool-shed.h"
@@ -42,9 +47,13 @@ Tool_modori::Tool_modori(void) {
 	define("m|modern=b",    "prepare score for modern style");
 	define("o|original=b", "prepare score for original style");
 	define("d|info=b", "display key/clef/mensuration information");
-	define("K|no-key|no-keys=b", "Do not change key signatures");
+
 	define("C|no-clef|no-clefs=b", "Do not change clefs");
+	define("K|no-key|no-keys=b", "Do not change key signatures");
+	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
 	define("M|no-mensuration|no-mensurations=b", "Do not change mensurations");
+	define("R|no-references=b", "Do not change reference records keys");
+	define("T|no-text=b",    "Do not change !LO:(TX|DY) layout parameters");
 }
 
 
@@ -110,6 +119,9 @@ void Tool_modori::initialize(void) {
 	}
 	m_nokeyQ         = getBoolean("no-key");
 	m_noclefQ        = getBoolean("no-clef");
+	m_nolotextQ      = getBoolean("no-text");
+	m_nolyricsQ      = getBoolean("no-lyrics");
+	m_norefsQ        = getBoolean("no-references");
 	m_nomensurationQ = getBoolean("no-mensuration");
 }
 
@@ -124,19 +136,52 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	m_keys.clear();
 	m_clefs.clear();
 	m_mensurations.clear();
+	m_references.clear();
+	m_lyrics.clear();
+	m_lotext.clear();
 
 	int maxtrack = infile.getMaxTrack();
 	m_keys.resize(maxtrack+1);
 	m_clefs.resize(maxtrack+1);
 	m_mensurations.resize(maxtrack+1);
+	m_references.reserve(1000);
+	m_lyrics.reserve(1000);
+	m_lotext.reserve(1000);
+
+	HumRegex hre;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isCommentLocal() || infile[i].isCommentGlobal()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (*token == "!") {
+					continue;
+				}
+				if (hre.search(token, "^!!?LO:(TX|DY).*:mod=")) {
+					m_lotext.push_back(token);
+				} else if (hre.search(token, "^!!?LO:(TX|DY).*:ori=")) {
+					m_lotext.push_back(token);
+				}
+			}
+		}
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
 		HumNum timeval = infile[i].getDurationFromStart();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
+			if (token->isExclusiveInterpretation()) {
+				if (*token == "**text") {
+					m_lyrics.push_back(token);
+				}
+				if (*token == "**mod-text") {
+					m_lyrics.push_back(token);
+				}
+				if (*token == "**ori-text") {
+					m_lyrics.push_back(token);
+				}
+				continue;
+			}
 			if (!token->isKern()) {
 				continue;
 			}
@@ -164,6 +209,8 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		}
 	}
 
+	storeModOriReferenceRecords(infile);
+
 	if (m_infoQ) {
 		if (m_modernQ || m_originalQ) {
 			m_humdrum_text << infile;
@@ -176,8 +223,104 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		return;
 	}
 
+
 	switchModernOriginal(infile);
+	m_humdrum_text << infile;
 }
+
+
+
+//////////////////////////////
+//
+// Tool_modori::storeModOriReferenceRecors --
+//
+
+void Tool_modori::storeModOriReferenceRecords(HumdrumFile& infile) {
+	m_references.clear();
+
+	vector<HLp> refs = infile.getGlobalReferenceRecords();
+	vector<string> keys(refs.size());
+	for (int i=0; i<(int)refs.size(); i++) {
+		string key = refs.at(i)->getReferenceKey();
+		keys.at(i) = key;
+	}
+
+	vector<int> modernIndex;
+	vector<int> originalIndex;
+
+	HumRegex hre;
+	for (int i=0; i<(int)keys.size(); i++) {
+		if (m_modernQ || m_infoQ) {
+			if (hre.search(keys[i], "-mod$")) {
+				modernIndex.push_back(i);
+			}
+		} else if (m_originalQ || m_infoQ) {
+			if (hre.search(keys[i], "-ori$")) {
+				originalIndex.push_back(i);
+			}
+		}
+	}
+
+	if (m_modernQ || m_infoQ) {
+		// Store *-mod reference records if there is a pairing:
+		int pairing = -1;
+		for (int i=0; i<(int)modernIndex.size(); i++) {
+			int index = modernIndex[i];
+			pairing = getPairedReference(index, keys);
+			if (pairing >= 0) {
+				m_references.push_back(make_pair(refs[index]->token(0), refs[pairing]->token(0)));
+			}
+		}
+	}
+
+	if (m_originalQ || m_infoQ) {
+		// Store *-ori reference records if there is a pairing:
+		int pairing = -1;
+		string target;
+		for (int i=0; i<(int)originalIndex.size(); i++) {
+			int index = originalIndex[i];
+			pairing = getPairedReference(index, keys);
+			if (pairing >= 0) {
+				target = keys[index];
+				m_references.push_back(make_pair(refs[index]->token(0), refs[pairing]->token(0)));
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::getPairedReference --
+//
+
+int Tool_modori::getPairedReference(int index, vector<string>& keys) {
+	string key = keys.at(index);
+	string tkey = key;
+	if (tkey.size() > 4) {
+		tkey.resize(tkey.size() - 4);
+	} else {
+		return -1;
+	}
+
+	for (int i=0; i<(int)keys.size(); i++) {
+		int ii = index + i;
+		if (ii < (int)keys.size()) {
+			if (tkey == keys.at(ii)) {
+				return ii;
+			}
+		}
+		ii = index - i;
+		if (ii >= 0) {
+			if (tkey == keys.at(ii)) {
+				return ii;
+			}
+		}
+	}
+	return -1;
+}
+
 
 
 //////////////////////////////
@@ -223,7 +366,92 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 		}
 	}
 
-	// mensurations are only used for "original" display.  It is possible
+	if (!m_nolyricsQ) {
+		bool adjust = false;
+		int line = -1;
+		for (int i=0; i<(int)m_lyrics.size(); i++) {
+			HTp token = m_lyrics[i];
+			line = token->getLineIndex();
+			if (m_modernQ) {
+				if (*token == "**text") {
+					adjust = true;
+					token->setText("**ori-text");
+				} else if (*token == "**mod-text") {
+					adjust = true;
+					token->setText("**text");
+				}
+			} else {
+				if (*token == "**text") {
+					adjust = true;
+					token->setText("**mod-text");
+				} else if (*token == "**ori-text") {
+					adjust = true;
+					token->setText("**text");
+				}
+			}
+		}
+		if (adjust && (line >= 0)) {
+			infile[line].createLineFromTokens();
+		}
+	}
+
+	if (!m_nolotextQ) {
+		HumRegex hre;
+		for (int i=0; i<(int)m_lotext.size(); i++) {
+			HTp token = m_lotext[i];
+			int line = token->getLineIndex();
+			if (hre.search(token, "^!!?LO:(TX|DY).*:mod=")) {
+				string text = *token;
+				hre.replaceDestructive(text, ":ori=", ":t=");
+				hre.replaceDestructive(text, ":t=", ":mod=");
+				token->setText(text);
+				changed.insert(line);
+			} else if (hre.search(token, "^!!?LO:(TX|DY).*:ori=")) {
+				string text = *token;
+				hre.replaceDestructive(text, ":mod=", ":t=");
+				hre.replaceDestructive(text, ":t=", ":ori=");
+				token->setText(text);
+				changed.insert(line);
+			}
+		}
+	}
+
+	if (!m_norefsQ) {
+		HumRegex hre;
+		for (int i=0; i<(int)m_references.size(); i++) {
+			HTp first = m_references[i].first;
+			HTp second = m_references[i].second;
+
+			if (m_modernQ) {
+				if (hre.search(first, "^!!![^:]*?-mod:")) {
+					string text = *first;
+					hre.replaceDestructive(text, ":", "-...:");
+					first->setText(text);
+					infile[first->getLineIndex()].createLineFromTokens();
+
+					text = *second;
+					hre.replaceDestructive(text, "-ori:", ":");
+					second->setText(text);
+					infile[second->getLineIndex()].createLineFromTokens();
+				}
+			} else if (m_originalQ) {
+				if (hre.search(first, "^!!![^:]*?-ori:")) {
+					string text = *first;
+					hre.replaceDestructive(text, ":", "-...:");
+					first->setText(text);
+					infile[first->getLineIndex()].createLineFromTokens();
+
+					text = *second;
+					hre.replaceDestructive(text, "-mod:", ":");
+					second->setText(text);
+					infile[second->getLineIndex()].createLineFromTokens();
+				}
+			}
+
+		}
+	}
+
+	// Mensurations are only used for "original" display.  It is possible
 	// to use a modern metric signature (common time or cut time) but these
 	// are not currently allowed.  Only one *met at a given time position
 	// is allowed.
@@ -507,7 +735,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_keys.size(); ++t) {
 		for (auto it = m_keys.at(t).begin(); it != m_keys.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); ++j) {
 				m_humdrum_text << '\t' << it->second.at(j);
 		}
@@ -520,7 +748,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_keys.size(); ++t) {
 		for (auto it = m_clefs.at(t).begin(); it != m_clefs.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); ++j) {
 				m_humdrum_text << '\t' << it->second.at(j);
 			}
@@ -533,7 +761,7 @@ void Tool_modori::printInfo(void) {
 
 	for (int t=1; t<(int)m_mensurations.size(); ++t) {
 		for (auto it = m_mensurations.at(t).begin(); it != m_mensurations.at(t).end(); ++it) {
-			m_humdrum_text << "!!    " << it->first;
+			m_humdrum_text << "!!\t" << it->first;
 			for (int j=0; j<(int)it->second.size(); j++) {
 				m_humdrum_text << '\t' << it->second.at(j);
 			}
@@ -542,7 +770,32 @@ void Tool_modori::printInfo(void) {
 	}
 
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	m_humdrum_text << "!! LYRICS:" << endl;
 
+	for (int i=0; i<(int)m_lyrics.size(); i++) {
+		HTp token = m_lyrics[i];
+		m_humdrum_text << "!!\t";
+		m_humdrum_text << token;
+		m_humdrum_text << endl;
+	}
+
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	m_humdrum_text << "!! TEXT:" << endl;
+
+	for (int i=0; i<(int)m_lotext.size(); i++) {
+		m_humdrum_text << "!!\t" << m_lotext[i] << endl;
+	}
+
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	m_humdrum_text << "!! REFERENCES:" << endl;
+
+	for (int i=0; i<(int)m_references.size(); i++) {
+		m_humdrum_text << "!!\t" << m_references[i].first << endl;
+		m_humdrum_text << "!!\t" << m_references[i].second << endl;
+		m_humdrum_text << "!!\n";
+	}
+
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 }
 
 

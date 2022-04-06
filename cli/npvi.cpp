@@ -112,7 +112,7 @@ string getReference(HumdrumFile& infile, const string& targetKey) {
 //
 
 double calculateNpviRhythm(HumdrumFile& infile, Options& options) {
-	vector<HTp> spinestarts = infile.getKernSpineStartList();
+	vector<HTp> spinestarts = infile.getKernLikeSpineStartList();
 	int kspine = options.getInteger("kern");
 	int kindex = kspine - 1;
 	if (kindex < 0) {
