@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr  5 19:56:05 PDT 2022
+// Last Modified: Wed Apr  6 13:35:04 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7575,6 +7575,8 @@ class Tool_modori : public HumTool {
 		void     convertClefToRegular         (HTp token);
 		int      getPairedReference  (int index, vector<string>& keys);
 		void     storeModOriReferenceRecords(HumdrumFile& infile);
+		void     processExclusiveInterpretationLine(HumdrumFile& infile, int line);
+		bool     processStaffCompanionSpines(std::vector<HTp> tokens);
 
 	private:
 		bool m_modernQ        = false; // -m option: show modern key/clef/time signatures

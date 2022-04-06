@@ -149,6 +149,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	m_lotext.reserve(1000);
 
 	HumRegex hre;
+	int exinterpLine = -1;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isCommentLocal() || infile[i].isCommentGlobal()) {
@@ -171,15 +172,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (token->isExclusiveInterpretation()) {
-				if (*token == "**text") {
-					m_lyrics.push_back(token);
-				}
-				if (*token == "**mod-text") {
-					m_lyrics.push_back(token);
-				}
-				if (*token == "**ori-text") {
-					m_lyrics.push_back(token);
-				}
+				exinterpLine = i;
 				continue;
 			}
 			if (!token->isKern()) {
@@ -209,6 +202,10 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		}
 	}
 
+	if (exinterpLine >= 0) {
+		processExclusiveInterpretationLine(infile, exinterpLine);
+	}
+
 	storeModOriReferenceRecords(infile);
 
 	if (m_infoQ) {
@@ -226,6 +223,143 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 
 	switchModernOriginal(infile);
 	m_humdrum_text << infile;
+}
+
+
+//////////////////////////////
+//
+// Tool_modori::processExclusiveInterpretationLine --
+//
+
+void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int line) {
+	vector<HTp> staff;
+	vector<vector<HTp>> nonstaff;
+	bool init = false;
+	bool changed = false;
+
+	if (!infile[line].isExclusive()) {
+		return;
+	}
+
+	for (int i=0; i<infile[line].getFieldCount(); i++) {
+		HTp token = infile.token(line, i);
+		if (!token->isExclusiveInterpretation()) {
+			continue;
+		}
+		if (token->isStaff()) {
+			staff.push_back(token);
+			nonstaff.resize(nonstaff.size() + 1);
+			init = 1;
+		} else {
+			if (init) {
+				nonstaff.back().push_back(token);
+			}
+		}
+	}
+
+	for (int i=0; i<(int)staff.size(); i++) {
+		changed |= processStaffCompanionSpines(nonstaff[i]);
+	}
+
+	if (changed) {
+		infile[line].createLineFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::processStaffCompanionSpines --
+//
+
+bool Tool_modori::processStaffCompanionSpines(vector<HTp> tokens) {
+	vector<HTp> mods;
+	vector<HTp> oris;
+	vector<HTp> other;
+
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (tokens[i]->find("**mod-") != string::npos) {
+			mods.push_back(tokens[i]);
+		} else if (tokens[i]->find("**ork-") != string::npos) {
+			oris.push_back(tokens[i]);
+		} else {
+			other.push_back(tokens[i]);
+		}
+	}
+
+	bool gchanged = false;
+
+	if (mods.empty() && oris.empty()) {
+		// Nothing to do.
+		return false;
+	}
+
+	// mods and oris should not be mixed, so if there are no
+	// other spines, then also give up:
+	if (other.empty()) {
+		return false;
+	}
+
+
+	if (m_modernQ) {
+		bool changed = false;
+		// Swap (**mod-XXX and **XXX) to (**XXX and **ori-XXX)
+
+		for (int i=0; i<(int)other.size(); i++) {
+			if (other[i] == NULL) {
+				continue;
+			}
+			string target = "**mod-" + other[i]->substr(2);
+			for (int j=0; j<(int)mods.size(); j++) {
+				if (mods[j] == NULL) {
+					continue;
+				}
+				if (*mods[j] != target) {
+					continue;
+				}
+				mods[j]->setText(*other[i]);
+				mods[j] = NULL;
+				changed = true;
+				gchanged = true;
+			}
+			if (changed) {
+				string replacement = "**ori-" + other[i]->substr(2);
+				other[i]->setText(replacement);
+				other[i] = NULL;
+			}
+		}
+
+	} else if (m_originalQ) {
+		bool changed = false;
+		// Swap (**ori-XXX and **XXX) to (**XXX and **mod-XXX)
+
+		for (int i=0; i<(int)other.size(); i++) {
+			if (other[i] == NULL) {
+				continue;
+			}
+			string target = "**ori-" + other[i]->substr(2);
+			for (int j=0; j<(int)oris.size(); j++) {
+				if (oris[j] == NULL) {
+					continue;
+				}
+				if (*oris[j] != target) {
+					continue;
+				}
+				oris[j]->setText(*other[i]);
+				oris[j] = NULL;
+				changed = true;
+				gchanged = true;
+			}
+			if (changed) {
+				string replacement = "**mod-" + other[i]->substr(2);
+				other[i]->setText(replacement);
+				other[i] = NULL;
+			}
+		}
+	}
+
+	return gchanged;
 }
 
 
