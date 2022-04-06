@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr  6 13:35:04 PDT 2022
+// Last Modified: Wed Apr  6 15:51:05 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -84472,6 +84472,7 @@ void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int li
 //
 
 bool Tool_modori::processStaffCompanionSpines(vector<HTp> tokens) {
+
 	vector<HTp> mods;
 	vector<HTp> oris;
 	vector<HTp> other;
@@ -84479,7 +84480,7 @@ bool Tool_modori::processStaffCompanionSpines(vector<HTp> tokens) {
 	for (int i=0; i<(int)tokens.size(); i++) {
 		if (tokens[i]->find("**mod-") != string::npos) {
 			mods.push_back(tokens[i]);
-		} else if (tokens[i]->find("**ork-") != string::npos) {
+		} else if (tokens[i]->find("**ori-") != string::npos) {
 			oris.push_back(tokens[i]);
 		} else {
 			other.push_back(tokens[i]);

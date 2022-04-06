@@ -274,6 +274,7 @@ void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int li
 //
 
 bool Tool_modori::processStaffCompanionSpines(vector<HTp> tokens) {
+
 	vector<HTp> mods;
 	vector<HTp> oris;
 	vector<HTp> other;
@@ -281,7 +282,7 @@ bool Tool_modori::processStaffCompanionSpines(vector<HTp> tokens) {
 	for (int i=0; i<(int)tokens.size(); i++) {
 		if (tokens[i]->find("**mod-") != string::npos) {
 			mods.push_back(tokens[i]);
-		} else if (tokens[i]->find("**ork-") != string::npos) {
+		} else if (tokens[i]->find("**ori-") != string::npos) {
 			oris.push_back(tokens[i]);
 		} else {
 			other.push_back(tokens[i]);
