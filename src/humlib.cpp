@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr  6 15:51:05 PDT 2022
+// Last Modified: Wed Apr  6 22:10:26 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -31036,6 +31036,28 @@ bool HumdrumToken::isMens(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isMensLike -- Returns true if the data type of the token
+//    is **mens, or **mens- plus a tag.  This Allows for **mens-tag to be
+//    treated as a staff for printing in verovio.  This can be used to separate
+//    analysis spines that are output as **mens data to be prevented for use
+//    as input to another analysis as real **mens data.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isMensLike(void) const {
+	string dtype = getDataType();
+	if (dtype == "**mens") {
+		return true;
+	} else if (dtype.compare(0, 7, "**mens-") == 0) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSpineInfo -- Sets the spine manipulation history string.
 // @SEEALTO: getSpineInfo
 //
@@ -31377,7 +31399,7 @@ bool HumdrumToken::analyzeDuration(void) {
 					} else {
 						m_duration = Convert::recipToDuration((string)(*this));
 					}
-				} else if (isMens()) {
+				} else if (isMensLike()) {
 					int rlev = this->getValueInt("auto", "mensuration", "levels");
 					if (rlev < 2222) {
 						cerr << "Warning: mensuration levels not analyzed yet" << endl;
@@ -31778,7 +31800,7 @@ bool HumdrumToken::isStaff(void) const {
 	if (isKernLike()) {
 		return true;
 	}
-	if (isMens()) {
+	if (isMensLike()) {
 		return true;
 	}
 
@@ -31799,7 +31821,7 @@ bool HumdrumToken::isRest(void) {
 		} else if (Convert::isKernRest((string)(*this))) {
 			return true;
 		}
-	} else if (isMens()) {
+	} else if (isMensLike()) {
 		if (isNull() && Convert::isMensRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isMensRest((string)(*this))) {
@@ -31828,7 +31850,7 @@ bool HumdrumToken::isNote(void) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
 		}
-	} else if (isMens()) {
+	} else if (isMensLike()) {
 		if (Convert::isMensNote((string)(*this))) {
 			return true;
 		}
@@ -32399,7 +32421,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 //
 
 bool HumdrumToken::hasLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasLigatureBegin(*this);
 	} else {
 		return false;
@@ -32414,7 +32436,7 @@ bool HumdrumToken::hasLigatureBegin(void) {
 //
 
 bool HumdrumToken::hasRectaLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasRectaLigatureBegin(*this);
 	} else {
 		return false;
@@ -32429,7 +32451,7 @@ bool HumdrumToken::hasRectaLigatureBegin(void) {
 //
 
 bool HumdrumToken::hasObliquaLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasObliquaLigatureBegin(*this);
 	} else {
 		return false;
@@ -32475,7 +32497,7 @@ bool HumdrumToken::allSameBarlineStyle(void) {
 //
 
 bool HumdrumToken::hasLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasLigatureEnd(*this);
 	} else {
 		return false;
@@ -32490,7 +32512,7 @@ bool HumdrumToken::hasLigatureEnd(void) {
 //
 
 bool HumdrumToken::hasRectaLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasRectaLigatureEnd(*this);
 	} else {
 		return false;
@@ -32505,7 +32527,7 @@ bool HumdrumToken::hasRectaLigatureEnd(void) {
 //
 
 bool HumdrumToken::hasObliquaLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasObliquaLigatureEnd(*this);
 	} else {
 		return false;
@@ -84430,6 +84452,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 //
 
 void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int line) {
+	vector<HTp> staffish;
 	vector<HTp> staff;
 	vector<vector<HTp>> nonstaff;
 	bool init = false;
@@ -84453,15 +84476,54 @@ void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int li
 				nonstaff.back().push_back(token);
 			}
 		}
+		if (token->isStaff()) {
+			staffish.push_back(token);
+		} else if (*token == "**mod-kern") {
+			staffish.push_back(token);
+		} else if (*token == "**mod-mens") {
+			staffish.push_back(token);
+		} else if (*token == "**ori-kern") {
+			staffish.push_back(token);
+		} else if (*token == "**ori-mens") {
+			staffish.push_back(token);
+		}
 	}
 
 	for (int i=0; i<(int)staff.size(); i++) {
 		changed |= processStaffCompanionSpines(nonstaff[i]);
 	}
 
+	changed |= processStaffSpines(staffish);
+
 	if (changed) {
 		infile[line].createLineFromTokens();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::processStaffSpines --
+//
+
+bool Tool_modori::processStaffSpines(vector<HTp>& tokens) {
+
+	HumRegex hre;
+	bool changed = false;
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (hre.search(tokens[i], "^\\*\\*(ori|mod)-(.*)")) {
+			string newexinterp = "**" + hre.getMatch(2) + "-" + hre.getMatch(1);
+			tokens[i]->setText(newexinterp);
+			changed = true;
+		} else if (hre.search(tokens[i], "^\\*\\*(.*?)-(ori|mod)$")) {
+			string newexinterp = "**" + hre.getMatch(2) + "-" + hre.getMatch(1);
+			tokens[i]->setText(newexinterp);
+			changed = true;
+		}
+	}
+
+	return changed;
 }
 
 

@@ -48,6 +48,7 @@ class Tool_modori : public HumTool {
 		void     storeModOriReferenceRecords(HumdrumFile& infile);
 		void     processExclusiveInterpretationLine(HumdrumFile& infile, int line);
 		bool     processStaffCompanionSpines(std::vector<HTp> tokens);
+		bool     processStaffSpines(vector<HTp>& tokens);
 
 	private:
 		bool m_modernQ        = false; // -m option: show modern key/clef/time signatures

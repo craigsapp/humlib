@@ -490,6 +490,28 @@ bool HumdrumToken::isMens(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::isMensLike -- Returns true if the data type of the token
+//    is **mens, or **mens- plus a tag.  This Allows for **mens-tag to be
+//    treated as a staff for printing in verovio.  This can be used to separate
+//    analysis spines that are output as **mens data to be prevented for use
+//    as input to another analysis as real **mens data.
+// @SEEALSO: isDataType
+//
+
+bool HumdrumToken::isMensLike(void) const {
+	string dtype = getDataType();
+	if (dtype == "**mens") {
+		return true;
+	} else if (dtype.compare(0, 7, "**mens-") == 0) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSpineInfo -- Sets the spine manipulation history string.
 // @SEEALTO: getSpineInfo
 //
@@ -831,7 +853,7 @@ bool HumdrumToken::analyzeDuration(void) {
 					} else {
 						m_duration = Convert::recipToDuration((string)(*this));
 					}
-				} else if (isMens()) {
+				} else if (isMensLike()) {
 					int rlev = this->getValueInt("auto", "mensuration", "levels");
 					if (rlev < 2222) {
 						cerr << "Warning: mensuration levels not analyzed yet" << endl;
@@ -1232,7 +1254,7 @@ bool HumdrumToken::isStaff(void) const {
 	if (isKernLike()) {
 		return true;
 	}
-	if (isMens()) {
+	if (isMensLike()) {
 		return true;
 	}
 
@@ -1253,7 +1275,7 @@ bool HumdrumToken::isRest(void) {
 		} else if (Convert::isKernRest((string)(*this))) {
 			return true;
 		}
-	} else if (isMens()) {
+	} else if (isMensLike()) {
 		if (isNull() && Convert::isMensRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isMensRest((string)(*this))) {
@@ -1282,7 +1304,7 @@ bool HumdrumToken::isNote(void) {
 		if (Convert::isKernNote((string)(*this))) {
 			return true;
 		}
-	} else if (isMens()) {
+	} else if (isMensLike()) {
 		if (Convert::isMensNote((string)(*this))) {
 			return true;
 		}
@@ -1853,7 +1875,7 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 //
 
 bool HumdrumToken::hasLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasLigatureBegin(*this);
 	} else {
 		return false;
@@ -1868,7 +1890,7 @@ bool HumdrumToken::hasLigatureBegin(void) {
 //
 
 bool HumdrumToken::hasRectaLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasRectaLigatureBegin(*this);
 	} else {
 		return false;
@@ -1883,7 +1905,7 @@ bool HumdrumToken::hasRectaLigatureBegin(void) {
 //
 
 bool HumdrumToken::hasObliquaLigatureBegin(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasObliquaLigatureBegin(*this);
 	} else {
 		return false;
@@ -1929,7 +1951,7 @@ bool HumdrumToken::allSameBarlineStyle(void) {
 //
 
 bool HumdrumToken::hasLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasLigatureEnd(*this);
 	} else {
 		return false;
@@ -1944,7 +1966,7 @@ bool HumdrumToken::hasLigatureEnd(void) {
 //
 
 bool HumdrumToken::hasRectaLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasRectaLigatureEnd(*this);
 	} else {
 		return false;
@@ -1959,7 +1981,7 @@ bool HumdrumToken::hasRectaLigatureEnd(void) {
 //
 
 bool HumdrumToken::hasObliquaLigatureEnd(void) {
-	if (isMens()) {
+	if (isMensLike()) {
 		return Convert::hasObliquaLigatureEnd(*this);
 	} else {
 		return false;

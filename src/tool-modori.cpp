@@ -232,6 +232,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 //
 
 void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int line) {
+	vector<HTp> staffish;
 	vector<HTp> staff;
 	vector<vector<HTp>> nonstaff;
 	bool init = false;
@@ -255,15 +256,54 @@ void Tool_modori::processExclusiveInterpretationLine(HumdrumFile& infile, int li
 				nonstaff.back().push_back(token);
 			}
 		}
+		if (token->isStaff()) {
+			staffish.push_back(token);
+		} else if (*token == "**mod-kern") {
+			staffish.push_back(token);
+		} else if (*token == "**mod-mens") {
+			staffish.push_back(token);
+		} else if (*token == "**ori-kern") {
+			staffish.push_back(token);
+		} else if (*token == "**ori-mens") {
+			staffish.push_back(token);
+		}
 	}
 
 	for (int i=0; i<(int)staff.size(); i++) {
 		changed |= processStaffCompanionSpines(nonstaff[i]);
 	}
 
+	changed |= processStaffSpines(staffish);
+
 	if (changed) {
 		infile[line].createLineFromTokens();
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::processStaffSpines --
+//
+
+bool Tool_modori::processStaffSpines(vector<HTp>& tokens) {
+
+	HumRegex hre;
+	bool changed = false;
+	for (int i=0; i<(int)tokens.size(); i++) {
+		if (hre.search(tokens[i], "^\\*\\*(ori|mod)-(.*)")) {
+			string newexinterp = "**" + hre.getMatch(2) + "-" + hre.getMatch(1);
+			tokens[i]->setText(newexinterp);
+			changed = true;
+		} else if (hre.search(tokens[i], "^\\*\\*(.*?)-(ori|mod)$")) {
+			string newexinterp = "**" + hre.getMatch(2) + "-" + hre.getMatch(1);
+			tokens[i]->setText(newexinterp);
+			changed = true;
+		}
+	}
+
+	return changed;
 }
 
 
