@@ -138,6 +138,12 @@ class HumdrumToken : public std::string, public HumHash {
 		char     hasStemDirection          (void);
 		bool     allSameBarlineStyle       (void);
 
+
+		// pitch-related functions:
+		void             getMidiPitches    (std::vector<int>& output);
+		std::vector<int> getMidiPitches    (void);
+
+		// duration-related functions:
 		HumNum   getDuration               (void);
 		HumNum   getDuration               (HumNum scale);
 		HumNum   getTiedDuration           (void);

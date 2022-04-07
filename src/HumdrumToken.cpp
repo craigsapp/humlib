@@ -901,6 +901,39 @@ bool HumdrumToken::isManipulator(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getMidiPitches -- Returns 0 if a rest.
+//    Does not check for valid MIDI note number range of 0-127.
+//    Also not checking to see if input data type is not **kern.
+//
+
+void HumdrumToken::getMidiPitches(vector<int>& output) {
+	if (*this == ".") {
+		// Not resolving null tokens in this function.
+		output.clear();
+		return;
+	}
+	vector<string> pieces = this->getSubtokens();
+	output.resize(pieces.size());
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (pieces[i].find("r") != string::npos) {
+			output[i] = 0;
+		} else {
+			output[i] = Convert::kernToMidiNoteNumber(pieces[i]);
+		}
+	}
+}
+
+
+vector<int> HumdrumToken::getMidiPitches(void) {
+	vector<int> output;
+	this->getMidiPitches(output);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getDuration -- Returns the duration of the token.  The token
 //    does not necessarily need to have any explicit duration, as the returned
 //    value will also include implicit duration calculated in analyzeRhythm
