@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr  7 10:51:19 PDT 2022
+// Last Modified: Thu Apr  7 20:00:36 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1542,8 +1542,20 @@ class HumdrumToken : public std::string, public HumHash {
 
 
 		// pitch-related functions:
-		void             getMidiPitches    (std::vector<int>& output);
-		std::vector<int> getMidiPitches    (void);
+
+		void             getMidiPitches       (std::vector<int>& output);
+		std::vector<int> getMidiPitches       (void);
+		void             getMidiPitchesSortHL (std::vector<int>& output);
+		std::vector<int> getMidiPitchesSortHL (void);
+		void             getMidiPitchesSortLH (std::vector<int>& output);
+		std::vector<int> getMidiPitchesSortLH (void);
+
+		void             getMidiPitchesResolveNull       (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNull       (void);
+		void             getMidiPitchesResolveNullSortHL (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNullSortHL (void);
+		void             getMidiPitchesResolveNullSortLH (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNullSortLH (void);
 
 		// duration-related functions:
 		HumNum   getDuration               (void);
