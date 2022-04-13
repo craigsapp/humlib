@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr  7 20:00:36 PDT 2022
+// Last Modified: Wed Apr 13 10:47:34 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -96792,6 +96792,8 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 	// get list of music spines (columns):
 	vector<HTp> starts = infile.getKernSpineStartList();
 
+	m_barNum = infile.getMeasureNumbers();
+
 	// The first "spine" is the lowest part on the system.
 	// The last "spine" is the highest part on the system.
 	for (int i=0; i<(int)starts.size(); i++) {
@@ -96810,6 +96812,15 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 
 	if (m_infoQ) {
 		m_humdrum_text << "!!!peaks: " << m_count << endl;
+		for (int i=0; i<(int)m_peakMeasureBegin.size(); i++) {
+			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+			m_humdrum_text << "!!!peak_group: " << i+1 << endl;
+			m_humdrum_text << "!!!start_measure: " << m_peakMeasureBegin[i] << endl;
+			m_humdrum_text << "!!!end_measure: " << m_peakMeasureEnd[i] << endl;
+			m_humdrum_text << "!!!group_duration: " << m_peakDuration[i] << endl;
+			m_humdrum_text << "!!!group_pitch: " << m_peakPitch[i] << endl;
+			m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i] << endl;
+		}
 	}
 
 }
@@ -96855,6 +96866,7 @@ void Tool_peak::processSpine(HTp startok) {
 		printData(notelist, midinums, peaknotes);
 	} else {
 		//markNotesInScore(notelist, peaknotes);
+
 		// Uncomment out the following line, and comment the above line,
 		// when identifyPeakSequence() is implemented:
 		markNotesInScore(peaknotelist, globalpeaknotes);
@@ -97001,32 +97013,6 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 	//
 	//////////////////////////////////////////
 
-// 	int previousNote = -1;
-// 	int sequenceNum = 0;
-// 	int sequenceStart = 0;
-//
-// 	for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
-// 		if (peakmidinums[i] == previousNote) { //check if same as previous peak
-// 			sequenceNum += 1;
-// 		} else {
-// 			sequenceNum = 0;
-// 		}
-// 		if (sequenceNum == 1) { //identify beginning of peak sequence
-// 			sequenceStart = i - 1;
-// 		}
-// 		if (sequenceNum >= m_peakNum - 1) {
-// 			int duration = timestamps[i] - timestamps[sequenceStart];
-// 			if (duration <= m_peakDur) {
-// 				for (int j=0; j<m_peakNum; j++) {
-// 					globalpeaknotes[sequenceStart + j] = true;
-// 				}
-// 		  } else {
-// 				sequenceStart += 1;
-// 		  }
-// 	  }
-// 		previousNote = peakmidinums[i];
-//   }
-// }
 	   for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
 			 bool match = true;
 			 for (int j=1; j<m_peakNum; j++) {
@@ -97039,14 +97025,24 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 			 	continue;
 			 }
 			 HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
-			 cerr << duration.getFloat() << "   " << m_peakDur << endl;
 			 if (duration.getFloat() > m_peakDur) {
 				 continue;
 			 }
+			 //data for every sub-sequeunce
+			 m_count += 1;
+			 int line = notes[i][0]->getLineIndex();
+			 int line2 = notes[i + m_peakNum - 1].back()->getLineIndex();
+
+			 m_peakDuration.push_back(duration.getFloat()/4.0);
+			 m_peakMeasureBegin.push_back(m_barNum[line]);
+			 m_peakMeasureEnd.push_back(m_barNum[line2]);
+			 m_peakPeakCount.push_back(3);
+			 m_peakPitch.push_back(notes[i][0]->getText());
+
 			 for (int j=0; j<m_peakNum; j++) {
-				 globalpeaknotes[i+j] = true;
-				 }
+				globalpeaknotes[i+j] = true;
 			 }
+		}
 }
 
 
@@ -97138,6 +97134,9 @@ vector<vector<HTp>> Tool_peak::getNoteList(HTp starting) {
 		}
 		tempout.resize(tempout.size() + 1);
 		tempout.back().push_back(current);
+		if (!current->isRest()) {
+			m_noteCount++;
+		}
 		previous = current;
 		current = current->getNextToken();
 	}
@@ -97196,7 +97195,7 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos[i] = false;
 		}
-		cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
+		//cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
 	}
 }
 
