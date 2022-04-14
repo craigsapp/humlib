@@ -68,14 +68,16 @@ class Tool_peak : public HumTool {
 
 
 		bool        m_infoQ     = false; // Used with -i option.
-		int         m_count     = 0;     // Number of peaks in score.
+		int         m_count     = 0;     // Number of peak sequences in score.
+		int					m_noteCount = 0;		 // Total number of notes in the score.
 
 		std::vector<int>    m_peakMeasureBegin;
 		std::vector<int>    m_peakMeasureEnd;
-		std::vector<HumNum> m_peakDuration;
-		std::vector<string> m_peakPitch;
-		std::vector<int>    m_peakPitchCount;
+		std::vector<HumNum> m_peakDuration; 		//between first peak note and last peak note.
+		std::vector<string> m_peakPitch; 				//pitch of the peak sequence.
+		std::vector<int>    m_peakPeakCount; 		//how many notes in a peak sequence.
 
+		std::vector<int>		m_barNum;
 };
 
 // END_MERGE
@@ -83,6 +85,3 @@ class Tool_peak : public HumTool {
 } // end namespace hum
 
 #endif /* _TOOL_PEAK_H */
-
-
-
