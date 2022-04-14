@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr  7 20:00:36 PDT 2022
+// Last Modified: Wed Apr 13 18:30:56 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1310,6 +1310,23 @@ class HumdrumLine : public std::string, public HumHash {
 		                                 const std::string& separator = ",");
 		void     setLineFromCsv         (const std::string& csv,
 		                                 const std::string& separator = ",");
+
+		// pitch-related functions, defined in HumdrumLine-kern.cpp:
+
+		void             getMidiPitches       (std::vector<int>& output);
+		std::vector<int> getMidiPitches       (void);
+		void             getMidiPitchesSortHL (std::vector<int>& output);
+		std::vector<int> getMidiPitchesSortHL (void);
+		void             getMidiPitchesSortLH (std::vector<int>& output);
+		std::vector<int> getMidiPitchesSortLH (void);
+
+		void             getMidiPitchesResolveNull       (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNull       (void);
+		void             getMidiPitchesResolveNullSortHL (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNullSortHL (void);
+		void             getMidiPitchesResolveNullSortLH (std::vector<int>& output);
+		std::vector<int> getMidiPitchesResolveNullSortLH (void);
+
 
 		// low-level editing functions (need to re-analyze structure after using)
 		void     appendToken            (HTp token, int tabcount = 1);

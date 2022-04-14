@@ -469,6 +469,8 @@ bool HumdrumToken::isKernLike(void) const {
 		return true;
 	} else if (dtype.compare(0, 7, "**kern-") == 0) {
 		return true;
+	} else if (dtype == "**kernyy") {
+		return true;
 	}
 	return false;
 }
@@ -1457,7 +1459,12 @@ bool HumdrumToken::isStaff(void) const {
 
 bool HumdrumToken::isRest(void) {
 	if (isKernLike()) {
-		if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
+		if (isChord()) {
+			// rests are not allowed in chords, so return false if
+			// token is a chord (rests in chords are used for non-sounding
+			// notes in artificial harmonics).
+			return false;
+		} else if (isNull() && Convert::isKernRest((string)(*resolveNull()))) {
 			return true;
 		} else if (Convert::isKernRest((string)(*this))) {
 			return true;
