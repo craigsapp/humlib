@@ -104,6 +104,7 @@ class HumFileAnalysis {
 			m_rhythm_analyzed    = false;
 			m_strands_analyzed   = false;
 			m_slurs_analyzed     = false;
+			m_beams_analyzed     = false;
 			m_phrases_analyzed   = false;
 			m_nulls_analyzed     = false;
 			m_strophes_analyzed  = false;
@@ -135,6 +136,10 @@ class HumFileAnalysis {
 		// m_phrases_analyzed: Used to keep track of whether or not
 		// phrase endpoints have been linked or not.
 		bool m_phrases_analyzed = false;
+
+		// m_beams_analyzed: Used to keep track of whether or not
+		// beam endpoints have been linked or not.
+		bool m_beams_analyzed = false;
 
 		// m_nulls_analyzed: Used to keep track of wheter or not
 		// null tokens have been analyzed yet.

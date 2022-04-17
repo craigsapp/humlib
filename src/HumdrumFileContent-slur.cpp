@@ -273,14 +273,14 @@ bool HumdrumFileContent::analyzeKernSlurs(HTp spinestart,
 							}
 							token->setValue("auto", "endingSlurBack", "true");
 							token->setValue("auto", "slurSide", "stop");
-							token->setValue("auto", "slurDration",
+							token->setValue("auto", "slurDuration",
 								token->getDurationToEnd());
 						} else {
 							// This is a slur closing that does not have a matching opening.
 							token->setValue("auto", "hangingSlur", "true");
 							token->setValue("auto", "slurSide", "stop");
 							token->setValue("auto", "slurOpenIndex", to_string(i));
-							token->setValue("auto", "slurDration",
+							token->setValue("auto", "slurDuration",
 								token->getDurationToEnd());
 						}
 					}

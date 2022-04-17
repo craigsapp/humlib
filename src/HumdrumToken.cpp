@@ -3356,6 +3356,24 @@ int  HumdrumToken::getStrandIndex(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getBeamStartElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur start character '('.
+//   Returns -1 if there is no slur start character.
+//   Default value: index = 0
+//
+
+int HumdrumToken::getBeamStartElisionLevel(int index) const {
+	if (isDataType("**kern") || isDataType("**mens")) {
+		return Convert::getKernBeamStartElisionLevel((string)(*this), index);
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getSlurStartElisionLevel -- Returns the count of
 //   elision marks ('&') preceding a slur start character '('.
 //   Returns -1 if there is no slur start character.
@@ -3383,6 +3401,24 @@ int HumdrumToken::getSlurStartElisionLevel(int index) const {
 int HumdrumToken::getPhraseStartElisionLevel(int index) const {
 	if (isDataType("**kern") || isDataType("**mens")) {
 		return Convert::getKernPhraseStartElisionLevel((string)(*this), index);
+	} else {
+		return -1;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getBeamEndElisionLevel -- Returns the count of
+//   elision marks ('&') preceding a slur end character ')'.
+//   Returns -1 if there is no slur end character.
+//   Default value: index = 0
+//
+
+int HumdrumToken::getBeamEndElisionLevel(int index) const {
+	if (isDataType("**kern") || isDataType("**mens")) {
+		return Convert::getKernBeamEndElisionLevel((string)(*this), index);
 	} else {
 		return -1;
 	}

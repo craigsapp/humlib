@@ -213,10 +213,16 @@ class HumdrumToken : public std::string, public HumHash {
 		void     setParameters             (HTp ptok);
 		void     setParameters             (const std::string& pdata, HTp ptok = NULL);
 		int      getStrandIndex            (void) const;
+
+		int      getBeamStartElisionLevel  (int index = 0) const;
+		int      getBeamEndElisionLevel    (int index = 0) const;
+
 		int      getSlurStartElisionLevel  (int index = 0) const;
-		int      getPhraseStartElisionLevel(int index) const;
 		int      getSlurEndElisionLevel    (int index = 0) const;
+
+		int      getPhraseStartElisionLevel(int index) const;
 		int      getPhraseEndElisionLevel  (int index = 0) const;
+
 		HTp      getSlurStartToken         (int number = 1);
 		int      getSlurStartNumber        (int endnumber);
 		HTp      getSlurEndToken           (int number = 1);

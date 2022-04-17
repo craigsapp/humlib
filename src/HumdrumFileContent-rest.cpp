@@ -1,6 +1,6 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Jun 12 21:02:48 PDT 2018
-// Last Modified: Tue Jun 12 21:02:56 PDT 2018
+// Last Modified: Sun Apr 17 01:39:03 PDT 2022
 // Filename:      HumdrumFileContent-rest.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-rest.cpp
 // Syntax:        C++11; humlib

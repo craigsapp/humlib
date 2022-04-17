@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 	options.define("p|phrases=b",          "analyze phrases");
 	options.define("r|rest-positions=b",   "analyze rest positions");
 	options.define("s|slurs=b",            "analyze slurs");
+	options.define("b|beams=b",            "analyze beams");
 	options.define("t|ties=b",             "analyze ties");
 	options.define("x|text-repetitions=b", "analyze text repetitions");
 
@@ -61,6 +62,12 @@ int main(int argc, char **argv) {
 		// usually used for phasing slurs.  Phrases that cross
 		// other phrases are prefixed with one or more "&".
 		infile.analyzeSlurs();
+	}
+	if (allQ || options.getBoolean("beams")) {
+		// Link beam endings to each other.  Beam start
+		// is "L" and beam end is "J".  Beams that cross
+		// other beams are prefixed with one or more "&".
+		infile.analyzeBeams();
 	}
 	if (allQ || options.getBoolean("rest-positions")) {
 		// Specify the vertical position of rests on the staff.

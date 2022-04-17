@@ -2256,6 +2256,9 @@ bool HumdrumLine::hasDataStraddle(void) {
 //
 
 void HumdrumLine::clearTokenLinkInfo(void) {
+	if (this->isEmpty()) {
+		return;
+	}
 	for (int i=0; i<getFieldCount(); i++) {
 		if (token(i)) {
 			token(i)->clearLinkInfo();

@@ -2840,7 +2840,9 @@ HLp HumdrumFileBase::getLineForInterpretationInsertionAbove(int index) {
 void HumdrumFileBase::clearTokenLinkInfo(void) {
 	HumdrumFileBase& infile = *this;
 	for (int i=0; i<infile.getLineCount(); i++) {
-		infile[i].clearTokenLinkInfo();
+		if (!infile[i].isEmpty()) {
+			infile[i].clearTokenLinkInfo();
+		}
 	}
 }
 

@@ -200,14 +200,19 @@ class Convert {
 		static bool hasKernSlurEnd          (const std::string& kerndata);
 		static bool hasKernPhraseStart      (const std::string& kerndata);
 		static bool hasKernPhraseEnd        (const std::string& kerndata);
+		static char hasKernStemDirection    (const std::string& kerndata);
+		static bool isKernSecondaryTiedNote (const std::string& kerndata);
+		static std::string getKernPitchAttributes(const std::string& kerndata);
+
 		static int  getKernSlurStartElisionLevel(const std::string& kerndata, int index);
 		static int  getKernSlurEndElisionLevel  (const std::string& kerndata, int index);
 		static int  getKernPhraseStartElisionLevel(const std::string& kerndata, int index);
 		static int  getKernPhraseEndElisionLevel(const std::string& kerndata, int index);
-		static char hasKernStemDirection    (const std::string& kerndata);
 
-		static bool isKernSecondaryTiedNote (const std::string& kerndata);
-		static std::string getKernPitchAttributes(const std::string& kerndata);
+		static int  getKernBeamStartElisionLevel(const std::string& kerndata, int index);
+		static int  getKernBeamEndElisionLevel  (const std::string& kerndata, int index);
+
+
 
 		// String processing, defined in Convert-string.cpp
 		static std::vector<std::string> splitString   (const std::string& data,

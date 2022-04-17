@@ -200,14 +200,14 @@ bool HumdrumFileContent::analyzeKernPhrasings(HTp spinestart,
 							}
 							token->setValue("auto", "endingPhraseBack", "true");
 							token->setValue("auto", "phraseSide", "stop");
-							token->setValue("auto", "phraseDration",
+							token->setValue("auto", "phraseDuration",
 								token->getDurationToEnd());
 						} else {
 							// This is a phrase closing that does not have a matching opening.
 							token->setValue("auto", "hangingPhrase", "true");
 							token->setValue("auto", "phraseSide", "stop");
 							token->setValue("auto", "phraseOpenIndex", to_string(i));
-							token->setValue("auto", "phraseDration",
+							token->setValue("auto", "phraseDuration",
 								token->getDurationToEnd());
 						}
 					}

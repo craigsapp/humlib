@@ -34,17 +34,12 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		       HumdrumFileContent         (std::istream& contents);
 		      ~HumdrumFileContent         ();
 
-		bool   analyzeSlurs               (void);
+		bool   analyzeSlurs               (void);  // in src/HumdrumFileContents-slur.cpp
+		bool   analyzeBeams               (void);  // in src/HumdrumFileContents-beam.cpp
 		bool   analyzePhrasings           (void);
 		bool   analyzeTextRepetition      (void);
-	private:
-		bool   analyzeMensSlurs           (void);
-		bool   analyzeKernSlurs           (void);
-		bool   analyzeKernPhrasings       (void);
-	public:
 		bool   analyzeKernTies            (void);
 		bool   analyzeKernAccidentals     (void);
-
 		bool   analyzeRScale              (void);
 
 		// in HumdrumFileContent-rest.cpp
@@ -104,11 +99,6 @@ class HumdrumFileContent : public HumdrumFileStructure {
 
 	protected:
 
-		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
-		                                   std::vector<HTp>& slurends,
-		                                   std::vector<std::pair<HTp, HTp>>& labels,
-		                                   std::vector<int>& endings,
-		                                   const std::string& linksig = "");
 		bool   analyzeKernPhrasings       (HTp spinestart,
 		                                   std::vector<HTp>& linkstarts,
 		                                   std::vector<HTp>& linkends,
@@ -122,29 +112,61 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		                                   const std::string& keysig);
 		void   resetDiatonicStatesWithKeySignature(std::vector<int>& states,
 				                             std::vector<int>& signature);
-		void    linkSlurEndpoints         (HTp slurstart, HTp slurend);
+
+		bool   analyzeKernPhrasings       (void);
+
+		// Slur analysis functions (defined in src/HumdrumFileContents-slur.cpp):
+		bool   analyzeMensSlurs           (void);
+		bool   analyzeKernSlurs           (void);
+		void   createLinkedSlurs          (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+		bool   isLinkedSlurEnd            (HTp token, int index, const std::string& pattern);
+		bool   isLinkedSlurBegin          (HTp token, int index, const std::string& pattern);
+		void   linkSlurEndpoints          (HTp slurstart, HTp slurend);
+		bool   analyzeKernSlurs           (HTp spinestart, std::vector<HTp>& slurstarts,
+		                                   std::vector<HTp>& slurends,
+		                                   std::vector<std::pair<HTp, HTp>>& labels,
+		                                   std::vector<int>& endings,
+		                                   const std::string& linksig = "");
+
+		// Beam analysis functions (defined in src/HumdrumFileContents-beam.cpp):
+		bool   analyzeMensBeams           (void);
+		bool   analyzeKernBeams           (void);
+		void   createLinkedBeams          (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+		bool   isLinkedBeamEnd            (HTp token, int index, const std::string& pattern);
+		bool   isLinkedBeamBegin          (HTp token, int index, const std::string& pattern);
+		void   linkBeamEndpoints          (HTp beamstart, HTp beamend);
+		void   markBeamSpanMembers        (HTp beamstart, HTp beamend);
+		bool   analyzeKernBeams           (HTp spinestart, std::vector<HTp>& beamstarts,
+		                                   std::vector<HTp>& beamends,
+		                                   std::vector<std::pair<HTp, HTp>>& labels,
+		                                   std::vector<int>& endings,
+		                                   const std::string& linksig = "");
+
+		// Analytic phrase markers:
 		void    linkPhraseEndpoints       (HTp phrasestart, HTp phraseend);
 		void    linkTieEndpoints          (HTp tiestart, int startindex,
 		                                   HTp tieend, int endindex);
-		bool    isLinkedSlurBegin         (HTp token, int index, const std::string& pattern);
 		bool    isLinkedPhraseBegin       (HTp token, int index, const std::string& pattern);
-		bool    isLinkedSlurEnd           (HTp token, int index, const std::string& pattern);
 		bool    isLinkedPhraseEnd         (HTp token, int index, const std::string& pattern);
-		void    createLinkedSlurs         (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
 		void    createLinkedPhrasings     (std::vector<HTp>& linkstarts, std::vector<HTp>& linkends);
+
+		// Rests:
 		void    assignVerticalRestPosition(HTp first, HTp second, int baseline);
 		int     getRestPositionAboveNotes (HTp rest, std::vector<int>& vpos);
 		int     getRestPositionBelowNotes (HTp rest, std::vector<int>& vpos);
 		void    setRestOnCenterStaffLine  (HTp rest, int baseline);
 		bool    checkRestForVerticalPositioning(HTp rest, int baseline);
+
+		// Stem lengths:
 		bool    analyzeKernStemLengths    (HTp stok, HTp etok, std::vector<std::vector<int>>& centerlines);
-		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
-		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts,
-		                                   std::vector<std::pair<HTp, int>>& ends);
 		void    checkCrossStaffStems      (HTp token, std::string& above, std::string& below);
 		void    checkDataForCrossStaffStems(HTp token, std::string& above, std::string& below);
 		void    prepareStaffAboveNoteStems (HTp token);
 		void    prepareStaffBelowNoteStems (HTp token);
+
+		void    getBaselines              (std::vector<std::vector<int>>& centerlines);
+		void    createLinkedTies          (std::vector<std::pair<HTp, int>>& starts,
+		                                   std::vector<std::pair<HTp, int>>& ends);
 };
 
 

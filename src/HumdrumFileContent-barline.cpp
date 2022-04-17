@@ -34,7 +34,7 @@ void HumdrumFileContent::analyzeBarlines(void) {
 		// Maybe allow forcing reanalysis.
 		return;
 	}
-	m_analyses.m_slurs_analyzed = true;
+	m_analyses.m_barlines_analyzed = true;
 	m_analyses.m_barlines_different = false;
 
 	string baseline;

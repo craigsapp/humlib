@@ -153,6 +153,84 @@ bool Convert::hasKernPhraseEnd(const string& kerndata) {
 
 //////////////////////////////
 //
+// Convert::getKernBeamStartElisionLevel -- Returns the number of
+//   '&' characters before the given 'L' character in a kern token.
+//   Returns -1 if no 'L' character in string.
+//
+
+int Convert::getKernBeamStartElisionLevel(const string& kerndata, int index) {
+	bool foundBeamStart = false;
+	int output = 0;
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == 'L') {
+			count++;
+		}
+		if (count == target) {
+			foundBeamStart = true;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
+		}
+	}
+	if (!foundBeamStart) {
+		return -1;
+	} else {
+		return output;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Convert::getKernBeamEndElisionLevel -- Returns the number of
+//   '&' characters before the last 'J' character in a kern token.
+//   Returns -1 if no 'J' character in string.
+//
+
+int Convert::getKernBeamEndElisionLevel(const string& kerndata, int index) {
+	bool foundBeamEnd = false;
+	int output = 0;
+	int count = 0;
+	int target = index + 1;
+	for (int i=0; i<(int)kerndata.size(); i++) {
+		char ch = kerndata[i];
+		if (ch == 'J') {
+			count++;
+		}
+		if (count == target) {
+			foundBeamEnd = true;
+			for (int j=i-1; j>=0; j--) {
+				ch = kerndata[j];
+				if (ch == '&') {
+					output++;
+				} else {
+					break;
+				}
+			}
+			break;
+		}
+	}
+	if (!foundBeamEnd) {
+		return -1;
+	} else {
+		return output;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Convert::getKernSlurStartElisionLevel -- Returns the number of
 //   '&' characters before the given '(' character in a kern token.
 //   Returns -1 if no '(' character in string.
