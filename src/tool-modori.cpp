@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Sep 28 12:08:25 PDT 2020
-// Last Modified: Thu Dec 17 23:28:58 PST 2020
+// Last Modified: Sun Apr 17 23:17:21 PDT 2022
 // Filename:      tool-modori.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-modori.cpp
 // Syntax:        C++11; humlib
@@ -163,6 +163,9 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 				} else if (hre.search(token, "^!!?LO:(TX|DY).*:ori=")) {
 					m_lotext.push_back(token);
 				}
+				if (hre.search(token, "^!LO:MO:.*")) {
+					m_lomo.push_back(token);
+				}
 			}
 		}
 		if (!infile[i].isInterpretation()) {
@@ -219,7 +222,6 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 		// nothing to do
 		return;
 	}
-
 
 	switchModernOriginal(infile);
 	m_humdrum_text << infile;
@@ -651,6 +653,97 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 		infile[line].createLineFromTokens();
 	}
 
+	updateLoMo(infile);
+}
+
+
+//////////////////////////////
+//
+// Tool_modori::updateLoMo --
+//
+
+void Tool_modori::updateLoMo(HumdrumFile& infile) {
+	for (int i=0; i<(int)m_lomo.size(); i++) {
+		processLoMo(m_lomo[i]);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::processLoMo --
+//
+
+void Tool_modori::processLoMo(HTp lomo) {
+	HumRegex hre;
+
+	if (m_modernQ) {
+		string text = lomo->getText();
+		string modtext;
+		string oritext;
+		string base;
+		string rest;
+		if (hre.search(text, "(.*):mod=([^:]*)(.*)")) {
+			base = hre.getMatch(1);
+			modtext = hre.getMatch(2);
+			rest = hre.getMatch(3);
+			hre.replaceDestructive(modtext, ":", "&colon;", "g");
+			HTp current = lomo->getNextToken();
+			while (current) {
+				if (current->isNull()) {
+					current = current->getNextToken();
+					continue;
+				}
+				break;
+			}
+			if (current) {
+				string oritext = current->getText();
+				hre.replaceDestructive(oritext, "&colon;", ":", "g");
+				current->setText(modtext);
+				string newtext = base;
+				newtext += ":ori=";
+				newtext += oritext;
+				newtext += rest;
+				lomo->setText(newtext);
+				lomo->getLine()->createLineFromTokens();
+				current->getLine()->createLineFromTokens();
+			}
+		}
+
+	} else if (m_originalQ) {
+		string text = lomo->getText();
+		string modtext;
+		string oritext;
+		string base;
+		string rest;
+		if (hre.search(text, "(.*):ori=([^:]*)(.*)")) {
+			base = hre.getMatch(1);
+			oritext = hre.getMatch(2);
+			rest = hre.getMatch(3);
+			hre.replaceDestructive(oritext, ":", "&colon;", "g");
+			HTp current = lomo->getNextToken();
+			while (current) {
+				if (current->isNull()) {
+					current = current->getNextToken();
+					continue;
+				}
+				break;
+			}
+			if (current) {
+				string modtext = current->getText();
+				hre.replaceDestructive(modtext, "&colon;", ":", "g");
+				current->setText(oritext);
+				string newtext = base;
+				newtext += ":mod=";
+				newtext += modtext;
+				newtext += rest;
+				lomo->setText(newtext);
+				lomo->getLine()->createLineFromTokens();
+				current->getLine()->createLineFromTokens();
+			}
+		}
+	}
 }
 
 
