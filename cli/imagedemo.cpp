@@ -34,8 +34,9 @@ int main(int argc, char** argv) {
 	int rows = options.getInteger("rows");
 	int cols = options.getInteger("columns");
 
-	vector<vector<PixelColor>> image;
+	vector<vector<PixelColor>> image(rows);
 	for (int y=0; y<(int)image.size(); y++) {
+			image[y].resize(cols);
 			for (int x=0; x<(int)image[y].size(); x++) {
 				image[y][x].setRedF((double)y/rows);
 				image[y][x].setBlueF((double)x/cols);
