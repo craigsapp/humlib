@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 20 10:18:07 PDT 2022
+// Last Modified: Wed Apr 20 13:19:13 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8631,7 +8631,7 @@ class Tool_peak : public HumTool {
 		std::vector<int>    m_peakMeasureBegin;  // starting measure of peak group
 		std::vector<int>    m_peakMeasureEnd;    // starting measure of peak group
 		std::vector<HumNum> m_peakDuration;      // between first peak note and last peak note.
-		std::vector<std::vector<HTp>> m_peakPitch; // pitch of the peak sequence
+		std::vector<std::vector<HTp>> m_peakPitch; // pitches of the peak sequence (excluding tied notes)
 		std::vector<int>    m_peakPeakCount;     // how many notes in a peak sequence
 
 		// Merging variables for peak groups:

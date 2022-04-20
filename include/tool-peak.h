@@ -78,7 +78,7 @@ class Tool_peak : public HumTool {
 		std::vector<int>    m_peakMeasureBegin;  // starting measure of peak group
 		std::vector<int>    m_peakMeasureEnd;    // starting measure of peak group
 		std::vector<HumNum> m_peakDuration;      // between first peak note and last peak note.
-		std::vector<std::vector<HTp>> m_peakPitch; // pitch of the peak sequence
+		std::vector<std::vector<HTp>> m_peakPitch; // pitches of the peak sequence (excluding tied notes)
 		std::vector<int>    m_peakPeakCount;     // how many notes in a peak sequence
 
 		// Merging variables for peak groups:

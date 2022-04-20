@@ -145,17 +145,23 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		m_humdrum_text << "!!!peak_groups: " << m_count << endl;
 		m_humdrum_text << "!!!peak_notes: "  << peak_note_count << endl;
 		m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
+		int pcounter = 1;
 		for (int i=0; i<(int)m_peakIndex.size(); i++) {
 			if (m_peakIndex[i] < 0) {
 				// This group has been merged into a larger one.
 				continue;
 			}
-			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"   << endl;
-			m_humdrum_text << "!!!peak_group: "      << i+1                   << endl;
-			m_humdrum_text << "!!!start_measure: "   << m_peakMeasureBegin[i] << endl;
-			m_humdrum_text << "!!!end_measure: "     << m_peakMeasureEnd[i]   << endl;
-			m_humdrum_text << "!!!group_duration: "  << m_peakDuration[i]     << endl;
-			m_humdrum_text << "!!!group_pitch: "     << m_peakPitch[i][0]     << endl;
+			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+			m_humdrum_text << "!!!peak_group: "     << pcounter++            << endl;
+			m_humdrum_text << "!!!start_measure: "  << m_peakMeasureBegin[i] << endl;
+			m_humdrum_text << "!!!end_measure: "    << m_peakMeasureEnd[i]   << endl;
+			m_humdrum_text << "!!!group_duration: " << m_peakDuration[i].getFloat()/4.0 << endl;
+			m_humdrum_text << "!!!group_pitches:";
+			for (int j=0; j<(int)m_peakPitch[i].size(); j++) {
+				m_humdrum_text << " " << m_peakPitch[i][j];
+				m_humdrum_text << "(" << m_peakPitch[i][j]->getLineIndex() << ")";
+			}
+			m_humdrum_text << endl;
 			m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i]    << endl;
 		}
 	}
@@ -284,19 +290,27 @@ bool Tool_peak::checkGroupPairForMerger(int index1, int index2) {
 	m_peakDuration[index1] = m_endTime[index2] - m_startTime[index1];
 
 	// merge the notes/counts:
-
 	for (int i=0; i<(int)m_peakPitch[index2].size(); i++) {
-		int found = -1;
+		vector<HTp> newtoks;
+		newtoks.clear();
 		for (int j=0; j<(int)m_peakPitch[index1].size(); j++) {
-			if (m_peakPitch[index2][i] == m_peakPitch[index1][j]) {
-				found = i;
-				break;
+			HTp token1 = m_peakPitch[index1][j];
+			HTp token2 = m_peakPitch[index2][i];
+			if (token2 == NULL) {
+				continue;
+			}
+			if (token1 == token2) {
+				m_peakPitch[index2][i] = NULL;
 			}
 		}
-		if (found < 0) {
+	}
+
+	for (int k=0; k<(int)m_peakPitch[index2].size(); k++) {
+		HTp token = m_peakPitch[index2][k];
+		if (!token) {
 			continue;
 		}
-		m_peakPitch[index1].push_back(m_peakPitch[index2][found]);
+		m_peakPitch[index1].push_back(token);
 	}
 
 	m_peakPeakCount[index1] = m_peakPitch[index1].size();
@@ -515,8 +529,12 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 		m_peakDuration.push_back(duration.getFloat()/4.0);
 		m_peakMeasureBegin.push_back(m_barNum[line]);
 		m_peakMeasureEnd.push_back(m_barNum[line2]);
-		m_peakPeakCount.push_back(3);
-		m_peakPitch.push_back(notes[i]);
+		vector<HTp> pnotes;
+		for (int j=0; j<m_peakNum; j++) {
+			pnotes.push_back(notes.at(i+j).at(0));
+		}
+		m_peakPitch.push_back(pnotes);
+		m_peakPeakCount.push_back((int)pnotes.size());
 
 		// variables to do peak group mergers later:
 		int track = notes[i][0]->getTrack();
