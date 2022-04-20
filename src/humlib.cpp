@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr 19 23:16:23 PDT 2022
+// Last Modified: Tue Apr 19 23:23:34 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -85904,12 +85904,17 @@ void Tool_modori::processLoMo(HTp lomo) {
 			rest = hre.getMatch(3);
 			hre.replaceDestructive(modtext, ":", "&colon;", "g");
 			HTp current = lomo->getNextToken();
-			while (current) {
-				if (current->isNull()) {
-					current = current->getNextToken();
-					continue;
+			// null parameter allows next following null token
+			// to be swapped out
+			bool nullQ = hre.search(text, ":null:");
+			if (!nullQ) {
+				while (current) {
+					if (current->isNull()) {
+						current = current->getNextToken();
+						continue;
+					}
+					break;
 				}
-				break;
 			}
 			if (current) {
 				string oritext = current->getText();
@@ -85937,12 +85942,17 @@ void Tool_modori::processLoMo(HTp lomo) {
 			rest = hre.getMatch(3);
 			hre.replaceDestructive(oritext, ":", "&colon;", "g");
 			HTp current = lomo->getNextToken();
-			while (current) {
-				if (current->isNull()) {
-					current = current->getNextToken();
-					continue;
+			// null parameter allows next following null token
+			// to be swapped out
+			bool nullQ = hre.search(text, ":null:");
+			if (nullQ) {
+				while (current) {
+					if (current->isNull()) {
+						current = current->getNextToken();
+						continue;
+					}
+					break;
 				}
-				break;
 			}
 			if (current) {
 				string modtext = current->getText();

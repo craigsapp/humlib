@@ -690,12 +690,17 @@ void Tool_modori::processLoMo(HTp lomo) {
 			rest = hre.getMatch(3);
 			hre.replaceDestructive(modtext, ":", "&colon;", "g");
 			HTp current = lomo->getNextToken();
-			while (current) {
-				if (current->isNull()) {
-					current = current->getNextToken();
-					continue;
+			// null parameter allows next following null token
+			// to be swapped out
+			bool nullQ = hre.search(text, ":null:");
+			if (!nullQ) {
+				while (current) {
+					if (current->isNull()) {
+						current = current->getNextToken();
+						continue;
+					}
+					break;
 				}
-				break;
 			}
 			if (current) {
 				string oritext = current->getText();
@@ -723,12 +728,17 @@ void Tool_modori::processLoMo(HTp lomo) {
 			rest = hre.getMatch(3);
 			hre.replaceDestructive(oritext, ":", "&colon;", "g");
 			HTp current = lomo->getNextToken();
-			while (current) {
-				if (current->isNull()) {
-					current = current->getNextToken();
-					continue;
+			// null parameter allows next following null token
+			// to be swapped out
+			bool nullQ = hre.search(text, ":null:");
+			if (nullQ) {
+				while (current) {
+					if (current->isNull()) {
+						current = current->getNextToken();
+						continue;
+					}
+					break;
 				}
-				break;
 			}
 			if (current) {
 				string modtext = current->getText();
