@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr 18 00:47:30 PDT 2022
+// Last Modified: Tue Apr 19 23:16:23 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -72379,6 +72379,7 @@ string Tool_fb::getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field)
 
 Tool_filter::Tool_filter(void) {
 	define("debug=b", "print debug statement");
+	define("v|variant=s:", "Run filters labeled with the given variant");
 }
 
 
@@ -72480,6 +72481,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(extract, infile, commands[i].second, status);
 		} else if (commands[i].first == "flipper") {
 			RUNTOOL(flipper, infile, commands[i].second, status);
+		} else if (commands[i].first == "filter") {
+			RUNTOOL(filter, infile, commands[i].second, status);
 		} else if (commands[i].first == "gasparize") {
 			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
@@ -72584,14 +72587,38 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 void Tool_filter::removeGlobalFilterLines(HumdrumFile& infile) {
 	HumRegex hre;
 	string text;
+
+	string maintag = "!!!filter:";
+	string mainXtag = "!!!Xfilter:";
+	string maintagQuery = "^!!!filter:";
+
+	string maintagV;
+	string mainXtagV;
+	string maintagQueryV;
+
+	if (m_variant.size() > 0) {
+		maintagV = "!!!filter-" + m_variant + ":";
+		mainXtagV = "!!!Xfilter-" + m_variant + ":";
+		maintagQueryV = "^!!!filter-" + m_variant + ":";
+	}
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isReference()) {
 			continue;
 		}
-		if (infile.token(i, 0)->compare(0, 10, "!!!filter:") == 0) {
-			text = infile.token(i, 0)->getText();
-			hre.replaceDestructive(text, "!!!Xfilter:", "^!!!filter:");
-			infile.token(i, 0)->setText(text);
+
+		if (m_variant.size() > 0) {
+			if (infile.token(i, 0)->compare(0, maintagV.size(), maintagV) == 0) {
+				text = infile.token(i, 0)->getText();
+				hre.replaceDestructive(text, mainXtagV, maintagQueryV);
+				infile.token(i, 0)->setText(text);
+			}
+		} else {
+			if (infile.token(i, 0)->compare(0, maintag.size(), maintag) == 0) {
+				text = infile.token(i, 0)->getText();
+				hre.replaceDestructive(text, mainXtag, maintagQuery);
+				infile.token(i, 0)->setText(text);
+			}
 		}
 	}
 }
@@ -72606,6 +72633,21 @@ void Tool_filter::removeGlobalFilterLines(HumdrumFile& infile) {
 void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
 	HumRegex hre;
 	string text;
+
+	string maintag = "!!!!filter:";
+	string mainXtag = "!!!!Xfilter:";
+	string maintagQuery = "^!!!!filter:";
+
+	string maintagV;
+	string mainXtagV;
+	string maintagQueryV;
+
+	if (m_variant.size() > 0) {
+		maintagV = "!!!!filter-" + m_variant + ":";
+		mainXtagV = "!!!!Xfilter-" + m_variant + ":";
+		maintagQueryV = "^!!!!filter-" + m_variant + ":";
+	}
+
 	for (int i=0; i<infiles.getCount(); i++) {
 		HumdrumFile& infile = infiles[i];
 		for (int j=0; j<infile.getLineCount(); j++) {
@@ -72613,11 +72655,20 @@ void Tool_filter::removeUniversalFilterLines(HumdrumFileSet& infiles) {
 				continue;
 			}
 			HTp token = infile.token(j, 0);
-			if (token->compare(0, 11, "!!!!filter:") == 0) {
-				text = token->getText();
-				hre.replaceDestructive(text, "!!!!Xfilter:", "^!!!!filter:");
-				token->setText(text);
-				infile[j].createLineFromTokens();
+			if (m_variant.size() > 0) {
+				if (token->compare(0, maintagV.size(), maintagV) == 0) {
+					text = token->getText();
+					hre.replaceDestructive(text, mainXtagV, maintagQueryV);
+					token->setText(text);
+					infile[j].createLineFromTokens();
+				}
+			} else {
+				if (token->compare(0, maintag.size(), maintag) == 0) {
+					text = token->getText();
+					hre.replaceDestructive(text, mainXtag, maintagQuery);
+					token->setText(text);
+					infile[j].createLineFromTokens();
+				}
 			}
 		}
 	}
@@ -72636,12 +72687,12 @@ void Tool_filter::getCommandList(vector<pair<string, string> >& commands,
 	vector<HLp> refs = infile.getReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
-	vector<string> clist;
-	HumRegex hre;
-   if (m_variant.size() > 0) {
+	if (m_variant.size() > 0) {
 		tag += "-";
 		tag += m_variant;
 	}
+	vector<string> clist;
+	HumRegex hre;
 	for (int i=0; i<(int)refs.size(); i++) {
 		string refkey = refs[i]->getGlobalReferenceKey();
 		if (refkey != tag) {
@@ -72767,12 +72818,12 @@ void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& command
 	vector<HLp> refs = infiles.getUniversalReferenceRecords();
 	pair<string, string> entry;
 	string tag = "filter";
-	vector<string> clist;
-	HumRegex hre;
-   if (m_variant.size() > 0) {
+	if (m_variant.size() > 0) {
 		tag += "-";
 		tag += m_variant;
 	}
+	vector<string> clist;
+	HumRegex hre;
 	for (int i=0; i<(int)refs.size(); i++) {
 		if (refs[i]->getUniversalReferenceKey() != tag) {
 			continue;
@@ -72798,6 +72849,10 @@ void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& command
 
 void Tool_filter::initialize(HumdrumFile& infile) {
 	m_debugQ = getBoolean("debug");
+	m_variant.clear();
+	if (getBoolean("variant")) {
+		m_variant = getString("variant");
+	}
 }
 
 
