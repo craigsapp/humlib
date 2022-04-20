@@ -141,6 +141,7 @@ class HumdrumToken : public std::string, public HumHash {
 
 		// pitch-related functions:
 
+		int              getMidiPitch         (void);
 		void             getMidiPitches       (std::vector<int>& output);
 		std::vector<int> getMidiPitches       (void);
 		void             getMidiPitchesSortHL (std::vector<int>& output);
@@ -148,6 +149,7 @@ class HumdrumToken : public std::string, public HumHash {
 		void             getMidiPitchesSortLH (std::vector<int>& output);
 		std::vector<int> getMidiPitchesSortLH (void);
 
+		int              getMidiPitchResolveNull         (void);
 		void             getMidiPitchesResolveNull       (std::vector<int>& output);
 		std::vector<int> getMidiPitchesResolveNull       (void);
 		void             getMidiPitchesResolveNullSortHL (std::vector<int>& output);

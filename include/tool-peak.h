@@ -57,27 +57,36 @@ class Tool_peak : public HumTool {
 		                                                  std::vector<bool>& peaknotes);
 		void                          markNotesInScore   (vector<vector<HTp>>& peaknotelist,
 		                                                  vector<bool>& ispeak);
+		void                          mergeOverlappingPeaks(void);
+		bool                          checkGroupPairForMerger(int index1, int index2);
+      int                           countNotesInScore   (HumdrumFile& infile);
 
 	private:
-		bool m_rawQ             = false;
-		std::string m_marker    = "@";
-		std::string m_color     = "red";
-		double      m_smallRest = 4.0;   // Ignore rests that are 1 whole note or less.
-		double      m_peakDur   = 24.0;  // 6 whole notes maximum between m_peakNum local maximums.
-		double      m_peakNum   = 3;     // Number of local maximums in a row needed to mark in score.
+		bool m_rawQ             = false;         // don't print score (only analysis)
+		std::string m_marker    = "@";           // marker to label peak notes in score
+		std::string m_color     = "red";         // color to mark peak notes
+		double      m_smallRest = 4.0;           // Ignore rests that are 1 whole note or less
+		double      m_peakDur   = 24.0;          // 6 whole notes maximum between m_peakNum local maximums
+		double      m_peakNum   = 3;             // number of local maximums in a row needed to mark in score
 
+		bool        m_infoQ     = false;         // used with -i option
+		int         m_count     = 0;             // number of peak sequences in score
+		int         m_noteCount = 0;             // total number of notes in the score
 
-		bool        m_infoQ     = false; // Used with -i option.
-		int         m_count     = 0;     // Number of peak sequences in score.
-		int					m_noteCount = 0;		 // Total number of notes in the score.
+		std::vector<int>    m_barNum;            // storage for identify start/end measures of peak groups
 
-		std::vector<int>    m_peakMeasureBegin;
-		std::vector<int>    m_peakMeasureEnd;
-		std::vector<HumNum> m_peakDuration; 		//between first peak note and last peak note.
-		std::vector<string> m_peakPitch; 				//pitch of the peak sequence.
-		std::vector<int>    m_peakPeakCount; 		//how many notes in a peak sequence.
+		std::vector<int>    m_peakMeasureBegin;  // starting measure of peak group
+		std::vector<int>    m_peakMeasureEnd;    // starting measure of peak group
+		std::vector<HumNum> m_peakDuration;      // between first peak note and last peak note.
+		std::vector<std::vector<HTp>> m_peakPitch; // pitch of the peak sequence
+		std::vector<int>    m_peakPeakCount;     // how many notes in a peak sequence
 
-		std::vector<int>		m_barNum;
+		// Merging variables for peak groups:
+		std::vector<int>    m_peakIndex;         // used to keep track of mergers
+		std::vector<int>    m_peakTrack;         // used to keep track of mergers
+		std::vector<HumNum> m_startTime;         // starting time of first note in group
+		std::vector<HumNum> m_endTime;           // ending time of last note in group
+
 };
 
 // END_MERGE

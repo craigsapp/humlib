@@ -940,6 +940,16 @@ vector<int> HumdrumToken::getMidiPitches(void) {
 }
 
 
+int HumdrumToken::getMidiPitch(void) {
+	vector<int> pitches = getMidiPitches();
+	if (pitches.size() > 0) {
+		return pitches[0];
+	} else {
+		return 0;
+	}
+}
+
+
 
 //////////////////////////////
 //
@@ -1044,6 +1054,16 @@ vector<int> HumdrumToken::getMidiPitchesResolveNull(void) {
 	vector<int> output;
 	this->getMidiPitchesResolveNull(output);
 	return output;
+}
+
+
+int HumdrumToken::getMidiPitchResolveNull(void) {
+	vector<int> pitches = getMidiPitchesResolveNull();
+	if (pitches.size() > 0) {
+		return pitches[0];
+	} else {
+		return 0;
+	}
 }
 
 

@@ -129,19 +129,179 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		m_humdrum_text << endl;
 	}
 
+	mergeOverlappingPeaks();
+
+	int all_note_count = countNotesInScore(infile);
+
+	int peak_note_count = 0;
+	for (int i=0; i<(int)m_peakIndex.size(); i++) {
+		if (m_peakIndex[i] < 0) {
+			continue;
+		}
+		peak_note_count += m_peakPeakCount[i];
+	}
+
 	if (m_infoQ) {
-		m_humdrum_text << "!!!peaks: " << m_count << endl;
-		for (int i=0; i<(int)m_peakMeasureBegin.size(); i++) {
-			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-			m_humdrum_text << "!!!peak_group: " << i+1 << endl;
-			m_humdrum_text << "!!!start_measure: " << m_peakMeasureBegin[i] << endl;
-			m_humdrum_text << "!!!end_measure: " << m_peakMeasureEnd[i] << endl;
-			m_humdrum_text << "!!!group_duration: " << m_peakDuration[i] << endl;
-			m_humdrum_text << "!!!group_pitch: " << m_peakPitch[i] << endl;
-			m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i] << endl;
+		m_humdrum_text << "!!!peak_groups: " << m_count << endl;
+		m_humdrum_text << "!!!peak_notes: "  << peak_note_count << endl;
+		m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
+		for (int i=0; i<(int)m_peakIndex.size(); i++) {
+			if (m_peakIndex[i] < 0) {
+				// This group has been merged into a larger one.
+				continue;
+			}
+			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"   << endl;
+			m_humdrum_text << "!!!peak_group: "      << i+1                   << endl;
+			m_humdrum_text << "!!!start_measure: "   << m_peakMeasureBegin[i] << endl;
+			m_humdrum_text << "!!!end_measure: "     << m_peakMeasureEnd[i]   << endl;
+			m_humdrum_text << "!!!group_duration: "  << m_peakDuration[i]     << endl;
+			m_humdrum_text << "!!!group_pitch: "     << m_peakPitch[i][0]     << endl;
+			m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i]    << endl;
 		}
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// mergeOverlappingPeaks -- Merge overlapping peak groups.
+//    Groups that need to be merged:
+//    * Have the same track number (same staff)
+//    * Have the same MIDI pitch
+//    * Have and starttime for one group that starts before or on the
+//      endtime of another group.
+//    Merged groups are indicated as inactive if their index is set to
+//    a negative value.
+//
+
+void Tool_peak::mergeOverlappingPeaks(void) {
+	// This algorithm does not handle multiple groups that
+	// need merging, so redo the overlap identification
+	// several more times to enture multiple groups are
+	// merged.
+	for (int k=0; k<100; k++) {
+		bool mergers = false;
+		for (int i=0; i<(int)m_peakIndex.size(); i++) {
+			for (int j=i+1; j<(int)m_peakIndex.size(); j++) {
+				mergers |= checkGroupPairForMerger(i, j);
+			}
+		}
+		if (!mergers) {
+			break;
+		}
+	}
+
+	// re-calculate m_count (number of peak groups):
+	m_count = 0;
+	for (int i=0; i<(int)m_peakIndex.size(); i++) {
+		if (m_peakIndex[i] >= 0) {
+			m_count++;
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_peak::checkGroupPairForMerger --
+//    * Have and starttime for one group that starts before or on the
+//      endtime of another group.
+//    Merged groups are indicated as inactive if their index is set to
+//    a negative value.
+// Return value is true if there was a merger; otherwise, returns false.
+//
+
+bool Tool_peak::checkGroupPairForMerger(int index1, int index2) {
+
+	// Groups must not have been merged already:
+	if (m_peakIndex[index1] < 0) {
+		return false;
+	}
+	if (m_peakIndex[index2] < 0) {
+		return false;
+	}
+
+	// Groups must have the same track number (i.e., the same staff/part):
+	if (m_peakTrack[index1] != m_peakTrack[index2]) {
+		return false;
+	}
+
+	// Groups must have the same MIDI pitch:
+	if (m_peakPitch[index1].empty()) {
+		return false;
+	}
+	if (m_peakPitch[index2].empty()) {
+		return false;
+	}
+	int midi1 = m_peakPitch[index1][0]->getMidiPitch();
+	int midi2 = m_peakPitch[index2][0]->getMidiPitch();
+	if (midi1 != midi2) {
+		return false;
+	}
+
+	// Check if they overlap:
+	HumNum start1 = m_startTime[index1];
+	HumNum start2 = m_startTime[index2];
+	HumNum end1   = m_endTime[index1];
+	HumNum end2   = m_endTime[index2];
+	
+	bool mergeQ = false;
+	bool flipQ  = false;
+	if (start1 < start2) {
+		if (start2 <= end1) {
+			mergeQ = true;
+		}
+	} else {
+		if (start1 <= end2) {
+			flipQ = true;
+			mergeQ = true;
+		}
+	}
+
+	if (mergeQ == false) {
+		return false;
+	}
+
+	// merge the two groups:
+	if (flipQ) {
+		int tempi = index1;
+		index1 = index2;
+		index2 = tempi;
+	}
+
+	// Deactivate the second group by setting a negative index:
+	m_peakIndex[index2] *= -1;
+	
+	// Set the endtime of the first group to the end of the second group:
+	m_endTime[index1] = m_endTime[index2];
+
+	// Likewise, merge the ending measure numbers:
+	m_peakMeasureEnd[index1] = m_peakMeasureEnd[index2];
+
+	// Update the duration of the merged peak group:
+	m_peakDuration[index1] = m_endTime[index2] - m_startTime[index1];
+
+	// merge the notes/counts:
+
+	for (int i=0; i<(int)m_peakPitch[index2].size(); i++) {
+		int found = -1;
+		for (int j=0; j<(int)m_peakPitch[index1].size(); j++) {
+			if (m_peakPitch[index2][i] == m_peakPitch[index1][j]) {
+				found = i;
+				break;
+			}
+		}
+		if (found < 0) {
+			continue;
+		}
+		m_peakPitch[index1].push_back(m_peakPitch[index2][found]);
+	}
+
+	m_peakPeakCount[index1] = m_peakPitch[index1].size();
+
+	return true;
 }
 
 
@@ -234,7 +394,7 @@ void Tool_peak::getLocalPeakNotes(vector<vector<HTp>>& newnotelist,
 	////////////////////////////
 	//
 	// Refinement to add to following loop: If the note has
-   // a duration less than or equal two 2 (half note), and
+	// a duration less than or equal two 2 (half note), and
 	// the note is not on a beat then do not add it to the
 	// newnotelist vector.
 	//
@@ -332,36 +492,45 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 	//
 	//////////////////////////////////////////
 
-	   for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
-			 bool match = true;
-			 for (int j=1; j<m_peakNum; j++) {
-				 if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
-					 match = false;
-					 break;
-				 }
-			 }
-			 if (match != true) {
-			 	continue;
-			 }
-			 HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
-			 if (duration.getFloat() > m_peakDur) {
-				 continue;
-			 }
-			 //data for every sub-sequeunce
-			 m_count += 1;
-			 int line = notes[i][0]->getLineIndex();
-			 int line2 = notes[i + m_peakNum - 1].back()->getLineIndex();
-
-			 m_peakDuration.push_back(duration.getFloat()/4.0);
-			 m_peakMeasureBegin.push_back(m_barNum[line]);
-			 m_peakMeasureEnd.push_back(m_barNum[line2]);
-			 m_peakPeakCount.push_back(3);
-			 m_peakPitch.push_back(notes[i][0]->getText());
-
-			 for (int j=0; j<m_peakNum; j++) {
-				globalpeaknotes[i+j] = true;
-			 }
+	for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
+		bool match = true;
+		for (int j=1; j<m_peakNum; j++) {
+			if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
+				match = false;
+				break;
+			}
 		}
+		if (match != true) {
+			continue;
+		}
+		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
+		if (duration.getFloat() > m_peakDur) {
+			continue;
+		}
+		//data for every sub-sequeunce
+		m_count += 1;
+		int line = notes[i][0]->getLineIndex();
+		int line2 = notes[i + m_peakNum - 1].back()->getLineIndex();
+
+		m_peakDuration.push_back(duration.getFloat()/4.0);
+		m_peakMeasureBegin.push_back(m_barNum[line]);
+		m_peakMeasureEnd.push_back(m_barNum[line2]);
+		m_peakPeakCount.push_back(3);
+		m_peakPitch.push_back(notes[i]);
+
+		// variables to do peak group mergers later:
+		int track = notes[i][0]->getTrack();
+		m_peakTrack.push_back(track);
+		m_peakIndex.push_back(m_peakIndex.size());
+		HumNum starttime = notes[i][0]->getDurationFromStart();
+		HumNum endtime   = notes[i+m_peakNum-1].back()->getDurationFromStart();
+		m_startTime.push_back(starttime);
+		m_endTime.push_back(endtime);
+
+		for (int j=0; j<m_peakNum; j++) {
+			globalpeaknotes[i+j] = true;
+		}
+	}
 }
 
 
@@ -500,7 +669,7 @@ void  Tool_peak::getDurations(vector<double>& durations, vector<vector<HTp>>& no
 
 //////////////////////////////
 //
-// getBeat --
+// Tool_peak::getBeat --
 //
 
 void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
@@ -519,10 +688,42 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 }
 
 
+//////////////////////////////
+//
+// Tool_peak::countNotesInScore --
+//
 
+int Tool_peak::countNotesInScore(HumdrumFile& infile) {
+	int counter = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			}
+			if (token->isSecondaryTiedNote()) {
+				continue;
+			}
+			counter++;
+
+		}
+	}
+	return counter;
+}
 
 
 
 // END_MERGE
 
 } // end namespace hum
+
+
