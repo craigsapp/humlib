@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 20 13:19:13 PDT 2022
+// Last Modified: Thu Apr 21 09:01:15 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22282,7 +22282,6 @@ void HumdrumFileBase::clearTokenLinkInfo(void) {
 
 
 
-
 //////////////////////////////
 //
 // HumdrumFileContent::analyzeKernAccidentals -- Identify accidentals that
@@ -22358,69 +22357,66 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 		}
 		if (infile[i].isInterpretation()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (!infile[i].token(j)->isKern()) {
+				HTp token  = infile.token(i, j);
+				if (!token->isKern()) {
 					continue;
 				}
-				if (infile[i].token(j)->compare(0, 3, "*k[") == 0) {
-					track = infile[i].token(j)->getTrack();
+				if (token->compare(0, 3, "*k[") == 0) {
+					track = token->getTrack();
 					kindex = rtracks[track];
 					fillKeySignature(keysigs[kindex], *infile[i].token(j));
 					// resetting key states of current measure.  What to do if this
 					// key signature is in the middle of a measure?
-					resetDiatonicStatesWithKeySignature(dstates[kindex],
-							keysigs[kindex]);
-					resetDiatonicStatesWithKeySignature(gdstates[kindex],
-							keysigs[kindex]);
+					resetDiatonicStatesWithKeySignature(dstates[kindex], keysigs[kindex]);
+					resetDiatonicStatesWithKeySignature(gdstates[kindex], keysigs[kindex]);
 				}
 			}
 		} else if (infile[i].isBarline()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (!infile[i].token(j)->isKern()) {
+				HTp token = infile.token(i, j);
+				if (!token->isKern()) {
 					continue;
 				}
-				if (infile[i].token(j)->isInvisible()) {
+				if (token->isInvisible()) {
 					continue;
 				}
 				std::fill(firstinbar.begin(), firstinbar.end(), 1);
-				track = infile[i].token(j)->getTrack();
+				track = token->getTrack();
 				kindex = rtracks[track];
 				// reset the accidental states in dstates to match keysigs.
-				resetDiatonicStatesWithKeySignature(dstates[kindex],
-						keysigs[kindex]);
-				resetDiatonicStatesWithKeySignature(gdstates[kindex],
-						keysigs[kindex]);
+				resetDiatonicStatesWithKeySignature(dstates[kindex], keysigs[kindex]);
+				resetDiatonicStatesWithKeySignature(gdstates[kindex], keysigs[kindex]);
 			}
 		}
 
 		if (!infile[i].isData()) {
 			continue;
 		}
-
 		fill(concurrentstate.begin(), concurrentstate.end(), 0);
 		lasttrack = -1;
 
 		for (j=0; j<infile[i].getFieldCount(); j++) {
-			if (!infile[i].token(j)->isKern()) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
 				continue;
 			}
-			if (infile[i].token(j)->isNull()) {
+			if (token->isNull()) {
 				continue;
 			}
-			if (infile[i].token(j)->isRest()) {
+			if (token->isRest()) {
 				continue;
 			}
 
-			int subcount = infile[i].token(j)->getSubtokenCount();
-			track = infile[i].token(j)->getTrack();
+			int subcount = token->getSubtokenCount();
+			track = token->getTrack();
 
 			if (lasttrack != track) {
 				fill(concurrentstate.begin(), concurrentstate.end(), 0);
 			}
 			lasttrack = track;
-
 			int rindex = rtracks[track];
 			for (k=0; k<subcount; k++) {
-				HTp token = infile[i].token(j);
+				bool tienote = false;
 				string subtok = token->getSubtoken(k);
 				int b40 = Convert::kernToBase40(subtok);
 				int diatonic = Convert::kernToBase7(subtok);
@@ -22430,7 +22426,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					// Deal with extra-low notes later.
 					continue;
 				}
-				int graceQ = infile[i].token(j)->isGrace();
+				int graceQ = token->isGrace();
 				int accid = Convert::kernToAccidentalCount(subtok);
 				int hiddenQ = 0;
 				if (subtok.find("yy") == string::npos) {
@@ -22441,11 +22437,10 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 				}
 
-				if (((subtok.find("_") != string::npos) ||
-						(subtok.find("]") != string::npos))) {
-					// tied notes do not have slurs, so skip them
-					if ((accid != keysigs[rindex][diatonic % 7]) &&
-							firstinbar[rindex]) {
+				if (((subtok.find("_") != string::npos) || (subtok.find("]") != string::npos))) {
+					tienote = true;
+					// tied notes do not have accidentals, so skip them
+					if ((accid != keysigs[rindex][diatonic % 7]) && firstinbar[rindex]) {
 						// But first, prepare to force an accidental to be shown on
 						// the note immediately following the end of a tied group
 						// if the tied group crosses a barline.
@@ -22454,13 +22449,13 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 					auto loc = subtok.find('X');
 					if (loc == string::npos) {
-						continue;
+						// continue;
 					} else if (loc == 0) {
-						continue;
+						// continue;
 					} else {
 						if (!((subtok[loc-1] == '#') || (subtok[loc-1] == '-') ||
 								(subtok[loc-1] == 'n'))) {
-							continue;
+							// continue;
 						} else {
 							// an accidental should be fored at end of tie
 						}
@@ -22475,7 +22470,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int trilldiatonic = Convert::base40ToDiatonic(trillnote);
 					int trillaccid    = Convert::base40ToAccidental(trillnote);
 					if (dstates[rindex][trilldiatonic] != trillaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
+						token->setValue("auto", to_string(k),
 								"trillAccidental", to_string(trillaccid));
 						dstates[rindex][trilldiatonic] = -1000 + trillaccid;
 					}
@@ -22485,8 +22480,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int trilldiatonic = Convert::base40ToDiatonic(trillnote);
 					int trillaccid    = Convert::base40ToAccidental(trillnote);
 					if (dstates[rindex][trilldiatonic] != trillaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"trillAccidental", to_string(trillaccid));
+						token->setValue("auto", to_string(k), "trillAccidental", to_string(trillaccid));
 						dstates[rindex][trilldiatonic] = -1000 + trillaccid;
 					}
 				} else if (subtok.find("M") != string::npos) {
@@ -22495,8 +22489,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
 					int auxaccid    = Convert::base40ToAccidental(auxnote);
 					if (dstates[rindex][auxdiatonic] != auxaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"mordentUpperAccidental", to_string(auxaccid));
+						token->setValue("auto", to_string(k), "mordentUpperAccidental", to_string(auxaccid));
 						dstates[rindex][auxdiatonic] = -1000 + auxaccid;
 					}
 				} else if (subtok.find("m") != string::npos) {
@@ -22505,8 +22498,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
 					int auxaccid    = Convert::base40ToAccidental(auxnote);
 					if (dstates[rindex][auxdiatonic] != auxaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"mordentUpperAccidental", to_string(auxaccid));
+						token->setValue("auto", to_string(k), "mordentUpperAccidental", to_string(auxaccid));
 						dstates[rindex][auxdiatonic] = -1000 + auxaccid;
 					}
 				} else if (subtok.find("W") != string::npos) {
@@ -22515,7 +22507,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
 					int auxaccid    = Convert::base40ToAccidental(auxnote);
 					if (dstates[rindex][auxdiatonic] != auxaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
+						token->setValue("auto", to_string(k),
 								"mordentLowerAccidental", to_string(auxaccid));
 						dstates[rindex][auxdiatonic] = -1000 + auxaccid;
 					}
@@ -22525,13 +22517,12 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int auxdiatonic = Convert::base40ToDiatonic(auxnote);
 					int auxaccid    = Convert::base40ToAccidental(auxnote);
 					if (dstates[rindex][auxdiatonic] != auxaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
+						token->setValue("auto", to_string(k),
 								"mordentLowerAccidental", to_string(auxaccid));
 						dstates[rindex][auxdiatonic] = -1000 + auxaccid;
 					}
 
 				} else if ((loc = subtok.find("$")) != string::npos) {
-
 					int turndiatonic = Convert::base40ToDiatonic(b40);
 					// int turnaccid = Convert::base40ToAccidental(b40);
 					// inverted turn
@@ -22576,18 +22567,16 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					int uacc = Convert::base40ToAccidental(b40 + upperint);
 					int bacc = Convert::base40ToAccidental(b40 + lowerint);
 					if (uacc != upperaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
+						token->setValue("auto", to_string(k),
 								"turnUpperAccidental", to_string(uacc));
 						dstates[rindex][upperdiatonic] = -1000 + uacc;
 					}
 					if (bacc != loweraccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
+						token->setValue("auto", to_string(k),
 								"turnLowerAccidental", to_string(bacc));
 						dstates[rindex][lowerdiatonic] = -1000 + bacc;
 					}
-
 				} else if ((loc = subtok.find("S")) != string::npos) {
-
 					int turndiatonic = Convert::base40ToDiatonic(b40);
 					// int turnaccid = Convert::base40ToAccidental(b40);
 					// regular turn
@@ -22631,31 +22620,31 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 					int uacc = Convert::base40ToAccidental(b40 + upperint);
 					int bacc = Convert::base40ToAccidental(b40 + lowerint);
+
 					if (uacc != upperaccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"turnUpperAccidental", to_string(uacc));
+						token->setValue("auto", to_string(k), "turnUpperAccidental", to_string(uacc));
 						dstates[rindex][upperdiatonic] = -1000 + uacc;
 					}
 					if (bacc != loweraccid) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"turnLowerAccidental", to_string(bacc));
+						token->setValue("auto", to_string(k), "turnLowerAccidental", to_string(bacc));
 						dstates[rindex][lowerdiatonic] = -1000 + bacc;
 					}
+				}
+
+				if (tienote) {
+					continue;
 				}
 
 				if (graceQ && (accid != gdstates[rindex][diatonic])) {
 					// accidental is different from the previous state so should be
 					// printed
 					if (!hiddenQ) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"visualAccidental", "true");
+						token->setValue("auto", to_string(k), "visualAccidental", "true");
 						if (gdstates[rindex][diatonic] < -900) {
 							// this is an obligatory cautionary accidental
 							// or at least half the time it is (figure that out later)
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"obligatoryAccidental", "true");
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"cautionaryAccidental", "true");
+							token->setValue("auto", to_string(k), "obligatoryAccidental", "true");
+							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
 						}
 					}
 					gdstates[rindex][diatonic] = accid;
@@ -22669,27 +22658,21 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					// accidental is different from the previous state so should be
 					// printed, but only print if not supposed to be hidden.
 					if (!hiddenQ) {
-						infile[i].token(j)->setValue("auto", to_string(k),
-								"visualAccidental", "true");
+						token->setValue("auto", to_string(k), "visualAccidental", "true");
 						concurrentstate[diatonic] = accid;
 						if (dstates[rindex][diatonic] < -900) {
 							// this is an obligatory cautionary accidental
 							// or at least half the time it is (figure that out later)
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"obligatoryAccidental", "true");
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"cautionaryAccidental", "true");
+							token->setValue("auto", to_string(k), "obligatoryAccidental", "true");
+							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
 						}
 					}
 					dstates[rindex][diatonic] = accid;
 					gdstates[rindex][diatonic] = accid;
 
-				} else if ((accid == 0) && (subtok.find("n") != string::npos) &&
-							!hiddenQ) {
-					infile[i].token(j)->setValue("auto", to_string(k),
-							"cautionaryAccidental", "true");
-					infile[i].token(j)->setValue("auto", to_string(k),
-							"visualAccidental", "true");
+				} else if ((accid == 0) && (subtok.find("n") != string::npos) && !hiddenQ) {
+					token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
+					token->setValue("auto", to_string(k), "visualAccidental", "true");
 				} else if (subtok.find("XX") == string::npos) {
 					// The accidental is not necessary. See if there is a single "X"
 					// immediately after the accidental which means to force it to
@@ -22697,20 +22680,14 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					auto loc = subtok.find("X");
 					if ((loc != string::npos) && (loc > 0)) {
 						if (subtok[loc-1] == '#') {
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"cautionaryAccidental", "true");
-									infile[i].token(j)->setValue("auto", to_string(k),
-											"visualAccidental", "true");
+							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
+									token->setValue("auto", to_string(k), "visualAccidental", "true");
 						} else if (subtok[loc-1] == '-') {
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"cautionaryAccidental", "true");
-									infile[i].token(j)->setValue("auto", to_string(k),
-											"visualAccidental", "true");
+							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
+									token->setValue("auto", to_string(k), "visualAccidental", "true");
 						} else if (subtok[loc-1] == 'n') {
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"cautionaryAccidental", "true");
-							infile[i].token(j)->setValue("auto", to_string(k),
-									"visualAccidental", "true");
+							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
+							token->setValue("auto", to_string(k), "visualAccidental", "true");
 						}
 					}
 				}
