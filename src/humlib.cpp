@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 21 09:01:15 PDT 2022
+// Last Modified: Sat Apr 23 13:38:14 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -22449,13 +22449,13 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 					auto loc = subtok.find('X');
 					if (loc == string::npos) {
-						// continue;
+						continue;
 					} else if (loc == 0) {
-						// continue;
+						continue;
 					} else {
 						if (!((subtok[loc-1] == '#') || (subtok[loc-1] == '-') ||
 								(subtok[loc-1] == 'n'))) {
-							// continue;
+							continue;
 						} else {
 							// an accidental should be fored at end of tie
 						}
@@ -22631,9 +22631,9 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 				}
 
-				if (tienote) {
-					continue;
-				}
+				// if (tienote) {
+				// 	continue;
+				// }
 
 				if (graceQ && (accid != gdstates[rindex][diatonic])) {
 					// accidental is different from the previous state so should be

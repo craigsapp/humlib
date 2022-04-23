@@ -187,13 +187,13 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 					auto loc = subtok.find('X');
 					if (loc == string::npos) {
-						// continue;
+						continue;
 					} else if (loc == 0) {
-						// continue;
+						continue;
 					} else {
 						if (!((subtok[loc-1] == '#') || (subtok[loc-1] == '-') ||
 								(subtok[loc-1] == 'n'))) {
-							// continue;
+							continue;
 						} else {
 							// an accidental should be fored at end of tie
 						}
@@ -369,9 +369,9 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					}
 				}
 
-				if (tienote) {
-					continue;
-				}
+				// if (tienote) {
+				// 	continue;
+				// }
 
 				if (graceQ && (accid != gdstates[rindex][diatonic])) {
 					// accidental is different from the previous state so should be
