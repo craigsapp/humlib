@@ -117,6 +117,7 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 	// The last "spine" is the highest part on the system.
 	for (int i=0; i<(int)starts.size(); i++) {
 		processSpine(starts[i]);
+		//add a flipped processSpine function
 	}
 
 	infile.createLinesFromTokens();
@@ -140,32 +141,42 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 		}
 		peak_note_count += m_peakPeakCount[i];
 	}
+	//print all statistics for peak groups
 
-	if (m_infoQ) {
-		m_humdrum_text << "!!!peak_groups: " << m_count << endl;
-		m_humdrum_text << "!!!peak_notes: "  << peak_note_count << endl;
-		m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
-		int pcounter = 1;
-		for (int i=0; i<(int)m_peakIndex.size(); i++) {
-			if (m_peakIndex[i] < 0) {
-				// This group has been merged into a larger one.
-				continue;
-			}
-			m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-			m_humdrum_text << "!!!peak_group: "     << pcounter++            << endl;
-			m_humdrum_text << "!!!start_measure: "  << m_peakMeasureBegin[i] << endl;
-			m_humdrum_text << "!!!end_measure: "    << m_peakMeasureEnd[i]   << endl;
-			m_humdrum_text << "!!!group_duration: " << m_peakDuration[i].getFloat()/4.0 << endl;
-			m_humdrum_text << "!!!group_pitches:";
-			for (int j=0; j<(int)m_peakPitch[i].size(); j++) {
-				m_humdrum_text << " " << m_peakPitch[i][j];
-				m_humdrum_text << "(" << m_peakPitch[i][j]->getLineIndex() << ")";
-			}
-			m_humdrum_text << endl;
-			m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i]    << endl;
-		}
-	}
+	//if (m_infoQ) {
+  m_humdrum_text << "!!!peak_groups: " << m_count << endl;
+  m_humdrum_text << "!!!peak_notes: "  << peak_note_count << endl;
+  m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
+	//print density information for peaks in myriads
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+	m_humdrum_text << "!!!peak_note_density (myriad): " << ((double)peak_note_count / all_note_count) * 1000 << endl;
+	m_humdrum_text << "!!!peak_group_density (myriad): " << ((double)m_count / all_note_count) * 1000 << endl;
 
+	//print density information for peaks in percents
+	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+	m_humdrum_text << "!!!peak_note_density (percentage): " << ((double)peak_note_count / all_note_count) * 100 << endl;
+	m_humdrum_text << "!!!peak_group_density (percentage): " << ((double)m_count / all_note_count) * 100 << endl;
+
+  int pcounter = 1;
+  for (int i=0; i<(int)m_peakIndex.size(); i++) {
+  	if (m_peakIndex[i] < 0) {
+  		// This group has been merged into a larger one.
+  		continue;
+  	}
+  	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+  	m_humdrum_text << "!!!peak_group: "     << pcounter++            << endl;
+  	m_humdrum_text << "!!!start_measure: "  << m_peakMeasureBegin[i] << endl;
+  	m_humdrum_text << "!!!end_measure: "    << m_peakMeasureEnd[i]   << endl;
+  	m_humdrum_text << "!!!group_duration: " << m_peakDuration[i].getFloat()/4.0 << endl;
+  	m_humdrum_text << "!!!group_pitches:";
+  	for (int j=0; j<(int)m_peakPitch[i].size(); j++) {
+  		m_humdrum_text << " " << m_peakPitch[i][j];
+  		m_humdrum_text << "(" << m_peakPitch[i][j]->getLineIndex() << ")";
+  	}
+  	m_humdrum_text << endl;
+  	m_humdrum_text << "!!!group_peakcount: " << m_peakPeakCount[i]    << endl;
+  }
+	//}
 }
 
 
@@ -252,7 +263,7 @@ bool Tool_peak::checkGroupPairForMerger(int index1, int index2) {
 	HumNum start2 = m_startTime[index2];
 	HumNum end1   = m_endTime[index1];
 	HumNum end2   = m_endTime[index2];
-	
+
 	bool mergeQ = false;
 	bool flipQ  = false;
 	if (start1 < start2) {
@@ -279,7 +290,7 @@ bool Tool_peak::checkGroupPairForMerger(int index1, int index2) {
 
 	// Deactivate the second group by setting a negative index:
 	m_peakIndex[index2] *= -1;
-	
+
 	// Set the endtime of the first group to the end of the second group:
 	m_endTime[index1] = m_endTime[index2];
 
@@ -358,15 +369,13 @@ void Tool_peak::processSpine(HTp startok) {
 	if (m_rawQ) {
 		printData(notelist, midinums, peaknotes);
 	} else {
-		//markNotesInScore(notelist, peaknotes);
-
-		// Uncomment out the following line, and comment the above line,
-		// when identifyPeakSequence() is implemented:
 		markNotesInScore(peaknotelist, globalpeaknotes);
 	}
 }
 
-
+//duplicate processSpine and make flip version
+	//get midiNumbers
+	//flip midiNumbers in a function that takes in midiNumbers
 
 //////////////////////////////
 //
@@ -728,7 +737,7 @@ int Tool_peak::countNotesInScore(HumdrumFile& infile) {
 			if (token->isRest()) {
 				continue;
 			}
-			if (token->isSecondaryTiedNote()) {
+		  if (token->isSecondaryTiedNote()) {
 				continue;
 			}
 			counter++;
@@ -743,5 +752,3 @@ int Tool_peak::countNotesInScore(HumdrumFile& infile) {
 // END_MERGE
 
 } // end namespace hum
-
-
