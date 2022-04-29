@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 28 21:09:35 PDT 2022
+// Last Modified: Thu Apr 28 21:23:22 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -9351,7 +9351,7 @@ class Tool_thru : public HumTool {
 		void      processData         (HumdrumFile& infile);
 		void      usage               (const char* command);
 		void      getLabelSequence    (vector<string>& labelsequence,
-                                     const string& astring);
+		                               const string& astring);
 		int       getLabelIndex       (vector<string>& labels, string& key);
 		void      printLabelList      (HumdrumFile& infile);
 		void      printLabelInfo      (HumdrumFile& infile);
@@ -9359,11 +9359,12 @@ class Tool_thru : public HumTool {
 		int       adjustFirstBarline  (HumdrumFile& infile);
 
 	private:
-		string       m_variation = "";     // used with -v option
-		int          m_listQ = 0;          // used with -l option
-		int          m_infoQ = 0;          // used with -i option
-		int          m_keepQ = 0;          // used with -k option
-		string       m_realization = "";   // used with -r option
+		bool      m_listQ = false;    // used with -l option
+		bool      m_infoQ = false;    // used with -i option
+		bool      m_keepQ = false;    // used with -k option
+		bool      m_quietQ = false;   // used with -q option
+		string    m_variation = "";   // used with -v option
+		string    m_realization = ""; // used with -r option
 
 };
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 28 21:09:35 PDT 2022
+// Last Modified: Thu Apr 28 21:23:22 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -106147,7 +106147,7 @@ void Tool_thru::processData(HumdrumFile& infile) {
 		if (!m_keepQ) {
 			if (infile[i].isInterpretation()) {
 				if (token->compare(0, 2, "*>") == 0) {
-               if (token->find('[') != string::npos) {
+					if (token->find('[') != string::npos) {
 						continue;
 					}
 				}
@@ -106181,7 +106181,7 @@ void Tool_thru::processData(HumdrumFile& infile) {
 				if (infile[j].isInterpretation()) {
 					HTp token = infile.token(j, 0);
 					if (token->compare(0, 2, "*>") == 0) {
-                  if (token->find('[') != string::npos) {
+						if (token->find('[') != string::npos) {
 							continue;
 						}
 					}
