@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 28 19:45:36 PDT 2022
+// Last Modified: Thu Apr 28 21:09:35 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -9328,6 +9328,42 @@ class Tool_tassoize : public HumTool {
 		vector<vector<int>> m_pstates;
 		vector<vector<int>> m_kstates;
 		vector<vector<bool>> m_estates;
+
+};
+
+
+class Tool_thru : public HumTool {
+	public:
+		         Tool_thru         (void);
+		        ~Tool_thru         () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void      processFile         (HumdrumFile& infile);
+		void      initialize          (void);
+
+		void      checkOptions        (Options& opts, int argc, char* argv[]);
+		void      example             (void);
+		void      processData         (HumdrumFile& infile);
+		void      usage               (const char* command);
+		void      getLabelSequence    (vector<string>& labelsequence,
+                                     const string& astring);
+		int       getLabelIndex       (vector<string>& labels, string& key);
+		void      printLabelList      (HumdrumFile& infile);
+		void      printLabelInfo      (HumdrumFile& infile);
+		int       getBarline          (HumdrumFile& infile, int line);
+		int       adjustFirstBarline  (HumdrumFile& infile);
+
+	private:
+		string       m_variation = "";     // used with -v option
+		int          m_listQ = 0;          // used with -l option
+		int          m_infoQ = 0;          // used with -i option
+		int          m_keepQ = 0;          // used with -k option
+		string       m_realization = "";   // used with -r option
 
 };
 

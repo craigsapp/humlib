@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Mon Feb 28 11:29:18 PST 2022
+// Last Modified: Thu Apr 28 20:57:27 PDT 2022
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -62,6 +62,7 @@
 #include "tool-strophe.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
+#include "tool-thru.h"
 #include "tool-tie.h"
 #include "tool-timebase.h"
 #include "tool-transpose.h"
@@ -313,6 +314,14 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "timebase") {
 			RUNTOOL(timebase, infile, commands[i].second, status);
+		} else if (commands[i].first == "thru") {
+			RUNTOOL(thru, infile, commands[i].second, status);
+		} else if (commands[i].first == "thrux") {
+			// Humdrum Extras emulation
+			RUNTOOL(thru, infile, commands[i].second, status);
+		} else if (commands[i].first == "thruxx") {
+			// humlib cli emulation
+			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
