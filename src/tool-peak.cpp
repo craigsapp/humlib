@@ -35,7 +35,8 @@ Tool_peak::Tool_peak(void) {
 	define("d|dur|duration=d:6.0", "maximum duration between peak note attacks in whole notes");
 	define("i|info=b",             "print peak info");
 	define("p|peaks=b",            "detect only peaks");
-	define("t|troughs=b",           "detect only negative peaks");
+	define("t|troughs=b",          "detect only negative peaks");
+	define("S|not_syncopated=b",   "counts only peaks that do not have syncopation");
 }
 
 
@@ -95,6 +96,7 @@ void Tool_peak::initialize(void) {
 	m_rawQ      = getBoolean("raw-data");
 	m_peakQ     = getBoolean("peaks");
 	m_npeakQ    = getBoolean("troughs");
+	m_nsyncoQ   = getBoolean("not_syncopated");
 	m_marker    = getString("marker");
 	m_color     = getString("color");
 	m_smallRest = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
@@ -575,18 +577,23 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 		bool match = true;
 		bool synco = isSyncopated(notes[i][0]);
 		for (int j=1; j<m_peakNum; j++) {
+			synco |= isSyncopated(notes[i+j][0]);
 			if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
 				match = false;
-				synco |= isSyncopated(notes[i+j][0]);
+				//synco |= isSyncopated(notes[i+j][0]);
 				break;
 			}
 		}
 		if (!match) {
 			continue;
 		}
-		if (!synco) {
+		if ((!m_nsyncoQ) && (!synco)){
 			continue;
 		}
+		if ((m_nsyncoQ) && (synco)) {
+			continue;
+		}
+
 		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
 		if (duration.getFloat() > m_peakDur) {
 			continue;
