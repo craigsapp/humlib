@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 27 10:31:59 PDT 2022
+// Last Modified: Thu Apr 28 19:45:36 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -98337,7 +98337,6 @@ void  Tool_peak::getDurations(vector<double>& durations, vector<vector<HTp>>& no
 	for (int i=0; i<(int)notelist.size(); i++) {
 		HumNum duration = notelist[i][0]->getTiedDuration();
 		durations[i] = duration.getFloat();
-		// cerr << "DURATION FOR " << notelist[i][0] << " IS " << durations[i] << endl;
 	}
 }
 
@@ -98359,7 +98358,6 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos[i] = false;
 		}
-		//cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
 	}
 }
 
