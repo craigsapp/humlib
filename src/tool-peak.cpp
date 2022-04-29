@@ -34,6 +34,8 @@ Tool_peak::Tool_peak(void) {
 	define("n|number=i:3",         "number of high notes in a row");
 	define("d|dur|duration=d:6.0", "maximum duration between peak note attacks in whole notes");
 	define("i|info=b",             "print peak info");
+	define("p|peaks=b",            "detect only peaks");
+	define("t|troughs=b",           "detect only negative peaks");
 }
 
 
@@ -91,6 +93,8 @@ bool Tool_peak::run(HumdrumFile& infile) {
 
 void Tool_peak::initialize(void) {
 	m_rawQ      = getBoolean("raw-data");
+	m_peakQ     = getBoolean("peaks");
+	m_npeakQ    = getBoolean("troughs");
 	m_marker    = getString("marker");
 	m_color     = getString("color");
 	m_smallRest = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
@@ -116,8 +120,14 @@ void Tool_peak::processFile(HumdrumFile& infile) {
 	// The first "spine" is the lowest part on the system.
 	// The last "spine" is the highest part on the system.
 	for (int i=0; i<(int)starts.size(); i++) {
-		processSpine(starts[i]);
-		//add a flipped processSpine function
+		if (m_peakQ) {
+			processSpine(starts[i]);
+		} else if (m_npeakQ) {
+			processSpineFlipped(starts[i]);
+		} else {
+			processSpine(starts[i]);
+			processSpineFlipped(starts[i]);
+		}
 	}
 
 	infile.createLinesFromTokens();
@@ -373,9 +383,55 @@ void Tool_peak::processSpine(HTp startok) {
 	}
 }
 
-//duplicate processSpine and make flip version
-	//get midiNumbers
-	//flip midiNumbers in a function that takes in midiNumbers
+void Tool_peak::processSpineFlipped(HTp startok) {
+	// notelist is a two dimensional array of notes.   The
+	// first dimension is a list of the note attacks in time
+	// (plus rests), and the second dimension is for a list of the
+	// tied notes after the first one (this is so that we can
+	// highlight both the starting note and any tied notes to that
+	// starting note later).
+	vector<vector<HTp>> notelist = getNoteList(startok);
+
+	// midinums: MIDI note numbers for each note (with rests being 0).
+	vector<int> midinums = getMidiNumbers(notelist);
+	midinums = flipMidiNumbers(midinums);
+
+	// peaknotes: True = the note is a local high pitch.
+	vector<bool> peaknotes(midinums.size(), false);
+	identifyLocalPeaks(peaknotes, midinums);
+
+	// peaknotelist: Only the local peak notes which will be extracted
+	// from all note list in the getLocalPeakNotes() function.
+	vector<vector<HTp>> peaknotelist;
+	getLocalPeakNotes(peaknotelist, notelist, peaknotes);
+
+	// peakmidinums: MIDI note numbers for peaknotelist notes.
+	vector<int> peakmidinums = getMidiNumbers(peaknotelist);
+
+	// globalpeaknotes: boolean list that indicates if a local
+	// peak note is part of a longer sequence of peak notes.
+	// This variable will be filled in by identifyPeakSequence().
+	vector<bool> globalpeaknotes(peaknotelist.size(), false);
+	identifyPeakSequence(globalpeaknotes, peakmidinums, peaknotelist);
+
+	if (m_rawQ) {
+		printData(notelist, midinums, peaknotes);
+	} else {
+		markNotesInScore(peaknotelist, globalpeaknotes);
+	}
+}
+
+
+vector<int> Tool_peak::flipMidiNumbers(vector<int>& midinums) {
+	for (int i=0; i<(int)midinums.size(); i++) {
+		if (midinums[i] == 0) {
+			continue;
+		}
+		int flippedMidiNum = (midinums[i] * -1) + 128;
+		midinums[i] = flippedMidiNum;
+	}
+	return midinums;
+}
 
 //////////////////////////////
 //
@@ -517,13 +573,18 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 
 	for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
 		bool match = true;
+		bool synco = isSyncopated(notes[i][0]);
 		for (int j=1; j<m_peakNum; j++) {
 			if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
 				match = false;
+				synco |= isSyncopated(notes[i+j][0]);
 				break;
 			}
 		}
-		if (match != true) {
+		if (!match) {
+			continue;
+		}
+		if (!synco) {
 			continue;
 		}
 		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
@@ -688,7 +749,6 @@ void  Tool_peak::getDurations(vector<double>& durations, vector<vector<HTp>>& no
 	for (int i=0; i<(int)notelist.size(); i++) {
 		HumNum duration = notelist[i][0]->getTiedDuration();
 		durations[i] = duration.getFloat();
-		// cerr << "DURATION FOR " << notelist[i][0] << " IS " << durations[i] << endl;
 	}
 }
 
@@ -710,9 +770,49 @@ void  Tool_peak::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos[i] = false;
 		}
-		//cerr << "Position FOR " << notelist[i][0] << " IS " << metpos[i] << " ON LINE " << notelist[i][0]->getLineNumber() << endl;
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_peak::getMetricLevel --
+//
+
+int  Tool_peak::getMetricLevel(HTp token) {
+	HumNum beat = token->getDurationFromBarline();
+	if (!beat.isInteger()) { // anything less than quarter note level
+		return -1;
+	}
+	if (beat.getNumerator() % 4 == 0) { // whole note level
+		return 2;
+	}
+	if (beat.getNumerator() % 2 == 0) { // half note level
+		return 1;
+	} else { // quarter note level
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::isSyncopated --
+//
+
+bool  Tool_peak::isSyncopated(HTp token) {
+	HumNum dur = token->getTiedDuration();
+	double logDur = log2(dur.getFloat());
+	int metLev = getMetricLevel(token);
+	if (logDur > metLev) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 
 //////////////////////////////

@@ -36,13 +36,15 @@ class Tool_peak : public HumTool {
 		void                          initialize         (void);
 		void                          processFile        (HumdrumFile& infile, Options& options);
 		void                          processSpine       (HTp startok);
+		void 													processSpineFlipped(HTp startok);
 		void                          identifyLocalPeaks (std::vector<bool>& peaknotes,
 		                                                  std::vector<int>& notelist);
 		void                          getDurations       (vector<double>& durations,
 		                                                  vector<vector<HTp>>& notelist);
 		void                          getBeat            (vector<bool>& metpos,
 		                                                  vector<vector<HTp>>& notelist);
-
+		int                           getMetricLevel     (HTp token);
+		bool                          isSyncopated       (HTp token);
 		void                          getLocalPeakNotes  (vector<vector<HTp>>& newnotelist,
 		                                                  vector<vector<HTp>>& oldnotelist,
 		                                                  vector<bool>& peaknotes);
@@ -59,10 +61,13 @@ class Tool_peak : public HumTool {
 		                                                  vector<bool>& ispeak);
 		void                          mergeOverlappingPeaks(void);
 		bool                          checkGroupPairForMerger(int index1, int index2);
-      int                           countNotesInScore   (HumdrumFile& infile);
+    int                           countNotesInScore   (HumdrumFile& infile);
+		std::vector<int> 							flipMidiNumbers     (vector<int>& midinums);
 
 	private:
 		bool m_rawQ             = false;         // don't print score (only analysis)
+		bool m_peakQ            = false;         // analyze only peaks
+		bool m_npeakQ           = false;         // analyze only negative peaks (troughs)
 		std::string m_marker    = "@";           // marker to label peak notes in score
 		std::string m_color     = "red";         // color to mark peak notes
 		double      m_smallRest = 4.0;           // Ignore rests that are 1 whole note or less
