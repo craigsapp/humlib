@@ -161,8 +161,8 @@ void Tool_peak::processFile(HumdrumFile& infile) {
   m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
 	//print density information for peaks per mille
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-	m_humdrum_text << "!!!peak_note_density: " << ((double)peak_note_count / all_note_count) * 1000 << " per mille " << endl;
-	m_humdrum_text << "!!!peak_group_density: " << ((double)m_count / all_note_count) * 1000 << " per mille " << endl;
+	m_humdrum_text << "!!!peak_note_density: " << ((double)peak_note_count / all_note_count) * 1000 << " permil " << endl;
+	m_humdrum_text << "!!!peak_group_density: " << ((double)m_count / all_note_count) * 1000 << " permil " << endl;
 
   int pcounter = 1;
   for (int i=0; i<(int)m_peakIndex.size(); i++) {
