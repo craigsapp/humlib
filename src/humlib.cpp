@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  2 20:51:49 PDT 2022
+// Last Modified: Fri Apr 29 11:07:15 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -97816,15 +97816,10 @@ void Tool_peak::processFile(HumdrumFile& infile) {
   m_humdrum_text << "!!!peak_groups: " << m_count << endl;
   m_humdrum_text << "!!!peak_notes: "  << peak_note_count << endl;
   m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
-	//print density information for peaks in myriads
+	//print density information for peaks per mille
 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-	m_humdrum_text << "!!!peak_note_density (myriad): " << ((double)peak_note_count / all_note_count) * 1000 << endl;
-	m_humdrum_text << "!!!peak_group_density (myriad): " << ((double)m_count / all_note_count) * 1000 << endl;
-
-	//print density information for peaks in percents
-	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-	m_humdrum_text << "!!!peak_note_density (percentage): " << ((double)peak_note_count / all_note_count) * 100 << endl;
-	m_humdrum_text << "!!!peak_group_density (percentage): " << ((double)m_count / all_note_count) * 100 << endl;
+	m_humdrum_text << "!!!peak_note_density: " << ((double)peak_note_count / all_note_count) * 1000 << " permil " << endl;
+	m_humdrum_text << "!!!peak_group_density: " << ((double)m_count / all_note_count) * 1000 << " permil " << endl;
 
   int pcounter = 1;
   for (int i=0; i<(int)m_peakIndex.size(); i++) {
@@ -98245,11 +98240,19 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 			continue;
 		}
 		if ((!m_nsyncoQ) && (!synco)){
+<<<<<<< HEAD
 			continue;
 		}
 		if ((m_nsyncoQ) && (synco)) {
 			continue;
 		}
+=======
+			continue;
+		}
+		if ((m_nsyncoQ) && (synco)) {
+			continue;
+		}
+>>>>>>> e90e32d291471d052776dae906dc472052914ae4
 
 		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
 		if (duration.getFloat() > m_peakDur) {
