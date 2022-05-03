@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 29 11:07:15 PDT 2022
+// Last Modified: Mon May  2 21:48:43 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -98240,19 +98240,11 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 			continue;
 		}
 		if ((!m_nsyncoQ) && (!synco)){
-<<<<<<< HEAD
 			continue;
 		}
 		if ((m_nsyncoQ) && (synco)) {
 			continue;
 		}
-=======
-			continue;
-		}
-		if ((m_nsyncoQ) && (synco)) {
-			continue;
-		}
->>>>>>> e90e32d291471d052776dae906dc472052914ae4
 
 		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
 		if (duration.getFloat() > m_peakDur) {
