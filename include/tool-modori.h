@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Dec 16 11:16:33 PST 2020
-// Last Modified: Wed Dec 16 11:16:37 PST 2020
+// Last Modified: Mon May  2 21:56:24 PDT 2022
 // Filename:      tool-modori.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-modori.h
 // Syntax:        C++11; humlib
@@ -22,35 +22,36 @@ namespace hum {
 
 class Tool_modori : public HumTool {
 	public:
-		         Tool_modori         (void);
-		        ~Tool_modori         () {};
+		         Tool_modori                  (void);
+		        ~Tool_modori                  () {};
 
-		bool     run                 (HumdrumFileSet& infiles);
-		bool     run                 (HumdrumFile& infile);
-		bool     run                 (const string& indata, ostream& out);
-		bool     run                 (HumdrumFile& infile, ostream& out);
+		bool     run                          (HumdrumFileSet& infiles);
+		bool     run                          (HumdrumFile& infile);
+		bool     run                          (const string& indata, ostream& out);
+		bool     run                          (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     processFile         (HumdrumFile& infile);
-		void     initialize          (void);
-		void     printInfo           (void);
-		void     switchModernOriginal(HumdrumFile& infile);
-		bool     swapKeyStyle        (HTp one, HTp two);
-		bool     swapClefStyle       (HTp one, HTp two);
-		bool     flipMensurationStyle(HTp token);
+		void     processFile                  (HumdrumFile& infile);
+		void     initialize                   (void);
+		void     printInfo                    (void);
+		void     switchModernOriginal         (HumdrumFile& infile);
+		bool     swapKeyStyle                 (HTp one, HTp two);
+		bool     swapClefStyle                (HTp one, HTp two);
+		bool     flipMensurationStyle         (HTp token);
 		void     convertKeySignatureToModern  (HTp token);
 		void     convertKeySignatureToOriginal(HTp token);
 		void     convertKeySignatureToRegular (HTp token);
 		void     convertClefToModern          (HTp token);
 		void     convertClefToOriginal        (HTp token);
 		void     convertClefToRegular         (HTp token);
-		int      getPairedReference  (int index, vector<string>& keys);
-		void     storeModOriReferenceRecords(HumdrumFile& infile);
+		int      getPairedReference           (int index, vector<string>& keys);
+		void     storeModOriReferenceRecords  (HumdrumFile& infile);
 		void     processExclusiveInterpretationLine(HumdrumFile& infile, int line);
-		bool     processStaffCompanionSpines(std::vector<HTp> tokens);
-		bool     processStaffSpines(vector<HTp>& tokens);
-		void     updateLoMo          (HumdrumFile& infile);
-		void     processLoMo         (HTp lomo);
+		bool     processStaffCompanionSpines  (std::vector<HTp> tokens);
+		bool     processStaffSpines           (vector<HTp>& tokens);
+		void     updateLoMo                   (HumdrumFile& infile);
+		void     processLoMo                  (HTp lomo);
+		void     printModoriOutput            (HumdrumFile& infile);
 
 	private:
 		bool m_modernQ        = false; // -m option: show modern key/clef/time signatures

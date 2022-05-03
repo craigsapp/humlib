@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  2 21:48:43 PDT 2022
+// Last Modified: Mon May  2 22:36:15 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -85504,7 +85504,7 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 	}
 
 	switchModernOriginal(infile);
-	m_humdrum_text << infile;
+	printModoriOutput(infile);
 }
 
 
@@ -85935,6 +85935,88 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 
 	updateLoMo(infile);
 }
+
+
+//////////////////////////////
+//
+// Tool_modori::printModoriOutput --
+//
+
+void Tool_modori::printModoriOutput(HumdrumFile& infile) {
+	string state;
+	if (m_modernQ) {
+
+		// convert to modern
+		for (int i=0; i<infile.getLineCount(); i++) {
+			if (infile[i].isCommentGlobal()) {
+				HTp token = infile.token(i, 0);
+				if (*token == "!!LO:MO:mod") {
+				   state = "mod";
+					m_humdrum_text << token << endl;
+					continue;
+				} else if (*token == "!!LO:MO:ori") {
+				   state = "ori";
+					m_humdrum_text << token << endl;
+					continue;
+				} else if (*token == "!!LO:MO:end") {
+					state = "";
+					m_humdrum_text << token << endl;
+					continue;
+				}
+			}
+			if (state == "mod") {
+				// Remove global comment prefix "!! ".  Complain if not there.
+				if (infile[i].compare(0, 3, "!! ") != 0) {
+					cerr << "Error: line does not start with \"!! \":\t" << infile[i] << endl;
+				} else {
+					m_humdrum_text << infile[i].substr(3) << endl;
+				}
+			} else if (state == "ori") {
+				// Add global comment prefix "!! ".
+				m_humdrum_text << "!! " << infile[i] << endl;
+			} else {
+				m_humdrum_text << infile[i] << endl;
+			}
+		}
+
+	} else if (m_originalQ) {
+
+		// convert to original
+		for (int i=0; i<infile.getLineCount(); i++) {
+			if (infile[i].isCommentGlobal()) {
+				HTp token = infile.token(i, 0);
+				if (*token == "!!LO:MO:mod") {
+				   state = "mod";
+					m_humdrum_text << token << endl;
+					continue;
+				} else if (*token == "!!LO:MO:ori") {
+				   state = "ori";
+					m_humdrum_text << token << endl;
+					continue;
+				} else if (*token == "!!LO:MO:end") {
+					state = "";
+					m_humdrum_text << token << endl;
+					continue;
+				}
+			}
+			if (state == "ori") {
+				// Remove global comment prefix "!! ".  Complain if not there.
+				if (infile[i].compare(0, 3, "!! ") != 0) {
+					cerr << "Error: line does not start with \"!! \":\t" << infile[i] << endl;
+				} else {
+					m_humdrum_text << infile[i].substr(3) << endl;
+				}
+			} else if (state == "mod") {
+				// Add global comment prefix "!! ".
+				m_humdrum_text << "!! " << infile[i] << endl;
+			} else {
+				m_humdrum_text << infile[i] << endl;
+			}
+		}
+
+	}
+}
+
 
 
 //////////////////////////////
