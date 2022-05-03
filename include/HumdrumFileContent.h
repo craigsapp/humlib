@@ -89,7 +89,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-note.cpp
 		void   analyzeCrossStaffStemDirections (void);
 		void   analyzeCrossStaffStemDirections (HTp kernstart);
-
+		int    getNoteCount               (void);
 		int    hasPickup                  (void);
 
 		// in HumdrumFileContent-barline.cpp

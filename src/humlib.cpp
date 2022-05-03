@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 28 21:23:22 PDT 2022
+// Last Modified: Mon May  2 20:51:49 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -23790,6 +23790,65 @@ void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
 		curr2->setValue("auto", "stem.dir", "-1");
 		curr2 = curr2->getNextToken();
 	}
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::getNoteCount -- Returns the number of notes in **kern spines.
+//    could be expanded to **mens, and kern-like sorts of spines.  Also could be
+//    expanded to all staff-like spines, or specific spines.
+//
+
+int HumdrumFileContent::getNoteCount(void) {
+	HumdrumFileContent& infile = *this;
+	int counter = 0;
+	
+	int scount = infile.getStrandCount();
+	for (int i=0; i<scount; i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send = infile.getStrandEnd(i);
+		HTp current = sstart;
+		while (current && (current != send)) {
+			if (!current->isData()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isNull()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isRest()) {
+				current = current->getNextToken();
+				continue;
+			}
+			int subcount = current->getSubtokenCount();
+			if (subcount == 1) {
+				if (!current->isSecondaryTiedNote()) {
+					counter++;
+				}
+			} else {
+				vector<string> subtokens = current->getSubtokens();
+				for (int i=0; i<(int)subtokens.size(); i++) {
+					if (subtokens[i].find("_") != string::npos) {
+						continue;
+					}
+					if (subtokens[i].find("]") != string::npos) {
+						continue;
+					}
+					if (subtokens[i].find("r") != string::npos) {
+						continue;
+					}
+					counter++;
+				}
+			}
+			current = current->getNextToken();
+		}
+	}
+	return counter;
 }
 
 
@@ -72529,6 +72588,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(spinetrace, infile, commands[i].second, status);
 		} else if (commands[i].first == "strophe") {
 			RUNTOOL(strophe, infile, commands[i].second, status);
+		} else if (commands[i].first == "synco") {
+			RUNTOOL(synco, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {
@@ -97631,7 +97692,8 @@ Tool_peak::Tool_peak(void) {
 	define("d|dur|duration=d:6.0", "maximum duration between peak note attacks in whole notes");
 	define("i|info=b",             "print peak info");
 	define("p|peaks=b",            "detect only peaks");
-	define("t|troughs=b",           "detect only negative peaks");
+	define("t|troughs=b",          "detect only negative peaks");
+	define("S|not_syncopated=b",   "counts only peaks that do not have syncopation");
 }
 
 
@@ -97691,6 +97753,7 @@ void Tool_peak::initialize(void) {
 	m_rawQ      = getBoolean("raw-data");
 	m_peakQ     = getBoolean("peaks");
 	m_npeakQ    = getBoolean("troughs");
+	m_nsyncoQ   = getBoolean("not_syncopated");
 	m_marker    = getString("marker");
 	m_color     = getString("color");
 	m_smallRest = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
@@ -98171,18 +98234,23 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 		bool match = true;
 		bool synco = isSyncopated(notes[i][0]);
 		for (int j=1; j<m_peakNum; j++) {
+			synco |= isSyncopated(notes[i+j][0]);
 			if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
 				match = false;
-				synco |= isSyncopated(notes[i+j][0]);
+				//synco |= isSyncopated(notes[i+j][0]);
 				break;
 			}
 		}
 		if (!match) {
 			continue;
 		}
-		if (!synco) {
+		if ((!m_nsyncoQ) && (!synco)){
 			continue;
 		}
+		if ((m_nsyncoQ) && (synco)) {
+			continue;
+		}
+
 		HumNum duration = timestamps[i + m_peakNum - 1] - timestamps[i];
 		if (duration.getFloat() > m_peakDur) {
 			continue;
@@ -104766,6 +104834,216 @@ void Tool_strophe::displayStropheVariants(HumdrumFile& infile) {
 }
 
 
+
+
+
+
+
+/////////////////////////////////
+//
+// Tool_synco::Tool_synco -- Set the recognized options for the tool.
+//
+
+Tool_synco::Tool_synco(void) {
+}
+
+
+/////////////////////////////////
+//
+// Tool_synco::run -- Do the main work of the tool.
+//
+
+bool Tool_synco::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_synco::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_synco::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_synco::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	if (m_hasSyncoQ) {
+		infile.createLinesFromTokens();
+		m_humdrum_text << infile;
+		m_humdrum_text << "!!!RDF**kern: @ = marked note, color=dodgerblue" << endl;
+	}
+	double notecount = infile.getNoteCount();
+	double density = m_scount / (double)notecount;
+	double percent =  int(density * 10000.0 + 0.5) / 100.0;
+	m_humdrum_text << "!!!total_notes: " << notecount << endl;
+	m_humdrum_text << "!!!syncopated_notes: " << m_scount << endl;
+	m_humdrum_text << "!!!syncopated_density: " << percent << "%" << endl;
+
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_synco::initialize(void) {
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::processFile --
+//
+
+void Tool_synco::processFile(HumdrumFile& infile) {
+	int scount = infile.getStrandCount();
+	for (int i=0; i<scount; i++) {
+		HTp stok = infile.getStrandStart(i);
+		if (!stok->isKern()) {
+			continue;
+		}
+		HTp etok = infile.getStrandEnd(i);
+		processStrand(stok, etok);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::processStrand --
+//
+
+void Tool_synco::processStrand(HTp stok, HTp etok) {
+	HTp current = stok;
+	while (current && (current != etok)) {
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isRest()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (current->isSecondaryTiedNote()) {
+			current = current->getNextToken();
+			continue;
+		}
+		if (isSyncopated(current)) {
+			m_hasSyncoQ = true;
+			m_scount++;
+			markNote(current);
+		}
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::isSyncopated --
+//
+
+bool Tool_synco::isSyncopated(HTp token) {
+	double metlev   = getMetricLevel(token);
+	HumNum duration = token->getTiedDuration();
+	double logDur   = log2(duration.getFloat());
+	if (metlev == 2) {
+		return false;
+	}
+	if (logDur > metlev) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::getMetricLevel -- Assuming whole-note beats for now.
+//
+
+double Tool_synco::getMetricLevel(HTp token) {
+	HumNum durbar = token->getDurationFromBarline();
+	if (!durbar.isInteger()) {
+		return -1.0;
+	}
+	if (durbar.getNumerator() % 4 == 0) {
+		return 2.0;
+	}
+	if (durbar.getNumerator() % 2 == 0) {
+		return 1.0;
+	}
+	return 0.0;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_synco::markNote -- Currently ignoring chords.
+//
+
+void Tool_synco::markNote(HTp token) {
+	token->setText(token->getText() + "@");
+	if ((token->find('[') != string::npos) || (token->find('_') != string::npos)) {
+		HTp current = token->getNextToken();
+		while (current) {
+			if (!current->isData()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isNull()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isRest()) {
+				break;
+			}
+			if (current->find("_") != string::npos) {
+				current->setText(current->getText() + "@");
+			} else if (current->find("]") != string::npos) {
+				current->setText(current->getText() + "@");
+				break;
+			}
+			current = current->getNextToken();
+		}
+	}
+}
 
 
 

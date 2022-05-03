@@ -101,10 +101,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HTp           getStrandStop     (int sindex, int index) { return getStrandEnd(sindex, index); }
 		int           getStrandCount    (int spineindex);
 
-		HTp           getStrand                    (int index)
-		                                        { return getStrandStart(index); }
-		HTp           getStrand                    (int sindex, int index)
-		                                { return getStrandStart(sindex, index); }
+		HTp           getStrand         (int index) { return getStrandStart(index); }
+		HTp           getStrand         (int sindex, int index) { return getStrandStart(sindex, index); }
 
 		// strophe functionality (located in src/HumdrumFileStructure-strophe.cpp)
 		bool         analyzeStrophes    (void);
@@ -165,8 +163,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		void          fillInNegativeStartTimes     (void);
 		void          assignLineDurations          (void);
 		void          assignStrandsToTokens        (void);
-		std::set<HumNum>   getNonZeroLineDurations      (void);
-		std::set<HumNum>   getPositiveLineDurations     (void);
+		std::set<HumNum> getNonZeroLineDurations   (void);
+		std::set<HumNum> getPositiveLineDurations  (void);
 		void          processLocalParametersForStrand(int index);
 		bool          processLocalParametersForTrack (HTp starttok, HTp current);
 		void          checkForLocalParameters      (HTp token, HTp current);

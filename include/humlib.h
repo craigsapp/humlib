@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 28 21:23:22 PDT 2022
+// Last Modified: Mon May  2 20:51:49 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -2351,10 +2351,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		HTp           getStrandStop     (int sindex, int index) { return getStrandEnd(sindex, index); }
 		int           getStrandCount    (int spineindex);
 
-		HTp           getStrand                    (int index)
-		                                        { return getStrandStart(index); }
-		HTp           getStrand                    (int sindex, int index)
-		                                { return getStrandStart(sindex, index); }
+		HTp           getStrand         (int index) { return getStrandStart(index); }
+		HTp           getStrand         (int sindex, int index) { return getStrandStart(sindex, index); }
 
 		// strophe functionality (located in src/HumdrumFileStructure-strophe.cpp)
 		bool         analyzeStrophes    (void);
@@ -2415,8 +2413,8 @@ class HumdrumFileStructure : public HumdrumFileBase {
 		void          fillInNegativeStartTimes     (void);
 		void          assignLineDurations          (void);
 		void          assignStrandsToTokens        (void);
-		std::set<HumNum>   getNonZeroLineDurations      (void);
-		std::set<HumNum>   getPositiveLineDurations     (void);
+		std::set<HumNum> getNonZeroLineDurations   (void);
+		std::set<HumNum> getPositiveLineDurations  (void);
 		void          processLocalParametersForStrand(int index);
 		bool          processLocalParametersForTrack (HTp starttok, HTp current);
 		void          checkForLocalParameters      (HTp token, HTp current);
@@ -2492,7 +2490,7 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		// in HumdrumFileContent-note.cpp
 		void   analyzeCrossStaffStemDirections (void);
 		void   analyzeCrossStaffStemDirections (HTp kernstart);
-
+		int    getNoteCount               (void);
 		int    hasPickup                  (void);
 
 		// in HumdrumFileContent-barline.cpp
@@ -8621,6 +8619,7 @@ class Tool_peak : public HumTool {
 		bool m_rawQ             = false;         // don't print score (only analysis)
 		bool m_peakQ            = false;         // analyze only peaks
 		bool m_npeakQ           = false;         // analyze only negative peaks (troughs)
+		bool m_nsyncoQ          = false;         // analyze peaks without syncopation
 		std::string m_marker    = "@";           // marker to label peak notes in score
 		std::string m_color     = "red";         // color to mark peak notes
 		double      m_smallRest = 4.0;           // Ignore rests that are 1 whole note or less
@@ -9275,6 +9274,32 @@ class Tool_strophe : public HumTool {
 		std::string  m_marker;     // character for marking strophes
 		std::string  m_color;      // color for strphe notes/rests
       std::set<std::string> m_variants;  // used for --list option
+
+};
+
+
+class Tool_synco : public HumTool {
+	public:
+		         Tool_synco        (void);
+		        ~Tool_synco        () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void      processFile      (HumdrumFile& infile);
+		void      initialize       (void);
+
+		void      processStrand    (HTp stok, HTp etok);
+		bool      isSyncopated     (HTp token);
+		double    getMetricLevel   (HTp token);
+		void      markNote         (HTp token);
+
+	private:
+		bool      m_hasSyncoQ = false;
+		int       m_scount    = 0;
 
 };
 

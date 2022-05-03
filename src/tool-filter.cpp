@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Thu Apr 28 20:57:27 PDT 2022
+// Last Modified: Sat Apr 30 12:05:40 PDT 2022
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -60,6 +60,7 @@
 #include "tool-slurcheck.h"
 #include "tool-spinetrace.h"
 #include "tool-strophe.h"
+#include "tool-synco.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
 #include "tool-thru.h"
@@ -300,6 +301,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(spinetrace, infile, commands[i].second, status);
 		} else if (commands[i].first == "strophe") {
 			RUNTOOL(strophe, infile, commands[i].second, status);
+		} else if (commands[i].first == "synco") {
+			RUNTOOL(synco, infile, commands[i].second, status);
 		} else if (commands[i].first == "tabber") {
 			RUNTOOL(tabber, infile, commands[i].second, status);
 		} else if (commands[i].first == "tassoize") {

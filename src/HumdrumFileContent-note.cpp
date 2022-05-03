@@ -1,6 +1,6 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Nov  5 13:25:49 CET 2018
-// Last Modified: Mon Nov  5 13:25:51 CET 2018
+// Last Modified: Sat Apr 30 12:15:31 PDT 2022
 // Filename:      HumdrumFileContent-note.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/HumdrumFileContent-note.cpp
 // Syntax:        C++11; humlib
@@ -335,6 +335,65 @@ void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
 		curr2->setValue("auto", "stem.dir", "-1");
 		curr2 = curr2->getNextToken();
 	}
+}
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::getNoteCount -- Returns the number of notes in **kern spines.
+//    could be expanded to **mens, and kern-like sorts of spines.  Also could be
+//    expanded to all staff-like spines, or specific spines.
+//
+
+int HumdrumFileContent::getNoteCount(void) {
+	HumdrumFileContent& infile = *this;
+	int counter = 0;
+	
+	int scount = infile.getStrandCount();
+	for (int i=0; i<scount; i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+		HTp send = infile.getStrandEnd(i);
+		HTp current = sstart;
+		while (current && (current != send)) {
+			if (!current->isData()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isNull()) {
+				current = current->getNextToken();
+				continue;
+			}
+			if (current->isRest()) {
+				current = current->getNextToken();
+				continue;
+			}
+			int subcount = current->getSubtokenCount();
+			if (subcount == 1) {
+				if (!current->isSecondaryTiedNote()) {
+					counter++;
+				}
+			} else {
+				vector<string> subtokens = current->getSubtokens();
+				for (int i=0; i<(int)subtokens.size(); i++) {
+					if (subtokens[i].find("_") != string::npos) {
+						continue;
+					}
+					if (subtokens[i].find("]") != string::npos) {
+						continue;
+					}
+					if (subtokens[i].find("r") != string::npos) {
+						continue;
+					}
+					counter++;
+				}
+			}
+			current = current->getNextToken();
+		}
+	}
+	return counter;
 }
 
 
