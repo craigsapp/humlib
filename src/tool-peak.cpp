@@ -502,10 +502,16 @@ void Tool_peak::getLocalPeakNotes(vector<vector<HTp>>& newnotelist,
 
 void Tool_peak::identifyLocalPeaks(vector<bool>& peaknotes, vector<int>& midinums) { //changed to midinums from 'notelist'
 	for (int i=1; i<(int)midinums.size() - 1; i++) {
-		if ((midinums[i - 1] <= 0) || (midinums[i + 1] <= 0)) { //not next to a rest
+		if ((midinums[i - 1] <= 0) && (midinums[i + 1] <= 0)) { //not sandwiched by rests
 			continue;
 		} else if (midinums[i] <= 0) {
 			continue;
+		}
+		if ((midinums[i] > midinums[i - 1]) && (midinums[i + 1] == 0)) { //allow rest after note
+			peaknotes[i] = 1;
+		}
+		if ((midinums[i - 1] == 0) && (midinums[i] > midinums[i + 1])) { //allow rest before note
+			peaknotes[i] = 1;
 		}
 		if ((midinums[i] > midinums[i - 1]) && (midinums[i] > midinums[i + 1])) { //check neighboring notes
 			peaknotes[i] = 1;
@@ -808,6 +814,9 @@ bool  Tool_peak::isSyncopated(HTp token) {
 	HumNum dur = token->getTiedDuration();
 	double logDur = log2(dur.getFloat());
 	int metLev = getMetricLevel(token);
+	if (metLev >= 2) { // no syncopations occuring on whole-note level or higher
+		return false;
+	}
 	if (logDur > metLev) {
 		return true;
 	} else {
