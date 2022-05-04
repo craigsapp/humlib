@@ -56,6 +56,8 @@ class HumTool : public Options {
 		ostream&      getError        (ostream& out);
 		void          setError        (const string& message);
 
+		void          finally         (void) { };
+
 	protected:
 		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
 		std::stringstream m_json_text;     // output text in JSON syntax.

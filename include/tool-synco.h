@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Apr 30 10:41:35 PDT 2022
-// Last Modified: Sat Apr 30 10:41:38 PDT 2022
+// Last Modified: Wed May  4 01:03:52 PDT 2022
 // Filename:      tool-synco.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-synco.h
 // Syntax:        C++11; humlib
@@ -40,8 +40,17 @@ class Tool_synco : public HumTool {
 		void      markNote         (HTp token);
 
 	private:
-		bool      m_hasSyncoQ = false;
-		int       m_scount    = 0;
+		bool        m_hasSyncoQ = false;
+		bool        m_infoQ     = false;
+		bool        m_fileQ     = false;
+		bool        m_allQ      = false;
+		int         m_scount    = 0;
+		std::string m_color     = "skyblue";
+
+		// for -a option
+		int         m_scountTotal    = 0;
+		int         m_notecountTotal = 0;
+		int         m_fileCount      = 0;
 
 };
 
