@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  2 22:36:15 PDT 2022
+// Last Modified: Tue May  3 18:21:15 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4086,7 +4086,7 @@ class PixelColor {
 		void         setRedF        (float value);
 		void         setGreenF      (float value);
 		void         setBlueF       (float value);
-		void         setColor       (PixelColor color);
+		void         setColor       (PixelColor& color);
 		PixelColor&  setHue         (float value);
 		PixelColor&  setTriHue      (float value);
 		PixelColor&  makeGrey       (void);
@@ -4095,21 +4095,28 @@ class PixelColor {
 		PixelColor&  setGreyNormalized(double value);
 		int          operator>      (int number);
 		int          operator<      (int number);
-		int          operator==     (PixelColor color);
-		int          operator!=     (PixelColor color);
+		int          operator==     (PixelColor& color);
+		int          operator!=     (PixelColor& color);
 		PixelColor&  operator=      (PixelColor color);
 		PixelColor&  operator=      (int value);
-		PixelColor   operator+      (PixelColor color);
+		PixelColor   operator+      (PixelColor& color);
 		PixelColor&  operator+=     (int number);
-		PixelColor   operator-      (PixelColor color);
+		PixelColor   operator-      (PixelColor& color);
 		PixelColor&  operator*=     (double number);
-		PixelColor   operator*      (PixelColor color);
+		PixelColor   operator*      (PixelColor& color);
 		PixelColor   operator*      (double color);
 		PixelColor   operator*      (int color);
 		PixelColor   operator/      (double number);
 		PixelColor   operator/      (int number);
 
-		static PixelColor getColor  (const std::string& colorstring);
+		PixelColor&  rgb2hsi        (void);
+		PixelColor&  hsi2rgb        (void);
+		PixelColor   getHsi         (void);
+		PixelColor   getRgb         (void);
+		std::string  getHexColor    (void);
+
+		PixelColor   getColor       (const std::string& colorstring);
+		static PixelColor   mix     (PixelColor& color1, PixelColor& color2);
 
 		void         writePpm6      (std::ostream& out);
 		void         writePpm3      (std::ostream& out);
@@ -4118,6 +4125,7 @@ class PixelColor {
 		unsigned char   Red;
 		unsigned char   Green;
 		unsigned char   Blue;
+		// maybe add opacity byte or option byte to fill out 4 byte space.
 
 	private:
 		float   charToFloat         (int value);
