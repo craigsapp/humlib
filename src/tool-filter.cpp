@@ -48,6 +48,7 @@
 #include "tool-myank.h"
 #include "tool-peak.h"
 #include "tool-phrase.h"
+#include "tool-popctext.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
@@ -268,6 +269,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(peak, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
+		} else if (commands[i].first == "popctext") {
+			RUNTOOL(popctext, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "rid") {
