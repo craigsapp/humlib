@@ -36,6 +36,7 @@
 #include "tool-hproof.h"
 #include "tool-humdiff.h"
 #include "tool-humsheet.h"
+#include "tool-humtr.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
 #include "tool-kernview.h"
@@ -48,7 +49,6 @@
 #include "tool-myank.h"
 #include "tool-peak.h"
 #include "tool-phrase.h"
-#include "tool-popctext.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
@@ -238,6 +238,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(hproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "humsheet") {
 			RUNTOOL(humsheet, infile, commands[i].second, status);
+		} else if (commands[i].first == "humtr") {
+			RUNTOOL(humtr, infile, commands[i].second, status);
 		} else if (commands[i].first == "kernview") {
 			RUNTOOL(kernview, infile, commands[i].second, status);
 		} else if (commands[i].first == "shed") {
@@ -269,8 +271,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(peak, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
-		} else if (commands[i].first == "popctext") {
-			RUNTOOL(popctext, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "rid") {
