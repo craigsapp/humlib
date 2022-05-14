@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May 14 04:14:34 PDT 2022
+// Last Modified: Sat May 14 04:30:30 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -98505,7 +98505,7 @@ Tool_peak::Tool_peak(void) {
 	define("i|info=b",             "print peak info");
 	define("p|peaks=b",            "detect only peaks");
 	define("t|troughs=b",          "detect only negative peaks");
-	define("S|not_syncopated=b",   "counts only peaks that do not have syncopation");
+	define("A|not_accented=b",     "counts only peaks that do not have melodic accentation");
 }
 
 
@@ -98562,17 +98562,17 @@ bool Tool_peak::run(HumdrumFile& infile) {
 //
 
 void Tool_peak::initialize(void) {
-	m_rawQ      = getBoolean("raw-data");
-	m_peakQ     = getBoolean("peaks");
-	m_npeakQ    = getBoolean("troughs");
-	m_nsyncoQ   = getBoolean("not_syncopated");
-	m_marker    = getString("marker");
-	m_color     = getString("color");
-	m_smallRest = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
-	m_peakNum   = getInteger("number");
-	m_peakDur   = getInteger("duration") * 4.0;    // convert to quarter notes
-	m_infoQ     = getBoolean("info");
-	m_count     = 0;
+	m_rawQ        = getBoolean("raw-data");
+	m_peakQ       = getBoolean("peaks");
+	m_npeakQ      = getBoolean("troughs");
+	m_naccentedQ  = getBoolean("not_accented");
+	m_marker      = getString("marker");
+	m_color       = getString("color");
+	m_smallRest   = getDouble("ignore-rest") * 4.0;  // convert to quarter notes
+	m_peakNum     = getInteger("number");
+	m_peakDur     = getInteger("duration") * 4.0;    // convert to quarter notes
+	m_infoQ       = getBoolean("info");
+	m_count       = 0;
 }
 
 
@@ -99045,22 +99045,21 @@ void Tool_peak::identifyPeakSequence(vector<bool>& globalpeaknotes, vector<int>&
 
 	for (int i=0; i<(int)peakmidinums.size() - m_peakNum; i++) {
 		bool match = true;
-		bool synco = isSyncopated(notes[i][0]);
+		bool accented = isMelodicallyAccented(notes[i][0]);
 		for (int j=1; j<m_peakNum; j++) {
-			synco |= isSyncopated(notes[i+j][0]);
+			accented |= isMelodicallyAccented(notes[i+j][0]);
 			if (peakmidinums[i+j] != peakmidinums[i+j-1]) {
 				match = false;
-				//synco |= isSyncopated(notes[i+j][0]);
 				break;
 			}
 		}
 		if (!match) {
 			continue;
 		}
-		if ((!m_nsyncoQ) && (!synco)){
+		if ((!m_naccentedQ) && (!accented)){
 			continue;
 		}
-		if ((m_nsyncoQ) && (synco)) {
+		if ((m_naccentedQ) && (accented)) {
 			continue;
 		}
 
@@ -99270,6 +99269,46 @@ int  Tool_peak::getMetricLevel(HTp token) {
 	} else { // quarter note level
 		return 0;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_peak::isMelodicallyAccented --
+//
+
+bool  Tool_peak::isMelodicallyAccented(HTp token) {
+	return hasLeapBefore(token) || isSyncopated(token);
+}
+
+
+//////////////////////////////
+//
+// Tool_peak::hasLeapBefore --
+//
+
+bool  Tool_peak::hasLeapBefore(HTp token) {
+	HTp current = token->getPreviousToken();
+	int startNote = token->getMidiPitch();
+	while (current) {
+		if (!current->isData()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (current->isRest()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		int testNote = current->getMidiPitch();
+		int interval = startNote - testNote;
+		return interval > 2;
+	}
+	return false;
 }
 
 

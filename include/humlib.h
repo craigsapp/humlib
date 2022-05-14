@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May 14 04:14:34 PDT 2022
+// Last Modified: Sat May 14 04:30:30 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -8653,6 +8653,8 @@ class Tool_peak : public HumTool {
 		void                          getBeat            (vector<bool>& metpos,
 		                                                  vector<vector<HTp>>& notelist);
 		int                           getMetricLevel     (HTp token);
+		bool  									      isMelodicallyAccented (HTp token);
+		bool                          hasLeapBefore      (HTp token);
 		bool                          isSyncopated       (HTp token);
 		void                          getLocalPeakNotes  (vector<vector<HTp>>& newnotelist,
 		                                                  vector<vector<HTp>>& oldnotelist,
@@ -8677,7 +8679,7 @@ class Tool_peak : public HumTool {
 		bool m_rawQ             = false;         // don't print score (only analysis)
 		bool m_peakQ            = false;         // analyze only peaks
 		bool m_npeakQ           = false;         // analyze only negative peaks (troughs)
-		bool m_nsyncoQ          = false;         // analyze peaks without syncopation
+		bool m_naccentedQ       = false;         // analyze peaks without melodic accentation
 		std::string m_marker    = "@";           // marker to label peak notes in score
 		std::string m_color     = "red";         // color to mark peak notes
 		double      m_smallRest = 4.0;           // Ignore rests that are 1 whole note or less
