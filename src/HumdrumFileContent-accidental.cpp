@@ -156,6 +156,18 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 			for (k=0; k<subcount; k++) {
 				bool tienote = false;
 				string subtok = token->getSubtoken(k);
+				if (subcount > 1) {
+					// Rests in chords represent unsounding notes.
+					// Rests can have pitch, but this is treated as
+					// Diatonic pitch which does not involve accidentals,
+					// so convert to pitch-like so that accidentals are
+					// processed on these notes.
+					for (int m=0; m<(int)subtok.size(); m++) {
+						if (subtok[m] == 'r') {
+							subtok[m] = 'R';
+						}
+					}
+				}
 				int b40 = Convert::kernToBase40(subtok);
 				int diatonic = Convert::kernToBase7(subtok);
 				int octaveadjust = token->getValueInt("auto", "ottava");
