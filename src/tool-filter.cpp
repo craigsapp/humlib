@@ -47,7 +47,7 @@
 #include "tool-modori.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
-#include "tool-peak.h"
+#include "tool-cmr.h"
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
@@ -222,6 +222,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
 			RUNTOOL(cint, infile, commands[i].second, status);
+		} else if (commands[i].first == "cmr") {
+			RUNTOOL(cmr, infile, commands[i].second, status);
 		} else if (commands[i].first == "composite") {
 			RUNTOOL(composite, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
@@ -267,8 +269,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
-		} else if (commands[i].first == "peak") {
-			RUNTOOL(peak, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
