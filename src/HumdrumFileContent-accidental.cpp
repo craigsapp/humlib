@@ -154,7 +154,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 			lasttrack = track;
 			int rindex = rtracks[track];
 			for (k=0; k<subcount; k++) {
-				bool tienote = false;
+				// bool tienote = false;
 				string subtok = token->getSubtoken(k);
 				if (subcount > 1) {
 					// Rests in chords represent unsounding notes.
@@ -188,7 +188,7 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 				}
 
 				if (((subtok.find("_") != string::npos) || (subtok.find("]") != string::npos))) {
-					tienote = true;
+					// tienote = true;
 					// tied notes do not have accidentals, so skip them
 					if ((accid != keysigs[rindex][diatonic % 7]) && firstinbar[rindex]) {
 						// But first, prepare to force an accidental to be shown on

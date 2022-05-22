@@ -139,8 +139,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     allSameBarlineStyle       (void);
 
 
-		// pitch-related functions:
-
+		// pitch-related functions (in HumdrumToken-midi.cpp):
 		int              getMidiPitch         (void);
 		void             getMidiPitches       (std::vector<int>& output);
 		std::vector<int> getMidiPitches       (void);
@@ -156,6 +155,23 @@ class HumdrumToken : public std::string, public HumHash {
 		std::vector<int> getMidiPitchesResolveNullSortHL (void);
 		void             getMidiPitchesResolveNullSortLH (std::vector<int>& output);
 		std::vector<int> getMidiPitchesResolveNullSortLH (void);
+
+		// pitch-related functions (in HumdrumToken-base40.cpp):
+		int              getBase40Pitch         (void);
+		void             getBase40Pitches       (std::vector<int>& output);
+		std::vector<int> getBase40Pitches       (void);
+		void             getBase40PitchesSortHL (std::vector<int>& output);
+		std::vector<int> getBase40PitchesSortHL (void);
+		void             getBase40PitchesSortLH (std::vector<int>& output);
+		std::vector<int> getBase40PitchesSortLH (void);
+
+		int              getBase40PitchResolveNull         (void);
+		void             getBase40PitchesResolveNull       (std::vector<int>& output);
+		std::vector<int> getBase40PitchesResolveNull       (void);
+		void             getBase40PitchesResolveNullSortHL (std::vector<int>& output);
+		std::vector<int> getBase40PitchesResolveNullSortHL (void);
+		void             getBase40PitchesResolveNullSortLH (std::vector<int>& output);
+		std::vector<int> getBase40PitchesResolveNullSortLH (void);
 
 		// duration-related functions:
 		HumNum   getDuration               (void);
