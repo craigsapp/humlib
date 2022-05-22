@@ -137,7 +137,6 @@ $license
 
 #include <stdarg.h>
 #include <string.h>
-#include <math.h>
 
 #include <algorithm>
 #include <cctype>
@@ -157,6 +156,10 @@ $license
 #include <string>
 #include <utility>
 #include <vector>
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
 
 using std::cerr;
 using std::cin;
