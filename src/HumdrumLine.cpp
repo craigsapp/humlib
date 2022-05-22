@@ -2245,7 +2245,7 @@ bool HumdrumLine::allSameBarlineStyle(void) {
 //
 
 bool HumdrumLine::hasDataStraddle(void) {
-	return this->getValueInt("auto", "straddlingData");
+	return (this->getValueInt("auto", "straddlingData") ? true : false);
 }
 
 
