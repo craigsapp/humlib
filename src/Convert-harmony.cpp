@@ -234,7 +234,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	}
 
 	int rootdeg = -1; // chord root scale degree in key
-	int degalt = 0;   // degree alteration
+	// int degalt = 0;   // degree alteration
 
 	vector<char> chars(256, 0);
 	for (auto ch : cbase) {
@@ -242,7 +242,7 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 	}
 
 	rootdeg = -1; // invalid scale degree
-	degalt = chars['#'] - chars['-'];
+	// degalt = chars['#'] - chars['-'];
 
 	int vcount = chars['V'] + chars['v'];
 	int icount = chars['I'] + chars['i'];
@@ -267,16 +267,16 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 				if (chars['N']) {
 					// Neapolitan (flat-second scale degree)
 					rootdeg = 1; // -II
-					degalt += -1; // -II
+					// degalt += -1; // -II
 				} else if (chars['L'] || chars['F'] || chars['G']) {
 					// augmented 6th chord on -VII
 					rootdeg = 5;
 					// fixed to -VI of major scale:
 					if (newkeymode == 0) { // major
-						degalt += -1;
+						// degalt += -1;
 					} else { // minor
 						// already at -VI in minor
-						degalt += 0;
+						// degalt += 0;
 					}
 				}
 				break;
