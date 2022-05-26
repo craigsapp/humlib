@@ -37,13 +37,26 @@ class Tool_modori : public HumTool {
 		void     switchModernOriginal         (HumdrumFile& infile);
 		bool     swapKeyStyle                 (HTp one, HTp two);
 		bool     swapClefStyle                (HTp one, HTp two);
+		bool     swapInstrumentAbbreviationStyle(HTp one, HTp two);
+		bool     swapInstrumentNameStyle      (HTp one, HTp two);
 		bool     flipMensurationStyle         (HTp token);
+
 		void     convertKeySignatureToModern  (HTp token);
 		void     convertKeySignatureToOriginal(HTp token);
 		void     convertKeySignatureToRegular (HTp token);
+
 		void     convertClefToModern          (HTp token);
 		void     convertClefToOriginal        (HTp token);
 		void     convertClefToRegular         (HTp token);
+
+		void     convertInstrumentNameToModern   (HTp token);
+		void     convertInstrumentNameToOriginal (HTp token);
+		void     convertInstrumentNameToRegular  (HTp token);
+
+		void     convertInstrumentAbbreviationToModern   (HTp token);
+		void     convertInstrumentAbbreviationToOriginal (HTp token);
+		void     convertInstrumentAbbreviationToRegular  (HTp token);
+
 		int      getPairedReference           (int index, vector<string>& keys);
 		void     storeModOriReferenceRecords  (HumdrumFile& infile);
 		void     processExclusiveInterpretationLine(HumdrumFile& infile, int line);
@@ -64,10 +77,14 @@ class Tool_modori : public HumTool {
 		bool m_nolyricsQ      = false; // -L option: don't change **text
 		bool m_nolotextQ      = false; // -T option: don't change !LO:TX
 		bool m_norefsQ        = false; // -R option: don't change !LO:TX
+		bool m_nolabelsQ      = false; // -L option: don't change *I"
+		bool m_nolabelAbbrsQ  = false; // -A option: don't change *I"
 
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_keys;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_clefs;
 		std::vector<std::map<HumNum, std::vector<HTp>>> m_mensurations;
+		std::vector<std::map<HumNum, std::vector<HTp>>> m_labels;
+		std::vector<std::map<HumNum, std::vector<HTp>>> m_labelAbbrs;
 		std::vector<std::pair<HTp, HTp>> m_references;
 		std::vector<HTp> m_lyrics;
 		std::vector<HTp> m_lotext;

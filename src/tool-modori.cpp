@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Sep 28 12:08:25 PDT 2020
-// Last Modified: Mon May  2 21:56:16 PDT 2022
+// Last Modified: Thu May 26 05:52:08 PDT 2022
 // Filename:      tool-modori.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-modori.cpp
 // Syntax:        C++11; humlib
@@ -10,16 +10,24 @@
 // Description:   Switch between original and modern
 //                clefs/keysig/mensuration/time sig.
 //
-//                *k[] == key signature (displayed)
+//                *k[]  == key signature (displayed)
 //                *ok[] == original key signature (implies *k[] is modern)
 //                *mk[] == modern key signature (implies *k[] is original)
 //
-//                *clefG2 == key signature (displayed)
+//                *clefG2  == key signature (displayed)
 //                *oclefG2 == original clef (implies *clefG2 is modern)
 //                *mclefG2 == modern clef (implies *clefG2 is original)
 //
-//                *met(C) == mensuration (displayed)
-//                *omet(C) == original mensuration (time sig. is instead)
+//                *met(C)  == mensuration (displayed)
+//                *omet(C) == original mensuration (paired time sig. is displayed instead)
+//
+//                *I"ALTUS  == Displayed name of part
+//                *oI"ALTUS == original name for part
+//                *mI"ALTUS == modern name for part
+//
+//                *I'A   == Abbreviated part label.
+//                *oI'A. == Original abbreviated part label.
+//                *mI'A  == Modern abbreviated part label.
 //
 //                **mod-text == modern text (converts to **text with -m option)
 //                **ori-text == original text (converts to **text with -o option)
@@ -47,7 +55,8 @@ Tool_modori::Tool_modori(void) {
 	define("m|modern=b",    "prepare score for modern style");
 	define("o|original=b", "prepare score for original style");
 	define("d|info=b", "display key/clef/mensuration information");
-
+	define("I|no-instrument-name|no-instrument-names=b", "Do not change part labels");
+	define("A|no-instrument-abbreviation|no-instrument-abbreviations=b", "Do not change part label abbreviations");
 	define("C|no-clef|no-clefs=b", "Do not change clefs");
 	define("K|no-key|no-keys=b", "Do not change key signatures");
 	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
@@ -123,6 +132,8 @@ void Tool_modori::initialize(void) {
 	m_nolyricsQ      = getBoolean("no-lyrics");
 	m_norefsQ        = getBoolean("no-references");
 	m_nomensurationQ = getBoolean("no-mensuration");
+	m_nolabelsQ      = getBoolean("no-instrument-names");
+	m_nolabelAbbrsQ  = getBoolean("no-instrument-abbreviations");
 }
 
 
@@ -134,6 +145,8 @@ void Tool_modori::initialize(void) {
 
 void Tool_modori::processFile(HumdrumFile& infile) {
 	m_keys.clear();
+	m_labels.clear();
+	m_labelAbbrs.clear();
 	m_clefs.clear();
 	m_mensurations.clear();
 	m_references.clear();
@@ -142,6 +155,8 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 
 	int maxtrack = infile.getMaxTrack();
 	m_keys.resize(maxtrack+1);
+	m_labels.resize(maxtrack+1);
+	m_labelAbbrs.resize(maxtrack+1);
 	m_clefs.resize(maxtrack+1);
 	m_mensurations.resize(maxtrack+1);
 	m_references.reserve(1000);
@@ -191,12 +206,28 @@ void Tool_modori::processFile(HumdrumFile& infile) {
 				m_keys[track][timeval].push_back(token);
 			} else if (token->isModernKeySignature()) {
 				m_keys[track][timeval].push_back(token);
+
+			} else if (token->isInstrumentName()) {
+				m_labels[track][timeval].push_back(token);
+			} else if (token->isOriginalInstrumentName()) {
+				m_labels[track][timeval].push_back(token);
+			} else if (token->isModernInstrumentName()) {
+				m_labels[track][timeval].push_back(token);
+
+			} else if (token->isInstrumentAbbreviation()) {
+				m_labelAbbrs[track][timeval].push_back(token);
+			} else if (token->isOriginalInstrumentAbbreviation()) {
+				m_labelAbbrs[track][timeval].push_back(token);
+			} else if (token->isModernInstrumentAbbreviation()) {
+				m_labelAbbrs[track][timeval].push_back(token);
+
 			} else if (token->isClef()) {
 				m_clefs[track][timeval].push_back(token);
 			} else if (token->isOriginalClef()) {
 				m_clefs[track][timeval].push_back(token);
 			} else if (token->isModernClef()) {
 				m_clefs[track][timeval].push_back(token);
+
 			} else if (token->isMensuration()) {
 				m_mensurations[track][timeval].push_back(token);
 			} else if (token->isOriginalMensuration()) {
@@ -516,6 +547,40 @@ void Tool_modori::switchModernOriginal(HumdrumFile& infile) {
 					continue;
 				}
 				bool status = swapKeyStyle(it->second.at(0), it->second.at(1));
+				if (status) {
+					int line = it->second.at(0)->getLineIndex();
+					changed.insert(line);
+					line = it->second.at(1)->getLineIndex();
+					changed.insert(line);
+				}
+			}
+		}
+	}
+
+	if (!m_nolabelsQ) {
+		for (int t=1; t<(int)m_labels.size(); ++t) {
+			for (auto it = m_labels.at(t).begin(); it != m_labels.at(t).end(); ++it) {
+				if (it->second.size() != 2) {
+					continue;
+				}
+				bool status = swapInstrumentNameStyle(it->second.at(0), it->second.at(1));
+				if (status) {
+					int line = it->second.at(0)->getLineIndex();
+					changed.insert(line);
+					line = it->second.at(1)->getLineIndex();
+					changed.insert(line);
+				}
+			}
+		}
+	}
+
+	if (!m_nolabelAbbrsQ) {
+		for (int t=1; t<(int)m_labelAbbrs.size(); ++t) {
+			for (auto it = m_labelAbbrs.at(t).begin(); it != m_labelAbbrs.at(t).end(); ++it) {
+				if (it->second.size() != 2) {
+					continue;
+				}
+				bool status = swapInstrumentAbbreviationStyle(it->second.at(0), it->second.at(1));
 				if (status) {
 					int line = it->second.at(0)->getLineIndex();
 					changed.insert(line);
@@ -930,6 +995,126 @@ bool Tool_modori::swapKeyStyle(HTp one, HTp two) {
 
 //////////////////////////////
 //
+// Tool_modori::swapInstrumentNameStyle -- Returns true if swapped.
+//
+
+bool Tool_modori::swapInstrumentNameStyle(HTp one, HTp two) {
+	bool mtype1 = false;
+	bool mtype2 = false;
+	bool otype1 = false;
+	bool otype2 = false;
+	bool ktype1 = false;
+	bool ktype2 = false;
+	bool output = false;
+
+	if (one->isInstrumentName()) {
+		ktype1 = true;
+	} else if (one->isModernInstrumentName()) {
+		mtype1 = true;
+	} else if (one->isOriginalInstrumentName()) {
+		otype1 = true;
+	}
+
+	if (two->isInstrumentName()) {
+		ktype2 = true;
+	} else if (two->isModernInstrumentName()) {
+		mtype2 = true;
+	} else if (two->isOriginalInstrumentName()) {
+		otype2 = true;
+	}
+
+	if (m_modernQ) {
+		// Show the modern instrument name.  If one name is *mI" and the
+		// other is *I" then change *mI" to *I" and *I" to *oI" respectively.
+		if (ktype1 && mtype2) {
+			convertInstrumentNameToOriginal(one);
+			convertInstrumentNameToRegular(two);
+			output = true;
+		} else if (mtype1 && ktype2) {
+			convertInstrumentNameToRegular(one);
+			convertInstrumentNameToOriginal(two);
+			output = true;
+		}
+	} else if (m_originalQ) {
+		// Show the original key.  If one key is *ok and the
+		// other is *k then change *ok to *k and *k to *mk respectively.
+		if (ktype1 && otype2) {
+			convertInstrumentNameToModern(one);
+			convertInstrumentNameToRegular(two);
+			output = true;
+		} else if (otype1 && ktype2) {
+			convertInstrumentNameToRegular(one);
+			convertInstrumentNameToModern(two);
+			output = true;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::swapInstrumentAbbreviationStyle -- Returns true if swapped.
+//
+
+bool Tool_modori::swapInstrumentAbbreviationStyle(HTp one, HTp two) {
+	bool mtype1 = false;
+	bool mtype2 = false;
+	bool otype1 = false;
+	bool otype2 = false;
+	bool ktype1 = false;
+	bool ktype2 = false;
+	bool output = false;
+
+	if (one->isInstrumentAbbreviation()) {
+		ktype1 = true;
+	} else if (one->isModernInstrumentAbbreviation()) {
+		mtype1 = true;
+	} else if (one->isOriginalInstrumentAbbreviation()) {
+		otype1 = true;
+	}
+
+	if (two->isInstrumentAbbreviation()) {
+		ktype2 = true;
+	} else if (two->isModernInstrumentAbbreviation()) {
+		mtype2 = true;
+	} else if (two->isOriginalInstrumentAbbreviation()) {
+		otype2 = true;
+	}
+
+	if (m_modernQ) {
+		// Show the modern instrument name.  If one name is *mI" and the
+		// other is *I" then change *mI" to *I" and *I" to *oI" respectively.
+		if (ktype1 && mtype2) {
+			convertInstrumentAbbreviationToOriginal(one);
+			convertInstrumentAbbreviationToRegular(two);
+			output = true;
+		} else if (mtype1 && ktype2) {
+			convertInstrumentAbbreviationToRegular(one);
+			convertInstrumentAbbreviationToOriginal(two);
+			output = true;
+		}
+	} else if (m_originalQ) {
+		// Show the original key.  If one key is *ok and the
+		// other is *k then change *ok to *k and *k to *mk respectively.
+		if (ktype1 && otype2) {
+			convertInstrumentAbbreviationToModern(one);
+			convertInstrumentAbbreviationToRegular(two);
+			output = true;
+		} else if (otype1 && ktype2) {
+			convertInstrumentAbbreviationToRegular(one);
+			convertInstrumentAbbreviationToModern(two);
+			output = true;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_modori::swapClefStyle -- Returns true if swapped.
 //
 
@@ -1006,6 +1191,38 @@ void Tool_modori::convertKeySignatureToModern(HTp token) {
 
 //////////////////////////////
 //
+// Tool_modori::convertInstrumentNameToModern --
+//
+
+void Tool_modori::convertInstrumentNameToModern(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I\"(.*)")) {
+		string text = "*mI\"";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::convertInstrumentAbbreviationToModern --
+//
+
+void Tool_modori::convertInstrumentAbbreviationToModern(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I'(.*)")) {
+		string text = "*mI'";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_modori::convertKeySignatureToOriginal --
 //
 
@@ -1022,6 +1239,38 @@ void Tool_modori::convertKeySignatureToOriginal(HTp token) {
 
 //////////////////////////////
 //
+// Tool_modori::convertInstrumentNameToOriginal --
+//
+
+void Tool_modori::convertInstrumentNameToOriginal(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I\"(.*)")) {
+		string text = "*oI\"";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::convertInstrumentAbbreviationToOriginal --
+//
+
+void Tool_modori::convertInstrumentAbbreviationToOriginal(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I'(.*)")) {
+		string text = "*oI'";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_modori::convertKeySignatureToRegular --
 //
 
@@ -1029,6 +1278,38 @@ void Tool_modori::convertKeySignatureToRegular(HTp token) {
 	HumRegex hre;
 	if (hre.search(token, "^\\*[mo]?k(.*)")) {
 		string text = "*k";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::convertInstrumentNameToRegular --
+//
+
+void Tool_modori::convertInstrumentNameToRegular(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I\"(.*)")) {
+		string text = "*I\"";
+		text += hre.getMatch(1);
+		token->setText(text);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_modori::convertInstrumentAbbreviationToRegular --
+//
+
+void Tool_modori::convertInstrumentAbbreviationToRegular(HTp token) {
+	HumRegex hre;
+	if (hre.search(token, "^\\*[mo]?I'(.*)")) {
+		string text = "*I'";
 		text += hre.getMatch(1);
 		token->setText(text);
 	}

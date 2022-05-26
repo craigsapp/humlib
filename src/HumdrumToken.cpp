@@ -1720,11 +1720,71 @@ bool HumdrumToken::isInstrumentName(void) {
 
 //////////////////////////////
 //
+// HumdrumToken::isModernInstrumentName -- True if a modern instrument name token.
+//
+
+bool HumdrumToken::isModernInstrumentName(void) {
+	if (this->compare(0, 4, "*mI\"") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isOriginalInstrumentName -- True if an original instrument name token.
+//
+
+bool HumdrumToken::isOriginalInstrumentName(void) {
+	if (this->compare(0, 4, "*oI\"") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::isInstrumentAbbreviation -- True if an instrument abbreviation token.
 //
 
 bool HumdrumToken::isInstrumentAbbreviation(void) {
 	if (this->compare(0, 3, "*I'") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isModernInstrumentAbbreviation -- True if a modern instrument abbreviation token.
+//
+
+bool HumdrumToken::isModernInstrumentAbbreviation(void) {
+	if (this->compare(0, 4, "*mI'") != 0) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isOriginalInstrumentAbbreviation -- True if a original instrument abbreviation token.
+//
+
+bool HumdrumToken::isOriginalInstrumentAbbreviation(void) {
+	if (this->compare(0, 4, "*oI'") != 0) {
 		return false;
 	} else {
 		return true;
