@@ -1665,11 +1665,28 @@ bool HumdrumToken::isMensurationSymbol(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isOriginalMensurationSymbol -- True if a **kern mensuration Symbol.
+// HumdrumToken::isOriginalMensurationSymbol -- True if a **kern mensuration symbol, original form.
 //
 
 bool HumdrumToken::isOriginalMensurationSymbol(void) {
 	if (this->compare(0, 6, "*omet(") != 0) {
+		return false;
+	}
+	if ((*this)[this->size()-1] != ')') {
+		return false;
+	}
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isModernMensurationSymbol -- True if a **kern mensuration symbol, modern form.
+//
+
+bool HumdrumToken::isModernMensurationSymbol(void) {
+	if (this->compare(0, 6, "*mmet(") != 0) {
 		return false;
 	}
 	if ((*this)[this->size()-1] != ')') {

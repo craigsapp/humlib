@@ -49,6 +49,10 @@ class Tool_modori : public HumTool {
 		void     convertClefToOriginal        (HTp token);
 		void     convertClefToRegular         (HTp token);
 
+		void     convertMensurationToModern   (HTp token);
+		void     convertMensurationToOriginal (HTp token);
+		void     convertMensurationToRegular  (HTp token);
+
 		void     convertInstrumentNameToModern   (HTp token);
 		void     convertInstrumentNameToOriginal (HTp token);
 		void     convertInstrumentNameToRegular  (HTp token);
@@ -65,6 +69,7 @@ class Tool_modori : public HumTool {
 		void     updateLoMo                   (HumdrumFile& infile);
 		void     processLoMo                  (HTp lomo);
 		void     printModoriOutput            (HumdrumFile& infile);
+		bool     swapMensurationStyle         (HTp one, HTp two);
 
 	private:
 		bool m_modernQ        = false; // -m option: show modern key/clef/time signatures
