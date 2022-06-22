@@ -93,6 +93,7 @@ class Tool_composite : public HumTool {
 		void        fixTiedNotes              (std::vector<string>& data, HumdrumFile& infile);
 		void        doOnsetAnalysisCoincidence(vector<double>& output,
 		                                       vector<double>& inputA, vector<double>& inputB);
+		void        checkForAutomaticGrouping (HumdrumFile& infile);
 
 		// Numeric analysis functions:
 		void        doNumericAnalyses         (HumdrumFile& infile);

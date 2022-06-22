@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Jul 14 01:03:07 CEST 2019
-// Last Modified: Fri Jan  7 15:33:12 PST 2022
+// Last Modified: Thu Jun  9 15:23:15 PDT 2022
 // Filename:      tool-composite.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-composite.cpp
 // Syntax:        C++11; humlib
@@ -285,6 +285,10 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		return;
 	}
 
+	if (m_groupsQ) {
+		checkForAutomaticGrouping(infile);
+	}
+
 	if (m_coincidenceQ) {
 		analyzeCoincidenceRhythms(infile);
 	}
@@ -296,6 +300,120 @@ void Tool_composite::processFile(HumdrumFile& infile) {
 		doNumericAnalyses(infile);
 	}
 	prepareOutput(infile);
+}
+
+
+
+//////////////////////////////
+//
+// checkForAutomaticGrouping --
+//
+
+void Tool_composite::checkForAutomaticGrouping(HumdrumFile& infile) {
+
+	bool hasGroups = false;
+	int interpline = -1;
+	int manipline = -1;
+	int dataline = -1;
+	int barline = -1;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if ((barline < 0) && infile[i].isBarline()) {
+			barline = i;
+		}
+		if ((dataline < 0) && infile[i].isData()) {
+			dataline = i;
+		}
+		if ((manipline < 0) && infile[i].isManipulator()) {
+			HTp token = infile.token(i, 0);
+			if ((!token->isExclusiveInterpretation()) && (!token->isTerminator())) {
+				manipline = i;
+			}
+			continue;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		if ((dataline < 0) && (barline < 0) && (manipline < 0)) {
+			// Put below last interp line
+			HTp current = infile.token(i, 0);
+			current = current->getNextToken();
+			if (current) {
+				interpline = current->getLineIndex();
+			} else {
+				interpline = i;
+			}
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->compare(0, 5, "*grp:") == 0) {
+				hasGroups = 1;
+				break;
+			}
+		}
+		if (hasGroups) {
+			break;
+		}
+	}
+	if (hasGroups) {
+		return;
+	}
+
+	// No Groupings found in score, so add *grp:A to the first kern spine
+	// and *grp:B to the second kern spine (from left-to-right). 
+	
+	vector<HTp> sstarts;
+	infile.getSpineStartList(sstarts, "**kern");
+	if (sstarts.size() != 2) {
+		return;
+	}
+
+	// Add a new interpretation line before the first data line, but also before
+	// the first barline and also before the first manipline.
+	int addline = dataline;
+	if (addline < 0) {
+		// no data?
+		return;
+	}
+	if ((addline > barline) && (barline > 0)) {
+		addline = barline;
+	}
+	if ((addline > manipline) && (manipline > 0)) {
+		addline = manipline;
+	}
+	if ((addline > interpline) && (interpline > 0)) {
+		addline = interpline;
+	}
+
+	if (addline < 0) {
+		// something strange
+		return;
+	}
+	
+	infile.insertNullInterpretationLineAboveIndex(addline);
+	for (int i=0; i< (int)sstarts.size(); i++) {
+		int track = sstarts[i]->getTrack();
+		for (int j=0; j<infile[addline].getFieldCount(); j++) {
+			HTp token = infile.token(addline, j);
+			int jtrack = token->getTrack();
+			if (track != jtrack) {
+				continue;
+			}
+			if (i == 0) {
+				token->setText("*grp:A");
+			} else if (i == 1) {
+				token->setText("*grp:B");
+			}
+			break;
+		}
+	}
+	infile[addline].createLineFromTokens();
 }
 
 
@@ -392,7 +510,6 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 
 	HumdrumFile output;
 	output.readString(analysis.str());
-
 	stringstream tempout;
 
 	addStaffInfo(output, infile);
@@ -403,13 +520,17 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 		output[i].createLineFromTokens();
 	}
 
+	HumRegex hre;
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 
 		if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
 			string labelLine = generateVerseLabelLine(output, infile, i);
 			if (!labelLine.empty()) {
-				tempout << labelLine;
-				tempout << endl;
+				if (!hre.search(labelLine, "^[*\t]+$")) {
+					tempout << labelLine;
+					tempout << endl;
+				}
 			}
 		}
 

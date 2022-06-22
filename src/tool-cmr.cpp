@@ -20,6 +20,8 @@ namespace hum {
 
 // START_MERGE
 
+double cmr_note_info::m_syncopationWeight = 1.0;
+double cmr_note_info::m_leapWeight = 0.5;
 
 /////////////////////////////////
 //
@@ -37,6 +39,8 @@ Tool_cmr::Tool_cmr(void) {
 	define("p|cmrs=b",             "detect only positive cmrs");
 	define("t|troughs=b",          "detect only negative cmrs");
 	define("A|not-accented=b",     "counts only cmrs that do not have melodic accentation");
+	define("s|syncopation-weight=d:1.0","weight for syncopated notes");
+	define("leap|leap-weight=d:0.5",    "weight for leapng notes");
 	define("l|local-peaks=b",      "mark local peaks");
 	define("L|only-local-peaks=b", "mark local peaks only");
 }
@@ -107,6 +111,9 @@ void Tool_cmr::initialize(void) {
 
 	m_marker       = getString("marker");
 	m_color        = getString("color");
+
+	cmr_note_info::m_syncopationWeight = getDouble("syncopation-weight");
+	cmr_note_info::m_leapWeight = getDouble("leap-weight");
 
 	m_smallRest    = getDouble("ignore-rest") * 4.0;  // convert from whole notes to quarter notes
 	m_cmrNum       = getInteger("number");
@@ -192,6 +199,14 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 	int all_note_count = countNotesInScore(infile);
 
 	int cmr_note_count = 0;
+
+	/*
+
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		cmr_note_count += m_noteGroups[i].getNoteCount();
+	}
+
+	*/
 	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
 		if (m_cmrIndex[i] < 0) {
 			continue;
@@ -210,6 +225,11 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 	m_humdrum_text << "!!!cmr_group_density: " << ((double)m_count / all_note_count) * 1000 << " permil" << endl;
 
 	int pcounter = 1;
+	/* 
+		for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		
+		}
+	*/
 	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
 		if (m_cmrIndex[i] < 0) {
 			// This group has been merged into a larger one.

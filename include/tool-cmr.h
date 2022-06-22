@@ -21,6 +21,92 @@ namespace hum {
 
 // START_MERGE
 
+class cmr_note_info {
+
+	public:
+		cmr_note_info(void) {
+			clear();
+		}
+
+		void clear(void) {
+			m_cmrPitch       = NULL;
+			m_hasSyncopation = false;
+			m_hasLeapBefore  = false;
+			m_cmrMeasureBegin= -1;
+			m_cmrMeasureEnd  = -1;
+		}
+
+		double getNoteStrength(void) {
+			double output = 1.0;
+			if (m_hasSyncopation) {
+				output += m_syncopationWeight;
+			}
+			if (m_hasLeapBefore) {
+				output += m_leapWeight;
+			}
+			return output;
+		}
+
+	public:
+		static double m_syncopationWeight;
+		static double m_leapWeight;
+
+		HTp   m_cmrPitch;        // pitches of the cmr sequence (excluding tied notes)
+		bool  m_hasSyncopation;  // is the note syncopated
+		bool  m_hasLeapBefore;   // is there a melodic leap before note
+		int   m_cmrMeasureBegin; // starting measure of cmr group
+		int   m_cmrMeasureEnd;   // starting measure of cmr group
+
+};
+
+
+class cmr_group_info {
+	public:
+		cmr_group_info(void) {
+			clear();
+		}
+
+		void clear(void) {
+			m_cmrIndex  = -1;
+			m_cmrTrack  = -1;
+			m_startTime = -1;
+			m_endTime   = -1;
+			m_notes.clear();
+		}
+
+		int getNoteCount(void) {
+			if (m_cmrIndex < 0) {
+				return 0;
+			}
+			return m_notes.size();
+		}
+
+		HumNum getGroupDuration(void) {
+			if (m_notes.empty()) {
+				return 0;
+			}
+			HumNum startPos = m_notes[0].m_cmrPitch->getDurationFromStart();
+			HumNum endPos   = m_notes.back().m_cmrPitch->getDurationFromStart();
+			return endPos - startPos;
+		}
+
+		double getGroupStrength(void) {
+			double output = 0.0;
+			for (int i=0; i<(int)m_notes.size(); i++) {
+				output += m_notes[i].getNoteStrength();
+			}
+			return output;
+		}
+
+		int   m_cmrIndex;    // used to keep track of mergers
+		int   m_cmrTrack;    // used to keep track of mergers
+		HumNum m_startTime;  // starting time of first note in group
+		HumNum m_endTime;    // ending time of last note in group
+		std::vector<cmr_note_info> m_notes; // note info for each note in group.
+};
+
+
+
 class Tool_cmr : public HumTool {
 	public:
 		                 Tool_cmr                (void);
@@ -102,16 +188,33 @@ class Tool_cmr : public HumTool {
 
 		std::vector<int>    m_barNum;            // storage for identify start/end measures of cmr groups
 
+		// m_noteGroups: 2D:
+		// dimension 1 == a note group
+		// dimension 2 == m_noteGroups.m_notesa == notes in specified group
+		// m_noteGroups[2].m_notes[5] == 3rd group, 6th note in the 3rd group
+		std::vector<cmr_group_info> m_noteGroups;
+
+// remove these variables:
+		// m_cmrMeasureBegin ->   m_noteGroups[i].m_notes[j].m_cmrMeasureBegin;
 		std::vector<int>    m_cmrMeasureBegin;   // starting measure of cmr group
+		// m_cmrMeasureEnd ->   m_noteGroups[i].m_notes[j].m_cmrMeasureEnd;
 		std::vector<int>    m_cmrMeasureEnd;     // starting measure of cmr group
+		// m_noteGroups[i].getDuration();
 		std::vector<HumNum> m_cmrDuration;       // between first cmr note and last cmr note.
+		// m_noteGroups[i].m_notes[j].m_cmrPitch;
 		std::vector<std::vector<HTp>> m_cmrPitch;// pitches of the cmr sequence (excluding tied notes)
+		// (int)m_noteGroups[i].m_notes.size();
 		std::vector<int>    m_cmrPeakCount;      // how many notes in a cmr sequence
 
+// remove these variables also:
 		// Merging variables for cmr groups:
+		// m_cmrIndex ->  m_notesGroups[i].m_cmrIndex;
 		std::vector<int>    m_cmrIndex;          // used to keep track of mergers
+		// m_cmrIndex ->  m_notesGroups[i].m_cmrTrack;
 		std::vector<int>    m_cmrTrack;          // used to keep track of mergers
+		// m_cmrIndex ->  m_notesGroups[i].m_StartTime;
 		std::vector<HumNum> m_startTime;         // starting time of first note in group
+		// m_cmrIndex ->  m_notesGroups[i].m_endTime;
 		std::vector<HumNum> m_endTime;           // ending time of last note in group
 
 };
