@@ -32,8 +32,29 @@ class cmr_note_info {
 			m_cmrPitch       = NULL;
 			m_hasSyncopation = false;
 			m_hasLeapBefore  = false;
-			m_cmrMeasureBegin= -1;
-			m_cmrMeasureEnd  = -1;
+			m_measureBegin= -1;
+			m_measureEnd  = -1;
+		}
+
+		int getMeasureBegin(void) {
+			return m_measureBegin;
+		}
+
+		int getMeasureEnd(void) {
+			return m_measureEnd;
+		}
+
+		HumNum getStartTime(void) {
+			return m_cmrPitch->getDurationFromStart();
+		}
+
+		HumNum getEndTime(void) {
+			HumNum noteDur = m_cmrPitch->getTiedDuration();
+			return m_cmrPitch->getDurationFromStart() + noteDur;
+		}
+
+		int getMidiPitch(void) {
+			return m_cmrPitch->kernToMidiNoteNumber();
 		}
 
 		double getNoteStrength(void) {
@@ -54,8 +75,8 @@ class cmr_note_info {
 		HTp   m_cmrPitch;        // pitches of the cmr sequence (excluding tied notes)
 		bool  m_hasSyncopation;  // is the note syncopated
 		bool  m_hasLeapBefore;   // is there a melodic leap before note
-		int   m_cmrMeasureBegin; // starting measure of cmr group
-		int   m_cmrMeasureEnd;   // starting measure of cmr group
+		int   m_measureBegin; // starting measure of note
+		int   m_measureEnd;   // ending measure of tied note group
 
 };
 
@@ -90,6 +111,41 @@ class cmr_group_info {
 			return endPos - startPos;
 		}
 
+		int getMeasureBegin(void) {
+			if (m_notes.empty()) {
+				return -1;
+			}
+			return m_notes[0].getMeasureBegin();
+		}
+
+		int getMeasureEnd(void) {
+			if (m_notes.empty()) {
+				return -1;
+			}
+			return m_notes.back().getMeasureEnd();
+		}
+
+		HumNum getStartTime(void) {
+			if (m_notes.empty()) {
+				return -1;
+			}
+			return m_notes[0].getStartTime();
+		}
+
+		HumNum getEndTime(void) {
+			if (m_notes.empty()) {
+				return -1;
+			}
+			return m_notes.back().getStartTime();
+		}
+
+		int getMidiPitch(void) {
+			if (m_notes.empty()) {
+				return -1;
+			}
+			return m_notes.getMidiPitch();
+		}
+
 		double getGroupStrength(void) {
 			double output = 0.0;
 			for (int i=0; i<(int)m_notes.size(); i++) {
@@ -98,10 +154,40 @@ class cmr_group_info {
 			return output;
 		}
 
+		void mergeGroup(cmr_group_info& group) {
+		for (int i=0; i<(int)m_cmrPitch[index2].size(); i++) { //not updated from here down
+			vector<HTp> newtoks;
+			newtoks.clear();
+			for (int j=0; j<(int)m_cmrPitch[index1].size(); j++) {
+				HTp token1 = m_cmrPitch[index1][j];
+				HTp token2 = m_cmrPitch[index2][i];
+				if (token2 == NULL) {
+					continue;
+				}
+				if (token1 == token2) {
+					m_cmrPitch[index2][i] = NULL;
+				}
+			}
+		}
+
+		// Deactivate the second group by setting a negative index:
+		m_noteGroups[index2].m_cmrIndex *= -1;
+
+		for (int k=0; k<(int)m_cmrPitch[index2].size(); k++) {
+			HTp token = m_cmrPitch[index2][k];
+			if (!token) {
+				continue;
+			}
+			m_cmrPitch[index1].push_back(token);
+		}
+
+		m_cmrPeakCount[index1] = m_cmrPitch[index1].size();
+
+		return true;
+	}
+
 		int   m_cmrIndex;    // used to keep track of mergers
 		int   m_cmrTrack;    // used to keep track of mergers
-		HumNum m_startTime;  // starting time of first note in group
-		HumNum m_endTime;    // ending time of last note in group
 		std::vector<cmr_note_info> m_notes; // note info for each note in group.
 };
 

@@ -200,20 +200,16 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 
 	int cmr_note_count = 0;
 
-	/*
-
 	for (int i=0; i<(int)m_noteGroups.size(); i++) {
 		cmr_note_count += m_noteGroups[i].getNoteCount();
 	}
 
-	*/
-	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
-		if (m_cmrIndex[i] < 0) {
-			continue;
-		}
-		cmr_note_count += m_cmrPeakCount[i];
-	}
-	//print all statistics for cmr groups
+	// for (int i=0; i<(int)m_cmrIndex.size(); i++) {
+	// 	if (m_cmrIndex[i] < 0) {
+	// 		continue;
+	// 	}
+	// 	cmr_note_count += m_cmrPeakCount[i];
+	// }
 
 	// if (m_infoQ) {
 	m_humdrum_text << "!!!cmr_groups: " << m_count << endl;
@@ -225,28 +221,47 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 	m_humdrum_text << "!!!cmr_group_density: " << ((double)m_count / all_note_count) * 1000 << " permil" << endl;
 
 	int pcounter = 1;
-	/* 
+	/*
 		for (int i=0; i<(int)m_noteGroups.size(); i++) {
-		
+
 		}
 	*/
-	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
-		if (m_cmrIndex[i] < 0) {
+	// for (int i=0; i<(int)m_cmrIndex.size(); i++) {
+	// 	if (m_cmrIndex[i] < 0) {
+	// 		// This group has been merged into a larger one.
+	// 		continue;
+	// 	}
+	// 	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+	// 	m_humdrum_text << "!!!cmr_group: "     << pcounter++            << endl;
+	// 	m_humdrum_text << "!!!start_measure: "  << m_cmrMeasureBegin[i] << endl;
+	// 	m_humdrum_text << "!!!end_measure: "    << m_cmrMeasureEnd[i]   << endl;
+	// 	m_humdrum_text << "!!!group_duration: " << m_cmrDuration[i].getFloat()/4.0 << endl;
+	// 	m_humdrum_text << "!!!group_pitches:";
+	// 	for (int j=0; j<(int)m_cmrPitch[i].size(); j++) {
+	// 		m_humdrum_text << " " << m_cmrPitch[i][j];
+	// 		m_humdrum_text << "(" << m_cmrPitch[i][j]->getLineIndex() << ")";
+	// 	}
+	// 	m_humdrum_text << endl;
+	// 	m_humdrum_text << "!!!group_cmrcount: " << m_cmrPeakCount[i]    << endl;
+	// }
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		if (m_notesGroups[i].m_cmrIndex < 0) {
 			// This group has been merged into a larger one.
 			continue;
 		}
 		m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
 		m_humdrum_text << "!!!cmr_group: "     << pcounter++            << endl;
-		m_humdrum_text << "!!!start_measure: "  << m_cmrMeasureBegin[i] << endl;
-		m_humdrum_text << "!!!end_measure: "    << m_cmrMeasureEnd[i]   << endl;
-		m_humdrum_text << "!!!group_duration: " << m_cmrDuration[i].getFloat()/4.0 << endl;
+		m_humdrum_text << "!!!start_measure: "  << m_noteGroups[i].getMeasureBegin() << endl;
+		m_humdrum_text << "!!!end_measure: "    << m_noteGroups[i].getMeasureEnd()   << endl;
+		m_humdrum_text << "!!!group_duration: " << m_noteGroups[i].getDuration().getFloat()/4.0 << endl;
 		m_humdrum_text << "!!!group_pitches:";
-		for (int j=0; j<(int)m_cmrPitch[i].size(); j++) {
-			m_humdrum_text << " " << m_cmrPitch[i][j];
-			m_humdrum_text << "(" << m_cmrPitch[i][j]->getLineIndex() << ")";
+		for (int j=0; j<(int)m_noteGroups[i].m_notes.size(); j++) {
+			m_humdrum_text << " " << m_noteGroups[i].m_notes[j].m_cmrPitch;
+			m_humdrum_text << "(" << m_noteGroups[i].m_notes[j].m_cmrPitch->getLineIndex() << ")";
+
 		}
 		m_humdrum_text << endl;
-		m_humdrum_text << "!!!group_cmrcount: " << m_cmrPeakCount[i]    << endl;
+		m_humdrum_text << "!!!group_cmrcount: " << m_noteGroups[i].getNoteCount() << endl;
 	}
 }
 
@@ -269,11 +284,23 @@ void Tool_cmr::mergeOverlappingPeaks(void) {
 	// need merging, so redo the overlap identification
 	// several more times to enture multiple groups are
 	// merged.
+
+	// for (int k=0; k<100; k++) {
+	// 	bool mergers = false;
+	// 	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
+	// 		for (int j=i+1; j<(int)m_cmrIndex.size(); j++) {
+	// 			mergers |= checkGroupPairForMerger(i, j);
+	// 		}
+	// 	}
+	// 	if (!mergers) {
+	// 		break;
+	// 	}
+	// }
 	for (int k=0; k<100; k++) {
 		bool mergers = false;
-		for (int i=0; i<(int)m_cmrIndex.size(); i++) {
-			for (int j=i+1; j<(int)m_cmrIndex.size(); j++) {
-				mergers |= checkGroupPairForMerger(i, j);
+		for (int i=0; i<(int)m_notesGroups.size(); i++) {
+			for (int j=i+1; j<(int)m_notesGroups.size(); j++) {
+				mergers |= checkGroupPairForMerger(m_notesGroups[i].m_cmrIndex, m_notesGroups[j].m_cmrIndex);
 			}
 		}
 		if (!mergers) {
@@ -282,9 +309,15 @@ void Tool_cmr::mergeOverlappingPeaks(void) {
 	}
 
 	// re-calculate m_count (number of cmr groups):
-	m_count = 0;
-	for (int i=0; i<(int)m_cmrIndex.size(); i++) {
-		if (m_cmrIndex[i] >= 0) {
+
+	// m_count = 0;
+	// for (int i=0; i<(int)m_cmrIndex.size(); i++) {
+	// 	if (m_cmrIndex[i] >= 0) {
+	// 		m_count++;
+	// 	}
+	// }
+	for (int i=0; i<(int)m_notesGroups.size(); i++) {
+		if (m_notesGroups[i].m_cmrIndex >= 0) {
 			m_count++;
 		}
 	}
@@ -304,36 +337,39 @@ void Tool_cmr::mergeOverlappingPeaks(void) {
 bool Tool_cmr::checkGroupPairForMerger(int index1, int index2) {
 
 	// Groups must not have been merged already:
-	if (m_cmrIndex[index1] < 0) {
+	if (m_noteGroups[index1].m_cmrIndex < 0) {
 		return false;
 	}
-	if (m_cmrIndex[index2] < 0) {
+	if (m_noteGroups[index2].m_cmrIndex < 0) {
 		return false;
 	}
 
 	// Groups must have the same track number (i.e., the same staff/part):
-	if (m_cmrTrack[index1] != m_cmrTrack[index2]) {
+	if (m_noteGroups[index1].m_cmrTrack != m_noteGroups[index2].m_cmrTrack) {
 		return false;
 	}
 
 	// Groups must have the same MIDI pitch:
-	if (m_cmrPitch[index1].empty()) {
-		return false;
-	}
-	if (m_cmrPitch[index2].empty()) {
-		return false;
-	}
-	int midi1 = m_cmrPitch[index1][0]->getMidiPitch();
-	int midi2 = m_cmrPitch[index2][0]->getMidiPitch();
+
+	// if (m_cmrPitch[index1].empty()) {
+	// 	return false;
+	// }
+	// if (m_cmrPitch[index2].empty()) {
+	// 	return false;
+	// }
+
+
+	int midi1 = m_noteGroups[index1].getMidiPitch();
+	int midi2 = m_noteGroups[index2].getMidiPitch();
 	if (midi1 != midi2) {
 		return false;
 	}
 
 	// Check if they overlap:
-	HumNum start1 = m_startTime[index1];
-	HumNum start2 = m_startTime[index2];
-	HumNum end1   = m_endTime[index1];
-	HumNum end2   = m_endTime[index2];
+	HumNum start1 = m_noteGroups[index1].getStartTime();
+	HumNum start2 = m_noteGroups[index2].getStartTime();
+	HumNum end1   = m_noteGroups[index1].getEndTime();
+	HumNum end2   = m_noteGroups[index2].getEndTime();
 
 	bool mergeQ = false;
 	bool flipQ  = false;
@@ -359,46 +395,48 @@ bool Tool_cmr::checkGroupPairForMerger(int index1, int index2) {
 		index2 = tempi;
 	}
 
-	// Deactivate the second group by setting a negative index:
-	m_cmrIndex[index2] *= -1;
+	// // Set the endtime of the first group to the end of the second group:
+	// m_noteGroups[index1].m_endTime = m_noteGroups[index2].m_endTime;
 
-	// Set the endtime of the first group to the end of the second group:
-	m_endTime[index1] = m_endTime[index2];
+	// // Likewise, merge the ending measure numbers:
+	// m_noteGroups[index1].getMeasureEnd() = m_noteGroups[index2].getMeasureEnd();
 
-	// Likewise, merge the ending measure numbers:
-	m_cmrMeasureEnd[index1] = m_cmrMeasureEnd[index2];
-
-	// Update the duration of the merged cmr group:
-	m_cmrDuration[index1] = m_endTime[index2] - m_startTime[index1];
+	// // Update the duration of the merged cmr group:
+	// m_noteGroups[index1].getDuration() = m_noteGroups[index2].m_endTime - m_notesGroups[index1].m_StartTime;
 
 	// merge the notes/counts:
-	for (int i=0; i<(int)m_cmrPitch[index2].size(); i++) {
-		vector<HTp> newtoks;
-		newtoks.clear();
-		for (int j=0; j<(int)m_cmrPitch[index1].size(); j++) {
-			HTp token1 = m_cmrPitch[index1][j];
-			HTp token2 = m_cmrPitch[index2][i];
-			if (token2 == NULL) {
-				continue;
-			}
-			if (token1 == token2) {
-				m_cmrPitch[index2][i] = NULL;
-			}
-		}
-	}
-
-	for (int k=0; k<(int)m_cmrPitch[index2].size(); k++) {
-		HTp token = m_cmrPitch[index2][k];
-		if (!token) {
-			continue;
-		}
-		m_cmrPitch[index1].push_back(token);
-	}
-
-	m_cmrPeakCount[index1] = m_cmrPitch[index1].size();
-
-	return true;
-}
+	m_noteGroups[index1].mergeGroup(m_noteGroups[index2]);
+	
+// 	for (int i=0; i<(int)m_cmrPitch[index2].size(); i++) { //not updated from here down
+// 		vector<HTp> newtoks;
+// 		newtoks.clear();
+// 		for (int j=0; j<(int)m_cmrPitch[index1].size(); j++) {
+// 			HTp token1 = m_cmrPitch[index1][j];
+// 			HTp token2 = m_cmrPitch[index2][i];
+// 			if (token2 == NULL) {
+// 				continue;
+// 			}
+// 			if (token1 == token2) {
+// 				m_cmrPitch[index2][i] = NULL;
+// 			}
+// 		}
+// 	}
+//
+// 	// Deactivate the second group by setting a negative index:
+// 	m_noteGroups[index2].m_cmrIndex *= -1;
+//
+// 	for (int k=0; k<(int)m_cmrPitch[index2].size(); k++) {
+// 		HTp token = m_cmrPitch[index2][k];
+// 		if (!token) {
+// 			continue;
+// 		}
+// 		m_cmrPitch[index1].push_back(token);
+// 	}
+//
+// 	m_cmrPeakCount[index1] = m_cmrPitch[index1].size();
+//
+// 	return true;
+// }
 
 
 
@@ -723,24 +761,24 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 		int line = notes[i][0]->getLineIndex();
 		int line2 = notes[i + m_cmrNum - 1].back()->getLineIndex();
 
-		m_cmrDuration.push_back(duration.getFloat()/4.0);
-		m_cmrMeasureBegin.push_back(m_barNum[line]);
-		m_cmrMeasureEnd.push_back(m_barNum[line2]);
+		m_noteGroups[i].getDuration().push_back(duration.getFloat()/4.0);
+		m_cmrMeasureBegin.push_back(m_barNum[line]); //not sure
+		m_cmrMeasureEnd.push_back(m_barNum[line2]); //not sure
 		vector<HTp> pnotes;
 		for (int j=0; j<m_cmrNum; j++) {
 			pnotes.push_back(notes.at(i+j).at(0));
 		}
-		m_cmrPitch.push_back(pnotes);
-		m_cmrPeakCount.push_back((int)pnotes.size());
+		m_cmrPitch.push_back(pnotes); //not sure
+		(int)m_noteGroups[i].m_notes.size().push_back((int)pnotes.size());
 
 		// variables to do cmr group mergers later:
 		int track = notes[i][0]->getTrack();
-		m_cmrTrack.push_back(track);
-		m_cmrIndex.push_back(m_cmrIndex.size());
+		m_notesGroups[i].m_cmrTrack.push_back(track);
+		m_notesGroups[i].m_cmrIndex.push_back(m_cmrIndex.size());
 		HumNum starttime = notes[i][0]->getDurationFromStart();
 		HumNum endtime   = notes[i+m_cmrNum-1].back()->getDurationFromStart();
-		m_startTime.push_back(starttime);
-		m_endTime.push_back(endtime);
+		m_notesGroups[i].m_StartTime.push_back(starttime);
+		m_notesGroups[i].m_endTime.push_back(endtime);
 
 		for (int j=0; j<m_cmrNum; j++) {
 			globalcmrnotes[i+j] = true;
