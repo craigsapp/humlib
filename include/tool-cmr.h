@@ -21,173 +21,65 @@ namespace hum {
 
 // START_MERGE
 
+class cmr_group_info;
+
 class cmr_note_info {
 
 	public:
-		cmr_note_info(void) {
-			clear();
-		}
+		         cmr_note_info    (void);
+		void     clear            (void);
+		int      getMeasureBegin  (void);
+		int      getMeasureEnd    (void);
+		void     setMeasureBegin  (int measure);
+		void     setMeasureEnd    (int measure);
+		HumNum   getStartTime     (void);
+		HumNum   getEndTime       (void);
+		int      getMidiPitch     (void);
+		double   getNoteStrength  (void);
 
-		void clear(void) {
-			m_cmrPitch       = NULL;
-			m_hasSyncopation = false;
-			m_hasLeapBefore  = false;
-			m_measureBegin= -1;
-			m_measureEnd  = -1;
-		}
-
-		int getMeasureBegin(void) {
-			return m_measureBegin;
-		}
-
-		int getMeasureEnd(void) {
-			return m_measureEnd;
-		}
-
-		HumNum getStartTime(void) {
-			return m_cmrPitch->getDurationFromStart();
-		}
-
-		HumNum getEndTime(void) {
-			HumNum noteDur = m_cmrPitch->getTiedDuration();
-			return m_cmrPitch->getDurationFromStart() + noteDur;
-		}
-
-		int getMidiPitch(void) {
-			return m_cmrPitch->kernToMidiNoteNumber();
-		}
-
-		double getNoteStrength(void) {
-			double output = 1.0;
-			if (m_hasSyncopation) {
-				output += m_syncopationWeight;
-			}
-			if (m_hasLeapBefore) {
-				output += m_leapWeight;
-			}
-			return output;
-		}
-
-	public:
 		static double m_syncopationWeight;
 		static double m_leapWeight;
 
-		HTp   m_cmrPitch;        // pitches of the cmr sequence (excluding tied notes)
+	private:
+		vector<HTp> m_tokens;    // List of tokens for the notes (first entry is note attack);
+
+		// location information:
+		int   m_measureBegin;    // starting measure of note
+		int   m_measureEnd;      // ending measure of tied note group
+
+		// analysis information:
 		bool  m_hasSyncopation;  // is the note syncopated
 		bool  m_hasLeapBefore;   // is there a melodic leap before note
-		int   m_measureBegin; // starting measure of note
-		int   m_measureEnd;   // ending measure of tied note group
+
+	friend class cmr_group_info;
 
 };
 
 
+
 class cmr_group_info {
 	public:
-		cmr_group_info(void) {
-			clear();
-		}
+		        cmr_group_info    (void);
+		void    clear             (void);
 
-		void clear(void) {
-			m_cmrIndex  = -1;
-			m_cmrTrack  = -1;
-			m_startTime = -1;
-			m_endTime   = -1;
-			m_notes.clear();
-		}
+		HumNum  getGroupDuration  (void);
+		int     getMeasureBegin   (void);
+		int     getMeasureEnd     (void);
+		int     getNoteCount      (void);
+		HTp     getNote           (int index);
+		int     getMidiPitch      (void);
 
-		int getNoteCount(void) {
-			if (m_cmrIndex < 0) {
-				return 0;
-			}
-			return m_notes.size();
-		}
+		int     getTrack          (void);
+		int     getIndex          (void);
+		void    setIndex          (int index);
+		HumNum  getStartTime      (void);
+		HumNum  getEndTime        (void);
 
-		HumNum getGroupDuration(void) {
-			if (m_notes.empty()) {
-				return 0;
-			}
-			HumNum startPos = m_notes[0].m_cmrPitch->getDurationFromStart();
-			HumNum endPos   = m_notes.back().m_cmrPitch->getDurationFromStart();
-			return endPos - startPos;
-		}
+		double  getGroupStrength  (void);
 
-		int getMeasureBegin(void) {
-			if (m_notes.empty()) {
-				return -1;
-			}
-			return m_notes[0].getMeasureBegin();
-		}
+		bool    mergeGroup        (cmr_group_info& group);
 
-		int getMeasureEnd(void) {
-			if (m_notes.empty()) {
-				return -1;
-			}
-			return m_notes.back().getMeasureEnd();
-		}
-
-		HumNum getStartTime(void) {
-			if (m_notes.empty()) {
-				return -1;
-			}
-			return m_notes[0].getStartTime();
-		}
-
-		HumNum getEndTime(void) {
-			if (m_notes.empty()) {
-				return -1;
-			}
-			return m_notes.back().getStartTime();
-		}
-
-		int getMidiPitch(void) {
-			if (m_notes.empty()) {
-				return -1;
-			}
-			return m_notes.getMidiPitch();
-		}
-
-		double getGroupStrength(void) {
-			double output = 0.0;
-			for (int i=0; i<(int)m_notes.size(); i++) {
-				output += m_notes[i].getNoteStrength();
-			}
-			return output;
-		}
-
-		void mergeGroup(cmr_group_info& group) {
-		for (int i=0; i<(int)m_cmrPitch[index2].size(); i++) { //not updated from here down
-			vector<HTp> newtoks;
-			newtoks.clear();
-			for (int j=0; j<(int)m_cmrPitch[index1].size(); j++) {
-				HTp token1 = m_cmrPitch[index1][j];
-				HTp token2 = m_cmrPitch[index2][i];
-				if (token2 == NULL) {
-					continue;
-				}
-				if (token1 == token2) {
-					m_cmrPitch[index2][i] = NULL;
-				}
-			}
-		}
-
-		// Deactivate the second group by setting a negative index:
-		m_noteGroups[index2].m_cmrIndex *= -1;
-
-		for (int k=0; k<(int)m_cmrPitch[index2].size(); k++) {
-			HTp token = m_cmrPitch[index2][k];
-			if (!token) {
-				continue;
-			}
-			m_cmrPitch[index1].push_back(token);
-		}
-
-		m_cmrPeakCount[index1] = m_cmrPitch[index1].size();
-
-		return true;
-	}
-
-		int   m_cmrIndex;    // used to keep track of mergers
-		int   m_cmrTrack;    // used to keep track of mergers
+		int   m_index;            // used to keep track of mergers
 		std::vector<cmr_note_info> m_notes; // note info for each note in group.
 };
 
@@ -240,6 +132,7 @@ class Tool_cmr : public HumTool {
 		void             markNotes               (vector<vector<HTp>>& notelist, vector<bool>& cmrnotesQ,
 		                                          const string& marker);
 		void             postProcessAnalysis     (HumdrumFile& infile);
+		void             prepareHtmlReport       (void);
 
 	private:
 		bool    m_rawQ        = false;           // don't print score (only analysis)
@@ -280,7 +173,9 @@ class Tool_cmr : public HumTool {
 		// m_noteGroups[2].m_notes[5] == 3rd group, 6th note in the 3rd group
 		std::vector<cmr_group_info> m_noteGroups;
 
-// remove these variables:
+};
+
+/*
 		// m_cmrMeasureBegin ->   m_noteGroups[i].m_notes[j].m_cmrMeasureBegin;
 		std::vector<int>    m_cmrMeasureBegin;   // starting measure of cmr group
 		// m_cmrMeasureEnd ->   m_noteGroups[i].m_notes[j].m_cmrMeasureEnd;
@@ -291,8 +186,7 @@ class Tool_cmr : public HumTool {
 		std::vector<std::vector<HTp>> m_cmrPitch;// pitches of the cmr sequence (excluding tied notes)
 		// (int)m_noteGroups[i].m_notes.size();
 		std::vector<int>    m_cmrPeakCount;      // how many notes in a cmr sequence
-
-// remove these variables also:
+      
 		// Merging variables for cmr groups:
 		// m_cmrIndex ->  m_notesGroups[i].m_cmrIndex;
 		std::vector<int>    m_cmrIndex;          // used to keep track of mergers
@@ -302,8 +196,7 @@ class Tool_cmr : public HumTool {
 		std::vector<HumNum> m_startTime;         // starting time of first note in group
 		// m_cmrIndex ->  m_notesGroups[i].m_endTime;
 		std::vector<HumNum> m_endTime;           // ending time of last note in group
-
-};
+*/
 
 // END_MERGE
 
