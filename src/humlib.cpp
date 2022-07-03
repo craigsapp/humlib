@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jul  2 17:27:22 PDT 2022
+// Last Modified: Sun Jul  3 07:12:08 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -58886,8 +58886,9 @@ bool  cmr_note_info::isLeapBefore(HTp token) {
 			continue;
 		}
 		if (current->isRest()) {
-			current = current->getPreviousToken();
-			continue;
+			return false;
+			// current = current->getPreviousToken();
+			// continue;
 		}
 		int testNote = current->getMidiPitch();
 		int interval = startNote - testNote;
@@ -58978,6 +58979,42 @@ ostream& cmr_note_info::printNote(ostream& output) {
 	output << ")";
 	return output;
 }
+
+
+//////////////////////////////
+//
+// cmr_note_info::getPitch -- Return scientific pitch name.
+//
+
+string cmr_note_info::getPitch(void) {
+	if (m_tokens.empty()) {
+		return "R";
+	} else {
+		int octave = Convert::kernToOctaveNumber(m_tokens.at(0));
+		int accidentals = Convert::kernToAccidentalCount(m_tokens.at(0));
+		int dpc = Convert::kernToDiatonicPC(m_tokens.at(0));
+		string output;
+		switch (dpc) {
+			case 0: output += "C"; break;
+			case 1: output += "D"; break;
+			case 2: output += "E"; break;
+			case 3: output += "F"; break;
+			case 4: output += "G"; break;
+			case 5: output += "A"; break;
+			case 6: output += "B"; break;
+		}
+		for (int i=0; i<abs(accidentals); i++) {
+			if (accidentals < 0) {
+				output += "b";
+			} else {
+				output += "#";
+			}
+		}
+		output += to_string(octave);
+		return output;
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -59330,6 +59367,19 @@ ostream& cmr_group_info::printNotes(ostream& output) {
 }
 
 
+//////////////////////////////
+//
+// cmr_group_info::getPitch -- Return scientific pitch name.
+//
+
+string cmr_group_info::getPitch(void) {
+	if (m_notes.empty()) {
+		return "R";
+	} else {
+		return m_notes.at(0).getPitch();
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -59642,7 +59692,7 @@ void Tool_cmr::printStatistics(HumdrumFile& infile) {
 	m_humdrum_text << "!!!cmr_group_density: " << groupDensity * 1000.0 << " permil" << endl;
 	m_humdrum_text << "!!!cmr_note_density: "  << groupNoteDensity * 1000.0 << " permil" << endl;
 
-	printGroupStatistics();
+	printGroupStatistics(infile);
 }
 
 
@@ -59652,18 +59702,22 @@ void Tool_cmr::printStatistics(HumdrumFile& infile) {
 // printGroupStatistics -- Print information about individual CMR groups.
 //
 
-void Tool_cmr::printGroupStatistics(void) {
+void Tool_cmr::printGroupStatistics(HumdrumFile& infile) {
 	int pcounter = 1;
 	// print information about each note group:
+	vector<string> partNames;
+	getPartNames(partNames, infile);
 	for (int i=0; i<(int)m_noteGroups.size(); i++) {
 		if (!m_noteGroups[i].isValid()) {
 			continue;
 		}
 		double groupDuration = m_noteGroups[i].getGroupDuration().getFloat() / 4.0;
+		int track = m_noteGroups[i].getTrack();
 
 		m_humdrum_text << "!!!!!!!!!! CMR GROUP INFO !!!!!!!!!!!!!!!!!!!!!!!"               << endl;
 		m_humdrum_text << "!!!cmr_group_num: "     << pcounter++                            << endl;
-		m_humdrum_text << "!!!cmr_track: "         << m_noteGroups[i].getTrack()            << endl;
+		m_humdrum_text << "!!!cmr_track: "         << track                                 << endl;
+		m_humdrum_text << "!!!cmr_part: "          << partNames.at(track)                   << endl;
 		m_humdrum_text << "!!!cmr_start_line: "    << m_noteGroups[i].getStartLineNumber()  << endl;
 		m_humdrum_text << "!!!cmr_start_field: "   << m_noteGroups[i].getStartFieldNumber() << endl;
 		m_humdrum_text << "!!!cmr_start_measure: " << m_noteGroups[i].getMeasureBegin()     << endl;
@@ -59671,10 +59725,66 @@ void Tool_cmr::printGroupStatistics(void) {
 		m_humdrum_text << "!!!cmr_duration: "      << groupDuration                         << endl;
 		m_humdrum_text << "!!!cmr_strength: "      << m_noteGroups[i].getGroupStrength()    << endl;
 		m_humdrum_text << "!!!cmr_note_count: "    << m_noteGroups[i].getNoteCount()        << endl;
+		m_humdrum_text << "!!!cmr_pitch: "         << m_noteGroups[i].getPitch()            << endl;
 		m_humdrum_text << "!!!cmr_pitches: ";
 		m_noteGroups[i].printNotes(m_humdrum_text);
 		m_humdrum_text << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::getPartNames -- partNames is indexed by track.
+//
+
+void Tool_cmr::getPartNames(vector<string>& partNames, HumdrumFile& infile) {
+	partNames.clear();
+	partNames.resize(infile.getMaxTrack() + 1);
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			if (!partNames[track].empty()) {
+				continue;
+			}
+			if (token->isInstrumentAbbreviation()) {
+				if (token->size() > 3) {
+					partNames[track] = token->substr(3);
+				}
+			}
+		}
+	}
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			int track = token->getTrack();
+			if (!partNames[track].empty()) {
+				continue;
+			}
+			if (token->isInstrumentName()) {
+				if (token->size() > 3) {
+					partNames[track] = token->substr(3);
+				}
+			}
+		}
+	}
+
 }
 
 

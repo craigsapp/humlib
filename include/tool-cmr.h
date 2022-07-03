@@ -41,11 +41,12 @@ class cmr_note_info {
 		HumNum   getStartTime     (void);
 		HumNum   getEndTime       (void);
 		int      getMidiPitch     (void);
+		string   getPitch         (void);
 		double   getNoteStrength  (void);
 		bool     hasSyncopation   (void);
 		bool     hasLeapBefore    (void);
 		void     markNote         (const std::string& marker);
-		ostream& printNote        (ostream& output = std::cout);
+		std::ostream& printNote   (std::ostream& output = std::cout);
 
 		static double getMetricLevel(HTp token);
 		static bool   isSyncopated(HTp token);
@@ -55,7 +56,7 @@ class cmr_note_info {
 		static double m_leapWeight;
 
 	private:
-		vector<HTp> m_tokens;    // List of tokens for the notes (first entry is note attack);
+		std::vector<HTp> m_tokens;    // List of tokens for the notes (first entry is note attack);
 
 		// location information:
 		int   m_measureBegin;    // starting measure of note
@@ -90,17 +91,18 @@ class cmr_group_info {
 		int     getTrack           (void);
 		int     getStartFieldNumber(void);
 		int     getStartLineNumber (void);
-		void    addNote            (vector<HTp>& tiednotes, vector<int>& barnums);
+		void    addNote            (std::vector<HTp>& tiednotes, std::vector<int>& barnums);
 		bool    isValid            (void);
 		void    markNotes          (const std::string& marker);
 		void    setSerial          (int serial);
 		int     getSerial          (void);
+		string   getPitch          (void);
 		HumNum  getEndTime         (void);
 		HumNum  getGroupDuration   (void);
 		HumNum  getStartTime       (void);
 		double  getGroupStrength   (void);
 		bool    mergeGroup         (cmr_group_info& group);
-		ostream& printNotes        (ostream& output = std::cout);
+		std::ostream& printNotes   (std::ostream& output = std::cout);
 
 	private:
 		int   m_serial;                     // used to keep track of mergers
@@ -117,8 +119,8 @@ class Tool_cmr : public HumTool {
 
 		bool             run                     (HumdrumFileSet& infiles);
 		bool             run                     (HumdrumFile& infile);
-		bool             run                     (const std::string& indata, ostream& out);
-		bool             run                     (HumdrumFile& infile, ostream& out);
+		bool             run                     (const std::string& indata, std::ostream& out);
+		bool             run                     (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void             processFile             (HumdrumFile& infile);
@@ -128,20 +130,20 @@ class Tool_cmr : public HumTool {
 		void             processSpineFlipped     (HTp startok);
 		void             identifyLocalPeaks      (std::vector<bool>& cmrnotes,
 		                                          std::vector<int>& notelist);
-		void             getDurations            (vector<double>& durations,
-		                                          vector<vector<HTp>>& notelist);
-		void             getBeat                 (vector<bool>& metpos,
-		                                          vector<vector<HTp>>& notelist);
+		void             getDurations            (std::vector<double>& durations,
+		                                          std::vector<std::vector<HTp>>& notelist);
+		void             getBeat                 (std::vector<bool>& metpos,
+		                                          std::vector<std::vector<HTp>>& notelist);
 		bool             isMelodicallyAccented   (HTp token);
 		bool             hasLeapBefore           (HTp token);
 		bool             isSyncopated            (HTp token);
-		void             getLocalPeakNotes       (vector<vector<HTp>>& newnotelist,
-		                                          vector<vector<HTp>>& oldnotelist,
-		                                          vector<bool>& cmrnotes);
+		void             getLocalPeakNotes       (std::vector<std::vector<HTp>>& newnotelist,
+		                                          std::vector<std::vector<HTp>>& oldnotelist,
+		                                          std::vector<bool>& cmrnotes);
 
-		void             identifyPeakSequence    (vector<bool>& globalcmrnotes,
-		                                          vector<int>& cmrmidinums,
-		                                          vector<vector<HTp>>& notes);
+		void             identifyPeakSequence    (std::vector<bool>& globalcmrnotes,
+		                                          std::vector<int>& cmrmidinums,
+		                                          std::vector<std::vector<HTp>>& notes);
 		std::vector<int> getMidiNumbers          (std::vector<std::vector<HTp>>& notelist);
 		std::vector<std::vector<HTp>> getNoteList(HTp starting);
 		void             printData               (std::vector<std::vector<HTp>>& notelist,
@@ -151,15 +153,16 @@ class Tool_cmr : public HumTool {
 		void             mergeOverlappingPeaks   (void);
 		bool             checkGroupPairForMerger (cmr_group_info& index1, cmr_group_info& index2);
 		int              countNotesInScore       (HumdrumFile& infile);
-		std::vector<int> flipMidiNumbers         (vector<int>& midinums);
-		void             markNotes               (vector<vector<HTp>>& noteslist, vector<bool> cmrnotesQ, const std::string& marker);
+		std::vector<int> flipMidiNumbers         (std::vector<int>& midinums);
+		void             markNotes               (std::vector<std::vector<HTp>>& noteslist, std::vector<bool> cmrnotesQ, const std::string& marker);
 		void             postProcessAnalysis     (HumdrumFile& infile);
 		void             prepareHtmlReport       (void);
-		void             printNoteList           (vector<vector<HTp>>& notelist);
+		void             printNoteList           (std::vector<std::vector<HTp>>& notelist);
 		int              getGroupCount           (void);
 		int              getGroupNoteCount       (void);
 		void             printStatistics         (HumdrumFile& infile);
-		void             printGroupStatistics    (void);
+		void             printGroupStatistics    (HumdrumFile& infile);
+		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 
 	private:
 		// Command-line options:
