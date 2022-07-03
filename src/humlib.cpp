@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 29 09:19:27 PDT 2022
+// Last Modified: Sat Jul  2 17:27:22 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -58673,7 +58673,8 @@ double cmr_note_info::m_leapWeight = 0.5;
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// cmr_note_info -- helper class describing a conspicuous repetition note.
+// cmr_note_info -- Helper class describing a conspicuous repetition note.
+//    The cmr_group_info contains a vector of cmr_note_info objects.
 //
 
 //////////////////////////////
@@ -58689,15 +58690,15 @@ cmr_note_info::cmr_note_info(void) {
 
 /////////////////////////////
 //
-// cmr_note_info::clear --
+// cmr_note_info::clear -- Clear or initialized the contents.
 //
 
 void cmr_note_info::clear(void) {
 	m_tokens.clear();
-	m_hasSyncopation = false;
-	m_hasLeapBefore  = false;
-	m_measureBegin= -1;
-	m_measureEnd  = -1;
+	m_measureBegin   = -1;
+	m_measureEnd     = -1;
+	m_hasSyncopation = -1;
+	m_hasLeapBefore  = -1;
 }
 
 
@@ -58708,7 +58709,6 @@ void cmr_note_info::clear(void) {
 //    the note starts in.
 //
 
-
 int cmr_note_info::getMeasureBegin(void) {
 	return m_measureBegin;
 }
@@ -58717,8 +58717,9 @@ int cmr_note_info::getMeasureBegin(void) {
 
 /////////////////////////////
 //
-// cmr_note_info::getMeasureEnd -- Get the measure number that the 
-//    note ends in (including consideration of the 
+// cmr_note_info::getMeasureEnd -- Get the measure number that the
+//    note ends in (including consideration of the duration of the
+//    note or tied groups that follow the notes).
 //
 
 int cmr_note_info::getMeasureEnd(void) {
@@ -58733,7 +58734,6 @@ int cmr_note_info::getMeasureEnd(void) {
 //    the note starts in.
 //
 
-
 void cmr_note_info::setMeasureBegin(int measure) {
 	m_measureBegin = measure;
 }
@@ -58742,8 +58742,9 @@ void cmr_note_info::setMeasureBegin(int measure) {
 
 /////////////////////////////
 //
-// cmr_note_info::setMeasureEnd -- Set the measure number that the 
-//    note ends in (including consideration of the 
+// cmr_note_info::setMeasureEnd -- Set the measure number that the
+//    note ends in (including consideration of the duration of the note
+//    or tied group of notes that follow it).
 //
 
 void cmr_note_info::setMeasureEnd(int measure) {
@@ -58757,6 +58758,7 @@ void cmr_note_info::setMeasureEnd(int measure) {
 // cmr_note_info::getStartTime -- Return the starting time of the note
 //    in units of quarter notes since the start of the score.
 //
+
 HumNum cmr_note_info::getStartTime(void) {
 	if (m_tokens.empty()) {
 		return -1;
@@ -58787,13 +58789,134 @@ HumNum cmr_note_info::getEndTime(void) {
 
 /////////////////////////////
 //
-// cmr_note_info::getMidiPitch --
+// cmr_note_info::getMidiPitch -- Return the MIDI pitch of the note or -1 if invalid.
 //
 int cmr_note_info::getMidiPitch(void) {
 	if (m_tokens.empty()) {
 		return -1;
 	} else {
 		return m_tokens[0]->getMidiPitch();
+	}
+}
+
+
+
+/////////////////////////////
+//
+// cmr_note_info::hasSyncopation -- True if the note is syncopated.
+//
+
+bool cmr_note_info::hasSyncopation(void) {
+	if (m_hasSyncopation >= 0) {
+		return (bool)m_hasSyncopation;
+	} else if (m_tokens.empty()) {
+		m_hasSyncopation = 0;
+		return false;
+	} else {
+		m_hasSyncopation = (int)cmr_note_info::isSyncopated(m_tokens[0]);
+		return (bool)m_hasSyncopation;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// cmr_note_info::isSyncopated -- Return true if the note is syncopated,which
+//   means that the note is longer than the metric position that it is one; however,
+//   this analysis is chopped off for notes longer than a beat (whole note).
+//   Static function.
+//
+
+bool cmr_note_info::isSyncopated(HTp token) {
+	if (token == NULL) {
+		return false;
+	}
+	HumNum dur = token->getTiedDuration();
+	double logDur = log2(dur.getFloat());
+	int metLev = cmr_note_info::getMetricLevel(token);
+	if (metLev >= 2) { // no syncopations occuring on whole-note level or higher
+		return false;
+	} else if (logDur > metLev) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+/////////////////////////////
+//
+// cmr_note_info::hasLeapBefore -- True if there is a melodic leap before the note.
+//
+
+bool cmr_note_info::hasLeapBefore(void) {
+	if (m_hasLeapBefore >= 0) {
+		return (bool)m_hasLeapBefore;
+	} else if (m_tokens.empty()) {
+		m_hasLeapBefore = 0;
+		return false;
+	} else {
+		m_hasLeapBefore = cmr_note_info::isLeapBefore(m_tokens[0]);
+		return (bool)m_hasLeapBefore;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// cmr_note_info::isLeapBefore -- Return true if the note is syncopated, which
+//   means that the note is longer than the metric position that it is one; however,
+//   this analysis is chopped off for notes longer than a beat (whole note).
+//   Static function.
+//
+
+bool  cmr_note_info::isLeapBefore(HTp token) {
+	HTp current = token->getPreviousToken();
+	int startNote = token->getMidiPitch();
+	while (current) {
+		if (!current->isData()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (current->isNull()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		if (current->isRest()) {
+			current = current->getPreviousToken();
+			continue;
+		}
+		int testNote = current->getMidiPitch();
+		int interval = startNote - testNote;
+		return interval > 2;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// cmr_note_info::getMetricLevel -- Return the metric level of the note:
+//    whole note:   2
+//    half note:    1
+//    quarter note: 0
+//    less than quarter note: -1
+//
+
+double cmr_note_info::getMetricLevel(HTp token) {
+	HumNum beat = token->getDurationFromBarline();
+	if (!beat.isInteger()) { // anything less than quarter note level
+		return -1;
+	} else if (beat.getNumerator() % 4 == 0) { // whole note level
+		return 2;
+	} else if (beat.getNumerator() % 2 == 0) { // half note level
+		return 1;
+	} else { // quarter note level
+		return 0;
 	}
 }
 
@@ -58808,10 +58931,10 @@ int cmr_note_info::getMidiPitch(void) {
 
 double cmr_note_info::getNoteStrength(void) {
 	double output = 1.0;
-	if (m_hasSyncopation) {
+	if (hasSyncopation()) {
 		output += m_syncopationWeight;
 	}
-	if (m_hasLeapBefore) {
+	if (hasLeapBefore()) {
 		output += m_leapWeight;
 	}
 	return output;
@@ -58819,9 +58942,48 @@ double cmr_note_info::getNoteStrength(void) {
 
 
 
+//////////////////////////////
+//
+// cmr_note_info::markNote --
+//
+
+void cmr_note_info::markNote(const string& marker) {
+	for (int i=0; i<(int)m_tokens.size(); i++) {
+		HTp token = m_tokens[i];
+		string text = *token;
+		if (text.find(marker) != string::npos) {
+			continue;
+		}
+		text += marker;
+		token->setText(text);
+	}
+}
+
+
+//////////////////////////////
+//
+// cmr_note_info::printNote --
+//
+
+ostream& cmr_note_info::printNote(ostream& output) {
+	output << m_tokens[0];
+	output << "(";
+	if (hasSyncopation()) {
+		output << "S";
+	}
+	if (hasLeapBefore()) {
+		output << "L";
+	}
+	output << m_tokens[0]->getLineNumber();
+	output << ")";
+	return output;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // cmr_group_info -- helper class describing a conspicuous repetition groups.
+//    This class is used to store a conspicuous melodic repetition (which will
+//    be merged with adjacent CMRs later if they overlap.
 //
 
 //////////////////////////////
@@ -58837,11 +58999,11 @@ cmr_group_info::cmr_group_info(void) {
 
 //////////////////////////////
 //
-// cmr_group_info::clear --
+// cmr_group_info::clear -- Clear or initialize object.
 //
 
 void cmr_group_info::clear(void) {
-	m_index  = -1;
+	m_serial  = -1;
 	m_notes.clear();
 }
 
@@ -58853,10 +59015,10 @@ void cmr_group_info::clear(void) {
 //
 
 int cmr_group_info::getNoteCount(void) {
-	if (m_index < 0) {
+	if (m_serial < 0) {
 		return 0;
 	} else {
-		return m_notes.size();
+		return (int)m_notes.size();
 	}
 }
 
@@ -58882,6 +59044,26 @@ HumNum cmr_group_info::getGroupDuration(void) {
 
 //////////////////////////////
 //
+// cmr_group_info::addNote -- Add a note to the list. The input is a list of
+//     notes tied together.
+//
+
+void cmr_group_info::addNote(vector<HTp>& tiednotes, vector<int>& barnums) {
+	if (tiednotes.empty()) {
+		cerr << "Strange problem in cmr_group_info::addNote" << endl;
+	}
+	m_notes.resize(m_notes.size() + 1);
+	m_notes.back().m_tokens = tiednotes;
+	int line = m_notes.back().m_tokens.at(0)->getLineIndex();
+	int mstart = barnums.at(line);
+	m_notes.back().setMeasureBegin(mstart);
+	// store measure end (after duration of last note in tied note group).
+}
+
+
+
+//////////////////////////////
+//
 // cmr_group_info::getMeasureBegin --
 //
 
@@ -58897,14 +59079,14 @@ int cmr_group_info::getMeasureBegin(void) {
 
 //////////////////////////////
 //
-// cmr_group_info::getMeasureEnd --
+// cmr_group_info::getMeasureEnd -- Return the starting measure of the last note in the group.
 //
 
 int cmr_group_info::getMeasureEnd(void) {
 	if (m_notes.empty()) {
 		return -1;
 	}
-	return m_notes.back().getMeasureEnd();
+	return m_notes.back().getMeasureBegin();
 }
 
 
@@ -58958,22 +59140,22 @@ int cmr_group_info::getMidiPitch(void) {
 
 //////////////////////////////
 //
-// cmr_group_info::getIndex --
+// cmr_group_info::getSerial --
 //
 
-int cmr_group_info::getIndex(void) {
-	return m_index;
+int cmr_group_info::getSerial(void) {
+	return m_serial;
 }
 
 
 
 //////////////////////////////
 //
-// cmr_group_info::setIndex --
+// cmr_group_info::setSerial --
 //
 
-void cmr_group_info::setIndex(int index) {
-	m_index = index;
+void cmr_group_info::setSerial(int serial) {
+	m_serial = serial;
 }
 
 
@@ -58993,6 +59175,36 @@ int cmr_group_info::getTrack(void) {
 		} else {
 			return -1;
 		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// cmr_group_info::getStartLineNumber --
+//
+
+int cmr_group_info::getStartLineNumber(void) {
+	if (m_notes.empty()) {
+		return -1;
+	} else {
+		return m_notes[0].m_tokens[0]->getLineNumber();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// cmr_group_info::getStartLineNumber --
+//
+
+int cmr_group_info::getStartFieldNumber(void) {
+	if (m_notes.empty()) {
+		return -1;
+	} else {
+		return m_notes[0].m_tokens[0]->getFieldNumber();
 	}
 }
 
@@ -59033,17 +59245,39 @@ HTp cmr_group_info::getNote(int index) {
 
 //////////////////////////////
 //
+// cmr_group_info::isValid -- Group that is not merged
+//
+
+bool cmr_group_info::isValid(void) {
+	if (m_serial >= 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// cmr_group_info::markNotes --
+//
+
+void cmr_group_info::markNotes(const string& marker) {
+	for (int i=0; i<(int)m_notes.size(); i++) {
+		m_notes[i].markNote(marker);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // cmr_group_info::mergeGroup -- Merges overlapping groups into a single
 //     larger group and invalidates the second group after merging.
 //
 
 bool cmr_group_info::mergeGroup(cmr_group_info& group) {
-
-	// deactivate group being merged:
-	if (group.getIndex() > 0) {
-		group.setIndex(group.getIndex() * -1);
-	}
-
 	// Identify duplicate notes shared between groups:
 	vector<bool> duplicateNote(group.getNoteCount(), false);
 	for (int i=0; i<group.getNoteCount(); i++) {
@@ -59059,22 +59293,49 @@ bool cmr_group_info::mergeGroup(cmr_group_info& group) {
 		}
 	}
 
-	// Copy unshared notes:
+	// Copy unshared notes into first group:
 	for (int i=0; i<group.getNoteCount(); i++) {
 		if (duplicateNote[i]) {
 			continue;
 		}
 		m_notes.push_back(group.m_notes[i]);
 	}
+
+	// Deactivate group being merged:
+	if (group.getSerial() > 0) {
+		group.setSerial(group.getSerial() * -1);
+	} else {
+		cerr << "Strange problem merging group" << endl;
+		return false;
+	}
+
 	return true;
 }
+
+
+
+//////////////////////////////
+//
+// cmr_group_info::printNotes --
+//
+
+ostream& cmr_group_info::printNotes(ostream& output) {
+	for (int i=0; i<(int)m_notes.size(); i++) {
+		m_notes[i].printNote(output);
+		if (i < (int)m_notes.size() - 1) {
+			output << " ";
+		}
+	}
+	return output;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////
 //
-// Tool_cmr::Tool_cmr -- Set the recognized options for the tool.
+// Tool_cmr::Tool_cmr -- Constructor: set the recognized options for the tool.
 //
 
 Tool_cmr::Tool_cmr(void) {
@@ -59092,6 +59353,7 @@ Tool_cmr::Tool_cmr(void) {
 	define("leap|leap-weight=d:0.5", "weight for leapng notes");
 	define("l|local-peaks=b",      "mark local peaks");
 	define("L|only-local-peaks=b", "mark local peaks only");
+	define("note-list|notelist=b", "display extracted note lists");
 }
 
 
@@ -59154,6 +59416,7 @@ void Tool_cmr::initialize(void) {
 	m_naccentedQ   = getBoolean("not-accented");
 	m_localQ       = getBoolean("local-peaks");
 	m_localOnlyQ   = getBoolean("only-local-peaks");
+	m_notelistQ    = getBoolean("note-list");
 	if (m_localOnlyQ) {
 		m_localQ = true;
 	}
@@ -59161,14 +59424,13 @@ void Tool_cmr::initialize(void) {
 	m_marker       = getString("marker");
 	m_color        = getString("color");
 
-	cmr_note_info::m_syncopationWeight = getDouble("syncopation-weight");
-	cmr_note_info::m_leapWeight = getDouble("leap-weight");
-
 	m_smallRest    = getDouble("ignore-rest") * 4.0;  // convert from whole notes to quarter notes
 	m_cmrNum       = getInteger("number");
 	m_cmrDur       = getInteger("duration") * 4.0;    // convert from whole notes to quarter notes
 	m_infoQ        = getBoolean("info");
-	m_count        = 0;
+
+	cmr_note_info::m_syncopationWeight = getDouble("syncopation-weight");
+	cmr_note_info::m_leapWeight        = getDouble("leap-weight");
 }
 
 
@@ -59185,8 +59447,7 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 
 	m_barNum = infile.getMeasureNumbers();
 
-	// Analyze CMR for each part, starting with the
-	// highest part.
+	// Analyze CMR for each part, starting with the highest part:
 	for (int i=(int)starts.size()-1; i>=0; i--) {
 		if (m_cmrQ) {
 			processSpine(starts[i]);
@@ -59196,6 +59457,10 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 			processSpine(starts[i]);
 			processSpineFlipped(starts[i]);
 		}
+	}
+
+	if (!m_rawQ) {
+		markNotesInScore();
 	}
 
 	infile.createLinesFromTokens();
@@ -59238,189 +59503,6 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_cmr::postProcessAnalysis -- Generate summary data for CMR analyses.
-//
-
-void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
-	mergeOverlappingPeaks();
-
-	int all_note_count = countNotesInScore(infile);
-
-	int cmr_note_count = 0;
-
-	for (int i=0; i<(int)m_noteGroups.size(); i++) {
-		cmr_note_count += m_noteGroups[i].getNoteCount();
-	}
-
-	m_humdrum_text << "!!!cmr_groups: " << m_count << endl;
-	m_humdrum_text << "!!!cmr_notes: "  << cmr_note_count << endl;
-	m_humdrum_text << "!!!score_notes: " << all_note_count << endl;
-
-	// print density information for cmrs per mille
-	m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-	m_humdrum_text << "!!!cmr_note_density: " << ((double)cmr_note_count / all_note_count) * 1000 << " permil" << endl;
-	m_humdrum_text << "!!!cmr_group_density: " << ((double)m_count / all_note_count) * 1000 << " permil" << endl;
-
-	int pcounter = 1;
-
-	// print information about each note group:
-	for (int i=0; i<(int)m_noteGroups.size(); i++) {
-		if (m_noteGroups[i].getIndex() < 0) {
-			// This group has been merged into a larger one.
-			continue;
-		}
-		m_humdrum_text << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
-		m_humdrum_text << "!!!cmr_group: "     << pcounter++            << endl;
-		m_humdrum_text << "!!!start_measure: "  << m_noteGroups[i].getMeasureBegin() << endl;
-		m_humdrum_text << "!!!end_measure: "    << m_noteGroups[i].getMeasureEnd()   << endl;
-		m_humdrum_text << "!!!group_duration: " << m_noteGroups[i].getGroupDuration().getFloat()/4.0 << endl;
-		m_humdrum_text << "!!!group_pitches:";
-		for (int j=0; j<(int)m_noteGroups[i].getNoteCount(); j++) {
-			m_humdrum_text << " " << m_noteGroups[i].getNote(j);
-			m_humdrum_text << "(" << m_noteGroups[i].getNote(j)->getLineIndex() << ")";
-
-		}
-		m_humdrum_text << endl;
-		m_humdrum_text << "!!!group_cmrcount: " << m_noteGroups[i].getNoteCount() << endl;
-	}
-
-
-	if (m_infoQ) {
-		prepareHtmlReport();
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_cmr::prepareHtmlReport --
-//
-
-void Tool_cmr::prepareHtmlReport(void) {
-	m_humdrum_text << "!!@@BEGIN: PREHMTL\n";
-	m_humdrum_text << "!!@@END: PREHMTL\n";
-}
-
-
-
-//////////////////////////////
-//
-// Tool_cmr::mergeOverlappingPeaks -- Merge overlapping cmr groups.
-//    Groups that need to be merged:
-//    * Have the same track number (same staff)
-//    * Have the same MIDI pitch
-//    * Have and starttime for one group that starts before or on the
-//      endtime of another group.
-//    Merged groups are indicated as inactive if their index is set to
-//    a negative value.
-//
-
-void Tool_cmr::mergeOverlappingPeaks(void) {
-	// This algorithm does not handle multiple groups that
-	// need merging, so redo the overlap identification
-	// several more times to enture multiple groups are
-	// merged.
-
-	for (int k=0; k<100; k++) {
-		bool mergers = false;
-		for (int i=0; i<(int)m_noteGroups.size(); i++) {
-			for (int j=i+1; j<(int)m_noteGroups.size(); j++) {
-				mergers |= checkGroupPairForMerger(m_noteGroups[i].getIndex(), m_noteGroups[j].getIndex());
-			}
-		}
-		if (!mergers) {
-			break;
-		}
-	}
-
-	// Re-calculate m_count (number of cmr groups), skipping merged groups:
-	for (int i=0; i<(int)m_noteGroups.size(); i++) {
-		if (m_noteGroups[i].getIndex() >= 0) {
-			m_count++;
-		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_cmr::checkGroupPairForMerger --
-//    * Have and starttime for one group that starts before or on the
-//      endtime of another group.
-//    Merged groups are indicated as inactive if their index is set to
-//    a negative value.
-// Return value is true if there was a merger; otherwise, returns false.
-//
-
-bool Tool_cmr::checkGroupPairForMerger(int index1, int index2) {
-
-	// Groups must not have been merged already:
-	if (m_noteGroups[index1].getIndex() < 0) {
-		return false;
-	}
-	if (m_noteGroups[index2].getIndex() < 0) {
-		return false;
-	}
-
-	// Groups must have the same track number (i.e., the same staff/part):
-	if (m_noteGroups[index1].getTrack() != m_noteGroups[index2].getTrack()) {
-		return false;
-	}
-
-	// Groups must have the same MIDI pitch:
-
-	// if (m_cmrPitch[index1].empty()) {
-	// 	return false;
-	// }
-	// if (m_cmrPitch[index2].empty()) {
-	// 	return false;
-	// }
-
-
-	int midi1 = m_noteGroups[index1].getMidiPitch();
-	int midi2 = m_noteGroups[index2].getMidiPitch();
-	if (midi1 != midi2) {
-		return false;
-	}
-
-	// Check if they overlap:
-	HumNum start1 = m_noteGroups[index1].getStartTime();
-	HumNum start2 = m_noteGroups[index2].getStartTime();
-	HumNum end1   = m_noteGroups[index1].getEndTime();
-	HumNum end2   = m_noteGroups[index2].getEndTime();
-
-	bool mergeQ = false;
-	bool flipQ  = false;
-	if (start1 < start2) {
-		if (start2 <= end1) {
-			mergeQ = true;
-		}
-	} else {
-		if (start1 <= end2) {
-			flipQ = true;
-			mergeQ = true;
-		}
-	}
-
-	if (mergeQ == false) {
-		return false;
-	}
-
-	// merge the two groups:
-	if (flipQ) {
-		int tempi = index1;
-		index1 = index2;
-		index2 = tempi;
-	}
-
-	return m_noteGroups[index1].mergeGroup(m_noteGroups[index2]);
-}
-	
-
-//////////////////////////////
-//
 // Tool_cmr::processSpine -- Process one part.  Only the first voice/layer
 //    on the staff will be processed (so only the top part if there is a divisi).
 //
@@ -59433,6 +59515,10 @@ void Tool_cmr::processSpine(HTp startok) {
 	// highlight both the starting note and any tied notes to that
 	// starting note later).
 	vector<vector<HTp>> notelist = getNoteList(startok);
+
+	if (m_notelistQ) {
+		printNoteList(notelist);
+	}
 
 	// midinums: MIDI note numbers for each note (with rests being 0).
 	vector<int> midinums = getMidiNumbers(notelist);
@@ -59464,41 +59550,6 @@ void Tool_cmr::processSpine(HTp startok) {
 
 	if (m_rawQ) {
 		printData(notelist, midinums, cmrnotesQ);
-	} else {
-		markNotesInScore(cmrnotelist, globalcmrnotes);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_cmr::markNotes -- mark notes in list that are true
-//     with given marker.
-//
-
-void Tool_cmr::markNotes(vector<vector<HTp>>& notelist,
-		vector<bool>& cmrnotesQ, const string& marker) {
-	bool negative = false;
-	if (marker == m_local_marker_n) {
-		negative = true;
-	}
-	for (int i=0; i<(int)cmrnotesQ.size(); i++) {
-		if (!cmrnotesQ[i]) {
-			continue;
-		}
-		for (int j=0; j<(int)notelist.at(i).size(); j++) {
-			string text = *notelist[i][j];
-			if (text.find(marker) == string::npos) {
-				text += marker;
-				notelist[i][j]->setText(text);
-				if (negative) {
-					m_local_count_n++;
-				} else {
-					m_local_count++;
-				}
-			}
-		}
 	}
 }
 
@@ -59550,11 +59601,260 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 
 	if (m_rawQ) {
 		printData(notelist, midinums, cmrnotesQ);
-	} else {
-		markNotesInScore(cmrnotelist, globalcmrnotes);
 	}
 }
 
+
+
+//////////////////////////////
+//
+// Tool_cmr::postProcessAnalysis -- Generate summary data for CMR analyses.
+//
+
+void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
+	mergeOverlappingPeaks();
+	printStatistics(infile);
+
+	if (m_infoQ) {
+		prepareHtmlReport();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// printStatistics --
+//
+
+void Tool_cmr::printStatistics(HumdrumFile& infile) {
+	int all_note_count = countNotesInScore(infile);
+
+	m_humdrum_text << "!!!!!!!!!! CMR INFO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!"  << endl;
+
+	m_humdrum_text << "!!!cmr_groups: "  << getGroupCount()     << endl;
+	m_humdrum_text << "!!!cmr_notes: "   << getGroupNoteCount() << endl;
+	m_humdrum_text << "!!!score_notes: " << all_note_count      << endl;
+
+	double groupDensity = ((double)getGroupCount() / all_note_count);
+	double groupNoteDensity = ((double)getGroupNoteCount() / all_note_count);
+
+	m_humdrum_text << "!!!cmr_group_density: " << groupDensity * 1000.0 << " permil" << endl;
+	m_humdrum_text << "!!!cmr_note_density: "  << groupNoteDensity * 1000.0 << " permil" << endl;
+
+	printGroupStatistics();
+}
+
+
+
+/////////////////////////////
+//
+// printGroupStatistics -- Print information about individual CMR groups.
+//
+
+void Tool_cmr::printGroupStatistics(void) {
+	int pcounter = 1;
+	// print information about each note group:
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		if (!m_noteGroups[i].isValid()) {
+			continue;
+		}
+		double groupDuration = m_noteGroups[i].getGroupDuration().getFloat() / 4.0;
+
+		m_humdrum_text << "!!!!!!!!!! CMR GROUP INFO !!!!!!!!!!!!!!!!!!!!!!!"               << endl;
+		m_humdrum_text << "!!!cmr_group_num: "     << pcounter++                            << endl;
+		m_humdrum_text << "!!!cmr_track: "         << m_noteGroups[i].getTrack()            << endl;
+		m_humdrum_text << "!!!cmr_start_line: "    << m_noteGroups[i].getStartLineNumber()  << endl;
+		m_humdrum_text << "!!!cmr_start_field: "   << m_noteGroups[i].getStartFieldNumber() << endl;
+		m_humdrum_text << "!!!cmr_start_measure: " << m_noteGroups[i].getMeasureBegin()     << endl;
+		m_humdrum_text << "!!!cmr_end_measure: "   << m_noteGroups[i].getMeasureEnd()       << endl;
+		m_humdrum_text << "!!!cmr_duration: "      << groupDuration                         << endl;
+		m_humdrum_text << "!!!cmr_strength: "      << m_noteGroups[i].getGroupStrength()    << endl;
+		m_humdrum_text << "!!!cmr_note_count: "    << m_noteGroups[i].getNoteCount()        << endl;
+		m_humdrum_text << "!!!cmr_pitches: ";
+		m_noteGroups[i].printNotes(m_humdrum_text);
+		m_humdrum_text << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::prepareHtmlReport -- Create HTML template for displaying CMR analysis data.
+//
+
+void Tool_cmr::prepareHtmlReport(void) {
+	m_humdrum_text << "!!@@BEGIN: PREHMTL\n";
+	m_humdrum_text << "!!@@END: PREHMTL\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::mergeOverlappingPeaks -- Merge overlapping cmr groups.
+//    Groups that need to be merged:
+//    * Have the same track number (same staff)
+//    * Have the same MIDI pitch
+//    * Have and starttime for one group that starts before or on the
+//      endtime of another group.
+//    Merged groups are indicated as inactive if their index is set to
+//    a negative value.
+//
+
+void Tool_cmr::mergeOverlappingPeaks(void) {
+	// This algorithm does not handle multiple groups that
+	// need merging, so redo the overlap identification
+	// several more times to enture multiple groups are
+	// merged (that is what the for-loop is for, which
+	// keeps merging until there are no mergers left).
+
+	for (int k=0; k<100; k++) {
+		bool mergers = false;
+		for (int i=0; i<(int)m_noteGroups.size(); i++) {
+			for (int j=i+1; j<(int)m_noteGroups.size(); j++) {
+				mergers |= checkGroupPairForMerger(m_noteGroups.at(i), m_noteGroups.at(j));
+			}
+		}
+		if (!mergers) {
+			break;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::checkGroupPairForMerger --
+//    * Have and starttime for one group that starts before or on the
+//      endtime of another group.
+//    Merged groups are indicated as inactive if their index is set to
+//    a negative value.
+// Return value is true if there was a merger; otherwise, returns false.
+//
+
+bool Tool_cmr::checkGroupPairForMerger(cmr_group_info& group1, cmr_group_info& group2) {
+	// Groups must not have been merged already:
+	if (!group1.isValid()) {
+		return false;
+	}
+	if (!group2.isValid()) {
+		return false;
+	}
+
+	// Groups must have the same track number (i.e., the same staff/part):
+	if (group1.getTrack() != group2.getTrack()) {
+		return false;
+	}
+
+	// Groups must have the same MIDI pitch:
+
+	// if (m_cmrPitch[index1].empty()) {
+	// 	return false;
+	// }
+	// if (m_cmrPitch[index2].empty()) {
+	// 	return false;
+	// }
+
+
+	int midi1 = group1.getMidiPitch();
+	int midi2 = group1.getMidiPitch();
+	if (midi1 != midi2) {
+		return false;
+	}
+
+	// Check if they overlap:
+	HumNum start1 = group1.getStartTime();
+	HumNum start2 = group2.getStartTime();
+	HumNum end1   = group1.getEndTime();
+	HumNum end2   = group2.getEndTime();
+
+	bool mergeQ = false;
+	bool flipQ  = false;
+	if (start1 < start2) {
+		if (start2 <= end1) {
+			mergeQ = true;
+		}
+	} else {
+		if (start1 <= end2) {
+			flipQ = true;
+			mergeQ = true;
+		}
+	}
+
+	if (mergeQ == false) {
+		return false;
+	}
+
+	// merge the two groups:
+	if (flipQ) {
+		cerr << "STRANG PROBLEM NEED TO FLIP" << endl;
+		// int tempi = index1;
+		// index1 = index2;
+		// index2 = tempi;
+	}
+
+	return group1.mergeGroup(group2);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::printNoteList -- For debugging.
+//
+
+void Tool_cmr::printNoteList(vector<vector<HTp>>& notelist) {
+	cerr << "NOTELIST =========================================" << endl;
+	for (int i=0; i<(int)notelist.size(); i++) {
+		for (int j=0; j<(int)notelist[i].size(); j++) {
+			cerr << notelist[i][j] << " ";
+		}
+		cerr << endl;
+	}
+	cerr << "==================================================" << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::markNotes -- mark notes in list that are true
+//     with given marker.
+//
+
+void Tool_cmr::markNotes(vector<vector<HTp>>& notelist, vector<bool> cmrnotesQ, const string& marker) {
+	bool negative = false;
+	if (marker == m_local_marker_n) {
+		negative = true;
+	}
+	for (int i=0; i<(int)cmrnotesQ.size(); i++) {
+		if (!cmrnotesQ[i]) {
+			continue;
+		}
+		for (int j=0; j<(int)notelist.at(i).size(); j++) {
+			string text = *notelist[i][j];
+			if (text.find(marker) == string::npos) {
+				text += marker;
+				notelist[i][j]->setText(text);
+				if (negative) {
+					m_local_count_n++;
+				} else {
+					m_local_count++;
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::flipMidiNumbers -- Invert midi numbers to search for minima rather than maxima.
+//
 
 vector<int> Tool_cmr::flipMidiNumbers(vector<int>& midinums) {
 	for (int i=0; i<(int)midinums.size(); i++) {
@@ -59567,20 +59867,17 @@ vector<int> Tool_cmr::flipMidiNumbers(vector<int>& midinums) {
 	return midinums;
 }
 
+
+
 //////////////////////////////
 //
-// Tool_cmr::markNotesInScore --
+// Tool_cmr::markNotesInScore -- Mark all valid CMR notes.
 //
 
-void Tool_cmr::markNotesInScore(vector<vector<HTp>>& cmrnotelist, vector<bool>& iscmr) {
-	for (int i=0; i<(int)cmrnotelist.size(); i++) {
-		if (!iscmr[i]) {
-			continue;
-		}
-		for (int j=0; j<(int)cmrnotelist[i].size(); j++) {
-			string text = *(cmrnotelist[i][j]);
-			text += m_marker;
-			cmrnotelist[i][j]->setText(text);
+void Tool_cmr::markNotesInScore(void) {
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		if (m_noteGroups[i].isValid()) {
+			m_noteGroups[i].markNotes(m_marker);
 		}
 	}
 }
@@ -59684,14 +59981,15 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 	// Set initial positions of globalcmrnotes to false:
 	globalcmrnotes.resize(cmrmidinums.size());
 	fill(globalcmrnotes.begin(), globalcmrnotes.end(), false);
-	// The code below (under Algorithms) will set notes identified as a "global cmr" to true
-	// in this vector.
 
-	// Get the timestamps of all local cmr notes:
+	// Get the timestamps of all local peak notes:
 	vector<double> timestamps(notes.size(), 0.0);
 	for (int i=0; i<(int)notes.size(); i++) {
 		timestamps[i] = notes[i][0]->getDurationFromStart().getFloat();
 	}
+
+	// The code below (under Algorithms) will set notes identified as a "global cmr" to true
+	// in this vector.
 
 	///////////////////////////////////////////
 	//
@@ -59713,10 +60011,10 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 
 	for (int i=0; i<(int)cmrmidinums.size() - m_cmrNum; i++) {
 		bool match = true;
-		bool accented = isMelodicallyAccented(notes[i][0]);
+		bool accented = isMelodicallyAccented(notes.at(i).at(0));
 		for (int j=1; j<m_cmrNum; j++) {
-			accented |= isMelodicallyAccented(notes[i+j][0]);
-			if (cmrmidinums[i+j] != cmrmidinums[i+j-1]) {
+			accented |= isMelodicallyAccented(notes.at(i+j).at(0));
+			if (cmrmidinums.at(i+j) != cmrmidinums.at(i+j-1)) {
 				match = false;
 				break;
 			}
@@ -59731,32 +60029,20 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 			continue;
 		}
 
-		HumNum duration = timestamps[i + m_cmrNum - 1] - timestamps[i];
+		HumNum duration = timestamps.at(i + m_cmrNum - 1) - timestamps.at(i);
 		if (duration.getFloat() > m_cmrDur) {
 			continue;
 		}
 
-		// data for every sub-sequeunce
-		m_count += 1;
-
-/* Need to convert these lines:
-		int line = notes[i][0]->getLineIndex();
-		int line2 = notes[i + m_cmrNum - 1].back()->getLineIndex();
-		m_cmrMeasureBegin.push_back(m_barNum[line]); //not sure
-		m_cmrMeasureEnd.push_back(m_barNum[line2]); //not sure
-*/
-
-		vector<HTp> pnotes;
+		// Store the (potential) CMR:
+		m_noteGroups.resize(m_noteGroups.size() + 1);
 		for (int j=0; j<m_cmrNum; j++) {
-			pnotes.push_back(notes.at(i+j).at(0));
+			m_noteGroups.back().addNote(notes.at(i+j), m_barNum);
 		}
-/*  need to convert these lines:
-		m_tokens.push_back(pnotes); //not sure
-		(int)m_noteGroups[i].m_notes.size().push_back((int)pnotes.size());
-*/
 
 		// variables to do cmr group mergers later:
-		m_noteGroups[i].setIndex(i+1);
+
+		m_noteGroups.back().setSerial(i+1);
 
 		for (int j=0; j<m_cmrNum; j++) {
 			globalcmrnotes[i+j] = true;
@@ -59918,26 +60204,6 @@ void  Tool_cmr::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 
 
 
-//////////////////////////////
-//
-// Tool_cmr::getMetricLevel --
-//
-
-int  Tool_cmr::getMetricLevel(HTp token) {
-	HumNum beat = token->getDurationFromBarline();
-	if (!beat.isInteger()) { // anything less than quarter note level
-		return -1;
-	}
-	if (beat.getNumerator() % 4 == 0) { // whole note level
-		return 2;
-	}
-	if (beat.getNumerator() % 2 == 0) { // half note level
-		return 1;
-	} else { // quarter note level
-		return 0;
-	}
-}
-
 
 
 //////////////////////////////
@@ -59945,37 +60211,8 @@ int  Tool_cmr::getMetricLevel(HTp token) {
 // Tool_cmr::isMelodicallyAccented --
 //
 
-bool  Tool_cmr::isMelodicallyAccented(HTp token) {
-	return hasLeapBefore(token) || isSyncopated(token);
-}
-
-
-//////////////////////////////
-//
-// Tool_cmr::hasLeapBefore --
-//
-
-bool  Tool_cmr::hasLeapBefore(HTp token) {
-	HTp current = token->getPreviousToken();
-	int startNote = token->getMidiPitch();
-	while (current) {
-		if (!current->isData()) {
-			current = current->getPreviousToken();
-			continue;
-		}
-		if (current->isNull()) {
-			current = current->getPreviousToken();
-			continue;
-		}
-		if (current->isRest()) {
-			current = current->getPreviousToken();
-			continue;
-		}
-		int testNote = current->getMidiPitch();
-		int interval = startNote - testNote;
-		return interval > 2;
-	}
-	return false;
+bool Tool_cmr::isMelodicallyAccented(HTp token) {
+	return cmr_note_info::isLeapBefore(token) || cmr_note_info::isSyncopated(token);
 }
 
 
@@ -59985,25 +60222,16 @@ bool  Tool_cmr::hasLeapBefore(HTp token) {
 // Tool_cmr::isSyncopated --
 //
 
-bool  Tool_cmr::isSyncopated(HTp token) {
-	HumNum dur = token->getTiedDuration();
-	double logDur = log2(dur.getFloat());
-	int metLev = getMetricLevel(token);
-	if (metLev >= 2) { // no syncopations occuring on whole-note level or higher
-		return false;
-	}
-	if (logDur > metLev) {
-		return true;
-	} else {
-		return false;
-	}
+bool Tool_cmr::isSyncopated(HTp token) {
+	return cmr_note_info::isSyncopated(token);
 }
 
 
 
 //////////////////////////////
 //
-// Tool_cmr::countNotesInScore --
+// Tool_cmr::countNotesInScore -- Count the number of notes in a score,
+//     ignoring tied notes that are not attacks, and treating chords as a single note.
 //
 
 int Tool_cmr::countNotesInScore(HumdrumFile& infile) {
@@ -60031,6 +60259,40 @@ int Tool_cmr::countNotesInScore(HumdrumFile& infile) {
 		}
 	}
 	return counter;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::getGroupCount -- Return the number of groups.
+//
+
+int Tool_cmr::getGroupCount(void) {
+	int output = 0;
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		if (m_noteGroups[i].isValid()) {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::getGroupNoteCount -- Return the number notes in all groups.
+//
+
+int Tool_cmr::getGroupNoteCount(void) {
+	int output = 0;
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		if (m_noteGroups[i].isValid()) {
+			output += m_noteGroups[i].getNoteCount();
+		}
+	}
+	return output;
 }
 
 
