@@ -144,8 +144,8 @@ class Tool_cmr : public HumTool {
 		void             identifyPeakSequence    (std::vector<bool>& globalcmrnotes,
 		                                          std::vector<int>& cmrmidinums,
 		                                          std::vector<std::vector<HTp>>& notes);
-		std::vector<int> getMidiNumbers          (std::vector<std::vector<HTp>>& notelist);
-		std::vector<std::vector<HTp>> getNoteList(HTp starting);
+		void             getMidiNumbers          (std::vector<int>& midinotes, std::vector<std::vector<HTp>>& notelist);
+		void             getNoteList             (std::vector<std::vector<HTp>>& notelist, HTp starting);
 		void             printData               (std::vector<std::vector<HTp>>& notelist,
 		                                          std::vector<int>& midinums,
 		                                          std::vector<bool>& cmrnotes);

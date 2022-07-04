@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  3 07:12:08 PDT 2022
+// Last Modified: Sun Jul  3 20:15:49 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6038,8 +6038,8 @@ class Tool_cmr : public HumTool {
 		void             identifyPeakSequence    (std::vector<bool>& globalcmrnotes,
 		                                          std::vector<int>& cmrmidinums,
 		                                          std::vector<std::vector<HTp>>& notes);
-		std::vector<int> getMidiNumbers          (std::vector<std::vector<HTp>>& notelist);
-		std::vector<std::vector<HTp>> getNoteList(HTp starting);
+		void             getMidiNumbers          (std::vector<int>& midinotes, std::vector<std::vector<HTp>>& notelist);
+		void             getNoteList             (std::vector<std::vector<HTp>>& notelist, HTp starting);
 		void             printData               (std::vector<std::vector<HTp>>& notelist,
 		                                          std::vector<int>& midinums,
 		                                          std::vector<bool>& cmrnotes);

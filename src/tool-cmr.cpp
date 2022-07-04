@@ -929,14 +929,16 @@ void Tool_cmr::processSpine(HTp startok) {
 	// tied notes after the first one (this is so that we can
 	// highlight both the starting note and any tied notes to that
 	// starting note later).
-	vector<vector<HTp>> notelist = getNoteList(startok);
+	vector<vector<HTp>> notelist;
+	getNoteList(notelist, startok);
 
 	if (m_notelistQ) {
 		printNoteList(notelist);
 	}
 
 	// midinums: MIDI note numbers for each note (with rests being 0).
-	vector<int> midinums = getMidiNumbers(notelist);
+	vector<int> midinums;
+	getMidiNumbers(midinums, notelist);
 
 	// cmrnotesQ: True = the note is a local high pitch.
 	vector<bool> cmrnotesQ(midinums.size(), false);
@@ -955,7 +957,8 @@ void Tool_cmr::processSpine(HTp startok) {
 	getLocalPeakNotes(cmrnotelist, notelist, cmrnotesQ);
 
 	// cmrmidinums: MIDI note numbers for cmrnotelist notes.
-	vector<int> cmrmidinums = getMidiNumbers(cmrnotelist);
+	vector<int> cmrmidinums;
+	getMidiNumbers(cmrmidinums, cmrnotelist);
 
 	// globalcmrnotes: boolean list that indicates if a local
 	// cmr note is part of a longer sequence of cmr notes.
@@ -983,10 +986,12 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 	// tied notes after the first one (this is so that we can
 	// highlight both the starting note and any tied notes to that
 	// starting note later).
-	vector<vector<HTp>> notelist = getNoteList(startok);
+	vector<vector<HTp>> notelist;
+	getNoteList(notelist, startok);
 
 	// midinums: MIDI note numbers for each note (with rests being 0).
-	vector<int> midinums = getMidiNumbers(notelist);
+	vector<int> midinums;
+	getMidiNumbers(midinums, notelist);
 	midinums = flipMidiNumbers(midinums);
 
 	// cmrnotesQ: True = the note is a local high pitch.
@@ -1006,7 +1011,8 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 	getLocalPeakNotes(cmrnotelist, notelist, cmrnotesQ);
 
 	// cmrmidinums: MIDI note numbers for cmrnotelist notes.
-	vector<int> cmrmidinums = getMidiNumbers(cmrnotelist);
+	vector<int> cmrmidinums;
+	getMidiNumbers(cmrmidinums, cmrnotelist);
 
 	// globalcmrnotes: boolean list that indicates if a local
 	// cmr note is part of a longer sequence of cmr notes.
@@ -1555,16 +1561,16 @@ void Tool_cmr::printData(vector<vector<HTp>>& notelist, vector<int>& midinums, v
 //    60 = middle C (C4), 62 = D4, 72 = C5, 48 = C3.
 //
 
-vector<int> Tool_cmr::getMidiNumbers(vector<vector<HTp>>& notelist) {
-	vector<int> output(notelist.size(), 0);  // fill with rests by default
+void Tool_cmr::getMidiNumbers(vector<int>& midinums, vector<vector<HTp>>& notelist) {
+	midinums.resize(notelist.size());
+	fill(midinums.begin(), midinums.end(), 0); // fill with rests by default
 	for (int i=0; i<(int)notelist.size(); i++) {
-		output[i] = Convert::kernToMidiNoteNumber(notelist.at(i).at(0));
-		if (output[i] < 0) {
+		midinums[i] = Convert::kernToMidiNoteNumber(notelist.at(i).at(0));
+		if (midinums[i] < 0) {
 			// Set rests to be 0
-			output[i] = 0;
+			midinums[i] = 0;
 		}
 	}
-	return output;
 }
 
 
@@ -1579,41 +1585,38 @@ vector<int> Tool_cmr::getMidiNumbers(vector<vector<HTp>>& notelist) {
 //     so that they can be marked and highlighted in the score.
 //
 
-vector<vector<HTp>> Tool_cmr::getNoteList(HTp starting) {
-	vector<vector<HTp>> tempout;
-	tempout.reserve(2000);
+void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
+	notelist.reserve(2000);
 
-	HTp previous = starting;
+	HTp previous = NULL;
 	HTp current = starting;
 	while (current) {
 		if (!current->isData()) {
-			previous = current;
 			current = current->getNextToken();
 			continue;
 		}
 		if (current->isNull()) {
-			previous = current;
 			current = current->getNextToken();
 			continue;
 		}
 		if (current->isNoteSustain()) {
-			if (tempout.size() > 0) {
-				tempout.back().push_back(current);
+			if (notelist.size() > 0) {
+				notelist.back().push_back(current);
 			}
 			previous = current;
 			current = current->getNextToken();
 			continue;
 		}
 		if (current->isRest()) {
-			if (previous->isRest()) {
-				// do not store previous rest
+			if ((!notelist.empty()) && notelist.back().at(0)->isRest()) {
+				notelist.back().push_back(current);
 				previous = current;
 				current = current->getNextToken();
 				continue;
 			}
 		}
-		tempout.resize(tempout.size() + 1);
-		tempout.back().push_back(current);
+		notelist.resize(notelist.size() + 1);
+		notelist.back().push_back(current);
 		if (!current->isRest()) {
 			m_noteCount++;
 		}
@@ -1623,22 +1626,20 @@ vector<vector<HTp>> Tool_cmr::getNoteList(HTp starting) {
 
 	// Remove any rests that are shorter or equal to m_shortRest:
 	vector<vector<HTp>> output;
-	output.reserve(tempout.size());
-	for (int i=0; i<(int)tempout.size() - 1; i++) {
-		if (!tempout[i][0]->isRest()) {
-			output.push_back(tempout[i]);
+	output.reserve(notelist.size());
+	for (int i=0; i<(int)notelist.size() - 1; i++) {
+		if (!notelist.at(i).at(0)->isRest()) {
+			output.push_back(notelist.at(i));
 			continue;
 		}
 		// get the duration of the (multi-rest):
-		HumNum restStart = tempout[i][0]->getDurationFromStart();
-		HumNum noteStart = tempout[i+1][0]->getDurationFromStart();
+		HumNum restStart = notelist.at(i).at(0)->getDurationFromStart();
+		HumNum noteStart = notelist.at(i+1).at(0)->getDurationFromStart();
 		HumNum duration = noteStart - restStart;
 		if (duration.getFloat() > m_smallRest) {
-			output.push_back(tempout[i]);
+			output.push_back(notelist.at(i));
 		}
 	}
-
-	return output;
 }
 
 
@@ -1651,8 +1652,8 @@ vector<vector<HTp>> Tool_cmr::getNoteList(HTp starting) {
 void  Tool_cmr::getDurations(vector<double>& durations, vector<vector<HTp>>& notelist) {
 	durations.resize(notelist.size());
 	for (int i=0; i<(int)notelist.size(); i++) {
-		HumNum duration = notelist[i][0]->getTiedDuration();
-		durations[i] = duration.getFloat();
+		HumNum duration = notelist.at(i).at(0)->getTiedDuration();
+		durations.at(i) = duration.getFloat();
 	}
 }
 
@@ -1666,13 +1667,13 @@ void  Tool_cmr::getDurations(vector<double>& durations, vector<vector<HTp>>& not
 void  Tool_cmr::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 	metpos.resize(notelist.size());
 	for (int i=0; i<(int)notelist.size(); i++) {
-		HumNum position = notelist[i][0]->getDurationFromBarline();
+		HumNum position = notelist.at(i).at(0)->getDurationFromBarline();
 		if (position.getDenominator() != 1) {
-			metpos[i] = false;
+			metpos.at(i) = false;
 		} if (position.getNumerator() % 4 == 0) {
-			metpos[i] = true;
+			metpos.at(i) = true;
 		} else {
-			metpos[i] = false;
+			metpos.at(i) = false;
 		}
 	}
 }
