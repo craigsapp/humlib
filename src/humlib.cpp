@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul  3 20:15:49 PDT 2022
+// Last Modified: Mon Jul  4 12:42:16 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59801,8 +59801,136 @@ void Tool_cmr::getPartNames(vector<string>& partNames, HumdrumFile& infile) {
 //
 
 void Tool_cmr::prepareHtmlReport(void) {
-	m_humdrum_text << "!!@@BEGIN: PREHMTL\n";
-	m_humdrum_text << "!!@@END: PREHMTL\n";
+	string multiline_str = R"(!!@@BEGIN: PREHTML
+!!@CONTENT:
+!!<h1 class='cmr'>Conspicuous Melodic Repetition</h1>
+!!<table class='gcmr'>
+!!   <tr><td>Group density</td><td>@{cmr_group_density}</td></tr>
+!!   <tr><td>Group note density</td><td>@{cmr_note_density}</td></tr>
+!!</table>
+!! <br/>
+!! @{printTable:}
+!!<style>
+!!   h1.cmr { font-size: 24px; }
+!!   table.cmr tr:not(:first-child):hover { background: #ff000011; }
+!!   table.cmr { max-width: 500px; }
+!!   table.gcmr td:nth-child(2) { width:100%; }
+!!   table.gcmr td:first-child {white-space: pre; text-align: right; padding-right: 10px; font-weight: bold; }
+!!   table.gcmr td:first-child::after { content: ':'; }
+!!</style>
+!!@JAVASCRIPT:
+!!function printTable(refs1, refs2, language) {
+!!   let numbers = refs2.cmr_group_num;
+!!   let durations = refs2.cmr_duration;
+!!   let pitches = refs2.cmr_pitch;
+!!   let strengths = refs2.cmr_strength;
+!!   let count = refs2.cmr_note_count;
+!!   let parts = refs2.cmr_part;
+!!   let smeasure = refs2.cmr_start_measure;
+!!   let emeasure = refs2.cmr_end_measure;
+!!   let output = '';
+!!   output += `<table class='cmr'>`;
+!!   output += '<tr>';
+!!   output += '<th>CMR</th>';
+!!   output += '<th>Notes</th>';
+!!   output += '<th>Pitch</th>';
+!!   output += '<th>Duration</th>';
+!!   output += '<th>Strength</th>';
+!!   output += '<th>Measure(s)</th>';
+!!   output += '</tr>';
+!!   for (let i=0; i<numbers.length; i++) {
+!!      output += '<tr>';
+!!      output += `<td>${numbers[i].value}</td>`;
+!!      output += `<td>${count[i].value}</td>`;
+!!      output += `<td>${pitches[i].value}</td>`;
+!!      output += `<td>${durations[i].value}</td>`;
+!!      output += `<td>${strengths[i].value}</td>`;
+!!      let location = '';
+!!      let part = parts[i].value;
+!!      let startm = parseInt(smeasure[i].value);
+!!      let endm   = parseInt(emeasure[i].value);
+!!      if (startm !== endm) {
+!!         location = `${startm}&ndash;${endm}`;
+!!      } else {
+!!         location = `${startm}`;
+!!      }
+!!      if (part) {
+!!         location = `${part}: ${location}`;
+!!      }
+!!      output += `<td>${location}</td>`;
+!!      output += '</tr>';
+!!   }
+!!   output += '</table>';
+!!   return output;
+!!}
+!!@@END: PREHTML)";
+
+    cout << multiline_str << endl;
+
+
+	// m_humdrum_text << "!!@@BEGIN: PREHMTL\n";
+	// m_humdrum_text << "!!@CONTENT:";
+	// m_humdrum_text << "!!<h1 class='cmr'>Conspicuous Melodic Repetition</h1>";
+	// m_humdrum_text << "!!<table class='gcmr'>";
+	// m_humdrum_text << "!!	  <tr><td>Group density</td><td>@{cmr_group_density}</td></tr>";
+	// m_humdrum_text << "!!	  <tr><td>Group note density</td><td>@{cmr_note_density}</td></tr>";
+	// m_humdrum_text << "!!</table>";
+	// m_humdrum_text << "!!<br/>";
+	// m_humdrum_text << "!!@{printTable:}";
+	// m_humdrum_text << "!!<style>";
+	// m_humdrum_text << "!!	  h1.cmr { font-size: 24px; }";
+	// m_humdrum_text << "!!   table.cmr tr:not(:first-child):hover { background: #ff000011; }";
+	// m_humdrum_text << "!!   table.cmr { max-width: 500px; }";
+	// m_humdrum_text << "!!   table.gcmr td:nth-child(2) { width:100%; }";
+	// m_humdrum_text << "!!   table.gcmr td:first-child {white-space: pre; text-align: right; padding-right: 10px; font-weight: bold; }";
+	// m_humdrum_text << "!!   table.gcmr td:first-child::after { content: ':'; }";
+	// m_humdrum_text << "!!</style>";
+	// m_humdrum_text << "!!@JAVASCRIPT:";
+	// m_humdrum_text << "!!function printTable(refs1, refs2, language) {";
+	// m_humdrum_text << "!!   let numbers = refs2.cmr_group_num;";
+	// m_humdrum_text << "!!   let durations = refs2.cmr_duration;";
+	// m_humdrum_text << "!!   let pitches = refs2.cmr_pitch;";
+	// m_humdrum_text << "!!   let strengths = refs2.cmr_strength;";
+	// m_humdrum_text << "!!   let count = refs2.cmr_note_count;";
+	// m_humdrum_text << "!!   let parts = refs2.cmr_part;";
+	// m_humdrum_text << "!!   let smeasure = refs2.cmr_start_measure;";
+	// m_humdrum_text << "!!   let emeasure = refs2.cmr_end_measure;";
+	// m_humdrum_text << "!!   let output = '';";
+	// m_humdrum_text << "!!   output += `<table class='cmr'>`;";
+	// m_humdrum_text << "!!   output += '<tr>';";
+	// m_humdrum_text << "!!   output += '<th>CMR</th>';";
+	// m_humdrum_text << "!!   output += '<th>Notes</th>';";
+	// m_humdrum_text << "!!   output += '<th>Pitch</th>';";
+	// m_humdrum_text << "!!   output += '<th>Duration</th>';";
+	// m_humdrum_text << "!!   output += '<th>Strength</th>';";
+	// m_humdrum_text << "!!   output += '<th>Measure(s)</th>';";
+	// m_humdrum_text << "!!   output += '</tr>';";
+	// m_humdrum_text << "!!   for (let i=0; i<numbers.length; i++) {";
+	// m_humdrum_text << "!!      output += '<tr>';";
+	// m_humdrum_text << "!!      output += `<td>${numbers[i].value}</td>`;";
+	// m_humdrum_text << "!!      output += `<td>${count[i].value}</td>`;";
+	// m_humdrum_text << "!!      output += `<td>${pitches[i].value}</td>`;";
+	// m_humdrum_text << "!!      output += `<td>${durations[i].value}</td>`;";
+	// m_humdrum_text << "!!      output += `<td>${strengths[i].value}</td>`;";
+	// m_humdrum_text << "!!      let location = '';";
+	// m_humdrum_text << "!!      let part = parts[i].value;";
+	// m_humdrum_text << "!!      let startm = parseInt(smeasure[i].value);";
+	// m_humdrum_text << "!!      let endm   = parseInt(emeasure[i].value);";
+	// m_humdrum_text << "!!      if (startm !== endm) {";
+	// m_humdrum_text << "!!         location = `${startm}&ndash;${endm}`;";
+	// m_humdrum_text << "!!      } else {";
+	// m_humdrum_text << "!!         location = `${startm}`;";
+	// m_humdrum_text << "!!      }";
+	// m_humdrum_text << "!!      if (part) {";
+	// m_humdrum_text << "!!         location = `${part}: ${location}`;";
+	// m_humdrum_text << "!!      }";
+	// m_humdrum_text << "!!      output += `<td>${location}</td>`;";
+	// m_humdrum_text << "!!      output += '</tr>';";
+	// m_humdrum_text << "!!   }";
+	// m_humdrum_text << "!!   output += '</table>';";
+	// m_humdrum_text << "!!   return output;";
+	// m_humdrum_text << "!!}";
+	// m_humdrum_text << "!!@@END: PREHMTL\n";
 }
 
 
