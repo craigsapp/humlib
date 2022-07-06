@@ -46,7 +46,7 @@ class cmr_note_info {
 		bool     hasSyncopation   (void);
 		bool     hasLeapBefore    (void);
 		void     markNote         (const std::string& marker);
-		std::ostream& printNote   (std::ostream& output = std::cout);
+		std::ostream& printNote   (std::ostream& output = std::cout, const std::string& marker = "");
 
 		static double getMetricLevel(HTp token);
 		static bool   isSyncopated(HTp token);
@@ -92,17 +92,18 @@ class cmr_group_info {
 		int     getStartFieldNumber(void);
 		int     getStartLineNumber (void);
 		void    addNote            (std::vector<HTp>& tiednotes, std::vector<int>& barnums);
-		bool    isValid            (void);
 		void    markNotes          (const std::string& marker);
 		void    setSerial          (int serial);
 		int     getSerial          (void);
-		string   getPitch          (void);
+		void    makeInvalid        (void);
+		bool    isValid            (void);
+		string  getPitch           (void);
 		HumNum  getEndTime         (void);
 		HumNum  getGroupDuration   (void);
 		HumNum  getStartTime       (void);
 		double  getGroupStrength   (void);
 		bool    mergeGroup         (cmr_group_info& group);
-		std::ostream& printNotes   (std::ostream& output = std::cout);
+		std::ostream& printNotes   (std::ostream& output = std::cout, const std::string& marker = "");
 
 	private:
 		int   m_serial;                     // used to keep track of mergers
@@ -134,7 +135,7 @@ class Tool_cmr : public HumTool {
 		                                          std::vector<std::vector<HTp>>& notelist);
 		void             getBeat                 (std::vector<bool>& metpos,
 		                                          std::vector<std::vector<HTp>>& notelist);
-		bool             isMelodicallyAccented   (HTp token);
+		bool             isMelodicallyAccented   (int index);
 		bool             hasLeapBefore           (HTp token);
 		bool             isSyncopated            (HTp token);
 		void             getLocalPeakNotes       (std::vector<std::vector<HTp>>& newnotelist,
@@ -145,6 +146,9 @@ class Tool_cmr : public HumTool {
 		                                          std::vector<int>& cmrmidinums,
 		                                          std::vector<std::vector<HTp>>& notes);
 		void             getMidiNumbers          (std::vector<int>& midinotes, std::vector<std::vector<HTp>>& notelist);
+		void             getMetlev               (std::vector<double>& metlevs, std::vector<std::vector<HTp>>& notelist);
+		void             getSyncopation          (std::vector<bool>& syncopation, std::vector<std::vector<HTp>>& notelist);
+		void             getLeapBefore           (std::vector<bool>& leap, std::vector<int>& midinums);
 		void             getNoteList             (std::vector<std::vector<HTp>>& notelist, HTp starting);
 		void             printData               (std::vector<std::vector<HTp>>& notelist,
 		                                          std::vector<int>& midinums,
@@ -153,22 +157,23 @@ class Tool_cmr : public HumTool {
 		void             mergeOverlappingPeaks   (void);
 		bool             checkGroupPairForMerger (cmr_group_info& index1, cmr_group_info& index2);
 		int              countNotesInScore       (HumdrumFile& infile);
-		std::vector<int> flipMidiNumbers         (std::vector<int>& midinums);
+		void             flipMidiNumbers         (std::vector<int>& midinums);
 		void             markNotes               (std::vector<std::vector<HTp>>& noteslist, std::vector<bool> cmrnotesQ, const std::string& marker);
 		void             postProcessAnalysis     (HumdrumFile& infile);
 		void             prepareHtmlReport       (void);
-		void             printNoteList           (std::vector<std::vector<HTp>>& notelist);
+		void             printAnalysisData       (void);
 		int              getGroupCount           (void);
 		int              getGroupNoteCount       (void);
 		void             printStatistics         (HumdrumFile& infile);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
+		void             checkForCmr             (int index);
 
 	private:
 		// Command-line options:
 		bool        m_rawQ        = false;       // don't print score (only analysis)
-		bool        m_cmrQ        = false;       // analyze only cmrs
-		bool        m_ncmrQ       = false;       // analyze only negative cmrs (troughs)
+		bool        m_peaksQ      = false;       // analyze only positive cmrs (peaks)
+		bool        m_npeaksQ     = false;       // analyze only negative cmrs (troughs)
 		bool        m_naccentedQ  = false;       // analyze cmrs without melodic accentation
 		bool        m_infoQ       = false;       // used with -i option: display info only
 		bool        m_localQ      = false;       // used with -l option: mark all local peaks
@@ -196,8 +201,25 @@ class Tool_cmr : public HumTool {
 		std::vector<std::vector<HTp>> notelist;  // list of all notes in a part before analysis.
 		std::vector<int>    m_barNum;            // starting bar number of lines in input score.
 
-		// m_noteGroups == storage for analized CMRs.
+		// m_noteGroups == Storage for analized CMRs.
 		std::vector<cmr_group_info> m_noteGroups;
+
+		// m_partNames == Names of the parts (or prefferably abbreviations)
+		std::vector<std::string> m_partNames;
+
+		// m_track == Current track being processed.
+		int m_track = 0;
+
+		// m_showMergedQ == Show merged groups in output list.
+		bool m_showMergedQ = false;
+
+		// variables for doing CMR analysis (reset for each part)
+		std::vector<std::vector<HTp>> m_notelist; // **kern tokens (each entry is a tied group)
+		std::vector<int>         m_midinums;      // MIDI note for first entry for teach tied group
+		std::vector<bool>        m_localpeaks;    // True if higher (or lower for negative search) than adjacent notes.
+		std::vector<double>      m_metlevs;       // True if higher (or lower for negative search) than adjacent notes.
+		std::vector<bool>        m_syncopation;   // True if note is syncopated.
+		std::vector<bool>        m_leapbefore;    // True if note has a leap before it.
 
 };
 
