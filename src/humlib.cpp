@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  8 09:40:30 PDT 2022
+// Last Modified: Fri Jul  8 10:13:14 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59923,7 +59923,7 @@ void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
 //
 
 void Tool_cmr::finally(void) {
-	cout << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
+	cerr << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
 	// calculate the mean and standard deviation of CMR counts and CMR note densities
 	// that were stored in the printSummaryStatistics function above.
 	// There are two helper function that can be used here:

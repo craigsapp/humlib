@@ -1250,7 +1250,7 @@ void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
 //
 
 void Tool_cmr::finally(void) {
-	cout << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
+	cerr << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
 	// calculate the mean and standard deviation of CMR counts and CMR note densities
 	// that were stored in the printSummaryStatistics function above.
 	// There are two helper function that can be used here:
