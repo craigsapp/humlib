@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  6 11:04:13 PDT 2022
+// Last Modified: Fri Jul  8 09:40:30 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -1085,6 +1085,21 @@ double Convert::standardDeviation(const vector<double>& x) {
 }
 
 
+double Convert::standardDeviation(const vector<int>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / x.size();
+	return sqrt(variance);
+}
+
+
 
 //////////////////////////////
 //
@@ -1107,6 +1122,21 @@ double Convert::standardDeviationSample(const vector<double>& x) {
 }
 
 
+double Convert::standardDeviationSample(const vector<int>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / ((int)x.size()-1);
+	return sqrt(variance);
+}
+
+
 
 //////////////////////////////
 //
@@ -1114,6 +1144,15 @@ double Convert::standardDeviationSample(const vector<double>& x) {
 //
 
 double Convert::mean(const std::vector<double>& x) {
+	double output = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		output += x[i];
+	}
+	return output / (int)x.size();
+}
+
+
+double Convert::mean(const std::vector<int>& x) {
 	double output = 0.0;
 	for (int i=0; i<(int)x.size(); i++) {
 		output += x[i];
@@ -59470,6 +59509,8 @@ Tool_cmr::Tool_cmr(void) {
 	define("l|local-peaks=b",           "mark local peaks");
 	define("L|only-local-peaks=b",      "mark local peaks only");
 	define("merge|merged|show-merged=b","print merged groups");
+	define("S|summary=b",               "summarize CMRs for multiple inputs");
+	define("D|debug=b",                 "print debug information");
 }
 
 
@@ -59533,6 +59574,8 @@ void Tool_cmr::initialize(void) {
 	m_localQ       = getBoolean("local-peaks");
 	m_localOnlyQ   = getBoolean("only-local-peaks");
 	m_showMergedQ  = getBoolean("show-merged");
+	m_summaryQ     = getBoolean("summary");
+	m_debugQ       = getBoolean("debug");
 	if (m_localOnlyQ) {
 		m_localQ = true;
 	}
@@ -59547,6 +59590,8 @@ void Tool_cmr::initialize(void) {
 
 	cmr_note_info::m_syncopationWeight = getDouble("syncopation-weight");
 	cmr_note_info::m_leapWeight        = getDouble("leap-weight");
+
+	m_noteGroups.clear();
 }
 
 
@@ -59578,13 +59623,12 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 		}
 	}
 
-	if (!m_rawQ) {
+	if (!(m_rawQ || m_summaryQ)) {
 		markNotesInScore();
 	}
 
-	infile.createLinesFromTokens();
-
-	if (!m_rawQ) {
+	if (!(m_rawQ || m_summaryQ)) {
+		infile.createLinesFromTokens();
 		m_humdrum_text << infile;
 
 		if (!m_localOnlyQ) {
@@ -59719,14 +59763,19 @@ void Tool_cmr::checkForCmr(int index) {
 		return;
 	}
 
-cerr << "CHECKING FOR CMR AT PEAK " << m_notelist.at(index).at(0) << " ON LINE " << m_notelist.at(index).at(0)->getLineNumber() << endl;
+	if (m_debugQ) {
+		cerr << "CHECKING FOR CMR AT PEAK " << m_notelist.at(index).at(0) << " ON LINE " << m_notelist.at(index).at(0)->getLineNumber() << endl;
+	}
 
 	// The local peak note must have a leap before it (or a rest)
 	// and/or a syncopation to trigger a CMR search:
 	if (!(m_syncopation.at(index) || m_leapbefore.at(index))) {
 		return;
 	}
-cerr << "\tTHE NOTE HAS SYNCOPATION OR LEAP" << endl;
+
+	if (m_debugQ) {
+		cerr << "\tTHE NOTE HAS SYNCOPATION OR LEAP" << endl;
+	}
 
 	int pitch = m_midinums.at(index);
 
@@ -59789,17 +59838,21 @@ cerr << "\tTHE NOTE HAS SYNCOPATION OR LEAP" << endl;
 	}
 
 	if ((int)candidates.size() < m_cmrNum) {
-cerr << "\tNOT ENOUGH NOTES " << m_cmrNum << endl;
+		if (m_debugQ) {
+			cerr << "\tNOT ENOUGH NOTES " << m_cmrNum << endl;
+		}
 		// Not enough note to consider a CMR.
 		return;
 	}
 
-cerr << "\tCANDIDATES: ";
-for (int z=0; z<(int)candidates.size(); z++) {
-HTp token = m_notelist.at(candidates[z]).at(0);
-	cerr << token << "(" << token->getLineNumber() << ") ";
-}
-cerr << endl;
+	if (m_debugQ) {
+		cerr << "\tCANDIDATES: ";
+		for (int z=0; z<(int)candidates.size(); z++) {
+		HTp token = m_notelist.at(candidates[z]).at(0);
+			cerr << token << "(" << token->getLineNumber() << ") ";
+		}
+		cerr << endl;
+	}
 
 	for (int i=0; i<(int)candidates.size() - m_cmrNum; i++) {
 		int index1 = candidates.at(i);
@@ -59830,9 +59883,13 @@ cerr << endl;
 
 void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 	mergeOverlappingPeaks();
-	printStatistics(infile);
+	if (m_summaryQ) {
+		printSummaryStatistics(infile);
+	} else {
+		printStatistics(infile);
+	}
 
-	if (m_infoQ) {
+	if (m_infoQ && !m_summaryQ) {
 		prepareHtmlReport();
 	}
 }
@@ -59841,7 +59898,45 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// printStatistics --
+// Tool_cmr::printSummaryStatistics --
+//
+
+void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
+
+	// print summary data here (one line of the spreadsheet:
+	m_free_text << "SUMMARY FOR " << infile.getFilename() << " GOES HERE" << endl;
+
+	// CMR count (getGroupCount()     CMR note density      Filename
+
+	// store the results in these two variables for later averaging and SD (defined in tool-cmr.h)
+	//	std::vector<int>      m_cmrCount;       // number of CMRs in each input file
+	//	std::vector<int>      m_cmrNoteCount;   // number of CMRs in each input file
+	//	std::vector<int>      m_scoreNoteCount;   // number of notes in each input file
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::finally --
+//
+
+void Tool_cmr::finally(void) {
+	cout << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
+	// calculate the mean and standard deviation of CMR counts and CMR note densities
+	// that were stored in the printSummaryStatistics function above.
+	// There are two helper function that can be used here:
+	// Convert::mean(vector<int>) and Convert::standardDeviation(vector<int>).
+	// Examples:
+	// double meanCmr = Convert::mean(m_cmrCount);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::printStatistics --
 //
 
 void Tool_cmr::printStatistics(HumdrumFile& infile) {
@@ -59968,8 +60063,71 @@ void Tool_cmr::getPartNames(vector<string>& partNames, HumdrumFile& infile) {
 //
 
 void Tool_cmr::prepareHtmlReport(void) {
-	m_humdrum_text << "!!@@BEGIN: PREHMTL\n";
-	m_humdrum_text << "!!@@END: PREHMTL\n";
+	string multiline_str = R"(!!@@BEGIN: PREHTML
+!!@CONTENT:
+!!<h1 class='cmr'>Conspicuous Melodic Repetition</h1>
+!!<table class='gcmr'>
+!!   <tr><td>Group density</td><td>@{cmr_group_density}</td></tr>
+!!   <tr><td>Group note density</td><td>@{cmr_note_density}</td></tr>
+!!</table>
+!! <br/>
+!! @{printTable:}
+!!<style>
+!!   h1.cmr { font-size: 24px; }
+!!   table.cmr tr:not(:first-child):hover { background: #ff000011; }
+!!   table.cmr { max-width: 500px; }
+!!   table.gcmr td:nth-child(2) { width:100%; }
+!!   table.gcmr td:first-child {white-space: pre; text-align: right; padding-right: 10px; font-weight: bold; }
+!!   table.gcmr td:first-child::after { content: ':'; }
+!!</style>
+!!@JAVASCRIPT:
+!!function printTable(refs1, refs2, language) {
+!!   let numbers = refs2.cmr_group_num;
+!!   let durations = refs2.cmr_duration;
+!!   let pitches = refs2.cmr_pitch;
+!!   let strengths = refs2.cmr_strength;
+!!   let count = refs2.cmr_note_count;
+!!   let parts = refs2.cmr_part;
+!!   let smeasure = refs2.cmr_start_measure;
+!!   let emeasure = refs2.cmr_end_measure;
+!!   let output = '';
+!!   output += `<table class='cmr'>`;
+!!   output += '<tr>';
+!!   output += '<th>CMR</th>';
+!!   output += '<th>Notes</th>';
+!!   output += '<th>Pitch</th>';
+!!   output += '<th>Duration</th>';
+!!   output += '<th>Strength</th>';
+!!   output += '<th>Measure(s)</th>';
+!!   output += '</tr>';
+!!   for (let i=0; i<numbers.length; i++) {
+!!      output += '<tr>';
+!!      output += `<td>${numbers[i].value}</td>`;
+!!      output += `<td>${count[i].value}</td>`;
+!!      output += `<td>${pitches[i].value}</td>`;
+!!      output += `<td>${durations[i].value}</td>`;
+!!      output += `<td>${strengths[i].value}</td>`;
+!!      let location = '';
+!!      let part = parts[i].value;
+!!      let startm = parseInt(smeasure[i].value);
+!!      let endm   = parseInt(emeasure[i].value);
+!!      if (startm !== endm) {
+!!         location = `${startm}&ndash;${endm}`;
+!!      } else {
+!!         location = `${startm}`;
+!!      }
+!!      if (part) {
+!!         location = `${part}: ${location}`;
+!!      }
+!!      output += `<td>${location}</td>`;
+!!      output += '</tr>';
+!!   }
+!!   output += '</table>';
+!!   return output;
+!!}
+!!@@END: PREHTML)";
+
+    m_humdrum_text << multiline_str << endl;
 }
 
 
@@ -60350,13 +60508,15 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 //
 
 void Tool_cmr::getMidiNumbers(vector<int>& midinums, vector<vector<HTp>>& notelist) {
+
 	midinums.resize(notelist.size());
+
 	fill(midinums.begin(), midinums.end(), 0); // fill with rests by default
 	for (int i=0; i<(int)notelist.size(); i++) {
-		midinums[i] = Convert::kernToMidiNoteNumber(notelist.at(i).at(0));
-		if (midinums[i] < 0) {
+		midinums.at(i) = Convert::kernToMidiNoteNumber(notelist.at(i).at(0));
+		if (midinums.at(i) < 0) {
 			// Set rests to be 0
-			midinums[i] = 0;
+			midinums.at(i) = 0;
 		}
 	}
 }
@@ -60432,6 +60592,7 @@ void Tool_cmr::getMetlev(std::vector<double>& metlevs, std::vector<std::vector<H
 //
 
 void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
+	notelist.clear();
 	notelist.reserve(2000);
 
 	HTp previous = NULL;
@@ -75513,6 +75674,7 @@ void Tool_filter::getUniversalCommandList(vector<pair<string, string> >& command
 		}
 	}
 }
+
 
 
 //////////////////////////////

@@ -249,8 +249,11 @@ class Convert {
 		static bool    isPowerOfTwo         (int value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
+		static double  standardDeviation    (const std::vector<int>& x);
 		static double  standardDeviationSample(const std::vector<double>& x);
+		static double  standardDeviationSample(const std::vector<int>& x);
 		static double  mean                 (const std::vector<double>& x);
+		static double  mean                 (const std::vector<int>& x);
 		static int     romanNumeralToInteger(const std::string& roman);
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);

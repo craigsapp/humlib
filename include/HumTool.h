@@ -26,7 +26,7 @@ namespace hum {
 class HumTool : public Options {
 	public:
 		              HumTool         (void);
-		             ~HumTool         ();
+		virtual      ~HumTool         ();
 
 		void          clearOutput     (void);
 
@@ -56,7 +56,7 @@ class HumTool : public Options {
 		ostream&      getError        (ostream& out);
 		void          setError        (const string& message);
 
-		void          finally         (void) { };
+		virtual void  finally         (void) { };
 
 	protected:
 		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
@@ -110,6 +110,7 @@ int main(int argc, char** argv) {                      \
 		interface.getError(cerr);                        \
 		return -1;                                       \
 	}                                                   \
+	interface.finally();                                \
 	return !status;                                     \
 }
 
@@ -152,6 +153,7 @@ int main(int argc, char** argv) {                                \
 		}                                                          \
 		interface.clearOutput();                                   \
 	}                                                             \
+	interface.finally();                                          \
 	return !status;                                               \
 }
 
@@ -185,6 +187,7 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
         return -1;                                               \
 	}                                                             \
+	interface.finally();                                          \
 	interface.clearOutput();                                      \
 	return !status;                                               \
 }
@@ -225,6 +228,7 @@ int main(int argc, char** argv) {                                \
 			cout << infiles[i];                                     \
 		}                                                          \
 	}                                                             \
+	interface.finally();                                          \
 	interface.clearOutput();                                      \
 	return !status;                                               \
 }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  6 11:04:13 PDT 2022
+// Last Modified: Fri Jul  8 09:40:30 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -4072,8 +4072,11 @@ class Convert {
 		static bool    isPowerOfTwo         (int value);
 		static double  pearsonCorrelation   (const std::vector<double> &x, const std::vector<double> &y);
 		static double  standardDeviation    (const std::vector<double>& x);
+		static double  standardDeviation    (const std::vector<int>& x);
 		static double  standardDeviationSample(const std::vector<double>& x);
+		static double  standardDeviationSample(const std::vector<int>& x);
 		static double  mean                 (const std::vector<double>& x);
+		static double  mean                 (const std::vector<int>& x);
 		static int     romanNumeralToInteger(const std::string& roman);
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);
@@ -5170,7 +5173,7 @@ class Options {
 class HumTool : public Options {
 	public:
 		              HumTool         (void);
-		             ~HumTool         ();
+		virtual      ~HumTool         ();
 
 		void          clearOutput     (void);
 
@@ -5200,7 +5203,7 @@ class HumTool : public Options {
 		ostream&      getError        (ostream& out);
 		void          setError        (const string& message);
 
-		void          finally         (void) { };
+		virtual void  finally         (void) { };
 
 	protected:
 		std::stringstream m_humdrum_text;  // output text in Humdrum syntax.
@@ -5254,6 +5257,7 @@ int main(int argc, char** argv) {                      \
 		interface.getError(cerr);                        \
 		return -1;                                       \
 	}                                                   \
+	interface.finally();                                \
 	return !status;                                     \
 }
 
@@ -5296,6 +5300,7 @@ int main(int argc, char** argv) {                                \
 		}                                                          \
 		interface.clearOutput();                                   \
 	}                                                             \
+	interface.finally();                                          \
 	return !status;                                               \
 }
 
@@ -5329,6 +5334,7 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
         return -1;                                               \
 	}                                                             \
+	interface.finally();                                          \
 	interface.clearOutput();                                      \
 	return !status;                                               \
 }
@@ -5369,6 +5375,7 @@ int main(int argc, char** argv) {                                \
 			cout << infiles[i];                                     \
 		}                                                          \
 	}                                                             \
+	interface.finally();                                          \
 	interface.clearOutput();                                      \
 	return !status;                                               \
 }
@@ -6016,6 +6023,7 @@ class Tool_cmr : public HumTool {
 		bool             run                     (HumdrumFile& infile);
 		bool             run                     (const std::string& indata, std::ostream& out);
 		bool             run                     (HumdrumFile& infile, std::ostream& out);
+		void             finally                 (void);
 
 	protected:
 		void             processFile             (HumdrumFile& infile);
@@ -6059,6 +6067,7 @@ class Tool_cmr : public HumTool {
 		int              getGroupCount           (void);
 		int              getGroupNoteCount       (void);
 		void             printStatistics         (HumdrumFile& infile);
+		void             printSummaryStatistics  (HumdrumFile& infile);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index);
@@ -6072,7 +6081,9 @@ class Tool_cmr : public HumTool {
 		bool        m_infoQ       = false;       // used with -i option: display info only
 		bool        m_localQ      = false;       // used with -l option: mark all local peaks
 		bool        m_localOnlyQ  = false;       // used with -L option: only mark local peaks, then exit before CMR analysis.
-		bool        m_notelistQ   = false;       // uwsed with --notelist option
+		bool        m_summaryQ    = false;       // used with -S option: summary statistics of multiple files
+		bool        m_notelistQ   = false;       // ussed with --notelist option
+		bool        m_debugQ      = false;       // ussed with --debug option
 		double      m_smallRest   = 4.0;         // Ignore rests that are 1 whole note or less
 		double      m_cmrDur      = 24.0;        // 6 whole notes maximum between m_cmrNum local maximums
 		double      m_cmrNum      = 3;           // number of local maximums in a row needed to mark in score
@@ -6114,6 +6125,11 @@ class Tool_cmr : public HumTool {
 		std::vector<double>      m_metlevs;       // True if higher (or lower for negative search) than adjacent notes.
 		std::vector<bool>        m_syncopation;   // True if note is syncopated.
 		std::vector<bool>        m_leapbefore;    // True if note has a leap before it.
+
+		// Summary statistics variables:
+		std::vector<int>         m_cmrCount;       // number of CMRs in each input file
+		std::vector<int>         m_cmrNoteCount;   // number of CMR notes in each input file
+		std::vector<int>         m_scoreNoteCount; // number of note in each input file
 
 };
 

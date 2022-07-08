@@ -122,6 +122,7 @@ class Tool_cmr : public HumTool {
 		bool             run                     (HumdrumFile& infile);
 		bool             run                     (const std::string& indata, std::ostream& out);
 		bool             run                     (HumdrumFile& infile, std::ostream& out);
+		void             finally                 (void);
 
 	protected:
 		void             processFile             (HumdrumFile& infile);
@@ -165,6 +166,7 @@ class Tool_cmr : public HumTool {
 		int              getGroupCount           (void);
 		int              getGroupNoteCount       (void);
 		void             printStatistics         (HumdrumFile& infile);
+		void             printSummaryStatistics  (HumdrumFile& infile);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index);
@@ -178,7 +180,9 @@ class Tool_cmr : public HumTool {
 		bool        m_infoQ       = false;       // used with -i option: display info only
 		bool        m_localQ      = false;       // used with -l option: mark all local peaks
 		bool        m_localOnlyQ  = false;       // used with -L option: only mark local peaks, then exit before CMR analysis.
-		bool        m_notelistQ   = false;       // uwsed with --notelist option
+		bool        m_summaryQ    = false;       // used with -S option: summary statistics of multiple files
+		bool        m_notelistQ   = false;       // ussed with --notelist option
+		bool        m_debugQ      = false;       // ussed with --debug option
 		double      m_smallRest   = 4.0;         // Ignore rests that are 1 whole note or less
 		double      m_cmrDur      = 24.0;        // 6 whole notes maximum between m_cmrNum local maximums
 		double      m_cmrNum      = 3;           // number of local maximums in a row needed to mark in score
@@ -220,6 +224,11 @@ class Tool_cmr : public HumTool {
 		std::vector<double>      m_metlevs;       // True if higher (or lower for negative search) than adjacent notes.
 		std::vector<bool>        m_syncopation;   // True if note is syncopated.
 		std::vector<bool>        m_leapbefore;    // True if note has a leap before it.
+
+		// Summary statistics variables:
+		std::vector<int>         m_cmrCount;       // number of CMRs in each input file
+		std::vector<int>         m_cmrNoteCount;   // number of CMR notes in each input file
+		std::vector<int>         m_scoreNoteCount; // number of note in each input file
 
 };
 

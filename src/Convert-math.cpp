@@ -195,6 +195,21 @@ double Convert::standardDeviation(const vector<double>& x) {
 }
 
 
+double Convert::standardDeviation(const vector<int>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / x.size();
+	return sqrt(variance);
+}
+
+
 
 //////////////////////////////
 //
@@ -217,6 +232,21 @@ double Convert::standardDeviationSample(const vector<double>& x) {
 }
 
 
+double Convert::standardDeviationSample(const vector<int>& x) {
+	double sum = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		sum += x[i];
+	}
+	double mean = sum / x.size();
+	double variance = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		variance += pow(x[i] - mean, 2);
+	}
+	variance = variance / ((int)x.size()-1);
+	return sqrt(variance);
+}
+
+
 
 //////////////////////////////
 //
@@ -224,6 +254,15 @@ double Convert::standardDeviationSample(const vector<double>& x) {
 //
 
 double Convert::mean(const std::vector<double>& x) {
+	double output = 0.0;
+	for (int i=0; i<(int)x.size(); i++) {
+		output += x[i];
+	}
+	return output / (int)x.size();
+}
+
+
+double Convert::mean(const std::vector<int>& x) {
 	double output = 0.0;
 	for (int i=0; i<(int)x.size(); i++) {
 		output += x[i];
