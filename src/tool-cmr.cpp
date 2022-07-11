@@ -1231,17 +1231,17 @@ void Tool_cmr::postProcessAnalysis(HumdrumFile& infile) {
 void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
 
 	// print summary data here (one line of the spreadsheet:
-	m_free_text << "SUMMARY FOR " << infile.getFilename() << " GOES HERE" << endl;
+	m_free_text << getGroupCount() << "	" << ((double)getGroupNoteCount() / countNotesInScore(infile)) * 1000.0 << "	" << infile.getFilename() << endl;
 
-	// CMR count (getGroupCount()     CMR note density      Filename
+	m_cmrCount.push_back(getGroupCount());
+	m_cmrNoteCount.push_back(getGroupNoteCount());
+	m_scoreNoteCount.push_back(countNotesInScore(infile));
 
 	// store the results in these two variables for later averaging and SD (defined in tool-cmr.h)
 	//	std::vector<int>      m_cmrCount;       // number of CMRs in each input file
 	//	std::vector<int>      m_cmrNoteCount;   // number of CMRs in each input file
 	//	std::vector<int>      m_scoreNoteCount;   // number of notes in each input file
-
 }
-
 
 
 //////////////////////////////
@@ -1251,12 +1251,26 @@ void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
 
 void Tool_cmr::finally(void) {
 	cerr << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
+	double meanCmrCount = Convert::mean(m_cmrCount);
+	double stdDevCmrCount = Convert::standardDeviation(m_cmrCount);
+
+	vector<double> cmrNoteDensities(m_cmrNoteCount.size());
+	for (int i=0; i < (int)cmrNoteDensities.size(); i++) {
+		cmrNoteDensities[i] = (double)m_cmrNoteCount[i] / m_scoreNoteCount[i];
+	}
+
+	double meanCmrNoteDen = Convert::mean(cmrNoteDensities);
+	double stdDevCmrNoteDen = Convert::standardDeviation(cmrNoteDensities);
+
+	cout << "CMR count mean: " << meanCmrCount << endl;
+	cout << "CMR count standard deviation: " << stdDevCmrCount << endl;
+	cout << "CMR note density mean: " << meanCmrNoteDen * 1000 << " permil " << endl;
+	cout << "CMR note density standard deviation: " << stdDevCmrNoteDen * 1000 << " permil " << endl;
+
 	// calculate the mean and standard deviation of CMR counts and CMR note densities
 	// that were stored in the printSummaryStatistics function above.
 	// There are two helper function that can be used here:
 	// Convert::mean(vector<int>) and Convert::standardDeviation(vector<int>).
-	// Examples:
-	// double meanCmr = Convert::mean(m_cmrCount);
 }
 
 
@@ -1704,7 +1718,7 @@ void Tool_cmr::identifyLocalPeaks(vector<bool>& localpeaks, vector<int>& midinum
 	}
 
 	for (int i=0; i<(int)midinums.size() - 1; i++) {
-		if ((i > 0) && (midinums.at(i-1) <= 0) && (midinums.at(i+1) <= 0)) { 
+		if ((i > 0) && (midinums.at(i-1) <= 0) && (midinums.at(i+1) <= 0)) {
 			// Ignore notes that have rests on both sides.
 			continue;
 		} else if (midinums.at(i) <= 0) {
