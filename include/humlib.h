@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jul  8 10:13:14 PDT 2022
+// Last Modified: Mon Jul 11 11:50:01 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -5943,6 +5943,7 @@ class cmr_note_info {
 		HumNum   getEndTime       (void);
 		int      getMidiPitch     (void);
 		string   getPitch         (void);
+		HTp      getToken         (void);
 		double   getNoteStrength  (void);
 		bool     hasSyncopation   (void);
 		bool     hasLeapBefore    (void);
@@ -5988,6 +5989,7 @@ class cmr_group_info {
 		int     getMeasureEnd      (void);
 		int     getMidiPitch       (void);
 		HTp     getNote            (int index);
+		HTp     getFirstToken      (void);
 		int     getNoteCount       (void);
 		int     getTrack           (void);
 		int     getStartFieldNumber(void);
@@ -5996,6 +5998,9 @@ class cmr_group_info {
 		void    markNotes          (const std::string& marker);
 		void    setSerial          (int serial);
 		int     getSerial          (void);
+		int     getDirection       (void);
+		void    setDirectionUp     (void);
+		void    setDirectionDown   (void);
 		void    makeInvalid        (void);
 		bool    isValid            (void);
 		string  getPitch           (void);
@@ -6008,6 +6013,7 @@ class cmr_group_info {
 
 	private:
 		int   m_serial;                     // used to keep track of mergers
+		int   m_direction;                  // +1 = positive peak, -1 = negative peak
 		std::vector<cmr_note_info> m_notes; // note info for each note in group.
 };
 
@@ -6043,7 +6049,6 @@ class Tool_cmr : public HumTool {
 		void             getLocalPeakNotes       (std::vector<std::vector<HTp>>& newnotelist,
 		                                          std::vector<std::vector<HTp>>& oldnotelist,
 		                                          std::vector<bool>& cmrnotes);
-
 		void             identifyPeakSequence    (std::vector<bool>& globalcmrnotes,
 		                                          std::vector<int>& cmrmidinums,
 		                                          std::vector<std::vector<HTp>>& notes);
@@ -6061,7 +6066,6 @@ class Tool_cmr : public HumTool {
 		int              countNotesInScore       (HumdrumFile& infile);
 		void             flipMidiNumbers         (std::vector<int>& midinums);
 		void             markNotes               (std::vector<std::vector<HTp>>& noteslist, std::vector<bool> cmrnotesQ, const std::string& marker);
-		void             postProcessAnalysis     (HumdrumFile& infile);
 		void             prepareHtmlReport       (void);
 		void             printAnalysisData       (void);
 		int              getGroupCount           (void);
@@ -6070,7 +6074,20 @@ class Tool_cmr : public HumTool {
 		void             printSummaryStatistics  (HumdrumFile& infile);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
-		void             checkForCmr             (int index);
+		void             checkForCmr             (int index, int direction);
+		bool             hasHigher               (int pitch, int tolerance,
+		                                          std::vector<int> midinums, int index1,
+                                                int index2);
+		bool             hasGroupUp              (void);
+		bool             hasGroupDown            (void);
+		void             getVocalRange           (std::vector<std::string>& minpitch,
+		                                          std::vector<std::string>& maxpitch,
+		                                          std::vector<std::vector<HTp>>& notelist);
+		std::string      getPitch                (HTp token);
+		void             addGroupNumbersToScore  (HumdrumFile& infile);
+		void             addGroupNumberToScore   (HumdrumFile& infile, HTp note, int number, int dir);
+		void             adjustGroupSerials      (void);
+		std::string      getLocalLabelToken      (int number, int dir);
 
 	private:
 		// Command-line options:
@@ -6082,15 +6099,18 @@ class Tool_cmr : public HumTool {
 		bool        m_localQ      = false;       // used with -l option: mark all local peaks
 		bool        m_localOnlyQ  = false;       // used with -L option: only mark local peaks, then exit before CMR analysis.
 		bool        m_summaryQ    = false;       // used with -S option: summary statistics of multiple files
-		bool        m_notelistQ   = false;       // ussed with --notelist option
-		bool        m_debugQ      = false;       // ussed with --debug option
+		bool        m_notelistQ   = false;       // used with --notelist option
+		bool        m_debugQ      = false;       // used with --debug option
+		bool        m_numberQ     = false;       // used with -N option
 		double      m_smallRest   = 4.0;         // Ignore rests that are 1 whole note or less
 		double      m_cmrDur      = 24.0;        // 6 whole notes maximum between m_cmrNum local maximums
 		double      m_cmrNum      = 3;           // number of local maximums in a row needed to mark in score
 		int         m_noteCount   = 0;           // total number of notes in the score
 		int         m_local_count = 0;           // used for coloring local peaks
-		std::string m_color       = "red";       // color to mark cmr notes
-		std::string m_marker      = "@";         // marker to label cmr notes in score
+		std::string m_colorUp     = "red";       // color to mark peak cmr notes
+		std::string m_markerUp    = "+";         // marker to label peak cmr notes in score
+		std::string m_colorDown   = "orange";    // color to mark antipeak cmr notes
+		std::string m_markerDown  = "@";         // marker to label antipeak cmr notes in score
 		std::string m_local_color = "limegreen"; // color to mark local peaks
 		std::string m_local_marker = "N";        // marker for local peak notes
 		std::string m_leap_color  = "purple";    // color to mark leap notes before peaks
@@ -6103,7 +6123,7 @@ class Tool_cmr : public HumTool {
 
 
 		// Analysis variables:
-		std::vector<std::vector<HTp>> notelist;  // list of all notes in a part before analysis.
+		std::vector<std::vector<HTp>> m_notelist; // **kern tokens (each entry is a tied group)
 		std::vector<int>    m_barNum;            // starting bar number of lines in input score.
 
 		// m_noteGroups == Storage for analized CMRs.
@@ -6118,8 +6138,19 @@ class Tool_cmr : public HumTool {
 		// m_showMergedQ == Show merged groups in output list.
 		bool m_showMergedQ = false;
 
+		// m_minPitch == minimum pitch indexed by track (scientific notation);
+		std::vector<std::string> m_minPitch;
+
+		// m_maxPitch == minimum pitch indexed by track (scientific notation);
+		std::vector<std::string> m_maxPitch;
+
+		// m_durUnit == duration unit for displaying durations in analysis table.
+		std::string m_durUnit = "w";
+
+		// m_halfQ == report durations in half note (minims).
+		bool m_halfQ = false;
+
 		// variables for doing CMR analysis (reset for each part)
-		std::vector<std::vector<HTp>> m_notelist; // **kern tokens (each entry is a tied group)
 		std::vector<int>         m_midinums;      // MIDI note for first entry for teach tied group
 		std::vector<bool>        m_localpeaks;    // True if higher (or lower for negative search) than adjacent notes.
 		std::vector<double>      m_metlevs;       // True if higher (or lower for negative search) than adjacent notes.
