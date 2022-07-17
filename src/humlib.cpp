@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 11 11:51:59 PDT 2022
+// Last Modified: Sun Jul 17 10:22:06 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -60799,7 +60799,9 @@ void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
 	notelist.clear();
 	notelist.reserve(2000);
 
-	HTp previous = NULL;
+	int lastpitch = -1;
+
+	// HTp previous = NULL;
 	HTp current = starting;
 	while (current) {
 		if (!current->isData()) {
@@ -60814,24 +60816,35 @@ void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
 			if (notelist.size() > 0) {
 				notelist.back().push_back(current);
 			}
-			previous = current;
+			// previous = current;
 			current = current->getNextToken();
 			continue;
 		}
 		if (current->isRest()) {
 			if ((!notelist.empty()) && notelist.back().at(0)->isRest()) {
 				notelist.back().push_back(current);
-				previous = current;
+				// previous = current;
 				current = current->getNextToken();
+				lastpitch = -1;
 				continue;
 			}
 		}
+		int pitch = current->getMidiPitch();
+		if (pitch == lastpitch) {
+			if (notelist.size() > 0) {
+				notelist.back().push_back(current);
+			}
+			// previous = current;
+			current = current->getNextToken();
+			continue;
+		}
+		lastpitch = pitch;
 		notelist.resize(notelist.size() + 1);
 		notelist.back().push_back(current);
 		if (!current->isRest()) {
 			m_noteCount++;
 		}
-		previous = current;
+		// previous = current;
 		current = current->getNextToken();
 	}
 

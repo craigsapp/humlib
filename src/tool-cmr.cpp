@@ -2126,7 +2126,9 @@ void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
 	notelist.clear();
 	notelist.reserve(2000);
 
-	HTp previous = NULL;
+	int lastpitch = -1;
+
+	// HTp previous = NULL;
 	HTp current = starting;
 	while (current) {
 		if (!current->isData()) {
@@ -2141,24 +2143,35 @@ void Tool_cmr::getNoteList(vector<vector<HTp>>& notelist, HTp starting) {
 			if (notelist.size() > 0) {
 				notelist.back().push_back(current);
 			}
-			previous = current;
+			// previous = current;
 			current = current->getNextToken();
 			continue;
 		}
 		if (current->isRest()) {
 			if ((!notelist.empty()) && notelist.back().at(0)->isRest()) {
 				notelist.back().push_back(current);
-				previous = current;
+				// previous = current;
 				current = current->getNextToken();
+				lastpitch = -1;
 				continue;
 			}
 		}
+		int pitch = current->getMidiPitch();
+		if (pitch == lastpitch) {
+			if (notelist.size() > 0) {
+				notelist.back().push_back(current);
+			}
+			// previous = current;
+			current = current->getNextToken();
+			continue;
+		}
+		lastpitch = pitch;
 		notelist.resize(notelist.size() + 1);
 		notelist.back().push_back(current);
 		if (!current->isRest()) {
 			m_noteCount++;
 		}
-		previous = current;
+		// previous = current;
 		current = current->getNextToken();
 	}
 
