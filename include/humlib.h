@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 17 10:22:06 PDT 2022
+// Last Modified: Sun Jul 24 23:56:59 PDT 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6070,8 +6070,13 @@ class Tool_cmr : public HumTool {
 		void             printAnalysisData       (void);
 		int              getGroupCount           (void);
 		int              getGroupNoteCount       (void);
+		int 						 getStrengthScore        (void);
 		void             printStatistics         (HumdrumFile& infile);
+		string           getComposer             (HumdrumFile& infile);
 		void             printSummaryStatistics  (HumdrumFile& infile);
+		void             storeVegaData           (HumdrumFile& infile);
+		void             printVegaPlot           (void);
+		void             printHtmlPlot           (void);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index, int direction);
@@ -6099,6 +6104,10 @@ class Tool_cmr : public HumTool {
 		bool        m_localQ      = false;       // used with -l option: mark all local peaks
 		bool        m_localOnlyQ  = false;       // used with -L option: only mark local peaks, then exit before CMR analysis.
 		bool        m_summaryQ    = false;       // used with -S option: summary statistics of multiple files
+		bool        m_vegaQ       = false;       // used with -v option: output Vega-lite plot directly
+		bool        m_htmlQ       = false;       // used with -V option: output Vega-lite plot in HTML file
+		bool        m_vegaCountQ  = false;       // used with -w option: output Vega-lite plot for CMR count
+		bool        m_vegaStrengthQ  = false;    // used with -W option: output Vega-lite plot with strength scores
 		bool        m_notelistQ   = false;       // used with --notelist option
 		bool        m_debugQ      = false;       // used with --debug option
 		bool        m_numberQ     = false;       // used with -N option
@@ -6162,6 +6171,7 @@ class Tool_cmr : public HumTool {
 		std::vector<int>         m_cmrNoteCount;   // number of CMR notes in each input file
 		std::vector<int>         m_scoreNoteCount; // number of note in each input file
 
+		std::stringstream        m_vegaData;       // stores all data for Vega plot from each processFile
 };
 
 
