@@ -66,7 +66,7 @@ To update to the most recent version of humlib if git was used to
 download the library, type anywhere in the humlib directory structure:
 
 ```console
-git pull
+make update
 ```
 
 Minimal downloading
@@ -80,6 +80,10 @@ linux):
 ```console
 wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.h
 wget https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp
+
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/src/pugixml.cpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugixml.hpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugiconfig.hpp
 ```
 
 Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X):
@@ -87,6 +91,10 @@ Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X)
 ```console
 curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.h -o humlib.h
 curl https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp -o humlib.cpp
+
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp -o humlib.cpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugixml.hpp -o pugixml.hpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.hpp -o pugiconfig.hpp
 ```
 
 The source code uses some C++11-specific features, so add the

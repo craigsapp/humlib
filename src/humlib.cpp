@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 24 23:56:59 PDT 2022
+// Last Modified: Sat Jul 30 12:11:45 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -58984,12 +58984,19 @@ double cmr_note_info::getNoteStrength(void) {
 
 //////////////////////////////
 //
-// cmr_note_info::markNote --
+// cmr_note_info::markNote -- Only print the first note in a series
+//     of notes with the same pitch.
 //
 
 void cmr_note_info::markNote(const string& marker) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		HTp token = m_tokens[i];
+		if (i > 0) {
+			// don't color repeated secondary notes.
+			if (token->isNoteAttack()) {
+				break;
+			}
+		}
 		string text = *token;
 		if (text.find(marker) != string::npos) {
 			continue;
