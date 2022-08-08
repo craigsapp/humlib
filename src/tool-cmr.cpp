@@ -311,12 +311,19 @@ double cmr_note_info::getNoteStrength(void) {
 
 //////////////////////////////
 //
-// cmr_note_info::markNote --
+// cmr_note_info::markNote -- Only print the first note in a series
+//     of notes with the same pitch.
 //
 
 void cmr_note_info::markNote(const string& marker) {
 	for (int i=0; i<(int)m_tokens.size(); i++) {
 		HTp token = m_tokens[i];
+		if (i > 0) {
+			// don't color repeated secondary notes.
+			if (token->isNoteAttack()) {
+				break;
+			}
+		}
 		string text = *token;
 		if (text.find(marker) != string::npos) {
 			continue;
