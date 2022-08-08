@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jul 24 23:56:59 PDT 2022
+// Last Modified: Sun Jul 31 21:51:57 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59592,9 +59592,9 @@ Tool_cmr::Tool_cmr(void) {
 	define("merge|merged|show-merged=b","print merged groups");
 	define("S|summary=b",               "summarize CMRs for multiple inputs");
 	define("v|vega=b",                  "output default Vega-lite plot");
-	define("V|html=b",                  "output Vega-lite plot with HTML");
-	define("w|cmr-count=b",             "output Vega-lite plot for CMR count");
-	define("W|strength=b",              "output Vega-lite plot with strength scores");
+	define("V|no-html=b",               "output Vega-lite plot without HTML");
+	define("countplot=b",               "output Vega-lite plot for CMR count");
+	define("strengthplot=b",            "output Vega-lite plot with strength scores");
 	define("h|half=b",                  "durations given in half notes (mimims)");
 	define("D|debug=b",                 "print debug information");
 }
@@ -59662,9 +59662,9 @@ void Tool_cmr::initialize(void) {
 	m_showMergedQ   = getBoolean("show-merged");
 	m_summaryQ      = getBoolean("summary");
 	m_vegaQ         = getBoolean("vega");
-	m_htmlQ         = getBoolean("html");
-	m_vegaCountQ    = getBoolean("cmr-count");
-	m_vegaStrengthQ = getBoolean("strength");
+	m_htmlQ         = getBoolean("no-html");
+	m_vegaCountQ    = getBoolean("countplot");
+	m_vegaStrengthQ = getBoolean("strengthplot");
 	m_numberQ       = getBoolean("cmr-number");
 	m_debugQ        = getBoolean("debug");
 	if (m_localOnlyQ) {
@@ -59687,6 +59687,7 @@ void Tool_cmr::initialize(void) {
 
 	m_noteGroups.clear();
 }
+
 
 
 //////////////////////////////
@@ -59724,15 +59725,15 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 
 	mergeOverlappingPeaks();
 
-	if (m_vegaQ || m_htmlQ || m_vegaStrengthQ || m_vegaCountQ) {
+	if (m_vegaQ || m_vegaStrengthQ || m_vegaCountQ) {
 		m_free_text << " " << endl;
 	}
 
-	if (!(m_rawQ || m_summaryQ || m_vegaQ || m_htmlQ || m_vegaStrengthQ || m_vegaCountQ)) {
+	if (!(m_rawQ || m_summaryQ || m_vegaQ || m_vegaStrengthQ || m_vegaCountQ)) {
 		markNotesInScore();
 	}
 
-	if (!(m_rawQ || m_summaryQ || m_vegaQ || m_htmlQ || m_vegaStrengthQ || m_vegaCountQ)) {
+	if (!(m_rawQ || m_summaryQ || m_vegaQ || m_vegaStrengthQ || m_vegaCountQ)) {
 		if (m_numberQ) {
 			addGroupNumbersToScore(infile);
 		}
@@ -59780,7 +59781,7 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 	if (!m_localOnlyQ) {
 		if (m_summaryQ) {
 			printSummaryStatistics(infile);
-		} else if (m_vegaQ || m_htmlQ || m_vegaCountQ || m_vegaStrengthQ) {
+		} else if (m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) {
 			storeVegaData(infile);
 		} else {
 			printStatistics(infile);
@@ -60018,6 +60019,7 @@ bool Tool_cmr::hasHigher(int pitch, int tolerance, vector<int> midinums, int ind
 }
 
 
+
 //////////////////////////////
 //
 // Tool_cmr::hasGroupUp -- True if there is at least one CMR that contains a peak note.
@@ -60052,30 +60054,27 @@ bool Tool_cmr::hasGroupDown(void) {
 	return false;
 }
 
+
+
 //////////////////////////////
 //
-// [fill in about new function]
+// Tool_cmr::getComposer-- Use regex to extract composer information from score filename
 //
 
 string Tool_cmr::getComposer(HumdrumFile& infile) {
-   // Options options;
-   // options.process(argc, argv);
-	 //
-   // HumdrumFileStream instream(options);
-   // HumdrumFile infile;
    HumRegex hre;
 
 	 string filename = infile.getFilename();
 	 // Remove any directory prefix:
 	 string code = "unknown";
-	 // Search for a capital letter followed by two small letters
-	 // followed by four digits:
+	 // Search for a capital letter followed by two small letters followed by four digits:
 	 if (hre.search(filename, "([A-Z][a-z][a-z])")) {
-			// Store the first match contents (stuff in parenthese on above line):
 			code = hre.getMatch(1);
 	 }
 	return code;
 }
+
+
 
 //////////////////////////////
 //
@@ -60089,12 +60088,9 @@ void Tool_cmr::printSummaryStatistics(HumdrumFile& infile) {
 	m_cmrCount.push_back(getGroupCount());
 	m_cmrNoteCount.push_back(getGroupNoteCount());
 	m_scoreNoteCount.push_back(countNotesInScore(infile));
-
-	// store the results in these two variables for later averaging and SD (defined in tool-cmr.h)
-	//	std::vector<int>      m_cmrCount;       // number of CMRs in each input file
-	//	std::vector<int>      m_cmrNoteCount;   // number of CMRs in each input file
-	//	std::vector<int>      m_scoreNoteCount;   // number of notes in each input file
 }
+
+
 
 //////////////////////////////
 //
@@ -60109,14 +60105,16 @@ void Tool_cmr::storeVegaData(HumdrumFile& infile) {
 	m_vegaData << "	\"Score\": \"" << infile.getFilename() << "\"," << endl;
 	m_vegaData << "	\"CMR note density permil\": " << ((double)getGroupNoteCount() / countNotesInScore(infile)) * 1000 << "," << endl;
 	if (getGroupCount() == 0) {
-		m_vegaData << "	\"CMR strength density\": " << "0" << "," << endl;
+		m_vegaData << "	\"Average CMR strength\": " << "0" << "," << endl;
 	} else {
-		m_vegaData << "	\"CMR strength density\": " << ((double)getStrengthScore() / getGroupCount()) << "," << endl;
+		m_vegaData << "	\"Average CMR strength\": " << ((double)getStrengthScore() / getGroupCount()) << "," << endl;
 	}
 	m_vegaData << "	\"CMR count\": " << getGroupCount() << endl;
 	m_vegaData << "}," << endl;
 
 }
+
+
 
 ////////////////////////////
 //
@@ -60164,7 +60162,7 @@ void Tool_cmr::printVegaPlot(void) {
 	 				 "x": {"field": "Composers", "type": "nominal"},
 	 				 "color": {"field": "Composers", "type": "nominal", "legend": null},
 	 				 "y": {
-	 					 "field": "CMR strength density",
+	 					 "field": "Average CMR strength",
 	 					 "type": "quantitative",
 	 					 "scale": {"zero": false}
 	 				 }
@@ -60192,6 +60190,8 @@ void Tool_cmr::printVegaPlot(void) {
 			cout << vegaDataFooter << endl;
 	 }
 }
+
+
 
 ////////////////////////////
 //
@@ -60224,6 +60224,7 @@ var mydata =)";
 }
 
 
+
 //////////////////////////////
 //
 // Tool_cmr::finally --
@@ -60231,10 +60232,9 @@ var mydata =)";
 
 void Tool_cmr::finally(void) {
 	//cerr << "\nFUNCTION RUN AFTER ALL INPUT FILES HAVE BEEN PROCESSED" << endl;
-
-	if (m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) {
+	if ((m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) && (m_htmlQ)) {
 		printVegaPlot();
-	} else if (m_htmlQ) {
+	} else if ((m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) && !(m_htmlQ)) {
 		printHtmlPlot();
 	} else {
 		double meanCmrCount = Convert::mean(m_cmrCount);
@@ -60255,6 +60255,7 @@ void Tool_cmr::finally(void) {
 	}
 
 }
+
 
 
 //////////////////////////////
@@ -61172,7 +61173,6 @@ int Tool_cmr::getStrengthScore(void) {
 	}
 	return output;
 }
-
 
 
 
