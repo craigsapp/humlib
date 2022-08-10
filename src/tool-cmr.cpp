@@ -1904,7 +1904,7 @@ bool Tool_cmr::checkGroupPairForMerger(cmr_group_info& group1, cmr_group_info& g
 
 	// Groups must have the same MIDI pitch:
 	int midi1 = group1.getMidiPitch();
-	int midi2 = group1.getMidiPitch();
+	int midi2 = group2.getMidiPitch();
 	if (midi1 != midi2) {
 		return false;
 	}

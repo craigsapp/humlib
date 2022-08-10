@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 10 20:16:16 CEST 2022
+// Last Modified: Wed Aug 10 20:23:58 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -60577,7 +60577,7 @@ bool Tool_cmr::checkGroupPairForMerger(cmr_group_info& group1, cmr_group_info& g
 
 	// Groups must have the same MIDI pitch:
 	int midi1 = group1.getMidiPitch();
-	int midi2 = group1.getMidiPitch();
+	int midi2 = group2.getMidiPitch();
 	if (midi1 != midi2) {
 		return false;
 	}
