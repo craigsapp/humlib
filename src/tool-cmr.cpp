@@ -628,6 +628,7 @@ int cmr_group_info::getDirection(void) {
 }
 
 
+
 //////////////////////////////
 //
 // cmr_group_info::setDirectionUp --
@@ -805,6 +806,16 @@ bool cmr_group_info::mergeGroup(cmr_group_info& group) {
 		return false;
 	}
 	if (!group.isValid()) {
+		return false;
+	}
+
+	int dir1 = getDirection();
+	int dir2 = group.getDirection();
+	if (dir1 != dir2) {
+		return false;
+	}
+	if (dir1 == 0) {
+		cerr << "Error: unassigned direction for groups" << endl;
 		return false;
 	}
 
@@ -1570,7 +1581,7 @@ void Tool_cmr::finally(void) {
 		printVegaPlot();
 	} else if ((m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) && !(m_htmlQ)) {
 		printHtmlPlot();
-	} else {
+	} else if (m_cmrCount.size() > 1) {
 		double meanCmrCount = Convert::mean(m_cmrCount);
 		double stdDevCmrCount = Convert::standardDeviation(m_cmrCount);
 

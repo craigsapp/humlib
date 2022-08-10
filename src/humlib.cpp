@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug  8 12:13:01 PDT 2022
+// Last Modified: Wed Aug 10 20:16:16 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59301,6 +59301,7 @@ int cmr_group_info::getDirection(void) {
 }
 
 
+
 //////////////////////////////
 //
 // cmr_group_info::setDirectionUp --
@@ -59478,6 +59479,16 @@ bool cmr_group_info::mergeGroup(cmr_group_info& group) {
 		return false;
 	}
 	if (!group.isValid()) {
+		return false;
+	}
+
+	int dir1 = getDirection();
+	int dir2 = group.getDirection();
+	if (dir1 != dir2) {
+		return false;
+	}
+	if (dir1 == 0) {
+		cerr << "Error: unassigned direction for groups" << endl;
 		return false;
 	}
 
@@ -60243,7 +60254,7 @@ void Tool_cmr::finally(void) {
 		printVegaPlot();
 	} else if ((m_vegaQ || m_vegaCountQ || m_vegaStrengthQ) && !(m_htmlQ)) {
 		printHtmlPlot();
-	} else {
+	} else if (m_cmrCount.size() > 1) {
 		double meanCmrCount = Convert::mean(m_cmrCount);
 		double stdDevCmrCount = Convert::standardDeviation(m_cmrCount);
 
