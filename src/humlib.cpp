@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 10 20:23:58 CEST 2022
+// Last Modified: Wed Aug 10 21:30:52 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59912,12 +59912,22 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 //
 // checkForCmr -- store CMR if identified.
 //
+// * Must have at least one sycopation or three leaps.
+// * Other CMR notes are on strong beats.
+// * Need three CMRs within window (6 whole notes) to count.
+// * Cannot have a note higher than a major/minor second between CMR notes.
+// * Can have a note a major/minor second above CMR notes, but only
+//   if the higher note is not on a strong beat.
+//
 
 void Tool_cmr::checkForCmr(int index, int direction) {
+	// Change next condition: trigger on a syncopation, or three leaps
+	// before the same pitch.  Then later there will be a check for higher
+	// notes between the candidate CMR notes:
 	// Local peak must be present to trigger CMR
-	if (!m_localpeaks.at(index)) {
-		return;
-	}
+	//if (!m_localpeaks.at(index)) {
+	//	return;
+	//}
 
 	// The local peak note must have a leap before it (or a rest)
 	// and/or a syncopation to trigger a CMR search:
@@ -59986,9 +59996,12 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 	}
 
 	if ((int)candidates.size() < m_cmrNum) {
-		// Not enough note to consider a CMR.
+		// Not enough notes to consider a CMR.
 		return;
 	}
+
+	// There must be at least one synopcation or three leaps
+	// within the candidates to consider it valid.
 
 	for (int i=0; i<=(int)candidates.size() - m_cmrNum; i++) {
 		int index1 = candidates.at(i);
@@ -59999,10 +60012,9 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 		if (duration > m_cmrDur) {
 			continue;
 		}
-		if (hasHigher(pitch, 2, m_midinums, index1, index2)) {
+		if (hasHigher(pitch, 2, m_midinums, m_notelist, index1, index2)) {
 			continue;
 		}
-
 
 		// found a CMR (or piece of longer one that will be merged later)
 		// so store it at the end of m_noteGroups:
@@ -60024,15 +60036,30 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 
 //////////////////////////////
 //
-// Tool_cmr::hasHigher --
+// Tool_cmr::hasHigher -- There may be a note a step higher
+//     (or lower) between any two notes of the CMR provided
+//     that that higher note is not on a strong beat.
+//     True = invalid CMR case.
 //
 
-bool Tool_cmr::hasHigher(int pitch, int tolerance, vector<int> midinums, int index1, int index2) {
+bool Tool_cmr::hasHigher(int pitch, int tolerance, vector<int>& midinums, vector<vector<HTp>>& notelist, int index1, int index2) {
+
 	for (int i=index1; i<=index2; i++) {
+		// Only a step above (major or minor second) is allowed.
+		// Input tolerance is 2.
 		if (midinums.at(i) > pitch + tolerance) {
 			return true;
 		}
+
+		if (midinums.at(i) > pitch) {
+			// If the higher note is accented, then invalidate the cmr.
+			if (isOnStrongBeat(notelist.at(i).at(0))) {
+				return true;
+			}
+		}
+
 	}
+
 	return false;
 }
 
@@ -61070,7 +61097,7 @@ void  Tool_cmr::getDurations(vector<double>& durations, vector<vector<HTp>>& not
 // Tool_cmr::getBeat --
 //
 
-void  Tool_cmr::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
+void Tool_cmr::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 	metpos.resize(notelist.size());
 	for (int i=0; i<(int)notelist.size(); i++) {
 		HumNum position = notelist.at(i).at(0)->getDurationFromBarline();
@@ -61081,6 +61108,25 @@ void  Tool_cmr::getBeat(vector<bool>& metpos, vector<vector<HTp>>& notelist) {
 		} else {
 			metpos.at(i) = false;
 		}
+
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_cmr::isOnStrongBeat --
+//
+
+bool Tool_cmr::isOnStrongBeat(HTp token) {
+	HumNum position = token->getDurationFromBarline();
+	if (position.getDenominator() != 1) {
+		return false;
+	} if (position.getNumerator() % 4 == 0) {
+		return true;
+	} else {
+		return false;
 	}
 }
 

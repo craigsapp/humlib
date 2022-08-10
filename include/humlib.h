@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 10 20:23:58 CEST 2022
+// Last Modified: Wed Aug 10 21:30:52 CEST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6081,8 +6081,9 @@ class Tool_cmr : public HumTool {
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index, int direction);
 		bool             hasHigher               (int pitch, int tolerance,
-		                                          std::vector<int> midinums, int index1,
-                                                int index2);
+		                                          std::vector<int>& midinums, 
+		                                          std::vector<std::vector<HTp>>& notelist,
+		                                          int index1, int index2);
 		bool             hasGroupUp              (void);
 		bool             hasGroupDown            (void);
 		void             getVocalRange           (std::vector<std::string>& minpitch,
@@ -6093,6 +6094,7 @@ class Tool_cmr : public HumTool {
 		void             addGroupNumberToScore   (HumdrumFile& infile, HTp note, int number, int dir);
 		void             adjustGroupSerials      (void);
 		std::string      getLocalLabelToken      (int number, int dir);
+		bool             isOnStrongBeat          (HTp token);
 
 	private:
 		// Command-line options:
