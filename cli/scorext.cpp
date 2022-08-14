@@ -95,7 +95,6 @@
 using namespace std;
 using namespace hum;
 
-
 void        processFile          (HumdrumFile& infile);
 vector<int> getTrack2StaffMapping(HumdrumFile& infile);
 bool        hasStaccato          (HTp token);
@@ -726,7 +725,7 @@ void fillAnalysisInfo(HumdrumFile& infile) {
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		for (int j=0; i<infile[i].getFieldCount(); j++) {
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp tok = infile.token(i, j);
 			if (!tok->isTimeSignature()) {
 				continue;
