@@ -137,6 +137,22 @@ HumNum cmr_note_info::getStartTime(void) {
 
 /////////////////////////////
 //
+// cmr_note_info::getLineIndex --
+//
+
+int cmr_note_info::getLineIndex(void) {
+	HTp token = getToken();
+	if (token) {
+		return token->getLineIndex();
+	} else {
+		return -1;
+	}
+}
+
+
+
+/////////////////////////////
+//
 // cmr_note_info::getEndTime -- Return the ending time of the note in
 //    units of quarter notes since the start of the score.  Note that this
 //    is the ending duration of the last note in the tied group.
@@ -1093,12 +1109,12 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 		getNoteList(m_notelist, starts.at(i));
 		getVocalRange(m_minPitch, m_maxPitch, m_notelist);
 		if (m_peaksQ) {
-			processSpine(starts[i]);
+			processSpine(starts[i], infile);
 		} else if (m_npeaksQ) {
-			processSpineFlipped(starts[i]);
+			processSpineFlipped(starts[i], infile);
 		} else {
-			processSpine(starts[i]);
-			processSpineFlipped(starts[i]);
+			processSpine(starts[i], infile);
+			processSpineFlipped(starts[i], infile);
 		}
 	}
 
@@ -1181,7 +1197,7 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 //    on the staff will be processed (so only the top part if there is a divisi).
 //
 
-void Tool_cmr::processSpine(HTp startok) {
+void Tool_cmr::processSpine(HTp startok, HumdrumFile&  infile) {
 	// notelist is a two dimensional array of notes.   The
 	// first dimension is a list of the note attacks in time
 	// (plus rests), and the second dimension is for a list of the
@@ -1211,7 +1227,7 @@ void Tool_cmr::processSpine(HTp startok) {
 	}
 
 	for (int i=0; i<(int)m_notelist.size(); i++) {
-		checkForCmr(i, 1);
+		checkForCmr(i, 1, infile);
 	}
 
 	if (m_rawQ) {
@@ -1227,7 +1243,7 @@ void Tool_cmr::processSpine(HTp startok) {
 //    searches for minima CMRs rather than maxima CMRs.
 //
 
-void Tool_cmr::processSpineFlipped(HTp startok) {
+void Tool_cmr::processSpineFlipped(HTp startok, HumdrumFile& infile) {
 	// notelist is a two dimensional array of notes.   The
 	// first dimension is a list of the note attacks in time
 	// (plus rests), and the second dimension is for a list of the
@@ -1263,7 +1279,7 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 	}
 
 	for (int i=0; i<(int)m_notelist.size(); i++) {
-		checkForCmr(i, -1);
+		checkForCmr(i, -1, infile);
 	}
 }
 
@@ -1281,7 +1297,7 @@ void Tool_cmr::processSpineFlipped(HTp startok) {
 //   if the higher note is not on a strong beat.
 //
 
-void Tool_cmr::checkForCmr(int index, int direction) {
+void Tool_cmr::checkForCmr(int index, int direction, HumdrumFile& infile) {
 	// Change next condition: trigger on a syncopation, or three leaps
 	// before the same pitch.  Then later there will be a check for higher
 	// notes between the candidate CMR notes:
@@ -1382,6 +1398,7 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 			m_noteGroups.back().addNote(m_notelist.at(tindex), m_barNum);
 		}
 		m_noteGroups.back().setSerial((int)m_noteGroups.size() + 1);
+
 		if (direction < 0) {
 			m_noteGroups.back().setDirectionDown();
 		} else {
@@ -1396,6 +1413,30 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 			// Delete groups since it has less than three leaps and no syncopations
 			if (m_noteGroups.size() > 0) {
 				m_noteGroups.resize(m_noteGroups.size() - 1);
+			}
+		}
+	}
+
+	// Remove negative groups if they share a note with a positive group.
+	vector<bool> positive(infile.getLineCount(), false);
+	for (int i=0; i<(int)m_noteGroups.size(); i++) {
+		int dir = m_noteGroups.at(i).getDirection();
+		if (dir > 0) {
+			for (int j=0; j<m_noteGroups.at(i).getNoteCount(); j++) {
+				int line = m_noteGroups.at(i).getToken(j)->getLineIndex();
+				positive.at(line) = true;
+			}
+		} else if (dir < 0) {
+			bool valid = true;
+			for (int j=0; j<m_noteGroups.at(i).getNoteCount(); j++) {
+				int line = m_noteGroups.at(i).getToken(j)->getLineIndex();
+				if (positive.at(line)) {
+					valid = false;
+					break;
+				}
+			}
+			if (!valid) {
+				m_noteGroups.at(i).makeInvalid();
 			}
 		}
 	}
@@ -2267,6 +2308,7 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 		}
 
 		// Store the (potential) CMR:
+cerr << "ADDING A NOTE GROUP " << m_noteGroups.size() + 1 << endl;
 		m_noteGroups.resize(m_noteGroups.size() + 1);
 		for (int j=0; j<m_cmrNum; j++) {
 			m_noteGroups.back().addNote(notes.at(i+j), m_barNum);

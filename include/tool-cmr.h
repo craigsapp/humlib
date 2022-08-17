@@ -43,6 +43,7 @@ class cmr_note_info {
 		int      getMidiPitch     (void);
 		string   getPitch         (void);
 		HTp      getToken         (void);
+		int      getLineIndex     (void);
 		double   getNoteStrength  (void);
 		bool     hasSyncopation   (void);
 		bool     hasLeapBefore    (void);
@@ -88,6 +89,7 @@ class cmr_group_info {
 		int     getMeasureEnd      (void);
 		int     getMidiPitch       (void);
 		HTp     getNote            (int index);
+		HTp     getToken           (int index) { return getNote(index); }
 		HTp     getFirstToken      (void);
 		int     getNoteCount       (void);
 		int     getTrack           (void);
@@ -136,8 +138,8 @@ class Tool_cmr : public HumTool {
 		void             processFile             (HumdrumFile& infile);
 		void             initialize              (void);
 		void             processFile             (HumdrumFile& infile, Options& options);
-		void             processSpine            (HTp startok);
-		void             processSpineFlipped     (HTp startok);
+		void             processSpine            (HTp startok, HumdrumFile& infile);
+		void             processSpineFlipped     (HTp startok, HumdrumFile& infile);
 		void             identifyLocalPeaks      (std::vector<bool>& cmrnotes,
 		                                          std::vector<int>& notelist);
 		void             getDurations            (std::vector<double>& durations,
@@ -180,7 +182,7 @@ class Tool_cmr : public HumTool {
 		void             printHtmlPlot           (void);
 		void             printGroupStatistics    (HumdrumFile& infile);
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
-		void             checkForCmr             (int index, int direction);
+		void             checkForCmr             (int index, int direction, HumdrumFile& infile);
 		bool             hasHigher               (int pitch, int tolerance,
 		                                          std::vector<int>& midinums, 
 		                                          std::vector<std::vector<HTp>>& notelist,
