@@ -100,6 +100,8 @@ class cmr_group_info {
 		int     getDirection       (void);
 		void    setDirectionUp     (void);
 		void    setDirectionDown   (void);
+		int     getLeapCount       (void);
+		int     getSyncopationCount(void);
 		void    makeInvalid        (void);
 		bool    isValid            (void);
 		string  getPitch           (void);

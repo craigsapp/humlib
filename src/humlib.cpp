@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 14 13:45:02 CEST 2022
+// Last Modified: Wed Aug 17 17:38:17 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59326,6 +59326,40 @@ void cmr_group_info::setDirectionDown(void) {
 
 //////////////////////////////
 //
+// cmr_group_info::getLeapCount --
+//
+
+int cmr_group_info::getLeapCount(void) {
+	int output = 0;
+	for (int i=0; i<(int)m_notes.size(); i++) {
+		if (m_notes.at(i).hasLeapBefore()) {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// cmr_group_info::getSyncopationCount --
+//
+
+int cmr_group_info::getSyncopationCount(void) {
+	int output = 0;
+	for (int i=0; i<(int)m_notes.size(); i++) {
+		if (m_notes.at(i).hasSyncopation()) {
+			output++;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
 // cmr_group_info::makeInvalid --
 //
 
@@ -60000,9 +60034,6 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 		return;
 	}
 
-	// There must be at least one synopcation or three leaps
-	// within the candidates to consider it valid.
-
 	for (int i=0; i<=(int)candidates.size() - m_cmrNum; i++) {
 		int index1 = candidates.at(i);
 		int index2 = candidates.at(i+m_cmrNum-1);
@@ -60016,7 +60047,7 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 			continue;
 		}
 
-		// found a CMR (or piece of longer one that will be merged later)
+		// Found a CMR (or piece of longer one that will be merged later)
 		// so store it at the end of m_noteGroups:
 		m_noteGroups.resize(m_noteGroups.size() + 1);
 		for (int j=0; j<m_cmrNum; j++) {
@@ -60028,6 +60059,17 @@ void Tool_cmr::checkForCmr(int index, int direction) {
 			m_noteGroups.back().setDirectionDown();
 		} else {
 			m_noteGroups.back().setDirectionUp();
+		}
+	}
+
+	int leapcount = m_noteGroups.back().getLeapCount();
+	int syncocount  = m_noteGroups.back().getSyncopationCount();
+	if (syncocount == 0) {
+		if (leapcount < 3) {
+			// Delete groups since it has less than three leaps and no syncopations
+			if (m_noteGroups.size() > 0) {
+				m_noteGroups.resize(m_noteGroups.size() - 1);
+			}
 		}
 	}
 }

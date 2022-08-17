@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Aug 14 13:45:02 CEST 2022
+// Last Modified: Wed Aug 17 17:38:16 CEST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6001,6 +6001,8 @@ class cmr_group_info {
 		int     getDirection       (void);
 		void    setDirectionUp     (void);
 		void    setDirectionDown   (void);
+		int     getLeapCount       (void);
+		int     getSyncopationCount(void);
 		void    makeInvalid        (void);
 		bool    isValid            (void);
 		string  getPitch           (void);
