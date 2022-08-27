@@ -302,6 +302,7 @@ void Tool_humtr::convertGlobalLayoutText(HumdrumFile& infile) {
 
 void Tool_humtr::convertLocalLayoutText(HumdrumFile& infile) {
 	HumRegex hre;
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isCommentLocal()) {
 			continue;
@@ -318,6 +319,7 @@ void Tool_humtr::convertLocalLayoutText(HumdrumFile& infile) {
 			string newcontents = transliterateText(oldcontents);
 			if (oldcontents != newcontents) {
 				string text = *token;
+				hre.makeSafeDestructive(oldcontents);
 				hre.replaceDestructive(text, ":t=" + newcontents, ":t=" + oldcontents);
 				token->setText(text);
 			}

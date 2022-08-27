@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 17 19:46:38 CEST 2022
+// Last Modified: Sat Aug 27 19:44:05 CEST 2022
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -633,7 +633,9 @@ class HumRegex {
 		std::string      replaceCopy        (std::string* input, const std::string& replacement,
 		                                const std::string& exp,
 		                                const std::string& options);
-		std::string&      tr                 (std::string& input, const std::string& from,
+		std::string       makeSafeCopy  (const std::string& input);
+		std::string&      makeSafeDestructive(std::string& inout);
+		std::string&      tr            (std::string& input, const std::string& from,
 		                                const std::string& to);
 
 		// matching (full-string match)

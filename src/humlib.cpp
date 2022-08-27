@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Aug 17 19:46:38 CEST 2022
+// Last Modified: Sat Aug 27 19:44:05 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -16353,6 +16353,32 @@ string& HumRegex::tr(string& input, const string& from, const string& to) {
 	}
 
 	return input;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::makeSafeCopy -- Escape all special characters in string to make them regular.
+//
+
+string HumRegex::makeSafeCopy(const std::string& input) {
+	string specialChars = R"([-[\]{}()*+?.,\^$|#\s])";
+	string output = replaceCopy(input, R"(\$&)", specialChars, "g");
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::makeSafeDestructive -- Escape all special characters in string to make them regular.
+//
+
+string& HumRegex::makeSafeDestructive(std::string& inout) {
+	string specialChars = R"([-[\]{}()*+?.,\^$|#\s])";
+	replaceDestructive(inout, R"(\$&)", specialChars, "g");
+	return inout;
 }
 
 
@@ -81630,6 +81656,7 @@ void Tool_humtr::convertGlobalLayoutText(HumdrumFile& infile) {
 
 void Tool_humtr::convertLocalLayoutText(HumdrumFile& infile) {
 	HumRegex hre;
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isCommentLocal()) {
 			continue;
@@ -81646,6 +81673,7 @@ void Tool_humtr::convertLocalLayoutText(HumdrumFile& infile) {
 			string newcontents = transliterateText(oldcontents);
 			if (oldcontents != newcontents) {
 				string text = *token;
+				hre.makeSafeDestructive(oldcontents);
 				hre.replaceDestructive(text, ":t=" + newcontents, ":t=" + oldcontents);
 				token->setText(text);
 			}

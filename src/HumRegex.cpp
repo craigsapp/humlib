@@ -527,6 +527,32 @@ string& HumRegex::tr(string& input, const string& from, const string& to) {
 
 //////////////////////////////
 //
+// HumRegex::makeSafeCopy -- Escape all special characters in string to make them regular.
+//
+
+string HumRegex::makeSafeCopy(const std::string& input) {
+	string specialChars = R"([-[\]{}()*+?.,\^$|#\s])";
+	string output = replaceCopy(input, R"(\$&)", specialChars, "g");
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// HumRegex::makeSafeDestructive -- Escape all special characters in string to make them regular.
+//
+
+string& HumRegex::makeSafeDestructive(std::string& inout) {
+	string specialChars = R"([-[\]{}()*+?.,\^$|#\s])";
+	replaceDestructive(inout, R"(\$&)", specialChars, "g");
+	return inout;
+}
+
+
+
+//////////////////////////////
+//
 // HumRegex::split --
 //
 

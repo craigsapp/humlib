@@ -63,7 +63,9 @@ class HumRegex {
 		std::string      replaceCopy        (std::string* input, const std::string& replacement,
 		                                const std::string& exp,
 		                                const std::string& options);
-		std::string&      tr                 (std::string& input, const std::string& from,
+		std::string       makeSafeCopy  (const std::string& input);
+		std::string&      makeSafeDestructive(std::string& inout);
+		std::string&      tr            (std::string& input, const std::string& from,
 		                                const std::string& to);
 
 		// matching (full-string match)
