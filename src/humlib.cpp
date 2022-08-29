@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 29 15:25:42 CEST 2022
+// Last Modified: Mon Aug 29 20:41:14 CEST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -59668,7 +59668,7 @@ string cmr_group_info::getPitch(void) {
 Tool_cmr::Tool_cmr(void) {
 	define("data|raw|raw-data=b",       "print analysis data");
 	define("m|mark-up|marker-up=s:+",   "symbol to mark peak cmr notes");
-	define("M|mark-down|marker-down=s:@", "symbol to mark anti-peak cmr notes");
+	define("M|mark-down|marker-down=s:|", "symbol to mark anti-peak cmr notes");
 	define("c|color|color-up=s:red",    "color of CMR peak notes");
 	define("C|color-down=s:orange",     "color of CMR anti-peak notes");
 	define("r|ignore-rest=d:1.0",       "ignore rests smaller than given value (in whole notes)");
@@ -59852,22 +59852,14 @@ void Tool_cmr::processFile(HumdrumFile& infile) {
 				m_humdrum_text << endl;
 			}
 
-		}
-
-		if (m_local_count > 0) {
-			m_humdrum_text << "!!!RDF**kern: ";
-			m_humdrum_text << m_local_marker;
-			m_humdrum_text << " = marked note, color=";
-			m_humdrum_text << m_local_color;
-			m_humdrum_text << endl;
-		}
-
-		if (m_local_count_n > 0) {
-			m_humdrum_text << "!!!RDF**kern: ";
-			m_humdrum_text << m_local_marker_n;
-			m_humdrum_text << " = marked note, color=";
-			m_humdrum_text << m_local_color_n;
-			m_humdrum_text << endl;
+		} else {
+			if (m_local_count_n > 0) {
+				m_humdrum_text << "!!!RDF**kern: ";
+				m_humdrum_text << m_local_marker_n;
+				m_humdrum_text << " = marked note, color=";
+				m_humdrum_text << m_local_color_n;
+				m_humdrum_text << endl;
+			}
 		}
 
 	}
@@ -61007,7 +60999,6 @@ void Tool_cmr::identifyPeakSequence(vector<bool>& globalcmrnotes, vector<int>& c
 		}
 
 		// Store the (potential) CMR:
-cerr << "ADDING A NOTE GROUP " << m_noteGroups.size() + 1 << endl;
 		m_noteGroups.resize(m_noteGroups.size() + 1);
 		for (int j=0; j<m_cmrNum; j++) {
 			m_noteGroups.back().addNote(notes.at(i+j), m_barNum);
