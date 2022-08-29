@@ -65,13 +65,16 @@ void processFile(HumdrumFile& infile, Options& options) {
 	int tokcount = infile[endi].getFieldCount();
 	int newtokcount = tokcount;
 	vector<string> info(tokcount);
+	vector<string> oinfo;
 	for (int j=0; j<infile[endi].getFieldCount(); j++) {
 		HTp token = infile.token(endi, j);
 		info.at(j) = token->getSpineInfo();
 		if (info.at(j).find(' ') != string::npos) {
 			problemQ = true;
+			oinfo.push_back(info.at(j));
 		} else if (info.at(j) == "") {
 			problemQ = true;
+			oinfo.push_back(info.at(j));
 		}
 	}
 
@@ -120,7 +123,17 @@ void processFile(HumdrumFile& infile, Options& options) {
 		if (verboseQ) {
 			cout << "SPINE ERROR IN:\t";
 		}
-		cout << infile.getFilename() << endl;
+		cout << infile.getFilename();
+		if (verboseQ) {
+			cout << "\t";
+			for (int i=0; i<(int)oinfo.size(); i++) {
+				cout << oinfo.at(i);
+				if (i < (int)oinfo.size() - 1) {
+					cout << ":";
+				}
+			}
+		}
+		cout << endl;
 	}
 	if (infoQ && foundQ) {
 		if (verboseQ) {
