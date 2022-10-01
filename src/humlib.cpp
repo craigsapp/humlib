@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Aug 29 20:41:14 CEST 2022
+// Last Modified: Sat Oct  1 14:53:09 PDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -21379,6 +21379,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 
 string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		int extra) {
+
 	string output;
 	int len1;
 	int len2;
@@ -21406,6 +21407,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 	for (i=0; i<=extra; i++) {
 		newinfo.push_back(info.at(starti+i));
 	}
+
 	for (i=1; i<(int)newinfo.size(); i++) {
 		int len1 = (int)newinfo[i-1].size();
 		int len2 = (int)newinfo[i].size();
@@ -21417,6 +21419,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 			newinfo[i] = newinfo[i].substr(1, len2-3);
 		}
 	}
+
 	vector<string> newinfo2;
 	for (i=0; i<(int)newinfo.size(); i++) {
 		if (newinfo[i].empty()) {
@@ -21424,6 +21427,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		}
 		newinfo2.push_back(newinfo[i]);
 	}
+
 	for (i=1; i<(int)newinfo2.size(); i++) {
 		int len1 = (int)newinfo2[i-1].size();
 		int len2 = (int)newinfo2[i].size();
@@ -21435,6 +21439,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 			newinfo2[i] = newinfo2[i].substr(1, len2-3);
 		}
 	}
+
 	newinfo.resize(0);
 	for (i=0; i<(int)newinfo2.size(); i++) {
 		if (newinfo2[i].empty()) {
@@ -21442,9 +21447,30 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		}
 		newinfo.push_back(newinfo2[i]);
 	}
-	output = newinfo[0];
-	for (int i=1; i<(int)newinfo.size(); i++) {
-		output += " " + info.at(i);
+
+	for (i=1; i<(int)newinfo.size(); i++) {
+		int len1 = (int)newinfo[i-1].size();
+		int len2 = (int)newinfo[i].size();
+		if (len1 != len2) {
+			continue;
+		}
+		if (newinfo[i-1].compare(0, len1-1, newinfo[i], 0, len2-1) == 0) {
+			newinfo[i-1] = "";
+			newinfo[i] = newinfo[i].substr(1, len2-3);
+		}
+	}
+
+	newinfo2.resize(0);
+	for (i=0; i<(int)newinfo.size(); i++) {
+		if (newinfo[i].empty()) {
+			continue;
+		}
+		newinfo2.push_back(newinfo[i]);
+	}
+
+	output = newinfo2[0];
+	for (int i=1; i<(int)newinfo2.size(); i++) {
+		output += " " + newinfo2.at(i);
 	}
 	return output;
 }
