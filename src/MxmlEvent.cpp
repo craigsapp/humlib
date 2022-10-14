@@ -1551,7 +1551,7 @@ string MxmlEvent::getPrefixNoteInfo(void) const {
 string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) const {
 	int beamstarts   = 0;
 	int beamends     = 0;
-	int beamconts    = 0;
+	//int beamconts    = 0;
 	int hookbacks    = 0;
 	int hookforwards = 0;
 	int stem         = 0;
@@ -1575,7 +1575,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) cons
 			} else if (strcmp(beaminfo, "end") == 0) {
 				beamends++;
 			} else if (strcmp(beaminfo, "continue") == 0) {
-				beamconts++;
+				// beamconts++;
 			} else if (strcmp(beaminfo, "forward hook") == 0) {
 				hookforwards++;
 			} else if (strcmp(beaminfo, "backward hook") == 0) {

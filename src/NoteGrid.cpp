@@ -125,7 +125,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 		grid[i].reserve(infile.getLineCount());
 	}
 
-	int attack = 0;
+	//int attack = 0;
 	int track, lasttrack;
 	vector<HTp> current;
 	HumRegex hre;
@@ -153,7 +153,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 			continue;
 		}
 		track = 0;
-		attack = 0;
+		//attack = 0;
 		current.clear();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			lasttrack = track;
@@ -168,7 +168,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 			current.push_back(infile.token(i, j));
 			if (!(current.back()->isRest()
 					|| current.back()->isSecondaryTiedNote())) {
-				attack++;
+				//attack++;
 			}
 		}
 		if (current.size() != kernspines.size()) {

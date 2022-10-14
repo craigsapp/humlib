@@ -2721,7 +2721,7 @@ void Tool_compositeold::removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile
 
 bool Tool_compositeold::onlyAuxTremoloNotes(HumdrumFile& infile, int line) {
 	int attackcount = 0;
-	int sustaincount = 0;
+	// int sustaincount = 0;
 	int auxcount = 0;
 	for (int i=0; i<infile[line].getFieldCount(); i++) {
 		HTp token = infile.token(line, i);
@@ -2736,7 +2736,7 @@ bool Tool_compositeold::onlyAuxTremoloNotes(HumdrumFile& infile, int line) {
 		}
 		bool attack = token->isNoteAttack();
 		if (!attack) {
-			sustaincount++;
+			// sustaincount++;
 			continue;
 		}
 		attackcount++;
