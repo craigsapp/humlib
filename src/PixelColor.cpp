@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Apr 11 12:33:09 PDT 2002
-// Last Modified: Wed Nov 11 12:40:11 PST 2020
+// Last Modified: Thu Oct 13 20:50:11 PDT 2022
 // Filename:      PixelColor.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/PixelColor.cpp
 // Syntax:        C++11
@@ -13,10 +13,11 @@
 #include "PixelColor.h"
 
 #include <string.h>
-#include <cctype>
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <cctype>
+#include <cmath>
 #include <iostream>
 
 using namespace std;
