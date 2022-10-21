@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri 21 Oct 2022 10:52:15 AM PDT
+// Last Modified: Fri 21 Oct 2022 10:52:57 AM PDT
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -12127,8 +12127,9 @@ void HumGrid::transferNonDataSlices(GridMeasure* output, GridMeasure* input) {
 			continue;
 		}
 		output->push_front(slice);
-		input->erase(it);
+		auto it2 = it;
 		it--;
+		input->erase(it2);
 	}
 }
 
@@ -21379,6 +21380,7 @@ bool HumdrumFileBase::adjustSpines(HumdrumLine& line, vector<string>& datatype,
 
 string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		int extra) {
+
 	string output;
 	int len1;
 	int len2;
@@ -21406,6 +21408,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 	for (i=0; i<=extra; i++) {
 		newinfo.push_back(info.at(starti+i));
 	}
+
 	for (i=1; i<(int)newinfo.size(); i++) {
 		int len1 = (int)newinfo[i-1].size();
 		int len2 = (int)newinfo[i].size();
@@ -21417,6 +21420,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 			newinfo[i] = newinfo[i].substr(1, len2-3);
 		}
 	}
+
 	vector<string> newinfo2;
 	for (i=0; i<(int)newinfo.size(); i++) {
 		if (newinfo[i].empty()) {
@@ -21424,6 +21428,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		}
 		newinfo2.push_back(newinfo[i]);
 	}
+
 	for (i=1; i<(int)newinfo2.size(); i++) {
 		int len1 = (int)newinfo2[i-1].size();
 		int len2 = (int)newinfo2[i].size();
@@ -21435,6 +21440,7 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 			newinfo2[i] = newinfo2[i].substr(1, len2-3);
 		}
 	}
+
 	newinfo.resize(0);
 	for (i=0; i<(int)newinfo2.size(); i++) {
 		if (newinfo2[i].empty()) {
@@ -21442,9 +21448,30 @@ string HumdrumFileBase::getMergedSpineInfo(vector<string>& info, int starti,
 		}
 		newinfo.push_back(newinfo2[i]);
 	}
-	output = newinfo[0];
-	for (int i=1; i<(int)newinfo.size(); i++) {
-		output += " " + info.at(i);
+
+	for (i=1; i<(int)newinfo.size(); i++) {
+		int len1 = (int)newinfo[i-1].size();
+		int len2 = (int)newinfo[i].size();
+		if (len1 != len2) {
+			continue;
+		}
+		if (newinfo[i-1].compare(0, len1-1, newinfo[i], 0, len2-1) == 0) {
+			newinfo[i-1] = "";
+			newinfo[i] = newinfo[i].substr(1, len2-3);
+		}
+	}
+
+	newinfo2.resize(0);
+	for (i=0; i<(int)newinfo.size(); i++) {
+		if (newinfo[i].empty()) {
+			continue;
+		}
+		newinfo2.push_back(newinfo[i]);
+	}
+
+	output = newinfo2[0];
+	for (int i=1; i<(int)newinfo2.size(); i++) {
+		output += " " + newinfo2.at(i);
 	}
 	return output;
 }
@@ -42177,7 +42204,7 @@ int MuseRecord::getAttributeInt(char attribute) {
 
 	int output = E_unknown;
 	int ending = 0;
-	int index = 0;
+	// int index = 0;
 	int tempcol;
 	int column;
 	for (column=4; column <= getLength(); column++) {
@@ -42194,7 +42221,7 @@ int MuseRecord::getAttributeInt(char attribute) {
 					ending = 1;
 				}
 				tempcol++;
-				index++;
+				// index++;
 			}
 		}
 		if (ending) {
@@ -42234,7 +42261,7 @@ int MuseRecord::getAttributeField(string& value, const string& key) {
 
 	int returnValue = 0;
 	int ending = 0;
-	int index = 0;
+	// int index = 0;
 	int tempcol;
 	int column;
 	for (column=4; column <= getLength(); column++) {
@@ -42251,7 +42278,7 @@ int MuseRecord::getAttributeField(string& value, const string& key) {
 					ending = 1;
 				}
 				tempcol++;
-				index++;
+				// index++;
 			}
 		}
 		if (ending) {
@@ -46102,7 +46129,7 @@ string MxmlEvent::getPrefixNoteInfo(void) const {
 string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) const {
 	int beamstarts   = 0;
 	int beamends     = 0;
-	int beamconts    = 0;
+	//int beamconts    = 0;
 	int hookbacks    = 0;
 	int hookforwards = 0;
 	int stem         = 0;
@@ -46126,7 +46153,7 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) cons
 			} else if (strcmp(beaminfo, "end") == 0) {
 				beamends++;
 			} else if (strcmp(beaminfo, "continue") == 0) {
-				beamconts++;
+				// beamconts++;
 			} else if (strcmp(beaminfo, "forward hook") == 0) {
 				hookforwards++;
 			} else if (strcmp(beaminfo, "backward hook") == 0) {
@@ -48933,7 +48960,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 		grid[i].reserve(infile.getLineCount());
 	}
 
-	int attack = 0;
+	//int attack = 0;
 	int track, lasttrack;
 	vector<HTp> current;
 	HumRegex hre;
@@ -48961,7 +48988,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 			continue;
 		}
 		track = 0;
-		attack = 0;
+		//attack = 0;
 		current.clear();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			lasttrack = track;
@@ -48976,7 +49003,7 @@ bool NoteGrid::load(HumdrumFile& infile) {
 			current.push_back(infile.token(i, j));
 			if (!(current.back()->isRest()
 					|| current.back()->isSecondaryTiedNote())) {
-				attack++;
+				//attack++;
 			}
 		}
 		if (current.size() != kernspines.size()) {
@@ -67875,7 +67902,7 @@ void Tool_compositeold::removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile
 
 bool Tool_compositeold::onlyAuxTremoloNotes(HumdrumFile& infile, int line) {
 	int attackcount = 0;
-	int sustaincount = 0;
+	// int sustaincount = 0;
 	int auxcount = 0;
 	for (int i=0; i<infile[line].getFieldCount(); i++) {
 		HTp token = infile.token(line, i);
@@ -67890,7 +67917,7 @@ bool Tool_compositeold::onlyAuxTremoloNotes(HumdrumFile& infile, int line) {
 		}
 		bool attack = token->isNoteAttack();
 		if (!attack) {
-			sustaincount++;
+			// sustaincount++;
 			continue;
 		}
 		attackcount++;

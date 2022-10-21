@@ -13,6 +13,7 @@
 #ifndef _HUMDRUMTOKEN_H_INCLUDED
 #define _HUMDRUMTOKEN_H_INCLUDED
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>

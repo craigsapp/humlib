@@ -109,7 +109,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 		}
 
 		cout << "}";
-		if (i < segments) {
+		if (i < segments - 1) {
 			cout << ",";
 		}
 		cout << "\n";
