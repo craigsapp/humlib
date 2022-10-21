@@ -2895,8 +2895,9 @@ void HumGrid::transferNonDataSlices(GridMeasure* output, GridMeasure* input) {
 			continue;
 		}
 		output->push_front(slice);
-		input->erase(it);
+		auto it2 = it;
 		it--;
+		input->erase(it2);
 	}
 }
 

@@ -17,6 +17,7 @@
 #include "HumdrumToken.h"
 #include "HumHash.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>

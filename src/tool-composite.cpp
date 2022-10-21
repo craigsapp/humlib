@@ -23,7 +23,7 @@
 #include "Convert.h"
 #include "HumRegex.h"
 
-#include <strstream>
+#include <sstream>
 
 using namespace std;
 

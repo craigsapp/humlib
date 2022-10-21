@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Oct 13 21:38:18 PDT 2022
+// Last Modified: Fri Oct 21 02:00:28 AM EDT 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -12127,8 +12127,9 @@ void HumGrid::transferNonDataSlices(GridMeasure* output, GridMeasure* input) {
 			continue;
 		}
 		output->push_front(slice);
-		input->erase(it);
+		auto it2 = it;
 		it--;
+		input->erase(it2);
 	}
 }
 
