@@ -172,6 +172,11 @@ makedirs:
 	@-mkdir -p $(LIBDIR)
 
 
+cli: programs
+examples: programs
+programs:
+	make -f Makefile.programs
+
 %:
 	@echo 'if [ "$<" == "" ]; then $(MAKE) -f Makefile.programs $@; fi' | bash -s
 
