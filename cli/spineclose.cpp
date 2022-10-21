@@ -84,7 +84,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 	// this program again to merge more complicated cases).
 	HumRegex hrea;
 	HumRegex hreb;
-	for (int i=0; i<info.size() - 1; i++) {
+	for (int i=0; i<(int)info.size() - 1; i++) {
 		string a = info.at(i);
 		string b = info.at(i+1);
 		if (!hrea.search(a, "\\(.*\\)a")) {
@@ -163,13 +163,13 @@ string getMergeLine(vector<string>& info, int index) {
 		output += "*\t";
 	}
 	output += "*v\t*v";
-	for (int i=index+2; i<info.size(); i++) {
+	for (int i=index+2; i<(int)info.size(); i++) {
 		output += "\t*";
 	}
 
 	// remove empty spot in info line:
 	info.at(index) = "x";
-	for (int i=index+2; i<info.size(); i++) {
+	for (int i=index+2; i<(int)info.size(); i++) {
 		info.at(i-1) = info.at(i);
 	}
 	info.resize(info.size() - 1);
