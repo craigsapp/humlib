@@ -621,6 +621,16 @@ tool-extract.o: tool-extract.cpp tool-extract.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   HumRegex.h
 
+tool-figuredbass.o: tool-figuredbass.cpp tool-figuredbass.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  NoteGrid.h NoteCell.h Convert.h \
+  HumRegex.h
+
 tool-filter.o: tool-filter.cpp tool-filter.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -632,7 +642,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-chooser.h tool-chord.h tool-cint.h \
   NoteGrid.h NoteCell.h HumRegex.h \
   tool-composite.h tool-dissonant.h \
-  tool-extract.h tool-homorhythm.h \
+  tool-extract.h tool-figuredbass.h tool-homorhythm.h \
   tool-homorhythm2.h tool-hproof.h \
   tool-humdiff.h tool-shed.h tool-imitation.h \
   tool-kern2mens.h tool-melisma.h tool-metlev.h \

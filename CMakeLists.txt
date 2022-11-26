@@ -89,6 +89,7 @@ set(SRCS
 	src/tool-dissonant.cpp
 	src/tool-esac2hum.cpp
 	src/tool-extract.cpp
+	src/tool-figuredbass.cpp
 	src/tool-filter.cpp
 	src/tool-hproof.cpp
 	src/tool-imitation.cpp
@@ -148,6 +149,7 @@ set(HDRS
 	include/tool-dissonant.h
 	include/tool-esac2hum.h
 	include/tool-extract.h
+	include/tool-figuredbass.h
 	include/tool-hproof.h
 	include/tool-imitation.h
 	include/tool-mei2hum.h
