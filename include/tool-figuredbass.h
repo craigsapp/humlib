@@ -17,6 +17,7 @@ class FiguredBassNumber {
 		string accidentals;
 		FiguredBassNumber(int num, string accid, int voiceIndex, int lineIndex);
 		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		int getNumberB7();
 };
 
 class Tool_figuredbass : public HumTool {
@@ -30,9 +31,9 @@ class Tool_figuredbass : public HumTool {
 		bool run (const string& indata, ostream& out);
 		bool run (HumdrumFile& infile, ostream& out);
 
-		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ);
 		
-		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ);
 
 		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target);
 		
@@ -40,7 +41,7 @@ class Tool_figuredbass : public HumTool {
 		
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
 
-		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ);
 
 	// protected:
 
@@ -49,6 +50,7 @@ class Tool_figuredbass : public HumTool {
 		bool noAccidentalsQ = false;
 		int baseQ = 0;
 		bool intervallsatzQ = false;
+		bool sortQ = false;
 
 };
 
