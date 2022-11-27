@@ -31,10 +31,14 @@ class Tool_figuredbass : public HumTool {
 		bool run (HumdrumFile& infile, ostream& out);
 
 		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		
+		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
 
 		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target);
 		
-		vector<FiguredBassNumber*> findFiguredBassNumbersForLine(vector<FiguredBassNumber*>, int lineIndex);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*>, int lineIndex);
+		
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
 
 		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ);
 
@@ -44,6 +48,7 @@ class Tool_figuredbass : public HumTool {
 		bool nonCompoundIntervalsQ = false;
 		bool noAccidentalsQ = false;
 		int baseQ = 0;
+		bool intervallsatzQ = false;
 
 };
 

@@ -12,6 +12,7 @@ Tool_figuredbass::Tool_figuredbass(void) {
 	define("C|non-compound=b", "output compound intervals as non-compound intervals");
 	define("A|no-accidentals=b", "ignore accidentals in figured bass output");
 	define("b|base=i:0", "number of the base voice/spine");
+	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
@@ -48,6 +49,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	nonCompoundIntervalsQ = getBoolean("non-compound");
 	noAccidentalsQ = getBoolean("no-accidentals");
 	baseQ = getInteger("base");
+	intervallsatzQ = getBoolean("intervallsatz");
 
 	NoteGrid grid(infile);
 
@@ -69,12 +71,28 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 		}
 	}
 
-	if(baseVoiceIndex < grid.getVoiceCount()) {
-		int trackIndex = kernspines[baseVoiceIndex + 1]->getTrack();
-		infile.insertDataSpineBefore(trackIndex, getTrackData(data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ), ".", "**fb");
+	if(intervallsatzQ) {
+		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
+			if(voiceIndex == baseVoiceIndex) {
+				continue;
+			}
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ);
+			if(voiceIndex + 1 < grid.getVoiceCount()) {
+				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
+				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
+			} else {
+				int trackIndex = kernspines[voiceIndex]->getTrack();
+				infile.appendDataSpine(trackData, ".", "**fb");
+			}
+		}
 	} else {
-		// TODO segmentation fault
-		infile.appendDataSpine(getTrackData(data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ), ".", "**fb");
+		vector<string> trackData = getTrackData(data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ);
+		if(baseVoiceIndex + 1 < grid.getVoiceCount()) {
+			int trackIndex = kernspines[baseVoiceIndex + 1]->getTrack();
+			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
+		} else {
+			infile.appendDataSpine(trackData, ".", "**fb");
+		}
 	}
 
 	return true;
@@ -85,7 +103,21 @@ vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
-		vector<FiguredBassNumber*> sliceNumbers = findFiguredBassNumbersForLine(numbers, i);
+		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
+		if(sliceNumbers.size() > 0) {
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers, nonCompoundIntervalsQ, noAccidentalsQ);
+		}
+	}
+
+	return trackData;
+};
+
+vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ) {
+	vector<string> trackData;
+	trackData.resize(lineCount);
+
+	for (int i = 0; i < lineCount; i++) {
+		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
 		if(sliceNumbers.size() > 0) {
 			trackData[i] = formatFiguredBassNumbers(sliceNumbers, nonCompoundIntervalsQ, noAccidentalsQ);
 		}
@@ -111,12 +143,27 @@ FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, Not
 	return number;
 };
 
-vector<FiguredBassNumber*> Tool_figuredbass::findFiguredBassNumbersForLine(vector<FiguredBassNumber*> numbers, int lineIndex) {
+vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLine(vector<FiguredBassNumber*> numbers, int lineIndex) {
 
 	vector<FiguredBassNumber*> filteredNumbers;
 
 	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex](FiguredBassNumber* num) {
 		return num->lineIndex == lineIndex;
+	});
+
+	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+    	return a->voiceIndex > b->voiceIndex; 
+	});
+
+	return filteredNumbers;
+};
+
+vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex) {
+
+	vector<FiguredBassNumber*> filteredNumbers;
+
+	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex, voiceIndex](FiguredBassNumber* num) {
+		return num->lineIndex == lineIndex && num->voiceIndex == voiceIndex;
 	});
 
 	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
