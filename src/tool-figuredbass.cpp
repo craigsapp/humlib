@@ -74,7 +74,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			if(num > 0) {
 				string accid = "";
 				if (!noAccidentalsQ) {
-					// TODO improve for souble sharps and double flats
+					// TODO improve for double sharps and double flats
 					if(targetCell->getSgnKernPitch().find("-") != string::npos) {
 						accid = '-';
 					} else if(targetCell->getSgnKernPitch().find("#") != string::npos) {
