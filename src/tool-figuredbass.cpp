@@ -91,7 +91,6 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 		int trackIndex = kernspines[baseVoiceIndex + 1]->getTrack();
 		infile.insertDataSpineBefore(trackIndex, data, ".", "**fb");
 	} else {
-		int trackIndex = kernspines[baseVoiceIndex]->getTrack();
 		// TODO segmentation fault
 		infile.appendDataSpine(data, ".", "**fb");
 	}
