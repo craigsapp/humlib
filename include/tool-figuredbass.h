@@ -15,7 +15,8 @@ class FiguredBassNumber {
 		int lineIndex;
 		int number;
 		string accidentals;
-		FiguredBassNumber(int num, string accid, int voiceIndex, int lineIndex);
+		bool showAccidentals;
+		FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex);
 		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
 		int getNumberB7();
 };
@@ -35,13 +36,15 @@ class Tool_figuredbass : public HumTool {
 		
 		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ);
 
-		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target);
+		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
 		
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*>, int lineIndex);
 		
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
 
 		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ);
+
+		string getKeySignature(HumdrumFile& infile, int lineIndex);
 
 	// protected:
 

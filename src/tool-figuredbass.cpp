@@ -76,12 +76,13 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 		}
 		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
+		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			if(j == usedBaseVoiceIndex) {
 				continue;
 			}
 			NoteCell* targetCell = grid.cell(j, i);
-			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell);
+			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
 			numbers.push_back(number);
 		}
 	}
@@ -138,15 +139,28 @@ vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<Fig
 	return trackData;
 };
 
-FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, NoteCell* target) {
+FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature) {
 
 	int basePitch = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
 	int num = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
-	regex keepAccid("^\\(?\\w+([^\\w\\)]*)\\)?$");
-    string accid = regex_replace(target->getSgnKernPitch(), keepAccid, "$1");
 
-	FiguredBassNumber* number = new FiguredBassNumber(num, accid, target->getVoiceIndex(), target->getLineIndex());
+	bool showAccid = false;
+	regex accidRegex("^\\(?(\\w)+([^\\w\\)]*)\\)?$");
+	string accid = regex_replace(target->getSgnKernPitch(), accidRegex, "$2");
+
+	string accidWithPitch = regex_replace(target->getSgnKernPitch(), accidRegex, "$1$2");
+	transform(accidWithPitch.begin(), accidWithPitch.end(), accidWithPitch.begin(), [](unsigned char c) {
+		return tolower(c);
+	});
+	transform(keySignature.begin(), keySignature.end(), keySignature.begin(), [](unsigned char c) {
+		return tolower(c);
+	});
+	if(accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
+    	showAccid = true;
+	}
+
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex());
 
 	return number;
 };
@@ -201,16 +215,35 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 	return str;
 };
 
-FiguredBassNumber::FiguredBassNumber(int num, string accid, int voiceIdx, int lineIdx) {
+string Tool_figuredbass::getKeySignature(HumdrumFile& infile, int lineIndex) {
+	string keySignature = "";
+	[&] {
+		for (int i = 0; i < infile.getLineCount(); i++) {
+			if(i > lineIndex) {
+				return;
+			}
+			HLp line = infile.getLine(i);
+			for (int j = 0; j < line->getFieldCount(); j++) {
+				if (line->token(j)->isKeySignature()) {
+					keySignature = line->getTokenString(j);
+				}
+			}
+		}
+	}();
+	return keySignature;
+};
+
+FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx) {
 	number = num;
 	accidentals = accid;
 	voiceIndex = voiceIdx;
 	lineIndex = lineIdx;
+	showAccidentals = showAccid;
 };
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 	int num = (compoundQ) ? getNumberB7() : number;
-	string accid = (accidentalsQ) ? accidentals : "";
+	string accid = (accidentalsQ && showAccidentals) ? accidentals : "";
 	return num > 0 ? to_string(num) + accid : "";
 };
 
