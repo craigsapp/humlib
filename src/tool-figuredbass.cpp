@@ -1,6 +1,7 @@
 #include "tool-figuredbass.h"
 #include "Convert.h"
 #include "HumRegex.h"
+#include <regex>
 
 using namespace std;
 
@@ -142,12 +143,8 @@ FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, Not
 	int basePitch = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
 	int num = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
-	string accid = "";
-	if(target->getSgnKernPitch().find("-") != string::npos) {
-		accid = '-';
-	} else if(target->getSgnKernPitch().find("#") != string::npos) {
-		accid = '#';
-	}
+	regex keepAccid("^\\(?\\w+([^\\w\\)]*)\\)?$");
+    string accid = regex_replace(target->getSgnKernPitch(), keepAccid, "$1");
 
 	FiguredBassNumber* number = new FiguredBassNumber(num, accid, target->getVoiceIndex(), target->getLineIndex());
 
