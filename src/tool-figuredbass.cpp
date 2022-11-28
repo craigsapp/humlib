@@ -57,14 +57,12 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	NoteGrid grid(infile);
 
-	vector<FiguredBassNumber*> data;
+	vector<FiguredBassNumber*> numbers;
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
-	int baseVoiceIndex = baseQ;
-
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
-		int usedBaseVoiceIndex = baseVoiceIndex;
+		int usedBaseVoiceIndex = baseQ;
 		if(lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
@@ -83,13 +81,13 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 			NoteCell* targetCell = grid.cell(j, i);
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell);
-			data.push_back(number);
+			numbers.push_back(number);
 		}
 	}
 
 	if(intervallsatzQ) {
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
-			vector<string> trackData = getTrackDataForVoice(voiceIndex, data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
 			if(voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -99,9 +97,9 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 		}
 	} else {
-		vector<string> trackData = getTrackData(data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
-		if(baseVoiceIndex + 1 < grid.getVoiceCount()) {
-			int trackIndex = kernspines[baseVoiceIndex + 1]->getTrack();
+		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+		if(baseQ + 1 < grid.getVoiceCount()) {
+			int trackIndex = kernspines[baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 		} else {
 			infile.appendDataSpine(trackData, ".", "**fb");
