@@ -14,6 +14,7 @@ Tool_figuredbass::Tool_figuredbass(void) {
 	define("b|base=i:0", "number of the base voice/spine");
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
 	define("s|sort=b", "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b", "use lowest note as base note; -b flag will be ignored");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
@@ -52,6 +53,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	baseQ = getInteger("base");
 	intervallsatzQ = getBoolean("intervallsatz");
 	sortQ = getBoolean("sort");
+	lowestQ = getBoolean("lowest");
 
 	NoteGrid grid(infile);
 
@@ -62,9 +64,22 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	int baseVoiceIndex = baseQ;
 
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
-		NoteCell* baseCell = grid.cell(baseVoiceIndex, i);
+		int usedBaseVoiceIndex = baseVoiceIndex;
+		if(lowestQ) {
+			int lowestNotePitch = 99999;
+			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
+				NoteCell* checkCell = grid.cell(k, i);
+				int checkCellPitch = abs(checkCell->getSgnDiatonicPitch());
+				if(checkCellPitch > 0 && checkCellPitch < lowestNotePitch) {
+					lowestNotePitch = checkCellPitch;
+					usedBaseVoiceIndex = k;
+				}
+			}
+			cout << "!! " << lowestNotePitch << " " << usedBaseVoiceIndex << " " << to_string(i) << "\n";
+		}
+		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
-			if(j == baseVoiceIndex) {
+			if(j == usedBaseVoiceIndex) {
 				continue;
 			}
 			NoteCell* targetCell = grid.cell(j, i);
@@ -75,9 +90,6 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	if(intervallsatzQ) {
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
-			if(voiceIndex == baseVoiceIndex) {
-				continue;
-			}
 			vector<string> trackData = getTrackDataForVoice(voiceIndex, data, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
 			if(voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();

@@ -51,6 +51,7 @@ class Tool_figuredbass : public HumTool {
 		int baseQ = 0;
 		bool intervallsatzQ = false;
 		bool sortQ = false;
+		bool lowestQ = false;
 
 };
 
