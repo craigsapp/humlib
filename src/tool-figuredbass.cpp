@@ -9,7 +9,7 @@ namespace hum {
 // START_MERGE
 
 Tool_figuredbass::Tool_figuredbass(void) {
-	define("C|non-compound=b", "output compound intervals as non-compound intervals");
+	define("c|compound=b", "output compound intervals for intervals bigger than 9");
 	define("A|no-accidentals=b", "ignore accidentals in figured bass output");
 	define("b|base=i:0", "number of the base voice/spine");
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
@@ -48,7 +48,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile, ostream &out) {
 
 bool Tool_figuredbass::run(HumdrumFile &infile) {
 
-	nonCompoundIntervalsQ = getBoolean("non-compound");
+	compoundQ = getBoolean("compound");
 	noAccidentalsQ = getBoolean("no-accidentals");
 	baseQ = getInteger("base");
 	intervallsatzQ = getBoolean("intervallsatz");
@@ -87,7 +87,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	if(intervallsatzQ) {
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
-			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), compoundQ, noAccidentalsQ, sortQ);
 			if(voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -97,7 +97,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 		}
 	} else {
-		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), compoundQ, noAccidentalsQ, sortQ);
 		if(baseQ + 1 < grid.getVoiceCount()) {
 			int trackIndex = kernspines[baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -109,28 +109,28 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	return true;
 };
 
-vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ) {
+vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool noAccidentalsQ, bool sortQ) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, noAccidentalsQ, sortQ);
 		}
 	}
 
 	return trackData;
 };
 
-vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ) {
+vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool noAccidentalsQ, bool sortQ) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, nonCompoundIntervalsQ, noAccidentalsQ, sortQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, noAccidentalsQ, sortQ);
 		}
 	}
 
@@ -184,17 +184,17 @@ vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLineAndV
 	return filteredNumbers;
 };
 
-string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ) {
+string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool compoundQ, bool noAccidentalsQ, bool sortQ) {
 	if(sortQ) {
-		sort(numbers.begin(), numbers.end(), [nonCompoundIntervalsQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-			return (nonCompoundIntervalsQ) ? a->number > b->number : a->getNumberB7() > b->getNumberB7();
+		sort(numbers.begin(), numbers.end(), [compoundQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+			return (compoundQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
 
 		});
 	}
 	string str = "";
 	bool first = true;
 	for (FiguredBassNumber* number: numbers) {
-		string num = number->toString(nonCompoundIntervalsQ, noAccidentalsQ);
+		string num = number->toString(compoundQ, noAccidentalsQ);
 		if(num.length() > 0) {
 			if (!first) str += " ";
 			first = false;
@@ -211,8 +211,8 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, int voiceIdx, int li
 	lineIndex = lineIdx;
 };
 
-string FiguredBassNumber::toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ) {
-	int num = (!nonCompoundIntervalsQ) ? getNumberB7() : number;
+string FiguredBassNumber::toString(bool compoundQ, bool noAccidentalsQ) {
+	int num = (compoundQ) ? getNumberB7() : number;
 	string accid = (!noAccidentalsQ) ? accidentals : "";
 	return num > 0 ? to_string(num) + accid : "";
 };

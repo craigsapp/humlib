@@ -46,7 +46,7 @@ class Tool_figuredbass : public HumTool {
 	// protected:
 
 	private:
-		bool nonCompoundIntervalsQ = false;
+		bool compoundQ = false;
 		bool noAccidentalsQ = false;
 		int baseQ = 0;
 		bool intervallsatzQ = false;
