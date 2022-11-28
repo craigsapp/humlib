@@ -75,7 +75,6 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 					usedBaseVoiceIndex = k;
 				}
 			}
-			cout << "!! " << lowestNotePitch << " " << usedBaseVoiceIndex << " " << to_string(i) << "\n";
 		}
 		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
