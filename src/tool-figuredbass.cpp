@@ -209,7 +209,8 @@ string FiguredBassNumber::toString(bool nonCompoundIntervalsQ, bool noAccidental
 };
 
 int FiguredBassNumber::getNumberB7() {
-	return (number > 9) ? number % 7 : number;
+	int num = (number > 9) ? number % 7 : number;
+	return (number > 8 && num == 1) ? 8 : num;
 };
 
 
