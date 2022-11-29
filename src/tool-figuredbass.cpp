@@ -280,9 +280,10 @@ vector<FiguredBassNumber*> Tool_figuredbass::getAbbrNumbers(vector<FiguredBassNu
 	if (it != figuredBassAbbrs.end()) {
 		int index = it - figuredBassAbbrs.begin();
 		FiguredBassAbbr* abbr = figuredBassAbbrs[index];
-		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr](FiguredBassNumber* num) {
+		bool aQ = accidentalsQ;
+		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
-			return find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end();
+			return find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end() || (num->showAccidentals && aQ);
 		});
 
 		return abbrNumbers;
