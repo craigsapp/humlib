@@ -344,6 +344,9 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 
 int FiguredBassNumber::getNumberB7() {
 	int num = (number > 9) ? number % 7 : number;
+	if(number > 9 && number % 7 == 0) {
+		num = 7;
+	}
 	return (number > 8 && num == 1) ? 8 : num;
 };
 
