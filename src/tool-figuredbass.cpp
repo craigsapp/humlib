@@ -102,7 +102,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	if(intervallsatzQ) {
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
-			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount());
 			if(voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -112,7 +112,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 		}
 	} else {
-		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
+		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
 		if(baseQ + 1 < grid.getVoiceCount()) {
 			int trackIndex = kernspines[baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -124,28 +124,28 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	return true;
 };
 
-vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
+vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
 		}
 	}
 
 	return trackData;
 };
 
-vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
+vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
 		}
 	}
 
@@ -208,7 +208,7 @@ vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLineAndV
 	return filteredNumbers;
 };
 
-string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
+string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers) {
 
 	vector<FiguredBassNumber*> normalizededNumbers;
 
@@ -227,8 +227,9 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 	}
 
 	if(sortQ) {
-		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [compoundQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-			return (compoundQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
+		bool cQ = compoundQ;
+		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+			return (cQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
 		});
 	}
 
