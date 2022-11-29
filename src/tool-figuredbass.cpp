@@ -18,6 +18,7 @@ Tool_figuredbass::Tool_figuredbass(void) {
 	define("l|lowest=b", "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b", "remove octave and doubled intervals, use compound interval, sort intervals");
 	define("r|abbr=b", "use abbreviated figures");
+	define("t|attack=b", "hide intervalls with no attack and when base does not change");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
@@ -59,6 +60,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	lowestQ = getBoolean("lowest");
 	normalizeQ = getBoolean("normalize");
 	abbrQ = getBoolean("abbr");
+	attackQ = getBoolean("attack");
 
 	if(abbrQ) {
 		normalizeQ = true;
@@ -75,7 +77,13 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
+	vector<int> lastNumbers = {};
+	lastNumbers.resize(3);
+	vector<int> currentNumbers = {};
+
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
+		currentNumbers.clear();
+		currentNumbers.resize(3);
 		int usedBaseVoiceIndex = baseQ;
 		if(lowestQ) {
 			int lowestNotePitch = 99999;
@@ -96,8 +104,13 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 			NoteCell* targetCell = grid.cell(j, i);
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
+			if(lastNumbers[j] != 0) {
+				number->currAttackNumberDidChange = targetCell->isSustained() && lastNumbers[j] != number->number;
+			}
+			currentNumbers[j] = number->number;
 			numbers.push_back(number);
 		}
+		lastNumbers = currentNumbers;
 	}
 
 	if(intervallsatzQ) {
@@ -173,7 +186,7 @@ FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, Not
     	showAccid = true;
 	}
 
-	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex());
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
 
 	return number;
 };
@@ -225,6 +238,14 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 		}), normalizededNumbers.end());
 	} else {
 		normalizededNumbers = numbers;
+	}
+
+	if(intervallsatzQ && attackQ) {
+		vector<FiguredBassNumber*> attackNumbers;
+		copy_if(normalizededNumbers.begin(), normalizededNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
+			return num->isAttack || num->currAttackNumberDidChange;
+		});
+		normalizededNumbers = attackNumbers;
 	}
 
 	if(sortQ) {
@@ -328,12 +349,13 @@ string Tool_figuredbass::getKeySignature(HumdrumFile& infile, int lineIndex) {
 	return keySignature;
 };
 
-FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx) {
+FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk) {
 	number = num;
 	accidentals = accid;
 	voiceIndex = voiceIdx;
 	lineIndex = lineIdx;
 	showAccidentals = showAccid;
+	isAttack = isAtk;
 };
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
