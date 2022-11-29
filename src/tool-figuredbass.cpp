@@ -17,6 +17,7 @@ Tool_figuredbass::Tool_figuredbass(void) {
 	define("s|sort=b", "sort figured bass numbers by interval size and not by voice index");
 	define("l|lowest=b", "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b", "Remove octave and doubled intervals, use compound interval, sort intervals");
+	define("r|abbr=b", "Use abbreviated figures");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
@@ -57,10 +58,23 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	sortQ = getBoolean("sort");
 	lowestQ = getBoolean("lowest");
 	normalizeQ = getBoolean("normalize");
+	abbrQ = getBoolean("abbr");
+
+	if(abbrQ) {
+		normalizeQ = true;
+	}
 
 	if(normalizeQ) {
 		compoundQ = true;
 		sortQ = true;
+	}
+
+	if(false) {
+		compoundQ = true;
+		accidentalsQ = true;
+		sortQ = true;
+		lowestQ = true;
+		normalizeQ = true;
 	}
 
 	NoteGrid grid(infile);
@@ -96,7 +110,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 
 	if(intervallsatzQ) {
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
-			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ);
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
 			if(voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -106,7 +120,7 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 			}
 		}
 	} else {
-		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ);
+		vector<string> trackData = getTrackData(numbers, infile.getLineCount(), compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
 		if(baseQ + 1 < grid.getVoiceCount()) {
 			int trackIndex = kernspines[baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
@@ -118,28 +132,28 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 	return true;
 };
 
-vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ) {
+vector<string> Tool_figuredbass::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
 		}
 	}
 
 	return trackData;
 };
 
-vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ) {
+vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
 		if(sliceNumbers.size() > 0) {
-			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ);
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers, compoundQ, accidentalsQ, sortQ, normalizeQ, abbrQ);
 		}
 	}
 
@@ -202,7 +216,7 @@ vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLineAndV
 	return filteredNumbers;
 };
 
-string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ) {
+string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool compoundQ, bool accidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ) {
 
 	vector<FiguredBassNumber*> normalizededNumbers;
 
@@ -219,11 +233,17 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 	} else {
 		normalizededNumbers = numbers;
 	}
+
 	if(sortQ) {
 		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [compoundQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			return (compoundQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
 		});
 	}
+
+	if(abbrQ) {
+		normalizededNumbers = getAbbrNumbers(normalizededNumbers);
+	}
+
 	string str = "";
 	bool first = true;
 	for (FiguredBassNumber* number: normalizededNumbers) {
@@ -233,6 +253,64 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 			first = false;
 			str += num;
 		}
+	}
+	return str;
+};
+
+vector<FiguredBassNumber*> Tool_figuredbass::getAbbrNumbers(vector<FiguredBassNumber*> numbers) {
+
+	vector<FiguredBassNumber*> abbrNumbers;
+
+	vector<FiguredBassAbbr*> figuredBassAbbrs = {
+		new FiguredBassAbbr("3", {}),
+		new FiguredBassAbbr("5", {}),
+		new FiguredBassAbbr("5 3", {}),
+		new FiguredBassAbbr("6 3", {6}),
+		new FiguredBassAbbr("5 4", {4}),
+		new FiguredBassAbbr("7 5 3", {7}),
+		new FiguredBassAbbr("7 3", {7}),
+		new FiguredBassAbbr("7 5", {7}),
+		new FiguredBassAbbr("6 5 3", {6, 5}),
+		new FiguredBassAbbr("6 4 3", {4, 3}),
+		new FiguredBassAbbr("6 4 2", {4, 2}),
+		new FiguredBassAbbr("9 5 3", {9}),
+		new FiguredBassAbbr("9 5", {9}),
+		new FiguredBassAbbr("9 3", {9}),
+	};
+
+	string numberString = getNumberString(numbers);
+
+	auto it = find_if(figuredBassAbbrs.begin(), figuredBassAbbrs.end(), [numberString](FiguredBassAbbr* abbr) {
+		return abbr->str == numberString;
+	});
+
+	if (it != figuredBassAbbrs.end()) {
+		int index = it - figuredBassAbbrs.begin();
+		FiguredBassAbbr* abbr = figuredBassAbbrs[index];
+		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr](FiguredBassNumber* num) {
+			vector<int> nums = abbr->numbers;
+			return find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end();
+		});
+
+		return abbrNumbers;
+	}
+
+	return numbers;
+};
+
+string Tool_figuredbass::getNumberString(vector<FiguredBassNumber*> numbers) {
+	sort(numbers.begin(), numbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		return a->getNumberB7() > b->getNumberB7();
+	});
+	string str = "";
+	bool first = true;
+	for (FiguredBassNumber* nr: numbers) {
+		int num = nr->getNumberB7();
+		if(num > 0) {
+			if (!first) str += " ";
+			first = false;
+			str += to_string(num);
+		}	
 	}
 	return str;
 };
@@ -274,6 +352,10 @@ int FiguredBassNumber::getNumberB7() {
 	return (number > 8 && num == 1) ? 8 : num;
 };
 
+FiguredBassAbbr::FiguredBassAbbr(string s, vector<int> n) {
+	str = s;
+	numbers = n;
+};
 
 // END_MERGE
 

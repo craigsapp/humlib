@@ -21,6 +21,13 @@ class FiguredBassNumber {
 		int getNumberB7();
 };
 
+class FiguredBassAbbr {
+	public:
+		string str;
+		vector<int> numbers;
+		FiguredBassAbbr(string s, vector<int> n);
+};
+
 class Tool_figuredbass : public HumTool {
 
 	public:
@@ -32,9 +39,9 @@ class Tool_figuredbass : public HumTool {
 		bool run (const string& indata, ostream& out);
 		bool run (HumdrumFile& infile, ostream& out);
 
-		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ);
+		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ);
 		
-		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ);
+		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ);
 
 		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
 		
@@ -42,7 +49,11 @@ class Tool_figuredbass : public HumTool {
 		
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
 
-		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ);
+		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers, bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool sortQ, bool normalizeQ, bool abbrQ);
+
+		vector<FiguredBassNumber*> getAbbrNumbers(vector<FiguredBassNumber*>);
+
+		string getNumberString(vector<FiguredBassNumber*> numbers);
 
 		string getKeySignature(HumdrumFile& infile, int lineIndex);
 
@@ -56,6 +67,7 @@ class Tool_figuredbass : public HumTool {
 		bool sortQ = false;
 		bool lowestQ = false;
 		bool normalizeQ = false;
+		bool abbrQ = false;
 
 };
 
