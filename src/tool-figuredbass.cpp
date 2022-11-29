@@ -213,8 +213,9 @@ string Tool_figuredbass::formatFiguredBassNumbers(vector<FiguredBassNumber*> num
 	vector<FiguredBassNumber*> normalizededNumbers;
 
 	if(normalizeQ) {
-		copy_if(numbers.begin(), numbers.end(), back_inserter(normalizededNumbers), [](FiguredBassNumber* num) {
-			return num->getNumberB7() != 8 && num->getNumberB7() != 1;
+		bool aQ = accidentalsQ;
+		copy_if(numbers.begin(), numbers.end(), back_inserter(normalizededNumbers), [aQ](FiguredBassNumber* num) {
+			return (num->getNumberB7() != 8 && num->getNumberB7() != 1) || (aQ && num->showAccidentals);
 		});
 		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			return a->getNumberB7() < b->getNumberB7();
