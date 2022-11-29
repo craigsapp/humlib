@@ -69,14 +69,6 @@ bool Tool_figuredbass::run(HumdrumFile &infile) {
 		sortQ = true;
 	}
 
-	if(false) {
-		compoundQ = true;
-		accidentalsQ = true;
-		sortQ = true;
-		lowestQ = true;
-		normalizeQ = true;
-	}
-
 	NoteGrid grid(infile);
 
 	vector<FiguredBassNumber*> numbers;
