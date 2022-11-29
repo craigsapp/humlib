@@ -16,8 +16,8 @@ Tool_figuredbass::Tool_figuredbass(void) {
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
 	define("s|sort=b", "sort figured bass numbers by interval size and not by voice index");
 	define("l|lowest=b", "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b", "Remove octave and doubled intervals, use compound interval, sort intervals");
-	define("r|abbr=b", "Use abbreviated figures");
+	define("n|normalize=b", "remove octave and doubled intervals, use compound interval, sort intervals");
+	define("r|abbr=b", "use abbreviated figures");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
