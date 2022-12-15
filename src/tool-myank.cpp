@@ -39,6 +39,7 @@ Tool_myank::Tool_myank(void) {
 	define("T|M|bar-number-text=b", "print barnum with LO text above system ");
 	define("d|double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
 	define("m|b|measures|bars|measure|bar=s", "Measures to yank");
+	define("l|lines=s", "Lines to yank");
 	define("I|i|instrument=b", "Include instrument codes from start of data");
 	define("visible|not-invisible=b", "Do not make initial measure invisible");
 	define("B|noendbar=b", "Do not print barline at end of data");
@@ -217,8 +218,10 @@ void Tool_myank::initialize(HumdrumFile& infile) {
 	sectionCountQ =  getBoolean("section-count");
 	Section       =  getInteger("section");
 
+	linesQ = getString("lines");
+
 	if (!Section) {
-		if (!(getBoolean("measures") || markQ)) {
+		if (!(getBoolean("measures") || markQ) && !getBoolean("lines")) {
 			// if -m option is not given, then --mark option presumed
 			markQ = 1;
 			// cerr << "Error: the -m option is required" << endl;
@@ -246,6 +249,14 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	getMeasureStartStop(MeasureInList, infile);
 
 	string measurestring = getString("measures");
+
+	if(getBoolean("lines")) {
+		BarNumbers = analyzeBarNumbers(infile);
+		int startBarNumber = getBarNumberForLine(getStartLine());
+		int endBarNumber = getBarNumberForLine(getEndLine());
+		measurestring = to_string(startBarNumber) + "-" + to_string(endBarNumber);
+	}
+
 	measurestring = expandMultipliers(measurestring);
 	if (markQ) {
 		stringstream mstring;
@@ -294,6 +305,46 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	myank(infile, MeasureOutList);
 }
 
+
+vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
+	vector<int> m_barnum;
+	m_barnum.resize(infile.getLineCount());
+	int current = -1;
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			m_barnum.at(i) = current;
+			continue;
+		}
+		if (hre.search(infile[i].token(0), "=(\\d+)")) {
+			current = hre.getMatchInt(1);
+		}
+		m_barnum.at(i) = current;
+	}
+	return m_barnum;
+}
+
+int Tool_myank::getBarNumberForLine(int line) {
+	return BarNumbers[line-1];
+}
+
+int Tool_myank::getStartLine() {
+	regex re("^(\\d+)\\-(\\d+)$");
+    std::smatch match;
+	if (regex_search(linesQ, match, re) && match.size() > 1) {
+		return stoi(match.str(1));
+	}
+	return -1;
+}
+
+int Tool_myank::getEndLine() {
+	regex re("^(\\d+)\\-(\\d+)$");
+    std::smatch match;
+	if (regex_search(linesQ, match, re) && match.size() > 1) {
+		return stoi(match.str(2));
+	}
+	return -1;
+}
 
 
 //////////////////////////////
@@ -564,7 +615,9 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		} else {
 			reconcileStartingPosition(infile, outmeasures[0].start);
 		}
-		for (i=outmeasures[h].start; i<outmeasures[h].stop; i++) {
+		int startLine = getBoolean("lines") ? std::max(getStartLine()-1, outmeasures[h].start): outmeasures[h].start;
+		int endLine = getBoolean("lines") ? std::min(getEndLine(), outmeasures[h].stop): outmeasures[h].stop;
+		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
 				if ((datastart == 0) && outmeasures[h].num == 0) {

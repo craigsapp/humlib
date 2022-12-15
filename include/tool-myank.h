@@ -155,6 +155,11 @@ class Tool_myank : public HumTool {
 		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
 		std::string expandMultipliers  (const string& inputstring);
 
+		vector<int> analyzeBarNumbers(HumdrumFile& infile);
+		int getBarNumberForLine(int line);
+		int getStartLine();
+		int getEndLine();
+
 	private:
 		int    debugQ      = 0;             // used with --debug option
 		// int    inputlist   = 0;             // used with --inlist option
@@ -174,6 +179,9 @@ class Tool_myank : public HumTool {
 		vector<MeasureInfo> MeasureOutList; // used with -m option
 		vector<MeasureInfo> MeasureInList;  // used with -m option
 		vector<vector<MyCoord> > metstates;
+
+		string linesQ;
+		vector<int> BarNumbers;             // used with -l option
 
 };
 
