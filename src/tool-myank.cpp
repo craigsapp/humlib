@@ -330,7 +330,7 @@ int Tool_myank::getBarNumberForLine(int line) {
 
 int Tool_myank::getStartLine() {
 	regex re("^(\\d+)\\-(\\d+)$");
-    std::smatch match;
+	std::smatch match;
 	if (regex_search(linesQ, match, re) && match.size() > 1) {
 		return stoi(match.str(1));
 	}
@@ -339,7 +339,7 @@ int Tool_myank::getStartLine() {
 
 int Tool_myank::getEndLine() {
 	regex re("^(\\d+)\\-(\\d+)$");
-    std::smatch match;
+	std::smatch match;
 	if (regex_search(linesQ, match, re) && match.size() > 1) {
 		return stoi(match.str(2));
 	}
