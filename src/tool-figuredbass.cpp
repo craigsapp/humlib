@@ -24,7 +24,7 @@ Tool_figuredbass::Tool_figuredbass(void) {
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
 	bool status = true;
 	for (int i = 0; i < infiles.getCount(); i++) {
-	 status &= run(infiles[i]);
+		status &= run(infiles[i]);
 	}
 	return status;
 }
@@ -33,9 +33,9 @@ bool Tool_figuredbass::run(const string &indata, ostream &out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
-	 getAllText(out);
+		getAllText(out);
 	} else {
-	 out << infile;
+		out << infile;
 	}
 	return status;
 }
@@ -43,9 +43,9 @@ bool Tool_figuredbass::run(const string &indata, ostream &out) {
 bool Tool_figuredbass::run(HumdrumFile &infile, ostream &out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
-	 getAllText(out);
+		getAllText(out);
 	} else {
-	 out << infile;
+		out << infile;
 	}
 	return status;
 }
@@ -183,7 +183,7 @@ FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, Not
 		return tolower(c);
 	});
 	if(accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
-    	showAccid = true;
+		showAccid = true;
 	}
 
 	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
@@ -200,7 +200,7 @@ vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLine(vec
 	});
 
 	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-    	return a->voiceIndex > b->voiceIndex; 
+		return a->voiceIndex > b->voiceIndex; 
 	});
 
 	return filteredNumbers;
@@ -215,7 +215,7 @@ vector<FiguredBassNumber*> Tool_figuredbass::filterFiguredBassNumbersForLineAndV
 	});
 
 	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-    	return a->voiceIndex > b->voiceIndex; 
+		return a->voiceIndex > b->voiceIndex; 
 	});
 
 	return filteredNumbers;
