@@ -1,19 +1,7 @@
-//
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Wed Mar  9 21:55:00 PST 2022
-// Last Modified: Wed Mar  9 21:55:04 PST 2022
-// Filename:      tool-fb.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-fb.cpp
-// Syntax:        C++11; humlib
-// vim:           ts=3 noexpandtab
-//
-// Description:   Extract figured bass from melodic content.
-// Reference:     https://github.com/WolfgangDrescher/humdrum-figured-bass-filter-demo
-//
-
 #include "tool-fb.h"
-#include "HumRegex.h"
 #include "Convert.h"
+#include "HumRegex.h"
+#include <regex>
 
 using namespace std;
 
@@ -21,34 +9,27 @@ namespace hum {
 
 // START_MERGE
 
-
-/////////////////////////////////
-//
-// Tool_fb::Tool_fb -- Set the recognized options for the tool.
-//
-
 Tool_fb::Tool_fb(void) {
-	define("d|debug=b", "Print debug information");
-	define("r|reference=i:0", "Reference kern spine (1 indexed)");
+	define("c|compound=b",      "output compound intervals for intervals bigger than 9");
+	define("a|accidentals=b",   "display accidentals in figured bass output");
+	define("b|base=i:0",        "number of the base voice/spine");
+	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
+	define("s|sort=b",          "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b",        "use lowest note as base note; -b flag will be ignored");
+	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
+	define("r|abbr=b",          "use abbreviated figures");
+	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
 }
 
-
-
-/////////////////////////////////
-//
-// Tool_fb::run -- Do the main work of the tool.
-//
-
-bool Tool_fb::run(HumdrumFileSet& infiles) {
+bool Tool_fb::run(HumdrumFileSet &infiles) {
 	bool status = true;
-	for (int i=0; i<infiles.getCount(); i++) {
+	for (int i = 0; i < infiles.getCount(); i++) {
 		status &= run(infiles[i]);
 	}
 	return status;
 }
 
-
-bool Tool_fb::run(const string& indata, ostream& out) {
+bool Tool_fb::run(const string &indata, ostream &out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
@@ -59,8 +40,7 @@ bool Tool_fb::run(const string& indata, ostream& out) {
 	return status;
 }
 
-
-bool Tool_fb::run(HumdrumFile& infile, ostream& out) {
+bool Tool_fb::run(HumdrumFile &infile, ostream &out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -70,323 +50,333 @@ bool Tool_fb::run(HumdrumFile& infile, ostream& out) {
 	return status;
 }
 
+bool Tool_fb::run(HumdrumFile &infile) {
 
-bool Tool_fb::run(HumdrumFile& infile) {
-	initialize();
-	processFile(infile);
-	return true;
-}
+	compoundQ      = getBoolean("compound");
+	accidentalsQ   = getBoolean("accidentals");
+	baseQ          = getInteger("base");
+	intervallsatzQ = getBoolean("intervallsatz");
+	sortQ          = getBoolean("sort");
+	lowestQ        = getBoolean("lowest");
+	normalizeQ     = getBoolean("normalize");
+	abbrQ          = getBoolean("abbr");
+	attackQ        = getBoolean("attack");
 
+	if(abbrQ) {
+		normalizeQ = true;
+	}
 
+	if(normalizeQ) {
+		compoundQ = true;
+		sortQ = true;
+	}
 
-//////////////////////////////
-//
-// Tool_fb::initialize --  Initializations that only have to be done once
-//    for all HumdrumFile segments.
-//
+	NoteGrid grid(infile);
 
-void Tool_fb::initialize(void) {
-	m_debugQ = getBoolean("debug");
-	m_reference = getInteger("reference") - 1;
-}
+	vector<FiguredBassNumber*> numbers;
 
+	vector<HTp> kernspines = infile.getKernSpineStartList();
 
+	vector<int> lastNumbers = {};
+	lastNumbers.resize(3);
+	vector<int> currentNumbers = {};
 
-//////////////////////////////
-//
-// Tool_fb::processFile --
-//
-
-void Tool_fb::processFile(HumdrumFile& infile) {
-	setupScoreData(infile);
-	getHarmonicIntervals(infile);
-	printOutput(infile);
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb::getHarmonicIntervals -- Fill in
-//
-
-void Tool_fb::getHarmonicIntervals(HumdrumFile& infile) {
-	m_intervals.resize(infile.getLineCount());
-
-	vector<HTp> tokens(m_kernspines.size(), NULL);
-	for (int i=0; i<infile.getLineCount(); i++) {
-		m_intervals[i].resize(0);
-		if (!infile[i].isData()) {
-			continue;
-		}
-		fill(tokens.begin(), tokens.end(), (HTp)NULL);
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			if (!token->isKern()) {
-				continue;
-			}
-			int track = token->getTrack();
-			int index = m_track2index.at(track);
-			tokens[index] = token;
-			// cerr << token << "\t";
-		}
-		m_intervals[i].resize(m_kernspines.size());
-		calculateIntervals(m_intervals[i], tokens, m_reference);
-		// cerr << endl;
-
-		if (m_debugQ) {
-			for (int j=0; j<(int)m_intervals[i].size(); j++) {
-				m_free_text << tokens[j] << "\t(";
-				if (m_intervals[i][j] == m_rest) {
-					m_free_text << "R";
-				} else {
-					m_free_text << m_intervals[i][j];
-				}
-				m_free_text << ")";
-				if (j < (int)m_intervals[i].size() - 1) {
-					m_free_text << "\t";
+	for (int i=0; i<(int)grid.getSliceCount(); i++) {
+		currentNumbers.clear();
+		currentNumbers.resize(3);
+		int usedBaseVoiceIndex = baseQ;
+		if(lowestQ) {
+			int lowestNotePitch = 99999;
+			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
+				NoteCell* checkCell = grid.cell(k, i);
+				int checkCellPitch = abs(checkCell->getSgnDiatonicPitch());
+				if(checkCellPitch > 0 && checkCellPitch < lowestNotePitch) {
+					lowestNotePitch = checkCellPitch;
+					usedBaseVoiceIndex = k;
 				}
 			}
-			m_free_text << endl;
 		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb::calculateIntervals --
-//
-
-void Tool_fb::calculateIntervals(vector<int>& intervals,
-		vector<HTp>& tokens, int bassIndex) {
-	if (intervals.size() != tokens.size()) {
-		cerr << "ERROR: Size if vectors do not match" << endl;
-		return;
-	}
-
-	HTp reftok = tokens[m_reference];
-	if (reftok->isNull()) {
-		reftok = reftok->resolveNull();
-	}
-
-	if (!reftok || reftok->isRest()) {
-		for (int i=0; i<(int)tokens.size(); i++) {
-			intervals[i] = m_rest;
-		}
-		return;
-	}
-
-	int base40ref = Convert::kernToBase40(reftok);
-
-	for (int i=0; i<(int)tokens.size(); i++) {
-		if (i == m_reference) {
-			intervals[i] = m_rest;
-			continue;
-		}
-		if (tokens[i]->isRest()) {
-			intervals[i] = m_rest;
-			continue;
-		}
-		if (tokens[m_reference]->isRest()) {
-			intervals[i] = m_rest;
-			continue;
-		}
-		if (tokens[i]->isNull()) {
-			continue;
-		}
-		int base40 = Convert::kernToBase40(tokens[i]);
-		int interval = base40 - base40ref;
-		intervals[i] = interval;
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb::setupScoreData --
-//
-
-void Tool_fb::setupScoreData(HumdrumFile& infile) {
-	infile.getKernSpineStartList(m_kernspines);
-	m_kerntracks.resize(m_kernspines.size());
-	for (int i=0; i<(int)m_kernspines.size(); i++) {
-		m_kerntracks[i] = m_kernspines[i]->getTrack();
-	}
-
-	int maxtrack = infile.getMaxTrack();
-	m_track2index.resize(maxtrack + 1);
-	fill(m_track2index.begin(), m_track2index.end(), -1);
-	for (int i=0; i<(int)m_kerntracks.size(); i++) {
-		m_track2index.at(m_kerntracks[i]) = i;
-	}
-
-	if (m_reference >= (int)m_kernspines.size()) {
-		m_reference = (int)m_kernspines.size() - 1;
-	}
-	if (m_reference < 0) {
-		m_reference = 0;
-	}
-
-	vector<int> pcs(7, 0);
-
-	m_keyaccid.resize(infile.getLineCount());
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].isInterpretation()) {
-			continue;
-		}
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			HTp token = infile.token(i, j);
-			if (!token->isKern()) {
+		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
+		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
+		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
+			if(j == usedBaseVoiceIndex) {
 				continue;
 			}
-			if (token->isKeySignature()) {
-				fill(pcs.begin(), pcs.end(), 0);
-				HumRegex hre;
-				if (hre.search(token, "c#")) { pcs[0] = +1;}
-				if (hre.search(token, "d#")) { pcs[1] = +1;}
-				if (hre.search(token, "e#")) { pcs[2] = +1;}
-				if (hre.search(token, "f#")) { pcs[3] = +1;}
-				if (hre.search(token, "g#")) { pcs[4] = +1;}
-				if (hre.search(token, "a#")) { pcs[5] = +1;}
-				if (hre.search(token, "b#")) { pcs[6] = +1;}
-				if (hre.search(token, "c-")) { pcs[0] = -1;}
-				if (hre.search(token, "d-")) { pcs[1] = -1;}
-				if (hre.search(token, "e-")) { pcs[2] = -1;}
-				if (hre.search(token, "f-")) { pcs[3] = -1;}
-				if (hre.search(token, "g-")) { pcs[4] = -1;}
-				if (hre.search(token, "a-")) { pcs[5] = -1;}
-				if (hre.search(token, "b-")) { pcs[6] = -1;}
-				m_keyaccid[i] = pcs;
+			NoteCell* targetCell = grid.cell(j, i);
+			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
+			if(lastNumbers[j] != 0) {
+				number->currAttackNumberDidChange = targetCell->isSustained() && lastNumbers[j] != number->number;
 			}
+			currentNumbers[j] = number->number;
+			numbers.push_back(number);
 		}
+		lastNumbers = currentNumbers;
 	}
 
-	for (int i=1; i<infile.getLineCount(); i++) {
-		if (m_keyaccid[i].empty()) {
-			m_keyaccid[i] = m_keyaccid[i-1];
-		}
-	}
-	for (int i=infile.getLineCount() - 2; i>=0; i--) {
-		if (m_keyaccid[i].empty()) {
-			m_keyaccid[i] = m_keyaccid[i+1];
-		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb:printOutput --
-//
-
-void Tool_fb::printOutput(HumdrumFile& infile) {
-	for (int i=0; i<infile.getLineCount(); i++) {
-		if (!infile[i].hasSpines()) {
-			m_humdrum_text << infile[i] << endl;
-			continue;
-		}
-		printLineStyle3(infile, i);
-	}
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb::printLineStyle3 --
-//
-
-void Tool_fb::printLineStyle3(HumdrumFile& infile, int line) {
-	bool printed = false;
-	int reftrack = m_kerntracks[m_reference];
-	bool tab = false;
-
-	for (int i=0; i<infile[line].getFieldCount(); i++) {
-		HTp token = infile.token(line, i);
-		int track = token->getTrack();
-		if (printed || (track != reftrack + 1)) {
-			if (tab) {
-				m_humdrum_text << "\t" << token;
+	if(intervallsatzQ) {
+		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
+			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount());
+			if(voiceIndex + 1 < grid.getVoiceCount()) {
+				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
+				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 			} else {
-				tab = true;
-				m_humdrum_text << token;
+				int trackIndex = kernspines[voiceIndex]->getTrack();
+				infile.appendDataSpine(trackData, ".", "**fb");
 			}
-			continue;
 		}
-		// print analysis spine and then next spine
-		if (tab) {
-			m_humdrum_text << "\t";
+	} else {
+		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
+		if(baseQ + 1 < grid.getVoiceCount()) {
+			int trackIndex = kernspines[baseQ + 1]->getTrack();
+			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 		} else {
-			tab = true;
-		}
-		m_humdrum_text << getAnalysisTokenStyle3(infile, line, i);
-		printed = true;
-		m_humdrum_text << "\t" << token;
-	}
-	m_humdrum_text << "\n";
-}
-
-
-
-//////////////////////////////
-//
-// Tool_fb::getAnalysisTokenStyle3 --
-//
-
-string Tool_fb::getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field) {
-	if (infile[line].isCommentLocal()) {
-		return "!";
-	}
-	if (infile[line].isInterpretation()) {
-		HTp token = infile.token(line, 0);
-		if (token->compare(0, 2, "**") == 0) {
-			return "**fb";
-		} else if (*token == "*-") {
-			return "*-";
-		} else if (token->isLabel()) {
-			return *token;
-		} else if (token->isExpansionList()) {
-			return *token;
-		} else if (token->isKeySignature()) {
-			return *token;
-		} else if (token->isKeyDesignation()) {
-			return *token;
-		} else {
-			return "*";
+			infile.appendDataSpine(trackData, ".", "**fb");
 		}
 	}
-	if (infile[line].isBarline()) {
-		HTp token = infile.token(line, 0);
-		return *token;
-	}
 
-	// create data token
-	string output;
+	return true;
+};
 
-	for (int i=(int)m_intervals[line].size()-1; i>=0; i--) {
-		if (i == m_reference) {
-			continue;
+vector<string> Tool_fb::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount) {
+	vector<string> trackData;
+	trackData.resize(lineCount);
+
+	for (int i = 0; i < lineCount; i++) {
+		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
+		if(sliceNumbers.size() > 0) {
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
 		}
-		int base40int = m_intervals[line][i];
-		string iname = Convert::base40ToIntervalAbbr(base40int);
-		output += iname;
-		output += " ";
-	}
-	if (!output.empty()) {
-		output.resize((int)output.size() - 1);
 	}
 
-	return output;
-}
+	return trackData;
+};
 
+vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount) {
+	vector<string> trackData;
+	trackData.resize(lineCount);
+
+	for (int i = 0; i < lineCount; i++) {
+		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
+		if(sliceNumbers.size() > 0) {
+			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
+		}
+	}
+
+	return trackData;
+};
+
+FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature) {
+
+	int basePitch   = base->getSgnDiatonicPitch();
+	int targetPitch = target->getSgnDiatonicPitch();
+	int num         = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
+
+	bool showAccid = false;
+	regex accidRegex("^\\(?(\\w)+([^\\w\\)]*)\\)?$");
+	string accid = regex_replace(target->getSgnKernPitch(), accidRegex, "$2");
+
+	string accidWithPitch = regex_replace(target->getSgnKernPitch(), accidRegex, "$1$2");
+	transform(accidWithPitch.begin(), accidWithPitch.end(), accidWithPitch.begin(), [](unsigned char c) {
+		return tolower(c);
+	});
+	transform(keySignature.begin(), keySignature.end(), keySignature.begin(), [](unsigned char c) {
+		return tolower(c);
+	});
+	if(accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
+		showAccid = true;
+	}
+
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
+
+	return number;
+};
+
+vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLine(vector<FiguredBassNumber*> numbers, int lineIndex) {
+
+	vector<FiguredBassNumber*> filteredNumbers;
+
+	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex](FiguredBassNumber* num) {
+		return num->lineIndex == lineIndex;
+	});
+
+	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		return a->voiceIndex > b->voiceIndex; 
+	});
+
+	return filteredNumbers;
+};
+
+vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex) {
+
+	vector<FiguredBassNumber*> filteredNumbers;
+
+	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex, voiceIndex](FiguredBassNumber* num) {
+		return num->lineIndex == lineIndex && num->voiceIndex == voiceIndex;
+	});
+
+	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		return a->voiceIndex > b->voiceIndex; 
+	});
+
+	return filteredNumbers;
+};
+
+string Tool_fb::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers) {
+
+	vector<FiguredBassNumber*> normalizededNumbers;
+
+	if(normalizeQ) {
+		bool aQ = accidentalsQ;
+		copy_if(numbers.begin(), numbers.end(), back_inserter(normalizededNumbers), [aQ](FiguredBassNumber* num) {
+			return (num->getNumberB7() != 8 && num->getNumberB7() != 1) || (aQ && num->showAccidentals);
+		});
+		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+			return a->getNumberB7() < b->getNumberB7();
+		});
+		normalizededNumbers.erase(unique(normalizededNumbers.begin(), normalizededNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) {
+			return a->getNumberB7() == b->getNumberB7();
+		}), normalizededNumbers.end());
+	} else {
+		normalizededNumbers = numbers;
+	}
+
+	if(intervallsatzQ && attackQ) {
+		vector<FiguredBassNumber*> attackNumbers;
+		copy_if(normalizededNumbers.begin(), normalizededNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
+			return num->isAttack || num->currAttackNumberDidChange;
+		});
+		normalizededNumbers = attackNumbers;
+	}
+
+	if(sortQ) {
+		bool cQ = compoundQ;
+		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+			return (cQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
+		});
+	}
+
+	if(abbrQ) {
+		normalizededNumbers = getAbbrNumbers(normalizededNumbers);
+	}
+
+	string str = "";
+	bool first = true;
+	for (FiguredBassNumber* number: normalizededNumbers) {
+		string num = number->toString(compoundQ, accidentalsQ);
+		if(num.length() > 0) {
+			if (!first) str += " ";
+			first = false;
+			str += num;
+		}
+	}
+	return str;
+};
+
+vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(vector<FiguredBassNumber*> numbers) {
+
+	vector<FiguredBassNumber*> abbrNumbers;
+
+	vector<FiguredBassAbbr*> figuredBassAbbrs = {
+		new FiguredBassAbbr("3", {}),
+		new FiguredBassAbbr("5", {}),
+		new FiguredBassAbbr("5 3", {}),
+		new FiguredBassAbbr("6 3", {6}),
+		new FiguredBassAbbr("5 4", {4}),
+		new FiguredBassAbbr("7 5 3", {7}),
+		new FiguredBassAbbr("7 3", {7}),
+		new FiguredBassAbbr("7 5", {7}),
+		new FiguredBassAbbr("6 5 3", {6, 5}),
+		new FiguredBassAbbr("6 4 3", {4, 3}),
+		new FiguredBassAbbr("6 4 2", {4, 2}),
+		new FiguredBassAbbr("9 5 3", {9}),
+		new FiguredBassAbbr("9 5", {9}),
+		new FiguredBassAbbr("9 3", {9}),
+	};
+
+	string numberString = getNumberString(numbers);
+
+	auto it = find_if(figuredBassAbbrs.begin(), figuredBassAbbrs.end(), [numberString](FiguredBassAbbr* abbr) {
+		return abbr->str == numberString;
+	});
+
+	if (it != figuredBassAbbrs.end()) {
+		int index = it - figuredBassAbbrs.begin();
+		FiguredBassAbbr* abbr = figuredBassAbbrs[index];
+		bool aQ = accidentalsQ;
+		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr, aQ](FiguredBassNumber* num) {
+			vector<int> nums = abbr->numbers;
+			return find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end() || (num->showAccidentals && aQ);
+		});
+
+		return abbrNumbers;
+	}
+
+	return numbers;
+};
+
+string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
+	sort(numbers.begin(), numbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		return a->getNumberB7() > b->getNumberB7();
+	});
+	string str = "";
+	bool first = true;
+	for (FiguredBassNumber* nr: numbers) {
+		int num = nr->getNumberB7();
+		if(num > 0) {
+			if (!first) str += " ";
+			first = false;
+			str += to_string(num);
+		}	
+	}
+	return str;
+};
+
+string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
+	string keySignature = "";
+	[&] {
+		for (int i = 0; i < infile.getLineCount(); i++) {
+			if(i > lineIndex) {
+				return;
+			}
+			HLp line = infile.getLine(i);
+			for (int j = 0; j < line->getFieldCount(); j++) {
+				if (line->token(j)->isKeySignature()) {
+					keySignature = line->getTokenString(j);
+				}
+			}
+		}
+	}();
+	return keySignature;
+};
+
+FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk) {
+	number          = num;
+	accidentals     = accid;
+	voiceIndex      = voiceIdx;
+	lineIndex       = lineIdx;
+	showAccidentals = showAccid;
+	isAttack        = isAtk;
+};
+
+string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
+	int num = (compoundQ) ? getNumberB7() : number;
+	string accid = (accidentalsQ && showAccidentals) ? accidentals : "";
+	return num > 0 ? to_string(num) + accid : "";
+};
+
+int FiguredBassNumber::getNumberB7() {
+	int num = (number > 9) ? number % 7 : number;
+	if(number > 9 && number % 7 == 0) {
+		num = 7;
+	}
+	return (number > 8 && num == 1) ? 8 : num;
+};
+
+FiguredBassAbbr::FiguredBassAbbr(string s, vector<int> n) {
+	str = s;
+	numbers = n;
+};
 
 // END_MERGE
 
 } // end namespace hum
-
-
-

@@ -1,57 +1,76 @@
-//
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Wed Mar  9 21:50:25 PST 2022
-// Last Modified: Wed Mar  9 21:50:28 PST 2022
-// Filename:      tool-fb.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-fb.h
-// Syntax:        C++11; humlib
-// vim:           ts=3 noexpandtab
-//
-// Description:   Extract figured bass numbers from musical content.
-// Reference:     https://github.com/WolfgangDrescher/humdrum-figured-bass-filter-demo
-//
-
 #ifndef _TOOL_FB_H
 #define _TOOL_FB_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
+#include "NoteGrid.h"
 
 namespace hum {
 
 // START_MERGE
 
-class Tool_fb : public HumTool {
+class FiguredBassNumber {
 	public:
-		         Tool_fb           (void);
-		        ~Tool_fb           () {};
+		int voiceIndex;
+		int lineIndex;
+		int number;
+		string accidentals;
+		bool showAccidentals;
+		bool currAttackNumberDidChange;
+		bool isAttack;
+		FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
+		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		int getNumberB7();
+};
 
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+class FiguredBassAbbr {
+	public:
+		string str;
+		vector<int> numbers;
+		FiguredBassAbbr(string s, vector<int> n);
+};
 
-	protected:
-		void     processFile       (HumdrumFile& infile);
-		void     initialize        (void);
-		void     processLine       (HumdrumFile& infile, int index);
-		void     setupScoreData    (HumdrumFile& infile);
-		void     getAnalyses       (HumdrumFile& infile);
-		void     getHarmonicIntervals(HumdrumFile& infile);
-		void     calculateIntervals(vector<int>& intervals, vector<HTp>& tokens, int bassIndex);
-		void     printOutput       (HumdrumFile& infile);
-		void     printLineStyle3   (HumdrumFile& infile, int line);
-		std::string getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field);
+class Tool_fb : public HumTool {
+
+	public:
+		Tool_fb(void);
+		~Tool_fb(){};
+
+		bool run (HumdrumFileSet& infiles);
+		bool run (HumdrumFile& infile);
+		bool run (const string& indata, ostream& out);
+		bool run (HumdrumFile& infile, ostream& out);
+
+		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount);
+		
+		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount);
+
+		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
+		
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*>, int lineIndex);
+		
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
+
+		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers);
+
+		vector<FiguredBassNumber*> getAbbrNumbers(vector<FiguredBassNumber*>);
+
+		string getNumberString(vector<FiguredBassNumber*> numbers);
+
+		string getKeySignature(HumdrumFile& infile, int lineIndex);
+
+	// protected:
 
 	private:
-		std::vector<HTp>              m_kernspines;
-		std::vector<int>              m_kerntracks;
-		std::vector<int>              m_track2index;
-		std::vector<std::vector<int>> m_keyaccid;
-		std::vector<std::vector<int>> m_intervals;
-		const int m_rest = -1000;
-		int       m_reference = 0; // currently fixed to bass
-		int       m_debugQ = false;
+		bool compoundQ = false;
+		bool accidentalsQ = false;
+		int baseQ = 0;
+		bool intervallsatzQ = false;
+		bool sortQ = false;
+		bool lowestQ = false;
+		bool normalizeQ = false;
+		bool abbrQ = false;
+		bool attackQ = false;
 
 };
 
@@ -60,6 +79,3 @@ class Tool_fb : public HumTool {
 } // end namespace hum
 
 #endif /* _TOOL_FB_H */
-
-
-
