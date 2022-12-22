@@ -10,15 +10,15 @@ namespace hum {
 // START_MERGE
 
 Tool_figuredbass::Tool_figuredbass(void) {
-	define("c|compound=b", "output compound intervals for intervals bigger than 9");
-	define("a|accidentals=b", "display accidentals in figured bass output");
-	define("b|base=i:0", "number of the base voice/spine");
+	define("c|compound=b",      "output compound intervals for intervals bigger than 9");
+	define("a|accidentals=b",   "display accidentals in figured bass output");
+	define("b|base=i:0",        "number of the base voice/spine");
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
-	define("s|sort=b", "sort figured bass numbers by interval size and not by voice index");
-	define("l|lowest=b", "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b", "remove octave and doubled intervals, use compound interval, sort intervals");
-	define("r|abbr=b", "use abbreviated figures");
-	define("t|attack=b", "hide intervalls with no attack and when base does not change");
+	define("s|sort=b",          "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b",        "use lowest note as base note; -b flag will be ignored");
+	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
+	define("r|abbr=b",          "use abbreviated figures");
+	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
 }
 
 bool Tool_figuredbass::run(HumdrumFileSet &infiles) {
@@ -52,15 +52,15 @@ bool Tool_figuredbass::run(HumdrumFile &infile, ostream &out) {
 
 bool Tool_figuredbass::run(HumdrumFile &infile) {
 
-	compoundQ = getBoolean("compound");
-	accidentalsQ = getBoolean("accidentals");
-	baseQ = getInteger("base");
+	compoundQ      = getBoolean("compound");
+	accidentalsQ   = getBoolean("accidentals");
+	baseQ          = getInteger("base");
 	intervallsatzQ = getBoolean("intervallsatz");
-	sortQ = getBoolean("sort");
-	lowestQ = getBoolean("lowest");
-	normalizeQ = getBoolean("normalize");
-	abbrQ = getBoolean("abbr");
-	attackQ = getBoolean("attack");
+	sortQ          = getBoolean("sort");
+	lowestQ        = getBoolean("lowest");
+	normalizeQ     = getBoolean("normalize");
+	abbrQ          = getBoolean("abbr");
+	attackQ        = getBoolean("attack");
 
 	if(abbrQ) {
 		normalizeQ = true;
@@ -167,9 +167,9 @@ vector<string> Tool_figuredbass::getTrackDataForVoice(int voiceIndex, vector<Fig
 
 FiguredBassNumber* Tool_figuredbass::createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature) {
 
-	int basePitch = base->getSgnDiatonicPitch();
+	int basePitch   = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
-	int num = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
+	int num         = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
 
 	bool showAccid = false;
 	regex accidRegex("^\\(?(\\w)+([^\\w\\)]*)\\)?$");
@@ -350,12 +350,12 @@ string Tool_figuredbass::getKeySignature(HumdrumFile& infile, int lineIndex) {
 };
 
 FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk) {
-	number = num;
-	accidentals = accid;
-	voiceIndex = voiceIdx;
-	lineIndex = lineIdx;
+	number          = num;
+	accidentals     = accid;
+	voiceIndex      = voiceIdx;
+	lineIndex       = lineIdx;
 	showAccidentals = showAccid;
-	isAttack = isAtk;
+	isAttack        = isAtk;
 };
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
