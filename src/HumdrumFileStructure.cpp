@@ -1596,7 +1596,9 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 		tok = tok->getNextToken();
 	}
 
-	cerr << "Should not get here in analyzeSpineStrands()\n";
+	cerr << "!!WARNING: spine " << starttok->getSpineInfo() << " is not terminated by *-" << endl;
+	// Maybe set last to null, but then programs would have to also
+	// check for null for end of track.
 	ends[index].last = lasttok;
 }
 

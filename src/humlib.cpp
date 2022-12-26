@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri 21 Oct 2022 10:52:57 AM PDT
+// Last Modified: Wed Dec 14 14:43:56 PST 2022
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -28825,7 +28825,9 @@ void HumdrumFileStructure::analyzeSpineStrands(vector<TokenPair>& ends,
 		tok = tok->getNextToken();
 	}
 
-	cerr << "Should not get here in analyzeSpineStrands()\n";
+	cerr << "!!WARNING: spine " << starttok->getSpineInfo() << " is not terminated by *-" << endl;
+	// Maybe set last to null, but then programs would have to also
+	// check for null for end of track.
 	ends[index].last = lasttok;
 }
 
@@ -53155,7 +53157,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 
 	// close the last beam
 	if ((beamstart >= 0) && ((int)measure.size() - beamstart > 1)) {
-		addBeam(measure[beamstart], measure[measure.size()-1]);
+		addBeam(measure[beamstart], measure[(int)measure.size()-1]);
 		beamstart = INVALID;
 	}
 }
@@ -53218,6 +53220,10 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 				return;
 			}
 			current = current->getNextNNDT();
+		}
+		if (!current) {
+			// Handle problem when spine is not terminated.
+			return;
 		}
 
 		if (current->getLineIndex() >= endindex) {
