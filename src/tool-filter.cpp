@@ -25,6 +25,7 @@
 #include "tool-colorgroups.h"
 #include "tool-colortriads.h"
 #include "tool-composite.h"
+#include "tool-deg.h"
 #include "tool-dissonant.h"
 #include "tool-double.h"
 #include "tool-extract.h"
@@ -226,6 +227,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(cmr, infile, commands[i].second, status);
 		} else if (commands[i].first == "composite") {
 			RUNTOOL(composite, infile, commands[i].second, status);
+		} else if (commands[i].first == "deg") {
+			RUNTOOL(deg, infile, commands[i].second, status);
 		} else if (commands[i].first == "dissonant") {
 			RUNTOOL(dissonant, infile, commands[i].second, status);
 		} else if (commands[i].first == "double") {
