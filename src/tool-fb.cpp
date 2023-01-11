@@ -78,12 +78,12 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
 	vector<int> lastNumbers = {};
-	lastNumbers.resize(3);
+	lastNumbers.resize((int)grid.getVoiceCount());
 	vector<int> currentNumbers = {};
 
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
 		currentNumbers.clear();
-		currentNumbers.resize(3);
+		currentNumbers.resize((int)grid.getVoiceCount());
 		int usedBaseVoiceIndex = baseQ;
 		if(lowestQ) {
 			int lowestNotePitch = 99999;
