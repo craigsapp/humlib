@@ -392,7 +392,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 
 	// Check if an abbreviation exists for passed numbers
 	auto it = find_if(mappings.begin(), mappings.end(), [numberString](FiguredBassAbbreviationMapping* abbr) {
-		return abbr->str == numberString;
+		return abbr->m_str == numberString;
 	});
 
 	if (it != mappings.end()) {
@@ -401,7 +401,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 		bool aQ = m_accidentalsQ;
 		// Store numbers to display by the abbreviation mapping in abbreviatedNumbers
 		copy_if(numbers.begin(), numbers.end(), back_inserter(abbreviatedNumbers), [abbr, aQ](FiguredBassNumber* num) {
-			vector<int> nums = abbr->numbers;
+			vector<int> nums = abbr->m_numbers;
 			// Show numbers if they are part of the abbreviation mapping or if they have an accidental
 			return (find(nums.begin(), nums.end(), num->getNumberWithinOctave()) != nums.end()) || (num->m_showAccidentals && aQ);
 		});
@@ -516,8 +516,8 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 //
 
 FiguredBassAbbreviationMapping::FiguredBassAbbreviationMapping(string s, vector<int> n) {
-	str = s;
-	numbers = n;
+	m_str = s;
+	m_numbers = n;
 }
 
 
