@@ -515,7 +515,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 // FiguredBassNumber::getNumberB7 -- Get figured bass number as non compound interval (base 7)
 //
 
-int FiguredBassNumber::getNumberB7() {
+int FiguredBassNumber::getNumberB7(void) {
 	int num = (number > 9) ? number % 7 : number;
 	if ((number > 9) && (number % 7 == 0)) {
 		num = 7;

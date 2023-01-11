@@ -32,7 +32,7 @@ class FiguredBassNumber {
 
 		FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
 		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
-		int getNumberB7();
+		int getNumberB7(void);
 };
 
 class FiguredBassAbbr {
