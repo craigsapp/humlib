@@ -74,15 +74,15 @@ class Tool_fb : public HumTool {
 
 
 	private:
-		bool compoundQ      = false;
-		bool accidentalsQ   = false;
-		int  baseQ          = 0;
-		bool intervallsatzQ = false;
-		bool sortQ          = false;
-		bool lowestQ        = false;
-		bool normalizeQ     = false;
-		bool abbrQ          = false;
-		bool attackQ        = false;
+		bool m_compoundQ      = false;
+		bool m_accidentalsQ   = false;
+		int  m_baseQ          = 0;
+		bool m_intervallsatzQ = false;
+		bool m_sortQ          = false;
+		bool m_lowestQ        = false;
+		bool m_normalizeQ     = false;
+		bool m_abbrQ          = false;
+		bool m_attackQ        = false;
 
 };
 

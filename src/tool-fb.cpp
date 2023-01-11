@@ -75,23 +75,23 @@ bool Tool_fb::run(HumdrumFile &infile, ostream &out) {
 
 bool Tool_fb::run(HumdrumFile &infile) {
 
-	compoundQ      = getBoolean("compound");
-	accidentalsQ   = getBoolean("accidentals");
-	baseQ          = getInteger("base");
-	intervallsatzQ = getBoolean("intervallsatz");
-	sortQ          = getBoolean("sort");
-	lowestQ        = getBoolean("lowest");
-	normalizeQ     = getBoolean("normalize");
-	abbrQ          = getBoolean("abbr");
-	attackQ        = getBoolean("attack");
+	m_compoundQ      = getBoolean("compound");
+	m_accidentalsQ   = getBoolean("accidentals");
+	m_baseQ          = getInteger("base");
+	m_intervallsatzQ = getBoolean("intervallsatz");
+	m_sortQ          = getBoolean("sort");
+	m_lowestQ        = getBoolean("lowest");
+	m_normalizeQ     = getBoolean("normalize");
+	m_abbrQ          = getBoolean("abbr");
+	m_attackQ        = getBoolean("attack");
 
-	if (abbrQ) {
-		normalizeQ = true;
+	if (m_abbrQ) {
+		m_normalizeQ = true;
 	}
 
-	if (normalizeQ) {
-		compoundQ = true;
-		sortQ = true;
+	if (m_normalizeQ) {
+		m_compoundQ = true;
+		m_sortQ = true;
 	}
 
 	NoteGrid grid(infile);
@@ -111,11 +111,11 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		currentNumbers.resize((int)grid.getVoiceCount());
 
 		// Reset usedBaseVoiceIndex
-		int usedBaseVoiceIndex = baseQ;
+		int usedBaseVoiceIndex = m_baseQ;
 
 		// Overwrite usedBaseVoiceIndex with the lowest voice index of the lowest pitched note
 		// TODO: check if this still works for chords
-		if (lowestQ) {
+		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
@@ -151,7 +151,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		lastNumbers = currentNumbers;
 	}
 
-	if (intervallsatzQ) {
+	if (m_intervallsatzQ) {
 		// Create **fb spine for each voice
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
 			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount());
@@ -165,8 +165,8 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	} else {
 		// Create **fb spine and bind it to the base voice
 		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
-		if (baseQ + 1 < grid.getVoiceCount()) {
-			int trackIndex = kernspines[baseQ + 1]->getTrack();
+		if (m_baseQ + 1 < grid.getVoiceCount()) {
+			int trackIndex = kernspines[m_baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 		} else {
 			infile.appendDataSpine(trackData, ".", "**fb");
@@ -320,8 +320,8 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	vector<FiguredBassNumber*> formattedNumbers;
 
 	// Normalize numbers (remove 8 and 1, sort by size, remove duplicate numbers)
-	if (normalizeQ) {
-		bool aQ = accidentalsQ;
+	if (m_normalizeQ) {
+		bool aQ = m_accidentalsQ;
 		// remove 8 and 1 but keep them if they have an accidental
 		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
 			return ((num->getNumberWithinOctave() != 8) && (num->getNumberWithinOctave() != 1)) || (aQ && num->m_showAccidentals);
@@ -339,7 +339,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	}
 
 	// Hide numbers if they have no attack
-	if (intervallsatzQ && attackQ) {
+	if (m_intervallsatzQ && m_attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
 		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
 			return num->m_isAttack || num->m_currAttackNumberDidChange;
@@ -348,15 +348,15 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	}
 
 	// Sort numbers by size
-	if (sortQ) {
-		bool cQ = compoundQ;
+	if (m_sortQ) {
+		bool cQ = m_compoundQ;
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			// sort by getNumberWithinOctave if compoundQ is true otherwise sort by number
 			return (cQ) ? a->getNumberWithinOctave() > b->getNumberWithinOctave() : a->m_number > b->m_number;
 		});
 	}
 
-	if (abbrQ) {
+	if (m_abbrQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
 		formattedNumbers = getAbbreviatedNumbers(formattedNumbers);
 	}
@@ -365,7 +365,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	string str = "";
 	bool first = true;
 	for (FiguredBassNumber* number: formattedNumbers) {
-		string num = number->toString(compoundQ, accidentalsQ);
+		string num = number->toString(m_compoundQ, m_accidentalsQ);
 		if (num.length() > 0) {
 			if (!first) str += " ";
 			first = false;
@@ -398,7 +398,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 	if (it != mappings.end()) {
 		int index = it - mappings.begin();
 		FiguredBassAbbreviationMapping* abbr = mappings[index];
-		bool aQ = accidentalsQ;
+		bool aQ = m_accidentalsQ;
 		// Store numbers to display by the abbreviation mapping in abbreviatedNumbers
 		copy_if(numbers.begin(), numbers.end(), back_inserter(abbreviatedNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
