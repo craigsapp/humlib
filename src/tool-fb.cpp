@@ -120,7 +120,6 @@ bool Tool_fb::run(HumdrumFile &infile) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 			} else {
-				int trackIndex = kernspines[voiceIndex]->getTrack();
 				infile.appendDataSpine(trackData, ".", "**fb");
 			}
 		}
