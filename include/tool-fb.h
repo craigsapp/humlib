@@ -37,6 +37,8 @@ class FiguredBassNumber {
 
 class FiguredBassAbbreviationMapping {
 	public:
+		static vector<FiguredBassAbbreviationMapping*> s_mappings;
+		
 		// String to compare the numbers with
 		// e.g. "6 4 3"
 		// Sorted by size, larger numbers first

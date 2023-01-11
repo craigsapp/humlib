@@ -386,22 +386,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 
 	vector<FiguredBassNumber*> abbreviatedNumbers;
 
-	vector<FiguredBassAbbreviationMapping*> mappings = {
-		new FiguredBassAbbreviationMapping("3", {}),
-		new FiguredBassAbbreviationMapping("5", {}),
-		new FiguredBassAbbreviationMapping("5 3", {}),
-		new FiguredBassAbbreviationMapping("6 3", {6}),
-		new FiguredBassAbbreviationMapping("5 4", {4}),
-		new FiguredBassAbbreviationMapping("7 5 3", {7}),
-		new FiguredBassAbbreviationMapping("7 3", {7}),
-		new FiguredBassAbbreviationMapping("7 5", {7}),
-		new FiguredBassAbbreviationMapping("6 5 3", {6, 5}),
-		new FiguredBassAbbreviationMapping("6 4 3", {4, 3}),
-		new FiguredBassAbbreviationMapping("6 4 2", {4, 2}),
-		new FiguredBassAbbreviationMapping("9 5 3", {9}),
-		new FiguredBassAbbreviationMapping("9 5", {9}),
-		new FiguredBassAbbreviationMapping("9 3", {9}),
-	};
+	vector<FiguredBassAbbreviationMapping*> mappings = FiguredBassAbbreviationMapping::s_mappings;
 
 	string numberString = getNumberString(numbers);
 
@@ -534,6 +519,30 @@ FiguredBassAbbreviationMapping::FiguredBassAbbreviationMapping(string s, vector<
 	str = s;
 	numbers = n;
 }
+
+
+
+//////////////////////////////
+//
+// FiguredBassAbbreviationMapping::s_mappings -- Mapping to abbreviate figured bass numbers
+//
+
+vector<FiguredBassAbbreviationMapping*> FiguredBassAbbreviationMapping::s_mappings = {
+	new FiguredBassAbbreviationMapping("3", {}),
+	new FiguredBassAbbreviationMapping("5", {}),
+	new FiguredBassAbbreviationMapping("5 3", {}),
+	new FiguredBassAbbreviationMapping("6 3", {6}),
+	new FiguredBassAbbreviationMapping("5 4", {4}),
+	new FiguredBassAbbreviationMapping("7 5 3", {7}),
+	new FiguredBassAbbreviationMapping("7 3", {7}),
+	new FiguredBassAbbreviationMapping("7 5", {7}),
+	new FiguredBassAbbreviationMapping("6 5 3", {6, 5}),
+	new FiguredBassAbbreviationMapping("6 4 3", {4, 3}),
+	new FiguredBassAbbreviationMapping("6 4 2", {4, 2}),
+	new FiguredBassAbbreviationMapping("9 5 3", {9}),
+	new FiguredBassAbbreviationMapping("9 5", {9}),
+	new FiguredBassAbbreviationMapping("9 3", {9}),
+};
 
 // END_MERGE
 
