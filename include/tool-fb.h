@@ -38,17 +38,18 @@ class FiguredBassNumber {
 
 class FiguredBassAbbreviationMapping {
 	public:
+		FiguredBassAbbreviationMapping(string s, vector<int> n);
+
 		static vector<FiguredBassAbbreviationMapping*> s_mappings;
-		
+
 		// String to compare the numbers with
 		// e.g. "6 4 3"
 		// Sorted by size, larger numbers first
-		string str;
+		string str; 
 
 		// Figured bass number as int
 		vector<int> numbers;
 
-		FiguredBassAbbreviationMapping(string s, vector<int> n);
 };
 
 class Tool_fb : public HumTool {
