@@ -183,7 +183,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 // Tool_fb::getTrackData -- Create **fb spine data with formatted numbers for all voices
 //
 
-vector<string> Tool_fb::getTrackData(vector<FiguredBassNumber*> numbers, int lineCount) {
+vector<string> Tool_fb::getTrackData(const vector<FiguredBassNumber*>& numbers, int lineCount) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
@@ -204,7 +204,7 @@ vector<string> Tool_fb::getTrackData(vector<FiguredBassNumber*> numbers, int lin
 // Tool_fb::getTrackDataForVoice -- Create **fb spine data with formatted numbers for passed voiceIndex
 //
 
-vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount) {
+vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount) {
 	vector<string> trackData;
 	trackData.resize(lineCount);
 
@@ -315,7 +315,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 // Tool_fb::formatFiguredBassNumbers -- Create a **fb data record string out of the passed FiguredBassNumber objects
 //
 
-string Tool_fb::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers) {
+string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbers) {
 
 	vector<FiguredBassNumber*> formattedNumbers;
 
@@ -382,7 +382,7 @@ string Tool_fb::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers) {
 // Tool_fb::getAbbrNumbers -- Get abbreviated figured bass numbers
 //    If no abbreviation is found all numbers will be shown
 
-vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(vector<FiguredBassNumber*> numbers) {
+vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumber*>& numbers) {
 
 	vector<FiguredBassNumber*> abbrNumbers;
 

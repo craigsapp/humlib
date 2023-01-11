@@ -59,9 +59,9 @@ class Tool_fb : public HumTool {
 		bool run (const string& indata, ostream& out);
 		bool run (HumdrumFile& infile, ostream& out);
 
-		vector<string> getTrackData(vector<FiguredBassNumber*> numbers, int lineCount);
+		vector<string> getTrackData(const vector<FiguredBassNumber*>& numbers, int lineCount);
 		
-		vector<string> getTrackDataForVoice(int voiceIndex, vector<FiguredBassNumber*> numbers, int lineCount);
+		vector<string> getTrackDataForVoice(int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
 
 		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
 		
@@ -69,9 +69,9 @@ class Tool_fb : public HumTool {
 		
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
 
-		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers);
+		string formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbers);
 
-		vector<FiguredBassNumber*> getAbbrNumbers(vector<FiguredBassNumber*> numbers);
+		vector<FiguredBassNumber*> getAbbrNumbers(const vector<FiguredBassNumber*>& numbers);
 
 		string getNumberString(vector<FiguredBassNumber*> numbers);
 
