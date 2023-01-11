@@ -358,7 +358,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 
 	if (abbrQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
-		formattedNumbers = getAbbrNumbers(formattedNumbers);
+		formattedNumbers = getAbbreviatedNumbers(formattedNumbers);
 	}
 
 	// join numbers
@@ -379,10 +379,10 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 
 //////////////////////////////
 //
-// Tool_fb::getAbbrNumbers -- Get abbreviated figured bass numbers
+// Tool_fb::getAbbreviatedNumbers -- Get abbreviated figured bass numbers
 //    If no abbreviation is found all numbers will be shown
 
-vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumber*>& numbers) {
+vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBassNumber*>& numbers) {
 
 	vector<FiguredBassNumber*> abbrNumbers;
 

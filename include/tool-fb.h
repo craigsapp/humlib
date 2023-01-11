@@ -71,7 +71,7 @@ class Tool_fb : public HumTool {
 
 		string formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbers);
 
-		vector<FiguredBassNumber*> getAbbrNumbers(const vector<FiguredBassNumber*>& numbers);
+		vector<FiguredBassNumber*> getAbbreviatedNumbers(const vector<FiguredBassNumber*>& numbers);
 
 		string getNumberString(vector<FiguredBassNumber*> numbers);
 
