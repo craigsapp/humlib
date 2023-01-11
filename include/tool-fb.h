@@ -35,7 +35,7 @@ class FiguredBassNumber {
 		int getNumberWithinOctave(void);
 };
 
-class FiguredBassAbbr {
+class FiguredBassAbbreviationMapping {
 	public:
 		// String to compare the numbers with
 		// e.g. "6 4 3"
@@ -45,7 +45,7 @@ class FiguredBassAbbr {
 		// Figured bass number as int
 		vector<int> numbers;
 
-		FiguredBassAbbr(string s, vector<int> n);
+		FiguredBassAbbreviationMapping(string s, vector<int> n);
 };
 
 class Tool_fb : public HumTool {

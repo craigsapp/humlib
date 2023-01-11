@@ -384,45 +384,44 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 
 vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBassNumber*>& numbers) {
 
-	vector<FiguredBassNumber*> abbrNumbers;
+	vector<FiguredBassNumber*> abbreviatedNumbers;
 
-	// Mapping to abbreviate figured bass numbers
-	vector<FiguredBassAbbr*> figuredBassAbbrs = {
-		new FiguredBassAbbr("3", {}),
-		new FiguredBassAbbr("5", {}),
-		new FiguredBassAbbr("5 3", {}),
-		new FiguredBassAbbr("6 3", {6}),
-		new FiguredBassAbbr("5 4", {4}),
-		new FiguredBassAbbr("7 5 3", {7}),
-		new FiguredBassAbbr("7 3", {7}),
-		new FiguredBassAbbr("7 5", {7}),
-		new FiguredBassAbbr("6 5 3", {6, 5}),
-		new FiguredBassAbbr("6 4 3", {4, 3}),
-		new FiguredBassAbbr("6 4 2", {4, 2}),
-		new FiguredBassAbbr("9 5 3", {9}),
-		new FiguredBassAbbr("9 5", {9}),
-		new FiguredBassAbbr("9 3", {9}),
+	vector<FiguredBassAbbreviationMapping*> mappings = {
+		new FiguredBassAbbreviationMapping("3", {}),
+		new FiguredBassAbbreviationMapping("5", {}),
+		new FiguredBassAbbreviationMapping("5 3", {}),
+		new FiguredBassAbbreviationMapping("6 3", {6}),
+		new FiguredBassAbbreviationMapping("5 4", {4}),
+		new FiguredBassAbbreviationMapping("7 5 3", {7}),
+		new FiguredBassAbbreviationMapping("7 3", {7}),
+		new FiguredBassAbbreviationMapping("7 5", {7}),
+		new FiguredBassAbbreviationMapping("6 5 3", {6, 5}),
+		new FiguredBassAbbreviationMapping("6 4 3", {4, 3}),
+		new FiguredBassAbbreviationMapping("6 4 2", {4, 2}),
+		new FiguredBassAbbreviationMapping("9 5 3", {9}),
+		new FiguredBassAbbreviationMapping("9 5", {9}),
+		new FiguredBassAbbreviationMapping("9 3", {9}),
 	};
 
 	string numberString = getNumberString(numbers);
 
 	// Check if an abbreviation exists for passed numbers
-	auto it = find_if(figuredBassAbbrs.begin(), figuredBassAbbrs.end(), [numberString](FiguredBassAbbr* abbr) {
+	auto it = find_if(mappings.begin(), mappings.end(), [numberString](FiguredBassAbbreviationMapping* abbr) {
 		return abbr->str == numberString;
 	});
 
-	if (it != figuredBassAbbrs.end()) {
-		int index = it - figuredBassAbbrs.begin();
-		FiguredBassAbbr* abbr = figuredBassAbbrs[index];
+	if (it != mappings.end()) {
+		int index = it - mappings.begin();
+		FiguredBassAbbreviationMapping* abbr = mappings[index];
 		bool aQ = accidentalsQ;
-		// Store numbers to display by the abbreviation mapping in abbrNumbers
-		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr, aQ](FiguredBassNumber* num) {
+		// Store numbers to display by the abbreviation mapping in abbreviatedNumbers
+		copy_if(numbers.begin(), numbers.end(), back_inserter(abbreviatedNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
 			// Show numbers if they are part of the abbreviation mapping or if they have an accidental
 			return (find(nums.begin(), nums.end(), num->getNumberWithinOctave()) != nums.end()) || (num->showAccidentals && aQ);
 		});
 
-		return abbrNumbers;
+		return abbreviatedNumbers;
 	}
 
 	return numbers;
@@ -527,11 +526,11 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 
 //////////////////////////////
 //
-// FiguredBassAbbr::FiguredBassAbbr -- Constructor
+// FiguredBassAbbreviationMapping::FiguredBassAbbreviationMapping -- Constructor
 //    Helper class to store the mappings for abbreviate figured bass numbers
 //
 
-FiguredBassAbbr::FiguredBassAbbr(string s, vector<int> n) {
+FiguredBassAbbreviationMapping::FiguredBassAbbreviationMapping(string s, vector<int> n) {
 	str = s;
 	numbers = n;
 }
