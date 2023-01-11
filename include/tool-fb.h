@@ -54,44 +54,35 @@ class FiguredBassAbbreviationMapping {
 class Tool_fb : public HumTool {
 
 	public:
-		Tool_fb(void);
-		~Tool_fb(){};
+		     Tool_fb (void);
+		     ~Tool_fb() {};
+		bool run     (HumdrumFileSet& infiles);
+		bool run     (HumdrumFile& infile);
+		bool run     (const string& indata, ostream& out);
+		bool run     (HumdrumFile& infile, ostream& out);
 
-		bool run (HumdrumFileSet& infiles);
-		bool run (HumdrumFile& infile);
-		bool run (const string& indata, ostream& out);
-		bool run (HumdrumFile& infile, ostream& out);
-
-		vector<string> getTrackData(const vector<FiguredBassNumber*>& numbers, int lineCount);
-		
-		vector<string> getTrackDataForVoice(int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
-
-		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
-		
-		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*> numbers, int lineIndex);
-		
+	protected:
+		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
+		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
+		FiguredBassNumber*         createFiguredBassNumber                (NoteCell* base, NoteCell* target, string keySignature);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine        (vector<FiguredBassNumber*> numbers, int lineIndex);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
+		string                     formatFiguredBassNumbers               (const vector<FiguredBassNumber*>& numbers);
+		vector<FiguredBassNumber*> getAbbreviatedNumbers                  (const vector<FiguredBassNumber*>& numbers);
+		string                     getNumberString                        (vector<FiguredBassNumber*> numbers);
+		string                     getKeySignature                        (HumdrumFile& infile, int lineIndex);
 
-		string formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbers);
-
-		vector<FiguredBassNumber*> getAbbreviatedNumbers(const vector<FiguredBassNumber*>& numbers);
-
-		string getNumberString(vector<FiguredBassNumber*> numbers);
-
-		string getKeySignature(HumdrumFile& infile, int lineIndex);
-
-	// protected:
 
 	private:
-		bool compoundQ = false;
-		bool accidentalsQ = false;
-		int baseQ = 0;
+		bool compoundQ      = false;
+		bool accidentalsQ   = false;
+		int  baseQ          = 0;
 		bool intervallsatzQ = false;
-		bool sortQ = false;
-		bool lowestQ = false;
-		bool normalizeQ = false;
-		bool abbrQ = false;
-		bool attackQ = false;
+		bool sortQ          = false;
+		bool lowestQ        = false;
+		bool normalizeQ     = false;
+		bool abbrQ          = false;
+		bool attackQ        = false;
 
 };
 
