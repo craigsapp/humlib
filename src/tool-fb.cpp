@@ -36,6 +36,7 @@ Tool_fb::Tool_fb(void) {
 	define("r|abbr=b",          "use abbreviated figures");
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
 	define("f|figuredbass=b",   "Shortcut for -c -a -s -l -n -r -3");
+	define("3|hide-three=b",    "Hide number 3 if it has an accidental (e.g.: #3 => #)");
 }
 
 
@@ -86,6 +87,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_abbrQ          = getBoolean("abbr");
 	m_attackQ        = getBoolean("attack");
 	m_figuredbassQ   = getBoolean("figuredbass");
+	m_hideThreeQ     = getBoolean("hide-three");
 
 	if (m_abbrQ) {
 		m_normalizeQ = true;
@@ -103,6 +105,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		m_lowestQ = true;
 		m_normalizeQ = true;
 		m_abbrQ = true;
+		m_hideThreeQ = true;
 	}
 
 	NoteGrid grid(infile);
@@ -376,7 +379,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	string str = "";
 	bool first = true;
 	for (FiguredBassNumber* number: formattedNumbers) {
-		string num = number->toString(m_compoundQ, m_accidentalsQ);
+		string num = number->toString(m_compoundQ, m_accidentalsQ, m_hideThreeQ);
 		if (num.length() > 0) {
 			if (!first) str += " ";
 			first = false;
@@ -497,9 +500,12 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 // FiguredBassNumber::toString -- Convert FiguredBassNumber to a string (accidental + number)
 //
 
-string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
+string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideThreeQ) {
 	int num = (compoundQ) ? getNumberWithinOctave() : m_number;
 	string accid = (accidentalsQ && m_showAccidentals) ? m_accidentals : "";
+	if ((num == 3) && accidentalsQ && m_showAccidentals && hideThreeQ) {
+		return accid;
+	}
 	return num > 0 ? accid + to_string(num) : "";
 }
 

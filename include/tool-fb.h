@@ -23,7 +23,7 @@ namespace hum {
 class FiguredBassNumber {
 	public:
 		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
-		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool hideThreeQ);
 		int         getNumberWithinOctave(void);
 
 		int         m_voiceIndex;
@@ -85,6 +85,7 @@ class Tool_fb : public HumTool {
 		bool m_abbrQ          = false;
 		bool m_attackQ        = false;
 		bool m_figuredbassQ   = false;
+		bool m_hideThreeQ     = false;
 
 };
 
