@@ -489,7 +489,7 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 	int num = (compoundQ) ? getNumberWithinOctave() : m_number;
 	string accid = (accidentalsQ && m_showAccidentals) ? m_accidentals : "";
-	return num > 0 ? to_string(num) + accid : "";
+	return num > 0 ? accid + to_string(num) : "";
 }
 
 
