@@ -36,8 +36,8 @@ Tool_fb::Tool_fb(void) {
 	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
 	define("r|abbr=b",          "use abbreviated figures");
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
-	define("f|figuredbass=b",   "Shortcut for -c -a -s -l -n -r -3");
-	define("3|hide-three=b",    "Hide number 3 if it has an accidental (e.g.: #3 => #)");
+	define("f|figuredbass=b",   "shortcut for -c -a -s -l -n -r -3");
+	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
 }
 
 
