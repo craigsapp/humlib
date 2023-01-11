@@ -324,15 +324,15 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		bool aQ = accidentalsQ;
 		// remove 8 and 1 but keep them if they have an accidental
 		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
-			return ((num->getNumberB7() != 8) && (num->getNumberB7() != 1)) || (aQ && num->showAccidentals);
+			return ((num->getNumberWithinOctave() != 8) && (num->getNumberWithinOctave() != 1)) || (aQ && num->showAccidentals);
 		});
 		// sort by size
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-			return a->getNumberB7() < b->getNumberB7();
+			return a->getNumberWithinOctave() < b->getNumberWithinOctave();
 		});
 		// remove duplicate numbers
 		formattedNumbers.erase(unique(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) {
-			return a->getNumberB7() == b->getNumberB7();
+			return a->getNumberWithinOctave() == b->getNumberWithinOctave();
 		}), formattedNumbers.end());
 	} else {
 		formattedNumbers = numbers;
@@ -351,8 +351,8 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	if (sortQ) {
 		bool cQ = compoundQ;
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-			// sort by getNumberB7 if compoundQ is true otherwise sort by number
-			return (cQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
+			// sort by getNumberWithinOctave if compoundQ is true otherwise sort by number
+			return (cQ) ? a->getNumberWithinOctave() > b->getNumberWithinOctave() : a->number > b->number;
 		});
 	}
 
@@ -419,7 +419,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumbe
 		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
 			// Show numbers if they are part of the abbreviation mapping or if they have an accidental
-			return (find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end()) || (num->showAccidentals && aQ);
+			return (find(nums.begin(), nums.end(), num->getNumberWithinOctave()) != nums.end()) || (num->showAccidentals && aQ);
 		});
 
 		return abbrNumbers;
@@ -438,13 +438,13 @@ vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumbe
 string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
 	// Sort numbers by size
 	sort(numbers.begin(), numbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-		return a->getNumberB7() > b->getNumberB7();
+		return a->getNumberWithinOctave() > b->getNumberWithinOctave();
 	});
 	// join numbers
 	string str = "";
 	bool first = true;
 	for (FiguredBassNumber* nr: numbers) {
-		int num = nr->getNumberB7();
+		int num = nr->getNumberWithinOctave();
 		if (num > 0) {
 			if (!first) str += " ";
 			first = false;
@@ -503,7 +503,7 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 //
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
-	int num = (compoundQ) ? getNumberB7() : number;
+	int num = (compoundQ) ? getNumberWithinOctave() : number;
 	string accid = (accidentalsQ && showAccidentals) ? accidentals : "";
 	return num > 0 ? to_string(num) + accid : "";
 }
@@ -512,10 +512,10 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 
 //////////////////////////////
 //
-// FiguredBassNumber::getNumberB7 -- Get figured bass number as non compound interval (base 7)
+// FiguredBassNumber::getNumberWithinOctave -- Get figured bass number as non compound interval (base 7)
 //
 
-int FiguredBassNumber::getNumberB7(void) {
+int FiguredBassNumber::getNumberWithinOctave(void) {
 	int num = (number > 9) ? number % 7 : number;
 	if ((number > 9) && (number % 7 == 0)) {
 		num = 7;
