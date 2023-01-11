@@ -84,6 +84,7 @@ class Tool_fb : public HumTool {
 		bool m_normalizeQ     = false;
 		bool m_abbrQ          = false;
 		bool m_attackQ        = false;
+		bool m_figuredbassQ   = false;
 
 };
 

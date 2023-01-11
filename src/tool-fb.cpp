@@ -35,6 +35,7 @@ Tool_fb::Tool_fb(void) {
 	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
 	define("r|abbr=b",          "use abbreviated figures");
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
+	define("f|figuredbass=b",   "Shortcut for -c -a -s -l -n -r -3");
 }
 
 
@@ -84,6 +85,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_normalizeQ     = getBoolean("normalize");
 	m_abbrQ          = getBoolean("abbr");
 	m_attackQ        = getBoolean("attack");
+	m_figuredbassQ   = getBoolean("figuredbass");
 
 	if (m_abbrQ) {
 		m_normalizeQ = true;
@@ -92,6 +94,15 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	if (m_normalizeQ) {
 		m_compoundQ = true;
 		m_sortQ = true;
+	}
+
+	if (m_figuredbassQ) {
+		m_compoundQ = true;
+		m_accidentalsQ = true;
+		m_sortQ = true;
+		m_lowestQ = true;
+		m_normalizeQ = true;
+		m_abbrQ = true;
 	}
 
 	NoteGrid grid(infile);
