@@ -65,13 +65,13 @@ class Tool_fb : public HumTool {
 
 		FiguredBassNumber* createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature);
 		
-		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*>, int lineIndex);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine(vector<FiguredBassNumber*> numbers, int lineIndex);
 		
-		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*>, int lineIndex, int voiceIndex);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
 
 		string formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers);
 
-		vector<FiguredBassNumber*> getAbbrNumbers(vector<FiguredBassNumber*>);
+		vector<FiguredBassNumber*> getAbbrNumbers(vector<FiguredBassNumber*> numbers);
 
 		string getNumberString(vector<FiguredBassNumber*> numbers);
 
