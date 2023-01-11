@@ -223,45 +223,45 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 
 string Tool_fb::formatFiguredBassNumbers(vector<FiguredBassNumber*> numbers) {
 
-	vector<FiguredBassNumber*> normalizededNumbers;
+	vector<FiguredBassNumber*> formattedNumbers;
 
 	if(normalizeQ) {
 		bool aQ = accidentalsQ;
-		copy_if(numbers.begin(), numbers.end(), back_inserter(normalizededNumbers), [aQ](FiguredBassNumber* num) {
+		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
 			return (num->getNumberB7() != 8 && num->getNumberB7() != 1) || (aQ && num->showAccidentals);
 		});
-		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			return a->getNumberB7() < b->getNumberB7();
 		});
-		normalizededNumbers.erase(unique(normalizededNumbers.begin(), normalizededNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) {
+		formattedNumbers.erase(unique(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) {
 			return a->getNumberB7() == b->getNumberB7();
-		}), normalizededNumbers.end());
+		}), formattedNumbers.end());
 	} else {
-		normalizededNumbers = numbers;
+		formattedNumbers = numbers;
 	}
 
 	if(intervallsatzQ && attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
-		copy_if(normalizededNumbers.begin(), normalizededNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
+		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
 			return num->isAttack || num->currAttackNumberDidChange;
 		});
-		normalizededNumbers = attackNumbers;
+		formattedNumbers = attackNumbers;
 	}
 
 	if(sortQ) {
 		bool cQ = compoundQ;
-		sort(normalizededNumbers.begin(), normalizededNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			return (cQ) ? a->getNumberB7() > b->getNumberB7() : a->number > b->number;
 		});
 	}
 
 	if(abbrQ) {
-		normalizededNumbers = getAbbrNumbers(normalizededNumbers);
+		formattedNumbers = getAbbrNumbers(formattedNumbers);
 	}
 
 	string str = "";
 	bool first = true;
-	for (FiguredBassNumber* number: normalizededNumbers) {
+	for (FiguredBassNumber* number: formattedNumbers) {
 		string num = number->toString(compoundQ, accidentalsQ);
 		if(num.length() > 0) {
 			if (!first) str += " ";
