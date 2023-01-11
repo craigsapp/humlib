@@ -13,6 +13,7 @@
 #include "Convert.h"
 #include "HumRegex.h"
 #include <regex>
+#include <cmath>
 
 using namespace std;
 
