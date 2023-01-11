@@ -174,7 +174,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	}
 
 	return true;
-};
+}
 
 
 
@@ -195,7 +195,7 @@ vector<string> Tool_fb::getTrackData(const vector<FiguredBassNumber*>& numbers, 
 	}
 
 	return trackData;
-};
+}
 
 
 
@@ -216,7 +216,7 @@ vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, const vector<Figure
 	}
 
 	return trackData;
-};
+}
 
 
 
@@ -258,7 +258,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
 
 	return number;
-};
+}
 
 
 
@@ -282,7 +282,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLine(vector<Figur
 	});
 
 	return filteredNumbers;
-};
+}
 
 
 
@@ -306,7 +306,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 	});
 
 	return filteredNumbers;
-};
+}
 
 
 
@@ -373,7 +373,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		}
 	}
 	return str;
-};
+}
 
 
 
@@ -426,7 +426,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumbe
 	}
 
 	return numbers;
-};
+}
 
 
 
@@ -452,7 +452,7 @@ string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
 		}	
 	}
 	return str;
-};
+}
 
 
 
@@ -477,7 +477,7 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 		}
 	}();
 	return keySignature;
-};
+}
 
 
 
@@ -493,7 +493,7 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 	lineIndex       = lineIdx;
 	showAccidentals = showAccid;
 	isAttack        = isAtk;
-};
+}
 
 
 
@@ -506,7 +506,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 	int num = (compoundQ) ? getNumberB7() : number;
 	string accid = (accidentalsQ && showAccidentals) ? accidentals : "";
 	return num > 0 ? to_string(num) + accid : "";
-};
+}
 
 
 
@@ -521,7 +521,7 @@ int FiguredBassNumber::getNumberB7(void) {
 		num = 7;
 	}
 	return ((number > 8) && (num == 1)) ? 8 : num;
-};
+}
 
 
 
@@ -534,7 +534,7 @@ int FiguredBassNumber::getNumberB7(void) {
 FiguredBassAbbr::FiguredBassAbbr(string s, vector<int> n) {
 	str = s;
 	numbers = n;
-};
+}
 
 // END_MERGE
 
