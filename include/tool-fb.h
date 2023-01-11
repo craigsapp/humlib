@@ -1,3 +1,14 @@
+//
+// Programmer:    Wolfgang Drescher <drescher.wolfgang@gmail.com>
+// Creation Date: Sun Nov 27 2022 00:25:34 CET
+// Filename:      tool-fb.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-fb.h
+// Syntax:        C++11; humlib
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
+//
+// Description:   Interface for fb tool, which automatically adds figured bass numbers.
+//
+
 #ifndef _TOOL_FB_H
 #define _TOOL_FB_H
 
@@ -15,9 +26,10 @@ class FiguredBassNumber {
 		int lineIndex;
 		int number;
 		string accidentals;
-		bool showAccidentals;
+		bool showAccidentals; // Force shoing figured base numbers when they need an accidental
 		bool currAttackNumberDidChange;
 		bool isAttack;
+		
 		FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
 		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
 		int getNumberB7();
@@ -25,8 +37,14 @@ class FiguredBassNumber {
 
 class FiguredBassAbbr {
 	public:
+		// String to compare the numbers with
+		// e.g. "6 4 3"
+		// Sorted by size, larger numbers first
 		string str;
+
+		// Figured bass number as int
 		vector<int> numbers;
+
 		FiguredBassAbbr(string s, vector<int> n);
 };
 
