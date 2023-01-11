@@ -1611,7 +1611,7 @@ void Tool_transpose::initialize(HumdrumFile& infile) {
 		case 2:
 			{
 				char buffer[128] = {0};
-				sprintf(buffer, "d%dc%d", getInt("d"), getInt("c"));
+				snprintf(buffer, 128, "d%dc%d", getInt("d"), getInt("c"));
 				transval = Convert::transToBase40(buffer);
 			}
 			break;

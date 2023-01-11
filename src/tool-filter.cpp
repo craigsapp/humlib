@@ -25,6 +25,7 @@
 #include "tool-colorgroups.h"
 #include "tool-colortriads.h"
 #include "tool-composite.h"
+#include "tool-deg.h"
 #include "tool-dissonant.h"
 #include "tool-double.h"
 #include "tool-extract.h"
@@ -219,6 +220,10 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(autobeam, infile, commands[i].second, status);
 		} else if (commands[i].first == "autostem") {
 			RUNTOOL(autostem, infile, commands[i].second, status);
+		} else if (commands[i].first == "binroll") {
+			RUNTOOL(binroll, infile, commands[i].second, status);
+		} else if (commands[i].first == "chantize") {
+			RUNTOOL(chantize, infile, commands[i].second, status);
 		} else if (commands[i].first == "chord") {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
@@ -233,6 +238,12 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(double, infile, commands[i].second, status);
 		} else if (commands[i].first == "fb") {
 			RUNTOOL(fb, infile, commands[i].second, status);
+		} else if (commands[i].first == "flipper") {
+			RUNTOOL(flipper, infile, commands[i].second, status);
+		} else if (commands[i].first == "filter") {
+			RUNTOOL(filter, infile, commands[i].second, status);
+		} else if (commands[i].first == "gasparize") {
+			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "half") {
 			RUNTOOL(half, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
@@ -245,23 +256,12 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(humsheet, infile, commands[i].second, status);
 		} else if (commands[i].first == "humtr") {
 			RUNTOOL(humtr, infile, commands[i].second, status);
-		} else if (commands[i].first == "kernview") {
-			RUNTOOL(kernview, infile, commands[i].second, status);
-		} else if (commands[i].first == "shed") {
-			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
-		} else if (commands[i].first == "extract") {
-			RUNTOOL(extract, infile, commands[i].second, status);
-		} else if (commands[i].first == "extractx") {
-			// Humdrum Extras emulation
-			RUNTOOL(extract, infile, commands[i].second, status);
-		} else if (commands[i].first == "flipper") {
-			RUNTOOL(flipper, infile, commands[i].second, status);
-		} else if (commands[i].first == "filter") {
-			RUNTOOL(filter, infile, commands[i].second, status);
-		} else if (commands[i].first == "gasparize") {
-			RUNTOOL(gasparize, infile, commands[i].second, status);
+		} else if (commands[i].first == "kern2mens") {
+			RUNTOOL(kern2mens, infile, commands[i].second, status);
+		} else if (commands[i].first == "kernview") {
+			RUNTOOL(kernview, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "mens2kern") {
@@ -274,31 +274,20 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(msearch, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
+		} else if (commands[i].first == "recip") {
+			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
-		} else if (commands[i].first == "rid") {
-			RUNTOOL(rid, infile, commands[i].second, status);
-		} else if (commands[i].first == "ridx") {
-			RUNTOOL(rid, infile, commands[i].second, status);
-		} else if (commands[i].first == "ridxx") {
-			RUNTOOL(rid, infile, commands[i].second, status);
-		} else if (commands[i].first == "satb2gs") {
-			RUNTOOL(satb2gs, infile, commands[i].second, status);
-		} else if (commands[i].first == "satb2gsx") {
-			// humlib cli emulation
-			RUNTOOL(satb2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
 			RUNTOOL(scordatura, infile, commands[i].second, status);
 		} else if (commands[i].first == "semitones") {
 			RUNTOOL(semitones, infile, commands[i].second, status);
+		} else if (commands[i].first == "shed") {
+			RUNTOOL(shed, infile, commands[i].second, status);
 		} else if (commands[i].first == "sic") {
 			RUNTOOL(sic, infile, commands[i].second, status);
 		} else if (commands[i].first == "simat") {
 			RUNTOOL2(simat, infile, infile, commands[i].second, status);
-		} else if (commands[i].first == "kern2mens") {
-			RUNTOOL(kern2mens, infile, commands[i].second, status);
-		} else if (commands[i].first == "recip") {
-			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "slurcheck") {
 			RUNTOOL(slurcheck, infile, commands[i].second, status);
 		} else if (commands[i].first == "slur") {
@@ -317,41 +306,71 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
-		} else if (commands[i].first == "chantize") {
-			RUNTOOL(chantize, infile, commands[i].second, status);
-		} else if (commands[i].first == "chantise") {
-			RUNTOOL(chantize, infile, commands[i].second, status);
-		} else if (commands[i].first == "timebase") {
-			RUNTOOL(timebase, infile, commands[i].second, status);
-		} else if (commands[i].first == "thru") {
-			RUNTOOL(thru, infile, commands[i].second, status);
-		} else if (commands[i].first == "thrux") {
-			// Humdrum Extras emulation
-			RUNTOOL(thru, infile, commands[i].second, status);
-		} else if (commands[i].first == "thruxx") {
-			// humlib cli emulation
-			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
-		} else if (commands[i].first == "colourtriads") {
-			RUNTOOL(colortriads, infile, commands[i].second, status);
-		} else if (commands[i].first == "colortriads") {
-			RUNTOOL(colortriads, infile, commands[i].second, status);
-		} else if (commands[i].first == "colorgroups") {
-			RUNTOOL(colorgroups, infile, commands[i].second, status);
-		} else if (commands[i].first == "colourgroups") {
-			RUNTOOL(colorgroups, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
 			RUNTOOL(tremolo, infile, commands[i].second, status);
 		} else if (commands[i].first == "trillspell") {
 			RUNTOOL(trillspell, infile, commands[i].second, status);
-		} else if (commands[i].first == "binroll") {
-			RUNTOOL(binroll, infile, commands[i].second, status);
-		} else if (commands[i].first == "myank") {
+
+		// filters with aliases:
+
+		} else if (commands[i].first == "colortriads") {
+			RUNTOOL(colortriads, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourtriads") {
+			// British spelling
+			RUNTOOL(colortriads, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "colorgroups") {
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourgroups") { // British spelling
+			RUNTOOL(colorgroups, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "deg") { // humlib version of Humdrum Toolkit deg tool
+			RUNTOOL(deg, infile, commands[i].second, status);
+		} else if (commands[i].first == "degx") { // humlib cli name
+			RUNTOOL(deg, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "extract") { // humlib version of Humdrum Toolkit extract tool
+			RUNTOOL(extract, infile, commands[i].second, status);
+		} else if (commands[i].first == "extractx") { // humlib cli name
+			RUNTOOL(extract, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "myank") { // humlib version of Humdrum Extras myank tool
 			RUNTOOL(myank, infile, commands[i].second, status);
+		} else if (commands[i].first == "myankx") { // humlib cli name
+			RUNTOOL(myank, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "rid") { // humlib version of Humdrum Toolkit deg tool
+			RUNTOOL(rid, infile, commands[i].second, status);
+		} else if (commands[i].first == "ridx") { // Humdrum Extra cli name
+			RUNTOOL(rid, infile, commands[i].second, status);
+		} else if (commands[i].first == "ridxx") { // humlib cli name
+			RUNTOOL(rid, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "satb2gs") { // humlib version of Humdrum Extras satg2gs tool
+			RUNTOOL(satb2gs, infile, commands[i].second, status);
+		} else if (commands[i].first == "satb2gsx") { // humlib cli name
+			RUNTOOL(satb2gs, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "thru") {
+			RUNTOOL(thru, infile, commands[i].second, status);
+		} else if (commands[i].first == "thru") { // humlib version of Humdrum Toolkit thru tool
+			RUNTOOL(thru, infile, commands[i].second, status);
+		} else if (commands[i].first == "thrux") { // Humdrum Extras cli name
+			RUNTOOL(thru, infile, commands[i].second, status);
+		} else if (commands[i].first == "thruxx") { // humlib cli name
+			RUNTOOL(thru, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "timebase") { // humlib version of Humdrum Toolkit timebase tool
+			RUNTOOL(timebase, infile, commands[i].second, status);
+		} else if (commands[i].first == "timebasex") { // humlib cli name
+			RUNTOOL(timebase, infile, commands[i].second, status);
 		}
+
+
 	}
 
 	removeGlobalFilterLines(infile);

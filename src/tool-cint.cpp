@@ -2557,7 +2557,7 @@ void Tool_cint::getNames(vector<string>& names, vector<int>& reverselookup,
 
 	for (i=0; i<(int)names.size(); i++) {
 		value = (int)reverselookup.size() - i;
-		sprintf(buffer, "%d", value);
+		snprintf(buffer, 1024, "%d", value);
 		names[i] = buffer;
 	}
 

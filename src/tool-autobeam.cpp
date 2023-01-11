@@ -992,7 +992,7 @@ void Tool_autobeam::processMeasure(vector<HTp>& measure) {
 
 	// close the last beam
 	if ((beamstart >= 0) && ((int)measure.size() - beamstart > 1)) {
-		addBeam(measure[beamstart], measure[measure.size()-1]);
+		addBeam(measure[beamstart], measure[(int)measure.size()-1]);
 		beamstart = INVALID;
 	}
 }
@@ -1055,6 +1055,10 @@ void Tool_autobeam::removeEdgeRests(HTp& startnote, HTp& endnote) {
 				return;
 			}
 			current = current->getNextNNDT();
+		}
+		if (!current) {
+			// Handle problem when spine is not terminated.
+			return;
 		}
 
 		if (current->getLineIndex() >= endindex) {
