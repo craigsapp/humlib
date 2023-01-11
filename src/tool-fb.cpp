@@ -120,7 +120,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
 				int checkCellPitch = abs(checkCell->getSgnDiatonicPitch());
-				if (checkCellPitch > 0 && checkCellPitch < lowestNotePitch) {
+				if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
 					lowestNotePitch = checkCellPitch;
 					usedBaseVoiceIndex = k;
 				}
@@ -141,7 +141,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
 			if (lastNumbers[j] != 0) {
 				// Set currAttackNumberDidChange
-				number->currAttackNumberDidChange = targetCell->isSustained() && lastNumbers[j] != number->number;
+				number->currAttackNumberDidChange = (targetCell->isSustained()) && (lastNumbers[j] != number->number);
 			}
 			currentNumbers[j] = number->number;
 			numbers.push_back(number);
@@ -233,7 +233,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	// There is currenlty no support for negative numbers (e.g. with intervallsatz)
 	int basePitch   = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
-	int num         = (basePitch == 0 || targetPitch == 0) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
+	int num         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
 
 	regex accidRegex("^\\(?(\\w)+([^\\w\\)]*)\\)?$");
 
@@ -251,7 +251,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 
 	// Only show accidentals when they are not included in the key signature
 	bool showAccid = false;
-	if (accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
+	if (accid.length() && (keySignature.find(accidWithPitch) == std::string::npos)) {
 		showAccid = true;
 	}
 
@@ -297,7 +297,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 
 	// filter numbers with passed lineIndex and passed voiceIndex
 	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex, voiceIndex](FiguredBassNumber* num) {
-		return num->lineIndex == lineIndex && num->voiceIndex == voiceIndex;
+		return (num->lineIndex == lineIndex) && (num->voiceIndex == voiceIndex);
 	});
 
 	// sort by voiceIndex (probably not needed here)
@@ -324,7 +324,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		bool aQ = accidentalsQ;
 		// remove 8 and 1 but keep them if they have an accidental
 		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
-			return (num->getNumberB7() != 8 && num->getNumberB7() != 1) || (aQ && num->showAccidentals);
+			return ((num->getNumberB7() != 8) && (num->getNumberB7() != 1)) || (aQ && num->showAccidentals);
 		});
 		// sort by size
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
@@ -419,7 +419,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbrNumbers(const vector<FiguredBassNumbe
 		copy_if(numbers.begin(), numbers.end(), back_inserter(abbrNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
 			// Show numbers if they are part of the abbreviation mapping or if they have an accidental
-			return find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end() || (num->showAccidentals && aQ);
+			return (find(nums.begin(), nums.end(), num->getNumberB7()) != nums.end()) || (num->showAccidentals && aQ);
 		});
 
 		return abbrNumbers;
@@ -517,10 +517,10 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 
 int FiguredBassNumber::getNumberB7() {
 	int num = (number > 9) ? number % 7 : number;
-	if (number > 9 && number % 7 == 0) {
+	if ((number > 9) && (number % 7 == 0)) {
 		num = 7;
 	}
-	return (number > 8 && num == 1) ? 8 : num;
+	return ((number > 8) && (num == 1)) ? 8 : num;
 };
 
 
