@@ -85,11 +85,11 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	abbrQ          = getBoolean("abbr");
 	attackQ        = getBoolean("attack");
 
-	if(abbrQ) {
+	if (abbrQ) {
 		normalizeQ = true;
 	}
 
-	if(normalizeQ) {
+	if (normalizeQ) {
 		compoundQ = true;
 		sortQ = true;
 	}
@@ -115,12 +115,12 @@ bool Tool_fb::run(HumdrumFile &infile) {
 
 		// Overwrite usedBaseVoiceIndex with the lowest voice index of the lowest pitched note
 		// TODO: check if this still works for chords
-		if(lowestQ) {
+		if (lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
 				int checkCellPitch = abs(checkCell->getSgnDiatonicPitch());
-				if(checkCellPitch > 0 && checkCellPitch < lowestNotePitch) {
+				if (checkCellPitch > 0 && checkCellPitch < lowestNotePitch) {
 					lowestNotePitch = checkCellPitch;
 					usedBaseVoiceIndex = k;
 				}
@@ -132,14 +132,14 @@ bool Tool_fb::run(HumdrumFile &infile) {
 
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
-			if(j == usedBaseVoiceIndex) {
+			if (j == usedBaseVoiceIndex) {
 				// Ignore base voice
 				continue;
 			}
 			NoteCell* targetCell = grid.cell(j, i);
 			// Create FiguredBassNumber
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
-			if(lastNumbers[j] != 0) {
+			if (lastNumbers[j] != 0) {
 				// Set currAttackNumberDidChange
 				number->currAttackNumberDidChange = targetCell->isSustained() && lastNumbers[j] != number->number;
 			}
@@ -151,11 +151,11 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		lastNumbers = currentNumbers;
 	}
 
-	if(intervallsatzQ) {
+	if (intervallsatzQ) {
 		// Create **fb spine for each voice
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
 			vector<string> trackData = getTrackDataForVoice(voiceIndex, numbers, infile.getLineCount());
-			if(voiceIndex + 1 < grid.getVoiceCount()) {
+			if (voiceIndex + 1 < grid.getVoiceCount()) {
 				int trackIndex = kernspines[voiceIndex + 1]->getTrack();
 				infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 			} else {
@@ -165,7 +165,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	} else {
 		// Create **fb spine and bind it to the base voice
 		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
-		if(baseQ + 1 < grid.getVoiceCount()) {
+		if (baseQ + 1 < grid.getVoiceCount()) {
 			int trackIndex = kernspines[baseQ + 1]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", "**fb");
 		} else {
@@ -189,7 +189,7 @@ vector<string> Tool_fb::getTrackData(const vector<FiguredBassNumber*>& numbers, 
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLine(numbers, i);
-		if(sliceNumbers.size() > 0) {
+		if (sliceNumbers.size() > 0) {
 			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
 		}
 	}
@@ -210,7 +210,7 @@ vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, const vector<Figure
 
 	for (int i = 0; i < lineCount; i++) {
 		vector<FiguredBassNumber*> sliceNumbers = filterFiguredBassNumbersForLineAndVoice(numbers, i, voiceIndex);
-		if(sliceNumbers.size() > 0) {
+		if (sliceNumbers.size() > 0) {
 			trackData[i] = formatFiguredBassNumbers(sliceNumbers);
 		}
 	}
@@ -251,7 +251,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 
 	// Only show accidentals when they are not included in the key signature
 	bool showAccid = false;
-	if(accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
+	if (accid.length() && keySignature.find(accidWithPitch) == std::string::npos) {
 		showAccid = true;
 	}
 
@@ -320,7 +320,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	vector<FiguredBassNumber*> formattedNumbers;
 
 	// Normalize numbers (remove 8 and 1, sort by size, remove duplicate numbers)
-	if(normalizeQ) {
+	if (normalizeQ) {
 		bool aQ = accidentalsQ;
 		// remove 8 and 1 but keep them if they have an accidental
 		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
@@ -339,7 +339,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	}
 
 	// Hide numbers if they have no attack
-	if(intervallsatzQ && attackQ) {
+	if (intervallsatzQ && attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
 		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
 			return num->isAttack || num->currAttackNumberDidChange;
@@ -348,7 +348,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	}
 
 	// Sort numbers by size
-	if(sortQ) {
+	if (sortQ) {
 		bool cQ = compoundQ;
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			// sort by getNumberB7 if compoundQ is true otherwise sort by number
@@ -356,7 +356,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		});
 	}
 
-	if(abbrQ) {
+	if (abbrQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
 		formattedNumbers = getAbbrNumbers(formattedNumbers);
 	}
@@ -366,7 +366,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	bool first = true;
 	for (FiguredBassNumber* number: formattedNumbers) {
 		string num = number->toString(compoundQ, accidentalsQ);
-		if(num.length() > 0) {
+		if (num.length() > 0) {
 			if (!first) str += " ";
 			first = false;
 			str += num;
@@ -445,7 +445,7 @@ string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
 	bool first = true;
 	for (FiguredBassNumber* nr: numbers) {
 		int num = nr->getNumberB7();
-		if(num > 0) {
+		if (num > 0) {
 			if (!first) str += " ";
 			first = false;
 			str += to_string(num);
@@ -465,7 +465,7 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 	string keySignature = "";
 	[&] {
 		for (int i = 0; i < infile.getLineCount(); i++) {
-			if(i > lineIndex) {
+			if (i > lineIndex) {
 				return;
 			}
 			HLp line = infile.getLine(i);
@@ -517,7 +517,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 
 int FiguredBassNumber::getNumberB7() {
 	int num = (number > 9) ? number % 7 : number;
-	if(number > 9 && number % 7 == 0) {
+	if (number > 9 && number % 7 == 0) {
 		num = 7;
 	}
 	return (number > 8 && num == 1) ? 8 : num;
