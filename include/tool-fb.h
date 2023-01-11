@@ -22,17 +22,18 @@ namespace hum {
 
 class FiguredBassNumber {
 	public:
-		int voiceIndex;
-		int lineIndex;
-		int number;
-		string accidentals;
-		bool showAccidentals; // Force shoing figured base numbers when they need an accidental
-		bool currAttackNumberDidChange;
-		bool isAttack;
+		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
+		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
+		int         getNumberWithinOctave(void);
 
-		FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
-		string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ);
-		int getNumberWithinOctave(void);
+		int         m_voiceIndex;
+		int         m_lineIndex;
+		int         m_number;
+		std::string m_accidentals;
+		bool        m_showAccidentals; // Force shoing figured base numbers when they need an accidental
+		bool        m_currAttackNumberDidChange;
+		bool        m_isAttack;
+
 };
 
 class FiguredBassAbbreviationMapping {

@@ -141,9 +141,9 @@ bool Tool_fb::run(HumdrumFile &infile) {
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
 			if (lastNumbers[j] != 0) {
 				// Set currAttackNumberDidChange
-				number->currAttackNumberDidChange = (targetCell->isSustained()) && (lastNumbers[j] != number->number);
+				number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (lastNumbers[j] != number->m_number);
 			}
-			currentNumbers[j] = number->number;
+			currentNumbers[j] = number->m_number;
 			numbers.push_back(number);
 		}
 		
@@ -273,12 +273,12 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLine(vector<Figur
 
 	// filter numbers with passed lineIndex
 	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex](FiguredBassNumber* num) {
-		return num->lineIndex == lineIndex;
+		return num->m_lineIndex == lineIndex;
 	});
 
 	// sort by voiceIndex
 	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-		return a->voiceIndex > b->voiceIndex; 
+		return a->m_voiceIndex > b->m_voiceIndex; 
 	});
 
 	return filteredNumbers;
@@ -297,12 +297,12 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 
 	// filter numbers with passed lineIndex and passed voiceIndex
 	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [lineIndex, voiceIndex](FiguredBassNumber* num) {
-		return (num->lineIndex == lineIndex) && (num->voiceIndex == voiceIndex);
+		return (num->m_lineIndex == lineIndex) && (num->m_voiceIndex == voiceIndex);
 	});
 
 	// sort by voiceIndex (probably not needed here)
 	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-		return a->voiceIndex > b->voiceIndex; 
+		return a->m_voiceIndex > b->m_voiceIndex; 
 	});
 
 	return filteredNumbers;
@@ -324,7 +324,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		bool aQ = accidentalsQ;
 		// remove 8 and 1 but keep them if they have an accidental
 		copy_if(numbers.begin(), numbers.end(), back_inserter(formattedNumbers), [aQ](FiguredBassNumber* num) {
-			return ((num->getNumberWithinOctave() != 8) && (num->getNumberWithinOctave() != 1)) || (aQ && num->showAccidentals);
+			return ((num->getNumberWithinOctave() != 8) && (num->getNumberWithinOctave() != 1)) || (aQ && num->m_showAccidentals);
 		});
 		// sort by size
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
@@ -342,7 +342,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	if (intervallsatzQ && attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
 		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
-			return num->isAttack || num->currAttackNumberDidChange;
+			return num->m_isAttack || num->m_currAttackNumberDidChange;
 		});
 		formattedNumbers = attackNumbers;
 	}
@@ -352,7 +352,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		bool cQ = compoundQ;
 		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
 			// sort by getNumberWithinOctave if compoundQ is true otherwise sort by number
-			return (cQ) ? a->getNumberWithinOctave() > b->getNumberWithinOctave() : a->number > b->number;
+			return (cQ) ? a->getNumberWithinOctave() > b->getNumberWithinOctave() : a->m_number > b->m_number;
 		});
 	}
 
@@ -403,7 +403,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 		copy_if(numbers.begin(), numbers.end(), back_inserter(abbreviatedNumbers), [abbr, aQ](FiguredBassNumber* num) {
 			vector<int> nums = abbr->numbers;
 			// Show numbers if they are part of the abbreviation mapping or if they have an accidental
-			return (find(nums.begin(), nums.end(), num->getNumberWithinOctave()) != nums.end()) || (num->showAccidentals && aQ);
+			return (find(nums.begin(), nums.end(), num->getNumberWithinOctave()) != nums.end()) || (num->m_showAccidentals && aQ);
 		});
 
 		return abbreviatedNumbers;
@@ -471,12 +471,12 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 //
 
 FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk) {
-	number          = num;
-	accidentals     = accid;
-	voiceIndex      = voiceIdx;
-	lineIndex       = lineIdx;
-	showAccidentals = showAccid;
-	isAttack        = isAtk;
+	m_number          = num;
+	m_accidentals     = accid;
+	m_voiceIndex      = voiceIdx;
+	m_lineIndex       = lineIdx;
+	m_showAccidentals = showAccid;
+	m_isAttack        = isAtk;
 }
 
 
@@ -487,8 +487,8 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 //
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
-	int num = (compoundQ) ? getNumberWithinOctave() : number;
-	string accid = (accidentalsQ && showAccidentals) ? accidentals : "";
+	int num = (compoundQ) ? getNumberWithinOctave() : m_number;
+	string accid = (accidentalsQ && m_showAccidentals) ? m_accidentals : "";
 	return num > 0 ? to_string(num) + accid : "";
 }
 
@@ -500,11 +500,11 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ) {
 //
 
 int FiguredBassNumber::getNumberWithinOctave(void) {
-	int num = (number > 9) ? number % 7 : number;
-	if ((number > 9) && (number % 7 == 0)) {
+	int num = (m_number > 9) ? m_number % 7 : m_number;
+	if ((m_number > 9) && (m_number % 7 == 0)) {
 		num = 7;
 	}
-	return ((number > 8) && (num == 1)) ? 8 : num;
+	return ((m_number > 8) && (num == 1)) ? 8 : num;
 }
 
 
