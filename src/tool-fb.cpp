@@ -250,14 +250,16 @@ vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, const vector<Figure
 
 FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature) {
 
-	// Calculate figured bass number and make value absolue
-	// There is currenlty no support for negative numbers (e.g. with intervallsatz)
+	// Calculate figured bass number
 	int basePitch   = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
-	int diff         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(targetPitch) - abs(basePitch);
+	int diff        = abs(targetPitch) - abs(basePitch);
 	int num;
-	if (diff == 0) {
+
+	if ((basePitch == 0) || (targetPitch == 0)) {
 		num = 0;
+	} else if (diff == 0) {
+		num = 1;
 	} else if (diff > 0) {
 		num = diff + 1;
 	} else {
