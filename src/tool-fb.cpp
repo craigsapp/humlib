@@ -617,7 +617,7 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 	int num = m_number % 7;
 
 	// Replace 0 with 7 and -7
-	if (abs(num) == 0) {
+	if ((abs(m_number) == 0) && (m_number != 0)) {
 		return m_number < 0 ? -7 : 7;
 	}
 
