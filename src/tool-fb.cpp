@@ -257,7 +257,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	int diff         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(targetPitch) - abs(basePitch);
 	int num;
 	if (diff == 0) {
-		num = 1;
+		num = 0;
 	} else if (diff > 0) {
 		num = diff + 1;
 	} else {
