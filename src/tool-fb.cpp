@@ -271,15 +271,15 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 		return tolower(c);
 	});
 
-	char targetPitchClass = Convert::kernToDiatonicLC(target->getSgnKernPitch());
-	int targetAccidNr = Convert::base40ToAccidental(target->getSgnBase40Pitch());
+	char targetPitchClass = Convert::kernToDiatonicLC(Convert::base40ToKern((int)target->getAbsBase40Pitch()));
+	int targetAccidNr = Convert::base40ToAccidental(target->getAbsBase40Pitch());
 	string targetAccid;
 	for (int i=0; i<abs(targetAccidNr); i++) {
 		targetAccid += (targetAccidNr < 0 ? "-" : "#");
 	}
 
-	char basePitchClass = Convert::kernToDiatonicLC(base->getSgnKernPitch());
-	int baseAccidNr = Convert::base40ToAccidental(base->getSgnBase40Pitch());
+	char basePitchClass = Convert::kernToDiatonicLC(Convert::base40ToKern((int)base->getAbsBase40Pitch()));
+	int baseAccidNr = Convert::base40ToAccidental(base->getAbsBase40Pitch());
 	string baseAccid;
 	for (int i=0; i<abs(baseAccidNr); i++) {
 		baseAccid += (baseAccidNr < 0 ? "-" : "#");
