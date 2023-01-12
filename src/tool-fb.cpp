@@ -273,14 +273,14 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	int targetAccidNr = Convert::base40ToAccidental(target->getSgnBase40Pitch());
 	string targetAccid;
 	for (int i=0; i<abs(targetAccidNr); i++) {
-		targetAccid += (targetAccidNr < 0 ? '-' : '#');
+		targetAccid += (targetAccidNr < 0 ? "-" : "#");
 	}
 
 	char basePitchClass = Convert::kernToDiatonicLC(base->getSgnKernPitch());
 	int baseAccidNr = Convert::base40ToAccidental(base->getSgnBase40Pitch());
 	string baseAccid;
 	for (int i=0; i<abs(baseAccidNr); i++) {
-		baseAccid += (baseAccidNr < 0 ? '-' : '#');
+		baseAccid += (baseAccidNr < 0 ? "-" : "#");
 	}
 
 	string accid = targetAccid;
@@ -293,7 +293,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 
 	// Show natural accidentals when they are alterations of the key signature
 	if ((targetAccidNr == 0) && (keySignature.find(targetPitchClass + targetAccid) != std::string::npos)) {
-		accid = 'n';
+		accid = "n";
 		showAccid = true;
 	}
 
