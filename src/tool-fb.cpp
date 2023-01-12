@@ -255,19 +255,47 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	// Parse accidental from getSgnKernPitch()
 	string accid = regex_replace(target->getSgnKernPitch(), accidRegex, "$2");
 
-	// Make sure accidWithPitch and keySignature are both lowercase for better comparison
-	string accidWithPitch = regex_replace(target->getSgnKernPitch(), accidRegex, "$1$2");
-	transform(accidWithPitch.begin(), accidWithPitch.end(), accidWithPitch.begin(), [](unsigned char c) {
-		return tolower(c);
-	});
+	// Transform key signature to lower case
 	transform(keySignature.begin(), keySignature.end(), keySignature.begin(), [](unsigned char c) {
 		return tolower(c);
 	});
 
-	// Only show accidentals when they are not included in the key signature
+	char targetPitchClass = Convert::kernToDiatonicLC(target->getSgnKernPitch());
+	int targetAccidNr = Convert::base40ToAccidental(target->getSgnBase40Pitch());
+	string targetAccid;
+	for (int i=0; i<abs(targetAccidNr); i++) {
+		targetAccid += (targetAccidNr < 0 ? '-' : '#');
+	}
+
+	char basePitchClass = Convert::kernToDiatonicLC(base->getSgnKernPitch());
+	int baseAccidNr = Convert::base40ToAccidental(base->getSgnBase40Pitch());
+	string baseAccid;
+	for (int i=0; i<abs(baseAccidNr); i++) {
+		baseAccid += (baseAccidNr < 0 ? '-' : '#');
+	}
+
+	string accid = targetAccid;
 	bool showAccid = false;
-	if (accid.length() && (keySignature.find(accidWithPitch) == std::string::npos)) {
+
+	// Show accidentals when they are not included in the key signature
+	if ((targetAccidNr != 0) && (keySignature.find(targetPitchClass + targetAccid) == std::string::npos)) {
 		showAccid = true;
+	}
+
+	// Show natural accidentals when they are alterations of the key signature
+	if ((targetAccidNr == 0) && (keySignature.find(targetPitchClass + targetAccid) != std::string::npos)) {
+		accid = 'n';
+		showAccid = true;
+	}
+
+	// Show accidentlas when pitch class of base and target is equal but alteration is different
+	if (basePitchClass == targetPitchClass) {
+		if (baseAccidNr == targetAccidNr) {
+			showAccid = false;
+		} else {
+			accid = (targetAccidNr == 0) ? "n" : targetAccid;
+			showAccid = true;
+		}
 	}
 
 	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
