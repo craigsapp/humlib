@@ -27,7 +27,7 @@ namespace hum {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",      "output compound intervals for intervals bigger than 9");
+	define("c|compound=b",      "output reasonable figured bass numbers within octave");
 	define("a|accidentals=b",   "display accidentals in figured bass output");
 	define("b|base=i:0",        "number of the base voice/spine");
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
@@ -420,6 +420,11 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		formattedNumbers = attackNumbers;
 	}
 
+	// Analysze before sorting
+	if (m_compoundQ) {
+		formattedNumbers = analyzeChordNumbers(formattedNumbers);
+	}
+
 	// Sort numbers by size
 	if (m_sortQ) {
 		bool cQ = m_compoundQ;
@@ -483,6 +488,30 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 	}
 
 	return numbers;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::analyzeChordNumbers -- Analyze chor numbers and improve them
+//    Set m_convert2To9 to true when a 3 is included in the chord numbers.
+
+vector<FiguredBassNumber*> Tool_fb::analyzeChordNumbers(const vector<FiguredBassNumber*>& numbers) {
+
+	vector<FiguredBassNumber*> analyzedNumbers = numbers;
+
+	// Check if compound numbers 3 is withing passed numbers (chord)
+	auto it = find_if(analyzedNumbers.begin(), analyzedNumbers.end(), [](FiguredBassNumber* number) {
+		return number->getNumberWithinOctave() == 3;
+	});
+	if (it != analyzedNumbers.end()) {
+		for (auto &number : analyzedNumbers) {  
+			number->m_convert2To9 = true;
+		}
+	}
+
+	return analyzedNumbers;
 }
 
 
@@ -581,6 +610,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideT
 // FiguredBassNumber::getNumberWithinOctave -- Get a reasonable figured bass number
 //    Replace 0 with 7 and -7
 //    Replace 1 with 8 and -8
+//    Replace 2 with 9 if it is a suspension of the ninth
 
 int FiguredBassNumber::getNumberWithinOctave(void) {
 	int num = m_number % 7;
@@ -593,6 +623,11 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 	// Replace 1 with 8 and -8
 	if (abs(num) == 1) {
 		return m_number < 0 ? -8 : 8;
+	}
+
+	// Replace 2 with 9 if m_convert2To9 is true (e.g. when a 3 is included in the chord numbers)
+	if (m_convert2To9 && (num == 2)) {
+		return 9;
 	}
 
 	return num;

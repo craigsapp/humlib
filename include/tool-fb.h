@@ -33,6 +33,7 @@ class FiguredBassNumber {
 		bool        m_showAccidentals; // Force shoing figured base numbers when they need an accidental
 		bool        m_currAttackNumberDidChange;
 		bool        m_isAttack;
+		bool        m_convert2To9 = false;
 
 };
 
@@ -71,6 +72,7 @@ class Tool_fb : public HumTool {
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine        (vector<FiguredBassNumber*> numbers, int lineIndex);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
 		string                     formatFiguredBassNumbers               (const vector<FiguredBassNumber*>& numbers);
+		vector<FiguredBassNumber*> analyzeChordNumbers                    (const vector<FiguredBassNumber*>& numbers);
 		vector<FiguredBassNumber*> getAbbreviatedNumbers                  (const vector<FiguredBassNumber*>& numbers);
 		string                     getNumberString                        (vector<FiguredBassNumber*> numbers);
 		string                     getKeySignature                        (HumdrumFile& infile, int lineIndex);
