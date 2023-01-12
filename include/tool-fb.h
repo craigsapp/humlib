@@ -67,6 +67,7 @@ class Tool_fb : public HumTool {
 		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
 		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
 		FiguredBassNumber*         createFiguredBassNumber                (NoteCell* base, NoteCell* target, string keySignature);
+		vector<FiguredBassNumber*> filterNegativeNumbers                  (vector<FiguredBassNumber*> numbers);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine        (vector<FiguredBassNumber*> numbers, int lineIndex);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
 		string                     formatFiguredBassNumbers               (const vector<FiguredBassNumber*>& numbers);
@@ -87,6 +88,7 @@ class Tool_fb : public HumTool {
 		bool m_attackQ        = false;
 		bool m_figuredbassQ   = false;
 		bool m_hideThreeQ     = false;
+		bool m_showNegativeQ  = false;
 
 };
 

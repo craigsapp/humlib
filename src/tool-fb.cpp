@@ -38,6 +38,7 @@ Tool_fb::Tool_fb(void) {
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
 	define("f|figuredbass=b",   "shortcut for -c -a -s -l -n -r -3");
 	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
+	define("m|negative=b",      "show negative numbers");
 }
 
 
@@ -89,6 +90,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_attackQ        = getBoolean("attack");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
+	m_showNegativeQ  = getBoolean("negative");
 
 	if (m_abbrQ) {
 		m_normalizeQ = true;
@@ -248,7 +250,15 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	// There is currenlty no support for negative numbers (e.g. with intervallsatz)
 	int basePitch   = base->getSgnDiatonicPitch();
 	int targetPitch = target->getSgnDiatonicPitch();
-	int num         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
+	int diff         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(targetPitch) - abs(basePitch);
+	int num;
+	if (diff == 0) {
+		num = 1;
+	} else if (diff > 0) {
+		num = diff + 1;
+	} else {
+		num = diff - 1;
+	}
 
 	// Transform key signature to lower case
 	transform(keySignature.begin(), keySignature.end(), keySignature.begin(), [](unsigned char c) {
@@ -302,6 +312,25 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 
 //////////////////////////////
 //
+// Tool_fb::filterNegativeNumbers -- Hide negative numbers if m_showNegativeQ if not true
+//
+
+vector<FiguredBassNumber*> Tool_fb::filterNegativeNumbers(vector<FiguredBassNumber*> numbers) {
+
+	vector<FiguredBassNumber*> filteredNumbers;
+	
+	bool mQ = m_showNegativeQ;
+	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [mQ](FiguredBassNumber* num) {
+		return mQ ? true : (num->m_number > 0);
+	});
+
+	return filteredNumbers;
+}
+
+
+
+//////////////////////////////
+//
 // Tool_fb::filterFiguredBassNumbersForLine -- Find all FiguredBassNumber objects for a slice (line index) of the music.
 //
 
@@ -319,7 +348,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLine(vector<Figur
 		return a->m_voiceIndex > b->m_voiceIndex; 
 	});
 
-	return filteredNumbers;
+	return filterNegativeNumbers(filteredNumbers);
 }
 
 
@@ -343,7 +372,7 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 		return a->m_voiceIndex > b->m_voiceIndex; 
 	});
 
-	return filteredNumbers;
+	return filterNegativeNumbers(filteredNumbers);
 }
 
 
@@ -527,10 +556,16 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideThreeQ) {
 	int num = (compoundQ) ? getNumberWithinOctave() : m_number;
 	string accid = (accidentalsQ && m_showAccidentals) ? m_accidentals : "";
-	if ((num == 3) && accidentalsQ && m_showAccidentals && hideThreeQ) {
+	if (((num == 3) || (num == -3)) && accidentalsQ && m_showAccidentals && hideThreeQ) {
 		return accid;
 	}
-	return num > 0 ? accid + to_string(num) : "";
+	if (num > 0) {
+		return accid + to_string(num);
+	}
+	if (num < 0) {
+		return accid + "m" + to_string(abs(num));
+	}
+	return "";
 }
 
 
@@ -541,11 +576,11 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideT
 //
 
 int FiguredBassNumber::getNumberWithinOctave(void) {
-	int num = (m_number > 9) ? m_number % 7 : m_number;
-	if ((m_number > 9) && (m_number % 7 == 0)) {
-		num = 7;
+	int num = ((m_number > 9) || (m_number < -9)) ? m_number % 7 : m_number;
+	if (((m_number > 9) || m_number < -9) && (m_number % 7 == 0)) {
+		num = m_number < 0 ? -7 : 7;
 	}
-	return ((m_number > 8) && (num == 1)) ? 8 : num;
+	return (((m_number > 8) || (m_number < -8)) && (num == 1)) ? (m_number < 0 ? -8 : 8) : num;
 }
 
 
