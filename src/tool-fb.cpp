@@ -578,15 +578,24 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideT
 
 //////////////////////////////
 //
-// FiguredBassNumber::getNumberWithinOctave -- Get figured bass number as non compound interval (base 7)
-//
+// FiguredBassNumber::getNumberWithinOctave -- Get a reasonable figured bass number
+//    Replace 0 with 7 and -7
+//    Replace 1 with 8 and -8
 
 int FiguredBassNumber::getNumberWithinOctave(void) {
-	int num = ((m_number > 9) || (m_number < -9)) ? m_number % 7 : m_number;
-	if (((m_number > 9) || m_number < -9) && (m_number % 7 == 0)) {
-		num = m_number < 0 ? -7 : 7;
+	int num = m_number % 7;
+
+	// Replace 0 with 7 and -7
+	if (abs(num) == 0) {
+		return m_number < 0 ? -7 : 7;
 	}
-	return (((m_number > 8) || (m_number < -8)) && (num == 1)) ? (m_number < 0 ? -8 : 8) : num;
+
+	// Replace 1 with 8 and -8
+	if (abs(num) == 1) {
+		return m_number < 0 ? -8 : 8;
+	}
+
+	return num;
 }
 
 
