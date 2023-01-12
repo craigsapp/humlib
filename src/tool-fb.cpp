@@ -250,11 +250,6 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	int targetPitch = target->getSgnDiatonicPitch();
 	int num         = ((basePitch == 0) || (targetPitch == 0)) ? 0 : abs(abs(targetPitch) - abs(basePitch)) + 1;
 
-	regex accidRegex("^\\(?(\\w)+([^\\w\\)]*)\\)?$");
-
-	// Parse accidental from getSgnKernPitch()
-	string accid = regex_replace(target->getSgnKernPitch(), accidRegex, "$2");
-
 	// Transform key signature to lower case
 	transform(keySignature.begin(), keySignature.end(), keySignature.begin(), [](unsigned char c) {
 		return tolower(c);
