@@ -36,7 +36,7 @@ Tool_fb::Tool_fb(void) {
 	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
 	define("r|abbr=b",          "use abbreviated figures");
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
-	define("f|figuredbass=b",   "shortcut for -c -a -s -l -n -r -3");
+	define("f|figuredbass=b",   "shortcut for -c -a -s -n -r -3");
 	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",      "show negative numbers");
 	define("fba=b",             "use **fba spines instead of **fb spines");
@@ -107,7 +107,6 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		m_compoundQ = true;
 		m_accidentalsQ = true;
 		m_sortQ = true;
-		m_lowestQ = true;
 		m_normalizeQ = true;
 		m_abbrQ = true;
 		m_hideThreeQ = true;
