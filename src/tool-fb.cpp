@@ -33,8 +33,8 @@ Tool_fb::Tool_fb(void) {
 	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
 	define("s|sort=b",          "sort figured bass numbers by interval size and not by voice index");
 	define("l|lowest=b",        "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b",     "remove octave and doubled intervals, use compound interval, sort intervals");
-	define("r|abbr=b",          "use abbreviated figures");
+	define("n|normalize=b",     "remove octave and doubled intervals; adds: --compound --sort");
+	define("r|abbr=b",          "use abbreviated figures; adds: --normalize --compound --sort");
 	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
 	define("f|figuredbass=b",   "shortcut for -c -a -s -n -r -3");
 	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
@@ -94,21 +94,23 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_showNegativeQ  = getBoolean("negative");
 	m_fbaQ           = getBoolean("fba");
 
-	if (m_abbrQ) {
-		m_normalizeQ = true;
-	}
-
 	if (m_normalizeQ) {
 		m_compoundQ = true;
 		m_sortQ = true;
 	}
 
-	if (m_figuredbassQ) {
-		m_compoundQ = true;
-		m_accidentalsQ = true;
-		m_sortQ = true;
+	if (m_abbrQ) {
 		m_normalizeQ = true;
+		m_compoundQ = true;
+		m_sortQ = true;
+	}
+
+	if (m_figuredbassQ) {
 		m_abbrQ = true;
+		m_normalizeQ = true;
+		m_compoundQ = true;
+		m_sortQ = true;
+		m_accidentalsQ = true;
 		m_hideThreeQ = true;
 	}
 
