@@ -57,6 +57,7 @@ class Tool_fb : public HumTool {
 	public:
 		     Tool_fb (void);
 		     ~Tool_fb() {};
+
 		bool run     (HumdrumFileSet& infiles);
 		bool run     (HumdrumFile& infile);
 		bool run     (const string& indata, ostream& out);
