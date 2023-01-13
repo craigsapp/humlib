@@ -143,7 +143,9 @@ class Tool_deg : public HumTool {
 		void            prepareDegSpine          (vector<vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
 		void            printDegScore            (void);
 		void            printDegScoreInterleavedWithInputScore(HumdrumFile& infile);
-		std::string     createOutputHumdrumLine(HumdrumFile& infile, std::vector<int> insertTracks, int lineIndex);
+		std::string     createOutputHumdrumLine  (HumdrumFile& infile, std::vector<int>& insertTracks, int lineIndex);
+      std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
+		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 
 	private:
 

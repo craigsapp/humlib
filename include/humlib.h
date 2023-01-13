@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jan  9 10:19:01 PST 2023
+// Last Modified: Thu Jan 12 16:52:12 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6691,7 +6691,9 @@ class Tool_deg : public HumTool {
 		void            prepareDegSpine          (vector<vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
 		void            printDegScore            (void);
 		void            printDegScoreInterleavedWithInputScore(HumdrumFile& infile);
-		std::string     createOutputHumdrumLine(HumdrumFile& infile, std::vector<int> insertTracks, int lineIndex);
+		std::string     createOutputHumdrumLine  (HumdrumFile& infile, std::vector<int>& insertTracks, int lineIndex);
+      std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
+		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 
 	private:
 

@@ -160,29 +160,242 @@ void Tool_deg::printDegScoreInterleavedWithInputScore(HumdrumFile& infile) {
 // Tool_deg::createOutputHumdrumLine --
 //
 
-string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int> insertTracks, int lineIndex) {
+string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& insertTracks, int lineIndex) {
 	int inputFieldCount = infile[lineIndex].getFieldCount();
 	int currentDegIndex = 0;
 	string output;
+
+
+	// tracks: this is for handling *v mergers gracefully for the inserted **deg data.
+	vector<int> tracks;
+	vector<string> tokens;
+	bool hasMerger = false;
+	bool hasDegMerger = false;
+	int degNegativeTrack = -1;
+
 	for (int i=0; i<inputFieldCount; i++) {
 		HTp token = infile.token(lineIndex, i);
 		int track = token->getTrack();
 		int dtrack = insertTracks.at(currentDegIndex);
 		if (dtrack == track) {
-			for (int k=0; k<(int)m_degSpines.at(currentDegIndex).at(lineIndex).size(); k++) {
+			// insert the
+			int spineSize = (int)m_degSpines.at(currentDegIndex).at(lineIndex).size();
+			for (int k=0; k<spineSize; k++) {
+				string value = m_degSpines[currentDegIndex][lineIndex][k].getDegToken();
 				output += "\t";
-				output += m_degSpines[currentDegIndex][lineIndex][k].getDegToken();
-				currentDegIndex++;
+				output += value;
+				tracks.push_back(degNegativeTrack);
+				tokens.push_back(value);
+				if (value == "*v") {
+					hasDegMerger = true;
+				}
 			}
+			degNegativeTrack--;
+			currentDegIndex++;
 		}
 		if (i > 0) {
 			output += "\t";
 		}
 		output += *token;
+		if (*token == "*v") {
+			hasMerger = true;
+		}
+		tracks.push_back(track);
+		tokens.push_back(*token);
 	}
-	output += "\t";
-	output += m_degSpines.back().at(lineIndex).back().getDegToken();
+
+	// Output the last **deg spine at the end of the line:
+	int kcount = (int)m_degSpines.back().at(lineIndex).size();
+	for (int k=0; k<kcount; k++) {
+		output += "\t";
+		string value = m_degSpines.back().at(lineIndex).at(k).getDegToken();
+		output += value;
+		if (value == "*v") {
+			hasDegMerger = true;
+		}
+		tracks.push_back(degNegativeTrack);
+		tokens.push_back(value);
+	}
+
+	if (!hasDegMerger) {
+		return output;
+	}
+
+	// The output contains some spine mergers, so be careful and
+	// place any adjacent mergers onto separate lines.
+
+	output = prepareMergerLine(output, tracks, tokens, hasMerger, hasDegMerger);
+
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::prepareMergerLine --
+//
+
+string Tool_deg::prepareMergerLine(const string& input, vector<int>& tracks, vector<string>& tokens, bool inputMerger, bool outputMerger) {
+	if (!outputMerger) {
+		return input;
+	}
+
+	// group tokens by track
+	vector<vector<string>> merge(1);
+	vector<vector<int>> tks(1);
+	merge[0].push_back(tokens[0]);
+	tks[0].push_back(tracks[0]);
+	for (int i=1; i<(int)tokens.size(); i++) {
+		if (tracks[i-1] != tracks[i]) {
+			merge.resize(merge.size() + 1);
+			tks.resize(tks.size() + 1);
+		}
+		merge.back().push_back(tokens[i]);
+		tks.back().push_back(tracks[i]);
+	}
+
+	// calculate result of spine manipulations
+	vector<vector<string>> after(merge.size());
+	for (int i=0; i<(int)merge.size(); i++) {
+		calculateManipulatorOutputForSpine(after.at(i), merge.at(i));
+	}
+
+	vector<vector<string>> before(merge.size());
+	for (int i=0; i<(int)merge.size(); i++) {
+		for (int j=0; j<(int)merge[i].size(); j++) {
+			before[i].push_back("*");
+		}
+	}
+
+	vector<vector<string>> line1(merge.size());
+	vector<vector<string>> line2(merge.size());
+
+	// before = spine states before merger
+	// merge  = unprocessed merger line
+	// after  = spine states after merger
+	// Simple example:
+	//  (*  * ) (*  * )  A: before line
+	//  (*v *v) (*v *v)  B: merge line
+	//  (*    ) (*    )  C: after line
+	// Output should be:
+	// B(*v *v) A(*   * )  line1
+	// C(*    ) B(*v	*v)  line2
+	//
+	// More complicated example:
+	//  (*  * ) (*  * ) (*  * ) A
+	//  (*v *v) (*v *v) (*v *v) B
+	//  (*    ) (*    ) (*    ) C
+	//  Output should be:
+	//  B(*v *v) A(*   * ) B(*v *v) line1
+	//  C(*    ) B(*v  *v) C(*    ) line2
+	//
+	// Algorithm:
+	//   If the current merger is not adjacent to the previous merger
+	//       (or there is no previous merger), then copy merger to line1
+	//       and after to line2
+	//
+	//   If the current merger is adjacent to the previous merger
+	//       then copy merger to line2 and copy before to line1.
+	//
+	//   If the current merger is adjacent and the previous merger
+	//       was delayed, then copy merger to line1 and after to line2.
+	//       (same as first if statement)
+
+	// Keep track delay of each track's merger line for above algorithm.
+	vector<bool> delayed;
+
+
+	for (int i=0; i<(int)merge.size(); i++) {
+		if (merge.at(i).empty()) {
+			// a track should not have an empty marger spine.
+			cerr << "STRANGE CASE 1" << endl;
+			continue;
+		}
+		if ((i > 0) && merge.at(i-1).empty()) {
+			cerr << "STRANGE CASE 2" << endl;
+			continue;
+		}
+
+
+		if (i == 0) {
+			line1.at(i) = merge.at(i);
+			line2.at(i) = after.at(i);
+			delayed.push_back(false);
+		} else if ((merge.at(i).at(0) == "*v") && (merge.at(i-1).back() == "*v")) {
+			// the current merge needs to be offset from the previous merge.
+			if (delayed.back()) {
+				// last spine was already displayed so undelay the next spine:
+				line1.at(i) = merge.at(i);
+				line1.at(i) = after.at(i);
+			} else {
+				// last spine was not delayed, so delay this spine:
+				line1.at(i) = before.at(i);
+				line2.at(i) = merge.at(i);
+			}
+			delayed.push_back(!delayed.back());
+		} else {
+			// no delay is needed
+			line1.at(i) = merge.at(i);
+			line2.at(i) = after.at(i);
+			delayed.push_back(false);
+		}
+	}
+
+	string output;
+	for (int i=0; i<(int)line1.size(); i++) {
+		for (int j=0; j<(int)line1[i].size(); j++) {
+			output += line1[i][j];
+			output += "\t";
+		}
+	}
+	output.back() = '\n';
+	for (int i=0; i<(int)line2.size(); i++) {
+		for (int j=0; j<(int)line2[i].size(); j++) {
+			output += line2[i][j];
+			output += "\t";
+		}
+	}
+	if (!output.empty()) {
+		output.resize(output.size() - 1);
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::calculateManipulatorOutput -- Deal with *^ *v *- *+ manipulators
+//
+
+void Tool_deg::calculateManipulatorOutputForSpine(vector<string>& lineout,
+		vector<string>& linein) {
+
+	lineout.clear();
+	for (int i=0; i<(int)linein.size(); i++) {
+		if (linein[i] == "*^") {
+			lineout.push_back("*");
+			lineout.push_back("*");
+		} else if (linein[i] == "*v") {
+			if (i==0) {
+				lineout.push_back("*");
+			} else if ((i > 0) && (linein[i-1] == "*v")) {
+				// do nothing for secondary merger manipulators
+			} else {
+				// strange data (merging two separate spines?)
+				lineout.push_back(linein[i]);
+			}
+		} else if (linein[i] == "*-") {
+			// do nothing
+		} else if (linein[i] == "*+") {
+			// rare so not well tested (and next line should have an exinterp.)
+			lineout.push_back("*");
+			lineout.push_back("*");
+		} else {
+			lineout.push_back(linein[i]);
+		}
+	}
 }
 
 
