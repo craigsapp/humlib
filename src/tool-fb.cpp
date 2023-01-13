@@ -637,7 +637,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideT
 		return accid + to_string(num);
 	}
 	if (num < 0) {
-		return accid + "m" + to_string(abs(num));
+		return accid + "v" + to_string(abs(num));
 	}
 	return "";
 }
