@@ -22,7 +22,7 @@ namespace hum {
 
 class FiguredBassNumber {
 	public:
-		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack);
+		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack, bool intervallsatz);
 		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool hideThreeQ);
 		int         getNumberWithinOctave(void);
 
@@ -34,6 +34,7 @@ class FiguredBassNumber {
 		bool        m_currAttackNumberDidChange;
 		bool        m_isAttack;
 		bool        m_convert2To9 = false;
+		bool        m_intervallsatz = false;
 
 };
 

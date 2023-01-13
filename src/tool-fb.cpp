@@ -348,7 +348,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 		}
 	}
 
-	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack());
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack(), m_intervallsatzQ);
 
 	return number;
 }
@@ -611,13 +611,14 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 // FiguredBassNumber::FiguredBassNumber -- Constructor
 //
 
-FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk) {
+FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk, bool intervallsatz) {
 	m_number          = num;
 	m_accidentals     = accid;
 	m_voiceIndex      = voiceIdx;
 	m_lineIndex       = lineIdx;
 	m_showAccidentals = showAccid;
 	m_isAttack        = isAtk;
+	m_intervallsatz   = intervallsatz;
 }
 
 
@@ -650,6 +651,7 @@ string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideT
 //    Replace 0 with 7 and -7
 //    Replace 1 with 8 and -8
 //    Replace 2 with 9 if it is a suspension of the ninth
+//    Allow 1 (unisono) in intervallsatz
 
 int FiguredBassNumber::getNumberWithinOctave(void) {
 	int num = m_number % 7;
@@ -661,6 +663,12 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 
 	// Replace 1 with 8 and -8
 	if (abs(num) == 1) {
+		// Allow unisono in intervallsatz
+		if (m_intervallsatz) {
+			if (abs(m_number) == 1) {
+				return 1;
+			}
+		}
 		return m_number < 0 ? -8 : 8;
 	}
 
