@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 12 20:18:51 PST 2023
+// Last Modified: Fri Jan 13 11:30:13 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68930,7 +68930,8 @@ bool Tool_deg::ScaleDegree::m_showTiesQ = false;
 Tool_deg::Tool_deg(void) {
 	define("arrow|arrows=b", "Display scale degree alterations as arrows");
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
-	define("r|recip=b", "Prefix output data with **recip spine");
+	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
+	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
 }
 
@@ -68990,7 +68991,11 @@ bool Tool_deg::run(HumdrumFile& infile) {
 void Tool_deg::initialize(void) {
 	m_arrowQ   = getBoolean("arrow");
 	m_degOnlyQ = getBoolean("no-input");
+	m_kernQ    = getBoolean("kern");
 	m_recipQ   = getBoolean("recip");
+	if (m_kernQ) {
+		m_recipQ = true;
+	}
 	m_degTiesQ = getBoolean("ties");
 
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
@@ -69306,19 +69311,75 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 	if (m_degSpines.empty()) {
 		return;
 	}
+
+	// Variables to keep track of printing interpretations in **recip spine
+	HumNum printTimeSignature = -1;
+	HumNum printMetricSignature = -1;
+	bool printClef  = false;
+	bool printColor = false;
+	bool printStria = false;
+	bool printStem  = false;
+	bool foundData  = false;
+	bool printArrow = !m_arrowQ;
+
 	int lineCount = (int)m_degSpines[0].size();
 	int spineCount = (int)m_degSpines.size();
+
 	for (int i=0; i<lineCount; i++) {
 		if (!m_degSpines[0][i][0].hasSpines()) {
 			m_free_text << m_degSpines[0][i][0].getLinkedKernToken() << endl;
 			continue;
 		}
 
+		// check for **recip spine display options before
+		// first data line.
+		if (!foundData && m_degSpines[0][i][0].isDataToken()) {
+			foundData = true;
+
+			// Add **recip styling options that have not yet been
+			// given in the spine.
+			if (m_recipQ) {
+				if (!printClef) {
+					string line = createRecipInterpretation("*clefXyy", i);
+					m_free_text << line << endl;
+					printClef = true;
+				}
+				if (!printStria) {
+					string line = createRecipInterpretation("*stria0", i);
+					m_free_text << line << endl;
+					printStria = true;
+				}
+				if (!printColor) {
+					string line = createRecipInterpretation("*color:#fff0", i);
+					m_free_text << line << endl;
+					printColor = true;
+				}
+				if (!printStem) {
+					string line = createRecipInterpretation("*Xstem", i);
+					m_free_text << line << endl;
+					printStem = true;
+				}
+
+			}
+
+			if (!printArrow) {
+				string line = createDegInterpretation("*arrow", i, m_recipQ);
+				m_free_text << line << endl;
+				printArrow = true;
+			}
+		}
+
 		for (int j=0; j<spineCount; j++) {
+
+			// recip spine generation:
 			if (m_recipQ && (j == 0)) {
 				HTp token = infile.token(i, 0);
 				if (infile[i].isExclusiveInterpretation()) {
-					m_free_text << "**recip";
+					if (m_kernQ) {
+						m_free_text << "**kern";
+					} else {
+						m_free_text << "**recip";
+					}
 				} else if (infile[i].isManipulator()) {
 					if (*token == "*-") {
 						m_free_text << "*-";
@@ -69326,15 +69387,76 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 						m_free_text << "*";
 					}
 				} else if (infile[i].isInterpretation()) {
-					m_free_text << "*";
+					HumNum timestamp = infile[i].getDurationFromStart();
+					string timesig;
+					string metersig;
+					string clef;
+
+					if (timestamp != printTimeSignature) {
+						for (int jj=0; jj<infile[i].getFieldCount(); jj++) {
+							HTp token = infile.token(i, jj);
+							if (!token->isKern()) {
+								continue;
+							}
+							if (token->isTimeSignature()) {
+								timesig = *token;
+								break;
+							}
+						}
+					}
+
+					if (timestamp != printMetricSignature) {
+						for (int jj=0; jj<infile[i].getFieldCount(); jj++) {
+							HTp token = infile.token(i, jj);
+							if (!token->isKern()) {
+								continue;
+							}
+							if (token->isMeterSignature()) {
+								metersig = *token;
+								break;
+							}
+						}
+					}
+
+					if (!printClef) {
+						for (int jj=0; jj<infile[i].getFieldCount(); jj++) {
+							HTp token = infile.token(i, jj);
+							if (!token->isKern()) {
+								continue;
+							}
+							if (token->isClef()) {
+								clef = "*clefXyy";
+								break;
+							}
+						}
+					}
+
+					if (!timesig.empty()) {
+						m_free_text << timesig;
+						printTimeSignature = timestamp;
+					} else if (!metersig.empty()) {
+						m_free_text << metersig;
+						printMetricSignature = timestamp;
+					} else if (!clef.empty()) {
+						m_free_text << clef;
+						printClef = true;
+					} else {
+						m_free_text << "*";
+					}
 				} else if (infile[i].isBarline()) {
 					m_free_text << token;
 				} else if (infile[i].isLocalComment()) {
 					m_free_text << "!";
 				} else if (infile[i].isData()) {
 					m_free_text << Convert::durationToRecip(infile[i].getDuration());
+					if (m_kernQ) {
+						m_free_text << m_kernSuffix;
+					}
 				}
 			}
+			// end of recip spine generation 
+
+			// Print deg spines
 			int subspineCount = (int)m_degSpines.at(j).at(i).size();
 			for (int k=0; k<subspineCount; k++) {
 				if ((j == 0) && (k == 0)) {
@@ -69351,6 +69473,59 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 		}
 		m_free_text << endl;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::createRecipInterpretation -- Add a new line to the output of a **deg-only
+//    score for a styling option in the **recip (**kern) spine at the start of the 
+//    line.  The **deg spines all get null interpretations.
+//    i = the line index in the proto **deg score that will be used to count the
+//        number of interpretations that need to be added.
+//
+
+string Tool_deg::createRecipInterpretation(const string& starttok,  int refLine) {
+	string output = starttok;
+	int count = 0;
+	for (int j=0; j < (int)m_degSpines.size(); j++) {
+		count += (int)m_degSpines.at(j).at(refLine).size();
+	}
+	for (int i=0; i<count; i++) {
+		output += "\t*";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::createDegInterpretation -- Add a new line to the output of a **deg-only
+//    score for a styling option in the **deg spines.  The 
+//    line.  The **deg spines all get null interpretations.
+//    i = the line index in the proto **deg score that will be used to count the
+//        number of interpretations that need to be added.
+//
+
+string Tool_deg::createDegInterpretation(const string& degtok,  int refLine, bool addPreSpine) {
+	string output;
+	if (addPreSpine) {
+		output += "*\t";
+	}
+	int count = 0;
+	for (int j=0; j < (int)m_degSpines.size(); j++) {
+		count += (int)m_degSpines.at(j).at(refLine).size();
+	}
+	for (int i=0; i<count; i++) {
+		if (i != 0) {
+			output += "\t";
+		}
+		output += degtok;
+	}
+
+	return output;
 }
 
 

@@ -146,6 +146,8 @@ class Tool_deg : public HumTool {
 		std::string     createOutputHumdrumLine  (HumdrumFile& infile, std::vector<int>& insertTracks, int lineIndex);
       std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
 		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
+		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
+		std::string     createDegInterpretation(const string& degtok, int refLine, bool addPreSpine);
 
 	private:
 
@@ -160,10 +162,15 @@ class Tool_deg : public HumTool {
 		//    handled by Tool_deg::ScaleDegree class).
 		std::vector<std::vector<std::vector<ScaleDegree>>> m_degSpines;
 
-		bool m_arrowQ   = false;  // used with --arrow option
-		bool m_degOnlyQ = false;  // used with -I option
-		bool m_recipQ   = false;  // used with -r option
-		bool m_degTiesQ = false;  // used with -t option
+		bool m_arrowQ          = false;   // used with --arrow option
+		bool m_degOnlyQ        = false;   // used with -I option
+		bool m_recipQ          = false;   // used with -r option
+		bool m_kernQ           = false;   // used with --kern option
+		bool m_degTiesQ        = false;   // used with -t option
+		bool m_forceKeyQ       = false;   // used with -K option
+
+		std::string m_defaultKey = "";    // used with -k option
+		std::string m_kernSuffix = "dR/"; // used with --kern option
 
 };
 
