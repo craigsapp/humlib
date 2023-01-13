@@ -40,6 +40,7 @@ Tool_fb::Tool_fb(void) {
 	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",      "show negative numbers");
 	define("fba=b",             "use **fba spines instead of **fb spines");
+	define("recip=s:",          "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
 }
 
 
@@ -93,6 +94,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
 	m_fbaQ           = getBoolean("fba");
+	m_recipQ         = getString("recip");
 
 	if (m_normalizeQ) {
 		m_compoundQ = true;
@@ -150,6 +152,17 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
+		// Hide numbers if they do not match rhythmic position of --recip
+		if (!m_recipQ.empty()) {
+			// Get time signatures
+			vector<pair<int, HumNum>> timeSigs;
+			infile.getTimeSigs(timeSigs, baseCell->getToken()->getTrack());
+			// Ignore numbers if they don't fit
+			if (hideNumbersForTokenLine(baseCell->getToken(), timeSigs[baseCell->getLineIndex()])) {
+				continue;
+			}
+		}
+
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			if (j == usedBaseVoiceIndex) {
@@ -196,6 +209,31 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	}
 
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::hideNumbersForTokenLine -- Checks if rhythmic position of line should display numbers
+//
+
+bool Tool_fb::hideNumbersForTokenLine(HTp token, pair<int, HumNum> timeSig) {
+	// Get note duration from --recip option
+	HumNum recip = Convert::recipToDuration(m_recipQ);
+	if (recip.toFloat() != 0) {
+		float timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
+		float durationFromBarline = token->getDurationFromBarline().toFloat();
+		// Handle upbeats
+		if (token->getBarlineDuration().toFloat() < timeSigBarDuration) {
+			// Fix durationFromBarline when current bar duration is shorter than
+			// the bar duration of the time signature
+			durationFromBarline = timeSigBarDuration - token->getDurationToBarline().toFloat();
+		}
+		// Checks if rhythmic position is divisible by recip duration 
+		return fmod(durationFromBarline, recip.toFloat()) != 0;
+	}
+	return false;
 }
 
 

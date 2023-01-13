@@ -65,6 +65,7 @@ class Tool_fb : public HumTool {
 		bool run     (HumdrumFile& infile, ostream& out);
 
 	protected:
+		bool                       hideNumbersForTokenLine                (HTp token, pair<int, HumNum> timeSig);
 		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
 		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
 		FiguredBassNumber*         createFiguredBassNumber                (NoteCell* base, NoteCell* target, string keySignature);
@@ -79,19 +80,20 @@ class Tool_fb : public HumTool {
 
 
 	private:
-		bool m_compoundQ      = false;
-		bool m_accidentalsQ   = false;
-		int  m_baseQ          = 0;
-		bool m_intervallsatzQ = false;
-		bool m_sortQ          = false;
-		bool m_lowestQ        = false;
-		bool m_normalizeQ     = false;
-		bool m_abbrQ          = false;
-		bool m_attackQ        = false;
-		bool m_figuredbassQ   = false;
-		bool m_hideThreeQ     = false;
-		bool m_showNegativeQ  = false;
-		bool m_fbaQ           = false;
+		bool   m_compoundQ      = false;
+		bool   m_accidentalsQ   = false;
+		int    m_baseQ          = 0;
+		bool   m_intervallsatzQ = false;
+		bool   m_sortQ          = false;
+		bool   m_lowestQ        = false;
+		bool   m_normalizeQ     = false;
+		bool   m_abbrQ          = false;
+		bool   m_attackQ        = false;
+		bool   m_figuredbassQ   = false;
+		bool   m_hideThreeQ     = false;
+		bool   m_showNegativeQ  = false;
+		bool   m_fbaQ           = false;
+		string m_recipQ         = "";
 
 };
 
