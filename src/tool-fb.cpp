@@ -533,7 +533,7 @@ vector<FiguredBassNumber*> Tool_fb::getAbbreviatedNumbers(const vector<FiguredBa
 
 //////////////////////////////
 //
-// Tool_fb::analyzeChordNumbers -- Analyze chor numbers and improve them
+// Tool_fb::analyzeChordNumbers -- Analyze chord numbers and improve them
 //    Set m_convert2To9 to true when a 3 is included in the chord numbers.
 
 vector<FiguredBassNumber*> Tool_fb::analyzeChordNumbers(const vector<FiguredBassNumber*>& numbers) {
