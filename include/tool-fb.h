@@ -92,7 +92,7 @@ class Tool_fb : public HumTool {
 		bool   m_figuredbassQ   = false;
 		bool   m_hideThreeQ     = false;
 		bool   m_showNegativeQ  = false;
-		bool   m_fbaQ           = false;
+		bool   m_aboveQ         = false;
 		string m_recipQ         = "";
 
 };

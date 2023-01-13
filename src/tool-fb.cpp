@@ -39,7 +39,7 @@ Tool_fb::Tool_fb(void) {
 	define("f|figuredbass=b",   "shortcut for -c -a -s -n -r -3");
 	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",      "show negative numbers");
-	define("fba=b",             "use **fba spines instead of **fb spines");
+	define("above=b",           "place figured bass numbers above staff (**fba)");
 	define("recip=s:",          "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
 }
 
@@ -93,7 +93,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
-	m_fbaQ           = getBoolean("fba");
+	m_aboveQ         = getBoolean("above");
 	m_recipQ         = getString("recip");
 
 	if (m_normalizeQ) {
@@ -184,7 +184,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		lastNumbers = currentNumbers;
 	}
 
-	string exinterp = m_fbaQ ? "**fba" : "**fb";
+	string exinterp = m_aboveQ ? "**fba" : "**fb";
 
 	if (m_intervallsatzQ) {
 		// Create **fb spine for each voice
