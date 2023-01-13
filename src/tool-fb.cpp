@@ -170,6 +170,13 @@ bool Tool_fb::run(HumdrumFile &infile) {
 				continue;
 			}
 			NoteCell* targetCell = grid.cell(j, i);
+
+			// Ignore if either base or target is a rest or silent note
+			if (targetCell->getSgnBase40Pitch() == -1000 || targetCell->getSgnBase40Pitch() == -2000 ||
+				baseCell->getSgnBase40Pitch() == -1000 || baseCell->getSgnBase40Pitch() == -2000) {
+				continue;
+			}
+			
 			// Create FiguredBassNumber
 			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
 			if (lastNumbers[j] != 0) {
