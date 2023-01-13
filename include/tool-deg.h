@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Jan  6 12:59:44 PST 2023
-// Last Modified: Mon Jan  9 09:50:50 PST 2023
+// Last Modified: Thu Jan 12 19:22:56 PST 2023
 // Filename:      tool-deg.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-deg.h
 // Syntax:        C++11; humlib
@@ -65,7 +65,7 @@ class Tool_deg : public HumTool {
 				int             getSubtokenCount         (void) const;
 
 				// output options:
-				static void     setShowTies              (bool state);
+				static void     setShowTies (bool state) { m_showTiesQ = state; }
 
 			protected:
 				std::string     generateDegDataToken     (void) const;
@@ -117,7 +117,7 @@ class Tool_deg : public HumTool {
 				ScaleDegree* m_prevRest = NULL;
 				ScaleDegree* m_nextRest = NULL;
 
-				// Rendering options:
+				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
 		};
 
@@ -141,7 +141,7 @@ class Tool_deg : public HumTool {
 		void            initialize               (void);
 
 		void            prepareDegSpine          (vector<vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
-		void            printDegScore            (void);
+		void            printDegScore            (HumdrumFile& infile);
 		void            printDegScoreInterleavedWithInputScore(HumdrumFile& infile);
 		std::string     createOutputHumdrumLine  (HumdrumFile& infile, std::vector<int>& insertTracks, int lineIndex);
       std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
@@ -160,7 +160,9 @@ class Tool_deg : public HumTool {
 		//    handled by Tool_deg::ScaleDegree class).
 		std::vector<std::vector<std::vector<ScaleDegree>>> m_degSpines;
 
+		bool m_arrowQ   = false;  // used with --arrow option
 		bool m_degOnlyQ = false;  // used with -I option
+		bool m_recipQ   = false;  // used with -r option
 		bool m_degTiesQ = false;  // used with -t option
 
 };

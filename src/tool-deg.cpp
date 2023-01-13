@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Jan  6 13:03:22 PST 2023
-// Last Modified: Sat Jan  7 13:57:43 PST 2023
+// Last Modified: Thu Jan 12 19:23:03 PST 2023
 // Filename:      tool-deg.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-deg.cpp
 // Syntax:        C++11; humlib
@@ -36,7 +36,9 @@ bool Tool_deg::ScaleDegree::m_showTiesQ = false;
 //
 
 Tool_deg::Tool_deg(void) {
+	define("arrow|arrows=b", "Display scale degree alterations as arrows");
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
+	define("r|recip=b", "Prefix output data with **recip spine");
 	define("t|ties=b", "Include scale degrees for tied notes");
 }
 
@@ -94,8 +96,11 @@ bool Tool_deg::run(HumdrumFile& infile) {
 //
 
 void Tool_deg::initialize(void) {
+	m_arrowQ   = getBoolean("arrow");
 	m_degOnlyQ = getBoolean("no-input");
+	m_recipQ   = getBoolean("recip");
 	m_degTiesQ = getBoolean("ties");
+
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
 }
 
@@ -120,7 +125,7 @@ void Tool_deg::processFile(HumdrumFile& infile) {
 	}
 
 	if (m_degOnlyQ) {
-		printDegScore();
+		printDegScore(infile);
 	} else {
 		printDegScoreInterleavedWithInputScore(infile);
 	}
@@ -405,30 +410,51 @@ void Tool_deg::calculateManipulatorOutputForSpine(vector<string>& lineout,
 // Tool_deg::printDegScore -- **deg spines without any input data.
 //
 
-void Tool_deg::printDegScore(void) {
+void Tool_deg::printDegScore(HumdrumFile& infile) {
 	if (m_degSpines.empty()) {
 		return;
 	}
 	int lineCount = (int)m_degSpines[0].size();
 	int spineCount = (int)m_degSpines.size();
-	for (int j=0; j<lineCount; j++) {
-		if (!m_degSpines[0][j][0].hasSpines()) {
-			m_free_text << m_degSpines[0][j][0].getLinkedKernToken() << endl;
+	for (int i=0; i<lineCount; i++) {
+		if (!m_degSpines[0][i][0].hasSpines()) {
+			m_free_text << m_degSpines[0][i][0].getLinkedKernToken() << endl;
 			continue;
 		}
-		for (int i=0; i<spineCount; i++) {
-			int hasSpines = 1;
-			int subspineCount = (int)m_degSpines.at(i).at(j).size();
+
+		for (int j=0; j<spineCount; j++) {
+			if (m_recipQ && (j == 0)) {
+				HTp token = infile.token(i, 0);
+				if (infile[i].isExclusiveInterpretation()) {
+					m_free_text << "**recip";
+				} else if (infile[i].isManipulator()) {
+					if (*token == "*-") {
+						m_free_text << "*-";
+					} else {
+						m_free_text << "*";
+					}
+				} else if (infile[i].isInterpretation()) {
+					m_free_text << "*";
+				} else if (infile[i].isBarline()) {
+					m_free_text << token;
+				} else if (infile[i].isLocalComment()) {
+					m_free_text << "!";
+				} else if (infile[i].isData()) {
+					m_free_text << Convert::durationToRecip(infile[i].getDuration());
+				}
+			}
+			int subspineCount = (int)m_degSpines.at(j).at(i).size();
 			for (int k=0; k<subspineCount; k++) {
-				if ((i == 0) && (k > 0)) {
+				if ((j == 0) && (k == 0)) {
+					if (m_recipQ) {
+						m_free_text << "\t";
+					}
+				} else if ((j == 0) && (k > 0)) {
 					m_free_text << "\t";
-				} else if (i > 0) {
+				} else if (j > 0) {
 					m_free_text << "\t";
 				}
-				m_free_text << m_degSpines[i][j][k];
-			}
-			if (!hasSpines) {
-				break;
+				m_free_text << m_degSpines[j][i][k];
 			}
 		}
 		m_free_text << endl;
@@ -1250,16 +1276,6 @@ bool Tool_deg::ScaleDegree::isInMajorMode(void) const {
 
 int  Tool_deg::ScaleDegree::getBase40Tonic(void) const {
 	return m_b40tonic;
-}
-
-
-
-//////////////////////////////
-//
-// Tool_deg::ScaleDegree::setShowTies --
-//
-void Tool_deg::ScaleDegree::setShowTies(bool state) {
-	m_showTiesQ = state;
 }
 
 
