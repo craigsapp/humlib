@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 13 11:30:13 PST 2023
+// Last Modified: Fri Jan 13 20:46:28 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6696,6 +6696,7 @@ class Tool_deg : public HumTool {
 		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
 		std::string     createDegInterpretation(const string& degtok, int refLine, bool addPreSpine);
+		std::string     printDegInterpretation(const string& interp, HumdrumFile& infile, int lineIndex);
 
 	private:
 
@@ -6719,6 +6720,17 @@ class Tool_deg : public HumTool {
 
 		std::string m_defaultKey = "";    // used with -k option
 		std::string m_kernSuffix = "dR/"; // used with --kern option
+
+		class InterleavedPrintVariables {
+			public:
+				bool foundData;
+
+				InterleavedPrintVariables(void) { clear(); }
+				void clear(void) {
+					foundData = false;
+				}
+		};
+		InterleavedPrintVariables m_ipv;
 
 };
 

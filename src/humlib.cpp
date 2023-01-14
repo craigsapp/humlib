@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 13 11:30:13 PST 2023
+// Last Modified: Fri Jan 13 20:46:28 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69040,6 +69040,9 @@ void Tool_deg::printDegScoreInterleavedWithInputScore(HumdrumFile& infile) {
 	if (kernStarts.empty()) {
 		return;
 	}
+
+	m_ipv.clear();
+
 	vector<int> insertTracks((int)kernStarts.size() - 1);
 	for (int i=0; i<(int)kernStarts.size() - 1; i++) {
 		insertTracks.at(i) = kernStarts.at(i+1)->getTrack();
@@ -69059,14 +69062,16 @@ void Tool_deg::printDegScoreInterleavedWithInputScore(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_deg::createOutputHumdrumLine --
+// Tool_deg::createOutputHumdrumLine -- Print **deg data within input score.  The **deg
+//    spine will be placed in the right-most spine after a **kern spine (so just to
+//    the left of the next **kern spine.  Perhaps change to staff-like spines such as
+//    **mens.
 //
 
 string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& insertTracks, int lineIndex) {
 	int inputFieldCount = infile[lineIndex].getFieldCount();
 	int currentDegIndex = 0;
 	string output;
-
 
 	// tracks: this is for handling *v mergers gracefully for the inserted **deg data.
 	vector<int> tracks;
@@ -69119,6 +69124,20 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 		tokens.push_back(value);
 	}
 
+	if ((!m_ipv.foundData) && infile[lineIndex].isData()) {
+		m_ipv.foundData = true;
+
+		// print *arrow interpretation if needed
+		// Improve later to add to a previous line if there
+		// are already *arrow **deg interpretations.
+		if (m_arrowQ) {
+			string line = printDegInterpretation("*arrow", infile, lineIndex);
+			if (!line.empty()) {
+				output = line + "\n" + output;
+			}
+		}
+	}
+
 	if (!hasDegMerger) {
 		return output;
 	}
@@ -69128,6 +69147,50 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 
 	output = prepareMergerLine(output, tracks, tokens, hasMerger, hasDegMerger);
 
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::printDegInterpretation --
+//
+
+string Tool_deg::printDegInterpretation(const string& interp, HumdrumFile& infile, int lineIndex) {
+	string output;
+	int degIndex = 0;
+	int kernCount = 0;
+	for (int j=0; j<infile[lineIndex].getFieldCount(); j++) {
+		HTp token = infile.token(lineIndex, j);
+		if (!token->isKern()) {
+			output += "*\t";
+		} else {
+			kernCount++;
+			if (kernCount == 1) {
+				output += "*\t";
+			} else {
+				// print **deg interps
+				int kcount = m_degSpines.at(degIndex).at(lineIndex).size();
+				for (int k=0; k<kcount; k++) {
+					output += interp;
+					output += "\t";
+				}
+				degIndex++;
+				output += "*\t";
+			}
+		}
+	}
+
+	// print the last **deg spine:
+	int kcount = m_degSpines.back().at(lineIndex).size();
+	for (int k=0; k<kcount; k++) {
+		output += interp;
+		output += "\t";
+	}
+	if (!output.empty()) {
+		output.resize(output.size() - 1);
+	}
 	return output;
 }
 
@@ -69454,7 +69517,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 					}
 				}
 			}
-			// end of recip spine generation 
+			// end of recip spine generation
 
 			// Print deg spines
 			int subspineCount = (int)m_degSpines.at(j).at(i).size();
@@ -69480,7 +69543,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 //////////////////////////////
 //
 // Tool_deg::createRecipInterpretation -- Add a new line to the output of a **deg-only
-//    score for a styling option in the **recip (**kern) spine at the start of the 
+//    score for a styling option in the **recip (**kern) spine at the start of the
 //    line.  The **deg spines all get null interpretations.
 //    i = the line index in the proto **deg score that will be used to count the
 //        number of interpretations that need to be added.
@@ -69503,7 +69566,7 @@ string Tool_deg::createRecipInterpretation(const string& starttok,  int refLine)
 //////////////////////////////
 //
 // Tool_deg::createDegInterpretation -- Add a new line to the output of a **deg-only
-//    score for a styling option in the **deg spines.  The 
+//    score for a styling option in the **deg spines.  The
 //    line.  The **deg spines all get null interpretations.
 //    i = the line index in the proto **deg score that will be used to count the
 //        number of interpretations that need to be added.

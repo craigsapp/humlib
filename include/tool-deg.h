@@ -148,6 +148,7 @@ class Tool_deg : public HumTool {
 		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
 		std::string     createDegInterpretation(const string& degtok, int refLine, bool addPreSpine);
+		std::string     printDegInterpretation(const string& interp, HumdrumFile& infile, int lineIndex);
 
 	private:
 
@@ -171,6 +172,17 @@ class Tool_deg : public HumTool {
 
 		std::string m_defaultKey = "";    // used with -k option
 		std::string m_kernSuffix = "dR/"; // used with --kern option
+
+		class InterleavedPrintVariables {
+			public:
+				bool foundData;
+
+				InterleavedPrintVariables(void) { clear(); }
+				void clear(void) {
+					foundData = false;
+				}
+		};
+		InterleavedPrintVariables m_ipv;
 
 };
 
