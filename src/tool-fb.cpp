@@ -144,9 +144,9 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
-	vector<int> lastNumbers = {};
+	vector<vector<int>> lastNumbers = {};
 	lastNumbers.resize((int)grid.getVoiceCount());
-	vector<int> currentNumbers = {};
+	vector<vector<int>> currentNumbers = {};
 
 	// Interate through the NoteGrid and fill the numbers vector with
 	// all generated FiguredBassNumbers
@@ -185,6 +185,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			}
 		}
 
+		// Ignore if base is a rest or silent note
+		if (baseCell->getSgnBase40Pitch() == -1000 || baseCell->getSgnBase40Pitch() == -2000) {
+			continue;
+		}
+
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			if (j == usedBaseVoiceIndex) {
@@ -192,21 +197,28 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				continue;
 			}
 			NoteCell* targetCell = grid.cell(j, i);
+			HTp resolvedToken = targetCell->getToken()->resolveNull();
 
-			// Ignore if either base or target is a rest or silent note
-			if (targetCell->getSgnBase40Pitch() == -1000 || targetCell->getSgnBase40Pitch() == -2000 ||
-				baseCell->getSgnBase40Pitch() == -1000 || baseCell->getSgnBase40Pitch() == -2000) {
-				continue;
+			// TODO: handle spine splits
+
+			for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
+
+				// Ignore if target is a rest or silent note
+				if (subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+					continue;
+				}
+
+				// Create FiguredBassNumber
+				FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
+				if (lastNumbers[j].size() != 0) {
+					// If a number belongs to a sustained note but the base note did change
+					// the new numbers need to be displayable
+					number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (std::find(lastNumbers[j].begin(), lastNumbers[j].end(), number->m_number) != lastNumbers[j].end());
+				}
+
+				currentNumbers[j].push_back(number->m_number);
+				numbers.push_back(number);
 			}
-			
-			// Create FiguredBassNumber
-			FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), targetCell->getAbsBase40Pitch(), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
-			if (lastNumbers[j] != 0) {
-				// Set currAttackNumberDidChange
-				number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (lastNumbers[j] != number->m_number);
-			}
-			currentNumbers[j] = number->m_number;
-			numbers.push_back(number);
 		}
 		
 		// Set current numbers as the new last numbers
