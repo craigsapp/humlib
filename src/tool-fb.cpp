@@ -192,10 +192,6 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
-			if (j == usedBaseVoiceIndex) {
-				// Ignore base voice
-				continue;
-			}
 			NoteCell* targetCell = grid.cell(j, i);
 			HTp resolvedToken = targetCell->getToken()->resolveNull();
 
@@ -205,6 +201,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 				// Ignore if target is a rest or silent note
 				if (subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+					continue;
+				}
+				
+				// Ignore if same pitch as base voice
+				if (baseCell->getAbsBase40Pitch() == abs(subtokenBase40)) {
 					continue;
 				}
 
