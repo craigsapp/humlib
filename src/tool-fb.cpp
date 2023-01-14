@@ -197,6 +197,8 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 			// TODO: handle spine splits
 
+			vector<FiguredBassNumber*> chordNumbers = {};
+
 			for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
 
 				// Ignore if target is a rest or silent note
@@ -218,9 +220,18 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				}
 
 				currentNumbers[j].push_back(number->m_number);
-				numbers.push_back(number);
+				chordNumbers.push_back(number);
 			}
-		}
+
+			// Sort chord numbers by size
+			sort(chordNumbers.begin(), chordNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+				return a->m_number > b->m_number;
+			});
+
+			// Then add to numbers vector
+			for (FiguredBassNumber*  num: chordNumbers)
+				numbers.push_back(num);
+			}
 		
 		// Set current numbers as the new last numbers
 		lastNumbers = currentNumbers;
