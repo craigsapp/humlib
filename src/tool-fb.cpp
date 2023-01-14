@@ -80,7 +80,19 @@ bool Tool_fb::run(HumdrumFile &infile, ostream &out) {
 }
 
 bool Tool_fb::run(HumdrumFile &infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
 
+
+
+//////////////////////////////
+//
+// Tool_fb::initialize -- 
+//
+
+void Tool_fb::initialize(void) {
 	m_compoundQ      = getBoolean("compound");
 	m_accidentalsQ   = getBoolean("accidentals");
 	m_baseQ          = getInteger("base");
@@ -115,6 +127,16 @@ bool Tool_fb::run(HumdrumFile &infile) {
 		m_accidentalsQ = true;
 		m_hideThreeQ = true;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_fb::processFile -- 
+//
+
+void Tool_fb::processFile(HumdrumFile& infile) {
 
 	NoteGrid grid(infile);
 
@@ -214,8 +236,6 @@ bool Tool_fb::run(HumdrumFile &infile) {
 			infile.appendDataSpine(trackData, ".", exinterp);
 		}
 	}
-
-	return true;
 }
 
 

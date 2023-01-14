@@ -66,6 +66,8 @@ class Tool_fb : public HumTool {
 		bool run     (HumdrumFile& infile, ostream& out);
 
 	protected:
+		void                       initialize                             (void);
+        void                       processFile                            (HumdrumFile& infile);
 		bool                       hideNumbersForTokenLine                (HTp token, pair<int, HumNum> timeSig);
 		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
 		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
