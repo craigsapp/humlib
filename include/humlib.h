@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 02:25:42 PST 2023
+// Last Modified: Sat Jan 14 15:31:19 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6578,10 +6578,10 @@ class Tool_deg : public HumTool {
 	// Tool_deg::ScaleDegree --
 	//
 
-	public:
+	public: // Tool_deg class
 		class ScaleDegree;
 		class ScaleDegree {
-			public:
+			public:  // ScaleDegree class
 				ScaleDegree (void);
 				~ScaleDegree ();
 
@@ -6616,14 +6616,14 @@ class Tool_deg : public HumTool {
 				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
 				static void     setShowZeros (bool state) { m_showZerosQ = state; }
 
-			protected:
+			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
 				std::string     generateDegDataSubtoken  (int index) const;
 				void            setMinorMode             (int b40tonic);
 				void            setMajorMode             (int b40tonic);
 				void            analyzeTokenScaleDegrees (void);
 
-			private:
+			private:  // ScaleDegree class
 				// m_token: token in **kern data that links to this scale degree
 				HTp m_linkedKernToken = NULL;
 
@@ -6677,7 +6677,7 @@ class Tool_deg : public HumTool {
 	// Tool_deg --
 	//
 
-	public:
+	public:  // Tool_deg class
 		      Tool_deg         (void);
 		     ~Tool_deg         () {};
 
@@ -6686,7 +6686,7 @@ class Tool_deg : public HumTool {
 		bool  run              (const std::string& indata, std::ostream& out);
 		bool  run              (HumdrumFile& infile, std::ostream& out);
 
-	protected:
+	protected: // Tool_deg class
 		void            processFile              (HumdrumFile& infile);
 		void            initialize               (void);
 
@@ -6697,10 +6697,11 @@ class Tool_deg : public HumTool {
       std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
 		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
-		std::string     createDegInterpretation(const string& degtok, int refLine, bool addPreSpine);
-		std::string     printDegInterpretation(const string& interp, HumdrumFile& infile, int lineIndex);
+		std::string     createDegInterpretation  (const string& degtok, int refLine, bool addPreSpine);
+		std::string     printDegInterpretation   (const string& interp, HumdrumFile& infile, int lineIndex);
+		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);
 
-	private:
+	private: // Tool_deg class
 
 		// m_degSpine: A three-dimensional list of **deg output spines.
 		// This is a scratch pad to create **deg data for the input **kern
@@ -6726,10 +6727,14 @@ class Tool_deg : public HumTool {
 		class InterleavedPrintVariables {
 			public:
 				bool foundData;
+				bool foundArrowLine;
+				bool hasDegSpines;
 
 				InterleavedPrintVariables(void) { clear(); }
 				void clear(void) {
-					foundData = false;
+					foundData      = false;
+					foundArrowLine = false;
+					hasDegSpines   = true;
 				}
 		};
 		InterleavedPrintVariables m_ipv;

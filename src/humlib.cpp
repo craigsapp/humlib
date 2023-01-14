@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 02:25:42 PST 2023
+// Last Modified: Sat Jan 14 15:31:19 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68929,7 +68929,7 @@ bool Tool_deg::ScaleDegree::m_showZerosQ = false;
 //
 
 Tool_deg::Tool_deg(void) {
-	define("arrow|arrows=b", "Display scale degree alterations as arrows");
+	define("arr|arrow|arrows=b", "Display scale degree alterations as arrows");
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
 	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
@@ -69083,6 +69083,14 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 	bool hasMerger = false;
 	bool hasDegMerger = false;
 	int degNegativeTrack = -1;
+	bool arrowStatus = false;
+
+	// Keep track of an existing arrow styling line and if m_arrowQ is true, then
+	// insert the arrow styling for new **deg spines here rather than just
+	// before the first data line.
+	if (m_arrowQ && !m_ipv.foundArrowLine && !m_ipv.foundData) {
+		arrowStatus = isDegArrowLine(infile, lineIndex);
+	}
 
 	for (int i=0; i<inputFieldCount; i++) {
 		HTp token = infile.token(lineIndex, i);
@@ -69093,6 +69101,13 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 			int spineSize = (int)m_degSpines.at(currentDegIndex).at(lineIndex).size();
 			for (int k=0; k<spineSize; k++) {
 				string value = m_degSpines[currentDegIndex][lineIndex][k].getDegToken();
+
+				if (arrowStatus && m_arrowQ && (!m_ipv.foundArrowLine) && (!m_ipv.foundData)) {
+					if (value == "*") {
+						value = "*arr";
+					}
+				}
+
 				output += "\t";
 				output += value;
 				tracks.push_back(degNegativeTrack);
@@ -69120,22 +69135,29 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 	for (int k=0; k<kcount; k++) {
 		output += "\t";
 		string value = m_degSpines.back().at(lineIndex).at(k).getDegToken();
-		output += value;
+
+		if (arrowStatus && m_arrowQ && (!m_ipv.foundArrowLine) && (!m_ipv.foundData)) {
+			if (value == "*") {
+				value = "*arr";
+			}
+		}
+
 		if (value == "*v") {
 			hasDegMerger = true;
 		}
+		output += value;
 		tracks.push_back(degNegativeTrack);
 		tokens.push_back(value);
 	}
 
-	if ((!m_ipv.foundData) && infile[lineIndex].isData()) {
-		m_ipv.foundData = true;
+	if (arrowStatus) {
+		m_ipv.foundArrowLine = true;
+	}
 
-		// print *arrow interpretation if needed
-		// Improve later to add to a previous line if there
-		// are already *arrow **deg interpretations.
-		if (m_arrowQ) {
-			string line = printDegInterpretation("*arrow", infile, lineIndex);
+	if ((!m_ipv.foundData) && infile[lineIndex].isData() && !m_ipv.foundArrowLine) {
+		m_ipv.foundData = true;
+		if (m_arrowQ && !m_ipv.foundArrowLine) {
+			string line = printDegInterpretation("*arr", infile, lineIndex);
 			if (!line.empty()) {
 				output = line + "\n" + output;
 			}
@@ -69152,6 +69174,44 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 	output = prepareMergerLine(output, tracks, tokens, hasMerger, hasDegMerger);
 
 	return output;
+}
+
+
+//////////////////////////////
+//
+// Tool_deg::isDegArrowLine -- Return true if **deg spines only
+//     include *arr, *Xarr, *acc, *Xacc interpretations
+//     and "*" (but not all "*").
+//
+
+bool Tool_deg::isDegArrowLine(HumdrumFile& infile, int lineIndex) {
+	// If there are no **deg spines, then don't bother searching for them.
+	if (!m_ipv.hasDegSpines) {
+		return false;
+	}
+	if (!infile[lineIndex].isInterpretation()) {
+		return false;
+	} if (infile[lineIndex].isManipulator()) {
+		return false;
+	}
+
+	int degCount = 0;
+	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
+		HTp token = infile.token(lineIndex, i);
+		if (!token->isDataType("**deg")) {
+			continue;
+		}
+		degCount++;
+		if (*token == "*arr")  { return true; }
+		if (*token == "*Xarr") { return true; }
+		if (*token == "*acc")  { return true; }
+		if (*token == "*Xacc") { return true; }
+	}
+	if (degCount == 0) {
+		m_ipv.hasDegSpines = false;
+	}
+
+	return false;
 }
 
 
@@ -69430,7 +69490,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 			}
 
 			if (!printArrow) {
-				string line = createDegInterpretation("*arrow", i, m_recipQ);
+				string line = createDegInterpretation("*arr", i, m_recipQ);
 				m_humdrum_text << line << endl;
 				printArrow = true;
 			}
