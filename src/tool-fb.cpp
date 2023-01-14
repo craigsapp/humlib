@@ -200,7 +200,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			}
 			
 			// Create FiguredBassNumber
-			FiguredBassNumber* number = createFiguredBassNumber(baseCell, targetCell, keySignature);
+			FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), targetCell->getAbsBase40Pitch(), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
 			if (lastNumbers[j] != 0) {
 				// Set currAttackNumberDidChange
 				number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (lastNumbers[j] != number->m_number);
@@ -314,15 +314,15 @@ vector<string> Tool_fb::getTrackDataForVoice(int voiceIndex, const vector<Figure
 //    as well as a passed key signature.
 //
 
-FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* target, string keySignature) {
+FiguredBassNumber* Tool_fb::createFiguredBassNumber(int basePitchBase40, int targetPitchBase40, int voiceIndex, int lineIndex, bool isAttack, string keySignature) {
 
 	// Calculate figured bass number
-	int basePitch   = base->getSgnDiatonicPitch();
-	int targetPitch = target->getSgnDiatonicPitch();
-	int diff        = abs(targetPitch) - abs(basePitch);
+	int baseDiatonicPitch   = Convert::base40ToDiatonic(basePitchBase40);
+	int targetDiatonicPitch = Convert::base40ToDiatonic(targetPitchBase40);
+	int diff        = abs(targetDiatonicPitch) - abs(baseDiatonicPitch);
 	int num;
 
-	if ((basePitch == 0) || (targetPitch == 0)) {
+	if ((baseDiatonicPitch == 0) || (targetDiatonicPitch == 0)) {
 		num = 0;
 	} else if (diff == 0) {
 		num = 1;
@@ -337,15 +337,15 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 		return tolower(c);
 	});
 
-	char targetPitchClass = Convert::kernToDiatonicLC(Convert::base40ToKern((int)target->getAbsBase40Pitch()));
-	int targetAccidNr = Convert::base40ToAccidental(target->getAbsBase40Pitch());
+	char targetPitchName = Convert::kernToDiatonicLC(Convert::base40ToKern(targetPitchBase40));
+	int targetAccidNr = Convert::base40ToAccidental(targetPitchBase40);
 	string targetAccid;
 	for (int i=0; i<abs(targetAccidNr); i++) {
 		targetAccid += (targetAccidNr < 0 ? "-" : "#");
 	}
 
-	char basePitchClass = Convert::kernToDiatonicLC(Convert::base40ToKern((int)base->getAbsBase40Pitch()));
-	int baseAccidNr = Convert::base40ToAccidental(base->getAbsBase40Pitch());
+	char basePitchName = Convert::kernToDiatonicLC(Convert::base40ToKern(basePitchBase40));
+	int baseAccidNr = Convert::base40ToAccidental(basePitchBase40);
 	string baseAccid;
 	for (int i=0; i<abs(baseAccidNr); i++) {
 		baseAccid += (baseAccidNr < 0 ? "-" : "#");
@@ -355,18 +355,18 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 	bool showAccid = false;
 
 	// Show accidentals when they are not included in the key signature
-	if ((targetAccidNr != 0) && (keySignature.find(targetPitchClass + targetAccid) == std::string::npos)) {
+	if ((targetAccidNr != 0) && (keySignature.find(targetPitchName + targetAccid) == std::string::npos)) {
 		showAccid = true;
 	}
 
 	// Show natural accidentals when they are alterations of the key signature
-	if ((targetAccidNr == 0) && (keySignature.find(targetPitchClass + targetAccid) != std::string::npos)) {
+	if ((targetAccidNr == 0) && (keySignature.find(targetPitchName + targetAccid) != std::string::npos)) {
 		accid = "n";
 		showAccid = true;
 	}
 
 	// Show accidentlas when pitch class of base and target is equal but alteration is different
-	if (basePitchClass == targetPitchClass) {
+	if (basePitchName == targetPitchName) {
 		if (baseAccidNr == targetAccidNr) {
 			showAccid = false;
 		} else {
@@ -375,7 +375,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(NoteCell* base, NoteCell* ta
 		}
 	}
 
-	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, target->getVoiceIndex(), target->getLineIndex(), target->isAttack(), m_intervallsatzQ);
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, voiceIndex, lineIndex, isAttack, m_intervallsatzQ);
 
 	return number;
 }

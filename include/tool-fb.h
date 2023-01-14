@@ -71,7 +71,7 @@ class Tool_fb : public HumTool {
 		bool                       hideNumbersForTokenLine                (HTp token, pair<int, HumNum> timeSig);
 		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
 		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
-		FiguredBassNumber*         createFiguredBassNumber                (NoteCell* base, NoteCell* target, string keySignature);
+		FiguredBassNumber*         createFiguredBassNumber                (int basePitchBase40, int targetPitchBase40, int voiceIndex, int lineIndex, bool isAttack, string keySignature);
 		vector<FiguredBassNumber*> filterNegativeNumbers                  (vector<FiguredBassNumber*> numbers);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine        (vector<FiguredBassNumber*> numbers, int lineIndex);
 		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
