@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 13 20:46:28 PST 2023
+// Last Modified: Fri Jan 13 21:15:55 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69390,7 +69390,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 
 	for (int i=0; i<lineCount; i++) {
 		if (!m_degSpines[0][i][0].hasSpines()) {
-			m_free_text << m_degSpines[0][i][0].getLinkedKernToken() << endl;
+			m_humdrum_text << m_degSpines[0][i][0].getLinkedKernToken() << endl;
 			continue;
 		}
 
@@ -69404,22 +69404,22 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 			if (m_recipQ) {
 				if (!printClef) {
 					string line = createRecipInterpretation("*clefXyy", i);
-					m_free_text << line << endl;
+					m_humdrum_text << line << endl;
 					printClef = true;
 				}
 				if (!printStria) {
 					string line = createRecipInterpretation("*stria0", i);
-					m_free_text << line << endl;
+					m_humdrum_text << line << endl;
 					printStria = true;
 				}
 				if (!printColor) {
 					string line = createRecipInterpretation("*color:#fff0", i);
-					m_free_text << line << endl;
+					m_humdrum_text << line << endl;
 					printColor = true;
 				}
 				if (!printStem) {
 					string line = createRecipInterpretation("*Xstem", i);
-					m_free_text << line << endl;
+					m_humdrum_text << line << endl;
 					printStem = true;
 				}
 
@@ -69427,7 +69427,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 
 			if (!printArrow) {
 				string line = createDegInterpretation("*arrow", i, m_recipQ);
-				m_free_text << line << endl;
+				m_humdrum_text << line << endl;
 				printArrow = true;
 			}
 		}
@@ -69439,15 +69439,15 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 				HTp token = infile.token(i, 0);
 				if (infile[i].isExclusiveInterpretation()) {
 					if (m_kernQ) {
-						m_free_text << "**kern";
+						m_humdrum_text << "**kern";
 					} else {
-						m_free_text << "**recip";
+						m_humdrum_text << "**recip";
 					}
 				} else if (infile[i].isManipulator()) {
 					if (*token == "*-") {
-						m_free_text << "*-";
+						m_humdrum_text << "*-";
 					} else {
-						m_free_text << "*";
+						m_humdrum_text << "*";
 					}
 				} else if (infile[i].isInterpretation()) {
 					HumNum timestamp = infile[i].getDurationFromStart();
@@ -69495,25 +69495,25 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 					}
 
 					if (!timesig.empty()) {
-						m_free_text << timesig;
+						m_humdrum_text << timesig;
 						printTimeSignature = timestamp;
 					} else if (!metersig.empty()) {
-						m_free_text << metersig;
+						m_humdrum_text << metersig;
 						printMetricSignature = timestamp;
 					} else if (!clef.empty()) {
-						m_free_text << clef;
+						m_humdrum_text << clef;
 						printClef = true;
 					} else {
-						m_free_text << "*";
+						m_humdrum_text << "*";
 					}
 				} else if (infile[i].isBarline()) {
-					m_free_text << token;
+					m_humdrum_text << token;
 				} else if (infile[i].isLocalComment()) {
-					m_free_text << "!";
+					m_humdrum_text << "!";
 				} else if (infile[i].isData()) {
-					m_free_text << Convert::durationToRecip(infile[i].getDuration());
+					m_humdrum_text << Convert::durationToRecip(infile[i].getDuration());
 					if (m_kernQ) {
-						m_free_text << m_kernSuffix;
+						m_humdrum_text << m_kernSuffix;
 					}
 				}
 			}
@@ -69524,17 +69524,17 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 			for (int k=0; k<subspineCount; k++) {
 				if ((j == 0) && (k == 0)) {
 					if (m_recipQ) {
-						m_free_text << "\t";
+						m_humdrum_text << "\t";
 					}
 				} else if ((j == 0) && (k > 0)) {
-					m_free_text << "\t";
+					m_humdrum_text << "\t";
 				} else if (j > 0) {
-					m_free_text << "\t";
+					m_humdrum_text << "\t";
 				}
-				m_free_text << m_degSpines[j][i][k];
+				m_humdrum_text << m_degSpines[j][i][k];
 			}
 		}
-		m_free_text << endl;
+		m_humdrum_text << endl;
 	}
 }
 
