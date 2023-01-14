@@ -65,7 +65,8 @@ class Tool_deg : public HumTool {
 				int             getSubtokenCount         (void) const;
 
 				// output options:
-				static void     setShowTies (bool state) { m_showTiesQ = state; }
+				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
+				static void     setShowZeros (bool state) { m_showZerosQ = state; }
 
 			protected:
 				std::string     generateDegDataToken     (void) const;
@@ -119,6 +120,7 @@ class Tool_deg : public HumTool {
 
 				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
+				static bool m_showZerosQ;
 		};
 
 

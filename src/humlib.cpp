@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jan 13 21:15:55 PST 2023
+// Last Modified: Sat Jan 14 02:25:42 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68918,7 +68918,8 @@ void Tool_compositeold::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 // Tool_deg::ScaleDegree static member variables:
 //
 
-bool Tool_deg::ScaleDegree::m_showTiesQ = false;
+bool Tool_deg::ScaleDegree::m_showTiesQ  = false;
+bool Tool_deg::ScaleDegree::m_showZerosQ = false;
 
 
 
@@ -68933,6 +68934,7 @@ Tool_deg::Tool_deg(void) {
 	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
+	define("0|z|zero|zeros=b", "Show rests as scale degree 0");
 }
 
 
@@ -68998,7 +69000,9 @@ void Tool_deg::initialize(void) {
 	}
 	m_degTiesQ = getBoolean("ties");
 
+
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
+	Tool_deg::ScaleDegree::setShowZeros(getBoolean("zeros"));
 }
 
 
@@ -70005,6 +70009,9 @@ string Tool_deg::ScaleDegree::generateDegDataSubtoken(int index) const {
 	int degree = m_degrees.at(index);
 	if (degree == 0) {
 		output += "r";
+		if (m_showZerosQ) {
+			output += "0";
+		}
    } else if ((degree > 0) && (degree <= 7)) {
 		output += to_string(degree);
 	} else {
