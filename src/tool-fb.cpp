@@ -158,15 +158,17 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		int usedBaseVoiceIndex = m_baseQ;
 
 		// Overwrite usedBaseVoiceIndex with the lowest voice index of the lowest pitched note
-		// TODO: check if this still works for chords
 		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
-				int checkCellPitch = abs(checkCell->getSgnDiatonicPitch());
-				if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
-					lowestNotePitch = checkCellPitch;
-					usedBaseVoiceIndex = k;
+				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
+				// Ignore if base is a rest or silent note
+				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
+					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
+						lowestNotePitch = checkCellPitch;
+						usedBaseVoiceIndex = k;
+					}
 				}
 			}
 		}
