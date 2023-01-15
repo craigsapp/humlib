@@ -229,9 +229,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			});
 
 			// Then add to numbers vector
-			for (FiguredBassNumber*  num: chordNumbers)
+			for (FiguredBassNumber*  num: chordNumbers) {
 				numbers.push_back(num);
 			}
+		}
 		
 		// Set current numbers as the new last numbers
 		lastNumbers = currentNumbers;
