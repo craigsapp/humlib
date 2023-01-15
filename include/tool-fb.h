@@ -86,7 +86,7 @@ class Tool_fb : public HumTool {
 	private:
 		bool   m_compoundQ      = false;
 		bool   m_accidentalsQ   = false;
-		int    m_baseQ          = 0;
+		int    m_baseTrackQ     = 1;
 		bool   m_intervallsatzQ = false;
 		bool   m_sortQ          = false;
 		bool   m_lowestQ        = false;

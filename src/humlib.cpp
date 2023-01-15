@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 00:43:21 CET
+// Last Modified: Mo 16 Jan 2023 00:58:36 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77459,7 +77459,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 void Tool_fb::initialize(void) {
 	m_compoundQ      = getBoolean("compound");
 	m_accidentalsQ   = getBoolean("accidentals");
-	m_baseQ          = getInteger("base");
+	m_baseTrackQ     = getInteger("base");
 	m_intervallsatzQ = getBoolean("intervallsatz");
 	m_sortQ          = getBoolean("sort");
 	m_lowestQ        = getBoolean("lowest");
@@ -77545,10 +77545,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		currentNumbers.clear();
 		currentNumbers.resize((int)grid.getVoiceCount());
 
-		// Reset usedBaseVoiceIndex
-		int usedBaseVoiceIndex = m_baseQ;
+		// Reset usedBaseTrack
+		int usedBaseTrack = m_baseTrackQ;
 
-		// Overwrite usedBaseVoiceIndex with the lowest voice index of the lowest pitched note
+		// Overwrite usedBaseTrack with the lowest voice index of the lowest pitched note
 		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
@@ -77559,13 +77559,13 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
 					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
 						lowestNotePitch = checkCellPitch;
-						usedBaseVoiceIndex = k;
+						usedBaseTrack = checkCell->getToken()->getTrack();
 					}
 				}
 			}
 		}
 
-		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
+		NoteCell* baseCell = grid.cell(usedBaseTrack - 1, i);
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip
@@ -77667,8 +77667,8 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	} else {
 		// Create **fb spine and bind it to the base voice
 		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
-		if (m_baseQ + 1 < grid.getVoiceCount()) {
-			int trackIndex = kernspines[m_baseQ + 1]->getTrack();
+		if (m_baseTrackQ < grid.getVoiceCount()) {
+			int trackIndex = kernspines[m_baseTrackQ]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", exinterp);
 		} else {
 			infile.appendDataSpine(trackData, ".", exinterp);

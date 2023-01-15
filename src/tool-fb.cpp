@@ -27,21 +27,21 @@ namespace hum {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",      "output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",   "display accidentals in figured bass output");
-	define("b|base=i:0",        "number of the base voice/spine");
-	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
-	define("o|sort|order=b",    "sort figured bass numbers by interval size and not by voice index");
-	define("l|lowest=b",        "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b",     "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbr=b",          "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
-	define("f|figuredbass=b",   "shortcut for -c -a -o -n -r -3");
-	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
-	define("m|negative=b",      "show negative numbers");
-	define("above=b",           "place figured bass numbers above staff (**fba)");
-	define("recip=s:",          "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
-	define("k|kern-tracks=s",   "Process only the specified kern spines");
+	define("c|compound=b",          "output reasonable figured bass numbers within octave");
+	define("a|accidentals=b",       "display accidentals in figured bass output");
+	define("b|base|base-track=i:1", "number of the base kern track (compare with -k)");
+	define("i|intervallsatz=b",     "display intervals under their voice and not under the lowest staff");
+	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
+	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
+	define("r|abbr=b",              "use abbreviated figures; adds: --normalize --compound --sort");
+	define("t|attack=b",            "hide intervalls with no attack and when base does not change");
+	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
+	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
+	define("m|negative=b",          "show negative numbers");
+	define("above=b",               "place figured bass numbers above staff (**fba)");
+	define("recip=s:",              "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
+	define("k|kern-tracks=s",       "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
 
@@ -97,7 +97,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 void Tool_fb::initialize(void) {
 	m_compoundQ      = getBoolean("compound");
 	m_accidentalsQ   = getBoolean("accidentals");
-	m_baseQ          = getInteger("base");
+	m_baseTrackQ     = getInteger("base");
 	m_intervallsatzQ = getBoolean("intervallsatz");
 	m_sortQ          = getBoolean("sort");
 	m_lowestQ        = getBoolean("lowest");
@@ -183,10 +183,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		currentNumbers.clear();
 		currentNumbers.resize((int)grid.getVoiceCount());
 
-		// Reset usedBaseVoiceIndex
-		int usedBaseVoiceIndex = m_baseQ;
+		// Reset usedBaseTrack
+		int usedBaseTrack = m_baseTrackQ;
 
-		// Overwrite usedBaseVoiceIndex with the lowest voice index of the lowest pitched note
+		// Overwrite usedBaseTrack with the lowest voice index of the lowest pitched note
 		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
@@ -197,13 +197,13 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
 					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
 						lowestNotePitch = checkCellPitch;
-						usedBaseVoiceIndex = k;
+						usedBaseTrack = checkCell->getToken()->getTrack();
 					}
 				}
 			}
 		}
 
-		NoteCell* baseCell = grid.cell(usedBaseVoiceIndex, i);
+		NoteCell* baseCell = grid.cell(usedBaseTrack - 1, i);
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip
@@ -305,8 +305,8 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	} else {
 		// Create **fb spine and bind it to the base voice
 		vector<string> trackData = getTrackData(numbers, infile.getLineCount());
-		if (m_baseQ + 1 < grid.getVoiceCount()) {
-			int trackIndex = kernspines[m_baseQ + 1]->getTrack();
+		if (m_baseTrackQ < grid.getVoiceCount()) {
+			int trackIndex = kernspines[m_baseTrackQ]->getTrack();
 			infile.insertDataSpineBefore(trackIndex, trackData, ".", exinterp);
 		} else {
 			infile.appendDataSpine(trackData, ".", exinterp);

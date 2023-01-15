@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 00:43:21 CET
+// Last Modified: Mo 16 Jan 2023 00:58:36 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7233,7 +7233,7 @@ class Tool_fb : public HumTool {
 	private:
 		bool   m_compoundQ      = false;
 		bool   m_accidentalsQ   = false;
-		int    m_baseQ          = 0;
+		int    m_baseTrackQ     = 1;
 		bool   m_intervallsatzQ = false;
 		bool   m_sortQ          = false;
 		bool   m_lowestQ        = false;
