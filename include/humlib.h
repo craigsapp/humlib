@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 15:31:19 PST 2023
+// Last Modified: Sat Jan 14 17:00:24 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6619,9 +6619,17 @@ class Tool_deg : public HumTool {
 			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
 				std::string     generateDegDataSubtoken  (int index) const;
-				void            setMinorMode             (int b40tonic);
-				void            setMajorMode             (int b40tonic);
 				void            analyzeTokenScaleDegrees (void);
+
+				void            setMajorMode             (int b40tonic);
+				void            setMinorMode             (int b40tonic);
+				void            setDorianMode            (int b40tonic);
+				void            setPhrygianMode          (int b40tonic);
+				void            setLydianMode            (int b40tonic);
+				void            setMixolydianMode        (int b40tonic);
+				void            setAeoleanMode           (int b40tonic);
+				void            setLocrianMode           (int b40tonic);
+				void            setIonianMode            (int b40tonic);
 
 			private:  // ScaleDegree class
 				// m_token: token in **kern data that links to this scale degree
@@ -6631,10 +6639,27 @@ class Tool_deg : public HumTool {
 				bool m_unpitched = false;
 
 			   // m_mode: the mode of the current key	(0 = none, 1 = major, 2 = minor)
+				//
+				// modal keys:
+				// 3 = dorian (such as *c:dor)
+				// 4 = phrygian (such as *c:phr)
+				// 5 = lydian (such as *C:lyd)
+				// 6 = mixolydian (such as *C:mix)
+				// 7 = aeolean (such as *c:aeo)
+				// 8 = locrian (such as *c:loc)
+				// 9 = ionian (such as *C:ion)
+				//
 				int m_mode = 0;
 				const int m_unknown_mode = 0;
 				const int m_major_mode   = 1;
 				const int m_minor_mode   = 2;
+				const int m_dor_mode     = 3;
+				const int m_phr_mode     = 4;
+				const int m_lyd_mode     = 5;
+				const int m_mix_mode     = 6;
+				const int m_aeo_mode     = 7;
+				const int m_loc_mode     = 8;
+				const int m_ion_mode     = 9;
 
 				// m_b40tonic: the tonic pitch of the key expressed as base-40
 				int m_b40tonic = 0;

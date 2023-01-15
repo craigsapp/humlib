@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 15:31:19 PST 2023
+// Last Modified: Sat Jan 14 17:00:24 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69686,13 +69686,23 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 			continue;
 		}
 		if (current->isKeyDesignation()) {
-			if (hre.search(current, "\\*([A-Ga-g][-#]*):")) {
+			if (hre.search(current, "\\*([A-Ga-g][-#]*):(.*)")) {
 				string key = hre.getMatch(1);
+				string kmode = hre.getMatch(2);
 				b40tonic = Convert::kernToBase40(key);
 				if (b40tonic < middleC - 2) {
 					mode = "major";
 				} else {
 					mode = "minor";
+				}
+				if (!kmode.empty()) {
+					if      (kmode == "dor") { mode = "dor"; }
+					else if (kmode == "phr") { mode = "phr"; }
+					else if (kmode == "lyd") { mode = "lyd"; }
+					else if (kmode == "mix") { mode = "mix"; }
+					else if (kmode == "aeo") { mode = "aeo"; }
+					else if (kmode == "loc") { mode = "loc"; }
+					else if (kmode == "ion") { mode = "ion"; }
 				}
 			}
 		}
@@ -69780,6 +69790,20 @@ void Tool_deg::ScaleDegree::setLinkedKernToken(HTp token, const string& mode, in
 			setMajorMode(b40tonic);
 		} else if (mode == "minor") {
 			setMinorMode(b40tonic);
+		} else if (mode == "dor") {
+			setDorianMode(b40tonic);
+		} else if (mode == "phr") {
+			setPhrygianMode(b40tonic);
+		} else if (mode == "lyd") {
+			setLydianMode(b40tonic);
+		} else if (mode == "mix") {
+			setMixolydianMode(b40tonic);
+		} else if (mode == "aeo") {
+			setAeoleanMode(b40tonic);
+		} else if (mode == "loc") {
+			setLocrianMode(b40tonic);
+		} else if (mode == "ion") {
+			setIonianMode(b40tonic);
 		}
 		analyzeTokenScaleDegrees();
 	} else {
@@ -69908,6 +69932,46 @@ void Tool_deg::ScaleDegree::analyzeTokenScaleDegrees(void) {
 			if ((m_degrees[i] == 3) || (m_degrees[i] == 6) || (m_degrees[i] == 7)) {
 				m_alters[i]++;
 			}
+		}
+
+		if (m_mode == m_dor_mode) {
+			if ((m_degrees[i] == 3) || (m_degrees[i] == 7)) {
+				m_alters[i]++;
+			}
+		}
+
+		if (m_mode == m_phr_mode) {
+			if ((m_degrees[i] == 2) || (m_degrees[i] == 3) || (m_degrees[i] == 6) || (m_degrees[i] == 7)) {
+				m_alters[i]++;
+			}
+		}
+
+		if (m_mode == m_lyd_mode) {
+			if (m_degrees[i] == 4) {
+				m_alters[i]--;
+			}
+		}
+
+		if (m_mode == m_mix_mode) {
+			if (m_degrees[i] == 7) {
+				m_alters[i]++;
+			}
+		}
+
+		if (m_mode == m_aeo_mode) {
+			if ((m_degrees[i] == 3) || (m_degrees[i] == 6) || (m_degrees[i] == 7)) {
+				m_alters[i]++;
+			}
+		}
+
+		if (m_mode == m_loc_mode) {
+			if ((m_degrees[i] == 2) || (m_degrees[i] == 3) || (m_degrees[i] == 5) || (m_degrees[i] == 6) || (m_degrees[i] == 7)) {
+				m_alters[i]++;
+			}
+		}
+
+		if (m_mode == m_ion_mode) {
+			// nothing to do
 		}
 	}
 }
@@ -70422,7 +70486,19 @@ int Tool_deg::ScaleDegree::getSubtokenCount(void) const {
 
 //////////////////////////////
 //
-// Tool_deg::ScaleDegree::setMinorMode --
+// Tool_deg::ScaleDegree::setMajorMode -- CDEFGABC
+//
+
+void Tool_deg::ScaleDegree::setMajorMode(int b40tonic) {
+	m_mode = m_major_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setMinorMode -- ABCDEFGA
 //
 
 void Tool_deg::ScaleDegree::setMinorMode(int b40tonic) {
@@ -70434,11 +70510,83 @@ void Tool_deg::ScaleDegree::setMinorMode(int b40tonic) {
 
 //////////////////////////////
 //
-// Tool_deg::ScaleDegree::setMajorMode --
+// Tool_deg::ScaleDegree::setDorianMode -- DEFGABCD
 //
 
-void Tool_deg::ScaleDegree::setMajorMode(int b40tonic) {
-	m_mode = m_major_mode;
+void Tool_deg::ScaleDegree::setDorianMode(int b40tonic) {
+	m_mode = m_dor_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setPhrygianMode -- EFGABCDE
+//
+
+void Tool_deg::ScaleDegree::setPhrygianMode(int b40tonic) {
+	m_mode = m_phr_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setLydianMode -- FGABCDEF
+//
+
+void Tool_deg::ScaleDegree::setLydianMode(int b40tonic) {
+	m_mode = m_lyd_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setMixolydianMode -- GABCDEFG
+//
+
+void Tool_deg::ScaleDegree::setMixolydianMode(int b40tonic) {
+	m_mode = m_mix_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setAeoleanMode -- ABCDEFGA
+//
+
+void Tool_deg::ScaleDegree::setAeoleanMode(int b40tonic) {
+	m_mode = m_aeo_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setLocrianMode -- BCDEFGAB
+//
+
+void Tool_deg::ScaleDegree::setLocrianMode(int b40tonic) {
+	m_mode = m_loc_mode;
+	m_b40tonic = b40tonic;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::ScaleDegree::setIonianMode -- CDEFGABC
+//
+
+void Tool_deg::ScaleDegree::setIonianMode(int b40tonic) {
+	m_mode = m_ion_mode;
 	m_b40tonic = b40tonic;
 }
 
