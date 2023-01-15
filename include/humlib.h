@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 17:00:24 PST 2023
+// Last Modified: Sun Jan 15 01:00:35 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6746,8 +6746,13 @@ class Tool_deg : public HumTool {
 		bool m_degTiesQ        = false;   // used with -t option
 		bool m_forceKeyQ       = false;   // used with -K option
 
-		std::string m_defaultKey = "";    // used with -k option
-		std::string m_kernSuffix = "dR/"; // used with --kern option
+		std::string m_defaultKey  = "";    // used with --default-key option
+		std::string m_forcedKey   = "";    // used with --forced-key option
+		std::string m_kernSuffix  = "dR/"; // used with --kern option (currently hardwired)
+		std::string m_spineTracks = "";    // used with -s option
+		std::string m_kernTracks  = "";    // used with -k option
+
+		std::vector<bool> m_processTrack;  // used with -k and -s option
 
 		class InterleavedPrintVariables {
 			public:

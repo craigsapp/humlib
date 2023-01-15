@@ -90,7 +90,7 @@ class Tool_deg : public HumTool {
 				// m_unpitched: true if unpitched (because in a percussion part)
 				bool m_unpitched = false;
 
-			   // m_mode: the mode of the current key	(0 = none, 1 = major, 2 = minor)
+				// m_mode: the mode of the current key	(0 = none, 1 = major, 2 = minor)
 				//
 				// modal keys:
 				// 3 = dorian (such as *c:dor)
@@ -198,8 +198,13 @@ class Tool_deg : public HumTool {
 		bool m_degTiesQ        = false;   // used with -t option
 		bool m_forceKeyQ       = false;   // used with -K option
 
-		std::string m_defaultKey = "";    // used with -k option
-		std::string m_kernSuffix = "dR/"; // used with --kern option
+		std::string m_defaultKey  = "";    // used with --default-key option
+		std::string m_forcedKey   = "";    // used with --forced-key option
+		std::string m_kernSuffix  = "dR/"; // used with --kern option (currently hardwired)
+		std::string m_spineTracks = "";    // used with -s option
+		std::string m_kernTracks  = "";    // used with -k option
+
+		std::vector<bool> m_processTrack;  // used with -k and -s option
 
 		class InterleavedPrintVariables {
 			public:

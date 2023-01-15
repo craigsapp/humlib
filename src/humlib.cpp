@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jan 14 17:00:24 PST 2023
+// Last Modified: Sun Jan 15 01:00:35 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -5040,7 +5040,7 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 				val = hre.getMatchInt(1);
 				tbuff = to_string(maxtrack - val);
 			}
-			hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+			hre.replaceDestructive(entries[i], tbuff, "\\$\\d*");
 		}
 
 		range = false;
@@ -5054,13 +5054,13 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 					val = hre.getMatchInt(1);
 					tbuff = to_string(maxtrack - val);
 				}
-				hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+				hre.replaceDestructive(entries[i], tbuff, "\\$\\d*");
 			}
 			if (entries[i].back() == '$') {
 				entries[i].pop_back();
 				entries[i] += to_string(maxtrack);
 			}
-			// extract second vlaue
+			// extract second value
 			if (hre.search(entries[i], "-(\\d+)")) {
 				val2 = hre.getMatchInt(1);
 			} else {
@@ -68930,10 +68930,17 @@ bool Tool_deg::ScaleDegree::m_showZerosQ = false;
 
 Tool_deg::Tool_deg(void) {
 	define("arr|arrow|arrows=b", "Display scale degree alterations as arrows");
+   define("b|boxes|box=b", "Display scale degrees in boxes");
+   define("color=s", "Display color for scale degrees");
+   define("c|circles|circle=b", "Display scale degrees in circles");
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
 	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
+	define("k|kern-tracks=s", "Process only the specified kern spines");
+	define("kd|dk|key-default|default-key=s", "Default key if none specified in data");
+	define("kf|fk|key-force|force-key=s", "Use the given key for analysing deg data (ignore modulations)");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
+	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 	define("0|z|zero|zeros=b", "Show rests as scale degree 0");
 }
 
@@ -69000,6 +69007,11 @@ void Tool_deg::initialize(void) {
 	}
 	m_degTiesQ = getBoolean("ties");
 
+	if (getBoolean("spine-tracks")) {
+		m_spineTracks = getString("spine-tracks");
+	} else if (getBoolean("kern-tracks")) {
+		m_kernTracks = getString("kern-tracks");
+	}
 
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
 	Tool_deg::ScaleDegree::setShowZeros(getBoolean("zeros"));
@@ -69015,16 +69027,53 @@ void Tool_deg::initialize(void) {
 void Tool_deg::processFile(HumdrumFile& infile) {
 	vector<HTp> kernstarts;
 	infile.getKernSpineStartList(kernstarts);
+
+	// Calculate which input spines to process based on -s or -k option:
+	int maxTrack = infile.getMaxTrack();
+	m_processTrack.resize(maxTrack + 1); // +1 is needed since track=0 is not used
+	// By default, process all tracks:
+	fill(m_processTrack.begin(), m_processTrack.end(), true);
+	// Otherwise, select which **kern track, or spine tracks to process selectively:
+	if (!m_kernTracks.empty()) {
+		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
+
+		fill(m_processTrack.begin(), m_processTrack.end(), false);
+		for (int i=0; i<(int)ktracks.size(); i++) {
+			int index = ktracks[i] - 1;
+			if ((index < 0) || (index >= (int)kernstarts.size())) {
+				continue;
+			}
+			int track = kernstarts.at(ktracks[i] - 1)->getTrack();
+			m_processTrack.at(track) = true;
+		}
+	} else if (!m_spineTracks.empty()) {
+		infile.makeBooleanTrackList(m_processTrack, m_spineTracks);
+	}
+
+	// Count how many **kern spines to process, doing nothing if none are selected/available:
 	m_degSpines.clear();
-	int kernCount = (int)kernstarts.size();
+	vector<HTp> newKernStarts;
+	for (int i=0; i<(int)kernstarts.size(); i++) {
+		int track = kernstarts[i]->getTrack();
+		if (m_processTrack.at(track)) {
+			newKernStarts.push_back(kernstarts[i]);
+		}
+	}
+	int kernCount = (int)newKernStarts.size();
 	if (kernCount == 0) {
 		return;
 	}
+
+	// Create storage space for scale degree analyses:
 	m_degSpines.resize(kernCount);
 	for (int i=0; i<kernCount; i++) {
-		prepareDegSpine(m_degSpines.at(i), kernstarts.at(i), infile);
+		int track = newKernStarts.at(i)->getTrack();
+		if (m_processTrack.at(track)) {
+			prepareDegSpine(m_degSpines.at(i), newKernStarts.at(i), infile);
+		}
 	}
 
+	// Analyze the scale degrees in the score (for selected spines)
 	if (m_degOnlyQ) {
 		printDegScore(infile);
 	} else {
@@ -69045,13 +69094,49 @@ void Tool_deg::printDegScoreInterleavedWithInputScore(HumdrumFile& infile) {
 		return;
 	}
 
+	// Store the list of kern tracks that will have
+	// **deg spines attached to them:
+	vector<HTp> newKernStarts;
+	for (int i=0; i<(int)kernStarts.size(); i++) {
+		int track = kernStarts[i]->getTrack();
+		if (m_processTrack.at(track)) {
+			newKernStarts.push_back(kernStarts[i]);
+		}
+	}
+
+	if (newKernStarts.empty()) {
+		// strange: nothing to print?
+		return;
+	}
+
 	m_ipv.clear();
 
-	vector<int> insertTracks((int)kernStarts.size() - 1);
-	for (int i=0; i<(int)kernStarts.size() - 1; i++) {
-		insertTracks.at(i) = kernStarts.at(i+1)->getTrack();
+	// Calculate the location that **deg analyses should
+	// be inserted.  This is the track number of the 
+	// next **kern spine after the **deg analysis's **kern spine,
+	// or -1 if the **deg analysis is placed after the last **kern
+	// spine.
+	vector<int> insertTracks((int)newKernStarts.size() - 1);
+
+	for (int i=0; i<(int)newKernStarts.size() - 1; i++) {
+		for (int j=0; j<(int)kernStarts.size(); j++) {
+			if (kernStarts.at(j) == newKernStarts.at(i)) {
+				insertTracks.at(i) = kernStarts.at(j+1)->getTrack();
+				break;
+			}
+		}
 	}
-	insertTracks.push_back(-1);
+	// Deal with the location of the last **deg spine:
+	if (kernStarts.back() == newKernStarts.back()) {
+		insertTracks.push_back(-1);
+	} else {
+		for (int j=0; j<(int)kernStarts.size(); j++) {
+			if (kernStarts.at(j) == newKernStarts.back()) {
+				insertTracks.push_back(kernStarts.at(j+1)->getTrack());
+				break;
+			}
+		}
+	}
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
@@ -69095,9 +69180,14 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 	for (int i=0; i<inputFieldCount; i++) {
 		HTp token = infile.token(lineIndex, i);
 		int track = token->getTrack();
-		int dtrack = insertTracks.at(currentDegIndex);
+		int dtrack;
+		if (currentDegIndex < (int)insertTracks.size()) {
+			dtrack = insertTracks.at(currentDegIndex);
+		} else {
+			dtrack = -1;
+		}
 		if (dtrack == track) {
-			// insert the
+			// insert the current **deg spine
 			int spineSize = (int)m_degSpines.at(currentDegIndex).at(lineIndex).size();
 			for (int k=0; k<spineSize; k++) {
 				string value = m_degSpines[currentDegIndex][lineIndex][k].getDegToken();
@@ -69131,23 +69221,25 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, vector<int>& inser
 	}
 
 	// Output the last **deg spine at the end of the line:
-	int kcount = (int)m_degSpines.back().at(lineIndex).size();
-	for (int k=0; k<kcount; k++) {
-		output += "\t";
-		string value = m_degSpines.back().at(lineIndex).at(k).getDegToken();
-
-		if (arrowStatus && m_arrowQ && (!m_ipv.foundArrowLine) && (!m_ipv.foundData)) {
-			if (value == "*") {
-				value = "*arr";
+	if ((!insertTracks.empty()) && (insertTracks.back() == -1)) {
+		int kcount = (int)m_degSpines.back().at(lineIndex).size();
+		for (int k=0; k<kcount; k++) {
+			output += "\t";
+			string value = m_degSpines.back().at(lineIndex).at(k).getDegToken();
+	
+			if (arrowStatus && m_arrowQ && (!m_ipv.foundArrowLine) && (!m_ipv.foundData)) {
+				if (value == "*") {
+					value = "*arr";
+				}
 			}
+	
+			if (value == "*v") {
+				hasDegMerger = true;
+			}
+			output += value;
+			tracks.push_back(degNegativeTrack);
+			tokens.push_back(value);
 		}
-
-		if (value == "*v") {
-			hasDegMerger = true;
-		}
-		output += value;
-		tracks.push_back(degNegativeTrack);
-		tokens.push_back(value);
 	}
 
 	if (arrowStatus) {
@@ -69334,7 +69426,6 @@ string Tool_deg::prepareMergerLine(const string& input, vector<int>& tracks, vec
 	// Keep track delay of each track's merger line for above algorithm.
 	vector<bool> delayed;
 
-
 	for (int i=0; i<(int)merge.size(); i++) {
 		if (merge.at(i).empty()) {
 			// a track should not have an empty marger spine.
@@ -69345,7 +69436,6 @@ string Tool_deg::prepareMergerLine(const string& input, vector<int>& tracks, vec
 			cerr << "STRANGE CASE 2" << endl;
 			continue;
 		}
-
 
 		if (i == 0) {
 			line1.at(i) = merge.at(i);
@@ -69810,6 +69900,7 @@ void Tool_deg::ScaleDegree::setLinkedKernToken(HTp token, const string& mode, in
 		m_mode = m_unknown_mode;
 		m_b40tonic = -1;
 	}
+
 }
 
 
