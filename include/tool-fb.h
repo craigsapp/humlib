@@ -80,6 +80,7 @@ class Tool_fb : public HumTool {
 		vector<FiguredBassNumber*> getAbbreviatedNumbers                  (const vector<FiguredBassNumber*>& numbers);
 		string                     getNumberString                        (vector<FiguredBassNumber*> numbers);
 		string                     getKeySignature                        (HumdrumFile& infile, int lineIndex);
+		int                        getLowestBase40Pitch                   (vector<int> base40Pitches);
 
 
 	private:

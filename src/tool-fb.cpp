@@ -185,8 +185,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			}
 		}
 
+		int lowestBaseNoteBase40Pitch = getLowestBase40Pitch(baseCell->getToken()->resolveNull()->getBase40Pitches());
+
 		// Ignore if base is a rest or silent note
-		if (baseCell->getSgnBase40Pitch() == -1000 || baseCell->getSgnBase40Pitch() == -2000) {
+		if (lowestBaseNoteBase40Pitch == 0 || lowestBaseNoteBase40Pitch == -1000 || lowestBaseNoteBase40Pitch == -2000) {
 			continue;
 		}
 
@@ -204,17 +206,17 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
 
 					// Ignore if target is a rest or silent note
-					if (subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+					if (subtokenBase40 == 0 || subtokenBase40 == -1000 || subtokenBase40 == -2000) {
 						continue;
 					}
 					
 					// Ignore if same pitch as base voice
-					if (baseCell->getAbsBase40Pitch() == abs(subtokenBase40)) {
+					if (abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) {
 						continue;
 					}
 
 					// Create FiguredBassNumber
-					FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
+					FiguredBassNumber* number = createFiguredBassNumber(abs(lowestBaseNoteBase40Pitch), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
 					if (lastNumbers[j].size() != 0) {
 						// If a number belongs to a sustained note but the base note did change
 						// the new numbers need to be displayable
@@ -667,6 +669,26 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 	return keySignature;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_fb::getLowestBase40Pitch -- Get lowest base 40 pitch that is not a rest or silent
+//
+
+int Tool_fb::getLowestBase40Pitch(vector<int> base40Pitches) {
+	vector<int> filteredBase40Pitches;
+	copy_if(base40Pitches.begin(), base40Pitches.end(), std::back_inserter(filteredBase40Pitches), [](int base40Pitch) {
+		// Ignore if base is a rest or silent note
+		return base40Pitch != -1000 && base40Pitch != -2000 && base40Pitch != 0;
+	});
+
+	if (filteredBase40Pitches.size() == 0) {
+		return -2000;
+	}
+
+	return *min_element(begin(filteredBase40Pitches), end(filteredBase40Pitches));
+}
 
 
 //////////////////////////////
