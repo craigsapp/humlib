@@ -193,35 +193,46 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			NoteCell* targetCell = grid.cell(j, i);
-			HTp resolvedToken = targetCell->getToken()->resolveNull();
-
-			// TODO: handle spine splits
-
+			HTp currentToken = targetCell->getToken();
+			int initialTokenTrack = targetCell->getToken()->getTrack();
 			vector<FiguredBassNumber*> chordNumbers = {};
 
-			for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
-
-				// Ignore if target is a rest or silent note
-				if (subtokenBase40 == -1000 || subtokenBase40 == -2000) {
-					continue;
-				}
+			// Handle spine splits
+			do {
+				HTp resolvedToken = currentToken->resolveNull();
 				
-				// Ignore if same pitch as base voice
-				if (baseCell->getAbsBase40Pitch() == abs(subtokenBase40)) {
-					continue;
+				for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
+
+					// Ignore if target is a rest or silent note
+					if (subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+						continue;
+					}
+					
+					// Ignore if same pitch as base voice
+					if (baseCell->getAbsBase40Pitch() == abs(subtokenBase40)) {
+						continue;
+					}
+
+					// Create FiguredBassNumber
+					FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
+					if (lastNumbers[j].size() != 0) {
+						// If a number belongs to a sustained note but the base note did change
+						// the new numbers need to be displayable
+						number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (std::find(lastNumbers[j].begin(), lastNumbers[j].end(), number->m_number) != lastNumbers[j].end());
+					}
+
+					currentNumbers[j].push_back(number->m_number);
+					chordNumbers.push_back(number);
 				}
 
-				// Create FiguredBassNumber
-				FiguredBassNumber* number = createFiguredBassNumber(baseCell->getAbsBase40Pitch(), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
-				if (lastNumbers[j].size() != 0) {
-					// If a number belongs to a sustained note but the base note did change
-					// the new numbers need to be displayable
-					number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (std::find(lastNumbers[j].begin(), lastNumbers[j].end(), number->m_number) != lastNumbers[j].end());
+				HTp nextToken = currentToken->getNextField();
+				if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
+						currentToken = nextToken;
+				} else {
+					// Break loop if nextToken is not the same track as initialTokenTrack
+					break;
 				}
-
-				currentNumbers[j].push_back(number->m_number);
-				chordNumbers.push_back(number);
-			}
+			} while (currentToken);
 
 			// Sort chord numbers by size
 			sort(chordNumbers.begin(), chordNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
