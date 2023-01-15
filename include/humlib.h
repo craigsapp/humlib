@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 00:32:57 CET
+// Last Modified: Mo 16 Jan 2023 00:43:21 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6578,10 +6578,10 @@ class Tool_deg : public HumTool {
 	// Tool_deg::ScaleDegree --
 	//
 
-	public:
+	public: // Tool_deg class
 		class ScaleDegree;
 		class ScaleDegree {
-			public:
+			public:  // ScaleDegree class
 				ScaleDegree (void);
 				~ScaleDegree ();
 
@@ -6613,27 +6613,53 @@ class Tool_deg : public HumTool {
 				int             getSubtokenCount         (void) const;
 
 				// output options:
-				static void     setShowTies              (bool state);
+				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
+				static void     setShowZeros (bool state) { m_showZerosQ = state; }
 
-			protected:
+			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
 				std::string     generateDegDataSubtoken  (int index) const;
-				void            setMinorMode             (int b40tonic);
-				void            setMajorMode             (int b40tonic);
 				void            analyzeTokenScaleDegrees (void);
 
-			private:
+				void            setMajorMode             (int b40tonic);
+				void            setMinorMode             (int b40tonic);
+				void            setDorianMode            (int b40tonic);
+				void            setPhrygianMode          (int b40tonic);
+				void            setLydianMode            (int b40tonic);
+				void            setMixolydianMode        (int b40tonic);
+				void            setAeoleanMode           (int b40tonic);
+				void            setLocrianMode           (int b40tonic);
+				void            setIonianMode            (int b40tonic);
+
+			private:  // ScaleDegree class
 				// m_token: token in **kern data that links to this scale degree
 				HTp m_linkedKernToken = NULL;
 
 				// m_unpitched: true if unpitched (because in a percussion part)
 				bool m_unpitched = false;
 
-			   // m_mode: the mode of the current key	(0 = none, 1 = major, 2 = minor)
+				// m_mode: the mode of the current key	(0 = none, 1 = major, 2 = minor)
+				//
+				// modal keys:
+				// 3 = dorian (such as *c:dor)
+				// 4 = phrygian (such as *c:phr)
+				// 5 = lydian (such as *C:lyd)
+				// 6 = mixolydian (such as *C:mix)
+				// 7 = aeolean (such as *c:aeo)
+				// 8 = locrian (such as *c:loc)
+				// 9 = ionian (such as *C:ion)
+				//
 				int m_mode = 0;
 				const int m_unknown_mode = 0;
 				const int m_major_mode   = 1;
 				const int m_minor_mode   = 2;
+				const int m_dor_mode     = 3;
+				const int m_phr_mode     = 4;
+				const int m_lyd_mode     = 5;
+				const int m_mix_mode     = 6;
+				const int m_aeo_mode     = 7;
+				const int m_loc_mode     = 8;
+				const int m_ion_mode     = 9;
 
 				// m_b40tonic: the tonic pitch of the key expressed as base-40
 				int m_b40tonic = 0;
@@ -6665,8 +6691,9 @@ class Tool_deg : public HumTool {
 				ScaleDegree* m_prevRest = NULL;
 				ScaleDegree* m_nextRest = NULL;
 
-				// Rendering options:
+				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
+				static bool m_showZerosQ;
 		};
 
 
@@ -6675,7 +6702,7 @@ class Tool_deg : public HumTool {
 	// Tool_deg --
 	//
 
-	public:
+	public:  // Tool_deg class
 		      Tool_deg         (void);
 		     ~Tool_deg         () {};
 
@@ -6684,16 +6711,22 @@ class Tool_deg : public HumTool {
 		bool  run              (const std::string& indata, std::ostream& out);
 		bool  run              (HumdrumFile& infile, std::ostream& out);
 
-	protected:
+	protected: // Tool_deg class
 		void            processFile              (HumdrumFile& infile);
 		void            initialize               (void);
 
 		void            prepareDegSpine          (vector<vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
-		void            printDegScore            (void);
+		void            printDegScore            (HumdrumFile& infile);
 		void            printDegScoreInterleavedWithInputScore(HumdrumFile& infile);
-		std::string     createOutputHumdrumLine(HumdrumFile& infile, std::vector<int> insertTracks, int lineIndex);
+		std::string     createOutputHumdrumLine  (HumdrumFile& infile, std::vector<int>& insertTracks, int lineIndex);
+      std::string     prepareMergerLine        (const std::string& input, std::vector<int>& tracks, std::vector<string>& tokens, bool inputMerger, bool outputMerger);
+		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
+		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
+		std::string     createDegInterpretation  (const string& degtok, int refLine, bool addPreSpine);
+		std::string     printDegInterpretation   (const string& interp, HumdrumFile& infile, int lineIndex);
+		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);
 
-	private:
+	private: // Tool_deg class
 
 		// m_degSpine: A three-dimensional list of **deg output spines.
 		// This is a scratch pad to create **deg data for the input **kern
@@ -6706,8 +6739,35 @@ class Tool_deg : public HumTool {
 		//    handled by Tool_deg::ScaleDegree class).
 		std::vector<std::vector<std::vector<ScaleDegree>>> m_degSpines;
 
-		bool m_degOnlyQ = false;  // used with -I option
-		bool m_degTiesQ = false;  // used with -t option
+		bool m_arrowQ          = false;   // used with --arrow option
+		bool m_degOnlyQ        = false;   // used with -I option
+		bool m_recipQ          = false;   // used with -r option
+		bool m_kernQ           = false;   // used with --kern option
+		bool m_degTiesQ        = false;   // used with -t option
+		bool m_forceKeyQ       = false;   // used with -K option
+
+		std::string m_defaultKey  = "";    // used with --default-key option
+		std::string m_forcedKey   = "";    // used with --forced-key option
+		std::string m_kernSuffix  = "dR/"; // used with --kern option (currently hardwired)
+		std::string m_spineTracks = "";    // used with -s option
+		std::string m_kernTracks  = "";    // used with -k option
+
+		std::vector<bool> m_processTrack;  // used with -k and -s option
+
+		class InterleavedPrintVariables {
+			public:
+				bool foundData;
+				bool foundArrowLine;
+				bool hasDegSpines;
+
+				InterleavedPrintVariables(void) { clear(); }
+				void clear(void) {
+					foundData      = false;
+					foundArrowLine = false;
+					hasDegSpines   = true;
+				}
+		};
+		InterleavedPrintVariables m_ipv;
 
 };
 

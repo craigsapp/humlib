@@ -234,7 +234,7 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 				val = hre.getMatchInt(1);
 				tbuff = to_string(maxtrack - val);
 			}
-			hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+			hre.replaceDestructive(entries[i], tbuff, "\\$\\d*");
 		}
 
 		range = false;
@@ -248,13 +248,13 @@ void Convert::makeBooleanTrackList(vector<bool>& spinelist,
 					val = hre.getMatchInt(1);
 					tbuff = to_string(maxtrack - val);
 				}
-				hre.replaceDestructive(entries[i], tbuff, "\\$\\d+");
+				hre.replaceDestructive(entries[i], tbuff, "\\$\\d*");
 			}
 			if (entries[i].back() == '$') {
 				entries[i].pop_back();
 				entries[i] += to_string(maxtrack);
 			}
-			// extract second vlaue
+			// extract second value
 			if (hre.search(entries[i], "-(\\d+)")) {
 				val2 = hre.getMatchInt(1);
 			} else {

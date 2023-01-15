@@ -1296,7 +1296,7 @@ void HumdrumFileBase::getPrimaryTrackSequence(vector<HTp>& sequence, int track,
 // * OPT_NONULL     => don't include any null tokens in extracted list.
 // * OPT_NOINTERP   => don't include interprtation tokens.
 // * OPT_NOMANIP    => don't include spine manipulators (*^, *v, *x, *+,
-//                        but still keep ** and *0).
+//                        but still keep ** and *-).
 // * OPT_NOCOMMENT  => don't include comment tokens.
 // * OPT_NOGLOBAL   => don't include global records (global comments, reference
 //                        records, and empty lines). In other words, only return
@@ -1594,7 +1594,7 @@ bool HumdrumFileBase::stitchLinesTogether(HumdrumLine& previous,
 				cerr << "Strange error 4" << endl;
 			}
 		} else if (previous.token(i)->isMergeInterpretation()) {
-			// connect multiple previous tokens which are adjacent *v
+			// Connect multiple previous tokens which are adjacent *v
 			// spine manipulators to the current next token.
 			while ((i<previous.getTokenCount()) &&
 					previous.token(i)->isMergeInterpretation()) {
@@ -2177,7 +2177,7 @@ void HumdrumFileBase::addUniqueTokens(vector<HTp>& target,
 
 //////////////////////////////
 //
-// HumdrumFileBase::adjustMergeSpineLines -- fix *v lines to that adjacent
+// HumdrumFileBase::adjustMergeSpineLines -- fix *v lines so that adjacent
 //     tracks do not merge at the same time.  In other words, split the line
 //     into two or more merge lines.
 //
