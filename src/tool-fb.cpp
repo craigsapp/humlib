@@ -41,6 +41,8 @@ Tool_fb::Tool_fb(void) {
 	define("m|negative=b",      "show negative numbers");
 	define("above=b",           "place figured bass numbers above staff (**fba)");
 	define("recip=s:",          "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
+	define("k|kern-tracks=s",   "Process only the specified kern spines");
+	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
 
 
@@ -108,6 +110,12 @@ void Tool_fb::initialize(void) {
 	m_aboveQ         = getBoolean("above");
 	m_recipQ         = getString("recip");
 
+	if (getBoolean("spine-tracks")) {
+		m_spineTracks = getString("spine-tracks");
+	} else if (getBoolean("kern-tracks")) {
+		m_kernTracks = getString("kern-tracks");
+	}
+
 	if (m_normalizeQ) {
 		m_compoundQ = true;
 		m_sortQ = true;
@@ -143,6 +151,27 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	vector<FiguredBassNumber*> numbers;
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
+
+	// Calculate which input spines to process based on -s or -k option:
+	int maxTrack = infile.getMaxTrack();
+	m_processTrack.resize(maxTrack + 1); // +1 is needed since track=0 is not used
+	// By default, process all tracks:
+	fill(m_processTrack.begin(), m_processTrack.end(), true);
+	// Otherwise, select which **kern track, or spine tracks to process selectively:
+	if (!m_kernTracks.empty()) {
+		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
+		fill(m_processTrack.begin(), m_processTrack.end(), false);
+		for (int i=0; i<(int)ktracks.size(); i++) {
+			int index = ktracks[i] - 1;
+			if ((index < 0) || (index >= (int)kernspines.size())) {
+				continue;
+			}
+			int track = kernspines.at(ktracks[i] - 1)->getTrack();
+			m_processTrack.at(track) = true;
+		}
+	} else if (!m_spineTracks.empty()) {
+		infile.makeBooleanTrackList(m_processTrack, m_spineTracks);
+	}
 
 	vector<vector<int>> lastNumbers = {};
 	lastNumbers.resize((int)grid.getVoiceCount());
@@ -198,6 +227,12 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		// Interate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			NoteCell* targetCell = grid.cell(j, i);
+
+			// Ignore voice if track is not active by --kern-tracks or --spine-tracks
+			if (m_processTrack.at(targetCell->getToken()->getTrack()) == false) {
+				continue;
+			}
+
 			HTp currentToken = targetCell->getToken();
 			int initialTokenTrack = targetCell->getToken()->getTrack();
 			vector<FiguredBassNumber*> chordNumbers = {};

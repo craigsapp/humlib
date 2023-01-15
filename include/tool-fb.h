@@ -99,6 +99,10 @@ class Tool_fb : public HumTool {
 		bool   m_aboveQ         = false;
 		string m_recipQ         = "";
 
+		string m_spineTracks    = ""; // used with -s option
+		string m_kernTracks     = ""; // used with -k option
+		vector<bool> m_processTrack;  // used with -k and -s option
+
 };
 
 // END_MERGE
