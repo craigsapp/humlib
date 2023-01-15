@@ -162,6 +162,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
+				// TODO: Handle spine splits
 				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
 				// Ignore if base is a rest or silent note
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
@@ -676,6 +677,7 @@ string Tool_fb::getKeySignature(HumdrumFile& infile, int lineIndex) {
 //////////////////////////////
 //
 // Tool_fb::getLowestBase40Pitch -- Get lowest base 40 pitch that is not a rest or silent
+//    TODO: Handle negative values and sustained notes
 //
 
 int Tool_fb::getLowestBase40Pitch(vector<int> base40Pitches) {
