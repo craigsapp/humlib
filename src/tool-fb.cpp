@@ -256,7 +256,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 					}
 					
 					// Ignore if same pitch as base voice
-					if (abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) {
+					if ((abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) && (baseCell->getToken()->getTrack() == initialTokenTrack)) {
 						continue;
 					}
 

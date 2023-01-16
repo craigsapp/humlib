@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 17:15:27 CET
+// Last Modified: Mo 16 Jan 2023 19:44:50 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77618,7 +77618,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 					}
 					
 					// Ignore if same pitch as base voice
-					if (abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) {
+					if ((abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) && (baseCell->getToken()->getTrack() == initialTokenTrack)) {
 						continue;
 					}
 
