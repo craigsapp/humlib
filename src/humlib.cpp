@@ -78081,7 +78081,7 @@ int Tool_fb::getLowestBase40Pitch(vector<int> base40Pitches) {
 	vector<int> filteredBase40Pitches;
 	copy_if(base40Pitches.begin(), base40Pitches.end(), std::back_inserter(filteredBase40Pitches), [](int base40Pitch) {
 		// Ignore if base is a rest or silent note
-		return base40Pitch != -1000 && base40Pitch != -2000 && base40Pitch != 0;
+		return (base40Pitch != -1000) && (base40Pitch != -2000) && (base40Pitch != 0);
 	});
 
 	if (filteredBase40Pitches.size() == 0) {
