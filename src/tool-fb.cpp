@@ -190,10 +190,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		currentNumbers.clear();
 		currentNumbers.resize((int)grid.getVoiceCount());
 
-		// Reset usedBaseTrack
-		int usedBaseTrack = m_baseTrackQ;
+		// Reset usedBaseKernTrack
+		int usedBaseKernTrack = m_baseTrackQ;
 
-		// Overwrite usedBaseTrack with the lowest voice index of the lowest pitched note
+		// Overwrite usedBaseKernTrack with the lowest voice index of the lowest pitched note
 		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
@@ -204,13 +204,13 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
 					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
 						lowestNotePitch = checkCellPitch;
-						usedBaseTrack = k + 1;
+						usedBaseKernTrack = k + 1;
 					}
 				}
 			}
 		}
 
-		NoteCell* baseCell = grid.cell(usedBaseTrack - 1, i);
+		NoteCell* baseCell = grid.cell(usedBaseKernTrack - 1, i);
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip
