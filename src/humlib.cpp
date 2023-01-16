@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 00:58:36 CET
+// Last Modified: Mo 16 Jan 2023 01:14:53 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77389,21 +77389,21 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",      "output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",   "display accidentals in figured bass output");
-	define("b|base=i:0",        "number of the base voice/spine");
-	define("i|intervallsatz=b", "display intervals under their voice and not under the lowest staff");
-	define("o|sort|order=b",    "sort figured bass numbers by interval size and not by voice index");
-	define("l|lowest=b",        "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b",     "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbr=b",          "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|attack=b",        "hide intervalls with no attack and when base does not change");
-	define("f|figuredbass=b",   "shortcut for -c -a -o -n -r -3");
-	define("3|hide-three=b",    "hide number 3 if it has an accidental (e.g.: #3 => #)");
-	define("m|negative=b",      "show negative numbers");
-	define("above=b",           "place figured bass numbers above staff (**fba)");
-	define("recip=s:",          "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
-	define("k|kern-tracks=s",   "Process only the specified kern spines");
+	define("c|compound=b",          "output reasonable figured bass numbers within octave");
+	define("a|accidentals=b",       "display accidentals in figured bass output");
+	define("b|base|base-track=i:1", "number of the base kern track (compare with -k)");
+	define("i|intervallsatz=b",     "display intervals under their voice and not under the lowest staff");
+	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
+	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
+	define("r|abbr=b",              "use abbreviated figures; adds: --normalize --compound --sort");
+	define("t|attack=b",            "hide intervalls with no attack and when base does not change");
+	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
+	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
+	define("m|negative=b",          "show negative numbers");
+	define("above=b",               "place figured bass numbers above staff (**fba)");
+	define("recip=s:",              "only show numbers if they are divisible by this **recip value (e.g. 2, 4, 8, 4.)");
+	define("k|kern-tracks=s",       "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
 
@@ -77514,12 +77514,19 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
-	// Calculate which input spines to process based on -s or -k option:
 	int maxTrack = infile.getMaxTrack();
+
+	// Do nothing if base track not withing kern track range
+	if (m_baseTrackQ < 1 || m_baseTrackQ > maxTrack) {
+		return;
+	}
+
 	m_processTrack.resize(maxTrack + 1); // +1 is needed since track=0 is not used
 	// By default, process all tracks:
 	fill(m_processTrack.begin(), m_processTrack.end(), true);
 	// Otherwise, select which **kern track, or spine tracks to process selectively:
+
+	// Calculate which input spines to process based on -s or -k option:
 	if (!m_kernTracks.empty()) {
 		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
 		fill(m_processTrack.begin(), m_processTrack.end(), false);
