@@ -262,11 +262,6 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 					// Create FiguredBassNumber
 					FiguredBassNumber* number = createFiguredBassNumber(abs(lowestBaseNoteBase40Pitch), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
-					if (lastNumbers[j].size() != 0) {
-						// If a number belongs to a sustained note but the base note did change
-						// the new numbers need to be displayable
-						number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (std::find(lastNumbers[j].begin(), lastNumbers[j].end(), number->m_number) != lastNumbers[j].end());
-					}
 
 					currentNumbers[j].push_back(number->m_number);
 					chordNumbers.push_back(number);
@@ -288,6 +283,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 			// Then add to numbers vector
 			for (FiguredBassNumber*  num: chordNumbers) {
+				if (lastNumbers[j].size() != 0) {
+					// If a number belongs to a sustained note but the base note did change
+					// the new numbers need to be displayable
+					num->m_baseOfSustainedNoteDidChange = !num->m_isAttack && std::find(lastNumbers[j].begin(), lastNumbers[j].end(), num->m_number) == lastNumbers[j].end();
+				}
 				numbers.push_back(num);
 			}
 		}
@@ -564,7 +564,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	if (m_intervallsatzQ && m_attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
 		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
-			return num->m_isAttack || num->m_currAttackNumberDidChange;
+			return num->m_isAttack || num->m_baseOfSustainedNoteDidChange;
 		});
 		formattedNumbers = attackNumbers;
 	}
