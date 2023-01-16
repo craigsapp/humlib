@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 10:08:28 CET
+// Last Modified: Mo 16 Jan 2023 17:15:27 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77397,7 +77397,7 @@ Tool_fb::Tool_fb(void) {
 	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
 	define("r|abbr=b",              "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|attack=b",            "hide intervalls with no attack and when base does not change");
+	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
 	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",          "show negative numbers");
@@ -77465,12 +77465,12 @@ void Tool_fb::initialize(void) {
 	m_lowestQ        = getBoolean("lowest");
 	m_normalizeQ     = getBoolean("normalize");
 	m_abbrQ          = getBoolean("abbr");
-	m_attackQ        = getBoolean("attack");
+	m_attackQ        = getBoolean("ties");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
 	m_aboveQ         = getBoolean("above");
-	m_recipQ         = getString("recip");
+	m_recipQ         = getString("frequency");
 
 	if (getBoolean("spine-tracks")) {
 		m_spineTracks = getString("spine-tracks");
@@ -77552,10 +77552,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		currentNumbers.clear();
 		currentNumbers.resize((int)grid.getVoiceCount());
 
-		// Reset usedBaseTrack
-		int usedBaseTrack = m_baseTrackQ;
+		// Reset usedBaseKernTrack
+		int usedBaseKernTrack = m_baseTrackQ;
 
-		// Overwrite usedBaseTrack with the lowest voice index of the lowest pitched note
+		// Overwrite usedBaseKernTrack with the lowest voice index of the lowest pitched note
 		if (m_lowestQ) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
@@ -77564,15 +77564,15 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
 				// Ignore if base is a rest or silent note
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
-					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
-						lowestNotePitch = checkCellPitch;
-						usedBaseTrack = checkCell->getToken()->getTrack();
+					if (abs(checkCellPitch) < lowestNotePitch) {
+						lowestNotePitch = abs(checkCellPitch);
+						usedBaseKernTrack = k + 1;
 					}
 				}
 			}
 		}
 
-		NoteCell* baseCell = grid.cell(usedBaseTrack - 1, i);
+		NoteCell* baseCell = grid.cell(usedBaseKernTrack - 1, i);
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip
@@ -77624,11 +77624,6 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 					// Create FiguredBassNumber
 					FiguredBassNumber* number = createFiguredBassNumber(abs(lowestBaseNoteBase40Pitch), abs(subtokenBase40), targetCell->getVoiceIndex(), targetCell->getLineIndex(), targetCell->isAttack(), keySignature);
-					if (lastNumbers[j].size() != 0) {
-						// If a number belongs to a sustained note but the base note did change
-						// the new numbers need to be displayable
-						number->m_currAttackNumberDidChange = (targetCell->isSustained()) && (std::find(lastNumbers[j].begin(), lastNumbers[j].end(), number->m_number) != lastNumbers[j].end());
-					}
 
 					currentNumbers[j].push_back(number->m_number);
 					chordNumbers.push_back(number);
@@ -77650,6 +77645,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 			// Then add to numbers vector
 			for (FiguredBassNumber*  num: chordNumbers) {
+				if (lastNumbers[j].size() != 0) {
+					// If a number belongs to a sustained note but the base note did change
+					// the new numbers need to be displayable
+					num->m_baseOfSustainedNoteDidChange = !num->m_isAttack && std::find(lastNumbers[j].begin(), lastNumbers[j].end(), num->m_number) == lastNumbers[j].end();
+				}
 				numbers.push_back(num);
 			}
 		}
@@ -77926,7 +77926,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	if (m_intervallsatzQ && m_attackQ) {
 		vector<FiguredBassNumber*> attackNumbers;
 		copy_if(formattedNumbers.begin(), formattedNumbers.end(), back_inserter(attackNumbers), [](FiguredBassNumber* num) {
-			return num->m_isAttack || num->m_currAttackNumberDidChange;
+			return num->m_isAttack || num->m_baseOfSustainedNoteDidChange;
 		});
 		formattedNumbers = attackNumbers;
 	}

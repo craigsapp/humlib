@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 10:08:28 CET
+// Last Modified: Mo 16 Jan 2023 17:15:27 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7178,7 +7178,7 @@ class FiguredBassNumber {
 		int         m_number;
 		std::string m_accidentals;
 		bool        m_showAccidentals; // Force shoing figured base numbers when they need an accidental
-		bool        m_currAttackNumberDidChange;
+		bool        m_baseOfSustainedNoteDidChange;
 		bool        m_isAttack;
 		bool        m_convert2To9 = false;
 		bool        m_intervallsatz = false;
