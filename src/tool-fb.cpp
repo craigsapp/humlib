@@ -35,7 +35,7 @@ Tool_fb::Tool_fb(void) {
 	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
 	define("r|abbr=b",              "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|attack=b",            "hide intervalls with no attack and when base does not change");
+	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
 	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",          "show negative numbers");
@@ -103,7 +103,7 @@ void Tool_fb::initialize(void) {
 	m_lowestQ        = getBoolean("lowest");
 	m_normalizeQ     = getBoolean("normalize");
 	m_abbrQ          = getBoolean("abbr");
-	m_attackQ        = getBoolean("attack");
+	m_attackQ        = getBoolean("ties");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
