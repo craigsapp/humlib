@@ -108,7 +108,7 @@ void Tool_fb::initialize(void) {
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
 	m_aboveQ         = getBoolean("above");
-	m_recipQ         = getString("recip");
+	m_recipQ         = getString("frequency");
 
 	if (getBoolean("spine-tracks")) {
 		m_spineTracks = getString("spine-tracks");
