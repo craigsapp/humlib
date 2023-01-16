@@ -204,7 +204,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
 					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
 						lowestNotePitch = checkCellPitch;
-						usedBaseTrack = checkCell->getToken()->getTrack();
+						usedBaseTrack = k + 1;
 					}
 				}
 			}
