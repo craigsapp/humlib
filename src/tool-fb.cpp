@@ -202,8 +202,8 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
 				// Ignore if base is a rest or silent note
 				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
-					if ((checkCellPitch > 0) && (checkCellPitch < lowestNotePitch)) {
-						lowestNotePitch = checkCellPitch;
+					if (abs(checkCellPitch) < lowestNotePitch) {
+						lowestNotePitch = abs(checkCellPitch);
 						usedBaseKernTrack = k + 1;
 					}
 				}
