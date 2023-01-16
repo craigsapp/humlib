@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 16 Jan 2023 19:44:50 CET
+// Last Modified: Di 17 Jan 2023 00:38:37 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77573,6 +77573,12 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		}
 
 		NoteCell* baseCell = grid.cell(usedBaseKernTrack - 1, i);
+
+		// Ignore grace notes
+		if (baseCell->getToken()->getOwner()->getDuration() == 0) {
+			continue;
+		}
+
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip

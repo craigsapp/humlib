@@ -211,6 +211,12 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		}
 
 		NoteCell* baseCell = grid.cell(usedBaseKernTrack - 1, i);
+
+		// Ignore grace notes
+		if (baseCell->getToken()->getOwner()->getDuration() == 0) {
+			continue;
+		}
+
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
 		// Hide numbers if they do not match rhythmic position of --recip
