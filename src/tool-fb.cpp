@@ -152,12 +152,19 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 	vector<HTp> kernspines = infile.getKernSpineStartList();
 
-	// Calculate which input spines to process based on -s or -k option:
 	int maxTrack = infile.getMaxTrack();
+
+	// Do nothing if base track not withing kern track range
+	if (m_baseTrackQ < 1 || m_baseTrackQ > maxTrack) {
+		return;
+	}
+
 	m_processTrack.resize(maxTrack + 1); // +1 is needed since track=0 is not used
 	// By default, process all tracks:
 	fill(m_processTrack.begin(), m_processTrack.end(), true);
 	// Otherwise, select which **kern track, or spine tracks to process selectively:
+
+	// Calculate which input spines to process based on -s or -k option:
 	if (!m_kernTracks.empty()) {
 		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
 		fill(m_processTrack.begin(), m_processTrack.end(), false);
