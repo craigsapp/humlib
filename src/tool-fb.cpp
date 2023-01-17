@@ -247,8 +247,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 			HTp nextToken = currentToken->getNextField();
 			if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
-					cerr << nextToken->getText();
-					currentToken = nextToken;
+				currentToken = nextToken;
 			} else {
 				// Break loop if nextToken is not the same track as initialTokenTrack
 				break;

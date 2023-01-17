@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Jan 2023 21:06:51 CET
+// Last Modified: Di 17 Jan 2023 21:09:28 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78045,8 +78045,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 			HTp nextToken = currentToken->getNextField();
 			if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
-					cerr << nextToken->getText();
-					currentToken = nextToken;
+				currentToken = nextToken;
 			} else {
 				// Break loop if nextToken is not the same track as initialTokenTrack
 				break;
