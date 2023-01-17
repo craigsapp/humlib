@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Jan 2023 21:09:28 CET
+// Last Modified: Di 17 Jan 2023 22:03:55 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77996,15 +77996,28 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
-				// TODO: Handle spine splits
-				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
-				// Ignore if base is a rest or silent note
-				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
-					if (abs(checkCellPitch) < lowestNotePitch) {
-						lowestNotePitch = abs(checkCellPitch);
+				HTp currentToken = checkCell->getToken();
+				int initialTokenTrack = currentToken->getTrack();
+
+				// Handle spine splits
+				do {
+					HTp resolvedToken = currentToken->resolveNull();
+					
+					int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
+
+					if (abs(lowest) < lowestNotePitch) {
+						lowestNotePitch = abs(lowest);
 						usedBaseKernTrack = k + 1;
 					}
-				}
+
+					HTp nextToken = currentToken->getNextField();
+					if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
+						currentToken = nextToken;
+					} else {
+						// Break loop if nextToken is not the same track as initialTokenTrack
+						break;
+					}
+				} while (currentToken);
 			}
 		}
 
@@ -78031,7 +78044,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 		HTp currentToken = baseCell->getToken();
 		int initialTokenTrack = baseCell->getToken()->getTrack();
-		int lowestBaseNoteBase40Pitch = getLowestBase40Pitch(baseCell->getToken()->resolveNull()->getBase40Pitches());
+		int lowestBaseNoteBase40Pitch = 9999;
 
 		// Handle spine splits
 		do {
@@ -78039,8 +78052,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			
 			int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
 
-			if(lowest < lowestBaseNoteBase40Pitch) {
-				lowestBaseNoteBase40Pitch = lowest;
+			// Ignore if base is a rest or silent note
+			if ((lowest != 0) && (lowest != -1000) && (lowest != -2000)) {
+				if(abs(lowest) < lowestBaseNoteBase40Pitch) {
+					lowestBaseNoteBase40Pitch = abs(lowest);
+				}
 			}
 
 			HTp nextToken = currentToken->getNextField();
@@ -78053,7 +78069,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		} while (currentToken);
 
 		// Ignore if base is a rest or silent note
-		if (lowestBaseNoteBase40Pitch == 0 || lowestBaseNoteBase40Pitch == -1000 || lowestBaseNoteBase40Pitch == -2000) {
+		if ((lowestBaseNoteBase40Pitch == 0) || (lowestBaseNoteBase40Pitch == -1000) || (lowestBaseNoteBase40Pitch == -2000) || (lowestBaseNoteBase40Pitch == 9999)) {
 			continue;
 		}
 
@@ -78077,7 +78093,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
 
 					// Ignore if target is a rest or silent note
-					if (subtokenBase40 == 0 || subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+					if ((subtokenBase40 == 0) || (subtokenBase40 == -1000) || (subtokenBase40 == -2000)) {
 						continue;
 					}
 					
