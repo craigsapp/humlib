@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Jan 2023 00:38:37 CET
+// Last Modified: Di 17 Jan 2023 21:03:33 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -77592,7 +77592,30 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			}
 		}
 
+
+		HTp currentToken = baseCell->getToken();
+		int initialTokenTrack = baseCell->getToken()->getTrack();
 		int lowestBaseNoteBase40Pitch = getLowestBase40Pitch(baseCell->getToken()->resolveNull()->getBase40Pitches());
+
+		// Handle spine splits
+		do {
+			HTp resolvedToken = currentToken->resolveNull();
+			
+			int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
+
+			if(lowest < lowestBaseNoteBase40Pitch) {
+				lowestBaseNoteBase40Pitch = lowest;
+			}
+
+			HTp nextToken = currentToken->getNextField();
+			if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
+					cerr << nextToken->getText();
+					currentToken = nextToken;
+			} else {
+				// Break loop if nextToken is not the same track as initialTokenTrack
+				break;
+			}
+		} while (currentToken);
 
 		// Ignore if base is a rest or silent note
 		if (lowestBaseNoteBase40Pitch == 0 || lowestBaseNoteBase40Pitch == -1000 || lowestBaseNoteBase40Pitch == -2000) {

@@ -230,7 +230,30 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			}
 		}
 
+
+		HTp currentToken = baseCell->getToken();
+		int initialTokenTrack = baseCell->getToken()->getTrack();
 		int lowestBaseNoteBase40Pitch = getLowestBase40Pitch(baseCell->getToken()->resolveNull()->getBase40Pitches());
+
+		// Handle spine splits
+		do {
+			HTp resolvedToken = currentToken->resolveNull();
+			
+			int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
+
+			if(lowest < lowestBaseNoteBase40Pitch) {
+				lowestBaseNoteBase40Pitch = lowest;
+			}
+
+			HTp nextToken = currentToken->getNextField();
+			if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
+					cerr << nextToken->getText();
+					currentToken = nextToken;
+			} else {
+				// Break loop if nextToken is not the same track as initialTokenTrack
+				break;
+			}
+		} while (currentToken);
 
 		// Ignore if base is a rest or silent note
 		if (lowestBaseNoteBase40Pitch == 0 || lowestBaseNoteBase40Pitch == -1000 || lowestBaseNoteBase40Pitch == -2000) {
