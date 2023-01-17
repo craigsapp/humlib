@@ -233,7 +233,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 		HTp currentToken = baseCell->getToken();
 		int initialTokenTrack = baseCell->getToken()->getTrack();
-		int lowestBaseNoteBase40Pitch = getLowestBase40Pitch(baseCell->getToken()->resolveNull()->getBase40Pitches());
+		int lowestBaseNoteBase40Pitch = 9999;
 
 		// Handle spine splits
 		do {
@@ -241,8 +241,11 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			
 			int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
 
-			if(lowest < lowestBaseNoteBase40Pitch) {
-				lowestBaseNoteBase40Pitch = lowest;
+			// Ignore if base is a rest or silent note
+			if ((lowest != 0) && (lowest != -1000) && (lowest != -2000)) {
+				if(abs(lowest) < lowestBaseNoteBase40Pitch) {
+					lowestBaseNoteBase40Pitch = abs(lowest);
+				}
 			}
 
 			HTp nextToken = currentToken->getNextField();
@@ -255,7 +258,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		} while (currentToken);
 
 		// Ignore if base is a rest or silent note
-		if ((lowestBaseNoteBase40Pitch == 0) || (lowestBaseNoteBase40Pitch == -1000) || (lowestBaseNoteBase40Pitch == -2000)) {
+		if ((lowestBaseNoteBase40Pitch == 0) || (lowestBaseNoteBase40Pitch == -1000) || (lowestBaseNoteBase40Pitch == -2000) || (lowestBaseNoteBase40Pitch == 9999)) {
 			continue;
 		}
 
