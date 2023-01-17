@@ -201,7 +201,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				// TODO: Handle spine splits
 				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
 				// Ignore if base is a rest or silent note
-				if (checkCellPitch != 0 && checkCellPitch != -1000 && checkCellPitch != -2000) {
+				if ((checkCellPitch != 0) && (checkCellPitch != -1000) && (checkCellPitch != -2000)) {
 					if (abs(checkCellPitch) < lowestNotePitch) {
 						lowestNotePitch = abs(checkCellPitch);
 						usedBaseKernTrack = k + 1;
@@ -255,7 +255,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		} while (currentToken);
 
 		// Ignore if base is a rest or silent note
-		if (lowestBaseNoteBase40Pitch == 0 || lowestBaseNoteBase40Pitch == -1000 || lowestBaseNoteBase40Pitch == -2000) {
+		if ((lowestBaseNoteBase40Pitch == 0) || (lowestBaseNoteBase40Pitch == -1000) || (lowestBaseNoteBase40Pitch == -2000)) {
 			continue;
 		}
 
@@ -279,7 +279,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
 
 					// Ignore if target is a rest or silent note
-					if (subtokenBase40 == 0 || subtokenBase40 == -1000 || subtokenBase40 == -2000) {
+					if ((subtokenBase40 == 0) || (subtokenBase40 == -1000) || (subtokenBase40 == -2000)) {
 						continue;
 					}
 					
