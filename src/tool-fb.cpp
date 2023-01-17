@@ -198,15 +198,28 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			int lowestNotePitch = 99999;
 			for (int k=0; k<(int)grid.getVoiceCount(); k++) {
 				NoteCell* checkCell = grid.cell(k, i);
-				// TODO: Handle spine splits
-				int checkCellPitch = getLowestBase40Pitch(checkCell->getToken()->resolveNull()->getBase40Pitches());
-				// Ignore if base is a rest or silent note
-				if ((checkCellPitch != 0) && (checkCellPitch != -1000) && (checkCellPitch != -2000)) {
-					if (abs(checkCellPitch) < lowestNotePitch) {
-						lowestNotePitch = abs(checkCellPitch);
+				HTp currentToken = checkCell->getToken();
+				int initialTokenTrack = currentToken->getTrack();
+
+				// Handle spine splits
+				do {
+					HTp resolvedToken = currentToken->resolveNull();
+					
+					int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
+
+					if (abs(lowest) < lowestNotePitch) {
+						lowestNotePitch = abs(lowest);
 						usedBaseKernTrack = k + 1;
 					}
-				}
+
+					HTp nextToken = currentToken->getNextField();
+					if (nextToken && (initialTokenTrack == nextToken->getTrack())) {
+						currentToken = nextToken;
+					} else {
+						// Break loop if nextToken is not the same track as initialTokenTrack
+						break;
+					}
+				} while (currentToken);
 			}
 		}
 
