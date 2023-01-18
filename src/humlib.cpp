@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jan 17 16:25:37 PST 2023
+// Last Modified: Tue Jan 17 19:21:08 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68941,7 +68941,7 @@ Tool_deg::Tool_deg(void) {
 	define("k|kern-tracks=s", "Process only the specified kern spines");
 	define("kd|dk|key-default|default-key=s", "Default key if none specified in data");
 	define("kf|fk|key-force|force-key=s", "Use the given key for analysing deg data (ignore modulations)");
-	define("o|octave|degree=b", "Encode octave information int **degree spines");
+	define("o|octave|octaves|degree=b", "Encode octave information int **degree spines");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
@@ -69029,6 +69029,14 @@ void Tool_deg::initialize(void) {
 
 	if (getBoolean("default-key")) {
 		m_defaultKey = getString("default-key");
+		if (!m_defaultKey.empty()) {
+			if (m_defaultKey[0] != '*') {
+				m_defaultKey = "*" + m_defaultKey;
+			}
+			if (m_defaultKey.find(":") == string::npos) {
+				m_defaultKey += ":";
+			}
+		}
 	}
 
 	Tool_deg::ScaleDegree::setShowTies(m_degTiesQ);
@@ -69368,7 +69376,7 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 
 		if (!m_ipv.foundKeyDesignationLine) {
 			if (!m_defaultKey.empty() && !m_ipv.foundKeyDesignationLine) {
-				string line = printDegInterpretation("*XXX", infile, lineIndex);
+				string line = printDegInterpretation(m_defaultKey, infile, lineIndex);
 				if (!line.empty()) {
 					extraLines.push_back(line);
 				}
@@ -69420,15 +69428,7 @@ void Tool_deg::checkKeyDesignationStatus(string& value, int keyDesignationStatus
 	if (keyDesignationStatus && (!m_ipv.foundKeyDesignationLine) && (!m_ipv.foundData)) {
 		if (value == "*") {
 			if (!m_defaultKey.empty()) {
-				if (m_defaultKey[0] == '*') {
-					value = m_defaultKey;
-				} else {
-					value = "*";
-					value += m_defaultKey;
-				}
-				if (value.find(":") == string::npos) {
-					value += ":";
-				}
+				value = m_defaultKey;
 			}
 		}
 	}
