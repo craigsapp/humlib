@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Jan  6 13:03:22 PST 2023
-// Last Modified: Sun Jan 15 20:24:59 PST 2023
+// Last Modified: Tue Jan 17 16:24:39 PST 2023
 // Filename:      tool-deg.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-deg.cpp
 // Syntax:        C++11; humlib
@@ -28,6 +28,7 @@ namespace hum {
 
 bool Tool_deg::ScaleDegree::m_showTiesQ  = false;
 bool Tool_deg::ScaleDegree::m_showZerosQ = false;
+bool Tool_deg::ScaleDegree::m_octaveQ = false;
 
 
 
@@ -48,10 +49,11 @@ Tool_deg::Tool_deg(void) {
 	define("k|kern-tracks=s", "Process only the specified kern spines");
 	define("kd|dk|key-default|default-key=s", "Default key if none specified in data");
 	define("kf|fk|key-force|force-key=s", "Use the given key for analysing deg data (ignore modulations)");
+	define("o|octave|degree=b", "Encode octave information int **degree spines");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
-	define("0|z|zero|zeros=b", "Show rests as scale degree 0");
+	define("0|O|z|zero|zeros=b", "Show rests as scale degree 0");
 }
 
 
@@ -125,6 +127,7 @@ void Tool_deg::initialize(void) {
 		m_recipQ = true;
 	}
 	m_degTiesQ = getBoolean("ties");
+	Tool_deg::ScaleDegree::setShowOctaves(getBoolean("octave"));
 
 	if (getBoolean("spine-tracks")) {
 		m_spineTracks = getString("spine-tracks");
@@ -660,7 +663,7 @@ bool Tool_deg::isDegAboveLine(HumdrumFile& infile, int lineIndex) {
 	int degCount = 0;
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (!token->isDataType("**deg")) {
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
 			continue;
 		}
 		degCount++;
@@ -697,7 +700,7 @@ bool Tool_deg::isDegArrowLine(HumdrumFile& infile, int lineIndex) {
 	int degCount = 0;
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (!token->isDataType("**deg")) {
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
 			continue;
 		}
 		degCount++;
@@ -735,7 +738,7 @@ bool Tool_deg::isDegCircleLine(HumdrumFile& infile, int lineIndex) {
 	int degCount = 0;
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (!token->isDataType("**deg")) {
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
 			continue;
 		}
 		degCount++;
@@ -772,7 +775,7 @@ bool Tool_deg::isDegColorLine(HumdrumFile& infile, int lineIndex) {
 	int degCount = 0;
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (!token->isDataType("**deg")) {
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
 			continue;
 		}
 		degCount++;
@@ -807,7 +810,7 @@ bool Tool_deg::isDegHatLine(HumdrumFile& infile, int lineIndex) {
 	int degCount = 0;
 	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
 		HTp token = infile.token(lineIndex, i);
-		if (!token->isDataType("**deg")) {
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
 			continue;
 		}
 		degCount++;
@@ -1629,7 +1632,7 @@ HTp Tool_deg::ScaleDegree::getLinkedKernToken(void) const {
 //////////////////////////////
 //
 // Tool_deg::ScaleDegree:getDegToken -- Convert the ScaleDegre
-//     to a **deg token string.
+//     to a **deg token string (or **degree token if including an octave).
 //
 
 string Tool_deg::ScaleDegree::getDegToken(void) const {
@@ -1643,7 +1646,11 @@ string Tool_deg::ScaleDegree::getDegToken(void) const {
 	}
 
 	if (isExclusiveInterpretation()) {
-		return "**deg";
+		if (m_octaveQ) {
+			return "**degree";
+		} else {
+			return "**deg";
+		}
 	} else if (isManipulator()) {
 		return getManipulator();
 	} else if (isInterpretation()) {
@@ -1786,6 +1793,12 @@ string Tool_deg::ScaleDegree::generateDegDataSubtoken(int index) const {
 		for (int i=0; i<m_alters.at(index); i++) {
 			output += "+";
 		}
+	}
+
+	// Add octave information if requested:
+	if (m_octaveQ && (degree != 0)) {
+		output += "/";
+		output += to_string(m_octaves.at(index));
 	}
 
 	return output;

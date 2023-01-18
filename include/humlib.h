@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jan 17 07:44:30 PST 2023
+// Last Modified: Tue Jan 17 16:25:37 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6615,6 +6615,7 @@ class Tool_deg : public HumTool {
 				// output options:
 				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
 				static void     setShowZeros (bool state) { m_showZerosQ = state; }
+				static void     setShowOctaves (bool state) { m_octaveQ = state; }
 
 			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
@@ -6694,6 +6695,7 @@ class Tool_deg : public HumTool {
 				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
 				static bool m_showZerosQ;
+				static bool m_octaveQ;
 		};
 
 

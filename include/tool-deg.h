@@ -67,6 +67,7 @@ class Tool_deg : public HumTool {
 				// output options:
 				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
 				static void     setShowZeros (bool state) { m_showZerosQ = state; }
+				static void     setShowOctaves (bool state) { m_octaveQ = state; }
 
 			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
@@ -146,6 +147,7 @@ class Tool_deg : public HumTool {
 				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
 				static bool m_showZerosQ;
+				static bool m_octaveQ;
 		};
 
 
