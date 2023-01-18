@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jan 17 19:21:08 PST 2023
+// Last Modified: Tue Jan 17 21:33:56 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68921,6 +68921,7 @@ void Tool_compositeold::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 bool Tool_deg::ScaleDegree::m_showTiesQ  = false;
 bool Tool_deg::ScaleDegree::m_showZerosQ = false;
 bool Tool_deg::ScaleDegree::m_octaveQ = false;
+string Tool_deg::ScaleDegree::m_forcedKey = "";
 
 
 
@@ -68939,8 +68940,8 @@ Tool_deg::Tool_deg(void) {
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
 	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
 	define("k|kern-tracks=s", "Process only the specified kern spines");
-	define("kd|dk|key-default|default-key=s", "Default key if none specified in data");
-	define("kf|fk|key-force|force-key=s", "Use the given key for analysing deg data (ignore modulations)");
+	define("kd|dk|key-default|default-key=s", "Default (initial) key if none specified in data");
+	define("kf|fk|key-force|force-key|forced-key|key-forced=s", "Use the given key for analysing deg data (ignore modulations)");
 	define("o|octave|octaves|degree=b", "Encode octave information int **degree spines");
 	define("r|recip=b", "Prefix output data with **recip spine with -I option");
 	define("t|ties=b", "Include scale degrees for tied notes");
@@ -69036,6 +69037,21 @@ void Tool_deg::initialize(void) {
 			if (m_defaultKey.find(":") == string::npos) {
 				m_defaultKey += ":";
 			}
+		}
+	}
+
+	if (getBoolean("forced-key")) {
+		m_defaultKey.clear(); // override --default-key option
+
+		m_forcedKey = getString("forced-key");
+		if (!m_forcedKey.empty()) {
+			if (m_forcedKey[0] != '*') {
+				m_forcedKey = "*" + m_forcedKey;
+			}
+			if (m_forcedKey.find(":") == string::npos) {
+				m_forcedKey += ":";
+			}
+			Tool_deg::ScaleDegree::setForcedKey(m_forcedKey);
 		}
 	}
 
@@ -69207,6 +69223,9 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 	// rather than just before the first data line.
 	if (!m_ipv.foundData) {
 		if (!m_defaultKey.empty() && !keyDesignationStatus && !m_ipv.foundKeyDesignationLine) {
+			keyDesignationStatus = isKeyDesignationLine(infile, lineIndex);
+		}
+		if (!m_forcedKey.empty() && !keyDesignationStatus && !m_ipv.foundKeyDesignationLine) {
 			keyDesignationStatus = isKeyDesignationLine(infile, lineIndex);
 		}
 		if (m_aboveQ && !m_ipv.foundAboveLine) {
@@ -69383,6 +69402,15 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 			}
 		}
 
+		if (!m_ipv.foundKeyDesignationLine) {
+			if (!m_forcedKey.empty() && !m_ipv.foundKeyDesignationLine) {
+				string line = printDegInterpretation(m_forcedKey, infile, lineIndex);
+				if (!line.empty()) {
+					extraLines.push_back(line);
+				}
+			}
+		}
+
 	}
 
 	if (!hasDegMerger) {
@@ -69429,6 +69457,8 @@ void Tool_deg::checkKeyDesignationStatus(string& value, int keyDesignationStatus
 		if (value == "*") {
 			if (!m_defaultKey.empty()) {
 				value = m_defaultKey;
+			} else if (!m_forcedKey.empty()) {
+				value = m_forcedKey;
 			}
 		}
 	}
@@ -70182,6 +70212,8 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 
 	if (!m_defaultKey.empty()) {
 		getModeAndTonic(mode, b40tonic, m_defaultKey);
+	} else if (!m_forcedKey.empty()) {
+		getModeAndTonic(mode, b40tonic, m_forcedKey);
 	}
 
 	int lineCount = infile.getLineCount();
@@ -70248,8 +70280,12 @@ void Tool_deg::prepareDegSpine(vector<vector<ScaleDegree>>& degspine, HTp kernst
 //
 
 void Tool_deg::getModeAndTonic(string& mode, int& b40tonic, const string& token) {
+	string newtoken = token;
+	if (!m_forcedKey.empty()) {
+		newtoken = m_forcedKey;
+	}
 	HumRegex hre;
-	if (hre.search(token, "^\\*?([A-Ga-g][-#]*):?(.*)$")) {
+	if (hre.search(newtoken, "^\\*?([A-Ga-g][-#]*):?(.*)$")) {
 		string key = hre.getMatch(1);
 		string kmode = hre.getMatch(2);
 		b40tonic = Convert::kernToBase40(key);
@@ -70547,7 +70583,11 @@ string Tool_deg::ScaleDegree::getDegToken(void) const {
 		return getManipulator();
 	} else if (isInterpretation()) {
 		if (isKeyDesignation()) {
-			return *token;
+			if (m_forcedKey.empty()) {
+				return *token;
+			} else{
+				return "*";
+			}
 		} else {
 			return "*";
 		}
