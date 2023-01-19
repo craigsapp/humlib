@@ -188,6 +188,7 @@ class Tool_deg : public HumTool {
 		bool            isDegCircleLine          (HumdrumFile& infile, int lineIndex);
 		bool            isDegColorLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegHatLine             (HumdrumFile& infile, int lineIndex);
+		bool            isDegSolfegeLine         (HumdrumFile& infile, int lineIndex);
 		bool            isKeyDesignationLine     (HumdrumFile& infile, int lineIndex);
 
 		void            checkAboveStatus         (string& value, bool arrowStatus);
@@ -195,6 +196,7 @@ class Tool_deg : public HumTool {
 		void            checkCircleStatus        (string& value, bool arrowStatus);
 		void            checkColorStatus         (string& value, bool arrowStatus);
 		void            checkHatStatus           (string& value, bool arrowStatus);
+		void            checkSolfegeStatus       (string& value, bool arrowStatus);
 
 		void            checkKeyDesignationStatus(string& value, int keyDesignationStatus);
 
@@ -235,6 +237,7 @@ class Tool_deg : public HumTool {
 		bool m_hatQ            = false;   // used with --hat option
 		bool m_colorQ          = false;   // used with --color option
 		std::string  m_color;             // used with --color option
+		bool m_solfegeQ        = false;   // used with --solfege option
 
 		bool m_degOnlyQ        = false;   // used with -I option
 		bool m_recipQ          = false;   // used with -r option
@@ -260,6 +263,7 @@ class Tool_deg : public HumTool {
 				bool foundColorLine;
 				bool foundHatLine;
 				bool foundKeyDesignationLine;
+				bool foundSolfegeLine;
 
 				InterleavedPrintVariables(void) { clear(); }
 				void clear(void) {
@@ -271,6 +275,7 @@ class Tool_deg : public HumTool {
 					foundColorLine  = false;
 					foundHatLine    = false;
 					foundKeyDesignationLine = false;
+					foundSolfegeLine = false;
 				}
 		};
 		InterleavedPrintVariables m_ipv;
