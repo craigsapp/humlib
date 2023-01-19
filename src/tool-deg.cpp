@@ -596,7 +596,7 @@ void Tool_deg::checkKeyDesignationStatus(string& value, int keyDesignationStatus
 
 //////////////////////////////
 //
-// Tool_deg::checkAboveStatus -- Add *arr interpretation to spine if needed.
+// Tool_deg::checkAboveStatus -- Add *above interpretation to spine if needed.
 //
 
 void Tool_deg::checkAboveStatus(string& value, bool aboveStatus) {
@@ -640,7 +640,7 @@ void Tool_deg::checkCircleStatus(string& value, bool circleStatus) {
 
 //////////////////////////////
 //
-// Tool_deg::checkColorStatus -- Add *arr interpretation to spine if needed.
+// Tool_deg::checkColorStatus -- Add *color interpretation to spine if needed.
 //
 
 void Tool_deg::checkColorStatus(string& value, bool colorStatus) {
@@ -710,8 +710,7 @@ bool Tool_deg::isKeyDesignationLine(HumdrumFile& infile, int lineIndex) {
 //////////////////////////////
 //
 // Tool_deg::isDegAboveLine -- Return true if **deg spines only
-//     include *arr, *Xarr, *acc, *Xacc interpretations
-//     and "*" (but not all "*").
+//     include *above, *below, interpretations and "*" (but not all "*").
 //
 
 bool Tool_deg::isDegAboveLine(HumdrumFile& infile, int lineIndex) {
@@ -1083,7 +1082,7 @@ string Tool_deg::prepareMergerLine(vector<vector<string>>& merge) {
 
 //////////////////////////////
 //
-// Tool_deg::calculateManipulatorOutput -- Deal with *^ *v *- *+ manipulators
+// Tool_deg::calculateManipulatorOutputForSpine -- Deal with *^ *v *- *+ manipulators
 //
 
 void Tool_deg::calculateManipulatorOutputForSpine(vector<string>& lineout,
@@ -1865,7 +1864,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 
 //////////////////////////////
 //
-// Tool_deg::ScaleDegree::createDegDataSubToken -- Convert the ScaleDegree
+// Tool_deg::ScaleDegree::generateDegDataSubtoken -- Convert the ScaleDegree
 //		subtoken (chord note) into **deg data.
 //
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 19 Jan 2023 23:53:41 CET
+// Last Modified: Do 19 Jan 2023 23:59:48 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69488,7 +69488,7 @@ void Tool_deg::checkKeyDesignationStatus(string& value, int keyDesignationStatus
 
 //////////////////////////////
 //
-// Tool_deg::checkAboveStatus -- Add *arr interpretation to spine if needed.
+// Tool_deg::checkAboveStatus -- Add *above interpretation to spine if needed.
 //
 
 void Tool_deg::checkAboveStatus(string& value, bool aboveStatus) {
@@ -69532,7 +69532,7 @@ void Tool_deg::checkCircleStatus(string& value, bool circleStatus) {
 
 //////////////////////////////
 //
-// Tool_deg::checkColorStatus -- Add *arr interpretation to spine if needed.
+// Tool_deg::checkColorStatus -- Add *color interpretation to spine if needed.
 //
 
 void Tool_deg::checkColorStatus(string& value, bool colorStatus) {
@@ -69602,8 +69602,7 @@ bool Tool_deg::isKeyDesignationLine(HumdrumFile& infile, int lineIndex) {
 //////////////////////////////
 //
 // Tool_deg::isDegAboveLine -- Return true if **deg spines only
-//     include *arr, *Xarr, *acc, *Xacc interpretations
-//     and "*" (but not all "*").
+//     include *above, *below, interpretations and "*" (but not all "*").
 //
 
 bool Tool_deg::isDegAboveLine(HumdrumFile& infile, int lineIndex) {
@@ -69975,7 +69974,7 @@ string Tool_deg::prepareMergerLine(vector<vector<string>>& merge) {
 
 //////////////////////////////
 //
-// Tool_deg::calculateManipulatorOutput -- Deal with *^ *v *- *+ manipulators
+// Tool_deg::calculateManipulatorOutputForSpine -- Deal with *^ *v *- *+ manipulators
 //
 
 void Tool_deg::calculateManipulatorOutputForSpine(vector<string>& lineout,
@@ -70757,7 +70756,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 
 //////////////////////////////
 //
-// Tool_deg::ScaleDegree::createDegDataSubToken -- Convert the ScaleDegree
+// Tool_deg::ScaleDegree::generateDegDataSubtoken -- Convert the ScaleDegree
 //		subtoken (chord note) into **deg data.
 //
 
