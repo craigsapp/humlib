@@ -1210,7 +1210,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 			}
 
 			if (!printHat) {
-				string line = createDegInterpretation("*arr", i, m_recipQ);
+				string line = createDegInterpretation("*hat", i, m_recipQ);
 				m_humdrum_text << line << endl;
 				printHat = true;
 			}

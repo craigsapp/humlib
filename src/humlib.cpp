@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 19 Jan 2023 23:59:48 CET
+// Last Modified: Fr 20 Jan 2023 00:01:35 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70102,7 +70102,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 			}
 
 			if (!printHat) {
-				string line = createDegInterpretation("*arr", i, m_recipQ);
+				string line = createDegInterpretation("*hat", i, m_recipQ);
 				m_humdrum_text << line << endl;
 				printHat = true;
 			}
