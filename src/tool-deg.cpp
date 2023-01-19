@@ -822,8 +822,7 @@ bool Tool_deg::isDegCircleLine(HumdrumFile& infile, int lineIndex) {
 //////////////////////////////
 //
 // Tool_deg::isDegColorLine -- Return true if **deg spines only
-//     include *arr, *Xarr, *acc, *Xacc interpretations
-//     and "*" (but not all "*").
+//     include *color interpretations and "*" (but not all "*").
 //
 
 bool Tool_deg::isDegColorLine(HumdrumFile& infile, int lineIndex) {

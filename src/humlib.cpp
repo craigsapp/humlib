@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 19 Jan 2023 23:52:54 CET
+// Last Modified: Do 19 Jan 2023 23:53:41 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69714,8 +69714,7 @@ bool Tool_deg::isDegCircleLine(HumdrumFile& infile, int lineIndex) {
 //////////////////////////////
 //
 // Tool_deg::isDegColorLine -- Return true if **deg spines only
-//     include *arr, *Xarr, *acc, *Xacc interpretations
-//     and "*" (but not all "*").
+//     include *color interpretations and "*" (but not all "*").
 //
 
 bool Tool_deg::isDegColorLine(HumdrumFile& infile, int lineIndex) {
