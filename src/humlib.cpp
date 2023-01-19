@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 19 Jan 2023 23:35:00 CET
+// Last Modified: Do 19 Jan 2023 23:52:54 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -68937,7 +68937,7 @@ Tool_deg::Tool_deg(void) {
 	define("color=s", "Display color for scale degrees");
 	define("c|circ|circles|circle=b", "Display scale degrees in circles");
 	define("hat|caret|circumflex=b", "Display hats on scale degrees");
-	define("solf|solfege=b", "Display solfege syllable instead of scale degree numbers");
+	define("solf|solfege=b", "Display (relative) solfege syllables instead of scale degree numbers");
 	define("I|no-input=b", "Do not interleave **deg data with input score in output");
 	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
 	define("k|kern-tracks=s", "Process only the specified kern spines");
