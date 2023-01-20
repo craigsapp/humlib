@@ -114,6 +114,7 @@ bool Tool_deg::run(HumdrumFile& infile) {
 void Tool_deg::initialize(void) {
 	m_aboveQ   = getBoolean("above");
 	m_arrowQ   = getBoolean("arrow");
+	m_boxQ     = getBoolean("box");
 	m_circleQ  = getBoolean("circle");
 	m_colorQ   = getBoolean("color");
 	m_hatQ     = getBoolean("hat");

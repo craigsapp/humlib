@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 19 21:21:56 PST 2023
+// Last Modified: Thu Jan 19 21:53:43 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -69006,6 +69006,7 @@ bool Tool_deg::run(HumdrumFile& infile) {
 void Tool_deg::initialize(void) {
 	m_aboveQ   = getBoolean("above");
 	m_arrowQ   = getBoolean("arrow");
+	m_boxQ     = getBoolean("box");
 	m_circleQ  = getBoolean("circle");
 	m_colorQ   = getBoolean("color");
 	m_hatQ     = getBoolean("hat");
