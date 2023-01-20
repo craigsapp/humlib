@@ -323,6 +323,7 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 	// Styling interpretation tracking variables:
 	bool aboveStatus          = false;
 	bool arrowStatus          = false;
+	bool boxStatus            = false;
 	bool circleStatus         = false;
 	bool colorStatus          = false;
 	bool hatStatus            = false;
@@ -344,6 +345,9 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 		}
 		if (m_arrowQ && !m_ipv.foundArrowLine) {
 			arrowStatus = isDegArrowLine(infile, lineIndex);
+		}
+		if (m_boxQ && !m_ipv.foundBoxLine) {
+			boxStatus = isDegBoxLine(infile, lineIndex);
 		}
 		if (m_circleQ && !m_ipv.foundCircleLine) {
 			circleStatus = isDegCircleLine(infile, lineIndex);
@@ -392,6 +396,7 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 				checkKeyDesignationStatus(value, keyDesignationStatus);
 				checkAboveStatus(value, aboveStatus);
 				checkArrowStatus(value, arrowStatus);
+				checkBoxStatus(value, boxStatus);
 				checkCircleStatus(value, circleStatus);
 				checkColorStatus(value, colorStatus);
 				checkHatStatus(value, hatStatus);
@@ -419,6 +424,7 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 			checkKeyDesignationStatus(value, keyDesignationStatus);
 			checkAboveStatus(value, aboveStatus);
 			checkArrowStatus(value, arrowStatus);
+			checkBoxStatus(value, boxStatus);
 			checkCircleStatus(value, circleStatus);
 			checkColorStatus(value, colorStatus);
 			checkHatStatus(value, hatStatus);
@@ -442,6 +448,9 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 	}
 	if (arrowStatus) {
 		m_ipv.foundArrowLine = true;
+	}
+	if (boxStatus) {
+		m_ipv.foundBoxLine = true;
 	}
 	if (circleStatus) {
 		m_ipv.foundCircleLine = true;
@@ -479,6 +488,15 @@ string Tool_deg::createOutputHumdrumLine(HumdrumFile& infile, int lineIndex) {
 				string interp = "*color:";
 				interp += m_color;
 				string line = printDegInterpretation(interp, infile, lineIndex);
+				if (!line.empty()) {
+					extraLines.push_back(line);
+				}
+			}
+		}
+
+		if (!m_ipv.foundBoxLine) {
+			if (m_boxQ && !m_ipv.foundBoxLine) {
+				string line = printDegInterpretation("*box", infile, lineIndex);
 				if (!line.empty()) {
 					extraLines.push_back(line);
 				}
@@ -618,6 +636,21 @@ void Tool_deg::checkArrowStatus(string& value, bool arrowStatus) {
 	if (arrowStatus && m_arrowQ && (!m_ipv.foundArrowLine) && (!m_ipv.foundData)) {
 		if (value == "*") {
 			value = "*arr";
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::checkBoxStatus -- Add *box interpretation to spine if needed.
+//
+
+void Tool_deg::checkBoxStatus(string& value, bool boxStatus) {
+	if (boxStatus && m_boxQ && (!m_ipv.foundBoxLine) && (!m_ipv.foundData)) {
+		if (value == "*") {
+			value = "*box";
 		}
 	}
 }
@@ -772,6 +805,42 @@ bool Tool_deg::isDegArrowLine(HumdrumFile& infile, int lineIndex) {
 		if (*token == "*Xarr") { return true; }
 		if (*token == "*acc")  { return true; }
 		if (*token == "*Xacc") { return true; }
+	}
+	if (degCount == 0) {
+		m_ipv.hasDegSpines = false;
+	}
+
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_deg::isDegBoxLine -- Return true if **deg spines includes
+//     any *box, or *Xbox, interpretations and "*" (but not all "*").
+//
+
+bool Tool_deg::isDegBoxLine(HumdrumFile& infile, int lineIndex) {
+	// If there are no **deg spines, then don't bother searching for them.
+	if (!m_ipv.hasDegSpines) {
+		return false;
+	}
+	if (!infile[lineIndex].isInterpretation()) {
+		return false;
+	} if (infile[lineIndex].isManipulator()) {
+		return false;
+	}
+
+	int degCount = 0;
+	for (int i=0; i<infile[lineIndex].getFieldCount(); i++) {
+		HTp token = infile.token(lineIndex, i);
+		if (!(token->isDataType("**deg") || token->isDataType("**degree"))) {
+			continue;
+		}
+		degCount++;
+		if (*token == "*box")  { return true; }
+		if (*token == "*Xbox") { return true; }
 	}
 	if (degCount == 0) {
 		m_ipv.hasDegSpines = false;
@@ -1138,6 +1207,7 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 	// input styling options
 	bool printAbove  = !m_aboveQ;
 	bool printArrow  = !m_arrowQ;
+	bool printBox    = !m_boxQ;
 	bool printCircle = !m_circleQ;
 	bool printColor  = !m_colorQ;
 	bool printHat    = !m_hatQ;
@@ -1193,6 +1263,12 @@ void Tool_deg::printDegScore(HumdrumFile& infile) {
 				string line = createDegInterpretation("*arr", i, m_recipQ);
 				m_humdrum_text << line << endl;
 				printArrow = true;
+			}
+
+			if (!printBox) {
+				string line = createDegInterpretation("*box", i, m_recipQ);
+				m_humdrum_text << line << endl;
+				printBox = true;
 			}
 
 			if (!printCircle) {

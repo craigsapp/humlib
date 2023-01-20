@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr 20 Jan 2023 00:01:35 CET
+// Last Modified: Thu Jan 19 21:21:56 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6733,6 +6733,7 @@ class Tool_deg : public HumTool {
 
 		bool            isDegAboveLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);
+		bool            isDegBoxLine             (HumdrumFile& infile, int lineIndex);
 		bool            isDegCircleLine          (HumdrumFile& infile, int lineIndex);
 		bool            isDegColorLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegHatLine             (HumdrumFile& infile, int lineIndex);
@@ -6741,6 +6742,7 @@ class Tool_deg : public HumTool {
 
 		void            checkAboveStatus         (string& value, bool arrowStatus);
 		void            checkArrowStatus         (string& value, bool arrowStatus);
+		void            checkBoxStatus           (string& value, bool arrowStatus);
 		void            checkCircleStatus        (string& value, bool arrowStatus);
 		void            checkColorStatus         (string& value, bool arrowStatus);
 		void            checkHatStatus           (string& value, bool arrowStatus);
@@ -6781,6 +6783,7 @@ class Tool_deg : public HumTool {
 
 		bool m_aboveQ          = false;   // used with --above option
 		bool m_arrowQ          = false;   // used with --arrow option
+		bool m_boxQ            = false;   // used with --box option
 		bool m_circleQ         = false;   // used with --circle option
 		bool m_hatQ            = false;   // used with --hat option
 		bool m_colorQ          = false;   // used with --color option
@@ -6807,6 +6810,7 @@ class Tool_deg : public HumTool {
 				bool hasDegSpines;
 				bool foundAboveLine;
 				bool foundArrowLine;
+				bool foundBoxLine;
 				bool foundCircleLine;
 				bool foundColorLine;
 				bool foundHatLine;
@@ -6819,6 +6823,7 @@ class Tool_deg : public HumTool {
 					hasDegSpines    = true;
 					foundAboveLine  = false;
 					foundArrowLine  = false;
+					foundBoxLine    = false;
 					foundCircleLine = false;
 					foundColorLine  = false;
 					foundHatLine    = false;
