@@ -101,7 +101,7 @@ class Tool_fb : public HumTool {
 
 		string m_spineTracks    = ""; // used with -s option
 		string m_kernTracks     = ""; // used with -k option
-		vector<bool> m_processTrack;  // used with -k and -s option
+		vector<bool> m_selectedKernSpines;  // used with -k and -s option
 
 };
 

@@ -159,25 +159,25 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		return;
 	}
 
-	m_processTrack.resize(maxTrack + 1); // +1 is needed since track=0 is not used
+	m_selectedKernSpines.resize(maxTrack + 1); // +1 is needed since track=0 is not used
 	// By default, process all tracks:
-	fill(m_processTrack.begin(), m_processTrack.end(), true);
+	fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), true);
 	// Otherwise, select which **kern track, or spine tracks to process selectively:
 
 	// Calculate which input spines to process based on -s or -k option:
 	if (!m_kernTracks.empty()) {
 		vector<int> ktracks = Convert::extractIntegerList(m_kernTracks, maxTrack);
-		fill(m_processTrack.begin(), m_processTrack.end(), false);
+		fill(m_selectedKernSpines.begin(), m_selectedKernSpines.end(), false);
 		for (int i=0; i<(int)ktracks.size(); i++) {
 			int index = ktracks[i] - 1;
 			if ((index < 0) || (index >= (int)kernspines.size())) {
 				continue;
 			}
 			int track = kernspines.at(ktracks[i] - 1)->getTrack();
-			m_processTrack.at(track) = true;
+			m_selectedKernSpines.at(track) = true;
 		}
 	} else if (!m_spineTracks.empty()) {
-		infile.makeBooleanTrackList(m_processTrack, m_spineTracks);
+		infile.makeBooleanTrackList(m_selectedKernSpines, m_spineTracks);
 	}
 
 	vector<vector<int>> lastNumbers = {};
@@ -280,7 +280,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			NoteCell* targetCell = grid.cell(j, i);
 
 			// Ignore voice if track is not active by --kern-tracks or --spine-tracks
-			if (m_processTrack.at(targetCell->getToken()->getTrack()) == false) {
+			if (m_selectedKernSpines.at(targetCell->getToken()->getTrack()) == false) {
 				continue;
 			}
 
