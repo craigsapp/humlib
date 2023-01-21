@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 17 Jan 2023 22:03:55 CET
+// Last Modified: Sa 21 Jan 2023 09:48:51 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6613,8 +6613,10 @@ class Tool_deg : public HumTool {
 				int             getSubtokenCount         (void) const;
 
 				// output options:
-				static void     setShowTies  (bool state) { m_showTiesQ = state;  }
-				static void     setShowZeros (bool state) { m_showZerosQ = state; }
+				static void     setShowTies    (bool state) { m_showTiesQ = state;  }
+				static void     setShowZeros   (bool state) { m_showZerosQ = state; }
+				static void     setShowOctaves (bool state) { m_octaveQ = state; }
+				static void     setForcedKey   (const string& key) { m_forcedKey = key; }
 
 			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
@@ -6694,6 +6696,8 @@ class Tool_deg : public HumTool {
 				// ScaleDegree rendering options:
 				static bool m_showTiesQ;
 				static bool m_showZerosQ;
+				static bool m_octaveQ;
+				static std::string m_forcedKey;
 		};
 
 
@@ -6729,16 +6733,20 @@ class Tool_deg : public HumTool {
 
 		bool            isDegAboveLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);
+		bool            isDegBoxLine             (HumdrumFile& infile, int lineIndex);
 		bool            isDegCircleLine          (HumdrumFile& infile, int lineIndex);
 		bool            isDegColorLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegHatLine             (HumdrumFile& infile, int lineIndex);
+		bool            isDegSolfegeLine         (HumdrumFile& infile, int lineIndex);
 		bool            isKeyDesignationLine     (HumdrumFile& infile, int lineIndex);
 
 		void            checkAboveStatus         (string& value, bool arrowStatus);
 		void            checkArrowStatus         (string& value, bool arrowStatus);
+		void            checkBoxStatus           (string& value, bool arrowStatus);
 		void            checkCircleStatus        (string& value, bool arrowStatus);
 		void            checkColorStatus         (string& value, bool arrowStatus);
 		void            checkHatStatus           (string& value, bool arrowStatus);
+		void            checkSolfegeStatus       (string& value, bool arrowStatus);
 
 		void            checkKeyDesignationStatus(string& value, int keyDesignationStatus);
 
@@ -6775,10 +6783,12 @@ class Tool_deg : public HumTool {
 
 		bool m_aboveQ          = false;   // used with --above option
 		bool m_arrowQ          = false;   // used with --arrow option
+		bool m_boxQ            = false;   // used with --box option
 		bool m_circleQ         = false;   // used with --circle option
 		bool m_hatQ            = false;   // used with --hat option
 		bool m_colorQ          = false;   // used with --color option
 		std::string  m_color;             // used with --color option
+		bool m_solfegeQ        = false;   // used with --solfege option
 
 		bool m_degOnlyQ        = false;   // used with -I option
 		bool m_recipQ          = false;   // used with -r option
@@ -6800,10 +6810,12 @@ class Tool_deg : public HumTool {
 				bool hasDegSpines;
 				bool foundAboveLine;
 				bool foundArrowLine;
+				bool foundBoxLine;
 				bool foundCircleLine;
 				bool foundColorLine;
 				bool foundHatLine;
 				bool foundKeyDesignationLine;
+				bool foundSolfegeLine;
 
 				InterleavedPrintVariables(void) { clear(); }
 				void clear(void) {
@@ -6811,10 +6823,12 @@ class Tool_deg : public HumTool {
 					hasDegSpines    = true;
 					foundAboveLine  = false;
 					foundArrowLine  = false;
+					foundBoxLine    = false;
 					foundCircleLine = false;
 					foundColorLine  = false;
 					foundHatLine    = false;
 					foundKeyDesignationLine = false;
+					foundSolfegeLine = false;
 				}
 		};
 		InterleavedPrintVariables m_ipv;
@@ -7298,7 +7312,7 @@ class Tool_fb : public HumTool {
 
 		string m_spineTracks    = ""; // used with -s option
 		string m_kernTracks     = ""; // used with -k option
-		vector<bool> m_processTrack;  // used with -k and -s option
+		vector<bool> m_selectedKernSpines;  // used with -k and -s option
 
 };
 
