@@ -363,6 +363,9 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			infile.appendDataSpine(trackData, ".", exinterp);
 		}
 	}
+
+	// Enables usage in verovio (`!!!filter: fb`)
+	m_humdrum_text << infile;
 }
 
 
