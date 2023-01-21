@@ -1,14 +1,12 @@
 //
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Wed Mar  9 21:50:25 PST 2022
-// Last Modified: Wed Mar  9 21:50:28 PST 2022
+// Programmer:    Wolfgang Drescher <drescher.wolfgang@gmail.com>
+// Creation Date: Sun Nov 27 2022 00:25:34 CET
 // Filename:      tool-fb.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-fb.h
 // Syntax:        C++11; humlib
-// vim:           ts=3 noexpandtab
+// vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Extract figured bass numbers from musical content.
-// Reference:     https://github.com/WolfgangDrescher/humdrum-figured-bass-filter-demo
+// Description:   Interface for fb tool, which automatically adds figured bass numbers.
 //
 
 #ifndef _TOOL_FB_H
@@ -16,42 +14,94 @@
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
+#include "NoteGrid.h"
 
 namespace hum {
 
 // START_MERGE
 
-class Tool_fb : public HumTool {
+class FiguredBassNumber {
 	public:
-		         Tool_fb           (void);
-		        ~Tool_fb           () {};
+		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack, bool intervallsatz);
+		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool hideThreeQ);
+		int         getNumberWithinOctave(void);
 
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		int         m_voiceIndex;
+		int         m_lineIndex;
+		int         m_number;
+		std::string m_accidentals;
+		bool        m_showAccidentals; // Force shoing figured base numbers when they need an accidental
+		bool        m_baseOfSustainedNoteDidChange;
+		bool        m_isAttack;
+		bool        m_convert2To9 = false;
+		bool        m_intervallsatz = false;
+
+};
+
+class FiguredBassAbbreviationMapping {
+	public:
+		FiguredBassAbbreviationMapping(string s, vector<int> n);
+
+		static vector<FiguredBassAbbreviationMapping*> s_mappings;
+
+		// String to compare the numbers with
+		// e.g. "6 4 3"
+		// Sorted by size, larger numbers first
+		string m_str; 
+
+		// Figured bass number as int
+		vector<int> m_numbers;
+
+};
+
+class Tool_fb : public HumTool {
+
+	public:
+		     Tool_fb (void);
+		     ~Tool_fb() {};
+
+		bool run     (HumdrumFileSet& infiles);
+		bool run     (HumdrumFile& infile);
+		bool run     (const string& indata, ostream& out);
+		bool run     (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     processFile       (HumdrumFile& infile);
-		void     initialize        (void);
-		void     processLine       (HumdrumFile& infile, int index);
-		void     setupScoreData    (HumdrumFile& infile);
-		void     getAnalyses       (HumdrumFile& infile);
-		void     getHarmonicIntervals(HumdrumFile& infile);
-		void     calculateIntervals(vector<int>& intervals, vector<HTp>& tokens, int bassIndex);
-		void     printOutput       (HumdrumFile& infile);
-		void     printLineStyle3   (HumdrumFile& infile, int line);
-		std::string getAnalysisTokenStyle3(HumdrumFile& infile, int line, int field);
+		void                       initialize                             (void);
+        void                       processFile                            (HumdrumFile& infile);
+		bool                       hideNumbersForTokenLine                (HTp token, pair<int, HumNum> timeSig);
+		vector<string>             getTrackData                           (const vector<FiguredBassNumber*>& numbers, int lineCount);
+		vector<string>             getTrackDataForVoice                   (int voiceIndex, const vector<FiguredBassNumber*>& numbers, int lineCount);
+		FiguredBassNumber*         createFiguredBassNumber                (int basePitchBase40, int targetPitchBase40, int voiceIndex, int lineIndex, bool isAttack, string keySignature);
+		vector<FiguredBassNumber*> filterNegativeNumbers                  (vector<FiguredBassNumber*> numbers);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLine        (vector<FiguredBassNumber*> numbers, int lineIndex);
+		vector<FiguredBassNumber*> filterFiguredBassNumbersForLineAndVoice(vector<FiguredBassNumber*> numbers, int lineIndex, int voiceIndex);
+		string                     formatFiguredBassNumbers               (const vector<FiguredBassNumber*>& numbers);
+		vector<FiguredBassNumber*> analyzeChordNumbers                    (const vector<FiguredBassNumber*>& numbers);
+		vector<FiguredBassNumber*> getAbbreviatedNumbers                  (const vector<FiguredBassNumber*>& numbers);
+		string                     getNumberString                        (vector<FiguredBassNumber*> numbers);
+		string                     getKeySignature                        (HumdrumFile& infile, int lineIndex);
+		int                        getLowestBase40Pitch                   (vector<int> base40Pitches);
+
 
 	private:
-		std::vector<HTp>              m_kernspines;
-		std::vector<int>              m_kerntracks;
-		std::vector<int>              m_track2index;
-		std::vector<std::vector<int>> m_keyaccid;
-		std::vector<std::vector<int>> m_intervals;
-		const int m_rest = -1000;
-		int       m_reference = 0; // currently fixed to bass
-		int       m_debugQ = false;
+		bool   m_compoundQ      = false;
+		bool   m_accidentalsQ   = false;
+		int    m_baseTrackQ     = 1;
+		bool   m_intervallsatzQ = false;
+		bool   m_sortQ          = false;
+		bool   m_lowestQ        = false;
+		bool   m_normalizeQ     = false;
+		bool   m_abbrQ          = false;
+		bool   m_attackQ        = false;
+		bool   m_figuredbassQ   = false;
+		bool   m_hideThreeQ     = false;
+		bool   m_showNegativeQ  = false;
+		bool   m_aboveQ         = false;
+		string m_recipQ         = "";
+
+		string m_spineTracks    = ""; // used with -s option
+		string m_kernTracks     = ""; // used with -k option
+		vector<bool> m_selectedKernSpines;  // used with -k and -s option
 
 };
 
@@ -60,6 +110,3 @@ class Tool_fb : public HumTool {
 } // end namespace hum
 
 #endif /* _TOOL_FB_H */
-
-
-
