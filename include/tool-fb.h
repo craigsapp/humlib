@@ -91,7 +91,7 @@ class Tool_fb : public HumTool {
 		bool   m_sortQ          = false;
 		bool   m_lowestQ        = false;
 		bool   m_normalizeQ     = false;
-		bool   m_abbreviateQ    = false;
+		bool   m_reduceQ        = false;
 		bool   m_attackQ        = false;
 		bool   m_figuredbassQ   = false;
 		bool   m_hideThreeQ     = false;

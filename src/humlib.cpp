@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 23 Jan 2023 17:27:53 CET
+// Last Modified: Mo 23 Jan 2023 17:34:04 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78031,21 +78031,21 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",          "output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",       "display accidentals in figured bass output");
-	define("b|base|base-track=i:1", "number of the base kern track (compare with -k)");
-	define("i|intervallsatz=b",     "display intervals under their voice and not under the lowest staff");
-	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
-	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbreviate|abbr=b",   "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
-	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
-	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
-	define("m|negative=b",          "show negative numbers");
-	define("above=b",               "place figured bass numbers above staff (**fba)");
-	define("rate=s:",               "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
-	define("k|kern-tracks=s",       "Process only the specified kern spines");
+	define("c|compound=b",               "output reasonable figured bass numbers within octave");
+	define("a|accidentals=b",            "display accidentals in figured bass output");
+	define("b|base|base-track=i:1",      "number of the base kern track (compare with -k)");
+	define("i|intervallsatz=b",          "display intervals under their voice and not under the lowest staff");
+	define("o|sort|order=b",             "sort figured bass numbers by interval size and not by voice index");
+	define("l|lowest=b",                 "use lowest note as base note; -b flag will be ignored");
+	define("n|normalize=b",              "remove octave and doubled intervals; adds: --compound --sort");
+	define("r|reduce|abbreviate|abbr=b", "use abbreviated figures; adds: --normalize --compound --sort");
+	define("t|ties=b",                   "hide repeated numbers for sustained notes when base does not change");
+	define("f|figuredbass=b",            "shortcut for -c -a -o -n -r -3");
+	define("3|hide-three=b",             "hide number 3 if it has an accidental (e.g.: #3 => #)");
+	define("m|negative=b",               "show negative numbers");
+	define("above=b",                    "place figured bass numbers above staff (**fba)");
+	define("rate=s:",                    "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
+	define("k|kern-tracks=s",            "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
 
@@ -78106,7 +78106,7 @@ void Tool_fb::initialize(void) {
 	m_sortQ          = getBoolean("sort");
 	m_lowestQ        = getBoolean("lowest");
 	m_normalizeQ     = getBoolean("normalize");
-	m_abbreviateQ    = getBoolean("abbreviate");
+	m_reduceQ        = getBoolean("reduce");
 	m_attackQ        = getBoolean("ties");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
@@ -78125,14 +78125,14 @@ void Tool_fb::initialize(void) {
 		m_sortQ = true;
 	}
 
-	if (m_abbreviateQ) {
+	if (m_reduceQ) {
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
 	}
 
 	if (m_figuredbassQ) {
-		m_abbreviateQ = true;
+		m_reduceQ = true;
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
@@ -78634,7 +78634,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		});
 	}
 
-	if (m_abbreviateQ) {
+	if (m_reduceQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
 		formattedNumbers = getAbbreviatedNumbers(formattedNumbers);
 	}
