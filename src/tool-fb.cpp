@@ -29,7 +29,7 @@ namespace hum {
 
 Tool_fb::Tool_fb(void) {
 	define("c|compound=b",               "Output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",            "Display accidentals in front of the numbers");
+	define("a|accidentals|accid|acc=b",  "Display accidentals in front of the numbers");
 	define("b|base|base-track=i:1",      "Number of the base kern track (compare with -k)");
 	define("i|intervallsatz=b",          "Display numbers under their voice instead of under the base staff");
 	define("o|sort|order=b",             "Sort figured bass numbers by size");

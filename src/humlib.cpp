@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 23 Jan 2023 17:46:24 CET
+// Last Modified: Mo 23 Jan 2023 17:51:36 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78032,7 +78032,7 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 
 Tool_fb::Tool_fb(void) {
 	define("c|compound=b",               "Output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",            "Display accidentals in front of the numbers");
+	define("a|accidentals|accid|acc=b",  "Display accidentals in front of the numbers");
 	define("b|base|base-track=i:1",      "Number of the base kern track (compare with -k)");
 	define("i|intervallsatz=b",          "Display numbers under their voice instead of under the base staff");
 	define("o|sort|order=b",             "Sort figured bass numbers by size");
