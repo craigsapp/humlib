@@ -34,7 +34,7 @@ Tool_fb::Tool_fb(void) {
 	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
 	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbr=b",              "use abbreviated figures; adds: --normalize --compound --sort");
+	define("r|abbreviate=b",        "use abbreviated figures; adds: --normalize --compound --sort");
 	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
 	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
@@ -102,7 +102,7 @@ void Tool_fb::initialize(void) {
 	m_sortQ          = getBoolean("sort");
 	m_lowestQ        = getBoolean("lowest");
 	m_normalizeQ     = getBoolean("normalize");
-	m_abbrQ          = getBoolean("abbr");
+	m_abbreviateQ    = getBoolean("abbreviate");
 	m_attackQ        = getBoolean("ties");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
@@ -121,14 +121,14 @@ void Tool_fb::initialize(void) {
 		m_sortQ = true;
 	}
 
-	if (m_abbrQ) {
+	if (m_abbreviateQ) {
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
 	}
 
 	if (m_figuredbassQ) {
-		m_abbrQ = true;
+		m_abbreviateQ = true;
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
@@ -630,7 +630,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		});
 	}
 
-	if (m_abbrQ) {
+	if (m_abbreviateQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
 		formattedNumbers = getAbbreviatedNumbers(formattedNumbers);
 	}
