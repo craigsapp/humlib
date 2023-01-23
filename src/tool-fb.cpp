@@ -7,6 +7,7 @@
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Add figured bass numbers from **kern spines.
+// Documentation: https://doc.verovio.humdrum.org/filter/fb
 //
 
 #include "tool-fb.h"
@@ -27,21 +28,21 @@ namespace hum {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",          "output reasonable figured bass numbers within octave");
-	define("a|accidentals=b",       "display accidentals in figured bass output");
-	define("b|base|base-track=i:1", "number of the base kern track (compare with -k)");
-	define("i|intervallsatz=b",     "display intervals under their voice and not under the lowest staff");
-	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
-	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
-	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbreviate=b",        "use abbreviated figures; adds: --normalize --compound --sort");
-	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
-	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
-	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
-	define("m|negative=b",          "show negative numbers");
-	define("above=b",               "place figured bass numbers above staff (**fba)");
-	define("rate=s:",               "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
-	define("k|kern-tracks=s",       "Process only the specified kern spines");
+	define("c|compound=b",               "Output reasonable figured bass numbers within octave");
+	define("a|accidentals|accid|acc=b",  "Display accidentals in front of the numbers");
+	define("b|base|base-track=i:1",      "Number of the base kern track (compare with -k)");
+	define("i|intervallsatz=b",          "Display numbers under their voice instead of under the base staff");
+	define("o|sort|order=b",             "Sort figured bass numbers by size");
+	define("l|lowest=b",                 "Use lowest note as base note");
+	define("n|normalize=b",              "Remove number 8 and doubled numbers; adds -co");
+	define("r|reduce|abbreviate|abbr=b", "Use abbreviated figures; adds -nco");
+	define("t|ties=b",                   "Hide numbers without attack or changing base (needs -i)");
+	define("f|figuredbass=b",            "Shortcut for -acorn3");
+	define("3|hide-three=b",             "Hide number 3 if it has an accidental");
+	define("m|negative=b",               "Show negative numbers");
+	define("above=b",                    "Show numbers above the staff (**fba)");
+	define("rate=s:",                    "Rate to display the numbers (use a **recip value, e.g. 4, 4.)");
+	define("k|kern-tracks=s",            "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
 
@@ -102,7 +103,7 @@ void Tool_fb::initialize(void) {
 	m_sortQ          = getBoolean("sort");
 	m_lowestQ        = getBoolean("lowest");
 	m_normalizeQ     = getBoolean("normalize");
-	m_abbreviateQ    = getBoolean("abbreviate");
+	m_reduceQ        = getBoolean("reduce");
 	m_attackQ        = getBoolean("ties");
 	m_figuredbassQ   = getBoolean("figuredbass");
 	m_hideThreeQ     = getBoolean("hide-three");
@@ -121,14 +122,14 @@ void Tool_fb::initialize(void) {
 		m_sortQ = true;
 	}
 
-	if (m_abbreviateQ) {
+	if (m_reduceQ) {
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
 	}
 
 	if (m_figuredbassQ) {
-		m_abbreviateQ = true;
+		m_reduceQ = true;
 		m_normalizeQ = true;
 		m_compoundQ = true;
 		m_sortQ = true;
@@ -630,7 +631,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 		});
 	}
 
-	if (m_abbreviateQ) {
+	if (m_reduceQ) {
 		// Overwrite formattedNumbers with abbreviated numbers
 		formattedNumbers = getAbbreviatedNumbers(formattedNumbers);
 	}
