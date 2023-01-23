@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 23 Jan 2023 17:20:50 CET
+// Last Modified: Mo 23 Jan 2023 17:27:53 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78038,7 +78038,7 @@ Tool_fb::Tool_fb(void) {
 	define("o|sort|order=b",        "sort figured bass numbers by interval size and not by voice index");
 	define("l|lowest=b",            "use lowest note as base note; -b flag will be ignored");
 	define("n|normalize=b",         "remove octave and doubled intervals; adds: --compound --sort");
-	define("r|abbreviate=b",        "use abbreviated figures; adds: --normalize --compound --sort");
+	define("r|abbreviate|abbr=b",   "use abbreviated figures; adds: --normalize --compound --sort");
 	define("t|ties=b",              "hide repeated numbers for sustained notes when base does not change");
 	define("f|figuredbass=b",       "shortcut for -c -a -o -n -r -3");
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
