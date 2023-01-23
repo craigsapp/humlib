@@ -40,7 +40,7 @@ Tool_fb::Tool_fb(void) {
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",          "show negative numbers");
 	define("above=b",               "place figured bass numbers above staff (**fba)");
-	define("rate|recip=s:",         "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
+	define("rate=s:",               "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
 	define("k|kern-tracks=s",       "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 23 Jan 2023 16:28:28 CET
+// Last Modified: Mo 23 Jan 2023 17:20:50 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78044,7 +78044,7 @@ Tool_fb::Tool_fb(void) {
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",          "show negative numbers");
 	define("above=b",               "place figured bass numbers above staff (**fba)");
-	define("rate|recip=s:",         "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
+	define("rate=s:",               "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
 	define("k|kern-tracks=s",       "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
