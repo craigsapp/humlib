@@ -91,13 +91,13 @@ class Tool_fb : public HumTool {
 		bool   m_sortQ          = false;
 		bool   m_lowestQ        = false;
 		bool   m_normalizeQ     = false;
-		bool   m_abbrQ          = false;
+		bool   m_abbreviateQ    = false;
 		bool   m_attackQ        = false;
 		bool   m_figuredbassQ   = false;
 		bool   m_hideThreeQ     = false;
 		bool   m_showNegativeQ  = false;
 		bool   m_aboveQ         = false;
-		string m_recipQ         = "";
+		string m_rateQ          = "";
 
 		string m_spineTracks    = ""; // used with -s option
 		string m_kernTracks     = ""; // used with -k option
