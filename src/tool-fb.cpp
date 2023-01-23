@@ -7,6 +7,7 @@
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
 // Description:   Add figured bass numbers from **kern spines.
+// Documentation: https://doc.verovio.humdrum.org/filter/fb
 //
 
 #include "tool-fb.h"
