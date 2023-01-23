@@ -40,7 +40,7 @@ Tool_fb::Tool_fb(void) {
 	define("3|hide-three=b",        "hide number 3 if it has an accidental (e.g.: #3 => #)");
 	define("m|negative=b",          "show negative numbers");
 	define("above=b",               "place figured bass numbers above staff (**fba)");
-	define("frequency|recip=s:",    "frequency to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
+	define("rate|recip=s:",         "rate to display the numbers (set a **recip value, e.g. 2, 4, 8, 4.)");
 	define("k|kern-tracks=s",       "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
 }
@@ -108,7 +108,7 @@ void Tool_fb::initialize(void) {
 	m_hideThreeQ     = getBoolean("hide-three");
 	m_showNegativeQ  = getBoolean("negative");
 	m_aboveQ         = getBoolean("above");
-	m_recipQ         = getString("frequency");
+	m_rateQ          = getString("rate");
 
 	if (getBoolean("spine-tracks")) {
 		m_spineTracks = getString("spine-tracks");
@@ -232,8 +232,8 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 		string keySignature = getKeySignature(infile, baseCell->getLineIndex());
 
-		// Hide numbers if they do not match rhythmic position of --recip
-		if (!m_recipQ.empty()) {
+		// Hide numbers if they do not match rhythmic position of --rate
+		if (!m_rateQ.empty()) {
 			// Get time signatures
 			vector<pair<int, HumNum>> timeSigs;
 			infile.getTimeSigs(timeSigs, baseCell->getToken()->getTrack());
@@ -376,9 +376,9 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 //
 
 bool Tool_fb::hideNumbersForTokenLine(HTp token, pair<int, HumNum> timeSig) {
-	// Get note duration from --recip option
-	HumNum recip = Convert::recipToDuration(m_recipQ);
-	if (recip.toFloat() != 0) {
+	// Get note duration from --rate option
+	HumNum rateDuration = Convert::recipToDuration(m_rateQ);
+	if (rateDuration.toFloat() != 0) {
 		float timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
 		float durationFromBarline = token->getDurationFromBarline().toFloat();
 		// Handle upbeats
@@ -387,8 +387,8 @@ bool Tool_fb::hideNumbersForTokenLine(HTp token, pair<int, HumNum> timeSig) {
 			// the bar duration of the time signature
 			durationFromBarline = timeSigBarDuration - token->getDurationToBarline().toFloat();
 		}
-		// Checks if rhythmic position is divisible by recip duration 
-		return fmod(durationFromBarline, recip.toFloat()) != 0;
+		// Checks if rhythmic position is divisible by rateDuration
+		return fmod(durationFromBarline, rateDuration.toFloat()) != 0;
 	}
 	return false;
 }

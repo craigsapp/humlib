@@ -97,7 +97,7 @@ class Tool_fb : public HumTool {
 		bool   m_hideThreeQ     = false;
 		bool   m_showNegativeQ  = false;
 		bool   m_aboveQ         = false;
-		string m_recipQ         = "";
+		string m_rateQ          = "";
 
 		string m_spineTracks    = ""; // used with -s option
 		string m_kernTracks     = ""; // used with -k option
