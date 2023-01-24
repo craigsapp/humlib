@@ -938,7 +938,7 @@ string Convert::base40ToIntervalAbbr(int base40interval) {
 	// Add base-7 number
 	char buffer2[32] = {0};
 	int diatonic = Convert::base40IntervalToDiatonic(base40interval)+1;
-	sprintf(buffer2, "%d", diatonic);
+	snprintf(buffer2, 32, "%d", diatonic);
 	output += buffer2;
 
 	return output;

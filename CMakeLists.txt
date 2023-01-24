@@ -86,9 +86,11 @@ set(SRCS
 	src/tool-binroll.cpp
 	src/tool-chord.cpp
 	src/tool-cint.cpp
+	src/tool-deg.cpp
 	src/tool-dissonant.cpp
 	src/tool-esac2hum.cpp
 	src/tool-extract.cpp
+	src/tool-fb.cpp
 	src/tool-filter.cpp
 	src/tool-hproof.cpp
 	src/tool-imitation.cpp
@@ -145,9 +147,11 @@ set(HDRS
 	include/tool-binroll.h
 	include/tool-chord.h
 	include/tool-cint.h
+	include/tool-deg.h
 	include/tool-dissonant.h
 	include/tool-esac2hum.h
 	include/tool-extract.h
+	include/tool-fb.h
 	include/tool-hproof.h
 	include/tool-imitation.h
 	include/tool-mei2hum.h
