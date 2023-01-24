@@ -329,20 +329,18 @@ int Tool_myank::getBarNumberForLine(int lineNumber) {
 }
 
 int Tool_myank::getStartLine(void) {
-	regex re("^(\\d+)\\-(\\d+)$");
-	std::smatch match;
-	if (regex_search(m_lineRange, match, re) && match.size() > 1) {
-		return stoi(match.str(1));
-	}
+	HumRegex hre;
+	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
+        return hre.getMatchInt(1);
+    }
 	return -1;
 }
 
 int Tool_myank::getEndLine(void) {
-	regex re("^(\\d+)\\-(\\d+)$");
-	std::smatch match;
-	if (regex_search(m_lineRange, match, re) && match.size() > 1) {
-		return stoi(match.str(2));
-	}
+	HumRegex hre;
+	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
+        return hre.getMatchInt(2);
+    }
 	return -1;
 }
 
