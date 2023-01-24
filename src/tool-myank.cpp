@@ -252,8 +252,8 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 
 	if (getBoolean("lines")) {
 		m_barNumbersPerLine = analyzeBarNumbers(infile);
-		int startBarNumber = getBarNumberForLine(getStartLine());
-		int endBarNumber = getBarNumberForLine(getEndLine());
+		int startBarNumber = getBarNumberForLineNumber(getStartLineNumber());
+		int endBarNumber = getBarNumberForLineNumber(getEndLineNumber());
 		measurestring = to_string(startBarNumber) + "-" + to_string(endBarNumber);
 	}
 
@@ -306,6 +306,12 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 }
 
 
+
+////////////////////////
+//
+// Tool_myank::analyzeBarNumbers -- Stores the bar number of each line in a vector
+//
+
 vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	vector<int> m_barnum;
 	m_barnum.resize(infile.getLineCount());
@@ -324,11 +330,25 @@ vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	return m_barnum;
 }
 
-int Tool_myank::getBarNumberForLine(int lineNumber) {
+
+
+////////////////////////
+//
+// Tool_myank::getBarNumberForLineNumber --
+//
+
+int Tool_myank::getBarNumberForLineNumber(int lineNumber) {
 	return m_barNumbersPerLine[lineNumber-1];
 }
 
-int Tool_myank::getStartLine(void) {
+
+
+////////////////////////
+//
+// Tool_myank::getStartLineNumber -- Get start line number from --lines
+//
+
+int Tool_myank::getStartLineNumber(void) {
 	HumRegex hre;
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
         return hre.getMatchInt(1);
@@ -336,13 +356,21 @@ int Tool_myank::getStartLine(void) {
 	return -1;
 }
 
-int Tool_myank::getEndLine(void) {
+
+
+////////////////////////
+//
+// Tool_myank::getEndLineNumber -- Get end line number from --lines
+//
+
+int Tool_myank::getEndLineNumber(void) {
 	HumRegex hre;
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
         return hre.getMatchInt(2);
     }
 	return -1;
 }
+
 
 
 //////////////////////////////
@@ -613,8 +641,8 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		} else {
 			reconcileStartingPosition(infile, outmeasures[0].start);
 		}
-		int startLine = getBoolean("lines") ? std::max(getStartLine()-1, outmeasures[h].start): outmeasures[h].start;
-		int endLine = getBoolean("lines") ? std::min(getEndLine(), outmeasures[h].stop): outmeasures[h].stop;
+		int startLine = getBoolean("lines") ? std::max(getStartLineNumber()-1, outmeasures[h].start): outmeasures[h].start;
+		int endLine = getBoolean("lines") ? std::min(getEndLineNumber(), outmeasures[h].stop): outmeasures[h].stop;
 		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
