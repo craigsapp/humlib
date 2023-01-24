@@ -250,7 +250,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 
 	string measurestring = getString("measures");
 
-	if(getBoolean("lines")) {
+	if (getBoolean("lines")) {
 		BarNumbers = analyzeBarNumbers(infile);
 		int startBarNumber = getBarNumberForLine(getStartLine());
 		int endBarNumber = getBarNumberForLine(getEndLine());
