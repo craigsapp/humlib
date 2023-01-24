@@ -17,6 +17,7 @@
 
 #include "tool-myank.h"
 #include "HumRegex.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -626,6 +627,33 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	int barnum = -1;
 	int datastart = 0;
 	int bartextcount = 0;
+	bool startLineHandled = false;
+
+	int lastLineIndex = getBoolean("lines") ? getEndLineNumber() - 1 : outmeasures[outmeasures.size() - 1].stop;
+
+	// Find the actual last line of the selected section that is a line with
+	// data tokens
+	while (infile.getLine(lastLineIndex)->isData() == false) {
+		lastLineIndex--;
+	}
+
+	// Mapping with with the start token for each spine 
+	vector<int> lastLineResolvedTokenLineIndex;
+	// Mapping with the later needed durations of the note that fits within the
+	// selected section
+	vector<HumNum> lastLineDurationsFromNoteStart;
+
+	lastLineResolvedTokenLineIndex.resize(infile.getLine(lastLineIndex)->getTokenCount());
+	lastLineDurationsFromNoteStart.resize(infile.getLine(lastLineIndex)->getTokenCount());
+
+	for (int a = 0; a < infile.getLine(lastLineIndex)->getTokenCount(); a++) {
+		HTp token = infile.token(lastLineIndex, a);
+		// Get lineIndex for last data token with an attack
+		lastLineResolvedTokenLineIndex[a] = infile.token(lastLineIndex, a)->resolveNull()->getLineIndex();
+		// Get needed duration for this token until section end
+		lastLineDurationsFromNoteStart[a] = token->getDurationFromNoteStart() + token->getLine()->getDuration();
+	}
+
 	for (h=0; h<(int)outmeasures.size(); h++) {
 		barnum = outmeasures[h].num;
 		measurestart = 1;
@@ -677,7 +705,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				printMeasureStart(infile, i, outmeasures[h].startStyle);
 				measurestart = 0;
 			} else {
-				m_humdrum_text << infile[i] << "\n";
+				printDataLine(infile.getLine(i), startLineHandled, lastLineResolvedTokenLineIndex, lastLineDurationsFromNoteStart);
 				if (m_barnumtextQ && (bartextcount++ == 0) && infile[i].isBarline()) {
 					int barline = 0;
 					sscanf(infile.token(i, 0)->c_str(), "=%d", &barline);
@@ -1233,6 +1261,77 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 		m_humdrum_text << "\n";
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_myank::printDataLine -- Print line with data tokens of selected section
+//
+
+void Tool_myank::printDataLine(HLp line, bool& startLineHandled, const vector<int>& lastLineResolvedTokenLineIndex, const vector<HumNum>& lastLineDurationsFromNoteStart) {
+	bool lineChange = false;
+	// Handle cutting the previeous token of a note that hangs into the selected
+	// section
+	if (startLineHandled == false) {
+		if (line->isData()) {
+			vector<HTp> tokens;
+			line->getTokens(tokens);
+			for (HTp token : tokens) {
+				if (token->isKern() && token->isNull()) {
+					HTp resolvedToken = token->resolveNull();
+					if (resolvedToken->isNull()) {
+						continue;
+					}
+					string recip = Convert::durationToRecip(token->getDurationToNoteEnd());
+					string pitch;
+					HumRegex hre;
+					if (hre.search(resolvedToken, "([rRA-Ga-gxyXYn#-]+)")) {
+						pitch = hre.getMatch(1);
+					}
+					string tokenText = recip + pitch + "]";
+					token->setText(tokenText);
+					lineChange = true;
+				}
+			}
+			startLineHandled = true;
+		}
+	// Handle cutting the last attacked note of the selected section
+	} else {
+		// Check if line has a note that needs to be handled
+		if (std::find(lastLineResolvedTokenLineIndex.begin(), lastLineResolvedTokenLineIndex.end(), line->getLineIndex()) != lastLineResolvedTokenLineIndex.end()) {
+			for (int i = 0; i < line->getTokenCount(); i++) {
+				HTp token = line->token(i);
+				// Check if token need the be handled and is of type **kern
+				if (token->isKern() && (lastLineResolvedTokenLineIndex[i] == line->getLineIndex())) {
+					HTp resolvedToken = token->resolveNull();
+					if (resolvedToken->isNull()) {
+						continue;
+					}
+					HumNum dur = lastLineDurationsFromNoteStart[i];
+					string recip = Convert::durationToRecip(dur);
+					string pitch;
+					HumRegex hre;
+					if (hre.search(resolvedToken, "([rRA-Ga-gxyXYn#-]+)")) {
+						pitch = hre.getMatch(1);
+					}
+					string tokenText;
+					if (resolvedToken->getDuration() > dur) {
+						tokenText += "[";
+					}
+					tokenText += recip + pitch;
+					token->setText(tokenText);
+					lineChange = true;
+				}
+			}
+		}
+	}
+	if (lineChange) {
+		line->getOwner()->createLinesFromTokens();
+	}
+	m_humdrum_text << line << "\n";
+}
+
 
 
 //////////////////////////////

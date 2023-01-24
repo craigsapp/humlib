@@ -159,6 +159,7 @@ class Tool_myank : public HumTool {
 		int         getBarNumberForLineNumber(int lineNumber);
 		int         getStartLineNumber (void);
 		int         getEndLineNumber   (void);
+		void        printDataLine      (HLp line, bool& startLineHandled, const vector<int>& lastLineResolvedTokenLineIndex, const vector<HumNum>& lastLineDurationsFromNoteStart);
 
 	private:
 		int    m_debugQ      = 0;             // used with --debug option
