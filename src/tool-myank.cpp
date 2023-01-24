@@ -202,28 +202,28 @@ void Tool_myank::initialize(HumdrumFile& infile) {
 		return;
 	}
 
-	debugQ        = getBoolean("debug");
-	inlistQ       = getBoolean("inlist");
-	outlistQ      = getBoolean("outlist");
-	verboseQ      = getBoolean("verbose");
-	maxQ          = getBoolean("max");
-	minQ          = getBoolean("min");
+	m_debugQ        = getBoolean("debug");
+	m_inlistQ       = getBoolean("inlist");
+	m_outlistQ      = getBoolean("outlist");
+	m_verboseQ      = getBoolean("verbose");
+	m_maxQ          = getBoolean("max");
+	m_minQ          = getBoolean("min");
 
-	invisibleQ    = !getBoolean("not-invisible");
-	instrumentQ   =  getBoolean("instrument");
-	nolastbarQ    =  getBoolean("noendbar");
-	markQ         =  getBoolean("mark");
-	doubleQ       =  getBoolean("mdsep");
-	barnumtextQ   =  getBoolean("bar-number-text");
-	sectionCountQ =  getBoolean("section-count");
-	Section       =  getInteger("section");
+	m_invisibleQ    = !getBoolean("not-invisible");
+	m_instrumentQ   =  getBoolean("instrument");
+	m_nolastbarQ    =  getBoolean("noendbar");
+	m_markQ         =  getBoolean("mark");
+	m_doubleQ       =  getBoolean("mdsep");
+	m_barnumtextQ   =  getBoolean("bar-number-text");
+	m_sectionCountQ =  getBoolean("section-count");
+	m_section       =  getInteger("section");
 
-	linesQ = getString("lines");
+	m_lineRange     = getString("lines");
 
-	if (!Section) {
-		if (!(getBoolean("measures") || markQ) && !getBoolean("lines")) {
+	if (!m_section) {
+		if (!(getBoolean("measures") || m_markQ) && !getBoolean("lines")) {
 			// if -m option is not given, then --mark option presumed
-			markQ = 1;
+			m_markQ = 1;
 			// cerr << "Error: the -m option is required" << endl;
 			// exit(1);
 		}
@@ -239,70 +239,70 @@ void Tool_myank::initialize(HumdrumFile& infile) {
 //
 
 void Tool_myank::processFile(HumdrumFile& infile) {
-	if (sectionCountQ) {
+	if (m_sectionCountQ) {
 		int sections = getSectionCount(infile);
 		m_humdrum_text << sections << endl;
 		return;
 	}
 
-	getMetStates(metstates, infile);
-	getMeasureStartStop(MeasureInList, infile);
+	getMetStates(m_metstates, infile);
+	getMeasureStartStop(m_measureInList, infile);
 
 	string measurestring = getString("measures");
 
 	if (getBoolean("lines")) {
-		BarNumbers = analyzeBarNumbers(infile);
+		m_barNumbersPerLine = analyzeBarNumbers(infile);
 		int startBarNumber = getBarNumberForLine(getStartLine());
 		int endBarNumber = getBarNumberForLine(getEndLine());
 		measurestring = to_string(startBarNumber) + "-" + to_string(endBarNumber);
 	}
 
 	measurestring = expandMultipliers(measurestring);
-	if (markQ) {
+	if (m_markQ) {
 		stringstream mstring;
 		getMarkString(mstring, infile);
 		measurestring = mstring.str();
-		if (debugQ) {
+		if (m_debugQ) {
 			m_free_text << "MARK STRING: " << mstring.str() << endl;
 		}
-	} else if (Section) {
+	} else if (m_section) {
 		string sstring;
-		getSectionString(sstring, infile, Section);
+		getSectionString(sstring, infile, m_section);
 		measurestring = sstring;
 	}
-	if (debugQ) {
+	if (m_debugQ) {
 		m_free_text << "MARK MEASURES: " << measurestring << endl;
 	}
 
 	// expand to multiple measures later.
-	expandMeasureOutList(MeasureOutList, MeasureInList, infile,
+	expandMeasureOutList(m_measureOutList, m_measureInList, infile,
 			measurestring);
 
-	if (inlistQ) {
+	if (m_inlistQ) {
 		m_free_text << "INPUT MEASURE MAP: " << endl;
-		for (int i=0; i<(int)MeasureInList.size(); i++) {
-			m_free_text << MeasureInList[i];
+		for (int i=0; i<(int)m_measureInList.size(); i++) {
+			m_free_text << m_measureInList[i];
 		}
 	}
-	if (outlistQ) {
+	if (m_outlistQ) {
 		m_free_text << "OUTPUT MEASURE MAP: " << endl;
-		for (int i=0; i<(int)MeasureOutList.size(); i++) {
-			m_free_text << MeasureOutList[i];
+		for (int i=0; i<(int)m_measureOutList.size(); i++) {
+			m_free_text << m_measureOutList[i];
 		}
 	}
 
-	if (MeasureOutList.size() == 0) {
+	if (m_measureOutList.size() == 0) {
 		// disallow processing files with no barlines
 		return;
 	}
 
 	// move stopStyle to startStyle of next measure group.
-	for (int i=(int)MeasureOutList.size()-1; i>0; i--) {
-		MeasureOutList[i].startStyle = MeasureOutList[i-1].stopStyle;
-		MeasureOutList[i-1].stopStyle = "";
+	for (int i=(int)m_measureOutList.size()-1; i>0; i--) {
+		m_measureOutList[i].startStyle = m_measureOutList[i-1].stopStyle;
+		m_measureOutList[i-1].stopStyle = "";
 	}
 
-	myank(infile, MeasureOutList);
+	myank(infile, m_measureOutList);
 }
 
 
@@ -324,23 +324,23 @@ vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	return m_barnum;
 }
 
-int Tool_myank::getBarNumberForLine(int line) {
-	return BarNumbers[line-1];
+int Tool_myank::getBarNumberForLine(int lineNumber) {
+	return m_barNumbersPerLine[lineNumber-1];
 }
 
-int Tool_myank::getStartLine() {
+int Tool_myank::getStartLine(void) {
 	regex re("^(\\d+)\\-(\\d+)$");
 	std::smatch match;
-	if (regex_search(linesQ, match, re) && match.size() > 1) {
+	if (regex_search(m_lineRange, match, re) && match.size() > 1) {
 		return stoi(match.str(1));
 	}
 	return -1;
 }
 
-int Tool_myank::getEndLine() {
+int Tool_myank::getEndLine(void) {
 	regex re("^(\\d+)\\-(\\d+)$");
 	std::smatch match;
-	if (regex_search(linesQ, match, re) && match.size() > 1) {
+	if (regex_search(m_lineRange, match, re) && match.size() > 1) {
 		return stoi(match.str(2));
 	}
 	return -1;
@@ -415,7 +415,7 @@ void Tool_myank::getMetStates(vector<vector<MyCoord> >& metstates,
 		}
 	}
 
-	if (debugQ) {
+	if (m_debugQ) {
 		for (int i=0; i<infile.getLineCount(); i++) {
 			for (int j=1; j<(int)metstates[i].size(); j++) {
 				if (metstates[i][j].x < 0) {
@@ -523,7 +523,7 @@ void Tool_myank::getMarkString(ostream& out, HumdrumFile& infile)  {
 		}
 	}
 
-	if (debugQ) {
+	if (m_debugQ) {
 		for (int i=0; i<(int)mchar.size(); i++) {
 			m_free_text << "\tMARK CHARCTER: " << mchar[i] << endl;
 		}
@@ -605,7 +605,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		measurestart = 1;
 		printed = 0;
 		counter = 0;
-		if (debugQ) {
+		if (m_debugQ) {
 			m_humdrum_text << "!! =====================================\n";
 			m_humdrum_text << "!! processing " << outmeasures[h].num << endl;
 		}
@@ -634,17 +634,17 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 			if (infile[i].isBarline()) {
 				mcount++;
 			}
-			if ((mcount == 1) && invisibleQ && infile[i].isBarline()) {
+			if ((mcount == 1) && m_invisibleQ && infile[i].isBarline()) {
 				printInvisibleMeasure(infile, i);
 				measurestart = 0;
 				if ((bartextcount++ == 0) && infile[i].isBarline()) {
 					int barline = 0;
 					sscanf(infile.token(i, 0)->c_str(), "=%d", &barline);
-					if (barnumtextQ && (barline > 0)) {
+					if (m_barnumtextQ && (barline > 0)) {
 						m_humdrum_text << "!!LO:TX:Z=20:X=-90:t=" << barline << endl;
 					}
 				}
-			} else if (doubleQ && (lastbarnum > -1) && (abs(barnum - lastbarnum) > 1)) {
+			} else if (m_doubleQ && (lastbarnum > -1) && (abs(barnum - lastbarnum) > 1)) {
 				printDoubleBarline(infile, i);
 				measurestart = 0;
 			} else if (measurestart && infile[i].isBarline()) {
@@ -652,7 +652,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				measurestart = 0;
 			} else {
 				m_humdrum_text << infile[i] << "\n";
-				if (barnumtextQ && (bartextcount++ == 0) && infile[i].isBarline()) {
+				if (m_barnumtextQ && (bartextcount++ == 0) && infile[i].isBarline()) {
 					int barline = 0;
 					sscanf(infile.token(i, 0)->c_str(), "=%d", &barline);
 					if (barline > 0) {
@@ -673,13 +673,13 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	} else {
 		lasti = -1;
 	}
-	if ((!nolastbarQ) &&  (lasti >= 0) && infile[lasti].isBarline()) {
+	if ((!m_nolastbarQ) &&  (lasti >= 0) && infile[lasti].isBarline()) {
 		for (j=0; j<infile[lasti].getFieldCount(); j++) {
 			token = *infile.token(lasti, j);
 			hre.replaceDestructive(token, outmeasures.back().stopStyle, "\\d+.*");
 			// collapse final barlines
 			hre.replaceDestructive(token, "==", "===+");
-			if (doubleQ) {
+			if (m_doubleQ) {
 				if (hre.search(token, "=(.+)")) {
 					// don't add double barline, there is already
 					// some style on the barline
@@ -698,7 +698,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 
 	collapseSpines(infile, lasti);
 
-	if (debugQ) {
+	if (m_debugQ) {
 		m_free_text << "PROCESSING ENDING" << endl;
 	}
 
@@ -1245,7 +1245,7 @@ void Tool_myank::printMeasureStart(HumdrumFile& infile, int line, const string& 
 	}
 	m_humdrum_text << "\n";
 
-	if (barnumtextQ) {
+	if (m_barnumtextQ) {
 		int barline = 0;
 		sscanf(infile.token(line, 0)->c_str(), "=%d", &barline);
 		if (barline > 0) {
@@ -1282,7 +1282,7 @@ void Tool_myank::printDoubleBarline(HumdrumFile& infile, int line) {
 	}
 	m_humdrum_text << "\n";
 
-	if (barnumtextQ) {
+	if (m_barnumtextQ) {
 		int barline = 0;
 		sscanf(infile.token(line, 0)->c_str(), "=%d", &barline);
 		if (barline > 0) {
@@ -1340,7 +1340,7 @@ void Tool_myank::printInvisibleMeasure(HumdrumFile& infile, int line) {
 
 void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2) {
 
-	if (debugQ) {
+	if (m_debugQ) {
 		m_humdrum_text << "RECONCILING LINES " << index1+1 << " and " << index2+1 << endl;
 		m_humdrum_text << "FIELD COUNT OF " << index1+1 << " is "
 			  << infile[index1].getFieldCount() << endl;
@@ -1507,7 +1507,7 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 
 	int hasI = 0;
 
-	if (instrumentQ) {
+	if (m_instrumentQ) {
 		// print any tandem interpretations which start with *I found
 		// at the start of the data before measures, notes, or any
 		// spine manipulator lines
@@ -1558,7 +1558,7 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 //
 
 void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
-	if (debugQ) {
+	if (m_debugQ) {
 		m_humdrum_text << "IN printEnding" << endl;
 	}
 	int ending = -1;
@@ -1881,14 +1881,14 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 		cerr << "Error: ridiculusly large measure number: " << maxmeasure << endl;
 		exit(1);
 	}
-	if (maxQ) {
+	if (m_maxQ) {
 		if (measurein.size() == 0) {
 			m_humdrum_text << 0 << endl;
 		} else {
 			m_humdrum_text << maxmeasure << endl;
 		}
 		exit(0);
-	} else if (minQ) {
+	} else if (m_minQ) {
 		for (int ii=0; ii<infile.getLineCount(); ii++) {
 			if (infile[ii].isBarline()) {
 				if (hre.search(infile.token(ii, 0), "=\\d", "")) {
@@ -1922,7 +1922,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	string ostring = optionstring;
 	removeDollarsFromString(ostring, maxmeasure);
 
-	if (debugQ) {
+	if (m_debugQ) {
 		m_free_text << "Option string expanded: " << ostring << endl;
 	}
 
@@ -2453,7 +2453,7 @@ void Tool_myank::removeDollarsFromString(string& buffer, int maxx) {
 	int outval;
 	int value;
 
-	if (debugQ) {
+	if (m_debugQ) {
 		m_free_text << "MEASURE STRING BEFORE DOLLAR REMOVAL: " << buffer << endl;
 	}
 
@@ -2475,7 +2475,7 @@ void Tool_myank::removeDollarsFromString(string& buffer, int maxx) {
 		obuf += hre.getMatch(1);
 		hre.replaceDestructive(buffer, tbuf, obuf);
 	}
-	if (debugQ) {
+	if (m_debugQ) {
 		m_free_text << "DOLLAR EXPAND: " << buffer << endl;
 	}
 }
