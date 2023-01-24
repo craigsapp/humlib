@@ -39,7 +39,7 @@ Tool_myank::Tool_myank(void) {
 	define("T|M|bar-number-text=b", "print barnum with LO text above system ");
 	define("d|double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
 	define("m|b|measures|bars|measure|bar=s", "Measures to yank");
-	define("l|lines=s", "Lines to yank");
+	define("l|lines|line-range=s", "Line numbers range to yank (e.g. 40-50)");
 	define("I|i|instrument=b", "Include instrument codes from start of data");
 	define("visible|not-invisible=b", "Do not make initial measure invisible");
 	define("B|noendbar=b", "Do not print barline at end of data");
