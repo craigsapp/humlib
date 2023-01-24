@@ -155,10 +155,10 @@ class Tool_myank : public HumTool {
 		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
 		std::string expandMultipliers  (const string& inputstring);
 
-		vector<int> analyzeBarNumbers(HumdrumFile& infile);
-		int getBarNumberForLine(int line);
-		int getStartLine();
-		int getEndLine();
+		vector<int> analyzeBarNumbers  (HumdrumFile& infile);
+		int         getBarNumberForLine(int line);
+		int         getStartLine       (void);
+		int         getEndLine         (void);
 
 	private:
 		int    m_debugQ      = 0;             // used with --debug option
