@@ -723,7 +723,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				}
 			}
 			lastline = i;
-			if (infile.getLine(i)->token(0)->isKern()) {
+			if (infile.getLine(i)->isData()) {
 				lastDataLine = i;
 			}
 		}
