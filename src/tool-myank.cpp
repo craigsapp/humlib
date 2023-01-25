@@ -252,9 +252,16 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	string measurestring = getString("measures");
 
 	if (getBoolean("lines")) {
+		int startLineNumber = getStartLineNumber();
+		int endLineNumber = getEndLineNumber();
+		if ((startLineNumber > endLineNumber) || (endLineNumber > infile.getLineCount())) {
+			// Disallow when end line number is bigger then line count or when
+			// start line number greather than end line number
+			return;
+		}
 		m_barNumbersPerLine = analyzeBarNumbers(infile);
-		int startBarNumber = getBarNumberForLineNumber(getStartLineNumber());
-		int endBarNumber = getBarNumberForLineNumber(getEndLineNumber());
+		int startBarNumber = getBarNumberForLineNumber(startLineNumber);
+		int endBarNumber = getBarNumberForLineNumber(endLineNumber);
 		measurestring = to_string(startBarNumber) + "-" + to_string(endBarNumber);
 	}
 
