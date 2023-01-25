@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 24 Jan 2023 22:28:46 CET
+// Last Modified: Mi 25 Jan 2023 16:23:25 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -102157,9 +102157,16 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 	string measurestring = getString("measures");
 
 	if (getBoolean("lines")) {
+		int startLineNumber = getStartLineNumber();
+		int endLineNumber = getEndLineNumber();
+		if ((startLineNumber > endLineNumber) || (endLineNumber > infile.getLineCount())) {
+			// Disallow when end line number is bigger then line count or when
+			// start line number greather than end line number
+			return;
+		}
 		m_barNumbersPerLine = analyzeBarNumbers(infile);
-		int startBarNumber = getBarNumberForLineNumber(getStartLineNumber());
-		int endBarNumber = getBarNumberForLineNumber(getEndLineNumber());
+		int startBarNumber = getBarNumberForLineNumber(startLineNumber);
+		int endBarNumber = getBarNumberForLineNumber(endLineNumber);
 		measurestring = to_string(startBarNumber) + "-" + to_string(endBarNumber);
 	}
 
@@ -102523,6 +102530,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	}
 
 	int lastline = -1;
+	int lastDataLine = -1;
 	int h, i, j;
 	int counter;
 	int printed = 0;
@@ -102559,6 +102567,29 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		lastLineDurationsFromNoteStart[a] = token->getDurationFromNoteStart() + token->getLine()->getDuration();
 	}
 
+	int startLineNumber = getStartLineNumber();
+	int endLineNumber = getEndLineNumber();
+
+	if (getBoolean("lines")) {
+		int firstDataLineIndex = -1;
+		for (int b = startLineNumber - 1; b <= endLineNumber - 1; b++) {
+			if (infile.getLine(b)->isData()) {
+				firstDataLineIndex = b;
+				break;
+			}
+		}
+		if (firstDataLineIndex >= 0) {
+			if (infile.getLine(firstDataLineIndex)->getDurationFromBarline() == 0) {
+				for (int c = startLineNumber - 1; c >=  0; c--) {
+					if (infile.getLine(c)->isBarline()) {
+						startLineNumber = c + 1;
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	for (h=0; h<(int)outmeasures.size(); h++) {
 		barnum = outmeasures[h].num;
 		measurestart = 1;
@@ -102574,8 +102605,8 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		} else {
 			reconcileStartingPosition(infile, outmeasures[0].start);
 		}
-		int startLine = getBoolean("lines") ? std::max(getStartLineNumber()-1, outmeasures[h].start): outmeasures[h].start;
-		int endLine = getBoolean("lines") ? std::min(getEndLineNumber(), outmeasures[h].stop): outmeasures[h].stop;
+		int startLine = getBoolean("lines") ? std::max(startLineNumber-1, outmeasures[h].start): outmeasures[h].start;
+		int endLine = getBoolean("lines") ? std::min(endLineNumber, outmeasures[h].stop): outmeasures[h].stop;
 		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
@@ -102620,8 +102651,15 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				}
 			}
 			lastline = i;
+			if (infile.getLine(i)->isData()) {
+				lastDataLine = i;
+			}
 		}
 		lastbarnum = barnum;
+	}
+
+	if (getBoolean("lines") && (lastDataLine >= 0) && (infile.getLine(lastDataLine)->getDurationToBarline() > infile.getLine(lastDataLine)->getDuration())) {
+		m_nolastbarQ = true;
 	}
 
 	HumRegex hre;
