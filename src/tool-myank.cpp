@@ -625,6 +625,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 	}
 
 	int lastline = -1;
+	int lastDataLine = -1;
 	int h, i, j;
 	int counter;
 	int printed = 0;
@@ -722,8 +723,15 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 				}
 			}
 			lastline = i;
+			if (infile.getLine(i)->token(0)->isKern()) {
+				lastDataLine = i;
+			}
 		}
 		lastbarnum = barnum;
+	}
+
+	if (getBoolean("lines") && (lastDataLine >= 0) && (infile.getLine(lastDataLine)->getDurationToBarline() > infile.getLine(lastDataLine)->getDuration())) {
+		m_nolastbarQ = true;
 	}
 
 	HumRegex hre;
