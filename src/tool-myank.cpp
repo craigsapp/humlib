@@ -662,6 +662,29 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		lastLineDurationsFromNoteStart[a] = token->getDurationFromNoteStart() + token->getLine()->getDuration();
 	}
 
+	int startLineNumber = getStartLineNumber();
+	int endLineNumber = getEndLineNumber();
+
+	if (getBoolean("lines")) {
+		int firstDataLineIndex = -1;
+		for (int b = startLineNumber - 1; b <= endLineNumber - 1; b++) {
+			if (infile.getLine(b)->isData()) {
+				firstDataLineIndex = b;
+				break;
+			}
+		}
+		if (firstDataLineIndex >= 0) {
+			if (infile.getLine(firstDataLineIndex)->getDurationFromBarline() == 0) {
+				for (int c = startLineNumber - 1; c >=  0; c--) {
+					if (infile.getLine(c)->isBarline()) {
+						startLineNumber = c + 1;
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	for (h=0; h<(int)outmeasures.size(); h++) {
 		barnum = outmeasures[h].num;
 		measurestart = 1;
@@ -677,8 +700,8 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		} else {
 			reconcileStartingPosition(infile, outmeasures[0].start);
 		}
-		int startLine = getBoolean("lines") ? std::max(getStartLineNumber()-1, outmeasures[h].start): outmeasures[h].start;
-		int endLine = getBoolean("lines") ? std::min(getEndLineNumber(), outmeasures[h].stop): outmeasures[h].stop;
+		int startLine = getBoolean("lines") ? std::max(startLineNumber-1, outmeasures[h].start): outmeasures[h].start;
+		int endLine = getBoolean("lines") ? std::min(endLineNumber, outmeasures[h].stop): outmeasures[h].stop;
 		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
