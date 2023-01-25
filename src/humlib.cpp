@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi 25 Jan 2023 16:23:25 CET
+// Last Modified: Mi 25 Jan 2023 23:37:27 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -102614,7 +102614,17 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 					// not ideal setup...
 					datastart = 1;
 				} else{
-					adjustGlobalInterpretations(infile, i, outmeasures, h);
+					// Fix adjustGlobalInterpretations when line is a global comment
+					int nextLineIndexWithSpines = i;
+					if (infile.getLine(i)->isCommentGlobal()) {
+						for (int d = i; d <= endLineNumber - 1; d++) {
+							if (!infile.getLine(d)->isCommentGlobal()) {
+								nextLineIndexWithSpines = d;
+								break;
+							}
+						}
+					}
+					adjustGlobalInterpretations(infile, nextLineIndexWithSpines, outmeasures, h);
 					printed = 1;
 				}
 			}

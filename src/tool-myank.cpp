@@ -709,7 +709,17 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 					// not ideal setup...
 					datastart = 1;
 				} else{
-					adjustGlobalInterpretations(infile, i, outmeasures, h);
+					// Fix adjustGlobalInterpretations when line is a global comment
+					int nextLineIndexWithSpines = i;
+					if (infile.getLine(i)->isCommentGlobal()) {
+						for (int d = i; d <= endLineNumber - 1; d++) {
+							if (!infile.getLine(d)->isCommentGlobal()) {
+								nextLineIndexWithSpines = d;
+								break;
+							}
+						}
+					}
+					adjustGlobalInterpretations(infile, nextLineIndexWithSpines, outmeasures, h);
 					printed = 1;
 				}
 			}
