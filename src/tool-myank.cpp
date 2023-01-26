@@ -52,6 +52,8 @@ Tool_myank::Tool_myank(void) {
 	define("version=b",       "Program version");
 	define("example=b",       "Program examples");
 	define("h|help=b",        "Short description");
+	define("hide-starting=b", "Prevent printStarting");
+	define("hide-ending=b",   "Prevent printEnding");
 }
 
 
@@ -220,6 +222,9 @@ void Tool_myank::initialize(HumdrumFile& infile) {
 	m_section       =  getInteger("section");
 
 	m_lineRange     = getString("lines");
+	m_hideStarting  = getBoolean("hide-starting");
+	m_hideEnding    = getBoolean("hide-ending");
+
 
 	if (!m_section) {
 		if (!(getBoolean("measures") || m_markQ) && !getBoolean("lines")) {
@@ -1675,7 +1680,9 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 			exi = i;
 			break;
 		}
-		m_humdrum_text << infile[i] << "\n";
+		if (!m_hideStarting) {
+			m_humdrum_text << infile[i] << "\n";
+		}
 	}
 
 	int hasI = 0;
@@ -1768,6 +1775,9 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 	if (startline >= 0) {
 		for (i=startline; i<infile.getLineCount(); i++) {
 			m_humdrum_text << infile[i] << "\n";
+			if (m_hideEnding && (i >= ending)) {
+				break;
+			}
 		}
 	}
 

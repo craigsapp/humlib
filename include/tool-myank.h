@@ -183,6 +183,8 @@ class Tool_myank : public HumTool {
 
 		string      m_lineRange;              // used with -l option
 		vector<int> m_barNumbersPerLine;      // used with -l option
+		bool m_hideStarting;                  // used with --hide-starting option
+		bool m_hideEnding;                    // used with --hide-ending option
 
 };
 

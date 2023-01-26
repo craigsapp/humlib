@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi 25 Jan 2023 23:37:27 CET
+// Last Modified: Do 26 Jan 2023 15:01:06 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -9207,6 +9207,8 @@ class Tool_myank : public HumTool {
 
 		string      m_lineRange;              // used with -l option
 		vector<int> m_barNumbersPerLine;      // used with -l option
+		bool m_hideStarting;                  // used with --hide-starting option
+		bool m_hideEnding;                    // used with --hide-ending option
 
 };
 
