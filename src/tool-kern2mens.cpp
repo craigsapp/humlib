@@ -170,11 +170,11 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 	hre.replaceDestructive(data, "X", "000");
 	hre.replaceDestructive(data, "L", "00");
 	hre.replaceDestructive(data, "S", "0");
-	hre.replaceDestructive(data, "s", "1");
+	hre.replaceDestructive(data, "u", "16");
 	hre.replaceDestructive(data, "M", "2");
 	hre.replaceDestructive(data, "m", "4");
 	hre.replaceDestructive(data, "U", "8");
-	hre.replaceDestructive(data, "u", "16");
+	hre.replaceDestructive(data, "s", "1");
 	hre.replaceDestructive(data, ":", "\\.");
 	if (perfect) {
 		hre.replaceDestructive(data, "$1p", "([XLSsMmUu]+)");
