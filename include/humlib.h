@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 26 22:41:11 PST 2023
+// Last Modified: Sa  4 Feb 2023 16:27:58 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7891,6 +7891,31 @@ class Tool_kernview : public HumTool {
 	private:
 		std::string m_view_string;
 		std::string m_hide_string;
+
+};
+
+
+class Tool_lyricsformatter : public HumTool {
+
+	public:
+		     Tool_lyricsformatter (void);
+		     ~Tool_lyricsformatter() {};
+
+		bool run(HumdrumFileSet& infiles);
+		bool run(HumdrumFile& infile);
+		bool run(const string& indata, ostream& out);
+		bool run(HumdrumFile& infile, ostream& out);
+
+	protected:
+		void initialize      (void);
+        void processFile     (HumdrumFile& infile);
+		void addUnderlines   (vector<HTp> spineStartList);
+		void removeUnderlines(vector<HTp> spineStartList);
+
+
+	private:
+		bool m_addUnderlineQ;
+		bool m_removeUnderlineQ;
 
 };
 
