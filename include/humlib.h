@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sa  4 Feb 2023 16:27:58 CET
+// Last Modified: Mo  6 Feb 2023 10:29:01 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -7895,31 +7895,6 @@ class Tool_kernview : public HumTool {
 };
 
 
-class Tool_lyricsformatter : public HumTool {
-
-	public:
-		     Tool_lyricsformatter (void);
-		     ~Tool_lyricsformatter() {};
-
-		bool run(HumdrumFileSet& infiles);
-		bool run(HumdrumFile& infile);
-		bool run(const string& indata, ostream& out);
-		bool run(HumdrumFile& infile, ostream& out);
-
-	protected:
-		void initialize      (void);
-        void processFile     (HumdrumFile& infile);
-		void addUnderlines   (vector<HTp> spineStartList);
-		void removeUnderlines(vector<HTp> spineStartList);
-
-
-	private:
-		bool m_addUnderlineQ;
-		bool m_removeUnderlineQ;
-
-};
-
-
 class mei_staffDef {
 	public:
 		HumNum timestamp;
@@ -10270,6 +10245,30 @@ class Tool_trillspell : public HumTool {
 
 };
 
+
+
+class Tool_worex : public HumTool {
+
+	public:
+		     Tool_worex (void);
+		     ~Tool_worex() {};
+
+		bool run(HumdrumFileSet& infiles);
+		bool run(HumdrumFile& infile);
+		bool run(const string& indata, ostream& out);
+		bool run(HumdrumFile& infile, ostream& out);
+
+	protected:
+		void initialize      (void);
+        void processFile     (HumdrumFile& infile);
+		void addWordExtenders   (vector<HTp> spineStartList);
+		void removeWordExtenders(vector<HTp> spineStartList);
+
+
+	private:
+		bool m_removeWordExtenderQ;
+
+};
 
 
 } // end of namespace hum

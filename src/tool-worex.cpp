@@ -1,15 +1,15 @@
 //
 // Programmer:    Wolfgang Drescher <drescher.wolfgang@gmail.com>
 // Creation Date: Sa  4 Feb 2023 16:27:58 CET
-// Filename:      tool-lyricsformatter.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-lyricsformatter.cpp
+// Filename:      tool-worex.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-worex.cpp
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Format the lyrics of **text spines
+// Description:   Add melismatic underlines at ending syllables of words
 //
 
-#include "tool-lyricsformatter.h"
+#include "tool-worex.h"
 #include "Convert.h"
 #include "HumRegex.h"
 #include <regex>
@@ -23,22 +23,21 @@ namespace hum {
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::Tool_lyricsformatter -- Set the recognized options for the tool.
+// Tool_worex::Tool_worex -- Set the recognized options for the tool.
 //
 
-Tool_lyricsformatter::Tool_lyricsformatter(void) {
-	define("ul|aul|add-ul|add-underline|underline=b", "Add melismatic underlines at ending syllables of words");
-	define("xul|rul|remove-ul|remove-underline=b", "Remove melismatic underlines at ending syllables of words");
+Tool_worex::Tool_worex(void) {
+	define("r|remove=b", "Remove melismatic underlines at ending syllables of words");
 }
 
 
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::run -- Do the main work of the tool.
+// Tool_worex::run -- Do the main work of the tool.
 //
 
-bool Tool_lyricsformatter::run(HumdrumFileSet &infiles) {
+bool Tool_worex::run(HumdrumFileSet &infiles) {
 	bool status = true;
 	for (int i = 0; i < infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -46,7 +45,7 @@ bool Tool_lyricsformatter::run(HumdrumFileSet &infiles) {
 	return status;
 }
 
-bool Tool_lyricsformatter::run(const string &indata, ostream &out) {
+bool Tool_worex::run(const string &indata, ostream &out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
@@ -57,7 +56,7 @@ bool Tool_lyricsformatter::run(const string &indata, ostream &out) {
 	return status;
 }
 
-bool Tool_lyricsformatter::run(HumdrumFile &infile, ostream &out) {
+bool Tool_worex::run(HumdrumFile &infile, ostream &out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -67,7 +66,7 @@ bool Tool_lyricsformatter::run(HumdrumFile &infile, ostream &out) {
 	return status;
 }
 
-bool Tool_lyricsformatter::run(HumdrumFile &infile) {
+bool Tool_worex::run(HumdrumFile &infile) {
 	initialize();
 	processFile(infile);
 	return true;
@@ -77,30 +76,29 @@ bool Tool_lyricsformatter::run(HumdrumFile &infile) {
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::initialize -- 
+// Tool_worex::initialize -- 
 //
 
-void Tool_lyricsformatter::initialize(void) {
-	m_addUnderlineQ = getBoolean("add-underline");
-	m_removeUnderlineQ = getBoolean("remove-underline");
+void Tool_worex::initialize(void) {
+	m_removeWordExtenderQ = getBoolean("remove");
 }
 
 
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::processFile -- 
+// Tool_worex::processFile -- 
 //
 
-void Tool_lyricsformatter::processFile(HumdrumFile& infile) {
+void Tool_worex::processFile(HumdrumFile& infile) {
 
 	vector<HTp> textSpinesStartList;
 	infile.getSpineStartList(textSpinesStartList, "**text");	
 
-	if (m_addUnderlineQ) {
-		addUnderlines(textSpinesStartList);
-	} else if (m_removeUnderlineQ) {
-		removeUnderlines(textSpinesStartList);
+	if (m_removeWordExtenderQ) {
+		removeWordExtenders(textSpinesStartList);
+	} else {
+		addWordExtenders(textSpinesStartList);
 	}
 
 	infile.createLinesFromTokens();
@@ -112,10 +110,10 @@ void Tool_lyricsformatter::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::addUnderlines -- 
+// Tool_worex::addWordExtenders -- 
 //
 
-void Tool_lyricsformatter::addUnderlines(vector<HTp> spineStartList) {
+void Tool_worex::addWordExtenders(vector<HTp> spineStartList) {
 	for (HTp token : spineStartList) {
 		if (!token->isDataType("**text")) {
 			continue;
@@ -145,10 +143,10 @@ void Tool_lyricsformatter::addUnderlines(vector<HTp> spineStartList) {
 
 //////////////////////////////
 //
-// Tool_lyricsformatter::removeUnderlines -- 
+// Tool_worex::removeWordExtenders -- 
 //
 
-void Tool_lyricsformatter::removeUnderlines(vector<HTp> spineStartList) {
+void Tool_worex::removeWordExtenders(vector<HTp> spineStartList) {
 	for (HTp token : spineStartList) {
 		if (!token->isDataType("**text")) {
 			continue;

@@ -1,16 +1,16 @@
 //
 // Programmer:    Wolfgang Drescher <drescher.wolfgang@gmail.com>
 // Creation Date: Sa  4 Feb 2023 16:27:58 CET
-// Filename:      tool-lyricsformatter.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-lyricsformatter.h
+// Filename:      tool-worex.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-worex.h
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Interface for lyricsformatter tool, which formats lyrics of **text spines.
+// Description:   Interface for worex tool, which adds word extenders to the lyrics.
 //
 
-#ifndef _TOOL_LYRICSFORMATTER_H
-#define _TOOL_LYRICSFORMATTER_H
+#ifndef _TOOL_WOREX_H
+#define _TOOL_WOREX_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -19,11 +19,11 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_lyricsformatter : public HumTool {
+class Tool_worex : public HumTool {
 
 	public:
-		     Tool_lyricsformatter (void);
-		     ~Tool_lyricsformatter() {};
+		     Tool_worex (void);
+		     ~Tool_worex() {};
 
 		bool run(HumdrumFileSet& infiles);
 		bool run(HumdrumFile& infile);
@@ -33,13 +33,12 @@ class Tool_lyricsformatter : public HumTool {
 	protected:
 		void initialize      (void);
         void processFile     (HumdrumFile& infile);
-		void addUnderlines   (vector<HTp> spineStartList);
-		void removeUnderlines(vector<HTp> spineStartList);
+		void addWordExtenders   (vector<HTp> spineStartList);
+		void removeWordExtenders(vector<HTp> spineStartList);
 
 
 	private:
-		bool m_addUnderlineQ;
-		bool m_removeUnderlineQ;
+		bool m_removeWordExtenderQ;
 
 };
 
@@ -47,4 +46,4 @@ class Tool_lyricsformatter : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_LYRICSFORMATTER_H */
+#endif /* _TOOL_WOREX_H */
