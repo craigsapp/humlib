@@ -101832,8 +101832,8 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 					output += "[(";
 					typeendings[number] = ")]";
 				} else if (g == "brace") {
-					output += "[(";
-					typeendings[number] = ")]";
+					output += "{(";
+					typeendings[number] = ")}";
 				} else {
 					cerr << "Unknown part grouping symbol: " << g << endl;
 				}
