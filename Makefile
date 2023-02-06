@@ -644,7 +644,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-composite.h tool-dissonant.h \
   tool-extract.h tool-fb.h tool-homorhythm.h \
   tool-homorhythm2.h tool-hproof.h \
-  tool-humdiff.h tool-shed.h tool-imitation.h tool-lyricsformatter.h \
+  tool-humdiff.h tool-shed.h tool-imitation.h tool-worex.h \
   tool-kern2mens.h tool-melisma.h tool-metlev.h \
   tool-msearch.h tool-myank.h tool-phrase.h \
   tool-recip.h tool-restfill.h tool-satb2gs.h \
@@ -708,7 +708,7 @@ tool-imitation.o: tool-imitation.cpp tool-imitation.h \
   NoteGrid.h NoteCell.h Convert.h \
   HumRegex.h
 
-tool-lyricsformatter.o: tool-lyricsformatter.cpp tool-lyricsformatter.h \
+tool-worex.o: tool-worex.cpp tool-worex.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
   HumdrumFileStructure.h HumdrumFileBase.h \

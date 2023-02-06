@@ -94,7 +94,7 @@ set(SRCS
 	src/tool-filter.cpp
 	src/tool-hproof.cpp
 	src/tool-imitation.cpp
-    src/tool-lyricsformatter.cpp
+    src/tool-worex.cpp
 	src/tool-mei2hum.cpp
 	src/tool-metlev.cpp
 	src/tool-msearch.cpp
@@ -155,7 +155,7 @@ set(HDRS
 	include/tool-fb.h
 	include/tool-hproof.h
 	include/tool-imitation.h
-    include/tool-lyricsformatter.h
+    include/tool-worex.h
 	include/tool-mei2hum.h
 	include/tool-metlev.h
 	include/tool-msearch.h
