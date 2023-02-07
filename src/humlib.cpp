@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  7 Feb 2023 15:00:18 CET
+// Last Modified: Di  7 Feb 2023 15:04:23 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -103285,7 +103285,7 @@ void Tool_myank::printDataLine(HLp line, bool& startLineHandled, const vector<in
 		}
 	}
 	if (lineChange) {
-		line->getOwner()->createLinesFromTokens();
+		line->createLineFromTokens();
 	}
 	m_humdrum_text << line << "\n";
 }

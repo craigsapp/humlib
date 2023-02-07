@@ -1380,7 +1380,7 @@ void Tool_myank::printDataLine(HLp line, bool& startLineHandled, const vector<in
 		}
 	}
 	if (lineChange) {
-		line->getOwner()->createLinesFromTokens();
+		line->createLineFromTokens();
 	}
 	m_humdrum_text << line << "\n";
 }
