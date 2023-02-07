@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  7 Feb 2023 15:20:03 CET
+// Last Modified: Di  7 Feb 2023 18:58:16 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -102673,7 +102673,8 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		lastbarnum = barnum;
 	}
 
-	if (getBoolean("lines") && (lastDataLine >= 0) && (infile.getLine(lastDataLine)->getDurationToBarline() > infile.getLine(lastDataLine)->getDuration())) {
+	if (getBoolean("lines") && (lastDataLine >= 0) &&
+			(infile.getLine(lastDataLine)->getDurationToBarline() > infile.getLine(lastDataLine)->getDuration())) {
 		m_nolastbarQ = true;
 	}
 
@@ -103227,7 +103228,10 @@ void Tool_myank::adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
 // Tool_myank::printDataLine -- Print line with data tokens of selected section
 //
 
-void Tool_myank::printDataLine(HLp line, bool& startLineHandled, const vector<int>& lastLineResolvedTokenLineIndex, const vector<HumNum>& lastLineDurationsFromNoteStart) {
+void Tool_myank::printDataLine(HLp line,
+		bool& startLineHandled,
+		const vector<int>& lastLineResolvedTokenLineIndex,
+		const vector<HumNum>& lastLineDurationsFromNoteStart) {
 	bool lineChange = false;
 	// Handle cutting the previeous token of a note that hangs into the selected
 	// section
@@ -103257,7 +103261,8 @@ void Tool_myank::printDataLine(HLp line, bool& startLineHandled, const vector<in
 	// Handle cutting the last attacked note of the selected section
 	} else {
 		// Check if line has a note that needs to be handled
-		if (std::find(lastLineResolvedTokenLineIndex.begin(), lastLineResolvedTokenLineIndex.end(), line->getLineIndex()) != lastLineResolvedTokenLineIndex.end()) {
+		if (std::find(lastLineResolvedTokenLineIndex.begin(), lastLineResolvedTokenLineIndex.end(), line->getLineIndex()) !=
+				lastLineResolvedTokenLineIndex.end()) {
 			for (int i = 0; i < line->getTokenCount(); i++) {
 				HTp token = line->token(i);
 				// Check if token need the be handled and is of type **kern
