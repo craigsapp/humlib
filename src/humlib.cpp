@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  7 Feb 2023 15:04:23 CET
+// Last Modified: Di  7 Feb 2023 15:20:03 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -85857,11 +85857,11 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 	hre.replaceDestructive(data, "X", "000");
 	hre.replaceDestructive(data, "L", "00");
 	hre.replaceDestructive(data, "S", "0");
-	hre.replaceDestructive(data, "s", "1");
+	hre.replaceDestructive(data, "u", "16");
 	hre.replaceDestructive(data, "M", "2");
 	hre.replaceDestructive(data, "m", "4");
 	hre.replaceDestructive(data, "U", "8");
-	hre.replaceDestructive(data, "u", "16");
+	hre.replaceDestructive(data, "s", "1");
 	hre.replaceDestructive(data, ":", "\\.");
 	if (perfect) {
 		hre.replaceDestructive(data, "$1p", "([XLSsMmUu]+)");
@@ -101876,8 +101876,8 @@ string Tool_musicxml2hum::getSystemDecoration(xml_document& doc, HumGrid& grid,
 					output += "[(";
 					typeendings[number] = ")]";
 				} else if (g == "brace") {
-					output += "[(";
-					typeendings[number] = ")]";
+					output += "{(";
+					typeendings[number] = ")}";
 				} else {
 					cerr << "Unknown part grouping symbol: " << g << endl;
 				}
