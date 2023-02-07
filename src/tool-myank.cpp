@@ -1682,6 +1682,10 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 		}
 		if (!m_hideStarting) {
 			m_humdrum_text << infile[i] << "\n";
+		} else {
+			if (infile[i].rfind("!!!RDF", 0) == 0) {
+				m_humdrum_text << infile[i] << "\n";
+			}
 		}
 	}
 
@@ -1774,9 +1778,12 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 
 	if (startline >= 0) {
 		for (i=startline; i<infile.getLineCount(); i++) {
-			m_humdrum_text << infile[i] << "\n";
 			if (m_hideEnding && (i >= ending)) {
-				break;
+				if (infile[i].rfind("!!!RDF", 0) == 0) {
+					m_humdrum_text << infile[i] << "\n";
+				}
+			} else {
+				m_humdrum_text << infile[i] << "\n";
 			}
 		}
 	}
