@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jan 26 22:41:11 PST 2023
+// Last Modified: Mi  8 Feb 2023 14:42:01 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -10245,6 +10245,31 @@ class Tool_trillspell : public HumTool {
 
 };
 
+
+
+class Tool_worex : public HumTool {
+
+	public:
+		     Tool_worex (void);
+		     ~Tool_worex() {};
+
+		bool run(HumdrumFileSet& infiles);
+		bool run(HumdrumFile& infile);
+		bool run(const string& indata, ostream& out);
+		bool run(HumdrumFile& infile, ostream& out);
+
+	protected:
+		void initialize         (void);
+        void processFile        (HumdrumFile& infile);
+		void addWordExtenders   (vector<HTp> spineStartList);
+		void removeWordExtenders(vector<HTp> spineStartList);
+		HTp  getParallelNote    (HTp token);
+
+
+	private:
+		bool m_removeWordExtenderQ;
+
+};
 
 
 } // end of namespace hum

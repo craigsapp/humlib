@@ -40,6 +40,7 @@
 #include "tool-humsheet.h"
 #include "tool-humtr.h"
 #include "tool-imitation.h"
+#include "tool-worex.h"
 #include "tool-kern2mens.h"
 #include "tool-kernview.h"
 #include "tool-mei2hum.h"
@@ -258,6 +259,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(humtr, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
+		} else if (commands[i].first == "worex") {
+			RUNTOOL(worex, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "kernview") {
