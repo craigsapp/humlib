@@ -31,8 +31,8 @@ class Tool_worex : public HumTool {
 		bool run(HumdrumFile& infile, ostream& out);
 
 	protected:
-		void initialize      (void);
-        void processFile     (HumdrumFile& infile);
+		void initialize         (void);
+        void processFile        (HumdrumFile& infile);
 		void addWordExtenders   (vector<HTp> spineStartList);
 		void removeWordExtenders(vector<HTp> spineStartList);
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo  6 Feb 2023 10:29:01 CET
+// Last Modified: Mi  8 Feb 2023 14:40:27 CET
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -10259,8 +10259,8 @@ class Tool_worex : public HumTool {
 		bool run(HumdrumFile& infile, ostream& out);
 
 	protected:
-		void initialize      (void);
-        void processFile     (HumdrumFile& infile);
+		void initialize         (void);
+        void processFile        (HumdrumFile& infile);
 		void addWordExtenders   (vector<HTp> spineStartList);
 		void removeWordExtenders(vector<HTp> spineStartList);
 
