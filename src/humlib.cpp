@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  8 Feb 2023 14:40:27 CET
+// Last Modified: Mi  8 Feb 2023 14:42:01 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -116598,19 +116598,33 @@ void Tool_worex::addWordExtenders(vector<HTp> spineStartList) {
 		}
 		HTp currentToken = token;
 		while (currentToken) {
+			HTp parallelNoteToken = getParallelNote(currentToken);
 			HTp nextToken = currentToken->getNextToken();
-			while (nextToken != NULL && !nextToken->isData()) {
+			// get token of next syllable
+			while (nextToken != NULL && !nextToken->isNonNullData()) {
 				nextToken = nextToken->getNextToken();
 			}
 			if (nextToken == NULL) {
+				// ignore current token if there is no next
 				break;
 			}
-			string syllableExtender = "-";
-			bool isWordEnd = equal(syllableExtender.rbegin(), syllableExtender.rend(), currentToken->getText().rbegin()) == false;
-			string wordEndExtender = "_";
-			bool endsWithUnderscore = equal(wordEndExtender.rbegin(), wordEndExtender.rend(), currentToken->getText().rbegin()) == true;
-			if (nextToken->isNull() && currentToken->isNonNullData() && isWordEnd && !endsWithUnderscore) {
-				currentToken->setText(currentToken->getText() + "_");
+			if (parallelNoteToken != NULL) {
+				// if next syllable if not direclty after the duration of the current parallel note token
+				if (nextToken->getDurationFromStart() > (parallelNoteToken->getDurationFromStart() + parallelNoteToken->getDuration())) {
+					// check if parallel note of current track is not followed by a rest
+					HTp nextNonNullDataToken = parallelNoteToken->getNextNonNullDataToken();
+					if (!nextNonNullDataToken->isRest()) {
+						string syllableExtender = "-";
+						bool isWordEnd = equal(syllableExtender.rbegin(), syllableExtender.rend(), currentToken->getText().rbegin()) == false;
+						string wordEndExtender = "_";
+						bool endsWithUnderscore = equal(wordEndExtender.rbegin(), wordEndExtender.rend(), currentToken->getText().rbegin()) == true;
+						// if current syllable is the end end of a word
+						// and the token does not alredy end with a underscore
+						if(isWordEnd && !endsWithUnderscore) {
+							currentToken->setText(currentToken->getText() + "_");
+						}
+					}
+				}
 			}
 			currentToken = nextToken;
 		}
@@ -116643,6 +116657,43 @@ void Tool_worex::removeWordExtenders(vector<HTp> spineStartList) {
 			currentToken = currentToken->getNextToken();
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_worex::getParallelNote -- Go backwards on the line and count any note
+//   attack (or tied note) on the first staff-like spine (track) found to the
+//   left. If there is a spine split in the text and or **kern data, then this
+//   algorithm needs to be refined further.
+//
+
+HTp Tool_worex::getParallelNote(hum::HTp token) {
+	hum::HTp current = token;
+	int track = -1;
+	while (current) {
+		current = current->getPreviousField();
+		if (!current) {
+			break;
+		}
+		if (current->isStaff()) {
+			int ctrack = current->getTrack();
+			if (track < 0) {
+				track = ctrack;
+			}
+			if (track != ctrack) {
+				return NULL;
+			}
+			if (current->isNull()) {
+				continue;
+			}
+			if (current->isNote()) {
+				return current;
+			}
+		}
+	}
+	return NULL;
 }
 
 

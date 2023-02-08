@@ -35,6 +35,7 @@ class Tool_worex : public HumTool {
         void processFile        (HumdrumFile& infile);
 		void addWordExtenders   (vector<HTp> spineStartList);
 		void removeWordExtenders(vector<HTp> spineStartList);
+		HTp  getParallelNote    (HTp token);
 
 
 	private:
