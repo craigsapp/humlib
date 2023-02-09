@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  7 Feb 2023 18:58:16 CET
+// Last Modified: Thu Feb  9 08:53:30 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -102269,8 +102269,8 @@ int Tool_myank::getBarNumberForLineNumber(int lineNumber) {
 int Tool_myank::getStartLineNumber(void) {
 	HumRegex hre;
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
-        return hre.getMatchInt(1);
-    }
+		return hre.getMatchInt(1);
+	}
 	return -1;
 }
 
@@ -102284,8 +102284,8 @@ int Tool_myank::getStartLineNumber(void) {
 int Tool_myank::getEndLineNumber(void) {
 	HumRegex hre;
 	if (hre.search(m_lineRange, "^(\\d+)\\-(\\d+)$")) {
-        return hre.getMatchInt(2);
-    }
+		return hre.getMatchInt(2);
+	}
 	return -1;
 }
 
@@ -102504,9 +102504,9 @@ void Tool_myank::getMarkString(ostream& out, HumdrumFile& infile)  {
 					for (int m=0; m<(int)mchar.size(); m++) {
 						if (str[k] == mchar[m]) {
 							if (inserted) {
-							   out << ',';
+								out << ',';
 							} else {
-							   inserted++;
+								inserted++;
 							}
 							out << curmeasure;
 							hasmark = 1;
@@ -102555,7 +102555,7 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		lastLineIndex--;
 	}
 
-	// Mapping with with the start token for each spine 
+	// Mapping with with the start token for each spine
 	vector<int> lastLineResolvedTokenLineIndex;
 	// Mapping with the later needed durations of the note that fits within the
 	// selected section
@@ -102610,8 +102610,10 @@ void Tool_myank::myank(HumdrumFile& infile, vector<MeasureInfo>& outmeasures) {
 		} else {
 			reconcileStartingPosition(infile, outmeasures[0].start);
 		}
-		int startLine = getBoolean("lines") ? std::max(startLineNumber-1, outmeasures[h].start): outmeasures[h].start;
-		int endLine = getBoolean("lines") ? std::min(endLineNumber, outmeasures[h].stop): outmeasures[h].stop;
+		int startLine = getBoolean("lines") ? std::max(startLineNumber-1, outmeasures[h].start)
+			: outmeasures[h].start;
+		int endLine = getBoolean("lines") ? std::min(endLineNumber, outmeasures[h].stop)
+			: outmeasures[h].stop;
 		for (i=startLine; i<endLine; i++) {
 			counter++;
 			if ((!printed) && ((mcount == 0) || (counter == 2))) {
@@ -103261,7 +103263,7 @@ void Tool_myank::printDataLine(HLp line,
 	// Handle cutting the last attacked note of the selected section
 	} else {
 		// Check if line has a note that needs to be handled
-		if (std::find(lastLineResolvedTokenLineIndex.begin(), lastLineResolvedTokenLineIndex.end(), line->getLineIndex()) !=
+		if (find(lastLineResolvedTokenLineIndex.begin(), lastLineResolvedTokenLineIndex.end(), line->getLineIndex()) !=
 				lastLineResolvedTokenLineIndex.end()) {
 			for (int i = 0; i < line->getTokenCount(); i++) {
 				HTp token = line->token(i);
@@ -103431,9 +103433,9 @@ void Tool_myank::reconcileSpineBoundary(HumdrumFile& infile, int index1, int ind
 	if (m_debugQ) {
 		m_humdrum_text << "RECONCILING LINES " << index1+1 << " and " << index2+1 << endl;
 		m_humdrum_text << "FIELD COUNT OF " << index1+1 << " is "
-			  << infile[index1].getFieldCount() << endl;
+			            << infile[index1].getFieldCount() << endl;
 		m_humdrum_text << "FIELD COUNT OF " << index2+1 << " is "
-			  << infile[index2].getFieldCount() << endl;
+			            << infile[index2].getFieldCount() << endl;
 	}
 
 	// check to see if any changes need reconciling; otherwise, exit function
@@ -104037,8 +104039,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 	while (value != 0) {
 		start += value - 1;
 		start += (int)hre.getMatch(1).size();
-		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure,
-			 measurein, inmap);
+		processFieldEntry(range, hre.getMatch(1), infile, maxmeasure, measurein, inmap);
 		value = hre.search(ostring, start, searchexp);
 	}
 }
@@ -104056,7 +104057,7 @@ void Tool_myank::fillGlobalDefaults(HumdrumFile& infile, vector<MeasureInfo>& me
 	HumRegex hre;
 
 	int tracks = infile.getMaxTrack();
-   // cerr << "MAX TRACKS " << tracks << " ===============================" << endl;
+	// cerr << "MAX TRACKS " << tracks << " ===============================" << endl;
 
 	vector<MyCoord> currclef(tracks+1);
 	vector<MyCoord> currkeysig(tracks+1);
