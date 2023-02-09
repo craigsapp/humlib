@@ -1092,6 +1092,52 @@ HumNum HumdrumToken::getDurationToEnd(HumNum scale) {
 
 //////////////////////////////
 //
+// HumdrumToken::getDurationFromNoteStart -- Returns the duration from the start
+//   of the resolved HumdrumToken to the starting time of this token. This is
+//   useful to get the pased duration of a null token.
+//
+
+HumNum HumdrumToken::getDurationFromNoteStart(void) {
+	HumNum dur = HumNum();
+	HTp resolvedToken = this->resolveNull();
+	HumdrumFile* infile = getLine()->getOwner();
+	int startLineIndex = resolvedToken->getLineIndex();
+	int thisLineIndex = getLineIndex();
+	for (int i = startLineIndex; i < thisLineIndex; i++) {
+		dur += infile->getLine(i)->getDuration();
+	}
+	// TODO handle tied notes
+	return dur;
+}
+
+
+HumNum HumdrumToken::getDurationFromNoteStart(HumNum scale) {
+	return this->getDurationFromNoteStart() * scale;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getDurationToNoteEnd -- Returns the duration from this token to
+//   the end of the resolved HumdrumToken duration. This is useful to get the
+//   remaining duration of a null token.
+//
+
+HumNum HumdrumToken::getDurationToNoteEnd(void) {
+	// TODO handle tied notes
+	return this->resolveNull()->getDuration() - getDurationFromNoteStart();
+}
+
+
+HumNum HumdrumToken::getDurationToNoteEnd(HumNum scale) {
+	return this->getDurationToNoteEnd() * scale;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::getBarlineDuration -- Returns the duration between
 //   the next and previous barline.  If the token is a barline token,
 //   then return the duration to the next barline.  The barline duration data

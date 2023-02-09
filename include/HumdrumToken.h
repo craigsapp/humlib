@@ -195,6 +195,12 @@ class HumdrumToken : public std::string, public HumHash {
 		HumNum   getDurationToEnd          (void);
 		HumNum   getDurationToEnd          (HumNum scale);
 
+		HumNum   getDurationFromNoteStart  (void);
+		HumNum   getDurationFromNoteStart  (HumNum scale);
+
+		HumNum   getDurationToNoteEnd      (void);
+		HumNum   getDurationToNoteEnd      (HumNum scale);
+
 		HumNum   getDurationFromBarline    (void);
 		HumNum   getDurationFromBarline    (HumNum scale);
 
