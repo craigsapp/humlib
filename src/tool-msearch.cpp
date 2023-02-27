@@ -537,6 +537,10 @@ void Tool_msearch::addMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	if (match.empty()) {
 		return;
 	}
+	if (match.back() == NULL) {
+		// strange problem
+		return;
+	}
 	int startIndex   = match.at(0)->getLineIndex();
 	int endIndex     = match.back()->getLineIndex();
 	int startMeasure = m_barnums.at(startIndex);

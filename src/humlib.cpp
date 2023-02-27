@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Feb  9 08:53:30 PST 2023
+// Last Modified: Mon Feb 27 15:56:33 PST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -94455,6 +94455,10 @@ void Tool_msearch::addMusicSearchSummary(HumdrumFile& infile, int mcount, const 
 
 void Tool_msearch::addMatch(HumdrumFile& infile, vector<NoteCell*>& match) {
 	if (match.empty()) {
+		return;
+	}
+	if (match.back() == NULL) {
+		// strange problem
 		return;
 	}
 	int startIndex   = match.at(0)->getLineIndex();
