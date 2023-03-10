@@ -1783,7 +1783,7 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 
 	if (startline >= 0) {
 		for (i=startline; i<infile.getLineCount(); i++) {
-			if (m_hideEnding && (i >= ending)) {
+			if (m_hideEnding && (i > ending)) {
 				if (infile[i].rfind("!!!RDF", 0) == 0) {
 					m_humdrum_text << infile[i] << "\n";
 				}
