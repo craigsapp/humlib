@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sa 11 Mär 2023 00:20:06 CET
+// Last Modified: Fri Mar 10 16:46:32 PST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -1654,6 +1654,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isKernLike                (void) const;
 		bool     isMens                    (void) const;
 		bool     isMensLike                (void) const;
+		bool     isStaffLike               (void) const { return isKernLike() && isMensLike(); }
 		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;
 		int      getSubtrack               (void) const;
