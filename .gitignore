@@ -21,6 +21,8 @@ cmake_install.cmake
 *.mei
 *.xml
 *.musicxml
+.vscode
+*.txt
 .DS_Store
 z
 zz
