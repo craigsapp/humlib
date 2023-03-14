@@ -24,6 +24,7 @@
 #include "tool-cint.h"
 #include "tool-colorgroups.h"
 #include "tool-colortriads.h"
+#include "tool-colorthirds.h"
 #include "tool-composite.h"
 #include "tool-deg.h"
 #include "tool-dissonant.h"
@@ -322,6 +323,12 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "colourtriads") {
 			// British spelling
 			RUNTOOL(colortriads, infile, commands[i].second, status);
+
+		} else if (commands[i].first == "colorthirds") {
+			RUNTOOL(colorthirds, infile, commands[i].second, status);
+		} else if (commands[i].first == "colourthirds") {
+			// British spelling
+			RUNTOOL(colorthirds, infile, commands[i].second, status);
 
 		} else if (commands[i].first == "colorgroups") {
 			RUNTOOL(colorgroups, infile, commands[i].second, status);
