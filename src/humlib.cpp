@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 14 Mär 2023 21:42:31 CET
+// Last Modified: Di 14 Mär 2023 22:41:15 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -103564,25 +103564,25 @@ void Tool_myank::printDataLine(HLp line,
 						continue;
 					}
 					HumNum dur = lastLineDurationsFromNoteStart[i];
-					if (resolvedToken->getDuration() > dur) {
-						HumRegex hre;
-						string recip = Convert::durationToRecip(dur);
-						vector<string> subtokens = resolvedToken->getSubtokens();
-						for (int i=0; i<(int)subtokens.size(); i++) {
-							if (hre.search(subtokens[i], recipRegex)) {
-								string before = hre.getPrefix();
-								string after = hre.getSuffix();
-								hre.replaceDestructive(after, "", recipRegex, "g");
-								string subtokenText;
+					HumRegex hre;
+					string recip = Convert::durationToRecip(dur);
+					vector<string> subtokens = resolvedToken->getSubtokens();
+					for (int i=0; i<(int)subtokens.size(); i++) {
+						if (hre.search(subtokens[i], recipRegex)) {
+							string before = hre.getPrefix();
+							string after = hre.getSuffix();
+							hre.replaceDestructive(after, "", recipRegex, "g");
+							string subtokenText;
+							if (resolvedToken->getDuration() > dur) {
 								// Add a tie start if not already in a tie group
 								if (!hre.search(subtokens[i], "[_\\[]")) {
 										subtokenText += "[";
 								}
-								// Replace the old duration with the clipped one
-								subtokenText += before + recip + after;
-								token->replaceSubtoken(i, subtokenText);
-								lineChange = true;
 							}
+							// Replace the old duration with the clipped one
+							subtokenText += before + recip + after;
+							token->replaceSubtoken(i, subtokenText);
+							lineChange = true;
 						}
 					}
 				}
