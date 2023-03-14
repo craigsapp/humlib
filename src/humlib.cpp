@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Mar 14 00:27:46 PDT 2023
+// Last Modified: Di 14 Mär 2023 19:56:17 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -78696,8 +78696,8 @@ bool Tool_fb::hideNumbersForTokenLine(HTp token, pair<int, HumNum> timeSig) {
 	// Get note duration from --rate option
 	HumNum rateDuration = Convert::recipToDuration(m_rateQ);
 	if (rateDuration.toFloat() != 0) {
-		float timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
-		float durationFromBarline = token->getDurationFromBarline().toFloat();
+		double timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
+		double durationFromBarline = token->getDurationFromBarline().toFloat();
 		// Handle upbeats
 		if (token->getBarlineDuration().toFloat() < timeSigBarDuration) {
 			// Fix durationFromBarline when current bar duration is shorter than

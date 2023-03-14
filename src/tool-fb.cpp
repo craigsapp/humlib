@@ -380,8 +380,8 @@ bool Tool_fb::hideNumbersForTokenLine(HTp token, pair<int, HumNum> timeSig) {
 	// Get note duration from --rate option
 	HumNum rateDuration = Convert::recipToDuration(m_rateQ);
 	if (rateDuration.toFloat() != 0) {
-		float timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
-		float durationFromBarline = token->getDurationFromBarline().toFloat();
+		double timeSigBarDuration = timeSig.first * Convert::recipToDuration(to_string(timeSig.second.getInteger())).toFloat();
+		double durationFromBarline = token->getDurationFromBarline().toFloat();
 		// Handle upbeats
 		if (token->getBarlineDuration().toFloat() < timeSigBarDuration) {
 			// Fix durationFromBarline when current bar duration is shorter than
