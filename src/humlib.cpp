@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 14 Mär 2023 22:41:15 CET
+// Last Modified: Tue Mar 21 12:00:06 PDT 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -61729,7 +61729,7 @@ void Tool_colorgroups::processFile(HumdrumFile& infile) {
 //
 
 Tool_colorthirds::Tool_colorthirds(void) {
-	// define("filters=b", "print filter commands only");
+	define("d|double=b", "highlight only doubled notes in triads");
 }
 
 
@@ -61882,9 +61882,9 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 		if (label.empty()) {
 			continue;
 		}
-		string text = *kernNotes[i];
+		string text = *kernNotes.at(i);
 		text += label;
-		kernNotes[i]->setText(text);
+		kernNotes.at(i)->setText(text);
 	}
 }
 
@@ -61906,13 +61906,14 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 	// create modulo 12 arr
 	vector<int> pitchClasses(12, 0);
 	for (int i = 0; i < (int)midiNotes.size(); i++) {
-		pitchClasses[midiNotes[i] % 12]++; // add one to the pitch
+		int index = midiNotes.at(i) % 12;
+		pitchClasses.at(index)++; // add one to the pitch
 	}
 
 	vector<int> noteMods;
 
 	for (int i = 0; i < (int)pitchClasses.size(); i++) {
-		if (pitchClasses[i] != 0) { // not zero
+		if (pitchClasses.at(i) != 0) { // not zero
 			noteMods.push_back(i); // add the index
 		}
 	}
@@ -61921,8 +61922,8 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 		return output;
 	}
 
-	int bint = noteMods[1] - noteMods[0];
-	int tint = noteMods[2] - noteMods[1];
+	int bint = noteMods.at(1) - noteMods.at(0);
+	int tint = noteMods.at(2) - noteMods.at(1);
 
 	int rootClass = -1; // curr uninitialized
 	int thirdClass = -1;
@@ -61931,17 +61932,17 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 	// NOTE: right now, noteMods is not in the order that the og notes in the score are in
 	// aka --> these inversions are not correct
 	if ((bint == 3 && tint == 4) || (bint == 4 && tint == 3) || (bint == 3 && tint == 3)) { // root pos
-		rootClass = noteMods[0];
-		thirdClass = noteMods[1];
-		fifthClass = noteMods[2];
+		rootClass = noteMods.at(0);
+		thirdClass = noteMods.at(1);
+		fifthClass = noteMods.at(2);
 	} else if ((bint == 4 && tint == 5) || (bint == 3 && tint == 5) || (bint == 3 && tint == 6)) { // first inv
-		rootClass = noteMods[2];
-		thirdClass = noteMods[0];
-		fifthClass = noteMods[1];
+		rootClass = noteMods.at(2);
+		thirdClass = noteMods.at(0);
+		fifthClass = noteMods.at(1);
 	} else if ((bint == 5 && tint == 3) || (bint == 5 && tint == 4) || (bint == 6 && tint == 3)) { // sec inv
-		rootClass = noteMods[1];
-		thirdClass = noteMods[2];
-		fifthClass = noteMods[0];
+		rootClass = noteMods.at(1);
+		thirdClass = noteMods.at(2);
+		fifthClass = noteMods.at(0);
 	}
 
 	if (rootClass == -1) {
@@ -61949,14 +61950,14 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 	}
 
 	for (int i = 0; i < (int)midiNotes.size(); i++) {
-		if (midiNotes[i] % 12 == rootClass) {
-			output[i] = 1;
+		if (midiNotes.at(i) % 12 == rootClass) {
+			output.at(i) = 1;
 		}
-		else if (midiNotes[i] % 12 == thirdClass) {
-			output[i] = 3;
+		else if (midiNotes.at(i) % 12 == thirdClass) {
+			output.at(i) = 3;
 		}
-		else if (midiNotes[i] % 12 == fifthClass) {
-			output[i] = 5;
+		else if (midiNotes.at(i) % 12 == fifthClass) {
+			output.at(i) = 5;
 		}
 	}
 
@@ -61976,12 +61977,15 @@ vector<int> Tool_colorthirds::getMidiNotes(vector<HTp>& kernNotes) {
 		return output;
 	}
 	for (int i=0; i<(int)kernNotes.size(); i++) {
-		int midiNote = kernNotes[i]->getMidiPitch();
+		int midiNote = kernNotes.at(i)->getMidiPitch();
+		if (midiNote < 0) {
+			// negative values indicate sustained note.
+			midiNote = -midiNote;
+		}
 		output.at(i) = midiNote;
 	}
 	return output;
 }
-
 
 
 
