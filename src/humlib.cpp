@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 14 Mär 2023 19:56:17 CET
+// Last Modified: Di 14 Mär 2023 22:41:15 CET
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -103509,6 +103509,7 @@ void Tool_myank::printDataLine(HLp line,
 		const vector<int>& lastLineResolvedTokenLineIndex,
 		const vector<HumNum>& lastLineDurationsFromNoteStart) {
 	bool lineChange = false;
+	string recipRegex = R"re(([\d%.]+))re";
 	// Handle cutting the previeous token of a note that hangs into the selected
 	// section
 	if (startLineHandled == false) {
@@ -103521,13 +103522,28 @@ void Tool_myank::printDataLine(HLp line,
 					if (resolvedToken->isNull()) {
 						continue;
 					}
-					string recip = Convert::durationToRecip(token->getDurationToNoteEnd());
-					string pitch;
 					HumRegex hre;
-					if (hre.search(resolvedToken, "([rRA-Ga-gxyXYn#-]+)")) {
-						pitch = hre.getMatch(1);
+					string recip = Convert::durationToRecip(token->getDurationToNoteEnd());
+					vector<string> subtokens = resolvedToken->getSubtokens();
+					string tokenText;
+					for (int i=0; i<(int)subtokens.size(); i++) {
+						if (hre.search(subtokens[i], recipRegex)) {
+							string before = hre.getPrefix();
+							string after = hre.getSuffix();
+							hre.replaceDestructive(after, "", recipRegex, "g");
+							string subtokenText;
+							// Replace the old duration with the clipped one
+							subtokenText += before + recip + after;
+							// Add a tie end if not already in a tie group
+							if (!hre.search(subtokens[i], "[_\\]]")) {
+									subtokenText += "]";
+							}
+							tokenText += subtokenText;
+							if (i < (int)subtokens.size() - 1) {
+								tokenText += " ";
+							}
+						}
 					}
-					string tokenText = recip + pitch + "]";
 					token->setText(tokenText);
 					lineChange = true;
 				}
@@ -103548,19 +103564,27 @@ void Tool_myank::printDataLine(HLp line,
 						continue;
 					}
 					HumNum dur = lastLineDurationsFromNoteStart[i];
-					string recip = Convert::durationToRecip(dur);
-					string pitch;
 					HumRegex hre;
-					if (hre.search(resolvedToken, "([rRA-Ga-gxyXYn#-]+)")) {
-						pitch = hre.getMatch(1);
+					string recip = Convert::durationToRecip(dur);
+					vector<string> subtokens = resolvedToken->getSubtokens();
+					for (int i=0; i<(int)subtokens.size(); i++) {
+						if (hre.search(subtokens[i], recipRegex)) {
+							string before = hre.getPrefix();
+							string after = hre.getSuffix();
+							hre.replaceDestructive(after, "", recipRegex, "g");
+							string subtokenText;
+							if (resolvedToken->getDuration() > dur) {
+								// Add a tie start if not already in a tie group
+								if (!hre.search(subtokens[i], "[_\\[]")) {
+										subtokenText += "[";
+								}
+							}
+							// Replace the old duration with the clipped one
+							subtokenText += before + recip + after;
+							token->replaceSubtoken(i, subtokenText);
+							lineChange = true;
+						}
 					}
-					string tokenText;
-					if (resolvedToken->getDuration() > dur) {
-						tokenText += "[";
-					}
-					tokenText += recip + pitch;
-					token->setText(tokenText);
-					lineChange = true;
 				}
 			}
 		}
