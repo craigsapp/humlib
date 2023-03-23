@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -48,6 +49,7 @@ Tool_extract::Tool_extract(void) {
 	define("t|trace=s:", "use a trace file to extract data");
 	define("e|expand=b", "expand spines with subspines");
 	define("k|kern=s", "Extract by kern spine group");
+	define("K|reverse-kern=s", "Extract by kern spine group top to bottom numbering");
 	define("E|expand-interp=s:", "expand subspines limited to exinterp");
 	define("m|model|method=s:d", "method for extracting secondary spines");
 	define("M|cospine-model=s:d", "method for extracting cospines");
@@ -2033,6 +2035,7 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	interpQ     = getBoolean("i");
 	interps     = getString("i");
 	kernQ       = getBoolean("k");
+	rkernQ      = getBoolean("K");
 
 	interpstate = 1;
 	if (!interpQ) {
@@ -2101,6 +2104,10 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	} else if (kernQ) {
 		fieldstring = getString("k");
 		fieldQ = 1;
+	} else if (rkernQ) {
+		fieldstring = getString("K");
+		fieldQ = 1;
+		fieldstring = reverseFieldString(fieldstring, infile.getMaxTrack());
 	}
 
 	spineListQ = getBoolean("spine-list");
@@ -2120,6 +2127,37 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		}
 	}
 
+}
+
+
+//////////////////////////////
+//
+// Tool_extract::reverseFieldString --  No dollar expansion for now.
+//
+
+string Tool_extract::reverseFieldString(const string& input, int maxval) {
+	string output;
+	string number;
+	for (int i=0; i<(int)input.size(); i++) {
+		if (isdigit(input[i])) {
+			number += input[i];
+			continue;
+		} else {
+			if (!number.empty()) {
+				int value = strtol(number.c_str(), NULL, 10);
+				value = maxval - value + 1;
+				output += to_string(value);
+				output += input[i];
+				number.clear();
+			}
+		}
+	}
+	if (!number.empty()) {
+		int value = strtol(number.c_str(), NULL, 10);
+		value = maxval - value + 1;
+		output += to_string(value);
+	}
+	return output;
 }
 
 

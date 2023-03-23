@@ -42,6 +42,7 @@
 #include "tool-humtr.h"
 #include "tool-imitation.h"
 #include "tool-kern2mens.h"
+#include "tool-kernify.h"
 #include "tool-kernview.h"
 #include "tool-mei2hum.h"
 #include "tool-melisma.h"
@@ -261,6 +262,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(imitation, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
+		} else if (commands[i].first == "kernify") {
+			RUNTOOL(kernify, infile, commands[i].second, status);
 		} else if (commands[i].first == "kernview") {
 			RUNTOOL(kernview, infile, commands[i].second, status);
 		} else if (commands[i].first == "melisma") {

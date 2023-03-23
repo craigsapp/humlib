@@ -12,6 +12,8 @@
 //
 
 #include "tool-kernify.h"
+#include "HumRegex.h"
+#include "Convert.h"
 
 using namespace std;
 
@@ -26,7 +28,7 @@ namespace hum {
 //
 
 Tool_kernify::Tool_kernify(void) {
-	// add options here
+	define("f|force=b", "force staff-like spines to be displayed as text");
 }
 
 
@@ -82,6 +84,9 @@ bool Tool_kernify::run(HumdrumFile& infile) {
 //
 
 void Tool_kernify::initialize(void) {
+	if (getBoolean("force")) {
+		m_forceQ = true;
+	}
 	// do nothing
 }
 
@@ -113,10 +118,12 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 	}
 	for (int i=0; i<(int)spineStarts.size(); i++) {
 		if (spineStarts[i]->isStaffLike()) {
-			// No need for a dummy kern spine, so do nothing.
-			// later an option can be used to force a dummy
-			// kern spine even if there already exists
-			return;
+			if (!m_forceQ) {
+				// No need for a dummy kern spine, so do nothing.
+				// later an option can be used to force a dummy
+				// kern spine even if there already exists
+				return;
+			}
 		}
 		if (spineStarts[i]->isDataType("**recip")) {
 			hasRecip = true;
@@ -154,19 +161,35 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 		striaIndex = -1;
 	}
 
+	bool hasDuration = infile.getScoreDuration() > 0 ? true : false;
+
+	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
 			m_humdrum_text << infile[i];
 		} else if (infile[i].isExclusiveInterpretation()) {
 			m_humdrum_text << "**kern";
-			for (int j=0; j<infile[i].getFieldCount(); j++) {
+			for (int j=infile[i].getFieldCount()-1; j>=0; j--) {
 				HTp token = infile.token(i, j);
 				if (*token == "**recip") {
 					m_humdrum_text << "\t**xrecip";
+				} else if (token->find("**kern") != std::string::npos) {
+					string value = *token;
+					hre.replaceDestructive(value, "nrek", "kern", "g");
+					hre.replaceDestructive(value, "**cdata-", "^\\*\\*");
+					m_humdrum_text << "\t" << value;
+				} else if (token->find("**mens") != std::string::npos) {
+					string value = *token;
+					hre.replaceDestructive(value, "snem", "mens", "g");
+					hre.replaceDestructive(value, "**cdata-", "^\\*\\*");
+					m_humdrum_text << "\t" << value;
 				} else if (token->find("**cdata") == std::string::npos) {
-					m_humdrum_text << "\t**cdata-" << token->substr(2);
+					string value = token->substr(2);
+					hre.replaceDestructive(value, "nrek", "kern", "g");
+					hre.replaceDestructive(value, "snem", "snem", "g");
+					m_humdrum_text << "\t**cdata-" << value;
 				} else {
-					m_humdrum_text << "\t" << infile[i];
+					m_humdrum_text << "\t" << token;
 				}
 			}
 			if (striaIndex < 0) {
@@ -181,9 +204,9 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 			} else {
 				m_humdrum_text << "*";
 			}
-			m_humdrum_text << "\t" << infile[i];
+			m_humdrum_text << "\t" << makeReverseLine(infile[i]);
 		} else if (infile[i].isBarline()) {
-			m_humdrum_text << infile[i].token(0) << "\t" << infile[i];
+			m_humdrum_text << infile[i].token(0) << "\t" << makeReverseLine(infile[i]);
 		} else if (infile[i].isData()) {
 			if (hasRecip) {
 				for (int j=0; j<infile[i].getFieldCount(); j++) {
@@ -191,23 +214,35 @@ void Tool_kernify::generateDummyKernSpine(HumdrumFile& infile) {
 					if (!token->isDataType("**recip")) {
 						continue;
 					}
-					m_humdrum_text << token << "ryy\t" << infile[i];
+					m_humdrum_text << token << "ryy\t" << makeReverseLine(infile[i]);
 					break;
 				}
 			} else {
-				m_humdrum_text << "4ryy" << "\t" << infile[i];
+				if (!hasDuration) {
+					m_humdrum_text << "4ryy" << "\t" << makeReverseLine(infile[i]);
+				} else {
+					HumNum duration = infile[i].getDuration();
+					string recip;
+					if (duration == 0) {
+						recip = "q";
+					} else {
+						recip = Convert::durationToRecip(duration);
+					}
+
+					m_humdrum_text << recip << "ryy\t" << makeReverseLine(infile[i]);
+				}
 			}
 		} else if (infile[i].isCommentLocal()) {
-				m_humdrum_text << "!" << "\t" << infile[i];
+				m_humdrum_text << "!" << "\t" << makeReverseLine(infile[i]);
 		} else if (infile[i].isInterpretation()) {
 				if (striaIndex == i) {
-					m_humdrum_text << "*stria0" << "\t" << infile[i];
+					m_humdrum_text << "*stria0" << "\t" << makeReverseLine(infile[i]);
 					striaIndex = -1;
 				} else if (clefIndex == i) {
-					m_humdrum_text << "*clefXyy" << "\t" << infile[i];
+					m_humdrum_text << "*clefXyy" << "\t" << makeReverseLine(infile[i]);
 					clefIndex = -1;
 				} else {
-					m_humdrum_text << "*" << "\t" << infile[i];
+					m_humdrum_text << "*" << "\t" << makeReverseLine(infile[i]);
 				}
 		} else {
 			m_humdrum_text << "!!UNKNONWN LINE TYPE FOR LINE " << i+1 << ":\t" << infile[i];
@@ -228,6 +263,24 @@ string Tool_kernify::makeNullLine(HumdrumLine& line) {
 	for (int i=0; i<line.getFieldCount(); i++) {
 		output += "*";
 		if (i < line.getFieldCount() - 1) {
+			output += "\t";
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kernify::makeReverseLine --
+//
+
+string Tool_kernify::makeReverseLine(HumdrumLine& line) {
+	string output;
+	for (int i=line.getFieldCount() - 1; i>= 0; i--) {
+		output += *line.token(i);
+		if (i > 0) {
 			output += "\t";
 		}
 	}

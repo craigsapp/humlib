@@ -36,8 +36,10 @@ class Tool_kernify : public HumTool {
 		void        processFile            (HumdrumFile& infile);
 		void        generateDummyKernSpine (HumdrumFile& infile);
 		std::string makeNullLine           (HumdrumLine& line);
+		std::string makeReverseLine        (HumdrumLine& line);
 
 	private:
+		bool m_forceQ = false;  // used with -f option
 
 };
 
