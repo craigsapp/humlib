@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Mar 22 22:19:43 PDT 2023
+// Last Modified: Mon Apr  3 14:44:20 BST 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -70873,7 +70873,7 @@ void Tool_deg::ScaleDegree::analyzeTokenScaleDegrees(void) {
 
 	// Only processing non-null data from here.
 	m_subtokens = m_linkedKernToken->getSubtokens();
-	int subtokCount = m_subtokens.size();
+	int subtokCount = (int)m_subtokens.size();
 
 	m_degrees.resize(subtokCount);
 	fill(m_degrees.begin(), m_degrees.end(), -1);
@@ -71135,7 +71135,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 		return ".";
 	}
 
-	int newCount = nontied.size();
+	int newCount = (int)nontied.size();
 	string output;
 	for (int i=0; i<newCount; i++) {
 		output += nontied[i];

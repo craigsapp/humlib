@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Mar 22 22:19:43 PDT 2023
+// Last Modified: Mon Apr  3 14:44:20 BST 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -98,9 +98,9 @@ using std::vector;
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 
-using pugi::xml_node;
 using pugi::xml_attribute;
 using pugi::xml_document;
+using pugi::xml_node;
 using pugi::xpath_node;
 
 namespace hum {
