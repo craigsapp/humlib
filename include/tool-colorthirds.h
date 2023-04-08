@@ -49,6 +49,10 @@ class Tool_colorthirds : public HumTool {
 		std::string m_third_color = "limegreen";
 		std::string m_fifth_color = "royalblue";
 
+		bool m_colorThirds = true;
+		bool m_colorFifths = true;
+		bool m_colorTriads = true;
+
 };
 
 // END_MERGE
