@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr  3 14:44:20 BST 2023
+// Last Modified: Sat Apr  8 12:51:19 PDT 2023
 // Filename:      humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
 // Syntax:        C++11
@@ -6233,6 +6233,10 @@ class Tool_colorthirds : public HumTool {
 		std::string m_root_color = "crimson";
 		std::string m_third_color = "limegreen";
 		std::string m_fifth_color = "royalblue";
+
+		bool m_colorThirds = true;
+		bool m_colorFifths = true;
+		bool m_colorTriads = true;
 
 };
 
