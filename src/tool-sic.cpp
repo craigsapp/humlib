@@ -133,6 +133,7 @@ void Tool_sic::processFile(HumdrumFile& infile) {
 	if (m_modifiedQ) {
 		infile.createLinesFromTokens();
 	}
+	m_humdrum_text << infile;
 }
 
 
