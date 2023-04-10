@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr  8 12:51:19 PDT 2023
+// Last Modified: Sun Apr  9 21:40:01 PDT 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -110772,6 +110772,7 @@ void Tool_sic::processFile(HumdrumFile& infile) {
 	if (m_modifiedQ) {
 		infile.createLinesFromTokens();
 	}
+	m_humdrum_text << infile;
 }
 
 
