@@ -245,6 +245,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "filter") {
 			RUNTOOL(filter, infile, commands[i].second, status);
 		} else if (commands[i].first == "gasparize") {
+			RUNTOOL(grep, infile, commands[i].second, status);
+		} else if (commands[i].first == "grep") {
 			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "half") {
 			RUNTOOL(half, infile, commands[i].second, status);
