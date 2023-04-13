@@ -61730,6 +61730,9 @@ void Tool_colorgroups::processFile(HumdrumFile& infile) {
 
 Tool_colorthirds::Tool_colorthirds(void) {
 	define("d|double=b", "highlight only doubled notes in triads");
+	define("3|no-thirds=b", "do not color thirds");
+	define("5|no-fifths=b", "do not color fifths");
+	define("T|no-triads=b", "do not color full triads");
 }
 
 
@@ -61785,7 +61788,9 @@ bool Tool_colorthirds::run(HumdrumFile& infile) {
 //
 
 void Tool_colorthirds::initialize(void) {
-	// do nothing
+	m_colorThirds = !getBoolean("no-thirds");
+	m_colorFifths = !getBoolean("no-thirds");
+	m_colorTriads = !getBoolean("no-triads");
 }
 
 
@@ -70873,7 +70878,7 @@ void Tool_deg::ScaleDegree::analyzeTokenScaleDegrees(void) {
 
 	// Only processing non-null data from here.
 	m_subtokens = m_linkedKernToken->getSubtokens();
-	int subtokCount = m_subtokens.size();
+	int subtokCount = (int)m_subtokens.size();
 
 	m_degrees.resize(subtokCount);
 	fill(m_degrees.begin(), m_degrees.end(), -1);
@@ -71135,7 +71140,7 @@ string Tool_deg::ScaleDegree::generateDegDataToken(void) const {
 		return ".";
 	}
 
-	int newCount = nontied.size();
+	int newCount = (int)nontied.size();
 	string output;
 	for (int i=0; i<newCount; i++) {
 		output += nontied[i];
@@ -110864,6 +110869,7 @@ void Tool_sic::processFile(HumdrumFile& infile) {
 	if (m_modifiedQ) {
 		infile.createLinesFromTokens();
 	}
+	m_humdrum_text << infile;
 }
 
 

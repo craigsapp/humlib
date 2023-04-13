@@ -98,9 +98,9 @@ using std::vector;
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 
-using pugi::xml_node;
 using pugi::xml_attribute;
 using pugi::xml_document;
+using pugi::xml_node;
 using pugi::xpath_node;
 
 namespace hum {
@@ -6233,6 +6233,10 @@ class Tool_colorthirds : public HumTool {
 		std::string m_root_color = "crimson";
 		std::string m_third_color = "limegreen";
 		std::string m_fifth_color = "royalblue";
+
+		bool m_colorThirds = true;
+		bool m_colorFifths = true;
+		bool m_colorTriads = true;
 
 };
 

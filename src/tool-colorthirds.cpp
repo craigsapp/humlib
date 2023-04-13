@@ -30,6 +30,9 @@ namespace hum {
 
 Tool_colorthirds::Tool_colorthirds(void) {
 	define("d|double=b", "highlight only doubled notes in triads");
+	define("3|no-thirds=b", "do not color thirds");
+	define("5|no-fifths=b", "do not color fifths");
+	define("T|no-triads=b", "do not color full triads");
 }
 
 
@@ -85,7 +88,9 @@ bool Tool_colorthirds::run(HumdrumFile& infile) {
 //
 
 void Tool_colorthirds::initialize(void) {
-	// do nothing
+	m_colorThirds = !getBoolean("no-thirds");
+	m_colorFifths = !getBoolean("no-thirds");
+	m_colorTriads = !getBoolean("no-triads");
 }
 
 
