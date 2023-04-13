@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 12 19:17:12 PDT 2023
+// Last Modified: Wed Apr 12 20:03:52 PDT 2023
 // Filename:      /include/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
 // Syntax:        C++11
@@ -82118,7 +82118,7 @@ bool Tool_grep::run(HumdrumFile& infile) {
 //
 
 void Tool_grep::initialize(void) {
-	m_negateQ = getBoolean("remove-matching-lines");
+	m_negateQ = !getBoolean("remove-matching-lines");
 	m_regex = getString("regular-expression");
 }
 
