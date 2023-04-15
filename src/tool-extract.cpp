@@ -2144,7 +2144,7 @@ string Tool_extract::reverseFieldString(const string& input, int maxval) {
 			continue;
 		} else {
 			if (!number.empty()) {
-				int value = strtol(number.c_str(), NULL, 10);
+				int value = (int)strtol(number.c_str(), NULL, 10);
 				value = maxval - value + 1;
 				output += to_string(value);
 				output += input[i];
@@ -2153,7 +2153,7 @@ string Tool_extract::reverseFieldString(const string& input, int maxval) {
 		}
 	}
 	if (!number.empty()) {
-		int value = strtol(number.c_str(), NULL, 10);
+		int value = (int)strtol(number.c_str(), NULL, 10);
 		value = maxval - value + 1;
 		output += to_string(value);
 	}
