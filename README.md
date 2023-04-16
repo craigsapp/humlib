@@ -1,145 +1,129 @@
 humlib
 ==========
 
-[![Travis Build Status](https://travis-ci.org/craigsapp/humlib.svg?branch=master)](https://travis-ci.org/craigsapp/humlib) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/e08c7i6tl17j3ip2?svg=true)](https://ci.appveyor.com/project/craigsapp/humlib)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/e08c7i6tl17j3ip2?svg=true)](https://ci.appveyor.com/project/craigsapp/humlib)
+
+The humlib repository consists of a set of C++ classes for parsing
+[Humdrum](http://www.humdrum.org) data files, used for digital
+encodings of musical scores.  In addition, Humlib includes [command-line
+tools](https://github.com/craigsapp/humlib/tree/master/cli) that
+also can be used via JavaScript in web applications.  This is easiest
+done through the notation renderer [verovio](https//www.verovio.org),
+and in particular with [Humdrum Notation
+Plugin](https://plugin.humdrum.org).  Online use of most tools can
+be done when editing Humdrum files in [Verovio Humdrum
+Viewer](https://verovio.humdrum.org).
 
 
-The humlib library consists of a set of C++ classes for parsing
-[Humdrum](http://www.humdrum.org) data files, used for digital encodings
-of musical scores.  The library is designed to be portable with
-only two source-code files to copy into your project:
+# Using humlib as a C++ library
 
-1. An include file [humlib.h](https://github.com/craigsapp/humlib/blob/master/include/humlib.h)
-2. And a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp)
+The library is designed to be portable with only two source-code 
+files to copy into your project:
 
-All other source-code files are irrelevant unless you are developing
-the library or need to create the command-line tools.  For example
-[verovio](https://github.com/rism-ch/verovio), a music notation
-rendering library,  uses humlib as an internal sublibrary for
-importing Humdrum data, placing `humlib.h`
-[here](https://github.com/rism-ch/verovio/blob/master/include/hum), and
-`humlib.cpp`
-[here](https://github.com/rism-ch/verovio/blob/master/src/hum).
-(see the `.download` scripts in those directories for how updates
-are managed).
+1. An include file [humlib.h](https://github.com/craigsapp/humlib/blob/master/min/humlib.h)
+2. And a source file [humlib.cpp](https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp)
 
-Most command-line tools are implemented as C++ classes, found in
-files that start with `tool-` in the
-[src](https://github.com/craigsapp/humlib/blob/master/src) directory. For
-example, here is a use of the `colortriads` and `satb2gs` tools
-inside of verovio to create [colorized version of Bach chorales on
-the Grand
-Staff](https://verovio.humdrum.org/?file=chorales&filter=colortriads%7csatb2gs).
+Plus three [Pugixml](https://pugixml.org) files used for parsing/writing
+data in the XML format:
+
+1. The pugixml include file [pugixml.hpp](https://github.com/craigsapp/humlib/blob/master/min/pugixml.hpp)
+2. The pugixml configuration file [pugiconfig.hpp](https://github.com/craigsapp/humlib/blob/master/min/pugiconfig.hpp)
+3. The pugixml source file [pugixml.cpp](https://github.com/craigsapp/humlib/blob/master/min/pugixml.cpp)
 
 
-Resources
-=========
-<center>
-<table style="display:block; padding:0; margin:0;">
-<tr><td>
-<ul id="resources">
-<li style="margin-top:0"> <a href=http://humlib.humdrum.org>Humlib website</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc>Documentation</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/class>Class overview</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/snippet>Code snippets</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/example>Example programs</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/topic>Topics</a> </li>
-<li> <a href=http://humlib.humdrum.org/doc/tutorial>Tutorial</a> </li>
-</ul>
-</td></tr></table>
-</center>
+All of these files can be copied from the
+[min](https://github.com/craigsapp/humlib/blob/master/min) directory
+into your project.  For example, verovio include the
+[humlib.cpp](https://github.com/rism-digital/verovio/blob/develop/src/hum/humlib.cpp)
+and
+[humlib.h](https://github.com/rism-digital/verovio/blob/develop/include/hum/humlib.h)
+and independently uses the pugixml library for processing XML data
+([MusicXML](https://en.wikipedia.org/wiki/MusicXML) and
+[MEI](https://www.music-encoding.org)).
 
 
-Downloading
-===========
 
-To compile humlib as a stand-alone library, you can download a ZIP or
-tarball from the buttons at the top of this page, or you can use
-[git](https://en.wikipedia.org/wiki/Git_(software)) in the console to
-download and allow easy updating:
+# Documentation
 
-```console
-git clone https://github.com/craigsapp/humlib
+Documentation for humlib source code can be found at https://humlib.humdrum.org
+
+Documentation for the tools can be found at https://doc.verovio.humdrum.org/filter
+
+
+
+# Download and compiling
+
+To download humlib with `git` in a directory where you want to store humlib:
+
+```bash
+git clone https://github.org/craigsapp/humlib.git
 ```
 
-To update to the most recent version of humlib if git was used to
-download the library, type anywhere in the humlib directory structure:
+To compile, run the command:
 
-```console
-make update
-```
-
-Minimal downloading
-======================
-
-For minimal use of the library, you can download just the composite
-header and source files.  In a terminal you can download with
-[wget](https://en.wikipedia.org/wiki/Wget) (most common method for
-linux):
-
-```console
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.h
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp
-
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/src/pugixml.cpp
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugixml.hpp
-wget https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugiconfig.hpp
-```
-
-Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method for OS X):
-
-```console
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.h -o humlib.h
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp -o humlib.cpp
-
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/src/humlib.cpp -o humlib.cpp
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/pugixml.hpp -o pugixml.hpp
-curl https://raw.githubusercontent.com/craigsapp/humlib/master/include/humlib.hpp -o pugiconfig.hpp
-```
-
-The source code uses some C++11-specific features, so add the
-`-stc=c++11` option when compiling with GNU g++ or the clang++ compiler.
-Also include the `-stdlib=libc++` option when compiling with [clang](https://en.wikipedia.org/wiki/Clang).  See the
-[Makefile](https://github.com/craigsapp/humlib/blob/master/Makefile)
-for compiling the library and
-[Makefile.examples](https://github.com/craigsapp/humlib/blob/master/Makefile.examples)
-for compiling and linking executables.
-
-
-Compiling
-==========
-
-When downloading the git repository or a zip/tarball of the repository,
-compile the library with the command:
-
-```console
+```bash
+cd humlib
 make
 ```
 
-This should compile the file `lib/libhumlib.a` as well as the
-command-line tools in
-[cli](https://github.com/craigsapp/humlib/blob/master/cli) into the
-`humlib/bin` directory..
+This will compile both the library and command-line tools found in [cli](https://github.com/craigsapp/humlib/tree/master/cli).  To compile only the library:
 
-```console
+
+```bash
+cd humlib
 make library
 ```
 
-This is similar to `make`, but only compiles the library file and
-not the command-line tools.
+To download updates of the humdrum repository, use the command:
 
-```console
-make lib
+```bash
+make update
 ```
 
-Used for testing purposes only, this make target compiles
-the uncollated library files, making it easier to debug
-the source code.
+after which you can recompile the library and programs:
+
+```bash
+make
+```
 
 
+# Minimal downloading
 
-Example
-=============
+For minimal use of the library with your own project, you can download just the composite
+header and source files (and pugixml library).  In a terminal you can download with
+[wget](https://en.wikipedia.org/wiki/Wget) (on linux):
+
+```console
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.h
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.cpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.cpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp
+wget https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugiconfig.hpp
+```
+
+Or with [curl](https://en.wikipedia.org/wiki/CURL) (most common method downloading on the comnmand line in MacOS):
+
+```console
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.h -o humlib.h
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/humlib.cpp -o humlib.cpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp -o pugixml.hpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugixml.hpp -o pugixml.hpp
+curl https://raw.githubusercontent.com/craigsapp/humlib/master/min/pugiconfig.cpp -o pugiconfig.cpp
+```
+
+The source code uses some C++11-specific features, so add the
+`-stc=c++11` option when compiling with GNU g++ or the clang++
+compiler.  (See the humlib
+[Makefile](https://github.com/craigsapp/humlib/blob/master/Makefile)).  In
+particular, include the `-stdlib=libc++` option when compiling with
+[clang](https://en.wikipedia.org/wiki/Clang).  See the
+[Makefile](https://github.com/craigsapp/humlib/blob/master/Makefile) for
+compiling the library and
+[Makefile.examples](https://github.com/craigsapp/humlib/blob/master/Makefile.examples)
+for compiling and linking executables for the command-line tools.
+
+
+# Example
 
 Here is a short example program that uses the humlib library to convert
 a Humdrum file into a MIDI-like listing of notes.
@@ -234,6 +218,9 @@ G3      1       12      6
 C4      2.2     12      6
 </pre>
 </td></tr></table>
+
+
+# Writing your own command-line tools with Humlib:
 
 If you are using the humlib project directory to compile your own programs (or this test program), place them
 into the [cli](https://github.com/craigsapp/humlib/blob/master/cli)
