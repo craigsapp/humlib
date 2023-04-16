@@ -230,8 +230,9 @@ list:
 ##
 
 update:
-	git checkout min/humlib.cpp
-	git checkout min/humlib.h
+	git checkout $(MINDIR)/humlib.cpp
+	git checkout $(MINDIR)/humlib.h
+	git checkout $(INCDIR)/humlib.h
 	git pull
 
 
