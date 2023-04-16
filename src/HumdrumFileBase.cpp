@@ -2480,26 +2480,6 @@ int HumdrumFileBase::getMeasureNumber(int line) {
 
 //////////////////////////////
 //
-// HumdrumFileBase::initializeArray -- adjust the size of the input array
-//     to the same dimensions as the HumdrumFile, filling in each cell of the
-//     array with the given value as a default.
-//
-
-template <class TYPE>
-void HumdrumFileBase::initializeArray(vector<vector<TYPE>>& array, TYPE value) {
-	HumdrumFileBase& infile = *this;
-	array.clear();
-	array.resize(infile.getLineCount());
-	for (int i=0; i<infile.getLineCount(); i++) {
-		array[i].resize(infile[i].getFieldCount());
-		fill(array[i].begin(), array[i].end(), value);
-	}
-}
-
-
-
-//////////////////////////////
-//
 // HumdrumFileBase::getReferenceRecord --
 //
 

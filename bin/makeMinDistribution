@@ -2,7 +2,7 @@
 #
 # Programmer:    Craig Stuart Sapp <craig.stanford.edu>
 # Creation Date: Mon Aug 10 00:06:00 PDT 2015
-# Last Modified: Sat Aug  6 11:26:12 CEST 2016
+# Last Modified: Sat Apr 15 12:02:53 PDT 2023
 # Filename:      /bin/makehumlib
 # Syntax:        perl 5
 # vim:           ts=3
@@ -11,29 +11,48 @@
 #
 
 use strict;
+use Getopt::Long;
 
-my $srcdir = "src";
-my $incdir = "include";
+my $TargetDirectory;
+
+Getopt::Long::Configure("bundling");
+GetOptions (
+   'd|directory=s' => \$TargetDirectory
+);
+
+$TargetDirectory = "min" if !$TargetDirectory;
+
+die "Cannot find directory $TargetDirectory" if !-d $TargetDirectory;
+
 my $license = getLicense("LICENSE.txt");
 
-createIncludeFile($incdir, "humlib.h");
-createSourceFile($srcdir, "humlib.cpp");
+my $SrcDir = "src";
+my $IncDir = "include";
+
+createIncludeFile($IncDir, $TargetDirectory, "humlib.h");
+createSourceFile($SrcDir, $TargetDirectory, "humlib.cpp");
+
+
+# Copy XML parsing library:
+
+link("$IncDir//pugixml.hpp", "$TargetDirectory/pugixml.hpp");
+link("$IncDir//pugiconfig.hpp", "$TargetDirectory/pugiconfig.hpp");
 
 exit(0);
 
 
+###########################################################################
 
 ##############################
 ##
-## createIncludeFile --
+## createIncludeFile -- Collate *.h files in include directory.
 ##
 
 sub createIncludeFile {
-	my ($basedir, $target) = @_;
-	open (IFILE, ">$basedir/$target") or die;
+	my ($sourceDir, $targetDir, $targetName) = @_;
+	open (IFILE, ">$targetDir/$targetName") or die;
 
 	my $contents = "";
-	# my @files = getFiles($basedir);
 	my @files = (
 		"HumHash.h",
 		"HumNum.h",
@@ -73,44 +92,44 @@ sub createIncludeFile {
 
 	my $file;
 	foreach $file (@files) {
-		my $lines = getMergeContents("$basedir/$file");
+		my $lines = getMergeContents("$sourceDir/$file");
 		if ($lines =~ /^\s*$/) {
-			# print "$basedir/$file is not formatted correctly.\n";
+			# print "$sourceDir/$file is not formatted correctly.\n";
 		}
 		$contents .= $lines;
 	}
 
-	$contents .= getMergeContents("$basedir/GridCommon.h");
-	$contents .= getMergeContents("$basedir/MxmlPart.h");
-	$contents .= getMergeContents("$basedir/GridSide.h");
-	$contents .= getMergeContents("$basedir/GridStaff.h");
-	$contents .= getMergeContents("$basedir/GridPart.h");
+	$contents .= getMergeContents("$sourceDir/GridCommon.h");
+	$contents .= getMergeContents("$sourceDir/MxmlPart.h");
+	$contents .= getMergeContents("$sourceDir/GridSide.h");
+	$contents .= getMergeContents("$sourceDir/GridStaff.h");
+	$contents .= getMergeContents("$sourceDir/GridPart.h");
 
 	foreach $file (@files2) {
-		my $lines = getMergeContents("$basedir/$file");
+		my $lines = getMergeContents("$sourceDir/$file");
 		if ($lines =~ /^\s*$/) {
-			print "$basedir/$file is not formatted correctly.\n";
+			print "$sourceDir/$file is not formatted correctly.\n";
 		}
 		$contents .= $lines;
 	}
 
-	my $options = getMergeContents("$basedir/Options.h");
+	my $options = getMergeContents("$sourceDir/Options.h");
 	$contents .= $options;
 
 	# HumTool depends on Options class:
-	$contents .= getMergeContents("$basedir/HumTool.h");
+	$contents .= getMergeContents("$sourceDir/HumTool.h");
 
 	# HumdrumFileStream depends on Options class:
-	$contents .= getMergeContents("$basedir/HumdrumFileStream.h");
+	$contents .= getMergeContents("$sourceDir/HumdrumFileStream.h");
 
 	# HumdrumFileSet depends on Options and HumdrumFileStream classes:
-	$contents .= getMergeContents("$basedir/HumdrumFileSet.h");
+	$contents .= getMergeContents("$sourceDir/HumdrumFileSet.h");
 
-	my @tools = glob "$basedir/tool-*.h";
+	my @tools = glob "$sourceDir/tool-*.h";
 
 	foreach my $tool (@tools) {
-		$tool =~ s/^include\///;
-		$contents .= getMergeContents("$basedir/$tool");
+		$tool =~ s/^$sourceDir\///;
+		$contents .= getMergeContents("$sourceDir/$tool");
 	}
 
 	my $date = `date`;
@@ -121,8 +140,8 @@ sub createIncludeFile {
 // Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: $date
-// Filename:      humlib.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/humlib.h
+// Filename:      min/humlib.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
 // vim:           ts=3
 //
@@ -238,12 +257,12 @@ EOT
 
 ##############################
 ##
-## createSourceFile --
+## createSourceFile -- Collate *.cpp files in src directory.
 ##
 
 sub createSourceFile {
-	my ($basedir, $target) = @_;
-	open (SFILE, ">$basedir/$target") or die;
+	my ($sourceDir, $targetDir, $targetName) = @_;
+	open (SFILE, ">$targetDir/$targetName") or die;
 
 	my $date = `date`;
 	chomp $date;
@@ -253,8 +272,8 @@ sub createSourceFile {
 // Programmer:    Craig Stuart Sapp <craig\@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
 // Last Modified: $date
-// Filename:      /include/humlib.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/humlib.cpp
+// Filename:      min/humlib.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
@@ -270,14 +289,14 @@ namespace hum {
 
 EOT
 
-	my @files = getFiles($basedir);
+	my @files = getFiles($sourceDir);
 	foreach my $file (@files) {
 		next if $file =~ /^humlib.cpp$/;
-		my $lines = getMergeContents("$basedir/$file");
+		my $lines = getMergeContents("$sourceDir/$file");
 		if ($lines =~ /^\s*$/) {
-			# print "$basedir/$file is not correctly formatted\n";
+			# print "$sourceDir/$file is not correctly formatted\n";
 		}
-		print SFILE getMergeContents("$basedir/$file");
+		print SFILE getMergeContents("$sourceDir/$file");
 	}
 
 print SFILE "\n} // end namespace hum\n";

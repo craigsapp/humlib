@@ -1,7 +1,7 @@
 ##
 ## Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 ## Creation Date: Mon Aug 10 16:06:48 PDT 2015
-## Last Modified: Sat Jun 17 00:16:40 CEST 2017
+## Last Modified: Sun Apr 16 10:01:31 PDT 2023
 ## Syntax:        GNU Makefile
 ## Filename:      Makefile.programs
 ## vim:           ts=3
@@ -9,24 +9,23 @@
 ## Description: Makefile to compile programs using the humlib library.
 ##
 ## To run this makefile, type (without quotes) "make -f Makefile.examples",
-## (or "gmake -f Makefile.examples" on FreeBSD computers). Although it is
-## intended to be used with the file "Makefile" which runs this makefile with
-## the command "make examples".  The program executables will be placed
-## in the bin directory.  Note that you have to first create the library
-## files with the main makefile using the command "make".
+## (or "gmake -f Makefile.examples" on FreeBSD computers). However this makefile
+## is intended to be used with the file "Makefile" which runs this makefile with
+## the command "make programs".  The program executables will be placed
+## in the "bin" directory.
 ##
 ## Without arguments or with the argument "programs", this makefile will
 ## compile all programs.  If you give a program name as an argument, it
-## will compile just that program. E.g.: "make -f Makefile.programs test1"
-## or used in conjunction with "Makefile", type "make test1", which will
-## compile the test1.cpp program and place it in the ./bin directory.
+## will compile just that program. E.g.: "make -f Makefile.programs flipper"
+## or used in conjunction with "Makefile", type "make flipper", which will
+## compile the cli/flipper.cpp program and place it in the ./bin directory.
 
 # Set the environmental variable $MACOSX_DEPLOYMENT_TARGET to
 # "10.9" in Apple OS X to compile for OS X 10.9 and later (for example,
 # you can compile for OS X 10.9 computers even if you are using the 10.10
 # version of the operating system).
-ENV =
 
+ENV =
 ifeq ($(shell uname),Darwin)
    ENV = MACOSX_DEPLOYMENT_TARGET=10.9
    # use the following to compile for 32-bit architecture on 64-bit comps:
@@ -44,21 +43,24 @@ endif
 #                                                                         #
 
 INCDIR    = include
+MINDIR    = min
 LIBDIR    = lib
 LIBFILE   = humlib
-#LIBFILE  = humdrum
 TARGDIR   = bin
 TOOLDIR   = cli
 PUGIXML   = pugixml
 
-PREFLAGS  = -Wall -I$(INCDIR)
+PREFLAGS  = -Wall
 PREFLAGS += -O3
+PREFLAGS += -I$(MINDIR)
+PREFLAGS += -I$(INCDIR)
 
 # include debugging information:
 #PREFLAGS += -g
 
-# using C++ 2011 standard:
-PREFLAGS += -std=c++11
+# using C++ 2011/2017 standard:
+#PREFLAGS += -std=c++11
+PREFLAGS += -std=c++17
 
 # Add -static flag to compile without dynamics libraries for better portability:
 #PREFLAGS += -static
@@ -66,6 +68,7 @@ PREFLAGS += -std=c++11
 POSTFLAGS = -L$(LIBDIR) -l$(LIBFILE) -l$(PUGIXML)
 
 COMPILER       = LANG=C $(ENV) g++ $(ARCH)
+
 # Alternatly, use clang++ v3.3:
 #COMPILER      = clang++
 #PREFLAGS     += -stdlib=libc++
@@ -74,6 +77,7 @@ COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 # End of user-modifiable variables.                                       #
 #                                                                         #
 ###########################################################################
+
 
 # setting up the directory paths to search for dependency files
 vpath %.h   $(INCDIR)
@@ -93,15 +97,16 @@ PROGS=$(PROGS1) testgrid
 #                                                                         #
 
 examples: all
-all: bin $(PROGS)
+
+all: library bin $(PROGS)
 	@echo Finished compiling all programs: $(PROGS).
+
+library:
+	@make library
 
 info:
 	@echo "Programs to compile: $(PROGS)" | fmt
 
-install:
-	@(cd bin && strip * ; sudo cp $(PROGS) /usr/local/bin)
-	@echo "Copied tools to /usr/local/bin"
 
 bin:
 ifeq ($(wildcard $(TARGDIR)),)
@@ -114,15 +119,13 @@ endif
 # Defining explicit rules for program sourcefile dependencies:
 #
 
-.cpp:
+.cpp: library
 ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
 	@echo [CC] $@
 	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)
 #		&& strip $(TARGDIR)/$@$(EXTEN)
-
-
 
 #                                                                         #
 #                                                                         #
