@@ -28,6 +28,7 @@ my $license = getLicense("LICENSE.txt");
 
 my $SrcDir = "src";
 my $IncDir = "include";
+my $MinDir = "min";
 
 createIncludeFile($IncDir, $TargetDirectory, "humlib.h");
 createSourceFile($SrcDir, $TargetDirectory, "humlib.cpp");
@@ -37,6 +38,10 @@ createSourceFile($SrcDir, $TargetDirectory, "humlib.cpp");
 
 link("$IncDir//pugixml.hpp", "$TargetDirectory/pugixml.hpp");
 link("$IncDir//pugiconfig.hpp", "$TargetDirectory/pugiconfig.hpp");
+
+# humlib.h is included in most tools and CLI programs, so copy updated file
+# to include directory:
+link("$MinDir//humlib.h", "$IncDir/humlib.h");
 
 exit(0);
 
