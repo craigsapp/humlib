@@ -15,6 +15,8 @@
 
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
+#include <vector>
+#include <string>
 
 namespace hum {
 

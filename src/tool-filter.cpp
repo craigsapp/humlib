@@ -33,6 +33,7 @@
 #include "tool-fb.h"
 #include "tool-flipper.h"
 #include "tool-gasparize.h"
+#include "tool-grep.h"
 #include "tool-half.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
