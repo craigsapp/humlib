@@ -108,6 +108,8 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 	vector<HTp> kernNotes;
 	vector<int> midiNotes;
 	vector<int> chordPositions;
+    vector<int> thirdPositions;
+    vector<int> fifthPositions;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) { // if no notes in the line
@@ -118,6 +120,8 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 		kernNotes.clear();
 		midiNotes.clear();
 		chordPositions.clear();
+        thirdPositions.clear();
+        fifthPositions.clear();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j); // get ptr to cell
 			// if not a **kern token, then skip:
@@ -143,22 +147,53 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 			}
 		}
 		midiNotes = getMidiNotes(kernNotes);
-		chordPositions = getChordPositions(midiNotes);
-		labelChordPositions(kernNotes, chordPositions);
+
+        if (m_colorThirds) { // thirds
+            thirdPositions = getThirds(midiNotes); 
+            labelThirds(kernNotes, thirdPositions);
+        }
+        
+        if (m_colorFifths) { // fifths
+            fifthPositions = getFifths(midiNotes);
+            labelFifths(kernNotes, fifthPositions);
+        }
+        
+        if (m_colorTriads) { // triads
+		    chordPositions = getChordPositions(midiNotes);
+		    labelChordPositions(kernNotes, chordPositions);
+        }
 	}
 
 	infile.createLinesFromTokens();
 
 	m_humdrum_text << infile;
 
-	m_humdrum_text << "!!!RDF**kern: " << m_root_marker
-		<< " = marked note, root position, color=\"" << m_root_color << "\"" << endl;
+    if (m_colorThirds) { // color thirds
+        m_humdrum_text << "!!!RDF**kern: " << m_3rd_root_marker
+            << " = marked note, root position, color=\"" << m_3rd_root_color << "\"" << endl;
 
-	m_humdrum_text << "!!!RDF**kern: " << m_third_marker
-		<< " = marked note, third position, color=\"" << m_third_color << "\"" << endl;
+        m_humdrum_text << "!!!RDF**kern: " << m_3rd_third_marker
+            << " = marked note, third position, color=\"" << m_3rd_third_color << "\"" << endl;
+    }
 
-	m_humdrum_text << "!!!RDF**kern: " << m_fifth_marker
-		<< " = marked note, third position, color=\"" << m_fifth_color << "\"" << endl;
+    if (m_colorFifths) { // color fifths
+        m_humdrum_text << "!!!RDF**kern: " << m_5th_root_marker
+            << " = marked note, root position, color=\"" << m_5th_root_color << "\"" << endl;
+
+        m_humdrum_text << "!!!RDF**kern: " << m_5th_fifth_marker
+            << " = marked note, fifth position, color=\"" << m_5th_fifth_color << "\"" << endl;
+    }
+
+    if (m_colorTriads) { // color full triads
+	    m_humdrum_text << "!!!RDF**kern: " << m_root_marker
+		    << " = marked note, root position, color=\"" << m_root_color << "\"" << endl;
+
+	    m_humdrum_text << "!!!RDF**kern: " << m_third_marker
+		    << " = marked note, third position, color=\"" << m_third_color << "\"" << endl;
+
+	    m_humdrum_text << "!!!RDF**kern: " << m_fifth_marker
+		    << " = marked note, third position, color=\"" << m_fifth_color << "\"" << endl;
+    }
 }
 
 
@@ -195,6 +230,65 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 
 //////////////////////////////
 //
+// Tool_colorthirds::labelThirds -- Mark the scale degree of notes:
+//       0: not in interval sonority so no label.
+//       1 == @: root (bottom of the interval)
+//       3 == N: third (top of the interval)
+
+void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
+    for (int i = 0; i < (int)kernNotes.size(); i++) {
+        int position = thirdPositions.at(i);
+        if (position == 0) {
+            continue;
+        }
+
+        string label;
+        switch (position) {
+            case 1: label = m_3rd_root_marker; break;
+            case 3: label = m_3rd_third_marker; break;
+        }
+
+        if (label.empty()) {
+            continue;
+        }
+        string text = *kernNotes.at(i);
+        text += label;
+        kernNotes.at(i)->setText(text);
+     }
+}
+
+//////////////////////////////
+//
+// Tool_colorthirds::labelFifths -- Mark the scale degree of notes:
+//       0: not in interval sonority so no label.
+//       1 == @: root (bottom of the interval)
+//       5 == Z: fifth (top of the interval)
+
+void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
+    for (int i = 0; i < (int)kernNotes.size(); i++) {
+        int position = fifthPositions.at(i);
+        if (position == 0) {
+            continue;
+        }
+
+        string label;
+        switch (position) {
+            case 1: label = m_5th_root_marker; break;
+            case 5: label = m_5th_fifth_marker; break;
+        }
+
+        if (label.empty()) {
+            continue;
+        }
+        string text = *kernNotes.at(i);
+        text += label;
+        kernNotes.at(i)->setText(text);
+    }
+}
+
+
+//////////////////////////////
+//
 // Tool_colorthirds::getChordPositions -- Identify if the sonority is a triad, and if so, place
 //    the position of the note in the chord:
 //       0: not in triadic sonority.
@@ -202,12 +296,8 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 //       3: third (such as E in C major triad)
 //       5: fifth (such as G in C major triad)
 //
-vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
-	vector<int> output(midiNotes.size(), 0);
-	if (midiNotes.empty()) {
-		return output;
-	}
 
+vector<int> Tool_colorthirds::getNoteMods(vector<int>& midiNotes) {
 	// create modulo 12 arr
 	vector<int> pitchClasses(12, 0);
 	for (int i = 0; i < (int)midiNotes.size(); i++) {
@@ -221,7 +311,115 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 		if (pitchClasses.at(i) != 0) { // not zero
 			noteMods.push_back(i); // add the index
 		}
+    }
+
+    return noteMods;
+}
+
+// Tool_colorthirds::getThirds -- Identify if the sonority is a third interval, and if so,
+//    place the position of the note in the output.
+//       0: not in the sonority
+//       1: root (bottom of the interval)
+//       3: third (top of the interval)
+
+vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
+    vector<int> output(midiNotes.size(), 0);
+
+    if (midiNotes.empty()) {
+        return output;
+    }
+
+    vector<int> noteMods = getNoteMods(midiNotes); // we know noteMods is sorted
+    if (noteMods.size() != 2) {
+        return output;
+    }
+    
+    int interval = noteMods[1] - noteMods[0];
+    int rootClass = -1; // currently uninitialized
+    int thirdClass = -1;
+
+    if (interval == 3 || interval == 4) { // third is found
+        rootClass = noteMods.at(0);
+        thirdClass = noteMods.at(1);
+    }
+    else if (interval == 8 || interval == 9) { // third is found (inversion)
+        rootClass = noteMods.at(1);
+        thirdClass = noteMods.at(0);
+    }
+
+    if (rootClass == -1) { // third was not found
+        return output;
+    }
+
+    // populate output
+    for (int i = 0; i < (int)midiNotes.size(); i++) {
+        if (midiNotes.at(i) % 12 == rootClass) {
+            output.at(i) = 1;
+        }
+        else if (midiNotes.at(i) % 12 == thirdClass) {
+            output.at(i) = 3;
+        }
+    }    
+    
+    return output;
+}
+
+// Tool_colorthirds::getFifths -- Identify if the sonority is a fifth interval, and if so,
+//    place the position of the note in the output.
+//       0: not in the sonority
+//       1: root (bottom of the interval)
+//       5: fifth (top of the interval)
+
+vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
+    vector<int> output(midiNotes.size(), 0);
+       
+    if (midiNotes.empty()) {
+        return output;
+    }
+
+    vector<int> noteMods = getNoteMods(midiNotes);
+    if (noteMods.size() != 2) {
+        return output;
+    }
+
+    int interval = noteMods.at(1) - noteMods.at(0);
+    int rootClass = -1; // currently uninitialized
+    int fifthClass = -1;
+
+    if ((interval == 7) || (interval == 6)) { // fifth found
+        rootClass = noteMods.at(0);
+        fifthClass = noteMods.at(1);
+    }
+
+    if (interval == 5) { // inverted fifth found
+        rootClass = noteMods.at(1);
+        fifthClass = noteMods.at(0);
+    }
+
+    if (rootClass == -1) { // fifth not found
+        return output;
+    }
+
+    // populate output 
+    for (int i = 0; i < (int)midiNotes.size(); i++) {
+        if (midiNotes.at(i) % 12 == rootClass) {
+            output.at(i) = 1;
+        }
+        else if (midiNotes.at(i) % 12 == fifthClass) {
+            output.at(i) = 5;
+        }
+    }
+    
+    return output;
+}
+
+vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
+	vector<int> output(midiNotes.size(), 0);
+	if (midiNotes.empty()) {
+		return output;
 	}
+
+	vector<int> noteMods = getNoteMods(midiNotes);
 
 	if (noteMods.size() != 3) { // not a triad
 		return output;
@@ -234,8 +432,6 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 	int thirdClass = -1;
 	int fifthClass = -1;
 
-	// NOTE: right now, noteMods is not in the order that the og notes in the score are in
-	// aka --> these inversions are not correct
 	if ((bint == 3 && tint == 4) || (bint == 4 && tint == 3) || (bint == 3 && tint == 3)) { // root pos
 		rootClass = noteMods.at(0);
 		thirdClass = noteMods.at(1);
