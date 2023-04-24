@@ -26,7 +26,6 @@ void addNonKernInstrumentInfo    (HumdrumFile& infile);
 bool m_removeQ = false;
 bool m_addQ    = false;
 bool m_checkQ  = false;
-bool m_changedQ = false;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -43,10 +42,9 @@ int main(int argc, char** argv) {
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
 	while (instream.read(infile)) {
-		m_changedQ = false;
 		processFile(infile);
 		infile.generateLinesFromTokens();
-		if (m_changedQ && (m_removeQ || m_addQ)) {
+		if (m_removeQ || m_addQ) {
 			cout << infile;
 		}
 	}
