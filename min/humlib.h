@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 16 11:58:45 PDT 2023
+// Last Modified: Sun Apr 23 18:59:11 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1544,9 +1544,12 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isModernMensurationSymbol (void);
 		bool     isOriginalMensuration     (void) { return isOriginalMensurationSymbol(); }
 		bool     isModernMensuration       (void) { return isModernMensurationSymbol(); }
-		bool     isInstrumentDesignation   (void);
 		bool     isInstrumentName          (void);
 		bool     isInstrumentAbbreviation  (void);
+		bool     isInstrumentDesignation   (void);
+		bool     isInstrumentCode          (void) { return isInstrumentDesignation(); }
+		bool     isInstrumentClass         (void);
+		bool     isInstrumentGroup         (void);
 		bool     isModernInstrumentName    (void);
 		bool     isModernInstrumentAbbreviation(void);
 		bool     isOriginalInstrumentName    (void);

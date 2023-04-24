@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 16 11:58:45 PDT 2023
+// Last Modified: Sun Apr 23 18:59:11 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -33558,22 +33558,55 @@ bool HumdrumToken::isModernMensurationSymbol(void) {
 //////////////////////////////
 //
 // HumdrumToken::isInstrumentDesignation -- Such as *Iclars for B-flat clarinet.
+//   Instrument codes can also contain "_" characters and capital letters
+//   as long as they are not at the start of the code after "I".
+//   This algorithm does not check past the first letter of the code,
+//   which has to be lower case letter.
 //
 
 bool HumdrumToken::isInstrumentDesignation(void) {
 	if (this->compare(0, 2, "*I") != 0) {
 		return false;
 	}
-	for (int i=2; i<(int)this->size(); i++) {
-		if (!isalpha(this->at(i))) {
-			return false;
-		}
-		if (!islower(this->at(i))) {
-			return false;
-		}
+	if (this->size() < 3) {
+		return false;
 	}
-
+	if (!islower(this->at(2))) {
+		return false;
+	}
 	return true;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentClass -- Instrument classes start with "*IC",
+//   such as "*ICww" for woodwinds.
+//
+
+bool HumdrumToken::isInstrumentClass(void) {
+	if (this->compare(0, 3, "*IC") == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentGroup -- Instrument groups start with "*IG",
+//   such as "*IGsolo" for the soloist(s).
+//
+
+bool HumdrumToken::isInstrumentGroup(void) {
+	if (this->compare(0, 3, "*IG") == 0) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -33626,6 +33659,7 @@ bool HumdrumToken::isOriginalInstrumentName(void) {
 //////////////////////////////
 //
 // HumdrumToken::isInstrumentAbbreviation -- True if an instrument abbreviation token.
+//    Checks to ensure the first three letters are *I' .
 //
 
 bool HumdrumToken::isInstrumentAbbreviation(void) {
