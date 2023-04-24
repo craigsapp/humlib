@@ -32,8 +32,8 @@ bool m_changedQ = false;
 
 int main(int argc, char** argv) {
    Options options;
-	options.define("a|add:b", "Add instrument information to **kern co-spines");
-	options.define("r|remove:b", "Remove instrument information to **kern co-spines");
+	options.define("a|add=b", "Add instrument information to **kern co-spines");
+	options.define("r|remove=b", "Remove instrument information to **kern co-spines");
    options.process(argc, argv);
 
 	m_addQ    = options.getBoolean("add");
