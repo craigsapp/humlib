@@ -91,6 +91,7 @@ void Tool_colorthirds::initialize(void) {
 	m_colorThirds = !getBoolean("no-thirds");
 	m_colorFifths = !getBoolean("no-thirds");
 	m_colorTriads = !getBoolean("no-triads");
+    m_doubleQ = getBoolean("double");
 }
 
 
@@ -149,17 +150,32 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 		midiNotes = getMidiNotes(kernNotes);
 
         if (m_colorThirds) { // thirds
-            thirdPositions = getThirds(midiNotes); 
+            thirdPositions = getThirds(midiNotes);
+
+            if (m_doubleQ) { // label only doubles if prompted
+                keepOnlyDoubles(thirdPositions);
+            }
+
             labelThirds(kernNotes, thirdPositions);
         }
-        
+
         if (m_colorFifths) { // fifths
             fifthPositions = getFifths(midiNotes);
+
+            if (m_doubleQ) { // label only doubles if prompted
+                keepOnlyDoubles(fifthPositions);
+            }
+
             labelFifths(kernNotes, fifthPositions);
         }
-        
+
         if (m_colorTriads) { // triads
 		    chordPositions = getChordPositions(midiNotes);
+
+            if (m_doubleQ) { // label only doubles if prompted
+                keepOnlyDoubles(chordPositions);
+            }
+
 		    labelChordPositions(kernNotes, chordPositions);
         }
 	}
@@ -333,7 +349,7 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
     if (noteMods.size() != 2) {
         return output;
     }
-    
+
     int interval = noteMods[1] - noteMods[0];
     int rootClass = -1; // currently uninitialized
     int thirdClass = -1;
@@ -359,8 +375,8 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
         else if (midiNotes.at(i) % 12 == thirdClass) {
             output.at(i) = 3;
         }
-    }    
-    
+    }
+
     return output;
 }
 
@@ -372,7 +388,7 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 
 vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
     vector<int> output(midiNotes.size(), 0);
-       
+
     if (midiNotes.empty()) {
         return output;
     }
@@ -400,7 +416,7 @@ vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
         return output;
     }
 
-    // populate output 
+    // populate output
     for (int i = 0; i < (int)midiNotes.size(); i++) {
         if (midiNotes.at(i) % 12 == rootClass) {
             output.at(i) = 1;
@@ -409,7 +425,7 @@ vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
             output.at(i) = 5;
         }
     }
-    
+
     return output;
 }
 
@@ -462,9 +478,36 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 		}
 	}
 
+    if (m_doubleQ) {
+        keepOnlyDoubles(output); // call some function that marks only doubles
+    }
+
 	return output;
 }
 
+void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
+    map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
+
+    for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
+        if (output[i] == 1) {
+            positionCounts[1]++;
+        }
+        else if (output[i] == 3) {
+            positionCounts[3]++;
+        }
+        else if (output[i] == 5) {
+            positionCounts[5]++;
+        }
+    }
+
+    for (auto positionCount : positionCounts) {
+        if (positionCount.second == 1) { // if only appears once
+            replace(output.begin(), output.end(), positionCount.first, 0); // replace with 0
+        }
+    }
+
+    return;
+}
 
 //////////////////////////////
 //

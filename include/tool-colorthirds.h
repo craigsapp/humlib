@@ -44,6 +44,7 @@ class Tool_colorthirds : public HumTool {
 		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
         void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
         void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
+        void             keepOnlyDoubles(std::vector<int>& output);
 
 	private:
 		std::string m_root_marker = "@";
@@ -65,6 +66,7 @@ class Tool_colorthirds : public HumTool {
 		bool m_colorThirds = true;
 		bool m_colorFifths = true;
 		bool m_colorTriads = true;
+        bool m_doubleQ = false;
 
 };
 
