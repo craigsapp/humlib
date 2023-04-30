@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr 24 14:34:54 PDT 2023
+// Last Modified: Fri Apr 28 18:03:15 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5310,6 +5310,9 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
+	if (interface.getBoolean("options") {                         \
+      return 1;                                                  \
+   }                                                             \
 	HumdrumFileStream instream(static_cast<Options&>(interface)); \
 	HumdrumFileSet infiles;                                       \
 	bool status = true;                                           \
@@ -6252,6 +6255,7 @@ class Tool_colorthirds : public HumTool {
 		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
         void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
         void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
+        void             keepOnlyDoubles(std::vector<int>& output);
 
 	private:
 		std::string m_root_marker = "@";
@@ -6273,6 +6277,7 @@ class Tool_colorthirds : public HumTool {
 		bool m_colorThirds = true;
 		bool m_colorFifths = true;
 		bool m_colorTriads = true;
+        bool m_doubleQ = false;
 
 };
 

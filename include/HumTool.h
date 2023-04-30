@@ -131,6 +131,9 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
+	if (interface.getBoolean("options") {                         \
+      return 1;                                                  \
+   }                                                             \
 	HumdrumFileStream instream(static_cast<Options&>(interface)); \
 	HumdrumFileSet infiles;                                       \
 	bool status = true;                                           \
