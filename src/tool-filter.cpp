@@ -14,6 +14,7 @@
 #include "tool-filter.h"
 
 // tools which filter can process:
+
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
@@ -22,9 +23,10 @@
 #include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
+#include "tool-cmr.h"
 #include "tool-colorgroups.h"
-#include "tool-colortriads.h"
 #include "tool-colorthirds.h"
+#include "tool-colortriads.h"
 #include "tool-composite.h"
 #include "tool-deg.h"
 #include "tool-dissonant.h"
@@ -52,7 +54,7 @@
 #include "tool-modori.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
-#include "tool-cmr.h"
+#include "tool-ordergps.h"
 #include "tool-phrase.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
@@ -279,6 +281,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "ordergps") {
+			RUNTOOL(ordergps, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {

@@ -91,7 +91,7 @@ void Tool_colorthirds::initialize(void) {
 	m_colorThirds = !getBoolean("no-thirds");
 	m_colorFifths = !getBoolean("no-thirds");
 	m_colorTriads = !getBoolean("no-triads");
-    m_doubleQ = getBoolean("double");
+   m_doubleQ = getBoolean("double");
 }
 
 

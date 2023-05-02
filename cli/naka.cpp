@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 //
 
 void processFile(HumdrumFile& infile, Options& options) {
-	int allcount = 0;
+	// int allcount = 0;
 	int measure = 0;
 	vector<int> partcount(1000, 0);
 	vector<HTp> spinestarts;
@@ -109,7 +109,7 @@ void processFile(HumdrumFile& infile, Options& options) {
 					cerr << "Strange problem with ticks: " << ticks << endl;
 				}
 
-				allcount++;
+				// allcount++;
 				cout << ticks << "\t";
 				char pitch = 'C';
 				if (diatonic < 5) {

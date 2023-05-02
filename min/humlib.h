@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Apr 28 18:03:15 PDT 2023
+// Last Modified: Mon May  1 08:13:44 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5310,7 +5310,7 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
-	if (interface.getBoolean("options") {                         \
+	if (interface.getBoolean("options")) {                         \
       return 1;                                                  \
    }                                                             \
 	HumdrumFileStream instream(static_cast<Options&>(interface)); \
@@ -9330,6 +9330,35 @@ class Tool_myank : public HumTool {
 		vector<int> m_barNumbersPerLine;      // used with -l option
 		bool m_hideStarting;                  // used with --hide-starting option
 		bool m_hideEnding;                    // used with --hide-ending option
+
+};
+
+
+class Tool_ordergps : public HumTool {
+	public:
+		      Tool_ordergps  (void);
+		     ~Tool_ordergps  () {};
+
+		bool  run            (HumdrumFileSet& infiles);
+		bool  run            (HumdrumFile& infile);
+		bool  run            (const string& indata, ostream& out);
+		bool  run            (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void  initialize     (void);
+		void  processFile    (HumdrumFile& infile);
+		void  printStaffLine (HumdrumFile& infile);
+		void  printFile      (HumdrumFile& infile, int gindex, int pindex, int sindex);
+		void  printFileTop   (HumdrumFile& infile, int gindex, int pindex, int sindex);
+
+	private:
+		bool m_emptyQ   = false;
+		bool m_fileQ    = false;
+		bool m_listQ    = false;
+		bool m_problemQ = false;
+		bool m_reverseQ = false;
+		bool m_staffQ   = false;
+		bool m_topQ     = false;
 
 };
 
