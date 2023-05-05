@@ -205,10 +205,11 @@ class Tool_composite : public HumTool {
 		int m_groupAssignmentIndex  = 0;
 		int m_verseLabelIndex       = 0;
 
-		int m_coincidenceEventCount   = -1;
-		int m_fullCompositeEventCount = -1;
-		int m_groupAEventCount        = -1;
-		int m_groupBEventCount        = -1;
+		// analytic counts:
+		int m_coincidenceEventCount   = -1; // number of events in coincidence
+		int m_fullCompositeEventCount = -1; // number of events in full composite rhythm
+		int m_groupAEventCount        = -1; // number of events in group A composite rhythm
+		int m_groupBEventCount        = -1; // number of events in group B composite rhythm
 
 		double m_scoreSize          = 100.0;
 		double m_analysisSize       = 100.0;

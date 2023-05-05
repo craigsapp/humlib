@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  1 08:13:44 PDT 2023
+// Last Modified: Fri May  5 02:54:19 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5310,9 +5310,6 @@ int main(int argc, char** argv) {                                \
 		interface.getError(cerr);                                  \
 		return -1;                                                 \
 	}                                                             \
-	if (interface.getBoolean("options")) {                         \
-      return 1;                                                  \
-   }                                                             \
 	HumdrumFileStream instream(static_cast<Options&>(interface)); \
 	HumdrumFileSet infiles;                                       \
 	bool status = true;                                           \
@@ -6495,10 +6492,11 @@ class Tool_composite : public HumTool {
 		int m_groupAssignmentIndex  = 0;
 		int m_verseLabelIndex       = 0;
 
-		int m_coincidenceEventCount   = -1;
-		int m_fullCompositeEventCount = -1;
-		int m_groupAEventCount        = -1;
-		int m_groupBEventCount        = -1;
+		// analytic counts:
+		int m_coincidenceEventCount   = -1; // number of events in coincidence
+		int m_fullCompositeEventCount = -1; // number of events in full composite rhythm
+		int m_groupAEventCount        = -1; // number of events in group A composite rhythm
+		int m_groupBEventCount        = -1; // number of events in group B composite rhythm
 
 		double m_scoreSize          = 100.0;
 		double m_analysisSize       = 100.0;

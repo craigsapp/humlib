@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon May  1 08:13:44 PDT 2023
+// Last Modified: Fri May  5 02:54:19 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -62832,8 +62832,8 @@ void Tool_composite::checkForAutomaticGrouping(HumdrumFile& infile) {
 	}
 
 	// No Groupings found in score, so add *grp:A to the first kern spine
-	// and *grp:B to the second kern spine (from left-to-right). 
-	
+	// and *grp:B to the second kern spine (from left-to-right).
+
 	vector<HTp> sstarts;
 	infile.getSpineStartList(sstarts, "**kern");
 	if (sstarts.size() != 2) {
@@ -62861,7 +62861,7 @@ void Tool_composite::checkForAutomaticGrouping(HumdrumFile& infile) {
 		// something strange
 		return;
 	}
-	
+
 	infile.insertNullInterpretationLineAboveIndex(addline);
 	for (int i=0; i< (int)sstarts.size(); i++) {
 		int track = sstarts[i]->getTrack();
@@ -64005,7 +64005,6 @@ void Tool_composite::analyzeCoincidenceRhythms(HumdrumFile& infile) {
 	vector<int> groupAstates;
 	vector<int> groupBstates;
 
-
 	// -2 = sustain tied note -1 = sustain, 0 = rest (or non-data), +1 = note attack
 	getNumericGroupStates(groupAstates, infile, "A");
 	getNumericGroupStates(groupBstates, infile, "B");
@@ -64030,6 +64029,9 @@ void Tool_composite::analyzeCoincidenceRhythms(HumdrumFile& infile) {
 		}
 	}
 
+	bool foundFirstAttackA = false;
+	bool foundFirstAttackB = false;
+
 	m_coincidence.resize(infile.getLineCount());
 	for (int i=0; i<infile.getLineCount(); i++) {
 		m_coincidence[i] = "";
@@ -64043,7 +64045,21 @@ void Tool_composite::analyzeCoincidenceRhythms(HumdrumFile& infile) {
 			continue;
 		}
 		lastValue = currValue;
-		currValue = merged[i];
+		if (groupAstates[i] > 0) {
+			foundFirstAttackA = true;
+		}
+		if (groupBstates[i] > 0) {
+			foundFirstAttackB = true;
+		}
+		int value = merged[i];
+		if (!foundFirstAttackA) {
+			value = 0;
+		}
+		if (!foundFirstAttackB) {
+			value = 0;
+		}
+		currValue = value;
+
 		if (currValue == 1) {
 			noteAttack[i] = 1;
 		} else if (currValue == -2) {
@@ -64198,6 +64214,8 @@ void Tool_composite::getNumericGroupStates(vector<int>& states,
 		if (!infile[i].isData()) {
 			continue;
 		}
+		vector<int> linestates;
+		linestates.clear();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j);
 			if (!token->isKern()) {
@@ -64221,7 +64239,8 @@ void Tool_composite::getNumericGroupStates(vector<int>& states,
 				continue;
 			}
 			vector<string> subtoks = token->getSubtokens();
-			bool sus2 = true;
+			bool suschord = true;
+			bool attackchord = false;
 			for (int k=0; k<(int)subtoks.size(); k++) {
 				if (subtoks[k].find("r") != string::npos) {
 					continue;
@@ -64232,7 +64251,8 @@ void Tool_composite::getNumericGroupStates(vector<int>& states,
 				}
 				if ((subtoks[k].find("]") == string::npos) &&
 						(subtoks[k].find("_") == string::npos)) {
-					sus2 = false;
+					suschord = false;
+					attackchord = true;
 				}
 				if (!nullSustain) {
 					if ((subtoks[k].find("]") != string::npos) ||
@@ -64244,23 +64264,45 @@ void Tool_composite::getNumericGroupStates(vector<int>& states,
 				} else {
 					tieNote = false;
 				}
-
-				if (sus2 && nullSustain) {
-					states[i] = -1;
-				} else if (nullSustain) {
-					if (states[i] <= 0) {
-						states[i] = -1;
-					}
-				} else if (sus2) {
-					if (tieNote) {
-						states[i] = -2;
-					} else {
-						states[i] = -1;
-					}
-				} else {
-					states[i] = 1;
-				}
+			} // end of chord analysis
+			if (attackchord) {
+				suschord = false;
 			}
+			if (suschord && nullSustain) {
+				linestates.push_back(-1);
+			} else if (nullSustain) {
+				linestates.push_back(-1);
+			} else if (suschord) {
+				if (tieNote) {
+					linestates.push_back(-2);
+				} else {
+					linestates.push_back(-1);
+				}
+			} else {
+				linestates.push_back(1);
+			}
+		} // end of line analysis
+
+		bool allZero = true;
+		for (int m=0; m<(int)linestates.size(); m++) {
+			if (linestates[m] != 0) {
+				allZero = false;
+				break;
+			}
+		}
+		bool hasAttack = false;
+		for (int m=0; m<(int)linestates.size(); m++) {
+			if (linestates[m] > 0) {
+				hasAttack = true;
+				break;
+			}
+		}
+		if (hasAttack) {
+			states[i] = 1;
+		} else if (allZero) {
+			states[i] = 0;
+		} else {
+			states[i] = -1;
 		}
 	}
 }
@@ -64436,7 +64478,6 @@ void Tool_composite::analyzeGroupCompositeRhythms(HumdrumFile& infile) {
 				recip2 += pstring;
 			}
 		}
-
 		m_groups[0][i] = recip;
 		m_groups[1][i] = recip2;
 	}
