@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  5 02:54:19 PDT 2023
+// Last Modified: Fri May  5 16:50:44 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6246,35 +6246,40 @@ class Tool_colorthirds : public HumTool {
 		void             processFile       (HumdrumFile& infile);
 		std::vector<int> getMidiNotes(std::vector<HTp>& kernNotes);
 		std::vector<int> getChordPositions(std::vector<int>& midiNotes);
-        std::vector<int> getNoteMods(std::vector<int>& midiNotes);
-        std::vector<int> getThirds(std::vector<int>& midiNotes);
-        std::vector<int> getFifths(std::vector<int>& midiNotes);
+		std::vector<int> getNoteMods(std::vector<int>& midiNotes);
+		std::vector<int> getThirds(std::vector<int>& midiNotes);
+		std::vector<int> getFifths(std::vector<int>& midiNotes);
 		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
-        void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
-        void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
-        void             keepOnlyDoubles(std::vector<int>& output);
+		void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
+		void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
+		void             keepOnlyDoubles(std::vector<int>& output);
+		void             checkForTriadicSonority(std::vector<int>& positions, int line);
+		std::string      generateStatistics(HumdrumFile& infile);
 
 	private:
 		std::string m_root_marker = "@";
 		std::string m_third_marker = "N";
 		std::string m_fifth_marker = "Z";
-        std::string m_3rd_root_marker = "j";
-        std::string m_3rd_third_marker = "l";
-        std::string m_5th_root_marker = "V";
-        std::string m_5th_fifth_marker = "|";
+		std::string m_3rd_root_marker = "j";
+		std::string m_3rd_third_marker = "l";
+		std::string m_5th_root_marker = "V";
+		std::string m_5th_fifth_marker = "|";
 
 		std::string m_root_color = "crimson";
 		std::string m_third_color = "limegreen";
 		std::string m_fifth_color = "royalblue";
-        std::string m_3rd_root_color = "darkred";
-        std::string m_3rd_third_color = "green";
-        std::string m_5th_root_color = "darkred";
-        std::string m_5th_fifth_color = "steelblue";
+		std::string m_3rd_root_color = "darkred";
+		std::string m_3rd_third_color = "green";
+		std::string m_5th_root_color = "darkred";
+		std::string m_5th_fifth_color = "steelblue";
 
 		bool m_colorThirds = true;
 		bool m_colorFifths = true;
 		bool m_colorTriads = true;
-        bool m_doubleQ = false;
+		bool m_doubleQ = false;
+
+		// Statistical data variables:
+		vector<bool> m_triadState;
 
 };
 

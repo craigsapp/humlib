@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  5 02:54:19 PDT 2023
+// Last Modified: Fri May  5 16:50:44 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61805,7 +61805,7 @@ void Tool_colorthirds::initialize(void) {
 	m_colorThirds = !getBoolean("no-thirds");
 	m_colorFifths = !getBoolean("no-thirds");
 	m_colorTriads = !getBoolean("no-triads");
-   m_doubleQ = getBoolean("double");
+	m_doubleQ = getBoolean("double");
 }
 
 
@@ -61820,11 +61820,14 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
 
+	m_triadState.clear();
+	m_triadState.resize(infile.getLineCount());
+
 	vector<HTp> kernNotes;
 	vector<int> midiNotes;
 	vector<int> chordPositions;
-    vector<int> thirdPositions;
-    vector<int> fifthPositions;
+	vector<int> thirdPositions;
+	vector<int> fifthPositions;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) { // if no notes in the line
@@ -61835,8 +61838,8 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 		kernNotes.clear();
 		midiNotes.clear();
 		chordPositions.clear();
-        thirdPositions.clear();
-        fifthPositions.clear();
+		thirdPositions.clear();
+		fifthPositions.clear();
 		for (int j=0; j<infile[i].getFieldCount(); j++) {
 			HTp token = infile.token(i, j); // get ptr to cell
 			// if not a **kern token, then skip:
@@ -61863,67 +61866,129 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 		}
 		midiNotes = getMidiNotes(kernNotes);
 
-        if (m_colorThirds) { // thirds
-            thirdPositions = getThirds(midiNotes);
+		if (m_colorThirds) { // thirds
+			thirdPositions = getThirds(midiNotes);
+			checkForTriadicSonority(thirdPositions, i);
 
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(thirdPositions);
-            }
+			if (m_doubleQ) { // label only doubles if prompted
+				keepOnlyDoubles(thirdPositions);
+			}
 
-            labelThirds(kernNotes, thirdPositions);
-        }
+			labelThirds(kernNotes, thirdPositions);
+		}
 
-        if (m_colorFifths) { // fifths
-            fifthPositions = getFifths(midiNotes);
+		if (m_colorFifths) { // fifths
+			fifthPositions = getFifths(midiNotes);
+			checkForTriadicSonority(fifthPositions, i);
 
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(fifthPositions);
-            }
+			if (m_doubleQ) { // label only doubles if prompted
+				keepOnlyDoubles(fifthPositions);
+			}
 
-            labelFifths(kernNotes, fifthPositions);
-        }
+			labelFifths(kernNotes, fifthPositions);
+		}
 
-        if (m_colorTriads) { // triads
-		    chordPositions = getChordPositions(midiNotes);
-
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(chordPositions);
-            }
-
-		    labelChordPositions(kernNotes, chordPositions);
-        }
+		if (m_colorTriads) { // triads
+	    	chordPositions = getChordPositions(midiNotes);
+			checkForTriadicSonority(chordPositions, i);
+			if (m_doubleQ) { // label only doubles if prompted
+				keepOnlyDoubles(chordPositions);
+			}
+    		labelChordPositions(kernNotes, chordPositions);
+		}
 	}
 
 	infile.createLinesFromTokens();
 
 	m_humdrum_text << infile;
 
-    if (m_colorThirds) { // color thirds
-        m_humdrum_text << "!!!RDF**kern: " << m_3rd_root_marker
-            << " = marked note, root position, color=\"" << m_3rd_root_color << "\"" << endl;
+	if (m_colorThirds) { // color thirds
+		m_humdrum_text << "!!!RDF**kern: " << m_3rd_root_marker
+			<< " = marked note, root position, color=\"" << m_3rd_root_color << "\"" << endl;
 
-        m_humdrum_text << "!!!RDF**kern: " << m_3rd_third_marker
-            << " = marked note, third position, color=\"" << m_3rd_third_color << "\"" << endl;
-    }
+		m_humdrum_text << "!!!RDF**kern: " << m_3rd_third_marker
+			<< " = marked note, third position, color=\"" << m_3rd_third_color << "\"" << endl;
+	}
 
-    if (m_colorFifths) { // color fifths
-        m_humdrum_text << "!!!RDF**kern: " << m_5th_root_marker
-            << " = marked note, root position, color=\"" << m_5th_root_color << "\"" << endl;
+	if (m_colorFifths) { // color fifths
+		m_humdrum_text << "!!!RDF**kern: " << m_5th_root_marker
+		<< " = marked note, root position, color=\"" << m_5th_root_color << "\"" << endl;
 
-        m_humdrum_text << "!!!RDF**kern: " << m_5th_fifth_marker
-            << " = marked note, fifth position, color=\"" << m_5th_fifth_color << "\"" << endl;
-    }
+		m_humdrum_text << "!!!RDF**kern: " << m_5th_fifth_marker
+		<< " = marked note, fifth position, color=\"" << m_5th_fifth_color << "\"" << endl;
+	}
 
-    if (m_colorTriads) { // color full triads
-	    m_humdrum_text << "!!!RDF**kern: " << m_root_marker
-		    << " = marked note, root position, color=\"" << m_root_color << "\"" << endl;
+	if (m_colorTriads) { // color full triads
+		m_humdrum_text << "!!!RDF**kern: " << m_root_marker
+		    	<< " = marked note, root position, color=\"" << m_root_color << "\"" << endl;
 
 	    m_humdrum_text << "!!!RDF**kern: " << m_third_marker
 		    << " = marked note, third position, color=\"" << m_third_color << "\"" << endl;
 
 	    m_humdrum_text << "!!!RDF**kern: " << m_fifth_marker
 		    << " = marked note, third position, color=\"" << m_fifth_color << "\"" << endl;
-    }
+	}
+
+	string statistics = generateStatistics(infile);
+	m_humdrum_text << statistics;
+}
+
+
+//////////////////////////////
+//
+// Tool_colorthirds::checkForTriadicSonority -- Mark the given line in the file as a triadic sonority
+//     of all MIDI note numbers are positive.
+//
+
+void Tool_colorthirds::checkForTriadicSonority(vector<int>& positions, int line) {
+	for (int i=0; i<(int)positions.size(); i++) {
+		if (positions[i] > 0) {
+			m_triadState.at(line) = true;	
+			break;
+		}
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_colorthirds::generateStatistics --
+//
+
+string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
+	int sonorityCount = 0;  // total number of sonorities
+	int triadCount = 0;     // sonorities that are triads
+	HumNum triadDuration = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (m_triadState.at(i)) {
+			triadDuration += infile[i].getDuration();
+		}
+		int attacks = infile[i].getKernNoteAttacks();
+		if (attacks == 0) {
+			continue;
+		}
+		sonorityCount++;
+		if (m_triadState.at(i)) {
+			triadCount++;
+		}
+	}
+
+	stringstream out;
+	out << "!!!colorthirds-sonority-count: " << sonorityCount << endl;
+	out << "!!!colorthirds-sonority-duration: " << infile.getScoreDuration().getFloat() << endl;
+	out << "!!!colorthirds-triadic-count: " << triadCount << endl;
+	out << "!!!colorthirds-triadic-duration: " << triadDuration.getFloat() << endl;
+	double percentage = 100.0 * (double)triadCount / (double)sonorityCount;
+	percentage = int(percentage * 100.0 + 0.5) / 100.0;
+	out << "!!!colorthirds-count-ratio: " << percentage << "%" << endl;
+	percentage = 100.0 * triadDuration.getFloat() / infile.getScoreDuration().getFloat();
+	percentage = int(percentage * 100.0 + 0.5) / 100.0;
+	out << "!!!colorthirds-duration-ratio: " << percentage << "%" << endl;
+	
+	return out.str();
 }
 
 
@@ -61966,26 +62031,28 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 //       3 == N: third (top of the interval)
 
 void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
-    for (int i = 0; i < (int)kernNotes.size(); i++) {
-        int position = thirdPositions.at(i);
-        if (position == 0) {
-            continue;
-        }
+	for (int i = 0; i < (int)kernNotes.size(); i++) {
+		int position = thirdPositions.at(i);
+		if (position == 0) {
+			continue;
+		}
 
-        string label;
-        switch (position) {
-            case 1: label = m_3rd_root_marker; break;
-            case 3: label = m_3rd_third_marker; break;
-        }
+		string label;
+		switch (position) {
+			case 1: label = m_3rd_root_marker; break;
+			case 3: label = m_3rd_third_marker; break;
+		}
 
-        if (label.empty()) {
-            continue;
-        }
-        string text = *kernNotes.at(i);
-        text += label;
-        kernNotes.at(i)->setText(text);
-     }
+		if (label.empty()) {
+			continue;
+		}
+		string text = *kernNotes.at(i);
+		text += label;
+		kernNotes.at(i)->setText(text);
+	}
 }
+
+
 
 //////////////////////////////
 //
@@ -61995,26 +62062,27 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
 //       5 == Z: fifth (top of the interval)
 
 void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
-    for (int i = 0; i < (int)kernNotes.size(); i++) {
-        int position = fifthPositions.at(i);
-        if (position == 0) {
-            continue;
-        }
+	for (int i = 0; i < (int)kernNotes.size(); i++) {
+		int position = fifthPositions.at(i);
+		if (position == 0) {
+			continue;
+		}
 
-        string label;
-        switch (position) {
-            case 1: label = m_5th_root_marker; break;
-            case 5: label = m_5th_fifth_marker; break;
-        }
+		string label;
+		switch (position) {
+			case 1: label = m_5th_root_marker; break;
+			case 5: label = m_5th_fifth_marker; break;
+		}
 
-        if (label.empty()) {
-            continue;
-        }
-        string text = *kernNotes.at(i);
-        text += label;
-        kernNotes.at(i)->setText(text);
-    }
+		if (label.empty()) {
+			continue;
+		}
+		string text = *kernNotes.at(i);
+		text += label;
+		kernNotes.at(i)->setText(text);
+	}
 }
+
 
 
 //////////////////////////////
@@ -62041,9 +62109,9 @@ vector<int> Tool_colorthirds::getNoteMods(vector<int>& midiNotes) {
 		if (pitchClasses.at(i) != 0) { // not zero
 			noteMods.push_back(i); // add the index
 		}
-    }
+	}
 
-    return noteMods;
+	return noteMods;
 }
 
 // Tool_colorthirds::getThirds -- Identify if the sonority is a third interval, and if so,
@@ -62053,45 +62121,44 @@ vector<int> Tool_colorthirds::getNoteMods(vector<int>& midiNotes) {
 //       3: third (top of the interval)
 
 vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
-    vector<int> output(midiNotes.size(), 0);
+	vector<int> output(midiNotes.size(), 0);
 
-    if (midiNotes.empty()) {
-        return output;
-    }
+	if (midiNotes.empty()) {
+		return output;
+	}
 
-    vector<int> noteMods = getNoteMods(midiNotes); // we know noteMods is sorted
-    if (noteMods.size() != 2) {
-        return output;
-    }
+	vector<int> noteMods = getNoteMods(midiNotes); // we know noteMods is sorted
+	if (noteMods.size() != 2) {
+		return output;
+	}
 
-    int interval = noteMods[1] - noteMods[0];
-    int rootClass = -1; // currently uninitialized
-    int thirdClass = -1;
+	int interval = noteMods[1] - noteMods[0];
+	int rootClass = -1; // currently uninitialized
+	int thirdClass = -1;
 
-    if (interval == 3 || interval == 4) { // third is found
-        rootClass = noteMods.at(0);
-        thirdClass = noteMods.at(1);
-    }
-    else if (interval == 8 || interval == 9) { // third is found (inversion)
-        rootClass = noteMods.at(1);
-        thirdClass = noteMods.at(0);
-    }
+	if (interval == 3 || interval == 4) { // third is found
+		rootClass = noteMods.at(0);
+		thirdClass = noteMods.at(1);
+	}
+	else if (interval == 8 || interval == 9) { // third is found (inversion)
+		rootClass = noteMods.at(1);
+		thirdClass = noteMods.at(0);
+	}
 
-    if (rootClass == -1) { // third was not found
-        return output;
-    }
+	if (rootClass == -1) { // third was not found
+		return output;
+	}
 
-    // populate output
-    for (int i = 0; i < (int)midiNotes.size(); i++) {
-        if (midiNotes.at(i) % 12 == rootClass) {
-            output.at(i) = 1;
-        }
-        else if (midiNotes.at(i) % 12 == thirdClass) {
-            output.at(i) = 3;
-        }
-    }
+	// populate output
+	for (int i = 0; i < (int)midiNotes.size(); i++) {
+		if (midiNotes.at(i) % 12 == rootClass) {
+		output.at(i) = 1;
+		} else if (midiNotes.at(i) % 12 == thirdClass) {
+			output.at(i) = 3;
+		}
+	}
 
-    return output;
+	return output;
 }
 
 // Tool_colorthirds::getFifths -- Identify if the sonority is a fifth interval, and if so,
@@ -62101,46 +62168,46 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 //       5: fifth (top of the interval)
 
 vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
-    vector<int> output(midiNotes.size(), 0);
+	vector<int> output(midiNotes.size(), 0);
 
-    if (midiNotes.empty()) {
-        return output;
-    }
+	if (midiNotes.empty()) {
+		return output;
+	}
 
-    vector<int> noteMods = getNoteMods(midiNotes);
-    if (noteMods.size() != 2) {
-        return output;
-    }
+	vector<int> noteMods = getNoteMods(midiNotes);
+	if (noteMods.size() != 2) {
+		return output;
+	}
 
-    int interval = noteMods.at(1) - noteMods.at(0);
-    int rootClass = -1; // currently uninitialized
-    int fifthClass = -1;
+	int interval = noteMods.at(1) - noteMods.at(0);
+	int rootClass = -1; // currently uninitialized
+	int fifthClass = -1;
 
-    if ((interval == 7) || (interval == 6)) { // fifth found
-        rootClass = noteMods.at(0);
-        fifthClass = noteMods.at(1);
-    }
+	if ((interval == 7) || (interval == 6)) { // fifth found
+		rootClass = noteMods.at(0);
+		fifthClass = noteMods.at(1);
+	}
 
-    if (interval == 5) { // inverted fifth found
-        rootClass = noteMods.at(1);
-        fifthClass = noteMods.at(0);
-    }
+	if (interval == 5) { // inverted fifth found
+		rootClass = noteMods.at(1);
+		fifthClass = noteMods.at(0);
+	}
 
-    if (rootClass == -1) { // fifth not found
-        return output;
-    }
+	if (rootClass == -1) { // fifth not found
+		return output;
+	}
 
-    // populate output
-    for (int i = 0; i < (int)midiNotes.size(); i++) {
-        if (midiNotes.at(i) % 12 == rootClass) {
-            output.at(i) = 1;
-        }
-        else if (midiNotes.at(i) % 12 == fifthClass) {
-            output.at(i) = 5;
-        }
-    }
+	// populate output
+	for (int i = 0; i < (int)midiNotes.size(); i++) {
+		if (midiNotes.at(i) % 12 == rootClass) {
+			output.at(i) = 1;
+		}
+		else if (midiNotes.at(i) % 12 == fifthClass) {
+			output.at(i) = 5;
+		}
+	}
 
-    return output;
+	return output;
 }
 
 vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
@@ -62192,35 +62259,35 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 		}
 	}
 
-    if (m_doubleQ) {
-        keepOnlyDoubles(output); // call some function that marks only doubles
-    }
+	if (m_doubleQ) {
+		keepOnlyDoubles(output); // call some function that marks only doubles
+	}
 
 	return output;
 }
 
 void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
-    map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
+	map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
 
-    for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
-        if (output[i] == 1) {
-            positionCounts[1]++;
-        }
-        else if (output[i] == 3) {
-            positionCounts[3]++;
-        }
-        else if (output[i] == 5) {
-            positionCounts[5]++;
-        }
-    }
+	for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
+		if (output[i] == 1) {
+			positionCounts[1]++;
+		}
+		else if (output[i] == 3) {
+			positionCounts[3]++;
+		}
+		else if (output[i] == 5) {
+			positionCounts[5]++;
+		}
+	}
 
-    for (auto positionCount : positionCounts) {
-        if (positionCount.second == 1) { // if only appears once
-            replace(output.begin(), output.end(), positionCount.first, 0); // replace with 0
-        }
-    }
+	for (auto positionCount : positionCounts) {
+		if (positionCount.second == 1) { // if only appears once
+		replace(output.begin(), output.end(), positionCount.first, 0); // replace with 0
+		}
+	}
 
-    return;
+	return;
 }
 
 //////////////////////////////
