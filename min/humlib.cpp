@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May  5 16:50:44 PDT 2023
+// Last Modified: Sat May 13 20:49:58 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -116599,6 +116599,7 @@ void Tool_transpose::printHumdrumMxhmToken(HumdrumLine& record, int index,
 	} else if (hre.search(record.token(index), "([A-Ga-g]+[n#-]{0,2})")) {
 		string pitch = hre.getMatch(1);
 		int b40 = Convert::kernToBase40(pitch) + transval;
+cerr << "B40 = " << b40 << "\t" << pitch << endl;
 		b40 = b40 % 40 + 120;
 		pitch = Convert::base40ToKern(b40);
 		string newtext = *record.token(index);
@@ -116636,7 +116637,9 @@ void Tool_transpose::printNewKernString(const string& input, int transval) {
 			// Transpose pitch portion of rest (indicating vertical position).
 			string pitch = hre.getMatch(1);
 			int base40 = Convert::kernToBase40(pitch);
+cerr << "XPITCH " << pitch << "\tbase40 = " << base40 << endl;
 			string newpitch = Convert::base40ToKern(base40 + transval);
+cerr << "\tNEWPITCH " << pitch << endl;
 			hre.replaceDestructive(newpitch, "", "[-#n]+");
 			hre.replaceDestructive(output, newpitch, "([A-Ga-g]+[#n-]*)");
 		}
