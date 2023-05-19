@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 18 19:27:12 PDT 2023
+// Last Modified: Fri May 19 12:32:26 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6250,11 +6250,17 @@ class Tool_colorthirds : public HumTool {
 		std::vector<int> getThirds(std::vector<int>& midiNotes);
 		std::vector<int> getFifths(std::vector<int>& midiNotes);
 		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
+<<<<<<< HEAD
 		void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
 		void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
 		void             keepOnlyDoubles(std::vector<int>& output);
 		void             checkForTriadicSonority(std::vector<int>& positions, int line);
 		std::string      generateStatistics(HumdrumFile& infile);
+=======
+        void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
+        void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
+        void             keepOnlyDoubles(std::vector<int>& output);
+>>>>>>> b29d250 (counted chord positions per part)
 
 	private:
 		std::string m_root_marker = "@";
@@ -6276,10 +6282,16 @@ class Tool_colorthirds : public HumTool {
 		bool m_colorThirds = true;
 		bool m_colorFifths = true;
 		bool m_colorTriads = true;
+<<<<<<< HEAD
 		bool m_doubleQ = false;
 
 		// Statistical data variables:
 		vector<bool> m_triadState;
+=======
+        bool m_doubleQ = false;
+
+        std::vector<vector<int>> m_partTriadPositions;
+>>>>>>> b29d250 (counted chord positions per part)
 
 };
 

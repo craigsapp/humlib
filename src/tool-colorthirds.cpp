@@ -111,6 +111,12 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 	// Algorithm go line by line in the infile, extracting the notes that are active
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
+    
+    m_partTriadPositions.resize(infile.getMaxTrack() + 1);
+    for (int i = 0; i < (int)infile.getMaxTrack() + 1; i++) {
+        m_partTriadPositions.at(i).resize(3);
+        fill(m_partTriadPositions.at(i).begin(), m_partTriadPositions.at(i).end(), 0);
+    }
 
 	m_triadState.clear();
 	m_triadState.resize(infile.getLineCount());
@@ -300,11 +306,22 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 		if (position == 0) {
 			continue;
 		}
+
+        int track = kernNotes[i]->getTrack(); // get part
 		string label;
 		switch (position) {
-			case 1: label = m_root_marker; break;
-			case 3: label = m_third_marker; break;
-			case 5: label = m_fifth_marker; break;
+			case 1: 
+                label = m_root_marker; 
+                m_partTriadPositions.at(track).at(0)++; 
+                break;
+			case 3: 
+                label = m_third_marker; 
+                m_partTriadPositions.at(track).at(1)++;
+                break;
+			case 5: 
+                label = m_fifth_marker; 
+                m_partTriadPositions.at(track).at(2)++;    
+                break;
 		}
 		if (label.empty()) {
 			continue;
@@ -323,17 +340,24 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 //       3 == N: third (top of the interval)
 
 void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
-	for (int i = 0; i < (int)kernNotes.size(); i++) {
-		int position = thirdPositions.at(i);
-		if (position == 0) {
-			continue;
-		}
-
-		string label;
-		switch (position) {
-			case 1: label = m_3rd_root_marker; break;
-			case 3: label = m_3rd_third_marker; break;
-		}
+    for (int i = 0; i < (int)kernNotes.size(); i++) {
+        int position = thirdPositions.at(i);
+        if (position == 0) {
+            continue;
+        }
+        
+        int track = kernNotes.at(i)->getTrack(); // get part
+        string label;
+        switch (position) {
+            case 1: 
+                label = m_3rd_root_marker; 
+                m_partTriadPositions.at(track).at(3)++; 
+                break;
+            case 3: 
+                label = m_3rd_third_marker; 
+                m_partTriadPositions.at(track).at(4)++; 
+                break;
+        }
 
 		if (label.empty()) {
 			continue;
@@ -354,17 +378,24 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
 //       5 == Z: fifth (top of the interval)
 
 void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
-	for (int i = 0; i < (int)kernNotes.size(); i++) {
-		int position = fifthPositions.at(i);
-		if (position == 0) {
-			continue;
-		}
-
-		string label;
-		switch (position) {
-			case 1: label = m_5th_root_marker; break;
-			case 5: label = m_5th_fifth_marker; break;
-		}
+    for (int i = 0; i < (int)kernNotes.size(); i++) {
+        int position = fifthPositions.at(i);
+        if (position == 0) {
+            continue;
+        }
+        
+        int track = kernNotes.at(i)->getTrack(); // get part
+        string label;
+        switch (position) {
+            case 1: 
+                label = m_5th_root_marker; 
+                m_partTriadPositions.at(track).at(5)++; 
+                break;
+            case 5: 
+                label = m_5th_fifth_marker; 
+                m_partTriadPositions.at(track).at(6)++; 
+                break;
+        }
 
 		if (label.empty()) {
 			continue;

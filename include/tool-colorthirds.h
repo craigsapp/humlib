@@ -73,6 +73,8 @@ class Tool_colorthirds : public HumTool {
 		// Statistical data variables:
 		vector<bool> m_triadState;
 
+        std::vector<vector<int>> m_partTriadPositions;
+
 };
 
 // END_MERGE
