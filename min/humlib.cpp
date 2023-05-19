@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat May 13 20:49:58 PDT 2023
+// Last Modified: Thu May 18 19:27:12 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -75034,36 +75034,7 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 			cerr << "Got a song ..." << endl;
 		}
 		init = 1;
-/*
-		if (splitQ) {
-			outfilename = namebase);
-			outfilename += to_string(filecounter);
-			if (filecounter < 1000) {
-				outfilename += "0";
-			}
-			if (filecounter < 100) {
-				outfilename += "0";
-			}
-			if (filecounter < 10) {
-				outfilename += "0";
-			}
-			outfilename += numberstring;
-			outfilename += fileextension;
-			filecounter++;
-
-			outfile.open(outfilename);
-
-			if (!outfile.is_open()) {
-				cerr << "Error: cannot write to file: " << outfilename << endl;
-			}
-			convertSong(song, outfile);
-			outfile.close();
-		} else {
-*/
-			convertSong(song, output);
-/*
-		}
-*/
+		convertSong(song, output);
 	}
 }
 
@@ -75071,23 +75042,21 @@ void Tool_esac2hum::convertEsacToHumdrum(ostream& output, istream& infile) {
 
 //////////////////////////////
 //
-// Tool_esac2hum::getSong -- get a song from the ESac file
+// Tool_esac2hum::getSong -- get a song from the EsAC file
 //
 
 bool Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
-	static char holdbuffer[10000] = {0};
-
+	string holdbuffer;
 	song.resize(0);
 	if (init) {
 		// do nothing holdbuffer has the CUT[] information
 	} else {
-		strcpy(holdbuffer, "");
-		while (!infile.eof() && strncmp(holdbuffer, "CUT[", 4) != 0) {
-			infile.getline(holdbuffer, 256, '\n');
+		while (!infile.eof() && holdbuffer.compare(0, 4, "CUT[") != 0) {
+			getline(infile, holdbuffer);
 			if (verboseQ) {
 				cerr << "Contents: " << holdbuffer << endl;
 			}
-			if (strncmp(holdbuffer, "!!", 2) == 0) {
+			if (holdbuffer.compare(0, 2, "!!") == 0) {
 				song.push_back(holdbuffer);
 			}
 		}
@@ -75102,15 +75071,15 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 		return false;
 	}
 
-	infile.getline(holdbuffer, 256, '\n');
+	getline(infile, holdbuffer);
 	chopExtraInfo(holdbuffer);
 	inputline++;
 	if (verboseQ) {
 		cerr << "READ LINE: " << holdbuffer << endl;
 	}
-	while (!infile.eof() && strncmp(holdbuffer, "CUT[", 4) != 0) {
+	while (!infile.eof() && (holdbuffer.compare(0, 4, "CUT[", 4) != 0)) {
 		song.push_back(holdbuffer);
-		infile.getline(holdbuffer, 256, '\n');
+		getline(infile, holdbuffer);
 		chopExtraInfo(holdbuffer);
 		inputline++;
 		if (verboseQ) {
@@ -75128,21 +75097,10 @@ bool Tool_esac2hum::getSong(vector<string>& song, istream& infile, int init) {
 // Tool_esac2hum::chopExtraInfo -- remove phrase number information from Luxembourg data.
 //
 
-void Tool_esac2hum::chopExtraInfo(char* holdbuffer) {
-	int length = (int)strlen(holdbuffer);
-	int i;
-	int spacecount = 0;
-	for (i=length-2; i>=0; i--) {
-		if (holdbuffer[i] == ' ') {
-			spacecount++;
-			if (spacecount > 10) {
-				holdbuffer[i] = '\0';
-				break;
-			}
-		} else {
-			spacecount = 0;
-		}
-	}
+void Tool_esac2hum::chopExtraInfo(string& buffer) {
+	HumRegex hre;
+	hre.replaceDestructive(buffer, "", "^\\s+");
+	hre.replaceDestructive(buffer, "", "\\s+$");
 }
 
 
@@ -75649,6 +75607,8 @@ bool Tool_esac2hum::printTitleInfo(vector<string>& song, ostream& out) {
 //
 
 void Tool_esac2hum::printChar(unsigned char c, ostream& out) {
+	out << c;
+/*
 	if (c < 128) {
 		out << c;
 	} else {
@@ -75696,6 +75656,7 @@ void Tool_esac2hum::printChar(unsigned char c, ostream& out) {
 			default:    out << c;
 		}
 	}
+*/
 }
 
 
@@ -76030,37 +75991,22 @@ void Tool_esac2hum::postProcessSongData(vector<NoteData>& songdata, vector<int>&
 
 void Tool_esac2hum::getMeterInfo(string& meter, vector<int>& numerator,
 		vector<int>& denominator) {
-	char buffer[256] = {0};
-	strcpy(buffer, meter.c_str());
-	numerator.resize(0);
-	denominator.resize(0);
-	int num = -1;
-	int denom = -1;
-	char* ptr;
-	ptr = strtok(buffer, " \t\n");
-	while (ptr != NULL) {
-		if (strcmp(ptr, "frei") == 0 || strcmp(ptr, "Frei") == 0) {
-			num = -1;
-			denom = -1;
-			numerator.push_back(num);
-			denominator.push_back(denom);
-		} else {
-			if (strchr(ptr, '/') != NULL) {
-				num = -1;
-				denom = 4;
-				sscanf(ptr, "%d/%d", &num, &denom);
-				numerator.push_back(num);
-				denominator.push_back(denom);
-			} else {
-				num = atoi(ptr);
-				denom = 4;
-				numerator.push_back(num);
-				denominator.push_back(denom);
-			}
-		}
-		ptr = strtok(NULL, " \t\n");
+	numerator.clear();
+	denominator.clear();
+	HumRegex hre;
+	hre.replaceDestructive(meter, "", "^\\s+");
+	hre.replaceDestructive(meter, "", "\\s+$");
+	if (hre.search(meter, "^(\\d+)/(\\d+)$")) {
+		numerator.push_back(hre.getMatchInt(1));
+		denominator.push_back(hre.getMatchInt(2));
+		return;
 	}
-
+	if (hre.search(meter, "^frei$", "i")) {
+		numerator.push_back(-1);
+		denominator.push_back(-1);
+		return;
+	}
+	cerr << "NEED TO DEAL WITH METER: " << meter << endl;
 }
 
 

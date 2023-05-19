@@ -95,7 +95,7 @@ class Tool_esac2hum : public HumTool {
 		void      getLyrics             (vector<string>& lyrics, const string& buffer);
 		void      cleanupLyrics         (vector<string>& lyrics);
 		bool      getFileContents       (vector<string>& array, const string& filename);
-		void      chopExtraInfo         (char* holdbuffer);
+		void      chopExtraInfo         (string& buffer);
 		void      printHumdrumHeaderInfo(ostream& out, vector<string>& song);
 		void      printHumdrumFooterInfo(ostream& out, vector<string>& song);
 
