@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri May 19 12:32:26 PDT 2023
+// Last Modified: Thu May 25 03:36:12 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61805,11 +61805,7 @@ void Tool_colorthirds::initialize(void) {
 	m_colorThirds = !getBoolean("no-thirds");
 	m_colorFifths = !getBoolean("no-thirds");
 	m_colorTriads = !getBoolean("no-triads");
-<<<<<<< HEAD
 	m_doubleQ = getBoolean("double");
-=======
-    m_doubleQ = getBoolean("double");
->>>>>>> b29d250 (counted chord positions per part)
 }
 
 
@@ -61876,7 +61872,6 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 		}
 		midiNotes = getMidiNotes(kernNotes);
 
-<<<<<<< HEAD
 		if (m_colorThirds) { // thirds
 			thirdPositions = getThirds(midiNotes);
 			checkForTriadicSonority(thirdPositions, i);
@@ -61907,37 +61902,6 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 			}
     		labelChordPositions(kernNotes, chordPositions);
 		}
-=======
-        if (m_colorThirds) { // thirds
-            thirdPositions = getThirds(midiNotes);
-
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(thirdPositions);
-            }
-
-            labelThirds(kernNotes, thirdPositions);
-        }
-
-        if (m_colorFifths) { // fifths
-            fifthPositions = getFifths(midiNotes);
-
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(fifthPositions);
-            }
-
-            labelFifths(kernNotes, fifthPositions);
-        }
-
-        if (m_colorTriads) { // triads
-		    chordPositions = getChordPositions(midiNotes);
-
-            if (m_doubleQ) { // label only doubles if prompted
-                keepOnlyDoubles(chordPositions);
-            }
-
-		    labelChordPositions(kernNotes, chordPositions);
-        }
->>>>>>> b29d250 (counted chord positions per part)
 	}
 
 	infile.createLinesFromTokens();
@@ -62084,19 +62048,6 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 //       3 == N: third (top of the interval)
 
 void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
-<<<<<<< HEAD
-	for (int i = 0; i < (int)kernNotes.size(); i++) {
-		int position = thirdPositions.at(i);
-		if (position == 0) {
-			continue;
-		}
-
-		string label;
-		switch (position) {
-			case 1: label = m_3rd_root_marker; break;
-			case 3: label = m_3rd_third_marker; break;
-		}
-=======
     for (int i = 0; i < (int)kernNotes.size(); i++) {
         int position = thirdPositions.at(i);
         if (position == 0) {
@@ -62115,7 +62066,6 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
                 m_partTriadPositions.at(track).at(4)++; 
                 break;
         }
->>>>>>> b29d250 (counted chord positions per part)
 
 		if (label.empty()) {
 			continue;
@@ -62136,19 +62086,6 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
 //       5 == Z: fifth (top of the interval)
 
 void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
-<<<<<<< HEAD
-	for (int i = 0; i < (int)kernNotes.size(); i++) {
-		int position = fifthPositions.at(i);
-		if (position == 0) {
-			continue;
-		}
-
-		string label;
-		switch (position) {
-			case 1: label = m_5th_root_marker; break;
-			case 5: label = m_5th_fifth_marker; break;
-		}
-=======
     for (int i = 0; i < (int)kernNotes.size(); i++) {
         int position = fifthPositions.at(i);
         if (position == 0) {
@@ -62167,7 +62104,6 @@ void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPos
                 m_partTriadPositions.at(track).at(6)++; 
                 break;
         }
->>>>>>> b29d250 (counted chord positions per part)
 
 		if (label.empty()) {
 			continue;
@@ -62222,21 +62158,10 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 		return output;
 	}
 
-<<<<<<< HEAD
 	vector<int> noteMods = getNoteMods(midiNotes); // we know noteMods is sorted
 	if (noteMods.size() != 2) {
 		return output;
 	}
-=======
-    vector<int> noteMods = getNoteMods(midiNotes); // we know noteMods is sorted
-    if (noteMods.size() != 2) {
-        return output;
-    }
-
-    int interval = noteMods[1] - noteMods[0];
-    int rootClass = -1; // currently uninitialized
-    int thirdClass = -1;
->>>>>>> b29d250 (counted chord positions per part)
 
 	int interval = noteMods[1] - noteMods[0];
 	int rootClass = -1; // currently uninitialized
@@ -62251,7 +62176,6 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 		thirdClass = noteMods.at(0);
 	}
 
-<<<<<<< HEAD
 	if (rootClass == -1) { // third was not found
 		return output;
 	}
@@ -62266,19 +62190,6 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 	}
 
 	return output;
-=======
-    // populate output
-    for (int i = 0; i < (int)midiNotes.size(); i++) {
-        if (midiNotes.at(i) % 12 == rootClass) {
-            output.at(i) = 1;
-        }
-        else if (midiNotes.at(i) % 12 == thirdClass) {
-            output.at(i) = 3;
-        }
-    }
-
-    return output;
->>>>>>> b29d250 (counted chord positions per part)
 }
 
 // Tool_colorthirds::getFifths -- Identify if the sonority is a fifth interval, and if so,
@@ -62288,15 +62199,7 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 //       5: fifth (top of the interval)
 
 vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
-<<<<<<< HEAD
 	vector<int> output(midiNotes.size(), 0);
-=======
-    vector<int> output(midiNotes.size(), 0);
-
-    if (midiNotes.empty()) {
-        return output;
-    }
->>>>>>> b29d250 (counted chord positions per part)
 
 	if (midiNotes.empty()) {
 		return output;
@@ -62321,7 +62224,6 @@ vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
 		fifthClass = noteMods.at(0);
 	}
 
-<<<<<<< HEAD
 	if (rootClass == -1) { // fifth not found
 		return output;
 	}
@@ -62337,19 +62239,6 @@ vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
 	}
 
 	return output;
-=======
-    // populate output
-    for (int i = 0; i < (int)midiNotes.size(); i++) {
-        if (midiNotes.at(i) % 12 == rootClass) {
-            output.at(i) = 1;
-        }
-        else if (midiNotes.at(i) % 12 == fifthClass) {
-            output.at(i) = 5;
-        }
-    }
-
-    return output;
->>>>>>> b29d250 (counted chord positions per part)
 }
 
 vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
@@ -62401,21 +62290,14 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 		}
 	}
 
-<<<<<<< HEAD
 	if (m_doubleQ) {
 		keepOnlyDoubles(output); // call some function that marks only doubles
 	}
-=======
-    if (m_doubleQ) {
-        keepOnlyDoubles(output); // call some function that marks only doubles
-    }
->>>>>>> b29d250 (counted chord positions per part)
 
 	return output;
 }
 
 void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
-<<<<<<< HEAD
 	map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
 
 	for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
@@ -62437,29 +62319,6 @@ void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
 	}
 
 	return;
-=======
-    map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
-
-    for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
-        if (output[i] == 1) {
-            positionCounts[1]++;
-        }
-        else if (output[i] == 3) {
-            positionCounts[3]++;
-        }
-        else if (output[i] == 5) {
-            positionCounts[5]++;
-        }
-    }
-
-    for (auto positionCount : positionCounts) {
-        if (positionCount.second == 1) { // if only appears once
-            replace(output.begin(), output.end(), positionCount.first, 0); // replace with 0
-        }
-    }
-
-    return;
->>>>>>> b29d250 (counted chord positions per part)
 }
 
 //////////////////////////////

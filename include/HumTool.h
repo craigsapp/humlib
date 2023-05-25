@@ -87,27 +87,25 @@ class HumTool : public Options {
 //
 
 #define BASIC_INTERFACE(CLASS)                         \
-using namespace std;                                   \
-using namespace hum;                                   \
 int main(int argc, char** argv) {                      \
-	CLASS interface;                                    \
+	hum::CLASS interface;                               \
 	if (!interface.process(argc, argv)) {               \
-		interface.getError(cerr);                        \
+		interface.getError(std::cerr);                   \
 		return -1;                                       \
 	}                                                   \
-	HumdrumFile infile;                                 \
+	hum::HumdrumFile infile;                            \
 	if (interface.getArgCount() > 0) {                  \
 		infile.readNoRhythm(interface.getArgument(1));   \
 	} else {                                            \
-		infile.readNoRhythm(cin);                        \
+		infile.readNoRhythm(std::cin);                   \
 	}                                                   \
-	int status = interface.run(infile, cout);           \
+	int status = interface.run(infile, std::cout);      \
 	if (interface.hasWarning()) {                       \
-		interface.getWarning(cerr);                      \
+		interface.getWarning(std::cerr);                 \
 		return 0;                                        \
 	}                                                   \
 	if (interface.hasError()) {                         \
-		interface.getError(cerr);                        \
+		interface.getError(std::cerr);                   \
 		return -1;                                       \
 	}                                                   \
 	interface.finally();                                \
@@ -122,39 +120,37 @@ int main(int argc, char** argv) {                      \
 //    usage implementation).
 //
 
-#define STREAM_INTERFACE(CLASS)                                  \
-using namespace std;                                             \
-using namespace hum;                                             \
-int main(int argc, char** argv) {                                \
-	CLASS interface;                                              \
-	if (!interface.process(argc, argv)) {                         \
-		interface.getError(cerr);                                  \
-		return -1;                                                 \
-	}                                                             \
-	HumdrumFileStream instream(static_cast<Options&>(interface)); \
-	HumdrumFileSet infiles;                                       \
-	bool status = true;                                           \
-	while (instream.readSingleSegment(infiles)) {                 \
-		status &= interface.run(infiles);                          \
-		if (interface.hasWarning()) {                              \
-			interface.getWarning(cerr);                             \
-		}                                                          \
-		if (interface.hasAnyText()) {                              \
-		   interface.getAllText(cout);                             \
-		}                                                          \
-		if (interface.hasError()) {                                \
-			interface.getError(cerr);                               \
-         return -1;                                              \
-		}                                                          \
-		if (!interface.hasAnyText()) {                             \
-			for (int i=0; i<infiles.getCount(); i++) {              \
-				cout << infiles[i];                                  \
-			}                                                       \
-		}                                                          \
-		interface.clearOutput();                                   \
-	}                                                             \
-	interface.finally();                                          \
-	return !status;                                               \
+#define STREAM_INTERFACE(CLASS)                                            \
+int main(int argc, char** argv) {                                          \
+	hum::CLASS interface;                                                   \
+	if (!interface.process(argc, argv)) {                                   \
+		interface.getError(std::cerr);                                       \
+		return -1;                                                           \
+	}                                                                       \
+	hum::HumdrumFileStream instream(static_cast<hum::Options&>(interface)); \
+	hum::HumdrumFileSet infiles;                                            \
+	bool status = true;                                                     \
+	while (instream.readSingleSegment(infiles)) {                           \
+		status &= interface.run(infiles);                                    \
+		if (interface.hasWarning()) {                                        \
+			interface.getWarning(std::cerr);                                  \
+		}                                                                    \
+		if (interface.hasAnyText()) {                                        \
+		   interface.getAllText(std::cout);                                  \
+		}                                                                    \
+		if (interface.hasError()) {                                          \
+			interface.getError(std::cerr);                                    \
+         return -1;                                                        \
+		}                                                                    \
+		if (!interface.hasAnyText()) {                                       \
+			for (int i=0; i<infiles.getCount(); i++) {                        \
+				cout << infiles[i];                                            \
+			}                                                                 \
+		}                                                                    \
+		interface.clearOutput();                                             \
+	}                                                                       \
+	interface.finally();                                                    \
+	return !status;                                                         \
 }
 
 
@@ -166,30 +162,28 @@ int main(int argc, char** argv) {                                \
 //    Humdrum files.
 //
 
-#define RAW_STREAM_INTERFACE(CLASS)                              \
-using namespace std;                                             \
-using namespace hum;                                             \
-int main(int argc, char** argv) {                                \
-	CLASS interface;                                              \
-	if (!interface.process(argc, argv)) {                         \
-		interface.getError(cerr);                                  \
-		return -1;                                                 \
-	}                                                             \
-	HumdrumFileStream instream(static_cast<Options&>(interface)); \
-	bool status = interface.run(instream);                        \
-	if (interface.hasWarning()) {                                 \
-		interface.getWarning(cerr);                                \
-	}                                                             \
-	if (interface.hasAnyText()) {                                 \
-	   interface.getAllText(cout);                                \
-	}                                                             \
-	if (interface.hasError()) {                                   \
-		interface.getError(cerr);                                  \
-        return -1;                                               \
-	}                                                             \
-	interface.finally();                                          \
-	interface.clearOutput();                                      \
-	return !status;                                               \
+#define RAW_STREAM_INTERFACE(CLASS)                                        \
+int main(int argc, char** argv) {                                          \
+	hum::CLASS interface;                                                   \
+	if (!interface.process(argc, argv)) {                                   \
+		interface.getError(std::cerr);                                       \
+		return -1;                                                           \
+	}                                                                       \
+	hum::HumdrumFileStream instream(static_cast<hum::Options&>(interface)); \
+	bool status = interface.run(instream);                                  \
+	if (interface.hasWarning()) {                                           \
+		interface.getWarning(std::cerr);                                     \
+	}                                                                       \
+	if (interface.hasAnyText()) {                                           \
+	   interface.getAllText(std::cout);                                     \
+	}                                                                       \
+	if (interface.hasError()) {                                             \
+		interface.getError(std::cerr);                                       \
+        return -1;                                                         \
+	}                                                                       \
+	interface.finally();                                                    \
+	interface.clearOutput();                                                \
+	return !status;                                                         \
 }
 
 
@@ -200,37 +194,35 @@ int main(int argc, char** argv) {                                \
 //    usage implementation).
 //
 
-#define SET_INTERFACE(CLASS)                                     \
-using namespace std;                                             \
-using namespace hum;                                             \
-int main(int argc, char** argv) {                                \
-	CLASS interface;                                              \
-	if (!interface.process(argc, argv)) {                         \
-		interface.getError(cerr);                                  \
-		return -1;                                                 \
-	}                                                             \
-	HumdrumFileStream instream(static_cast<Options&>(interface)); \
-	HumdrumFileSet infiles;                                       \
-	instream.read(infiles);                                       \
-	bool status = interface.run(infiles);                         \
-	if (interface.hasWarning()) {                                 \
-		interface.getWarning(cerr);                                \
-	}                                                             \
-	if (interface.hasAnyText()) {                                 \
-	   interface.getAllText(cout);                                \
-	}                                                             \
-	if (interface.hasError()) {                                   \
-		interface.getError(cerr);                                  \
-        return -1;                                               \
-	}                                                             \
-	if (!interface.hasAnyText()) {                                \
-		for (int i=0; i<infiles.getCount(); i++) {                 \
-			cout << infiles[i];                                     \
-		}                                                          \
-	}                                                             \
-	interface.finally();                                          \
-	interface.clearOutput();                                      \
-	return !status;                                               \
+#define SET_INTERFACE(CLASS)                                               \
+int main(int argc, char** argv) {                                          \
+	hum::CLASS interface;                                                   \
+	if (!interface.process(argc, argv)) {                                   \
+		interface.getError(std::cerr);                                       \
+		return -1;                                                           \
+	}                                                                       \
+	hum::HumdrumFileStream instream(static_cast<hum::Options&>(interface)); \
+	hum::HumdrumFileSet infiles;                                            \
+	instream.read(infiles);                                                 \
+	bool status = interface.run(infiles);                                   \
+	if (interface.hasWarning()) {                                           \
+		interface.getWarning(std::cerr);                                     \
+	}                                                                       \
+	if (interface.hasAnyText()) {                                           \
+	   interface.getAllText(std::cout);                                     \
+	}                                                                       \
+	if (interface.hasError()) {                                             \
+		interface.getError(std::cerr);                                       \
+        return -1;                                                         \
+	}                                                                       \
+	if (!interface.hasAnyText()) {                                          \
+		for (int i=0; i<infiles.getCount(); i++) {                           \
+			std::cout << infiles[i];                                          \
+		}                                                                    \
+	}                                                                       \
+	interface.finally();                                                    \
+	interface.clearOutput();                                                \
+	return !status;                                                         \
 }
 
 
