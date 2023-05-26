@@ -46,7 +46,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("debug=b",                 "print grid cell information");
 	define("u|undirected=b",          "use undirected dissonance labels");
 	define("c|count=b",               "count dissonances by category");
-	define("i|x|e|exinterp=s:**cdata","specify exinterp for **cdata spine");
+	define("i|x|e|exinterp=s:**cdata-rdiss","specify exinterp for **diss spines");
 	define("color|colorize|color-by-rhythm=b", "color dissonant notes by beat level");
 	define("color2|colorize2|color-by-interval=b", "color dissonant notes by dissonant interval");
 }

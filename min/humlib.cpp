@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu May 25 03:36:12 PDT 2023
+// Last Modified: Thu May 25 19:10:00 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -72117,7 +72117,7 @@ Tool_dissonant::Tool_dissonant(void) {
 	define("debug=b",                 "print grid cell information");
 	define("u|undirected=b",          "use undirected dissonance labels");
 	define("c|count=b",               "count dissonances by category");
-	define("i|x|e|exinterp=s:**cdata","specify exinterp for **cdata spine");
+	define("i|x|e|exinterp=s:**cdata-rdiss","specify exinterp for **diss spines");
 	define("color|colorize|color-by-rhythm=b", "color dissonant notes by beat level");
 	define("color2|colorize2|color-by-interval=b", "color dissonant notes by dissonant interval");
 }
