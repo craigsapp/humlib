@@ -111,10 +111,10 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 	// Algorithm go line by line in the infile, extracting the notes that are active
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
-    
+
     m_partTriadPositions.resize(infile.getMaxTrack() + 1);
     for (int i = 0; i < (int)infile.getMaxTrack() + 1; i++) {
-        m_partTriadPositions.at(i).resize(3);
+        m_partTriadPositions.at(i).resize(m_positionCount);
         fill(m_partTriadPositions.at(i).begin(), m_partTriadPositions.at(i).end(), 0);
     }
 
@@ -241,7 +241,7 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 void Tool_colorthirds::checkForTriadicSonority(vector<int>& positions, int line) {
 	for (int i=0; i<(int)positions.size(); i++) {
 		if (positions[i] > 0) {
-			m_triadState.at(line) = true;	
+			m_triadState.at(line) = true;
 			break;
 		}
 	}
@@ -285,10 +285,87 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 	percentage = 100.0 * triadDuration.getFloat() / infile.getScoreDuration().getFloat();
 	percentage = int(percentage * 100.0 + 0.5) / 100.0;
 	out << "!!!colorthirds-duration-ratio: " << percentage << "%" << endl;
-	
+
+	// Report triads positions by voice:
+	vector<string> names = getTrackNames(infile);
+	for (int i=1; i<(int)names.size(); i++) {
+		out << "!!!colorthirds-track-name-" << to_string(i) << ": " << names[i] << endl;
+	}
+	for (int i=0; i<(int)m_partTriadPositions.size(); i++) {
+		vector<int>& entry = m_partTriadPositions[i];
+		int sum = getVectorSum(entry);
+		if (sum == 0) {
+			continue;
+		}
+		int rootCount = 0;
+		int thirdCount = 0;
+		int fifthCount = 0;
+		rootCount += entry[0] + entry[3] + entry[5];
+		thirdCount += entry[1] + entry[4];
+		fifthCount += entry[2] + entry[6];
+		double rootPercent = int(rootCount * 1000.0 / sum + 0.5) / 10.0;
+		double thirdPercent = int(thirdCount * 1000.0 / sum + 0.5) / 10.0;
+		double fifthPercent = int(fifthCount * 1000.0 / sum + 0.5) / 10.0;
+		out << "!!!" << m_toolName << "-count-sum-" << (i+1) << ": " << rootCount << endl;
+		out << "!!!" << m_toolName << "-root-count-" << (i+1) << ": " << rootCount << " (" << rootPercent << "%)" << endl;
+		out << "!!!" << m_toolName << "-third-count-" << (i+1) << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
+		out << "!!!" << m_toolName << "-fifth-count-" << (i+1) << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
+	}
+
 	return out.str();
 }
 
+
+
+//////////////////////////////
+//
+// Tool_colorthirds::getVectorSum --
+//
+
+int Tool_colorthirds::getVectorSum(vector<int>& input) {
+	int sum = 0;
+	for (int i=0; i<(int)input.size(); i++) {
+		sum += input[i];
+	}
+	return sum;
+}
+
+
+//////////////////////////////
+//
+// Tool_colorthirds::getTrackNames --
+//
+
+vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
+	int tracks = infile.getTrackCount();
+	vector<string> output(tracks+1);
+	for (int i=0; i<(int)output.size(); i++) {
+		output[i] = "Track " + to_string(i+1);
+	}
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->compare(0, 3, "*I\"") == 0) {
+				string value = token->substr(3);
+				if (!value.empty()) {
+					int track = token->getTrack();
+					output.at(track) = value;
+				}
+			}
+			if (token->compare(0, 3, "*I\'") == 0) {
+				string value = token->substr(3);
+				if (!value.empty()) {
+					int track = token->getTrack();
+					output.at(track) = value;
+				}
+			}
+		}
+	}
+	return output;
+}
 
 
 //////////////////////////////
@@ -310,17 +387,17 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
         int track = kernNotes[i]->getTrack(); // get part
 		string label;
 		switch (position) {
-			case 1: 
-                label = m_root_marker; 
-                m_partTriadPositions.at(track).at(0)++; 
+			case 1:
+                label = m_root_marker;
+                m_partTriadPositions.at(track).at(0)++;
                 break;
-			case 3: 
-                label = m_third_marker; 
+			case 3:
+                label = m_third_marker;
                 m_partTriadPositions.at(track).at(1)++;
                 break;
-			case 5: 
-                label = m_fifth_marker; 
-                m_partTriadPositions.at(track).at(2)++;    
+			case 5:
+                label = m_fifth_marker;
+                m_partTriadPositions.at(track).at(2)++;
                 break;
 		}
 		if (label.empty()) {
@@ -345,17 +422,17 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
         if (position == 0) {
             continue;
         }
-        
+
         int track = kernNotes.at(i)->getTrack(); // get part
         string label;
         switch (position) {
-            case 1: 
-                label = m_3rd_root_marker; 
-                m_partTriadPositions.at(track).at(3)++; 
+            case 1:
+                label = m_3rd_root_marker;
+                m_partTriadPositions.at(track).at(3)++;
                 break;
-            case 3: 
-                label = m_3rd_third_marker; 
-                m_partTriadPositions.at(track).at(4)++; 
+            case 3:
+                label = m_3rd_third_marker;
+                m_partTriadPositions.at(track).at(4)++;
                 break;
         }
 
@@ -383,17 +460,17 @@ void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPos
         if (position == 0) {
             continue;
         }
-        
+
         int track = kernNotes.at(i)->getTrack(); // get part
         string label;
         switch (position) {
-            case 1: 
-                label = m_5th_root_marker; 
-                m_partTriadPositions.at(track).at(5)++; 
+            case 1:
+                label = m_5th_root_marker;
+                m_partTriadPositions.at(track).at(5)++;
                 break;
-            case 5: 
-                label = m_5th_fifth_marker; 
-                m_partTriadPositions.at(track).at(6)++; 
+            case 5:
+                label = m_5th_fifth_marker;
+                m_partTriadPositions.at(track).at(6)++;
                 break;
         }
 
