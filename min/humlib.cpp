@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun  2 11:01:49 PDT 2023
+// Last Modified: Fri Jun  2 11:56:42 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -61996,15 +61996,33 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 
 	// Report triads positions by voice:
 	vector<string> names = getTrackNames(infile);
+
 	for (int i=1; i<(int)names.size(); i++) {
 		out << "!!!colorthirds-track-name-" << to_string(i) << ": " << names[i] << endl;
 	}
-	for (int i=0; i<(int)m_partTriadPositions.size(); i++) {
+	vector<HTp> kernstarts;
+	infile.getKernSpineStartList(kernstarts);
+	if (!kernstarts.empty()) {
+		out << "!!!" << m_toolName << "-first-kern-track: " << kernstarts[0]->getTrack() << endl;
+		out << "!!!" << m_toolName << "-last-kern-track: " << kernstarts.back()->getTrack() << endl;
+	}
+	out << "!!!" << m_toolName << "-kern-count: " << kernstarts.size() << endl;
+	out << "!!!" << m_toolName << "-kern-tracks: ";
+	for (int i=0; i<(int)kernstarts.size(); i++) {
+		out << kernstarts[i]->getTrack();
+		if (i < (int)kernstarts.size() - 1) {
+			out << " ";
+		}
+	}
+	out << endl;
+
+	for (int i=1; i<(int)m_partTriadPositions.size(); i++) {
 		vector<int>& entry = m_partTriadPositions[i];
 		int sum = getVectorSum(entry);
 		if (sum == 0) {
 			continue;
 		}
+		string name = names[i];
 		int rootCount = 0;
 		int thirdCount = 0;
 		int fifthCount = 0;
@@ -62014,10 +62032,10 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 		double rootPercent = int(rootCount * 1000.0 / sum + 0.5) / 10.0;
 		double thirdPercent = int(thirdCount * 1000.0 / sum + 0.5) / 10.0;
 		double fifthPercent = int(fifthCount * 1000.0 / sum + 0.5) / 10.0;
-		out << "!!!" << m_toolName << "-count-sum-" << (i+1) << ": " << rootCount << endl;
-		out << "!!!" << m_toolName << "-root-count-" << (i+1) << ": " << rootCount << " (" << rootPercent << "%)" << endl;
-		out << "!!!" << m_toolName << "-third-count-" << (i+1) << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
-		out << "!!!" << m_toolName << "-fifth-count-" << (i+1) << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
+		out << "!!!" << m_toolName << "-count-sum-" << i << "-" << name << ": " << sum << endl;
+		out << "!!!" << m_toolName << "-root-count-" << i << "-" << name << ": " << rootCount << " (" << rootPercent << "%)" << endl;
+		out << "!!!" << m_toolName << "-third-count-" << i << "-" << name << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
+		out << "!!!" << m_toolName << "-fifth-count-" << i << "-" << name << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
 	}
 
 	return out.str();
@@ -62047,8 +62065,8 @@ int Tool_colorthirds::getVectorSum(vector<int>& input) {
 vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
 	int tracks = infile.getTrackCount();
 	vector<string> output(tracks+1);
-	for (int i=0; i<(int)output.size(); i++) {
-		output[i] = "Track " + to_string(i+1);
+	for (int i=1; i<(int)output.size(); i++) {
+		output[i] = "Track " + to_string(i);
 	}
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isData()) {
@@ -62063,6 +62081,7 @@ vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
 					output.at(track) = value;
 				}
 			}
+/*
 			if (token->compare(0, 3, "*I\'") == 0) {
 				string value = token->substr(3);
 				if (!value.empty()) {
@@ -62070,10 +62089,23 @@ vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
 					output.at(track) = value;
 				}
 			}
+*/
 		}
+	}
+	// Remove colons from names and convert spaces into underscores:
+	HumRegex hre;
+	for (int i=0; i<(int)output.size(); i++) {
+		hre.replaceDestructive(output[i], "", "^\\s+");
+		hre.replaceDestructive(output[i], "", "\\s+$");
+		hre.replaceDestructive(output[i], "_", "\\s+", "g");
+		hre.replaceDestructive(output[i], "", ":", "g");
 	}
 	return output;
 }
+
+
+
+
 
 
 //////////////////////////////
