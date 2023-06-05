@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun  2 11:56:42 PDT 2023
+// Last Modified: Sun Jun  4 21:47:33 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -6223,76 +6223,6 @@ class Tool_colorgroups : public HumTool {
 };
 
 
-class Tool_colorthirds : public HumTool {
-	public:
-		         Tool_colorthirds  (void);
-		        ~Tool_colorthirds  () {};
-
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
-
-	protected:
-		void             initialize        (void);
-		void             processFile       (HumdrumFile& infile);
-		std::vector<int> getMidiNotes(std::vector<HTp>& kernNotes);
-		std::vector<int> getChordPositions(std::vector<int>& midiNotes);
-		std::vector<int> getNoteMods(std::vector<int>& midiNotes);
-		std::vector<int> getThirds(std::vector<int>& midiNotes);
-		std::vector<int> getFifths(std::vector<int>& midiNotes);
-		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
-		void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
-		void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
-		void             keepOnlyDoubles(std::vector<int>& output);
-		void             checkForTriadicSonority(std::vector<int>& positions, int line);
-		std::string      generateStatistics(HumdrumFile& infile);
-		std::vector<std::string> getTrackNames(HumdrumFile& infile);
-		int              getVectorSum(std::vector<int>& input);
-
-	private:
-		std::string m_root_marker = "@";
-		std::string m_third_marker = "N";
-		std::string m_fifth_marker = "Z";
-		std::string m_3rd_root_marker = "j";
-		std::string m_3rd_third_marker = "l";
-		std::string m_5th_root_marker = "V";
-		std::string m_5th_fifth_marker = "|";
-
-		std::string m_root_color = "crimson";
-		std::string m_third_color = "limegreen";
-		std::string m_fifth_color = "royalblue";
-		std::string m_3rd_root_color = "darkred";
-		std::string m_3rd_third_color = "green";
-		std::string m_5th_root_color = "darkred";
-		std::string m_5th_fifth_color = "steelblue";
-
-		bool m_colorThirds = true;
-		bool m_colorFifths = true;
-		bool m_colorTriads = true;
-		bool m_doubleQ = false;
-
-		// Statistical data variables:
-		vector<bool> m_triadState;
-
-		// m_partTriadPositions -- count the number of chordal positions by
-		// voice.  The first dimention is the track number of the part, and
-		// the second dimension is the counts for 7 categories:
-		// 0 = count of root positions in full triadic chords
-		// 1 = count of third positions in full triadic chords
-		// 2 = count of fifth positions in full triadic chords
-		// 3 = count of root positions in partial triadic chords ("open third")
-		// 4 = count of third positions in partial triadic chords
-		// 5 = count of root positions in partial triadic chords ("open fifth")
-		// 6 = count of fifth positions in partial triadic chords
-		std::vector<vector<int>> m_partTriadPositions;
-		int m_positionCount = 7;
-
-		string m_toolName = "colorthirds";
-
-};
-
-
 class Tool_colortriads : public HumTool {
 	public:
 		         Tool_colortriads  (void);
@@ -10262,6 +10192,85 @@ class Tool_timebase : public HumTool {
 
 };
 
+
+
+class Tool_tpos : public HumTool {
+	public:
+		         Tool_tpos  (void);
+		        ~Tool_tpos  () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+	protected:
+		void             initialize        (void);
+		void             processFile       (HumdrumFile& infile);
+		std::vector<int> getMidiNotes(std::vector<HTp>& kernNotes);
+		std::vector<int> getChordPositions(std::vector<int>& midiNotes);
+		std::vector<int> getNoteMods(std::vector<int>& midiNotes);
+		std::vector<int> getThirds(std::vector<int>& midiNotes);
+		std::vector<int> getFifths(std::vector<int>& midiNotes);
+		void             labelChordPositions(std::vector<HTp>& kernNotes, std::vector<int>& chordPositions);
+		void             labelThirds(std::vector<HTp>& kernNotes, std::vector<int>& thirdPositions);
+		void             labelFifths(std::vector<HTp>& kernNotes, std::vector<int>& fifthPositions);
+		void             keepOnlyDoubles(std::vector<int>& output);
+		void             checkForTriadicSonority(std::vector<int>& positions, int line);
+		std::string      generateStatistics(HumdrumFile& infile);
+		std::vector<std::string> getTrackNames(HumdrumFile& infile);
+		int              getVectorSum(std::vector<int>& input);
+		void             analyzeVoiceCount(HumdrumFile& infile);
+		int              countVoicesOnLine(HumdrumFile& infile, int line);
+
+	private:
+		std::string m_root_marker = "@";
+		std::string m_third_marker = "N";
+		std::string m_fifth_marker = "Z";
+		std::string m_3rd_root_marker = "j";
+		std::string m_3rd_third_marker = "l";
+		std::string m_5th_root_marker = "V";
+		std::string m_5th_fifth_marker = "|";
+
+		std::string m_root_color = "crimson";
+		std::string m_third_color = "limegreen";
+		std::string m_fifth_color = "royalblue";
+		std::string m_3rd_root_color = "darkred";
+		std::string m_3rd_third_color = "green";
+		std::string m_5th_root_color = "darkred";
+		std::string m_5th_fifth_color = "steelblue";
+
+		bool m_colorThirds = true;
+		bool m_colorFifths = true;
+		bool m_colorTriads = true;
+		bool m_doubleQ = false;
+
+		bool m_topQ = false;
+
+		// Statistical data variables:
+		vector<bool> m_triadState;
+
+		// m_partTriadPositions -- count the number of chordal positions by
+		// voice.  The first dimention is the track number of the part, and
+		// the second dimension is the counts for 7 categories:
+		// 0 = count of root positions in full triadic chords
+		// 1 = count of third positions in full triadic chords
+		// 2 = count of fifth positions in full triadic chords
+		// 3 = count of root positions in partial triadic chords ("open third")
+		// 4 = count of third positions in partial triadic chords
+		// 5 = count of root positions in partial triadic chords ("open fifth")
+		// 6 = count of fifth positions in partial triadic chords
+		std::vector<vector<int>> m_partTriadPositions;
+		int m_positionCount = 7;
+
+		string m_toolName = "tpos";
+
+		std::vector<int> m_voiceCount;
+		// m_voice: used with -v option to limit analysis to sonorities that
+		// have the given voice count. 0 means analyze any voice counts.
+		int m_voice = 0;
+
+};
 
 
 class Tool_transpose : public HumTool {

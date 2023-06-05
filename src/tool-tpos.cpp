@@ -2,9 +2,9 @@
 // Programmer:    Katherine Wong
 // Programmer:    Craig Stuart Sapp
 // Creation Date: Mon Mar 13 23:45:00 PDT 2023
-// Last Modified: Fri Mar 17 12:36:19 PDT 2023
-// Filename:      tool-colorthirds.cpp
-// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-colorthirds.cpp
+// Last Modified: Sun Jun  4 19:50:11 PDT 2023
+// Filename:      tool-tpos.cpp
+// URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-tpos.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
@@ -20,7 +20,7 @@
 //                Place a marker (|) on the non-doubled sonority notes (when it is a triad).
 //
 
-#include "tool-colorthirds.h"
+#include "tool-tpos.h"
 #include "HumRegex.h"
 
 using namespace std;
@@ -32,24 +32,26 @@ namespace hum {
 
 /////////////////////////////////
 //
-// Tool_colorthirds::Tool_colorthirds -- Set the recognized options for the tool.
+// Tool_tpos::Tool_tpos -- Set the recognized options for the tool.
 //
 
-Tool_colorthirds::Tool_colorthirds(void) {
+Tool_tpos::Tool_tpos(void) {
 	define("d|double=b", "highlight only doubled notes in triads");
 	define("3|no-thirds=b", "do not color thirds");
 	define("5|no-fifths=b", "do not color fifths");
 	define("T|no-triads=b", "do not color full triads");
+	define("v|voice-count=i:0", "Only analyze sonorities with given voice count");
+	define("top=b", "mark top voice in analysis output");
 }
 
 
 
 /////////////////////////////////
 //
-// Tool_colorthirds::run -- Do the main work of the tool.
+// Tool_tpos::run -- Do the main work of the tool.
 //
 
-bool Tool_colorthirds::run(HumdrumFileSet& infiles) {
+bool Tool_tpos::run(HumdrumFileSet& infiles) {
 	bool status = true;
 	for (int i=0; i<infiles.getCount(); i++) {
 		status &= run(infiles[i]);
@@ -58,7 +60,7 @@ bool Tool_colorthirds::run(HumdrumFileSet& infiles) {
 }
 
 
-bool Tool_colorthirds::run(const string& indata, ostream& out) {
+bool Tool_tpos::run(const string& indata, ostream& out) {
 	HumdrumFile infile(indata);
 	bool status = run(infile);
 	if (hasAnyText()) {
@@ -70,7 +72,7 @@ bool Tool_colorthirds::run(const string& indata, ostream& out) {
 }
 
 
-bool Tool_colorthirds::run(HumdrumFile& infile, ostream& out) {
+bool Tool_tpos::run(HumdrumFile& infile, ostream& out) {
 	bool status = run(infile);
 	if (hasAnyText()) {
 		getAllText(out);
@@ -81,7 +83,7 @@ bool Tool_colorthirds::run(HumdrumFile& infile, ostream& out) {
 }
 
 
-bool Tool_colorthirds::run(HumdrumFile& infile) {
+bool Tool_tpos::run(HumdrumFile& infile) {
 	initialize();
 	processFile(infile);
 	return true;
@@ -91,27 +93,30 @@ bool Tool_colorthirds::run(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_colorthirds::initialize -- Setup to do before processing a file.
+// Tool_tpos::initialize -- Setup to do before processing a file.
 //
 
-void Tool_colorthirds::initialize(void) {
+void Tool_tpos::initialize(void) {
 	m_colorThirds = !getBoolean("no-thirds");
 	m_colorFifths = !getBoolean("no-thirds");
 	m_colorTriads = !getBoolean("no-triads");
 	m_doubleQ = getBoolean("double");
+	m_topQ = getBoolean("top");
 }
 
 
 
 //////////////////////////////
 //
-// Tool_colorthirds::processFile -- Analyze an input file.
+// Tool_tpos::processFile -- Analyze an input file.
 //
 
-void Tool_colorthirds::processFile(HumdrumFile& infile) {
+void Tool_tpos::processFile(HumdrumFile& infile) {
 	// Algorithm go line by line in the infile, extracting the notes that are active
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
+
+	analyzeVoiceCount(infile);
 
     m_partTriadPositions.resize(infile.getMaxTrack() + 1);
     for (int i = 0; i < (int)infile.getMaxTrack() + 1; i++) {
@@ -131,6 +136,13 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isData()) { // if no notes in the line
 			continue;
+		}
+		if (m_voiceCount.at(i) != m_voice) {
+			// Ignore sonorities that do not have the required number of
+			// voices.  m_voices==0 means consider all voice counts.
+			if (m_voice != 0) {
+				continue;
+			}
 		}
 		// iterate along the line looking at each field, and creating a '
 		//     list of tokens that are notes.
@@ -233,13 +245,64 @@ void Tool_colorthirds::processFile(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
-// Tool_colorthirds::checkForTriadicSonority -- Mark the given line in the file as a triadic sonority
+// Tool_tpos:analyzeVoiceCount -- Chords count as a single voice.
+//
+
+void Tool_tpos::analyzeVoiceCount(HumdrumFile& infile) {
+	vector<int>& voices = m_voiceCount;
+	voices.resize(infile.getLineCount());
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			voices[i] = 0;
+			continue;
+		}
+		voices[i] = countVoicesOnLine(infile, i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tpos::countVoicesOnLine --
+//
+
+int Tool_tpos::countVoicesOnLine(HumdrumFile& infile, int line) {
+	int output = 0;
+	for (int j=0; j<infile[line].getFieldCount(); j++) {
+		HTp token = infile.token(line, j);
+		if (!token->isKern()) {
+			continue;
+		}
+		if (token->isNull()) {
+			token = token->resolveNull();
+			if (!token) {
+				continue;
+			}
+			if (token->isNull()) {
+				continue;
+			}
+		}
+		if (token->isRest()) {
+			continue;
+		}
+		output++;
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tpos::checkForTriadicSonority -- Mark the given line in the file as a triadic sonority
 //     of all MIDI note numbers are positive.
 //
 
-void Tool_colorthirds::checkForTriadicSonority(vector<int>& positions, int line) {
+void Tool_tpos::checkForTriadicSonority(vector<int>& positions, int line) {
 	for (int i=0; i<(int)positions.size(); i++) {
 		if (positions[i] > 0) {
 			m_triadState.at(line) = true;
@@ -251,10 +314,10 @@ void Tool_colorthirds::checkForTriadicSonority(vector<int>& positions, int line)
 
 //////////////////////////////
 //
-// Tool_colorthirds::generateStatistics --
+// Tool_tpos::generateStatistics --
 //
 
-string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
+string Tool_tpos::generateStatistics(HumdrumFile& infile) {
 	int sonorityCount = 0;  // total number of sonorities
 	int triadCount = 0;     // sonorities that are triads
 	HumNum triadDuration = 0;
@@ -276,22 +339,22 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 	}
 
 	stringstream out;
-	out << "!!!colorthirds-sonority-count: " << sonorityCount << endl;
-	out << "!!!colorthirds-sonority-duration: " << infile.getScoreDuration().getFloat() << endl;
-	out << "!!!colorthirds-triadic-count: " << triadCount << endl;
-	out << "!!!colorthirds-triadic-duration: " << triadDuration.getFloat() << endl;
+	out << "!!!tpos-sonority-count: " << sonorityCount << endl;
+	out << "!!!tpos-sonority-duration: " << infile.getScoreDuration().getFloat() << endl;
+	out << "!!!tpos-triadic-count: " << triadCount << endl;
+	out << "!!!tpos-triadic-duration: " << triadDuration.getFloat() << endl;
 	double percentage = 100.0 * (double)triadCount / (double)sonorityCount;
 	percentage = int(percentage * 100.0 + 0.5) / 100.0;
-	out << "!!!colorthirds-count-ratio: " << percentage << "%" << endl;
+	out << "!!!tpos-count-ratio: " << percentage << "%" << endl;
 	percentage = 100.0 * triadDuration.getFloat() / infile.getScoreDuration().getFloat();
 	percentage = int(percentage * 100.0 + 0.5) / 100.0;
-	out << "!!!colorthirds-duration-ratio: " << percentage << "%" << endl;
+	out << "!!!tpos-duration-ratio: " << percentage << "%" << endl;
 
 	// Report triads positions by voice:
 	vector<string> names = getTrackNames(infile);
 
 	for (int i=1; i<(int)names.size(); i++) {
-		out << "!!!colorthirds-track-name-" << to_string(i) << ": " << names[i] << endl;
+		out << "!!!tpos-track-name-" << to_string(i) << ": " << names[i] << endl;
 	}
 	vector<HTp> kernstarts;
 	infile.getKernSpineStartList(kernstarts);
@@ -308,6 +371,7 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 		}
 	}
 	out << endl;
+	int topTrack = kernstarts.back()->getTrack();
 
 	for (int i=1; i<(int)m_partTriadPositions.size(); i++) {
 		vector<int>& entry = m_partTriadPositions[i];
@@ -325,6 +389,9 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 		double rootPercent = int(rootCount * 1000.0 / sum + 0.5) / 10.0;
 		double thirdPercent = int(thirdCount * 1000.0 / sum + 0.5) / 10.0;
 		double fifthPercent = int(fifthCount * 1000.0 / sum + 0.5) / 10.0;
+		if (m_topQ && (topTrack == i)) {
+			name = "top-" + name;
+		}
 		out << "!!!" << m_toolName << "-count-sum-" << i << "-" << name << ": " << sum << endl;
 		out << "!!!" << m_toolName << "-root-count-" << i << "-" << name << ": " << rootCount << " (" << rootPercent << "%)" << endl;
 		out << "!!!" << m_toolName << "-third-count-" << i << "-" << name << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
@@ -338,10 +405,10 @@ string Tool_colorthirds::generateStatistics(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_colorthirds::getVectorSum --
+// Tool_tpos::getVectorSum --
 //
 
-int Tool_colorthirds::getVectorSum(vector<int>& input) {
+int Tool_tpos::getVectorSum(vector<int>& input) {
 	int sum = 0;
 	for (int i=0; i<(int)input.size(); i++) {
 		sum += input[i];
@@ -352,10 +419,10 @@ int Tool_colorthirds::getVectorSum(vector<int>& input) {
 
 //////////////////////////////
 //
-// Tool_colorthirds::getTrackNames --
+// Tool_tpos::getTrackNames --
 //
 
-vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
+vector<string> Tool_tpos::getTrackNames(HumdrumFile& infile) {
 	int tracks = infile.getTrackCount();
 	vector<string> output(tracks+1);
 	for (int i=1; i<(int)output.size(); i++) {
@@ -403,14 +470,14 @@ vector<string> Tool_colorthirds::getTrackNames(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_colorthirds::labelChordPositions -- Mark the scale degree of notes:
+// Tool_tpos::labelChordPositions -- Mark the scale degree of notes:
 //       0: not in triadic sonority so no label.
 //       1 == @: root (such as C in C major triad)
 //       3 == N third (such as E in C major triad)
 //       5 == Z fifth (such as G in C major triad)
 //
 
-void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& chordPositions) {
+void Tool_tpos::labelChordPositions(vector<HTp>& kernNotes, vector<int>& chordPositions) {
 	for (int i=0; i<(int)kernNotes.size(); i++) {
 		int position = chordPositions.at(i);
 		if (position == 0) {
@@ -444,12 +511,12 @@ void Tool_colorthirds::labelChordPositions(vector<HTp>& kernNotes, vector<int>& 
 
 //////////////////////////////
 //
-// Tool_colorthirds::labelThirds -- Mark the scale degree of notes:
+// Tool_tpos::labelThirds -- Mark the scale degree of notes:
 //       0: not in interval sonority so no label.
 //       1 == @: root (bottom of the interval)
 //       3 == N: third (top of the interval)
 
-void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
+void Tool_tpos::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions) {
     for (int i = 0; i < (int)kernNotes.size(); i++) {
         int position = thirdPositions.at(i);
         if (position == 0) {
@@ -482,12 +549,12 @@ void Tool_colorthirds::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPos
 
 //////////////////////////////
 //
-// Tool_colorthirds::labelFifths -- Mark the scale degree of notes:
+// Tool_tpos::labelFifths -- Mark the scale degree of notes:
 //       0: not in interval sonority so no label.
 //       1 == @: root (bottom of the interval)
 //       5 == Z: fifth (top of the interval)
 
-void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
+void Tool_tpos::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions) {
     for (int i = 0; i < (int)kernNotes.size(); i++) {
         int position = fifthPositions.at(i);
         if (position == 0) {
@@ -520,7 +587,7 @@ void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPos
 
 //////////////////////////////
 //
-// Tool_colorthirds::getChordPositions -- Identify if the sonority is a triad, and if so, place
+// Tool_tpos::getChordPositions -- Identify if the sonority is a triad, and if so, place
 //    the position of the note in the chord:
 //       0: not in triadic sonority.
 //       1: root (such as C in C major triad)
@@ -528,7 +595,7 @@ void Tool_colorthirds::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPos
 //       5: fifth (such as G in C major triad)
 //
 
-vector<int> Tool_colorthirds::getNoteMods(vector<int>& midiNotes) {
+vector<int> Tool_tpos::getNoteMods(vector<int>& midiNotes) {
 	// create modulo 12 arr
 	vector<int> pitchClasses(12, 0);
 	for (int i = 0; i < (int)midiNotes.size(); i++) {
@@ -547,13 +614,13 @@ vector<int> Tool_colorthirds::getNoteMods(vector<int>& midiNotes) {
 	return noteMods;
 }
 
-// Tool_colorthirds::getThirds -- Identify if the sonority is a third interval, and if so,
+// Tool_tpos::getThirds -- Identify if the sonority is a third interval, and if so,
 //    place the position of the note in the output.
 //       0: not in the sonority
 //       1: root (bottom of the interval)
 //       3: third (top of the interval)
 
-vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
+vector<int> Tool_tpos::getThirds(vector<int>& midiNotes) {
 	vector<int> output(midiNotes.size(), 0);
 
 	if (midiNotes.empty()) {
@@ -594,13 +661,13 @@ vector<int> Tool_colorthirds::getThirds(vector<int>& midiNotes) {
 	return output;
 }
 
-// Tool_colorthirds::getFifths -- Identify if the sonority is a fifth interval, and if so,
+// Tool_tpos::getFifths -- Identify if the sonority is a fifth interval, and if so,
 //    place the position of the note in the output.
 //       0: not in the sonority
 //       1: root (bottom of the interval)
 //       5: fifth (top of the interval)
 
-vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
+vector<int> Tool_tpos::getFifths(vector<int>& midiNotes) {
 	vector<int> output(midiNotes.size(), 0);
 
 	if (midiNotes.empty()) {
@@ -643,7 +710,7 @@ vector<int> Tool_colorthirds::getFifths(vector<int>& midiNotes) {
 	return output;
 }
 
-vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
+vector<int> Tool_tpos::getChordPositions(vector<int>& midiNotes) {
 	vector<int> output(midiNotes.size(), 0);
 	if (midiNotes.empty()) {
 		return output;
@@ -699,7 +766,7 @@ vector<int> Tool_colorthirds::getChordPositions(vector<int>& midiNotes) {
 	return output;
 }
 
-void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
+void Tool_tpos::keepOnlyDoubles(vector<int>& output) {
 	map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
 
 	for (int i = 0; i < (int)output.size(); i++) { // create hashmap of counts
@@ -725,11 +792,11 @@ void Tool_colorthirds::keepOnlyDoubles(vector<int>& output) {
 
 //////////////////////////////
 //
-// Tool_colorthirds::getMidiNotes -- Convert kern notes to MIDI note numbers.
+// Tool_tpos::getMidiNotes -- Convert kern notes to MIDI note numbers.
 //    If the note is sustaining, then make the MIDI note number negative.
 //
 
-vector<int> Tool_colorthirds::getMidiNotes(vector<HTp>& kernNotes) {
+vector<int> Tool_tpos::getMidiNotes(vector<HTp>& kernNotes) {
 	vector<int> output(kernNotes.size());
 	if (kernNotes.empty()) {
 		return output;

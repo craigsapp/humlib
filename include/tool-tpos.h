@@ -2,8 +2,8 @@
 // Programmer:    Katherine Wong
 // Creation Date: Mon Mar 13 23:47:52 PDT 2023
 // Last Modified: Mon Mar 13 23:47:55 PDT 2023
-// Filename:      tool-colorthirds.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-colorthirds.h
+// Filename:      tool-tpos.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-tpos.h
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
@@ -13,8 +13,8 @@
 //                    blue  = fifth
 //
 
-#ifndef _TOOL_COLORTHIRDS_H
-#define _TOOL_COLORTHIRDS_H
+#ifndef _TOOL_TPOS_H
+#define _TOOL_TPOS_H
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
@@ -23,10 +23,10 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_colorthirds : public HumTool {
+class Tool_tpos : public HumTool {
 	public:
-		         Tool_colorthirds  (void);
-		        ~Tool_colorthirds  () {};
+		         Tool_tpos  (void);
+		        ~Tool_tpos  () {};
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
@@ -49,6 +49,8 @@ class Tool_colorthirds : public HumTool {
 		std::string      generateStatistics(HumdrumFile& infile);
 		std::vector<std::string> getTrackNames(HumdrumFile& infile);
 		int              getVectorSum(std::vector<int>& input);
+		void             analyzeVoiceCount(HumdrumFile& infile);
+		int              countVoicesOnLine(HumdrumFile& infile, int line);
 
 	private:
 		std::string m_root_marker = "@";
@@ -72,6 +74,8 @@ class Tool_colorthirds : public HumTool {
 		bool m_colorTriads = true;
 		bool m_doubleQ = false;
 
+		bool m_topQ = false;
+
 		// Statistical data variables:
 		vector<bool> m_triadState;
 
@@ -88,7 +92,12 @@ class Tool_colorthirds : public HumTool {
 		std::vector<vector<int>> m_partTriadPositions;
 		int m_positionCount = 7;
 
-		string m_toolName = "colorthirds";
+		string m_toolName = "tpos";
+
+		std::vector<int> m_voiceCount;
+		// m_voice: used with -v option to limit analysis to sonorities that
+		// have the given voice count. 0 means analyze any voice counts.
+		int m_voice = 0;
 
 };
 
@@ -96,7 +105,7 @@ class Tool_colorthirds : public HumTool {
 
 } // end namespace hum
 
-#endif /* _TOOL_COLORTHIRDS_H */
+#endif /* _TOOL_TPOS_H */
 
 
 
