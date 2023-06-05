@@ -1043,7 +1043,7 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   tool-slurcheck.h tool-spinetrace.h \
   tool-strophe.h tool-synco.h tool-tabber.h \
   tool-tassoize.h tool-thru.h tool-tie.h \
-  tool-timebase.h tool-tpos.h tool-transpose.h \
+  tool-timebase.h tool-tspos.h tool-transpose.h \
   tool-tremolo.h tool-trillspell.h
 
 tool-fixps.o: tool-fixps.cpp tool-fixps.h HumTool.h \
@@ -1501,7 +1501,7 @@ tool-timebase.o: tool-timebase.cpp tool-timebase.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h
 
-tool-tpos.o: tool-tpos.cpp tool-tpos.h HumTool.h \
+tool-tspos.o: tool-tspos.cpp tool-tspos.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \

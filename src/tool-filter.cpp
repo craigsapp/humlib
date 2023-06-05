@@ -73,7 +73,7 @@
 #include "tool-thru.h"
 #include "tool-tie.h"
 #include "tool-timebase.h"
-#include "tool-tpos.h"
+#include "tool-tspos.h"
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
@@ -319,8 +319,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
-		} else if (commands[i].first == "tpos") {
-			RUNTOOL(tpos, infile, commands[i].second, status);
+		} else if (commands[i].first == "tspos") {
+			RUNTOOL(tspos, infile, commands[i].second, status);
 		} else if (commands[i].first == "transpose") {
 			RUNTOOL(transpose, infile, commands[i].second, status);
 		} else if (commands[i].first == "tremolo") {
@@ -337,10 +337,10 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(colortriads, infile, commands[i].second, status);
 
 		} else if (commands[i].first == "colorthirds") {
-			RUNTOOL(tpos, infile, commands[i].second, status);
+			RUNTOOL(tspos, infile, commands[i].second, status);
 		} else if (commands[i].first == "colourthirds") {
 			// British spelling
-			RUNTOOL(tpos, infile, commands[i].second, status);
+			RUNTOOL(tspos, infile, commands[i].second, status);
 
 		} else if (commands[i].first == "colorgroups") {
 			RUNTOOL(colorgroups, infile, commands[i].second, status);

@@ -2,8 +2,8 @@
 // Programmer:    Katherine Wong
 // Creation Date: Mon Mar 13 23:47:52 PDT 2023
 // Last Modified: Mon Mar 13 23:47:55 PDT 2023
-// Filename:      tool-tpos.h
-// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-tpos.h
+// Filename:      tool-tspos.h
+// URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-tspos.h
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
@@ -23,10 +23,10 @@ namespace hum {
 
 // START_MERGE
 
-class Tool_tpos : public HumTool {
+class Tool_tspos : public HumTool {
 	public:
-		         Tool_tpos  (void);
-		        ~Tool_tpos  () {};
+		         Tool_tspos  (void);
+		        ~Tool_tspos  () {};
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
@@ -51,6 +51,7 @@ class Tool_tpos : public HumTool {
 		int              getVectorSum(std::vector<int>& input);
 		void             analyzeVoiceCount(HumdrumFile& infile);
 		int              countVoicesOnLine(HumdrumFile& infile, int line);
+		std::string      generateTable(HumdrumFile& infile, std::vector<std::string>& name);
 
 	private:
 		std::string m_root_marker = "@";
@@ -61,13 +62,13 @@ class Tool_tpos : public HumTool {
 		std::string m_5th_root_marker = "V";
 		std::string m_5th_fifth_marker = "|";
 
-		std::string m_root_color = "crimson";
-		std::string m_third_color = "limegreen";
-		std::string m_fifth_color = "royalblue";
-		std::string m_3rd_root_color = "darkred";
-		std::string m_3rd_third_color = "green";
-		std::string m_5th_root_color = "darkred";
-		std::string m_5th_fifth_color = "steelblue";
+		std::string m_root_color = "#DC143C";  // crimson
+		std::string m_third_color = "#32CD32"; // limegreen
+		std::string m_fifth_color = "#4169E1"; // royalblue
+		std::string m_3rd_root_color = "#8B0000"; // darkred
+		std::string m_3rd_third_color = "#008000"; // green
+		std::string m_5th_root_color = "#8B0000"; // darkred
+		std::string m_5th_fifth_color = "4682B4"; // steelblue
 
 		bool m_colorThirds = true;
 		bool m_colorFifths = true;
@@ -75,6 +76,7 @@ class Tool_tpos : public HumTool {
 		bool m_doubleQ = false;
 
 		bool m_topQ = false;
+		bool m_tableQ = false;
 
 		// Statistical data variables:
 		vector<bool> m_triadState;
@@ -92,12 +94,16 @@ class Tool_tpos : public HumTool {
 		std::vector<vector<int>> m_partTriadPositions;
 		int m_positionCount = 7;
 
-		string m_toolName = "tpos";
+		string m_toolName = "tspos";
 
 		std::vector<int> m_voiceCount;
 		// m_voice: used with -v option to limit analysis to sonorities that
 		// have the given voice count. 0 means analyze any voice counts.
 		int m_voice = 0;
+
+		bool m_evenNoteSpacingQ = false;
+
+		std::vector<string> m_fullNames;
 
 };
 
