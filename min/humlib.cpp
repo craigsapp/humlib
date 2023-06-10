@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun  5 12:29:07 PDT 2023
+// Last Modified: Fri Jun  9 21:48:40 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -117661,10 +117661,12 @@ Tool_tspos::Tool_tspos(void) {
 	define("3|no-thirds=b", "do not color thirds");
 	define("5|no-fifths=b", "do not color fifths");
 	define("T|no-triads=b", "do not color full triads");
+	define("x|attacks=b", "only process sonorities with three unique triadic pitch classes attacking at once (sustains in additional voices are allowed)");
 	define("v|voice-count=i:0", "Only analyze sonorities with given voice count");
 	define("e|even-note-spacing=b", "Add evenNoteSpacing verovio parameter");
 	define("top=b", "mark top voice in analysis output");
 	define("t|table=b", "add analysis table above score");
+	define("V|all-voices=b", "Require all voices in score to be sounding");
 }
 
 
@@ -117707,7 +117709,7 @@ bool Tool_tspos::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_tspos::run(HumdrumFile& infile) {
-	initialize();
+	initialize(infile);
 	processFile(infile);
 	return true;
 }
@@ -117719,14 +117721,20 @@ bool Tool_tspos::run(HumdrumFile& infile) {
 // Tool_tspos::initialize -- Setup to do before processing a file.
 //
 
-void Tool_tspos::initialize(void) {
+void Tool_tspos::initialize(HumdrumFile& infile) {
 	m_colorThirds = !getBoolean("no-thirds");
-	m_colorFifths = !getBoolean("no-thirds");
+	m_colorFifths = !getBoolean("no-fifths");
 	m_colorTriads = !getBoolean("no-triads");
 	m_doubleQ = getBoolean("double");
 	m_topQ = getBoolean("top");
 	m_tableQ = getBoolean("table");
 	m_evenNoteSpacingQ = getBoolean("even-note-spacing");
+	m_voice = getInteger("voice-count");
+	if (getBoolean("all-voices")) {
+		vector<HTp> kernSpines =  infile.getKernSpineStartList();
+		m_voice = (int)kernSpines.size();
+	}
+	m_triadAttack = getBoolean("attacks");
 }
 
 
@@ -117740,6 +117748,11 @@ void Tool_tspos::processFile(HumdrumFile& infile) {
 	// Algorithm go line by line in the infile, extracting the notes that are active
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
+
+	m_used_markers.resize(7);
+	fill(m_used_markers.begin(), m_used_markers.end(), 0);
+
+	avoidRdfCollisions(infile);
 
 	analyzeVoiceCount(infile);
 
@@ -117762,14 +117775,18 @@ void Tool_tspos::processFile(HumdrumFile& infile) {
 		if (!infile[i].isData()) { // if no notes in the line
 			continue;
 		}
-		if (m_voiceCount.at(i) != m_voice) {
+		if ((m_voice > 0)&& (m_voiceCount.at(i) != m_voice)) {
 			// Ignore sonorities that do not have the required number of
 			// voices.  m_voices==0 means consider all voice counts.
-			if (m_voice != 0) {
+			continue;
+		}
+		if (m_triadAttack) {
+			if (!hasFullTriadAttack(infile[i])) {
 				continue;
 			}
 		}
-		// iterate along the line looking at each field, and creating a '
+
+		// iterate along the line looking at each field, and creating a
 		//     list of tokens that are notes.
 		kernNotes.clear();
 		midiNotes.clear();
@@ -117838,38 +117855,133 @@ void Tool_tspos::processFile(HumdrumFile& infile) {
 
 	m_humdrum_text << infile;
 
-	if (m_colorThirds) { // color thirds
-		m_humdrum_text << "!!!RDF**kern: " << m_3rd_root_marker
-			<< " = marked note, root position, color=\"" << m_3rd_root_color << "\"" << endl;
-
-		m_humdrum_text << "!!!RDF**kern: " << m_3rd_third_marker
-			<< " = marked note, third position, color=\"" << m_3rd_third_color << "\"" << endl;
-	}
-
-	if (m_colorFifths) { // color fifths
-		m_humdrum_text << "!!!RDF**kern: " << m_5th_root_marker
-		<< " = marked note, root position, color=\"" << m_5th_root_color << "\"" << endl;
-
-		m_humdrum_text << "!!!RDF**kern: " << m_5th_fifth_marker
-		<< " = marked note, fifth position, color=\"" << m_5th_fifth_color << "\"" << endl;
-	}
-
-	if (m_colorTriads) { // color full triads
-		m_humdrum_text << "!!!RDF**kern: " << m_root_marker
-		 	<< " = marked note, root position, color=\"" << m_root_color << "\"" << endl;
-
-		m_humdrum_text << "!!!RDF**kern: " << m_third_marker
-			<< " = marked note, third position, color=\"" << m_third_color << "\"" << endl;
-
-		m_humdrum_text << "!!!RDF**kern: " << m_fifth_marker
-			<< " = marked note, third position, color=\"" << m_fifth_color << "\"" << endl;
-	}
+	printUsedMarkers();
 
 	string statistics = generateStatistics(infile);
 	m_humdrum_text << statistics;
 	if (m_evenNoteSpacingQ) {
 		m_humdrum_text << "!!!verovio: evenNoteSpacing\n";
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::printUsedMarkers --
+//
+
+void Tool_tspos::printUsedMarkers(void) {
+	for (int i=0; i<(int)m_used_markers.size(); i++) {
+		if (!m_used_markers[i]) {
+			continue;
+		}
+		switch (i) {
+
+			case 0:
+				m_humdrum_text << "!!!RDF**kern: " << m_root_marker
+		 		<< " = marked note, "
+				<< "type=\"root position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_root_color << "\"" << endl;
+				break;
+
+			case 1:
+				m_humdrum_text << "!!!RDF**kern: " << m_third_marker
+		 		<< " = marked note, "
+				<< "type=\"third position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_third_color << "\"" << endl;
+				break;
+
+			case 2:
+				m_humdrum_text << "!!!RDF**kern: " << m_fifth_marker
+		 		<< " = marked note, "
+				<< "type=\"fifth position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_fifth_color << "\"" << endl;
+				break;
+
+			case 3:
+				m_humdrum_text << "!!!RDF**kern: " << m_3rd_root_marker
+		 		<< " = marked note, "
+				<< "type=\"open third root position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_3rd_root_color << "\"" << endl;
+				break;
+
+			case 4:
+				m_humdrum_text << "!!!RDF**kern: " << m_3rd_third_marker
+		 		<< " = marked note, "
+				<< "type=\"open third, third position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_3rd_third_color << "\"" << endl;
+				break;
+
+			case 5:
+				m_humdrum_text << "!!!RDF**kern: " << m_5th_root_marker
+		 		<< " = marked note, "
+				<< "type=\"open fifth, root position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_5th_root_color << "\"" << endl;
+				break;
+
+			case 6:
+				m_humdrum_text << "!!!RDF**kern: " << m_5th_fifth_marker
+		 		<< " = marked note, "
+				<< "type=\"open fifth, fifth position\" "
+				<< "count=\"" << m_used_markers[i] << " "
+				<< "color=\"" << m_5th_fifth_color << "\"" << endl;
+				break;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::hasFullTriadAttack --
+//
+
+bool Tool_tspos::hasFullTriadAttack(HumdrumLine& line) {
+	vector<int> midiPitches = line.getMidiPitchesSortLH();
+	vector<int> positive(24, 0);
+	int count = 0;
+	for (int i=0; i<(int)midiPitches.size(); i++) {
+		if (midiPitches[i] > 0) {
+			if (!positive[midiPitches[i] % 12]) {
+				positive[midiPitches[i] % 12]++;
+				positive[midiPitches[i] % 12 + 12]++;
+				count++;
+			}
+		}
+	}
+
+	if (count != 3) {
+		return false;
+	}
+
+	for (int i=0; i<12; i++) {
+		if (!positive[i]) {
+			continue;
+		}
+		if (positive[i+3]) {
+			if (positive[i+3+3]) { // diminished triad pitch-classes present
+				return true;
+			} else if (positive[i+3+4]) { // minor
+				return true;
+			}
+		} else if (positive[i+4]) {
+			if (positive[i+4+3]) { // major
+				return true;
+			} else if (positive[i+4+4]) { // augmented
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 
@@ -118026,7 +118138,9 @@ string Tool_tspos::generateStatistics(HumdrumFile& infile) {
 		out << "!!!" << "TOOL-" << m_toolName << "-fifth-count-" << i << "-" << name << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
 	}
 
-	out << generateTable(infile, names);
+	if (m_tableQ) {
+		out << generateTable(infile, names);
+	}
 
 	return out.str();
 }
@@ -118095,6 +118209,52 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 		out << "!!</tr>\n";
 	}
 	out << "!!</table>\n";
+	
+	stringstream options;
+	int licount = 0;
+	options << "!!<ul>\n";
+
+	// Print summary of options used:
+	if (m_voice > 0) {
+		options << "!!<li> Only sonorities with " << m_voice << " sounding voices analyzed</li>\n";
+		licount++;
+	}
+
+	if (m_triadAttack) {
+		options << "!!<li> Only sonorities with at least three unique pitch-class attacks are analyzed</li>\n";
+		licount++;
+	}
+
+	if (!(m_colorThirds && m_colorFifths && m_colorTriads)) {
+		if (m_colorTriads && !m_colorThirds && !m_colorFifths) {
+			options << "!!<li> Only sonorities with three triadic pitch-classes analyzed</li>\n";
+			licount++;
+		} else if (!m_colorTriads && m_colorThirds && m_colorFifths) {
+			options << "!!<li> Only sonorities with two triadic pitch-classes analyzed</li>\n";
+			licount++;
+		} else if (!m_colorTriads && m_colorThirds && !m_colorFifths) {
+			options << "!!<li> Only sonorities with open thirds analyzed</li>\n";
+			licount++;
+		} else if (!m_colorTriads && !m_colorThirds && m_colorFifths) {
+			options << "!!<li> Only sonorities with open fifths analyzed</li>\n";
+			licount++;
+		} else if (m_colorTriads && m_colorThirds && !m_colorFifths) {
+			options << "!!<li> Ignoring open fifths </li>\n";
+			licount++;
+		} else if (m_colorTriads && !m_colorThirds && m_colorFifths) {
+			options << "!!<li> Ignoring open thirds </li>\n";
+			licount++;
+		}
+	} else {
+		// print a message about two- and three-pitch-class sonorities.
+	}
+
+	options << "!!</ul>\n";
+	if (licount) {
+		out << options.str();
+	}
+	
+	
 	out << "!!</div>\n";
 
 	// Styling of table:
@@ -118216,14 +118376,17 @@ void Tool_tspos::labelChordPositions(vector<HTp>& kernNotes, vector<int>& chordP
 		switch (position) {
 			case 1:
 				label = m_root_marker;
+				m_used_markers[0]++;
 				m_partTriadPositions.at(track).at(0)++;
 				break;
 			case 3:
 				label = m_third_marker;
+				m_used_markers[1]++;
 				m_partTriadPositions.at(track).at(1)++;
 				break;
 			case 5:
 				label = m_fifth_marker;
+				m_used_markers[2]++;
 				m_partTriadPositions.at(track).at(2)++;
 				break;
 		}
@@ -118255,10 +118418,12 @@ void Tool_tspos::labelThirds(vector<HTp>& kernNotes, vector<int>& thirdPositions
 		switch (position) {
 			case 1:
 				label = m_3rd_root_marker;
+				m_used_markers[3]++;
 				m_partTriadPositions.at(track).at(3)++;
 				break;
 			case 3:
 				label = m_3rd_third_marker;
+				m_used_markers[4]++;
 				m_partTriadPositions.at(track).at(4)++;
 				break;
 		}
@@ -118293,10 +118458,12 @@ void Tool_tspos::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions
 		switch (position) {
 			case 1:
 				label = m_5th_root_marker;
+				m_used_markers[5]++;
 				m_partTriadPositions.at(track).at(5)++;
 				break;
 			case 5:
 				label = m_5th_fifth_marker;
+				m_used_markers[6]++;
 				m_partTriadPositions.at(track).at(6)++;
 				break;
 		}
@@ -118537,6 +118704,60 @@ vector<int> Tool_tspos::getMidiNotes(vector<HTp>& kernNotes) {
 		output.at(i) = midiNote;
 	}
 	return output;
+}
+
+
+//////////////////////////////
+//
+// Tool_tspos::avoidRdfCollisions -- Adjust markers if they are already
+//      defined in the file.
+//
+
+void Tool_tspos::avoidRdfCollisions(HumdrumFile& infile) {
+	map<string, bool> rdfs;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isReferenceRecord()) {
+			continue;
+		}
+		string value = infile[i].getReferenceValue();
+		HumRegex hre;
+		if (hre.search(value, "^\\s*([^\\s]+)\\s*=\\s*(.*)\\s*$")) {
+			string rdf = hre.getMatch(1);
+			rdfs[rdf] = true;
+		}
+	}
+
+	vector<string> replacement(7);
+	replacement[0] = "😀";
+	replacement[1] = "😄";
+	replacement[2] = "😉";
+	replacement[3] = "😍";
+	replacement[4] = "😂";
+	replacement[5] = "😎";
+	replacement[6] = "😗";
+
+	if (rdfs[m_root_marker]) {
+		m_root_marker = replacement[0];
+	}
+	if (rdfs[m_third_marker]) {
+		m_third_marker = replacement[1];
+	}
+	if (rdfs[m_fifth_marker]) {
+		m_fifth_marker = replacement[2];
+	}
+	if (rdfs[m_3rd_root_marker]) {
+		m_3rd_root_marker = replacement[3];
+	}
+	if (rdfs[m_3rd_third_marker]) {
+		m_3rd_third_marker = replacement[4];
+	}
+	if (rdfs[m_5th_root_marker]) {
+		m_5th_root_marker = replacement[5];
+	}
+	if (rdfs[m_5th_fifth_marker]) {
+		m_5th_fifth_marker = replacement[6];
+	}
+
 }
 
 
