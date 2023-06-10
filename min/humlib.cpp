@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun  9 21:48:40 PDT 2023
+// Last Modified: Sat Jun 10 12:07:42 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -117661,6 +117661,8 @@ Tool_tspos::Tool_tspos(void) {
 	define("3|no-thirds=b", "do not color thirds");
 	define("5|no-fifths=b", "do not color fifths");
 	define("T|no-triads=b", "do not color full triads");
+	define("m|minor-triads=b", "only analyze major triad");
+	define("M|major-triads=b", "only analyze minor triads");
 	define("x|attacks=b", "only process sonorities with three unique triadic pitch classes attacking at once (sustains in additional voices are allowed)");
 	define("v|voice-count=i:0", "Only analyze sonorities with given voice count");
 	define("e|even-note-spacing=b", "Add evenNoteSpacing verovio parameter");
@@ -117735,6 +117737,16 @@ void Tool_tspos::initialize(HumdrumFile& infile) {
 		m_voice = (int)kernSpines.size();
 	}
 	m_triadAttack = getBoolean("attacks");
+	m_majorQ = true;
+	m_minorQ = true;
+	if (getBoolean("major-triads")) {
+		m_majorQ = true;
+		m_minorQ = false;
+	}
+	if (getBoolean("minor-triads")) {
+		m_majorQ = false;
+		m_minorQ = true;
+	}
 }
 
 
@@ -118481,7 +118493,7 @@ void Tool_tspos::labelFifths(vector<HTp>& kernNotes, vector<int>& fifthPositions
 
 //////////////////////////////
 //
-// Tool_tspos::getChordPositions -- Identify if the sonority is a triad, and if so, place
+// Tool_tspos::getNoteMods -- Identify if the sonority is a triad, and if so, place
 //    the position of the note in the chord:
 //       0: not in triadic sonority.
 //       1: root (such as C in C major triad)
@@ -118508,6 +118520,8 @@ vector<int> Tool_tspos::getNoteMods(vector<int>& midiNotes) {
 	return noteMods;
 }
 
+//////////////////////////////
+//
 // Tool_tspos::getThirds -- Identify if the sonority is a third interval, and if so,
 //    place the position of the note in the output.
 //       0: not in the sonority
@@ -118530,13 +118544,41 @@ vector<int> Tool_tspos::getThirds(vector<int>& midiNotes) {
 	int rootClass = -1; // currently uninitialized
 	int thirdClass = -1;
 
-	if (interval == 3 || interval == 4) { // third is found
-		rootClass = noteMods.at(0);
-		thirdClass = noteMods.at(1);
+	if (m_majorQ && m_minorQ) {
+
+		if (interval == 3 || interval == 4) { // third is found
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+		}
+		else if (interval == 8 || interval == 9) { // third is found (inversion)
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(0);
+		}
+
 	}
-	else if (interval == 8 || interval == 9) { // third is found (inversion)
-		rootClass = noteMods.at(1);
-		thirdClass = noteMods.at(0);
+
+	else if (m_majorQ && !m_minorQ) {
+		if (interval == 3) { // minor third is found
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+		}
+		else if (interval == 9) { // major sixth is found (inversion)
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(0);
+		}
+	}
+
+	else if (!m_majorQ && m_minorQ) {
+
+		if (interval == 4) { // major third is found
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+		}
+		else if (interval == 8) { // minor sixth is found (inversion)
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(0);
+		}
+
 	}
 
 	if (rootClass == -1) { // third was not found
@@ -118555,6 +118597,10 @@ vector<int> Tool_tspos::getThirds(vector<int>& midiNotes) {
 	return output;
 }
 
+
+
+//////////////////////////////
+//
 // Tool_tspos::getFifths -- Identify if the sonority is a fifth interval, and if so,
 //    place the position of the note in the output.
 //       0: not in the sonority
@@ -118604,6 +118650,13 @@ vector<int> Tool_tspos::getFifths(vector<int>& midiNotes) {
 	return output;
 }
 
+
+
+///////////////////////////////
+//
+// Tool_tspos::getChordPositions -- 
+//
+
 vector<int> Tool_tspos::getChordPositions(vector<int>& midiNotes) {
 	vector<int> output(midiNotes.size(), 0);
 	if (midiNotes.empty()) {
@@ -118623,18 +118676,53 @@ vector<int> Tool_tspos::getChordPositions(vector<int>& midiNotes) {
 	int thirdClass = -1;
 	int fifthClass = -1;
 
-	if ((bint == 3 && tint == 4) || (bint == 4 && tint == 3) || (bint == 3 && tint == 3)) { // root pos
-		rootClass = noteMods.at(0);
-		thirdClass = noteMods.at(1);
-		fifthClass = noteMods.at(2);
-	} else if ((bint == 4 && tint == 5) || (bint == 3 && tint == 5) || (bint == 3 && tint == 6)) { // first inv
-		rootClass = noteMods.at(2);
-		thirdClass = noteMods.at(0);
-		fifthClass = noteMods.at(1);
-	} else if ((bint == 5 && tint == 3) || (bint == 5 && tint == 4) || (bint == 6 && tint == 3)) { // sec inv
-		rootClass = noteMods.at(1);
-		thirdClass = noteMods.at(2);
-		fifthClass = noteMods.at(0);
+	if (m_majorQ && m_minorQ) {
+
+		if ((bint == 3 && tint == 4) || (bint == 4 && tint == 3) || (bint == 3 && tint == 3)) { // root pos
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+			fifthClass = noteMods.at(2);
+		} else if ((bint == 4 && tint == 5) || (bint == 3 && tint == 5) || (bint == 3 && tint == 6)) { // first inv
+			rootClass = noteMods.at(2);
+			thirdClass = noteMods.at(0);
+			fifthClass = noteMods.at(1);
+		} else if ((bint == 5 && tint == 3) || (bint == 5 && tint == 4) || (bint == 6 && tint == 3)) { // sec inv
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(2);
+			fifthClass = noteMods.at(0);
+		}
+	}
+
+	else if (!m_majorQ && m_minorQ) {
+		if (bint == 3 && tint == 4) {// minor root pos
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+			fifthClass = noteMods.at(2);
+		} else if (bint == 4 && tint == 5) { // minor first inv
+			rootClass = noteMods.at(2);
+			thirdClass = noteMods.at(0);
+			fifthClass = noteMods.at(1);
+		} else if (bint == 5 && tint == 3) { // minor sec inv
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(2);
+			fifthClass = noteMods.at(0);
+		}
+	}
+
+	else if (!m_majorQ && m_minorQ) {
+		if (bint == 4 && tint == 3) {// major root pos
+			rootClass = noteMods.at(0);
+			thirdClass = noteMods.at(1);
+			fifthClass = noteMods.at(2);
+		} else if (bint == 3 && tint == 5) { // major first inv
+			rootClass = noteMods.at(2);
+			thirdClass = noteMods.at(0);
+			fifthClass = noteMods.at(1);
+		} else if (bint == 5 && tint == 4) { // major sec inv
+			rootClass = noteMods.at(1);
+			thirdClass = noteMods.at(2);
+			fifthClass = noteMods.at(0);
+		}
 	}
 
 	if (rootClass == -1) {

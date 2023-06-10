@@ -109,6 +109,9 @@ class Tool_tspos : public HumTool {
 
 		bool m_evenNoteSpacingQ = false;
 
+		bool m_minorQ = true;
+		bool m_majorQ = true;
+
 		std::vector<string> m_fullNames;
 };
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fri Jun  9 21:48:40 PDT 2023
+// Last Modified: Sat Jun 10 12:07:42 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10442,6 +10442,9 @@ class Tool_tspos : public HumTool {
 		int m_voice = 0;
 
 		bool m_evenNoteSpacingQ = false;
+
+		bool m_minorQ = true;
+		bool m_majorQ = true;
 
 		std::vector<string> m_fullNames;
 };
