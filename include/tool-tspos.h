@@ -55,6 +55,9 @@ class Tool_tspos : public HumTool {
 		bool             hasFullTriadAttack(HumdrumLine& line);
 		void             avoidRdfCollisions(HumdrumFile& infile);
 		void             printUsedMarkers(void);
+		std::string      makeOpacityColor(std::string& color, double value, double total);
+		int              getToolCounter(HumdrumFile& infile);
+		std::string      makePercentString(double value, double total, int digits);
 
 	private:
 		std::string m_root_marker      = "@";
@@ -107,10 +110,13 @@ class Tool_tspos : public HumTool {
 		// have the given voice count. 0 means analyze any voice counts.
 		int m_voice = 0;
 
-		bool m_evenNoteSpacingQ = false;
+		bool m_compressedQ = false;
 
 		bool m_minorQ = true;
 		bool m_majorQ = true;
+
+		bool m_questionQ = true;
+		int  m_toolCount = 0;
 
 		std::vector<string> m_fullNames;
 };

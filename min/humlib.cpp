@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Jun 10 12:07:42 PDT 2023
+// Last Modified: Tue Jun 13 04:58:02 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -117665,10 +117665,11 @@ Tool_tspos::Tool_tspos(void) {
 	define("M|major-triads=b", "only analyze minor triads");
 	define("x|attacks=b", "only process sonorities with three unique triadic pitch classes attacking at once (sustains in additional voices are allowed)");
 	define("v|voice-count=i:0", "Only analyze sonorities with given voice count");
-	define("e|even-note-spacing=b", "Add evenNoteSpacing verovio parameter");
+	define("c|compressed=b", "Compress music to see more on each system");
 	define("top=b", "mark top voice in analysis output");
 	define("t|table=b", "add analysis table above score");
 	define("V|all-voices=b", "Require all voices in score to be sounding");
+	define("Q|no-question=b", "Do not show question mark in table header");
 }
 
 
@@ -117730,7 +117731,7 @@ void Tool_tspos::initialize(HumdrumFile& infile) {
 	m_doubleQ = getBoolean("double");
 	m_topQ = getBoolean("top");
 	m_tableQ = getBoolean("table");
-	m_evenNoteSpacingQ = getBoolean("even-note-spacing");
+	m_compressedQ = getBoolean("compressed");
 	m_voice = getInteger("voice-count");
 	if (getBoolean("all-voices")) {
 		vector<HTp> kernSpines =  infile.getKernSpineStartList();
@@ -117747,6 +117748,7 @@ void Tool_tspos::initialize(HumdrumFile& infile) {
 		m_majorQ = false;
 		m_minorQ = true;
 	}
+	m_questionQ = !getBoolean("no-question");
 }
 
 
@@ -117761,11 +117763,12 @@ void Tool_tspos::processFile(HumdrumFile& infile) {
 	// check to see if the list of notes form a triad
 	// label the root third and fifth notes of the triad
 
+	m_toolCount = getToolCounter(infile);
+
 	m_used_markers.resize(7);
 	fill(m_used_markers.begin(), m_used_markers.end(), 0);
 
 	avoidRdfCollisions(infile);
-
 	analyzeVoiceCount(infile);
 
 	m_partTriadPositions.resize(infile.getMaxTrack() + 1);
@@ -117871,7 +117874,7 @@ void Tool_tspos::processFile(HumdrumFile& infile) {
 
 	string statistics = generateStatistics(infile);
 	m_humdrum_text << statistics;
-	if (m_evenNoteSpacingQ) {
+	if (m_compressedQ) {
 		m_humdrum_text << "!!!verovio: evenNoteSpacing\n";
 	}
 }
@@ -117998,6 +118001,7 @@ bool Tool_tspos::hasFullTriadAttack(HumdrumLine& line) {
 
 
 
+
 //////////////////////////////
 //
 // Tool_tspos:analyzeVoiceCount -- Chords count as a single voice.
@@ -118012,6 +118016,23 @@ void Tool_tspos::analyzeVoiceCount(HumdrumFile& infile) {
 			continue;
 		}
 		voices[i] = countVoicesOnLine(infile, i);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::checkForTriadicSonority -- Mark the given line in the file as a triadic sonority
+//     of all MIDI note numbers are positive.
+//
+
+void Tool_tspos::checkForTriadicSonority(vector<int>& positions, int line) {
+	for (int i=0; i<(int)positions.size(); i++) {
+		if (positions[i] > 0) {
+			m_triadState.at(line) = true;
+			break;
+		}
 	}
 }
 
@@ -118050,22 +118071,6 @@ int Tool_tspos::countVoicesOnLine(HumdrumFile& infile, int line) {
 
 //////////////////////////////
 //
-// Tool_tspos::checkForTriadicSonority -- Mark the given line in the file as a triadic sonority
-//     of all MIDI note numbers are positive.
-//
-
-void Tool_tspos::checkForTriadicSonority(vector<int>& positions, int line) {
-	for (int i=0; i<(int)positions.size(); i++) {
-		if (positions[i] > 0) {
-			m_triadState.at(line) = true;
-			break;
-		}
-	}
-}
-
-
-//////////////////////////////
-//
 // Tool_tspos::generateStatistics --
 //
 
@@ -118090,32 +118095,40 @@ string Tool_tspos::generateStatistics(HumdrumFile& infile) {
 		}
 	}
 
+	string toolPrefix = "!!!TOOL-";
+	if (m_toolCount > 0) {
+		toolPrefix += to_string(m_toolCount) + "-";
+	}
+	toolPrefix += m_toolName + "-";
+
 	stringstream out;
-	out << "!!!TOOL-" << m_toolName << "-sonority-count: " << sonorityCount << endl;
-	out << "!!!TOOL-" << m_toolName << "-sonority-duration: " << infile.getScoreDuration().getFloat() << endl;
-	out << "!!!TOOL-" << m_toolName << "-triadic-count: " << triadCount << endl;
-	out << "!!!TOOL-" << m_toolName << "-triadic-duration: " << triadDuration.getFloat() << endl;
+	out << toolPrefix << "sonority-count: " << sonorityCount << endl;
+	out << toolPrefix << "sonority-duration: " << infile.getScoreDuration().getFloat() << endl;
+	out << toolPrefix << "triadic-count: " << triadCount << endl;
+	out << toolPrefix << "triadic-duration: " << triadDuration.getFloat() << endl;
+
 	double percentage = 100.0 * (double)triadCount / (double)sonorityCount;
 	percentage = int(percentage * 100.0 + 0.5) / 100.0;
-	out << "!!!TOOL-" << m_toolName << "-count-ratio: " << percentage << "%" << endl;
+	out << toolPrefix << "count-ratio: " << percentage << "%" << endl;
+
 	percentage = 100.0 * triadDuration.getFloat() / infile.getScoreDuration().getFloat();
 	percentage = int(percentage * 100.0 + 0.5) / 100.0;
-	out << "!!!TOOL-" << m_toolName << "-duration-ratio: " << percentage << "%" << endl;
+	out << toolPrefix << "duration-ratio: " << percentage << "%" << endl;
 
 	// Report triads positions by voice:
 	vector<string> names = getTrackNames(infile);
 
 	for (int i=1; i<(int)names.size(); i++) {
-		out << "!!!TOOL-" << m_toolName << "-track-name-" << to_string(i) << ": " << names[i] << endl;
+		out << toolPrefix << m_toolName << "track-name-" << to_string(i) << ": " << names[i] << endl;
 	}
 	vector<HTp> kernstarts;
 	infile.getKernSpineStartList(kernstarts);
 	if (!kernstarts.empty()) {
-		out << "!!!" << "TOOL-" << m_toolName << "-first-kern-track: " << kernstarts[0]->getTrack() << endl;
-		out << "!!!" << "TOOL-" << m_toolName << "-last-kern-track: " << kernstarts.back()->getTrack() << endl;
+		out << toolPrefix << "first-kern-track: " << kernstarts[0]->getTrack() << endl;
+		out << toolPrefix << "last-kern-track: " << kernstarts.back()->getTrack() << endl;
 	}
-	out << "!!!" << "TOOL-" << m_toolName << "-kern-count: " << kernstarts.size() << endl;
-	out << "!!!" << "TOOL-" << m_toolName << "-kern-tracks: ";
+	out << toolPrefix << "kern-count: " << kernstarts.size() << endl;
+	out << toolPrefix << "kern-tracks: ";
 	for (int i=0; i<(int)kernstarts.size(); i++) {
 		out << kernstarts[i]->getTrack();
 		if (i < (int)kernstarts.size() - 1) {
@@ -118144,10 +118157,10 @@ string Tool_tspos::generateStatistics(HumdrumFile& infile) {
 		if (m_topQ && (topTrack == i)) {
 			name = "top-" + name;
 		}
-		out << "!!!" << "TOOL-" << m_toolName << "-count-sum-" << i << "-" << name << ": " << sum << endl;
-		out << "!!!" << "TOOL-" << m_toolName << "-root-count-" << i << "-" << name << ": " << rootCount << " (" << rootPercent << "%)" << endl;
-		out << "!!!" << "TOOL-" << m_toolName << "-third-count-" << i << "-" << name << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
-		out << "!!!" << "TOOL-" << m_toolName << "-fifth-count-" << i << "-" << name << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
+		out << toolPrefix << "count-sum-" << i << "-" << name << ": " << sum << endl;
+		out << toolPrefix << "root-count-" << i << "-" << name << ": " << rootCount << " (" << rootPercent << "%)" << endl;
+		out << toolPrefix << "third-count-" << i << "-" << name << ": " << thirdCount << " (" << thirdPercent << "%)" << endl;
+		out << toolPrefix << "fifth-count-" << i << "-" << name << ": " << fifthCount << " (" << fifthPercent << "%)" << endl;
 	}
 
 	if (m_tableQ) {
@@ -118161,24 +118174,49 @@ string Tool_tspos::generateStatistics(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_tspos::generateTable --
+// Tool_tspos::generateTable -- Create an HTML table that the statistics
+//     will be filled into.
 //
 
 string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
+
+	string toolPrefix = "TOOL-";
+	if (m_toolCount > 0) {
+		toolPrefix += to_string(m_toolCount) + "-";
+	}
+	toolPrefix += m_toolName + "-";
+
 	vector<HTp> spinestarts;
 	infile.getSpineStartList(spinestarts);
 	stringstream out;
 	out << "!!@@BEGIN: PREHTML\n";
 	out << "!!@CONTENT:\n";
 	out << "!!<div class='tool-" << m_toolName << "'>\n";
-	out << "!!<h2 class='header-tool-" << m_toolName
-			<< "'> Triadic sonority position analysis <a class='info-" << m_toolName
-			<< "' target='_blank' href='https://doc.verovio.humdrum.org/filter/" << m_toolName
-			<< "'>?</a></h2>\n";
+	out << "!!<h2 class='header-tool-" << m_toolName << "'>";
+	if (m_majorQ && !m_minorQ) {
+		out << "Major triadic";
+	} else if (!m_majorQ && m_minorQ) {
+		out << "Minor triadic";
+	} else {
+		out << "Triadic";
+	}
+	out << " sonority position analysis";
+	if (m_questionQ) {
+		out <<  " <a class='info-" << m_toolName
+				<< "' target='_blank' href='https://doc.verovio.humdrum.org/filter/"
+				<< m_toolName
+				<< "'>?</a>";
+	}
+	out << "</h2>\n";
 	out << "!!<table class='analysis'>\n";
 	out << "!!<tr><th class='voice'>Voice</th>"
 			<< "<th class='root'>Root</th><th class='third'>Third</th>"
 			<< "<th class='fifth'>Fifth</th><th class='total'>Total</th></td>\n";
+
+	int rootSum = 0;
+	int thirdSum = 0;
+	int fifthSum = 0;
+
 	std::vector<vector<int>>& pt =  m_partTriadPositions;
 	for (int i=(int)names.size() - 1; i>0; i--) {
 		int track = i;
@@ -118191,37 +118229,74 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 			sum += pt[i][j];
 		}
 
-		int rootPercent = int((pt.at(i)[0] + pt.at(i)[3] + pt.at(i)[5]) * 255.49 / sum + 0.5);
-		int thirdPercent = int((pt.at(i)[1] + pt.at(i)[4]) * 255.49 / sum + 0.5);
-		int fifthPercent = int((pt.at(i)[2] + pt.at(i)[6]) * 255.49 / sum + 0.5);
+		int rootCount  = pt.at(i)[0] + pt.at(i)[3] + pt.at(i)[5];
+		int thirdCount = pt.at(i)[1] + pt.at(i)[4];
+		int fifthCount = pt.at(i)[2] + pt.at(i)[6];
 
-		// requires the colors to be hex:
-		stringstream rootColor;
-		stringstream thirdColor;
-		stringstream fifthColor;
-		rootColor  << m_root_color  << std::hex << std::setw(2)
-				<< std::setfill('0') << std::uppercase << rootPercent << std::dec;
-		thirdColor << m_third_color << std::hex << std::setw(2)
-				<< std::setfill('0') << std::uppercase << thirdPercent << std::dec;
-		fifthColor << m_fifth_color << std::hex << std::setw(2)
-				<< std::setfill('0') << std::uppercase << fifthPercent << std::dec;
+		rootSum  += rootCount;
+		thirdSum += thirdCount;
+		fifthSum += fifthCount;
+
+		// Requires the colors to be hex:
+		string oc1 = makeOpacityColor(m_root_color,  rootCount,  sum);
+		string oc3 = makeOpacityColor(m_third_color, thirdCount, sum);
+		string oc5 = makeOpacityColor(m_fifth_color, fifthCount, sum);
 
 		out << "!!   <td class='voice'>" << m_fullNames[i] << "</td>\n";
-		out << "!!   <td class='root'  style='background-color:" << rootColor.str()
-			<< ";'>@{" << "TOOL-" << m_toolName << "-root-count-"  << to_string(track)
+		out << "!!   <td class='root'  style='background-color:" << oc1
+			<< ";'>@{" << toolPrefix << "root-count-"  << to_string(track)
 			<< "-" << names[track] << "}</td>\n";
-		out << "!!   <td class='third' style='background-color:" << thirdColor.str()
-			<< ";'>@{" << "TOOL-" << m_toolName << "-third-count-" << to_string(track)
+		out << "!!   <td class='third' style='background-color:" << oc3
+			<< ";'>@{" << toolPrefix << "third-count-" << to_string(track)
 			<< "-" << names[track] << "}</td>\n";
-		out << "!!   <td class='fifth' style='background-color:" << fifthColor.str()
-				<< ";'>@{" << "TOOL-" << m_toolName << "-fifth-count-" << to_string(track)
+		out << "!!   <td class='fifth' style='background-color:" << oc5
+				<< ";'>@{" << toolPrefix << "fifth-count-" << to_string(track)
 				<< "-" << names[track] << "}</td>\n";
-		out << "!!   <td class='total'>@{" << "TOOL-" << m_toolName << "-count-sum-"
+		out << "!!   <td class='total'>@{" << toolPrefix << "count-sum-"
 				<< to_string(track) << "-" << names[track] << "}</td>\n";
 		out << "!!</tr>\n";
 	}
+
+	int totalSum = rootSum + thirdSum + fifthSum;
+
+	string p1 = makePercentString(rootSum,  totalSum, 1);
+	string p3 = makePercentString(thirdSum, totalSum, 1);
+	string p5 = makePercentString(fifthSum, totalSum, 1);
+
+	string oc1 = makeOpacityColor(m_root_color,  rootSum,  totalSum);
+	string oc3 = makeOpacityColor(m_third_color, thirdSum, totalSum);
+	string oc5 = makeOpacityColor(m_fifth_color, fifthSum, totalSum);
+
+	// print column sum table
+	out << "!!<tr>\n";
+	out << "!!<td style='text-align:right; font-style:italic;'>\n";
+	out << "!!   sum:\n";
+	out << "!!</td>\n";
+
+	// root sum:
+	out << "!!<td class='root' style='background-color:" << oc1 << ";'>\n";
+	out << "!!   " << rootSum << " (" << p1 << "%)" << endl;
+	out << "!!</td>\n";
+
+	// third sum:
+	out << "!!<td class='third' style='background-color:" << oc3 << ";'>\n";
+	out << "!!   " << thirdSum << " (" << p3 << "%)" << endl;
+	out << "!!</td>\n";
+
+	// fifth sum:
+	out << "!!<td class='fifth' style='background-color:" << oc5 << ";'>\n";
+	out << "!!   " << fifthSum << " (" << p5 << "%)" << endl;
+	out << "!!</td>\n";
+
+	// total sum:
+	out << "!!<td class='total'>\n";
+	out << "!!   " << totalSum << endl;
+	out << "!!</td>\n";
+
+	out << "!!</tr>\n";
+
 	out << "!!</table>\n";
-	
+
 	stringstream options;
 	int licount = 0;
 	options << "!!<ul>\n";
@@ -118238,11 +118313,14 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 	}
 
 	if (!(m_colorThirds && m_colorFifths && m_colorTriads)) {
-		if (m_colorTriads && !m_colorThirds && !m_colorFifths) {
-			options << "!!<li> Only sonorities with three triadic pitch-classes analyzed</li>\n";
+		if (m_colorTriads && m_colorThirds && m_colorFifths) {
+			options << "!!<li> Sonorities with two or three triadic positions analyzed</li>\n";
+			licount++;
+		} else if (m_colorTriads && !m_colorThirds && !m_colorFifths) {
+			options << "!!<li> Only sonorities with all three triadic positions analyzed</li>\n";
 			licount++;
 		} else if (!m_colorTriads && m_colorThirds && m_colorFifths) {
-			options << "!!<li> Only sonorities with two triadic pitch-classes analyzed</li>\n";
+			options << "!!<li> Only sonorities with two triadic positions analyzed</li>\n";
 			licount++;
 		} else if (!m_colorTriads && m_colorThirds && !m_colorFifths) {
 			options << "!!<li> Only sonorities with open thirds analyzed</li>\n";
@@ -118258,15 +118336,14 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 			licount++;
 		}
 	} else {
-		// print a message about two- and three-pitch-class sonorities.
+		// print a message about both two- and three-pitch-class sonorities?
 	}
 
 	options << "!!</ul>\n";
 	if (licount) {
 		out << options.str();
 	}
-	
-	
+
 	out << "!!</div>\n";
 
 	// Styling of table:
@@ -118310,6 +118387,37 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 
 //////////////////////////////
 //
+// Tool_tspos::makeOpacityColor --
+//
+
+string Tool_tspos::makeOpacityColor(string& color, double value, double total) {
+	stringstream output;
+	int percent  = int(value / total * 255.49 + 0.5);
+	output << color << std::hex << std::setw(2) << std::setfill('0') << percent << std::dec;
+	return output.str();
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::makePercentString --
+//
+
+string Tool_tspos::makePercentString(double value, double total, int digits) {
+	double percent = int(value / total * 100.0 * std::pow(10, digits) + 0.5) / std::pow(10, digits);
+	stringstream output;
+	output << percent;
+	if ((percent - int(percent)) < 1.0 / std::pow(10, digits) / 10.0) {
+		output << ".0";
+	}
+	return output.str();
+}
+
+
+
+//////////////////////////////
+//
 // Tool_tspos::getVectorSum --
 //
 
@@ -118320,6 +118428,7 @@ int Tool_tspos::getVectorSum(vector<int>& input) {
 	}
 	return sum;
 }
+
 
 
 //////////////////////////////
@@ -118361,9 +118470,6 @@ vector<string> Tool_tspos::getTrackNames(HumdrumFile& infile) {
 	}
 	return output;
 }
-
-
-
 
 
 
@@ -118410,6 +118516,8 @@ void Tool_tspos::labelChordPositions(vector<HTp>& kernNotes, vector<int>& chordP
 		kernNotes.at(i)->setText(text);
 	}
 }
+
+
 
 //////////////////////////////
 //
@@ -118520,6 +118628,8 @@ vector<int> Tool_tspos::getNoteMods(vector<int>& midiNotes) {
 	return noteMods;
 }
 
+
+
 //////////////////////////////
 //
 // Tool_tspos::getThirds -- Identify if the sonority is a third interval, and if so,
@@ -118557,7 +118667,7 @@ vector<int> Tool_tspos::getThirds(vector<int>& midiNotes) {
 
 	}
 
-	else if (m_majorQ && !m_minorQ) {
+	else if (!m_majorQ && m_minorQ) {
 		if (interval == 3) { // minor third is found
 			rootClass = noteMods.at(0);
 			thirdClass = noteMods.at(1);
@@ -118568,7 +118678,7 @@ vector<int> Tool_tspos::getThirds(vector<int>& midiNotes) {
 		}
 	}
 
-	else if (!m_majorQ && m_minorQ) {
+	else if (m_majorQ && !m_minorQ) {
 
 		if (interval == 4) { // major third is found
 			rootClass = noteMods.at(0);
@@ -118654,7 +118764,7 @@ vector<int> Tool_tspos::getFifths(vector<int>& midiNotes) {
 
 ///////////////////////////////
 //
-// Tool_tspos::getChordPositions -- 
+// Tool_tspos::getChordPositions --
 //
 
 vector<int> Tool_tspos::getChordPositions(vector<int>& midiNotes) {
@@ -118709,7 +118819,7 @@ vector<int> Tool_tspos::getChordPositions(vector<int>& midiNotes) {
 		}
 	}
 
-	else if (!m_majorQ && m_minorQ) {
+	else if (m_majorQ && !m_minorQ) {
 		if (bint == 4 && tint == 3) {// major root pos
 			rootClass = noteMods.at(0);
 			thirdClass = noteMods.at(1);
@@ -118748,6 +118858,13 @@ vector<int> Tool_tspos::getChordPositions(vector<int>& midiNotes) {
 	return output;
 }
 
+
+
+//////////////////////////////
+//
+// Tool_tspos::keepOnlyDoubles --
+//
+
 void Tool_tspos::keepOnlyDoubles(vector<int>& output) {
 	map<int, int> positionCounts = {{1, 0}, {3, 0}, {5, 0}};
 
@@ -118772,6 +118889,8 @@ void Tool_tspos::keepOnlyDoubles(vector<int>& output) {
 	return;
 }
 
+
+
 //////////////////////////////
 //
 // Tool_tspos::getMidiNotes -- Convert kern notes to MIDI note numbers.
@@ -118793,6 +118912,7 @@ vector<int> Tool_tspos::getMidiNotes(vector<HTp>& kernNotes) {
 	}
 	return output;
 }
+
 
 
 //////////////////////////////
@@ -118846,6 +118966,24 @@ void Tool_tspos::avoidRdfCollisions(HumdrumFile& infile) {
 		m_5th_fifth_marker = replacement[6];
 	}
 
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::getToolCounter --
+//
+
+int Tool_tspos::getToolCounter(HumdrumFile& infile) {
+	int counter = 0;
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (hre.search(infile[i], "^!!@@BEGIN:\\s*PREHTML\\s*$")) {
+			counter++;
+		}
+	}
+	return counter;
 }
 
 
