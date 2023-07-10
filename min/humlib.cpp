@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 13 04:58:02 PDT 2023
+// Last Modified: Mo 10 Jul 2023 15:49:26 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -78135,6 +78135,7 @@ Tool_fb::Tool_fb(void) {
 	define("rate=s:",                    "Rate to display the numbers (use a **recip value, e.g. 4, 4.)");
 	define("k|kern-tracks=s",            "Process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
+	define("hint=b",                     "Determine harmonic intervals with interval quality");
 }
 
 
@@ -78201,6 +78202,7 @@ void Tool_fb::initialize(void) {
 	m_showNegativeQ  = getBoolean("negative");
 	m_aboveQ         = getBoolean("above");
 	m_rateQ          = getString("rate");
+	m_hintQ          = getBoolean("hint");
 
 	if (getBoolean("spine-tracks")) {
 		m_spineTracks = getString("spine-tracks");
@@ -78226,6 +78228,11 @@ void Tool_fb::initialize(void) {
 		m_sortQ = true;
 		m_accidentalsQ = true;
 		m_hideThreeQ = true;
+	}
+
+	if (m_hintQ) {
+		m_showNegativeQ = true;
+		// m_lowestQ = true;
 	}
 }
 
@@ -78434,6 +78441,10 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 
 	string exinterp = m_aboveQ ? "**fba" : "**fb";
 
+	if (m_hintQ) {
+		exinterp = "**hint";
+	}
+
 	if (m_intervallsatzQ) {
 		// Create **fb spine for each voice
 		for (int voiceIndex = 0; voiceIndex < grid.getVoiceCount(); voiceIndex++) {
@@ -78597,7 +78608,9 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(int basePitchBase40, int tar
 		}
 	}
 
-	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, voiceIndex, lineIndex, isAttack, m_intervallsatzQ);
+	string intervalQuality = getIntervalQuality(basePitchBase40, targetPitchBase40);
+
+	FiguredBassNumber* number = new FiguredBassNumber(num, accid, showAccid, voiceIndex, lineIndex, isAttack, m_intervallsatzQ, intervalQuality, m_hintQ);
 
 	return number;
 }
@@ -78873,12 +78886,95 @@ int Tool_fb::getLowestBase40Pitch(vector<int> base40Pitches) {
 }
 
 
+
+//////////////////////////////
+//
+// Tool_fb::getIntervalQuality -- Return interval quality prefix string
+//
+
+string Tool_fb::getIntervalQuality(int basePitchBase40, int targetPitchBase40) {
+
+	int diff = (targetPitchBase40 - basePitchBase40) % 40;
+
+	diff = diff < -2 ? abs(diff) : diff;
+
+	// See https://wiki.ccarh.org/wiki/Base_40
+	string quality;
+	switch (diff) {
+		// 1
+		case -2:
+		case 38:
+			quality = "dd"; break;
+		case -1:
+		case 39:
+			quality = "d"; break;
+		case 0: quality = "P"; break;
+		case 1: quality = "A"; break;
+		case 2: quality = "AA"; break;
+
+		// 2
+		case 3: quality = "dd"; break;
+		case 4: quality = "d"; break;
+		case 5: quality = "m"; break;
+		case 6: quality = "M"; break;
+		case 7: quality = "A"; break;
+		case 8: quality = "AA"; break;
+
+		// 3
+		case 9: quality = "dd"; break;
+		case 10: quality = "d"; break;
+		case 11: quality = "m"; break;
+		case 12: quality = "M"; break;
+		case 13: quality = "A"; break;
+		case 14: quality = "AA"; break;
+
+		// 4
+		case 15: quality = "dd"; break;
+		case 16: quality = "d"; break;
+		case 17: quality = "P"; break;
+		case 18: quality = "A"; break;
+		case 19: quality = "AA"; break;
+
+		case 20: quality = "<unused>"; break;
+
+		// 5
+		case 21: quality = "dd"; break;
+		case 22: quality = "d"; break;
+		case 23: quality = "P"; break;
+		case 24: quality = "A"; break;
+		case 25: quality = "AA"; break;
+
+		// 6
+		case 26: quality = "dd"; break;
+		case 27: quality = "d"; break;
+		case 28: quality = "m"; break;
+		case 29: quality = "M"; break;
+		case 30: quality = "A"; break;
+		case 31: quality = "AA"; break;
+
+		// 7
+		case 32: quality = "dd"; break;
+		case 33: quality = "d"; break;
+		case 34: quality = "m"; break;
+		case 35: quality = "M"; break;
+		case 36: quality = "A"; break;
+		case 37: quality = "AA"; break;
+
+		default: quality = "?"; break;
+	}
+
+	return quality;
+
+}
+
+
+
 //////////////////////////////
 //
 // FiguredBassNumber::FiguredBassNumber -- Constructor
 //
 
-FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk, bool intervallsatz) {
+FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int voiceIdx, int lineIdx, bool isAtk, bool intervallsatz, string intervalQuality, bool hint) {
 	m_number          = num;
 	m_accidentals     = accid;
 	m_voiceIndex      = voiceIdx;
@@ -78886,6 +78982,8 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 	m_showAccidentals = showAccid;
 	m_isAttack        = isAtk;
 	m_intervallsatz   = intervallsatz;
+	m_intervalQuality = intervalQuality;
+	m_hint            = hint;
 }
 
 
@@ -78897,6 +78995,9 @@ FiguredBassNumber::FiguredBassNumber(int num, string accid, bool showAccid, int 
 
 string FiguredBassNumber::toString(bool compoundQ, bool accidentalsQ, bool hideThreeQ) {
 	int num = (compoundQ) ? getNumberWithinOctave() : m_number;
+	if (m_hint) {
+		return m_intervalQuality + to_string(abs(num));
+	}
 	string accid = (accidentalsQ && m_showAccidentals) ? m_accidentals : "";
 	if (((num == 3) || (num == -3)) && accidentalsQ && m_showAccidentals && hideThreeQ) {
 		return accid;
@@ -78931,7 +79032,7 @@ int FiguredBassNumber::getNumberWithinOctave(void) {
 	// Replace 1 with 8 and -8
 	if (abs(num) == 1) {
 		// Allow unisono in intervallsatz
-		if (m_intervallsatz) {
+		if (m_intervallsatz || m_hint) {
 			if (abs(m_number) == 1) {
 				return 1;
 			}
