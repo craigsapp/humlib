@@ -22,7 +22,7 @@ namespace hum {
 
 class FiguredBassNumber {
 	public:
-		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack, bool intervallsatz);
+		            FiguredBassNumber(int num, string accid, bool showAccid, int voiceIndex, int lineIndex, bool isAttack, bool intervallsatz, string intervalQuality, bool hint);
 		std::string toString(bool nonCompoundIntervalsQ, bool noAccidentalsQ, bool hideThreeQ);
 		int         getNumberWithinOctave(void);
 
@@ -35,6 +35,8 @@ class FiguredBassNumber {
 		bool        m_isAttack;
 		bool        m_convert2To9 = false;
 		bool        m_intervallsatz = false;
+		std::string m_intervalQuality;
+		bool        m_hint = false;
 
 };
 
@@ -81,6 +83,7 @@ class Tool_fb : public HumTool {
 		string                     getNumberString                        (vector<FiguredBassNumber*> numbers);
 		string                     getKeySignature                        (HumdrumFile& infile, int lineIndex);
 		int                        getLowestBase40Pitch                   (vector<int> base40Pitches);
+		string                     getIntervalQuality                     (int basePitchBase40, int targetPitchBase40);
 
 
 	private:
@@ -98,6 +101,7 @@ class Tool_fb : public HumTool {
 		bool   m_showNegativeQ  = false;
 		bool   m_aboveQ         = false;
 		string m_rateQ          = "";
+		bool   m_hintQ          = false;
 
 		string m_spineTracks    = ""; // used with -s option
 		string m_kernTracks     = ""; // used with -k option
