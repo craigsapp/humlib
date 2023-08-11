@@ -583,7 +583,7 @@ void Tool_shed::searchAndReplaceGlobalComment(HumdrumFile& infile) {
 			continue;
 		}
 		if (hre.search(token, isearch, m_grepoptions)) {
-			string text = token->getText().substr(1);
+			string text = token->getText().substr(2);
 			hre.replaceDestructive(text, m_replace, m_search, m_grepoptions);
 			hre.replaceDestructive(text, "", "^!+");
 			text = "!!" + text;

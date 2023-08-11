@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 10 Jul 2023 15:49:26 CEST
+// Last Modified: Fri Aug 11 14:56:20 CEST 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -110765,7 +110765,7 @@ void Tool_shed::searchAndReplaceGlobalComment(HumdrumFile& infile) {
 			continue;
 		}
 		if (hre.search(token, isearch, m_grepoptions)) {
-			string text = token->getText().substr(1);
+			string text = token->getText().substr(2);
 			hre.replaceDestructive(text, m_replace, m_search, m_grepoptions);
 			hre.replaceDestructive(text, "", "^!+");
 			text = "!!" + text;
