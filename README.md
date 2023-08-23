@@ -134,16 +134,13 @@ a Humdrum file into a MIDI-like listing of notes.
 using namespace std;
 using namespace hum;
 
-void printNoteInformation(HTp token, int tpq) {
-   int duration  = token->getTiedDuration(tpq).getInteger();
-   int starttime = token->getDurationFromStart(tpq).getInteger();
-   vector<string> chordnotes = token->getSubtokens();
-   for (size_t i=0; i<chordnotes.size(); i++) {
-      cout << Convert::kernToSciPitch(chordnotes[i])
-         << '\t' << token->getTrackString()
-         << '\t' << starttime
-         << '\t' << duration << endl;
-   }
+void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
+	HTp token = infile.token(line, field);
+   int starttime = infile[line].getDurationFromStart(tpq).getInteger();
+   int duration  = token->getDuration(tpq).getInteger();
+   cout << Convert::kernToSciPitch(*token)
+        << '\t' << token->getTrackString()
+        << '\t' << starttime << '\t' << duration << endl;
 }
 
 int main(int argc, char** argv) {
@@ -162,15 +159,14 @@ int main(int argc, char** argv) {
       if (!infile[i].isData()) {
          continue;
       }
-      for (int j=0; j<infile[i].getFieldCount(); j++) {
-         HTp token = infile.token(i, j);
-         if (!token->isKern()) {
+      for (int j=0; j<infile[i].getTokenCount(); j++) {
+			HTp token = infile.token(i, j);
+         if (token->isNull()) {
             continue;
          }
-         if (token->isNull() || token->isRest()) {
-            continue;
+         if (token->isKern()) {
+            printNoteInformation(infile, i, j, tpq);
          }
-         printNoteInformation(token, tpq);
       }
    }
    return 0;
@@ -186,7 +182,7 @@ Test data for use with the above program:
 <table style="width:100%">
 <tr><td style="border:0">
 Example input:<br>
-<pre style="tab-stop: 12; font-family: Courier; text-align:left">
+<textinput style="tab-stop: 12; font-family: Courier; text-align:left">
 **kern	**kern
 *M3/4	*M3/4
 8C	12d
@@ -203,7 +199,7 @@ Example input:<br>
 </td>
 <td style="border:0">
 Example output:<br>
-<pre style="font-family: Courier; text-align:left">
+<textarea style="font-family: Courier; text-align:left">
 TPQ: 6
 PITCH   TRACK   START   DURATION
 C3      1       0       3
