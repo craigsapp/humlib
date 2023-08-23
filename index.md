@@ -90,13 +90,14 @@ a Humdrum file into a MIDI-like listing of notes:
 #include "humlib.h"
 
 using namespace std;
-using namespace Humdrum;
+using namespace hum;
 
 void printNoteInformation(HumdrumFile& infile, int line, int field, int tpq) {
+	HTp token = infile.token(line, field);
    int starttime = infile[line].getDurationFromStart(tpq).getInteger();
-   int duration  = infile.token(line, field).getDuration(tpq).getInteger();
-   cout << Convert::kernToSciPitch(infile.token(line, field))
-        << '\t' << infile.token(line, field).getTrackString()
+   int duration  = token->getDuration(tpq).getInteger();
+   cout << Convert::kernToSciPitch(*token)
+        << '\t' << token->getTrackString()
         << '\t' << starttime << '\t' << duration << endl;
 }
 
@@ -117,10 +118,11 @@ int main(int argc, char** argv) {
          continue;
       }
       for (int j=0; j<infile[i].getTokenCount(); j++) {
-         if (infile.token(i, j).isNull()) {
+			HTp token = infile.token(i, j);
+         if (token->isNull()) {
             continue;
          }
-         if (infile.token(i, j).isDataType("kern")) {
+         if (token->isKern()) {
             printNoteInformation(infile, i, j, tpq);
          }
       }
