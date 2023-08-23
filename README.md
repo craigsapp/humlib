@@ -182,7 +182,7 @@ Test data for use with the above program:
 <table style="width:100%">
 <tr><td style="border:0">
 Example input:<br>
-<textinput style="tab-stop: 12; font-family: Courier; text-align:left">
+<pre style="tab-stop: 12; font-family: Courier; text-align:left">
 **kern	**kern
 *M3/4	*M3/4
 8C	12d
@@ -199,7 +199,7 @@ Example input:<br>
 </td>
 <td style="border:0">
 Example output:<br>
-<textarea style="font-family: Courier; text-align:left">
+<pre style="font-family: Courier; text-align:left">
 TPQ: 6
 PITCH   TRACK   START   DURATION
 C3      1       0       3
