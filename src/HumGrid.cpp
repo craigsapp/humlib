@@ -117,7 +117,9 @@ int  HumGrid::getPartCount(void) {
 
 //////////////////////////////
 //
-// HumGrid::getStaffCount --
+// HumGrid::getStaffCount -- Get the number of staves in a
+//    given part.  Most parts will be single staff, but grand staff
+//    parts with have two staves.  Organ may have 3 staves.
 //
 
 int HumGrid::getStaffCount(int partindex) {
@@ -129,7 +131,8 @@ int HumGrid::getStaffCount(int partindex) {
 		return 0;
 	}
 
-	return (int)this->at(0)->back()->at(partindex)->size();
+	return (int)this->at(0)->front()->at(partindex)->size();
+	// return (int)this->at(0)->back()->at(partindex)->size();
 }
 
 

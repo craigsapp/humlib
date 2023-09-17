@@ -1,14 +1,13 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Sat Apr 30 12:05:40 PDT 2022
+// Last Modified: Sat Sep  2 18:06:26 CEST 2023
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
 // vim:           syntax=cpp ts=3 noexpandtab nowrap
 //
-// Description:   Example of extracting a 2D pitch grid from
-//                a score for dissonance analysis.
+// Description:   Verovio/VHV filter interface.
 //
 
 #include "tool-filter.h"
@@ -49,12 +48,14 @@
 #include "tool-mei2hum.h"
 #include "tool-melisma.h"
 #include "tool-mens2kern.h"
+#include "tool-meter.h"
 #include "tool-metlev.h"
 #include "tool-modori.h"
 #include "tool-msearch.h"
 #include "tool-myank.h"
 #include "tool-ordergps.h"
 #include "tool-phrase.h"
+#include "tool-pline.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
@@ -70,6 +71,7 @@
 #include "tool-synco.h"
 #include "tool-tabber.h"
 #include "tool-tassoize.h"
+#include "tool-textdur.h"
 #include "tool-thru.h"
 #include "tool-tie.h"
 #include "tool-timebase.h"
@@ -275,6 +277,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(melisma, infile, commands[i].second, status);
 		} else if (commands[i].first == "mens2kern") {
 			RUNTOOL(mens2kern, infile, commands[i].second, status);
+		} else if (commands[i].first == "meter") {
+			RUNTOOL(meter, infile, commands[i].second, status);
 		} else if (commands[i].first == "metlev") {
 			RUNTOOL(metlev, infile, commands[i].second, status);
 		} else if (commands[i].first == "modori") {
@@ -285,6 +289,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(ordergps, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
+		} else if (commands[i].first == "pline") {
+			RUNTOOL(pline, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
@@ -317,6 +323,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
 		} else if (commands[i].first == "tasso") {
 			RUNTOOL(tassoize, infile, commands[i].second, status);
+		} else if (commands[i].first == "textdur") {
+			RUNTOOL(textdur, infile, commands[i].second, status);
 		} else if (commands[i].first == "tie") {
 			RUNTOOL(tie, infile, commands[i].second, status);
 		} else if (commands[i].first == "tspos") {
