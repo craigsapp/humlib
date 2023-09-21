@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 16 19:23:59 PDT 2023
+// Last Modified: Wed Sep 20 23:39:20 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -438,6 +438,243 @@ vector<int> Convert::harmToBase40(const string& harm, int keyroot, int keymode) 
 
 	return output;
 
+}
+
+
+
+
+
+//////////////////////////////
+//
+// Convert::getInstrumentList -- List from https://bit.ly/humdrum-instrument-codes
+//
+
+vector<pair<string, string> > Convert::getInstrumentList(void) {
+	return vector<pair<string, string> > {
+		{"accor",	"klav"},
+		{"alto",	"vox"},
+		{"anvil",	"idio"},
+		{"archl",	"str"},
+		{"armon",	"ww"},
+		{"arpa",	"str"},
+		{"bagpI",	"ww"},
+		{"bagpS",	"ww"},
+		{"banjo",	"str"},
+		{"bansu",	"ww"},
+		{"barit",	"vox"},
+		{"baset",	"ww"},
+		{"bass",	"vox"},
+		{"bdrum",	"idio"},
+		{"bguit",	"str"},
+		{"biwa",	"str"},
+		{"brush",	"idio"},
+		{"bscan",	"vox"},
+		{"bspro",	"vox"},
+		{"bugle",	"bras"},
+		{"calam",	"ww"},
+		{"calpe",	"ww"},
+		{"calto",	"vox"},
+		{"campn",	"idio"},
+		{"cangl",	"ww"},
+		{"canto",	"vox"},
+		{"caril",	"idio"},
+		{"castr",	"vox"},
+		{"casts",	"idio"},
+		{"cbass",	"str"},
+		{"cello",	"str"},
+		{"cemba",	"klav"},
+		{"cetra",	"str"},
+		{"chain",	"idio"},
+		{"chcym",	"idio"},
+		{"chime",	"idio"},
+		{"chlma",	"ww"},
+		{"chlms",	"ww"},
+		{"chlmt",	"ww"},
+		{"clap",	"idio"},
+		{"clara",	"ww"},
+		{"clarb",	"ww"},
+		{"claro",	"ww"},
+		{"clarp",	"ww"},
+		{"clars",	"ww"},
+		{"clave",	"idio"},
+		{"clavi",	"klav"},
+		{"clest",	"klav"},
+		{"clrno",	"bras"},
+		{"colsp",	"vox"},
+		{"conga",	"idio"},
+		{"cor",	"bras"},
+		{"cornm",	"ww"},
+		{"corno",	"ww"},
+		{"cornt",	"bras"},
+		{"coro",	"vox"},
+		{"crshc",	"idio"},
+		{"ctenor",	"vox"},
+		{"ctina",	"klav"},
+		{"drmsp",	"vox"},
+		{"drum",	"idio"},
+		{"drumP",	"idio"},
+		{"dulc",	"str"},
+		{"eguit",	"str"},
+		{"fag_c",	"ww"},
+		{"fagot",	"ww"},
+		{"false",	"vox"},
+		{"fdrum",	"idio"},
+		{"feme",	"vox"},
+		{"fife",	"ww"},
+		{"fingc",	"idio"},
+		{"flex",	"idio"},
+		{"flt",	"ww"},
+		{"flt_a",	"ww"},
+		{"flt_b",	"ww"},
+		{"fltda",	"ww"},
+		{"fltdb",	"ww"},
+		{"fltdn",	"ww"},
+		{"fltds",	"ww"},
+		{"fltdt",	"ww"},
+		{"flugh",	"bras"},
+		{"forte",	"klav"},
+		{"gen",	"gen"},
+		{"genB",	"gen"},
+		{"genT",	"gen"},
+		{"glock",	"idio"},
+		{"gong",	"idio"},
+		{"guitr",	"str"},
+		{"hammd",	"klav"},
+		{"hbell",	"idio"},
+		{"heck",	"ww"},
+		{"heltn",	"vox"},
+		{"hichi",	"ww"},
+		{"hurdy",	"str"},
+		{"kitv",	"str"},
+		{"klav",	"klav"},
+		{"kokyu",	"str"},
+		{"komun",	"str"},
+		{"koto",	"str"},
+		{"kruma",	"ww"},
+		{"krumb",	"ww"},
+		{"krums",	"ww"},
+		{"krumt",	"ww"},
+		{"lion",	"idio"},
+		{"liuto",	"str"},
+		{"lyrsp",	"vox"},
+		{"lyrtn",	"vox"},
+		{"male",	"vox"},
+		{"mando",	"str"},
+		{"marac",	"idio"},
+		{"marim",	"idio"},
+		{"mbari",	"vox"},
+		{"mezzo",	"vox"},
+		{"nfant",	"vox"},
+		{"nokan",	"ww"},
+		{"oboe",	"ww"},
+		{"oboeD",	"ww"},
+		{"ocari",	"ww"},
+		{"ondes",	"klav"},
+		{"ophic",	"bras"},
+		{"organ",	"klav"},
+		{"oud",	"str"},
+		{"paila",	"idio"},
+		{"panpi",	"ww"},
+		{"pbell",	"idio"},
+		{"pguit",	"str"},
+		{"physh",	"klav"},
+		{"piano",	"klav"},
+		{"piatt",	"idio"},
+		{"picco",	"ww"},
+		{"pipa",	"str"},
+		{"piri",	"ww"},
+		{"porta",	"klav"},
+		{"psalt",	"str"},
+		{"qin",	"str"},
+		{"quinto",	"vox"},
+		{"quitr",	"str"},
+		{"rackt",	"ww"},
+		{"ratch",	"idio"},
+		{"ratl",	"idio"},
+		{"rebec",	"str"},
+		{"recit",	"vox"},
+		{"reedo",	"klav"},
+		{"rhode",	"klav"},
+		{"ridec",	"idio"},
+		{"sarod",	"str"},
+		{"sarus",	"ww"},
+		{"saxA",	"ww"},
+		{"saxB",	"ww"},
+		{"saxC",	"ww"},
+		{"saxN",	"ww"},
+		{"saxR",	"ww"},
+		{"saxS",	"ww"},
+		{"saxT",	"ww"},
+		{"sbell",	"idio"},
+		{"sdrum",	"idio"},
+		{"serp",	"bras"},
+		{"sesto",	"vox"},
+		{"shaku",	"ww"},
+		{"shami",	"str"},
+		{"sheng",	"ww"},
+		{"sho",	"ww"},
+		{"siren",	"idio"},
+		{"sitar",	"str"},
+		{"slap",	"idio"},
+		{"soprn",	"vox"},
+		{"spok",	"vox"},
+		{"spokF",	"vox"},
+		{"spokM",	"vox"},
+		{"spshc",	"idio"},
+		{"steel",	"idio"},
+		{"stim",	"vox"},
+		{"stimA",	"vox"},
+		{"stimB",	"vox"},
+		{"stimC",	"vox"},
+		{"stimR",	"vox"},
+		{"stimS",	"vox"},
+		{"strdr",	"idio"},
+		{"sxhA",	"bras"},
+		{"sxhB",	"bras"},
+		{"sxhC",	"bras"},
+		{"sxhR",	"bras"},
+		{"sxhS",	"bras"},
+		{"sxhT",	"bras"},
+		{"synth",	"klav"},
+		{"tabla",	"idio"},
+		{"tambn",	"idio"},
+		{"tambu",	"str"},
+		{"tanbr",	"str"},
+		{"tblok",	"idio"},
+		{"tdrum",	"idio"},
+		{"tenor",	"vox"},
+		{"timpa",	"idio"},
+		{"tiorb",	"str"},
+		{"tom",	"idio"},
+		{"trngl",	"idio"},
+		{"tromP",	"bras"},
+		{"troma",	"bras"},
+		{"tromb",	"bras"},
+		{"tromp",	"bras"},
+		{"tromt",	"bras"},
+		{"trumB",	"bras"},
+		{"tuba",	"bras"},
+		{"tubaB",	"bras"},
+		{"tubaC",	"bras"},
+		{"tubaT",	"bras"},
+		{"tubaU",	"bras"},
+		{"ukule",	"str"},
+		{"vibra",	"idio"},
+		{"vina",	"str"},
+		{"viola",	"str"},
+		{"violb",	"str"},
+		{"viold",	"str"},
+		{"viole",	"str"},
+		{"violn",	"str"},
+		{"violp",	"str"},
+		{"viols",	"str"},
+		{"violt",	"str"},
+		{"vox",	"vox"},
+		{"wblok",	"idio"},
+		{"xylo",	"idio"},
+		{"zithr",	"str"},
+		{"zurna",	"ww"}
+	};
 }
 
 
@@ -4407,6 +4644,7 @@ string Convert::getLanguageName(const string& abbreviation) {
 	}
 	return code;
 }
+
 
 
 
@@ -79282,6 +79520,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(modori, infile, commands[i].second, status);
 		} else if (commands[i].first == "msearch") {
 			RUNTOOL(msearch, infile, commands[i].second, status);
+		} else if (commands[i].first == "nproof") {
+			RUNTOOL(nproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "ordergps") {
 			RUNTOOL(ordergps, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
@@ -92756,18 +92996,25 @@ string Tool_mens2kern::mens2kernRhythm(const string& rhythm, bool altera, bool p
 //
 
 Tool_meter::Tool_meter(void) {
-	// options
 
-	define("B|no-beat=b", "Do not display metric positions (beats)");
 	define("c|comma=b", "display decimal points as commas");
 	define("d|denominator=b", "display denominator spine");
+	define("e|eighth=b", "metric positions in eighth notes rather than beats");
 	define("f|float=b", "floating-point beat values instead of rational numbers");
+	define("h|half=b", "metric positions in half notes rather than beats");
 	define("j|join=b", "join time signature information and metric positions into a single token");
-	define("L|no-label=b", "do not add labels to analysis spines");
 	define("n|numerator=b", "display numerator spine");
+	define("q|quarter=b", "metric positions in quarter notes rather than beats");
 	define("r|rest=b", "add meteric positions of rests");
+	define("s|sixteenth=b", "metric positions in sixteenth notes rather than beats");
 	define("t|time-signature|tsig|m|meter=b", "display active time signature for each note");
+	define("w|whole=b", "metric positions in whole notes rather than beats");
 	define("z|zero=b", "start of measure is beat 0 rather than beat 1");
+
+	define("B|no-beat=b", "Do not display metric positions (beats)");
+	define("D|digits=i:0", "number of digits after decimal point");
+	define("L|no-label=b", "do not add labels to analysis spines");
+
 }
 
 
@@ -92823,16 +93070,31 @@ bool Tool_meter::run(HumdrumFile& infile) {
 //
 
 void Tool_meter::initialize(void) {
+
 	m_commaQ       = getBoolean("comma");
 	m_denominatorQ = getBoolean("denominator");
+	m_digits       = getInteger("digits");
 	m_floatQ       = getBoolean("float");
-	m_tsigQ        = getBoolean("meter");
-	m_nobeatQ      = getBoolean("no-beat");
-	m_numeratorQ   = getBoolean("numerator");
-	m_restQ        = getBoolean("rest");
-	m_zeroQ        = getBoolean("zero");
+	m_halfQ        = getBoolean("half");
 	m_joinQ        = getBoolean("join");
+	m_nobeatQ      = getBoolean("no-beat");
 	m_nolabelQ     = getBoolean("no-label");
+	m_numeratorQ   = getBoolean("numerator");
+	m_quarterQ     = getBoolean("quarter");
+	m_halfQ        = getBoolean("half");
+	m_eighthQ      = getBoolean("eighth");
+	m_sixteenthQ   = getBoolean("sixteenth");
+	m_restQ        = getBoolean("rest");
+	m_tsigQ        = getBoolean("meter");
+	m_wholeQ       = getBoolean("whole");
+	m_zeroQ        = getBoolean("zero");
+
+	if (m_digits < 0) {
+		m_digits = 0;
+	}
+	if (m_digits > 15) {
+		m_digits = 15;
+	}
 
 	if (m_joinQ && !(m_tsigQ || m_numeratorQ || m_denominatorQ)) {
 		m_tsigQ = true;
@@ -92840,11 +93102,44 @@ void Tool_meter::initialize(void) {
 	if (m_joinQ) {
 		m_nobeatQ = false;
 	}
+	if (m_joinQ && m_numeratorQ && m_denominatorQ) {
+		m_tsigQ = true;
+	}
 
 	if (m_tsigQ) {
 		m_numeratorQ = true;
 		m_denominatorQ = true;
 	}
+
+	// Only one fix-width metric position allowed, prioritize
+	// largest given duration:
+	if (m_wholeQ) {
+		m_halfQ      = false;
+		m_quarterQ   = false;
+		m_eighthQ    = false;
+		m_sixteenthQ = false;
+	} else if (m_halfQ) {
+		m_wholeQ     = false;
+		m_quarterQ   = false;
+		m_eighthQ    = false;
+		m_sixteenthQ = false;
+	} else if (m_quarterQ) {
+		m_wholeQ     = false;
+		m_halfQ      = false;
+		m_eighthQ    = false;
+		m_sixteenthQ = false;
+	} else if (m_eighthQ) {
+		m_wholeQ     = false;
+		m_halfQ      = false;
+		m_quarterQ   = false;
+		m_sixteenthQ = false;
+	} else if (m_sixteenthQ) {
+		m_wholeQ     = false;
+		m_halfQ      = false;
+		m_quarterQ   = false;
+		m_eighthQ    = false;
+	}
+
 }
 
 
@@ -92855,9 +93150,193 @@ void Tool_meter::initialize(void) {
 //
 
 void Tool_meter::processFile(HumdrumFile& infile) {
+	analyzePickupMeasures(infile);
 	getMeterData(infile);
 	printMeterData(infile);
 }
+
+
+//////////////////////////////
+//
+// Tool_meter::analyzePickupMeasures --
+//
+
+void Tool_meter::analyzePickupMeasures(HumdrumFile& infile) {
+	vector<HTp> sstarts;
+	infile.getKernSpineStartList(sstarts);
+	for (int i=0; i<(int)sstarts.size(); i++) {
+		analyzePickupMeasures(sstarts[i]);
+	}
+}
+
+
+void Tool_meter::analyzePickupMeasures(HTp sstart) {
+	// First dimension are visible barlines.
+	// Second dimension are time signature(s) within the barlines.
+	vector<vector<HTp>> barandtime;
+	barandtime.reserve(1000);
+	barandtime.resize(1);
+	barandtime[0].push_back(sstart);
+	HTp current = sstart->getNextToken();
+	while (current) {
+		if (current->isTimeSignature()) {
+			barandtime.back().push_back(current);
+		} else if (current->isBarline()) {
+			if (current->find("-") != std::string::npos) {
+				current = current->getNextToken();
+				continue;
+			}
+			barandtime.resize(barandtime.size() + 1);
+			barandtime.back().push_back(current);
+		} else if (*current == "*-") {
+			barandtime.resize(barandtime.size() + 1);
+			barandtime.back().push_back(current);
+			break;
+		}
+		current = current->getNextToken();
+	}
+
+	// Extract the actual duration of measures:
+	vector<HumNum> bardur(barandtime.size(), 0);
+	for (int i=0; i<(int)barandtime.size() - 1; i++) {
+		HumNum starttime = barandtime[i][0]->getDurationFromStart();
+		HumNum endtime = barandtime.at(i+1)[0]->getDurationFromStart();
+		HumNum duration = endtime - starttime;
+		bardur.at(i) = duration;
+	}
+
+	// Extract the expected duration of measures:
+	vector<HumNum> tsigdur(barandtime.size(), 0);
+	int firstmeasure = -1;
+	HumNum active = 0;
+	for (int i=0; i<(int)barandtime.size() - 1; i++) {
+		if (firstmeasure < 0) {
+			if (bardur.at(i) > 0) {
+				firstmeasure = i;
+			}
+		}
+		if (barandtime[i].size() < 2) {
+			tsigdur.at(i) = active;
+			continue;
+		}
+		active = getTimeSigDuration(barandtime.at(i).at(1));
+		tsigdur.at(i) = active;
+	}
+
+	vector<bool> pickup(barandtime.size(), false);
+	for (int i=0; i<(int)barandtime.size() - 1; i++) {
+		if (tsigdur.at(i) == bardur.at(i)) {
+			// actual and expected are the same
+			continue;
+		}
+		if (tsigdur.at(i) == tsigdur.at(i+1)) {
+			if (bardur.at(i) + bardur.at(i+1) == tsigdur.at(i)) {
+				pickup.at(i+1) = true;
+				i++;
+				continue;
+			}
+		}
+	}
+
+	// check for first-measure pickup
+	if (firstmeasure >= 0) {
+		if (bardur.at(firstmeasure) < tsigdur.at(firstmeasure)) {
+			pickup.at(firstmeasure) = true;
+		}
+	}
+
+	if (m_debugQ) {
+		cerr << "============================" << endl;
+		for (int i=0; i<(int)barandtime.size(); i++) {
+			cerr << pickup.at(i);
+			cerr << "\t";
+			cerr << bardur.at(i);
+			cerr << "\t";
+			cerr << tsigdur.at(i);
+			cerr << "\t";
+			for (int j=0; j<(int)barandtime[i].size(); j++) {
+				cerr << barandtime.at(i).at(j) << "\t";
+			}
+			cerr << endl;
+		}
+		cerr << endl;
+	}
+
+	// Markup pickup measure notes/rests
+	for (int i=0; i<(int)pickup.size() - 1; i++) {
+		if (!pickup[i]) {
+			continue;
+		}
+		markPickupContent(barandtime.at(i).at(0), barandtime.at(i+1).at(0));
+	}
+
+	// Pickup/incomplete measures covering three or more barlines are not considered
+	// (these could be used with dashed barlines or similar).
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_meter::markPickupContent --
+//
+
+void Tool_meter::markPickupContent(HTp stok, HTp etok) {
+	int endline = etok->getLineIndex();
+	HTp current = stok;
+	while (current) {
+		int line = current->getLineIndex();
+		if (line > endline) {
+			break;
+		}
+		if (current->isData()) {
+			HTp field = current;
+			int track = field->getTrack();
+			while (field) {
+				int ttrack = field->getTrack();
+				if (ttrack != track) {
+					break;
+				}
+				if (field->isNull()) {
+					field = field->getNextFieldToken();
+					continue;
+				}
+				field->setValue("auto", "pickup", 1);
+				HumNum nbt = etok->getDurationFromStart() - field->getDurationFromStart();
+				stringstream ntime;
+				ntime.str("");
+				ntime << nbt.getNumerator() << "/" << nbt.getDenominator();
+				field->setValue("auto", "nextBarTime", ntime.str());
+				field = field->getNextFieldToken();
+			}
+		}
+		if (current == etok) {
+			break;
+		}
+		current = current->getNextToken();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_meter::getTimeSigDuration --
+//
+
+HumNum Tool_meter::getTimeSigDuration(HTp tsig) {
+	HumNum output = 0;
+	HumRegex hre;
+	if (hre.search(tsig, "^\\*M(\\d+)/(\\d+%?\\d*)")) {
+		int top = hre.getMatchInt(1);
+		string bot = hre.getMatch(2);
+		HumNum botdur = Convert::recipToDuration(bot);
+		output = botdur * top;
+	}
+	return output;
+}
+
 
 
 //////////////////////////////
@@ -93067,7 +93546,11 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 				}
 				if (m_floatQ) {
 					stringstream tem;
-					tem << value.getFloat();
+					if (m_digits) {
+						tem << std::setprecision(m_digits + 1) << value.getFloat();
+					} else {
+						tem << value.getFloat();
+					}
 					analysis = tem.str();
 					if (m_commaQ) {
 						HumRegex hre;
@@ -93094,16 +93577,35 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 				numerator = "*-";
 				denominator = "*-";
 				meter = "*-";
+			} else if (token->isTimeSignature()) {
+				analysis = *token;
 			} else {
 				analysis = "*";
 				numerator = "*";
 				denominator = "*";
 				meter = "*";
 				if (printLabels) {
-					analysis = "*vi:beat:";
+					if (m_quarterQ) {
+						analysis = "*vi:4ths:";
+					} else if (m_eighthQ) {
+						analysis = "*vi:8ths:";
+					} else if (m_halfQ) {
+						analysis = "*vi:half:";
+					} else if (m_wholeQ) {
+						analysis = "*vi:whole:";
+					} else if (m_sixteenthQ) {
+						analysis = "*vi:16ths:";
+					} else {
+						analysis = "*vi:beat:";
+					}
 					numerator = "*vi:top:";
 					denominator = "*vi:bot:";
 					meter = "*vi:tsig:";
+					if (m_joinQ) {
+						numerator = "";
+						denominator = "";
+						meter = "";
+					}
 				}
 			}
 		} else if (line.isBarline()) {
@@ -93122,7 +93624,7 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 	}
 
 	if (m_joinQ) {
-		if (line.isData()) {
+		if (line.isData() && !forceInterpretation) {
 			if (m_tsigQ) {
 					m_humdrum_text << "\t" << meter;
 			} else {
@@ -93135,7 +93637,7 @@ int Tool_meter::printKernAndAnalysisSpine(HumdrumLine& line, int index, bool pri
 			}
 		}
 		if (!m_nobeatQ) {
-			if (line.isData()) {
+			if (line.isData() && !forceInterpretation) {
 				m_humdrum_text << ":";
 			} else {
 				m_humdrum_text << "\t";
@@ -93262,6 +93764,7 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 			if (!token->isNoteAttack() && !(m_restQ && token->isRest())) {
 				continue;
 			}
+			int pickup = token->getValueInt("auto", "pickup");
 			int track = token->getTrack();
 			stringstream value;
 			value.str("");
@@ -93271,7 +93774,16 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 			value << curDen.at(track);
 			token->setValue("auto", "denominator", value.str());
 			HumNum curTime = token->getDurationFromStart();
-			HumNum q = curTime - curBarTime.at(track);
+			HumNum q;
+			if (pickup) {
+				HumNum meterDur = curNum.at(track);
+				meterDur /= curDen.at(track);
+				meterDur *= 4;
+				HumNum nbt = getHumNum(token, "nextBarTime");
+				q = meterDur - nbt;
+			} else {
+				q = curTime - curBarTime.at(track);
+			}
 			value.str("");
 			value << q;
 			token->setValue("auto", "q", value.str());
@@ -93279,20 +93791,33 @@ void Tool_meter::processLine(HumdrumLine& line, vector<HumNum>& curNum,
 			int multiple = curNum.at(track).getNumerator() / 3;
 			int remainder = curNum.at(track).getNumerator() % 3;
 			int bottom = curDen.at(track).getNumerator();
-			if ((curBeat.at(track) == 0) && (bottom == 8) && (multiple > 1) && (remainder == 0)) {
+			if ((curBeat.at(track) == 0) && (bottom >= 8) && (multiple > 1) && (remainder == 0)) {
 				compound = true;
 			}
 
 			HumNum qq = q;
-			if (compound) {
-				qq *= curDen.at(track);
+			if (m_quarterQ) {
+				// do nothing (prior calculations are done in quarter notes)
+			} else if (m_halfQ) {
+				qq /= 2;
+			} else if (m_wholeQ) {
 				qq /= 4;
-				qq /= 3;
-			} else if (curBeat.at(track) > 0) {
-				qq /= curBeat.at(track);
+			} else if (m_eighthQ) {
+				qq *= 2;
+			} else if (m_sixteenthQ) {
+				qq *= 4;
 			} else {
-				qq *= curDen.at(track);
-				qq /= 4;
+				// convert quarter note metric positions into beat positions
+				if (compound) {
+					qq *= curDen.at(track);
+					qq /= 4;
+					qq /= 3;
+				} else if (curBeat.at(track) > 0) {
+					qq /= curBeat.at(track);
+				} else {
+					qq *= curDen.at(track);
+					qq /= 4;
+				}
 			}
 
 			value.str("");
@@ -95139,7 +95664,7 @@ Tool_msearch::Tool_msearch(void) {
 	define("c|color=s",             "highlight color");
 	define("m|mark|marker=s:@",     "marking character");
 	define("M|no-mark|no-marker=b", "do not mark matches");
-	define("Q|quiet=b",             "quite mode: do not summarize matches");
+	define("Q|quiet=b",             "quiet mode: do not summarize matches");
 }
 
 
@@ -105719,6 +106244,316 @@ void Tool_myank::example(void) {
 void Tool_myank::usage(const string& ommand) {
 
 }
+
+
+
+
+/////////////////////////////////
+//
+// Tool_nproof::Tool_nproof -- Set the recognized options for the tool.
+//
+
+Tool_nproof::Tool_nproof(void) {
+	define("K|no-key=b", "Do not check for !!!key: reference record.\n");
+	define("I|no-instrument|no-instruments=b", "Do not check instrument interpretations.\n");
+	define("T|no-termination=b", "Do not check spine termination.\n");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_nproof::run -- Do the main work of the tool.
+//
+
+bool Tool_nproof::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_nproof::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_nproof::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_nproof::run(HumdrumFile& infile) {
+	initialize();
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_nproof::initialize --
+//
+
+void Tool_nproof::initialize(void) {
+	m_nokeyQ         = getBoolean("no-key");
+	m_noinstrumentQ  = getBoolean("no-instrument");
+	m_noterminationQ = getBoolean("no-termination");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_nproof::processFile --
+//
+
+void Tool_nproof::processFile(HumdrumFile& infile) {
+	m_errorCount = 0;
+	m_errorList = "";
+	m_errorHtml = "";
+
+	if (!m_nokeyQ) {
+		checkKeyInformation(infile);
+	}
+	if (!m_noinstrumentQ) {
+		checkInstrumentInformation(infile);
+	}
+	if (!m_noterminationQ) {
+		checkSpineTerminations(infile);
+	}
+
+	m_humdrum_text << infile;
+
+	if (m_errorCount > 0) {
+		m_humdrum_text << m_errorList;
+		m_humdrum_text << "!!!TOOL-nproof-error-count: " << m_errorCount << endl;
+		m_humdrum_text << "!!@@BEGIN: PREHTML\n";
+		m_humdrum_text << "!!@CONTENT:\n";
+		m_humdrum_text << "!! <h2 style='color:red'> @{TOOL-nproof-error-count} problem";
+		if (m_errorCount != 1) {
+			m_humdrum_text << "s";
+		}
+		m_humdrum_text << " detected </h2>\n";
+		m_humdrum_text << "!! <ul style='color:darkred'>\n";
+		m_humdrum_text << m_errorHtml;
+		m_humdrum_text << "!! </ul>\n";
+		m_humdrum_text << "!!@@END: PREHTML\n";
+	} else {
+		m_humdrum_text << "!!@@BEGIN: PREHTML\n";
+		m_humdrum_text << "!!@CONTENTS:\n";
+		m_humdrum_text << "!! <h2 style='color:red'> No problems detected </h2>\n";
+		m_humdrum_text << "!!@@END: PREHTML\n";
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_nproof::checkForValidInstrumentCode --
+//
+
+void Tool_nproof::checkForValidInstrumentCode(HTp token,
+		vector<pair<string, string>>& instrumentList) {
+	string code = token->substr(2);
+	for (int i=0; i<(int)instrumentList.size(); i++) {
+		if (instrumentList[i].first == code) {
+			return;
+		}
+	}
+
+	m_errorCount++;
+	m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + code + "\" on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ".\n";
+	m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+}
+
+//////////////////////////////
+//
+// Tool_nproof::checkInstrumentInformation --
+//
+
+void Tool_nproof::checkInstrumentInformation(HumdrumFile& infile) {
+	int codeLine = -1;
+	int classLine = -1;
+	HumRegex hre;
+
+	vector<pair<string, string>> instrumentList = Convert::getInstrumentList();
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		if (infile[i].isManipulator()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->compare("*IC") == 0) {
+				if (classLine < 0) {
+					classLine = i;
+				}
+			} else if (hre.search(token, "^\\*I[a-z]")) {
+				if (codeLine < 0) {
+					codeLine = i;
+				}
+			}
+		}
+	}
+
+	if (codeLine < 0) {
+		m_errorCount++;
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": No instrument code line.\n";
+		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+	} else {
+		for (int i=0; i<infile[codeLine].getFieldCount(); i++) {
+			HTp token = infile.token(codeLine, i);
+			if (token->isKern()) {
+				if (!hre.search(token, "^\\*I[a-z]")) {
+					m_errorCount++;
+					m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": expected instrument code on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ".\n";
+					m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+				} else {
+					checkForValidInstrumentCode(token, instrumentList);
+				}
+			} else {
+				if (*token != "*") {
+					m_errorCount++;
+					m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Expected null interpretation on instrument code line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ".\n";
+					m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+				}
+			}
+		}
+	}
+
+	if (classLine < 0) {
+		m_errorCount++;
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": No instrument class line.\n";
+		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+	} else {
+		for (int i=0; i<infile[classLine].getFieldCount(); i++) {
+			HTp token = infile.token(classLine, i);
+			if (token->isKern()) {
+				if (!hre.search(token, "^\\*IC[a-z]")) {
+					m_errorCount++;
+					m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": expected instrument class on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ".\n";
+					m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+				}
+			} else {
+				if (*token != "*") {
+					m_errorCount++;
+					m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Expected null interpretation on instrument class line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ".\n";
+					m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+				}
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_nproof::checkKeyInformation --
+//
+
+void Tool_nproof::checkKeyInformation(HumdrumFile& infile) {
+	int foundKey = -1;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (token->compare(0, 7, "!!!key:") == 0) {
+			foundKey = i;
+			break;
+		}
+	}
+
+	if (foundKey >= 0) {
+		return;
+	}
+
+	m_errorCount++;
+	m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": No <tt>!!!key:</tt> reference record.\n";
+	m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_nproof::checkSpineTerminations --
+//
+
+void Tool_nproof::checkSpineTerminations(HumdrumFile& infile) {
+	int foundTerminal = 0;
+	for (int i=infile.getLineCount() - 1; i>0; i--) {
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		HTp token = infile.token(i, 0);
+		if (*token == "*-") {
+			foundTerminal = i;
+			break;
+		}
+	}
+
+	if (!foundTerminal) {
+		m_errorCount++;
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": No spine terminators.\n";
+		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+		return;
+	}
+
+	bool problem = false;
+	for (int i=0; i<infile[foundTerminal].getFieldCount(); i++) {
+		HTp token = infile[foundTerminal].token(i);
+		string value = token->getSpineInfo();
+		if (value.find(" ") != string::npos) {
+			problem = true;
+			break;
+		}
+	}
+
+	if (!problem) {
+		return;
+	}
+
+	m_errorCount++;
+	m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Incorrect spine merger(s): ";
+	for (int i=0; i<infile[foundTerminal].getFieldCount(); i++) {
+		HTp token = infile[foundTerminal].token(i);
+		m_errorList += "<" + token->getSpineInfo() + ">";
+		if (i < infile[foundTerminal].getFieldCount() - 1) {
+			m_errorList += " ";
+		}
+	}
+	m_errorList += "\n";
+	m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
+}
+
 
 
 

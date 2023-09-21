@@ -949,8 +949,6 @@ string Convert::getLanguageName(const string& abbreviation) {
 }
 
 
-// END_MERGE
-
 
 // END_MERGE
 

@@ -134,7 +134,7 @@ Tool_msearch::Tool_msearch(void) {
 	define("c|color=s",             "highlight color");
 	define("m|mark|marker=s:@",     "marking character");
 	define("M|no-mark|no-marker=b", "do not mark matches");
-	define("Q|quiet=b",             "quite mode: do not summarize matches");
+	define("Q|quiet=b",             "quiet mode: do not summarize matches");
 }
 
 

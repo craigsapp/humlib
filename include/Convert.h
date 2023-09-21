@@ -259,6 +259,9 @@ class Convert {
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);
 		static double  nPvi                 (const std::vector<double>& x);
 
+		// instrument related functions defined in Convert-instrument.cpp
+		static std::vector<std::pair<std::string, std::string>> getInstrumentList(void);
+
 		// Reference record functions defined in Convert-reference.cpp
 		static std::string getReferenceKeyMeaning(HTp token);
 		static std::string getReferenceKeyMeaning(const std::string& token);

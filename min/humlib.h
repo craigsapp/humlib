@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Sep 16 19:23:59 PDT 2023
+// Last Modified: Wed Sep 20 23:39:20 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4115,6 +4115,9 @@ class Convert {
 		static double  coefficientOfVariationSample(const std::vector<double>& x);
 		static double  coefficientOfVariationPopulation(const std::vector<double>& x);
 		static double  nPvi                 (const std::vector<double>& x);
+
+		// instrument related functions defined in Convert-instrument.cpp
+		static std::vector<std::pair<std::string, std::string>> getInstrumentList(void);
 
 		// Reference record functions defined in Convert-reference.cpp
 		static std::string getReferenceKeyMeaning(HTp token);
@@ -8377,18 +8380,30 @@ class Tool_meter : public HumTool {
 		std::string getHumNumString(HumNum input);
 		bool     searchForLabels   (HumdrumLine& line);
 		void     printLabelLine    (HumdrumLine& line);
+		void     analyzePickupMeasures(HumdrumFile& infile);
+		void     analyzePickupMeasures(HTp sstart);
+		HumNum   getTimeSigDuration(HTp tsig);
+		void     markPickupContent (HTp stok, HTp etok);
 
 	private:
+
 		bool     m_commaQ       = false;
+		bool     m_debugQ       = false;
 		bool     m_denominatorQ = false;
+		bool     m_eighthQ      = false;
 		bool     m_floatQ       = false;
+		bool     m_halfQ        = false;
 		bool     m_joinQ        = false;
-		bool     m_tsigQ        = false;
 		bool     m_nobeatQ      = false;
 		bool     m_nolabelQ     = false;
 		bool     m_numeratorQ   = false;
+		bool     m_quarterQ     = false;
 		bool     m_restQ        = false;
+		bool     m_sixteenthQ   = false;
+		bool     m_tsigQ        = false;
+		bool     m_wholeQ       = false;
 		bool     m_zeroQ        = false;
+		int      m_digits       = 0;
 
 };
 
@@ -9322,6 +9337,38 @@ class Tool_myank : public HumTool {
 		vector<int> m_barNumbersPerLine;      // used with -l option
 		bool m_hideStarting;                  // used with --hide-starting option
 		bool m_hideEnding;                    // used with --hide-ending option
+
+};
+
+
+class Tool_nproof : public HumTool {
+
+	public:
+		         Tool_nproof        (void);
+		        ~Tool_nproof        () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+		void     checkInstrumentInformation(HumdrumFile& infile);
+		void     checkKeyInformation(HumdrumFile& infile);
+		void     checkSpineTerminations(HumdrumFile& infile);
+		void     checkForValidInstrumentCode(HTp token, vector<pair<string, string>>& instrumentList);
+
+	protected:
+		void     initialize        (void);
+		void     processFile       (HumdrumFile& infile);
+
+	private:
+		int m_errorCount = 0;
+		std::string m_errorList;
+		std::string m_errorHtml;
+
+		bool m_nokeyQ         = false;
+		bool m_noinstrumentQ  = false;
+		bool m_noterminationQ = false;
 
 };
 
