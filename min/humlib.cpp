@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 24 17:51:40 PDT 2023
+// Last Modified: Sun Sep 24 22:39:42 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -86264,6 +86264,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_invisibleQ = !getBoolean("not-invisible");
 	m_doublebarQ = !getBoolean("no-double-bar");
 	m_clef       = getString("clef");
+	storeKernEditorialAccidental(infile);
 	convertToMens(infile);
 	return true;
 }
@@ -86283,7 +86284,11 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 			continue;
 		}
 		if (!infile[i].hasSpines()) {
-			m_humdrum_text << infile[i] << "\n";
+			if (i == m_kernEdAccLineIndex) {
+				m_humdrum_text << m_mensEdAccLine;
+			} else {
+				m_humdrum_text << infile[i] << "\n";
+			}
 			continue;
 		}
 		if ((maxtrack == 1) && infile[i].isAllNull()) {
@@ -86368,6 +86373,13 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 		hre.replaceDestructive(data, "$1p", "([XLSsMmUu]+)");
 	} else {
 		hre.replaceDestructive(data, "$1i", "([XLSsMmUu]+)");
+	}
+
+	// transfer editorial accidental
+	if (!m_kernEditorialAccidental.empty()) {
+		if (token->find(m_kernEditorialAccidental) != string::npos) {
+			hre.replaceDestructive(data, "$1z", "([#-n]+)", "g");
+		}
 	}
 	return data;
 }
@@ -86517,6 +86529,41 @@ string Tool_kern2mens::getClefConversion(HTp token) {
 	}
 
 	return *token;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::storeKernEditorialAccidental --
+//
+
+void Tool_kern2mens::storeKernEditorialAccidental(HumdrumFile& infile) {
+	for (int i=infile.getLineCount() - 1; i>= 0; i--) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		if (!infile[i].isReferenceRecord()) {
+			continue;
+		}
+		string key = infile[i].getReferenceKey();
+		if (key != "RDF**kern") {
+			continue;
+		}
+		HumRegex hre;
+		string value = infile[i].getReferenceValue();
+		if (hre.search(value, "^\\s*([^\\s]+)\\s*=\\s*(.*)\\s*$")) {
+			string signifier = hre.getMatch(1);
+			string definition = hre.getMatch(2);
+			if (hre.search(definition, "editorial\\s+accidental")) {
+				m_kernEditorialAccidental = signifier;
+				m_kernEdAccLineIndex = i;
+				m_mensEdAccLine = "!!!RDF**mens: z = ";
+				m_mensEdAccLine += definition;
+				break;
+			}
+		}
+	}
 }
 
 

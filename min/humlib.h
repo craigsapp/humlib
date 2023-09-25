@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 24 17:51:40 PDT 2023
+// Last Modified: Sun Sep 24 22:39:42 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7918,13 +7918,18 @@ class Tool_kern2mens : public HumTool {
 		std::string convertKernTokenToMens(HTp token);
 		void        printBarline          (HumdrumFile& infile, int line);
 		std::string getClefConversion     (HTp token);
+		void        storeKernEditorialAccidental(HumdrumFile& infile);
 
 	private:
-		bool     m_numbersQ   = true;      // used with -N option
-		bool     m_measuresQ  = true;      // used with -M option
-		bool     m_invisibleQ = true;      // used with -I option
-		bool     m_doublebarQ = true;      // used with -D option
-		string   m_clef;                   // used with -c option
+		bool        m_numbersQ   = true; // used with -N option
+		bool        m_measuresQ  = true; // used with -M option
+		bool        m_invisibleQ = true; // used with -I option
+		bool        m_doublebarQ = true; // used with -D option
+		std::string m_clef;              // used with -c option
+
+		std::string m_kernEditorialAccidental;  // used with !!!RDF**kern:
+		int         m_kernEdAccLineIndex = -1;
+		std::string m_mensEdAccLine;
 
 };
 
