@@ -1,14 +1,14 @@
 //
+// Programmer:    Martha Thomae
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
-// Creation Date: Sat May  5 21:06:29 PDT 2018
-// Last Modified: Sat May  5 21:06:32 PDT 2018
+// Creation Date: Wed Dec 16 11:16:33 PST 2020
+// Last Modified: Sun Sep 24 17:17:23 PDT 2023
 // Filename:      tool-kern2mens.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-kern2mens.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Interface for fixing early-music MusicXML import where a tied note over a barline
-//                is represented as an invisible rest.  This occurs in MusicXML output from Sibelius.
+// Description:   Converts **kerns data into **mens.
 //
 
 #include "tool-kern2mens.h"
@@ -141,6 +141,9 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 				data += m_clef;
 				return data;
 			}
+		} else if (hre.search(token, "^\\*[mo]?clef")) {
+			string value = getClefConversion(token);
+			return value;
 		}
 	}
 	if (!token->isData()) {
@@ -257,6 +260,78 @@ void Tool_kern2mens::printBarline(HumdrumFile& infile, int line) {
 		}
 	}
 	m_humdrum_text << "\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::getClefConversion --
+//    If token is *oclef and there is an adjacent *clef,
+//        convert *oclef to *clef and *clef to *mclef; otherwise,
+//        return the given clef.
+//
+//
+
+string Tool_kern2mens::getClefConversion(HTp token) {
+
+	vector<HTp> clefs;
+	vector<HTp> oclefs;
+	vector<HTp> mclefs;
+
+	HumRegex hre;
+
+	HTp current = token->getNextToken();
+	while (current) {
+		if (current->isData()) {
+			break;
+		}
+		if (current->compare(0, 5, "*clef") == 0) {
+			clefs.push_back(current);
+		}
+		if (current->compare(0, 6, "*oclef") == 0) {
+			oclefs.push_back(current);
+		}
+		if (current->compare(0, 6, "*mclef") == 0) {
+			mclefs.push_back(current);
+		}
+		current = current->getNextToken();
+	}
+
+	current = token->getPreviousToken();
+	while (current) {
+		if (current->isData()) {
+			break;
+		}
+		if (current->compare(0, 5, "*clef") == 0) {
+			clefs.push_back(current);
+		}
+		if (current->compare(0, 6, "*oclef") == 0) {
+			oclefs.push_back(current);
+		}
+		if (current->compare(0, 6, "*mclef") == 0) {
+			mclefs.push_back(current);
+		}
+		current = current->getPreviousToken();
+	}
+
+	if (token->compare(0, 5, "*clef") == 0) {
+		if (oclefs.size() > 0) {
+			string value = *token;
+			hre.replaceDestructive(value, "mclef", "clef");
+			return value;
+		}
+	}
+
+	if (token->compare(0, 6, "*oclef") == 0) {
+		if (clefs.size() > 0) {
+			string value = *token;
+			hre.replaceDestructive(value, "clef", "oclef");
+			return value;
+		}
+	}
+
+	return *token;
 }
 
 

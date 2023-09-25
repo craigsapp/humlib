@@ -33,9 +33,10 @@ class Tool_kern2mens : public HumTool {
 		bool     run                      (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     convertToMens            (HumdrumFile& infile);
-		string   convertKernTokenToMens   (HTp token);
-		void     printBarline             (HumdrumFile& infile, int line);
+		void        convertToMens         (HumdrumFile& infile);
+		std::string convertKernTokenToMens(HTp token);
+		void        printBarline          (HumdrumFile& infile, int line);
+		std::string getClefConversion     (HTp token);
 
 	private:
 		bool     m_numbersQ   = true;      // used with -N option
