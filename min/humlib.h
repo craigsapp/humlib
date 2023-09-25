@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 20 23:39:20 PDT 2023
+// Last Modified: Sun Sep 24 17:51:40 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7914,9 +7914,10 @@ class Tool_kern2mens : public HumTool {
 		bool     run                      (HumdrumFile& infile, ostream& out);
 
 	protected:
-		void     convertToMens            (HumdrumFile& infile);
-		string   convertKernTokenToMens   (HTp token);
-		void     printBarline             (HumdrumFile& infile, int line);
+		void        convertToMens         (HumdrumFile& infile);
+		std::string convertKernTokenToMens(HTp token);
+		void        printBarline          (HumdrumFile& infile, int line);
+		std::string getClefConversion     (HTp token);
 
 	private:
 		bool     m_numbersQ   = true;      // used with -N option
@@ -8344,6 +8345,7 @@ class Tool_mens2kern : public HumTool {
 		                              int brevis_def, int semibrevis_def);
 		void     getMensuralInfo     (HTp token, int& maximodus, int& modus,
 		                              int& tempus, int& prolatio);
+		std::string getClefConversion(HTp token);
 
 	private:
 		bool     m_debugQ;
@@ -9352,10 +9354,12 @@ class Tool_nproof : public HumTool {
 		bool     run               (const string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
+		void     checkForBlankLines(HumdrumFile& infile);
 		void     checkInstrumentInformation(HumdrumFile& infile);
 		void     checkKeyInformation(HumdrumFile& infile);
 		void     checkSpineTerminations(HumdrumFile& infile);
 		void     checkForValidInstrumentCode(HTp token, vector<pair<string, string>>& instrumentList);
+		void     checkReferenceRecords(HumdrumFile& infile);
 
 	protected:
 		void     initialize        (void);
@@ -9366,9 +9370,14 @@ class Tool_nproof : public HumTool {
 		std::string m_errorList;
 		std::string m_errorHtml;
 
-		bool m_nokeyQ         = false;
+		bool m_noblankQ       = false;
 		bool m_noinstrumentQ  = false;
+		bool m_nokeyQ         = false;
+		bool m_noreferenceQ   = false;
 		bool m_noterminationQ = false;
+
+		bool m_fileQ          = false;
+		bool m_rawQ           = false;
 
 };
 

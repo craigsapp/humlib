@@ -1,13 +1,14 @@
 //
 // Programmer:    Martha Thomae
+// Programmer:    Craig Stuart Sapp
 // Creation Date: Wed Dec 16 11:16:33 PST 2020
-// Last Modified: Sun Mar  7 06:57:44 PST 2021
+// Last Modified: Sun Sep 24 17:17:36 PDT 2023
 // Filename:      tool-mens2kern.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/include/tool-mens2kern.h
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Convert **mens to **kern
+// Description:   Convert **mens to **kern.
 //
 
 #ifndef _TOOL_MENS2KERN_H
@@ -40,6 +41,7 @@ class Tool_mens2kern : public HumTool {
 		                              int brevis_def, int semibrevis_def);
 		void     getMensuralInfo     (HTp token, int& maximodus, int& modus,
 		                              int& tempus, int& prolatio);
+		std::string getClefConversion(HTp token);
 
 	private:
 		bool     m_debugQ;

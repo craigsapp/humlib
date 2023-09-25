@@ -32,10 +32,12 @@ class Tool_nproof : public HumTool {
 		bool     run               (const string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
+		void     checkForBlankLines(HumdrumFile& infile);
 		void     checkInstrumentInformation(HumdrumFile& infile);
 		void     checkKeyInformation(HumdrumFile& infile);
 		void     checkSpineTerminations(HumdrumFile& infile);
 		void     checkForValidInstrumentCode(HTp token, vector<pair<string, string>>& instrumentList);
+		void     checkReferenceRecords(HumdrumFile& infile);
 
 	protected:
 		void     initialize        (void);
@@ -46,9 +48,14 @@ class Tool_nproof : public HumTool {
 		std::string m_errorList;
 		std::string m_errorHtml;
 
-		bool m_nokeyQ         = false;
+		bool m_noblankQ       = false;
 		bool m_noinstrumentQ  = false;
+		bool m_nokeyQ         = false;
+		bool m_noreferenceQ   = false;
 		bool m_noterminationQ = false;
+
+		bool m_fileQ          = false;
+		bool m_rawQ           = false;
 
 };
 
