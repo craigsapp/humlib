@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Sep 24 22:39:42 PDT 2023
+// Last Modified: Mon Sep 25 21:37:49 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -704,6 +704,9 @@ bool Convert::isKernRest(const string& kerndata) {
 //
 
 bool Convert::isKernNote(const string& kerndata) {
+	if (isKernRest(kerndata)) {
+		return false;
+	}
 	char ch;
 	for (int i=0; i < (int)kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);

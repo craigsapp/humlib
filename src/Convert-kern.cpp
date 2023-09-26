@@ -45,6 +45,9 @@ bool Convert::isKernRest(const string& kerndata) {
 //
 
 bool Convert::isKernNote(const string& kerndata) {
+	if (isKernRest(kerndata)) {
+		return false;
+	}
 	char ch;
 	for (int i=0; i < (int)kerndata.size(); i++) {
 		ch = std::tolower(kerndata[i]);
