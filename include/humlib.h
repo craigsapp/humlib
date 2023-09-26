@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Sep 25 21:37:49 PDT 2023
+// Last Modified: Tue Sep 26 09:24:44 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5497,6 +5497,34 @@ class HumdrumFileSet {
                                                std::stringstream& inbuffer);
 };
 
+
+
+class Tool_addic : public HumTool {
+	public:
+		         Tool_addic        (void);
+		        ~Tool_addic        () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, ostream& out);
+		bool     run               (HumdrumFile& infile, ostream& out);
+
+		int      getInstrumentCodeIndex(HumdrumFile& infile);
+		int      getInstrumentClassIndex(HumdrumFile& infile);
+		void     updateInstrumentClassLine(HumdrumFile& infile, int codeIndex, int classIndex);
+		std::string makeClassLine(HumdrumFile& infile, int codeIndex);
+		std::string getInstrumentClass(const string& code);
+
+
+	protected:
+		void     initialize        (void);
+		void     processFile       (HumdrumFile& infile);
+
+	private:
+		std::vector<std::pair<std::string, std::string>> m_instrumentList;
+
+
+};
 
 
 class Tool_autoaccid : public HumTool {
