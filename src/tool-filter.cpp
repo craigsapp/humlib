@@ -14,6 +14,7 @@
 
 // tools which filter can process:
 
+#include "tool-addic.h"
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
@@ -222,7 +223,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
-		if (commands[i].first == "autoaccid") {
+		if (commands[i].first == "addic") {
+			RUNTOOL(addic, infile, commands[i].second, status);
+		} else if (commands[i].first == "autoaccid") {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {
 			RUNTOOL(autobeam, infile, commands[i].second, status);

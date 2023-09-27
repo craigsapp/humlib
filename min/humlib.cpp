@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep 26 22:32:57 PDT 2023
+// Last Modified: Wed Sep 27 13:19:39 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -52322,10 +52322,12 @@ void Tool_addic::processFile(HumdrumFile& infile) {
 
 	if (!codeIndex) {
 		// No code index, so nothing to do.
+		m_humdrum_text << infile;
 	}
 	if (classIndex) {
 		// Instrument class line already exists so adjust it:
 		updateInstrumentClassLine(infile, codeIndex, classIndex);
+		m_humdrum_text << infile;
 	} else {
 		string classLine = makeClassLine(infile, codeIndex);
 		for (int i=0; i<infile.getLineCount(); i++) {
@@ -79760,7 +79762,9 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
-		if (commands[i].first == "autoaccid") {
+		if (commands[i].first == "addic") {
+			RUNTOOL(addic, infile, commands[i].second, status);
+		} else if (commands[i].first == "autoaccid") {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {
 			RUNTOOL(autobeam, infile, commands[i].second, status);

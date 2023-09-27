@@ -100,10 +100,12 @@ void Tool_addic::processFile(HumdrumFile& infile) {
 
 	if (!codeIndex) {
 		// No code index, so nothing to do.
+		m_humdrum_text << infile;
 	}
 	if (classIndex) {
 		// Instrument class line already exists so adjust it:
 		updateInstrumentClassLine(infile, codeIndex, classIndex);
+		m_humdrum_text << infile;
 	} else {
 		string classLine = makeClassLine(infile, codeIndex);
 		for (int i=0; i<infile.getLineCount(); i++) {
