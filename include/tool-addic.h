@@ -43,6 +43,7 @@ class Tool_addic : public HumTool {
 
 	private:
 		std::vector<std::pair<std::string, std::string>> m_instrumentList;
+		bool m_fixQ = false;  // used with -f option: fix incorrect instrument classes
 
 
 };

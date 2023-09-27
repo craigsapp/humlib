@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep 26 09:24:44 PDT 2023
+// Last Modified: Tue Sep 26 22:32:57 PDT 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5522,6 +5522,7 @@ class Tool_addic : public HumTool {
 
 	private:
 		std::vector<std::pair<std::string, std::string>> m_instrumentList;
+		bool m_fixQ = false;  // used with -f option: fix incorrect instrument classes
 
 
 };

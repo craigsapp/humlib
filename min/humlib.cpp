@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Sep 26 09:24:44 PDT 2023
+// Last Modified: Tue Sep 26 22:32:57 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -52249,6 +52249,7 @@ ostream& operator<<(ostream& out, PixelColor apixel) {
 //
 
 Tool_addic::Tool_addic(void) {
+	define("f|fix=b", "Fix instrument class values if different from expected for instrument code.");
 }
 
 
@@ -52304,6 +52305,7 @@ bool Tool_addic::run(HumdrumFile& infile) {
 
 void Tool_addic::initialize(void) {
 	m_instrumentList = Convert::getInstrumentList();
+	m_fixQ = getBoolean("fix");
 }
 
 
@@ -52397,8 +52399,13 @@ void Tool_addic::updateInstrumentClassLine(HumdrumFile& infile, int codeIndex,
 		if (*codeToken == "*") {
 			continue;
 		}
-		if ((*classToken != "*") || !hre.search(classToken, "^\\*IC")) {
+		if ((*classToken != "*") && !hre.search(classToken, "^\\*IC")) {
 			cerr << "Not overwriting non-class content: " << classToken << endl;
+			continue;
+		}
+		if ((!m_fixQ) && hre.search(classToken, "^\\*IC")) {
+			// There is already an instrument class, but don't check to see if it
+			// is correct.
 			continue;
 		}
 		if (!hre.search(codeToken, "^\\*I([a-z].*)")) {
@@ -52483,19 +52490,57 @@ int Tool_addic::getInstrumentClassIndex(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_addic --
+// Tool_addic::getInstrumentClass --
 //
 
 string Tool_addic::getInstrumentClass(const string& code) {
+	HumRegex hre;
+	string code1 = code;
+	string code2;
+	string divider;
+	int count = 1;
+	if (hre.search(code, "([^I]+)([&|])I(.*)")) {
+		count   = 2;
+		code1   = hre.getMatch(1);
+		divider = hre.getMatch(2);
+		code2   = hre.getMatch(3);
+	}
+
+	string class1 = "";
+	string class2 = "";
+
 	for (int i=0; i<(int)m_instrumentList.size(); i++) {
-		if (code == m_instrumentList[i].first) {
-			return m_instrumentList[i].second;
+		if (code1 == m_instrumentList[i].first) {
+			class1 = m_instrumentList[i].second;
+		}
+		if (count == 2) {
+			if (code2 == m_instrumentList[i].first) {
+				class2 = m_instrumentList[i].second;
+			}
 		}
 	}
-	return "UNKNOWN" + code;
+
+	if (count == 1) {
+		if (class1 == "") {
+			return "UNKNOWN" + code1;
+		}
+	} else {
+		if ((class1 == "") && (class2 == "")) {
+			return "UNKNOWN" + code1;
+		}
+	}
+
+	if (count == 1) {
+		return class1;
+	}
+
+	if (class1 == class2) {
+		return class1;
+	}
+
+	// return two instrument classes:
+	return class1 + divider + "IC" + class2;
 }
-
-
 
 
 
@@ -62979,7 +63024,6 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 	HumRegex hre;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
-
 		if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
 			string labelLine = generateVerseLabelLine(output, infile, i);
 			if (!labelLine.empty()) {
@@ -65472,9 +65516,9 @@ void Tool_composite::addTimeSignatureChanges(HumdrumFile& output, HumdrumFile& i
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		timesig    = "";
-		groupAsig  = "";
-		groupBsig  = "";
+		timesig    = "*";
+		groupAsig  = "*";
+		groupBsig  = "*";
 
 		bool foundtime = false;
 
@@ -65544,7 +65588,7 @@ void Tool_composite::addMeterSignatureChanges(HumdrumFile& output, HumdrumFile& 
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		metersig    = "";
+		metersig   = "";
 		groupAsig  = "";
 		groupBsig  = "";
 

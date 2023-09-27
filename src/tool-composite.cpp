@@ -523,7 +523,6 @@ void Tool_composite::prepareOutput(HumdrumFile& infile) {
 	HumRegex hre;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
-
 		if (m_verseLabelIndex && (m_verseLabelIndex == -i)) {
 			string labelLine = generateVerseLabelLine(output, infile, i);
 			if (!labelLine.empty()) {
@@ -3016,9 +3015,9 @@ void Tool_composite::addTimeSignatureChanges(HumdrumFile& output, HumdrumFile& i
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		timesig    = "";
-		groupAsig  = "";
-		groupBsig  = "";
+		timesig    = "*";
+		groupAsig  = "*";
+		groupBsig  = "*";
 
 		bool foundtime = false;
 
@@ -3088,7 +3087,7 @@ void Tool_composite::addMeterSignatureChanges(HumdrumFile& output, HumdrumFile& 
 		if (!infile[i].isInterpretation()) {
 			continue;
 		}
-		metersig    = "";
+		metersig   = "";
 		groupAsig  = "";
 		groupBsig  = "";
 
