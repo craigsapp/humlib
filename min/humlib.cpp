@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Sep 27 13:19:39 PDT 2023
+// Last Modified: Sun Oct  1 00:35:13 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -86523,9 +86523,10 @@ int Tool_imitation::compareSequences(vector<NoteCell*>& attack1,
 Tool_kern2mens::Tool_kern2mens(void) {
 	define("N|no-measure-numbers=b", "remove measure numbers");
 	define("M|no-measures=b",        "remove measures ");
-	define("I|not-invisible=b",       "keep measures visible");
-	define("D|no-double-bar=b",       "keep thick final barlines");
-	define("c|clef=s",                "clef to use in mensural notation");
+	define("I|not-invisible=b",      "keep measures visible");
+	define("D|no-double-bar=b",      "keep thick final barlines");
+	define("c|clef=s",               "clef to use in mensural notation");
+	define("V|no-verovio=b",         "don't add verovio styling");
 }
 
 
@@ -86571,7 +86572,8 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_measuresQ  = !getBoolean("no-measures");
 	m_invisibleQ = !getBoolean("not-invisible");
 	m_doublebarQ = !getBoolean("no-double-bar");
-	m_clef       = getString("clef");
+	m_noverovioQ =  getBoolean("no-verovio");
+	m_clef       =  getString("clef");
 	storeKernEditorialAccidental(infile);
 	convertToMens(infile);
 	return true;
@@ -86611,6 +86613,29 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 		}
 		m_humdrum_text << "\n";
 	}
+	if (!m_noverovioQ) {
+		addVerovioStyling(infile);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::addVerovioStyling --
+//
+
+void Tool_kern2mens::addVerovioStyling(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		if (hre.search(infile[i].token(0), "!!!verovio:\\s*evenNoteSpacing")) {
+			return;
+		}
+	}
+	m_humdrum_text << "!!!verovio: evenNoteSpacing\n";
 }
 
 
@@ -106928,13 +106953,13 @@ void Tool_nproof::checkForValidInstrumentCode(HTp token,
 
 	if (!found1) {
 		m_errorCount++;
-		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst1 + "\" in token " + *token + "on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst1 + "\" in token " + *token + " on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
 		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
 	}
 
 	if (!found2) {
 		m_errorCount++;
-		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst2 + "\" in token " + *token + "on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst2 + "\" in token " + *token + " on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
 		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
 	}
 

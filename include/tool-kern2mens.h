@@ -38,12 +38,14 @@ class Tool_kern2mens : public HumTool {
 		void        printBarline          (HumdrumFile& infile, int line);
 		std::string getClefConversion     (HTp token);
 		void        storeKernEditorialAccidental(HumdrumFile& infile);
+		void        addVerovioStyling     (HumdrumFile& infile);
 
 	private:
 		bool        m_numbersQ   = true; // used with -N option
 		bool        m_measuresQ  = true; // used with -M option
 		bool        m_invisibleQ = true; // used with -I option
 		bool        m_doublebarQ = true; // used with -D option
+		bool        m_noverovioQ = false; // used with -V option
 		std::string m_clef;              // used with -c option
 
 		std::string m_kernEditorialAccidental;  // used with !!!RDF**kern:

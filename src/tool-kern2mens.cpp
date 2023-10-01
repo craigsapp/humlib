@@ -30,9 +30,10 @@ namespace hum {
 Tool_kern2mens::Tool_kern2mens(void) {
 	define("N|no-measure-numbers=b", "remove measure numbers");
 	define("M|no-measures=b",        "remove measures ");
-	define("I|not-invisible=b",       "keep measures visible");
-	define("D|no-double-bar=b",       "keep thick final barlines");
-	define("c|clef=s",                "clef to use in mensural notation");
+	define("I|not-invisible=b",      "keep measures visible");
+	define("D|no-double-bar=b",      "keep thick final barlines");
+	define("c|clef=s",               "clef to use in mensural notation");
+	define("V|no-verovio=b",         "don't add verovio styling");
 }
 
 
@@ -78,7 +79,8 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_measuresQ  = !getBoolean("no-measures");
 	m_invisibleQ = !getBoolean("not-invisible");
 	m_doublebarQ = !getBoolean("no-double-bar");
-	m_clef       = getString("clef");
+	m_noverovioQ =  getBoolean("no-verovio");
+	m_clef       =  getString("clef");
 	storeKernEditorialAccidental(infile);
 	convertToMens(infile);
 	return true;
@@ -118,6 +120,29 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 		}
 		m_humdrum_text << "\n";
 	}
+	if (!m_noverovioQ) {
+		addVerovioStyling(infile);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::addVerovioStyling --
+//
+
+void Tool_kern2mens::addVerovioStyling(HumdrumFile& infile) {
+	HumRegex hre;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		if (hre.search(infile[i].token(0), "!!!verovio:\\s*evenNoteSpacing")) {
+			return;
+		}
+	}
+	m_humdrum_text << "!!!verovio: evenNoteSpacing\n";
 }
 
 

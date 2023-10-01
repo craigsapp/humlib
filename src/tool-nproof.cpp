@@ -272,13 +272,13 @@ void Tool_nproof::checkForValidInstrumentCode(HTp token,
 
 	if (!found1) {
 		m_errorCount++;
-		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst1 + "\" in token " + *token + "on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst1 + "\" in token " + *token + " on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
 		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
 	}
 
 	if (!found2) {
 		m_errorCount++;
-		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst2 + "\" in token " + *token + "on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
+		m_errorList += "!!!TOOL-nproof-error-" + to_string(m_errorCount) + ": Unknown instrument code \"" + inst2 + "\" in token " + *token + " on line " + to_string(token->getLineNumber()) + ", field " + to_string(token->getFieldNumber()) + ". See list of codes at <a target='_blank' href='https://bit.ly/humdrum-instrument-codes'>https://bit.ly/humdrum-instrument-codes</a>.\n";
 		m_errorHtml += "!! <li> @{TOOL-nproof-error-" + to_string(m_errorCount) + "} </li>\n";
 	}
 
