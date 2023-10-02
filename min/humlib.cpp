@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Oct  1 00:35:13 PDT 2023
+// Last Modified: Mon Oct  2 15:07:05 PDT 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -86622,7 +86622,9 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_kern2mens::addVerovioStyling --
+// Tool_kern2mens::addVerovioStyling --  Add a spacing of 0.3, 0.5 if no
+//   spacing is already found in the data.  Use the -V option to no add any
+//   spacing options (to use the defaults in verovio).
 //
 
 void Tool_kern2mens::addVerovioStyling(HumdrumFile& infile) {
@@ -86631,11 +86633,19 @@ void Tool_kern2mens::addVerovioStyling(HumdrumFile& infile) {
 		if (infile[i].hasSpines()) {
 			continue;
 		}
-		if (hre.search(infile[i].token(0), "!!!verovio:\\s*evenNoteSpacing")) {
+		HTp token = infile[i].token(0);
+		if (hre.search(token, "!!!verovio:\\s*evenNoteSpacing")) {
+			return;
+		}
+		if (hre.search(token, "!!!verovio:\\s*spacingLinear")) {
+			return;
+		}
+		if (hre.search(token, "!!!verovio:\\s*spacingNonLinear")) {
 			return;
 		}
 	}
-	m_humdrum_text << "!!!verovio: evenNoteSpacing\n";
+	m_humdrum_text << "!!!verovio: spacingLinear 0.3\n";
+	m_humdrum_text << "!!!verovio: spacingNonLinear 0.5\n";
 }
 
 
