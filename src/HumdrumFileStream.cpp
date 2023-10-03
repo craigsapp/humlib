@@ -14,9 +14,9 @@
 //                types of analyses to the HumdrumFileStream class.
 //
 
-#include "HumdrumFileStream.h"
-#include "HumdrumFileSet.h"
 #include "HumRegex.h"
+#include "HumdrumFileSet.h"
+#include "HumdrumFileStream.h"
 
 #include <cstring>
 #include <fstream>

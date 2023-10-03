@@ -15,9 +15,8 @@
 #include "HumGrid.h"
 #include "Convert.h"
 
-#include <string.h>
-
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
 #include <iomanip>
 
 using namespace std;

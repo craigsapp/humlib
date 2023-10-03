@@ -10,8 +10,8 @@
 // Description:   Links tie starting/continuing/ending points to each other.
 //
 
-#include "HumdrumFileContent.h"
 #include "Convert.h"
+#include "HumdrumFileContent.h"
 
 using namespace std;
 

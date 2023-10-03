@@ -13,7 +13,7 @@
 
 #include "HumInstrument.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace std;
 

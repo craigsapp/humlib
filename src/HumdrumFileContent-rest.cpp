@@ -9,9 +9,9 @@
 // Description:   Identify the vertical positions of rests in two-layer staves.
 //
 
+#include "Convert.h"
 #include "HumdrumFileContent.h"
 #include "HumRegex.h"
-#include "Convert.h"
 
 
 using namespace std;

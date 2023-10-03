@@ -13,15 +13,14 @@
 //
 
 #include "Convert.h"
-#include "MuseRecord.h"
-#include "MuseData.h"
 #include "HumRegex.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "MuseData.h"
+#include "MuseRecord.h"
 
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

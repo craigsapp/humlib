@@ -10,13 +10,12 @@
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-
 #include <algorithm>
+#include <cstdlib>
 #include <iostream>
-#include <vector>
 #include <map>
 #include <set>
+#include <vector>
 
 using namespace pugi;
 using namespace std;

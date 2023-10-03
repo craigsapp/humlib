@@ -9,9 +9,10 @@
 // Description:   Content analysis functions related to notes.
 //
 
-#include "HumdrumFileContent.h"
-#include "HumRegex.h"
 #include "Convert.h"
+#include "HumRegex.h"
+#include "HumdrumFileContent.h"
+
 #include <string>
 
 

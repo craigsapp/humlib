@@ -10,9 +10,9 @@
 // Description:   Used to add content analysis to HumdrumFileStructure class.
 //
 
-#include "HumdrumFileContent.h"
-#include "HumRegex.h"
 #include "Convert.h"
+#include "HumRegex.h"
+#include "HumdrumFileContent.h"
 
 using namespace std;
 

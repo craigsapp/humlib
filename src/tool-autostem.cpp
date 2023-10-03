@@ -14,10 +14,9 @@
 #include "HumRegex.h"
 #include "Convert.h"
 
-#include "string.h"
-
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <sstream>
 

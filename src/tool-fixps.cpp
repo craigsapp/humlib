@@ -12,7 +12,6 @@
 //
 
 #include "tool-fixps.h"
-
 #include "Convert.h"
 
 using namespace std;

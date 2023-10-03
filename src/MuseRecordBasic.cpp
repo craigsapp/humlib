@@ -10,10 +10,9 @@
 
 #include "MuseRecordBasic.h"
 
-#include <string.h>
-#include <stdio.h>
-
 #include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

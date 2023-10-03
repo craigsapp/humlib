@@ -11,14 +11,13 @@
 //
 
 #include "tool-simat.h"
-
-#include <algorithm>
-#include <sstream>
-
 #include "Convert.h"
 #include "HumRegex.h"
 
 #include "pugixml.hpp"
+
+#include <algorithm>
+#include <sstream>
 
 using namespace std;
 

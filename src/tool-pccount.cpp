@@ -12,8 +12,8 @@
 //
 
 #include "tool-pccount.h"
-#include "HumRegex.h"
 #include "Convert.h"
+#include "HumRegex.h"
 
 using namespace std;
 

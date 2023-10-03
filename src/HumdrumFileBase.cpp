@@ -15,13 +15,12 @@
 //                **koto data) and global/local parameters.
 //
 
-#include "HumdrumFileBase.h"
 #include "Convert.h"
 #include "HumRegex.h"
+#include "HumdrumFileBase.h"
 
-#include <stdarg.h>
-#include <string.h>
-
+#include <cstdarg>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 

@@ -11,15 +11,14 @@
 //
 
 #include "tool-mei2hum.h"
+#include "Convert.h"
 #include "HumGrid.h"
 #include "HumRegex.h"
-#include "Convert.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 using namespace pugi;

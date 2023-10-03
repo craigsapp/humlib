@@ -11,8 +11,8 @@
 //                all parts in the given slice.
 //
 
-#include "HumGrid.h"
 #include "GridPart.h"
+#include "HumGrid.h"
 
 using namespace std;
 

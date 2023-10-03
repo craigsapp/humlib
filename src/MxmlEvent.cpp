@@ -11,21 +11,20 @@
 //                of the measure element.
 //
 
+#include "Convert.h"
 #include "MxmlEvent.h"
 #include "MxmlMeasure.h"
-#include "Convert.h"
 
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <string.h>
-
-#include <sstream>
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <vector>
 #include <map>
+#include <sstream>
+#include <vector>
 
 using namespace pugi;
 using namespace std;

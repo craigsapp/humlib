@@ -15,8 +15,8 @@
 #include "HumRegex.h"
 
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
 
 using namespace std;
 

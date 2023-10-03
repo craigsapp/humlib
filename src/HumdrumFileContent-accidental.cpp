@@ -10,8 +10,8 @@
 // Description:   Content analysis of accidentals.
 //
 
-#include "HumdrumFileContent.h"
 #include "Convert.h"
+#include "HumdrumFileContent.h"
 
 using namespace std;
 

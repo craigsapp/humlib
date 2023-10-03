@@ -99,9 +99,9 @@
 //                  score).
 //
 
+#include "Convert.h"
 #include "HumHash.h"
 #include "HumNum.h"
-#include "Convert.h"
 #include "HumdrumToken.h"
 
 #include <iostream>

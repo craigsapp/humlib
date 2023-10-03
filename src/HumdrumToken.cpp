@@ -10,14 +10,14 @@
 // Description:   Used to work with tokens on a Humdrum line.
 //
 
-#include "HumAddress.h"
-#include "HumdrumToken.h"
-#include "HumdrumLine.h"
-#include "HumdrumFile.h"
 #include "Convert.h"
+#include "HumAddress.h"
 #include "HumRegex.h"
+#include "HumdrumFile.h"
+#include "HumdrumLine.h"
+#include "HumdrumToken.h"
 
-#include "string.h"
+#include <cstring>
 
 using namespace std;
 

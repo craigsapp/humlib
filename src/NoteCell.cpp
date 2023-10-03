@@ -11,9 +11,9 @@
 //                within a time slice (could be a note attack, note
 //                sustain, or rest.
 
+#include "Convert.h"
 #include "NoteCell.h"
 #include "NoteGrid.h"
-#include "Convert.h"
 
 using namespace std;
 

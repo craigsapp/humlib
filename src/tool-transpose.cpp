@@ -22,8 +22,9 @@
 #include "tool-transpose.h"
 #include "Convert.h"
 #include "HumRegex.h"
+
 #include <cstring>
-#include <ctype.h>
+#include <cctype>
 
 using namespace std;
 

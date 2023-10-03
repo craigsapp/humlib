@@ -13,8 +13,8 @@
 #include "tool-thru.h"
 #include "HumRegex.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 
 using namespace std;

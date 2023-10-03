@@ -10,12 +10,12 @@
 // Description:   Conversions related to pitch.
 //
 
-#include <cmath>
-#include <vector>
-#include <ctype.h>
-
 #include "Convert.h"
 #include "HumRegex.h"
+
+#include <cctype>
+#include <cmath>
+#include <vector>
 
 using namespace std;
 

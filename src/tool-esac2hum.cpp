@@ -17,11 +17,10 @@
 #include "Convert.h"
 #include "HumRegex.h"
 
-#include <string.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <math.h>
-
+#include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <vector>

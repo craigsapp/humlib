@@ -14,7 +14,8 @@
 #include "Convert.h"
 
 #include "pugixml.hpp"
-#include <math.h>
+
+#include <cmath>
 
 using namespace std;
 

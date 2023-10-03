@@ -15,7 +15,7 @@
 #include "Convert.h"
 
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 using namespace std;
 

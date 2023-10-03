@@ -10,12 +10,12 @@
 // Description:   Conversions related to strings.
 //
 
-#include <sstream>
-#include <cctype>
-#include <string>
-
 #include "Convert.h"
 #include "HumRegex.h"
+
+#include <cctype>
+#include <sstream>
+#include <string>
 
 using namespace std;
 

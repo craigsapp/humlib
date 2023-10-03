@@ -17,9 +17,8 @@
 #include "HumdrumFileStructure.h"
 #include "Convert.h"
 
-#include <string.h>
-
 #include <algorithm>
+#include <cstring>
 #include <sstream>
 
 using namespace std;

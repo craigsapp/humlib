@@ -10,8 +10,8 @@
 // Description:   HumdrumToken functions related to MIDI.
 //
 
-#include "HumdrumToken.h"
 #include "Convert.h"
+#include "HumdrumToken.h"
 
 #include <string>
 #include <vector>

@@ -82,6 +82,7 @@ bool Tool_kern2mens::run(HumdrumFile& infile) {
 	m_noverovioQ =  getBoolean("no-verovio");
 	m_clef       =  getString("clef");
 	storeKernEditorialAccidental(infile);
+	storeKernTerminalLong(infile);
 	convertToMens(infile);
 	return true;
 }
@@ -102,7 +103,9 @@ void Tool_kern2mens::convertToMens(HumdrumFile& infile) {
 		}
 		if (!infile[i].hasSpines()) {
 			if (i == m_kernEdAccLineIndex) {
-				m_humdrum_text << m_mensEdAccLine;
+				m_humdrum_text << m_mensEdAccLine << endl;
+			} else if (i == m_kernTerminalLongIndex) {
+				m_humdrum_text << m_mensTerminalLongLine << endl;
 			} else {
 				m_humdrum_text << infile[i] << "\n";
 			}
@@ -231,6 +234,15 @@ string Tool_kern2mens::convertKernTokenToMens(HTp token) {
 			hre.replaceDestructive(data, "$1z", "([#-n]+)", "g");
 		}
 	}
+
+	// transfer terminal longs
+	if (!m_kernTerminalLong.empty()) {
+		string searchTerm = "(" + m_kernTerminalLong + "+)";
+		if (hre.search(token, searchTerm)) {
+			data += hre.getMatch(1);
+		}
+	}
+
 	return data;
 }
 
@@ -410,6 +422,41 @@ void Tool_kern2mens::storeKernEditorialAccidental(HumdrumFile& infile) {
 				m_kernEdAccLineIndex = i;
 				m_mensEdAccLine = "!!!RDF**mens: z = ";
 				m_mensEdAccLine += definition;
+				break;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_kern2mens::storeKernTerminalLong --
+//
+
+void Tool_kern2mens::storeKernTerminalLong(HumdrumFile& infile) {
+	for (int i=infile.getLineCount() - 1; i>= 0; i--) {
+		if (infile[i].hasSpines()) {
+			continue;
+		}
+		if (!infile[i].isReferenceRecord()) {
+			continue;
+		}
+		string key = infile[i].getReferenceKey();
+		if (key != "RDF**kern") {
+			continue;
+		}
+		HumRegex hre;
+		string value = infile[i].getReferenceValue();
+		if (hre.search(value, "^\\s*([^\\s]+)\\s*=\\s*(.*)\\s*$")) {
+			string signifier = hre.getMatch(1);
+			string definition = hre.getMatch(2);
+			if (hre.search(definition, "terminal\\s+long")) {
+				m_kernTerminalLong = signifier;
+				m_kernTerminalLongIndex = i;
+				m_mensTerminalLongLine = "!!!RDF**mens: " + signifier + " = ";
+				m_mensTerminalLongLine += definition;
 				break;
 			}
 		}

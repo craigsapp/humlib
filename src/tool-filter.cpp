@@ -77,10 +77,10 @@
 #include "tool-thru.h"
 #include "tool-tie.h"
 #include "tool-timebase.h"
-#include "tool-tspos.h"
 #include "tool-transpose.h"
 #include "tool-tremolo.h"
 #include "tool-trillspell.h"
+#include "tool-tspos.h"
 
 #include "HumRegex.h"
 

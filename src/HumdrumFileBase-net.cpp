@@ -11,12 +11,11 @@
 //                over the internet.
 //
 
-#include "HumdrumFileBase.h"
 #include "Convert.h"
+#include "HumdrumFileBase.h"
 
-#include <stdarg.h>
-#include <string.h>
-
+#include <cstdarg>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 

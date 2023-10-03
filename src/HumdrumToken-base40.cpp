@@ -10,8 +10,8 @@
 // Description:   HumdrumToken functions related to Base-40.
 //
 
-#include "HumdrumToken.h"
 #include "Convert.h"
+#include "HumdrumToken.h"
 
 #include <string>
 #include <vector>

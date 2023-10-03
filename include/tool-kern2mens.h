@@ -38,6 +38,7 @@ class Tool_kern2mens : public HumTool {
 		void        printBarline          (HumdrumFile& infile, int line);
 		std::string getClefConversion     (HTp token);
 		void        storeKernEditorialAccidental(HumdrumFile& infile);
+		void        storeKernTerminalLong (HumdrumFile& infile);
 		void        addVerovioStyling     (HumdrumFile& infile);
 
 	private:
@@ -51,6 +52,10 @@ class Tool_kern2mens : public HumTool {
 		std::string m_kernEditorialAccidental;  // used with !!!RDF**kern:
 		int         m_kernEdAccLineIndex = -1;
 		std::string m_mensEdAccLine;
+
+		std::string m_kernTerminalLong;  // used with !!!RDF**kern:
+		int         m_kernTerminalLongIndex = -1;
+		std::string m_mensTerminalLongLine;
 
 };
 

@@ -11,7 +11,6 @@
 //
 
 #include "tool-double.h"
-
 #include "Convert.h"
 #include "HumRegex.h"
 

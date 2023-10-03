@@ -17,11 +17,11 @@
 //   beat level have yet to be implemented.
 //
 
-#include "HumdrumFileContent.h"
 #include "Convert.h"
+#include "HumdrumFileContent.h"
 
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 using namespace std;
 

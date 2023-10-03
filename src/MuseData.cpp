@@ -10,15 +10,14 @@
 // Description:   A class that multiple MuseRecord lines.
 //
 
-#include "MuseData.h"
 #include "HumRegex.h"
+#include "MuseData.h"
 
-#include <string.h>
 #include <cctype>
-#include <stdlib.h>
-
-#include <sstream>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 

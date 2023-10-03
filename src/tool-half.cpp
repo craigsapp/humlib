@@ -11,10 +11,9 @@
 //
 
 #include "tool-half.h"
-
+#include "tool-autobeam.h"
 #include "Convert.h"
 #include "HumRegex.h"
-#include "tool-autobeam.h"
 
 #include <algorithm>
 

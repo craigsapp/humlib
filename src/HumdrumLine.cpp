@@ -11,10 +11,10 @@
 //                of the line.
 //
 
-#include "HumdrumLine.h"
-#include "HumdrumFile.h"
-#include "HumNum.h"
 #include "Convert.h"
+#include "HumNum.h"
+#include "HumdrumFile.h"
+#include "HumdrumLine.h"
 
 #include <algorithm>
 #include <sstream>

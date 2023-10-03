@@ -22,11 +22,10 @@
 #include "HumGrid.h"
 #include "HumRegex.h"
 
-#include <string.h>
-#include <stdlib.h>
-
-#include <cctype>
 #include <algorithm>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 using namespace pugi;

@@ -13,10 +13,9 @@
 
 #include "MuseDataSet.h"
 
-#include <string.h>
-
-#include <sstream>
+#include <cstring>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 

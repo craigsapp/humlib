@@ -99,9 +99,8 @@
 //                  score).
 //
 
-
-#include "HumParamSet.h"
 #include "Convert.h"
+#include "HumParamSet.h"
 
 using namespace std;
 

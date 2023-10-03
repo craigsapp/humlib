@@ -17,9 +17,9 @@
 // (R130) has a problem in coincidence (ties)
 //
 
+#include "tool-autobeam.h"
 #include "tool-composite.h"
 #include "tool-extract.h"
-#include "tool-autobeam.h"
 #include "Convert.h"
 #include "HumRegex.h"
 
