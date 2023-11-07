@@ -15,7 +15,7 @@
 //                Maybe allow more groups and allow for *Xgrp: to turn off a group.
 //
 //                Essentially the commands:
-//                   shed -e "s/grp:A/color:crimson/I; s/grp:B/color:dodgerblue/I; s/grp:C/color:limegreen/I"
+//                   shed -e "s/grp:A/color:crimson/I; s/grp:B/color:dodgerblue/I; s/grp:C/color:purple/I"
 //
 
 #include "tool-colorgroups.h"
@@ -36,7 +36,7 @@ namespace hum {
 Tool_colorgroups::Tool_colorgroups(void) {
 	define("A=s:crimson",    "Color for group A");
 	define("B=s:dodgerblue", "Color for group B");
-	define("C=s:limegreen",  "Color for group C");
+	define("C=s:purple",     "Color for group C");
 	define("command=b",     "print shed command only");
 }
 
