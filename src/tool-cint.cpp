@@ -1567,13 +1567,14 @@ void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infi
 		if (!(rawQ || raw2Q)) {
 			m_humdrum_text << infile[i];
 		}
-		if (infile.token(i, 0)->compare(0, 2, "**") == 0) {
+		HTp ltok = infile.token(i, 0);
+		if (ltok->compare(0, 2, "**") == 0) {
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << "\t**cint\n";
 			}
-			continue;
-		}
-		if (infile[i].isData()) {
+		} else if (*ltok == "*-") {
+				m_humdrum_text << "\t*-\n";
+		} else if (infile[i].isData()) {
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << "\t";
 			}
@@ -1585,28 +1586,22 @@ void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infi
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << "\n";
 			}
-			continue;
-		}
-		if (infile[i].isBarline()) {
+		} else if (infile[i].isBarline()) {
 			if (!(rawQ || raw2Q)) {
-				m_humdrum_text << "\t" << infile.token(i, 0) << "\n";
+				m_humdrum_text << "\t" << ltok << "\n";
 			}
-			continue;
-		}
-		if (infile[i].isInterpretation()) {
+		} else if (infile[i].isInterpretation()) {
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << "\t*\n";
 			}
-			continue;
-		}
-		if (infile[i].isLocalComment()) {
+		} else if (infile[i].isLocalComment()) {
 			if (!(rawQ || raw2Q)) {
 				m_humdrum_text << "\t!\n";
 			}
-			continue;
+		} else {
+			// null, global comment or reference record
+			m_humdrum_text << "\n";
 		}
-		// null, global comment or reference record
-		m_humdrum_text << "\n";
 	}
 
 }
