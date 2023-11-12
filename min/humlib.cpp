@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  6 19:54:46 PST 2023
+// Last Modified: Mon Nov 13 02:31:47 JST 2023
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -58259,6 +58259,8 @@ void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infi
 			}
 			continue;
 		}
+		// null, global comment or reference record
+		m_humdrum_text << "\n";
 	}
 
 }

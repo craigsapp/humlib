@@ -1605,6 +1605,8 @@ void Tool_cint::printLattice(vector<vector<NoteNode> >& notes, HumdrumFile& infi
 			}
 			continue;
 		}
+		// null, global comment or reference record
+		m_humdrum_text << "\n";
 	}
 
 }
