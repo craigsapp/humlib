@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Nov  6 19:54:46 PST 2023
+// Last Modified: Mo 13 Nov 2023 10:29:45 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -106131,7 +106131,7 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	int startline = -1;
 	int stopline = -1;
 	int i;
-	for (i=9; i<infile.getLineCount(); i++) {
+	for (i=0; i<infile.getLineCount(); i++) {
 		if ((exinterpline < 0) && infile[i].isInterpretation()) {
 			exinterpline = i;
 		}
@@ -106161,9 +106161,10 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	MeasureInfo current;
 	current.clear();
 	current.num = 0;
-	// current.start = startline;
-	current.start = exinterpline+1;
+	current.start = startline;
+	// current.start = exinterpline+1;
 	current.stop = stopline;
+	current.file = &infile;
 	measurelist.push_back(current);
 }
 

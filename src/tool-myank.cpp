@@ -2032,7 +2032,7 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	int startline = -1;
 	int stopline = -1;
 	int i;
-	for (i=9; i<infile.getLineCount(); i++) {
+	for (i=0; i<infile.getLineCount(); i++) {
 		if ((exinterpline < 0) && infile[i].isInterpretation()) {
 			exinterpline = i;
 		}
@@ -2062,9 +2062,10 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	MeasureInfo current;
 	current.clear();
 	current.num = 0;
-	// current.start = startline;
-	current.start = exinterpline+1;
+	current.start = startline;
+	// current.start = exinterpline+1;
 	current.stop = stopline;
+	current.file = &infile;
 	measurelist.push_back(current);
 }
 
