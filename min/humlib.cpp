@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo 13 Nov 2023 10:29:45 CET
+// Last Modified: Mo 13 Nov 2023 10:31:21 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -104425,7 +104425,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	vector<int> m_barnum;
 	m_barnum.resize(infile.getLineCount());
-	int current = -1;
+	int current = 0;
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isBarline()) {

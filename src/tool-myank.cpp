@@ -326,7 +326,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	vector<int> m_barnum;
 	m_barnum.resize(infile.getLineCount());
-	int current = -1;
+	int current = 0;
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isBarline()) {
