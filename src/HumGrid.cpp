@@ -130,8 +130,8 @@ int HumGrid::getStaffCount(int partindex) {
 		return 0;
 	}
 
-	return (int)this->at(0)->front()->at(partindex)->size();
-	// return (int)this->at(0)->back()->at(partindex)->size();
+	// return (int)this->at(0)->front()->at(partindex)->size();
+	return (int)this->at(0)->back()->at(partindex)->size();
 }
 
 
