@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 30 Nov 2023 08:29:32 CET
+// Last Modified: Do 30 Nov 2023 12:59:09 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -106021,6 +106021,15 @@ void Tool_myank::getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFi
 		measurelist.push_back(current);
 	}
 
+	// allow "myank -l" when there are no measure numbers
+	if (getBoolean("lines") && measurelist.size() == 0) {
+		current.clear();
+		current.num = 0;
+		current.start = 0;
+		current.stop = dataend;
+		current.file = &infile;
+		measurelist.push_back(current);
+	}
 
 }
 
@@ -106189,7 +106198,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 			minmeasure = measurein[i].num;
 		}
 	}
-	if (maxmeasure <= 0) {
+	if (maxmeasure <= 0 && !getBoolean("lines")) {
 		cerr << "Error: There are no measure numbers present in the data" << endl;
 		exit(1);
 	}

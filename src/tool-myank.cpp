@@ -1925,6 +1925,15 @@ void Tool_myank::getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFi
 		measurelist.push_back(current);
 	}
 
+	// allow "myank -l" when there are no measure numbers
+	if (getBoolean("lines") && measurelist.size() == 0) {
+		current.clear();
+		current.num = 0;
+		current.start = 0;
+		current.stop = dataend;
+		current.file = &infile;
+		measurelist.push_back(current);
+	}
 
 }
 
@@ -2093,7 +2102,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 			minmeasure = measurein[i].num;
 		}
 	}
-	if (maxmeasure <= 0) {
+	if (maxmeasure <= 0 && !getBoolean("lines")) {
 		cerr << "Error: There are no measure numbers present in the data" << endl;
 		exit(1);
 	}
