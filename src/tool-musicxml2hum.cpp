@@ -1766,7 +1766,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		cerr << "!!TOKEN: " << ss.str();
 		cerr << "\tTS: "    << event->getStartTime();
 		cerr << "\tDUR: "   << event->getDuration();
-		cerr << "\tSTi: "   << event->getStaffNumber();
+		cerr << "\tSTn: "   << event->getStaffNumber();
 		cerr << "\tVn: "    << event->getVoiceNumber();
 		cerr << "\tSTi: "   << event->getStaffIndex();
 		cerr << "\tVi: "    << event->getVoiceIndex();
