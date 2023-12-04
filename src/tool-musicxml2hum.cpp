@@ -1564,7 +1564,14 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendZeroEvents(outdata, nowevents, nowtime, partdata);
 
-	if (nowevents[0]->nonzerodur.size() == 0) {
+	bool hasNonZeroDurElements = false;
+	for (const SimultaneousEvents* event : nowevents) {
+        if (event->nonzerodur.size() != 0) {
+            hasNonZeroDurElements = true;
+			break;
+        }
+    }
+	if (!hasNonZeroDurElements) {
 		// no duration events (should be a terminal barline)
 		// ignore and deal with in calling function.
 		return true;
