@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mo  4 Dez 2023 11:23:27 CET
+// Last Modified: Di  5 Dez 2023 11:57:39 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -100634,7 +100634,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		cerr << "!!TOKEN: " << ss.str();
 		cerr << "\tTS: "    << event->getStartTime();
 		cerr << "\tDUR: "   << event->getDuration();
-		cerr << "\tSTi: "   << event->getStaffNumber();
+		cerr << "\tSTn: "   << event->getStaffNumber();
 		cerr << "\tVn: "    << event->getVoiceNumber();
 		cerr << "\tSTi: "   << event->getStaffIndex();
 		cerr << "\tVi: "    << event->getVoiceIndex();
