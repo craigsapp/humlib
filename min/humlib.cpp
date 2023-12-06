@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  6 Dez 2023 18:35:46 CET
+// Last Modified: Mi  6 Dez 2023 21:07:52 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -99053,7 +99053,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		bool fbstate = partdata[p].hasFiguredBass();
 		if (fbstate) {
 			outdata.setFiguredBassPresent(p);
-			break;
+			// break;
 		}
 	}
 
