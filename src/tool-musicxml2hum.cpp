@@ -185,7 +185,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		bool fbstate = partdata[p].hasFiguredBass();
 		if (fbstate) {
 			outdata.setFiguredBassPresent(p);
-			break;
+			// break;
 		}
 	}
 
