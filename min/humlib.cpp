@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  6 Dez 2023 14:34:42 CET
+// Last Modified: Mi  6 Dez 2023 18:35:46 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -100179,7 +100179,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 	if (offsetHarmony.size() > 0) {
 		insertOffsetHarmonyIntoMeasure(outdata.back());
 	}
-	if (offsetFiguredBass.size() > 0) {
+	if (m_offsetFiguredBass.size() > 0) {
 		insertOffsetFiguredBassIntoMeasure(outdata.back());
 	}
 	return status;
@@ -100193,7 +100193,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 //
 
 void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
-	if (offsetFiguredBass.empty()) {
+	if (m_offsetFiguredBass.empty()) {
 		return;
 	}
 
@@ -100205,15 +100205,15 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 			continue;
 		}
 		HumNum timestamp = gs->getTimestamp();
-		for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
-			if (offsetFiguredBass[i].token == NULL) {
+		for (int i=0; i<(int)m_offsetFiguredBass.size(); i++) {
+			if (m_offsetFiguredBass[i].token == NULL) {
 				continue;
  			}
-			if (offsetFiguredBass[i].timestamp == timestamp) {
+			if (m_offsetFiguredBass[i].timestamp == timestamp) {
 				// this is the slice to insert the harmony
-				gs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
-				offsetFiguredBass[i].token = NULL;
-			} else if (offsetFiguredBass[i].timestamp < timestamp) {
+				gs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
+				m_offsetFiguredBass[i].token = NULL;
+			} else if (m_offsetFiguredBass[i].timestamp < timestamp) {
 				if (beginQ) {
 					cerr << "Error: Cannot insert harmony " << offsetFiguredBass[i].token
 					     << " at timestamp " << offsetFiguredBass[i].timestamp
@@ -100231,11 +100231,11 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 						}
 						int partcount = (int)(*tempit)->size();
 						tempit++;
-						GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+						GridSlice* newgs = new GridSlice(gm, m_offsetFiguredBass[i].timestamp,
 								SliceType::Notes, partcount);
-						newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+						newgs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
 						gm->insert(tempit, newgs);
-						offsetFiguredBass[i].token = NULL;
+						m_offsetFiguredBass[i].token = NULL;
 						break;
 					}
 				}
@@ -100245,19 +100245,19 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 	}
 	// If there are still valid harmonies in the input list, apppend
 	// them to the end of the measure.
-	for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
-		if (offsetFiguredBass[i].token == NULL) {
+	for (int i=0; i<(int)m_offsetFiguredBass.size(); i++) {
+		if (m_offsetFiguredBass[i].token == NULL) {
 			continue;
  		}
 		m_forceRecipQ = true;
 		int partcount = (int)gm->back()->size();
-		GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+		GridSlice* newgs = new GridSlice(gm, m_offsetFiguredBass[i].timestamp,
 				SliceType::Notes, partcount);
-		newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+		newgs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
 		gm->insert(gm->end(), newgs);
-		offsetFiguredBass[i].token = NULL;
+		m_offsetFiguredBass[i].token = NULL;
 	}
-	offsetFiguredBass.clear();
+	m_offsetFiguredBass.clear();
 }
 
 
@@ -101885,7 +101885,7 @@ int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum n
 			finfo.timestamp += nowtime;
 			finfo.partindex = partindex;
 			finfo.token = ftok;
-			offsetFiguredBass.push_back(finfo);
+			m_offsetFiguredBass.push_back(finfo);
 		}
 		if (i < (int)m_current_figured_bass[partindex].size() - 1) {
 			dursum += getFiguredBassDuration(fnode);

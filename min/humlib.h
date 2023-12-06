@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  6 Dez 2023 14:34:42 CET
+// Last Modified: Mi  6 Dez 2023 18:35:46 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9178,7 +9178,7 @@ class Tool_musicxml2hum : public HumTool {
 		int  m_maxstaff      = 0;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 		std::vector<MusicXmlHarmonyInfo> offsetHarmony;
-		std::vector<MusicXmlFiguredBassInfo> offsetFiguredBass;
+		std::vector<MusicXmlFiguredBassInfo> m_offsetFiguredBass;
 		std::vector<string> m_stop_char;
 
 		// RDF indications in **kern data:
