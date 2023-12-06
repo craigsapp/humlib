@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  6 Dez 2023 21:07:52 CET
+// Last Modified: Mi  6 Dez 2023 21:12:42 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -100215,8 +100215,8 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 				m_offsetFiguredBass[i].token = NULL;
 			} else if (m_offsetFiguredBass[i].timestamp < timestamp) {
 				if (beginQ) {
-					cerr << "Error: Cannot insert harmony " << offsetFiguredBass[i].token
-					     << " at timestamp " << offsetFiguredBass[i].timestamp
+					cerr << "Error: Cannot insert harmony " << m_offsetFiguredBass[i].token
+					     << " at timestamp " << m_offsetFiguredBass[i].timestamp
 					     << " since first timestamp in measure is " << timestamp << endl;
 				} else {
 					m_forceRecipQ = true;
