@@ -236,7 +236,7 @@ class Tool_musicxml2hum : public HumTool {
 		int  m_maxstaff      = 0;
 		std::vector<std::vector<std::string>> m_last_ottava_direction;
 		std::vector<MusicXmlHarmonyInfo> offsetHarmony;
-		std::vector<MusicXmlFiguredBassInfo> offsetFiguredBass;
+		std::vector<MusicXmlFiguredBassInfo> m_offsetFiguredBass;
 		std::vector<string> m_stop_char;
 
 		// RDF indications in **kern data:
