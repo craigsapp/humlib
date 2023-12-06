@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  5 Dez 2023 11:57:39 CET
+// Last Modified: Mi  6 Dez 2023 14:34:42 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9191,7 +9191,7 @@ class Tool_musicxml2hum : public HumTool {
 		std::vector<std::vector<pugi::xml_node>> m_current_brackets;
 		std::map<int, string> m_bracket_type_buffer;
 		std::vector<std::vector<pugi::xml_node>> m_used_hairpins;
-		std::vector<pugi::xml_node> m_current_figured_bass;
+		std::vector<std::vector<pugi::xml_node>> m_current_figured_bass;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_text;
 		std::vector<std::pair<int, pugi::xml_node>> m_current_tempo;
 
