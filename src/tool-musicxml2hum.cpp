@@ -1347,8 +1347,8 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 				m_offsetFiguredBass[i].token = NULL;
 			} else if (m_offsetFiguredBass[i].timestamp < timestamp) {
 				if (beginQ) {
-					cerr << "Error: Cannot insert harmony " << offsetFiguredBass[i].token
-					     << " at timestamp " << offsetFiguredBass[i].timestamp
+					cerr << "Error: Cannot insert harmony " << m_offsetFiguredBass[i].token
+					     << " at timestamp " << m_offsetFiguredBass[i].timestamp
 					     << " since first timestamp in measure is " << timestamp << endl;
 				} else {
 					m_forceRecipQ = true;
