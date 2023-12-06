@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di  5 Dez 2023 11:57:39 CET
+// Last Modified: Mi  6 Dez 2023 14:34:42 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -98976,6 +98976,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	m_current_dynamic.resize(partids.size());
 	m_current_brackets.resize(partids.size());
+	m_current_figured_bass.resize(partids.size());
 	m_stop_char.resize(partids.size(), "[");
 
 	getPartContent(partcontent, partids, doc);
@@ -101859,13 +101860,13 @@ string Tool_musicxml2hum::getDynamicString(xml_node element) {
 //
 
 int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum nowtime, int partindex) {
-	if (m_current_figured_bass.empty()) {
+	if (m_current_figured_bass[partindex].empty()) {
 		return 0;
 	}
 
 	int dursum = 0;
-	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
-		xml_node fnode = m_current_figured_bass.at(i);
+	for (int i=0; i<(int)m_current_figured_bass[partindex].size(); i++) {
+		xml_node fnode = m_current_figured_bass[partindex].at(i);
 		if (!fnode) {
 			// strange problem
 			continue;
@@ -101886,11 +101887,11 @@ int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum n
 			finfo.token = ftok;
 			offsetFiguredBass.push_back(finfo);
 		}
-		if (i < (int)m_current_figured_bass.size() - 1) {
+		if (i < (int)m_current_figured_bass[partindex].size() - 1) {
 			dursum += getFiguredBassDuration(fnode);
 		}
 	}
-	m_current_figured_bass.clear();
+	m_current_figured_bass[partindex].clear();
 
 	return 1;
 
@@ -102535,7 +102536,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 				}
 			} else if (nodeType(element, "figured-bass")) {
-				m_current_figured_bass.push_back(element);
+				m_current_figured_bass[pindex].push_back(element);
 			} else if (nodeType(element, "note")) {
 				if (foundnongrace) {
 					addEventToList(graceafter, nowevents[i]->zerodur[j]);
