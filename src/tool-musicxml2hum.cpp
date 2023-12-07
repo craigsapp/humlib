@@ -1580,6 +1580,10 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendNonZeroEvents(outdata, nowevents, nowtime, partdata);
 
+	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
+		m_current_figured_bass[i].clear();
+	}
+
 	return true;
 }
 

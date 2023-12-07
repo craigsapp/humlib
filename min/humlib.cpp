@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do  7 Dez 2023 12:33:50 CET
+// Last Modified: Do  7 Dez 2023 22:29:45 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -100447,6 +100447,10 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 	}
 
 	appendNonZeroEvents(outdata, nowevents, nowtime, partdata);
+
+	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
+		m_current_figured_bass[i].clear();
+	}
 
 	return true;
 }
