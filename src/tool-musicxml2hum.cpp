@@ -2729,7 +2729,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--";
 	} else if (prefix == "flat") {
 		accidental = "-";
-	} else if (prefix == "double-sharp") {
+	} else if (prefix == "double-sharp" || prefix == "sharp-sharp") {
 		accidental = "##";
 	} else if (prefix == "sharp") {
 		accidental = "#";
@@ -2739,7 +2739,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--r";
 	} else if (suffix == "flat") {
 		accidental = "-r";
-	} else if (suffix == "double-sharp") {
+	} else if (suffix == "double-sharp" || suffix == "sharp-sharp") {
 		accidental = "##r";
 	} else if (suffix == "sharp") {
 		accidental = "#r";
