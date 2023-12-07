@@ -2752,12 +2752,12 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	// could be a flat).  At the moment do not assign the accidental, but
 	// in the future assign an accidental to the slashed figure, probably
 	// with a post-processing tool.
-	if (suffix == "cross" || prefix == "cross") {
+	if (suffix == "cross" || prefix == "cross" || suffix == "vertical" || prefix == "vertical") {
 		slash = "|";
 		if (accidental.empty()) {
 			accidental = "#";
 		}
-	} else if ((suffix == "backslash") || (prefix == "backslash")) {
+	} else if ((suffix == "backslash" || suffix == "back-slash") || (prefix == "backslash" || prefix == "back-slash")) {
 		slash = "\\";
 		if (accidental.empty()) {
 			accidental = "#";
