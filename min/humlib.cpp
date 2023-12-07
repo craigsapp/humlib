@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do  7 Dez 2023 12:23:44 CET
+// Last Modified: Do  7 Dez 2023 12:33:50 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -101597,7 +101597,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--";
 	} else if (prefix == "flat") {
 		accidental = "-";
-	} else if (prefix == "double-sharp") {
+	} else if (prefix == "double-sharp" || prefix == "sharp-sharp") {
 		accidental = "##";
 	} else if (prefix == "sharp") {
 		accidental = "#";
@@ -101607,7 +101607,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--r";
 	} else if (suffix == "flat") {
 		accidental = "-r";
-	} else if (suffix == "double-sharp") {
+	} else if (suffix == "double-sharp" || suffix == "sharp-sharp") {
 		accidental = "##r";
 	} else if (suffix == "sharp") {
 		accidental = "#r";
