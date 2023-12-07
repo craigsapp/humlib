@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mi  6 Dez 2023 21:12:42 CET
+// Last Modified: Do  7 Dez 2023 12:23:44 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -101620,12 +101620,12 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	// could be a flat).  At the moment do not assign the accidental, but
 	// in the future assign an accidental to the slashed figure, probably
 	// with a post-processing tool.
-	if (suffix == "cross" || prefix == "cross") {
+	if (suffix == "cross" || prefix == "cross" || suffix == "vertical" || prefix == "vertical") {
 		slash = "|";
 		if (accidental.empty()) {
 			accidental = "#";
 		}
-	} else if ((suffix == "backslash") || (prefix == "backslash")) {
+	} else if ((suffix == "backslash" || suffix == "back-slash") || (prefix == "backslash" || prefix == "back-slash")) {
 		slash = "\\";
 		if (accidental.empty()) {
 			accidental = "#";
