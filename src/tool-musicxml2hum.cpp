@@ -1306,6 +1306,13 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		}
 		status &= convertNowEvents(outdata.back(),
 				nowevents, nowparts, processtime, partdata, partstaves);
+
+		// Remove all figured bass numbers for this nowtime so that they are not
+		// accidentally displayed in the next nowtime, which can currently
+		// happen if there are no nonzerodur events in the same part
+		for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
+			m_current_figured_bass[i].clear();
+		}
 	}
 
 	if (offsetHarmony.size() > 0) {
@@ -1579,10 +1586,6 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 	}
 
 	appendNonZeroEvents(outdata, nowevents, nowtime, partdata);
-
-	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
-		m_current_figured_bass[i].clear();
-	}
 
 	return true;
 }
