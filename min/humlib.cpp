@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr  8 Dez 2023 00:13:22 CET
+// Last Modified: Fr  8 Dez 2023 12:36:58 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -101947,6 +101947,17 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 		if (i < (int)children.size() - 1) {
 			output += " ";
 		}
+	}
+
+	output = std::regex_replace(output, std::regex("^ +| +$|( ) +"), "$1");
+
+	if (output.empty()) {
+		if (children.size()) {
+			cerr << "WARNING: figured bass string is empty but has "
+				<< children.size() << " figure elements as children. "
+				<< "The output has been replaced with \".\"" << endl;
+		}
+		output = ".";
 	}
 
 	return output;
