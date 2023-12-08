@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr  8 Dez 2023 12:36:58 CET
+// Last Modified: Fr  8 Dez 2023 12:39:54 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9035,6 +9035,7 @@ class Tool_musicxml2hum : public HumTool {
 		                             std::vector<SimultaneousEvents*>& nowevents,
 		                             HumNum nowtime,
 		                             std::vector<MxmlPart>& partdata);
+		void   handleFiguredBassWithoutNonZeroEvent (std::vector<SimultaneousEvents*>& nowevents, HumNum nowtime);
 		void   appendNonZeroEvents   (GridMeasure* outdata,
 		                              std::vector<SimultaneousEvents*>& nowevents,
 		                              HumNum nowtime,

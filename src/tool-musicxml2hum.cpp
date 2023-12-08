@@ -1587,7 +1587,41 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendNonZeroEvents(outdata, nowevents, nowtime, partdata);
 
+	handleFiguredBassWithoutNonZeroEvent(nowevents, nowtime);
+
 	return true;
+}
+
+
+
+/////////////////////////////
+//
+// Tool_musicxml2hum::handleFiguredBassWithoutNonZeroEvent --
+//
+
+void Tool_musicxml2hum::handleFiguredBassWithoutNonZeroEvent(vector<SimultaneousEvents*>& nowevents, HumNum nowtime) {
+	vector<int> nonZeroParts;
+	vector<MxmlEvent> floatingFiguredBass;
+	for (const SimultaneousEvents* sevent : nowevents) {
+		for (MxmlEvent* mxmlEvent : sevent->nonzerodur) {
+			nonZeroParts.push_back(mxmlEvent->getPartIndex());
+		}
+		for (MxmlEvent* mxmlEvent : sevent->zerodur) {
+			if ("figured-bass" == mxmlEvent->getElementName()) {
+				if (std::find(nonZeroParts.begin(), nonZeroParts.end(), mxmlEvent->getPartIndex()) == nonZeroParts.end()) {
+					// cerr << mxmlEvent->getNode() << "\n";
+					string fstring = getFiguredBassString(mxmlEvent->getNode());
+					HTp ftok = new HumdrumToken(fstring);
+					MusicXmlFiguredBassInfo finfo;
+					finfo.timestamp = nowtime;
+					finfo.partindex = mxmlEvent->getPartIndex();
+					finfo.token = ftok;
+					m_offsetFiguredBass.push_back(finfo);
+					// cerr << "ADD FLOATING FB NUM " << fstring << " " << nowtime << "\n";
+				}
+			}
+		}
+	}
 }
 
 

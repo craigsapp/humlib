@@ -93,6 +93,7 @@ class Tool_musicxml2hum : public HumTool {
 		                             std::vector<SimultaneousEvents*>& nowevents,
 		                             HumNum nowtime,
 		                             std::vector<MxmlPart>& partdata);
+		void   handleFiguredBassWithoutNonZeroEvent (std::vector<SimultaneousEvents*>& nowevents, HumNum nowtime);
 		void   appendNonZeroEvents   (GridMeasure* outdata,
 		                              std::vector<SimultaneousEvents*>& nowevents,
 		                              HumNum nowtime,
