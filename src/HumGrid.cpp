@@ -1980,7 +1980,7 @@ void HumGrid::checkForNullDataHoles(void) {
 							if (v >= (int)sp->size() - 1) {
 								// Found a data line with no data at given voice, so
 								// add slice duration to cumulative duration.
-								duration += slicep->getDuration();
+								// duration += slicep->getDuration();
 								continue;
 							}
 							vp = sp->at(v);
