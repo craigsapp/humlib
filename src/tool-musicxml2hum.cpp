@@ -3081,6 +3081,17 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 		}
 	}
 
+	output = std::regex_replace(output, std::regex("^ +| +$|( ) +"), "$1");
+
+	if (output.empty()) {
+		if (children.size()) {
+			cerr << "WARNING: figured bass string is empty but has "
+				<< children.size() << " figure elements as children. "
+				<< "The output has been replaced with \".\"" << endl;
+		}
+		output = ".";
+	}
+
 	return output;
 
 	// HTp fbtok = new HumdrumToken(fbstring);
