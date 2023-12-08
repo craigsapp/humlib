@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr  8 Dez 2023 12:39:54 CET
+// Last Modified: Fr  8 Dez 2023 20:35:27 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -101983,7 +101983,8 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 		}
 	}
 
-	output = std::regex_replace(output, std::regex("^ +| +$|( ) +"), "$1");
+	HumRegex hre;
+	hre.replaceDestructive(output, "", R"(^\s+|\s+$)");
 
 	if (output.empty()) {
 		if (children.size()) {

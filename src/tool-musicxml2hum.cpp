@@ -3115,7 +3115,8 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 		}
 	}
 
-	output = std::regex_replace(output, std::regex("^ +| +$|( ) +"), "$1");
+	HumRegex hre;
+	hre.replaceDestructive(output, "", R"(^\s+|\s+$)");
 
 	if (output.empty()) {
 		if (children.size()) {
