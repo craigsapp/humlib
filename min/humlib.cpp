@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr  8 Dez 2023 21:34:43 CET
+// Last Modified: Di 12 Dez 2023 11:50:56 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -45771,6 +45771,20 @@ int MxmlEvent::getVoiceIndex(int maxvoice) const {
 	if (m_owner) {
 		int voiceindex = m_owner->getVoiceIndex(m_voice);
 		if (voiceindex >= 0) {
+			vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+			if (getVoiceNumber() < mapping.size()) {
+				// prevent overwriting existing notes in voiceindex layer, when
+				// the MxmlEvent are in another staff than in calculated in
+				// MxmlPart::m_voicemapping
+				vector<vector<int>> staffvoicehist = getOwner()->getOwner()->getStaffVoiceHist();
+				int totalVoicesInStaff = staffvoicehist[getStaffNumber()][getVoiceNumber()];
+				const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+				if (mappingStaffIndex != getStaffIndex()) {
+					// add total number of voices of the new staff to the
+					// voiceindex of the old staff
+					return totalVoicesInStaff + voiceindex;
+				}
+			}
 			return voiceindex;
 		}
 	}

@@ -14,6 +14,7 @@
 #include "Convert.h"
 #include "MxmlEvent.h"
 #include "MxmlMeasure.h"
+#include "MxmlPart.h"
 
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
@@ -869,6 +870,20 @@ int MxmlEvent::getVoiceIndex(int maxvoice) const {
 	if (m_owner) {
 		int voiceindex = m_owner->getVoiceIndex(m_voice);
 		if (voiceindex >= 0) {
+			vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+			if (getVoiceNumber() < mapping.size()) {
+				// prevent overwriting existing notes in voiceindex layer, when
+				// the MxmlEvent are in another staff than in calculated in
+				// MxmlPart::m_voicemapping
+				vector<vector<int>> staffvoicehist = getOwner()->getOwner()->getStaffVoiceHist();
+				int totalVoicesInStaff = staffvoicehist[getStaffNumber()][getVoiceNumber()];
+				const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+				if (mappingStaffIndex != getStaffIndex()) {
+					// add total number of voices of the new staff to the
+					// voiceindex of the old staff
+					return totalVoicesInStaff + voiceindex;
+				}
+			}
 			return voiceindex;
 		}
 	}

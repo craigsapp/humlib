@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Fr  8 Dez 2023 21:34:43 CET
+// Last Modified: Di 12 Dez 2023 11:50:56 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4301,6 +4301,9 @@ class MxmlPart {
 		string        getPartAbbr          (void) const;
 		string        cleanSpaces          (const string& input);
 		bool          hasOrnaments         (void) const;
+		
+		vector<pair<int, int>> getVoiceMapping (void) { return m_voicemapping; };
+		vector<vector<int>> getStaffVoiceHist (void) { return m_staffvoicehist; };
 
 
 	private:
