@@ -229,7 +229,7 @@ class Tool_deg : public HumTool {
 		// m_insertTracks: matches to m_degSpines first dimension.
 		// It gives the track number for spines before which the corresponding
 		// m_degSpine[x] spine should be inserted.  A -1 value at the last
-		// position in m_insertTracks means append the **deg spine at the 
+		// position in m_insertTracks means append the **deg spine at the
 		// end of the line.
 		std::vector<int> m_insertTracks;
 

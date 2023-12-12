@@ -349,7 +349,7 @@ void HumdrumFileContent::prepareStaffBelowNoteStems(HTp token) {
 int HumdrumFileContent::getNoteCount(void) {
 	HumdrumFileContent& infile = *this;
 	int counter = 0;
-	
+
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandStart(i);

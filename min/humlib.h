@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec 12 10:30:33 PST 2023
+// Last Modified: Tue Dec 12 10:50:27 PST 2023
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3362,7 +3362,7 @@ class MuseRecord : public MuseRecordBasic {
 		std::string      getStaffString               (void);
 		int              getStaff                     (void);
 		int              staffQ                       (void);
-		
+
 		// column 25 ---> blank
 
 		// columns 26 - 31: beam codes
@@ -3424,7 +3424,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              getFigureCount               (void);
 
 		// columns 3 -- 5 ---> blank
-		
+
 		// columns 6 -- 8: figure division pointer advancement (duration)
 		std::string      getFigurePointerField        (void);
 		int              figurePointerQ               (void);
@@ -4301,7 +4301,7 @@ class MxmlPart {
 		string        getPartAbbr          (void) const;
 		string        cleanSpaces          (const string& input);
 		bool          hasOrnaments         (void) const;
-		
+
 		vector<pair<int, int>> getVoiceMapping (void) { return m_voicemapping; };
 		vector<vector<int>> getStaffVoiceHist (void) { return m_staffvoicehist; };
 
@@ -6146,7 +6146,7 @@ class Tool_cmr : public HumTool {
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index, int direction, HumdrumFile& infile);
 		bool             hasHigher               (int pitch, int tolerance,
-		                                          std::vector<int>& midinums, 
+		                                          std::vector<int>& midinums,
 		                                          std::vector<std::vector<HTp>>& notelist,
 		                                          int index1, int index2);
 		bool             hasGroupUp              (void);
@@ -6837,7 +6837,7 @@ class Tool_deg : public HumTool {
 		// m_insertTracks: matches to m_degSpines first dimension.
 		// It gives the track number for spines before which the corresponding
 		// m_degSpine[x] spine should be inserted.  A -1 value at the last
-		// position in m_insertTracks means append the **deg spine at the 
+		// position in m_insertTracks means append the **deg spine at the
 		// end of the line.
 		std::vector<int> m_insertTracks;
 
@@ -7322,7 +7322,7 @@ class FiguredBassAbbreviationMapping {
 		// String to compare the numbers with
 		// e.g. "6 4 3"
 		// Sorted by size, larger numbers first
-		string m_str; 
+		string m_str;
 
 		// Figured bass number as int
 		vector<int> m_numbers;
@@ -7824,7 +7824,7 @@ class Tool_humtr : public HumTool {
 	public:
 		            Tool_humtr        (void);
 		           ~Tool_humtr        () {};
-  
+
 		bool        run               (HumdrumFileSet& infiles);
 		bool        run               (HumdrumFile& infile);
 		bool        run               (const std::string& indata, ostream& out);
@@ -8419,7 +8419,7 @@ class Tool_meter : public HumTool {
 		void     getMeterData      (HumdrumFile& infile);
 		void     processLine       (HumdrumLine& line,
 		                            std::vector<HumNum>& curNum,
-		                            std::vector<HumNum>& curDen, 
+		                            std::vector<HumNum>& curDen,
 		                            std::vector<HumNum>& curBeat,
 		                            std::vector<HumNum>& curBarTime);
 		void     printMeterData    (HumdrumFile& infile);
@@ -8642,7 +8642,7 @@ class SonorityNoteData {
 				break;
 			}
 		}
-	
+
 		bool hasAccidental(void) {
 			// Set only with setText() input.
 			return m_accidentalQ;

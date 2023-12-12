@@ -184,7 +184,7 @@ class Tool_cmr : public HumTool {
 		void             getPartNames            (std::vector<std::string>& partNames, HumdrumFile& infile);
 		void             checkForCmr             (int index, int direction, HumdrumFile& infile);
 		bool             hasHigher               (int pitch, int tolerance,
-		                                          std::vector<int>& midinums, 
+		                                          std::vector<int>& midinums,
 		                                          std::vector<std::vector<HTp>>& notelist,
 		                                          int index1, int index2);
 		bool             hasGroupUp              (void);

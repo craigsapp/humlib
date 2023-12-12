@@ -1777,7 +1777,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 			}
 		}
 	}
-	
+
 	if (event->getCrossStaffOffset() > 0) {
 		m_staffbelow = true;
 	} else if (event->getCrossStaffOffset() < 0) {

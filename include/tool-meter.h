@@ -39,7 +39,7 @@ class Tool_meter : public HumTool {
 		void     getMeterData      (HumdrumFile& infile);
 		void     processLine       (HumdrumLine& line,
 		                            std::vector<HumNum>& curNum,
-		                            std::vector<HumNum>& curDen, 
+		                            std::vector<HumNum>& curDen,
 		                            std::vector<HumNum>& curBeat,
 		                            std::vector<HumNum>& curBarTime);
 		void     printMeterData    (HumdrumFile& infile);

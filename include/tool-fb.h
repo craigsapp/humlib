@@ -49,7 +49,7 @@ class FiguredBassAbbreviationMapping {
 		// String to compare the numbers with
 		// e.g. "6 4 3"
 		// Sorted by size, larger numbers first
-		string m_str; 
+		string m_str;
 
 		// Figured bass number as int
 		vector<int> m_numbers;

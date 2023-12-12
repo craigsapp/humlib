@@ -64,7 +64,7 @@ void HumdrumLine::getMidiPitchesSortHL(std::vector<int>& output) {
 		}
 	);
 }
-	
+
 
 std::vector<int> HumdrumLine::getMidiPitchesSortHL(void) {
 	vector<int> output;

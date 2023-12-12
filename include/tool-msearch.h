@@ -107,7 +107,7 @@ class SonorityNoteData {
 				break;
 			}
 		}
-	
+
 		bool hasAccidental(void) {
 			// Set only with setText() input.
 			return m_accidentalQ;

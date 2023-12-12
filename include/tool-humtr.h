@@ -24,7 +24,7 @@ class Tool_humtr : public HumTool {
 	public:
 		            Tool_humtr        (void);
 		           ~Tool_humtr        () {};
-  
+
 		bool        run               (HumdrumFileSet& infiles);
 		bool        run               (HumdrumFile& infile);
 		bool        run               (const std::string& indata, ostream& out);

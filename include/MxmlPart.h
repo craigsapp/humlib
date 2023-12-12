@@ -72,7 +72,7 @@ class MxmlPart {
 		string        getPartAbbr          (void) const;
 		string        cleanSpaces          (const string& input);
 		bool          hasOrnaments         (void) const;
-		
+
 		vector<pair<int, int>> getVoiceMapping (void) { return m_voicemapping; };
 		vector<vector<int>> getStaffVoiceHist (void) { return m_staffvoicehist; };
 

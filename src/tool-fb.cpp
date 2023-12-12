@@ -94,7 +94,7 @@ bool Tool_fb::run(HumdrumFile &infile) {
 
 //////////////////////////////
 //
-// Tool_fb::initialize -- 
+// Tool_fb::initialize --
 //
 
 void Tool_fb::initialize(void) {
@@ -150,7 +150,7 @@ void Tool_fb::initialize(void) {
 
 //////////////////////////////
 //
-// Tool_fb::processFile -- 
+// Tool_fb::processFile --
 //
 
 void Tool_fb::processFile(HumdrumFile& infile) {
@@ -213,7 +213,6 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				// Handle spine splits
 				do {
 					HTp resolvedToken = currentToken->resolveNull();
-					
 					int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
 
 					if (abs(lowest) < lowestNotePitch) {
@@ -260,7 +259,6 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 		// Handle spine splits
 		do {
 			HTp resolvedToken = currentToken->resolveNull();
-			
 			int lowest = getLowestBase40Pitch(resolvedToken->getBase40Pitches());
 
 			// Ignore if base is a rest or silent note
@@ -300,14 +298,13 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			// Handle spine splits
 			do {
 				HTp resolvedToken = currentToken->resolveNull();
-				
 				for (int subtokenBase40: resolvedToken->getBase40Pitches()) {
 
 					// Ignore if target is a rest or silent note
 					if ((subtokenBase40 == 0) || (subtokenBase40 == -1000) || (subtokenBase40 == -2000)) {
 						continue;
 					}
-					
+
 					// Ignore if same pitch as base voice
 					if ((abs(lowestBaseNoteBase40Pitch) == abs(subtokenBase40)) && (baseCell->getToken()->getTrack() == initialTokenTrack)) {
 						continue;
@@ -330,7 +327,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			} while (currentToken);
 
 			// Sort chord numbers by size
-			sort(chordNumbers.begin(), chordNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+			sort(chordNumbers.begin(), chordNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
 				return a->m_number > b->m_number;
 			});
 
@@ -344,7 +341,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 				numbers.push_back(num);
 			}
 		}
-		
+
 		// Set current numbers as the new last numbers
 		lastNumbers = currentNumbers;
 	}
@@ -535,7 +532,7 @@ FiguredBassNumber* Tool_fb::createFiguredBassNumber(int basePitchBase40, int tar
 vector<FiguredBassNumber*> Tool_fb::filterNegativeNumbers(vector<FiguredBassNumber*> numbers) {
 
 	vector<FiguredBassNumber*> filteredNumbers;
-	
+
 	bool mQ = m_showNegativeQ;
 	copy_if(numbers.begin(), numbers.end(), back_inserter(filteredNumbers), [mQ](FiguredBassNumber* num) {
 		return mQ ? true : (num->m_number > 0);
@@ -561,8 +558,8 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLine(vector<Figur
 	});
 
 	// sort by voiceIndex
-	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-		return a->m_voiceIndex > b->m_voiceIndex; 
+	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
+		return a->m_voiceIndex > b->m_voiceIndex;
 	});
 
 	return filterNegativeNumbers(filteredNumbers);
@@ -585,8 +582,8 @@ vector<FiguredBassNumber*> Tool_fb::filterFiguredBassNumbersForLineAndVoice(vect
 	});
 
 	// sort by voiceIndex (probably not needed here)
-	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
-		return a->m_voiceIndex > b->m_voiceIndex; 
+	sort(filteredNumbers.begin(), filteredNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
+		return a->m_voiceIndex > b->m_voiceIndex;
 	});
 
 	return filterNegativeNumbers(filteredNumbers);
@@ -611,7 +608,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 			return ((num->getNumberWithinOctave() != 8) && (num->getNumberWithinOctave() != 1)) || (aQ && num->m_showAccidentals);
 		});
 		// sort by size
-		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		sort(formattedNumbers.begin(), formattedNumbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
 			return a->getNumberWithinOctave() < b->getNumberWithinOctave();
 		});
 		// remove duplicate numbers
@@ -639,7 +636,7 @@ string Tool_fb::formatFiguredBassNumbers(const vector<FiguredBassNumber*>& numbe
 	// Sort numbers by size
 	if (m_sortQ) {
 		bool cQ = m_compoundQ;
-		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+		sort(formattedNumbers.begin(), formattedNumbers.end(), [cQ](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
 			// sort by getNumberWithinOctave if compoundQ is true otherwise sort by number
 			return (cQ) ? a->getNumberWithinOctave() > b->getNumberWithinOctave() : a->m_number > b->m_number;
 		});
@@ -714,7 +711,7 @@ vector<FiguredBassNumber*> Tool_fb::analyzeChordNumbers(const vector<FiguredBass
 		return number->getNumberWithinOctave() == 3;
 	});
 	if (it != analyzedNumbers.end()) {
-		for (auto &number : analyzedNumbers) {  
+		for (auto &number : analyzedNumbers) {
 			number->m_convert2To9 = true;
 		}
 	}
@@ -731,7 +728,7 @@ vector<FiguredBassNumber*> Tool_fb::analyzeChordNumbers(const vector<FiguredBass
 
 string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
 	// Sort numbers by size
-	sort(numbers.begin(), numbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool { 
+	sort(numbers.begin(), numbers.end(), [](FiguredBassNumber* a, FiguredBassNumber* b) -> bool {
 		return a->getNumberWithinOctave() > b->getNumberWithinOctave();
 	});
 	// join numbers
@@ -743,7 +740,7 @@ string Tool_fb::getNumberString(vector<FiguredBassNumber*> numbers) {
 			if (!first) str += " ";
 			first = false;
 			str += to_string(num);
-		}	
+		}
 	}
 	return str;
 }

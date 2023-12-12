@@ -174,7 +174,7 @@ class MuseRecord : public MuseRecordBasic {
 		std::string      getStaffString               (void);
 		int              getStaff                     (void);
 		int              staffQ                       (void);
-		
+
 		// column 25 ---> blank
 
 		// columns 26 - 31: beam codes
@@ -236,7 +236,7 @@ class MuseRecord : public MuseRecordBasic {
 		int              getFigureCount               (void);
 
 		// columns 3 -- 5 ---> blank
-		
+
 		// columns 6 -- 8: figure division pointer advancement (duration)
 		std::string      getFigurePointerField        (void);
 		int              figurePointerQ               (void);

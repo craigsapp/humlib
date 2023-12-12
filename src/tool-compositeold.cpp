@@ -1922,7 +1922,7 @@ void Tool_compositeold::getGroupRhythms(vector<string>& rhythms, vector<HumNum>&
 }
 
 
- 
+
 //////////////////////////////
 //
 // Tool_compositeold::getGroupDurations --
@@ -3544,7 +3544,7 @@ void Tool_compositeold::addStria(HumdrumFile& infile, HTp spinestart) {
 	}
 
 	if (striaLine) {
-		// place stria token on line 
+		// place stria token on line
 		int track;
 		for (int j=0; j<striaLine->getFieldCount(); j++) {
 			HTp token = striaLine->token(j);
@@ -3657,7 +3657,7 @@ void Tool_compositeold::addVerseLabels2(HumdrumFile& infile, HTp spinestart) {
 	}
 
 	if (labelLine) {
-		// place verse label token on line 
+		// place verse label token on line
 		int track;
 		for (int j=0; j<labelLine->getFieldCount(); j++) {
 			HTp token = labelLine->token(j);
