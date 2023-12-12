@@ -268,10 +268,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	// add RDFs
-	if (m_slurabove) {
+	if (m_slurabove || m_staffabove) {
 		out << "!!!RDF**kern: > = above" << endl;
 	}
-	if (m_slurbelow) {
+	if (m_slurbelow || m_staffbelow) {
 		out << "!!!RDF**kern: < = below" << endl;
 	}
 
@@ -1776,6 +1776,12 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 				recip += "q";
 			}
 		}
+	}
+	
+	if (event->getCrossStaffOffset() > 0) {
+		m_staffbelow = true;
+	} else if (event->getCrossStaffOffset() < 0) {
+		m_staffabove = true;
 	}
 
 	stringstream ss;

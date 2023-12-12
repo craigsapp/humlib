@@ -870,20 +870,6 @@ int MxmlEvent::getVoiceIndex(int maxvoice) const {
 	if (m_owner) {
 		int voiceindex = m_owner->getVoiceIndex(m_voice);
 		if (voiceindex >= 0) {
-			vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
-			if (getVoiceNumber() < mapping.size()) {
-				// prevent overwriting existing notes in voiceindex layer, when
-				// the MxmlEvent are in another staff than in calculated in
-				// MxmlPart::m_voicemapping
-				vector<vector<int>> staffvoicehist = getOwner()->getOwner()->getStaffVoiceHist();
-				int totalVoicesInStaff = staffvoicehist[getStaffNumber()][getVoiceNumber()];
-				const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
-				if (mappingStaffIndex != getStaffIndex()) {
-					// add total number of voices of the new staff to the
-					// voiceindex of the old staff
-					return totalVoicesInStaff + voiceindex;
-				}
-			}
 			return voiceindex;
 		}
 	}
@@ -940,6 +926,13 @@ bool MxmlEvent::isInvisible(void) {
 
 int MxmlEvent::getStaffIndex(void) const {
 	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			if (m_staff - 1 != mappingStaffIndex) {
+				return mappingStaffIndex;
+			}
+		}
 		return m_staff - 1;
 	}
 	if (m_owner) {
@@ -955,6 +948,24 @@ int MxmlEvent::getStaffIndex(void) const {
 	} else {
 		return m_staff - 1;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getCrossStaffOffset --
+//
+
+int MxmlEvent::getCrossStaffOffset(void) const {
+	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			return m_staff - 1 - mappingStaffIndex;
+		}
+	}
+	return 0;
 }
 
 
@@ -1647,6 +1658,12 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) cons
 		ss << "_";
 	} else if (tiestop) {
 		ss << "]";
+	}
+
+	if (getCrossStaffOffset() > 0) {
+		ss << "<";
+	} else if (getCrossStaffOffset() < 0) {
+		ss << ">";
 	}
 
 	return ss.str();
