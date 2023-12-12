@@ -927,7 +927,7 @@ bool MxmlEvent::isInvisible(void) {
 int MxmlEvent::getStaffIndex(void) const {
 	if (m_staff > 0) {
 		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
-		if (getVoiceNumber() < mapping.size()) {
+		if (getVoiceNumber() < (int)mapping.size()) {
 			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
 			if (m_staff - 1 != mappingStaffIndex) {
 				return mappingStaffIndex;
@@ -960,7 +960,7 @@ int MxmlEvent::getStaffIndex(void) const {
 int MxmlEvent::getCrossStaffOffset(void) const {
 	if (m_staff > 0) {
 		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
-		if (getVoiceNumber() < mapping.size()) {
+		if (getVoiceNumber() < (int)mapping.size()) {
 			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
 			return m_staff - 1 - mappingStaffIndex;
 		}
