@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 28 Nov 2023 10:52:29 CET
+// Last Modified: Di 12 Dez 2023 16:19:41 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -11454,7 +11454,7 @@ void HumGrid::checkForNullDataHoles(void) {
 							if (v >= (int)sp->size() - 1) {
 								// Found a data line with no data at given voice, so
 								// add slice duration to cumulative duration.
-								duration += slicep->getDuration();
+								// duration += slicep->getDuration();
 								continue;
 							}
 							vp = sp->at(v);
@@ -45827,6 +45827,13 @@ bool MxmlEvent::isInvisible(void) {
 
 int MxmlEvent::getStaffIndex(void) const {
 	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			if (m_staff - 1 != mappingStaffIndex) {
+				return mappingStaffIndex;
+			}
+		}
 		return m_staff - 1;
 	}
 	if (m_owner) {
@@ -45842,6 +45849,24 @@ int MxmlEvent::getStaffIndex(void) const {
 	} else {
 		return m_staff - 1;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getCrossStaffOffset --
+//
+
+int MxmlEvent::getCrossStaffOffset(void) const {
+	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			return m_staff - 1 - mappingStaffIndex;
+		}
+	}
+	return 0;
 }
 
 
@@ -46534,6 +46559,12 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) cons
 		ss << "_";
 	} else if (tiestop) {
 		ss << "]";
+	}
+
+	if (getCrossStaffOffset() > 0) {
+		ss << "<";
+	} else if (getCrossStaffOffset() < 0) {
+		ss << ">";
 	}
 
 	return ss.str();
@@ -98976,6 +99007,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 
 	m_current_dynamic.resize(partids.size());
 	m_current_brackets.resize(partids.size());
+	m_current_figured_bass.resize(partids.size());
 	m_stop_char.resize(partids.size(), "[");
 
 	getPartContent(partcontent, partids, doc);
@@ -99052,7 +99084,7 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 		bool fbstate = partdata[p].hasFiguredBass();
 		if (fbstate) {
 			outdata.setFiguredBassPresent(p);
-			break;
+			// break;
 		}
 	}
 
@@ -99135,10 +99167,10 @@ bool Tool_musicxml2hum::convert(ostream& out, xml_document& doc) {
 	}
 
 	// add RDFs
-	if (m_slurabove) {
+	if (m_slurabove || m_staffabove) {
 		out << "!!!RDF**kern: > = above" << endl;
 	}
-	if (m_slurbelow) {
+	if (m_slurbelow || m_staffbelow) {
 		out << "!!!RDF**kern: < = below" << endl;
 	}
 
@@ -100173,12 +100205,19 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 		}
 		status &= convertNowEvents(outdata.back(),
 				nowevents, nowparts, processtime, partdata, partstaves);
+
+		// Remove all figured bass numbers for this nowtime so that they are not
+		// accidentally displayed in the next nowtime, which can currently
+		// happen if there are no nonzerodur events in the same part
+		for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
+			m_current_figured_bass[i].clear();
+		}
 	}
 
 	if (offsetHarmony.size() > 0) {
 		insertOffsetHarmonyIntoMeasure(outdata.back());
 	}
-	if (offsetFiguredBass.size() > 0) {
+	if (m_offsetFiguredBass.size() > 0) {
 		insertOffsetFiguredBassIntoMeasure(outdata.back());
 	}
 	return status;
@@ -100192,7 +100231,7 @@ bool Tool_musicxml2hum::insertMeasure(HumGrid& outdata, int mnum,
 //
 
 void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
-	if (offsetFiguredBass.empty()) {
+	if (m_offsetFiguredBass.empty()) {
 		return;
 	}
 
@@ -100204,18 +100243,18 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 			continue;
 		}
 		HumNum timestamp = gs->getTimestamp();
-		for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
-			if (offsetFiguredBass[i].token == NULL) {
+		for (int i=0; i<(int)m_offsetFiguredBass.size(); i++) {
+			if (m_offsetFiguredBass[i].token == NULL) {
 				continue;
  			}
-			if (offsetFiguredBass[i].timestamp == timestamp) {
+			if (m_offsetFiguredBass[i].timestamp == timestamp) {
 				// this is the slice to insert the harmony
-				gs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
-				offsetFiguredBass[i].token = NULL;
-			} else if (offsetFiguredBass[i].timestamp < timestamp) {
+				gs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
+				m_offsetFiguredBass[i].token = NULL;
+			} else if (m_offsetFiguredBass[i].timestamp < timestamp) {
 				if (beginQ) {
-					cerr << "Error: Cannot insert harmony " << offsetFiguredBass[i].token
-					     << " at timestamp " << offsetFiguredBass[i].timestamp
+					cerr << "Error: Cannot insert harmony " << m_offsetFiguredBass[i].token
+					     << " at timestamp " << m_offsetFiguredBass[i].timestamp
 					     << " since first timestamp in measure is " << timestamp << endl;
 				} else {
 					m_forceRecipQ = true;
@@ -100230,11 +100269,11 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 						}
 						int partcount = (int)(*tempit)->size();
 						tempit++;
-						GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+						GridSlice* newgs = new GridSlice(gm, m_offsetFiguredBass[i].timestamp,
 								SliceType::Notes, partcount);
-						newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+						newgs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
 						gm->insert(tempit, newgs);
-						offsetFiguredBass[i].token = NULL;
+						m_offsetFiguredBass[i].token = NULL;
 						break;
 					}
 				}
@@ -100244,19 +100283,19 @@ void Tool_musicxml2hum::insertOffsetFiguredBassIntoMeasure(GridMeasure* gm) {
 	}
 	// If there are still valid harmonies in the input list, apppend
 	// them to the end of the measure.
-	for (int i=0; i<(int)offsetFiguredBass.size(); i++) {
-		if (offsetFiguredBass[i].token == NULL) {
+	for (int i=0; i<(int)m_offsetFiguredBass.size(); i++) {
+		if (m_offsetFiguredBass[i].token == NULL) {
 			continue;
  		}
 		m_forceRecipQ = true;
 		int partcount = (int)gm->back()->size();
-		GridSlice* newgs = new GridSlice(gm, offsetFiguredBass[i].timestamp,
+		GridSlice* newgs = new GridSlice(gm, m_offsetFiguredBass[i].timestamp,
 				SliceType::Notes, partcount);
-		newgs->at(offsetFiguredBass[i].partindex)->setFiguredBass(offsetFiguredBass[i].token);
+		newgs->at(m_offsetFiguredBass[i].partindex)->setFiguredBass(m_offsetFiguredBass[i].token);
 		gm->insert(gm->end(), newgs);
-		offsetFiguredBass[i].token = NULL;
+		m_offsetFiguredBass[i].token = NULL;
 	}
-	offsetFiguredBass.clear();
+	m_offsetFiguredBass.clear();
 }
 
 
@@ -100432,7 +100471,14 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendZeroEvents(outdata, nowevents, nowtime, partdata);
 
-	if (nowevents[0]->nonzerodur.size() == 0) {
+	bool hasNonZeroDurElements = false;
+	for (const SimultaneousEvents* event : nowevents) {
+		if (event->nonzerodur.size() != 0) {
+			hasNonZeroDurElements = true;
+			break;
+		}
+	}
+	if (!hasNonZeroDurElements) {
 		// no duration events (should be a terminal barline)
 		// ignore and deal with in calling function.
 		return true;
@@ -100440,7 +100486,41 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendNonZeroEvents(outdata, nowevents, nowtime, partdata);
 
+	handleFiguredBassWithoutNonZeroEvent(nowevents, nowtime);
+
 	return true;
+}
+
+
+
+/////////////////////////////
+//
+// Tool_musicxml2hum::handleFiguredBassWithoutNonZeroEvent --
+//
+
+void Tool_musicxml2hum::handleFiguredBassWithoutNonZeroEvent(vector<SimultaneousEvents*>& nowevents, HumNum nowtime) {
+	vector<int> nonZeroParts;
+	vector<MxmlEvent> floatingFiguredBass;
+	for (const SimultaneousEvents* sevent : nowevents) {
+		for (MxmlEvent* mxmlEvent : sevent->nonzerodur) {
+			nonZeroParts.push_back(mxmlEvent->getPartIndex());
+		}
+		for (MxmlEvent* mxmlEvent : sevent->zerodur) {
+			if ("figured-bass" == mxmlEvent->getElementName()) {
+				if (std::find(nonZeroParts.begin(), nonZeroParts.end(), mxmlEvent->getPartIndex()) == nonZeroParts.end()) {
+					// cerr << mxmlEvent->getNode() << "\n";
+					string fstring = getFiguredBassString(mxmlEvent->getNode());
+					HTp ftok = new HumdrumToken(fstring);
+					MusicXmlFiguredBassInfo finfo;
+					finfo.timestamp = nowtime;
+					finfo.partindex = mxmlEvent->getPartIndex();
+					finfo.token = ftok;
+					m_offsetFiguredBass.push_back(finfo);
+					// cerr << "ADD FLOATING FB NUM " << fstring << " " << nowtime << "\n";
+				}
+			}
+		}
+	}
 }
 
 
@@ -100596,6 +100676,12 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 			}
 		}
 	}
+	
+	if (event->getCrossStaffOffset() > 0) {
+		m_staffbelow = true;
+	} else if (event->getCrossStaffOffset() < 0) {
+		m_staffabove = true;
+	}
 
 	stringstream ss;
 	if (event->isFloating()) {
@@ -100627,7 +100713,7 @@ void Tool_musicxml2hum::addEvent(GridSlice* slice, GridMeasure* outdata, MxmlEve
 		cerr << "!!TOKEN: " << ss.str();
 		cerr << "\tTS: "    << event->getStartTime();
 		cerr << "\tDUR: "   << event->getDuration();
-		cerr << "\tSTi: "   << event->getStaffNumber();
+		cerr << "\tSTn: "   << event->getStaffNumber();
 		cerr << "\tVn: "    << event->getVoiceNumber();
 		cerr << "\tSTi: "   << event->getStaffIndex();
 		cerr << "\tVi: "    << event->getVoiceIndex();
@@ -101589,7 +101675,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--";
 	} else if (prefix == "flat") {
 		accidental = "-";
-	} else if (prefix == "double-sharp") {
+	} else if (prefix == "double-sharp" || prefix == "sharp-sharp") {
 		accidental = "##";
 	} else if (prefix == "sharp") {
 		accidental = "#";
@@ -101599,7 +101685,7 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 		accidental = "--r";
 	} else if (suffix == "flat") {
 		accidental = "-r";
-	} else if (suffix == "double-sharp") {
+	} else if (suffix == "double-sharp" || suffix == "sharp-sharp") {
 		accidental = "##r";
 	} else if (suffix == "sharp") {
 		accidental = "#r";
@@ -101612,12 +101698,12 @@ string Tool_musicxml2hum::convertFiguredBassNumber(const xml_node& figure) {
 	// could be a flat).  At the moment do not assign the accidental, but
 	// in the future assign an accidental to the slashed figure, probably
 	// with a post-processing tool.
-	if (suffix == "cross" || prefix == "cross") {
+	if (suffix == "cross" || prefix == "cross" || suffix == "vertical" || prefix == "vertical") {
 		slash = "|";
 		if (accidental.empty()) {
 			accidental = "#";
 		}
-	} else if ((suffix == "backslash") || (prefix == "backslash")) {
+	} else if ((suffix == "backslash" || suffix == "back-slash") || (prefix == "backslash" || prefix == "back-slash")) {
 		slash = "\\";
 		if (accidental.empty()) {
 			accidental = "#";
@@ -101852,13 +101938,13 @@ string Tool_musicxml2hum::getDynamicString(xml_node element) {
 //
 
 int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum nowtime, int partindex) {
-	if (m_current_figured_bass.empty()) {
+	if (m_current_figured_bass[partindex].empty()) {
 		return 0;
 	}
 
 	int dursum = 0;
-	for (int i=0; i<(int)m_current_figured_bass.size(); i++) {
-		xml_node fnode = m_current_figured_bass.at(i);
+	for (int i=0; i<(int)m_current_figured_bass[partindex].size(); i++) {
+		xml_node fnode = m_current_figured_bass[partindex].at(i);
 		if (!fnode) {
 			// strange problem
 			continue;
@@ -101877,13 +101963,13 @@ int Tool_musicxml2hum::addFiguredBass(GridPart* part, MxmlEvent* event, HumNum n
 			finfo.timestamp += nowtime;
 			finfo.partindex = partindex;
 			finfo.token = ftok;
-			offsetFiguredBass.push_back(finfo);
+			m_offsetFiguredBass.push_back(finfo);
 		}
-		if (i < (int)m_current_figured_bass.size() - 1) {
+		if (i < (int)m_current_figured_bass[partindex].size() - 1) {
 			dursum += getFiguredBassDuration(fnode);
 		}
 	}
-	m_current_figured_bass.clear();
+	m_current_figured_bass[partindex].clear();
 
 	return 1;
 
@@ -101932,6 +102018,18 @@ string Tool_musicxml2hum::getFiguredBassString(xml_node fnode) {
 		if (i < (int)children.size() - 1) {
 			output += " ";
 		}
+	}
+
+	HumRegex hre;
+	hre.replaceDestructive(output, "", R"(^\s+|\s+$)");
+
+	if (output.empty()) {
+		if (children.size()) {
+			cerr << "WARNING: figured bass string is empty but has "
+				<< children.size() << " figure elements as children. "
+				<< "The output has been replaced with \".\"" << endl;
+		}
+		output = ".";
 	}
 
 	return output;
@@ -102528,7 +102626,7 @@ void Tool_musicxml2hum::appendZeroEvents(GridMeasure* outdata,
 					}
 				}
 			} else if (nodeType(element, "figured-bass")) {
-				m_current_figured_bass.push_back(element);
+				m_current_figured_bass[pindex].push_back(element);
 			} else if (nodeType(element, "note")) {
 				if (foundnongrace) {
 					addEventToList(graceafter, nowevents[i]->zerodur[j]);

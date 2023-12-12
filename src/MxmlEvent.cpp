@@ -14,6 +14,7 @@
 #include "Convert.h"
 #include "MxmlEvent.h"
 #include "MxmlMeasure.h"
+#include "MxmlPart.h"
 
 #include "pugiconfig.hpp"
 #include "pugixml.hpp"
@@ -925,6 +926,13 @@ bool MxmlEvent::isInvisible(void) {
 
 int MxmlEvent::getStaffIndex(void) const {
 	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			if (m_staff - 1 != mappingStaffIndex) {
+				return mappingStaffIndex;
+			}
+		}
 		return m_staff - 1;
 	}
 	if (m_owner) {
@@ -940,6 +948,24 @@ int MxmlEvent::getStaffIndex(void) const {
 	} else {
 		return m_staff - 1;
 	}
+}
+
+
+
+//////////////////////////////
+//
+// MxmlEvent::getCrossStaffOffset --
+//
+
+int MxmlEvent::getCrossStaffOffset(void) const {
+	if (m_staff > 0) {
+		vector<pair<int, int>> mapping = getOwner()->getOwner()->getVoiceMapping();
+		if (getVoiceNumber() < mapping.size()) {
+			const auto& [mappingStaffIndex, mappingVoiceIndex] = mapping[getVoiceNumber()];
+			return m_staff - 1 - mappingStaffIndex;
+		}
+	}
+	return 0;
 }
 
 
@@ -1632,6 +1658,12 @@ string MxmlEvent::getPostfixNoteInfo(bool primarynote, const string& recip) cons
 		ss << "_";
 	} else if (tiestop) {
 		ss << "]";
+	}
+
+	if (getCrossStaffOffset() > 0) {
+		ss << "<";
+	} else if (getCrossStaffOffset() < 0) {
+		ss << ">";
 	}
 
 	return ss.str();
