@@ -104520,7 +104520,7 @@ void Tool_myank::processFile(HumdrumFile& infile) {
 vector<int> Tool_myank::analyzeBarNumbers(HumdrumFile& infile) {
 	vector<int> m_barnum;
 	m_barnum.resize(infile.getLineCount());
-	int current = -1;
+	int current = 0;
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].isBarline()) {
@@ -106119,6 +106119,15 @@ void Tool_myank::getMeasureStartStop(vector<MeasureInfo>& measurelist, HumdrumFi
 		measurelist.push_back(current);
 	}
 
+	// allow "myank -l" when there are no measure numbers
+	if (getBoolean("lines") && measurelist.size() == 0) {
+		current.clear();
+		current.num = 0;
+		current.start = 0;
+		current.stop = dataend;
+		current.file = &infile;
+		measurelist.push_back(current);
+	}
 
 }
 
@@ -106226,7 +106235,7 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	int startline = -1;
 	int stopline = -1;
 	int i;
-	for (i=9; i<infile.getLineCount(); i++) {
+	for (i=0; i<infile.getLineCount(); i++) {
 		if ((exinterpline < 0) && infile[i].isInterpretation()) {
 			exinterpline = i;
 		}
@@ -106256,9 +106265,10 @@ void Tool_myank::insertZerothMeasure(vector<MeasureInfo>& measurelist,
 	MeasureInfo current;
 	current.clear();
 	current.num = 0;
-	// current.start = startline;
-	current.start = exinterpline+1;
+	current.start = startline;
+	// current.start = exinterpline+1;
 	current.stop = stopline;
+	current.file = &infile;
 	measurelist.push_back(current);
 }
 
@@ -106286,7 +106296,7 @@ void Tool_myank::expandMeasureOutList(vector<MeasureInfo>& measureout,
 			minmeasure = measurein[i].num;
 		}
 	}
-	if (maxmeasure <= 0) {
+	if (maxmeasure <= 0 && !getBoolean("lines")) {
 		cerr << "Error: There are no measure numbers present in the data" << endl;
 		exit(1);
 	}
