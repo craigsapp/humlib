@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Do 30 Nov 2023 12:59:09 CET
+// Last Modified: Mo  4 Dez 2023 10:58:34 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -100432,7 +100432,14 @@ bool Tool_musicxml2hum::convertNowEvents(GridMeasure* outdata,
 
 	appendZeroEvents(outdata, nowevents, nowtime, partdata);
 
-	if (nowevents[0]->nonzerodur.size() == 0) {
+	bool hasNonZeroDurElements = false;
+	for (const SimultaneousEvents* event : nowevents) {
+        if (event->nonzerodur.size() != 0) {
+            hasNonZeroDurElements = true;
+			break;
+        }
+    }
+	if (!hasNonZeroDurElements) {
 		// no duration events (should be a terminal barline)
 		// ignore and deal with in calling function.
 		return true;
