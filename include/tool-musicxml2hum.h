@@ -232,6 +232,8 @@ class Tool_musicxml2hum : public HumTool {
 		bool m_stemsQ        = false;
 		int  m_slurabove     = 0;
 		int  m_slurbelow     = 0;
+		int  m_staffabove    = 0;
+		int  m_staffbelow    = 0;
 		char m_hasEditorial  = '\0';
 		bool m_hasOrnamentsQ = false;
 		int  m_maxstaff      = 0;

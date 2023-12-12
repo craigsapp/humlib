@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 12 Dez 2023 11:50:56 CET
+// Last Modified: Di 12 Dez 2023 16:19:41 CET
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -4850,6 +4850,7 @@ class MxmlEvent {
 		void               setVoiceNumber     (int value);
 		int                getStaffNumber     (void) const;
 		int                getStaffIndex      (void) const;
+		int                getCrossStaffOffset(void) const;
 		int                getVoiceIndex      (int maxvoice = 4) const;
 		void               setStaffNumber     (int value);
 		measure_event_type getType            (void) const;
@@ -9177,6 +9178,8 @@ class Tool_musicxml2hum : public HumTool {
 		bool m_stemsQ        = false;
 		int  m_slurabove     = 0;
 		int  m_slurbelow     = 0;
+		int  m_staffabove    = 0;
+		int  m_staffbelow    = 0;
 		char m_hasEditorial  = '\0';
 		bool m_hasOrnamentsQ = false;
 		int  m_maxstaff      = 0;
