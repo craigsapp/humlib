@@ -1718,6 +1718,31 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 		}
 	}
 
+	// keep *part interpretations
+	bool hasPart = false;
+	for (i=exi+1; i<infile.getLineCount(); i++) {
+		hasPart = false;
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (infile.token(i, j)->compare(0, 5, "*part") == 0) {
+				hasPart = true;
+				break;
+			}
+		}
+		if (hasPart) {
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (infile.token(i, j)->compare(0, 5, "*part") == 0) {
+					m_humdrum_text << infile.token(i, j);
+				} else {
+					m_humdrum_text << "*";
+				}
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+			}
+			m_humdrum_text << "\n";
+		}
+	}
+
 	int hasI = 0;
 
 	if (m_instrumentQ) {

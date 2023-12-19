@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Dec 12 11:01:04 PST 2023
+// Last Modified: Di 19 Dez 2023 10:29:03 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -105906,6 +105906,31 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 			if (infile[i].rfind("!!!RDF", 0) == 0) {
 				m_humdrum_text << infile[i] << "\n";
 			}
+		}
+	}
+
+	// keep *part interpretations
+	bool hasPart = false;
+	for (i=exi+1; i<infile.getLineCount(); i++) {
+		hasPart = false;
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (infile.token(i, j)->compare(0, 5, "*part") == 0) {
+				hasPart = true;
+				break;
+			}
+		}
+		if (hasPart) {
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (infile.token(i, j)->compare(0, 5, "*part") == 0) {
+					m_humdrum_text << infile.token(i, j);
+				} else {
+					m_humdrum_text << "*";
+				}
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+			}
+			m_humdrum_text << "\n";
 		}
 	}
 
