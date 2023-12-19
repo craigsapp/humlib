@@ -1743,6 +1743,31 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 		}
 	}
 
+	// keep *staff interpretations
+	bool hasStaff = false;
+	for (i=exi+1; i<infile.getLineCount(); i++) {
+		hasStaff = false;
+		for (j=0; j<infile[i].getFieldCount(); j++) {
+			if (infile.token(i, j)->compare(0, 6, "*staff") == 0) {
+				hasStaff = true;
+				break;
+			}
+		}
+		if (hasStaff) {
+			for (j=0; j<infile[i].getFieldCount(); j++) {
+				if (infile.token(i, j)->compare(0, 6, "*staff") == 0) {
+					m_humdrum_text << infile.token(i, j);
+				} else {
+					m_humdrum_text << "*";
+				}
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+			}
+			m_humdrum_text << "\n";
+		}
+	}
+
 	int hasI = 0;
 
 	if (m_instrumentQ) {
