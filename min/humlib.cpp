@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Di 19 Dez 2023 10:30:08 CET
+// Last Modified: Di 19 Dez 2023 10:33:13 CET
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -105903,7 +105903,7 @@ void Tool_myank::printStarting(HumdrumFile& infile) {
 		if (!m_hideStarting) {
 			m_humdrum_text << infile[i] << "\n";
 		} else {
-			if (infile[i].rfind("!!!RDF", 0) == 0) {
+			if (infile[i].rfind("!!!RDF", 0) == 0 || infile[i].rfind("!!!system-decoration", 0) == 0) {
 				m_humdrum_text << infile[i] << "\n";
 			}
 		}
@@ -106049,7 +106049,7 @@ void Tool_myank::printEnding(HumdrumFile& infile, int lastline, int adjlin) {
 	if (startline >= 0) {
 		for (i=startline; i<infile.getLineCount(); i++) {
 			if (m_hideEnding && (i > ending)) {
-				if (infile[i].rfind("!!!RDF", 0) == 0) {
+				if (infile[i].rfind("!!!RDF", 0) == 0 || infile[i].rfind("!!!system-decoration", 0) == 0) {
 					m_humdrum_text << infile[i] << "\n";
 				}
 			} else {
