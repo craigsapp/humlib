@@ -55,9 +55,10 @@ class Tool_tspos : public HumTool {
 		bool             hasFullTriadAttack(HumdrumLine& line);
 		void             avoidRdfCollisions(HumdrumFile& infile);
 		void             printUsedMarkers(void);
-		std::string      makeOpacityColor(std::string& color, double value, double total);
+		std::string      makeOpacityColor(std::string& color, double value, double total, bool enhance = false);
 		int              getToolCounter(HumdrumFile& infile);
 		std::string      makePercentString(double value, double total, int digits);
+		int              logisticColorMap(double input, double max);
 
 	private:
 		std::string m_root_marker      = "@";

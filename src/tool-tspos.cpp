@@ -773,10 +773,20 @@ string Tool_tspos::generateTable(HumdrumFile& infile, vector<string>& names) {
 // Tool_tspos::makeOpacityColor --
 //
 
-string Tool_tspos::makeOpacityColor(string& color, double value, double total) {
+string Tool_tspos::makeOpacityColor(string& color, double value, double total, bool enhance) {
 	stringstream output;
-	int percent  = int(value / total * 255.49 + 0.5);
-	output << color << std::hex << std::setw(2) << std::setfill('0') << percent << std::dec;
+	int opacity;
+	if (enhance) {
+		opacity = logisticColorMap(value, total);
+	} else {
+		opacity  = int(value / total * 255.49 + 0.5);
+	}
+	if (opacity < 0) {
+		opacity = 0;
+	} else if (opacity > 255) {
+		opacity = 255;
+	}
+	output << color << std::hex << std::setw(2) << std::setfill('0') << opacity << std::dec;
 	return output.str();
 }
 
@@ -1367,6 +1377,29 @@ int Tool_tspos::getToolCounter(HumdrumFile& infile) {
 		}
 	}
 	return counter;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tspos::logisticColorMap -- Increase sensitivity of color mapping
+//    around 40%.
+//
+
+int Tool_tspos::logisticColorMap(double input, double max) {
+	double center = max * 0.40;
+	double k = 0.04;
+	int output = max / (1.0 + pow(M_E, -k * (input + center) - (max + center)/2));
+	output -= 11.4209;
+	output = output * 255.0 / 243.377;
+	if (output < 0) {
+		output = 0;
+	}
+	if (output > 255) {
+		output = 255;
+	}
+	return output;
 }
 
 
