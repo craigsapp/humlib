@@ -39,7 +39,9 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzePhrasings           (void);
 		bool   analyzeTextRepetition      (void);
 		bool   analyzeKernTies            (void);
-		bool   analyzeKernAccidentals     (void);
+		bool   analyzeAccidentals         (void);
+		bool   analyzeKernAccidentals     (const std::string& dataType = "**kern");
+		bool   analyzeMensAccidentals     (void);
 		bool   analyzeRScale              (void);
 
 		// in HumdrumFileContent-rest.cpp

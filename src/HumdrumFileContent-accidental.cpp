@@ -22,6 +22,31 @@ namespace hum {
 
 //////////////////////////////
 //
+// HumdrumFileContent::analyzeAccidentals -- Analyze kern and mens accidentals.
+//
+
+bool HumdrumFileContent::analyzeAccidentals(void) {
+	bool status = true;
+	status &= analyzeKernAccidentals();
+	status &= analyzeMensAccidentals();
+	return status;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::analyzeMensAccidentals -- Analyze kern and mens accidentals.
+//
+
+bool HumdrumFileContent::analyzeMensAccidentals(void) {
+	return analyzeKernAccidentals("**mens");
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumFileContent::analyzeKernAccidentals -- Identify accidentals that
 //    should be printed (only in **kern spines) as well as cautionary
 //    accidentals (accidentals which are forced to be displayed but otherwise
@@ -30,7 +55,7 @@ namespace hum {
 //    about grace-note accidental display still needs to be done.
 //
 
-bool HumdrumFileContent::analyzeKernAccidentals(void) {
+bool HumdrumFileContent::analyzeKernAccidentals(const string& dataType) {
 
 	// ottava marks must be analyzed first:
 	this->analyzeOttavas();
@@ -42,7 +67,17 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 
 	// ktracks == List of **kern spines in data.
 	// rtracks == Reverse mapping from track to ktrack index (part/staff index).
-	vector<HTp> ktracks = getKernSpineStartList();
+	vector<HTp> ktracks;
+	if ((dataType == "**kern") || dataType.empty()) {
+		ktracks = getKernSpineStartList();
+	} else if (dataType == "**mens") {
+		getSpineStartList(ktracks, "**mens");
+	} else {
+		getSpineStartList(ktracks, dataType);
+	}
+	if (ktracks.empty()) {
+		return true;
+	}
 	vector<int> rtracks(getMaxTrack()+1, -1);
 	for (i=0; i<(int)ktracks.size(); i++) {
 		track = ktracks[i]->getTrack();
@@ -431,10 +466,10 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 					if ((loc != string::npos) && (loc > 0)) {
 						if (subtok[loc-1] == '#') {
 							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
-									token->setValue("auto", to_string(k), "visualAccidental", "true");
+							token->setValue("auto", to_string(k), "visualAccidental", "true");
 						} else if (subtok[loc-1] == '-') {
 							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
-									token->setValue("auto", to_string(k), "visualAccidental", "true");
+							token->setValue("auto", to_string(k), "visualAccidental", "true");
 						} else if (subtok[loc-1] == 'n') {
 							token->setValue("auto", to_string(k), "cautionaryAccidental", "true");
 							token->setValue("auto", to_string(k), "visualAccidental", "true");
@@ -447,7 +482,8 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 	}
 
 	// Indicate that the accidental analysis has been done:
-	infile.setValue("auto", "accidentalAnalysis", "true");
+	string dataTypeDone = "accidentalAnalysis" + dataType;
+	infile.setValue("auto", dataTypeDone, "true");
 
 	return true;
 }
@@ -461,23 +497,26 @@ bool HumdrumFileContent::analyzeKernAccidentals(void) {
 //    only by HumdrumFileContent::analyzeKernAccidentals().
 //
 
-void HumdrumFileContent::fillKeySignature(vector<int>& states,
-		const string& keysig) {
+void HumdrumFileContent::fillKeySignature(vector<int>& states, const string& keysig) {
+	if (states.size() < 7) {
+		cerr << "In HumdrumFileContent::fillKeySignature, states is too small: " << states.size() << endl;
+		return;
+	}
 	std::fill(states.begin(), states.end(), 0);
-	if (keysig.find("f#") != string::npos) { states[3] = +1; }
-	if (keysig.find("c#") != string::npos) { states[0] = +1; }
-	if (keysig.find("g#") != string::npos) { states[4] = +1; }
-	if (keysig.find("d#") != string::npos) { states[1] = +1; }
-	if (keysig.find("a#") != string::npos) { states[5] = +1; }
-	if (keysig.find("e#") != string::npos) { states[2] = +1; }
-	if (keysig.find("b#") != string::npos) { states[6] = +1; }
-	if (keysig.find("b-") != string::npos) { states[6] = -1; }
-	if (keysig.find("e-") != string::npos) { states[2] = -1; }
-	if (keysig.find("a-") != string::npos) { states[5] = -1; }
-	if (keysig.find("d-") != string::npos) { states[1] = -1; }
-	if (keysig.find("g-") != string::npos) { states[4] = -1; }
-	if (keysig.find("c-") != string::npos) { states[0] = -1; }
-	if (keysig.find("f-") != string::npos) { states[3] = -1; }
+	if (keysig.find("f#") != string::npos) { states.at(3) = +1; }
+	if (keysig.find("c#") != string::npos) { states.at(0) = +1; }
+	if (keysig.find("g#") != string::npos) { states.at(4) = +1; }
+	if (keysig.find("d#") != string::npos) { states.at(1) = +1; }
+	if (keysig.find("a#") != string::npos) { states.at(5) = +1; }
+	if (keysig.find("e#") != string::npos) { states.at(2) = +1; }
+	if (keysig.find("b#") != string::npos) { states.at(6) = +1; }
+	if (keysig.find("b-") != string::npos) { states.at(6) = -1; }
+	if (keysig.find("e-") != string::npos) { states.at(2) = -1; }
+	if (keysig.find("a-") != string::npos) { states.at(5) = -1; }
+	if (keysig.find("d-") != string::npos) { states.at(1) = -1; }
+	if (keysig.find("g-") != string::npos) { states.at(4) = -1; }
+	if (keysig.find("c-") != string::npos) { states.at(0) = -1; }
+	if (keysig.find("f-") != string::npos) { states.at(3) = -1; }
 }
 
 

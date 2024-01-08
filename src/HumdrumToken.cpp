@@ -2009,10 +2009,19 @@ int HumdrumToken::hasVisibleAccidental(int subtokenIndex) const {
 	if (humfile == NULL) {
 		return -1;
 	}
-	if (!humfile->getValueBool("auto", "accidentalAnalysis")) {
-		int status = humfile->analyzeKernAccidentals();
-		if (!status) {
-			return -1;
+	if (isKern()) {
+		if (!humfile->getValueBool("auto", "accidentalAnalysis**kern")) {
+			int status = humfile->analyzeKernAccidentals();
+			if (!status) {
+				return -1;
+			}
+		}
+	} else if (isMens()) {
+		if (!humfile->getValueBool("auto", "accidentalAnalysis**mens")) {
+			int status = humfile->analyzeMensAccidentals();
+			if (!status) {
+				return -1;
+			}
 		}
 	}
 	return getValueBool("auto", to_string(subtokenIndex), "visualAccidental");
@@ -2039,10 +2048,19 @@ int HumdrumToken::hasCautionaryAccidental(int subtokenIndex) const {
 	if (humfile == NULL) {
 		return -1;
 	}
-	if (!humfile->getValueBool("auto", "accidentalAnalysis")) {
-		int status = humfile->analyzeKernAccidentals();
-		if (!status) {
-			return -1;
+	if (isKern()) {
+		if (!humfile->getValueBool("auto", "accidentalAnalysis**kern")) {
+			int status = humfile->analyzeKernAccidentals();
+			if (!status) {
+				return -1;
+			}
+		}
+	} else if (isMens()) {
+		if (!humfile->getValueBool("auto", "accidentalAnalysis**mens")) {
+			int status = humfile->analyzeMensAccidentals();
+			if (!status) {
+				return -1;
+			}
 		}
 	}
 	return getValueBool("auto", to_string(subtokenIndex), "cautionaryAccidental");
