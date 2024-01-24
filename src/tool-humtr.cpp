@@ -100,7 +100,7 @@ void Tool_humtr::initialize(void) {
 	}
 
 	if (getBoolean("popc")) {
-		addFromToCombined("ſ:s ʃ:s &#383;:s ν:u ί:í α:a ť:k ᴣ:z ʓ:z̨ ʒ̇:ż ʒ́:ź Ʒ̇:Ż Ʒ́:Ź æ:ae");
+		addFromToCombined("ſ:s ʃ:s &#383;:s ν:u ί:í α:a ť:k ᴣ:z ʓ:z̨ ʒ̇:ż ʒ́:ź Ʒ̇:Ż Ʒ́:Ź ӡ:z Ʒ:Z æ:ae");
 	}
 }
 
