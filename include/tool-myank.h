@@ -33,20 +33,26 @@ class MeasureInfo {
 	public:
 		MeasureInfo(void) { clear(); }
 		void clear(void)  { num = seg = start = stop = -1;
-			sclef.resize(0); skeysig.resize(0); skey.resize(0);
+			sclef.resize(0); smclef.resize(0); soclef.resize(0);
+			skeysig.resize(0); skey.resize(0);
 			stimesig.resize(0); smet.resize(0); stempo.resize(0);
-			eclef.resize(0); ekeysig.resize(0); ekey.resize(0);
+			eclef.resize(0); emclef.resize(0); eoclef.resize(0);
+			ekeysig.resize(0); ekey.resize(0);
 			etimesig.resize(0); emet.resize(0); etempo.resize(0);
 			file = NULL;
 		}
 		void setTrackCount(int tcount) {
 			sclef.resize(tcount+1);
+			smclef.resize(tcount+1);
+			soclef.resize(tcount+1);
 			skeysig.resize(tcount+1);
 			skey.resize(tcount+1);
 			stimesig.resize(tcount+1);
 			smet.resize(tcount+1);
 			stempo.resize(tcount+1);
 			eclef.resize(tcount+1);
+			emclef.resize(tcount+1);
+			eoclef.resize(tcount+1);
 			ekeysig.resize(tcount+1);
 			ekey.resize(tcount+1);
 			etimesig.resize(tcount+1);
@@ -55,12 +61,16 @@ class MeasureInfo {
 			int i;
 			for (i=0; i<tcount+1; i++) {
 				sclef[i].clear();
+				smclef[i].clear();
+				soclef[i].clear();
 				skeysig[i].clear();
 				skey[i].clear();
 				stimesig[i].clear();
 				smet[i].clear();
 				stempo[i].clear();
 				eclef[i].clear();
+				emclef[i].clear();
+				eoclef[i].clear();
 				ekeysig[i].clear();
 				ekey[i].clear();
 				etimesig[i].clear();
@@ -80,6 +90,8 @@ class MeasureInfo {
 
 		// musical settings at start of measure
 		vector<MyCoord> sclef;     // starting clef of segment
+		vector<MyCoord> smclef;    // starting mclef of segment
+		vector<MyCoord> soclef;    // starting oclef of segment
 		vector<MyCoord> skeysig;   // starting keysig of segment
 		vector<MyCoord> skey;      // starting key of segment
 		vector<MyCoord> stimesig;  // starting timesig of segment
@@ -88,6 +100,8 @@ class MeasureInfo {
 
 		// musical settings at start of measure
 		vector<MyCoord> eclef;     // ending clef    of segment
+		vector<MyCoord> emclef;    // ending mclef   of segment
+		vector<MyCoord> eoclef;    // ending oclef   of segment
 		vector<MyCoord> ekeysig;   // ending keysig  of segment
 		vector<MyCoord> ekey;      // ending key     of segment
 		vector<MyCoord> etimesig;  // ending timesig of segment
