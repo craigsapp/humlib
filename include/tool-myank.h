@@ -33,38 +33,56 @@ class MeasureInfo {
 	public:
 		MeasureInfo(void) { clear(); }
 		void clear(void)  { num = seg = start = stop = -1;
-			sclef.resize(0); skeysig.resize(0); skey.resize(0);
-			stimesig.resize(0); smet.resize(0); stempo.resize(0);
-			eclef.resize(0); ekeysig.resize(0); ekey.resize(0);
-			etimesig.resize(0); emet.resize(0); etempo.resize(0);
+			sclef.resize(0); smclef.resize(0); soclef.resize(0);
+			smet.resize(0); smmet.resize(0); somet.resize(0);
+			skeysig.resize(0); skey.resize(0); stimesig.resize(0); stempo.resize(0);
+			eclef.resize(0); emclef.resize(0); eoclef.resize(0);
+			emet.resize(0); emmet.resize(0); eomet.resize(0);
+			ekeysig.resize(0); ekey.resize(0); etimesig.resize(0); etempo.resize(0);
 			file = NULL;
 		}
 		void setTrackCount(int tcount) {
 			sclef.resize(tcount+1);
+			smclef.resize(tcount+1);
+			soclef.resize(tcount+1);
 			skeysig.resize(tcount+1);
 			skey.resize(tcount+1);
 			stimesig.resize(tcount+1);
 			smet.resize(tcount+1);
+			smmet.resize(tcount+1);
+			somet.resize(tcount+1);
 			stempo.resize(tcount+1);
 			eclef.resize(tcount+1);
+			emclef.resize(tcount+1);
+			eoclef.resize(tcount+1);
 			ekeysig.resize(tcount+1);
 			ekey.resize(tcount+1);
 			etimesig.resize(tcount+1);
 			emet.resize(tcount+1);
+			emmet.resize(tcount+1);
+			eomet.resize(tcount+1);
 			etempo.resize(tcount+1);
 			int i;
 			for (i=0; i<tcount+1; i++) {
 				sclef[i].clear();
+				smclef[i].clear();
+				soclef[i].clear();
 				skeysig[i].clear();
 				skey[i].clear();
 				stimesig[i].clear();
 				smet[i].clear();
+				smmet[i].clear();
+				somet[i].clear();
 				stempo[i].clear();
 				eclef[i].clear();
+				emclef[i].clear();
+				eoclef[i].clear();
 				ekeysig[i].clear();
 				ekey[i].clear();
 				etimesig[i].clear();
 				emet[i].clear();
+				emmet[i].clear();
+				eomet[i].clear();
 				etempo[i].clear();
 			}
 			tracks = tcount;
@@ -80,18 +98,26 @@ class MeasureInfo {
 
 		// musical settings at start of measure
 		vector<MyCoord> sclef;     // starting clef of segment
+		vector<MyCoord> smclef;    // starting mclef of segment
+		vector<MyCoord> soclef;    // starting oclef of segment
 		vector<MyCoord> skeysig;   // starting keysig of segment
 		vector<MyCoord> skey;      // starting key of segment
 		vector<MyCoord> stimesig;  // starting timesig of segment
 		vector<MyCoord> smet;      // starting met of segment
+		vector<MyCoord> smmet;     // starting mmet of segment
+		vector<MyCoord> somet;     // starting omet of segment
 		vector<MyCoord> stempo;    // starting tempo of segment
 
 		// musical settings at start of measure
 		vector<MyCoord> eclef;     // ending clef    of segment
+		vector<MyCoord> emclef;    // ending mclef   of segment
+		vector<MyCoord> eoclef;    // ending oclef   of segment
 		vector<MyCoord> ekeysig;   // ending keysig  of segment
 		vector<MyCoord> ekey;      // ending key     of segment
 		vector<MyCoord> etimesig;  // ending timesig of segment
 		vector<MyCoord> emet;      // ending met     of segment
+		vector<MyCoord> emmet;     // ending mmet    of segment
+		vector<MyCoord> eomet;     // ending omet    of segment
 		vector<MyCoord> etempo;    // ending tempo   of segment
 };
 
@@ -144,8 +170,10 @@ class Tool_myank : public HumTool {
 		void      insertZerothMeasure  (vector<MeasureInfo>& measurelist,
 		                                HumdrumFile& infile);
 		void      getMetStates         (vector<vector<MyCoord> >& metstates,
+										vector<vector<MyCoord> >& mmetstates,
+										vector<vector<MyCoord> >& ometstates,
 		                                HumdrumFile& infile);
-		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track);
+		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track, string prefix = "");
 		int       atEndOfFile          (HumdrumFile& infile, int line);
 		void      processFile          (HumdrumFile& infile);
 		int       getSectionCount      (HumdrumFile& infile);
@@ -180,6 +208,8 @@ class Tool_myank : public HumTool {
 		vector<MeasureInfo> m_measureOutList; // used with -m option
 		vector<MeasureInfo> m_measureInList;  // used with -m option
 		vector<vector<MyCoord> > m_metstates;
+		vector<vector<MyCoord> > m_mmetstates;
+		vector<vector<MyCoord> > m_ometstates;
 
 		string      m_lineRange;              // used with -l option
 		vector<int> m_barNumbersPerLine;      // used with -l option
