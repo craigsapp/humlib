@@ -171,6 +171,10 @@ bool HumdrumFileStructure::analyzeStrophes(void) {
 			if (*current == "*Xstrophe") {
 				break;
 			}
+			if (*current == "*S-") {
+				// Alternate for *Xstrophe
+				break;
+			}
 			current->setStrophe(strophestarts[i]);
 			current = current->getNextToken();
 		}

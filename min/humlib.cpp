@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Feb  6 22:50:09 PST 2024
+// Last Modified: Thu Feb 15 01:06:51 PST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -27431,6 +27431,10 @@ bool HumdrumFileStructure::analyzeStrophes(void) {
 				break;
 			}
 			if (*current == "*Xstrophe") {
+				break;
+			}
+			if (*current == "*S-") {
+				// Alternate for *Xstrophe
 				break;
 			}
 			current->setStrophe(strophestarts[i]);
