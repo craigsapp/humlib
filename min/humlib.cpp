@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr  1 12:53:29 PDT 2024
+// Last Modified: Mon Apr  1 12:56:05 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -79932,7 +79932,7 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "sab2gs") {
-			RUNTOOL(restfill, infile, commands[i].second, status);
+			RUNTOOL(sab2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
 			RUNTOOL(scordatura, infile, commands[i].second, status);
 		} else if (commands[i].first == "semitones") {

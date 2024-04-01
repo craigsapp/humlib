@@ -303,7 +303,7 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "sab2gs") {
-			RUNTOOL(restfill, infile, commands[i].second, status);
+			RUNTOOL(sab2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
 			RUNTOOL(scordatura, infile, commands[i].second, status);
 		} else if (commands[i].first == "semitones") {
