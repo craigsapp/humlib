@@ -30,10 +30,15 @@ namespace hum {
 
 void HumdrumFileContent::analyzeRestPositions(void) {
 	vector<HTp> kernstarts = getKernSpineStartList();
-	for (int i=0; i<(int)kernstarts.size(); i++) {
-		assignImplicitVerticalRestPositions(kernstarts[i]);
-	}
 
+	// Now using verovio automatic rest positions, so not calcualting
+	// by default anymore.  This code can be uncommented out if explicit
+	// rest positions are needed for other purposes.
+	//for (int i=0; i<(int)kernstarts.size(); i++) {
+	//	assignImplicitVerticalRestPositions(kernstarts[i]);
+	//}
+
+	// Check for explicit positioning:
 	checkForExplicitVerticalRestPositions();
 }
 

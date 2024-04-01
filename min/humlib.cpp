@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Feb 15 01:06:51 PST 2024
+// Last Modified: Mon Apr  1 01:04:09 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -24655,10 +24655,15 @@ void HumdrumFileContent::linkPhraseEndpoints(HTp phrasestart, HTp phraseend) {
 
 void HumdrumFileContent::analyzeRestPositions(void) {
 	vector<HTp> kernstarts = getKernSpineStartList();
-	for (int i=0; i<(int)kernstarts.size(); i++) {
-		assignImplicitVerticalRestPositions(kernstarts[i]);
-	}
 
+	// Now using verovio automatic rest positions, so not calcualting
+	// by default anymore.  This code can be uncommented out if explicit
+	// rest positions are needed for other purposes.
+	//for (int i=0; i<(int)kernstarts.size(); i++) {
+	//	assignImplicitVerticalRestPositions(kernstarts[i]);
+	//}
+
+	// Check for explicit positioning:
 	checkForExplicitVerticalRestPositions();
 }
 
