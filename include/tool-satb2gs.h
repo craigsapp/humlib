@@ -7,7 +7,7 @@
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   Sort data spines in a Humdrum file.
+// Description:   Convert 4-staff single-voice music into 2-staff Grand Staff layout.
 //
 
 #ifndef _TOOL_SATB2GS_H

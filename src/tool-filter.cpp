@@ -61,6 +61,7 @@
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
+#include "tool-sab2gs.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
 #include "tool-semitones.h"
@@ -300,6 +301,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
+			RUNTOOL(restfill, infile, commands[i].second, status);
+		} else if (commands[i].first == "sab2gs") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
 			RUNTOOL(scordatura, infile, commands[i].second, status);

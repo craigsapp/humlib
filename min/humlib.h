@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr  1 01:04:09 PDT 2024
+// Last Modified: Mon Apr  1 12:53:29 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9762,6 +9762,38 @@ class Tool_ruthfix : public HumTool {
 		void    insertCrossBarTies (HumdrumFile& infile);
 		void    insertCrossBarTies (HumdrumFile& infile, int strand);
 		void    createTiedNote     (HTp left, HTp right);
+
+};
+
+
+class Tool_sab2gs : public HumTool {
+	public:
+		         Tool_sab2gs      (void);
+		        ~Tool_sab2gs      () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+
+		void    adjustMiddleVoice  (HTp spineStart);
+		void    printGrandStaff    (HumdrumFile& infile, std::vector<HTp>& starts);
+		std::string hasBelowMarker(HumdrumFile& infile);
+
+		void    printReducedLine   (HumdrumFile& infile, int index, std::vector<int>& ktracks);
+		void    printSpineMerge    (HumdrumFile& infile, int index, std::vector<int>& ktracks);
+		void    printSpineSplit    (HumdrumFile& infile, int index, std::vector<int>& ktracks);
+		void    printSwappedLine   (HumdrumFile& infile, int index, std::vector<int>& ktracks);
+
+	private:
+		bool    m_hasCrossStaff = false;
+		bool    m_hasBelowMarker = false;
+		string  m_belowMarker = "<";
+
 
 };
 
