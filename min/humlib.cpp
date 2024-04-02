@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr  1 12:56:05 PDT 2024
+// Last Modified: Tue Apr  2 11:17:09 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -111154,6 +111154,7 @@ void Tool_ruthfix::createTiedNote(HTp left, HTp right) {
 
 Tool_sab2gs::Tool_sab2gs(void) {
 	define("b|below=s:<", "Marker for displaying on next staff below");
+	define("d|down=b", "Use only *down/*Xdown interpretations");
 }
 
 
@@ -111210,6 +111211,8 @@ bool Tool_sab2gs::run(HumdrumFile& infile) {
 //
 
 void Tool_sab2gs::initialize(void) {
+	m_belowMarker = getString("below");
+	m_downQ       = getBoolean("down");
 }
 
 
@@ -111220,7 +111223,6 @@ void Tool_sab2gs::initialize(void) {
 //
 
 void Tool_sab2gs::processFile(HumdrumFile& infile) {
-	m_belowMarker = getString("below");
 
 	vector<HTp> spines;
 	infile.getSpineStartList(spines);
@@ -111757,20 +111759,30 @@ void Tool_sab2gs::adjustMiddleVoice(HTp spineStart) {
 	// bottom staff.  Staff choice is selected by clef: clefG2 is for top staff
 	// and staffF4 is for bottom staff. Chords are not expected.
 	int staff = 0; 
-	string replacement = "$1" + m_belowMarker;
+	string replacement = "$1" + m_belowMarker + "/";
 	HumRegex hre;
 	while (current) {
 		if (*current == "*-") {
 			break;
 		}
-		if (current->isClef()) {
+		if (!m_downQ && current->isClef()) {
 			if (current->substr(0, 7) == "*clefG2") {
 				staff = 1;
+				// suppress clef:
+				string text = "*x" + current->substr(1);
+				current->setText(text);
 			} else if (current->substr(0, 7) == "*clefF4") {
 				staff = -1;
+				// suppress clef:
+				string text = "*x" + current->substr(1);
+				current->setText(text);
 			}
-			// delete clef:
-			current->setText("*");
+		} else if (current->isInterpretation()) {
+			if (*current == "*down") {
+				staff = -1;
+			} else if (*current == "*Xdown") {
+				staff = 1;
+			}
 		} else if ((staff != 0) && current->isData()) {
 			if (current->isNull()) {
 				// nothing to do with token

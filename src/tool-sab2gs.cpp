@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Apr  1 01:11:53 PDT 2024
-// Last Modified: Mon Apr  1 01:12:21 PDT 2024
+// Last Modified: Mon Apr  1 23:38:26 PDT 2024
 // Filename:      tool-sab2gs.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-sab2gs.cpp
 // Syntax:        C++11; humlib
@@ -14,9 +14,12 @@
 //
 //                Assumes no spine splits/merges in the three input **kern spines.
 //
-// To do:         Add *lh/*rh for choosing the staff as an alternate instead of
-//                by clef changes. (could also do *up/*down or *down/*Xdown if 
-//                *lh/*rh is not appropriate).
+//                *clefF4 moves middle part to bottom staff, *clefG2 moves it to top staff.
+//                Also *down/*Xdown work in a similar manner.
+// Options:
+//                -b char == RDF**kern down marking character (<) by default
+//                -d      == Use only *down/*Xdown for controlling staff assignment
+//                           for middle part (ignore clefs).
 
 #include "tool-sab2gs.h"
 #include "Convert.h"
@@ -38,6 +41,7 @@ namespace hum {
 
 Tool_sab2gs::Tool_sab2gs(void) {
 	define("b|below=s:<", "Marker for displaying on next staff below");
+	define("d|down=b", "Use only *down/*Xdown interpretations");
 }
 
 
@@ -94,6 +98,8 @@ bool Tool_sab2gs::run(HumdrumFile& infile) {
 //
 
 void Tool_sab2gs::initialize(void) {
+	m_belowMarker = getString("below");
+	m_downQ       = getBoolean("down");
 }
 
 
@@ -104,7 +110,6 @@ void Tool_sab2gs::initialize(void) {
 //
 
 void Tool_sab2gs::processFile(HumdrumFile& infile) {
-	m_belowMarker = getString("below");
 
 	vector<HTp> spines;
 	infile.getSpineStartList(spines);
@@ -647,14 +652,24 @@ void Tool_sab2gs::adjustMiddleVoice(HTp spineStart) {
 		if (*current == "*-") {
 			break;
 		}
-		if (current->isClef()) {
+		if (!m_downQ && current->isClef()) {
 			if (current->substr(0, 7) == "*clefG2") {
 				staff = 1;
+				// suppress clef:
+				string text = "*x" + current->substr(1);
+				current->setText(text);
 			} else if (current->substr(0, 7) == "*clefF4") {
 				staff = -1;
+				// suppress clef:
+				string text = "*x" + current->substr(1);
+				current->setText(text);
 			}
-			// delete clef:
-			current->setText("*");
+		} else if (current->isInterpretation()) {
+			if (*current == "*down") {
+				staff = -1;
+			} else if (*current == "*Xdown") {
+				staff = 1;
+			}
 		} else if ((staff != 0) && current->isData()) {
 			if (current->isNull()) {
 				// nothing to do with token

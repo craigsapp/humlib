@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Apr  1 12:56:05 PDT 2024
+// Last Modified: Tue Apr  2 11:17:09 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9790,9 +9790,10 @@ class Tool_sab2gs : public HumTool {
 		void    printSwappedLine   (HumdrumFile& infile, int index, std::vector<int>& ktracks);
 
 	private:
-		bool    m_hasCrossStaff = false;
-		bool    m_hasBelowMarker = false;
-		string  m_belowMarker = "<";
+		bool    m_hasCrossStaff = false;   // Middle voice has notes/rests on bottom staff
+		bool    m_hasBelowMarker = false;  // Input data has RDF**kern down marker
+		string  m_belowMarker = "<";       // RDF**kern marker for staff down
+		bool    m_downQ = false;           // Used only *down/*Xdown for staff changes
 
 
 };
