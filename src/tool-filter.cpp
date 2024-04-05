@@ -39,6 +39,7 @@
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
+#include "tool-humbreak.h"
 #include "tool-humdiff.h"
 #include "tool-humsheet.h"
 #include "tool-humtr.h"
@@ -266,6 +267,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(homorhythm2, infile, commands[i].second, status);
 		} else if (commands[i].first == "hproof") {
 			RUNTOOL(hproof, infile, commands[i].second, status);
+		} else if (commands[i].first == "humbreak") {
+			RUNTOOL(humbreak, infile, commands[i].second, status);
 		} else if (commands[i].first == "humsheet") {
 			RUNTOOL(humsheet, infile, commands[i].second, status);
 		} else if (commands[i].first == "humtr") {

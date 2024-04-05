@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Apr  2 11:17:09 PDT 2024
+// Last Modified: Thu Apr  4 23:30:44 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7661,6 +7661,33 @@ class Tool_hproof : public HumTool {
 
 };
 
+
+
+class Tool_humbreak : public HumTool {
+	public:
+		         Tool_humbreak     (void);
+		        ~Tool_humbreak     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    addBreaks          (HumdrumFile& infile);
+		void    removeBreaks       (HumdrumFile& infile);
+		void    convertPageToLine  (HumdrumFile& infile);
+
+	private:
+		std::map<int, int> m_lineMeasures;  // list of measures to add line breaks to
+		std::map<int, int> m_pageMeasures;  // list of measures to add page breaks to
+		std::string m_group = "original";
+		bool m_removeQ = false;
+		bool m_page2lineQ = false;
+
+};
 
 
 // A TimePoint records the event times in a file.  These are positions of note attacks
