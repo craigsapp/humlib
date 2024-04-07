@@ -69,6 +69,7 @@ class Tool_musedata2hum : public HumTool {
 		bool m_recipQ = false;         // used with -r option
       std::string m_group = "score"; // used with -g option
 		std::string m_omd = "";        // initial tempo designation (store for later output)
+		bool m_noOmvQ = false;         // used with --omd option
 
 		// state variables:
 		int m_part     = 0;            // staff index currently being processed

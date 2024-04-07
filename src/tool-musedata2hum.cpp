@@ -35,9 +35,10 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 	// Options& options = m_options;
 	// options.define("k|kern=b","display corresponding **kern data");
 
-	define("g|group=s:score", "the data group to process");
-	define("r|recip=b",       "output **recip spine");
-	define("s|stems=b",       "include stems in output");
+	define("g|group=s:score", "The data group to process");
+	define("r|recip=b",       "Output **recip spine");
+	define("s|stems=b",       "Include stems in output");
+	define("omv|no-omv=b",    "Exclude OMV record in output data");
 }
 
 
@@ -51,6 +52,7 @@ void Tool_musedata2hum::initialize(void) {
 	m_stemsQ = getBoolean("stems");
 	m_recipQ = getBoolean("recip");
 	m_group  = getString("group");
+	m_noOmvQ = getBoolean("no-omv");
 }
 
 
@@ -203,10 +205,12 @@ cerr << "TEMPO " << m_tempo << endl;
 		}
 	}
 
-	if (!m_usedReferences["OMV"]) {
-		string movementtitle = mds[ii].getMovementTitle();
-		if (!movementtitle.empty()) {
-			out << "!!!OMV: " << movementtitle << endl;
+	if (!m_noOmvQ) {
+		if (!m_usedReferences["OMV"]) {
+			string movementtitle = mds[ii].getMovementTitle();
+			if (!movementtitle.empty()) {
+				out << "!!!OMV: " << movementtitle << endl;
+			}
 		}
 	}
 

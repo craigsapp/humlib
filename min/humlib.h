@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr  4 23:30:44 PDT 2024
+// Last Modified: Sat Apr  6 17:41:48 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5533,6 +5533,39 @@ class Tool_addic : public HumTool {
 };
 
 
+class Tool_addkey : public HumTool {
+	public:
+		         Tool_addkey     (void);
+		        ~Tool_addkey     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    getLineIndexes     (HumdrumFile& infile);
+		void    insertReferenceKey (HumdrumFile& infile);
+		void    addInputKey        (HumdrumFile& infile);
+		void    insertKeyDesig     (HumdrumFile& infile, const string& keyDesig);
+		void    printKeyDesig      (HumdrumFile& infile, int index, const string& desig, int direction);
+
+	private:
+		std::string m_key;
+		bool        m_keyQ           = false;
+		bool        m_addKeyRefQ     = false;
+
+		int         m_exinterpIndex  = -1;
+		int         m_refKeyIndex    = -1;
+		int         m_keyDesigIndex  = -1;
+		int         m_keySigIndex    = -1;
+		int         m_dataStartIndex = -1;
+
+};
+
+
 class Tool_autoaccid : public HumTool {
 	public:
 		         Tool_autoaccid    (void);
@@ -8991,6 +9024,7 @@ class Tool_musedata2hum : public HumTool {
 		bool m_recipQ = false;         // used with -r option
       std::string m_group = "score"; // used with -g option
 		std::string m_omd = "";        // initial tempo designation (store for later output)
+		bool m_noOmvQ = false;         // used with --omd option
 
 		// state variables:
 		int m_part     = 0;            // staff index currently being processed

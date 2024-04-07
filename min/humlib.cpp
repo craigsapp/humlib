@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr  4 23:30:44 PDT 2024
+// Last Modified: Sat Apr  6 17:41:48 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -2397,6 +2397,8 @@ string Convert::museFiguredBassToKernFiguredBass(const string& mfb) {
 			output += 'X';
 		} else if (mfb[i] == 'f') { // flat
 			output += '-';
+		} else if (mfb[i] == 'x') { // sharp
+			output += '#';
 		} else if ((mfb[i] == '&') && (i < (int)mfb.size()-1) && (mfb[i+1] == '0')) {
 			output += ":";
 			i++;
@@ -37035,8 +37037,8 @@ void MuseData::analyzeType(void) {
 			case 'P': thing[i].setType(E_muserec_print_suggestion);   break;
 			case 'S': thing[i].setType(E_muserec_sound_directives);   break;
 			case '/': thing[i].setType(E_muserec_end);
-		   foundend = 1;
-		   break;
+			          foundend = 1;
+			          break;
 			case 'a': thing[i].setType(E_muserec_append);             break;
 			case 'b': thing[i].setType(E_muserec_backspace);          break;
 			case 'f': thing[i].setType(E_muserec_figured_harmony);    break;
@@ -37045,8 +37047,8 @@ void MuseData::analyzeType(void) {
 			case 'r': thing[i].setType(E_muserec_rest);               break;
 			case '*': thing[i].setType(E_muserec_musical_directions); break;
 			case '$': thing[i].setType(E_muserec_musical_attributes);
-						 foundattributes = 1;
-						 break;
+			          foundattributes = 1;
+			          break;
 		}
 	}
 }
@@ -52639,6 +52641,303 @@ string Tool_addic::getInstrumentClass(const string& code) {
 
 	// return two instrument classes:
 	return class1 + divider + "IC" + class2;
+}
+
+
+
+
+/////////////////////////////////
+//
+// Tool_addkey::Tool_addkey -- Set the recognized options for the tool.
+//
+
+Tool_addkey::Tool_addkey(void) {
+	define("k|key=s", "Add given key designtation to data");
+	define("K|reference-key=b", "Update or add !!!key: designation, used with -k");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_addkey::run -- Do the main work of the tool.
+//
+
+bool Tool_addkey::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_addkey::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addkey::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addkey::run(HumdrumFile& infile) {
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_addkey::initialize(void) {
+	m_addKeyRefQ = getBoolean("reference-key");
+	m_keyQ       = getBoolean("key");
+	m_key        = getString("key");
+	HumRegex hre;
+	hre.replaceDestructive(m_key, "", ":$");
+	hre.replaceDestructive(m_key, "", "^\\*");
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::processFile --
+//
+
+void Tool_addkey::processFile(HumdrumFile& infile) {
+	initialize();
+	if (m_keyQ) {
+		addInputKey(infile);
+	} else {
+		insertReferenceKey(infile);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::addInputKey -- Insert key from -k option into score
+//    rather than !!!key: entry.  Insert input into !!!key: entry if
+//    -K option is given.
+//
+
+void Tool_addkey::addInputKey(HumdrumFile& infile) {
+	getLineIndexes(infile);
+
+	if (m_refKeyIndex != -1) {
+		string text = "!!!key: " + m_key;
+		infile[m_refKeyIndex].token(0)->setText(text);
+	}
+
+	HumRegex hre;
+	string keyDesig = "*" + m_key;
+	if (!hre.search(m_key, ":")) {
+		keyDesig += ":";
+	}
+	insertKeyDesig(infile, keyDesig);
+
+	// Update the reference key record if -K option is used:
+	if (m_addKeyRefQ) {
+		if (m_refKeyIndex != -1) {
+			string text = "!!!key: " + m_key;
+			infile[m_refKeyIndex].setText(text);
+		}
+		// Or print just before exinterp line later if not found,
+		// but needs to be created.
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::insertKeyDesig --
+//
+
+void Tool_addkey::insertKeyDesig(HumdrumFile& infile, const string& keyDesig) {
+	// Replace the key designation if any are found in the header.
+	// If not found, then store in key signature for printing later.
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (i >= m_dataStartIndex) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->isKeyDesignation()) {
+				token->setText(keyDesig);
+			} else if ((m_keyDesigIndex == -1) && (token->isKeySignature())) {
+				// Store keyDesig later to print:
+				token->setValue("auto", "keyDesig", keyDesig);
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::insertReferenceKey -- Take the !!!key: value and insert
+// into key designations in the header.  Add key designation line if not
+// present already in header.
+//
+
+void Tool_addkey::insertReferenceKey(HumdrumFile& infile) {
+	getLineIndexes(infile);
+
+	if (m_refKeyIndex == -1) {
+		// Nothing to do, add later before exinterp line.
+		return;
+	}
+
+	HumRegex hre;
+	string keyValue = infile[m_refKeyIndex].getReferenceValue();
+	if (!hre.search(keyValue, ":")) {
+		keyValue += ":";
+	}
+	if (!hre.search(keyValue, "^\\*")) {
+		hre.replaceDestructive(keyValue, "*", "^");
+	}
+	if (m_keyDesigIndex > 0) {
+		for (int i=m_exinterpIndex+1; i<=m_keyDesigIndex; i++) {
+			if (!infile[i].isInterpretation()) {
+				continue;
+			}
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (!token->isKeyDesignation()) {
+					continue;
+				}
+				string text = "*" + keyValue;
+				token->setText(text);
+			}
+		}
+		infile.generateLinesFromTokens();
+		m_humdrum_text << infile;
+	} else if (m_keySigIndex > 0) {
+		printKeyDesig(infile, m_keySigIndex, keyValue, +1);
+	} else if (m_dataStartIndex > 0) {
+		printKeyDesig(infile, m_dataStartIndex, keyValue, -1);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::printKeyDesig --
+//
+
+void Tool_addkey::printKeyDesig(HumdrumFile& infile, int index, const string& desig, int direction) {
+	int index2 = index + direction;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (i != index2) {
+			m_humdrum_text << infile[i] << endl;
+		} else {
+			if (index > index2) {
+				m_humdrum_text << infile[i] << endl;
+			}
+			for (int j=0; j<infile[index].getFieldCount(); j++) {
+				HTp token = infile.token(index, j);
+				if (j > 0) {
+					m_humdrum_text << "\t";
+				}
+				if (token->isKern()) {
+					m_humdrum_text << desig;
+				} else {
+					m_humdrum_text << "*";
+				}
+			}
+			m_humdrum_text << endl;
+			if (index < index2) {
+				m_humdrum_text << infile[i] << endl;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addkey::getLineIndexes --
+//
+
+void Tool_addkey::getLineIndexes(HumdrumFile& infile) {
+	m_refKeyIndex    = -1;
+	m_keyDesigIndex  = -1;
+	m_keySigIndex    = -1;
+	m_dataStartIndex = -1;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (infile[i].isExclusiveInterpretation()) {
+			m_exinterpIndex = i;
+			continue;
+		}
+		if (infile[i].isData()) {
+			m_dataStartIndex = i;
+			break;
+		}
+		if (infile[i].isBarline()) {
+			m_dataStartIndex = i;
+			break;
+		}
+		if (infile[i].token(0)->compare(0, 7, "!!!key:") == 0) {
+			m_refKeyIndex = i;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (token->isKeySignature()) {
+				m_keySigIndex = i;
+			} else if (token->isKeyDesignation()) {
+				m_keyDesigIndex = i;
+			}
+		}
+	}
+
+	if (m_refKeyIndex == -1) {
+		// !!!key: could be at bottom, so search backwards in file.
+		for (int i=infile.getLineCount() - 1; i>=0; i--) {
+			if (!infile[i].isReference()) {
+				continue;
+			}
+			string key = infile[i].getReferenceKey();
+			if (key == "key") {
+				m_refKeyIndex   = i;
+				break;
+			}
+		}
+	}
 }
 
 
@@ -79855,6 +80154,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	for (int i=0; i<(int)commands.size(); i++) {
 		if (commands[i].first == "addic") {
 			RUNTOOL(addic, infile, commands[i].second, status);
+		} else if (commands[i].first == "addkey") {
+			RUNTOOL(addkey, infile, commands[i].second, status);
 		} else if (commands[i].first == "autoaccid") {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {
@@ -98413,9 +98714,10 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 	// Options& options = m_options;
 	// options.define("k|kern=b","display corresponding **kern data");
 
-	define("g|group=s:score", "the data group to process");
-	define("r|recip=b",       "output **recip spine");
-	define("s|stems=b",       "include stems in output");
+	define("g|group=s:score", "The data group to process");
+	define("r|recip=b",       "Output **recip spine");
+	define("s|stems=b",       "Include stems in output");
+	define("omv|no-omv=b",    "Exclude OMV record in output data");
 }
 
 
@@ -98429,6 +98731,7 @@ void Tool_musedata2hum::initialize(void) {
 	m_stemsQ = getBoolean("stems");
 	m_recipQ = getBoolean("recip");
 	m_group  = getString("group");
+	m_noOmvQ = getBoolean("no-omv");
 }
 
 
@@ -98581,10 +98884,12 @@ cerr << "TEMPO " << m_tempo << endl;
 		}
 	}
 
-	if (!m_usedReferences["OMV"]) {
-		string movementtitle = mds[ii].getMovementTitle();
-		if (!movementtitle.empty()) {
-			out << "!!!OMV: " << movementtitle << endl;
+	if (!m_noOmvQ) {
+		if (!m_usedReferences["OMV"]) {
+			string movementtitle = mds[ii].getMovementTitle();
+			if (!movementtitle.empty()) {
+				out << "!!!OMV: " << movementtitle << endl;
+			}
 		}
 	}
 

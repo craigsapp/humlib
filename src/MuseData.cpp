@@ -818,8 +818,8 @@ void MuseData::analyzeType(void) {
 			case 'P': thing[i].setType(E_muserec_print_suggestion);   break;
 			case 'S': thing[i].setType(E_muserec_sound_directives);   break;
 			case '/': thing[i].setType(E_muserec_end);
-		   foundend = 1;
-		   break;
+			          foundend = 1;
+			          break;
 			case 'a': thing[i].setType(E_muserec_append);             break;
 			case 'b': thing[i].setType(E_muserec_backspace);          break;
 			case 'f': thing[i].setType(E_muserec_figured_harmony);    break;
@@ -828,8 +828,8 @@ void MuseData::analyzeType(void) {
 			case 'r': thing[i].setType(E_muserec_rest);               break;
 			case '*': thing[i].setType(E_muserec_musical_directions); break;
 			case '$': thing[i].setType(E_muserec_musical_attributes);
-						 foundattributes = 1;
-						 break;
+			          foundattributes = 1;
+			          break;
 		}
 	}
 }
