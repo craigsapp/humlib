@@ -1,5 +1,5 @@
 //
-// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
+// programmer:    craig stuart sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:23:06 PDT 2019
 // Last Modified: Sun Feb 27 02:39:41 PST 2022
 // Filename:      musedata2hum.cpp
@@ -38,7 +38,7 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 	define("g|group=s:score", "The data group to process");
 	define("r|recip=b",       "Output **recip spine");
 	define("s|stems=b",       "Include stems in output");
-	define("omv|no-omv=b",    "Exclude OMV record in output data");
+	define("omv|no-omv=b",    "Exclude extracted OMV record in output data");
 }
 
 
@@ -148,8 +148,11 @@ cerr << "TEMPO " << m_tempo << endl;
 
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
+	if (needsAboveBelowKernRdf()) {
+		outfile.appendLine("!!!RDF**kern: > = above");
+		outfile.appendLine("!!!RDF**kern: < = above");
+	}
 	outfile.createLinesFromTokens();
-
 
 	// Convert comments in header of first part:
 	int ii = groupMemberIndex[0];
@@ -481,6 +484,11 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		layer = layer - 1;
 	}
 
+	if (mr.isDirection()) {
+		mr.addMusicalDirectionBuffer(&mr);
+		return;
+	}
+
 	HumNum timestamp = mr.getAbsBeat();
 	// cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;
@@ -533,6 +541,15 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
+		string other = mr.getKernNoteOtherNotations();
+		if (!needsAboveBelowKernRdf()) {
+			if (other.find("<") != string::npos) {
+				addAboveBelowKernRdf();
+			} else if (other.find(">") != string::npos) {
+				addAboveBelowKernRdf();
+			}
+		}
+		tok += other;
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
@@ -543,7 +560,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
+		addDirectionDynamics(slice, part, mr);
 		addLyrics(slice, part, staff, mr);
+		mr.clearMusicalDirectionBuffer();
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -578,6 +597,43 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			addTextDirection(gm, part, staff, mr, timestamp);
 		}
 	}
+}
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addDirectionDynamics -- search for a dynamic
+//     marking before the current line and after any previous note
+//     or similar line.   These lines are store in "musical directions"
+//     which start the line with a "*" character.
+//
+
+void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
+	// vector<MuseRecordBasic*>& directions = mr.getMusicalDirectionBuffer();
+	// search for musical dynamics directions and process them here.
+}
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addAboveBelowKernRdf -- Save for later that
+//      !!!RDF**kern: > = above
+//      !!!RDF**kern: < = below
+//    in the output Humdrum data file.
+//
+
+void Tool_musedata2hum::addAboveBelowKernRdf(void) {
+	m_aboveBelowKernRdf = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::needsAboveBelowKernRdf -- Function name says it all.
+//
+
+bool Tool_musedata2hum::needsAboveBelowKernRdf(void) {
+	return m_aboveBelowKernRdf;
 }
 
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr  6 17:41:48 PDT 2024
+// Last Modified: Wed Apr 10 14:47:43 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3148,15 +3148,15 @@ class MuseRecordBasic {
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
-		bool              isDirection        (void);
+		bool              isDirection        (void); // starts with "*"
 		bool              isAnyComment       (void);
 		bool              isLineComment      (void);
 		bool              isBlockComment     (void);
-		bool              isCopyright        (void);
-		bool              isCueNote          (void);
-		bool              isEncoder          (void);
-		bool              isFiguredHarmony   (void);
-		bool              isGraceNote        (void);
+		bool              isCopyright        (void); // 1st non-comment line in file
+		bool              isCueNote          (void); // starts with "c"
+		bool              isEncoder          (void); // 4th non-comment line in file
+		bool              isFiguredHarmony   (void); // starts with "f"
+		bool              isGraceNote        (void); // starts with "g"
 		bool              isGroup            (void);
 		bool              isGroupMembership  (void);
 		bool              isHeaderRecord     (void);
@@ -3167,7 +3167,7 @@ class MuseRecordBasic {
 		bool              isAnyRest          (void);
 		bool              isRegularRest      (void);
 		bool              isInvisibleRest    (void);
-		bool              isPrintSuggestion  (void);
+		bool              isPrintSuggestion  (void);  // starts with "P"
 		bool              isSource           (void);
 		bool              isWorkInfo         (void);
 		bool              isWorkTitle        (void);
@@ -3175,6 +3175,19 @@ class MuseRecordBasic {
 		int               getTpq             (void);
 		void              setTpq             (int value);
 		static std::string musedataToUtf8    (std::string& input);
+
+		// Musical Directions: Lines starting with *
+		// Functions stored in src/MuseRecordBasic-directions.cpp
+		std::string getDirectionAsciiCharacters             (void);
+		void clearMusicalDirectionBuffer                    (void);
+		std::vector<MuseRecordBasic*>& getMusicalDirectionBuffer (void);
+		void addMusicalDirectionBuffer(MuseRecordBasic* mr);
+
+		// Other Notations: columns 32-43 on notes/rests
+		// Functions stored in src/MuseRecordBasic-notations.cpp
+		std::string       getOtherNotations  (void);
+		std::string       getKernNoteOtherNotations(void);
+		int               hasFermata         (void);
 
 	protected:
 		std::string       m_recordString;    // actual characters on line
@@ -3198,6 +3211,10 @@ class MuseRecordBasic {
 		std::string       m_graphicrecip;    // graphical duration of note/rest
 		GridVoice*			m_voice = NULL;    // conversion structure that token is stored in.
 		MuseData*         m_owner = NULL;
+
+		// m_muiscalDirectionBuffer: used to store lines that start with "*"
+		// that will be processed later (currently by notes).
+		std::vector<MuseRecordBasic*> m_musicalDirectionBuffer;
 
 		void              setOwner    (MuseData* owner);
 
@@ -9016,6 +9033,9 @@ class Tool_musedata2hum : public HumTool {
 		std::string cleanString      (const std::string& input);
 		void    addTextDirection     (GridMeasure* gm, int part, int staff,
 		                              MuseRecord& mr, HumNum timestamp);
+		void    addAboveBelowKernRdf (void);
+		bool    needsAboveBelowKernRdf(void);
+		void    addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr);
 
 	private:
 		// options:
@@ -9034,6 +9054,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_lastbarnum = -1;         // barnumber carried over from previous bar
 		HTp m_lastnote = NULL;         // for dealing with chords.
 		double m_tempo = 0.0;          // for initial tempo from MIDI settings
+		bool m_aboveBelowKernRdf = false; // output RDF**kern above/below markers
 
 		std::map<std::string, bool> m_usedReferences;
 		std::vector<std::string> m_postReferences;

@@ -61,6 +61,9 @@ class Tool_musedata2hum : public HumTool {
 		std::string cleanString      (const std::string& input);
 		void    addTextDirection     (GridMeasure* gm, int part, int staff,
 		                              MuseRecord& mr, HumNum timestamp);
+		void    addAboveBelowKernRdf (void);
+		bool    needsAboveBelowKernRdf(void);
+		void    addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr);
 
 	private:
 		// options:
@@ -79,6 +82,7 @@ class Tool_musedata2hum : public HumTool {
 		int m_lastbarnum = -1;         // barnumber carried over from previous bar
 		HTp m_lastnote = NULL;         // for dealing with chords.
 		double m_tempo = 0.0;          // for initial tempo from MIDI settings
+		bool m_aboveBelowKernRdf = false; // output RDF**kern above/below markers
 
 		std::map<std::string, bool> m_usedReferences;
 		std::vector<std::string> m_postReferences;

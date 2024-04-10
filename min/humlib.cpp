@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr  6 17:41:48 PDT 2024
+// Last Modified: Wed Apr 10 14:47:43 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -43532,6 +43532,165 @@ void MuseRecord::getAllPrintSuggestions(vector<string>& suggestions) {
 
 
 
+//////////////////////////////
+//
+// MuseRecordBasic::getDirectionAsciiCharacters -- returns columns 25
+//    and later, but with the return string removing any trailing spaces.
+//
+
+std::string MuseRecordBasic::getDirectionAsciiCharacters(void) {
+	if (!isDirection()) {
+		return "";
+	}
+	string& mrs = m_recordString;
+	if (mrs.size() < 25) {
+		return "";
+	}
+	string output = mrs.substr(24);
+	size_t endpos = output.find_last_not_of(" \t\r\n");
+   return (endpos != std::string::npos) ? output.substr(0, endpos + 1) : "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getMusicalDirectionBuffer -- buffered musical directions
+//    that should be applied at the next note.
+//
+
+vector<MuseRecordBasic*>& MuseRecordBasic::getMusicalDirectionBuffer(void) {
+	return m_musicalDirectionBuffer;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::clearMusicalDirectionBuffer -- clear buffered musical
+//    directions.
+//
+
+void MuseRecordBasic::clearMusicalDirectionBuffer(void) {
+	m_musicalDirectionBuffer.clear();
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::addMusicalDirectionBuffer -- add buffered musical
+//    directions.
+//
+
+void MuseRecordBasic::addMusicalDirectionBuffer(MuseRecordBasic* mr) {
+	m_musicalDirectionBuffer.push_back(mr);
+}
+
+
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getOtherNotationsString -- return columns
+//   32-42 (for notes and rests, but currently not checking if
+//   the correct record type).
+//
+
+string MuseRecordBasic::getOtherNotations(void) {
+    if ((int)m_recordString.size() < 32) {
+        return "";
+    } else {
+        size_t lengthToExtract = std::min(size_t(12), m_recordString.size() - 31);
+        return m_recordString.substr(31, lengthToExtract);
+    }
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getKernNoteOtherNotations -- Extract note-level ornaments
+//    and articulations.  See MuseRecordBasic::getOtherNotation() for list
+//    of "other notations".
+//
+
+string MuseRecordBasic::getKernNoteOtherNotations(void) {
+	string output;
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		switch(notations[i]) {
+			case 'F': // fermata above
+				output += ";";
+				break;
+			case 'E': // fermata below
+				output += ";<";
+				break;
+			case '.': // staccato
+				output += "'";
+				break;
+			case ',': // breath mark
+				output += ",";
+				break;
+			case '=': // tenuto-staccato
+				output += "~'";
+				break;
+			case '>': // accent
+				output += "^";
+				break;
+			case 'A': // heavy accent
+				output += "^^";
+				break;
+			case 'M': // mordent
+				output += "M";
+				break;
+			case 'r': // turn
+				output += "S";
+				break;
+			case 't': // trill
+				output += "T";
+				break;
+			case 'n': // down bow
+				output += "u";
+				break;
+			case 'v': // up bow
+				output += "v";
+				break;
+			case 'Z': // sfz
+				output += "zz";
+				break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::hasFermata -- Return 0 if no fermata
+//    E or F in columns 32-43 of a note or rest.  Returns +1 if fermata
+//    above (E), or -1 if fermata below (F).  Check for &+ before
+//    fermata for editorial.
+//
+
+int MuseRecordBasic::hasFermata(void) {
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		if (notations[i] == 'F') {
+			return +1;
+		}
+		if (notations[i] == 'E') {
+			return -1;
+		}
+	}
+	return 0;
+}
+
+
+
+
 
 //////////////////////////////
 //
@@ -43967,7 +44126,7 @@ void MuseRecordBasic::appendString(const string& astring) {
 
 //////////////////////////////
 //
-// MuseRecord::appendInteger -- Insert an integer after the last character
+// MuseRecordBasic::appendInteger -- Insert an integer after the last character
 //     in the current line.
 //
 
@@ -43980,7 +44139,7 @@ void MuseRecordBasic::appendInteger(int value) {
 
 //////////////////////////////
 //
-// MuseRecord::appendRational -- Insert a rational after the last character
+// MuseRecordBasic::appendRational -- Insert a rational after the last character
 //     in the current line.
 //
 
@@ -43995,7 +44154,7 @@ void MuseRecordBasic::appendRational(HumNum& value) {
 
 //////////////////////////////
 //
-// MuseRecord::append -- append multiple objects in sequence
+// MuseRecordBasic::append -- append multiple objects in sequence
 // from left to right onto the record.  The format contains
 // characters with two possibilities at the moment:
 //    "i": integer value
@@ -98717,7 +98876,7 @@ Tool_musedata2hum::Tool_musedata2hum(void) {
 	define("g|group=s:score", "The data group to process");
 	define("r|recip=b",       "Output **recip spine");
 	define("s|stems=b",       "Include stems in output");
-	define("omv|no-omv=b",    "Exclude OMV record in output data");
+	define("omv|no-omv=b",    "Exclude extracted OMV record in output data");
 }
 
 
@@ -98827,8 +98986,11 @@ cerr << "TEMPO " << m_tempo << endl;
 
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
+	if (needsAboveBelowKernRdf()) {
+		outfile.appendLine("!!!RDF**kern: > = above");
+		outfile.appendLine("!!!RDF**kern: < = above");
+	}
 	outfile.createLinesFromTokens();
-
 
 	// Convert comments in header of first part:
 	int ii = groupMemberIndex[0];
@@ -99160,6 +99322,11 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		layer = layer - 1;
 	}
 
+	if (mr.isDirection()) {
+		mr.addMusicalDirectionBuffer(&mr);
+		return;
+	}
+
 	HumNum timestamp = mr.getAbsBeat();
 	// cerr << "CONVERTING LINE " << timestamp << "\t" << mr << endl;
 	string tok;
@@ -99212,6 +99379,15 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 	} else if (mr.isRegularNote()) {
 		tok = mr.getKernNoteStyle(1, 1);
+		string other = mr.getKernNoteOtherNotations();
+		if (!needsAboveBelowKernRdf()) {
+			if (other.find("<") != string::npos) {
+				addAboveBelowKernRdf();
+			} else if (other.find(">") != string::npos) {
+				addAboveBelowKernRdf();
+			}
+		}
+		tok += other;
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
@@ -99222,7 +99398,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();
 		addNoteDynamics(slice, part, mr);
+		addDirectionDynamics(slice, part, mr);
 		addLyrics(slice, part, staff, mr);
+		mr.clearMusicalDirectionBuffer();
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -99257,6 +99435,43 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			addTextDirection(gm, part, staff, mr, timestamp);
 		}
 	}
+}
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addDirectionDynamics -- search for a dynamic
+//     marking before the current line and after any previous note
+//     or similar line.   These lines are store in "musical directions"
+//     which start the line with a "*" character.
+//
+
+void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
+	// vector<MuseRecordBasic*>& directions = mr.getMusicalDirectionBuffer();
+	// search for musical dynamics directions and process them here.
+}
+
+//////////////////////////////
+//
+// Tool_musedata2hum::addAboveBelowKernRdf -- Save for later that
+//      !!!RDF**kern: > = above
+//      !!!RDF**kern: < = below
+//    in the output Humdrum data file.
+//
+
+void Tool_musedata2hum::addAboveBelowKernRdf(void) {
+	m_aboveBelowKernRdf = true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::needsAboveBelowKernRdf -- Function name says it all.
+//
+
+bool Tool_musedata2hum::needsAboveBelowKernRdf(void) {
+	return m_aboveBelowKernRdf;
 }
 
 

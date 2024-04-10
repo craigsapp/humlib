@@ -457,7 +457,7 @@ void MuseRecordBasic::appendString(const string& astring) {
 
 //////////////////////////////
 //
-// MuseRecord::appendInteger -- Insert an integer after the last character
+// MuseRecordBasic::appendInteger -- Insert an integer after the last character
 //     in the current line.
 //
 
@@ -470,7 +470,7 @@ void MuseRecordBasic::appendInteger(int value) {
 
 //////////////////////////////
 //
-// MuseRecord::appendRational -- Insert a rational after the last character
+// MuseRecordBasic::appendRational -- Insert a rational after the last character
 //     in the current line.
 //
 
@@ -485,7 +485,7 @@ void MuseRecordBasic::appendRational(HumNum& value) {
 
 //////////////////////////////
 //
-// MuseRecord::append -- append multiple objects in sequence
+// MuseRecordBasic::append -- append multiple objects in sequence
 // from left to right onto the record.  The format contains
 // characters with two possibilities at the moment:
 //    "i": integer value
