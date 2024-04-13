@@ -182,6 +182,7 @@ class MuseRecordBasic {
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
 		bool              isDirection        (void); // starts with "*"
+		bool              isMusicalDirection (void); // starts with "*"
 		bool              isAnyComment       (void);
 		bool              isLineComment      (void);
 		bool              isBlockComment     (void);
@@ -211,43 +212,56 @@ class MuseRecordBasic {
 
 		// Musical Directions: Lines starting with *
 		// Functions stored in src/MuseRecordBasic-directions.cpp
-		std::string getDirectionAsciiCharacters             (void);
-		void clearMusicalDirectionBuffer                    (void);
-		std::vector<MuseRecordBasic*>& getMusicalDirectionBuffer (void);
-		void addMusicalDirectionBuffer(MuseRecordBasic* mr);
+		void             addMusicDirection           (int deltaIndex);
+		std::string      getDirectionAsciiCharacters (void);
+		bool             hasMusicalDirection         (void);
+		MuseRecordBasic* getMusicalDirection         (int index = 0);
+		bool             isDynamic                   (void);
+		std::string      getDynamicText              (void);
+		MuseRecordBasic* getDirectionRecord          (int deltaIndex);
+		std::string      getDirectionType            (void);
 
 		// Other Notations: columns 32-43 on notes/rests
 		// Functions stored in src/MuseRecordBasic-notations.cpp
-		std::string       getOtherNotations  (void);
-		std::string       getKernNoteOtherNotations(void);
-		int               hasFermata         (void);
+		std::string  getOtherNotations  (void);
+		std::string  getKernNoteOtherNotations(void);
+		int          hasFermata         (void);
+
+		// Print Suggestions: Lines starting with "P"
+		void         addPrintSuggestion   (int deltaIndex);
 
 	protected:
-		std::string       m_recordString;    // actual characters on line
+		std::string       m_recordString;     // actual characters on line
+		std::vector<int>  m_printSuggestions; // print suggestions for this line (if applicable)
+		                                      // print suggestions start with the letter "P" and
+                                            // follow a note/rest line, as well as musical direction
+		                                      // lines that start with "*".  The value in the difference
+		                                      // in indexes between the current line and the print
+		                                      // suggestion (typically +1)
+      std::vector<int> m_musicalDirections; // Musical directions associated with this line (if applicable)
+		                                      // Musical direction lines start with "*" and are used for dynamics,
+		                                      // hairpins, etc.  Typically -1 from a note or -2 if there is a
+		                                      // print suggestion for the musical direction.
 
 		// mark-up data for the line:
-		int               m_lineindex;       // index into original file
-		int               m_type;            // category of MuseRecordBasic record
-		HumNum            m_absbeat;         // dur in quarter notes from start
-		HumNum            m_lineduration;    // duration of line
-		HumNum            m_noteduration;    // duration of note
+		int               m_lineindex;        // index into original file
+		int               m_type;             // category of MuseRecordBasic record
+		HumNum            m_absbeat;          // dur in quarter notes from start
+		HumNum            m_lineduration;     // duration of line
+		HumNum            m_noteduration;     // duration of note
 
-		int               m_b40pitch;        // base 40 pitch
-		int               m_nexttiednote;    // line number of next note tied to
-		                                     // this one (-1 if no tied note)
-		int               m_lasttiednote;    // line number of previous note tied
-		                                     // to this one (-1 if no tied note)
+		int               m_b40pitch;         // base 40 pitch
+		int               m_nexttiednote;     // line number of next note tied to
+		                                      // this one (-1 if no tied note)
+		int               m_lasttiednote;     // line number of previous note tied
+		                                      // to this one (-1 if no tied note)
 		int               m_roundBreve;
-		int               m_header = -1;     // -1 = undefined, 0 = no, 1 = yes
-		int               m_layer = 0;       // voice/layer (track info but may be analyzed)
-		int               m_tpq = 0;         // ticks-per-quarter for durations
-		std::string       m_graphicrecip;    // graphical duration of note/rest
-		GridVoice*			m_voice = NULL;    // conversion structure that token is stored in.
+		int               m_header = -1;      // -1 = undefined, 0 = no, 1 = yes
+		int               m_layer = 0;        // voice/layer (track info but may be analyzed)
+		int               m_tpq = 0;          // ticks-per-quarter for durations
+		std::string       m_graphicrecip;     // graphical duration of note/rest
+		GridVoice*			m_voice = NULL;     // conversion structure that token is stored in.
 		MuseData*         m_owner = NULL;
-
-		// m_muiscalDirectionBuffer: used to store lines that start with "*"
-		// that will be processed later (currently by notes).
-		std::vector<MuseRecordBasic*> m_musicalDirectionBuffer;
 
 		void              setOwner    (MuseData* owner);
 

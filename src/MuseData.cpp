@@ -350,6 +350,17 @@ MuseRecord& MuseData::getRecord(int lindex) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseData::getRecordPointer --
+//
+
+MuseRecord* MuseData::getRecordPointer(int lindex) {
+	return m_data[lindex];
+}
+
+
 //////////////////////////////
 //
 // MuseData::getRecord -- This version with two index inputs is
@@ -460,6 +471,8 @@ void MuseData::doAnalyses(void) {
 	if (hasError()) { return; }
 	analyzeTies();
 	if (hasError()) { return; }
+	linkPrintSuggestions();
+	linkMusicDirections();
 }
 
 
@@ -2605,6 +2618,83 @@ void MuseData::assignHeaderBodyState(void) {
 		}
 		// still in header
 		m_data[i]->setHeaderState(state);
+	}
+}
+
+
+//////////////////////////////
+//
+// MuseData::linkPrintSuggestions -- Store print suggestions with
+//    the record that they apply to.  A print suggestion starts
+//    with the letter "P" and follows immediately after the 
+//    record to which they apply (unless another print suggestion
+//    or a comment.
+//
+
+void MuseData::linkPrintSuggestions(void) {
+	// don't go all of the way to 0: stop at header:
+	vector<int> Plines;
+	for (int i=getLineCount()-1; i>=0; i--) {
+		if (!m_data[i]->isPrintSuggestion()) {
+			continue;
+		}
+		Plines.clear();
+		Plines.push_back(i);
+		i--;
+		while (i>=0 && (m_data[i]->isPrintSuggestion() || m_data[i]->isAnyComment())) {
+			if (m_data[i]->isPrintSuggestion()) {
+				cerr << "PRINT SUGGESTION: " << m_data[i] << endl;
+				Plines.push_back(i);
+			}
+			i--;
+		}
+		if (i<0) {
+			break;
+		}
+		// Store the print suggestions on the current line, which is at least
+		// a note/rest or musical direction.
+		for (int j=0; j<(int)Plines.size(); j++) {
+			m_data[i]->addPrintSuggestion(Plines[j] - i);
+		}
+		Plines.clear();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::linkMusicDirections -- Store music directions with
+//    the record that they apply to.  A music direction starts
+//    with "*" and precedes the record to which they apply (unless 
+//    a print suggestion or a comment intervenes.
+//
+
+
+void MuseData::linkMusicDirections(void) {
+	vector<int> Dlines;
+	for (int i=0; i<getLineCount(); i++) {
+		if (!m_data[i]->isDirection()) {
+			continue;
+		}
+		Dlines.clear();
+		Dlines.push_back(i);
+		i++;
+		while (i<getLineCount() && !m_data[i]->isAnyNoteOrRest()) {
+			if (m_data[i]->isMusicalDirection()) {
+				Dlines.push_back(i);
+			}
+			i++;
+		}
+		if (i>=getLineCount()) {
+			break;
+		}
+		// Store the print suggestions on the current line, which is hopefully
+		// a note/rest or musical direction.
+		for (int j=0; j<(int)Dlines.size(); j++) {
+			m_data[i]->addMusicDirection(Dlines[j] - i);
+		}
+		Dlines.clear();
 	}
 }
 

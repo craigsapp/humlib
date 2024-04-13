@@ -123,6 +123,7 @@ class MuseData {
 		// line-based (file-order indexing) accessor functions:
 		MuseRecord&       operator[]          (int lindex);
 		MuseRecord&       getRecord           (int lindex);
+		MuseRecord*       getRecordPointer    (int lindex);
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
@@ -165,6 +166,8 @@ class MuseData {
 		int          getPartNameIndex     (void);
 		std::string  getPartName          (int index);
 		void         assignHeaderBodyState(void);
+		void         linkPrintSuggestions (void);
+		void         linkMusicDirections  (void);
 
 	public:
 		static std::string  trimSpaces    (const std::string& input);

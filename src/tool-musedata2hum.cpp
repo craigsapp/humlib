@@ -132,7 +132,6 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	initialize();
 
 	m_tempo = mds.getMidiTempo();
-cerr << "TEMPO " << m_tempo << endl;
 
 	vector<int> groupMemberIndex = mds.getGroupIndexList(m_group);
 	if (groupMemberIndex.empty()) {
@@ -485,7 +484,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	}
 
 	if (mr.isDirection()) {
-		mr.addMusicalDirectionBuffer(&mr);
 		return;
 	}
 
@@ -562,7 +560,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		addNoteDynamics(slice, part, mr);
 		addDirectionDynamics(slice, part, mr);
 		addLyrics(slice, part, staff, mr);
-		mr.clearMusicalDirectionBuffer();
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -592,7 +589,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			}
 		}
 	} else if (mr.isDirection()) {
-		cerr << "PROCESS DIRECTION HERE: " << mr << endl;
 		if (mr.isTextDirection()) {
 			addTextDirection(gm, part, staff, mr, timestamp);
 		}
@@ -607,11 +603,32 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 //     or similar line.   These lines are store in "musical directions"
 //     which start the line with a "*" character.
 //
+// Example for "p" dyamic, with print suggesting.
+//             1         2
+//    12345678901234567890123456789
+//    *               G       p
+//    P    C17:Y57
+//
 
 void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
-	// vector<MuseRecordBasic*>& directions = mr.getMusicalDirectionBuffer();
-	// search for musical dynamics directions and process them here.
+	MuseRecordBasic* direction = mr.getMusicalDirection();
+	if (direction == NULL) {
+		return;
+	}
+
+	if (direction->isDynamic()) {
+		string dynamicText = direction->getDynamicText();
+		if (!dynamicText.empty()) {
+			slice->at(part)->setDynamics(dynamicText);
+			HumGrid* grid = slice->getOwner();
+			if (grid) {
+				grid->setDynamicsPresent(part);
+			}
+		}
+	}
 }
+
+
 
 //////////////////////////////
 //

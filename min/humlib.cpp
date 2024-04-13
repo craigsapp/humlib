@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Apr 10 14:47:43 PDT 2024
+// Last Modified: Sat Apr 13 04:49:42 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -36569,6 +36569,17 @@ MuseRecord& MuseData::getRecord(int lindex) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseData::getRecordPointer --
+//
+
+MuseRecord* MuseData::getRecordPointer(int lindex) {
+	return m_data[lindex];
+}
+
+
 //////////////////////////////
 //
 // MuseData::getRecord -- This version with two index inputs is
@@ -36679,6 +36690,8 @@ void MuseData::doAnalyses(void) {
 	if (hasError()) { return; }
 	analyzeTies();
 	if (hasError()) { return; }
+	linkPrintSuggestions();
+	linkMusicDirections();
 }
 
 
@@ -38824,6 +38837,83 @@ void MuseData::assignHeaderBodyState(void) {
 		}
 		// still in header
 		m_data[i]->setHeaderState(state);
+	}
+}
+
+
+//////////////////////////////
+//
+// MuseData::linkPrintSuggestions -- Store print suggestions with
+//    the record that they apply to.  A print suggestion starts
+//    with the letter "P" and follows immediately after the 
+//    record to which they apply (unless another print suggestion
+//    or a comment.
+//
+
+void MuseData::linkPrintSuggestions(void) {
+	// don't go all of the way to 0: stop at header:
+	vector<int> Plines;
+	for (int i=getLineCount()-1; i>=0; i--) {
+		if (!m_data[i]->isPrintSuggestion()) {
+			continue;
+		}
+		Plines.clear();
+		Plines.push_back(i);
+		i--;
+		while (i>=0 && (m_data[i]->isPrintSuggestion() || m_data[i]->isAnyComment())) {
+			if (m_data[i]->isPrintSuggestion()) {
+				cerr << "PRINT SUGGESTION: " << m_data[i] << endl;
+				Plines.push_back(i);
+			}
+			i--;
+		}
+		if (i<0) {
+			break;
+		}
+		// Store the print suggestions on the current line, which is at least
+		// a note/rest or musical direction.
+		for (int j=0; j<(int)Plines.size(); j++) {
+			m_data[i]->addPrintSuggestion(Plines[j] - i);
+		}
+		Plines.clear();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::linkMusicDirections -- Store music directions with
+//    the record that they apply to.  A music direction starts
+//    with "*" and precedes the record to which they apply (unless 
+//    a print suggestion or a comment intervenes.
+//
+
+
+void MuseData::linkMusicDirections(void) {
+	vector<int> Dlines;
+	for (int i=0; i<getLineCount(); i++) {
+		if (!m_data[i]->isDirection()) {
+			continue;
+		}
+		Dlines.clear();
+		Dlines.push_back(i);
+		i++;
+		while (i<getLineCount() && !m_data[i]->isAnyNoteOrRest()) {
+			if (m_data[i]->isMusicalDirection()) {
+				Dlines.push_back(i);
+			}
+			i++;
+		}
+		if (i>=getLineCount()) {
+			break;
+		}
+		// Store the print suggestions on the current line, which is hopefully
+		// a note/rest or musical direction.
+		for (int j=0; j<(int)Dlines.size(); j++) {
+			m_data[i]->addMusicDirection(Dlines[j] - i);
+		}
+		Dlines.clear();
 	}
 }
 
@@ -43534,6 +43624,438 @@ void MuseRecord::getAllPrintSuggestions(vector<string>& suggestions) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::isPartName --
+//
+
+bool MuseRecordBasic::isPartName(void) {
+	return m_type == E_muserec_header_part_name;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAttributes --
+//
+
+bool MuseRecordBasic::isAttributes(void) {
+	return m_type == E_muserec_musical_attributes;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isSource --
+//
+
+bool MuseRecordBasic::isSource(void) {
+	return m_type == E_muserec_source;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isEncoder --
+//
+
+bool MuseRecordBasic::isEncoder(void) {
+	return m_type == E_muserec_encoder;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isId --
+//
+
+bool MuseRecordBasic::isId(void) {
+	return m_type == E_muserec_id;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBarline --
+//
+
+bool MuseRecordBasic::isBarline(void) {
+	return m_type == E_muserec_measure;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBackup --
+//
+
+bool MuseRecordBasic::isBackup(void) {
+	return m_type == E_muserec_back;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyComment --
+//
+
+bool MuseRecordBasic::isAnyComment(void) {
+	return isLineComment() || isBlockComment();
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isLineComment --
+//
+
+bool MuseRecordBasic::isLineComment(void) {
+	return m_type == E_muserec_comment_line;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBlockComment --
+//
+
+bool MuseRecordBasic::isBlockComment(void) {
+	return m_type == E_muserec_comment_toggle;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
+//    note in a chord (not the first note in the chord).
+//
+
+bool MuseRecordBasic::isChordNote(void) {
+	return m_type == E_muserec_note_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isDirection -- Is a musical direction (text)
+//     instruction.
+//
+
+bool MuseRecordBasic::isDirection(void) {
+	return m_type == E_muserec_musical_directions;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isMusicalDirection -- Is a musical direction (text)
+//     instruction.
+//
+
+bool MuseRecordBasic::isMusicalDirection(void) {
+	return isDirection();
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGraceNote -- A grace note, either a single note or
+//     the first note in a gracenote chord.
+//
+
+bool MuseRecordBasic::isGraceNote(void) {
+	return m_type == E_muserec_note_grace;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isCueNote --
+//
+
+bool MuseRecordBasic::isCueNote(void) {
+	return m_type == E_muserec_note_cue;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isChordNote --
+//
+
+bool MuseRecordBasic::isChordGraceNote(void) {
+	return m_type == E_muserec_note_grace_chord;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isFiguredHarmony --
+//
+
+bool MuseRecordBasic::isFiguredHarmony(void) {
+	return m_type == E_muserec_figured_harmony;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isPrintSuggestion --
+//
+
+bool MuseRecordBasic::isPrintSuggestion(void) {
+	switch (m_type) {
+		case E_muserec_print_suggestion:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRegularNote --
+//
+
+bool MuseRecordBasic::isRegularNote(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+			return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyNote --
+//
+
+bool MuseRecordBasic::isAnyNote(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_cue:
+		case E_muserec_note_grace:
+		case E_muserec_note_grace_chord:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyNoteOrRest --
+//
+
+bool MuseRecordBasic::isAnyNoteOrRest(void) {
+	switch (m_type) {
+		case E_muserec_note_regular:
+		case E_muserec_note_chord:
+		case E_muserec_note_cue:
+		case E_muserec_note_grace:
+		case E_muserec_note_grace_chord:
+		case E_muserec_rest_invisible:
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isInvisibleRest --
+//
+
+bool MuseRecordBasic::isInvisibleRest(void) {
+	switch (m_type) {
+		case E_muserec_rest_invisible:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isRegularRest --
+//
+
+bool MuseRecordBasic::isRegularRest(void) {
+	switch (m_type) {
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isAnyRest -- Also cue-sized rests?
+//
+
+bool MuseRecordBasic::isAnyRest(void) {
+	switch (m_type) {
+		case E_muserec_rest_invisible:
+		case E_muserec_rest:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isCopyright --
+//
+
+bool MuseRecordBasic::isCopyright(void) {
+	switch (m_type) {
+		case E_muserec_copyright:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isWorkInfo --
+//
+
+bool MuseRecordBasic::isWorkInfo(void) {
+	switch (m_type) {
+		case E_muserec_work_info:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isWorkTitle --
+//
+
+bool MuseRecordBasic::isWorkTitle(void) {
+	switch (m_type) {
+		case E_muserec_work_title:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isMovementTitle --
+//
+
+bool MuseRecordBasic::isMovementTitle(void) {
+	switch (m_type) {
+		case E_muserec_movement_title:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGroup --
+//
+
+bool MuseRecordBasic::isGroup(void) {
+	switch (m_type) {
+		case E_muserec_group:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isGroupMembership --
+//
+
+bool MuseRecordBasic::isGroupMembership(void) {
+	switch (m_type) {
+		case E_muserec_group_memberships:
+			return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isHeaderRecord -- True if a header, or a comment
+//   occurring before the first non-header record.
+//
+
+bool MuseRecordBasic::isHeaderRecord(void) {
+	return m_header > 0;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isBodyRecord -- True if not a header record.
+//
+
+bool MuseRecordBasic::isBodyRecord(void) {
+	return m_header == 0;
+}
+
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::addMusicDirection -- add a delta index for associated
+//     print suggestion.
+//
+
+void MuseRecordBasic::addMusicDirection(int deltaIndex) {
+	m_musicalDirections.push_back(deltaIndex);
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::getDirectionAsciiCharacters -- returns columns 25
 //    and later, but with the return string removing any trailing spaces.
 //
@@ -43555,38 +44077,131 @@ std::string MuseRecordBasic::getDirectionAsciiCharacters(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getMusicalDirectionBuffer -- buffered musical directions
-//    that should be applied at the next note.
+// MuseRecordBasic::hasMusicalDirection --
 //
 
-vector<MuseRecordBasic*>& MuseRecordBasic::getMusicalDirectionBuffer(void) {
-	return m_musicalDirectionBuffer;
+bool MuseRecordBasic::hasMusicalDirection(void) {
+	if (isDirection()) {
+		return true;
+	}
+	if (!m_musicalDirections.empty()) {
+		return true;
+	}
+	return false;
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecordBasic::clearMusicalDirectionBuffer -- clear buffered musical
-//    directions.
+// MuseRecordBasic::getMusicalDuration -- return any associated
+//     Musical Direction record for the current record.  If there
+//     is no linked direction, then return NULL.  If the record is
+//     itself a muscial direction, return the pointer to the record.
+//     Default value for index is 0.
 //
 
-void MuseRecordBasic::clearMusicalDirectionBuffer(void) {
-	m_musicalDirectionBuffer.clear();
+MuseRecordBasic* MuseRecordBasic::getMusicalDirection(int index) {
+	if (m_musicalDirections.empty()) {
+		return NULL;
+	}
+	if (index >= (int)m_musicalDirections.size()) {
+		return NULL;
+	}
+	return getDirectionRecord(m_musicalDirections.at(index));
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecordBasic::addMusicalDirectionBuffer -- add buffered musical
-//    directions.
+// MuseRecordBasic::getDirectionRecord -- return the given direction from the store
+//    delta index for the musical direction line.  Default value index = 0.
 //
 
-void MuseRecordBasic::addMusicalDirectionBuffer(MuseRecordBasic* mr) {
-	m_musicalDirectionBuffer.push_back(mr);
+MuseRecordBasic* MuseRecordBasic::getDirectionRecord(int deltaIndex) {
+	int index = m_lineindex + deltaIndex;
+	if (index < 0) {
+		return NULL;
+	}
+	if (!m_owner) {
+		return NULL;
+	}
+	int lineCount = m_owner->getLineCount();
+	if (index >= lineCount) {
+		return NULL;
+	}
+	return m_owner->getRecordPointer(index);
 }
 
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getDirectionType -- columns 17 and 18 of
+//    musical directions.  This function will remove space
+//    chaters from the columns.
+//
+// Direction Types:
+// =================
+// A = segno sign
+// E = dynamics hairpin start (qualifiers [BCDG])
+// F = dynamics hairpin start
+// G = dynamics letters (in columns 25+)
+// H = dash line start (qualifiers [BCDG])
+// J = dash line end (qualifiers [BCDG])
+// P = piano pedal start
+// Q = piano pedal end
+// R = rehearsal number or letter
+// U = shift notes up (usually by 8va)
+// V = shift notes down (usually by 8va)
+// W = stop octave shift
+// X = tie terminator
+//
+
+string MuseRecordBasic::getDirectionType(void) {
+	if (!isDirection()) {
+		return "";
+	}
+	string value = getColumns(17, 18);
+	if (value[1] == ' ') {
+		value.resize(1);
+	}
+	if (value[0] == ' ') {
+		value.resize(0);
+	}
+	return value;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isDynamic -- helper function for getDirectionType() == "G".
+//
+
+bool MuseRecordBasic::isDynamic(void) {
+	string dirtype = getDirectionType();
+	if (dirtype.empty()) {
+		return false;
+	}
+	if (dirtype.at(0) == 'G') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::getDynamicText -- 
+//
+
+string MuseRecordBasic::getDynamicText(void) {
+	return getDirectionAsciiCharacters();
+}
 
 
 
@@ -43687,6 +44302,20 @@ int MuseRecordBasic::hasFermata(void) {
 	}
 	return 0;
 }
+
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::addPrintSuggestion -- add a delta index for associated
+//     print suggestion.
+//
+
+void MuseRecordBasic::addPrintSuggestion(int deltaIndex) {
+	m_printSuggestions.push_back(deltaIndex);
+}
+
 
 
 
@@ -44444,413 +45073,6 @@ void MuseRecordBasic::cleanLineEnding(void) {
 		m_recordString.resize((int)m_recordString.size() - 1);
 		i = (int)m_recordString.size() - 1;
 	}
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isPartName --
-//
-
-bool MuseRecordBasic::isPartName(void) {
-	return m_type == E_muserec_header_part_name;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isAttributes --
-//
-
-bool MuseRecordBasic::isAttributes(void) {
-	return m_type == E_muserec_musical_attributes;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isSource --
-//
-
-bool MuseRecordBasic::isSource(void) {
-	return m_type == E_muserec_source;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isEncoder --
-//
-
-bool MuseRecordBasic::isEncoder(void) {
-	return m_type == E_muserec_encoder;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isId --
-//
-
-bool MuseRecordBasic::isId(void) {
-	return m_type == E_muserec_id;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isBarline --
-//
-
-bool MuseRecordBasic::isBarline(void) {
-	return m_type == E_muserec_measure;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isBackup --
-//
-
-bool MuseRecordBasic::isBackup(void) {
-	return m_type == E_muserec_back;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isAnyComment --
-//
-
-bool MuseRecordBasic::isAnyComment(void) {
-	return isLineComment() || isBlockComment();
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isLineComment --
-//
-
-bool MuseRecordBasic::isLineComment(void) {
-	return m_type == E_muserec_comment_line;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isBlockComment --
-//
-
-bool MuseRecordBasic::isBlockComment(void) {
-	return m_type == E_muserec_comment_toggle;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isChordNote -- Is a regular note that is a seoncdary
-//    note in a chord (not the first note in the chord).
-//
-
-bool MuseRecordBasic::isChordNote(void) {
-	return m_type == E_muserec_note_chord;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isDirection -- Is a musical direction (text)
-//     instruction.
-//
-
-bool MuseRecordBasic::isDirection(void) {
-	return m_type == E_muserec_musical_directions;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isGraceNote -- A grace note, either a single note or
-//     the first note in a gracenote chord.
-//
-
-bool MuseRecordBasic::isGraceNote(void) {
-	return m_type == E_muserec_note_grace;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isCueNote --
-//
-
-bool MuseRecordBasic::isCueNote(void) {
-	return m_type == E_muserec_note_cue;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isChordNote --
-//
-
-bool MuseRecordBasic::isChordGraceNote(void) {
-	return m_type == E_muserec_note_grace_chord;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isFiguredHarmony --
-//
-
-bool MuseRecordBasic::isFiguredHarmony(void) {
-	return m_type == E_muserec_figured_harmony;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isPrintSuggestion --
-//
-
-bool MuseRecordBasic::isPrintSuggestion(void) {
-	switch (m_type) {
-		case E_muserec_print_suggestion:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isRegularNote --
-//
-
-bool MuseRecordBasic::isRegularNote(void) {
-	switch (m_type) {
-		case E_muserec_note_regular:
-			return true;
-	}
-	return false;
-}
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isAnyNote --
-//
-
-bool MuseRecordBasic::isAnyNote(void) {
-	switch (m_type) {
-		case E_muserec_note_regular:
-		case E_muserec_note_chord:
-		case E_muserec_note_cue:
-		case E_muserec_note_grace:
-		case E_muserec_note_grace_chord:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isAnyNoteOrRest --
-//
-
-bool MuseRecordBasic::isAnyNoteOrRest(void) {
-	switch (m_type) {
-		case E_muserec_note_regular:
-		case E_muserec_note_chord:
-		case E_muserec_note_cue:
-		case E_muserec_note_grace:
-		case E_muserec_note_grace_chord:
-		case E_muserec_rest_invisible:
-		case E_muserec_rest:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isInvisibleRest --
-//
-
-bool MuseRecordBasic::isInvisibleRest(void) {
-	switch (m_type) {
-		case E_muserec_rest_invisible:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isRegularRest --
-//
-
-bool MuseRecordBasic::isRegularRest(void) {
-	switch (m_type) {
-		case E_muserec_rest:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isAnyRest -- Also cue-sized rests?
-//
-
-bool MuseRecordBasic::isAnyRest(void) {
-	switch (m_type) {
-		case E_muserec_rest_invisible:
-		case E_muserec_rest:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isCopyright --
-//
-
-bool MuseRecordBasic::isCopyright(void) {
-	switch (m_type) {
-		case E_muserec_copyright:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isWorkInfo --
-//
-
-bool MuseRecordBasic::isWorkInfo(void) {
-	switch (m_type) {
-		case E_muserec_work_info:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isWorkTitle --
-//
-
-bool MuseRecordBasic::isWorkTitle(void) {
-	switch (m_type) {
-		case E_muserec_work_title:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isMovementTitle --
-//
-
-bool MuseRecordBasic::isMovementTitle(void) {
-	switch (m_type) {
-		case E_muserec_movement_title:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isGroup --
-//
-
-bool MuseRecordBasic::isGroup(void) {
-	switch (m_type) {
-		case E_muserec_group:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isGroupMembership --
-//
-
-bool MuseRecordBasic::isGroupMembership(void) {
-	switch (m_type) {
-		case E_muserec_group_memberships:
-			return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isHeaderRecord -- True if a header, or a comment
-//   occurring before the first non-header record.
-//
-
-bool MuseRecordBasic::isHeaderRecord(void) {
-	return m_header > 0;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isBodyRecord -- True if not a header record.
-//
-
-bool MuseRecordBasic::isBodyRecord(void) {
-	return m_header == 0;
 }
 
 
@@ -98970,7 +99192,6 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	initialize();
 
 	m_tempo = mds.getMidiTempo();
-cerr << "TEMPO " << m_tempo << endl;
 
 	vector<int> groupMemberIndex = mds.getGroupIndexList(m_group);
 	if (groupMemberIndex.empty()) {
@@ -99323,7 +99544,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	}
 
 	if (mr.isDirection()) {
-		mr.addMusicalDirectionBuffer(&mr);
 		return;
 	}
 
@@ -99400,7 +99620,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		addNoteDynamics(slice, part, mr);
 		addDirectionDynamics(slice, part, mr);
 		addLyrics(slice, part, staff, mr);
-		mr.clearMusicalDirectionBuffer();
 	} else if (mr.isFiguredHarmony()) {
 		addFiguredHarmony(mr, gm, timestamp, part, maxstaff);
 	} else if (mr.isChordNote()) {
@@ -99430,7 +99649,6 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			}
 		}
 	} else if (mr.isDirection()) {
-		cerr << "PROCESS DIRECTION HERE: " << mr << endl;
 		if (mr.isTextDirection()) {
 			addTextDirection(gm, part, staff, mr, timestamp);
 		}
@@ -99445,11 +99663,32 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 //     or similar line.   These lines are store in "musical directions"
 //     which start the line with a "*" character.
 //
+// Example for "p" dyamic, with print suggesting.
+//             1         2
+//    12345678901234567890123456789
+//    *               G       p
+//    P    C17:Y57
+//
 
 void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
-	// vector<MuseRecordBasic*>& directions = mr.getMusicalDirectionBuffer();
-	// search for musical dynamics directions and process them here.
+	MuseRecordBasic* direction = mr.getMusicalDirection();
+	if (direction == NULL) {
+		return;
+	}
+
+	if (direction->isDynamic()) {
+		string dynamicText = direction->getDynamicText();
+		if (!dynamicText.empty()) {
+			slice->at(part)->setDynamics(dynamicText);
+			HumGrid* grid = slice->getOwner();
+			if (grid) {
+				grid->setDynamicsPresent(part);
+			}
+		}
+	}
 }
+
+
 
 //////////////////////////////
 //
