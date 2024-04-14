@@ -1,5 +1,5 @@
 //
-// programmer:    craig stuart sapp <craig@ccrma.stanford.edu>
+// Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:23:06 PDT 2019
 // Last Modified: Sun Feb 27 02:39:41 PST 2022
 // Filename:      musedata2hum.cpp
@@ -236,7 +236,9 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 		}
 	}
 
-	out << outfile;
+	for (int i=0; i<outfile.getLineCount(); i++) {
+		printLine(out, outfile[i]);
+	}
 
 	if (!m_usedReferences["SMS"]) {
 		string source = mds[ii].getSource();
@@ -300,6 +302,43 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 	}
 
 	return status;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_musedata2hum::printLine -- Print line of Humdrum file
+//     contents.  If there is any layout parameter in the line tokens,
+//     then print an extra line with these.  Currently only checking for
+//     a single parameter.
+//
+
+void Tool_musedata2hum::printLine(ostream& out, HumdrumLine& line) {
+	vector<string> lo(line.getFieldCount());
+	int count = 0;
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		string value = token->getValue("auto", "LO");
+		if (!value.empty()) {
+			lo.at(i) = value;
+			count++;
+		}
+	}
+	if (count > 0) {
+		for (int i=0; i<(int)lo.size(); i++) {
+			if (lo[i].empty()) {
+				out << "!";
+			} else {
+				out << lo[i];
+			}
+			if (i < (int)lo.size() - 1) {
+				out << "\t";
+			}
+		}
+		out << endl;
+	}
+	out << line << endl;
 }
 
 
@@ -461,6 +500,9 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 	} else if (line.compare(0, 7, "mheavy4") == 0) {
 		if (barstyle.find(":|:") != string::npos) {
 			gm->setStyle(MeasureStyle::RepeatBoth);
+		} else if (barstyle.find("|: :|") != string::npos) {
+			// Vivaldi op. 1, no. 1, mvmt. 1, m. 10: mheavy4          |: :|
+			gm->setStyle(MeasureStyle::RepeatBoth);
 		}
 	} else if (line.compare(0, 7, "mdouble") == 0) {
 		gm->setStyle(MeasureStyle::Double);
@@ -553,7 +595,10 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
 			string gr = mr.getLayoutVis();
 			if (gr.size() > 0) {
-				cerr << "GRAPHIC VERSION OF NOTEA " << gr << endl;
+				// visual and performance durations are not equal
+				HTp token = slice->at(part)->at(staff)->at(layer)->getToken();
+				string text = "!LO:N:vis=" + gr;
+				token->setValue("auto", "LO", text);
 			}
 		}
 		m_lastnote = slice->at(part)->at(staff)->at(layer)->getToken();

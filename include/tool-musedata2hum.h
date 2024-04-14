@@ -64,6 +64,7 @@ class Tool_musedata2hum : public HumTool {
 		void    addAboveBelowKernRdf (void);
 		bool    needsAboveBelowKernRdf(void);
 		void    addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr);
+		void    printLine           (std::ostream& out, HumdrumLine& line);
 
 	private:
 		// options:

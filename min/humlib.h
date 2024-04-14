@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr 13 04:49:42 PDT 2024
+// Last Modified: Sun Apr 14 01:27:27 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9053,6 +9053,7 @@ class Tool_musedata2hum : public HumTool {
 		void    addAboveBelowKernRdf (void);
 		bool    needsAboveBelowKernRdf(void);
 		void    addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr);
+		void    printLine           (std::ostream& out, HumdrumLine& line);
 
 	private:
 		// options:
