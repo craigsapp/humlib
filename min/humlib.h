@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 14 01:27:27 PDT 2024
+// Last Modified: Sun Apr 14 02:15:57 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3484,23 +3484,22 @@ class MuseRecord : public MuseRecordBasic {
 	//////////////////////////////
 	// functions which work with measure records ('m'):
 
-		// columns 1 -- 7: measure style information
-		std::string      getMeasureTypeField          (void);
+		// columns 1-7: measure style information
+		std::string      getMeasureType               (void);
 
-		// columns 9 -- 12: measure number (left justified)
+		// columns 9-12: measure number (left justified)
 		std::string      getMeasureNumberField        (void);
-		std::string      getMeasureNumberString       (void);
-		int              getMeasureNumber             (void);
-		int              measureNumberQ               (void);
+		std::string      getMeasureNumber             (void);
+		bool             measureNumberQ               (void);
 
-		// columns 17 -- 80: measure flags
-		std::string      getMeasureFlagsString        (void);
+		// columns 17-80: measure flags
+		std::string      getMeasureFlags              (void);
 		int              measureFermataQ              (void);
 		int              measureFlagQ                 (const std::string& key);
 		void             addMeasureFlag               (const std::string& strang);
 
 		// general functions for measure records:
-		std::string      getKernMeasureStyle          (void);
+		std::string      getKernMeasure               (void);
 
 
 	//////////////////////////////

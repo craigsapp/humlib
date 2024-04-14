@@ -484,6 +484,7 @@ void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
+/*
 	// Add bar numbers as well.
 	string line = mr.getLine();
 	string barstyle = mr.getMeasureFlagsString();
@@ -507,6 +508,7 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 	} else if (line.compare(0, 7, "mdouble") == 0) {
 		gm->setStyle(MeasureStyle::Double);
 	}
+*/
 }
 
 
@@ -535,7 +537,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	GridSlice* slice = NULL;
 
 	if (mr.isBarline()) {
-		tok = mr.getKernMeasureStyle();
+		tok = mr.getKernMeasure();
 	} else if (mr.isAttributes()) {
 		map<string, string> attributes;
 		mr.getAttributeMap(attributes);
@@ -595,7 +597,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
 			string gr = mr.getLayoutVis();
 			if (gr.size() > 0) {
-				// visual and performance durations are not equal
+				// Visual and performance durations are not equal:
 				HTp token = slice->at(part)->at(staff)->at(layer)->getToken();
 				string text = "!LO:N:vis=" + gr;
 				token->setValue("auto", "LO", text);
