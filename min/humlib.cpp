@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 14 02:15:57 PDT 2024
+// Last Modified: Sun Apr 14 03:43:45 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -39403,6 +39403,422 @@ ostream& operator<<(ostream& out, MuseDataSet& musedataset) {
 
 
 
+#define E_unknown   (0x7fff)
+
+//////////////////////////////
+//
+// MuseRecord::getAttributeMap --
+//
+
+void MuseRecord::getAttributeMap(map<string, string>& amap) {
+	amap.clear();
+	// Should be "3" on the next line, but "1" or "2" might catch poorly formatted data.
+	string contents = getLine().substr(2);
+	if (contents.empty()) {
+		return;
+	}
+	int i = 0;
+	string key;
+	string value;
+	int state = 0;  // 0 outside, 1 = in key, 2 = in value
+	while (i < (int)contents.size()) {
+		switch (state) {
+			case 0: // outside of key or value
+				if (!isspace(contents[i])) {
+					if (contents[i] == ':') {
+						// Strange: should not happen
+						key.clear();
+						state = 2;
+					} else {
+						state = 1;
+						key += contents[i];
+					}
+				}
+				break;
+			case 1: // in key
+				if (!isspace(contents[i])) {
+					if (contents[i] == ':') {
+						value.clear();
+						state = 2;
+					} else {
+						// Add to key, such as "C2" for second staff clef.
+						key += contents[i];
+					}
+				}
+				break;
+			case 2: // in value
+				if (key == "D") {
+					value += contents[i];
+				} else if (isspace(contents[i])) {
+					// store parameter and clear variables
+					amap[key] = value;
+					state = 0;
+					key.clear();
+					value.clear();
+				} else {
+					value += contents[i];
+				}
+				break;
+		}
+		i++;
+	}
+
+	if ((!key.empty()) && (!value.empty())) {
+		amap[key] = value;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getAttributes --
+//
+
+string MuseRecord::getAttributes(void) {
+	string output;
+	switch (getType()) {
+		case E_muserec_musical_attributes:
+			break;
+		default:
+			cerr << "Error: cannot use getAttributes function on line: "
+				  << getLine() << endl;
+			return "";
+	}
+
+	int ending = 0;
+	int tempcol;
+	for (int column=4; column <= getLength(); column++) {
+		if (getColumn(column) == ':') {
+			tempcol = column - 1;
+			while (tempcol > 0 && getColumn(tempcol) != ' ') {
+				tempcol--;
+			}
+			tempcol++;
+			while (tempcol <= column) {
+				output += getColumn(tempcol);
+				if (output.back() == 'D') {
+					ending = 1;
+				}
+				tempcol++;
+			}
+		}
+		if (ending) {
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::attributeQ --
+//
+
+int MuseRecord::attributeQ(const string& attribute) {
+	switch (getType()) {
+		case E_muserec_musical_attributes:
+			break;
+		default:
+			cerr << "Error: cannot use getAttributes function on line: "
+				  << getLine() << endl;
+			return 0;
+	}
+
+
+	string attributelist = getAttributes();
+
+	int output = 0;
+	int attstrlength = (int)attributelist.size();
+	int attlength = (int)attribute.size();
+
+	for (int i=0; i<attstrlength-attlength+1; i++) {
+		if (attributelist[i] == attribute[0]) {
+			output = 1;
+			for (int j=0; j<attlength; j++) {
+				if (attributelist[i] != attribute[j]) {
+					output = 0;
+					break;
+				}
+			}
+			if (output == 1) {
+				break;
+			}
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getAttributeInt --
+//
+
+int MuseRecord::getAttributeInt(char attribute) {
+	switch (getType()) {
+		case E_muserec_musical_attributes:
+			break;
+		default:
+			cerr << "Error: cannot use getAttributeInt function on line: "
+				  << getLine() << endl;
+			return 0;
+	}
+
+	int output = E_unknown;
+	int ending = 0;
+	// int index = 0;
+	int tempcol;
+	int column;
+	for (column=4; column <= getLength(); column++) {
+		if (getColumn(column) == ':') {
+			tempcol = column - 1;
+			while (tempcol > 0 && getColumn(tempcol) != ' ') {
+				tempcol--;
+			}
+			tempcol++;
+			while (tempcol <= column) {
+				if (getColumn(tempcol) == attribute) {
+					ending = 2;
+				} else if (getColumn(tempcol) == 'D') {
+					ending = 1;
+				}
+				tempcol++;
+				// index++;
+			}
+		}
+		if (ending) {
+			break;
+		}
+	}
+
+	if (ending == 0 || ending == 1) {
+		return output;
+	} else {
+		string value = &getColumn(column+1);
+		if (value.empty()) {
+			output = std::stoi(value);
+			return output;
+		} else {
+			return 0;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getAttributeField -- returns true if found attribute
+//
+
+int MuseRecord::getAttributeField(string& value, const string& key) {
+	switch (getType()) {
+		case E_muserec_musical_attributes:
+			break;
+		default:
+			cerr << "Error: cannot use getAttributeInt function on line: "
+				  << getLine() << endl;
+			return 0;
+	}
+
+	int returnValue = 0;
+	int ending = 0;
+	// int index = 0;
+	int tempcol;
+	int column;
+	for (column=4; column <= getLength(); column++) {
+		if (getColumn(column) == ':') {
+			tempcol = column - 1;
+			while (tempcol > 0 && getColumn(tempcol) != ' ') {
+				tempcol--;
+			}
+			tempcol++;
+			while (tempcol <= column) {
+				if (getColumn(tempcol) == key[0]) {
+					ending = 2;
+				} else if (getColumn(tempcol) == 'D') {
+					ending = 1;
+				}
+				tempcol++;
+				// index++;
+			}
+		}
+		if (ending) {
+			break;
+		}
+	}
+
+	value.clear();
+	if (ending == 0 || ending == 1) {
+		return returnValue;
+	} else {
+		returnValue = 1;
+		column++;
+		while (getColumn(column) != ' ') {
+			value += getColumn(column++);
+		}
+		return returnValue;
+	}
+}
+
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigureCountField -- column 2.
+//
+
+string MuseRecord::getFigureCountField(void) {
+	allowFigurationOnly("getFigureCountField");
+	return extract(2, 2);
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigurationCountString --
+//
+
+string MuseRecord::getFigureCountString(void) {
+	allowFigurationOnly("getFigureCount");
+	string output = extract(2, 2);
+	if (output[0] == ' ') {
+		output = "";
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigurationCount --
+//
+
+int MuseRecord::getFigureCount(void) {
+	allowFigurationOnly("getFigureCount");
+	string temp = getFigureCountString();
+	int output = (int)strtol(temp.c_str(), NULL, 36);
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// getFigurePointerField -- columns 6 -- 8.
+//
+
+string MuseRecord::getFigurePointerField(void) {
+	allowFigurationOnly("getFigurePointerField");
+	return extract(6, 8);
+}
+
+
+//////////////////////////////
+//
+// figurePointerQ --
+//
+
+int MuseRecord::figurePointerQ(void) {
+	allowFigurationOnly("figurePointerQ");
+	int output = 0;
+	for (int i=6; i<=8; i++) {
+		if (getColumn(i) != ' ') {
+			output = 1;
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigureString --
+//
+
+string MuseRecord::getFigureString(void) {
+	string output = getFigureFields();
+	for (int i=(int)output.size()-1; i>= 0; i--) {
+		if (isspace(output[i])) {
+			output.resize((int)output.size() - 1);
+		} else {
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigureFields -- columns 17 -- 80
+//
+
+string MuseRecord::getFigureFields(void) {
+	allowFigurationOnly("getFigureFields");
+	return extract(17, 80);
+}
+
+
+//////////////////////////////
+//
+// MuseRecord::figureFieldsQ --
+//
+
+int MuseRecord::figureFieldsQ(void) {
+	allowFigurationOnly("figureFieldsQ");
+	int output = 0;
+	if (getLength() < 17) {
+		output = 0;
+	} else {
+		for (int i=17; i<=80; i++) {
+			if (getColumn(i) != ' ') {
+				output = 1;
+				break;
+			}
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// getFigure --
+//
+
+string MuseRecord::getFigure(int index) {
+	string output;
+	allowFigurationOnly("getFigure");
+	if (index >= getFigureCount()) {
+		return output;
+	}
+	string temp = getFigureString();
+	if (index == 0) {
+		return temp;
+	}
+	HumRegex hre;
+	vector<string> pieces;
+	hre.split(pieces, temp, " +");
+	if (index < (int)pieces.size()) {
+	output = pieces[index];
+	}
+	return output;
+}
+
+
+
 
 //////////////////////////////
 //
@@ -39748,62 +40164,151 @@ string MuseRecord::getKernMeasure(void) {
 
 
 
-#define E_unknown   (0x7fff)
 
 //////////////////////////////
 //
-// MuseRecord::MuseRecord --
+// MuseRecord::getMeasureNumberField -- Columns 9-12 contain the measure number.
 //
 
-MuseRecord::MuseRecord(void) : MuseRecordBasic() { }
-MuseRecord::MuseRecord(const string& aLine) : MuseRecordBasic(aLine) { }
-MuseRecord::MuseRecord(MuseRecord& aRecord) : MuseRecordBasic(aRecord) { }
-
-
-
-//////////////////////////////
-//
-// MuseRecord::~MuseRecord --
-//
-
-MuseRecord::~MuseRecord() {
-	// do nothing
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::operator= --
-//
-
-MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
-	// don't copy onto self
-	if (&aRecord == this) {
-		return *this;
+string MuseRecord::getMeasureNumberField(void) {
+	if (!isBarline()) {
+		return "";
 	}
-
-	setLine(aRecord.getLine());
-	setType(aRecord.getType());
-	m_lineindex = aRecord.m_lineindex;
-
-	m_absbeat = aRecord.m_absbeat;
-	m_lineduration = aRecord.m_lineduration;
-	m_noteduration = aRecord.m_noteduration;
-
-	m_b40pitch     = aRecord.m_b40pitch;
-	m_nexttiednote = aRecord.m_nexttiednote;
-	m_lasttiednote = aRecord.m_lasttiednote;
-
-	return *this;
+	return extract(9, 12);
 }
 
 
 
-//////////////////////////////////////////////////////////////////////////
+//////////////////////////////
 //
-// functions that work with note records
+// MuseRecord::getMeasureNumber -- Remove spaces from field.
 //
+
+string MuseRecord::getMeasureNumber(void) {
+	return trimSpaces(getMeasureNumberField());
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getMeasureType -- Columns 1-7.
+//
+
+string MuseRecord::getMeasureType(void) {
+	if (!isBarline()) {
+		return "";
+	}
+	return extract(1, 7);
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::measureNumberQ -- Returns true if barline
+//     has a measure number.
+//
+
+bool MuseRecord::measureNumberQ(void) {
+	return (getMeasureNumber() != "");
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getMeasureFlags --  Columns 17 to 80.  This is
+//    the styling of the barline.
+//
+
+string MuseRecord::getMeasureFlags(void) {
+	if (m_recordString.size() < 17) {
+		return "";
+	} else {
+		return trimSpaces(m_recordString.substr(16));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::measureFermataQ -- returns true if there is a
+//	fermata above or below the measure
+//
+
+int MuseRecord::measureFermataQ(void) {
+	int output = 0;
+	for (int i=17; i<=80 && i<= getLength(); i++) {
+		if (getColumn(i) == 'F' || getColumn(i) == 'E') {
+			output = 1;
+			break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::measureFlagQ -- Returns true if there are non-space
+//     characters in columns 17 through 80.   A more smarter way of
+//     doing this is checking the allocated length of the record, and
+//     do not search non-allocated columns for non-space characters...
+//
+
+int MuseRecord::measureFlagQ(const string& key) {
+	int output = 0;
+	int len = (int)key.size();
+	for (int i=17; i<=80-len && i<getLength(); i++) {
+		if (getColumn(i) == key[0]) {
+			output = 1;
+			for (int j=0; j<len; j++) {
+				if (getColumn(i+j) != key[j]) {
+					output = 0;
+					break;
+				}
+			}
+			if (output == 1) {
+				break;
+			}
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::addMeasureFlag -- add the following characters to the
+//    Flag region of the measure flag area (columns 17-80).  But only
+//    add the flag if it is not already present in the region.  If it is
+//    not present, then append it after the last non-space character
+//    in that region.  A space will be added between the last item
+//    and the newly added parameter.
+//
+
+void MuseRecord::addMeasureFlag(const string& strang) {
+	string flags = getColumns(17, 80);
+	string flag = strang;
+
+	HumRegex hre;
+	hre.replaceDestructive(flag, "\\*", "\\*", "g");
+	hre.replaceDestructive(flag, "\\|", "\\|", "g");
+	if (hre.search(flags, flag)) {
+		// flag was already found in flags, so don't do anything
+		return;
+	}
+	hre.replaceDestructive(flags, "", "\\s+$");
+	flags += " ";
+	flags += strang;
+	setColumns(flags, 17, 80);
+}
+
+
 
 
 //////////////////////////////
@@ -39828,7 +40333,6 @@ string MuseRecord::getNoteField(void) {
 	}
 	return "";
 }
-
 
 
 
@@ -42335,576 +42839,53 @@ void MuseRecord::getSlurInfo(string& slurstarts, string& slurends) {
 
 
 
-//////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////
 //
-// functions that work with measure records
+// MuseRecord::MuseRecord --
 //
+
+MuseRecord::MuseRecord(void) : MuseRecordBasic() { }
+MuseRecord::MuseRecord(const string& aLine) : MuseRecordBasic(aLine) { }
+MuseRecord::MuseRecord(MuseRecord& aRecord) : MuseRecordBasic(aRecord) { }
+
 
 
 //////////////////////////////
 //
-// MuseRecord::getMeasureNumberField -- Columns 9-12 contain the measure number.
+// MuseRecord::~MuseRecord --
 //
 
-string MuseRecord::getMeasureNumberField(void) {
-	if (!isBarline()) {
-		return "";
-	}
-	return extract(9, 12);
+MuseRecord::~MuseRecord() {
+	// do nothing
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecord::getMeasureNumber -- Remove spaces from field.
+// MuseRecord::operator= --
 //
 
-string MuseRecord::getMeasureNumber(void) {
-	return trimSpaces(getMeasureNumberField());
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getMeasureType -- Columns 1-7.
-//
-
-string MuseRecord::getMeasureType(void) {
-	if (!isBarline()) {
-		return "";
-	}
-	return extract(1, 7);
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::measureNumberQ -- Returns true if barline
-//     has a measure number.
-//
-
-bool MuseRecord::measureNumberQ(void) {
-	return (getMeasureNumber() != "");
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getMeasureFlags --  Columns 17 to 80.  This is
-//    the styling of the barline.
-//
-
-string MuseRecord::getMeasureFlags(void) {
-	if (m_recordString.size() < 17) {
-		return "";
-	} else {
-		return trimSpaces(m_recordString.substr(16));
-	}
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::measureFermataQ -- returns true if there is a
-//	fermata above or below the measure
-//
-
-int MuseRecord::measureFermataQ(void) {
-	int output = 0;
-	for (int i=17; i<=80 && i<= getLength(); i++) {
-		if (getColumn(i) == 'F' || getColumn(i) == 'E') {
-			output = 1;
-			break;
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::measureFlagQ -- Returns true if there are non-space
-//     characters in columns 17 through 80.   A more smarter way of
-//     doing this is checking the allocated length of the record, and
-//     do not search non-allocated columns for non-space characters...
-//
-
-int MuseRecord::measureFlagQ(const string& key) {
-	int output = 0;
-	int len = (int)key.size();
-	for (int i=17; i<=80-len && i<getLength(); i++) {
-		if (getColumn(i) == key[0]) {
-			output = 1;
-			for (int j=0; j<len; j++) {
-				if (getColumn(i+j) != key[j]) {
-					output = 0;
-					break;
-				}
-			}
-			if (output == 1) {
-				break;
-			}
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::addMeasureFlag -- add the following characters to the
-//    Flag region of the measure flag area (columns 17-80).  But only
-//    add the flag if it is not already present in the region.  If it is
-//    not present, then append it after the last non-space character
-//    in that region.  A space will be added between the last item
-//    and the newly added parameter.
-//
-
-void MuseRecord::addMeasureFlag(const string& strang) {
-	string flags = getColumns(17, 80);
-	string flag = strang;
-
-	HumRegex hre;
-	hre.replaceDestructive(flag, "\\*", "\\*", "g");
-	hre.replaceDestructive(flag, "\\|", "\\|", "g");
-	if (hre.search(flags, flag)) {
-		// flag was already found in flags, so don't do anything
-		return;
-	}
-	hre.replaceDestructive(flags, "", "\\s+$");
-	flags += " ";
-	flags += strang;
-	setColumns(flags, 17, 80);
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-// functions that work with musical attributes records
-//
-
-//////////////////////////////
-//
-// MuseRecord::getAttributeMap --
-//
-
-void MuseRecord::getAttributeMap(map<string, string>& amap) {
-	amap.clear();
-	// Should be "3" on the next line, but "1" or "2" might catch poorly formatted data.
-	string contents = getLine().substr(2);
-	if (contents.empty()) {
-		return;
-	}
-	int i = 0;
-	string key;
-	string value;
-	int state = 0;  // 0 outside, 1 = in key, 2 = in value
-	while (i < (int)contents.size()) {
-		switch (state) {
-			case 0: // outside of key or value
-				if (!isspace(contents[i])) {
-					if (contents[i] == ':') {
-						// Strange: should not happen
-						key.clear();
-						state = 2;
-					} else {
-						state = 1;
-						key += contents[i];
-					}
-				}
-				break;
-			case 1: // in key
-				if (!isspace(contents[i])) {
-					if (contents[i] == ':') {
-						value.clear();
-						state = 2;
-					} else {
-						// Add to key, such as "C2" for second staff clef.
-						key += contents[i];
-					}
-				}
-				break;
-			case 2: // in value
-				if (key == "D") {
-					value += contents[i];
-				} else if (isspace(contents[i])) {
-					// store parameter and clear variables
-					amap[key] = value;
-					state = 0;
-					key.clear();
-					value.clear();
-				} else {
-					value += contents[i];
-				}
-				break;
-		}
-		i++;
+MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
+	// don't copy onto self
+	if (&aRecord == this) {
+		return *this;
 	}
 
-	if ((!key.empty()) && (!value.empty())) {
-		amap[key] = value;
-	}
-}
+	setLine(aRecord.getLine());
+	setType(aRecord.getType());
+	m_lineindex = aRecord.m_lineindex;
 
+	m_absbeat = aRecord.m_absbeat;
+	m_lineduration = aRecord.m_lineduration;
+	m_noteduration = aRecord.m_noteduration;
 
+	m_b40pitch     = aRecord.m_b40pitch;
+	m_nexttiednote = aRecord.m_nexttiednote;
+	m_lasttiednote = aRecord.m_lasttiednote;
 
-//////////////////////////////
-//
-// MuseRecord::getAttributes --
-//
-
-string MuseRecord::getAttributes(void) {
-	string output;
-	switch (getType()) {
-		case E_muserec_musical_attributes:
-			break;
-		default:
-			cerr << "Error: cannot use getAttributes function on line: "
-				  << getLine() << endl;
-			return "";
-	}
-
-	int ending = 0;
-	int tempcol;
-	for (int column=4; column <= getLength(); column++) {
-		if (getColumn(column) == ':') {
-			tempcol = column - 1;
-			while (tempcol > 0 && getColumn(tempcol) != ' ') {
-				tempcol--;
-			}
-			tempcol++;
-			while (tempcol <= column) {
-				output += getColumn(tempcol);
-				if (output.back() == 'D') {
-					ending = 1;
-				}
-				tempcol++;
-			}
-		}
-		if (ending) {
-			break;
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::attributeQ --
-//
-
-int MuseRecord::attributeQ(const string& attribute) {
-	switch (getType()) {
-		case E_muserec_musical_attributes:
-			break;
-		default:
-			cerr << "Error: cannot use getAttributes function on line: "
-				  << getLine() << endl;
-			return 0;
-	}
-
-
-	string attributelist = getAttributes();
-
-	int output = 0;
-	int attstrlength = (int)attributelist.size();
-	int attlength = (int)attribute.size();
-
-	for (int i=0; i<attstrlength-attlength+1; i++) {
-		if (attributelist[i] == attribute[0]) {
-			output = 1;
-			for (int j=0; j<attlength; j++) {
-				if (attributelist[i] != attribute[j]) {
-					output = 0;
-					break;
-				}
-			}
-			if (output == 1) {
-				break;
-			}
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getAttributeInt --
-//
-
-int MuseRecord::getAttributeInt(char attribute) {
-	switch (getType()) {
-		case E_muserec_musical_attributes:
-			break;
-		default:
-			cerr << "Error: cannot use getAttributeInt function on line: "
-				  << getLine() << endl;
-			return 0;
-	}
-
-	int output = E_unknown;
-	int ending = 0;
-	// int index = 0;
-	int tempcol;
-	int column;
-	for (column=4; column <= getLength(); column++) {
-		if (getColumn(column) == ':') {
-			tempcol = column - 1;
-			while (tempcol > 0 && getColumn(tempcol) != ' ') {
-				tempcol--;
-			}
-			tempcol++;
-			while (tempcol <= column) {
-				if (getColumn(tempcol) == attribute) {
-					ending = 2;
-				} else if (getColumn(tempcol) == 'D') {
-					ending = 1;
-				}
-				tempcol++;
-				// index++;
-			}
-		}
-		if (ending) {
-			break;
-		}
-	}
-
-	if (ending == 0 || ending == 1) {
-		return output;
-	} else {
-		string value = &getColumn(column+1);
-		if (value.empty()) {
-			output = std::stoi(value);
-			return output;
-		} else {
-			return 0;
-		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getAttributeField -- returns true if found attribute
-//
-
-int MuseRecord::getAttributeField(string& value, const string& key) {
-	switch (getType()) {
-		case E_muserec_musical_attributes:
-			break;
-		default:
-			cerr << "Error: cannot use getAttributeInt function on line: "
-				  << getLine() << endl;
-			return 0;
-	}
-
-	int returnValue = 0;
-	int ending = 0;
-	// int index = 0;
-	int tempcol;
-	int column;
-	for (column=4; column <= getLength(); column++) {
-		if (getColumn(column) == ':') {
-			tempcol = column - 1;
-			while (tempcol > 0 && getColumn(tempcol) != ' ') {
-				tempcol--;
-			}
-			tempcol++;
-			while (tempcol <= column) {
-				if (getColumn(tempcol) == key[0]) {
-					ending = 2;
-				} else if (getColumn(tempcol) == 'D') {
-					ending = 1;
-				}
-				tempcol++;
-				// index++;
-			}
-		}
-		if (ending) {
-			break;
-		}
-	}
-
-	value.clear();
-	if (ending == 0 || ending == 1) {
-		return returnValue;
-	} else {
-		returnValue = 1;
-		column++;
-		while (getColumn(column) != ' ') {
-			value += getColumn(column++);
-		}
-		return returnValue;
-	}
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////
-//
-// functions that work with basso continuo figuration records (f):
-//
-
-
-//////////////////////////////
-//
-// MuseRecord::getFigureCountField -- column 2.
-//
-
-string MuseRecord::getFigureCountField(void) {
-	allowFigurationOnly("getFigureCountField");
-	return extract(2, 2);
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getFigurationCountString --
-//
-
-string MuseRecord::getFigureCountString(void) {
-	allowFigurationOnly("getFigureCount");
-	string output = extract(2, 2);
-	if (output[0] == ' ') {
-		output = "";
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getFigurationCount --
-//
-
-int MuseRecord::getFigureCount(void) {
-	allowFigurationOnly("getFigureCount");
-	string temp = getFigureCountString();
-	int output = (int)strtol(temp.c_str(), NULL, 36);
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// getFigurePointerField -- columns 6 -- 8.
-//
-
-string MuseRecord::getFigurePointerField(void) {
-	allowFigurationOnly("getFigurePointerField");
-	return extract(6, 8);
-}
-
-
-//////////////////////////////
-//
-// figurePointerQ --
-//
-
-int MuseRecord::figurePointerQ(void) {
-	allowFigurationOnly("figurePointerQ");
-	int output = 0;
-	for (int i=6; i<=8; i++) {
-		if (getColumn(i) != ' ') {
-			output = 1;
-			break;
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getFigureString --
-//
-
-string MuseRecord::getFigureString(void) {
-	string output = getFigureFields();
-	for (int i=(int)output.size()-1; i>= 0; i--) {
-		if (isspace(output[i])) {
-			output.resize((int)output.size() - 1);
-		} else {
-			break;
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getFigureFields -- columns 17 -- 80
-//
-
-string MuseRecord::getFigureFields(void) {
-	allowFigurationOnly("getFigureFields");
-	return extract(17, 80);
-}
-
-
-//////////////////////////////
-//
-// MuseRecord::figureFieldsQ --
-//
-
-int MuseRecord::figureFieldsQ(void) {
-	allowFigurationOnly("figureFieldsQ");
-	int output = 0;
-	if (getLength() < 17) {
-		output = 0;
-	} else {
-		for (int i=17; i<=80; i++) {
-			if (getColumn(i) != ' ') {
-				output = 1;
-				break;
-			}
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// getFigure --
-//
-
-string MuseRecord::getFigure(int index) {
-	string output;
-	allowFigurationOnly("getFigure");
-	if (index >= getFigureCount()) {
-		return output;
-	}
-	string temp = getFigureString();
-	if (index == 0) {
-		return temp;
-	}
-	HumRegex hre;
-	vector<string> pieces;
-	hre.split(pieces, temp, " +");
-	if (index < (int)pieces.size()) {
-	output = pieces[index];
-	}
-	return output;
+	return *this;
 }
 
 
