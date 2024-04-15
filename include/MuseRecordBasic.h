@@ -27,11 +27,16 @@
 namespace hum {
 
 class MuseData;
+class MuseRecord;
 class MuseRecordBasic;
 
 // START_MERGE
 
-// Reference:     Beyond Midi, page 410.
+//////////////////////////////
+//
+// MuseData line types, reference: Beyond Midi, page 410.
+//
+
 #define E_muserec_note_regular       'N'
 	//                                'A' --> use type E_muserec_note_regular
 	//                                'B' --> use type E_muserec_note_regular
@@ -61,33 +66,46 @@ class MuseRecordBasic;
 #define E_muserec_comment_toggle     '&'
 #define E_muserec_comment_line       '@'
 #define E_muserec_musical_directions '*'
+
 #define E_muserec_copyright          '1'  // reserved for copyright notice
 #define E_muserec_header_1           '1'  // reserved for copyright notice
+
 #define E_muserec_header_2           '2'  // reserved for identification
 #define E_muserec_id                 '2'  // reserved for identification
+
 #define E_muserec_header_3           '3'  // reserved
+
 #define E_muserec_header_4           '4'  // <date> <name of encoder>
 #define E_muserec_encoder            '4'  // <date> <name of encoder>
+
 #define E_muserec_header_5           '5'  // WK#:<work number> MV#:<mvmt num>
 #define E_muserec_work_info          '5'  // WK#:<work number> MV#:<mvmt num>
+
 #define E_muserec_header_6           '6'  // <source>
 #define E_muserec_source             '6'  // <source>
+
 #define E_muserec_header_7           '7'  // <work title>
 #define E_muserec_work_title         '7'  // <work title>
+
 #define E_muserec_header_8           '8'  // <movement title>
 #define E_muserec_movement_title     '8'  // <movement title>
+
 #define E_muserec_header_9           '9'  // <name of part>
 #define E_muserec_header_part_name   '9'  // <name of part>
+
 #define E_muserec_header_10          '0'  // misc designations
+
 #define E_muserec_header_11          'A'  // group memberships
 #define E_muserec_group_memberships  'A'  // group memberships
-// multiple musered_head_12 lines can occur:
+
+// multiple muserec_head_12 lines can occur:
 #define E_muserec_header_12          'B'  // <name1>: part <x> of <num in group>
 #define E_muserec_group              'B'  // <name1>: part <x> of <num in group>
+
 #define E_muserec_unknown            'U'  // unknown record type
-#define E_muserec_empty              'E'  // nothing on line and not header
-	                                       // or multi-line comment
+#define E_muserec_empty              'E'  // nothing on line and not header or multi-line comment
 #define E_muserec_deleted            'D'  // deleted line
+
 // non-standard record types for MuseDataSet
 #define E_muserec_filemarker         '+'
 #define E_muserec_filename           'F'
@@ -210,38 +228,23 @@ class MuseRecordBasic {
 		void              setTpq             (int value);
 		static std::string musedataToUtf8    (std::string& input);
 
-		// Musical Directions: Lines starting with *
-		// Functions stored in src/MuseRecordBasic-directions.cpp
-		void             addMusicDirection           (int deltaIndex);
-		std::string      getDirectionAsciiCharacters (void);
-		bool             hasMusicalDirection         (void);
-		MuseRecordBasic* getMusicalDirection         (int index = 0);
-		bool             isDynamic                   (void);
-		std::string      getDynamicText              (void);
-		MuseRecordBasic* getDirectionRecord          (int deltaIndex);
-		std::string      getDirectionType            (void);
-
-		// Other Notations: columns 32-43 on notes/rests
-		// Functions stored in src/MuseRecordBasic-notations.cpp
-		std::string  getOtherNotations  (void);
-		std::string  getKernNoteOtherNotations(void);
-		int          hasFermata         (void);
-
-		// Print Suggestions: Lines starting with "P"
-		void         addPrintSuggestion   (int deltaIndex);
 
 	protected:
 		std::string       m_recordString;     // actual characters on line
+
 		std::vector<int>  m_printSuggestions; // print suggestions for this line (if applicable)
 		                                      // print suggestions start with the letter "P" and
-                                            // follow a note/rest line, as well as musical direction
-		                                      // lines that start with "*".  The value in the difference
-		                                      // in indexes between the current line and the print
-		                                      // suggestion (typically +1)
-      std::vector<int> m_musicalDirections; // Musical directions associated with this line (if applicable)
-		                                      // Musical direction lines start with "*" and are used for dynamics,
-		                                      // hairpins, etc.  Typically -1 from a note or -2 if there is a
-		                                      // print suggestion for the musical direction.
+                                            // follow a note/rest line, as well as musical
+		                                      // direction lines that start with "*".  The value
+		                                      // int the difference in indexes between the current
+		                                      //  line and the print suggestion (typically +1).
+
+      std::vector<int> m_musicalDirections; // Musical directions associated with this line
+		                                      // (if applicable) stored as delta indexes.  Musical
+		                                      // direction lines start with "*" and are used for
+		                                      // dynamics, hairpins, etc.  Typically -1 from a note
+		                                      // or -2 if there is a print suggestion for the musical
+		                                      // direction.
 
 		// mark-up data for the line:
 		int               m_lineindex;        // index into original file
@@ -268,6 +271,7 @@ class MuseRecordBasic {
 	public:
 		static std::string       trimSpaces         (std::string input);
 
+		friend class MuseRecord;
 		friend class MuseData;
 };
 

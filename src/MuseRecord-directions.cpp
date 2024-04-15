@@ -2,14 +2,14 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Apr 10 09:47:42 PDT 2024
 // Last Modified: Wed Apr 10 09:47:44 PDT 2024
-// Filename:      humlib/src/MuseRecordBasic-direction.cpp
-// URL:           http://github.com/craigsapp/humlib/blob/master/src/MuseRecordBasic-direction.cpp
+// Filename:      humlib/src/MuseRecord-direction.cpp
+// URL:           http://github.com/craigsapp/humlib/blob/master/src/MuseRecord-direction.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
 
 #include "MuseData.h"
-#include "MuseRecordBasic.h"
+#include "MuseRecord.h"
 
 #include <cctype>
 #include <cstdio>
@@ -25,11 +25,11 @@ namespace hum {
 
 //////////////////////////////
 //
-// MuseRecordBasic::addMusicDirection -- add a delta index for associated
+// MuseRecord::addMusicDirection -- add a delta index for associated
 //     print suggestion.
 //
 
-void MuseRecordBasic::addMusicDirection(int deltaIndex) {
+void MuseRecord::addMusicDirection(int deltaIndex) {
 	m_musicalDirections.push_back(deltaIndex);
 }
 
@@ -37,11 +37,11 @@ void MuseRecordBasic::addMusicDirection(int deltaIndex) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getDirectionAsciiCharacters -- returns columns 25
+// MuseRecord::getDirectionAsciiCharacters -- returns columns 25
 //    and later, but with the return string removing any trailing spaces.
 //
 
-std::string MuseRecordBasic::getDirectionAsciiCharacters(void) {
+std::string MuseRecord::getDirectionAsciiCharacters(void) {
 	if (!isDirection()) {
 		return "";
 	}
@@ -58,10 +58,10 @@ std::string MuseRecordBasic::getDirectionAsciiCharacters(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::hasMusicalDirection --
+// MuseRecord::hasMusicalDirection --
 //
 
-bool MuseRecordBasic::hasMusicalDirection(void) {
+bool MuseRecord::hasMusicalDirection(void) {
 	if (isDirection()) {
 		return true;
 	}
@@ -75,14 +75,14 @@ bool MuseRecordBasic::hasMusicalDirection(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getMusicalDuration -- return any associated
+// MuseRecord::getMusicalDuration -- return any associated
 //     Musical Direction record for the current record.  If there
 //     is no linked direction, then return NULL.  If the record is
 //     itself a muscial direction, return the pointer to the record.
 //     Default value for index is 0.
 //
 
-MuseRecordBasic* MuseRecordBasic::getMusicalDirection(int index) {
+MuseRecord* MuseRecord::getMusicalDirection(int index) {
 	if (m_musicalDirections.empty()) {
 		return NULL;
 	}
@@ -96,11 +96,11 @@ MuseRecordBasic* MuseRecordBasic::getMusicalDirection(int index) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getDirectionRecord -- return the given direction from the store
+// MuseRecord::getDirectionRecord -- return the given direction from the store
 //    delta index for the musical direction line.  Default value index = 0.
 //
 
-MuseRecordBasic* MuseRecordBasic::getDirectionRecord(int deltaIndex) {
+MuseRecord* MuseRecord::getDirectionRecord(int deltaIndex) {
 	int index = m_lineindex + deltaIndex;
 	if (index < 0) {
 		return NULL;
@@ -119,7 +119,7 @@ MuseRecordBasic* MuseRecordBasic::getDirectionRecord(int deltaIndex) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getDirectionType -- columns 17 and 18 of
+// MuseRecord::getDirectionType -- columns 17 and 18 of
 //    musical directions.  This function will remove space
 //    chaters from the columns.
 //
@@ -140,7 +140,7 @@ MuseRecordBasic* MuseRecordBasic::getDirectionRecord(int deltaIndex) {
 // X = tie terminator
 //
 
-string MuseRecordBasic::getDirectionType(void) {
+string MuseRecord::getDirectionType(void) {
 	if (!isDirection()) {
 		return "";
 	}
@@ -158,10 +158,10 @@ string MuseRecordBasic::getDirectionType(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::isDynamic -- helper function for getDirectionType() == "G".
+// MuseRecord::isDynamic -- helper function for getDirectionType() == "G".
 //
 
-bool MuseRecordBasic::isDynamic(void) {
+bool MuseRecord::isDynamic(void) {
 	string dirtype = getDirectionType();
 	if (dirtype.empty()) {
 		return false;
@@ -177,10 +177,10 @@ bool MuseRecordBasic::isDynamic(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getDynamicText -- 
+// MuseRecord::getDynamicText --
 //
 
-string MuseRecordBasic::getDynamicText(void) {
+string MuseRecord::getDynamicText(void) {
 	return getDirectionAsciiCharacters();
 }
 

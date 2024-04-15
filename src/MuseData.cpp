@@ -2626,7 +2626,7 @@ void MuseData::assignHeaderBodyState(void) {
 //
 // MuseData::linkPrintSuggestions -- Store print suggestions with
 //    the record that they apply to.  A print suggestion starts
-//    with the letter "P" and follows immediately after the 
+//    with the letter "P" and follows immediately after the
 //    record to which they apply (unless another print suggestion
 //    or a comment.
 //
@@ -2666,7 +2666,7 @@ void MuseData::linkPrintSuggestions(void) {
 //
 // MuseData::linkMusicDirections -- Store music directions with
 //    the record that they apply to.  A music direction starts
-//    with "*" and precedes the record to which they apply (unless 
+//    with "*" and precedes the record to which they apply (unless
 //    a print suggestion or a comment intervenes.
 //
 

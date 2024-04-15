@@ -2,8 +2,8 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Jun 30 21:44:58 PDT 1998
 // Last Modified: Mon Sep 23 22:49:43 PDT 2019 Convert to STL
-// Filename:      humlib/src/MuseRecordBasic.cpp
-// URL:           http://github.com/craigsapp/humlib/blob/master/src/MuseRecordBasic.cpp
+// Filename:      humlib/src/MuseRecord.cpp
+// URL:           http://github.com/craigsapp/humlib/blob/master/src/MuseRecord.cpp
 // Syntax:        C++11
 // vim:           ts=3
 //
@@ -193,7 +193,7 @@
 // 126      ~  = wavy line (trill)
 // 
 
-#include "MuseRecordBasic.h"
+#include "MuseRecord.h"
 
 #include <cctype>
 #include <cstdio>
@@ -209,12 +209,12 @@ namespace hum {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getOtherNotationsString -- return columns
+// MuseRecord::getOtherNotationsString -- return columns
 //   32-42 (for notes and rests, but currently not checking if
 //   the correct record type).
 //
 
-string MuseRecordBasic::getOtherNotations(void) {
+string MuseRecord::getOtherNotations(void) {
     if ((int)m_recordString.size() < 32) {
         return "";
     } else {
@@ -227,12 +227,12 @@ string MuseRecordBasic::getOtherNotations(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::getKernNoteOtherNotations -- Extract note-level ornaments
-//    and articulations.  See MuseRecordBasic::getOtherNotation() for list
+// MuseRecord::getKernNoteOtherNotations -- Extract note-level ornaments
+//    and articulations.  See MuseRecord::getOtherNotation() for list
 //    of "other notations".
 //
 
-string MuseRecordBasic::getKernNoteOtherNotations(void) {
+string MuseRecord::getKernNoteOtherNotations(void) {
 	string output;
 	string notations = getOtherNotations();
 	for (int i=0; i<(int)notations.size(); i++) {
@@ -285,13 +285,13 @@ string MuseRecordBasic::getKernNoteOtherNotations(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::hasFermata -- Return 0 if no fermata
+// MuseRecord::hasFermata -- Return 0 if no fermata
 //    E or F in columns 32-43 of a note or rest.  Returns +1 if fermata
 //    above (E), or -1 if fermata below (F).  Check for &+ before
 //    fermata for editorial.
 //
 
-int MuseRecordBasic::hasFermata(void) {
+int MuseRecord::hasFermata(void) {
 	string notations = getOtherNotations();
 	for (int i=0; i<(int)notations.size(); i++) {
 		if (notations[i] == 'F') {

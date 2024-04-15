@@ -117,30 +117,14 @@ int MuseRecord::measureFermataQ(void) {
 
 //////////////////////////////
 //
-// MuseRecord::measureFlagQ -- Returns true if there are non-space
+// MuseRecord::measureFlagEqual -- Returns true if there are non-space
 //     characters in columns 17 through 80.   A more smarter way of
 //     doing this is checking the allocated length of the record, and
 //     do not search non-allocated columns for non-space characters...
 //
 
-int MuseRecord::measureFlagQ(const string& key) {
-	int output = 0;
-	int len = (int)key.size();
-	for (int i=17; i<=80-len && i<getLength(); i++) {
-		if (getColumn(i) == key[0]) {
-			output = 1;
-			for (int j=0; j<len; j++) {
-				if (getColumn(i+j) != key[j]) {
-					output = 0;
-					break;
-				}
-			}
-			if (output == 1) {
-				break;
-			}
-		}
-	}
-	return output;
+bool MuseRecord::measureFlagEqual(const string& key) {
+	return (getMeasureFlags() == key);
 }
 
 

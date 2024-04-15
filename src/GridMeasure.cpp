@@ -767,6 +767,17 @@ GridSlice* GridMeasure::addBarlineToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::setKernBar -- set the token for the barline.
+//
+
+void GridMeasure::setKernBar(const string& kernBar) {
+	m_kernBar = kernBar;
+}
+
+
+
+//////////////////////////////
+//
 // GridMeasure::addFiguredBass --
 //
 GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff) {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 14 03:43:45 PDT 2024
+// Last Modified: Sun Apr 14 19:48:55 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -6325,6 +6325,17 @@ GridSlice* GridMeasure::addBarlineToken(const string& tok, HumNum timestamp,
 
 //////////////////////////////
 //
+// GridMeasure::setKernBar -- set the token for the barline.
+//
+
+void GridMeasure::setKernBar(const string& kernBar) {
+	m_kernBar = kernBar;
+}
+
+
+
+//////////////////////////////
+//
 // GridMeasure::addFiguredBass --
 //
 GridSlice* GridMeasure::addFiguredBass(HTp token, HumNum timestamp, int part, int maxstaff) {
@@ -10872,6 +10883,7 @@ string HumGrid::createBarToken(int m, int barnum, GridMeasure* measure) {
 //
 
 void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
+return;
 	int mcount = (int)this->size();
 	barnums.resize(mcount);
 
@@ -38845,7 +38857,7 @@ void MuseData::assignHeaderBodyState(void) {
 //
 // MuseData::linkPrintSuggestions -- Store print suggestions with
 //    the record that they apply to.  A print suggestion starts
-//    with the letter "P" and follows immediately after the 
+//    with the letter "P" and follows immediately after the
 //    record to which they apply (unless another print suggestion
 //    or a comment.
 //
@@ -38885,7 +38897,7 @@ void MuseData::linkPrintSuggestions(void) {
 //
 // MuseData::linkMusicDirections -- Store music directions with
 //    the record that they apply to.  A music direction starts
-//    with "*" and precedes the record to which they apply (unless 
+//    with "*" and precedes the record to which they apply (unless
 //    a print suggestion or a comment intervenes.
 //
 
@@ -39670,6 +39682,170 @@ int MuseRecord::getAttributeField(string& value, const string& key) {
 
 //////////////////////////////
 //
+// MuseRecord::addMusicDirection -- add a delta index for associated
+//     print suggestion.
+//
+
+void MuseRecord::addMusicDirection(int deltaIndex) {
+	m_musicalDirections.push_back(deltaIndex);
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDirectionAsciiCharacters -- returns columns 25
+//    and later, but with the return string removing any trailing spaces.
+//
+
+std::string MuseRecord::getDirectionAsciiCharacters(void) {
+	if (!isDirection()) {
+		return "";
+	}
+	string& mrs = m_recordString;
+	if (mrs.size() < 25) {
+		return "";
+	}
+	string output = mrs.substr(24);
+	size_t endpos = output.find_last_not_of(" \t\r\n");
+   return (endpos != std::string::npos) ? output.substr(0, endpos + 1) : "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::hasMusicalDirection --
+//
+
+bool MuseRecord::hasMusicalDirection(void) {
+	if (isDirection()) {
+		return true;
+	}
+	if (!m_musicalDirections.empty()) {
+		return true;
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getMusicalDuration -- return any associated
+//     Musical Direction record for the current record.  If there
+//     is no linked direction, then return NULL.  If the record is
+//     itself a muscial direction, return the pointer to the record.
+//     Default value for index is 0.
+//
+
+MuseRecord* MuseRecord::getMusicalDirection(int index) {
+	if (m_musicalDirections.empty()) {
+		return NULL;
+	}
+	if (index >= (int)m_musicalDirections.size()) {
+		return NULL;
+	}
+	return getDirectionRecord(m_musicalDirections.at(index));
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDirectionRecord -- return the given direction from the store
+//    delta index for the musical direction line.  Default value index = 0.
+//
+
+MuseRecord* MuseRecord::getDirectionRecord(int deltaIndex) {
+	int index = m_lineindex + deltaIndex;
+	if (index < 0) {
+		return NULL;
+	}
+	if (!m_owner) {
+		return NULL;
+	}
+	int lineCount = m_owner->getLineCount();
+	if (index >= lineCount) {
+		return NULL;
+	}
+	return m_owner->getRecordPointer(index);
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDirectionType -- columns 17 and 18 of
+//    musical directions.  This function will remove space
+//    chaters from the columns.
+//
+// Direction Types:
+// =================
+// A = segno sign
+// E = dynamics hairpin start (qualifiers [BCDG])
+// F = dynamics hairpin start
+// G = dynamics letters (in columns 25+)
+// H = dash line start (qualifiers [BCDG])
+// J = dash line end (qualifiers [BCDG])
+// P = piano pedal start
+// Q = piano pedal end
+// R = rehearsal number or letter
+// U = shift notes up (usually by 8va)
+// V = shift notes down (usually by 8va)
+// W = stop octave shift
+// X = tie terminator
+//
+
+string MuseRecord::getDirectionType(void) {
+	if (!isDirection()) {
+		return "";
+	}
+	string value = getColumns(17, 18);
+	if (value[1] == ' ') {
+		value.resize(1);
+	}
+	if (value[0] == ' ') {
+		value.resize(0);
+	}
+	return value;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::isDynamic -- helper function for getDirectionType() == "G".
+//
+
+bool MuseRecord::isDynamic(void) {
+	string dirtype = getDirectionType();
+	if (dirtype.empty()) {
+		return false;
+	}
+	if (dirtype.at(0) == 'G') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getDynamicText --
+//
+
+string MuseRecord::getDynamicText(void) {
+	return getDirectionAsciiCharacters();
+}
+
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getFigureCountField -- column 2.
 //
 
@@ -40142,19 +40318,21 @@ string MuseRecord::getKernMeasure(void) {
 	if (measureStyle == "mheavy1") {
 		output += "!";
 	} else if (measureStyle == "mheavy2") {
-		if (measureFlagQ(":||:")) {
+		if (measureFlagEqual(":||:")) {
 			output += ":|!|:";
-		} else if (measureFlagQ("|: :|")) {
+		} else if (measureFlagEqual("|: :|")) {
 			// Vivaldi op. 1, no. 1, mvmt. 1, m. 10: mheavy4          |: :|
 			output += ":|!|:";
 		}
 	} else if (measureStyle == "mheavy3") {
 		output += "!|";
 	} else if (measureStyle == "mheavy4") {
-		if (measureFlagQ(":||:")) {
+		if (measureFlagEqual(":||:")) {
 			output += ":!!:";
-		} else if (measureFlagQ(":||:")) {
-			output += ":!!:";
+		} else if (measureFlagEqual(":||:")) {
+			output += ":|!|:";
+		} else if (measureFlagEqual("|: :|")) {
+			output += ":|!|:";
 		} else {
 			output += "!!";
 		}
@@ -40253,30 +40431,14 @@ int MuseRecord::measureFermataQ(void) {
 
 //////////////////////////////
 //
-// MuseRecord::measureFlagQ -- Returns true if there are non-space
+// MuseRecord::measureFlagEqual -- Returns true if there are non-space
 //     characters in columns 17 through 80.   A more smarter way of
 //     doing this is checking the allocated length of the record, and
 //     do not search non-allocated columns for non-space characters...
 //
 
-int MuseRecord::measureFlagQ(const string& key) {
-	int output = 0;
-	int len = (int)key.size();
-	for (int i=17; i<=80-len && i<getLength(); i++) {
-		if (getColumn(i) == key[0]) {
-			output = 1;
-			for (int j=0; j<len; j++) {
-				if (getColumn(i+j) != key[j]) {
-					output = 0;
-					break;
-				}
-			}
-			if (output == 1) {
-				break;
-			}
-		}
-	}
-	return output;
+bool MuseRecord::measureFlagEqual(const string& key) {
+	return (getMeasureFlags() == key);
 }
 
 
@@ -40306,6 +40468,106 @@ void MuseRecord::addMeasureFlag(const string& strang) {
 	flags += " ";
 	flags += strang;
 	setColumns(flags, 17, 80);
+}
+
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getOtherNotationsString -- return columns
+//   32-42 (for notes and rests, but currently not checking if
+//   the correct record type).
+//
+
+string MuseRecord::getOtherNotations(void) {
+    if ((int)m_recordString.size() < 32) {
+        return "";
+    } else {
+        size_t lengthToExtract = std::min(size_t(12), m_recordString.size() - 31);
+        return m_recordString.substr(31, lengthToExtract);
+    }
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getKernNoteOtherNotations -- Extract note-level ornaments
+//    and articulations.  See MuseRecord::getOtherNotation() for list
+//    of "other notations".
+//
+
+string MuseRecord::getKernNoteOtherNotations(void) {
+	string output;
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		switch(notations[i]) {
+			case 'F': // fermata above
+				output += ";";
+				break;
+			case 'E': // fermata below
+				output += ";<";
+				break;
+			case '.': // staccato
+				output += "'";
+				break;
+			case ',': // breath mark
+				output += ",";
+				break;
+			case '=': // tenuto-staccato
+				output += "~'";
+				break;
+			case '>': // accent
+				output += "^";
+				break;
+			case 'A': // heavy accent
+				output += "^^";
+				break;
+			case 'M': // mordent
+				output += "M";
+				break;
+			case 'r': // turn
+				output += "S";
+				break;
+			case 't': // trill
+				output += "T";
+				break;
+			case 'n': // down bow
+				output += "u";
+				break;
+			case 'v': // up bow
+				output += "v";
+				break;
+			case 'Z': // sfz
+				output += "zz";
+				break;
+		}
+	}
+	return output;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::hasFermata -- Return 0 if no fermata
+//    E or F in columns 32-43 of a note or rest.  Returns +1 if fermata
+//    above (E), or -1 if fermata below (F).  Check for &+ before
+//    fermata for editorial.
+//
+
+int MuseRecord::hasFermata(void) {
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		if (notations[i] == 'F') {
+			return +1;
+		}
+		if (notations[i] == 'E') {
+			return -1;
+		}
+	}
+	return 0;
 }
 
 
@@ -43995,275 +44257,11 @@ bool MuseRecordBasic::isBodyRecord(void) {
 
 //////////////////////////////
 //
-// MuseRecordBasic::addMusicDirection -- add a delta index for associated
+// MuseRecord::addPrintSuggestion -- add a delta index for associated
 //     print suggestion.
 //
 
-void MuseRecordBasic::addMusicDirection(int deltaIndex) {
-	m_musicalDirections.push_back(deltaIndex);
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getDirectionAsciiCharacters -- returns columns 25
-//    and later, but with the return string removing any trailing spaces.
-//
-
-std::string MuseRecordBasic::getDirectionAsciiCharacters(void) {
-	if (!isDirection()) {
-		return "";
-	}
-	string& mrs = m_recordString;
-	if (mrs.size() < 25) {
-		return "";
-	}
-	string output = mrs.substr(24);
-	size_t endpos = output.find_last_not_of(" \t\r\n");
-   return (endpos != std::string::npos) ? output.substr(0, endpos + 1) : "";
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::hasMusicalDirection --
-//
-
-bool MuseRecordBasic::hasMusicalDirection(void) {
-	if (isDirection()) {
-		return true;
-	}
-	if (!m_musicalDirections.empty()) {
-		return true;
-	}
-	return false;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getMusicalDuration -- return any associated
-//     Musical Direction record for the current record.  If there
-//     is no linked direction, then return NULL.  If the record is
-//     itself a muscial direction, return the pointer to the record.
-//     Default value for index is 0.
-//
-
-MuseRecordBasic* MuseRecordBasic::getMusicalDirection(int index) {
-	if (m_musicalDirections.empty()) {
-		return NULL;
-	}
-	if (index >= (int)m_musicalDirections.size()) {
-		return NULL;
-	}
-	return getDirectionRecord(m_musicalDirections.at(index));
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getDirectionRecord -- return the given direction from the store
-//    delta index for the musical direction line.  Default value index = 0.
-//
-
-MuseRecordBasic* MuseRecordBasic::getDirectionRecord(int deltaIndex) {
-	int index = m_lineindex + deltaIndex;
-	if (index < 0) {
-		return NULL;
-	}
-	if (!m_owner) {
-		return NULL;
-	}
-	int lineCount = m_owner->getLineCount();
-	if (index >= lineCount) {
-		return NULL;
-	}
-	return m_owner->getRecordPointer(index);
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getDirectionType -- columns 17 and 18 of
-//    musical directions.  This function will remove space
-//    chaters from the columns.
-//
-// Direction Types:
-// =================
-// A = segno sign
-// E = dynamics hairpin start (qualifiers [BCDG])
-// F = dynamics hairpin start
-// G = dynamics letters (in columns 25+)
-// H = dash line start (qualifiers [BCDG])
-// J = dash line end (qualifiers [BCDG])
-// P = piano pedal start
-// Q = piano pedal end
-// R = rehearsal number or letter
-// U = shift notes up (usually by 8va)
-// V = shift notes down (usually by 8va)
-// W = stop octave shift
-// X = tie terminator
-//
-
-string MuseRecordBasic::getDirectionType(void) {
-	if (!isDirection()) {
-		return "";
-	}
-	string value = getColumns(17, 18);
-	if (value[1] == ' ') {
-		value.resize(1);
-	}
-	if (value[0] == ' ') {
-		value.resize(0);
-	}
-	return value;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::isDynamic -- helper function for getDirectionType() == "G".
-//
-
-bool MuseRecordBasic::isDynamic(void) {
-	string dirtype = getDirectionType();
-	if (dirtype.empty()) {
-		return false;
-	}
-	if (dirtype.at(0) == 'G') {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getDynamicText -- 
-//
-
-string MuseRecordBasic::getDynamicText(void) {
-	return getDirectionAsciiCharacters();
-}
-
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getOtherNotationsString -- return columns
-//   32-42 (for notes and rests, but currently not checking if
-//   the correct record type).
-//
-
-string MuseRecordBasic::getOtherNotations(void) {
-    if ((int)m_recordString.size() < 32) {
-        return "";
-    } else {
-        size_t lengthToExtract = std::min(size_t(12), m_recordString.size() - 31);
-        return m_recordString.substr(31, lengthToExtract);
-    }
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::getKernNoteOtherNotations -- Extract note-level ornaments
-//    and articulations.  See MuseRecordBasic::getOtherNotation() for list
-//    of "other notations".
-//
-
-string MuseRecordBasic::getKernNoteOtherNotations(void) {
-	string output;
-	string notations = getOtherNotations();
-	for (int i=0; i<(int)notations.size(); i++) {
-		switch(notations[i]) {
-			case 'F': // fermata above
-				output += ";";
-				break;
-			case 'E': // fermata below
-				output += ";<";
-				break;
-			case '.': // staccato
-				output += "'";
-				break;
-			case ',': // breath mark
-				output += ",";
-				break;
-			case '=': // tenuto-staccato
-				output += "~'";
-				break;
-			case '>': // accent
-				output += "^";
-				break;
-			case 'A': // heavy accent
-				output += "^^";
-				break;
-			case 'M': // mordent
-				output += "M";
-				break;
-			case 'r': // turn
-				output += "S";
-				break;
-			case 't': // trill
-				output += "T";
-				break;
-			case 'n': // down bow
-				output += "u";
-				break;
-			case 'v': // up bow
-				output += "v";
-				break;
-			case 'Z': // sfz
-				output += "zz";
-				break;
-		}
-	}
-	return output;
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::hasFermata -- Return 0 if no fermata
-//    E or F in columns 32-43 of a note or rest.  Returns +1 if fermata
-//    above (E), or -1 if fermata below (F).  Check for &+ before
-//    fermata for editorial.
-//
-
-int MuseRecordBasic::hasFermata(void) {
-	string notations = getOtherNotations();
-	for (int i=0; i<(int)notations.size(); i++) {
-		if (notations[i] == 'F') {
-			return +1;
-		}
-		if (notations[i] == 'E') {
-			return -1;
-		}
-	}
-	return 0;
-}
-
-
-
-
-//////////////////////////////
-//
-// MuseRecordBasic::addPrintSuggestion -- add a delta index for associated
-//     print suggestion.
-//
-
-void MuseRecordBasic::addPrintSuggestion(int deltaIndex) {
+void MuseRecord::addPrintSuggestion(int deltaIndex) {
 	m_printSuggestions.push_back(deltaIndex);
 }
 
@@ -99247,7 +99245,39 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 		}
 	}
 
+	bool foundDataQ = false;
 	for (int i=0; i<outfile.getLineCount(); i++) {
+		if (outfile[i].isData()) {
+			foundDataQ = true;
+		}
+		if (outfile[i].isBarline() && !foundDataQ) {
+			HTp token = outfile.token(i, 0);
+			if (*token == "=") {
+				HTp nextBar = NULL;
+				for (int j=i+1; j<outfile.getLineCount(); j++) {
+					if (outfile[j].isBarline()) {
+						nextBar = outfile.token(j, 0);
+						break;
+					}
+				}
+				if (nextBar) {
+					HumRegex hre;
+					if (hre.search(nextBar, "\\b1\\b")) {
+						continue;
+					} else if (hre.search(nextBar, "\\b2\\b")) {
+						for (int j=0; j<outfile[i].getFieldCount(); j++) {
+							out << "=1";
+							if (j < outfile[i].getFieldCount() - 1) {
+								out << "\t";
+							}
+						}
+						out << endl;
+						continue;
+					}
+					// also deal with repeat barlines at the start of the music.
+				}
+			}
+		}
 		printLine(out, outfile[i]);
 	}
 
@@ -99413,10 +99443,6 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
-	setMeasureNumber(outdata[(int)outdata.size() - 1], part[startindex]);
-	if (partindex == 0) {
-		gm->setBarStyle(MeasureStyle::Plain);
-	}
 	int i = startindex;
 	for (i=startindex; i<part.getLineCount(); i++) {
 		if ((i != startindex) && part[i].isBarline()) {
@@ -99445,6 +99471,8 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 			// GridMeasure objects only has a setting
 			// for a single barline style.
 			setMeasureStyle(outdata.back(), part[i]);
+			setMeasureNumber(outdata.back(), part[i]);
+			// gm->setBarStyle(MeasureStyle::Plain);
 		}
 	}
 
@@ -99476,6 +99504,7 @@ void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
 		}
 	}
 	if (pos < 0) {
+		gm->setMeasureNumber(-1);
 		return;
 	}
 	int num = stoi(line.substr(pos));
@@ -99495,10 +99524,8 @@ void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
-/*
-	// Add bar numbers as well.
 	string line = mr.getLine();
-	string barstyle = mr.getMeasureFlagsString();
+	string barstyle = mr.getMeasureFlags();
 	if (line.compare(0, 7, "mheavy2") == 0) {
 		if (barstyle.find(":|") != string::npos) {
 			gm->setStyle(MeasureStyle::RepeatBackward);
@@ -99519,7 +99546,6 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 	} else if (line.compare(0, 7, "mdouble") == 0) {
 		gm->setStyle(MeasureStyle::Double);
 	}
-*/
 }
 
 
@@ -99548,7 +99574,8 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	GridSlice* slice = NULL;
 
 	if (mr.isBarline()) {
-		tok = mr.getKernMeasure();
+		// barline handled elsewhere
+		// tok = mr.getKernMeasure();
 	} else if (mr.isAttributes()) {
 		map<string, string> attributes;
 		mr.getAttributeMap(attributes);
@@ -99669,7 +99696,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
-	MuseRecordBasic* direction = mr.getMusicalDirection();
+	MuseRecord* direction = mr.getMusicalDirection();
 	if (direction == NULL) {
 		return;
 	}

@@ -1396,6 +1396,7 @@ string HumGrid::createBarToken(int m, int barnum, GridMeasure* measure) {
 //
 
 void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
+return;
 	int mcount = (int)this->size();
 	barnums.resize(mcount);
 

@@ -236,7 +236,39 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 		}
 	}
 
+	bool foundDataQ = false;
 	for (int i=0; i<outfile.getLineCount(); i++) {
+		if (outfile[i].isData()) {
+			foundDataQ = true;
+		}
+		if (outfile[i].isBarline() && !foundDataQ) {
+			HTp token = outfile.token(i, 0);
+			if (*token == "=") {
+				HTp nextBar = NULL;
+				for (int j=i+1; j<outfile.getLineCount(); j++) {
+					if (outfile[j].isBarline()) {
+						nextBar = outfile.token(j, 0);
+						break;
+					}
+				}
+				if (nextBar) {
+					HumRegex hre;
+					if (hre.search(nextBar, "\\b1\\b")) {
+						continue;
+					} else if (hre.search(nextBar, "\\b2\\b")) {
+						for (int j=0; j<outfile[i].getFieldCount(); j++) {
+							out << "=1";
+							if (j < outfile[i].getFieldCount() - 1) {
+								out << "\t";
+							}
+						}
+						out << endl;
+						continue;
+					}
+					// also deal with repeat barlines at the start of the music.
+				}
+			}
+		}
 		printLine(out, outfile[i]);
 	}
 
@@ -402,10 +434,6 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 	}
 
 	GridMeasure* gm = getMeasure(outdata, starttime);
-	setMeasureNumber(outdata[(int)outdata.size() - 1], part[startindex]);
-	if (partindex == 0) {
-		gm->setBarStyle(MeasureStyle::Plain);
-	}
 	int i = startindex;
 	for (i=startindex; i<part.getLineCount(); i++) {
 		if ((i != startindex) && part[i].isBarline()) {
@@ -434,6 +462,8 @@ int Tool_musedata2hum::convertMeasure(HumGrid& outdata, MuseData& part, int part
 			// GridMeasure objects only has a setting
 			// for a single barline style.
 			setMeasureStyle(outdata.back(), part[i]);
+			setMeasureNumber(outdata.back(), part[i]);
+			// gm->setBarStyle(MeasureStyle::Plain);
 		}
 	}
 
@@ -465,6 +495,7 @@ void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
 		}
 	}
 	if (pos < 0) {
+		gm->setMeasureNumber(-1);
 		return;
 	}
 	int num = stoi(line.substr(pos));
@@ -484,10 +515,8 @@ void Tool_musedata2hum::setMeasureNumber(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
-/*
-	// Add bar numbers as well.
 	string line = mr.getLine();
-	string barstyle = mr.getMeasureFlagsString();
+	string barstyle = mr.getMeasureFlags();
 	if (line.compare(0, 7, "mheavy2") == 0) {
 		if (barstyle.find(":|") != string::npos) {
 			gm->setStyle(MeasureStyle::RepeatBackward);
@@ -508,7 +537,6 @@ void Tool_musedata2hum::setMeasureStyle(GridMeasure* gm, MuseRecord& mr) {
 	} else if (line.compare(0, 7, "mdouble") == 0) {
 		gm->setStyle(MeasureStyle::Double);
 	}
-*/
 }
 
 
@@ -537,7 +565,8 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 	GridSlice* slice = NULL;
 
 	if (mr.isBarline()) {
-		tok = mr.getKernMeasure();
+		// barline handled elsewhere
+		// tok = mr.getKernMeasure();
 	} else if (mr.isAttributes()) {
 		map<string, string> attributes;
 		mr.getAttributeMap(attributes);
@@ -658,7 +687,7 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 //
 
 void Tool_musedata2hum::addDirectionDynamics(GridSlice* slice, int part, MuseRecord& mr) {
-	MuseRecordBasic* direction = mr.getMusicalDirection();
+	MuseRecord* direction = mr.getMusicalDirection();
 	if (direction == NULL) {
 		return;
 	}

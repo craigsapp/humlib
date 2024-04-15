@@ -346,19 +346,21 @@ string MuseRecord::getKernMeasure(void) {
 	if (measureStyle == "mheavy1") {
 		output += "!";
 	} else if (measureStyle == "mheavy2") {
-		if (measureFlagQ(":||:")) {
+		if (measureFlagEqual(":||:")) {
 			output += ":|!|:";
-		} else if (measureFlagQ("|: :|")) {
+		} else if (measureFlagEqual("|: :|")) {
 			// Vivaldi op. 1, no. 1, mvmt. 1, m. 10: mheavy4          |: :|
 			output += ":|!|:";
 		}
 	} else if (measureStyle == "mheavy3") {
 		output += "!|";
 	} else if (measureStyle == "mheavy4") {
-		if (measureFlagQ(":||:")) {
+		if (measureFlagEqual(":||:")) {
 			output += ":!!:";
-		} else if (measureFlagQ(":||:")) {
-			output += ":!!:";
+		} else if (measureFlagEqual(":||:")) {
+			output += ":|!|:";
+		} else if (measureFlagEqual("|: :|")) {
+			output += ":|!|:";
 		} else {
 			output += "!!";
 		}
