@@ -88,7 +88,7 @@ bool Tool_grep::run(HumdrumFile& infile) {
 //
 
 void Tool_grep::initialize(void) {
-	m_negateQ = !getBoolean("remove-matching-lines");
+	m_negateQ = getBoolean("remove-matching-lines");
 	m_regex = getString("regular-expression");
 }
 
@@ -102,6 +102,7 @@ void Tool_grep::initialize(void) {
 void Tool_grep::processFile(HumdrumFile& infile) {
 	HumRegex hre;
 	bool match;
+cerr  << "Mnegate " << m_negateQ << endl;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		match = hre.search(infile[i], m_regex);
 		if (m_negateQ) {

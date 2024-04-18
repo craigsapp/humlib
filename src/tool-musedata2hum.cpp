@@ -620,7 +620,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 				addAboveBelowKernRdf();
 			}
 		}
-		tok += other;
+		if (!other.empty()) {
+			tok += other;
+		}
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 14 19:48:55 PDT 2024
+// Last Modified: Thu Apr 18 08:45:11 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5646,6 +5646,62 @@ class Tool_addkey : public HumTool {
 		int         m_keyDesigIndex  = -1;
 		int         m_keySigIndex    = -1;
 		int         m_dataStartIndex = -1;
+
+};
+
+
+class Tool_addlabels : public HumTool {
+	public:
+		         Tool_addlabels     (void);
+		        ~Tool_addlabels     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		int     getExpansionIndex  (HumdrumFile& infile);
+		void    printExpansionLists(HumdrumFile& infile, int index);
+		void    assignLabels       (std::vector<std::string>& llist, HumdrumFile& infile);
+		void    addLabel           (std::vector<std::string>& llist, HumdrumFile& infile,
+		                            int barnum, int subbarnum, const std::string& label);
+	private:
+		std::string m_default;             // set with the -d option
+		std::string m_norep;               // set with the -r option
+		std::string m_zeroth;              // m0 label (right after default and norep expansion lists)
+		int m_defaultIndex = -1;           // line to place default expansions list above (and then norep)
+		std::vector<int> m_barnums;        // set with -l option
+		std::vector<int> m_subbarnums;     // set with -l option
+		std::vector<std::string> m_labels; // set with -l option
+};
+
+
+class Tool_addtempo : public HumTool {
+	public:
+		         Tool_addtempo     (void);
+		        ~Tool_addtempo     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    assignTempoChanges (std::vector<double>& tlist,
+		                            HumdrumFile& infile);
+		void    addTempo           (vector<double>& tlist,
+		                            HumdrumFile& infile,
+		                            int measure, double tempo);
+		void   addTempoToStart     (vector<double>& tlist,
+		                            HumdrumFile& infile, double tempo);
+
+	private:
+		std::vector<std::pair<int, double>> m_tempos;
 
 };
 

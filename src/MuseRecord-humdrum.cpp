@@ -369,6 +369,64 @@ string MuseRecord::getKernMeasure(void) {
 }
 
 
+
+//////////////////////////////
+//
+// MuseRecord::getKernNoteOtherNotations -- Extract note-level ornaments
+//    and articulations.  See MuseRecord::getOtherNotation() for list
+//    of "other notations".
+//
+
+string MuseRecord::getKernNoteOtherNotations(void) {
+	string output;
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		switch(notations[i]) {
+			case 'F': // fermata above
+				output += ";";
+				break;
+			case 'E': // fermata below
+				output += ";<";
+				break;
+			case '.': // staccato
+				output += "'";
+				break;
+			case ',': // breath mark
+				output += ",";
+				break;
+			case '=': // tenuto-staccato
+				output += "~'";
+				break;
+			case '>': // accent
+				output += "^";
+				break;
+			case 'A': // heavy accent
+				output += "^^";
+				break;
+			case 'M': // mordent
+				output += "M";
+				break;
+			case 'r': // turn
+				output += "S";
+				break;
+			case 't': // trill
+				output += "T";
+				break;
+			case 'n': // down bow
+				output += "u";
+				break;
+			case 'v': // up bow
+				output += "v";
+				break;
+			case 'Z': // sfz
+				output += "zz";
+				break;
+		}
+	}
+	return output;
+}
+
+
 // END_MERGE
 
 } // end namespace hum

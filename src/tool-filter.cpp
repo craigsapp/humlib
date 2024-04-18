@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Wed Sep 20 23:01:04 PDT 2023
+// Last Modified: Wed Apr 17 22:42:11 PDT 2024
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -16,6 +16,8 @@
 
 #include "tool-addic.h"
 #include "tool-addkey.h"
+#include "tool-addlabels.h"
+#include "tool-addtempo.h"
 #include "tool-autoaccid.h"
 #include "tool-autobeam.h"
 #include "tool-autostem.h"
@@ -226,10 +228,15 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
+cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		if (commands[i].first == "addic") {
 			RUNTOOL(addic, infile, commands[i].second, status);
 		} else if (commands[i].first == "addkey") {
 			RUNTOOL(addkey, infile, commands[i].second, status);
+		} else if (commands[i].first == "addlabels") {
+			RUNTOOL(addlabels, infile, commands[i].second, status);
+		} else if (commands[i].first == "addtempo") {
+			RUNTOOL(addtempo, infile, commands[i].second, status);
 		} else if (commands[i].first == "autoaccid") {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {

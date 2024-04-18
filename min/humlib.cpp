@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Apr 14 19:48:55 PDT 2024
+// Last Modified: Thu Apr 18 08:45:11 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -40342,6 +40342,64 @@ string MuseRecord::getKernMeasure(void) {
 
 
 
+//////////////////////////////
+//
+// MuseRecord::getKernNoteOtherNotations -- Extract note-level ornaments
+//    and articulations.  See MuseRecord::getOtherNotation() for list
+//    of "other notations".
+//
+
+string MuseRecord::getKernNoteOtherNotations(void) {
+	string output;
+	string notations = getOtherNotations();
+	for (int i=0; i<(int)notations.size(); i++) {
+		switch(notations[i]) {
+			case 'F': // fermata above
+				output += ";";
+				break;
+			case 'E': // fermata below
+				output += ";<";
+				break;
+			case '.': // staccato
+				output += "'";
+				break;
+			case ',': // breath mark
+				output += ",";
+				break;
+			case '=': // tenuto-staccato
+				output += "~'";
+				break;
+			case '>': // accent
+				output += "^";
+				break;
+			case 'A': // heavy accent
+				output += "^^";
+				break;
+			case 'M': // mordent
+				output += "M";
+				break;
+			case 'r': // turn
+				output += "S";
+				break;
+			case 't': // trill
+				output += "T";
+				break;
+			case 'n': // down bow
+				output += "u";
+				break;
+			case 'v': // up bow
+				output += "v";
+				break;
+			case 'Z': // sfz
+				output += "zz";
+				break;
+		}
+	}
+	return output;
+}
+
+
+
 
 //////////////////////////////
 //
@@ -40487,64 +40545,6 @@ string MuseRecord::getOtherNotations(void) {
         size_t lengthToExtract = std::min(size_t(12), m_recordString.size() - 31);
         return m_recordString.substr(31, lengthToExtract);
     }
-}
-
-
-
-//////////////////////////////
-//
-// MuseRecord::getKernNoteOtherNotations -- Extract note-level ornaments
-//    and articulations.  See MuseRecord::getOtherNotation() for list
-//    of "other notations".
-//
-
-string MuseRecord::getKernNoteOtherNotations(void) {
-	string output;
-	string notations = getOtherNotations();
-	for (int i=0; i<(int)notations.size(); i++) {
-		switch(notations[i]) {
-			case 'F': // fermata above
-				output += ";";
-				break;
-			case 'E': // fermata below
-				output += ";<";
-				break;
-			case '.': // staccato
-				output += "'";
-				break;
-			case ',': // breath mark
-				output += ",";
-				break;
-			case '=': // tenuto-staccato
-				output += "~'";
-				break;
-			case '>': // accent
-				output += "^";
-				break;
-			case 'A': // heavy accent
-				output += "^^";
-				break;
-			case 'M': // mordent
-				output += "M";
-				break;
-			case 'r': // turn
-				output += "S";
-				break;
-			case 't': // trill
-				output += "T";
-				break;
-			case 'n': // down bow
-				output += "u";
-				break;
-			case 'v': // up bow
-				output += "v";
-				break;
-			case 'Z': // sfz
-				output += "zz";
-				break;
-		}
-	}
-	return output;
 }
 
 
@@ -53269,6 +53269,700 @@ void Tool_addkey::getLineIndexes(HumdrumFile& infile) {
 		}
 	}
 }
+
+
+
+
+/////////////////////////////////
+//
+// Tool_addlabels::Tool_addlabels -- Set the recognized options for the tool.
+//
+
+Tool_addlabels::Tool_addlabels(void) {
+	define("d|default=s:", "Default expansion list");
+	define("r|norep=s:",   "norep expansion list");
+	define("l|labels=s:",  "List of labels to insert");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_addlabels::run -- Do the main work of the tool.
+//
+
+bool Tool_addlabels::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_addlabels::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addlabels::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addlabels::run(HumdrumFile& infile) {
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::initialize -- Process input options.
+//
+
+void Tool_addlabels::initialize(void) {
+	m_default = getString("default");
+	m_norep   = getString("norep");
+	m_zeroth.clear();
+
+	HumRegex hre;
+	if (!m_default.empty()) {
+		if (!hre.search(m_default, "^\\[")) {
+			m_default = "[" + m_default;
+		}
+		if (!hre.search(m_default, "\\]$")) {
+			m_default += "]";
+		}
+	}
+	if (!m_norep.empty()) {
+		if (!hre.search(m_norep, "^\\[")) {
+			m_norep = "[" + m_norep;
+		}
+		if (!hre.search(m_norep, "\\]$")) {
+			m_norep += "]";
+		}
+	}
+
+	string value = getString("labels");
+	hre.replaceDestructive(value, "", "^[\\s;,]+");
+	hre.replaceDestructive(value, "", "[\\s;,]+$");
+
+	vector<string> pieces;
+	hre.split(pieces, value, "\\s*[;,]\\s*");
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (hre.search(pieces[i], "^\\s$")) {
+			continue;
+		}
+		if (hre.search(pieces[i], "^\\s*m?\\s*(\\d+)([a-z]?)\\s*:\\s*(.+)\\s*$")) {
+			int barnum = hre.getMatchInt(1);
+			string sub = hre.getMatch(2);
+			int subbar = 0;
+			if (!sub.empty()) {
+				subbar = sub[0] - 'a';
+			}
+			string label = hre.getMatch(3);
+
+			if ((barnum <= 0) && (subbar <= 0)) {
+				m_zeroth = label;
+				continue;
+			}
+			m_barnums.push_back(barnum);
+			m_subbarnums.push_back(subbar);
+			m_labels.push_back(label);
+		} else {
+			cerr << "Error parsing label (ignoring): " << pieces[i] << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::processFile --
+//
+
+void Tool_addlabels::processFile(HumdrumFile& infile) {
+	initialize();
+
+	vector<string> llist;
+	assignLabels(llist, infile);
+
+	m_defaultIndex = getExpansionIndex(infile);
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (i == m_defaultIndex) {
+			printExpansionLists(infile, i);
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+		m_humdrum_text << infile[i] << endl;
+		if (!llist.at(i).empty()) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				m_humdrum_text << "*>" << llist.at(i);
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+			}
+			m_humdrum_text << endl;
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::getExpsnsionIndex -- Return index that is where the 
+//    expansion labels and 0th label should be printed ABOVE.
+//
+
+int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
+	int staffIndex    = 0;
+	int partIndex     = 0;
+	int groupIndex    = 0;
+	int clefIndex     = 0;
+	int keySigIndex   = 0;
+	int keyDesigIndex = 0;
+	int exIndex       = -1;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].hasSpines()) {
+			continue;
+		}
+		if (infile[i].isExclusiveInterpretation()) {
+			exIndex = i;
+			continue;
+		}
+		if (infile[i].isData()) {
+			break;
+		}
+		if (infile[i].isBarline()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (*token == "*") {
+				continue;
+			}
+			if ((clefIndex < 0) && token->isClef()) {
+				clefIndex = i;
+			}
+			if ((keySigIndex < 0) && token->isKeySignature()) {
+				keySigIndex = i;
+			}
+			if ((keyDesigIndex < 0) && token->isKeyDesignation()) {
+				keyDesigIndex = i;
+			}
+			if ((staffIndex != i) && (token->compare(0, 6, "*staff") == 0)) {
+				staffIndex = i;
+			}
+			if ((partIndex != i) && (token->compare(0, 5, "*part") == 0)) {
+				partIndex = i;
+			}
+			if ((groupIndex != i) && (token->compare(0, 6, "*group") == 0)) {
+				groupIndex = i;
+			}
+		}
+	}
+
+	int spgIndex = staffIndex;
+	if (partIndex > spgIndex) {
+		spgIndex = partIndex;
+	}
+	if (groupIndex > staffIndex) {
+		spgIndex = partIndex;
+	}
+	if (spgIndex > 0) {
+		return spgIndex + 1;
+	}
+
+	int tindex = -1;
+
+	if ((clefIndex > 0) && (tindex > 0)) {
+		tindex = clefIndex;
+	}
+
+	if ((keySigIndex > 0) && (tindex > 0)) {
+		if (keySigIndex < tindex) {
+			tindex = keySigIndex;
+		}
+	}
+
+	if ((keyDesigIndex > 0) && (tindex > 0)) {
+		if (keyDesigIndex < tindex) {
+			tindex = keyDesigIndex;
+		}
+	}
+	if (tindex > 0) {
+		if (exIndex < tindex - 1) {
+			return tindex;
+		}
+	}
+	return exIndex + 1;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::printExpansionLists -- printing above given line index
+//   But use field count of next spined line in data if target line is
+//   unspined.
+//
+
+void Tool_addlabels::printExpansionLists(HumdrumFile& infile, int index) {
+	int ii = -1;
+	for (int i=index; i<infile.getLineCount(); i++) {
+		if (infile[i].hasSpines()) {
+			ii = i;
+			break;
+		}
+	}
+	if (ii < 0) {
+		cerr << "STRANGE ERROR ON LINE: " << infile[index] << endl;
+	}
+
+	if (!m_default.empty()) {
+		for (int j=0; j<infile[ii].getFieldCount(); j++) {
+			m_humdrum_text << "*>" << m_default;
+			if (j < infile[ii].getFieldCount() - 1) {
+				m_humdrum_text << "\t";
+			}
+		}
+		m_humdrum_text << endl;
+	}
+
+	if (!m_norep.empty()) {
+		for (int j=0; j<infile[ii].getFieldCount(); j++) {
+			m_humdrum_text << "*>norep" << m_norep;
+			if (j < infile[ii].getFieldCount() - 1) {
+				m_humdrum_text << "\t";
+			}
+		}
+		m_humdrum_text << endl;
+	}
+
+	if (!m_zeroth.empty()) {
+		for (int j=0; j<infile[ii].getFieldCount(); j++) {
+			m_humdrum_text << "*>" << m_zeroth;
+			if (j < infile[ii].getFieldCount() - 1) {
+				m_humdrum_text << "\t";
+			}
+		}
+		m_humdrum_text << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::assignLabels -- assign labels to specific lines.
+//
+
+void Tool_addlabels::assignLabels(vector<string>& llist, HumdrumFile& infile) {
+	llist.resize(infile.getLineCount());
+	for (int i=0; i<(int)m_barnums.size(); i++) {
+		addLabel(llist, infile, m_barnums.at(i), m_subbarnums.at(i), m_labels.at(i));
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addlabels::addLabel -- Add specified tempo to list.
+//
+
+void Tool_addlabels::addLabel(vector<string>& llist, HumdrumFile& infile,
+		int barnum, int subbarnum, const string& label) {
+
+	if (barnum <= 0) {
+		return;
+	}
+
+	// find barnum index:
+	int barIndex = -1;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		int bar = infile[i].getBarNumber();
+		if (bar == barnum) {
+			barIndex = i;
+			break;
+		}
+	}
+	if (barIndex < 0) {
+		cerr << "WARNING: could not find measure number " << barnum << endl;
+		return;
+	}
+
+	int counter = 0;
+	if (subbarnum > 0) {
+		for (int i=barIndex + 1; i<infile.getLineCount(); i++) {
+			if (!infile[i].isBarline()) {
+				continue;
+			}
+			counter++;
+			if (counter >= subbarnum) {
+				barIndex = i;
+				break;
+			}
+		}
+	}
+
+	if (barIndex < 0) {
+		return;
+	}
+
+	// insert at the next spined line (but figure that out later):
+	llist.at(barIndex) = label;
+}
+
+
+
+
+/////////////////////////////////
+//
+// Tool_addtempo::Tool_addtempo -- Set the recognized options for the tool.
+//
+
+Tool_addtempo::Tool_addtempo(void) {
+	define("q|quarter-notes-per-minute=s:120", "Quarter notes per minute (or list by measure)");
+}
+
+
+
+/////////////////////////////////
+//
+// Tool_addtempo::run -- Do the main work of the tool.
+//
+
+bool Tool_addtempo::run(HumdrumFileSet& infiles) {
+	bool status = true;
+	for (int i=0; i<infiles.getCount(); i++) {
+		status &= run(infiles[i]);
+	}
+	return status;
+}
+
+
+bool Tool_addtempo::run(const string& indata, ostream& out) {
+	HumdrumFile infile(indata);
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addtempo::run(HumdrumFile& infile, ostream& out) {
+	bool status = run(infile);
+	if (hasAnyText()) {
+		getAllText(out);
+	} else {
+		out << infile;
+	}
+	return status;
+}
+
+
+bool Tool_addtempo::run(HumdrumFile& infile) {
+	processFile(infile);
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addtempo::initialize --  Initializations that only have to be done once
+//    for all HumdrumFile segments.
+//
+
+void Tool_addtempo::initialize(void) {
+	string value = getString("quarter-notes-per-minute");
+	HumRegex hre;
+	m_tempos.clear();
+	vector<string> pieces;
+	hre.split(pieces, value, "\\s*;\\s*");
+	for (int i=0; i<(int)pieces.size(); i++) {
+		if (hre.search(pieces[i], "^\\s$")) {
+			continue;
+		}
+		if (hre.search(pieces[i], "^\\s*m\\s*(\\d+)\\s*:\\s*([\\d.]+)\\s*$")) {
+			int measure = hre.getMatchInt(1);
+			double tempo = hre.getMatchDouble(2);
+			m_tempos.emplace_back(measure, tempo);
+		} else if (hre.search(pieces[i], "^\\s*([\\d.]+)\\s*$")) {
+			int measure = 0;
+			double tempo = hre.getMatchDouble(1);
+			m_tempos.emplace_back(measure, tempo);
+		}
+	}
+
+    auto compareByFirst = [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+        return a.first < b.first;
+    };
+    std::sort(m_tempos.begin(), m_tempos.end(), compareByFirst);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addtempo::processFile --
+//
+
+void Tool_addtempo::processFile(HumdrumFile& infile) {
+	initialize();
+
+	vector<double> tlist;
+	assignTempoChanges(tlist, infile);
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (tlist.at(i) > 0.0) {
+			for (int j=0; j<infile[i].getFieldCount(); j++) {
+				HTp token = infile.token(i, j);
+				if (token->isKern()) {
+					m_humdrum_text << "*MM" << tlist.at(i);
+				} else {
+					m_humdrum_text << "*";
+				}
+				if (j < infile[i].getFieldCount() - 1) {
+					m_humdrum_text << "\t";
+				}
+			}
+			m_humdrum_text << endl;
+		}
+		m_humdrum_text << infile[i] << endl;
+	}
+}
+
+
+//////////////////////////////
+//
+// Tool_addtempo::assignTempoChanges -- add non-zero
+//    tempo when it should change.
+//
+
+void Tool_addtempo::assignTempoChanges(vector<double>& tlist, HumdrumFile& infile) {
+	tlist.resize(infile.getLineCount());
+	std::fill(tlist.begin(), tlist.end(), 0.0);
+	for (int i=0; i<(int)m_tempos.size(); i++) {
+		addTempo(tlist, infile, m_tempos[i].first, m_tempos[i].second);
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addtempo::addTempo -- Add specified tempo to list.
+//
+
+void Tool_addtempo::addTempo(vector<double>& tlist, HumdrumFile& infile,
+		int measure, double tempo) {
+
+	if (measure == 0) {
+		addTempoToStart(tlist, infile, tempo);
+		return;
+	}
+
+	// find measure index:
+	int barIndex = -1;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+		int bar = infile[i].getBarNumber();
+		if (bar == measure) {
+			barIndex = i;
+			break;
+		}
+	}
+	if (barIndex < 0) {
+		return;
+	}
+	int sigIndex = -1;
+	int symIndex = -1;
+	int dataIndex = -1;
+	for (int i=barIndex+1; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			dataIndex = i;
+			break;
+		}
+		if (infile[i].isBarline()) {
+			break;
+		}
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isTimeSignature()) {
+				sigIndex = i;
+			} else if (token->isMetricSymbol()) {
+				symIndex = i;
+			}
+		}
+	}
+
+	if (dataIndex < 0) {
+		return;
+	}
+
+	if ((sigIndex >= 0) && (symIndex >= 0)) {
+		if (sigIndex > symIndex) {
+			tlist.at(sigIndex+1) = tempo;
+		} else {
+			tlist.at(symIndex+1) = tempo;
+		}
+		return;
+	} else if (sigIndex >= 0) {
+		tlist.at(sigIndex+1) = tempo;
+		return;
+	} else if (symIndex >= 0) {
+		return;
+	} else if (dataIndex >= 0) {
+		int localIndex = dataIndex - 1;
+		int lastSpineIndex = localIndex;
+		if (infile[dataIndex-1].isLocalComment()) {
+			while (infile[localIndex].isLocalComment() || !infile[localIndex].hasSpines()) {
+				if (!infile[localIndex].hasSpines()) {
+					localIndex--;
+					continue;
+				} else {
+					lastSpineIndex = localIndex;
+				}
+				if (infile[localIndex].isLocalComment()) {
+					lastSpineIndex = localIndex;
+					localIndex--;
+					continue;
+				}
+			}
+			tlist.at(lastSpineIndex) = tempo;
+			return;
+		} else {
+			tlist.at(dataIndex) = tempo;
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_addtempo::addTempoToStart --
+//
+
+void Tool_addtempo::addTempoToStart(vector<double>& tlist,
+		HumdrumFile& infile, double tempo) {
+
+	// find first measure and data line indexes:
+	int barIndex  = -1;
+	int dataIndex = -1;
+	int sigIndex  = -1;
+	int symIndex  = -1;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isData()) {
+			dataIndex = i;
+			break;
+		}
+
+		if (infile[i].isBarline()) {
+			if (barIndex < 0) {
+				barIndex = i;
+			}
+			continue;
+		}
+
+		if (!infile[i].isInterpretation()) {
+			continue;
+		}
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isTimeSignature()) {
+				sigIndex = i;
+			} else if (token->isMetricSymbol()) {
+				symIndex = i;
+			}
+		}
+	}
+
+	if (dataIndex < 0) {
+		return;
+	}
+
+	if ((sigIndex >= 0) && (symIndex >= 0)) {
+		if (sigIndex > symIndex) {
+			tlist.at(sigIndex+1) = tempo;
+		} else {
+			tlist.at(symIndex+1) = tempo;
+		}
+		return;
+	} else if (sigIndex >= 0) {
+		tlist.at(sigIndex+1) = tempo;
+		return;
+	} else if (symIndex >= 0) {
+		return;
+	} else if (dataIndex >= 0) {
+		if (infile[dataIndex-1].isLocalComment()) {
+			int localIndex = dataIndex - 1;
+			int lastSpineIndex = localIndex;
+			while (infile[localIndex].isLocalComment() || !infile[localIndex].hasSpines()) {
+				if (!infile[localIndex].hasSpines()) {
+					localIndex--;
+					continue;
+				} else {
+					lastSpineIndex = localIndex;
+				}
+				if (infile[localIndex].isLocalComment()) {
+					lastSpineIndex = localIndex;
+					localIndex--;
+					continue;
+				}
+			}
+			tlist.at(lastSpineIndex) = tempo;
+			return;
+		} else {
+			tlist.at(dataIndex) = tempo;
+		}
+	}
+
+}
+
 
 
 
@@ -80482,10 +81176,15 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
+cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		if (commands[i].first == "addic") {
 			RUNTOOL(addic, infile, commands[i].second, status);
 		} else if (commands[i].first == "addkey") {
 			RUNTOOL(addkey, infile, commands[i].second, status);
+		} else if (commands[i].first == "addlabels") {
+			RUNTOOL(addlabels, infile, commands[i].second, status);
+		} else if (commands[i].first == "addtempo") {
+			RUNTOOL(addtempo, infile, commands[i].second, status);
 		} else if (commands[i].first == "autoaccid") {
 			RUNTOOL(autoaccid, infile, commands[i].second, status);
 		} else if (commands[i].first == "autobeam") {
@@ -83235,7 +83934,7 @@ bool Tool_grep::run(HumdrumFile& infile) {
 //
 
 void Tool_grep::initialize(void) {
-	m_negateQ = !getBoolean("remove-matching-lines");
+	m_negateQ = getBoolean("remove-matching-lines");
 	m_regex = getString("regular-expression");
 }
 
@@ -83249,6 +83948,7 @@ void Tool_grep::initialize(void) {
 void Tool_grep::processFile(HumdrumFile& infile) {
 	HumRegex hre;
 	bool match;
+cerr  << "Mnegate " << m_negateQ << endl;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		match = hre.search(infile[i], m_regex);
 		if (m_negateQ) {
@@ -99629,7 +100329,9 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 				addAboveBelowKernRdf();
 			}
 		}
-		tok += other;
+		if (!other.empty()) {
+			tok += other;
+		}
 		slice = gm->addDataToken(tok, timestamp, part, staff, layer, maxstaff);
 		if (slice) {
 			mr.setVoice(slice->at(part)->at(staff)->at(layer));
