@@ -102,7 +102,6 @@ void Tool_grep::initialize(void) {
 void Tool_grep::processFile(HumdrumFile& infile) {
 	HumRegex hre;
 	bool match;
-cerr  << "Mnegate " << m_negateQ << endl;
 	for (int i=0; i<infile.getLineCount(); i++) {
 		match = hre.search(infile[i], m_regex);
 		if (m_negateQ) {

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Nov 30 01:02:57 PST 2016
-// Last Modified: Wed Apr 17 22:42:11 PDT 2024
+// Last Modified: Thu Apr 18 08:58:38 PDT 2024
 // Filename:      tool-filter.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-filter.cpp
 // Syntax:        C++11; humlib
@@ -228,7 +228,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);
 	for (int i=0; i<(int)commands.size(); i++) {
-cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		if (commands[i].first == "addic") {
 			RUNTOOL(addic, infile, commands[i].second, status);
 		} else if (commands[i].first == "addkey") {
@@ -266,8 +265,6 @@ cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second <
 		} else if (commands[i].first == "filter") {
 			RUNTOOL(filter, infile, commands[i].second, status);
 		} else if (commands[i].first == "gasparize") {
-			RUNTOOL(grep, infile, commands[i].second, status);
-		} else if (commands[i].first == "grep") {
 			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "half") {
 			RUNTOOL(half, infile, commands[i].second, status);
@@ -387,6 +384,11 @@ cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second <
 		} else if (commands[i].first == "extractx") { // humlib cli name
 			RUNTOOL(extract, infile, commands[i].second, status);
 
+		} else if (commands[i].first == "grep") {
+			RUNTOOL(grep, infile, commands[i].second, status);
+		} else if (commands[i].first == "humgrep") {
+			RUNTOOL(grep, infile, commands[i].second, status);
+
 		} else if (commands[i].first == "myank") { // humlib version of Humdrum Extras myank tool
 			RUNTOOL(myank, infile, commands[i].second, status);
 		} else if (commands[i].first == "myankx") { // humlib cli name
@@ -417,6 +419,8 @@ cerr << "COMMAND: " << commands[i].first << " OPTIONS: " << commands[i].second <
 			RUNTOOL(timebase, infile, commands[i].second, status);
 		} else if (commands[i].first == "timebasex") { // humlib cli name
 			RUNTOOL(timebase, infile, commands[i].second, status);
+		} else {
+			cerr << "UNKNOWN FILTER: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		}
 
 
