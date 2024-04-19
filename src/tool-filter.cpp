@@ -406,8 +406,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "satb2gsx") { // humlib cli name
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 
-		} else if (commands[i].first == "thru") {
-			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "thru") { // humlib version of Humdrum Toolkit thru tool
 			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "thrux") { // Humdrum Extras cli name
@@ -422,7 +420,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else {
 			cerr << "UNKNOWN FILTER: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		}
-
 
 	}
 

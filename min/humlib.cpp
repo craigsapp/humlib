@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Apr 18 09:04:17 PDT 2024
+// Last Modified: Thu Apr 18 17:42:25 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -53433,12 +53433,14 @@ void Tool_addlabels::processFile(HumdrumFile& infile) {
 //
 
 int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
-	int staffIndex    = 0;
-	int partIndex     = 0;
-	int groupIndex    = 0;
-	int clefIndex     = 0;
-	int keySigIndex   = 0;
-	int keyDesigIndex = 0;
+	int staffIndex    = -1;
+	int partIndex     = -1;
+	int groupIndex    = -1;
+	int instIndex     = -1;
+	int abbrIndex     = -1;
+	int clefIndex     = -1;
+	int keySigIndex   = -1;
+	int keyDesigIndex = -1;
 	int exIndex       = -1;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -53466,6 +53468,12 @@ int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
 			if ((clefIndex < 0) && token->isClef()) {
 				clefIndex = i;
 			}
+			if ((instIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
+				instIndex = i;
+			}
+			if ((abbrIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
+				abbrIndex = i;
+			}
 			if ((keySigIndex < 0) && token->isKeySignature()) {
 				keySigIndex = i;
 			}
@@ -53484,15 +53492,22 @@ int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
 		}
 	}
 
-	int spgIndex = staffIndex;
-	if (partIndex > spgIndex) {
-		spgIndex = partIndex;
+	int spigaIndex = staffIndex;
+	if (partIndex > spigaIndex) {
+		spigaIndex = partIndex;
 	}
-	if (groupIndex > staffIndex) {
-		spgIndex = partIndex;
+	if (groupIndex > spigaIndex) {
+		spigaIndex = groupIndex;
 	}
-	if (spgIndex > 0) {
-		return spgIndex + 1;
+	if (instIndex > spigaIndex) {
+		spigaIndex = instIndex;
+	}
+	if (abbrIndex > spigaIndex) {
+		spigaIndex = abbrIndex;
+	}
+
+	if (spigaIndex > 0) {
+		return spigaIndex + 1;
 	}
 
 	int tindex = -1;
@@ -81354,8 +81369,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else if (commands[i].first == "satb2gsx") { // humlib cli name
 			RUNTOOL(satb2gs, infile, commands[i].second, status);
 
-		} else if (commands[i].first == "thru") {
-			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "thru") { // humlib version of Humdrum Toolkit thru tool
 			RUNTOOL(thru, infile, commands[i].second, status);
 		} else if (commands[i].first == "thrux") { // Humdrum Extras cli name
@@ -81370,7 +81383,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 		} else {
 			cerr << "UNKNOWN FILTER: " << commands[i].first << " OPTIONS: " << commands[i].second << endl;
 		}
-
 
 	}
 

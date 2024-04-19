@@ -186,12 +186,14 @@ void Tool_addlabels::processFile(HumdrumFile& infile) {
 //
 
 int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
-	int staffIndex    = 0;
-	int partIndex     = 0;
-	int groupIndex    = 0;
-	int clefIndex     = 0;
-	int keySigIndex   = 0;
-	int keyDesigIndex = 0;
+	int staffIndex    = -1;
+	int partIndex     = -1;
+	int groupIndex    = -1;
+	int instIndex     = -1;
+	int abbrIndex     = -1;
+	int clefIndex     = -1;
+	int keySigIndex   = -1;
+	int keyDesigIndex = -1;
 	int exIndex       = -1;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
@@ -219,6 +221,12 @@ int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
 			if ((clefIndex < 0) && token->isClef()) {
 				clefIndex = i;
 			}
+			if ((instIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
+				instIndex = i;
+			}
+			if ((abbrIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
+				abbrIndex = i;
+			}
 			if ((keySigIndex < 0) && token->isKeySignature()) {
 				keySigIndex = i;
 			}
@@ -237,15 +245,22 @@ int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
 		}
 	}
 
-	int spgIndex = staffIndex;
-	if (partIndex > spgIndex) {
-		spgIndex = partIndex;
+	int spigaIndex = staffIndex;
+	if (partIndex > spigaIndex) {
+		spigaIndex = partIndex;
 	}
-	if (groupIndex > staffIndex) {
-		spgIndex = partIndex;
+	if (groupIndex > spigaIndex) {
+		spigaIndex = groupIndex;
 	}
-	if (spgIndex > 0) {
-		return spgIndex + 1;
+	if (instIndex > spigaIndex) {
+		spigaIndex = instIndex;
+	}
+	if (abbrIndex > spigaIndex) {
+		spigaIndex = abbrIndex;
+	}
+
+	if (spigaIndex > 0) {
+		return spigaIndex + 1;
 	}
 
 	int tindex = -1;
