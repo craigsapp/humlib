@@ -28,10 +28,10 @@ namespace hum {
 
 Tool_sic::Tool_sic(void) {
 	define("s|substitution=b", "insert substitutions into music");
-	define("o|original=b", "insert originals into music");
-	define("r|remove=b", "remove sic layout tokens");
-	define("v|verbose=b", "add verbose parameter");
-	define("q|quiet=b", "remove verbose parameter");
+	define("o|original=b",     "insert originals into music");
+	define("r|remove=b",       "remove sic layout tokens");
+	define("v|verbose=b",      "add verbose parameter");
+	define("q|quiet=b",        "remove verbose parameter");
 }
 
 

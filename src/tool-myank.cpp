@@ -30,28 +30,28 @@ namespace hum {
 //
 
 Tool_myank::Tool_myank(void) {
-	define("v|verbose=b",    "Verbose output of data");
-	define("debug=b",        "Debugging information");
-	define("inlist=b",       "Show input measure list");
-	define("outlist=b",      "Show output measure list");
-	define("mark|marks=b",   "Yank measure with marked notes");
-	define("T|M|bar-number-text=b", "print barnum with LO text above system ");
-	define("d|double|dm|md|mdsep|mdseparator=b", "Put double barline between non-consecutive measure segments");
-	define("m|b|measures|bars|measure|bar=s", "Measures to yank");
-	define("l|lines|line-range=s", "Line numbers range to yank (e.g. 40-50)");
-	define("I|i|instrument=b", "Include instrument codes from start of data");
-	define("visible|not-invisible=b", "Do not make initial measure invisible");
-	define("B|noendbar=b", "Do not print barline at end of data");
-	define("max=b",  "print maximum measure number");
-	define("min=b",  "print minimum measure number");
-	define("section-count=b", "count the number of sections, JRP style");
-	define("section=i:0", "extract given section number (indexed from 1");
-	define("author=b",        "Program author");
-	define("version=b",       "Program version");
-	define("example=b",       "Program examples");
-	define("h|help=b",        "Short description");
-	define("hide-starting=b", "Prevent printStarting");
-	define("hide-ending=b",   "Prevent printEnding");
+	define("v|verbose=b",                        "verbose output of data");
+	define("debug=b",                            "debugging information");
+	define("inlist=b",                           "show input measure list");
+	define("outlist=b",                          "show output measure list");
+	define("mark|marks=b",                       "yank measure with marked notes");
+	define("T|M|bar-number-text=b",              "print barnum with LO text above system ");
+	define("d|double|dm|md|mdsep|mdseparator=b", "put double barline between non-consecutive measure segments");
+	define("m|b|measures|bars|measure|bar=s",    "measures to yank");
+	define("l|lines|line-range=s",               "line numbers range to yank (e.g. 40-50)");
+	define("I|i|instrument=b",                   "Include instrument codes from start of data");
+	define("visible|not-invisible=b",            "do not make initial measure invisible");
+	define("B|noendbar=b",                       "do not print barline at end of data");
+	define("max=b",                              "print maximum measure number");
+	define("min=b",                              "print minimum measure number");
+	define("section-count=b",                    "count the number of sections, JRP style");
+	define("section=i:0",                        "extract given section number (indexed from 1");
+	define("author=b",                           "program author");
+	define("version=b",                          "program version");
+	define("example=b",                          "program examples");
+	define("h|help=b",                           "short description");
+	define("hide-starting=b",                    "prevent printStarting");
+	define("hide-ending=b",                      "prevent printEnding");
 }
 
 

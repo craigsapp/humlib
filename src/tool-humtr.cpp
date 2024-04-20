@@ -26,25 +26,25 @@ namespace hum {
 //
 
 Tool_humtr::Tool_humtr(void) {
-	define("T|no-text|no-lyrics=b", "Do not convert lyrics in **text spines.");
-	define("L|no-local=b", "Do not convert local LO t parameters.");
-	define("G|no-global=b", "Do not convert global LO t parameters.");
-	define("R|no-reference=b", "Do not convert reference record values.");
+	define("T|no-text|no-lyrics=b",     "do not convert lyrics in **text spines.");
+	define("L|no-local=b",              "do not convert local LO t parameters.");
+	define("G|no-global=b",             "do not convert global LO t parameters.");
+	define("R|no-reference=b",          "do not convert reference record values.");
 
 	define("t|text-only|lyrics-only=b", "convert only lyrics in **text spines.");
-	define("l|local-only=b", "convert only local LO t parameters.");
-	define("g|global-only=b", "convert only global LO t parameters.");
-	define("r|reference-only=b", "convert only reference record values.");
+	define("l|local-only=b",            "convert only local LO t parameters.");
+	define("g|global-only=b",           "convert only global LO t parameters.");
+	define("r|reference-only=b",        "convert only reference record values.");
 
-	define("d|data-type=s", "process only given exclusive interpretations");
-	define("s|spines=s", "spines to process");
+	define("d|data-type=s",             "process only given exclusive interpretations");
+	define("s|spines=s",                "spines to process");
 
-	define("i|input=s", "Input characters to change");
-	define("o|output=s", "Output characters to change to");
+	define("i|input=s",                 "input characters to change");
+	define("o|output=s",                "output characters to change to");
 
-	define("m|replace-map=s", "Characters to change from and to");
-	define("M|display-mapping=b", "Display character transliterations mappings");
-	define("p|popc|popc2=b", "Add POPC2 character substitutions");
+	define("m|replace-map=s",           "characters to change from and to");
+	define("M|display-mapping=b",       "display character transliterations mappings");
+	define("p|popc|popc2=b",            "add POPC2 character substitutions");
 }
 
 

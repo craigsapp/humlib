@@ -967,31 +967,31 @@ string cmr_group_info::getPitch(void) {
 //
 
 Tool_cmr::Tool_cmr(void) {
-	define("data|raw|raw-data=b",       "print analysis data");
-	define("m|mark-up|marker-up=s:+",   "symbol to mark peak cmr notes");
+	define("data|raw|raw-data=b",         "print analysis data");
+	define("m|mark-up|marker-up=s:+",     "symbol to mark peak cmr notes");
 	define("M|mark-down|marker-down=s:|", "symbol to mark anti-peak cmr notes");
-	define("c|color|color-up=s:red",    "color of CMR peak notes");
-	define("C|color-down=s:orange",     "color of CMR anti-peak notes");
-	define("r|ignore-rest=d:1.0",       "ignore rests smaller than given value (in whole notes)");
-	define("n|number=i:3",              "number of high notes in a row");
-	define("N|cmr-number=b",            "show enumeration number of CMR above/below starting note");
-	define("d|dur|duration=d:6.0",      "maximum duration between cmr note attacks in whole notes");
-	define("i|info=b",                  "print cmr info");
-	define("p|peaks=b",                 "detect only positive cmrs");
-	define("t|troughs=b",               "detect only negative cmrs");
-	define("A|not-accented=b",          "counts only cmrs that do not have melodic accentation");
-	define("s|syncopation-weight=d:1.0","weight for syncopated notes");
-	define("leap|leap-weight=d:0.5",    "weight for leapng notes");
-	define("l|local-peaks=b",           "mark local peaks");
-	define("L|only-local-peaks=b",      "mark local peaks only");
-	define("merge|merged|show-merged=b","print merged groups");
-	define("S|summary=b",               "summarize CMRs for multiple inputs");
-	define("v|vega=b",                  "output default Vega-lite plot");
-	define("V|no-html=b",               "output Vega-lite plot without HTML");
-	define("countplot=b",               "output Vega-lite plot for CMR count");
-	define("strengthplot=b",            "output Vega-lite plot with strength scores");
-	define("h|half=b",                  "durations given in half notes (mimims)");
-	define("D|debug=b",                 "print debug information");
+	define("c|color|color-up=s:red",      "color of CMR peak notes");
+	define("C|color-down=s:orange",       "color of CMR anti-peak notes");
+	define("r|ignore-rest=d:1.0",         "ignore rests smaller than given value (in whole notes)");
+	define("n|number=i:3",                "number of high notes in a row");
+	define("N|cmr-number=b",              "show enumeration number of CMR above/below starting note");
+	define("d|dur|duration=d:6.0",        "maximum duration between cmr note attacks in whole notes");
+	define("i|info=b",                    "print cmr info");
+	define("p|peaks=b",                   "detect only positive cmrs");
+	define("t|troughs=b",                 "detect only negative cmrs");
+	define("A|not-accented=b",            "counts only cmrs that do not have melodic accentation");
+	define("s|syncopation-weight=d:1.0",  "weight for syncopated notes");
+	define("leap|leap-weight=d:0.5",      "weight for leapng notes");
+	define("l|local-peaks=b",             "mark local peaks");
+	define("L|only-local-peaks=b",        "mark local peaks only");
+	define("merge|merged|show-merged=b",  "print merged groups");
+	define("S|summary=b",                 "summarize CMRs for multiple inputs");
+	define("v|vega=b",                    "output default Vega-lite plot");
+	define("V|no-html=b",                 "output Vega-lite plot without HTML");
+	define("countplot=b",                 "output Vega-lite plot for CMR count");
+	define("strengthplot=b",              "output Vega-lite plot with strength scores");
+	define("h|half=b",                    "durations given in half notes (mimims)");
+	define("D|debug=b",                   "print debug information");
 }
 
 

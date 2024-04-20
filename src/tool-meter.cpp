@@ -30,25 +30,23 @@ namespace hum {
 //
 
 Tool_meter::Tool_meter(void) {
-
-	define("c|comma=b", "display decimal points as commas");
-	define("d|denominator=b", "display denominator spine");
-	define("e|eighth=b", "metric positions in eighth notes rather than beats");
-	define("f|float=b", "floating-point beat values instead of rational numbers");
-	define("h|half=b", "metric positions in half notes rather than beats");
-	define("j|join=b", "join time signature information and metric positions into a single token");
-	define("n|numerator=b", "display numerator spine");
-	define("q|quarter=b", "metric positions in quarter notes rather than beats");
-	define("r|rest=b", "add meteric positions of rests");
-	define("s|sixteenth=b", "metric positions in sixteenth notes rather than beats");
+	define("c|comma=b",                       "display decimal points as commas");
+	define("d|denominator=b",                 "display denominator spine");
+	define("e|eighth=b",                      "metric positions in eighth notes rather than beats");
+	define("f|float=b",                       "floating-point beat values instead of rational numbers");
+	define("h|half=b",                        "metric positions in half notes rather than beats");
+	define("j|join=b",                        "join time signature information and metric positions into a single token");
+	define("n|numerator=b",                   "display numerator spine");
+	define("q|quarter=b",                     "metric positions in quarter notes rather than beats");
+	define("r|rest=b",                        "add meteric positions of rests");
+	define("s|sixteenth=b",                   "metric positions in sixteenth notes rather than beats");
 	define("t|time-signature|tsig|m|meter=b", "display active time signature for each note");
-	define("w|whole=b", "metric positions in whole notes rather than beats");
-	define("z|zero=b", "start of measure is beat 0 rather than beat 1");
+	define("w|whole=b",                       "metric positions in whole notes rather than beats");
+	define("z|zero=b",                        "start of measure is beat 0 rather than beat 1");
 
-	define("B|no-beat=b", "Do not display metric positions (beats)");
-	define("D|digits=i:0", "number of digits after decimal point");
-	define("L|no-label=b", "do not add labels to analysis spines");
-
+	define("B|no-beat=b",                     "Do not display metric positions (beats)");
+	define("D|digits=i:0",                    "number of digits after decimal point");
+	define("L|no-label=b",                    "do not add labels to analysis spines");
 }
 
 

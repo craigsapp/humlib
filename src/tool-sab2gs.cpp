@@ -41,7 +41,7 @@ namespace hum {
 
 Tool_sab2gs::Tool_sab2gs(void) {
 	define("b|below=s:<", "Marker for displaying on next staff below");
-	define("d|down=b", "Use only *down/*Xdown interpretations");
+	define("d|down=b",    "Use only *down/*Xdown interpretations");
 }
 
 

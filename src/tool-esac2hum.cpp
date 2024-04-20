@@ -40,11 +40,11 @@ namespace hum {
 Tool_esac2hum::Tool_esac2hum(void) {
 	define("debug=b",            "print debug information");
 	define("v|verbose=b",        "verbose output");
-	define("h|header=s:",        "Header filename for placement in output");
-	define("t|trailer=s:",       "Trailer filename for placement in output");
-	define("s|split=s:file",     "Split song info into separate files");
-	define("x|extension=s:.krn", "Split filename extension");
-	define("f|first=i:1",        "Number of first split filename");
+	define("h|header=s:",        "header filename for placement in output");
+	define("t|trailer=s:",       "trailer filename for placement in output");
+	define("s|split=s:file",     "split song info into separate files");
+	define("x|extension=s:.krn", "split filename extension");
+	define("f|first=i:1",        "number of first split filename");
 	define("author=b",           "author of program");
 	define("version=b",          "compilation info");
 	define("example=b",          "example usages");

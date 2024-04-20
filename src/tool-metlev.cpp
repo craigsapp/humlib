@@ -33,14 +33,14 @@ namespace hum {
 //
 
 Tool_metlev::Tool_metlev(void) {
-	define("a|append=b",          "append data analysis to input file");
-	define("p|prepend=b",         "prepend data analysis to input file");
-	define("c|composite=b",       "generate composite rhythm");
-	define("i|integer=b",         "quantize metric levels to int values");
-	define("x|attacks-only=b",    "only mark lines with note attacks");
-	define("G|no-grace-notes=b",  "do not mark grace note lines");
-	define("k|kern-spine=i:1",    "analyze only given kern spine");
-	define("e|exinterp=s:blev",   "exclusive interpretation type for output");
+	define("a|append=b",         "append data analysis to input file");
+	define("p|prepend=b",        "prepend data analysis to input file");
+	define("c|composite=b",      "generate composite rhythm");
+	define("i|integer=b",        "quantize metric levels to int values");
+	define("x|attacks-only=b",   "only mark lines with note attacks");
+	define("G|no-grace-notes=b", "do not mark grace note lines");
+	define("k|kern-spine=i:1",   "analyze only given kern spine");
+	define("e|exinterp=s:blev",  "exclusive interpretation type for output");
 }
 
 

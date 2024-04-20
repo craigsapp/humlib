@@ -33,20 +33,19 @@ namespace hum {
 //
 
 Tool_autostem::Tool_autostem(void) {
-	define("d|debug=b",       "Debugging information");
-	define("r|remove=b",      "Remove stems");
-	define("R|removeall=b",   "Remove all stems including explicit beams");
-	define("o|overwrite|replace=b","Overwrite non-explicit stems in input");
-	define("O|overwriteall|replaceall=b",  "Overwrite all stems in input");
-	define("L|no-long|not-long|not-longs=b",
-	       "Do not put stems one whole notes or breves");
-	define("u|up=b",          "Middle note on staff has stem up");
-	define("p|pos=b",         "Display only note vertical positions on staves");
-	define("v|voice=b",       "Display only voice/layer information");
-	define("author=b",        "Program author");
-	define("version=b",       "Program version");
-	define("example=b",       "Program examples");
-	define("h|help=b",        "Short description");
+	define("d|debug=b",                      "Debugging information");
+	define("r|remove=b",                     "Remove stems");
+	define("R|removeall=b",                  "Remove all stems including explicit beams");
+	define("o|overwrite|replace=b",          "Overwrite non-explicit stems in input");
+	define("O|overwriteall|replaceall=b",    "Overwrite all stems in input");
+	define("L|no-long|not-long|not-longs=b", "Do not put stems one whole notes or breves");
+	define("u|up=b",                         "Middle note on staff has stem up");
+	define("p|pos=b",                        "Display only note vertical positions on staves");
+	define("v|voice=b",                      "Display only voice/layer information");
+	define("author=b",                       "Program author");
+	define("version=b",                      "Program version");
+	define("example=b",                      "Program examples");
+	define("h|help=b",                       "Short description");
 }
 
 

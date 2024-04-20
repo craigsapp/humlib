@@ -122,7 +122,8 @@ void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 			}
 			cerr << "Warning, replacing existing token: "
 			     << *this->at(layerindex)->getToken()
-			     << " with a null token"
+			     << " with a null token around time "
+			     << nextdur
 			     << endl;
 		}
 	}

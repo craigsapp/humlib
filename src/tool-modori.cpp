@@ -53,17 +53,17 @@ namespace hum {
 //
 
 Tool_modori::Tool_modori(void) {
-	define("m|modern=b",    "prepare score for modern style");
-	define("o|original=b", "prepare score for original style");
-	define("d|info=b", "display key/clef/mensuration information");
-	define("I|no-instrument-name|no-instrument-names=b", "Do not change part labels");
-	define("A|no-instrument-abbreviation|no-instrument-abbreviations=b", "Do not change part label abbreviations");
-	define("C|no-clef|no-clefs=b", "Do not change clefs");
-	define("K|no-key|no-keys=b", "Do not change key signatures");
-	define("L|no-lyrics=b", "Do not change **text exclusive interpretations");
-	define("M|no-mensuration|no-mensurations=b", "Do not change mensurations");
-	define("R|no-references=b", "Do not change reference records keys");
-	define("T|no-text=b",    "Do not change !LO:(TX|DY) layout parameters");
+	define("m|modern=b",                                                 "prepare score for modern style");
+	define("o|original=b",                                               "prepare score for original style");
+	define("d|info=b",                                                   "display key/clef/mensuration information");
+	define("I|no-instrument-name|no-instrument-names=b",                 "do not change part labels");
+	define("A|no-instrument-abbreviation|no-instrument-abbreviations=b", "do not change part label abbreviations");
+	define("C|no-clef|no-clefs=b",                                       "do not change clefs");
+	define("K|no-key|no-keys=b",                                         "do not change key signatures");
+	define("L|no-lyrics=b",                                              "do not change **text exclusive interpretations");
+	define("M|no-mensuration|no-mensurations=b",                         "do not change mensurations");
+	define("R|no-references=b",                                          "do not change reference records keys");
+	define("T|no-text=b",                                                "do not change !LO:(TX|DY) layout parameters");
 }
 
 

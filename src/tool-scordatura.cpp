@@ -27,16 +27,16 @@ namespace hum {
 //
 
 Tool_scordatura::Tool_scordatura(void) {
-	define("s|sounding=b", "generate sounding score");
-	define("w|written=b", "generate written score");
+	define("s|sounding=b",      "generate sounding score");
+	define("w|written=b",       "generate written score");
 	define("m|mark|marker=s:@", "marker to add to score");
 	define("p|pitch|pitches=s", "list of pitches to mark");
-	define("i|interval=s", "musical interval of marked pitches");
-	define("I|is-sounding=s", "musical score is in sounding format for marks");
-	define("c|chromatic=i:0", "chromatic interval of marked pitches");
-	define("d|diatonic=i:0", "diatonic interval of marked pitches");
-	define("color=s", "color marked pitches");
-	define("string=s", "string number");
+	define("i|interval=s",      "musical interval of marked pitches");
+	define("I|is-sounding=s",   "musical score is in sounding format for marks");
+	define("c|chromatic=i:0",   "chromatic interval of marked pitches");
+	define("d|diatonic=i:0",    "diatonic interval of marked pitches");
+	define("color=s",           "color marked pitches");
+	define("string=s",          "string number");
 }
 
 

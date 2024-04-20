@@ -35,11 +35,11 @@ namespace hum {
 //
 
 Tool_humbreak::Tool_humbreak(void) {
-	define("m|measures=s", "Measures numbers to place linebreaks before");
-	define("p|page-breaks=s", "Measure numbers to place page breaks before");
-	define("g|group=s:original", "Line/page break group");
-	define("r|remove|remove-breaks=b", "Remove line/page breaks");
-	define("l|page-to-line-breaks=b", "Convert page breaks to line breaks");
+	define("m|measures=s",             "measures numbers to place linebreaks before");
+	define("p|page-breaks=s",          "measure numbers to place page breaks before");
+	define("g|group=s:original",       "line/page break group");
+	define("r|remove|remove-breaks=b", "remove line/page breaks");
+	define("l|page-to-line-breaks=b",  "convert page breaks to line breaks");
 }
 
 

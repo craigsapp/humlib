@@ -28,24 +28,24 @@ namespace hum {
 
 Tool_rid::Tool_rid(void) {
    // Humdrum Toolkit classic rid options:
-   define("D|all-data=b", "remove all data records");
-   define("d|null-data=b", "remove null data records");
-   define("G|all-global=b", "remove all global comments");
-   define("g|null-global=b", "remove null global comments");
-   define("I|all-interpretation=b", "remove all interpretation records");
-   define("i|null-interpretation=b", "remove null interpretation records");
-   define("L|all-local-comment=b", "remove all local comments");
-   define("l|1|null-local-comment=b", "remove null local comments");
+   define("D|all-data=b",                  "remove all data records");
+   define("d|null-data=b",                 "remove null data records");
+   define("G|all-global=b",                "remove all global comments");
+   define("g|null-global=b",               "remove null global comments");
+   define("I|all-interpretation=b",        "remove all interpretation records");
+   define("i|null-interpretation=b",       "remove null interpretation records");
+   define("L|all-local-comment=b",         "remove all local comments");
+   define("l|1|null-local-comment=b",      "remove null local comments");
    define("T|all-tandem-interpretation=b", "remove all tandem interpretations");
-   define("U|u=b", "remove unnecessary (duplicate ex. interps.");
-   define("k|consider-kern-only=b", "for -d, only consider **kern spines.");
-   define("V=b","negate filtering effect of program.");
-   define("H|no-humdrum-syntax=b", "equivalent to -GLIMd.");
+   define("U|u=b",                         "remove unnecessary (duplicate ex. interps.");
+   define("k|consider-kern-only=b",        "for -d, only consider **kern spines.");
+   define("V=b",                           "negate filtering effect of program.");
+   define("H|no-humdrum-syntax=b",         "equivalent to -GLIMd.");
 
    // additional options
-   define("M|all-barlines=b", "remove measure lines");
-   define("C|all-comments=b", "remove all comment lines");
-   define("c=b", "remove global and local comment lines");
+   define("M|all-barlines=b",              "remove measure lines");
+   define("C|all-comments=b",              "remove all comment lines");
+   define("c=b",                           "remove global and local comment lines");
 }
 
 

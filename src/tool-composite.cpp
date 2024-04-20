@@ -51,28 +51,28 @@ namespace hum {
 //
 
 Tool_composite::Tool_composite(void) {
-	define("debug=b",         "print debug statements");
-	define("a|append=b",      "append data to end of line (top of system)");
-	define("x|extract=b",     "only output composite rhythm spines");
-	define("grace=b",         "include grace notes in composite rhythms");
-	define("u|up-stem=b",     "force notes to be up-stem");
+	define("debug=b",                  "print debug statements");
+	define("a|append=b",               "append data to end of line (top of system)");
+	define("x|extract=b",              "only output composite rhythm spines");
+	define("grace=b",                  "include grace notes in composite rhythms");
+	define("u|up-stem=b",              "force notes to be up-stem");
 	define("C|color-full-composite=b", "color full composite rhythm if score has groups");
 	define("l|score-size=d:100.0",     "set staff size of input score (percent)");
 	define("L|analysis-size=d:100.0",  "set staff size of analysis staves (percent)");
-	define("o|only=s",        "output notes of given group (A or B)");
-	define("r|rhythms=b",     "convert input score to rhythms only.");
-	define("e|events=b",      "show event counts on analysis staves.");
-	define("F|no-full-composite=b", "Do not do full composite rhythm analysis");
-	define("c|coincidence=b", "Do coincidence rhythm analysis");
-	define("g|group|groups|grouping|groupings=b", "Do group rhythm analysis");
-	define("m|mark=b",        "Mark coincidences in group analysis and input score");
-	define("M|mark-input=b",  "Mark coincidences in input score");
+	define("o|only=s",                 "output notes of given group (A or B)");
+	define("r|rhythms=b",              "convert input score to rhythms only.");
+	define("e|events=b",               "show event counts on analysis staves.");
+	define("F|no-full-composite=b",    "do not do full composite rhythm analysis");
+	define("c|coincidence=b",          "do coincidence rhythm analysis");
+	define("g|group|groups=b",         "do group rhythm analysis");
+	define("m|mark=b",                 "mark coincidences in group analysis and input score");
+	define("M|mark-input=b",           "mark coincidences in input score");
 
 	// Numeric analysis options:
-	define("A|analysis|analyses=s",  "List of numeric analysis features to extract");
+	define("A|analysis|analyses=s",    "list of numeric analysis features to extract");
 
 	// Styling for numeric analyses;
-	define("Z|no-zeros|no-zeroes=b", "do not show zeros in analyses.");
+	define("Z|no-zeros|no-zeroes=b",   "do not show zeros in analyses.");
 }
 
 

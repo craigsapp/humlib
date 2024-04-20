@@ -28,8 +28,8 @@ namespace hum {
 //
 
 Tool_restfill::Tool_restfill(void) {
-	define("y|hidden-rests=b",        "hide inserted rests");
-	define("i|exinterp=s:kern",       "type of spine to fill with rests");
+	define("y|hidden-rests=b",  "hide inserted rests");
+	define("i|exinterp=s:kern", "type of spine to fill with rests");
 }
 
 

@@ -28,12 +28,12 @@ namespace hum {
 //
 
 Tool_kern2mens::Tool_kern2mens(void) {
-	define("N|no-measure-numbers=b", "remove measure numbers");
-	define("M|no-measures=b",        "remove measures ");
-	define("I|not-invisible=b",      "keep measures visible");
-	define("D|no-double-bar=b",      "keep thick final barlines");
-	define("c|clef=s",               "clef to use in mensural notation");
-	define("V|no-verovio=b",         "don't add verovio styling");
+	define("N|no-measure-numbers=b",                "remove measure numbers");
+	define("M|no-measures=b",                       "remove measures ");
+	define("I|not-invisible=b",                     "keep measures visible");
+	define("D|no-double-bar=b",                     "keep thick final barlines");
+	define("c|clef=s",                              "clef to use in mensural notation");
+	define("V|no-verovio=b",                        "don't add verovio styling");
 	define("e|evenNoteSpacing|even-note-spacing=b", "add evenNoteSpacing option");
 }
 

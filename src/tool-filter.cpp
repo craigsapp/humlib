@@ -164,7 +164,7 @@ namespace hum {
 //
 
 Tool_filter::Tool_filter(void) {
-	define("debug=b", "print debug statement");
+	define("debug=b",      "print debug statement");
 	define("v|variant=s:", "Run filters labeled with the given variant");
 }
 

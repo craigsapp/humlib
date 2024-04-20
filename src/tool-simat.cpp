@@ -987,7 +987,7 @@ ostream& MeasureComparisonGrid::printSvgGrid(ostream& out) {
 //
 
 Tool_simat::Tool_simat(void) {
-	define("r|raw=b", "output raw correlation matrix");
+	define("r|raw=b",      "output raw correlation matrix");
 	define("d|diagonal=b", "output diagonal of correlation matrix");
 }
 

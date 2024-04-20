@@ -60,10 +60,10 @@ namespace hum {
 
 Tool_mei2hum::Tool_mei2hum(void) {
 	define("app|app-label=s", "app label to follow");
-	define("r|recip=b", "output **recip spine");
-	define("s|stems=b", "include stems in output");
-	define("x|xmlids=b", "include xmlids in output");
-	define("P|no-place=b", "Do not convert placement attribute");
+	define("r|recip=b",       "output **recip spine");
+	define("s|stems=b",       "include stems in output");
+	define("x|xmlids=b",      "include xmlids in output");
+	define("P|no-place=b",    "do not convert placement attribute");
 
 	m_maxverse.resize(m_maxstaff);
 	fill(m_maxverse.begin(), m_maxverse.end(), 0);

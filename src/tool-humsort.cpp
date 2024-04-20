@@ -32,11 +32,11 @@ namespace hum {
 
 Tool_humsort::Tool_humsort(void) {
 	// add options here
-	define("n|numeric=b", "Sort numerically");
-	define("r|reverse=b", "Sort in reversed order");
-	define("s|spine=i:1", "Spine to sort (1-indexed)");
-	define("I|do-not-ignore-case=b", "Do not ignore case when sorting alphabetically");
-	define("i|e|x|interp|exclusive-interpretation=s", "Exclusive interpretation to sort");
+	define("n|numeric=b",                             "sort numerically");
+	define("r|reverse=b",                             "sort in reversed order");
+	define("s|spine=i:1",                             "spine to sort (1-indexed)");
+	define("I|do-not-ignore-case=b",                  "do not ignore case when sorting alphabetically");
+	define("i|e|x|interp|exclusive-interpretation=s", "exclusive interpretation to sort");
 }
 
 

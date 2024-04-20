@@ -31,10 +31,10 @@ namespace hum {
 
 Tool_phrase::Tool_phrase(void) {
 	define("A|no-average=b", "do not do average phrase-length analysis");
-	define("R|remove2=b", "remove phrase boundaries in data and do not do analysis");
-	define("m|mark=b", "mark phrase boundaries based on rests");
-	define("r|remove=b", "remove phrase boundaries in data");
-	define("c|color=s", "display color of analysis data");
+	define("R|remove2=b",    "remove phrase boundaries in data and do not do analysis");
+	define("m|mark=b",       "mark phrase boundaries based on rests");
+	define("r|remove=b",     "remove phrase boundaries in data");
+	define("c|color=s",      "display color of analysis data");
 }
 
 

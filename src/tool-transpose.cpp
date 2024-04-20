@@ -60,10 +60,10 @@ Tool_transpose::Tool_transpose(void) {
 	define("n|negate=b",      "negate transposition indications");
 	define("rotation=b",      "display transposition in half-steps");
 
-	define("author=b",   "author of program");
-	define("version=b",  "compilation info");
-	define("example=b",  "example usages");
-	define("help=b",     "short description");
+	define("author=b",        "author of program");
+	define("version=b",       "compilation info");
+	define("example=b",       "example usages");
+	define("help=b",          "short description");
 }
 
 

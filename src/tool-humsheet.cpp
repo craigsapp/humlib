@@ -26,14 +26,14 @@ namespace hum {
 //
 
 Tool_humsheet::Tool_humsheet(void) {
-	define("h|H|html|HTML=b", "output table in HTML wrapper");
-	define("i|id|ID=b", "include ID for each cell");
-	define("z|zebra=b", "add zebra striping by spine to style");
+	define("h|H|html|HTML=b",       "output table in HTML wrapper");
+	define("i|id|ID=b",             "include ID for each cell");
+	define("z|zebra=b",             "add zebra striping by spine to style");
 	define("y|z2|zebra2|zebra-2=b", "zebra striping by data type");
-	define("t|tab-index=b", "vertical tab indexing");
-	define("X|no-exinterp=b", "do not embed exclusive interp data");
-	define("J|no-javascript=b", "do not embed javascript code");
-	define("S|no-style=b", "do not embed CSS style element");
+	define("t|tab-index=b",         "vertical tab indexing");
+	define("X|no-exinterp=b",       "do not embed exclusive interp data");
+	define("J|no-javascript=b",     "do not embed javascript code");
+	define("S|no-style=b",          "do not embed CSS style element");
 }
 
 

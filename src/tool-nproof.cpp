@@ -28,23 +28,23 @@ namespace hum {
 //
 
 Tool_nproof::Tool_nproof(void) {
-	define("B|no-blank|no-blanks=b", "Do not check for blank lines.\n");
-	define("b|only-blank|only-blanks=b", "Only check for blank lines.\n");
+	define("B|no-blank|no-blanks=b",                 "do not check for blank lines.\n");
+	define("b|only-blank|only-blanks=b",             "only check for blank lines.\n");
 
-	define("I|no-instrument|no-instruments=b", "Do not check instrument interpretations.\n");
-	define("i|only-instrument|only-instruments=b", "Only check instrument interpretations.\n");
+	define("I|no-instrument|no-instruments=b",       "do not check instrument interpretations.\n");
+	define("i|only-instrument|only-instruments=b",   "only check instrument interpretations.\n");
 
-	define("K|no-key=b", "Do not check for !!!key: manual initial key designation.\n");
-	define("k|only-key=b", "Only check for !!!key: manual initial key designation.\n");
+	define("K|no-key=b",                             "do not check for !!!key: manual initial key designation.\n");
+	define("k|only-key=b",                           "only check for !!!key: manual initial key designation.\n");
 
-	define("R|no-reference=b", "Do not check for reference records.\n");
-	define("r|only-reference=b", "Only check for reference records.\n");
+	define("R|no-reference=b",                       "do not check for reference records.\n");
+	define("r|only-reference=b",                     "only check for reference records.\n");
 
-	define("T|no-termination|no-terminations=b", "Do not check spine terminations.\n");
-	define("t|only-termination|only-terminations=b", "Only check spine terminations.\n");
+	define("T|no-termination|no-terminations=b",     "do not check spine terminations.\n");
+	define("t|only-termination|only-terminations=b", "only check spine terminations.\n");
 
-	define("file|filename=b", "Print filename with raw count (if available).\n");
-	define("raw=b", "Only print error count.\n");
+	define("file|filename=b",                        "print filename with raw count (if available).\n");
+	define("raw=b",                                  "only print error count.\n");
 }
 
 

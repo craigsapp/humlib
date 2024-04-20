@@ -31,13 +31,13 @@ namespace hum {
 //
 
 Tool_pnum::Tool_pnum(void) {
-	define("b|base=i:midi",      "numeric base of pitch to extract");
-	define("D|no-duration=b",    "do not include duration");
-	define("c|pitch-class=b",    "give numeric pitch-class rather than pitch");
-	define("o|octave=b",         "give octave rather than pitch");
-	define("r|rest=s:0",         "representation string for rests");
-	define("R|no-rests=b",       "do not include rests in conversion");
-	define("x|attacks-only=b",   "only mark lines with note attacks");
+	define("b|base=i:midi",    "numeric base of pitch to extract");
+	define("D|no-duration=b",  "do not include duration");
+	define("c|pitch-class=b",  "give numeric pitch-class rather than pitch");
+	define("o|octave=b",       "give octave rather than pitch");
+	define("r|rest=s:0",       "representation string for rests");
+	define("R|no-rests=b",     "do not include rests in conversion");
+	define("x|attacks-only=b", "only mark lines with note attacks");
 }
 
 

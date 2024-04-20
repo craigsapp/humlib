@@ -28,21 +28,21 @@ namespace hum {
 //
 
 Tool_pccount::Tool_pccount(void) {
-	define("a|attacks=b", "count attacks instead of durations");
-	define("d|data|vega-data=b", "display the vega-lite template.");
-	define("f|full=b", "full count attacks all single sharps and flats.");
-	define("ff|double-full=b", "full count attacks all double sharps and flats.");
-	define("h|html=b", "generate vega-lite HTML content");
-	define("i|id=s:id", "ID for use as variable and in plot title");
-	define("K|no-key|no-final=b", "Do not label key tonic or final");
-	define("m|maximum=b", "normalize by maximum count");
-	define("n|normalize=b", "normalize counts");
-	define("p|page=b", "generate vega-lite stand-alone HTML page");
+	define("a|attacks=b",                 "count attacks instead of durations");
+	define("d|data|vega-data=b",          "display the vega-lite template.");
+	define("f|full=b",                    "full count attacks all single sharps and flats.");
+	define("ff|double-full=b",            "full count attacks all double sharps and flats.");
+	define("h|html=b",                    "generate vega-lite HTML content");
+	define("i|id=s:id",                   "ID for use as variable and in plot title");
+	define("K|no-key|no-final=b",         "do not label key tonic or final");
+	define("m|maximum=b",                 "normalize by maximum count");
+	define("n|normalize=b",               "normalize counts");
+	define("p|page=b",                    "generate vega-lite stand-alone HTML page");
 	define("r|ratio|aspect-ratio=d:0.67", "width*ratio=height of vega-lite plot");
-	define("s|script|vega-script=b", "generate vega-lite javascript content");
-	define("title=s", "Title for plot");
-	define("t|template|vega-template=b", "display the vega-lite template.");
-	define("w|width=i:400", "width of vega-lite plot");
+	define("s|script|vega-script=b",      "generate vega-lite javascript content");
+	define("title=s",                     "title for plot");
+	define("t|template|vega-template=b",  "display the vega-lite template.");
+	define("w|width=i:400",               "width of vega-lite plot");
 }
 
 

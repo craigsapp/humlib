@@ -37,12 +37,12 @@ namespace hum {
 //
 
 Tool_tie::Tool_tie(void) {
-	define("s|split=b", "split overfill notes into tied notes across barlines.");
-	define("m|merge=b", "merge tied notes into a single note.");
-	define("p|printable=b", "merge tied notes only if single note is a printable note.");
-	define("M|mark=b", "Mark overfill notes.");
-	define("i|invisible=b", "Mark overfill barlines invisible.");
-	define("I|skip-invisible=b", "Skip invisible measures when splitting overfill durations.");
+	define("s|split=b",          "split overfill notes into tied notes across barlines.");
+	define("m|merge=b",          "merge tied notes into a single note.");
+	define("p|printable=b",      "merge tied notes only if single note is a printable note.");
+	define("M|mark=b",           "mark overfill notes.");
+	define("i|invisible=b",      "mark overfill barlines invisible.");
+	define("I|skip-invisible=b", "skip invisible measures when splitting overfill durations.");
 }
 
 

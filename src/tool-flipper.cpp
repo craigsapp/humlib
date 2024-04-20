@@ -27,11 +27,11 @@ namespace hum {
 //
 
 Tool_flipper::Tool_flipper(void) {
-	define("k|keep=b",         "keep *flip/*Xflip instructions");
-	define("a|all=b",          "flip globally, not just inside *flip/*Xflip regions");
-	define("s|strophe=b",      "flip inside of strophes as well");
+	define("k|keep=b",                      "keep *flip/*Xflip instructions");
+	define("a|all=b",                       "flip globally, not just inside *flip/*Xflip regions");
+	define("s|strophe=b",                   "flip inside of strophes as well");
 	define("S|strophe-only|only-strophe=b", "flip only inside of strophes as well");
-	define("i|interp=s:kern",  "flip only in this interpretation");
+	define("i|interp=s:kern",               "flip only in this interpretation");
 }
 
 

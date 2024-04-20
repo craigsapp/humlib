@@ -40,19 +40,19 @@ namespace hum {
 //
 
 Tool_tspos::Tool_tspos(void) {
-	define("d|double=b", "highlight only doubled notes in triads");
-	define("3|no-thirds=b", "do not color thirds");
-	define("5|no-fifths=b", "do not color fifths");
-	define("T|no-triads=b", "do not color full triads");
-	define("m|minor-triads=b", "only analyze major triad");
-	define("M|major-triads=b", "only analyze minor triads");
-	define("x|attacks=b", "only process sonorities with three unique triadic pitch classes attacking at once (sustains in additional voices are allowed)");
-	define("v|voice-count=i:0", "Only analyze sonorities with given voice count");
-	define("c|compressed=b", "Compress music to see more on each system");
-	define("top=b", "mark top voice in analysis output");
-	define("t|table=b", "add analysis table above score");
-	define("V|all-voices=b", "Require all voices in score to be sounding");
-	define("Q|no-question=b", "Do not show question mark in table header");
+	define("d|double=b",        "highlight only doubled notes in triads");
+	define("3|no-thirds=b",     "do not color thirds");
+	define("5|no-fifths=b",     "do not color fifths");
+	define("T|no-triads=b",     "do not color full triads");
+	define("m|minor-triads=b",  "only analyze major triad");
+	define("M|major-triads=b",  "only analyze minor triads");
+	define("x|attacks=b",       "only process sonorities with three unique triadic pitch classes attacking at once (sustains in additional voices are allowed)");
+	define("v|voice-count=i:0", "only analyze sonorities with given voice count");
+	define("c|compressed=b",    "compress music to see more on each system");
+	define("top=b",             "mark top voice in analysis output");
+	define("t|table=b",         "add analysis table above score");
+	define("V|all-voices=b",    "require all voices in score to be sounding");
+	define("Q|no-question=b",   "do not show question mark in table header");
 }
 
 

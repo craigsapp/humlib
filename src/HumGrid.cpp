@@ -1397,6 +1397,11 @@ string HumGrid::createBarToken(int m, int barnum, GridMeasure* measure) {
 
 void HumGrid::getMetricBarNumbers(vector<int>& barnums) {
 return;
+
+/* Disabling for now.  Causes problems in MuseData conversion, but usually needed for MusicXML conversion
+ * to get correct measures numbers (related to pickup measures, particularly in older MusicXML files).
+ * For MuseData, the first barline in a score is not explicitly given, which is the source of the problem.
+
 	int mcount = (int)this->size();
 	barnums.resize(mcount);
 
@@ -1450,6 +1455,7 @@ return;
 			barnums[m] = counter++;
 		}
 	}
+*/
 }
 
 

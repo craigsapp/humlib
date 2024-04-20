@@ -31,14 +31,14 @@ namespace hum {
 //
 
 Tool_periodicity::Tool_periodicity(void) {
-	define("m|min=b", "minimum time unit (other than grace notes)");
+	define("m|min=b",         "minimum time unit (other than grace notes)");
 	define("n|max-rows=i:-1", "maxumum number of rows in svg analysis display");
-	define("t|track=i:0", "track to analyze");
-	define("attacks=b", "extract attack grid)");
-	define("raw=b", "show only raw period data");
-	define("s|svg=b", "output svg image");
-	define("p|power=d:2.0", "scaling power for visual display");
-	define("1|one=b", "composite rhythms are not weighted by attack");
+	define("t|track=i:0",     "track to analyze");
+	define("attacks=b",       "extract attack grid)");
+	define("raw=b",           "show only raw period data");
+	define("s|svg=b",         "output svg image");
+	define("p|power=d:2.0",   "scaling power for visual display");
+	define("1|one=b",         "composite rhythms are not weighted by attack");
 }
 
 

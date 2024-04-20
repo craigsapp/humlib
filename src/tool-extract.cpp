@@ -36,36 +36,34 @@ namespace hum {
 //
 
 Tool_extract::Tool_extract(void) {
-	define("P|F|S|x|exclude=s:", "Remove listed spines from output");
-	define("i=s:", "Exclusive interpretation list to extract from input");
-	define("I=s:", "Exclusive interpretation exclusion list");
-	define("f|p|s|field|path|spine=s:",
-			 "for extraction of particular spines");
-	define("C|count=b", "print a count of the number of spines in file");
-	define("c|cointerp=s:**kern", "Exclusive interpretation for cospines");
-	define("g|grep=s:", "Extract spines which match a given regex.");
-	define("r|reverse=b", "reverse order of spines by **kern group");
-	define("R=s:**kern", "reverse order of spine by exinterp group");
-	define("t|trace=s:", "use a trace file to extract data");
-	define("e|expand=b", "expand spines with subspines");
-	define("k|kern=s", "Extract by kern spine group");
-	define("K|reverse-kern=s", "Extract by kern spine group top to bottom numbering");
-	define("E|expand-interp=s:", "expand subspines limited to exinterp");
-	define("m|model|method=s:d", "method for extracting secondary spines");
-	define("M|cospine-model=s:d", "method for extracting cospines");
-	define("Y|no-editoral-rests=b",
-			"do not display yy marks on interpreted rests");
-	define("n|name|b|blank=s:**blank", "Name if exinterp added with 0");
-	define("no-empty|no-empties=b", "Suppress spines with only null data tokens");
-	define("empty|empties=b", "Only keep spines with only null data tokens");
-	define("spine-list=b", "Show spine list and then exit");
-	define("no-rest|no-rests=b", "remove **kern spines containing only rests (and their co-spines)");
+	define("P|F|S|x|exclude=s:",        "remove listed spines from output");
+	define("i=s:",                      "exclusive interpretation list to extract from input");
+	define("I=s:",                      "exclusive interpretation exclusion list");
+	define("f|p|s|field|path|spine=s:", "for extraction of particular spines");
+	define("C|count=b",                 "print a count of the number of spines in file");
+	define("c|cointerp=s:**kern",       "exclusive interpretation for cospines");
+	define("g|grep=s:",                 "extract spines which match a given regex.");
+	define("r|reverse=b",               "reverse order of spines by **kern group");
+	define("R=s:**kern",                "reverse order of spine by exinterp group");
+	define("t|trace=s:",                "use a trace file to extract data");
+	define("e|expand=b",                "expand spines with subspines");
+	define("k|kern=s",                  "extract by kern spine group");
+	define("K|reverse-kern=s",          "extract by kern spine group top to bottom numbering");
+	define("E|expand-interp=s:",        "expand subspines limited to exinterp");
+	define("m|model|method=s:d",        "method for extracting secondary spines");
+	define("M|cospine-model=s:d",       "method for extracting cospines");
+	define("Y|no-editoral-rests=b",     "do not display yy marks on interpreted rests");
+	define("n|name|b|blank=s:**blank",  "name if exinterp added with 0");
+	define("no-empty|no-empties=b",     "suppress spines with only null data tokens");
+	define("empty|empties=b",           "only keep spines with only null data tokens");
+	define("spine-list=b",              "show spine list and then exit");
+	define("no-rest|no-rests=b",        "remove **kern spines containing only rests (and their co-spines)");
 
-	define("debug=b", "print debugging information");
-	define("author=b");              // author of program
-	define("version=b");             // compilation info
-	define("example=b");             // example usages
-	define("h|help=b");              // short description
+	define("debug=b",                   "print debugging information");
+	define("author=b",                  "author of the program");
+	define("version=b",                 "compilation info");
+	define("example=b",                 "example usages");
+	define("h|help=b",                  "short description");
 }
 
 

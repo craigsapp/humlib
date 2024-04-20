@@ -27,10 +27,10 @@ namespace hum {
 
 Tool_textdur::Tool_textdur(void) {
 	// add command-line options here
-	define("a|analysis=b", "calculate and display analyses");
-	define("m|melisma=b", "Count number of notes for each syllable");
-	define("d|duration=b", "Duration of each syllable");
-	define("i|interleave=b", "Preserve original text, and place analyses below text");
+	define("a|analysis=b",   "calculate and display analyses");
+	define("m|melisma=b",    "count number of notes for each syllable");
+	define("d|duration=b",   "duration of each syllable");
+	define("i|interleave=b", "preserve original text, and place analyses below text");
 }
 
 

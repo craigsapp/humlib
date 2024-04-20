@@ -29,23 +29,23 @@ namespace hum {
 //
 
 Tool_fb::Tool_fb(void) {
-	define("c|compound=b",               "Output reasonable figured bass numbers within octave");
-	define("a|accidentals|accid|acc=b",  "Display accidentals in front of the numbers");
-	define("b|base|base-track=i:1",      "Number of the base kern track (compare with -k)");
-	define("i|intervallsatz=b",          "Display numbers under their voice instead of under the base staff");
-	define("o|sort|order=b",             "Sort figured bass numbers by size");
-	define("l|lowest=b",                 "Use lowest note as base note");
-	define("n|normalize=b",              "Remove number 8 and doubled numbers; adds -co");
-	define("r|reduce|abbreviate|abbr=b", "Use abbreviated figures; adds -nco");
-	define("t|ties=b",                   "Hide numbers without attack or changing base (needs -i)");
-	define("f|figuredbass=b",            "Shortcut for -acorn3");
-	define("3|hide-three=b",             "Hide number 3 if it has an accidental");
-	define("m|negative=b",               "Show negative numbers");
-	define("above=b",                    "Show numbers above the staff (**fba)");
-	define("rate=s:",                    "Rate to display the numbers (use a **recip value, e.g. 4, 4.)");
-	define("k|kern-tracks=s",            "Process only the specified kern spines");
+	define("c|compound=b",                               "output reasonable figured bass numbers within octave");
+	define("a|accidentals|accid|acc=b",                  "display accidentals in front of the numbers");
+	define("b|base|base-track=i:1",                      "number of the base kern track (compare with -k)");
+	define("i|intervallsatz=b",                          "display numbers under their voice instead of under the base staff");
+	define("o|sort|order=b",                             "sort figured bass numbers by size");
+	define("l|lowest=b",                                 "use lowest note as base note");
+	define("n|normalize=b",                              "remove number 8 and doubled numbers; adds -co");
+	define("r|reduce|abbreviate|abbr=b",                 "use abbreviated figures; adds -nco");
+	define("t|ties=b",                                   "hide numbers without attack or changing base (needs -i)");
+	define("f|figuredbass=b",                            "shortcut for -acorn3");
+	define("3|hide-three=b",                             "hide number 3 if it has an accidental");
+	define("m|negative=b",                               "show negative numbers");
+	define("above=b",                                    "show numbers above the staff (**fba)");
+	define("rate=s:",                                    "rate to display the numbers (use a **recip value, e.g. 4, 4.)");
+	define("k|kern-tracks=s",                            "process only the specified kern spines");
 	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
-	define("hint=b",                     "Determine harmonic intervals with interval quality");
+	define("hint=b",                                     "determine harmonic intervals with interval quality");
 }
 
 

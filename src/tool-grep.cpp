@@ -31,8 +31,8 @@ namespace hum {
 //
 
 Tool_grep::Tool_grep(void) {
-	define("v|remove-matching-lines=b", "Remove lines that match regex");
-	define("e|regex|regular-expression=s", "Regular expression to search with");
+	define("v|remove-matching-lines=b",    "remove lines that match regex");
+	define("e|regex|regular-expression=s", "regular expression to search with");
 }
 
 

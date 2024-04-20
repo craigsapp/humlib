@@ -39,23 +39,23 @@ string Tool_deg::ScaleDegree::m_forcedKey = "";
 //
 
 Tool_deg::Tool_deg(void) {
-	define("above=b", "Display scale degrees above analyzed staff");
-	define("arr|arrow|arrows=b", "Display scale degree alterations as arrows");
-	define("b|boxes|box=b", "Display scale degrees in boxes");
-	define("color=s", "Display color for scale degrees");
-	define("c|circ|circles|circle=b", "Display scale degrees in circles");
-	define("hat|caret|circumflex=b", "Display hats on scale degrees");
-	define("solf|solfege=b", "Display (relative) solfege syllables instead of scale degree numbers");
-	define("I|no-input=b", "Do not interleave **deg data with input score in output");
-	define("kern=b", "Prefix composite rhythm **kern spine with -I option");
-	define("k|kern-tracks=s", "Process only the specified kern spines");
-	define("kd|dk|key-default|default-key=s", "Default (initial) key if none specified in data");
-	define("kf|fk|key-force|force-key|forced-key|key-forced=s", "Use the given key for analysing deg data (ignore modulations)");
-	define("o|octave|octaves|degree=b", "Encode octave information int **degree spines");
-	define("r|recip=b", "Prefix output data with **recip spine with -I option");
-	define("t|ties=b", "Include scale degrees for tied notes");
-	define("s|spine-tracks|spine|spines|track|tracks=s", "Process only the specified spines");
-	define("0|O|z|zero|zeros=b", "Show rests as scale degree 0");
+	define("above=b",                                    "display scale degrees above analyzed staff");
+	define("arr|arrow|arrows=b",                         "display scale degree alterations as arrows");
+	define("b|boxes|box=b",                              "display scale degrees in boxes");
+	define("color=s",                                    "display color for scale degrees");
+	define("c|circ|circles|circle=b",                    "display scale degrees in circles");
+	define("hat|caret|circumflex=b",                     "display hats on scale degrees");
+	define("solf|solfege=b",                             "display (relative) solfege syllables instead of scale degree numbers");
+	define("I|no-input=b",                               "do not interleave **deg data with input score in output");
+	define("kern=b",                                     "prefix composite rhythm **kern spine with -I option");
+	define("k|kern-tracks=s",                            "process only the specified kern spines");
+	define("kd|dk|key-default|default-key=s",            "default (initial) key if none specified in data");
+	define("kf|fk|key-force|force-key=s",                "use the given key for analysing deg data (ignore modulations)");
+	define("o|octave|octaves|degree=b",                  "encode octave information int **degree spines");
+	define("r|recip=b",                                  "prefix output data with **recip spine with -I option");
+	define("t|ties=b",                                   "include scale degrees for tied notes");
+	define("s|spine-tracks|spine|spines|track|tracks=s", "process only the specified spines");
+	define("0|O|z|zero|zeros=b",                         "show rests as scale degree 0");
 }
 
 

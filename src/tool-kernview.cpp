@@ -27,9 +27,9 @@ namespace hum {
 //
 
 Tool_kernview::Tool_kernview(void) {
-	define("v|view|s|show=s", "view the list of spines");
-	define("g=s", "Regular expression of kern spines to view");
-	define("G=s", "Regular expression of kern spines to hide");
+	define("v|view|s|show=s",   "view the list of spines");
+	define("g=s",               "regular expression of kern spines to view");
+	define("G=s",               "regular expression of kern spines to hide");
 	define("h|hide|r|remove=s", "hide the list of spines");
 }
 

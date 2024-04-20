@@ -30,10 +30,10 @@ namespace hum {
 //
 
 Tool_timebase::Tool_timebase(void) {
-	define("g|grace=b",       "Keep grace notes");
-	define("m|min=b",         "Use minimum time in score for timebase");
-	define("t|timebase=s:16", "Timebase rhythm");
-	define("q|quiet=b",       "Quite mode: Do not output warnings");
+	define("g|grace=b",       "keep grace notes");
+	define("m|min=b",         "use minimum time in score for timebase");
+	define("t|timebase=s:16", "timebase rhythm");
+	define("q|quiet=b",       "quiet mode: Do not output warnings");
 }
 
 

@@ -39,7 +39,7 @@ namespace hum {
 //
 
 Tool_addkey::Tool_addkey(void) {
-	define("k|key=s", "Add given key designtation to data");
+	define("k|key=s",           "Add given key designtation to data");
 	define("K|reference-key=b", "Update or add !!!key: designation, used with -k");
 }
 

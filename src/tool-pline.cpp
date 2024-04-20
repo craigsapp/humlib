@@ -26,7 +26,7 @@ namespace hum {
 //
 
 Tool_pline::Tool_pline(void) {
-	define("c|color=b", "color poetic lines (currently only by notes)");
+	define("c|color=b",   "color poetic lines (currently only by notes)");
 	define("o|overlap=b", "do overlap analysis/markup");
 }
 

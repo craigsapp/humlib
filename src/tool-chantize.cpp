@@ -32,20 +32,20 @@ namespace hum {
 //
 
 Tool_chantize::Tool_chantize(void) {
-	define("R|no-reference-records=b", "Do not add reference records");
-	define("r|only-add-reference-records=b", "Only add reference records");
+	define("R|no-reference-records=b",                "do not add reference records");
+	define("r|only-add-reference-records=b",          "only add reference records");
 
-	define("B|do-not-delete-breaks=b", "Do not delete system/page break markers");
-	define("b|only-delete-breaks=b", "only delete breaks");
+	define("B|do-not-delete-breaks=b",                "do not delete system/page break markers");
+	define("b|only-delete-breaks=b",                  "only delete breaks");
 
-	define("A|do-not-fix-instrument-abbreviations=b", "Do not fix instrument abbreviations");
-	define("a|only-fix-instrument-abbreviations=b", "Only fix instrument abbreviations");
+	define("A|do-not-fix-instrument-abbreviations=b", "do not fix instrument abbreviations");
+	define("a|only-fix-instrument-abbreviations=b",   "only fix instrument abbreviations");
 
-	define("E|do-not-fix-editorial-accidentals=b", "Do not fix instrument abbreviations");
-	define("e|only-fix-editorial-accidentals=b", "Only fix editorial accidentals");
+	define("E|do-not-fix-editorial-accidentals=b",    "do not fix instrument abbreviations");
+	define("e|only-fix-editorial-accidentals=b",      "only fix editorial accidentals");
 
-	define("N|do-not-remove-empty-transpositions=b", "Do not remove empty transposition instructions");
-	define ("n|only-remove-empty-transpositions=b", "Only remove empty transpositions");
+	define("N|do-not-remove-empty-transpositions=b",  "do not remove empty transposition instructions");
+	define ("n|only-remove-empty-transpositions=b",   "only remove empty transpositions");
 }
 
 

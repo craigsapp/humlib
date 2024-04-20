@@ -28,8 +28,8 @@ namespace hum {
 
 Tool_slurcheck::Tool_slurcheck(void) {
 	// add options here
-	define("l|list=b", "list locations of unclosed slur endings");
-	define("c|count=b", "count unclosed slur endings");
+	define("l|list=b",     "list locations of unclosed slur endings");
+	define("c|count=b",    "count unclosed slur endings");
 	define("Z|no-zeros=b", "do not list files that have zero unclosed slurs in counts");
 	define("f|filename=b", "print filename for list and count options");
 }

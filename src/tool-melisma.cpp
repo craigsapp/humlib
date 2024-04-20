@@ -31,7 +31,7 @@ Tool_melisma::Tool_melisma(void) {
 	define("r|replace=b",      "replace lyrics with note counts");
 	define("a|average|avg=b",  "calculate note-to-syllable ratio");
 	define("w|words=b",        "list words that contain a melisma");
-	define("p|part=b", "also calculate note-to-syllable ratios by part");
+	define("p|part=b",         "also calculate note-to-syllable ratios by part");
 }
 
 

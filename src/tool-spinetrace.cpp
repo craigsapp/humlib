@@ -24,7 +24,7 @@ namespace hum {
 //
 
 Tool_spinetrace::Tool_spinetrace(void) {
-	define("a|append=b", "append analysis to input data lines");
+	define("a|append=b",  "append analysis to input data lines");
 	define("p|prepend=b", "prepend analysis to input data lines");
 }
 

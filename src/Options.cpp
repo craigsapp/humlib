@@ -737,9 +737,24 @@ int Options::optionsArg(void) {
 //
 
 ostream& Options::print(ostream& out) {
-	for (unsigned int i=0; i<m_optionRegister.size(); i++) {
-		out << m_optionRegister[i]->getDefinition() << "\t"
-			  << m_optionRegister[i]->getDescription() << endl;
+	vector<string> declarations;
+	vector<string> descriptions;
+	int maxlen = 0;
+	for (int i=0; i<(int)m_optionRegister.size(); i++) {
+		declarations.push_back(m_optionRegister[i]->getDefinition());
+		if (maxlen < (int)declarations.back().size()) {
+			maxlen = (int)declarations.back().size();
+		}
+		descriptions.push_back(m_optionRegister[i]->getDescription());
+	}
+	int separation = 3;
+
+	for (int i=0; i<(int)declarations.size(); i++) {
+		out << declarations[i];
+		for (int j=(int)declarations[i].size(); j < maxlen + separation; j++) {
+			out << ' ';
+		}
+		out << descriptions[i] << endl;
 	}
 	return out;
 }
@@ -1082,6 +1097,9 @@ int Options::getRegIndex(const string& optionName) {
 
 	if (optionName == "options") {
 		print(cout);
+		#ifndef __EMSCRIPTEN__
+		exit(0);
+		#endif
 		return -1;
 	}
 

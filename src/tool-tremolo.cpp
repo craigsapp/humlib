@@ -27,9 +27,9 @@ namespace hum {
 //
 
 Tool_tremolo::Tool_tremolo(void) {
-	define("k|keep=b", "Keep tremolo rhythm markup");
-	define("F|no-fill=b", "Do not fill in tremolo spaces");
-	define("T|no-tremolo-interpretation=b", "Do not add *tremolo/*Xtremolo marks");
+	define("k|keep=b",                      "keep tremolo rhythm markup");
+	define("F|no-fill=b",                   "do not fill in tremolo spaces");
+	define("T|no-tremolo-interpretation=b", "do not add *tremolo/*Xtremolo marks");
 }
 
 

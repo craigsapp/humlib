@@ -27,14 +27,14 @@ namespace hum {
 //
 
 Tool_shed::Tool_shed(void) {
-	define("s|spine|spines=s", "list of spines to process");
-	define("e|expression=s", "regular expression");
-	define("E|exclusion-expression=s", "regular expression to skip");
+	define("s|spine|spines=s",              "list of spines to process");
+	define("e|expression=s",                "regular expression");
+	define("E|exclusion-expression=s",      "regular expression to skip");
 	define("x|exclusive-interpretations=s", "apply only to spine types in list");
-	define("k|kern=b", "apply only to **kern data");
-	define("X=s", "defineable exclusive interpretation x");
-	define("Y=s", "defineable exclusive interpretation y");
-	define("Z=s", "defineable exclusive interpretation z");
+	define("k|kern=b",                      "apply only to **kern data");
+	define("X=s",                           "defineable exclusive interpretation x");
+	define("Y=s",                           "defineable exclusive interpretation y");
+	define("Z=s",                           "defineable exclusive interpretation z");
 }
 
 

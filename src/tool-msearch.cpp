@@ -123,18 +123,18 @@ void MSearchQueryToken::parseHarmonicQuery(void) {
 //
 
 Tool_msearch::Tool_msearch(void) {
-	define("debug=b",               "diatonic search");
-	define("q|query=s:4c4d4e4f4g",  "combined rhythm/pitch query string");
-	define("p|pitch=s:cdefg",       "pitch query string");
-	define("i|interval=s:2222",     "interval query string");
+	define("debug=b",                     "diatonic search");
+	define("q|query=s:4c4d4e4f4g",        "combined rhythm/pitch query string");
+	define("p|pitch=s:cdefg",             "pitch query string");
+	define("i|interval=s:2222",           "interval query string");
 	define("r|d|rhythm|duration=s:44444", "rhythm query string");
-	define("t|text=s:",             "lyrical text query string");
-	define("O|no-overlap=b",        "do not allow matches to overlap");
-	define("x|cross=b",             "search across parts");
-	define("c|color=s",             "highlight color");
-	define("m|mark|marker=s:@",     "marking character");
-	define("M|no-mark|no-marker=b", "do not mark matches");
-	define("Q|quiet=b",             "quiet mode: do not summarize matches");
+	define("t|text=s:",                   "lyrical text query string");
+	define("O|no-overlap=b",              "do not allow matches to overlap");
+	define("x|cross=b",                   "search across parts");
+	define("c|color=s",                   "highlight color");
+	define("m|mark|marker=s:@",           "marking character");
+	define("M|no-mark|no-marker=b",       "do not mark matches");
+	define("Q|quiet=b",                   "quiet mode: do not summarize matches");
 }
 
 

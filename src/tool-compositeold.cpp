@@ -42,31 +42,31 @@ namespace hum {
 //
 
 Tool_compositeold::Tool_compositeold(void) {
-	define("a|append=b",    "append data to end of line (top of system)");
+	define("a|append=b",                      "append data to end of line (top of system)");
 
-	define("P|analysis-onsets=b",    "count number of note (pitch) onsets in feature");
-	define("A|analysis-accents=b",   "count number of accents in feature");
-	define("O|analysis-ornaments=b", "count number of ornaments in feature");
-	define("S|analysis-slurs=b",     "count number of slur beginnings/ending in feature");
-	define("T|analysis-total=b",     "count total number of analysis features for each note");
-	define("all|all-analyses=b",     "do all analyses");
+	define("P|analysis-onsets=b",             "count number of note (pitch) onsets in feature");
+	define("A|analysis-accents=b",            "count number of accents in feature");
+	define("O|analysis-ornaments=b",          "count number of ornaments in feature");
+	define("S|analysis-slurs=b",              "count number of slur beginnings/ending in feature");
+	define("T|analysis-total=b",              "count total number of analysis features for each note");
+	define("all|all-analyses=b",              "do all analyses");
 
-	define("grace=b",       "include grace notes in composite rhythm");
-	define("u|stem-up=b",   "stem-up for composite rhythm parts");
-	define("x|extract=b",   "only output composite rhythm spines");
-	define("o|only=s",      "output notes of given group");
-	define("t|tremolo=b",   "preserve tremolos");
-	define("B|no-beam=b",   "do not apply automatic beaming");
-	define("G|only-groups=b", "only split composite rhythm into separate streams by group markers");
-	define("g|add-groups=b", "also split composite rhythm into separate streams by group markers");
-	define("c|coincidence-rhythm=b", "add coincidence rhythm for groups");
-	define("m|match|together=s:limegreen", "mark alignments in group composite analyses");
-	define("M=b",           "equivalent to -m limegreen");
+	define("grace=b",                         "include grace notes in composite rhythm");
+	define("u|stem-up=b",                     "stem-up for composite rhythm parts");
+	define("x|extract=b",                     "only output composite rhythm spines");
+	define("o|only=s",                        "output notes of given group");
+	define("t|tremolo=b",                     "preserve tremolos");
+	define("B|no-beam=b",                     "do not apply automatic beaming");
+	define("G|only-groups=b",                 "only split composite rhythm into separate streams by group markers");
+	define("g|add-groups=b",                  "also split composite rhythm into separate streams by group markers");
+	define("c|coincidence-rhythm=b",          "add coincidence rhythm for groups");
+	define("m|match|together=s:limegreen",    "mark alignments in group composite analyses");
+	define("M=b",                             "equivalent to -m limegreen");
 	define("n|together-in-score=s:limegreen", "mark alignments in group in SCORE (not analyses)");
-	define("N=b",           "equivalent to -n limegreen");
-	define("Z|no-zeros|no-zeroes=b",  "do not show zeros in analyses.");
-	define("pitch=s:eR",    "pitch to display for composite rhythm");
-	define("debug=b",       "print debugging information");
+	define("N=b",                             "equivalent to -n limegreen");
+	define("Z|no-zeros|no-zeroes=b",          "do not show zeros in analyses.");
+	define("pitch=s:eR",                      "pitch to display for composite rhythm");
+	define("debug=b",                         "print debugging information");
 }
 
 

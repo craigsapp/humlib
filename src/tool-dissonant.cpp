@@ -31,24 +31,24 @@ namespace hum {
 //
 
 Tool_dissonant::Tool_dissonant(void) {
-	define("r|raw=b",                 "print raw grid");
-	define("p|percent=b",             "print counts as percentages");
-	define("s|suppress=b",            "suppress dissonant notes");
-	define("d|diatonic=b",            "print diatonic grid");
-	define("D|no-dissonant=b",        "don't do dissonance anaysis");
-	define("m|midi-pitch=b",          "print midi-pitch grid");
-	define("b|base-40=b",             "print base-40 grid");
-	define("l|metric-levels=b",       "use metric levels in analysis");
-	define("k|kern=b",                "print kern pitch grid");
-	define("V|voice-functions=b",     "do cadential-voice-function analysis");
-	define("v|voice-number=b",        "print voice number of dissonance");
-	define("f|self-number=b",         "print self voice number of dissonance");
-	define("debug=b",                 "print grid cell information");
-	define("u|undirected=b",          "use undirected dissonance labels");
-	define("c|count=b",               "count dissonances by category");
-	define("i|x|e|exinterp=s:**cdata-rdiss","specify exinterp for **diss spines");
-	define("color|colorize|color-by-rhythm=b", "color dissonant notes by beat level");
-	define("color2|colorize2|color-by-interval=b", "color dissonant notes by dissonant interval");
+	define("r|raw=b",                        "print raw grid");
+	define("p|percent=b",                    "print counts as percentages");
+	define("s|suppress=b",                   "suppress dissonant notes");
+	define("d|diatonic=b",                   "print diatonic grid");
+	define("D|no-dissonant=b",               "don't do dissonance anaysis");
+	define("m|midi-pitch=b",                 "print midi-pitch grid");
+	define("b|base-40=b",                    "print base-40 grid");
+	define("l|metric-levels=b",              "use metric levels in analysis");
+	define("k|kern=b",                       "print kern pitch grid");
+	define("V|voice-functions=b",            "do cadential-voice-function analysis");
+	define("v|voice-number=b",               "print voice number of dissonance");
+	define("f|self-number=b",                "print self voice number of dissonance");
+	define("debug=b",                        "print grid cell information");
+	define("u|undirected=b",                 "use undirected dissonance labels");
+	define("c|count=b",                      "count dissonances by category");
+	define("i|x|e|exinterp=s:**cdata-rdiss", "specify exinterp for **diss spines");
+	define("color|color-by-rhythm=b",        "color dissonant notes by beat level");
+	define("color2|color-by-interval=b",     "color dissonant notes by dissonant interval");
 }
 
 

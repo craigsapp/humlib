@@ -27,10 +27,11 @@ namespace hum {
 
 Tool_synco::Tool_synco(void) {
 	define("c|color=s:skyblue", "SVG color to highlight syncopation notes");
-	define("i|info=b", "Display only statistics info");
-	define("f|filename=b", "Add filename to statistics info");
-	define("a|all=b", "Average all statistics info");
+	define("i|info=b",          "display only statistics info");
+	define("f|filename=b",      "add filename to statistics info");
+	define("a|all=b",           "average all statistics info");
 }
+
 
 
 /////////////////////////////////
