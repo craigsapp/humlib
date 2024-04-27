@@ -235,11 +235,12 @@ int Convert::kernToBase40PC(const string& kerndata) {
 //
 
 int Convert::kernToBase40(const string& kerndata) {
-	int pc = Convert::kernToBase40PC(kerndata);
+	string trimmed = Convert::trimWhiteSpace(kerndata);
+	int pc = Convert::kernToBase40PC(trimmed);
 	if (pc < 0) {
 		return pc;
 	}
-	int octave   = Convert::kernToOctaveNumber(kerndata);
+	int octave   = Convert::kernToOctaveNumber(trimmed);
 	return pc + 40 * octave;
 }
 

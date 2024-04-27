@@ -224,6 +224,15 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 
 	HumdrumFile& infile = infiles[0];
 
+	#ifdef __EMSCRIPTEN__
+	bool optionList = getBoolean("options");
+	if (optionList) {
+		cerr << "GOT HERE BEFORE PRINT EMSCDRIPTEN" << endl;
+		printEmscripten(m_humdrum_text);
+		m_humdrum_text << infile;
+	}
+	#endif
+
 	bool status = true;
 	vector<pair<string, string> > commands;
 	getCommandList(commands, infile);

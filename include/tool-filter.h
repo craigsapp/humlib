@@ -15,8 +15,10 @@
 
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
-#include <vector>
+
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace hum {
 
@@ -29,22 +31,22 @@ class Tool_filter : public HumTool {
 
 		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
-		bool     run                (const string& indata);
+		bool     run                (const std::string& indata);
 
 		bool     runUniversal       (HumdrumFileSet& infiles);
 
 	protected:
-		void     getCommandList     (vector<pair<string, string> >& commands,
+		void     getCommandList     (std::vector<std::pair<std::string, std::string> >& commands,
 		                             HumdrumFile& infile);
 		void     getUniversalCommandList(std::vector<std::pair<std::string, std::string> >& commands,
 		                             HumdrumFileSet& infiles);
 		void     initialize         (HumdrumFile& infile);
 		void     removeGlobalFilterLines    (HumdrumFile& infile);
 		void     removeUniversalFilterLines (HumdrumFileSet& infiles);
-		void     splitPipeline      (vector<string>& clist, const string& command);
+		void     splitPipeline      (std::vector<std::string>& clist, const std::string& command);
 
 	private:
-		string   m_variant;        // used with -v option.
+		std::string   m_variant;        // used with -v option.
 		bool     m_debugQ = false; // used with --debug option
 
 };

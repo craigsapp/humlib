@@ -72,13 +72,51 @@ int MuseRecord::getFigureCount(void) {
 
 //////////////////////////////
 //
-// getFigurePointerField -- columns 6 -- 8.
+// getFigurePointerField -- columns 6-8.
 //
 
 string MuseRecord::getFigurePointerField(void) {
 	allowFigurationOnly("getFigurePointerField");
 	return extract(6, 8);
 }
+
+
+
+//////////////////////////////
+//
+// getFigurePointer -- columns 6-8 for figures, removing
+//    spaces.
+//
+
+string MuseRecord::getFigurePointer(void) {
+	return trimSpaces(getFigurePointerField());
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getFigureDuration -- return the duration
+//    in ticks for figured bass (to give an offset to next
+//    figure which happens before another note in the score).
+//
+
+int MuseRecord::getFigureDuration(void) {
+	string value = getFigurePointer();
+	int output = 0;
+	if (value.empty()) {
+		return output;
+	} else {
+		try {
+			output = std::stoi(value);
+		} catch (const std::invalid_argument& e) {
+        cout << "Invalid integer: " << e.what() << ". Setting to 0." << endl;
+        output = 0;
+		}
+	}
+	return output;
+}
+
 
 
 //////////////////////////////

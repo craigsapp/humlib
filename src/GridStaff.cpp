@@ -13,6 +13,7 @@
 //
 
 #include "HumGrid.h"
+#include "HumRegex.h"
 
 using namespace std;
 
@@ -113,22 +114,36 @@ void GridStaff::setNullTokenLayer(int layerindex, SliceType type,
 		cerr << "!!SLICE TYPE: " << (int)type << endl;
 	}
 
+	bool errorQ = false;
 	if (layerindex < (int)this->size()) {
 		if ((at(layerindex) != NULL) && (at(layerindex)->getToken() != NULL)) {
 			if ((string)*at(layerindex)->getToken() == nulltoken) {
 				// there is already a null data token here, so don't
 				// replace it.
 				return;
+			} else {
+				cerr << "GRID STAFF: " << this << endl;
+				cerr << "Warning, replacing existing token: "
+				     << this->at(layerindex)->getToken()
+				     << " with a null token around time "
+				     << nextdur
+				     << " in layerindex " << layerindex
+				     << endl;
+				errorQ = true;
 			}
-			cerr << "Warning, replacing existing token: "
-			     << *this->at(layerindex)->getToken()
-			     << " with a null token around time "
-			     << nextdur
-			     << endl;
 		}
 	}
-	HumdrumToken* token = new  HumdrumToken(nulltoken);
-	setTokenLayer(layerindex, token, nextdur);
+	if (errorQ) {
+		string original = *this->at(layerindex)->getToken();
+		HumRegex hre;
+		hre.replaceDestructive(original, "", ".ZZZ", "g");
+		string value = nulltoken + "ZZZ" + original;
+		HumdrumToken* token = new  HumdrumToken(value);
+		setTokenLayer(layerindex, token, nextdur);
+	} else {
+		HumdrumToken* token = new  HumdrumToken(nulltoken);
+		setTokenLayer(layerindex, token, nextdur);
+	}
 
 }
 

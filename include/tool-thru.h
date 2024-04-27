@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_thru : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void      processFile         (HumdrumFile& infile);
@@ -38,9 +42,9 @@ class Tool_thru : public HumTool {
 		void      example             (void);
 		void      processData         (HumdrumFile& infile);
 		void      usage               (const char* command);
-		void      getLabelSequence    (vector<string>& labelsequence,
-		                               const string& astring);
-		int       getLabelIndex       (vector<string>& labels, string& key);
+		void      getLabelSequence    (std::vector<std::string>& labelsequence,
+		                               const std::string& astring);
+		int       getLabelIndex       (std::vector<std::string>& labels, std::string& key);
 		void      printLabelList      (HumdrumFile& infile);
 		void      printLabelInfo      (HumdrumFile& infile);
 		int       getBarline          (HumdrumFile& infile, int line);
@@ -51,8 +55,8 @@ class Tool_thru : public HumTool {
 		bool      m_infoQ = false;    // used with -i option
 		bool      m_keepQ = false;    // used with -k option
 		bool      m_quietQ = false;   // used with -q option
-		string    m_variation = "";   // used with -v option
-		string    m_realization = ""; // used with -r option
+		std::string    m_variation = "";   // used with -v option
+		std::string    m_realization = ""; // used with -r option
 
 };
 

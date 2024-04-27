@@ -74,14 +74,10 @@ string MuseRecord::getKernNoteStyle(int beams, int stems) {
 
 	// place the rhythm
 	stringstream tempdur;
-	int notetype = getGraphicNoteType();
-	if (timeModificationLeftQ()) {
-		notetype = notetype / 4 * getTimeModificationLeft();
-		if (timeModificationRightQ()) {
-			notetype = notetype * getTimeModificationRight();
-		} else {
-			notetype = notetype * 2;
-		}
+	HumNum notetype = getGraphicNoteType();
+	HumNum mod = getTimeModification();
+	if (mod != 1) {
+		notetype *= mod;
 	}
 
 	// logical duration of the note

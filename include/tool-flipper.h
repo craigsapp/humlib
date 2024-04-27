@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_flipper : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
@@ -36,9 +40,9 @@ class Tool_flipper : public HumTool {
 
 		void     processLine        (HumdrumFile& infile, int index);
 		void     checkForFlipChanges(HumdrumFile& infile, int index);
-		bool     flipSubspines      (vector<vector<HTp>>& flipees);
-		void     flipSpineTokens    (vector<HTp>& subtokens);
-		void     extractFlipees     (vector<vector<HTp>>& flipees,
+		bool     flipSubspines      (std::vector<std::vector<HTp>>& flipees);
+		void     flipSpineTokens    (std::vector<HTp>& subtokens);
+		void     extractFlipees     (std::vector<std::vector<HTp>>& flipees,
 		                             HumdrumFile& infile, int index);
 
 	private:

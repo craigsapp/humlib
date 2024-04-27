@@ -3731,6 +3731,21 @@ ostream& HumdrumToken::printXmlStructureInfo(ostream& out, int level,
 
 //////////////////////////////
 //
+// HumdrumToken::getBeat -- Return the beat (1 indexed)
+//
+
+HumNum HumdrumToken::getBeat(HumNum scale) {
+	if (!m_address.hasOwner()) {
+		return 0;
+	} else {
+		return m_address.getOwner()->getBeat(scale);
+	}
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::printXmlContentInfo -- Print content analysis information.
 // default value: out = cout
 // default value: level = 0

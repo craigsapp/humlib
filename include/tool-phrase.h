@@ -16,8 +16,9 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
-#include <vector>
+#include <ostream>
 #include <string>
+#include <vector>
 
 namespace hum {
 
@@ -30,8 +31,8 @@ class Tool_phrase : public HumTool {
 
 		bool  run                 (HumdrumFileSet& infiles);
 		bool  run                 (HumdrumFile& infile);
-		bool  run                 (const string& indata, ostream& out);
-		bool  run                 (HumdrumFile& infile, ostream& out);
+		bool  run                 (const std::string& indata, std::ostream& out);
+		bool  run                 (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void  analyzeSpineByRests (int index);
@@ -43,16 +44,16 @@ class Tool_phrase : public HumTool {
 		void  removePhraseMarks   (HTp start);
 
 	private:
-		vector<vector<string>>    m_results;
-		vector<HTp>               m_starts;
+		std::vector<std::vector<std::string>>    m_results;
+		std::vector<HTp>               m_starts;
 		HumdrumFile               m_infile;
-		vector<int>               m_pcount;
-		vector<HumNum>            m_psum;
+		std::vector<int>               m_pcount;
+		std::vector<HumNum>            m_psum;
 		bool                      m_markQ;
 		bool                      m_removeQ;
 		bool                      m_remove2Q;
 		bool                      m_averageQ;
-		string                    m_color;
+		std::string               m_color;
 
 };
 

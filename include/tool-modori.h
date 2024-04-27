@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_modori : public HumTool {
 
 		bool     run                          (HumdrumFileSet& infiles);
 		bool     run                          (HumdrumFile& infile);
-		bool     run                          (const string& indata, ostream& out);
-		bool     run                          (HumdrumFile& infile, ostream& out);
+		bool     run                          (const std::string& indata, std::ostream& out);
+		bool     run                          (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile                  (HumdrumFile& infile);
@@ -61,11 +65,11 @@ class Tool_modori : public HumTool {
 		void     convertInstrumentAbbreviationToOriginal (HTp token);
 		void     convertInstrumentAbbreviationToRegular  (HTp token);
 
-		int      getPairedReference           (int index, vector<string>& keys);
+		int      getPairedReference           (int index, std::vector<std::string>& keys);
 		void     storeModOriReferenceRecords  (HumdrumFile& infile);
 		void     processExclusiveInterpretationLine(HumdrumFile& infile, int line);
 		bool     processStaffCompanionSpines  (std::vector<HTp> tokens);
-		bool     processStaffSpines           (vector<HTp>& tokens);
+		bool     processStaffSpines           (std::vector<HTp>& tokens);
 		void     updateLoMo                   (HumdrumFile& infile);
 		void     processLoMo                  (HTp lomo);
 		void     printModoriOutput            (HumdrumFile& infile);

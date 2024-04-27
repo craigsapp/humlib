@@ -155,16 +155,17 @@ class MuseRecord : public MuseRecordBasic {
 
 		// columns 20-22: time modification
 		std::string      getTimeModificationField     (void);
-		std::string      getTimeModification          (void);
+		std::string      getTimeModificationString    (void);
+		HumNum           getTimeModification          (void);
 		std::string      getTimeModificationLeftField (void);
 		std::string      getTimeModificationLeftString(void);
 		int              getTimeModificationLeft      (void);
 		std::string      getTimeModificationRightField(void);
 		std::string      getTimeModificationRightString(void);
 		int              getTimeModificationRight     (void);
-		int              timeModificationQ            (void);
-		int              timeModificationLeftQ        (void);
-		int              timeModificationRightQ       (void);
+		bool             timeModificationQ            (void);
+		bool             timeModificationLeftQ        (void);
+		bool             timeModificationRightQ       (void);
 
 		// column 23: stem direction
 		std::string      getStemDirectionField        (void);
@@ -241,9 +242,13 @@ class MuseRecord : public MuseRecordBasic {
 		// columns 3-5: blank
 
 		// columns 6-8: figure division pointer advancement (duration)
+		// this is the offset to the next figure and is not part
+		// of the note pointer advancement
 		std::string      getFigurePointerField        (void);
+		std::string      getFigurePointer             (void);
 		int              figurePointerQ               (void);
-		// same as note records: getDuration
+		int              getFigureDuration            (void);
+
 
 		// columns 9-12: blank
 

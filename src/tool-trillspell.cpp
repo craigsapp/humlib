@@ -63,8 +63,11 @@ bool Tool_trillspell::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_trillspell::run(HumdrumFile& infile) {
+cerr << "GOT HERE AAA" << endl;
 	processFile(infile);
+cerr << "GOT HERE BBB" << endl;
 	infile.createLinesFromTokens();
+cerr << "GOT HERE CCC" << endl;
 	return true;
 }
 
@@ -197,6 +200,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 				// N.B.: augmented-second intervals are not considered.
 
 				if ((subtok.find("t") != string::npos) && !hre.search(subtok, "[tT]x")) {
+cerr << "FOUND LOW t: " << subtok << endl;
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
@@ -213,6 +217,7 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 						infile[i].token(j)->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("T") != string::npos) && !hre.search(subtok, "[tT]x")) {
+cerr << "FOUND HI t: " << subtok << endl;
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {

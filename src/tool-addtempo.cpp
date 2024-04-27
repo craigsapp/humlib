@@ -41,7 +41,7 @@ namespace hum {
 //
 
 Tool_addtempo::Tool_addtempo(void) {
-	define("q|quarter-notes-per-minute=s:120", "Quarter notes per minute (or list by measure)");
+	define("q|quarter-notes-per-minute=d:120.0", "Quarter notes per minute (or list by measure)");
 }
 
 

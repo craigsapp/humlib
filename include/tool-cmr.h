@@ -17,6 +17,11 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -41,7 +46,7 @@ class cmr_note_info {
 		HumNum   getStartTime     (void);
 		HumNum   getEndTime       (void);
 		int      getMidiPitch     (void);
-		string   getPitch         (void);
+		std::string   getPitch         (void);
 		HTp      getToken         (void);
 		int      getLineIndex     (void);
 		double   getNoteStrength  (void);
@@ -106,7 +111,7 @@ class cmr_group_info {
 		int     getSyncopationCount(void);
 		void    makeInvalid        (void);
 		bool    isValid            (void);
-		string  getPitch           (void);
+		std::string  getPitch      (void);
 		HumNum  getEndTime         (void);
 		HumNum  getGroupDuration   (void);
 		HumNum  getStartTime       (void);
@@ -175,7 +180,7 @@ class Tool_cmr : public HumTool {
 		int              getGroupNoteCount       (void);
 		int 						 getStrengthScore        (void);
 		void             printStatistics         (HumdrumFile& infile);
-		string           getComposer             (HumdrumFile& infile);
+		std::string           getComposer             (HumdrumFile& infile);
 		void             printSummaryStatistics  (HumdrumFile& infile);
 		void             storeVegaData           (HumdrumFile& infile);
 		void             printVegaPlot           (void);

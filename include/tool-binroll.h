@@ -17,6 +17,10 @@
 #include "HumNum.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -28,15 +32,15 @@ class Tool_binroll : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
-		void     processStrand     (vector<vector<char>>& roll, HTp starting,
+		void     processStrand     (std::vector<std::vector<char>>& roll, HTp starting,
 		                            HTp ending);
 		void     printAnalysis     (HumdrumFile& infile,
-		                            vector<vector<char>>& roll);
+		                            std::vector<std::vector<char>>& roll);
 
 	private:
 		HumNum    m_duration;

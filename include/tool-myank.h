@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -70,8 +74,8 @@ class MeasureInfo {
 			tracks = tcount;
 		}
 		int num;          // measure number
-		string stopStyle;  // styling for end of last measure
-		string startStyle; // styling for start of first measure
+		std::string stopStyle;  // styling for end of last measure
+		std::string startStyle; // styling for start of first measure
 		int seg;          // measure segment
 		int start;        // starting line of segment
 		int stop;         // ending line of segment
@@ -79,20 +83,20 @@ class MeasureInfo {
 		HumdrumFile* file;
 
 		// musical settings at start of measure
-		vector<MyCoord> sclef;     // starting clef of segment
-		vector<MyCoord> skeysig;   // starting keysig of segment
-		vector<MyCoord> skey;      // starting key of segment
-		vector<MyCoord> stimesig;  // starting timesig of segment
-		vector<MyCoord> smet;      // starting met of segment
-		vector<MyCoord> stempo;    // starting tempo of segment
+		std::vector<MyCoord> sclef;     // starting clef of segment
+		std::vector<MyCoord> skeysig;   // starting keysig of segment
+		std::vector<MyCoord> skey;      // starting key of segment
+		std::vector<MyCoord> stimesig;  // starting timesig of segment
+		std::vector<MyCoord> smet;      // starting met of segment
+		std::vector<MyCoord> stempo;    // starting tempo of segment
 
 		// musical settings at start of measure
-		vector<MyCoord> eclef;     // ending clef    of segment
-		vector<MyCoord> ekeysig;   // ending keysig  of segment
-		vector<MyCoord> ekey;      // ending key     of segment
-		vector<MyCoord> etimesig;  // ending timesig of segment
-		vector<MyCoord> emet;      // ending met     of segment
-		vector<MyCoord> etempo;    // ending tempo   of segment
+		std::vector<MyCoord> eclef;     // ending clef    of segment
+		std::vector<MyCoord> ekeysig;   // ending keysig  of segment
+		std::vector<MyCoord> ekey;      // ending key     of segment
+		std::vector<MyCoord> etimesig;  // ending timesig of segment
+		std::vector<MyCoord> emet;      // ending met     of segment
+		std::vector<MyCoord> etempo;    // ending tempo   of segment
 };
 
 
@@ -104,62 +108,62 @@ class Tool_myank : public HumTool {
 
 		bool     run                   (HumdrumFileSet& infiles);
 		bool     run                   (HumdrumFile& infile);
-		bool     run                   (const string& indata, ostream& out);
-		bool     run                   (HumdrumFile& infile, ostream& out);
+		bool     run                   (const std::string& indata, std::ostream& out);
+		bool     run                   (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void      initialize            (HumdrumFile& infile);
 		void      example              (void);
-		void      usage                (const string& command);
+		void      usage                (const std::string& command);
 		void      myank                (HumdrumFile& infile,
-		                                vector<MeasureInfo>& outmeasure);
-		void      removeDollarsFromString(string& buffer, int maxx);
-		void      processFieldEntry    (vector<MeasureInfo>& field,
-		                                const string& str,
+		                                std::vector<MeasureInfo>& outmeasure);
+		void      removeDollarsFromString(std::string& buffer, int maxx);
+		void      processFieldEntry    (std::vector<MeasureInfo>& field,
+		                                const std::string& str,
 		                                HumdrumFile& infile, int maxmeasure,
-		                                vector<MeasureInfo>& inmeasures,
-		                                vector<int>& inmap);
-		void      expandMeasureOutList (vector<MeasureInfo>& measureout,
-		                                vector<MeasureInfo>& measurein,
-		                                HumdrumFile& infile, const string& optionstring);
-		void      getMeasureStartStop  (vector<MeasureInfo>& measurelist,
+		                                std::vector<MeasureInfo>& inmeasures,
+		                                std::vector<int>& inmap);
+		void      expandMeasureOutList (std::vector<MeasureInfo>& measureout,
+		                                std::vector<MeasureInfo>& measurein,
+		                                HumdrumFile& infile, const std::string& optionstring);
+		void      getMeasureStartStop  (std::vector<MeasureInfo>& measurelist,
 		                                HumdrumFile& infile);
 		void      printEnding          (HumdrumFile& infile, int lastline, int adjlin);
 		void      printStarting        (HumdrumFile& infile);
 		void      reconcileSpineBoundary(HumdrumFile& infile, int index1, int index2);
 		void      reconcileStartingPosition(HumdrumFile& infile, int index2);
-		void      printJoinLine        (vector<int>& splits, int index, int count);
+		void      printJoinLine        (std::vector<int>& splits, int index, int count);
 		void      printInvisibleMeasure(HumdrumFile& infile, int line);
 		void      fillGlobalDefaults   (HumdrumFile& infile,
-		                                vector<MeasureInfo>& measurein,
-		                                vector<int>& inmap);
+		                                std::vector<MeasureInfo>& measurein,
+		                                std::vector<int>& inmap);
 		void      adjustGlobalInterpretations(HumdrumFile& infile, int ii,
-		                                vector<MeasureInfo>& outmeasures,
+		                                std::vector<MeasureInfo>& outmeasures,
 		                                int index);
 		void      adjustGlobalInterpretationsStart(HumdrumFile& infile, int ii,
-		                                vector<MeasureInfo>& outmeasures,
+		                                std::vector<MeasureInfo>& outmeasures,
 		                                int index);
-		void      getMarkString        (ostream& out, HumdrumFile& infile);
+		void      getMarkString        (std::ostream& out, HumdrumFile& infile);
 		void      printDoubleBarline   (HumdrumFile& infile, int line);
-		void      insertZerothMeasure  (vector<MeasureInfo>& measurelist,
+		void      insertZerothMeasure  (std::vector<MeasureInfo>& measurelist,
 		                                HumdrumFile& infile);
-		void      getMetStates         (vector<vector<MyCoord> >& metstates,
+		void      getMetStates         (std::vector<std::vector<MyCoord> >& metstates,
 		                                HumdrumFile& infile);
 		MyCoord   getLocalMetInfo      (HumdrumFile& infile, int row, int track);
 		int       atEndOfFile          (HumdrumFile& infile, int line);
 		void      processFile          (HumdrumFile& infile);
 		int       getSectionCount      (HumdrumFile& infile);
-		void      getSectionString     (string& sstring, HumdrumFile& infile,
+		void      getSectionString     (std::string& sstring, HumdrumFile& infile,
 		                                int sec);
 		void      collapseSpines       (HumdrumFile& infile, int line);
-		void      printMeasureStart    (HumdrumFile& infile, int line, const string& style);
-		std::string expandMultipliers  (const string& inputstring);
+		void      printMeasureStart    (HumdrumFile& infile, int line, const std::string& style);
+		std::string expandMultipliers  (const std::string& inputstring);
 
-		vector<int> analyzeBarNumbers  (HumdrumFile& infile);
+		std::vector<int> analyzeBarNumbers  (HumdrumFile& infile);
 		int         getBarNumberForLineNumber(int lineNumber);
 		int         getStartLineNumber (void);
 		int         getEndLineNumber   (void);
-		void        printDataLine      (HLp line, bool& startLineHandled, const vector<int>& lastLineResolvedTokenLineIndex, const vector<HumNum>& lastLineDurationsFromNoteStart);
+		void        printDataLine      (HLp line, bool& startLineHandled, const std::vector<int>& lastLineResolvedTokenLineIndex, const std::vector<HumNum>& lastLineDurationsFromNoteStart);
 
 	private:
 		int    m_debugQ      = 0;             // used with --debug option
@@ -177,12 +181,12 @@ class Tool_myank : public HumTool {
 		int    m_barnumtextQ = 0;             // used with -T option
 		int    m_section     = 0;             // used with --section option
 		int    m_sectionCountQ = 0;           // used with --section-count option
-		vector<MeasureInfo> m_measureOutList; // used with -m option
-		vector<MeasureInfo> m_measureInList;  // used with -m option
-		vector<vector<MyCoord> > m_metstates;
+		std::vector<MeasureInfo> m_measureOutList; // used with -m option
+		std::vector<MeasureInfo> m_measureInList;  // used with -m option
+		std::vector<std::vector<MyCoord> > m_metstates;
 
-		string      m_lineRange;              // used with -l option
-		vector<int> m_barNumbersPerLine;      // used with -l option
+		std::string m_lineRange;              // used with -l option
+		std::vector<int> m_barNumbersPerLine;      // used with -l option
 		bool m_hideStarting;                  // used with --hide-starting option
 		bool m_hideEnding;                    // used with --hide-ending option
 

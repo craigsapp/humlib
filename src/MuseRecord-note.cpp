@@ -14,6 +14,7 @@
 
 #include "Convert.h"
 #include "HumRegex.h"
+#include "HumNum.h"
 #include "MuseData.h"
 #include "MuseRecord.h"
 
@@ -1600,35 +1601,46 @@ string MuseRecord::getTimeModificationField(void) {
 
 //////////////////////////////
 //
+// MuseRecord::getTimeModificationString --
+//
+
+string MuseRecord::getTimeModificationString(void) {
+	string output = getTimeModificationField();
+	HumRegex hre;
+	if (hre.search(output, "[1-9A-Z]:[1-9A-Z]")) {
+		return output;
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecord::getTimeModification --
 //
 
-string MuseRecord::getTimeModification(void) {
+HumNum MuseRecord::getTimeModification(void) {
 	string output = getTimeModificationField();
-	int index = 2;
-	while (index >= 0 && output[index] == ' ') {
-		output.resize(index);
-		index--;
-	}
-	if (output.size() > 2) {
-		if (output[0] == ' ') {
-			output[0] = output[1];
-			output[1] = output[2];
-			output.resize(2);
+	HumRegex hre;
+	if (hre.search(output, "([1-9A-Z]):([1-9A-Z])")) {
+		string top = hre.getMatch(1);
+		string bot = hre.getMatch(2);
+		int topint = (int)strtol(top.c_str(), NULL, 36);
+		int botint = (int)strtol(top.c_str(), NULL, 36);
+		HumNum number(topint, botint);
+		return number;
+	} else {
+		if (hre.search(output, "^([1-9A-Z])")) {
+			string value = hre.getMatch(1);
+			int top = (int)strtol(value.c_str(), NULL, 36);
+			// Time modification can be "3  " for triplets.
+			HumNum out(top, 2);
+			return out;
+		} else {
+			return 1;
 		}
 	}
-	if (output.size() > 1) {
-		if (output[0] == ' ') {
-			output[0] = output[1];
-			output.resize(1);
-		}
-	}
-	if (output[0] == ' ') {
-		cerr << "Error: funny error occured in time modification "
-			  << "(columns 20-22): " << getLine() << endl;
-		return "";
-	}
-	return output;
 }
 
 
@@ -1640,8 +1652,11 @@ string MuseRecord::getTimeModification(void) {
 
 string MuseRecord::getTimeModificationLeftField(void) {
 	string output = getTimeModificationField();
-	output.resize(1);
-	return output;
+	HumRegex hre;
+	if (!hre.search(output, "^[1-9A-Z]:[1-9A-Z]$")) {
+		return " ";
+	}
+	return output.substr(0, 1);
 }
 
 
@@ -1653,12 +1668,11 @@ string MuseRecord::getTimeModificationLeftField(void) {
 
 string MuseRecord::getTimeModificationLeftString(void) {
 	string output = getTimeModificationField();
-	if (output[0] == ' ') {
-		output = "";
-	} else {
-		output.resize(1);
+	HumRegex hre;
+	if (!hre.search(output, "^[1-9A-Z]:[1-9A-Z]$")) {
+		return "";
 	}
-	return output;
+	return output.substr(0, 1);
 }
 
 
@@ -1671,8 +1685,8 @@ string MuseRecord::getTimeModificationLeftString(void) {
 int MuseRecord::getTimeModificationLeft(void) {
 	int output = 0;
 	string recordInfo = getTimeModificationLeftString();
-	if (recordInfo[0] == ' ') {
-		output = 0;
+	if (recordInfo.empty()) {
+		return 1;
 	} else {
 		output = (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
@@ -1700,13 +1714,12 @@ string MuseRecord::getTimeModificationRightField(void) {
 //
 
 string MuseRecord::getTimeModificationRightString(void) {
+	HumRegex hre;
 	string output = getTimeModificationField();
-	if (output[2] == ' ') {
-		output = "";
-	} else {
-		output = output[2];
+	if (!hre.search(output, "^[1-9A-Z]:[1-9A-Z]$")) {
+		return " ";
 	}
-	return output;
+	return output.substr(2, 1);
 }
 
 
@@ -1717,15 +1730,15 @@ string MuseRecord::getTimeModificationRightString(void) {
 //
 
 int MuseRecord::getTimeModificationRight(void) {
-	int output = 0;
 	string recordInfo = getTimeModificationRightString();
-	if (recordInfo[2] == ' ') {
-		output = 0;
+	HumRegex hre;
+	if (recordInfo.empty()) {
+		return 1;
+	} else if (!hre.search(recordInfo, "^[1-9A-Z]$")) {
+		return 1;
 	} else {
-		string temp = recordInfo.substr(2);
-		output = (int)strtol(temp.c_str(), NULL, 36);
+		return (int)strtol(recordInfo.c_str(), NULL, 36);
 	}
-	return output;
 }
 
 
@@ -1735,15 +1748,14 @@ int MuseRecord::getTimeModificationRight(void) {
 // MuseRecord::timeModificationQ --
 //
 
-int MuseRecord::timeModificationQ(void) {
-	int output = 0;
+bool MuseRecord::timeModificationQ(void) {
 	string recordInfo = getTimeModificationField();
-	if (recordInfo[0] != ' ' || recordInfo[1] != ' ' || recordInfo[2] != ' ') {
-		output = 1;
+	HumRegex hre;
+	if (hre.search(recordInfo, "^[1-9A-Z]:[1-9A-Z]$")) {
+		return true;
 	} else {
-		output = 0;
+		return false;
 	}
-	return output;
 }
 
 
@@ -1753,15 +1765,16 @@ int MuseRecord::timeModificationQ(void) {
 // MuseRecord::timeModificationLeftQ --
 //
 
-int MuseRecord::timeModificationLeftQ(void) {
-	int output = 0;
+bool MuseRecord::timeModificationLeftQ(void) {
 	string recordInfo = getTimeModificationField();
-	if (recordInfo[0] == ' ') {
-		output = 0;
+	HumRegex hre;
+	string value;
+	value.push_back(recordInfo.at(0));
+	if (hre.search(value, "^[1-9A-Z]$")) {
+		return true;
 	} else {
-		output = 1;
+		return false;
 	}
-	return output;
 }
 
 
@@ -1771,15 +1784,16 @@ int MuseRecord::timeModificationLeftQ(void) {
 // MuseRecord::timeModificationRightQ --
 //
 
-int MuseRecord::timeModificationRightQ(void) {
-	int output = 0;
+bool MuseRecord::timeModificationRightQ(void) {
 	string recordInfo = getTimeModificationField();
-	if (recordInfo[2] == ' ') {
-		output = 0;
+	HumRegex hre;
+	string value;
+	value.push_back(recordInfo.at(0));
+	if (hre.search(value, "^[1-9A-Z]$")) {
+		return true;
 	} else {
-		output = 1;
+		return false;
 	}
-	return output;
 }
 
 

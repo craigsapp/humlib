@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_humsheet : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 		void     printRowClasses   (HumdrumFile& infile, int row);
 		void     printRowContents  (HumdrumFile& infile, int row);

@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_homorhythm2 : public HumTool {
 
 		bool        run                (HumdrumFileSet& infiles);
 		bool        run                (HumdrumFile& infile);
-		bool        run                (const string& indata, ostream& out);
-		bool        run                (HumdrumFile& infile, ostream& out);
+		bool        run                (const std::string& indata, std::ostream& out);
+		bool        run                (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void        processFile        (HumdrumFile& infile);
@@ -37,7 +41,7 @@ class Tool_homorhythm2 : public HumTool {
 	private:
 		double      m_threshold = 0.6;
 		double      m_threshold2 = 0.4;
-		vector<double> m_score;
+		std::vector<double> m_score;
 };
 
 // END_MERGE

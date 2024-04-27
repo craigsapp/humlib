@@ -16,6 +16,9 @@
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
 
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -26,18 +29,18 @@ class Tool_chooser : public HumTool {
 		       	  ~Tool_chooser       () {};
 
 		bool        run                (HumdrumFileSet& infiles);
-		bool        run                (const string& indata);
+		bool        run                (const std::string& indata);
 		bool        run                (HumdrumFileStream& instream);
 
 	protected:
 		void        processFiles       (HumdrumFileSet& infiles);
 		void        initialize         (void);
 
-		void        expandSegmentList  (vector<int>& field, string& fieldstring,
+		void        expandSegmentList  (std::vector<int>& field, std::string& fieldstring,
 		                                int maximum);
-		void        processSegmentEntry(vector<int>& field,
-		                                const string& astring, int maximum);
-		void        removeDollarsFromString(string& buffer, int maximum);
+		void        processSegmentEntry(std::vector<int>& field,
+		                                const std::string& astring, int maximum);
+		void        removeDollarsFromString(std::string& buffer, int maximum);
 
 	private:
 

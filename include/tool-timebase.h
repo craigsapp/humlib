@@ -17,8 +17,9 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
-#include <vector>
+#include <ostream>
 #include <string>
+#include <vector>
 
 namespace hum {
 
@@ -31,8 +32,8 @@ class Tool_timebase : public HumTool {
 
 		bool  run                 (HumdrumFileSet& infiles);
 		bool  run                 (HumdrumFile& infile);
-		bool  run                 (const string& indata, ostream& out);
-		bool  run                 (HumdrumFile& infile, ostream& out);
+		bool  run                 (const std::string& indata, std::ostream& out);
+		bool  run                 (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void   processFile         (HumdrumFile& infile);

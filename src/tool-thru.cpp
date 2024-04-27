@@ -30,11 +30,11 @@ namespace hum {
 //
 
 Tool_thru::Tool_thru(void) {
-	define("v|variation=s:",   "choose the expansion variation");
-	define("l|list=b:",        "print list of labels in file");
-	define("k|keep=b:",        "keep variation interpretations");
-	define("i|info=b:",        "print info list of labels in file");
-	define("r|realization=s:", "alternate relaization label sequence");
+	define("v|variant|variation=s:", "choose the expansion variant");
+	define("l|list=b:",              "print list of labels in file");
+	define("k|keep=b:",              "keep variation interpretations");
+	define("i|info=b:",              "print info list of labels in file");
+	define("r|realization=s:",       "alternate relaization label sequence");
 }
 
 

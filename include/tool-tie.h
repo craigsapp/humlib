@@ -16,6 +16,8 @@
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
+
+#include <ostream>
 #include <string>
 
 namespace hum {
@@ -29,7 +31,7 @@ class Tool_tie : public HumTool {
 
 		bool     run                     (HumdrumFileSet& infiles);
 		bool     run                     (HumdrumFile& infile);
-		bool     run                     (const string& indata, std::ostream& out);
+		bool     run                     (const std::string& indata, std::ostream& out);
 		bool     run                     (HumdrumFile& infile, std::ostream& out);
 
 	protected:

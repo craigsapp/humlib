@@ -39,9 +39,9 @@ class HumdrumFileStream {
 		                HumdrumFileStream  (char** list);
 		                HumdrumFileStream  (const std::vector<std::string>& list);
 		                HumdrumFileStream  (Options& options);
-		                HumdrumFileStream  (const string& datastream);
+		                HumdrumFileStream  (const std::string& datastream);
 
-		void            loadString         (const string& data);
+		void            loadString         (const std::string& data);
 
 		int             setFileList        (char** list);
 		int             setFileList        (const std::vector<std::string>& list);

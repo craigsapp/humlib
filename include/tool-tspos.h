@@ -19,6 +19,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -30,8 +34,8 @@ class Tool_tspos : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void             initialize        (HumdrumFile& infile);
@@ -89,7 +93,7 @@ class Tool_tspos : public HumTool {
 		bool m_triadAttack = false;  // used with -x option
 
 		// Statistical data variables:
-		vector<bool> m_triadState;
+		std::vector<bool> m_triadState;
 
 		// m_partTriadPositions -- count the number of chordal positions by
 		// voice.  The first dimention is the track number of the part, and
@@ -101,10 +105,10 @@ class Tool_tspos : public HumTool {
 		// 4 = count of third positions in partial triadic chords
 		// 5 = count of root positions in partial triadic chords ("open fifths")
 		// 6 = count of fifth positions in partial triadic chords
-		std::vector<vector<int>> m_partTriadPositions;
+		std::vector<std::vector<int>> m_partTriadPositions;
 		int m_positionCount = 7; // entries in 2nd dim. of m_partTriadPositions
 
-		string m_toolName = "tspos";
+		std::string m_toolName = "tspos";
 
 		std::vector<int> m_voiceCount;
 		// m_voice: used with -v option to limit analysis to sonorities that
@@ -119,7 +123,7 @@ class Tool_tspos : public HumTool {
 		bool m_questionQ = true;
 		int  m_toolCount = 0;
 
-		std::vector<string> m_fullNames;
+		std::vector<std::string> m_fullNames;
 };
 
 // END_MERGE

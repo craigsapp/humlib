@@ -38,7 +38,7 @@ class Tool_addtempo : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
@@ -46,10 +46,10 @@ class Tool_addtempo : public HumTool {
 		void    initialize         (void);
 		void    assignTempoChanges (std::vector<double>& tlist,
 		                            HumdrumFile& infile);
-		void    addTempo           (vector<double>& tlist,
+		void    addTempo           (std::vector<double>& tlist,
 		                            HumdrumFile& infile,
 		                            int measure, double tempo);
-		void   addTempoToStart     (vector<double>& tlist,
+		void   addTempoToStart     (std::vector<double>& tlist,
 		                            HumdrumFile& infile, double tempo);
 
 	private:

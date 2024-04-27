@@ -32,29 +32,29 @@ class HumTool : public Options {
 
 		bool          hasAnyText      (void);
 		std::string   getAllText      (void);
-		ostream&      getAllText      (ostream& out);
+		std::ostream& getAllText      (std::ostream& out);
 
 		bool          hasHumdrumText  (void);
 		std::string   getHumdrumText  (void);
-		ostream&      getHumdrumText  (ostream& out);
+		std::ostream& getHumdrumText  (std::ostream& out);
 		void          suppressHumdrumFileOutput(void);
 
 		bool          hasJsonText     (void);
 		std::string   getJsonText     (void);
-		ostream&      getJsonText     (ostream& out);
+		std::ostream& getJsonText     (std::ostream& out);
 
 		bool          hasFreeText     (void);
 		std::string   getFreeText     (void);
-		ostream&      getFreeText     (ostream& out);
+		std::ostream& getFreeText     (std::ostream& out);
 
 		bool          hasWarning      (void);
 		std::string   getWarning      (void);
-		ostream&      getWarning      (ostream& out);
+		std::ostream& getWarning      (std::ostream& out);
 
 		bool          hasError        (void);
 		std::string   getError        (void);
-		ostream&      getError        (ostream& out);
-		void          setError        (const string& message);
+		std::ostream& getError        (std::ostream& out);
+		void          setError        (const std::string& message);
 
 		virtual void  finally         (void) { };
 

@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,15 +31,15 @@ class Tool_double : public HumTool {
 
 		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
-		bool     run                (const string& indata, ostream& out);
-		bool     run                (HumdrumFile& infile, ostream& out);
+		bool     run                (const std::string& indata, std::ostream& out);
+		bool     run                (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     initialize         (HumdrumFile& infile);
 		void     processFile        (HumdrumFile& infile);
 		void     doubleRhythms      (HumdrumFile& infile);
 		void     terminalBreveToTerminalLong(HumdrumFile& infile);
-		void     processBeamsForMeasure(vector<HTp>& notes);
+		void     processBeamsForMeasure(std::vector<HTp>& notes);
 		void     adjustBeams        (HumdrumFile& infile);
 		void     adjustBeams        (HTp sstart, HTp send);
 

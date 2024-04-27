@@ -17,6 +17,9 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+
 namespace hum {
 
 // START_MERGE
@@ -28,7 +31,7 @@ class Tool_addkey : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
@@ -37,8 +40,8 @@ class Tool_addkey : public HumTool {
 		void    getLineIndexes     (HumdrumFile& infile);
 		void    insertReferenceKey (HumdrumFile& infile);
 		void    addInputKey        (HumdrumFile& infile);
-		void    insertKeyDesig     (HumdrumFile& infile, const string& keyDesig);
-		void    printKeyDesig      (HumdrumFile& infile, int index, const string& desig, int direction);
+		void    insertKeyDesig     (HumdrumFile& infile, const std::string& keyDesig);
+		void    printKeyDesig      (HumdrumFile& infile, int index, const std::string& desig, int direction);
 
 	private:
 		std::string m_key;

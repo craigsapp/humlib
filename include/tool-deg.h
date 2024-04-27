@@ -19,6 +19,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -68,7 +72,7 @@ class Tool_deg : public HumTool {
 				static void     setShowTies    (bool state) { m_showTiesQ = state;  }
 				static void     setShowZeros   (bool state) { m_showZerosQ = state; }
 				static void     setShowOctaves (bool state) { m_octaveQ = state; }
-				static void     setForcedKey   (const string& key) { m_forcedKey = key; }
+				static void     setForcedKey   (const std::string& key) { m_forcedKey = key; }
 
 			protected:  // ScaleDegree class
 				std::string     generateDegDataToken     (void) const;
@@ -172,16 +176,16 @@ class Tool_deg : public HumTool {
 		void            initialize               (void);
 
 		bool            setupSpineInfo           (HumdrumFile& infile);
-		void            prepareDegSpine          (vector<vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
+		void            prepareDegSpine          (std::vector<std::vector<ScaleDegree>>& degspine, HTp kernstart, HumdrumFile& infil);
 		void            printDegScore            (HumdrumFile& infile);
 		void            printDegScoreInterleavedWithInputScore(HumdrumFile& infile);
 		std::string     createOutputHumdrumLine  (HumdrumFile& infile, int lineIndex);
       std::string     prepareMergerLine        (std::vector<std::vector<std::string>>& merge);
 		void            calculateManipulatorOutputForSpine(std::vector<std::string>& lineout, std::vector<std::string>& linein);
 		std::string     createRecipInterpretation(const std::string& starttok, int refLine);
-		std::string     createDegInterpretation  (const string& degtok, int refLine, bool addPreSpine);
-		std::string     printDegInterpretation   (const string& interp, HumdrumFile& infile, int lineIndex);
-		void            getModeAndTonic          (string& mode, int& b40tonic, const string& token);
+		std::string     createDegInterpretation  (const std::string& degtok, int refLine, bool addPreSpine);
+		std::string     printDegInterpretation   (const std::string& interp, HumdrumFile& infile, int lineIndex);
+		void            getModeAndTonic          (std::string& mode, int& b40tonic, const std::string& token);
 
 		bool            isDegAboveLine           (HumdrumFile& infile, int lineIndex);
 		bool            isDegArrowLine           (HumdrumFile& infile, int lineIndex);
@@ -192,15 +196,15 @@ class Tool_deg : public HumTool {
 		bool            isDegSolfegeLine         (HumdrumFile& infile, int lineIndex);
 		bool            isKeyDesignationLine     (HumdrumFile& infile, int lineIndex);
 
-		void            checkAboveStatus         (string& value, bool arrowStatus);
-		void            checkArrowStatus         (string& value, bool arrowStatus);
-		void            checkBoxStatus           (string& value, bool arrowStatus);
-		void            checkCircleStatus        (string& value, bool arrowStatus);
-		void            checkColorStatus         (string& value, bool arrowStatus);
-		void            checkHatStatus           (string& value, bool arrowStatus);
-		void            checkSolfegeStatus       (string& value, bool arrowStatus);
+		void            checkAboveStatus         (std::string& value, bool arrowStatus);
+		void            checkArrowStatus         (std::string& value, bool arrowStatus);
+		void            checkBoxStatus           (std::string& value, bool arrowStatus);
+		void            checkCircleStatus        (std::string& value, bool arrowStatus);
+		void            checkColorStatus         (std::string& value, bool arrowStatus);
+		void            checkHatStatus           (std::string& value, bool arrowStatus);
+		void            checkSolfegeStatus       (std::string& value, bool arrowStatus);
 
-		void            checkKeyDesignationStatus(string& value, int keyDesignationStatus);
+		void            checkKeyDesignationStatus(std::string& value, int keyDesignationStatus);
 
 	private: // Tool_deg class
 

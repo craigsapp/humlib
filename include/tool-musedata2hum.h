@@ -85,6 +85,16 @@ class Tool_musedata2hum : public HumTool {
 		double m_tempo = 0.0;          // for initial tempo from MIDI settings
 		bool m_aboveBelowKernRdf = false; // output RDF**kern above/below markers
 
+		// m_measureLineIndex -- keep track of index for processed
+		// measure for debugging.
+		int m_measureLineIndex = -1;
+
+		// m_figuredOffset -- increment for the next figure bass offset.
+		int m_figureOffset = 0;
+
+		// m_quarterDivisions -- currently processed $Q value.
+		int m_quarterDivisions = 0;
+
 		std::map<std::string, bool> m_usedReferences;
 		std::vector<std::string> m_postReferences;
 

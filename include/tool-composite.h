@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -42,7 +46,7 @@ class Tool_composite : public HumTool {
 		void        assignGroups              (HumdrumFile& infile);
 		void        analyzeLineGroups         (HumdrumFile& infile);
 		void        analyzeLineGroup          (HumdrumFile& infile, int line,
-		                                       const string& target);
+		                                       const std::string& target);
 		void        extractGroup              (HumdrumFile& infile, const std::string &target);
 		void        getNumericGroupStates     (std::vector<int>& states, HumdrumFile& infile, const std::string& tgroup);
 		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
@@ -73,8 +77,8 @@ class Tool_composite : public HumTool {
 		void        getGroupRhythms           (std::vector<std::string>& rhythms,
 		                                       std::vector<HumNum>& durs, std::vector<int>& states,
 		                                       HumdrumFile& infile);
-		int         typeStringToInt           (const string& value);
-		void        addNumericAnalyses        (ostream& output, HumdrumFile& infile, int line,
+		int         typeStringToInt           (const std::string& value);
+		void        addNumericAnalyses        (std::ostream& output, HumdrumFile& infile, int line,
 		                                       std::vector<std::vector<double>>&  rhythmIndex);
 		void        analyzeOutputVariables(HumdrumFile& infile);
 		std::string getTimeSignature          (HumdrumFile& infile, int line, const std::string& group);
@@ -86,13 +90,13 @@ class Tool_composite : public HumTool {
 		void        addTimeSignatureChanges   (HumdrumFile& output, HumdrumFile& infile);
 		void        addMeterSignatureChanges  (HumdrumFile& output, HumdrumFile& infile);
 		void        adjustBadCoincidenceRests (HumdrumFile& output, HumdrumFile& infile);
-		HTp         fixBadRestRhythm          (HTp token, string& rhythm, HumNum tstop, HumNum tsbot);
+		HTp         fixBadRestRhythm          (HTp token, std::string& rhythm, HumNum tstop, HumNum tsbot);
 		std::string generateSizeLine          (HumdrumFile& output, HumdrumFile& input, int line);
 		void        convertNotesToRhythms     (HumdrumFile& infile);
-		int         getEventCount             (std::vector<string>& data);
-		void        fixTiedNotes              (std::vector<string>& data, HumdrumFile& infile);
-		void        doOnsetAnalysisCoincidence(vector<double>& output,
-		                                       vector<double>& inputA, vector<double>& inputB);
+		int         getEventCount             (std::vector<std::string>& data);
+		void        fixTiedNotes              (std::vector<std::string>& data, HumdrumFile& infile);
+		void        doOnsetAnalysisCoincidence(std::vector<double>& output,
+		                                       std::vector<double>& inputA, std::vector<double>& inputB);
 		void        checkForAutomaticGrouping (HumdrumFile& infile);
 
 		// Numeric analysis functions:
@@ -100,7 +104,7 @@ class Tool_composite : public HumTool {
 		void        doOnsetAnalyses           (HumdrumFile& infile);
 		void        doOnsetAnalysis           (std::vector<double>& analysis,
 		                                       HumdrumFile& infile,
-		                                       const string& targetGroup);
+		                                       const std::string& targetGroup);
 
 		void        doAccentAnalyses          (HumdrumFile& infile);
 

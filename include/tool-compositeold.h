@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_compositeold : public HumTool {
 
 		bool        run                  (HumdrumFileSet& infiles);
 		bool        run                  (HumdrumFile& infile);
-		bool        run                  (const std::string& indata, ostream& out);
-		bool        run                  (HumdrumFile& infile, ostream& out);
+		bool        run                  (const std::string& indata, std::ostream& out);
+		bool        run                  (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void        processFile          (HumdrumFile& infile);
@@ -62,13 +66,13 @@ class Tool_compositeold : public HumTool {
 		void        getBeamedNotes       (std::vector<HTp>& notes, HTp starting);
 		void        getPitches           (std::vector<int>& pitches, HTp token);
 		void        addLabelsAndStria    (HumdrumFile& infile);
-		void        addLabels            (HTp sstart, int labelIndex, const string& label,
-		                                  int abbrIndex, const string& abbr);
+		void        addLabels            (HTp sstart, int labelIndex, const std::string& label,
+		                                  int abbrIndex, const std::string& abbr);
 		void        addStria             (HumdrumFile& infile, HTp spinestart);
 		void        addVerseLabels       (HumdrumFile& infile, HTp spinestart);
 		void        addVerseLabels2      (HumdrumFile& infile, HTp spinestart);
-		bool        pitchesEqual         (vector<int>& pitches1, vector<int>& pitches2);
-		void        mergeTremoloGroup    (vector<HTp>& notes, vector<int> groups, int group);
+		bool        pitchesEqual         (std::vector<int>& pitches1, std::vector<int>& pitches2);
+		void        mergeTremoloGroup    (std::vector<HTp>& notes, std::vector<int> groups, int group);
 		bool        onlyAuxTremoloNotes  (HumdrumFile& infile, int line);
 		void        removeAuxTremolosFromCompositeRhythm(HumdrumFile& infile);
 		void        markTogether         (HumdrumFile& infile, int direction);
@@ -79,41 +83,41 @@ class Tool_compositeold : public HumTool {
 		void        analyzeNestingDataGroups(HumdrumFile& infile, int direction);
 		void        analyzeNestingDataAll(HumdrumFile& infile, int direction);
 		void        getNestData          (HTp spine, int& total, int& coincide);
-		void        getCoincidenceRhythms(vector<string>& rhythms, vector<int>& coincidences,
+		void        getCoincidenceRhythms(std::vector<std::string>& rhythms, std::vector<int>& coincidences,
 		                                  HumdrumFile& infile);
-		void        fillInCoincidenceRhythm(vector<int>& coincidences,
+		void        fillInCoincidenceRhythm(std::vector<int>& coincidences,
 		                                  HumdrumFile& infile, int direction);
 		void        processCoincidenceInterpretation(HumdrumFile& infile, HTp token);
 		bool        hasPipeRdf           (HumdrumFile& infile);
-		void        extractGroup         (HumdrumFile& infile, const string &target);
-		void        backfillGroup        (vector<vector<string>>& curgroup, HumdrumFile& infile,
-		                                  int line, int track, int subtrack, const string& group);
+		void        extractGroup         (HumdrumFile& infile, const std::string &target);
+		void        backfillGroup        (std::vector<std::vector<std::string>>& curgroup, HumdrumFile& infile,
+		                                  int line, int track, int subtrack, const std::string& group);
 
 		void        analyzeComposite      (HumdrumFile& infile);
-		void        analyzeCompositeOnsets(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeAccents(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeOrnaments(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeSlurs(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
-		void        analyzeCompositeTotal(HumdrumFile& infile, vector<HTp>& groups, vector<bool>& tracks);
+		void        analyzeCompositeOnsets(HumdrumFile& infile, std::vector<HTp>& groups, std::vector<bool>& tracks);
+		void        analyzeCompositeAccents(HumdrumFile& infile, std::vector<HTp>& groups, std::vector<bool>& tracks);
+		void        analyzeCompositeOrnaments(HumdrumFile& infile, std::vector<HTp>& groups, std::vector<bool>& tracks);
+		void        analyzeCompositeSlurs(HumdrumFile& infile, std::vector<HTp>& groups, std::vector<bool>& tracks);
+		void        analyzeCompositeTotal(HumdrumFile& infile, std::vector<HTp>& groups, std::vector<bool>& tracks);
 
 		void        getCompositeSpineStarts(std::vector<HTp>& groups, HumdrumFile& infile);
-		std::vector<int> getExpansionList(vector<bool>& tracks, int maxtrack, int count);
-		std::string makeExpansionString(vector<int>& tracks);
+		std::vector<int> getExpansionList(std::vector<bool>& tracks, int maxtrack, int count);
+		std::string makeExpansionString(std::vector<int>& tracks);
 		void        doCoincidenceAnalysis(HumdrumFile& outfile, HumdrumFile& infile,
 		                                  int ctrack, HTp compositeoldStart);
 		void        doTotalAnalysis(HumdrumFile& outfile, HumdrumFile& infile, int ctrack);
 		void        doGroupAnalyses(HumdrumFile& outfile, HumdrumFile& infile);
 		int         countNoteOnsets(HTp token);
-		void        doTotalOnsetAnalysis(vector<double>& analysis, HumdrumFile& infile,
-		                                  int track, vector<bool>& tracks);
-		void        doGroupOnsetAnalyses(vector<double>& analysisA,
-		                                  vector<double>& analysisB,
+		void        doTotalOnsetAnalysis(std::vector<double>& analysis, HumdrumFile& infile,
+		                                  int track, std::vector<bool>& tracks);
+		void        doGroupOnsetAnalyses(std::vector<double>& analysisA,
+		                                  std::vector<double>& analysisB,
 		                                  HumdrumFile& infile);
-		void        doCoincidenceOnsetAnalysis(vector<vector<double>>& analysis);
-		void        insertAnalysesIntoFile(HumdrumFile& outfile, vector<string>& spines,
-		                                   vector<int>& trackMap, vector<bool>& tracks);
-		void        assignAnalysesToVdataTracks(vector<vector<double>*>& data,
-		                                   vector<string>& spines, HumdrumFile& outfile);
+		void        doCoincidenceOnsetAnalysis(std::vector<std::vector<double>>& analysis);
+		void        insertAnalysesIntoFile(HumdrumFile& outfile, std::vector<std::string>& spines,
+		                                   std::vector<int>& trackMap, std::vector<bool>& tracks);
+		void        assignAnalysesToVdataTracks(std::vector<std::vector<double>*>& data,
+		                                   std::vector<std::string>& spines, HumdrumFile& outfile);
 
 	private:
 		std::string m_pitch       = "eR";   // pitch to display for compositeold rhythm
@@ -145,11 +149,11 @@ class Tool_compositeold : public HumTool {
 		bool        m_analysisTotalQ    = false;   // used with -T option
 		bool        m_analysisQ          = false;   // union of -paost options
 		bool        m_nozerosQ           = false;   // used with -Z option
-		vector<vector<double>> m_analysisOnsets;    // used with -P
-		vector<vector<double>> m_analysisAccents;   // used with -A
-		vector<vector<double>> m_analysisOrnaments; // used with -O
-		vector<vector<double>> m_analysisSlurs;     // used with -S
-		vector<vector<double>> m_analysisTotal;    // used with -T
+		std::vector<std::vector<double>> m_analysisOnsets;    // used with -P
+		std::vector<std::vector<double>> m_analysisAccents;   // used with -A
+		std::vector<std::vector<double>> m_analysisOrnaments; // used with -O
+		std::vector<std::vector<double>> m_analysisSlurs;     // used with -S
+		std::vector<std::vector<double>> m_analysisTotal;    // used with -T
 
 };
 

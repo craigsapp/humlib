@@ -17,6 +17,8 @@
 #include "HumdrumFile.h"
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -31,18 +33,18 @@ class Tool_periodicity : public HumTool {
 
 		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile);
-		bool     run                (const string& indata, ostream& out);
-		bool     run                (HumdrumFile& infile, ostream& out);
+		bool     run                (const std::string& indata, std::ostream& out);
+		bool     run                (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     initialize         (HumdrumFile& infile);
 		void     processFile        (HumdrumFile& infile);
-		void     fillAttackGrids    (HumdrumFile& infile, vector<vector<double>>& grids, HumNum minrhy);
-		void     printAttackGrid    (ostream& out, HumdrumFile& infile, vector<vector<double>>& grids, HumNum minrhy);
-		void     doAnalysis         (vector<vector<double>>& analysis, int level, vector<double>& grid);
-		void     doPeriodicityAnalysis(vector<vector<double>> & analysis, vector<double>& grid, HumNum minrhy);
-		void     printPeriodicityAnalysis(ostream& out, vector<vector<double>>& analysis);
-		void     printSvgAnalysis(ostream& out, vector<vector<double>>& analysis, HumNum minrhy);
+		void     fillAttackGrids    (HumdrumFile& infile, std::vector<std::vector<double>>& grids, HumNum minrhy);
+		void     printAttackGrid    (std::ostream& out, HumdrumFile& infile, std::vector<std::vector<double>>& grids, HumNum minrhy);
+		void     doAnalysis         (std::vector<std::vector<double>>& analysis, int level, std::vector<double>& grid);
+		void     doPeriodicityAnalysis(std::vector<std::vector<double>> & analysis, std::vector<double>& grid, HumNum minrhy);
+		void     printPeriodicityAnalysis(std::ostream& out, std::vector<std::vector<double>>& analysis);
+		void     printSvgAnalysis(std::ostream& out, std::vector<std::vector<double>>& analysis, HumNum minrhy);
 		void     getColorMapping(double input, double& hue, double& saturation, double& lightness);
 
 	private:

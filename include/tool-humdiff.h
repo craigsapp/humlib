@@ -17,7 +17,9 @@
 #include "HumdrumFile.h"
 #include "HumdrumFileSet.h"
 
-#include <iostream>
+#include <ostream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -30,11 +32,11 @@ namespace hum {
 class TimePoint {
 	public:
 		// file: pointers to the file in which the index refers to
-		vector<HumdrumFile*> file;
+		std::vector<HumdrumFile*> file;
 
 		// index :: A list of indexes for the lines at which the given timestamp
 		// occurs in each file.  The first index is for the reference work.
-		vector<int> index;
+		std::vector<int> index;
 
 		// timestamp :: The duration from the start of the score to given time in score.
 		HumNum timestamp = -1;
@@ -56,7 +58,7 @@ class TimePoint {
 class NotePoint {
 	public:
 		HTp         token          = NULL;   // Humdrum token that contains note
-		string      subtoken;                // string that represents not (token may be chord)
+		std::string subtoken;                // string that represents not (token may be chord)
 		int         subindex       = -1;     // subtoken index of note (in chord)
 		int         measure        = -1;     // measure number that note is found
 		HumNum      measurequarter = -1;     // distance from start of measure to note
@@ -67,7 +69,7 @@ class NotePoint {
 		int         processed      = 0;      // has note been processed/matched
 		int         sourceindex    = -1;     // source file index for note
 		int         tpindex        = -1;     // timepoint index of note in source
-		vector<int> matched;       // indexes to the location of the note in TimePoint list.
+		std::vector<int> matched;       // indexes to the location of the note in TimePoint list.
 		                           // the index indicate which score the match is related to,
 		                           // and a value of -1 means there is no equivalent timepoint.
 		void clear(void) {
@@ -99,13 +101,13 @@ class Tool_humdiff : public HumTool {
 	protected:
 		void     compareFiles       (HumdrumFile& reference, HumdrumFile& alternate);
 
-		void     compareTimePoints  (vector<vector<TimePoint>>& timepoints, HumdrumFile& reference, HumdrumFile& alternate);
-		void     extractTimePoints  (vector<TimePoint>& points, HumdrumFile& infile);
-		void     printTimePoints    (vector<TimePoint>& timepoints);
-		void     compareLines       (HumNum minval, vector<int>& indexes, vector<vector<TimePoint>>& timepoints, vector<HumdrumFile*> infiles);
-		void     getNoteList        (vector<NotePoint>& notelist, HumdrumFile& infile, int line, int measure, int sourceindex, int tpindex);
-		int      findNoteInList     (NotePoint& np, vector<NotePoint>& nps);
-		void     printNotePoints    (vector<NotePoint>& notelist);
+		void     compareTimePoints  (std::vector<std::vector<TimePoint>>& timepoints, HumdrumFile& reference, HumdrumFile& alternate);
+		void     extractTimePoints  (std::vector<TimePoint>& points, HumdrumFile& infile);
+		void     printTimePoints    (std::vector<TimePoint>& timepoints);
+		void     compareLines       (HumNum minval, std::vector<int>& indexes, std::vector<std::vector<TimePoint>>& timepoints, std::vector<HumdrumFile*> infiles);
+		void     getNoteList        (std::vector<NotePoint>& notelist, HumdrumFile& infile, int line, int measure, int sourceindex, int tpindex);
+		int      findNoteInList     (NotePoint& np, std::vector<NotePoint>& nps);
+		void     printNotePoints    (std::vector<NotePoint>& notelist);
 		void     markNote           (NotePoint& np);
 
 	private:
@@ -114,8 +116,8 @@ class Tool_humdiff : public HumTool {
 
 };
 
-ostream& operator<<(ostream& out, TimePoint& tp);
-ostream& operator<<(ostream& out, NotePoint& np);
+std::ostream& operator<<(std::ostream& out, TimePoint& tp);
+std::ostream& operator<<(std::ostream& out, NotePoint& np);
 
 
 // END_MERGE

@@ -23,27 +23,27 @@ namespace hum {
 
 class Tool_autoaccid : public HumTool {
 	public:
-		         Tool_autoaccid    (void);
-		        ~Tool_autoaccid    () {};
+		             Tool_autoaccid    (void);
+		            ~Tool_autoaccid    () {};
 
-		bool     run               (HumdrumFileSet& infiles);
-		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool         run               (HumdrumFileSet& infiles);
+		bool         run               (HumdrumFile& infile);
+		bool         run               (const std::string& indata, std::ostream& out);
+		bool         run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
-		void    processFile        (HumdrumFile& infile);
-		void    initialize         (void);
-		void    addAccidentalInfo  (HTp token);
-		void    removeAccidentalQualifications(HumdrumFile& infile);
-		void    addAccidentalQualifications(HumdrumFile& infile);
-		string  setVisualState     (const string& input, bool state);
+		void        processFile        (HumdrumFile& infile);
+		void        initialize         (void);
+		void        addAccidentalInfo  (HTp token);
+		void        removeAccidentalQualifications(HumdrumFile& infile);
+		void        addAccidentalQualifications(HumdrumFile& infile);
+		std::string setVisualState     (const std::string& input, bool state);
 
 	private:
-		bool    m_visualQ;
-		bool    m_hiddenQ;
-		bool    m_removeQ;
-		bool    m_cautionQ;
+		bool         m_visualQ;
+		bool         m_hiddenQ;
+		bool         m_removeQ;
+		bool         m_cautionQ;
 
 };
 

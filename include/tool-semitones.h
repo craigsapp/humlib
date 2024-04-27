@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -45,7 +49,7 @@ class Tool_semitones : public HumTool {
 		int         filterData(HTp token);
 		std::vector<HTp> getTieGroup(HTp token);
 		HTp         getNextNote(HTp token);
-		bool        hasTieContinue(const string& value);
+		bool        hasTieContinue(const std::string& value);
 
 	private:
 

@@ -11,6 +11,8 @@
 //
 
 #include "tool-musedata2hum.h"
+#include "tool-trillspell.h"
+
 #include "Convert.h"
 #include "HumRegex.h"
 #include "HumGrid.h"
@@ -147,11 +149,16 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
+
 	if (needsAboveBelowKernRdf()) {
 		outfile.appendLine("!!!RDF**kern: > = above");
 		outfile.appendLine("!!!RDF**kern: < = above");
 	}
+
 	outfile.createLinesFromTokens();
+
+	Tool_trillspell trillspell;
+	trillspell.run(outfile);
 
 	// Convert comments in header of first part:
 	int ii = groupMemberIndex[0];
@@ -392,6 +399,7 @@ bool Tool_musedata2hum::convertPart(HumGrid& outdata, MuseDataSet& mds, int inde
 	bool status = true;
 	int i = 0;
 	while (i < part.getLineCount()) {
+		m_measureLineIndex = i;
 		i = convertMeasure(outdata, part, partindex, i);
 	}
 
@@ -555,6 +563,10 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 		layer = layer - 1;
 	}
 
+	if (mr.isAnyNoteOrRest()) {
+		m_figureOffset = 0;
+	}
+
 	if (mr.isDirection()) {
 		return;
 	}
@@ -579,6 +591,10 @@ void Tool_musedata2hum::convertLine(GridMeasure* gm, MuseRecord& mr) {
 			} else {
 				setInitialOmd(mtempo);
 			}
+		}
+
+		if (!attributes["Q"].empty()) {
+			m_quarterDivisions = std::stoi(attributes["Q"]);
 		}
 
 		string mclef = attributes["C"];
@@ -771,11 +787,19 @@ void Tool_musedata2hum::addTextDirection(GridMeasure* gm, int part, int staff,
 void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HumNum timestamp, int part, int maxstaff) {
 	string fh = mr.getFigureString();
+	int figureDuration = mr.getFigureDuration();
 	fh = Convert::museFiguredBassToKernFiguredBass(fh);
+	if (m_figureOffset > 0) {
+		if (m_quarterDivisions > 0) {
+			HumNum offset(m_figureOffset, m_quarterDivisions);
+			timestamp + offset;
+		}
+	}
 	if (fh.find(":") == string::npos) {
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		m_figureOffset += figureDuration;
 		return;
 	}
 
@@ -783,6 +807,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		m_figureOffset += figureDuration;
 		return;
 	}
 
@@ -830,6 +855,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 		HTp fhtok = new HumdrumToken(fh);
 		m_lastfigure = fhtok;
 		gm->addFiguredBass(fhtok, timestamp, part, maxstaff);
+		m_figureOffset += figureDuration;
 		return;
 	}
 
@@ -848,6 +874,7 @@ void Tool_musedata2hum::addFiguredHarmony(MuseRecord& mr, GridMeasure* gm,
 	HTp newtok = new HumdrumToken(fh);
 	m_lastfigure = newtok;
 	gm->addFiguredBass(newtok, timestamp, part, maxstaff);
+	m_figureOffset += figureDuration;
 }
 
 

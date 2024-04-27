@@ -36,10 +36,15 @@ class Tool_humbreak : public HumTool {
 		void    addBreaks          (HumdrumFile& infile);
 		void    removeBreaks       (HumdrumFile& infile);
 		void    convertPageToLine  (HumdrumFile& infile);
+		void    markLineBreakMeasures(HumdrumFile& infile);
 
 	private:
 		std::map<int, int> m_lineMeasures;  // list of measures to add line breaks to
 		std::map<int, int> m_pageMeasures;  // list of measures to add page breaks to
+
+		std::map<int, int> m_lineOffset;  // measure offsets for measure breaks
+		std::map<int, int> m_pageOffset;  // measure offsets for page breaks
+
 		std::string m_group = "original";
 		bool m_removeQ = false;
 		bool m_page2lineQ = false;

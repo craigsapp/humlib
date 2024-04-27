@@ -16,7 +16,9 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
-#include <iostream>
+#include <ostream>
+#include <string>
+#include <vector>
 
 namespace hum {
 
@@ -121,9 +123,9 @@ class MeasureComparisonGrid {
 		std::string  getQoff2                  (int index);
 		double       getScoreDuration2         (void);
 
-		ostream&     printCorrelationGrid      (ostream& out = std::cout);
-		ostream&     printCorrelationDiagonal  (ostream& out = std::cout);
-		ostream&     printSvgGrid              (ostream& out = std::cout);
+		std::ostream&     printCorrelationGrid      (std::ostream& out = std::cout);
+		std::ostream&     printCorrelationDiagonal  (std::ostream& out = std::cout);
+		std::ostream&     printSvgGrid              (std::ostream& out = std::cout);
 		void         getColorMapping           (double input, double& hue, double& saturation,
 				 double& lightness);
 
@@ -142,8 +144,8 @@ class Tool_simat : public HumTool {
 
 		bool     run                (HumdrumFileSet& infiles);
 		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2);
-		bool     run                (const string& indata1, const string& indata2, ostream& out);
-		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2, ostream& out);
+		bool     run                (const std::string& indata1, const std::string& indata2, std::ostream& out);
+		bool     run                (HumdrumFile& infile1, HumdrumFile& infile2, std::ostream& out);
 
 	protected:
 		void     initialize         (HumdrumFile& infile1, HumdrumFile& infile2);

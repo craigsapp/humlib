@@ -16,6 +16,11 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,14 +32,14 @@ class Tool_addic : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 		int      getInstrumentCodeIndex(HumdrumFile& infile);
 		int      getInstrumentClassIndex(HumdrumFile& infile);
 		void     updateInstrumentClassLine(HumdrumFile& infile, int codeIndex, int classIndex);
 		std::string makeClassLine(HumdrumFile& infile, int codeIndex);
-		std::string getInstrumentClass(const string& code);
+		std::string getInstrumentClass(const std::string& code);
 
 
 	protected:

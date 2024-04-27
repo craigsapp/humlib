@@ -17,6 +17,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -28,13 +32,13 @@ class Tool_mens2kern : public HumTool {
 
 		bool     run                 (HumdrumFileSet& infiles);
 		bool     run                 (HumdrumFile& infile);
-		bool     run                 (const string& indata, ostream& out);
-		bool     run                 (HumdrumFile& infile, ostream& out);
+		bool     run                 (const std::string& indata, std::ostream& out);
+		bool     run                 (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile         (HumdrumFile& infile);
 		void     initialize          (void);
-		void     processMelody       (vector<HTp>& melody);
+		void     processMelody       (std::vector<HTp>& melody);
 		std::string mens2kernRhythm  (const std::string& rhythm,
 		                              bool altera,  bool perfecta,
 		                              bool imperfecta, int maxima_def, int longa_def,

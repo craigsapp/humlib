@@ -20,47 +20,45 @@
 #include <string>
 #include <sstream>
 
-using namespace std;
-
 namespace hum {
 
 // START_MERGE
 
 class Option_register {
 	public:
-		         Option_register     (void);
-		         Option_register     (const string& aDefinition, char aType,
-		                                  const string& aDefaultOption);
-		         Option_register     (const string& aDefinition, char aType,
-		                                  const string& aDefaultOption,
-		                                  const string& aModifiedOption);
-		         Option_register     (const Option_register& reg);
-		        ~Option_register     ();
+		                 Option_register (void);
+		                 Option_register (const std::string& aDefinition, char aType,
+		                                  const std::string& aDefaultOption);
+		                 Option_register (const std::string& aDefinition, char aType,
+		                                  const std::string& aDefaultOption,
+		                                  const std::string& aModifiedOption);
+		                 Option_register (const Option_register& reg);
+		                ~Option_register ();
 
-		Option_register& operator=(const Option_register& reg);
-		void     clearModified      (void);
-		string   getDefinition      (void);
-		string   getDefault         (void);
-		string   getOption          (void);
-		string   getModified        (void);
-		string   getDescription     (void);
-		bool     isModified         (void);
-		char     getType            (void);
-		void     reset              (void);
-		void     setDefault         (const string& aString);
-		void     setDefinition      (const string& aString);
-		void     setDescription     (const string& aString);
-		void     setModified        (const string& aString);
-		void     setType            (char aType);
-		ostream& print              (ostream& out);
+		Option_register& operator=       (const Option_register& reg);
+		void             clearModified   (void);
+		std::string      getDefinition   (void);
+		std::string      getDefault      (void);
+		std::string      getOption       (void);
+		std::string      getModified     (void);
+		std::string      getDescription  (void);
+		bool             isModified      (void);
+		char             getType         (void);
+		void             reset           (void);
+		void             setDefault      (const std::string& aString);
+		void             setDefinition   (const std::string& aString);
+		void             setDescription  (const std::string& aString);
+		void             setModified     (const std::string& aString);
+		void             setType         (char aType);
+		std::ostream&    print           (std::ostream& out);
 
 	protected:
-		string       m_definition;
-		string       m_description;
-		string       m_defaultOption;
-		string       m_modifiedOption;
-		bool         m_modifiedQ;
-		char         m_type;
+		std::string      m_definition;
+		std::string      m_description;
+		std::string      m_defaultOption;
+		std::string      m_modifiedOption;
+		bool             m_modifiedQ;
+		char             m_type;
 };
 
 
@@ -73,81 +71,82 @@ class Options {
 
 		Options&        operator=         (const Options& options);
 		int             argc              (void) const;
-		const vector<string>& argv        (void) const;
-		int             define            (const string& aDefinition);
-		int             define            (const string& aDefinition,
-		                                   const string& description);
-		string          getArg            (int index);
-		string          getArgument       (int index);
+		const std::vector<std::string>& argv (void) const;
+		int             define            (const std::string& aDefinition);
+		int             define            (const std::string& aDefinition,
+		                                   const std::string& description);
+		std::string     getArg            (int index);
+		std::string     getArgument       (int index);
 		int             getArgCount       (void);
 		int             getArgumentCount  (void);
-		vector<string>& getArgList        (vector<string>& output);
-		vector<string>& getArgumentList   (vector<string>& output);
-		bool            getBoolean        (const string& optionName);
-		string          getCommand        (void);
-		string          getCommandLine    (void);
-		string          getDefinition     (const string& optionName);
-		double          getDouble         (const string& optionName);
+		std::vector<std::string>& getArgList        (std::vector<std::string>& output);
+		std::vector<std::string>& getArgumentList   (std::vector<std::string>& output);
+		bool            getBoolean        (const std::string& optionName);
+		std::string     getCommand        (void);
+		std::string     getCommandLine    (void);
+		std::string     getDefinition     (const std::string& optionName);
+		double          getDouble         (const std::string& optionName);
 		char            getFlag           (void);
-		char            getChar           (const string& optionName);
-		float           getFloat          (const string& optionName);
-		int             getInt            (const string& optionName);
-		int             getInteger        (const string& optionName);
-		string          getString         (const string& optionName);
-		char            getType           (const string& optionName);
+		char            getChar           (const std::string& optionName);
+		float           getFloat          (const std::string& optionName);
+		int             getInt            (const std::string& optionName);
+		int             getInteger        (const std::string& optionName);
+		std::string     getString         (const std::string& optionName);
+		char            getType           (const std::string& optionName);
 		int             optionsArg        (void);
-		ostream&        print             (ostream& out);
-		ostream&        printOptionList   (ostream& out);
-		ostream&        printOptionListBooleanState(ostream& out);
+		std::ostream&   print             (std::ostream& out);
+		std::ostream&   printEmscripten   (std::ostream& out);
+		std::ostream&   printOptionList   (std::ostream& out);
+		std::ostream&   printOptionListBooleanState(std::ostream& out);
 		bool            process           (int error_check = 1, int suppress = 0);
 		bool            process           (int argc, char** argv,
-		                                      int error_check = 1,
-		                                      int suppress = 0);
-		bool            process           (const vector<string>& argv,
-		                                      int error_check = 1,
-		                                      int suppress = 0);
-		bool            process           (const string& argv, int error_check = 1,
-		                                      int suppress = 0);
+		                                   int error_check = 1,
+		                                   int suppress = 0);
+		bool            process           (const std::vector<std::string>& argv,
+		                                   int error_check = 1,
+		                                   int suppress = 0);
+		bool            process           (const std::string& argv, int error_check = 1,
+		                                   int suppress = 0);
 		void            reset             (void);
 		void            xverify           (int argc, char** argv,
-		                                      int error_check = 1,
-		                                      int suppress = 0);
+		                                   int error_check = 1,
+		                                   int suppress = 0);
 		void            xverify           (int error_check = 1,
-		                                      int suppress = 0);
+		                                   int suppress = 0);
 		void            setFlag           (char aFlag);
-		void            setModified       (const string& optionName,
-		                                   const string& optionValue);
+		void            setModified       (const std::string& optionName,
+		                                   const std::string& optionValue);
 		void            setOptions        (int argc, char** argv);
-		void            setOptions        (const vector<string>& argv);
-		void            setOptions        (const string& args);
+		void            setOptions        (const std::vector<std::string>& argv);
+		void            setOptions        (const std::string& args);
 		void            appendOptions     (int argc, char** argv);
-		void            appendOptions     (string& args);
-		void            appendOptions     (vector<string>& argv);
-		ostream&        printRegister     (ostream& out);
-		int             isDefined         (const string& name);
-		static vector<string> tokenizeCommandLine(const string& args);
+		void            appendOptions     (std::string& args);
+		void            appendOptions     (std::vector<std::string>& argv);
+		std::ostream&   printRegister     (std::ostream& out);
+		int             isDefined         (const std::string& name);
+		static std::vector<std::string> tokenizeCommandLine(const std::string& args);
 		bool            hasParseError     (void);
-		string          getParseError     (void);
-		ostream&        getParseError     (ostream& out);
+		std::string     getParseError     (void);
+		std::ostream&   getParseError     (std::ostream& out);
 
 	protected:
 		// m_argv: the list of raw command line strings including
 		// a mix of options and non-option argument.
-		vector<string> m_argv;
+		std::vector<std::string> m_argv;
 
 		// m_arguments: list of parsed command-line arguments which
 		// are not options, or the command (argv[0]);
-		vector<string> m_arguments;
+		std::vector<std::string> m_arguments;
 
 		// m_optionRegister: store for the states/values of each option.
-		vector<Option_register*> m_optionRegister;
+		std::vector<Option_register*> m_optionRegister;
 
 		// m_optionFlag: the character which indicates an option.
 		// Generally a dash, but could be made a slash for Windows environments.
 		char m_optionFlag = '-';
 
 		// m_optionList:
-		map<string, int> m_optionList;
+		std::map<std::string, int> m_optionList;
 
 		//
 		// boolern options for object:
@@ -169,12 +168,13 @@ class Options {
 		bool m_optionsArgQ = false;
 
 		// m_error: used to store errors in parsing command-line options.
-		stringstream m_error;
+		std::stringstream m_error;
 
-	private:
-		int     getRegIndex    (const string& optionName);
-		bool    isOption       (const string& aString, int& argp);
+	protected:
+		int     getRegIndex    (const std::string& optionName);
+		bool    isOption       (const std::string& aString, int& argp);
 		int     storeOption    (int gargp, int& position, int& running);
+
 };
 
 #define OPTION_BOOLEAN_TYPE   'b'

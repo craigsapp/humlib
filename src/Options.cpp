@@ -12,6 +12,7 @@
 //
 
 #include "Options.h"
+#include "HumRegex.h"
 
 #include <algorithm>
 #include <cctype>
@@ -763,6 +764,72 @@ ostream& Options::print(ostream& out) {
 
 //////////////////////////////
 //
+// Options::printEmscripten -- Print a list of the defined options
+//    when compiled with Emscripten (for use in https://verovio.humdrum.org
+//    with JavaScript compiled code for a web browser using Humdrum data.
+//
+
+ostream& Options::printEmscripten(ostream& out) {
+	vector<string> declarations;
+	vector<string> descriptions;
+	out << "!!@@BEGIN: PREHTML" << endl;
+	out << "!!<table>" << endl;
+	out << "!!   <tr>" << endl;
+	out << "!!      <th>Option</th><th>Type</th><th>Default</th><th>Description</th>" << endl;
+	out << "!!   </tr>" << endl;
+	HumRegex hre;
+	for (int i=0; i<(int)m_optionRegister.size(); i++) {
+		out << "!!   <tr>" << endl;
+		string definition = m_optionRegister[i]->getDefinition();
+		string description = m_optionRegister[i]->getDescription();
+		string option = "";
+		string optionType = "";
+		string defaultValue = "";
+		string prefix = "";
+		if (hre.search(definition, "^([^|]+).*=([a-z]):?(.*)$")) {
+			option = hre.getMatch(1);
+			if (option.length() == 0) {
+				prefix = "";
+			} else if (option.length() == 1) {
+				prefix = "-";
+			} else if (option.length() > 1) {
+				prefix = "--";
+			}
+			optionType = hre.getMatch(2);
+			defaultValue = hre.getMatch(3);
+
+			if (optionType == "b")      { optionType = "boolean"; }
+			else if (optionType == "s") { optionType = "string";  }
+			else if (optionType == "i") { optionType = "integer"; }
+			else if (optionType == "d") { optionType = "double";  }
+
+			hre.replaceDestructive(option,       "&lt;", "<", "g");
+			hre.replaceDestructive(option,       "&gt;", ">", "g");
+			hre.replaceDestructive(optionType,   "&lt;", "<", "g");
+			hre.replaceDestructive(optionType,   "&gt;", ">", "g");
+			hre.replaceDestructive(defaultValue, "&lt;", "<", "g");
+			hre.replaceDestructive(defaultValue, "&gt;", ">", "g");
+			hre.replaceDestructive(description,  "&lt;", "<", "g");
+			hre.replaceDestructive(description,  "&gt;", ">", "g");
+
+			out << "!!     <td>" << prefix << option << "</td>";
+			out << "<td>" << optionType << " </td>";
+			out << "<td>" << optionType << " </td>";
+			out << "<td>" << defaultValue << " </td>";
+			out << "<td>" << description << " </td>";
+			out << endl;
+		}
+		out << "!!   </tr>" << endl;
+	}
+	out << "!!</table>" << endl;
+	out << "!!@@END: PREHTML" << endl;
+	return out;
+}
+
+
+
+//////////////////////////////
+//
 // Options::reset -- Clear all defined options.
 //
 
@@ -1096,8 +1163,8 @@ int Options::getRegIndex(const string& optionName) {
 	}
 
 	if (optionName == "options") {
-		print(cout);
 		#ifndef __EMSCRIPTEN__
+		print(cout);
 		exit(0);
 		#endif
 		return -1;

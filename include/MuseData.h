@@ -147,7 +147,6 @@ class MuseData {
 		std::string       getError            (void);
 		bool              hasError            (void);
 
-
 	private:
 		std::vector<MuseRecord*>    m_data;
 		std::vector<MuseEventSet*>  m_sequence;

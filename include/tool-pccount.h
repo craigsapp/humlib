@@ -15,7 +15,10 @@
 
 #include "HumTool.h"
 #include "HumdrumFile.h"
+
 #include <map>
+#include <ostream>
+#include <string>
 #include <vector>
 
 namespace hum {
@@ -30,8 +33,8 @@ class Tool_pccount : public HumTool {
 
 		bool  run                       (HumdrumFileSet& infiles);
 		bool  run                       (HumdrumFile& infile);
-		bool  run                       (const string& indata, ostream& out);
-		bool  run                       (HumdrumFile& infile, ostream& out);
+		bool  run                       (const std::string& indata, std::ostream& out);
+		bool  run                       (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void   initialize               (HumdrumFile& infile);
@@ -47,21 +50,21 @@ class Tool_pccount : public HumTool {
 		void   printReverseVoiceList    (void);
 		void   printColorList           (void);
 		std::string getPitchClassString (int b40);
-		void   printVegaLiteScript      (const string& jsonvar,
-		                                 const string& target,
-		                                 const string& datavar,
+		void   printVegaLiteScript      (const std::string& jsonvar,
+		                                 const std::string& target,
+		                                 const std::string& datavar,
 		                                 HumdrumFile& infile);
-		void   printVegaLiteHtml        (const string& jsonvar,
-		                                 const string& target,
-		                                 const string& datavar,
+		void   printVegaLiteHtml        (const std::string& jsonvar,
+		                                 const std::string& target,
+		                                 const std::string& datavar,
 		                                 HumdrumFile& infile);
-		void   printVegaLitePage        (const string& jsonvar,
-		                                 const string& target,
-		                                 const string& datavar,
+		void   printVegaLitePage        (const std::string& jsonvar,
+		                                 const std::string& target,
+		                                 const std::string& datavar,
 		                                 HumdrumFile& infile);
 		std::string getFinal            (HumdrumFile& infile);
-		double  getPercent              (const string& pitchclass);
-		int     getCount                (const string& pitchclass);
+		double  getPercent              (const std::string& pitchclass);
+		int     getCount                (const std::string& pitchclass);
 		void    setFactorMaximum        (void);
 		void    setFactorNormalize      (void);
 

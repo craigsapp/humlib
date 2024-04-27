@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
 
+#include <string>
+#include <vector>
+#include <ostream>
+
 namespace hum {
 
 // START_MERGE
@@ -37,61 +41,61 @@ class Tool_autostem : public HumTool {
 
 		bool     run                   (HumdrumFileSet& infiles);
 		bool     run                   (HumdrumFile& infile);
-		bool     run                   (const string& indata, ostream& out);
-		bool     run                   (HumdrumFile& infile, ostream& out);
+		bool     run                   (const std::string& indata, std::ostream& out);
+		bool     run                   (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     initialize            (HumdrumFile& infile);
 		void      example              (void);
 		void      usage                (void);
 		bool      autostem             (HumdrumFile& infile);
-		void      getClefInfo          (vector<vector<int> >& baseline,
+		void      getClefInfo          (std::vector<std::vector<int>>& baseline,
 		                                HumdrumFile& infile);
-		void      addStem              (string& input, const string& piece);
+		void      addStem              (std::string& input, const std::string& piece);
 		void      processKernTokenStemsSimpleModel(HumdrumFile& infile,
-		                                vector<vector<int> >& baseline,
+		                                std::vector<std::vector<int>>& baseline,
 		                                int row, int col);
 		void      removeStems          (HumdrumFile& infile);
 		void      removeStem2          (HumdrumFile& infile, int row, int col);
 		int       getVoice             (HumdrumFile& infile, int row, int col);
-		void      getNotePositions     (vector<vector<vector<int> > >& notepos,
-		                                vector<vector<int> >& baseline,
+		void      getNotePositions     (std::vector<std::vector<std::vector<int>>>& notepos,
+		                                std::vector<std::vector<int>>& baseline,
 		                                HumdrumFile& infile);
 		void      printNotePositions   (HumdrumFile& infile,
-		                                vector<vector<vector<int> > >& notepos);
-		void      getVoiceInfo         (vector<vector<int> >& voice, HumdrumFile& infile);
-		void      printVoiceInfo       (HumdrumFile& infile, vector<vector<int> >& voice);
+		                                std::vector<std::vector<std::vector<int>>>& notepos);
+		void      getVoiceInfo         (std::vector<std::vector<int>>& voice, HumdrumFile& infile);
+		void      printVoiceInfo       (HumdrumFile& infile, std::vector<std::vector<int>>& voice);
 		void      processKernTokenStems(HumdrumFile& infile,
-		                                vector<vector<int> >& baseline, int row, int col);
-		void      getMaxLayers         (vector<int>& maxlayer, vector<vector<int> >& voice,
+		                                std::vector<std::vector<int>>& baseline, int row, int col);
+		void      getMaxLayers         (std::vector<int>& maxlayer, std::vector<std::vector<int>>& voice,
 		                                HumdrumFile& infile);
-		bool      assignStemDirections (vector<vector<int> >& stemdir,
-		                                vector<vector<int> > & voice,
-		                                vector<vector<vector<int> > >& notepos,
+		bool      assignStemDirections (std::vector<std::vector<int>>& stemdir,
+		                                std::vector<std::vector<int>> & voice,
+		                                std::vector<std::vector<std::vector<int>>>& notepos,
 		                                HumdrumFile& infile);
-		void      assignBasicStemDirections(vector<vector<int> >& stemdir,
-		                                vector<vector<int> >& voice,
-		                                vector<vector<vector<int> > >& notepos,
+		void      assignBasicStemDirections(std::vector<std::vector<int>>& stemdir,
+		                                std::vector<std::vector<int>>& voice,
+		                                std::vector<std::vector<std::vector<int>>>& notepos,
 		                                HumdrumFile& infile);
-		int       determineChordStem   (vector<vector<int> >& voice,
-		                                vector<vector<vector<int> > >& notepos,
+		int       determineChordStem   (std::vector<std::vector<int>>& voice,
+		                                std::vector<std::vector<std::vector<int>>>& notepos,
 		                                HumdrumFile& infile, int row, int col);
 		void      insertStems          (HumdrumFile& infile,
-		                                vector<vector<int> >& stemdir);
+		                                std::vector<std::vector<int>>& stemdir);
 		void      setStemDirection     (HumdrumFile& infile, int row, int col,
 		                                int direction);
-		bool      getBeamState         (vector<vector<string > >& beams,
+		bool      getBeamState         (std::vector<std::vector<std::string >>& beams,
 		                                HumdrumFile& infile);
-		void      countBeamStuff       (const string& token, int& start, int& stop,
+		void      countBeamStuff       (const std::string& token, int& start, int& stop,
 		                                int& flagr, int& flagl);
-		void      getBeamSegments      (vector<vector<Coord> >& beamednotes,
-		                                vector<vector<string > >& beamstates,
-		                                HumdrumFile& infile, vector<int> maxlayer);
-		int       getBeamDirection     (vector<Coord>& coords,
-		                                vector<vector<int> >& voice,
-		                                vector<vector<vector<int> > >& notepos);
-		void      setBeamDirection     (vector<vector<int> >& stemdir,
-		                                vector<Coord>& bnote, int direction);
+		void      getBeamSegments      (std::vector<std::vector<Coord>>& beamednotes,
+		                                std::vector<std::vector<std::string >>& beamstates,
+		                                HumdrumFile& infile, std::vector<int> maxlayer);
+		int       getBeamDirection     (std::vector<Coord>& coords,
+		                                std::vector<std::vector<int>>& voice,
+		                                std::vector<std::vector<std::vector<int>>>& notepos);
+		void      setBeamDirection     (std::vector<std::vector<int>>& stemdir,
+		                                std::vector<Coord>& bnote, int direction);
 
 	private:
 		int    debugQ        = 0;       // used with --debug option

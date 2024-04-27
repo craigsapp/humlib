@@ -17,6 +17,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include<ostream>
+#include<utility>
+#include<vector>
+
 namespace hum {
 
 // START_MERGE
@@ -28,15 +32,15 @@ class Tool_chord : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile       (HumdrumFile& infile, int direction);
 		void     processChord      (HTp tok, int direction);
 		void     initialize        (void);
-		void     minimizeChordPitches(vector<string>& notes, vector<pair<int,int>>& pitches);
-		void     maximizeChordPitches(vector<string>& notes, vector<pair<int,int>>& pitches);
+		void     minimizeChordPitches(std::vector<std::string>& notes, std::vector<std::pair<int, int>>& pitches);
+		void     maximizeChordPitches(std::vector<std::string>& notes, std::vector<std::pair<int, int>>& pitches);
 
 	private:
 		int       m_direction = 0;

@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFileSet.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -40,8 +44,8 @@ class Tool_homorhythm : public HumTool {
 
 		bool        run                (HumdrumFileSet& infiles);
 		bool        run                (HumdrumFile& infile);
-		bool        run                (const string& indata, ostream& out);
-		bool        run                (HumdrumFile& infile, ostream& out);
+		bool        run                (const std::string& indata, std::ostream& out);
+		bool        run                (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void        processFile        (HumdrumFile& infile);
@@ -50,9 +54,9 @@ class Tool_homorhythm : public HumTool {
 		void        markHomophonicNotes(void);
 		int         getExtantVoiceCount(HumdrumFile& infile);
 		int         getOriginalVoiceCount(HumdrumFile& infile);
-		void        addRawAnalysis     (HumdrumFile& infile, vector<double>& raw);
-		void        addAccumulatedScores(HumdrumFile& infile, vector<double>& score);
-		void        addAttacks         (HumdrumFile& infile, vector<int>& attacks);
+		void        addRawAnalysis     (HumdrumFile& infile, std::vector<double>& raw);
+		void        addAccumulatedScores(HumdrumFile& infile, std::vector<double>& score);
+		void        addAttacks         (HumdrumFile& infile, std::vector<int>& attacks);
 		void        addFractionAnalysis(HumdrumFile& infile, std::vector<double>& score);
 
 	private:

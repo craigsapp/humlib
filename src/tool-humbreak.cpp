@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Thu Apr  4 23:11:06 PDT 2024
-// Last Modified: Thu Apr  4 23:11:09 PDT 2024
+// Last Modified: Sun Apr 21 15:35:52 PDT 2024
 // Filename:      tool-humbreak.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-humbreak.cpp
 // Syntax:        C++11; humlib
@@ -104,19 +104,154 @@ void Tool_humbreak::initialize(void) {
 	vector<string> lbs;
 	vector<string> pbs;
 	HumRegex hre;
-	hre.split(lbs, systemMeasures, "[^\\d]+");
-	hre.split(pbs, pageMeasures, "[^\\d]+");
+	hre.split(lbs, systemMeasures, "[^\\da-z]+");
+	hre.split(pbs, pageMeasures, "[^\\da-z]+");
 
 	for (int i=0; i<(int)lbs.size(); i++) {
-		int number = std::stoi(lbs[i]);
-		m_lineMeasures[number] = 1;
+		if (hre.search(lbs[i], "^(p?)(\\d+)([a-z]?)")) {
+			int number = hre.getMatchInt(2);
+			if (!hre.getMatch(1).empty()) {
+				m_pageMeasures[number] = 1;
+				int offset = 0;
+				string letter;
+				if (!hre.getMatch(3).empty()) {
+					letter = hre.getMatch(3);
+					offset = letter.at(0) - 'a';
+				}
+				m_pageOffset[number] = offset;
+			} else {
+				m_lineMeasures[number] = 1;
+				int offset = 0;
+				if (!hre.getMatch(3).empty()) {
+					string letter = hre.getMatch(3);
+					offset = letter.at(0) - 'a';
+				}
+				m_lineOffset[number] = offset;
+			}
+		}
 	}
 
 	for (int i=0; i<(int)pbs.size(); i++) {
-		int number = std::stoi(lbs[i]);
-		m_pageMeasures[number] = 1;
+		if (hre.search(pbs[i], "^(\\d+)([a-z]?)")) {
+			int number = hre.getMatchInt(1);
+			m_pageMeasures[number] = 1;
+			int offset = 0;
+			if (!hre.getMatch(2).empty()) {
+				string letter = hre.getMatch(2);
+				offset = letter.at(0) - 'a';
+			}
+			m_pageOffset[number] = offset;
+		}
 	}
 }
+
+
+
+//////////////////////////////
+//
+// Tool_humbreak::markLineBreakMeasures --
+//
+
+void Tool_humbreak::markLineBreakMeasures(HumdrumFile& infile) {
+	vector<HLp> pbreak;
+	vector<HLp> lbreak;
+	HumRegex hre;
+
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isCommentGlobal()) {
+			HTp token = infile[i].token(0);
+			if (hre.search(token, "^!!LO:LB:")) {
+				lbreak.push_back(&infile[i]);
+			} else if (hre.search(token, "^!!LO:PB:")) {
+				pbreak.push_back(&infile[i]);
+			}
+		}
+
+		if (!infile[i].isBarline()) {
+			continue;
+		}
+
+		int barnum = infile[i].getBarNumber();
+		if (barnum < 0) {
+			lbreak.clear();
+			pbreak.clear();
+			continue;
+		}
+
+		int status = m_lineMeasures[barnum];
+		if (status) {
+			HLp line = &infile[i];
+			int offset = m_lineOffset[barnum];
+			if (offset) {
+				int ocounter = 0;
+				lbreak.clear();
+				pbreak.clear();
+				for (int j=i+1; j<infile.getLineCount(); j++) {
+					if (infile[i].isCommentGlobal()) {
+						HTp token = infile.token(i, 0);
+						if (hre.search(token, "^!!LO:LB:")) {
+							lbreak.push_back(&infile[i]);
+						}
+						if (hre.search(token, "^!!LO:PB:")) {
+							pbreak.push_back(&infile[i]);
+						}
+					}
+					if (!infile[j].isBarline()) {
+						continue;
+					}
+					ocounter++;
+					if (ocounter == offset) {
+						line = &infile[j];
+					}
+				}
+				if (!lbreak.empty()) {
+					lbreak.back()->setValue("auto", "barnum", barnum + 1);
+				} else {
+					line->setValue("auto", "barnum", barnum + 1);
+				}
+			} else {
+				line->setValue("auto", "barnum", barnum + 1);
+			}
+		}
+
+		status = m_pageMeasures[barnum];
+		if (status) {
+			HLp line = &infile[i];
+			int offset = m_pageOffset[barnum];
+			if (offset) {
+				int ocounter = 0;
+				lbreak.clear();
+				pbreak.clear();
+				for (int j=i+1; j<infile.getLineCount(); j++) {
+					if (infile[i].isCommentGlobal()) {
+						HTp token = infile.token(i, 0);
+						if (hre.search(token, "^!!LO:LB:")) {
+							lbreak.push_back(&infile[i]);
+						}
+						if (hre.search(token, "^!!LO:PB:")) {
+							pbreak.push_back(&infile[i]);
+						}
+					}
+					if (!infile[j].isBarline()) {
+						continue;
+					}
+					ocounter++;
+					if (ocounter == offset) {
+						line = &infile[j];
+					}
+				}
+				if (!pbreak.empty()) {
+					pbreak.back()->setValue("auto", "barnum", barnum + 1);
+					pbreak.back()->setValue("auto", "page", 1);
+				}
+			} else {
+				line->setValue("auto", "barnum", barnum + 1);
+				line->setValue("auto", "page", 1);
+			}
+		}
+	}
+}
+
 
 
 //////////////////////////////
@@ -125,76 +260,78 @@ void Tool_humbreak::initialize(void) {
 //
 
 void Tool_humbreak::addBreaks(HumdrumFile& infile) {
+	markLineBreakMeasures(infile);
 
 	HumRegex hre;
 	for (int i=0; i<infile.getLineCount(); i++) {
-
-		if ((i<infile.getLineCount()-1) && (infile.token(i, 0)->compare(0, 8, "!!LO:PB:") == 0)) {
-			// Add group to existing LO:PB:
-			HTp token = infile.token(i, 0);
-			HTp barToken = infile.token(i+1, 0);
-			if (barToken->isBarline()) {
-				int measure = infile[i+1].getBarNumber();
-				int pbStatus = m_pageMeasures[measure];
-				if (pbStatus) {
-					string query = "\\b" + m_group + "\\b";
-					if (!hre.match(token, query)) {
-						m_humdrum_text << token << ", " << m_group << endl;
-					} else {
-						m_humdrum_text << token << endl;
-					}
-				} else {
-					m_humdrum_text << token << endl;
-				}
-				m_humdrum_text << infile[i+1] << endl;
-				i++;
-				continue;
-			}
-		}
-
-		if ((i<infile.getLineCount()-1) && (infile.token(i, 0)->compare(0, 8, "!!LO:LB:") == 0)) {
-			// Add group to existing LO:LB:
-			HTp token = infile.token(i, 0);
-			HTp barToken = infile.token(i+1, 0);
-			if (barToken->isBarline()) {
-				int measure = infile[i+1].getBarNumber();
-				int lbStatus = m_lineMeasures[measure];
-				if (lbStatus) {
-					string query = "\\b" + m_group + "\\b";
-					if (!hre.match(token, query)) {
-						m_humdrum_text << token << ", " << m_group << endl;
-					} else {
-						m_humdrum_text << token << endl;
-					}
-				} else {
-					m_humdrum_text << token << endl;
-				}
-				m_humdrum_text << infile[i+1] << endl;
-				i++;
-				continue;
-			}
-		}
-
-		if (!infile[i].isBarline()) {
+		if (!(infile[i].isBarline() || infile[i].isComment())) {
 			m_humdrum_text << infile[i] << endl;
 			continue;
 		}
-		
-		int measure = infile[i].getBarNumber();
-		int pbStatus = m_pageMeasures[measure];
-		int lbStatus = m_lineMeasures[measure];
 
+		int barnum = infile[i].getValueInt("auto", "barnum");
+		if (barnum < 1) {
+			m_humdrum_text << infile[i] << endl;
+			continue;
+		}
+		barnum--;
+		int pageQ = infile[i].getValueInt("auto", "page");
 
-		if (pbStatus) {
-			m_humdrum_text << "!!LO:PB:g=" << m_group << endl;
-		} else if (lbStatus) {
-			m_humdrum_text << "!!LO:LB:g=" << m_group << endl;
+		if (pageQ && infile[i].isComment()) {
+			HTp token = infile.token(i, 0);
+			if (hre.search(token, "^!!LO:PB:")) {
+				// Add group to existing LO:PB:
+				HTp token = infile.token(i, 0);
+				HTp barToken = infile.token(i+1, 0);
+				if (barToken->isBarline()) {
+					int measure = infile[i+1].getBarNumber();
+					int pbStatus = m_pageMeasures[measure];
+					if (pbStatus) {
+						string query = "\\b" + m_group + "\\b";
+						if (!hre.match(token, query)) {
+							m_humdrum_text << token << ", " << m_group << endl;
+						} else {
+							m_humdrum_text << token << endl;
+						}
+					} else {
+						m_humdrum_text << token << endl;
+					}
+					m_humdrum_text << infile[i+1] << endl;
+					i++;
+					continue;
+				}
+			} else if (hre.search(token, "^!!LO:LB:")) {
+				// Add group to existing LO:LB:
+				HTp token = infile.token(i, 0);
+				HTp barToken = infile.token(i+1, 0);
+				if (barToken->isBarline()) {
+					int measure = infile[i+1].getBarNumber();
+					int lbStatus = m_lineMeasures[measure];
+					if (lbStatus) {
+						string query = "\\b" + m_group + "\\b";
+						if (!hre.match(token, query)) {
+							m_humdrum_text << token << ", " << m_group << endl;
+						} else {
+							m_humdrum_text << token << endl;
+						}
+					} else {
+						m_humdrum_text << token << endl;
+					}
+					m_humdrum_text << infile[i+1] << endl;
+					i++;
+					continue;
+				}
+			}
 		}
 
+		if (pageQ) {
+			m_humdrum_text << "!!LO:PB:g=" << m_group << endl;
+		} else {
+			m_humdrum_text << "!!LO:LB:g=" << m_group << endl;
+		}
 		m_humdrum_text << infile[i] << endl;
 	}
 }
-
 
 
 

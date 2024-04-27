@@ -16,6 +16,11 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +32,8 @@ class Tool_transpose : public HumTool {
 
 		bool     run             (HumdrumFileSet& infiles);
 		bool     run             (HumdrumFile& infile);
-		bool     run             (const std::string& indata, ostream& out);
-		bool     run             (HumdrumFile& infile, ostream& out);
+		bool     run             (const std::string& indata, std::ostream& out);
+		bool     run             (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 
@@ -36,14 +41,14 @@ class Tool_transpose : public HumTool {
 		void     initialize             (HumdrumFile& infile);
 		void     convertScore           (HumdrumFile& infile, int style);
 		void     processFile            (HumdrumFile& infile,
-		                                 vector<bool>& spineprocess);
+		                                 std::vector<bool>& spineprocess);
 		void     convertToConcertPitches(HumdrumFile& infile, int line,
-		                                 vector<int>& tvals);
+		                                 std::vector<int>& tvals);
 		void     convertToWrittenPitches(HumdrumFile& infile, int line,
-		                                 vector<int>& tvals);
+		                                 std::vector<int>& tvals);
 		void     printNewKeySignature   (const std::string& keysig, int trans);
 		void     processInterpretationLine(HumdrumFile& infile, int line,
-		                                 vector<int>& tvals, int style);
+		                                 std::vector<int>& tvals, int style);
 		int      isKeyMarker            (const std::string& str);
 		void     printNewKeyInterpretation(HumdrumLine& aRecord,
 		                                 int index, int transval);
@@ -57,54 +62,54 @@ class Tool_transpose : public HumTool {
 		void     example                (void);
 		void     usage                  (const std::string& command);
 		void     printHumdrumDataRecord (HumdrumLine& record,
-		                                 vector<bool>& spineprocess);
+		                                 std::vector<bool>& spineprocess);
 
 		double   pearsonCorrelation     (int size, double* x, double* y);
 		void     doAutoTransposeAnalysis(HumdrumFile& infile);
-		void     addToHistogramDouble   (vector<vector<double> >& histogram,
+		void     addToHistogramDouble   (std::vector<std::vector<double> >& histogram,
 		                                 int pc, double start, double dur,
 		                                 double tdur, int segments);
-		double   storeHistogramForTrack (vector<vector<double> >& histogram,
+		double   storeHistogramForTrack (std::vector<std::vector<double> >& histogram,
 		                                 HumdrumFile& infile, int track,
 		                                 int segments);
-		void     printHistograms        (int segments, vector<int> ktracks,
-		                                vector<vector<vector<double> > >&
+		void     printHistograms        (int segments, std::vector<int> ktracks,
+		                                std::vector<std::vector<std::vector<double> > >&
 		                                 trackhist);
-		void     doAutoKeyAnalysis      (vector<vector<vector<double> > >&
+		void     doAutoKeyAnalysis      (std::vector<std::vector<std::vector<double> > >&
 		                                 analysis, int level, int hop, int count,
-		                                 int segments, vector<int>& ktracks,
-		                                 vector<vector<vector<double> > >&
+		                                 int segments, std::vector<int>& ktracks,
+		                                 std::vector<std::vector<std::vector<double> > >&
 		                                 trackhist);
-		void     doTrackKeyAnalysis     (vector<vector<double> >& analysis,
+		void     doTrackKeyAnalysis     (std::vector<std::vector<double> >& analysis,
 		                                 int level, int hop, int count,
-		                                 vector<vector<double> >& trackhist,
-		                                 vector<double>& majorweights,
-		                                 vector<double>& minorweights);
-		void     identifyKeyDouble      (vector<double>& correls,
-		                                 vector<double>& histogram,
-		                                 vector<double>& majorweights,
-		                                 vector<double>& minorweights);
-		void     fillWeightsWithKostkaPayne(vector<double>& maj,
-		                                 vector<double>& min);
-		void     printRawTrackAnalysis  (vector<vector<vector<double> > >&
-		                                 analysis, vector<int>& ktracks);
-		void     doSingleAnalysis       (vector<double>& analysis,
+		                                 std::vector<std::vector<double> >& trackhist,
+		                                 std::vector<double>& majorweights,
+		                                 std::vector<double>& minorweights);
+		void     identifyKeyDouble      (std::vector<double>& correls,
+		                                 std::vector<double>& histogram,
+		                                 std::vector<double>& majorweights,
+		                                 std::vector<double>& minorweights);
+		void     fillWeightsWithKostkaPayne(std::vector<double>& maj,
+		                                 std::vector<double>& min);
+		void     printRawTrackAnalysis  (std::vector<std::vector<std::vector<double> > >&
+		                                 analysis, std::vector<int>& ktracks);
+		void     doSingleAnalysis       (std::vector<double>& analysis,
 		                                 int startindex, int length,
-		                                 vector<vector<double> >& trackhist,
-		                                 vector<double>& majorweights,
-		                                 vector<double>& minorweights);
-		void     identifyKey            (vector<double>& correls,
-		                                 vector<double>& histogram,
-		                                 vector<double>& majorweights,
-		                                 vector<double>& minorweights);
-		void     doTranspositionAnalysis(vector<vector<vector<double> > >&
+		                                 std::vector<std::vector<double> >& trackhist,
+		                                 std::vector<double>& majorweights,
+		                                 std::vector<double>& minorweights);
+		void     identifyKey            (std::vector<double>& correls,
+		                                 std::vector<double>& histogram,
+		                                 std::vector<double>& majorweights,
+		                                 std::vector<double>& minorweights);
+		void     doTranspositionAnalysis(std::vector<std::vector<std::vector<double> > >&
 		                                 analysis);
 		int      calculateTranspositionFromKey(int targetkey,
 		                                 HumdrumFile& infile);
 		void     printTransposedToken   (HumdrumFile& infile, int row, int col,
 		                                 int transval);
 		void     printTransposeInformation(HumdrumFile& infile,
-		                                 vector<bool>& spineprocess,
+		                                 std::vector<bool>& spineprocess,
 		                                 int line, int transval);
 		int      getTransposeInfo       (HumdrumFile& infile, int row, int col);
 		void     printNewKernString     (const std::string& string, int transval);
@@ -116,7 +121,7 @@ class Tool_transpose : public HumTool {
 		int      currentkey   = 0;
 		int      autoQ        = 0;   // used with --auto option
 		int      debugQ       = 0;   // used with --debug option
-		string   spinestring  = "";  // used with -s option
+		std::string   spinestring  = "";  // used with -s option
 		int      octave       = 0;   // used with -o option
 		int      concertQ     = 0;   // used with -C option
 		int      writtenQ     = 0;   // used with -W option

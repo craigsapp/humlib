@@ -17,6 +17,10 @@
 #include "HumdrumFile.h"
 #include "HumTransposer.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -28,21 +32,21 @@ class Tool_scordatura : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
 		void     processFile       (HumdrumFile& infile);
 		void     initialize        (void);
-		void     getScordaturaRdfs (vector<HTp>& rdfs, HumdrumFile& infile);
+		void     getScordaturaRdfs (std::vector<HTp>& rdfs, HumdrumFile& infile);
 		void     processScordatura (HumdrumFile& infile, HTp reference);
-		void     processScordaturas(HumdrumFile& infile, vector<HTp>& rdfs);
+		void     processScordaturas(HumdrumFile& infile, std::vector<HTp>& rdfs);
 		void     flipScordaturaInfo(HTp reference, int diatonic, int chromatic);
-		void     transposeStrand   (HTp sstart, HTp sstop, const string& marker);
-		void     transposeChord    (HTp token, const string& marker);
-		std::string transposeNote     (const string& note);
-		void     transposeMarker   (HumdrumFile& infile, const string& marker, int diatonic, int chromatic);
-		std::set<int> parsePitches(const string& input);
+		void     transposeStrand   (HTp sstart, HTp sstop, const std::string& marker);
+		void     transposeChord    (HTp token, const std::string& marker);
+		std::string transposeNote     (const std::string& note);
+		void     transposeMarker   (HumdrumFile& infile, const std::string& marker, int diatonic, int chromatic);
+		std::set<int> parsePitches(const std::string& input);
 		void     markPitches       (HumdrumFile& infile);
 		void     markPitches       (HTp sstart, HTp sstop);
 		void     markPitches       (HTp token);
