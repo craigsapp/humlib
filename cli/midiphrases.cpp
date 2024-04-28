@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Apr 27 10:23:51 PDT 2024
 // Last Modified: Sat Apr 27 10:23:54 PDT 2024
-// Filename:      midiphrases.cpp
+// Filename:      cli/midiphrases.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/midiphrases.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue May  3 18:25:53 PDT 2022
 // Last Modified: Tue May  3 18:25:56 PDT 2022
-// Filename:      colormix.cpp
+// Filename:      cli/colormix.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //

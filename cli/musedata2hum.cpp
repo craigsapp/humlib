@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Wed Sep 25 19:35:54 PDT 2019
 // Last Modified: Mon Feb 21 18:31:59 PST 2022
-// Filename:      musedata2hum.cpp
+// Filename:      cli/musedata2hum.cpp
 // URL:           https://github.com/craigsapp/musedata2hum/blob/master/src/musedata2hum.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab

@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Apr 16 09:47:57 PDT 2021
 // Last Modified: Fri Apr 16 19:57:21 PDT 2021
-// Filename:      activevoices.cpp
+// Filename:      cli/activevoices.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/activevoices.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

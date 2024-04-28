@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Apr 22 21:45:43 PDT 2023
 // Last Modified: Sun Apr 23 19:02:58 PDT 2023
-// Filename:      mergetime.cpp
+// Filename:      cli/mergetime.cpp
 // Syntax:        C++11
 // 
 // Description:   Merge a Humdrum score and a SV time instant

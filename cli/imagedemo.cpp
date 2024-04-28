@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon 18 Apr 2022 06:34:46 PM UTC
 // Last Modified: Mon 18 Apr 2022 06:34:49 PM UTC
-// Filename:      imagedemo.cpp
+// Filename:      cli/imagedemo.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/imagedemo.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

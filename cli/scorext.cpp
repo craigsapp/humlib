@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue Oct 29 22:38:35 PDT 2019
 // Last Modified: Thu Nov 14 23:56:42 WET 2019
-// Filename:      scorext.cpp
+// Filename:      cli/scorext.cpp
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab nowrap
 //

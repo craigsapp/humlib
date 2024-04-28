@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul  1 11:49:28 CEST 2019
 // Last Modified: Mon Mar 16 20:45:00 PDT 2020
-// Filename:      accent-features.cpp
+// Filename:      cli/accent-features.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
 //

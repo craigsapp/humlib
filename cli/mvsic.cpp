@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Apr  9 22:43:34 PDT 2023
 // Last Modified: Mon Apr 10 13:02:03 PDT 2023
-// Filename:      mvsic.cpp
+// Filename:      cli/mvsic.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/mvsic.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

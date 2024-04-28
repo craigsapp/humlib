@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 29 08:39:30 CEST 2022
 // Last Modified: Mon Aug 29 08:39:41 CEST 2022
-// Filename:      spineclose.cpp
+// Filename:      cli/spineclose.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/spineclose.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

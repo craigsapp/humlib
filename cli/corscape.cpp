@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Nov  9 14:24:19 PST 2020
 // Last Modified: Mon Nov  9 08:33:32 PST 2020
-// Filename:      corscape.cpp
+// Filename:      cli/corscape.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/corscape.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

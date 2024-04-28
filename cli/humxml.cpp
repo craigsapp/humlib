@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Fri Jan 29 18:58:32 PST 2021
 // Last Modified: Sun Jan 31 01:22:56 PST 2021
-// Filename:      humxml.cpp
+// Filename:      cli/humxml.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/humxml.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

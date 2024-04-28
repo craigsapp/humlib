@@ -3,7 +3,7 @@
 // Programmer:    Daniel Shanahan
 // Creation Date: Wed Jun 26 13:12:48 CEST 2019
 // Last Modified: Wed Jun 26 17:35:34 CEST 2019
-// Filename:      npvi.cpp
+// Filename:      cli/npvi.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/npvi.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

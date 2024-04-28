@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Apr 29 16:34:41 PDT 2023
 // Last Modified: Sat Apr 29 16:34:44 PDT 2023
-// Filename:      alignXywh.cpp
+// Filename:      cli/alignXywh.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/alignXywh.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

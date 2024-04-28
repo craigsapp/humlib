@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Tue 28 Apr 2020 08:54:49 AM PDT
 // Last Modified: Tue 28 Apr 2020 08:54:52 AM PDT
-// Filename:      naka.cpp
+// Filename:      cli/naka.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/naka.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr 27 20:49:22 PDT 2024
+// Last Modified: Sat Apr 27 23:34:55 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -10959,6 +10959,32 @@ class Tool_tspos : public HumTool {
 		int  m_toolCount = 0;
 
 		std::vector<std::string> m_fullNames;
+};
+
+
+class Tool_vcross : public HumTool {
+	public:
+		         Tool_vcross     (void);
+		        ~Tool_vcross     () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile        (HumdrumFile& infile);
+		void    initialize         (void);
+		void    getMidiInfo        (std::vector<int>& midis, HTp token);
+		void    compareVoices      (std::vector<HTp>& higher, std::vector<HTp>& lower);
+		void    processLine        (HumdrumFile& infile, int index);
+
+	private:
+		bool m_redQ = false;
+		bool m_greenQ = false;
+		bool m_blueQ = false;
+
+
 };
 
 

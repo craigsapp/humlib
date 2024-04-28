@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Jun 13 11:45:47 PDT 2020
 // Last Modified: Sat Jun 13 11:45:50 PDT 2020
-// Filename:      ligfind.cpp
+// Filename:      cli/ligfind.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/ligfind.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

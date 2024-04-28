@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Apr 23 16:44:17 PDT 2023
 // Last Modified: Sun Apr 23 16:44:20 PDT 2023
-// Filename:      kerninst.cpp
+// Filename:      cli/kerninst.cpp
 // Syntax:        C++11
 //
 // Description:   Add or remove **kern instrument information

@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon 10 Feb 2020 08:54:53 PM PST
 // Last Modified: Mon 10 Feb 2020 08:54:57 PM PST
-// Filename:      markov.cpp
+// Filename:      cli/markov.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/markov.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

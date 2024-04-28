@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Apr 23 20:34:59 PDT 2023
 // Last Modified: Sun Apr 23 20:35:02 PDT 2023
-// Filename:      partinst.cpp
+// Filename:      cli/partinst.cpp
 // Syntax:        C++11
 //
 // Description:   Add or remove **kern instrument information

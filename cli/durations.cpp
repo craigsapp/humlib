@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Mar 12 12:35:38 PST 2022
 // Last Modified: Sat Mar 12 12:52:21 PST 2022
-// Filename:      durations.cpp
+// Filename:      cli/durations.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/durations.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap

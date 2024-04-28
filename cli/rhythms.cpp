@@ -2,7 +2,7 @@
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Jun 14 10:26:30 PDT 2020
 // Last Modified: Mon Jun 15 06:55:26 PDT 2020
-// Filename:      rhythms.cpp
+// Filename:      cli/rhythms.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/rhythms.cpp
 // Syntax:        C++11
 // vim:           ts=3 noexpandtab nowrap
