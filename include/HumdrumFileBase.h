@@ -18,6 +18,9 @@
 #ifndef _HUMDRUMFILEBASE_H_INCLUDED
 #define _HUMDRUMFILEBASE_H_INCLUDED
 
+#include "HumSignifiers.h"
+#include "HumdrumLine.h"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -37,9 +40,6 @@
 	#include <string.h>      /* memcpy          */
 	#include <sstream>
 #endif
-
-#include "HumSignifiers.h"
-#include "HumdrumLine.h"
 
 namespace hum {
 
@@ -306,8 +306,6 @@ class HumdrumFileBase : public HumHash {
 		HLp           back                     (void);
 		void          makeBooleanTrackList     (std::vector<bool>& spinelist,
 		                                        const std::string& spinestring);
-		bool          analyzeBaseFromLines     (void);
-		bool          analyzeBaseFromTokens    (void);
 
 
 		std::vector<HLp> getReferenceRecords(void);
@@ -348,6 +346,15 @@ class HumdrumFileBase : public HumHash {
 		static void   readStringFromHttpUri     (std::stringstream& inputdata,
 		                                         const std::string& webaddress);
 
+		bool          analyzeBaseFromLines     (void);
+		bool          analyzeBaseFromTokens    (void);
+
+		bool          analyzeTokens             (void);
+		bool          analyzeSpines             (void);
+		bool          analyzeLinks              (void);
+		bool          analyzeTracks             (void);
+		bool          analyzeLines              (void);
+
 	protected:
 		static int    getChunk                  (int socket_id,
 		                                         std::stringstream& inputdata,
@@ -363,10 +370,6 @@ class HumdrumFileBase : public HumHash {
 		                                         unsigned short int port);
 
 	protected:
-		bool          analyzeTokens             (void);
-		bool          analyzeSpines             (void);
-		bool          analyzeLinks              (void);
-		bool          analyzeTracks             (void);
 		bool          adjustSpines              (HumdrumLine& line,
 		                                         std::vector<std::string>& datatype,
 		                                         std::vector<std::string>& sinfo);
@@ -384,7 +387,6 @@ class HumdrumFileBase : public HumHash {
 		bool          setParseError             (std::stringstream& err);
 		bool          setParseError             (const std::string& err);
 		bool          setParseError             (const char* format, ...);
-		bool          analyzeLines              (void);
 //		void          fixMerges                 (int linei);
 
 	protected:

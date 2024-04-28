@@ -149,6 +149,10 @@ bool Tool_musedata2hum::convert(ostream& out, MuseDataSet& mds) {
 
 	HumdrumFile outfile;
 	outdata.transferTokens(outfile);
+	outfile.generateLinesFromTokens();
+	stringstream sss;
+	sss << outfile;
+	outfile.readString(sss.str());
 
 	if (needsAboveBelowKernRdf()) {
 		outfile.appendLine("!!!RDF**kern: > = above");

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr 27 13:12:20 PDT 2024
+// Last Modified: Sat Apr 27 20:49:22 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -2141,8 +2141,6 @@ class HumdrumFileBase : public HumHash {
 		HLp           back                     (void);
 		void          makeBooleanTrackList     (std::vector<bool>& spinelist,
 		                                        const std::string& spinestring);
-		bool          analyzeBaseFromLines     (void);
-		bool          analyzeBaseFromTokens    (void);
 
 
 		std::vector<HLp> getReferenceRecords(void);
@@ -2183,6 +2181,15 @@ class HumdrumFileBase : public HumHash {
 		static void   readStringFromHttpUri     (std::stringstream& inputdata,
 		                                         const std::string& webaddress);
 
+		bool          analyzeBaseFromLines     (void);
+		bool          analyzeBaseFromTokens    (void);
+
+		bool          analyzeTokens             (void);
+		bool          analyzeSpines             (void);
+		bool          analyzeLinks              (void);
+		bool          analyzeTracks             (void);
+		bool          analyzeLines              (void);
+
 	protected:
 		static int    getChunk                  (int socket_id,
 		                                         std::stringstream& inputdata,
@@ -2198,10 +2205,6 @@ class HumdrumFileBase : public HumHash {
 		                                         unsigned short int port);
 
 	protected:
-		bool          analyzeTokens             (void);
-		bool          analyzeSpines             (void);
-		bool          analyzeLinks              (void);
-		bool          analyzeTracks             (void);
 		bool          adjustSpines              (HumdrumLine& line,
 		                                         std::vector<std::string>& datatype,
 		                                         std::vector<std::string>& sinfo);
@@ -2219,7 +2222,6 @@ class HumdrumFileBase : public HumHash {
 		bool          setParseError             (std::stringstream& err);
 		bool          setParseError             (const std::string& err);
 		bool          setParseError             (const char* format, ...);
-		bool          analyzeLines              (void);
 //		void          fixMerges                 (int linei);
 
 	protected:
@@ -7851,7 +7853,7 @@ class Tool_humbreak : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
@@ -8624,7 +8626,7 @@ class Tool_meter : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 
@@ -9632,14 +9634,14 @@ class Tool_nproof : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 		void     checkForBlankLines(HumdrumFile& infile);
 		void     checkInstrumentInformation(HumdrumFile& infile);
 		void     checkKeyInformation(HumdrumFile& infile);
 		void     checkSpineTerminations(HumdrumFile& infile);
-		void     checkForValidInstrumentCode(HTp token, vector<pair<string, string>>& instrumentList);
+		void     checkForValidInstrumentCode(HTp token, std::vector<std::pair<std::string, std::string>>& instrumentList);
 		void     checkReferenceRecords(HumdrumFile& infile);
 
 	protected:
@@ -9834,15 +9836,15 @@ class Tool_pline : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 
 	protected:
 		void     initialize        (void);
 		void     processFile       (HumdrumFile& infile);
-		void     getPlineInterpretations(HumdrumFile& infile, vector<HTp>& tokens);
-		void     plineToColor      (HumdrumFile& infile, vector<HTp>& tokens);
+		void     getPlineInterpretations(HumdrumFile& infile, std::vector<HTp>& tokens);
+		void     plineToColor      (HumdrumFile& infile, std::vector<HTp>& tokens);
 		void     markRests         (HumdrumFile& infile);
 		void     markSpineRests    (HTp spineStop);
 		void     fillLineInfo      (HumdrumFile& infile, std::vector<std::vector<int>>& lineInfo);
@@ -10002,7 +10004,7 @@ class Tool_sab2gs : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 	protected:
@@ -10021,7 +10023,7 @@ class Tool_sab2gs : public HumTool {
 	private:
 		bool    m_hasCrossStaff = false;   // Middle voice has notes/rests on bottom staff
 		bool    m_hasBelowMarker = false;  // Input data has RDF**kern down marker
-		string  m_belowMarker = "<";       // RDF**kern marker for staff down
+		std::string  m_belowMarker = "<";       // RDF**kern marker for staff down
 		bool    m_downQ = false;           // Used only *down/*Xdown for staff changes
 
 
@@ -10555,8 +10557,8 @@ class Tool_textdur : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 
 	protected:
@@ -10564,13 +10566,13 @@ class Tool_textdur : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     printMelismas     (HumdrumFile& infile);
 		void     printDurations     (HumdrumFile& infile);
-		void     getTextSpineStarts(HumdrumFile& infile, vector<HTp>& starts);
-		void     processTextSpine  (vector<HTp>& starts, int index);
+		void     getTextSpineStarts(HumdrumFile& infile, std::vector<HTp>& starts);
+		void     processTextSpine  (std::vector<HTp>& starts, int index);
 		int      getMelisma        (HTp tok1, HTp tok2);
 		HumNum   getDuration       (HTp tok1, HTp tok2);
 		HTp      getTandemKernToken(HTp token);
 		void     printInterleaved  (HumdrumFile& infile);
-		void     printInterleavedLine(HumdrumLine& line, vector<bool>& textTrack);
+		void     printInterleavedLine(HumdrumLine& line, std::vector<bool>& textTrack);
 		void     printTokenAnalysis(HTp token);
 		void     printAnalysis      (void);
 		void     printDurationAverage(void);
@@ -10585,7 +10587,7 @@ class Tool_textdur : public HumTool {
 	private:
 		std::vector<HTp>                 m_textStarts;
 		std::vector<int>                 m_track2column;
-		std::vector<string>              m_columnName;
+		std::vector<std::string>         m_columnName;
 
 		std::vector<std::vector<HTp>>    m_syllables;  // List of syllables in **text/**sylba
 		std::vector<std::vector<HumNum>> m_durations;  // List of durations excluding trailing rests

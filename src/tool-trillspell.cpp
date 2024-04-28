@@ -63,11 +63,8 @@ bool Tool_trillspell::run(HumdrumFile& infile, ostream& out) {
 
 
 bool Tool_trillspell::run(HumdrumFile& infile) {
-cerr << "GOT HERE AAA" << endl;
 	processFile(infile);
-cerr << "GOT HERE BBB" << endl;
 	infile.createLinesFromTokens();
-cerr << "GOT HERE CCC" << endl;
 	return true;
 }
 
@@ -136,7 +133,8 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 		}
 		if (infile[i].isInterpretation()) {
 			for (j=0; j<infile[i].getFieldCount(); j++) {
-				if (!infile[i].token(j)->isKern()) {
+				HTp token = infile.token(i, j);
+				if (!token->isKern()) {
 					continue;
 				}
 				if (infile[i].token(j)->compare(0, 3, "*k[") == 0) {
@@ -170,23 +168,24 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 		}
 
 		for (j=0; j<infile[i].getFieldCount(); j++) {
-			if (!infile[i].token(j)->isKern()) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
 				continue;
 			}
-			if (infile[i].token(j)->isNull()) {
+			if (token->isNull()) {
 				continue;
 			}
-			if (infile[i].token(j)->isRest()) {
+			if (token->isRest()) {
 				continue;
 			}
 
-			int subcount = infile[i].token(j)->getSubtokenCount();
-			track = infile[i].token(j)->getTrack();
+			int subcount = token->getSubtokenCount();
+			track = token->getTrack();
 
 			HumRegex hre;
 			int rindex = rtracks[track];
 			for (k=0; k<subcount; k++) {
-				string subtok = infile[i].token(j)->getSubtoken(k);
+				string subtok = token->getSubtoken(k);
 				int b40 = Convert::kernToBase40(subtok);
 				int diatonic = Convert::kernToBase7(subtok);
 				if (diatonic < 0) {
@@ -200,7 +199,6 @@ bool Tool_trillspell::analyzeOrnamentAccidentals(HumdrumFile& infile) {
 				// N.B.: augmented-second intervals are not considered.
 
 				if ((subtok.find("t") != string::npos) && !hre.search(subtok, "[tT]x")) {
-cerr << "FOUND LOW t: " << subtok << endl;
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 6) {
@@ -209,15 +207,14 @@ cerr << "FOUND LOW t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("T") != string::npos) && !hre.search(subtok, "[tT]x")) {
-cerr << "FOUND HI t: " << subtok << endl;
 					int nextup = getBase40(diatonic + 1, dstates[rindex][diatonic+1]);
 					int interval = nextup - b40;
 					if (interval == 5) {
@@ -226,12 +223,12 @@ cerr << "FOUND HI t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Tt]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("M") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// major-second upper mordent
@@ -243,12 +240,12 @@ cerr << "FOUND HI t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("m") != string::npos) && !hre.search(subtok, "[Mm]x")) {
 					// minor-second upper mordent
@@ -260,12 +257,12 @@ cerr << "FOUND HI t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Mm]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("W") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// major-second lower mordent
@@ -277,12 +274,12 @@ cerr << "FOUND HI t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				} else if ((subtok.find("w") != string::npos) && !hre.search(subtok, "[Ww]x")) {
 					// minor-second lower mordent
@@ -294,12 +291,12 @@ cerr << "FOUND HI t: " << subtok << endl;
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					} else {
 						if (m_xmark) {
 							hre.replaceDestructive(subtok, "$1x", "([Ww]+)", "g");
 						}
-						infile[i].token(j)->replaceSubtoken(k, subtok);
+						token->replaceSubtoken(k, subtok);
 					}
 				}
 				// deal with turns and inverted turns here.
