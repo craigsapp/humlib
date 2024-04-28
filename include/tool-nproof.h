@@ -17,6 +17,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -29,14 +33,14 @@ class Tool_nproof : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, std::ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
 		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 		void     checkForBlankLines(HumdrumFile& infile);
 		void     checkInstrumentInformation(HumdrumFile& infile);
 		void     checkKeyInformation(HumdrumFile& infile);
 		void     checkSpineTerminations(HumdrumFile& infile);
-		void     checkForValidInstrumentCode(HTp token, vector<pair<string, string>>& instrumentList);
+		void     checkForValidInstrumentCode(HTp token, std::vector<std::pair<std::string, std::string>>& instrumentList);
 		void     checkReferenceRecords(HumdrumFile& infile);
 
 	protected:

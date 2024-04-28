@@ -395,6 +395,9 @@ programs:
 strip:
 	@(cd $(BINDIR) && strip $(CLILIST))
 
+strip-sudo:
+	@(cd $(BINDIR) && sudo -u $(SUDO_USER) strip $(CLILIST))
+
 
 
 ##############################
@@ -424,7 +427,7 @@ strip:
 ##     (try without sudo first, then if that fails use sudo).
 ##
 
-install: strip
+install: strip-sudo
 	@echo Copying cli tools to /usr/local/bin
 	@(cd $(BINDIR) && cp -f $(CLILIST) /usr/local/bin/)
 
@@ -470,6 +473,10 @@ makedirs:
 Convert-harmony.o: Convert-harmony.cpp Convert.h \
   HumNum.h HumdrumToken.h HumAddress.h \
   HumHash.h HumParamSet.h HumRegex.h
+
+Convert-instrument.o: Convert-instrument.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h
 
 Convert-kern.o: Convert-kern.cpp Convert.h HumNum.h \
   HumdrumToken.h HumAddress.h HumHash.h \
@@ -534,16 +541,16 @@ GridSide.o: GridSide.cpp HumGrid.h GridMeasure.h \
   GridPart.h GridStaff.h GridSide.h \
   GridVoice.h
 
-GridSlice.o: GridSlice.cpp HumGrid.h GridMeasure.h \
-  GridCommon.h HumdrumFile.h \
+GridSlice.o: GridSlice.cpp GridPart.h GridStaff.h \
+  GridCommon.h GridSide.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h GridVoice.h HumGrid.h \
+  GridMeasure.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h GridSlice.h MxmlPart.h \
-  MxmlMeasure.h   \
-  GridPart.h GridStaff.h GridSide.h \
-  GridVoice.h
+  HumSignifier.h HumdrumLine.h GridSlice.h \
+  MxmlPart.h MxmlMeasure.h  \
+  
 
 GridStaff.o: GridStaff.cpp HumGrid.h GridMeasure.h \
   GridCommon.h HumdrumFile.h \
@@ -554,7 +561,7 @@ GridStaff.o: GridStaff.cpp HumGrid.h GridMeasure.h \
   HumParamSet.h GridSlice.h MxmlPart.h \
   MxmlMeasure.h   \
   GridPart.h GridStaff.h GridSide.h \
-  GridVoice.h
+  GridVoice.h HumRegex.h
 
 GridVoice.o: GridVoice.cpp GridVoice.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
@@ -575,17 +582,17 @@ HumGrid.o: HumGrid.cpp HumGrid.h GridMeasure.h \
   GridPart.h GridStaff.h GridSide.h \
   GridVoice.h Convert.h
 
-HumHash.o: HumHash.cpp HumHash.h HumNum.h \
-  Convert.h HumdrumToken.h HumAddress.h \
+HumHash.o: HumHash.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
   HumParamSet.h
 
 HumInstrument.o: HumInstrument.cpp HumInstrument.h
 
 HumNum.o: HumNum.cpp HumNum.h
 
-HumParamSet.o: HumParamSet.cpp HumParamSet.h \
-  HumdrumToken.h HumNum.h HumAddress.h \
-  HumHash.h Convert.h
+HumParamSet.o: HumParamSet.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h
 
 HumPitch.o: HumPitch.cpp HumPitch.h HumRegex.h
 
@@ -615,24 +622,23 @@ HumdrumFile.o: HumdrumFile.cpp HumdrumFile.h \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h Convert.h
 
-HumdrumFileBase-net.o: HumdrumFileBase-net.cpp \
-  HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+HumdrumFileBase-net.o: HumdrumFileBase-net.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h
 
-HumdrumFileBase.o: HumdrumFileBase.cpp HumdrumFileBase.h \
-  HumSignifiers.h HumSignifier.h HumdrumLine.h \
-  HumdrumToken.h HumNum.h HumAddress.h \
-  HumHash.h HumParamSet.h Convert.h \
-  HumRegex.h
+HumdrumFileBase.o: HumdrumFileBase.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h
 
 HumdrumFileContent-accidental.o: HumdrumFileContent-accidental.cpp \
+  Convert.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+  HumSignifier.h HumdrumLine.h
 
 HumdrumFileContent-barline.o: HumdrumFileContent-barline.cpp \
   HumdrumFileContent.h HumdrumFileStructure.h \
@@ -649,18 +655,18 @@ HumdrumFileContent-beam.o: HumdrumFileContent-beam.cpp \
   HumParamSet.h
 
 HumdrumFileContent-metlev.o: HumdrumFileContent-metlev.cpp \
+  Convert.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+  HumSignifier.h HumdrumLine.h
 
 HumdrumFileContent-note.o: HumdrumFileContent-note.cpp \
-  HumdrumFileContent.h HumdrumFileStructure.h \
-  HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumRegex.h Convert.h
+  Convert.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
+  HumRegex.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h
 
 HumdrumFileContent-ottava.o: HumdrumFileContent-ottava.cpp \
   HumdrumFileContent.h HumdrumFileStructure.h \
@@ -677,11 +683,11 @@ HumdrumFileContent-phrase.o: HumdrumFileContent-phrase.cpp \
   HumParamSet.h
 
 HumdrumFileContent-rest.o: HumdrumFileContent-rest.cpp \
+  Convert.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumRegex.h Convert.h
+  HumSignifier.h HumdrumLine.h HumRegex.h
 
 HumdrumFileContent-slur.o: HumdrumFileContent-slur.cpp \
   HumdrumFileContent.h HumdrumFileStructure.h \
@@ -705,11 +711,11 @@ HumdrumFileContent-text.o: HumdrumFileContent-text.cpp \
   HumParamSet.h
 
 HumdrumFileContent-tie.o: HumdrumFileContent-tie.cpp \
+  Convert.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+  HumSignifier.h HumdrumLine.h
 
 HumdrumFileContent-timesig.o: HumdrumFileContent-timesig.cpp \
   HumdrumFileContent.h HumdrumFileStructure.h \
@@ -718,12 +724,12 @@ HumdrumFileContent-timesig.o: HumdrumFileContent-timesig.cpp \
   HumNum.h HumAddress.h HumHash.h \
   HumParamSet.h Convert.h
 
-HumdrumFileContent.o: HumdrumFileContent.cpp \
+HumdrumFileContent.o: HumdrumFileContent.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumRegex.h Convert.h
+  HumSignifier.h HumdrumLine.h
 
 HumdrumFileSet.o: HumdrumFileSet.cpp HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -733,14 +739,13 @@ HumdrumFileSet.o: HumdrumFileSet.cpp HumdrumFileSet.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Options.h
 
-HumdrumFileStream.o: HumdrumFileStream.cpp \
-  HumdrumFileStream.h HumdrumFile.h \
+HumdrumFileStream.o: HumdrumFileStream.cpp HumRegex.h \
+  HumdrumFileSet.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Options.h HumdrumFileSet.h \
-  HumRegex.h
+  HumParamSet.h HumdrumFileStream.h Options.h
 
 HumdrumFileStructure-strophe.o: HumdrumFileStructure-strophe.cpp \
   HumdrumFileStructure.h HumdrumFileBase.h \
@@ -758,32 +763,32 @@ HumdrumLine-kern.o: HumdrumLine-kern.cpp HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h
 
-HumdrumLine.o: HumdrumLine.cpp HumdrumLine.h \
-  HumdrumToken.h HumNum.h HumAddress.h \
-  HumHash.h HumParamSet.h HumdrumFile.h \
+HumdrumLine.o: HumdrumLine.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h Convert.h
+  HumSignifier.h HumdrumLine.h
 
-HumdrumToken-base40.o: HumdrumToken-base40.cpp HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+HumdrumToken-base40.o: HumdrumToken-base40.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h
 
-HumdrumToken-midi.o: HumdrumToken-midi.cpp HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h Convert.h
+HumdrumToken-midi.o: HumdrumToken-midi.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h
 
-HumdrumToken.o: HumdrumToken.cpp HumAddress.h \
-  HumdrumToken.h HumNum.h HumHash.h \
-  HumParamSet.h HumdrumLine.h HumdrumFile.h \
+HumdrumToken.o: HumdrumToken.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h HumRegex.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h Convert.h HumRegex.h
+  HumSignifier.h HumdrumLine.h
 
-MuseData.o: MuseData.cpp MuseData.h MuseRecord.h \
-  MuseRecordBasic.h HumNum.h HumdrumToken.h \
-  HumAddress.h HumHash.h HumParamSet.h \
-  GridVoice.h HumRegex.h
+MuseData.o: MuseData.cpp HumRegex.h MuseData.h \
+  MuseRecord.h MuseRecordBasic.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h GridVoice.h
 
 MuseDataSet.o: MuseDataSet.cpp MuseDataSet.h \
   MuseData.h MuseRecord.h MuseRecordBasic.h \
@@ -791,19 +796,69 @@ MuseDataSet.o: MuseDataSet.cpp MuseDataSet.h \
   HumHash.h HumParamSet.h GridVoice.h \
   HumRegex.h
 
+MuseRecord-attributes.o: MuseRecord-attributes.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
+  MuseData.h MuseRecord.h MuseRecordBasic.h \
+  GridVoice.h
+
+MuseRecord-directions.o: MuseRecord-directions.cpp MuseData.h \
+  MuseRecord.h MuseRecordBasic.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h GridVoice.h
+
+MuseRecord-figure.o: MuseRecord-figure.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
+  MuseData.h MuseRecord.h MuseRecordBasic.h \
+  GridVoice.h
+
+MuseRecord-humdrum.o: MuseRecord-humdrum.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h MuseData.h \
+  MuseRecord.h MuseRecordBasic.h GridVoice.h
+
+MuseRecord-measure.o: MuseRecord-measure.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
+  MuseData.h MuseRecord.h MuseRecordBasic.h \
+  GridVoice.h
+
+MuseRecord-notations.o: MuseRecord-notations.cpp MuseRecord.h \
+  MuseRecordBasic.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
+  GridVoice.h
+
+MuseRecord-note.o: MuseRecord-note.cpp Convert.h \
+  HumNum.h HumdrumToken.h HumAddress.h \
+  HumHash.h HumParamSet.h HumRegex.h \
+  MuseData.h MuseRecord.h MuseRecordBasic.h \
+  GridVoice.h
+
 MuseRecord.o: MuseRecord.cpp Convert.h HumNum.h \
   HumdrumToken.h HumAddress.h HumHash.h \
-  HumParamSet.h MuseRecord.h MuseRecordBasic.h \
-  GridVoice.h MuseData.h HumRegex.h
+  HumParamSet.h HumRegex.h MuseData.h \
+  MuseRecord.h MuseRecordBasic.h GridVoice.h
+
+MuseRecordBasic-controls.o: MuseRecordBasic-controls.cpp \
+  MuseRecordBasic.h HumNum.h HumdrumToken.h \
+  HumAddress.h HumHash.h HumParamSet.h \
+  GridVoice.h
+
+MuseRecordBasic-suggestions.o: MuseRecordBasic-suggestions.cpp \
+  MuseRecord.h MuseRecordBasic.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h GridVoice.h
 
 MuseRecordBasic.o: MuseRecordBasic.cpp MuseRecordBasic.h \
   HumNum.h HumdrumToken.h HumAddress.h \
   HumHash.h HumParamSet.h GridVoice.h
 
-MxmlEvent.o: MxmlEvent.cpp MxmlEvent.h GridCommon.h \
-  HumNum.h   \
-  MxmlMeasure.h Convert.h HumdrumToken.h \
-  HumAddress.h HumHash.h HumParamSet.h
+MxmlEvent.o: MxmlEvent.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h MxmlEvent.h GridCommon.h \
+    MxmlMeasure.h \
+  MxmlPart.h
 
 MxmlMeasure.o: MxmlMeasure.cpp MxmlEvent.h \
   GridCommon.h HumNum.h  \
@@ -813,12 +868,12 @@ MxmlPart.o: MxmlPart.cpp MxmlMeasure.h GridCommon.h \
   HumNum.h   \
   MxmlPart.h
 
-NoteCell.o: NoteCell.cpp NoteCell.h HumdrumFile.h \
+NoteCell.o: NoteCell.cpp Convert.h HumNum.h \
+  HumdrumToken.h HumAddress.h HumHash.h \
+  HumParamSet.h NoteCell.h HumdrumFile.h \
   HumdrumFileContent.h HumdrumFileStructure.h \
   HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h NoteGrid.h Convert.h
+  HumSignifier.h HumdrumLine.h NoteGrid.h
 
 NoteGrid.o: NoteGrid.cpp NoteGrid.h NoteCell.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -827,11 +882,47 @@ NoteGrid.o: NoteGrid.cpp NoteGrid.h NoteCell.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumRegex.h
 
-Options.o: Options.cpp Options.h
+Options.o: Options.cpp Options.h HumRegex.h
 
 PixelColor.o: PixelColor.cpp PixelColor.h
 
 pugixml.o: pugixml.cpp  
+
+tool-addic.o: tool-addic.cpp tool-addic.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h Convert.h \
+  HumRegex.h
+
+tool-addkey.o: tool-addkey.cpp tool-addkey.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  HumRegex.h
+
+tool-addlabels.o: tool-addlabels.cpp tool-addlabels.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  HumRegex.h
+
+tool-addtempo.o: tool-addtempo.cpp tool-addtempo.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  HumRegex.h
 
 tool-autoaccid.o: tool-autoaccid.cpp tool-autoaccid.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -842,14 +933,14 @@ tool-autoaccid.o: tool-autoaccid.cpp tool-autoaccid.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h HumRegex.h
 
-tool-autobeam.o: tool-autobeam.cpp Convert.h HumNum.h \
-  HumdrumToken.h HumAddress.h HumHash.h \
-  HumParamSet.h HumRegex.h tool-autobeam.h \
+tool-autobeam.o: tool-autobeam.cpp tool-autobeam.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
   HumdrumFileStructure.h HumdrumFileBase.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
-  HumdrumFileStream.h
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  Convert.h HumRegex.h
 
 tool-autostem.o: tool-autostem.cpp tool-autostem.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -885,7 +976,7 @@ tool-chooser.o: tool-chooser.cpp tool-chooser.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  HumRegex.h Convert.h
+  Convert.h HumRegex.h
 
 tool-chord.o: tool-chord.cpp tool-chord.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
@@ -933,14 +1024,14 @@ tool-colortriads.o: tool-colortriads.cpp tool-colortriads.h \
   tool-msearch.h NoteGrid.h NoteCell.h \
   Convert.h HumRegex.h
 
-tool-composite.o: tool-composite.cpp tool-composite.h \
+tool-composite.o: tool-composite.cpp tool-autobeam.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
   HumdrumFileStructure.h HumdrumFileBase.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  tool-extract.h tool-autobeam.h Convert.h \
+  tool-composite.h tool-extract.h Convert.h \
   HumRegex.h
 
 tool-compositeold.o: tool-compositeold.cpp \
@@ -960,8 +1051,8 @@ tool-deg.o: tool-deg.cpp tool-deg.h HumTool.h \
   HumdrumFileBase.h HumSignifiers.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumdrumFileStream.h HumRegex.h \
-  Convert.h
+  HumParamSet.h HumdrumFileStream.h Convert.h \
+  HumRegex.h
 
 tool-dissonant.o: tool-dissonant.cpp tool-dissonant.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1016,35 +1107,38 @@ tool-filter.o: tool-filter.cpp tool-filter.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  tool-autoaccid.h tool-autobeam.h \
-  tool-autostem.h tool-binroll.h tool-chantize.h \
-  tool-chooser.h tool-chord.h tool-cint.h \
-  NoteGrid.h NoteCell.h HumRegex.h \
-  tool-cmr.h tool-colorgroups.h \
+  tool-addic.h tool-addkey.h tool-addlabels.h \
+  tool-addtempo.h tool-autoaccid.h \
+  tool-autobeam.h tool-autostem.h tool-binroll.h \
+  tool-chantize.h tool-chooser.h tool-chord.h \
+  tool-cint.h NoteGrid.h NoteCell.h \
+  HumRegex.h tool-cmr.h tool-colorgroups.h \
   tool-colortriads.h tool-composite.h tool-deg.h \
   tool-dissonant.h tool-double.h tool-extract.h \
   tool-fb.h tool-flipper.h tool-gasparize.h \
   tool-grep.h tool-half.h tool-homorhythm.h \
   tool-homorhythm2.h tool-hproof.h \
-  tool-humdiff.h tool-humsheet.h tool-humtr.h \
-  tool-imitation.h tool-kern2mens.h \
+  tool-humbreak.h tool-humdiff.h tool-humsheet.h \
+  tool-humtr.h tool-imitation.h tool-kern2mens.h \
   tool-kernify.h tool-kernview.h tool-mei2hum.h \
     MxmlPart.h \
   MxmlMeasure.h GridCommon.h MxmlEvent.h \
   HumGrid.h GridMeasure.h GridSlice.h \
   GridPart.h GridStaff.h GridSide.h \
   GridVoice.h tool-melisma.h tool-mens2kern.h \
-  tool-metlev.h tool-modori.h tool-msearch.h \
-  Convert.h tool-myank.h tool-ordergps.h \
-  tool-phrase.h tool-recip.h tool-restfill.h \
-  tool-rid.h tool-satb2gs.h tool-scordatura.h \
-  HumTransposer.h HumPitch.h tool-semitones.h \
-  tool-shed.h tool-sic.h tool-simat.h \
-  tool-slurcheck.h tool-spinetrace.h \
-  tool-strophe.h tool-synco.h tool-tabber.h \
-  tool-tassoize.h tool-thru.h tool-tie.h \
-  tool-timebase.h tool-tspos.h tool-transpose.h \
-  tool-tremolo.h tool-trillspell.h
+  tool-meter.h tool-metlev.h tool-modori.h \
+  tool-msearch.h Convert.h tool-myank.h \
+  tool-nproof.h tool-ordergps.h tool-phrase.h \
+  tool-pline.h tool-recip.h tool-restfill.h \
+  tool-rid.h tool-sab2gs.h tool-satb2gs.h \
+  tool-scordatura.h HumTransposer.h HumPitch.h \
+  tool-semitones.h tool-shed.h tool-sic.h \
+  tool-simat.h tool-slurcheck.h \
+  tool-spinetrace.h tool-strophe.h tool-synco.h \
+  tool-tabber.h tool-tassoize.h tool-textdur.h \
+  tool-thru.h tool-tie.h tool-timebase.h \
+  tool-transpose.h tool-tremolo.h \
+  tool-trillspell.h tool-tspos.h
 
 tool-fixps.o: tool-fixps.cpp tool-fixps.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
@@ -1070,7 +1164,7 @@ tool-gasparize.o: tool-gasparize.cpp tool-gasparize.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  Convert.h HumRegex.h tool-shed.h
+  tool-shed.h Convert.h HumRegex.h
 
 tool-grep.o: tool-grep.cpp tool-grep.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
@@ -1086,8 +1180,8 @@ tool-half.o: tool-half.cpp tool-half.h HumTool.h \
   HumdrumFileBase.h HumSignifiers.h \
   HumSignifier.h HumdrumLine.h HumdrumToken.h \
   HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumdrumFileStream.h Convert.h \
-  HumRegex.h tool-autobeam.h
+  HumParamSet.h HumdrumFileStream.h \
+  tool-autobeam.h Convert.h HumRegex.h
 
 tool-homorhythm.o: tool-homorhythm.cpp tool-homorhythm.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1115,6 +1209,15 @@ tool-hproof.o: tool-hproof.cpp tool-hproof.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h
+
+tool-humbreak.o: tool-humbreak.cpp tool-humbreak.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  HumRegex.h
 
 tool-humdiff.o: tool-humdiff.cpp tool-humdiff.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1200,7 +1303,7 @@ tool-mei2hum.o: tool-mei2hum.cpp tool-mei2hum.h \
   MxmlMeasure.h GridCommon.h MxmlEvent.h \
   HumGrid.h GridMeasure.h GridSlice.h \
   GridPart.h GridStaff.h GridSide.h \
-  GridVoice.h HumRegex.h Convert.h
+  GridVoice.h Convert.h HumRegex.h
 
 tool-melisma.o: tool-melisma.cpp tool-melisma.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1219,6 +1322,15 @@ tool-mens2kern.o: tool-mens2kern.cpp tool-mens2kern.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   HumRegex.h
+
+tool-meter.o: tool-meter.cpp tool-meter.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h HumRegex.h \
+  Convert.h
 
 tool-metlev.o: tool-metlev.cpp tool-metlev.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1261,7 +1373,7 @@ tool-musedata2hum.o: tool-musedata2hum.cpp \
   GridCommon.h GridSlice.h MxmlPart.h \
   MxmlMeasure.h   \
   GridPart.h GridStaff.h GridSide.h \
-  Convert.h
+  tool-trillspell.h Convert.h
 
 tool-musicxml2hum.o: tool-musicxml2hum.cpp tool-autobeam.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1288,6 +1400,15 @@ tool-myank.o: tool-myank.cpp tool-myank.h HumTool.h \
   HumParamSet.h HumdrumFileStream.h HumRegex.h \
   Convert.h
 
+tool-nproof.o: tool-nproof.cpp tool-nproof.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  Convert.h HumRegex.h
+
 tool-ordergps.o: tool-ordergps.cpp tool-ordergps.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -1303,7 +1424,7 @@ tool-pccount.o: tool-pccount.cpp tool-pccount.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  HumRegex.h Convert.h
+  Convert.h HumRegex.h
 
 tool-periodicity.o: tool-periodicity.cpp tool-periodicity.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1322,6 +1443,14 @@ tool-phrase.o: tool-phrase.cpp tool-phrase.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h HumRegex.h
+
+tool-pline.o: tool-pline.cpp tool-pline.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h HumRegex.h
 
 tool-pnum.o: tool-pnum.cpp tool-pnum.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
@@ -1369,6 +1498,15 @@ tool-ruthfix.o: tool-ruthfix.cpp tool-ruthfix.h \
   NoteGrid.h NoteCell.h Convert.h \
   HumRegex.h
 
+tool-sab2gs.o: tool-sab2gs.cpp tool-sab2gs.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  Convert.h HumRegex.h
+
 tool-satb2gs.o: tool-satb2gs.cpp tool-satb2gs.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -1385,8 +1523,8 @@ tool-scordatura.o: tool-scordatura.cpp tool-scordatura.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  HumTransposer.h HumPitch.h HumRegex.h \
-  Convert.h
+  HumTransposer.h HumPitch.h Convert.h \
+  HumRegex.h
 
 tool-semitones.o: tool-semitones.cpp tool-semitones.h \
   HumTool.h Options.h HumdrumFileSet.h \
@@ -1473,7 +1611,16 @@ tool-tassoize.o: tool-tassoize.cpp tool-tassoize.h \
   HumSignifiers.h HumSignifier.h HumdrumLine.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
-  Convert.h HumRegex.h tool-shed.h
+  tool-shed.h Convert.h HumRegex.h
+
+tool-textdur.o: tool-textdur.cpp tool-textdur.h \
+  HumTool.h Options.h HumdrumFileSet.h \
+  HumdrumFile.h HumdrumFileContent.h \
+  HumdrumFileStructure.h HumdrumFileBase.h \
+  HumSignifiers.h HumSignifier.h HumdrumLine.h \
+  HumdrumToken.h HumNum.h HumAddress.h \
+  HumHash.h HumParamSet.h HumdrumFileStream.h \
+  HumRegex.h
 
 tool-thru.o: tool-thru.cpp tool-thru.h HumTool.h \
   Options.h HumdrumFileSet.h HumdrumFile.h \
@@ -1501,14 +1648,6 @@ tool-timebase.o: tool-timebase.cpp tool-timebase.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h
 
-tool-tspos.o: tool-tspos.cpp tool-tspos.h HumTool.h \
-  Options.h HumdrumFileSet.h HumdrumFile.h \
-  HumdrumFileContent.h HumdrumFileStructure.h \
-  HumdrumFileBase.h HumSignifiers.h \
-  HumSignifier.h HumdrumLine.h HumdrumToken.h \
-  HumNum.h HumAddress.h HumHash.h \
-  HumParamSet.h HumdrumFileStream.h HumRegex.h
-
 tool-transpose.o: tool-transpose.cpp tool-transpose.h \
   HumTool.h Options.h HumdrumFileSet.h \
   HumdrumFile.h HumdrumFileContent.h \
@@ -1535,4 +1674,12 @@ tool-trillspell.o: tool-trillspell.cpp tool-trillspell.h \
   HumdrumToken.h HumNum.h HumAddress.h \
   HumHash.h HumParamSet.h HumdrumFileStream.h \
   Convert.h HumRegex.h
+
+tool-tspos.o: tool-tspos.cpp tool-tspos.h HumTool.h \
+  Options.h HumdrumFileSet.h HumdrumFile.h \
+  HumdrumFileContent.h HumdrumFileStructure.h \
+  HumdrumFileBase.h HumSignifiers.h \
+  HumSignifier.h HumdrumLine.h HumdrumToken.h \
+  HumNum.h HumAddress.h HumHash.h \
+  HumParamSet.h HumdrumFileStream.h HumRegex.h
 

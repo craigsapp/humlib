@@ -16,6 +16,10 @@
 #include "HumTool.h"
 #include "HumdrumFile.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 namespace hum {
 
 // START_MERGE
@@ -27,8 +31,8 @@ class Tool_textdur : public HumTool {
 
 		bool     run               (HumdrumFileSet& infiles);
 		bool     run               (HumdrumFile& infile);
-		bool     run               (const string& indata, ostream& out);
-		bool     run               (HumdrumFile& infile, ostream& out);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
 
 
 	protected:
@@ -36,13 +40,13 @@ class Tool_textdur : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     printMelismas     (HumdrumFile& infile);
 		void     printDurations     (HumdrumFile& infile);
-		void     getTextSpineStarts(HumdrumFile& infile, vector<HTp>& starts);
-		void     processTextSpine  (vector<HTp>& starts, int index);
+		void     getTextSpineStarts(HumdrumFile& infile, std::vector<HTp>& starts);
+		void     processTextSpine  (std::vector<HTp>& starts, int index);
 		int      getMelisma        (HTp tok1, HTp tok2);
 		HumNum   getDuration       (HTp tok1, HTp tok2);
 		HTp      getTandemKernToken(HTp token);
 		void     printInterleaved  (HumdrumFile& infile);
-		void     printInterleavedLine(HumdrumLine& line, vector<bool>& textTrack);
+		void     printInterleavedLine(HumdrumLine& line, std::vector<bool>& textTrack);
 		void     printTokenAnalysis(HTp token);
 		void     printAnalysis      (void);
 		void     printDurationAverage(void);
@@ -57,7 +61,7 @@ class Tool_textdur : public HumTool {
 	private:
 		std::vector<HTp>                 m_textStarts;
 		std::vector<int>                 m_track2column;
-		std::vector<string>              m_columnName;
+		std::vector<std::string>         m_columnName;
 
 		std::vector<std::vector<HTp>>    m_syllables;  // List of syllables in **text/**sylba
 		std::vector<std::vector<HumNum>> m_durations;  // List of durations excluding trailing rests
