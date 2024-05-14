@@ -361,7 +361,7 @@ vector<string> Tool_shed::addToExInterpList(void) {
 	hre.split(pieces, elist, "[,;\\s*]+");
 
 	vector<string> output;
-	for (int i=0; i<pieces.size(); i++) {
+	for (int i=0; i<(int)pieces.size(); i++) {
 		if (pieces[i].empty()) {
 			continue;
 		}
