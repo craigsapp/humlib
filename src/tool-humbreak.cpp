@@ -20,6 +20,7 @@
 #include "tool-humbreak.h"
 #include "HumRegex.h"
 
+#include <map>
 #include <vector>
 
 using namespace std;
@@ -156,6 +157,7 @@ void Tool_humbreak::markLineBreakMeasures(HumdrumFile& infile) {
 	vector<HLp> pbreak;
 	vector<HLp> lbreak;
 	HumRegex hre;
+	map<int, int> used;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isCommentGlobal()) {
@@ -182,7 +184,8 @@ void Tool_humbreak::markLineBreakMeasures(HumdrumFile& infile) {
 		if (status) {
 			HLp line = &infile[i];
 			int offset = m_lineOffset[barnum];
-			if (offset) {
+			if (offset && (used[barnum] == 0)) {
+				used[barnum] = offset;
 				int ocounter = 0;
 				lbreak.clear();
 				pbreak.clear();

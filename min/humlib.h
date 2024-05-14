@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sat Apr 27 23:34:55 PDT 2024
+// Last Modified: Tue May 14 03:29:40 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1551,6 +1551,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isInstrumentCode          (void) { return isInstrumentDesignation(); }
 		bool     isInstrumentClass         (void);
 		bool     isInstrumentGroup         (void);
+		bool     isInstrumentNumber        (void);
 		bool     isModernInstrumentName    (void);
 		bool     isModernInstrumentAbbreviation(void);
 		bool     isOriginalInstrumentName    (void);
@@ -5703,16 +5704,13 @@ class Tool_addtempo : public HumTool {
 	protected:
 		void    processFile        (HumdrumFile& infile);
 		void    initialize         (void);
-		void    assignTempoChanges (std::vector<double>& tlist,
-		                            HumdrumFile& infile);
-		void    addTempo           (std::vector<double>& tlist,
-		                            HumdrumFile& infile,
-		                            int measure, double tempo);
-		void   addTempoToStart     (std::vector<double>& tlist,
-		                            HumdrumFile& infile, double tempo);
+		void    assignTempoChanges (std::vector<double>& tlist, HumdrumFile& infile);
+		void    addTempo           (std::vector<double>& tlist, HumdrumFile& infile, int measure, double tempo, int offset);
+		void    addTempoToStart    (std::vector<double>& tlist, HumdrumFile& infile, double tempo);
 
 	private:
-		std::vector<std::pair<int, double>> m_tempos;
+		// tuple<measure, tempo, mesure offset>
+		std::vector<std::tuple<int, double, int>> m_tempos;
 
 };
 
@@ -5932,6 +5930,66 @@ class Tool_chantize : public HumTool {
 		std::vector<std::vector<int>>  m_kstates;
 		std::vector<std::vector<bool>> m_estates;
 		bool m_diamondQ = false;
+};
+
+
+class Tool_chint : public HumTool {
+	public:
+		         Tool_chint          (void);
+		        ~Tool_chint          () {};
+
+		bool     run                 (HumdrumFileSet& infiles);
+		bool     run                 (HumdrumFile& infile);
+		bool     run                 (const std::string& indata, std::ostream& out);
+		bool     run                 (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile          (HumdrumFile& infile);
+		void    initialize           (void);
+		void    fillIntervalNames    (void);
+		void    fillIntervalNamesDiatonic(void);
+		void    chromaticColoring    (void);
+		void    dissonanceColoring   (void);
+		void    getPartIntervals     (std::vector<int>& topInterval,
+		                              std::vector<int>& botInterval,
+		                              HTp botSpine, HTp topSpine, HumdrumFile& infile);
+		void    insertPartColors     (HumdrumFile& infile, std::vector<int>& botInterval,
+		                              std::vector<int>& topInterval, int botTrack, int topTrack);
+		std::string getColorToken    (int interval, HumdrumFile& infile, int line, HTp token);
+		std::string getIntervalToken (int interval, HumdrumFile& infile, int line);
+
+	private:
+		// m_color: Color mapping for notes, indexed by base-40:
+		std::vector<std::string> m_color;
+
+		// m_intervals: Names of intervals indexed by base-40:
+		std::vector<std::string> m_intervals;
+
+		// Used in particular to avoid adding interval when both
+		// staves have tied notes:
+		std::vector<std::string>  m_botPitch;
+		std::vector<std::string>  m_topPitch;
+
+		// m_intervalQ: Show interval numbers
+		bool m_intervalQ = false;
+
+		// m_octaveQ: Do not collapse octaves to unisons.
+		bool m_octaveQ = false;
+
+		// m_noColorBotQ: Do not colorize bottom analysis staff
+		bool m_noColorBotQ = false;
+
+		// m_noColortopQ: Do not colorize top analysis staff
+		bool m_noColorTopQ = false;
+
+		// m_negativeQ: Add minus sign to intervals
+		// when staff notes are crossed.
+		bool m_negativeQ = false;
+
+		// m_middle: Add intervals between analysis staves, or actually
+		// below top staff. (Only effective in JavaScript compiled code.)
+		bool m_middleQ = true;
+
 };
 
 
@@ -8149,6 +8207,40 @@ class Tool_imitation : public HumTool {
 		bool m_retrograde = false;
 
 		vector<int> m_barlines;
+};
+
+
+class Tool_instinfo : public HumTool {
+	public:
+		         Tool_instinfo      (void);
+		        ~Tool_instinfo      () {};
+
+		bool     run                (HumdrumFileSet& infiles);
+		bool     run                (HumdrumFile& infile);
+		bool     run                (const std::string& indata, std::ostream& out);
+		bool     run                (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void    processFile         (HumdrumFile& infile);
+		void    initialize          (HumdrumFile& infile);
+		void    updateInstrumentLine(HumdrumFile& infile, int inumIndex,
+		                             std::map<int, std::string>& value,
+		                             std::map<int, int>& track2kindex,
+		                             const std::string& prefix);
+		void    insertInstrumentInfo(HumdrumFile& infile, int index,
+		                             std::map<int, std::string>& info, const std::string& prefix,
+		                             const std::string& key, std::map<int, int>& track2kindex);
+		void    printLine           (HumdrumFile& infile, int index);
+		void    printLine           (HumdrumFile& infile, int index,
+		                             const std::string& key);
+
+	private:
+		std::map<int, std::string> m_icode;  // instrument code, e.g., *Iflt
+		std::map<int, std::string> m_iclass; // instrument class, e.g., *Iww
+		std::map<int, std::string> m_iname;  // instrument name, e.g., *I"flute
+		std::map<int, std::string> m_iabbr;  // instrument name, e.g., *I'flt.
+		std::map<int, std::string> m_inum;   // instrument number, e.g., *I#2
+
 };
 
 

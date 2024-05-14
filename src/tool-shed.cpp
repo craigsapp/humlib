@@ -352,29 +352,20 @@ void Tool_shed::initializeSegment(HumdrumFile& infile) {
 //
 
 vector<string> Tool_shed::addToExInterpList(void) {
-	vector<string> output(1);
 	string elist = getString("exclusive-interpretations");
-	for (int i=0; i<(int)elist.size(); i++) {
-		if (isspace(elist[i]) || (elist[i] == ',')) {
-			if (!output.back().empty()) {
-				output.push_back("");
-			}
-		} else {
-			output.back() += elist[i];
-		}
-	}
-	if (output.back().empty()) {
-		output.resize((int)output.size() - 1);
-	}
-	for (int i=0; i<(int)output.size(); i++) {
-		if (output[i].compare(0, 2, "**") == 0) {
+	elist = Convert::trimWhiteSpace(elist);
+	HumRegex hre;
+	hre.replaceDestructive(elist, "", "^[,;\\s*]+");
+	hre.replaceDestructive(elist, "", "[,;\\s*]+$");
+	vector<string> pieces;
+	hre.split(pieces, elist, "[,;\\s*]+");
+
+	vector<string> output;
+	for (int i=0; i<pieces.size(); i++) {
+		if (pieces[i].empty()) {
 			continue;
 		}
-		if (output[i].compare(0, 1, "*") == 0) {
-			output[i] = "*" + output[i];
-			continue;
-		}
-		output[i] = "**" + output[i];
+		output.push_back("**" + pieces[i]);
 	}
 	return output;
 }

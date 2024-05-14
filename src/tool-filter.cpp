@@ -23,6 +23,7 @@
 #include "tool-autostem.h"
 #include "tool-binroll.h"
 #include "tool-chantize.h"
+#include "tool-chint.h"
 #include "tool-chooser.h"
 #include "tool-chord.h"
 #include "tool-cint.h"
@@ -47,6 +48,7 @@
 #include "tool-humsheet.h"
 #include "tool-humtr.h"
 #include "tool-imitation.h"
+#include "tool-instinfo.h"
 #include "tool-kern2mens.h"
 #include "tool-kernify.h"
 #include "tool-kernview.h"
@@ -228,7 +230,6 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 	#ifdef __EMSCRIPTEN__
 	bool optionList = getBoolean("options");
 	if (optionList) {
-		cerr << "GOT HERE BEFORE PRINT EMSCDRIPTEN" << endl;
 		printEmscripten(m_humdrum_text);
 		m_humdrum_text << infile;
 	}
@@ -256,6 +257,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(binroll, infile, commands[i].second, status);
 		} else if (commands[i].first == "chantize") {
 			RUNTOOL(chantize, infile, commands[i].second, status);
+		} else if (commands[i].first == "chint") {
+			RUNTOOL(chint, infile, commands[i].second, status);
 		} else if (commands[i].first == "chord") {
 			RUNTOOL(chord, infile, commands[i].second, status);
 		} else if (commands[i].first == "cint") {
@@ -292,6 +295,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(humtr, infile, commands[i].second, status);
 		} else if (commands[i].first == "imitation") {
 			RUNTOOL(imitation, infile, commands[i].second, status);
+		} else if (commands[i].first == "instinfo") {
+			RUNTOOL(instinfo, infile, commands[i].second, status);
 		} else if (commands[i].first == "kern2mens") {
 			RUNTOOL(kern2mens, infile, commands[i].second, status);
 		} else if (commands[i].first == "kernify") {

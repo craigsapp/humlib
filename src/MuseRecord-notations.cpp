@@ -93,7 +93,7 @@
 //////////////////////////////
 //
 // Codes sorted alphabetically:
-// 
+//
 // A  = vertical accent (/\)      a  = unassigned
 // B  = unassigned                b  = flat (bb = double flat) for ornaments
 // C  = unassigned                c  = continue wavy line
@@ -125,51 +125,51 @@
 // Organized alphabetically
 // ------------------
 // ASCII    Symbol/Meaning
-// 33       !  = stop tuplet    
-// 34       "                  
-// 35       #                 
-// 36       $                
-// 37       %               
-// 38       &  = editorial switch  
-// 39       '                     
-// 40       (  = open slur1      
-// 41       )  = close slur1    
-// 42       *  = start tuplet  
+// 33       !  = stop tuplet
+// 34       "
+// 35       #
+// 36       $
+// 37       %
+// 38       &  = editorial switch
+// 39       '
+// 40       (  = open slur1
+// 41       )  = close slur1
+// 42       *  = start tuplet
 // 43       +  = cautionary accidental
-// 44       ,  = breath mark         
-// 45       -  = tie                
-// 46       .  = staccato          
-// 47       /                     
-// 48       0  = open string     
-// 49       1  = fingering      
-// 50       2  = fingering     
-// 51       3  = fingering    
-// 52       4  = fingering   
-// 53       5  = fingering  
+// 44       ,  = breath mark
+// 45       -  = tie
+// 46       .  = staccato
+// 47       /
+// 48       0  = open string
+// 49       1  = fingering
+// 50       2  = fingering
+// 51       3  = fingering
+// 52       4  = fingering
+// 53       5  = fingering
 //
 // Non-alphabetic
 // ------------------
-// 33       !  = stop tuplet      
-// 34       "                    
-// 35       #                   
-// 36       $                  
-// 37       %                 
-// 38       &  = editorial switch  
-// 39       '                     
-// 40       (  = open slur1      
-// 41       )  = close slur1    
-// 42       *  = start tuplet  
+// 33       !  = stop tuplet
+// 34       "
+// 35       #
+// 36       $
+// 37       %
+// 38       &  = editorial switch
+// 39       '
+// 40       (  = open slur1
+// 41       )  = close slur1
+// 42       *  = start tuplet
 // 43       +  = cautionary accidental
-// 44       ,  = breath mark         
-// 45       -  = tie                
-// 46       .  = staccato          
-// 47       /                     
-// 48       0  = open string     
-// 49       1  = fingering      
-// 50       2  = fingering     
-// 51       3  = fingering    
-// 52       4  = fingering   
-// 53       5  = fingering  
+// 44       ,  = breath mark
+// 45       -  = tie
+// 46       .  = staccato
+// 47       /
+// 48       0  = open string
+// 49       1  = fingering
+// 50       2  = fingering
+// 51       3  = fingering
+// 52       4  = fingering
+// 53       5  = fingering
 // 54       6
 // 55       7
 // 56       8
@@ -191,7 +191,7 @@
 // 124      |
 // 125      }  = close slur3
 // 126      ~  = wavy line (trill)
-// 
+//
 
 #include "MuseRecord.h"
 

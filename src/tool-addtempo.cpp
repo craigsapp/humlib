@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Apr 15 00:21:49 PDT 2024
-// Last Modified: Mon Apr 15 00:21:53 PDT 2024
+// Last Modified: Thu May  2 01:08:42 PDT 2024
 // Filename:      tool-addtempo.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-addtempo.cpp
 // Syntax:        C++11; humlib
@@ -20,11 +20,17 @@
 //                Add *MM60 at start of music, *MM132 at measure 12, and
 //                *MM92 at measure 24.
 //
+// Example:       Adding mutiple tempo changes:
+//                    addtempo -q "126; m7:52; m7b:126; m14:52; m15:126"
+//                m7b: "b" is an offset, meaning the next measure after the (first) labeled measure 7.
+//
+
 
 #include "tool-addtempo.h"
 #include "HumRegex.h"
 
 #include <algorithm>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -106,21 +112,27 @@ void Tool_addtempo::initialize(void) {
 		if (hre.search(pieces[i], "^\\s$")) {
 			continue;
 		}
-		if (hre.search(pieces[i], "^\\s*m\\s*(\\d+)\\s*:\\s*([\\d.]+)\\s*$")) {
+		if (hre.search(pieces[i], "^\\s*m\\s*(\\d+)\\s*([a-z]?)\\s*:\\s*([\\d.]+)\\s*$")) {
 			int measure = hre.getMatchInt(1);
-			double tempo = hre.getMatchDouble(2);
-			m_tempos.emplace_back(measure, tempo);
+			string soffset = hre.getMatch(2);
+			int offset = 0;
+			if (!soffset.empty()) {
+				offset = soffset.at(0) - 'a';
+			}
+			double tempo = hre.getMatchDouble(3);
+			m_tempos.emplace_back(measure, tempo, offset);
 		} else if (hre.search(pieces[i], "^\\s*([\\d.]+)\\s*$")) {
 			int measure = 0;
+			int offset = 0;
 			double tempo = hre.getMatchDouble(1);
-			m_tempos.emplace_back(measure, tempo);
+			m_tempos.emplace_back(measure, tempo, offset);
 		}
 	}
 
-    auto compareByFirst = [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-        return a.first < b.first;
-    };
-    std::sort(m_tempos.begin(), m_tempos.end(), compareByFirst);
+	auto compareByFirst = [](const std::tuple<int, double, int>& a, const std::tuple<int, double, int>& b) {
+		return std::get<0>(a) < std::get<0>(b);
+	};
+	std::sort(m_tempos.begin(), m_tempos.end(), compareByFirst);
 }
 
 
@@ -156,6 +168,7 @@ void Tool_addtempo::processFile(HumdrumFile& infile) {
 }
 
 
+
 //////////////////////////////
 //
 // Tool_addtempo::assignTempoChanges -- add non-zero
@@ -166,7 +179,7 @@ void Tool_addtempo::assignTempoChanges(vector<double>& tlist, HumdrumFile& infil
 	tlist.resize(infile.getLineCount());
 	std::fill(tlist.begin(), tlist.end(), 0.0);
 	for (int i=0; i<(int)m_tempos.size(); i++) {
-		addTempo(tlist, infile, m_tempos[i].first, m_tempos[i].second);
+		addTempo(tlist, infile, std::get<0>(m_tempos[i]), std::get<1>(m_tempos[i]), std::get<2>(m_tempos[i]));
 	}
 }
 
@@ -178,7 +191,7 @@ void Tool_addtempo::assignTempoChanges(vector<double>& tlist, HumdrumFile& infil
 //
 
 void Tool_addtempo::addTempo(vector<double>& tlist, HumdrumFile& infile,
-		int measure, double tempo) {
+		int measure, double tempo, int offset) {
 
 	if (measure == 0) {
 		addTempoToStart(tlist, infile, tempo);
@@ -193,7 +206,20 @@ void Tool_addtempo::addTempo(vector<double>& tlist, HumdrumFile& infile,
 		}
 		int bar = infile[i].getBarNumber();
 		if (bar == measure) {
-			barIndex = i;
+			if (offset == 0) {
+				barIndex = i;
+				break;
+			}
+			int counter = 0;
+			for (int j=i+1; j<infile.getLineCount(); j++) {
+				if (infile[j].isBarline()) {
+					counter++;
+					if (counter == offset) {
+						barIndex = j;
+						break;
+					}
+				}
+			}
 			break;
 		}
 	}
@@ -273,7 +299,7 @@ void Tool_addtempo::addTempo(vector<double>& tlist, HumdrumFile& infile,
 
 //////////////////////////////
 //
-// Tool_addtempo::addTempoToStart --
+// Tool_addtempo::addTempoToStart -- Can't use letter postfix for 0 measure for now.
 //
 
 void Tool_addtempo::addTempoToStart(vector<double>& tlist,

@@ -181,7 +181,7 @@ void Tool_addlabels::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_addlabels::getExpsnsionIndex -- Return index that is where the 
+// Tool_addlabels::getExpsnsionIndex -- Return index that is where the
 //    expansion labels and 0th label should be printed ABOVE.
 //
 
@@ -224,7 +224,7 @@ int Tool_addlabels::getExpansionIndex(HumdrumFile& infile) {
 			if ((instIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
 				instIndex = i;
 			}
-			if ((abbrIndex < 0) && token->compare(0, 3, "*I\"") == 0) {
+			if ((abbrIndex < 0) && token->compare(0, 3, "*I'") == 0) {
 				abbrIndex = i;
 			}
 			if ((keySigIndex < 0) && token->isKeySignature()) {

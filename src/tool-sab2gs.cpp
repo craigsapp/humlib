@@ -258,7 +258,7 @@ void Tool_sab2gs::printSpineSplit(HumdrumFile& infile, int index, vector<int>& k
 	// Ignore the second kern spine as it does not exist yet in the
 	// output data.
 	nextIndex++;
-	// Then store any non-kern spines between the second and third kern spines to 
+	// Then store any non-kern spines between the second and third kern spines to
 	// append to the end of the data line later.
 	string postData;
 	for (int i=nextIndex; i<infile[index].getFieldCount(); i++) {
@@ -364,7 +364,7 @@ void Tool_sab2gs::printSpineMerge(HumdrumFile& infile, int index, vector<int>& k
 	// output data.
 	// HTp savedKernToken = infile.token(index, nextIndex);
 	nextIndex++;
-	// Then store any non-kern spines between the second and third kern spines to 
+	// Then store any non-kern spines between the second and third kern spines to
 	// append to the end of the data line later.
 	string postData;
 	for (int i=nextIndex; i<infile[index].getFieldCount(); i++) {
@@ -475,7 +475,7 @@ void Tool_sab2gs::printSwappedLine(HumdrumFile& infile, int index, vector<int>& 
 	// Save the second kern spine as it does not exist yet in the
 	// output data.
 	HTp savedKernToken = infile.token(index, nextIndex++);
-	// Then store any non-kern spines between the second and third kern spines to 
+	// Then store any non-kern spines between the second and third kern spines to
 	// append to the end of the data line later.
 	string postData;
 	for (int i=nextIndex; i<infile[index].getFieldCount(); i++) {
@@ -584,7 +584,7 @@ void Tool_sab2gs::printReducedLine(HumdrumFile& infile, int index, vector<int>& 
 	// Ignore the second kern spine as it does not exist yet in the
 	// output data.
 	nextIndex++;
-	// Then store any non-kern spines between the second and third kern spines to 
+	// Then store any non-kern spines between the second and third kern spines to
 	// append to the end of the data line later.
 	string postData;
 	for (int i=nextIndex; i<infile[index].getFieldCount(); i++) {
@@ -645,7 +645,7 @@ void Tool_sab2gs::adjustMiddleVoice(HTp spineStart) {
 	// when on bottom staff add "<" marker after pitch (or rest) to move to
 	// bottom staff.  Staff choice is selected by clef: clefG2 is for top staff
 	// and staffF4 is for bottom staff. Chords are not expected.
-	int staff = 0; 
+	int staff = 0;
 	string replacement = "$1" + m_belowMarker;
 	HumRegex hre;
 	while (current) {

@@ -44,16 +44,13 @@ class Tool_addtempo : public HumTool {
 	protected:
 		void    processFile        (HumdrumFile& infile);
 		void    initialize         (void);
-		void    assignTempoChanges (std::vector<double>& tlist,
-		                            HumdrumFile& infile);
-		void    addTempo           (std::vector<double>& tlist,
-		                            HumdrumFile& infile,
-		                            int measure, double tempo);
-		void   addTempoToStart     (std::vector<double>& tlist,
-		                            HumdrumFile& infile, double tempo);
+		void    assignTempoChanges (std::vector<double>& tlist, HumdrumFile& infile);
+		void    addTempo           (std::vector<double>& tlist, HumdrumFile& infile, int measure, double tempo, int offset);
+		void    addTempoToStart    (std::vector<double>& tlist, HumdrumFile& infile, double tempo);
 
 	private:
-		std::vector<std::pair<int, double>> m_tempos;
+		// tuple<measure, tempo, mesure offset>
+		std::vector<std::tuple<int, double, int>> m_tempos;
 
 };
 

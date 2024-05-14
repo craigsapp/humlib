@@ -1818,7 +1818,8 @@ bool HumdrumToken::isInstrumentGroup(void) {
 
 //////////////////////////////
 //
-// HumdrumToken::isInstrumentName -- True if an instrument name token.
+// HumdrumToken::isInstrumentName -- True if an instrument name token,
+//    such as *I"Flute 1
 //
 
 bool HumdrumToken::isInstrumentName(void) {
@@ -1826,6 +1827,23 @@ bool HumdrumToken::isInstrumentName(void) {
 		return false;
 	} else {
 		return true;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::isInstrumentNumber -- True if an instrument number token,
+//    such as *I#2 for a second instrument (Such as Flute 2)
+//
+
+bool HumdrumToken::isInstrumentNumber(void) {
+	HumRegex hre;
+	if (hre.search(this, "^\\*I#\\d+$")) {
+		return true;
+	} else {
+		return false;
 	}
 }
 
