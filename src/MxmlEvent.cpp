@@ -1329,6 +1329,8 @@ void MxmlEvent::setBarlineStyle(xml_node node) {
 		reportMeasureStyleToOwner(MeasureStyle::RepeatBackward);
 	} else if (repeat == +1) {
 		reportMeasureStyleToOwner(MeasureStyle::RepeatForward);
+	} else if (barstyle == "none") {
+		reportMeasureStyleToOwner(MeasureStyle::Invisible);
 	}
 }
 
