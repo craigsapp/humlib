@@ -126,6 +126,7 @@ endif
 #COMPILER      = clang++
 #PREFLAGS     += -stdlib=libc++
 
+
 #                                                                         #
 # End of user-modifiable variables.                                       #
 #                                                                         #
@@ -235,6 +236,19 @@ update:
 	git checkout $(INCDIR)/humlib.h
 	git pull
 
+# copy Midifile library (maintance use only, not of general use):
+midifile:
+	cp ../../midifile/src/*.cpp               src/
+	cp ../../midifile/src/Binasc.cpp          src/
+	cp ../../midifile/src/MidiEvent.cpp       src/
+	cp ../../midifile/src/MidiEventList.cpp   src/
+	cp ../../midifile/src/MidiFile.cpp        src/
+	cp ../../midifile/src/MidiMessage.cpp     src/
+	cp ../../midifile/include/Binasc.h        include/
+	cp ../../midifile/include/MidiEvent.h     include/
+	cp ../../midifile/include/MidiEventList.h include/
+	cp ../../midifile/include/MidiFile.h      include/
+	cp ../../midifile/include/MidiMessage.h   include/
 
 
 ##############################

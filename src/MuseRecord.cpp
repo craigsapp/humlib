@@ -67,7 +67,7 @@ MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
 	setType(aRecord.getType());
 	m_lineindex = aRecord.m_lineindex;
 
-	m_absbeat = aRecord.m_absbeat;
+	m_qstamp       = aRecord.m_qstamp;
 	m_lineduration = aRecord.m_lineduration;
 	m_noteduration = aRecord.m_noteduration;
 

@@ -17,6 +17,7 @@
 #include "MuseData.h"
 #include "HumRegex.h"
 
+#include <iostream>
 #include <vector>
 
 namespace hum {
@@ -35,12 +36,15 @@ class MuseDataSet {
 		int               readPart            (std::istream& input);
 		int               readFile            (const std::string& filename);
 		int               readString          (const std::string& data);
+		int               readString          (std::istream& input);
+		int               readString          (std::stringstream& input);
 		int               read                (std::istream& input);
 		MuseData&         operator[]          (int index);
 		int               getFileCount        (void);
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
 		std::vector<int>  getGroupIndexList   (const std::string& group);
+		int               appendPart          (MuseData* musedata);
 
 		std::string       getError            (void);
 		bool              hasError            (void);
@@ -55,7 +59,6 @@ class MuseDataSet {
 		std::string             m_error;
 
 	protected:
-		int               appendPart          (MuseData* musedata);
 		void              analyzeSetType      (std::vector<int>& types,
 		                                       std::vector<std::string>& lines);
 		void              analyzePartSegments (std::vector<int>& startindex,

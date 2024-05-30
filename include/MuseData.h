@@ -127,6 +127,7 @@ class MuseData {
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
+		HumNum            getQStamp          (int lindex);
 		HumNum            getFileDuration    (void);
 
 		int               getLineTickDuration (int lindex);

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue May 14 04:19:39 PDT 2024
+// Last Modified: Wed May 29 19:37:05 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -36555,7 +36555,7 @@ int MuseData::append(string& charstring) {
 	temprec = new MuseRecord;
 	temprec->setString(charstring);
 	temprec->setType(E_muserec_unknown);
-	temprec->setAbsBeat(0);
+	temprec->setQStamp(0);
 	m_data.push_back(temprec);
 	temprec->setLineIndex((int)m_data.size() - 1);
 	temprec->setOwner(this);
@@ -36859,7 +36859,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 
 	// There is another note tied to this one in the future, so
 	// first get the absolute time location of the future tied note
-	HumNum abstime    = m_data[lineindex]->getAbsBeat();
+	HumNum abstime    = m_data[lineindex]->getQStamp();
 	HumNum notedur    = m_data[lineindex]->getNoteDuration();
 	HumNum searchtime = abstime + notedur;
 
@@ -37166,7 +37166,7 @@ void MuseData::analyzeRhythm(void) {
 		if (m_data[i]->isChordNote()) {
 			// insert an automatic back command for chord tones
 			// also deal with cue-size note chords?
-			m_data[i]->setAbsBeat(cumulative - primarychordnoteduration);
+			m_data[i]->setQStamp(cumulative - primarychordnoteduration);
 
 			// Check to see if the secondary chord note has a duration.
 			// If so, then set the note duration to that value; otherwise,
@@ -37185,7 +37185,7 @@ void MuseData::analyzeRhythm(void) {
 			// cumulative timestamp; instead they temporarily advance
 			// the time placement of the next figure if it occurs
 			// during the same note as the previous figure.
-			m_data[i]->setAbsBeat(cumulative + figadj);
+			m_data[i]->setQStamp(cumulative + figadj);
 			HumNum tick = m_data[i]->getLineTickDuration();
 			if (tick == 0) {
 				figadj = 0;
@@ -37195,7 +37195,7 @@ void MuseData::analyzeRhythm(void) {
 				figadj += dur;
 			}
 		} else {
-			m_data[i]->setAbsBeat(cumulative);
+			m_data[i]->setQStamp(cumulative);
 			m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			m_data[i]->setLineDuration(m_data[i]->getNoteDuration());
 			linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
@@ -37215,7 +37215,7 @@ void MuseData::analyzeRhythm(void) {
 		switch (m_data[i]->getType()) {
 			case E_muserec_print_suggestion:
 			case E_muserec_sound_directives:
-				m_data[i]->setAbsBeat(m_data[i-1]->getAbsBeat());
+				m_data[i]->setQStamp(m_data[i-1]->getQStamp());
 		}
 	}
 
@@ -37279,7 +37279,7 @@ void MuseData::constructTimeSequence(void) {
 
 	MuseData& thing = *this;
 	for (int i=0; i<(int)m_data.size(); i++) {
-		insertEventBackwards(thing[i].getAbsBeat(), &thing[i]);
+		insertEventBackwards(thing[i].getQStamp(), &thing[i]);
 		if (hasError()) {
 			return;
 		}
@@ -37510,13 +37510,18 @@ int MuseData::getType(int eindex, int erecord) {
 
 //////////////////////////////
 //
-// MuseData::getAbsBeat -- return the absolute beat time (quarter
+// MuseData::getQStamp -- return the absolute beat time (quarter
 //    note durations from the start of the music until the current
 //    object.
 //
 
+HumNum MuseData::getQStamp(int lindex) {
+	return m_data[lindex]->getQStamp();
+}
+
+
 HumNum MuseData::getAbsBeat(int lindex) {
-	return m_data[lindex]->getAbsBeat();
+	return m_data[lindex]->getQStamp();
 }
 
 
@@ -37769,7 +37774,7 @@ void MuseData::setError(const string& error) {
 //
 
 HumNum MuseData::getFileDuration(void) {
-	return getRecord(getLineCount()-1).getAbsBeat();
+	return getRecord(getLineCount()-1).getQStamp();
 }
 
 
@@ -39092,6 +39097,7 @@ int MuseDataSet::readFile(const string& filename) {
 	return MuseDataSet::read(infile);
 }
 
+
 int MuseDataSet::readString(const string& data) {
 	stringstream ss;
 	ss << data;
@@ -39099,6 +39105,20 @@ int MuseDataSet::readString(const string& data) {
 }
 
 
+int MuseDataSet::readString(istream& input) {
+	stringstream buffer;
+	buffer << input.rdbuf();
+	return readString(buffer.str());
+}
+
+
+int MuseDataSet::readString(stringstream& input) {
+	return readString(input.str());
+}
+
+
+// Similar to readstring(istream&) but reading separate
+// MuseDatafiles directly:
 int MuseDataSet::read(istream& infile) {
 	vector<string> datalines;
 	datalines.reserve(100000);
@@ -43241,7 +43261,7 @@ MuseRecord& MuseRecord::operator=(MuseRecord& aRecord) {
 	setType(aRecord.getType());
 	m_lineindex = aRecord.m_lineindex;
 
-	m_absbeat = aRecord.m_absbeat;
+	m_qstamp       = aRecord.m_qstamp;
 	m_lineduration = aRecord.m_lineduration;
 	m_noteduration = aRecord.m_noteduration;
 
@@ -44382,7 +44402,7 @@ MuseRecordBasic::MuseRecordBasic(void) {
 	setType(E_muserec_unknown);
 	m_owner        = NULL;
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -44401,7 +44421,7 @@ MuseRecordBasic::MuseRecordBasic(const string& aLine, int index) {
 	setType(E_muserec_unknown);
 	m_lineindex = index;
 	m_owner        = NULL;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -44428,7 +44448,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 	m_recordString.resize(0);
 	m_owner        = NULL;
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -44448,7 +44468,7 @@ MuseRecordBasic::~MuseRecordBasic() {
 void MuseRecordBasic::clear(void) {
 	m_recordString.clear();
 	m_owner        = NULL;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineindex    =   -1;
 	m_lineduration =    0;
 	m_noteduration =    0;
@@ -44631,7 +44651,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(MuseRecordBasic& aRecord) {
 	setType(aRecord.getType());
 	m_lineindex = aRecord.m_lineindex;
 
-	m_absbeat = aRecord.m_absbeat;
+	m_qstamp = aRecord.m_qstamp;
 	m_lineduration = aRecord.m_lineduration;
 	m_noteduration = aRecord.m_noteduration;
 
@@ -44654,7 +44674,7 @@ MuseRecordBasic& MuseRecordBasic::operator=(const string& aLine) {
 	setType(aLine[0]);
 
 	m_lineindex    =   -1;
-	m_absbeat      =    0;
+	m_qstamp      =    0;
 	m_lineduration =    0;
 	m_noteduration =    0;
 	m_b40pitch     = -100;
@@ -44906,24 +44926,39 @@ void MuseRecordBasic::setString(string& astring) {
 
 
 void MuseRecordBasic::setAbsBeat(HumNum value) {
-	m_absbeat = value;
+	m_qstamp = value;
+}
+
+
+void MuseRecordBasic::setQStamp(HumNum value) {
+	m_qstamp = value;
 }
 
 
 // default value botval = 1
 void MuseRecordBasic::setAbsBeat(int topval, int botval) {
-	m_absbeat.setValue(topval, botval);
+	m_qstamp.setValue(topval, botval);
+}
+
+
+void MuseRecordBasic::setQStamp(int topval, int botval) {
+	m_qstamp.setValue(topval, botval);
 }
 
 
 
 //////////////////////////////
 //
-// MuseRecordBasic::getAbsBeat --
+// MuseRecordBasic::getAbsBeat -- Quarter notes from the
+//     start of the music.
 //
 
 HumNum MuseRecordBasic::getAbsBeat(void) {
-	return m_absbeat;
+	return m_qstamp;
+}
+
+HumNum MuseRecordBasic::getQStamp(void) {
+	return m_qstamp;
 }
 
 

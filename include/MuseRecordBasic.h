@@ -163,8 +163,11 @@ class MuseRecordBasic {
 		// mark-up accessor functions:
 
 		void              setAbsBeat         (HumNum value);
+		void              setQStamp          (HumNum value);
 		void              setAbsBeat         (int topval, int botval = 1);
+		void              setQStamp          (int topval, int botval = 1);
 		HumNum            getAbsBeat         (void);
+		HumNum            getQStamp          (void);
 
 		void              setLineDuration    (HumNum value);
 		void              setLineDuration    (int topval, int botval = 1);
@@ -249,7 +252,7 @@ class MuseRecordBasic {
 		// mark-up data for the line:
 		int               m_lineindex;        // index into original file
 		int               m_type;             // category of MuseRecordBasic record
-		HumNum            m_absbeat;          // dur in quarter notes from start
+		HumNum            m_qstamp;           // dur in quarter notes from start
 		HumNum            m_lineduration;     // duration of line
 		HumNum            m_noteduration;     // duration of note
 

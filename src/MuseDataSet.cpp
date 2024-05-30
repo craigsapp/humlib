@@ -15,6 +15,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -107,6 +108,7 @@ int MuseDataSet::readFile(const string& filename) {
 	return MuseDataSet::read(infile);
 }
 
+
 int MuseDataSet::readString(const string& data) {
 	stringstream ss;
 	ss << data;
@@ -114,6 +116,20 @@ int MuseDataSet::readString(const string& data) {
 }
 
 
+int MuseDataSet::readString(istream& input) {
+	stringstream buffer;
+	buffer << input.rdbuf();
+	return readString(buffer.str());
+}
+
+
+int MuseDataSet::readString(stringstream& input) {
+	return readString(input.str());
+}
+
+
+// Similar to readstring(istream&) but reading separate
+// MuseDatafiles directly:
 int MuseDataSet::read(istream& infile) {
 	vector<string> datalines;
 	datalines.reserve(100000);

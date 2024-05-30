@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue May 14 04:19:39 PDT 2024
+// Last Modified: Wed May 29 19:37:05 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3135,8 +3135,11 @@ class MuseRecordBasic {
 		// mark-up accessor functions:
 
 		void              setAbsBeat         (HumNum value);
+		void              setQStamp          (HumNum value);
 		void              setAbsBeat         (int topval, int botval = 1);
+		void              setQStamp          (int topval, int botval = 1);
 		HumNum            getAbsBeat         (void);
+		HumNum            getQStamp          (void);
 
 		void              setLineDuration    (HumNum value);
 		void              setLineDuration    (int topval, int botval = 1);
@@ -3221,7 +3224,7 @@ class MuseRecordBasic {
 		// mark-up data for the line:
 		int               m_lineindex;        // index into original file
 		int               m_type;             // category of MuseRecordBasic record
-		HumNum            m_absbeat;          // dur in quarter notes from start
+		HumNum            m_qstamp;           // dur in quarter notes from start
 		HumNum            m_lineduration;     // duration of line
 		HumNum            m_noteduration;     // duration of note
 
@@ -3721,6 +3724,7 @@ class MuseData {
 		HumNum            getTiedDuration     (int lindex);
 
 		HumNum            getAbsBeat         (int lindex);
+		HumNum            getQStamp          (int lindex);
 		HumNum            getFileDuration    (void);
 
 		int               getLineTickDuration (int lindex);
@@ -3786,12 +3790,15 @@ class MuseDataSet {
 		int               readPart            (std::istream& input);
 		int               readFile            (const std::string& filename);
 		int               readString          (const std::string& data);
+		int               readString          (std::istream& input);
+		int               readString          (std::stringstream& input);
 		int               read                (std::istream& input);
 		MuseData&         operator[]          (int index);
 		int               getFileCount        (void);
 		void              deletePart          (int index);
 		void              cleanLineEndings    (void);
 		std::vector<int>  getGroupIndexList   (const std::string& group);
+		int               appendPart          (MuseData* musedata);
 
 		std::string       getError            (void);
 		bool              hasError            (void);
@@ -3806,7 +3813,6 @@ class MuseDataSet {
 		std::string             m_error;
 
 	protected:
-		int               appendPart          (MuseData* musedata);
 		void              analyzeSetType      (std::vector<int>& types,
 		                                       std::vector<std::string>& lines);
 		void              analyzePartSegments (std::vector<int>& startindex,

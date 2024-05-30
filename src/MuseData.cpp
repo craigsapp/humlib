@@ -269,7 +269,7 @@ int MuseData::append(string& charstring) {
 	temprec = new MuseRecord;
 	temprec->setString(charstring);
 	temprec->setType(E_muserec_unknown);
-	temprec->setAbsBeat(0);
+	temprec->setQStamp(0);
 	m_data.push_back(temprec);
 	temprec->setLineIndex((int)m_data.size() - 1);
 	temprec->setOwner(this);
@@ -573,7 +573,7 @@ void MuseData::processTie(int eindex, int rindex, int lastindex) {
 
 	// There is another note tied to this one in the future, so
 	// first get the absolute time location of the future tied note
-	HumNum abstime    = m_data[lineindex]->getAbsBeat();
+	HumNum abstime    = m_data[lineindex]->getQStamp();
 	HumNum notedur    = m_data[lineindex]->getNoteDuration();
 	HumNum searchtime = abstime + notedur;
 
@@ -880,7 +880,7 @@ void MuseData::analyzeRhythm(void) {
 		if (m_data[i]->isChordNote()) {
 			// insert an automatic back command for chord tones
 			// also deal with cue-size note chords?
-			m_data[i]->setAbsBeat(cumulative - primarychordnoteduration);
+			m_data[i]->setQStamp(cumulative - primarychordnoteduration);
 
 			// Check to see if the secondary chord note has a duration.
 			// If so, then set the note duration to that value; otherwise,
@@ -899,7 +899,7 @@ void MuseData::analyzeRhythm(void) {
 			// cumulative timestamp; instead they temporarily advance
 			// the time placement of the next figure if it occurs
 			// during the same note as the previous figure.
-			m_data[i]->setAbsBeat(cumulative + figadj);
+			m_data[i]->setQStamp(cumulative + figadj);
 			HumNum tick = m_data[i]->getLineTickDuration();
 			if (tick == 0) {
 				figadj = 0;
@@ -909,7 +909,7 @@ void MuseData::analyzeRhythm(void) {
 				figadj += dur;
 			}
 		} else {
-			m_data[i]->setAbsBeat(cumulative);
+			m_data[i]->setQStamp(cumulative);
 			m_data[i]->setNoteDuration(m_data[i]->getNoteTickDuration(), tpq);
 			m_data[i]->setLineDuration(m_data[i]->getNoteDuration());
 			linedur.setValue(m_data[i]->getLineTickDuration(), tpq);
@@ -929,7 +929,7 @@ void MuseData::analyzeRhythm(void) {
 		switch (m_data[i]->getType()) {
 			case E_muserec_print_suggestion:
 			case E_muserec_sound_directives:
-				m_data[i]->setAbsBeat(m_data[i-1]->getAbsBeat());
+				m_data[i]->setQStamp(m_data[i-1]->getQStamp());
 		}
 	}
 
@@ -940,7 +940,9 @@ void MuseData::analyzeRhythm(void) {
 //////////////////////////////
 //
 // MuseData::getInitialTpq -- return the Q: field in the first $ record
-//    at the top of the file.
+//    at the top of the file.  If there is an updated Q: field, this
+//    function will need to be improved since TPQ cannot change in MIDI files,
+//    for example.
 //
 
 int MuseData::getInitialTpq(void) {
@@ -993,7 +995,7 @@ void MuseData::constructTimeSequence(void) {
 
 	MuseData& thing = *this;
 	for (int i=0; i<(int)m_data.size(); i++) {
-		insertEventBackwards(thing[i].getAbsBeat(), &thing[i]);
+		insertEventBackwards(thing[i].getQStamp(), &thing[i]);
 		if (hasError()) {
 			return;
 		}
@@ -1224,13 +1226,18 @@ int MuseData::getType(int eindex, int erecord) {
 
 //////////////////////////////
 //
-// MuseData::getAbsBeat -- return the absolute beat time (quarter
+// MuseData::getQStamp -- return the absolute beat time (quarter
 //    note durations from the start of the music until the current
 //    object.
 //
 
+HumNum MuseData::getQStamp(int lindex) {
+	return m_data[lindex]->getQStamp();
+}
+
+
 HumNum MuseData::getAbsBeat(int lindex) {
-	return m_data[lindex]->getAbsBeat();
+	return m_data[lindex]->getQStamp();
 }
 
 
@@ -1483,7 +1490,7 @@ void MuseData::setError(const string& error) {
 //
 
 HumNum MuseData::getFileDuration(void) {
-	return getRecord(getLineCount()-1).getAbsBeat();
+	return getRecord(getLineCount()-1).getQStamp();
 }
 
 
