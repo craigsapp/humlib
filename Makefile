@@ -308,7 +308,7 @@ $(LIBDIR)/$(LIBFILE_PUGI): $(OBJDIR)/pugixml.o
 
 $(OBJDIR)/pugixml.o: pugixml.cpp
 	@echo [CC] $<
-	$(COMPILER) $(PREFLAGS) -I$(INCDIR)/pugixml -c $< -o $@ $(POSTFLAGS)
+	@$(COMPILER) $(PREFLAGS) -I$(INCDIR)/pugixml -c $< -o $@ $(POSTFLAGS)
 
 
 

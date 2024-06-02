@@ -9,6 +9,11 @@
 //
 // Description:   Converter from Humdrum to Extended Piano Roll data for use with pandas or
 //                similar 2-D data structure.
+// To do:
+//      * Add option to set the column separator character(s).
+//      * Give separate Lables to each staff of piano music
+//      * Process *LH/*RH for cases where hand crosses to other staff.
+//      * Chords with notes having different tie states is not yet implemented.
 //
 
 #include "humlib.h"
@@ -296,7 +301,7 @@ void prepareSeconds(vector<double>& seconds, map<HumNum, double>& timemap, Humdr
 void printMeasure(HumdrumFile& infile, int index) {
 	HumRegex hre;
 	HTp token = infile[index].token(0);
-	cout << "# measure";
+	cout << "#measure:";
 	int barnum = infile[index].getBarNumber();
 	if (barnum >= 0) {
 		cout << " " << barnum;
