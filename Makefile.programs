@@ -49,23 +49,23 @@ LIBFILE   = humlib
 TARGDIR   = bin
 TOOLDIR   = cli
 PUGIXML   = pugixml
+MIDIFILE  = midifile
 
 PREFLAGS  = -Wall
 PREFLAGS += -O3
 PREFLAGS += -I$(MINDIR)
-PREFLAGS += -I$(INCDIR)
+PREFLAGS += -I$(INCDIR) -I$(INCDIR)/midifile
 
 # include debugging information:
 #PREFLAGS += -g
 
 # using C++ 2011/2017 standard:
-#PREFLAGS += -std=c++11
 PREFLAGS += -std=c++17
 
 # Add -static flag to compile without dynamics libraries for better portability:
 #PREFLAGS += -static
 
-POSTFLAGS = -L$(LIBDIR) -l$(LIBFILE) -l$(PUGIXML)
+POSTFLAGS = -L$(LIBDIR) -l$(LIBFILE) -l$(PUGIXML) -l$(MIDIFILE)
 
 COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 
@@ -80,7 +80,7 @@ COMPILER       = LANG=C $(ENV) g++ $(ARCH)
 
 
 # setting up the directory paths to search for dependency files
-vpath %.h   $(INCDIR)
+vpath %.h   $(INCDIR) $(INCDIR)/midifile
 vpath %.cpp $(wildcard tests/test-*) examples myprograms
 vpath %.cpp $(wildcard $(TOOLDIR)) examples myprograms
 

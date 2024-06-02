@@ -73,6 +73,14 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isManipulator          (void) const;
 		bool        hasSpines              (void) const;
 		bool        isGlobal               (void) const;
+
+		int         isKeySignature         (int startTrack = 0, int stopTrack = 0);
+		int         isKeyDesignation       (int startTrack = 0, int stopTrack = 0);
+		int         isTempo                (int startTrack = 0, int stopTrack = 0);
+		int         isTimeSignature        (int startTrack = 0, int stopTrack = 0);
+		int         isExpansionLabel       (int startTrack = 0, int stopTrack = 0);
+		int         isExpansionList        (int startTrack = 0, int stopTrack = 0);
+
 		bool        equalFieldsQ           (const std::string& exinterp, const std::string& value);
 		HTp         token                  (int index) const;
 		void        getTokens              (std::vector<HTp>& list);

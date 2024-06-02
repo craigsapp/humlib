@@ -1174,7 +1174,13 @@ int Options::getRegIndex(const string& optionName) {
 	if (it == m_optionList.end()) {
 		if (m_options_error_checkQ) {
 			m_error << "Error: unknown option \"" << optionName << "\"." << endl;
-			print(cout);
+			#ifndef __EMSCRIPTEN__
+				cerr << "Error: unknown option \"" << optionName << "\"." << endl;
+			#endif
+			print(cerr);
+			#ifndef __EMSCRIPTEN__
+				exit(1);
+			#endif
 			return -1;
 		} else {
 			return -1;

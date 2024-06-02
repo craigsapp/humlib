@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 29 19:37:05 PDT 2024
+// Last Modified: Sat Jun  1 21:03:09 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -31711,6 +31711,191 @@ void HumdrumLine::clearTokenLinkInfo(void) {
 }
 
 
+//////////////////////////////
+//
+// HumdrumLine::isKeySignature -- Returns 0 if no key signature on line, otherwise returns
+//     the field index + 1 of the first key signature found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isKeySignature(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isKeySignature()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isKeyDesignation -- Returns 0 if no key designation on line, otherwise returns
+//     the field index + 1 of the first key designation found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isKeyDesignation(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isKeyDesignation()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isTempo -- Returns 0 if no tempo on line, otherwise returns
+//     the field index + 1 of the first tempo found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isTempo(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isTempo()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isTimeSignature -- Returns 0 if no time signature on line, otherwise returns
+//     the field index + 1 of the first time signature found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isTimeSignature(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isTimeSignature()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isLabel -- Returns 0 if no label on line, otherwise returns
+//     the field index + 1 of the first label found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isExpansionLabel(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isExpansionLabel()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumLine::isLabelExpansionList -- Returns 0 if no label expansion list on line, otherwise returns
+//     the field index + 1 of the first label expansion list found in the given range.  If startTrack == 0,
+//     then start at first field, if stopTrack == 0, then end at last field.
+//     Default values:
+//        startTrack = 0
+//        stopTrack  = 0
+//
+
+int HumdrumLine::isExpansionList(int startTrack, int stopTrack) {
+	HumdrumLine& line = *this;
+	if (!line.isInterpretation()) {
+		return 0;
+	}
+	for (int i=0; i<line.getFieldCount(); i++) {
+		HTp token = line.token(i);
+		int track = token->getTrack();
+		if ((startTrack == 0) || (track >= startTrack)) {
+			if ((stopTrack == 0) || (track <= stopTrack)) {
+				if (token->isExpansionList()) {
+					return i+1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
 
 //////////////////////////////
 //
@@ -37226,7 +37411,9 @@ void MuseData::analyzeRhythm(void) {
 //////////////////////////////
 //
 // MuseData::getInitialTpq -- return the Q: field in the first $ record
-//    at the top of the file.
+//    at the top of the file.  If there is an updated Q: field, this
+//    function will need to be improved since TPQ cannot change in MIDI files,
+//    for example.
 //
 
 int MuseData::getInitialTpq(void) {
@@ -37595,11 +37782,7 @@ string MuseData::getPartName(void) {
 	if (line < 0) {
 		return "";
 	}
-	HumRegex hre;
-	string output = m_data[line]->getLine();
-	hre.replaceDestructive(output, "", "^\\s+");
-	hre.replaceDestructive(output, "", "\\s+$");
-	return output;
+	return m_data[line]->getPartName();
 }
 
 
@@ -38990,6 +39173,114 @@ void MuseData::linkMusicDirections(void) {
 }
 
 
+//////////////////////////////
+//
+// MuseData::getMeasureNumber -- If index == 0, return the next barnumber
+//     minus 1.  If on a measure record, return the number on that line.
+//     If neither, then search backwards for the last measure line (or 0 
+//     index) and return the measure number for that barline (or 0 index).
+//
+
+string MuseData::getMeasureNumber(int index) {
+	MuseData& md = *this;
+	if ((index > 0) && !md[index].isMeasure()) {
+		for (int i=index-1; i>= 0; i--) {
+			if (md[i].isMeasure()) {
+				index = i;
+				break;
+			}
+		}
+	}
+	if ((index != 0) && !md[index].isMeasure()) {
+		index = 0;
+	}
+	if (index == 0) {
+		// search for the first measure, and return
+		// that number.  If there are notes before the
+		// first barline, return the next measure number
+		// minus 1.
+		bool dataQ = false;
+		for (int i=0; i<md.getLineCount(); i++) {
+			if (md[i].isAnyNoteOrRest()) {
+				dataQ = true;
+			}
+			if (!md[i].isMeasure()) {
+				continue;
+			}
+			if (!dataQ) {
+				string number = md[i].getMeasureNumber();
+				return number;
+			} else {
+				// first measure is not numbered, so return next 
+				// measure number minus 1.
+				for (int j=index; j<md.getLineCount(); j++) {
+					if (md[j].isMeasure()) {
+						string number = md[j].getMeasureNumber();
+						if (number.empty()) {
+							// problem, so return empty string
+							return "";
+						}
+						int value = stoi(number) - 1;
+						return to_string(value);
+					}
+				}
+			}
+		}
+	} else {
+		// found a measure line, so extract the number:
+		string number = md[index].getMeasureNumber();
+		return number;
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::measureHasData -- From current index to the next barline
+// 	(or end of file), as at least one note or rest.
+//
+
+bool MuseData::measureHasData(int index) {
+	MuseData& md = *this;
+	if (md[index].isMeasure()) {
+		index++;
+	}
+	for (int i=index; i<md.getLineCount(); i++) {
+		if (md[i].isMeasure()) {
+			return false;
+		}
+		if (md[i].isAnyNoteOrRest()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getNextMeasureIndex -- Find the next measure line after
+//    the given line.  Return line count of MuseData if no measure line
+//    found before end of file.
+//
+
+int MuseData::getNextMeasureIndex(int index) {
+	MuseData& md = *this;
+	if (md[index].isMeasure()) {
+		index++;
+	}
+	for (int i=index; i<md.getLineCount(); i++) {
+		if (md[i].isMeasure()) {
+			return i;
+		}
+	}
+	return md.getLineCount();
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -40104,6 +40395,28 @@ string MuseRecord::getFigure(int index) {
 	output = pieces[index];
 	}
 	return output;
+}
+
+
+
+
+//////////////////////////////
+//
+// MuseRecord::getPartName -- return the name line in the 
+//     MuseData part's header.  This is the 9th non-comment
+//     line in a part file.
+//
+
+string MuseRecord::getPartName(void) {
+	if (isPartName()) {
+		HumRegex hre;
+		string raw = this->getLine();
+		hre.replaceDestructive(raw, "", "^\\s+");
+		hre.replaceDestructive(raw, "", "\\s+$");
+		return raw;
+	} else {
+		return "";
+	}
 }
 
 
@@ -43949,9 +44262,6 @@ void MuseRecord::getAllPrintSuggestions(vector<string>& suggestions) {
 		}
 	}
 }
-
-
-
 
 
 
@@ -51562,7 +51872,13 @@ int Options::getRegIndex(const string& optionName) {
 	if (it == m_optionList.end()) {
 		if (m_options_error_checkQ) {
 			m_error << "Error: unknown option \"" << optionName << "\"." << endl;
-			print(cout);
+			#ifndef __EMSCRIPTEN__
+				cerr << "Error: unknown option \"" << optionName << "\"." << endl;
+			#endif
+			print(cerr);
+			#ifndef __EMSCRIPTEN__
+				exit(1);
+			#endif
 			return -1;
 		} else {
 			return -1;

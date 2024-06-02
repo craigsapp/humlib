@@ -60,11 +60,23 @@ OBJDIR = obj
 # SRCDIR: Location of source-code files
 SRCDIR = src
 
+# SRCDIR_MIDIFILE: Location of Midifile library files
+SRCDIR_MIDIFILE = src/midifile
+
 # SRCDIR_MIN: Location of the combined source code file (humlib.cpp) is located.
 SRCDIR_MIN = min
 
+# SRCS_MIDIFILE: List of midifile source files in include/midifile
+SRCS_MIDIFILE = $(wildcard $(SRCDIR_MIDIFILE)/*.cpp)
+
+# OBJS_MIDIFILE: List of midifile library object files:
+OBJS_MIDIFILE = $(patsubst $(SRCDIR_MIDIFILE)/%.cpp,$(OBJDIR)/%.o,$(SRCS_MIDIFILE))
+
 # INCDIR: Location where the header files are located.
 INCDIR = include
+
+# INCDIR_MIDIFILE: Location where the header files of the midifile library are located.
+INCDIR_MIDIFILE = include/midifile
 
 # MINDIR: Location for the combined files humlib.cpp and (humlib.h are located.
 MINDIR = min
@@ -77,6 +89,9 @@ LIBFILE = libhumlib.a
 
 # LIBFILE_PUGI: Name of the (static) pugixml library file.
 LIBFILE_PUGI = libpugixml.a
+
+# LIBFILE_MIDIFILE: Name of the (static) midifile library file.
+LIBFILE_MIDIFILE = libmidifile.a
 
 # CLIDIR: Location where command-line interface programs are located.
 CLIDIR = cli
@@ -96,14 +111,13 @@ AR        = ar
 RANLIB    = ranlib
 
 # PREFLAGS: Compiler options placed before filenames
-PREFLAGS = -c -g -I$(INCDIR)
+PREFLAGS = -c -g -I$(INCDIR) -I$(INCDIR_MIDIFILE)
 # Add warnings to PREFLAGS:
 PREFLAGS += -Wall -Werror
 # Optimize the binary code in object files to run faster:
 PREFLAGS += -O3
 
 # Set the C++ standard being used to compile code.  Must be C++ 11 or later.
-#PREFLAGS += -std=c++11
 PREFLAGS += -std=c++17
 
 # POSTFLAGS: Compile options placed after filenames
@@ -141,12 +155,12 @@ endif
 # you to specify alternate locations for files that a target depends
 # on, rather than having to include the full path to each prerequisite
 # in the Makefile.
-vpath %.h   $(INCDIR)
-vpath %.cpp $(SRCDIR)
-vpath %.hpp $(INCDIR)
+vpath %.h   $(INCDIR) $(INCDIR)/pugixml $(INCDIR_MIDIFILE)
+vpath %.cpp $(SRCDIR) $(SRCDIR)/pugixml $(SRCDIR_MIDIFILE)
+vpath %.hpp $(INCDIR)/pugixml
 vpath %.o   $(OBJDIR)
 
-# Generate a list of the object files (excluding pugixml files):
+# Generate a list of the object files for humlib (excluding pugixml/midifile files):
 OBJS =
 OBJS += $(patsubst %.cpp,%.o,$(notdir $(wildcard $(SRCDIR)/tool-*.cpp)))
 OBJS += $(patsubst %.cpp,%.o,$(notdir $(wildcard $(SRCDIR)/[A-Z]*.cpp)))
@@ -236,19 +250,45 @@ update:
 	git checkout $(INCDIR)/humlib.h
 	git pull
 
+
+
 # copy Midifile library (maintance use only, not of general use):
-midifile:
-	cp ../../midifile/src/*.cpp               src/
-	cp ../../midifile/src/Binasc.cpp          src/
-	cp ../../midifile/src/MidiEvent.cpp       src/
-	cp ../../midifile/src/MidiEventList.cpp   src/
-	cp ../../midifile/src/MidiFile.cpp        src/
-	cp ../../midifile/src/MidiMessage.cpp     src/
-	cp ../../midifile/include/Binasc.h        include/
-	cp ../../midifile/include/MidiEvent.h     include/
-	cp ../../midifile/include/MidiEventList.h include/
-	cp ../../midifile/include/MidiFile.h      include/
-	cp ../../midifile/include/MidiMessage.h   include/
+midifile-copy:
+	cp ../../midifile/src/*.cpp               $(SRCDIR_MIDIFILE)
+	cp ../../midifile/src/Binasc.cpp          $(SRCDIR_MIDIFILE)
+	cp ../../midifile/src/MidiEvent.cpp       $(SRCDIR_MIDIFILE)
+	cp ../../midifile/src/MidiEventList.cpp   $(SRCDIR_MIDIFILE)
+	cp ../../midifile/src/MidiFile.cpp        $(SRCDIR_MIDIFILE)
+	cp ../../midifile/src/MidiMessage.cpp     $(SRCDIR_MIDIFILE)
+	cp ../../midifile/include/Binasc.h        $(INCDIR_MIDIFILE)
+	cp ../../midifile/include/MidiEvent.h     $(INCDIR_MIDIFILE)
+	cp ../../midifile/include/MidiEventList.h $(INCDIR_MIDIFILE)
+	cp ../../midifile/include/MidiFile.h      $(INCDIR_MIDIFILE)
+	cp ../../midifile/include/MidiMessage.h   $(INCDIR_MIDIFILE)
+
+
+
+##############################
+##
+## midifile: Create a static library for midifile (https://midifile.sapp.org).
+##     Midifile is used to parse and write MIDI files files in the humlib code,
+##     such as for the tool muse2mid.
+##
+
+midifile: makedirs $(LIBDIR)/$(LIBFILE_MIDIFILE)
+
+$(LIBDIR)/$(LIBFILE_MIDIFILE): $(OBJS_MIDIFILE)
+	@echo [AR] $@
+	@$(AR) cru $@ $^
+	@$(RANLIB) $@
+
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
+
+$(OBJDIR)/%.o: $(SRCDIR_MIDIFILE)/%.cpp | $(OBJDIR)
+	@echo [CC] $<
+	@$(COMPILER) $(PREFLAGS) -c $< -o $@ $(POSTFLAGS)
+
 
 
 ##############################
@@ -259,9 +299,16 @@ midifile:
 ##
 
 pugi: pugixml
-pugixml: makedirs pugixml.o
-	@$(AR) r $(LIBDIR)/$(LIBFILE_PUGI) $(OBJDIR)/pugixml.o
-	@$(RANLIB) $(LIBDIR)/$(LIBFILE_PUGI)
+pugixml: makedirs $(LIBDIR)/$(LIBFILE_PUGI)
+
+$(LIBDIR)/$(LIBFILE_PUGI): $(OBJDIR)/pugixml.o
+	@echo [AR] $@
+	@$(AR) cru $@ $<
+	@$(RANLIB) $@
+
+$(OBJDIR)/pugixml.o: pugixml.cpp
+	@echo [CC] $<
+	$(COMPILER) $(PREFLAGS) -I$(INCDIR)/pugixml -c $< -o $@ $(POSTFLAGS)
 
 
 
@@ -289,7 +336,7 @@ endif
 
 l: library
 lib: library
-library: makedirs min pugixml $(OBJS)
+library: makedirs min pugixml midifile $(OBJS)
 	@-rm -f $(LIBDIR)/$(LIBFILE)
 	@$(AR) r $(LIBDIR)/$(LIBFILE) $(OBJLIST)
 	@$(RANLIB) $(LIBDIR)/$(LIBFILE)
@@ -330,7 +377,7 @@ co: clean-obj
 clean-obj: clean
 clean:
 	@echo Erasing object files...
-	@-rm -f $(OBJDIR)/*.o $(OBJDIR)/humlib.o
+	@-rm -f $(OBJDIR)/*.o 
 	@echo Erasing obj directory...
 	@-rmdir $(OBJDIR)
 
@@ -478,7 +525,7 @@ makedirs:
 #                                                                         #
 # for i in src/*.cpp
 # do
-#    cc -std=c++11 -Iinclude -MM $i \
+#    cc -std=c++17 -Iinclude -MM $i \
 #    | sed 's/include\///g; s/src\///g; s/pugixml.hpp//g; s/pugiconfig.hpp//g'
 #    echo
 # done

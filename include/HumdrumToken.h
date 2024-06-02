@@ -83,6 +83,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isNullData                (void) const;
 		bool     isChord                   (const std::string& separator = " ");
 		bool     isLabel                   (void) const;
+		bool     isExpansionLabel          (void) const { return isLabel(); };
 		bool     isExpansionList           (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;

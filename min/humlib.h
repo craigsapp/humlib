@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed May 29 19:37:05 PDT 2024
+// Last Modified: Sat Jun  1 21:03:09 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -1257,6 +1257,14 @@ class HumdrumLine : public std::string, public HumHash {
 		bool        isManipulator          (void) const;
 		bool        hasSpines              (void) const;
 		bool        isGlobal               (void) const;
+
+		int         isKeySignature         (int startTrack = 0, int stopTrack = 0);
+		int         isKeyDesignation       (int startTrack = 0, int stopTrack = 0);
+		int         isTempo                (int startTrack = 0, int stopTrack = 0);
+		int         isTimeSignature        (int startTrack = 0, int stopTrack = 0);
+		int         isExpansionLabel       (int startTrack = 0, int stopTrack = 0);
+		int         isExpansionList        (int startTrack = 0, int stopTrack = 0);
+
 		bool        equalFieldsQ           (const std::string& exinterp, const std::string& value);
 		HTp         token                  (int index) const;
 		void        getTokens              (std::vector<HTp>& list);
@@ -1508,6 +1516,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isNullData                (void) const;
 		bool     isChord                   (const std::string& separator = " ");
 		bool     isLabel                   (void) const;
+		bool     isExpansionLabel          (void) const { return isLabel(); };
 		bool     isExpansionList           (void) const;
 		bool     hasRhythm                 (void) const;
 		bool     hasBeam                   (void) const;
@@ -3133,7 +3142,6 @@ class MuseRecordBasic {
 		void              append             (const char* format, ...);
 
 		// mark-up accessor functions:
-
 		void              setAbsBeat         (HumNum value);
 		void              setQStamp          (HumNum value);
 		void              setAbsBeat         (int topval, int botval = 1);
@@ -3167,18 +3175,21 @@ class MuseRecordBasic {
 
 		// boolean type fuctions:
 		bool              isAnyNote          (void);
+		bool              isRest             (void);
 		bool              isAnyNoteOrRest    (void);
-		bool              isAttributes       (void);
+		bool              isAttributes       (void); // starts with $
+		bool              isAttribute        (void) { return isAttributes(); }
 		bool              isBackup           (void);
 		bool              isBarline          (void);
+		bool              isMeasure          (void) { return isBarline(); }
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
 		bool              isDirection        (void); // starts with "*"
 		bool              isMusicalDirection (void); // starts with "*"
-		bool              isAnyComment       (void);
-		bool              isLineComment      (void);
-		bool              isBlockComment     (void);
+		bool              isAnyComment       (void); // starts with "@" or between lines starting with &.
+		bool              isLineComment      (void); // starts with "@"
+		bool              isBlockComment     (void); // lines between lines starting with &.
 		bool              isCopyright        (void); // 1st non-comment line in file
 		bool              isCueNote          (void); // starts with "c"
 		bool              isEncoder          (void); // 4th non-comment line in file
@@ -3266,6 +3277,10 @@ class MuseRecord : public MuseRecordBasic {
 		           ~MuseRecord                  ();
 
 		MuseRecord& operator=                   (MuseRecord& aRecord);
+
+
+	// MuseData part header information:
+		std::string getPartName();
 
 
 	//////////////////////////////
@@ -3655,7 +3670,6 @@ class MuseData {
 
 		void              setFilename         (const std::string& filename);
 		std::string       getFilename         (void);
-		std::string       getPartName         (void);
 		int               isMember            (const std::string& mstring);
 		int               getMembershipPartNumber(const std::string& mstring);
 		void              selectMembership    (const std::string& selectstring);
@@ -3676,6 +3690,10 @@ class MuseData {
 		int               readFile            (const std::string& filename);
 		void              analyzeLayers       (void);
 		int               analyzeLayersInMeasure(int startindex);
+		std::string       getMeasureNumber    (int index);
+		bool              measureHasData      (int index);
+		bool              hasMeasureData      (int index) { return measureHasData(index); }
+		int               getNextMeasureIndex (int index);
 
 		// aliases for access to MuseRecord objects based on line indexes:
 		std::string       getLine             (int index);
@@ -3700,6 +3718,7 @@ class MuseData {
 		std::string       getEncoder          (void);
 		std::string       getEncoderDate      (void);
 		std::string       getEncoderName      (void);
+		std::string       getPartName         (void);
 		std::string       getId               (void);
 		std::string       getMovementTitle    (void);
 		std::string       getSource           (void);
@@ -3761,7 +3780,6 @@ class MuseData {
 		void         constructTimeSequence(void);
 		void         insertEventBackwards (HumNum atime, MuseRecord* arecord);
 		int          getPartNameIndex     (void);
-		std::string  getPartName          (int index);
 		void         assignHeaderBodyState(void);
 		void         linkPrintSuggestions (void);
 		void         linkMusicDirections  (void);
@@ -4113,39 +4131,36 @@ class Convert {
 		static HumNum mensToDuration        (HTp menstok);
 
 		// older functions to enhance or remove:
-		static HumNum  mensToDuration       (const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static HumNum  mensToDuration       (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static std::string  mensToRecip     (const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static std::string  mensToRecip     (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
-		static HumNum  mensToDurationNoDots(const std::string& mensdata,
-		                                     HumNum scale = 4,
+		static HumNum  mensToDurationNoDots (const std::string& mensdata, HumNum scale = 4,
 		                                     const std::string& separator = " ");
 
 		// MuseData conversions in Convert-musedata.cpp
-      static int       museToBase40        (const std::string& pitchString);
-      static std::string musePitchToKernPitch(const std::string& museInput);
-		static std::string museClefToKernClef(const std::string& mclef);
-		static std::string museKeySigToKernKeySig(const std::string& mkeysig);
-		static std::string museTimeSigToKernTimeSig(const std::string& mtimesig);
-		static std::string museMeterSigToKernMeterSig(const std::string& mtimesig);
+      static int         museToBase40                    (const std::string& pitchString);
+      static std::string musePitchToKernPitch            (const std::string& museInput);
+		static std::string museClefToKernClef              (const std::string& mclef);
+		static std::string museKeySigToKernKeySig          (const std::string& mkeysig);
+		static std::string museTimeSigToKernTimeSig        (const std::string& mtimesig);
+		static std::string museMeterSigToKernMeterSig      (const std::string& mtimesig);
 		static std::string museFiguredBassToKernFiguredBass(const std::string& mfb);
 
 		// Harmony processing, defined in Convert-harmony.cpp
 		static std::vector<int> minorHScaleBase40(void);
 		static std::vector<int> majorScaleBase40 (void);
-		static int         keyToInversion   (const std::string& harm);
-		static int         keyToBase40      (const std::string& key);
+		static int              keyToInversion   (const std::string& harm);
+		static int              keyToBase40      (const std::string& key);
 		static std::vector<int> harmToBase40     (HTp harm, const std::string& key) {
-		                                        return harmToBase40(*harm, key); }
+		                                          return harmToBase40(*harm, key); }
 		static std::vector<int> harmToBase40     (HTp harm, HTp key) {
-		                                        return harmToBase40(*harm, *key); }
+		                                          return harmToBase40(*harm, *key); }
 		static std::vector<int> harmToBase40     (const std::string& harm, const std::string& key);
 		static std::vector<int> harmToBase40     (const std::string& harm, int keyroot, int keymode);
-		static void        makeAdjustedKeyRootAndMode(const std::string& secondary,
-		                                     int& keyroot, int& keymode);
-		static int         chromaticAlteration(const std::string& content);
+		static void             makeAdjustedKeyRootAndMode(const std::string& secondary,
+		                                          int& keyroot, int& keymode);
+		static int              chromaticAlteration(const std::string& content);
 
 		// data-type specific (other than pitch/rhythm),
 		// defined in Convert-kern.cpp
@@ -4160,35 +4175,32 @@ class Convert {
 		static bool isKernSecondaryTiedNote (const std::string& kerndata);
 		static std::string getKernPitchAttributes(const std::string& kerndata);
 
-		static int  getKernSlurStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernSlurEndElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernSlurStartElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernSlurEndElisionLevel    (const std::string& kerndata, int index);
 		static int  getKernPhraseStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernPhraseEndElisionLevel(const std::string& kerndata, int index);
-
-		static int  getKernBeamStartElisionLevel(const std::string& kerndata, int index);
-		static int  getKernBeamEndElisionLevel  (const std::string& kerndata, int index);
-
-
+		static int  getKernPhraseEndElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernBeamStartElisionLevel  (const std::string& kerndata, int index);
+		static int  getKernBeamEndElisionLevel    (const std::string& kerndata, int index);
 
 		// String processing, defined in Convert-string.cpp
 		static std::vector<std::string> splitString   (const std::string& data,
-		                                     char separator = ' ');
-		static void    replaceOccurrences   (std::string& source,
-		                                     const std::string& search,
-		                                     const std::string& replace);
+		                                               char separator = ' ');
+		static void    replaceOccurrences        (std::string& source,
+		                                          const std::string& search,
+		                                          const std::string& replace);
 		static std::string  repeatString         (const std::string& pattern, int count);
 		static std::string  encodeXml            (const std::string& input);
 		static std::string  getHumNumAttributes  (const HumNum& num);
 		static std::string  trimWhiteSpace       (const std::string& input);
-		static bool    startsWith           (const std::string& input,
-		                                     const std::string& searchstring);
+		static bool    startsWith                (const std::string& input,
+		                                          const std::string& searchstring);
 		static bool    contains(const std::string& input, const std::string& pattern);
 		static bool    contains(const std::string& input, char pattern);
 		static bool    contains(std::string* input, const std::string& pattern);
 		static bool    contains(std::string* input, char pattern);
-		static void    makeBooleanTrackList(std::vector<bool>& spinelist,
-		                                     const std::string& spinestring,
-		                                     int maxtrack);
+		static void    makeBooleanTrackList      (std::vector<bool>& spinelist,
+		                                          const std::string& spinestring,
+		                                          int maxtrack);
 		static std::vector<int> extractIntegerList(const std::string& input, int maximum);
 		// private functions for extractIntegerList:
 		static void processSegmentEntry(std::vector<int>& field, const std::string& astring, int maximum);

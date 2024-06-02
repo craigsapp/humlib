@@ -36,6 +36,10 @@ class MuseRecord : public MuseRecordBasic {
 		MuseRecord& operator=                   (MuseRecord& aRecord);
 
 
+	// MuseData part header information:
+		std::string getPartName();
+
+
 	//////////////////////////////
 	//
 	// functions which process regular notes (A-G), cue notes (c), grace notes (g),

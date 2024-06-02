@@ -21,6 +21,7 @@
 
 #include <cstdarg>
 #include <iostream>
+#include <map>
 #include <vector>
 
 
@@ -161,7 +162,6 @@ class MuseRecordBasic {
 		void              append             (const char* format, ...);
 
 		// mark-up accessor functions:
-
 		void              setAbsBeat         (HumNum value);
 		void              setQStamp          (HumNum value);
 		void              setAbsBeat         (int topval, int botval = 1);
@@ -195,18 +195,21 @@ class MuseRecordBasic {
 
 		// boolean type fuctions:
 		bool              isAnyNote          (void);
+		bool              isRest             (void);
 		bool              isAnyNoteOrRest    (void);
-		bool              isAttributes       (void);
+		bool              isAttributes       (void); // starts with $
+		bool              isAttribute        (void) { return isAttributes(); }
 		bool              isBackup           (void);
 		bool              isBarline          (void);
+		bool              isMeasure          (void) { return isBarline(); }
 		bool              isBodyRecord       (void);
 		bool              isChordGraceNote   (void);
 		bool              isChordNote        (void);
 		bool              isDirection        (void); // starts with "*"
 		bool              isMusicalDirection (void); // starts with "*"
-		bool              isAnyComment       (void);
-		bool              isLineComment      (void);
-		bool              isBlockComment     (void);
+		bool              isAnyComment       (void); // starts with "@" or between lines starting with &.
+		bool              isLineComment      (void); // starts with "@"
+		bool              isBlockComment     (void); // lines between lines starting with &.
 		bool              isCopyright        (void); // 1st non-comment line in file
 		bool              isCueNote          (void); // starts with "c"
 		bool              isEncoder          (void); // 4th non-comment line in file

@@ -1311,11 +1311,7 @@ string MuseData::getPartName(void) {
 	if (line < 0) {
 		return "";
 	}
-	HumRegex hre;
-	string output = m_data[line]->getLine();
-	hre.replaceDestructive(output, "", "^\\s+");
-	hre.replaceDestructive(output, "", "\\s+$");
-	return output;
+	return m_data[line]->getPartName();
 }
 
 
@@ -2703,6 +2699,114 @@ void MuseData::linkMusicDirections(void) {
 		}
 		Dlines.clear();
 	}
+}
+
+
+//////////////////////////////
+//
+// MuseData::getMeasureNumber -- If index == 0, return the next barnumber
+//     minus 1.  If on a measure record, return the number on that line.
+//     If neither, then search backwards for the last measure line (or 0 
+//     index) and return the measure number for that barline (or 0 index).
+//
+
+string MuseData::getMeasureNumber(int index) {
+	MuseData& md = *this;
+	if ((index > 0) && !md[index].isMeasure()) {
+		for (int i=index-1; i>= 0; i--) {
+			if (md[i].isMeasure()) {
+				index = i;
+				break;
+			}
+		}
+	}
+	if ((index != 0) && !md[index].isMeasure()) {
+		index = 0;
+	}
+	if (index == 0) {
+		// search for the first measure, and return
+		// that number.  If there are notes before the
+		// first barline, return the next measure number
+		// minus 1.
+		bool dataQ = false;
+		for (int i=0; i<md.getLineCount(); i++) {
+			if (md[i].isAnyNoteOrRest()) {
+				dataQ = true;
+			}
+			if (!md[i].isMeasure()) {
+				continue;
+			}
+			if (!dataQ) {
+				string number = md[i].getMeasureNumber();
+				return number;
+			} else {
+				// first measure is not numbered, so return next 
+				// measure number minus 1.
+				for (int j=index; j<md.getLineCount(); j++) {
+					if (md[j].isMeasure()) {
+						string number = md[j].getMeasureNumber();
+						if (number.empty()) {
+							// problem, so return empty string
+							return "";
+						}
+						int value = stoi(number) - 1;
+						return to_string(value);
+					}
+				}
+			}
+		}
+	} else {
+		// found a measure line, so extract the number:
+		string number = md[index].getMeasureNumber();
+		return number;
+	}
+	return "";
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::measureHasData -- From current index to the next barline
+// 	(or end of file), as at least one note or rest.
+//
+
+bool MuseData::measureHasData(int index) {
+	MuseData& md = *this;
+	if (md[index].isMeasure()) {
+		index++;
+	}
+	for (int i=index; i<md.getLineCount(); i++) {
+		if (md[i].isMeasure()) {
+			return false;
+		}
+		if (md[i].isAnyNoteOrRest()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+//////////////////////////////
+//
+// MuseData::getNextMeasureIndex -- Find the next measure line after
+//    the given line.  Return line count of MuseData if no measure line
+//    found before end of file.
+//
+
+int MuseData::getNextMeasureIndex(int index) {
+	MuseData& md = *this;
+	if (md[index].isMeasure()) {
+		index++;
+	}
+	for (int i=index; i<md.getLineCount(); i++) {
+		if (md[i].isMeasure()) {
+			return i;
+		}
+	}
+	return md.getLineCount();
 }
 
 
