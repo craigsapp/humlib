@@ -10,8 +10,7 @@
 // Description:   Converter from Humdrum to Extended Piano Roll data for use with pandas or
 //                similar 2-D data structure.
 // To do:
-//      * Give separate Labels to each staff of piano music.
-//      * Process *LH/*RH for cases where hand crosses to other staff.
+//      * Hand assignment does not differentiation between notes in chord yet.
 //      * Chords with notes having different tie states is not yet implemented.
 //      * Disjunct ties are not implemented (found in a few Beethoven sonatas).
 //
@@ -47,6 +46,8 @@ void   printKeyDesignation   (HumdrumFile& infile, int index, int field);
 void   printExpansionList    (HumdrumFile& infile, int lineIndex, int fieldIndex);
 void   printExpansionLabel   (HumdrumFile& infile, int lineIndex, int fieldIndex);
 void   prepareSeconds        (vector<double>& seconds, map<HumNum, double>& timemap, HumdrumFile& infile);
+void   doHandAnalysis        (HTp startSpine);
+void   prepareOptions        (Options& options);
 string getDate               (void);
 void   applyThru             (HumdrumFile& infile);
 vector<string> getExpansionLabels(HumdrumFile& infile);
@@ -73,9 +74,10 @@ string m_separator   = ";";    // used with --separator option
 string m_tab;                  // used with -t (add tab character after separator)
 
 // Other global variables:
-vector<string>      m_labels;  // instrument name for labels column
+vector<string>      m_labels;  // instrument name for "Labels" column
 vector<double>      m_seconds; // time in seconds for each line of input file
 map<HumNum, double> m_timemap; // lookup map for calculating durations in seconds
+vector<bool>        m_hand;    // given track uses hand labels
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -100,7 +102,26 @@ int main(int argc, char** argv) {
 	options.define("Z|no-markup=b",          "do not export any metadata markup");
 
 	options.process(argc, argv);
+	prepareOptions(options);
 
+	HumdrumFileStream instream(options);
+	HumdrumFile infile;
+	while (instream.read(infile)) {
+		processFile(infile);
+	}
+
+	return 0;
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////
+//
+// prepareOptions --
+//
+
+void prepareOptions(Options& options) {
 	m_velocity  = options.getDouble("velocity");
 	if (m_velocity < 0.0) {
 		m_velocity = 0.0;
@@ -143,18 +164,8 @@ int main(int argc, char** argv) {
 
 	m_variant     = options.getString("variant");
 	m_realization = options.getString("realization");
-
-	HumdrumFileStream instream(options);
-	HumdrumFile infile;
-	while (instream.read(infile)) {
-		processFile(infile);
-	}
-
-	return 0;
 }
 
-
-///////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////
@@ -494,6 +505,17 @@ void getLabels(vector<string>& labels, HumdrumFile& infile) {
 		string label = getTrackLabel(kstarts, i);
 		labels.at(track) = label;
 	}
+
+	// Adjust piano labels (can apply to organ, harp xylophone, celeste as well):
+	// Not dealing with piano and accompaniment.
+	if (labels.size() == 2) {
+		if (!(labels[0] == "LR_HAND")) {
+			if (labels[0] == labels[1]) {
+				labels[0] = "staff 2";
+				labels[1] = "staff 1";
+			}
+		}
+	}
 }
 
 
@@ -512,12 +534,20 @@ string getTrackLabel(vector<HTp>& kstarts, int index) {
 	HTp iName   = NULL;  // text string for name printed on score
 	HTp iAbbr   = NULL;  // instrument abbreviation for systems other than the first
 	HTp staff   = NULL;  // staff number
+	HTp iLH     = NULL;  // *LH
+	HTp iRH     = NULL;  // *RH
 
 	while (current) {
 		if (current->isData()) {
 			break;
 		}
-		if (current->isInstrumentCode()) {
+		if (*current == "*LH") {
+			iLH = current;
+			break;
+		} else if (*current == "*RH") {
+			iRH = current;
+			break;
+		} else if (current->isInstrumentCode()) {
 			iCode = current;
 		} else if (current->isInstrumentNumber()) {
 			iNumber = current;
@@ -527,6 +557,11 @@ string getTrackLabel(vector<HTp>& kstarts, int index) {
 			iAbbr = current;
 		}
 		current = current->getNextToken();
+	}
+
+	if (iLH || iRH) {
+		doHandAnalysis(kstarts[index]);
+		return "LR_HAND";
 	}
 
 	HumRegex hre;
@@ -554,6 +589,97 @@ string getTrackLabel(vector<HTp>& kstarts, int index) {
 	}
 
 	return output;
+}
+
+
+
+//////////////////////////////
+//
+// doHandAnalysis -- Mark each note as "LH" or "RH" according to
+//     *LH and *RH tandem interpretations in the spine.
+//
+
+void doHandAnalysis(HTp startSpine) {
+	if (!startSpine->isKern()) {
+		return;
+	}
+	vector<string> states(20);
+	states[0] = "none";
+	HTp current = startSpine->getNextToken();
+	while (current) {
+		int subtrack = current->getSubtrack();
+		if (subtrack == 0) {
+			states.resize(2);
+			states.resize(20);
+		}
+		if (current->isInterpretation()) {
+			if (subtrack == 0) {
+				if (*current == "*LH") {
+					states[0] = "LH";
+					states[1] = "LH";
+				} else if (*current == "*RH") {
+					states[0] = "RH";
+					states[1] = "RH";
+				}
+			} else {
+				int ttrack = current->getTrack();
+				m_hand[ttrack] = true;
+				HTp c2 = current;
+				while (c2) {
+					int track = c2->getTrack();
+					if (track != ttrack) {
+						break;
+					}
+					int sub = c2->getSubtrack();
+					if (*c2 == "*LH") {
+						states.at(sub) = "LH";
+						if (sub == 1) {
+							states.at(0) = "LH";
+						}
+					} else if (*c2 == "*RH") {
+						states.at(sub) = "RH";
+						if (sub == 1) {
+							states.at(0) = "RH";
+						}
+					}
+					c2 = c2->getNextFieldToken();
+				}
+			}
+		}
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+
+		if (subtrack == 0) {
+			// no subspines
+			if (current->isNoteAttack()) {
+				current->setValue("auto", "hand", states[0]);
+			}
+		} else {
+			int ttrack = current->getTrack();
+			HTp c2 = current;
+			while (c2) {
+				int track = c2->getTrack();
+				if (track != ttrack) {
+					break;
+				}
+				if (!c2->isNoteAttack()) {
+					c2 = c2->getNextFieldToken();
+					continue;
+				}
+				int sub = c2->getSubtrack();
+				if (states.at(sub).empty()) {
+					c2->setValue("auto", "hand", states.at(0));
+				} else {
+					c2->setValue("auto", "hand", states.at(sub));
+				}
+				c2 = c2->getNextFieldToken();
+			}
+		}
+		current = current->getNextToken();
+		continue;
+	}
 }
 
 
@@ -606,7 +732,22 @@ void printChordNotes(HTp token) {
 		cout << duration   << m_separator;
 		cout << midiPitch  << m_separator;
 		cout << m_velocity << m_separator;
-		cout << '"' << m_labels.at(track) << '"';
+		if (m_hand.at(track)) {
+			string hand = token->getValue("auto", "hand");
+			if (!hand.empty()) {
+				string label = "UNKNOWN";
+				if (hand == "LH") {
+					label = "Left Hand";
+				} else if (hand == "RH") {
+					label = "Right Hand";
+				}
+				cout << '"' << label << '"';
+			} else {
+				cout << '"' << m_labels.at(track) << '"';
+			}
+		} else {
+			cout << '"' << m_labels.at(track) << '"';
+		}
 		cout << endl;
 	}
 }
@@ -619,6 +760,8 @@ void printChordNotes(HTp token) {
 //
 
 void processFile(HumdrumFile& infile) {
+	m_hand.resize(infile.getMaxTrack()+1);
+	fill(m_hand.begin(), m_hand.end(), false);
 	printHeader(infile);
 
 	applyThru(infile);
