@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Jun  1 14:52:42 PDT 2024
-// Last Modified: Sat Jun  1 21:51:14 PDT 2024
+// Last Modified: Sun Jun  2 16:30:12 PDT 2024
 // Filename:      cli/hum2epr.cpp
 // URL:           https://github.com/craigsapp/g/blob/master/src/hum2epr.cpp
 // Syntax:        C++11
@@ -10,10 +10,10 @@
 // Description:   Converter from Humdrum to Extended Piano Roll data for use with pandas or
 //                similar 2-D data structure.
 // To do:
-//      * Add option to set the column separator character(s).
-//      * Give separate Lables to each staff of piano music
+//      * Give separate Labels to each staff of piano music.
 //      * Process *LH/*RH for cases where hand crosses to other staff.
 //      * Chords with notes having different tie states is not yet implemented.
+//      * Disjunct ties are not implemented (found in a few Beethoven sonatas).
 //
 
 #include "humlib.h"
@@ -55,35 +55,42 @@ map<string, string> getEmbeddedExpansionLists(HumdrumFile& infile);
 
 // User-interface options:
 Options options;
-double m_velocity    = 1.0;   // used with --velocity
-bool   m_barnumsQ    = true;  // used with -M (no measure numbers)
-bool   m_keysQ       = true;  // used with -K (no key info markup)
-bool   m_keysigsQ    = true;  // used with -K (no key info markup)
-bool   m_labelsQ     = true;  // used with -L (no expansion label markup)
-bool   m_expansionsQ = true;  // used with -E (no expansion lists markup)
-bool   m_referencesQ = true;  // used with -R (no reference records)
-bool   m_temposQ     = true;  // used with -T (no tempo markup)
-bool   m_timesigsQ   = true;  // used with -I (no time signature markup)
-bool   m_secondsQ    = false; // used with -s (start times and durations in seconds)
-string m_variant;     // used with -v (thru label expansion variant)
-string m_realization; // used with -r (thru label realization)
+bool   m_barnumsQ    = true;   // used with -M (no measure numbers)
+bool   m_expansionsQ = true;   // used with -E (no expansion lists markup)
+bool   m_keysQ       = true;   // used with -K (no key info markup)
+bool   m_keysigsQ    = true;   // used with -K (no key info markup)
+bool   m_labelsQ     = true;   // used with -L (no expansion label markup)
+bool   m_referencesQ = true;   // used with -R (no reference records)
+bool   m_secondsQ    = false;  // used with -s (start times and durations in seconds)
+bool   m_temposQ     = true;   // used with -T (no tempo markup)
+bool   m_timesigsQ   = true;   // used with -I (no time signature markup)
+bool   m_footerQ     = true;   // used with -F (no ending footer)
+
+double m_velocity    = 1.0;    // used with --velocity
+string m_variant;              // used with -v (thru label expansion variant)
+string m_realization;          // used with -r (thru label realization)
+string m_separator   = ";";    // used with --separator option
+string m_tab;                  // used with -t (add tab character after separator)
 
 // Other global variables:
-vector<string>      m_labels;
-vector<double>      m_seconds;
-map<HumNum, double> m_timemap;
+vector<string>      m_labels;  // instrument name for labels column
+vector<double>      m_seconds; // time in seconds for each line of input file
+map<HumNum, double> m_timemap; // lookup map for calculating durations in seconds
 
 
 ///////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv) {
-	options.define("velocity=d:1.0",         "default MIDI note attack velocity");
+	options.define("r|realization=s:",       "create expansion list");
 	options.define("s|seconds=b",            "timeline in seconds rather than quarter notes");
-	options.define("v|variant=s:",           "Choose expansion list variant");
-	options.define("r|realization=s:",       "Create expansion list");
+	options.define("separator=s:;",          "separator character between fields");
+	options.define("t|tab=b",                "place tab character after separator character");
+	options.define("v|variant=s:",           "choose expansion list variant");
+	options.define("velocity=d:1.0",         "default MIDI note attack velocity");
 
 	// metadata comments:
 	options.define("E|no-expansions=b",      "do not export label expansion lists");
+	options.define("F|no-footer=b",          "do not export footer reference records");
 	options.define("I|no-time-signatures=b", "do not export time signatures");
 	options.define("K|no-key-info=b",        "do not export tempo markings");
 	options.define("L|no-labels=b",          "do not export label markings");
@@ -94,8 +101,15 @@ int main(int argc, char** argv) {
 
 	options.process(argc, argv);
 
-	m_velocity = options.getDouble("velocity");
-	m_secondsQ = options.getBoolean("seconds");
+	m_velocity  = options.getDouble("velocity");
+	if (m_velocity < 0.0) {
+		m_velocity = 0.0;
+	} else if (m_velocity > 1.0) {
+		m_velocity = 1.0;
+	}
+	m_secondsQ  = options.getBoolean("seconds");
+	m_tab       = options.getBoolean("tab") ? "\t" : "";
+	m_separator = options.getString("separator") + m_tab;
 
 	if (options.getBoolean("no-markup")) {
 		m_barnumsQ    = false;
@@ -105,6 +119,14 @@ int main(int argc, char** argv) {
 		m_keysigsQ    = false;
 		m_temposQ     = false;
 		m_timesigsQ   = false;
+
+		m_barnumsQ    = !!options.getBoolean("no-measure-numbers");
+		m_labelsQ     = !!options.getBoolean("no-labels");
+		m_expansionsQ = !!options.getBoolean("no-expansions");
+		m_keysQ       = !!options.getBoolean("no-key-info");
+		m_keysigsQ    = !!options.getBoolean("no-key-info");
+		m_temposQ     = !!options.getBoolean("no-tempos");
+		m_timesigsQ   = !!options.getBoolean("no-time-signatures");
 	} else {
 		m_barnumsQ    = !options.getBoolean("no-measure-numbers");
 		m_labelsQ     = !options.getBoolean("no-labels");
@@ -117,6 +139,7 @@ int main(int argc, char** argv) {
 		m_timesigsQ   = !options.getBoolean("no-time-signatures");
 	}
 	m_referencesQ = !options.getBoolean("no-references");
+	m_footerQ     = !options.getBoolean("no-footer");
 
 	m_variant     = options.getString("variant");
 	m_realization = options.getString("realization");
@@ -579,10 +602,10 @@ void printChordNotes(HTp token) {
 		int midiPitch = Convert::kernToMidiNoteNumber(subtokens[i]);
 		int track = token->getTrack();
 
-		cout << startTime<< ";\t";
-		cout << duration << ";\t";
-		cout << midiPitch << ";\t";
-		cout << m_velocity << ";\t";
+		cout << startTime  << m_separator;
+		cout << duration   << m_separator;
+		cout << midiPitch  << m_separator;
+		cout << m_velocity << m_separator;
 		cout << '"' << m_labels.at(track) << '"';
 		cout << endl;
 	}
@@ -615,11 +638,11 @@ void printHeader(HumdrumFile& infile) {
 	if (m_referencesQ) {
 		printHeaderReferences(infile);
 	}
-	cout << "\"Start\";\t";
-	cout << "\"Duration\";\t";
-	cout << "\"Pitch\";\t";
-	cout << "\"Velocity\";\t";
-	cout << "\"Label\"\t";
+	cout << "\"Start\""    << m_separator;
+	cout << "\"Duration\"" << m_separator;
+	cout << "\"Pitch\""    << m_separator;
+	cout << "\"Velocity\"" << m_separator;
+	cout << "\"Label\"";
 	cout << endl;
 }
 
@@ -811,7 +834,7 @@ bool isInterestingReferenceRecord(const string& key) {
 // printFooter --
 //
 void printFooter(HumdrumFile& infile) {
-	if (m_referencesQ) {
+	if (m_referencesQ && m_footerQ) {
 		printFooterReferences(infile);
 	}
 }
