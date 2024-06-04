@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun  2 01:07:29 PDT 2024
+// Last Modified: Mon Jun  3 20:14:55 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3597,7 +3597,7 @@ class MuseRecord : public MuseRecordBasic {
 	//     in MuseRecord-suggestions.cpp.
 	//
 
-		void            addPrintSuggestion            (int deltaIndex);
+		void             addPrintSuggestion           (int deltaIndex);
 		bool             hasPrintSuggestions          (void);
 		void             getAllPrintSuggestions       (std::vector<std::string>& suggestions);
 		void             getPrintSuggestions          (std::vector<std::string>& suggestions, int column);

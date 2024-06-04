@@ -22,16 +22,16 @@ using namespace std;
 using namespace hum;
 using namespace smf;
 
-void setTempo(MidiFile& midiout);
-void setTpq(MidiFile& midiout, MuseDataSet& mds);
-void processData(MidiFile& midiout, MuseDataSet& mds);
-void convertPartData(MidiEventList& outlist, MuseData& md, int channel);
+void setTempo        (MidiFile& midiout);
+void setTrackNames   (MidiFile& midiout, MuseDataSet& mds);
+void setTpq          (MidiFile& midiout, MuseDataSet& mds);
+void processData     (MidiFile& midiout, MuseDataSet& mds);
+void convertPartData (MidiEventList& outlist, MuseData& md, int channel);
 
 // Global variables:
 int Tpq = 120;
 
 Options options;
-bool floatQ = false;  // Used with -f option
 bool graceQ = true;   // Used with -G option
 bool tieQ   = false;  // Todo: add -T option to attack tied notes
 
@@ -43,17 +43,22 @@ int main(int argc, char** argv) {
 	options.define("o|output=s",    "Save MIDI file to given filename");
 	options.define("G|no-grace=b",  "Do not translate grace notes");
 	options.process(argc, argv);
-	floatQ = options.getBoolean("float");
 	graceQ = !options.getBoolean("no-grace");
 	MuseDataSet mds;
-	int output = 1;
+	int status = 1;
 	if (options.getArgCount() == 0) {
-		mds.readString(cin);
+		status = mds.readString(cin);
+		if (!status) {
+			cerr << "Problem reading input string " << endl;
+		}
 	} else {
 		for (int i=0; i<options.getArgCount(); i++) {
 			MuseData* md;
 			md = new MuseData;
-			output &= md->readFile(options.getArg(i+1));
+			status &= md->readFile(options.getArg(i+1));
+			if (!status) {
+				cerr << "Problem reading " << options.getArg(i+1) << endl;
+			}
 			mds.appendPart(md);
 		}
 	}
@@ -63,6 +68,8 @@ int main(int argc, char** argv) {
 	setTempo(midiout);
 	midiout.absoluteTicks(); // time information stored as absolute time rather than delta time
 	processData(midiout, mds);
+
+	setTrackNames(midiout, mds);
 	midiout.sortTracks();
 	midiout.deltaTicks();
 	if (options.getBoolean("output")) {
@@ -71,11 +78,33 @@ int main(int argc, char** argv) {
 		cout << midiout;
 	}
 
-	return !output;
+	return !status;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////
+//
+// setTrackNames -- set the track names in the MIDI file to the instrument names
+//     in the MuseData file(s).
+//
+
+void setTrackNames(MidiFile& midiout, MuseDataSet& mds) {
+	for (int i=0; i<mds.getFileCount(); i++) {
+		string name = mds[i].getPartName();
+		if (name.empty()) {
+			name = "track " + to_string(i+1);
+		}
+		MidiEvent trackName;
+		trackName.makeTrackName(name);
+		trackName.tick = 0;
+		midiout[i+1].push_back(trackName);
+	}
+}
+
+
 
 //////////////////////////////
 //
