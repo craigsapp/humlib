@@ -182,7 +182,7 @@
 // 63       ?  = dead space (do not assign)
 // 64       @  = dead space (do not assign)
 // 91       [  = open slur2
-// 92       \
+// 92       "\"
 // 93       ]  = close slur2
 // 94       ^  = accidental above note
 // 95       _  = legato

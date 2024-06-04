@@ -54,7 +54,7 @@ MIDIFILE  = midifile
 PREFLAGS  = -Wall
 PREFLAGS += -O3
 PREFLAGS += -I$(MINDIR)
-PREFLAGS += -I$(INCDIR) -I$(INCDIR)/midifile
+PREFLAGS += -I$(INCDIR) -I$(INCDIR)/pugixml -I$(INCDIR)/midifile
 
 # include debugging information:
 #PREFLAGS += -g
@@ -124,7 +124,7 @@ ifeq ($(wildcard $(TARGDIR)),)
 	@-mkdir -p $(TARGDIR)
 endif
 	@echo [CC] $@
-	@$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)
+	$(COMPILER) $(PREFLAGS) -o $(TARGDIR)/$@ $< $(POSTFLAGS)
 #		&& strip $(TARGDIR)/$@$(EXTEN)
 
 #                                                                         #

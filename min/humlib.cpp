@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun  3 20:14:55 PDT 2024
+// Last Modified: Mon Jun  3 09:34:45 PM PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -66518,9 +66518,9 @@ void Tool_composite::analyzeFullCompositeRhythm(HumdrumFile& infile) {
 		durations[i] = infile[i].getDuration();
 	}
 
-	vector<bool> isRest(infile.getLineCount(), false);
-	vector<bool> isNull(infile.getLineCount(), false);
-	vector<bool> isSustain(infile.getLineCount(), false);
+	vector<int> isRest(infile.getLineCount(), false);
+	vector<int> isNull(infile.getLineCount(), false);
+	vector<int> isSustain(infile.getLineCount(), false);
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (durations[i] == 0) {
@@ -67018,8 +67018,8 @@ void Tool_composite::analyzeGroupCompositeRhythms(HumdrumFile& infile) {
 		durations[i] = infile[i].getDuration();
 	}
 
-	vector<bool> isRest(infile.getLineCount(), false);
-	vector<bool> isNull(infile.getLineCount(), false);
+	vector<int> isRest(infile.getLineCount(), false);
+	vector<int> isNull(infile.getLineCount(), false);
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (durations[i] == 0) {
@@ -67346,7 +67346,7 @@ void Tool_composite::getGroupStates(vector<vector<int>>& groupstates, HumdrumFil
 //    0 if the line only contains nulls.  Also add the duration of any subsequent
 //    lines that are null lines before any data content lines.
 
-HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<bool>& isNull) {
+HumNum Tool_composite::getLineDuration(HumdrumFile& infile, int index, vector<int>& isNull) {
 	if (isNull[index]) {
 		return 0;
 	}

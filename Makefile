@@ -78,6 +78,9 @@ INCDIR = include
 # INCDIR_MIDIFILE: Location where the header files of the midifile library are located.
 INCDIR_MIDIFILE = include/midifile
 
+# INCDIR_PUGIXML: Location where the header files of the midifile library are located.
+INCDIR_PUGIXML = include/pugixml
+
 # MINDIR: Location for the combined files humlib.cpp and (humlib.h are located.
 MINDIR = min
 
@@ -111,7 +114,7 @@ AR        = ar
 RANLIB    = ranlib
 
 # PREFLAGS: Compiler options placed before filenames
-PREFLAGS = -c -g -I$(INCDIR) -I$(INCDIR_MIDIFILE)
+PREFLAGS = -c -g -I$(INCDIR) -I$(INCDIR_PUGIXML) -I$(INCDIR_MIDIFILE)
 # Add warnings to PREFLAGS:
 PREFLAGS += -Wall -Werror
 # Optimize the binary code in object files to run faster:

@@ -40,7 +40,7 @@ class Tool_colortriads : public HumTool {
 		int      getDiatonicTransposition(HumdrumFile& infile);
 
 	private:
-		std::vector<bool> m_colorState;
+		std::vector<int> m_colorState;
 		std::vector<std::string> m_color;
 		std::vector<std::string> m_searches;
 		std::vector<std::string> m_marks;

@@ -51,7 +51,7 @@ class Tool_composite : public HumTool {
 		void        getNumericGroupStates     (std::vector<int>& states, HumdrumFile& infile, const std::string& tgroup);
 		int         getGroupNoteType          (HumdrumFile& infile, int line, const std::string& group);
 		HumNum      getLineDuration           (HumdrumFile& infile, int index,
-		                                       std::vector<bool>& isNull);
+		                                       std::vector<int>& isNull);
 		void        backfillGroup             (std::vector<std::vector<std::string>>& curgroup,
 		                                       HumdrumFile& infile, int line, int track,
 		                                       int subtrack, const std::string& group);
@@ -153,7 +153,7 @@ class Tool_composite : public HumTool {
 		bool        m_analysisOrnamentsQ = false;    // used with -O option
 		bool        m_analysisSlursQ     = false;    // used with -S option
 		bool        m_analysisTotalQ     = false;    // used with -T option
-		std::vector<bool> m_analysisIndex;           // -PAOST booleans in array
+		std::vector<int> m_analysisIndex;           // -PAOST booleans in array
 
 		bool        m_analysesQ          = false;    // union of -PAOST options
 		int         m_numericAnalysisSpineCount = 0; // sum of -PAOST options
