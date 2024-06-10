@@ -40,6 +40,7 @@
 #include "tool-gasparize.h"
 #include "tool-grep.h"
 #include "tool-half.h"
+#include "tool-hands.h"
 #include "tool-homorhythm.h"
 #include "tool-homorhythm2.h"
 #include "tool-hproof.h"
@@ -64,6 +65,7 @@
 #include "tool-ordergps.h"
 #include "tool-phrase.h"
 #include "tool-pline.h"
+#include "tool-prange.h"
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
@@ -281,6 +283,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(gasparize, infile, commands[i].second, status);
 		} else if (commands[i].first == "half") {
 			RUNTOOL(half, infile, commands[i].second, status);
+		} else if (commands[i].first == "hands") {
+			RUNTOOL(hands, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm") {
 			RUNTOOL(homorhythm, infile, commands[i].second, status);
 		} else if (commands[i].first == "homorhythm2") {
@@ -323,6 +327,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "pline") {
 			RUNTOOL(pline, infile, commands[i].second, status);
+		} else if (commands[i].first == "prange") {
+			RUNTOOL(prange, infile, commands[i].second, status);
 		} else if (commands[i].first == "recip") {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {

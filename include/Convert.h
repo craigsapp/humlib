@@ -101,6 +101,9 @@ class Convert {
 				{ return kernToBase7          ((std::string)*token); }
 		static std::string  kernToRecip     (const std::string& kerndata);
 		static std::string  kernToRecip     (HTp token);
+      static std::string base12ToKern     (int aPitch);
+      static std::string base12ToPitch    (int aPitch);
+      static int         base12ToBase40   (int aPitch);
 		static int     kernToMidiNoteNumber (const std::string& kerndata);
 		static int     kernToMidiNoteNumber(HTp token)
 				{ return kernToMidiNoteNumber((std::string)*token); }
@@ -128,8 +131,12 @@ class Convert {
 		static int     transToBase40        (const std::string& input);
 		static int     base40IntervalToLineOfFifths(int trans);
 		static std::string  keyNumberToKern (int number);
+      static int     kernKeyToNumber      (const std::string& aKernString);
+
 		static int     base7ToBase40        (int base7);
+      static int     base7ToBase12        (int aPitch, int alter = 0);
 		static int     base40IntervalToDiatonic(int base40interval);
+      static HumNum  kernToDuration       (const std::string& aKernString);
 
 
 		// **mens, mensual notation, defiend in Convert-mens.cpp
