@@ -1062,6 +1062,16 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 		vector<string> pieces;
 		hre.split(pieces, voicestring, "\\\\n");
 
+		if (pieces.size() > 1) {
+			voicestring = "";
+			for (int i=0; i<(int)pieces.size(); i++) {
+				voicestring += pieces[i];
+				if (i < (int)pieces.size() - 1) {
+					voicestring += "/";
+				}
+			}
+		}
+
 		double increment = 4.0;
 		for (int i=0; i<(int)pieces.size(); i++) {
 			// print voice name

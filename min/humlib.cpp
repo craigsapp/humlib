@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 10 00:12:39 PDT 2024
+// Last Modified: Mon Jun 10 12:19:50 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -115404,7 +115404,6 @@ void Tool_prange::printXmlEncodedText(ostream& out, const string& strang) {
 
 void Tool_prange::printScoreFile(ostream& out, vector<_VoiceInfo>& voiceInfo, HumdrumFile& infile) {
 	string titlestring = getTitle();
-cerr << "TITLE = " << titlestring << endl;
 
 	if (m_defineQ) {
 		out << "#define SVG t 1 1 \\n_99%svg%\n";
@@ -115708,6 +115707,16 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 		hre.replaceDestructive(voicestring, "", "(\\\\n)+$");
 		vector<string> pieces;
 		hre.split(pieces, voicestring, "\\\\n");
+
+		if (pieces.size() > 1) {
+			voicestring = "";
+			for (int i=0; i<(int)pieces.size(); i++) {
+				voicestring += pieces[i];
+				if (i < (int)pieces.size() - 1) {
+					voicestring += "/";
+				}
+			}
+		}
 
 		double increment = 4.0;
 		for (int i=0; i<(int)pieces.size(); i++) {
