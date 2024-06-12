@@ -105,9 +105,16 @@ class Tool_prange : public HumTool {
 		                                         std::vector<std::vector<int>>& accfinal);
 		void        getInstrumentNames          (std::vector<std::string>& nameByTrack,
 		                                         std::vector<int>& kernSpines, HumdrumFile& infile);
-		void        printEmbeddedScore          (std::ostream& out, std::stringstream& scoredata);
+		void        printEmbeddedScore          (std::ostream& out, std::stringstream& scoredata, HumdrumFile& infile);
 		void        prepareRefmap               (HumdrumFile& infile);
 		int         getMaxStaffPosition         (std::vector<_VoiceInfo>& voiceinfo);
+		int         getPrangeId                 (HumdrumFile& infile);
+		void        processStrandNotes          (HTp sstart, HTp send,
+		                                         std::vector<std::vector<std::pair<HTp, int>>>& trackInfo);
+		void        fillMidiInfo                (HumdrumFile& infile);
+		void        doExtremaMarkup             (HumdrumFile& infile);
+		void        applyMarkup                 (std::vector<std::pair<HTp, int>>& notelist,
+		                                         const std::string& mark);
 
 	private:
 
@@ -136,6 +143,10 @@ class Tool_prange : public HumTool {
 		bool m_reverseQ     = false; // for --reverse option
 		bool m_scoreQ       = false; // for --score option
 		bool m_titleQ       = false; // for --title option
+		bool m_extremaQ     = false; // for --extrema option
+
+		std::string m_highMark = "🌸";
+		std::string m_lowMark  = "🟢";
 
 		double m_percentile = 50.0;  // for --percentile option
 		std::string m_title;         // for --title option
@@ -144,6 +155,12 @@ class Tool_prange : public HumTool {
 		int m_rangeH;                // for --range option
 
 		std::map<std::string, std::string> m_refmap;
+
+		//   track       >midi       >tokens        <token, subtoken>
+		std::vector<std::vector<std::vector<std::pair<HTp, int>>>> m_trackMidi;
+
+		// m_trackToKernIndex: mapping from track to **kern index
+		std::vector<int> m_trackToKernIndex;
 
 };
 

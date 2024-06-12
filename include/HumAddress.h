@@ -36,6 +36,7 @@ class HumAddress {
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
 		const HumdrumToken& getDataType       (void) const;
+		HTp                 getExclusiveInterpretation(void);
 		const std::string&  getSpineInfo      (void) const;
 		int                 getTrack          (void) const;
 		int                 getSubtrack       (void) const;

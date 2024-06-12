@@ -225,6 +225,7 @@ class Convert {
 		static std::string  encodeXml            (const std::string& input);
 		static std::string  getHumNumAttributes  (const HumNum& num);
 		static std::string  trimWhiteSpace       (const std::string& input);
+		static std::string  generateRandomId     (int length);
 		static bool    startsWith                (const std::string& input,
 		                                          const std::string& searchstring);
 		static bool    contains(const std::string& input, const std::string& pattern);

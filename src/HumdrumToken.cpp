@@ -386,6 +386,16 @@ const string& HumdrumToken::getDataType(void) const {
 }
 
 
+/////////////////////////////
+//
+// HumdrumToken::getExclusiveInterpretation -- Get the exclusive
+//      interpretation token that owns the given token.
+//
+
+HTp HumdrumToken::getExclusiveInterpretation(void) {
+	return m_address.getExclusiveInterpretation();
+}
+
 
 //////////////////////////////
 //

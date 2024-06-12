@@ -175,6 +175,7 @@ $license
 #include <locale>
 #include <map>
 #include <numeric>
+#include <random>
 #include <regex>
 #include <set>
 #include <sstream>

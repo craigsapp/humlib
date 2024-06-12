@@ -139,6 +139,26 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 
 //////////////////////////////
 //
+// HumAddress::getExclusiveInterpretation -- Return the exclusive
+//     interpretation token of the token associated with the address.
+//
+
+HTp HumAddress::getExclusiveInterpretation(void) {
+	static HumdrumToken null("");
+	if (m_owner == NULL) {
+		return &null;
+	}
+	HumdrumToken* tok = m_owner->getTrackStart(getTrack());
+	if (tok == NULL) {
+		return &null;
+	}
+	return tok;
+}
+
+
+
+//////////////////////////////
+//
 // HumAddress::getSpineInfo -- Return the spine information for the token
 //     associated with the address.  Examples: "1" the token is in the first
 //     (left-most) spine, and there are no active sub-spines for the spine.

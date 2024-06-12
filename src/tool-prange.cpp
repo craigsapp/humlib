@@ -9,6 +9,8 @@
 //
 // Description:   Calculate pitch histograms in a score of **kern data.
 //
+// Reference:     https://en.wikipedia.org/wiki/List_of_emojis
+//
 
 #include "tool-prange.h"
 #include "HumRegex.h"
@@ -143,6 +145,7 @@ Tool_prange::Tool_prange(void) {
 	define("p|percentile=d:0.0",        "display the xth percentile pitch");
 	define("q|quartile=b",              "display quartile notes");
 	define("r|reverse=b",               "reverse list of notes in analysis from high to low");
+	define("x|extrema=b",               "highlight extrema notes in each part");
 	define("sx|scorexml|score-xml|ScoreXML|scoreXML=b", "output ScoreXML format");
 	define("title=s:",                  "title for SCORE display");
 
@@ -201,7 +204,7 @@ bool Tool_prange::run(HumdrumFile& infile) {
 //
 
 void Tool_prange::initialize(void) {
-	m_accQ         = getBoolean("acc");
+	m_accQ         = getBoolean("color-accidentals");
 	m_addFractionQ = getBoolean("fraction");
 	m_allQ         = getBoolean("all");
 	m_debugQ       = getBoolean("debug");
@@ -228,6 +231,7 @@ void Tool_prange::initialize(void) {
 	m_title        = getString("title");
 	m_titleQ       = getBoolean("title");
 	m_embedQ       = getBoolean("embed");
+	m_extremaQ     = getBoolean("extrema");
 
 	getRange(m_rangeL, m_rangeH, getString("range"));
 
@@ -251,7 +255,7 @@ void Tool_prange::initialize(void) {
 
 	#ifdef __EMSCRIPTEN__
 		// Default styling for JavaScript version of program:
-		m_accQ     = !getBoolean("embed");
+		m_accQ     = !getBoolean("color-accidentals");
 		m_scoreQ   = !getBoolean("score");
 		m_embedQ   = !getBoolean("embed");
 		m_hoverQ   = !getBoolean("hover");
@@ -269,9 +273,10 @@ void Tool_prange::initialize(void) {
 void Tool_prange::processFile(HumdrumFile& infile) {
 	prepareRefmap(infile);
 	vector<_VoiceInfo> voiceInfo;
-
+	infile.fillMidiInfo(m_trackMidi);
 	getVoiceInfo(voiceInfo, infile);
 	fillHistograms(voiceInfo, infile);
+
 	if (m_debugQ) {
 		for (int i=0; i<(int)voiceInfo.size(); i++) {
 			voiceInfo[i].print(cerr);
@@ -282,9 +287,15 @@ void Tool_prange::processFile(HumdrumFile& infile) {
 		stringstream scoreout;
 		printScoreFile(scoreout, voiceInfo, infile);
 		if (m_embedQ) {
+			if (m_extremaQ) {
+				doExtremaMarkup(infile);
+			}
 			m_humdrum_text << infile;
-			printEmbeddedScore(m_humdrum_text, scoreout);
+			printEmbeddedScore(m_humdrum_text, scoreout, infile);
 		} else {
+			if (m_extremaQ) {
+				doExtremaMarkup(infile);
+			}
 			m_humdrum_text << scoreout.str();
 		}
 	} else {
@@ -296,15 +307,100 @@ void Tool_prange::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_prange::doExtremaMarkup -- Mark highest and lowest note
+//     in each **kern spine.
+//
+//
+
+void Tool_prange::doExtremaMarkup(HumdrumFile& infile) {
+	bool highQ = false;
+	bool lowQ = false;
+	for (int i=0; i<(int)m_trackMidi.size(); i++) {
+		int maxindex = -1;
+		int minindex = -1;
+
+		for (int j=(int)m_trackMidi[i].size()-1; j>=0; j--) {
+			if (m_trackMidi[i][j].empty()) {
+				continue;
+			}
+			if (maxindex < 0) {
+				maxindex = j;
+				break;
+			}
+		}
+
+		for (int j=1; j<(int)m_trackMidi[i].size(); j++) {
+			if (m_trackMidi[i][j].empty()) {
+				continue;
+			}
+			if (minindex < 0) {
+				minindex = j;
+				break;
+			}
+		}
+
+		if ((maxindex < 0) || (minindex < 0)) {
+			continue;
+		}
+		applyMarkup(m_trackMidi[i][maxindex], m_highMark);
+		applyMarkup(m_trackMidi[i][minindex], m_lowMark);
+		highQ = true;
+		lowQ  = true;
+	}
+	if (highQ) {
+		string highRdf = "!!!RDF**kern: " + m_highMark + " = marked note, color=\"hotpink\", highest note";
+		infile.appendLine(highRdf);
+	}
+	if (lowQ) {
+		string lowRdf = "!!!RDF**kern: " + m_lowMark + " = marked note, color=\"limegreen\", lowest note";
+		infile.appendLine(lowRdf);
+	}
+	if (highQ || lowQ) {
+		infile.createLinesFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_prange::applyMarkup --
+//
+
+void Tool_prange::applyMarkup(vector<pair<HTp, int>>& notelist, const string& mark) {
+	for (int i=0; i<(int)notelist.size(); i++) {
+		HTp token = notelist[i].first;
+		int subtoken = notelist[i].second;
+		int tokenCount = token->getSubtokenCount();
+		if (tokenCount == 1) {
+			string text = *token;
+			text += mark;
+			token->setText(text);
+		} else {
+			string stok = token->getSubtoken(subtoken);
+			stok += mark;
+			token->replaceSubtoken(subtoken, stok);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_prange::printEmbeddedScore --
 //
 
-void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata) {
+void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata, HumdrumFile& infile) {
+	int id = getPrangeId(infile);
+
 	out << "!!@@BEGIN: PREHTML\n";
-	out << "!!@CONTENT: <div class=\"score-svg\" style=\"margin-top:50px;text-align:center;\" data-score=\"myscore\"></div>\n";
+	out << "!!@CONTENT: <div class=\"score-svg\" ";
+	out <<    "style=\"margin-top:50px;text-align:center;\" ";
+	out <<    " data-score=\"prange-" << id << "\"></div>\n";
 	out << "!!@@END: PREHTML\n";
 	out << "!!@@BEGIN: SCORE\n";
-	out << "!!@ID: myscore\n";
+	out << "!!@ID: prange-" << id << "\n";
 	out << "!!@OUTPUTFORMAT: svg\n";
 	out << "!!@CROP: yes\n";
 	out << "!!@PADDING: 10\n";
@@ -320,6 +416,33 @@ void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata) {
 		out << "!!" << line << endl;
 	}
 	out << "!!@@END: SCORE\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_prange::getPrangeId -- Find a line in this form
+//          ^!!@ID: prange-(\d+)$
+//      and return $1+1.  Searching backwards since the HTML section
+//      will likely be at the bottom.  Assuming that the prange
+//      SVG images are stored in sequence, with the highest ID last
+//      in the file if there are more than one.
+//
+
+int Tool_prange::getPrangeId(HumdrumFile& infile) {
+	string search = "!!@ID: prange-";
+	int length = (int)search.length();
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		HTp token = infile.token(i, 0);
+		if (token->compare(0, length, search) == 0) {
+			HumRegex hre;
+			if (hre.search(token, "prange-(\\d+)")) {
+				return hre.getMatchInt(1) + 1;
+			}
+		}
+	}
+	return 1;
 }
 
 
@@ -429,14 +552,14 @@ void Tool_prange::getVoiceInfo(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infil
 
 //////////////////////////////
 //
-// getHand --
+// Tool_prange::getHand --
 //
 
 string Tool_prange::getHand(HTp sstart) {
 	HTp current = sstart->getNextToken();
 	HTp target = NULL;
 	while (current) {
-		if (current->isData()) {	
+		if (current->isData()) {
 			break;
 		}
 		if (*current == "*LH") {
@@ -774,6 +897,10 @@ void Tool_prange::printScoreFile(ostream& out, vector<_VoiceInfo>& voiceInfo, Hu
 	}
 	text1 += "g.labeltext&#123;color:gray;&#125;";
 	text1 += "g.lastnote&#123;color:gray;&#125;";
+	if (m_extremaQ) {
+		text1 += "g.highest-pitch&#123;color:hotpink;&#125;";
+		text1 += "g.lowest-pitch&#123;color:limegreen;&#125;";
+	}
 	text1 += "</style>";
 	string text2 = text1;
 
@@ -1097,7 +1224,7 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 	staff = getStaffBase7(mindiatonic);
 	vpos = getVpos(mindiatonic);
 	if (m_hoverQ) {
-		string content = "<g><title>";
+		string content = "<g class=\"lowest-pitch\"><title>";
 		content += getDiatonicPitchName(mindiatonic, 0);
 		content += ": lowest note";
 		if (!voicestring.empty()) {
@@ -1118,7 +1245,7 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 	staff = getStaffBase7(maxdiatonic);
 	vpos = getVpos(maxdiatonic);
 	if (m_hoverQ) {
-		string content = "<g><title>";
+		string content = "<g class=\"highest-pitch\"><title>";
 		content += getDiatonicPitchName(maxdiatonic, 0);
 		content += ": highest note";
 		if (!voicestring.empty()) {

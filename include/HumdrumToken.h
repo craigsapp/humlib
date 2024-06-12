@@ -279,6 +279,7 @@ class HumdrumToken : public std::string, public HumHash {
 		std::string   getXmlIdPrefix       (void) const;
 		void     setText                   (const std::string& text);
 		std::string   getText              (void) const;
+		HTp      getExclusiveInterpretation(void);
 		int      addLinkedParameterSet     (HTp token);
 		int      getLinkedParameterSetCount(void);
 		HumParamSet* getLinkedParameterSet (int index);

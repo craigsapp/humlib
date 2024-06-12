@@ -109,7 +109,7 @@ bool Tool_hands::run(HumdrumFile& infile) {
 
 void Tool_hands::processFile(HumdrumFile& infile) {
 	if (m_markQ || m_leftOnlyQ || m_rightOnlyQ) {
-		doHandAnalysis(infile);
+		infile.doHandAnalysis(m_attacksOnlyQ);
 	}
 	if (m_leftOnlyQ) {
 		removeNotes(infile, "RH");
@@ -136,8 +136,9 @@ void Tool_hands::removeNotes(HumdrumFile& infile, const string& htype) {
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandStart(i);
-		int track  = sstart->getTrack();
-		if (!m_trackHasHandMarkup[track]) {
+		HTp xtok = sstart->getExclusiveInterpretation();
+		int hasHandMarkup = xtok->getValueInt("auto", "hand");
+		if (!hasHandMarkup) {
 			continue;
 		}
 		HTp send = infile.getStrandEnd(i);
@@ -189,8 +190,9 @@ void Tool_hands::markNotes(HumdrumFile& infile) {
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandStart(i);
-		int track  = sstart->getTrack();
-		if (!m_trackHasHandMarkup[track]) {
+		HTp xtok = sstart->getExclusiveInterpretation();
+		int hasHandMarkup = xtok->getValueInt("auto", "hand");
+		if (!hasHandMarkup) {
 			continue;
 		}
 		HTp send   = infile.getStrandEnd(i);
@@ -261,124 +263,6 @@ void Tool_hands::colorHands(HumdrumFile& infile) {
 		if (changed) {
 			infile[i].createLineFromTokens();
 		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// doHandAnalysis -- Mark each note as "LH" or "RH" according to
-//     *LH and *RH tandem interpretations in the spine.
-//
-
-void Tool_hands::doHandAnalysis(HumdrumFile& infile) {
-	// Keep track of which tracks contain hand markup 
-	// (**kern spines with *LH/*RH marker before first data line).
-	m_trackHasHandMarkup.resize(infile.getMaxTrack() + 1);
-	vector<int>& thhm = m_trackHasHandMarkup;
-	fill(thhm.begin(), thhm.end(), 0);
-
-	vector<HTp> kstarts;
-	infile.getKernSpineStartList(kstarts);
-	for (int i=0; i<(int)kstarts.size(); i++) {
-		doHandAnalysis(kstarts[i]);
-	}
-}
-
-
-void Tool_hands::doHandAnalysis(HTp startSpine) {
-	if (!startSpine->isKern()) {
-		return;
-	}
-	int strack = startSpine->getTrack();
-	vector<string> states(20);
-	states[0] = "none";
-	HTp current = startSpine->getNextToken();
-	while (current) {
-cerr << "PROCESSING NOTE: " << current << endl;
-		int subtrack = current->getSubtrack();
-		if (subtrack == 0) {
-			for (int i=1; i<(int)states.size(); i++) {
-				states[i] = states[0];
-			}
-		}
-
-		if (current->isInterpretation()) {
-			if (subtrack == 0) {
-				if (*current == "*LH") {
-					states[0] = "LH";
-					m_trackHasHandMarkup[strack] = true;
-					for (int i=1; i<(int)states.size(); i++) {
-						states[i] = states[0];
-					}
-				} else if (*current == "*RH") {
-					states[0] = "RH";
-					m_trackHasHandMarkup[strack] = true;
-					for (int i=1; i<(int)states.size(); i++) {
-						states[i] = states[0];
-					}
-				}
-			} else {
-				int ttrack = current->getTrack();
-				HTp c2 = current;
-				while (c2) {
-					int track = c2->getTrack();
-					if (track != ttrack) {
-						break;
-					}
-					int sub = c2->getSubtrack();
-					if (*c2 == "*LH") {
-						states.at(sub) = "LH";
-						if (sub == 1) {
-							states.at(0) = "LH";
-						}
-					} else if (*c2 == "*RH") {
-						states.at(sub) = "RH";
-						if (sub == 1) {
-							states.at(0) = "RH";
-						}
-					}
-					c2 = c2->getNextFieldToken();
-				}
-			}
-		}
-
-		if (!current->isData()) {
-			current = current->getNextToken();
-			continue;
-		}
-
-		if (subtrack == 0) {
-			// no subspines
-			if (m_attacksOnlyQ && current->isNoteAttack()) {
-				current->setValue("auto", "hand", states[0]);
-			} else {
-				current->setValue("auto", "hand", states[0]);
-			}
-		} else {
-			int ttrack = current->getTrack();
-			HTp c2 = current;
-			while (c2) {
-				int track = c2->getTrack();
-				if (track != ttrack) {
-					break;
-				}
-				if (m_attacksOnlyQ && !c2->isNoteAttack()) {
-					c2 = c2->getNextFieldToken();
-					continue;
-				}
-				int sub = c2->getSubtrack();
-				if (states.at(sub).empty()) {
-					c2->setValue("auto", "hand", states.at(0));
-				} else {
-					c2->setValue("auto", "hand", states.at(sub));
-				}
-				c2 = c2->getNextFieldToken();
-			}
-		}
-		current = current->getNextToken();
-		continue;
 	}
 }
 

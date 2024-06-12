@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 10 12:19:50 PDT 2024
+// Last Modified: Tue Jun 11 23:16:57 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <locale>
 #include <map>
 #include <numeric>
+#include <random>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -830,6 +831,7 @@ class HumAddress {
 		int                 getLineNumber     (void) const;
 		int                 getFieldIndex     (void) const;
 		const HumdrumToken& getDataType       (void) const;
+		HTp                 getExclusiveInterpretation(void);
 		const std::string&  getSpineInfo      (void) const;
 		int                 getTrack          (void) const;
 		int                 getSubtrack       (void) const;
@@ -1714,6 +1716,7 @@ class HumdrumToken : public std::string, public HumHash {
 		std::string   getXmlIdPrefix       (void) const;
 		void     setText                   (const std::string& text);
 		std::string   getText              (void) const;
+		HTp      getExclusiveInterpretation(void);
 		int      addLinkedParameterSet     (HTp token);
 		int      getLinkedParameterSetCount(void);
 		HumParamSet* getLinkedParameterSet (int index);
@@ -2520,6 +2523,17 @@ class HumdrumFileContent : public HumdrumFileStructure {
 		bool   analyzeKernAccidentals     (const std::string& dataType = "**kern");
 		bool   analyzeMensAccidentals     (void);
 		bool   analyzeRScale              (void);
+
+		// in HumdrumFileContent-hand.cpp
+		bool   doHandAnalysis             (bool attacksOnlyQ = false);
+		bool   doHandAnalysis             (HTp startSpine, bool attacksOnlyQ = false);
+
+		// in HumdrumFileContent-kern.cpp
+		std::vector<int> getTrackToKernIndex (void);
+
+		// in HumdrumFileContent-midi.cpp
+		void fillMidiInfo(std::vector<std::vector<std::vector<std::pair<HTp, int>>>>& trackMidi);
+		void processStrandNotesForMidi(HTp sstart, HTp send, std::vector<std::vector<std::pair<HTp, int>>>& trackInfo);
 
 		// in HumdrumFileContent-rest.cpp
 		void  analyzeRestPositions                  (void);
@@ -4201,6 +4215,7 @@ class Convert {
 		static std::string  encodeXml            (const std::string& input);
 		static std::string  getHumNumAttributes  (const HumNum& num);
 		static std::string  trimWhiteSpace       (const std::string& input);
+		static std::string  generateRandomId     (int length);
 		static bool    startsWith                (const std::string& input,
 		                                          const std::string& searchstring);
 		static bool    contains(const std::string& input, const std::string& pattern);
@@ -10126,9 +10141,16 @@ class Tool_prange : public HumTool {
 		                                         std::vector<std::vector<int>>& accfinal);
 		void        getInstrumentNames          (std::vector<std::string>& nameByTrack,
 		                                         std::vector<int>& kernSpines, HumdrumFile& infile);
-		void        printEmbeddedScore          (std::ostream& out, std::stringstream& scoredata);
+		void        printEmbeddedScore          (std::ostream& out, std::stringstream& scoredata, HumdrumFile& infile);
 		void        prepareRefmap               (HumdrumFile& infile);
 		int         getMaxStaffPosition         (std::vector<_VoiceInfo>& voiceinfo);
+		int         getPrangeId                 (HumdrumFile& infile);
+		void        processStrandNotes          (HTp sstart, HTp send,
+		                                         std::vector<std::vector<std::pair<HTp, int>>>& trackInfo);
+		void        fillMidiInfo                (HumdrumFile& infile);
+		void        doExtremaMarkup             (HumdrumFile& infile);
+		void        applyMarkup                 (std::vector<std::pair<HTp, int>>& notelist,
+		                                         const std::string& mark);
 
 	private:
 
@@ -10157,6 +10179,10 @@ class Tool_prange : public HumTool {
 		bool m_reverseQ     = false; // for --reverse option
 		bool m_scoreQ       = false; // for --score option
 		bool m_titleQ       = false; // for --title option
+		bool m_extremaQ     = false; // for --extrema option
+
+		std::string m_highMark = "🌸";
+		std::string m_lowMark  = "🟢";
 
 		double m_percentile = 50.0;  // for --percentile option
 		std::string m_title;         // for --title option
@@ -10165,6 +10191,12 @@ class Tool_prange : public HumTool {
 		int m_rangeH;                // for --range option
 
 		std::map<std::string, std::string> m_refmap;
+
+		//   track       >midi       >tokens        <token, subtoken>
+		std::vector<std::vector<std::vector<std::pair<HTp, int>>>> m_trackMidi;
+
+		// m_trackToKernIndex: mapping from track to **kern index
+		std::vector<int> m_trackToKernIndex;
 
 };
 

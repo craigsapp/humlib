@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 10 12:19:50 PDT 2024
+// Last Modified: Tue Jun 11 23:16:57 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -5813,6 +5813,26 @@ void Convert::removeDollarsFromString(string& buffer, int maximum) {
 
 
 
+//////////////////////////////
+//
+// Convert::generateRandomId -- using characters 0-9, A-Z, a-z with the
+//     given length.
+//
+
+string Convert::generateRandomId(int length) {
+    const string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    std::random_device rd;  // Non-deterministic generator
+    std::mt19937 gen(rd()); // Seed the generator
+    std::uniform_int_distribution<> distr(0, characters.size() - 1);
+    string randomId;
+    std::generate_n(std::back_inserter(randomId), length, [&]() {
+        return characters[distr(gen)];
+    });
+    return randomId;
+}
+
+
+
 
 
 
@@ -9627,6 +9647,26 @@ const HumdrumToken& HumAddress::getDataType(void) const {
 		return null;
 	}
 	return *tok;
+}
+
+
+
+//////////////////////////////
+//
+// HumAddress::getExclusiveInterpretation -- Return the exclusive
+//     interpretation token of the token associated with the address.
+//
+
+HTp HumAddress::getExclusiveInterpretation(void) {
+	static HumdrumToken null("");
+	if (m_owner == NULL) {
+		return &null;
+	}
+	HumdrumToken* tok = m_owner->getTrackStart(getTrack());
+	if (tok == NULL) {
+		return &null;
+	}
+	return tok;
 }
 
 
@@ -24112,6 +24152,147 @@ void HumdrumFileContent::markBeamSpanMembers(HTp beamstart, HTp beamend) {
 
 
 
+
+//////////////////////////////
+//
+// HumdrumFileContent::doHandAnalysis -- Returns true if any **kern spine has hand markup.
+//    default value:
+//         attacksOnlyQ = false;
+//
+
+bool HumdrumFileContent::doHandAnalysis(bool attacksOnlyQ) {
+	HumdrumFileContent& infile = *this;
+	vector<HTp> kstarts = infile.getKernSpineStartList();
+	bool status = 0; 
+	for (int i=0; i<(int)kstarts.size(); i++) {
+		status |= doHandAnalysis(kstarts[i], attacksOnlyQ);
+	}
+	return status;
+}
+
+
+bool HumdrumFileContent::doHandAnalysis(HTp startSpine, bool attacksOnlyQ) {
+	if (!startSpine->isKern()) {
+		return false;
+	}
+	bool output = false;
+	vector<string> states(20);
+	states[0] = "none";
+	HTp current = startSpine->getNextToken();
+	while (current) {
+		int subtrack = current->getSubtrack();
+		if (subtrack == 0) {
+			for (int i=1; i<(int)states.size(); i++) {
+				states[i] = states[0];
+			}
+		}
+
+		if (current->isInterpretation()) {
+			if (subtrack == 0) {
+				if (*current == "*LH") {
+					states[0] = "LH";
+					output = true;
+					for (int i=1; i<(int)states.size(); i++) {
+						states[i] = states[0];
+					}
+				} else if (*current == "*RH") {
+					states[0] = "RH";
+					output = true;
+					for (int i=1; i<(int)states.size(); i++) {
+						states[i] = states[0];
+					}
+				}
+			} else {
+				int ttrack = current->getTrack();
+				HTp c2 = current;
+				while (c2) {
+					int track = c2->getTrack();
+					if (track != ttrack) {
+						break;
+					}
+					int sub = c2->getSubtrack();
+					if (*c2 == "*LH") {
+						states.at(sub) = "LH";
+						if (sub == 1) {
+							states.at(0) = "LH";
+						}
+					} else if (*c2 == "*RH") {
+						states.at(sub) = "RH";
+						if (sub == 1) {
+							states.at(0) = "RH";
+						}
+					}
+					c2 = c2->getNextFieldToken();
+				}
+			}
+		}
+
+		if (!current->isData()) {
+			current = current->getNextToken();
+			continue;
+		}
+
+		if (subtrack == 0) {
+			// no subspines
+			if (attacksOnlyQ && current->isNoteAttack()) {
+				current->setValue("auto", "hand", states[0]);
+			} else {
+				current->setValue("auto", "hand", states[0]);
+			}
+		} else {
+			int ttrack = current->getTrack();
+			HTp c2 = current;
+			while (c2) {
+				int track = c2->getTrack();
+				if (track != ttrack) {
+					break;
+				}
+				if (attacksOnlyQ && !c2->isNoteAttack()) {
+					c2 = c2->getNextFieldToken();
+					continue;
+				}
+				int sub = c2->getSubtrack();
+				if (states.at(sub).empty()) {
+					c2->setValue("auto", "hand", states.at(0));
+				} else {
+					c2->setValue("auto", "hand", states.at(sub));
+				}
+				c2 = c2->getNextFieldToken();
+			}
+		}
+		current = current->getNextToken();
+		continue;
+	}
+	if (output) {
+		startSpine->setValue("auto", "hand", 1);
+	}
+	return output;
+}
+
+
+
+
+
+//////////////////////////////
+//
+// HumdrumFileContent::getTrackToKernIndex -- return a list indexed by file track
+//     numbers (first entry not used), with non-zero values in the vector being
+//     the **kern index with the given track number.
+//
+
+vector<int> HumdrumFileContent::getTrackToKernIndex(void) {
+	HumdrumFileContent& infile = *this;
+	vector<HTp> ktracks = infile.getKernSpineStartList();
+	vector<int> trackToKernIndex(infile.getMaxTrack() + 1, -1);
+	for (int i=0; i<(int)ktracks.size(); i++) {
+		int track = ktracks[i]->getTrack();
+		trackToKernIndex[track] = i;
+	}
+	return trackToKernIndex;
+}
+
+
+
 //////////////////////////////
 //
 // HumdrumFileStructure::getMetricLevels -- Each line in the output
@@ -24197,6 +24378,87 @@ void HumdrumFileContent::getMetricLevels(vector<double>& output,
 		} else {
 			output[i] = Convert::nearIntQuantize(log(denominator) / log(2.0));
 		}
+	}
+}
+
+
+
+
+
+/////////////////////////////////
+//
+// HumdrumFileContent::fillMidiInfo -- Create a data structure that
+//     organizes tokens by track/midi note number.
+//     Input object to fill is firsted indexed the **kern track
+//     number, then by MIDI note number, and then an array of pairs
+//     <HTp, int> where int is the subtoken number in the token
+//     for the given MIDI note.
+
+
+void HumdrumFileContent::fillMidiInfo(vector<vector<vector<pair<HTp, int>>>>& trackMidi) {
+	HumdrumFileContent& infile = *this;
+	vector<HTp> ktracks = infile.getKernSpineStartList();
+	trackMidi.clear();
+	trackMidi.resize(ktracks.size());
+	for (int i=0; i<(int)trackMidi.size(); i++) {
+		trackMidi[i].resize(128);   // 0 used for rests
+	}
+	// each entry is trackMidi[track][key] is an array of <token, subtoken> pairs.
+	// using trackMidi[track][0] for rests;
+	
+	vector<int> trackToKernIndex = infile.getTrackToKernIndex();
+
+	for (int i=0; i<infile.getStrandCount(); i++) {
+		HTp sstart = infile.getStrandStart(i);
+		if (!sstart->isKern()) {
+			continue;
+		}
+
+		int track = sstart->getTrack();
+		HTp send = infile.getStrandEnd(i);
+		processStrandNotesForMidi(sstart, send, trackMidi[trackToKernIndex[track]]);
+	}
+}
+
+
+
+/////////////////////////////////
+//
+// HumdrumFileContent::processStrandNotesForMidi -- store strand tokens/subtokens by MIDI note
+//     in the midi track entry.
+//    
+//     First index if track info is the MIDI note number, second is a list
+//     of tokens for that note number, with the second value of the pair
+//     giving the subtoken index of the note in the token.
+//
+
+void HumdrumFileContent::processStrandNotesForMidi(HTp sstart, HTp send, vector<vector<pair<HTp, int>>>& trackInfo) {
+	HTp current = sstart->getNextToken();
+	while (current && (current != send)) {
+		if (!current->isData() || current->isNull()) {
+			current = current->getNextToken();
+			continue;
+		}
+		vector<string> subtokens = current->getSubtokens();
+		for (int i=0; i<(int)subtokens.size(); i++) {
+			if (subtokens[i] == ".") {
+				// something strange happened (no null tokens expected)
+				continue;
+			}
+			if (subtokens[i].find("r") != string::npos) {
+				// rest, so store in MIDI[0]
+				trackInfo.at(0).emplace_back(current, 0);
+			} else if (subtokens[i].find("R") != string::npos) {
+				// unpitched or quasi-pitched note, so store in MIDI[0]
+				trackInfo.at(0).emplace_back(current, 0);
+			} else {
+				int keyno = Convert::kernToMidiNoteNumber(subtokens[i]);
+				if ((keyno >= 0) && (keyno < 128)) {
+					trackInfo.at(keyno).emplace_back(current, i);
+				}
+			}
+		}
+		current = current->getNextToken();
 	}
 }
 
@@ -33016,6 +33278,16 @@ const string& HumdrumToken::getDataType(void) const {
 	return m_address.getDataType();
 }
 
+
+/////////////////////////////
+//
+// HumdrumToken::getExclusiveInterpretation -- Get the exclusive
+//      interpretation token that owns the given token.
+//
+
+HTp HumdrumToken::getExclusiveInterpretation(void) {
+	return m_address.getExclusiveInterpretation();
+}
 
 
 //////////////////////////////
@@ -85837,7 +86109,7 @@ bool Tool_hands::run(HumdrumFile& infile) {
 
 void Tool_hands::processFile(HumdrumFile& infile) {
 	if (m_markQ || m_leftOnlyQ || m_rightOnlyQ) {
-		doHandAnalysis(infile);
+		infile.doHandAnalysis(m_attacksOnlyQ);
 	}
 	if (m_leftOnlyQ) {
 		removeNotes(infile, "RH");
@@ -85864,8 +86136,9 @@ void Tool_hands::removeNotes(HumdrumFile& infile, const string& htype) {
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandStart(i);
-		int track  = sstart->getTrack();
-		if (!m_trackHasHandMarkup[track]) {
+		HTp xtok = sstart->getExclusiveInterpretation();
+		int hasHandMarkup = xtok->getValueInt("auto", "hand");
+		if (!hasHandMarkup) {
 			continue;
 		}
 		HTp send = infile.getStrandEnd(i);
@@ -85917,8 +86190,9 @@ void Tool_hands::markNotes(HumdrumFile& infile) {
 	int scount = infile.getStrandCount();
 	for (int i=0; i<scount; i++) {
 		HTp sstart = infile.getStrandStart(i);
-		int track  = sstart->getTrack();
-		if (!m_trackHasHandMarkup[track]) {
+		HTp xtok = sstart->getExclusiveInterpretation();
+		int hasHandMarkup = xtok->getValueInt("auto", "hand");
+		if (!hasHandMarkup) {
 			continue;
 		}
 		HTp send   = infile.getStrandEnd(i);
@@ -85989,124 +86263,6 @@ void Tool_hands::colorHands(HumdrumFile& infile) {
 		if (changed) {
 			infile[i].createLineFromTokens();
 		}
-	}
-}
-
-
-
-//////////////////////////////
-//
-// doHandAnalysis -- Mark each note as "LH" or "RH" according to
-//     *LH and *RH tandem interpretations in the spine.
-//
-
-void Tool_hands::doHandAnalysis(HumdrumFile& infile) {
-	// Keep track of which tracks contain hand markup 
-	// (**kern spines with *LH/*RH marker before first data line).
-	m_trackHasHandMarkup.resize(infile.getMaxTrack() + 1);
-	vector<int>& thhm = m_trackHasHandMarkup;
-	fill(thhm.begin(), thhm.end(), 0);
-
-	vector<HTp> kstarts;
-	infile.getKernSpineStartList(kstarts);
-	for (int i=0; i<(int)kstarts.size(); i++) {
-		doHandAnalysis(kstarts[i]);
-	}
-}
-
-
-void Tool_hands::doHandAnalysis(HTp startSpine) {
-	if (!startSpine->isKern()) {
-		return;
-	}
-	int strack = startSpine->getTrack();
-	vector<string> states(20);
-	states[0] = "none";
-	HTp current = startSpine->getNextToken();
-	while (current) {
-cerr << "PROCESSING NOTE: " << current << endl;
-		int subtrack = current->getSubtrack();
-		if (subtrack == 0) {
-			for (int i=1; i<(int)states.size(); i++) {
-				states[i] = states[0];
-			}
-		}
-
-		if (current->isInterpretation()) {
-			if (subtrack == 0) {
-				if (*current == "*LH") {
-					states[0] = "LH";
-					m_trackHasHandMarkup[strack] = true;
-					for (int i=1; i<(int)states.size(); i++) {
-						states[i] = states[0];
-					}
-				} else if (*current == "*RH") {
-					states[0] = "RH";
-					m_trackHasHandMarkup[strack] = true;
-					for (int i=1; i<(int)states.size(); i++) {
-						states[i] = states[0];
-					}
-				}
-			} else {
-				int ttrack = current->getTrack();
-				HTp c2 = current;
-				while (c2) {
-					int track = c2->getTrack();
-					if (track != ttrack) {
-						break;
-					}
-					int sub = c2->getSubtrack();
-					if (*c2 == "*LH") {
-						states.at(sub) = "LH";
-						if (sub == 1) {
-							states.at(0) = "LH";
-						}
-					} else if (*c2 == "*RH") {
-						states.at(sub) = "RH";
-						if (sub == 1) {
-							states.at(0) = "RH";
-						}
-					}
-					c2 = c2->getNextFieldToken();
-				}
-			}
-		}
-
-		if (!current->isData()) {
-			current = current->getNextToken();
-			continue;
-		}
-
-		if (subtrack == 0) {
-			// no subspines
-			if (m_attacksOnlyQ && current->isNoteAttack()) {
-				current->setValue("auto", "hand", states[0]);
-			} else {
-				current->setValue("auto", "hand", states[0]);
-			}
-		} else {
-			int ttrack = current->getTrack();
-			HTp c2 = current;
-			while (c2) {
-				int track = c2->getTrack();
-				if (track != ttrack) {
-					break;
-				}
-				if (m_attacksOnlyQ && !c2->isNoteAttack()) {
-					c2 = c2->getNextFieldToken();
-					continue;
-				}
-				int sub = c2->getSubtrack();
-				if (states.at(sub).empty()) {
-					c2->setValue("auto", "hand", states.at(0));
-				} else {
-					c2->setValue("auto", "hand", states.at(sub));
-				}
-				c2 = c2->getNextFieldToken();
-			}
-		}
-		current = current->getNextToken();
-		continue;
 	}
 }
 
@@ -114789,6 +114945,7 @@ Tool_prange::Tool_prange(void) {
 	define("p|percentile=d:0.0",        "display the xth percentile pitch");
 	define("q|quartile=b",              "display quartile notes");
 	define("r|reverse=b",               "reverse list of notes in analysis from high to low");
+	define("x|extrema=b",               "highlight extrema notes in each part");
 	define("sx|scorexml|score-xml|ScoreXML|scoreXML=b", "output ScoreXML format");
 	define("title=s:",                  "title for SCORE display");
 
@@ -114847,7 +115004,7 @@ bool Tool_prange::run(HumdrumFile& infile) {
 //
 
 void Tool_prange::initialize(void) {
-	m_accQ         = getBoolean("acc");
+	m_accQ         = getBoolean("color-accidentals");
 	m_addFractionQ = getBoolean("fraction");
 	m_allQ         = getBoolean("all");
 	m_debugQ       = getBoolean("debug");
@@ -114874,6 +115031,7 @@ void Tool_prange::initialize(void) {
 	m_title        = getString("title");
 	m_titleQ       = getBoolean("title");
 	m_embedQ       = getBoolean("embed");
+	m_extremaQ     = getBoolean("extrema");
 
 	getRange(m_rangeL, m_rangeH, getString("range"));
 
@@ -114897,7 +115055,7 @@ void Tool_prange::initialize(void) {
 
 	#ifdef __EMSCRIPTEN__
 		// Default styling for JavaScript version of program:
-		m_accQ     = !getBoolean("embed");
+		m_accQ     = !getBoolean("color-accidentals");
 		m_scoreQ   = !getBoolean("score");
 		m_embedQ   = !getBoolean("embed");
 		m_hoverQ   = !getBoolean("hover");
@@ -114915,9 +115073,10 @@ void Tool_prange::initialize(void) {
 void Tool_prange::processFile(HumdrumFile& infile) {
 	prepareRefmap(infile);
 	vector<_VoiceInfo> voiceInfo;
-
+	infile.fillMidiInfo(m_trackMidi);
 	getVoiceInfo(voiceInfo, infile);
 	fillHistograms(voiceInfo, infile);
+
 	if (m_debugQ) {
 		for (int i=0; i<(int)voiceInfo.size(); i++) {
 			voiceInfo[i].print(cerr);
@@ -114928,9 +115087,15 @@ void Tool_prange::processFile(HumdrumFile& infile) {
 		stringstream scoreout;
 		printScoreFile(scoreout, voiceInfo, infile);
 		if (m_embedQ) {
+			if (m_extremaQ) {
+				doExtremaMarkup(infile);
+			}
 			m_humdrum_text << infile;
-			printEmbeddedScore(m_humdrum_text, scoreout);
+			printEmbeddedScore(m_humdrum_text, scoreout, infile);
 		} else {
+			if (m_extremaQ) {
+				doExtremaMarkup(infile);
+			}
 			m_humdrum_text << scoreout.str();
 		}
 	} else {
@@ -114942,15 +115107,99 @@ void Tool_prange::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
+// Tool_prange::doExtremaMarkup --
+//
+//
+
+void Tool_prange::doExtremaMarkup(HumdrumFile& infile) {
+	bool highQ = false;
+	bool lowQ = false;
+	for (int i=0; i<(int)m_trackMidi.size(); i++) {
+		int maxindex = -1;
+		int minindex = -1;
+
+		for (int j=(int)m_trackMidi[i].size()-1; j>=0; j--) {
+			if (m_trackMidi[i][j].empty()) {
+				continue;
+			}
+			if (maxindex < 0) {
+				maxindex = j;
+				break;
+			}
+		}
+
+		for (int j=1; j<(int)m_trackMidi[i].size(); j++) {
+			if (m_trackMidi[i][j].empty()) {
+				continue;
+			}
+			if (minindex < 0) {
+				minindex = j;
+				break;
+			}
+		}
+
+		if ((maxindex < 0) || (minindex < 0)) {
+			continue;
+		}
+		applyMarkup(m_trackMidi[i][maxindex], m_highMark);
+		applyMarkup(m_trackMidi[i][minindex], m_lowMark);
+		highQ = true;
+		lowQ  = true;
+	}
+	if (highQ) {
+		string highRdf = "!!!RDF**kern: " + m_highMark + " = marked note, color=\"hotpink\", highest note";
+		infile.appendLine(highRdf);
+	}
+	if (lowQ) {
+		string lowRdf = "!!!RDF**kern: " + m_lowMark + " = marked note, color=\"limegreen\", lowest note";
+		infile.appendLine(lowRdf);
+	}
+	if (highQ || lowQ) {
+		infile.createLinesFromTokens();
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_prange::applyMarkup --
+//
+
+void Tool_prange::applyMarkup(vector<pair<HTp, int>>& notelist, const string& mark) {
+	for (int i=0; i<(int)notelist.size(); i++) {
+		HTp token = notelist[i].first;
+		int subtoken = notelist[i].second;
+		int tokenCount = token->getSubtokenCount();
+		if (tokenCount == 1) {
+			string text = *token;
+			text += mark;
+			token->setText(text);
+		} else {
+			string stok = token->getSubtoken(subtoken);
+			stok += mark;
+			token->replaceSubtoken(subtoken, stok);
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
 // Tool_prange::printEmbeddedScore --
 //
 
-void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata) {
+void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata, HumdrumFile& infile) {
+	int id = getPrangeId(infile);
+
 	out << "!!@@BEGIN: PREHTML\n";
-	out << "!!@CONTENT: <div class=\"score-svg\" style=\"margin-top:50px;text-align:center;\" data-score=\"myscore\"></div>\n";
+	out << "!!@CONTENT: <div class=\"score-svg\" ";
+	out <<    "style=\"margin-top:50px;text-align:center;\" ";
+	out <<    " data-score=\"prange-" << id << "\"></div>\n";
 	out << "!!@@END: PREHTML\n";
 	out << "!!@@BEGIN: SCORE\n";
-	out << "!!@ID: myscore\n";
+	out << "!!@ID: prange-" << id << "\n";
 	out << "!!@OUTPUTFORMAT: svg\n";
 	out << "!!@CROP: yes\n";
 	out << "!!@PADDING: 10\n";
@@ -114966,6 +115215,33 @@ void Tool_prange::printEmbeddedScore(ostream& out, stringstream& scoredata) {
 		out << "!!" << line << endl;
 	}
 	out << "!!@@END: SCORE\n";
+}
+
+
+
+//////////////////////////////
+//
+// Tool_prange::getPrangeId -- Find a line in this form
+//          ^!!@ID: prange-(\d+)$
+//      and return $1+1.  Searching backwards since the HTML section
+//      will likely be at the bottom.  Assuming that the prange
+//      SVG images are stored in sequence, with the highest ID last
+//      in the file if there are more than one.
+//
+
+int Tool_prange::getPrangeId(HumdrumFile& infile) {
+	string search = "!!@ID: prange-";
+	int length = (int)search.length();
+	for (int i=infile.getLineCount() - 1; i>=0; i--) {
+		HTp token = infile.token(i, 0);
+		if (token->compare(0, length, search) == 0) {
+			HumRegex hre;
+			if (hre.search(token, "prange-(\\d+)")) {
+				return hre.getMatchInt(1) + 1;
+			}
+		}
+	}
+	return 1;
 }
 
 
@@ -115075,14 +115351,14 @@ void Tool_prange::getVoiceInfo(vector<_VoiceInfo>& voiceInfo, HumdrumFile& infil
 
 //////////////////////////////
 //
-// getHand --
+// Tool_prange::getHand --
 //
 
 string Tool_prange::getHand(HTp sstart) {
 	HTp current = sstart->getNextToken();
 	HTp target = NULL;
 	while (current) {
-		if (current->isData()) {	
+		if (current->isData()) {
 			break;
 		}
 		if (*current == "*LH") {
@@ -115420,6 +115696,10 @@ void Tool_prange::printScoreFile(ostream& out, vector<_VoiceInfo>& voiceInfo, Hu
 	}
 	text1 += "g.labeltext&#123;color:gray;&#125;";
 	text1 += "g.lastnote&#123;color:gray;&#125;";
+	if (m_extremaQ) {
+		text1 += "g.highest-pitch&#123;color:hotpink;&#125;";
+		text1 += "g.lowest-pitch&#123;color:limegreen;&#125;";
+	}
 	text1 += "</style>";
 	string text2 = text1;
 
@@ -115743,7 +116023,7 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 	staff = getStaffBase7(mindiatonic);
 	vpos = getVpos(mindiatonic);
 	if (m_hoverQ) {
-		string content = "<g><title>";
+		string content = "<g class=\"lowest-pitch\"><title>";
 		content += getDiatonicPitchName(mindiatonic, 0);
 		content += ": lowest note";
 		if (!voicestring.empty()) {
@@ -115764,7 +116044,7 @@ void Tool_prange::printScoreVoice(ostream& out, _VoiceInfo& voiceInfo, double ma
 	staff = getStaffBase7(maxdiatonic);
 	vpos = getVpos(maxdiatonic);
 	if (m_hoverQ) {
-		string content = "<g><title>";
+		string content = "<g class=\"highest-pitch\"><title>";
 		content += getDiatonicPitchName(maxdiatonic, 0);
 		content += ": highest note";
 		if (!voicestring.empty()) {
