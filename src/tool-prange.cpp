@@ -378,7 +378,7 @@ void Tool_prange::applyMarkup(vector<pair<HTp, int>>& notelist, const string& ma
 			token->setText(text);
 		} else {
 			string stok = token->getSubtoken(subtoken);
-			stok += mark;
+			stok = mark + stok;
 			token->replaceSubtoken(subtoken, stok);
 		}
 	}

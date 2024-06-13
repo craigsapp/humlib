@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jun 11 23:16:57 PDT 2024
+// Last Modified: Wed Jun 12 00:36:12 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -115107,7 +115107,8 @@ void Tool_prange::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_prange::doExtremaMarkup --
+// Tool_prange::doExtremaMarkup -- Mark highest and lowest note
+//     in each **kern spine.
 //
 //
 
@@ -115177,7 +115178,7 @@ void Tool_prange::applyMarkup(vector<pair<HTp, int>>& notelist, const string& ma
 			token->setText(text);
 		} else {
 			string stok = token->getSubtoken(subtoken);
-			stok += mark;
+			stok = mark + stok;
 			token->replaceSubtoken(subtoken, stok);
 		}
 	}
