@@ -718,6 +718,48 @@ int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
 
 //////////////////////////////
 //
+// MuseRecordBasic::hasTieGroupStart -- Return true if note is
+//    at the start of a tied group.
+//
+
+int MuseRecordBasic::hasTieGroupStart(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isNoteAttack -- Return true if note is
+//    at the start of a tied group or is a regular note.
+//
+
+int MuseRecordBasic::isNoteAttack(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 1;
+	}
+}
+
+
+
+//////////////////////////////
+//
 // MuseRecordBasic::setLastTiedNoteLineIndex --
 //
 

@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 12 00:36:12 PDT 2024
+// Last Modified: Mon Jun 17 07:10:09 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -3186,6 +3186,9 @@ class MuseRecordBasic {
 		int               getNextTiedNoteLineIndex(void);
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
+		int               hasTieGroupStart        (void);
+		int               isNoteAttack            (void);
+		/* HumNum            getTiedNoteDuration     (void); */
 
 		std::string       getLayoutVis       (void);
 

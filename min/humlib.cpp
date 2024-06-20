@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jun 12 00:36:12 PDT 2024
+// Last Modified: Mon Jun 17 07:10:09 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -45986,6 +45986,48 @@ int MuseRecordBasic::getLastTiedNoteLineIndex(void) {
 
 int MuseRecordBasic::getNextTiedNoteLineIndex(void) {
 	return m_nexttiednote;
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::hasTieGroupStart -- Return true if note is
+//    at the start of a tied group.
+//
+
+int MuseRecordBasic::hasTieGroupStart(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 0;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// MuseRecordBasic::isNoteAttack -- Return true if note is
+//    at the start of a tied group or is a regular note.
+//
+
+int MuseRecordBasic::isNoteAttack(void) {
+	if (getLastTiedNoteLineIndex() > 0) {
+		// Note is in the middle of a tie group.
+		return 0;
+	}
+	if (getNextTiedNoteLineIndex() > 0) {
+		return 1;
+	} else {
+		// no tie on note.
+		return 1;
+	}
 }
 
 

@@ -190,6 +190,9 @@ class MuseRecordBasic {
 		int               getNextTiedNoteLineIndex(void);
 		void              setLastTiedNoteLineIndex(int index);
 		void              setNextTiedNoteLineIndex(int index);
+		int               hasTieGroupStart        (void);
+		int               isNoteAttack            (void);
+		/* HumNum            getTiedNoteDuration     (void); */
 
 		std::string       getLayoutVis       (void);
 
