@@ -1,12 +1,13 @@
 
 
 All tokens in a Humdrum file can be uniquely iterated through with two methods.
-The most straightforward way is to iterate through each line in the data, 
-and then for each line, iterating through each field on the line.  Here is some
-example code which will print the Humdrum file which will be identical
-to an input TSV Humdrum file.
+The simplest way is to iterate by line and then by field on the line.  Here is a
+short program that does this to echo out the input Humdrum file contents in the
+same format of a standard TSV Humdrum file:
 
 ```cpp
+#include "humlib.h"
+
 HumdrumFile infile;
 for (int i=0; i<infile.getLineCount(); i++) {
 	for (int j=0; j<infile[i].getFieldCount(); j++) {
