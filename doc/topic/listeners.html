@@ -1,14 +1,18 @@
-<script>
+{% comment %}
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sun Sep 13 12:46:07 PDT 2015
 // Last Modified: Sun Sep 13 12:46:11 PDT 2015
-// Filename:      _includes/topics/topics.html
+// Filename:      doc/topics/topics.html
 // Syntax:        JavaScript 1.8.5/ECMAScript 5.1
 // vim:           ts=3 hlsearch
 //
 // Description:   Manage topic documentation page.
 //
+{% endcomment %}
+
+
+<script>
 
 document.addEventListener('DOMContentLoaded', function(event) {
 	checkAnchor("topic");
@@ -20,15 +24,6 @@ document.addEventListener('keydown', function(event) {
 
 
 </script>
-
-
-<style>
-details summary {
-	color: #159987;
-	/* color: #255799; */
-	font-size: 120%;
-}
-</style>
 
 
 

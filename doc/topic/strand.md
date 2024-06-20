@@ -31,7 +31,8 @@ spine splits or merges.  The following figure shows an example
 Humdrum data stream with individual strands given different 
 colors.
 
-<img width=100% src="/images/strand.svg">
+![Strand example](strand.svg)
+
 
 Each spine consists of a primary strand which is continuous
 throughout the total length of the spine.  When a spine

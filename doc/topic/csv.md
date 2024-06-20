@@ -3,17 +3,16 @@ Standard Humdrum files are encoded as
 [TSV](https://en.wikipedia.org/wiki/Tab-separated_values) (Tab
 Separated Values).  The minHumdurm library can also read and write
 data in the [CSV](https://en.wikipedia.org/wiki/Comma-separated_values)
-(Comma Separate Values) format.  This serves two purposes: (1) for
-people who cannot wrap their minds around the concept of a tab
-character, and (2) for text processing which may munge tabs
-(particularly when copy/pasting Humdrum files into email messages).
+(Comma Separated Values) format. This format of the data is useful
+for text processing which may munge tabs (in particular for
+copy/pasting Humdrum files into email messages).
 
 Use the <span class="mhcf paren">HumdrumFile::printCSV</span> 
 funtion to print Humdrum data in the
 CSV format.  The example file in CSV format:
 
 <center>
-<table><tr><td>
+<table><tr><td markdown="1">
 
 ```
 **kern  **kern
@@ -30,7 +29,7 @@ CSV format.  The example file in CSV format:
 *-      *-
 ```
 
-</td><td>
+</td><td markdown="1">
 
 ```
 **kern,**kern
@@ -53,6 +52,5 @@ CSV format.  The example file in CSV format:
 CSV files can be read into a HumdrumFile object by appending "CSV" to the
 various read functions, such as readCSV() and parseCSV().
 
-</details>
 
 

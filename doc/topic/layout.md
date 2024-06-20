@@ -134,7 +134,6 @@ div.humDiv table td {
 	background-color:  #f3f6fa;
 }
 </style>
-
 <style>
 .humTable      { padding:0; border-spacing:0; }
 .humSubtable   { padding:0; border-spacing:0; }
@@ -154,7 +153,6 @@ div.humDiv table td {
 .humGcom       { color:#1100aa; }
 .humLcom       { color:#7d1b7e; }
 </style>
-
 <div class="humDiv">
 <table class="humTable">
 <tr valign="baseline" class="humLine humExinterp"><td class=" humTok  humSSkern humTr1 humTrackpad">**kern</td><td class=" humTok  humSSkern humTr2">**kern</td></tr>
@@ -189,26 +187,20 @@ div.humDiv table td {
 <tr valign="baseline" class="humLine humManip"><td class=" humTok  humSSkern humTr1 humTrackpad">*-</td><td class=" humTok  humSSkern humTr2">*-</td></tr>
 </table>
 </div>
-
-
 </td><td>
 <img src="/images/layout/text.png">
-
 <h3 style="margin:0;">Text parameters:</h3>
 <ul>
-<li> t = text to display.
-<li> rj = right justify text (boolean).
-<li> cj = center justify text (boolean).
-<li> b = bold text.
-<li> X = horizontal offset of text.
-<li> Y = placement height below bottom line of staff.
-<li> Z = placement height above top line of staff.
+<li> t = text to display.</li>
+<li> rj = right justify text (boolean).</li>
+<li> cj = center justify text (boolean).</li>
+<li> b = bold text.</li>
+<li> X = horizontal offset of text.</li>
+<li> Y = placement height below bottom line of staff.</li>
+<li> Z = placement height above top line of staff.</li>
 </ul>
-
-
 </td></tr></table>
 </p>
-
 
 
 

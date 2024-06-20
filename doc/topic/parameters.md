@@ -1,17 +1,19 @@
-
+<!--
+vim: ts=3:ft=text
+-->
 
 humlib can processes non-data parameters embedded in local or global
-comments before the data token, interpretation or barline in a spine.
-The form of a parameter is:
+comments before the data token, interpretation or barline in a
+spine.  The form of a parameter is:
 
 
 ```
 ![!][ns1]:[ns2]:key1=[value1][:key2=value[:key3=value3]
 ```
 
-The parameter system includes two optional namespace prefixes
-to the list of parameters.  A parameter in the default namespace
-will start with two colons (:), followed by the parameter list. For
+The parameter system includes two optional namespace prefixes to
+the list of parameters.  A parameter in the default namespace will
+start with two colons (:), followed by the parameter list. For
 example here is a parameter list which does not include any namespace
 qualifiers:
 
@@ -31,12 +33,12 @@ And with a full name space description:
 !:D:C:A=a:B=b
 ```
 
-Namespaces and keys may not contain spaces or colons, and ideally should 
-only contain letters, digits, dashes (-), and underscores (_).  Values
-may contain any character except for colons or newlines.  To represent
-a colon, use `&colon;` in place of `:`.
+Namespaces and keys may not contain spaces or colons, and ideally
+should only contain letters, digits, dashes (`-`), and underscores
+(`_`).  Values may contain any character except for colons or newlines.
+To represent a colon, use `&colon;` in place of `:`.
 
-When the minHumdurm parser reads a Humdrum file with parameters, it will 
+When the humlib parser reads a Humdrum file with parameters, it will 
 automatically parse the parameters and attaches them to the next non-null
 token in the spine which follows.  These parameters can then be accessed
 from a HumdrumToken with the functions:
@@ -66,10 +68,10 @@ HumdrumFile infile;
 cout << infile.token(3,0).getValue("Z");
 ```
 
-The list of parameters for a token are exposed when generating a 
-HumdruXML file for the data.  will be given as a child of the 
-&lt;field&gt; element that represents the data token.  Here is 
-the field element for the "a2" in XML format:
+The list of parameters for a token are exposed when generating a
+HumdruXML file for the data will be given as a child of the
+&lt;field&gt; element that represents the data token.  Here is the
+field element for the "a2" in XML format:
 
 ```
 <field n="0" track="1" token="a2" xml:id="loc3_0">
@@ -86,11 +88,11 @@ the field element for the "a2" in XML format:
 </field>
 ```
 
-The parameter@idref attribute is an XML id which points to the source line 
-used to set the parameter.
+The `parameter@idref` attribute is an XML id which points to the
+source line used to set the parameter.
 
-Parameters may be split into separate comments.  These two forms are 
-equivalent:
+Parameters may be split into separate comments.  These two forms
+are equivalent:
 
 ```
 **A
@@ -114,9 +116,9 @@ a3
 This will cause token `a2` to have two parameters `Z=z` and `Y=y`.
 
 
-When the same key is used to set the parameter for a token, only the
-first value of the parameter will be used.  In the following example,
-`.getValue("Z")` will return `z1`:
+When the same key is used to set the parameter for a token, only
+the first value of the parameter will be used.  In the following
+example, `.getValue("Z")` will return `z1`:
 
 ```
 **A
@@ -127,7 +129,6 @@ a2
 a3
 *-
 ```
-
 
 Example with namespaces:
 
@@ -148,7 +149,7 @@ infile.token(3, 0).getValue("ns1", "ns2", Z");
 ```
 
 If a parameter key is not followed by a parameter, it's value is set to the
-string "true" which also returns a true when accessing the .getValueBool()
+string "true" which also returns true when accessing the .getValueBool()
 function.
 
 
