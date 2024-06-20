@@ -58,8 +58,6 @@ var QuestionKey  = 191;
 var EscKey       =  27;
 
 
-
-
 document.addEventListener('DOMContentLoaded', function(event) {
 	insertLinks();
 });
@@ -82,12 +80,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 //
 
 function insertLinks() {
-	var matches;
-	var output;
-	var i;
+	let matches;
+	let output;
 
-	var funcs = document.querySelectorAll('.mhcf');
-	for (i=0; i<funcs.length; i++) {
+	let funcs = document.querySelectorAll('.mhcf');
+	for (let i=0; i<funcs.length; i++) {
 		matches = funcs[i].innerHTML.match(/(.*)::(.*)/);
 		if (!matches) {
 			continue;
@@ -123,9 +120,9 @@ function insertLinks() {
 //
 
 function makeDocLinks(tag, prefix) {
-	var list = document.querySelectorAll("span[class^='" + tag + "']");
-	for (i=0; i<list.length; i++) {
-		var regex = new RegExp(tag + '-(.*)');
+	let list = document.querySelectorAll("span[class^='" + tag + "']");
+	for (let i=0; i<list.length; i++) {
+		let regex = new RegExp(tag + '-(.*)');
 		matches = list[i].className.match(regex);
 		if (!matches) {
 			continue;
@@ -165,7 +162,7 @@ function removeHash () {
 //
 
 function checkDetailsState(openlist, tag) {
-	var anchor = sessionStorage.hash;
+	let anchor = sessionStorage.hash;
 	if (anchor) {
 		sessionStorage[openlist] = '["' + anchor + '"]';
 	}
@@ -173,7 +170,7 @@ function checkDetailsState(openlist, tag) {
 		return;
 	}
 	list = JSON.parse(sessionStorage[openlist]);
-	var item = document.querySelector('details.' + tag + '-' + anchor);
+	let item = document.querySelector('details.' + tag + '-' + anchor);
 	if (!item) {
 		return;
 	}
@@ -189,9 +186,9 @@ function checkDetailsState(openlist, tag) {
 //
 
 function closeAllDetails() {
-	var list = document.querySelectorAll('details');
-	for (var i=0; i<list.length; i++) {
-		var detail = list[i];
+	let list = document.querySelectorAll('details');
+	for (let i=0; i<list.length; i++) {
+		let detail = list[i];
 		if (!detail) {
 			continue;
 		}
@@ -207,9 +204,9 @@ function closeAllDetails() {
 //
 
 function openAllDetails() {
-	var list = document.querySelectorAll('details');
-	for (var i=0; i<list.length; i++) {
-		var detail = list[i];
+	let list = document.querySelectorAll('details');
+	for (let i=0; i<list.length; i++) {
+		let detail = list[i];
 		if (!detail) {
 			continue;
 		}
@@ -227,7 +224,7 @@ function openAllDetails() {
 function documentationKeyCommands(event, tag) {
 	switch (event.keyCode) {
 		case OneKey:
-			var list = document.querySelector('details[class^="' + tag + '-"]');
+			let list = document.querySelector('details[class^="' + tag + '-"]');
 			if (list.open) {
 				closeAllDetails();
 			} else {
@@ -257,19 +254,21 @@ function documentationKeyCommands(event, tag) {
 //
 
 function checkAnchor(tag) {
-	var anchor = '';
+	let anchor = '';
 	matches = window.location.hash.match(/^#(.*)/);
 	if (matches) {
 		sessionStorage.hash = matches[1];
 		anchor = matches[1];
 	}
+	anchor = anchor.toLowerCase();
 	removeHash();
-	var list = document.querySelector('details.' + tag + '-' + anchor);
-	if (!list) {
+	let selector = `details.${tag}-${anchor}`;
+	let element = document.querySelector(selector);
+	if (!element) {
 		return;
 	}
-	list.open = 'open';
-	list.scrollIntoViewIfNeeded();
+	element.open = 'open';
+	element.scrollIntoViewIfNeeded();
 }
 
 

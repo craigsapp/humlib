@@ -1,4 +1,5 @@
 
+<h3> 2-D row/column iteration of tokens </h3>
 
 You can uniquely iterate through all tokens in a Humdrum file using
 two methods. The simplest one involves iterating first by line and
@@ -7,29 +8,7 @@ demonstrates this process by echoing the input Humdrum file contents
 in the same format as a standard TSV Humdrum file 
 
 ```cpp
-#include "humlib.h"
-using namespace std;
-using namespace hum;
-int main(int argc, char** argv) {
-	HumdrumFile infile;
-	Options options;
-	options.process(argc, argv);
-	if (options.getArgCount() > 0) {
-		infile.read(options.getArg(1));
-	} else {
-		infile.read(cin);
-	}
-	for (int i=0; i<infile.getLineCount(); i++) {
-		for (int j=0; j<infile[i].getFieldCount(); j++) {
-			cout << infile.token(i, j);
-			if (j < infile[i].getFieldCount()) {
-				cout << '\t';
-			}
-		}
-		cout << '\n';
-	}
-	return 0;
-}
+{% include_relative humecho.cpp %}
 ```
 
 You can copy this code to `cli/humecho.cpp` and then in the base
@@ -38,9 +17,11 @@ to `bin/humecho`.
 
 The lines in the file represent a sequence of data that is sorted
 in chronological order.  This row/column iteration method is suitable
-for temporal sequence processing of all spine tokens simultaneously
-on each line.
+for temporal processing of all data tokens.
 
+
+
+<h3> 1-D strand iteration </h3>
 
 To iterate through all spines in an different order, the humlib library
 introduces the concept of *strands*. A strand is a sequence of
@@ -50,8 +31,6 @@ with individual strands highlighted in different colors.
 
 ![Strand example](strand.svg)
 
-
-
 Each spine consists of a primary strand which is continuous
 throughout the total length of the spine.  When a spine
 splits into sub-spines, a new strand starts at the beginning
@@ -60,43 +39,41 @@ strand continues along the left-side branch.
 
 The strand segments can be used to iterate through all tokens in
 the file (excluding non-spine lines, which are global comments,
-reference records and empty lines).  A one dimensional iteration
+reference records and empty lines).  A one-dimensional iteration
 through all tokens is illustrated in the following code:
 
 ```cpp
-
-Humdrum infile;
-HumdrumToken* tok;
-for (int i=0; i<infile.getStrandCount(); i++) {
-	tok = infile.getStrandStart(i);
-	while (!tok->isStrandEnd()) {
-		cout << tok << endl;
-		tok->getNextToken();
-	}
-}
-
+{% include_relative strand1.cpp %}
 ```
 
-The above illustration contains seven 1D strands, so the above code
-will generate this data sequence (removing duplicate adjacent tokens in
-the sequence):
+The example Humdrum data contains seven 1-D strands and the example
+program prints the row/column in the original data that the tokens
+originate.
 
-<span style="font-weight:900">
-<span style="color:#F59DB8">a a a a a1 a1 a a a a a1 a1 a a</span>
-<span style="color:#F176A3">a2 a2 </span>
-<span style="color:#F26451">a2 a2 </span>
-<span style="color:#A8CCA3">b b b1 b1 b1 b1 b1 b1 b1,21 b1,21 b b b b </span>
-<span style="color:#D7DF23">b2 b2 b21 b21 b21 b21</span>
-<span style="color:#39B54A">b22 b22 b22 b22 b22 b22 </span>
-<span style="color:#81D4F7">c c c c c c c c c c c c c c</span>
-</span>
+<details markdown="1">
+<summary> Click to view output of the program using the illustrated data </summary>
+```
+{% include_relative strand1-output.txt %}
+```
+</details>
 
-A two-dimensional iteration through the spine tokens can generate the same
-ordering.  In the following example the strands are first iterated through
-by spine index, and then by strands in the spines, always starting with
-the primary strand.
+
+
+<h3> 2-D strand iteration </h3>
+
+A related two-dimensional iteration through the spine tokens can
+generate the same ordering as the 1-D strand iteration.  The main
+difference is that you can select one or more spines to strand in
+advance and only iterate through all strands in those spines,
+ignoring strands in other spines.
+
+In the following example the strands are first iterated through by
+spine index, and then by strands in the spines, always starting
+with the primary strand which follows the lefthand side of spine
+splits from the starting exclusive interpretation of the spine.
 
 ```cpp
+
 Humdrum infile;
 HumdrumToken* tok;
 for (int i=0; i<infile.getSpineCount(); i++) {
@@ -107,6 +84,8 @@ for (int i=0; i<infile.getSpineCount(); i++) {
 		tok->getNextToken();
 	}
 }
+
+
 ```
 
 When spines do not split or merge, then strands are equivalent to
