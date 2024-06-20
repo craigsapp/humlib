@@ -1,38 +1,55 @@
 
 
-All tokens in a Humdrum file can be uniquely iterated through with two methods.
-The simplest way is to iterate by line and then by field on the line.  Here is a
-short program that does this to echo out the input Humdrum file contents in the
-same format of a standard TSV Humdrum file:
+You can uniquely iterate through all tokens in a Humdrum file using
+two methods. The simplest one involves iterating first by line and
+then by field within each line. Below is a short program that
+demonstrates this process by echoing the input Humdrum file contents
+in the same format as a standard TSV Humdrum file 
 
 ```cpp
 #include "humlib.h"
-
-HumdrumFile infile;
-for (int i=0; i<infile.getLineCount(); i++) {
-	for (int j=0; j<infile[i].getFieldCount(); j++) {
-		cout << infile.token(i, j);
-		// or: cout << infile[i].token(j);
-		if (j < infile[i].getFieldCount() {
-			cout << '\t';
-		}
+using namespace std;
+using namespace hum;
+int main(int argc, char** argv) {
+	HumdrumFile infile;
+	Options options;
+	options.process(argc, argv);
+	if (options.getArgCount() > 0) {
+		infile.read(options.getArg(1));
+	} else {
+		infile.read(cin);
 	}
-	cout << '\n';
+	for (int i=0; i<infile.getLineCount(); i++) {
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			cout << infile.token(i, j);
+			if (j < infile[i].getFieldCount()) {
+				cout << '\t';
+			}
+		}
+		cout << '\n';
+	}
+	return 0;
 }
 ```
 
-This format of iterating through the file is suitable for temporal 
-sequence processing of all spine tokens at the same time.  The lines
-in the file represent a sequence where the lines are sorted in time order.
+You can copy this code to `cli/humecho.cpp` and then in the base
+directory of humlib type `make library && make humecho` to compile
+to `bin/humecho`.
 
-To iterate through spines in an orthogonal manner, the humlib
-library introduces a concept of <i>strands</i>.  A strand is a
-sequence of tokens in a particular spine which does not include
-spine splits or merges.  The following figure shows an example
-Humdrum data stream with individual strands given different 
-colors.
+The lines in the file represent a sequence of data that is sorted
+in chronological order.  This row/column iteration method is suitable
+for temporal sequence processing of all spine tokens simultaneously
+on each line.
+
+
+To iterate through all spines in an different order, the humlib library
+introduces the concept of *strands*. A strand is a sequence of
+tokens in a particular spine that does not include spine splits or
+merges. The following figure shows example Humdrum data 
+with individual strands highlighted in different colors.
 
 ![Strand example](strand.svg)
+
 
 
 Each spine consists of a primary strand which is continuous
@@ -41,21 +58,23 @@ splits into sub-spines, a new strand starts at the beginning
 of the right-side branch of the split, while the previous
 strand continues along the left-side branch.
 
-The strand segments can be used to iterate through all 
-tokens in the file (excluding non-spine lines, which
-are global comments and reference records).  A one dimensional
-iteration is illustrated in the following code:
+The strand segments can be used to iterate through all tokens in
+the file (excluding non-spine lines, which are global comments,
+reference records and empty lines).  A one dimensional iteration
+through all tokens is illustrated in the following code:
 
 ```cpp
+
 Humdrum infile;
 HumdrumToken* tok;
 for (int i=0; i<infile.getStrandCount(); i++) {
 	tok = infile.getStrandStart(i);
 	while (!tok->isStrandEnd()) {
-		cout << *tok << endl;
+		cout << tok << endl;
 		tok->getNextToken();
 	}
 }
+
 ```
 
 The above illustration contains seven 1D strands, so the above code
