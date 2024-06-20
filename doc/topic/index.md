@@ -49,6 +49,6 @@ breadcrumbs: [
 
 <details class="topic-strands" markdown="1">
 <summary> Strands </summary>
-{% include_relative strand.md %}
+{% include_relative strands.md %}
 </details>
 
