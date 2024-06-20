@@ -665,6 +665,19 @@ int HumdrumToken::getTrack(void) const {
 
 //////////////////////////////
 //
+// HumdrumToken::getSpineIndex -- Similar to getTrack() but indexed from 0
+//      rather than 1.  Non-spined tokens should return -1 since they
+//      are not in the spine structure.
+//
+
+int HumdrumToken::getSpineIndex(void) const {
+	return m_address.getTrack() - 1;
+}
+
+
+
+//////////////////////////////
+//
 // HumdrumToken::setSubtrack -- Sets the subtrack (similar to a layer
 //    in MEI).
 //

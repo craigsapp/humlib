@@ -241,6 +241,7 @@ class HumdrumToken : public std::string, public HumHash {
 		bool     isStaffLike               (void) const { return isKernLike() || isMensLike(); }
 		std::string   getSpineInfo         (void) const;
 		int      getTrack                  (void) const;
+		int      getSpineIndex             (void) const;
 		int      getSubtrack               (void) const;
 		bool     noteInLowerSubtrack       (void);
 		std::string   getTrackString       (void) const;

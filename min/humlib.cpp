@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jun 17 07:10:09 PDT 2024
+// Last Modified: Thu Jun 20 03:39:52 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -33552,6 +33552,19 @@ void HumdrumToken::setTrack(int aTrack, int aSubtrack) {
 
 int HumdrumToken::getTrack(void) const {
 	return m_address.getTrack();
+}
+
+
+
+//////////////////////////////
+//
+// HumdrumToken::getSpineIndex -- Similar to getTrack() but indexed from 0
+//      rather than 1.  Non-spined tokens should return -1 since they
+//      are not in the spine structure.
+//
+
+int HumdrumToken::getSpineIndex(void) const {
+	return m_address.getTrack() - 1;
 }
 
 
