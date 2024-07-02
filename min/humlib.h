@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sun Jun 30 19:51:54 WEST 2024
+// Last Modified: Tue Jul  2 20:40:30 CEST 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -9865,6 +9865,32 @@ class Tool_ordergps : public HumTool {
 		bool m_reverseQ = false;
 		bool m_staffQ   = false;
 		bool m_topQ     = false;
+
+};
+
+
+class Tool_pbar : public HumTool {
+	public:
+		            Tool_pbar        (void);
+		           ~Tool_pbar        () {};
+
+		bool        run               (HumdrumFileSet& infiles);
+		bool        run               (HumdrumFile& infile);
+		bool        run               (const std::string& indata, std::ostream& out);
+		bool        run               (HumdrumFile& infile, std::ostream& out);
+
+	protected:
+		void        processFile       (HumdrumFile& infile);
+		void        initialize        (void);
+		void        processSpine      (HTp spineStart);
+		void        printDataLine                   (HumdrumFile& infile, int index);
+		void        printLocalCommentLine           (HumdrumFile& infile, int index);
+		void        addBarLineToFollowingNoteOrRest (HTp token);
+		void        printInvisibleBarlines          (HumdrumFile& infile, int index);
+		void        printBarLine                    (HumdrumFile& infile, int index);
+
+	private:
+		bool        m_invisibleQ = false;   // used with -i option
 
 };
 

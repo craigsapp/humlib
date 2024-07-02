@@ -63,6 +63,7 @@
 #include "tool-myank.h"
 #include "tool-nproof.h"
 #include "tool-ordergps.h"
+#include "tool-pbar.h"
 #include "tool-phrase.h"
 #include "tool-pline.h"
 #include "tool-prange.h"
@@ -323,6 +324,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(nproof, infile, commands[i].second, status);
 		} else if (commands[i].first == "ordergps") {
 			RUNTOOL(ordergps, infile, commands[i].second, status);
+		} else if (commands[i].first == "pbar") {
+			RUNTOOL(pbar, infile, commands[i].second, status);
 		} else if (commands[i].first == "phrase") {
 			RUNTOOL(phrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "pline") {
