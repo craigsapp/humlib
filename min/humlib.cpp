@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jun 20 03:39:52 PDT 2024
+// Last Modified: Sun Jun 30 19:51:54 WEST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -27948,7 +27948,7 @@ void HumdrumFileStructure::analyzeStropheMarkers(void) {
 					// Store the new strophe.
 					laststrophe[spineinfo] = token;
 				}
-			} else if (*token == "*Xstrophe") {
+			} else if ((*token == "*Xstrophe") || (*token == "*S-")) {
 				string spineinfo = token->getSpineInfo();
 	 			HTp lastone = laststrophe[spineinfo];
 				if (lastone) {
@@ -130154,6 +130154,10 @@ int Tool_tspos::getToolCounter(HumdrumFile& infile) {
 // Tool_tspos::logisticColorMap -- Increase sensitivity of color mapping
 //    around 40%.
 //
+
+#ifndef M_E
+#define M_E 2.71828182845904523536
+#endif
 
 int Tool_tspos::logisticColorMap(double input, double max) {
 	double center = max * 0.40;
