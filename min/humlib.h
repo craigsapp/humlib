@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  2 20:40:30 CEST 2024
+// Last Modified: Wed Jul  3 21:58:04 CEST 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7540,23 +7540,23 @@ class Tool_extract : public HumTool {
 	private:
 
 		// global variables
-		int         excludeQ = 0;        // used with -x option
-		int         expandQ  = 0;        // used with -e option
-		std::string expandInterp = "";   // used with -E option
-		int         interpQ  = 0;        // used with -i option
-		std::string interps  = "";       // used with -i option
-		int         debugQ   = 0;        // used with --debug option
-		int         kernQ    = 0;        // used with -k option
-		int         rkernQ  = 0;         // used with -K option
-		int         fieldQ   = 0;        // used with -f or -p option
-		std::string fieldstring = "";    // used with -f or -p option
+		bool        excludeQ     = false;     // used with -x option
+		bool        expandQ      = false;     // used with -e option
+		std::string expandInterp = "";        // used with -E option
+		bool        interpQ      = false;     // used with -i option
+		std::string interps      = "";        // used with -i option
+		bool        debugQ       = false;     // used with --debug option
+		bool        kernQ        = false;     // used with -k option
+		bool        rkernQ       = false;     // used with -K option
+		bool        fieldQ       = false;     // used with -f or -p option
+		std::string fieldstring  = "";        // used with -f or -p option
 		std::vector<int> field;               // used with -f or -p option
 		std::vector<int> subfield;            // used with -f or -p option
 		std::vector<int> model;               // used with -p, or -e options and similar
-		int         countQ   = 0;        // used with -C option
-		int         traceQ   = 0;        // used with -t option
-		std::string tracefile = "";      // used with -t option
-		int         reverseQ = 0;        // used with -r option
+		bool        countQ        = false;    // used with -C option
+		bool        traceQ        = false;    // used with -t option
+		std::string tracefile     = "";       // used with -t option
+		bool        reverseQ      = false;    // used with -r option
 		std::string reverseInterp = "**kern"; // used with -r and -R options.
 		// sub-spine "b" expansion model: how to generate data for a secondary
 		// spine if the primary spine is not divided.  Models are:
@@ -7566,17 +7566,18 @@ class Tool_extract : public HumTool {
 		//         data.  'n' will be used for non-kern spines when 'r' is used.
 		int          submodel = 'd';       // used with -m option
 		std::string editorialInterpretation = "yy";
-		std::string cointerp = "**kern";   // used with -c option
-		int         comodel  = 0;          // used with -M option
+		std::string cointerp    = "**kern";  // used with -c option
+		int         comodel     = 0;         // used with -M option
 		std::string subtokenseparator = " "; // used with a future option
-		int         interpstate = 0;       // used -I or with -i
-		int         grepQ       = 0;       // used with -g option
-		std::string grepString  = "";      // used with -g option
+		int         interpstate = 0;         // used -I or with -i
+		bool        grepQ       = false;     // used with -g option
+		std::string grepString  = "";        // used with -g option
 		std::string blankName   = "**blank"; // used with -n option
-		int         noEmptyQ    = 0;       // used with --no-empty option
-		int         emptyQ      = 0;       // used with --empty option
-		int         spineListQ  = 0;       // used with --spine option
-		int         removerestQ = 0;       // used with --no-rest option
+ 		bool        addRestsQ   = false;     // used with -n option
+		bool        noEmptyQ    = false;     // used with --no-empty option
+		bool        emptyQ      = false;     // used with --empty option
+		bool        spineListQ  = false;     // used with --spine option
+		bool        removerestQ = false;     // used with --no-rest option
 
 };
 

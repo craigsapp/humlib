@@ -30,7 +30,7 @@ namespace hum {
 bool HumdrumFileContent::doHandAnalysis(bool attacksOnlyQ) {
 	HumdrumFileContent& infile = *this;
 	vector<HTp> kstarts = infile.getKernSpineStartList();
-	bool status = 0; 
+	bool status = 0;
 	for (int i=0; i<(int)kstarts.size(); i++) {
 		status |= doHandAnalysis(kstarts[i], attacksOnlyQ);
 	}

@@ -7,7 +7,7 @@
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   
+// Description:
 //
 
 #include "HumRegex.h"

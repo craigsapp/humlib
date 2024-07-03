@@ -2706,7 +2706,7 @@ void MuseData::linkMusicDirections(void) {
 //
 // MuseData::getMeasureNumber -- If index == 0, return the next barnumber
 //     minus 1.  If on a measure record, return the number on that line.
-//     If neither, then search backwards for the last measure line (or 0 
+//     If neither, then search backwards for the last measure line (or 0
 //     index) and return the measure number for that barline (or 0 index).
 //
 
@@ -2740,7 +2740,7 @@ string MuseData::getMeasureNumber(int index) {
 				string number = md[i].getMeasureNumber();
 				return number;
 			} else {
-				// first measure is not numbered, so return next 
+				// first measure is not numbered, so return next
 				// measure number minus 1.
 				for (int j=index; j<md.getLineCount(); j++) {
 					if (md[j].isMeasure()) {

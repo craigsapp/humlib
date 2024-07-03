@@ -24,7 +24,7 @@ namespace hum {
 
 //////////////////////////////
 //
-// MuseRecord::getPartName -- return the name line in the 
+// MuseRecord::getPartName -- return the name line in the
 //     MuseData part's header.  This is the 9th non-comment
 //     line in a part file.
 //

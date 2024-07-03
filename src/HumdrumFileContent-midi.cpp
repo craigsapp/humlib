@@ -62,7 +62,7 @@ void HumdrumFileContent::fillMidiInfo(vector<vector<vector<pair<HTp, int>>>>& tr
 //
 // HumdrumFileContent::processStrandNotesForMidi -- store strand tokens/subtokens by MIDI note
 //     in the midi track entry.
-//    
+//
 //     First index if track info is the MIDI note number, second is a list
 //     of tokens for that note number, with the second value of the pair
 //     giving the subtoken index of the note in the token.

@@ -7,7 +7,7 @@
 // Syntax:        C++11; humlib
 // vim:           ts=3 noexpandtab
 //
-// Description:   
+// Description:
 //
 
 #include "HumRegex.h"
@@ -220,7 +220,7 @@ void Tool_pbar::printLocalCommentLine(HumdrumFile& infile, int index) {
 	if (!hasKp) {
 		m_humdrum_text << infile[index] << endl;
 		return;
-	} 
+	}
 
 	if (hasOther) {
 		for (int i=0; i<infile[index].getFieldCount(); i++) {

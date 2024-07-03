@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Tue Jul  2 20:40:30 CEST 2024
+// Last Modified: Wed Jul  3 21:58:04 CEST 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -24163,7 +24163,7 @@ void HumdrumFileContent::markBeamSpanMembers(HTp beamstart, HTp beamend) {
 bool HumdrumFileContent::doHandAnalysis(bool attacksOnlyQ) {
 	HumdrumFileContent& infile = *this;
 	vector<HTp> kstarts = infile.getKernSpineStartList();
-	bool status = 0; 
+	bool status = 0;
 	for (int i=0; i<(int)kstarts.size(); i++) {
 		status |= doHandAnalysis(kstarts[i], attacksOnlyQ);
 	}
@@ -24426,7 +24426,7 @@ void HumdrumFileContent::fillMidiInfo(vector<vector<vector<pair<HTp, int>>>>& tr
 //
 // HumdrumFileContent::processStrandNotesForMidi -- store strand tokens/subtokens by MIDI note
 //     in the midi track entry.
-//    
+//
 //     First index if track info is the MIDI note number, second is a list
 //     of tokens for that note number, with the second value of the pair
 //     giving the subtoken index of the note in the token.
@@ -39785,7 +39785,7 @@ void MuseData::linkMusicDirections(void) {
 //
 // MuseData::getMeasureNumber -- If index == 0, return the next barnumber
 //     minus 1.  If on a measure record, return the number on that line.
-//     If neither, then search backwards for the last measure line (or 0 
+//     If neither, then search backwards for the last measure line (or 0
 //     index) and return the measure number for that barline (or 0 index).
 //
 
@@ -39819,7 +39819,7 @@ string MuseData::getMeasureNumber(int index) {
 				string number = md[i].getMeasureNumber();
 				return number;
 			} else {
-				// first measure is not numbered, so return next 
+				// first measure is not numbered, so return next
 				// measure number minus 1.
 				for (int j=index; j<md.getLineCount(); j++) {
 					if (md[j].isMeasure()) {
@@ -41010,7 +41010,7 @@ string MuseRecord::getFigure(int index) {
 
 //////////////////////////////
 //
-// MuseRecord::getPartName -- return the name line in the 
+// MuseRecord::getPartName -- return the name line in the
 //     MuseData part's header.  This is the 9th non-comment
 //     line in a part file.
 //
@@ -80160,7 +80160,7 @@ void Tool_extract::fillFieldDataByNoRest(vector<int>& field, vector<int>& subfie
 	}
 
 	// Go back and mark any empty spines as non-empty if they
-   // are in a part that contains multiple staves. I.e., only
+	// are in a part that contains multiple staves. I.e., only
 	// delete a staff if all staves for the part are empty.
 	// There should be a single *part# line at the start of the
 	// score.
@@ -80397,12 +80397,8 @@ void Tool_extract::expandSpines(vector<int>& field, vector<int>& subfield, vecto
 	model.reserve(infile.getMaxTrack()*2);
 	model.resize(0);
 
-	int allQ = 0;
-	if (interp.size() == 0) {
-		allQ = 1;
-	}
+	bool allQ = interp.empty();
 
-	// ggg
 	vector<int> dummyfield;
 	vector<int> dummysubfield;
 	vector<int> dummymodel;
@@ -80606,25 +80602,25 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 
 		if ((firstone < 1) && (firstone != 0)) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains too small a number at start: " << firstone << endl;
+			             << " contains too small a number at start: " << firstone << endl;
 			m_error_text << "Minimum number allowed is " << 1 << endl;
 			return;
 		}
 		if ((lastone < 1) && (lastone != 0)) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains too small a number at end: " << lastone << endl;
+			             << " contains too small a number at end: " << lastone << endl;
 			m_error_text << "Minimum number allowed is " << 1 << endl;
 			return;
 		}
 		if (firstone > maxtrack) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains number too large at start: " << firstone << endl;
+			             << " contains number too large at start: " << firstone << endl;
 			m_error_text << "Maximum number allowed is " << maxtrack << endl;
 			return;
 		}
 		if (lastone > maxtrack) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains number too large at end: " << lastone << endl;
+			             << " contains number too large at end: " << lastone << endl;
 			m_error_text << "Maximum number allowed is " << maxtrack << endl;
 			return;
 		}
@@ -80667,13 +80663,13 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 
 		if ((value < 1) && (value != 0)) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains too small a number at end: " << value << endl;
+			             << " contains too small a number at end: " << value << endl;
 			m_error_text << "Minimum number allowed is " << 1 << endl;
 			return;
 		}
 		if (value > maxtrack) {
 			m_error_text << "Error: range token: \"" << astring << "\""
-				  << " contains number too large at start: " << value << endl;
+			             << " contains number too large at start: " << value << endl;
 			m_error_text << "Maximum number allowed is " << maxtrack << endl;
 			return;
 		}
@@ -80698,11 +80694,10 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 
 	vector<HTp> trackstarts;
 	infile.getTrackStartList(trackstarts);
-	int i, j;
 	int spine;
 
 	// convert kern tracks into spine tracks:
-	for (i=finitsize; i<(int)field.size(); i++) {
+	for (int i=finitsize; i<(int)field.size(); i++) {
 		if (field[i] > 0) {
 			spine = ktracks[field[i]-1]->getTrack();
 		   field[i] = spine;
@@ -80710,7 +80705,7 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 	}
 
 	int startspineindex, stopspineindex;
-	for (i=0; i<(int)field.size(); i++) {
+	for (int i=0; i<(int)field.size(); i++) {
 		newfield.push_back(field[i]); // copy **kern spine index into new list
 		newsubfield.push_back(subfield[i]);
 		newmodel.push_back(model[i]);
@@ -80718,7 +80713,7 @@ void Tool_extract::processFieldEntry(vector<int>& field,
 		// search for non **kern spines after specified **kern spine:
 		startspineindex = field[i] + 1 - 1;
 		stopspineindex = maxtrack;
-		for (j=startspineindex; j<stopspineindex; j++) {
+		for (int j=startspineindex; j<stopspineindex; j++) {
 			if (trackstarts[j]->isKern()) {
 				break;
 			}
@@ -80818,6 +80813,7 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 	int subtarget;
 	int modeltarget;
 	string spat;
+	bool foundBarline = true;
 
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (!infile[i].hasSpines()) {
@@ -80830,6 +80826,10 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 			continue;
 		}
 
+		if (infile[i].isBarline()) {
+			foundBarline = true;
+		}
+
 		start = 0;
 		for (int t=0; t<(int)field.size(); t++) {
 			target = field[t];
@@ -80837,17 +80837,17 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 			modeltarget = model[t];
 			if (modeltarget == 0) {
 				switch (subtarget) {
-					 case 'a':
-					 case 'b':
-					    modeltarget = submodel;
-					    break;
-					 case 'c':
-					    modeltarget = comodel;
+					case 'a':
+					case 'b':
+						modeltarget = submodel;
+						break;
+					case 'c':
+						modeltarget = comodel;
 				}
 			}
 			if (target == 0) {
 				if (start != 0) {
-					 m_humdrum_text << '\t';
+					m_humdrum_text << '\t';
 				}
 				start = 1;
 				if (!infile[i].isManipulator()) {
@@ -80856,66 +80856,80 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 					} else if (infile[i].isBarline()) {
 						m_humdrum_text << infile[i].token(0);
 					} else if (infile[i].isData()) {
-				       m_humdrum_text << ".";
-					    // interpretations handled in dealWithSpineManipulators()
-					    // [obviously not, so adding a blank one here
+						if (foundBarline) {
+							if (addRestsQ) {
+								HumNum dur = infile[i].getDurationToBarline();
+								m_humdrum_text << Convert::durationToRecip(dur);
+							} else {
+								m_humdrum_text << ".";
+							}
+						} else {
+							m_humdrum_text << ".";
+						}
+						// interpretations handled in dealWithSpineManipulators()
+						// [obviously not, so adding a blank one here
 					} else if (infile[i].isInterpretation()) {
-					    m_humdrum_text << "*";
-					 }
+						m_humdrum_text << "*";
+					}
 				}
 			} else {
 				for (int j=0; j<infile[i].getFieldCount(); j++) {
-					 if (infile[i].token(j)->getTrack() != target) {
-					    continue;
-					 }
-					 switch (subtarget) {
-					 case 'a':
-					    getSearchPat(spat, target, "a");
-					    if (hre.search(infile.token(i,j)->getSpineInfo(), spat) ||
-					          !hre.search(infile.token(i, j)->getSpineInfo(), "\\(")) {
-					       if (start != 0) {
-					          m_humdrum_text << '\t';
-					       }
-					       start = 1;
-					       m_humdrum_text << infile.token(i, j);
-					    }
-					    break;
-					 case 'b':
-					    getSearchPat(spat, target, "b");
-					    if (hre.search(infile.token(i, j)->getSpineInfo(), spat)) {
-					       if (start != 0) {
-					          m_humdrum_text << '\t';
-					       }
-					       start = 1;
-					       m_humdrum_text << infile.token(i, j);
-					    } else if (!hre.search(infile.token(i, j)->getSpineInfo(),
-					          "\\(")) {
-					       if (start != 0) {
-					          m_humdrum_text << '\t';
-					       }
-					       start = 1;
-					       dealWithSecondarySubspine(field, subfield, model, t,
-					             infile, i, j, modeltarget);
-					    }
-					    break;
-					 case 'c':
-					    if (start != 0) {
-					       m_humdrum_text << '\t';
-					    }
-					    start = 1;
-					    dealWithCospine(field, subfield, model, t, infile, i, j,
-					       modeltarget, modeltarget, cointerp);
-					    break;
-					 default:
-					    if (start != 0) {
-					       m_humdrum_text << '\t';
-					    }
-					    start = 1;
-					    m_humdrum_text << infile.token(i, j);
-					 }
+					if (infile[i].token(j)->getTrack() != target) {
+						continue;
+					}
+					switch (subtarget) {
+					case 'a':
+						getSearchPat(spat, target, "a");
+						if (hre.search(infile.token(i,j)->getSpineInfo(), spat) ||
+								!hre.search(infile.token(i, j)->getSpineInfo(), "\\(")) {
+							if (start != 0) {
+								m_humdrum_text << '\t';
+							}
+							start = 1;
+							m_humdrum_text << infile.token(i, j);
+						}
+						break;
+					case 'b':
+						getSearchPat(spat, target, "b");
+						if (hre.search(infile.token(i, j)->getSpineInfo(), spat)) {
+							if (start != 0) {
+								m_humdrum_text << '\t';
+							}
+							start = 1;
+							m_humdrum_text << infile.token(i, j);
+						} else if (!hre.search(infile.token(i, j)->getSpineInfo(),
+								"\\(")) {
+							if (start != 0) {
+								m_humdrum_text << '\t';
+							}
+							start = 1;
+							dealWithSecondarySubspine(field, subfield, model, t,
+									infile, i, j, modeltarget);
+						}
+						break;
+					case 'c':
+						if (start != 0) {
+							m_humdrum_text << '\t';
+						}
+						start = 1;
+						dealWithCospine(field, subfield, model, t, infile, i, j,
+								modeltarget, modeltarget, cointerp);
+						break;
+					default:
+						if (start != 0) {
+							m_humdrum_text << '\t';
+						}
+						start = 1;
+						m_humdrum_text << infile.token(i, j);
+					}
 				}
 			}
 		}
+
+		if (infile[i].isData()) {
+			foundBarline = false;
+		}
+
 		if (start != 0) {
 			m_humdrum_text << endl;
 		}
@@ -81024,7 +81038,7 @@ void Tool_extract::dealWithCospine(vector<int>& field, vector<int>& subfield, ve
 				if ((strchr(infile.token(line, j)->getSpineInfo().c_str(), '(') == NULL) ||
 					(infile.token(line, j)->getSpineInfo().find(buff) != string::npos)) {
 					printCotokenInfo(start, infile, line, j, cotokens, spineindex,
-							 subspineindex);
+							subspineindex);
 				}
 			} else if (subfield[i] == 'b') {
 				// this section may need more work...
@@ -81032,7 +81046,7 @@ void Tool_extract::dealWithCospine(vector<int>& field, vector<int>& subfield, ve
 				if ((strchr(infile.token(line, j)->getSpineInfo().c_str(), '(') == NULL) ||
 					(strstr(infile.token(line, j)->getSpineInfo().c_str(), buff.c_str()) != NULL)) {
 					printCotokenInfo(start, infile, line, j, cotokens, spineindex,
-							 subspineindex);
+							subspineindex);
 				}
 			} else {
 				printCotokenInfo(start, infile, line, j, cotokens, spineindex,
@@ -81306,18 +81320,18 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 				if (infile[line].token(j)->getTrack() != target) {
 					continue;
 				}
-		 // filter by subfield
-		 if (subtarget == 'a') {
-					getSearchPat(spat, target, "b");
-			 if (hre.search(infile.token(line, j)->getSpineInfo(), spat)) {
+		// filter by subfield
+		if (subtarget == 'a') {
+			getSearchPat(spat, target, "b");
+			if (hre.search(infile.token(line, j)->getSpineInfo(), spat)) {
 						continue;
-			 }
-		 } else if (subtarget == 'b') {
-					getSearchPat(spat, target, "a");
-			 if (hre.search(infile.token(line, j)->getSpineInfo(), spat)) {
-						continue;
-					}
-				}
+			}
+		} else if (subtarget == 'b') {
+			getSearchPat(spat, target, "a");
+			if (hre.search(infile.token(line, j)->getSpineInfo(), spat)) {
+				continue;
+			}
+		}
 
 				switch (subtarget) {
 				case 'a':
@@ -81338,14 +81352,14 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 							    (spinepat == spat)) {
 							 storeToken(tempout, "*");
 						} else {
-							 getSearchPat(spat, target, "b");
-							 if ((spinepat == spat) &&
-							       (*infile.token(line, j) ==  "*v")) {
-							    // do nothing
-							    suppress = 1;
-							 } else {
-							    storeToken(tempout, *infile.token(line, j));
-							 }
+							getSearchPat(spat, target, "b");
+							if ((spinepat == spat) &&
+									(*infile.token(line, j) ==  "*v")) {
+								// do nothing
+								suppress = 1;
+							} else {
+								storeToken(tempout, *infile.token(line, j));
+							}
 						}
 					}
 
@@ -81354,9 +81368,9 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 
 					if (!hre.search(infile.token(line, j)->getSpineInfo(), "\\(")) {
 						if (*infile.token(line, j) == "*^") {
-							 storeToken(tempout, "*");
+							storeToken(tempout, "*");
 						} else {
-							 storeToken(tempout, *infile.token(line, j));
+							storeToken(tempout, *infile.token(line, j));
 						}
 					} else {
 						getSearchPat(spat, target, "b");
@@ -81365,17 +81379,17 @@ void Tool_extract::dealWithSpineManipulators(HumdrumFile& infile, int line,
 						hre.replaceDestructive(spinepat, "\\)", "\\)", "g");
 
 						if ((*infile.token(line, j) ==  "*v") &&
-							    (spinepat == spat)) {
-							 storeToken(tempout, "*");
+								(spinepat == spat)) {
+							storeToken(tempout, "*");
 						} else {
-							 getSearchPat(spat, target, "a");
-							 if ((spinepat == spat) &&
-							       (*infile.token(line, j) == "*v")) {
-							    // do nothing
-							    suppress = 1;
-							 } else {
-							    storeToken(tempout, *infile.token(line, j));
-							 }
+							getSearchPat(spat, target, "a");
+							if ((spinepat == spat) &&
+									(*infile.token(line, j) == "*v")) {
+								// do nothing
+								suppress = 1;
+							} else {
+								storeToken(tempout, *infile.token(line, j));
+							}
 						}
 					}
 
@@ -81878,19 +81892,19 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	}
 
 	if (interpQ) {
-		fieldQ = 1;
+		fieldQ = true;
 	}
 
 	if (emptyQ) {
-		fieldQ = 1;
+		fieldQ = true;
 	}
 
 	if (noEmptyQ) {
-		fieldQ = 1;
+		fieldQ = true;
 	}
 
 	if (expandQ) {
-		fieldQ = 1;
+		fieldQ = true;
 		expandInterp = getString("expand-interp");
 	}
 
@@ -81902,7 +81916,7 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 	}
 
 	if (reverseQ) {
-		fieldQ = 1;
+		fieldQ = true;
 	}
 
 	if (excludeQ) {
@@ -81911,15 +81925,15 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 		fieldstring = getString("f");
 	} else if (kernQ) {
 		fieldstring = getString("k");
-		fieldQ = 1;
+		fieldQ = true;
 	} else if (rkernQ) {
 		fieldstring = getString("K");
-		fieldQ = 1;
+		fieldQ = true;
 		fieldstring = reverseFieldString(fieldstring, infile.getMaxTrack());
 	}
 
 	spineListQ = getBoolean("spine-list");
-	grepQ = getBoolean("grep");
+	grepQ      = getBoolean("grep");
 	grepString = getString("grep");
 
 	if (getBoolean("name")) {
@@ -81932,6 +81946,9 @@ void Tool_extract::initialize(HumdrumFile& infile) {
 			} else {
 				blankName = "*" + blankName;
 			}
+		}
+		if (blankName == "**kern") {
+			addRestsQ = true;
 		}
 	}
 
@@ -112913,7 +112930,7 @@ void Tool_pbar::printLocalCommentLine(HumdrumFile& infile, int index) {
 	if (!hasKp) {
 		m_humdrum_text << infile[index] << endl;
 		return;
-	} 
+	}
 
 	if (hasOther) {
 		for (int i=0; i<infile[index].getFieldCount(); i++) {
