@@ -103,6 +103,7 @@ class Tool_extract : public HumTool {
 		void fillFieldDataByNoRest      (std::vector<int>& field, std::vector<int>& subfield,
 		                                 std::vector<int>& model, const std::string& searchstring,
 		                                 HumdrumFile& infile, int state);
+		void printInterpretationForKernSpine(HumdrumFile& infile, int index);
 
 	private:
 

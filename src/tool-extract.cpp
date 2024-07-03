@@ -1060,7 +1060,18 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 						// interpretations handled in dealWithSpineManipulators()
 						// [obviously not, so adding a blank one here
 					} else if (infile[i].isInterpretation()) {
-						m_humdrum_text << "*";
+						HTp token = infile.token(i, 0);
+						if (token->isExpansionLabel()) {
+							m_humdrum_text << token;
+						} else if (token->isExpansionList()) {
+							m_humdrum_text << token;
+						} else {
+							if (addRestsQ) {
+								printInterpretationForKernSpine(infile, i);
+							} else {
+								m_humdrum_text << "*";
+							}
+						}
 					}
 				}
 			} else {
@@ -1125,6 +1136,66 @@ void Tool_extract::extractFields(HumdrumFile& infile, vector<int>& field,
 			m_humdrum_text << endl;
 		}
 	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_extract::printInterpretationForKernSpine --
+//
+
+void Tool_extract::printInterpretationForKernSpine(HumdrumFile& infile, int index) {
+	HTp kerntok = NULL;
+	for (int j=0; j<infile[index].getFieldCount(); j++) {
+		HTp token = infile.token(index, j);
+		if (!token->isKern()) {
+			continue;
+		}
+		kerntok = token;
+		break;
+	}
+
+	if (kerntok == NULL) {
+		m_humdrum_text << "*";
+		return;
+	}
+
+	if (*kerntok == "*") {
+		m_humdrum_text << kerntok;
+		return;
+	}
+
+	if (kerntok->isKeySignature()) {
+		m_humdrum_text << kerntok;
+		return;
+	}
+	if (kerntok->isKeyDesignation()) {
+		m_humdrum_text << kerntok;
+		return;
+	}
+	if (kerntok->isTimeSignature()) {
+		m_humdrum_text << kerntok;
+		return;
+	}
+	if (kerntok->isMensurationSymbol()) {
+		m_humdrum_text << kerntok;
+		return;
+	}
+	if (kerntok->isTempo()) {
+		m_humdrum_text << kerntok;
+		return;
+	}
+	if (kerntok->isInstrumentName()) {
+		m_humdrum_text << "*I\"";
+		return;
+	}
+	if (kerntok->isInstrumentAbbreviation()) {
+		m_humdrum_text << "*I'";
+		return;
+	}
+
+	m_humdrum_text << "*";
 }
 
 

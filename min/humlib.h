@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  3 21:58:04 CEST 2024
+// Last Modified: Wed Jul  3 23:34:11 CEST 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -7536,6 +7536,7 @@ class Tool_extract : public HumTool {
 		void fillFieldDataByNoRest      (std::vector<int>& field, std::vector<int>& subfield,
 		                                 std::vector<int>& model, const std::string& searchstring,
 		                                 HumdrumFile& infile, int state);
+		void printInterpretationForKernSpine(HumdrumFile& infile, int index);
 
 	private:
 
