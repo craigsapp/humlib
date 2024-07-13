@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Sa 13 Jul 2024 10:40:06 CEST
+// Last Modified: Sa 13 Jul 2024 10:45:50 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -92102,6 +92102,7 @@ void Tool_kernview::processFile(HumdrumFile& infile) {
 
 Tool_lnnr::Tool_lnnr(void) {
 	define("i|index=b", "output line indices instead of line numbers");
+	define("p|prepend=b", "add **lnnr spine as first spine");
 }
 
 
@@ -92155,6 +92156,7 @@ bool Tool_lnnr::run(HumdrumFile &infile) {
 
 void Tool_lnnr::initialize(void) {
 	m_indexQ = getBoolean("index");
+	m_prependQ = getBoolean("prepend");
 }
 
 
@@ -92167,7 +92169,11 @@ void Tool_lnnr::initialize(void) {
 void Tool_lnnr::processFile(HumdrumFile& infile) {
 	vector<string> trackData = getTrackData(infile);
 	string exinterp = m_indexQ ? "**lnidx" : "**lnnr";
-	infile.appendDataSpine(trackData, ".", exinterp);
+	if (m_prependQ) {
+		infile.insertDataSpineBefore(1, trackData, ".", exinterp);
+	} else {
+		infile.appendDataSpine(trackData, ".", exinterp);
+	}
 	m_humdrum_text << infile;
 }
 

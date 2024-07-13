@@ -26,6 +26,7 @@ namespace hum {
 
 Tool_lnnr::Tool_lnnr(void) {
 	define("i|index=b", "output line indices instead of line numbers");
+	define("p|prepend=b", "add **lnnr spine as first spine");
 }
 
 
@@ -79,6 +80,7 @@ bool Tool_lnnr::run(HumdrumFile &infile) {
 
 void Tool_lnnr::initialize(void) {
 	m_indexQ = getBoolean("index");
+	m_prependQ = getBoolean("prepend");
 }
 
 
@@ -91,7 +93,11 @@ void Tool_lnnr::initialize(void) {
 void Tool_lnnr::processFile(HumdrumFile& infile) {
 	vector<string> trackData = getTrackData(infile);
 	string exinterp = m_indexQ ? "**lnidx" : "**lnnr";
-	infile.appendDataSpine(trackData, ".", exinterp);
+	if (m_prependQ) {
+		infile.insertDataSpineBefore(1, trackData, ".", exinterp);
+	} else {
+		infile.appendDataSpine(trackData, ".", exinterp);
+	}
 	m_humdrum_text << infile;
 }
 

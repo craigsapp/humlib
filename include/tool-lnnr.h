@@ -38,7 +38,8 @@ class Tool_lnnr : public HumTool {
 		vector<string> getTrackData(HumdrumFile& infile);
 
 	private:
-		bool m_indexQ = false;
+		bool m_indexQ   = false;
+		bool m_prependQ = false;
 };
 
 // END_MERGE
