@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  3 23:34:11 CEST 2024
+// Last Modified: Sa 13 Jul 2024 10:00:46 CEST
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -82228,7 +82228,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	lastNumbers.resize((int)grid.getVoiceCount());
 	vector<vector<int>> currentNumbers = {};
 
-	// Interate through the NoteGrid and fill the numbers vector with
+	// Iterate through the NoteGrid and fill the numbers vector with
 	// all generated FiguredBassNumbers
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
 		currentNumbers.clear();
@@ -82317,7 +82317,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			continue;
 		}
 
-		// Interate through each voice
+		// Iterate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			NoteCell* targetCell = grid.cell(j, i);
 

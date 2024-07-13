@@ -193,7 +193,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 	lastNumbers.resize((int)grid.getVoiceCount());
 	vector<vector<int>> currentNumbers = {};
 
-	// Interate through the NoteGrid and fill the numbers vector with
+	// Iterate through the NoteGrid and fill the numbers vector with
 	// all generated FiguredBassNumbers
 	for (int i=0; i<(int)grid.getSliceCount(); i++) {
 		currentNumbers.clear();
@@ -282,7 +282,7 @@ void Tool_fb::processFile(HumdrumFile& infile) {
 			continue;
 		}
 
-		// Interate through each voice
+		// Iterate through each voice
 		for (int j=0; j<(int)grid.getVoiceCount(); j++) {
 			NoteCell* targetCell = grid.cell(j, i);
 
