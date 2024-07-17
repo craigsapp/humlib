@@ -1108,13 +1108,16 @@ void Options::xverify(int error_check, int suppress) {
 	bool optionend = false;
 	int i          = 1;
 	int oldi;
-	int terminate = 1000; // for malformed options (missing arguments)
+	int terminate = 15000; // for malformed options (missing arguments)
 	int tcount = 0;
 
 	while ((i < (int)m_argv.size()) && !optionend) {
 		tcount++;
 		if (tcount > terminate) {
 			m_error << "Error: missing option argument" << endl;
+			m_error << "ARGV count: " << m_argv.size()  << endl;
+			m_error << "terminate: "  << terminate      << endl;
+			m_error << "tcount: "     << tcount         << endl;
 			break;
 		}
 		if (isOption(m_argv[i], i)) {

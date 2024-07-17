@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul  3 23:34:11 CEST 2024
+// Last Modified: Wed Jul 17 13:50:04 PDT 2024
 // Filename:      min/humlib.h
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.h
 // Syntax:        C++11
@@ -5431,6 +5431,7 @@ int main(int argc, char** argv) {                      \
 		infile.readNoRhythm(std::cin);                   \
 	}                                                   \
 	int status = interface.run(infile, std::cout);      \
+	interface.finally();                                \
 	if (interface.hasWarning()) {                       \
 		interface.getWarning(std::cerr);                 \
 		return 0;                                        \
@@ -5439,7 +5440,6 @@ int main(int argc, char** argv) {                      \
 		interface.getError(std::cerr);                   \
 		return -1;                                       \
 	}                                                   \
-	interface.finally();                                \
 	return !status;                                     \
 }
 
@@ -5463,24 +5463,24 @@ int main(int argc, char** argv) {                                          \
 	bool status = true;                                                     \
 	while (instream.readSingleSegment(infiles)) {                           \
 		status &= interface.run(infiles);                                    \
-		if (interface.hasWarning()) {                                        \
-			interface.getWarning(std::cerr);                                  \
-		}                                                                    \
-		if (interface.hasAnyText()) {                                        \
-		   interface.getAllText(std::cout);                                  \
-		}                                                                    \
-		if (interface.hasError()) {                                          \
-			interface.getError(std::cerr);                                    \
-         return -1;                                                        \
-		}                                                                    \
-		if (!interface.hasAnyText()) {                                       \
-			for (int i=0; i<infiles.getCount(); i++) {                        \
-				cout << infiles[i];                                            \
-			}                                                                 \
-		}                                                                    \
-		interface.clearOutput();                                             \
 	}                                                                       \
 	interface.finally();                                                    \
+	if (interface.hasWarning()) {                                           \
+		interface.getWarning(std::cerr);                                     \
+	}                                                                       \
+	if (interface.hasAnyText()) {                                           \
+	   interface.getAllText(std::cout);                                     \
+	}                                                                       \
+	if (interface.hasError()) {                                             \
+		interface.getError(std::cerr);                                       \
+        return -1;                                                         \
+	}                                                                       \
+	if (!interface.hasAnyText()) {                                          \
+		for (int i=0; i<infiles.getCount(); i++) {                           \
+			cout << infiles[i];                                               \
+		}                                                                    \
+	}                                                                       \
+	interface.clearOutput();                                                \
 	return !status;                                                         \
 }
 
@@ -5502,6 +5502,7 @@ int main(int argc, char** argv) {                                          \
 	}                                                                       \
 	hum::HumdrumFileStream instream(static_cast<hum::Options&>(interface)); \
 	bool status = interface.run(instream);                                  \
+	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
 		interface.getWarning(std::cerr);                                     \
 	}                                                                       \
@@ -5512,7 +5513,6 @@ int main(int argc, char** argv) {                                          \
 		interface.getError(std::cerr);                                       \
         return -1;                                                         \
 	}                                                                       \
-	interface.finally();                                                    \
 	interface.clearOutput();                                                \
 	return !status;                                                         \
 }
@@ -5536,6 +5536,7 @@ int main(int argc, char** argv) {                                          \
 	hum::HumdrumFileSet infiles;                                            \
 	instream.read(infiles);                                                 \
 	bool status = interface.run(infiles);                                   \
+	interface.finally();                                                    \
 	if (interface.hasWarning()) {                                           \
 		interface.getWarning(std::cerr);                                     \
 	}                                                                       \
@@ -5551,7 +5552,6 @@ int main(int argc, char** argv) {                                          \
 			std::cout << infiles[i];                                          \
 		}                                                                    \
 	}                                                                       \
-	interface.finally();                                                    \
 	interface.clearOutput();                                                \
 	return !status;                                                         \
 }
@@ -10317,6 +10317,48 @@ class Tool_rid : public HumTool {
 		int      option_c = 0;   // used with -c option
 		int      option_k = 0;   // used with -k option
 		int      option_V = 0;   // used with -V option
+
+};
+
+
+class Tool_rphrase : public HumTool {
+	public:
+
+	class VoiceInfo {
+		public:
+			std::string name;
+			std::vector<double> phraseDurs;
+			std::vector<int>    barStarts;
+	};
+
+		         Tool_rphrase      (void);
+		        ~Tool_rphrase      () {};
+
+		bool     run               (HumdrumFileSet& infiles);
+		bool     run               (HumdrumFile& infile);
+		bool     run               (const std::string& indata, std::ostream& out);
+		bool     run               (HumdrumFile& infile, std::ostream& out);
+		void     finally           (void);
+
+	protected:
+		void     initialize        (void);
+		void     processFile       (HumdrumFile& infile);
+		void     fillVoiceInfo     (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, std::vector<HTp>& kstarts);
+		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart);
+		void     printVoiceInfo    (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo);
+		void     printVoiceInfo    (Tool_rphrase::VoiceInfo& voiceInfo);
+
+	private:
+		bool        m_averageQ      = false; // for -a option
+		bool        m_allAverageQ   = false; // for -A option
+		bool        m_barlineQ      = false; // for -m option
+		bool        m_filenameQ     = false; // for -f option
+		bool        m_fullFilenameQ = false; // for -F option
+		std::string m_filename;              // for -f or -F option
+		bool        m_sortQ         = false; // for -s option
+		bool        m_reverseSortQ  = false; // for -S option
+		int         m_pcount        = 0;     // for -a option
+		double      m_sum           = 0.0;   // for -a option
 
 };
 
