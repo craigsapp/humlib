@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Wed Jul 17 13:50:04 PDT 2024
+// Last Modified: Wed Jul 17 17:58:11 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -118103,13 +118103,14 @@ void Tool_rid::processFile(HumdrumFile& infile) {
 
 Tool_rphrase::Tool_rphrase(void) {
 	// add command-line options here
-	define("a|average=b",           "calculate average length of rest-phrases by score");
-	define("A|all-average=b",       "calculate average length of rest-phrases for all scores");
-	define("f|filename=b",          "include filename in output analysis");
-	define("F|full-filename=b",     "include full filename location in output analysis");
-	define("m|b|measure|barline=b", "include barline numbers in output analysis");
-	define("s|sort=b",              "sort phrases by short to long length");
-	define("S|reverse-sort=b",      "sort phrases by long to short length");
+	define("a|average=b",            "calculate average length of rest-phrases by score");
+	define("A|all-average=b",        "calculate average length of rest-phrases for all scores");
+	define("c|composite|collapse=b", "collapse all voices into single part");
+	define("f|filename=b",           "include filename in output analysis");
+	define("F|full-filename=b",      "include full filename location in output analysis");
+	define("m|b|measure|barline=b",  "include barline numbers in output analysis");
+	define("s|sort=b",               "sort phrases by short to long length");
+	define("S|reverse-sort=b",       "sort phrases by long to short length");
 }
 
 
@@ -118166,8 +118167,13 @@ bool Tool_rphrase::run(HumdrumFile& infile) {
 
 void Tool_rphrase::finally(void) {
 	if (m_allAverageQ) {
-		double average = m_sum / m_pcount;
-		m_free_text << "All average phrase length: " << average << " minims" << endl;
+		if (m_collapseQ) {
+			double average = m_sumCollapse / m_pcountCollapse;
+			m_free_text << "Composite average phrase length: " << average << " minims" << endl;
+		} else {
+			double average = m_sum / m_pcount;
+			m_free_text << "All average phrase length: " << average << " minims" << endl;
+		}
 	}
 }
 
@@ -118181,6 +118187,7 @@ void Tool_rphrase::finally(void) {
 void Tool_rphrase::initialize(void) {
 	m_averageQ      = getBoolean("average");
 	m_allAverageQ   = getBoolean("all-average");
+	m_collapseQ     = getBoolean("collapse");
 	m_filenameQ     = getBoolean("filename");
 	m_fullFilenameQ = getBoolean("full-filename");
 	m_barlineQ      = getBoolean("measure");
@@ -118206,10 +118213,62 @@ void Tool_rphrase::processFile(HumdrumFile& infile) {
 	}
 	vector<HTp> kernStarts = infile.getKernSpineStartList();
 	vector<Tool_rphrase::VoiceInfo> voiceInfo(kernStarts.size());
+	Tool_rphrase::VoiceInfo collapseInfo;
 	
-	fillVoiceInfo(voiceInfo, kernStarts);
+	if (m_collapseQ) {
+		fillCollapseInfo(collapseInfo, infile);
+	} else {
+		fillVoiceInfo(voiceInfo, kernStarts);
+	}
+
 	if (!m_allAverageQ) {
-		printVoiceInfo(voiceInfo);
+		if (m_collapseQ) {
+			printVoiceInfo(collapseInfo);
+		} else {
+			printVoiceInfo(voiceInfo);
+		}
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// Tool_rphrase::getCompositeStates --
+//
+
+void Tool_rphrase::getCompositeStates(vector<int>& noteStates, HumdrumFile& infile) {
+	noteStates.resize(infile.getLineCount());
+	fill(noteStates.begin(), noteStates.end(), -1);
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (!infile[i].isData()) {
+			continue;
+		}
+		int value = 0;
+		for (int j=0; j<infile[i].getFieldCount(); j++) {
+			HTp token = infile.token(i, j);
+			if (!token->isKern()) {
+				continue;
+			}
+			if (token->isRest()) {
+				continue;
+			} else if (token->isNull()) {
+				HTp resolve = token->resolveNull();
+				if (!resolve) {
+					continue;
+				} else if (resolve->isRest()) {
+					continue;
+				} else {
+					value = 1;
+					break;
+				}
+			} else {
+				value = 1;
+				break;
+			}
+		}
+		noteStates[i] = value;
 	}
 }
 
@@ -118283,6 +118342,75 @@ void Tool_rphrase::printVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo) {
 	}
 
 	m_free_text << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_rphrase::fillCollapseInfo --
+//
+
+void Tool_rphrase::fillCollapseInfo(Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile) {
+	collapseInfo.name = "composite";
+	vector<int> noteStates;
+	getCompositeStates(noteStates, infile);
+
+	bool inPhraseQ     = false;
+	int currentBarline = 0;
+	int startBarline   = 1;
+	HumNum startTime   = 0;
+	for (int i=0; i<infile.getLineCount(); i++) {
+		if (infile[i].isBarline()) {
+			HTp token = infile.token(i, 0);
+			HumRegex hre;
+			if (hre.search(token, "(\\d+)")) {
+				currentBarline = hre.getMatchInt(1);
+				continue;
+			}
+		}
+
+		if (!infile[i].isData()) {
+			continue;
+		}
+		if (inPhraseQ) {
+			// In phrase, so continue if still notes, otherwise
+			// if a rest, then record the currently active phrase
+			// that has ended.
+			if (noteStates[i] == 0) {
+				HumNum endTime = infile[i].getDurationFromStart();
+				HumNum duration = endTime - startTime;
+				startTime = -1;
+				inPhraseQ = false;
+				collapseInfo.phraseDurs.push_back(duration.getFloat() / 2.0);
+				collapseInfo.barStarts.push_back(startBarline);
+				m_sumCollapse += duration.getFloat() / 2.0;
+				m_pcountCollapse++;
+			} else {
+				// continuing a phrase, so do nothing
+			}
+		} else {
+			// Not in phrase, so continue if rest; otherwise,
+			// if a note, then record a phrase start.
+			if (noteStates[i] == 0) {
+				// continuing a non-phrase, so do nothing
+			} else {
+				startTime = infile[i].getDurationFromStart();
+				startBarline = currentBarline;
+				inPhraseQ = true;
+			}
+		}
+	}
+
+	if (inPhraseQ) {
+		// process last phrase
+		HumNum endTime = infile.getScoreDuration();
+		HumNum duration = endTime - startTime;
+		collapseInfo.phraseDurs.push_back(duration.getFloat() / 2.0);
+		collapseInfo.barStarts.push_back(startBarline);
+		m_sumCollapse += duration.getFloat() / 2.0;
+		m_pcountCollapse++;
+	}
 }
 
 

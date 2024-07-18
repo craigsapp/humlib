@@ -50,11 +50,14 @@ class Tool_rphrase : public HumTool {
 		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart);
 		void     printVoiceInfo    (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo);
 		void     printVoiceInfo    (Tool_rphrase::VoiceInfo& voiceInfo);
+		void     fillCollapseInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
+		void     getCompositeStates(std::vector<int>& noteStates, HumdrumFile& infile);
 
 	private:
 		bool        m_averageQ      = false; // for -a option
 		bool        m_allAverageQ   = false; // for -A option
 		bool        m_barlineQ      = false; // for -m option
+		bool        m_collapseQ     = false; // for -c option
 		bool        m_filenameQ     = false; // for -f option
 		bool        m_fullFilenameQ = false; // for -F option
 		std::string m_filename;              // for -f or -F option
@@ -62,6 +65,8 @@ class Tool_rphrase : public HumTool {
 		bool        m_reverseSortQ  = false; // for -S option
 		int         m_pcount        = 0;     // for -a option
 		double      m_sum           = 0.0;   // for -a option
+		int         m_pcountCollapse= 0;     // for -c option
+		double      m_sumCollapse   = 0.0;   // for -c option
 
 };
 
