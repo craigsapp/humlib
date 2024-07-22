@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Thu Jul 18 14:11:28 PDT 2024
+// Last Modified: Mon Jul 22 16:53:34 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -118192,7 +118192,11 @@ void Tool_rphrase::initialize(void) {
 	m_averageQ      = getBoolean("average");
 	m_barlineQ      = getBoolean("measure");
 	m_allAverageQ   = getBoolean("all-average");
-	m_collapseQ     = getBoolean("collapse");
+	#ifndef __EMSCRIPTEN__
+		m_collapseQ     = !getBoolean("collapse");
+	#else
+		m_collapseQ     = getBoolean("collapse");
+	#endif
 	m_filenameQ     = getBoolean("filename");
 	m_fullFilenameQ = getBoolean("full-filename");
 	m_longaQ        = getBoolean("longa");
@@ -118329,7 +118333,7 @@ void Tool_rphrase::outputMarkedFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_rphrase::printDataLine -- 
+// Tool_rphrase::printDataLine --
 //
 
 void Tool_rphrase::printDataLine(HumdrumFile& infile, int index) {
@@ -118373,7 +118377,7 @@ void Tool_rphrase::printDataLine(HumdrumFile& infile, int index) {
 				if (value.empty()) {
 					m_humdrum_text << "!";
 				} else {
-					m_humdrum_text << "!LO:TX:a:color=silver:circle:t=" << value;
+					m_humdrum_text << "!LO:TX:a:B:color=silver:t=" << value;
 				}
 			}
 			if (j < infile[index].getFieldCount() - 1) {

@@ -65,7 +65,7 @@ class Tool_rphrase : public HumTool {
 		bool        m_allAverageQ   = false; // for -A option
 		bool        m_barlineQ      = false; // for -m option
 		bool        m_collapseQ     = false; // for -c option
-		0ool        m_longaQ        = false; // for -l option
+		bool        m_longaQ        = false; // for -l option
 		bool        m_filenameQ     = false; // for -f option
 		bool        m_fullFilenameQ = false; // for -F option
 		std::string m_filename;              // for -f or -F option
