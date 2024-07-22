@@ -30,8 +30,10 @@ class Tool_rphrase : public HumTool {
 	class VoiceInfo {
 		public:
 			std::string name;
+			std::vector<double> restsBefore;
 			std::vector<double> phraseDurs;
 			std::vector<int>    barStarts;
+			std::vector<HTp>    phraseStartToks;
 	};
 
 		         Tool_rphrase      (void);
@@ -46,18 +48,24 @@ class Tool_rphrase : public HumTool {
 	protected:
 		void     initialize        (void);
 		void     processFile       (HumdrumFile& infile);
-		void     fillVoiceInfo     (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, std::vector<HTp>& kstarts);
-		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart);
+		void     fillVoiceInfo     (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, std::vector<HTp>& kstarts, HumdrumFile& infile);
+		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart, HumdrumFile& infile);
+		void     fillCollapseInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
 		void     printVoiceInfo    (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo);
 		void     printVoiceInfo    (Tool_rphrase::VoiceInfo& voiceInfo);
-		void     fillCollapseInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
 		void     getCompositeStates(std::vector<int>& noteStates, HumdrumFile& infile);
+		std::string getCompositeLabel(HumdrumFile& infile);
+		void     markPhraseStartsInScore(HumdrumFile& infile, Tool_rphrase::VoiceInfo& voiceInfo);
+		void     outputMarkedFile  (HumdrumFile& infile);
+		void     printDataLine     (HumdrumFile& infile, int index);
+		void     markLongaDurations(HumdrumFile& infile);
 
 	private:
 		bool        m_averageQ      = false; // for -a option
 		bool        m_allAverageQ   = false; // for -A option
 		bool        m_barlineQ      = false; // for -m option
 		bool        m_collapseQ     = false; // for -c option
+		0ool        m_longaQ        = false; // for -l option
 		bool        m_filenameQ     = false; // for -f option
 		bool        m_fullFilenameQ = false; // for -F option
 		std::string m_filename;              // for -f or -F option
@@ -67,6 +75,7 @@ class Tool_rphrase : public HumTool {
 		double      m_sum           = 0.0;   // for -a option
 		int         m_pcountCollapse= 0;     // for -c option
 		double      m_sumCollapse   = 0.0;   // for -c option
+		bool        m_markQ         = false; // for --mark option
 
 };
 
