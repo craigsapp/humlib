@@ -614,7 +614,7 @@ string Tool_rphrase::getCompositeLabel(HumdrumFile& infile) {
 
 	if (hre.search(voices, "^\\d+$")) {
 		int vint = stoi(voices);
-		if (vint != kstarts.size()) {
+		if (vint != (int)kstarts.size()) {
 			output += "(";
 			output += to_string(kstarts.size());
 			output += ")";

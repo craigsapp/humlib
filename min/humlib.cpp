@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Sat Aug  8 12:24:49 PDT 2015
-// Last Modified: Mon Jul 22 16:53:34 PDT 2024
+// Last Modified: Mon Jul 29 23:24:23 PDT 2024
 // Filename:      min/humlib.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/min/humlib.cpp
 // Syntax:        C++11
@@ -118690,7 +118690,7 @@ string Tool_rphrase::getCompositeLabel(HumdrumFile& infile) {
 
 	if (hre.search(voices, "^\\d+$")) {
 		int vint = stoi(voices);
-		if (vint != kstarts.size()) {
+		if (vint != (int)kstarts.size()) {
 			output += "(";
 			output += to_string(kstarts.size());
 			output += ")";
