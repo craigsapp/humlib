@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Jul 15 23:33:44 PDT 2024
-// Last Modified: Tue Jul 16 08:29:14 PDT 2024
+// Last Modified: Fri Aug  2 14:01:23 PDT 2024
 // Filename:      tool-rphrase.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/src/tool-rphrase.cpp
 // Syntax:        C++11; humlib
@@ -116,11 +116,7 @@ void Tool_rphrase::initialize(void) {
 	m_averageQ      = getBoolean("average");
 	m_barlineQ      = getBoolean("measure");
 	m_allAverageQ   = getBoolean("all-average");
-	#ifndef __EMSCRIPTEN__
-		m_collapseQ     = !getBoolean("collapse");
-	#else
-		m_collapseQ     = getBoolean("collapse");
-	#endif
+	m_collapseQ     = getBoolean("collapse");
 	m_filenameQ     = getBoolean("filename");
 	m_fullFilenameQ = getBoolean("full-filename");
 	m_longaQ        = getBoolean("longa");
@@ -131,7 +127,6 @@ void Tool_rphrase::initialize(void) {
 	#endif
 	m_sortQ         = getBoolean("sort");
 	m_reverseSortQ  = getBoolean("reverse-sort");
-	m_longaQ        = getBoolean("longa");
 }
 
 
@@ -159,7 +154,6 @@ void Tool_rphrase::processFile(HumdrumFile& infile) {
 	} else {
 		fillVoiceInfo(voiceInfo, kernStarts, infile);
 	}
-
 
 	if (m_longaQ) {
 		markLongaDurations(infile);
@@ -435,6 +429,9 @@ void Tool_rphrase::printVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo) {
 	} else {
 		for (int i=0; i<(int)voiceInfo.phraseDurs.size(); i++) {
 			if (voiceInfo.restsBefore.at(i) > 0) {
+				m_free_text << "r:" << voiceInfo.restsBefore.at(i) << " ";
+			} else if (i > 0) {
+				// force display r:0 for section boundaries.
 				m_free_text << "r:" << voiceInfo.restsBefore.at(i) << " ";
 			}
 			if (m_barlineQ) {
@@ -773,7 +770,6 @@ void Tool_rphrase::fillVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart
 		voiceInfo.phraseStartToks.push_back(phraseStartTok);
 		m_sum += duration.getFloat() / 2.0;
 		m_pcount++;
-		voiceInfo.restsBefore.push_back(0.0);
 		voiceInfo.restsBefore.push_back(restBefore.getFloat() / 2.0);
 	}
 

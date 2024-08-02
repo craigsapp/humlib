@@ -70,6 +70,7 @@
 #include "tool-recip.h"
 #include "tool-restfill.h"
 #include "tool-rid.h"
+#include "tool-rphrase.h"
 #include "tool-sab2gs.h"
 #include "tool-satb2gs.h"
 #include "tool-scordatura.h"
@@ -336,6 +337,8 @@ bool Tool_filter::run(HumdrumFileSet& infiles) {
 			RUNTOOL(recip, infile, commands[i].second, status);
 		} else if (commands[i].first == "restfill") {
 			RUNTOOL(restfill, infile, commands[i].second, status);
+		} else if (commands[i].first == "rphrase") {
+			RUNTOOL(rphrase, infile, commands[i].second, status);
 		} else if (commands[i].first == "sab2gs") {
 			RUNTOOL(sab2gs, infile, commands[i].second, status);
 		} else if (commands[i].first == "scordatura") {
