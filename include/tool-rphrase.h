@@ -50,32 +50,53 @@ class Tool_rphrase : public HumTool {
 		void     processFile       (HumdrumFile& infile);
 		void     fillVoiceInfo     (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, std::vector<HTp>& kstarts, HumdrumFile& infile);
 		void     fillVoiceInfo     (Tool_rphrase::VoiceInfo& voiceInfo, HTp& kstart, HumdrumFile& infile);
-		void     fillCollapseInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
+		void     fillCompositeInfo  (Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
 		void     printVoiceInfo    (std::vector<Tool_rphrase::VoiceInfo>& voiceInfo);
 		void     printVoiceInfo    (Tool_rphrase::VoiceInfo& voiceInfo);
+
+		void     printEmbeddedVoiceInfo(std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, Tool_rphrase::VoiceInfo& collapseInfo, HumdrumFile& infile);
+		void     printEmbeddedIndividualVoiceInfo(Tool_rphrase::VoiceInfo& voiceInfo, HumdrumFile& infile);
+		void     printEmbeddedCompositeInfo(Tool_rphrase::VoiceInfo& compositeInfo, HumdrumFile& infile);
+
 		void     getCompositeStates(std::vector<int>& noteStates, HumdrumFile& infile);
 		std::string getCompositeLabel(HumdrumFile& infile);
 		void     markPhraseStartsInScore(HumdrumFile& infile, Tool_rphrase::VoiceInfo& voiceInfo);
-		void     outputMarkedFile  (HumdrumFile& infile);
+		void     markCompositePhraseStartsInScore(HumdrumFile& infile, Tool_rphrase::VoiceInfo& collapseInfo);
+		void     outputMarkedFile  (HumdrumFile& infile, std::vector<Tool_rphrase::VoiceInfo>& voiceInfo,
+		                            Tool_rphrase::VoiceInfo& compositeInfo);
 		void     printDataLine     (HumdrumFile& infile, int index);
 		void     markLongaDurations(HumdrumFile& infile);
+		std::string getVoiceInfo(HumdrumFile& infile);
+		void     printEmbeddedVoiceInfoSummary(std::vector<Tool_rphrase::VoiceInfo>& voiceInfo, HumdrumFile& infile);
+		double   twoDigitRound(double input);
+		void     printHyperlink(const std::string& urlType);
 
 	private:
-		bool        m_averageQ      = false; // for -a option
-		bool        m_allAverageQ   = false; // for -A option
-		bool        m_barlineQ      = false; // for -m option
-		bool        m_collapseQ     = false; // for -c option
-		bool        m_longaQ        = false; // for -l option
-		bool        m_filenameQ     = false; // for -f option
-		bool        m_fullFilenameQ = false; // for -F option
-		std::string m_filename;              // for -f or -F option
-		bool        m_sortQ         = false; // for -s option
-		bool        m_reverseSortQ  = false; // for -S option
-		int         m_pcount        = 0;     // for -a option
-		double      m_sum           = 0.0;   // for -a option
-		int         m_pcountCollapse= 0;     // for -c option
-		double      m_sumCollapse   = 0.0;   // for -c option
-		bool        m_markQ         = false; // for --mark option
+		bool        m_averageQ        = false; // for -a option
+		bool        m_allAverageQ     = false; // for -A option
+		bool        m_breathQ         = true;  // for -B option
+		bool        m_barlineQ        = false; // for -m option
+		bool        m_compositeQ      = false; // for -c option
+		bool        m_longaQ          = false; // for -l option
+		bool        m_filenameQ       = false; // for -f option
+		bool        m_fullFilenameQ   = false; // for -F option
+		std::string m_filename;                // for -f or -F option
+		bool        m_sortQ           = false; // for -s option
+		bool        m_reverseSortQ    = false; // for -S option
+		int         m_pcount          = 0;     // for -a option
+		double      m_sum             = 0.0;   // for -a option
+		int         m_pcountComposite = 0;     // for -c option
+		double      m_sumComposite    = 0.0;   // for -c option
+		bool        m_markQ           = false; // for --mark option
+		double      m_durUnit         = 2.0;   // for -d option
+		bool        m_infoQ           = false; // for -i option (when --mark is active)
+		bool        m_squeezeQ        = false; // for -z option
+		bool        m_closeQ          = false; // for --close option
+		std::string m_urlType;                 // for -u option
+
+		int         m_line = 1;
+		std::string m_voiceLengthColor     = "crimson";
+		std::string m_compositeLengthColor = "limegreen";
 
 };
 
