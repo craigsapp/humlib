@@ -48,9 +48,9 @@ class HumInstrument {
 		int         setGM               (const std::string& Hname, int aValue);
 
 	private:
-		int                            index;
-		static std::vector<_HumInstrument>  data;
-		static int                     classcount;
+		int                            m_index;
+		static std::vector<_HumInstrument>  m_data;
+		static int                     m_classcount;
 
 	protected:
 		void       initialize          (void);

@@ -24,8 +24,8 @@ namespace hum {
 typedef unsigned long long TEMP64BITFIX;
 
 // declare static variables
-vector<_HumInstrument> HumInstrument::data;
-int HumInstrument::classcount = 0;
+vector<_HumInstrument> HumInstrument::m_data;
+int HumInstrument::m_classcount = 0;
 
 
 //////////////////////////////
@@ -34,11 +34,11 @@ int HumInstrument::classcount = 0;
 //
 
 HumInstrument::HumInstrument(void) {
-	if (classcount == 0) {
+	if (m_classcount == 0) {
 		initialize();
 	}
-	classcount++;
-	index = -1;
+	m_classcount++;
+	m_index = -1;
 }
 
 
@@ -49,11 +49,11 @@ HumInstrument::HumInstrument(void) {
 //
 
 HumInstrument::HumInstrument(const string& Hname) {
-	if (classcount == 0) {
+	if (m_classcount == 0) {
 		initialize();
 	}
 
-	index = find(Hname);
+	m_index = find(Hname);
 }
 
 
@@ -64,7 +64,7 @@ HumInstrument::HumInstrument(const string& Hname) {
 //
 
 HumInstrument::~HumInstrument() {
-	index = -1;
+	m_index = -1;
 }
 
 
@@ -75,8 +75,8 @@ HumInstrument::~HumInstrument() {
 //
 
 int HumInstrument::getGM(void) {
-	if (index > 0) {
-		return data[index].gm;
+	if (m_index > 0) {
+		return m_data[m_index].gm;
 	} else {
 		return -1;
 	}
@@ -98,7 +98,7 @@ int HumInstrument::getGM(const string& Hname) {
 	}
 
 	if (tindex > 0) {
-		return data[tindex].gm;
+		return m_data[tindex].gm;
 	} else {
 		return -1;
 	}
@@ -112,8 +112,8 @@ int HumInstrument::getGM(const string& Hname) {
 //
 
 string HumInstrument::getName(void) {
-	if (index > 0) {
-		return data[index].name;
+	if (m_index > 0) {
+		return m_data[m_index].name;
 	} else {
 		return "";
 	}
@@ -134,7 +134,7 @@ string HumInstrument::getName(const string& Hname) {
 		tindex = find(Hname);
 	}
 	if (tindex > 0) {
-		return data[tindex].name;
+		return m_data[tindex].name;
 	} else {
 		return "";
 	}
@@ -148,8 +148,8 @@ string HumInstrument::getName(const string& Hname) {
 //
 
 string HumInstrument::getHumdrum(void) {
-	if (index > 0) {
-		return data[index].humdrum;
+	if (m_index > 0) {
+		return m_data[m_index].humdrum;
 	} else {
 		return "";
 	}
@@ -168,7 +168,7 @@ int HumInstrument::setGM(const string& Hname, int aValue) {
 	}
 	int rindex = find(Hname);
 	if (rindex > 0) {
-		data[rindex].gm = aValue;
+		m_data[rindex].gm = aValue;
 	} else {
 		afi(Hname.c_str(), aValue, Hname.c_str());
 		sortData();
@@ -185,9 +185,9 @@ int HumInstrument::setGM(const string& Hname, int aValue) {
 
 void HumInstrument::setHumdrum(const string& Hname) {
 	if (Hname.compare(0, 2, "*I") == 0) {
-		index = find(Hname.substr(2));
+		m_index = find(Hname.substr(2));
 	} else {
-		index = find(Hname);
+		m_index = find(Hname);
 	}
 }
 
@@ -205,7 +205,7 @@ void HumInstrument::setHumdrum(const string& Hname) {
 //
 
 void HumInstrument::initialize(void) {
-	data.reserve(500);
+	m_data.reserve(500);
 	afi("accor",	GM_ACCORDION,	"accordion");
 	afi("alto",		GM_RECORDER,	"alto");
 	afi("archl",	GM_ACOUSTIC_GUITAR_NYLON,	"archlute");
@@ -384,7 +384,7 @@ void HumInstrument::afi(const char* humdrum_name, int midinum,
 	x.humdrum = humdrum_name;
 	x.gm = midinum;
 
-	data.push_back(x);
+	m_data.push_back(x);
 }
 
 
@@ -401,14 +401,14 @@ int HumInstrument::find(const string& Hname) {
 	key.name = "";
 	key.gm = 0;
 
-	searchResult = bsearch(&key, data.data(),
-			data.size(), sizeof(_HumInstrument),
+	searchResult = bsearch(&key, m_data.data(),
+			m_data.size(), sizeof(_HumInstrument),
 			&data_compare_by_humdrum_name);
 
 	if (searchResult == NULL) {
 		return -1;
 	} else {
-		return (int)(((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(data.data())))/
+		return (int)(((TEMP64BITFIX)(searchResult)) - ((TEMP64BITFIX)(m_data.data())))/
 			sizeof(_HumInstrument);
 	}
 }
@@ -434,7 +434,7 @@ int HumInstrument::data_compare_by_humdrum_name(const void* a,
 //
 
 void HumInstrument::sortData(void) {
-	qsort(data.data(), data.size(), sizeof(_HumInstrument),
+	qsort(m_data.data(), m_data.size(), sizeof(_HumInstrument),
 		&HumInstrument::data_compare_by_humdrum_name);
 }
 
