@@ -1,7 +1,7 @@
 //
 // Programmer:    Craig Stuart Sapp <craig@ccrma.stanford.edu>
 // Creation Date: Mon Aug 12 10:58:43 PDT 2024
-// Last Modified: Mon Aug 12 10:58:48 PDT 2024
+// Last Modified: Tue Aug 13 20:19:09 PDT 2024
 // Filename:      cli/tandeminfo.cpp
 // URL:           https://github.com/craigsapp/humlib/blob/master/cli/tandeminfo.cpp
 // Syntax:        C++11
@@ -35,15 +35,20 @@ string checkForFlip           (const string& tok);
 string checkForTremolo        (const string& tok);
 string checkForOttava         (const string& tok);
 string checkForPedal          (const string& tok);
-string checkForLigature       (const string& tok);
-string checkForColoration     (const string& tok);
+string checkForBracket        (const string& tok);
 string checkForRscale         (const string& tok);
 string checkForTimebase       (const string& tok);
+string checkForTransposition  (const string& tok);
+string checkForGrp            (const string& tok);
+string checkForStria          (const string& tok);
+string checkForFont           (const string& tok);
 
 bool exclusiveQ = true;   // used with -X option (don't print exclusive interpretation)
 bool unknownQ   = false;  // used with -u option (print only unknown tandem interpretations)
 bool filenameQ  = false;  // used with -f option (print only unknown tandem interpretations)
 bool meaningQ   = false;  // used with -m option (print meaning of interpretation)
+bool locationQ  = false;  // used with -l option (print location of interpretation in file)
+bool zeroQ      = false;  // used with -z option (location address by 0-index)
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -53,11 +58,15 @@ int main(int argc, char** argv) {
 	options.define("m|meaning=b",                             "give meaning of tandem interpretation");
 	options.define("u|unknown-tandem-interpretations-only=b", "do not show exclusive interpretation context");
 	options.define("X|no-exclusive-interpretations=b",        "do not show exclusive interpretation context");
+	options.define("l|location=b",                            "show location of interpretation in file (row, column)");
+	options.define("z|zero-indexed-locations=b",              "locations are 0-indexed");
 	options.process(argc, argv);
 	exclusiveQ = !options.getBoolean("no-exclusive-interpretations");
 	unknownQ   = options.getBoolean("unknown-tandem-interpretations-only");
 	filenameQ  = options.getBoolean("filename");
 	meaningQ   = options.getBoolean("meaning");
+	locationQ  = options.getBoolean("location");
+	zeroQ      = options.getBoolean("zero-indexed-locations");
 
 	HumdrumFileStream instream(options);
 	HumdrumFile infile;
@@ -100,6 +109,17 @@ void processFile(HumdrumFile& infile) {
 			}
 			if (filenameQ) {
 				cout << infile.getFilename() << "\t";
+			}
+			if (locationQ) {
+				if (zeroQ) {
+					int row = token->getLineIndex();
+					int col = token->getFieldIndex();
+					cout << "(" << row << ", " << col << ")" << "\t";
+				} else {
+					int row = token->getLineNumber();
+					int col = token->getFieldNumber();
+					cout << "(" << row << ", " << col << ")" << "\t";
+				}
 			}
 			if (exclusiveQ) {
 				cout << token->getDataType() << "\t";
@@ -209,12 +229,7 @@ string getMeaning(HTp token) {
 		return meaning;
 	}
 
-	meaning = checkForLigature(tok);
-	if (meaning != "unknown") {
-		return meaning;
-	}
-
-	meaning = checkForColoration(tok);
+	meaning = checkForBracket(tok);
 	if (meaning != "unknown") {
 		return meaning;
 	}
@@ -227,6 +242,119 @@ string getMeaning(HTp token) {
 	meaning = checkForTimebase(tok);
 	if (meaning != "unknown") {
 		return meaning;
+	}
+
+	meaning = checkForTransposition(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForGrp(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForStria(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForFont(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForFont -- Extended interprtations for styling **text and **silbe.
+//
+
+string checkForFont(const string& tok) {
+	if (tok == "italic") {
+		return "use italic font style";
+	}
+	if (tok == "Xitalic") {
+		return "stop using italic font style";
+	}
+	if (tok == "bold") {
+		return "use bold font style";
+	}
+	if (tok == "Xbold") {
+		return "stop using bold font style";
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForStria -- Humdrum Toolkit interpretation.
+//
+
+string checkForStria(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^stria(\\d+)$")) {
+		string output = "number of staff lines:" + hre.getMatch(1);
+		return output;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForGrp -- Polyrhythm project interpretations for 
+//      polyrhythm group assignments.  Related to humlib composite tool.
+//
+
+string checkForGrp(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^grp:([AB])$")) {
+		string output = "composite rhythm grouping label " + hre.getMatch(1);
+		return output;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForTransposition -- Humdrum Toolkit interpretations related
+//      to pitch transposition.
+//
+
+string checkForTransposition(const string& tok) {
+	HumRegex hre;
+
+	if (hre.search(tok, "ITrd(-?\\d+)c(-?\\d+)$")) {
+		string diatonic = hre.getMatch(1);
+		string chromatic = hre.getMatch(2);
+		string output = "transposition for written part, diatonic: ";
+		output += diatonic;
+		output += ", chromatic: ";
+		output += chromatic;
+		return output;
+	}
+
+	if (hre.search(tok, "Trd(-?\\d+)c(-?\\d+)$")) {
+		string diatonic = hre.getMatch(1);
+		string chromatic = hre.getMatch(2);
+		string output = "transposed by diatonic: ";
+		output += diatonic;
+		output += ", chromatic: ";
+		output += chromatic;
+		return output;
 	}
 
 	return "unknown";
@@ -279,35 +407,47 @@ string checkForRscale(const string& tok) {
 
 //////////////////////////////
 //
-// checkForColoration -- Extended interpretations for displaying
-//     coloration lines (brackets) for mensural music.
+// checkForBracket -- Extended interpretations for displaying
+//     various bracket lines in visual music notation.
 //
 
-string checkForColoration(const string& tok) {
+string checkForBracket(const string& tok) {
+	// Coloration
 	if (tok == "col") {
-		return "start of coloration line";
+		return "start of coloration bracket";
 	}
 	if (tok == "Xcol") {
-		return "end of coloration line";
+		return "end of coloration bracket";
 	}
-	return "unknown";
-}
 
-
-
-//////////////////////////////
-//
-// checkForLigature -- Extended interpretations for displaying
-//     ligature lines for mensural music.
-//
-
-string checkForLigature(const string& tok) {
+	// Ligatures
 	if (tok == "lig") {
-		return "start of ligature line";
+		return "start of ligature bracket";
 	}
 	if (tok == "Xlig") {
-		return "end of ligature line";
+		return "end of ligature bracket";
 	}
+
+	// Schoenberg
+	if (tok == "haupt") {
+		return "start of Hauptstimme bracket";
+	}
+	if (tok == "Xhaupt") {
+		return "end of Hauptstimme bracket";
+	}
+	if (tok == "neben") {
+		return "start of Nebenstimme bracket";
+	}
+	if (tok == "Xneben") {
+		return "end of Nebenstimme bracket";
+	}
+	if (tok == "rhaupt") {
+		return "start of Hauptrhythm bracket";
+	}
+	if (tok == "Xrhaupt") {
+		return "end of Hauptrhythm bracket";
+	}
+
 	return "unknown";
 }
 
@@ -349,6 +489,12 @@ string checkForOttava(const string& tok) {
 	}
 	if (tok == "X8ba") {
 		return "end of 8ba (ottava basso) line";
+	}
+	if (tok == "15ma") {
+		return "start of 15ma line";
+	}
+	if (tok == "X15ma") {
+		return "end of 15ma line";
 	}
 	return "unknown";
 }
@@ -753,17 +899,49 @@ string checkForInstrumentInfo(const string& tok) {
 
 	if (hre.search(tok, "^I([a-z].*)")) {
 		string code = hre.getMatch(1);
-		string output = "instrument code (";
-		output += code;
-		HumInstrument inst;
-		inst.setHumdrum(code);
-		string text = inst.getName();
-		if (!text.empty()) {
-			output += ": \"" + text + "\"";
+
+		bool andy = false;
+		bool ory  = false;
+		vector<string> codes;
+		string tok2 = tok;
+		hre.replaceDestructive(tok2, "", "I", "g");
+		if (hre.search(tok2, "&")) {
+			hre.split(codes, tok2, "&+");
+			andy = true;
+		} else if (hre.search(tok2, "\\|")) {
+			hre.split(codes, tok2, "\\++");
+			ory = true;
 		} else {
-			output += ": unknown code";
+			codes.push_back(tok2);
 		}
-		output += ")";
+
+		string output = "instrument code";
+		if (codes.size() != 1) {
+			output += "s";
+		}
+		output += ":";
+
+		for (int i=0; i<(int)codes.size(); i++) {
+			output += "(";
+			output += codes[i];
+			HumInstrument inst;
+			inst.setHumdrum(codes[i]);
+			string text = inst.getName();
+			if (!text.empty()) {
+				output += ": \"" + text + "\"";
+			} else {
+				output += ": unknown code";
+			}
+			output += ")";
+			if (i < (int)codes.size() - 1) {
+				if (andy) {
+					output += " and ";
+				} else if (ory) {
+					output += " or ";
+				}
+			}
+		}
+
 		return output;
 	}
 
