@@ -39,7 +39,7 @@ Tool_tandeminfo::Tool_tandeminfo(void) {
 	define("c|count=b",                               "show only unique list of interpretations with counts");
 	define("s|sort=b",                                "sort entries alphabetically by tandem interpretation");
 	define("t|table=b",                               "embed analysis withing input data");
-	define("x|exclusive-interpretations=b",           "do not show exclusive interpretation context");
+	define("x|exclusive-interpretations=b",           "show exclusive interpretation context");
 	define("z|zero-indexed-locations=b",              "locations are 0-indexed");
 	define("close=b",                                 "close <details> by default in HTML output");
 	m_entries.reserve(1000);
