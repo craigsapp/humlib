@@ -29,11 +29,15 @@ namespace hum {
 
 Tool_tandeminfo::Tool_tandeminfo(void) {
 	define("f|filename=b",                            "show filename");
-	define("m|meaning=b",                             "give meaning of tandem interpretation");
+	define("d|description|m|meaning=b",               "give description of tandem interpretation");
 	define("u|unknown-tandem-interpretations-only=b", "do not show exclusive interpretation context");
-	define("X|no-exclusive-interpretations=b",        "do not show exclusive interpretation context");
 	define("l|location=b",                            "show location of interpretation in file (row, column)");
+	define("s|sort=b",                                "sort entries alphabetically by tandem interpretation");
+	define("t|inline-table=b",                        "embed analysis withing input data");
+	define("x|exclusive-interpretations=b",           "do not show exclusive interpretation context");
 	define("z|zero-indexed-locations=b",              "locations are 0-indexed");
+	define("close=b",                                 "close <details> by default in HTML output");
+	m_entries.reserve(1000);
 }
 
 
@@ -88,12 +92,20 @@ bool Tool_tandeminfo::run(HumdrumFile& infile) {
 //
 
 void Tool_tandeminfo::initialize(void) {
-	m_exclusive = !getBoolean("no-exclusive-interpretations");
+	m_exclusiveQ = getBoolean("exclusive-interpretations");
 	m_unknownQ   = getBoolean("unknown-tandem-interpretations-only");
 	m_filenameQ  = getBoolean("filename");
-	m_meaningQ   = getBoolean("meaning");
 	m_locationQ  = getBoolean("location");
+	m_tableQ     = getBoolean("inline-table");
 	m_zeroQ      = getBoolean("zero-indexed-locations");
+	m_closeQ     = getBoolean("close");
+	m_sortQ      = getBoolean("sort");
+
+	#ifndef __EMSCRIPTEN__
+		m_descriptionQ   = getBoolean("description");
+	#else
+		m_descriptionQ   = !getBoolean("description");
+	#endif
 }
 
 
@@ -104,6 +116,8 @@ void Tool_tandeminfo::initialize(void) {
 //
 
 void Tool_tandeminfo::processFile(HumdrumFile& infile) {
+	m_entries.clear();
+
 	for (int i=0; i<infile.getLineCount(); i++) {
 		if (infile[i].isManipulator()) {
 			continue;
@@ -116,39 +130,47 @@ void Tool_tandeminfo::processFile(HumdrumFile& infile) {
 			if (*token == "*") {
 				continue;
 			}
-			string meaning;
-			if (m_meaningQ) {
-				meaning = getMeaning(token);
+			string description;
+			if (m_descriptionQ) {
+				description = getDescription(token);
 				if (m_unknownQ) {
 					HumRegex hre;
-					if (!hre.search(meaning, m_unknown)) {
+					if (!hre.search(description, m_unknown)) {
 						continue;
 					}
 				}
 			}
-			if (m_filenameQ) {
-				cout << infile.getFilename() << "\t";
-			}
-			if (m_locationQ) {
-				if (m_zeroQ) {
-					int row = token->getLineIndex();
-					int col = token->getFieldIndex();
-					cout << "(" << row << ", " << col << ")" << "\t";
-				} else {
-					int row = token->getLineNumber();
-					int col = token->getFieldNumber();
-					cout << "(" << row << ", " << col << ")" << "\t";
-				}
-			}
-			if (m_exclusive) {
-				cout << token->getDataType() << "\t";
-			}
-			cout << token;
-			if (m_meaningQ) {
-				cout << "\t" << meaning;
-			}
-			cout << endl;
+			m_entries.resize(m_entries.size() + 1);
+			m_entries.back().token = token;
+			m_entries.back().description = description;
 		}
+	}
+
+	printEntries(infile);
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tandeminfo::printEntries --
+//
+
+void Tool_tandeminfo::printEntries(HumdrumFile& infile) {
+	if (m_sortQ) {
+		sort(m_entries.begin(), m_entries.end(), [](const Entry &a, const Entry &b) {
+			string aa = a.token->getText();
+			string bb = b.token->getText();
+			std::transform(aa.begin(), aa.end(), aa.begin(), ::tolower);
+			std::transform(bb.begin(), bb.end(), bb.begin(), ::tolower);
+			return (aa < bb);
+		});
+	}
+
+	if (m_tableQ) {
+		printEntriesHtml(infile);
+	} else {
+		printEntriesText(infile);
 	}
 }
 
@@ -156,191 +178,319 @@ void Tool_tandeminfo::processFile(HumdrumFile& infile) {
 
 //////////////////////////////
 //
-// Tool_tandeminfo::getMeaning -- Return meaning of the input token; otherwise, return m_unknown.
+// Tool_tandeminfo::printEntiesHtml -- Print as embedded HTML code at end of
+//    input score.
 //
 
-string Tool_tandeminfo::getMeaning(HTp token) {
+void Tool_tandeminfo::printEntriesHtml(HumdrumFile& infile) {
+	m_humdrum_text << infile;
+
+	m_humdrum_text << "!!@@BEGIN: PREHTML" << endl;
+	m_humdrum_text << "!!@CONTENT:" << endl;
+
+	m_humdrum_text << "!!<style>" << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo { border: 1px solid black; border-collapse: collapse; width:98%; }" << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th, .PREHTML table.tandeminfo td { vertical-align: top; padding-right: 10px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo tr:hover td { background-color: #eee; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.tandem, .PREHTML table.tandeminfo td { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.location, .PREHTML table.tandeminfo td.location { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo th.exclusive, .PREHTML table.tandeminfo td.exclusive { padding-right: 30px; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th:last-child, .PREHTML table.tandeminfo tr td:last-child { width:100%; padding-right: 0; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th:last-child, .PREHTML table.tandeminfo tr td:last-child { width:100%; padding-right: 0; } " << endl;
+	m_humdrum_text << "!!.PREHTML table.tandeminfo tr th, .PREHTML table.tandeminfo tr td { padding:1px; padding-left:3px; } " << endl;
+	m_humdrum_text << "!!.PREHTML span.unknown.tandeminfo { color:crimson; font-weight:bold; }" << endl;
+
+	m_humdrum_text << "!!.PREHTML details { position: relative; padding-left: 20px; }" << endl;
+	m_humdrum_text << "!!.PREHTML summary { font-size: 1.5rem; cursor: pointer; list-style: none; }" << endl;
+	m_humdrum_text << "!!.PREHTML summary::before { content: '▶'; display: inline-block; width: 2em; margin-left: -1.5em; text-align: center; }" << endl;
+	m_humdrum_text << "!!.PREHTML details[open] summary::before { content: '▼'; }" << endl;
+
+	m_humdrum_text << "!!</style>" << endl;
+
+	m_humdrum_text << "!!<details class='tandeminfo' ";
+	if (!m_closeQ) {
+		m_humdrum_text << "open";
+	}
+	m_humdrum_text << ">" << endl;;
+	m_humdrum_text << "!!<summary class='tandeminfo'>Tandem interpretation information</summary>" << endl;;
+	m_humdrum_text << "!!<table class='tandeminfo'>" << endl;
+
+	// print table header
+	m_humdrum_text << "!!<tr>" << endl;
+	if (m_locationQ) {
+		m_humdrum_text << "!!<th class='location'>Location</th>" << endl;
+	}
+	if (m_locationQ) {
+		m_humdrum_text << "!!<th class='exclusive'>exclusive</th>" << endl;
+	}
+	m_humdrum_text << "!!<th class='tandem' >Tandem</th>" << endl;
+	m_humdrum_text << "!!<th class='description'>Description</th>" << endl;
+	m_humdrum_text << "!!</tr>" << endl;
+
+	// print table entries
+	for (int i=0; i<(int)m_entries.size(); i++) {
+		HTp token = m_entries[i].token;
+		m_humdrum_text << "!!<tr>" << endl;
+
+		if (m_locationQ) {
+			m_humdrum_text << "!!<td class='location'>" << endl;
+			m_humdrum_text << "!!(" << token->getLineNumber() << ", " << token->getFieldNumber() << ")" << endl;
+			m_humdrum_text << "!!</td>" << endl;
+		}
+
+		if (m_exclusiveQ) {
+			m_humdrum_text << "!!<td class='exclusive'>" << endl;
+			m_humdrum_text << "!!" << token->getDataType() << endl;
+			m_humdrum_text << "!!</td>" << endl;
+		}
+
+		m_humdrum_text << "!!<td class='tandem'>" << endl;
+		m_humdrum_text << "!!" << m_entries[i].token << endl;
+		m_humdrum_text << "!!</td>" << endl;
+
+		HumRegex hre;
+		m_humdrum_text << "!!<td class='description'>" << endl;
+		string description = m_entries[i].description;
+		hre.replaceDestructive(description, "&lt;", "<", "g");
+		hre.replaceDestructive(description, "&gt;", ">", "g");
+		hre.replaceDestructive(description, "<span class='tandeminfo unknown'>unknown</span>", "unknown");
+		m_humdrum_text << "!!" << description << endl;
+		m_humdrum_text << "!!</td>" << endl;
+
+		m_humdrum_text << "!!</tr>" << endl;
+	}
+
+	m_humdrum_text << "!!</table>" << endl;
+	m_humdrum_text << "!!</details>" << endl;
+	m_humdrum_text << "!!@@END: PREHTML" << endl;
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tandeminfo::printEntiesText --
+//
+
+void Tool_tandeminfo::printEntriesText(HumdrumFile& infile) {
+	for (int i=0; i<(int)m_entries.size(); i++) {
+		HTp token          = m_entries[i].token;
+		string description = m_entries[i].description;
+
+		if (m_filenameQ) {
+			m_free_text << infile.getFilename() << "\t";
+		}
+		if (m_locationQ) {
+			if (m_zeroQ) {
+				int row = token->getLineIndex();
+				int col = token->getFieldIndex();
+				m_free_text << "(" << row << ", " << col << ")" << "\t";
+			} else {
+				int row = token->getLineNumber();
+				int col = token->getFieldNumber();
+				m_free_text << "(" << row << ", " << col << ")" << "\t";
+			}
+		}
+		if (m_exclusiveQ) {
+			m_free_text << token->getDataType() << "\t";
+		}
+		m_free_text << token;
+		if (m_descriptionQ) {
+			m_free_text << "\t" << description;
+		}
+		m_free_text << endl;
+	}
+}
+
+
+
+//////////////////////////////
+//
+// Tool_tandeminfo::getDescription -- Return description of the input token; otherwise, return m_unknown.
+//
+
+string Tool_tandeminfo::getDescription(HTp token) {
 	string tok = token->substr(1);
-	string meaning;
+	string description;
 
-	meaning = checkForKeySignature(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForKeySignature(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForKeyDesignation(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForKeyDesignation(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForInstrumentInfo(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForInstrumentInfo(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForLabelInfo(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForLabelInfo(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTimeSignature(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTimeSignature(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForMeter(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForMeter(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTempoMarking(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTempoMarking(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForClef(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForClef(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForStaffPartGroup(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForStaffPartGroup(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTuplet(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTuplet(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForHands(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForHands(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForPosition(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForPosition(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForCue(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForCue(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForFlip(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForFlip(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTremolo(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTremolo(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForOttava(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForOttava(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForPedal(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForPedal(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForBracket(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForBracket(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForRscale(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForRscale(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTimebase(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTimebase(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTransposition(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTransposition(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForGrp(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForGrp(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForStria(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForStria(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForFont(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForFont(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForVerseLabels(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForVerseLabels(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForLanguage(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForLanguage(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForStemInfo(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForStemInfo(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForXywh(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForXywh(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForCustos(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForCustos(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTextInterps(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTextInterps(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForRep(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForRep(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForPline(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForPline(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForTacet(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForTacet(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForFb(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForFb(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForColor(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForColor(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
-	meaning = checkForThru(tok);
-	if (meaning != m_unknown) {
-		return meaning;
+	description = checkForThru(tok);
+	if (description != m_unknown) {
+		return description;
 	}
 
 	HumRegex hre;

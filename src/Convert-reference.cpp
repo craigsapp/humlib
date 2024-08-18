@@ -229,721 +229,721 @@ string Convert::getLanguageName(const string& abbreviation) {
 		if (abbreviation[i] == '@') {
 			continue;
 		}
-		code.push_back(tolower(abbreviation[i]));
+		code.push_back(toupper(abbreviation[i]));
 	}
 
 	if (code.size() == 2) {
 		// ISO 639-1 language codes
 
-		if (code == "aa") { return "Afar"; }
-		if (code == "ab") { return "Abkhazian"; }
-		if (code == "ae") { return "Avestan"; }
-		if (code == "af") { return "Afrikaans"; }
-		if (code == "ak") { return "Akan"; }
-		if (code == "am") { return "Amharic"; }
-		if (code == "an") { return "Aragonese"; }
-		if (code == "ar") { return "Arabic"; }
-		if (code == "as") { return "Assamese"; }
-		if (code == "av") { return "Avaric"; }
-		if (code == "ay") { return "Aymara"; }
-		if (code == "az") { return "Azerbaijani"; }
-		if (code == "ba") { return "Bashkir"; }
-		if (code == "be") { return "Belarusian"; }
-		if (code == "bg") { return "Bulgarian"; }
-		if (code == "bh") { return "Bihari languages"; }
-		if (code == "bi") { return "Bislama"; }
-		if (code == "bm") { return "Bambara"; }
-		if (code == "bn") { return "Bengali"; }
-		if (code == "bo") { return "Tibetan"; }
-		if (code == "br") { return "Breton"; }
-		if (code == "bs") { return "Bosnian"; }
-		if (code == "ca") { return "Catalan"; }
-		if (code == "ce") { return "Chechen"; }
-		if (code == "ch") { return "Chamorro"; }
-		if (code == "co") { return "Corsican"; }
-		if (code == "cr") { return "Cree"; }
-		if (code == "cs") { return "Czech"; }
-		if (code == "cs") { return "Czech"; }
-		if (code == "cu") { return "Church Slavic"; }
-		if (code == "cv") { return "Chuvash"; }
-		if (code == "cy") { return "Welsh"; }
-		if (code == "cy") { return "Welsh"; }
-		if (code == "da") { return "Danish"; }
-		if (code == "de") { return "German"; }
-		if (code == "dv") { return "Divehi"; }
-		if (code == "dz") { return "Dzongkha"; }
-		if (code == "ee") { return "Ewe"; }
-		if (code == "el") { return "Greek, Modern (1453-)"; }
-		if (code == "en") { return "English"; }
-		if (code == "eo") { return "Esperanto"; }
-		if (code == "es") { return "Spanish"; }
-		if (code == "et") { return "Estonian"; }
-		if (code == "eu") { return "Basque"; }
-		if (code == "eu") { return "Basque"; }
-		if (code == "fa") { return "Persian"; }
-		if (code == "ff") { return "Fulah"; }
-		if (code == "fi") { return "Finnish"; }
-		if (code == "fj") { return "Fijian"; }
-		if (code == "fo") { return "Faroese"; }
-		if (code == "fr") { return "French"; }
-		if (code == "fy") { return "Western Frisian"; }
-		if (code == "ga") { return "Irish"; }
-		if (code == "gd") { return "Gaelic"; }
-		if (code == "gl") { return "Galician"; }
-		if (code == "gn") { return "Guarani"; }
-		if (code == "gu") { return "Gujarati"; }
-		if (code == "gv") { return "Manx"; }
-		if (code == "ha") { return "Hausa"; }
-		if (code == "he") { return "Hebrew"; }
-		if (code == "hi") { return "Hindi"; }
-		if (code == "ho") { return "Hiri Motu"; }
-		if (code == "hr") { return "Croatian"; }
-		if (code == "ht") { return "Haitian"; }
-		if (code == "hu") { return "Hungarian"; }
-		if (code == "hy") { return "Armenian"; }
-		if (code == "hz") { return "Herero"; }
-		if (code == "ia") { return "Interlingua"; }
-		if (code == "id") { return "Indonesian"; }
-		if (code == "ie") { return "Interlingue"; }
-		if (code == "ig") { return "Igbo"; }
-		if (code == "ii") { return "Sichuan Yi"; }
-		if (code == "ik") { return "Inupiaq"; }
-		if (code == "io") { return "Ido"; }
-		if (code == "is") { return "Icelandic"; }
-		if (code == "it") { return "Italian"; }
-		if (code == "iu") { return "Inuktitut"; }
-		if (code == "ja") { return "Japanese"; }
-		if (code == "jv") { return "Javanese"; }
-		if (code == "ka") { return "Georgian"; }
-		if (code == "kg") { return "Kongo"; }
-		if (code == "ki") { return "Kikuyu"; }
-		if (code == "kj") { return "Kuanyama"; }
-		if (code == "kk") { return "Kazakh"; }
-		if (code == "kl") { return "Greenlandic"; }
-		if (code == "km") { return "Central Khmer"; }
-		if (code == "kn") { return "Kannada"; }
-		if (code == "ko") { return "Korean"; }
-		if (code == "kr") { return "Kanuri"; }
-		if (code == "ks") { return "Kashmiri"; }
-		if (code == "ku") { return "Kurdish"; }
-		if (code == "kv") { return "Komi"; }
-		if (code == "kw") { return "Cornish"; }
-		if (code == "ky") { return "Kirghiz"; }
-		if (code == "la") { return "Latin"; }
-		if (code == "lb") { return "Luxembourgish"; }
-		if (code == "lg") { return "Ganda"; }
-		if (code == "li") { return "Limburgan"; }
-		if (code == "ln") { return "Lingala"; }
-		if (code == "lo") { return "Lao"; }
-		if (code == "lt") { return "Lithuanian"; }
-		if (code == "lu") { return "Luba-Katanga"; }
-		if (code == "lv") { return "Latvian"; }
-		if (code == "mg") { return "Malagasy"; }
-		if (code == "mh") { return "Marshallese"; }
-		if (code == "mi") { return "Maori"; }
-		if (code == "mk") { return "Macedonian"; }
-		if (code == "mk") { return "Macedonian"; }
-		if (code == "ml") { return "Malayalam"; }
-		if (code == "mn") { return "Mongolian"; }
-		if (code == "mr") { return "Marathi"; }
-		if (code == "ms") { return "Malay"; }
-		if (code == "mt") { return "Maltese"; }
-		if (code == "my") { return "Burmese"; }
-		if (code == "my") { return "Burmese"; }
-		if (code == "na") { return "Nauru"; }
-		if (code == "nb") { return "Bokmål, Norwegian"; }
-		if (code == "nd") { return "Ndebele, North"; }
-		if (code == "ne") { return "Nepali"; }
-		if (code == "ng") { return "Ndonga"; }
-		if (code == "nl") { return "Dutch"; }
-		if (code == "nl") { return "Dutch"; }
-		if (code == "nn") { return "Norwegian Nynorsk"; }
-		if (code == "no") { return "Norwegian"; }
-		if (code == "nr") { return "Ndebele, South"; }
-		if (code == "nv") { return "Navajo"; }
-		if (code == "ny") { return "Chichewa"; }
-		if (code == "oc") { return "Occitan (post 1500)"; }
-		if (code == "oj") { return "Ojibwa"; }
-		if (code == "om") { return "Oromo"; }
-		if (code == "or") { return "Oriya"; }
-		if (code == "os") { return "Ossetian"; }
-		if (code == "pa") { return "Panjabi"; }
-		if (code == "pi") { return "Pali"; }
-		if (code == "pl") { return "Polish"; }
-		if (code == "ps") { return "Pushto"; }
-		if (code == "pt") { return "Portuguese"; }
-		if (code == "qu") { return "Quechua"; }
-		if (code == "rm") { return "Romansh"; }
-		if (code == "rn") { return "Rundi"; }
-		if (code == "ro") { return "Romanian"; }
-		if (code == "ru") { return "Russian"; }
-		if (code == "rw") { return "Kinyarwanda"; }
-		if (code == "sa") { return "Sanskrit"; }
-		if (code == "sc") { return "Sardinian"; }
-		if (code == "sd") { return "Sindhi"; }
-		if (code == "se") { return "Northern Sami"; }
-		if (code == "sg") { return "Sango"; }
-		if (code == "si") { return "Sinhala"; }
-		if (code == "sl") { return "Slovenian"; }
-		if (code == "sm") { return "Samoan"; }
-		if (code == "sn") { return "Shona"; }
-		if (code == "so") { return "Somali"; }
-		if (code == "sq") { return "Albanian"; }
-		if (code == "sr") { return "Serbian"; }
-		if (code == "ss") { return "Swati"; }
-		if (code == "st") { return "Sotho, Southern"; }
-		if (code == "su") { return "Sundanese"; }
-		if (code == "sv") { return "Swedish"; }
-		if (code == "sw") { return "Swahili"; }
-		if (code == "ta") { return "Tamil"; }
-		if (code == "te") { return "Telugu"; }
-		if (code == "tg") { return "Tajik"; }
-		if (code == "th") { return "Thai"; }
-		if (code == "ti") { return "Tigrinya"; }
-		if (code == "tk") { return "Turkmen"; }
-		if (code == "tl") { return "Tagalog"; }
-		if (code == "tn") { return "Tswana"; }
-		if (code == "to") { return "Tonga (Tonga Islands)"; }
-		if (code == "tr") { return "Turkish"; }
-		if (code == "ts") { return "Tsonga"; }
-		if (code == "tt") { return "Tatar"; }
-		if (code == "tw") { return "Twi"; }
-		if (code == "ty") { return "Tahitian"; }
-		if (code == "ug") { return "Uighur"; }
-		if (code == "uk") { return "Ukrainian"; }
-		if (code == "ur") { return "Urdu"; }
-		if (code == "uz") { return "Uzbek"; }
-		if (code == "ve") { return "Venda"; }
-		if (code == "vi") { return "Vietnamese"; }
-		if (code == "vo") { return "Volapük"; }
-		if (code == "wa") { return "Walloon"; }
-		if (code == "wo") { return "Wolof"; }
-		if (code == "xh") { return "Xhosa"; }
-		if (code == "yi") { return "Yiddish"; }
-		if (code == "yo") { return "Yoruba"; }
-		if (code == "za") { return "Zhuang"; }
-		if (code == "zh") { return "Chinese"; }
-		if (code == "zu") { return "Zulu"; }
+		if (code == "AA") { return "Afar"; }
+		if (code == "AB") { return "Abkhazian"; }
+		if (code == "AE") { return "Avestan"; }
+		if (code == "AF") { return "Afrikaans"; }
+		if (code == "AK") { return "Akan"; }
+		if (code == "AM") { return "Amharic"; }
+		if (code == "AN") { return "Aragonese"; }
+		if (code == "AR") { return "Arabic"; }
+		if (code == "AS") { return "Assamese"; }
+		if (code == "AV") { return "Avaric"; }
+		if (code == "AY") { return "Aymara"; }
+		if (code == "AZ") { return "Azerbaijani"; }
+		if (code == "BA") { return "Bashkir"; }
+		if (code == "BE") { return "Belarusian"; }
+		if (code == "BG") { return "Bulgarian"; }
+		if (code == "BH") { return "Bihari languages"; }
+		if (code == "BI") { return "Bislama"; }
+		if (code == "BM") { return "Bambara"; }
+		if (code == "BN") { return "Bengali"; }
+		if (code == "BO") { return "Tibetan"; }
+		if (code == "BR") { return "Breton"; }
+		if (code == "BS") { return "Bosnian"; }
+		if (code == "CA") { return "Catalan"; }
+		if (code == "CE") { return "Chechen"; }
+		if (code == "CH") { return "Chamorro"; }
+		if (code == "CO") { return "Corsican"; }
+		if (code == "CR") { return "Cree"; }
+		if (code == "CS") { return "Czech"; }
+		if (code == "CS") { return "Czech"; }
+		if (code == "CU") { return "Church Slavic"; }
+		if (code == "CV") { return "Chuvash"; }
+		if (code == "CY") { return "Welsh"; }
+		if (code == "CY") { return "Welsh"; }
+		if (code == "DA") { return "Danish"; }
+		if (code == "DE") { return "German"; }
+		if (code == "DV") { return "Divehi"; }
+		if (code == "DZ") { return "Dzongkha"; }
+		if (code == "EE") { return "Ewe"; }
+		if (code == "EL") { return "Greek, Modern (1453-)"; }
+		if (code == "EN") { return "English"; }
+		if (code == "EO") { return "Esperanto"; }
+		if (code == "ES") { return "Spanish"; }
+		if (code == "ET") { return "Estonian"; }
+		if (code == "EU") { return "Basque"; }
+		if (code == "EU") { return "Basque"; }
+		if (code == "FA") { return "Persian"; }
+		if (code == "FF") { return "Fulah"; }
+		if (code == "FI") { return "Finnish"; }
+		if (code == "FJ") { return "Fijian"; }
+		if (code == "FO") { return "Faroese"; }
+		if (code == "FR") { return "French"; }
+		if (code == "FY") { return "Western Frisian"; }
+		if (code == "GA") { return "Irish"; }
+		if (code == "GD") { return "Gaelic"; }
+		if (code == "GL") { return "Galician"; }
+		if (code == "GN") { return "Guarani"; }
+		if (code == "GU") { return "Gujarati"; }
+		if (code == "GV") { return "Manx"; }
+		if (code == "HA") { return "Hausa"; }
+		if (code == "HE") { return "Hebrew"; }
+		if (code == "HI") { return "Hindi"; }
+		if (code == "HO") { return "Hiri Motu"; }
+		if (code == "HR") { return "Croatian"; }
+		if (code == "HT") { return "Haitian"; }
+		if (code == "HU") { return "Hungarian"; }
+		if (code == "HY") { return "Armenian"; }
+		if (code == "HZ") { return "Herero"; }
+		if (code == "IA") { return "Interlingua"; }
+		if (code == "ID") { return "Indonesian"; }
+		if (code == "IE") { return "Interlingue"; }
+		if (code == "IG") { return "Igbo"; }
+		if (code == "II") { return "Sichuan Yi"; }
+		if (code == "IK") { return "Inupiaq"; }
+		if (code == "IO") { return "Ido"; }
+		if (code == "IS") { return "Icelandic"; }
+		if (code == "IT") { return "Italian"; }
+		if (code == "IU") { return "Inuktitut"; }
+		if (code == "JA") { return "Japanese"; }
+		if (code == "JV") { return "Javanese"; }
+		if (code == "KA") { return "Georgian"; }
+		if (code == "KG") { return "Kongo"; }
+		if (code == "KI") { return "Kikuyu"; }
+		if (code == "KJ") { return "Kuanyama"; }
+		if (code == "KK") { return "Kazakh"; }
+		if (code == "KL") { return "Greenlandic"; }
+		if (code == "KM") { return "Central Khmer"; }
+		if (code == "KN") { return "Kannada"; }
+		if (code == "KO") { return "Korean"; }
+		if (code == "KR") { return "Kanuri"; }
+		if (code == "KS") { return "Kashmiri"; }
+		if (code == "KU") { return "Kurdish"; }
+		if (code == "KV") { return "Komi"; }
+		if (code == "KW") { return "Cornish"; }
+		if (code == "KY") { return "Kirghiz"; }
+		if (code == "LA") { return "Latin"; }
+		if (code == "LB") { return "Luxembourgish"; }
+		if (code == "LG") { return "Ganda"; }
+		if (code == "LI") { return "Limburgan"; }
+		if (code == "LN") { return "Lingala"; }
+		if (code == "LO") { return "Lao"; }
+		if (code == "LT") { return "Lithuanian"; }
+		if (code == "LU") { return "Luba-Katanga"; }
+		if (code == "LV") { return "Latvian"; }
+		if (code == "MG") { return "Malagasy"; }
+		if (code == "MH") { return "Marshallese"; }
+		if (code == "MI") { return "Maori"; }
+		if (code == "MK") { return "Macedonian"; }
+		if (code == "MK") { return "Macedonian"; }
+		if (code == "ML") { return "Malayalam"; }
+		if (code == "MN") { return "Mongolian"; }
+		if (code == "MR") { return "Marathi"; }
+		if (code == "MS") { return "Malay"; }
+		if (code == "MT") { return "Maltese"; }
+		if (code == "MY") { return "Burmese"; }
+		if (code == "MY") { return "Burmese"; }
+		if (code == "NA") { return "Nauru"; }
+		if (code == "NB") { return "Bokmål, Norwegian"; }
+		if (code == "ND") { return "Ndebele, North"; }
+		if (code == "NE") { return "Nepali"; }
+		if (code == "NG") { return "Ndonga"; }
+		if (code == "NL") { return "Dutch"; }
+		if (code == "NL") { return "Dutch"; }
+		if (code == "NN") { return "Norwegian Nynorsk"; }
+		if (code == "NO") { return "Norwegian"; }
+		if (code == "NR") { return "Ndebele, South"; }
+		if (code == "NV") { return "Navajo"; }
+		if (code == "NY") { return "Chichewa"; }
+		if (code == "OC") { return "Occitan (post 1500)"; }
+		if (code == "OJ") { return "Ojibwa"; }
+		if (code == "OM") { return "Oromo"; }
+		if (code == "OR") { return "Oriya"; }
+		if (code == "OS") { return "Ossetian"; }
+		if (code == "PA") { return "Panjabi"; }
+		if (code == "PI") { return "Pali"; }
+		if (code == "PL") { return "Polish"; }
+		if (code == "PS") { return "Pushto"; }
+		if (code == "PT") { return "Portuguese"; }
+		if (code == "QU") { return "Quechua"; }
+		if (code == "RM") { return "Romansh"; }
+		if (code == "RN") { return "Rundi"; }
+		if (code == "RO") { return "Romanian"; }
+		if (code == "RU") { return "Russian"; }
+		if (code == "RW") { return "Kinyarwanda"; }
+		if (code == "SA") { return "Sanskrit"; }
+		if (code == "SC") { return "Sardinian"; }
+		if (code == "SD") { return "Sindhi"; }
+		if (code == "SE") { return "Northern Sami"; }
+		if (code == "SG") { return "Sango"; }
+		if (code == "SI") { return "Sinhala"; }
+		if (code == "SL") { return "Slovenian"; }
+		if (code == "SM") { return "Samoan"; }
+		if (code == "SN") { return "Shona"; }
+		if (code == "SO") { return "Somali"; }
+		if (code == "SQ") { return "Albanian"; }
+		if (code == "SR") { return "Serbian"; }
+		if (code == "SS") { return "Swati"; }
+		if (code == "ST") { return "Sotho, Southern"; }
+		if (code == "SU") { return "Sundanese"; }
+		if (code == "SV") { return "Swedish"; }
+		if (code == "SW") { return "Swahili"; }
+		if (code == "TA") { return "Tamil"; }
+		if (code == "TE") { return "Telugu"; }
+		if (code == "TG") { return "Tajik"; }
+		if (code == "TH") { return "Thai"; }
+		if (code == "TI") { return "Tigrinya"; }
+		if (code == "TK") { return "Turkmen"; }
+		if (code == "TL") { return "Tagalog"; }
+		if (code == "TN") { return "Tswana"; }
+		if (code == "TO") { return "Tonga (Tonga Islands)"; }
+		if (code == "TR") { return "Turkish"; }
+		if (code == "TS") { return "Tsonga"; }
+		if (code == "TT") { return "Tatar"; }
+		if (code == "TW") { return "Twi"; }
+		if (code == "TY") { return "Tahitian"; }
+		if (code == "UG") { return "Uighur"; }
+		if (code == "UK") { return "Ukrainian"; }
+		if (code == "UR") { return "Urdu"; }
+		if (code == "UZ") { return "Uzbek"; }
+		if (code == "VE") { return "Venda"; }
+		if (code == "VI") { return "Vietnamese"; }
+		if (code == "VO") { return "Volapük"; }
+		if (code == "WA") { return "Walloon"; }
+		if (code == "WO") { return "Wolof"; }
+		if (code == "XH") { return "Xhosa"; }
+		if (code == "YI") { return "Yiddish"; }
+		if (code == "YO") { return "Yoruba"; }
+		if (code == "ZA") { return "Zhuang"; }
+		if (code == "ZH") { return "Chinese"; }
+		if (code == "ZU") { return "Zulu"; }
 
 	} else if (code.size() == 3) {
 		// ISO 639-2 language codes
 
-		if (code == "aar") { return "Afar"; }
-		if (code == "abk") { return "Abkhazian"; }
-		if (code == "ace") { return "Achinese"; }
-		if (code == "ach") { return "Acoli"; }
-		if (code == "ada") { return "Adangme"; }
-		if (code == "ady") { return "Adyghe"; }
-		if (code == "afa") { return "Afro-Asiatic languages"; }
-		if (code == "afh") { return "Afrihili"; }
-		if (code == "afr") { return "Afrikaans"; }
-		if (code == "ain") { return "Ainu"; }
-		if (code == "aka") { return "Akan"; }
-		if (code == "akk") { return "Akkadian"; }
-		if (code == "alb") { return "Albanian"; }
-		if (code == "ale") { return "Aleut"; }
-		if (code == "alg") { return "Algonquian languages"; }
-		if (code == "alt") { return "Southern Altai"; }
-		if (code == "amh") { return "Amharic"; }
-		if (code == "ang") { return "English, Old (ca.450-1100)"; }
-		if (code == "anp") { return "Angika"; }
-		if (code == "apa") { return "Apache languages"; }
-		if (code == "ara") { return "Arabic"; }
-		if (code == "arc") { return "Aramaic (700-300 BCE)"; }
-		if (code == "arg") { return "Aragonese"; }
-		if (code == "arm") { return "Armenian"; }
-		if (code == "arn") { return "Mapudungun"; }
-		if (code == "arp") { return "Arapaho"; }
-		if (code == "art") { return "Artificial languages"; }
-		if (code == "arw") { return "Arawak"; }
-		if (code == "asm") { return "Assamese"; }
-		if (code == "ast") { return "Asturian"; }
-		if (code == "ath") { return "Athapascan languages"; }
-		if (code == "aus") { return "Australian languages"; }
-		if (code == "ava") { return "Avaric"; }
-		if (code == "ave") { return "Avestan"; }
-		if (code == "awa") { return "Awadhi"; }
-		if (code == "aym") { return "Aymara"; }
-		if (code == "aze") { return "Azerbaijani"; }
-		if (code == "bad") { return "Banda languages"; }
-		if (code == "bai") { return "Bamileke languages"; }
-		if (code == "bak") { return "Bashkir"; }
-		if (code == "bal") { return "Baluchi"; }
-		if (code == "bam") { return "Bambara"; }
-		if (code == "ban") { return "Balinese"; }
-		if (code == "baq") { return "Basque"; }
-		if (code == "baq") { return "Basque"; }
-		if (code == "bas") { return "Basa"; }
-		if (code == "bat") { return "Baltic languages"; }
-		if (code == "bej") { return "Beja"; }
-		if (code == "bel") { return "Belarusian"; }
-		if (code == "bem") { return "Bemba"; }
-		if (code == "ben") { return "Bengali"; }
-		if (code == "ber") { return "Berber languages"; }
-		if (code == "bho") { return "Bhojpuri"; }
-		if (code == "bih") { return "Bihari languages"; }
-		if (code == "bik") { return "Bikol"; }
-		if (code == "bin") { return "Bini"; }
-		if (code == "bis") { return "Bislama"; }
-		if (code == "bla") { return "Siksika"; }
-		if (code == "bnt") { return "Bantu languages"; }
-		if (code == "bod") { return "Tibetan"; }
-		if (code == "bos") { return "Bosnian"; }
-		if (code == "bra") { return "Braj"; }
-		if (code == "bre") { return "Breton"; }
-		if (code == "btk") { return "Batak languages"; }
-		if (code == "bua") { return "Buriat"; }
-		if (code == "bug") { return "Buginese"; }
-		if (code == "bul") { return "Bulgarian"; }
-		if (code == "bur") { return "Burmese"; }
-		if (code == "bur") { return "Burmese"; }
-		if (code == "byn") { return "Blin"; }
-		if (code == "cad") { return "Caddo"; }
-		if (code == "cai") { return "Central American Indian languages"; }
-		if (code == "car") { return "Galibi Carib"; }
-		if (code == "cat") { return "Catalan"; }
-		if (code == "cau") { return "Caucasian languages"; }
-		if (code == "ceb") { return "Cebuano"; }
-		if (code == "cel") { return "Celtic languages"; }
-		if (code == "ces") { return "Czech"; }
-		if (code == "ces") { return "Czech"; }
-		if (code == "cha") { return "Chamorro"; }
-		if (code == "chb") { return "Chibcha"; }
-		if (code == "che") { return "Chechen"; }
-		if (code == "chg") { return "Chagatai"; }
-		if (code == "chi") { return "Chinese"; }
-		if (code == "chk") { return "Chuukese"; }
-		if (code == "chm") { return "Mari"; }
-		if (code == "chn") { return "Chinook jargon"; }
-		if (code == "cho") { return "Choctaw"; }
-		if (code == "chp") { return "Chipewyan"; }
-		if (code == "chr") { return "Cherokee"; }
-		if (code == "chu") { return "Church Slavic"; }
-		if (code == "chv") { return "Chuvash"; }
-		if (code == "chy") { return "Cheyenne"; }
-		if (code == "cmc") { return "Chamic languages"; }
-		if (code == "cnr") { return "Montenegrin"; }
-		if (code == "cop") { return "Coptic"; }
-		if (code == "cor") { return "Cornish"; }
-		if (code == "cos") { return "Corsican"; }
-		if (code == "cpe") { return "Creoles and pidgins, English based"; }
-		if (code == "cpf") { return "Creoles and pidgins, French-based"; }
-		if (code == "cpp") { return "Creoles and pidgins, Portuguese-based"; }
-		if (code == "cre") { return "Cree"; }
-		if (code == "crh") { return "Crimean Tatar"; }
-		if (code == "crp") { return "Creoles and pidgins"; }
-		if (code == "csb") { return "Kashubian"; }
-		if (code == "cus") { return "Cushitic languages"; }
-		if (code == "cym") { return "Welsh"; }
-		if (code == "cym") { return "Welsh"; }
-		if (code == "cze") { return "Czech"; }
-		if (code == "cze") { return "Czech"; }
-		if (code == "dak") { return "Dakota"; }
-		if (code == "dan") { return "Danish"; }
-		if (code == "dar") { return "Dargwa"; }
-		if (code == "day") { return "Land Dayak languages"; }
-		if (code == "del") { return "Delaware"; }
-		if (code == "den") { return "Slave (Athapascan)"; }
-		if (code == "deu") { return "German"; }
-		if (code == "dgr") { return "Dogrib"; }
-		if (code == "din") { return "Dinka"; }
-		if (code == "div") { return "Divehi"; }
-		if (code == "doi") { return "Dogri"; }
-		if (code == "dra") { return "Dravidian languages"; }
-		if (code == "dsb") { return "Lower Sorbian"; }
-		if (code == "dua") { return "Duala"; }
-		if (code == "dum") { return "Dutch, Middle (ca.1050-1350)"; }
-		if (code == "dut") { return "Dutch"; }
-		if (code == "dut") { return "Dutch"; }
-		if (code == "dyu") { return "Dyula"; }
-		if (code == "dzo") { return "Dzongkha"; }
-		if (code == "efi") { return "Efik"; }
-		if (code == "egy") { return "Egyptian (Ancient)"; }
-		if (code == "eka") { return "Ekajuk"; }
-		if (code == "ell") { return "Greek, Modern (1453-)"; }
-		if (code == "elx") { return "Elamite"; }
-		if (code == "eng") { return "English"; }
-		if (code == "enm") { return "English, Middle (1100-1500)"; }
-		if (code == "epo") { return "Esperanto"; }
-		if (code == "est") { return "Estonian"; }
-		if (code == "eus") { return "Basque"; }
-		if (code == "eus") { return "Basque"; }
-		if (code == "ewe") { return "Ewe"; }
-		if (code == "ewo") { return "Ewondo"; }
-		if (code == "fan") { return "Fang"; }
-		if (code == "fao") { return "Faroese"; }
-		if (code == "fas") { return "Persian"; }
-		if (code == "fat") { return "Fanti"; }
-		if (code == "fij") { return "Fijian"; }
-		if (code == "fil") { return "Filipino"; }
-		if (code == "fin") { return "Finnish"; }
-		if (code == "fiu") { return "Finno-Ugrian languages"; }
-		if (code == "fon") { return "Fon"; }
-		if (code == "fra") { return "French"; }
-		if (code == "fre") { return "French"; }
-		if (code == "frm") { return "French, Middle (ca.1400-1600)"; }
-		if (code == "fro") { return "French, Old (842-ca.1400)"; }
-		if (code == "frr") { return "Northern Frisian"; }
-		if (code == "frs") { return "Eastern Frisian"; }
-		if (code == "fry") { return "Western Frisian"; }
-		if (code == "ful") { return "Fulah"; }
-		if (code == "fur") { return "Friulian"; }
-		if (code == "gaa") { return "Ga"; }
-		if (code == "gay") { return "Gayo"; }
-		if (code == "gba") { return "Gbaya"; }
-		if (code == "gem") { return "Germanic languages"; }
-		if (code == "geo") { return "Georgin"; }
-		if (code == "ger") { return "German"; }
-		if (code == "gez") { return "Geez"; }
-		if (code == "gil") { return "Gilbertese"; }
-		if (code == "gla") { return "Gaelic"; }
-		if (code == "gle") { return "Irish"; }
-		if (code == "glg") { return "Galician"; }
-		if (code == "glv") { return "Manx"; }
-		if (code == "gmh") { return "German, Middle High (ca.1050-1500)"; }
-		if (code == "goh") { return "German, Old High (ca.750-1050)"; }
-		if (code == "gon") { return "Gondi"; }
-		if (code == "gor") { return "Gorontalo"; }
-		if (code == "got") { return "Gothic"; }
-		if (code == "grb") { return "Grebo"; }
-		if (code == "grc") { return "Greek, Ancient (to 1453)"; }
-		if (code == "gre") { return "Greek"; }
-		if (code == "grn") { return "Guarani"; }
-		if (code == "gsw") { return "Swiss German"; }
-		if (code == "guj") { return "Gujarati"; }
-		if (code == "gwi") { return "Gwich'in"; }
-		if (code == "hai") { return "Haida"; }
-		if (code == "hat") { return "Haitian"; }
-		if (code == "hau") { return "Hausa"; }
-		if (code == "haw") { return "Hawaiian"; }
-		if (code == "heb") { return "Hebrew"; }
-		if (code == "her") { return "Herero"; }
-		if (code == "hil") { return "Hiligaynon"; }
-		if (code == "him") { return "Himachali languages"; }
-		if (code == "hin") { return "Hindi"; }
-		if (code == "hit") { return "Hittite"; }
-		if (code == "hmn") { return "Hmong"; }
-		if (code == "hmo") { return "Hiri Motu"; }
-		if (code == "hrv") { return "Croatian"; }
-		if (code == "hsb") { return "Upper Sorbian"; }
-		if (code == "hun") { return "Hungarian"; }
-		if (code == "hup") { return "Hupa"; }
-		if (code == "hye") { return "Armenian"; }
-		if (code == "iba") { return "Iban"; }
-		if (code == "ibo") { return "Igbo"; }
-		if (code == "ice") { return "Icelandic"; }
-		if (code == "ido") { return "Ido"; }
-		if (code == "iii") { return "Sichuan Yi"; }
-		if (code == "ijo") { return "Ijo languages"; }
-		if (code == "iku") { return "Inuktitut"; }
-		if (code == "ile") { return "Interlingue"; }
-		if (code == "ilo") { return "Iloko"; }
-		if (code == "ina") { return "Interlingua)"; }
-		if (code == "inc") { return "Indic languages"; }
-		if (code == "ind") { return "Indonesian"; }
-		if (code == "ine") { return "Indo-European languages"; }
-		if (code == "inh") { return "Ingush"; }
-		if (code == "ipk") { return "Inupiaq"; }
-		if (code == "ira") { return "Iranian languages"; }
-		if (code == "iro") { return "Iroquoian languages"; }
-		if (code == "isl") { return "Icelandic"; }
-		if (code == "ita") { return "Italian"; }
-		if (code == "jav") { return "Javanese"; }
-		if (code == "jbo") { return "Lojban"; }
-		if (code == "jpn") { return "Japanese"; }
-		if (code == "jpr") { return "Judeo-Persian"; }
-		if (code == "jrb") { return "Judeo-Arabic"; }
-		if (code == "kaa") { return "Kara-Kalpak"; }
-		if (code == "kab") { return "Kabyle"; }
-		if (code == "kac") { return "Kachin"; }
-		if (code == "kal") { return "Greenlandic"; }
-		if (code == "kam") { return "Kamba"; }
-		if (code == "kan") { return "Kannada"; }
-		if (code == "kar") { return "Karen languages"; }
-		if (code == "kas") { return "Kashmiri"; }
-		if (code == "kat") { return "Georgian"; }
-		if (code == "kau") { return "Kanuri"; }
-		if (code == "kaw") { return "Kawi"; }
-		if (code == "kaz") { return "Kazakh"; }
-		if (code == "kbd") { return "Kabardian"; }
-		if (code == "kha") { return "Khasi"; }
-		if (code == "khi") { return "Khoisan languages"; }
-		if (code == "khm") { return "Central Khmer"; }
-		if (code == "kho") { return "Khotanese"; }
-		if (code == "kik") { return "Kikuyu"; }
-		if (code == "kin") { return "Kinyarwanda"; }
-		if (code == "kir") { return "Kirghiz"; }
-		if (code == "kmb") { return "Kimbundu"; }
-		if (code == "kok") { return "Konkani"; }
-		if (code == "kom") { return "Komi"; }
-		if (code == "kon") { return "Kongo"; }
-		if (code == "kor") { return "Korean"; }
-		if (code == "kos") { return "Kosraean"; }
-		if (code == "kpe") { return "Kpelle"; }
-		if (code == "krc") { return "Karachay-Balkar"; }
-		if (code == "krl") { return "Karelian"; }
-		if (code == "kro") { return "Kru languages"; }
-		if (code == "kru") { return "Kurukh"; }
-		if (code == "kua") { return "Kuanyama"; }
-		if (code == "kum") { return "Kumyk"; }
-		if (code == "kur") { return "Kurdish"; }
-		if (code == "kut") { return "Kutenai"; }
-		if (code == "lad") { return "Ladino"; }
-		if (code == "lah") { return "Lahnda"; }
-		if (code == "lam") { return "Lamba"; }
-		if (code == "lao") { return "Lao"; }
-		if (code == "lat") { return "Latin"; }
-		if (code == "lav") { return "Latvian"; }
-		if (code == "lez") { return "Lezghian"; }
-		if (code == "lim") { return "Limburgan"; }
-		if (code == "lin") { return "Lingala"; }
-		if (code == "lit") { return "Lithuanian"; }
-		if (code == "lol") { return "Mongo"; }
-		if (code == "loz") { return "Lozi"; }
-		if (code == "ltz") { return "Luxembourgish"; }
-		if (code == "lua") { return "Luba-Lulua"; }
-		if (code == "lub") { return "Luba-Katanga"; }
-		if (code == "lug") { return "Ganda"; }
-		if (code == "lui") { return "Luiseno"; }
-		if (code == "lun") { return "Lunda"; }
-		if (code == "luo") { return "Luo (Kenya and Tanzania)"; }
-		if (code == "lus") { return "Lushai"; }
-		if (code == "mac") { return "Macedonian"; }
-		if (code == "mac") { return "Macedonian"; }
-		if (code == "mad") { return "Madurese"; }
-		if (code == "mag") { return "Magahi"; }
-		if (code == "mah") { return "Marshallese"; }
-		if (code == "mai") { return "Maithili"; }
-		if (code == "mak") { return "Makasar"; }
-		if (code == "mal") { return "Malayalam"; }
-		if (code == "man") { return "Mandingo"; }
-		if (code == "mao") { return "Maori"; }
-		if (code == "map") { return "Austronesian languages"; }
-		if (code == "mar") { return "Marathi"; }
-		if (code == "mas") { return "Masai"; }
-		if (code == "may") { return "Malay"; }
-		if (code == "mdf") { return "Moksha"; }
-		if (code == "mdr") { return "Mandar"; }
-		if (code == "men") { return "Mende"; }
-		if (code == "mga") { return "Irish, Middle (900-1200)"; }
-		if (code == "mic") { return "Mi'kmaq"; }
-		if (code == "min") { return "Minangkabau"; }
-		if (code == "mis") { return "Uncoded languages"; }
-		if (code == "mkd") { return "Macedonian"; }
-		if (code == "mkd") { return "Macedonian"; }
-		if (code == "mkh") { return "Mon-Khmer languages"; }
-		if (code == "mlg") { return "Malagasy"; }
-		if (code == "mlt") { return "Maltese"; }
-		if (code == "mnc") { return "Manchu"; }
-		if (code == "mni") { return "Manipuri"; }
-		if (code == "mno") { return "Manobo languages"; }
-		if (code == "moh") { return "Mohawk"; }
-		if (code == "mon") { return "Mongolian"; }
-		if (code == "mos") { return "Mossi"; }
-		if (code == "mri") { return "Maori"; }
-		if (code == "msa") { return "Malay"; }
-		if (code == "mul") { return "Multiple languages"; }
-		if (code == "mun") { return "Munda languages"; }
-		if (code == "mus") { return "Creek"; }
-		if (code == "mwl") { return "Mirandese"; }
-		if (code == "mwr") { return "Marwari"; }
-		if (code == "mya") { return "Burmese"; }
-		if (code == "mya") { return "Burmese"; }
-		if (code == "myn") { return "Mayan languages"; }
-		if (code == "myv") { return "Erzya"; }
-		if (code == "nah") { return "Nahuatl languages"; }
-		if (code == "nai") { return "North American Indian languages"; }
-		if (code == "nap") { return "Neapolitan"; }
-		if (code == "nau") { return "Nauru"; }
-		if (code == "nav") { return "Navajo"; }
-		if (code == "nbl") { return "Ndebele, South"; }
-		if (code == "nde") { return "Ndebele, North"; }
-		if (code == "ndo") { return "Ndonga"; }
-		if (code == "nds") { return "Low German"; }
-		if (code == "nep") { return "Nepali"; }
-		if (code == "new") { return "Nepal Bhasa"; }
-		if (code == "nia") { return "Nias"; }
-		if (code == "nic") { return "Niger-Kordofanian languages"; }
-		if (code == "niu") { return "Niuean"; }
-		if (code == "nld") { return "Dutch"; }
-		if (code == "nld") { return "Dutch"; }
-		if (code == "nno") { return "Norwegian Nynorsk"; }
-		if (code == "nob") { return "Bokmål, Norwegian"; }
-		if (code == "nog") { return "Nogai"; }
-		if (code == "non") { return "Norse, Old"; }
-		if (code == "nor") { return "Norwegian"; }
-		if (code == "nqo") { return "N'Ko"; }
-		if (code == "nso") { return "Pedi"; }
-		if (code == "nub") { return "Nubian languages"; }
-		if (code == "nwc") { return "Classical Newari"; }
-		if (code == "nya") { return "Chichewa"; }
-		if (code == "nym") { return "Nyamwezi"; }
-		if (code == "nyn") { return "Nyankole"; }
-		if (code == "nyo") { return "Nyoro"; }
-		if (code == "nzi") { return "Nzima"; }
-		if (code == "oci") { return "Occitan (post 1500)"; }
-		if (code == "oji") { return "Ojibwa"; }
-		if (code == "ori") { return "Oriya"; }
-		if (code == "orm") { return "Oromo"; }
-		if (code == "osa") { return "Osage"; }
-		if (code == "oss") { return "Ossetian"; }
-		if (code == "ota") { return "Turkish, Ottoman (1500-1928)"; }
-		if (code == "oto") { return "Otomian languages"; }
-		if (code == "paa") { return "Papuan languages"; }
-		if (code == "pag") { return "Pangasinan"; }
-		if (code == "pal") { return "Pahlavi"; }
-		if (code == "pam") { return "Pampanga"; }
-		if (code == "pan") { return "Panjabi"; }
-		if (code == "pap") { return "Papiamento"; }
-		if (code == "pau") { return "Palauan"; }
-		if (code == "peo") { return "Persian, Old (ca.600-400 B.C.)"; }
-		if (code == "per") { return "Persian"; }
-		if (code == "phi") { return "Philippine languages"; }
-		if (code == "phn") { return "Phoenician"; }
-		if (code == "pli") { return "Pali"; }
-		if (code == "pol") { return "Polish"; }
-		if (code == "pon") { return "Pohnpeian"; }
-		if (code == "por") { return "Portuguese"; }
-		if (code == "pra") { return "Prakrit languages"; }
-		if (code == "pro") { return "Provençal, Old (to 1500)"; }
-		if (code == "pus") { return "Pushto"; }
-		if (code == "que") { return "Quechua"; }
-		if (code == "raj") { return "Rajasthani"; }
-		if (code == "rap") { return "Rapanui"; }
-		if (code == "rar") { return "Rarotongan"; }
-		if (code == "roa") { return "Romance languages"; }
-		if (code == "roh") { return "Romansh"; }
-		if (code == "rom") { return "Romany"; }
-		if (code == "ron") { return "Romanian"; }
-		if (code == "rum") { return "Romanian"; }
-		if (code == "run") { return "Rundi"; }
-		if (code == "rup") { return "Aromanian"; }
-		if (code == "rus") { return "Russian"; }
-		if (code == "sad") { return "Sandawe"; }
-		if (code == "sag") { return "Sango"; }
-		if (code == "sah") { return "Yakut"; }
-		if (code == "sai") { return "South American Indian languages"; }
-		if (code == "sal") { return "Salishan languages"; }
-		if (code == "sam") { return "Samaritan Aramaic"; }
-		if (code == "san") { return "Sanskrit"; }
-		if (code == "sas") { return "Sasak"; }
-		if (code == "sat") { return "Santali"; }
-		if (code == "scn") { return "Sicilian"; }
-		if (code == "sco") { return "Scots"; }
-		if (code == "sel") { return "Selkup"; }
-		if (code == "sem") { return "Semitic languages"; }
-		if (code == "sga") { return "Irish, Old (to 900)"; }
-		if (code == "sgn") { return "Sign Languages"; }
-		if (code == "shn") { return "Shan"; }
-		if (code == "sid") { return "Sidamo"; }
-		if (code == "sin") { return "Sinhala"; }
-		if (code == "sio") { return "Siouan languages"; }
-		if (code == "sit") { return "Sino-Tibetan languages"; }
-		if (code == "sla") { return "Slavic languages"; }
-		if (code == "slo") { return "Slovak"; }
-		if (code == "slv") { return "Slovenian"; }
-		if (code == "sma") { return "Southern Sami"; }
-		if (code == "sme") { return "Northern Sami"; }
-		if (code == "smi") { return "Sami languages"; }
-		if (code == "smj") { return "Lule Sami"; }
-		if (code == "smn") { return "Inari Sami"; }
-		if (code == "smo") { return "Samoan"; }
-		if (code == "sms") { return "Skolt Sami"; }
-		if (code == "sna") { return "Shona"; }
-		if (code == "snd") { return "Sindhi"; }
-		if (code == "snk") { return "Soninke"; }
-		if (code == "sog") { return "Sogdian"; }
-		if (code == "som") { return "Somali"; }
-		if (code == "son") { return "Songhai languages"; }
-		if (code == "sot") { return "Sotho, Southern"; }
-		if (code == "spa") { return "Spanish"; }
-		if (code == "sqi") { return "Albanian"; }
-		if (code == "srd") { return "Sardinian"; }
-		if (code == "srn") { return "Sranan Tongo"; }
-		if (code == "srp") { return "Serbian"; }
-		if (code == "srr") { return "Serer"; }
-		if (code == "ssa") { return "Nilo-Saharan languages"; }
-		if (code == "ssw") { return "Swati"; }
-		if (code == "suk") { return "Sukuma"; }
-		if (code == "sun") { return "Sundanese"; }
-		if (code == "sus") { return "Susu"; }
-		if (code == "sux") { return "Sumerian"; }
-		if (code == "swa") { return "Swahili"; }
-		if (code == "swe") { return "Swedish"; }
-		if (code == "syc") { return "Classical Syriac"; }
-		if (code == "syr") { return "Syriac"; }
-		if (code == "tah") { return "Tahitian"; }
-		if (code == "tai") { return "Tai languages"; }
-		if (code == "tam") { return "Tamil"; }
-		if (code == "tat") { return "Tatar"; }
-		if (code == "tel") { return "Telugu"; }
-		if (code == "tem") { return "Timne"; }
-		if (code == "ter") { return "Tereno"; }
-		if (code == "tet") { return "Tetum"; }
-		if (code == "tgk") { return "Tajik"; }
-		if (code == "tgl") { return "Tagalog"; }
-		if (code == "tha") { return "Thai"; }
-		if (code == "tib") { return "Tibetian"; }
-		if (code == "tig") { return "Tigre"; }
-		if (code == "tir") { return "Tigrinya"; }
-		if (code == "tiv") { return "Tiv"; }
-		if (code == "tkl") { return "Tokelau"; }
-		if (code == "tlh") { return "Klingon"; }
-		if (code == "tli") { return "Tlingit"; }
-		if (code == "tmh") { return "Tamashek"; }
-		if (code == "tog") { return "Tonga (Nyasa)"; }
-		if (code == "ton") { return "Tonga (Tonga Islands)"; }
-		if (code == "tpi") { return "Tok Pisin"; }
-		if (code == "tsi") { return "Tsimshian"; }
-		if (code == "tsn") { return "Tswana"; }
-		if (code == "tso") { return "Tsonga"; }
-		if (code == "tuk") { return "Turkmen"; }
-		if (code == "tum") { return "Tumbuka"; }
-		if (code == "tup") { return "Tupi languages"; }
-		if (code == "tur") { return "Turkish"; }
-		if (code == "tut") { return "Altaic languages"; }
-		if (code == "tvl") { return "Tuvalu"; }
-		if (code == "twi") { return "Twi"; }
-		if (code == "tyv") { return "Tuvinian"; }
-		if (code == "udm") { return "Udmurt"; }
-		if (code == "uga") { return "Ugaritic"; }
-		if (code == "uig") { return "Uighur"; }
-		if (code == "ukr") { return "Ukrainian"; }
-		if (code == "umb") { return "Umbundu"; }
-		if (code == "und") { return "Undetermined"; }
-		if (code == "urd") { return "Urdu"; }
-		if (code == "uzb") { return "Uzbek"; }
-		if (code == "vai") { return "Vai"; }
-		if (code == "ven") { return "Venda"; }
-		if (code == "vie") { return "Vietnamese"; }
-		if (code == "vol") { return "Volapük"; }
-		if (code == "vot") { return "Votic"; }
-		if (code == "wak") { return "Wakashan languages"; }
-		if (code == "wal") { return "Wolaitta"; }
-		if (code == "war") { return "Waray"; }
-		if (code == "was") { return "Washo"; }
-		if (code == "wel") { return "Welsh"; }
-		if (code == "wel") { return "Welsh"; }
-		if (code == "wen") { return "Sorbian languages"; }
-		if (code == "wln") { return "Walloon"; }
-		if (code == "wol") { return "Wolof"; }
-		if (code == "xal") { return "Kalmyk"; }
-		if (code == "xho") { return "Xhosa"; }
-		if (code == "yao") { return "Yao"; }
-		if (code == "yap") { return "Yapese"; }
-		if (code == "yid") { return "Yiddish"; }
-		if (code == "yor") { return "Yoruba"; }
-		if (code == "ypk") { return "Yupik languages"; }
-		if (code == "zap") { return "Zapotec"; }
-		if (code == "zbl") { return "Blissymbols"; }
-		if (code == "zen") { return "Zenaga"; }
-		if (code == "zgh") { return "Moroccan"; }
-		if (code == "zha") { return "Zhuang"; }
-		if (code == "zho") { return "Chinese"; }
-		if (code == "znd") { return "Zande languages"; }
-		if (code == "zul") { return "Zulu"; }
-		if (code == "zun") { return "Zuni"; }
-		if (code == "zza") { return "Zaza"; }
+		if (code == "AAR") { return "Afar"; }
+		if (code == "ABK") { return "Abkhazian"; }
+		if (code == "ACE") { return "Achinese"; }
+		if (code == "ACH") { return "Acoli"; }
+		if (code == "ADA") { return "Adangme"; }
+		if (code == "ADY") { return "Adyghe"; }
+		if (code == "AFA") { return "Afro-Asiatic languages"; }
+		if (code == "AFH") { return "Afrihili"; }
+		if (code == "AFR") { return "Afrikaans"; }
+		if (code == "AIN") { return "Ainu"; }
+		if (code == "AKA") { return "Akan"; }
+		if (code == "AKK") { return "Akkadian"; }
+		if (code == "ALB") { return "Albanian"; }
+		if (code == "ALE") { return "Aleut"; }
+		if (code == "ALG") { return "Algonquian languages"; }
+		if (code == "ALT") { return "Southern Altai"; }
+		if (code == "AMH") { return "Amharic"; }
+		if (code == "ANG") { return "English, Old (ca.450-1100)"; }
+		if (code == "ANP") { return "Angika"; }
+		if (code == "APA") { return "Apache languages"; }
+		if (code == "ARA") { return "Arabic"; }
+		if (code == "ARC") { return "Aramaic (700-300 BCE)"; }
+		if (code == "ARG") { return "Aragonese"; }
+		if (code == "ARM") { return "Armenian"; }
+		if (code == "ARN") { return "Mapudungun"; }
+		if (code == "ARP") { return "Arapaho"; }
+		if (code == "ART") { return "Artificial languages"; }
+		if (code == "ARW") { return "Arawak"; }
+		if (code == "ASM") { return "Assamese"; }
+		if (code == "AST") { return "Asturian"; }
+		if (code == "ATH") { return "Athapascan languages"; }
+		if (code == "AUS") { return "Australian languages"; }
+		if (code == "AVA") { return "Avaric"; }
+		if (code == "AVE") { return "Avestan"; }
+		if (code == "AWA") { return "Awadhi"; }
+		if (code == "AYM") { return "Aymara"; }
+		if (code == "AZE") { return "Azerbaijani"; }
+		if (code == "BAD") { return "Banda languages"; }
+		if (code == "BAI") { return "Bamileke languages"; }
+		if (code == "BAK") { return "Bashkir"; }
+		if (code == "BAL") { return "Baluchi"; }
+		if (code == "BAM") { return "Bambara"; }
+		if (code == "BAN") { return "Balinese"; }
+		if (code == "BAQ") { return "Basque"; }
+		if (code == "BAQ") { return "Basque"; }
+		if (code == "BAS") { return "Basa"; }
+		if (code == "BAT") { return "Baltic languages"; }
+		if (code == "BEJ") { return "Beja"; }
+		if (code == "BEL") { return "Belarusian"; }
+		if (code == "BEM") { return "Bemba"; }
+		if (code == "BEN") { return "Bengali"; }
+		if (code == "BER") { return "Berber languages"; }
+		if (code == "BHO") { return "Bhojpuri"; }
+		if (code == "BIH") { return "Bihari languages"; }
+		if (code == "BIK") { return "Bikol"; }
+		if (code == "BIN") { return "Bini"; }
+		if (code == "BIS") { return "Bislama"; }
+		if (code == "BLA") { return "Siksika"; }
+		if (code == "BNT") { return "Bantu languages"; }
+		if (code == "BOD") { return "Tibetan"; }
+		if (code == "BOS") { return "Bosnian"; }
+		if (code == "BRA") { return "Braj"; }
+		if (code == "BRE") { return "Breton"; }
+		if (code == "BTK") { return "Batak languages"; }
+		if (code == "BUA") { return "Buriat"; }
+		if (code == "BUG") { return "Buginese"; }
+		if (code == "BUL") { return "Bulgarian"; }
+		if (code == "BUR") { return "Burmese"; }
+		if (code == "BUR") { return "Burmese"; }
+		if (code == "BYN") { return "Blin"; }
+		if (code == "CAD") { return "Caddo"; }
+		if (code == "CAI") { return "Central American Indian languages"; }
+		if (code == "CAR") { return "Galibi Carib"; }
+		if (code == "CAT") { return "Catalan"; }
+		if (code == "CAU") { return "Caucasian languages"; }
+		if (code == "CEB") { return "Cebuano"; }
+		if (code == "CEL") { return "Celtic languages"; }
+		if (code == "CES") { return "Czech"; }
+		if (code == "CES") { return "Czech"; }
+		if (code == "CHA") { return "Chamorro"; }
+		if (code == "CHB") { return "Chibcha"; }
+		if (code == "CHE") { return "Chechen"; }
+		if (code == "CHG") { return "Chagatai"; }
+		if (code == "CHI") { return "Chinese"; }
+		if (code == "CHK") { return "Chuukese"; }
+		if (code == "CHM") { return "Mari"; }
+		if (code == "CHN") { return "Chinook jargon"; }
+		if (code == "CHO") { return "Choctaw"; }
+		if (code == "CHP") { return "Chipewyan"; }
+		if (code == "CHR") { return "Cherokee"; }
+		if (code == "CHU") { return "Church Slavic"; }
+		if (code == "CHV") { return "Chuvash"; }
+		if (code == "CHY") { return "Cheyenne"; }
+		if (code == "CMC") { return "Chamic languages"; }
+		if (code == "CNR") { return "Montenegrin"; }
+		if (code == "COP") { return "Coptic"; }
+		if (code == "COR") { return "Cornish"; }
+		if (code == "COS") { return "Corsican"; }
+		if (code == "CPE") { return "Creoles and pidgins, English based"; }
+		if (code == "CPF") { return "Creoles and pidgins, French-based"; }
+		if (code == "CPP") { return "Creoles and pidgins, Portuguese-based"; }
+		if (code == "CRE") { return "Cree"; }
+		if (code == "CRH") { return "Crimean Tatar"; }
+		if (code == "CRP") { return "Creoles and pidgins"; }
+		if (code == "CSB") { return "Kashubian"; }
+		if (code == "CUS") { return "Cushitic languages"; }
+		if (code == "CYM") { return "Welsh"; }
+		if (code == "CYM") { return "Welsh"; }
+		if (code == "CZE") { return "Czech"; }
+		if (code == "CZE") { return "Czech"; }
+		if (code == "DAK") { return "Dakota"; }
+		if (code == "DAN") { return "Danish"; }
+		if (code == "DAR") { return "Dargwa"; }
+		if (code == "DAY") { return "Land Dayak languages"; }
+		if (code == "DEL") { return "Delaware"; }
+		if (code == "DEN") { return "Slave (Athapascan)"; }
+		if (code == "DEU") { return "German"; }
+		if (code == "DGR") { return "Dogrib"; }
+		if (code == "DIN") { return "Dinka"; }
+		if (code == "DIV") { return "Divehi"; }
+		if (code == "DOI") { return "Dogri"; }
+		if (code == "DRA") { return "Dravidian languages"; }
+		if (code == "DSB") { return "Lower Sorbian"; }
+		if (code == "DUA") { return "Duala"; }
+		if (code == "DUM") { return "Dutch, Middle (ca.1050-1350)"; }
+		if (code == "DUT") { return "Dutch"; }
+		if (code == "DUT") { return "Dutch"; }
+		if (code == "DYU") { return "Dyula"; }
+		if (code == "DZO") { return "Dzongkha"; }
+		if (code == "EFI") { return "Efik"; }
+		if (code == "EGY") { return "Egyptian (Ancient)"; }
+		if (code == "EKA") { return "Ekajuk"; }
+		if (code == "ELL") { return "Greek, Modern (1453-)"; }
+		if (code == "ELX") { return "Elamite"; }
+		if (code == "ENG") { return "English"; }
+		if (code == "ENM") { return "English, Middle (1100-1500)"; }
+		if (code == "EPO") { return "Esperanto"; }
+		if (code == "EST") { return "Estonian"; }
+		if (code == "EUS") { return "Basque"; }
+		if (code == "EUS") { return "Basque"; }
+		if (code == "EWE") { return "Ewe"; }
+		if (code == "EWO") { return "Ewondo"; }
+		if (code == "FAN") { return "Fang"; }
+		if (code == "FAO") { return "Faroese"; }
+		if (code == "FAS") { return "Persian"; }
+		if (code == "FAT") { return "Fanti"; }
+		if (code == "FIJ") { return "Fijian"; }
+		if (code == "FIL") { return "Filipino"; }
+		if (code == "FIN") { return "Finnish"; }
+		if (code == "FIU") { return "Finno-Ugrian languages"; }
+		if (code == "FON") { return "Fon"; }
+		if (code == "FRA") { return "French"; }
+		if (code == "FRE") { return "French"; }
+		if (code == "FRM") { return "French, Middle (ca.1400-1600)"; }
+		if (code == "FRO") { return "French, Old (842-ca.1400)"; }
+		if (code == "FRR") { return "Northern Frisian"; }
+		if (code == "FRS") { return "Eastern Frisian"; }
+		if (code == "FRY") { return "Western Frisian"; }
+		if (code == "FUL") { return "Fulah"; }
+		if (code == "FUR") { return "Friulian"; }
+		if (code == "GAA") { return "Ga"; }
+		if (code == "GAY") { return "Gayo"; }
+		if (code == "GBA") { return "Gbaya"; }
+		if (code == "GEM") { return "Germanic languages"; }
+		if (code == "GEO") { return "Georgin"; }
+		if (code == "GER") { return "German"; }
+		if (code == "GEZ") { return "Geez"; }
+		if (code == "GIL") { return "Gilbertese"; }
+		if (code == "GLA") { return "Gaelic"; }
+		if (code == "GLE") { return "Irish"; }
+		if (code == "GLG") { return "Galician"; }
+		if (code == "GLV") { return "Manx"; }
+		if (code == "GMH") { return "German, Middle High (ca.1050-1500)"; }
+		if (code == "GOH") { return "German, Old High (ca.750-1050)"; }
+		if (code == "GON") { return "Gondi"; }
+		if (code == "GOR") { return "Gorontalo"; }
+		if (code == "GOT") { return "Gothic"; }
+		if (code == "GRB") { return "Grebo"; }
+		if (code == "GRC") { return "Greek, Ancient (to 1453)"; }
+		if (code == "GRE") { return "Greek"; }
+		if (code == "GRN") { return "Guarani"; }
+		if (code == "GSW") { return "Swiss German"; }
+		if (code == "GUJ") { return "Gujarati"; }
+		if (code == "GWI") { return "Gwich'in"; }
+		if (code == "HAI") { return "Haida"; }
+		if (code == "HAT") { return "Haitian"; }
+		if (code == "HAU") { return "Hausa"; }
+		if (code == "HAW") { return "Hawaiian"; }
+		if (code == "HEB") { return "Hebrew"; }
+		if (code == "HER") { return "Herero"; }
+		if (code == "HIL") { return "Hiligaynon"; }
+		if (code == "HIM") { return "Himachali languages"; }
+		if (code == "HIN") { return "Hindi"; }
+		if (code == "HIT") { return "Hittite"; }
+		if (code == "HMN") { return "Hmong"; }
+		if (code == "HMO") { return "Hiri Motu"; }
+		if (code == "HRV") { return "Croatian"; }
+		if (code == "HSB") { return "Upper Sorbian"; }
+		if (code == "HUN") { return "Hungarian"; }
+		if (code == "HUP") { return "Hupa"; }
+		if (code == "HYE") { return "Armenian"; }
+		if (code == "IBA") { return "Iban"; }
+		if (code == "IBO") { return "Igbo"; }
+		if (code == "ICE") { return "Icelandic"; }
+		if (code == "IDO") { return "Ido"; }
+		if (code == "III") { return "Sichuan Yi"; }
+		if (code == "IJO") { return "Ijo languages"; }
+		if (code == "IKU") { return "Inuktitut"; }
+		if (code == "ILE") { return "Interlingue"; }
+		if (code == "ILO") { return "Iloko"; }
+		if (code == "INA") { return "Interlingua)"; }
+		if (code == "INC") { return "Indic languages"; }
+		if (code == "IND") { return "Indonesian"; }
+		if (code == "INE") { return "Indo-European languages"; }
+		if (code == "INH") { return "Ingush"; }
+		if (code == "IPK") { return "Inupiaq"; }
+		if (code == "IRA") { return "Iranian languages"; }
+		if (code == "IRO") { return "Iroquoian languages"; }
+		if (code == "ISL") { return "Icelandic"; }
+		if (code == "ITA") { return "Italian"; }
+		if (code == "JAV") { return "Javanese"; }
+		if (code == "JBO") { return "Lojban"; }
+		if (code == "JPN") { return "Japanese"; }
+		if (code == "JPR") { return "Judeo-Persian"; }
+		if (code == "JRB") { return "Judeo-Arabic"; }
+		if (code == "KAA") { return "Kara-Kalpak"; }
+		if (code == "KAB") { return "Kabyle"; }
+		if (code == "KAC") { return "Kachin"; }
+		if (code == "KAL") { return "Greenlandic"; }
+		if (code == "KAM") { return "Kamba"; }
+		if (code == "KAN") { return "Kannada"; }
+		if (code == "KAR") { return "Karen languages"; }
+		if (code == "KAS") { return "Kashmiri"; }
+		if (code == "KAT") { return "Georgian"; }
+		if (code == "KAU") { return "Kanuri"; }
+		if (code == "KAW") { return "Kawi"; }
+		if (code == "KAZ") { return "Kazakh"; }
+		if (code == "KBD") { return "Kabardian"; }
+		if (code == "KHA") { return "Khasi"; }
+		if (code == "KHI") { return "Khoisan languages"; }
+		if (code == "KHM") { return "Central Khmer"; }
+		if (code == "KHO") { return "Khotanese"; }
+		if (code == "KIK") { return "Kikuyu"; }
+		if (code == "KIN") { return "Kinyarwanda"; }
+		if (code == "KIR") { return "Kirghiz"; }
+		if (code == "KMB") { return "Kimbundu"; }
+		if (code == "KOK") { return "Konkani"; }
+		if (code == "KOM") { return "Komi"; }
+		if (code == "KON") { return "Kongo"; }
+		if (code == "KOR") { return "Korean"; }
+		if (code == "KOS") { return "Kosraean"; }
+		if (code == "KPE") { return "Kpelle"; }
+		if (code == "KRC") { return "Karachay-Balkar"; }
+		if (code == "KRL") { return "Karelian"; }
+		if (code == "KRO") { return "Kru languages"; }
+		if (code == "KRU") { return "Kurukh"; }
+		if (code == "KUA") { return "Kuanyama"; }
+		if (code == "KUM") { return "Kumyk"; }
+		if (code == "KUR") { return "Kurdish"; }
+		if (code == "KUT") { return "Kutenai"; }
+		if (code == "LAD") { return "Ladino"; }
+		if (code == "LAH") { return "Lahnda"; }
+		if (code == "LAM") { return "Lamba"; }
+		if (code == "LAO") { return "Lao"; }
+		if (code == "LAT") { return "Latin"; }
+		if (code == "LAV") { return "Latvian"; }
+		if (code == "LEZ") { return "Lezghian"; }
+		if (code == "LIM") { return "Limburgan"; }
+		if (code == "LIN") { return "Lingala"; }
+		if (code == "LIT") { return "Lithuanian"; }
+		if (code == "LOL") { return "Mongo"; }
+		if (code == "LOZ") { return "Lozi"; }
+		if (code == "LTZ") { return "Luxembourgish"; }
+		if (code == "LUA") { return "Luba-Lulua"; }
+		if (code == "LUB") { return "Luba-Katanga"; }
+		if (code == "LUG") { return "Ganda"; }
+		if (code == "LUI") { return "Luiseno"; }
+		if (code == "LUN") { return "Lunda"; }
+		if (code == "LUO") { return "Luo (Kenya and Tanzania)"; }
+		if (code == "LUS") { return "Lushai"; }
+		if (code == "MAC") { return "Macedonian"; }
+		if (code == "MAC") { return "Macedonian"; }
+		if (code == "MAD") { return "Madurese"; }
+		if (code == "MAG") { return "Magahi"; }
+		if (code == "MAH") { return "Marshallese"; }
+		if (code == "MAI") { return "Maithili"; }
+		if (code == "MAK") { return "Makasar"; }
+		if (code == "MAL") { return "Malayalam"; }
+		if (code == "MAN") { return "Mandingo"; }
+		if (code == "MAO") { return "Maori"; }
+		if (code == "MAP") { return "Austronesian languages"; }
+		if (code == "MAR") { return "Marathi"; }
+		if (code == "MAS") { return "Masai"; }
+		if (code == "MAY") { return "Malay"; }
+		if (code == "MDF") { return "Moksha"; }
+		if (code == "MDR") { return "Mandar"; }
+		if (code == "MEN") { return "Mende"; }
+		if (code == "MGA") { return "Irish, Middle (900-1200)"; }
+		if (code == "MIC") { return "Mi'kmaq"; }
+		if (code == "MIN") { return "Minangkabau"; }
+		if (code == "MIS") { return "Uncoded languages"; }
+		if (code == "MKD") { return "Macedonian"; }
+		if (code == "MKD") { return "Macedonian"; }
+		if (code == "MKH") { return "Mon-Khmer languages"; }
+		if (code == "MLG") { return "Malagasy"; }
+		if (code == "MLT") { return "Maltese"; }
+		if (code == "MNC") { return "Manchu"; }
+		if (code == "MNI") { return "Manipuri"; }
+		if (code == "MNO") { return "Manobo languages"; }
+		if (code == "MOH") { return "Mohawk"; }
+		if (code == "MON") { return "Mongolian"; }
+		if (code == "MOS") { return "Mossi"; }
+		if (code == "MRI") { return "Maori"; }
+		if (code == "MSA") { return "Malay"; }
+		if (code == "MUL") { return "Multiple languages"; }
+		if (code == "MUN") { return "Munda languages"; }
+		if (code == "MUS") { return "Creek"; }
+		if (code == "MWL") { return "Mirandese"; }
+		if (code == "MWR") { return "Marwari"; }
+		if (code == "MYA") { return "Burmese"; }
+		if (code == "MYA") { return "Burmese"; }
+		if (code == "MYN") { return "Mayan languages"; }
+		if (code == "MYV") { return "Erzya"; }
+		if (code == "NAH") { return "Nahuatl languages"; }
+		if (code == "NAI") { return "North American Indian languages"; }
+		if (code == "NAP") { return "Neapolitan"; }
+		if (code == "NAU") { return "Nauru"; }
+		if (code == "NAV") { return "Navajo"; }
+		if (code == "NBL") { return "Ndebele, South"; }
+		if (code == "NDE") { return "Ndebele, North"; }
+		if (code == "NDO") { return "Ndonga"; }
+		if (code == "NDS") { return "Low German"; }
+		if (code == "NEP") { return "Nepali"; }
+		if (code == "NEW") { return "Nepal Bhasa"; }
+		if (code == "NIA") { return "Nias"; }
+		if (code == "NIC") { return "Niger-Kordofanian languages"; }
+		if (code == "NIU") { return "Niuean"; }
+		if (code == "NLD") { return "Dutch"; }
+		if (code == "NLD") { return "Dutch"; }
+		if (code == "NNO") { return "Norwegian Nynorsk"; }
+		if (code == "NOB") { return "Bokmål, Norwegian"; }
+		if (code == "NOG") { return "Nogai"; }
+		if (code == "NON") { return "Norse, Old"; }
+		if (code == "NOR") { return "Norwegian"; }
+		if (code == "NQO") { return "N'Ko"; }
+		if (code == "NSO") { return "Pedi"; }
+		if (code == "NUB") { return "Nubian languages"; }
+		if (code == "NWC") { return "Classical Newari"; }
+		if (code == "NYA") { return "Chichewa"; }
+		if (code == "NYM") { return "Nyamwezi"; }
+		if (code == "NYN") { return "Nyankole"; }
+		if (code == "NYO") { return "Nyoro"; }
+		if (code == "NZI") { return "Nzima"; }
+		if (code == "OCI") { return "Occitan (post 1500)"; }
+		if (code == "OJI") { return "Ojibwa"; }
+		if (code == "ORI") { return "Oriya"; }
+		if (code == "ORM") { return "Oromo"; }
+		if (code == "OSA") { return "Osage"; }
+		if (code == "OSS") { return "Ossetian"; }
+		if (code == "OTA") { return "Turkish, Ottoman (1500-1928)"; }
+		if (code == "OTO") { return "Otomian languages"; }
+		if (code == "PAA") { return "Papuan languages"; }
+		if (code == "PAG") { return "Pangasinan"; }
+		if (code == "PAL") { return "Pahlavi"; }
+		if (code == "PAM") { return "Pampanga"; }
+		if (code == "PAN") { return "Panjabi"; }
+		if (code == "PAP") { return "Papiamento"; }
+		if (code == "PAU") { return "Palauan"; }
+		if (code == "PEO") { return "Persian, Old (ca.600-400 B.C.)"; }
+		if (code == "PER") { return "Persian"; }
+		if (code == "PHI") { return "Philippine languages"; }
+		if (code == "PHN") { return "Phoenician"; }
+		if (code == "PLI") { return "Pali"; }
+		if (code == "POL") { return "Polish"; }
+		if (code == "PON") { return "Pohnpeian"; }
+		if (code == "POR") { return "Portuguese"; }
+		if (code == "PRA") { return "Prakrit languages"; }
+		if (code == "PRO") { return "Provençal, Old (to 1500)"; }
+		if (code == "PUS") { return "Pushto"; }
+		if (code == "QUE") { return "Quechua"; }
+		if (code == "RAJ") { return "Rajasthani"; }
+		if (code == "RAP") { return "Rapanui"; }
+		if (code == "RAR") { return "Rarotongan"; }
+		if (code == "ROA") { return "Romance languages"; }
+		if (code == "ROH") { return "Romansh"; }
+		if (code == "ROM") { return "Romany"; }
+		if (code == "RON") { return "Romanian"; }
+		if (code == "RUM") { return "Romanian"; }
+		if (code == "RUN") { return "Rundi"; }
+		if (code == "RUP") { return "Aromanian"; }
+		if (code == "RUS") { return "Russian"; }
+		if (code == "SAD") { return "Sandawe"; }
+		if (code == "SAG") { return "Sango"; }
+		if (code == "SAH") { return "Yakut"; }
+		if (code == "SAI") { return "South American Indian languages"; }
+		if (code == "SAL") { return "Salishan languages"; }
+		if (code == "SAM") { return "Samaritan Aramaic"; }
+		if (code == "SAN") { return "Sanskrit"; }
+		if (code == "SAS") { return "Sasak"; }
+		if (code == "SAT") { return "Santali"; }
+		if (code == "SCN") { return "Sicilian"; }
+		if (code == "SCO") { return "Scots"; }
+		if (code == "SEL") { return "Selkup"; }
+		if (code == "SEM") { return "Semitic languages"; }
+		if (code == "SGA") { return "Irish, Old (to 900)"; }
+		if (code == "SGN") { return "Sign Languages"; }
+		if (code == "SHN") { return "Shan"; }
+		if (code == "SID") { return "Sidamo"; }
+		if (code == "SIN") { return "Sinhala"; }
+		if (code == "SIO") { return "Siouan languages"; }
+		if (code == "SIT") { return "Sino-Tibetan languages"; }
+		if (code == "SLA") { return "Slavic languages"; }
+		if (code == "SLO") { return "Slovak"; }
+		if (code == "SLV") { return "Slovenian"; }
+		if (code == "SMA") { return "Southern Sami"; }
+		if (code == "SME") { return "Northern Sami"; }
+		if (code == "SMI") { return "Sami languages"; }
+		if (code == "SMJ") { return "Lule Sami"; }
+		if (code == "SMN") { return "Inari Sami"; }
+		if (code == "SMO") { return "Samoan"; }
+		if (code == "SMS") { return "Skolt Sami"; }
+		if (code == "SNA") { return "Shona"; }
+		if (code == "SND") { return "Sindhi"; }
+		if (code == "SNK") { return "Soninke"; }
+		if (code == "SOG") { return "Sogdian"; }
+		if (code == "SOM") { return "Somali"; }
+		if (code == "SON") { return "Songhai languages"; }
+		if (code == "SOT") { return "Sotho, Southern"; }
+		if (code == "SPA") { return "Spanish"; }
+		if (code == "SQI") { return "Albanian"; }
+		if (code == "SRD") { return "Sardinian"; }
+		if (code == "SRN") { return "Sranan Tongo"; }
+		if (code == "SRP") { return "Serbian"; }
+		if (code == "SRR") { return "Serer"; }
+		if (code == "SSA") { return "Nilo-Saharan languages"; }
+		if (code == "SSW") { return "Swati"; }
+		if (code == "SUK") { return "Sukuma"; }
+		if (code == "SUN") { return "Sundanese"; }
+		if (code == "SUS") { return "Susu"; }
+		if (code == "SUX") { return "Sumerian"; }
+		if (code == "SWA") { return "Swahili"; }
+		if (code == "SWE") { return "Swedish"; }
+		if (code == "SYC") { return "Classical Syriac"; }
+		if (code == "SYR") { return "Syriac"; }
+		if (code == "TAH") { return "Tahitian"; }
+		if (code == "TAI") { return "Tai languages"; }
+		if (code == "TAM") { return "Tamil"; }
+		if (code == "TAT") { return "Tatar"; }
+		if (code == "TEL") { return "Telugu"; }
+		if (code == "TEM") { return "Timne"; }
+		if (code == "TER") { return "Tereno"; }
+		if (code == "TET") { return "Tetum"; }
+		if (code == "TGK") { return "Tajik"; }
+		if (code == "TGL") { return "Tagalog"; }
+		if (code == "THA") { return "Thai"; }
+		if (code == "TIB") { return "Tibetian"; }
+		if (code == "TIG") { return "Tigre"; }
+		if (code == "TIR") { return "Tigrinya"; }
+		if (code == "TIV") { return "Tiv"; }
+		if (code == "TKL") { return "Tokelau"; }
+		if (code == "TLH") { return "Klingon"; }
+		if (code == "TLI") { return "Tlingit"; }
+		if (code == "TMH") { return "Tamashek"; }
+		if (code == "TOG") { return "Tonga (Nyasa)"; }
+		if (code == "TON") { return "Tonga (Tonga Islands)"; }
+		if (code == "TPI") { return "Tok Pisin"; }
+		if (code == "TSI") { return "Tsimshian"; }
+		if (code == "TSN") { return "Tswana"; }
+		if (code == "TSO") { return "Tsonga"; }
+		if (code == "TUK") { return "Turkmen"; }
+		if (code == "TUM") { return "Tumbuka"; }
+		if (code == "TUP") { return "Tupi languages"; }
+		if (code == "TUR") { return "Turkish"; }
+		if (code == "TUT") { return "Altaic languages"; }
+		if (code == "TVL") { return "Tuvalu"; }
+		if (code == "TWI") { return "Twi"; }
+		if (code == "TYV") { return "Tuvinian"; }
+		if (code == "UDM") { return "Udmurt"; }
+		if (code == "UGA") { return "Ugaritic"; }
+		if (code == "UIG") { return "Uighur"; }
+		if (code == "UKR") { return "Ukrainian"; }
+		if (code == "UMB") { return "Umbundu"; }
+		if (code == "UND") { return "Undetermined"; }
+		if (code == "URD") { return "Urdu"; }
+		if (code == "UZB") { return "Uzbek"; }
+		if (code == "VAI") { return "Vai"; }
+		if (code == "VEN") { return "Venda"; }
+		if (code == "VIE") { return "Vietnamese"; }
+		if (code == "VOL") { return "Volapük"; }
+		if (code == "VOT") { return "Votic"; }
+		if (code == "WAK") { return "Wakashan languages"; }
+		if (code == "WAL") { return "Wolaitta"; }
+		if (code == "WAR") { return "Waray"; }
+		if (code == "WAS") { return "Washo"; }
+		if (code == "WEL") { return "Welsh"; }
+		if (code == "WEL") { return "Welsh"; }
+		if (code == "WEN") { return "Sorbian languages"; }
+		if (code == "WLN") { return "Walloon"; }
+		if (code == "WOL") { return "Wolof"; }
+		if (code == "XAL") { return "Kalmyk"; }
+		if (code == "XHO") { return "Xhosa"; }
+		if (code == "YAO") { return "Yao"; }
+		if (code == "YAP") { return "Yapese"; }
+		if (code == "YID") { return "Yiddish"; }
+		if (code == "YOR") { return "Yoruba"; }
+		if (code == "YPK") { return "Yupik languages"; }
+		if (code == "ZAP") { return "Zapotec"; }
+		if (code == "ZBL") { return "Blissymbols"; }
+		if (code == "ZEN") { return "Zenaga"; }
+		if (code == "ZGH") { return "Moroccan"; }
+		if (code == "ZHA") { return "Zhuang"; }
+		if (code == "ZHO") { return "Chinese"; }
+		if (code == "ZND") { return "Zande languages"; }
+		if (code == "ZUL") { return "Zulu"; }
+		if (code == "ZUN") { return "Zuni"; }
+		if (code == "ZZA") { return "Zaza"; }
 	}
 	return code;
 }

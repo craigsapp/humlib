@@ -27,6 +27,12 @@ namespace hum {
 
 class Tool_tandeminfo : public HumTool {
 	public:
+	class Entry {
+		public:
+			HTp token = NULL;
+			std::string description;
+	};
+
 		         Tool_tandeminfo   (void);
 		        ~Tool_tandeminfo   () {};
 
@@ -39,8 +45,11 @@ class Tool_tandeminfo : public HumTool {
 	protected:
 		void     initialize        (void);
 		void     processFile       (HumdrumFile& infile);
+		void     printEntries      (HumdrumFile& infile);
+		void     printEntriesHtml  (HumdrumFile& infile);
+		void     printEntriesText  (HumdrumFile& infile);
 
-		std::string getMeaning             (HTp token);
+		std::string getDescription         (HTp token);
 		std::string checkForKeySignature   (const std::string& tok);
 		std::string checkForKeyDesignation (const std::string& tok);
 		std::string checkForInstrumentInfo (const std::string& tok);
@@ -79,14 +88,19 @@ class Tool_tandeminfo : public HumTool {
 		std::string checkForThru           (const std::string& tok);
 
 	private:
-		bool m_exclusive  = true;   // used with -X option (don't print exclusive interpretation)
-		bool m_unknownQ   = false;  // used with -u option (print only unknown tandem interpretations)
-		bool m_filenameQ  = false;  // used with -f option (print only unknown tandem interpretations)
-		bool m_meaningQ   = false;  // used with -m option (print meaning of interpretation)
-		bool m_locationQ  = false;  // used with -l option (print location of interpretation in file)
-		bool m_zeroQ      = false;  // used with -z option (location address by 0-index)
+		bool m_exclusiveQ   = true;   // used with -X option (don't print exclusive interpretation)
+		bool m_unknownQ     = false;  // used with -u option (print only unknown tandem interpretations)
+		bool m_filenameQ    = false;  // used with -f option (print only unknown tandem interpretations)
+		bool m_descriptionQ = false;  // used with -m option (print description of interpretation)
+		bool m_locationQ    = false;  // used with -l option (print location of interpretation in file)
+		bool m_zeroQ        = false;  // used with -z option (location address by 0-index)
+		bool m_tableQ       = false;  // used with -t option (display results as inline HTML table)
+		bool m_closeQ       = false;  // used with --close option (HTML details closed by default)
+		bool m_sortQ        = false;  // used with -s (sort entries alphabetically by tandem interpretation)
 
 		std::string m_unknown = "unknown";
+
+		std::vector<Tool_tandeminfo::Entry> m_entries;
 };
 
 // END_MERGE
