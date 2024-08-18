@@ -192,6 +192,7 @@ class HumdrumFileBase : public HumHash {
 		bool          isRhythmAnalyzed         (void);
 		bool          areStrandsAnalyzed       (void);
 		bool          areStrophesAnalyzed      (void);
+		void          setFilenameFromSegment   (void);
 
     	template <class TYPE>
 		   void       initializeArray          (std::vector<std::vector<TYPE>>& array, TYPE value);
