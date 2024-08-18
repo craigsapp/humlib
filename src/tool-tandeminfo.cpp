@@ -30,7 +30,7 @@ namespace hum {
 Tool_tandeminfo::Tool_tandeminfo(void) {
 
 	define("c|count=b",                               "show only unique list of interpretations with counts");
-	define("d|description|m|meaning=b",               "give description of tandem interpretation");
+	define("d|description|m|meaning=b",               "give descriptions of tandem interpretations");
 	define("f|filename=b",                            "show filename");
 	define("h|header-only=b",                         "only process interpretations before first data line");
 	define("H|body-only=b",                           "only process interpretations after first data line");
