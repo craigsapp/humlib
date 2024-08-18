@@ -28,17 +28,18 @@ namespace hum {
 //
 
 Tool_tandeminfo::Tool_tandeminfo(void) {
-	define("f|filename=b",                            "show filename");
+
+	define("c|count=b",                               "show only unique list of interpretations with counts");
 	define("d|description|m|meaning=b",               "give description of tandem interpretation");
-	define("u|unknown-tandem-interpretations-only=b", "do not show exclusive interpretation context");
+	define("f|filename=b",                            "show filename");
 	define("h|header-only=b",                         "only process interpretations before first data line");
 	define("H|body-only=b",                           "only process interpretations after first data line");
 	define("l|location=b",                            "show location of interpretation in file (row, column)");
 	define("n|sort-by-count=b",                       "sort entries by unique counts from low to high (when -c is used)");
 	define("N|sort-by-reverse-count=b",               "sort entries by unique counts from high to low (when -c is used)");
-	define("c|count=b",                               "show only unique list of interpretations with counts");
 	define("s|sort=b",                                "sort entries alphabetically by tandem interpretation");
 	define("t|table=b",                               "embed analysis withing input data");
+	define("u|unknown-tandem-interpretations-only=b", "only list unknown interpretations");
 	define("x|exclusive-interpretations=b",           "show exclusive interpretation context");
 	define("z|zero-indexed-locations=b",              "locations are 0-indexed");
 	define("close=b",                                 "close <details> by default in HTML output");
