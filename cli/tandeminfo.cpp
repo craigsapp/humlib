@@ -43,6 +43,9 @@ string checkForGrp            (const string& tok);
 string checkForStria          (const string& tok);
 string checkForFont           (const string& tok);
 string checkForVerseLabels    (const string& tok);
+string checkForLanguage       (const string& tok);
+string checkForStemInfo       (const string& tok);
+string checkForXywh           (const string& tok);
 
 bool exclusiveQ = true;   // used with -X option (don't print exclusive interpretation)
 bool unknownQ   = false;  // used with -u option (print only unknown tandem interpretations)
@@ -270,6 +273,124 @@ string getMeaning(HTp token) {
 		return meaning;
 	}
 
+	meaning = checkForLanguage(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForStemInfo(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	meaning = checkForXywh(tok);
+	if (meaning != "unknown") {
+		return meaning;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForStemInfo -- Extended interprerations
+//      for visual display of stems (on left or right side of notes).
+//
+
+string checkForXywh(const string& tok) {
+	HumRegex hre;
+	if (hre.search(tok, "^xywh-([^:\\s]+):(\\d+),(\\d+),(\\d+),(\\d+)$")) {
+		string page = hre.getMatch(1);
+		string x = hre.getMatch(2);
+		string y = hre.getMatch(3);
+		string w = hre.getMatch(4);
+		string h = hre.getMatch(5);
+		string output = "IIIF bounding box, page=";
+		output += page;
+		output += ", x=" + x;
+		output += ", y=" + y;
+		output += ", w=" + w;
+		output += ", h=" + h;
+		return output;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForStemInfo -- Extended interprerations
+//      for visual display of stems (on left or right side of notes).
+//
+
+string checkForStemInfo(const string& tok) {
+	HumRegex hre;
+
+	if (hre.search(tok, "^(\\d+)/left")) {
+		string rhythm = hre.getMatch(1);
+		string output = rhythm + " notes always have stem up on the left";
+		return output;
+	}
+
+	if (hre.search(tok, "^(\\d+)\\\\left")) {
+		string rhythm = hre.getMatch(1);
+		string output = rhythm + " notes always have stem down on the left";
+		return output;
+	}
+
+	if (hre.search(tok, "^(\\d+)/right")) {
+		string rhythm = hre.getMatch(1);
+		string output = rhythm + " notes always have stem up on the right";
+		return output;
+	}
+
+	if (hre.search(tok, "^(\\d+)\\\\right")) {
+		string rhythm = hre.getMatch(1);
+		string output = rhythm + " notes always have stem down on the right";
+		return output;
+	}
+
+	return "unknown";
+}
+
+
+
+//////////////////////////////
+//
+// checkForLanguage -- Humdrum Toolkit and extended interprerations
+//      for langauages (for **text and **silbe).
+//
+
+string checkForLanguage(const string& tok) {
+	HumRegex hre;
+
+	if (hre.search(tok, "^L([A-Z][^\\s]+)$")) {
+		string language = hre.getMatch(1);
+		string output = "Language, old style: " + language;
+		return output;
+	}
+
+	if (hre.search(tok, "^lang:([A-Z]{2,3})$")) {
+		string code = hre.getMatch(1);
+		string name = Convert::getLanguageName(code);
+		if (name.empty()) {
+			return "language code " + code +  " (unknown)";
+		}
+		string output = "language code";
+		if (code.size() == 2) {
+			output = "ISO 639-1 language code (";
+		} else if (code.size() == 3) {
+			output = "ISO 639-2 language code (";
+		}
+		output += name;
+		output += ")";
+		return output;
+	}
+
 	return "unknown";
 }
 
@@ -340,7 +461,7 @@ string checkForStria(const string& tok) {
 
 //////////////////////////////
 //
-// checkForGrp -- Polyrhythm project interpretations for 
+// checkForGrp -- Polyrhythm project interpretations for
 //      polyrhythm group assignments.  Related to humlib composite tool.
 //
 
@@ -750,7 +871,6 @@ string checkForClef(const string& tok) {
 			if (!octave.empty()) {
 				if (hre.search(octave, "^v+$")) {
 					output += ", octave displacement -" + to_string(octave.size());
-					
 				} else if (hre.search(octave, "^\\^+$")) {
 					output += ", octave displacement +" + to_string(octave.size());
 				}
@@ -785,13 +905,21 @@ string checkForTimeSignature(const string& tok) {
 	if (tok == "MX") {
 		return "unmeasured music time signature";
 	}
-	if (hre.search(tok, "^MX/(\\d+)(%\\d+)?")) {
+	if (hre.search(tok, "^MX/(\\d+)(%\\d+)?(yy)?")) {
 		string output = "unmeasured music with beat " + hre.getMatch(1) + hre.getMatch(2);
+		if (hre.getMatch(3) == "yy") {
+			output += ", invisible";
+			return output;
+		}
 	}
-	if (hre.search(tok, "^M(\\d+)/(\\d+)(%\\d+)?$")) {
+	if (hre.search(tok, "^M(\\d+)/(\\d+)(%\\d+)?(yy)?$")) {
 		string top = hre.getMatch(1);
 		string bot = hre.getMatch(2) + hre.getMatch(3);
+		string invisible = hre.getMatch(4);
 		string output = "time signature: top: " + top + ", bottom: " + bot;
+		if (invisible == "yy") {
+			output += ", invisible";
+		}
 		return output;
 	}
 
@@ -956,7 +1084,7 @@ string checkForInstrumentInfo(const string& tok) {
 		output += ":";
 
 		for (int i=0; i<(int)codes.size(); i++) {
-			output += "(";
+			output += " (";
 			output += codes[i];
 			HumInstrument inst;
 			inst.setHumdrum(codes[i]);
@@ -991,7 +1119,7 @@ string checkForInstrumentInfo(const string& tok) {
 //     but typically the standard ones are in circle-of-fifths orderings.
 //     This function also allows double sharps/flats in the key signature
 //     which are very uncommon in real music.  Standard key signatures:
-//    
+//
 //     *k[f#c#g#d#a#e#b#]
 //     *k[c#g#d#a#e#b#]
 //     *k[g#d#a#e#b#]
@@ -1106,6 +1234,9 @@ string checkForKeySignature(const string& tok) {
 
 string checkForKeyDesignation(const string& tok) {
 	HumRegex hre;
+	if (tok == "?:") {
+		return "key designation, unknown/unassigned key";
+	}
 	if (hre.search(tok, "^([a-gA-G])([-#]*):(ion|dor|phr|lyd|mix|aeo|loc)?$")) {
 		string tonic = hre.getMatch(1);
 		string accid = hre.getMatch(2);
